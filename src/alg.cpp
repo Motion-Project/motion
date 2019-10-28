@@ -653,7 +653,7 @@ void alg_despeckle(struct ctx_cam *cam) {
     int diffs,width,height,done,i,len;
     unsigned char *out, *common_buffer;
 
-    if (!cam->conf->despeckle_filter || cam->current_image->diffs <= 0){
+    if ((cam->conf->despeckle_filter == "") || cam->current_image->diffs <= 0){
         if (cam->imgs.labelsize_max) cam->imgs.labelsize_max = 0;
         return;
     }
@@ -663,7 +663,7 @@ void alg_despeckle(struct ctx_cam *cam) {
     width = cam->imgs.width;
     height = cam->imgs.height;
     done = 0;
-    len = strlen(cam->conf->despeckle_filter);
+    len = cam->conf->despeckle_filter.length();
     common_buffer = cam->imgs.common_buffer;
     cam->current_image->total_labels = 0;
     cam->imgs.largest_label = 0;

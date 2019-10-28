@@ -1082,8 +1082,8 @@ static int v4l2_device_open(struct ctx_cam *cam, struct video_dev *curdev) {
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         ,_("Using videodevice %s and input %d")
         ,cam->conf->videodevice, cam->conf->input);
+    cam->conf->videodevice.copy(curdev->videodevice,PATH_MAX);
 
-    curdev->videodevice = cam->conf->videodevice;
     curdev->fd_device = -1;
     fd_device = -1;
 
@@ -1258,7 +1258,7 @@ int v4l2_start(struct ctx_cam *cam) {
         /* If device is already open and initialized use it*/
         curdev = videodevices;
         while (curdev) {
-            if (mystreq(cam->conf->videodevice, curdev->videodevice)) {
+            if (mystreq(cam->conf->videodevice.c_str(), curdev->videodevice)) {
                 retcd = v4l2_vdev_init(cam);
                 if (retcd == 0) retcd = vid_parms_parse(cam);
                 if (retcd == 0) retcd = v4l2_imgs_set(cam, curdev);

@@ -295,9 +295,9 @@ int webu_stream_mjpeg(struct webui_ctx *webui) {
         return MHD_NO;
     }
 
-    if (webui->cam->conf->stream_cors_header != NULL){
+    if (webui->cam->conf->stream_cors_header != ""){
         MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-            , webui->cam->conf->stream_cors_header);
+            , webui->cam->conf->stream_cors_header.c_str());
     }
 
     MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE
@@ -335,9 +335,9 @@ int webu_stream_static(struct webui_ctx *webui) {
         return MHD_NO;
     }
 
-    if (webui->cam->conf->stream_cors_header != NULL){
+    if (webui->cam->conf->stream_cors_header != ""){
         MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-            , webui->cam->conf->stream_cors_header);
+            , webui->cam->conf->stream_cors_header.c_str());
     }
 
     MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "image/jpeg;");

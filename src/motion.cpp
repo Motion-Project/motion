@@ -150,9 +150,9 @@ static void setup_signals(void){
 static void motion_remove_pid(struct ctx_motapp *motapp) {
 
     if ((motapp->daemon) &&
-        (motapp->pid_file) &&
+        (motapp->pid_file != "") &&
         (motapp->restart_all == FALSE)) {
-        if (!unlink(motapp->pid_file)){
+        if (!unlink(motapp->pid_file.c_str())){
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Removed process id file (pid file)."));
         } else{
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error removing pid file"));
@@ -187,8 +187,8 @@ static void motion_daemon(struct ctx_motapp *motapp) {
      * later when we have closed stdout. Otherwise Motion hangs in the terminal waiting
      * for an enter.
      */
-    if (motapp->pid_file[0]) {
-        pidf = myfopen(motapp->pid_file, "w+");
+    if (motapp->pid_file != "") {
+        pidf = myfopen(motapp->pid_file.c_str(), "w+");
 
         if (pidf) {
             (void)fprintf(pidf, "%d\n", getpid());
@@ -261,6 +261,7 @@ static void motion_shutdown(struct ctx_motapp *motapp){
     conf_deinit(motapp);
 
     vid_mutex_destroy();
+
 }
 
 static void motion_camera_ids(struct ctx_cam **cam_list){
@@ -574,17 +575,48 @@ static int motion_check_threadcount(struct ctx_motapp *motapp){
 
 }
 
+static void motion_init(struct ctx_motapp *motapp){
+
+    motapp->cam_list = NULL;
+    pthread_mutex_init(&motapp->global_lock, NULL);
+
+    motapp->threads_running = 0;
+    motapp->finish_all = FALSE;
+    motapp->restart_all = FALSE;
+
+    motapp->argc = 0;
+    motapp->argv = NULL;
+
+    motapp->daemon = FALSE;
+    motapp->conf_filename="";
+    motapp->pid_file="";
+    motapp->log_file="";
+    motapp->log_type_str="";
+    motapp->log_level=0;
+    motapp->log_type=0;
+    motapp->setup_mode = FALSE;
+    motapp->pause = FALSE;
+    motapp->native_language = FALSE;
+
+    motapp->webcontrol_running = FALSE;
+    motapp->webcontrol_finish = FALSE;
+    motapp->webcontrol_daemon = NULL;
+    memset(motapp->webcontrol_digest_rand,0,8);
+
+    pthread_key_create(&tls_key_threadnr, NULL);
+    pthread_setspecific(tls_key_threadnr, (void *)(0));
+
+}
+
 /** Main entry point of Motion. */
 int main (int argc, char **argv) {
 
     int indx;
     struct ctx_motapp *motapp;
 
-    motapp = (struct ctx_motapp*)mymalloc(sizeof(struct ctx_motapp));
+    motapp = new ctx_motapp;
 
-    pthread_mutex_init(&motapp->global_lock, NULL);
-    pthread_key_create(&tls_key_threadnr, NULL);
-    pthread_setspecific(tls_key_threadnr, (void *)(0));
+    motion_init(motapp);
 
     setup_signals();
 
@@ -644,7 +676,7 @@ int main (int argc, char **argv) {
     pthread_key_delete(tls_key_threadnr);
     pthread_mutex_destroy(&motapp->global_lock);
 
-    free(motapp);
+    delete motapp;
 
     return 0;
 }

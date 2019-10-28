@@ -143,7 +143,7 @@ static void mlp_ring_process(struct ctx_cam *cam, unsigned int max_images) {
         cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_out];
 
         if (cam->imgs.image_ring[cam->imgs.ring_out].shot < cam->conf->framerate) {
-            if (cam->log_level >= DBG) mlp_ring_process_debug(cam);
+            if (cam->motapp->log_level >= DBG) mlp_ring_process_debug(cam);
 
             event(cam, EVENT_IMAGE_DETECTED,
               &cam->imgs.image_ring[cam->imgs.ring_out], NULL, NULL,
@@ -192,7 +192,7 @@ static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img
             cam->eventtime = img->imgts.tv_sec;
 
             mystrftime(cam, cam->text_event_string, sizeof(cam->text_event_string),
-                       cam->conf->text_event, &img->imgts, NULL, 0);
+                       cam->conf->text_event.c_str(), &img->imgts, NULL, 0);
 
             event(cam, EVENT_FIRSTMOTION, img, NULL, NULL,
                 &cam->imgs.image_ring[cam->imgs.ring_out].imgts);
@@ -246,24 +246,24 @@ static int init_camera_type(struct ctx_cam *cam){
 
     cam->camera_type = CAMERA_TYPE_UNKNOWN;
 
-    if (cam->conf->mmalcam_name) {
+    if (cam->conf->mmalcam_name != "") {
         cam->camera_type = CAMERA_TYPE_MMAL;
         return 0;
     }
 
-    if (cam->conf->netcam_url) {
-        if ((strncmp(cam->conf->netcam_url,"mjpeg",5) == 0) ||
-            (strncmp(cam->conf->netcam_url,"http" ,4) == 0) ||
-            (strncmp(cam->conf->netcam_url,"v4l2" ,4) == 0) ||
-            (strncmp(cam->conf->netcam_url,"file" ,4) == 0) ||
-            (strncmp(cam->conf->netcam_url,"rtmp" ,4) == 0) ||
-            (strncmp(cam->conf->netcam_url,"rtsp" ,4) == 0)) {
+    if (cam->conf->netcam_url != "") {
+        if ((cam->conf->netcam_url.compare(0,5,"mjpeg") == 0) ||
+            (cam->conf->netcam_url.compare(0,4,"http") == 0) ||
+            (cam->conf->netcam_url.compare(0,4,"v4l2") == 0) ||
+            (cam->conf->netcam_url.compare(0,4,"file") == 0) ||
+            (cam->conf->netcam_url.compare(0,4,"rtmp") == 0) ||
+            (cam->conf->netcam_url.compare(0,4,"rtsp") == 0)) {
             cam->camera_type = CAMERA_TYPE_NETCAM;
         }
         return 0;
     }
 
-    if (cam->conf->videodevice) {
+    if (cam->conf->videodevice != "") {
         cam->camera_type = CAMERA_TYPE_V4L2;
         return 0;
     }
@@ -386,25 +386,10 @@ static void mlp_init_buffers(struct ctx_cam *cam){
 
 static void mlp_init_values(struct ctx_cam *cam) {
 
-    /* cam has been initialized to 0 upon creation
-     * so we only need to initialize non zero values*/
+    cam->event_nr=1;
 
-    clock_gettime(CLOCK_REALTIME, &cam->frame_last_ts);
     clock_gettime(CLOCK_REALTIME, &cam->frame_curr_ts);
-
-    cam->event_nr = 1;
-
-    /* These are soon to be changed to bools so we leave the init for now*/
-    cam->detecting_motion = FALSE;
-    cam->event_user = FALSE;
-    cam->event_stop = FALSE;
-    cam->passflag = FALSE;  //only purpose to flag first frame
-    cam->algsec_inuse = FALSE;
-
-    /* Make sure to default the high res to zero */
-    cam->imgs.width_high = 0;
-    cam->imgs.height_high = 0;
-    cam->imgs.size_high = 0;
+    clock_gettime(CLOCK_REALTIME, &cam->frame_last_ts);
 
     cam->noise = cam->conf->noise_level;
 
@@ -461,7 +446,7 @@ static int mlp_init_cam_start(struct ctx_cam *cam) {
 /** mlp_init */
 static int mlp_init(struct ctx_cam *cam) {
 
-    mythreadname_set("ml",cam->threadnr,cam->conf->camera_name);
+    mythreadname_set("ml",cam->threadnr,cam->conf->camera_name.c_str());
 
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cam->threadnr));
 
@@ -680,10 +665,10 @@ static void mlp_mask_privacy(struct ctx_cam *cam){
 static void mlp_areadetect(struct ctx_cam *cam){
     int i, j, z = 0;
 
-    if ((cam->conf->area_detect) &&
+    if ((cam->conf->area_detect != "" ) &&
         (cam->event_nr != cam->areadetect_eventnbr) &&
         (cam->current_image->flags & IMAGE_TRIGGER)) {
-        j = strlen(cam->conf->area_detect);
+        j = cam->conf->area_detect.length();
         for (i = 0; i < j; i++) {
             z = cam->conf->area_detect[i] - 49; /* characters are stored as ascii 48-57 (0-9) */
             if ((z >= 0) && (z < 9)) {
@@ -1012,16 +997,16 @@ static void mlp_overlay(struct ctx_cam *cam){
     }
 
     /* Add text in lower left corner of the pictures */
-    if (cam->conf->text_left) {
-        mystrftime(cam, tmp, sizeof(tmp), cam->conf->text_left,
+    if (cam->conf->text_left != "") {
+        mystrftime(cam, tmp, sizeof(tmp), cam->conf->text_left.c_str(),
                    &cam->current_image->imgts, NULL, 0);
         draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
                   10, cam->imgs.height - (10 * cam->text_scale), tmp, cam->text_scale);
     }
 
     /* Add text in lower right corner of the pictures */
-    if (cam->conf->text_right) {
-        mystrftime(cam, tmp, sizeof(tmp), cam->conf->text_right,
+    if (cam->conf->text_right != "") {
+        mystrftime(cam, tmp, sizeof(tmp), cam->conf->text_right.c_str(),
                    &cam->current_image->imgts, NULL, 0);
         draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
                   cam->imgs.width - 10, cam->imgs.height - (10 * cam->text_scale),
@@ -1167,11 +1152,11 @@ static void mlp_setupmode(struct ctx_cam *cam){
         char msg[1024] = "\0";
         char part[100];
 
-        if (cam->conf->despeckle_filter) {
+        if (cam->conf->despeckle_filter != "") {
             snprintf(part, 99, _("Raw changes: %5d - changes after '%s': %5d"),
                      cam->olddiffs, cam->conf->despeckle_filter, cam->current_image->diffs);
             strcat(msg, part);
-            if (strchr(cam->conf->despeckle_filter, 'l')) {
+            if (cam->conf->despeckle_filter.find('l') != std::string::npos) {
                 snprintf(part, 99,_(" - labels: %3d"), cam->current_image->total_labels);
                 strcat(msg, part);
             }
@@ -1218,20 +1203,20 @@ static void mlp_timelapse(struct ctx_cam *cam){
             (cam->frame_curr_ts.tv_sec % 60 < cam->frame_last_ts.tv_sec % 60) &&
             cam->shots == 0) {
 
-            if (mystrceq(cam->conf->timelapse_mode, "daily")) {
+            if (cam->conf->timelapse_mode == "daily"){
                 if (timestamp_tm.tm_hour == 0)
                     event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
-            } else if (mystreq(cam->conf->timelapse_mode, "hourly")) {
+            } else if (cam->conf->timelapse_mode == "hourly"){
                 event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
-            } else if (mystrceq(cam->conf->timelapse_mode, "weekly-sunday")) {
+            } else if (cam->conf->timelapse_mode == "weekly-sunday"){
                 if (timestamp_tm.tm_wday == 0 &&
                     timestamp_tm.tm_hour == 0)
                     event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
-            } else if (mystrceq(cam->conf->timelapse_mode, "weekly-monday") == 0) {
+            } else if (cam->conf->timelapse_mode == "weekly-monday"){
                 if (timestamp_tm.tm_wday == 1 &&
                     timestamp_tm.tm_hour == 0)
                     event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
-            } else if (mystrceq(cam->conf->timelapse_mode, "monthly")) {
+            } else if (cam->conf->timelapse_mode == "monthly"){
                 if (timestamp_tm.tm_mday == 1 &&
                     timestamp_tm.tm_hour == 0)
                     event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
@@ -1280,34 +1265,37 @@ static void mlp_parmsupdate(struct ctx_cam *cam){
 
     draw_init_scale(cam);  /* Initialize and validate text_scale */
 
-    if (mystrceq(cam->conf->picture_output, "on"))
+    if (cam->conf->picture_output == "on"){
         cam->new_img = NEWIMG_ON;
-    else if (mystrceq(cam->conf->picture_output, "first"))
+    } else if (cam->conf->picture_output == "first"){
         cam->new_img = NEWIMG_FIRST;
-    else if (mystrceq(cam->conf->picture_output, "best"))
+    } else if (cam->conf->picture_output == "best"){
         cam->new_img = NEWIMG_BEST;
-    else if (mystrceq(cam->conf->picture_output, "center"))
+    } else if (cam->conf->picture_output == "center"){
         cam->new_img = NEWIMG_CENTER;
-    else
+    } else {
         cam->new_img = NEWIMG_OFF;
+    }
 
-    if (mystrceq(cam->conf->locate_motion_mode, "on"))
+    if (cam->conf->locate_motion_mode == "on") {
         cam->locate_motion_mode = LOCATE_ON;
-    else if (mystrceq(cam->conf->locate_motion_mode, "preview"))
+    } else if (cam->conf->locate_motion_mode == "preview"){
         cam->locate_motion_mode = LOCATE_PREVIEW;
-    else
+    } else {
         cam->locate_motion_mode = LOCATE_OFF;
+    }
 
-    if (mystrceq(cam->conf->locate_motion_style, "box"))
+    if (cam->conf->locate_motion_style == "box"){
         cam->locate_motion_style = LOCATE_BOX;
-    else if (mystrceq(cam->conf->locate_motion_style, "redbox"))
+    } else if (cam->conf->locate_motion_style == "redbox"){
         cam->locate_motion_style = LOCATE_REDBOX;
-    else if (mystrceq(cam->conf->locate_motion_style, "cross"))
+    } else if (cam->conf->locate_motion_style == "cross"){
         cam->locate_motion_style = LOCATE_CROSS;
-    else if (mystrceq(cam->conf->locate_motion_style, "redcross"))
+    } else if (cam->conf->locate_motion_style == "redcross"){
         cam->locate_motion_style = LOCATE_REDCROSS;
-    else
+    } else {
         cam->locate_motion_style = LOCATE_BOX;
+    }
 
     if (cam->conf->smart_mask_speed != cam->smartmask_speed ||
         cam->smartmask_lastrate != cam->lastrate) {

@@ -675,9 +675,9 @@ static int webu_process_config_set(struct webui_ctx *webui) {
      */
     snprintf(temp_name, WEBUI_LEN_PARM, "%s", webui->uri_parm1);
     indx=0;
-    while (config_parms_depr[indx].parm_name != NULL) {
-        if (mystreq(config_parms_depr[indx].parm_name,webui->uri_parm1)){
-            snprintf(temp_name, WEBUI_LEN_PARM, "%s", config_parms_depr[indx].newname);
+    while (config_parms_depr[indx].parm_name != "") {
+        if (mystreq(config_parms_depr[indx].parm_name.c_str() ,webui->uri_parm1)){
+            snprintf(temp_name, WEBUI_LEN_PARM, "%s", config_parms_depr[indx].newname.c_str());
             break;
         }
         indx++;
@@ -686,33 +686,33 @@ static int webu_process_config_set(struct webui_ctx *webui) {
      * webcontrol_parms level.
      */
     indx=0;
-    while (config_parms[indx].parm_name != NULL) {
+    while (config_parms[indx].parm_name != "") {
         if (((webui->thread_nbr != 0) && (config_parms[indx].main_thread)) ||
             (config_parms[indx].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
             (config_parms[indx].webui_level == WEBUI_LEVEL_NEVER) ) {
             indx++;
             continue;
         }
-        if (mystreq(temp_name, config_parms[indx].parm_name)) break;
+        if (mystreq(temp_name, config_parms[indx].parm_name.c_str())) break;
         indx++;
     }
     /* If we found the parm, assign it.  If the loop above did not find the parm
      * then we ignore the request
      */
-    if (config_parms[indx].parm_name != NULL){
+    if (config_parms[indx].parm_name != ""){
         if (strlen(webui->uri_parm1) > 0){
 
             conf_edit_set(webui->camlst[webui->thread_nbr]->motapp,webui->thread_nbr
-                , (char *)config_parms[indx].parm_name, webui->uri_parm1);
+                ,config_parms[indx].parm_name, webui->uri_parm1);
 
             /*If we are updating vid parms, set the flag to update the device.*/
-            if (mystreq(config_parms[indx].parm_name, "vid_control_params") &&
+            if ((config_parms[indx].parm_name == "vid_control_params") &&
                 (webui->camlst[webui->thread_nbr]->vdev != NULL)){
                 webui->camlst[webui->thread_nbr]->vdev->update_parms = TRUE;
             }
 
             /* If changing language, do it now */
-            if (mystreq(config_parms[indx].parm_name, "native_language")){
+            if (config_parms[indx].parm_name == "native_language"){
                 if (webui->camlst[webui->thread_nbr]->motapp->native_language){
                     mytranslate_text("", 1);
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Native Language : on"));
@@ -1028,35 +1028,35 @@ static void webu_mhd_auth_parse(struct webui_ctx *webui, int ctrl){
     webui->auth_pass = NULL;
 
     if (ctrl){
-        auth_len = strlen(webui->cam->conf->webcontrol_authentication);
-        col_pos =(char*) strstr(webui->cam->conf->webcontrol_authentication,":");
+        auth_len = webui->cam->conf->webcontrol_authentication.length();
+        col_pos =(char*) strstr(webui->cam->conf->webcontrol_authentication.c_str() ,":");
         if (col_pos == NULL){
             webui->auth_user = (char*)mymalloc(auth_len+1);
             webui->auth_pass = (char*)mymalloc(2);
             snprintf(webui->auth_user, auth_len + 1, "%s"
-                ,webui->cam->conf->webcontrol_authentication);
+                ,webui->cam->conf->webcontrol_authentication.c_str());
             snprintf(webui->auth_pass, 2, "%s","");
         } else {
             webui->auth_user = (char*)mymalloc(auth_len - strlen(col_pos) + 1);
             webui->auth_pass =(char*)mymalloc(strlen(col_pos));
             snprintf(webui->auth_user, auth_len - strlen(col_pos) + 1, "%s"
-                ,webui->cam->conf->webcontrol_authentication);
+                ,webui->cam->conf->webcontrol_authentication.c_str());
             snprintf(webui->auth_pass, strlen(col_pos), "%s", col_pos + 1);
         }
     } else {
-        auth_len = strlen(webui->cam->conf->stream_authentication);
-        col_pos =(char*) strstr(webui->cam->conf->stream_authentication,":");
+        auth_len = strlen(webui->cam->conf->stream_authentication.c_str());
+        col_pos =(char*) strstr(webui->cam->conf->stream_authentication.c_str(),":");
         if (col_pos == NULL){
             webui->auth_user = (char*)mymalloc(auth_len+1);
             webui->auth_pass = (char*)mymalloc(2);
             snprintf(webui->auth_user, auth_len + 1, "%s"
-                ,webui->cam->conf->stream_authentication);
+                ,webui->cam->conf->stream_authentication.c_str());
             snprintf(webui->auth_pass, 2, "%s","");
         } else {
             webui->auth_user = (char*)mymalloc(auth_len - strlen(col_pos) + 1);
             webui->auth_pass = (char*)mymalloc(strlen(col_pos));
             snprintf(webui->auth_user, auth_len - strlen(col_pos) + 1, "%s"
-                ,webui->cam->conf->stream_authentication);
+                ,webui->cam->conf->stream_authentication.c_str());
             snprintf(webui->auth_pass, strlen(col_pos), "%s", col_pos + 1);
         }
     }
@@ -1081,7 +1081,7 @@ static int webu_mhd_auth(struct webui_ctx *webui, int ctrl){
 
     if (ctrl){
         /* Authentication for the webcontrol*/
-        if (webui->cam->conf->webcontrol_authentication == NULL){
+        if (webui->cam->conf->webcontrol_authentication == ""){
             webui->authenticated = TRUE;
             if (webui->cam->conf->webcontrol_auth_method != 0){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No webcontrol user:pass provided"));
@@ -1099,7 +1099,7 @@ static int webu_mhd_auth(struct webui_ctx *webui, int ctrl){
 
     } else {
         /* Authentication for the streams */
-        if (webui->cam->conf->stream_authentication == NULL){
+        if (webui->cam->conf->stream_authentication == ""){
             webui->authenticated = TRUE;
             if (webui->cam->conf->stream_auth_method != 0){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No stream user:pass provided"));
@@ -1143,9 +1143,9 @@ static int webu_mhd_send(struct webui_ctx *webui, int ctrl) {
 
     if (webui->cam != NULL){
         if (ctrl){
-            if (webui->cam->conf->webcontrol_cors_header != NULL){
+            if (webui->cam->conf->webcontrol_cors_header != ""){
                 MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-                    , webui->cam->conf->webcontrol_cors_header);
+                    , webui->cam->conf->webcontrol_cors_header.c_str());
             }
             if (webui->cam->conf->webcontrol_interface == 1){
                 MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/plain;");
@@ -1153,9 +1153,9 @@ static int webu_mhd_send(struct webui_ctx *webui, int ctrl) {
                 MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
             }
         } else {
-            if (webui->cam->conf->stream_cors_header != NULL){
+            if (webui->cam->conf->stream_cors_header !=""){
                 MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-                    , webui->cam->conf->stream_cors_header);
+                    , webui->cam->conf->stream_cors_header.c_str());
             }
             MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
         }
@@ -1652,12 +1652,12 @@ static void webu_mhd_checktls(struct mhdstart_ctx *mhdst){
      */
     if (mhdst->ctrl){
         if (mhdst->camlst[0]->conf->webcontrol_tls){
-            if ((mhdst->camlst[0]->conf->webcontrol_cert == NULL) || (mhdst->tls_cert == NULL)) {
+            if ((mhdst->camlst[0]->conf->webcontrol_cert == "") || (mhdst->tls_cert == NULL)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
                 mhdst->camlst[0]->conf->webcontrol_tls = 0;
             }
-            if ((mhdst->camlst[0]->conf->webcontrol_key == NULL) || (mhdst->tls_key == NULL)) {
+            if ((mhdst->camlst[0]->conf->webcontrol_key == "") || (mhdst->tls_key == NULL)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("SSL/TLS requested but no key file provided.  SSL/TLS disabled"));
                 mhdst->camlst[0]->conf->webcontrol_tls = 0;
@@ -1665,12 +1665,12 @@ static void webu_mhd_checktls(struct mhdstart_ctx *mhdst){
         }
     } else {
         if (mhdst->camlst[mhdst->indxthrd]->conf->stream_tls){
-            if ((mhdst->camlst[0]->conf->webcontrol_cert == NULL) || (mhdst->tls_cert == NULL)) {
+            if ((mhdst->camlst[0]->conf->webcontrol_cert == "") || (mhdst->tls_cert == NULL)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
                 mhdst->camlst[mhdst->indxthrd]->conf->stream_tls = 0;
             }
-            if ((mhdst->camlst[0]->conf->webcontrol_key == NULL) || (mhdst->tls_key == NULL)) {
+            if ((mhdst->camlst[0]->conf->webcontrol_key == "") || (mhdst->tls_key == NULL)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("SSL/TLS requested but no key file provided.  SSL/TLS disabled"));
                 mhdst->camlst[mhdst->indxthrd]->conf->stream_tls = 0;
@@ -1893,8 +1893,8 @@ static void webu_init_ctrl(struct ctx_motapp *motapp){
     struct mhdstart_ctx mhdst;
     unsigned int randnbr;
 
-    mhdst.tls_cert = webu_mhd_loadfile(motapp->cam_list[0]->conf->webcontrol_cert);
-    mhdst.tls_key  = webu_mhd_loadfile(motapp->cam_list[0]->conf->webcontrol_key);
+    mhdst.tls_cert = webu_mhd_loadfile(motapp->cam_list[0]->conf->webcontrol_cert.c_str());
+    mhdst.tls_key  = webu_mhd_loadfile(motapp->cam_list[0]->conf->webcontrol_key.c_str());
     mhdst.ctrl = TRUE;
     mhdst.indxthrd = 0;
     mhdst.camlst = motapp->cam_list;
@@ -1948,8 +1948,8 @@ static void webu_init_strm(struct ctx_cam **cam_list){
     struct mhdstart_ctx mhdst;
     unsigned int randnbr;
 
-    mhdst.tls_cert = webu_mhd_loadfile(cam_list[0]->conf->webcontrol_cert);
-    mhdst.tls_key  = webu_mhd_loadfile(cam_list[0]->conf->webcontrol_key);
+    mhdst.tls_cert = webu_mhd_loadfile(cam_list[0]->conf->webcontrol_cert.c_str());
+    mhdst.tls_key  = webu_mhd_loadfile(cam_list[0]->conf->webcontrol_key.c_str());
     mhdst.ctrl = FALSE;
     mhdst.indxthrd = 0;
     mhdst.camlst = cam_list;

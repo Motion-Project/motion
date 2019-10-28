@@ -502,7 +502,7 @@ void algsec_init(ctx_cam *cam){
     #ifdef HAVE_OPENCV
         int retcd;
 
-        mythreadname_set("cv",cam->threadnr,cam->conf->camera_name);
+        mythreadname_set("cv",cam->threadnr,cam->conf->camera_name.c_str());
 
         cam->algsec = new ctx_algsec;
 
@@ -514,7 +514,7 @@ void algsec_init(ctx_cam *cam){
 
         if (retcd == 0) algsec_start_handler(cam);
 
-        mythreadname_set("ml",cam->threadnr,cam->conf->camera_name);
+        mythreadname_set("ml",cam->threadnr,cam->conf->camera_name.c_str());
     #else
         (void)cam;
     #endif

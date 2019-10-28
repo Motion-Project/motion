@@ -262,10 +262,10 @@ void log_init(struct ctx_motapp *motapp){
     }
 
 
-    if (motapp->log_file != NULL) {
-        if (mystrne(motapp->log_file,"syslog")) {
+    if (motapp->log_file != "") {
+        if (motapp->log_file != "syslog") {
             log_set_mode(LOGMODE_FILE);
-            log_set_logfile(motapp->log_file);
+            log_set_logfile(motapp->log_file.c_str());
             if (logfile) {
                 log_set_mode(LOGMODE_SYSLOG);
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
@@ -285,7 +285,7 @@ void log_init(struct ctx_motapp *motapp){
     }
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion %s Started",VERSION);
 
-    motapp->log_type = log_get_type(motapp->log_type_str);
+    motapp->log_type = log_get_type(motapp->log_type_str.c_str());
 
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Using log type (%s) log level (%s)"),
                log_get_type_str(motapp->log_type), log_get_level_str(motapp->log_level));

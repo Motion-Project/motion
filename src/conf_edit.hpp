@@ -25,10 +25,15 @@
 #ifndef _INCLUDE_CONF_EDIT_H_
 #define _INCLUDE_CONF_EDIT_H_
 
-void conf_edit_set(struct ctx_motapp *motapp, int threadnbr, char *cmd, char *arg1);
-int conf_edit_get(struct ctx_cam *cam, const char *cmd, char *arg1 , enum PARM_CAT pcat);
+void conf_edit_set(struct ctx_motapp *motapp, int threadnbr,std::string parm_nm, std::string parm_val);
+void conf_edit_set(struct ctx_motapp *motapp, int threadnbr,const char *parm_nm_chr, std::string parm_val);
+void conf_edit_set(struct ctx_motapp *motapp, int threadnbr,std::string parm_nm, const char *parm_chr);
+void conf_edit_set(struct ctx_motapp *motapp, int threadnbr,const char *parm_nm_chr, const char *parm_val_chr);
+
+void conf_edit_get(struct ctx_cam *cam, std::string parm_nm, std::string &parm_val, enum PARM_CAT parm_cat);
+void conf_edit_get(struct ctx_cam *cam, std::string parm_nm, char *parm_chr, enum PARM_CAT parm_cat);
+
 void conf_edit_dflt_app(struct ctx_motapp *motapp);
 void conf_edit_dflt_cam(struct ctx_cam *cam);
-void conf_edit_free(struct ctx_cam *cam);
 
 #endif

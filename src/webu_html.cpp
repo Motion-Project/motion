@@ -254,7 +254,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
 
     if (webui->cam_threads == 1){
         /* Only Motion.conf file */
-        if (webui->camlst[0]->conf->camera_name == NULL){
+        if (webui->camlst[0]->conf->camera_name == ""){
             snprintf(response, sizeof (response),
                 "    <div class=\"dropdown\">\n"
                 "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
@@ -272,7 +272,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
                 "        <a onclick=\"camera_click('cam_%05d');\">%s</a>\n"
                 ,_("Cameras")
                 ,webui->camlst[0]->camera_id
-                ,webui->camlst[0]->conf->camera_name);
+                ,webui->camlst[0]->conf->camera_name.c_str());
             webu_write(webui, response);
         }
     } else if (webui->cam_threads > 1){
@@ -287,7 +287,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
         webu_write(webui, response);
 
         for (indx=1;indx <= webui->cam_count;indx++){
-            if (webui->camlst[indx]->conf->camera_name == NULL){
+            if (webui->camlst[indx]->conf->camera_name == ""){
                 snprintf(response, sizeof (response),
                     "        <a onclick=\"camera_click('cam_%05d');\">%s %d</a>\n"
                     ,webui->camlst[indx]->camera_id
@@ -296,7 +296,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
                 snprintf(response, sizeof (response),
                     "        <a onclick=\"camera_click('cam_%05d');\">%s</a>\n"
                     ,webui->camlst[indx]->camera_id
-                    ,webui->camlst[indx]->conf->camera_name
+                    ,webui->camlst[indx]->conf->camera_name.c_str()
                 );
             }
             webu_write(webui, response);
@@ -452,7 +452,7 @@ static void webu_html_config(struct webui_ctx *webui) {
      */
     val_temp=(char*) malloc(PATH_MAX);
     indx_parm = 0;
-    while (config_parms[indx_parm].parm_name != NULL){
+    while (config_parms[indx_parm].parm_name != ""){
 
         if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
             (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER)){
@@ -465,7 +465,7 @@ static void webu_html_config(struct webui_ctx *webui) {
 
         snprintf(response, sizeof (response),
             "        <option value='%s' data-cam_all00=\""
-            , config_parms[indx_parm].parm_name);
+            , config_parms[indx_parm].parm_name.c_str());
         webu_write(webui, response);
 
         memset(val_temp,'\0',PATH_MAX);
@@ -506,15 +506,15 @@ static void webu_html_config(struct webui_ctx *webui) {
         }
         /* Terminate the open quote and option.  For foreign language put hint in ()  */
         if (mystrceq(webui->lang,"en") ||
-            mystrceq(config_parms[indx_parm].parm_name
-                ,_(config_parms[indx_parm].parm_name))){
+            mystrceq(config_parms[indx_parm].parm_name.c_str()
+                ,_(config_parms[indx_parm].parm_name.c_str()))){
             snprintf(response, sizeof (response),"\" >%s</option>\n",
-                config_parms[indx_parm].parm_name);
+                config_parms[indx_parm].parm_name.c_str());
             webu_write(webui, response);
         } else {
             snprintf(response, sizeof (response),"\" >%s (%s)</option>\n",
-                config_parms[indx_parm].parm_name
-                ,_(config_parms[indx_parm].parm_name));
+                config_parms[indx_parm].parm_name.c_str()
+                ,_(config_parms[indx_parm].parm_name.c_str()));
             webu_write(webui, response);
         }
 
@@ -801,7 +801,7 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui) {
             webu_write(webui, response);
         }
 
-        if (webui->camlst[indx]->conf->camera_name == NULL){
+        if (webui->camlst[indx]->conf->camera_name == ""){
             snprintf(response, sizeof (response),
                 "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
                 " class='header-center' >%s %d (%s)</h3>\"\n"
@@ -815,7 +815,7 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui) {
             snprintf(response, sizeof (response),
                 "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
                 " class='header-center' >%s (%s)</h3>\"\n"
-                , webui->camlst[indx]->conf->camera_name
+                , webui->camlst[indx]->conf->camera_name.c_str()
                 ,(!webui->camlst[indx]->running_cam)? _("Not running") :
                  (webui->camlst[indx]->lost_connection)? _("Lost connection"):
                  (webui->camlst[indx]->pause)? _("Paused"):_("Active")

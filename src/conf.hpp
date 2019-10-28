@@ -21,30 +21,30 @@
     struct ctx_config {
         /* Overall system configuration parameters */
         int             quiet;
-        char*           camera_name;
+        std::string     camera_name;
         int             camera_id;
-        char*           camera_dir;
-        char*           target_dir;
+        std::string      camera_dir;
+        std::string     target_dir;
 
         /* Capture device configuration parameters */
-        char*           videodevice;
-        char*           vid_control_params;
+        std::string     videodevice;
+        std::string     vid_control_params;
         int             v4l2_palette;
         int             input;
         int             norm;
         unsigned long   frequency;
-        char*           tuner_device;
+        std::string     tuner_device;
         int             roundrobin_frames;
         int             roundrobin_skip;
         int             roundrobin_switchfilter;
 
-        char*           netcam_url;
-        char*           netcam_highres;
-        char*           netcam_userpass;
+        std::string     netcam_url;
+        std::string     netcam_highres;
+        std::string     netcam_userpass;
         int             netcam_use_tcp;
 
-        char*           mmalcam_name;
-        char*           mmalcam_control_params;
+        std::string     mmalcam_name;
+        std::string     mmalcam_control_params;
 
         /* Image processing configuration parameters */
         int             width;
@@ -52,14 +52,14 @@
         int             framerate;
         int             minimum_frame_time;
         int             rotate;
-        char*           flip_axis;
-        char*           locate_motion_mode;
-        char*           locate_motion_style;
-        char*           text_left;
-        char*           text_right;
+        std::string     flip_axis;
+        std::string     locate_motion_mode;
+        std::string     locate_motion_style;
+        std::string     text_left;
+        std::string     text_right;
         int             text_changes;
         int             text_scale;
-        char*           text_event;
+        std::string     text_event;
 
         /* Motion detection configuration parameters */
         int             emulate_motion;
@@ -72,20 +72,20 @@
         int             threshold_tune;
         int             secondary_interval;
         int             secondary_method;
-        char*           secondary_model;
-        char*           secondary_config;
+        std::string     secondary_model;
+        std::string     secondary_config;
         int             secondary_method2;
-        char*           secondary_model2;
-        char*           secondary_config2;
+        std::string     secondary_model2;
+        std::string     secondary_config2;
         int             secondary_method3;
-        char*           secondary_model3;
-        char*           secondary_config3;
+        std::string     secondary_model3;
+        std::string     secondary_config3;
         int             noise_level;
         int             noise_tune;
-        char*           despeckle_filter;
-        char*           area_detect;
-        char*           mask_file;
-        char*           mask_privacy;
+        std::string     despeckle_filter;
+        std::string     area_detect;
+        std::string     mask_file;
+        std::string     mask_privacy;
         int             smart_mask_speed;
         int             lightswitch_percent;
         int             lightswitch_frames;
@@ -95,27 +95,27 @@
         int             post_capture;
 
         /* Script execution configuration parameters */
-        char*           on_event_start;
-        char*           on_event_end;
-        char*           on_picture_save;
-        char*           on_area_detected;
-        char*           on_motion_detected;
-        char*           on_movie_start;
-        char*           on_movie_end;
-        char*           on_camera_lost;
-        char*           on_camera_found;
+        std::string     on_event_start;
+        std::string     on_event_end;
+        std::string     on_picture_save;
+        std::string     on_area_detected;
+        std::string     on_motion_detected;
+        std::string     on_movie_start;
+        std::string     on_movie_end;
+        std::string     on_camera_lost;
+        std::string     on_camera_found;
 
         /* Picture output configuration parameters */
-        char*           picture_output;
+        std::string     picture_output;
         int             picture_output_motion;
-        char*           picture_type;
+        std::string     picture_type;
         int             picture_quality;
-        char*           picture_exif;
-        char*           picture_filename;
+        std::string     picture_exif;
+        std::string     picture_filename;
 
         /* Snapshot configuration parameters */
         int             snapshot_interval;
-        char*           snapshot_filename;
+        std::string     snapshot_filename;
 
         /* Movie output configuration parameters */
         int             movie_output;
@@ -123,22 +123,22 @@
         int             movie_max_time;
         int             movie_bps;
         int             movie_quality;
-        char*           movie_codec;
+        std::string     movie_codec;
         int             movie_passthrough;
-        char*           movie_filename;
+        std::string     movie_filename;
         int             movie_extpipe_use;
-        char*           movie_extpipe;
+        std::string     movie_extpipe;
 
         /* Timelapse movie configuration parameters */
         int             timelapse_interval;
-        char*           timelapse_mode;
+        std::string     timelapse_mode;
         int             timelapse_fps;
-        char*           timelapse_codec;
-        char*           timelapse_filename;
+        std::string     timelapse_codec;
+        std::string     timelapse_filename;
 
         /* Loopback device configuration parameters */
-        char*           video_pipe;
-        char*           video_pipe_motion;
+        std::string     video_pipe;
+        std::string     video_pipe_motion;
 
         /* Webcontrol configuration parameters */
         int             webcontrol_port;
@@ -147,19 +147,19 @@
         int             webcontrol_parms;
         int             webcontrol_interface;
         int             webcontrol_auth_method;
-        char*           webcontrol_authentication;
+        std::string     webcontrol_authentication;
         int             webcontrol_tls;
-        char*           webcontrol_cert;
-        char*           webcontrol_key;
-        char*           webcontrol_cors_header;
+        std::string     webcontrol_cert;
+        std::string     webcontrol_key;
+        std::string     webcontrol_cors_header;
 
         /* Live stream configuration parameters */
         int             stream_port;
         int             stream_localhost;
         int             stream_auth_method;
-        char*           stream_authentication;
+        std::string     stream_authentication;
         int             stream_tls;
-        char*           stream_cors_header;
+        std::string     stream_cors_header;
         int             stream_preview_scale;
         int             stream_preview_newline;
         int             stream_preview_method;
@@ -169,28 +169,28 @@
         int             stream_maxrate;
 
         /* Database and SQL configuration parameters */
-        char*           database_type;
-        char*           database_dbname;
-        char*           database_host;
+        std::string     database_type;
+        std::string     database_dbname;
+        std::string     database_host;
         int             database_port;
-        char*           database_user;
-        char*           database_password;
+        std::string     database_user;
+        std::string     database_password;
         int             database_busy_timeout;
 
         int             sql_log_picture;
         int             sql_log_snapshot;
         int             sql_log_movie;
         int             sql_log_timelapse;
-        char*           sql_query_start;
-        char*           sql_query_stop;
-        char*           sql_query;
+        std::string     sql_query_start;
+        std::string     sql_query_stop;
+        std::string     sql_query;
 
         int             track_type;
         int             track_auto;
         int             track_step_angle_x;
         int             track_step_angle_y;
         int             track_move_wait;
-        char*           track_generic_move;
+        std::string     track_generic_move;
     };
 
     enum PARM_CAT{
@@ -209,8 +209,8 @@
 
     /** Current parameters in the config file */
     struct ctx_parm {
-        const char*         parm_name;     /* name for this parameter                  */
-        const char*         parm_help;     /* short explanation for parameter          */
+        const std::string   parm_name;     /* name for this parameter                  */
+        const std::string   parm_help;     /* short explanation for parameter          */
         int                 main_thread;    /* belong only to main thread when value>0  */
         enum PARM_TYP       parm_type;      /* char string of either bool,int,string,etc.  */
         enum PARM_CAT       parm_cat;
@@ -219,10 +219,10 @@
 
     /** Deprecated parameters in the config file  */
     struct ctx_parm_depr{
-        const char*         parm_name;     /* Name of the deprecated option */
-        const char*         last_version;  /* Last version this option was used in */
-        const char*         info;          /* Short text on why it was deprecated (removed, replaced with, etc) */
-        const char*         newname;       /* Name of the new parameter */
+        const std::string   parm_name;     /* Name of the deprecated option */
+        const std::string   last_version;  /* Last version this option was used in */
+        const std::string   info;          /* Short text on why it was deprecated (removed, replaced with, etc) */
+        const std::string   newname;       /* Name of the new parameter */
     };
 
     extern struct ctx_parm config_parms[];

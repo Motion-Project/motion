@@ -415,7 +415,8 @@ static int generic_move(struct ctx_cam *cam, enum track_action action, int manua
     cam->track->posx += cent->x;
     cam->track->posy += cent->y;
 
-    mystrftime(cam, fmtcmd, sizeof(fmtcmd), cam->conf->track_generic_move, &cam->current_image->imgts, NULL, 0);
+    mystrftime(cam, fmtcmd, sizeof(fmtcmd), cam->conf->track_generic_move.c_str()
+        , &cam->current_image->imgts, NULL, 0);
 
     if (!fork()) {
         int i;
@@ -507,12 +508,12 @@ int track_center(struct ctx_cam *cam, int dev,
     if (cam->conf->track_type == TRACK_TYPE_UVC){
         return uvc_center(cam, dev, xoff, yoff);
     } else if (cam->conf->track_type == TRACK_TYPE_GENERIC) {
-        if (cam->conf->track_generic_move){
+        if (cam->conf->track_generic_move != ""){
             cent.x = -cam->track->posx;
             cent.y = -cam->track->posy;
             return generic_move(cam, TRACK_CENTER, manual,0 ,0 ,&cent , NULL);
         } else {
-            return 10; // FIX ME. I chose to return something reasonable.
+            return 10;
         }
     }
 
@@ -531,7 +532,7 @@ int track_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
     if (cam->conf->track_type == TRACK_TYPE_UVC){
         return uvc_move(cam, dev, cent, imgs, manual);
     } else if (cam->conf->track_type == TRACK_TYPE_GENERIC) {
-        if (cam->conf->track_generic_move) {
+        if (cam->conf->track_generic_move != "") {
             return generic_move(cam, TRACK_MOVE, manual, 0, 0, cent, imgs);
         } else {
             return cam->conf->track_move_wait;

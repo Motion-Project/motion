@@ -96,7 +96,7 @@ struct ctx_netcam {
 
     char                     *path;             /* The connection string to use for the camera */
     char                      service[5];       /* String specifying the type of camera http, rtsp, v4l2 */
-    const char               *camera_name;      /* The name of the camera as provided in the config file */
+    char                      camera_name[PATH_MAX];      /* The name of the camera as provided in the config file */
     char                      cameratype[30];   /* String specifying Normal or High for use in logging */
     struct imgsize_context    imgsize;          /* The image size parameters */
 

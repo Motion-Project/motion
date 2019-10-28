@@ -447,8 +447,8 @@ size_t mystrftime(const struct ctx_cam *cam, char *s, size_t max, const char *us
                 break;
 
             case '$': // thread name
-                if (cam->conf->camera_name && cam->conf->camera_name[0])
-                    snprintf(tempstr, PATH_MAX, "%s", cam->conf->camera_name);
+                if (cam->conf->camera_name != "")
+                    cam->conf->camera_name.copy(tempstr, PATH_MAX);
                 else
                     ++pos_userformat;
                 break;

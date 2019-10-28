@@ -547,7 +547,7 @@ int vid_parms_parse(struct ctx_cam *cam){
     }
     vdevctx->usrctrl_count = 0;
 
-    if (cam->conf->vid_control_params != NULL){
+    if (cam->conf->vid_control_params != ""){
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Parsing controls: %s"),cam->conf->vid_control_params);
 
         indx_parm = 0;

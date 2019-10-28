@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include <pthread.h>
 #include <microhttpd.h>
+#include <string>
 
 #if defined(HAVE_PTHREAD_NP_H)
     #include <pthread_np.h>
@@ -260,21 +261,13 @@ struct ctx_stream {
  *  own context
  */
 struct ctx_cam {
-    pthread_t               thread_id;
+
     struct ctx_motapp       *motapp;
     struct ctx_cam          **cam_list;
-
-    FILE                    *extpipe;
-    int                     extpipe_open;
     char                    conf_filename[PATH_MAX];
     int                     from_conf_dir;
     int                     threadnr;
-    unsigned int            daemon;
-    char                    pid_file[PATH_MAX];
-    char                    log_file[PATH_MAX];
-    char                    log_type_str[6];
-    int                     log_level;
-    unsigned int            log_type;
+    pthread_t               thread_id;
 
     struct ctx_config       *conf;
     struct ctx_track        *track;
@@ -292,6 +285,8 @@ struct ctx_cam {
     struct ctx_movie        *movie_timelapse;
     struct ctx_stream       stream;
 
+    FILE                    *extpipe;
+    int                     extpipe_open;
     int                     algsec_inuse;        /*Bool for whether we have secondary detection*/
     int                     track_posx;
     int                     track_posy;
@@ -380,11 +375,12 @@ struct ctx_motapp {
 
     int                 argc;
     char                **argv;
+
     int                 daemon;
-    char                *conf_filename;
-    char                *pid_file;
-    char                *log_file;
-    char                *log_type_str;
+    std::string         conf_filename;
+    std::string         pid_file;
+    std::string         log_file;
+    std::string         log_type_str;
     int                 log_level;
     int                 log_type;
     int                 setup_mode;

@@ -267,14 +267,17 @@ static void pic_write(struct ctx_cam *cam, FILE *picture, unsigned char *image, 
         height = cam->imgs.height;
     }
 
-    if (mystreq(cam->conf->picture_type, "ppm")) {
+    if (cam->conf->picture_type == "ppm") {
         pic_save_ppm(picture, image, width, height);
-    } else if (mystreq(cam->conf->picture_type, "webp")) {
-        pic_save_webp(picture, image, width, height, quality, cam, &(cam->current_image->imgts), &(cam->current_image->location));
-    } else if (mystreq(cam->conf->picture_type, "grey")) {
-        pic_save_grey(picture, image, width, height, quality, cam, &(cam->current_image->imgts), &(cam->current_image->location));
+    } else if (cam->conf->picture_type == "webp") {
+        pic_save_webp(picture, image, width, height, quality, cam
+            , &(cam->current_image->imgts), &(cam->current_image->location));
+    } else if (cam->conf->picture_type == "grey") {
+        pic_save_grey(picture, image, width, height, quality, cam
+            , &(cam->current_image->imgts), &(cam->current_image->location));
     } else {
-        pic_save_yuv420p(picture, image, width, height, quality, cam, &(cam->current_image->imgts), &(cam->current_image->location));
+        pic_save_yuv420p(picture, image, width, height, quality, cam
+            , &(cam->current_image->imgts), &(cam->current_image->location));
     }
 }
 
@@ -496,8 +499,8 @@ void pic_init_privacy(struct ctx_cam *cam){
     cam->imgs.mask_privacy_high = NULL;
     cam->imgs.mask_privacy_high_uv = NULL;
 
-    if (cam->conf->mask_privacy) {
-        if ((picture = myfopen(cam->conf->mask_privacy, "r"))) {
+    if (cam->conf->mask_privacy != "") {
+        if ((picture = myfopen(cam->conf->mask_privacy.c_str(), "r"))) {
             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Opening privacy mask file"));
             /*
              * NOTE: The mask is expected to have the output dimensions. I.e., the mask
@@ -521,7 +524,7 @@ void pic_init_privacy(struct ctx_cam *cam){
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
                 ,_("Error opening mask file %s"), cam->conf->mask_privacy);
             /* Try to write an empty mask file to make it easier for the user to edit it */
-            pic_write_mask(cam, cam->conf->mask_privacy);
+            pic_write_mask(cam, cam->conf->mask_privacy.c_str() );
         }
 
         if (!cam->imgs.mask_privacy) {
@@ -589,8 +592,8 @@ void pic_init_mask(struct ctx_cam *cam){
     FILE *picture;
 
     /* Load the mask file if any */
-    if (cam->conf->mask_file) {
-        if ((picture = myfopen(cam->conf->mask_file, "r"))) {
+    if (cam->conf->mask_file != "") {
+        if ((picture = myfopen(cam->conf->mask_file.c_str(), "r"))) {
             /*
              * NOTE: The mask is expected to have the output dimensions. I.e., the mask
              * applies to the already rotated image, not the capture image. Thus, use
@@ -606,7 +609,7 @@ void pic_init_mask(struct ctx_cam *cam){
              * Try to write an empty mask file to make it easier
              * for the user to edit it
              */
-            pic_write_mask(cam, cam->conf->mask_file);
+            pic_write_mask(cam, cam->conf->mask_file.c_str());
         }
 
         if (!cam->imgs.mask) {

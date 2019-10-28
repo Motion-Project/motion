@@ -1094,23 +1094,28 @@ static void netcam_set_v4l2(struct ctx_netcam *netcam){
 
 static void netcam_set_path (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
 
-    char        *userpass = NULL;
+    char   userpass[PATH_MAX];
     struct url_t url;
+    int retcd;
 
     netcam->path = NULL;
 
     memset(&url, 0, sizeof(url));
+    memset(userpass,0,PATH_MAX);
 
     if (netcam->high_resolution){
-        netcam_url_parse(&url, cam->conf->netcam_highres);
+        netcam_url_parse(&url, cam->conf->netcam_highres.c_str());
     } else {
-        netcam_url_parse(&url, cam->conf->netcam_url);
+        netcam_url_parse(&url, cam->conf->netcam_url.c_str());
     }
 
-    if (cam->conf->netcam_userpass != NULL) {
-        userpass = mystrdup(cam->conf->netcam_userpass);
+    if (cam->conf->netcam_userpass != "") {
+        cam->conf->netcam_userpass.copy(userpass, PATH_MAX);
     } else if (url.userpass != NULL) {
-        userpass = mystrdup(url.userpass);
+        retcd = snprintf(userpass,PATH_MAX,"%s",url.userpass);
+        if ((retcd <0) || (retcd>=PATH_MAX)){
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("Error getting userpass"));
+        }
     }
 
     if (mystreq(url.service, "v4l2")) {
@@ -1148,22 +1153,27 @@ static void netcam_set_path (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
     sprintf(netcam->service, "%s",url.service);
 
     netcam_url_free(&url);
-    if (userpass) free (userpass);
 
 }
 
 static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
     /* Set the parameters to be used with our camera */
+    int retcd;
 
     if (netcam->high_resolution) {
         netcam->imgsize.width = 0;
         netcam->imgsize.height = 0;
-        snprintf(netcam->cameratype,29, "%s",_("High resolution"));
+        retcd = snprintf(netcam->cameratype,29, "%s",_("High resolution"));
     } else {
         netcam->imgsize.width = cam->conf->width;
         netcam->imgsize.height = cam->conf->height;
-        snprintf(netcam->cameratype,29, "%s",_("Normal resolution"));
+        retcd = snprintf(netcam->cameratype,29, "%s",_("Normal resolution"));
     }
+    if ((retcd <0) || (retcd >= 30)){
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("Error setting name of resolution %s."),netcam->cameratype);
+    }
+
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("Setting up %s stream."),netcam->cameratype);
 
@@ -1175,7 +1185,6 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
     netcam->src_fps =  cam->conf->framerate; /* Default to conf fps */
     netcam->motapp = cam->motapp;
     netcam->conf = cam->conf;
-    netcam->camera_name = cam->conf->camera_name;
     netcam->img_recv =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
     netcam->img_recv->ptr =(char*) mymalloc(NETCAM_BUFFSIZE);
     netcam->img_latest =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
@@ -1186,6 +1195,7 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
     netcam->handler_finished = TRUE;
     netcam->first_image = TRUE;
     netcam->reconnect_count = 0;
+    cam->conf->camera_name.copy(netcam->camera_name,PATH_MAX);
 
     snprintf(netcam->threadname, 15, "%s",_("Unknown"));
 
@@ -1194,7 +1204,7 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
 
     /* If this is the norm and we have a highres, then disable passthru on the norm */
     if ((!netcam->high_resolution) &&
-        (cam->conf->netcam_highres)) {
+        (cam->conf->netcam_highres != "")) {
         netcam->passthrough = FALSE;
     } else {
         netcam->passthrough = mycheck_passthrough(cam);
@@ -1696,7 +1706,7 @@ int netcam_setup(struct ctx_cam *cam){
 
     indx_cam = 1;
     indx_max = 1;
-    if (cam->conf->netcam_highres) indx_max = 2;
+    if (cam->conf->netcam_highres != "") indx_max = 2;
 
     while (indx_cam <= indx_max){
         if (indx_cam == 1){
