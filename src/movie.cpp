@@ -1498,30 +1498,28 @@ static const char* movie_init_codec(struct ctx_cam *cam){
     * specify a maximum movie time and let Motion run for days creating all the
     * different types of movies checking for crashes, warnings, etc.
     */
-    const char *codec;
     int codenbr;
 
-    codec = cam->conf->movie_codec.c_str();
-    if (mystreq(codec, "ogg")) {
+    if (cam->conf->movie_codec == "ogg") {
         MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, "The ogg container is no longer supported.  Changing to mpeg4");
-        codec = "mpeg4";
+        return "mpeg4";
     }
-    if (mystreq(codec, "test")) {
+    if (cam->conf->movie_codec == "test") {
         MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "Running test of the various output formats.");
         codenbr = cam->event_nr % 10;
-        if (codenbr == 1)      codec = "mpeg4";
-        else if (codenbr == 2) codec = "msmpeg4";
-        else if (codenbr == 3) codec = "swf";
-        else if (codenbr == 4) codec = "flv";
-        else if (codenbr == 5) codec = "ffv1";
-        else if (codenbr == 6) codec = "mov";
-        else if (codenbr == 7) codec = "mp4";
-        else if (codenbr == 8) codec = "mkv";
-        else if (codenbr == 9) codec = "hevc";
-        else                   codec = "msmpeg4";
+        if (codenbr == 1)      return "mpeg4";
+        else if (codenbr == 2) return "msmpeg4";
+        else if (codenbr == 3) return "swf";
+        else if (codenbr == 4) return "flv";
+        else if (codenbr == 5) return "ffv1";
+        else if (codenbr == 6) return "mov";
+        else if (codenbr == 7) return "mp4";
+        else if (codenbr == 8) return "mkv";
+        else if (codenbr == 9) return "hevc";
+        else                   return "msmpeg4";
     }
 
-    return codec;
+    return cam->conf->movie_codec.c_str();
 
 }
 

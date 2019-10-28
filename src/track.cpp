@@ -467,7 +467,7 @@ static int generic_move(struct ctx_cam *cam, enum track_action action, int manua
         /* if above function succeeds the program never reach here */
         MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
             ,_("Unable to start external command '%s'")
-            ,cam->conf->track_generic_move);
+            ,cam->conf->track_generic_move.c_str());
 
         exit(1);
     }

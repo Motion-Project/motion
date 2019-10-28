@@ -430,7 +430,7 @@ static void pic_write_mask(struct ctx_cam *cam, const char *file) {
 
     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
         ,_("Creating empty mask %s\nPlease edit this file and "
-        "re-run motion to enable mask feature"), cam->conf->mask_file);
+        "re-run motion to enable mask feature"), cam->conf->mask_file.c_str());
 }
 
 void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst){
@@ -522,7 +522,7 @@ void pic_init_privacy(struct ctx_cam *cam){
             myfclose(picture);
         } else {
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
-                ,_("Error opening mask file %s"), cam->conf->mask_privacy);
+                ,_("Error opening mask file %s"), cam->conf->mask_privacy.c_str());
             /* Try to write an empty mask file to make it easier for the user to edit it */
             pic_write_mask(cam, cam->conf->mask_privacy.c_str() );
         }
@@ -532,7 +532,7 @@ void pic_init_privacy(struct ctx_cam *cam){
                 ,_("Failed to read mask privacy image. Mask privacy feature disabled."));
         } else {
             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
-            ,_("Mask privacy file \"%s\" loaded."), cam->conf->mask_privacy);
+            ,_("Mask privacy file \"%s\" loaded."), cam->conf->mask_privacy.c_str());
 
             indx_img = 1;
             indx_max = 1;
@@ -604,7 +604,7 @@ void pic_init_mask(struct ctx_cam *cam){
         } else {
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
                 ,_("Error opening mask file %s")
-                ,cam->conf->mask_file);
+                ,cam->conf->mask_file.c_str());
             /*
              * Try to write an empty mask file to make it easier
              * for the user to edit it
@@ -618,7 +618,7 @@ void pic_init_mask(struct ctx_cam *cam){
         } else {
             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
                 ,_("Maskfile \"%s\" loaded.")
-                ,cam->conf->mask_file);
+                ,cam->conf->mask_file.c_str());
         }
     } else {
         cam->imgs.mask = NULL;

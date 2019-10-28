@@ -539,18 +539,18 @@ static void event_create_extpipe(struct ctx_cam *cam, motion_event evnt
             /* Permission denied */
             if (errno ==  EACCES) {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
-                    ,_("no write access to target directory %s"), cam->conf->target_dir);
+                    ,_("no write access to target directory %s"), cam->conf->target_dir.c_str());
                 return ;
             /* Path not found - create it */
             } else if (errno ==  ENOENT) {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
-                    ,_("path not found, trying to create it %s ..."), cam->conf->target_dir);
+                    ,_("path not found, trying to create it %s ..."), cam->conf->target_dir.c_str());
                 if (mycreate_path(cam->extpipefilename) == -1)
                     return ;
             }
             else {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
-                    ,_("error accesing path %s"), cam->conf->target_dir);
+                    ,_("error accesing path %s"), cam->conf->target_dir.c_str());
                 return ;
             }
         }

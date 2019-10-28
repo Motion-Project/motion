@@ -109,7 +109,7 @@ void dbse_global_init(struct ctx_cam **cam_list){
                 if (mysql_library_init(0, NULL, NULL)) {
                     MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                         ,_("Could not initialize database %s")
-                        ,cam_list[0]->conf->database_type);
+                        ,cam_list[0]->conf->database_type.c_str());
                     cam_list[0]->conf->database_type = "";
                     return;
                 }
@@ -121,7 +121,7 @@ void dbse_global_init(struct ctx_cam **cam_list){
                 if (mysql_library_init(0, NULL, NULL)) {
                     MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                         ,_("Could not initialize database %s")
-                        ,cam_list[0]->conf->database_type);
+                        ,cam_list[0]->conf->database_type.c_str());
                     cam_list[0]->conf->database_type = "";
                     return;
                 }
@@ -136,7 +136,7 @@ void dbse_global_init(struct ctx_cam **cam_list){
                 (cam_list[0]->conf->database_dbname != "")) {
                 MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
                     ,_("SQLite3 Database filename %s")
-                    ,cam_list[0]->conf->database_dbname);
+                    ,cam_list[0]->conf->database_dbname.c_str());
 
                 int thread_safe = sqlite3_threadsafe();
                 if (thread_safe > 0) {
@@ -146,12 +146,12 @@ void dbse_global_init(struct ctx_cam **cam_list){
                     if (sqlite3_open(cam_list[0]->conf->database_dbname.c_str(), &cam_list[0]->dbse->database_sqlite3) != SQLITE_OK) {
                         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                             ,_("Can't open database %s : %s")
-                            ,cam_list[0]->conf->database_dbname
+                            ,cam_list[0]->conf->database_dbname.c_str()
                             ,sqlite3_errmsg(cam_list[0]->dbse->database_sqlite3));
                         sqlite3_close(cam_list[0]->dbse->database_sqlite3);
                         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                             ,_("Could not initialize database %s")
-                            ,cam_list[0]->conf->database_dbname);
+                            ,cam_list[0]->conf->database_dbname.c_str());
                         cam_list[0]->conf->database_type = "";
                         return;
                     }
@@ -190,8 +190,8 @@ static void dbse_init_mysql(struct ctx_cam *cam){
 
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 ,_("Cannot connect to MySQL database %s on host %s with user %s")
-                ,cam->conf->database_dbname, cam->conf->database_host
-                ,cam->conf->database_user);
+                ,cam->conf->database_dbname.c_str(), cam->conf->database_host.c_str()
+                ,cam->conf->database_user.c_str());
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 ,_("MySQL error was %s"), mysql_error(cam->dbse->database_mysql));
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
@@ -228,8 +228,8 @@ static void dbse_init_mariadb(struct ctx_cam *cam){
             , cam->conf->database_port, NULL, 0)) {
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 ,_("Cannot connect to MySQL database %s on host %s with user %s")
-                ,cam->conf->database_dbname, cam->conf->database_host
-                ,cam->conf->database_user);
+                ,cam->conf->database_dbname.c_str(), cam->conf->database_host.c_str()
+                ,cam->conf->database_user.c_str());
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 ,_("MySQL error was %s"), mysql_error(cam->dbse->database_mariadb));
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
@@ -257,11 +257,11 @@ static void dbse_init_sqlite3(struct ctx_cam *cam){
             cam->dbse->database_sqlite3 = cam->cam_list[0]->dbse->database_sqlite3;
         } else {
             MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-                ,_("SQLite3 Database filename %s"), cam->conf->database_dbname);
+                ,_("SQLite3 Database filename %s"), cam->conf->database_dbname.c_str());
             if (sqlite3_open(cam->conf->database_dbname.c_str(), &cam->dbse->database_sqlite3) != SQLITE_OK) {
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                     ,_("Can't open database %s : %s")
-                    ,cam->conf->database_dbname, sqlite3_errmsg(cam->dbse->database_sqlite3));
+                    ,cam->conf->database_dbname.c_str(), sqlite3_errmsg(cam->dbse->database_sqlite3));
                 sqlite3_close(cam->dbse->database_sqlite3);
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                     ,_("Disabling database functionality"));
@@ -302,7 +302,7 @@ static void dbse_init_pgsql(struct ctx_cam *cam){
         if (PQstatus(cam->dbse->database_pg) == CONNECTION_BAD) {
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             ,_("Connection to PostgreSQL database '%s' failed: %s")
-            ,cam->conf->database_dbname, PQerrorMessage(cam->dbse->database_pg));
+            ,cam->conf->database_dbname.c_str(), PQerrorMessage(cam->dbse->database_pg));
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 ,_("Disabling database functionality"));
             cam->conf->database_type = "";
@@ -319,7 +319,7 @@ void dbse_init(struct ctx_cam *cam){
 
     if (cam->conf->database_type != "") {
         MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-            ,_("Database backend %s"), cam->conf->database_type);
+            ,_("Database backend %s"), cam->conf->database_type.c_str());
         if (cam->conf->database_type == "mysql") {
             dbse_init_mysql(cam);
         } else if (cam->conf->database_type == "mariadb") {
@@ -331,7 +331,7 @@ void dbse_init(struct ctx_cam *cam){
         } else {
             MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
             ,_("Invalid Database backend %s")
-            , cam->conf->database_type);
+            , cam->conf->database_type.c_str());
         }
         dbse_sqlmask_update(cam);
     }
@@ -411,13 +411,13 @@ static void dbse_mysql_exec(char *sqlquery,struct ctx_cam *cam, int save_id) {
                     MOTION_LOG(ALR, TYPE_DB, NO_ERRNO
                         ,_("Cannot reconnect to MySQL"
                         " database %s on host %s with user %s MySQL error was %s"),
-                        cam->conf->database_dbname,
-                        cam->conf->database_host, cam->conf->database_user,
+                        cam->conf->database_dbname.c_str(),
+                        cam->conf->database_host.c_str(), cam->conf->database_user.c_str(),
                         mysql_error(cam->dbse->database_mysql));
                 } else {
                     MOTION_LOG(INF, TYPE_DB, NO_ERRNO
                         ,_("Re-Connection to Mysql database '%s' Succeed")
-                        ,cam->conf->database_dbname);
+                        ,cam->conf->database_dbname.c_str());
                     if (mysql_query(cam->dbse->database_mysql, sqlquery) != 0) {
                         int error_my = mysql_errno(cam->dbse->database_mysql);
                         MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
@@ -462,13 +462,13 @@ static void dbse_mariadb_exec(char *sqlquery,struct ctx_cam *cam, int save_id) {
                     MOTION_LOG(ALR, TYPE_DB, NO_ERRNO
                         ,_("Cannot reconnect to MySQL"
                         " database %s on host %s with user %s MySQL error was %s"),
-                        cam->conf->database_dbname,
-                        cam->conf->database_host, cam->conf->database_user,
+                        cam->conf->database_dbname.c_str(),
+                        cam->conf->database_host.c_str(), cam->conf->database_user.c_str(),
                         mysql_error(cam->dbse->database_mariadb));
                 } else {
                     MOTION_LOG(INF, TYPE_DB, NO_ERRNO
                         ,_("Re-Connection to Mysql database '%s' Succeed")
-                        ,cam->conf->database_dbname);
+                        ,cam->conf->database_dbname.c_str());
                     if (mysql_query(cam->dbse->database_mariadb, sqlquery) != 0) {
                         int error_my = mysql_errno(cam->dbse->database_mariadb);
                         MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
@@ -500,7 +500,7 @@ static void dbse_pgsql_exec(char *sqlquery,struct ctx_cam *cam, int save_id) {
 
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 ,_("Connection to PostgreSQL database '%s' failed: %s")
-                ,cam->conf->database_dbname, PQerrorMessage(cam->dbse->database_pg));
+                ,cam->conf->database_dbname.c_str(), PQerrorMessage(cam->dbse->database_pg));
 
         // This function will close the connection to the server and attempt to reestablish a new connection to the same server,
         // using all the same parameters previously used. This may be useful for error recovery if a working connection is lost
@@ -509,11 +509,11 @@ static void dbse_pgsql_exec(char *sqlquery,struct ctx_cam *cam, int save_id) {
             if (PQstatus(cam->dbse->database_pg) == CONNECTION_BAD) {
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                     ,_("Re-Connection to PostgreSQL database '%s' failed: %s")
-                    ,cam->conf->database_dbname, PQerrorMessage(cam->dbse->database_pg));
+                    ,cam->conf->database_dbname.c_str(), PQerrorMessage(cam->dbse->database_pg));
             } else {
                 MOTION_LOG(INF, TYPE_DB, NO_ERRNO
                     ,_("Re-Connection to PostgreSQL database '%s' Succeed")
-                    ,cam->conf->database_dbname);
+                    ,cam->conf->database_dbname.c_str());
             }
 
         } else if (!(PQresultStatus(res) == PGRES_COMMAND_OK || PQresultStatus(res) == PGRES_TUPLES_OK)) {

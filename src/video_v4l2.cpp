@@ -1081,7 +1081,7 @@ static int v4l2_device_open(struct ctx_cam *cam, struct video_dev *curdev) {
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         ,_("Using videodevice %s and input %d")
-        ,cam->conf->videodevice, cam->conf->input);
+        ,cam->conf->videodevice.c_str(), cam->conf->input);
     cam->conf->videodevice.copy(curdev->videodevice,PATH_MAX);
 
     curdev->fd_device = -1;
@@ -1097,7 +1097,7 @@ static int v4l2_device_open(struct ctx_cam *cam, struct video_dev *curdev) {
 
     MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
         ,_("Failed to open video device %s")
-        ,cam->conf->videodevice);
+        ,cam->conf->videodevice.c_str());
     return -1;
 
 }
