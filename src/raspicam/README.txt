@@ -11,6 +11,9 @@ the "RaspiCamControl.c" file was altered to include the
 removed. The inserted "mmal_status_to_int" function is an exact copy
 from the helper module.
 
+Additional Revision:
+Added more default values to raspicamcontrol_set_defaults
+
 They are used to parse an options string and setup the camera
 parameters appropriately. The format of the string is the same as
 other raspberry pi camera tools.
