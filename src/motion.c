@@ -535,8 +535,17 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
                        cnt->conf.text_event, &img->timestamp_tv, NULL, 0);
 
             /* EVENT_FIRSTMOTION triggers on_event_start_command and event_ffmpeg_newfile */
-            event(cnt, EVENT_FIRSTMOTION, img, NULL, NULL,
-                &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv);
+            int indx;
+            indx = cnt->imgs.image_ring_out;
+            while (indx != cnt->imgs.image_ring_in ){
+                if ((cnt->imgs.image_ring[cnt->imgs.image_ring_out].flags & (IMAGE_SAVE | IMAGE_SAVED)) == IMAGE_SAVE){
+                    event(cnt, EVENT_FIRSTMOTION, img, NULL, NULL, &cnt->imgs.image_ring[indx].timestamp_tv);
+                    indx = cnt->imgs.image_ring_in;
+                } else {
+                    indx++;
+                    if (indx == cnt->imgs.image_ring_size) indx = 0;
+                }
+            }
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
                        cnt->event_nr);
