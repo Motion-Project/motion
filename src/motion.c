@@ -1291,6 +1291,19 @@ static int motion_init(struct context *cnt)
     if (cnt->conf.width  < 64) cnt->conf.width  = 64;
     if (cnt->conf.height < 64) cnt->conf.height = 64;
 
+    if (cnt->conf.netcam_decoder != NULL){
+        cnt->netcam_decoder = mymalloc(strlen(cnt->conf.netcam_decoder)+1);
+        retcd = snprintf(cnt->netcam_decoder,strlen(cnt->conf.netcam_decoder)+1
+            ,"%s",cnt->conf.netcam_decoder);
+        if (retcd < 0){
+            free(cnt->netcam_decoder);
+            cnt->netcam_decoder = NULL;
+        }
+    } else {
+        cnt->netcam_decoder = NULL;
+    }
+
+
     /* set the device settings */
     cnt->video_dev = vid_start(cnt);
 
@@ -1721,6 +1734,11 @@ static void motion_cleanup(struct context *cnt) {
     cnt->eventtime_tm = NULL;
 
     dbse_deinit(cnt);
+
+    if (cnt->netcam_decoder){
+        free(cnt->netcam_decoder);
+        cnt->netcam_decoder = NULL;
+    }
 
 }
 

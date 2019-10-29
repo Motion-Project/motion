@@ -53,6 +53,7 @@ struct config {
     const char      *netcam_proxy;
     int             netcam_tolerant_check;
     int             netcam_use_tcp;
+    char            *netcam_decoder;
 
     const char      *mmalcam_name;
     const char      *mmalcam_control_params;

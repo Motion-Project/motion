@@ -876,6 +876,12 @@
         <tr>
           <td align="left"></td>
           <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#netcam_decoder" >netcam_decoder</a></td>
+        </tr>
+        <tr>
+          <td align="left"></td>
+          <td align="left"></td>
           <td align="left">netcam_highres</td>
           <td align="left"><a href="#netcam_highres" >netcam_highres</a></td>
         </tr>
@@ -1643,9 +1649,10 @@
               <td bgcolor="#edf4f9" ><a href="#netcam_url" >netcam_url</a> </td>
               <td bgcolor="#edf4f9" ><a href="#netcam_highres" >netcam_highres</a> </td>
               <td bgcolor="#edf4f9" ><a href="#netcam_userpass" >netcam_userpass</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#netcam_keepalive" >netcam_keepalive</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_decoder" >netcam_decoder</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#netcam_keepalive" >netcam_keepalive</a> </td>
               <td bgcolor="#edf4f9" ><a href="#netcam_proxy" >netcam_proxy</a> </td>
               <td bgcolor="#edf4f9" ><a href="#netcam_tolerant_check" >netcam_tolerant_check</a> </td>
               <td bgcolor="#edf4f9" ><a href="#netcam_use_tcp" >netcam_use_tcp</a> </td>
@@ -3049,6 +3056,25 @@
         The Username and password for the network camera.  For http protocols, this
         option is for HTTP 1.1 Basic authentication only. The string is specified as username:password.
         To use no authentication simply remove this option.  Digest authentication is only available for rtsp/rtmp cameras.
+        <p></p>
+
+        <h3><a name="netcam_decoder"></a> netcam_decoder </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not defined</li>
+        </ul>
+        <p></p>
+        The user requested decoder to use for rtsp/rtmp cameras.  Motion will try to open the camera using the decoder
+        specified by this parameter. If it not successful, it will usually fall back to the default decoder.  This
+        option may improve performance in certain situations for certain platforms and cameras.  Users can find the
+        names of the decoders on their system by going to a command prompt and typing <code>ffmpeg -formats</code> and
+        looking for the name of the decoder with a 'D' next to it and correlating this with the type of image
+        provided from the camera.  Note that not all decoders will work with all cameras.  If the camera does not
+        open using the requested decoder, specify a different decoder or leave this parameter empty to use the default.
+        Additionally, ffmpeg will only list out the decoders that it was compiled to support.  Additional decoders
+        may be available if ffmpeg is compiled from source.
         <p></p>
 
         <h3><a name="netcam_keepalive"></a> netcam_keepalive </h3>

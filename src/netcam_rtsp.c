@@ -329,11 +329,36 @@ static int netcam_rtsp_decode_packet(struct rtsp_context *rtsp_data){
     return frame_size;
 }
 
+static void netcam_rtsp_decoder_error(struct rtsp_context *rtsp_data, int retcd, const char* fnc_nm){
+
+    char errstr[128];
+
+    if (retcd < 0){
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            ,_("%s: %s: %s,Interrupt %s")
+            ,rtsp_data->cameratype,fnc_nm, errstr, rtsp_data->interrupted ? _("True"):_("False"));
+    } else {
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            ,_("%s: %s: Failed,Interrupt %s"),rtsp_data->cameratype
+            ,fnc_nm, rtsp_data->interrupted ? _("True"):_("False"));
+    }
+
+    if (rtsp_data->decoder_nm != NULL){
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            ,_("%s: Ignoring user requested decoder %s"),rtsp_data->cameratype
+            ,rtsp_data->decoder_nm);
+        free(rtsp_data->cnt->netcam_decoder);
+        rtsp_data->cnt->netcam_decoder = NULL;
+        rtsp_data->decoder_nm = NULL;
+    }
+
+}
+
 static int netcam_rtsp_open_codec(struct rtsp_context *rtsp_data){
 
 #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
     int retcd;
-    char errstr[128];
     AVStream *st;
     AVCodec *decoder = NULL;
 
@@ -341,46 +366,46 @@ static int netcam_rtsp_open_codec(struct rtsp_context *rtsp_data){
 
     retcd = av_find_best_stream(rtsp_data->format_context, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
     if ((retcd < 0) || (rtsp_data->interrupted)){
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: av_find_best_stream: %s,Interrupt %s")
-            ,rtsp_data->cameratype, errstr, rtsp_data->interrupted ? _("True"):_("False"));
+        netcam_rtsp_decoder_error(rtsp_data, retcd, "av_find_best_stream");
         return -1;
     }
     rtsp_data->video_stream_index = retcd;
     st = rtsp_data->format_context->streams[rtsp_data->video_stream_index];
 
-    decoder = avcodec_find_decoder(st->codecpar->codec_id);
+    if (rtsp_data->decoder_nm != NULL){
+        decoder = avcodec_find_decoder_by_name(rtsp_data->decoder_nm);
+        if (decoder == NULL) {
+            netcam_rtsp_decoder_error(rtsp_data, 0, "avcodec_find_decoder_by_name");
+        } else {
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("%s: Using decoder %s")
+                ,rtsp_data->cameratype,rtsp_data->decoder_nm);
+        }
+    }
+
+    if (decoder == NULL) {
+        decoder = avcodec_find_decoder(st->codecpar->codec_id);
+    }
+
     if ((decoder == NULL) || (rtsp_data->interrupted)){
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: avcodec_find_decoder: Failed,Interrupt %s")
-            ,rtsp_data->cameratype, rtsp_data->interrupted ? _("True"):_("False"));
+        netcam_rtsp_decoder_error(rtsp_data, 0, "avcodec_find_decoder");
         return -1;
     }
 
     rtsp_data->codec_context = avcodec_alloc_context3(decoder);
     if ((rtsp_data->codec_context == NULL) || (rtsp_data->interrupted)){
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: avcodec_alloc_context3: Failed,Interrupt %s")
-            ,rtsp_data->cameratype, rtsp_data->interrupted ? _("True"):_("False"));
+        netcam_rtsp_decoder_error(rtsp_data, 0, "avcodec_alloc_context3");
         return -1;
     }
 
     retcd = avcodec_parameters_to_context(rtsp_data->codec_context, st->codecpar);
     if ((retcd < 0) || (rtsp_data->interrupted)) {
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: avcodec_parameters_to_context: %s,Interrupt %s")
-            ,rtsp_data->cameratype, errstr, rtsp_data->interrupted ? _("True"):_("False"));
+        netcam_rtsp_decoder_error(rtsp_data, retcd, "avcodec_alloc_context3");
         return -1;
     }
 
     retcd = avcodec_open2(rtsp_data->codec_context, decoder, NULL);
     if ((retcd < 0) || (rtsp_data->interrupted)){
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: avcodec_open2: %s,Interrupt %s")
-            ,rtsp_data->cameratype, errstr, rtsp_data->interrupted ? _("True"):_("False"));
+        netcam_rtsp_decoder_error(rtsp_data, retcd, "avcodec_open2");
         return -1;
     }
 
@@ -388,7 +413,6 @@ static int netcam_rtsp_open_codec(struct rtsp_context *rtsp_data){
 #else
 
     int retcd;
-    char errstr[128];
     AVStream *st;
     AVCodec *decoder = NULL;
 
@@ -396,10 +420,7 @@ static int netcam_rtsp_open_codec(struct rtsp_context *rtsp_data){
 
     retcd = av_find_best_stream(rtsp_data->format_context, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
     if ((retcd < 0) || (rtsp_data->interrupted)){
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: av_find_best_stream: %s,Interrupt %s")
-            ,rtsp_data->cameratype, errstr, rtsp_data->interrupted ? _("True"):_("False"));
+        netcam_rtsp_decoder_error(rtsp_data, retcd, "av_find_best_stream");
         return -1;
     }
     rtsp_data->video_stream_index = retcd;
@@ -408,17 +429,12 @@ static int netcam_rtsp_open_codec(struct rtsp_context *rtsp_data){
     rtsp_data->codec_context = st->codec;
     decoder = avcodec_find_decoder(rtsp_data->codec_context->codec_id);
     if ((decoder == NULL) || (rtsp_data->interrupted)) {
-         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: avcodec_find_decoder: Failed,Interrupt %s")
-            ,rtsp_data->cameratype, rtsp_data->interrupted ? _("True"):_("False"));
-         return -1;
+        netcam_rtsp_decoder_error(rtsp_data, 0, "avcodec_find_decoder");
+        return -1;
      }
     retcd = avcodec_open2(rtsp_data->codec_context, decoder, NULL);
     if ((retcd < 0) || (rtsp_data->interrupted)){
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: avcodec_open2: %s,Interrupt %s")
-            ,rtsp_data->cameratype, errstr, rtsp_data->interrupted ? _("True"):_("False"));
+        netcam_rtsp_decoder_error(rtsp_data, retcd, "avcodec_open2");
         return -1;
     }
 
@@ -982,6 +998,8 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     rtsp_data->handler_finished = TRUE;
     rtsp_data->first_image = TRUE;
     rtsp_data->reconnect_count = 0;
+    rtsp_data->decoder_nm = cnt->netcam_decoder;
+    rtsp_data->cnt = cnt;
 
     snprintf(rtsp_data->threadname, 15, "%s",_("Unknown"));
 

@@ -79,6 +79,8 @@ struct rtsp_context {
     struct timeval            frame_prev_tm;    /* The time set before calling the av functions */
     struct timeval            frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
     struct config            *conf;             /* Pointer to conf parms of parent cnt*/
+    char                      *decoder_nm;      /* User requested decoder */
+    struct context            *cnt;
 
     char                      threadname[16];   /* The thread name*/
     int                       threadnbr;        /* The thread number */
