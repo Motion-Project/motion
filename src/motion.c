@@ -486,6 +486,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
     struct config *conf = &cnt->conf;
     struct images *imgs = &cnt->imgs;
     struct coord *location = &img->location;
+    int indx;
 
     /* Draw location */
     if (cnt->locate_motion_mode == LOCATE_ON) {
@@ -535,17 +536,16 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
                        cnt->conf.text_event, &img->timestamp_tv, NULL, 0);
 
             /* EVENT_FIRSTMOTION triggers on_event_start_command and event_ffmpeg_newfile */
-            int indx;
-            indx = cnt->imgs.image_ring_out;
-            while (indx != cnt->imgs.image_ring_in ){
-                if ((cnt->imgs.image_ring[cnt->imgs.image_ring_out].flags & (IMAGE_SAVE | IMAGE_SAVED)) == IMAGE_SAVE){
+
+            indx = cnt->imgs.image_ring_out-1;
+            do {
+                indx++;
+                if (indx == cnt->imgs.image_ring_size) indx = 0;
+                if ((cnt->imgs.image_ring[indx].flags & (IMAGE_SAVE | IMAGE_SAVED)) == IMAGE_SAVE){
                     event(cnt, EVENT_FIRSTMOTION, img, NULL, NULL, &cnt->imgs.image_ring[indx].timestamp_tv);
                     indx = cnt->imgs.image_ring_in;
-                } else {
-                    indx++;
-                    if (indx == cnt->imgs.image_ring_size) indx = 0;
                 }
-            }
+            } while (indx != cnt->imgs.image_ring_in);
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
                        cnt->event_nr);
