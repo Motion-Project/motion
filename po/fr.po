@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-10-22 20:17-0600\n"
+"POT-Creation-Date: 2019-10-30 20:07-0600\n"
 "PO-Revision-Date: 2018-10-13 12:01-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -66,11 +66,6 @@ msgid "Writing config file to %s"
 msgstr "Ecriture du fichier de configuration sur %s"
 
 #: src/conf.cpp
-#, fuzzy
-msgid "Error setting filename"
-msgstr "Erreur lors de l'encodage de l'image"
-
-#: src/conf.cpp
 msgid "Error getcwd"
 msgstr "Erreur getcwd"
 
@@ -84,11 +79,6 @@ msgid "No config file to process, using default values"
 msgstr ""
 "Pas de fichier de configuration à traiter, utilisation des valeurs par "
 "défault"
-
-#: src/conf.cpp
-#, fuzzy, c-format
-msgid "Error setting file name %s"
-msgstr "Erreur lors de l'encodage de l'image"
 
 #: src/conf.cpp
 #, c-format
@@ -121,17 +111,18 @@ msgid "log_level"
 msgstr ""
 
 #: src/conf_edit.cpp
-#, c-format
-msgid "Invalid log_level %s"
-msgstr ""
+#, fuzzy, c-format
+msgid "Invalid log_type %s"
+msgstr "    Fréquence d'images %d/%d"
 
 #: src/conf_edit.cpp
 msgid "log_type"
 msgstr ""
 
 #: src/conf_edit.cpp
-msgid "text_changes"
-msgstr ""
+#, fuzzy
+msgid "native_language"
+msgstr "Langage natif : Oui"
 
 #: src/conf_edit.cpp
 msgid "quiet"
@@ -351,6 +342,10 @@ msgstr ""
 
 #: src/conf_edit.cpp
 msgid "text_right"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "text_changes"
 msgstr ""
 
 #: src/conf_edit.cpp
@@ -1044,14 +1039,14 @@ msgid "track_step_angle_y"
 msgstr ""
 
 #: src/conf_edit.cpp
-#, c-format
-msgid "Unknown config option \"%s\""
-msgstr "Option de configuration \"%s\" inconnue "
-
-#: src/conf_edit.cpp
 #, fuzzy
 msgid "Program coding error"
 msgstr "Erreur lors de l'encodage de l'image"
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Unknown config option \"%s\""
+msgstr "Option de configuration \"%s\" inconnue "
 
 #: src/draw.cpp
 #, c-format
@@ -1974,6 +1969,11 @@ msgid "%s: Setting v4l2 video_size: %s"
 msgstr ""
 
 #: src/netcam.cpp
+#, fuzzy
+msgid "Error getting userpass"
+msgstr "Erreur lors de l'encodage de l'image"
+
+#: src/netcam.cpp
 msgid "Setting up v4l2 via ffmpeg netcam"
 msgstr ""
 
@@ -1997,6 +1997,11 @@ msgstr ""
 #: src/netcam.cpp
 msgid "Normal resolution"
 msgstr ""
+
+#: src/netcam.cpp
+#, fuzzy, c-format
+msgid "Error setting name of resolution %s."
+msgstr "Erreur lors de l'encodage de l'image"
 
 #: src/netcam.cpp
 #, c-format

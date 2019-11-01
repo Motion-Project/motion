@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-10-22 20:17-0600\n"
+"POT-Creation-Date: 2019-10-30 20:07-0600\n"
 "PO-Revision-Date: 2018-10-13 12:03-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -64,10 +64,6 @@ msgid "Writing config file to %s"
 msgstr ""
 
 #: src/conf.cpp
-msgid "Error setting filename"
-msgstr ""
-
-#: src/conf.cpp
 msgid "Error getcwd"
 msgstr ""
 
@@ -78,11 +74,6 @@ msgstr ""
 
 #: src/conf.cpp
 msgid "No config file to process, using default values"
-msgstr ""
-
-#: src/conf.cpp
-#, c-format
-msgid "Error setting file name %s"
 msgstr ""
 
 #: src/conf.cpp
@@ -117,7 +108,7 @@ msgstr ""
 
 #: src/conf_edit.cpp
 #, c-format
-msgid "Invalid log_level %s"
+msgid "Invalid log_type %s"
 msgstr ""
 
 #: src/conf_edit.cpp
@@ -125,7 +116,7 @@ msgid "log_type"
 msgstr ""
 
 #: src/conf_edit.cpp
-msgid "text_changes"
+msgid "native_language"
 msgstr ""
 
 #: src/conf_edit.cpp
@@ -344,6 +335,10 @@ msgstr ""
 
 #: src/conf_edit.cpp
 msgid "text_right"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "text_changes"
 msgstr ""
 
 #: src/conf_edit.cpp
@@ -1034,12 +1029,12 @@ msgid "track_step_angle_y"
 msgstr ""
 
 #: src/conf_edit.cpp
-#, c-format
-msgid "Unknown config option \"%s\""
+msgid "Program coding error"
 msgstr ""
 
 #: src/conf_edit.cpp
-msgid "Program coding error"
+#, c-format
+msgid "Unknown config option \"%s\""
 msgstr ""
 
 #: src/draw.cpp
@@ -1957,6 +1952,10 @@ msgid "%s: Setting v4l2 video_size: %s"
 msgstr ""
 
 #: src/netcam.cpp
+msgid "Error getting userpass"
+msgstr ""
+
+#: src/netcam.cpp
 msgid "Setting up v4l2 via ffmpeg netcam"
 msgstr ""
 
@@ -1979,6 +1978,11 @@ msgstr ""
 
 #: src/netcam.cpp
 msgid "Normal resolution"
+msgstr ""
+
+#: src/netcam.cpp
+#, c-format
+msgid "Error setting name of resolution %s."
 msgstr ""
 
 #: src/netcam.cpp
