@@ -299,7 +299,7 @@ static void mlp_init_firstimage(struct ctx_cam *cam) {
 
     if (cam->conf->primary_method == 0){
         alg_update_reference_frame(cam, RESET_REF_FRAME);
-    } else {
+    } else if (cam->conf->primary_method == 1) {
         alg_new_update_frame(cam);
     }
 
@@ -905,8 +905,10 @@ static void mlp_detection(struct ctx_cam *cam){
             alg_switchfilter(cam);
             alg_despeckle(cam);
             alg_tune_smartmask(cam);
-        } else {
+        } else if (cam->conf->primary_method == 1) {
             alg_new_diff(cam);
+        } else if (cam->conf->primary_method == 2) {
+            algsec_primary(cam);
         }
 
     } else {

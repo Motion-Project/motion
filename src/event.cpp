@@ -347,7 +347,6 @@ static void event_imagem_detect(struct ctx_cam *cam, motion_event evnt
 
     struct ctx_config *conf = cam->conf;
     char fullfilenamem[PATH_MAX];
-    char filename[PATH_MAX];
     char filenamem[PATH_MAX];
     int retcd;
 
@@ -357,7 +356,7 @@ static void event_imagem_detect(struct ctx_cam *cam, motion_event evnt
     (void)ftype;
 
     if (conf->picture_output_motion) {
-        mystrftime(cam, filename, sizeof(filename), cam->conf->picture_filename.c_str(), ts1, NULL, 0);
+        mystrftime(cam, filenamem, sizeof(filenamem), cam->conf->picture_filename.c_str(), ts1, NULL, 0);
         retcd = snprintf(fullfilenamem, PATH_MAX, "%s/%sm.%s"
             , cam->conf->target_dir.c_str(), filenamem, imageext(cam));
         if ((retcd < 0) || (retcd >= PATH_MAX)){
