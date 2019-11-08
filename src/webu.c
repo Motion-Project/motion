@@ -42,6 +42,7 @@
 #include "webu_html.h"
 #include "webu_text.h"
 #include "webu_stream.h"
+#include "webu_status.h"
 #include "translate.h"
 
 /* Context to pass the parms to functions to start mhd */
@@ -1159,7 +1160,19 @@ static int webu_mhd_send(struct webui_ctx *webui, int ctrl) {
                 MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
                     , webui->cnt->conf.stream_cors_header);
             }
-            MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
+
+            switch (webui->cnct_type) {
+            case WEBUI_CNCT_STATUS_LIST:
+                /*FALLTHROUGH*/
+            case WEBUI_CNCT_STATUS_ONE:
+                MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE,
+                                         "application/json;");
+                break;
+
+            default:
+                MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
+                break;
+            }
         }
     }
 
@@ -1192,6 +1205,22 @@ static void webu_answer_strm_type(struct webui_ctx *webui) {
     } else if ((strcmp(webui->uri_cmd1,"current") == 0) ||
         (strcmp(webui->uri_camid,"current") == 0)){
         webui->cnct_type = WEBUI_CNCT_STATIC;
+
+    } else if (strcmp(webui->uri_camid, "cameras.json") == 0 &&
+               strlen(webui->uri_cmd1) == 0) {
+        webui->cnct_type = WEBUI_CNCT_STATUS_LIST;
+
+    } else if (strcmp(webui->uri_cmd1, "cameras.json") == 0 &&
+               strlen(webui->uri_cmd2) == 0) {
+        webui->cnct_type = WEBUI_CNCT_STATUS_LIST;
+
+    } else if (strcmp(webui->uri_camid, "status.json") == 0 &&
+               strlen(webui->uri_cmd1) == 0) {
+        webui->cnct_type = WEBUI_CNCT_STATUS_ONE;
+
+    } else if (strcmp(webui->uri_cmd1, "status.json") == 0 &&
+               strlen(webui->uri_cmd2) == 0) {
+        webui->cnct_type = WEBUI_CNCT_STATUS_ONE;
 
     } else if ((strlen(webui->uri_camid) > 0) &&
         (strlen(webui->uri_cmd1) == 0)){
@@ -1317,9 +1346,6 @@ static int webu_answer_strm(void *cls
         return retcd;
     }
 
-    /* Do not answer a request until the motion loop has completed at least once */
-    if (webui->cnt->passflag == 0) return MHD_NO;
-
     if (webui->cnt->webcontrol_finish) return MHD_NO;
 
     if (strlen(webui->clientip) == 0){
@@ -1334,6 +1360,26 @@ static int webu_answer_strm(void *cls
     }
 
     webu_answer_strm_type(webui);
+
+    switch (webui->cnct_type) {
+    case WEBUI_CNCT_STATUS_LIST:
+        /*FALLTHROUGH*/
+    case WEBUI_CNCT_STATUS_ONE:
+        webu_status_main(webui);
+
+        retcd = webu_mhd_send(webui, FALSE);
+        if (retcd == MHD_NO){
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed %d"), retcd);
+        }
+
+        return retcd;
+
+    default:
+        break;
+    }
+
+    /* Do not answer a request until the motion loop has completed at least once */
+    if (webui->cnt->passflag == 0) return MHD_NO;
 
     retcd = 0;
     if (webui->cnct_type == WEBUI_CNCT_STATIC){
