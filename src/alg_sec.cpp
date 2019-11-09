@@ -592,35 +592,4 @@ void algsec_detect(ctx_cam *cam){
 
 }
 
-void algsec_primary(ctx_cam *cam){
-    /*This function runs on the camera thread */
-    #ifdef HAVE_OPENCV
-        Mat mat_dst, mat_out, mat_fgmsk;
-        int imgsize;
-
-        mythreadname_set("pcv",cam->threadnr,cam->conf->camera_name.c_str());
-
-        imgsize = (cam->imgs.height * cam->imgs.width * 3) / 2;
-        cam->current_image->diffs=2000;
-
-        Ptr<BackgroundSubtractor> pBackSub;
-        pBackSub = createBackgroundSubtractorMOG2();
-
-        Mat mat_src = Mat(cam->imgs.height*3/2, cam->imgs.width
-            , CV_8UC1, (void*)cam->current_image->image_norm);
-        cvtColor(mat_src, mat_dst, COLOR_YUV2RGB_YV12);
-
-        pBackSub->apply(mat_dst, mat_fgmsk,0);
-
-        cvtColor(mat_fgmsk, mat_out, COLOR_BGR2YUV_I420);
-        memcpy(cam->imgs.image_motion.image_norm,(unsigned char*)mat_out.data,imgsize);
-
-        mythreadname_set("ml",cam->threadnr,cam->conf->camera_name.c_str());
-
-    #else
-        (void)cam;
-    #endif
-
-}
-
 

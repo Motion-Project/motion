@@ -899,18 +899,15 @@ static void mlp_detection(struct ctx_cam *cam){
     }
 
     if ( !cam->pause ) {
-        if (cam->conf->primary_method == 0){
+        if (cam->conf->primary_method == 1) {
+            alg_new_diff(cam);
+        } else if (cam->conf->primary_method == 0){
             alg_diff(cam);
             alg_lightswitch(cam);
             alg_switchfilter(cam);
             alg_despeckle(cam);
             alg_tune_smartmask(cam);
-        } else if (cam->conf->primary_method == 1) {
-            alg_new_diff(cam);
-        } else if (cam->conf->primary_method == 2) {
-            algsec_primary(cam);
         }
-
     } else {
         cam->current_image->diffs = 0;
     }
@@ -938,8 +935,6 @@ static void mlp_tuning(struct ctx_cam *cam){
 
     if (cam->conf->primary_method == 0){
         alg_update_reference_frame(cam, UPDATE_REF_FRAME);
-    } else {
-        alg_new_update_frame(cam);
     }
 
     cam->previous_diffs = cam->current_image->diffs;

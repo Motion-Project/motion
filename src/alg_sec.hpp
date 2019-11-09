@@ -54,6 +54,5 @@ struct ctx_algsec {
 void algsec_detect(ctx_cam *cam);
 void algsec_init(ctx_cam *cam);
 void algsec_deinit(ctx_cam *cam);
-void algsec_primary(ctx_cam *cam);
 
 #endif
