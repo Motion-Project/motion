@@ -24,12 +24,26 @@
 
 //example source config line:  human:75:25,car:60:30:4:15:A:1.012:3,dog:90:70
 struct ctx_algsec_model {
+    std::string                 config;             //Source config line
+
     int                         method;
     std::string                 modelfile;          //Source model file
-    std::string                 config;             //Source config line
-    std::string                 parms[3][10];       //Parms as strings
-    int                         parms_int[3][10];   //Parms convert to int
-    float                       parms_float[3][10]; //Parms converted to float
+    std::string                 imagetype;
+    int                         rotate;
+
+    float                       scalefactor;
+    float                       threshold_model;    /* Threshold fed into the opencv model*/
+    int                         threshold_motion;   /* Threshold for motion to use on detection*/
+
+    int                         hog_winstride;
+    int                         hog_padding;
+
+
+    int                         haar_minneighbors;
+    int                         haar_flags;
+    int                         haar_minsize;
+    int                         haar_maxsize;
+    bool                        isdetected;         /* Bool reset for each image as to whether a detection occurred */
     #ifdef HAVE_OPENCV
         cv::CascadeClassifier   haar_cascade;       //Haar Cascade (if applicable)
     #endif
@@ -46,8 +60,9 @@ struct ctx_algsec {
     unsigned char           *image_norm;
     int                     width;
     int                     height;
+    bool                    isdetected;         /* Bool reset for each Motion event as to whether a detection occurred */
     pthread_mutex_t         mutex;
-    struct ctx_algsec_model models[3];
+    struct ctx_algsec_model models;
 };
 
 

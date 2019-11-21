@@ -9,7 +9,7 @@ AC_CANONICAL_HOST
 AC_CONFIG_MACRO_DIR([m4])
 
 AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION([0.18])
+AM_GNU_GETTEXT_VERSION([0.19])
 
 ##############################################################################
 ###  Check additional system headers

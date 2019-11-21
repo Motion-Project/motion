@@ -72,14 +72,7 @@
         int             threshold_tune;
         int             secondary_interval;
         int             secondary_method;
-        std::string     secondary_model;
         std::string     secondary_config;
-        int             secondary_method2;
-        std::string     secondary_model2;
-        std::string     secondary_config2;
-        int             secondary_method3;
-        std::string     secondary_model3;
-        std::string     secondary_config3;
         int             noise_level;
         int             noise_tune;
         std::string     despeckle_filter;
@@ -104,6 +97,7 @@
         std::string     on_movie_end;
         std::string     on_camera_lost;
         std::string     on_camera_found;
+        std::string     on_secondary_detect;
 
         /* Picture output configuration parameters */
         std::string     picture_output;

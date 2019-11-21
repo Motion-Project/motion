@@ -468,6 +468,20 @@ static void event_camera_lost(struct ctx_cam *cam, motion_event evnt
         exec_command(cam, cam->conf->on_camera_lost.c_str(), NULL, 0);
 }
 
+static void event_secondary_detect(struct ctx_cam *cam, motion_event evnt
+            ,struct ctx_image_data *img_data, char *fname
+            ,void *ftype, struct timespec *ts1) {
+
+    (void)evnt;
+    (void)img_data;
+    (void)fname;
+    (void)ftype;
+    (void)ts1;
+
+    if (cam->conf->on_secondary_detect != "")
+        exec_command(cam, cam->conf->on_secondary_detect.c_str(), NULL, 0);
+}
+
 static void event_camera_found(struct ctx_cam *cam, motion_event evnt
             ,struct ctx_image_data *img_data, char *fname
             ,void *ftype, struct timespec *ts1) {
@@ -894,6 +908,10 @@ struct event_handlers event_handlers[] = {
     {
     EVENT_CAMERA_FOUND,
     event_camera_found
+    },
+    {
+    EVENT_SECDETECT,
+    event_secondary_detect
     },
     {(motion_event)0, NULL}
 };

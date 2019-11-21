@@ -792,17 +792,6 @@ static void conf_edit_secondary_method(struct ctx_cam *cam, std::string &parm, e
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_method",_("secondary_method"));
 }
-static void conf_edit_secondary_model(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
-    if (pact == PARM_ACT_DFLT) {
-        cam->conf->secondary_model = "";
-    } else if (pact == PARM_ACT_SET){
-        cam->conf->secondary_model = parm;
-    } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->secondary_model;
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_model",_("secondary_model"));
-}
 static void conf_edit_secondary_config(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->secondary_config = "";
@@ -813,84 +802,6 @@ static void conf_edit_secondary_config(struct ctx_cam *cam, std::string &parm, e
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_config",_("secondary_config"));
-}
-static void conf_edit_secondary_method2(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
-    int parm_in;
-    if (pact == PARM_ACT_DFLT){
-        cam->conf->secondary_method2 = 0;
-    } else if (pact == PARM_ACT_SET){
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) ) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid secondary_method2 %d"),parm_in);
-        } else {
-            cam->conf->secondary_method2 = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET){
-        parm = std::to_string(cam->conf->secondary_method2);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_method2",_("secondary_method2"));
-}
-static void conf_edit_secondary_model2(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
-    if (pact == PARM_ACT_DFLT) {
-        cam->conf->secondary_model2 = "";
-    } else if (pact == PARM_ACT_SET){
-        cam->conf->secondary_model2 = parm;
-    } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->secondary_model2;
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_model2",_("secondary_model2"));
-}
-static void conf_edit_secondary_config2(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
-    if (pact == PARM_ACT_DFLT) {
-        cam->conf->secondary_config2 = "";
-    } else if (pact == PARM_ACT_SET){
-        cam->conf->secondary_config2 = parm;
-    } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->secondary_config2;
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_config2",_("secondary_config2"));
-}
-static void conf_edit_secondary_method3(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
-    int parm_in;
-    if (pact == PARM_ACT_DFLT){
-        cam->conf->secondary_method3 = 0;
-    } else if (pact == PARM_ACT_SET){
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) ) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid secondary_method3 %d"),parm_in);
-        } else {
-            cam->conf->secondary_method3 = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET){
-        parm = std::to_string(cam->conf->secondary_method3);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_method3",_("secondary_method3"));
-}
-static void conf_edit_secondary_model3(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
-    if (pact == PARM_ACT_DFLT) {
-        cam->conf->secondary_model3 = "";
-    } else if (pact == PARM_ACT_SET){
-        cam->conf->secondary_model3 = parm;
-    } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->secondary_model3;
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_model3",_("secondary_model3"));
-}
-static void conf_edit_secondary_config3(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
-    if (pact == PARM_ACT_DFLT) {
-        cam->conf->secondary_config3 = "";
-    } else if (pact == PARM_ACT_SET){
-        cam->conf->secondary_config3 = parm;
-    } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->secondary_config3;
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_config3",_("secondary_config3"));
 }
 static void conf_edit_noise_level(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
     int parm_in;
@@ -1182,6 +1093,17 @@ static void conf_edit_on_camera_found(struct ctx_cam *cam, std::string &parm, en
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_camera_found",_("on_camera_found"));
+}
+static void conf_edit_on_secondary_detect(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->on_secondary_detect = "";
+    } else if (pact == PARM_ACT_SET){
+        cam->conf->on_secondary_detect = parm;
+    } else if (pact == PARM_ACT_GET){
+        parm = cam->conf->on_secondary_detect;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_secondary_detect",_("on_secondary_detect"));
 }
 
 static void conf_edit_picture_output(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
@@ -2207,14 +2129,7 @@ static void conf_edit_cat02(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "threshold_tune"){          conf_edit_threshold_tune(cam, parm_val, pact);
     } else if (parm_nm == "secondary_interval"){      conf_edit_secondary_interval(cam, parm_val, pact);
     } else if (parm_nm == "secondary_method"){        conf_edit_secondary_method(cam, parm_val, pact);
-    } else if (parm_nm == "secondary_model"){         conf_edit_secondary_model(cam, parm_val, pact);
     } else if (parm_nm == "secondary_config"){        conf_edit_secondary_config(cam, parm_val, pact);
-    } else if (parm_nm == "secondary_method2"){       conf_edit_secondary_method2(cam, parm_val, pact);
-    } else if (parm_nm == "secondary_model2"){        conf_edit_secondary_model2(cam, parm_val, pact);
-    } else if (parm_nm == "secondary_config2"){       conf_edit_secondary_config2(cam, parm_val, pact);
-    } else if (parm_nm == "secondary_method3"){       conf_edit_secondary_method3(cam, parm_val, pact);
-    } else if (parm_nm == "secondary_model3"){        conf_edit_secondary_model3(cam, parm_val, pact);
-    } else if (parm_nm == "secondary_config3"){       conf_edit_secondary_config3(cam, parm_val, pact);
     } else if (parm_nm == "noise_level"){             conf_edit_noise_level(cam, parm_val, pact);
     } else if (parm_nm == "noise_tune"){              conf_edit_noise_tune(cam, parm_val, pact);
     } else if (parm_nm == "despeckle_filter"){        conf_edit_despeckle_filter(cam, parm_val, pact);
@@ -2242,6 +2157,7 @@ static void conf_edit_cat03(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "on_movie_end"){            conf_edit_on_movie_end(cam, parm_val, pact);
     } else if (parm_nm == "on_camera_lost"){          conf_edit_on_camera_lost(cam, parm_val, pact);
     } else if (parm_nm == "on_camera_found"){         conf_edit_on_camera_found(cam, parm_val, pact);
+    } else if (parm_nm == "on_secondary_detect"){     conf_edit_on_secondary_detect(cam, parm_val, pact);
     } else if (parm_nm == "picture_output"){          conf_edit_picture_output(cam, parm_val, pact);
     } else if (parm_nm == "picture_output_motion"){   conf_edit_picture_output_motion(cam, parm_val, pact);
     } else if (parm_nm == "picture_type"){            conf_edit_picture_type(cam, parm_val, pact);

@@ -234,36 +234,8 @@ struct ctx_parm config_parms[] = {
     "# The method to use for secondary detection.",
     0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
     {
-    "secondary_model",
-    "# Full path name for the secondary model.",
-    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
-    {
     "secondary_config",
-    "# Configuration parameters for the secondary model.",
-    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
-    {
-    "secondary_method2",
-    "# The method to use for secondary detection 2.",
-    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
-    {
-    "secondary_model2",
-    "# Full path name for the secondary model 2.",
-    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
-    {
-    "secondary_config2",
-    "# Configuration parameters for the secondary model 2.",
-    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
-    {
-    "secondary_method3",
-    "# The method to use for secondary detection 3.",
-    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
-    {
-    "secondary_model3",
-    "# Full path name for the secondary model 3.",
-    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
-    {
-    "secondary_config3",
-    "# Configuration parameters for the secondary model 3.",
+    "# Full path name for the secondary model and configuration.",
     0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
     {
     "noise_level",
@@ -356,6 +328,10 @@ struct ctx_parm config_parms[] = {
     {
     "on_camera_found",
     "# Command to be executed when a camera that was lost has been found.",
+    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_RESTRICTED},
+    {
+    "on_secondary_detect",
+    "# Command to be executed when the secondary detection has triggered.",
     0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_RESTRICTED},
     {
     "picture_output",

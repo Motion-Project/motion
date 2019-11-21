@@ -1095,6 +1095,13 @@ static void mlp_actions_event(struct ctx_cam *cam){
                 cam->frame_skip = track_center(cam, cam->video_dev, 0, 0, 0);
             }
 
+            if (cam->algsec_inuse){
+                if (cam->algsec->isdetected){
+                    event(cam, EVENT_SECDETECT, NULL, NULL, NULL, &cam->current_image->imgts);
+                }
+                cam->algsec->isdetected = false;
+            }
+
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), cam->event_nr);
 
             cam->event_stop = FALSE;
