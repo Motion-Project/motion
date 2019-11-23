@@ -39,7 +39,7 @@
 #include "util.hpp"
 #include "webu.hpp"
 #include "webu_html.hpp"
-#include "conf_edit.hpp"
+
 
 /* struct to save information regarding the links to include in html page */
 struct strminfo_ctx {

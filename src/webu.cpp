@@ -39,7 +39,6 @@
 
 #include "motion.hpp"
 #include "conf.hpp"
-#include "conf_edit.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "webu.hpp"

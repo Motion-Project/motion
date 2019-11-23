@@ -25,7 +25,6 @@
 #include "util.hpp"
 #include "webu.hpp"
 #include "webu_text.hpp"
-#include "conf_edit.hpp"
 
 static void webu_text_seteol(struct webui_ctx *webui) {
     /* Set the end of line character for text interface */

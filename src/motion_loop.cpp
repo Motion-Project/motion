@@ -30,7 +30,6 @@
 #include "video_loopback.hpp"
 #include "netcam.hpp"
 #include "conf.hpp"
-#include "conf_edit.hpp"
 #include "alg.hpp"
 #include "alg_sec.hpp"
 #include "track.hpp"
