@@ -56,7 +56,7 @@ msgstr "Kamera %d - Konfigurationsdatei: %s"
 #: src/conf.cpp
 #, c-format
 msgid "%-25s <redacted>"
-msgstr %-25s <redacted>
+msgstr "%-25s <redacted>"
 
 #: src/conf.cpp
 #, c-format
@@ -1225,7 +1225,7 @@ msgstr ""
  "%d"
 #, c-format
 msgid "%s codec vbr/crf/bit_rate: %d"
-msgstr %s Codec vbr / crf / Bitrate: %d
+msgstr "%s Codec vbr / crf / Bitrate: %d"
 
 #: src/movie.cpp
 #, c-format
@@ -2536,7 +2536,7 @@ msgstr "Gerät unterstützt keine Angabe der PAL / NTSC-Norm"
 #: src/video_v4l2.cpp
 #, c-format
 msgid "- video standard %s"
-msgstr - Videostandard %s
+msgstr "- Videostandard %s"
 
 #: src/video_v4l2.cpp
 #, c-format
@@ -2599,7 +2599,8 @@ msgid ""
 "VIDIOC_S_FMT: "
 msgstr
  "Fehler beim Einstellen des Pixelformats.\n"
- VIDIOC S FMT:
+ "VIDIOC S FMT:"
+
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
 msgstr "Verwenden der Palette %c%c%c%c (%dx%d)"
@@ -2646,7 +2647,7 @@ msgstr "Unterstützte Paletten:"
 #: src/video_v4l2.cpp
 #, c-format
 msgid "%d - %s (compressed : %d) (%#x)"
-msgstr %d - %s (komprimiert: %d) (% # x)
+msgstr "%d - %s (komprimiert: %d) (% # x)"
 
 #: src/video_v4l2.cpp
 #, c-format
@@ -2670,7 +2671,7 @@ msgstr "Fehler beim Anfordern der Puffer %d für die Speicherzuordnung. VIDIOC R
 #: src/video_v4l2.cpp
 #, c-format
 msgid "mmap information: frames=%d"
-msgstr mmap information: frames = %d
+msgstr "mmap information: frames = %d"
 
 #: src/video_v4l2.cpp
 #, c-format
@@ -2688,7 +2689,7 @@ msgid ""
 "VIDIOC_QUERYBUF: "
 msgstr
  "Fehler beim Abfragen des Puffers %i\n"
- VIDIOC QUERYBUF:
+ "VIDIOC QUERYBUF:"
 #, c-format
 msgid "Error mapping buffer %i mmap"
 msgstr "Fehler beim Mappen des Puffers %i mmap"
@@ -2705,7 +2706,7 @@ msgstr "Fehler beim Starten des Streams. VIDIOC STREAMON"
 #: src/video_v4l2.cpp
 #, c-format
 msgid "1) vid_source->pframe %i"
-msgstr 1) vid source->pframe %i
+msgstr "1) vid source->pframe %i"
 
 #: src/video_v4l2.cpp
 #, c-format

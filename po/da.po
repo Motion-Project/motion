@@ -55,7 +55,7 @@ msgstr "Camera %d - Config fil: %s"
 
 #: src/conf.cpp
 #, c-format
-msgid "%-25s <redacted>"
+msgid  "%-25s <redacted>"
 msgstr "%-25s <redacted>"
 
 #: src/conf.cpp
@@ -2632,7 +2632,8 @@ msgstr "Justering til højde (%d)"
 msgid ""
 "H264(21) format not supported via videodevice.  Changing to default palette"
 msgstr ""
- "H264 (21) -format understøttes ikke via videodevice. Ændring til standardpalet
+ "H264 (21) -format understøttes ikke via videodevice. Ændring til standardpalet"
+
 #: src/video_v4l2.cpp
 #, c-format
 msgid "Configuration palette index %d (%s) for %dx%d doesn't work."
