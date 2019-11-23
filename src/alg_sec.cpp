@@ -307,21 +307,20 @@ static void algsec_parms_parse_microdetail(std::string &vin, ctx_algsec_model &a
         st_colon = en_colon+1;
         en_colon = vin.find(':',st_colon);
         tmp = vin.substr(st_colon,en_colon-st_colon);
-        //algmdl???? = tmp;
+        (void)algmdl;  /*tbd */
         if (en_colon == std::string::npos) return;
     }
 
     return;
 }
 
-/* modelfile=/home/whatever/model.xml,threshold_motion=50
-
-/**Parse parm based upon equals*/
+/* Parse parm based upon equals*/
 static void algsec_parms_parse_detail(std::string &vin, ctx_algsec_model &algmdl){
+
+    /* modelfile=/home/whatever/model.xml,threshold_motion=50*/
 
     std::size_t stpos;
     std::string tmpvar, tmpparm;
-    int indx1;
 
     if (vin == "") return;
 
@@ -441,8 +440,6 @@ static int algsec_load_parms(ctx_cam *cam){
 /**If possible preload the models and initialize them */
 static int algsec_load_models(ctx_cam *cam){
 
-    int indx;
-
     if (cam->algsec->models.method != 0){
         switch (cam->algsec->models.method) {
         case 1:     //Haar Method
@@ -470,7 +467,6 @@ static int algsec_load_models(ctx_cam *cam){
 /**Detection thread processing loop */
 static void *algsec_handler(void *arg) {
     ctx_cam *cam = (ctx_cam*)arg;
-    int indx;
     long interval;
 
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("Starting."));
@@ -505,7 +501,7 @@ static void *algsec_handler(void *arg) {
 /**Start the detection thread*/
 static void algsec_start_handler(ctx_cam *cam){
 
-    int retcd, indx;
+    int retcd;
     pthread_attr_t handler_attribute;
 
     pthread_attr_init(&handler_attribute);
