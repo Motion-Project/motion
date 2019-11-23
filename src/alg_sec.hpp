@@ -22,7 +22,6 @@
 #endif
 
 
-//example source config line:  human:75:25,car:60:30:4:15:A:1.012:3,dog:90:70
 struct ctx_algsec_model {
     std::string                 config;             //Source config line
 
@@ -46,6 +45,7 @@ struct ctx_algsec_model {
     bool                        isdetected;         /* Bool reset for each image as to whether a detection occurred */
     #ifdef HAVE_OPENCV
         cv::CascadeClassifier   haar_cascade;       //Haar Cascade (if applicable)
+        cv::HOGDescriptor       hog;
     #endif
 };
 

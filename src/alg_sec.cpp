@@ -160,7 +160,6 @@ static void algsec_detect_hog(ctx_cam *cam, ctx_algsec_model &algmdl){
 
     std::vector<double> detect_weights;
     std::vector<Rect> detect_pos;
-    HOGDescriptor hog;
     Mat mat_dst;
 
     try {
@@ -170,11 +169,7 @@ static void algsec_detect_hog(ctx_cam *cam, ctx_algsec_model &algmdl){
                 , CV_8UC1, (void*)cam->algsec->image_norm);
             cvtColor(mat_src, mat_dst, COLOR_YUV2RGB_YV12);
 
-        } else if (algmdl.imagetype == "full"){
-            mat_dst = Mat(cam->imgs.height, cam->imgs.width
-                , CV_8UC1, (void*)cam->algsec->image_norm);
-
-        } else {
+        } else if (algmdl.imagetype == "roi"){
             /*Discard really small and large images */
             if ((cam->current_image->location.width < 64) ||
                 (cam->current_image->location.height < 64) ||
@@ -185,13 +180,16 @@ static void algsec_detect_hog(ctx_cam *cam, ctx_algsec_model &algmdl){
                 , CV_8UC1, (void*)cam->algsec->image_norm);
             algsec_img_roi(cam, mat_src, mat_dst);
 
+        } else {
+            mat_dst = Mat(cam->imgs.height, cam->imgs.width
+                , CV_8UC1, (void*)cam->algsec->image_norm);
         }
 
         equalizeHist(mat_dst, mat_dst);
 
-        hog.setSVMDetector(HOGDescriptor::getDefaultPeopleDetector());
+        algmdl.hog.setSVMDetector(HOGDescriptor::getDefaultPeopleDetector());
 
-        hog.detectMultiScale(mat_dst, detect_pos, detect_weights, 0
+        algmdl.hog.detectMultiScale(mat_dst, detect_pos, detect_weights, 0
             ,Size(algmdl.hog_winstride, algmdl.hog_winstride)
             ,Size(algmdl.hog_padding, algmdl.hog_padding)
             ,algmdl.scalefactor
@@ -213,20 +211,40 @@ static void algsec_detect_haar(ctx_cam *cam, ctx_algsec_model &algmdl){
     std::vector<double> detect_weights;
     std::vector<Rect> detect_pos;
     std::vector<int> levels;
+    Mat mat_dst;
 
     try {
-        Mat mat_src(cam->imgs.height, cam->imgs.width
-            , CV_8UC1, (void*)cam->algsec->image_norm);
+        if (algmdl.imagetype == "color"){
+            /* AFAIK, the detector uses grey so users shouldn't really use this*/
+            Mat mat_src = Mat(cam->imgs.height*3/2, cam->imgs.width
+                , CV_8UC1, (void*)cam->algsec->image_norm);
+            cvtColor(mat_src, mat_dst, COLOR_YUV2RGB_YV12);
 
-        equalizeHist(mat_src, mat_src);
+        } else if (algmdl.imagetype == "roi"){
+            /*Discard really small and large images */
+            if ((cam->current_image->location.width < 64) ||
+                (cam->current_image->location.height < 64) ||
+               ((cam->current_image->location.width/cam->imgs.width) > 0.7) ||
+               ((cam->current_image->location.height/cam->imgs.height) > 0.7)) return;
+
+            Mat mat_src = Mat(cam->imgs.height, cam->imgs.width
+                , CV_8UC1, (void*)cam->algsec->image_norm);
+            algsec_img_roi(cam, mat_src, mat_dst);
+
+        } else {
+            mat_dst = Mat(cam->imgs.height, cam->imgs.width
+                , CV_8UC1, (void*)cam->algsec->image_norm);
+        }
+
+        equalizeHist(mat_dst, mat_dst);
 
         algmdl.haar_cascade.detectMultiScale(
-            mat_src, detect_pos, levels, detect_weights
+            mat_dst, detect_pos, levels, detect_weights
             ,algmdl.scalefactor, algmdl.haar_minneighbors,algmdl.haar_flags
             , Size(algmdl.haar_minsize,algmdl.haar_minsize)
             , Size(algmdl.haar_maxsize,algmdl.haar_maxsize), true);
 
-        algsec_img_show(cam, mat_src, detect_pos, detect_weights, "haar", algmdl);
+        algsec_img_show(cam, mat_dst, detect_pos, detect_weights, "haar", algmdl);
 
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
