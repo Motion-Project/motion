@@ -349,7 +349,7 @@ struct ctx_parm config_parms[] = {
     {
     "picture_output_motion",
     "# Output pictures with only the pixels moving object (ghost images)",
-    0, PARM_TYP_BOOL, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
     {
     "picture_type",
     "# Format for the output pictures.",
@@ -1945,12 +1945,16 @@ static void conf_edit_picture_output(struct ctx_cam *cam, std::string &parm, enu
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_output",_("picture_output"));
 }
 static void conf_edit_picture_output_motion(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
-    if (pact == PARM_ACT_DFLT){
-        cam->conf->picture_output_motion = FALSE;
+        if (pact == PARM_ACT_DFLT) {
+        cam->conf->picture_output_motion = "off";
     } else if (pact == PARM_ACT_SET){
-        conf_edit_set_bool(cam->conf->picture_output_motion, parm);
+        if ((parm == "on") || (parm == "off") || (parm == "roi"))  {
+            cam->conf->picture_output_motion = parm;
+        } else {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_output_motion %s"), parm);
+        }
     } else if (pact == PARM_ACT_GET){
-        conf_edit_get_bool(parm, cam->conf->picture_output_motion);
+        parm = cam->conf->picture_output;
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_output_motion",_("picture_output_motion"));

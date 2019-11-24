@@ -308,6 +308,46 @@ void pic_save_norm(struct ctx_cam *cam, char *file, unsigned char *image, int ft
     myfclose(picture);
 }
 
+/* Saves image to a file in format requested */
+void pic_save_roi(struct ctx_cam *cam, char *file, unsigned char *image) {
+    FILE *picture;
+    int image_size, sz, indxh;
+    ctx_coord *bx;
+    unsigned char *buf, *img;
+
+    picture = myfopen(file, "w");
+    if (!picture) {
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            ,_("Can't write picture to file %s"), file);
+        return;
+    }
+
+    bx = &cam->current_image->location;
+
+    if ((bx->width <64) || (bx->height <64)) return;
+
+    image_size = bx->width * bx->height;
+
+    buf =(unsigned char*) mymalloc(image_size);
+    img =(unsigned char*) mymalloc(image_size);
+
+    for (indxh=bx->miny; indxh<bx->maxy; indxh++){
+        memcpy(img+((indxh-bx->miny)*bx->width), image+(indxh*cam->imgs.width)+bx->minx, bx->width);
+    }
+
+    sz = jpgutl_put_grey(buf, image_size, img
+        ,bx->width, bx->height
+        ,cam->conf->picture_quality, cam
+        ,&(cam->current_image->imgts), bx);
+
+    fwrite(buf, sz, 1, picture);
+
+    free(buf);
+    free(img);
+
+    myfclose(picture);
+}
+
 /** Get the pgm file used as fixed mask */
 unsigned char *pic_load_pgm(FILE *picture, int width, int height) {
 

@@ -229,7 +229,7 @@ static void mlp_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *im
         if (conf->stream_motion && !cam->motapp->setup_mode && img->shot != 1){
             event(cam, EVENT_STREAM, img, NULL, NULL, &img->imgts);
         }
-        if (conf->picture_output_motion){
+        if (conf->picture_output_motion != "off"){
             event(cam, EVENT_IMAGEM_DETECTED, NULL, NULL, NULL, &img->imgts);
         }
     }
@@ -947,16 +947,24 @@ static void mlp_overlay(struct ctx_cam *cam){
     char tmp[PATH_MAX];
 
     if (cam->smartmask_speed &&
-        (cam->conf->picture_output_motion || cam->conf->movie_output_motion ||
-         cam->motapp->setup_mode || (cam->stream.motion.cnct_count > 0)))
+        ((cam->conf->picture_output_motion != "off") ||
+        cam->conf->movie_output_motion ||
+        cam->motapp->setup_mode ||
+        (cam->stream.motion.cnct_count > 0)))
         draw_smartmask(cam, cam->imgs.image_motion.image_norm);
 
-    if (cam->imgs.largest_label && (cam->conf->picture_output_motion || cam->conf->movie_output_motion ||
-        cam->motapp->setup_mode || (cam->stream.motion.cnct_count > 0)))
+    if (cam->imgs.largest_label &&
+        ((cam->conf->picture_output_motion != "off") ||
+        cam->conf->movie_output_motion ||
+        cam->motapp->setup_mode ||
+        (cam->stream.motion.cnct_count > 0)))
         draw_largest_label(cam, cam->imgs.image_motion.image_norm);
 
-    if (cam->imgs.mask && (cam->conf->picture_output_motion || cam->conf->movie_output_motion ||
-        cam->motapp->setup_mode || (cam->stream.motion.cnct_count > 0)))
+    if (cam->imgs.mask &&
+        ((cam->conf->picture_output_motion != "off") ||
+        cam->conf->movie_output_motion ||
+        cam->motapp->setup_mode ||
+        (cam->stream.motion.cnct_count > 0)))
         draw_fixed_mask(cam, cam->imgs.image_motion.image_norm);
 
     if (cam->conf->text_changes) {

@@ -345,9 +345,8 @@ static void event_imagem_detect(struct ctx_cam *cam, motion_event evnt
             ,struct ctx_image_data *img_data, char *fname
             ,void *ftype, struct timespec *ts1) {
 
-    struct ctx_config *conf = cam->conf;
-    char fullfilenamem[PATH_MAX];
-    char filenamem[PATH_MAX];
+    char fullfilename[PATH_MAX];
+    char filename[PATH_MAX];
     int retcd;
 
     (void)evnt;
@@ -355,17 +354,28 @@ static void event_imagem_detect(struct ctx_cam *cam, motion_event evnt
     (void)fname;
     (void)ftype;
 
-    if (conf->picture_output_motion) {
-        mystrftime(cam, filenamem, sizeof(filenamem), cam->conf->picture_filename.c_str(), ts1, NULL, 0);
-        retcd = snprintf(fullfilenamem, PATH_MAX, "%s/%sm.%s"
-            , cam->conf->target_dir.c_str(), filenamem, imageext(cam));
+    if (cam->conf->picture_output_motion == "on") {
+        mystrftime(cam, filename, sizeof(filename), cam->conf->picture_filename.c_str(), ts1, NULL, 0);
+        retcd = snprintf(fullfilename, PATH_MAX, "%s/%sm.%s"
+            , cam->conf->target_dir.c_str(), filename, imageext(cam));
         if ((retcd < 0) || (retcd >= PATH_MAX)){
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating image motion file name"));
             return;
         }
-        pic_save_norm(cam, fullfilenamem, cam->imgs.image_motion.image_norm, FTYPE_IMAGE_MOTION);
-        event(cam, EVENT_FILECREATE, NULL, fullfilenamem, (void *)FTYPE_IMAGE, ts1);
+        pic_save_norm(cam, fullfilename, cam->imgs.image_motion.image_norm, FTYPE_IMAGE_MOTION);
+        event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE, ts1);
+    } else if (cam->conf->picture_output_motion == "roi") {
+        mystrftime(cam, filename, sizeof(filename), cam->conf->picture_filename.c_str(), ts1, NULL, 0);
+        retcd = snprintf(fullfilename, PATH_MAX, "%s/%sr.%s"
+            , cam->conf->target_dir.c_str(), filename, imageext(cam));
+        if ((retcd < 0) || (retcd >= PATH_MAX)){
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+                ,_("Error creating image motion roi file name"));
+            return;
+        }
+        pic_save_roi(cam, fullfilename, cam->current_image->image_norm);
+        event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE, ts1);
     }
 }
 

@@ -101,7 +101,7 @@
 
         /* Picture output configuration parameters */
         std::string     picture_output;
-        int             picture_output_motion;
+        std::string     picture_output_motion;
         std::string     picture_type;
         int             picture_quality;
         std::string     picture_exif;
