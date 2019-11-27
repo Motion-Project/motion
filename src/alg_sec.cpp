@@ -61,9 +61,6 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
     std::vector<uchar> buff;    //buffer for coding
     std::vector<int> param(2);
     char wstr[10];
-    float min_weight;
-
-    min_weight = algmdl.threshold_motion/100;
 
     testdir = cam->conf->target_dir;
 
@@ -77,7 +74,8 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
         for (indx1=0; indx1<src_pos.size(); indx1++){
             if (indx1 != indx0 && (r & src_pos[indx1])==r) break;
         }
-        if ((indx1==src_pos.size()) && (w > min_weight)){
+        if ((indx1==src_pos.size()) && (w > algmdl.threshold_motion)){
+        //if ((indx1==src_pos.size()) ){
             fltr_pos.push_back(r);
             fltr_weights.push_back(w);
             algmdl.isdetected = true;
@@ -117,42 +115,40 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
 static void algsec_img_roi(ctx_cam *cam, Mat &mat_src, Mat &mat_dst){
 
     cv::Rect roi;
+    int chk;
 
     /* Set the ROI just a small bit larger than the motion detected area */
-    roi.x = cam->current_image->location.minx-32;
-    roi.y = cam->current_image->location.miny-32;
-    roi.width = cam->current_image->location.width+64;
-    roi.height = cam->current_image->location.height+64;
-    /*
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-        ,"bbx %d y %d %dx%d %dx%d "
-        ,roi.x, roi.y, roi.width, roi.height
-        ,cam->current_image->location.width
-        ,cam->current_image->location.height);
-    */
+    chk = cam->current_image->location.width * 0.4;
+    roi.x = cam->current_image->location.minx - (chk / 2);
     if (roi.x < 0) {
+        chk += roi.x;
         roi.x = 0;
-        roi.width =roi.width-16;
     }
-    if (roi.y < 0){
-        roi.y = 0;
-        roi.height = roi.height-16;
-    }
+    roi.width = cam->current_image->location.width + chk;
     if ((roi.x + roi.width) > cam->imgs.width) {
         roi.width = cam->imgs.width - roi.x;
     }
+
+    chk = cam->current_image->location.height * 0.4;
+    roi.y = cam->current_image->location.miny - (chk / 2);
+    if (roi.y < 0){
+        chk += roi.y;
+        roi.y = 0;
+    }
+    roi.height = cam->current_image->location.height + chk;
     if ((roi.y + roi.height) > cam->imgs.height) {
         roi.height = cam->imgs.height - roi.y;
     }
 
-    mat_dst = mat_src(roi);
-    /*
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-        ,"x %d y %d %dx%d %dx%d "
-        ,roi.x, roi.y, roi.width, roi.height
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Base %d %d %d %d"
+        ,cam->current_image->location.minx
+        ,cam->current_image->location.miny
         ,cam->current_image->location.width
         ,cam->current_image->location.height);
-    */
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Opencv %d %d %d %d"
+        ,roi.x,roi.y,roi.width,roi.height);
+
+    mat_dst = mat_src(roi);
 
 }
 
@@ -258,6 +254,11 @@ static void algsec_load_haar(ctx_algsec_model &algmdl){
 
     /* If loading fails, reset the method to invalidate detection */
     try {
+        if (algmdl.modelfile == ""){
+            algmdl.method = 0;
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("No secondary model specified."));
+            return;
+        }
         if (!algmdl.haar_cascade.load(algmdl.modelfile)){
             /* Loading failed, reset method*/
             algmdl.method = 0;
@@ -273,22 +274,45 @@ static void algsec_load_haar(ctx_algsec_model &algmdl){
     }
 }
 
-static void algsec_parms_default_hog(ctx_algsec_model &algmdl){
-    algmdl.hog_padding = 8;
-    algmdl.scalefactor = 1.05;
-    algmdl.threshold_model = 1.4;
-    algmdl.hog_winstride = 8;
-    algmdl.threshold_motion = 50;
+static void algsec_parms_log(ctx_algsec_model &algmdl){
+
+    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %s","modelfile", algmdl.modelfile.c_str());
+    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %0.6f","threshold_motion", algmdl.threshold_motion);
+    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %s","imagetype", algmdl.imagetype.c_str() );
+
+    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %0.6f","scalefactor", algmdl.scalefactor);
+    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %0.6f","threshold_model", algmdl.threshold_model);
+
+    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %d","haar_flags", algmdl.haar_flags);
+    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %d","haar_maxsize", algmdl.haar_maxsize);
+    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %d","haar_minsize", algmdl.haar_minsize);
+    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %d","haar_minneighbors", algmdl.haar_minneighbors);
+
+    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %d","hog_padding", algmdl.hog_padding);
+    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %d","hog_winstride", algmdl.hog_winstride);
+
 }
 
-static void algsec_parms_default_haar(ctx_algsec_model &algmdl){
-    algmdl.scalefactor = 1.1;
-    algmdl.threshold_model = 2;
+static void algsec_parms_defaults(ctx_algsec_model &algmdl){
+
+    algmdl.threshold_motion = 1.1;
+    algmdl.imagetype = "full";
+
+    algmdl.hog_padding = 8;
+    algmdl.hog_winstride = 8;
+
     algmdl.haar_flags = 0;
-    algmdl.haar_maxsize = 8;
+    algmdl.haar_maxsize = 1024;
     algmdl.haar_minsize = 8;
     algmdl.haar_minneighbors = 8;
-    algmdl.threshold_motion = 50;
+
+    if (algmdl.method == 1){
+        algmdl.scalefactor = 1.1;
+        algmdl.threshold_model = 1.4;
+    } else {
+        algmdl.scalefactor = 1.05;
+        algmdl.threshold_model = 2;
+    }
 }
 
 /**Parse parm based upon colons*/
@@ -327,7 +351,7 @@ static void algsec_parms_parse_detail(std::string &vin, ctx_algsec_model &algmdl
     stpos = vin.find('=');
     if (stpos != std::string::npos){
 
-        tmpvar = vin.substr(0, stpos-1);
+        tmpvar = vin.substr(0, stpos);
         tmpparm = vin.substr(stpos+1);
         mytrim(tmpvar);
         mytrim(tmpparm);
@@ -340,12 +364,12 @@ static void algsec_parms_parse_detail(std::string &vin, ctx_algsec_model &algmdl
             algmdl.imagetype = tmpparm;
         } else if (tmpvar == "rotate"){
             algmdl.rotate = std::atoi(tmpparm.c_str());
-        } else if (tmpvar == "scale"){
+        } else if (tmpvar == "scalefactor"){
             algmdl.scalefactor = std::atof(tmpparm.c_str());
         } else if (tmpvar == "threshold_model"){
-            algmdl.threshold_model= std::atoi(tmpparm.c_str());
+            algmdl.threshold_model= std::atof(tmpparm.c_str());
         } else if (tmpvar == "threshold_motion"){
-            algmdl.threshold_motion= std::atoi(tmpparm.c_str());
+            algmdl.threshold_motion= std::atof(tmpparm.c_str());
         }
 
         /* Hog specific parms below */
@@ -379,20 +403,6 @@ static void algsec_parms_parse(ctx_cam *cam){
     std::size_t st_comma, en_comma;
     std::string tmp;
 
-    cam->algsec->models.method = cam->conf->secondary_method;
-    cam->algsec->models.config = cam->conf->secondary_config;
-
-    switch (cam->algsec->models.method) {
-    case 1:     //Haar Method
-        algsec_parms_default_haar(cam->algsec->models);
-        break;
-    case 2:     //HoG Method
-        algsec_parms_default_hog(cam->algsec->models);
-        break;
-    default:
-        cam->algsec->models.method  = 0;
-        break;
-    }
 
     if (cam->algsec->models.config != ""){
         st_comma = 0;
@@ -412,15 +422,13 @@ static void algsec_parms_parse(ctx_cam *cam){
 /**Load the parms from the config to algsec struct */
 static int algsec_load_parms(ctx_cam *cam){
 
-    if (cam->conf->secondary_method == 0){
-        cam->algsec->models.method = 0;
-        return -1;
-    }
-
     cam->algsec->height = cam->imgs.height;
     cam->algsec->width = cam->imgs.width;
 
     cam->algsec->frame_interval = cam->conf->secondary_interval;
+    cam->algsec->models.method = cam->conf->secondary_method;
+    cam->algsec->models.config = cam->conf->secondary_config;
+
     cam->algsec->frame_cnt = cam->algsec->frame_interval;
     cam->algsec->image_norm = (unsigned char*)mymalloc(cam->imgs.size_norm);
     cam->algsec->frame_missed = 0;
@@ -432,7 +440,11 @@ static int algsec_load_parms(ctx_cam *cam){
     */
     cam->algsec->closing = true;
 
+    algsec_parms_defaults(cam->algsec->models);
+
     algsec_parms_parse(cam);
+
+    algsec_parms_log(cam->algsec->models);
 
     return 0;
 }
@@ -558,9 +570,9 @@ void algsec_deinit(ctx_cam *cam){
                 waitcnt++;
             }
         }
-        if (cam->algsec->image_norm != nullptr){
+        if (cam->algsec->image_norm != NULL){
             free(cam->algsec->image_norm);
-            cam->algsec->image_norm = nullptr;
+            cam->algsec->image_norm = NULL;
         }
         if (waitcnt == 1000){
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
