@@ -25,20 +25,19 @@
 /* These strings are used for the HTTP connection. */
 static const char *connect_req;
 
-static const char *connect_req_http10 = "GET %s HTTP/1.0\r\n"
-                                        "Host: %s\r\n"
-                                        "User-Agent: Motion-netcam/" VERSION "\r\n";
+#define connect_req_http10 "GET %s HTTP/1.0\r\n" \
+                           "Host: %s\r\n" \
+                           "User-Agent: Motion-netcam/" VERSION "\r\n"
 
-static const char *connect_req_http11 = "GET %s HTTP/1.1\r\n"
-                                        "Host: %s\r\n"
-                                        "User-Agent: Motion-netcam/" VERSION "\r\n";
+#define connect_req_http11 "GET %s HTTP/1.1\r\n" \
+                           "Host: %s\r\n" \
+                           "User-Agent: Motion-netcam/" VERSION "\r\n"
 
-static const char *connect_req_close = "Connection: close\r\n";
+#define connect_req_close "Connection: close\r\n"
 
-static const char *connect_req_keepalive = "Connection: Keep-Alive\r\n";
+#define connect_req_keepalive "Connection: Keep-Alive\r\n"
 
-static const char *connect_auth_req = "Authorization: Basic %s\r\n";
-
+#define connect_auth_req "Authorization: Basic %s\r\n"
 
 tfile_context *file_new_context(void);
 void file_free_context(tfile_context* ctxt);
