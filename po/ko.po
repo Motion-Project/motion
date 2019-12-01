@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
 "POT-Creation-Date: 2019-10-27 22:19-0600\n"
-"PO-Revision-Date: 2018-10-13 12:02-0600\n"
+"PO-Revision-Date: 2019-12-01 11:16-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: ko\n"
@@ -19,966 +19,972 @@ msgstr ""
 #: src/conf.c
 #, c-format
 msgid "Unknown config option \"%s\""
-msgstr ""
+msgstr "알 수없는 구성 옵션 \" %s \""
 
 #: src/conf.c
 #, c-format
 msgid "Writing config file to %s"
-msgstr ""
+msgstr "구성 파일을 %s에 쓰는 중"
 
 #: src/conf.c
 #, c-format
 msgid "Configfile %s not found - trying defaults."
-msgstr ""
+msgstr "구성 파일 %s을 (를) 찾을 수 없습니다. 기본값을 시도합니다."
 
 #: src/conf.c
 msgid "Error getcwd"
-msgstr ""
+msgstr "getcwd 오류"
 
 #: src/conf.c
 #, c-format
 msgid "could not open configfile %s"
-msgstr ""
+msgstr "구성 파일 %s을 (를) 열 수 없습니다."
 
 #: src/conf.c
 #, c-format
 msgid "Invalid file name %s"
-msgstr ""
+msgstr "잘못된 파일 이름 %s"
 
 #: src/conf.c
 #, c-format
 msgid "Processing thread 0 - config file %s"
-msgstr ""
+msgstr "스레드 0 처리-구성 파일 %s"
 
 #: src/conf.c
 msgid "No config file to process, using default values"
-msgstr ""
+msgstr "기본값을 사용하여 처리 할 구성 파일이 없습니다."
 
 #: src/conf.c
 #, c-format
 msgid "Writing configuration parameters from all files (%d):"
-msgstr ""
+msgstr "모든 파일에서 구성 매개 변수 쓰기 ( %d) :"
 
 #: src/conf.c
 #, c-format
 msgid "Thread %d - Config file: %s"
-msgstr ""
+msgstr "스레드 %d-구성 파일 : %s"
 
 #: src/conf.c
 #, c-format
 msgid "%-25s <redacted>"
-msgstr ""
+msgstr "%-25s <편집 됨>"
 
 #: src/conf.c
 msgid "Unable to locate vid_control_params"
-msgstr ""
+msgstr "Vid 컨트롤 매개 변수를 찾을 수 없습니다"
 
 #: src/conf.c
 msgid "No value provided to put into vid_control_params"
-msgstr ""
+msgstr "vid control params에 입력 할 값이 없습니다."
 
 #: src/conf.c
 msgid "Error compiling regex in copy_uri"
-msgstr ""
+msgstr "복사 URI에서 정규식 컴파일 오류"
 
 #: src/conf.c
 msgid "Invalid origin for cors_header in copy_uri"
-msgstr ""
+msgstr "copy URI의 cors 헤더에 대한 잘못된 출처"
 
 #: src/conf.c
 #, c-format
 msgid "Processing config file %s"
-msgstr ""
+msgstr "구성 파일 %s 처리 중"
 
 #: src/conf.c
 #, c-format
 msgid "Camera directory config %s not found"
-msgstr ""
+msgstr "카메라 디렉토리 구성 %s를 찾을 수 없습니다"
 
 #: src/conf.c
 #, c-format
 msgid "Camera config file %s not found"
-msgstr ""
+msgstr "카메라 구성 파일 %s를 찾을 수 없습니다"
 
 #: src/conf.c
 #, c-format
 msgid "Processing camera config file %s"
-msgstr ""
+msgstr "카메라 구성 파일 %s 처리 중"
 
 #: src/conf.c
 msgid "daemon"
-msgstr ""
+msgstr "악마"
 
 #: src/conf.c
 msgid "setup_mode"
-msgstr ""
+msgstr "설정 모드"
 
 #: src/conf.c
 msgid "pid_file"
-msgstr ""
+msgstr "pid 파일"
 
 #: src/conf.c
 msgid "log_file"
-msgstr ""
+msgstr "로그 파일"
 
 #: src/conf.c
 msgid "log_level"
-msgstr ""
+msgstr "로그 레벨"
 
 #: src/conf.c
 msgid "log_type"
-msgstr ""
+msgstr "로그 유형"
 
 #: src/conf.c
 msgid "quiet"
-msgstr ""
+msgstr "조용한"
 
 #: src/conf.c
 msgid "native_language"
-msgstr ""
+msgstr "모국어"
 
 #: src/conf.c
 msgid "camera_name"
-msgstr ""
+msgstr "카메라 이름"
 
 #: src/conf.c
 msgid "camera_id"
-msgstr ""
+msgstr "카메라 아이디"
 
 #: src/conf.c
 msgid "target_dir"
-msgstr ""
+msgstr "대상 디렉토리"
 
 #: src/conf.c
 msgid "videodevice"
-msgstr ""
+msgstr "비디오 장치"
 
 #: src/conf.c
 msgid "vid_control_params"
-msgstr ""
+msgstr "vid 제어 매개 변수"
 
 #: src/conf.c
 msgid "v4l2_palette"
-msgstr ""
+msgstr "v4l2 팔레트"
 
 #: src/conf.c
 msgid "input"
-msgstr ""
+msgstr "입력"
 
 #: src/conf.c
 msgid "norm"
-msgstr ""
+msgstr "표준"
 
 #: src/conf.c
 msgid "frequency"
-msgstr ""
+msgstr "회수"
 
 #: src/conf.c
 msgid "auto_brightness"
-msgstr ""
+msgstr "자동 밝기"
 
 #: src/conf.c
 msgid "tunerdevice"
-msgstr ""
+msgstr "튜너 장치"
 
 #: src/conf.c
 msgid "roundrobin_frames"
-msgstr ""
+msgstr "라운드 로빈 프레임"
 
 #: src/conf.c
 msgid "roundrobin_skip"
-msgstr ""
+msgstr "라운드 로빈 건너 뛰기"
 
 #: src/conf.c
 msgid "roundrobin_switchfilter"
-msgstr ""
+msgstr "라운드 로빈 스위치 필터"
 
 #: src/conf.c
 msgid "netcam_url"
-msgstr ""
+msgstr "넷캠 URL"
 
 #: src/conf.c
 msgid "netcam_highres"
-msgstr ""
+msgstr "넷캠 고어"
 
 #: src/conf.c
 msgid "netcam_userpass"
-msgstr ""
+msgstr "넷캠 사용자 패스"
 
 #: src/conf.c
 msgid "netcam_keepalive"
-msgstr ""
+msgstr "넷캠 킵 얼라이브"
 
 #: src/conf.c
 msgid "netcam_proxy"
-msgstr ""
+msgstr "넷캠 프록시"
 
 #: src/conf.c
 msgid "netcam_tolerant_check"
-msgstr ""
+msgstr "넷캠 허용 검사"
 
 #: src/conf.c
 msgid "netcam_use_tcp"
-msgstr ""
+msgstr "넷캠 사용 TCP"
 
 #: src/conf.c
 msgid "netcam_decoder"
-msgstr ""
+msgstr "넷캠 디코더"
 
 #: src/conf.c
 msgid "mmalcam_name"
-msgstr ""
+msgstr "mmalcam 이름"
 
 #: src/conf.c
 msgid "mmalcam_control_params"
-msgstr ""
+msgstr "mmalcam 제어 매개 변수"
 
 #: src/conf.c
 msgid "width"
-msgstr ""
+msgstr "폭"
 
 #: src/conf.c
 msgid "height"
-msgstr ""
+msgstr "신장"
 
 #: src/conf.c
 msgid "framerate"
-msgstr ""
+msgstr "프레임 속도"
 
 #: src/conf.c
 msgid "minimum_frame_time"
-msgstr ""
+msgstr "최소 프레임 시간"
 
 #: src/conf.c
 msgid "rotate"
-msgstr ""
+msgstr "회전"
 
 #: src/conf.c
 msgid "flip_axis"
-msgstr ""
+msgstr "축 플립"
 
 #: src/conf.c
 msgid "locate_motion_mode"
-msgstr ""
+msgstr "모션 모드 찾기"
 
 #: src/conf.c
 msgid "locate_motion_style"
-msgstr ""
+msgstr "모션 스타일 찾기"
 
 #: src/conf.c
 msgid "text_left"
-msgstr ""
+msgstr "남은 텍스트"
 
 #: src/conf.c
 msgid "text_right"
-msgstr ""
+msgstr "바로 텍스트"
 
 #: src/conf.c
 msgid "text_changes"
-msgstr ""
+msgstr "텍스트 변경"
 
 #: src/conf.c
 msgid "text_scale"
-msgstr ""
+msgstr "텍스트 스케일"
 
 #: src/conf.c
 msgid "text_event"
-msgstr ""
+msgstr "문자 이벤트"
 
 #: src/conf.c
 msgid "emulate_motion"
-msgstr ""
+msgstr "모션 에뮬레이션"
 
 #: src/conf.c
 msgid "threshold"
-msgstr ""
+msgstr "문지방"
 
 #: src/conf.c
 msgid "threshold_maximum"
-msgstr ""
+msgstr "임계 값 최대"
 
 #: src/conf.c
 msgid "threshold_tune"
-msgstr ""
+msgstr "임계 값 조정"
 
 #: src/conf.c
 msgid "noise_level"
-msgstr ""
+msgstr "소음 수준"
 
 #: src/conf.c
 msgid "noise_tune"
-msgstr ""
+msgstr "소음 조정"
 
 #: src/conf.c
 msgid "despeckle_filter"
-msgstr ""
+msgstr "얼룩 제거 필터"
 
 #: src/conf.c
 msgid "area_detect"
-msgstr ""
+msgstr "영역 감지"
 
 #: src/conf.c
 msgid "mask_file"
-msgstr ""
+msgstr "마스크 파일"
 
 #: src/conf.c
 msgid "mask_privacy"
-msgstr ""
+msgstr "마스크 프라이버시"
 
 #: src/conf.c
 msgid "smart_mask_speed"
-msgstr ""
+msgstr "스마트 마스크 속도"
 
 #: src/conf.c
 msgid "lightswitch_percent"
-msgstr ""
+msgstr "전등 스위치 퍼센트"
 
 #: src/conf.c
 msgid "lightswitch_frames"
-msgstr ""
+msgstr "전등 스위치 프레임"
 
 #: src/conf.c
 msgid "minimum_motion_frames"
-msgstr ""
+msgstr "최소 모션 프레임"
 
 #: src/conf.c
 msgid "event_gap"
-msgstr ""
+msgstr "이벤트 갭"
 
 #: src/conf.c
 msgid "pre_capture"
-msgstr ""
+msgstr "사전 캡처"
 
 #: src/conf.c
 msgid "post_capture"
-msgstr ""
+msgstr "캡처 후"
 
 #: src/conf.c
 msgid "on_event_start"
-msgstr ""
+msgstr "이벤트 시작시"
 
 #: src/conf.c
 msgid "on_event_end"
-msgstr ""
+msgstr "이벤트 종료시"
 
 #: src/conf.c
 msgid "on_picture_save"
-msgstr ""
+msgstr "사진 저장"
 
 #: src/conf.c
 msgid "on_area_detected"
-msgstr ""
+msgstr "감지 된 영역"
 
 #: src/conf.c
 msgid "on_motion_detected"
-msgstr ""
+msgstr "움직임 감지"
 
 #: src/conf.c
 msgid "on_movie_start"
-msgstr ""
+msgstr "영화를 시작할 때"
 
 #: src/conf.c
 msgid "on_movie_end"
-msgstr ""
+msgstr "영화 끝에서"
 
 #: src/conf.c
 msgid "on_camera_lost"
-msgstr ""
+msgstr "카메라를 잃어버린"
 
 #: src/conf.c
 msgid "on_camera_found"
-msgstr ""
+msgstr "카메라에서 발견"
 
 #: src/conf.c
 msgid "picture_output"
-msgstr ""
+msgstr "사진 출력"
 
 #: src/conf.c
 msgid "picture_output_motion"
-msgstr ""
+msgstr "사진 출력 동작"
 
 #: src/conf.c
 msgid "picture_type"
-msgstr ""
+msgstr "사진 종류"
 
 #: src/conf.c
 msgid "picture_quality"
-msgstr ""
+msgstr "화질"
 
 #: src/conf.c
 msgid "picture_exif"
-msgstr ""
+msgstr "사진 EXIF"
 
 #: src/conf.c
 msgid "picture_filename"
-msgstr ""
+msgstr "사진 파일 이름"
 
 #: src/conf.c
 msgid "snapshot_interval"
-msgstr ""
+msgstr "스냅 샷 간격"
 
 #: src/conf.c
 msgid "snapshot_filename"
-msgstr ""
+msgstr "스냅 샷 파일 이름"
 
 #: src/conf.c
 msgid "movie_output"
-msgstr ""
+msgstr "영화 출력"
 
 #: src/conf.c
 msgid "movie_output_motion"
-msgstr ""
+msgstr "영화 출력 동작"
 
 #: src/conf.c
 msgid "movie_max_time"
-msgstr ""
+msgstr "영화 최대 시간"
 
 #: src/conf.c
 msgid "movie_bps"
-msgstr ""
+msgstr "영화 bps"
 
 #: src/conf.c
 msgid "movie_quality"
-msgstr ""
+msgstr "영화 품질"
 
 #: src/conf.c
 msgid "movie_codec"
-msgstr ""
+msgstr "영화 코덱"
 
 #: src/conf.c
 msgid "movie_duplicate_frames"
-msgstr ""
+msgstr "영화 복제 프레임"
 
 #: src/conf.c
 msgid "movie_passthrough"
-msgstr ""
+msgstr "영화 통과"
 
 #: src/conf.c
 msgid "movie_filename"
-msgstr ""
+msgstr "영화 파일 이름"
 
 #: src/conf.c
 msgid "movie_extpipe_use"
-msgstr ""
+msgstr "영화 extpipe 사용"
 
 #: src/conf.c
 msgid "movie_extpipe"
-msgstr ""
+msgstr "영화 extpipe"
 
 #: src/conf.c
 msgid "timelapse_interval"
-msgstr ""
+msgstr "저속 간격"
 
 #: src/conf.c
 msgid "timelapse_mode"
-msgstr ""
+msgstr "저속 모드"
 
 #: src/conf.c
 msgid "timelapse_fps"
-msgstr ""
+msgstr "저속 fps"
 
 #: src/conf.c
 msgid "timelapse_codec"
-msgstr ""
+msgstr "저속 촬영 코덱"
 
 #: src/conf.c
 msgid "timelapse_filename"
-msgstr ""
+msgstr "timelapse 파일 이름"
 
 #: src/conf.c
 msgid "video_pipe"
-msgstr ""
+msgstr "비디오 파이프"
 
 #: src/conf.c
 msgid "video_pipe_motion"
-msgstr ""
+msgstr "비디오 파이프 모션"
 
 #: src/conf.c
 msgid "webcontrol_port"
-msgstr ""
+msgstr "webcontrol 포트"
 
 #: src/conf.c
 msgid "webcontrol_ipv6"
-msgstr ""
+msgstr "webcontrol ipv6"
 
 #: src/conf.c
 msgid "webcontrol_localhost"
-msgstr ""
+msgstr "webcontrol localhost"
 
 #: src/conf.c
 msgid "webcontrol_parms"
-msgstr ""
+msgstr "webcontrol parms"
 
 #: src/conf.c
 msgid "webcontrol_interface"
-msgstr ""
+msgstr "웹 컨트롤 인터페이스"
 
 #: src/conf.c
 msgid "webcontrol_auth_method"
-msgstr ""
+msgstr "webcontrol 인증 방법"
 
 #: src/conf.c
 msgid "webcontrol_authentication"
-msgstr ""
+msgstr "웹 컨트롤 인증"
 
 #: src/conf.c
 msgid "webcontrol_tls"
-msgstr ""
+msgstr "webcontrol tls"
 
 #: src/conf.c
 msgid "webcontrol_cert"
-msgstr ""
+msgstr "웹 컨트롤 인증서"
 
 #: src/conf.c
 msgid "webcontrol_key"
-msgstr ""
+msgstr "webcontrol 키"
 
 #: src/conf.c
 msgid "webcontrol_cors_header"
-msgstr ""
+msgstr "webcontrol cors 헤더"
 
 #: src/conf.c
 msgid "stream_port"
-msgstr ""
+msgstr "스트림 포트"
 
 #: src/conf.c
 msgid "stream_localhost"
-msgstr ""
+msgstr "로컬 호스트 스트림"
 
 #: src/conf.c
 msgid "stream_auth_method"
-msgstr ""
+msgstr "스트림 인증 방법"
 
 #: src/conf.c
 msgid "stream_authentication"
-msgstr ""
+msgstr "스트림 인증"
 
 #: src/conf.c
 msgid "stream_tls"
-msgstr ""
+msgstr "스트림 tls"
 
 #: src/conf.c
 msgid "stream_cors_header"
-msgstr ""
+msgstr "스트림 코르 헤더"
 
 #: src/conf.c
 msgid "stream_preview_scale"
-msgstr ""
+msgstr "스트림 미리보기 스케일"
 
 #: src/conf.c
 msgid "stream_preview_newline"
-msgstr ""
+msgstr "스트림 미리보기 개행"
 
 #: src/conf.c
 msgid "stream_preview_method"
-msgstr ""
+msgstr "스트림 미리보기 방법"
 
 #: src/conf.c
 msgid "stream_quality"
-msgstr ""
+msgstr "스트림 품질"
 
 #: src/conf.c
 msgid "stream_grey"
-msgstr ""
+msgstr "스트림 그레이"
 
 #: src/conf.c
 msgid "stream_motion"
-msgstr ""
+msgstr "스트림 모션"
 
 #: src/conf.c
 msgid "stream_maxrate"
-msgstr ""
+msgstr "스트림 최대"
 
 #: src/conf.c
 msgid "stream_limit"
-msgstr ""
+msgstr "스트림 제한"
 
 #: src/conf.c
 msgid "database_type"
-msgstr ""
+msgstr "데이터베이스 유형"
 
 #: src/conf.c
 msgid "database_dbname"
-msgstr ""
+msgstr "데이터베이스 DB 이름"
 
 #: src/conf.c
 msgid "database_host"
-msgstr ""
+msgstr "데이터베이스 호스트"
 
 #: src/conf.c
 msgid "database_port"
-msgstr ""
+msgstr "데이터베이스 포트"
 
 #: src/conf.c
 msgid "database_user"
-msgstr ""
+msgstr "데이터베이스 사용자"
 
 #: src/conf.c
 msgid "database_password"
-msgstr ""
+msgstr "데이터베이스 비밀번호"
 
 #: src/conf.c
 msgid "database_busy_timeout"
-msgstr ""
+msgstr "데이터베이스 사용 중 시간 초과"
 
 #: src/conf.c
 msgid "sql_log_picture"
-msgstr ""
+msgstr "SQL 로그 사진"
 
 #: src/conf.c
 msgid "sql_log_snapshot"
-msgstr ""
+msgstr "SQL 로그 스냅 샷"
 
 #: src/conf.c
 msgid "sql_log_movie"
-msgstr ""
+msgstr "SQL 로그 영화"
 
 #: src/conf.c
 msgid "sql_log_timelapse"
-msgstr ""
+msgstr "SQL 로그 저속"
 
 #: src/conf.c
 msgid "sql_query_start"
-msgstr ""
+msgstr "SQL 쿼리 시작"
 
 #: src/conf.c
 msgid "sql_query_stop"
-msgstr ""
+msgstr "SQL 쿼리 중지"
 
 #: src/conf.c
 msgid "sql_query"
-msgstr ""
+msgstr "SQL 쿼리"
 
 #: src/conf.c
 msgid "track_type"
-msgstr ""
+msgstr "트랙 타입"
 
 #: src/conf.c
 msgid "track_auto"
-msgstr ""
+msgstr "자동 추적"
 
 #: src/conf.c
 msgid "track_port"
-msgstr ""
+msgstr "트랙 포트"
 
 #: src/conf.c
 msgid "track_motorx"
-msgstr ""
+msgstr "motorx를 추적"
 
 #: src/conf.c
 msgid "track_motorx_reverse"
-msgstr ""
+msgstr "motorx 역 추적"
 
 #: src/conf.c
 msgid "track_motory"
-msgstr ""
+msgstr "운동 추적"
 
 #: src/conf.c
 msgid "track_motory_reverse"
-msgstr ""
+msgstr "운동 역 추적"
 
 #: src/conf.c
 msgid "track_maxx"
-msgstr ""
+msgstr "맥스를 추적"
 
 #: src/conf.c
 msgid "track_minx"
-msgstr ""
+msgstr "말괄량이 추적"
 
 #: src/conf.c
 msgid "track_maxy"
-msgstr ""
+msgstr "맥시를 추적하다"
 
 #: src/conf.c
 msgid "track_miny"
-msgstr ""
+msgstr "마이너를 추적하다"
 
 #: src/conf.c
 msgid "track_homex"
-msgstr ""
+msgstr "Homex 추적"
 
 #: src/conf.c
 msgid "track_homey"
-msgstr ""
+msgstr "고향을 추적하다"
 
 #: src/conf.c
 msgid "track_iomojo_id"
-msgstr ""
+msgstr "이오 모조 ID 추적"
 
 #: src/conf.c
 msgid "track_step_angle_x"
-msgstr ""
+msgstr "스텝 각도 x 추적"
 
 #: src/conf.c
 msgid "track_step_angle_y"
-msgstr ""
+msgstr "스텝 스텝 각도 y"
 
 #: src/conf.c
 msgid "track_move_wait"
-msgstr ""
+msgstr "트랙 이동 대기"
 
 #: src/conf.c
 msgid "track_speed"
-msgstr ""
+msgstr "트랙 속도"
 
 #: src/conf.c
 msgid "track_stepsize"
-msgstr ""
+msgstr "단계적 추적"
 
 #: src/conf.c
 msgid "track_generic_move"
-msgstr ""
+msgstr "일반 이동 추적"
 
 #: src/conf.c
 msgid "camera"
-msgstr ""
+msgstr "카메라"
 
 #: src/conf.c
 msgid "camera_dir"
-msgstr ""
+msgstr "카메라 디렉토리"
 
 #: src/event.c src/track.c
 #, c-format
 msgid "Unable to start external command '%s'"
-msgstr ""
+msgstr "외부 명령 ' %s'을 (를) 시작할 수 없습니다"
 
 #: src/event.c src/track.c
 #, c-format
 msgid "Executing external command '%s'"
-msgstr ""
+msgstr "외부 명령 ' %s'실행"
 
 #: src/event.c
 #, c-format
 msgid "File of type %ld saved to: %s"
-msgstr ""
+msgstr "%ld 유형의 파일이 %s에 저장되었습니다."
 
 #: src/event.c
 #, c-format
 msgid "Mysql query failed %s error code %d"
-msgstr ""
+msgstr "MySQL 쿼리 실패 %s 오류 코드 %d"
 
 #: src/event.c
 #, c-format
 msgid ""
-"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error "
-"was %s"
+"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error was "
+"%s"
 msgstr ""
+"사용자 %s MySQL 오류로 호스트 %s에서 MySQL 데이터베이스 %s에 다시 연결할 수 없"
+"습니다.%s이었다"
 
 #: src/event.c
 #, c-format
 msgid "Re-Connection to Mysql database '%s' Succeed"
-msgstr ""
+msgstr "MySQL 데이터베이스 ' %s'에 다시 연결 성공"
 
 #: src/event.c
 #, c-format
 msgid "after re-connection Mysql query failed %s error code %d"
-msgstr ""
+msgstr "재 연결 후 MySQL 쿼리 실패 %s 오류 코드 %d"
 
 #: src/event.c src/motion.c
 #, c-format
 msgid "Connection to PostgreSQL database '%s' failed: %s"
-msgstr ""
+msgstr "PostgreSQL 데이터베이스 ' %s'에 연결하지 못했습니다 : %s"
 
 #: src/event.c
 #, c-format
 msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
-msgstr ""
+msgstr "PostgreSQL 데이터베이스 ' %s'에 다시 연결하지 못했습니다 : %s"
 
 #: src/event.c
 #, c-format
 msgid "Re-Connection to PostgreSQL database '%s' Succeed"
-msgstr ""
+msgstr "PostgreSQL 데이터베이스 ' %s'에 다시 연결 성공"
 
 #: src/event.c
 #, c-format
 msgid "SQLite error was %s"
-msgstr ""
+msgstr "SQLite 오류는 %s입니다."
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
-msgstr ""
+msgstr "비디오 파이프에 이미지를 넣지 못했습니다"
 
 #: src/event.c
 #, c-format
 msgid "Could not create symbolic link [%s]"
-msgstr ""
+msgstr "기호 링크를 만들 수 없습니다 [ %s]"
 
 #: src/event.c
 #, c-format
 msgid "Error creating preview pipe name %d %s"
-msgstr ""
+msgstr "미리보기 파이프 이름 %d %s 작성 중 오류"
 
 #: src/event.c
 #, c-format
 msgid "Error creating file name base %d %s"
-msgstr ""
+msgstr "파일 이름 기본 %d %s을 (를) 작성하는 중 오류가 발생했습니다."
 
 #: src/event.c
 #, c-format
 msgid "Error creating preview name %d %s"
-msgstr ""
+msgstr "미리보기 이름 %d %s 작성 중 오류"
 
 #: src/event.c
 #, c-format
 msgid "CLOSING: extpipe file desc %d, error state %d"
-msgstr ""
+msgstr "닫기 : extpipe 파일 설명 %d, 오류 상태 %d"
 
 #: src/event.c
 #, c-format
 msgid "moviepath: %s"
-msgstr ""
+msgstr "영화 경로 : %s"
 
 #: src/event.c
 #, c-format
 msgid "no write access to target directory %s"
-msgstr ""
+msgstr "대상 디렉토리 %s에 대한 쓰기 권한이 없습니다."
 
 #: src/event.c
 #, c-format
 msgid "path not found, trying to create it %s ..."
-msgstr ""
+msgstr "경로를 찾을 수 없습니다. %s ..."
 
 #: src/event.c
 #, c-format
 msgid "error accesing path %s"
-msgstr ""
+msgstr "오류가 발생하는 경로 %s"
 
 #: src/event.c
 #, c-format
 msgid "Error specifying command line: %s"
-msgstr ""
+msgstr "명령 행 지정 오류 : %s"
 
 #: src/event.c
 #, c-format
 msgid "pipe: %s"
-msgstr ""
+msgstr "파이프 : %s"
 
 #: src/event.c
 msgid "popen failed"
-msgstr ""
+msgstr "실패 했어"
 
 #: src/event.c
 msgid "Using extpipe"
-msgstr ""
+msgstr "extpipe 사용"
 
 #: src/event.c
 #, c-format
 msgid "Error writing in pipe , state error %d"
-msgstr ""
+msgstr "파이프 쓰기 오류, 상태 오류 %d"
 
 #: src/event.c
 #, c-format
 msgid "pipe %s not created or closed already "
-msgstr ""
+msgstr "파이프 %s이 (가) 작성되지 않았거나 닫혔습니다"
 
 #: src/event.c
 #, c-format
 msgid "Source FPS %d"
-msgstr ""
+msgstr "소스 FPS %d"
 
 #: src/event.c
 msgid "Error opening context for movie output."
-msgstr ""
+msgstr "영화 출력에 대한 컨텍스트를 여는 중 오류가 발생했습니다."
 
 #: src/event.c
 #, c-format
 msgid "ffopen_open error creating (motion) file [%s]"
-msgstr ""
+msgstr "ffopen 열기 오류 생성 (동작) 파일 [ %s]"
 
 #: src/event.c
 msgid ""
 "The swf container for timelapse no longer supported.  Using mpg container."
 msgstr ""
+"timelapse 용 swf 컨테이너는 더 이상 지원되지 않습니다. mpg 컨테이너를 사용합니"
+"다."
 
 #: src/event.c
 msgid "Timelapse using mpg codec."
-msgstr ""
+msgstr "mpg 코덱을 사용하는 저속 촬영."
 
 #: src/event.c
 msgid "Events will be appended to file"
-msgstr ""
+msgstr "이벤트가 파일에 추가됩니다"
 
 #: src/event.c
 msgid "Timelapse using mpeg4 codec."
-msgstr ""
+msgstr "mpeg4 코덱을 사용하는 저속 촬영."
 
 #: src/event.c
 msgid "Events will be trigger new files"
-msgstr ""
+msgstr "이벤트는 새 파일을 트리거합니다"
 
 #: src/event.c
 #, c-format
 msgid "ffopen_open error creating (timelapse) file [%s]"
-msgstr ""
+msgstr "ffopen 열기 오류 생성 (timelapse) 파일 [ %s]"
 
 #: src/event.c
 msgid "Error encoding image"
-msgstr ""
+msgstr "이미지 인코딩 오류"
 
 #: src/ffmpeg.c
 msgid "Failed to allocate memory for codec name"
-msgstr ""
+msgstr "코덱 이름에 메모리를 할당하지 못했습니다"
 
 #: src/ffmpeg.c
 msgid ""
 "The frame rate specified is too high for the ffmpeg movie type specified. "
 "Choose a different ffmpeg container or lower framerate."
 msgstr ""
+"지정된 프레임 속도가 지정된 ffmpeg 동영상 유형에 비해 너무 높습니다.다른 "
+"ffmpeg 컨테이너 또는 낮은 프레임 속도를 선택하십시오."
 
 #: src/ffmpeg.c
 msgid "Error setting base file name"
-msgstr ""
+msgstr "기본 파일 이름 설정 오류"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Error setting timelapse append for codec %s"
-msgstr ""
+msgstr "코덱 %s에 대한 timelapse 추가 설정 오류"
 
 #: src/ffmpeg.c
 msgid "Error setting file name"
-msgstr ""
+msgstr "파일 이름 설정 오류"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "codec option value %s is not supported"
-msgstr ""
+msgstr "코덱 옵션 값 %s이 (가) 지원되지 않습니다"
 
 #: src/ffmpeg.c
 msgid "Could not get the codec"
-msgstr ""
+msgstr "코덱을 얻을 수 없습니다"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Error sending frame for encoding:%s"
-msgstr ""
+msgstr "인코딩을위한 프레임 전송 오류 : %s"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Receive packet threw EAGAIN returning -2 code :%s"
-msgstr ""
+msgstr "수신 패킷에서 EAGAIN이 -2 코드를 반환 함 : %s"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Error receiving encoded packet video:%s"
-msgstr ""
+msgstr "인코딩 된 패킷 비디오 수신 오류 : %s"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Error encoding video:%s"
-msgstr ""
+msgstr "비디오 인코딩 오류 : %s"
 
 #: src/ffmpeg.c
 msgid "Error encoding video"
-msgstr ""
+msgstr "비디오 인코딩 오류"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d"
-msgstr ""
+msgstr "PTS %<PRId64> 기본 PTS %<PRId64> ms 간격 %<PRId64> 타임베이스 %d- %d"
 
 #: src/ffmpeg.c
 msgid "BAD TIMING!! Frame skipped."
-msgstr ""
+msgstr "나쁜 타이밍! 프레임을 건너 뜁니다."
 
 #: src/ffmpeg.c
 #, c-format
@@ -986,550 +992,553 @@ msgid ""
 "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change "
 "%d"
 msgstr ""
+"PTS %<PRId64> 기본 PTS %<PRId64> ms 간격 %<PRId64> 타임베이스 %d-%d 변경%d"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "%s codec vbr/crf/bit_rate: %d"
-msgstr ""
+msgstr "%s 코덱 vbr / crf / 비트 속도 : %d"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Preferred codec %s has been blacklisted: %s"
-msgstr ""
+msgstr "기본 코덱 %s이 (가) 블랙리스트에 추가되었습니다 : %s"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Preferred codec %s not found"
-msgstr ""
+msgstr "기본 코덱 %s를 찾을 수 없습니다"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Codec %s not found"
-msgstr ""
+msgstr "코덱 %s를 찾을 수 없습니다"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Using codec %s"
-msgstr ""
+msgstr "코덱 %s 사용"
 
 #: src/ffmpeg.c
 msgid "Could not alloc stream"
-msgstr ""
+msgstr "스트림을 할당 할 수 없습니다"
 
 #: src/ffmpeg.c
 msgid "Failed to allocate decoder!"
-msgstr ""
+msgstr "디코더를 할당하지 못했습니다!"
 
 #: src/ffmpeg.c
 msgid "Unable to set quality"
-msgstr ""
+msgstr "품질을 설정할 수 없습니다"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Reported FPS Supported %d/%d"
-msgstr ""
+msgstr "보고 된 FPS 지원 %d / %d"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Could not open codec %s"
-msgstr ""
+msgstr "코덱 %s을 (를) 열 수 없습니다."
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Failed to copy decoder parameters!: %s"
-msgstr ""
+msgstr "디코더 매개 변수를 복사하지 못했습니다! : %s"
 
 #: src/ffmpeg.c
 msgid "could not alloc frame"
-msgstr ""
+msgstr "프레임을 할당 할 수 없습니다"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "could not alloc buffers %s"
-msgstr ""
+msgstr "%s 버퍼를 할당 할 수 없습니다"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "error opening file %s"
-msgstr ""
+msgstr "파일 %s을 (를) 여는 중 오류가 발생했습니다"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Permission denied. %s"
-msgstr ""
+msgstr "권한이 거부되었습니다. %s"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Error opening file %s"
-msgstr ""
+msgstr "파일 %s을 (를) 여는 중 오류가 발생했습니다"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Could not write ffmpeg header %s"
-msgstr ""
+msgstr "ffmpeg 헤더 %s을 (를) 쓸 수 없습니다."
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Error entering draining mode:%s"
-msgstr ""
+msgstr "배수 모드 진입 오류 : %s"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Error draining codec:%s"
-msgstr ""
+msgstr "코덱 배수 오류 : %s"
 
 #: src/ffmpeg.c
 msgid "Error writing draining video frame"
-msgstr ""
+msgstr "배수 비디오 프레임을 쓰는 중 오류"
 
 #: src/ffmpeg.c
 msgid "Error while encoding picture"
-msgstr ""
+msgstr "사진을 인코딩하는 동안 오류가 발생했습니다"
 
 #: src/ffmpeg.c
 msgid "Error while writing video frame"
-msgstr ""
+msgstr "비디오 프레임을 쓰는 중 오류"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "Error while writing video frame: %s"
-msgstr ""
+msgstr "비디오 프레임을 쓰는 중 오류가 발생했습니다 : %s"
 
 #: src/ffmpeg.c
 msgid "RTSP context not available."
-msgstr ""
+msgstr "RTSP 컨텍스트를 사용할 수 없습니다."
 
 #: src/ffmpeg.c
 msgid "rtsp camera not ready for pass-through."
-msgstr ""
+msgstr "rtsp 카메라가 통과 준비가되지 않았습니다."
 
 #: src/ffmpeg.c
 msgid "pass-through mode enabled.  Changing to MP4 container."
-msgstr ""
+msgstr "통과 모드가 활성화되었습니다. MP4 컨테이너로 변경"
 
 #: src/ffmpeg.c
 msgid "Could not get codec!"
-msgstr ""
+msgstr "코덱을 얻을 수 없습니다!"
 
 #: src/ffmpeg.c src/netcam_rtsp.c
 msgid "Unable to copy codec parameters"
-msgstr ""
+msgstr "코덱 매개 변수를 복사 할 수 없습니다"
 
 #: src/ffmpeg.c
 msgid "Pass-through disabled.  ffmpeg too old"
-msgstr ""
+msgstr "통과가 비활성화되었습니다. 너무 오래된 ffmpeg"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "ffmpeg libavcodec version %d.%d.%d libavformat version %d.%d.%d"
-msgstr ""
+msgstr "ffmpeg libavcodec 버전 %d. %d. %d libavformat 버전 %d. %d. %d"
 
 #: src/ffmpeg.c
 #, c-format
 msgid "av_lockmgr_register failed (%d)"
-msgstr ""
+msgstr "av lockmgr 등록 실패 ( %d)"
 
 #: src/ffmpeg.c
 msgid "No ffmpeg functionality included"
-msgstr ""
+msgstr "ffmpeg 기능이 포함되어 있지 않습니다"
 
 #: src/ffmpeg.c
 msgid "av_lockmgr_register reset failed on cleanup"
-msgstr ""
+msgstr "정리시 av lockmgr 레지스터 재설정 실패"
 
 #: src/ffmpeg.c
 msgid "Could not allocate output context"
-msgstr ""
+msgstr "출력 컨텍스트를 할당 할 수 없습니다"
 
 #: src/ffmpeg.c
 msgid "Could not setup passthru!"
-msgstr ""
+msgstr "경유를 설정할 수 없습니다!"
 
 #: src/ffmpeg.c
 msgid "Failed to allocate codec!"
-msgstr ""
+msgstr "코덱을 할당하지 못했습니다!"
 
 #: src/ffmpeg.c
 msgid "Could not set the stream"
-msgstr ""
+msgstr "스트림을 설정할 수 없습니다"
 
 #: src/ffmpeg.c
 msgid "Error flushing codec"
-msgstr ""
+msgstr "코덱 플러시 오류"
 
 #: src/ffmpeg.c
 msgid "Excessive attempts to clear buffered packet"
-msgstr ""
+msgstr "버퍼링 된 패킷을 지우려는 과도한 시도"
 
 #: src/ffmpeg.c
 msgid "Buffered packet"
-msgstr ""
+msgstr "버퍼링 된 패킷"
 
 #: src/ffmpeg.c
 msgid "No ffmpeg support"
-msgstr ""
+msgstr "ffmpeg 지원 안함"
 
 #: src/jpegutils.c
 #, c-format
 msgid "%s: Given jpeg buffer was too small"
-msgstr ""
+msgstr "%s : JPEG 버퍼가 너무 작을 때"
 
 #: src/jpegutils.c
 msgid "Invalid JPEG image dimensions"
-msgstr ""
+msgstr "잘못된 JPEG 이미지 크기"
 
 #: src/jpegutils.c src/netcam_jpeg.c
 #, c-format
 msgid "JPEG image size %dx%d, JPEG was %dx%d"
-msgstr ""
+msgstr "JPEG 이미지 크기 %dx %d, JPEG는 %dx %d"
 
 #: src/mmalcam.c
 #, c-format
 msgid "Received unexpected camera control callback event, 0x%08x"
-msgstr ""
+msgstr "예기치 않은 카메라 제어 콜백 이벤트 수신 : 0x %08x"
 
 #: src/mmalcam.c
 msgid "A high frame rate can cause problems with exposure of images"
-msgstr ""
+msgstr "높은 프레임 속도는 이미지 노출에 문제를 일으킬 수 있습니다"
 
 #: src/mmalcam.c
 msgid "If autoexposure is not working, try a lower frame rate."
-msgstr ""
+msgstr "자동 노출이 작동하지 않으면 더 낮은 프레임 속도를 시도하십시오."
 
 #: src/mmalcam.c
 #, c-format
 msgid "Failed to create MMAL camera component %s"
-msgstr ""
+msgstr "MMAL 카메라 구성 요소 %s를 만들지 못했습니다."
 
 #: src/mmalcam.c
 #, c-format
 msgid "MMAL camera %s doesn't have output ports"
-msgstr ""
+msgstr "MMAL 카메라 %s에 출력 포트가 없습니다"
 
 #: src/mmalcam.c
 #, c-format
 msgid "Unable to enable control port : error %d"
-msgstr ""
+msgstr "제어 포트를 활성화 할 수 없습니다 : 오류 %d"
 
 #: src/mmalcam.c
 msgid "MMAL no-padding setup failed"
-msgstr ""
+msgstr "MMAL 패딩 없음 설정 실패"
 
 #: src/mmalcam.c
 msgid "camera video format couldn't be set"
-msgstr ""
+msgstr "카메라 비디오 형식을 설정할 수 없습니다"
 
 #: src/mmalcam.c
 msgid "camera component couldn't be enabled"
-msgstr ""
+msgstr "카메라 구성 요소를 사용할 수 없습니다"
 
 #: src/mmalcam.c
 msgid "MMAL camera component created"
-msgstr ""
+msgstr "MMAL 카메라 컴포넌트 생성"
 
 #: src/mmalcam.c
 msgid "MMAL camera buffer pool creation failed"
-msgstr ""
+msgstr "MMAL 카메라 버퍼 풀 생성 실패"
 
 #: src/mmalcam.c
 msgid "MMAL camera buffer queue creation failed"
-msgstr ""
+msgstr "MMAL 카메라 버퍼 큐 생성 실패"
 
 #: src/mmalcam.c
 #, c-format
 msgid "Unable to get a required buffer %d from pool queue"
-msgstr ""
+msgstr "풀 큐에서 필요한 버퍼 %d을 (를) 가져올 수 없습니다."
 
 #: src/mmalcam.c
 #, c-format
 msgid "Unable to send a buffer to port (%d)"
-msgstr ""
+msgstr "포트로 버퍼를 보낼 수 없습니다 ( %d)."
 
 #: src/mmalcam.c
 #, c-format
 msgid "MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps"
-msgstr ""
+msgstr "MMAL 카메라 스레드 시작 중 ... 카메라 (%s). %d x %d 에서 %d fps"
 
 #: src/mmalcam.c
 msgid "camera params couldn't be allocated"
-msgstr ""
+msgstr "카메라 매개 변수를 할당 할 수 없습니다"
 
 #: src/mmalcam.c
 msgid "MMAL camera capture port enabling failed"
-msgstr ""
+msgstr "MMAL 카메라 캡처 포트 활성화 실패"
 
 #: src/mmalcam.c
 msgid "MMAL camera capture start failed"
-msgstr ""
+msgstr "MMAL 카메라 캡처 시작 실패"
 
 #: src/mmalcam.c
 msgid "MMAL Camera cleanup"
-msgstr ""
+msgstr "MMAL 카메라 정리"
 
 #: src/mmalcam.c
 #, c-format
 msgid "cmd %d flags %08x size %d/%d at %08x, img_size=%d"
-msgstr ""
+msgstr "cmd %d 플래그 %08x 크기 %d / %d에서 %08x, img 크기 = %d"
 
 #: src/mmalcam.c
 msgid "Unable to return a buffer to the camera video port"
-msgstr ""
+msgstr "카메라 비디오 포트로 버퍼를 반환 할 수 없습니다"
 
 #: src/motion.c
 #, c-format
 msgid "Resizing pre_capture buffer to %d items"
-msgstr ""
+msgstr "사전 캡처 버퍼 크기를 %d 개 항목으로 조정"
 
 #: src/motion.c
 msgid "Removed process id file (pid file)."
-msgstr ""
+msgstr "프로세스 ID 파일 (pid 파일)을 제거했습니다."
 
 #: src/motion.c
 msgid "Error removing pid file"
-msgstr ""
+msgstr "pid 파일 제거 오류"
 
 #: src/motion.c
 #, c-format
 msgid "Closing logfile (%s)."
-msgstr ""
+msgstr "로그 파일을 닫는 중 ( %s)."
 
 #: src/motion.c
 #, c-format
 msgid "Motion detected - starting event %d"
-msgstr ""
+msgstr "동작 감지-시작 이벤트 %d"
 
 #: src/motion.c
 #, c-format
 msgid "Added %d fillerframes into movie"
-msgstr ""
+msgstr "영화에 %d 필러 프레임 추가"
 
 #: src/motion.c
 msgid "Unable to determine camera type (MMAL, Netcam, V4L2, BKTR)"
-msgstr ""
+msgstr "카메라 유형을 확인할 수 없습니다 (MMAL, Netcam, V4L2, BKTR)"
 
 #: src/motion.c
 msgid "Opening privacy mask file"
-msgstr ""
+msgstr "프라이버시 마스크 파일 열기"
 
 #: src/motion.c
 msgid "Opening high resolution privacy mask file"
-msgstr ""
+msgstr "고해상도 프라이버시 마스크 파일 열기"
 
 #: src/motion.c
 #, c-format
 msgid "Error opening mask file %s"
-msgstr ""
+msgstr "마스크 파일 %s을 (를) 여는 중 오류가 발생했습니다"
 
 #: src/motion.c
 msgid "Failed to read mask privacy image. Mask privacy feature disabled."
 msgstr ""
+"마스크 개인 정보 보호 이미지를 읽지 못했습니다. 마스크 개인 정보 보호 기능이 "
+"비활성화되었습니다."
 
 #: src/motion.c
 #, c-format
 msgid "Mask privacy file \"%s\" loaded."
-msgstr ""
+msgstr "마스크 개인 정보 파일 \" %s \"이 (가)로드되었습니다."
 
 #: src/motion.c
 #, c-format
 msgid "Invalid text scale.  Adjusted to %d"
-msgstr ""
+msgstr "텍스트 크기가 잘못되었습니다. %d (으)로 조정"
 
 #: src/motion.c
 msgid "Closing MYSQL"
-msgstr ""
+msgstr "MYSQL 닫기"
 
 #: src/motion.c
 msgid "Initializing database"
-msgstr ""
+msgstr "데이터베이스 초기화"
 
 #: src/motion.c
 #, c-format
 msgid "SQLite3 Database filename %s"
-msgstr ""
+msgstr "SQLite3 데이터베이스 파일 이름 %s"
 
 #: src/motion.c
 msgid "SQLite3 is threadsafe"
-msgstr ""
+msgstr "SQLite3은 스레드 안전"
 
 #: src/motion.c
 #, c-format
 msgid "SQLite3 serialized %s"
-msgstr ""
+msgstr "SQLite3 직렬화 %s"
 
 #: src/motion.c
 msgid "FAILED"
-msgstr ""
+msgstr "실패한"
 
 #: src/motion.c
 msgid "SUCCESS"
-msgstr ""
+msgstr "성공"
 
 #: src/motion.c
 #, c-format
 msgid "Can't open database %s : %s"
-msgstr ""
+msgstr "데이터베이스 %s을 (를) 열 수 없습니다 : %s"
 
 #: src/motion.c
 #, c-format
 msgid "database_busy_timeout %d msec"
-msgstr ""
+msgstr "데이터베이스 사용 시간 초과 %d msec"
 
 #: src/motion.c
 #, c-format
 msgid "database_busy_timeout failed %s"
-msgstr ""
+msgstr "데이터베이스 사용 시간 초과 실패 %s"
 
 #: src/motion.c
 #, c-format
 msgid "Cannot connect to MySQL database %s on host %s with user %s"
-msgstr ""
+msgstr "사용자 %s로 호스트 %s의 MySQL 데이터베이스 %s에 연결할 수 없습니다."
 
 #: src/motion.c
 #, c-format
 msgid "MySQL error was %s"
-msgstr ""
+msgstr "MySQL 오류는 %s입니다"
 
 #: src/motion.c
 msgid "SQLite3 using shared handle"
-msgstr ""
+msgstr "공유 핸들을 사용하는 SQLite3"
 
 #: src/motion.c
 #, c-format
 msgid "Database backend %s"
-msgstr ""
+msgstr "데이터베이스 백엔드 %s"
 
 #: src/motion.c
 #, c-format
 msgid "Camera %d started: motion detection %s"
-msgstr ""
+msgstr "카메라 %d 시작 : 움직임 감지 %s"
 
 #: src/motion.c
 msgid "Disabled"
-msgstr ""
+msgstr "비활성화"
 
 #: src/motion.c
 msgid "Enabled"
-msgstr ""
+msgstr "가능"
 
 #: src/motion.c
 msgid "Pass-through processing disabled."
-msgstr ""
+msgstr "통과 처리가 비활성화되었습니다."
 
 #: src/motion.c
 #, c-format
 msgid "Invalid configuration dimensions %dx%d"
-msgstr ""
+msgstr "잘못된 구성 차원 %dx %d"
 
 #: src/motion.c
 #, c-format
 msgid "Using default dimensions %dx%d"
-msgstr ""
+msgstr "기본 치수 %dx %d 사용"
 
 #: src/motion.c src/netcam_rtsp.c
 #, c-format
 msgid "Image width (%d) requested is not modulo 8."
-msgstr ""
+msgstr "요청한 이미지 너비 ( %d)가 모듈로 8이 아닙니다."
 
 #: src/motion.c src/netcam_rtsp.c
 #, c-format
 msgid "Adjusting width to next higher multiple of 8 (%d)."
-msgstr ""
+msgstr "너비를 다음 8의 배수 ( %d)로 조정합니다."
 
 #: src/motion.c src/netcam_rtsp.c
 #, c-format
 msgid "Image height (%d) requested is not modulo 8."
-msgstr ""
+msgstr "요청한 이미지 높이 ( %d)는 모듈로 8이 아닙니다."
 
 #: src/motion.c src/netcam_rtsp.c
 #, c-format
 msgid "Adjusting height to next higher multiple of 8 (%d)."
-msgstr ""
+msgstr "높이를 다음 8의 배수로 조정합니다 ( %d)."
 
 #: src/motion.c
 msgid "Could not fetch initial image from camera "
-msgstr ""
+msgstr "카메라에서 초기 이미지를 가져올 수 없습니다"
 
 #: src/motion.c
 msgid "Motion continues using width and height from config file(s)"
-msgstr ""
+msgstr "구성 파일에서 너비와 높이를 계속 사용하여 모션"
 
 #: src/motion.c
 msgid "Motion only supports width and height modulo 8"
-msgstr ""
+msgstr "모션은 너비와 높이 만 지원합니다"
 
 #: src/motion.c
 #, c-format
 msgid "Image width (%d) or height(%d) requested is not modulo 8."
-msgstr ""
+msgstr "요청한 이미지 너비 ( %d) 또는 높이 ( %d)가 모듈로 8이 아닙니다."
 
 #: src/motion.c
 #, c-format
 msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
-msgstr ""
+msgstr "모션은 64 %dx %d 이상의 너비와 높이 만 지원합니다"
 
 #: src/motion.c
 msgid "Substream not available.  Image sizes not modulo 16."
-msgstr ""
+msgstr "서브 스트림을 사용할 수 없습니다. 모듈로가 아닌 이미지 크기 16."
 
 #: src/motion.c
 msgid "webp image format is not available, failing back to jpeg"
-msgstr ""
+msgstr "jpeg로 실패한 webp 이미지 형식을 사용할 수 없습니다."
 
 #: src/motion.c
 msgid "Error capturing first image"
-msgstr ""
+msgstr "첫 번째 이미지 캡처 오류"
 
 #: src/motion.c
 msgid "Opening video loopback device for normal pictures"
-msgstr ""
+msgstr "일반 사진을위한 비디오 루프백 장치 열기"
 
 #: src/motion.c
 msgid "Failed to open video loopback for normal pictures"
-msgstr ""
+msgstr "일반 사진의 비디오 루프백을 열지 못했습니다."
 
 #: src/motion.c
 msgid "Opening video loopback device for motion pictures"
-msgstr ""
+msgstr "동영상 용 비디오 루프백 장치 열기"
 
 #: src/motion.c
 msgid "Failed to open video loopback for motion pictures"
-msgstr ""
+msgstr "동영상의 비디오 루프백을 열지 못했습니다."
 
 #: src/motion.c
 msgid "Failed to read mask image. Mask feature disabled."
-msgstr ""
+msgstr "마스크 이미지를 읽지 못했습니다. 마스크 기능이 비활성화되었습니다."
 
 #: src/motion.c
 #, c-format
 msgid "Maskfile \"%s\" loaded."
-msgstr ""
+msgstr "마스크 파일 \" %s \"이 (가)로드되었습니다."
 
 #: src/motion.c
 #, c-format
 msgid "Problem enabling motion-stream server in port %d"
-msgstr ""
+msgstr "포트 %d에서 모션 스트림 서버 활성화 문제"
 
 #: src/motion.c
 #, c-format
 msgid "Started motion-stream server on port %d (auth %s)"
-msgstr ""
+msgstr "포트 %d에서 모션 스트림 서버 시작 (인증 %s)"
 
 #: src/motion.c
 msgid "Emulating motion"
-msgstr ""
+msgstr "모션 모방"
 
 #: src/motion.c
 msgid "Calling vid_close() from motion_cleanup"
-msgstr ""
+msgstr "모션 정리에서 vid close () 호출"
 
 #: src/motion.c
 #, c-format
 msgid "Motion in area %d detected."
-msgstr ""
+msgstr "%d 영역의 모션이 감지되었습니다."
 
 #: src/motion.c
 msgid "Retrying until successful connection with camera"
-msgstr ""
+msgstr "카메라와 성공적으로 연결될 때까지 재시도"
 
 #: src/motion.c
 msgid ""
@@ -1539,436 +1548,445 @@ msgid ""
 "Restarting Motion thread to reinitialize all image buffers to new picture "
 "dimensions"
 msgstr ""
+"카메라를 사용할 수있게되었습니다 \n"
+"카메라 이미지는 구성 파일의 너비와 높이가 다릅니다.문제를 해결해야합니다 \n"
+"모든 이미지 버퍼를 새 그림으로 다시 초기화하기 위해 모션 스레드를 다시 시작치"
+"수"
 
 #: src/motion.c
 msgid "Video signal re-acquired"
-msgstr ""
+msgstr "비디오 신호 재 획득"
 
 #: src/motion.c
 msgid "Video device fatal error - Closing video device"
-msgstr ""
+msgstr "비디오 장치 치명적 오류-비디오 장치 닫기"
 
 #: src/motion.c
 msgid "Restarting Motion thread to reinitialize all image buffers"
-msgstr ""
+msgstr "모든 이미지 버퍼를 다시 초기화하기 위해 모션 스레드 재시작"
 
 #: src/motion.c
 msgid "Video signal lost - Adding grey image"
-msgstr ""
+msgstr "비디오 신호 손실-회색 이미지 추가"
 
 #: src/motion.c
 msgid "Video signal still lost - Trying to close video device"
-msgstr ""
+msgstr "비디오 신호가 여전히 손실 됨-비디오 장치를 닫으려고합니다."
 
 #: src/motion.c
 msgid "Lightswitch detected"
-msgstr ""
+msgstr "전등 스위치 감지"
 
 #: src/motion.c
 msgid "Switchfilter detected"
-msgstr ""
+msgstr "스위치 필터 감지"
 
 #: src/motion.c
 msgid "micro-lightswitch!"
-msgstr ""
+msgstr "마이크로 전등 스위치!"
 
 #: src/motion.c
 #, c-format
 msgid "End of event %d"
-msgstr ""
+msgstr "이벤트 종료 %d"
 
 #: src/motion.c
 #, c-format
 msgid "Raw changes: %5d - changes after '%s': %5d"
-msgstr ""
+msgstr "변경 사항 : %5d- ' %s'이후의 변경 사항 : %5d"
 
 #: src/motion.c
 #, c-format
 msgid " - labels: %3d"
-msgstr ""
+msgstr "-라벨 : %3d"
 
 #: src/motion.c
 #, c-format
 msgid "Changes: %5d"
-msgstr ""
+msgstr "변경 사항 : %5d"
 
 #: src/motion.c
 #, c-format
 msgid " - noise level: %2d"
-msgstr ""
+msgstr "-소음 수준 : %2d"
 
 #: src/motion.c
 #, c-format
 msgid " - threshold: %d"
-msgstr ""
+msgstr "-임계 값 : %d"
 
 #: src/motion.c
 #, c-format
 msgid "Invalid timelapse_mode argument '%s'"
-msgstr ""
+msgstr "유효하지 않은 timelapse 모드 인수 ' %s'"
 
 #: src/motion.c
 msgid "%:s Defaulting to manual timelapse mode"
-msgstr ""
+msgstr "%: s 수동 타임 랩스 모드 기본값"
 
 #: src/motion.c
 msgid "Thread exiting"
-msgstr ""
+msgstr "스레드 종료"
 
 #: src/motion.c
 msgid "Motion going to daemon mode"
-msgstr ""
+msgstr "데몬 모드로 이동하는 모션"
 
 #: src/motion.c
 #, c-format
 msgid "Exit motion, cannot create process id file (pid file) %s"
-msgstr ""
+msgstr "모션 종료, 프로세스 ID 파일 (pid 파일)을 만들 수 없습니다. %s"
 
 #: src/motion.c
 msgid "Could not change directory"
-msgstr ""
+msgstr "디렉토리를 변경할 수 없습니다"
 
 #: src/motion.c
 #, c-format
 msgid "Created process id file %s. Process ID is %d"
-msgstr ""
+msgstr "프로세스 ID 파일 %s을 (를) 생성했습니다. 프로세스 ID는 %d입니다"
 
 #: src/motion.c
 msgid ""
-"Camara IDs are not unique or have values over 32,000.  Falling back to "
-"thread numbers"
+"Camara IDs are not unique or have values over 32,000.  Falling back to thread "
+"numbers"
 msgstr ""
+"Camara ID는 고유하지 않거나 32,000 이상의 값을 갖습니다. 다시 떨어지는스레드 "
+"번호"
 
 #: src/motion.c
 msgid "v4l2   : available"
-msgstr ""
+msgstr "v4l2 : 사용 가능"
 
 #: src/motion.c
 msgid "v4l2   : not available"
-msgstr ""
+msgstr "v4l2 : 사용할 수 없음"
 
 #: src/motion.c
 msgid "bktr   : available"
-msgstr ""
+msgstr "bktr : 사용 가능"
 
 #: src/motion.c
 msgid "bktr   : not available"
-msgstr ""
+msgstr "bktr : 사용할 수 없음"
 
 #: src/motion.c
 msgid "webp   : available"
-msgstr ""
+msgstr "webp : 가능"
 
 #: src/motion.c
 msgid "webp   : not available"
-msgstr ""
+msgstr "webp : 사용할 수 없음"
 
 #: src/motion.c
 msgid "mmal   : available"
-msgstr ""
+msgstr "mmal : 가능"
 
 #: src/motion.c
 msgid "mmal   : not available"
-msgstr ""
+msgstr "mmal : 자료 없음"
 
 #: src/motion.c
 msgid "ffmpeg : available"
-msgstr ""
+msgstr "ffmpeg : 가능"
 
 #: src/motion.c
 msgid "ffmpeg : not available"
-msgstr ""
+msgstr "ffmpeg : 사용할 수 없음"
 
 #: src/motion.c
 msgid "mysql  : available"
-msgstr ""
+msgstr "MySQL : 사용 가능"
 
 #: src/motion.c
 msgid "mysql  : not available"
-msgstr ""
+msgstr "mysql : 사용할 수 없음"
 
 #: src/motion.c
 msgid "MariaDB: available"
-msgstr ""
+msgstr "MariaDB : 사용 가능"
 
 #: src/motion.c
 msgid "MariaDB: not available"
-msgstr ""
+msgstr "MariaDB : 사용할 수 없음"
 
 #: src/motion.c
 msgid "sqlite3: available"
-msgstr ""
+msgstr "sqlite3 : 가능"
 
 #: src/motion.c
 msgid "sqlite3: not available"
-msgstr ""
+msgstr "sqlite3 : 사용할 수 없음"
 
 #: src/motion.c
 msgid "pgsql  : available"
-msgstr ""
+msgstr "pgsql : 사용 가능"
 
 #: src/motion.c
 msgid "pgsql  : not available"
-msgstr ""
+msgstr "pgsql : 사용할 수 없음"
 
 #: src/motion.c
 msgid "nls    : available"
-msgstr ""
+msgstr "nls : 사용 가능"
 
 #: src/motion.c
 msgid "nls    : not available"
-msgstr ""
+msgstr "nls : 사용할 수 없음"
 
 #: src/motion.c
 #, c-format
 msgid "Using default log level (%s) (%d)"
-msgstr ""
+msgstr "기본 로그 수준 ( %s) 사용 ( %d)"
 
 #: src/motion.c
 #, c-format
 msgid "Logging to file (%s)"
-msgstr ""
+msgstr "파일에 로깅 ( %s)"
 
 #: src/motion.c
 #, c-format
 msgid "Exit motion, cannot create log file %s"
-msgstr ""
+msgstr "종료 모션, 로그 파일 %s을 (를) 만들 수 없습니다"
 
 #: src/motion.c
 msgid "Logging to syslog"
-msgstr ""
+msgstr "syslog에 로깅"
 
 #: src/motion.c
 #, c-format
 msgid "Using default log type (%s)"
-msgstr ""
+msgstr "기본 로그 유형 ( %s) 사용"
 
 #: src/motion.c
 #, c-format
 msgid "Using log type (%s) log level (%s)"
-msgstr ""
+msgstr "로그 유형 ( %s) 사용 로그 수준 ( %s)"
 
 #: src/motion.c
 msgid "Motion running as daemon process"
-msgstr ""
+msgstr "데몬 프로세스로 실행되는 모션"
 
 #: src/motion.c
 msgid "Motion running in setup mode."
-msgstr ""
+msgstr "설정 모드에서 동작하는 모션."
 
 #: src/motion.c
 #, c-format
 msgid "Camera ID: %d is from %s"
-msgstr ""
+msgstr "카메라 ID : %d은 (는) %s 출신"
 
 #: src/motion.c
 #, c-format
 msgid "Camera ID: %d Camera Name: %s Service: %s"
-msgstr ""
+msgstr "카메라 ID : %d 카메라 이름 : %s 서비스 : %s"
 
 #: src/motion.c
 #, c-format
 msgid "Camera ID: %d Camera Name: %s Device: %s"
-msgstr ""
+msgstr "카메라 ID : %d 카메라 이름 : %s 장치 : %s"
 
 #: src/motion.c
 #, c-format
 msgid "Stream port number %d for thread %d conflicts with the control port"
-msgstr ""
+msgstr "스레드 %d의 스트림 포트 번호 %d이 (가) 제어 포트와 충돌합니다"
 
 #: src/motion.c
 #, c-format
 msgid "Stream feature for thread %d is disabled."
-msgstr ""
+msgstr "스레드 %d에 대한 스트림 기능이 비활성화되었습니다."
 
 #: src/motion.c
 #, c-format
 msgid "Stream port number %d for thread %d conflicts with thread %d"
-msgstr ""
+msgstr "스레드 %d의 스트림 포트 번호 %d이 (가) 스레드 %d과 (와) 충돌합니다"
 
 #: src/motion.c
 msgid "Restarting motion."
-msgstr ""
+msgstr "모션 재시작."
 
 #: src/motion.c
 msgid "Motion restarted"
-msgstr ""
+msgstr "모션 재시작"
 
 #: src/motion.c
 #, c-format
 msgid "Thread %d - Watchdog timeout. Trying to do a graceful restart"
-msgstr ""
+msgstr "스레드 %d-워치 독 시간 초과. 정상적으로 다시 시작하려고"
 
 #: src/motion.c
 #, c-format
 msgid "Thread %d - Watchdog timeout did NOT restart, killing it!"
-msgstr ""
+msgstr "스레드 %d-워치 독 시간 초과가 다시 시작되지 않아 종료되었습니다!"
 
 #: src/motion.c
 #, c-format
 msgid "Thread %d - Cleaning thread."
-msgstr ""
+msgstr "스레드 %d-청소 스레드."
 
 #: src/motion.c
 #, c-format
 msgid "DEBUG-1 threads_running %d motion_threads_running %d , finish %d"
-msgstr ""
+msgstr "%d를 실행하는 DEBUG-1 스레드 %d를 실행하는 모션 스레드, %d 완료"
 
 #: src/motion.c
 #, c-format
 msgid "Waiting for threads to finish, pid: %d"
-msgstr ""
+msgstr "스레드가 완료되기를 기다리는 중, pid : %d"
 
 #: src/motion.c
 #, c-format
 msgid "Motion thread %d restart"
-msgstr ""
+msgstr "모션 스레드 %d 다시 시작"
 
 #: src/motion.c
 msgid "Threads finished"
-msgstr ""
+msgstr "스레드 완료"
 
 #: src/motion.c src/webu.c
 msgid "Motion terminating"
-msgstr ""
+msgstr "모션 종료"
 
 #: src/motion.c
 #, c-format
 msgid "Could not allocate %llu bytes of memory!"
-msgstr ""
+msgstr "%llu 바이트의 메모리를 할당 할 수 없습니다!"
 
 #: src/motion.c
 #, c-format
 msgid "Warning! Function %s tries to resize memoryblock at %p to 0 bytes!"
-msgstr ""
+msgstr "경고! %s 함수는 %p에서 0 바이트로 메모리 블록 크기를 조정하려고합니다!"
 
 #: src/motion.c
 #, c-format
 msgid "Could not resize memory-block at offset %p to %llu bytes (function %s)!"
 msgstr ""
+"오프셋 %p에서 메모리 블록의 크기를 %llu 바이트 (기능 %s)로 조정할 수 없습니다!"
 
 #: src/motion.c
 #, c-format
 msgid "Problem creating directory %s"
-msgstr ""
+msgstr "디렉토리 %s를 만드는 중에 문제가 발생했습니다"
 
 #: src/motion.c
 #, c-format
 msgid "creating directory %s"
-msgstr ""
+msgstr "디렉토리 %s를 만드는 중"
 
 #: src/motion.c
 #, c-format
 msgid "Error opening file %s with mode %s"
-msgstr ""
+msgstr "%s 모드에서 %s 파일을 여는 중 오류가 발생했습니다"
 
 #: src/motion.c
 msgid "Error closing file"
-msgstr ""
+msgstr "파일 닫기 오류"
 
 #: src/motion.c
 #, c-format
 msgid "invalid format specifier keyword %*.*s"
-msgstr ""
+msgstr "유효하지 않은 형식 지정자 키워드 %*.*s"
 
 #: src/motion.c
 #, c-format
 msgid "Unable to set thread name %s"
-msgstr ""
+msgstr "스레드 이름 %s을 (를) 설정할 수 없습니다"
 
 #: src/motion.c
 msgid "FFMPEG version too old. Disabling pass-through processing."
-msgstr ""
+msgstr "FFMPEG 버전이 너무 오래되었습니다. 통과 처리 비활성화"
 
 #: src/motion.c
 msgid "pass-through is enabled but is still experimental."
-msgstr ""
+msgstr "통과가 활성화되었지만 여전히 실험 중입니다."
 
 #: src/netcam.c
 msgid "Invalid URL.  Can not parse values."
-msgstr ""
+msgstr "잘못된 URL. 값을 구문 분석 할 수 없습니다."
 
 #: src/netcam.c
 #, c-format
 msgid "Using port number %d"
-msgstr ""
+msgstr "포트 번호 %d 사용"
 
 #: src/netcam.c
 #, c-format
 msgid "Camera handler thread [%d] started"
-msgstr ""
+msgstr "카메라 처리기 스레드 [ %d]이 (가) 시작되었습니다"
 
 #: src/netcam.c
 msgid ""
 "Closing netcam socket as Keep-Alive time is up (camera sent Close field). A "
 "reconnect should happen."
 msgstr ""
+"Keep-Alive 시간이 종료되면 netcam 소켓을 닫는 중입니다 (카메라가 필드 닫기를 "
+"보냄). 에이다시 연결해야합니다."
 
 #: src/netcam.c
 msgid "re-opening camera (non-streaming)"
-msgstr ""
+msgstr "카메라 다시 열기 (비 스트리밍)"
 
 #: src/netcam.c
 msgid "camera re-connected"
-msgstr ""
+msgstr "카메라 재 연결"
 
 #: src/netcam.c
 #, c-format
 msgid "Unrecognized image header (%d)"
-msgstr ""
+msgstr "인식 할 수없는 이미지 헤더 ( %d)"
 
 #: src/netcam.c
 #, c-format
 msgid "Error in header (%d)"
-msgstr ""
+msgstr "헤더 오류 ( %d)"
 
 #: src/netcam.c
 msgid "re-opening camera (streaming)"
-msgstr ""
+msgstr "카메라 다시 열기 (스트리밍)"
 
 #: src/netcam.c
 msgid "Error getting jpeg image"
-msgstr ""
+msgstr "JPEG 이미지를 가져 오는 중 오류"
 
 #: src/netcam.c
 msgid "Trying to re-connect"
-msgstr ""
+msgstr "다시 연결하려고"
 
 #: src/netcam.c src/netcam_rtsp.c
 msgid "netcam camera handler: finish set, exiting"
-msgstr ""
+msgstr "넷캠 카메라 핸들러 : 설정 완료, 종료"
 
 #: src/netcam.c
 msgid "No response from camera handler - it must have already died"
-msgstr ""
+msgstr "카메라 핸들러의 응답이 없습니다. 이미 사망 했어야합니다."
 
 #: src/netcam.c
 msgid "called with no data in buffer"
-msgstr ""
+msgstr "버퍼에 데이터없이 호출"
 
 #: src/netcam.c
 #, c-format
 msgid "Network Camera starting for camera (%s)"
-msgstr ""
+msgstr "카메라의 네트워크 카메라 시작 ( %s)"
 
 #: src/netcam.c
 #, c-format
 msgid "Invalid netcam_proxy (%s)"
-msgstr ""
+msgstr "잘못된 넷캠 프록시 ( %s)"
 
 #: src/netcam.c
 msgid "Username/password not allowed on a proxy URL"
-msgstr ""
+msgstr "프록시 URL에서 사용자 이름 / 암호를 사용할 수 없습니다"
 
 #: src/netcam.c
 #, c-format
 msgid "Invalid netcam service '%s' "
-msgstr ""
+msgstr "잘못된 넷캠 서비스 ' %s'"
 
 #: src/netcam.c
 #, c-format
 msgid "Invalid netcam_url for camera (%s)"
-msgstr ""
+msgstr "카메라에 대한 잘못된 넷캠 URL ( %s)"
 
 #: src/netcam.c
 #, c-format
@@ -1976,550 +1994,575 @@ msgid ""
 "Netcam_http parameter '%s' converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-"
 "Alive %s."
 msgstr ""
+"Netcam http 매개 변수 ' %s'은 (는) 플래그로 변환합니다. HTTP / 1.0 : %s "
+"HTTP / 1.1 : %s Keep-살아있는 %s."
 
 #: src/netcam.c
 msgid "now calling netcam_setup_html()"
-msgstr ""
+msgstr "이제 netcam setup html () 호출"
 
 #: src/netcam.c
 msgid "now calling netcam_setup_ftp"
-msgstr ""
+msgstr "이제 netcam setup ftp를 호출"
 
 #: src/netcam.c
 msgid "now calling netcam_setup_file()"
-msgstr ""
+msgstr "이제 netcam 설정 파일 () 호출"
 
 #: src/netcam.c
 #, c-format
 msgid ""
 "Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or jpeg."
 msgstr ""
+"잘못된 넷캠 서비스 ' %s'-http, ftp, mjpg, mjpeg, v4l2 또는 jpeg 여야합니다."
 
 #: src/netcam.c src/netcam_rtsp.c
 #, c-format
 msgid "Failed trying to read first image - retval:%d"
-msgstr ""
+msgstr "첫 번째 이미지를 읽지 못했습니다-retval : %d"
 
 #: src/netcam.c
 msgid "libjpeg decompression failure on first frame - giving up!"
-msgstr ""
+msgstr "첫 번째 프레임에서 libjpeg 압축 해제 실패-포기!"
 
 #: src/netcam.c
 #, c-format
 msgid "Width/height(%dx%d) must be multiples of 8"
-msgstr ""
+msgstr "너비 / 높이 ( %dx %d)는 8의 배수 여야합니다"
 
 #: src/netcam.c
 #, c-format
 msgid "Error starting camera handler thread [%d]"
-msgstr ""
+msgstr "카메라 처리기 스레드 시작 오류 [ %d]"
 
 #: src/netcam_ftp.c
 msgid "recv failed in ftp_get_more"
-msgstr ""
+msgstr "ftp에서 recv가 실패했습니다."
 
 #: src/netcam_ftp.c
 #, c-format
 msgid "Server Response: %s"
-msgstr ""
+msgstr "서버 응답 : %s"
 
 #: src/netcam_ftp.c
 msgid "send failed in ftp_send_user"
-msgstr ""
+msgstr "ftp send user에서 전송 실패"
 
 #: src/netcam_ftp.c
 msgid "send failed in ftp_send_passwd"
-msgstr ""
+msgstr "ftp에서 전송 실패"
 
 #: src/netcam_ftp.c
 msgid "send failed in ftp_quit"
-msgstr ""
+msgstr "ftp에서 전송 실패"
 
 #: src/netcam_ftp.c
 msgid "gethostbyname failed in ftp_connect"
-msgstr ""
+msgstr "ftp 연결에서 gethostbyname이 실패했습니다."
 
 #: src/netcam_ftp.c
 msgid "gethostbyname address mismatch in ftp_connect"
-msgstr ""
+msgstr "ftp 연결에서 gethostbyname 주소가 일치하지 않습니다"
 
 #: src/netcam_ftp.c
 msgid "socket failed"
-msgstr ""
+msgstr "소켓 고장"
 
 #: src/netcam_ftp.c
 msgid "Failed to create a connection"
-msgstr ""
+msgstr "연결을 만들지 못했습니다"
 
 #: src/netcam_ftp.c
 msgid "FTP server asking for ACCT on anonymous"
-msgstr ""
+msgstr "익명의 ACCT를 요구하는 FTP 서버"
 
 #: src/netcam_ftp.c
 msgid "setting socket option SO_REUSEADDR"
-msgstr ""
+msgstr "소켓 옵션 설정 SO REUSEADDR"
 
 #: src/netcam_ftp.c
 msgid "send failed in ftp_get_connection"
-msgstr ""
+msgstr "ftp get 연결에서 전송 실패"
 
 #: src/netcam_ftp.c
 msgid "Invalid answer to PASV"
-msgstr ""
+msgstr "PASV에 대한 잘못된 답변"
 
 #: src/netcam_ftp.c
 msgid "Failed to create a data connection"
-msgstr ""
+msgstr "데이터 연결을 만들지 못했습니다"
 
 #: src/netcam_ftp.c
 msgid "bind failed"
-msgstr ""
+msgstr "바인드 실패"
 
 #: src/netcam_ftp.c
 msgid "listen failed"
-msgstr ""
+msgstr "듣지 못했습니다"
 
 #: src/netcam_ftp.c
 msgid "send failed in ftp_get_socket"
-msgstr ""
+msgstr "ftp get 소켓에서 전송 실패"
 
 #: src/netcam_ftp.c
 msgid "accept in ftp_get_socket"
-msgstr ""
+msgstr "ftp get 소켓에서 수락"
 
 #: src/netcam_ftp.c
 msgid "recv failed in ftp_read"
-msgstr ""
+msgstr "FTP 읽기에서 recv 실패"
 
 #: src/netcam_ftp.c
 msgid "ftp_get_socket failed"
-msgstr ""
+msgstr "ftp get 소켓 실패"
 
 #: src/netcam_ftp.c
 msgid "Error sending TYPE I to ftp server"
-msgstr ""
+msgstr "유형 I를 FTP 서버로 보내는 중 오류가 발생했습니다"
 
 #: src/netcam_http.c
 #, c-format
 msgid "malformed token Content-Length but value %ld"
-msgstr ""
+msgstr "잘못된 토큰 Content-Length이지만 값 %ld"
 
 #: src/netcam_http.c
 #, c-format
 msgid "Content-Length %ld"
-msgstr ""
+msgstr "콘텐츠 길이 %ld"
 
 #: src/netcam_http.c
 #, c-format
 msgid "Content-type %s"
-msgstr ""
+msgstr "콘텐츠 유형 %s"
 
 #: src/netcam_http.c
 msgid "Error reading image header, streaming mode (1). Null header."
-msgstr ""
+msgstr "이미지 헤더를 읽는 중 오류가 발생했습니다. 스트리밍 모드 (1). 널 헤더."
 
 #: src/netcam_http.c
 #, c-format
 msgid "Error reading image header, streaming mode (1). Unknown header '%s'"
 msgstr ""
+"이미지 헤더를 읽는 중 오류가 발생했습니다. 스트리밍 모드 (1). 알 수없는 헤더 "
+"' %s'"
 
 #: src/netcam_http.c
 msgid "Error reading image header (2)"
-msgstr ""
+msgstr "이미지 헤더를 읽는 중 오류가 발생했습니다 (2)"
 
 #: src/netcam_http.c
 msgid "Header not JPEG"
-msgstr ""
+msgstr "JPEG가 아닌 헤더"
 
 #: src/netcam_http.c
 msgid "Content-Length 0"
-msgstr ""
+msgstr "콘텐츠 길이 0"
 
 #: src/netcam_http.c
 msgid "Found image header record"
-msgstr ""
+msgstr "발견 된 이미지 헤더 레코드"
 
 #: src/netcam_http.c
 msgid "Error sending 'connect' request"
-msgstr ""
+msgstr "'연결'요청 전송 중 오류"
 
 #: src/netcam_http.c
 #, c-format
 msgid "Received first header ('%s')"
-msgstr ""
+msgstr "첫 번째 헤더를 받았습니다 ( ' %s')"
 
 #: src/netcam_http.c
 #, c-format
 msgid "Error reading first header (%s)"
-msgstr ""
+msgstr "첫 번째 헤더를 읽는 중 오류 ( %s)"
 
 #: src/netcam_http.c
 #, c-format
 msgid "HTTP Result code %d"
-msgstr ""
+msgstr "HTTP 결과 코드 %d"
 
 #: src/netcam_http.c
 msgid "Removed netcam Keep-Alive flag due to apparent closed HTTP connection."
-msgstr ""
+msgstr "명백한 닫힌 HTTP 연결로 인해 netcam Keep-Alive 플래그가 제거되었습니다."
 
 #: src/netcam_http.c
 msgid "Non-streaming camera (keep-alive set)"
-msgstr ""
+msgstr "비 스트리밍 카메라 (연결 유지 세트)"
 
 #: src/netcam_http.c
 msgid "Non-streaming camera (keep-alive not set)"
-msgstr ""
+msgstr "비 스트리밍 카메라 (연결 유지 설정 안 됨)"
 
 #: src/netcam_http.c
 msgid "Streaming camera"
-msgstr ""
+msgstr "스트리밍 카메라"
 
 #: src/netcam_http.c
 #, c-format
 msgid "Boundary string [%s]"
-msgstr ""
+msgstr "경계 문자열 [ %s]"
 
 #: src/netcam_http.c
 msgid "Boundary string not found in header"
-msgstr ""
+msgstr "헤더에 경계 문자열이 없습니다."
 
 #: src/netcam_http.c
 msgid ""
 "Streaming camera probably using MJPG-blocks, consider using mjpg:// "
 "netcam_url."
 msgstr ""
+"아마도 MJPG 블록을 사용하는 스트리밍 카메라, mjpg : // 사용을 고려하십시오넷"
+"캠 URL."
 
 #: src/netcam_http.c
 msgid "Unrecognized content type"
-msgstr ""
+msgstr "인식 할 수없는 콘텐츠 유형"
 
 #: src/netcam_http.c
 msgid "Content-length present"
-msgstr ""
+msgstr "내용 길이 선물"
 
 #: src/netcam_http.c
 msgid "Content-length 0"
-msgstr ""
+msgstr "내용 길이 0"
 
 #: src/netcam_http.c
 #, c-format
 msgid "Found Conn: close header ('%s')"
-msgstr ""
+msgstr "Conn 발견 : 헤더 닫기 ( ' %s')"
 
 #: src/netcam_http.c
 msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
-"Motion removes keepalive."
+"Both 'Connection: Keep-Alive' and 'Connection: close' header received. Motion "
+"removes keepalive."
 msgstr ""
+"'연결 : 연결 유지'및 '연결 : 닫기'헤더가 모두 수신되었습니다.동작은 keepalive"
+"를 제거합니다."
 
 #: src/netcam_http.c
 msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
-"Motion continues unchanged."
+"Both 'Connection: Keep-Alive' and 'Connection: close' header received. Motion "
+"continues unchanged."
 msgstr ""
+"'연결 : 연결 유지'및 '연결 : 닫기'헤더가 모두 수신되었습니다.모션은 변경되지 "
+"않습니다."
 
 #: src/netcam_http.c
 msgid "Received a Keep-Alive field in this set of headers."
-msgstr ""
+msgstr "이 헤더 세트에서 Keep-Alive 필드를 받았습니다."
 
 #: src/netcam_http.c
 msgid ""
 "No 'Connection: Keep-Alive' nor 'Connection: close' header received.\n"
 " Motion removes keepalive."
 msgstr ""
+"'연결 : 연결 유지'또는 '연결 : 닫기'헤더가 없습니다. \n"
+"동작은 keepalive를 제거합니다."
 
 #: src/netcam_http.c
 msgid ""
 "No 'Connection: Keep-Alive' nor 'Connection: close' header received.\n"
 " Motion continues unchanged."
 msgstr ""
+"'연결 : 연결 유지'또는 '연결 : 닫기'헤더가 없습니다. \n"
+"모션은 변경되지 않습니다."
 
 #: src/netcam_http.c
 msgid ""
 "Removed netcam Keep-Alive flag because 'Connection: close' header received.\n"
 " Netcam does not support Keep-Alive. Motion continues in non-Keep-Alive."
 msgstr ""
+"'Connection : close'헤더가 수신되어 netcam Keep-Alive 플래그가 제거되었습니"
+"다. \n"
+"Netcam은 Keep-Alive를 지원하지 않습니다. 비 Keep-Alive에서 모션이 계속됩니다."
 
 #: src/netcam_http.c
 msgid ""
 "Keep-Alive has reached end of valid period.\n"
 "Motion will close netcam, then resume Keep-Alive with a new socket."
 msgstr ""
+"연결 유지 기간이 만료되었습니다. \n"
+"모션이 넷캠을 닫은 다음 새 소켓으로 Keep-Alive를 다시 시작합니다."
 
 #: src/netcam_http.c
 msgid "disconnect"
-msgstr ""
+msgstr "분리"
 
 #: src/netcam_http.c
 #, c-format
 msgid "getaddrinfo() failed (%s): %s"
-msgstr ""
+msgstr "getaddrinfo () 실패 ( %s) : %s"
 
 #: src/netcam_http.c
 msgid "disconnecting netcam (1)"
-msgstr ""
+msgstr "넷캠 연결 해제 (1)"
 
 #: src/netcam_http.c
 msgid "disconnecting netcam since keep-alive not set."
-msgstr ""
+msgstr "연결 유지가 설정되지 않았으므로 넷캠 연결을 끊습니다."
 
 #: src/netcam_http.c
 msgid "with no keepalive, attempt to create socket failed."
-msgstr ""
+msgstr "keepalive없이 소켓 작성 시도가 실패했습니다."
 
 #: src/netcam_http.c
 #, c-format
 msgid "with no keepalive, new socket created fd %d"
-msgstr ""
+msgstr "keepalive가없고 새로운 소켓이 생성됨 fd %d"
 
 #: src/netcam_http.c
 msgid ""
 "with keepalive set, invalid socket.This could be the first time. Creating a "
 "new one failed."
 msgstr ""
+"keepalive가 설정되어 있고 유효하지 않은 소켓이 있습니다. 만들기새로운 것이 실"
+"패했습니다."
 
 #: src/netcam_http.c
 #, c-format
 msgid ""
 "with keepalive set, invalid socket.This could be first time, created a new "
 "one with fd %d"
-msgstr ""
+msgstr "keepalive가 설정되어 있고 유효하지 않은 소켓이 있습니다.fd %d가있는 것"
 
 #: src/netcam_http.c
 #, c-format
 msgid "SO_KEEPALIVE is %s"
-msgstr ""
+msgstr "KEEPALIVE는 %s입니다."
 
 #: src/netcam_http.c
 msgid "ON"
-msgstr ""
+msgstr "에"
 
 #: src/netcam_http.c
 msgid "OFF"
-msgstr ""
+msgstr "떨어져서"
 
 #: src/netcam_http.c
 msgid "SO_KEEPALIVE set on socket."
-msgstr ""
+msgstr "소켓에 KEEPALIVE가 설정되었습니다."
 
 #: src/netcam_http.c
 #, c-format
 msgid "re-using socket %d since keepalive is set."
-msgstr ""
+msgstr "keepalive가 설정되었으므로 소켓 %d을 (를) 다시 사용하십시오."
 
 #: src/netcam_http.c
 msgid "fcntl(1) on socket"
-msgstr ""
+msgstr "소켓의 fcntl (1)"
 
 #: src/netcam_http.c
 msgid "fcntl(2) on socket"
-msgstr ""
+msgstr "소켓의 fcntl (2)"
 
 #: src/netcam_http.c
 #, c-format
 msgid "connect() failed (%d)"
-msgstr ""
+msgstr "connect () 실패 ( %d)"
 
 #: src/netcam_http.c
 msgid "disconnecting netcam (4)"
-msgstr ""
+msgstr "넷캠 연결 해제 (4)"
 
 #: src/netcam_http.c
 msgid "timeout on connect()"
-msgstr ""
+msgstr "connect ()의 타임 아웃"
 
 #: src/netcam_http.c
 msgid "disconnecting netcam (2)"
-msgstr ""
+msgstr "넷캠 연결 해제 (2)"
 
 #: src/netcam_http.c
 msgid "getsockopt after connect"
-msgstr ""
+msgstr "연결 후 getsockopt"
 
 #: src/netcam_http.c
 msgid "connect returned error"
-msgstr ""
+msgstr "연결 오류 반환"
 
 #: src/netcam_http.c
 msgid "disconnecting netcam (3)"
-msgstr ""
+msgstr "넷캠 연결 해제 (3)"
 
 #: src/netcam_http.c
 #, c-format
 msgid "expanding buffer from [%d/%d] to [%d/%d] bytes."
-msgstr ""
+msgstr "버퍼를 [ %d / %d]에서 [ %d / %d] 바이트로 확장"
 
 #: src/netcam_http.c
 #, c-format
 msgid "Potential split boundary - %d chars flushed, %d re-positioned"
-msgstr ""
+msgstr "잠재적 분할 경계- %d 문자 삭제, %d 위치 변경"
 
 #: src/netcam_http.c
 msgid "recv() fail after boundary string"
-msgstr ""
+msgstr "경계 문자열 다음에 recv () 실패"
 
 #: src/netcam_http.c
 msgid "leaving netcam connected."
-msgstr ""
+msgstr "netcam을 연결 한 상태로 둡니다."
 
 #: src/netcam_http.c
 #, c-format
 msgid "about to try to connect, time #%d"
-msgstr ""
+msgstr "연결 시도 중, 시간 # %d"
 
 #: src/netcam_http.c
 msgid "Failed to open camera - check your config and that netcamera is online"
 msgstr ""
+"카메라를 열지 못했습니다-구성을 확인하고 netcamera가 온라인인지 확인하십시오"
 
 #: src/netcam_http.c
 msgid "Error reading first header - re-trying"
-msgstr ""
+msgstr "첫 번째 헤더 읽기 오류-재시도"
 
 #: src/netcam_http.c
 msgid "Failed to read first camera header - giving up for now"
-msgstr ""
+msgstr "첫 번째 카메라 헤더를 읽지 못했습니다-지금 포기"
 
 #: src/netcam_http.c
 #, c-format
 msgid "Netcam has flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s."
 msgstr ""
+"Netcam에는 HTTP / 1.0 : %s HTTP / 1.1 : %s Keep-Alive %s 플래그가 있습니다."
 
 #: src/netcam_http.c
 msgid ""
 "Removed netcam_keepalive flag due to proxy set.Proxy is incompatible with "
 "Keep-Alive."
 msgstr ""
+"프록시 설정으로 인해 netcam keepalive 플래그가 제거되었습니다.살아 유지."
 
 #: src/netcam_http.c
 msgid "Failed to read first stream header - giving up for now"
-msgstr ""
+msgstr "첫 번째 스트림 헤더를 읽지 못했습니다-지금 포기"
 
 #: src/netcam_http.c
 msgid "connected, going on to read image."
-msgstr ""
+msgstr "연결되어 이미지를 읽습니다."
 
 #: src/netcam_http.c
 msgid "Read error, trying to reconnect.."
-msgstr ""
+msgstr "다시 연결하려는 중에 오류가 발생했습니다."
 
 #: src/netcam_http.c
 msgid "lost the cam."
-msgstr ""
+msgstr "캠을 잃었다."
 
 #: src/netcam_http.c
 #, c-format
 msgid "Refilled buffer with [%d] bytes from the network."
-msgstr ""
+msgstr "네트워크에서 [ %d] 바이트의 버퍼를 리필했습니다."
 
 #: src/netcam_http.c
 #, c-format
 msgid "Read [%d/%d] header bytes."
-msgstr ""
+msgstr "[ %d / %d] 헤더 바이트를 읽습니다."
 
 #: src/netcam_http.c
 msgid "Invalid header received, reconnecting"
-msgstr ""
+msgstr "잘못된 헤더를 수신하고 다시 연결"
 
 #: src/netcam_http.c
 #, c-format
 msgid "Read [%d/%d] chunk bytes, [%d/%d] total"
-msgstr ""
+msgstr "[ %d / %d] 청크 바이트 읽기, [ %d / %d] 총"
 
 #: src/netcam_http.c
 #, c-format
 msgid "Chunk complete, buffer used [%d] bytes."
-msgstr ""
+msgstr "청크 완료, 버퍼 사용률 [ %d] 바이트"
 
 #: src/netcam_http.c
 #, c-format
 msgid "Image complete, buffer used [%d] bytes."
-msgstr ""
+msgstr "이미지 완료, 버퍼 사용률 [ %d] 바이트"
 
 #: src/netcam_http.c
 msgid "now calling netcam_setup_mjpg()"
-msgstr ""
+msgstr "이제 netcam setup을 호출합니다. mjpg ()"
 
 #: src/netcam_http.c
 msgid "connected, going on to read and decode MJPG chunks."
-msgstr ""
+msgstr "MJPG 청크를 읽고 디코딩합니다."
 
 #: src/netcam_http.c
 msgid "Begin"
-msgstr ""
+msgstr "시작"
 
 #: src/netcam_http.c
 #, c-format
 msgid "stat(%s) error"
-msgstr ""
+msgstr "통계 ( %s) 오류"
 
 #: src/netcam_http.c
 #, c-format
 msgid "statbuf.st_mtime[%d] != last_st_mtime[%d]"
-msgstr ""
+msgstr "statbuf.st mtime [ %d]! = 마지막 st mtime [ %d]"
 
 #: src/netcam_http.c
 msgid "waiting new file image timeout"
-msgstr ""
+msgstr "새 파일 이미지 대기 시간 초과"
 
 #: src/netcam_http.c
 msgid "delay waiting new file image "
-msgstr ""
+msgstr "새 파일 이미지 대기 지연"
 
 #: src/netcam_http.c
 #, c-format
 msgid "processing new file image - st_mtime %d"
-msgstr ""
+msgstr "새 파일 이미지 처리 중-st mtime %d"
 
 #: src/netcam_http.c
 #, c-format
 msgid "open(%s) error: %d"
-msgstr ""
+msgstr "열기 ( %s) 오류 : %d"
 
 #: src/netcam_http.c
 #, c-format
 msgid "read(%s) error: %d"
-msgstr ""
+msgstr "읽기 ( %s) 오류 : %d"
 
 #: src/netcam_http.c
 msgid "End"
-msgstr ""
+msgstr "종료"
 
 #: src/netcam_http.c
 #, c-format
 msgid "netcam->file->path %s"
-msgstr ""
+msgstr "netcam-> 파일-> 경로 %s"
 
 #: src/netcam_jpeg.c
 msgid "Not enough data from netcam."
-msgstr ""
+msgstr "넷캠의 데이터가 충분하지 않습니다."
 
 #: src/netcam_jpeg.c
 #, c-format
 msgid "netcam->jpeg_error %d"
-msgstr ""
+msgstr "netcam-> jpeg 오류 %d"
 
 #: src/netcam_jpeg.c
 msgid "no new pic, no signal rcvd"
-msgstr ""
+msgstr "새로운 그림 없음, 신호 없음 rcvd"
 
 #: src/netcam_jpeg.c
 msgid "***new pic delay successful***"
-msgstr ""
+msgstr "*** 새로운 사진 지연 성공 ***"
 
 #: src/netcam_jpeg.c
 #, c-format
 msgid "jpeg_error %d"
-msgstr ""
+msgstr "JPEG 오류 %d"
 
 #: src/netcam_jpeg.c
 #, c-format
 msgid "processing jpeg image - content length %d"
-msgstr ""
+msgstr "JPEG 이미지 처리-콘텐츠 길이 %d"
 
 #: src/netcam_jpeg.c
 #, c-format
 msgid "return code %d"
-msgstr ""
+msgstr "리턴 코드 %d"
 
 #: src/netcam_jpeg.c
 #, c-format
@@ -2527,428 +2570,429 @@ msgid ""
 "Camera width/height mismatch with JPEG image -  expected %dx%d, JPEG %dx%d "
 "retval %d"
 msgstr ""
+"JPEG 이미지와 카메라 너비 / 높이 불일치-예상 %dx %d, JPEG %dx %d회귀 율 %d"
 
 #: src/netcam_jpeg.c
 #, c-format
 msgid "ret %d retval %d"
-msgstr ""
+msgstr "ret %d retval %d"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Resized packet array to %d"
-msgstr ""
+msgstr "%s : 패킷 배열의 크기를 %d (으)로 조정"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: av_copy_packet: %s ,Interrupt: %s"
-msgstr ""
+msgstr "%s : av 카피 패킷 : %s, 인터럽트 : %s"
 
 #: src/netcam_rtsp.c
 msgid "True"
-msgstr ""
+msgstr "참된"
 
 #: src/netcam_rtsp.c
 msgid "False"
-msgstr ""
+msgstr "그릇된"
 
 #: src/netcam_rtsp.c
 msgid "Ignoring packet with invalid data"
-msgstr ""
+msgstr "유효하지 않은 데이터가있는 패킷 무시"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Error sending packet to codec: %s"
-msgstr ""
+msgstr "코덱으로 패킷을 보내는 동안 오류가 발생했습니다 : %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Error receiving frame from codec: %s"
-msgstr ""
+msgstr "코덱에서 프레임을받는 중 오류 : %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Error decoding packet: %s"
-msgstr ""
+msgstr "패킷 디코딩 오류 : %s"
 
 #: src/netcam_rtsp.c
 msgid "Error decoding video packet: Copying to buffer"
-msgstr ""
+msgstr "비디오 패킷 디코딩 오류 : 버퍼로 복사"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s: %s,Interrupt %s"
-msgstr ""
+msgstr "%s : %s : %s, 인터럽트 %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s: Failed,Interrupt %s"
-msgstr ""
+msgstr "%s : %s : 실패, 인터럽트 %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Ignoring user requested decoder %s"
-msgstr ""
+msgstr "%s : 사용자 요청 디코더 무시 %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Using decoder %s"
-msgstr ""
+msgstr "%s : 디코더 사용 %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Camera reading (%s) timed out"
-msgstr ""
+msgstr "%s : 카메라 읽기 ( %s)가 시간 초과되었습니다"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Camera (%s) timed out"
-msgstr ""
+msgstr "%s : 카메라 ( %s) 시간 초과"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Error allocating picture in: %s"
-msgstr ""
+msgstr "%s의 사진 할당 오류"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Error allocating picture out: %s"
-msgstr ""
+msgstr "그림 할당 오류 : %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Error resizing/reformatting: %s"
-msgstr ""
+msgstr "크기 조정 / 재 포맷 오류 : %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Error putting frame into output buffer: %s"
-msgstr ""
+msgstr "출력 버퍼에 프레임을 넣는 중 오류 발생 : %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: av_read_frame: %s ,Interrupt: %s"
-msgstr ""
+msgstr "%s : av 읽기 프레임 : %s, 인터럽트 : %s"
 
 #: src/netcam_rtsp.c
 msgid "The network camera is sending pictures in a different"
-msgstr ""
+msgstr "네트워크 카메라가 다른 사진을 보내고 있습니다"
 
 #: src/netcam_rtsp.c
 msgid "size than specified in the config and also a "
-msgstr ""
+msgstr "구성에 지정된 크기 및"
 
 #: src/netcam_rtsp.c
 msgid "different picture format.  The picture is being"
-msgstr ""
+msgstr "다른 사진 형식. 사진은"
 
 #: src/netcam_rtsp.c
 msgid "transcoded to YUV420P and into the size requested"
-msgstr ""
+msgstr "YUV420P로 트랜스 코딩되고 요청 된 크기로"
 
 #: src/netcam_rtsp.c
 msgid "in the config file.  If possible change netcam to"
-msgstr ""
+msgstr "구성 파일에서. 가능한 경우 넷캠을 다음으로 변경하십시오."
 
 #: src/netcam_rtsp.c
 msgid "be in YUV420P format and the size requested in the"
-msgstr ""
+msgstr "YUV420P 형식이어야하며 크기는"
 
 #: src/netcam_rtsp.c
 msgid "config to possibly lower CPU usage."
-msgstr ""
+msgstr "CPU 사용량을 줄 이도록 구성하십시오."
 
 #: src/netcam_rtsp.c
 msgid "size than specified in the configuration file."
-msgstr ""
+msgstr "구성 파일에 지정된 크기보다 큽니다."
 
 #: src/netcam_rtsp.c
 msgid "The picture is being transcoded into the size "
-msgstr ""
+msgstr "사진이 크기로 트랜스 코딩되고 있습니다"
 
 #: src/netcam_rtsp.c
 msgid "requested in the configuration.  If possible change"
-msgstr ""
+msgstr "구성에서 요청했습니다. 가능한 경우 변경"
 
 #: src/netcam_rtsp.c
 msgid "netcam or configuration to indicate the same size"
-msgstr ""
+msgstr "동일한 크기를 나타내는 netcam 또는 구성"
 
 #: src/netcam_rtsp.c
 msgid "to possibly lower CPU usage."
-msgstr ""
+msgstr "CPU 사용량을 줄일 수 있습니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Netcam: %d x %d => Config: %d x %d"
-msgstr ""
+msgstr "넷캠 : %dx %d => 구성 : %dx %d"
 
 #: src/netcam_rtsp.c
 msgid "The image sent is being "
-msgstr ""
+msgstr "전송 된 이미지가"
 
 #: src/netcam_rtsp.c
 msgid "trancoded to YUV420P.  If possible change netcam "
-msgstr ""
+msgstr "YUV420P로 트랜스 코딩 됨. 가능한 경우 넷캠 변경"
 
 #: src/netcam_rtsp.c
 msgid "picture format to YUV420P to possibly lower CPU usage."
-msgstr ""
+msgstr "CPU 사용률을 낮추려면 YUV420P로 사진 형식을 지정하십시오."
 
 #: src/netcam_rtsp.c
 msgid "Unable to allocate swsframe_in."
-msgstr ""
+msgstr "swsframe을 할당 할 수 없습니다."
 
 #: src/netcam_rtsp.c
 msgid "Unable to allocate swsframe_out."
-msgstr ""
+msgstr "swsframe을 할당 할 수 없습니다."
 
 #: src/netcam_rtsp.c
 msgid "Unable to allocate scaling context."
-msgstr ""
+msgstr "스케일링 컨텍스트를 할당 할 수 없습니다."
 
 #: src/netcam_rtsp.c
 msgid "Error determining size of frame out"
-msgstr ""
+msgstr "프레임 아웃 크기 결정 오류"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting http input_format mjpeg"
-msgstr ""
+msgstr "%s : http 입력 형식 mjpeg 설정"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting rtsp transport to tcp"
-msgstr ""
+msgstr "%s : rtsp 전송을 tcp로 설정"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting rtsp transport to udp"
-msgstr ""
+msgstr "%s : RTSP 전송을 UDP로 설정"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting attributes to read file"
-msgstr ""
+msgstr "%s : 파일을 읽을 속성 설정"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Requested v4l2_palette option: %d"
-msgstr ""
+msgstr "%s : 요청 된 v4l2 팔레트 옵션 : %d"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Requested FOURCC code: %s"
-msgstr ""
+msgstr "%s : 요청 된 FOURCC 코드 : %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting v4l2 input_format: %s"
-msgstr ""
+msgstr "%s : v4l2 입력 형식 설정 : %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting v4l2 framerate: %s"
-msgstr ""
+msgstr "%s : v4l2 프레임 속도 설정 : %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting v4l2 video_size: %s"
-msgstr ""
+msgstr "%s : v4l2 비디오 크기 설정 : %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Proxies not supported using for %s"
-msgstr ""
+msgstr "%s에 대해 프록시가 지원되지 않습니다"
 
 #: src/netcam_rtsp.c
 msgid "Setting up v4l2 via ffmpeg netcam"
-msgstr ""
+msgstr "ffmpeg netcam을 통해 v4l2 설정"
 
 #: src/netcam_rtsp.c
 msgid "Setting up file via ffmpeg netcam"
-msgstr ""
+msgstr "ffmpeg netcam을 통한 파일 설정"
 
 #: src/netcam_rtsp.c
 msgid "Setting up http via ffmpeg netcam"
-msgstr ""
+msgstr "ffmpeg netcam을 통해 http 설정"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Setting up %s via ffmpeg netcam"
-msgstr ""
+msgstr "ffmpeg netcam을 통한 %s 설정"
 
 #: src/netcam_rtsp.c
 msgid "High resolution"
-msgstr ""
+msgstr "높은 해상도"
 
 #: src/netcam_rtsp.c
 msgid "Normal resolution"
-msgstr ""
+msgstr "일반 해상도"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Setting up %s stream."
-msgstr ""
+msgstr "%s 스트림을 설정 중입니다."
 
 #: src/netcam_rtsp.c
 msgid "Unknown"
-msgstr ""
+msgstr "알 수 없는"
 
 #: src/netcam_rtsp.c
 msgid "Stream copied for pass-through"
-msgstr ""
+msgstr "통과를 위해 복사 된 스트림"
 
 #: src/netcam_rtsp.c
 msgid "ffmpeg too old"
-msgstr ""
+msgstr "너무 오래된 ffmpeg"
 
 #: src/netcam_rtsp.c
 msgid "Null path passed to connect"
-msgstr ""
+msgstr "널 경로를 통과하여 연결"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Invalid camera service"
-msgstr ""
+msgstr "%s : 잘못된 카메라 서비스"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to open camera(%s)"
-msgstr ""
+msgstr "%s : 카메라를 열 수 없습니다 ( %s)"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to open camera(%s): %s"
-msgstr ""
+msgstr "%s : 카메라를 열 수 없습니다 ( %s) : %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Opened camera(%s)"
-msgstr ""
+msgstr "%s : 카메라를 열었습니다 ( %s)"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to find stream info: %s"
-msgstr ""
+msgstr "%s : 스트림 정보를 찾을 수 없습니다 : %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to open codec context: %s"
-msgstr ""
+msgstr "%s : 코덱 컨텍스트를 열 수 없습니다 : %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Camera image size is invalid"
-msgstr ""
+msgstr "%s : 카메라 이미지 크기가 잘못되었습니다"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to allocate frame."
-msgstr ""
+msgstr "%s : 프레임을 할당 할 수 없습니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Failed to copy stream for pass-through."
-msgstr ""
+msgstr "%s : 통과를 위해 스트림을 복사하지 못했습니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Failed to read first image"
-msgstr ""
+msgstr "%s : 첫 번째 이미지를 읽지 못했습니다"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Camera (%s) connected"
-msgstr ""
+msgstr "%s : 카메라 ( %s) 연결"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Reconnecting with camera...."
-msgstr ""
+msgstr "%s : 카메라와 다시 연결 중 ..."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Camera did not reconnect."
-msgstr ""
+msgstr "%s : 카메라가 다시 연결되지 않았습니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Checking for camera every 10 seconds."
-msgstr ""
+msgstr "%s : 10 초마다 카메라 확인."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Camera handler thread [%d] started"
-msgstr ""
+msgstr "%s : 카메라 처리기 스레드 [ %d]이 (가) 시작되었습니다"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Handler loop finished."
-msgstr ""
+msgstr "%s : 처리기 루프가 완료되었습니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Error starting handler thread"
-msgstr ""
+msgstr "%s : 처리기 스레드 시작 오류"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Waiting for first image from the handler."
-msgstr ""
+msgstr "%s : 핸들러에서 첫 번째 이미지를 기다리는 중입니다."
 
 #: src/netcam_rtsp.c
 msgid "unable to create rtsp context"
-msgstr ""
+msgstr "RTSP 컨텍스트를 만들 수 없습니다"
 
 #: src/netcam_rtsp.c
 msgid "unable to create rtsp high context"
-msgstr ""
+msgstr "RTSP 높은 컨텍스트를 만들 수 없습니다"
 
 #: src/netcam_rtsp.c
 msgid "FFmpeg/Libav not found on computer.  No RTSP support"
-msgstr ""
+msgstr "컴퓨터에서 FFmpeg / Libav를 찾을 수 없습니다. RTSP 지원 안함"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Shutting down network camera."
-msgstr ""
+msgstr "%s : 네트워크 카메라를 종료하고 있습니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: No response from handler thread."
-msgstr ""
+msgstr "%s : 처리기 스레드에서 응답이 없습니다."
 
 #: src/netcam_rtsp.c
 msgid "Normal resolution: Shut down complete."
-msgstr ""
+msgstr "정상 해상도 : 종료 완료"
 
 #: src/netcam_rtsp.c
 msgid "High resolution: Shut down complete."
-msgstr ""
+msgstr "고해상도 : 시스템 종료가 완료되었습니다."
 
 #: src/picture.c
 msgid "Unable to set set EXIF to webp chunk"
-msgstr ""
+msgstr "EXIF를 webp chunk로 설정할 수 없습니다"
 
 #: src/picture.c
 msgid "libwebp version error"
-msgstr ""
+msgstr "libwebp 버전 오류"
 
 #: src/picture.c
 msgid "libwebp image buffer allocation error"
-msgstr ""
+msgstr "libwebp 이미지 버퍼 할당 오류"
 
 #: src/picture.c
 msgid "libwebp image compression error"
-msgstr ""
+msgstr "libwebp 이미지 압축 오류"
 
 #: src/picture.c
 msgid "unable to assemble webp image"
-msgstr ""
+msgstr "webp 이미지를 조립할 수 없습니다"
 
 #: src/picture.c
 msgid "unable to save webp image to file"
-msgstr ""
+msgstr "webp 이미지를 파일로 저장할 수 없습니다"
 
 #: src/picture.c
 #, c-format
@@ -2956,51 +3000,56 @@ msgid ""
 "Can't write picture to file %s - check access rights to target directory\n"
 "Thread is going to finish due to this fatal error"
 msgstr ""
+"%s 파일에 그림을 쓸 수 없습니다-대상 디렉토리에 대한 액세스 권한을 확인하십시"
+"오 \n"
+"이 치명적인 오류로 인해 스레드가 완료됩니다."
 
 #: src/picture.c
 #, c-format
 msgid "Can't write picture to file %s"
-msgstr ""
+msgstr "%s 파일에 그림을 쓸 수 없습니다"
 
 #: src/picture.c
 msgid "Could not read from pgm file"
-msgstr ""
+msgstr "pgm 파일에서 읽을 수 없습니다"
 
 #: src/picture.c
 #, c-format
 msgid "This is not a pgm file, starts with '%s'"
-msgstr ""
+msgstr "이것은 pgm 파일이 아니며 ' %s'로 시작합니다"
 
 #: src/picture.c
 msgid "Failed reading size in pgm file"
-msgstr ""
+msgstr "pgm 파일에서 읽지 않은 크기"
 
 #: src/picture.c
 msgid "Failed reading maximum value in pgm file"
-msgstr ""
+msgstr "pgm 파일에서 최대 값을 읽지 못했습니다."
 
 #: src/picture.c
 msgid "The mask file specified is not the same size as image from camera."
-msgstr ""
+msgstr "지정된 마스크 파일이 카메라의 이미지와 크기가 다릅니다."
 
 #: src/picture.c
 #, c-format
 msgid "Attempting to resize mask image from %dx%d to %dx%d"
-msgstr ""
+msgstr "마스크 이미지의 크기를 %dx %d에서 %dx %d (으)로 조정하려고합니다"
 
 #: src/picture.c
 #, c-format
 msgid "can't write mask file %s - check access rights to target directory"
 msgstr ""
+"마스크 파일 %s을 (를) 쓸 수 없습니다. 대상 디렉토리에 대한 액세스 권한을 확인"
+"하십시오."
 
 #: src/picture.c
 #, c-format
 msgid "can't write mask file %s"
-msgstr ""
+msgstr "마스크 파일 %s을 (를) 쓸 수 없습니다"
 
 #: src/picture.c
 msgid "Failed writing default mask as pgm file"
-msgstr ""
+msgstr "기본 마스크를 pgm 파일로 쓰지 못했습니다."
 
 #: src/picture.c
 #, c-format
@@ -3008,117 +3057,119 @@ msgid ""
 "Creating empty mask %s\n"
 "Please edit this file and re-run motion to enable mask feature"
 msgstr ""
+"빈 마스크 %s 생성 \n"
+"마스크 기능을 사용하려면이 파일을 편집하고 모션을 다시 실행하십시오."
 
 #: src/rotate.c
 #, c-format
 msgid "Config option \"rotate\" not a multiple of 90: %d"
-msgstr ""
+msgstr "구성 옵션 \"rotate \"는 90의 배수가 아닙니다 : %d"
 
 #: src/track.c
 msgid "internal error"
-msgstr ""
+msgstr "내부 오류"
 
 #: src/track.c
 #, c-format
 msgid "internal error, %hu is not a known track-type"
-msgstr ""
+msgstr "내부 오류, %hu은 (는) 알려진 트랙 유형이 아닙니다"
 
 #: src/track.c
 #, c-format
 msgid "port %s dev fd %i, motor %hu command %hu data %hu"
-msgstr ""
+msgstr "포트 %s dev fd %i, 모터 %hu 명령 %hu 데이터 %hu"
 
 #: src/track.c
 msgid "Status byte timeout!"
-msgstr ""
+msgstr "상태 바이트 타임 아웃!"
 
 #: src/track.c
 #, c-format
 msgid "Try to open serial device %s"
-msgstr ""
+msgstr "직렬 장치 %s을 (를) 열려고 시도하십시오."
 
 #: src/track.c
 #, c-format
 msgid "Unable to open serial device %s"
-msgstr ""
+msgstr "직렬 장치 %s을 (를) 열 수 없습니다"
 
 #: src/track.c
 #, c-format
 msgid "Unable to initialize serial device %s"
-msgstr ""
+msgstr "직렬 장치 %s을 (를) 초기화 할 수 없습니다"
 
 #: src/track.c
 #, c-format
 msgid "Opened serial device %s and initialize, fd %i"
-msgstr ""
+msgstr "직렬 장치 %s을 (를) 열고 초기화했습니다. fd %i"
 
 #: src/track.c
 #, c-format
 msgid "No device %s started yet , trying stepper_center()"
-msgstr ""
+msgstr "스테퍼 센터 ()를 시도하는 중 %s 장치가 아직 시작되지 않았습니다."
 
 #: src/track.c
 #, c-format
 msgid "failed to initialize stepper device on %s , fd [%i]."
-msgstr ""
+msgstr "%s에서 스테퍼 장치를 초기화하지 못했습니다 (fd [ %i])."
 
 #: src/track.c
 #, c-format
 msgid "succeed , device started %s , fd [%i]"
-msgstr ""
+msgstr "성공, 장치 시작 %s, fd [ %i]"
 
 #: src/track.c
 #, c-format
 msgid "SENDS port %s dev fd %i, motor %hu command %hu data %hu"
-msgstr ""
+msgstr "SENDS 포트 %s dev fd %i, 모터 %hu 명령 %hu 데이터 %hu"
 
 #: src/track.c
 #, c-format
 msgid "Command return %d"
-msgstr ""
+msgstr "명령 반환 %d"
 
 #: src/track.c
 msgid "Problem opening servo!"
-msgstr ""
+msgstr "서보 개방 문제!"
 
 #: src/track.c
 #, c-format
 msgid "cent->x %d, cent->y %d, reversex %d, reversey %d manual %d"
-msgstr ""
+msgstr "cent-> x %d, cent-> y %d, reversex %d, reversey %d 수동 %d"
 
 #: src/track.c
 #, c-format
 msgid "x %d value out of range! (%d - %d)"
-msgstr ""
+msgstr "x %d 값이 범위를 벗어났습니다! ( %d- %d)"
 
 #: src/track.c
 #, c-format
 msgid "y %d value out of range! (%d - %d)"
-msgstr ""
+msgstr "y %d 값이 범위를 벗어났습니다! (%d-%d)"
 
 #: src/track.c
 #, c-format
 msgid "X offset %d"
-msgstr ""
+msgstr "X 오프셋 %d"
 
 #: src/track.c
 #, c-format
 msgid ""
-"X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command "
-"%d"
+"X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command %d"
 msgstr ""
+"X cent->x %d, cent->y %d, reversex %d, reversey %d motorx %d 데이터 %d 명령%d"
 
 #: src/track.c
 #, c-format
 msgid "Y offset %d"
-msgstr ""
+msgstr "Y 오프셋 %d"
 
 #: src/track.c
 #, c-format
 msgid ""
-"Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command "
-"%d"
+"Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command %d"
 msgstr ""
+"Y cent->x %d, cent->y %d, reversex %d, reversey %d motory %d data %d 명령%d"
 
 #: src/track.c
 #, c-format
@@ -3126,464 +3177,468 @@ msgid ""
 "X-offset %d, Y-offset %d, x-position %d. y-position %d,reversex %d, reversey "
 "%d , stepsize %d"
 msgstr ""
+"X 오프셋 %d, Y 오프셋 %d, x 위치 %d. y 위치 %d, 역 %d, 역순%d, 단계 화 %d"
 
 #: src/track.c
 msgid "Return byte timeout!"
-msgstr ""
+msgstr "바이트 타임 아웃을 반환!"
 
 #: src/track.c
 msgid "Unable to set camera speed"
-msgstr ""
+msgstr "카메라 속도를 설정할 수 없습니다"
 
 #: src/track.c
 msgid "succeed"
-msgstr ""
+msgstr "성공하다"
 
 #: src/track.c
 msgid "Failed to reset pwc camera to starting position! Reason"
-msgstr ""
+msgstr "pwc 카메라를 시작 위치로 재설정하지 못했습니다! 이유"
 
 #: src/track.c
 msgid "failed VIDIOCPWCMPTGRANGE"
-msgstr ""
+msgstr "VIDIOCPWCMPTGRANGE 실패"
 
 #: src/track.c
 msgid "ioctl VIDIOCPWCMPTGANGLE"
-msgstr ""
+msgstr "ioctl VIDIOCPWCMPTGANGLE"
 
 #: src/track.c
 msgid "Failed to pan/tilt pwc camera! Reason"
-msgstr ""
+msgstr "카메라를 팬 / 틸트하지 못했습니다! 이유"
 
 #: src/track.c
 msgid "Failed to reset UVC camera to starting position! Reason"
-msgstr ""
+msgstr "UVC 카메라를 시작 위치로 재설정하지 못했습니다! 이유"
 
 #: src/track.c
 msgid "Reseting UVC camera to starting position"
-msgstr ""
+msgstr "UVC 카메라를 시작 위치로 재설정"
 
 #: src/track.c
 msgid "ioctl querycontrol"
-msgstr ""
+msgstr "ioctl 쿼리 제어"
 
 #: src/track.c
 msgid "Getting camera range"
-msgstr ""
+msgstr "카메라 범위 얻기"
 
 #: src/track.c
 #, c-format
 msgid "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d "
 msgstr ""
+"입력 매개 변수 ABS 팬 최소 %d, 팬 최대 %d, 기울기 최소 %d, 기울기 최대 %d"
 
 #: src/track.c
 #, c-format
 msgid "INPUT_PARAM_ABS X_Angel %d, Y_Angel %d "
-msgstr ""
+msgstr "입력 매개 변수 ABS X Angel %d, Y Angel %d"
 
 #: src/track.c
 #, c-format
 msgid "For_SET_ABS move_X %d,move_Y %d"
-msgstr ""
+msgstr "SET ABS 이동 X %d의 경우 Y %d 이동"
 
 #: src/track.c
 msgid "Failed to move UVC camera!"
-msgstr ""
+msgstr "UVC 카메라를 이동하지 못했습니다!"
 
 #: src/track.c
 #, c-format
 msgid "Found MINMAX = %d"
-msgstr ""
+msgstr "발견 된 MINMAX = %d"
 
 #: src/track.c
 #, c-format
 msgid "Before_ABS_Y_Angel : x= %d , Y= %d, "
-msgstr ""
+msgstr "ABS Y Angel 전 : x = %d, Y = %d,"
 
 #: src/track.c
 #, c-format
 msgid "After_ABS_Y_Angel : x= %d , Y= %d"
-msgstr ""
+msgstr "ABS Y Angel 후 : x = %d, Y = %d"
 
 #: src/track.c
 #, c-format
 msgid "For_SET_REL pan_min %d,pan_max %d,tilt_min %d,tilt_max %d"
-msgstr ""
+msgstr "SET REL 팬 최소 %d, 팬 최대 %d, 기울기 최소 %d, 기울기 최대 %d"
 
 #: src/track.c
 #, c-format
 msgid "For_SET_REL track_pan_Angel %d, track_tilt_Angel %d"
-msgstr ""
+msgstr "SET REL 트랙 팬 엔젤 %d의 경우, 트랙 기울기 엔젤 %d"
 
 #: src/track.c
 #, c-format
 msgid "For_SET_REL move_X %d,move_Y %d"
-msgstr ""
+msgstr "SET REL 이동 X %d의 경우 Y %d 이동"
 
 #: src/track.c
 #, c-format
 msgid " dev %d, addr= %d, control_S= %d, Wert= %d"
-msgstr ""
+msgstr "dev %d, addr = %d, control S = %d, Wert = %d"
 
 #: src/track.c
 #, c-format
 msgid " dev %d,addr= %d, control_S= %d, Wert= %d"
-msgstr ""
+msgstr "dev %d, addr = %d, 제어 S = %d, Wert = %d"
 
 #: src/track.c
 #, c-format
 msgid "Before_REL_Y_Angel : x= %d , Y= %d"
-msgstr ""
+msgstr "REL Y Angel 이전 : x = %d, Y = %d"
 
 #: src/track.c
 #, c-format
 msgid "After_REL_Y_Angel : x= %d , Y= %d"
-msgstr ""
+msgstr "REL Y Angel 후 : x = %d, Y = %d"
 
 #: src/translate.c
 msgid "Language: English"
-msgstr ""
+msgstr "언어 : 영어"
 
 #: src/video_bktr.c
 #, c-format
 msgid "METEORSHUE Error setting hue [%d]"
-msgstr ""
+msgstr "METEORSHUE 색조 설정 오류 [ %d]"
 
 #: src/video_bktr.c
 #, c-format
 msgid "to [%d]"
-msgstr ""
+msgstr "[ %d]까지"
 
 #: src/video_bktr.c
 msgid "METEORGHUE Error getting hue"
-msgstr ""
+msgstr "METEORGHUE 색조를 얻는 중 오류가 발생했습니다"
 
 #: src/video_bktr.c
 #, c-format
 msgid "METEORSCSAT Error setting saturation [%d]"
-msgstr ""
+msgstr "METEORSCSAT 채도 설정 오류 [ %d]"
 
 #: src/video_bktr.c
 msgid "METEORGCSAT Error getting saturation"
-msgstr ""
+msgstr "METEORGCSAT 채도를 얻는 중 오류"
 
 #: src/video_bktr.c
 #, c-format
 msgid "METEORSCONT Error setting contrast [%d]"
-msgstr ""
+msgstr "METEORSCONT 오류 설정 대비 [ %d]"
 
 #: src/video_bktr.c
 msgid "METEORGCONT Error getting contrast"
-msgstr ""
+msgstr "METEORGCONT 대비를 얻는 중 오류"
 
 #: src/video_bktr.c
 #, c-format
 msgid "METEORSBRIG  brightness [%d]"
-msgstr ""
+msgstr "METEORSBRIG 밝기 [ %d]"
 
 #: src/video_bktr.c
 msgid "METEORGBRIG  getting brightness"
-msgstr ""
+msgstr "METEORGBRIG의 밝기"
 
 #: src/video_bktr.c
 msgid "Not implemented"
-msgstr ""
+msgstr "구현되지 않음"
 
 #: src/video_bktr.c
 #, c-format
 msgid "Device Input %d out of range (0-4)"
-msgstr ""
+msgstr "장치 입력 %d이 (가) 범위를 벗어났습니다 (0-4)"
 
 #: src/video_bktr.c
 #, c-format
 msgid "METEORSINPUT %d invalid -Trying composite %d"
-msgstr ""
+msgstr "METEORSINPUT %d 유효하지 않음-복합 %d 시도 중"
 
 #: src/video_bktr.c
 msgid "BT848SFMT, Couldn't set the input format, try again with default"
 msgstr ""
+"BT848SFMT, 입력 형식을 설정할 수 없습니다. 기본값으로 다시 시도하십시오."
 
 #: src/video_bktr.c
 msgid "BT848SFMT, Couldn't set the input format either default"
-msgstr ""
+msgstr "BT848SFMT, 입력 형식을 기본값으로 설정할 수 없습니다"
 
 #: src/video_bktr.c
 msgid "Couldn't set the geometry"
-msgstr ""
+msgstr "지오메트리를 설정할 수 없습니다"
 
 #: src/video_bktr.c
 #, c-format
 msgid "to [%d/%d] Norm %d"
-msgstr ""
+msgstr "[ %d / %d]까지 규범 %d"
 
 #: src/video_bktr.c
 #, c-format
 msgid "Not valid Frequency [%lu] for Source input [%i]"
-msgstr ""
+msgstr "유효하지 않은 주파수 [%lu] 소스 입력 [%i]"
 
 #: src/video_bktr.c
 #, c-format
 msgid "Frequency [%lu] Source input [%i]"
-msgstr ""
+msgstr "주파수 [ %lu] 소스 입력 [ %i]"
 
 #: src/video_bktr.c
 #, c-format
 msgid "set input [%d]"
-msgstr ""
+msgstr "입력 설정 [ %d]"
 
 #: src/video_bktr.c
 #, c-format
 msgid "set input format [%d]"
-msgstr ""
+msgstr "입력 형식 설정 [ %d]"
 
 #: src/video_bktr.c
 #, c-format
 msgid "set geometry [%d]x[%d]"
-msgstr ""
+msgstr "형상 설정 [ %d] x [ %d]"
 
 #: src/video_bktr.c
 msgid "Frequency set (no implemented yet"
-msgstr ""
+msgstr "주파수 설정 (아직 구현되지 않음)"
 
 #: src/video_bktr.c
 msgid "Sizing buffer to 3x"
-msgstr ""
+msgstr "사이징 버퍼 3 배"
 
 #: src/video_bktr.c
 msgid "Sizing buffer to 3/2x"
-msgstr ""
+msgstr "크기 조정 버퍼를 3 / 2x"
 
 #: src/video_bktr.c
 msgid "mmap failed"
-msgstr ""
+msgstr "mmap 실패"
 
 #: src/video_bktr.c
 msgid "METEORCAPTUR using single method Error capturing"
-msgstr ""
+msgstr "단일 방법을 사용한 METEORCAPTUR 오류 캡처"
 
 #: src/video_bktr.c
 msgid "Error capturing using single method"
-msgstr ""
+msgstr "단일 방법을 사용하여 캡처 오류"
 
 #: src/video_bktr.c
 msgid "BKTR is not enabled."
-msgstr ""
+msgstr "BKTR이 활성화되어 있지 않습니다."
 
 #: src/video_bktr.c src/video_v4l2.c
 msgid "Unable to find video device"
-msgstr ""
+msgstr "비디오 장치를 찾을 수 없습니다"
 
 #: src/video_bktr.c src/video_v4l2.c
 #, c-format
 msgid "Closing video device %s"
-msgstr ""
+msgstr "비디오 장치 %s 닫기"
 
 #: src/video_bktr.c src/video_v4l2.c
 #, c-format
 msgid "Still %d users of video device %s, so we don't close it now"
 msgstr ""
+"여전히 %d 개의 연결이 있습니다. 장치 %s의 경우. 우리는 지금 닫지 않습니다"
 
 #: src/video_bktr.c src/video_v4l2.c
 #, c-format
 msgid "config image width (%d) is not modulo 8"
-msgstr ""
+msgstr "구성 이미지 너비 ( %d)가 모듈로가 아닙니다 8"
 
 #: src/video_bktr.c src/video_v4l2.c
 #, c-format
 msgid "config image height (%d) is not modulo 8"
-msgstr ""
+msgstr "구성 이미지 높이 ( %d)가 모듈로가 아님 8"
 
 #: src/video_bktr.c
 msgid "Stopping capture"
-msgstr ""
+msgstr "캡처 중지"
 
 #: src/video_bktr.c
 #, c-format
 msgid "Reusing [%s] inputs [%d,%d] Change capture method METEOR_CAP_SINGLE"
-msgstr ""
+msgstr "[ %s] 입력 재사용 [ %d, %d] 캡처 방법 변경 METEOR CAP SINGLE"
 
 #: src/video_bktr.c
 msgid "VIDEO_PALETTE_YUV420P setting imgs.size_norm and imgs.motionsize"
-msgstr ""
+msgstr "비디오 팔레트 YUV420P 설정 imgs.size 표준 및 imgs.motionsize"
 
 #: src/video_bktr.c
 #, c-format
 msgid "open video device %s"
-msgstr ""
+msgstr "열린 비디오 장치 %s"
 
 #: src/video_bktr.c
 #, c-format
 msgid "open tuner device %s"
-msgstr ""
+msgstr "열린 튜너 장치 %s"
 
 #: src/video_common.c
 msgid "Corrupt image ... continue"
-msgstr ""
+msgstr "손상된 이미지 ... 계속"
 
 #: src/video_common.c
 #, c-format
 msgid "SOI position adjusted by %d bytes."
-msgstr ""
+msgstr "SOI 위치가 %d 바이트 씩 조정되었습니다."
 
 #: src/video_common.c
 #, c-format
 msgid "Parsing controls: %s"
-msgstr ""
+msgstr "파싱 ​​컨트롤 : %s"
 
 #: src/video_common.c
 msgid "calling mmalcam_cleanup"
-msgstr ""
+msgstr "mmalcam 정리 호출"
 
 #: src/video_common.c
 msgid "calling netcam_cleanup"
-msgstr ""
+msgstr "넷캠 정리 호출"
 
 #: src/video_common.c
 msgid "calling netcam_rtsp_cleanup"
-msgstr ""
+msgstr "netcam rtsp 정리 호출"
 
 #: src/video_common.c
 msgid "Cleaning up V4L2 device"
-msgstr ""
+msgstr "V4L2 장치 정리"
 
 #: src/video_common.c
 msgid "Cleaning up BKTR device"
-msgstr ""
+msgstr "BKTR 장치 정리"
 
 #: src/video_common.c
 msgid "No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)"
-msgstr ""
+msgstr "카메라 장치 정리 없음 (MMAL, Netcam, V4L2, BKTR)"
 
 #: src/video_common.c
 msgid "Opening MMAL cam"
-msgstr ""
+msgstr "MMAL 캠 열기"
 
 #: src/video_common.c
 msgid "MMAL cam failed to open"
-msgstr ""
+msgstr "MMAL 캠을 열지 못했습니다"
 
 #: src/video_common.c
 msgid "Opening Netcam"
-msgstr ""
+msgstr "넷캠 열기"
 
 #: src/video_common.c
 msgid "Netcam failed to open"
-msgstr ""
+msgstr "넷캠을 열지 못했습니다"
 
 #: src/video_common.c
 msgid "Opening Netcam RTSP"
-msgstr ""
+msgstr "Netcam RTSP 열기"
 
 #: src/video_common.c
 msgid "Netcam RTSP failed to open"
-msgstr ""
+msgstr "Netcam RTSP를 열지 못했습니다"
 
 #: src/video_common.c
 msgid "Opening V4L2 device"
-msgstr ""
+msgstr "V4L2 장치 열기"
 
 #: src/video_common.c
 msgid "V4L2 device failed to open"
-msgstr ""
+msgstr "V4L2 장치를 열지 못했습니다"
 
 #: src/video_common.c
 msgid "Opening BKTR device"
-msgstr ""
+msgstr "BKTR 장치 열기"
 
 #: src/video_common.c
 msgid "BKTR device failed to open"
-msgstr ""
+msgstr "BKTR 장치를 열지 못했습니다"
 
 #: src/video_common.c
 msgid "No Camera device specified (MMAL, Netcam, V4L2, BKTR)"
-msgstr ""
+msgstr "카메라 장치를 지정하지 않았습니다 (MMAL, Netcam, V4L2, BKTR)"
 
 #: src/video_loopback.c
 #, c-format
 msgid "Failed to open '%s'"
-msgstr ""
+msgstr "' %s'을 (를) 열지 못했습니다."
 
 #: src/video_loopback.c
 #, c-format
 msgid "Error specifying buffer: %s"
-msgstr ""
+msgstr "버퍼 지정 오류 : %s"
 
 #: src/video_loopback.c
 #, c-format
 msgid "Opening buffer: %s"
-msgstr ""
+msgstr "오프닝 버퍼 : %s"
 
 #: src/video_loopback.c
 #, c-format
 msgid "Read buffer: %s"
-msgstr ""
+msgstr "읽기 버퍼 : %s"
 
 #: src/video_loopback.c
 #, c-format
 msgid "found video device '%s' %d"
-msgstr ""
+msgstr "비디오 장치 ' %s'을 (를) 찾았습니다. %d"
 
 #: src/video_loopback.c
 #, c-format
 msgid "Opened %s as pipe output"
-msgstr ""
+msgstr "파이프 출력으로 %s을 (를) 열었습니다."
 
 #: src/video_loopback.c
 #, c-format
 msgid "Opening %s as pipe output failed"
-msgstr ""
+msgstr "파이프 출력 실패로 %s 열기"
 
 #: src/video_loopback.c
 msgid "Original pipe specifications"
-msgstr ""
+msgstr "오리지널 파이프 사양"
 
 #: src/video_loopback.c
 msgid "Proposed pipe specifications"
-msgstr ""
+msgstr "제안 된 파이프 사양"
 
 #: src/video_loopback.c
 msgid "Final pipe specifications"
-msgstr ""
+msgstr "최종 파이프 사양"
 
 #: src/video_v4l2.c
 msgid "No Controls found for device"
-msgstr ""
+msgstr "장치에 대한 컨트롤이 없습니다."
 
 #: src/video_v4l2.c
 msgid "---------Controls---------"
-msgstr ""
+msgstr "---------통제 수단---------"
 
 #: src/video_v4l2.c
 msgid "  V4L2 ID   Name and Range"
-msgstr ""
+msgstr "V4L2 ID 이름 및 범위"
 
 #: src/video_v4l2.c
 msgid "Device not ready"
-msgstr ""
+msgstr "장치가 준비되지 않았습니다"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "setting control %s \"%s\" to %d failed with return code %d"
-msgstr ""
+msgstr "설정 제어 %s \"%s\"에서 %d 로의 리턴 코드 %d 실패"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Set control \"%s\" to value %d"
-msgstr ""
+msgstr "제어 \" %s \"를 값 %d (으)로 설정"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %d is below minimum.  Using minimum"
-msgstr ""
+msgstr "%s 제어 옵션 값 %d이 (가) 최소값보다 낮습니다. 최소 사용"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %d is above maximum.  Using maximum"
-msgstr ""
+msgstr "%s 제어 옵션 값 %d이 (가) 최대 값보다 큽니다. 최대 사용"
 
 #: src/video_v4l2.c
 msgid "control type not supported yet"
-msgstr ""
+msgstr "아직 지원되지 않는 제어 유형"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3591,168 +3646,174 @@ msgid ""
 "Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input "
 "value in conf by -1"
 msgstr ""
+"입력 %d을 (를) 쿼리 할 수 ​​없습니다. WEBCAM 변경 입력을 사용하는 경우 VIDIOC "
+"ENUMINPUTconf의 값 -1"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Name = \"%s\", type 0x%08X, status %08x"
-msgstr ""
+msgstr "이름 = \" %s \", 유형 0x %08X, 상태 %08x"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Name = \"%s\",- TUNER"
-msgstr ""
+msgstr "이름 = \" %s \",-튜너"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Name = \"%s\"- CAMERA"
-msgstr ""
+msgstr "이름 = \" %s \"-카메라"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Error selecting input %d VIDIOC_S_INPUT"
-msgstr ""
+msgstr "입력 선택 오류 %d VIDIOC S INPUT"
 
 #: src/video_v4l2.c
 msgid "Device does not support specifying PAL/NTSC norm"
-msgstr ""
+msgstr "장치는 PAL / NTSC 규범 지정을 지원하지 않습니다"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "- video standard %s"
-msgstr ""
+msgstr "-비디오 표준 %s"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Error selecting standard method %d VIDIOC_S_STD"
-msgstr ""
+msgstr "표준 방법 선택 오류 %d VIDIOC S STD"
 
 #: src/video_v4l2.c
 msgid "Video standard set to NTSC"
-msgstr ""
+msgstr "NTSC로 설정된 비디오 표준"
 
 #: src/video_v4l2.c
 msgid "Video standard set to SECAM"
-msgstr ""
+msgstr "비디오 표준을 SECAM으로 설정"
 
 #: src/video_v4l2.c
 msgid "Video standard set to PAL"
-msgstr ""
+msgstr "PAL로 설정된 비디오 표준"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "tuner %d VIDIOC_G_TUNER"
-msgstr ""
+msgstr "튜너 %d VIDIOC G 튜너"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Set tuner %d"
-msgstr ""
+msgstr "튜너 %d 설정"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "freq %ul VIDIOC_S_FREQUENCY"
-msgstr ""
+msgstr "주파수 %ul VIDIOC S 주파수"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Set Frequency to %ul"
-msgstr ""
+msgstr "빈도를 %ul로 설정"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Testing palette %c%c%c%c (%dx%d)"
-msgstr ""
+msgstr "테스트 팔레트 %c %c %c %c ( %dx %d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Adjusting resolution from %ix%i to %ix%i."
-msgstr ""
+msgstr "%ix %i에서 %ix %i로 해상도 조정"
 
 #: src/video_v4l2.c
 msgid "Adjusted resolution not modulo 8."
-msgstr ""
+msgstr "모듈로가 아닌 조정 된 해상도 8."
 
 #: src/video_v4l2.c
 msgid "Specify different palette or width/height in config file."
-msgstr ""
+msgstr "구성 파일에서 다른 팔레트 또는 너비 / 높이를 지정하십시오."
 
 #: src/video_v4l2.c
 msgid ""
 "Error setting pixel format.\n"
 "VIDIOC_S_FMT: "
 msgstr ""
+"픽셀 형식을 설정하는 중 오류가 발생했습니다. \n"
+"VIDIOC S FMT :"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
-msgstr ""
+msgstr "팔레트 사용 %c %c %c %c ( %dx %d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Bytesperlines %d sizeimage %d colorspace %08x"
-msgstr ""
+msgstr "바이트 라인 %d 크기 이미지 %d 색 공간 %08x"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Adjusting to width (%d)"
-msgstr ""
+msgstr "너비 ( %d)로 조정"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Adjusting to height (%d)"
-msgstr ""
+msgstr "높이 ( %d)로 조정"
 
 #: src/video_v4l2.c
 msgid ""
 "H264(21) format not supported via videodevice.  Changing to default palette"
 msgstr ""
+"비디오 장치를 통해 H264 (21) 형식이 지원되지 않습니다. 기본 팔레트로 변경"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Configuration palette index %d (%s) for %dx%d doesn't work."
-msgstr ""
+msgstr "구성 팔레트 색인 %d (%s)이 작동하지 않습니다. 사용 된 치수 %dx%d."
 
 #: src/video_v4l2.c
 msgid "Supported palettes:"
-msgstr ""
+msgstr "지원되는 팔레트 :"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%d - %s (compressed : %d) (%#x)"
-msgstr ""
+msgstr "%d- %s (압축 : %d) ( %# x)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Selected palette %s"
-msgstr ""
+msgstr "선택된 팔레트 %s"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Palette selection failed for format %s"
-msgstr ""
+msgstr "%s 형식에 대한 팔레트 선택에 실패했습니다"
 
 #: src/video_v4l2.c
 msgid "Unable to find a compatible palette format."
-msgstr ""
+msgstr "호환되는 팔레트 형식을 찾을 수 없습니다."
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Error requesting buffers %d for memory map. VIDIOC_REQBUFS"
 msgstr ""
+"메모리 맵에 버퍼 %d을 (를) 요청하는 동안 오류가 발생했습니다. VIDIOC REQBUFS"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "mmap information: frames=%d"
-msgstr ""
+msgstr "mmap 정보 : 프레임 = %d"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Insufficient buffer memory %d < MIN_MMAP_BUFFERS."
-msgstr ""
+msgstr "버퍼 메모리가 충분하지 않습니다 %d <MIN MMAP BUFFERS."
 
 #: src/video_v4l2.c
 msgid "Out of memory."
-msgstr ""
+msgstr "메모리가 부족합니다."
 
 #: src/video_v4l2.c
 #, c-format
@@ -3760,268 +3821,272 @@ msgid ""
 "Error querying buffer %i\n"
 "VIDIOC_QUERYBUF: "
 msgstr ""
+"버퍼 %i \n"
+" 쿼리 오류VIDIOC QUERYBUF :"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Error mapping buffer %i mmap"
-msgstr ""
+msgstr "오류 매핑 버퍼 %i mmap"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%i length=%d Address (%x)"
-msgstr ""
+msgstr "%i 길이 = %d 주소 ( %x)"
 
 #: src/video_v4l2.c
 msgid "Error starting stream. VIDIOC_STREAMON"
-msgstr ""
+msgstr "스트림을 시작하는 동안 오류가 발생했습니다. VIDIOC STREAMON"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "1) vid_source->pframe %i"
-msgstr ""
+msgstr "1) vid source-> pframe %i"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "the_buffer index %d Address (%x)"
-msgstr ""
+msgstr "버퍼 인덱스 %d 주소 ( %x)"
 
 #: src/video_v4l2.c
 msgid "Errors occurred during device select"
-msgstr ""
+msgstr "장치 선택 중 오류가 발생했습니다"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Using videodevice %s and input %d"
-msgstr ""
+msgstr "비디오 장치 %s 및 입력 %d 사용"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Failed to open video device %s"
-msgstr ""
+msgstr "비디오 장치 %s을 (를) 열지 못했습니다."
 
 #: src/video_v4l2.c
 msgid "Not a V4L2 device?"
-msgstr ""
+msgstr "V4L2 장치가 아닙니까?"
 
 #: src/video_v4l2.c
 msgid "Device does not support capturing."
-msgstr ""
+msgstr "장치가 캡처를 지원하지 않습니다."
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Trying to set fps to %d"
-msgstr ""
+msgstr "fps를 %d (으)로 설정하려고합니다"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Error setting fps. Return code %d"
-msgstr ""
+msgstr "FPS 설정 오류. 리턴 코드 %d"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Device set fps to %d"
-msgstr ""
+msgstr "장치 설정 fps를 %d로"
 
 #: src/video_v4l2.c
 msgid "V4L2 is not enabled"
-msgstr ""
+msgstr "V4L2를 사용할 수 없습니다"
 
 #: src/video_v4l2.c
 msgid "V4L2 is not enabled."
-msgstr ""
+msgstr "V4L2가 사용 가능하지 않습니다."
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Testing palette %s (%c%c%c%c)"
-msgstr ""
+msgstr "테스트 팔레트 %s ( %c %c %c %c)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "  Width: %d, Height %d"
-msgstr ""
+msgstr "폭 : %d, 높이 %d"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "    Framerate %d/%d"
-msgstr ""
+msgstr "프레임 속도 %d / %d"
 
 #: src/webu.c
 #, c-format
 msgid "Invalid url: %s"
-msgstr ""
+msgstr "잘못된 URL : %s"
 
 #: src/webu.c
 msgid "Error decoding url"
-msgstr ""
+msgstr "URL 디코딩 오류"
 
 #: src/webu.c
 #, c-format
 msgid "Sent url: %s"
-msgstr ""
+msgstr "보낸 URL : %s"
 
 #: src/webu.c
 #, c-format
 msgid "Decoded url: %s"
-msgstr ""
+msgstr "디코딩 된 URL : %s"
 
 #: src/webu.c
 msgid "Restarting all threads"
-msgstr ""
+msgstr "모든 스레드 재시작"
 
 #: src/webu.c
 #, c-format
 msgid "Restarting thread %d"
-msgstr ""
+msgstr "스레드 %d 다시 시작"
 
 #: src/webu.c
 #, c-format
 msgid "Quitting thread %d"
-msgstr ""
+msgstr "종료 나사 %d"
 
 #: src/webu.c src/webu_html.c src/webu_text.c
 #, c-format
 msgid "Invalid action requested: >%s< >%s< >%s<"
-msgstr ""
+msgstr "요청 된 잘못된 조치 :> %s <> %s <> %s <"
 
 #: src/webu.c
 msgid "Native Language : on"
-msgstr ""
+msgstr "모국어 : 켜기"
 
 #: src/webu.c
 msgid "Native Language : off"
-msgstr ""
+msgstr "모국어 : 해제"
 
 #: src/webu.c
 msgid "Set the value to null/zero"
-msgstr ""
+msgstr "값을 null / zero로 설정"
 
 #: src/webu.c
 #, c-format
 msgid "Connection from: %s"
-msgstr ""
+msgstr "연결 : %s"
 
 #: src/webu.c
 #, c-format
 msgid "Failed authentication from %s"
-msgstr ""
+msgstr "%s의 인증 실패"
 
 #: src/webu.c
 msgid "No webcontrol user:pass provided"
-msgstr ""
+msgstr "웹 컨트롤 사용자 없음 : 패스 제공"
 
 #: src/webu.c
 msgid "No stream user:pass provided"
-msgstr ""
+msgstr "스트림 사용자 없음 : 패스 제공"
 
 #: src/webu.c src/webu_stream.c
 msgid "Invalid response"
-msgstr ""
+msgstr "잘못된 답변"
 
 #: src/webu.c
 #, c-format
 msgid "Invalid Method requested: %s"
-msgstr ""
+msgstr "요청 된 잘못된 방법 : %s"
 
 #: src/webu.c
 #, c-format
 msgid "send page failed %d"
-msgstr ""
+msgstr "페이지 전송 실패 %d"
 
 #: src/webu.c
 msgid "Basic authentication: available"
-msgstr ""
+msgstr "기본 인증 : 가능"
 
 #: src/webu.c
 msgid "Basic authentication: disabled"
-msgstr ""
+msgstr "기본 인증 : 비활성화"
 
 #: src/webu.c
 msgid "Digest authentication: available"
-msgstr ""
+msgstr "다이제스트 인증 : 사용 가능"
 
 #: src/webu.c
 msgid "Digest authentication: disabled"
-msgstr ""
+msgstr "다이제스트 인증 : 비활성화"
 
 #: src/webu.c
 msgid "libmicrohttpd libary too old ipv6 disabled"
-msgstr ""
+msgstr "libmicrohttpd 라이브러리가 너무 오래된 ipv6 비활성화"
 
 #: src/webu.c
 msgid "IPV6: available"
-msgstr ""
+msgstr "IPV6 : 사용 가능"
 
 #: src/webu.c
 msgid "IPV6: disabled"
-msgstr ""
+msgstr "IPV6 : 비활성화"
 
 #: src/webu.c
 msgid "libmicrohttpd libary too old SSL/TLS disabled"
-msgstr ""
+msgstr "libmicrohttpd 라이브러리가 너무 오래된 SSL / TLS 비활성화"
 
 #: src/webu.c
 msgid "SSL/TLS: available"
-msgstr ""
+msgstr "SSL / TLS : 사용 가능"
 
 #: src/webu.c
 msgid "SSL/TLS: disabled"
-msgstr ""
+msgstr "SSL / TLS : 비활성화"
 
 #: src/webu.c
 msgid "Error reading file for SSL/TLS support."
-msgstr ""
+msgstr "SSL / TLS 지원을위한 파일을 읽는 중 오류가 발생했습니다."
 
 #: src/webu.c
 msgid "SSL/TLS requested but no cert file provided.  SSL/TLS disabled"
 msgstr ""
+"SSL / TLS가 요청했지만 인증서 파일이 제공되지 않았습니다. SSL / TLS 비활성화"
 
 #: src/webu.c
 msgid "SSL/TLS requested but no key file provided.  SSL/TLS disabled"
 msgstr ""
+"SSL / TLS가 요청되었지만 키 파일이 제공되지 않았습니다. SSL / TLS 비활성화"
 
 #: src/webu.c
 #, c-format
 msgid "Starting webcontrol on port %d"
-msgstr ""
+msgstr "포트 %d에서 webcontrol 시작"
 
 #: src/webu.c
 msgid "Unable to start MHD"
-msgstr ""
+msgstr "MHD를 시작할 수 없습니다"
 
 #: src/webu.c
 #, c-format
 msgid "Started webcontrol on port %d"
-msgstr ""
+msgstr "포트 %d에서 웹 컨트롤 시작"
 
 #: src/webu.c
 #, c-format
 msgid "Started camera %d stream on port/camera_id %d/%d"
-msgstr ""
+msgstr "포트 / 카메라 ID %d / %d에서 카메라 %d 스트림을 시작했습니다."
 
 #: src/webu.c
 #, c-format
 msgid "Started camera %d stream on port %d"
-msgstr ""
+msgstr "포트 %d에서 카메라 %d 스트림을 시작했습니다."
 
 #: src/webu.c
 #, c-format
 msgid "Starting all camera streams on port %d"
-msgstr ""
+msgstr "포트 %d에서 모든 카메라 스트림 시작"
 
 #: src/webu.c
 #, c-format
 msgid "Starting camera %d stream on port %d"
-msgstr ""
+msgstr "포트 %d에서 카메라 %d 스트림 시작"
 
 #: src/webu.c
 #, c-format
 msgid "Unable to start stream for camera %d"
-msgstr ""
+msgstr "카메라 %d의 스트림을 시작할 수 없습니다"
 
 #: src/webu.c
 #, c-format
 msgid "Duplicate port requested %d"
-msgstr ""
+msgstr "중복 포트 요청 %d"
 
 #: src/webu_html.c
 msgid "Cameras"
@@ -4150,34 +4215,28 @@ msgstr "틸트"
 #: src/webu_stream.c
 #, c-format
 msgid "Invalid thread specified: %s"
-msgstr ""
+msgstr "유효하지 않은 스레드가 지정되었습니다 : %s"
 
 #: src/webu_stream.c
 #, c-format
 msgid "Invalid URL for a camera specific port: %s"
-msgstr ""
+msgstr "카메라 별 포트에 대한 잘못된 URL : %s"
 
 #: src/webu_stream.c
 #, c-format
 msgid "URL for thread 0 is not valid when using camera specific files.: %s"
-msgstr ""
+msgstr "카메라 특정 파일을 사용할 때 스레드 0의 URL이 유효하지 않습니다. : %s"
 
 #: src/webu_stream.c
 #, c-format
 msgid "Bad URL for a camera specific port: %s"
-msgstr ""
+msgstr "카메라 특정 포트의 잘못된 URL : %s"
 
 #: src/webu_stream.c
 msgid "Could not get image to stream."
-msgstr ""
+msgstr "이미지를 스트리밍 할 수 없습니다."
 
 #: src/webu_text.c
 #, c-format
 msgid "'%s' option is depreciated.  New option name is `%s'"
-msgstr ""
-
-#~ msgid "Make Movie"
-#~ msgstr "영화 만들기"
-
-#~ msgid "All  "
-#~ msgstr "전체"
+msgstr "' %s'옵션이 감가 상각되었습니다. 새로운 옵션 이름은` %s '입니다"
