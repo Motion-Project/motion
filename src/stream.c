@@ -1,4 +1,17 @@
 /*
+ *                 NOTICE
+ *   This entire module (stream.c) is dead code and will be removed in its entirety very shortly
+ *
+ *   The only reason that it has not been removed yet is to allow for an emergency option to use
+ *   the old stream method if for some reason the webu MHD option does not work on a particular
+ *   platform.  It is only avaialable for activation using the undocumented option of
+ *   cnt->conf.stream_preview_method == 99
+ *
+ *   NO REVISIONS SHOULD BE MADE TO THIS MODULE.  IT IS DEAD
+ */
+
+
+/*
  *    stream.c (based in webcam.c)
  *    Streaming using jpeg images over a multipart/x-mixed-replace stream
  *    Copyright (C) 2002 Jeroen Vreeken (pe1rxq@amsat.org)
