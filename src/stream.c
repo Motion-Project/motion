@@ -106,20 +106,20 @@ static int read_http_request(int sock, char* buffer, int buflen, char* uri, int 
     char url[512] = {'\0'};
     char protocol[10] = {'\0'};
 
-    static const char *bad_request_response_raw =
-        "HTTP/1.0 400 Bad Request\r\n"
-        "Content-type: text/plain\r\n\r\n"
-        "Bad Request\n";
+#define bad_request_response_raw \
+        "HTTP/1.0 400 Bad Request\r\n" \
+        "Content-type: text/plain\r\n\r\n" \
+        "Bad Request\n"
 
-    static const char *bad_method_response_template_raw =
-        "HTTP/1.0 501 Method Not Implemented\r\n"
-        "Content-type: text/plain\r\n\r\n"
-        "Method Not Implemented\n";
+#define bad_method_response_template_raw \
+        "HTTP/1.0 501 Method Not Implemented\r\n" \
+        "Content-type: text/plain\r\n\r\n" \
+        "Method Not Implemented\n"
 
-    static const char *timeout_response_template_raw =
-        "HTTP/1.0 408 Request Timeout\r\n"
-        "Content-type: text/plain\r\n\r\n"
-        "Request Timeout\n";
+#define timeout_response_template_raw \
+        "HTTP/1.0 408 Request Timeout\r\n" \
+        "Content-type: text/plain\r\n\r\n" \
+        "Request Timeout\n"
 
     buffer[0] = '\0';
 
@@ -178,7 +178,7 @@ static int read_http_request(int sock, char* buffer, int buflen, char* uri, int 
          * uses other method, report the failure.
          */
         char response[1024];
-        snprintf(response, sizeof(response), bad_method_response_template_raw, method);
+        snprintf(response, sizeof(response), bad_method_response_template_raw);
         ret = write(sock, response, strlen (response));
 
         return 0;
