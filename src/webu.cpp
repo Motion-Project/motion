@@ -417,7 +417,11 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
         if (!last_parm){
             /* Get the next parameter value */
             st_pos = st_pos + parm_len;     /* Move past the equals sign */
-            en_pos = strstr(st_pos,"&");
+            if (!strcasecmp(webui->uri_parm1,"x") || !strcasecmp(webui->uri_parm1,"pan") ){
+                en_pos = strstr(st_pos,"&");
+            } else {
+                en_pos = NULL;
+            }
             if (en_pos == NULL){
                 parm_len = strlen(webui->url) - parm_len;
                 last_parm = TRUE;
