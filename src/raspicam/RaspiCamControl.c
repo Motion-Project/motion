@@ -1056,6 +1056,14 @@ void raspicamcontrol_set_defaults(RASPICAM_CAMERA_PARAMETERS *params)
    params->stereo_mode.mode = MMAL_STEREOSCOPIC_MODE_NONE;
    params->stereo_mode.decimate = MMAL_FALSE;
    params->stereo_mode.swap_eyes = MMAL_FALSE;
+   params->annotate_justify = 0;
+   params->annotate_x = 0;
+   params->annotate_y = 0;
+   params->analog_gain = 0;
+   params->digital_gain = 0;
+   params->settings = 0;
+}
+}
 }
 
 /**
