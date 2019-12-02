@@ -952,7 +952,7 @@ static void conf_edit_log_type(struct ctx_motapp *motapp, std::string &parm, enu
             (parm == "VID") || (parm == "ALL")) {
             motapp->log_type_str = parm;
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid log_type %s"),parm);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid log_type %s"),parm.c_str());
         }
     } else if (pact == PARM_ACT_GET){
         parm = motapp->log_type_str;
@@ -1355,7 +1355,7 @@ static void conf_edit_flip_axis(struct ctx_cam *cam, std::string &parm, enum PAR
         if ((parm == "none") || (parm == "v") || (parm == "h")) {
             cam->conf->flip_axis = parm;
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid flip_axis %s"), parm);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid flip_axis %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->flip_axis;
@@ -1370,7 +1370,7 @@ static void conf_edit_locate_motion_mode(struct ctx_cam *cam, std::string &parm,
         if ((parm == "off") || (parm == "on") || (parm == "preview")) {
             cam->conf->locate_motion_mode = parm;
         } else {
-          MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid locate_motion_mode %s"), parm);
+          MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid locate_motion_mode %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->locate_motion_mode;
@@ -1386,7 +1386,7 @@ static void conf_edit_locate_motion_style(struct ctx_cam *cam, std::string &parm
             (parm == "cross") || (parm == "redcross"))  {
             cam->conf->locate_motion_style = parm;
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid locate_motion_style %s"), parm);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid locate_motion_style %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->locate_motion_style;
@@ -1936,7 +1936,7 @@ static void conf_edit_picture_output(struct ctx_cam *cam, std::string &parm, enu
             (parm == "first") || (parm == "best"))  {
             cam->conf->picture_output = parm;
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_output %s"), parm);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_output %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->picture_output;
@@ -1951,7 +1951,7 @@ static void conf_edit_picture_output_motion(struct ctx_cam *cam, std::string &pa
         if ((parm == "on") || (parm == "off") || (parm == "roi"))  {
             cam->conf->picture_output_motion = parm;
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_output_motion %s"), parm);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_output_motion %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->picture_output;
@@ -1966,7 +1966,7 @@ static void conf_edit_picture_type(struct ctx_cam *cam, std::string &parm, enum 
         if ((parm == "jpeg") || (parm == "webp") || (parm == "ppm"))  {
             cam->conf->picture_type = parm;
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_type %s"), parm);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_type %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->picture_type;
@@ -2197,7 +2197,7 @@ static void conf_edit_timelapse_mode(struct ctx_cam *cam, std::string &parm, enu
             (parm == "monthly") || (parm == "manual"))  {
             cam->conf->timelapse_mode = parm;
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_mode %s"), parm);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_mode %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->timelapse_mode;
@@ -2229,7 +2229,7 @@ static void conf_edit_timelapse_codec(struct ctx_cam *cam, std::string &parm, en
         if ((parm == "mpg") || (parm == "mpeg4"))  {
             cam->conf->timelapse_codec = parm;
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_codec %s"), parm);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_codec %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->timelapse_codec;
@@ -2635,7 +2635,7 @@ static void conf_edit_database_type(struct ctx_cam *cam, std::string &parm, enum
             (parm == "postgresql") || (parm == "sqlite3")) {
             cam->conf->database_type = parm;
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid database_type %s"), parm);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid database_type %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->database_type;
@@ -3195,8 +3195,8 @@ static int conf_edit_set_depr(struct ctx_motapp *motapp, int threadnbr
     while (config_parms_depr[indx].parm_name != "") {
         if (parm_nm ==  config_parms_depr[indx].parm_name) {
             MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s after version %s"
-                , config_parms_depr[indx].info
-                , config_parms_depr[indx].last_version);
+                , config_parms_depr[indx].info.c_str()
+                , config_parms_depr[indx].last_version.c_str());
 
             if ((config_parms_depr[indx].parm_name == "brightness") ||
                 (config_parms_depr[indx].parm_name == "contrast") ||

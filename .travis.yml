@@ -54,8 +54,8 @@ before_install:
 #  MariaDB has broken mysql.h and we do not test it for buster.
 before_script:
   - if [ $TRAVIS_OS_NAME = osx ]; then
-      brew upgrade ffmpeg pkg-config jpeg libmicrohttpd opencv;
-      brew install ffmpeg pkg-config libjpeg libmicrohttpd opencv;
+      brew upgrade ffmpeg pkg-config jpeg libmicrohttpd;
+      brew install ffmpeg pkg-config libjpeg libmicrohttpd;
       export PATH="/usr/local/opt/gettext/bin:/usr/local/bin:$PATH";
       autoreconf -fiv;
     elif [ "$BUILD_IMAGE" = "14.04" ]; then
@@ -64,36 +64,36 @@ before_script:
       docker exec $(docker ps -aq) /bin/sh -c 'apk update';
       docker exec $(docker ps -aq) /bin/sh -c 'apk add alpine-sdk autoconf automake pkgconf libtool';
       docker exec $(docker ps -aq) /bin/sh -c 'apk add libjpeg-turbo-dev libzip-dev ffmpeg-dev';
-      docker exec $(docker ps -aq) /bin/sh -c 'apk add libmicrohttpd-dev gettext-dev opencv';
+      docker exec $(docker ps -aq) /bin/sh -c 'apk add libmicrohttpd-dev gettext-dev';
       docker exec $(docker ps -aq) /bin/sh -c 'autoreconf -fiv';
     elif [ "$DOCKER_IMAGE" = "debian:buster" ]; then
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg62-turbo-dev libzip-dev autoconf automake autopoint pkgconf libtool git';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev opencv';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev libopencv-dev';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmariadbclient-dev libwebp-dev libmicrohttpd-dev gettext';
       docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
     elif [ "$DOCKER_IMAGE" = "debian:stretch" ]; then
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg62-turbo-dev libzip-dev autoconf automake autopoint pkgconf libtool git';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev opencv';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev libopencv-dev';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmariadbclient-dev libwebp-dev libmicrohttpd-dev gettext';
       docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
     elif [ "$DOCKER_IMAGE" = "debian:jessie" ]; then
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg62-turbo-dev libzip-dev autoconf automake autopoint pkgconf libtool git';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev opencv';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev libopencv-dev';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmysqlclient-dev libwebp-dev libmicrohttpd-dev gettext';
       docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
     elif [ "$DOCKER_IMAGE" = "ubuntu:16.04" ]; then
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg8-dev libzip-dev autoconf automake autopoint pkgconf libtool git';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev opencv';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev libopencv-dev';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmysqlclient-dev libwebp-dev libmicrohttpd-dev gettext';
       docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
     elif [ "x$DOCKER_IMAGE" != "x" ]; then
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg8-dev libzip-dev autoconf automake autopoint pkgconf libtool git';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev opencv';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev libopencv-dev';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmariadbclient-dev libwebp-dev libmicrohttpd-dev gettext';
       docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
     fi;
