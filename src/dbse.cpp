@@ -61,7 +61,7 @@ void dbse_global_deinit(struct ctx_cam **cam_list){
 
     #if defined(HAVE_MYSQL)
         if (cam_list[0]->conf->database_type != "") {
-            if (mystreq(cam_list[0]->conf->database_type, "mysql")) {
+            if (cam_list[0]->conf->database_type == "mysql")) {
                 MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing MYSQL"));
                 mysql_library_end();
             }
