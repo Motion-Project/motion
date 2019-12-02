@@ -573,7 +573,7 @@ void mytranslate_init(void){
         mytranslate_text("", 0);
 
         /* This avoids a unused function warning */
-        translate_locale_chg("en");
+        mytranslate_locale_chg("en");
     #endif
 }
 
