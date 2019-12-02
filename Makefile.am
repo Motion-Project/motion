@@ -66,6 +66,7 @@ install-data-local:
 
 check:
 	./configure --with-developer-flags                   && $(MAKE) clean && $(MAKE)
+	./configure --with-developer-flags --without-opencv  && $(MAKE) clean && $(MAKE)
 	./configure --with-developer-flags --without-mariadb && $(MAKE) clean && $(MAKE)
 	./configure --with-developer-flags --without-mysql   && $(MAKE) clean && $(MAKE)
 	./configure --with-developer-flags --without-mariadb && $(MAKE) clean && $(MAKE)

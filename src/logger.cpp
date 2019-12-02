@@ -269,12 +269,12 @@ void log_init(struct ctx_motapp *motapp){
             if (logfile) {
                 log_set_mode(LOGMODE_SYSLOG);
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                    ,_("Logging to file (%s)"),motapp->log_file);
+                    ,_("Logging to file (%s)"),motapp->log_file.c_str());
                 log_set_mode(LOGMODE_FILE);
             } else {
                 MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
                     ,_("Exit motion, cannot create log file %s")
-                    ,motapp->log_file);
+                    ,motapp->log_file.c_str());
                 exit(0);
             }
         } else {
@@ -299,7 +299,7 @@ void log_deinit(struct ctx_motapp *motapp){
 
     if (logfile != NULL) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Closing logfile (%s)."),
-                   motapp->log_file);
+                   motapp->log_file.c_str());
         myfclose(logfile);
         log_set_mode(LOGMODE_NONE);
         logfile = NULL;
