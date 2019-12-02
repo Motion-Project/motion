@@ -67,7 +67,6 @@ install-data-local:
 check:
 	./configure --with-developer-flags                   && $(MAKE) clean && $(MAKE)
 	./configure --with-developer-flags --without-mariadb && $(MAKE) clean && $(MAKE)
-	./configure --with-developer-flags --without-ffmpeg  && $(MAKE) clean && $(MAKE)
 	./configure --with-developer-flags --without-mysql   && $(MAKE) clean && $(MAKE)
 	./configure --with-developer-flags --without-mariadb && $(MAKE) clean && $(MAKE)
 	./configure --with-developer-flags --without-sqlite3 && $(MAKE) clean && $(MAKE)

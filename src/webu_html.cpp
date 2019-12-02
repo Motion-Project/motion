@@ -427,7 +427,7 @@ static void webu_html_config(struct webui_ctx *webui) {
      */
 
     char response[WEBUI_LEN_RESP];
-    int indx_parm, indx, diff_vals;
+    int indx_parm, indx, diff_vals, retcd;
     char val_main[PATH_MAX], val_thread[PATH_MAX];
     char *val_temp;
 
@@ -470,7 +470,8 @@ static void webu_html_config(struct webui_ctx *webui) {
 
         memset(val_temp,'\0',PATH_MAX);
         if (val_main != NULL){
-            snprintf(response, sizeof (response),"%s", val_main);
+            retcd= snprintf(response, sizeof (response),"%s", val_main);
+            if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
             webu_write(webui, response);
             snprintf(val_temp, PATH_MAX,"%s", val_main);
         }
@@ -498,7 +499,8 @@ static void webu_html_config(struct webui_ctx *webui) {
                         ,webui->camlst[indx]->camera_id);
                     webu_write(webui, response);
                     if (val_thread != NULL){
-                        snprintf(response, sizeof (response),"%s", val_thread);
+                        retcd = snprintf(response, sizeof (response),"%s", val_thread);
+                        if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
                         webu_write(webui, response);
                     }
                 }

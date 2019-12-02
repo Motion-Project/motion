@@ -170,7 +170,7 @@ static void webu_text_page_basic(struct webui_ctx *webui) {
 static void webu_text_list_raw(struct webui_ctx *webui) {
     /* Write out the options and values */
     char response[WEBUI_LEN_RESP];
-    int indx_parm;
+    int indx_parm,retcd;
     char val_parm[PATH_MAX];
 
     indx_parm = 0;
@@ -189,11 +189,12 @@ static void webu_text_list_raw(struct webui_ctx *webui) {
             conf_edit_get(webui->camlst[0], config_parms[indx_parm].parm_name
                 , val_parm, config_parms[indx_parm].parm_cat);
         }
-        snprintf(response, sizeof (response),
+        retcd = snprintf(response, sizeof (response),
             "  %s = %s \n"
             ,config_parms[indx_parm].parm_name.c_str()
             ,val_parm
         );
+        if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
         webu_write(webui, response);
 
         indx_parm++;
@@ -204,7 +205,7 @@ static void webu_text_list_raw(struct webui_ctx *webui) {
 static void webu_text_list_basic(struct webui_ctx *webui) {
     /* Write out the options and values */
     char response[WEBUI_LEN_RESP];
-    int indx_parm;
+    int indx_parm,retcd;
     char val_parm[PATH_MAX];
 
     webu_text_header(webui);
@@ -236,12 +237,13 @@ static void webu_text_list_basic(struct webui_ctx *webui) {
             conf_edit_get(webui->camlst[0], config_parms[indx_parm].parm_name
                 , val_parm, config_parms[indx_parm].parm_cat);
         }
-        snprintf(response, sizeof (response),
+        retcd = snprintf(response, sizeof (response),
             "  <li><a href=/%s/config/set?%s>%s</a> = %s</li>\n"
             ,webui->uri_camid
             ,config_parms[indx_parm].parm_name.c_str()
             ,config_parms[indx_parm].parm_name.c_str()
             ,val_parm);
+        if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
         webu_write(webui, response);
 
         indx_parm++;
@@ -323,7 +325,7 @@ static void webu_text_set_query(struct webui_ctx *webui) {
 
     /* Write out the options and values to allow user to set them*/
     char response[WEBUI_LEN_RESP];
-    int indx_parm;
+    int indx_parm,retcd;
     char val_parm[PATH_MAX];
 
     webu_text_header(webui);
@@ -349,7 +351,7 @@ static void webu_text_set_query(struct webui_ctx *webui) {
             conf_edit_get(webui->camlst[0], config_parms[indx_parm].parm_name
                 , val_parm, config_parms[indx_parm].parm_cat);
         }
-        snprintf(response, sizeof (response),
+        retcd = snprintf(response, sizeof (response),
             "<form action=set?>\n"
             "%s <input type=text name='%s' value='%s' size=60>\n"
             "<input type='submit' value='set'>\n"
@@ -357,6 +359,7 @@ static void webu_text_set_query(struct webui_ctx *webui) {
             ,config_parms[indx_parm].parm_name.c_str()
             ,val_parm
         );
+        if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
         webu_write(webui, response);
 
         break;
@@ -874,7 +877,7 @@ static void webu_text_submenu(struct webui_ctx *webui) {
 void webu_text_get_query(struct webui_ctx *webui) {
     /* Write out the option value for one parm */
     char response[WEBUI_LEN_RESP];
-    int indx_parm;
+    int indx_parm, retcd;
     char val_parm[PATH_MAX];
     char temp_name[WEBUI_LEN_PARM];
 
@@ -922,21 +925,23 @@ void webu_text_get_query(struct webui_ctx *webui) {
         webu_text_camera_name(webui);
 
         if (webui->camlst[0]->conf->webcontrol_interface == 2) {
-            snprintf(response, sizeof (response),
+            retcd = snprintf(response, sizeof (response),
                 "<ul>\n"
                 "  <li>%s = %s </li>\n"
                 "</ul>\n"
                 ,config_parms[indx_parm].parm_name.c_str()
                 ,val_parm
             );
+            if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
         } else {
-            snprintf(response, sizeof (response),
+            retcd = snprintf(response, sizeof (response),
                 "%s = %s %s\n"
                 "Done %s\n"
                 ,config_parms[indx_parm].parm_name.c_str()
                 ,val_parm
                 ,webui->text_eol, webui->text_eol
             );
+            if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
         }
         webu_write(webui, response);
         webu_text_trailer(webui);

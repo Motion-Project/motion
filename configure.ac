@@ -1,5 +1,6 @@
 AC_INIT(motion, esyscmd(['./scripts/version.sh']))
 AM_INIT_AUTOMAKE([subdir-objects foreign])
+CXXFLAGS="$CXXFLAGS -std=c++0x"
 AC_PROG_CC
 AC_PROG_CXX
 AC_GNU_SOURCE

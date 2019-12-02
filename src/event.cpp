@@ -97,7 +97,7 @@ static void exec_command(struct ctx_cam *cam, const char *command, char *filenam
         for (i = getdtablesize() - 1; i > 2; i--)
             close(i);
 
-        execl("/bin/sh", "sh", "-c", stamp, " &", NULL);
+        execl("/bin/sh", "sh", "-c", stamp, " &",(char*)NULL);
 
         /* if above function succeeds the program never reach here */
         MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
@@ -387,7 +387,7 @@ static void event_image_snapshot(struct ctx_cam *cam, motion_event evnt
     char filename[PATH_MAX];
     char filepath[PATH_MAX];
     char linkpath[PATH_MAX];
-    int offset;
+    int offset, retcd;
 
     (void)evnt;
     (void)fname;
@@ -398,8 +398,11 @@ static void event_image_snapshot(struct ctx_cam *cam, motion_event evnt
 
     if (cam->conf->snapshot_filename.compare(offset, 8, "lastsnap") != 0) {
         mystrftime(cam, filepath, sizeof(filepath), cam->conf->snapshot_filename.c_str(), ts1, NULL, 0);
-        snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cam));
-        snprintf(fullfilename, PATH_MAX, "%s/%s", cam->conf->target_dir.c_str(), filename);
+        retcd = snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cam));
+        if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+
+        retcd =snprintf(fullfilename, PATH_MAX, "%s/%s", cam->conf->target_dir.c_str(), filename);
+        if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
 
         pic_save_norm(cam, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
         event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE_SNAPSHOT, ts1);
@@ -414,8 +417,12 @@ static void event_image_snapshot(struct ctx_cam *cam, motion_event evnt
         }
     } else {
         mystrftime(cam, filepath, sizeof(filepath), cam->conf->snapshot_filename.c_str(), ts1, NULL, 0);
-        snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cam));
-        snprintf(fullfilename, PATH_MAX, "%s/%s", cam->conf->target_dir.c_str(), filename);
+        retcd = snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cam));
+        if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+
+        retcd = snprintf(fullfilename, PATH_MAX, "%s/%s", cam->conf->target_dir.c_str(), filename);
+        if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+
         remove(fullfilename);
         pic_save_norm(cam, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
         event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE_SNAPSHOT, ts1);
@@ -557,8 +564,9 @@ static void event_create_extpipe(struct ctx_cam *cam, motion_event evnt
 
     if ((cam->conf->movie_extpipe_use) && (cam->conf->movie_extpipe != "" )) {
         mystrftime(cam, stamp, sizeof(stamp), cam->conf->movie_filename.c_str(), ts1, NULL, 0);
-        snprintf(cam->extpipefilename, PATH_MAX - 4, "%s/%s"
+        retcd = snprintf(cam->extpipefilename, PATH_MAX - 4, "%s/%s"
             , cam->conf->target_dir.c_str(), stamp);
+        if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
 
         if (access(cam->conf->target_dir.c_str(), W_OK)!= 0) {
             /* Permission denied */

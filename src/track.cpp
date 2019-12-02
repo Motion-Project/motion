@@ -202,6 +202,10 @@ static int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle) {
 
         return cam->conf->track_move_wait;
     #else
+        (void)cam;
+        (void)dev;
+        (void)x_angle;
+        (void)y_angle;
         return 0;
     #endif
 
@@ -403,6 +407,11 @@ static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
 
         return cam->conf->track_move_wait;
     #else
+        (void)cam;
+        (void)dev;
+        (void)cent;
+        (void)imgs;
+        (void)manual;
         return 0;
     #endif /* HAVE_V4L2 */
 }

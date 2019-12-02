@@ -196,7 +196,7 @@ static void motion_daemon(struct ctx_motapp *motapp) {
         } else {
             MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
                 ,_("Exit motion, cannot create process"
-                " id file (pid file) %s"),motapp->pid_file);
+                " id file (pid file) %s"),motapp->pid_file.c_str());
             log_deinit(motapp);
             exit(0);
         }
@@ -240,7 +240,7 @@ static void motion_daemon(struct ctx_motapp *motapp) {
     if (pidf){
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Created process id file %s. Process ID is %d")
-            ,motapp->pid_file, getpid());
+            ,motapp->pid_file.c_str(), getpid());
     }
 
     sigaction(SIGTTOU, &sig_ign_action, NULL);
