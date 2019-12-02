@@ -1842,7 +1842,7 @@ static void webu_mhd_opts(struct mhdstart_ctx *mhdst){
 static void webu_mhd_flags(struct mhdstart_ctx *mhdst){
 
     /* This sets the MHD startup flags based upon what user put into configuration */
-    mhdst->mhd_flags = MHD_USE_THREAD_PER_CONNECTION | MHD_USE_POLL| MHD_USE_SELECT_INTERNALLY;
+    mhdst->mhd_flags = MHD_USE_THREAD_PER_CONNECTION;
 
     if (mhdst->ipv6) mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_DUAL_STACK;
 
