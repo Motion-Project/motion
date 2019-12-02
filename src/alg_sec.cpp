@@ -75,7 +75,6 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
             if (indx1 != indx0 && (r & src_pos[indx1])==r) break;
         }
         if ((indx1==src_pos.size()) && (w > algmdl.threshold_motion)){
-        //if ((indx1==src_pos.size()) ){
             fltr_pos.push_back(r);
             fltr_weights.push_back(w);
             algmdl.isdetected = true;
@@ -91,7 +90,7 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
             r.height = cvRound(r.height*0.9);
             rectangle(mat_src, r.tl(), r.br(), cv::Scalar(0,255,0), 2);
             snprintf(wstr, 10, "%.4f", fltr_weights[indx0]);
-            putText(mat_src, wstr, Point(r.x,r.y), FONT_HERSHEY_SIMPLEX, 1, 255, 2);
+            putText(mat_src, wstr, Point(r.x,r.y), FONT_HERSHEY_PLAIN, 1, 255, 1);
         }
         imwrite(testdir  + "/detect_" + algmethod + ".jpg", mat_src);
     }
@@ -115,38 +114,53 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
 static void algsec_img_roi(ctx_cam *cam, Mat &mat_src, Mat &mat_dst){
 
     cv::Rect roi;
-    int chk;
+    int width,height, x, y;
 
-    /* Set the ROI just a small bit larger than the motion detected area */
-    chk = cam->current_image->location.width * 0.4;
-    roi.x = cam->current_image->location.minx - (chk / 2);
-    if (roi.x < 0) {
-        chk += roi.x;
-        roi.x = 0;
-    }
-    roi.width = cam->current_image->location.width + chk;
-    if ((roi.x + roi.width) > cam->imgs.width) {
-        roi.width = cam->imgs.width - roi.x;
+    /* Lets make the box square */
+
+    width = cam->current_image->location.width;
+    height= cam->current_image->location.height;
+
+    if (width > cam->imgs.height) width =cam->imgs.height;
+    if (height > cam->imgs.width) height =cam->imgs.width;
+
+    if (width > height){
+        height= width;
+        x = cam->current_image->location.minx;
+        y = cam->current_image->location.miny - ((width - height)/2);
+
+        if (y < 0) y = 0;
+        if ((y+height) > cam->imgs.height) y = cam->imgs.height - height;
+
+    } else {
+        width = height;
+        x = cam->current_image->location.minx - ((height - width)/2);
+        y = cam->current_image->location.miny;
+
+        if (x < 0) x = 0;
+        if ((x+width) > cam->imgs.width) x = cam->imgs.width - width;
+
     }
 
-    chk = cam->current_image->location.height * 0.4;
-    roi.y = cam->current_image->location.miny - (chk / 2);
-    if (roi.y < 0){
-        chk += roi.y;
-        roi.y = 0;
-    }
-    roi.height = cam->current_image->location.height + chk;
-    if ((roi.y + roi.height) > cam->imgs.height) {
-        roi.height = cam->imgs.height - roi.y;
-    }
+    roi.x = x;
+    roi.y = y;
+    roi.width = width;
+    roi.height = height;
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Base %d %d %d %d"
+    /*
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Base %d %d (%dx%d) img(%dx%d)"
         ,cam->current_image->location.minx
         ,cam->current_image->location.miny
         ,cam->current_image->location.width
-        ,cam->current_image->location.height);
+        ,cam->current_image->location.height
+        ,cam->imgs.width
+        ,cam->imgs.height);
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Set %d %d %d %d"
+        ,x,y,width,height);
+
     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Opencv %d %d %d %d"
         ,roi.x,roi.y,roi.width,roi.height);
+    */
 
     mat_dst = mat_src(roi);
 
@@ -612,7 +626,9 @@ void algsec_detect(ctx_cam *cam){
                             ,_("Your computer is too slow for these settings."));
                    } else if (cam->algsec->too_slow == 10){
                         MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
-                            ,_("Missed many frames for secondary detection.  Your computer is too slow."));
+                            ,_("Missed many frames for secondary detection."));
+                        MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                            ,_("Your computer is too slow."));
                     }
                     cam->algsec->too_slow++;
                 }

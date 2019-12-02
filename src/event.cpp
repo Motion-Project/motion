@@ -488,6 +488,8 @@ static void event_secondary_detect(struct ctx_cam *cam, motion_event evnt
     (void)ftype;
     (void)ts1;
 
+    MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO,_("Event secondary detect"));
+
     if (cam->conf->on_secondary_detect != "")
         exec_command(cam, cam->conf->on_secondary_detect.c_str(), NULL, 0);
 }
