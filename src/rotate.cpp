@@ -69,7 +69,7 @@ static void reverse_inplace_quad(unsigned char *src, int size)
 {
     uint32_t *nsrc = (uint32_t *)src;              /* first quad */
     uint32_t *ndst = (uint32_t *)(src + size - 4); /* last quad */
-    register uint32_t tmp;
+    uint32_t tmp;
 
     while (nsrc < ndst) {
         tmp = bswap_32(*ndst);
@@ -80,7 +80,7 @@ static void reverse_inplace_quad(unsigned char *src, int size)
 
 static void flip_inplace_horizontal(unsigned char *src, int width, int height) {
     uint8_t *nsrc, *ndst;
-    register uint8_t tmp;
+    uint8_t tmp;
     int l,w;
 
     for(l=0; l < height/2; l++) {
@@ -98,7 +98,7 @@ static void flip_inplace_horizontal(unsigned char *src, int width, int height) {
 static void flip_inplace_vertical(unsigned char *src, int width, int height)
 {
     uint8_t *nsrc, *ndst;
-    register uint8_t tmp;
+    uint8_t tmp;
     int l;
 
     for(l=0; l < height; l++) {
@@ -129,11 +129,11 @@ static void flip_inplace_vertical(unsigned char *src, int width, int height)
  *
  * Returns: nothing
  */
-static void rot90cw(unsigned char *src, register unsigned char *dst, int size,
+static void rot90cw(unsigned char *src, unsigned char *dst, int size,
                     int width, int height)
 {
     unsigned char *endp;
-    register unsigned char *base;
+    unsigned char *base;
     int j;
 
     endp = src + size;
@@ -162,11 +162,11 @@ static void rot90cw(unsigned char *src, register unsigned char *dst, int size,
  *
  * Returns: nothing
  */
-static inline void rot90ccw(unsigned char *src, register unsigned char *dst,
+static inline void rot90ccw(unsigned char *src, unsigned char *dst,
                             int size, int width, int height)
 {
     unsigned char *endp;
-    register unsigned char *base;
+    unsigned char *base;
     int j;
 
     endp = src + size;

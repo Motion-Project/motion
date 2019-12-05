@@ -915,7 +915,7 @@ void webu_text_get_query(struct webui_ctx *webui) {
         if (mystrne(webui->uri_value1, config_parms[indx_parm].parm_name.c_str())){
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("'%s' option is depreciated.  New option name is `%s'")
-            ,webui->uri_value1, config_parms[indx_parm].parm_name);
+            ,webui->uri_value1, config_parms[indx_parm].parm_name.c_str());
         }
 
         webu_text_header(webui);

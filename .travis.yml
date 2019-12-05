@@ -2,14 +2,6 @@ sudo: required
 
 matrix:
   include:
-  - os: osx
-    language: c
-    compiler: gcc
-  - os: linux
-    env:  DOCKER_IMAGE=ubuntu:16.04
-    services:  docker
-    language: c
-    compiler: gcc
   - os: linux
     env:  DOCKER_IMAGE=ubuntu:18.04
     services:  docker
@@ -21,22 +13,7 @@ matrix:
     language: c
     compiler: gcc
   - os: linux
-    env:  DOCKER_IMAGE=debian:jessie
-    services:  docker
-    language: c
-    compiler: gcc
-  - os: linux
-    env:  DOCKER_IMAGE=debian:stretch
-    services:  docker
-    language: c
-    compiler: gcc
-  - os: linux
     env:  DOCKER_IMAGE=debian:buster
-    services:  docker
-    language: c
-    compiler: gcc
-  - os: linux
-    env:  DOCKER_IMAGE=alpine:latest
     services:  docker
     language: c
     compiler: gcc

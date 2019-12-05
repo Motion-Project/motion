@@ -461,7 +461,7 @@ AC_ARG_WITH([developer-flags],
     [DEVELOPER_FLAGS=no])
 
 AS_IF([test "${DEVELOPER_FLAGS}" = "yes"], [
-    TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -Werror -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
+    TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
   ]
 )
 

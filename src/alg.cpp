@@ -766,13 +766,14 @@ static int alg_diff_standard(struct ctx_cam *cam, unsigned char *new_var) {
     unsigned char *mask = imgs->mask;
     unsigned char *smartmask_final = imgs->smartmask_final;
     int *smartmask_buffer = imgs->smartmask_buffer;
+    unsigned char curdiff;
 
     i = imgs->motionsize;
     memset(out + i, 128, i / 2); /* Motion pictures are now b/w i.o. green */
     memset(out, 0, i);
 
     for (; i > 0; i--) {
-        register unsigned char curdiff = (int)(abs(*ref - *new_var)); /* Using a temp variable is 12% faster. */
+        curdiff = (int)(abs(*ref - *new_var)); /* Using a temp variable is 12% faster. */
         /* Apply fixed mask */
         if (mask)
             curdiff = ((int)(curdiff * *mask++) / 255);
@@ -812,6 +813,7 @@ static char alg_diff_fast(struct ctx_cam *cam, int max_n_changes, unsigned char 
     int i, diffs = 0, step = imgs->motionsize/10000;
     int noise = cam->noise;
     unsigned char *ref = imgs->ref;
+    unsigned char curdiff;
 
     if (!step % 2)
         step++;
@@ -821,7 +823,7 @@ static char alg_diff_fast(struct ctx_cam *cam, int max_n_changes, unsigned char 
     i = imgs->motionsize;
 
     for (; i > 0; i -= step) {
-        register unsigned char curdiff = (int)(abs((char)(*ref - *new_var))); /* Using a temp variable is 12% faster. */
+        curdiff = (int)(abs((char)(*ref - *new_var))); /* Using a temp variable is 12% faster. */
         if (curdiff >  noise) {
             diffs++;
             if (diffs > max_n_changes)
