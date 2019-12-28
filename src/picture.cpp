@@ -17,6 +17,7 @@
 #include "event.hpp"
 #include "exif.hpp"
 #include "draw.hpp"
+#include "alg.hpp"
 
 #ifdef HAVE_WEBP
     #include <webp/encode.h>
@@ -311,9 +312,10 @@ void pic_save_norm(struct ctx_cam *cam, char *file, unsigned char *image, int ft
 /* Saves image to a file in format requested */
 void pic_save_roi(struct ctx_cam *cam, char *file, unsigned char *image) {
     FILE *picture;
-    int image_size, sz, indxh;
+
+    int image_size, sz, indxh, indxw, indx;
     ctx_coord *bx;
-    unsigned char *buf, *img;
+    unsigned char *buf, *img, curdiff ;
     int width,height, x, y;
 
     bx = &cam->current_image->location;
@@ -327,8 +329,23 @@ void pic_save_roi(struct ctx_cam *cam, char *file, unsigned char *image) {
         return;
     }
 
-    /* Lets make the box square */
+    /*
+    char testname[4096];
+    FILE *pictest;
 
+    memset(testname,0,4096);
+    memcpy(testname,file,strlen(file)-5);
+    memcpy(testname+strlen(file)-5,"s.jpg",5);
+
+    pictest = myfopen(testname, "w");
+    if (!pictest) {
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            ,_("Can't write picture to file %s"), file);
+        return;
+    }
+    */
+
+    /* Lets make the box square */
     width = bx->width;
     height= bx->height;
 
@@ -354,9 +371,27 @@ void pic_save_roi(struct ctx_cam *cam, char *file, unsigned char *image) {
     buf =(unsigned char*) mymalloc(image_size);
     img =(unsigned char*) mymalloc(image_size);
 
+    /* Subtract the background */
     for (indxh=y; indxh<y+height; indxh++){
-        memcpy(img+((indxh-y)*width), image+(indxh*cam->imgs.width)+x, width);
+        indx = (indxh*cam->imgs.width)+x;
+        memcpy(img+((indxh-y)*width), image+indx, width);
+        for(indxw=0; indxw <width;indxw++){
+            curdiff = (int)(abs((char)(*(image+indx+indxw) - *(cam->imgs.ref+indx+indxw))));
+            if (curdiff < cam->noise) img[((indxh-y)*width)+indxw] = 0xff;
+        }
     }
+
+    /*
+    sz = jpgutl_put_grey(buf, image_size, img
+        ,width, height
+        ,cam->conf->picture_quality, cam
+        ,&(cam->current_image->imgts), bx);
+
+    fwrite(buf, sz, 1, pictest);
+    myfclose(pictest);
+    */
+    //alg_dilate5(img,width,height,cam->imgs.common_buffer);
+    //alg_erode5(img,width,height,cam->imgs.common_buffer,0);
 
     sz = jpgutl_put_grey(buf, image_size, img
         ,width, height
@@ -365,10 +400,26 @@ void pic_save_roi(struct ctx_cam *cam, char *file, unsigned char *image) {
 
     fwrite(buf, sz, 1, picture);
 
+    /*
+    unsigned char *buf2, *img2;
+    image_size =cam->imgs.motionsize;
+    img2 =(unsigned char*) mymalloc(image_size);
+    buf2 =(unsigned char*) mymalloc(image_size);
+    memcpy(img2,cam->imgs.image_bground,image_size);
+    sz = jpgutl_put_grey(buf2, image_size, img2
+        ,cam->imgs.width,cam->imgs.height
+        ,cam->conf->picture_quality, cam
+        ,&(cam->current_image->imgts), bx);
+    fwrite(buf2, sz, 1, picture);
+    free(buf2);
+    free(img2);
+    */
+
     free(buf);
     free(img);
 
     myfclose(picture);
+
 }
 
 /** Get the pgm file used as fixed mask */

@@ -198,6 +198,7 @@ struct ctx_images {
     struct ctx_image_data image_preview;  /* Picture buffer for best image when enables */
 
     unsigned char *ref;               /* The reference frame */
+    unsigned char *ref_next;          /* The reference frame */
     unsigned char *mask;              /* Buffer for the mask file */
     unsigned char *smartmask;
     unsigned char *smartmask_final;
@@ -317,6 +318,7 @@ struct ctx_cam {
 
     int                     postcap;                             /* downcounter, frames left to to send post event */
     int                     shots;
+    int                     ref_lag;
     unsigned int            detecting_motion;
     long                    frame_wait[AVGCNT];   /* Last wait times through motion loop*/
 

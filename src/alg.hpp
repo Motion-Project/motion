@@ -21,6 +21,10 @@
     void alg_despeckle(struct ctx_cam *cam);
     void alg_tune_smartmask(struct ctx_cam *cam);
     void alg_update_reference_frame(struct ctx_cam *cam, int);
+    int alg_dilate9(unsigned char *img, int width, int height, void *buffer);
+    int alg_dilate5(unsigned char *img, int width, int height, void *buffer);
+    int alg_erode9(unsigned char *img, int width, int height, void *buffer, unsigned char flag);
+    int alg_erode5(unsigned char *img, int width, int height, void *buffer, unsigned char flag);
 
     void alg_new_update_frame(ctx_cam *cam);
     void alg_new_diff(ctx_cam *cam);
