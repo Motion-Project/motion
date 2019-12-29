@@ -1092,16 +1092,12 @@ static int draw_textn(unsigned char *image, int startx,  int starty,  int width,
     for (pos = 0; pos < len; pos++) {
         int pos_check = (int)text[pos];
 
+        if ((pos_check <0) || (pos_check >127)) pos_check = 45; /* Use a - for non ascii characters*/
+
         char_ptr = char_arr_ptr[pos_check];
 
         for (y = 0; y < 8 * factor; y++) {
             for (x = 0; x < 7 * factor; x++) {
-
-                if (pos_check < 0) {
-                    image_ptr++;
-                    continue;
-                }
-
                 char_ptr = char_arr_ptr[pos_check] + y/factor*7 + x/factor;
 
                 switch(*char_ptr) {
