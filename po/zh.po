@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-10-27 22:19-0600\n"
-"PO-Revision-Date: 2019-12-01 12:41-0700\n"
+"POT-Creation-Date: 2019-12-29 16:29-0700\n"
+"PO-Revision-Date: 2020-01-10 21:31-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: zh\n"
@@ -15,6 +15,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.0.6\n"
+
+#: src/conf.c
+#, c-format
+msgid "%s after version %s"
+msgstr "版本 %s 之后的 %s"
 
 #: src/conf.c
 #, c-format
@@ -753,6 +758,14 @@ msgid "File of type %ld saved to: %s"
 msgstr " %ld类型的文件已保存到： %s"
 
 #: src/event.c
+msgid "Ignoring empty sql query"
+msgstr "忽略空的SQL查询"
+
+#: src/event.c
+msgid "Executing mysql query"
+msgstr "执行mysql查询"
+
+#: src/event.c
 #, c-format
 msgid "Mysql query failed %s error code %d"
 msgstr "MySQL查询失败 %s错误代码 %d"
@@ -774,6 +787,10 @@ msgstr "重新连接到Mysql数据库' %s'成功"
 msgid "after re-connection Mysql query failed %s error code %d"
 msgstr "重新连接MySQL查询后失败 %s错误代码 %d"
 
+#: src/event.c
+msgid "Executing postgresql query"
+msgstr "执行PostgreSQL查询"
+
 #: src/event.c src/motion.c
 #, c-format
 msgid "Connection to PostgreSQL database '%s' failed: %s"
@@ -788,6 +805,15 @@ msgstr "重新连接到PostgreSQL数据库' %s'失败： %s"
 #, c-format
 msgid "Re-Connection to PostgreSQL database '%s' Succeed"
 msgstr "重新连接到PostgreSQL数据库' %s'成功"
+
+#: src/event.c
+#, c-format
+msgid "PGSQL query failed: [%s]  %s %s"
+msgstr "PGSQL查询失败：[%s] %s %s"
+
+#: src/event.c
+msgid "Executing sqlite query"
+msgstr "执行sqlite查询"
 
 #: src/event.c
 #, c-format
@@ -825,6 +851,11 @@ msgstr "正在关闭：extpipe文件描述 %d，错误状态为 %d"
 
 #: src/event.c
 #, c-format
+msgid "pclose return: %d"
+msgstr "pclose返回：%d"
+
+#: src/event.c
+#, c-format
 msgid "moviepath: %s"
 msgstr "电影路径： %s"
 
@@ -854,6 +885,11 @@ msgid "pipe: %s"
 msgstr "管道： %s"
 
 #: src/event.c
+#, c-format
+msgid "cnt->moviefps: %d"
+msgstr "cnt-> moviefps：%d"
+
+#: src/event.c
 msgid "popen failed"
 msgstr "弹出失败"
 
@@ -875,6 +911,14 @@ msgstr "管道 %s尚未创建或关闭"
 #, c-format
 msgid "Source FPS %d"
 msgstr "来源FPS %d"
+
+#: src/event.c
+msgid "The ogg container is no longer supported.  Changing to mpeg4"
+msgstr "不再支持ogg容器。更改为mpeg4"
+
+#: src/event.c
+msgid "Running test of the various output formats."
+msgstr "各种输出格式的运行测试。"
 
 #: src/event.c
 msgid "Error opening context for movie output."
@@ -1022,6 +1066,11 @@ msgid "Failed to allocate decoder!"
 msgstr "分配解码器失败！"
 
 #: src/ffmpeg.c
+#, c-format
+msgid "Low fps. Encoding %d frames into a %d frames container."
+msgstr "低fps。将%d个帧编码到%d个帧容器中。"
+
+#: src/ffmpeg.c
 msgid "Unable to set quality"
 msgstr "无法设定品质"
 
@@ -1093,6 +1142,11 @@ msgstr "编写视频帧时出错"
 
 #: src/ffmpeg.c
 #, c-format
+msgid "av_copy_packet: %s"
+msgstr "av_copy_packet：%s"
+
+#: src/ffmpeg.c
+#, c-format
 msgid "Error while writing video frame: %s"
 msgstr "编写视频帧时出错： %s"
 
@@ -1119,6 +1173,10 @@ msgstr "无法复制编解码器参数"
 #: src/ffmpeg.c
 msgid "Pass-through disabled.  ffmpeg too old"
 msgstr "传递功能已禁用。ffmpeg太旧了"
+
+#: src/ffmpeg.c
+msgid "Pass-through stream opened"
+msgstr "直通流已打开"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1741,6 +1799,11 @@ msgstr "退出运动，无法创建日志文件 %s"
 #: src/motion.c
 msgid "Logging to syslog"
 msgstr "记录到系统日志"
+
+#: src/motion.c
+#, c-format
+msgid "Motion %s Started"
+msgstr "运动 %s 已开始"
 
 #: src/motion.c
 #, c-format
@@ -2913,6 +2976,21 @@ msgid "%s: Waiting for first image from the handler."
 msgstr " %s：等待处理程序中的第一张图像。"
 
 #: src/netcam_rtsp.c
+#, c-format
+msgid "Requested frame rate %d FPS is less than camera frame rate %d FPS"
+msgstr "请求的帧速率%d FPS小于相机帧速率%d FPS"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "Increasing capture rate to %d FPS to match camera."
+msgstr "将捕获率提高到%d FPS以匹配相机。"
+
+#: src/netcam_rtsp.c
+msgid ""
+"To lower CPU, change camera FPS to lower rate and decrease I frame interval."
+msgstr "要降低CPU，请将摄像机FPS更改为较低的速率并减小I帧间隔。"
+
+#: src/netcam_rtsp.c
 msgid "unable to create rtsp context"
 msgstr "无法创建rtsp上下文"
 
@@ -2996,6 +3074,10 @@ msgstr "pgm文件中的读取大小失败"
 #: src/picture.c
 msgid "Failed reading maximum value in pgm file"
 msgstr "读取pgm文件中的最大值失败"
+
+#: src/picture.c
+msgid "Failed reading image data from pgm file"
+msgstr "无法从pgm文件读取图像数据"
 
 #: src/picture.c
 msgid "The mask file specified is not the same size as image from camera."

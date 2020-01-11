@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-12-01 13:10-0700\n"
-"PO-Revision-Date: 2019-12-01 11:22-0700\n"
+"POT-Creation-Date: 2019-12-29 16:29-0700\n"
+"PO-Revision-Date: 2019-12-29 16:56-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: es\n"
@@ -15,6 +15,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.0.6\n"
+
+#: src/conf.c
+#, c-format
+msgid "%s after version %s"
+msgstr "%s después de la versión %s"
 
 #: src/conf.c
 #, c-format
@@ -759,6 +764,14 @@ msgid "File of type %ld saved to: %s"
 msgstr "Archivo de tipo %ld guardado en: %s"
 
 #: src/event.c
+msgid "Ignoring empty sql query"
+msgstr "Ignorando la consulta SQL vacía"
+
+#: src/event.c
+msgid "Executing mysql query"
+msgstr "Ejecutando consulta mysql"
+
+#: src/event.c
 #, c-format
 msgid "Mysql query failed %s error code %d"
 msgstr "La consulta de Mysql falló %s código de error %d"
@@ -783,6 +796,10 @@ msgid "after re-connection Mysql query failed %s error code %d"
 msgstr ""
 "después de la reconexión, la consulta Mysql falló %s código de error %d"
 
+#: src/event.c
+msgid "Executing postgresql query"
+msgstr "Ejecutando consulta postgresql"
+
 #: src/event.c src/motion.c
 #, c-format
 msgid "Connection to PostgreSQL database '%s' failed: %s"
@@ -797,6 +814,15 @@ msgstr "La reconexión a la base de datos PostgreSQL ' %s' falló: %s"
 #, c-format
 msgid "Re-Connection to PostgreSQL database '%s' Succeed"
 msgstr "La reconexión a la base de datos PostgreSQL ' %s' tiene éxito"
+
+#: src/event.c
+#, c-format
+msgid "PGSQL query failed: [%s]  %s %s"
+msgstr "La consulta de PGSQL falló: [%s] %s %s"
+
+#: src/event.c
+msgid "Executing sqlite query"
+msgstr "Ejecutando consulta sqlite"
 
 #: src/event.c
 #, c-format
@@ -834,6 +860,11 @@ msgstr "CIERRE: archivo extpipe desc %d, estado de error %d"
 
 #: src/event.c
 #, c-format
+msgid "pclose return: %d"
+msgstr "pclose return: %d"
+
+#: src/event.c
+#, c-format
 msgid "moviepath: %s"
 msgstr "ruta de película: %s"
 
@@ -863,6 +894,11 @@ msgid "pipe: %s"
 msgstr "tubería: %s"
 
 #: src/event.c
+#, c-format
+msgid "cnt->moviefps: %d"
+msgstr "cnt->moviefps: %d"
+
+#: src/event.c
 msgid "popen failed"
 msgstr "popen falló"
 
@@ -884,6 +920,14 @@ msgstr "tubería %s no creada o cerrada ya"
 #, c-format
 msgid "Source FPS %d"
 msgstr "Fuente FPS %d"
+
+#: src/event.c
+msgid "The ogg container is no longer supported.  Changing to mpeg4"
+msgstr "El contenedor ogg ya no es compatible. Cambiar a mpeg4"
+
+#: src/event.c
+msgid "Running test of the various output formats."
+msgstr "Ejecución de prueba de los distintos formatos de salida."
 
 #: src/event.c
 msgid "Error opening context for movie output."
@@ -1037,6 +1081,12 @@ msgid "Failed to allocate decoder!"
 msgstr "¡Error al asignar decodificador!"
 
 #: src/ffmpeg.c
+#, c-format
+msgid "Low fps. Encoding %d frames into a %d frames container."
+msgstr ""
+"Bajo fps. Codificación de% d fotogramas en un contenedor% d fotogramas."
+
+#: src/ffmpeg.c
 msgid "Unable to set quality"
 msgstr "No se puede establecer la calidad"
 
@@ -1108,6 +1158,11 @@ msgstr "Error al escribir el cuadro de video"
 
 #: src/ffmpeg.c
 #, c-format
+msgid "av_copy_packet: %s"
+msgstr "av_copy_packet: %s"
+
+#: src/ffmpeg.c
+#, c-format
 msgid "Error while writing video frame: %s"
 msgstr "Error al escribir el cuadro de video: %s"
 
@@ -1134,6 +1189,10 @@ msgstr "No se pueden copiar los parámetros del códec"
 #: src/ffmpeg.c
 msgid "Pass-through disabled.  ffmpeg too old"
 msgstr "Paso deshabilitado. ffmpeg demasiado viejo"
+
+#: src/ffmpeg.c
+msgid "Pass-through stream opened"
+msgstr "Transmisión de paso abierta"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1786,6 +1845,11 @@ msgstr "Salir de movimiento, no se puede crear el archivo de registro %s"
 #: src/motion.c
 msgid "Logging to syslog"
 msgstr "Iniciando sesión en syslog"
+
+#: src/motion.c
+#, c-format
+msgid "Motion %s Started"
+msgstr "Motion %s iniciado"
 
 #: src/motion.c
 #, c-format
@@ -3000,6 +3064,26 @@ msgid "%s: Waiting for first image from the handler."
 msgstr "%s: esperando la primera imagen del controlador."
 
 #: src/netcam_rtsp.c
+#, c-format
+msgid "Requested frame rate %d FPS is less than camera frame rate %d FPS"
+msgstr ""
+"La velocidad de fotogramas solicitada %d FPS es menor que la velocidad de "
+"fotogramas de la cámara %d FPS"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "Increasing capture rate to %d FPS to match camera."
+msgstr ""
+"Aumento de la velocidad de captura a %d FPS para que coincida con la cámara."
+
+#: src/netcam_rtsp.c
+msgid ""
+"To lower CPU, change camera FPS to lower rate and decrease I frame interval."
+msgstr ""
+"Para bajar la CPU, cambie el FPS de la cámara a una velocidad más baja y "
+"disminuya el intervalo de fotogramas."
+
+#: src/netcam_rtsp.c
 msgid "unable to create rtsp context"
 msgstr "incapaz de crear contexto rtsp"
 
@@ -3084,6 +3168,10 @@ msgstr "Tamaño de lectura fallido en el archivo pgm"
 #: src/picture.c
 msgid "Failed reading maximum value in pgm file"
 msgstr "Error al leer el valor máximo en el archivo pgm"
+
+#: src/picture.c
+msgid "Failed reading image data from pgm file"
+msgstr "Error al leer los datos de imagen del archivo pgm"
 
 #: src/picture.c
 msgid "The mask file specified is not the same size as image from camera."

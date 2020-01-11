@@ -890,7 +890,7 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 
     for (y = 0; y < mask_height; y++) {
         if ((int)fread(&image[y * mask_width], 1, mask_width, picture) != mask_width)
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Failed reading image data from pgm file");
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Failed reading image data from pgm file"));
 
         for (x = 0; x < mask_width; x++)
             image[y * mask_width + x] = (int)image[y * mask_width + x] * 255 / maxval;

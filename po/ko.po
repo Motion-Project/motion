@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-10-27 22:19-0600\n"
-"PO-Revision-Date: 2019-12-01 11:16-0700\n"
+"POT-Creation-Date: 2019-12-29 16:29-0700\n"
+"PO-Revision-Date: 2020-01-10 20:49-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: ko\n"
@@ -15,6 +15,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.0.6\n"
+
+#: src/conf.c
+#, c-format
+msgid "%s after version %s"
+msgstr "버전 %s 이후 %s"
 
 #: src/conf.c
 #, c-format
@@ -753,6 +758,14 @@ msgid "File of type %ld saved to: %s"
 msgstr "%ld 유형의 파일이 %s에 저장되었습니다."
 
 #: src/event.c
+msgid "Ignoring empty sql query"
+msgstr "빈 SQL 쿼리 무시"
+
+#: src/event.c
+msgid "Executing mysql query"
+msgstr "MySQL 쿼리 실행"
+
+#: src/event.c
 #, c-format
 msgid "Mysql query failed %s error code %d"
 msgstr "MySQL 쿼리 실패 %s 오류 코드 %d"
@@ -760,11 +773,11 @@ msgstr "MySQL 쿼리 실패 %s 오류 코드 %d"
 #: src/event.c
 #, c-format
 msgid ""
-"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error was "
-"%s"
+"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error "
+"was %s"
 msgstr ""
-"사용자 %s MySQL 오류로 호스트 %s에서 MySQL 데이터베이스 %s에 다시 연결할 수 없"
-"습니다.%s이었다"
+"사용자 %s MySQL 오류로 호스트 %s에서 MySQL 데이터베이스 %s에 다시 연결할 수 "
+"없습니다.%s이었다"
 
 #: src/event.c
 #, c-format
@@ -775,6 +788,10 @@ msgstr "MySQL 데이터베이스 ' %s'에 다시 연결 성공"
 #, c-format
 msgid "after re-connection Mysql query failed %s error code %d"
 msgstr "재 연결 후 MySQL 쿼리 실패 %s 오류 코드 %d"
+
+#: src/event.c
+msgid "Executing postgresql query"
+msgstr "postgresql 쿼리 실행"
 
 #: src/event.c src/motion.c
 #, c-format
@@ -790,6 +807,15 @@ msgstr "PostgreSQL 데이터베이스 ' %s'에 다시 연결하지 못했습니�
 #, c-format
 msgid "Re-Connection to PostgreSQL database '%s' Succeed"
 msgstr "PostgreSQL 데이터베이스 ' %s'에 다시 연결 성공"
+
+#: src/event.c
+#, c-format
+msgid "PGSQL query failed: [%s]  %s %s"
+msgstr "PGSQL 쿼리 실패 : [%s] %s %s"
+
+#: src/event.c
+msgid "Executing sqlite query"
+msgstr "sqlite 쿼리 실행"
 
 #: src/event.c
 #, c-format
@@ -827,6 +853,11 @@ msgstr "닫기 : extpipe 파일 설명 %d, 오류 상태 %d"
 
 #: src/event.c
 #, c-format
+msgid "pclose return: %d"
+msgstr "반품 마감 : %d"
+
+#: src/event.c
+#, c-format
 msgid "moviepath: %s"
 msgstr "영화 경로 : %s"
 
@@ -856,6 +887,11 @@ msgid "pipe: %s"
 msgstr "파이프 : %s"
 
 #: src/event.c
+#, c-format
+msgid "cnt->moviefps: %d"
+msgstr "cnt-> moviefps : %d"
+
+#: src/event.c
 msgid "popen failed"
 msgstr "실패 했어"
 
@@ -879,6 +915,14 @@ msgid "Source FPS %d"
 msgstr "소스 FPS %d"
 
 #: src/event.c
+msgid "The ogg container is no longer supported.  Changing to mpeg4"
+msgstr "ogg 컨테이너는 더 이상 지원되지 않습니다. mpeg4로 변경"
+
+#: src/event.c
+msgid "Running test of the various output formats."
+msgstr "다양한 출력 형식의 테스트를 실행합니다."
+
+#: src/event.c
 msgid "Error opening context for movie output."
 msgstr "영화 출력에 대한 컨텍스트를 여는 중 오류가 발생했습니다."
 
@@ -891,8 +935,8 @@ msgstr "ffopen 열기 오류 생성 (동작) 파일 [ %s]"
 msgid ""
 "The swf container for timelapse no longer supported.  Using mpg container."
 msgstr ""
-"timelapse 용 swf 컨테이너는 더 이상 지원되지 않습니다. mpg 컨테이너를 사용합니"
-"다."
+"timelapse 용 swf 컨테이너는 더 이상 지원되지 않습니다. mpg 컨테이너를 사용합"
+"니다."
 
 #: src/event.c
 msgid "Timelapse using mpg codec."
@@ -1028,6 +1072,11 @@ msgid "Failed to allocate decoder!"
 msgstr "디코더를 할당하지 못했습니다!"
 
 #: src/ffmpeg.c
+#, c-format
+msgid "Low fps. Encoding %d frames into a %d frames container."
+msgstr "낮은 fps. %d 프레임을 %d 프레임 컨테이너에 인코딩"
+
+#: src/ffmpeg.c
 msgid "Unable to set quality"
 msgstr "품질을 설정할 수 없습니다"
 
@@ -1099,6 +1148,11 @@ msgstr "비디오 프레임을 쓰는 중 오류"
 
 #: src/ffmpeg.c
 #, c-format
+msgid "av_copy_packet: %s"
+msgstr "av_copy_packet : %s"
+
+#: src/ffmpeg.c
+#, c-format
 msgid "Error while writing video frame: %s"
 msgstr "비디오 프레임을 쓰는 중 오류가 발생했습니다 : %s"
 
@@ -1125,6 +1179,10 @@ msgstr "코덱 매개 변수를 복사 할 수 없습니다"
 #: src/ffmpeg.c
 msgid "Pass-through disabled.  ffmpeg too old"
 msgstr "통과가 비활성화되었습니다. 너무 오래된 ffmpeg"
+
+#: src/ffmpeg.c
+msgid "Pass-through stream opened"
+msgstr "통과 스트림이 열렸습니다"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1648,8 +1706,8 @@ msgstr "프로세스 ID 파일 %s을 (를) 생성했습니다. 프로세스 ID�
 
 #: src/motion.c
 msgid ""
-"Camara IDs are not unique or have values over 32,000.  Falling back to thread "
-"numbers"
+"Camara IDs are not unique or have values over 32,000.  Falling back to "
+"thread numbers"
 msgstr ""
 "Camara ID는 고유하지 않거나 32,000 이상의 값을 갖습니다. 다시 떨어지는스레드 "
 "번호"
@@ -1752,6 +1810,11 @@ msgstr "종료 모션, 로그 파일 %s을 (를) 만들 수 없습니다"
 #: src/motion.c
 msgid "Logging to syslog"
 msgstr "syslog에 로깅"
+
+#: src/motion.c
+#, c-format
+msgid "Motion %s Started"
+msgstr "모션 %s 시작"
 
 #: src/motion.c
 #, c-format
@@ -1861,7 +1924,8 @@ msgstr "경고! %s 함수는 %p에서 0 바이트로 메모리 블록 크기를 
 #, c-format
 msgid "Could not resize memory-block at offset %p to %llu bytes (function %s)!"
 msgstr ""
-"오프셋 %p에서 메모리 블록의 크기를 %llu 바이트 (기능 %s)로 조정할 수 없습니다!"
+"오프셋 %p에서 메모리 블록의 크기를 %llu 바이트 (기능 %s)로 조정할 수 없습니"
+"다!"
 
 #: src/motion.c
 #, c-format
@@ -2183,7 +2247,8 @@ msgstr "HTTP 결과 코드 %d"
 
 #: src/netcam_http.c
 msgid "Removed netcam Keep-Alive flag due to apparent closed HTTP connection."
-msgstr "명백한 닫힌 HTTP 연결로 인해 netcam Keep-Alive 플래그가 제거되었습니다."
+msgstr ""
+"명백한 닫힌 HTTP 연결로 인해 netcam Keep-Alive 플래그가 제거되었습니다."
 
 #: src/netcam_http.c
 msgid "Non-streaming camera (keep-alive set)"
@@ -2233,16 +2298,16 @@ msgstr "Conn 발견 : 헤더 닫기 ( ' %s')"
 
 #: src/netcam_http.c
 msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. Motion "
-"removes keepalive."
+"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
+"Motion removes keepalive."
 msgstr ""
 "'연결 : 연결 유지'및 '연결 : 닫기'헤더가 모두 수신되었습니다.동작은 keepalive"
 "를 제거합니다."
 
 #: src/netcam_http.c
 msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. Motion "
-"continues unchanged."
+"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
+"Motion continues unchanged."
 msgstr ""
 "'연결 : 연결 유지'및 '연결 : 닫기'헤더가 모두 수신되었습니다.모션은 변경되지 "
 "않습니다."
@@ -2941,6 +3006,22 @@ msgid "%s: Waiting for first image from the handler."
 msgstr "%s : 핸들러에서 첫 번째 이미지를 기다리는 중입니다."
 
 #: src/netcam_rtsp.c
+#, c-format
+msgid "Requested frame rate %d FPS is less than camera frame rate %d FPS"
+msgstr "요청한 프레임 속도 %d FPS가 카메라 프레임 속도 %d FPS보다 작습니다."
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "Increasing capture rate to %d FPS to match camera."
+msgstr "카메라와 일치시키기 위해 캡처 속도를 %d FPS로 증가"
+
+#: src/netcam_rtsp.c
+msgid ""
+"To lower CPU, change camera FPS to lower rate and decrease I frame interval."
+msgstr ""
+"CPU를 낮추려면 카메라 FPS를 낮은 속도로 변경하고 I 프레임 간격을 줄입니다."
+
+#: src/netcam_rtsp.c
 msgid "unable to create rtsp context"
 msgstr "RTSP 컨텍스트를 만들 수 없습니다"
 
@@ -3025,6 +3106,10 @@ msgstr "pgm 파일에서 읽지 않은 크기"
 #: src/picture.c
 msgid "Failed reading maximum value in pgm file"
 msgstr "pgm 파일에서 최대 값을 읽지 못했습니다."
+
+#: src/picture.c
+msgid "Failed reading image data from pgm file"
+msgstr "pgm 파일에서 이미지 데이터를 읽지 못했습니다"
 
 #: src/picture.c
 msgid "The mask file specified is not the same size as image from camera."
@@ -3155,7 +3240,8 @@ msgstr "X 오프셋 %d"
 #: src/track.c
 #, c-format
 msgid ""
-"X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command %d"
+"X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command "
+"%d"
 msgstr ""
 "X cent->x %d, cent->y %d, reversex %d, reversey %d motorx %d 데이터 %d 명령%d"
 
@@ -3167,7 +3253,8 @@ msgstr "Y 오프셋 %d"
 #: src/track.c
 #, c-format
 msgid ""
-"Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command %d"
+"Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command "
+"%d"
 msgstr ""
 "Y cent->x %d, cent->y %d, reversex %d, reversey %d motory %d data %d 명령%d"
 

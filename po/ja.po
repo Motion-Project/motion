@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-10-27 22:19-0600\n"
-"PO-Revision-Date: 2019-12-01 12:33-0700\n"
+"POT-Creation-Date: 2019-12-29 16:29-0700\n"
+"PO-Revision-Date: 2020-01-10 20:43-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: ja\n"
@@ -15,6 +15,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.0.6\n"
+
+#: src/conf.c
+#, c-format
+msgid "%s after version %s"
+msgstr "バージョン %s の後の %s"
 
 #: src/conf.c
 #, c-format
@@ -753,6 +758,14 @@ msgid "File of type %ld saved to: %s"
 msgstr "タイプ %ldのファイルの保存先： %s"
 
 #: src/event.c
+msgid "Ignoring empty sql query"
+msgstr "空のSQLクエリを無視する"
+
+#: src/event.c
+msgid "Executing mysql query"
+msgstr "mysqlクエリの実行"
+
+#: src/event.c
 #, c-format
 msgid "Mysql query failed %s error code %d"
 msgstr "Mysqlクエリが %sエラーコード %dに失敗しました"
@@ -776,6 +789,10 @@ msgstr "Mysqlデータベース ' %s'への再接続に成功しました"
 msgid "after re-connection Mysql query failed %s error code %d"
 msgstr "再接続後、Mysqlクエリは %sエラーコード %dに失敗しました"
 
+#: src/event.c
+msgid "Executing postgresql query"
+msgstr "postgresqlクエリの実行"
+
 #: src/event.c src/motion.c
 #, c-format
 msgid "Connection to PostgreSQL database '%s' failed: %s"
@@ -790,6 +807,15 @@ msgstr "PostgreSQLデータベース ' %s'への再接続に失敗しました�
 #, c-format
 msgid "Re-Connection to PostgreSQL database '%s' Succeed"
 msgstr "PostgreSQLデータベース ' %s'への再接続に成功しました"
+
+#: src/event.c
+#, c-format
+msgid "PGSQL query failed: [%s]  %s %s"
+msgstr "PGSQLクエリが失敗しました：[%s] %s %s"
+
+#: src/event.c
+msgid "Executing sqlite query"
+msgstr "sqliteクエリの実行"
 
 #: src/event.c
 #, c-format
@@ -827,6 +853,11 @@ msgstr "クローズ：extpipeファイルの説明 %d、エラー状態 %d"
 
 #: src/event.c
 #, c-format
+msgid "pclose return: %d"
+msgstr "pcloseリターン：%d"
+
+#: src/event.c
+#, c-format
 msgid "moviepath: %s"
 msgstr "ムービーパス： %s"
 
@@ -856,6 +887,11 @@ msgid "pipe: %s"
 msgstr "パイプ： %s"
 
 #: src/event.c
+#, c-format
+msgid "cnt->moviefps: %d"
+msgstr "cnt-> moviefps：%d"
+
+#: src/event.c
 msgid "popen failed"
 msgstr "ポペン失敗"
 
@@ -877,6 +913,14 @@ msgstr "パイプ %sはまだ作成または閉じられていません"
 #, c-format
 msgid "Source FPS %d"
 msgstr "ソースFPS %d"
+
+#: src/event.c
+msgid "The ogg container is no longer supported.  Changing to mpeg4"
+msgstr "oggコンテナはサポートされなくなりました。mpeg4への変更"
+
+#: src/event.c
+msgid "Running test of the various output formats."
+msgstr "さまざまな出力形式のテストを実行しています。"
 
 #: src/event.c
 msgid "Error opening context for movie output."
@@ -1030,6 +1074,11 @@ msgid "Failed to allocate decoder!"
 msgstr "デコーダーの割り当てに失敗しました！"
 
 #: src/ffmpeg.c
+#, c-format
+msgid "Low fps. Encoding %d frames into a %d frames container."
+msgstr "低fps。%dフレームを%dフレームコンテナーにエンコードしています。"
+
+#: src/ffmpeg.c
 msgid "Unable to set quality"
 msgstr "品質を設定できません"
 
@@ -1101,6 +1150,11 @@ msgstr "ビデオフレームの書き込み中にエラーが発生しました
 
 #: src/ffmpeg.c
 #, c-format
+msgid "av_copy_packet: %s"
+msgstr "av_copy_packet：%s"
+
+#: src/ffmpeg.c
+#, c-format
 msgid "Error while writing video frame: %s"
 msgstr "ビデオフレームの書き込み中にエラーが発生しました： %s"
 
@@ -1127,6 +1181,10 @@ msgstr "コーデックパラメータをコピーできません"
 #: src/ffmpeg.c
 msgid "Pass-through disabled.  ffmpeg too old"
 msgstr "パススルーは無効です。ffmpegが古すぎる"
+
+#: src/ffmpeg.c
+msgid "Pass-through stream opened"
+msgstr "パススルーストリームを開きました"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1757,6 +1815,11 @@ msgstr "モーションを終了し、ログファイル %sを作成できませ
 #: src/motion.c
 msgid "Logging to syslog"
 msgstr "syslogへのロギング"
+
+#: src/motion.c
+#, c-format
+msgid "Motion %s Started"
+msgstr "モーション %s が開始しました"
 
 #: src/motion.c
 #, c-format
@@ -2957,6 +3020,23 @@ msgid "%s: Waiting for first image from the handler."
 msgstr " %s：ハンドラーからの最初の画像を待機しています。"
 
 #: src/netcam_rtsp.c
+#, c-format
+msgid "Requested frame rate %d FPS is less than camera frame rate %d FPS"
+msgstr ""
+"要求されたフレームレート%d FPSはカメラのフレームレート%d FPSよりも小さい"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "Increasing capture rate to %d FPS to match camera."
+msgstr "カメラに合わせてキャプチャ率を%d FPSに上げます。"
+
+#: src/netcam_rtsp.c
+msgid ""
+"To lower CPU, change camera FPS to lower rate and decrease I frame interval."
+msgstr ""
+"CPUを下げるには、カメラのFPSを低いレートに変更し、Iフレーム間隔を減らします。"
+
+#: src/netcam_rtsp.c
 msgid "unable to create rtsp context"
 msgstr "rtspコンテキストを作成できません"
 
@@ -3041,6 +3121,10 @@ msgstr "pgmファイルのサイズの読み取りに失敗しました"
 #: src/picture.c
 msgid "Failed reading maximum value in pgm file"
 msgstr "pgmファイルの最大値の読み取りに失敗しました"
+
+#: src/picture.c
+msgid "Failed reading image data from pgm file"
+msgstr "pgmファイルからの画像データの読み取りに失敗しました"
 
 #: src/picture.c
 msgid "The mask file specified is not the same size as image from camera."
