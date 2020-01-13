@@ -811,7 +811,7 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
             (strcmp(ffmpeg->codec_name, "mp4") == 0) ||
             (strcmp(ffmpeg->codec_name, "hevc") == 0) ||
             (strcmp(ffmpeg->codec_name, "mpeg4")   == 0)) {
-            MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "Low fps. Encoding %d frames into a %d frames container.", ffmpeg->fps, 10);
+            MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("Low fps. Encoding %d frames into a %d frames container."), ffmpeg->fps, 10);
             ffmpeg->fps = 10;
         }
     }
@@ -1189,7 +1189,7 @@ static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx){
     retcd = my_copy_packet(&ffmpeg->pkt, &ffmpeg->rtsp_data->pktarray[indx].packet);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "av_copy_packet: %s",errstr);
+        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("av_copy_packet: %s"),errstr);
         my_packet_unref(ffmpeg->pkt);
         return;
     }
@@ -1363,7 +1363,7 @@ static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg){
 
         ffmpeg->video_st->time_base         = stream_in->time_base;
     pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
-    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "Pass-through stream opened");
+    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("Pass-through stream opened"));
     return 0;
 
 }

@@ -1497,13 +1497,13 @@ static int netcam_rtsp_start_handler(struct rtsp_context *rtsp_data){
     /* Warn the user about a mismatch of camera FPS vs handler capture rate*/
     if (rtsp_data->conf->framerate < rtsp_data->src_fps){
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-            , "Requested frame rate %d FPS is less than camera frame rate %d FPS"
+            , _("Requested frame rate %d FPS is less than camera frame rate %d FPS")
             , rtsp_data->conf->framerate,rtsp_data->src_fps);
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-            , "Increasing capture rate to %d FPS to match camera."
+            , _("Increasing capture rate to %d FPS to match camera.")
             , rtsp_data->src_fps);
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-            , "To lower CPU, change camera FPS to lower rate and decrease I frame interval."
+            , _("To lower CPU, change camera FPS to lower rate and decrease I frame interval.")
             , rtsp_data->src_fps);
 
     }

@@ -3306,7 +3306,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Logging to syslog"));
     }
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion %s Started",VERSION);
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion %s Started"),VERSION);
 
     if ((cnt_list[0]->conf.log_type == NULL) ||
         !(cnt_list[0]->log_type = get_log_type(cnt_list[0]->conf.log_type))) {

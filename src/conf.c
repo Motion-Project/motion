@@ -2092,7 +2092,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
     i = 0;
     while (dep_config_params[i].name != NULL) {
         if (!strncasecmp(cmd, dep_config_params[i].name, 255 + 50)) {
-            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s after version %s"
+            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("%s after version %s")
                 , dep_config_params[i].info, dep_config_params[i].last_version);
 
             if (dep_config_params[i].copy != NULL){

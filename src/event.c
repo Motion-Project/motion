@@ -169,13 +169,13 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
 
     if (strlen(sqlquery) <= 0) {
         /* don't try to execute empty queries */
-        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, "Ignoring empty sql query");
+        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, _("Ignoring empty sql query"));
         return;
     }
 
 #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
     if (!strcmp(cnt->conf.database_type, "mysql")) {
-        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing mysql query");
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing mysql query"));
         if (mysql_query(cnt->database, sqlquery) != 0) {
             int error_code = mysql_errno(cnt->database);
 
@@ -221,7 +221,7 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
 
 #ifdef HAVE_PGSQL
     if (!strcmp(cnt->conf.database_type, "postgresql")) {
-        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing postgresql query");
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing postgresql query"));
         PGresult *res;
 
         res = PQexec(cnt->database_pg, sqlquery);
@@ -247,7 +247,7 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
             }
 
         } else if (!(PQresultStatus(res) == PGRES_COMMAND_OK || PQresultStatus(res) == PGRES_TUPLES_OK)) {
-            MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "PGSQL query failed: [%s]  %s %s",
+            MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, _("PGSQL query failed: [%s]  %s %s"),
                        sqlquery, PQresStatus(PQresultStatus(res)), PQresultErrorMessage(res));
         }
         if (save_id) {
@@ -263,7 +263,7 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
     if ((!strcmp(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
         int res;
         char *errmsg = 0;
-        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing sqlite query");
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing sqlite query"));
         res = sqlite3_exec(cnt->database_sqlite3, sqlquery, NULL, 0, &errmsg);
         if (res != SQLITE_OK ) {
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("SQLite error was %s"), errmsg);
@@ -798,7 +798,7 @@ static void event_extpipe_end(struct context *cnt,
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO
             ,_("CLOSING: extpipe file desc %d, error state %d")
             ,fileno(cnt->extpipe), ferror(cnt->extpipe));
-        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "pclose return: %d",
+        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("pclose return: %d"),
                    pclose(cnt->extpipe));
         event(cnt, EVENT_FILECLOSE, NULL, cnt->extpipefilename, (void *)FTYPE_MPEG, currenttime_tv);
     }
@@ -867,7 +867,7 @@ static void event_create_extpipe(struct context *cnt,
         }
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("pipe: %s"), cnt->extpipecmdline);
 
-        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "cnt->moviefps: %d", cnt->movie_fps);
+        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("cnt->moviefps: %d"), cnt->movie_fps);
 
         event(cnt, EVENT_FILECREATE, NULL, cnt->extpipefilename, (void *)FTYPE_MPEG, currenttime_tv);
         cnt->extpipe = popen(cnt->extpipecmdline, "we");
@@ -971,11 +971,11 @@ static void event_ffmpeg_newfile(struct context *cnt,
      */
     codec = cnt->conf.movie_codec;
     if (strcmp(codec, "ogg") == 0) {
-        MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, "The ogg container is no longer supported.  Changing to mpeg4");
+        MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, _("The ogg container is no longer supported.  Changing to mpeg4"));
         codec = "mpeg4";
     }
     if (strcmp(codec, "test") == 0) {
-        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "Running test of the various output formats.");
+        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("Running test of the various output formats."));
         codenbr = cnt->event_nr % 10;
         switch (codenbr) {
         case 1:
