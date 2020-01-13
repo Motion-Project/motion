@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
 "POT-Creation-Date: 2019-12-29 16:29-0700\n"
-"PO-Revision-Date: 2020-01-10 20:54-0700\n"
+"PO-Revision-Date: 2020-01-12 17:49-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: li\n"
@@ -57,8 +57,7 @@ msgstr "Apdorojama gija 0 - konfigūracijos failas %s"
 
 #: src/conf.c
 msgid "No config file to process, using default values"
-msgstr ""
-"Nereikia apdoroti konfigūracijos failo, naudojant numatytąsias reikšmes"
+msgstr "Nereikia apdoroti konfigūracijos failo, naudojant numatytąsias reikšmes"
 
 #: src/conf.c
 #, c-format
@@ -775,11 +774,10 @@ msgstr "„MySQL“ užklausa nepavyko %s klaidos kodas %d"
 #: src/event.c
 #, c-format
 msgid ""
-"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error "
-"was %s"
+"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error was %s"
 msgstr ""
-"Neįmanoma iš naujo prisijungti prie „MySQL“ duomenų bazės %s, esančioje %s, "
-"su vartotojo %s „MySQL“ klaidabuvo %s"
+"Neįmanoma iš naujo prisijungti prie „MySQL“ duomenų bazės %s, esančioje %s, su "
+"vartotojo %s „MySQL“ klaidabuvo %s"
 
 #: src/event.c
 #, c-format
@@ -789,8 +787,7 @@ msgstr "Pakartotinis prisijungimas prie „MySQL“ duomenų bazės „ %s“ pa
 #: src/event.c
 #, c-format
 msgid "after re-connection Mysql query failed %s error code %d"
-msgstr ""
-"po pakartotinio prisijungimo „MySQL“ užklausa nepavyko %s klaidos kodas %d"
+msgstr "po pakartotinio prisijungimo „MySQL“ užklausa nepavyko %s klaidos kodas %d"
 
 #: src/event.c
 msgid "Executing postgresql query"
@@ -804,8 +801,7 @@ msgstr "Nepavyko prisijungti prie „PostgreSQL“ duomenų bazės „ %s“: %s
 #: src/event.c
 #, c-format
 msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
-msgstr ""
-"Nepavyko iš naujo prisijungti prie „PostgreSQL“ duomenų bazės „ %s“: %s"
+msgstr "Nepavyko iš naujo prisijungti prie „PostgreSQL“ duomenų bazės „ %s“: %s"
 
 #: src/event.c
 #, c-format
@@ -936,8 +932,7 @@ msgid "ffopen_open error creating (motion) file [%s]"
 msgstr "ffopen atidaryti klaida kuriant (judesio) failą [ %s]"
 
 #: src/event.c
-msgid ""
-"The swf container for timelapse no longer supported.  Using mpg container."
+msgid "The swf container for timelapse no longer supported.  Using mpg container."
 msgstr "Laikinas „swf“ laikiklis nebepalaikomas. Naudojant mpg konteinerį."
 
 #: src/event.c
@@ -971,11 +966,11 @@ msgstr "Nepavyko skirti atminties kodeko pavadinimui"
 
 #: src/ffmpeg.c
 msgid ""
-"The frame rate specified is too high for the ffmpeg movie type specified. "
-"Choose a different ffmpeg container or lower framerate."
+"The frame rate specified is too high for the ffmpeg movie type specified. Choose a "
+"different ffmpeg container or lower framerate."
 msgstr ""
-"Nurodytas kadrų dažnis yra per didelis nurodytam „ffmpeg“ filmo tipui."
-"Pasirinkite kitą „ffmpeg“ konteinerį arba mažesnį kadrų dažnį."
+"Nurodytas kadrų dažnis yra per didelis nurodytam „ffmpeg“ filmo tipui.Pasirinkite "
+"kitą „ffmpeg“ konteinerį arba mažesnį kadrų dažnį."
 
 #: src/ffmpeg.c
 msgid "Error setting base file name"
@@ -1026,8 +1021,7 @@ msgstr "Klaida koduojant vaizdo įrašą"
 #: src/ffmpeg.c
 #, c-format
 msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d"
-msgstr ""
-"PTS %<PRId64> bazinis PTS %<PRId64> ms intervalas %<PRId64> laiko bazė %d- %d"
+msgstr "PTS %<PRId64> bazinis PTS %<PRId64> ms intervalas %<PRId64> laiko bazė %d- %d"
 
 #: src/ffmpeg.c
 msgid "BAD TIMING!! Frame skipped."
@@ -1036,11 +1030,10 @@ msgstr "BLOGAS LAIKAS!! Rėmelis praleistas."
 #: src/ffmpeg.c
 #, c-format
 msgid ""
-"PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change "
-"%d"
+"PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change %d"
 msgstr ""
-"PTS %<PRId64> bazinis PTS %<PRId64> ms intervalas %<PRId64> laiko bazė %d- "
-"%d Pakeisti%d"
+"PTS %<PRId64> bazinis PTS %<PRId64> ms intervalas %<PRId64> laiko bazė %d- %d "
+"Pakeisti%d"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1191,8 +1184,7 @@ msgstr "Praėjo srautas"
 #: src/ffmpeg.c
 #, c-format
 msgid "ffmpeg libavcodec version %d.%d.%d libavformat version %d.%d.%d"
-msgstr ""
-"„ffmpeg libavcodec“ versija %d. %d. %d „libavformat“ versija %d. %d. %d"
+msgstr "„ffmpeg libavcodec“ versija %d. %d. %d „libavformat“ versija %d. %d. %d"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1393,8 +1385,7 @@ msgstr "Klaida atidarant kaukės failą %s"
 #: src/motion.c
 msgid "Failed to read mask privacy image. Mask privacy feature disabled."
 msgstr ""
-"Nepavyko nuskaityti kaukės privatumo vaizdo. Kaukės privatumo funkcija "
-"išjungta."
+"Nepavyko nuskaityti kaukės privatumo vaizdo. Kaukės privatumo funkcija išjungta."
 
 #: src/motion.c
 #, c-format
@@ -1455,8 +1446,7 @@ msgstr "duomenų bazės užimtumo laikas nepavyko %s"
 #, c-format
 msgid "Cannot connect to MySQL database %s on host %s with user %s"
 msgstr ""
-"Neįmanoma prisijungti prie „MySQL“ duomenų bazės %s pagrindiniame %s su "
-"vartotoju %s"
+"Neįmanoma prisijungti prie „MySQL“ duomenų bazės %s pagrindiniame %s su vartotoju %s"
 
 #: src/motion.c
 #, c-format
@@ -1540,8 +1530,7 @@ msgstr "Prašomas vaizdo plotis ( %d) arba aukštis ( %d) nėra modulo 8."
 #, c-format
 msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
 msgstr ""
-"Judesys palaiko tik tokį plotį ir aukštį, kuris yra lygus arba lygus 64 %dx "
-"%d"
+"Judesys palaiko tik tokį plotį ir aukštį, kuris yra lygus arba lygus 64 %dx %d"
 
 #: src/motion.c
 msgid "Substream not available.  Image sizes not modulo 16."
@@ -1562,8 +1551,7 @@ msgstr "Atidaromas vaizdo atkūrimo įtaisas įprastoms nuotraukoms"
 #: src/motion.c
 msgid "Failed to open video loopback for normal pictures"
 msgstr ""
-"Nepavyko atidaryti vaizdo įrašo atgalinio vaizdo, skirto įprastoms "
-"nuotraukoms"
+"Nepavyko atidaryti vaizdo įrašo atgalinio vaizdo, skirto įprastoms nuotraukoms"
 
 #: src/motion.c
 msgid "Opening video loopback device for motion pictures"
@@ -1612,16 +1600,15 @@ msgstr "Bandoma dar kartą, kol nebus sėkmingai užmegztas ryšys su kamera"
 #: src/motion.c
 msgid ""
 "Camera has finally become available\n"
-"Camera image has different width and heightfrom what is in the config file. "
-"You should fix that\n"
-"Restarting Motion thread to reinitialize all image buffers to new picture "
-"dimensions"
+"Camera image has different width and heightfrom what is in the config file. You "
+"should fix that\n"
+"Restarting Motion thread to reinitialize all image buffers to new picture dimensions"
 msgstr ""
 "Fotoaparatas pagaliau tapo prieinamas \n"
-"Kameros vaizdo plotis ir aukštis skiriasi nuo konfigūracijos failo."
-"Turėtumėte tai išspręsti \n"
-"Iš naujo paleidę judesio sriegį, iš naujo inicijuoti visų vaizdų buferius į "
-"naują paveikslėlįmatmenys"
+"Kameros vaizdo plotis ir aukštis skiriasi nuo konfigūracijos failo.Turėtumėte tai "
+"išspręsti \n"
+"Iš naujo paleidę judesio sriegį, iš naujo inicijuoti visų vaizdų buferius į naują "
+"paveikslėlįmatmenys"
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -1720,11 +1707,10 @@ msgstr "Sukurtas proceso ID failas %s. Proceso ID yra %d"
 
 #: src/motion.c
 msgid ""
-"Camara IDs are not unique or have values over 32,000.  Falling back to "
-"thread numbers"
+"Camara IDs are not unique or have values over 32,000.  Falling back to thread "
+"numbers"
 msgstr ""
-"„Camara“ ID nėra unikalūs arba jų vertė didesnė nei 32 000. Grįžta įgijų "
-"skaičiai"
+"„Camara“ ID nėra unikalūs arba jų vertė didesnė nei 32 000. Grįžta įgijų skaičiai"
 
 #: src/motion.c
 msgid "v4l2   : available"
@@ -1866,8 +1852,7 @@ msgstr "Kameros ID: %d Fotoaparato pavadinimas: %s Įrenginys: %s"
 #: src/motion.c
 #, c-format
 msgid "Stream port number %d for thread %d conflicts with the control port"
-msgstr ""
-"Srauto prievado numeris %d, kai srautas %d, prieštarauja valdymo prievadui"
+msgstr "Srauto prievado numeris %d, kai srautas %d, prieštarauja valdymo prievadui"
 
 #: src/motion.c
 #, c-format
@@ -1895,8 +1880,7 @@ msgstr "Gija %d - sargybinio laikas. Bando padaryti grakštų paleidimą"
 #: src/motion.c
 #, c-format
 msgid "Thread %d - Watchdog timeout did NOT restart, killing it!"
-msgstr ""
-"Siūlas %d - sargybinio laikas nebebuvo paleistas iš naujo, jį užmušant!"
+msgstr "Siūlas %d - sargybinio laikas nebebuvo paleistas iš naujo, jį užmušant!"
 
 #: src/motion.c
 #, c-format
@@ -1906,8 +1890,7 @@ msgstr "Sriegis %d - valymo siūlas."
 #: src/motion.c
 #, c-format
 msgid "DEBUG-1 threads_running %d motion_threads_running %d , finish %d"
-msgstr ""
-"DEBUG-1 sriegiai, einantys %d judesio sriegiai, einantys %d, pabaiga %d"
+msgstr "DEBUG-1 sriegiai, einantys %d judesio sriegiai, einantys %d, pabaiga %d"
 
 #: src/motion.c
 #, c-format
@@ -2072,11 +2055,11 @@ msgstr "Netinkamas kameros „netcam“ URL ( %s)"
 #: src/netcam.c
 #, c-format
 msgid ""
-"Netcam_http parameter '%s' converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-"
-"Alive %s."
+"Netcam_http parameter '%s' converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive "
+"%s."
 msgstr ""
-"„Netcam“ http parametras „ %s“ virsta vėliavomis: HTTP / 1.0: %s HTTP / 1.1: "
-"%s Keep-Gyvas %s."
+"„Netcam“ http parametras „ %s“ virsta vėliavomis: HTTP / 1.0: %s HTTP / 1.1: %s "
+"Keep-Gyvas %s."
 
 #: src/netcam.c
 msgid "now calling netcam_setup_html()"
@@ -2092,11 +2075,10 @@ msgstr "dabar skambina „netcam“ sąrankos failui ()"
 
 #: src/netcam.c
 #, c-format
-msgid ""
-"Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or jpeg."
+msgid "Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or jpeg."
 msgstr ""
-"Netinkama „netcam“ paslauga „ %s“ - turi būti http, ftp, mjpg, mjpeg, v4l2 "
-"arba JPEG."
+"Netinkama „netcam“ paslauga „ %s“ - turi būti http, ftp, mjpg, mjpeg, v4l2 arba "
+"JPEG."
 
 #: src/netcam.c src/netcam_rtsp.c
 #, c-format
@@ -2220,15 +2202,14 @@ msgstr "Turinio tipas %s"
 #: src/netcam_http.c
 msgid "Error reading image header, streaming mode (1). Null header."
 msgstr ""
-"Klaida skaitant vaizdo antraštę, srautinio perdavimo režimą (1). Nulinė "
-"antraštė."
+"Klaida skaitant vaizdo antraštę, srautinio perdavimo režimą (1). Nulinė antraštė."
 
 #: src/netcam_http.c
 #, c-format
 msgid "Error reading image header, streaming mode (1). Unknown header '%s'"
 msgstr ""
-"Klaida skaitant vaizdo antraštę, srautinio perdavimo režimą (1). Nežinoma "
-"antraštė „ %s“"
+"Klaida skaitant vaizdo antraštę, srautinio perdavimo režimą (1). Nežinoma antraštė "
+"„ %s“"
 
 #: src/netcam_http.c
 msgid "Error reading image header (2)"
@@ -2292,11 +2273,10 @@ msgstr "Antraštėje nerasta ribų eilutė"
 
 #: src/netcam_http.c
 msgid ""
-"Streaming camera probably using MJPG-blocks, consider using mjpg:// "
-"netcam_url."
+"Streaming camera probably using MJPG-blocks, consider using mjpg:// netcam_url."
 msgstr ""
-"Srautinio vaizdo kamera, turbūt naudojanti MJPG blokus, apsvarstykite "
-"galimybę naudoti mjpg: //„netcam“ URL."
+"Srautinio vaizdo kamera, turbūt naudojanti MJPG blokus, apsvarstykite galimybę "
+"naudoti mjpg: //„netcam“ URL."
 
 #: src/netcam_http.c
 msgid "Unrecognized content type"
@@ -2317,19 +2297,19 @@ msgstr "Rasta Conn: uždaryti antraštę (' %s')"
 
 #: src/netcam_http.c
 msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
-"Motion removes keepalive."
+"Both 'Connection: Keep-Alive' and 'Connection: close' header received. Motion "
+"removes keepalive."
 msgstr ""
-"Gauta tiek „Connection: Keep-Alive“, tiek „Connection: close“ antraštė."
-"Judesys pašalina išlaikymą."
+"Gauta tiek „Connection: Keep-Alive“, tiek „Connection: close“ antraštė.Judesys "
+"pašalina išlaikymą."
 
 #: src/netcam_http.c
 msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
-"Motion continues unchanged."
+"Both 'Connection: Keep-Alive' and 'Connection: close' header received. Motion "
+"continues unchanged."
 msgstr ""
-"Gauta tiek „Connection: Keep-Alive“, tiek „Connection: close“ antraštė."
-"Judesys nesikeičia."
+"Gauta tiek „Connection: Keep-Alive“, tiek „Connection: close“ antraštė.Judesys "
+"nesikeičia."
 
 #: src/netcam_http.c
 msgid "Received a Keep-Alive field in this set of headers."
@@ -2340,32 +2320,32 @@ msgid ""
 "No 'Connection: Keep-Alive' nor 'Connection: close' header received.\n"
 " Motion removes keepalive."
 msgstr ""
-"Negauta antraštė „Ryšys: išlikkite gyvas“ ir „Ryšys: uždarykite“. \\NJudesys "
-"pašalina išlaikymą."
+"Negauta antraštė „Ryšys: išlikkite gyvas“ ir „Ryšys: uždarykite“. \n"
+" Judesys pašalina išlaikymą."
 
 #: src/netcam_http.c
 msgid ""
 "No 'Connection: Keep-Alive' nor 'Connection: close' header received.\n"
 " Motion continues unchanged."
 msgstr ""
-"Negauta antraštė „Ryšys: išlikkite gyvas“ ir „Ryšys: uždarykite“. \\NJudesys "
-"nesikeičia."
+"Negauta antraštė „Ryšys: išlikkite gyvas“ ir „Ryšys: uždarykite“. \n"
+" Judesys nesikeičia."
 
 #: src/netcam_http.c
 msgid ""
 "Removed netcam Keep-Alive flag because 'Connection: close' header received.\n"
 " Netcam does not support Keep-Alive. Motion continues in non-Keep-Alive."
 msgstr ""
-"Pašalinta „netcam“ „Keep-Alive“ vėliava, nes gauta antraštė „Connection: "
-"close“. \\N„Netcam“ nepalaiko „Keep-Alive“. Judesys tęsiasi nelaikant gyvu."
+"Pašalinta „netcam“ „Keep-Alive“ vėliava, nes gauta antraštė „Connection: close“. \n"
+" „Netcam“ nepalaiko „Keep-Alive“. Judesys tęsiasi nelaikant gyvu."
 
 #: src/netcam_http.c
 msgid ""
 "Keep-Alive has reached end of valid period.\n"
 "Motion will close netcam, then resume Keep-Alive with a new socket."
 msgstr ""
-"„Keep-Alive“ pasibaigė galiojančio laikotarpio pabaigai. \\N„Motion“ uždarys "
-"„netcam“, tada atnaujins „Keep-Alive“ naudodamas naują lizdą."
+"„Keep-Alive“ pasibaigė galiojančio laikotarpio pabaigai. \n"
+" „Motion“ uždarys „netcam“, tada atnaujins „Keep-Alive“ naudodamas naują lizdą."
 
 #: src/netcam_http.c
 msgid "disconnect"
@@ -2395,17 +2375,17 @@ msgstr "be nuolatinio, naujas lizdas sukurtas fd %d"
 
 #: src/netcam_http.c
 msgid ""
-"with keepalive set, invalid socket.This could be the first time. Creating a "
-"new one failed."
+"with keepalive set, invalid socket.This could be the first time. Creating a new one "
+"failed."
 msgstr ""
-"su „keepalive“ komplektu, netinkamu lizdu. Tai gali būti pirmą kartą. "
-"Sukurtinaujas nepavyko."
+"su „keepalive“ komplektu, netinkamu lizdu. Tai gali būti pirmą kartą. Sukurtinaujas "
+"nepavyko."
 
 #: src/netcam_http.c
 #, c-format
 msgid ""
-"with keepalive set, invalid socket.This could be first time, created a new "
-"one with fd %d"
+"with keepalive set, invalid socket.This could be first time, created a new one with "
+"fd %d"
 msgstr ""
 "su „keepalive“ rinkiniu, netinkamu lizdu. Tai gali būti pirmą kartą, sukurta "
 "naujavienas su fd %d"
@@ -2478,8 +2458,7 @@ msgstr "išplečiamas buferis nuo [ %d / %d] iki [ %d / %d] baitų."
 #, c-format
 msgid "Potential split boundary - %d chars flushed, %d re-positioned"
 msgstr ""
-"Potenciali padalijimo riba - %d simboliai praplatėję, %d perkelti į kitą "
-"vietą"
+"Potenciali padalijimo riba - %d simboliai praplatėję, %d perkelti į kitą vietą"
 
 #: src/netcam_http.c
 msgid "recv() fail after boundary string"
@@ -2497,8 +2476,8 @@ msgstr "ruošiasi prisijungti, laikas # %d"
 #: src/netcam_http.c
 msgid "Failed to open camera - check your config and that netcamera is online"
 msgstr ""
-"Nepavyko atidaryti fotoaparato - patikrinkite savo konfigūraciją ir ar "
-"„netcamera“ yra prisijungusi"
+"Nepavyko atidaryti fotoaparato - patikrinkite savo konfigūraciją ir ar „netcamera“ "
+"yra prisijungusi"
 
 #: src/netcam_http.c
 msgid "Error reading first header - re-trying"
@@ -2506,8 +2485,7 @@ msgstr "Klaida skaitant pirmą antraštę - bandoma iš naujo"
 
 #: src/netcam_http.c
 msgid "Failed to read first camera header - giving up for now"
-msgstr ""
-"Nepavyko nuskaityti pirmosios fotoaparato antraštės - kol kas jos atsisakiau"
+msgstr "Nepavyko nuskaityti pirmosios fotoaparato antraštės - kol kas jos atsisakiau"
 
 #: src/netcam_http.c
 #, c-format
@@ -2516,16 +2494,15 @@ msgstr "„Netcam“ turi vėliavas: HTTP / 1.0: %s HTTP / 1.1: %s „Keep-Alive
 
 #: src/netcam_http.c
 msgid ""
-"Removed netcam_keepalive flag due to proxy set.Proxy is incompatible with "
-"Keep-Alive."
+"Removed netcam_keepalive flag due to proxy set.Proxy is incompatible with Keep-"
+"Alive."
 msgstr ""
-"Pašalinta „netcam“ išsaugojimo vėliava dėl įgaliotojo serverio rinkinio. "
-"„Proxy“ nesuderinamas suIšlaikyti gyvą."
+"Pašalinta „netcam“ išsaugojimo vėliava dėl įgaliotojo serverio rinkinio. „Proxy“ "
+"nesuderinamas suIšlaikyti gyvą."
 
 #: src/netcam_http.c
 msgid "Failed to read first stream header - giving up for now"
-msgstr ""
-"Nepavyko nuskaityti pirmosios srauto antraštės - kol kas jos atsisakiau"
+msgstr "Nepavyko nuskaityti pirmosios srauto antraštės - kol kas jos atsisakiau"
 
 #: src/netcam_http.c
 msgid "connected, going on to read image."
@@ -2657,11 +2634,10 @@ msgstr "grąžinimo kodas %d"
 #: src/netcam_jpeg.c
 #, c-format
 msgid ""
-"Camera width/height mismatch with JPEG image -  expected %dx%d, JPEG %dx%d "
-"retval %d"
+"Camera width/height mismatch with JPEG image -  expected %dx%d, JPEG %dx%d retval %d"
 msgstr ""
-"Fotoaparato pločio / aukščio neatitikimas JPEG vaizdui - laukiama %dx %d, "
-"JPEG %dx %dretvalis %d"
+"Fotoaparato pločio / aukščio neatitikimas JPEG vaizdui - laukiama %dx %d, JPEG %dx "
+"%dretvalis %d"
 
 #: src/netcam_jpeg.c
 #, c-format
@@ -2827,8 +2803,7 @@ msgstr "koduotas į YUV420P. Jei įmanoma, pakeiskite „netcam“"
 
 #: src/netcam_rtsp.c
 msgid "picture format to YUV420P to possibly lower CPU usage."
-msgstr ""
-"vaizdo formatas į YUV420P, kad būtų galima naudoti mažiau procesoriaus."
+msgstr "vaizdo formatas į YUV420P, kad būtų galima naudoti mažiau procesoriaus."
 
 #: src/netcam_rtsp.c
 msgid "Unable to allocate swsframe_in."
@@ -3035,8 +3010,7 @@ msgstr "%s: laukiama pirmo atvaizdo iš prižiūrėtojo."
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Requested frame rate %d FPS is less than camera frame rate %d FPS"
-msgstr ""
-"Prašoma kadrų dažnio %d FPS yra mažesnė nei fotoaparato kadrų dažnio %d FPS"
+msgstr "Prašoma kadrų dažnio %d FPS yra mažesnė nei fotoaparato kadrų dažnio %d FPS"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3044,11 +3018,10 @@ msgid "Increasing capture rate to %d FPS to match camera."
 msgstr "Padidinamas fotografavimo greitis iki %d FPS, kad atitiktų kamerą."
 
 #: src/netcam_rtsp.c
-msgid ""
-"To lower CPU, change camera FPS to lower rate and decrease I frame interval."
+msgid "To lower CPU, change camera FPS to lower rate and decrease I frame interval."
 msgstr ""
-"Norėdami sumažinti CPU, pakeiskite fotoaparato FPS į mažesnį dažnį ir "
-"sumažinkite I kadrų intervalą."
+"Norėdami sumažinti CPU, pakeiskite fotoaparato FPS į mažesnį dažnį ir sumažinkite I "
+"kadrų intervalą."
 
 #: src/netcam_rtsp.c
 msgid "unable to create rtsp context"
@@ -3153,8 +3126,7 @@ msgstr "Bandoma pakeisti kaukės vaizdą nuo %dx %d iki %dx %d"
 #, c-format
 msgid "can't write mask file %s - check access rights to target directory"
 msgstr ""
-"negali rašyti kaukės failo %s - patikrinkite prieigos teises į tikslinį "
-"katalogą"
+"negali rašyti kaukės failo %s - patikrinkite prieigos teises į tikslinį katalogą"
 
 #: src/picture.c
 #, c-format
@@ -3172,8 +3144,7 @@ msgid ""
 "Please edit this file and re-run motion to enable mask feature"
 msgstr ""
 "Kuriama tuščia kaukė %s \n"
-"Redaguokite šį failą ir vėl paleiskite judesį, kad įjungtumėte kaukės "
-"funkciją"
+"Redaguokite šį failą ir vėl paleiskite judesį, kad įjungtumėte kaukės funkciją"
 
 #: src/rotate.c
 #, c-format
@@ -3269,12 +3240,9 @@ msgstr "X poslinkis %d"
 
 #: src/track.c
 #, c-format
-msgid ""
-"X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command "
-"%d"
+msgid "X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command %d"
 msgstr ""
-"X cent-> x %d, cent-> y %d, reversex %d, reversey %d motorx %d data %d "
-"command%d"
+"X cent-> x %d, cent-> y %d, reversex %d, reversey %d motorx %d data %d command%d"
 
 #: src/track.c
 #, c-format
@@ -3283,21 +3251,18 @@ msgstr "Y poslinkis %d"
 
 #: src/track.c
 #, c-format
-msgid ""
-"Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command "
-"%d"
+msgid "Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command %d"
 msgstr ""
-"Y cent-> x %d, cent-> y %d, reversex %d, reversey %d motyvas %d data %d "
-"komanda%d"
+"Y cent-> x %d, cent-> y %d, reversex %d, reversey %d motyvas %d data %d komanda%d"
 
 #: src/track.c
 #, c-format
 msgid ""
-"X-offset %d, Y-offset %d, x-position %d. y-position %d,reversex %d, reversey "
-"%d , stepsize %d"
+"X-offset %d, Y-offset %d, x-position %d. y-position %d,reversex %d, reversey %d , "
+"stepsize %d"
 msgstr ""
-"%d, X poslinkis, %d, x padėtis %d. y padėtis %d, atvirkštinė %d, atvirkštinė"
-"%d, laipsniškumas %d"
+"%d, X poslinkis, %d, x padėtis %d. y padėtis %d, atvirkštinė %d, atvirkštinė%d, "
+"laipsniškumas %d"
 
 #: src/track.c
 msgid "Return byte timeout!"
@@ -3347,8 +3312,8 @@ msgstr "Gaunamas fotoaparatų diapazonas"
 #, c-format
 msgid "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d "
 msgstr ""
-"Įvesties PARAMAS ABS visos minutės %d, visos maksimalios %d, pokrypio min "
-"%d, pokrypio maksimalus %d"
+"Įvesties PARAMAS ABS visos minutės %d, visos maksimalios %d, pokrypio min %d, "
+"pokrypio maksimalus %d"
 
 #: src/track.c
 #, c-format
@@ -3383,8 +3348,8 @@ msgstr "Po ABS Y Angel: x = %d, Y = %d"
 #, c-format
 msgid "For_SET_REL pan_min %d,pan_max %d,tilt_min %d,tilt_max %d"
 msgstr ""
-"„SET REL“ keptuvei min %d, pan. Max %d, pakreipimui min %d, pakreipimui "
-"maksimaliai %d"
+"„SET REL“ keptuvei min %d, pan. Max %d, pakreipimui min %d, pakreipimui maksimaliai "
+"%d"
 
 #: src/track.c
 #, c-format
@@ -3559,8 +3524,7 @@ msgstr "Vaizdo įrenginio „ %s“ uždarymas"
 #: src/video_bktr.c src/video_v4l2.c
 #, c-format
 msgid "Still %d users of video device %s, so we don't close it now"
-msgstr ""
-"Vis dar %d vaizdo įrašų įrenginio %s vartotojai, todėl jo neuždarome dabar"
+msgstr "Vis dar %d vaizdo įrašų įrenginio %s vartotojai, todėl jo neuždarome dabar"
 
 #: src/video_bktr.c src/video_v4l2.c
 #, c-format
@@ -3580,8 +3544,8 @@ msgstr "Sustabdyti gaudymą"
 #, c-format
 msgid "Reusing [%s] inputs [%d,%d] Change capture method METEOR_CAP_SINGLE"
 msgstr ""
-"Pakartotinis [ %s] įvesties panaudojimas [ %d, %d] Pakeiskite fiksavimo "
-"metodą METEOR CAP SINGLE"
+"Pakartotinis [ %s] įvesties panaudojimas [ %d, %d] Pakeiskite fiksavimo metodą "
+"METEOR CAP SINGLE"
 
 #: src/video_bktr.c
 msgid "VIDEO_PALETTE_YUV420P setting imgs.size_norm and imgs.motionsize"
@@ -3755,14 +3719,12 @@ msgstr "Nustatykite valdymo elementą „ %s“ reikšmei %d"
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %d is below minimum.  Using minimum"
-msgstr ""
-"%s valdymo parinkties vertė %d yra mažesnė už minimalią. Naudojant minimumą"
+msgstr "%s valdymo parinkties vertė %d yra mažesnė už minimalią. Naudojant minimumą"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %d is above maximum.  Using maximum"
-msgstr ""
-"%s valdymo parinkties vertė %d viršija maksimalią. Naudojant maksimaliai"
+msgstr "%s valdymo parinkties vertė %d viršija maksimalią. Naudojant maksimaliai"
 
 #: src/video_v4l2.c
 msgid "control type not supported yet"
@@ -3771,11 +3733,11 @@ msgstr "valdymo tipas dar nepalaikomas"
 #: src/video_v4l2.c
 #, c-format
 msgid ""
-"Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input "
-"value in conf by -1"
+"Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input value "
+"in conf by -1"
 msgstr ""
-"Nepavyko užklausti įvesties %d. VIDIOC ENUMINPUT, jei naudojate WEBCAM "
-"keitimo įvestįvertė santykinai -1"
+"Nepavyko užklausti įvesties %d. VIDIOC ENUMINPUT, jei naudojate WEBCAM keitimo "
+"įvestįvertė santykinai -1"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3865,7 +3827,9 @@ msgstr "Konfigūracijos faile nurodykite skirtingą paletę arba plotį / aukšt
 msgid ""
 "Error setting pixel format.\n"
 "VIDIOC_S_FMT: "
-msgstr "Klaida nustatant vaizdo elementų formatą. \\NVIDIOC S FMT:"
+msgstr ""
+"Klaida nustatant vaizdo elementų formatą. \n"
+" VIDIOC S FMT:"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3888,11 +3852,9 @@ msgid "Adjusting to height (%d)"
 msgstr "Sureguliavimas pagal aukštį ( %d)"
 
 #: src/video_v4l2.c
-msgid ""
-"H264(21) format not supported via videodevice.  Changing to default palette"
+msgid "H264(21) format not supported via videodevice.  Changing to default palette"
 msgstr ""
-"H264 (21) formatas nepalaikomas per vaizdo įrenginį. Pakeitus numatytąją "
-"paletę"
+"H264 (21) formatas nepalaikomas per vaizdo įrenginį. Pakeitus numatytąją paletę"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4162,8 +4124,7 @@ msgstr "Klaida skaitant SSL / TLS palaikymo failą."
 
 #: src/webu.c
 msgid "SSL/TLS requested but no cert file provided.  SSL/TLS disabled"
-msgstr ""
-"Prašoma SSL / TLS, bet nepateiktas sertifikatų failas. SSL / TLS išjungtas"
+msgstr "Prašoma SSL / TLS, bet nepateiktas sertifikatų failas. SSL / TLS išjungtas"
 
 #: src/webu.c
 msgid "SSL/TLS requested but no key file provided.  SSL/TLS disabled"
@@ -4351,8 +4312,7 @@ msgstr "Neteisingas kameros prievado URL: %s"
 #: src/webu_stream.c
 #, c-format
 msgid "URL for thread 0 is not valid when using camera specific files.: %s"
-msgstr ""
-"0 sriegio URL negalioja, kai naudojami specialūs fotoaparato failai: %s"
+msgstr "0 sriegio URL negalioja, kai naudojami specialūs fotoaparato failai: %s"
 
 #: src/webu_stream.c
 #, c-format
@@ -4365,5 +4325,5 @@ msgstr "Nepavyko gauti vaizdo srautui."
 
 #: src/webu_text.c
 #, c-format
-msgid "'%s' option is depreciated.  New option name is `%s'"
-msgstr "„ %s“ galimybė yra nusidėvėjusi. Naujo varianto pavadinimas yra „ %s“"
+msgid "'%s' option is depreciated.  New option name is '%s'"
+msgstr "„ %s“ galimybė yra nusidėvėjusi. Naujo varianto pavadinimas yra '%s' "

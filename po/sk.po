@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-12-29 16:29-0700\n"
+"POT-Creation-Date: 2020-01-12 17:18-0700\n"
 "PO-Revision-Date: 2020-01-10 21:18-0700\n"
 "Last-Translator: Dusan Mikulas <dmkil22@gmail.com>\n"
 "Language-Team: Dusan Mikulas <dmkil22@gmail.com>\n"
@@ -820,7 +820,7 @@ msgstr "Vykonáva sa dotaz typu sqlite"
 #: src/event.c
 #, c-format
 msgid "SQLite error was %s"
-msgstr "Chyba SQLite bola \"%s\""
+msgstr "Chyba SQLite bola %s "
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -1038,7 +1038,7 @@ msgid ""
 "%d"
 msgstr ""
 "PTS %<PRId64> Základný PTS %<PRId64> ms interval %<PRId64> timebase %d- %d "
-"Zmena%d"
+"Zmena %d"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1616,7 +1616,7 @@ msgid ""
 "dimensions"
 msgstr ""
 "Fotoaparát je konečne k dispozícii \n"
-"Obrázok kamery má rôznu šírku a výšku od toho, čo je v konfiguračnom súbore."
+"Obrázok kamery má rôznu šírku a výšku od toho, čo je v konfiguračnom súbore. "
 "Mali by ste to opraviť \n"
 "Reštartovanie vlákna vlákna na opätovné inicializáciu všetkých vyrovnávacích "
 "pamätí obrázkov do nového obrázkarozmery"
@@ -2226,7 +2226,7 @@ msgstr ""
 msgid "Error reading image header, streaming mode (1). Unknown header '%s'"
 msgstr ""
 "Pri čítaní hlavičky obrázka sa vyskytla chyba, režim streamovania (1). "
-"Neznáma hlavička ' %s'"
+"Neznáma hlavička '%s'"
 
 #: src/netcam_http.c
 msgid "Error reading image header (2)"
@@ -2295,8 +2295,8 @@ msgid ""
 "Streaming camera probably using MJPG-blocks, consider using mjpg:// "
 "netcam_url."
 msgstr ""
-"Streamujúca kamera pravdepodobne používa bloky MJPG, zvážte použitie mjpg: //"
-"webová adresa netcam."
+"Streamujúca kamera pravdepodobne používa bloky MJPG, zvážte použitie "
+"mjpg: // webová adresa netcam."
 
 #: src/netcam_http.c
 msgid "Unrecognized content type"
@@ -2341,7 +2341,8 @@ msgid ""
 " Motion removes keepalive."
 msgstr ""
 "Nebolo prijaté žiadne spojenie „Spojenie: Zachovať živé“ ani „Spojenie: "
-"zatvorené“. \\NPohyb odstraňuje udržovač."
+"zatvorené“. \n"
+" Pohyb odstraňuje udržovač."
 
 #: src/netcam_http.c
 msgid ""
@@ -2349,7 +2350,8 @@ msgid ""
 " Motion continues unchanged."
 msgstr ""
 "Nebolo prijaté žiadne spojenie „Spojenie: Zachovať živé“ ani „Spojenie: "
-"zatvorené“. \\NPohyb pokračuje bez zmeny."
+"zatvorené“. \n"
+" Pohyb pokračuje bez zmeny."
 
 #: src/netcam_http.c
 msgid ""
@@ -2357,16 +2359,17 @@ msgid ""
 " Netcam does not support Keep-Alive. Motion continues in non-Keep-Alive."
 msgstr ""
 "Odstránený príznak netcam Keep-Alive, pretože bola prijatá hlavička "
-"'Connection: close'. \\NNetcam nepodporuje Keep-Alive. Pohyb pokračuje non-"
-"Keep-Alive."
+"'Connection: close'. \n"
+" Netcam nepodporuje Keep-Alive. Pohyb pokračuje non-Keep-Alive."
 
 #: src/netcam_http.c
 msgid ""
 "Keep-Alive has reached end of valid period.\n"
 "Motion will close netcam, then resume Keep-Alive with a new socket."
 msgstr ""
-"Keep-Alive dosiahol koniec platného obdobia. \\NPohyb sa zatvorí netcam, "
-"potom sa obnoví funkcia Keep-Alive s novou zásuvkou."
+"Keep-Alive dosiahol koniec platného obdobia. \n"
+" Pohyb sa zatvorí netcam, potom sa obnoví funkcia Keep-Alive s novou "
+"zásuvkou."
 
 #: src/netcam_http.c
 msgid "disconnect"
@@ -3109,7 +3112,7 @@ msgid ""
 msgstr ""
 "Obrázok sa nedá zapísať do súboru %s - skontrolujte prístupové práva do "
 "cieľového adresára \n"
-"Vlákno bude dokončené kvôli tejto fatálnej chybe"
+" Vlákno bude dokončené kvôli tejto fatálnej chybe"
 
 #: src/picture.c
 #, c-format
@@ -3169,7 +3172,7 @@ msgid ""
 "Please edit this file and re-run motion to enable mask feature"
 msgstr ""
 "Vytvára sa prázdna maska %s \n"
-"Upravte tento súbor a znova spustite pohyb, aby ste povolili funkciu masky"
+" Upravte tento súbor a znova spustite pohyb, aby ste povolili funkciu masky"
 
 #: src/rotate.c
 #, c-format
@@ -3293,8 +3296,8 @@ msgid ""
 "X-offset %d, Y-offset %d, x-position %d. y-position %d,reversex %d, reversey "
 "%d , stepsize %d"
 msgstr ""
-"X-posun %d, Y-posun %d, x-poloha %d. poloha y %d, reverzný index %d, reversey"
-"%d, zmena veľkosti %d"
+"X-posun %d, Y-posun %d, x-poloha %d. poloha y %d, reverzný index %d, "
+"reversey %d, zmena veľkosti %d"
 
 #: src/track.c
 msgid "Return byte timeout!"
@@ -3860,7 +3863,9 @@ msgstr "V konfiguračnom súbore zadajte inú paletu alebo šírku / výšku."
 msgid ""
 "Error setting pixel format.\n"
 "VIDIOC_S_FMT: "
-msgstr "Chyba pri nastavovaní formátu pixlov. \\NVIDIOC S FMT:"
+msgstr ""
+"Chyba pri nastavovaní formátu pixlov. \n"
+" VIDIOC S FMT:"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3944,7 +3949,7 @@ msgid ""
 "VIDIOC_QUERYBUF: "
 msgstr ""
 "Chyba pri vyhľadávaní vyrovnávacej pamäte %i \n"
-"VIDIOC QUERYBUF:"
+" VIDIOC QUERYBUF:"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4364,5 +4369,5 @@ msgstr "Nemožné dostať obrázok do stream-u."
 
 #: src/webu_text.c
 #, c-format
-msgid "'%s' option is depreciated.  New option name is `%s'"
-msgstr "Možnosť ' %s' je odpisovaná. Nový názov voľby je ` %s '"
+msgid "'%s' option is depreciated.  New option name is '%s'"
+msgstr "Možnosť ' %s' je odpisovaná. Nový názov voľby je '%s' "

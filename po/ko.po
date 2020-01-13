@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-12-29 16:29-0700\n"
-"PO-Revision-Date: 2020-01-10 20:49-0700\n"
+"POT-Creation-Date: 2020-01-12 16:32-0700\n"
+"PO-Revision-Date: 2020-01-12 17:49-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: ko\n"
@@ -4325,5 +4325,5 @@ msgstr "이미지를 스트리밍 할 수 없습니다."
 
 #: src/webu_text.c
 #, c-format
-msgid "'%s' option is depreciated.  New option name is `%s'"
-msgstr "' %s'옵션이 감가 상각되었습니다. 새로운 옵션 이름은` %s '입니다"
+msgid "'%s' option is depreciated.  New option name is '%s'"
+msgstr "' %s'옵션이 감가 상각되었습니다. 새로운 옵션 이름은 '%s' 입니다"

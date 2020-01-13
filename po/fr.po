@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-12-29 16:29-0700\n"
-"PO-Revision-Date: 2020-01-10 20:20-0700\n"
+"POT-Creation-Date: 2020-01-12 17:18-0700\n"
+"PO-Revision-Date: 2020-01-12 17:46-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: fr\n"
@@ -824,7 +824,7 @@ msgstr "Exécution d'une requête sqlite"
 #: src/event.c
 #, c-format
 msgid "SQLite error was %s"
-msgstr "L'erreur SQLite était \"%s\""
+msgstr "l'erreur SQLite était  %s "
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -1043,7 +1043,7 @@ msgid ""
 "%d"
 msgstr ""
 "PTS %<PRId64> de base PTS %<PRId64> ms intervalle %<PRId64> base de temps %d-"
-"%d%d"
+"%d %d"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1633,7 +1633,7 @@ msgid ""
 "dimensions"
 msgstr ""
 "La caméra est enfin disponible \n"
-"L'image de la caméra a une largeur et une hauteur différentes de celles "
+"l'image de la caméra a une largeur et une hauteur différentes de celles "
 "contenues dans le fichier de configuration.Vous devriez corriger ça \n"
 "Redémarrage du thread Motion pour réinitialiser tous les tampons d'image sur "
 "une nouvelle imagedimensions"
@@ -1735,7 +1735,7 @@ msgstr "Impossible de changer de répertoire"
 #, c-format
 msgid "Created process id file %s. Process ID is %d"
 msgstr ""
-"Fichier d'identification de processus créé %s. L'ID de processus est %d"
+"Fichier d'identification de processus créé %s. l'ID de processus est %d"
 
 #: src/motion.c
 msgid ""
@@ -1743,7 +1743,7 @@ msgid ""
 "thread numbers"
 msgstr ""
 "Les identifiants Camara ne sont pas uniques ou ont une valeur supérieure à "
-"32 000. Retomber surnuméros de fil"
+"32,000. Retomber surnuméros de fil"
 
 #: src/motion.c
 msgid "v4l2   : available"
@@ -1920,7 +1920,7 @@ msgstr ""
 #, c-format
 msgid "Thread %d - Watchdog timeout did NOT restart, killing it!"
 msgstr ""
-"Thread %d - Le délai d'attente du chien de garde N'A PAS redémarré, ce qui "
+"Thread %d - Le délai d'attente du chien de garde n'A PAS redémarré, ce qui "
 "l'a tué!"
 
 #: src/motion.c
@@ -2329,7 +2329,7 @@ msgid ""
 "netcam_url."
 msgstr ""
 "Caméra en streaming utilisant probablement des blocs MJPG, envisagez "
-"d'utiliser mjpg: //URL netcam."
+"d'utiliser mjpg:// netcam_url"
 
 #: src/netcam_http.c
 msgid "Unrecognized content type"
@@ -2353,7 +2353,7 @@ msgid ""
 "Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
 "Motion removes keepalive."
 msgstr ""
-"Les en-têtes 'Connection: Keep-Alive' et 'Connection: close' ont été reçus."
+"Les en-têtes 'Connection: Keep-Alive' et 'Connection: close' ont été reçus. "
 "Motion supprime Keepalive."
 
 #: src/netcam_http.c
@@ -2361,7 +2361,7 @@ msgid ""
 "Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
 "Motion continues unchanged."
 msgstr ""
-"Les en-têtes 'Connection: Keep-Alive' et 'Connection: close' ont été reçus."
+"Les en-têtes 'Connection: Keep-Alive' et 'Connection: close' ont été reçus. "
 "La motion continue sans changement."
 
 #: src/netcam_http.c
@@ -2374,7 +2374,8 @@ msgid ""
 " Motion removes keepalive."
 msgstr ""
 "Aucun en-tête \"Connexion: Keep-Alive\" ni \"Connexion: fermer\" n'a été "
-"reçu. \\NMotion supprime Keepalive."
+"reçu. \n"
+" Motion supprime Keepalive."
 
 #: src/netcam_http.c
 msgid ""
@@ -2382,7 +2383,8 @@ msgid ""
 " Motion continues unchanged."
 msgstr ""
 "Aucun en-tête \"Connexion: Keep-Alive\" ni \"Connexion: fermer\" n'a été "
-"reçu. \\NLa motion continue sans changement."
+"reçu. \n"
+" La motion continue sans changement."
 
 #: src/netcam_http.c
 msgid ""
@@ -2390,16 +2392,17 @@ msgid ""
 " Netcam does not support Keep-Alive. Motion continues in non-Keep-Alive."
 msgstr ""
 "Suppression de l'indicateur Keep-Alive de netcam car l'en-tête \"Connection: "
-"close\" a été reçu. \\NNetcam ne prend pas en charge Keep-Alive. La motion "
-"continue dans non-Keep-Alive."
+"close\" a été reçu. \n"
+" Netcam ne prend pas en charge Keep-Alive. La motion continue dans non-Keep-"
+"Alive."
 
 #: src/netcam_http.c
 msgid ""
 "Keep-Alive has reached end of valid period.\n"
 "Motion will close netcam, then resume Keep-Alive with a new socket."
 msgstr ""
-"Keep-Alive a atteint la fin de la période de validité. \\NMotion fermera "
-"netcam, puis reprendra Keep-Alive avec un nouveau socket."
+"Keep-Alive a atteint la fin de la période de validité. \n"
+" Motion fermera netcam, puis reprendra Keep-Alive avec un nouveau socket."
 
 #: src/netcam_http.c
 msgid "disconnect"
@@ -3913,7 +3916,9 @@ msgstr ""
 msgid ""
 "Error setting pixel format.\n"
 "VIDIOC_S_FMT: "
-msgstr "Erreur lors de la définition du format de pixel. \\NVIDIOC S FMT:"
+msgstr ""
+"Erreur lors de la définition du format de pixel. \n"
+" VIDIOC S FMT:"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3999,7 +4004,7 @@ msgid ""
 "VIDIOC_QUERYBUF: "
 msgstr ""
 "Erreur d'interrogation du tampon %i \n"
-"VIDIOC QUERYBUF:"
+" VIDIOC QUERYBUF:"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4418,5 +4423,5 @@ msgstr "Impossible de récupérer le codec."
 
 #: src/webu_text.c
 #, c-format
-msgid "'%s' option is depreciated.  New option name is `%s'"
-msgstr "L'option ' %s' est dépréciée. Le nouveau nom de l'option est « %s»"
+msgid "'%s' option is depreciated.  New option name is '%s'"
+msgstr "L'option ' %s' est dépréciée. Le nouveau nom de l'option est '%s'"

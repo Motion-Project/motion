@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-12-29 16:29-0700\n"
-"PO-Revision-Date: 2020-01-10 21:00-0700\n"
+"POT-Creation-Date: 2020-01-12 17:18-0700\n"
+"PO-Revision-Date: 2020-01-12 17:51-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: nl\n"
@@ -776,8 +776,8 @@ msgid ""
 "Cannot reconnect to MySQL database %s on host %s with user %s MySQL error "
 "was %s"
 msgstr ""
-"Kan niet opnieuw verbinding maken met MySQL-database %s op host %s met MySQL-"
-"fout gebruiker %swas %s"
+"Kan niet opnieuw verbinding maken met MySQL-database %s op host %s met "
+"MySQL- fout gebruiker %s was %s"
 
 #: src/event.c
 #, c-format
@@ -972,7 +972,7 @@ msgid ""
 "The frame rate specified is too high for the ffmpeg movie type specified. "
 "Choose a different ffmpeg container or lower framerate."
 msgstr ""
-"De opgegeven framesnelheid is te hoog voor het opgegeven ffmpeg-filmtype."
+"De opgegeven framesnelheid is te hoog voor het opgegeven ffmpeg-filmtype. "
 "Kies een andere ffmpeg-container of lagere framerate."
 
 #: src/ffmpeg.c
@@ -1038,7 +1038,7 @@ msgid ""
 "%d"
 msgstr ""
 "PTS %<PRId64> Basis PTS %<PRId64> ms interval %<PRId64> tijdbasis %d- %d "
-"Wijzigen%d"
+"Wijzigen %d"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1540,7 +1540,7 @@ msgstr ""
 #, c-format
 msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
 msgstr ""
-"Motion ondersteunt alleen breedte en hoogte groter dan of gelijk aan 64 %dx "
+"Motion ondersteunt alleen breedte en hoogte groter dan of gelijk aan 64 %d x "
 "%d"
 
 #: src/motion.c
@@ -2226,8 +2226,8 @@ msgstr ""
 #, c-format
 msgid "Error reading image header, streaming mode (1). Unknown header '%s'"
 msgstr ""
-"Fout bij lezen van afbeeldingskoptekst, streamingmodus (1). Onbekende kop ' "
-"%s'"
+"Fout bij lezen van afbeeldingskoptekst, streamingmodus (1). Onbekende kop "
+"'%s' "
 
 #: src/netcam_http.c
 msgid "Error reading image header (2)"
@@ -2340,16 +2340,16 @@ msgid ""
 "No 'Connection: Keep-Alive' nor 'Connection: close' header received.\n"
 " Motion removes keepalive."
 msgstr ""
-"Geen 'Connection: Keep-Alive' of 'Connection: close' header ontvangen. "
-"\\NBeweging verwijdert keepalive."
+"Geen 'Connection: Keep-Alive' of 'Connection: close' header ontvangen.\n"
+" Beweging verwijdert keepalive. "
 
 #: src/netcam_http.c
 msgid ""
 "No 'Connection: Keep-Alive' nor 'Connection: close' header received.\n"
 " Motion continues unchanged."
 msgstr ""
-"Geen 'Connection: Keep-Alive' of 'Connection: close' header ontvangen. "
-"\\NBeweging blijft ongewijzigd."
+"Geen 'Connection: Keep-Alive' of 'Connection: close' header ontvangen. \n"
+" Beweging blijft ongewijzigd."
 
 #: src/netcam_http.c
 msgid ""
@@ -2357,16 +2357,17 @@ msgid ""
 " Netcam does not support Keep-Alive. Motion continues in non-Keep-Alive."
 msgstr ""
 "Netcam Keep-Alive-vlag verwijderd omdat de kop 'Verbinding: sluiten' is "
-"ontvangen. \\NNetcam ondersteunt Keep-Alive niet. Beweging gaat door in non-"
-"Keep-Alive."
+"ontvangen. \n"
+" Netcam ondersteunt Keep-Alive niet. Beweging gaat door in non-Keep-Alive."
 
 #: src/netcam_http.c
 msgid ""
 "Keep-Alive has reached end of valid period.\n"
 "Motion will close netcam, then resume Keep-Alive with a new socket."
 msgstr ""
-"Keep-Alive heeft het einde van de geldige periode bereikt. \\NMotion sluit "
-"netcam en hervat Keep-Alive met een nieuwe socket."
+"Keep-Alive heeft het einde van de geldige periode bereikt. \n"
+" \n"
+" Motion sluit netcam en hervat Keep-Alive met een nieuwe socket."
 
 #: src/netcam_http.c
 msgid "disconnect"
@@ -2657,8 +2658,8 @@ msgid ""
 "Camera width/height mismatch with JPEG image -  expected %dx%d, JPEG %dx%d "
 "retval %d"
 msgstr ""
-"Camerabreedte / hoogte komt niet overeen met JPEG-afbeelding - verwacht %dx "
-"%d, JPEG %dx %dretval %d"
+"Camerabreedte / hoogte komt niet overeen met JPEG-afbeelding - verwacht %dx"
+"%d, JPEG %dx%d retval %d"
 
 #: src/netcam_jpeg.c
 #, c-format
@@ -3109,7 +3110,7 @@ msgid ""
 msgstr ""
 "Kan afbeelding niet naar bestand %s schrijven - controleer toegangsrechten "
 "tot doelmap \n"
-"Discussie gaat eindigen vanwege deze fatale fout"
+" Discussie gaat eindigen vanwege deze fatale fout "
 
 #: src/picture.c
 #, c-format
@@ -3171,8 +3172,8 @@ msgid ""
 "Please edit this file and re-run motion to enable mask feature"
 msgstr ""
 "Leeg masker %s maken \n"
-"Bewerk dit bestand en voer de beweging opnieuw uit om de maskerfunctie in te "
-"schakelen"
+" Bewerk dit bestand en voer de beweging opnieuw uit om de maskerfunctie in "
+"te schakelen "
 
 #: src/rotate.c
 #, c-format
@@ -3273,7 +3274,7 @@ msgid ""
 "%d"
 msgstr ""
 "X cent-> x %d, cent-> y %d, reversex %d, reversey %d motorx %d data %d "
-"commando%d"
+"commando %d "
 
 #: src/track.c
 #, c-format
@@ -3287,7 +3288,7 @@ msgid ""
 "%d"
 msgstr ""
 "Y cent-> x %d, cent-> y %d, reversex %d, reversey %d motory %d data %d "
-"commando%d"
+"commando %d"
 
 #: src/track.c
 #, c-format
@@ -3295,7 +3296,7 @@ msgid ""
 "X-offset %d, Y-offset %d, x-position %d. y-position %d,reversex %d, reversey "
 "%d , stepsize %d"
 msgstr ""
-"X-offset %d, Y-offset %d, x-positie %d. y-positie %d, reversex %d, reversey"
+"X-offset %d, Y-offset %d, x-positie %d. y-positie %d, reversex %d, reversey "
 "%d, stapgrootte %d"
 
 #: src/track.c
@@ -3575,8 +3576,8 @@ msgstr "Stoppen met vastleggen"
 #, c-format
 msgid "Reusing [%s] inputs [%d,%d] Change capture method METEOR_CAP_SINGLE"
 msgstr ""
-"[ %s] -ingangen opnieuw gebruiken [ %d, %d] Opnamemethode wijzigen METEOR "
-"CAP SINGLE"
+"[ %s] -ingangen opnieuw gebruiken [ %d, %d] Opnamemethode wijzigen "
+"METEOR_CAP_SINGLE"
 
 #: src/video_bktr.c
 msgid "VIDEO_PALETTE_YUV420P setting imgs.size_norm and imgs.motionsize"
@@ -3859,7 +3860,9 @@ msgstr ""
 msgid ""
 "Error setting pixel format.\n"
 "VIDIOC_S_FMT: "
-msgstr "Fout bij het instellen van de pixelindeling. \\NVIDIOC S FMT:"
+msgstr ""
+"Fout bij het instellen van de pixelindeling. \n"
+" VIDIOC S FMT: "
 
 #: src/video_v4l2.c
 #, c-format
@@ -3942,7 +3945,7 @@ msgid ""
 "VIDIOC_QUERYBUF: "
 msgstr ""
 "Fout bij het opvragen van buffer %i \n"
-"VIDIOC QUERYBUF:"
+" VIDIOC QUERYBUF: "
 
 #: src/video_v4l2.c
 #, c-format
@@ -4362,5 +4365,5 @@ msgstr "Kon afbeelding niet streamen."
 
 #: src/webu_text.c
 #, c-format
-msgid "'%s' option is depreciated.  New option name is `%s'"
-msgstr "' %s' optie wordt afgeschreven. Nieuwe optienaam is ` %s '"
+msgid "'%s' option is depreciated.  New option name is '%s'"
+msgstr "' %s' optie wordt afgeschreven. Nieuwe optienaam is '%s'"

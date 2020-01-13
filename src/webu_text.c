@@ -901,7 +901,7 @@ void webu_text_get_query(struct webui_ctx *webui) {
 
         if (strcmp(webui->uri_value1, config_params[indx_parm].param_name) != 0){
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-            , _("'%s' option is depreciated.  New option name is `%s'")
+            , _("'%s' option is depreciated.  New option name is '%s'")
             ,webui->uri_value1, config_params[indx_parm].param_name);
         }
 
