@@ -113,7 +113,7 @@ typedef struct netcam_image_buff {
 } netcam_buff;
 typedef netcam_buff *netcam_buff_ptr;
 
-struct netcam_caps {                    /* netcam capabilities: */
+extern struct netcam_caps {                    /* netcam capabilities: */
         unsigned char streaming;        /*  See the NCS_* defines */
         unsigned char content_length;   /*  0 - unsupported     */
 } caps;

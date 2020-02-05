@@ -10,7 +10,7 @@
 #ifndef _INCLUDE_TRANSLATE_H_
 #define _INCLUDE_TRANSLATE_H_
 
-int nls_enabled;
+extern int nls_enabled;
 
 #ifdef HAVE_GETTEXT
 #   include <libintl.h>
