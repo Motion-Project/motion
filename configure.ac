@@ -494,11 +494,11 @@ echo "      Configure status       "
 echo "      ${PACKAGE_NAME} ${PACKAGE_VERSION}"
 echo "   **************************"
 echo
-echo "CFLAGS: $CFLAGS"
+echo "CFLAGS: $TEMP_CFLAGS $CFLAGS"
 echo
 echo "LIBS: $LIBS"
 echo
-echo "LDFLAGS: $LDFLAGS"
+echo "LDFLAGS: $TEMP_LDFLAGS $LDFLAGS"
 echo
 echo
 echo "OS                  : $host_os"
