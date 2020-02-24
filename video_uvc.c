@@ -95,6 +95,8 @@ uvc_device uvc_device_list[] =
 
         /* UCAM-DLY300TA: Etron Technology, Inc., UCAM-DLY300TA */
         { 0x056e, 0x7008, 0, 1, 1,  0, 0x82, 1, 0x0200, 0x0100 },
+
+	/* UCAM-DLE300T: ELECOM */
         { 0x056e, 0x700e, 0, 1, 1,  0, 0x82, 1, 0x0200, 0x0100 },
 
         /* C920: Logitech Inc., LOGICOOL HD Webcam C920 */
