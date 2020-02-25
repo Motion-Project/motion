@@ -3,6 +3,7 @@
  * Copyright (c) 2012-2014 SAITOU Toshihide
  * All rights reserved.
  *
+ * This is libusb base UVC camera support code for FreeBSD
  * This code based on ex41.c.
  * A sample program for LibUSB isochronous transfer using UVC cam.
  *
@@ -85,39 +86,7 @@ typedef struct uvc_device
 
 uvc_device uvc_device_list[] =
 {
-	/* Isochronous */
-
-        /* MSK-1425: Microsoft, Microsoft LifeCam StudioTM  */
-        { 0x045e, 0x0772, 0, 1, 1,  0, 0x81, 2, 0x0400, 0x0100 },
-
-        /* BSW20K07HWH: iBUFFALO, BSW20K07HWH */
-        { 0x0458, 0x7081, 0, 1, 1,  0, 0x82, 7, 0x0200, 0x0100 },
-
-        /* UCAM-DLY300TA: Etron Technology, Inc., UCAM-DLY300TA */
-        { 0x056e, 0x7008, 0, 1, 1,  0, 0x82, 1, 0x0200, 0x0100 },
-
-	/* UCAM-DLE300T: ELECOM */
-        { 0x056e, 0x700e, 0, 1, 1,  0, 0x82, 1, 0x0200, 0x0100 },
-
-        /* C920: Logitech Inc., LOGICOOL HD Webcam C920 */
-        { 0x046d, 0x082d, 0, 1, 1, 10, 0x81, 1, 0x0300, 0x0100 },
-
-	/* Logitech HD Webcam C270 */
-        { 0x046d, 0x0825, 0, 1, 1, 10, 0x81, 1, 0x0300, 0x0100 },
-
-        /* UCAM-MS130: Etron Technology, Inc., UCAM-MS130SV */
-        { 0x056e, 0x7012, 0, 1, 1,  0, 0x81, 2, 0x0300, 0x0100 },
-
-        /* KBCR-S01MU */
-        { 0x05ca, 0x18d0, 0, 1, 1,  0, 0x82, 1, 0x0200, 0x0400 },
-
-        /* Bulk */
-
-        /* ESCH021: e-con System Pvt. Ltd., See3CAM_10CUG_CH */
-        { 0x2560, 0xc111, 0, 1, 1,  0, 0x83, 1, 0x0200, 0x0100 },
-
-        /* ESMH156: e-con System Pvt. Ltd., See3CAM_10CUG_MH */
-        { 0x2560, 0xc110, 0, 1, 1,  0, 0x83, 1, 0x0200, 0x0100 },
+        { 0, 0, 0, 1, 1,  0, 0, 1, 0x0200, 0x0100 },
 
         { 0, 0, 0, 0, 0, 0, 0 }
 };
@@ -432,24 +401,18 @@ int uvc_start(struct context *cnt)
 
         foundIt = FALSE;
         i = 0;
+	j = 0;
         while ((dev = devs[i++]) != NULL)
         {
                 bus = libusb_get_bus_number(dev);
                 addr = libusb_get_device_address(dev);
                 snprintf(devname, sizeof(devname), "/dev/ugen%u.%u", bus, addr);
                 libusb_get_device_descriptor(dev, &desc);
-                uvc_device *uvc;
-                for (j = 0; uvc_device_list[j].VID != 0; j++)
-                {
-                        uvc = &uvc_device_list[j];
-                        if (uvc->VID == desc.idVendor &&
-                            uvc->PID == desc.idProduct &&
-                            !strcmp(cnt->conf.video_device, devname))
-                        {
-                                foundIt = TRUE;
-                                goto FOUND;
-                        }
-                }
+                if (strcmp(cnt->conf.video_device, devname) == 0) {
+			MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Camera found %04x:%04x"), desc.idVendor, desc.idProduct);
+			foundIt = TRUE;
+			goto FOUND;
+		}
         }
 FOUND:
         if (!foundIt)
@@ -607,6 +570,8 @@ FOUND:
                                         ep = (void *) &intfDesc->endpoint[k];
                                         if (ep->wMaxPacketSize > maxPktSize)
                                         {
+						uvc_private->uvc->Endpoint =
+						    ep->bEndpointAddress;
                                                 maxPktSize = ep->wMaxPacketSize;
                                                 altSetting = j;
                                                 foundIt = TRUE;
