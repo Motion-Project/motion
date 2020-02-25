@@ -36,7 +36,7 @@ AS_IF([test "${PKGCONFIG}" = "no" ],[
 ###  Check pthread
 ##############################################################################
 AC_CHECK_HEADERS(pthread.h,,AC_MSG_ERROR([pthread is required.]))
-CFLAGS="${CFLAGS} -D_THREAD_SAFE "
+TEMP_CFLAGS="-D_THREAD_SAFE"
 LIBS="$LIBS -pthread "
 
 ##############################################################################
