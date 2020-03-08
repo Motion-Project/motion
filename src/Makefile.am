@@ -1,4 +1,4 @@
-AM_CFLAGS= -Dsysconfdir=\"$(sysconfdir)/motion\" -DLOCALEDIR=\"$(DESTDIR)$(localedir)\"
+AM_CPPFLAGS= -Dsysconfdir=\"$(sysconfdir)/motion\" -DLOCALEDIR=\"$(DESTDIR)$(localedir)\"
 
 if INC_MMAL_SRC
 MMAL_SRC=raspicam/RaspiCamControl.c raspicam/RaspiCLI.c
