@@ -1,5 +1,6 @@
 AC_INIT(motion, esyscmd(['./scripts/version.sh']))
 AM_INIT_AUTOMAKE([subdir-objects foreign])
+AM_MAINTAINER_MODE([enable])
 AC_PROG_CC
 AC_PROG_CXX
 AC_GNU_SOURCE
