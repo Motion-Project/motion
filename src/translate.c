@@ -10,6 +10,8 @@
 #include "motion.h"
 #include "translate.h"
 
+int nls_enabled;
+
 void translate_locale_chg(const char *langcd){
 #ifdef HAVE_GETTEXT
     /* This routine is for development testing only.  It is not used for
