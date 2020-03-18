@@ -996,8 +996,9 @@ static int v4l2_capture(struct context *cnt, struct video_dev *curdev, unsigned 
     sigaddset(&set, SIGHUP);
     pthread_sigmask(SIG_BLOCK, &set, &old);
 
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-        ,_("1) vid_source->pframe %i"), vid_source->pframe);
+    /* Most MOTION_LOG statements are commented out to avoid spamming to regular users*/
+    //MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+    //    ,_("1) vid_source->pframe %i"), vid_source->pframe);
 
     if (vid_source->pframe >= 0) {
         if (xioctl(vid_source, VIDIOC_QBUF, &vid_source->buf) == -1) {
@@ -1043,23 +1044,24 @@ static int v4l2_capture(struct context *cnt, struct video_dev *curdev, unsigned 
         return retcd;
     }
 
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "2) vid_source->pframe %i", vid_source->pframe);
+    //MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "2) vid_source->pframe %i", vid_source->pframe);
 
     vid_source->pframe = vid_source->buf.index;
     vid_source->buffers[vid_source->buf.index].used = vid_source->buf.bytesused;
     vid_source->buffers[vid_source->buf.index].content_length = vid_source->buf.bytesused;
 
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "3) vid_source->pframe %i "
-               "vid_source->buf.index %i", vid_source->pframe, vid_source->buf.index);
+    //MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "3) vid_source->pframe %i "
+    //           "vid_source->buf.index %i", vid_source->pframe, vid_source->buf.index);
 
     pthread_sigmask(SIG_UNBLOCK, &old, NULL);    /*undo the signal blocking */
 
     {
         video_buff *the_buffer = &vid_source->buffers[vid_source->buf.index];
 
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-            ,_("the_buffer index %d Address (%x)")
-            ,vid_source->buf.index, the_buffer->ptr);
+        //MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+        //    ,_("the_buffer index %d Address (%x)")
+        //    ,vid_source->buf.index, the_buffer->ptr);
+
         shift = 0;
         /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
         switch (curdev->pixfmt_src) {
