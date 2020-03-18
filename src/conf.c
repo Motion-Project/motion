@@ -3050,6 +3050,7 @@ struct context **read_camera_dir(struct context **cnt, const char *str, int val)
     {
         MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
             ,_("Camera directory config %s not found"), str);
+        return cnt;
     }
 
     /* Store the given config value to allow writing it out */
