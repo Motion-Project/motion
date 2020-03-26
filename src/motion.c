@@ -553,6 +553,9 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
             /* always save first motion frame as preview-shot, may be changed to an other one later */
             if (cnt->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER))
                 image_save_as_preview(cnt, img);
+            /* Save first motion frame */
+            if (cnt->new_img & NEWIMG_FIRST)
+                event(cnt, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
 
         }
 
@@ -2610,7 +2613,9 @@ static void mlp_actions(struct context *cnt){
 
             /* Save preview_shot here at the end of event */
             if (cnt->imgs.preview_image.diffs) {
-                event(cnt, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
+                /* Do not save if it was saved at start */
+                if (!(cnt->new_img & NEWIMG_FIRST))
+                    event(cnt, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
                 cnt->imgs.preview_image.diffs = 0;
             }
 
