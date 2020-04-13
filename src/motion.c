@@ -1039,10 +1039,7 @@ static int dbse_init_mysql(struct context *cnt){
     #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
         int dbport;
         if ((!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {
-            // close database to be sure that we are not leaking
-            mysql_close(cnt->database);
             cnt->database_event_id = 0;
-
             cnt->database = mymalloc(sizeof(MYSQL));
             mysql_init(cnt->database);
             if ((cnt->conf.database_port < 0) || (cnt->conf.database_port > 65535)){
@@ -1167,6 +1164,7 @@ static void dbse_deinit(struct context *cnt){
     if (cnt->conf.database_type) {
         #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
             if ( (!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {
+                mysql_thread_end();
                 mysql_close(cnt->database);
                 cnt->database_event_id = 0;
             }
