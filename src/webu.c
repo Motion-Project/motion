@@ -1318,9 +1318,15 @@ static int webu_answer_strm(void *cls
     }
 
     /* Do not answer a request until the motion loop has completed at least once */
-    if (webui->cnt->passflag == 0) return MHD_NO;
+    if (webui->cnt->passflag == 0) {
+        MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Stream picture is not ready yet"));
+        return MHD_NO;
+    }
 
-    if (webui->cnt->webcontrol_finish) return MHD_NO;
+    if (webui->cnt->webcontrol_finish) {
+        MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Stream is about to finish"));
+        return MHD_NO;
+    }
 
     if (strlen(webui->clientip) == 0){
         webu_clientip(webui);
