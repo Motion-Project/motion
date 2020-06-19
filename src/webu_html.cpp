@@ -460,6 +460,7 @@ static void webu_html_config(struct webui_ctx *webui) {
             continue;
         }
 
+        memset(val_main,'\0',PATH_MAX);
         conf_edit_get(webui->camlst[0], config_parms[indx_parm].parm_name
             , val_main, config_parms[indx_parm].parm_cat);
 
@@ -479,6 +480,7 @@ static void webu_html_config(struct webui_ctx *webui) {
         /* Loop through all the treads and see if any have a different value from motion.conf */
         if (webui->cam_threads > 1){
             for (indx=1;indx <= webui->cam_count;indx++){
+                memset(val_thread,'\0',PATH_MAX);
                 conf_edit_get(webui->camlst[indx], config_parms[indx_parm].parm_name
                     , val_thread, config_parms[indx_parm].parm_cat);
                 diff_vals = FALSE;
