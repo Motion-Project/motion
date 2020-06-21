@@ -14,6 +14,7 @@
 #include "util.hpp"
 #include "logger.hpp"
 #include <stdarg.h>
+#include <syslog.h>
 
 static int log_mode = LOGMODE_SYSLOG;
 static FILE *logfile  = NULL;
@@ -51,7 +52,8 @@ static void log_set_type(unsigned int type) {
 
 /** Gets string value for log level. */
 static const char* log_get_level_str(unsigned int level) {
-    return log_level_str[level];
+    /* The array is zero based vs our level values are 1 based */
+    return log_level_str[level-1];
 }
 
 /** Sets log level. */
@@ -138,6 +140,7 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
     char threadname[32];
 
 
+
     /* Exit if level is greater than log_level */
     if ((unsigned int)level > log_level){
         return;
@@ -154,7 +157,6 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
     n = 0;
 
     errno_save = errno;
-
     mythreadname_get(threadname);
 
     if (log_mode == LOGMODE_FILE) {
@@ -221,7 +223,8 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
                 break;
 
             case LOGMODE_SYSLOG:
-                syslog(level, "%s", flood_repeats);
+                /* The syslog level values are one less than the motion numeric values*/
+                syslog(level-1, "%s", flood_repeats);
                 strncat(flood_repeats, "\n", 1024 - strlen(flood_repeats));
                 fputs(flood_repeats, stderr);
                 fflush(stderr);
@@ -238,7 +241,8 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
             break;
 
         case LOGMODE_SYSLOG:
-            syslog(level, "%s", buf);
+            /* The syslog level values are one less than the motion numeric values*/
+            syslog(level-1, "%s", buf);
             strncat(buf, "\n", 1024 - strlen(buf));
             fputs(buf, stderr);
             fflush(stderr);
@@ -256,9 +260,7 @@ void log_init(struct ctx_motapp *motapp){
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Using default log level (%s) (%d)")
             ,log_get_level_str(motapp->log_level)
-            ,SHOW_LEVEL_VALUE(motapp->log_level));
-    } else {
-        motapp->log_level--; // Let's make syslog compatible
+            ,motapp->log_level);
     }
 
 
@@ -283,7 +285,7 @@ void log_init(struct ctx_motapp *motapp){
     } else {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Logging to syslog"));
     }
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion %s Started",VERSION);
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion %s started",VERSION);
 
     motapp->log_type = log_get_type(motapp->log_type_str.c_str());
 

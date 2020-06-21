@@ -14,8 +14,6 @@
 
     struct ctx_cam;
 
-    #include <syslog.h>
-
     /* Logging mode */
     #define LOGMODE_NONE            0   /* No logging             */
     #define LOGMODE_FILE            1   /* Log messages to file   */
@@ -25,18 +23,21 @@
     #define SHOW_ERRNO              1   /* Flag to show message associated to errno */
 
     /* Log levels */
+    /* It would be HUGELY helpful to have the motion log values start at zero instead of
+       1 but that would be a headache for historical compatability...maybe think about this
+       as a break later on.
+    */
     #define LOG_ALL                 9
-    #define EMG                     LOG_EMERG     /* syslog 0 motion 1 */
-    #define ALR                     LOG_ALERT     /* syslog 1 motion 2 */
-    #define CRT                     LOG_CRIT      /* syslog 2 motion 3 */
-    #define ERR                     LOG_ERR       /* syslog 3 motion 4 */
-    #define WRN                     LOG_WARNING   /* syslog 4 motion 5 */
-    #define NTC                     LOG_NOTICE    /* syslog 5 motion 6 */
-    #define INF                     LOG_INFO      /* syslog 6 motion 7 */
-    #define DBG                     LOG_DEBUG     /* syslog 7 motion 8 */
-    #define ALL                     LOG_ALL       /* syslog 8 motion 9 */
-    #define LEVEL_DEFAULT           NTC           /* syslog 5 motion 6 default */
-    #define SHOW_LEVEL_VALUE(x)     (x+1)
+    #define EMG                     1       /* syslog 0 motion 1 */
+    #define ALR                     2       /* syslog 1 motion 2 */
+    #define CRT                     3       /* syslog 2 motion 3 */
+    #define ERR                     4       /* syslog 3 motion 4 */
+    #define WRN                     5       /* syslog 4 motion 5 */
+    #define NTC                     6       /* syslog 5 motion 6 */
+    #define INF                     7       /* syslog 6 motion 7 */
+    #define DBG                     8       /* syslog 7 motion 8 */
+    #define ALL                     9       /* syslog 8 motion 9 */
+    #define LEVEL_DEFAULT           NTC     /* syslog 5 motion 6 default */
 
     /* Log types */
     #define TYPE_CORE               1             /* Core logs         */
