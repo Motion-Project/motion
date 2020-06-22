@@ -1675,10 +1675,10 @@ static int netcam_start_handler(struct ctx_netcam *netcam){
         }
     }
     /* Warn the user about a mismatch of camera FPS vs handler capture rate*/
-    if (netcam->conf->framerate < netcam->src_fps){
+    if (netcam->framerate < netcam->src_fps){
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             , "Requested frame rate %d FPS is less than camera frame rate %d FPS"
-            , netcam->conf->framerate,netcam->src_fps);
+            , netcam->framerate,netcam->src_fps);
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             , "Increasing capture rate to %d FPS to match camera."
             , netcam->src_fps);
