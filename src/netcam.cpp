@@ -4,13 +4,7 @@
  *      netcam_setup
  *      netcam_next
  *      netcam_cleanup
- *  are called from video_common.c
- *
- *  Additional note:  Although this module is called netcam_rtsp,
- *  it actually handles more camera types than just rtsp.
- *  Within its current construct, it could be set up to handle
- *  whatever types of capture devices that ffmpeg can use.
- *  As of this writing it includes rtsp, http, files and v4l2.
+ *  are called from video_common.c which is on the main thread
  *
  ***********************************************************/
 
@@ -592,6 +586,9 @@ static int netcam_open_codec(struct ctx_netcam *netcam){
             return -1;
         }
 
+        netcam->codec_context->error_concealment = FF_EC_GUESS_MVS | FF_EC_DEBLOCK;
+        netcam->codec_context->err_recognition = AV_EF_EXPLODE;
+
         retcd = avcodec_open2(netcam->codec_context, decoder, NULL);
         if ((retcd < 0) || (netcam->interrupted)){
             av_strerror(retcd, errstr, sizeof(errstr));
@@ -1006,7 +1003,9 @@ static void netcam_set_rtsp(struct ctx_netcam *netcam){
                 ,_("%s: Setting rtsp transport to tcp"),netcam->cameratype);
     } else {
         av_dict_set(&netcam->opts, "rtsp_transport", "udp", 0);
-        av_dict_set(&netcam->opts, "max_delay", "500000", 0);  /* 100000 is the default */
+        av_dict_set(&netcam->opts, "max_delay", "500000", 0);
+        av_dict_set(&netcam->opts, "buffer_size", "2560000", 0);
+        av_dict_set(&netcam->opts, "fifo_size", "1000000", 0);
         if (netcam->status == NETCAM_NOTCONNECTED)
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Setting rtsp transport to udp"),netcam->cameratype);
