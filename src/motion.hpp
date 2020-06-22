@@ -242,6 +242,7 @@ struct ctx_stream_data {
     unsigned char   *jpeg_data; /* Image compressed as JPG */
     long            jpeg_size;  /* The number of bytes for jpg */
     int             cnct_count; /* Counter of the number of connections */
+    int             consumed;   /* Bool for whether the jpeg data was consumed*/
 };
 
 struct ctx_stream {

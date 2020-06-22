@@ -119,6 +119,7 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
         /* Copy in the terminator after the jpg data at the end*/
         memcpy(webui->resp_page + header_len + jpeg_size,"\r\n",2);
         webui->resp_used = header_len + jpeg_size + 2;
+        local_stream->consumed = true;
     pthread_mutex_unlock(&webui->cam->stream.mutex);
 
 }
@@ -362,18 +363,22 @@ void webu_stream_init(struct ctx_cam *cam){
     cam->stream.norm.jpeg_size = 0;
     cam->stream.norm.jpeg_data = NULL;
     cam->stream.norm.cnct_count = 0;
+    cam->stream.norm.consumed = false;
 
     cam->stream.sub.jpeg_size = 0;
     cam->stream.sub.jpeg_data = NULL;
     cam->stream.sub.cnct_count = 0;
+    cam->stream.sub.consumed = false;
 
     cam->stream.motion.jpeg_size = 0;
     cam->stream.motion.jpeg_data = NULL;
     cam->stream.motion.cnct_count = 0;
+    cam->stream.motion.consumed = false;
 
     cam->stream.source.jpeg_size = 0;
     cam->stream.source.jpeg_data = NULL;
     cam->stream.source.cnct_count = 0;
+    cam->stream.source.consumed = false;
 
     cam->stream.secondary.jpeg_size = 0;
     cam->stream.secondary.jpeg_data = NULL;
@@ -427,7 +432,7 @@ static void webu_stream_getimg_norm(struct ctx_cam *cam, struct ctx_image_data *
     if (cam->stream.norm.jpeg_data == NULL){
         cam->stream.norm.jpeg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
     }
-    if (img_data->image_norm != NULL){
+    if (img_data->image_norm != NULL && cam->stream.norm.consumed) {
         cam->stream.norm.jpeg_size = pic_put_memory(cam
             ,cam->stream.norm.jpeg_data
             ,cam->imgs.size_norm
@@ -435,6 +440,7 @@ static void webu_stream_getimg_norm(struct ctx_cam *cam, struct ctx_image_data *
             ,cam->conf->stream_quality
             ,cam->imgs.width
             ,cam->imgs.height);
+        cam->stream.norm.consumed = false;
     }
 
 }
@@ -447,7 +453,7 @@ static void webu_stream_getimg_sub(struct ctx_cam *cam, struct ctx_image_data *i
     if (cam->stream.sub.jpeg_data == NULL){
         cam->stream.sub.jpeg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
     }
-    if (img_data->image_norm != NULL){
+    if (img_data->image_norm != NULL && cam->stream.sub.consumed) {
         /* Resulting substream image must be multiple of 8 */
         if (((cam->imgs.width  % 16) == 0)  &&
             ((cam->imgs.height % 16) == 0)) {
@@ -477,6 +483,7 @@ static void webu_stream_getimg_sub(struct ctx_cam *cam, struct ctx_image_data *i
                 ,cam->imgs.width
                 ,cam->imgs.height);
         }
+        cam->stream.sub.consumed = false;
     }
 
 }
@@ -487,7 +494,7 @@ static void webu_stream_getimg_motion(struct ctx_cam *cam){
     if (cam->stream.motion.jpeg_data == NULL){
         cam->stream.motion.jpeg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
     }
-    if (cam->imgs.image_motion.image_norm != NULL){
+    if (cam->imgs.image_motion.image_norm != NULL  && cam->stream.motion.consumed) {
         cam->stream.motion.jpeg_size = pic_put_memory(cam
             ,cam->stream.motion.jpeg_data
             ,cam->imgs.size_norm
@@ -495,6 +502,7 @@ static void webu_stream_getimg_motion(struct ctx_cam *cam){
             ,cam->conf->stream_quality
             ,cam->imgs.width
             ,cam->imgs.height);
+        cam->stream.motion.consumed = false;
     }
 
 }
@@ -505,7 +513,7 @@ static void webu_stream_getimg_source(struct ctx_cam *cam){
     if (cam->stream.source.jpeg_data == NULL){
         cam->stream.source.jpeg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
     }
-    if (cam->imgs.image_virgin != NULL){
+    if (cam->imgs.image_virgin != NULL && cam->stream.source.consumed) {
         cam->stream.source.jpeg_size = pic_put_memory(cam
             ,cam->stream.source.jpeg_data
             ,cam->imgs.size_norm
@@ -513,6 +521,7 @@ static void webu_stream_getimg_source(struct ctx_cam *cam){
             ,cam->conf->stream_quality
             ,cam->imgs.width
             ,cam->imgs.height);
+        cam->stream.source.consumed = false;
     }
 
 }
