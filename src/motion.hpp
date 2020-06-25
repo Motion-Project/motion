@@ -363,6 +363,8 @@ struct ctx_cam {
     int previous_diffs, previous_location_x, previous_location_y;
     unsigned int            passflag;  //only purpose is to flag first frame vs all others.....
 
+    pthread_mutex_t         parms_lock;
+    int                     parms_changed;      /*bool indicating if the parms have changed */
 
 };
 
@@ -395,6 +397,7 @@ struct ctx_motapp {
 
     struct MHD_Daemon   *webcontrol_daemon;
     char                webcontrol_digest_rand[8];
+    int                 parms_changed;      /*bool indicating if the parms have changed */
 
 };
 

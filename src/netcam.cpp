@@ -1176,45 +1176,49 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("Setting up %s stream."),netcam->cameratype);
 
-    mycheck_passthrough(cam); /* In case it was turned on via webcontrol */
-    netcam->status = NETCAM_NOTCONNECTED;
-    netcam->rtsp_uses_tcp =cam->conf->netcam_use_tcp;
-    netcam->v4l2_palette = cam->conf->v4l2_palette;
-    netcam->framerate = cam->conf->framerate;
-    netcam->src_fps =  cam->conf->framerate; /* Default to conf fps */
-    netcam->motapp = cam->motapp;
-    netcam->conf = cam->conf;
-    netcam->img_recv =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
-    netcam->img_recv->ptr =(char*) mymalloc(NETCAM_BUFFSIZE);
-    netcam->img_latest =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
-    netcam->img_latest->ptr =(char*) mymalloc(NETCAM_BUFFSIZE);
-    netcam->pktarray_size = 0;
-    netcam->pktarray_index = -1;
-    netcam->pktarray = NULL;
-    netcam->handler_finished = TRUE;
-    netcam->first_image = TRUE;
-    netcam->reconnect_count = 0;
-    cam->conf->camera_name.copy(netcam->camera_name,PATH_MAX);
+    pthread_mutex_lock(&netcam->mutex_parms);
 
-    snprintf(netcam->threadname, 15, "%s",_("Unknown"));
+        mycheck_passthrough(cam); /* In case it was turned on via webcontrol */
+        netcam->status = NETCAM_NOTCONNECTED;
+        netcam->rtsp_uses_tcp =cam->conf->netcam_use_tcp;
+        netcam->v4l2_palette = cam->conf->v4l2_palette;
+        netcam->framerate = cam->conf->framerate;
+        netcam->src_fps =  cam->conf->framerate; /* Default to conf fps */
+        netcam->motapp = cam->motapp;
+        netcam->conf = cam->conf;
+        netcam->img_recv =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
+        netcam->img_recv->ptr =(char*) mymalloc(NETCAM_BUFFSIZE);
+        netcam->img_latest =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
+        netcam->img_latest->ptr =(char*) mymalloc(NETCAM_BUFFSIZE);
+        netcam->pktarray_size = 0;
+        netcam->pktarray_index = -1;
+        netcam->pktarray = NULL;
+        netcam->handler_finished = TRUE;
+        netcam->first_image = TRUE;
+        netcam->reconnect_count = 0;
+        cam->conf->camera_name.copy(netcam->camera_name,PATH_MAX);
 
-    clock_gettime(CLOCK_REALTIME, &netcam->interruptstarttime);
-    clock_gettime(CLOCK_REALTIME, &netcam->interruptcurrenttime);
+        snprintf(netcam->threadname, 15, "%s",_("Unknown"));
 
-    /* If this is the norm and we have a highres, then disable passthru on the norm */
-    if ((!netcam->high_resolution) &&
-        (cam->conf->netcam_highres != "")) {
-        netcam->passthrough = FALSE;
-    } else {
-        netcam->passthrough = mycheck_passthrough(cam);
-    }
-    netcam->interruptduration = 5;
-    netcam->interrupted = FALSE;
+        clock_gettime(CLOCK_REALTIME, &netcam->interruptstarttime);
+        clock_gettime(CLOCK_REALTIME, &netcam->interruptcurrenttime);
 
-    clock_gettime(CLOCK_REALTIME, &netcam->frame_curr_tm);
-    clock_gettime(CLOCK_REALTIME, &netcam->frame_prev_tm);
+        /* If this is the norm and we have a highres, then disable passthru on the norm */
+        if ((!netcam->high_resolution) &&
+            (cam->conf->netcam_highres != "")) {
+            netcam->passthrough = FALSE;
+        } else {
+            netcam->passthrough = mycheck_passthrough(cam);
+        }
+        netcam->interruptduration = 5;
+        netcam->interrupted = FALSE;
 
-    netcam_set_path(cam, netcam);
+        clock_gettime(CLOCK_REALTIME, &netcam->frame_curr_tm);
+        clock_gettime(CLOCK_REALTIME, &netcam->frame_prev_tm);
+
+        netcam_set_path(cam, netcam);
+
+    pthread_mutex_unlock(&netcam->mutex_parms);
 
 }
 
@@ -1522,7 +1526,10 @@ static void netcam_handler_wait(struct ctx_netcam *netcam){
     int framerate;
     long usec_maxrate, usec_delay;
 
-    framerate = netcam->conf->framerate;
+    pthread_mutex_lock(&netcam->mutex_parms);
+        framerate = netcam->framerate;
+    pthread_mutex_unlock(&netcam->mutex_parms);
+
     if (framerate < 2) framerate = 2;
 
     if (mystreq(netcam->service,"file")) {
@@ -1639,6 +1646,7 @@ static int netcam_start_handler(struct ctx_netcam *netcam){
     pthread_mutex_init(&netcam->mutex, NULL);
     pthread_mutex_init(&netcam->mutex_pktarray, NULL);
     pthread_mutex_init(&netcam->mutex_transfer, NULL);
+    pthread_mutex_init(&netcam->mutex_parms,NULL);
 
     pthread_attr_init(&handler_attribute);
     pthread_attr_setdetachstate(&handler_attribute, PTHREAD_CREATE_DETACHED);
@@ -1807,7 +1815,7 @@ void netcam_cleanup(struct ctx_cam *cam, int init_retry_flag){
      * If the init_retry_flag is not set this function was
      * called while retrying the initial connection and there is
      * no camera-handler started yet and thread_running must
-     * not be decremented.
+     * not be decremented.  This is called from motion_loop thread
      */
     int wait_counter;
     int indx_cam, indx_max;
@@ -1858,6 +1866,7 @@ void netcam_cleanup(struct ctx_cam *cam, int init_retry_flag){
             pthread_mutex_destroy(&netcam->mutex);
             pthread_mutex_destroy(&netcam->mutex_pktarray);
             pthread_mutex_destroy(&netcam->mutex_transfer);
+            pthread_mutex_destroy(&netcam->mutex_parms);
 
             free(netcam);
             netcam = NULL;

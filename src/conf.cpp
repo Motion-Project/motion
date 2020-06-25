@@ -3068,6 +3068,7 @@ static void conf_edit_cat05(struct ctx_cam *cam, std::string parm_nm, std::strin
 static void conf_edit_dflt_app(struct ctx_motapp *motapp) {
     std::string dflt = "";
 
+    motapp->parms_changed = false;
     conf_edit_conf_filename(motapp, dflt, PARM_ACT_DFLT);
     conf_edit_log_file(motapp, dflt, PARM_ACT_DFLT);
     conf_edit_log_type(motapp, dflt, PARM_ACT_DFLT);
@@ -3085,6 +3086,8 @@ static void conf_edit_dflt_cam(struct ctx_cam *cam) {
     int indx;
     enum PARM_CAT pcat;
     std::string dflt = "";
+
+    cam->parms_changed = false;
 
     indx = 0;
     while (config_parms[indx].parm_name != "") {
@@ -3117,8 +3120,10 @@ int conf_edit_set_active(struct ctx_motapp *motapp, int threadnbr
         if (parm_nm ==  config_parms[indx].parm_name) {
             pcat = config_parms[indx].parm_cat;
             if ((pcat == PARM_CAT_00) && (threadnbr == -1)) {
+                motapp->parms_changed = true;
                 conf_edit_cat00(motapp, parm_nm, parm_val, PARM_ACT_SET);
             } else if ((config_parms[indx].parm_cat != PARM_CAT_00) && (threadnbr != -1)) {
+                motapp->cam_list[threadnbr]->parms_changed = true;
                 if (pcat == PARM_CAT_01) {
                     conf_edit_cat01(motapp->cam_list[threadnbr], parm_nm, parm_val, PARM_ACT_SET);
                 } else if (pcat == PARM_CAT_02) {
