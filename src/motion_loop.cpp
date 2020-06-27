@@ -1300,76 +1300,85 @@ static void mlp_loopback(struct ctx_cam *cam){
 static void mlp_parmsupdate(struct ctx_cam *cam){
 
     /* Check for some config parameter changes but only every second */
-    if ((cam->shots != 0) || (cam->parms_changed = false)) return;
+    if (cam->shots != 0) return;
 
-    draw_init_scale(cam);  /* Initialize and validate text_scale */
+    if (cam->parms_changed ) {
+        draw_init_scale(cam);  /* Initialize and validate text_scale */
 
-    if (cam->conf->picture_output == "on"){
-        cam->new_img = NEWIMG_ON;
-    } else if (cam->conf->picture_output == "first"){
-        cam->new_img = NEWIMG_FIRST;
-    } else if (cam->conf->picture_output == "best"){
-        cam->new_img = NEWIMG_BEST;
-    } else if (cam->conf->picture_output == "center"){
-        cam->new_img = NEWIMG_CENTER;
-    } else {
-        cam->new_img = NEWIMG_OFF;
-    }
-
-    if (cam->conf->locate_motion_mode == "on") {
-        cam->locate_motion_mode = LOCATE_ON;
-    } else if (cam->conf->locate_motion_mode == "preview"){
-        cam->locate_motion_mode = LOCATE_PREVIEW;
-    } else {
-        cam->locate_motion_mode = LOCATE_OFF;
-    }
-
-    if (cam->conf->locate_motion_style == "box"){
-        cam->locate_motion_style = LOCATE_BOX;
-    } else if (cam->conf->locate_motion_style == "redbox"){
-        cam->locate_motion_style = LOCATE_REDBOX;
-    } else if (cam->conf->locate_motion_style == "cross"){
-        cam->locate_motion_style = LOCATE_CROSS;
-    } else if (cam->conf->locate_motion_style == "redcross"){
-        cam->locate_motion_style = LOCATE_REDCROSS;
-    } else {
-        cam->locate_motion_style = LOCATE_BOX;
-    }
-
-    if (cam->conf->smart_mask_speed != cam->smartmask_speed ||
-        cam->smartmask_lastrate != cam->lastrate) {
-        if (cam->conf->smart_mask_speed == 0) {
-            memset(cam->imgs.smartmask, 0, cam->imgs.motionsize);
-            memset(cam->imgs.smartmask_final, 255, cam->imgs.motionsize);
+        if (cam->conf->picture_output == "on"){
+            cam->new_img = NEWIMG_ON;
+        } else if (cam->conf->picture_output == "first"){
+            cam->new_img = NEWIMG_FIRST;
+        } else if (cam->conf->picture_output == "best"){
+            cam->new_img = NEWIMG_BEST;
+        } else if (cam->conf->picture_output == "center"){
+            cam->new_img = NEWIMG_CENTER;
+        } else {
+            cam->new_img = NEWIMG_OFF;
         }
-        cam->smartmask_lastrate = cam->lastrate;
-        cam->smartmask_speed = cam->conf->smart_mask_speed;
-        cam->smartmask_ratio = 5 * cam->lastrate * (11 - cam->smartmask_speed);
+
+        if (cam->conf->locate_motion_mode == "on") {
+            cam->locate_motion_mode = LOCATE_ON;
+        } else if (cam->conf->locate_motion_mode == "preview"){
+            cam->locate_motion_mode = LOCATE_PREVIEW;
+        } else {
+            cam->locate_motion_mode = LOCATE_OFF;
+        }
+
+        if (cam->conf->locate_motion_style == "box"){
+            cam->locate_motion_style = LOCATE_BOX;
+        } else if (cam->conf->locate_motion_style == "redbox"){
+            cam->locate_motion_style = LOCATE_REDBOX;
+        } else if (cam->conf->locate_motion_style == "cross"){
+            cam->locate_motion_style = LOCATE_CROSS;
+        } else if (cam->conf->locate_motion_style == "redcross"){
+            cam->locate_motion_style = LOCATE_REDCROSS;
+        } else {
+            cam->locate_motion_style = LOCATE_BOX;
+        }
+
+        if (cam->conf->smart_mask_speed != cam->smartmask_speed ||
+            cam->smartmask_lastrate != cam->lastrate) {
+            if (cam->conf->smart_mask_speed == 0) {
+                memset(cam->imgs.smartmask, 0, cam->imgs.motionsize);
+                memset(cam->imgs.smartmask_final, 255, cam->imgs.motionsize);
+            }
+            cam->smartmask_lastrate = cam->lastrate;
+            cam->smartmask_speed = cam->conf->smart_mask_speed;
+            cam->smartmask_ratio = 5 * cam->lastrate * (11 - cam->smartmask_speed);
+        }
+
+        dbse_sqlmask_update(cam);
+
+        cam->threshold = cam->conf->threshold;
+        if (cam->conf->threshold_maximum > cam->conf->threshold ){
+            cam->threshold_maximum = cam->conf->threshold_maximum;
+        } else {
+            cam->threshold_maximum = (cam->imgs.height * cam->imgs.width * 3) / 2;
+        }
+
+        if (!cam->conf->noise_tune){
+            cam->noise = cam->conf->noise_level;
+        }
+
+        if (cam->netcam != NULL){
+            pthread_mutex_lock(&cam->motapp->mutex_parms);
+                cam->netcam->framerate = cam->conf->framerate;
+            pthread_mutex_unlock(&cam->motapp->mutex_parms);
+        }
+
+        if (cam->netcam_high != NULL){
+            pthread_mutex_lock(&cam->motapp->mutex_parms);
+                cam->netcam_high->framerate = cam->conf->framerate;
+            pthread_mutex_unlock(&cam->motapp->mutex_parms);
+        }
+        cam->parms_changed = false;
     }
 
-    dbse_sqlmask_update(cam);
-
-    cam->threshold = cam->conf->threshold;
-    if (cam->conf->threshold_maximum > cam->conf->threshold ){
-        cam->threshold_maximum = cam->conf->threshold_maximum;
-    } else {
-        cam->threshold_maximum = (cam->imgs.height * cam->imgs.width * 3) / 2;
-    }
-
-    if (!cam->conf->noise_tune){
-        cam->noise = cam->conf->noise_level;
-    }
-
-    if (cam->netcam != NULL){
-        pthread_mutex_lock(&cam->netcam->mutex_parms);
-            cam->netcam->framerate = cam->conf->framerate;
-        pthread_mutex_unlock(&cam->netcam->mutex_parms);
-    }
-
-   if (cam->netcam_high != NULL){
-        pthread_mutex_lock(&cam->netcam_high->mutex_parms);
-            cam->netcam_high->framerate = cam->conf->framerate;
-        pthread_mutex_unlock(&cam->netcam_high->mutex_parms);
+    if (cam->motapp->parms_changed) {
+        log_set_level(cam->motapp->log_level);
+        log_set_type(cam->motapp->log_type_str.c_str());
+        cam->motapp->parms_changed = false;
     }
 
 }

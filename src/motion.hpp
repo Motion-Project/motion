@@ -398,6 +398,7 @@ struct ctx_motapp {
     struct MHD_Daemon   *webcontrol_daemon;
     char                webcontrol_digest_rand[8];
     int                 parms_changed;      /*bool indicating if the parms have changed */
+    pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */
 
 };
 

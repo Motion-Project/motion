@@ -23,21 +23,17 @@
     #define SHOW_ERRNO              1   /* Flag to show message associated to errno */
 
     /* Log levels */
-    /* It would be HUGELY helpful to have the motion log values start at zero instead of
-       1 but that would be a headache for historical compatability...maybe think about this
-       as a break later on.
-    */
     #define LOG_ALL                 9
-    #define EMG                     1       /* syslog 0 motion 1 */
-    #define ALR                     2       /* syslog 1 motion 2 */
-    #define CRT                     3       /* syslog 2 motion 3 */
-    #define ERR                     4       /* syslog 3 motion 4 */
-    #define WRN                     5       /* syslog 4 motion 5 */
-    #define NTC                     6       /* syslog 5 motion 6 */
-    #define INF                     7       /* syslog 6 motion 7 */
-    #define DBG                     8       /* syslog 7 motion 8 */
-    #define ALL                     9       /* syslog 8 motion 9 */
-    #define LEVEL_DEFAULT           NTC     /* syslog 5 motion 6 default */
+    #define EMG                     1
+    #define ALR                     2
+    #define CRT                     3
+    #define ERR                     4
+    #define WRN                     5
+    #define NTC                     6
+    #define INF                     7
+    #define DBG                     8
+    #define ALL                     9
+    #define LEVEL_DEFAULT           NTC
 
     /* Log types */
     #define TYPE_CORE               1             /* Core logs         */
@@ -54,8 +50,11 @@
 
     #define MOTION_LOG(x, y, z, format, args...)  motion_log(x, y, z, 1, format, __FUNCTION__, ##args)
 
-    void motion_log(int level, unsigned int type, int errno_flag,int fncname, const char *fmt, ...);
+    void motion_log(int loglevel, int logtype, int errno_flag,int fncname, const char *fmt, ...);
     void log_init(struct ctx_motapp *motapp);
     void log_deinit(struct ctx_motapp *motapp);
+    void log_set_level(int new_level);
+    void log_set_type(const char *new_logtype);
+    void log_set_motapp(struct ctx_motapp *motapp);
 
 #endif

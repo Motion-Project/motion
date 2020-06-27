@@ -703,10 +703,9 @@ static int webu_process_config_set(struct webui_ctx *webui) {
      * then we ignore the request
      */
     if (config_parms[indx].parm_name != ""){
-        if (strlen(webui->uri_parm1) > 0){
-
+        if (strlen(webui->uri_value1) > 0){
             conf_edit_set(webui->camlst[webui->thread_nbr]->motapp,webui->thread_nbr
-                ,config_parms[indx].parm_name, webui->uri_parm1);
+                ,config_parms[indx].parm_name, webui->uri_value1);
 
             /*If we are updating vid parms, set the flag to update the device.*/
             if ((config_parms[indx].parm_name == "vid_control_params") &&

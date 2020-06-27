@@ -117,8 +117,6 @@ struct ctx_netcam {
     pthread_mutex_t           mutex;            /* mutex used with conditional waits */
     pthread_mutex_t           mutex_transfer;   /* mutex used with transferring stream info for pass-through */
     pthread_mutex_t           mutex_pktarray;   /* mutex used with the packet array */
-    pthread_mutex_t           mutex_parms;      /* mutex used with the parms */
-
 };
 
 int netcam_setup(struct ctx_cam *cam);

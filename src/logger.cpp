@@ -18,12 +18,12 @@
 
 static int log_mode = LOGMODE_SYSLOG;
 static FILE *logfile  = NULL;
-static unsigned int log_level = LEVEL_DEFAULT;
-static unsigned int log_type = TYPE_DEFAULT;
+static int log_level = LEVEL_DEFAULT;
+static int log_type = TYPE_DEFAULT;
 
-static const char *log_type_str[] = {NULL, "COR", "STR", "ENC", "NET", "DBL", "EVT", "TRK", "VID", "ALL"};
-static const char *log_level_str[] = {"EMG", "ALR", "CRT", "ERR", "WRN", "NTC", "INF", "DBG", "ALL", NULL};
-
+static const char *log_type_str[]  = {NULL, "COR", "STR", "ENC", "NET", "DBL", "EVT", "TRK", "VID", "ALL"};
+static const char *log_level_str[] = {NULL, "EMG", "ALR", "CRT", "ERR", "WRN", "NTC", "INF", "DBG", "ALL"};
+static struct ctx_motapp *log_motapp;  /*Used to access the parms mutex for updates*/
 
 /** Returns index of log type or 0 if not valid type. */
 static int log_get_type(const char *type) {
@@ -40,25 +40,24 @@ static int log_get_type(const char *type) {
     return ret;
 }
 
-/** Gets string value for type log level. */
-static const char* log_get_type_str(unsigned int type) {
-    return log_type_str[type];
+void log_set_type(const char *new_logtype) {
+
+    if ( mystreq(new_logtype, log_type_str[log_type]) ) return;
+
+    pthread_mutex_lock(&log_motapp->mutex_parms);
+        log_type = log_get_type(new_logtype);
+    pthread_mutex_unlock(&log_motapp->mutex_parms);
+
 }
 
-/** Sets log type level. */
-static void log_set_type(unsigned int type) {
-    log_type = type;
-}
+void log_set_level(int new_loglevel) {
 
-/** Gets string value for log level. */
-static const char* log_get_level_str(unsigned int level) {
-    /* The array is zero based vs our level values are 1 based */
-    return log_level_str[level-1];
-}
+    if (new_loglevel == log_level) return;
 
-/** Sets log level. */
-static void log_set_level(unsigned int level) {
-    log_level = level;
+    pthread_mutex_lock(&log_motapp->mutex_parms);
+        log_level = new_loglevel;
+    pthread_mutex_unlock(&log_motapp->mutex_parms);
+
 }
 
 /** Sets mode of logging, could be using syslog or files. */
@@ -92,8 +91,7 @@ static void log_set_logfile(const char *logfile_name) {
 }
 
 /** Return string with human readable time */
-static char *str_time(void)
-{
+static char *str_time(void) {
     static char buffer[16];
     time_t now = 0;
 
@@ -103,29 +101,10 @@ static char *str_time(void)
 }
 
 /**
- * MOTION_LOG
- *
  *    This routine is used for printing all informational, debug or error
- *    messages produced by any of the other motion functions.  It always
- *    produces a message of the form "[n] {message}", and (if the param
- *    'errno_flag' is set) follows the message with the associated error
- *    message from the library.
- *
- * Parameters:
- *
- *     level           logging level for the 'syslog' function
- *
- *     type            logging type.
- *
- *     errno_flag      if set, the log message should be followed by the
- *                     error message.
- *     fmt             the format string for producing the message
- *     ap              variable-length argument list
- *
- * Returns:
- *                     Nothing
+ *    messages produced by any of the other motion functions.
  */
-void motion_log(int level, unsigned int type, int errno_flag,int fncname, const char *fmt, ...){
+void motion_log(int level, int type, int errno_flag,int fncname, const char *fmt, ...){
     int errno_save, n;
     char buf[1024]= {0};
     char usrfmt[1024]= {0};
@@ -138,18 +117,16 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
     static char flood_msg[1024];
     char flood_repeats[1024];
     char threadname[32];
+    int  applvl, apptyp;
 
+    pthread_mutex_lock(&log_motapp->mutex_parms);
+        applvl = log_level;
+        apptyp = log_type;
+    pthread_mutex_unlock(&log_motapp->mutex_parms);
 
-
-    /* Exit if level is greater than log_level */
-    if ((unsigned int)level > log_level){
-        return;
-    }
-
-    /* Exit if type is not equal to log_type and not TYPE_ALL */
-    if ((log_type != TYPE_ALL) && (type != log_type)){
-        return;
-    }
+    /*Exit if not our level or type */
+    if (level > applvl) return;
+    if ((apptyp != TYPE_ALL) && (apptyp != type)) return;
 
     threadnr = (unsigned long)pthread_getspecific(tls_key_threadnr);
 
@@ -161,11 +138,11 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
 
     if (log_mode == LOGMODE_FILE) {
         n = snprintf(buf, sizeof(buf), "[%d:%s] [%s] [%s] [%s] ",
-                     threadnr, threadname, log_get_level_str(level), log_get_type_str(type),
+                     threadnr, threadname, log_level_str[level], log_type_str[type],
                      str_time());
     } else {
         n = snprintf(buf, sizeof(buf), "[%d:%s] [%s] [%s] ",
-                     threadnr, threadname, log_get_level_str(level), log_get_type_str(type));
+                     threadnr, threadname, log_level_str[level], log_type_str[type]);
     }
 
     /* Prepend the format specifier for the function name */
@@ -213,8 +190,8 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
     } else {
         if (flood_cnt > 1){
             snprintf(flood_repeats,1024,"[%d:%s] [%s] [%s] Above message repeats %d times",
-                     threadnr, threadname, log_get_level_str(level)
-                     , log_get_type_str(type), flood_cnt-1);
+                     threadnr, threadname, log_level_str[level]
+                     , log_type_str[type], flood_cnt-1);
             switch (log_mode) {
             case LOGMODE_FILE:
                 strncat(flood_repeats, "\n", 1024 - strlen(flood_repeats));
@@ -259,7 +236,7 @@ void log_init(struct ctx_motapp *motapp){
         motapp->log_level = LEVEL_DEFAULT;
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Using default log level (%s) (%d)")
-            ,log_get_level_str(motapp->log_level)
+            ,log_level_str[motapp->log_level]
             ,motapp->log_level);
     }
 
@@ -290,10 +267,10 @@ void log_init(struct ctx_motapp *motapp){
     motapp->log_type = log_get_type(motapp->log_type_str.c_str());
 
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Using log type (%s) log level (%s)"),
-               log_get_type_str(motapp->log_type), log_get_level_str(motapp->log_level));
+               log_type_str[motapp->log_type], log_level_str[motapp->log_level]);
 
     log_set_level(motapp->log_level);
-    log_set_type(motapp->log_type);
+    log_type = motapp->log_type;
 
 }
 
@@ -306,5 +283,11 @@ void log_deinit(struct ctx_motapp *motapp){
         log_set_mode(LOGMODE_NONE);
         logfile = NULL;
     }
+
+}
+
+void log_set_motapp(struct ctx_motapp *motapp){
+    /* Need better design to avoid the need to do this.  Extern motapp to whole app? */
+    log_motapp = motapp;  /* Set our static pointer used for locking parms mutex*/
 
 }

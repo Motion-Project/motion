@@ -3119,7 +3119,7 @@ int conf_edit_set_active(struct ctx_motapp *motapp, int threadnbr
     while (config_parms[indx].parm_name != "") {
         if (parm_nm ==  config_parms[indx].parm_name) {
             pcat = config_parms[indx].parm_cat;
-            if ((pcat == PARM_CAT_00) && (threadnbr == -1)) {
+            if (pcat == PARM_CAT_00) {
                 motapp->parms_changed = true;
                 conf_edit_cat00(motapp, parm_nm, parm_val, PARM_ACT_SET);
             } else if ((config_parms[indx].parm_cat != PARM_CAT_00) && (threadnbr != -1)) {

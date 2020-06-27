@@ -357,6 +357,8 @@ static void motion_ntc(void){
 /** Initialize upon start up or restart */
 static void motion_startup(struct ctx_motapp *motapp, int daemonize, int argc, char *argv[]) {
 
+    log_set_motapp(motapp);  /* This is needed prior to any function possibly calling motion_log*/
+
     conf_init_app(motapp, argc, argv);
 
     log_init(motapp);
@@ -579,6 +581,7 @@ static void motion_init(struct ctx_motapp *motapp){
 
     motapp->cam_list = NULL;
     pthread_mutex_init(&motapp->global_lock, NULL);
+    pthread_mutex_init(&motapp->mutex_parms,NULL);
 
     motapp->threads_running = 0;
     motapp->finish_all = FALSE;
@@ -675,6 +678,7 @@ int main (int argc, char **argv) {
 
     pthread_key_delete(tls_key_threadnr);
     pthread_mutex_destroy(&motapp->global_lock);
+    pthread_mutex_destroy(&motapp->mutex_parms);
 
     delete motapp;
 
