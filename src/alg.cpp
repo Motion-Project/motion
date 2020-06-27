@@ -27,9 +27,7 @@ typedef struct {
     short y, xl, xr, dy;
 } Segment;
 
-
 void alg_locate_center_size_label(struct ctx_images *imgs, int width, int height, struct ctx_coord *cent) {
-    unsigned char *out = imgs->image_motion.image_norm;
     int *labels = imgs->labels;
     int x, y, centc = 0, xdist = 0, ydist = 0;
 
@@ -61,7 +59,6 @@ void alg_locate_center_size_label(struct ctx_images *imgs, int width, int height
     /* First reset pointers back to initial value. */
     centc = 0;
     labels = imgs->labels;
-    out = imgs->image_motion.image_norm;
 
     /* If Labeling then we find the area around largest labelgroup instead. */
     for (y = 0; y < height; y++) {
@@ -136,7 +133,6 @@ void alg_locate_center_size_label(struct ctx_images *imgs, int width, int height
 /** Locates the center and size of the movement. */
 void alg_locate_center_size(struct ctx_images *imgs, int width, int height, struct ctx_coord *cent) {
     unsigned char *out;
-    int *labels = imgs->labels;
     int x, y, xdist = 0, ydist = 0;
     int64_t wght_x, wght_y, centc;
 
@@ -151,26 +147,6 @@ void alg_locate_center_size(struct ctx_images *imgs, int width, int height, stru
     cent->maxy = 0;
     cent->minx = width;
     cent->miny = height;
-
-    /* Locate movement */
-
-    /*
-    out = imgs->image_motion.image_norm;
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++) {
-            if (*(out++) != 0xff) {
-                cent->x+=x;
-                cent->y+=y;
-                centc++;
-            }
-        }
-    }
-    if (centc){
-        cent->x = cent->x / centc;
-        cent->y = cent->y / centc;
-    }
-    */
-
 
     out = imgs->image_motion.image_norm;
     centc = 0;
@@ -195,11 +171,8 @@ void alg_locate_center_size(struct ctx_images *imgs, int width, int height, stru
     }
 
 
-    //MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Centx %d Centy %d",cent->x,cent->y);
-
     /* Find bounds of motion area*/
     centc = 0;
-    labels = imgs->labels;
     out = imgs->image_motion.image_norm;
 
     for (y = 0; y < height; y++) {
@@ -992,10 +965,10 @@ void alg_switchfilter(struct ctx_cam *cam) {
  *   action - UPDATE_REF_FRAME or RESET_REF_FRAME
  *
  */
-void alg_update_reference_frame(struct ctx_cam *cam, int action)
-{
+void alg_update_reference_frame(struct ctx_cam *cam, int action) {
+
     int accept_timer = cam->lastrate * ACCEPT_STATIC_OBJECT_TIME;
-    int i, threshold_ref, diffs;
+    int i, diffs;
     int *ref_dyn = cam->imgs.ref_dyn;
     unsigned char *image_vprvcy = cam->imgs.image_vprvcy;
     unsigned char *ref = cam->imgs.ref;
@@ -1004,15 +977,8 @@ void alg_update_reference_frame(struct ctx_cam *cam, int action)
 
     if (cam->lastrate > 5)  /* Match rate limit */
         accept_timer /= (cam->lastrate / 3);
-accept_timer = 5;
-
 
     if (action == UPDATE_REF_FRAME) { /* Black&white only for better performance. */
-
-        //memset(out + cam->imgs.motionsize, 128, cam->imgs.motionsize / 2); /* Motion pictures are now b/w i.o. green */
-
-        threshold_ref = cam->noise * EXCLUDE_LEVEL_PERCENT / 100;
-        threshold_ref = cam->noise;
         diffs = 0;
         for (i = cam->imgs.motionsize; i > 0; i--) {
             /* Exclude pixels from ref frame well below noise level. */
@@ -1022,13 +988,8 @@ accept_timer = 5;
                 } else if (*ref_dyn > accept_timer) { /* Include static Object after some time. */
                     *ref_dyn = 0;
                     *ref = *image_vprvcy;
-                //} else if (*out != 0xff) {
-                //    (*ref_dyn)++; /* Motionpixel? Keep excluding from ref frame. */
                 } else {
-                //    *ref_dyn = 0; /* Nothing special - release pixel. */
                     (*ref_dyn)++;
-                //    *ref = *image_vprvcy;
-                    //*ref = (*ref + *image_vprvcy) / 2;
                 }
                 *out = *image_vprvcy;
                 diffs++;
