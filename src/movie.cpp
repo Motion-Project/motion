@@ -473,8 +473,7 @@ static int movie_set_quality(struct ctx_movie *movie){
         movie->ctx_codec->codec_id == MY_CODEC_ID_HEVC){
         if (movie->quality <= 0)
             movie->quality = 45; // default to 45% quality
-        av_dict_set(&movie->opts, "preset", "ultrafast", 0);
-        av_dict_set(&movie->opts, "tune", "zerolatency", 0);
+
         /* This next if statement needs validation.  Are mpeg4omx
          * and v4l2m2m even MY_CODEC_ID_H264 or MY_CODEC_ID_HEVC
          * such that it even would be possible to be part of this
@@ -482,6 +481,7 @@ static int movie_set_quality(struct ctx_movie *movie){
         if ((movie->preferred_codec == USER_CODEC_H264OMX) ||
             (movie->preferred_codec == USER_CODEC_MPEG4OMX) ||
             (movie->preferred_codec == USER_CODEC_V4L2M2M)) {
+
             // bit_rate = movie->width * movie->height * movie->fps * quality_factor
             movie->quality = (int)(((int64_t)movie->width * movie->height * movie->fps * movie->quality) >> 7);
             // Clip bit rate to min
@@ -489,12 +489,23 @@ static int movie_set_quality(struct ctx_movie *movie){
                 movie->quality = 4000;
             movie->ctx_codec->profile = FF_PROFILE_H264_HIGH;
             movie->ctx_codec->bit_rate = movie->quality;
+            av_dict_set(&movie->opts, "preset", "ultrafast", 0);
+            av_dict_set(&movie->opts, "tune", "zerolatency", 0);
+
         } else {
-            // Control other H264 encoders quality via CRF
+            /* Control other H264 encoders quality is via CRF.  To get the profiles
+             * to work (main), (high), we are setting this via the opt instead of
+             * dictionary.  The ultrafast is not used because at that level, the
+             * profile reverts to (baseline) and a bit more efficiency is in
+             * (main) or (high) so we choose next fastest option (superfast)
+             */
             char crf[10];
             movie->quality = (int)(( (100-movie->quality) * 51)/100);
             snprintf(crf, 10, "%d", movie->quality);
-            av_dict_set(&movie->opts, "crf", crf, 0);
+            av_opt_set(movie->ctx_codec->priv_data, "profile", "high", 0);
+            av_opt_set(movie->ctx_codec->priv_data, "crf", crf, 0);
+            av_opt_set(movie->ctx_codec->priv_data, "tune", "zerolatency", 0);
+            av_opt_set(movie->ctx_codec->priv_data, "preset", "superfast",0);
         }
     } else {
         /* The selection of 8000 is a subjective number based upon viewing output files */
@@ -601,7 +612,7 @@ static int movie_set_codec(struct ctx_movie *movie){
     if (retcd != 0) return retcd;
 
     #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
-        //If we provide the codec to this, it results in a memory leak.  movie ticket: 5714
+        //If we provide the codec to this, it results in a memory leak.  ffmpeg ticket: 5714
         movie->video_st = avformat_new_stream(movie->oc, NULL);
         if (!movie->video_st) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
@@ -1292,10 +1303,9 @@ static void movie_put_pix_yuv420(struct ctx_movie *movie, struct ctx_image_data 
 
 void movie_global_init(void){
 
-    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
-        ,_("movie libavcodec version %d.%d.%d"
-        " libavformat version %d.%d.%d")
-        , LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO
+    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("libavcodec  version %d.%d.%d")
+        , LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO);
+    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("libavformat version %d.%d.%d")
         , LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
 
     #if (LIBAVFORMAT_VERSION_MAJOR < 58)
@@ -1384,8 +1394,6 @@ int movie_open(struct ctx_movie *movie){
             return -1;
         }
     }
-
-
 
     retcd = movie_set_outputfile(movie);
     if (retcd < 0){
