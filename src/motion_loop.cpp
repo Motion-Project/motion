@@ -240,6 +240,351 @@ static void mlp_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *im
 
 }
 
+
+static int init_camera_type(struct ctx_cam *cam){
+
+    cam->camera_type = CAMERA_TYPE_UNKNOWN;
+
+    if (cam->conf->mmalcam_name != "") {
+        cam->camera_type = CAMERA_TYPE_MMAL;
+        return 0;
+    }
+
+    if (cam->conf->netcam_url != "") {
+        if ((cam->conf->netcam_url.compare(0,5,"mjpeg") == 0) ||
+            (cam->conf->netcam_url.compare(0,4,"http") == 0) ||
+            (cam->conf->netcam_url.compare(0,4,"v4l2") == 0) ||
+            (cam->conf->netcam_url.compare(0,4,"file") == 0) ||
+            (cam->conf->netcam_url.compare(0,4,"rtmp") == 0) ||
+            (cam->conf->netcam_url.compare(0,4,"rtsp") == 0)) {
+            cam->camera_type = CAMERA_TYPE_NETCAM;
+        }
+        return 0;
+    }
+
+    if (cam->conf->videodevice != "") {
+        cam->camera_type = CAMERA_TYPE_V4L2;
+        return 0;
+    }
+
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        , _("Unable to determine camera type (MMAL, Netcam, V4L2)"));
+    return -1;
+
+}
+
+/** Get first images from camera at startup */
+static void mlp_init_firstimage(struct ctx_cam *cam) {
+
+    int indx;
+
+    cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
+
+    /* Capture first image, or we will get an alarm on start */
+    if (cam->video_dev >= 0) {
+        for (indx = 0; indx < 5; indx++) {
+            if (vid_next(cam, cam->current_image) == 0) break;
+            SLEEP(2, 0);
+        }
+
+        if (indx >= 5) {
+            memset(cam->imgs.image_virgin, 0x80, cam->imgs.size_norm);       /* initialize to grey */
+            draw_text(cam->imgs.image_virgin, cam->imgs.width, cam->imgs.height,
+                      10, 20, "Error capturing first image", cam->text_scale);
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error capturing first image"));
+        }
+    }
+    cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
+
+    if (cam->conf->primary_method == 0){
+        alg_update_reference_frame(cam, RESET_REF_FRAME);
+    } else if (cam->conf->primary_method == 1) {
+        alg_new_update_frame(cam);
+    }
+
+
+}
+
+/** Check the image size to determine if modulo 8 and over 64 */
+static int mlp_check_szimg(struct ctx_cam *cam){
+
+    /* Revalidate we got a valid image size */
+    if ((cam->imgs.width % 8) || (cam->imgs.height % 8)) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Image width (%d) or height(%d) requested is not modulo 8.")
+            ,cam->imgs.width, cam->imgs.height);
+        return -1;
+    }
+    if ((cam->imgs.width  < 64) || (cam->imgs.height < 64)){
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
+            ,cam->imgs.width, cam->imgs.height);
+            return -1;
+    }
+    /* Substream size notification*/
+    if ((cam->imgs.width % 16) || (cam->imgs.height % 16)) {
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            ,_("Substream not available.  Image sizes not modulo 16."));
+    }
+
+    return 0;
+
+}
+
+/** Set the items required for the area detect */
+static void mlp_init_areadetect(struct ctx_cam *cam){
+
+    /* Initialize area detection */
+    cam->area_minx[0] = cam->area_minx[3] = cam->area_minx[6] = 0;
+    cam->area_miny[0] = cam->area_miny[1] = cam->area_miny[2] = 0;
+
+    cam->area_minx[1] = cam->area_minx[4] = cam->area_minx[7] = cam->imgs.width / 3;
+    cam->area_maxx[0] = cam->area_maxx[3] = cam->area_maxx[6] = cam->imgs.width / 3;
+
+    cam->area_minx[2] = cam->area_minx[5] = cam->area_minx[8] = cam->imgs.width / 3 * 2;
+    cam->area_maxx[1] = cam->area_maxx[4] = cam->area_maxx[7] = cam->imgs.width / 3 * 2;
+
+    cam->area_miny[3] = cam->area_miny[4] = cam->area_miny[5] = cam->imgs.height / 3;
+    cam->area_maxy[0] = cam->area_maxy[1] = cam->area_maxy[2] = cam->imgs.height / 3;
+
+    cam->area_miny[6] = cam->area_miny[7] = cam->area_miny[8] = cam->imgs.height / 3 * 2;
+    cam->area_maxy[3] = cam->area_maxy[4] = cam->area_maxy[5] = cam->imgs.height / 3 * 2;
+
+    cam->area_maxx[2] = cam->area_maxx[5] = cam->area_maxx[8] = cam->imgs.width;
+    cam->area_maxy[6] = cam->area_maxy[7] = cam->area_maxy[8] = cam->imgs.height;
+
+    cam->areadetect_eventnbr = 0;
+
+}
+
+/** Allocate the required buffers */
+static void mlp_init_buffers(struct ctx_cam *cam){
+
+    cam->imgs.ref =(unsigned char*) mymalloc(cam->imgs.size_norm);
+    cam->imgs.image_motion.image_norm = (unsigned char*)mymalloc(cam->imgs.size_norm);
+    cam->imgs.ref_dyn =(int*) mymalloc(cam->imgs.motionsize * sizeof(*cam->imgs.ref_dyn));
+    cam->imgs.image_virgin =(unsigned char*) mymalloc(cam->imgs.size_norm);
+    cam->imgs.image_vprvcy = (unsigned char*)mymalloc(cam->imgs.size_norm);
+    cam->imgs.smartmask =(unsigned char*) mymalloc(cam->imgs.motionsize);
+    cam->imgs.smartmask_final =(unsigned char*) mymalloc(cam->imgs.motionsize);
+    cam->imgs.smartmask_buffer =(int*) mymalloc(cam->imgs.motionsize * sizeof(*cam->imgs.smartmask_buffer));
+    cam->imgs.labels =(int*)mymalloc(cam->imgs.motionsize * sizeof(*cam->imgs.labels));
+    cam->imgs.labelsize =(int*) mymalloc((cam->imgs.motionsize/2+1) * sizeof(*cam->imgs.labelsize));
+    cam->imgs.image_preview.image_norm =(unsigned char*) mymalloc(cam->imgs.size_norm);
+    cam->imgs.common_buffer =(unsigned char*) mymalloc(3 * cam->imgs.width * cam->imgs.height);
+    cam->imgs.image_secondary =(unsigned char*) mymalloc(3 * cam->imgs.width * cam->imgs.height);
+    if (cam->imgs.size_high > 0){
+        cam->imgs.image_preview.image_high =(unsigned char*) mymalloc(cam->imgs.size_high);
+    }
+
+    memset(cam->imgs.smartmask, 0, cam->imgs.motionsize);
+    memset(cam->imgs.smartmask_final, 255, cam->imgs.motionsize);
+    memset(cam->imgs.smartmask_buffer, 0, cam->imgs.motionsize * sizeof(*cam->imgs.smartmask_buffer));
+
+}
+
+static void mlp_init_values(struct ctx_cam *cam) {
+
+    cam->event_nr=1;
+
+    clock_gettime(CLOCK_REALTIME, &cam->frame_curr_ts);
+    clock_gettime(CLOCK_REALTIME, &cam->frame_last_ts);
+
+    cam->noise = cam->conf->noise_level;
+
+    cam->threshold = cam->conf->threshold;
+    if (cam->conf->threshold_maximum > cam->conf->threshold ){
+        cam->threshold_maximum = cam->conf->threshold_maximum;
+    } else {
+        cam->threshold_maximum = (cam->imgs.height * cam->imgs.width * 3) / 2;
+    }
+
+    cam->startup_frames = (cam->conf->framerate * 2) + cam->conf->pre_capture + cam->conf->minimum_motion_frames;
+
+    cam->minimum_frame_time_downcounter = cam->conf->minimum_frame_time;
+    cam->get_image = 1;
+
+    cam->movie_passthrough = cam->conf->movie_passthrough;
+    if ((cam->camera_type != CAMERA_TYPE_NETCAM) &&
+        (cam->movie_passthrough)) {
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
+        cam->movie_passthrough = FALSE;
+    }
+
+}
+
+static int mlp_init_cam_start(struct ctx_cam *cam) {
+
+    cam->video_dev = vid_start(cam);
+
+    if (cam->video_dev == -1) {
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+            ,_("Could not fetch initial image from camera "));
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+            ,_("Motion continues using width and height from config file(s)"));
+        cam->imgs.width = cam->conf->width;
+        cam->imgs.height = cam->conf->height;
+        cam->imgs.size_norm = cam->conf->width * cam->conf->height * 3 / 2;
+        cam->imgs.motionsize = cam->conf->width * cam->conf->height;
+    } else if (cam->video_dev == -2) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Could not fetch initial image from camera "));
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Motion only supports width and height modulo 8"));
+        return -1;
+    } else {
+        cam->imgs.motionsize = (cam->imgs.width * cam->imgs.height);
+        cam->imgs.size_norm  = (cam->imgs.width * cam->imgs.height * 3) / 2;
+        cam->imgs.size_high  = (cam->imgs.width_high * cam->imgs.height_high * 3) / 2;
+    }
+
+    return 0;
+
+}
+
+/** mlp_init */
+static int mlp_init(struct ctx_cam *cam) {
+
+    mythreadname_set("ml",cam->threadnr,cam->conf->camera_name.c_str());
+
+    pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cam->threadnr));
+
+    if (init_camera_type(cam) != 0 ) return -1;
+
+    mlp_init_values(cam);
+
+    if (mlp_init_cam_start(cam) != 0) return -1;
+
+    if (mlp_check_szimg(cam) != 0) return -1;
+
+    mlp_ring_resize(cam, 1); /* Create a initial precapture ring buffer with 1 frame */
+
+    mlp_init_buffers(cam);
+
+    webu_stream_init(cam);
+
+    algsec_init(cam);
+
+    rotate_init(cam);
+
+    draw_init_scale(cam);
+
+    mlp_init_firstimage(cam);
+
+    vlp_init(cam);
+
+    dbse_init(cam);
+
+    pic_init_mask(cam);
+
+    pic_init_privacy(cam);
+
+    track_init(cam);
+
+    mlp_init_areadetect(cam);
+
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        ,_("Camera %d started: motion detection %s"),
+        cam->camera_id, cam->pause ? _("Disabled"):_("Enabled"));
+
+    if (cam->conf->emulate_motion) {
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Emulating motion"));
+    }
+
+    return 0;
+}
+
+/** clean up all memory etc. from motion init */
+void mlp_cleanup(struct ctx_cam *cam) {
+
+    event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, NULL);
+    event(cam, EVENT_ENDMOTION, NULL, NULL, NULL, NULL);
+
+    webu_stream_deinit(cam);
+
+    algsec_deinit(cam);
+
+    track_deinit(cam);
+
+    if (cam->video_dev >= 0) vid_close(cam);
+
+    free(cam->imgs.image_motion.image_norm);
+    cam->imgs.image_motion.image_norm = NULL;
+
+    free(cam->imgs.ref);
+    cam->imgs.ref = NULL;
+
+    free(cam->imgs.ref_dyn);
+    cam->imgs.ref_dyn = NULL;
+
+    free(cam->imgs.image_virgin);
+    cam->imgs.image_virgin = NULL;
+
+    free(cam->imgs.image_vprvcy);
+    cam->imgs.image_vprvcy = NULL;
+
+    free(cam->imgs.labels);
+    cam->imgs.labels = NULL;
+
+    free(cam->imgs.labelsize);
+    cam->imgs.labelsize = NULL;
+
+    free(cam->imgs.smartmask);
+    cam->imgs.smartmask = NULL;
+
+    free(cam->imgs.smartmask_final);
+    cam->imgs.smartmask_final = NULL;
+
+    free(cam->imgs.smartmask_buffer);
+    cam->imgs.smartmask_buffer = NULL;
+
+    if (cam->imgs.mask) free(cam->imgs.mask);
+    cam->imgs.mask = NULL;
+
+    if (cam->imgs.mask_privacy) free(cam->imgs.mask_privacy);
+    cam->imgs.mask_privacy = NULL;
+
+    if (cam->imgs.mask_privacy_uv) free(cam->imgs.mask_privacy_uv);
+    cam->imgs.mask_privacy_uv = NULL;
+
+    if (cam->imgs.mask_privacy_high) free(cam->imgs.mask_privacy_high);
+    cam->imgs.mask_privacy_high = NULL;
+
+    if (cam->imgs.mask_privacy_high_uv) free(cam->imgs.mask_privacy_high_uv);
+    cam->imgs.mask_privacy_high_uv = NULL;
+
+    free(cam->imgs.common_buffer);
+    cam->imgs.common_buffer = NULL;
+
+    free(cam->imgs.image_secondary);
+    cam->imgs.image_secondary = NULL;
+
+    free(cam->imgs.image_preview.image_norm);
+    cam->imgs.image_preview.image_norm = NULL;
+
+    if (cam->imgs.size_high > 0){
+        free(cam->imgs.image_preview.image_high);
+        cam->imgs.image_preview.image_high = NULL;
+    }
+
+    mlp_ring_destroy(cam); /* Cleanup the precapture ring buffer */
+
+    rotate_deinit(cam); /* cleanup image rotation data */
+
+    if (cam->pipe != -1) {
+        close(cam->pipe);
+        cam->pipe = -1;
+    }
+
+    if (cam->mpipe != -1) {
+        close(cam->mpipe);
+        cam->mpipe = -1;
+    }
+
+    dbse_deinit(cam);
+
+}
+
 static void mlp_mask_privacy(struct ctx_cam *cam){
 
     if (cam->imgs.mask_privacy == NULL) return;
@@ -314,355 +659,6 @@ static void mlp_mask_privacy(struct ctx_cam *cam){
 
         indx_img++;
     }
-}
-
-static int mlp_init_camera_type(struct ctx_cam *cam){
-
-    cam->camera_type = CAMERA_TYPE_UNKNOWN;
-
-    if (cam->conf->mmalcam_name != "") {
-        cam->camera_type = CAMERA_TYPE_MMAL;
-        return 0;
-    }
-
-    if (cam->conf->netcam_url != "") {
-        if ((cam->conf->netcam_url.compare(0,5,"mjpeg") == 0) ||
-            (cam->conf->netcam_url.compare(0,4,"http") == 0) ||
-            (cam->conf->netcam_url.compare(0,4,"v4l2") == 0) ||
-            (cam->conf->netcam_url.compare(0,4,"file") == 0) ||
-            (cam->conf->netcam_url.compare(0,4,"rtmp") == 0) ||
-            (cam->conf->netcam_url.compare(0,4,"rtsp") == 0)) {
-            cam->camera_type = CAMERA_TYPE_NETCAM;
-        }
-        return 0;
-    }
-
-    if (cam->conf->videodevice != "") {
-        cam->camera_type = CAMERA_TYPE_V4L2;
-        return 0;
-    }
-
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-        , _("Unable to determine camera type (MMAL, Netcam, V4L2)"));
-    return -1;
-
-}
-
-/** Get first images from camera at startup */
-static void mlp_init_firstimage(struct ctx_cam *cam) {
-
-    int indx;
-
-    cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
-
-    /* Capture first image, or we will get an alarm on start */
-    if (cam->video_dev >= 0) {
-        for (indx = 0; indx < 5; indx++) {
-            if (vid_next(cam, cam->current_image) == 0) break;
-            SLEEP(2, 0);
-        }
-
-        if (indx >= 5) {
-            memset(cam->imgs.image_virgin, 0x80, cam->imgs.size_norm);       /* initialize to grey */
-            draw_text(cam->imgs.image_virgin, cam->imgs.width, cam->imgs.height,
-                      10, 20, "Error capturing first image", cam->text_scale);
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error capturing first image"));
-        }
-    }
-
-    cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
-
-    mlp_mask_privacy(cam);
-    memcpy(cam->imgs.ref, cam->current_image->image_norm, cam->imgs.size_norm);
-    memcpy(cam->imgs.ref_next, cam->current_image->image_norm, cam->imgs.size_norm);
-
-}
-
-/** Check the image size to determine if modulo 8 and over 64 */
-static int mlp_check_szimg(struct ctx_cam *cam){
-
-    /* Revalidate we got a valid image size */
-    if ((cam->imgs.width % 8) || (cam->imgs.height % 8)) {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Image width (%d) or height(%d) requested is not modulo 8.")
-            ,cam->imgs.width, cam->imgs.height);
-        return -1;
-    }
-    if ((cam->imgs.width  < 64) || (cam->imgs.height < 64)){
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
-            ,cam->imgs.width, cam->imgs.height);
-            return -1;
-    }
-    /* Substream size notification*/
-    if ((cam->imgs.width % 16) || (cam->imgs.height % 16)) {
-        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-            ,_("Substream not available.  Image sizes not modulo 16."));
-    }
-
-    return 0;
-
-}
-
-/** Set the items required for the area detect */
-static void mlp_init_areadetect(struct ctx_cam *cam){
-
-    /* Initialize area detection */
-    cam->area_minx[0] = cam->area_minx[3] = cam->area_minx[6] = 0;
-    cam->area_miny[0] = cam->area_miny[1] = cam->area_miny[2] = 0;
-
-    cam->area_minx[1] = cam->area_minx[4] = cam->area_minx[7] = cam->imgs.width / 3;
-    cam->area_maxx[0] = cam->area_maxx[3] = cam->area_maxx[6] = cam->imgs.width / 3;
-
-    cam->area_minx[2] = cam->area_minx[5] = cam->area_minx[8] = cam->imgs.width / 3 * 2;
-    cam->area_maxx[1] = cam->area_maxx[4] = cam->area_maxx[7] = cam->imgs.width / 3 * 2;
-
-    cam->area_miny[3] = cam->area_miny[4] = cam->area_miny[5] = cam->imgs.height / 3;
-    cam->area_maxy[0] = cam->area_maxy[1] = cam->area_maxy[2] = cam->imgs.height / 3;
-
-    cam->area_miny[6] = cam->area_miny[7] = cam->area_miny[8] = cam->imgs.height / 3 * 2;
-    cam->area_maxy[3] = cam->area_maxy[4] = cam->area_maxy[5] = cam->imgs.height / 3 * 2;
-
-    cam->area_maxx[2] = cam->area_maxx[5] = cam->area_maxx[8] = cam->imgs.width;
-    cam->area_maxy[6] = cam->area_maxy[7] = cam->area_maxy[8] = cam->imgs.height;
-
-    cam->areadetect_eventnbr = 0;
-
-}
-
-/** Allocate the required buffers */
-static void mlp_init_buffers(struct ctx_cam *cam){
-
-    /* TODO:  Determine why ref image is full size instead of just motionsize*/
-    cam->imgs.ref =(unsigned char*) mymalloc(cam->imgs.size_norm);
-    cam->imgs.ref_next =(unsigned char*) mymalloc(cam->imgs.size_norm);
-    cam->imgs.ref_dyn =(int*) mymalloc(cam->imgs.motionsize * sizeof(*cam->imgs.ref_dyn));
-    cam->imgs.image_motion.image_norm = (unsigned char*)mymalloc(cam->imgs.size_norm);
-    cam->imgs.image_virgin =(unsigned char*) mymalloc(cam->imgs.size_norm);
-    cam->imgs.image_vprvcy = (unsigned char*)mymalloc(cam->imgs.size_norm);
-    cam->imgs.smartmask =(unsigned char*) mymalloc(cam->imgs.motionsize);
-    cam->imgs.smartmask_final =(unsigned char*) mymalloc(cam->imgs.motionsize);
-    cam->imgs.smartmask_buffer =(int*) mymalloc(cam->imgs.motionsize * sizeof(*cam->imgs.smartmask_buffer));
-    cam->imgs.labels =(int*)mymalloc(cam->imgs.motionsize * sizeof(*cam->imgs.labels));
-    cam->imgs.labelsize =(int*) mymalloc((cam->imgs.motionsize/2+1) * sizeof(*cam->imgs.labelsize));
-    cam->imgs.image_preview.image_norm =(unsigned char*) mymalloc(cam->imgs.size_norm);
-    cam->imgs.common_buffer =(unsigned char*) mymalloc(3 * cam->imgs.width * cam->imgs.height);
-    cam->imgs.image_secondary =(unsigned char*) mymalloc(3 * cam->imgs.width * cam->imgs.height);
-    if (cam->imgs.size_high > 0){
-        cam->imgs.image_preview.image_high =(unsigned char*) mymalloc(cam->imgs.size_high);
-    }
-
-    memset(cam->imgs.smartmask, 0, cam->imgs.motionsize);
-    memset(cam->imgs.smartmask_final, 255, cam->imgs.motionsize);
-    memset(cam->imgs.smartmask_buffer, 0, cam->imgs.motionsize * sizeof(*cam->imgs.smartmask_buffer));
-
-}
-
-static void mlp_init_values(struct ctx_cam *cam) {
-
-    cam->event_nr=1;
-
-    clock_gettime(CLOCK_REALTIME, &cam->frame_curr_ts);
-    clock_gettime(CLOCK_REALTIME, &cam->frame_last_ts);
-
-    cam->noise = cam->conf->noise_level;
-
-    cam->threshold = cam->conf->threshold;
-    if (cam->conf->threshold_maximum > cam->conf->threshold ){
-        cam->threshold_maximum = cam->conf->threshold_maximum;
-    } else {
-        cam->threshold_maximum = (cam->imgs.height * cam->imgs.width * 3) / 2;
-    }
-
-    cam->startup_frames = (cam->conf->framerate * 2) + cam->conf->pre_capture + cam->conf->minimum_motion_frames;
-
-    cam->minimum_frame_time_downcounter = cam->conf->minimum_frame_time;
-    cam->get_image = 1;
-
-    cam->movie_passthrough = cam->conf->movie_passthrough;
-    if ((cam->camera_type != CAMERA_TYPE_NETCAM) &&
-        (cam->movie_passthrough)) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
-        cam->movie_passthrough = FALSE;
-    }
-
-    cam->ref_lag = 130;
-
-}
-
-static int mlp_init_cam_start(struct ctx_cam *cam) {
-
-    cam->video_dev = vid_start(cam);
-
-    if (cam->video_dev == -1) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
-            ,_("Could not fetch initial image from camera "));
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
-            ,_("Motion continues using width and height from config file(s)"));
-        cam->imgs.width = cam->conf->width;
-        cam->imgs.height = cam->conf->height;
-        cam->imgs.size_norm = cam->conf->width * cam->conf->height * 3 / 2;
-        cam->imgs.motionsize = cam->conf->width * cam->conf->height;
-    } else if (cam->video_dev == -2) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Could not fetch initial image from camera "));
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Motion only supports width and height modulo 8"));
-        return -1;
-    } else {
-        cam->imgs.motionsize = (cam->imgs.width * cam->imgs.height);
-        cam->imgs.size_norm  = (cam->imgs.width * cam->imgs.height * 3) / 2;
-        cam->imgs.size_high  = (cam->imgs.width_high * cam->imgs.height_high * 3) / 2;
-    }
-
-    return 0;
-
-}
-
-/** mlp_init */
-static int mlp_init(struct ctx_cam *cam) {
-
-    mythreadname_set("ml",cam->threadnr,cam->conf->camera_name.c_str());
-
-    pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cam->threadnr));
-
-    if (mlp_init_camera_type(cam) != 0 ) return -1;
-
-    mlp_init_values(cam);
-
-    if (mlp_init_cam_start(cam) != 0) return -1;
-
-    if (mlp_check_szimg(cam) != 0) return -1;
-
-    mlp_ring_resize(cam, 1); /* Create a initial precapture ring buffer with 1 frame */
-
-    mlp_init_buffers(cam);
-
-    webu_stream_init(cam);
-
-    algsec_init(cam);
-
-    rotate_init(cam);
-
-    draw_init_scale(cam);
-
-    pic_init_mask(cam);
-
-    pic_init_privacy(cam);
-
-    mlp_init_firstimage(cam);
-
-    vlp_init(cam);
-
-    dbse_init(cam);
-
-    track_init(cam);
-
-    mlp_init_areadetect(cam);
-
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-        ,_("Camera %d started: motion detection %s"),
-        cam->camera_id, cam->pause ? _("Disabled"):_("Enabled"));
-
-    if (cam->conf->emulate_motion) {
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Emulating motion"));
-    }
-
-    return 0;
-}
-
-/** clean up all memory etc. from motion init */
-void mlp_cleanup(struct ctx_cam *cam) {
-
-    event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, NULL);
-    event(cam, EVENT_ENDMOTION, NULL, NULL, NULL, NULL);
-
-    webu_stream_deinit(cam);
-
-    algsec_deinit(cam);
-
-    track_deinit(cam);
-
-    if (cam->video_dev >= 0) vid_close(cam);
-
-    free(cam->imgs.image_motion.image_norm);
-    cam->imgs.image_motion.image_norm = NULL;
-
-    free(cam->imgs.ref);
-    cam->imgs.ref = NULL;
-
-    free(cam->imgs.ref_next);
-    cam->imgs.ref_next = NULL;
-
-    free(cam->imgs.ref_dyn);
-    cam->imgs.ref_dyn = NULL;
-
-    free(cam->imgs.image_virgin);
-    cam->imgs.image_virgin = NULL;
-
-    free(cam->imgs.image_vprvcy);
-    cam->imgs.image_vprvcy = NULL;
-
-    free(cam->imgs.labels);
-    cam->imgs.labels = NULL;
-
-    free(cam->imgs.labelsize);
-    cam->imgs.labelsize = NULL;
-
-    free(cam->imgs.smartmask);
-    cam->imgs.smartmask = NULL;
-
-    free(cam->imgs.smartmask_final);
-    cam->imgs.smartmask_final = NULL;
-
-    free(cam->imgs.smartmask_buffer);
-    cam->imgs.smartmask_buffer = NULL;
-
-    if (cam->imgs.mask) free(cam->imgs.mask);
-    cam->imgs.mask = NULL;
-
-    if (cam->imgs.mask_privacy) free(cam->imgs.mask_privacy);
-    cam->imgs.mask_privacy = NULL;
-
-    if (cam->imgs.mask_privacy_uv) free(cam->imgs.mask_privacy_uv);
-    cam->imgs.mask_privacy_uv = NULL;
-
-    if (cam->imgs.mask_privacy_high) free(cam->imgs.mask_privacy_high);
-    cam->imgs.mask_privacy_high = NULL;
-
-    if (cam->imgs.mask_privacy_high_uv) free(cam->imgs.mask_privacy_high_uv);
-    cam->imgs.mask_privacy_high_uv = NULL;
-
-    free(cam->imgs.common_buffer);
-    cam->imgs.common_buffer = NULL;
-
-    free(cam->imgs.image_secondary);
-    cam->imgs.image_secondary = NULL;
-
-    free(cam->imgs.image_preview.image_norm);
-    cam->imgs.image_preview.image_norm = NULL;
-
-    if (cam->imgs.size_high > 0){
-        free(cam->imgs.image_preview.image_high);
-        cam->imgs.image_preview.image_high = NULL;
-    }
-
-    mlp_ring_destroy(cam); /* Cleanup the precapture ring buffer */
-
-    rotate_deinit(cam); /* cleanup image rotation data */
-
-    if (cam->pipe != -1) {
-        close(cam->pipe);
-        cam->pipe = -1;
-    }
-
-    if (cam->mpipe != -1) {
-        close(cam->mpipe);
-        cam->mpipe = -1;
-    }
-
-    dbse_deinit(cam);
-
 }
 
 static void mlp_areadetect(struct ctx_cam *cam){
@@ -810,104 +806,31 @@ static int mlp_retry(struct ctx_cam *cam){
     return 0;
 }
 
-static void mlp_capture_valid(struct ctx_cam *cam){
-
-    cam->lost_connection = 0;
-    cam->connectionlosttime = 0;
-
-    memcpy(cam->imgs.image_virgin, cam->current_image->image_norm, cam->imgs.size_norm);
-    mlp_mask_privacy(cam);
-    memcpy(cam->imgs.image_vprvcy, cam->current_image->image_norm, cam->imgs.size_norm);
-
-    if (cam->missing_frame_counter >= MISSING_FRAMES_TIMEOUT * cam->conf->framerate) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
-        event(cam, EVENT_CAMERA_FOUND, NULL, NULL, NULL, NULL);
-        cam->ref_lag = 0;
-        memcpy(cam->imgs.ref_next, cam->imgs.image_vprvcy, cam->imgs.size_norm);
-    }
-    cam->missing_frame_counter = 0;
-
-    alg_update_reference_frame(cam, UPDATE_REF_FRAME);
-
-    cam->ref_lag--;
-    if ((cam->ref_lag >= 1000000) && (cam->detecting_motion == FALSE)) {
-        memcpy(cam->imgs.ref, cam->imgs.ref_next, cam->imgs.size_norm);
-        memcpy(cam->imgs.ref_next, cam->imgs.image_vprvcy, cam->imgs.size_norm);
-        cam->ref_lag = 130;
-    }
-
-
-}
-
-static int mlp_capture_nonfatal(struct ctx_cam *cam, int vid_return_code){
+static int mlp_capture(struct ctx_cam *cam){
 
     const char *tmpin;
     char tmpout[80];
+    int vid_return_code = 0;        /* Return code used when calling vid_next */
     struct timespec ts1;
 
-    if (vid_return_code == NETCAM_RESTART_ERROR) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,_("Restarting Motion thread to reinitialize all "
-            "image buffers"));
-        cam->lost_connection = 1;
-        return 1;
-    }
-
-    if (cam->connectionlosttime == 0){
-        cam->connectionlosttime = cam->frame_curr_ts.tv_sec;
-    }
-
-    ++cam->missing_frame_counter;
-
-    if (cam->video_dev >= 0 &&
-        cam->missing_frame_counter < (MISSING_FRAMES_TIMEOUT * cam->conf->framerate)) {
-        memcpy(cam->current_image->image_norm, cam->imgs.image_vprvcy, cam->imgs.size_norm);
-    } else {
-        cam->lost_connection = 1;
-
-        if (cam->video_dev >= 0)
-            tmpin = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
-        else
-            tmpin = "UNABLE TO OPEN VIDEO DEVICE\\nSINCE %Y-%m-%d %T";
-
-        ts1.tv_sec=cam->connectionlosttime;
-        ts1.tv_nsec = 0;
-        memset(cam->current_image->image_norm, 0x80, cam->imgs.size_norm);
-        mystrftime(cam, tmpout, sizeof(tmpout), tmpin, &ts1, NULL, 0);
-        draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
-                    10, 20 * cam->text_scale, tmpout, cam->text_scale);
-
-        /* Write error message only once */
-        if (cam->missing_frame_counter == MISSING_FRAMES_TIMEOUT * cam->conf->framerate) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                ,_("Video signal lost - Adding grey image"));
-            event(cam, EVENT_CAMERA_LOST, NULL, NULL, NULL, &ts1);
-        }
-
-        if ((cam->video_dev > 0) &&
-            (cam->missing_frame_counter == (MISSING_FRAMES_TIMEOUT * 4) * cam->conf->framerate)) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                ,_("Video signal still lost - Trying to close video device"));
-            vid_close(cam);
-        }
-    }
-
-    return 0;
-
-}
-
-static int mlp_capture(struct ctx_cam *cam){
-
-    int vid_return_code = 0;        /* Return code used when calling vid_next */
-
-    if (cam->video_dev >= 0){
+    if (cam->video_dev >= 0)
         vid_return_code = vid_next(cam, cam->current_image);
-    } else {
+    else
         vid_return_code = 1; /* Non fatal error */
-    }
 
     if (vid_return_code == 0) {
-        mlp_capture_valid(cam);
+        cam->lost_connection = 0;
+        cam->connectionlosttime = 0;
+
+        if (cam->missing_frame_counter >= MISSING_FRAMES_TIMEOUT * cam->conf->framerate) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
+            event(cam, EVENT_CAMERA_FOUND, NULL, NULL, NULL, NULL);
+        }
+        cam->missing_frame_counter = 0;
+        memcpy(cam->imgs.image_virgin, cam->current_image->image_norm, cam->imgs.size_norm);
+        mlp_mask_privacy(cam);
+        memcpy(cam->imgs.image_vprvcy, cam->current_image->image_norm, cam->imgs.size_norm);
+
     } else if (vid_return_code < 0) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Video device fatal error - Closing video device"));
@@ -915,9 +838,53 @@ static int mlp_capture(struct ctx_cam *cam){
         memcpy(cam->current_image->image_norm, cam->imgs.image_virgin, cam->imgs.size_norm);
         cam->lost_connection = 1;
     } else {
-        return mlp_capture_nonfatal(cam, vid_return_code);
-    }
+        if (vid_return_code == NETCAM_RESTART_ERROR) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Restarting Motion thread to reinitialize all "
+                "image buffers"));
+            cam->lost_connection = 1;
+            return 1;
+        }
 
+        if (cam->connectionlosttime == 0){
+            cam->connectionlosttime = cam->frame_curr_ts.tv_sec;
+        }
+
+        ++cam->missing_frame_counter;
+
+        if (cam->video_dev >= 0 &&
+            cam->missing_frame_counter < (MISSING_FRAMES_TIMEOUT * cam->conf->framerate)) {
+            memcpy(cam->current_image->image_norm, cam->imgs.image_vprvcy, cam->imgs.size_norm);
+        } else {
+            cam->lost_connection = 1;
+
+            if (cam->video_dev >= 0)
+                tmpin = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
+            else
+                tmpin = "UNABLE TO OPEN VIDEO DEVICE\\nSINCE %Y-%m-%d %T";
+
+            ts1.tv_sec=cam->connectionlosttime;
+            ts1.tv_nsec = 0;
+            memset(cam->current_image->image_norm, 0x80, cam->imgs.size_norm);
+            mystrftime(cam, tmpout, sizeof(tmpout), tmpin, &ts1, NULL, 0);
+            draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
+                      10, 20 * cam->text_scale, tmpout, cam->text_scale);
+
+            /* Write error message only once */
+            if (cam->missing_frame_counter == MISSING_FRAMES_TIMEOUT * cam->conf->framerate) {
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                    ,_("Video signal lost - Adding grey image"));
+                event(cam, EVENT_CAMERA_LOST, NULL, NULL, NULL, &ts1);
+            }
+
+            if ((cam->video_dev > 0) &&
+                (cam->missing_frame_counter == (MISSING_FRAMES_TIMEOUT * 4) * cam->conf->framerate)) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    ,_("Video signal still lost - Trying to close video device"));
+                vid_close(cam);
+            }
+        }
+    }
     return 0;
 
 }
@@ -948,12 +915,9 @@ static void mlp_detection(struct ctx_cam *cam){
 
 static void mlp_tuning(struct ctx_cam *cam){
 
-    if ((cam->conf->noise_tune == TRUE) &&
-        (cam->shots == 0) &&
-        (cam->detecting_motion == FALSE) &&
-        (cam->current_image->diffs <= cam->threshold)) {
+    if ((cam->conf->noise_tune && cam->shots == 0) &&
+         (!cam->detecting_motion && (cam->current_image->diffs <= cam->threshold)))
         alg_noise_tune(cam, cam->imgs.image_vprvcy);
-    }
 
     if (cam->conf->threshold_tune){
         alg_threshold_tune(cam, cam->current_image->diffs, cam->detecting_motion);
@@ -966,6 +930,10 @@ static void mlp_tuning(struct ctx_cam *cam){
             , cam->imgs.width
             , cam->imgs.height
             , &cam->current_image->location);
+        }
+
+    if (cam->conf->primary_method == 0){
+        alg_update_reference_frame(cam, UPDATE_REF_FRAME);
     }
 
     cam->previous_diffs = cam->current_image->diffs;
@@ -1087,7 +1055,8 @@ static void mlp_actions_motion(struct ctx_cam *cam){
     }
 
     if (frame_count >= cam->conf->minimum_motion_frames) {
-         cam->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
+
+        cam->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
 
         if ( (cam->detecting_motion == FALSE) && (cam->movie_norm != NULL) ){
             movie_reset_start_time(cam->movie_norm, &cam->current_image->imgts);
@@ -1153,7 +1122,7 @@ static void mlp_actions_event(struct ctx_cam *cam){
 
 static void mlp_actions(struct ctx_cam *cam){
 
-    if ((cam->current_image->diffs > cam->threshold) &&
+     if ((cam->current_image->diffs > cam->threshold) &&
         (cam->current_image->diffs < cam->threshold_maximum)) {
         cam->current_image->flags |= IMAGE_MOTION;
     }
@@ -1175,13 +1144,16 @@ static void mlp_actions(struct ctx_cam *cam){
         cam->lasttime = cam->current_image->imgts.tv_sec;
     }
 
-    if (cam->detecting_motion){
-        algsec_detect(cam);
-    }
+    if (cam->detecting_motion) algsec_detect(cam);
 
     mlp_areadetect(cam);
 
     mlp_actions_event(cam);
+
+    /* Save/send to movie some images */
+    /* But why?  And why just two images from the ring? Didn't other functions flush already?*/
+    mlp_ring_process(cam, 2);
+
 
 }
 
