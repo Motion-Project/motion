@@ -8,7 +8,7 @@ matrix:
     language: c
     compiler: gcc
   - os: linux
-    env:  DOCKER_IMAGE=ubuntu:19.04
+    env:  DOCKER_IMAGE=ubuntu:20.04
     services:  docker
     language: c
     compiler: gcc
@@ -35,8 +35,6 @@ before_script:
       brew install ffmpeg pkg-config libjpeg libmicrohttpd;
       export PATH="/usr/local/opt/gettext/bin:/usr/local/bin:$PATH";
       autoreconf -fiv;
-    elif [ "$BUILD_IMAGE" = "14.04" ]; then
-      autoreconf -fiv;
     elif [ "$DOCKER_IMAGE" = "alpine:latest" ]; then
       docker exec $(docker ps -aq) /bin/sh -c 'apk update';
       docker exec $(docker ps -aq) /bin/sh -c 'apk add alpine-sdk autoconf automake pkgconf libtool';
@@ -55,20 +53,10 @@ before_script:
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmariadbclient-dev libwebp-dev libmicrohttpd-dev gettext';
       docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
-    elif [ "$DOCKER_IMAGE" = "debian:jessie" ]; then
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg62-turbo-dev libzip-dev autoconf automake autopoint pkgconf libtool git';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmysqlclient-dev libwebp-dev libmicrohttpd-dev gettext';
-      docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
-    elif [ "$DOCKER_IMAGE" = "ubuntu:16.04" ]; then
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg8-dev libzip-dev autoconf automake autopoint pkgconf libtool git';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmysqlclient-dev libwebp-dev libmicrohttpd-dev gettext';
-      docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
     elif [ "x$DOCKER_IMAGE" != "x" ]; then
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
+      docker exec $(docker ps -aq) /bin/bash -c 'ENV DEBIAN_FRONTEND=noninteractive';
+      docker exec $(docker ps -aq) /bin/bash -c 'RUN apt-get -y install tzdata';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg8-dev libzip-dev autoconf automake autopoint pkgconf libtool git';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev libopencv-dev';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmariadbclient-dev libwebp-dev libmicrohttpd-dev gettext';
@@ -78,10 +66,6 @@ before_script:
 script:
   - if [ $TRAVIS_OS_NAME = osx ]; then
       ./configure --with-developer-flags && make;
-    elif [ "$BUILD_IMAGE" = "14.04" ]; then
-      ./configure && make check;
-    elif [ "$DOCKER_IMAGE" = "alpine:latest" ]; then
-      docker exec $(docker ps -aq) /bin/sh -c './configure && make check';
     elif [ "x$DOCKER_IMAGE" != "x" ]; then
       docker exec $(docker ps -aq) /bin/bash -c './configure && make check';
     fi;
