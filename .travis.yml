@@ -22,11 +22,11 @@ before_install:
   - if [ "$DOCKER_IMAGE" = "alpine:latest" ]; then
       echo $DOCKER_IMAGE;
       docker pull $DOCKER_IMAGE;
-      docker run -d -v $(pwd):/motion -w /motion $DOCKER_IMAGE /bin/sh -c 'while true; do sleep 1; done';
+      docker run -d -v $(pwd):/motionplus -w /motionplus $DOCKER_IMAGE /bin/sh -c 'while true; do sleep 1; done';
     elif [ "x$DOCKER_IMAGE" != "x" ]; then
       echo $DOCKER_IMAGE;
       docker pull $DOCKER_IMAGE;
-      docker run -d -v $(pwd):/motion -w /motion $DOCKER_IMAGE /bin/bash -c 'while true; do sleep 1; done';
+      docker run -d -v $(pwd):/motionplus -w /motionplus $DOCKER_IMAGE /bin/bash -c 'while true; do sleep 1; done';
     fi;
 #  MariaDB has broken mysql.h and we do not test it for buster.
 before_script:
