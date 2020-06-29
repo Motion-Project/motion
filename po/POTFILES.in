@@ -7,7 +7,7 @@ src/movie.cpp
 src/jpegutils.cpp
 src/logger.cpp
 src/mmalcam.cpp
-src/motion.cpp
+src/motionplus.cpp
 src/netcam.cpp
 src/picture.cpp
 src/rotate.cpp

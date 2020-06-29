@@ -4,13 +4,13 @@ SUBDIRS = src po man
 
 sysconfdir = @sysconfdir@/$(PACKAGE)
 sysconf_DATA = \
-	data/motion-dist.conf \
+	data/motionplus-dist.conf \
 	data/camera1-dist.conf \
 	data/camera2-dist.conf \
 	data/camera3-dist.conf \
 	data/camera4-dist.conf
 
-man_MANS = man/motion.1
+man_MANS = man/motionplus.1
 
 docdir = $(datadir)/doc/@PACKAGE@
 doc_DATA = \
@@ -18,12 +18,12 @@ doc_DATA = \
 	doc/normal.jpg \
 	doc/outputmotion1.jpg  \
 	doc/outputnormal1.jpg \
-	doc/motion_guide.html \
-	doc/motion_stylesheet.css \
+	doc/motionplus_guide.html \
+	doc/motionplus_stylesheet.css \
 	doc/COPYING \
 	doc/CREDITS \
-	doc/motion_build.html \
-	doc/motion_config.html
+	doc/motionplus_build.html \
+	doc/motionplus_config.html
 
 ###################################################################
 ## Create pristine directories to match exactly distributed files
@@ -34,9 +34,9 @@ cleanall: distclean
 	@rm -f compile config.guess config.rpath configure depcomp install-sh
 	@rm -f po/en@boldquot.header po/en@quot.header po/insert-header.sin
 	@rm -f po/Makevars.template po/quot.sed po/remove-potcdate.sin
-	@rm -f po/Rules-quot po/stamp-po po/*.gmo po/motion.pot po/boldquot.sed
+	@rm -f po/Rules-quot po/stamp-po po/*.gmo po/motionplus.pot po/boldquot.sed
 	@rm -f Makefile.in src/Makefile.in po/Makefile.in.in man/Makefile.in
-	@rm -f data/motion.service data/motion-dist.conf
+	@rm -f data/motionplus.service data/motionplus-dist.conf
 	@rm -f data/camera1-dist.conf data/camera2-dist.conf
 	@rm -f data/camera3-dist.conf data/camera4-dist.conf
 
@@ -50,15 +50,15 @@ all-local:
 ## Update contents of sample files with the correct directory
 ###################################################################
 install-data-local:
-	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/motion-dist.conf > ${DESTDIR}${sysconfdir}/motion-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/motion-dist.conf.tmp ${DESTDIR}${sysconfdir}/motion-dist.conf
+	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/motionplus-dist.conf > ${DESTDIR}${sysconfdir}/motionplus-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/motionplus-dist.conf.tmp ${DESTDIR}${sysconfdir}/motionplus-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera1-dist.conf > ${DESTDIR}${sysconfdir}/camera1-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera1-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera1-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera2-dist.conf > ${DESTDIR}${sysconfdir}/camera2-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera2-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera2-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera3-dist.conf > ${DESTDIR}${sysconfdir}/camera3-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera3-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera3-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera4-dist.conf > ${DESTDIR}${sysconfdir}/camera4-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera4-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera4-dist.conf
 
-	@sed -e 's|$${exec_prefix}|$(exec_prefix)|' data/motion.service > data/motion.service.tmp && mv -f data/motion.service.tmp data/motion.service
+	@sed -e 's|$${exec_prefix}|$(exec_prefix)|' data/motionplus.service > data/motionplus.service.tmp && mv -f data/motionplus.service.tmp data/motionplus.service
 
-	@sed -e 's|$${prefix}|$(prefix)|' data/motion-dist.conf > data/motion-dist.conf.tmp && mv -f data/motion-dist.conf.tmp data/motion-dist.conf
+	@sed -e 's|$${prefix}|$(prefix)|' data/motionplus-dist.conf > data/motionplus-dist.conf.tmp && mv -f data/motionplus-dist.conf.tmp data/motionplus-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' data/camera1-dist.conf > data/camera1-dist.conf.tmp && mv -f data/camera1-dist.conf.tmp data/camera1-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' data/camera2-dist.conf > data/camera2-dist.conf.tmp && mv -f data/camera2-dist.conf.tmp data/camera2-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' data/camera3-dist.conf > data/camera3-dist.conf.tmp && mv -f data/camera3-dist.conf.tmp data/camera3-dist.conf

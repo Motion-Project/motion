@@ -1,10 +1,23 @@
 /*
+ *    This file is part of Motionplus.
  *
- * movie.cpp
+ *    MotionPlus is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
  *
- * This software is distributed under the GNU Public License version 2
- * See also the file 'COPYING'.
+ *    Motionplus is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motionplus.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *    Copyright 2020 MotionMrDave@gmail.com
+ */
+
+/*
  * The contents of this file has been derived from output_example.c
  * and apiexample.c from the FFmpeg distribution.
  *
@@ -21,7 +34,7 @@
  * indicate libav
 */
 
-#include "motion.hpp"
+#include "motionplus.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"

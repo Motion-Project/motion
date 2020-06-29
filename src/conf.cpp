@@ -1,17 +1,26 @@
 /*
-  **
-  ** conf.cpp
-  ** Copyright 1999 Jeroen Vreeken (pe1rxq@chello.nl)
-  **
-  ** This software is licensed under the terms of the GNU General
-  ** Public License (GPL). Please see the file COPYING for details.
-  **
-  **
-*/
+ *    This file is part of Motionplus.
+ *
+ *    MotionPlus is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    Motionplus is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motionplus.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *    Copyright 2020 MotionMrDave@gmail.com
+ */
+
 #include <regex.h>
 #include <dirent.h>
 #include <string>
-#include "motion.hpp"
+#include "motionplus.hpp"
 #include "util.hpp"
 #include "logger.hpp"
 #include "conf.hpp"
@@ -87,7 +96,7 @@ struct ctx_parm config_parms[] = {
     },
     {
     "vid_control_params",
-    "# Parameters to control video device.  See motion_guide.html",
+    "# Parameters to control video device.  See motionplus_guide.html",
     0,PARM_TYP_STRING,PARM_CAT_01,WEBUI_LEVEL_LIMITED},
     {
     "v4l2_palette",
@@ -402,7 +411,7 @@ struct ctx_parm config_parms[] = {
     0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
     {
     "movie_codec",
-    "# Container/Codec to used for the movie. See motion_guide.html",
+    "# Container/Codec to used for the movie. See motionplus_guide.html",
     0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
     {
     "movie_passthrough",
@@ -429,7 +438,7 @@ struct ctx_parm config_parms[] = {
     0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
     {
     "timelapse_mode",
-    "# Timelapse file rollover mode. See motion_guide.html for options and uses.",
+    "# Timelapse file rollover mode. See motionplus_guide.html for options and uses.",
     0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED},
     {
     "timelapse_fps",
@@ -605,22 +614,22 @@ struct ctx_parm config_parms[] = {
     0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED},
     {
     "sql_query_start",
-    "# SQL query at event start.  See motion_guide.html",
+    "# SQL query at event start.  See motionplus_guide.html",
     0, PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_ADVANCED },
     {
     "sql_query_stop",
-    "# SQL query at event stop.  See motion_guide.html",
+    "# SQL query at event stop.  See motionplus_guide.html",
     0, PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_ADVANCED },
     {
     "sql_query",
-    "# SQL query string that is sent to the database.  See motion_guide.html",
+    "# SQL query string that is sent to the database.  See motionplus_guide.html",
     0, PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_ADVANCED},
     {
     "track_type",
     "############################################################\n"
     "# Tracking configuration parameters\n"
     "############################################################\n\n"
-    "# Method used by tracking camera. See motion_guide.html",
+    "# Method used by tracking camera. See motionplus_guide.html",
     0, PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {
     "track_auto",
@@ -3316,9 +3325,8 @@ void conf_edit_set(struct ctx_motapp *motapp, int threadnbr
 
 /** Prints usage and options allowed from Command-line. */
 static void usage(void) {
-    printf("motion Version %s, Copyright 2000-2019 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen/Motion-Project maintainers\n",PACKAGE_VERSION);
-    printf("\nHome page :\t https://motion-project.github.io/ \n");
-    printf("\nusage:\tmotion [options]\n");
+    printf("motionplus version %s, Copyright 2020\n",PACKAGE_VERSION);
+    printf("\nusage:\tmotionplus [options]\n");
     printf("\n\n");
     printf("Possible options:\n\n");
     printf("-b\t\t\tRun in background (daemon) mode.\n");
@@ -3329,12 +3337,8 @@ static void usage(void) {
     printf("-k type\t\t\tType of log (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL). default: ALL.\n");
     printf("-p process_id_file\tFull path and filename of process id file (pid file).\n");
     printf("-l log file \t\tFull path and filename of log file.\n");
-    printf("-m\t\t\tDisable motion detection at startup.\n");
+    printf("-m\t\t\tDisable detection at startup.\n");
     printf("-h\t\t\tShow this screen.\n");
-    printf("\n");
-    printf("Motion is configured using a config file only. If none is supplied,\n");
-    printf("it will read motion.conf from current directory, ~/.motion or %s.\n", sysconfdir);
-    printf("%s\n", sysconfdir);
     printf("\n");
 }
 
@@ -3624,7 +3628,7 @@ void conf_parms_write(struct ctx_cam **cam_list) {
         strftime(timestamp, 32, "%Y-%m-%dT%H:%M:%S", localtime(&now));
 
         fprintf(conffile, "# %s\n", cam_list[thread]->conf_filename);
-        fprintf(conffile, "#\n# This config file was generated by motion " VERSION "\n");
+        fprintf(conffile, "#\n# This config file was generated by motionplus " VERSION "\n");
         fprintf(conffile, "# at %s\n", timestamp);
         fprintf(conffile, "\n\n");
 
@@ -3690,17 +3694,17 @@ void conf_init_app(struct ctx_motapp *motapp, int argc, char *argv[]){
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error getcwd"));
             exit(-1);
         }
-        filename = path + std::string("/motion.conf");
+        filename = path + std::string("/motionplus.conf");
         fp = fopen (filename.c_str(), "r");
     }
 
     if (!fp) {
-        filename = std::string(getenv("HOME")) + std::string("/.motion/motion.conf");
+        filename = std::string(getenv("HOME")) + std::string("/.motionplus/motionplus.conf");
         fp = fopen(filename.c_str(), "r");
     }
 
     if (!fp) {
-        filename = std::string( sysconfdir ) + std::string("/motion.conf");
+        filename = std::string( sysconfdir ) + std::string("/motionplus.conf");
         fp = fopen(filename.c_str(), "r");
     }
 
@@ -3709,7 +3713,7 @@ void conf_init_app(struct ctx_motapp *motapp, int argc, char *argv[]){
             ,_("could not open configfile %s"), filename.c_str());
     }
 
-    /* Now we process the motion.conf config file and close it. */
+    /* Now we process the motionplus.conf config file and close it. */
     if (fp) {
 
         conf_edit_set(motapp, -1, "conf_filename", filename);

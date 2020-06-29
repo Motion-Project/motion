@@ -1,12 +1,20 @@
 /*
- *    rotate.hpp
+ *    This file is part of Motionplus.
  *
- *    Include file for handling image rotation.
+ *    MotionPlus is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
  *
- *    Copyright 2004-2005, Per Jonsson (per@pjd.nu)
+ *    Motionplus is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *    This software is distributed under the GNU Public license
- *    Version 2.  See also the file 'COPYING'.
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motionplus.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *    Copyright 2020 MotionMrDave@gmail.com
  */
 #ifndef _INCLUDE_ROTATE_H
 #define _INCLUDE_ROTATE_H

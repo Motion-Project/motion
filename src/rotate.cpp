@@ -1,35 +1,22 @@
 /*
- *    rotate.cpp
+ *    This file is part of Motionplus.
  *
- *    Module for handling image rotation.
+ *    MotionPlus is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
  *
- *    Copyright 2004-2005, Per Jonsson (per@pjd.nu)
+ *    Motionplus is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *    This software is distributed under the GNU Public license
- *    Version 2.  See also the file 'COPYING'.
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motionplus.  If not, see <https://www.gnu.org/licenses/>.
  *
- *    Image rotation is a feature of Motion that can be used when the
- *    camera is mounted upside-down or on the side. The module only
- *    supports rotation in multiples of 90 degrees. Using rotation
- *    increases the Motion CPU usage slightly.
- *
- *    Version history:
- *      v6 (29-Aug-2005) - simplified the code as Motion now requires
- *                         that width and height are multiples of 16
- *      v5 (3-Aug-2005)  - cleanup in code comments
- *                       - better adherence to coding standard
- *                       - fix for __bswap_32 macro collision
- *                       - fixed bug where initialization would be
- *                         incomplete for invalid degrees of rotation
- *                       - now uses MOTION_LOG for error reporting
- *      v4 (26-Oct-2004) - new fix for width/height from imgs/conf due to
- *                         earlier misinterpretation
- *      v3 (11-Oct-2004) - cleanup of width/height from imgs/conf
- *      v2 (26-Sep-2004) - separation of capture/internal dimensions
- *                       - speed optimization, including bswap
- *      v1 (28-Aug-2004) - initial version
+ *    Copyright 2020 MotionMrDave@gmail.com
  */
-#include "motion.hpp"
+#include "motionplus.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"

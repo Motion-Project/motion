@@ -1,17 +1,25 @@
 /*
- * mmalcam.cpp
+ *    This file is part of Motionplus.
  *
- *    Raspberry Pi camera module using MMAL API.
+ *    MotionPlus is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
  *
- *    Built upon functionality from the Raspberry Pi userland utility raspivid.
+ *    Motionplus is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motionplus.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *    Copyright 2020 MotionMrDave@gmail.com
  *    Copyright 2013 by Nicholas Tuckett
- *    This software is distributed under the GNU public license version 2
- *    See also the file 'COPYING'.
  *
  */
 
-#include "motion.hpp"
+#include "motionplus.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"

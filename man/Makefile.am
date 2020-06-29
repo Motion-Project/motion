@@ -1,1 +1,1 @@
-man_MANS = motion.1
+man_MANS = motionplus.1

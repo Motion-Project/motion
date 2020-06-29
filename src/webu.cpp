@@ -1,16 +1,24 @@
 /*
- *    webu.cpp
+ *    This file is part of Motionplus.
  *
- *    Webcontrol and Streams for motion.
+ *    MotionPlus is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
  *
- *    This software is distributed under the GNU Public License Version 2
- *    See also the file 'COPYING'.
+ *    Motionplus is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *    Portions of code from Angel Carpintero (motiondevelop@gmail.com)
- *    from webhttpd.c Copyright 2004-2005
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motionplus.  If not, see <https://www.gnu.org/licenses/>.
  *
- *    Majority of module written by MrDave.
- *
+ *    Copyright 2020 MotionMrDave@gmail.com
+*/
+
+
+/*
  *    Function naming scheme:
  *      webu*      - All functions in this module have this prefix.
  *      webu_start - Entry point to start the daemon.
@@ -37,7 +45,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#include "motion.hpp"
+#include "motionplus.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"

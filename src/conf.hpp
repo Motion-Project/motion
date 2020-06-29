@@ -1,16 +1,22 @@
 /*
+ *    This file is part of Motionplus.
  *
- * conf.hpp - function prototypes for the config handling routines
+ *    MotionPlus is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
  *
- * Originally written for the dproxy package by Matthew Pratt.
+ *    Motionplus is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- * Copyright 2000 Jeroen Vreeken (pe1rxq@chello.nl)
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motionplus.  If not, see <https://www.gnu.org/licenses/>.
  *
- * This software is licensed under the terms of the GNU General
- * Public License (GPL). Please see the file COPYING for details.
- *
- *
+ *    Copyright 2020 MotionMrDave@gmail.com
  */
+
 
 #ifndef _INCLUDE_CONF_H
 #define _INCLUDE_CONF_H
