@@ -55,8 +55,7 @@ before_script:
       docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
     elif [ "x$DOCKER_IMAGE" != "x" ]; then
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
-      docker exec $(docker ps -aq) /bin/bash -c 'ENV DEBIAN_FRONTEND=noninteractive';
-      docker exec $(docker ps -aq) /bin/bash -c 'RUN apt-get -y install tzdata';
+      docker exec $(docker ps -aq) /bin/bash -c 'DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg8-dev libzip-dev autoconf automake autopoint pkgconf libtool git';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev libopencv-dev';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmariadbclient-dev libwebp-dev libmicrohttpd-dev gettext';
