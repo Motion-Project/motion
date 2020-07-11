@@ -240,6 +240,81 @@ static void mlp_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *im
 
 }
 
+static void mlp_mask_privacy(struct ctx_cam *cam){
+
+    if (cam->imgs.mask_privacy == NULL) return;
+
+    /*
+    * This function uses long operations to process 4 (32 bit) or 8 (64 bit)
+    * bytes at a time, providing a significant boost in performance.
+    * Then a trailer loop takes care of any remaining bytes.
+    */
+    unsigned char *image;
+    const unsigned char *mask;
+    const unsigned char *maskuv;
+
+    int index_y;
+    int index_crcb;
+    int increment;
+    int indx_img;                /* Counter for how many images we need to apply the mask to */
+    int indx_max;                /* 1 if we are only doing norm, 2 if we are doing both norm and high */
+
+    indx_img = 1;
+    indx_max = 1;
+    if (cam->imgs.size_high > 0) indx_max = 2;
+    increment = sizeof(unsigned long);
+
+    while (indx_img <= indx_max){
+        if (indx_img == 1) {
+            /* Normal Resolution */
+            index_y = cam->imgs.height * cam->imgs.width;
+            image = cam->current_image->image_norm;
+            mask = cam->imgs.mask_privacy;
+            index_crcb = cam->imgs.size_norm - index_y;
+            maskuv = cam->imgs.mask_privacy_uv;
+        } else {
+            /* High Resolution */
+            index_y = cam->imgs.height_high * cam->imgs.width_high;
+            image = cam->current_image->image_high;
+            mask = cam->imgs.mask_privacy_high;
+            index_crcb = cam->imgs.size_high - index_y;
+            maskuv = cam->imgs.mask_privacy_high_uv;
+        }
+
+        while (index_y >= increment) {
+            *((unsigned long *)image) &= *((unsigned long *)mask);
+            image += increment;
+            mask += increment;
+            index_y -= increment;
+        }
+        while (--index_y >= 0) {
+            *(image++) &= *(mask++);
+        }
+
+        /* Mask chrominance. */
+        while (index_crcb >= increment) {
+            index_crcb -= increment;
+            /*
+            * Replace the masked bytes with 0x080. This is done using two masks:
+            * the normal privacy mask is used to clear the masked bits, the
+            * "or" privacy mask is used to write 0x80. The benefit of that method
+            * is that we process 4 or 8 bytes in just two operations.
+            */
+            *((unsigned long *)image) &= *((unsigned long *)mask);
+            mask += increment;
+            *((unsigned long *)image) |= *((unsigned long *)maskuv);
+            maskuv += increment;
+            image += increment;
+        }
+
+        while (--index_crcb >= 0) {
+            if (*(mask++) == 0x00) *image = 0x80; // Mask last remaining bytes.
+            image += 1;
+        }
+
+        indx_img++;
+    }
+}
 
 static int init_camera_type(struct ctx_cam *cam){
 
@@ -279,8 +354,6 @@ static void mlp_init_firstimage(struct ctx_cam *cam) {
     int indx;
 
     cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
-
-    /* Capture first image, or we will get an alarm on start */
     if (cam->video_dev >= 0) {
         for (indx = 0; indx < 5; indx++) {
             if (vid_next(cam, cam->current_image) == 0) break;
@@ -288,21 +361,12 @@ static void mlp_init_firstimage(struct ctx_cam *cam) {
         }
 
         if (indx >= 5) {
-            memset(cam->imgs.image_virgin, 0x80, cam->imgs.size_norm);       /* initialize to grey */
-            draw_text(cam->imgs.image_virgin, cam->imgs.width, cam->imgs.height,
+            memset(cam->current_image->image_norm, 0x80, cam->imgs.size_norm);       /* initialize to grey */
+            draw_text(cam->current_image->image_norm , cam->imgs.width, cam->imgs.height,
                       10, 20, "Error capturing first image", cam->text_scale);
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error capturing first image"));
         }
     }
-    cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
-
-    if (cam->conf->primary_method == 0){
-        alg_update_reference_frame(cam, RESET_REF_FRAME);
-    } else if (cam->conf->primary_method == 1) {
-        alg_new_update_frame(cam);
-    }
-
-
 }
 
 /** Check the image size to determine if modulo 8 and over 64 */
@@ -442,6 +506,23 @@ static int mlp_init_cam_start(struct ctx_cam *cam) {
 
 }
 
+static void mlp_init_ref(struct ctx_cam *cam) {
+
+    memcpy(cam->imgs.image_virgin, cam->current_image->image_norm, cam->imgs.size_norm);
+
+    mlp_mask_privacy(cam);
+
+    memcpy(cam->imgs.image_vprvcy, cam->current_image->image_norm, cam->imgs.size_norm);
+
+    if (cam->conf->primary_method == 0){
+        alg_update_reference_frame(cam, RESET_REF_FRAME);
+    } else if (cam->conf->primary_method == 1) {
+        //alg_new_update_frame(cam);
+        alg_update_reference_frame(cam, RESET_REF_FRAME);
+    }
+
+}
+
 /** mlp_init */
 static int mlp_init(struct ctx_cam *cam) {
 
@@ -482,6 +563,8 @@ static int mlp_init(struct ctx_cam *cam) {
     track_init(cam);
 
     mlp_init_areadetect(cam);
+
+    mlp_init_ref(cam);
 
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
         ,_("Camera %d started: motion detection %s"),
@@ -583,82 +666,6 @@ void mlp_cleanup(struct ctx_cam *cam) {
 
     dbse_deinit(cam);
 
-}
-
-static void mlp_mask_privacy(struct ctx_cam *cam){
-
-    if (cam->imgs.mask_privacy == NULL) return;
-
-    /*
-    * This function uses long operations to process 4 (32 bit) or 8 (64 bit)
-    * bytes at a time, providing a significant boost in performance.
-    * Then a trailer loop takes care of any remaining bytes.
-    */
-    unsigned char *image;
-    const unsigned char *mask;
-    const unsigned char *maskuv;
-
-    int index_y;
-    int index_crcb;
-    int increment;
-    int indx_img;                /* Counter for how many images we need to apply the mask to */
-    int indx_max;                /* 1 if we are only doing norm, 2 if we are doing both norm and high */
-
-    indx_img = 1;
-    indx_max = 1;
-    if (cam->imgs.size_high > 0) indx_max = 2;
-    increment = sizeof(unsigned long);
-
-    while (indx_img <= indx_max){
-        if (indx_img == 1) {
-            /* Normal Resolution */
-            index_y = cam->imgs.height * cam->imgs.width;
-            image = cam->current_image->image_norm;
-            mask = cam->imgs.mask_privacy;
-            index_crcb = cam->imgs.size_norm - index_y;
-            maskuv = cam->imgs.mask_privacy_uv;
-        } else {
-            /* High Resolution */
-            index_y = cam->imgs.height_high * cam->imgs.width_high;
-            image = cam->current_image->image_high;
-            mask = cam->imgs.mask_privacy_high;
-            index_crcb = cam->imgs.size_high - index_y;
-            maskuv = cam->imgs.mask_privacy_high_uv;
-        }
-
-        while (index_y >= increment) {
-            *((unsigned long *)image) &= *((unsigned long *)mask);
-            image += increment;
-            mask += increment;
-            index_y -= increment;
-        }
-        while (--index_y >= 0) {
-            *(image++) &= *(mask++);
-        }
-
-        /* Mask chrominance. */
-        while (index_crcb >= increment) {
-            index_crcb -= increment;
-            /*
-            * Replace the masked bytes with 0x080. This is done using two masks:
-            * the normal privacy mask is used to clear the masked bits, the
-            * "or" privacy mask is used to write 0x80. The benefit of that method
-            * is that we process 4 or 8 bytes in just two operations.
-            */
-            *((unsigned long *)image) &= *((unsigned long *)mask);
-            mask += increment;
-            *((unsigned long *)image) |= *((unsigned long *)maskuv);
-            maskuv += increment;
-            image += increment;
-        }
-
-        while (--index_crcb >= 0) {
-            if (*(mask++) == 0x00) *image = 0x80; // Mask last remaining bytes.
-            image += 1;
-        }
-
-        indx_img++;
-    }
 }
 
 static void mlp_areadetect(struct ctx_cam *cam){
@@ -898,14 +905,14 @@ static void mlp_detection(struct ctx_cam *cam){
     }
 
     if ( !cam->pause ) {
-        if (cam->conf->primary_method == 1) {
-            alg_new_diff(cam);
-        } else if (cam->conf->primary_method == 0){
+        if (cam->conf->primary_method == 0){
             alg_diff(cam);
             alg_lightswitch(cam);
             alg_switchfilter(cam);
             alg_despeckle(cam);
             alg_tune_smartmask(cam);
+        } else if (cam->conf->primary_method == 1) {
+            alg_new_diff(cam);
         }
     } else {
         cam->current_image->diffs = 0;
@@ -916,8 +923,9 @@ static void mlp_detection(struct ctx_cam *cam){
 static void mlp_tuning(struct ctx_cam *cam){
 
     if ((cam->conf->noise_tune && cam->shots == 0) &&
-         (!cam->detecting_motion && (cam->current_image->diffs <= cam->threshold)))
+          (!cam->detecting_motion && (cam->current_image->diffs <= cam->threshold))) {
         alg_noise_tune(cam, cam->imgs.image_vprvcy);
+    }
 
     if (cam->conf->threshold_tune){
         alg_threshold_tune(cam, cam->current_image->diffs, cam->detecting_motion);
@@ -925,15 +933,17 @@ static void mlp_tuning(struct ctx_cam *cam){
 
     if ((cam->current_image->diffs > cam->threshold) &&
         (cam->current_image->diffs < cam->threshold_maximum)){
-
         alg_locate_center_size(&cam->imgs
             , cam->imgs.width
             , cam->imgs.height
             , &cam->current_image->location);
-        }
+    }
 
     if (cam->conf->primary_method == 0){
         alg_update_reference_frame(cam, UPDATE_REF_FRAME);
+    } else if (cam->conf->primary_method == 1){
+        alg_update_reference_frame(cam, UPDATE_REF_FRAME);
+        //alg_new_update_frame(cam);
     }
 
     cam->previous_diffs = cam->current_image->diffs;
