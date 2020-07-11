@@ -194,6 +194,8 @@ struct ctx_image_data {
     unsigned char       *image_norm;
     unsigned char       *image_high;
     int                 diffs;
+    int                 diffs_raw;
+    int                 diffs_ratio;
     int64_t             idnbr_norm;
     int64_t             idnbr_high;
     struct timespec     imgts;

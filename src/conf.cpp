@@ -237,6 +237,10 @@ struct ctx_parm config_parms[] = {
     "# The maximum standard deviation of the distance of motion to center.",
     0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
     {
+    "threshold_ratio",
+    "# The maximum ratio between total pixels changed versus change in same brightness level(times 10).",
+    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    {
     "threshold_tune",
     "# Enable tuning of the threshold down if possible.",
     0,PARM_TYP_BOOL, PARM_CAT_02, WEBUI_LEVEL_LIMITED},
@@ -1578,6 +1582,24 @@ static void conf_edit_threshold_sdevxy(struct ctx_cam *cam, std::string &parm, e
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_sdevxy",_("threshold_sdevxy"));
 }
+static void conf_edit_threshold_ratio(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
+    int parm_in;
+    if (pact == PARM_ACT_DFLT){
+        cam->conf->threshold_ratio = 999999; /* Arbitrary large value */
+    } else if (pact == PARM_ACT_SET){
+        parm_in = atoi(parm.c_str());
+        if ((parm_in < 0) ) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_ratio %d"),parm_in);
+        } else {
+            cam->conf->threshold_ratio = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET){
+        parm = std::to_string(cam->conf->threshold_ratio);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_ratio",_("threshold_ratio"));
+}
+
 static void conf_edit_threshold_tune(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
     if (pact == PARM_ACT_DFLT){
         cam->conf->threshold_tune = FALSE;
@@ -2961,6 +2983,7 @@ static void conf_edit_cat02(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "threshold_sdevx"){         conf_edit_threshold_sdevx(cam, parm_val, pact);
     } else if (parm_nm == "threshold_sdevy"){         conf_edit_threshold_sdevy(cam, parm_val, pact);
     } else if (parm_nm == "threshold_sdevxy"){        conf_edit_threshold_sdevxy(cam, parm_val, pact);
+    } else if (parm_nm == "threshold_ratio"){         conf_edit_threshold_ratio(cam, parm_val, pact);
     } else if (parm_nm == "threshold_tune"){          conf_edit_threshold_tune(cam, parm_val, pact);
     } else if (parm_nm == "secondary_interval"){      conf_edit_secondary_interval(cam, parm_val, pact);
     } else if (parm_nm == "secondary_method"){        conf_edit_secondary_method(cam, parm_val, pact);

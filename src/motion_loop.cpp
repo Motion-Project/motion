@@ -939,12 +939,7 @@ static void mlp_tuning(struct ctx_cam *cam){
             , &cam->current_image->location);
     }
 
-    if (cam->conf->primary_method == 0){
-        alg_update_reference_frame(cam, UPDATE_REF_FRAME);
-    } else if (cam->conf->primary_method == 1){
-        alg_update_reference_frame(cam, UPDATE_REF_FRAME);
-        //alg_new_update_frame(cam);
-    }
+    alg_update_reference_frame(cam, UPDATE_REF_FRAME);
 
     cam->previous_diffs = cam->current_image->diffs;
     cam->previous_location_x = cam->current_image->location.x;

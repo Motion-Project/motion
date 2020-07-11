@@ -29,7 +29,7 @@
         int             quiet;
         std::string     camera_name;
         int             camera_id;
-        std::string      camera_dir;
+        std::string     camera_dir;
         std::string     target_dir;
 
         /* Capture device configuration parameters */
@@ -75,6 +75,7 @@
         int             threshold_sdevx;
         int             threshold_sdevy;
         int             threshold_sdevxy;
+        int             threshold_ratio;
         int             threshold_tune;
         int             secondary_interval;
         int             secondary_method;
