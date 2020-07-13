@@ -24,7 +24,7 @@
  *    are available as the HTML as well as a few more.
  *      Additional functions not directly available via HTML
  *          get:    Returns the value of a parameter.
- *          quit:   Terminates motion
+ *          quit:   Terminates motionplus
  *          list:   Lists all the configuration parameters and values
  *          status  Whether the camera is in pause mode.
  *          connection  Whether the camera connection is working
@@ -87,7 +87,7 @@ static void webu_text_header(struct webui_ctx *webui) {
         snprintf(response, sizeof (response),"%s",
             "<!DOCTYPE html>\n"
             "<html>\n"
-            "<head><title>Motion " VERSION " </title></head>\n"
+            "<head><title>MotionPlus " VERSION " </title></head>\n"
             "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=yes\">\n"
             "<body>\n");
         webu_write(webui, response);
@@ -127,7 +127,7 @@ static void webu_text_page_raw(struct webui_ctx *webui) {
     int indx;
 
     snprintf(response, sizeof (response),
-        "Motion " VERSION " Running [%d] Camera%s \n"
+        "MotionPlus " VERSION " Running [%d] Camera%s \n"
         ,webui->cam_count
         ,(webui->cam_count > 1 ? "s" : "")
     );
@@ -152,7 +152,7 @@ static void webu_text_page_basic(struct webui_ctx *webui) {
 
     webu_text_header(webui);
     snprintf(response, sizeof (response),
-        "Motion " VERSION " Running [%d] Camera%s<br>\n"
+        "MotionPlus " VERSION " Running [%d] Camera%s<br>\n"
         "<a href='/%d/'>All</a><br>\n"
         ,webui->cam_count, (webui->cam_count > 1 ? "s" : "")
         ,webui->camlst[0]->camera_id);
@@ -460,7 +460,7 @@ static void webu_text_get_menu(struct webui_ctx *webui) {
 }
 
 static void webu_text_action_quit(struct webui_ctx *webui) {
-    /* Shut down motion or the associated thread */
+    /* Shut down motionplus or the associated thread */
     char response[WEBUI_LEN_RESP];
 
     webu_process_action(webui);

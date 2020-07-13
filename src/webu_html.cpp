@@ -41,7 +41,7 @@
  *    Additional functionality considerations:
  *      Notification to user of items that require restart when changed.
  *      Notification to user that item successfully implemented (config change/tracking)
- *      List motion parms somewhere so they can be found by xgettext
+ *      List motionplus parms somewhere so they can be found by xgettext
  *
  */
 
@@ -248,7 +248,7 @@ static void webu_html_head(struct webui_ctx *webui) {
 
     snprintf(response, sizeof (response),"%s","<head>\n"
         "  <meta charset=\"UTF-8\">\n"
-        "  <title>Motion</title>\n"
+        "  <title>MotionPlus</title>\n"
         "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n");
     webu_write(webui, response);
 
@@ -265,7 +265,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
     int indx;
 
     if (webui->cam_threads == 1){
-        /* Only Motion.conf file */
+        /* Only Motionplus.conf file */
         if (webui->camlst[0]->conf->camera_name == ""){
             snprintf(response, sizeof (response),
                 "    <div class=\"dropdown\">\n"
@@ -288,7 +288,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
             webu_write(webui, response);
         }
     } else if (webui->cam_threads > 1){
-        /* Motion.conf + separate camera.conf file */
+        /* Motionplus.conf + separate camera.conf file */
         snprintf(response, sizeof (response),
             "    <div class=\"dropdown\">\n"
             "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
@@ -371,7 +371,7 @@ static void webu_html_navbar(struct webui_ctx *webui) {
     snprintf(response, sizeof (response),
         "    <a href=\"https://motion-project.github.io/motion_guide.html\" "
         " target=\"_blank\">%s</a>\n"
-        "    <p class=\"header-right\">Motion " VERSION "</p>\n"
+        "    <p class=\"header-right\">MotionPlus " VERSION "</p>\n"
         "  </div>\n"
         ,_("Help"));
     webu_write(webui, response);
@@ -489,7 +489,7 @@ static void webu_html_config(struct webui_ctx *webui) {
             snprintf(val_temp, PATH_MAX,"%s", val_main);
         }
 
-        /* Loop through all the treads and see if any have a different value from motion.conf */
+        /* Loop through all the treads and see if any have a different value from motionplus.conf */
         if (webui->cam_threads > 1){
             for (indx=1;indx <= webui->cam_count;indx++){
                 memset(val_thread,'\0',PATH_MAX);
