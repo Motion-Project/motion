@@ -456,11 +456,13 @@
       <p></p>
       <p></p>
 
-      <h4><a name="BUILD_CENTOS"></a>CentOS 7</a> </h4>
+      <h4><a name="BUILD_CENTOS"></a>CentOS 8</a> </h4>
       <ul>
         <li>Required</li>
         <ul>
           <p></p>
+          <code><strong>sudo yum install dnf-plugins-core</strong></code>
+          <code><strong>yum config-manager --set-enabled PowerTools</strong></code>
           <code><strong>sudo yum groupinstall 'Development Tools'</strong></code>
           <p></p>
           <code><strong>sudo yum install libjpeg-turbo libjpeg-turbo-devel gettext libmicrohttpd-devel</strong></code>
@@ -474,7 +476,7 @@
           <li>FFMpeg Functionality(Required for creating movies, using network cameras, etc.  SEE NOTE BELOW!)</li>
           <ul>
             <p></p>
-            <code><strong>sudo yum localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-7.noarch.rpm</strong></code>
+            <code><strong>sudo yum localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm</strong></code>
             <p></p>
             <code><strong>sudo yum install ffmpeg ffmpeg-devel</strong></code>
             <p></p>
@@ -488,13 +490,13 @@
           <li>MariaDB database functionality</li>
           <ul>
             <p></p>
-            <code><strong>Not known by author</strong></code>
+            <code><strong>sudo yum install mariadb-devel</strong></code>
             <p></p>
           </ul>
           <li>PostgreSQL database functionality</li>
           <ul>
             <p></p>
-            <code><strong>Not known by author</strong></code>
+            <code><strong>sudo yum install postgresql-devel</strong></code>
             <p></p>
           </ul>
           <li>SQLite3 database functionality</li>
@@ -506,7 +508,7 @@
           <li>Webp Image Support</li>
           <ul>
             <p></p>
-            <code><strong>Not known by author</strong></code>
+            <code><strong>sudo yum install libwebp-devel</strong></code>
             <p></p>
           </ul>
         </ul>
