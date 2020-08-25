@@ -697,9 +697,11 @@ static const char *ffmpeg_codec_is_blacklisted(const char *codec_name){
         {"h264_v4l2m2m", "FFMpeg version is too old"},
 #endif
     };
-    size_t i;
+    size_t i, i_mx;
 
-    for (i = 0; i < sizeof(blacklisted_codec)/sizeof(blacklisted_codec[0]); i++) {
+    i_mx = (size_t)(sizeof(blacklisted_codec)/sizeof(blacklisted_codec[0]));
+
+    for (i = 0; i < i_mx; i++) {
         if (strcmp(codec_name, blacklisted_codec[i].codec_name) == 0)
             return blacklisted_codec[i].reason;
     }
