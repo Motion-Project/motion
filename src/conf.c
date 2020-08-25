@@ -2782,23 +2782,22 @@ static struct context **copy_html_output(struct context **cnt, const char *str, 
 
 struct context **copy_uri(struct context **cnt, const char *str, int val) {
 
-    // Here's a complicated regex I found here: https://stackoverflow.com/questions/38608116/how-to-check-a-specified-string-is-a-valid-url-or-not-using-c-code
-    // Use it for validating URIs.
-    const char *regex_str = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$";
+    const char *regex_str = "(http|https)://(((.*):(.*))@)?([^/:]|[-_.a-z0-9]+)(:([0-9]+))?($|(/[^*]*))";
 
     regex_t regex;
     if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Error compiling regex in copy_uri"));
         return cnt;
     }
 
     // A single asterisk is also valid, so check for that.
+    // Getting a perfect regex for all the uri's that are possible is
+    // almost impossible so if it fails, we warn the user but still accept
+    // that they know what they typed and move on.
     if (strcmp(str, "*") != 0 && regexec(&regex, str, 0, NULL, 0) == REG_NOMATCH) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            ,_("Invalid origin for cors_header in copy_uri"));
-        regfree(&regex);
-        return cnt;
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+            ,_("The CORS header may not be valid %s"),str);
     }
 
     regfree(&regex);
