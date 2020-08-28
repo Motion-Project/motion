@@ -72,12 +72,13 @@ struct rtsp_context {
 
     int                       rtsp_uses_tcp;    /* Flag from config for whether to use tcp transport */
     int                       v4l2_palette;     /* Palette from config for v4l2 devices */
-    int                       framerate;        /* Frames per second from configuration file */
     int                       reconnect_count;  /* Count of the times reconnection is tried*/
     int                       src_fps;          /* The fps provided from source*/
+    int64_t                   capture_nbr;      /* The number of images captured since last av_read_play */
 
     struct timeval            frame_prev_tm;    /* The time set before calling the av functions */
     struct timeval            frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
+
     struct config            *conf;             /* Pointer to conf parms of parent cnt*/
     char                      *decoder_nm;      /* User requested decoder */
     struct context            *cnt;
