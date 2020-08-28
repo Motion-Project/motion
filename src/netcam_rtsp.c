@@ -607,20 +607,17 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data){
      * Addendum:  This does invoke many decoding errors but the process still continues rather than
      * disconnecting the camera. As the network camera rate of capture increases, we need fewer calls
      * to the av_read_play.  Also, it highly likely that the fps that the camera is providing images
-     * and I-frames is influential.  Camera tested is sending at 30fps.
+     * and I-frames is influential.  The camera tested was sending at 30fps.
     */
 
-
-    if (((rtsp_data->conf->netcam_rate < 1) &&
-        (rtsp_data->capture_nbr > (rtsp_data->conf->framerate-1))) ||
-        ((rtsp_data->conf->netcam_rate >= 1) &&
-        (rtsp_data->capture_nbr >=(rtsp_data->conf->netcam_rate-1))) ) {
-
+    if (rtsp_data->framerate < rtsp_data->src_fps) {
+        if (rtsp_data->capture_nbr > ((rtsp_data->framerate-1)*2)) {
+            rtsp_data->capture_nbr = 0;
+            av_read_play(rtsp_data->format_context);
+        }
+    } else {
         rtsp_data->capture_nbr = 0;
-        av_read_play(rtsp_data->format_context);
-
     }
-
 
     av_init_packet(&rtsp_data->packet_recv);
     rtsp_data->packet_recv.data = NULL;
@@ -679,7 +676,7 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data){
             }
         }
     }
-    rtsp_data->capture_nbr =+ 1;
+    rtsp_data->capture_nbr++;
 
 
     if (gettimeofday(&rtsp_data->img_recv->image_time, NULL) < 0) {
@@ -876,14 +873,7 @@ static void netcam_rtsp_set_v4l2(struct rtsp_context *rtsp_data){
 
     char optsize[10], optfmt[10], optfps[10];
     char *fourcc;
-    int framerate, retcd;
-
-    if (rtsp_data->conf->netcam_rate < 1){
-        framerate = rtsp_data->conf->framerate;
-    } else {
-        framerate = rtsp_data->conf->netcam_rate;
-    }
-    if (framerate < 1 ) framerate = 1;
+    int retcd;
 
     rtsp_data->format_context->iformat = av_find_input_format("video4linux2");
 
@@ -912,13 +902,13 @@ static void netcam_rtsp_set_v4l2(struct rtsp_context *rtsp_data){
     if (strcmp(optfmt,"default") != 0) {
         if (v4l2_parms_valid(rtsp_data->path
                              ,rtsp_data->v4l2_palette
-                             ,framerate
+                             ,rtsp_data->framerate
                              ,rtsp_data->imgsize.width
                              ,rtsp_data->imgsize.height)) {
-            retcd=snprintf(optfps,9, "%d",framerate);
+            retcd=snprintf(optfps,9, "%d",rtsp_data->framerate);
             if ((retcd < 1) || (retcd >9)) {
                 MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s: Error setting frame rate: %d"),rtsp_data->cameratype, framerate);
+                    ,_("%s: Error setting frame rate: %d"),rtsp_data->cameratype, rtsp_data->framerate);
             }
             av_dict_set(&rtsp_data->opts, "framerate", optfps, 0);
 
@@ -1035,7 +1025,6 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     rtsp_data->status = RTSP_NOTCONNECTED;
     rtsp_data->rtsp_uses_tcp =cnt->conf.netcam_use_tcp;
     rtsp_data->v4l2_palette = cnt->conf.v4l2_palette;
-    rtsp_data->src_fps =  -99; /* Default to invalid value so we can test for whether real value exist */
     rtsp_data->conf = &cnt->conf;
     rtsp_data->camera_name = cnt->conf.camera_name;
     rtsp_data->img_recv = mymalloc(sizeof(netcam_buff));
@@ -1051,6 +1040,13 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     rtsp_data->decoder_nm = cnt->netcam_decoder;
     rtsp_data->cnt = cnt;
     rtsp_data->capture_nbr = -1;
+    rtsp_data->src_fps =  -99; /* Default to invalid value so we can test for whether real value exist */
+    if (rtsp_data->conf->netcam_rate < 1){
+        rtsp_data->framerate = rtsp_data->conf->framerate;
+    } else {
+        rtsp_data->framerate = rtsp_data->conf->netcam_rate;
+    }
+    if (rtsp_data->framerate < 1 ) rtsp_data->framerate = 1;
 
     snprintf(rtsp_data->threadname, 15, "%s",_("Unknown"));
 
@@ -1344,11 +1340,31 @@ static int netcam_rtsp_connect(struct rtsp_context *rtsp_data){
      * Motion loop to start quite yet on this first image so we do
      * not set the status to connected
      */
-    if (!rtsp_data->first_image) rtsp_data->status = RTSP_CONNECTED;
+    if (!rtsp_data->first_image){
 
-    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-        ,_("%s: Camera (%s) connected")
-        , rtsp_data->cameratype,rtsp_data->camera_name);
+        rtsp_data->status = RTSP_CONNECTED;
+
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            ,_("%s: Camera (%s) connected")
+            , rtsp_data->cameratype,rtsp_data->camera_name);
+
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            , _("Netcam capture FPS is %d."), rtsp_data->framerate);
+
+        if (rtsp_data->src_fps > 0){
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                , _("Camera source is %d FPS"), rtsp_data->src_fps);
+        } else {
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                , _("Unable to determine the camera source FPS."));
+        }
+
+        if (rtsp_data->framerate < rtsp_data->src_fps){
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                , _("Capture FPS rate is less than camera FPS so decoding errors may occur.")
+                , rtsp_data->framerate,rtsp_data->src_fps);
+        }
+    }
 
     return 0;
 }
@@ -1384,17 +1400,16 @@ static void netcam_rtsp_handler_wait(struct rtsp_context *rtsp_data){
      * with lots of reconnects or fragmented images
      */
 
-    int framerate;
     long usec_maxrate, usec_delay;
 
     if (rtsp_data->conf->netcam_rate < 1){
-        framerate = rtsp_data->conf->framerate;
+        rtsp_data->framerate = rtsp_data->conf->framerate;
     } else {
-        framerate = rtsp_data->conf->netcam_rate;
+        rtsp_data->framerate = rtsp_data->conf->netcam_rate;
     }
-    if (framerate < 1 ) framerate = 1;
+    if (rtsp_data->framerate < 1 ) rtsp_data->framerate = 1;
 
-    usec_maxrate = (1000000L / framerate);
+    usec_maxrate = (1000000L / rtsp_data->framerate);
 
     if (gettimeofday(&rtsp_data->frame_curr_tm, NULL) < 0) {
         MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
@@ -1442,6 +1457,7 @@ static void netcam_rtsp_handler_reconnect(struct rtsp_context *rtsp_data){
     } else {
         rtsp_data->reconnect_count = 0;
     }
+
 
 }
 
@@ -1498,7 +1514,7 @@ static void *netcam_rtsp_handler(void *arg){
 
 static int netcam_rtsp_start_handler(struct rtsp_context *rtsp_data){
 
-    int retcd, wait_counter, framerate;
+    int retcd, wait_counter;
     pthread_attr_t handler_attribute;
 
     pthread_mutex_init(&rtsp_data->mutex, NULL);
@@ -1538,28 +1554,6 @@ static int netcam_rtsp_start_handler(struct rtsp_context *rtsp_data){
             SLEEP(0,5000000);
             wait_counter--;
         }
-    }
-
-    if (rtsp_data->conf->netcam_rate < 1){
-        framerate = rtsp_data->conf->framerate;
-    } else {
-        framerate = rtsp_data->conf->netcam_rate;
-    }
-    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-        , _("Netcam capture FPS is %d."), framerate);
-
-    if (rtsp_data->src_fps > 0){
-        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-            , _("Camera source is sending pictures at %d FPS"), rtsp_data->src_fps);
-    } else {
-        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-            , _("Unable to determine the camera source FPS."));
-    }
-
-    if (framerate < rtsp_data->src_fps){
-        MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
-            , _("Decoding errors may occur since capture FPS rate is less than what camera is sending.")
-            , framerate,rtsp_data->src_fps);
     }
 
     return 0;
