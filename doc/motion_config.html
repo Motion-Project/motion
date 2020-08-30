@@ -874,6 +874,12 @@
           <td align="left"><a href="#netcam_proxy" >netcam_proxy</a></td>
         </tr>
         <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#netcam_rate" >netcam_rate</a></td>
+        </tr>
+        <tr>
           <td align="left">netcam_tolerant_check</td>
           <td align="left">netcam_tolerant_check</td>
           <td align="left">netcam_tolerant_check</td>
@@ -1624,7 +1630,10 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#netcam_keepalive" >netcam_keepalive</a> </td>
               <td bgcolor="#edf4f9" ><a href="#netcam_proxy" >netcam_proxy</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_rate" >netcam_rate</a> </td>
               <td bgcolor="#edf4f9" ><a href="#netcam_tolerant_check" >netcam_tolerant_check</a> </td>
+            </tr>
+            <tr>
               <td bgcolor="#edf4f9" ><a href="#netcam_use_tcp" >netcam_use_tcp</a> </td>
             </tr>
           </tbody>
@@ -3081,6 +3090,53 @@
         Leave this option undefined if you do not use a proxy server.
         <p></p>
             Motion will ignore this option for rtsp/rtmp cameras.
+        <p></p>
+
+        <h3><a name="netcam_rate"></a> netcam_rate </h3>
+        <p></p>
+        <ul>
+          <li> Type: Int</li>
+          <li> Range / Valid values: Integer</li>
+          <li> Default: <a href="#framerate">framerate</a></li>
+        </ul>
+        <p></p>
+        This option allows for the user to request a specific frame per second (FPS) capture rate for
+        the network camera.  This is needed
+        at times so that the rate Motion is capturing images is in sync with what the camera is sending.
+        <p></p>
+        When this value is used, it makes a slight distinction from
+        the usual interpretation of <a href="#framerate">framerate</a>.  The netcam_rate will specify
+        how fast images are <u>captured and decoded</u> and the <a href="#framerate">framerate</a>
+        will specify the rate at which they are <u>processed for motion</u>.
+        <p></p>
+        For example, if the netcam_rate were set to be 10 and the
+        <a href="#framerate">framerate</a> was set to be 20, what would happen is that each captured image
+        would end up going through the Motion detection / processing routines twice because that loop is
+        processing at twice the speed of the capture loop.  Conversely, if the netcam_rate was set
+        to 20 and the <a href="#framerate">framerate</a> is specified as 10, then Motion will be detecting
+        and processing every other image captured.
+        <p></p>
+        The reason that the netcam_rate is not systematically set to the <a href="#framerate">framerate</a>
+        within Motion has to with the camera.  Each camera will provide a stream of images usually in some
+        compression format such as H264/H265 and provide those images at a particular FPS.  If the
+        capture and decoding FPS of Motion is set to a rate lower than the camera, decoding and disconnection
+        errors will occur.
+        <p></p>
+        To avoid the decoding and disconnection errors, it is recommended that the FPS of the camera be
+        adjusted where possible.  Generally, it is preferable to have the FPS of the camera be slightly
+        lower than the netcam_rate of Motion.  This allows for the decoder to perform better and reduce
+        decode errors.  For example if the netcam_rate is set at 5 and the camera is sending images at
+        30 FPS, the resulting images, processing latency, etc is going to be extremely "poor".  But if
+        the camera FPS is set at 4 instead, the results will be much better.
+        <p></p>
+        Reviews of the Motion log at the INF level can assist in determining whether a higher netcam_rate is
+        required.  In particular, look for the following:
+        <ul>
+          <li> Log messages indicating what the netcam capture rate is versus the log entry
+          for the camera FPS.</li>
+          <li> The network camera is disconnecting and reconnecting frequently.</li>
+          <li> A significant number of ffmpeg_avcodec_log messages</li>
+        </ul>
         <p></p>
 
         <h3><a name="netcam_tolerant_check"></a> netcam_tolerant_check </h3>

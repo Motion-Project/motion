@@ -1,4 +1,4 @@
-.TH MOTION 1 2019-02-02 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2020-08-30 "Motion" "Motion Options and Config Files"
 .SH NAME
 motion \-   Detect motion using a video4linux device or network camera
 .SH SYNOPSIS
@@ -546,6 +546,19 @@ If required, the URL to use for a netcam proxy server.
 For example, "http://myproxy".
 If a port number other than 80 is needed, append to the specification.
 For examplet, "http://myproxy:1234".
+.RE
+.RE
+
+.TP
+.B netcam_rate
+.RS
+.nf
+Values: Integer
+Default: framerate
+Description:
+.fi
+.RS
+The FPS that the images will be captured and decoded from the network camera.
 .RE
 .RE
 

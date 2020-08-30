@@ -604,14 +604,14 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data){
      * use the av_read_pause.  Simply having the av_read_play here was enough to keep the TCP connection
      * open to the camera and allow for av_read_frame to return without the numerous EOFs.
      *
-     * Addendum:  This does invoke many decoding errors but the process still continues rather than
-     * disconnecting the camera. As the network camera rate of capture increases, we need fewer calls
-     * to the av_read_play.  Also, it highly likely that the fps that the camera is providing images
-     * and I-frames is influential.  The camera tested was sending at 30fps.
+     * Addendum:  The downside of this av_read_play is that the more times it is called, the
+     * greater the number of decoder warning messages.  As a result, additional conditions are placed
+     * upon when the av_read_play is called.
     */
 
-    if (rtsp_data->framerate < rtsp_data->src_fps) {
-        if (rtsp_data->capture_nbr > ((rtsp_data->framerate-1)*2)) {
+    if ((rtsp_data->conf->netcam_use_tcp) &&
+        (rtsp_data->framerate < (rtsp_data->src_fps))) {
+        if (rtsp_data->capture_nbr > ((rtsp_data->framerate-1))) {
             rtsp_data->capture_nbr = 0;
             av_read_play(rtsp_data->format_context);
         }
@@ -1361,8 +1361,9 @@ static int netcam_rtsp_connect(struct rtsp_context *rtsp_data){
 
         if (rtsp_data->framerate < rtsp_data->src_fps){
             MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
-                , _("Capture FPS rate is less than camera FPS so decoding errors may occur.")
-                , rtsp_data->framerate,rtsp_data->src_fps);
+                , _("Capture FPS rate is less than camera FPS.  Decoding errors will occur."));
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                , _("Better decoding occurs when netcam capture FPS is slightly larger than camera FPS"));
         }
     }
 
@@ -1457,7 +1458,6 @@ static void netcam_rtsp_handler_reconnect(struct rtsp_context *rtsp_data){
     } else {
         rtsp_data->reconnect_count = 0;
     }
-
 
 }
 
