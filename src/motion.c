@@ -2239,7 +2239,7 @@ static void mlp_detection(struct context *cnt){
              * 'lightswitch_frames' frames to allow the camera to settle.
              * Don't check if we have lost connection, we detect "Lost signal" frame as lightswitch
              */
-            if (cnt->conf.lightswitch_percent > 1 && !cnt->lost_connection) {
+            if (cnt->conf.lightswitch_percent >= 1 && !cnt->lost_connection) {
                 if (alg_lightswitch(cnt, cnt->current_image->diffs)) {
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
 
