@@ -1,18 +1,18 @@
 /*
- *    This file is part of Motionplus.
+ *    This file is part of MotionPlus.
  *
  *    MotionPlus is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
  *    (at your option) any later version.
  *
- *    Motionplus is distributed in the hope that it will be useful,
+ *    MotionPlus is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with Motionplus.  If not, see <https://www.gnu.org/licenses/>.
+ *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
  *
  *    Copyright 2020 MotionMrDave@gmail.com
  *
@@ -1265,7 +1265,7 @@ static void mlp_loopback(struct ctx_cam *cam){
     } else {
         event(cam, EVENT_IMAGE, cam->current_image, NULL, &cam->pipe, &cam->current_image->imgts);
 
-        if (!cam->conf->stream_motion || cam->shots == 1){
+        if (!cam->conf->stream_motion || cam->shots == 0){
             event(cam, EVENT_STREAM, cam->current_image, NULL, NULL, &cam->current_image->imgts);
         }
     }
@@ -1413,8 +1413,12 @@ void *motion_loop(void *arg) {
                 mlp_resetimages(cam);
                 if (mlp_retry(cam) == 1)  break;
                 if (mlp_capture(cam) == 1)  break;
-                mlp_detection(cam);
-                mlp_tuning(cam);
+                if (cam->shots == 0){
+                    mlp_detection(cam);
+                    mlp_tuning(cam);
+                } else {
+                    cam->current_image->diffs = cam->previous_diffs;
+                }
                 mlp_overlay(cam);
                 mlp_actions(cam);
                 mlp_setupmode(cam);
@@ -1423,6 +1427,7 @@ void *motion_loop(void *arg) {
             mlp_timelapse(cam);
             mlp_loopback(cam);
             mlp_parmsupdate(cam);
+//            mythreadname_set("ml15",cam->threadnr,cam->conf->camera_name.c_str());
             mlp_frametiming(cam);
         }
     }

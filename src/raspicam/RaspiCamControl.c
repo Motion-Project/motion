@@ -27,9 +27,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
-This file was modified to be used with motionplus. The controls are parsed
-via "mmalcam_control_params" function in motionplus to the raspicam driver. To fulfill
-such functionality without expanding the motionplus code, the following changes were
+This file was modified to be used with MotionPlus. The controls are parsed
+via "mmalcam_control_params" function in MotionPlus to the raspicam driver. To fulfill
+such functionality without expanding the MotionPlus code, the following changes were
 made:
 - remove call to helper module "RaspiHelpers.h";
 - include only "mmal_status_to_int" function from "RaspiHelpers.h". This function

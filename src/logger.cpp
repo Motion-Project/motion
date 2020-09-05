@@ -1,18 +1,18 @@
 /*
- *    This file is part of Motionplus.
+ *    This file is part of MotionPlus.
  *
  *    MotionPlus is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
  *    (at your option) any later version.
  *
- *    Motionplus is distributed in the hope that it will be useful,
+ *    MotionPlus is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with Motionplus.  If not, see <https://www.gnu.org/licenses/>.
+ *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
  *
  *    Copyright 2020 MotionMrDave@gmail.com
  */
@@ -269,7 +269,7 @@ void log_init(struct ctx_motapp *motapp){
     } else {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Logging to syslog"));
     }
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion %s started",VERSION);
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "MotionPlus %s started",VERSION);
 
     motapp->log_type = log_get_type(motapp->log_type_str.c_str());
 

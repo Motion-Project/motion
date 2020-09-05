@@ -1,18 +1,18 @@
 /*
- *    This file is part of Motionplus.
+ *    This file is part of MotionPlus.
  *
  *    MotionPlus is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
  *    (at your option) any later version.
  *
- *    Motionplus is distributed in the hope that it will be useful,
+ *    MotionPlus is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with Motionplus.  If not, see <https://www.gnu.org/licenses/>.
+ *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
  *
  *    Copyright 2020 MotionMrDave@gmail.com
  */
@@ -730,99 +730,226 @@ void alg_tune_smartmask(struct ctx_cam *cam) {
 /* Increment for *smartmask_buffer in alg_diff_standard. */
 #define SMARTMASK_SENSITIVITY_INCR 5
 
-static int alg_diff_standard(struct ctx_cam *cam, unsigned char *new_var) {
-    struct ctx_images *imgs = &cam->imgs;
-    int i, diffs = 0;
+static int alg_diff_nomask(struct ctx_cam *cam, unsigned char *new_var) {
+    unsigned char *ref = cam->imgs.ref;
+    unsigned char *out = cam->imgs.image_motion.image_norm;
+
+    int i, curdiff;
+    int imgsz = cam->imgs.motionsize;
+    int diffs = 0;
+    int noise = cam->noise;
+
+    memset(out + imgsz, 128, (imgsz / 2));
+    memset(out, 0, imgsz);
+
+    for (i = 0; i < imgsz; i++) {
+        curdiff = abs(*ref - *new_var);
+        if (curdiff > noise) {
+            *out = *new_var;
+            diffs++;
+        }
+        out++;
+        ref++;
+        new_var++;
+    }
+
+    struct timespec ts2;
+
+    clock_gettime(CLOCK_REALTIME, &ts2);
+
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        ,"Diffs %d detected %ld - %ld", diffs,ts2.tv_sec,ts2.tv_nsec/1000);
+
+    return diffs;
+}
+
+static int alg_diff_mask(struct ctx_cam *cam, unsigned char *new_img) {
+    unsigned char *ref  = cam->imgs.ref;
+    unsigned char *out  = cam->imgs.image_motion.image_norm;
+    unsigned char *mask = cam->imgs.mask;
+
+    int i, curdiff;
+    int imgsz = cam->imgs.motionsize;
+    int diffs = 0;
+    int noise = cam->noise;
+
+    memset(out + imgsz, 128, (imgsz / 2));
+    memset(out, 0, imgsz);
+
+    for (i = 0; i < imgsz; i++) {
+        curdiff = abs(*ref - *new_img);
+        if (mask){
+            curdiff = ((curdiff * *mask) / 255);
+            mask++;
+        }
+
+        if (curdiff > noise) {
+            *out = *new_img;
+            diffs++;
+        }
+        out++;
+        ref++;
+        new_img++;
+    }
+
+    return diffs;
+}
+
+static int alg_diff_smart(struct ctx_cam *cam, unsigned char *new_img) {
+
+    unsigned char *ref  = cam->imgs.ref;
+    unsigned char *out  = cam->imgs.image_motion.image_norm;
+    unsigned char *smartmask_final = cam->imgs.smartmask_final;
+
+    int i, curdiff;
+    int imgsz = cam->imgs.motionsize;
+    int diffs = 0;
     int noise = cam->noise;
     int smartmask_speed = cam->smartmask_speed;
-    unsigned char *ref = imgs->ref;
-    unsigned char *out = imgs->image_motion.image_norm;
-    unsigned char *mask = imgs->mask;
-    unsigned char *smartmask_final = imgs->smartmask_final;
-    int *smartmask_buffer = imgs->smartmask_buffer;
-    unsigned char curdiff;
-    int chksize1, chksize2;
+    int *smartmask_buffer = cam->imgs.smartmask_buffer;
 
-    chksize1 = imgs->width;
-    chksize2 = imgs->motionsize - imgs->width;
+    imgsz = cam->imgs.motionsize;
+    memset(out + imgsz, 128, (imgsz / 2));
+    memset(out, 0, imgsz);
 
-    memset(out + imgs->motionsize, 128, (imgs->motionsize / 2)); /* Motion pictures are now b/w i.o. green */
-    memset(out, 0, imgs->motionsize);
-
-    for (i = 0; i < imgs->motionsize; i++)
-    {
-        curdiff = (int)(abs(*ref - *new_var)); /* Using a temp variable is 12% faster. */
-        /* Apply fixed mask */
-        if (mask)
-            curdiff = ((int)(curdiff * *mask++) / 255);
-
+    for (i = 0; i < imgsz; i++) {
+        curdiff = abs(*ref - *new_img);
         if (smartmask_speed) {
             if (curdiff > noise) {
-                /*
-                 * Increase smart_mask sensitivity every frame when motion
-                 * is detected. (with speed=5, mask is increased by 1 every
-                 * second. To be able to increase by 5 every second (with
-                 * speed=10) we add 5 here. NOT related to the 5 at ratio-
-                 * calculation.
-                 */
-                if (cam->event_nr != cam->prev_event)
+                if (cam->event_nr != cam->prev_event) {
                     (*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
-                /* Apply smart_mask */
-                if (!*smartmask_final)
-                    curdiff = 0;
+                }
+                if (!*smartmask_final) curdiff = 0;
             }
             smartmask_final++;
             smartmask_buffer++;
         }
         /* Pixel still in motion after all the masks? */
         if (curdiff > noise) {
-            *out = *new_var;
+            *out = *new_img;
             diffs++;
         }
 
         out++;
         ref++;
-        new_var++;
+        new_img++;
     }
 
     return diffs;
 }
 
+static int alg_diff_masksmart(struct ctx_cam *cam, unsigned char *new_img) {
+    unsigned char *ref = cam->imgs.ref;
+    unsigned char *out = cam->imgs.image_motion.image_norm;
+    unsigned char *mask = cam->imgs.mask;
+    unsigned char *smartmask_final = cam->imgs.smartmask_final;
+
+    int i, curdiff;
+    int imgsz = cam->imgs.motionsize;
+    int diffs = 0;
+    int noise = cam->noise;
+    int smartmask_speed = cam->smartmask_speed;
+    int *smartmask_buffer = cam->imgs.smartmask_buffer;
+
+    imgsz= cam->imgs.motionsize;
+    memset(out + imgsz, 128, (imgsz / 2));
+    memset(out, 0, imgsz);
+
+    for (i = 0; i < imgsz; i++) {
+        curdiff = abs(*ref - *new_img);
+        if (mask){
+            curdiff = ((curdiff * *mask) / 255);
+            mask++;
+        }
+
+        if (smartmask_speed) {
+            if (curdiff > noise) {
+                if (cam->event_nr != cam->prev_event) {
+                    (*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
+                }
+                if (!*smartmask_final) curdiff = 0;
+            }
+            smartmask_final++;
+            smartmask_buffer++;
+        }
+        /* Pixel still in motion after all the masks? */
+        if (curdiff > noise) {
+            *out = *new_img;
+            diffs++;
+        }
+
+        out++;
+        ref++;
+        new_img++;
+    }
+
+    return diffs;
+}
+
+
 static char alg_diff_fast(struct ctx_cam *cam, int max_n_changes, unsigned char *new_var) {
     struct ctx_images *imgs = &cam->imgs;
-    int i, diffs = 0, step = imgs->motionsize / 10000;
+    int i;
+    int diffs = 0;
+    int step = cam->imgs.motionsize / 10000;
     int noise = cam->noise;
     unsigned char *ref = imgs->ref;
-    unsigned char curdiff;
+    int curdiff;
 
-    if (!step % 2)
-        step++;
-    /* We're checking only 1 of several pixels. */
+    if (!step % 2) step++;
+
     max_n_changes /= step;
+
 
     i = imgs->motionsize;
 
     for (; i > 0; i -= step) {
-        curdiff = (int)(abs((char)(*ref - *new_var))); /* Using a temp variable is 12% faster. */
+        curdiff = abs(*ref - *new_var); /* Using a temp variable is 12% faster. */
         if (curdiff >  noise) {
             diffs++;
-            if (diffs > max_n_changes)
+            if (diffs > max_n_changes){
+
+                //MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                //,"Lots of fast diffs %d detected.", diffs);
+
                 return 1;
+            }
         }
         ref += step;
         new_var += step;
     }
 
+    //MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+    //    ,"Fast Diffs %d detected.", diffs);
+
     return 0;
+}
+
+static void alg_diff_standard(struct ctx_cam *cam) {
+
+    if (cam->smartmask_speed == 0){
+        if (cam->imgs.mask == NULL) {
+            cam->current_image->diffs = alg_diff_nomask(cam, cam->imgs.image_vprvcy);
+        } else {
+            cam->current_image->diffs = alg_diff_mask(cam, cam->imgs.image_vprvcy);
+        }
+    } else {
+        if (cam->imgs.mask == NULL) {
+            cam->current_image->diffs = alg_diff_smart(cam, cam->imgs.image_vprvcy);
+        } else {
+            cam->current_image->diffs = alg_diff_masksmart(cam, cam->imgs.image_vprvcy);
+        }
+    }
+
 }
 
 void alg_diff(struct ctx_cam *cam) {
 
     if (cam->detecting_motion || cam->motapp->setup_mode) {
-        cam->current_image->diffs = alg_diff_standard(cam, cam->imgs.image_vprvcy);
+        alg_diff_standard(cam);
     } else {
         if (alg_diff_fast(cam, cam->conf->threshold / 2, cam->imgs.image_vprvcy)) {
-            cam->current_image->diffs = alg_diff_standard(cam, cam->imgs.image_vprvcy);
+            alg_diff_standard(cam);
         } else {
             cam->current_image->diffs = 0;
         }
@@ -897,8 +1024,7 @@ void alg_switchfilter(struct ctx_cam *cam) {
  *   action - UPDATE_REF_FRAME or RESET_REF_FRAME
  *
  */
-void alg_update_reference_frame(struct ctx_cam *cam, int action)
-{
+void alg_update_reference_frame(struct ctx_cam *cam, int action) {
     int accept_timer = cam->lastrate * ACCEPT_STATIC_OBJECT_TIME;
     int i, threshold_ref;
     int *ref_dyn = cam->imgs.ref_dyn;
@@ -910,8 +1036,7 @@ void alg_update_reference_frame(struct ctx_cam *cam, int action)
     if (cam->lastrate > 5) /* Match rate limit */
         accept_timer /= (cam->lastrate / 3);
 
-    if (action == UPDATE_REF_FRAME)
-    { /* Black&white only for better performance. */
+    if (action == UPDATE_REF_FRAME) { /* Black&white only for better performance. */
         threshold_ref = cam->noise * EXCLUDE_LEVEL_PERCENT / 100;
 
         for (i = cam->imgs.motionsize; i > 0; i--) {

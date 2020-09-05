@@ -1,19 +1,19 @@
-.TH MOTION 1 2020-06-08 "Motionplus" "Motionplus Options and Config Files"
+.TH MOTION 1 2020-06-08 "MotionPlus" "MotionPlus Options and Config Files"
 .SH NAME
-motionplus \-   Detect motion using a video4linux device or network camera
+MotionPlus \-   Detect motion using a video4linux device or network camera
 .SH SYNOPSIS
 .B motionplus [ \-hbnsm ] [ \-c config file path ] [ \-d level ] [ \-k level ] [ \-p pid_file ][ \-l log_file ]
 .SH DESCRIPTION
-.I  Motionplus
+.I  MotionPlus
 uses a video4linux device or network camera to detect motion. If motion is detected both normal
-and motion pictures can be taken. Motionplus can also take actions to notify you
+and motion pictures can be taken. MotionPlus can also take actions to notify you
 if needed. Creation of automated snapshots is also possible.
 .SH OPTIONS
 .TP
 .B \-c
 Full path and filename of config file.
 For example: \fI /home/kurt/motionplus.conf \fR
-The default is \fI /usr/local/etc/motionplus\fR unless specified differently when building Motionplus.
+The default is \fI /usr/local/etc/motionplus\fR unless specified differently when building MotionPlus.
 Many RPMs and Debian packages will use \fI/etc\fR or \fI/etc/motionplus\fR as the default.
 .TP
 .B \-h
@@ -38,7 +38,7 @@ Run with message log type 1-9.
 Full path and file name for the log file.
 .TP
 .B \-p
-Full path and filename for process id file (pid file). E.g /var/run/motionplus.pid. Default is not defined. Pid file is only created when Motionplus is started in daemon mode.
+Full path and filename for process id file (pid file). E.g /var/run/motionplus.pid. Default is not defined. Pid file is only created when MotionPlus is started in daemon mode.
 .TP
 .B \-m
 Start in pause mode.
@@ -58,7 +58,7 @@ Default: off
 Description:
 .fi
 .RS
-When specified as ON, Motionplus goes into daemon (background process) mode and releases the terminal.
+When specified as ON, MotionPlus goes into daemon (background process) mode and releases the terminal.
 .RE
 .RE
 
@@ -171,13 +171,13 @@ User specified string to describe the camera.
 .RS
 .nf
 Values: Numeric identification number for the camera
-Default: The order in which the camera is opened by Motionplus
+Default: The order in which the camera is opened by MotionPlus
 Description:
 .fi
 .RS
-Use this option to assign a number to each camera that is consistent every time that Motionplus is started.
-By default Motionplus will assign a number based upon the sequence in which it reads the configuration and this
-sequence may not be the same every time that Motionplus starts.
+Use this option to assign a number to each camera that is consistent every time that MotionPlus is started.
+By default MotionPlus will assign a number based upon the sequence in which it reads the configuration and this
+sequence may not be the same every time that MotionPlus starts.
 .RE
 .RE
 
@@ -259,7 +259,7 @@ Description:
 .RS
 String to specify the parameters to pass in for a videodevice.  The parameters
 permitted are dependent upon the device.  This only applies to V4L2 devices.  The
-Motionplus log reports all the available options for the device.
+MotionPlus log reports all the available options for the device.
 .RE
 .RE
 
@@ -296,8 +296,8 @@ Default: 17
 Description:
 .fi
 .RS
-The v4l2_palette option allows users to choose the preferred palette to be use by motionplus to capture from the video device.
-If the preferred palette is not available from the video device, Motionplus will attempt to use palettes that are supported.
+The v4l2_palette option allows users to choose the preferred palette to be use by MotionPlus to capture from the video device.
+If the preferred palette is not available from the video device, MotionPlus will attempt to use palettes that are supported.
 .RE
 .RE
 
@@ -754,7 +754,7 @@ Description:
 .fi
 .RS
 When specified, draw the number of changed pixed on the images.
-This option will normally be set to off except when you setup and adjust the Motionplus settings.
+This option will normally be set to off except when you setup and adjust the MotionPlus settings.
 The text is placed in upper right corner of the image.
 .RE
 .RE
@@ -1271,7 +1271,7 @@ A value of 1 is worst quality versus a value of 100 is best quality.
 .nf
 Values:
 .RS
-Motionplus videos:
+MotionPlus videos:
 .RS
 mpeg4 - Creates .avi file
 msmpeg4 - Creates .avi file
@@ -1428,9 +1428,9 @@ Default: mpg
 Description:
 .fi
 .RS
-For mpg timelapse videos, if Motionplus is shutdown and restarted, new pics will be appended
+For mpg timelapse videos, if MotionPlus is shutdown and restarted, new pics will be appended
 to any previously created file with name indicated for timelapse.
-For mpeg4 timelapse videos, if Motionplus is shutdown and restarted, new pics will create a
+For mpeg4 timelapse videos, if MotionPlus is shutdown and restarted, new pics will create a
 new file with the name indicated for timelapse.
 .RE
 .RE
@@ -2106,16 +2106,16 @@ Full path and file name for the script to execute to move a camera in generic tr
 
 
 .SH SIGNALS
-Motionplus responds to the following signals:
+MotionPlus responds to the following signals:
 .TP
 .B SIGHUP
 The config file will be reread.
 .TP
 .B SIGTERM
-If needed Motionplus will create an movie file of the last event and exit
+If needed MotionPlus will create an movie file of the last event and exit
 .TP
 .B SIGUSR1
-Motionplus will create an movie file of the current event.
+MotionPlus will create an movie file of the current event.
 .SH NOTES
 .TP
 .B Snapshot
@@ -2128,23 +2128,23 @@ A "motion" image/movie shows the pixels that have actually changed during the la
 A "normal" image is the real image taken by the camera with text overlayed.
 .TP
 .B Cameras and config files
-If Motionplus was invoked with command line option \-c pathname Motionplus will expect the config file to be as specified. When you specify the config file on the command line with \-c you can call it anything.
+If MotionPlus was invoked with command line option \-c pathname MotionPlus will expect the config file to be as specified. When you specify the config file on the command line with \-c you can call it anything.
 .br
-If you do not specify \-c or the filename you give Motionplus does not exist, Motionplus will search for the configuration file called 'motionplus.conf' in the following order:
+If you do not specify \-c or the filename you give MotionPlus does not exist, MotionPlus will search for the configuration file called 'motionplus.conf' in the following order:
 .br
-1. Current directory from where Motionplus was invoked
+1. Current directory from where MotionPlus was invoked
 .br
 2. Then in a directory called '.motionplus' in the current users home directory (shell environment variable $HOME). E.g. /home/goofy/.motionplus/motionplus.conf
 .br
-3. The motionplus subdirectory inside the directory defined by the \-\-sysconfdir=DIR when running .configure during installation of Motionplus (If this option was not defined the default is /usr/local/etc/)
+3. The motionplus subdirectory inside the directory defined by the \-\-sysconfdir=DIR when running .configure during installation of MotionPlus (If this option was not defined the default is /usr/local/etc/)
 .br
 If you have write access to /usr/local/etc/motionplus then the editor recommends having only one motionplus.conf file in the default /usr/local/etc/motionplus directory.
 .br
-motionplus has a configuration file in the distribution package called motionplus-dist.conf. When you run 'make install' this files gets copied to the /usr/local/etc/motionplus directory.
+MotionPlus has a configuration file in the distribution package called motionplus-dist.conf. When you run 'make install' this files gets copied to the /usr/local/etc/motionplus directory.
 .br
-The configuration file needs to be renamed from motionplus-dist.conf to motionplus.conf. The original file is called motionplus-dist.conf so that your perfectly working motionplus.conf file does not accidentally get overwritten when you re-install or upgrade to a newer version of motionplus.
+The configuration file needs to be renamed from motionplus-dist.conf to motionplus.conf. The original file is called motionplus-dist.conf so that your perfectly working motionplus.conf file does not accidentally get overwritten when you re-install or upgrade to a newer version of MotionPlus.
 .br
-If you have more than one camera you should not try and invoke motionplus more times. motionplus is made to work with more than one camera in a very elegant way and the way to do it is to create a number of camera config files. motionplus will then create an extra thread of itself for each camera. If you only have one camera you only need the motionplus.conf file. The minute you have two or more cameras you must have one camera config file per camera besides the motionplus.conf file.
+If you have more than one camera you should not try and invoke MotionPlus more times. MotionPlus is made to work with more than one camera in a very elegant way and the way to do it is to create a number of camera config files. MotionPlus will then create an extra thread of itself for each camera. If you only have one camera you only need the motionplus.conf file. The minute you have two or more cameras you must have one camera config file per camera besides the motionplus.conf file.
 .br
 So if you have for example two cameras you need motionplus.conf and two camera config files. Total of 3 config files.
 .br
@@ -2156,21 +2156,21 @@ The first camera is defined in the first camera file called from motionplus.conf
 .br
 Any option defined in motionplus.conf will be used for all cameras except for the cameras in which the same option is defined in a camera config file.
 .br
-motionplus reads its configuration parameters in the following sequence. If the same parameter exists more than one place the last one read wins.
+MotionPlus reads its configuration parameters in the following sequence. If the same parameter exists more than one place the last one read wins.
 .br
-1. motionplus reads the configuration file motionplus.conf from the beginning of the file going down line by line.
+1. MotionPlus reads the configuration file motionplus.conf from the beginning of the file going down line by line.
 .br
 2. If the option "camera" is defined in motionplus.conf, the camera configuration file(s) is/(are) read.
 .br
-3. motionplus continues reading the rest of the motionplus.conf file. Any options from here will overrule the same option previously defines in a camera config file.
+3. MotionPlus continues reading the rest of the motionplus.conf file. Any options from here will overrule the same option previously defines in a camera config file.
 .br
-4. motionplus reads the command line option again overruling any previously defined options.
+4. MotionPlus reads the command line option again overruling any previously defined options.
 .br
 So always call the camera config files in the end of the motionplus.conf file. If you define options in motionplus.conf AFTER the camera file calls, the same options in the camera files will never be used. So always put the camera file call at the end of motionplus.conf.
 .br
-If motionplus is built without specific features such as ffmpeg, mysql etc it will ignore the options that belongs to these features. You do not have to remove them or comment them out.
+If MotionPlus is built without specific features such as ffmpeg, mysql etc it will ignore the options that belongs to these features. You do not have to remove them or comment them out.
 .br
-If you run the http control command http://host:port/0/config/writeyes, motionplus will overwrite motionplus.conf and all the camera.conf files by autogenerated config files neatly formatted and only with the features included that motionplus was built with. If you later re-build motionplus with more features or upgrade to a new version, you can use your old config files, run the motionplus.conf.write command, and you will have new config files with the new options included all set to their default values. This makes upgrading very easy to do.
+If you run the http control command http://host:port/0/config/writeyes, MotionPlus will overwrite motionplus.conf and all the camera.conf files by autogenerated config files neatly formatted and only with the features included that MotionPlus was built with. If you later re-build MotionPlus with more features or upgrade to a new version, you can use your old config files, run the motionplus.conf.write command, and you will have new config files with the new options included all set to their default values. This makes upgrading very easy to do.
 .TP
 .B Conversion Specifiers for Advanced Filename and Text Features
 The table below shows all the supported Conversion Specifiers you can use in the options text_left, text_right, snapshot_filename, jpeg_filename, ffmpeg_filename, timelapse_filename, on_event_start, on_event_end, on_picture_save, on_movie_start, on_movie_end, and on_motion_detected.
@@ -2200,7 +2200,7 @@ Text defined by the text_event feature
 The day of the month as a decimal number (range 01 to 31).
 .TP
 .B %D
-Number of pixels detected as motionplus. If labelling is enabled the number is the number of pixels in the largest labelled motion area.
+Number of pixels detected as MotionPlus. If labelling is enabled the number is the number of pixels in the largest labelled motion area.
 .TP
 .B %E
 Modifier: use alternative format, see below.
@@ -2335,13 +2335,13 @@ The frame per seconds.
 The id number returned from mysql_insert_id.
 .TP
 .B %{ver}
-The version number of motionplus.
+The version number of MotionPlus.
 
 
 
 .TP
 .B More information
-Motionplus homepage: TBD
+MotionPlus homepage: TBD
 
-Motionplus Guide (user and installation guide):
+MotionPlus Guide (user and installation guide):
 .br /usr/share/doc/motionplus/motionplus_guide.html

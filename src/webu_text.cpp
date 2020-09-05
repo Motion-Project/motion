@@ -1,18 +1,18 @@
 /*
- *    This file is part of Motionplus.
+ *    This file is part of MotionPlus.
  *
  *    MotionPlus is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
  *    (at your option) any later version.
  *
- *    Motionplus is distributed in the hope that it will be useful,
+ *    MotionPlus is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with Motionplus.  If not, see <https://www.gnu.org/licenses/>.
+ *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
  *
  *    Copyright 2020 MotionMrDave@gmail.com
 */
@@ -24,7 +24,7 @@
  *    are available as the HTML as well as a few more.
  *      Additional functions not directly available via HTML
  *          get:    Returns the value of a parameter.
- *          quit:   Terminates motionplus
+ *          quit:   Terminates MotionPlus
  *          list:   Lists all the configuration parameters and values
  *          status  Whether the camera is in pause mode.
  *          connection  Whether the camera connection is working
@@ -460,7 +460,7 @@ static void webu_text_get_menu(struct webui_ctx *webui) {
 }
 
 static void webu_text_action_quit(struct webui_ctx *webui) {
-    /* Shut down motionplus or the associated thread */
+    /* Shut down MotionPlus or the associated thread */
     char response[WEBUI_LEN_RESP];
 
     webu_process_action(webui);

@@ -1,18 +1,18 @@
 /*
- *    This file is part of Motionplus.
+ *    This file is part of MotionPlus.
  *
  *    MotionPlus is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
  *    (at your option) any later version.
  *
- *    Motionplus is distributed in the hope that it will be useful,
+ *    MotionPlus is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with Motionplus.  If not, see <https://www.gnu.org/licenses/>.
+ *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
  *
  *    Copyright 2020 MotionMrDave@gmail.com
 */
@@ -41,7 +41,7 @@
  *    Additional functionality considerations:
  *      Notification to user of items that require restart when changed.
  *      Notification to user that item successfully implemented (config change/tracking)
- *      List motionplus parms somewhere so they can be found by xgettext
+ *      List MotionPlus parms somewhere so they can be found by xgettext
  *
  */
 
@@ -265,7 +265,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
     int indx;
 
     if (webui->cam_threads == 1){
-        /* Only Motionplus.conf file */
+        /* Only MotionPlus.conf file */
         if (webui->camlst[0]->conf->camera_name == ""){
             snprintf(response, sizeof (response),
                 "    <div class=\"dropdown\">\n"
@@ -288,7 +288,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
             webu_write(webui, response);
         }
     } else if (webui->cam_threads > 1){
-        /* Motionplus.conf + separate camera.conf file */
+        /* MotionPlus.conf + separate camera.conf file */
         snprintf(response, sizeof (response),
             "    <div class=\"dropdown\">\n"
             "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
