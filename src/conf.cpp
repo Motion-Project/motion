@@ -3598,7 +3598,12 @@ void conf_process(struct ctx_motapp *motapp, FILE *fp, int threadnbr) {
             }
             /* Ignore camera/dir in sub files */
             parm_nm = std::string(cmd);
-            parm_val= std::string(arg1);
+            if (arg1 == NULL){
+                parm_val= std::string("");
+            } else {
+                parm_val= std::string(arg1);
+            }
+
             if (threadnbr == -1){
                 conf_edit_set(motapp, threadnbr,parm_nm, parm_val);
             } else {
