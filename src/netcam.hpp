@@ -130,7 +130,8 @@ struct ctx_netcam {
     int                       framerate;        /* Frames per second from configuration file */
     int                       reconnect_count;  /* Count of the times reconnection is tried*/
     int                       src_fps;          /* The fps provided from source*/
-    char                      *decoder_nm;  /* User requested decoder */
+    char                      *decoder_nm;      /* User requested decoder */
+    int                       capture_nbr;      /* Picture capture number since last read */
 
     struct timespec           frame_prev_tm;    /* The time set before calling the av functions */
     struct timespec           frame_curr_tm;    /* Time during the interrupt to determine duration since start*/

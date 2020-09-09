@@ -147,6 +147,10 @@ struct ctx_parm config_parms[] = {
     "# User specified decoder.",
     0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED},
     {
+    "netcam_rate",
+    "# Network camera picture capture rate.",
+    0, PARM_TYP_INT, PARM_CAT_01, WEBUI_LEVEL_LIMITED},
+    {
     "mmalcam_name",
     "# Name of mmal camera (e.g. vc.ril.camera for pi camera).",
     0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
@@ -1253,6 +1257,23 @@ static void conf_edit_netcam_decoder(struct ctx_cam *cam, std::string &parm, enu
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_decoder",_("netcam_decoder"));
+}
+static void conf_edit_netcam_rate(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
+    int parm_in;
+    if (pact == PARM_ACT_DFLT){
+        cam->conf->netcam_rate = -1;
+    } else if (pact == PARM_ACT_SET){
+        parm_in = atoi(parm.c_str());
+        if ((parm_in < 1) || (parm_in > 100)) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid netcam_rate %d"),parm_in);
+        } else {
+            cam->conf->netcam_rate = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET){
+        parm = std::to_string(cam->conf->netcam_rate);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_rate",_("netcam_rate"));
 }
 static void conf_edit_mmalcam_name(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
     if (pact == PARM_ACT_DFLT) {
@@ -2972,6 +2993,7 @@ static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "netcam_userpass"){       conf_edit_netcam_userpass(cam, parm_val, pact);
     } else if (parm_nm == "netcam_use_tcp"){        conf_edit_netcam_use_tcp(cam, parm_val, pact);
     } else if (parm_nm == "netcam_decoder"){        conf_edit_netcam_decoder(cam, parm_val, pact);
+    } else if (parm_nm == "netcam_rate"){           conf_edit_netcam_rate(cam, parm_val, pact);
     } else if (parm_nm == "mmalcam_name"){          conf_edit_mmalcam_name(cam, parm_val, pact);
     } else if (parm_nm == "mmalcam_control_params"){conf_edit_mmalcam_control_params(cam, parm_val, pact);
     }
