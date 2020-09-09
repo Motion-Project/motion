@@ -48,6 +48,7 @@
         std::string     netcam_highres;
         std::string     netcam_userpass;
         int             netcam_use_tcp;
+        std::string     netcam_decoder;
 
         std::string     mmalcam_name;
         std::string     mmalcam_control_params;

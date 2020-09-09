@@ -143,6 +143,10 @@ struct ctx_parm config_parms[] = {
     "# Use TCP transport for RTSP/RTMP connections to camera.",
     1, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
     {
+    "netcam_decoder",
+    "# User specified decoder.",
+    0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED},
+    {
     "mmalcam_name",
     "# Name of mmal camera (e.g. vc.ril.camera for pi camera).",
     0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
@@ -1238,6 +1242,17 @@ static void conf_edit_netcam_use_tcp(struct ctx_cam *cam, std::string &parm, enu
         conf_edit_get_bool(parm, cam->conf->netcam_use_tcp);
     }
     return;
+}
+static void conf_edit_netcam_decoder(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->netcam_decoder = "";
+    } else if (pact == PARM_ACT_SET){
+        cam->conf->netcam_decoder = parm;
+    } else if (pact == PARM_ACT_GET){
+        parm = cam->conf->netcam_decoder;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_decoder",_("netcam_decoder"));
 }
 static void conf_edit_mmalcam_name(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
     if (pact == PARM_ACT_DFLT) {
@@ -2956,6 +2971,7 @@ static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "netcam_highres"){        conf_edit_netcam_highres(cam, parm_val, pact);
     } else if (parm_nm == "netcam_userpass"){       conf_edit_netcam_userpass(cam, parm_val, pact);
     } else if (parm_nm == "netcam_use_tcp"){        conf_edit_netcam_use_tcp(cam, parm_val, pact);
+    } else if (parm_nm == "netcam_decoder"){        conf_edit_netcam_decoder(cam, parm_val, pact);
     } else if (parm_nm == "mmalcam_name"){          conf_edit_mmalcam_name(cam, parm_val, pact);
     } else if (parm_nm == "mmalcam_control_params"){conf_edit_mmalcam_control_params(cam, parm_val, pact);
     }

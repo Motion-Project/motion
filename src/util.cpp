@@ -27,21 +27,25 @@
 
 /** Non case sensitive equality check for strings*/
 int mystrceq(const char* var1, const char* var2){
+    if ((var1 == NULL) ||(var2 == NULL)) return 0;
     return (strcasecmp(var1,var2) ? 0 : 1);
 }
 
 /** Non case sensitive inequality check for strings*/
 int mystrcne(const char* var1, const char* var2){
+    if ((var1 == NULL) ||(var2 == NULL)) return 0;
     return (strcasecmp(var1,var2) ? 1: 0);
 }
 
 /** Case sensitive equality check for strings*/
 int mystreq(const char* var1, const char* var2){
+    if ((var1 == NULL) ||(var2 == NULL)) return 0;
     return (strcmp(var1,var2) ? 0 : 1);
 }
 
 /** Case sensitive inequality check for strings*/
 int mystrne(const char* var1, const char* var2){
+    if ((var1 == NULL) ||(var2 == NULL)) return 0;
     return (strcmp(var1,var2) ? 1: 0);
 }
 

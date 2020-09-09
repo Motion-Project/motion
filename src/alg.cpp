@@ -757,8 +757,8 @@ static int alg_diff_nomask(struct ctx_cam *cam, unsigned char *new_var) {
 
     clock_gettime(CLOCK_REALTIME, &ts2);
 
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-        ,"Diffs %d detected %ld - %ld", diffs,ts2.tv_sec,ts2.tv_nsec/1000);
+    //MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+    //    ,"Diffs %d detected %ld - %ld", diffs,ts2.tv_sec,ts2.tv_nsec/1000);
 
     return diffs;
 }

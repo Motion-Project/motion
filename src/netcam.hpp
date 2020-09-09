@@ -99,6 +99,10 @@ struct ctx_netcam {
     AVDictionary             *opts;                  /* AVOptions when opening the format context */
     int                       swsframe_size;         /* The size of the image after resizing */
     int                       video_stream_index;    /* Stream index associated with video from camera */
+    enum AVHWDeviceType       hw_type;
+    enum AVPixelFormat        hw_pix_fmt;
+    AVBufferRef               *hw_device_ctx;
+    AVCodec                   *decoder;
 
     enum NETCAM_STATUS        status;                /* Status of whether the camera is connecting, closed, etc*/
     struct timespec           interruptstarttime;    /* The time set before calling the av functions */
@@ -126,6 +130,7 @@ struct ctx_netcam {
     int                       framerate;        /* Frames per second from configuration file */
     int                       reconnect_count;  /* Count of the times reconnection is tried*/
     int                       src_fps;          /* The fps provided from source*/
+    char                      *decoder_nm;  /* User requested decoder */
 
     struct timespec           frame_prev_tm;    /* The time set before calling the av functions */
     struct timespec           frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
@@ -138,6 +143,8 @@ struct ctx_netcam {
     pthread_mutex_t           mutex;            /* mutex used with conditional waits */
     pthread_mutex_t           mutex_transfer;   /* mutex used with transferring stream info for pass-through */
     pthread_mutex_t           mutex_pktarray;   /* mutex used with the packet array */
+
+
 };
 
 int netcam_setup(struct ctx_cam *cam);
