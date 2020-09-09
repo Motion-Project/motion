@@ -657,38 +657,48 @@ static void netcam_open_hw_pix(struct ctx_netcam *netcam){
 
     if (netcam->hw_type == AV_HWDEVICE_TYPE_NONE) return;
 
-    for (indx = 0;; indx++) {
-        const AVCodecHWConfig *config = avcodec_get_hw_config(netcam->decoder, indx);
-        if (!config) {
+    /* This section seems to not really be needed but was copied from the example
+    * Essentially this is just to check that the hw config pix format agrees with
+    * the type of VAAPI.
+    */
+
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 58)
+
+        for (indx = 0;; indx++) {
+            const AVCodecHWConfig *config = avcodec_get_hw_config(netcam->decoder, indx);
+            if (!config) {
+                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                    , _("%s: Decoder %s does not support device type %s")
+                    , netcam->cameratype
+                    , netcam->decoder->name
+                    , av_hwdevice_get_type_name(netcam->hw_type));
+                netcam->hw_type = AV_HWDEVICE_TYPE_NONE;
+                return;
+            }
+            if (config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX &&
+                config->device_type == netcam->hw_type) {
+                netcam->hw_pix_fmt = config->pix_fmt;
+                MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    , _("%s: Decoding %s with %s")
+                    , netcam->cameratype
+                    , netcam->decoder->name
+                    , av_hwdevice_get_type_name(netcam->hw_type));
+                break;
+            }
+        }
+
+        if (netcam->hw_pix_fmt != AV_PIX_FMT_VAAPI) {
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                , _("%s: Decoder %s does not support device type %s")
+                , _("%s: Hard coded pix format VAAPI error. %d is not %d")
                 , netcam->cameratype
-                , netcam->decoder->name
-                , av_hwdevice_get_type_name(netcam->hw_type));
+                , netcam->hw_pix_fmt
+                , AV_PIX_FMT_VAAPI);
             netcam->hw_type = AV_HWDEVICE_TYPE_NONE;
             return;
         }
-        if (config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX &&
-            config->device_type == netcam->hw_type) {
-            netcam->hw_pix_fmt = config->pix_fmt;
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                , _("%s: Decoding %s with %s")
-                , netcam->cameratype
-                , netcam->decoder->name
-                , av_hwdevice_get_type_name(netcam->hw_type));
-            break;
-        }
-    }
-
-    if (netcam->hw_pix_fmt != AV_PIX_FMT_VAAPI) {
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            , _("%s: Hard coded pix format VAAPI error. %d is not %d")
-            , netcam->cameratype
-            , netcam->hw_pix_fmt
-            , AV_PIX_FMT_VAAPI);
-        netcam->hw_type = AV_HWDEVICE_TYPE_NONE;
-        return;
-    }
+    #else
+        netcam->hw_pix_fmt = AV_PIX_FMT_VAAPI;
+    #endif
 
     return;
 }
