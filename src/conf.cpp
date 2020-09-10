@@ -1403,6 +1403,8 @@ static void conf_edit_flip_axis(struct ctx_cam *cam, std::string &parm, enum PAR
     } else if (pact == PARM_ACT_SET){
         if ((parm == "none") || (parm == "v") || (parm == "h")) {
             cam->conf->flip_axis = parm;
+        } else if (parm == "") {
+            cam->conf->flip_axis = "none";
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid flip_axis %s"), parm.c_str());
         }
@@ -1418,6 +1420,8 @@ static void conf_edit_locate_motion_mode(struct ctx_cam *cam, std::string &parm,
     } else if (pact == PARM_ACT_SET){
         if ((parm == "off") || (parm == "on") || (parm == "preview")) {
             cam->conf->locate_motion_mode = parm;
+        } else if (parm == "") {
+            cam->conf->locate_motion_mode = "off";
         } else {
           MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid locate_motion_mode %s"), parm.c_str());
         }
@@ -1434,6 +1438,8 @@ static void conf_edit_locate_motion_style(struct ctx_cam *cam, std::string &parm
         if ((parm == "box") || (parm == "redbox") ||
             (parm == "cross") || (parm == "redcross"))  {
             cam->conf->locate_motion_style = parm;
+        } else if (parm == "") {
+            cam->conf->locate_motion_style = "box";
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid locate_motion_style %s"), parm.c_str());
         }
@@ -2002,6 +2008,8 @@ static void conf_edit_picture_output(struct ctx_cam *cam, std::string &parm, enu
         if ((parm == "on") || (parm == "off") ||
             (parm == "first") || (parm == "best"))  {
             cam->conf->picture_output = parm;
+        } else if (parm == "") {
+            cam->conf->picture_output = "off";
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_output %s"), parm.c_str());
         }
@@ -2012,11 +2020,13 @@ static void conf_edit_picture_output(struct ctx_cam *cam, std::string &parm, enu
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_output",_("picture_output"));
 }
 static void conf_edit_picture_output_motion(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
-        if (pact == PARM_ACT_DFLT) {
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->picture_output_motion = "off";
     } else if (pact == PARM_ACT_SET){
         if ((parm == "on") || (parm == "off") || (parm == "roi"))  {
             cam->conf->picture_output_motion = parm;
+        } else if (parm == "") {
+            cam->conf->picture_output_motion = "off";
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_output_motion %s"), parm.c_str());
         }
@@ -2032,6 +2042,8 @@ static void conf_edit_picture_type(struct ctx_cam *cam, std::string &parm, enum 
     } else if (pact == PARM_ACT_SET){
         if ((parm == "jpeg") || (parm == "webp") || (parm == "ppm"))  {
             cam->conf->picture_type = parm;
+        } else if (parm == "") {
+            cam->conf->picture_type = "jpeg";
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_type %s"), parm.c_str());
         }
@@ -2263,6 +2275,8 @@ static void conf_edit_timelapse_mode(struct ctx_cam *cam, std::string &parm, enu
             (parm == "weekly-sunday") || (parm == "weekly-monday") ||
             (parm == "monthly") || (parm == "manual"))  {
             cam->conf->timelapse_mode = parm;
+        } else if (parm == "") {
+            cam->conf->timelapse_mode = "daily";
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_mode %s"), parm.c_str());
         }
@@ -2295,6 +2309,8 @@ static void conf_edit_timelapse_codec(struct ctx_cam *cam, std::string &parm, en
     } else if (pact == PARM_ACT_SET){
         if ((parm == "mpg") || (parm == "mpeg4"))  {
             cam->conf->timelapse_codec = parm;
+        } else if (parm == "") {
+            cam->conf->timelapse_codec = "mpg";
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_codec %s"), parm.c_str());
         }
@@ -2695,7 +2711,7 @@ static void conf_edit_database_type(struct ctx_cam *cam, std::string &parm, enum
     if (pact == PARM_ACT_DFLT) {
         cam->conf->database_type = "";
     } else if (pact == PARM_ACT_SET){
-        if ((parm == "mysql") || (parm == "mariadb") ||
+        if ((parm == "mysql") || (parm == "mariadb") || (parm == "") ||
             (parm == "postgresql") || (parm == "sqlite3")) {
             cam->conf->database_type = parm;
         } else {
