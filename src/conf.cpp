@@ -2478,20 +2478,18 @@ static void conf_edit_webcontrol_cors_header(struct ctx_cam *cam, std::string &p
     if (pact == PARM_ACT_DFLT) {
         cam->conf->webcontrol_cors_header = "";
     } else if (pact == PARM_ACT_SET){
-        // A complicated regex to validate a url found here:
-        // https://stackoverflow.com/questions/38608116/how-to-check-a-specified-string-is-a-valid-url-or-not-using-c-code
-        const char *regex_str = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$";
+        const char *regex_str = "(http|https)://(((.*):(.*))@)?([^/:]|[-_.a-z0-9]+)(:([0-9]+))?($|(/[^*]*))";
         regex_t regex;
         if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
             MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Error compiling regex in copy_uri"));
             return;
         }
+        /* We only warn on this since regex may not perfectly edit uris */
         retcd = regexec(&regex, parm.c_str(), 0, NULL, 0);
-        if ((parm != "*") && (retcd == REG_NOMATCH)) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Invalid origin for cors_header"));
-        } else {
-            cam->conf->webcontrol_cors_header = parm;
+        if ((parm != "*") && (parm != "") && (retcd == REG_NOMATCH)) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Possibly invalid webcontrol_cors_header"));
         }
+        cam->conf->webcontrol_cors_header = parm;
         regfree(&regex);
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->webcontrol_cors_header;
@@ -2572,20 +2570,19 @@ static void conf_edit_stream_cors_header(struct ctx_cam *cam, std::string &parm,
     if (pact == PARM_ACT_DFLT) {
         cam->conf->stream_cors_header = "";
     } else if (pact == PARM_ACT_SET){
-        // A complicated regex to validate a url found here:
-        // https://stackoverflow.com/questions/38608116/how-to-check-a-specified-string-is-a-valid-url-or-not-using-c-code
-        const char *regex_str = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$";
+        const char *regex_str = "(http|https)://(((.*):(.*))@)?([^/:]|[-_.a-z0-9]+)(:([0-9]+))?($|(/[^*]*))";
         regex_t regex;
         if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
             MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Error compiling regex in copy_uri"));
             return;
         }
+        /* We only warn on this since regex may not perfectly edit uris */
         retcd = regexec(&regex, parm.c_str(), 0, NULL, 0);
-        if ((parm != "*") && (retcd == REG_NOMATCH)) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Invalid origin for cors_header"));
-        } else {
-            cam->conf->stream_cors_header = parm;
+        if ((parm != "*") && (parm != "") && (retcd == REG_NOMATCH)) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Possibly invalid stream_cors_header"));
         }
+
+        cam->conf->stream_cors_header = parm;
         regfree(&regex);
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->stream_cors_header;
