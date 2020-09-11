@@ -1159,8 +1159,10 @@ static int netcam_ntc(struct ctx_netcam *netcam){
         (netcam->imgsize.height != netcam->frame->height) ){
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "");
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "******************************************************");
-        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("The network camera is sending pictures in a different"));
-        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("size than specified in the config. If possible change"));
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("The network camera is sending pictures at %dx%d")
+            , netcam->frame->width,netcam->frame->height);
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("resolution but config is %dx%d. If possible change")
+            , netcam->imgsize.width,netcam->imgsize.height);
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("the netcam or config so that the image height and"));
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("width are the same to lower the CPU usage."));
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "******************************************************");
