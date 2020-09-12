@@ -615,6 +615,9 @@ static int netcam_decode_packet(struct ctx_netcam *netcam){
 
 static void netcam_hwdecoders(struct ctx_netcam *netcam){
 
+    /* High Res pass through does not decode images into frames*/
+    if (netcam->high_resolution && netcam->passthrough) return;
+
     if ((netcam->hw_type == AV_HWDEVICE_TYPE_NONE) && (netcam->first_image)) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("%s: HW Devices: "), netcam->cameratype);
         while((netcam->hw_type = av_hwdevice_iterate_types(netcam->hw_type)) != AV_HWDEVICE_TYPE_NONE){
@@ -912,11 +915,12 @@ static int netcam_open_sws(struct ctx_netcam *netcam){
      *  The scaling context is used to change dimensions to config file and
      *  also if the format sent by the camera is not YUV420.
      */
-    if ((enum AVPixelFormat)netcam->frame->format != MY_PIX_FMT_YUV420P){
+    if (netcam_check_pixfmt(netcam) != 0){
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             , _("Pixel format %d will be converted.")
             , netcam->frame->format, MY_PIX_FMT_YUV420P);
     }
+
     netcam->swsctx = sws_getContext(
          netcam->frame->width
         ,netcam->frame->height
@@ -1155,6 +1159,9 @@ static int netcam_ntc(struct ctx_netcam *netcam){
 
     if ((netcam->finish) || (!netcam->first_image)) return 0;
 
+    /* High Res pass through does not decode images into frames*/
+    if (netcam->high_resolution && netcam->passthrough) return 0;
+
     if ((netcam->imgsize.width  != netcam->frame->width) ||
         (netcam->imgsize.height != netcam->frame->height) ){
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "");
@@ -1352,11 +1359,13 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
     if (netcam->high_resolution) {
         netcam->imgsize.width = 0;
         netcam->imgsize.height = 0;
-        retcd = snprintf(netcam->cameratype,29, "%s",_("HighRes"));
+        retcd = snprintf(netcam->cameratype,29, "%s",_("High"));
+        netcam->framerate = netcam->conf->netcam_ratehigh;
     } else {
         netcam->imgsize.width = cam->conf->width;
         netcam->imgsize.height = cam->conf->height;
         retcd = snprintf(netcam->cameratype,29, "%s",_("Norm"));
+        netcam->framerate = netcam->conf->netcam_rate;
     }
     if ((retcd <0) || (retcd >= 30)){
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
@@ -1373,13 +1382,7 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
     netcam->motapp = cam->motapp;
     netcam->conf = cam->conf;
     netcam->src_fps =  -1; /* Default to neg so we know it has not been set */
-    netcam->framerate = cam->conf->framerate;
-    if (netcam->conf->netcam_rate < 1){
-        netcam->framerate = netcam->conf->framerate;
-    } else {
-        netcam->framerate = netcam->conf->netcam_rate;
-    }
-    if (netcam->framerate < 1 ) netcam->framerate = 1;
+    if (netcam->framerate < 1) netcam->framerate = netcam->conf->framerate;
     netcam->capture_nbr = -1;
     netcam->img_recv =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
     netcam->img_recv->ptr =(char*) mymalloc(NETCAM_BUFFSIZE);
@@ -1693,21 +1696,26 @@ static int netcam_connect(struct ctx_netcam *netcam){
             , netcam->cameratype,netcam->camera_name);
 
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-            , _("Netcam capture FPS is %d."), netcam->framerate);
+            , _("%s: Netcam capture FPS is %d.")
+            , netcam->cameratype, netcam->framerate);
 
         if (netcam->src_fps > 0){
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-                , _("Camera source is %d FPS"), netcam->src_fps);
+                , _("%s: Camera source is %d FPS")
+                , netcam->cameratype, netcam->src_fps);
         } else {
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-                , _("Unable to determine the camera source FPS."));
+                , _("%s: Unable to determine the camera source FPS.")
+                , netcam->cameratype);
         }
 
         if (netcam->framerate < netcam->src_fps){
             MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
-                , _("Capture FPS less than camera FPS, decoding errors will occur."));
+                , _("%s: Capture FPS less than camera FPS. Decoding errors will occur.")
+                , netcam->cameratype);
             MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
-                , _("Capture FPS should be greater than camera FPS."));
+                , _("%s: Capture FPS should be greater than camera FPS.")
+                , netcam->cameratype);
         }
     }
 
@@ -1746,14 +1754,13 @@ static void netcam_handler_wait(struct ctx_netcam *netcam){
     long usec_maxrate, usec_delay;
 
     pthread_mutex_lock(&netcam->motapp->mutex_parms);
-        if (netcam->conf->netcam_rate < 1){
-            netcam->framerate = netcam->conf->framerate;
+        if (netcam->high_resolution) {
+            netcam->framerate = netcam->conf->netcam_ratehigh;
         } else {
             netcam->framerate = netcam->conf->netcam_rate;
         }
+        if (netcam->framerate < 1) netcam->framerate = netcam->conf->framerate;
     pthread_mutex_unlock(&netcam->motapp->mutex_parms);
-
-    if (netcam->framerate < 1 ) netcam->framerate = 1;
 
     usec_maxrate = (1000000L / netcam->framerate);
 
@@ -1836,7 +1843,7 @@ static void *netcam_handler(void *arg){
     }
 
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-        ,_("%s: Handler loop finished."),netcam->cameratype);
+        ,_("%s: Loop finished."),netcam->cameratype);
     netcam_shutdown(netcam);
 
     /* Our thread is finished - decrement motion's thread count. */
@@ -1845,7 +1852,7 @@ static void *netcam_handler(void *arg){
     pthread_mutex_unlock(&netcam->motapp->global_lock);
 
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-        ,_("netcam camera handler: finish set, exiting"));
+        ,_("%s: Exiting"),netcam->cameratype);
     netcam->handler_finished = TRUE;
 
     pthread_exit(NULL);
@@ -2070,10 +2077,10 @@ void netcam_cleanup(struct ctx_cam *cam, int init_retry_flag){
             netcam = NULL;
             if (indx_cam == 1){
                 MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-                    ,_("Normal resolution: Shut down complete."));
+                    ,_("Norm: Shut down complete."));
             } else {
                 MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-                    ,_("High resolution: Shut down complete."));
+                    ,_("High: Shut down complete."));
             }
         }
         indx_cam++;

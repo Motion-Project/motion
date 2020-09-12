@@ -50,6 +50,7 @@
         int             netcam_use_tcp;
         std::string     netcam_decoder;
         int             netcam_rate;
+        int             netcam_ratehigh;
 
         std::string     mmalcam_name;
         std::string     mmalcam_control_params;
