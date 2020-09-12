@@ -144,12 +144,13 @@ void motion_log(int level, int type, int errno_flag,int fncname, const char *fmt
     mythreadname_get(threadname);
 
     if (log_mode == LOGMODE_FILE) {
-        n = snprintf(buf, sizeof(buf), "[%d:%s] [%s] [%s] [%s] ",
-                     threadnr, threadname, log_level_str[level], log_type_str[type],
-                     str_time());
+        n = snprintf(buf, sizeof(buf), "%s [%s][%s][%02d:%s] "
+            , str_time(), log_level_str[level], log_type_str[type]
+            , threadnr, threadname );
     } else {
-        n = snprintf(buf, sizeof(buf), "[%d:%s] [%s] [%s] ",
-                     threadnr, threadname, log_level_str[level], log_type_str[type]);
+        n = snprintf(buf, sizeof(buf), "[%s][%s][%02d:%s] "
+            , log_level_str[level], log_type_str[type]
+            , threadnr, threadname );
     }
 
     /* Prepend the format specifier for the function name */
@@ -196,9 +197,17 @@ void motion_log(int level, int type, int errno_flag,int fncname, const char *fmt
         flood_cnt++;
     } else {
         if (flood_cnt > 1){
-            snprintf(flood_repeats,1024,"[%d:%s] [%s] [%s] Above message repeats %d times",
-                     threadnr, threadname, log_level_str[level]
-                     , log_type_str[type], flood_cnt-1);
+            if (log_mode == LOGMODE_FILE) {
+                snprintf(flood_repeats,1024,"%s [%s] [%s] [%02d:%s] Above message repeats %d times"
+                    , str_time(), log_level_str[level], log_type_str[type]
+                    , threadnr, threadname
+                    , flood_cnt-1);
+            } else {
+                snprintf(flood_repeats,1024,"[%s] [%s] [%02d:%s] Above message repeats %d times"
+                    , log_level_str[level], log_type_str[type]
+                    , threadnr, threadname
+                    , flood_cnt-1);
+            }
             switch (log_mode) {
             case LOGMODE_FILE:
                 strncat(flood_repeats, "\n", 1024 - strlen(flood_repeats));

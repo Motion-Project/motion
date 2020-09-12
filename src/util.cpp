@@ -490,9 +490,9 @@ void mythreadname_set(const char *abbr, int threadnbr, const char *threadname){
      *  formatting.
      */
 
-    char tname[16];
+    char tname[32];
     if (abbr != NULL){
-        snprintf(tname, sizeof(tname), "%s%d%s%s",abbr,threadnbr,
+        snprintf(tname, sizeof(tname), "%s%02d%s%s",abbr,threadnbr,
              threadname ? ":" : "",
              threadname ? threadname : "");
     } else {
