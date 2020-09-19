@@ -447,15 +447,21 @@ static void netcam_hwdecoders(struct rtsp_context *rtsp_data){
 }
 
 static enum AVPixelFormat netcam_getfmt_vaapi(AVCodecContext *avctx, const enum AVPixelFormat *pix_fmts) {
-    const enum AVPixelFormat *p;
-    (void)avctx;
+    #if ( MYFFVER >= 57083)
+        const enum AVPixelFormat *p;
+        (void)avctx;
 
-    for (p = pix_fmts; *p != -1; p++) {
-        if (*p == AV_PIX_FMT_VAAPI) return *p;
-    }
+        for (p = pix_fmts; *p != -1; p++) {
+            if (*p == AV_PIX_FMT_VAAPI) return *p;
+        }
 
-    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Failed to get vaapi pix format"));
-    return AV_PIX_FMT_NONE;
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Failed to get vaapi pix format"));
+        return AV_PIX_FMT_NONE;
+    #else
+        (void)avctx;
+        (void)pix_fmts;
+        return AV_PIX_FMT_NONE;
+    #endif
 }
 
 static void netcam_rtsp_decoder_error(struct rtsp_context *rtsp_data, int retcd, const char* fnc_nm){
