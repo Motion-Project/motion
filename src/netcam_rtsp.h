@@ -24,7 +24,9 @@ struct imgsize_context {
 #include <libavutil/avutil.h>
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
-#include "libavutil/hwcontext.h"
+#if ((LIBAVFORMAT_VERSION_MAJOR*1000)+LIBAVFORMAT_VERSION_MINOR >= 57083)
+    #include "libavutil/hwcontext.h"
+#endif
 
 struct packet_item{
     AVPacket                  packet;
