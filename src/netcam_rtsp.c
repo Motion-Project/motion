@@ -38,8 +38,8 @@ static int netcam_rtsp_check_pixfmt(struct rtsp_context *rtsp_data){
     int retcd;
 
     retcd = -1;
-    if ((rtsp_data->codec_context->pix_fmt == MY_PIX_FMT_YUV420P) ||
-        (rtsp_data->codec_context->pix_fmt == MY_PIX_FMT_YUVJ420P)) retcd = 0;
+    if (((enum AVPixelFormat)rtsp_data->frame->format == MY_PIX_FMT_YUV420P) ||
+        ((enum AVPixelFormat)rtsp_data->frame->format == MY_PIX_FMT_YUVJ420P)) retcd = 0;
 
     return retcd;
 
@@ -86,6 +86,9 @@ static void netcam_rtsp_close_context(struct rtsp_context *rtsp_data){
     if (rtsp_data->codec_context    != NULL) my_avcodec_close(rtsp_data->codec_context);
     if (rtsp_data->format_context   != NULL) avformat_close_input(&rtsp_data->format_context);
     if (rtsp_data->transfer_format != NULL) avformat_close_input(&rtsp_data->transfer_format);
+    #if (MYFFVER >= 57083)
+        if (rtsp_data->hw_device_ctx   != NULL) av_buffer_unref(&rtsp_data->hw_device_ctx);
+    #endif
     netcam_rtsp_null_context(rtsp_data);
 
 }
@@ -381,18 +384,18 @@ static int netcam_rtsp_decode_packet(struct rtsp_context *rtsp_data){
     retcd = netcam_rtsp_decode_video(rtsp_data);
     if (retcd <= 0) return retcd;
 
-    frame_size = my_image_get_buffer_size(rtsp_data->codec_context->pix_fmt
-                                          ,rtsp_data->codec_context->width
-                                          ,rtsp_data->codec_context->height);
+    frame_size = my_image_get_buffer_size((enum AVPixelFormat) rtsp_data->frame->format
+                                        ,rtsp_data->frame->width
+                                        ,rtsp_data->frame->height);
 
     netcam_check_buffsize(rtsp_data->img_recv, frame_size);
     netcam_check_buffsize(rtsp_data->img_latest, frame_size);
 
     retcd = my_image_copy_to_buffer(rtsp_data->frame
                                     ,(uint8_t *)rtsp_data->img_recv->ptr
-                                    ,rtsp_data->codec_context->pix_fmt
-                                    ,rtsp_data->codec_context->width
-                                    ,rtsp_data->codec_context->height
+                                    ,(enum AVPixelFormat) rtsp_data->frame->format
+                                    ,rtsp_data->frame->width
+                                    ,rtsp_data->frame->height
                                     ,frame_size);
     if ((retcd < 0) || (rtsp_data->interrupted)) {
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
@@ -621,8 +624,9 @@ static int netcam_rtsp_open_codec(struct rtsp_context *rtsp_data){
 
         netcam_hwdecoders(rtsp_data);
 
-        rtsp_data->decoder = NULL;
-        retcd = av_find_best_stream(rtsp_data->format_context, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
+        rtsp_data->decoder=NULL;
+        retcd = av_find_best_stream(rtsp_data->format_context
+            , AVMEDIA_TYPE_VIDEO, -1, -1, &rtsp_data->decoder, 0);
         if ((retcd < 0) || (rtsp_data->interrupted)){
             netcam_rtsp_decoder_error(rtsp_data, retcd, "av_find_best_stream");
             return -1;
@@ -737,6 +741,68 @@ static int netcam_rtsp_interrupt(void *ctx){
     return FALSE;
 }
 
+static int netcam_rtsp_open_sws(struct rtsp_context *rtsp_data){
+
+    if (rtsp_data->finish) return -1;   /* This just speeds up the shutdown time */
+
+    rtsp_data->swsframe_in = my_frame_alloc();
+    if (rtsp_data->swsframe_in == NULL) {
+        if (rtsp_data->status == RTSP_NOTCONNECTED){
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("Unable to allocate swsframe_in."));
+        }
+        netcam_rtsp_close_context(rtsp_data);
+        return -1;
+    }
+
+    rtsp_data->swsframe_out = my_frame_alloc();
+    if (rtsp_data->swsframe_out == NULL) {
+        if (rtsp_data->status == RTSP_NOTCONNECTED){
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("Unable to allocate swsframe_out."));
+        }
+        netcam_rtsp_close_context(rtsp_data);
+        return -1;
+    }
+
+    /*
+     *  The scaling context is used to change dimensions to config file and
+     *  also if the format sent by the camera is not YUV420.
+     */
+    rtsp_data->swsctx = sws_getContext(
+         rtsp_data->frame->width
+        ,rtsp_data->frame->height
+        ,(enum AVPixelFormat) rtsp_data->frame->format
+        ,rtsp_data->imgsize.width
+        ,rtsp_data->imgsize.height
+        ,MY_PIX_FMT_YUV420P
+        ,SWS_BICUBIC,NULL,NULL,NULL);
+    if (rtsp_data->swsctx == NULL) {
+        if (rtsp_data->status == RTSP_NOTCONNECTED){
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("Unable to allocate scaling context."));
+        }
+        netcam_rtsp_close_context(rtsp_data);
+        return -1;
+    }
+
+    rtsp_data->swsframe_size = my_image_get_buffer_size(
+            MY_PIX_FMT_YUV420P
+            ,rtsp_data->imgsize.width
+            ,rtsp_data->imgsize.height);
+    if (rtsp_data->swsframe_size <= 0) {
+        if (rtsp_data->status == RTSP_NOTCONNECTED){
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("Error determining size of frame out"));
+        }
+        netcam_rtsp_close_context(rtsp_data);
+        return -1;
+    }
+
+    /* the image buffers must be big enough to hold the final frame after resizing */
+    netcam_check_buffsize(rtsp_data->img_recv, rtsp_data->swsframe_size);
+    netcam_check_buffsize(rtsp_data->img_latest, rtsp_data->swsframe_size);
+
+    return 0;
+
+}
+
 static int netcam_rtsp_resize(struct rtsp_context *rtsp_data){
 
     int      retcd;
@@ -745,12 +811,16 @@ static int netcam_rtsp_resize(struct rtsp_context *rtsp_data){
 
     if (rtsp_data->finish) return -1;   /* This just speeds up the shutdown time */
 
+    if (rtsp_data->swsctx == NULL) {
+        if (netcam_rtsp_open_sws(rtsp_data) < 0) return -1;
+    }
+
     retcd=my_image_fill_arrays(
         rtsp_data->swsframe_in
         ,(uint8_t*)rtsp_data->img_recv->ptr
-        ,rtsp_data->codec_context->pix_fmt
-        ,rtsp_data->codec_context->width
-        ,rtsp_data->codec_context->height);
+        ,(enum AVPixelFormat)rtsp_data->frame->format
+        ,rtsp_data->frame->width
+        ,rtsp_data->frame->height);
     if (retcd < 0) {
         if (rtsp_data->status == RTSP_NOTCONNECTED){
             av_strerror(retcd, errstr, sizeof(errstr));
@@ -784,7 +854,7 @@ static int netcam_rtsp_resize(struct rtsp_context *rtsp_data){
         ,(const uint8_t* const *)rtsp_data->swsframe_in->data
         ,rtsp_data->swsframe_in->linesize
         ,0
-        ,rtsp_data->codec_context->height
+        ,rtsp_data->frame->height
         ,rtsp_data->swsframe_out->data
         ,rtsp_data->swsframe_out->linesize);
     if (retcd < 0) {
@@ -929,8 +999,8 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data){
 
     /* Skip resize/pix format for high pass-through */
     if (!(rtsp_data->high_resolution && rtsp_data->passthrough)){
-        if ((rtsp_data->imgsize.width  != rtsp_data->codec_context->width) ||
-            (rtsp_data->imgsize.height != rtsp_data->codec_context->height) ||
+        if ((rtsp_data->imgsize.width  != rtsp_data->frame->width) ||
+            (rtsp_data->imgsize.height != rtsp_data->frame->height) ||
             (netcam_rtsp_check_pixfmt(rtsp_data) != 0) ){
             if (netcam_rtsp_resize(rtsp_data) < 0){
                 my_packet_unref(rtsp_data->packet_recv);
@@ -966,13 +1036,13 @@ static int netcam_rtsp_ntc(struct rtsp_context *rtsp_data){
 
     if ((rtsp_data->finish) || (!rtsp_data->first_image)) return 0;
 
-    if ((rtsp_data->imgsize.width  != rtsp_data->codec_context->width) ||
-        (rtsp_data->imgsize.height != rtsp_data->codec_context->height) ||
+    if ((rtsp_data->imgsize.width  != rtsp_data->frame->width) ||
+        (rtsp_data->imgsize.height != rtsp_data->frame->height) ||
         (netcam_rtsp_check_pixfmt(rtsp_data) != 0) ){
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "");
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "******************************************************");
-        if ((rtsp_data->imgsize.width  != rtsp_data->codec_context->width) ||
-            (rtsp_data->imgsize.height != rtsp_data->codec_context->height)) {
+        if ((rtsp_data->imgsize.width  != rtsp_data->frame->width) ||
+            (rtsp_data->imgsize.height != rtsp_data->frame->height)) {
             if (netcam_rtsp_check_pixfmt(rtsp_data) != 0) {
                 MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("The network camera is sending pictures in a different"));
                 MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("size than specified in the config and also a "));
@@ -990,7 +1060,7 @@ static int netcam_rtsp_ntc(struct rtsp_context *rtsp_data){
                 MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("to possibly lower CPU usage."));
             }
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("Netcam: %d x %d => Config: %d x %d")
-            ,rtsp_data->codec_context->width,rtsp_data->codec_context->height
+            ,rtsp_data->frame->width,rtsp_data->frame->height
             ,rtsp_data->imgsize.width,rtsp_data->imgsize.height);
         } else {
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("The image sent is being "));
@@ -1000,68 +1070,6 @@ static int netcam_rtsp_ntc(struct rtsp_context *rtsp_data){
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "******************************************************");
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "");
     }
-
-    return 0;
-
-}
-
-static int netcam_rtsp_open_sws(struct rtsp_context *rtsp_data){
-
-    if (rtsp_data->finish) return -1;   /* This just speeds up the shutdown time */
-
-    rtsp_data->swsframe_in = my_frame_alloc();
-    if (rtsp_data->swsframe_in == NULL) {
-        if (rtsp_data->status == RTSP_NOTCONNECTED){
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("Unable to allocate swsframe_in."));
-        }
-        netcam_rtsp_close_context(rtsp_data);
-        return -1;
-    }
-
-    rtsp_data->swsframe_out = my_frame_alloc();
-    if (rtsp_data->swsframe_out == NULL) {
-        if (rtsp_data->status == RTSP_NOTCONNECTED){
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("Unable to allocate swsframe_out."));
-        }
-        netcam_rtsp_close_context(rtsp_data);
-        return -1;
-    }
-
-    /*
-     *  The scaling context is used to change dimensions to config file and
-     *  also if the format sent by the camera is not YUV420.
-     */
-    rtsp_data->swsctx = sws_getContext(
-         rtsp_data->codec_context->width
-        ,rtsp_data->codec_context->height
-        ,rtsp_data->codec_context->pix_fmt
-        ,rtsp_data->imgsize.width
-        ,rtsp_data->imgsize.height
-        ,MY_PIX_FMT_YUV420P
-        ,SWS_BICUBIC,NULL,NULL,NULL);
-    if (rtsp_data->swsctx == NULL) {
-        if (rtsp_data->status == RTSP_NOTCONNECTED){
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("Unable to allocate scaling context."));
-        }
-        netcam_rtsp_close_context(rtsp_data);
-        return -1;
-    }
-
-    rtsp_data->swsframe_size = my_image_get_buffer_size(
-            MY_PIX_FMT_YUV420P
-            ,rtsp_data->imgsize.width
-            ,rtsp_data->imgsize.height);
-    if (rtsp_data->swsframe_size <= 0) {
-        if (rtsp_data->status == RTSP_NOTCONNECTED){
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("Error determining size of frame out"));
-        }
-        netcam_rtsp_close_context(rtsp_data);
-        return -1;
-    }
-
-    /* the image buffers must be big enough to hold the final frame after resizing */
-    netcam_check_buffsize(rtsp_data->img_recv, rtsp_data->swsframe_size);
-    netcam_check_buffsize(rtsp_data->img_latest, rtsp_data->swsframe_size);
 
     return 0;
 
@@ -1526,8 +1534,6 @@ static int netcam_rtsp_open_context(struct rtsp_context *rtsp_data){
     if (rtsp_data->high_resolution){
         rtsp_data->imgsize.width = rtsp_data->codec_context->width;
         rtsp_data->imgsize.height = rtsp_data->codec_context->height;
-    } else {
-        if (netcam_rtsp_open_sws(rtsp_data) < 0) return -1;
     }
 
     rtsp_data->frame = my_frame_alloc();
@@ -1622,14 +1628,18 @@ static void netcam_rtsp_shutdown(struct rtsp_context *rtsp_data){
             free(rtsp_data->img_latest->ptr);
             free(rtsp_data->img_latest);
         }
+
         if (rtsp_data->img_recv != NULL){
             free(rtsp_data->img_recv->ptr);
             free(rtsp_data->img_recv);
         }
 
-        rtsp_data->path    = NULL;
+        if (rtsp_data->decoder_nm != NULL) free(rtsp_data->decoder_nm);
+
+        rtsp_data->path       = NULL;
         rtsp_data->img_latest = NULL;
         rtsp_data->img_recv   = NULL;
+        rtsp_data->decoder_nm = NULL;
     }
 
 }
