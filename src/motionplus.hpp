@@ -60,7 +60,6 @@ extern "C" {
     #include <libavutil/imgutils.h>
     #include <libavutil/mathematics.h>
     #include <libavdevice/avdevice.h>
-    #include <libavutil/hwcontext.h>
 }
 
 /* Forward declarations, used in functional definitions of headers */

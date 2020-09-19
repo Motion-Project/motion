@@ -71,9 +71,13 @@ extern "C" {
     #include <libavcodec/avcodec.h>
     #include <libavformat/avformat.h>
     #include <libavformat/avio.h>
+    #include <libswscale/swscale.h>
     #include <libavutil/avutil.h>
     #include <libavutil/imgutils.h>
-    #include <libswscale/swscale.h>
+    #include "libavutil/buffer.h"
+    #include "libavutil/error.h"
+    #include "libavutil/hwcontext.h"
+    #include "libavutil/mem.h"
 }
 struct packet_item{
     AVPacket                  packet;
@@ -84,8 +88,10 @@ struct packet_item{
 };
 
 struct ctx_netcam {
+
     AVFormatContext          *format_context;        /* Main format context for the camera */
     AVCodecContext           *codec_context;         /* Codec being sent from the camera */
+    AVStream                 *strm;
     AVFrame                  *frame;                 /* Reusable frame for images from camera */
     AVFrame                  *swsframe_in;           /* Used when resizing image sent from camera */
     AVFrame                  *swsframe_out;          /* Used when resizing image sent from camera */
