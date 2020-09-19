@@ -3047,13 +3047,22 @@
         <p></p>
         The user requested decoder to use for rtsp/rtmp cameras.  Motion will try to open the camera using the decoder
         specified by this parameter. If it not successful, it will usually fall back to the default decoder.  This
-        option may improve performance in certain situations for certain platforms and cameras.  Users can find the
-        names of the decoders on their system by going to a command prompt and typing <code>ffmpeg -formats</code> and
-        looking for the name of the decoder with a 'D' next to it and correlating this with the type of image
-        provided from the camera.  Note that not all decoders will work with all cameras.  If the camera does not
-        open using the requested decoder, specify a different decoder or leave this parameter empty to use the default.
-        Additionally, ffmpeg will only list out the decoders that it was compiled to support.  Additional decoders
-        may be available if ffmpeg is compiled from source.
+        option may improve performance in certain situations for certain platforms and cameras.
+        <p></p>
+        Users can find the names of the decoders on their system by going to a command prompt and
+        typing <code>ffmpeg -decoders</code> and looking for the name of the decoder with a 'D' next
+        to it and correlating this with the type of image provided from the camera.  The list of decoders
+        will correspond with how the distro built ffmpeg.  Additional decoders could also be available
+        if ffmpeg is compiled from source.
+        <p></p>
+        Additional different decoder options may also be found by reviewing the Motion log.  These
+        decoders will be shown as "available" in log when <a href="#log_level">log_level</a> is
+        specified at the INF level or higher.
+        <p></p>
+        Note that not all decoders will work with all cameras even if they are indicated as
+        available.  If the camera does not open using the requested decoder, specify a different
+        decoder or leave this parameter empty to use the default.
+        <p></p>
         <p></p>
 
         <h3><a name="netcam_keepalive"></a> netcam_keepalive </h3>
