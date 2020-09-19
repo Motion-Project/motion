@@ -69,7 +69,8 @@ struct config conf_template = {
     .netcam_tolerant_check =           FALSE,
     .netcam_use_tcp =                  TRUE,
     .netcam_decoder =                  NULL,
-    .netcam_rate =                     -99,
+    .netcam_rate =                     -1,
+    .netcam_ratehigh =                 -1,
 
     .mmalcam_name =                    NULL,
     .mmalcam_control_params =          NULL,
@@ -511,6 +512,15 @@ config_param config_params[] = {
     {
     "netcam_rate",
     "# The frames per second that Motion will use to capture images from the network camera.",
+    0,
+    CONF_OFFSET(netcam_rate),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "netcam_ratehigh",
+    "# The frames per second that Motion will use to capture images from the high resolution network camera.",
     0,
     CONF_OFFSET(netcam_rate),
     copy_int,
@@ -3208,6 +3218,7 @@ static void config_parms_intl(){
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_use_tcp",_("netcam_use_tcp"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_decoder",_("netcam_decoder"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_rate",_("netcam_rate"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_ratehigh",_("netcam_ratehigh"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mmalcam_name",_("mmalcam_name"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mmalcam_control_params",_("mmalcam_control_params"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","width",_("width"));
