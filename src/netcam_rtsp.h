@@ -24,6 +24,10 @@ struct imgsize_context {
 #include <libavutil/avutil.h>
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
+#if (MYFFVER >= 57083)
+    #include "libavutil/hwcontext.h"
+#endif
+
 struct packet_item{
     AVPacket                  packet;
     int64_t                   idnbr;
@@ -35,6 +39,7 @@ struct packet_item{
 struct rtsp_context {
     AVFormatContext          *format_context;        /* Main format context for the camera */
     AVCodecContext           *codec_context;         /* Codec being sent from the camera */
+    AVStream                 *strm;
     AVFrame                  *frame;                 /* Reusable frame for images from camera */
     AVFrame                  *swsframe_in;           /* Used when resizing image sent from camera */
     AVFrame                  *swsframe_out;          /* Used when resizing image sent from camera */
@@ -48,6 +53,12 @@ struct rtsp_context {
     AVDictionary             *opts;                  /* AVOptions when opening the format context */
     int                       swsframe_size;         /* The size of the image after resizing */
     int                       video_stream_index;    /* Stream index associated with video from camera */
+    #if (MYFFVER >= 57083)
+        enum AVHWDeviceType       hw_type;
+        enum AVPixelFormat        hw_pix_fmt;
+        AVBufferRef               *hw_device_ctx;
+    #endif
+    AVCodec                   *decoder;
 
     enum RTSP_STATUS          status;                /* Status of whether the camera is connecting, closed, etc*/
     struct timeval            interruptstarttime;    /* The time set before calling the av functions */

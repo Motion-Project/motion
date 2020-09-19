@@ -57,6 +57,12 @@ struct image_data;
     #include <pthread_np.h>
 #endif
 
+#ifdef HAVE_FFMPEG
+    #define MYFFVER (LIBAVFORMAT_VERSION_MAJOR * 1000)+LIBAVFORMAT_VERSION_MINOR
+#else
+    #define MYFFVER 0
+#endif
+
 #include "logger.h"
 #include "conf.h"
 #include "stream.h"
