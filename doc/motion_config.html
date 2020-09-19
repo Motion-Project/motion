@@ -880,6 +880,12 @@
           <td align="left"><a href="#netcam_rate" >netcam_rate</a></td>
         </tr>
         <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#netcam_ratehigh" >netcam_ratehigh</a></td>
+        </tr>
+        <tr>
           <td align="left">netcam_tolerant_check</td>
           <td align="left">netcam_tolerant_check</td>
           <td align="left">netcam_tolerant_check</td>
@@ -1631,9 +1637,10 @@
               <td bgcolor="#edf4f9" ><a href="#netcam_keepalive" >netcam_keepalive</a> </td>
               <td bgcolor="#edf4f9" ><a href="#netcam_proxy" >netcam_proxy</a> </td>
               <td bgcolor="#edf4f9" ><a href="#netcam_rate" >netcam_rate</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#netcam_tolerant_check" >netcam_tolerant_check</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_ratehigh" >netcam_ratehigh</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#netcam_tolerant_check" >netcam_tolerant_check</a> </td>
               <td bgcolor="#edf4f9" ><a href="#netcam_use_tcp" >netcam_use_tcp</a> </td>
             </tr>
           </tbody>
@@ -3137,6 +3144,20 @@
           <li> The network camera is disconnecting and reconnecting frequently.</li>
           <li> A significant number of ffmpeg_avcodec_log messages</li>
         </ul>
+        <p></p>
+
+        <h3><a name="netcam_ratehigh"></a> netcam_ratehigh </h3>
+        <p></p>
+        <ul>
+          <li> Type: Int</li>
+          <li> Range / Valid values: Integer</li>
+          <li> Default: <a href="#framerate">framerate</a></li>
+        </ul>
+        <p></p>
+        This option allows for the user to request a specific frame per second (FPS) capture rate for
+        the high resolution network camera.  This option works the same as
+        <a href="#netcam_rate">netcam_rate</a> except that this parameter applies to the camera specified
+        by <a href="#netcam_highres">netcam_highres</a> (if applicable).
         <p></p>
 
         <h3><a name="netcam_tolerant_check"></a> netcam_tolerant_check </h3>

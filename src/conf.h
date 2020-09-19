@@ -55,6 +55,7 @@ struct config {
     int             netcam_use_tcp;
     char            *netcam_decoder;
     int             netcam_rate;
+    int             netcam_ratehigh;
 
     const char      *mmalcam_name;
     const char      *mmalcam_control_params;

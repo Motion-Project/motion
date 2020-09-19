@@ -1009,14 +1009,26 @@ static void netcam_rtsp_set_path (struct context *cnt, struct rtsp_context *rtsp
 static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rtsp_data ) {
     /* Set the parameters to be used with our camera */
 
+    rtsp_data->conf = &cnt->conf;
+
     if (rtsp_data->high_resolution) {
         rtsp_data->imgsize.width = 0;
         rtsp_data->imgsize.height = 0;
         snprintf(rtsp_data->cameratype,29, "%s",_("High resolution"));
+        if (rtsp_data->conf->netcam_rate < 1){
+            rtsp_data->framerate = rtsp_data->conf->framerate;
+        } else {
+            rtsp_data->framerate = rtsp_data->conf->netcam_ratehigh;
+        }
     } else {
         rtsp_data->imgsize.width = cnt->conf.width;
         rtsp_data->imgsize.height = cnt->conf.height;
         snprintf(rtsp_data->cameratype,29, "%s",_("Normal resolution"));
+        if (rtsp_data->conf->netcam_rate < 1){
+            rtsp_data->framerate = rtsp_data->conf->framerate;
+        } else {
+            rtsp_data->framerate = rtsp_data->conf->netcam_rate;
+        }
     }
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("Setting up %s stream."),rtsp_data->cameratype);
@@ -1025,7 +1037,6 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     rtsp_data->status = RTSP_NOTCONNECTED;
     rtsp_data->rtsp_uses_tcp =cnt->conf.netcam_use_tcp;
     rtsp_data->v4l2_palette = cnt->conf.v4l2_palette;
-    rtsp_data->conf = &cnt->conf;
     rtsp_data->camera_name = cnt->conf.camera_name;
     rtsp_data->img_recv = mymalloc(sizeof(netcam_buff));
     rtsp_data->img_recv->ptr = mymalloc(NETCAM_BUFFSIZE);
@@ -1041,11 +1052,6 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     rtsp_data->cnt = cnt;
     rtsp_data->capture_nbr = -1;
     rtsp_data->src_fps =  -99; /* Default to invalid value so we can test for whether real value exist */
-    if (rtsp_data->conf->netcam_rate < 1){
-        rtsp_data->framerate = rtsp_data->conf->framerate;
-    } else {
-        rtsp_data->framerate = rtsp_data->conf->netcam_rate;
-    }
     if (rtsp_data->framerate < 1 ) rtsp_data->framerate = 1;
 
     snprintf(rtsp_data->threadname, 15, "%s",_("Unknown"));
@@ -1403,10 +1409,18 @@ static void netcam_rtsp_handler_wait(struct rtsp_context *rtsp_data){
 
     long usec_maxrate, usec_delay;
 
-    if (rtsp_data->conf->netcam_rate < 1){
-        rtsp_data->framerate = rtsp_data->conf->framerate;
+    if (rtsp_data->high_resolution) {
+        if (rtsp_data->conf->netcam_ratehigh < 1){
+            rtsp_data->framerate = rtsp_data->conf->framerate;
+        } else {
+            rtsp_data->framerate = rtsp_data->conf->netcam_ratehigh;
+        }
     } else {
-        rtsp_data->framerate = rtsp_data->conf->netcam_rate;
+        if (rtsp_data->conf->netcam_rate < 1){
+            rtsp_data->framerate = rtsp_data->conf->framerate;
+        } else {
+            rtsp_data->framerate = rtsp_data->conf->netcam_rate;
+        }
     }
     if (rtsp_data->framerate < 1 ) rtsp_data->framerate = 1;
 
