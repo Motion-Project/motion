@@ -24,7 +24,7 @@ struct imgsize_context {
 #include <libavutil/avutil.h>
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
-#if ((LIBAVFORMAT_VERSION_MAJOR*1000)+LIBAVFORMAT_VERSION_MINOR >= 57083)
+#if (MYFFVER >= 57083)
     #include "libavutil/hwcontext.h"
 #endif
 
@@ -53,9 +53,11 @@ struct rtsp_context {
     AVDictionary             *opts;                  /* AVOptions when opening the format context */
     int                       swsframe_size;         /* The size of the image after resizing */
     int                       video_stream_index;    /* Stream index associated with video from camera */
-    enum AVHWDeviceType       hw_type;
-    enum AVPixelFormat        hw_pix_fmt;
-    AVBufferRef               *hw_device_ctx;
+    #if (MYFFVER >= 57083)
+        enum AVHWDeviceType       hw_type;
+        enum AVPixelFormat        hw_pix_fmt;
+        AVBufferRef               *hw_device_ctx;
+    #endif
     AVCodec                   *decoder;
 
     enum RTSP_STATUS          status;                /* Status of whether the camera is connecting, closed, etc*/

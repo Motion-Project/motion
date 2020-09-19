@@ -41,8 +41,6 @@ enum USER_CODEC {
 #define MyPixelFormat PixelFormat
 #endif  //Libavformat >= 56
 
-#define MYFFVER (LIBAVFORMAT_VERSION_MAJOR * 1000)+LIBAVFORMAT_VERSION_MINOR
-
 #endif // HAVE_FFMPEG
 
 #ifdef HAVE_FFMPEG
