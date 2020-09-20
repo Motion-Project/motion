@@ -1122,6 +1122,10 @@ static void netcam_rtsp_set_v4l2(struct rtsp_context *rtsp_data){
     char *fourcc;
     int retcd;
 
+    /* Allow a bit more time for the v4l2 device to start up */
+    rtsp_data->cnt->watchdog = 60;
+    rtsp_data->interruptduration=55;
+
     rtsp_data->format_context->iformat = av_find_input_format("video4linux2");
 
     fourcc=malloc(5*sizeof(char));
@@ -1144,6 +1148,12 @@ static void netcam_rtsp_set_v4l2(struct rtsp_context *rtsp_data){
         }
     } else {
         sprintf(optfmt, "%s","default");
+        if (rtsp_data->passthrough){
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: Passthrough disabled for v4l2 via netcam"),rtsp_data->cameratype);
+            rtsp_data->passthrough=FALSE;
+            rtsp_data->cnt->movie_passthrough = FALSE;
+        }
     }
 
     if (strcmp(optfmt,"default") != 0) {
@@ -1186,12 +1196,6 @@ static void netcam_rtsp_set_v4l2(struct rtsp_context *rtsp_data){
 
     free(fourcc);
 
-    if (rtsp_data->passthrough){
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: Passthrough disabled for v4l2 via netcam"),rtsp_data->cameratype);
-        rtsp_data->passthrough=FALSE;
-        rtsp_data->cnt->movie_passthrough = FALSE;
-    }
 }
 
 static void netcam_rtsp_set_path (struct context *cnt, struct rtsp_context *rtsp_data ) {
