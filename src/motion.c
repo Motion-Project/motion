@@ -4161,7 +4161,7 @@ int util_check_passthrough(struct context *cnt){
 #else
     if (cnt->movie_passthrough){
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("pass-through is enabled but is still experimental."));
+            ,_("pass-through enabled."));
         return 1;
     } else {
         return 0;
