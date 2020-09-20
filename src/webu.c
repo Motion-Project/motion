@@ -2106,11 +2106,9 @@ void webu_start(struct context **cnt) {
         indxthrd++;
     }
 
-    if (cnt[0]->conf.stream_preview_method != 99){
-        webu_start_ports(cnt);
+    webu_start_ports(cnt);
 
-        webu_start_strm(cnt);
-    }
+    webu_start_strm(cnt);
 
     webu_start_ctrl(cnt);
 

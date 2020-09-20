@@ -65,7 +65,6 @@ struct image_data;
 
 #include "logger.h"
 #include "conf.h"
-#include "stream.h"
 
 #include "track.h"
 #include "netcam.h"
@@ -454,9 +453,6 @@ struct context {
     int video_dev;
     int pipe;
     int mpipe;
-
-    struct stream stream;
-    int stream_count;
 
     char hostname[PATH_MAX];
     char *netcam_decoder;
