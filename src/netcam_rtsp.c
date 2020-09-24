@@ -1034,7 +1034,9 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data){
 
 static int netcam_rtsp_ntc(struct rtsp_context *rtsp_data){
 
-    if ((rtsp_data->finish) || (!rtsp_data->first_image)) return 0;
+    if ((rtsp_data->finish) ||
+        (!rtsp_data->first_image) ||
+        (rtsp_data->high_resolution && rtsp_data->passthrough)) return 0;
 
     if ((rtsp_data->imgsize.width  != rtsp_data->frame->width) ||
         (rtsp_data->imgsize.height != rtsp_data->frame->height) ||
@@ -1272,7 +1274,7 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
         rtsp_data->imgsize.width = 0;
         rtsp_data->imgsize.height = 0;
         snprintf(rtsp_data->cameratype,29, "%s",_("High resolution"));
-        if (rtsp_data->conf->netcam_rate < 1){
+        if (rtsp_data->conf->netcam_ratehigh < 1){
             rtsp_data->framerate = rtsp_data->conf->framerate;
         } else {
             rtsp_data->framerate = rtsp_data->conf->netcam_ratehigh;
@@ -1609,24 +1611,29 @@ static int netcam_rtsp_connect(struct rtsp_context *rtsp_data){
 
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("%s: Camera (%s) connected")
-            , rtsp_data->cameratype,rtsp_data->camera_name);
+            ,rtsp_data->cameratype,rtsp_data->camera_name);
 
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-            , _("Netcam capture FPS is %d."), rtsp_data->framerate);
+            ,_("%s: Netcam capture FPS is %d.")
+            ,rtsp_data->cameratype, rtsp_data->framerate);
 
         if (rtsp_data->src_fps > 0){
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-                , _("Camera source is %d FPS"), rtsp_data->src_fps);
+                ,_("%s: Camera source is %d FPS")
+                ,rtsp_data->cameratype, rtsp_data->src_fps);
         } else {
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-                , _("Unable to determine the camera source FPS."));
+                ,_("%s: Unable to determine the camera source FPS.")
+                ,rtsp_data->cameratype);
         }
 
         if (rtsp_data->framerate < rtsp_data->src_fps){
             MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
-                , _("Capture FPS rate is less than camera FPS.  Decoding errors will occur."));
+                ,_("%s: Capture FPS rate is less than camera FPS.  Decoding errors will occur.")
+                , rtsp_data->cameratype);
             MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
-                , _("Better decoding occurs when netcam capture FPS is slightly larger than camera FPS"));
+                , _("%s:  Better decoding occurs when netcam capture FPS is slightly larger than camera FPS")
+                , rtsp_data->cameratype);
         }
     }
 
