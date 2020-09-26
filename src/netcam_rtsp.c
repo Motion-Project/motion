@@ -1150,12 +1150,6 @@ static void netcam_rtsp_set_v4l2(struct rtsp_context *rtsp_data){
         }
     } else {
         sprintf(optfmt, "%s","default");
-        if (rtsp_data->passthrough){
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s: Passthrough disabled for v4l2 via netcam"),rtsp_data->cameratype);
-            rtsp_data->passthrough=FALSE;
-            rtsp_data->cnt->movie_passthrough = FALSE;
-        }
     }
 
     if (strcmp(optfmt,"default") != 0) {
