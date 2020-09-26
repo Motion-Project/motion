@@ -522,7 +522,7 @@ config_param config_params[] = {
     "netcam_ratehigh",
     "# The frames per second that Motion will use to capture images from the high resolution network camera.",
     0,
-    CONF_OFFSET(netcam_rate),
+    CONF_OFFSET(netcam_ratehigh),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
