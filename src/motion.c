@@ -2560,65 +2560,56 @@ static void mlp_actions(struct context *cnt){
 
     mlp_areadetect(cnt);
 
-    /*
-     * Is the movie too long? Then make movies
-     * First test for movie_max_time
-     */
-    if ((cnt->conf.movie_max_time && cnt->event_nr == cnt->prev_event) &&
-        (cnt->currenttime - cnt->eventtime >= cnt->conf.movie_max_time))
+    /* Check for movie length */
+    if ((cnt->conf.movie_max_time > 0) &&
+        (cnt->event_nr == cnt->prev_event) &&
+        ((cnt->currenttime - cnt->eventtime) >= cnt->conf.movie_max_time)) {
         cnt->event_stop = TRUE;
+    }
 
-    /*
-     * Now test for quiet longer than 'gap' OR make movie as decided in
-     * previous statement.
-     */
-    if (((cnt->currenttime - cnt->lasttime >= cnt->conf.event_gap) && cnt->conf.event_gap > 0) ||
-          cnt->event_stop) {
-        if (cnt->event_nr == cnt->prev_event || cnt->event_stop) {
+    /* Check event gap */
+    if ((cnt->conf.event_gap > 0) &&
+        ((cnt->currenttime - cnt->lasttime) >= cnt->conf.event_gap )) {
+        cnt->event_stop = TRUE;
+    }
+    /* Note that event_stop can be set elsewhere in code as well */
 
-            /* Flush image buffer */
-            process_image_ring(cnt, IMAGE_BUFFER_FLUSH);
+    if ( cnt->event_stop ) {
+        if (cnt->event_nr == cnt->prev_event) {
+            /* When prev_event = event_nr, there is currently
+             * an event occurring so trigger ending events */
+
+            process_image_ring(cnt, IMAGE_BUFFER_FLUSH);  /* Flush image buffer */
 
             /* Save preview_shot here at the end of event */
             if (cnt->imgs.preview_image.diffs) {
                 /* Do not save if it was saved at start */
-                if (!(cnt->new_img & NEWIMG_FIRST))
+                if (!(cnt->new_img & NEWIMG_FIRST)) {
                     event(cnt, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
+                }
                 cnt->imgs.preview_image.diffs = 0;
             }
 
             event(cnt, EVENT_ENDMOTION, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
 
-            /*
-             * If tracking is enabled we center our camera so it does not
-             * point to a place where it will miss the next action
-             */
-            if (cnt->track.type)
+            if (cnt->track.type){
                 cnt->moved = track_center(cnt, cnt->video_dev, 0, 0, 0);
+            }
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), cnt->event_nr);
 
-            cnt->event_stop = FALSE;
-            cnt->event_user = FALSE;
-
-            /* Reset post capture */
+            /* Reset vars for next event and increment to next event number */
             cnt->postcap = 0;
-
-            /* Finally we increase the event number */
-            cnt->event_nr++;
             cnt->lightswitch_framecounter = 0;
-
-            /*
-             * And we unset the text_event_string to avoid that buffered
-             * images get a timestamp from previous event.
-             */
             cnt->text_event_string[0] = '\0';
+            cnt->event_nr++;
         }
+        cnt->event_stop = FALSE;
+        cnt->event_user = FALSE;
     }
 
     /* Save/send to movie some images */
     process_image_ring(cnt, 2);
-
 
 }
 
