@@ -39,7 +39,6 @@
         int             input;
         int             norm;
         unsigned long   frequency;
-        std::string     tuner_device;
         int             roundrobin_frames;
         int             roundrobin_skip;
         int             roundrobin_switchfilter;

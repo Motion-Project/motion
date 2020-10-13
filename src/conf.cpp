@@ -1152,17 +1152,6 @@ static void conf_edit_frequency(struct ctx_cam *cam, std::string &parm, enum PAR
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","frequency",_("frequency"));
 }
-static void conf_edit_tuner_device(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
-    if (pact == PARM_ACT_DFLT) {
-        cam->conf->tuner_device = "/dev/tuner0";
-    } else if (pact == PARM_ACT_SET){
-        cam->conf->tuner_device = parm;
-    } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->tuner_device;
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","tuner_device",_("tuner_device"));
-}
 static void conf_edit_roundrobin_frames(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
     int parm_in;
     if (pact == PARM_ACT_DFLT){
@@ -3018,7 +3007,6 @@ static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "input"){                 conf_edit_input(cam, parm_val, pact);
     } else if (parm_nm == "norm"){                  conf_edit_norm(cam, parm_val, pact);
     } else if (parm_nm == "frequency"){             conf_edit_frequency(cam, parm_val, pact);
-    } else if (parm_nm == "tuner_device"){          conf_edit_tuner_device(cam, parm_val, pact);
     } else if (parm_nm == "roundrobin_frames"){     conf_edit_roundrobin_frames(cam, parm_val, pact);
     } else if (parm_nm == "roundrobin_skip"){       conf_edit_roundrobin_skip(cam, parm_val, pact);
     } else if (parm_nm == "roundrobin_switchfilter"){   conf_edit_roundrobin_switchfilter(cam, parm_val, pact);
