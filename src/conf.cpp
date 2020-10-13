@@ -95,7 +95,7 @@ struct ctx_parm config_parms[] = {
     0,PARM_TYP_STRING,PARM_CAT_01,WEBUI_LEVEL_ADVANCED
     },
     {
-    "vid_control_params",
+    "v4l2_parms",
     "# Parameters to control video device.  See motionplus_guide.html",
     0,PARM_TYP_STRING,PARM_CAT_01,WEBUI_LEVEL_LIMITED},
     {
@@ -717,32 +717,32 @@ struct ctx_parm_depr config_parms_depr[] = {
     {
     "brightness",
     "4.1.1",
-    "\"brightness\" replaced with \"vid_control_params\"",
-    "vid_control_params"
+    "\"brightness\" replaced with \"v4l2_parms\"",
+    "v4l2_parms"
     },
     {
     "contrast",
     "4.1.1",
-    "\"contrast\" replaced with \"vid_control_params\"",
-    "vid_control_params"
+    "\"contrast\" replaced with \"v4l2_parms\"",
+    "v4l2_parms"
     },
     {
     "saturation",
     "4.1.1",
-    "\"saturation\" replaced with \"vid_control_params\"",
-    "vid_control_params"
+    "\"saturation\" replaced with \"v4l2_parms\"",
+    "v4l2_parms"
     },
     {
     "hue",
     "4.1.1",
-    "\"hue\" replaced with \"vid_control_params\"",
-    "vid_control_params"
+    "\"hue\" replaced with \"v4l2_parms\"",
+    "v4l2_parms"
     },
     {
     "power_line_frequency",
     "4.1.1",
-    "\"power_line_frequency\" replaced with \"vid_control_params\"",
-    "vid_control_params"
+    "\"power_line_frequency\" replaced with \"v4l2_parms\"",
+    "v4l2_parms"
     },
     {
     "text_double",
@@ -1073,16 +1073,16 @@ static void conf_edit_v4l2_device(struct ctx_cam *cam, std::string &parm, enum P
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","v4l2_device",_("v4l2_device"));
 }
-static void conf_edit_vid_control_params(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
+static void conf_edit_v4l2_parms(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->vid_control_params = "";
+        cam->conf->v4l2_parms = "";
     } else if (pact == PARM_ACT_SET){
-        cam->conf->vid_control_params = parm;
+        cam->conf->v4l2_parms = parm;
     } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->vid_control_params;
+        parm = cam->conf->v4l2_parms;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","vid_control_params",_("vid_control_params"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","v4l2_parms",_("v4l2_parms"));
 }
 static void conf_edit_v4l2_palette(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
     int parm_in;
@@ -3002,7 +3002,7 @@ static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "camera_id"){             conf_edit_camera_id(cam, parm_val, pact);
     } else if (parm_nm == "target_dir"){            conf_edit_target_dir(cam, parm_val, pact);
     } else if (parm_nm == "v4l2_device"){           conf_edit_v4l2_device(cam, parm_val, pact);
-    } else if (parm_nm == "vid_control_params"){    conf_edit_vid_control_params(cam, parm_val, pact);
+    } else if (parm_nm == "v4l2_parms"){    conf_edit_v4l2_parms(cam, parm_val, pact);
     } else if (parm_nm == "v4l2_palette"){          conf_edit_v4l2_palette(cam, parm_val, pact);
     } else if (parm_nm == "input"){                 conf_edit_input(cam, parm_val, pact);
     } else if (parm_nm == "norm"){                  conf_edit_norm(cam, parm_val, pact);
@@ -3241,7 +3241,7 @@ static void conf_edit_depr_vid(struct ctx_motapp *motapp, int threadnbr
         , std::string parm_nm, std::string newname, std::string parm_val){
     std::string parm_curr, parm_new;
 
-    conf_edit_vid_control_params(motapp->cam_list[threadnbr], parm_curr, PARM_ACT_GET);
+    conf_edit_v4l2_parms(motapp->cam_list[threadnbr], parm_curr, PARM_ACT_GET);
     if (parm_curr == ""){
         if (parm_nm == "power_line_frequency"){
             parm_new = "\"power line frequency\"=" + parm_val;

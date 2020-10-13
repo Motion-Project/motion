@@ -716,7 +716,7 @@ static int webu_process_config_set(struct webui_ctx *webui) {
                 ,config_parms[indx].parm_name, webui->uri_value1);
 
             /*If we are updating vid parms, set the flag to update the device.*/
-            if ((config_parms[indx].parm_name == "vid_control_params") &&
+            if ((config_parms[indx].parm_name == "v4l2_parms") &&
                 (webui->camlst[webui->thread_nbr]->vdev != NULL)){
                 webui->camlst[webui->thread_nbr]->vdev->update_parms = TRUE;
             }

@@ -34,7 +34,7 @@
 
         /* Capture device configuration parameters */
         std::string     v4l2_device;
-        std::string     vid_control_params;
+        std::string     v4l2_parms;
         int             v4l2_palette;
         int             input;
         int             norm;
