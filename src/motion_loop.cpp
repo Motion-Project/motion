@@ -337,7 +337,7 @@ static int init_camera_type(struct ctx_cam *cam){
         return 0;
     }
 
-    if (cam->conf->videodevice != "") {
+    if (cam->conf->v4l2_device != "") {
         cam->camera_type = CAMERA_TYPE_V4L2;
         return 0;
     }

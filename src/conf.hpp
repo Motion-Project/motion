@@ -33,7 +33,7 @@
         std::string     target_dir;
 
         /* Capture device configuration parameters */
-        std::string     videodevice;
+        std::string     v4l2_device;
         std::string     vid_control_params;
         int             v4l2_palette;
         int             input;

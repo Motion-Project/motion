@@ -46,7 +46,7 @@
     #define MIN2(x, y) ((x) < (y) ? (x) : (y))
 
     static pthread_mutex_t   v4l2_mutex;
-    static struct video_dev *videodevices = NULL;
+    static struct video_dev *v4l2_devices = NULL;
 
     typedef struct video_image_buff {
         unsigned char *ptr;
@@ -654,7 +654,7 @@ static int v4l2_pixfmt_select(struct ctx_cam *cam, struct video_dev *curdev) {
 
     if (cam->conf->v4l2_palette == 21 ) {
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-            ,_("H264(21) format not supported via videodevice.  Changing to default palette"));
+            ,_("H264(21) format not supported via v4l2_device.  Changing to default palette"));
         cam->conf->v4l2_palette = 17;
     }
 
@@ -1080,14 +1080,14 @@ static int v4l2_device_open(struct ctx_cam *cam, struct video_dev *curdev) {
     /* Open the video device */
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-        ,_("Using videodevice %s and input %d")
-        ,cam->conf->videodevice.c_str(), cam->conf->input);
-    cam->conf->videodevice.copy(curdev->videodevice,PATH_MAX);
+        ,_("Using v4l2_device %s and input %d")
+        ,cam->conf->v4l2_device.c_str(), cam->conf->input);
+    cam->conf->v4l2_device.copy(curdev->v4l2_device,PATH_MAX);
 
     curdev->fd_device = -1;
     fd_device = -1;
 
-    fd_device = open(curdev->videodevice, O_RDWR|O_CLOEXEC);
+    fd_device = open(curdev->v4l2_device, O_RDWR|O_CLOEXEC);
     if (fd_device > 0) {
         curdev->fd_device = fd_device;
         src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
@@ -1097,7 +1097,7 @@ static int v4l2_device_open(struct ctx_cam *cam, struct video_dev *curdev) {
 
     MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
         ,_("Failed to open video device %s")
-        ,cam->conf->videodevice.c_str());
+        ,cam->conf->v4l2_device.c_str());
     return -1;
 
 }
@@ -1256,9 +1256,9 @@ int v4l2_start(struct ctx_cam *cam) {
         pthread_mutex_lock(&v4l2_mutex);
 
         /* If device is already open and initialized use it*/
-        curdev = videodevices;
+        curdev = v4l2_devices;
         while (curdev) {
-            if (mystreq(cam->conf->videodevice.c_str(), curdev->videodevice)) {
+            if (mystreq(cam->conf->v4l2_device.c_str(), curdev->v4l2_device)) {
                 retcd = v4l2_vdev_init(cam);
                 if (retcd == 0) retcd = vid_parms_parse(cam);
                 if (retcd == 0) retcd = v4l2_imgs_set(cam, curdev);
@@ -1310,8 +1310,8 @@ int v4l2_start(struct ctx_cam *cam) {
         curdev->starting = FALSE;
 
         /* Insert into linked list. */
-        curdev->next = videodevices;
-        videodevices = curdev;
+        curdev->next = v4l2_devices;
+        v4l2_devices = curdev;
 
         pthread_mutex_unlock(&v4l2_mutex);
 
@@ -1325,7 +1325,7 @@ int v4l2_start(struct ctx_cam *cam) {
 void v4l2_cleanup(struct ctx_cam *cam) {
     #ifdef HAVE_V4L2
 
-        struct video_dev *dev = videodevices;
+        struct video_dev *dev = v4l2_devices;
         struct video_dev *prev = NULL;
 
         /* Cleanup the v4l2 part */
@@ -1350,7 +1350,7 @@ void v4l2_cleanup(struct ctx_cam *cam) {
 
         if (--dev->usage_count == 0) {
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-                ,_("Closing video device %s"), dev->videodevice);
+                ,_("Closing video device %s"), dev->v4l2_device);
 
             v4l2_device_close(dev);
             v4l2_device_cleanup(dev);
@@ -1359,7 +1359,7 @@ void v4l2_cleanup(struct ctx_cam *cam) {
 
             /* Remove from list */
             if (prev == NULL)
-                videodevices = dev->next;
+                v4l2_devices = dev->next;
             else
                 prev->next = dev->next;
 
@@ -1370,7 +1370,7 @@ void v4l2_cleanup(struct ctx_cam *cam) {
         } else {
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 ,_("Still %d users of video device %s, so we don't close it now")
-                ,dev->usage_count, dev->videodevice);
+                ,dev->usage_count, dev->v4l2_device);
             /*
             * There is still at least one thread using this device
             * If we own it, release it.
@@ -1395,7 +1395,7 @@ int v4l2_next(struct ctx_cam *cam, struct ctx_image_data *img_data) {
         struct video_dev *dev;
 
         pthread_mutex_lock(&v4l2_mutex);
-        dev = videodevices;
+        dev = v4l2_devices;
         while (dev) {
             if (dev->fd_device == cam->video_dev)
                 break;
@@ -1433,7 +1433,7 @@ int v4l2_next(struct ctx_cam *cam, struct ctx_image_data *img_data) {
     #endif // HAVE_V4L2
 }
 
-int v4l2_palette_valid(char *videodevice, int v4l2_palette) {
+int v4l2_palette_valid(char *v4l2_device, int v4l2_palette) {
     #ifdef HAVE_V4L2
 
         /* This function is a boolean that returns true(1) if the palette selected in the
@@ -1452,10 +1452,10 @@ int v4l2_palette_valid(char *videodevice, int v4l2_palette) {
         v4l2_palette_init(palette_array);
 
         vid_source =(src_v4l2_t*)calloc(sizeof(src_v4l2_t), 1);
-        vid_source->fd_device = open(videodevice, O_RDWR|O_CLOEXEC);
+        vid_source->fd_device = open(v4l2_device, O_RDWR|O_CLOEXEC);
         if (vid_source->fd_device < 0) {
             MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
-                ,_("Failed to open video device %s"),videodevice);
+                ,_("Failed to open video device %s"),v4l2_device);
             free(vid_source);
             free(palette_array);
             return 0;
@@ -1482,7 +1482,7 @@ int v4l2_palette_valid(char *videodevice, int v4l2_palette) {
         return retcd;
     #else
         /* We do not have v4l2 so we can not determine whether it is valid or not */
-        (void)videodevice;
+        (void)v4l2_device;
         (void)v4l2_palette;
         return 0;
     #endif // HAVE_V4L2
@@ -1518,7 +1518,7 @@ void v4l2_palette_fourcc(int v4l2_palette, char *fourcc) {
     #endif // HAVE_V4L2
 }
 
-int v4l2_parms_valid(char *videodevice, int v4l2_palette, int v4l2_fps, int v4l2_width, int v4l2_height){
+int v4l2_parms_valid(char *v4l2_device, int v4l2_palette, int v4l2_fps, int v4l2_width, int v4l2_height){
     #ifdef HAVE_V4L2
 
         /* This function is a boolean that returns true(1) if the parms selected in the
@@ -1539,10 +1539,10 @@ int v4l2_parms_valid(char *videodevice, int v4l2_palette, int v4l2_fps, int v4l2
         v4l2_palette_init(palette_array);
 
         vid_source =(src_v4l2_t*) calloc(sizeof(src_v4l2_t), 1);
-        vid_source->fd_device = open(videodevice, O_RDWR|O_CLOEXEC);
+        vid_source->fd_device = open(v4l2_device, O_RDWR|O_CLOEXEC);
         if (vid_source->fd_device < 0) {
             MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
-                ,_("Failed to open video device %s"),videodevice);
+                ,_("Failed to open video device %s"),v4l2_device);
             free(vid_source);
             free(palette_array);
             return 0;
@@ -1609,7 +1609,7 @@ int v4l2_parms_valid(char *videodevice, int v4l2_palette, int v4l2_fps, int v4l2
         return retcd;
     #else
         /* We do not have v4l2 so we can not determine whether it is valid or not */
-        (void)videodevice;
+        (void)v4l2_device;
         (void)v4l2_fps;
         (void)v4l2_palette;
         (void)v4l2_width;

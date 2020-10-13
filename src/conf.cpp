@@ -90,7 +90,7 @@ struct ctx_parm config_parms[] = {
     "# Target directory for pictures, snapshots and movies",
     0,PARM_TYP_STRING,PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {
-    "videodevice",
+    "v4l2_device",
     "# Video device (e.g. /dev/video0) to be used for capturing.",
     0,PARM_TYP_STRING,PARM_CAT_01,WEBUI_LEVEL_ADVANCED
     },
@@ -1062,16 +1062,16 @@ static void conf_edit_target_dir(struct ctx_cam *cam, std::string &parm, enum PA
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","target_dir",_("target_dir"));
 }
-static void conf_edit_videodevice(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
+static void conf_edit_v4l2_device(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->videodevice = "/dev/video0";
+        cam->conf->v4l2_device = "/dev/video0";
     } else if (pact == PARM_ACT_SET){
-        cam->conf->videodevice = parm;
+        cam->conf->v4l2_device = parm;
     } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->videodevice;
+        parm = cam->conf->v4l2_device;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","videodevice",_("videodevice"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","v4l2_device",_("v4l2_device"));
 }
 static void conf_edit_vid_control_params(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact) {
     if (pact == PARM_ACT_DFLT) {
@@ -3001,7 +3001,7 @@ static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "camera_name"){           conf_edit_camera_name(cam, parm_val, pact);
     } else if (parm_nm == "camera_id"){             conf_edit_camera_id(cam, parm_val, pact);
     } else if (parm_nm == "target_dir"){            conf_edit_target_dir(cam, parm_val, pact);
-    } else if (parm_nm == "videodevice"){           conf_edit_videodevice(cam, parm_val, pact);
+    } else if (parm_nm == "v4l2_device"){           conf_edit_v4l2_device(cam, parm_val, pact);
     } else if (parm_nm == "vid_control_params"){    conf_edit_vid_control_params(cam, parm_val, pact);
     } else if (parm_nm == "v4l2_palette"){          conf_edit_v4l2_palette(cam, parm_val, pact);
     } else if (parm_nm == "input"){                 conf_edit_input(cam, parm_val, pact);

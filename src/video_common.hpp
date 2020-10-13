@@ -37,7 +37,7 @@ struct video_dev {
     struct video_dev        *next;
     int                      usage_count;
     int                      fd_device;
-    char                     videodevice[PATH_MAX];
+    char                     v4l2_device[PATH_MAX];
     int                      input;
     int                      norm;
     int                      width;
