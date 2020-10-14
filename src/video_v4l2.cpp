@@ -356,20 +356,16 @@ static int v4l2_parms_set(struct ctx_cam *cam, struct video_dev *curdev){
                 case V4L2_CTRL_TYPE_MENU:
                     /*FALLTHROUGH*/
                 case V4L2_CTRL_TYPE_INTEGER:
-                    if (usritem->ctrl_value < devitem->ctrl_minimum){
+                    if (atoi(usritem->ctrl_value) < devitem->ctrl_minimum){
                         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-                            ,_("%s control option value %d is below minimum.  Using minimum")
+                            ,_("%s control option value %s is below minimum.  Skipping...")
                             ,devitem->ctrl_name, usritem->ctrl_value, devitem->ctrl_minimum);
-                        devitem->ctrl_newval = devitem->ctrl_minimum;
-                        usritem->ctrl_value  = devitem->ctrl_minimum;
-                    } else if (usritem->ctrl_value > devitem->ctrl_maximum){
+                    } else if (atoi(usritem->ctrl_value) > devitem->ctrl_maximum){
                         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-                            ,_("%s control option value %d is above maximum.  Using maximum")
+                            ,_("%s control option value %s is above maximum.  Skipping...")
                             ,devitem->ctrl_name, usritem->ctrl_value, devitem->ctrl_maximum);
-                        devitem->ctrl_newval = devitem->ctrl_maximum;
-                        usritem->ctrl_value  = devitem->ctrl_maximum;
                     } else {
-                        devitem->ctrl_newval = usritem->ctrl_value;
+                        devitem->ctrl_newval = atoi(usritem->ctrl_value);
                     }
                     break;
                 case V4L2_CTRL_TYPE_BOOLEAN:
@@ -920,9 +916,9 @@ static int v4l2_capture(struct ctx_cam *cam, struct video_dev *curdev, unsigned 
     {
         video_buff *the_buffer = &vid_source->buffers[vid_source->buf.index];
 
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-            ,_("the_buffer index %d Address (%x)")
-            ,vid_source->buf.index, the_buffer->ptr);
+        //MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+        //    ,_("the_buffer index %d Address (%x)")
+        //    ,vid_source->buf.index, the_buffer->ptr);
         shift = 0;
         /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
         switch (curdev->pixfmt_src) {
@@ -1086,6 +1082,8 @@ static int v4l2_device_open(struct ctx_cam *cam, struct video_dev *curdev) {
 
     curdev->fd_device = -1;
     fd_device = -1;
+
+    cam->watchdog = 60;
 
     fd_device = open(curdev->v4l2_device, O_RDWR|O_CLOEXEC);
     if (fd_device > 0) {

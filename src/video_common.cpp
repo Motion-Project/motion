@@ -495,35 +495,93 @@ void vid_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
 
 }
 
-static void vid_parms_add(struct ctx_vdev *vdevctx, char *config_name, char *config_val){
+static void vid_parms_free(struct ctx_cam *cam)
+{
+    int indx_parm;
 
-    /* Add the parameter and value to our user control array*/
-    struct ctx_usrctrl *tmp;
-    int indx;
-
-    tmp =(struct ctx_usrctrl *) mymalloc(sizeof(struct ctx_usrctrl)*(vdevctx->usrctrl_count+1));
-    for (indx=0;indx<vdevctx->usrctrl_count;indx++){
-        tmp[indx].ctrl_name =(char*) mymalloc(strlen(vdevctx->usrctrl_array[indx].ctrl_name)+1);
-        sprintf(tmp[indx].ctrl_name,"%s",vdevctx->usrctrl_array[indx].ctrl_name);
-        free(vdevctx->usrctrl_array[indx].ctrl_name);
-        vdevctx->usrctrl_array[indx].ctrl_name=NULL;
-        tmp[indx].ctrl_value = vdevctx->usrctrl_array[indx].ctrl_value;
-    }
-    if (vdevctx->usrctrl_array != NULL){
-      free(vdevctx->usrctrl_array);
-      vdevctx->usrctrl_array =  NULL;
+    for (indx_parm=0; indx_parm<cam->vdev->usrctrl_count; indx_parm++)
+    {
+        free(cam->vdev->usrctrl_array[indx_parm].ctrl_name);
+        cam->vdev->usrctrl_array[indx_parm].ctrl_name = NULL;
     }
 
-    vdevctx->usrctrl_array = tmp;
-    vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_name = (char*)mymalloc(strlen(config_name)+1);
-    sprintf(vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_name,"%s",config_name);
-    vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_value=atoi(config_val);
-    vdevctx->usrctrl_count++;
+    if (cam->vdev->usrctrl_array != NULL) {
+      free(cam->vdev->usrctrl_array);
+      cam->vdev->usrctrl_array = NULL;
+    }
+
+    cam->vdev->usrctrl_count = 0;
 
 }
 
-int vid_parms_parse(struct ctx_cam *cam){
+static void vid_parms_add(struct ctx_cam *cam, const char *parm_nm, const char *parm_val)
+{
+    cam->vdev->usrctrl_count++;
 
+    if (cam->vdev->usrctrl_count == 1) {
+        cam->vdev->usrctrl_array =(struct ctx_usrctrl *) mymalloc(sizeof(struct ctx_usrctrl));
+    } else {
+        cam->vdev->usrctrl_array =(struct ctx_usrctrl *)realloc(cam->vdev->usrctrl_array
+            , sizeof(struct ctx_usrctrl)*cam->vdev->usrctrl_count);
+    }
+
+    if (parm_nm != NULL) {
+        cam->vdev->usrctrl_array[cam->vdev->usrctrl_count-1].ctrl_name =(char*)mymalloc(strlen(parm_nm)+1);
+        sprintf(cam->vdev->usrctrl_array[cam->vdev->usrctrl_count-1].ctrl_name,"%s",parm_nm);
+    } else {
+        cam->vdev->usrctrl_array[cam->vdev->usrctrl_count-1].ctrl_name = NULL;
+    }
+
+    if (parm_val != NULL) {
+        cam->vdev->usrctrl_array[cam->vdev->usrctrl_count-1].ctrl_value =(char*)mymalloc(strlen(parm_val)+1);
+        sprintf(cam->vdev->usrctrl_array[cam->vdev->usrctrl_count-1].ctrl_value,"%s",parm_val);
+    } else {
+        cam->vdev->usrctrl_array[cam->vdev->usrctrl_count-1].ctrl_value = NULL;
+    }
+
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("Parsed: >%s< >%s<")
+        ,cam->vdev->usrctrl_array[cam->vdev->usrctrl_count-1].ctrl_name
+        ,cam->vdev->usrctrl_array[cam->vdev->usrctrl_count-1].ctrl_value);
+
+}
+
+static void vid_parms_set(struct ctx_cam *cam, std::string &parms
+        ,size_t indxnm_st,size_t indxnm_en,size_t indxvl_st,size_t indxvl_en)
+{
+    std::string parm_nm, parm_vl;
+
+    if ((indxnm_st != std::string::npos) &&
+        (indxnm_en != std::string::npos) &&
+        (indxvl_st != std::string::npos) &&
+        (indxvl_en != std::string::npos))
+    {
+        parm_nm = parms.substr(indxnm_st, indxnm_en - indxnm_st);
+        parm_vl = parms.substr(indxvl_st, indxvl_en - indxvl_st);
+
+        mytrim(parm_nm);
+        mytrim(parm_vl);
+
+        vid_parms_add(cam, parm_nm.c_str(), parm_vl.c_str());
+
+    }
+
+    if (indxnm_st == 0) {
+        if ((indxvl_en + 1) > parms.length() ) {
+            parms = "";
+        } else {
+            parms = parms.substr(indxvl_en + 1);
+        }
+    } else {
+        if ((indxvl_en + 1) > parms.length() ) {
+            parms = parms.substr(0, indxnm_st - 1);
+        } else {
+            parms = parms.substr(0, indxnm_st - 1) + parms.substr(indxvl_en + 1);
+        }
+    }
+}
+
+int vid_parms_parse(struct ctx_cam *cam)
+{
     /* Parse through the configuration option to get values
      * The values are separated by commas but may also have
      * double quotes around the names which include a comma.
@@ -531,116 +589,60 @@ int vid_parms_parse(struct ctx_cam *cam){
      * vid_control_parms ID01234= 1, ID23456=2
      * vid_control_parms "Brightness, auto" = 1, ID23456=2
      * vid_control_parms ID23456=2, "Brightness, auto" = 1,ID2222=5
-     * TODO:  This code is terrible and needs rewriting
      */
-    int indx_parm;
-    int parmval_st , parmval_len;
-    int parmdesc_st, parmdesc_len;
-    int qte_open;
-    struct ctx_vdev *vdevctx;
-    char tst;
-    char *parmdesc, *parmval;
+
+    size_t indxnm_st, indxnm_en;
+    size_t indxvl_st, indxvl_en;
+    std::string parms;
 
     if (!cam->vdev->update_parms) return 0;
 
-    vdevctx = cam->vdev;
-
-    for (indx_parm=0;indx_parm<vdevctx->usrctrl_count;indx_parm++){
-        free(vdevctx->usrctrl_array[indx_parm].ctrl_name);
-        vdevctx->usrctrl_array[indx_parm].ctrl_name=NULL;
-    }
-    if (vdevctx->usrctrl_array != NULL){
-      free(vdevctx->usrctrl_array);
-      vdevctx->usrctrl_array = NULL;
-    }
-    vdevctx->usrctrl_count = 0;
+    vid_parms_free(cam);
 
     if (cam->conf->v4l2_parms != ""){
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Parsing controls: %s"),cam->conf->v4l2_parms.c_str());
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("Parsing controls: %s"),cam->conf->v4l2_parms.c_str());
 
-        indx_parm = 0;
-        parmdesc_st  = parmval_st  = -1;
-        parmdesc_len = parmval_len = 0;
-        qte_open = FALSE;
-        parmdesc = parmval = NULL;
-        tst = cam->conf->v4l2_parms[indx_parm];
-        while (tst != '\0') {
-            if (!qte_open) {
-                if (tst == '\"') {                    /* This is the opening quotation */
-                    qte_open = TRUE;
-                    parmdesc_st = indx_parm + 1;
-                    parmval_st  = -1;
-                    parmdesc_len = parmval_len = 0;
-                    if (parmdesc != NULL) free(parmdesc);
-                    if (parmval  != NULL) free(parmval);
-                    parmdesc = parmval = NULL;
-                } else if (tst == ','){               /* Designator for next parm*/
-                    if ((parmval_st >= 0) && (parmval_len > 0)){
-                        if (parmval  != NULL) free(parmval);
-                        parmval =(char*) mymalloc(parmval_len);
-                        snprintf(parmval, parmval_len,"%s",&cam->conf->v4l2_parms[parmval_st]);
-                    }
-                    parmdesc_st  = indx_parm + 1;
-                    parmval_st  = -1;
-                    parmdesc_len = parmval_len = 0;
-                } else if (tst == '='){               /* Designator for end of desc and start of value*/
-                    if ((parmdesc_st >= 0) && (parmdesc_len > 0)) {
-                        if (parmdesc != NULL) free(parmdesc);
-                        parmdesc =(char*) mymalloc(parmdesc_len);
-                        snprintf(parmdesc, parmdesc_len,"%s",&cam->conf->v4l2_parms[parmdesc_st]);
-                    }
-                    parmdesc_st = -1;
-                    parmval_st = indx_parm + 1;
-                    parmdesc_len = parmval_len = 0;
-                    if (parmval != NULL) free(parmval);
-                    parmval = NULL;
-                } else if (tst == ' '){               /* Skip leading spaces */
-                    if (indx_parm == parmdesc_st) parmdesc_st++;
-                    if (indx_parm == parmval_st) parmval_st++;
-                } else if (tst != ' '){               /* Revise the length making sure it is not a space*/
-                    parmdesc_len = indx_parm - parmdesc_st + 2;
-                    parmval_len = indx_parm - parmval_st + 2;
-                    if (parmdesc_st == -1) parmdesc_st = indx_parm;
-                }
-            } else if (tst == '\"') {                /* This is the closing quotation */
-                parmdesc_len = indx_parm - parmdesc_st + 1;
-                if (parmdesc_len > 0 ){
-                    if (parmdesc != NULL) free(parmdesc);
-                    parmdesc =(char*) mymalloc(parmdesc_len);
-                    snprintf(parmdesc, parmdesc_len,"%s",&cam->conf->v4l2_parms[parmdesc_st]);
-                }
-                parmdesc_st = -1;
-                parmval_st = indx_parm + 1;
-                parmdesc_len = parmval_len = 0;
-                if (parmval != NULL) free(parmval);
-                parmval = NULL;
-                qte_open = FALSE;   /* Reset the open/close on quotation */
-            }
-            if ((parmdesc != NULL) && (parmval  != NULL)){
-                vid_parms_add(vdevctx, parmdesc, parmval);
-                free(parmdesc);
-                free(parmval);
-                parmdesc = parmval = NULL;
+        parms = cam->conf->v4l2_parms;
+
+        /* Parse out all the items within quotes first */
+        while (parms.find("\"",0) != std::string::npos)
+        {
+            indxnm_st = parms.find("\"",0) + 1;
+            indxnm_en = parms.find("\"", indxnm_st);
+            indxvl_st = parms.find("=",indxnm_en + 1) + 1;
+            if (parms.find(",",indxvl_st) == std::string::npos) {
+                indxvl_en = parms.length();
+            } else {
+                indxvl_en = parms.find(",",indxvl_st);
             }
 
-            indx_parm++;
-            tst = cam->conf->v4l2_parms[indx_parm];
-        }
-        /* Process the last parameter */
-        if ((parmval_st >= 0) && (parmval_len > 0)){
-            if (parmval  != NULL) free(parmval);
-            parmval =(char*) mymalloc(parmval_len+1);
-            snprintf(parmval, parmval_len,"%s",&cam->conf->v4l2_parms[parmval_st]);
-        }
-        if ((parmdesc != NULL) && (parmval  != NULL)){
-            vid_parms_add(vdevctx, parmdesc, parmval);
-            free(parmdesc);
-            free(parmval);
-            parmdesc = parmval = NULL;
+            vid_parms_set(cam,parms,indxnm_st,indxnm_en,indxvl_st,indxvl_en);
         }
 
-        if (parmdesc != NULL) free(parmdesc);
-        if (parmval  != NULL) free(parmval);
+        /* Now parse out anything remaining based upon commas */
+        while (parms.find(",",0) != std::string::npos)
+        {
+            indxnm_st = 0;
+            indxnm_en = parms.find("=",1);
+            indxvl_st = indxnm_en + 1;
+            if (parms.find(",",indxvl_st) == std::string::npos) {
+                indxvl_en = parms.length();
+            } else {
+                indxvl_en = parms.find(",",indxvl_st);
+            }
+
+            vid_parms_set(cam,parms,indxnm_st,indxnm_en,indxvl_st,indxvl_en);
+        }
+
+        if (parms != "") {
+
+            indxnm_st = 0;
+            indxnm_en = parms.find("=",1);
+            indxvl_st = indxnm_en + 1;
+            indxvl_en = parms.length();
+
+            vid_parms_set(cam,parms,indxnm_st,indxnm_en,indxvl_st,indxvl_en);
+        }
     }
 
     cam->vdev->update_parms = FALSE;
@@ -659,7 +661,8 @@ void vid_mutex_destroy(void)
     v4l2_mutex_destroy();
 }
 
-void vid_close(struct ctx_cam *cam) {
+void vid_close(struct ctx_cam *cam)
+{
 
     if (cam->mmalcam) {
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling mmalcam_cleanup"));

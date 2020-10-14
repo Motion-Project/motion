@@ -101,6 +101,10 @@
     int mystrne(const char* var1, const char* var2);
     char *mystrdup(const char *);
     char *mystrcpy(char *, const char *);
+    void myltrim(std::string &parm);
+    void myrtrim(std::string &parm);
+    void mytrim(std::string &parm);
+
 
     AVFrame *myframe_alloc(void);
     void myframe_free(AVFrame *frame);

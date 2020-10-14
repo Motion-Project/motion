@@ -39,26 +39,6 @@
 
 using namespace cv;
 
-static void myltrim(std::string &vstr){
-    vstr.erase(
-        vstr.begin()
-        , std::find_if( vstr.begin() , vstr.end() , [](int ch)
-            { return !std::isspace(ch);}
-        )
-    );
-}
-static void myrtrim(std::string &vstr){
-    vstr.erase(
-        std::find_if(vstr.rbegin(), vstr.rend(), [](int ch)
-            {return !std::isspace(ch);}
-        ).base()
-        , vstr.end()
-    );
-}
-static void mytrim(std::string &vstr){
-    myltrim(vstr);
-    myrtrim(vstr);
-}
 
 static void algsec_img_show(ctx_cam *cam, Mat &mat_src
     , std::vector<Rect> &src_pos, std::vector<double> &src_weights

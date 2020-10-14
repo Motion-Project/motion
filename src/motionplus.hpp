@@ -162,15 +162,12 @@ enum MOTION_SIGNAL {
 };
 
 struct ctx_usrctrl {
+    char          *ctrl_src;        /* The full parameter provided from user*/
     char          *ctrl_name;       /* The name or description of the ID as requested by user*/
-    int            ctrl_value;      /* The value that the user wants the control set to*/
+    char          *ctrl_value;      /* The value that the user wants the control set to*/
 };
 
 struct ctx_vdev {
-    /* As v4l2 gets rewritten, put thread specific items here
-     * Rather than use conf options directly, copy from conf to here
-     * to handle cross thread webui changes which could cause problems
-     */
     struct ctx_usrctrl *usrctrl_array;     /*Array of the controls the user specified*/
     int usrctrl_count;                          /*Count of the controls the user specified*/
     int update_parms;                           /*Bool for whether to update the parameters on the device*/

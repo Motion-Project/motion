@@ -49,6 +49,35 @@ int mystrne(const char* var1, const char* var2){
     return (strcmp(var1,var2) ? 1: 0);
 }
 
+void myltrim(std::string &parm)
+{
+    while (parm.substr(0,1) == " ")
+    {
+        if (parm.length() == 1) {
+            parm="";
+        } else {
+            parm = parm.substr(1);
+        }
+    }
+}
+
+void myrtrim(std::string &parm)
+{
+    while (parm.substr(parm.length()-1,1) == " ")
+    {
+        if (parm.length() == 1) {
+            parm="";
+        } else {
+            parm = parm.substr(0,parm.length()-1);
+        }
+    }
+}
+void mytrim(std::string &parm)
+{
+    myrtrim(parm);
+    myltrim(parm);
+}
+
 /**
  * mymalloc
  *
