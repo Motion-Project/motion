@@ -483,151 +483,249 @@ void vid_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
 
 }
 
-static void vid_parms_add(struct vdev_context *vdevctx, char *config_name, char *config_val){
+/* vid_parms_free
+ * Free all the memory associated with the parameter control array.
+*/
+static void vid_parms_free(struct context *cnt)
+{
+    int indx_parm;
 
-    /* Add the parameter and value to our user control array*/
-    struct vdev_usrctrl_ctx *tmp;
-    int indx;
-
-    tmp = mymalloc(sizeof(struct vdev_usrctrl_ctx)*(vdevctx->usrctrl_count+1));
-    for (indx=0;indx<vdevctx->usrctrl_count;indx++){
-        tmp[indx].ctrl_name = mymalloc(strlen(vdevctx->usrctrl_array[indx].ctrl_name)+1);
-        sprintf(tmp[indx].ctrl_name,"%s",vdevctx->usrctrl_array[indx].ctrl_name);
-        free(vdevctx->usrctrl_array[indx].ctrl_name);
-        vdevctx->usrctrl_array[indx].ctrl_name=NULL;
-        tmp[indx].ctrl_value = vdevctx->usrctrl_array[indx].ctrl_value;
-    }
-    if (vdevctx->usrctrl_array != NULL){
-      free(vdevctx->usrctrl_array);
-      vdevctx->usrctrl_array =  NULL;
+    for (indx_parm=0; indx_parm<cnt->vdev->usrctrl_count; indx_parm++)
+    {
+        free(cnt->vdev->usrctrl_array[indx_parm].ctrl_name);
+        cnt->vdev->usrctrl_array[indx_parm].ctrl_name = NULL;
     }
 
-    vdevctx->usrctrl_array = tmp;
-    vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_name = mymalloc(strlen(config_name)+1);
-    sprintf(vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_name,"%s",config_name);
-    vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_value=atoi(config_val);
-    vdevctx->usrctrl_count++;
+    if (cnt->vdev->usrctrl_array != NULL) {
+      free(cnt->vdev->usrctrl_array);
+      cnt->vdev->usrctrl_array = NULL;
+    }
+
+    cnt->vdev->usrctrl_count = 0;
 
 }
 
-int vid_parms_parse(struct context *cnt){
+/* vid_parms_add
+ * Add the parsed out parameter and value to the control array.
+*/
+static void vid_parms_add(struct context *cnt, const char *parm_nm, const char *parm_val)
+{
+    cnt->vdev->usrctrl_count++;
 
+    if (cnt->vdev->usrctrl_count == 1) {
+        cnt->vdev->usrctrl_array =(struct vdev_usrctrl_ctx *) mymalloc(sizeof(struct vdev_usrctrl_ctx));
+    } else {
+        cnt->vdev->usrctrl_array =(struct vdev_usrctrl_ctx *)realloc(cnt->vdev->usrctrl_array
+            , sizeof(struct vdev_usrctrl_ctx)*cnt->vdev->usrctrl_count);
+    }
+
+    if (parm_nm != NULL) {
+        cnt->vdev->usrctrl_array[cnt->vdev->usrctrl_count-1].ctrl_name =(char*)mymalloc(strlen(parm_nm)+1);
+        sprintf(cnt->vdev->usrctrl_array[cnt->vdev->usrctrl_count-1].ctrl_name,"%s",parm_nm);
+    } else {
+        cnt->vdev->usrctrl_array[cnt->vdev->usrctrl_count-1].ctrl_name = NULL;
+    }
+
+    cnt->vdev->usrctrl_array[cnt->vdev->usrctrl_count-1].ctrl_value = atoi(parm_val);
+
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Parsed: >%s< >%d<")
+        ,cnt->vdev->usrctrl_array[cnt->vdev->usrctrl_count-1].ctrl_name
+        ,cnt->vdev->usrctrl_array[cnt->vdev->usrctrl_count-1].ctrl_value);
+
+}
+
+/* vid_parms_set
+ * Extract out of the string the parameter name and values at the location
+ * specified.
+*/
+static void vid_parms_set(struct context *cnt, char *parms
+        ,int indxnm_st, int indxnm_en, int indxvl_st, int indxvl_en)
+{
+    char *parm_nm, *parm_vl;
+    int retcd, chksz;
+
+    if ((indxnm_en != 0) &&
+        (indxvl_st != 0) &&
+        ((indxnm_en - indxnm_st) > 0) &&
+        ((indxvl_en - indxvl_st) > 0))
+    {
+        parm_nm = mymalloc(PATH_MAX);
+        parm_vl = mymalloc(PATH_MAX);
+
+        chksz = indxnm_en - indxnm_st + 1;
+        retcd = snprintf(parm_nm, chksz, "%s", parms + indxnm_st);
+        if (retcd < 0) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Error parsing parm_nm controls: %s"), parms);
+        }
+
+        chksz = indxvl_en - indxvl_st + 1;
+        retcd = snprintf(parm_vl, chksz, "%s", parms + indxvl_st);
+        if (retcd < 0) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Error parsing parm_vl controls: %s"), parms);
+        }
+
+        util_trim(parm_nm);
+        util_trim(parm_vl);
+
+        vid_parms_add(cnt, parm_nm, parm_vl);
+
+        free(parm_nm);
+        free(parm_vl);
+    }
+
+}
+
+/* vid_parms_next
+ * Remove the parameter parsed out in previous steps from the parms string
+ * and set up the string for parsing out the next parameter.
+*/
+static void vid_parms_next(char *parms,int indxnm_st, int indxvl_en)
+{
+    char *parm_tmp;
+    int retcd;
+
+    parm_tmp = mymalloc(PATH_MAX);
+    retcd = snprintf(parm_tmp, PATH_MAX, "%s", parms);
+    if (retcd < 0) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Error setting temp: %s"), parms);
+    }
+
+    if (indxnm_st == 0) {
+        if ((size_t)(indxvl_en + 1) >strlen(parms)) {
+            parms[0]='\0';
+        } else {
+            retcd = snprintf(parms, strlen(parm_tmp) - indxvl_en + 1
+                , "%s", parm_tmp+indxvl_en+1);
+        }
+    } else {
+        if ((size_t)(indxvl_en + 1) > strlen(parms) ) {
+            retcd = snprintf(parms, indxnm_st - 1, "%s", parm_tmp);
+        } else {
+            retcd = snprintf(parms, PATH_MAX, "%.*s%.*s"
+                , indxnm_st - 1, parm_tmp
+                , (int)(strlen(parm_tmp) - indxvl_en)
+                , parm_tmp + indxvl_en);
+        }
+    }
+    if (retcd < 0) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Error reparsing controls: %s"), parms);
+    }
+
+    free(parm_tmp);
+
+}
+
+/* vid_parms_parse_qte
+ * Split out the parameters that have quotes around the name.
+*/
+static void vid_parms_parse_qte(struct context *cnt, char *parms)
+{
+    int indxnm_st, indxnm_en, indxvl_st, indxvl_en;
+
+    while (strstr(parms,"\"") != NULL)
+    {
+        indxnm_st = 0;
+        indxnm_en = 0;
+        indxvl_st = 0;
+        indxvl_en = strlen(parms);
+
+        indxnm_st = strstr(parms,"\"") - parms + 1;
+        if (strstr(parms + indxnm_st,"\"") != NULL) {
+            indxnm_en = strstr(parms + indxnm_st,"\"") - parms;
+            if (strstr(parms + indxnm_en + 1,"=") != NULL) {
+                indxvl_st = strstr(parms + indxnm_en + 1,"=") - parms + 1;
+            }
+            if (strstr(parms + indxvl_st + 1,",") != NULL) {
+                indxvl_en = strstr(parms + indxvl_st + 1,",") - parms;
+            }
+        }
+
+        vid_parms_set(cnt, parms, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+        vid_parms_next(parms, indxnm_st, indxvl_en);
+    }
+}
+
+/* vid_parms_parse_comma
+ * Split out the parameters between the commas.
+*/
+static void vid_parms_parse_comma(struct context *cnt, char *parms)
+{
+    int indxnm_st, indxnm_en, indxvl_st, indxvl_en;
+
+    while (strstr(parms,",") != NULL)
+    {
+        indxnm_st = 0;
+        indxnm_en = 0;
+        indxvl_st = 0;
+        indxvl_en = strstr(parms, ",") - parms;
+
+        if (strstr(parms, "=") != NULL) {
+            indxnm_en = strstr(parms,"=") - parms;
+            if ((size_t)indxnm_en < strlen(parms)) {
+                indxvl_st = indxnm_en + 1;
+            }
+        }
+        vid_parms_set(cnt, parms, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+        vid_parms_next(parms, indxnm_st, indxvl_en);
+    }
+
+}
+
+/* vid_parms_parse
+ * Parse the vid_control_params into an array.
+*/
+int vid_parms_parse(struct context *cnt)
+{
     /* Parse through the configuration option to get values
      * The values are separated by commas but may also have
      * double quotes around the names which include a comma.
      * Examples:
-     * vid_control_parms ID01234= 1, ID23456=2
-     * vid_control_parms "Brightness, auto" = 1, ID23456=2
-     * vid_control_parms ID23456=2, "Brightness, auto" = 1,ID2222=5
+     * vid_control_params ID01234= 1, ID23456=2
+     * vid_control_params "Brightness, auto" = 1, ID23456=2
+     * vid_control_params ID23456=2, "Brightness, auto" = 1,ID2222=5
      */
-    int indx_parm;
-    int parmval_st , parmval_len;
-    int parmdesc_st, parmdesc_len;
-    int qte_open;
-    struct vdev_context *vdevctx;
-    char tst;
-    char *parmdesc, *parmval;
+
+    int retcd, indxnm_st, indxnm_en, indxvl_st, indxvl_en;
+    char *parms;
 
     if (!cnt->vdev->update_parms) return 0;
 
-    vdevctx = cnt->vdev;
+    vid_parms_free(cnt);
+    parms = NULL;
 
-    for (indx_parm=0;indx_parm<vdevctx->usrctrl_count;indx_parm++){
-        free(vdevctx->usrctrl_array[indx_parm].ctrl_name);
-        vdevctx->usrctrl_array[indx_parm].ctrl_name=NULL;
-    }
-    if (vdevctx->usrctrl_array != NULL){
-      free(vdevctx->usrctrl_array);
-      vdevctx->usrctrl_array = NULL;
-    }
-    vdevctx->usrctrl_count = 0;
+    if (cnt->conf.vid_control_params != NULL) {
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
+            ,_("Parsing controls: %s"), cnt->conf.vid_control_params);
 
-    if (cnt->conf.vid_control_params != NULL){
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Parsing controls: %s"),cnt->conf.vid_control_params);
+        parms = mymalloc(PATH_MAX);
 
-        indx_parm = 0;
-        parmdesc_st  = parmval_st  = -1;
-        parmdesc_len = parmval_len = 0;
-        qte_open = FALSE;
-        parmdesc = parmval = NULL;
-        tst = cnt->conf.vid_control_params[indx_parm];
-        while (tst != '\0') {
-            if (!qte_open) {
-                if (tst == '\"') {                    /* This is the opening quotation */
-                    qte_open = TRUE;
-                    parmdesc_st = indx_parm + 1;
-                    parmval_st  = -1;
-                    parmdesc_len = parmval_len = 0;
-                    if (parmdesc != NULL) free(parmdesc);
-                    if (parmval  != NULL) free(parmval);
-                    parmdesc = parmval = NULL;
-                } else if (tst == ','){               /* Designator for next parm*/
-                    if ((parmval_st >= 0) && (parmval_len > 0)){
-                        if (parmval  != NULL) free(parmval);
-                        parmval = mymalloc(parmval_len);
-                        snprintf(parmval, parmval_len,"%s",&cnt->conf.vid_control_params[parmval_st]);
-                    }
-                    parmdesc_st  = indx_parm + 1;
-                    parmval_st  = -1;
-                    parmdesc_len = parmval_len = 0;
-                } else if (tst == '='){               /* Designator for end of desc and start of value*/
-                    if ((parmdesc_st >= 0) && (parmdesc_len > 0)) {
-                        if (parmdesc != NULL) free(parmdesc);
-                        parmdesc = mymalloc(parmdesc_len);
-                        snprintf(parmdesc, parmdesc_len,"%s",&cnt->conf.vid_control_params[parmdesc_st]);
-                    }
-                    parmdesc_st = -1;
-                    parmval_st = indx_parm + 1;
-                    parmdesc_len = parmval_len = 0;
-                    if (parmval != NULL) free(parmval);
-                    parmval = NULL;
-                } else if (tst == ' '){               /* Skip leading spaces */
-                    if (indx_parm == parmdesc_st) parmdesc_st++;
-                    if (indx_parm == parmval_st) parmval_st++;
-                } else if (tst != ' '){               /* Revise the length making sure it is not a space*/
-                    parmdesc_len = indx_parm - parmdesc_st + 2;
-                    parmval_len = indx_parm - parmval_st + 2;
-                    if (parmdesc_st == -1) parmdesc_st = indx_parm;
+        retcd = snprintf(parms, PATH_MAX, "%s", cnt->conf.vid_control_params);
+        if ((retcd < 0) || (retcd > PATH_MAX)) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                ,_("Error parsing controls: %s"), cnt->conf.vid_control_params);
+            free(parms);
+            return 0;
+        }
+
+        vid_parms_parse_qte(cnt, parms);
+
+        vid_parms_parse_comma(cnt, parms);
+
+        if (strlen(parms) != 0) {
+            indxnm_st = 0;
+            indxnm_en = 0;
+            indxvl_st = 0;
+            indxvl_en = strlen(parms);
+            if (strstr(parms + 1,"=") != NULL) {
+                indxnm_en = strstr(parms + 1,"=") - parms;
+                if ((size_t)indxnm_en < strlen(parms)){
+                    indxvl_st = indxnm_en + 1;
                 }
-            } else if (tst == '\"') {                /* This is the closing quotation */
-                parmdesc_len = indx_parm - parmdesc_st + 1;
-                if (parmdesc_len > 0 ){
-                    if (parmdesc != NULL) free(parmdesc);
-                    parmdesc = mymalloc(parmdesc_len);
-                    snprintf(parmdesc, parmdesc_len,"%s",&cnt->conf.vid_control_params[parmdesc_st]);
-                }
-                parmdesc_st = -1;
-                parmval_st = indx_parm + 1;
-                parmdesc_len = parmval_len = 0;
-                if (parmval != NULL) free(parmval);
-                parmval = NULL;
-                qte_open = FALSE;   /* Reset the open/close on quotation */
-            }
-            if ((parmdesc != NULL) && (parmval  != NULL)){
-                vid_parms_add(vdevctx, parmdesc, parmval);
-                free(parmdesc);
-                free(parmval);
-                parmdesc = parmval = NULL;
             }
 
-            indx_parm++;
-            tst = cnt->conf.vid_control_params[indx_parm];
+            vid_parms_set(cnt, parms, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
         }
-        /* Process the last parameter */
-        if ((parmval_st >= 0) && (parmval_len > 0)){
-            if (parmval  != NULL) free(parmval);
-            parmval = mymalloc(parmval_len+1);
-            snprintf(parmval, parmval_len,"%s",&cnt->conf.vid_control_params[parmval_st]);
-        }
-        if ((parmdesc != NULL) && (parmval  != NULL)){
-            vid_parms_add(vdevctx, parmdesc, parmval);
-            free(parmdesc);
-            free(parmval);
-            parmdesc = parmval = NULL;
-        }
-
-        if (parmdesc != NULL) free(parmdesc);
-        if (parmval  != NULL) free(parmval);
+        free(parms);
     }
 
     cnt->vdev->update_parms = FALSE;
@@ -635,6 +733,7 @@ int vid_parms_parse(struct context *cnt){
     return 0;
 
 }
+
 
 void vid_mutex_init(void)
 {

@@ -4169,3 +4169,33 @@ int util_check_passthrough(struct context *cnt){
 #endif
 
 }
+
+/* util_trim
+ * Trim away any leading or trailing whitespace in the string
+*/
+void util_trim(char *parm)
+{
+    int indx, indx_st, indx_en;
+
+    if (parm == NULL) return;
+
+    indx_en = strlen(parm) - 1;
+    if (indx_en == -1) return;
+
+    indx_st = 0;
+
+    while (isspace(parm[indx_st]) && (indx_st <= indx_en)) indx_st++;
+    if (indx_st > indx_en){
+        parm[0]= '\0';
+        return;
+    }
+
+    while (isspace(parm[indx_en]) && (indx_en > indx_st)) indx_en--;
+
+    for (indx = indx_st; indx<=indx_en; indx++)
+    {
+        parm[indx-indx_st] = parm[indx];
+    }
+    parm[indx_en-indx_st+1] = '\0';
+
+}

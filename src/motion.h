@@ -35,6 +35,7 @@ struct image_data;
 #ifndef __USE_GNU
 #define __USE_GNU
 #endif
+#include <ctype.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -547,5 +548,6 @@ int create_path(const char *);
 void util_threadname_set(const char *abbr, int threadnbr, const char *threadname);
 void util_threadname_get(char *threadname);
 int util_check_passthrough(struct context *cnt);
+void util_trim(char *parm);
 
 #endif /* _INCLUDE_MOTION_H */
