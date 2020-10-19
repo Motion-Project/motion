@@ -35,11 +35,7 @@ struct config {
 
     /* Capture device configuration parameters */
     const char      *video_device;
-    char            *vid_control_params;
-    int             v4l2_palette;
-    int             input;
-    int             norm;
-    unsigned long   frequency;
+    char            *video_params;
     int             auto_brightness;
     const char      *tuner_device;
     int             roundrobin_frames;
@@ -47,18 +43,13 @@ struct config {
     int             roundrobin_switchfilter;
 
     const char      *netcam_url;
-    const char      *netcam_highres;
+    char            *netcam_params;
+    const char      *netcam_high_url;
+    char            *netcam_high_params;
     const char      *netcam_userpass;
-    const char      *netcam_keepalive;
-    const char      *netcam_proxy;
-    int             netcam_tolerant_check;
-    int             netcam_use_tcp;
-    char            *netcam_decoder;
-    int             netcam_rate;
-    int             netcam_ratehigh;
 
     const char      *mmalcam_name;
-    const char      *mmalcam_control_params;
+    const char      *mmalcam_params;
 
     /* Image processing configuration parameters */
     int             width;

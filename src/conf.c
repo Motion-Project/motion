@@ -50,11 +50,7 @@ struct config conf_template = {
 
     /* Capture device configuration parameters */
     .video_device =                    DEF_VIDEO_DEVICE,
-    .vid_control_params =              NULL,
-    .v4l2_palette =                    DEF_PALETTE,
-    .input =                           DEF_INPUT,
-    .norm =                            0,
-    .frequency =                       0,
+    .video_params =                    NULL,
     .auto_brightness =                 0,
     .tuner_device =                    NULL,
     .roundrobin_frames =               1,
@@ -62,18 +58,13 @@ struct config conf_template = {
     .roundrobin_switchfilter =         FALSE,
 
     .netcam_url =                      NULL,
-    .netcam_highres=                   NULL,
+    .netcam_params =                   NULL,
+    .netcam_high_url=                  NULL,
+    .netcam_high_params =              NULL,
     .netcam_userpass =                 NULL,
-    .netcam_keepalive =                "off",
-    .netcam_proxy =                    NULL,
-    .netcam_tolerant_check =           FALSE,
-    .netcam_use_tcp =                  TRUE,
-    .netcam_decoder =                  NULL,
-    .netcam_rate =                     -1,
-    .netcam_ratehigh =                 -1,
 
     .mmalcam_name =                    NULL,
-    .mmalcam_control_params =          NULL,
+    .mmalcam_params =                  NULL,
 
     /* Image processing configuration parameters */
     .width =                           DEF_WIDTH,
@@ -210,7 +201,8 @@ static void malloc_strings(struct context *);
 static struct context **copy_bool(struct context **, const char *, int);
 static struct context **copy_int(struct context **, const char *, int);
 static struct context **config_camera(struct context **cnt, const char *str, int val);
-static struct context **copy_vid_ctrl(struct context **, const char *, int);
+static struct context **copy_video_params(struct context **cnt, const char *config_val, int config_indx);
+static struct context **copy_netcam_params(struct context **cnt, const char *config_val, int config_indx);
 static struct context **copy_text_double(struct context **, const char *, int);
 static struct context **copy_html_output(struct context **, const char *, int);
 
@@ -339,7 +331,7 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "videodevice",
+    "video_device",
     "# Video device (e.g. /dev/video0) to be used for capturing.",
     0,
     CONF_OFFSET(video_device),
@@ -348,49 +340,13 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
-    "vid_control_params",
+    "video_params",
     "# Parameters to control video device.  See motion_guide.html",
     0,
-    CONF_OFFSET(vid_control_params),
+    CONF_OFFSET(video_params),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
-    },
-    {
-    "v4l2_palette",
-    "# Preferred color palette to be used for the video device",
-    0,
-    CONF_OFFSET(v4l2_palette),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "input",
-    "# The input number to be used on the video device.",
-    0,
-    CONF_OFFSET(input),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "norm",
-    "# The video norm to use for video capture and TV tuner cards.",
-    0,
-    CONF_OFFSET(norm),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "frequency",
-    "# The frequency to set the tuner to (kHz) for TV tuner cards",
-    0,
-    CONF_OFFSET(frequency),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_ADVANCED
     },
     {
     "auto_brightness",
@@ -402,7 +358,7 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "tunerdevice",
+    "tuner_device",
     "# Device name (e.g. /dev/tuner0) to be used for capturing when using tuner as source",
     0,
     CONF_OFFSET(tuner_device),
@@ -447,10 +403,28 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
-    "netcam_highres",
+    "netcam_params",
+    "# The parameters for the network camera.",
+    0,
+    CONF_OFFSET(netcam_params),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_ADVANCED
+    },
+    {
+    "netcam_high_url",
     "# Optional high resolution URL for rtsp/rtmp cameras only.",
     0,
-    CONF_OFFSET(netcam_highres),
+    CONF_OFFSET(netcam_high_url),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_ADVANCED
+    },
+    {
+    "netcam_high_params",
+    "# The parameters for the high resolution network camera.",
+    0,
+    CONF_OFFSET(netcam_high_params),
     copy_string,
     print_string,
     WEBUI_LEVEL_ADVANCED
@@ -465,69 +439,6 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
-    "netcam_keepalive",
-    "# The method for keep-alive of network socket for mjpeg streams.",
-    0,
-    CONF_OFFSET(netcam_keepalive),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "netcam_proxy",
-    "# The URL to use for a netcam proxy server.",
-    0,
-    CONF_OFFSET(netcam_proxy),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "netcam_tolerant_check",
-    "# Use less strict jpeg checks for network cameras.",
-    0,
-    CONF_OFFSET(netcam_tolerant_check),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "netcam_use_tcp",
-    "# Use TCP transport for RTSP/RTMP connections to camera.",
-    1,
-    CONF_OFFSET(netcam_use_tcp),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "netcam_decoder",
-    "# User requested decoder for netcam.",
-    0,
-    CONF_OFFSET(netcam_decoder),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "netcam_rate",
-    "# The frames per second that Motion will use to capture images from the network camera.",
-    0,
-    CONF_OFFSET(netcam_rate),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "netcam_ratehigh",
-    "# The frames per second that Motion will use to capture images from the high resolution network camera.",
-    0,
-    CONF_OFFSET(netcam_ratehigh),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
     "mmalcam_name",
     "# Name of mmal camera (e.g. vc.ril.camera for pi camera).",
     0,
@@ -537,10 +448,10 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
-    "mmalcam_control_params",
+    "mmalcam_params",
     "# Camera control parameters (see raspivid/raspistill tool documentation)",
     0,
-    CONF_OFFSET(mmalcam_control_params),
+    CONF_OFFSET(mmalcam_params),
     copy_string,
     print_string,
     WEBUI_LEVEL_ADVANCED
@@ -1762,42 +1673,42 @@ dep_config_param dep_config_params[] = {
     {
     "brightness",
     "4.1.1",
-    "\"brightness\" replaced with \"vid_control_params\"",
-    CONF_OFFSET(vid_control_params),
-    "vid_control_params",
-    copy_vid_ctrl
+    "\"brightness\" replaced with \"video_params\"",
+    CONF_OFFSET(video_params),
+    "video_params",
+    copy_video_params
     },
     {
     "contrast",
     "4.1.1",
-    "\"contrast\" replaced with \"vid_control_params\"",
-    CONF_OFFSET(vid_control_params),
-    "vid_control_params",
-    copy_vid_ctrl
+    "\"contrast\" replaced with \"video_params\"",
+    CONF_OFFSET(video_params),
+    "video_params",
+    copy_video_params
     },
     {
     "saturation",
     "4.1.1",
-    "\"saturation\" replaced with \"vid_control_params\"",
-    CONF_OFFSET(vid_control_params),
-    "vid_control_params",
-    copy_vid_ctrl
+    "\"saturation\" replaced with \"video_params\"",
+    CONF_OFFSET(video_params),
+    "video_params",
+    copy_video_params
     },
     {
     "hue",
     "4.1.1",
-    "\"hue\" replaced with \"vid_control_params\"",
-    CONF_OFFSET(vid_control_params),
-    "vid_control_params",
-    copy_vid_ctrl
+    "\"hue\" replaced with \"video_params\"",
+    CONF_OFFSET(video_params),
+    "video_params",
+    copy_video_params
     },
     {
     "power_line_frequency",
     "4.1.1",
-    "\"power_line_frequency\" replaced with \"vid_control_params\"",
-    CONF_OFFSET(vid_control_params),
-    "vid_control_params",
-    copy_vid_ctrl
+    "\"power_line_frequency\" replaced with \"video_params\"",
+    CONF_OFFSET(video_params),
+    "video_params",
+    copy_video_params
     },
     {
     "text_double",
@@ -1952,14 +1863,6 @@ dep_config_param dep_config_params[] = {
     copy_bool
     },
     {
-    "rtsp_uses_tcp",
-    "4.1.1",
-    "\"rtsp_uses_tcp\" replaced with \"netcam_use_tcp\"",
-    CONF_OFFSET(netcam_use_tcp),
-    "netcam_use_tcp",
-    copy_bool
-    },
-    {
     "switchfilter",
     "4.1.1",
     "\"switchfilter\" replaced with \"roundrobin_switchfilter\"",
@@ -1983,6 +1886,143 @@ dep_config_param dep_config_params[] = {
     "pid_file",
     copy_string
     },
+    {
+    "vid_control_params",
+    "4.3.1",
+    "\"vid_control_params\" replaced with \"video_params\"",
+    CONF_OFFSET(video_params),
+    "video_params",
+    copy_video_params
+    },
+    {
+    "v4l2_palette",
+    "4.3.1",
+    "\"v4l2_palette\" replaced with \"video_params\"",
+    CONF_OFFSET(video_params),
+    "video_params",
+    copy_video_params
+    },
+    {
+    "input",
+    "4.3.1",
+    "\"input\" replaced with \"video_params\"",
+    CONF_OFFSET(video_params),
+    "video_params",
+    copy_video_params
+    },
+    {
+    "norm",
+    "4.3.1",
+    "\"norm\" replaced with \"video_params\"",
+    CONF_OFFSET(video_params),
+    "video_params",
+    copy_video_params
+    },
+    {
+    "frequency",
+    "4.3.1",
+    "\"frequency\" replaced with \"video_params\"",
+    CONF_OFFSET(video_params),
+    "video_params",
+    copy_video_params
+    },
+    {
+    "rtsp_uses_tcp",
+    "4.3.1",
+    "\"rtsp_uses_tcp\" replaced with \"netcam_params\"",
+    CONF_OFFSET(netcam_params),
+    "netcam_params",
+    copy_netcam_params
+    },
+    {
+    "netcam_use_tcp",
+    "4.3.1",
+    "\"netcam_use_tcp\" replaced with \"netcam_params\"",
+    CONF_OFFSET(netcam_params),
+    "netcam_params",
+    copy_netcam_params
+    },
+    {
+    "netcam_rate",
+    "4.3.1",
+    "\"netcam_rate\" replaced with \"netcam_params\"",
+    CONF_OFFSET(netcam_params),
+    "netcam_params",
+    copy_netcam_params
+    },
+    {
+    "netcam_ratehigh",
+    "4.3.1",
+    "\"netcam_ratehigh\" replaced with \"netcam_params\"",
+    CONF_OFFSET(netcam_params),
+    "netcam_params",
+    copy_netcam_params
+    },
+    {
+    "netcam_decoder",
+    "4.3.1",
+    "\"netcam_decoder\" replaced with \"netcam_params\"",
+    CONF_OFFSET(netcam_params),
+    "netcam_params",
+    copy_netcam_params
+    },
+    {
+    "netcam_proxy",
+    "4.3.1",
+    "\"netcam_proxy\" replaced with \"netcam_params\"",
+    CONF_OFFSET(netcam_params),
+    "netcam_params",
+    copy_netcam_params
+    },
+    {
+    "netcam_keepalive",
+    "4.3.1",
+    "\"netcam_keepalive\" replaced with \"netcam_params\"",
+    CONF_OFFSET(netcam_params),
+    "netcam_params",
+    copy_netcam_params
+    },
+    {
+    "netcam_tolerant_check",
+    "4.3.1",
+    "\"netcam_tolerant_check\" replaced with \"netcam_params\"",
+    CONF_OFFSET(netcam_params),
+    "netcam_params",
+    copy_netcam_params
+    },
+    {
+    "videodevice",
+    "4.3.1",
+    "\"videodevice\" replaced with \"video_device\"",
+    CONF_OFFSET(video_device),
+    "video_device",
+    copy_string
+    },
+    {
+    "tunerdevice",
+    "4.3.1",
+    "\"tunerdevice\" replaced with \"tuner_device\"",
+    CONF_OFFSET(tuner_device),
+    "tuner_device",
+    copy_string
+    },
+    {
+    "mmalcam_control_params",
+    "4.3.1",
+    "\"mmalcam_control_params\" replaced with \"mmalcam_params\"",
+    CONF_OFFSET(mmalcam_params),
+    "mmalcam_params",
+    copy_string
+    },
+    {
+    "netcam_highres",
+    "4.3.1",
+    "\"netcam_highres\" replaced with \"netcam_high_url\"",
+    CONF_OFFSET(netcam_high_url),
+    "netcam_high_url",
+    copy_string
+    },
+
     { NULL, NULL, NULL, 0, NULL, NULL}
 };
 
@@ -2069,8 +2109,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
 {
     unsigned int i = 0;
 
-    if (!cmd)
-        return cnt;
+    if (!cmd) return cnt;
 
     /*
      * We search through config_params until we find a param_name that matches
@@ -2116,15 +2155,33 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
                 , dep_config_params[i].info, dep_config_params[i].last_version);
 
             if (dep_config_params[i].copy != NULL){
-                /* If the depreciated option is a vid item, copy_vid_ctrl is called
+                /* If the depreciated option is a vid item, copy_video_params is called
                  * with the array index sent instead of the context structure member pointer.
                  */
                 if (!strcmp(dep_config_params[i].name,"brightness") ||
                     !strcmp(dep_config_params[i].name,"contrast") ||
                     !strcmp(dep_config_params[i].name,"saturation") ||
                     !strcmp(dep_config_params[i].name,"hue") ||
-                    !strcmp(dep_config_params[i].name,"power_line_frequency")) {
-                    cnt = copy_vid_ctrl(cnt, arg1, i);
+                    !strcmp(dep_config_params[i].name,"power_line_frequency") ||
+                    !strcmp(dep_config_params[i].name,"v4l2_palette") ||
+                    !strcmp(dep_config_params[i].name,"input") ||
+                    !strcmp(dep_config_params[i].name,"norm") ||
+                    !strcmp(dep_config_params[i].name,"frequency") ||
+                    !strcmp(dep_config_params[i].name,"vid_control_params") )
+                {
+                    cnt = copy_video_params(cnt, arg1, i);
+
+                } else if (!strcmp(dep_config_params[i].name,"netcam_decoder") ||
+                    !strcmp(dep_config_params[i].name,"netcam_use_tcp") ||
+                    !strcmp(dep_config_params[i].name,"rtsp_uses_tcp") ||
+                    !strcmp(dep_config_params[i].name,"netcam_rate")  ||
+                    !strcmp(dep_config_params[i].name,"netcam_ratehigh") ||
+                    !strcmp(dep_config_params[i].name,"netcam_proxy") ||
+                    !strcmp(dep_config_params[i].name,"netcam_tolerant_check") ||
+                    !strcmp(dep_config_params[i].name,"netcam_keepalive") )
+                {
+                    cnt = copy_netcam_params(cnt, arg1, i);
+
                 } else {
                     cnt = dep_config_params[i].copy(cnt, arg1, dep_config_params[i].conf_value);
                 }
@@ -2675,11 +2732,12 @@ struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
 }
 
 /**
- * copy_vid_ctrl
+ * copy_video_params
  *      Assigns a new string value to a config option.
  * Returns context struct.
  */
-static struct context **copy_vid_ctrl(struct context **cnt, const char *config_val, int config_indx) {
+static struct context **copy_video_params(struct context **cnt, const char *config_val, int config_indx)
+{
 
     int i, indx_vid;
     int parmnew_len, parmval;
@@ -2687,19 +2745,19 @@ static struct context **copy_vid_ctrl(struct context **cnt, const char *config_v
 
     indx_vid = 0;
     while (config_params[indx_vid].param_name != NULL) {
-        if (!strcmp(config_params[indx_vid].param_name,"vid_control_params")) break;
+        if (!strcmp(config_params[indx_vid].param_name,"video_params")) break;
         indx_vid++;
     }
 
-    if (strcmp(config_params[indx_vid].param_name,"vid_control_params")){
+    if (strcmp(config_params[indx_vid].param_name,"video_params")){
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
-            ,_("Unable to locate vid_control_params"));
+            ,_("Unable to locate video_params"));
         return cnt;
     }
 
     if (config_val == NULL){
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
-            ,_("No value provided to put into vid_control_params"));
+            ,_("No value provided to put into video_params"));
     }
 
     /* If the depreciated option is the default, then just return */
@@ -2713,6 +2771,9 @@ static struct context **copy_vid_ctrl(struct context **cnt, const char *config_v
     if (!strcmp(dep_config_params[config_indx].name,"power_line_frequency")) {
         parmname_new = mymalloc(strlen(dep_config_params[config_indx].name) + 3);
         sprintf(parmname_new,"%s","\"power line frequency\"");
+    } else if (!strcmp(dep_config_params[config_indx].name,"v4l2_palette")) {
+        parmname_new = mymalloc(strlen("palette") + 1);
+        sprintf(parmname_new,"%s","palette");
     } else {
         parmname_new = mymalloc(strlen(dep_config_params[config_indx].name)+1);
         sprintf(parmname_new,"%s",dep_config_params[config_indx].name);
@@ -2722,20 +2783,28 @@ static struct context **copy_vid_ctrl(struct context **cnt, const char *config_v
     i = -1;
     while (cnt[++i]) {
         parmnew_len = strlen(parmname_new) + strlen(config_val) + 2; /*Add for = and /0*/
-        if (cnt[i]->conf.vid_control_params != NULL) {
-            orig_parm = mymalloc(strlen(cnt[i]->conf.vid_control_params)+1);
-            sprintf(orig_parm,"%s",cnt[i]->conf.vid_control_params);
+        if (cnt[i]->conf.video_params != NULL) {
+            orig_parm = mymalloc(strlen(cnt[i]->conf.video_params)+1);
+            sprintf(orig_parm,"%s",cnt[i]->conf.video_params);
 
             parmnew_len = strlen(orig_parm) + parmnew_len + 1; /*extra 1 for the comma */
 
-            free(cnt[i]->conf.vid_control_params);
-            cnt[i]->conf.vid_control_params = mymalloc(parmnew_len);
-            sprintf(cnt[i]->conf.vid_control_params,"%s=%s,%s",parmname_new, config_val, orig_parm);
+            free(cnt[i]->conf.video_params);
+            cnt[i]->conf.video_params = mymalloc(parmnew_len);
+            if (!strcmp(dep_config_params[config_indx].name,"vid_control_params")) {
+                sprintf(cnt[i]->conf.video_params,"%s,%s",config_val, orig_parm);
+            } else {
+                sprintf(cnt[i]->conf.video_params,"%s=%s,%s",parmname_new, config_val, orig_parm);
+            }
 
             free(orig_parm);
         } else {
-            cnt[i]->conf.vid_control_params = mymalloc(parmnew_len);
-            sprintf(cnt[i]->conf.vid_control_params,"%s=%s", parmname_new, config_val);
+            cnt[i]->conf.video_params = mymalloc(parmnew_len);
+            if (!strcmp(dep_config_params[config_indx].name,"vid_control_params")) {
+                sprintf(cnt[i]->conf.video_params,"%s", config_val);
+            } else {
+                sprintf(cnt[i]->conf.video_params,"%s=%s", parmname_new, config_val);
+            }
         }
     }
 
@@ -2745,9 +2814,130 @@ static struct context **copy_vid_ctrl(struct context **cnt, const char *config_v
 }
 
 /**
+ * copy_netcam_params
+ *      Assigns a new string value to a config option.
+ * Returns context struct.
+ */
+static struct context **copy_netcam_params(struct context **cnt, const char *config_val, int config_indx)
+{
+
+    int i, indx;
+    int parm_len;
+    char *orig_parm, *parm_new;
+
+
+    indx = 0;
+    while (config_params[indx].param_name != NULL) {
+        if (!strcmp(config_params[indx].param_name,"netcam_params")) break;
+        indx++;
+    }
+
+    if (strcmp(config_params[indx].param_name,"netcam_params")){
+        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
+            ,_("Unable to locate netcam_params"));
+        return cnt;
+    }
+
+    if (config_val == NULL){
+        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
+            ,_("No value provided to put into netcam_params"));
+        return cnt;
+    }
+
+    /* Remove underscore from parm name and add quotes*/
+    if (!strcmp(dep_config_params[config_indx].name,"netcam_use_tcp") ||
+        !strcmp(dep_config_params[config_indx].name,"rtsp_uses_tcp"))
+    {
+        parm_len = strlen("rtsp_transport = tcp") + 1;
+        parm_new = mymalloc(parm_len);
+        if ( !strcmp(config_val,"on")) {
+            snprintf(parm_new, parm_len, "%s", "rtsp_transport = tcp");
+        } else {
+            snprintf(parm_new, parm_len, "%s", "rtsp_transport = udp");
+        }
+
+    } else if (!strcmp(dep_config_params[config_indx].name,"netcam_decoder")) {
+        parm_len = strlen("decoder = ") + strlen(config_val) + 1;
+        parm_new = mymalloc(parm_len);
+        snprintf(parm_new, parm_len, "%s%s", "decoder = ", config_val);
+
+    } else if (!strcmp(dep_config_params[config_indx].name,"netcam_rate") ||
+        !strcmp(dep_config_params[config_indx].name,"netcam_ratehigh"))
+    {
+        parm_len = strlen("capture_rate = ") + strlen(config_val) + 1;
+        parm_new = mymalloc(parm_len);
+        snprintf(parm_new, parm_len, "%s%s", "capture_rate = ", config_val);
+
+    } else if (!strcmp(dep_config_params[config_indx].name,"netcam_proxy")) {
+        parm_len = strlen("proxy = ") + strlen(config_val) + 1;
+        parm_new = mymalloc(parm_len);
+        snprintf(parm_new, parm_len, "%s%s", "proxy = ", config_val);
+
+    } else if (!strcmp(dep_config_params[config_indx].name,"netcam_keepalive")) {
+        parm_len = strlen("keepalive = ") + strlen(config_val) + 1;
+        parm_new = mymalloc(parm_len);
+        snprintf(parm_new, parm_len, "%s%s", "keepalive = ", config_val);
+
+    } else if (!strcmp(dep_config_params[config_indx].name,"netcam_tolerant_check")) {
+        parm_len = strlen("tolerant_check = ") + strlen(config_val) + 1;
+        parm_new = mymalloc(parm_len);
+        snprintf(parm_new, parm_len, "%s%s", "tolerant_check = ", config_val);
+
+    } else {
+        return cnt;
+    }
+
+    /* Recall that the current parms have already been processed by time this is called */
+    i = -1;
+    while (cnt[++i]) {
+        if (!strcmp(dep_config_params[config_indx].name,"netcam_ratehigh")){
+            if (cnt[i]->conf.netcam_high_params != NULL) {
+                parm_len = strlen(cnt[i]->conf.netcam_high_params) + 1;
+                orig_parm = mymalloc(parm_len);
+                snprintf(orig_parm,parm_len, "%s",cnt[i]->conf.netcam_high_params);
+
+                parm_len = strlen(parm_new) + strlen(orig_parm) + 2; /* the comma*/
+
+                free(cnt[i]->conf.netcam_high_params);
+                cnt[i]->conf.netcam_high_params = mymalloc(parm_len);
+                snprintf(cnt[i]->conf.netcam_high_params,parm_len,"%s,%s",parm_new, orig_parm);
+
+                free(orig_parm);
+            } else {
+                parm_len = strlen(parm_new) + 1;
+                cnt[i]->conf.netcam_high_params = mymalloc(parm_len);
+                snprintf(cnt[i]->conf.netcam_high_params,parm_len, "%s", parm_new);
+            }
+        } else {
+            if (cnt[i]->conf.netcam_params != NULL) {
+                parm_len =  strlen(cnt[i]->conf.netcam_params) + 1;
+                orig_parm = mymalloc(parm_len);
+                snprintf(orig_parm,parm_len,"%s",cnt[i]->conf.netcam_params);
+
+                parm_len = strlen(parm_new) + strlen(orig_parm) + 2;
+
+                free(cnt[i]->conf.netcam_params);
+                cnt[i]->conf.netcam_params = mymalloc(parm_len);
+                snprintf(cnt[i]->conf.netcam_params,parm_len, "%s,%s",parm_new, orig_parm);
+
+                free(orig_parm);
+            } else {
+                parm_len = strlen(parm_new) + 1;
+                cnt[i]->conf.netcam_params = mymalloc(parm_len);
+                snprintf(cnt[i]->conf.netcam_params,parm_len, "%s", parm_new);
+            }
+        }
+
+    }
+
+    free(parm_new);
+
+    return cnt;
+}
+
+/**
  * copy_text_double
  *      Converts the bool of text_double to a 1 or 2 in text_scale
- *
  * Returns context struct.
  */
 static struct context **copy_text_double(struct context **cnt, const char *str, int val_ptr)
@@ -3198,29 +3388,20 @@ static void config_parms_intl(){
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera_name",_("camera_name"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera_id",_("camera_id"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","target_dir",_("target_dir"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","videodevice",_("videodevice"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","vid_control_params",_("vid_control_params"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","v4l2_palette",_("v4l2_palette"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","input",_("input"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","norm",_("norm"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","frequency",_("frequency"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","video_device",_("video_device"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","video_params",_("video_params"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","auto_brightness",_("auto_brightness"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","tunerdevice",_("tunerdevice"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","tuner_device",_("tuner_device"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","roundrobin_frames",_("roundrobin_frames"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","roundrobin_skip",_("roundrobin_skip"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","roundrobin_switchfilter",_("roundrobin_switchfilter"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_url",_("netcam_url"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_highres",_("netcam_highres"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_params",_("netcam_params"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_high_url",_("netcam_high_url"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_high_params",_("netcam_high_params"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_userpass",_("netcam_userpass"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_keepalive",_("netcam_keepalive"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_proxy",_("netcam_proxy"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_tolerant_check",_("netcam_tolerant_check"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_use_tcp",_("netcam_use_tcp"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_decoder",_("netcam_decoder"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_rate",_("netcam_rate"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_ratehigh",_("netcam_ratehigh"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mmalcam_name",_("mmalcam_name"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mmalcam_control_params",_("mmalcam_control_params"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mmalcam_params",_("mmalcam_params"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","width",_("width"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","height",_("height"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","framerate",_("framerate"));
