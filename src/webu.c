@@ -59,6 +59,11 @@ struct mhdstart_ctx {
     struct sockaddr_in6     lpbk_ipv6;
 };
 
+#if MHD_VERSION >= 0x00097002
+    typedef enum MHD_Result mymhd_retcd;
+#else
+    typedef int mymhd_retcd;
+#endif
 
 static void webu_context_init(struct context **cntlst, struct context *cnt, struct webui_ctx *webui) {
 
@@ -223,66 +228,6 @@ void webu_write(struct webui_ctx *webui, const char *buf) {
     webui->resp_used = webui->resp_used + resp_len;
 
     return;
-}
-
-static int webu_url_decode(char *urlencoded, size_t length) {
-    /* We are sent a URI encoded string and this decodes it to characters
-     * If the sent URL that isn't valid, then we clear out the URL
-     * so it is not processed in further functions.  The "answer" functions
-     * look for empty urls and answer with bad request
-     */
-    char *data = urlencoded;
-    char *urldecoded = urlencoded;
-    int scan_rslt;
-    size_t origlen;
-
-    origlen = length;
-
-    if (urlencoded[0] != '/'){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid url: %s"),urlencoded);
-        memset(urlencoded,'\0',origlen);
-        return -1;
-    }
-
-    while (length > 0) {
-        if (*data == '%') {
-            char c[3];
-            int i;
-            data++;
-            length--;
-            c[0] = *data++;
-            length--;
-            c[1] = *data;
-            c[2] = 0;
-
-            scan_rslt = sscanf(c, "%x", &i);
-            if (scan_rslt < 1){
-                MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Error decoding url"));
-                memset(urlencoded,'\0',origlen);
-                return -1;
-            }
-
-            if (i < 128) {
-                *urldecoded++ = (char)i;
-            } else {
-                *urldecoded++ = '%';
-                *urldecoded++ = c[0];
-                *urldecoded++ = c[1];
-            }
-
-        } else if (*data == '<' || *data == '+' || *data == '>') {
-            *urldecoded++ = ' ';
-        } else {
-            *urldecoded++ = *data;
-        }
-
-        data++;
-        length--;
-    }
-    *urldecoded = '\0';
-
-    return 0;
-
 }
 
 static void webu_parms_edit(struct webui_ctx *webui) {
@@ -471,8 +416,7 @@ static int webu_parseurl(struct webui_ctx *webui) {
 
     if (strlen(webui->url) == 0) return -1;
 
-    retcd = webu_url_decode(webui->url, strlen(webui->url));
-    if (retcd != 0) return retcd;
+    MHD_http_unescape(webui->url);
 
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),webui->url);
 
@@ -1203,7 +1147,7 @@ static void webu_answer_strm_type(struct webui_ctx *webui) {
 
 }
 
-static int webu_answer_ctrl(void *cls
+static mymhd_retcd webu_answer_ctrl(void *cls
         , struct MHD_Connection *connection
         , const char *url
         , const char *method
@@ -1275,7 +1219,7 @@ static int webu_answer_ctrl(void *cls
 
 }
 
-static int webu_answer_strm(void *cls
+static mymhd_retcd webu_answer_strm(void *cls
         , struct MHD_Connection *connection
         , const char *url
         , const char *method

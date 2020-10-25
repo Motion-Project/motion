@@ -1,3 +1,15 @@
+Summary of changes for version 4.3.2 are below
+   * Revise to use MHD function for url decode
+   * Update travis distribution testing
+   * Eliminate compiler warnings on unsigned comparisons
+   * Eliminate compiler warnings on MHD return codes
+Summary of changes for version 4.3.1 are below
+  * Compiler errors with GCC 10
+  * Overrides to CFLAGS
+  * Add maintainer mode
+  * Segfault when invalid camera directory specified
+  * MariaDB initializations
+  * Updated guide
 Summary of changes for version 4.3.0 are below
    * Implement default for non ascii characters
    * Removed poll requirement for MHD
