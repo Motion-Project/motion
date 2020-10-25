@@ -34,11 +34,6 @@ matrix:
     language: c
     compiler: gcc
   - os: linux
-    env:  DOCKER_IMAGE=debian:jessie
-    services:  docker
-    language: c
-    compiler: gcc
-  - os: linux
     env:  DOCKER_IMAGE=debian:stretch
     services:  docker
     language: c
@@ -91,14 +86,6 @@ before_script:
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg62-turbo-dev libzip-dev autoconf automake autopoint pkgconf libtool git';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmariadbclient-dev libwebp-dev libmicrohttpd-dev gettext';
-      docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
-    elif [ "$DOCKER_IMAGE" = "debian:jessie" ]; then
-      docker exec $(docker ps -aq) /bin/bash -c 'ln -fs /usr/share/zoneinfo/UTC /etc/localtime';
-      docker exec $(docker ps -aq) /bin/bash -c 'export DEBIAN_FRONTEND=noninteractive';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg62-turbo-dev libzip-dev autoconf automake autopoint pkgconf libtool git';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmysqlclient-dev libwebp-dev libmicrohttpd-dev gettext';
       docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
     elif [ "$DOCKER_IMAGE" = "ubuntu:16.04" ]; then
       docker exec $(docker ps -aq) /bin/bash -c 'ln -fs /usr/share/zoneinfo/UTC /etc/localtime';
