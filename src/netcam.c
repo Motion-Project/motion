@@ -615,7 +615,7 @@ int netcam_start(struct context *cnt){
 
     netcam_context_ptr netcam;        /* Local pointer to our context. */
     pthread_attr_t handler_attribute; /* Attributes of our handler thread. */
-    int retval;                       /* Working var. */
+    int retval, indx;
     struct url_t url;                 /* For parsing netcam URL. */
     char    err_service[6];
 
@@ -647,33 +647,40 @@ int netcam_start(struct context *cnt){
     MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
         ,_("Network Camera starting for camera (%s)"), cnt->conf.camera_name);
 
-    /* If a proxy has been specified, parse that URL. */
-    if (cnt->conf.netcam_proxy) {
-        netcam_url_parse(&url, cnt->conf.netcam_proxy);
+    netcam->parameters = mymalloc(sizeof(struct params_context));
+    netcam->parameters->update_params = TRUE;
+    util_parms_parse(netcam->parameters, (char*)cnt->conf.netcam_params);
+    util_parms_add_default(netcam->parameters,"proxy","NULL");
+    util_parms_add_default(netcam->parameters,"keepalive","off");
+    util_parms_add_default(netcam->parameters,"tolerant_check","off"); /*false*/
 
-        if (!url.host) {
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-                ,_("Invalid netcam_proxy (%s)"), cnt->conf.netcam_proxy);
-            netcam_url_free(&url);
-            return -1;
+    for (indx = 0; indx < netcam->parameters->params_count; indx++)
+    {
+        if ( !strcmp(netcam->parameters->params_array[indx].param_name,"proxy") &&
+             strcmp(netcam->parameters->params_array[indx].param_name,"NULL") )
+        {
+            netcam_url_parse(&url, netcam->parameters->params_array[indx].param_value);
+            if (!url.host) {
+                MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+                    ,_("Invalid netcam_proxy (%s)")
+                    ,netcam->parameters->params_array[indx].param_value);
+                netcam_url_free(&url);
+                return -1;
+            }
+            if (url.userpass) {
+                MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+                    ,_("Username/password not allowed on a proxy URL"));
+                netcam_url_free(&url);
+                return -1;
+            }
+
+            netcam->connect_host = url.host;
+            url.host = NULL;
+            netcam->connect_port = url.port;
+            netcam_url_free(&url);  /* Finished with proxy */
+
+            break;
         }
-
-        if (url.userpass) {
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-                ,_("Username/password not allowed on a proxy URL"));
-            netcam_url_free(&url);
-            return -1;
-        }
-
-        /*
-         * A 'proxy' means that our eventual 'connect' to our
-         * camera must be sent to the proxy, and that our 'GET' must
-         * include the full path to the camera host.
-         */
-        netcam->connect_host = url.host;
-        url.host = NULL;
-        netcam->connect_port = url.port;
-        netcam_url_free(&url);  /* Finished with proxy */
     }
 
     /* Parse the URL from the configuration data */
@@ -694,39 +701,49 @@ int netcam_start(struct context *cnt){
         return -1;
     }
 
-    if (cnt->conf.netcam_proxy == NULL) {
-        netcam->connect_host = url.host;
-        url.host = NULL;
-        netcam->connect_port = url.port;
+    for (indx = 0; indx < netcam->parameters->params_count; indx++)
+    {
+        if (!strcmp(netcam->parameters->params_array[indx].param_name,"proxy")) {
+            if (!strcmp(netcam->parameters->params_array[indx].param_name,"NULL")) {
+                netcam->connect_host = url.host;
+                url.host = NULL;
+                netcam->connect_port = url.port;
+                netcam->haveproxy = FALSE;
+            } else {
+                netcam->haveproxy = TRUE;
+            }
+        }
+
+        if (!strcmp(netcam->parameters->params_array[indx].param_name,"keepalive")) {
+            if (!strcmp(netcam->parameters->params_array[indx].param_value,"force")) {
+                netcam->connect_http_10   = TRUE;
+                netcam->connect_http_11   = FALSE;
+                netcam->connect_keepalive = TRUE;
+            } else if (!strcmp(netcam->parameters->params_array[indx].param_value,"off")) {
+                netcam->connect_http_10   = TRUE;
+                netcam->connect_http_11   = FALSE;
+                netcam->connect_keepalive = FALSE;
+            } else if (!strcmp(netcam->parameters->params_array[indx].param_value,"on")) {
+                netcam->connect_http_10   = FALSE;
+                netcam->connect_http_11   = TRUE;
+                netcam->connect_keepalive = TRUE; /* HTTP 1.1 has keepalive by default. */
+            }
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("Netcam_http parameter '%s' converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s.")
+                ,netcam->parameters->params_array[indx].param_value
+                ,netcam->connect_http_10 ? "1":"0", netcam->connect_http_11 ? "1":"0"
+                ,netcam->connect_keepalive ? "ON":"OFF");
+        }
+
+        if (!strcmp(netcam->parameters->params_array[indx].param_name,"tolerant_check")) {
+            if (!strcmp(netcam->parameters->params_array[indx].param_value,"off")) {
+                netcam->netcam_tolerant_check = FALSE;
+            } else {
+                netcam->netcam_tolerant_check = TRUE;
+            }
+        }
     }
 
-    /* Get HTTP Mode (1.0 default, 1.0 Keep-Alive, 1.1) flag from config
-     * and report its stata for debug reasons.
-     * The flags in the conf structure is read only and cannot be
-     * unset if the Keep-Alive needs to be switched off (ie. netcam does
-     * not turn out to support it. That is handled by unsetting the flags
-     * in the context structures (cnt->...) only.
-     */
-
-    if (!strcmp(cnt->conf.netcam_keepalive, "force")) {
-            netcam->connect_http_10   = TRUE;
-            netcam->connect_http_11   = FALSE;
-            netcam->connect_keepalive = TRUE;
-    } else if (!strcmp(cnt->conf.netcam_keepalive, "off")) {
-            netcam->connect_http_10   = TRUE;
-            netcam->connect_http_11   = FALSE;
-            netcam->connect_keepalive = FALSE;
-    } else if (!strcmp(cnt->conf.netcam_keepalive, "on")) {
-            netcam->connect_http_10   = FALSE;
-            netcam->connect_http_11   = TRUE;
-            netcam->connect_keepalive = TRUE; /* HTTP 1.1 has keepalive by default. */
-    }
-
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-        ,_("Netcam_http parameter '%s' converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s.")
-        ,cnt->conf.netcam_keepalive
-        ,netcam->connect_http_10 ? "1":"0", netcam->connect_http_11 ? "1":"0"
-        ,netcam->connect_keepalive ? "ON":"OFF");
 
 
     /* Initialise the netcam socket to -1 to trigger a connection by the keep-alive logic. */
@@ -777,7 +794,6 @@ int netcam_start(struct context *cnt){
         return -1;
     }
 
-    netcam->netcam_tolerant_check = cnt->conf.netcam_tolerant_check;
     netcam->JFIF_marker = 0;
     netcam_get_dimensions(netcam);
 

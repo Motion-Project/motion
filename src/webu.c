@@ -650,7 +650,7 @@ static int webu_process_config_set(struct webui_ctx *webui) {
             /*If we are updating vid parms, set the flag to update the device.*/
             if (!strcmp(config_params[indx].param_name, "vid_control_params") &&
                 (webui->cntlst[webui->thread_nbr]->vdev != NULL)){
-                webui->cntlst[webui->thread_nbr]->vdev->update_parms = TRUE;
+                webui->cntlst[webui->thread_nbr]->vdev->update_params = TRUE;
             }
 
             /* If changing language, do it now */

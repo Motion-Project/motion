@@ -35,6 +35,7 @@ struct image_data;
 #ifndef __USE_GNU
 #define __USE_GNU
 #endif
+#include <ctype.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -103,8 +104,6 @@ struct image_data;
                 while (nanosleep(&tv, &tv) == -1); \
         }
 
-#define DEF_PALETTE             17
-
 /* Default picture settings */
 #define DEF_WIDTH              640
 #define DEF_HEIGHT             480
@@ -117,7 +116,6 @@ struct image_data;
 /* Minimum time between two 'actions' (email, sms, external) */
 #define DEF_EVENT_GAP            60  /* 1 minutes */
 
-#define DEF_INPUT               -1
 #define DEF_VIDEO_DEVICE         "/dev/video0"
 
 #define THRESHOLD_TUNE_LENGTH  256
@@ -218,21 +216,16 @@ enum WEBUI_LEVEL{
   WEBUI_LEVEL_NEVER      = 99
 };
 
-struct vdev_usrctrl_ctx {
-    char          *ctrl_name;       /* The name or description of the ID as requested by user*/
-    int            ctrl_value;      /* The value that the user wants the control set to*/
+struct params_item_ctx {
+    char    *param_name;       /* The name or description of the ID as requested by user*/
+    char    *param_value;      /* The value that the user wants the control set to*/
 };
 
-struct vdev_context {
-    /* As v4l2 and bktr get rewritten, put thread specific items here
-     * Rather than use conf options directly, copy from conf to here
-     * to handle cross thread webui changes which could cause problems
-     */
-    struct vdev_usrctrl_ctx *usrctrl_array;     /*Array of the controls the user specified*/
-    int usrctrl_count;                          /*Count of the controls the user specified*/
-    int update_parms;                           /*Bool for whether to update the parameters on the device*/
+struct params_context {
+    struct params_item_ctx *params_array;     /*Array of the controls the user specified*/
+    int params_count;                         /*Count of the controls the user specified*/
+    int update_params;                        /*Bool for whether to update the parameters on the device*/
 };
-
 
 struct image_data {
     unsigned char *image_norm;
@@ -393,7 +386,7 @@ struct context {
     struct rtsp_context *rtsp;              /* this structure contains the context for normal RTSP connection */
     struct rtsp_context *rtsp_high;         /* this structure contains the context for high resolution RTSP connection */
 
-    struct vdev_context *vdev;              /* Structure for v4l2 and bktr device information */
+    struct params_context *vdev;            /* Structure for v4l2 and bktr device information */
 
     struct image_data *current_image;       /* Pointer to a structure where the image, diffs etc is stored */
     unsigned int new_img;
@@ -455,7 +448,6 @@ struct context {
     int mpipe;
 
     char hostname[PATH_MAX];
-    char *netcam_decoder;
 
     int sql_mask;
 
@@ -547,5 +539,9 @@ int create_path(const char *);
 void util_threadname_set(const char *abbr, int threadnbr, const char *threadname);
 void util_threadname_get(char *threadname);
 int util_check_passthrough(struct context *cnt);
+void util_trim(char *parm);
+void util_parms_free(struct params_context *parameters);
+void util_parms_parse(struct params_context *parameters, char *confparm);
+void util_parms_add_default(struct params_context *parameters, const char *parm_nm, const char *parm_vl);
 
 #endif /* _INCLUDE_MOTION_H */

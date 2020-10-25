@@ -483,154 +483,24 @@ void vid_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
 
 }
 
-static void vid_parms_add(struct vdev_context *vdevctx, char *config_name, char *config_val){
+/* vid_parms_parse
+ * Parse the video_params into an array.
+*/
+int vid_parms_parse(struct context *cnt)
+{
 
-    /* Add the parameter and value to our user control array*/
-    struct vdev_usrctrl_ctx *tmp;
-    int indx;
+    if (cnt->vdev->update_params == FALSE) return 0;
 
-    tmp = mymalloc(sizeof(struct vdev_usrctrl_ctx)*(vdevctx->usrctrl_count+1));
-    for (indx=0;indx<vdevctx->usrctrl_count;indx++){
-        tmp[indx].ctrl_name = mymalloc(strlen(vdevctx->usrctrl_array[indx].ctrl_name)+1);
-        sprintf(tmp[indx].ctrl_name,"%s",vdevctx->usrctrl_array[indx].ctrl_name);
-        free(vdevctx->usrctrl_array[indx].ctrl_name);
-        vdevctx->usrctrl_array[indx].ctrl_name=NULL;
-        tmp[indx].ctrl_value = vdevctx->usrctrl_array[indx].ctrl_value;
-    }
-    if (vdevctx->usrctrl_array != NULL){
-      free(vdevctx->usrctrl_array);
-      vdevctx->usrctrl_array =  NULL;
-    }
+    /* Put in the user specified parameters */
+    util_parms_parse(cnt->vdev, cnt->conf.video_params);
 
-    vdevctx->usrctrl_array = tmp;
-    vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_name = mymalloc(strlen(config_name)+1);
-    sprintf(vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_name,"%s",config_name);
-    vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_value=atoi(config_val);
-    vdevctx->usrctrl_count++;
+    /* Now add any missing default items */
+    util_parms_add_default(cnt->vdev,"palette","17");
+    util_parms_add_default(cnt->vdev,"input","-1");
+    util_parms_add_default(cnt->vdev,"norm","0");
+    util_parms_add_default(cnt->vdev,"frequency","0");
 
-}
-
-int vid_parms_parse(struct context *cnt){
-
-    /* Parse through the configuration option to get values
-     * The values are separated by commas but may also have
-     * double quotes around the names which include a comma.
-     * Examples:
-     * vid_control_parms ID01234= 1, ID23456=2
-     * vid_control_parms "Brightness, auto" = 1, ID23456=2
-     * vid_control_parms ID23456=2, "Brightness, auto" = 1,ID2222=5
-     */
-    int indx_parm;
-    int parmval_st , parmval_len;
-    int parmdesc_st, parmdesc_len;
-    int qte_open;
-    struct vdev_context *vdevctx;
-    char tst;
-    char *parmdesc, *parmval;
-
-    if (!cnt->vdev->update_parms) return 0;
-
-    vdevctx = cnt->vdev;
-
-    for (indx_parm=0;indx_parm<vdevctx->usrctrl_count;indx_parm++){
-        free(vdevctx->usrctrl_array[indx_parm].ctrl_name);
-        vdevctx->usrctrl_array[indx_parm].ctrl_name=NULL;
-    }
-    if (vdevctx->usrctrl_array != NULL){
-      free(vdevctx->usrctrl_array);
-      vdevctx->usrctrl_array = NULL;
-    }
-    vdevctx->usrctrl_count = 0;
-
-    if (cnt->conf.vid_control_params != NULL){
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Parsing controls: %s"),cnt->conf.vid_control_params);
-
-        indx_parm = 0;
-        parmdesc_st  = parmval_st  = -1;
-        parmdesc_len = parmval_len = 0;
-        qte_open = FALSE;
-        parmdesc = parmval = NULL;
-        tst = cnt->conf.vid_control_params[indx_parm];
-        while (tst != '\0') {
-            if (!qte_open) {
-                if (tst == '\"') {                    /* This is the opening quotation */
-                    qte_open = TRUE;
-                    parmdesc_st = indx_parm + 1;
-                    parmval_st  = -1;
-                    parmdesc_len = parmval_len = 0;
-                    if (parmdesc != NULL) free(parmdesc);
-                    if (parmval  != NULL) free(parmval);
-                    parmdesc = parmval = NULL;
-                } else if (tst == ','){               /* Designator for next parm*/
-                    if ((parmval_st >= 0) && (parmval_len > 0)){
-                        if (parmval  != NULL) free(parmval);
-                        parmval = mymalloc(parmval_len);
-                        snprintf(parmval, parmval_len,"%s",&cnt->conf.vid_control_params[parmval_st]);
-                    }
-                    parmdesc_st  = indx_parm + 1;
-                    parmval_st  = -1;
-                    parmdesc_len = parmval_len = 0;
-                } else if (tst == '='){               /* Designator for end of desc and start of value*/
-                    if ((parmdesc_st >= 0) && (parmdesc_len > 0)) {
-                        if (parmdesc != NULL) free(parmdesc);
-                        parmdesc = mymalloc(parmdesc_len);
-                        snprintf(parmdesc, parmdesc_len,"%s",&cnt->conf.vid_control_params[parmdesc_st]);
-                    }
-                    parmdesc_st = -1;
-                    parmval_st = indx_parm + 1;
-                    parmdesc_len = parmval_len = 0;
-                    if (parmval != NULL) free(parmval);
-                    parmval = NULL;
-                } else if (tst == ' '){               /* Skip leading spaces */
-                    if (indx_parm == parmdesc_st) parmdesc_st++;
-                    if (indx_parm == parmval_st) parmval_st++;
-                } else if (tst != ' '){               /* Revise the length making sure it is not a space*/
-                    parmdesc_len = indx_parm - parmdesc_st + 2;
-                    parmval_len = indx_parm - parmval_st + 2;
-                    if (parmdesc_st == -1) parmdesc_st = indx_parm;
-                }
-            } else if (tst == '\"') {                /* This is the closing quotation */
-                parmdesc_len = indx_parm - parmdesc_st + 1;
-                if (parmdesc_len > 0 ){
-                    if (parmdesc != NULL) free(parmdesc);
-                    parmdesc = mymalloc(parmdesc_len);
-                    snprintf(parmdesc, parmdesc_len,"%s",&cnt->conf.vid_control_params[parmdesc_st]);
-                }
-                parmdesc_st = -1;
-                parmval_st = indx_parm + 1;
-                parmdesc_len = parmval_len = 0;
-                if (parmval != NULL) free(parmval);
-                parmval = NULL;
-                qte_open = FALSE;   /* Reset the open/close on quotation */
-            }
-            if ((parmdesc != NULL) && (parmval  != NULL)){
-                vid_parms_add(vdevctx, parmdesc, parmval);
-                free(parmdesc);
-                free(parmval);
-                parmdesc = parmval = NULL;
-            }
-
-            indx_parm++;
-            tst = cnt->conf.vid_control_params[indx_parm];
-        }
-        /* Process the last parameter */
-        if ((parmval_st >= 0) && (parmval_len > 0)){
-            if (parmval  != NULL) free(parmval);
-            parmval = mymalloc(parmval_len+1);
-            snprintf(parmval, parmval_len,"%s",&cnt->conf.vid_control_params[parmval_st]);
-        }
-        if ((parmdesc != NULL) && (parmval  != NULL)){
-            vid_parms_add(vdevctx, parmdesc, parmval);
-            free(parmdesc);
-            free(parmval);
-            parmdesc = parmval = NULL;
-        }
-
-        if (parmdesc != NULL) free(parmdesc);
-        if (parmval  != NULL) free(parmval);
-    }
-
-    cnt->vdev->update_parms = FALSE;
+    cnt->vdev->update_params = FALSE;
 
     return 0;
 

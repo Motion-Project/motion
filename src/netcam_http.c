@@ -396,8 +396,6 @@ int netcam_read_first_header(netcam_context_ptr netcam)
                      * if your netcam often returns bad HTTP result codes.
                      */
                     netcam->connect_keepalive = FALSE;
-                    free((void *)netcam->cnt->conf.netcam_keepalive);
-                    netcam->cnt->conf.netcam_keepalive = strdup("off");
                     MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
                         ,_("Removed netcam Keep-Alive flag "
                         "due to apparent closed HTTP connection."));
@@ -521,8 +519,6 @@ int netcam_read_first_header(netcam_context_ptr netcam)
                         ,_("Both 'Connection: Keep-Alive' and "
                         "'Connection: close' header received. Motion removes keepalive."));
                     netcam->connect_keepalive = FALSE;
-                    free((void *)netcam->cnt->conf.netcam_keepalive);
-                    netcam->cnt->conf.netcam_keepalive = strdup("off");
                 } else {
                    /*
                     * If not a streaming cam, and keepalive is set, and the flag shows we
@@ -555,8 +551,6 @@ int netcam_read_first_header(netcam_context_ptr netcam)
                         ,_("No 'Connection: Keep-Alive' nor 'Connection: close'"
                         " header received.\n Motion removes keepalive."));
                     netcam->connect_keepalive = FALSE;
-                    free((void *)netcam->cnt->conf.netcam_keepalive);
-                    netcam->cnt->conf.netcam_keepalive = strdup("off");
                 } else {
                    /*
                     * If not a streaming cam, and keepalive is set, and the flag shows we
@@ -592,8 +586,6 @@ int netcam_read_first_header(netcam_context_ptr netcam)
                  */
                 if (!netcam->keepalive_thisconn) {
                     netcam->connect_keepalive = FALSE;    /* No further attempts at keep-alive */
-                    free((void *)netcam->cnt->conf.netcam_keepalive);
-                    netcam->cnt->conf.netcam_keepalive = strdup("off");
                     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                         ,_("Removed netcam Keep-Alive flag because"
                         " 'Connection: close' header received.\n Netcam does not support "
@@ -1316,7 +1308,7 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
      * Note: Keep-Alive (but not HTTP 1.1) is disabled if a proxy URL
      * is set, since HTTP 1.0 Keep-alive cannot be transferred through.
      */
-    if (cnt->conf.netcam_proxy) {
+    if ( netcam->haveproxy) {
         /*
          * Allocate space for a working string to contain the path.
          * The extra 4 is for "://" and string terminator.
@@ -1330,8 +1322,6 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
         }
 
         netcam->connect_keepalive = FALSE; /* Disable Keepalive if proxy */
-        free((void *)netcam->cnt->conf.netcam_keepalive);
-        netcam->cnt->conf.netcam_keepalive = strdup("off");
 
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("Removed netcam_keepalive flag due to proxy set."

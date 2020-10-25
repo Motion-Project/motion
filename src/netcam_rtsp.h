@@ -85,12 +85,13 @@ struct rtsp_context {
     int                       v4l2_palette;     /* Palette from config for v4l2 devices */
     int                       reconnect_count;  /* Count of the times reconnection is tried*/
     int                       src_fps;          /* The fps provided from source*/
-    int                       framerate;        /* The framerate for the capture rate*/
+    int                       capture_rate;     /* The framerate for the capture rate*/
     int64_t                   capture_nbr;      /* The number of images captured since last av_read_play */
 
     struct timeval            frame_prev_tm;    /* The time set before calling the av functions */
     struct timeval            frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
 
+    struct params_context    *parameters;       /* User specified parameters for the camera */
     struct config            *conf;             /* Pointer to conf parms of parent cnt*/
     char                      *decoder_nm;      /* User requested decoder */
     struct context            *cnt;

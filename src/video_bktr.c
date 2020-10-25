@@ -179,7 +179,7 @@ static int bktr_get_brightness(int viddev, int *brightness)
     return ioctlval;
 }
 
-static int bktr_set_freq(struct video_dev *viddev, unsigned long freq)
+static int bktr_set_freq(struct video_dev *viddev, long freq)
 {
     int tuner_fd = viddev->bktr_fdtuner;
     int old_audio;
@@ -195,7 +195,7 @@ static int bktr_set_freq(struct video_dev *viddev, unsigned long freq)
 
     if (ioctl(tuner_fd, TVTUNER_SETFREQ, &freq) < 0) {
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "Tuning (TVTUNER_SETFREQ) failed, ",
-                   "freq [%lu]", freq);
+                   "freq [%ld]", freq);
         return -1;
     }
 
@@ -357,7 +357,7 @@ static void bktr_picture_controls(struct context *cnt, struct video_dev *viddev)
 }
 
 static unsigned char *bktr_device_init(struct video_dev *viddev, int width, int height,
-                                unsigned input, unsigned norm, unsigned long freq)
+                                unsigned input, unsigned norm, long freq)
 {
     int dev_bktr = viddev->fd_device;
     struct sigaction act, old;
@@ -374,11 +374,11 @@ static unsigned char *bktr_device_init(struct video_dev *viddev, int width, int 
     if ((viddev->bktr_tuner != NULL) && (input == BKTR_IN_TV)) {
         if (!freq) {
             MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-                ,_("Not valid Frequency [%lu] for Source input [%i]"), freq, input);
+                ,_("Not valid Frequency [%ld] for Source input [%i]"), freq, input);
             return NULL;
         } else if (bktr_set_freq(viddev, freq) == -1) {
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-                ,_("Frequency [%lu] Source input [%i]"), freq, input);
+                ,_("Frequency [%ld] Source input [%i]"), freq, input);
             return NULL;
         }
     }
@@ -617,12 +617,11 @@ static int bktr_capture(struct video_dev *viddev, unsigned char *map, int width,
 }
 
 static void bktr_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width,
-                          int height, int input, int norm, int skip, unsigned long freq)
+                          int height, int input, int norm, int skip, long freq)
 {
     if (input != viddev->input || norm != viddev->norm || freq != viddev->frequency) {
         int dummy;
-        unsigned long frequnits = freq;
-
+        long frequnits = freq;
 
         if ((dummy = bktr_set_input_device(viddev, input)) == -1)
             return;
@@ -778,8 +777,8 @@ int bktr_start(struct context *cnt) {
     struct video_dev *dev;
     int bktr_fdtuner = -1;
     int width, height, bktr_method;
-    unsigned input, norm;
-    unsigned long frequency;
+    int input, norm;
+    long frequency;
     int fd_device = -1;
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "[%s]", conf->video_device);
@@ -804,9 +803,20 @@ int bktr_start(struct context *cnt) {
 
     width = conf->width;
     height = conf->height;
-    input = conf->input;
-    norm = conf->norm;
-    frequency = conf->frequency;
+
+    for (indx = 0; indx < cnt->vdev->params_count; indx++)
+    {
+        if ( !strcmp(cnt->vdev->params_array[indx].param_name, "input") ){
+            input = atoi(cnt->vdev->params_array[indx].param_value);
+        }
+        if ( !strcmp(cnt->vdev->params_array[indx].param_name, "norm") ){
+            norm = atoi(cnt->vdev->params_array[indx].param_value);
+        }
+        if ( !strcmp(cnt->vdev->params_array[indx].param_name, "frequency") ){
+            frequency = atol(cnt->vdev->params_array[indx].param_value);
+        }
+    }
+
     bktr_method = METEOR_CAP_CONTINOUS;
 
     pthread_mutex_lock(&bktr_mutex);

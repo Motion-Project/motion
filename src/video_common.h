@@ -24,7 +24,7 @@ struct video_dev {
     int                      norm;
     int                      width;
     int                      height;
-    unsigned long            frequency;
+    long                     frequency;
     int                      fps;
     int                      owner;
     int                      frames;

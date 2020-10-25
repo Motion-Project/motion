@@ -124,9 +124,9 @@ extern struct netcam_caps {                    /* netcam capabilities: */
  * for an individual netcam.
  */
 typedef struct netcam_context {
-    struct context *cnt;        /* pointer to parent motion
-                                   context structure */
-
+    struct context            *cnt;         /* pointer to parent motion context structure */
+    struct params_context     *parameters;  /* User specified parameters for the camera */
+    int haveproxy;              /* bool for whether there is a proxy */
     int finish;                 /* flag to break the camera-
                                    handling thread out of it's
                                    infinite loop in emergency */
