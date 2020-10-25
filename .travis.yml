@@ -16,11 +16,11 @@ matrix:
     language: c
     compiler: gcc
   - os: linux
-    env:  DOCKER_IMAGE=ubuntu:19.04
+    env:  DOCKER_IMAGE=ubuntu:20.04
     services:  docker
     language: c
     compiler: gcc
-  - os: linux
+    - os: linux
     env:  DOCKER_IMAGE=debian:stretch
     services:  docker
     language: c

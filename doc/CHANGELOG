@@ -1,6 +1,8 @@
 Summary of changes for version 4.3.2 are below
    * Revise to use MHD function for url decode
-   * Depreciate travis testing of Jessie
+   * Update travis distribution testing
+   * Eliminate compiler warnings on unsigned comparisons
+   * Eliminate compiler warnings on MHD return codes
 Summary of changes for version 4.3.1 are below
   * Compiler errors with GCC 10
   * Overrides to CFLAGS

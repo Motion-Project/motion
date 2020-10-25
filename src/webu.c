@@ -59,6 +59,11 @@ struct mhdstart_ctx {
     struct sockaddr_in6     lpbk_ipv6;
 };
 
+#if MHD_VERSION >= 0x00097002
+    typedef enum MHD_Result mymhd_retcd;
+#else
+    typedef int mymhd_retcd;
+#endif
 
 static void webu_context_init(struct context **cntlst, struct context *cnt, struct webui_ctx *webui) {
 
@@ -1142,7 +1147,7 @@ static void webu_answer_strm_type(struct webui_ctx *webui) {
 
 }
 
-static int webu_answer_ctrl(void *cls
+static mymhd_retcd webu_answer_ctrl(void *cls
         , struct MHD_Connection *connection
         , const char *url
         , const char *method
@@ -1214,7 +1219,7 @@ static int webu_answer_ctrl(void *cls
 
 }
 
-static int webu_answer_strm(void *cls
+static mymhd_retcd webu_answer_strm(void *cls
         , struct MHD_Connection *connection
         , const char *url
         , const char *method
