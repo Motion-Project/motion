@@ -4126,21 +4126,20 @@ void util_threadname_get(char *threadname){
 
 }
 int util_check_passthrough(struct context *cnt){
-#if (HAVE_FFMPEG && LIBAVFORMAT_VERSION_MAJOR < 55)
-    if (cnt->movie_passthrough)
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("FFMPEG version too old. Disabling pass-through processing."));
-    return 0;
-#else
-    if (cnt->movie_passthrough){
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("pass-through enabled."));
-        return 1;
-    } else {
+    #if ( MYFFVER < 55000)
+        if (cnt->movie_passthrough)
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("FFMPEG version too old. Disabling pass-through processing."));
         return 0;
-    }
-#endif
-
+    #else
+        if (cnt->movie_passthrough){
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("pass-through enabled."));
+            return 1;
+        } else {
+            return 0;
+        }
+    #endif
 }
 
 /* util_trim
