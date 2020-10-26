@@ -90,7 +90,7 @@ void my_frame_free(AVFrame *frame){
 /*********************************************/
 int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height){
     int retcd = 0;
-    #if ( MYFFVER >= 55000)
+    #if ( MYFFVER >= 57000)
         int align = 1;
         retcd = av_image_get_buffer_size(pix_fmt, width, height, align);
     #else
