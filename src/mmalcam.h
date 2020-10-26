@@ -15,7 +15,7 @@ typedef struct mmalcam_context *mmalcam_context_ptr;
 
 typedef struct mmalcam_context {
     struct context *cnt;        /* pointer to parent motion
-                                   context structure */
+                                context structure */
     int width;
     int height;
     int framerate;

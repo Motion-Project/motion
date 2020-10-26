@@ -49,8 +49,8 @@ unsigned int track_move(struct context *, int, struct coord *, struct images *, 
 enum track_action { TRACK_CENTER, TRACK_MOVE };
 
 /*
- * Some default values:
- */
+* Some default values:
+*/
 #define TRACK_SPEED             255
 #define TRACK_STEPSIZE          40
 
@@ -62,8 +62,8 @@ enum track_action { TRACK_CENTER, TRACK_MOVE };
 #define TRACK_TYPE_SERVO        6
 
 /*
- * Some defines for the Serial stepper motor:
- */
+* Some defines for the Serial stepper motor:
+*/
 
 #define STEPPER_BAUDRATE        B9600
 
@@ -96,27 +96,27 @@ enum track_action { TRACK_CENTER, TRACK_MOVE };
 
 
 /*
- * Some defines for the Serial servo motor:
- */
+* Some defines for the Serial servo motor:
+*/
 
 /*
- * Controlling:
- * Three bytes are sent to the servo - BYTE1=SERVO_COMMAND BYTE2=COMMAND BYTE3=DATA
- * eg, sending the command    01 02 08    would Command SERVO_COMMAND1 to move LEFT a total of 8 STEPS
- *
- * An extra command 0x08 has been added but here is the basic command set.
- *
- * 0x00 STATUS   - Current status byte will be returned, data byte ignored
- * 0x01 LEFT_N   - Servo will take N Steps to the Left until it reaches the Servos safety limit
- * 0x02 RIGHT_N  - Servo will take N Steps to the Right until it reaches the Servos safety limit
- * 0x03 LEFT     - Servo will move to Left most position, data byte ignored.
- * 0x04 RIGHT    - Servo will move to Right most position, data byte ignored.
- * 0x05 SWEEP    - Servo will sweep between its extremes, data byte ignored.
- * 0x06 STOP     -  Servo will Stop, data byte ignored
- * 0x07 SPEED    - Set servos speed between 0 and 255.
- * 0x08 ABSOLUTE - Set servo to absolute position between 0 and 255
- * 0x09 POSITION - Get servo to absolute position between 0 and 255
- * */
+* Controlling:
+* Three bytes are sent to the servo - BYTE1=SERVO_COMMAND BYTE2=COMMAND BYTE3=DATA
+* eg, sending the command    01 02 08    would Command SERVO_COMMAND1 to move LEFT a total of 8 STEPS
+*
+* An extra command 0x08 has been added but here is the basic command set.
+*
+* 0x00 STATUS   - Current status byte will be returned, data byte ignored
+* 0x01 LEFT_N   - Servo will take N Steps to the Left until it reaches the Servos safety limit
+* 0x02 RIGHT_N  - Servo will take N Steps to the Right until it reaches the Servos safety limit
+* 0x03 LEFT     - Servo will move to Left most position, data byte ignored.
+* 0x04 RIGHT    - Servo will move to Right most position, data byte ignored.
+* 0x05 SWEEP    - Servo will sweep between its extremes, data byte ignored.
+* 0x06 STOP     -  Servo will Stop, data byte ignored
+* 0x07 SPEED    - Set servos speed between 0 and 255.
+* 0x08 ABSOLUTE - Set servo to absolute position between 0 and 255
+* 0x09 POSITION - Get servo to absolute position between 0 and 255
+* */
 
 #define SERVO_BAUDRATE        B9600
 
@@ -140,8 +140,8 @@ enum track_action { TRACK_CENTER, TRACK_MOVE };
 
 
 /*
- * Some defines for the Iomojo Smilecam:
- */
+* Some defines for the Iomojo Smilecam:
+*/
 
 #define IOMOJO_BAUDRATE    B19200
 
@@ -160,34 +160,34 @@ enum track_action { TRACK_CENTER, TRACK_MOVE };
 
 #ifdef HAVE_V4L2
 
-/*
- * Defines for the Logitech QuickCam Orbit/Sphere USB webcam
- */
+    /*
+    * Defines for the Logitech QuickCam Orbit/Sphere USB webcam
+    */
 
-#define LQOS_VERTICAL_DEGREES   180
-#define LQOS_HORIZONAL_DEGREES  120
+    #define LQOS_VERTICAL_DEGREES   180
+    #define LQOS_HORIZONAL_DEGREES  120
 
-/*
- * UVC
- */
+    /*
+    * UVC
+    */
 
-#ifndef V4L2_CID_PAN_RELATIVE
-#define V4L2_CID_PAN_RELATIVE                   (V4L2_CID_CAMERA_CLASS_BASE+4)
-#endif
+    #ifndef V4L2_CID_PAN_RELATIVE
+        #define V4L2_CID_PAN_RELATIVE                   (V4L2_CID_CAMERA_CLASS_BASE+4)
+    #endif
 
-#ifndef V4L2_CID_TILT_RELATIVE
-#define V4L2_CID_TILT_RELATIVE                  (V4L2_CID_CAMERA_CLASS_BASE+5)
-#endif
+    #ifndef V4L2_CID_TILT_RELATIVE
+        #define V4L2_CID_TILT_RELATIVE                  (V4L2_CID_CAMERA_CLASS_BASE+5)
+    #endif
 
-#ifndef V4L2_CID_PAN_RESET
-#define V4L2_CID_PAN_RESET                      (V4L2_CID_CAMERA_CLASS_BASE+6)
-#endif
+    #ifndef V4L2_CID_PAN_RESET
+        #define V4L2_CID_PAN_RESET                      (V4L2_CID_CAMERA_CLASS_BASE+6)
+    #endif
 
-#ifndef V4L2_CID_TILT_RESET
-#define V4L2_CID_TILT_RESET                     (V4L2_CID_CAMERA_CLASS_BASE+7)
-#endif
+    #ifndef V4L2_CID_TILT_RESET
+        #define V4L2_CID_TILT_RESET                     (V4L2_CID_CAMERA_CLASS_BASE+7)
+    #endif
 
-#define INCPANTILT 64 // 1 degree
+    #define INCPANTILT 64 // 1 degree
 
 
 #endif /* HAVE_V4L2 */

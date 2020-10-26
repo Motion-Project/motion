@@ -34,21 +34,21 @@ struct rbuf
     char buffer[4096];      /* the input buffer */
     char *buffer_pos;       /* current position in the buffer */
     size_t buffer_left;     /* number of bytes left in the buffer:
-                               buffer_left = buffer_end - buffer_pos */
+                            buffer_left = buffer_end - buffer_pos */
     int ret;                /* used by RBUF_READCHAR macro */
 };
 
 /* Read a character from RBUF.  If there is anything in the buffer,
-   the character is returned from the buffer.  Otherwise, refill the
-   buffer and return the first character.
+the character is returned from the buffer.  Otherwise, refill the
+buffer and return the first character.
 
-   The return value is the same as with read(2).  On buffered read,
-   the function returns 1.
+The return value is the same as with read(2).  On buffered read,
+the function returns 1.
 
-   #### That return value is totally screwed up, and is a direct
-   result of historical implementation of header code.  The macro
-   should return the character or EOF, and in case of error store it
-   to rbuf->err or something.  */
+#### That return value is totally screwed up, and is a direct
+result of historical implementation of header code.  The macro
+should return the character or EOF, and in case of error store it
+to rbuf->err or something.  */
 
 #define RBUF_READCHAR(netcam, store)    \
 ((netcam)->response->buffer_left ? (--(netcam)->response->buffer_left,    \

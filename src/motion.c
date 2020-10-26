@@ -396,9 +396,9 @@ static void sig_handler(int signo)
  */
 static void sigchild_handler(int signo ATTRIBUTE_UNUSED)
 {
-#ifdef WNOHANG
-    while (waitpid(-1, NULL, WNOHANG) > 0) {};
-#endif /* WNOHANG */
+    #ifdef WNOHANG
+        while (waitpid(-1, NULL, WNOHANG) > 0) {};
+    #endif /* WNOHANG */
     return;
 }
 
@@ -416,18 +416,18 @@ static void setup_signals(void){
     struct sigaction sig_handler_action;
     struct sigaction sigchild_action;
 
-#ifdef SA_NOCLDWAIT
-    sigchild_action.sa_flags = SA_NOCLDWAIT;
-#else
-    sigchild_action.sa_flags = 0;
-#endif
+    #ifdef SA_NOCLDWAIT
+        sigchild_action.sa_flags = SA_NOCLDWAIT;
+    #else
+        sigchild_action.sa_flags = 0;
+    #endif
     sigchild_action.sa_handler = sigchild_handler;
     sigemptyset(&sigchild_action.sa_mask);
-#ifdef SA_RESTART
-    sig_handler_action.sa_flags = SA_RESTART;
-#else
-    sig_handler_action.sa_flags = 0;
-#endif
+    #ifdef SA_RESTART
+        sig_handler_action.sa_flags = SA_RESTART;
+    #else
+        sig_handler_action.sa_flags = 0;
+    #endif
     sig_handler_action.sa_handler = sig_handler;
     sigemptyset(&sig_handler_action.sa_mask);
 
@@ -2959,11 +2959,11 @@ static void become_daemon(void)
     struct sigaction sig_ign_action;
 
     /* Setup sig_ign_action */
-#ifdef SA_RESTART
-    sig_ign_action.sa_flags = SA_RESTART;
-#else
-    sig_ign_action.sa_flags = 0;
-#endif
+    #ifdef SA_RESTART
+        sig_ign_action.sa_flags = SA_RESTART;
+    #else
+        sig_ign_action.sa_flags = 0;
+    #endif
     sig_ign_action.sa_handler = SIG_IGN;
     sigemptyset(&sig_ign_action.sa_mask);
 
@@ -3003,11 +3003,11 @@ static void become_daemon(void)
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Could not change directory"));
 
 
-#if (defined(BSD) && !defined(__APPLE__))
-    setpgrp(0, getpid());
-#else
-    setpgrp();
-#endif
+    #if (defined(BSD) && !defined(__APPLE__))
+        setpgrp(0, getpid());
+    #else
+        setpgrp();
+    #endif
 
 
     if ((i = open("/dev/tty", O_RDWR)) >= 0) {
@@ -4102,27 +4102,27 @@ void util_threadname_set(const char *abbr, int threadnbr, const char *threadname
         snprintf(tname, sizeof(tname), "%s",threadname);
     }
 
-#ifdef __APPLE__
-    pthread_setname_np(tname);
-#elif defined(BSD)
-    pthread_set_name_np(pthread_self(), tname);
-#elif HAVE_PTHREAD_SETNAME_NP
-    pthread_setname_np(pthread_self(), tname);
-#else
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Unable to set thread name %s"), tname);
-#endif
+    #ifdef __APPLE__
+        pthread_setname_np(tname);
+    #elif defined(BSD)
+        pthread_set_name_np(pthread_self(), tname);
+    #elif HAVE_PTHREAD_SETNAME_NP
+        pthread_setname_np(pthread_self(), tname);
+    #else
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Unable to set thread name %s"), tname);
+    #endif
 
 }
 
 void util_threadname_get(char *threadname){
 
-#if ((!defined(BSD) && HAVE_PTHREAD_GETNAME_NP) || defined(__APPLE__))
-    char currname[16];
-    pthread_getname_np(pthread_self(), currname, sizeof(currname));
-    snprintf(threadname, sizeof(currname), "%s",currname);
-#else
-    snprintf(threadname, 8, "%s","Unknown");
-#endif
+    #if ((!defined(BSD) && HAVE_PTHREAD_GETNAME_NP) || defined(__APPLE__))
+        char currname[16];
+        pthread_getname_np(pthread_self(), currname, sizeof(currname));
+        snprintf(threadname, sizeof(currname), "%s",currname);
+    #else
+        snprintf(threadname, 8, "%s","Unknown");
+    #endif
 
 }
 int util_check_passthrough(struct context *cnt){

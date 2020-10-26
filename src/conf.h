@@ -16,8 +16,8 @@
 #define _INCLUDE_CONF_H
 
 /*
- * More parameters may be added later.
- */
+* More parameters may be added later.
+*/
 struct config {
     /* Overall system configuration parameters */
     /* daemon is directly cast into the cnt context rather than conf */

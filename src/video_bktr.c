@@ -656,352 +656,352 @@ static void bktr_set_input(struct context *cnt, struct video_dev *viddev, unsign
 
 
 void bktr_mutex_init(void) {
-#ifdef HAVE_BKTR
-    pthread_mutex_init(&bktr_mutex, NULL);
-#else
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
-#endif
+    #ifdef HAVE_BKTR
+        pthread_mutex_init(&bktr_mutex, NULL);
+    #else
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
+    #endif
 }
 
 void bktr_mutex_destroy(void) {
-#ifdef HAVE_BKTR
-    pthread_mutex_destroy(&bktr_mutex);
-#else
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
-#endif
+    #ifdef HAVE_BKTR
+        pthread_mutex_destroy(&bktr_mutex);
+    #else
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
+    #endif
 }
 
 void bktr_cleanup(struct context *cnt){
-#ifdef HAVE_BKTR
+    #ifdef HAVE_BKTR
 
-    struct video_dev *dev = viddevs;
-    struct video_dev *prev = NULL;
-    int indx;
+        struct video_dev *dev = viddevs;
+        struct video_dev *prev = NULL;
+        int indx;
 
-    /* Cleanup the v4l part */
-    pthread_mutex_lock(&bktr_mutex);
-
-    while (dev) {
-        if (dev->fd_device == cnt->video_dev)
-            break;
-        prev = dev;
-        dev = dev->next;
-    }
-
-    pthread_mutex_unlock(&bktr_mutex);
-
-    /* Set it as closed in thread context. */
-    cnt->video_dev = -1;
-
-    /* free the information we collected regarding the controls */
-    if (cnt->vdev != NULL){
-        if (cnt->vdev->usrctrl_count > 0){
-            for (indx=0;indx<cnt->vdev->usrctrl_count;indx++){
-                free(cnt->vdev->usrctrl_array[indx].ctrl_name);
-                cnt->vdev->usrctrl_array[indx].ctrl_name=NULL;
-            }
-        }
-        cnt->vdev->usrctrl_count = 0;
-        if (cnt->vdev->usrctrl_array != NULL){
-            free(cnt->vdev->usrctrl_array);
-            cnt->vdev->usrctrl_array = NULL;
-        }
-
-        free(cnt->vdev);
-    }
-
-    if (dev == NULL) {
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO,_("Unable to find video device"));
-        return;
-    }
-
-    if (--dev->usage_count == 0) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-            ,_("Closing video device %s"), dev->video_device);
-
-        if (dev->bktr_fdtuner > 0)
-            close(dev->bktr_fdtuner);
-
-        if (dev->fd_device > 0) {
-            if (dev->bktr_method == METEOR_CAP_CONTINOUS) {
-                dev->bktr_fdtuner = METEOR_CAP_STOP_CONT;
-                ioctl(dev->fd_device, METEORCAPTUR, &dev->bktr_fdtuner);
-            }
-            close(dev->fd_device);
-            dev->bktr_fdtuner = -1;
-        }
-
-
-        munmap(viddevs->bktr_buffers[0], viddevs->bktr_bufsize);
-        viddevs->bktr_buffers[0] = MAP_FAILED;
-
-        dev->fd_device = -1;
+        /* Cleanup the v4l part */
         pthread_mutex_lock(&bktr_mutex);
 
-        /* Remove from list */
-        if (prev == NULL)
-            viddevs = dev->next;
-        else
-            prev->next = dev->next;
+        while (dev) {
+            if (dev->fd_device == cnt->video_dev)
+                break;
+            prev = dev;
+            dev = dev->next;
+        }
 
         pthread_mutex_unlock(&bktr_mutex);
 
-        pthread_mutexattr_destroy(&dev->attr);
-        pthread_mutex_destroy(&dev->mutex);
-        free(dev);
-    } else {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-            ,_("Still %d users of video device %s, so we don't close it now")
-            , dev->usage_count, dev->video_device);
-        /*
-         * There is still at least one thread using this device
-         * If we own it, release it.
-         */
-        if (dev->owner == cnt->threadnr) {
-                dev->frames = 0;
-                dev->owner = -1;
-                pthread_mutex_unlock(&dev->mutex);
-        }
-    }
+        /* Set it as closed in thread context. */
+        cnt->video_dev = -1;
 
-#else
-    if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
-#endif
+        /* free the information we collected regarding the controls */
+        if (cnt->vdev != NULL){
+            if (cnt->vdev->usrctrl_count > 0){
+                for (indx=0;indx<cnt->vdev->usrctrl_count;indx++){
+                    free(cnt->vdev->usrctrl_array[indx].ctrl_name);
+                    cnt->vdev->usrctrl_array[indx].ctrl_name=NULL;
+                }
+            }
+            cnt->vdev->usrctrl_count = 0;
+            if (cnt->vdev->usrctrl_array != NULL){
+                free(cnt->vdev->usrctrl_array);
+                cnt->vdev->usrctrl_array = NULL;
+            }
+
+            free(cnt->vdev);
+        }
+
+        if (dev == NULL) {
+            MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO,_("Unable to find video device"));
+            return;
+        }
+
+        if (--dev->usage_count == 0) {
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                ,_("Closing video device %s"), dev->video_device);
+
+            if (dev->bktr_fdtuner > 0)
+                close(dev->bktr_fdtuner);
+
+            if (dev->fd_device > 0) {
+                if (dev->bktr_method == METEOR_CAP_CONTINOUS) {
+                    dev->bktr_fdtuner = METEOR_CAP_STOP_CONT;
+                    ioctl(dev->fd_device, METEORCAPTUR, &dev->bktr_fdtuner);
+                }
+                close(dev->fd_device);
+                dev->bktr_fdtuner = -1;
+            }
+
+
+            munmap(viddevs->bktr_buffers[0], viddevs->bktr_bufsize);
+            viddevs->bktr_buffers[0] = MAP_FAILED;
+
+            dev->fd_device = -1;
+            pthread_mutex_lock(&bktr_mutex);
+
+            /* Remove from list */
+            if (prev == NULL)
+                viddevs = dev->next;
+            else
+                prev->next = dev->next;
+
+            pthread_mutex_unlock(&bktr_mutex);
+
+            pthread_mutexattr_destroy(&dev->attr);
+            pthread_mutex_destroy(&dev->mutex);
+            free(dev);
+        } else {
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                ,_("Still %d users of video device %s, so we don't close it now")
+                , dev->usage_count, dev->video_device);
+            /*
+            * There is still at least one thread using this device
+            * If we own it, release it.
+            */
+            if (dev->owner == cnt->threadnr) {
+                    dev->frames = 0;
+                    dev->owner = -1;
+                    pthread_mutex_unlock(&dev->mutex);
+            }
+        }
+
+    #else
+        if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
+    #endif
 
 }
 
 int bktr_start(struct context *cnt) {
-#ifdef HAVE_BKTR
+    #ifdef HAVE_BKTR
 
-    struct config *conf = &cnt->conf;
-    struct video_dev *dev;
-    int bktr_fdtuner = -1;
-    int width, height, bktr_method;
-    int input, norm;
-    long frequency;
-    int fd_device = -1;
+        struct config *conf = &cnt->conf;
+        struct video_dev *dev;
+        int bktr_fdtuner = -1;
+        int width, height, bktr_method;
+        int input, norm;
+        long frequency;
+        int fd_device = -1;
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "[%s]", conf->video_device);
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "[%s]", conf->video_device);
 
-    /*
-     * We use width and height from conf in this function. They will be assigned
-     * to width and height in imgs here, and capture_width_norm and capture_height_norm in
-     * rotate_data won't be set until in rotate_init.
-     * Motion requires that width and height are multiples of 8 so we check for this.
-     */
-    if (conf->width % 8) {
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO
-            ,_("config image width (%d) is not modulo 8"), conf->width);
-        return -2;
-    }
-
-    if (conf->height % 8) {
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO
-            ,_("config image height (%d) is not modulo 8"), conf->height);
-        return -2;
-    }
-
-    width = conf->width;
-    height = conf->height;
-
-    for (indx = 0; indx < cnt->vdev->params_count; indx++)
-    {
-        if ( !strcmp(cnt->vdev->params_array[indx].param_name, "input") ){
-            input = atoi(cnt->vdev->params_array[indx].param_value);
+        /*
+        * We use width and height from conf in this function. They will be assigned
+        * to width and height in imgs here, and capture_width_norm and capture_height_norm in
+        * rotate_data won't be set until in rotate_init.
+        * Motion requires that width and height are multiples of 8 so we check for this.
+        */
+        if (conf->width % 8) {
+            MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO
+                ,_("config image width (%d) is not modulo 8"), conf->width);
+            return -2;
         }
-        if ( !strcmp(cnt->vdev->params_array[indx].param_name, "norm") ){
-            norm = atoi(cnt->vdev->params_array[indx].param_value);
+
+        if (conf->height % 8) {
+            MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO
+                ,_("config image height (%d) is not modulo 8"), conf->height);
+            return -2;
         }
-        if ( !strcmp(cnt->vdev->params_array[indx].param_name, "frequency") ){
-            frequency = atol(cnt->vdev->params_array[indx].param_value);
-        }
-    }
 
-    bktr_method = METEOR_CAP_CONTINOUS;
+        width = conf->width;
+        height = conf->height;
 
-    pthread_mutex_lock(&bktr_mutex);
-
-    /*
-     * Transfer width and height from conf to imgs. The imgs values are the ones
-     * that is used internally in Motion. That way, setting width and height via
-     * http remote control won't screw things up.
-     */
-    cnt->imgs.width = width;
-    cnt->imgs.height = height;
-
-    cnt->vdev = mymalloc(sizeof(struct vdev_context));
-    memset(cnt->vdev, 0, sizeof(struct vdev_context));
-    cnt->vdev->usrctrl_array = NULL;
-    cnt->vdev->usrctrl_count = 0;
-    cnt->vdev->update_parms = TRUE;     /*Set trigger that we have updated user parameters */
-
-    /*
-     * First we walk through the already discovered video devices to see
-     * if we have already setup the same device before. If this is the case
-     * the device is a Round Robin device and we set the basic settings
-     * and return the file descriptor.
-     */
-    dev = viddevs;
-    while (dev) {
-        if (!strcmp(conf->video_device, dev->video_device)) {
-            int dummy = METEOR_CAP_STOP_CONT;
-            dev->usage_count++;
-
-            if (ioctl(dev->fd_device, METEORCAPTUR, &dummy) < 0) {
-                MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("Stopping capture"));
-                return -1;
+        for (indx = 0; indx < cnt->vdev->params_count; indx++)
+        {
+            if ( !strcmp(cnt->vdev->params_array[indx].param_name, "input") ){
+                input = atoi(cnt->vdev->params_array[indx].param_value);
             }
-
-            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-                ,_("Reusing [%s] inputs [%d,%d] Change capture"
-                " method METEOR_CAP_SINGLE")
-                , dev->video_device, dev->input, conf->input);
-
-            dev->bktr_method = METEOR_CAP_SINGLE;
-
-
-            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-                ,_("VIDEO_PALETTE_YUV420P setting"
-                " imgs.size_norm and imgs.motionsize"));
-            cnt->imgs.motionsize = width * height;
-            cnt->imgs.size_norm = (width * height * 3) / 2;
-
-            pthread_mutex_unlock(&bktr_mutex);
-            return dev->fd_device; // FIXME return bktr_fdtuner ?!
+            if ( !strcmp(cnt->vdev->params_array[indx].param_name, "norm") ){
+                norm = atoi(cnt->vdev->params_array[indx].param_value);
+            }
+            if ( !strcmp(cnt->vdev->params_array[indx].param_name, "frequency") ){
+                frequency = atol(cnt->vdev->params_array[indx].param_value);
+            }
         }
-        dev = dev->next;
-    }
+
+        bktr_method = METEOR_CAP_CONTINOUS;
+
+        pthread_mutex_lock(&bktr_mutex);
+
+        /*
+        * Transfer width and height from conf to imgs. The imgs values are the ones
+        * that is used internally in Motion. That way, setting width and height via
+        * http remote control won't screw things up.
+        */
+        cnt->imgs.width = width;
+        cnt->imgs.height = height;
+
+        cnt->vdev = mymalloc(sizeof(struct vdev_context));
+        memset(cnt->vdev, 0, sizeof(struct vdev_context));
+        cnt->vdev->usrctrl_array = NULL;
+        cnt->vdev->usrctrl_count = 0;
+        cnt->vdev->update_parms = TRUE;     /*Set trigger that we have updated user parameters */
+
+        /*
+        * First we walk through the already discovered video devices to see
+        * if we have already setup the same device before. If this is the case
+        * the device is a Round Robin device and we set the basic settings
+        * and return the file descriptor.
+        */
+        dev = viddevs;
+        while (dev) {
+            if (!strcmp(conf->video_device, dev->video_device)) {
+                int dummy = METEOR_CAP_STOP_CONT;
+                dev->usage_count++;
+
+                if (ioctl(dev->fd_device, METEORCAPTUR, &dummy) < 0) {
+                    MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("Stopping capture"));
+                    return -1;
+                }
+
+                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                    ,_("Reusing [%s] inputs [%d,%d] Change capture"
+                    " method METEOR_CAP_SINGLE")
+                    , dev->video_device, dev->input, conf->input);
+
+                dev->bktr_method = METEOR_CAP_SINGLE;
 
 
-    dev = mymalloc(sizeof(struct video_dev));
+                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                    ,_("VIDEO_PALETTE_YUV420P setting"
+                    " imgs.size_norm and imgs.motionsize"));
+                cnt->imgs.motionsize = width * height;
+                cnt->imgs.size_norm = (width * height * 3) / 2;
 
-    fd_device = open(conf->video_device, O_RDWR|O_CLOEXEC);
+                pthread_mutex_unlock(&bktr_mutex);
+                return dev->fd_device; // FIXME return bktr_fdtuner ?!
+            }
+            dev = dev->next;
+        }
 
-    if (fd_device < 0) {
-        MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("open video device %s"),
-                   conf->video_device);
-        free(dev);
-        pthread_mutex_unlock(&bktr_mutex);
-        return -1;
-    }
 
-    /* Only open tuner if conf->tuner_device has set , freq and input is 1. */
-    if ((conf->tuner_device != NULL) && (frequency > 0) && (input == BKTR_IN_TV)) {
-        bktr_fdtuner = open(conf->tuner_device, O_RDWR|O_CLOEXEC);
-        if (bktr_fdtuner < 0) {
-            MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("open tuner device %s"),
-                       conf->tuner_device);
+        dev = mymalloc(sizeof(struct video_dev));
+
+        fd_device = open(conf->video_device, O_RDWR|O_CLOEXEC);
+
+        if (fd_device < 0) {
+            MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("open video device %s"),
+                    conf->video_device);
             free(dev);
             pthread_mutex_unlock(&bktr_mutex);
             return -1;
         }
-    }
 
-    pthread_mutexattr_init(&dev->attr);
-    pthread_mutex_init(&dev->mutex, &dev->attr);
+        /* Only open tuner if conf->tuner_device has set , freq and input is 1. */
+        if ((conf->tuner_device != NULL) && (frequency > 0) && (input == BKTR_IN_TV)) {
+            bktr_fdtuner = open(conf->tuner_device, O_RDWR|O_CLOEXEC);
+            if (bktr_fdtuner < 0) {
+                MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("open tuner device %s"),
+                        conf->tuner_device);
+                free(dev);
+                pthread_mutex_unlock(&bktr_mutex);
+                return -1;
+            }
+        }
 
-    dev->usage_count = 1;
-    dev->video_device = conf->video_device;
-    dev->bktr_tuner = conf->tuner_device;
-    dev->fd_device = fd_device;
-    dev->bktr_fdtuner = bktr_fdtuner;
-    dev->input = input;
-    dev->height = height;
-    dev->width = width;
-    dev->frequency = frequency;
-    dev->owner = -1;
-    dev->bktr_method = bktr_method;
+        pthread_mutexattr_init(&dev->attr);
+        pthread_mutex_init(&dev->mutex, &dev->attr);
 
-    /*
-     * We set brightness, contrast, saturation and hue = 0 so that they only get
-     * set if the config is not zero.
-     */
+        dev->usage_count = 1;
+        dev->video_device = conf->video_device;
+        dev->bktr_tuner = conf->tuner_device;
+        dev->fd_device = fd_device;
+        dev->bktr_fdtuner = bktr_fdtuner;
+        dev->input = input;
+        dev->height = height;
+        dev->width = width;
+        dev->frequency = frequency;
+        dev->owner = -1;
+        dev->bktr_method = bktr_method;
 
-    dev->owner = -1;
+        /*
+        * We set brightness, contrast, saturation and hue = 0 so that they only get
+        * set if the config is not zero.
+        */
 
-    /* Default palette */
-    dev->pixfmt_src = METEOR_GEO_YUV_422;
-    dev->bktr_curbuffer = 0;
-    dev->bktr_maxbuffer = 1;
+        dev->owner = -1;
 
-    if (!bktr_device_init(dev, width, height, input, norm, frequency)) {
-        close(dev->fd_device);
-        pthread_mutexattr_destroy(&dev->attr);
-        pthread_mutex_destroy(&dev->mutex);
-        free(dev);
+        /* Default palette */
+        dev->pixfmt_src = METEOR_GEO_YUV_422;
+        dev->bktr_curbuffer = 0;
+        dev->bktr_maxbuffer = 1;
+
+        if (!bktr_device_init(dev, width, height, input, norm, frequency)) {
+            close(dev->fd_device);
+            pthread_mutexattr_destroy(&dev->attr);
+            pthread_mutex_destroy(&dev->mutex);
+            free(dev);
+
+            pthread_mutex_unlock(&bktr_mutex);
+            return -1;
+        }
+
+        cnt->imgs.size_norm = (width * height * 3) / 2;
+        cnt->imgs.motionsize = width * height;
+
+        /* Insert into linked list */
+        dev->next = viddevs;
+        viddevs = dev;
 
         pthread_mutex_unlock(&bktr_mutex);
+
+        return fd_device;
+    #else
+        if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
         return -1;
-    }
-
-    cnt->imgs.size_norm = (width * height * 3) / 2;
-    cnt->imgs.motionsize = width * height;
-
-    /* Insert into linked list */
-    dev->next = viddevs;
-    viddevs = dev;
-
-    pthread_mutex_unlock(&bktr_mutex);
-
-    return fd_device;
-#else
-    if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
-    return -1;
-#endif
+    #endif
 
 }
 
 int bktr_next(struct context *cnt,  struct image_data *img_data) {
-#ifdef HAVE_BKTR
+    #ifdef HAVE_BKTR
 
-    struct config *conf = &cnt->conf;
-    struct video_dev *dev;
-    int width, height;
-    int dev_bktr = cnt->video_dev;
-    int ret = -1;
+        struct config *conf = &cnt->conf;
+        struct video_dev *dev;
+        int width, height;
+        int dev_bktr = cnt->video_dev;
+        int ret = -1;
 
-    /* NOTE: Since this is a capture, we need to use capture dimensions. */
-    width = cnt->rotate_data.capture_width_norm;
-    height = cnt->rotate_data.capture_height_norm;
+        /* NOTE: Since this is a capture, we need to use capture dimensions. */
+        width = cnt->rotate_data.capture_width_norm;
+        height = cnt->rotate_data.capture_height_norm;
 
-    pthread_mutex_lock(&bktr_mutex);
-    dev = viddevs;
+        pthread_mutex_lock(&bktr_mutex);
+        dev = viddevs;
 
-    while (dev) {
-        if (dev->fd_device == dev_bktr)
-            break;
-        dev = dev->next;
-    }
+        while (dev) {
+            if (dev->fd_device == dev_bktr)
+                break;
+            dev = dev->next;
+        }
 
-    pthread_mutex_unlock(&bktr_mutex);
+        pthread_mutex_unlock(&bktr_mutex);
 
-    if (dev == NULL) return -1;
+        if (dev == NULL) return -1;
 
-    if (dev->owner != cnt->threadnr) {
-        pthread_mutex_lock(&dev->mutex);
-        dev->owner = cnt->threadnr;
-        dev->frames = conf->roundrobin_frames;
-    }
+        if (dev->owner != cnt->threadnr) {
+            pthread_mutex_lock(&dev->mutex);
+            dev->owner = cnt->threadnr;
+            dev->frames = conf->roundrobin_frames;
+        }
 
-    bktr_set_input(cnt, dev, img_data->image_norm, width, height, conf->input, conf->norm,
-                  conf->roundrobin_skip, conf->frequency);
+        bktr_set_input(cnt, dev, img_data->image_norm, width, height, conf->input, conf->norm,
+                    conf->roundrobin_skip, conf->frequency);
 
-    ret = bktr_capture(dev, img_data->image_norm, width, height);
+        ret = bktr_capture(dev, img_data->image_norm, width, height);
 
-    if (--dev->frames <= 0) {
-        dev->owner = -1;
-        dev->frames = 0;
-        pthread_mutex_unlock(&dev->mutex);
-    }
+        if (--dev->frames <= 0) {
+            dev->owner = -1;
+            dev->frames = 0;
+            pthread_mutex_unlock(&dev->mutex);
+        }
 
-    /* Rotate the image as specified */
-    rotate_map(cnt, img_data);
+        /* Rotate the image as specified */
+        rotate_map(cnt, img_data);
 
-    return ret;
-#else
-    if (!cnt || !img_data) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
-    return -1;
-#endif
+        return ret;
+    #else
+        if (!cnt || !img_data) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
+        return -1;
+    #endif
 
 }
 

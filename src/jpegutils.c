@@ -587,9 +587,9 @@ int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
     jpeg_set_colorspace(&cinfo, JCS_YCbCr);
 
     cinfo.raw_data_in = TRUE; // Supply downsampled data
-#if JPEG_LIB_VERSION >= 70
-    cinfo.do_fancy_downsampling = FALSE;  // Fix segfault with v7
-#endif
+    #if JPEG_LIB_VERSION >= 70
+        cinfo.do_fancy_downsampling = FALSE;  // Fix segfault with v7
+    #endif
     cinfo.comp_info[0].h_samp_factor = 2;
     cinfo.comp_info[0].v_samp_factor = 2;
     cinfo.comp_info[1].h_samp_factor = 1;

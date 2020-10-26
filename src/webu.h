@@ -6,7 +6,7 @@
  *      This software is distributed under the GNU Public License Version 2
  *      See also the file 'COPYING'.
  *
- */
+*/
 #ifndef _INCLUDE_WEBU_H_
 #define _INCLUDE_WEBU_H_
 
