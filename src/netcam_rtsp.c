@@ -1768,207 +1768,207 @@ static int netcam_rtsp_start_handler(struct rtsp_context *rtsp_data){
 
 
 int netcam_rtsp_setup(struct context *cnt){
-#ifdef HAVE_FFMPEG
+    #ifdef HAVE_FFMPEG
 
-    int retcd;
-    int indx_cam, indx_max;
-    struct rtsp_context *rtsp_data;
+        int retcd;
+        int indx_cam, indx_max;
+        struct rtsp_context *rtsp_data;
 
-    cnt->rtsp = NULL;
-    cnt->rtsp_high = NULL;
+        cnt->rtsp = NULL;
+        cnt->rtsp_high = NULL;
 
-    if (netcam_rtsp_set_dimensions(cnt) < 0 ) return -1;
+        if (netcam_rtsp_set_dimensions(cnt) < 0 ) return -1;
 
-    indx_cam = 1;
-    indx_max = 1;
-    if (cnt->conf.netcam_high_url) indx_max = 2;
+        indx_cam = 1;
+        indx_max = 1;
+        if (cnt->conf.netcam_high_url) indx_max = 2;
 
-    while (indx_cam <= indx_max){
-        if (indx_cam == 1){
-            cnt->rtsp = rtsp_new_context();
-            if (cnt->rtsp == NULL) {
-                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                    ,_("unable to create rtsp context"));
+        while (indx_cam <= indx_max){
+            if (indx_cam == 1){
+                cnt->rtsp = rtsp_new_context();
+                if (cnt->rtsp == NULL) {
+                    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                        ,_("unable to create rtsp context"));
+                    return -1;
+                }
+                rtsp_data = cnt->rtsp;
+                rtsp_data->high_resolution = FALSE;           /* Set flag for this being the normal resolution camera */
+            } else {
+                cnt->rtsp_high = rtsp_new_context();
+                if (cnt->rtsp_high == NULL) {
+                    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                        ,_("unable to create rtsp high context"));
+                    return -1;
+                }
+                rtsp_data = cnt->rtsp_high;
+                rtsp_data->high_resolution = TRUE;            /* Set flag for this being the high resolution camera */
+            }
+
+            netcam_rtsp_null_context(rtsp_data);
+
+            netcam_rtsp_set_parms(cnt, rtsp_data);
+
+            if (netcam_rtsp_connect(rtsp_data) < 0) return -1;
+
+            retcd = netcam_rtsp_read_image(rtsp_data);
+            if (retcd < 0){
+                MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+                    ,_("Failed trying to read first image - retval:%d"), retcd);
+                rtsp_data->status = RTSP_NOTCONNECTED;
                 return -1;
             }
-            rtsp_data = cnt->rtsp;
-            rtsp_data->high_resolution = FALSE;           /* Set flag for this being the normal resolution camera */
-        } else {
-            cnt->rtsp_high = rtsp_new_context();
-            if (cnt->rtsp_high == NULL) {
-                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                    ,_("unable to create rtsp high context"));
-                return -1;
+            /* When running dual, there seems to be contamination across norm/high with codec functions. */
+            netcam_rtsp_close_context(rtsp_data);       /* Close in this thread to open it again within handler thread */
+            rtsp_data->status = RTSP_RECONNECTING;      /* Set as reconnecting to avoid excess messages when starting */
+            rtsp_data->first_image = FALSE;             /* Set flag that we are not processing our first image */
+
+            /* For normal resolution, we resize the image to the config parms so we do not need
+            * to set the dimension parameters here (it is done in the set_parms).  For high res
+            * we must get the dimensions from the first image captured
+            */
+            if (rtsp_data->high_resolution){
+                cnt->imgs.width_high = rtsp_data->imgsize.width;
+                cnt->imgs.height_high = rtsp_data->imgsize.height;
             }
-            rtsp_data = cnt->rtsp_high;
-            rtsp_data->high_resolution = TRUE;            /* Set flag for this being the high resolution camera */
+
+            if (netcam_rtsp_start_handler(rtsp_data) < 0 ) return -1;
+
+            indx_cam++;
         }
 
-        netcam_rtsp_null_context(rtsp_data);
+        return 0;
 
-        netcam_rtsp_set_parms(cnt, rtsp_data);
-
-        if (netcam_rtsp_connect(rtsp_data) < 0) return -1;
-
-        retcd = netcam_rtsp_read_image(rtsp_data);
-        if (retcd < 0){
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-                ,_("Failed trying to read first image - retval:%d"), retcd);
-            rtsp_data->status = RTSP_NOTCONNECTED;
-            return -1;
-        }
-        /* When running dual, there seems to be contamination across norm/high with codec functions. */
-        netcam_rtsp_close_context(rtsp_data);       /* Close in this thread to open it again within handler thread */
-        rtsp_data->status = RTSP_RECONNECTING;      /* Set as reconnecting to avoid excess messages when starting */
-        rtsp_data->first_image = FALSE;             /* Set flag that we are not processing our first image */
-
-        /* For normal resolution, we resize the image to the config parms so we do not need
-         * to set the dimension parameters here (it is done in the set_parms).  For high res
-         * we must get the dimensions from the first image captured
-         */
-        if (rtsp_data->high_resolution){
-            cnt->imgs.width_high = rtsp_data->imgsize.width;
-            cnt->imgs.height_high = rtsp_data->imgsize.height;
-        }
-
-        if (netcam_rtsp_start_handler(rtsp_data) < 0 ) return -1;
-
-        indx_cam++;
-    }
-
-    return 0;
-
-#else  /* No FFmpeg/Libav */
-    /* Stop compiler warnings */
-    if (cnt)
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("FFmpeg/Libav not found on computer.  No RTSP support"));
-    return -1;
-#endif /* End #ifdef HAVE_FFMPEG */
+    #else  /* No FFmpeg/Libav */
+        /* Stop compiler warnings */
+        if (cnt)
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("FFmpeg/Libav not found on computer.  No RTSP support"));
+        return -1;
+    #endif /* End #ifdef HAVE_FFMPEG */
 }
 
 int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
-#ifdef HAVE_FFMPEG
-    /* This is called from the motion loop thread */
+    #ifdef HAVE_FFMPEG
+        /* This is called from the motion loop thread */
 
-    if ((cnt->rtsp->status == RTSP_RECONNECTING) ||
-        (cnt->rtsp->status == RTSP_NOTCONNECTED)){
-            return 1;
-        }
-    pthread_mutex_lock(&cnt->rtsp->mutex);
-        netcam_rtsp_pktarray_resize(cnt, FALSE);
-        memcpy(img_data->image_norm
-               , cnt->rtsp->img_latest->ptr
-               , cnt->rtsp->img_latest->used);
-        img_data->idnbr_norm = cnt->rtsp->idnbr;
-    pthread_mutex_unlock(&cnt->rtsp->mutex);
-
-    if (cnt->rtsp_high){
-        if ((cnt->rtsp_high->status == RTSP_RECONNECTING) ||
-            (cnt->rtsp_high->status == RTSP_NOTCONNECTED)) return 1;
-
-        pthread_mutex_lock(&cnt->rtsp_high->mutex);
-            netcam_rtsp_pktarray_resize(cnt, TRUE);
-            if (!(cnt->rtsp_high->high_resolution && cnt->rtsp_high->passthrough)) {
-                memcpy(img_data->image_high
-                       ,cnt->rtsp_high->img_latest->ptr
-                       ,cnt->rtsp_high->img_latest->used);
+        if ((cnt->rtsp->status == RTSP_RECONNECTING) ||
+            (cnt->rtsp->status == RTSP_NOTCONNECTED)){
+                return 1;
             }
-            img_data->idnbr_high = cnt->rtsp_high->idnbr;
-        pthread_mutex_unlock(&cnt->rtsp_high->mutex);
-    }
+        pthread_mutex_lock(&cnt->rtsp->mutex);
+            netcam_rtsp_pktarray_resize(cnt, FALSE);
+            memcpy(img_data->image_norm
+                , cnt->rtsp->img_latest->ptr
+                , cnt->rtsp->img_latest->used);
+            img_data->idnbr_norm = cnt->rtsp->idnbr;
+        pthread_mutex_unlock(&cnt->rtsp->mutex);
 
-    /* Rotate images if requested */
-    rotate_map(cnt, img_data);
+        if (cnt->rtsp_high){
+            if ((cnt->rtsp_high->status == RTSP_RECONNECTING) ||
+                (cnt->rtsp_high->status == RTSP_NOTCONNECTED)) return 1;
 
-    return 0;
+            pthread_mutex_lock(&cnt->rtsp_high->mutex);
+                netcam_rtsp_pktarray_resize(cnt, TRUE);
+                if (!(cnt->rtsp_high->high_resolution && cnt->rtsp_high->passthrough)) {
+                    memcpy(img_data->image_high
+                        ,cnt->rtsp_high->img_latest->ptr
+                        ,cnt->rtsp_high->img_latest->used);
+                }
+                img_data->idnbr_high = cnt->rtsp_high->idnbr;
+            pthread_mutex_unlock(&cnt->rtsp_high->mutex);
+        }
 
-#else  /* No FFmpeg/Libav */
-    /* Stop compiler warnings */
-    if ((cnt) || (img_data))
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("FFmpeg/Libav not found on computer.  No RTSP support"));
-    return -1;
-#endif /* End #ifdef HAVE_FFMPEG */
+        /* Rotate images if requested */
+        rotate_map(cnt, img_data);
+
+        return 0;
+
+    #else  /* No FFmpeg/Libav */
+        /* Stop compiler warnings */
+        if ((cnt) || (img_data))
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("FFmpeg/Libav not found on computer.  No RTSP support"));
+        return -1;
+    #endif /* End #ifdef HAVE_FFMPEG */
 }
 
 void netcam_rtsp_cleanup(struct context *cnt, int init_retry_flag){
-#ifdef HAVE_FFMPEG
-     /*
-     * If the init_retry_flag is not set this function was
-     * called while retrying the initial connection and there is
-     * no camera-handler started yet and thread_running must
-     * not be decremented.
-     */
-    int wait_counter;
-    int indx_cam, indx_max;
-    struct rtsp_context *rtsp_data;
+    #ifdef HAVE_FFMPEG
+        /*
+        * If the init_retry_flag is not set this function was
+        * called while retrying the initial connection and there is
+        * no camera-handler started yet and thread_running must
+        * not be decremented.
+        */
+        int wait_counter;
+        int indx_cam, indx_max;
+        struct rtsp_context *rtsp_data;
 
-    indx_cam = 1;
-    indx_max = 1;
-    if (cnt->rtsp_high) indx_max = 2;
+        indx_cam = 1;
+        indx_max = 1;
+        if (cnt->rtsp_high) indx_max = 2;
 
-    while (indx_cam <= indx_max) {
-        if (indx_cam == 1){
-            rtsp_data = cnt->rtsp;
-        } else {
-            rtsp_data = cnt->rtsp_high;
-        }
-
-        if (rtsp_data){
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s: Shutting down network camera."),rtsp_data->cameratype);
-
-            /* Throw the finish flag in context and wait a bit for it to finish its work and close everything
-             * This is shutting down the thread so for the moment, we are not worrying about the
-             * cross threading and protecting these variables with mutex's
-            */
-            rtsp_data->finish = TRUE;
-            rtsp_data->interruptduration = 0;
-            wait_counter = 0;
-            while ((!rtsp_data->handler_finished) && (wait_counter < 10)) {
-                SLEEP(1,0);
-                wait_counter++;
+        while (indx_cam <= indx_max) {
+            if (indx_cam == 1){
+                rtsp_data = cnt->rtsp;
+            } else {
+                rtsp_data = cnt->rtsp_high;
             }
-            if (!rtsp_data->handler_finished) {
-                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s: No response from handler thread."),rtsp_data->cameratype);
-                /* Last resort.  Kill the thread. Not safe for posix but if no response, what to do...*/
-                /* pthread_kill(rtsp_data->thread_id); */
-                pthread_cancel(rtsp_data->thread_id);
-                pthread_kill(rtsp_data->thread_id, SIGVTALRM); /* This allows the cancel to be processed */
-                if (!init_retry_flag){
-                    pthread_mutex_lock(&global_lock);
-                        threads_running--;
-                    pthread_mutex_unlock(&global_lock);
+
+            if (rtsp_data){
+                MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s: Shutting down network camera."),rtsp_data->cameratype);
+
+                /* Throw the finish flag in context and wait a bit for it to finish its work and close everything
+                * This is shutting down the thread so for the moment, we are not worrying about the
+                * cross threading and protecting these variables with mutex's
+                */
+                rtsp_data->finish = TRUE;
+                rtsp_data->interruptduration = 0;
+                wait_counter = 0;
+                while ((!rtsp_data->handler_finished) && (wait_counter < 10)) {
+                    SLEEP(1,0);
+                    wait_counter++;
+                }
+                if (!rtsp_data->handler_finished) {
+                    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                        ,_("%s: No response from handler thread."),rtsp_data->cameratype);
+                    /* Last resort.  Kill the thread. Not safe for posix but if no response, what to do...*/
+                    /* pthread_kill(rtsp_data->thread_id); */
+                    pthread_cancel(rtsp_data->thread_id);
+                    pthread_kill(rtsp_data->thread_id, SIGVTALRM); /* This allows the cancel to be processed */
+                    if (!init_retry_flag){
+                        pthread_mutex_lock(&global_lock);
+                            threads_running--;
+                        pthread_mutex_unlock(&global_lock);
+                    }
+                }
+                /* If we never connect we don't have a handler but we still need to clean up some */
+                netcam_rtsp_shutdown(rtsp_data);
+
+                pthread_mutex_destroy(&rtsp_data->mutex);
+                pthread_mutex_destroy(&rtsp_data->mutex_pktarray);
+                pthread_mutex_destroy(&rtsp_data->mutex_transfer);
+
+                free(rtsp_data);
+                rtsp_data = NULL;
+                if (indx_cam == 1){
+                    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                        ,_("Normal resolution: Shut down complete."));
+                } else {
+                    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                        ,_("High resolution: Shut down complete."));
                 }
             }
-            /* If we never connect we don't have a handler but we still need to clean up some */
-            netcam_rtsp_shutdown(rtsp_data);
-
-            pthread_mutex_destroy(&rtsp_data->mutex);
-            pthread_mutex_destroy(&rtsp_data->mutex_pktarray);
-            pthread_mutex_destroy(&rtsp_data->mutex_transfer);
-
-            free(rtsp_data);
-            rtsp_data = NULL;
-            if (indx_cam == 1){
-                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-                    ,_("Normal resolution: Shut down complete."));
-            } else {
-                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-                    ,_("High resolution: Shut down complete."));
-            }
+            indx_cam++;
         }
-        indx_cam++;
-    }
-    cnt->rtsp = NULL;
-    cnt->rtsp_high = NULL;
+        cnt->rtsp = NULL;
+        cnt->rtsp_high = NULL;
 
-#else  /* No FFmpeg/Libav */
-    /* Stop compiler warnings */
-    if ((cnt) || (init_retry_flag))
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("FFmpeg/Libav not found on computer.  No RTSP support"));
-    return;
-#endif /* End #ifdef HAVE_FFMPEG */
+    #else  /* No FFmpeg/Libav */
+        /* Stop compiler warnings */
+        if ((cnt) || (init_retry_flag))
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("FFmpeg/Libav not found on computer.  No RTSP support"));
+        return;
+    #endif /* End #ifdef HAVE_FFMPEG */
 
 }
 

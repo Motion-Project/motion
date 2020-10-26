@@ -10,14 +10,14 @@
 #ifndef _INCLUDE_TRANSLATE_H_
 #define _INCLUDE_TRANSLATE_H_
 
-extern int nls_enabled;
+    extern int nls_enabled;
 
-#ifdef HAVE_GETTEXT
-#   include <libintl.h>
-    extern int  _nl_msg_cat_cntr;    /* Required for changing the locale dynamically */
-#endif
+    #ifdef HAVE_GETTEXT
+        #include <libintl.h>
+        extern int  _nl_msg_cat_cntr;    /* Required for changing the locale dynamically */
+    #endif
 
-#define _(STRING) translate_text(STRING)
+    #define _(STRING) translate_text(STRING)
 
     char* translate_text(const char *msgid);
     void translate_init(void);

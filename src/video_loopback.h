@@ -10,7 +10,7 @@
 #ifndef _INCLUDE_VIDEO_LOOPBACK_H
 #define _INCLUDE_VIDEO_LOOPBACK_H
 
-int vlp_startpipe(const char *dev_name, int width, int height);
-int vlp_putpipe(int dev, unsigned char *image, int imgsize);
+    int vlp_startpipe(const char *dev_name, int width, int height);
+    int vlp_putpipe(int dev, unsigned char *image, int imgsize);
 
 #endif

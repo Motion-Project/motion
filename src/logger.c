@@ -172,10 +172,10 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
     char buf[1024];
     char usrfmt[1024];
 
-/* GNU-specific strerror_r() */
-#if (!defined(XSI_STRERROR_R))
-    char msg_buf[100];
-#endif
+    /* GNU-specific strerror_r() */
+    #if (!defined(XSI_STRERROR_R))
+        char msg_buf[100];
+    #endif
     va_list ap;
     int threadnr;
 
@@ -254,13 +254,13 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
          * version of strerror_r, which doesn't actually put the message into
          * my buffer :-(.  I have put in a 'hack' to get around this.
          */
-#if defined(XSI_STRERROR_R)
-        /* XSI-compliant strerror_r() */
-        strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
-#else
-        /* GNU-specific strerror_r() */
-        strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
-#endif
+        #if defined(XSI_STRERROR_R)
+            /* XSI-compliant strerror_r() */
+            strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
+        #else
+            /* GNU-specific strerror_r() */
+            strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
+        #endif
     }
 
     if ((!strcmp(buf,flood_msg)) && (flood_cnt <= 5000)){
