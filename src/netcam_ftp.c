@@ -783,6 +783,7 @@ int ftp_get_socket(ftp_context_pointer ctxt)
 
     return ctxt->data_file_desc;
 }
+
 /**
 * ftp_send_type
 *
@@ -863,7 +864,6 @@ int ftp_read(ftp_context_pointer ctxt, void *dest, int len)
 
     return len;
 }
-
 
 /**
 * ftp_close

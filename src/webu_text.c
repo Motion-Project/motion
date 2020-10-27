@@ -24,7 +24,8 @@
 #include "webu_text.h"
 #include "translate.h"
 
-static void webu_text_seteol(struct webui_ctx *webui) {
+static void webu_text_seteol(struct webui_ctx *webui)
+{
     /* Set the end of line character for text interface */
     if (webui->cntlst[0]->conf.webcontrol_interface == 2) {
         snprintf(webui->text_eol, WEBUI_LEN_PARM,"%s","<br>");
@@ -34,7 +35,8 @@ static void webu_text_seteol(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_camera_name(struct webui_ctx *webui) {
+static void webu_text_camera_name(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     if (webui->cntlst[webui->thread_nbr]->conf.camera_name == NULL){
@@ -53,7 +55,8 @@ static void webu_text_camera_name(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_back(struct webui_ctx *webui, const char *prevuri) {
+static void webu_text_back(struct webui_ctx *webui, const char *prevuri)
+{
     char response[WEBUI_LEN_RESP];
 
     if (webui->cntlst[0]->conf.webcontrol_interface == 2) {
@@ -66,7 +69,8 @@ static void webu_text_back(struct webui_ctx *webui, const char *prevuri) {
 
 }
 
-static void webu_text_header(struct webui_ctx *webui) {
+static void webu_text_header(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     if (webui->cntlst[0]->conf.webcontrol_interface == 2) {
@@ -80,7 +84,8 @@ static void webu_text_header(struct webui_ctx *webui) {
     }
 }
 
-static void webu_text_trailer(struct webui_ctx *webui) {
+static void webu_text_trailer(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     if (webui->cntlst[0]->conf.webcontrol_interface == 2) {
@@ -92,7 +97,8 @@ static void webu_text_trailer(struct webui_ctx *webui) {
 
 }
 
-void webu_text_badreq(struct webui_ctx *webui) {
+void webu_text_badreq(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     webu_text_header(webui);
@@ -107,7 +113,8 @@ void webu_text_badreq(struct webui_ctx *webui) {
     return;
 }
 
-static void webu_text_page_raw(struct webui_ctx *webui) {
+static void webu_text_page_raw(struct webui_ctx *webui)
+{
     /* Write the main page text */
     char response[WEBUI_LEN_RESP];
     int indx;
@@ -131,7 +138,8 @@ static void webu_text_page_raw(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_page_basic(struct webui_ctx *webui) {
+static void webu_text_page_basic(struct webui_ctx *webui)
+{
     /* Write the main page text */
     char response[WEBUI_LEN_RESP];
     int indx;
@@ -165,7 +173,8 @@ static void webu_text_page_basic(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_list_raw(struct webui_ctx *webui) {
+static void webu_text_list_raw(struct webui_ctx *webui)
+{
     /* Write out the options and values */
     char response[WEBUI_LEN_RESP];
     int indx_parm;
@@ -197,7 +206,8 @@ static void webu_text_list_raw(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_list_basic(struct webui_ctx *webui) {
+static void webu_text_list_basic(struct webui_ctx *webui)
+{
     /* Write out the options and values */
     char response[WEBUI_LEN_RESP];
     int indx_parm;
@@ -248,7 +258,8 @@ static void webu_text_list_basic(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_set_menu(struct webui_ctx *webui) {
+static void webu_text_set_menu(struct webui_ctx *webui)
+{
 
     /* Write out the options and values to allow user to set them*/
     char response[WEBUI_LEN_RESP];
@@ -311,7 +322,8 @@ static void webu_text_set_menu(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_set_query(struct webui_ctx *webui) {
+static void webu_text_set_query(struct webui_ctx *webui)
+{
 
     /* Write out the options and values to allow user to set them*/
     char response[WEBUI_LEN_RESP];
@@ -359,7 +371,8 @@ static void webu_text_set_query(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_set_assign(struct webui_ctx *webui) {
+static void webu_text_set_assign(struct webui_ctx *webui)
+{
     /* Set a particular configuration parameter to desired value */
 
     char response[WEBUI_LEN_RESP];
@@ -388,7 +401,8 @@ static void webu_text_set_assign(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_get_menu(struct webui_ctx *webui) {
+static void webu_text_get_menu(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
     int indx_parm;
 
@@ -435,7 +449,8 @@ static void webu_text_get_menu(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_quit(struct webui_ctx *webui) {
+static void webu_text_action_quit(struct webui_ctx *webui)
+{
     /* Shut down motion or the associated thread */
     char response[WEBUI_LEN_RESP];
 
@@ -453,7 +468,8 @@ static void webu_text_action_quit(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_makemovie(struct webui_ctx *webui) {
+static void webu_text_action_makemovie(struct webui_ctx *webui)
+{
     /* end the event.  Legacy api name*/
 
     char response[WEBUI_LEN_RESP];
@@ -475,7 +491,8 @@ static void webu_text_action_makemovie(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_eventstart(struct webui_ctx *webui) {
+static void webu_text_action_eventstart(struct webui_ctx *webui)
+{
     /* Start the event*/
 
     char response[WEBUI_LEN_RESP];
@@ -497,7 +514,8 @@ static void webu_text_action_eventstart(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_eventend(struct webui_ctx *webui) {
+static void webu_text_action_eventend(struct webui_ctx *webui)
+{
     /* End any active event*/
 
     char response[WEBUI_LEN_RESP];
@@ -519,7 +537,8 @@ static void webu_text_action_eventend(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_snapshot(struct webui_ctx *webui) {
+static void webu_text_action_snapshot(struct webui_ctx *webui)
+{
     /* trigger a snapshot*/
 
     char response[WEBUI_LEN_RESP];
@@ -541,7 +560,8 @@ static void webu_text_action_snapshot(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_restart(struct webui_ctx *webui) {
+static void webu_text_action_restart(struct webui_ctx *webui)
+{
     /* Restart*/
 
     char response[WEBUI_LEN_RESP];
@@ -562,7 +582,8 @@ static void webu_text_action_restart(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_start(struct webui_ctx *webui) {
+static void webu_text_action_start(struct webui_ctx *webui)
+{
     /* un-pause the camera*/
 
     char response[WEBUI_LEN_RESP];
@@ -584,7 +605,8 @@ static void webu_text_action_start(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_pause(struct webui_ctx *webui) {
+static void webu_text_action_pause(struct webui_ctx *webui)
+{
     /* pause the camera*/
 
     char response[WEBUI_LEN_RESP];
@@ -606,7 +628,8 @@ static void webu_text_action_pause(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_write(struct webui_ctx *webui) {
+static void webu_text_action_write(struct webui_ctx *webui)
+{
     /* write the parms to file*/
 
     char response[WEBUI_LEN_RESP];
@@ -628,7 +651,8 @@ static void webu_text_action_write(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action(struct webui_ctx *webui) {
+static void webu_text_action(struct webui_ctx *webui)
+{
     /* Call the action functions */
 
     if (!strcmp(webui->uri_cmd2,"makemovie")){
@@ -670,7 +694,8 @@ static void webu_text_action(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_track_pantilt(struct webui_ctx *webui) {
+static void webu_text_track_pantilt(struct webui_ctx *webui)
+{
     /* Call the track function */
     char response[WEBUI_LEN_RESP];
 
@@ -697,7 +722,8 @@ static void webu_text_track_pantilt(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_track(struct webui_ctx *webui) {
+static void webu_text_track(struct webui_ctx *webui)
+{
     /* Call the track function */
     char response[WEBUI_LEN_RESP];
     int retcd;
@@ -725,7 +751,8 @@ static void webu_text_track(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_menu(struct webui_ctx *webui) {
+static void webu_text_menu(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     webu_text_header(webui);
@@ -749,7 +776,8 @@ static void webu_text_menu(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_menu_config(struct webui_ctx *webui) {
+static void webu_text_menu_config(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     webu_text_header(webui);
@@ -770,7 +798,8 @@ static void webu_text_menu_config(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_menu_action(struct webui_ctx *webui) {
+static void webu_text_menu_action(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     webu_text_header(webui);
@@ -793,7 +822,8 @@ static void webu_text_menu_action(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_menu_detection(struct webui_ctx *webui) {
+static void webu_text_menu_detection(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     webu_text_header(webui);
@@ -815,7 +845,8 @@ static void webu_text_menu_detection(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_menu_track(struct webui_ctx *webui) {
+static void webu_text_menu_track(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     webu_text_header(webui);
@@ -835,7 +866,8 @@ static void webu_text_menu_track(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_submenu(struct webui_ctx *webui) {
+static void webu_text_submenu(struct webui_ctx *webui)
+{
 
     if ((!strcmp(webui->uri_cmd1,"config")) &&
         (strlen(webui->uri_cmd2) == 0)) {
@@ -862,7 +894,8 @@ static void webu_text_submenu(struct webui_ctx *webui) {
 
 }
 
-void webu_text_get_query(struct webui_ctx *webui) {
+void webu_text_get_query(struct webui_ctx *webui)
+{
     /* Write out the option value for one parm */
     char response[WEBUI_LEN_RESP];
     int indx_parm;
@@ -940,7 +973,8 @@ void webu_text_get_query(struct webui_ctx *webui) {
 
 }
 
-void webu_text_status(struct webui_ctx *webui) {
+void webu_text_status(struct webui_ctx *webui)
+{
     /* Write out the pause/active status */
 
     char response[WEBUI_LEN_RESP];
@@ -977,7 +1011,8 @@ void webu_text_status(struct webui_ctx *webui) {
     webu_text_trailer(webui);
 }
 
-void webu_text_connection(struct webui_ctx *webui) {
+void webu_text_connection(struct webui_ctx *webui)
+{
     /* Write out the connection status */
     char response[WEBUI_LEN_RESP];
     int indx, indx_st;
@@ -1019,7 +1054,8 @@ void webu_text_connection(struct webui_ctx *webui) {
     webu_text_trailer(webui);
 }
 
-void webu_text_list(struct webui_ctx *webui) {
+void webu_text_list(struct webui_ctx *webui)
+{
 
     if (webui->cntlst[0]->conf.webcontrol_interface == 2) {
         webu_text_list_basic(webui);
@@ -1029,7 +1065,8 @@ void webu_text_list(struct webui_ctx *webui) {
 
 }
 
-void webu_text_main(struct webui_ctx *webui) {
+void webu_text_main(struct webui_ctx *webui)
+{
 
     /* Main entry point for processing requests for the text interface */
 

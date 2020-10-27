@@ -772,7 +772,8 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
     return 0;
 }
 
-static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, int quality, int ftype){
+static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, int quality, int ftype)
+{
     int width, height;
     int passthrough;
     int dummy = 1;
@@ -969,7 +970,8 @@ void put_fixed_mask(struct context *cnt, const char *file)
         "re-run motion to enable mask feature"), cnt->conf.mask_file);
 }
 
-void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst){
+void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst)
+{
 
     int i = 0, x, y;
     for (y = 0; y < height_src; y+=2)

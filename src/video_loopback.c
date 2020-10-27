@@ -120,7 +120,8 @@ typedef struct capent {const char *cap; int code;} capentT;
         {"Last",0}
 };
 
-static void vlp_show_vcap(struct v4l2_capability *cap) {
+static void vlp_show_vcap(struct v4l2_capability *cap)
+{
     unsigned int vers = cap->version;
     unsigned int c    = cap->capabilities;
     int i;
@@ -137,7 +138,8 @@ static void vlp_show_vcap(struct v4l2_capability *cap) {
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "------------------------");
 }
 
-static void vlp_show_vfmt(struct v4l2_format *v) {
+static void vlp_show_vfmt(struct v4l2_format *v)
+{
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "type: type:           %d",v->type);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.width:        %d",v->fmt.pix.width);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.height:       %d",v->fmt.pix.height);

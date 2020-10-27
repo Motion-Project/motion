@@ -12,7 +12,8 @@
 
 int nls_enabled;
 
-void translate_locale_chg(const char *langcd){
+void translate_locale_chg(const char *langcd)
+{
     #ifdef HAVE_GETTEXT
         /* This routine is for development testing only.  It is not used for
         * regular users because once this locale is change, it changes the
@@ -28,7 +29,8 @@ void translate_locale_chg(const char *langcd){
     #endif
 }
 
-void translate_init(void){
+void translate_init(void)
+{
     #ifdef HAVE_GETTEXT
         /* Set the flag to enable native language support */
         nls_enabled = 1;
@@ -53,7 +55,8 @@ void translate_init(void){
     #endif
 }
 
-char* translate_text(const char *msgid){
+char* translate_text(const char *msgid)
+{
     #ifdef HAVE_GETTEXT
         if (nls_enabled){
             return (char*)gettext(msgid);

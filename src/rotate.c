@@ -74,7 +74,8 @@ static void reverse_inplace_quad(unsigned char *src, int size)
     }
 }
 
-static void flip_inplace_horizontal(unsigned char *src, int width, int height) {
+static void flip_inplace_horizontal(unsigned char *src, int width, int height)
+{
     uint8_t *nsrc, *ndst;
     register uint8_t tmp;
     int l,w;
@@ -187,7 +188,8 @@ static inline void rot90ccw(unsigned char *src, register unsigned char *dst,
  *
  * Returns: nothing
  */
-void rotate_init(struct context *cnt){
+void rotate_init(struct context *cnt)
+{
     int size_norm, size_high;
 
     /* Make sure buffer_norm isn't freed if it hasn't been allocated. */
@@ -275,7 +277,8 @@ void rotate_init(struct context *cnt){
  *
  * Returns: nothing
  */
-void rotate_deinit(struct context *cnt){
+void rotate_deinit(struct context *cnt)
+{
 
     if (cnt->rotate_data.buffer_norm)
         free(cnt->rotate_data.buffer_norm);
@@ -299,7 +302,8 @@ void rotate_deinit(struct context *cnt){
  *   0  - success
  *   -1 - failure (shouldn't happen)
  */
-int rotate_map(struct context *cnt, struct image_data *img_data){
+int rotate_map(struct context *cnt, struct image_data *img_data)
+{
     /*
      * The image format is YUV 4:2:0 planar, which has the pixel
      * data is divided in three parts:

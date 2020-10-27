@@ -62,7 +62,8 @@ static void catchsignal(int sig ATTRIBUTE_UNUSED)
     bktr_frame_waiting++;
 }
 
-static int bktr_set_hue(int viddev, int new_hue) {
+static int bktr_set_hue(int viddev, int new_hue)
+{
     signed char ioctlval = new_hue;
 
     if (ioctl(viddev, METEORSHUE, &ioctlval) < 0) {
@@ -76,7 +77,8 @@ static int bktr_set_hue(int viddev, int new_hue) {
     return ioctlval;
 }
 
-static int bktr_get_hue(int viddev , int *hue) {
+static int bktr_get_hue(int viddev , int *hue)
+{
     signed char ioctlval;
 
     if (ioctl(viddev, METEORGHUE, &ioctlval) < 0) {
@@ -90,7 +92,8 @@ static int bktr_get_hue(int viddev , int *hue) {
     return ioctlval;
 }
 
-static int bktr_set_saturation(int viddev, int new_saturation) {
+static int bktr_set_saturation(int viddev, int new_saturation)
+{
     unsigned char ioctlval= new_saturation;
 
     if (ioctl(viddev, METEORSCSAT, &ioctlval) < 0) {
@@ -104,7 +107,8 @@ static int bktr_set_saturation(int viddev, int new_saturation) {
     return ioctlval;
 }
 
-static int bktr_get_saturation(int viddev , int *saturation) {
+static int bktr_get_saturation(int viddev , int *saturation)
+{
     unsigned char ioctlval;
 
     if (ioctl(viddev, METEORGCSAT, &ioctlval) < 0) {
@@ -119,7 +123,8 @@ static int bktr_get_saturation(int viddev , int *saturation) {
     return ioctlval;
 }
 
-static int bktr_set_contrast(int viddev, int new_contrast) {
+static int bktr_set_contrast(int viddev, int new_contrast)
+{
     unsigned char ioctlval = new_contrast;
 
     if (ioctl(viddev, METEORSCONT, &ioctlval) < 0) {
@@ -133,7 +138,8 @@ static int bktr_set_contrast(int viddev, int new_contrast) {
     return ioctlval;
 }
 
-static int bktr_get_contrast(int viddev, int *contrast) {
+static int bktr_get_contrast(int viddev, int *contrast)
+{
     unsigned char ioctlval;
 
     if (ioctl(viddev, METEORGCONT, &ioctlval) < 0) {
@@ -333,7 +339,8 @@ static int bktr_set_geometry(struct video_dev *viddev, int width, int height)
     return 0;
 }
 
-static void bktr_picture_controls(struct context *cnt, struct video_dev *viddev) {
+static void bktr_picture_controls(struct context *cnt, struct video_dev *viddev)
+{
 
     int dev = viddev->fd_device;
     int indx_user, retcd;
@@ -535,7 +542,8 @@ static unsigned char *bktr_device_init(struct video_dev *viddev, int width, int 
  *    -1          Fatal error
  *     1          Non fatal error (not implemented)
  */
-static int bktr_capture(struct video_dev *viddev, unsigned char *map, int width, int height) {
+static int bktr_capture(struct video_dev *viddev, unsigned char *map, int width, int height)
+{
     int dev_bktr = viddev->fd_device;
     unsigned char *cap_map = NULL;
     unsigned char *common_buffer;
@@ -655,7 +663,8 @@ static void bktr_set_input(struct context *cnt, struct video_dev *viddev, unsign
 #endif /* HAVE_BKTR */
 
 
-void bktr_mutex_init(void) {
+void bktr_mutex_init(void)
+{
     #ifdef HAVE_BKTR
         pthread_mutex_init(&bktr_mutex, NULL);
     #else
@@ -663,7 +672,8 @@ void bktr_mutex_init(void) {
     #endif
 }
 
-void bktr_mutex_destroy(void) {
+void bktr_mutex_destroy(void)
+{
     #ifdef HAVE_BKTR
         pthread_mutex_destroy(&bktr_mutex);
     #else
@@ -671,7 +681,8 @@ void bktr_mutex_destroy(void) {
     #endif
 }
 
-void bktr_cleanup(struct context *cnt){
+void bktr_cleanup(struct context *cnt)
+{
     #ifdef HAVE_BKTR
 
         struct video_dev *dev = viddevs;
@@ -770,7 +781,8 @@ void bktr_cleanup(struct context *cnt){
 
 }
 
-int bktr_start(struct context *cnt) {
+int bktr_start(struct context *cnt)
+{
     #ifdef HAVE_BKTR
 
         struct config *conf = &cnt->conf;
@@ -951,7 +963,8 @@ int bktr_start(struct context *cnt) {
 
 }
 
-int bktr_next(struct context *cnt,  struct image_data *img_data) {
+int bktr_next(struct context *cnt,  struct image_data *img_data)
+{
     #ifdef HAVE_BKTR
 
         struct config *conf = &cnt->conf;
