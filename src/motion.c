@@ -406,7 +406,8 @@ static void sigchild_handler(int signo ATTRIBUTE_UNUSED)
  * setup_signals
  *   Attaches handlers to a number of signals that Motion need to catch.
  */
-static void setup_signals(void){
+static void setup_signals(void)
+{
     /*
      * Setup signals and do some initialization. 1 in the call to
      * 'motion_startup' means that Motion will become a daemon if so has been
@@ -737,7 +738,8 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
     cnt->current_image = saved_current_image;
 }
 
-static int init_camera_type(struct context *cnt){
+static int init_camera_type(struct context *cnt)
+{
 
     cnt->camera_type = CAMERA_TYPE_UNKNOWN;
 
@@ -782,7 +784,8 @@ static int init_camera_type(struct context *cnt){
 
 }
 
-static void init_mask_privacy(struct context *cnt){
+static void init_mask_privacy(struct context *cnt)
+{
 
     int indxrow, indxcol;
     int start_cr, offset_cb, start_cb;
@@ -888,7 +891,8 @@ static void init_mask_privacy(struct context *cnt){
 
 }
 
-static void init_text_scale(struct context *cnt){
+static void init_text_scale(struct context *cnt)
+{
 
     /* Consider that web interface may change conf values at any moment.
      * The below can put two sections in the image so make sure that after
@@ -917,7 +921,8 @@ static void init_text_scale(struct context *cnt){
 
 }
 
-static void mot_stream_init(struct context *cnt){
+static void mot_stream_init(struct context *cnt)
+{
 
     /* The image buffers are allocated in event_stream_put if needed*/
     pthread_mutex_init(&cnt->mutex_stream, NULL);
@@ -942,7 +947,8 @@ static void mot_stream_init(struct context *cnt){
 
 }
 
-static void mot_stream_deinit(struct context *cnt){
+static void mot_stream_deinit(struct context *cnt)
+{
 
     /* Need to check whether buffers were allocated since init
      * function defers the allocations to event_stream_put
@@ -977,7 +983,8 @@ static void mot_stream_deinit(struct context *cnt){
 }
 
 /* TODO: dbse functions are to be moved to separate module in future change*/
-static void dbse_global_deinit(void){
+static void dbse_global_deinit(void)
+{
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing MYSQL"));
     #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
         mysql_library_end();
@@ -985,7 +992,8 @@ static void dbse_global_deinit(void){
 
 }
 
-static void dbse_global_init(void){
+static void dbse_global_init(void)
+{
 
     MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("Initializing database"));
    /* Initialize all the database items */
@@ -1037,7 +1045,8 @@ static void dbse_global_init(void){
 
 }
 
-static int dbse_init_mysql(struct context *cnt){
+static int dbse_init_mysql(struct context *cnt)
+{
 
     #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
         int dbport;
@@ -1073,7 +1082,8 @@ static int dbse_init_mysql(struct context *cnt){
 
 }
 
-static int dbse_init_sqlite3(struct context *cnt){
+static int dbse_init_sqlite3(struct context *cnt)
+{
     #ifdef HAVE_SQLITE3
         if (cnt_list[0]->database_sqlite3 != 0) {
             MOTION_LOG(NTC, TYPE_DB, NO_ERRNO,_("SQLite3 using shared handle"));
@@ -1104,7 +1114,8 @@ static int dbse_init_sqlite3(struct context *cnt){
 
 }
 
-static int dbse_init_pgsql(struct context *cnt){
+static int dbse_init_pgsql(struct context *cnt)
+{
     #ifdef HAVE_PGSQL
         if ((!strcmp(cnt->conf.database_type, "postgresql")) && (cnt->conf.database_dbname)) {
             char connstring[255];
@@ -1137,7 +1148,8 @@ static int dbse_init_pgsql(struct context *cnt){
     return 0;
 }
 
-static int dbse_init(struct context *cnt){
+static int dbse_init(struct context *cnt)
+{
     int retcd = 0;
 
     if (cnt->conf.database_type) {
@@ -1163,7 +1175,8 @@ static int dbse_init(struct context *cnt){
     return retcd;
 }
 
-static void dbse_deinit(struct context *cnt){
+static void dbse_deinit(struct context *cnt)
+{
     if (cnt->conf.database_type) {
         #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
             if ( (!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {
@@ -1190,7 +1203,8 @@ static void dbse_deinit(struct context *cnt){
     }
 }
 
-static void dbse_sqlmask_update(struct context *cnt){
+static void dbse_sqlmask_update(struct context *cnt)
+{
     /*
     * Set the sql mask file according to the SQL config options
     * We update it for every frame in case the config was updated
@@ -1595,7 +1609,8 @@ static int motion_init(struct context *cnt)
  *
  * Returns:     nothing
  */
-static void motion_cleanup(struct context *cnt) {
+static void motion_cleanup(struct context *cnt)
+{
 
     event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, NULL);
     event(cnt, EVENT_ENDMOTION, NULL, NULL, NULL, NULL);
@@ -1695,7 +1710,8 @@ static void motion_cleanup(struct context *cnt) {
 
 }
 
-static void mlp_mask_privacy(struct context *cnt){
+static void mlp_mask_privacy(struct context *cnt)
+{
 
     if (cnt->imgs.mask_privacy == NULL) return;
 
@@ -1771,7 +1787,8 @@ static void mlp_mask_privacy(struct context *cnt){
     }
 }
 
-static void mlp_areadetect(struct context *cnt){
+static void mlp_areadetect(struct context *cnt)
+{
     int i, j, z = 0;
     /*
      * Simple hack to recognize motion in a specific area
@@ -1800,7 +1817,8 @@ static void mlp_areadetect(struct context *cnt){
 
 }
 
-static void mlp_prepare(struct context *cnt){
+static void mlp_prepare(struct context *cnt)
+{
 
     int frame_buffer_size;
     struct timeval tv1;
@@ -1887,7 +1905,8 @@ static void mlp_prepare(struct context *cnt){
 
 }
 
-static void mlp_resetimages(struct context *cnt){
+static void mlp_resetimages(struct context *cnt)
+{
 
     struct image_data *old_image;
 
@@ -1941,7 +1960,8 @@ static void mlp_resetimages(struct context *cnt){
 
 }
 
-static int mlp_retry(struct context *cnt){
+static int mlp_retry(struct context *cnt)
+{
 
     /*
      * If a camera is not available we keep on retrying every 10 seconds
@@ -2002,7 +2022,8 @@ static int mlp_retry(struct context *cnt){
     return 0;
 }
 
-static int mlp_capture(struct context *cnt){
+static int mlp_capture(struct context *cnt)
+{
 
     const char *tmpin;
     char tmpout[80];
@@ -2161,7 +2182,8 @@ static int mlp_capture(struct context *cnt){
 
 }
 
-static void mlp_detection(struct context *cnt){
+static void mlp_detection(struct context *cnt)
+{
 
 
     /***** MOTION LOOP - MOTION DETECTION SECTION *****/
@@ -2279,7 +2301,8 @@ static void mlp_detection(struct context *cnt){
 
 }
 
-static void mlp_tuning(struct context *cnt){
+static void mlp_tuning(struct context *cnt)
+{
 
     /***** MOTION LOOP - TUNING SECTION *****/
 
@@ -2353,7 +2376,8 @@ static void mlp_tuning(struct context *cnt){
 
 }
 
-static void mlp_overlay(struct context *cnt){
+static void mlp_overlay(struct context *cnt)
+{
 
     char tmp[PATH_MAX];
 
@@ -2427,7 +2451,8 @@ static void mlp_overlay(struct context *cnt){
 
 }
 
-static void mlp_actions(struct context *cnt){
+static void mlp_actions(struct context *cnt)
+{
 
     int indx;
 
@@ -2595,7 +2620,8 @@ static void mlp_actions(struct context *cnt){
 
 }
 
-static void mlp_setupmode(struct context *cnt){
+static void mlp_setupmode(struct context *cnt)
+{
     /***** MOTION LOOP - SETUP MODE CONSOLE OUTPUT SECTION *****/
 
     /* If CAMERA_VERBOSE enabled output some numbers to console */
@@ -2631,7 +2657,8 @@ static void mlp_setupmode(struct context *cnt){
 
 }
 
-static void mlp_snapshot(struct context *cnt){
+static void mlp_snapshot(struct context *cnt)
+{
     /***** MOTION LOOP - SNAPSHOT FEATURE SECTION *****/
     /*
      * Did we get triggered to make a snapshot from control http? Then shoot a snap
@@ -2654,7 +2681,8 @@ static void mlp_snapshot(struct context *cnt){
 
 }
 
-static void mlp_timelapse(struct context *cnt){
+static void mlp_timelapse(struct context *cnt)
+{
 
     struct tm timestamp_tm;
 
@@ -2730,7 +2758,8 @@ static void mlp_timelapse(struct context *cnt){
 
 }
 
-static void mlp_loopback(struct context *cnt){
+static void mlp_loopback(struct context *cnt)
+{
     /*
      * Feed last image and motion image to video device pipes and the stream clients
      * In setup mode we send the special setup mode image to both stream and vloopback pipe
@@ -2758,7 +2787,8 @@ static void mlp_loopback(struct context *cnt){
 
 }
 
-static void mlp_parmsupdate(struct context *cnt){
+static void mlp_parmsupdate(struct context *cnt)
+{
     /***** MOTION LOOP - ONCE PER SECOND PARAMETER UPDATE SECTION *****/
 
     /* Check for some config parameter changes but only every second */
@@ -2831,7 +2861,8 @@ static void mlp_parmsupdate(struct context *cnt){
 
 }
 
-static void mlp_frametiming(struct context *cnt){
+static void mlp_frametiming(struct context *cnt)
+{
 
     int indx;
     struct timeval tv2;
@@ -3042,7 +3073,8 @@ static void become_daemon(void)
     sigaction(SIGTSTP, &sig_ign_action, NULL);
 }
 
-static void cntlist_create(int argc, char *argv[]){
+static void cntlist_create(int argc, char *argv[])
+{
     /*
      * cnt_list is an array of pointers to the context structures cnt for each thread.
      * First we reserve room for a pointer to thread 0's context structure
@@ -3074,7 +3106,8 @@ static void cntlist_create(int argc, char *argv[]){
     cnt_list = conf_load(cnt_list);
 }
 
-static void motion_shutdown(void){
+static void motion_shutdown(void)
+{
     int i = -1;
 
     motion_remove_pid();
@@ -3090,7 +3123,8 @@ static void motion_shutdown(void){
     vid_mutex_destroy();
 }
 
-static void motion_camera_ids(void){
+static void motion_camera_ids(void)
+{
     /* Set the camera id's on the context.  They must be unique */
     int indx, indx2, invalid_ids;
 
@@ -3128,7 +3162,8 @@ static void motion_camera_ids(void){
     }
 }
 
-static void motion_ntc(void){
+static void motion_ntc(void)
+{
 
     #ifdef HAVE_V4L2
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("v4l2   : available"));
@@ -3309,7 +3344,8 @@ static void motion_startup(int daemonize, int argc, char *argv[])
  *
  * Returns: nothing
  */
-static void motion_start_thread(struct context *cnt){
+static void motion_start_thread(struct context *cnt)
+{
     int i;
     char service[6];
     pthread_attr_t thread_attr;
@@ -3398,7 +3434,8 @@ static void motion_start_thread(struct context *cnt){
 
 }
 
-static void motion_restart(int argc, char **argv){
+static void motion_restart(int argc, char **argv)
+{
     /*
     * Handle the restart situation. Currently the approach is to
     * cleanup everything, and then initialize everything again
@@ -3415,7 +3452,8 @@ static void motion_restart(int argc, char **argv){
     restart = 0;
 }
 
-static void motion_watchdog(int indx){
+static void motion_watchdog(int indx)
+{
 
     /* Notes:
      * To test scenarios, just double lock a mutex in a spawned thread.
@@ -3518,7 +3556,8 @@ static void motion_watchdog(int indx){
     }
 }
 
-static int motion_check_threadcount(void){
+static int motion_check_threadcount(void)
+{
     /* Return 1 if we should break out of loop */
 
     /* It has been observed that this is not counting every
@@ -3719,7 +3758,6 @@ void *myrealloc(void *ptr, size_t size, const char *desc)
 
     return dummy;
 }
-
 
 /**
  * create_path
@@ -4086,7 +4124,8 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
 /* This is a temporary location for these util functions.  All the generic utility
  * functions will be collected here and ultimately moved into a new common "util" module
  */
-void util_threadname_set(const char *abbr, int threadnbr, const char *threadname){
+void util_threadname_set(const char *abbr, int threadnbr, const char *threadname)
+{
     /* When the abbreviation is sent in as null, that means we are being
      * provided a fully filled out thread name (usually obtained from a
      * previously called get_threadname so we set it without additional
@@ -4114,7 +4153,8 @@ void util_threadname_set(const char *abbr, int threadnbr, const char *threadname
 
 }
 
-void util_threadname_get(char *threadname){
+void util_threadname_get(char *threadname)
+{
 
     #if ((!defined(BSD) && HAVE_PTHREAD_GETNAME_NP) || defined(__APPLE__))
         char currname[16];
@@ -4125,7 +4165,9 @@ void util_threadname_get(char *threadname){
     #endif
 
 }
-int util_check_passthrough(struct context *cnt){
+
+int util_check_passthrough(struct context *cnt)
+{
     #if ( MYFFVER < 55000)
         if (cnt->movie_passthrough)
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO

@@ -2990,7 +2990,8 @@ static struct context **copy_html_output(struct context **cnt, const char *str, 
     return cnt;
 }
 
-struct context **copy_uri(struct context **cnt, const char *str, int val) {
+struct context **copy_uri(struct context **cnt, const char *str, int val)
+{
 
     const char *regex_str = "(http|https)://(((.*):(.*))@)?([^/:]|[-_.a-z0-9]+)(:([0-9]+))?($|(/[^*]*))";
 
@@ -3034,7 +3035,8 @@ struct context **copy_uri(struct context **cnt, const char *str, int val) {
  * when the motion program is terminated normally instead of relying on the
  * OS to clean up.
  */
-char *mystrcpy(char *to, const char *from){
+char *mystrcpy(char *to, const char *from)
+{
     /*
      * Free the memory used by the to string, if such memory exists,
      * and return a pointer to a freshly malloc()'d string with the
@@ -3369,7 +3371,8 @@ static void usage()
     printf("\n");
 }
 
-static void config_parms_intl(){
+static void config_parms_intl()
+{
     /* This function prints out the configuration parms side by side
      * with the translations.  It is currently disabled but put into
      * the code so that they can be found by xgettext.  If enabled, then

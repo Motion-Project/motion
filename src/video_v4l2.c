@@ -79,7 +79,8 @@ typedef struct palette_item_struct{
     char     fourcc[5];
 } palette_item;
 
-static void v4l2_palette_init(palette_item *palette_array){
+static void v4l2_palette_init(palette_item *palette_array)
+{
 
     int indx;
 
@@ -132,7 +133,8 @@ static int xioctl(src_v4l2_t *vid_source, int request, void *arg)
     return ret;
 }
 
-static void v4l2_vdev_free(struct context *cnt){
+static void v4l2_vdev_free(struct context *cnt)
+{
 
     /* free the information we collected regarding the controls */
     if (cnt->vdev != NULL){
@@ -143,7 +145,8 @@ static void v4l2_vdev_free(struct context *cnt){
     }
 }
 
-static int v4l2_vdev_init(struct context *cnt){
+static int v4l2_vdev_init(struct context *cnt)
+{
 
     /* Create the v4l2 context within the main thread context  */
     cnt->vdev = mymalloc(sizeof(struct params_context));
@@ -156,7 +159,8 @@ static int v4l2_vdev_init(struct context *cnt){
 
 }
 
-static int v4l2_ctrls_count(struct video_dev *curdev){
+static int v4l2_ctrls_count(struct video_dev *curdev)
+{
 
     /* Get the count of how many controls and menu items the device supports */
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
@@ -189,7 +193,8 @@ static int v4l2_ctrls_count(struct video_dev *curdev){
 
 }
 
-static int v4l2_ctrls_list(struct video_dev *curdev){
+static int v4l2_ctrls_list(struct video_dev *curdev)
+{
 
     /* Get the names of the controls and menu items the device supports */
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
@@ -280,7 +285,8 @@ static int v4l2_ctrls_list(struct video_dev *curdev){
 
 }
 
-static int v4l2_ctrls_set(struct video_dev *curdev) {
+static int v4l2_ctrls_set(struct video_dev *curdev)
+{
 
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     struct vid_devctrl_ctx *devitem;
@@ -320,7 +326,8 @@ static int v4l2_ctrls_set(struct video_dev *curdev) {
     return 0;
 }
 
-static int v4l2_parms_set(struct context *cnt, struct video_dev *curdev){
+static int v4l2_parms_set(struct context *cnt, struct video_dev *curdev)
+{
 
     struct vid_devctrl_ctx  *devitem;
     struct params_item_ctx *usritem;
@@ -373,7 +380,8 @@ static int v4l2_parms_set(struct context *cnt, struct video_dev *curdev){
 
 }
 
-static int v4l2_autobright(struct context *cnt, struct video_dev *curdev, int method) {
+static int v4l2_autobright(struct context *cnt, struct video_dev *curdev, int method)
+{
 
     struct vid_devctrl_ctx  *devitem;
     struct params_item_ctx  *usritem;
@@ -511,7 +519,8 @@ static int v4l2_autobright(struct context *cnt, struct video_dev *curdev, int me
     return 0;
 }
 
-static int v4l2_input_select(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_input_select(struct context *cnt, struct video_dev *curdev)
+{
 
     /* Set the input number for the device if applicable */
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
@@ -571,7 +580,8 @@ static int v4l2_input_select(struct context *cnt, struct video_dev *curdev) {
     return 0;
 }
 
-static int v4l2_norm_select(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_norm_select(struct context *cnt, struct video_dev *curdev)
+{
 
     /* Set the video standard (norm) for the device NTSC/PAL/etc*/
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
@@ -641,7 +651,8 @@ static int v4l2_norm_select(struct context *cnt, struct video_dev *curdev) {
     return 0;
 }
 
-static int v4l2_frequency_select(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_frequency_select(struct context *cnt, struct video_dev *curdev)
+{
 
     /* Set the frequency for the tuner */
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
@@ -698,7 +709,8 @@ static int v4l2_frequency_select(struct context *cnt, struct video_dev *curdev) 
     return 0;
 }
 
-static int v4l2_pixfmt_set(struct context *cnt, struct video_dev *curdev, u32 pixformat){
+static int v4l2_pixfmt_set(struct context *cnt, struct video_dev *curdev, u32 pixformat)
+{
 
     /* Set the pixel format for the camera*/
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
@@ -769,7 +781,8 @@ static int v4l2_pixfmt_set(struct context *cnt, struct video_dev *curdev, u32 pi
     return -1;
 }
 
-static int v4l2_pixfmt_select(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_pixfmt_select(struct context *cnt, struct video_dev *curdev)
+{
 
     /* Find and select the pixel format for camera*/
 
@@ -879,7 +892,8 @@ static int v4l2_pixfmt_select(struct context *cnt, struct video_dev *curdev) {
 
 }
 
-static int v4l2_mmap_set(struct video_dev *curdev) {
+static int v4l2_mmap_set(struct video_dev *curdev)
+{
 
     /* Set the memory mapping from device to Motion*/
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
@@ -977,7 +991,8 @@ static int v4l2_mmap_set(struct video_dev *curdev) {
     return 0;
 }
 
-static int v4l2_imgs_set(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_imgs_set(struct context *cnt, struct video_dev *curdev)
+{
     /* Set the items on the imgs */
 
     cnt->imgs.width = curdev->width;
@@ -991,7 +1006,8 @@ static int v4l2_imgs_set(struct context *cnt, struct video_dev *curdev) {
 
 }
 
-static int v4l2_capture(struct context *cnt, struct video_dev *curdev, unsigned char *map) {
+static int v4l2_capture(struct context *cnt, struct video_dev *curdev, unsigned char *map)
+{
 
     /* Capture a image */
     /* FIXME:  This function needs to be refactored*/
@@ -1144,7 +1160,8 @@ static int v4l2_capture(struct context *cnt, struct video_dev *curdev, unsigned 
     return 1;
 }
 
-static int v4l2_device_init(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_device_init(struct context *cnt, struct video_dev *curdev)
+{
 
     src_v4l2_t *vid_source;
     int indx;
@@ -1193,7 +1210,8 @@ static int v4l2_device_init(struct context *cnt, struct video_dev *curdev) {
     return 0;
 }
 
-static void v4l2_device_select(struct context *cnt, struct video_dev *curdev, unsigned char *map) {
+static void v4l2_device_select(struct context *cnt, struct video_dev *curdev, unsigned char *map)
+{
 
     int indx, retcd, newvals;
 
@@ -1258,7 +1276,8 @@ static void v4l2_device_select(struct context *cnt, struct video_dev *curdev, un
     }
 }
 
-static int v4l2_device_open(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_device_open(struct context *cnt, struct video_dev *curdev)
+{
 
     int fd_device, indx, usrinp;
     /* Open the video device */
@@ -1297,7 +1316,8 @@ static int v4l2_device_open(struct context *cnt, struct video_dev *curdev) {
 
 }
 
-static void v4l2_device_close(struct video_dev *curdev) {
+static void v4l2_device_close(struct video_dev *curdev)
+{
 
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     enum v4l2_buf_type type;
@@ -1314,7 +1334,8 @@ static void v4l2_device_close(struct video_dev *curdev) {
     }
 }
 
-static void v4l2_device_cleanup(struct video_dev *curdev) {
+static void v4l2_device_cleanup(struct video_dev *curdev)
+{
 
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
 
@@ -1348,7 +1369,8 @@ static void v4l2_device_cleanup(struct video_dev *curdev) {
 
 }
 
-static int v4l2_device_capability(struct video_dev *curdev) {
+static int v4l2_device_capability(struct video_dev *curdev)
+{
 
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
 
@@ -1397,7 +1419,8 @@ static int v4l2_device_capability(struct video_dev *curdev) {
     return 0;
 }
 
-static int v4l2_fps_set(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_fps_set(struct context *cnt, struct video_dev *curdev)
+{
 
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     struct v4l2_streamparm setfps;
@@ -1426,7 +1449,8 @@ static int v4l2_fps_set(struct context *cnt, struct video_dev *curdev) {
 
 #endif /* HAVE_V4L2 */
 
-void v4l2_mutex_init(void) {
+void v4l2_mutex_init(void)
+{
     #ifdef HAVE_V4L2
         pthread_mutex_init(&v4l2_mutex, NULL);
     #else
@@ -1434,7 +1458,8 @@ void v4l2_mutex_init(void) {
     #endif // HAVE_V4L2
 }
 
-void v4l2_mutex_destroy(void) {
+void v4l2_mutex_destroy(void)
+{
     #ifdef HAVE_V4L2
         pthread_mutex_destroy(&v4l2_mutex);
     #else
@@ -1442,7 +1467,8 @@ void v4l2_mutex_destroy(void) {
     #endif // HAVE_V4L2
 }
 
-int v4l2_start(struct context *cnt) {
+int v4l2_start(struct context *cnt)
+{
     #ifdef HAVE_V4L2
 
         int retcd;
@@ -1517,7 +1543,8 @@ int v4l2_start(struct context *cnt) {
     #endif // HAVE_V4l2
 }
 
-void v4l2_cleanup(struct context *cnt) {
+void v4l2_cleanup(struct context *cnt)
+{
     #ifdef HAVE_V4L2
 
         struct video_dev *dev = video_devices;
@@ -1583,7 +1610,8 @@ void v4l2_cleanup(struct context *cnt) {
     #endif // HAVE_V4L2
 }
 
-int v4l2_next(struct context *cnt, struct image_data *img_data) {
+int v4l2_next(struct context *cnt, struct image_data *img_data)
+{
     #ifdef HAVE_V4L2
         int ret = -2;
         struct config *conf = &cnt->conf;
@@ -1627,7 +1655,8 @@ int v4l2_next(struct context *cnt, struct image_data *img_data) {
     #endif // HAVE_V4L2
 }
 
-int v4l2_palette_valid(char *video_device, int v4l2_palette) {
+int v4l2_palette_valid(char *video_device, int v4l2_palette)
+{
     #ifdef HAVE_V4L2
 
         /* This function is a boolean that returns true(1) if the palette selected in the
@@ -1681,7 +1710,8 @@ int v4l2_palette_valid(char *video_device, int v4l2_palette) {
     #endif // HAVE_V4L2
 }
 
-void v4l2_palette_fourcc(int v4l2_palette, char *fourcc) {
+void v4l2_palette_fourcc(int v4l2_palette, char *fourcc)
+{
     #ifdef HAVE_V4L2
 
         /* This function populates the provided fourcc pointer with the fourcc code for the
@@ -1711,7 +1741,8 @@ void v4l2_palette_fourcc(int v4l2_palette, char *fourcc) {
     #endif // HAVE_V4L2
 }
 
-int v4l2_parms_valid(char *video_device, int v4l2_palette, int v4l2_fps, int v4l2_width, int v4l2_height){
+int v4l2_parms_valid(char *video_device, int v4l2_palette, int v4l2_fps, int v4l2_width, int v4l2_height)
+{
     #ifdef HAVE_V4L2
 
         /* This function is a boolean that returns true(1) if the parms selected in the

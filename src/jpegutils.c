@@ -96,8 +96,9 @@ struct jpgutl_error_mgr {
 };
 
 /*  These huffman tables are required by the old jpeg libs included with 14.04 */
-static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr, const UINT8 *bits, const UINT8 *val){
-/* Define a Huffman table */
+static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr, const UINT8 *bits, const UINT8 *val)
+{
+    /* Define a Huffman table */
     int nsymbols, len;
 
     if (*htblptr == NULL)
@@ -122,9 +123,10 @@ static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr, const UI
     memcpy((*htblptr)->huffval, val, nsymbols * sizeof(UINT8));
 }
 
-static void std_huff_tables (j_decompress_ptr dinfo){
-/* Set up the standard Huffman tables (cf. JPEG standard section K.3) */
-/* IMPORTANT: these are only valid for 8-bit data precision! */
+static void std_huff_tables (j_decompress_ptr dinfo)
+{
+    /* Set up the standard Huffman tables (cf. JPEG standard section K.3) */
+    /* IMPORTANT: these are only valid for 8-bit data precision! */
 
     static const UINT8 bits_dc_luminance[17] =
     { /* 0-base */ 0, 0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 };

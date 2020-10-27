@@ -167,7 +167,8 @@ static char *str_time(void)
  * Returns:
  *                     Nothing
  */
-void motion_log(int level, unsigned int type, int errno_flag,int fncname, const char *fmt, ...){
+void motion_log(int level, unsigned int type, int errno_flag,int fncname, const char *fmt, ...)
+{
     int errno_save, n;
     char buf[1024];
     char usrfmt[1024];

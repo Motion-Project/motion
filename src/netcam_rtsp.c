@@ -33,7 +33,8 @@
 
 #include "ffmpeg.h"
 
-static int netcam_rtsp_check_pixfmt(struct rtsp_context *rtsp_data){
+static int netcam_rtsp_check_pixfmt(struct rtsp_context *rtsp_data)
+{
     /* Determine if the format is YUV420P */
     int retcd;
 
@@ -45,7 +46,8 @@ static int netcam_rtsp_check_pixfmt(struct rtsp_context *rtsp_data){
 
 }
 
-static void netcam_rtsp_pktarray_free(struct rtsp_context *rtsp_data){
+static void netcam_rtsp_pktarray_free(struct rtsp_context *rtsp_data)
+{
 
     int indx;
     pthread_mutex_lock(&rtsp_data->mutex_pktarray);
@@ -64,7 +66,8 @@ static void netcam_rtsp_pktarray_free(struct rtsp_context *rtsp_data){
 
 }
 
-static void netcam_rtsp_null_context(struct rtsp_context *rtsp_data){
+static void netcam_rtsp_null_context(struct rtsp_context *rtsp_data)
+{
 
     rtsp_data->swsctx          = NULL;
     rtsp_data->swsframe_in     = NULL;
@@ -76,7 +79,8 @@ static void netcam_rtsp_null_context(struct rtsp_context *rtsp_data){
 
 }
 
-static void netcam_rtsp_close_context(struct rtsp_context *rtsp_data){
+static void netcam_rtsp_close_context(struct rtsp_context *rtsp_data)
+{
 
     if (rtsp_data->swsctx       != NULL) sws_freeContext(rtsp_data->swsctx);
     if (rtsp_data->swsframe_in  != NULL) my_frame_free(rtsp_data->swsframe_in);
@@ -93,7 +97,8 @@ static void netcam_rtsp_close_context(struct rtsp_context *rtsp_data){
 
 }
 
-static void netcam_rtsp_pktarray_resize(struct context *cnt, int is_highres){
+static void netcam_rtsp_pktarray_resize(struct context *cnt, int is_highres)
+{
     /* This is called from netcam_rtsp_next and is on the motion loop thread
      * The rtsp_data->mutex is locked around the call to this function.
     */
@@ -160,7 +165,8 @@ static void netcam_rtsp_pktarray_resize(struct context *cnt, int is_highres){
 
 }
 
-static void netcam_rtsp_pktarray_add(struct rtsp_context *rtsp_data){
+static void netcam_rtsp_pktarray_add(struct rtsp_context *rtsp_data)
+{
 
     int indx_next;
     int retcd;
@@ -212,7 +218,8 @@ static void netcam_rtsp_pktarray_add(struct rtsp_context *rtsp_data){
 
 }
 
-static int netcam_decode_sw(struct rtsp_context *rtsp_data){
+static int netcam_decode_sw(struct rtsp_context *rtsp_data)
+{
 
     #if ( MYFFVER >= 57041)
         int retcd;
@@ -265,7 +272,8 @@ static int netcam_decode_sw(struct rtsp_context *rtsp_data){
     #endif
 }
 
-static int netcam_decode_vaapi(struct rtsp_context *rtsp_data){
+static int netcam_decode_vaapi(struct rtsp_context *rtsp_data)
+{
 
     #if ( MYFFVER >= 57083)
 
@@ -320,7 +328,8 @@ static int netcam_decode_vaapi(struct rtsp_context *rtsp_data){
  *   0 invalid but continue
  *   1 valid data
  */
-static int netcam_rtsp_decode_video(struct rtsp_context *rtsp_data){
+static int netcam_rtsp_decode_video(struct rtsp_context *rtsp_data)
+{
 
     #if ( MYFFVER >= 57041)
 
@@ -374,7 +383,8 @@ static int netcam_rtsp_decode_video(struct rtsp_context *rtsp_data){
 
 }
 
-static int netcam_rtsp_decode_packet(struct rtsp_context *rtsp_data){
+static int netcam_rtsp_decode_packet(struct rtsp_context *rtsp_data)
+{
 
     int frame_size;
     int retcd;
@@ -408,7 +418,8 @@ static int netcam_rtsp_decode_packet(struct rtsp_context *rtsp_data){
     return frame_size;
 }
 
-static void netcam_hwdecoders(struct rtsp_context *rtsp_data){
+static void netcam_hwdecoders(struct rtsp_context *rtsp_data)
+{
 
     #if ( MYFFVER >= 57083)
 
@@ -449,7 +460,8 @@ static void netcam_hwdecoders(struct rtsp_context *rtsp_data){
     #endif
 }
 
-static enum AVPixelFormat netcam_getfmt_vaapi(AVCodecContext *avctx, const enum AVPixelFormat *pix_fmts) {
+static enum AVPixelFormat netcam_getfmt_vaapi(AVCodecContext *avctx, const enum AVPixelFormat *pix_fmts)
+{
     #if ( MYFFVER >= 57083)
         const enum AVPixelFormat *p;
         (void)avctx;
@@ -467,7 +479,8 @@ static enum AVPixelFormat netcam_getfmt_vaapi(AVCodecContext *avctx, const enum 
     #endif
 }
 
-static void netcam_rtsp_decoder_error(struct rtsp_context *rtsp_data, int retcd, const char* fnc_nm){
+static void netcam_rtsp_decoder_error(struct rtsp_context *rtsp_data, int retcd, const char* fnc_nm)
+{
 
     char errstr[128];
     int indx;
@@ -512,7 +525,8 @@ static void netcam_rtsp_decoder_error(struct rtsp_context *rtsp_data, int retcd,
 
 }
 
-static int netcam_init_vaapi(struct rtsp_context *rtsp_data){
+static int netcam_init_vaapi(struct rtsp_context *rtsp_data)
+{
 
     #if ( MYFFVER >= 57083)
 
@@ -564,7 +578,8 @@ static int netcam_init_vaapi(struct rtsp_context *rtsp_data){
     #endif
 }
 
-static int netcam_init_swdecoder(struct rtsp_context *rtsp_data) {
+static int netcam_init_swdecoder(struct rtsp_context *rtsp_data)
+{
 
     #if ( MYFFVER >= 57041)
 
@@ -623,7 +638,8 @@ static int netcam_init_swdecoder(struct rtsp_context *rtsp_data) {
     #endif
 }
 
-static int netcam_rtsp_open_codec(struct rtsp_context *rtsp_data){
+static int netcam_rtsp_open_codec(struct rtsp_context *rtsp_data)
+{
 
     #if ( MYFFVER >= 57041)
         int retcd;
@@ -691,7 +707,8 @@ static int netcam_rtsp_open_codec(struct rtsp_context *rtsp_data){
 
 }
 
-static struct rtsp_context *rtsp_new_context(void){
+static struct rtsp_context *rtsp_new_context(void)
+{
     struct rtsp_context *ret;
 
     /* Note that mymalloc will exit on any problem. */
@@ -702,7 +719,8 @@ static struct rtsp_context *rtsp_new_context(void){
     return ret;
 }
 
-static int netcam_rtsp_interrupt(void *ctx){
+static int netcam_rtsp_interrupt(void *ctx)
+{
     struct rtsp_context *rtsp_data = ctx;
 
     if (rtsp_data->finish){
@@ -749,7 +767,8 @@ static int netcam_rtsp_interrupt(void *ctx){
     return FALSE;
 }
 
-static int netcam_rtsp_open_sws(struct rtsp_context *rtsp_data){
+static int netcam_rtsp_open_sws(struct rtsp_context *rtsp_data)
+{
 
     if (rtsp_data->finish) return -1;   /* This just speeds up the shutdown time */
 
@@ -811,7 +830,8 @@ static int netcam_rtsp_open_sws(struct rtsp_context *rtsp_data){
 
 }
 
-static int netcam_rtsp_resize(struct rtsp_context *rtsp_data){
+static int netcam_rtsp_resize(struct rtsp_context *rtsp_data)
+{
 
     int      retcd;
     char     errstr[128];
@@ -899,7 +919,8 @@ static int netcam_rtsp_resize(struct rtsp_context *rtsp_data){
 
 }
 
-static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data){
+static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data)
+{
 
     int  size_decoded;
     int  retcd, errcnt, haveimage;
@@ -1039,7 +1060,8 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data){
     return 0;
 }
 
-static int netcam_rtsp_ntc(struct rtsp_context *rtsp_data){
+static int netcam_rtsp_ntc(struct rtsp_context *rtsp_data)
+{
 
     if ((rtsp_data->finish) ||
         (!rtsp_data->first_image) ||
@@ -1084,7 +1106,8 @@ static int netcam_rtsp_ntc(struct rtsp_context *rtsp_data){
 
 }
 
-static void netcam_rtsp_set_options(struct rtsp_context *rtsp_data){
+static void netcam_rtsp_set_options(struct rtsp_context *rtsp_data)
+{
 
     int indx;
     char *tmpval;
@@ -1158,7 +1181,8 @@ static void netcam_rtsp_set_options(struct rtsp_context *rtsp_data){
 
 }
 
-static void netcam_rtsp_set_path (struct context *cnt, struct rtsp_context *rtsp_data ) {
+static void netcam_rtsp_set_path (struct context *cnt, struct rtsp_context *rtsp_data )
+{
 
     char        *userpass = NULL;
     struct url_t url;
@@ -1218,7 +1242,8 @@ static void netcam_rtsp_set_path (struct context *cnt, struct rtsp_context *rtsp
 
 }
 
-static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rtsp_data ) {
+static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rtsp_data )
+{
     /* Set the parameters to be used with our camera */
 
     char *tmpval;
@@ -1312,7 +1337,8 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
 
 }
 
-static int netcam_rtsp_set_dimensions (struct context *cnt) {
+static int netcam_rtsp_set_dimensions (struct context *cnt)
+{
 
     cnt->imgs.width = 0;
     cnt->imgs.height = 0;
@@ -1347,7 +1373,8 @@ static int netcam_rtsp_set_dimensions (struct context *cnt) {
     return 0;
 }
 
-static int netcam_rtsp_copy_stream(struct rtsp_context *rtsp_data){
+static int netcam_rtsp_copy_stream(struct rtsp_context *rtsp_data)
+{
     /* Make a static copy of the stream information for use in passthrough processing */
     #if ( MYFFVER >= 57041)
         AVStream  *transfer_stream, *stream_in;
@@ -1395,7 +1422,8 @@ static int netcam_rtsp_copy_stream(struct rtsp_context *rtsp_data){
 
 }
 
-static int netcam_rtsp_open_context(struct rtsp_context *rtsp_data){
+static int netcam_rtsp_open_context(struct rtsp_context *rtsp_data)
+{
 
     int  retcd;
     char errstr[128];
@@ -1525,7 +1553,8 @@ static int netcam_rtsp_open_context(struct rtsp_context *rtsp_data){
 
 }
 
-static int netcam_rtsp_connect(struct rtsp_context *rtsp_data){
+static int netcam_rtsp_connect(struct rtsp_context *rtsp_data)
+{
 
     if (netcam_rtsp_open_context(rtsp_data) < 0) return -1;
 
@@ -1574,7 +1603,8 @@ static int netcam_rtsp_connect(struct rtsp_context *rtsp_data){
     return 0;
 }
 
-static void netcam_rtsp_shutdown(struct rtsp_context *rtsp_data){
+static void netcam_rtsp_shutdown(struct rtsp_context *rtsp_data)
+{
 
     if (rtsp_data) {
         netcam_rtsp_close_context(rtsp_data);
@@ -1605,7 +1635,8 @@ static void netcam_rtsp_shutdown(struct rtsp_context *rtsp_data){
 
 }
 
-static void netcam_rtsp_handler_wait(struct rtsp_context *rtsp_data){
+static void netcam_rtsp_handler_wait(struct rtsp_context *rtsp_data)
+{
 
     long usec_maxrate, usec_delay;
 
@@ -1626,7 +1657,8 @@ static void netcam_rtsp_handler_wait(struct rtsp_context *rtsp_data){
 
 }
 
-static void netcam_rtsp_handler_reconnect(struct rtsp_context *rtsp_data){
+static void netcam_rtsp_handler_reconnect(struct rtsp_context *rtsp_data)
+{
 
     int retcd;
 
@@ -1662,7 +1694,8 @@ static void netcam_rtsp_handler_reconnect(struct rtsp_context *rtsp_data){
 
 }
 
-static void *netcam_rtsp_handler(void *arg){
+static void *netcam_rtsp_handler(void *arg)
+{
 
     struct rtsp_context *rtsp_data = arg;
 
@@ -1713,7 +1746,8 @@ static void *netcam_rtsp_handler(void *arg){
     pthread_exit(NULL);
 }
 
-static int netcam_rtsp_start_handler(struct rtsp_context *rtsp_data){
+static int netcam_rtsp_start_handler(struct rtsp_context *rtsp_data)
+{
 
     int retcd, wait_counter;
     pthread_attr_t handler_attribute;
@@ -1767,7 +1801,8 @@ static int netcam_rtsp_start_handler(struct rtsp_context *rtsp_data){
 #endif /* End HAVE_FFMPEG */
 
 
-int netcam_rtsp_setup(struct context *cnt){
+int netcam_rtsp_setup(struct context *cnt)
+{
     #ifdef HAVE_FFMPEG
 
         int retcd;
@@ -1846,7 +1881,8 @@ int netcam_rtsp_setup(struct context *cnt){
     #endif /* End #ifdef HAVE_FFMPEG */
 }
 
-int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
+int netcam_rtsp_next(struct context *cnt, struct image_data *img_data)
+{
     #ifdef HAVE_FFMPEG
         /* This is called from the motion loop thread */
 
@@ -1890,7 +1926,8 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
     #endif /* End #ifdef HAVE_FFMPEG */
 }
 
-void netcam_rtsp_cleanup(struct context *cnt, int init_retry_flag){
+void netcam_rtsp_cleanup(struct context *cnt, int init_retry_flag)
+{
     #ifdef HAVE_FFMPEG
         /*
         * If the init_retry_flag is not set this function was

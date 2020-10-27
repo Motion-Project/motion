@@ -69,7 +69,8 @@ static char *netcam_url_match(regmatch_t m, const char *input)
     return match;
 }
 
-static void netcam_url_invalid(struct url_t *parse_url){
+static void netcam_url_invalid(struct url_t *parse_url)
+{
 
     MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Invalid URL.  Can not parse values."));
 
@@ -84,6 +85,7 @@ static void netcam_url_invalid(struct url_t *parse_url){
     sprintf(parse_url->userpass, "%s","INVALID");
 
 }
+
 /**
  * netcam_url_parse
  *
@@ -424,7 +426,8 @@ static void *netcam_handler_loop(void *arg)
  * Returns:              Nothing.
  *
  */
-void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag){
+void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
+{
     struct timespec waittime;
 
     if (!netcam) return;
@@ -550,7 +553,8 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag){
  *
  * Returns:             Error code
  */
-int netcam_next(struct context *cnt, struct image_data *img_data){
+int netcam_next(struct context *cnt, struct image_data *img_data)
+{
 
     netcam_context_ptr netcam;
 
@@ -611,7 +615,8 @@ int netcam_next(struct context *cnt, struct image_data *img_data){
  *              -1 on any failure
  *              -2 image dimensions are not modulo 8
  */
-int netcam_start(struct context *cnt){
+int netcam_start(struct context *cnt)
+{
 
     netcam_context_ptr netcam;        /* Local pointer to our context. */
     pthread_attr_t handler_attribute; /* Attributes of our handler thread. */

@@ -70,7 +70,8 @@
 #endif
 
 /*********************************************/
-AVFrame *my_frame_alloc(void){
+AVFrame *my_frame_alloc(void)
+{
     AVFrame *pic;
     #if ( MYFFVER >= 55000)
         pic = av_frame_alloc();
@@ -80,7 +81,8 @@ AVFrame *my_frame_alloc(void){
     return pic;
 }
 /*********************************************/
-void my_frame_free(AVFrame *frame){
+void my_frame_free(AVFrame *frame)
+{
     #if ( MYFFVER >= 55000)
         av_frame_free(&frame);
     #else
@@ -88,7 +90,8 @@ void my_frame_free(AVFrame *frame){
     #endif
 }
 /*********************************************/
-int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height){
+int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height)
+{
     int retcd = 0;
     #if ( MYFFVER >= 57000)
         int align = 1;
@@ -99,7 +102,8 @@ int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height){
     return retcd;
 }
 /*********************************************/
-int my_image_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum MyPixelFormat pix_fmt,int width, int height,int dest_size){
+int my_image_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum MyPixelFormat pix_fmt,int width, int height,int dest_size)
+{
     int retcd = 0;
     #if ( MYFFVER >= 57000)
         int align = 1;
@@ -112,7 +116,8 @@ int my_image_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum MyPixelFor
     return retcd;
 }
 /*********************************************/
-int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height){
+int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height)
+{
     int retcd = 0;
     #if ( MYFFVER >= 57000)
         int align = 1;
@@ -136,7 +141,8 @@ int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat p
     return retcd;
 }
 /*********************************************/
-void my_packet_unref(AVPacket pkt){
+void my_packet_unref(AVPacket pkt)
+{
     #if ( MYFFVER >= 57000)
         av_packet_unref(&pkt);
     #else
@@ -144,7 +150,8 @@ void my_packet_unref(AVPacket pkt){
     #endif
 }
 /*********************************************/
-void my_avcodec_close(AVCodecContext *codec_context){
+void my_avcodec_close(AVCodecContext *codec_context)
+{
     #if ( MYFFVER >= 57041)
         avcodec_free_context(&codec_context);
     #else
@@ -152,7 +159,8 @@ void my_avcodec_close(AVCodecContext *codec_context){
     #endif
 }
 /*********************************************/
-int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt){
+int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt)
+{
     #if ( MYFFVER >= 55000)
         return av_packet_ref(dest_pkt, src_pkt);
     #else
@@ -173,7 +181,8 @@ int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt){
  ****************************************************************************
  ****************************************************************************/
 /*********************************************/
-static void ffmpeg_free_nal(struct ffmpeg *ffmpeg){
+static void ffmpeg_free_nal(struct ffmpeg *ffmpeg)
+{
     if (ffmpeg->nal_info) {
         free(ffmpeg->nal_info);
         ffmpeg->nal_info = NULL;
@@ -181,7 +190,8 @@ static void ffmpeg_free_nal(struct ffmpeg *ffmpeg){
     }
 }
 
-static int ffmpeg_encode_nal(struct ffmpeg *ffmpeg){
+static int ffmpeg_encode_nal(struct ffmpeg *ffmpeg)
+{
     // h264_v4l2m2m has NAL units separated from the first frame, which makes
     // some players very unhappy.
     if ((ffmpeg->pkt.pts == 0) && (!(ffmpeg->pkt.flags & AV_PKT_FLAG_KEY))) {
@@ -203,7 +213,8 @@ static int ffmpeg_encode_nal(struct ffmpeg *ffmpeg){
     return 0;
 }
 
-static int ffmpeg_timelapse_exists(const char *fname){
+static int ffmpeg_timelapse_exists(const char *fname)
+{
     FILE *file;
     file = fopen(fname, "r");
     if (file)
@@ -214,7 +225,8 @@ static int ffmpeg_timelapse_exists(const char *fname){
     return 0;
 }
 
-static int ffmpeg_timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt){
+static int ffmpeg_timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt)
+{
     FILE *file;
 
     file = fopen(ffmpeg->filename, "a");
@@ -231,7 +243,8 @@ static int ffmpeg_timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt){
 /* TODO Determine if this is even needed for old versions. Per
  * documentation for version 58, 'av_lockmgr_register This function does nothing'
  */
-static int ffmpeg_lockmgr_cb(void **arg, enum AVLockOp op){
+static int ffmpeg_lockmgr_cb(void **arg, enum AVLockOp op)
+{
     pthread_mutex_t *mutex = *arg;
     int err;
 
@@ -267,7 +280,8 @@ static int ffmpeg_lockmgr_cb(void **arg, enum AVLockOp op){
 }
 #endif
 
-static void ffmpeg_free_context(struct ffmpeg *ffmpeg){
+static void ffmpeg_free_context(struct ffmpeg *ffmpeg)
+{
 
         if (ffmpeg->picture != NULL){
             my_frame_free(ffmpeg->picture);
@@ -286,7 +300,8 @@ static void ffmpeg_free_context(struct ffmpeg *ffmpeg){
 
 }
 
-static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
+static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg)
+{
 
     size_t codec_name_len = strcspn(ffmpeg->codec_name, ":");
     char *codec_name = malloc(codec_name_len + 1);
@@ -422,7 +437,8 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
     return 0;
 }
 
-static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
+static int ffmpeg_encode_video(struct ffmpeg *ffmpeg)
+{
     #if ( MYFFVER >= 57041)
         //ffmpeg version 3.1 and after
         int retcd = 0;
@@ -535,7 +551,8 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
     #endif
 }
 
-static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
+static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1)
+{
 
     int64_t pts_interval;
 
@@ -574,7 +591,8 @@ static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
     return 0;
 }
 
-static int ffmpeg_set_pktpts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
+static int ffmpeg_set_pktpts(struct ffmpeg *ffmpeg, const struct timeval *tv1)
+{
 
     int64_t pts_interval;
 
@@ -613,7 +631,8 @@ static int ffmpeg_set_pktpts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
     return 0;
 }
 
-static int ffmpeg_set_quality(struct ffmpeg *ffmpeg){
+static int ffmpeg_set_quality(struct ffmpeg *ffmpeg)
+{
 
     ffmpeg->opts = 0;
     if (ffmpeg->quality > 100) ffmpeg->quality = 100;
@@ -664,7 +683,8 @@ struct blacklist_t
     const char *reason;
 };
 
-static const char *ffmpeg_codec_is_blacklisted(const char *codec_name){
+static const char *ffmpeg_codec_is_blacklisted(const char *codec_name)
+{
 
     static struct blacklist_t blacklisted_codec[] =
     {
@@ -694,7 +714,8 @@ static const char *ffmpeg_codec_is_blacklisted(const char *codec_name){
     return NULL;
 }
 
-static int ffmpeg_set_codec_preferred(struct ffmpeg *ffmpeg){
+static int ffmpeg_set_codec_preferred(struct ffmpeg *ffmpeg)
+{
     size_t codec_name_len = strcspn(ffmpeg->codec_name, ":");
 
     ffmpeg->codec = NULL;
@@ -741,7 +762,8 @@ static int ffmpeg_set_codec_preferred(struct ffmpeg *ffmpeg){
 
 }
 
-static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
+static int ffmpeg_set_codec(struct ffmpeg *ffmpeg)
+{
 
     int retcd;
     char errstr[128];
@@ -868,7 +890,8 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
     return 0;
 }
 
-static int ffmpeg_set_stream(struct ffmpeg *ffmpeg){
+static int ffmpeg_set_stream(struct ffmpeg *ffmpeg)
+{
 
     #if ( MYFFVER >= 57041)
         int retcd;
@@ -947,8 +970,8 @@ static int ffmpeg_alloc_video_buffer(AVFrame *frame, int align)
     return 0;
 }
 
-
-static int ffmpeg_set_picture(struct ffmpeg *ffmpeg){
+static int ffmpeg_set_picture(struct ffmpeg *ffmpeg)
+{
 
     int retcd;
     char errstr[128];
@@ -986,7 +1009,8 @@ static int ffmpeg_set_picture(struct ffmpeg *ffmpeg){
 
 }
 
-static int ffmpeg_set_outputfile(struct ffmpeg *ffmpeg){
+static int ffmpeg_set_outputfile(struct ffmpeg *ffmpeg)
+{
 
     int retcd;
     char errstr[128];
@@ -1048,7 +1072,8 @@ static int ffmpeg_set_outputfile(struct ffmpeg *ffmpeg){
 
 }
 
-static int ffmpeg_flush_codec(struct ffmpeg *ffmpeg){
+static int ffmpeg_flush_codec(struct ffmpeg *ffmpeg)
+{
 
     #if ( MYFFVER >= 57041)
         //ffmpeg version 3.1 and after
@@ -1112,7 +1137,8 @@ static int ffmpeg_flush_codec(struct ffmpeg *ffmpeg){
 
 }
 
-static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
+static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1)
+{
     int retcd;
 
     av_init_packet(&ffmpeg->pkt);
@@ -1150,7 +1176,8 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 
 }
 
-static void ffmpeg_passthru_reset(struct ffmpeg *ffmpeg){
+static void ffmpeg_passthru_reset(struct ffmpeg *ffmpeg)
+{
     /* Reset the written flag at start of each event */
     int indx;
 
@@ -1162,7 +1189,8 @@ static void ffmpeg_passthru_reset(struct ffmpeg *ffmpeg){
 
 }
 
-static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx){
+static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx)
+{
     /* Write the packet in the buffer at indx to file */
     char errstr[128];
     int retcd;
@@ -1201,7 +1229,8 @@ static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx){
 
 }
 
-static int ffmpeg_passthru_put(struct ffmpeg *ffmpeg, struct image_data *img_data){
+static int ffmpeg_passthru_put(struct ffmpeg *ffmpeg, struct image_data *img_data)
+{
 
     int idnbr_image, idnbr_lastwritten, idnbr_stop, idnbr_firstkey;
     int indx, indx_lastwritten, indx_firstkey;
@@ -1271,7 +1300,8 @@ static int ffmpeg_passthru_put(struct ffmpeg *ffmpeg, struct image_data *img_dat
     return 0;
 }
 
-static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg){
+static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg)
+{
 
     int retcd;
     AVStream    *stream_in;
@@ -1355,7 +1385,8 @@ static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg){
 
 }
 
-void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUTE_UNUSED, const char *fmt, va_list vl){
+void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUTE_UNUSED, const char *fmt, va_list vl)
+{
 
     char buf[1024];
     char *end;
@@ -1379,7 +1410,8 @@ void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUT
     }
 }
 
-static void ffmpeg_put_pix_nv21(struct ffmpeg *ffmpeg, struct image_data *img_data){
+static void ffmpeg_put_pix_nv21(struct ffmpeg *ffmpeg, struct image_data *img_data)
+{
     unsigned char *image,*imagecr, *imagecb;
     int cr_len, x, y;
 
@@ -1405,7 +1437,8 @@ static void ffmpeg_put_pix_nv21(struct ffmpeg *ffmpeg, struct image_data *img_da
 
 }
 
-static void ffmpeg_put_pix_yuv420(struct ffmpeg *ffmpeg, struct image_data *img_data){
+static void ffmpeg_put_pix_yuv420(struct ffmpeg *ffmpeg, struct image_data *img_data)
+{
     unsigned char *image;
 
     if (ffmpeg->high_resolution){
@@ -1428,7 +1461,8 @@ static void ffmpeg_put_pix_yuv420(struct ffmpeg *ffmpeg, struct image_data *img_
  ****************************************************************************
  ****************************************************************************/
 
-void ffmpeg_global_init(void){
+void ffmpeg_global_init(void)
+{
     #ifdef HAVE_FFMPEG
         MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
             ,_("ffmpeg libavcodec version %d.%d.%d"
@@ -1461,7 +1495,8 @@ void ffmpeg_global_init(void){
     #endif /* HAVE_FFMPEG */
 }
 
-void ffmpeg_global_deinit(void) {
+void ffmpeg_global_deinit(void)
+{
     #ifdef HAVE_FFMPEG
         avformat_network_deinit();
         #if ( MYFFVER < 58000)
@@ -1477,7 +1512,8 @@ void ffmpeg_global_deinit(void) {
     #endif /* HAVE_FFMPEG */
 }
 
-int ffmpeg_open(struct ffmpeg *ffmpeg){
+int ffmpeg_open(struct ffmpeg *ffmpeg)
+{
 
     #ifdef HAVE_FFMPEG
         int retcd;
@@ -1543,7 +1579,8 @@ int ffmpeg_open(struct ffmpeg *ffmpeg){
 
 }
 
-void ffmpeg_close(struct ffmpeg *ffmpeg){
+void ffmpeg_close(struct ffmpeg *ffmpeg)
+{
     #ifdef HAVE_FFMPEG
 
         if (ffmpeg != NULL) {
@@ -1570,8 +1607,8 @@ void ffmpeg_close(struct ffmpeg *ffmpeg){
     #endif // HAVE_FFMPEG
 }
 
-
-int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const struct timeval *tv1){
+int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const struct timeval *tv1)
+{
     #ifdef HAVE_FFMPEG
         int retcd = 0;
         int cnt = 0;
@@ -1631,7 +1668,8 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const s
     #endif // HAVE_FFMPEG
 }
 
-void ffmpeg_reset_movie_start_time(struct ffmpeg *ffmpeg, const struct timeval *tv1){
+void ffmpeg_reset_movie_start_time(struct ffmpeg *ffmpeg, const struct timeval *tv1)
+{
     #ifdef HAVE_FFMPEG
         int64_t one_frame_interval = av_rescale_q(1,(AVRational){1, ffmpeg->fps},ffmpeg->video_st->time_base);
         if (one_frame_interval <= 0)

@@ -518,7 +518,8 @@ void vid_mutex_destroy(void)
     bktr_mutex_destroy();
 }
 
-void vid_close(struct context *cnt) {
+void vid_close(struct context *cnt)
+{
 
     #ifdef HAVE_MMAL
         if (cnt->mmalcam) {
@@ -582,7 +583,8 @@ void vid_close(struct context *cnt) {
  *     -1 if failed to open device.
  *     -3 image dimensions are not modulo 8
  */
-int vid_start(struct context *cnt) {
+int vid_start(struct context *cnt)
+{
     int dev = -1;
 
     #ifdef HAVE_MMAL
@@ -663,7 +665,8 @@ int vid_start(struct context *cnt) {
  *    with bit 0 set            Non fatal V4L error (copy grey image and discard this image)
  *    with bit 1 set            Non fatal Netcam error
  */
-int vid_next(struct context *cnt, struct image_data *img_data){
+int vid_next(struct context *cnt, struct image_data *img_data)
+{
 
     #ifdef HAVE_MMAL
         if (cnt->camera_type == CAMERA_TYPE_MMAL) {

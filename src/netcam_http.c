@@ -1498,7 +1498,6 @@ static int netcam_mjpg_buffer_refill(netcam_context_ptr netcam)
     return retval;
 }
 
-
 /**
  * netcam_read_mjpg_jpeg
  *
