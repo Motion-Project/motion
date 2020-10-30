@@ -1076,11 +1076,9 @@ static int draw_textn(unsigned char *image, int startx,  int starty,  int width,
     int pos, line_offset, next_char_offs;
     unsigned char *image_ptr, *char_ptr;
 
-    if (startx > width / 2)
-        startx -= len * (6 * factor);
+    if (startx > width / 2) startx -= len * (6 * factor);
 
-    if (startx + len * 6 * factor >= width)
-        len = (width-startx-1)/(6*factor);
+    if (startx + len * 6 * factor >= width) len = (width-startx-1)/(6*factor);
 
     if ((startx < 1) || (starty < 1) || (len < 1)) return 0;
 

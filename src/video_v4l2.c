@@ -312,10 +312,11 @@ static int v4l2_ctrls_set(struct video_dev *curdev)
                         ,devitem->ctrl_iddesc, devitem->ctrl_name
                         ,devitem->ctrl_newval,retcd);
                 } else {
-                    if (curdev->starting)
+                    if (curdev->starting) {
                         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
                             ,_("Set control \"%s\" to value %d")
                             ,devitem->ctrl_name, devitem->ctrl_newval);
+                    }
                    devitem->ctrl_currval = devitem->ctrl_newval;
                 }
 
@@ -612,9 +613,10 @@ static int v4l2_norm_select(struct context *cnt, struct video_dev *curdev)
         standard.index = 0;
 
         while (xioctl(vid_source, VIDIOC_ENUMSTD, &standard) == 0) {
-            if ((standard.id & std_id) && (curdev->starting))
+            if ((standard.id & std_id) && (curdev->starting)) {
                 MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                     ,_("- video standard %s"), standard.name);
+            }
             standard.index++;
         }
 
@@ -858,8 +860,9 @@ static int v4l2_pixfmt_select(struct context *cnt, struct video_dev *curdev)
          /* Prevent the selection of H264 since this module does not support it */
         for (indx = 0; indx <= V4L2_PALETTE_COUNT_MAX; indx++)
             if ((palette_array[indx].v4l2id == fmtd.pixelformat) &&
-                (palette_array[indx].v4l2id != V4L2_PIX_FMT_H264))
+                (palette_array[indx].v4l2id != V4L2_PIX_FMT_H264)) {
                 indx_palette = indx;
+            }
 
         memset(&fmtd, 0, sizeof(struct v4l2_fmtdesc));
         fmtd.index = ++v4l2_pal;
@@ -1055,8 +1058,9 @@ static int v4l2_capture(struct context *cnt, struct video_dev *curdev, unsigned 
         if (errno == EIO) {
             vid_source->pframe++;
 
-            if ((u32)vid_source->pframe >= vid_source->req.count)
+            if ((u32)vid_source->pframe >= vid_source->req.count) {
                 vid_source->pframe = 0;
+            }
 
              vid_source->buf.index = vid_source->pframe;
              MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
@@ -1386,30 +1390,42 @@ static int v4l2_device_capability(struct video_dev *curdev)
     MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.capabilities=0x%08X",vid_source->cap.capabilities);
     MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "------------------------");
 
-    if (vid_source->cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)
+    if (vid_source->cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "- VIDEO_CAPTURE");
-    if (vid_source->cap.capabilities & V4L2_CAP_VIDEO_OUTPUT)
+    }
+    if (vid_source->cap.capabilities & V4L2_CAP_VIDEO_OUTPUT) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "- VIDEO_OUTPUT");
-    if (vid_source->cap.capabilities & V4L2_CAP_VIDEO_OVERLAY)
+    }
+    if (vid_source->cap.capabilities & V4L2_CAP_VIDEO_OVERLAY) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "- VIDEO_OVERLAY");
-    if (vid_source->cap.capabilities & V4L2_CAP_VBI_CAPTURE)
+    }
+    if (vid_source->cap.capabilities & V4L2_CAP_VBI_CAPTURE) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "- VBI_CAPTURE");
-    if (vid_source->cap.capabilities & V4L2_CAP_VBI_OUTPUT)
+    }
+    if (vid_source->cap.capabilities & V4L2_CAP_VBI_OUTPUT) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "- VBI_OUTPUT");
-    if (vid_source->cap.capabilities & V4L2_CAP_RDS_CAPTURE)
+    }
+    if (vid_source->cap.capabilities & V4L2_CAP_RDS_CAPTURE) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "- RDS_CAPTURE");
-    if (vid_source->cap.capabilities & V4L2_CAP_TUNER)
+    }
+    if (vid_source->cap.capabilities & V4L2_CAP_TUNER) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "- TUNER");
-    if (vid_source->cap.capabilities & V4L2_CAP_AUDIO)
+    }
+    if (vid_source->cap.capabilities & V4L2_CAP_AUDIO) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "- AUDIO");
-    if (vid_source->cap.capabilities & V4L2_CAP_READWRITE)
+    }
+    if (vid_source->cap.capabilities & V4L2_CAP_READWRITE) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "- READWRITE");
-    if (vid_source->cap.capabilities & V4L2_CAP_ASYNCIO)
+    }
+    if (vid_source->cap.capabilities & V4L2_CAP_ASYNCIO) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "- ASYNCIO");
-    if (vid_source->cap.capabilities & V4L2_CAP_STREAMING)
+    }
+    if (vid_source->cap.capabilities & V4L2_CAP_STREAMING) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "- STREAMING");
-    if (vid_source->cap.capabilities & V4L2_CAP_TIMEPERFRAME)
+    }
+    if (vid_source->cap.capabilities & V4L2_CAP_TIMEPERFRAME) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "- TIMEPERFRAME");
+    }
 
     if (!(vid_source->cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("Device does not support capturing."));
@@ -1553,8 +1569,7 @@ void v4l2_cleanup(struct context *cnt)
         /* Cleanup the v4l2 part */
         pthread_mutex_lock(&v4l2_mutex);
         while (dev) {
-            if (dev->fd_device == cnt->video_dev)
-                break;
+            if (dev->fd_device == cnt->video_dev) break;
             prev = dev;
             dev = dev->next;
         }
@@ -1580,10 +1595,11 @@ void v4l2_cleanup(struct context *cnt)
             dev->fd_device = -1;
 
             /* Remove from list */
-            if (prev == NULL)
+            if (prev == NULL) {
                 video_devices = dev->next;
-            else
+            } else {
                 prev->next = dev->next;
+            }
 
             pthread_mutexattr_destroy(&dev->attr);
             pthread_mutex_destroy(&dev->mutex);
@@ -1620,8 +1636,7 @@ int v4l2_next(struct context *cnt, struct image_data *img_data)
         pthread_mutex_lock(&v4l2_mutex);
         dev = video_devices;
         while (dev) {
-            if (dev->fd_device == cnt->video_dev)
-                break;
+            if (dev->fd_device == cnt->video_dev) break;
             dev = dev->next;
         }
         pthread_mutex_unlock(&v4l2_mutex);

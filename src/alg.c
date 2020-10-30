@@ -78,16 +78,16 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
         for (y = 0; y < height; y++) {
             for (x = 0; x < width; x++) {
                 if (*(labels++) & 32768) {
-                    if (x > cent->x)
+                    if (x > cent->x) {
                         xdist += x - cent->x;
-                    else if (x < cent->x)
+                    } else if (x < cent->x) {
                         xdist += cent->x - x;
-
-                    if (y > cent->y)
+                    }
+                    if (y > cent->y) {
                         ydist += y - cent->y;
-                    else if (y < cent->y)
+                    } else if (y < cent->y) {
                         ydist += cent->y - y;
-
+                    }
                     centc++;
                 }
             }
@@ -97,16 +97,16 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
         for (y = 0; y < height; y++) {
             for (x = 0; x < width; x++) {
                 if (*(out++)) {
-                    if (x > cent->x)
+                    if (x > cent->x) {
                         xdist += x - cent->x;
-                    else if (x < cent->x)
+                    } else if (x < cent->x) {
                         xdist += cent->x - x;
-
-                    if (y > cent->y)
+                    }
+                    if (y > cent->y) {
                         ydist += y - cent->y;
-                    else if (y < cent->y)
+                    } else if (y < cent->y) {
                         ydist += cent->y - y;
-
+                    }
                     centc++;
                 }
             }
@@ -126,25 +126,28 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
         cent->maxy = cent->y + ydist / centc * 2;
     }
 
-    if (cent->maxx > width - 1)
+    if (cent->maxx > width - 1) {
         cent->maxx = width - 1;
-    else if (cent->maxx < 0)
+    } else if (cent->maxx < 0) {
         cent->maxx = 0;
-
-    if (cent->maxy > height - 1)
+    }
+    if (cent->maxy > height - 1) {
         cent->maxy = height - 1;
-    else if (cent->maxy < 0)
+    } else if (cent->maxy < 0) {
         cent->maxy = 0;
+    }
 
-    if (cent->minx > width - 1)
+    if (cent->minx > width - 1) {
         cent->minx = width - 1;
-    else if (cent->minx < 0)
+    } else if (cent->minx < 0) {
         cent->minx = 0;
+    }
 
-    if (cent->miny > height - 1)
+    if (cent->miny > height - 1) {
         cent->miny = height - 1;
-    else if (cent->miny < 0)
+    } else if (cent->miny < 0) {
         cent->miny = 0;
+    }
 
     /* Align for better locate box handling */
     cent->minx += cent->minx % 2;
@@ -370,8 +373,7 @@ void alg_noise_tune(struct context *cnt, unsigned char *new)
     for (; i > 0; i--) {
         diff = ABS(*ref - *new);
 
-        if (mask)
-            diff = ((diff * *mask++) / 255);
+        if (mask)  diff = ((diff * *mask++) / 255);
 
         if (*smartmask) {
             sum += diff + 1;
@@ -399,22 +401,20 @@ void alg_threshold_tune(struct context *cnt, int diffs, int motion)
     int i;
     int sum = 0, top = diffs;
 
-    if (!diffs)
-        return;
+    if (!diffs) return;
 
-    if (motion)
-        diffs = cnt->threshold / 4;
+    if (motion) diffs = cnt->threshold / 4;
 
     for (i = 0; i < THRESHOLD_TUNE_LENGTH - 1; i++) {
         sum += cnt->diffs_last[i];
 
-        if (cnt->diffs_last[i + 1] && !motion)
+        if (cnt->diffs_last[i + 1] && !motion) {
             cnt->diffs_last[i] = cnt->diffs_last[i + 1];
-        else
+        } else {
             cnt->diffs_last[i] = cnt->threshold / 4;
+        }
 
-        if (cnt->diffs_last[i] > top)
-            top = cnt->diffs_last[i];
+        if (cnt->diffs_last[i] > top) top = cnt->diffs_last[i];
     }
 
     sum += cnt->diffs_last[i];
@@ -422,11 +422,9 @@ void alg_threshold_tune(struct context *cnt, int diffs, int motion)
 
     sum /= THRESHOLD_TUNE_LENGTH / 4;
 
-    if (sum < top * 2)
-        sum = top * 2;
+    if (sum < top * 2) sum = top * 2;
 
-    if (sum < cnt->conf.threshold)
-        cnt->threshold = (cnt->threshold + sum) / 2;
+    if (sum < cnt->conf.threshold) cnt->threshold = (cnt->threshold + sum) / 2;
 }
 
 /*
@@ -463,8 +461,7 @@ static int iflood(int x, int y, int width, int height,
     Segment stack[MAXS], *sp = stack;    /* Stack of filled segments. */
     int count = 0;
 
-    if (x < 0 || x >= width || y < 0 || y >= height)
-        return 0;
+    if (x < 0 || x >= width || y < 0 || y >= height) return 0;
 
     PUSH(y, x, x, 1);             /* Needed in some cases. */
     PUSH(y+1, x, x, -1);          /* Seed segment (popped 1st). */
@@ -481,13 +478,11 @@ static int iflood(int x, int y, int width, int height,
             count++;
         }
 
-        if (x >= x1)
-            goto skip;
+        if (x >= x1) goto skip;
 
         l = x + 1;
 
-        if (l < x1)
-            PUSH(y, l, x1 - 1, -dy);  /* Leak on left? */
+        if (l < x1) PUSH(y, l, x1 - 1, -dy);  /* Leak on left? */
 
         x = x1 + 1;
 
@@ -499,8 +494,7 @@ static int iflood(int x, int y, int width, int height,
 
             PUSH(y, l, x - 1, dy);
 
-            if (x > x2 + 1)
-                PUSH(y, x2 + 1, x - 1, -dy);  /* Leak on right? */
+            if (x > x2 + 1) PUSH(y, x2 + 1, x - 1, -dy);  /* Leak on right? */
 
             skip:
 
@@ -548,8 +542,7 @@ static int alg_labeling(struct context *cnt)
             }
 
             /* Already visited by iflood */
-            if (labels[pixelpos] > 0)
-                continue;
+            if (labels[pixelpos] > 0) continue;
 
             labelsize = iflood(ix, iy, width, height, out, labels, current_label, 0);
 
@@ -563,8 +556,9 @@ static int alg_labeling(struct context *cnt)
                     labelsize = iflood(ix, iy, width, height, out, labels, current_label + 32768, current_label);
                     imgs->labelgroup_max += labelsize;
                     imgs->labels_above++;
-                } else if(max_under < labelsize)
+                } else if(max_under < labelsize) {
                     max_under = labelsize;
+                }
 
                 if (imgs->labelsize_max < labelsize) {
                     imgs->labelsize_max = labelsize;
@@ -627,10 +621,11 @@ static int dilate9(unsigned char *img, int width, int height, void *buffer)
         row3 = rowTemp;
 
         /* If we're at the last row, fill with zeros, otherwise copy from img. */
-        if (y == height - 1)
+        if (y == height - 1) {
             memset(row3, 0, width);
-        else
+        } else {
             memcpy(row3, yp+width, width);
+        }
 
         /* Init slots 0 and 1 in the moving window. */
         window[0] = MAX3(row1[0], row2[0], row3[0]);
@@ -652,10 +647,11 @@ static int dilate9(unsigned char *img, int width, int height, void *buffer)
              * If the value is larger than the current max, use it. Otherwise,
              * calculate a new max (because the new value may not be the max.
              */
-            if (latest >= blob)
+            if (latest >= blob) {
                 blob = latest;
-            else
+            } else {
                 blob = MAX3(window[0], window[1], window[2]);
+            }
 
             /* Write the max value (blob) to the image. */
             if (blob != 0) {
@@ -664,8 +660,7 @@ static int dilate9(unsigned char *img, int width, int height, void *buffer)
             }
 
             /* Wrap around the window index if necessary. */
-            if (++widx == 3)
-                widx = 0;
+            if (++widx == 3) widx = 0;
         }
 
         /* Store zeros in the vertical sides. */
@@ -710,10 +705,11 @@ static int dilate5(unsigned char *img, int width, int height, void *buffer)
         row3 = rowTemp;
 
         /* If we're at the last row, fill with zeros, otherwise copy from img. */
-        if (y == height - 1)
+        if (y == height - 1) {
             memset(row3, 0, width);
-        else
+        } else {
             memcpy(row3, yp + width, width);
+        }
 
         /* Init mem and set blob to force an evaluation of the entire + shape. */
         mem = MAX2(row2[0], row2[1]);
@@ -766,10 +762,11 @@ static int erode9(unsigned char *img, int width, int height, void *buffer, unsig
         memcpy(Row1, Row2, width);
         memcpy(Row2, Row3, width);
 
-        if (y == height-1)
+        if (y == height-1) {
             memset(Row3, flag, width);
-        else
+        } else {
             memcpy(Row3, img + (y+1) * width, width);
+        }
 
         for (i = width - 2; i >= 1; i--) {
             if (Row1[i - 1] == 0 ||
@@ -780,10 +777,11 @@ static int erode9(unsigned char *img, int width, int height, void *buffer, unsig
                 Row2[i + 1] == 0 ||
                 Row3[i - 1] == 0 ||
                 Row3[i]     == 0 ||
-                Row3[i + 1] == 0)
+                Row3[i + 1] == 0) {
                 img[y * width + i] = 0;
-            else
+            } else {
                 sum++;
+            }
         }
 
         img[y * width] = img[y * width + width - 1] = flag;
@@ -810,20 +808,22 @@ static int erode5(unsigned char *img, int width, int height, void *buffer, unsig
         memcpy(Row1, Row2, width);
         memcpy(Row2, Row3, width);
 
-        if (y == height-1)
+        if (y == height-1) {
             memset(Row3, flag, width);
-        else
+        } else {
             memcpy(Row3, img + (y + 1) * width, width);
+        }
 
         for (i = width - 2; i >= 1; i--) {
             if (Row1[i]     == 0 ||
                 Row2[i - 1] == 0 ||
                 Row2[i]     == 0 ||
                 Row2[i + 1] == 0 ||
-                Row3[i]     == 0)
+                Row3[i]     == 0) {
                 img[y * width + i] = 0;
-            else
+            } else {
                 sum++;
+            }
         }
 
         img[y * width] = img[y * width + width - 1] = flag;
@@ -847,13 +847,11 @@ int alg_despeckle(struct context *cnt, int olddiffs)
     for (i = 0; i < len; i++) {
         switch (cnt->conf.despeckle_filter[i]) {
         case 'E':
-            if ((diffs = erode9(out, width, height, common_buffer, 0)) == 0)
-                i = len;
+            if ((diffs = erode9(out, width, height, common_buffer, 0)) == 0) i = len;
             done = 1;
             break;
         case 'e':
-            if ((diffs = erode5(out, width, height, common_buffer, 0)) == 0)
-                i = len;
+            if ((diffs = erode5(out, width, height, common_buffer, 0)) == 0) i = len;
             done = 1;
             break;
         case 'D':
@@ -875,8 +873,7 @@ int alg_despeckle(struct context *cnt, int olddiffs)
 
     /* If conf.despeckle_filter contains any valid action EeDdl */
     if (done) {
-        if (done != 2)
-            cnt->imgs.labelsize_max = 0; // Disable Labeling
+        if (done != 2) cnt->imgs.labelsize_max = 0; // Disable Labeling
         return diffs;
     } else {
         cnt->imgs.labelsize_max = 0; // Disable Labeling
@@ -900,23 +897,24 @@ void alg_tune_smartmask(struct context *cnt)
 
     for (i = 0; i < motionsize; i++) {
         /* Decrease smart_mask sensitivity every 5*speed seconds only. */
-        if (smartmask[i] > 0)
-            smartmask[i]--;
+        if (smartmask[i] > 0) smartmask[i]--;
         /* Increase smart_mask sensitivity based on the buffered values. */
         diff = smartmask_buffer[i]/sensitivity;
 
         if (diff) {
-            if (smartmask[i] <= diff + 80)
+            if (smartmask[i] <= diff + 80) {
                 smartmask[i] += diff;
-            else
+            } else {
                 smartmask[i] = 80;
+            }
             smartmask_buffer[i] %= sensitivity;
         }
         /* Transfer raw mask to the final stage when above trigger value. */
-        if (smartmask[i] > 20)
+        if (smartmask[i] > 20) {
             smartmask_final[i] = 0;
-        else
+        } else {
             smartmask_final[i] = 255;
+        }
     }
     /* Further expansion (here:erode due to inverted logic!) of the mask. */
     diff = erode9(smartmask_final, cnt->imgs.width, cnt->imgs.height,
@@ -1168,8 +1166,7 @@ int alg_diff_standard(struct context *cnt, unsigned char *new)
     for (; i > 0; i--) {
         register unsigned char curdiff = (int)(abs(*ref - *new)); /* Using a temp variable is 12% faster. */
         /* Apply fixed mask */
-        if (mask)
-            curdiff = ((int)(curdiff * *mask++) / 255);
+        if (mask) curdiff = ((int)(curdiff * *mask++) / 255);
 
         if (smartmask_speed) {
             if (curdiff > noise) {
@@ -1180,11 +1177,9 @@ int alg_diff_standard(struct context *cnt, unsigned char *new)
                  * speed=10) we add 5 here. NOT related to the 5 at ratio-
                  * calculation.
                  */
-                if (cnt->event_nr != cnt->prev_event)
-                    (*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
+                if (cnt->event_nr != cnt->prev_event) (*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
                 /* Apply smart_mask */
-                if (!*smartmask_final)
-                    curdiff = 0;
+                if (!*smartmask_final) curdiff = 0;
             }
             smartmask_final++;
             smartmask_buffer++;
@@ -1212,8 +1207,7 @@ static char alg_diff_fast(struct context *cnt, int max_n_changes, unsigned char 
     int noise = cnt->noise;
     unsigned char *ref = imgs->ref;
 
-    if (!step % 2)
-        step++;
+    if (!step % 2) step++;
     /* We're checking only 1 of several pixels. */
     max_n_changes /= step;
 
@@ -1223,8 +1217,7 @@ static char alg_diff_fast(struct context *cnt, int max_n_changes, unsigned char 
         register unsigned char curdiff = (int)(abs((char)(*ref - *new))); /* Using a temp variable is 12% faster. */
         if (curdiff >  noise) {
             diffs++;
-            if (diffs > max_n_changes)
-                return 1;
+            if (diffs > max_n_changes) return 1;
         }
         ref += step;
         new += step;
@@ -1242,8 +1235,9 @@ int alg_diff(struct context *cnt, unsigned char *new)
 {
     int diffs = 0;
 
-    if (alg_diff_fast(cnt, cnt->conf.threshold / 2, new))
+    if (alg_diff_fast(cnt, cnt->conf.threshold / 2, new)) {
         diffs = alg_diff_standard(cnt, new);
+    }
 
     return diffs;
 }
@@ -1258,14 +1252,11 @@ int alg_lightswitch(struct context *cnt, int diffs)
 {
     struct images *imgs = &cnt->imgs;
 
-    if (cnt->conf.lightswitch_percent < 0)
-        cnt->conf.lightswitch_percent = 0;
-    if (cnt->conf.lightswitch_percent > 100)
-        cnt->conf.lightswitch_percent = 100;
+    if (cnt->conf.lightswitch_percent < 0) cnt->conf.lightswitch_percent = 0;
+    if (cnt->conf.lightswitch_percent > 100) cnt->conf.lightswitch_percent = 100;
 
     /* Is lightswitch percent of the image changed? */
-    if (diffs > (imgs->motionsize * cnt->conf.lightswitch_percent / 100))
-        return 1;
+    if (diffs > (imgs->motionsize * cnt->conf.lightswitch_percent / 100)) return 1;
 
     return 0;
 }
@@ -1284,15 +1275,12 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
     for (y = 0; y < cnt->imgs.height; y++) {
         line = 0;
         for (x = 0; x < cnt->imgs.width; x++) {
-            if (*(out++))
-                line++;
+            if (*(out++)) line++;
         }
 
-        if (line > cnt->imgs.width / 18)
-            vertlines++;
+        if (line > cnt->imgs.width / 18) vertlines++;
 
-        if (line > linediff * 2)
-            lines++;
+        if (line > linediff * 2) lines++;
     }
 
     if (vertlines > cnt->imgs.height / 10 && lines < vertlines / 3 &&
@@ -1332,8 +1320,8 @@ void alg_update_reference_frame(struct context *cnt, int action)
     unsigned char *smartmask = cnt->imgs.smartmask_final;
     unsigned char *out = cnt->imgs.img_motion.image_norm;
 
-    if (cnt->lastrate > 5)  /* Match rate limit */
-        accept_timer /= (cnt->lastrate / 3);
+    /* Match rate limit */
+    if (cnt->lastrate > 5) accept_timer /= (cnt->lastrate / 3);
 
     if (action == UPDATE_REF_FRAME) { /* Black&white only for better performance. */
         threshold_ref = cnt->noise * EXCLUDE_LEVEL_PERCENT / 100;

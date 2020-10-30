@@ -1889,7 +1889,7 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data)
         if ((cnt->rtsp->status == RTSP_RECONNECTING) ||
             (cnt->rtsp->status == RTSP_NOTCONNECTED)){
                 return 1;
-            }
+        }
         pthread_mutex_lock(&cnt->rtsp->mutex);
             netcam_rtsp_pktarray_resize(cnt, FALSE);
             memcpy(img_data->image_norm
@@ -1900,8 +1900,9 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data)
 
         if (cnt->rtsp_high){
             if ((cnt->rtsp_high->status == RTSP_RECONNECTING) ||
-                (cnt->rtsp_high->status == RTSP_NOTCONNECTED)) return 1;
-
+                (cnt->rtsp_high->status == RTSP_NOTCONNECTED)){
+                return 1;
+            }
             pthread_mutex_lock(&cnt->rtsp_high->mutex);
                 netcam_rtsp_pktarray_resize(cnt, TRUE);
                 if (!(cnt->rtsp_high->high_resolution && cnt->rtsp_high->passthrough)) {
@@ -1920,8 +1921,9 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data)
 
     #else  /* No FFmpeg/Libav */
         /* Stop compiler warnings */
-        if ((cnt) || (img_data))
+        if ((cnt) || (img_data)) {
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("FFmpeg/Libav not found on computer.  No RTSP support"));
+        }
         return -1;
     #endif /* End #ifdef HAVE_FFMPEG */
 }
