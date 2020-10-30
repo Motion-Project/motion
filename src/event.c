@@ -126,8 +126,7 @@ static void event_beep(struct context *cnt, motion_event type ATTRIBUTE_UNUSED,
             void *ftype ATTRIBUTE_UNUSED,
             struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
-    if (!cnt->conf.quiet)
-        printf("\a");
+    if (!cnt->conf.quiet) printf("\a");
 }
 
 /**
@@ -145,11 +144,13 @@ static void on_picture_save_command(struct context *cnt,
 {
     int filetype = (unsigned long)arg;
 
-    if ((filetype & FTYPE_IMAGE_ANY) != 0 && cnt->conf.on_picture_save)
+    if ((filetype & FTYPE_IMAGE_ANY) != 0 && cnt->conf.on_picture_save) {
         exec_command(cnt, cnt->conf.on_picture_save, filename, filetype);
+    }
 
-    if ((filetype & FTYPE_MPEG_ANY) != 0 && cnt->conf.on_movie_start)
+    if ((filetype & FTYPE_MPEG_ANY) != 0 && cnt->conf.on_movie_start) {
         exec_command(cnt, cnt->conf.on_movie_start, filename, filetype);
+    }
 }
 
 static void on_motion_detected_command(struct context *cnt,
@@ -158,8 +159,9 @@ static void on_motion_detected_command(struct context *cnt,
             char *dummy2 ATTRIBUTE_UNUSED, void *dummy3 ATTRIBUTE_UNUSED,
             struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
-    if (cnt->conf.on_motion_detected)
+    if (cnt->conf.on_motion_detected) {
         exec_command(cnt, cnt->conf.on_motion_detected, NULL, 0);
+    }
 }
 
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3) || defined(HAVE_MARIADB)
@@ -309,8 +311,7 @@ static void event_sqlnewfile(struct context *cnt, motion_event type  ATTRIBUTE_U
     int sqltype = (unsigned long)arg;
 
     /* Only log the file types we want */
-    if (!(cnt->conf.database_type) || (sqltype & cnt->sql_mask) == 0)
-        return;
+    if (!(cnt->conf.database_type) || (sqltype & cnt->sql_mask) == 0) return;
 
     /*
      * We place the code in a block so we only spend time making space in memory
@@ -333,8 +334,7 @@ static void event_sqlfileclose(struct context *cnt, motion_event type  ATTRIBUTE
     int sqltype = (unsigned long)arg;
 
     /* Only log the file types we want */
-    if (!(cnt->conf.database_type) || (sqltype & cnt->sql_mask) == 0)
-        return;
+    if (!(cnt->conf.database_type) || (sqltype & cnt->sql_mask) == 0) return;
 
     /*
      * We place the code in a block so we only spend time making space in memory
@@ -358,8 +358,9 @@ static void on_area_command(struct context *cnt,
             char *dummy2 ATTRIBUTE_UNUSED, void *dummy3 ATTRIBUTE_UNUSED,
             struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
-    if (cnt->conf.on_area_detected)
+    if (cnt->conf.on_area_detected) {
         exec_command(cnt, cnt->conf.on_area_detected, NULL, 0);
+    }
 }
 
 static void on_event_start_command(struct context *cnt,
@@ -368,8 +369,9 @@ static void on_event_start_command(struct context *cnt,
             char *dummy2 ATTRIBUTE_UNUSED, void *dummy3 ATTRIBUTE_UNUSED,
             struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
-    if (cnt->conf.on_event_start)
+    if (cnt->conf.on_event_start) {
         exec_command(cnt, cnt->conf.on_event_start, NULL, 0);
+    }
 }
 
 static void on_event_end_command(struct context *cnt,
@@ -378,8 +380,9 @@ static void on_event_end_command(struct context *cnt,
             char *dummy2 ATTRIBUTE_UNUSED, void *dummy3 ATTRIBUTE_UNUSED,
             struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
-    if (cnt->conf.on_event_end)
+    if (cnt->conf.on_event_end) {
         exec_command(cnt, cnt->conf.on_event_end, NULL, 0);
+    }
 }
 
 static void event_stream_put(struct context *cnt,
@@ -487,20 +490,19 @@ static void event_vlp_putpipe(struct context *cnt,
             struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
     if (*(int *)devpipe >= 0) {
-        if (vlp_putpipe(*(int *)devpipe, img_data->image_norm, cnt->imgs.size_norm) == -1)
+        if (vlp_putpipe(*(int *)devpipe, img_data->image_norm, cnt->imgs.size_norm) == -1) {
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                 ,_("Failed to put image into video pipe"));
+        }
     }
 }
 #endif /* defined(HAVE_V4L2) && !defined(BSD)  */
 
 const char *imageext(struct context *cnt)
 {
-    if (cnt->imgs.picture_type == IMAGE_TYPE_PPM)
-        return "ppm";
+    if (cnt->imgs.picture_type == IMAGE_TYPE_PPM) return "ppm";
 
-    if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP)
-        return "webp";
+    if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP) return "webp";
 
     return "jpg";
 }
@@ -521,10 +523,11 @@ static void event_image_detect(struct context *cnt,
          *  conf.imagepath would normally be defined but if someone deleted it by control interface
          *  it is better to revert to the default than fail
          */
-        if (cnt->conf.picture_filename)
+        if (cnt->conf.picture_filename) {
             imagepath = cnt->conf.picture_filename;
-        else
+        } else {
             imagepath = DEF_IMAGEPATH;
+        }
 
         mystrftime(cnt, filename, sizeof(filename), imagepath, currenttime_tv, NULL, 0);
         snprintf(fullfilename, PATH_MAX, "%.*s/%.*s.%s"
@@ -560,10 +563,11 @@ static void event_imagem_detect(struct context *cnt,
          *  conf.picture_filename would normally be defined but if someone deleted it by control interface
          *  it is better to revert to the default than fail
          */
-        if (cnt->conf.picture_filename)
+        if (cnt->conf.picture_filename) {
             imagepath = cnt->conf.picture_filename;
-        else
+        } else {
             imagepath = DEF_IMAGEPATH;
+        }
 
         mystrftime(cnt, filename, sizeof(filename), imagepath, currenttime_tv, NULL, 0);
 
@@ -592,8 +596,7 @@ static void event_image_snapshot(struct context *cnt,
     int offset = 0;
     int len = strlen(cnt->conf.snapshot_filename);
 
-    if (len >= 9)
-        offset = len - 8;
+    if (len >= 9) offset = len - 8;
 
     if (strcmp(cnt->conf.snapshot_filename+offset, "lastsnap")) {
         char linkpath[PATH_MAX];
@@ -602,10 +605,11 @@ static void event_image_snapshot(struct context *cnt,
          *  conf.snapshot_filename would normally be defined but if someone deleted it by control interface
          *  it is better to revert to the default than fail
          */
-        if (cnt->conf.snapshot_filename)
+        if (cnt->conf.snapshot_filename) {
             snappath = cnt->conf.snapshot_filename;
-        else
+        } else {
             snappath = DEF_SNAPPATH;
+        }
 
         mystrftime(cnt, filepath, sizeof(filepath), snappath, currenttime_tv, NULL, 0);
         snprintf(filename, PATH_MAX, "%.*s.%s"
@@ -727,10 +731,11 @@ static void event_image_preview(struct context *cnt,
              * conf.picture_filename would normally be defined but if someone deleted it by
              * control interface it is better to revert to the default than fail.
              */
-            if (cnt->conf.picture_filename)
+            if (cnt->conf.picture_filename) {
                 imagepath = cnt->conf.picture_filename;
-            else
+            } else {
                 imagepath = (char *)DEF_IMAGEPATH;
+            }
 
             mystrftime(cnt, filename, sizeof(filename), imagepath, &cnt->imgs.preview_image.timestamp_tv, NULL, 0);
             snprintf(previewname, PATH_MAX, "%.*s/%.*s.%s"
@@ -759,8 +764,9 @@ static void event_camera_lost(struct context *cnt,
             struct image_data *img_data ATTRIBUTE_UNUSED, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
-    if (cnt->conf.on_camera_lost)
+    if (cnt->conf.on_camera_lost) {
         exec_command(cnt, cnt->conf.on_camera_lost, NULL, 0);
+    }
 }
 
 static void event_camera_found(struct context *cnt,
@@ -768,8 +774,9 @@ static void event_camera_found(struct context *cnt,
             struct image_data *img_data ATTRIBUTE_UNUSED, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
-    if (cnt->conf.on_camera_found)
+    if (cnt->conf.on_camera_found) {
         exec_command(cnt, cnt->conf.on_camera_found, NULL, 0);
+    }
 }
 
 static void on_movie_end_command(struct context *cnt,
@@ -779,8 +786,9 @@ static void on_movie_end_command(struct context *cnt,
 {
     int filetype = (unsigned long) arg;
 
-    if ((filetype & FTYPE_MPEG_ANY) && cnt->conf.on_movie_end)
+    if ((filetype & FTYPE_MPEG_ANY) && cnt->conf.on_movie_end) {
         exec_command(cnt, cnt->conf.on_movie_end, filename, filetype);
+    }
 }
 
 static void event_extpipe_end(struct context *cnt,
@@ -839,10 +847,8 @@ static void event_create_extpipe(struct context *cnt,
             } else if (errno ==  ENOENT) {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     ,_("path not found, trying to create it %s ..."), cnt->conf.target_dir);
-                if (create_path(cnt->extpipefilename) == -1)
-                    return ;
-            }
-            else {
+                if (create_path(cnt->extpipefilename) == -1) return ;
+            } else {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     ,_("error accesing path %s"), cnt->conf.target_dir);
                 return ;
@@ -850,8 +856,7 @@ static void event_create_extpipe(struct context *cnt,
         }
 
         /* Always create any path specified as file name */
-        if (create_path(cnt->extpipefilename) == -1)
-            return ;
+        if (create_path(cnt->extpipefilename) == -1) return ;
 
         mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.movie_extpipe, currenttime_tv, cnt->extpipefilename, 0);
 
@@ -892,13 +897,15 @@ static void event_extpipe_put(struct context *cnt,
         /* Check that is open */
         if ((cnt->extpipe_open) && (fileno(cnt->extpipe) > 0)) {
             if ((cnt->imgs.size_high > 0) && (!passthrough)){
-                if (!fwrite(img_data->image_high, cnt->imgs.size_high, 1, cnt->extpipe))
+                if (!fwrite(img_data->image_high, cnt->imgs.size_high, 1, cnt->extpipe)) {
                     MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                         ,_("Error writing in pipe , state error %d"), ferror(cnt->extpipe));
+                }
             } else {
-                if (!fwrite(img_data->image_norm, cnt->imgs.size_norm, 1, cnt->extpipe))
+                if (!fwrite(img_data->image_norm, cnt->imgs.size_norm, 1, cnt->extpipe)) {
                     MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                         ,_("Error writing in pipe , state error %d"), ferror(cnt->extpipe));
+                }
            }
         } else {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
@@ -937,17 +944,17 @@ static void event_ffmpeg_newfile(struct context *cnt,
     long codenbr;
     int retcd;
 
-    if (!cnt->conf.movie_output && !cnt->conf.movie_output_motion)
-        return;
+    if (!cnt->conf.movie_output && !cnt->conf.movie_output_motion) return;
 
     /*
      *  conf.mpegpath would normally be defined but if someone deleted it by control interface
      *  it is better to revert to the default than fail
      */
-    if (cnt->conf.movie_filename)
+    if (cnt->conf.movie_filename) {
         moviepath = cnt->conf.movie_filename;
-    else
+    } else {
         moviepath = DEF_MOVIEPATH;
+    }
 
     mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tv, NULL, 0);
 
@@ -1126,10 +1133,11 @@ static void event_ffmpeg_timelapse(struct context *cnt,
          *  conf.timelapse_filename would normally be defined but if someone deleted it by control interface
          *  it is better to revert to the default than fail
          */
-        if (cnt->conf.timelapse_filename)
+        if (cnt->conf.timelapse_filename) {
             timepath = cnt->conf.timelapse_filename;
-        else
+        } else {
             timepath = DEF_TIMEPATH;
+        }
 
         mystrftime(cnt, tmp, sizeof(tmp), timepath, currenttime_tv, NULL, 0);
 
@@ -1423,7 +1431,8 @@ void event(struct context *cnt, motion_event type, struct image_data *img_data,
     int i=-1;
 
     while (event_handlers[++i].handler) {
-        if (type == event_handlers[i].type)
+        if (type == event_handlers[i].type) {
             event_handlers[i].handler(cnt, type, img_data, filename, eventdata, tv1);
+        }
     }
 }

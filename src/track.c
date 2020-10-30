@@ -75,8 +75,7 @@ unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
 {
     struct coord cent;
 
-    if (!manual && !cnt->track.active)
-        return 0;
+    if (!manual && !cnt->track.active) return 0;
 
     if (cnt->track.type == TRACK_TYPE_STEPPER) {
         unsigned int ret;
@@ -84,20 +83,22 @@ unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
         if (!ret) {
             MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO,_("internal error"));
             return 0;
+        } else {
+            return ret;
         }
-        else return ret;
     } else if (cnt->track.type == TRACK_TYPE_SERVO) {
         return servo_center(cnt, xoff, yoff);
-    }
-    #ifdef HAVE_V4L2
-        else if (cnt->track.type == TRACK_TYPE_PWC)
+
+    #ifdef HAVE_V4L2    /*dreadful coding method imo */
+        } else if (cnt->track.type == TRACK_TYPE_PWC) {
             return lqos_center(cnt, dev, xoff, yoff);
-        else if (cnt->track.type == TRACK_TYPE_UVC)
+        } else if (cnt->track.type == TRACK_TYPE_UVC) {
             return uvc_center(cnt, dev, xoff, yoff);
     #endif
-    else if (cnt->track.type == TRACK_TYPE_IOMOJO)
+
+    } else if (cnt->track.type == TRACK_TYPE_IOMOJO) {
         return iomojo_center(cnt, xoff, yoff);
-    else if (cnt->track.type == TRACK_TYPE_GENERIC) {
+    } else if (cnt->track.type == TRACK_TYPE_GENERIC) {
         if (cnt->track.generic_move){
             cent.x = -cnt->track_posx;
             cent.y = -cnt->track_posy;
@@ -118,26 +119,28 @@ unsigned int track_move(struct context *cnt, int dev, struct coord *cent, struct
                         unsigned int manual)
 {
 
-    if (!manual && !cnt->track.active)
-        return 0;
+    if (!manual && !cnt->track.active) return 0;
 
-    if (cnt->track.type == TRACK_TYPE_STEPPER)
+    if (cnt->track.type == TRACK_TYPE_STEPPER) {
         return stepper_move(cnt, cent, imgs);
-    else if (cnt->track.type == TRACK_TYPE_SERVO)
+    } else if (cnt->track.type == TRACK_TYPE_SERVO) {
         return servo_move(cnt, cent, imgs, manual);
+
     #ifdef HAVE_V4L2
-        else if (cnt->track.type == TRACK_TYPE_PWC)
+        } else if (cnt->track.type == TRACK_TYPE_PWC) {
             return lqos_move(cnt, dev, cent, imgs, manual);
-        else if (cnt->track.type == TRACK_TYPE_UVC)
+        } else if (cnt->track.type == TRACK_TYPE_UVC) {
             return uvc_move(cnt, dev, cent, imgs, manual);
     #endif
-    else if (cnt->track.type == TRACK_TYPE_IOMOJO)
+
+    } else if (cnt->track.type == TRACK_TYPE_IOMOJO) {
         return iomojo_move(cnt, dev, cent, imgs);
-    else if (cnt->track.type == TRACK_TYPE_GENERIC) {
-        if (cnt->track.generic_move)
+    } else if (cnt->track.type == TRACK_TYPE_GENERIC) {
+        if (cnt->track.generic_move) {
           return generic_move(cnt, TRACK_MOVE, manual, 0, 0, cent, imgs);
-        else
+        } else {
           return cnt->track.move_wait; // FIX ME. I chose to return something reasonable.
+        }
     }
 
     MOTION_LOG(WRN, TYPE_TRACK, SHOW_ERRNO
@@ -299,8 +302,9 @@ static unsigned int stepper_move(struct context *cnt,
 
     data = data * cnt->track.stepsize / imgs->height;
 
-    if (data)
+    if (data) {
         stepper_command(cnt, cnt->track.motory, command, data);
+    }
 
 
     return cnt->track.move_wait;
@@ -427,10 +431,11 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
 
 
             if ((cnt->track.motorx_reverse && (offset > 0)) ||
-                (!cnt->track.motorx_reverse && (offset < 0)))
+                (!cnt->track.motorx_reverse && (offset < 0))) {
                 command = SERVO_COMMAND_LEFT_N;
-            else
+            } else {
                 command = SERVO_COMMAND_RIGHT_N;
+            }
 
             data = abs(offset);
 
@@ -453,10 +458,11 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
             offset = cent->y * cnt->track.stepsize;
 
             if ((cnt->track.motory_reverse && (offset > 0)) ||
-                (!cnt->track.motory_reverse && (offset < 0)))
+                (!cnt->track.motory_reverse && (offset < 0))) {
                 command = SERVO_COMMAND_UP_N;
-            else
+            } else {
                 command = SERVO_COMMAND_DOWN_N;
+            }
 
             data = abs(offset);
 

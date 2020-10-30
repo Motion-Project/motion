@@ -259,7 +259,7 @@ void rotate_init(struct context *cnt)
      * Allocate memory if rotating 90 or 270 degrees, because those rotations
      * cannot be performed in-place (they can, but it would be too slow).
      */
-    if ((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270)){
+    if ((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270)) {
         cnt->rotate_data.buffer_norm = mymalloc(size_norm);
         if (size_high > 0 ) cnt->rotate_data.buffer_high = mymalloc(size_high);
     }
@@ -280,11 +280,9 @@ void rotate_init(struct context *cnt)
 void rotate_deinit(struct context *cnt)
 {
 
-    if (cnt->rotate_data.buffer_norm)
-        free(cnt->rotate_data.buffer_norm);
+    if (cnt->rotate_data.buffer_norm) free(cnt->rotate_data.buffer_norm);
 
-    if (cnt->rotate_data.buffer_high)
-        free(cnt->rotate_data.buffer_high);
+    if (cnt->rotate_data.buffer_high) free(cnt->rotate_data.buffer_high);
 }
 
 /**

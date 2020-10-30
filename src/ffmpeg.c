@@ -217,8 +217,7 @@ static int ffmpeg_timelapse_exists(const char *fname)
 {
     FILE *file;
     file = fopen(fname, "r");
-    if (file)
-    {
+    if (file) {
         fclose(file);
         return 1;
     }
@@ -251,8 +250,8 @@ static int ffmpeg_lockmgr_cb(void **arg, enum AVLockOp op)
     switch (op) {
     case AV_LOCK_CREATE:
         mutex = malloc(sizeof(*mutex));
-        if (!mutex)
-            return AVERROR(ENOMEM);
+        if (!mutex) return AVERROR(ENOMEM);
+
         if ((err = pthread_mutex_init(mutex, NULL))) {
             free(mutex);
             return AVERROR(err);
@@ -260,18 +259,15 @@ static int ffmpeg_lockmgr_cb(void **arg, enum AVLockOp op)
         *arg = mutex;
         return 0;
     case AV_LOCK_OBTAIN:
-        if ((err = pthread_mutex_lock(mutex)))
-            return AVERROR(err);
+        if ((err = pthread_mutex_lock(mutex))) return AVERROR(err);
 
         return 0;
     case AV_LOCK_RELEASE:
-        if ((err = pthread_mutex_unlock(mutex)))
-            return AVERROR(err);
+        if ((err = pthread_mutex_unlock(mutex))) return AVERROR(err);
 
         return 0;
     case AV_LOCK_DESTROY:
-        if (mutex)
-            pthread_mutex_destroy(mutex);
+        if (mutex) pthread_mutex_destroy(mutex);
         free(mutex);
         *arg = NULL;
         return 0;
@@ -530,8 +526,7 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg)
         ffmpeg->pkt.size = retcd;
         ffmpeg->pkt.data = video_outbuf;
 
-        if (ffmpeg->picture->key_frame == 1)
-        ffmpeg->pkt.flags |= AV_PKT_FLAG_KEY;
+        if (ffmpeg->picture->key_frame == 1) ffmpeg->pkt.flags |= AV_PKT_FLAG_KEY;
 
         ffmpeg->pkt.pts = ffmpeg->picture->pts;
         ffmpeg->pkt.dts = ffmpeg->pkt.pts;
@@ -638,8 +633,7 @@ static int ffmpeg_set_quality(struct ffmpeg *ffmpeg)
     if (ffmpeg->quality > 100) ffmpeg->quality = 100;
     if (ffmpeg->ctx_codec->codec_id == MY_CODEC_ID_H264 ||
         ffmpeg->ctx_codec->codec_id == MY_CODEC_ID_HEVC){
-        if (ffmpeg->quality <= 0)
-            ffmpeg->quality = 45; // default to 45% quality
+        if (ffmpeg->quality <= 0) ffmpeg->quality = 45; // default to 45% quality
         av_dict_set(&ffmpeg->opts, "preset", "ultrafast", 0);
         av_dict_set(&ffmpeg->opts, "tune", "zerolatency", 0);
         /* This next if statement needs validation.  Are mpeg4omx
@@ -652,8 +646,10 @@ static int ffmpeg_set_quality(struct ffmpeg *ffmpeg)
             // bit_rate = ffmpeg->width * ffmpeg->height * ffmpeg->fps * quality_factor
             ffmpeg->quality = (int)(((int64_t)ffmpeg->width * ffmpeg->height * ffmpeg->fps * ffmpeg->quality) >> 7);
             // Clip bit rate to min
-            if (ffmpeg->quality < 4000) // magic number
+            if (ffmpeg->quality < 4000) {
+                // magic number
                 ffmpeg->quality = 4000;
+            }
             ffmpeg->ctx_codec->profile = FF_PROFILE_H264_HIGH;
             ffmpeg->ctx_codec->bit_rate = ffmpeg->quality;
         } else {
@@ -708,8 +704,9 @@ static const char *ffmpeg_codec_is_blacklisted(const char *codec_name)
     i_mx = (size_t)(sizeof(blacklisted_codec)/sizeof(blacklisted_codec[0]));
 
     for (i = 0; i < i_mx; i++) {
-        if (strcmp(codec_name, blacklisted_codec[i].codec_name) == 0)
+        if (strcmp(codec_name, blacklisted_codec[i].codec_name) == 0) {
             return blacklisted_codec[i].reason;
+        }
     }
     return NULL;
 }
@@ -736,8 +733,9 @@ static int ffmpeg_set_codec_preferred(struct ffmpeg *ffmpeg)
             }
         }
     }
-    if (!ffmpeg->codec)
+    if (!ffmpeg->codec) {
         ffmpeg->codec = avcodec_find_encoder(ffmpeg->oc->oformat->video_codec);
+    }
     if (!ffmpeg->codec) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Codec %s not found"), ffmpeg->codec_name);
@@ -755,8 +753,9 @@ static int ffmpeg_set_codec_preferred(struct ffmpeg *ffmpeg)
         ffmpeg->preferred_codec = USER_CODEC_DEFAULT;
     }
 
-    if (ffmpeg->codec_name[codec_name_len])
+    if (ffmpeg->codec_name[codec_name_len]) {
         MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO,_("Using codec %s"), ffmpeg->codec->name);
+    }
 
     return 0;
 
@@ -920,23 +919,20 @@ static int ffmpeg_alloc_video_buffer(AVFrame *frame, int align)
     int ret, i, padded_height;
     int plane_padding = FFMAX(16 + 16/*STRIDE_ALIGN*/, align);
 
-    if (!desc)
-        return AVERROR(EINVAL);
+    if (!desc) return AVERROR(EINVAL);
 
-    if ((ret = av_image_check_size(frame->width, frame->height, 0, NULL)) < 0)
+    if ((ret = av_image_check_size(frame->width, frame->height, 0, NULL)) < 0) {
         return ret;
+    }
 
     if (!frame->linesize[0]) {
-        if (align <= 0)
-            align = 32; /* STRIDE_ALIGN. Should be av_cpu_max_align() */
+        if (align <= 0) align = 32; /* STRIDE_ALIGN. Should be av_cpu_max_align() */
 
         for(i=1; i<=align; i+=i) {
             ret = av_image_fill_linesizes(frame->linesize, frame->format,
                                           FFALIGN(frame->width, i));
-            if (ret < 0)
-                return ret;
-            if (!(frame->linesize[0] & (align-1)))
-                break;
+            if (ret < 0) return ret;
+            if (!(frame->linesize[0] & (align-1))) break;
         }
 
         for (i = 0; i < 4 && frame->linesize[i]; i++)
@@ -945,8 +941,9 @@ static int ffmpeg_alloc_video_buffer(AVFrame *frame, int align)
 
     padded_height = FFALIGN(frame->height, 32);
     if ((ret = av_image_fill_pointers(frame->data, frame->format, padded_height,
-                                      NULL, frame->linesize)) < 0)
+                                      NULL, frame->linesize)) < 0){
         return ret;
+    }
 
     frame->buf[0] = av_buffer_alloc(ret + 4*plane_padding);
     if (!frame->buf[0]) {
@@ -984,8 +981,9 @@ static int ffmpeg_set_picture(struct ffmpeg *ffmpeg)
     }
 
     /* Take care of variable bitrate setting. */
-    if (ffmpeg->quality)
+    if (ffmpeg->quality) {
         ffmpeg->picture->quality = ffmpeg->quality;
+    }
 
     ffmpeg->picture->linesize[0] = ffmpeg->ctx_codec->width;
     ffmpeg->picture->linesize[1] = ffmpeg->ctx_codec->width / 2;
@@ -1401,8 +1399,7 @@ void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUT
         /* Flatten the message coming in from avcodec. */
         vsnprintf(buf, sizeof(buf), fmt, vl);
         end = buf + strlen(buf);
-        if (end > buf && end[-1] == '\n')
-        {
+        if (end > buf && end[-1] == '\n') {
             *--end = 0;
         }
 
@@ -1484,8 +1481,7 @@ void ffmpeg_global_init(void)
             /* TODO: Determine if this is even needed for older versions */
             int ret;
             ret = av_lockmgr_register(ffmpeg_lockmgr_cb);
-            if (ret < 0)
-            {
+            if (ret < 0) {
                 MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, _("av_lockmgr_register failed (%d)"), ret);
                 exit(1);
             }
@@ -1501,8 +1497,7 @@ void ffmpeg_global_deinit(void)
         avformat_network_deinit();
         #if ( MYFFVER < 58000)
             /* TODO Determine if this is even needed for old versions */
-            if (av_lockmgr_register(NULL) < 0)
-            {
+            if (av_lockmgr_register(NULL) < 0) {
                 MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
                     ,_("av_lockmgr_register reset failed on cleanup"));
             }
@@ -1672,8 +1667,9 @@ void ffmpeg_reset_movie_start_time(struct ffmpeg *ffmpeg, const struct timeval *
 {
     #ifdef HAVE_FFMPEG
         int64_t one_frame_interval = av_rescale_q(1,(AVRational){1, ffmpeg->fps},ffmpeg->video_st->time_base);
-        if (one_frame_interval <= 0)
+        if (one_frame_interval <= 0) {
             one_frame_interval = 1;
+        }
         ffmpeg->base_pts = ffmpeg->last_pts + one_frame_interval;
 
         ffmpeg->start_time.tv_sec = tv1->tv_sec;

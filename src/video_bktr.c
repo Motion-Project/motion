@@ -323,8 +323,9 @@ static int bktr_set_geometry(struct video_dev *viddev, int width, int height)
         h_max = BKTR_PAL_HEIGHT;
     }
 
-    if (height <= h_max / 2)
+    if (height <= h_max / 2) {
         geom.oformat |= METEOR_GEO_EVEN_ONLY;
+    }
 
     geom.frames = 1;
 
@@ -510,10 +511,11 @@ static unsigned char *bktr_device_init(struct video_dev *viddev, int width, int 
         }
     }
 
-    if (viddev->bktr_method == METEOR_CAP_CONTINOUS)
+    if (viddev->bktr_method == METEOR_CAP_CONTINOUS) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "METEORCAPTUR METEOR_CAP_CONTINOUS");
-    else
+    } else {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "METEORCAPTUR METEOR_CAP_SINGLE");
+    }
 
     SLEEP(1, 0);
 
@@ -567,14 +569,16 @@ static int bktr_capture(struct video_dev *viddev, unsigned char *map, int width,
     cap_map = viddev->bktr_buffers[viddev->bktr_curbuffer];
 
     viddev->bktr_curbuffer++;
-    if (viddev->bktr_curbuffer >= viddev->bktr_maxbuffer)
+    if (viddev->bktr_curbuffer >= viddev->bktr_maxbuffer) {
         viddev->bktr_curbuffer = 0;
+    }
 
     /* Capture */
 
     if (viddev->bktr_method == METEOR_CAP_CONTINOUS) {
-        if (bktr_frame_waiting)
+        if (bktr_frame_waiting) {
             bktr_frame_waiting = 0;
+        }
 
     } else if (ioctl(dev_bktr, METEORCAPTUR, &single) < 0) {
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
@@ -631,20 +635,17 @@ static void bktr_set_input(struct context *cnt, struct video_dev *viddev, unsign
         int dummy;
         long frequnits = freq;
 
-        if ((dummy = bktr_set_input_device(viddev, input)) == -1)
-            return;
+        if ((dummy = bktr_set_input_device(viddev, input)) == -1) return;
 
         viddev->input = dummy;
 
-        if ((dummy = bktr_set_input_format(viddev, norm)) == -1)
-            return;
+        if ((dummy = bktr_set_input_format(viddev, norm)) == -1) return;
 
         viddev->norm = dummy;
 
         if ((viddev->bktr_tuner != NULL) && (viddev->input == BKTR_IN_TV) &&
             (frequnits > 0)) {
-            if (bktr_set_freq(viddev, freq) == -1)
-                return;
+            if (bktr_set_freq(viddev, freq) == -1) return;
         }
 
         bktr_picture_controls(cnt, viddev);
@@ -693,8 +694,7 @@ void bktr_cleanup(struct context *cnt)
         pthread_mutex_lock(&bktr_mutex);
 
         while (dev) {
-            if (dev->fd_device == cnt->video_dev)
-                break;
+            if (dev->fd_device == cnt->video_dev) break;
             prev = dev;
             dev = dev->next;
         }
@@ -730,8 +730,9 @@ void bktr_cleanup(struct context *cnt)
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 ,_("Closing video device %s"), dev->video_device);
 
-            if (dev->bktr_fdtuner > 0)
+            if (dev->bktr_fdtuner > 0) {
                 close(dev->bktr_fdtuner);
+            }
 
             if (dev->fd_device > 0) {
                 if (dev->bktr_method == METEOR_CAP_CONTINOUS) {
@@ -750,10 +751,11 @@ void bktr_cleanup(struct context *cnt)
             pthread_mutex_lock(&bktr_mutex);
 
             /* Remove from list */
-            if (prev == NULL)
+            if (prev == NULL) {
                 viddevs = dev->next;
-            else
+            } else {
                 prev->next = dev->next;
+            }
 
             pthread_mutex_unlock(&bktr_mutex);
 
@@ -981,8 +983,7 @@ int bktr_next(struct context *cnt,  struct image_data *img_data)
         dev = viddevs;
 
         while (dev) {
-            if (dev->fd_device == dev_bktr)
-                break;
+            if (dev->fd_device == dev_bktr) break;
             dev = dev->next;
         }
 

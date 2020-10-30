@@ -386,8 +386,9 @@ int mmalcam_next(struct context *cnt,  struct image_data *img_data)
 {
     mmalcam_context_ptr mmalcam;
 
-    if ((!cnt) || (!cnt->mmalcam))
+    if ((!cnt) || (!cnt->mmalcam)) {
         return NETCAM_FATAL_ERROR;
+    }
 
     mmalcam = cnt->mmalcam;
 
@@ -415,9 +416,10 @@ int mmalcam_next(struct context *cnt,  struct image_data *img_data)
             status = mmal_port_send_buffer(mmalcam->camera_capture_port, new_buffer);
         }
 
-        if (!new_buffer || status != MMAL_SUCCESS)
+        if (!new_buffer || status != MMAL_SUCCESS) {
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 ,_("Unable to return a buffer to the camera video port"));
+        }
     }
 
     rotate_map(cnt,img_data);

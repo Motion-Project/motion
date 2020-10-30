@@ -172,6 +172,23 @@ switch (expr) {
         statement;
 }
 
+RULE 5A
+if statements shall always have braces unless it easily on a single line.
+
+GOOD EXAMPLE
+
+if (finish) return;
+
+BAD EXAMPLE
+
+if ((picture=fopen(cnt->conf.mask_file, "r")))
+    fclose(picture);
+else
+    printf("Hello world\n");
+
+
+
+
 
 
 --------------------

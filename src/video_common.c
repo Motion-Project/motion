@@ -678,15 +678,17 @@ int vid_next(struct context *cnt, struct image_data *img_data)
     #endif
 
     if (cnt->camera_type == CAMERA_TYPE_NETCAM) {
-        if (cnt->video_dev == -1)
+        if (cnt->video_dev == -1) {
             return NETCAM_GENERAL_ERROR;
+        }
 
         return netcam_next(cnt, img_data);
     }
 
     if (cnt->camera_type == CAMERA_TYPE_RTSP) {
-        if (cnt->video_dev == -1)
+        if (cnt->video_dev == -1) {
             return NETCAM_GENERAL_ERROR;
+        }
 
         return netcam_rtsp_next(cnt, img_data);
     }

@@ -101,8 +101,9 @@ static void webu_context_init(struct context **cntlst, struct context *cnt, stru
     webui->cam_threads = indx;
 
     webui->cam_count = indx;
-    if (indx > 1)
+    if (indx > 1) {
         webui->cam_count--;
+    }
 
     /* 1 thread, 1 camera = just motion.conf.
      * 2 thread, 1 camera, then using motion.conf plus a separate camera file */

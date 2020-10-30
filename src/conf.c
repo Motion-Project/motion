@@ -2060,8 +2060,9 @@ static void conf_cmdline(struct context *cnt, int thread)
             break;
         case 'd':
             /* No validation - just take what user gives. */
-            if (thread == -1)
+            if (thread == -1) {
                 cnt->log_level = (unsigned int)atoi(optarg);
+            }
             break;
         case 'k':
             if (thread == -1) {
@@ -2230,8 +2231,7 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
             *(end+1) = '\0';
 
             /* If line is only whitespace we continue to the next line. */
-            if (strlen(line) == 0)
-                continue;
+            if (strlen(line) == 0) continue;
 
             /* Trim leading whitespace from the line and find command. */
             beg = line;
@@ -2297,8 +2297,7 @@ void conf_print(struct context **cnt)
 
         conffile = myfopen(cnt[thread]->conf_filename, "w");
 
-        if (!conffile)
-            continue;
+        if (!conffile) continue;
 
         char timestamp[32];
         time_t now = time(0);
@@ -2318,10 +2317,11 @@ void conf_print(struct context **cnt)
                  * If the option is a text_* and first char is a space put
                  * quotation marks around to allow leading spaces.
                  */
-                if (strncmp(config_params[i].param_name, "text", 4) || strncmp(retval, " ", 1))
+                if (strncmp(config_params[i].param_name, "text", 4) || strncmp(retval, " ", 1)) {
                     fprintf(conffile, "%s %s\n\n", config_params[i].param_name, retval);
-                else
+                } else {
                     fprintf(conffile, "%s \"%s\"\n\n", config_params[i].param_name, retval);
+                }
             } else {
                 val = NULL;
                 config_params[i].print(cnt, &val, i, thread);
@@ -2334,19 +2334,21 @@ void conf_print(struct context **cnt)
                 if (val) {
                     fprintf(conffile, "%s\n", config_params[i].param_help);
 
-                    if (strlen(val) > 0)
+                    if (strlen(val) > 0) {
                         fprintf(conffile, "%s\n", val);
-                    else
+                    } else {
                         fprintf(conffile, "; camera %s/camera1.conf\n", sysconfdir);
+                    }
 
                     free(val);
                 } else if (thread == 0) {
                     char value[PATH_MAX];
                     /* The 'camera_dir' option should keep the installed default value */
-                    if (!strncmp(config_params[i].param_name, "camera_dir", 10))
+                    if (!strncmp(config_params[i].param_name, "camera_dir", 10)) {
                         sprintf(value, "%s", sysconfdir"/conf.d");
-                    else
+                    } else {
                         sprintf(value, "%s", "value");
+                    }
 
                     fprintf(conffile, "%s\n", config_params[i].param_help);
                     fprintf(conffile, "; %s %s\n\n", config_params[i].param_name, value);
@@ -2436,10 +2438,11 @@ struct context **conf_load(struct context **cnt)
     if (!fp) {  /* Command-line didn't work, try current dir. */
         char path[PATH_MAX];
 
-        if (cnt[0]->conf_filename[0])
+        if (cnt[0]->conf_filename[0]) {
             MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
                 ,_("Configfile %s not found - trying defaults.")
                 ,filename);
+        }
 
         if (getcwd(path, sizeof(path)) == NULL) {
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error getcwd"));
@@ -2460,10 +2463,11 @@ struct context **conf_load(struct context **cnt)
             snprintf(filename, PATH_MAX, "%s/motion.conf", sysconfdir);
             fp = fopen(filename, "r");
 
-            if (!fp) /* There is no config file.... use defaults. */
+            if (!fp) { /* There is no config file.... use defaults. */
                 MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
                     ,_("could not open configfile %s")
                     ,filename);
+            }
         }
     }
 
@@ -2502,20 +2506,24 @@ struct context **conf_load(struct context **cnt)
         conf_cmdline(cnt[i], i);
 
     /* If pid file was passed from Command-line copy to main thread conf struct. */
-    if (cnt[0]->pid_file[0])
+    if (cnt[0]->pid_file[0]) {
         cnt[0]->conf.pid_file = mystrcpy(cnt[0]->conf.pid_file, cnt[0]->pid_file);
+    }
 
     /* If log file was passed from Command-line copy to main thread conf struct. */
-    if (cnt[0]->log_file[0])
+    if (cnt[0]->log_file[0]) {
         cnt[0]->conf.log_file = mystrcpy(cnt[0]->conf.log_file, cnt[0]->log_file);
+    }
 
     /* If log type string was passed from Command-line copy to main thread conf struct. */
-    if (cnt[0]->log_type_str[0])
+    if (cnt[0]->log_type_str[0]) {
         cnt[0]->conf.log_type = mystrcpy(cnt[0]->conf.log_type, cnt[0]->log_type_str);
+    }
 
     /* if log level was passed from Command-line copy to main thread conf struct. */
-    if (cnt[0]->log_level != -1)
+    if (cnt[0]->log_level != -1) {
         cnt[0]->conf.log_level = cnt[0]->log_level;
+    }
 
     config_parms_intl();
 
@@ -2562,10 +2570,11 @@ void conf_output_parms(struct context **cnt)
                     motion_log(INF, TYPE_ALL, NO_ERRNO,0
                         ,_("%-25s <redacted>"), name);
                 } else {
-                    if (strncmp(name, "text", 4) || strncmp(value, " ", 1))
+                    if (strncmp(name, "text", 4) || strncmp(value, " ", 1)) {
                         motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %s", name, value);
-                    else
+                    } else {
                         motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s \"%s\"", name, value);
+                    }
                 }
             } else {
                 if (t == 0) motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s ", name);
@@ -2656,8 +2665,7 @@ static struct context **copy_bool(struct context **cnt, const char *str, int val
             *((int *)tmp) = 0;
         }
 
-        if (cnt[0]->threadnr)
-            return cnt;
+        if (cnt[0]->threadnr) return cnt;
     }
 
     return cnt;
@@ -2686,8 +2694,7 @@ static struct context **copy_int(struct context **cnt, const char *str, int val_
         } else {
             *((int *)tmp) = atoi(str);
         }
-        if (cnt[0]->threadnr)
-            return cnt;
+        if (cnt[0]->threadnr) return cnt;
     }
 
     return cnt;
@@ -2724,8 +2731,7 @@ struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
          * Set the option on all threads if setting the option
          * for thread 0; otherwise just set that one thread's option.
          */
-        if (cnt[0]->threadnr)
-            return cnt;
+        if (cnt[0]->threadnr) return cnt;
     }
 
     return cnt;
@@ -2763,9 +2769,14 @@ static struct context **copy_video_params(struct context **cnt, const char *conf
     /* If the depreciated option is the default, then just return */
     parmval = atoi(config_val);
     if (!strcmp(dep_config_params[config_indx].name,"power_line_frequency") &&
-        (parmval == -1)) return cnt;
+        (parmval == -1)){
+        return cnt;
+    }
+
     if (strcmp(dep_config_params[config_indx].name,"power_line_frequency") &&
-        (parmval == 0)) return cnt;
+        (parmval == 0)){
+        return cnt;
+    }
 
     /* Remove underscore from parm name and add quotes*/
     if (!strcmp(dep_config_params[config_indx].name,"power_line_frequency")) {
@@ -2955,8 +2966,7 @@ static struct context **copy_text_double(struct context **cnt, const char *str, 
             *((int *)tmp) = 1;
         }
 
-        if (cnt[0]->threadnr)
-            return cnt;
+        if (cnt[0]->threadnr) return cnt;
     }
 
     return cnt;
@@ -2983,8 +2993,7 @@ static struct context **copy_html_output(struct context **cnt, const char *str, 
             *((int *)tmp) = 1;
         }
 
-        if (cnt[0]->threadnr)
-            return cnt;
+        if (cnt[0]->threadnr) return cnt;
     }
 
     return cnt;
@@ -3043,8 +3052,7 @@ char *mystrcpy(char *to, const char *from)
      * same value as from.
      */
 
-    if (to != NULL)
-        free(to);
+    if (to != NULL) free(to);
 
     return mystrdup(from);
 }
@@ -3093,14 +3101,10 @@ char *mystrdup(const char *from)
  */
 const char *config_type(config_param *configparam)
 {
-    if (configparam->copy == copy_string)
-        return "string";
-    if (configparam->copy == copy_int)
-        return "int";
-    if (configparam->copy == copy_bool)
-        return "bool";
-    if (configparam->copy == copy_uri)
-        return "uri";
+    if (configparam->copy == copy_string) return "string";
+    if (configparam->copy == copy_int)    return "int";
+    if (configparam->copy == copy_bool)   return "bool";
+    if (configparam->copy == copy_uri)    return "uri";
 
     return "unknown";
 }
@@ -3118,13 +3122,15 @@ static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
     int val = config_params[parm].conf_value;
 
     if (threadnr &&
-        *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val))
+        *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val)) {
         return NULL;
+    }
 
-    if (*(int*)((char *)cnt[threadnr] + val))
+    if (*(int*)((char *)cnt[threadnr] + val)) {
         return "on";
-    else
+    } else {
         return "off";
+    }
 }
 
 /**
@@ -3148,8 +3154,9 @@ static const char *print_string(struct context **cnt,
     cptr0 = (const char **)((char *)cnt[0] + val);
     cptr1 = (const char **)((char *)cnt[threadnr] + val);
 
-    if ((threadnr) && (*cptr0 != NULL) && (*cptr1 != NULL) && (!strcmp(*cptr0, *cptr1)))
+    if ((threadnr) && (*cptr0 != NULL) && (*cptr1 != NULL) && (!strcmp(*cptr0, *cptr1))) {
         return NULL;
+    }
 
     return *cptr1;
 }
@@ -3171,8 +3178,9 @@ static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
     int val = config_params[parm].conf_value;
 
     if (threadnr &&
-        *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val))
+        *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val)) {
         return NULL;
+    }
 
     sprintf(retval, "%d", *(int*)((char *)cnt[threadnr] + val));
 
@@ -3192,16 +3200,14 @@ static const char *print_camera(struct context **cnt, char **str,
     char *retval;
     unsigned int i = 0;
 
-    if (!str || threadnr)
-        return NULL;
+    if (!str || threadnr) return NULL;
 
     retval = mymalloc(1);
     retval[0] = 0;
 
     while (cnt[++i]) {
         /* Skip config files loaded from conf directory */
-        if (cnt[i]->from_conf_dir)
-            continue;
+        if (cnt[i]->from_conf_dir) continue;
 
         retval = myrealloc(retval, strlen(retval) + strlen(cnt[i]->conf_filename) + 10,
                            "print_camera");
@@ -3229,16 +3235,13 @@ struct context **read_camera_dir(struct context **cnt, const char *str, int val)
     char conf_file[PATH_MAX];
 
     dp = opendir(str);
-    if (dp != NULL)
-    {
-        while( (ep = readdir(dp)) )
-        {
+    if (dp != NULL) {
+        while( (ep = readdir(dp)) ) {
             name_len = strlen(ep->d_name);
             if (name_len > strlen(EXTENSION) &&
-                    (strncmp(EXTENSION,
-                                (ep->d_name + name_len - strlen(EXTENSION)),
-                                strlen(EXTENSION)) == 0
-                    )
+                (strncmp(EXTENSION,
+                        (ep->d_name + name_len - strlen(EXTENSION)),
+                        strlen(EXTENSION)) == 0 )
                 )
             {
                 memset(conf_file, '\0', sizeof(conf_file));
@@ -3253,12 +3256,10 @@ struct context **read_camera_dir(struct context **cnt, const char *str, int val)
                 i = 0;
                 while (cnt[++i]);
                 cnt[i-1]->from_conf_dir = 1;
-	    }
+	        }
         }
         closedir(dp);
-    }
-    else
-    {
+    } else {
         MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
             ,_("Camera directory config %s not found"), str);
         return cnt;
@@ -3288,8 +3289,7 @@ static struct context **config_camera(struct context **cnt, const char *str,
     int i;
     FILE *fp;
 
-    if (cnt[0]->threadnr)
-        return cnt;
+    if (cnt[0]->threadnr) return cnt;
 
     fp = fopen(str, "r");
 
