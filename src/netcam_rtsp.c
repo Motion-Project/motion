@@ -305,13 +305,68 @@ static int netcam_decode_vaapi(struct rtsp_context *rtsp_data)
             return retcd;
         }
         rtsp_data->frame->format=AV_PIX_FMT_YUV420P;
+
         retcd = av_hwframe_transfer_data(rtsp_data->frame, hw_frame, 0);
         if (retcd < 0) {
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Error transferring HW decoded to system memory")
                 ,rtsp_data->cameratype);
+            my_frame_free(hw_frame);
             return -1;
         }
+
+        my_frame_free(hw_frame);
+
+        return 1;
+    #else
+        (void)rtsp_data;
+        return 1;
+    #endif
+}
+
+static int netcam_decode_cuda(struct rtsp_context *rtsp_data)
+{
+
+    #if ( MYFFVER >= 57083)
+
+        int retcd;
+        char errstr[128];
+        AVFrame *hw_frame = NULL;
+
+        hw_frame = my_frame_alloc();
+
+        retcd = avcodec_receive_frame(rtsp_data->codec_context, hw_frame);
+        if ((rtsp_data->interrupted) || (rtsp_data->finish) || (retcd < 0) ){
+            if (retcd == AVERROR(EAGAIN)){
+                retcd = 0;
+            } else if (retcd == AVERROR_INVALIDDATA) {
+                MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s: Ignoring packet with invalid data")
+                    ,rtsp_data->cameratype);
+                retcd = 0;
+            } else if (retcd < 0) {
+                av_strerror(retcd, errstr, sizeof(errstr));
+                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                        ,_("%s: Rec frame error: %s")
+                        ,rtsp_data->cameratype, errstr);
+                retcd = -1;
+            } else {
+                retcd = -1;
+            }
+            my_frame_free(hw_frame);
+            return retcd;
+        }
+        rtsp_data->frame->format=AV_PIX_FMT_NV12;
+
+        retcd = av_hwframe_transfer_data(rtsp_data->frame, hw_frame, 0);
+        if (retcd < 0) {
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: Error transferring HW decoded to system memory")
+                ,rtsp_data->cameratype);
+            my_frame_free(hw_frame);
+            return -1;
+        }
+
         my_frame_free(hw_frame);
 
         return 1;
@@ -359,6 +414,8 @@ static int netcam_rtsp_decode_video(struct rtsp_context *rtsp_data)
 
         if (!strcasecmp(rtsp_data->decoder_nm,"vaapi")) {
             retcd = netcam_decode_vaapi(rtsp_data);
+        } else if (!strcasecmp(rtsp_data->decoder_nm,"cuda")) {
+            retcd = netcam_decode_cuda(rtsp_data);
         } else {
             retcd = netcam_decode_sw(rtsp_data);
         }
@@ -373,6 +430,8 @@ static int netcam_rtsp_decode_video(struct rtsp_context *rtsp_data)
 
         if (!strcasecmp(rtsp_data->decoder_nm,"vaapi")){
             retcd = netcam_decode_vaapi(rtsp_data);
+        } else if (!strcasecmp(rtsp_data->decoder_nm,"cuda")) {
+            retcd = netcam_decode_cuda(rtsp_data);
         } else {
             retcd = netcam_decode_sw(rtsp_data);
         }
@@ -431,7 +490,7 @@ static void netcam_hwdecoders(struct rtsp_context *rtsp_data)
                 ,_("%s: HW Devices: ")
                 , rtsp_data->cameratype);
             while((rtsp_data->hw_type = av_hwdevice_iterate_types(rtsp_data->hw_type)) != AV_HWDEVICE_TYPE_NONE){
-                if (rtsp_data->hw_type == AV_HWDEVICE_TYPE_VAAPI) {
+                if (rtsp_data->hw_type == AV_HWDEVICE_TYPE_VAAPI || rtsp_data->hw_type == AV_HWDEVICE_TYPE_CUDA) {
                     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                         ,_("%s: %s (available)")
                         , rtsp_data->cameratype
@@ -471,6 +530,25 @@ static enum AVPixelFormat netcam_getfmt_vaapi(AVCodecContext *avctx, const enum 
         }
 
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Failed to get vaapi pix format"));
+        return AV_PIX_FMT_NONE;
+    #else
+        (void)avctx;
+        (void)pix_fmts;
+        return AV_PIX_FMT_NONE;
+    #endif
+}
+
+static enum AVPixelFormat netcam_getfmt_cuda(AVCodecContext *avctx, const enum AVPixelFormat *pix_fmts)
+{
+    #if ( MYFFVER >= 57083)
+        const enum AVPixelFormat *p;
+        (void)avctx;
+
+        for (p = pix_fmts; *p != -1; p++) {
+            if (*p == AV_PIX_FMT_CUDA) return *p;
+        }
+
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Failed to get cuda pix format"));
         return AV_PIX_FMT_NONE;
     #else
         (void)avctx;
@@ -578,6 +656,59 @@ static int netcam_init_vaapi(struct rtsp_context *rtsp_data)
     #endif
 }
 
+static int netcam_init_cuda(struct rtsp_context *rtsp_data)
+{
+
+    #if ( MYFFVER >= 57083)
+
+        int retcd;
+
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s: Initializing cuda decoder"),rtsp_data->cameratype);
+
+        rtsp_data->hw_type = av_hwdevice_find_type_by_name("cuda");
+        if (rtsp_data->hw_type == AV_HWDEVICE_TYPE_NONE){
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("%s: Unable to find cuda hw device")
+                , rtsp_data->cameratype);
+            netcam_rtsp_decoder_error(rtsp_data, 0, "av_hwdevice");
+            return -1;
+        }
+
+        rtsp_data->codec_context = avcodec_alloc_context3(rtsp_data->decoder);
+        if ((rtsp_data->codec_context == NULL) || (rtsp_data->interrupted)){
+            netcam_rtsp_decoder_error(rtsp_data, 0, "avcodec_alloc_context3");
+            return -1;
+        }
+
+        retcd = avcodec_parameters_to_context(rtsp_data->codec_context,rtsp_data->strm->codecpar);
+        if ((retcd < 0) || (rtsp_data->interrupted)) {
+            netcam_rtsp_decoder_error(rtsp_data, retcd, "avcodec_parameters_to_context");
+            return -1;
+        }
+
+        rtsp_data->hw_pix_fmt = AV_PIX_FMT_CUDA;
+        rtsp_data->codec_context->get_format  = netcam_getfmt_cuda;
+        av_opt_set_int(rtsp_data->codec_context, "refcounted_frames", 1, 0);
+        rtsp_data->codec_context->sw_pix_fmt = AV_PIX_FMT_YUV420P;
+        rtsp_data->codec_context->hwaccel_flags=
+            AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH |
+            AV_HWACCEL_FLAG_IGNORE_LEVEL;
+
+        retcd = av_hwdevice_ctx_create(&rtsp_data->hw_device_ctx, rtsp_data->hw_type, NULL, NULL, 0);
+        if (retcd < 0){
+            netcam_rtsp_decoder_error(rtsp_data, retcd, "hwctx");
+            return -1;
+        }
+        rtsp_data->codec_context->hw_device_ctx = av_buffer_ref(rtsp_data->hw_device_ctx);
+
+        return 0;
+    #else
+        (void)rtsp_data;
+        (void)netcam_getfmt_cuda;
+        return 0;
+    #endif
+}
+
 static int netcam_init_swdecoder(struct rtsp_context *rtsp_data)
 {
 
@@ -660,6 +791,8 @@ static int netcam_rtsp_open_codec(struct rtsp_context *rtsp_data)
 
         if (!strcasecmp(rtsp_data->decoder_nm,"vaapi")){
             retcd = netcam_init_vaapi(rtsp_data);
+        } else if (!strcasecmp(rtsp_data->decoder_nm,"cuda")){
+            retcd = netcam_init_cuda(rtsp_data);
         } else {
             retcd = netcam_init_swdecoder(rtsp_data);
         }
@@ -698,6 +831,8 @@ static int netcam_rtsp_open_codec(struct rtsp_context *rtsp_data)
         /* This is currently always true for older ffmpeg until it is built */
         if (!strcasecmp(rtsp_data->decoder_nm,"vaapi")){
             retcd = netcam_init_vaapi(rtsp_data);
+        } else if (!strcasecmp(rtsp_data->decoder_nm,"cuda")){
+            retcd = netcam_init_cuda(rtsp_data);
         } else {
             retcd = netcam_init_swdecoder(rtsp_data);
         }
