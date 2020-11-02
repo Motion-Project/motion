@@ -973,8 +973,9 @@ static int ffmpeg_alloc_video_buffer(AVFrame *frame, int align)
             }
         }
 
-        for (i = 0; i < 4 && frame->linesize[i]; i++)
+        for (i = 0; i < 4 && frame->linesize[i]; i++) {
             frame->linesize[i] = FFALIGN(frame->linesize[i], align);
+        }
     }
 
     padded_height = FFALIGN(frame->height, 32);
@@ -1132,7 +1133,7 @@ static int ffmpeg_flush_codec(struct ffmpeg *ffmpeg)
                     ,_("Error entering draining mode:%s"),errstr);
                 return -1;
             }
-            while (recv_cd != AVERROR_EOF){
+            while (recv_cd != AVERROR_EOF) {
                 av_init_packet(&ffmpeg->pkt);
                 ffmpeg->pkt.data = NULL;
                 ffmpeg->pkt.size = 0;
@@ -1323,7 +1324,7 @@ static int ffmpeg_passthru_put(struct ffmpeg *ffmpeg, struct image_data *img_dat
             indx = 0;
         }
 
-        while (TRUE){
+        while (TRUE) {
             if ((!ffmpeg->rtsp_data->pktarray[indx].iswritten) &&
                 (ffmpeg->rtsp_data->pktarray[indx].packet.size > 0) &&
                 (ffmpeg->rtsp_data->pktarray[indx].idnbr >  idnbr_lastwritten) &&

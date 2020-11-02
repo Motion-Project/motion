@@ -181,7 +181,7 @@ static void webu_text_list_raw(struct webui_ctx *webui)
     const char *val_parm;
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_params[indx_parm].param_name != NULL) {
 
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
@@ -227,7 +227,7 @@ static void webu_text_list_basic(struct webui_ctx *webui)
     webu_write(webui, response);
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_params[indx_parm].param_name != NULL) {
 
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
@@ -284,7 +284,7 @@ static void webu_text_set_menu(struct webui_ctx *webui)
     webu_write(webui, response);
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_params[indx_parm].param_name != NULL) {
 
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
@@ -337,7 +337,7 @@ static void webu_text_set_query(struct webui_ctx *webui)
     webu_text_camera_name(webui);
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_params[indx_parm].param_name != NULL) {
 
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
@@ -419,7 +419,7 @@ static void webu_text_get_menu(struct webui_ctx *webui)
     webu_write(webui, response);
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_params[indx_parm].param_name != NULL) {
 
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
@@ -917,7 +917,7 @@ void webu_text_get_query(struct webui_ctx *webui)
     }
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_params[indx_parm].param_name != NULL) {
 
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||

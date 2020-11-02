@@ -356,7 +356,7 @@ static void bktr_picture_controls(struct context *cnt, struct video_dev *viddev)
         return;
     }
 
-    for (indx_user=0; indx_user<cnt->vdev->usrctrl_count; indx_user++){
+    for (indx_user=0; indx_user<cnt->vdev->usrctrl_count; indx_user++) {
         usritem=&cnt->vdev->usrctrl_array[indx_user];
         if (!strcasecmp(usritem->ctrl_name,"contrast")) {
             bktr_set_contrast(dev,usritem->ctrl_value);
@@ -672,8 +672,9 @@ static void bktr_set_input(struct context *cnt, struct video_dev *viddev, unsign
         viddev->frequency = freq;
 
         /* skip a few frames if needed */
-        for (dummy = 0; dummy < skip; dummy++)
+        for (dummy = 0; dummy < skip; dummy++) {
             bktr_capture(viddev, map, width, height);
+        }
     } else {
         /* No round robin - we only adjust picture controls */
         bktr_picture_controls(cnt, viddev);
@@ -728,7 +729,7 @@ void bktr_cleanup(struct context *cnt)
         /* free the information we collected regarding the controls */
         if (cnt->vdev != NULL) {
             if (cnt->vdev->usrctrl_count > 0) {
-                for (indx=0;indx<cnt->vdev->usrctrl_count;indx++){
+                for (indx=0;indx<cnt->vdev->usrctrl_count;indx++) {
                     free(cnt->vdev->usrctrl_array[indx].ctrl_name);
                     cnt->vdev->usrctrl_array[indx].ctrl_name=NULL;
                 }
@@ -841,8 +842,7 @@ int bktr_start(struct context *cnt)
         width = conf->width;
         height = conf->height;
 
-        for (indx = 0; indx < cnt->vdev->params_count; indx++)
-        {
+        for (indx = 0; indx < cnt->vdev->params_count; indx++) {
             if ( !strcmp(cnt->vdev->params_array[indx].param_name, "input")) {
                 input = atoi(cnt->vdev->params_array[indx].param_value);
             }

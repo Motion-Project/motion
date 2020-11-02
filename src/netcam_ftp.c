@@ -238,8 +238,9 @@ static int ftp_get_response(ftp_context_pointer ctxt)
             res = cur;
             ptr += 3;
             ctxt->control_buffer_answer = ptr - ctxt->control_buffer;
-            while ((ptr < end) && (*ptr != '\n'))
+            while ((ptr < end) && (*ptr != '\n')) {
                 ptr++;
+            }
 
             if (*ptr == '\n') {
                 ptr++;
@@ -252,8 +253,9 @@ static int ftp_get_response(ftp_context_pointer ctxt)
             break;
         }
 
-        while ((ptr < end) && (*ptr != '\n'))
+        while ((ptr < end) && (*ptr != '\n')) {
             ptr++;
+        }
 
         if (ptr >= end) {
             ctxt->control_buffer_index = ctxt->control_buffer_used;
@@ -594,8 +596,9 @@ static int ftp_get_connection(ftp_context_pointer ctxt)
         /* Parse the IP address and port supplied by the server. */
         cur = &ctxt->control_buffer[ctxt->control_buffer_answer];
 
-        while (((*cur < '0') || (*cur > '9')) && *cur != '\0')
+        while (((*cur < '0') || (*cur > '9')) && *cur != '\0') {
             cur++;
+        }
 
         if (sscanf(cur, "%u,%u,%u,%u,%u,%u", &temp[0], &temp[1], &temp[2],
             &temp[3], &temp[4], &temp[5]) != 6) {
@@ -607,8 +610,9 @@ static int ftp_get_connection(ftp_context_pointer ctxt)
             return -1;
         }
 
-        for (i = 0; i < 6; i++)
+        for (i = 0; i < 6; i++) {
             ad[i] = (unsigned char) (temp[i] & 0xff) ;
+        }
 
         memcpy (&((struct sockaddr_in *)&data_address)->sin_addr, &ad[0], 4);
         memcpy (&((struct sockaddr_in *)&data_address)->sin_port, &ad[4], 2);

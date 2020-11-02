@@ -425,7 +425,7 @@ int vid_mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
      Some cameras are sending multiple SOIs in the buffer.
      Move the pointer to the last SOI in the buffer and proceed.
     */
-    while (ptr_buffer != NULL && ((size - soi_pos - 1) > 2) ){
+    while (ptr_buffer != NULL && ((size - soi_pos - 1) > 2)) {
         soi_pos = ptr_buffer - cap_map;
         ptr_buffer = memmem(cap_map + soi_pos + 1, size - soi_pos - 1, "\xff\xd8", 2);
     }

@@ -873,10 +873,11 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 
     /* Skip comment */
     line[0] = '#';
-    while (line[0] == '#')
+    while (line[0] == '#') {
         if (!fgets(line, 255, picture)) {
             return NULL;
         }
+    }
 
     /* Read image size */
     if (sscanf(line, "%d %d", &mask_width, &mask_height) != 2) {
@@ -887,10 +888,11 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 
     /* Maximum value */
     line[0] = '#';
-    while (line[0] == '#')
+    while (line[0] == '#') {
         if (!fgets(line, 255, picture)) {
             return NULL;
         }
+    }
 
     if (sscanf(line, "%d", &maxval) != 1) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
@@ -910,8 +912,9 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Failed reading image data from pgm file"));
         }
 
-        for (x = 0; x < mask_width; x++)
+        for (x = 0; x < mask_width; x++) {
             image[y * mask_width + x] = (int)image[y * mask_width + x] * 255 / maxval;
+        }
 
     }
 
@@ -991,16 +994,18 @@ void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsign
 {
 
     int i = 0, x, y;
-    for (y = 0; y < height_src; y+=2)
-        for (x = 0; x < width_src; x+=2)
+    for (y = 0; y < height_src; y+=2) {
+        for (x = 0; x < width_src; x+=2) {
             img_dst[i++] = img_src[y * width_src + x];
+        }
+    }
 
-    for (y = 0; y < height_src / 2; y+=2)
-       for (x = 0; x < width_src; x += 4)
-       {
+    for (y = 0; y < height_src / 2; y+=2) {
+       for (x = 0; x < width_src; x += 4) {
           img_dst[i++] = img_src[(width_src * height_src) + (y * width_src) + x];
           img_dst[i++] = img_src[(width_src * height_src) + (y * width_src) + (x + 1)];
        }
+    }
 
     return;
 }

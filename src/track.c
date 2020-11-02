@@ -176,7 +176,9 @@ static unsigned int stepper_command(struct context *cnt, unsigned int motor,
         return 0;
     }
 
-    while (read(cnt->track.dev, buffer, 1) != 1 && time(NULL) < timeout + 1);
+    while (read(cnt->track.dev, buffer, 1) != 1 && time(NULL) < timeout + 1) {
+        continue;
+    }
 
     if (time(NULL) >= timeout + 2) {
         MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO,_("Status byte timeout!"));
@@ -232,24 +234,33 @@ static unsigned int stepper_center(struct context *cnt, int x_offset, int y_offs
     stepper_command(cnt, cnt->track.motorx, STEPPER_COMMAND_SPEED, cnt->track.speed);
     stepper_command(cnt, cnt->track.motorx, STEPPER_COMMAND_LEFT_N, cnt->track.maxx);
 
-    while (stepper_status(cnt, cnt->track.motorx) & STEPPER_STATUS_LEFT);
+    while (stepper_status(cnt, cnt->track.motorx) & STEPPER_STATUS_LEFT) {
+        continue;
+    }
 
     stepper_command(cnt, cnt->track.motorx, STEPPER_COMMAND_RIGHT_N,
                     cnt->track.maxx / 2 + x_offset * cnt->track.stepsize);
 
-    while (stepper_status(cnt, cnt->track.motorx) & STEPPER_STATUS_RIGHT);
+    while (stepper_status(cnt, cnt->track.motorx) & STEPPER_STATUS_RIGHT) {
+        continue;
+    }
 
     /* y-axis */
 
     stepper_command(cnt, cnt->track.motory, STEPPER_COMMAND_SPEED, cnt->track.speed);
     stepper_command(cnt, cnt->track.motory, STEPPER_COMMAND_UP_N, cnt->track.maxy);
 
-    while (stepper_status(cnt, cnt->track.motory) & STEPPER_STATUS_UP)
+    while (stepper_status(cnt, cnt->track.motory) & STEPPER_STATUS_UP) {
+        continue;
+    }
 
     stepper_command(cnt, cnt->track.motory, STEPPER_COMMAND_DOWN_N,
                     cnt->track.maxy / 2 + y_offset * cnt->track.stepsize);
 
-    while (stepper_status(cnt, cnt->track.motory) & STEPPER_STATUS_DOWN);
+
+    while (stepper_status(cnt, cnt->track.motory) & STEPPER_STATUS_DOWN) {
+        continue;
+    }
 
     return cnt->track.move_wait;
 }
@@ -378,7 +389,9 @@ static unsigned int servo_command(struct context *cnt, unsigned int motor,
         return 0;
     }
 
-    while (read(cnt->track.dev, buffer, 1) != 1 && time(NULL) < timeout + 1);
+    while (read(cnt->track.dev, buffer, 1) != 1 && time(NULL) < timeout + 1) {
+        continue;
+    }
 
     if (time(NULL) >= timeout + 2) {
         MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO,_("Status byte timeout!"));
@@ -677,7 +690,9 @@ static char iomojo_command(struct context *cnt, char *command, int len, unsigned
     }
 
     if (ret) {
-        while (read(cnt->track.dev, buffer, 1) != 1 && time(NULL) < timeout + 2);
+        while (read(cnt->track.dev, buffer, 1) != 1 && time(NULL) < timeout + 2) {
+            continue;
+        }
 
         if (time(NULL) >= timeout + 2) {
             MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO,_("Return byte timeout!"));
@@ -1400,8 +1415,9 @@ static unsigned int generic_move(struct context *cnt, enum track_action action, 
          * Close any file descriptor except console because we will
          * like to see error messages
          */
-        for (i = getdtablesize() - 1; i > 2; i--)
+        for (i = getdtablesize() - 1; i > 2; i--) {
             close(i);
+        }
 
         execl("/bin/sh", "sh", "-c", fmtcmd, " &", NULL);
 

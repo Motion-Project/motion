@@ -111,8 +111,9 @@ int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flag
                  * decrement I until it points to the last available
                  * whitespace.
                  */
-                while (i > 0 && isspace((*hdr)[i - 1]))
+                while (i > 0 && isspace((*hdr)[i - 1])) {
                     --i;
+                }
 
                 (*hdr)[i] = '\0';
                 break;
@@ -164,8 +165,9 @@ int header_extract_number(const char *header, void *closure)
     const char *p = header;
     long result;
 
-    for (result = 0; isdigit (*p); p++)
+    for (result = 0; isdigit (*p); p++) {
         result = 10 * result + (*p - '0');
+    }
 
     /* Failure if no number present. */
     if (p == header) {
@@ -207,8 +209,9 @@ int skip_lws(const char *string)
 {
     const char *p = string;
 
-    while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n')
+    while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') {
         ++p;
+    }
 
     return p - string;
 }
@@ -283,8 +286,9 @@ int http_process_type(const char *hdr, void *arg)
         p = hdr + strlen (hdr);
     }
 
-    while (p > hdr && isspace (*(p - 1)))
+    while (p > hdr && isspace (*(p - 1))) {
         --p;
+    }
 
     *result = strdupdelim (hdr, p);
     return 1;

@@ -2043,7 +2043,7 @@ static void conf_cmdline(struct context *cnt, int thread)
      * if necessary. This is accomplished by calling mystrcpy();
      * see this function for more information.
      */
-    while ((c = getopt(conf->argc, conf->argv, "bc:d:hmns?p:k:l:")) != EOF)
+    while ((c = getopt(conf->argc, conf->argv, "bc:d:hmns?p:k:l:")) != EOF) {
         switch (c) {
         case 'c':
             if (thread == -1) {
@@ -2092,6 +2092,7 @@ static void conf_cmdline(struct context *cnt, int thread)
              usage();
              exit(1);
         }
+    }
 
     optind = 1;
 }
@@ -2226,8 +2227,9 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
 
             /* Trim white space and any CR or LF at the end of the line. */
             end = line + strlen(line) - 1; /* Point to the last non-null character in the string. */
-            while (end >= line && (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r'))
+            while (end >= line && (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r')) {
                 end--;
+            }
 
             *(end+1) = '\0';
 
@@ -2238,14 +2240,16 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
 
             /* Trim leading whitespace from the line and find command. */
             beg = line;
-            while (*beg == ' ' || *beg == '\t')
+            while (*beg == ' ' || *beg == '\t') {
                 beg++;
+            }
 
 
             cmd = beg; /* Command starts here. */
 
-            while (*beg != ' ' && *beg != '\t' && *beg != '=' && *beg != '\0')
+            while (*beg != ' ' && *beg != '\t' && *beg != '=' && *beg != '\0') {
                 beg++;
+            }
 
             *beg = '\0'; /* Command string terminates here. */
 
@@ -2253,8 +2257,9 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
             beg++;
 
             if (strlen(beg) > 0) {
-                while (*beg == ' ' || *beg == '\t' || *beg == '=' || *beg == '\n' || *beg == '\r')
+                while (*beg == ' ' || *beg == '\t' || *beg == '=' || *beg == '\n' || *beg == '\r') {
                     beg++;
+                }
 
 
                 /*
@@ -2508,8 +2513,9 @@ struct context **conf_load(struct context **cnt)
      */
     i = -1;
 
-    while (cnt[++i])
+    while (cnt[++i]) {
         conf_cmdline(cnt[i], i);
+    }
 
     /* If pid file was passed from Command-line copy to main thread conf struct. */
     if (cnt[0]->pid_file[0]) {
@@ -2550,7 +2556,9 @@ void conf_output_parms(struct context **cnt)
     unsigned int i, t = 0;
     const char *name, *value;
 
-    while(cnt[++t]);
+    while(cnt[++t]) {
+        continue;
+    }
 
     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
         ,_("Writing configuration parameters from all files (%d):"), t);
@@ -3284,7 +3292,9 @@ struct context **read_camera_dir(struct context **cnt, const char *str, int val)
                  * set it as created from conf directory.
                  */
                 i = 0;
-                while (cnt[++i]);
+                while (cnt[++i]) {
+                    continue;
+                }
                 cnt[i-1]->from_conf_dir = 1;
 	        }
         }
@@ -3334,7 +3344,9 @@ static struct context **config_camera(struct context **cnt, const char *str,
     /* Find the current number of threads defined. */
     i = -1;
 
-    while (cnt[++i]);
+    while (cnt[++i]) {
+        continue;
+    }
 
     /*
      * Make space for the threads + the terminating NULL pointer

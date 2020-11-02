@@ -1770,8 +1770,9 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
         ,_("processing new file image - st_mtime %d"), netcam->file->last_st_mtime);
 
     /* Assure there's enough room in the buffer. */
-    while (buffer->size < (size_t)statbuf.st_size)
+    while (buffer->size < (size_t)statbuf.st_size) {
         netcam_check_buffsize(buffer, statbuf.st_size);
+    }
 
 
     /* Do the read */

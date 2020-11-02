@@ -135,10 +135,11 @@ static void vlp_show_vcap(struct v4l2_capability *cap)
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.bus_info: %s",cap->bus_info);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.card:     %u.%u.%u",(vers >> 16) & 0xFF,(vers >> 8) & 0xFF,vers & 0xFF);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Device capabilities");
-    for (i=0;cap_list[i].code;i++)
+    for (i=0;cap_list[i].code;i++) {
         if (c & cap_list[i].code) {
             MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s",cap_list[i].cap);
         }
+    }
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "------------------------");
 }
 

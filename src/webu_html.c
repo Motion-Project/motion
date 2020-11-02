@@ -290,7 +290,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui)
             ,_("All"));
         webu_write(webui, response);
 
-        for (indx=1;indx <= webui->cam_count;indx++){
+        for (indx=1;indx <= webui->cam_count;indx++) {
             if (webui->cntlst[indx]->conf.camera_name == NULL) {
                 snprintf(response, sizeof (response),
                     "        <a onclick=\"camera_click('cam_%05d');\">%s %d</a>\n"
@@ -461,7 +461,7 @@ static void webu_html_config(struct webui_ctx *webui)
      */
     val_temp=malloc(PATH_MAX);
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_params[indx_parm].param_name != NULL) {
 
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER)) {
@@ -485,7 +485,7 @@ static void webu_html_config(struct webui_ctx *webui)
 
         /* Loop through all the treads and see if any have a different value from motion.conf */
         if (webui->cam_threads > 1) {
-            for (indx=1;indx <= webui->cam_count;indx++){
+            for (indx=1;indx <= webui->cam_count;indx++) {
                 val_thread=config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, indx);
                 diff_vals = FALSE;
                 if (((strlen(val_temp) == 0) && (val_thread == NULL)) ||
@@ -653,7 +653,7 @@ static void webu_html_preview(struct webui_ctx *webui)
         indx_st = 0;
     }
 
-    for (indx = indx_st; indx<webui->cam_threads; indx++){
+    for (indx = indx_st; indx<webui->cam_threads; indx++) {
         if (webui->cntlst[indx]->conf.stream_preview_newline) {
             snprintf(response, sizeof (response),"%s","      <br>\n");
             webu_write(webui, response);
@@ -782,7 +782,7 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui)
 
     strm_info.cntlst = webui->cntlst;
 
-    for (indx = indx_st; indx<webui->cam_threads; indx++){
+    for (indx = indx_st; indx<webui->cam_threads; indx++) {
         snprintf(response, sizeof (response),
             "      if (camid == \"cam_%05d\") {\n"
             ,webui->cntlst[indx]->camera_id);
@@ -865,7 +865,7 @@ static void webu_html_script_camera_all(struct webui_ctx *webui)
     snprintf(response, sizeof (response), "      if (camid == \"cam_all00\") {\n");
     webu_write(webui, response);
 
-    for (indx = indx_st; indx<webui->cam_threads; indx++){
+    for (indx = indx_st; indx<webui->cam_threads; indx++) {
         if (indx == indx_st) {
             snprintf(response, sizeof (response),"%s","        preview = \"\";\n");
             webu_write(webui, response);

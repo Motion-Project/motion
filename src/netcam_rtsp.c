@@ -630,8 +630,7 @@ static void netcam_rtsp_decoder_error(struct rtsp_context *rtsp_data, int retcd,
             ,_("%s: Ignoring and removing the user requested decoder %s")
             ,rtsp_data->cameratype, rtsp_data->decoder_nm);
 
-        for (indx = 0; indx < rtsp_data->parameters->params_count; indx++)
-        {
+        for (indx = 0; indx < rtsp_data->parameters->params_count; indx++) {
             if ( !strcmp(rtsp_data->parameters->params_array[indx].param_name,"decoder") ) {
                 free(rtsp_data->parameters->params_array[indx].param_value);
                 rtsp_data->parameters->params_array[indx].param_value = mymalloc(5);
@@ -1365,8 +1364,7 @@ static void netcam_rtsp_set_options(struct rtsp_context *rtsp_data)
     free(tmpval);
 
     /* Write the options to the context, while skipping the Motion ones */
-    for (indx = 0; indx < rtsp_data->parameters->params_count; indx++)
-    {
+    for (indx = 0; indx < rtsp_data->parameters->params_count; indx++) {
         if (strcmp(rtsp_data->parameters->params_array[indx].param_name,"decoder") &&
             strcmp(rtsp_data->parameters->params_array[indx].param_name,"capture_rate")) {
             av_dict_set(&rtsp_data->opts
@@ -1498,8 +1496,7 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     rtsp_data->capture_nbr = -1;
     rtsp_data->src_fps =  -99; /* Default to invalid value so we can test for whether real value exist */
 
-    for (indx = 0; indx < rtsp_data->parameters->params_count; indx++)
-    {
+    for (indx = 0; indx < rtsp_data->parameters->params_count; indx++) {
         if ( !strcmp(rtsp_data->parameters->params_array[indx].param_name,"decoder")) {
             val_len = strlen(rtsp_data->parameters->params_array[indx].param_value) + 1;
             rtsp_data->decoder_nm = mymalloc(val_len);
@@ -2055,7 +2052,7 @@ int netcam_rtsp_setup(struct context *cnt)
             indx_max = 2;
         }
 
-        while (indx_cam <= indx_max){
+        while (indx_cam <= indx_max) {
             if (indx_cam == 1) {
                 cnt->rtsp = rtsp_new_context();
                 if (cnt->rtsp == NULL) {

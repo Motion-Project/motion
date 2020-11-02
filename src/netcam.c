@@ -671,8 +671,7 @@ int netcam_start(struct context *cnt)
     util_parms_add_default(netcam->parameters,"keepalive","off");
     util_parms_add_default(netcam->parameters,"tolerant_check","off"); /*false*/
 
-    for (indx = 0; indx < netcam->parameters->params_count; indx++)
-    {
+    for (indx = 0; indx < netcam->parameters->params_count; indx++) {
         if ( !strcmp(netcam->parameters->params_array[indx].param_name,"proxy") &&
              strcmp(netcam->parameters->params_array[indx].param_name,"NULL")) {
             netcam_url_parse(&url, netcam->parameters->params_array[indx].param_value);
@@ -717,8 +716,7 @@ int netcam_start(struct context *cnt)
         return -1;
     }
 
-    for (indx = 0; indx < netcam->parameters->params_count; indx++)
-    {
+    for (indx = 0; indx < netcam->parameters->params_count; indx++) {
         if (!strcmp(netcam->parameters->params_array[indx].param_name,"proxy")) {
             if (!strcmp(netcam->parameters->params_array[indx].param_name,"NULL")) {
                 netcam->connect_host = url.host;

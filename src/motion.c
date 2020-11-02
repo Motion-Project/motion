@@ -166,7 +166,7 @@ static void image_ring_destroy(struct context *cnt)
     }
 
     /* Free all image buffers */
-    for (i = 0; i < cnt->imgs.image_ring_size; i++){
+    for (i = 0; i < cnt->imgs.image_ring_size; i++) {
         free(cnt->imgs.image_ring[i].image_norm);
         if (cnt->imgs.size_high >0 ) {
             free(cnt->imgs.image_ring[i].image_high);
@@ -345,7 +345,7 @@ static void sig_handler(int signo)
         /* Trigger the end of a event */
         if (cnt_list) {
             i = -1;
-            while (cnt_list[++i]){
+            while (cnt_list[++i]) {
                 cnt_list[i]->event_stop = TRUE;
             }
         }
@@ -403,7 +403,9 @@ static void sig_handler(int signo)
 static void sigchild_handler(int signo ATTRIBUTE_UNUSED)
 {
     #ifdef WNOHANG
-        while (waitpid(-1, NULL, WNOHANG) > 0) {};
+        while (waitpid(-1, NULL, WNOHANG) > 0) {
+            continue;
+        }
     #endif /* WNOHANG */
     return;
 }
@@ -863,7 +865,7 @@ static void init_mask_privacy(struct context *cnt)
                 indx_max = 2;
             }
 
-            while (indx_img <= indx_max){
+            while (indx_img <= indx_max) {
                 if (indx_img == 1) {
                     start_cr = (cnt->imgs.height * cnt->imgs.width);
                     offset_cb = ((cnt->imgs.height * cnt->imgs.width)/4);
@@ -1582,8 +1584,9 @@ static int motion_init(struct context *cnt)
     cnt->rolling_average_data = mymalloc(sizeof(cnt->rolling_average_data) * cnt->rolling_average_limit);
 
     /* Preset history buffer with expected frame rate */
-    for (indx = 0; indx < cnt->rolling_average_limit; indx++)
+    for (indx = 0; indx < cnt->rolling_average_limit; indx++) {
         cnt->rolling_average_data[indx] = cnt->required_frame_time;
+    }
 
 
     cnt->track_posx = 0;
@@ -1797,7 +1800,7 @@ static void mlp_mask_privacy(struct context *cnt)
     }
     increment = sizeof(unsigned long);
 
-    while (indx_img <= indx_max){
+    while (indx_img <= indx_max) {
         if (indx_img == 1) {
             /* Normal Resolution */
             index_y = cnt->imgs.height * cnt->imgs.width;
@@ -2572,7 +2575,7 @@ static void mlp_actions(struct context *cnt)
 
         cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
         /* Mark all images in image_ring to be saved */
-        for (indx = 0; indx < cnt->imgs.image_ring_size; indx++){
+        for (indx = 0; indx < cnt->imgs.image_ring_size; indx++) {
             cnt->imgs.image_ring[indx].flags |= IMAGE_SAVE;
         }
 
@@ -2617,8 +2620,9 @@ static void mlp_actions(struct context *cnt)
             //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Setup post capture %d", cnt->postcap);
 
             /* Mark all images in image_ring to be saved */
-            for (indx = 0; indx < cnt->imgs.image_ring_size; indx++)
+            for (indx = 0; indx < cnt->imgs.image_ring_size; indx++) {
                 cnt->imgs.image_ring[indx].flags |= IMAGE_SAVE;
+            }
 
         } else if (cnt->postcap > 0) {
            /* we have motion in this frame, but not enought frames for trigger. Check postcap */
@@ -2994,8 +2998,9 @@ static void mlp_frametiming(struct context *cnt)
     /* Calculate 10 second average and use deviation in delay calculation */
     cnt->rolling_average = 0L;
 
-    for (indx = 0; indx < cnt->rolling_average_limit; indx++)
+    for (indx = 0; indx < cnt->rolling_average_limit; indx++) {
         cnt->rolling_average += cnt->rolling_average_data[indx];
+    }
 
     cnt->rolling_average /= cnt->rolling_average_limit;
     cnt->frame_delay = cnt->required_frame_time - elapsedtime - (cnt->rolling_average - cnt->required_frame_time);
@@ -3218,8 +3223,9 @@ static void motion_shutdown(void)
 
     webu_stop(cnt_list);
 
-    while (cnt_list[++i])
+    while (cnt_list[++i]) {
         context_destroy(cnt_list[i]);
+    }
 
     free(cnt_list);
     cnt_list = NULL;
@@ -3234,7 +3240,7 @@ static void motion_camera_ids(void)
 
     /* Set defaults */
     indx = 0;
-    while (cnt_list[indx] != NULL){
+    while (cnt_list[indx] != NULL) {
         if (cnt_list[indx]->conf.camera_id > 0) {
             cnt_list[indx]->camera_id = cnt_list[indx]->conf.camera_id;
         } else {
@@ -3245,12 +3251,12 @@ static void motion_camera_ids(void)
 
     invalid_ids = FALSE;
     indx = 0;
-    while (cnt_list[indx] != NULL){
+    while (cnt_list[indx] != NULL) {
         if (cnt_list[indx]->camera_id > 32000) {
             invalid_ids = TRUE;
         }
         indx2 = indx + 1;
-        while (cnt_list[indx2] != NULL){
+        while (cnt_list[indx2] != NULL) {
             if (cnt_list[indx]->camera_id == cnt_list[indx2]->camera_id) {
                 invalid_ids = TRUE;
             }
@@ -3262,7 +3268,7 @@ static void motion_camera_ids(void)
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Camara IDs are not unique or have values over 32,000.  Falling back to thread numbers"));
         indx = 0;
-        while (cnt_list[indx] != NULL){
+        while (cnt_list[indx] != NULL) {
             cnt_list[indx]->camera_id = indx;
             indx++;
         }
@@ -3696,7 +3702,7 @@ static int motion_check_threadcount(void)
      * to restart the cameras and keep Motion running.
      */
     indx = 0;
-    while (cnt_list[indx] != NULL){
+    while (cnt_list[indx] != NULL) {
         if ((cnt_list[indx]->webcontrol_finish == FALSE) &&
             ((cnt_list[indx]->webcontrol_daemon != NULL) ||
              (cnt_list[indx]->webstream_daemon != NULL))) {
@@ -4209,8 +4215,9 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
             case '{': // long format specifier word.
                 {
                     const char *word = ++pos_userformat;
-                    while ((*pos_userformat != '}') && (*pos_userformat != 0))
+                    while ((*pos_userformat != '}') && (*pos_userformat != 0)) {
                         ++pos_userformat;
+                    }
                     mystrftime_long (cnt, width, word, (int)(pos_userformat-word), tempstr);
                     if (*pos_userformat == '\0') {
                         --pos_userformat;
@@ -4237,8 +4244,9 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
              * 'tempstr' to 'format'.
              */
             if (tempstr[0]) {
-                while ((*format = *tempstr++) != '\0')
+                while ((*format = *tempstr++) != '\0') {
                     ++format;
+                }
                 continue;
             }
         }
@@ -4334,16 +4342,19 @@ void util_trim(char *parm)
 
     indx_st = 0;
 
-    while (isspace(parm[indx_st]) && (indx_st <= indx_en)) indx_st++;
+    while (isspace(parm[indx_st]) && (indx_st <= indx_en)) {
+        indx_st++;
+    }
     if (indx_st > indx_en) {
         parm[0]= '\0';
         return;
     }
 
-    while (isspace(parm[indx_en]) && (indx_en > indx_st)) indx_en--;
+    while (isspace(parm[indx_en]) && (indx_en > indx_st)) {
+        indx_en--;
+    }
 
-    for (indx = indx_st; indx<=indx_en; indx++)
-    {
+    for (indx = indx_st; indx<=indx_en; indx++) {
         parm[indx-indx_st] = parm[indx];
     }
     parm[indx_en-indx_st+1] = '\0';
@@ -4495,8 +4506,7 @@ static void util_parms_parse_qte(struct params_context *parameters, char *parmln
 {
     int indxnm_st, indxnm_en, indxvl_st, indxvl_en;
 
-    while (strstr(parmlne,"\"") != NULL)
-    {
+    while (strstr(parmlne,"\"") != NULL) {
         indxnm_st = 0;
         indxnm_en = 0;
         indxvl_st = 0;
@@ -4525,8 +4535,7 @@ static void util_parms_parse_comma(struct params_context *parameters, char *parm
 {
     int indxnm_st, indxnm_en, indxvl_st, indxvl_en;
 
-    while (strstr(parmlne,",") != NULL)
-    {
+    while (strstr(parmlne,",") != NULL) {
         indxnm_st = 0;
         indxnm_en = 0;
         indxvl_st = 0;
@@ -4555,8 +4564,7 @@ void util_parms_free(struct params_context *parameters)
         return;
     }
 
-    for (indx = 0; indx < parameters->params_count; indx++)
-    {
+    for (indx = 0; indx < parameters->params_count; indx++) {
         if (parameters->params_array[indx].param_name != NULL) {
             free(parameters->params_array[indx].param_name);
         }
@@ -4643,8 +4651,7 @@ void util_parms_add_default(struct params_context *parameters
     int indx, dflt;
 
     dflt = TRUE;
-    for (indx = 0; indx < parameters->params_count; indx++)
-    {
+    for (indx = 0; indx < parameters->params_count; indx++) {
         if ( !strcmp(parameters->params_array[indx].param_name, parm_nm) ) {
             dflt = FALSE;
         }

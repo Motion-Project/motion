@@ -520,7 +520,7 @@ static int iflood(int x, int y, int width, int height,
 
             skip:
 
-            for (x++; x <= x2 && !(out[y * width + x] != 0 && labels[y * width + x] == oldvalue); x++);
+            for (x++; x <= x2 && !(out[y * width + x] != 0 && labels[y * width + x] == oldvalue); x++) {}
 
             l = x;
         } while (x <= x2);

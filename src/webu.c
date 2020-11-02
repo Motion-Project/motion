@@ -96,7 +96,9 @@ static void webu_context_init(struct context **cntlst, struct context *cnt, stru
     /* get the number of cameras and threads */
     indx = 0;
     if (webui->cntlst != NULL) {
-        while (webui->cntlst[++indx]);
+        while (webui->cntlst[++indx]) {
+            continue;
+        }
     }
     webui->cam_threads = indx;
 
@@ -217,7 +219,7 @@ void webu_write(struct webui_ctx *webui, const char *buf)
     resp_len = strlen(buf);
 
     temp_size = webui->resp_size;
-    while ((resp_len + webui->resp_used) > temp_size){
+    while ((resp_len + webui->resp_used) > temp_size) {
         temp_size = temp_size + (WEBUI_LEN_RESP * 10);
     }
 
@@ -252,7 +254,7 @@ static void webu_parms_edit(struct webui_ctx *webui)
 
     if (strlen(webui->uri_camid) > 0) {
         is_nbr = TRUE;
-        for (indx=0; indx < (int)strlen(webui->uri_camid);indx++){
+        for (indx=0; indx < (int)strlen(webui->uri_camid);indx++) {
             if ((webui->uri_camid[indx] > '9') || (webui->uri_camid[indx] < '0')) {
                 is_nbr = FALSE;
             }
@@ -281,7 +283,7 @@ static void webu_parms_edit(struct webui_ctx *webui)
             webui->thread_nbr = 0;
         } else {
             indx = 0;
-            while (webui->cntlst[indx] != NULL){
+            while (webui->cntlst[indx] != NULL) {
                 if (webui->cntlst[indx]->camera_id == webui->thread_nbr) {
                     webui->thread_nbr = indx;
                     break;
@@ -539,7 +541,7 @@ void webu_process_action(struct webui_ctx *webui)
     if ((strcmp(webui->uri_cmd2,"makemovie") == 0) ||
         (strcmp(webui->uri_cmd2,"eventend") == 0)) {
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
-            while (webui->cntlst[++indx]){
+            while (webui->cntlst[++indx]) {
                 webui->cntlst[indx]->event_stop = TRUE;
             }
         } else {
@@ -548,7 +550,7 @@ void webu_process_action(struct webui_ctx *webui)
 
     } else if (strcmp(webui->uri_cmd2,"eventstart") == 0) {
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
-            while (webui->cntlst[++indx]){
+            while (webui->cntlst[++indx]) {
                 webui->cntlst[indx]->event_user = TRUE;
             }
         } else {
@@ -557,8 +559,9 @@ void webu_process_action(struct webui_ctx *webui)
 
     } else if (!strcmp(webui->uri_cmd2,"snapshot")) {
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
-            while (webui->cntlst[++indx])
-            webui->cntlst[indx]->snapshot = 1;
+            while (webui->cntlst[++indx]) {
+                webui->cntlst[indx]->snapshot = 1;
+            }
         } else {
             webui->cnt->snapshot = 1;
         }
@@ -582,7 +585,7 @@ void webu_process_action(struct webui_ctx *webui)
 
     } else if (!strcmp(webui->uri_cmd2,"quit")) {
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
-            while (webui->cntlst[++indx]){
+            while (webui->cntlst[++indx]) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
                     _("Quitting thread %d"),webui->thread_nbr);
                 webui->cntlst[indx]->restart = FALSE;
@@ -601,7 +604,7 @@ void webu_process_action(struct webui_ctx *webui)
 
     } else if (!strcmp(webui->uri_cmd2,"end")) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Motion terminating"));
-            while (webui->cntlst[indx]){
+            while (webui->cntlst[indx]) {
                 webui->cntlst[indx]->webcontrol_finish = TRUE;
                 webui->cntlst[indx]->restart = FALSE;
                 webui->cntlst[indx]->event_stop = TRUE;
@@ -1981,7 +1984,7 @@ static void webu_strm_ntc(struct context **cnt, int indxthrd)
     if (indxthrd == 0 ) {
         if (cnt[1] != NULL) {
             indx = 1;
-            while (cnt[indx] != NULL){
+            while (cnt[indx] != NULL) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("Started camera %d stream on port/camera_id %d/%d")
                     ,cnt[indx]->camera_id
@@ -2024,7 +2027,7 @@ static void webu_start_strm(struct context **cnt)
     snprintf(cnt[0]->webstream_digest_rand
         ,sizeof(cnt[0]->webstream_digest_rand),"%d",randnbr);
 
-    while (cnt[mhdst.indxthrd] != NULL){
+    while (cnt[mhdst.indxthrd] != NULL) {
         cnt[mhdst.indxthrd]->webstream_daemon = NULL;
         if (cnt[mhdst.indxthrd]->conf.stream_port != 0 ) {
             if (mhdst.indxthrd == 0) {
@@ -2088,7 +2091,7 @@ static void webu_start_ports(struct context **cnt)
 
     if (cnt[0]->conf.webcontrol_port != 0) {
         indx = 0;
-        while (cnt[indx] != NULL){
+        while (cnt[indx] != NULL) {
             if ((cnt[0]->conf.webcontrol_port == cnt[indx]->conf.webcontrol_port) && (indx > 0)) {
                 cnt[indx]->conf.webcontrol_port = 0;
             }
@@ -2106,10 +2109,10 @@ static void webu_start_ports(struct context **cnt)
 
     /* Now check on the stream ports */
     indx = 0;
-    while (cnt[indx] != NULL){
+    while (cnt[indx] != NULL) {
         if (cnt[indx]->conf.stream_port != 0) {
             indx2 = indx + 1;
-            while (cnt[indx2] != NULL){
+            while (cnt[indx2] != NULL) {
                 if (cnt[indx]->conf.stream_port == cnt[indx2]->conf.stream_port) {
                     if (indx != 0) {
                         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
@@ -2139,7 +2142,7 @@ void webu_stop(struct context **cnt)
 
 
     indxthrd = 0;
-    while (cnt[indxthrd] != NULL){
+    while (cnt[indxthrd] != NULL) {
         if (cnt[indxthrd]->webstream_daemon != NULL) {
             cnt[indxthrd]->webcontrol_finish = TRUE;
             MHD_stop_daemon (cnt[indxthrd]->webstream_daemon);
@@ -2168,7 +2171,7 @@ void webu_start(struct context **cnt)
 
 
     indxthrd = 0;
-    while (cnt[indxthrd] != NULL){
+    while (cnt[indxthrd] != NULL) {
         cnt[indxthrd]->webstream_daemon = NULL;
         cnt[indxthrd]->webcontrol_daemon = NULL;
         cnt[indxthrd]->webcontrol_finish = FALSE;

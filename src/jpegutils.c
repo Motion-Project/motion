@@ -115,8 +115,9 @@ static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr, const UI
      */
     nsymbols = 0;
 
-    for (len = 1; len <= 16; len++)
+    for (len = 1; len <= 16; len++) {
         nsymbols += bits[len];
+    }
 
     if (nsymbols < 1 || nsymbols > 256) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("%s: Given jpeg buffer was too small"));
