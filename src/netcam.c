@@ -436,7 +436,9 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
 {
     struct timespec waittime;
 
-    if (!netcam) return;
+    if (!netcam) {
+        return;
+    }
 
     /*
      * This 'lock' is just a bit of "defensive" programming.  It should
@@ -600,7 +602,7 @@ int netcam_next(struct context *cnt, struct image_data *img_data)
      * approach is to just return a NULL (failed) to the caller (an
      * error message has already been produced by the libjpeg routines).
      */
-    if (setjmp(netcam->setjmp_buffer)){
+    if (setjmp(netcam->setjmp_buffer)) {
         return NETCAM_GENERAL_ERROR | NETCAM_JPEG_CONV_ERROR;
     }
 
@@ -672,8 +674,7 @@ int netcam_start(struct context *cnt)
     for (indx = 0; indx < netcam->parameters->params_count; indx++)
     {
         if ( !strcmp(netcam->parameters->params_array[indx].param_name,"proxy") &&
-             strcmp(netcam->parameters->params_array[indx].param_name,"NULL") )
-        {
+             strcmp(netcam->parameters->params_array[indx].param_name,"NULL")) {
             netcam_url_parse(&url, netcam->parameters->params_array[indx].param_value);
             if (!url.host) {
                 MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
@@ -783,7 +784,9 @@ int netcam_start(struct context *cnt)
     }
 
     netcam_url_free(&url);
-    if (retval < 0) return -1;
+    if (retval < 0) {
+        return -1;
+    }
 
     /*
      * We expect that, at this point, we should be positioned to read

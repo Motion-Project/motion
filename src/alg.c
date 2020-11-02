@@ -373,7 +373,9 @@ void alg_noise_tune(struct context *cnt, unsigned char *new)
     for (; i > 0; i--) {
         diff = ABS(*ref - *new);
 
-        if (mask)  diff = ((diff * *mask++) / 255);
+        if (mask) {
+            diff = ((diff * *mask++) / 255);
+        }
 
         if (*smartmask) {
             sum += diff + 1;
@@ -385,8 +387,10 @@ void alg_noise_tune(struct context *cnt, unsigned char *new)
         smartmask++;
     }
 
-    if (count > 3)  /* Avoid divide by zero. */
+    if (count > 3) {
+        /* Avoid divide by zero. */
         sum /= count / 3;
+    }
 
     /* 5: safe, 4: regular, 3: more sensitive */
     cnt->noise = 4 + (cnt->noise + sum) / 2;
@@ -401,9 +405,13 @@ void alg_threshold_tune(struct context *cnt, int diffs, int motion)
     int i;
     int sum = 0, top = diffs;
 
-    if (!diffs) return;
+    if (!diffs) {
+        return;
+    }
 
-    if (motion) diffs = cnt->threshold / 4;
+    if (motion) {
+        diffs = cnt->threshold / 4;
+    }
 
     for (i = 0; i < THRESHOLD_TUNE_LENGTH - 1; i++) {
         sum += cnt->diffs_last[i];
@@ -414,7 +422,9 @@ void alg_threshold_tune(struct context *cnt, int diffs, int motion)
             cnt->diffs_last[i] = cnt->threshold / 4;
         }
 
-        if (cnt->diffs_last[i] > top) top = cnt->diffs_last[i];
+        if (cnt->diffs_last[i] > top) {
+            top = cnt->diffs_last[i];
+        }
     }
 
     sum += cnt->diffs_last[i];
@@ -422,9 +432,13 @@ void alg_threshold_tune(struct context *cnt, int diffs, int motion)
 
     sum /= THRESHOLD_TUNE_LENGTH / 4;
 
-    if (sum < top * 2) sum = top * 2;
+    if (sum < top * 2) {
+        sum = top * 2;
+    }
 
-    if (sum < cnt->conf.threshold) cnt->threshold = (cnt->threshold + sum) / 2;
+    if (sum < cnt->conf.threshold) {
+        cnt->threshold = (cnt->threshold + sum) / 2;
+    }
 }
 
 /*
@@ -461,7 +475,9 @@ static int iflood(int x, int y, int width, int height,
     Segment stack[MAXS], *sp = stack;    /* Stack of filled segments. */
     int count = 0;
 
-    if (x < 0 || x >= width || y < 0 || y >= height) return 0;
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+        return 0;
+    }
 
     PUSH(y, x, x, 1);             /* Needed in some cases. */
     PUSH(y+1, x, x, -1);          /* Seed segment (popped 1st). */
@@ -478,11 +494,15 @@ static int iflood(int x, int y, int width, int height,
             count++;
         }
 
-        if (x >= x1) goto skip;
+        if (x >= x1) {
+            goto skip;
+        }
 
         l = x + 1;
 
-        if (l < x1) PUSH(y, l, x1 - 1, -dy);  /* Leak on left? */
+        if (l < x1) {
+            PUSH(y, l, x1 - 1, -dy);  /* Leak on left? */
+        }
 
         x = x1 + 1;
 
@@ -494,7 +514,9 @@ static int iflood(int x, int y, int width, int height,
 
             PUSH(y, l, x - 1, dy);
 
-            if (x > x2 + 1) PUSH(y, x2 + 1, x - 1, -dy);  /* Leak on right? */
+            if (x > x2 + 1) {
+                PUSH(y, x2 + 1, x - 1, -dy);  /* Leak on right? */
+            }
 
             skip:
 
@@ -542,7 +564,9 @@ static int alg_labeling(struct context *cnt)
             }
 
             /* Already visited by iflood */
-            if (labels[pixelpos] > 0) continue;
+            if (labels[pixelpos] > 0) {
+                continue;
+            }
 
             labelsize = iflood(ix, iy, width, height, out, labels, current_label, 0);
 
@@ -660,7 +684,9 @@ static int dilate9(unsigned char *img, int width, int height, void *buffer)
             }
 
             /* Wrap around the window index if necessary. */
-            if (++widx == 3) widx = 0;
+            if (++widx == 3) {
+                widx = 0;
+            }
         }
 
         /* Store zeros in the vertical sides. */
@@ -847,11 +873,15 @@ int alg_despeckle(struct context *cnt, int olddiffs)
     for (i = 0; i < len; i++) {
         switch (cnt->conf.despeckle_filter[i]) {
         case 'E':
-            if ((diffs = erode9(out, width, height, common_buffer, 0)) == 0) i = len;
+            if ((diffs = erode9(out, width, height, common_buffer, 0)) == 0) {
+                i = len;
+            }
             done = 1;
             break;
         case 'e':
-            if ((diffs = erode5(out, width, height, common_buffer, 0)) == 0) i = len;
+            if ((diffs = erode5(out, width, height, common_buffer, 0)) == 0) {
+                i = len;
+            }
             done = 1;
             break;
         case 'D':
@@ -873,7 +903,9 @@ int alg_despeckle(struct context *cnt, int olddiffs)
 
     /* If conf.despeckle_filter contains any valid action EeDdl */
     if (done) {
-        if (done != 2) cnt->imgs.labelsize_max = 0; // Disable Labeling
+        if (done != 2) {
+            cnt->imgs.labelsize_max = 0; // Disable Labeling
+        }
         return diffs;
     } else {
         cnt->imgs.labelsize_max = 0; // Disable Labeling
@@ -897,7 +929,9 @@ void alg_tune_smartmask(struct context *cnt)
 
     for (i = 0; i < motionsize; i++) {
         /* Decrease smart_mask sensitivity every 5*speed seconds only. */
-        if (smartmask[i] > 0) smartmask[i]--;
+        if (smartmask[i] > 0) {
+            smartmask[i]--;
+        }
         /* Increase smart_mask sensitivity based on the buffered values. */
         diff = smartmask_buffer[i]/sensitivity;
 
@@ -1094,15 +1128,32 @@ int alg_diff_standard(struct context *cnt, unsigned char *new)
                 movq_r2r(mm3, mm0);              /* U */
 
                 /* Add to *smartmask_buffer. This is probably the fastest way to do it. */
+                /* TODO:  Revise this to use a loop */
                 if (cnt->event_nr != cnt->prev_event) {
-                    if (mmtemp.ub[0]) smartmask_buffer[0] += SMARTMASK_SENSITIVITY_INCR;
-                    if (mmtemp.ub[1]) smartmask_buffer[1] += SMARTMASK_SENSITIVITY_INCR;
-                    if (mmtemp.ub[2]) smartmask_buffer[2] += SMARTMASK_SENSITIVITY_INCR;
-                    if (mmtemp.ub[3]) smartmask_buffer[3] += SMARTMASK_SENSITIVITY_INCR;
-                    if (mmtemp.ub[4]) smartmask_buffer[4] += SMARTMASK_SENSITIVITY_INCR;
-                    if (mmtemp.ub[5]) smartmask_buffer[5] += SMARTMASK_SENSITIVITY_INCR;
-                    if (mmtemp.ub[6]) smartmask_buffer[6] += SMARTMASK_SENSITIVITY_INCR;
-                    if (mmtemp.ub[7]) smartmask_buffer[7] += SMARTMASK_SENSITIVITY_INCR;
+                    if (mmtemp.ub[0]) {
+                        smartmask_buffer[0] += SMARTMASK_SENSITIVITY_INCR;
+                    }
+                    if (mmtemp.ub[1]) {
+                        smartmask_buffer[1] += SMARTMASK_SENSITIVITY_INCR;
+                    }
+                    if (mmtemp.ub[2]) {
+                        smartmask_buffer[2] += SMARTMASK_SENSITIVITY_INCR;
+                    }
+                    if (mmtemp.ub[3]) {
+                        smartmask_buffer[3] += SMARTMASK_SENSITIVITY_INCR;
+                    }
+                    if (mmtemp.ub[4]) {
+                        smartmask_buffer[4] += SMARTMASK_SENSITIVITY_INCR;
+                    }
+                    if (mmtemp.ub[5]) {
+                        smartmask_buffer[5] += SMARTMASK_SENSITIVITY_INCR;
+                    }
+                    if (mmtemp.ub[6]) {
+                        smartmask_buffer[6] += SMARTMASK_SENSITIVITY_INCR;
+                    }
+                    if (mmtemp.ub[7]) {
+                        smartmask_buffer[7] += SMARTMASK_SENSITIVITY_INCR;
+                    }
                 }
 
                 smartmask_buffer += 8;
@@ -1166,7 +1217,9 @@ int alg_diff_standard(struct context *cnt, unsigned char *new)
     for (; i > 0; i--) {
         register unsigned char curdiff = (int)(abs(*ref - *new)); /* Using a temp variable is 12% faster. */
         /* Apply fixed mask */
-        if (mask) curdiff = ((int)(curdiff * *mask++) / 255);
+        if (mask) {
+            curdiff = ((int)(curdiff * *mask++) / 255);
+        }
 
         if (smartmask_speed) {
             if (curdiff > noise) {
@@ -1177,9 +1230,13 @@ int alg_diff_standard(struct context *cnt, unsigned char *new)
                  * speed=10) we add 5 here. NOT related to the 5 at ratio-
                  * calculation.
                  */
-                if (cnt->event_nr != cnt->prev_event) (*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
+                if (cnt->event_nr != cnt->prev_event) {
+                    (*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
+                }
                 /* Apply smart_mask */
-                if (!*smartmask_final) curdiff = 0;
+                if (!*smartmask_final) {
+                    curdiff = 0;
+                }
             }
             smartmask_final++;
             smartmask_buffer++;
@@ -1207,7 +1264,9 @@ static char alg_diff_fast(struct context *cnt, int max_n_changes, unsigned char 
     int noise = cnt->noise;
     unsigned char *ref = imgs->ref;
 
-    if (!step % 2) step++;
+    if (!step % 2) {
+        step++;
+    }
     /* We're checking only 1 of several pixels. */
     max_n_changes /= step;
 
@@ -1217,7 +1276,9 @@ static char alg_diff_fast(struct context *cnt, int max_n_changes, unsigned char 
         register unsigned char curdiff = (int)(abs((char)(*ref - *new))); /* Using a temp variable is 12% faster. */
         if (curdiff >  noise) {
             diffs++;
-            if (diffs > max_n_changes) return 1;
+            if (diffs > max_n_changes) {
+                return 1;
+            }
         }
         ref += step;
         new += step;
@@ -1252,11 +1313,17 @@ int alg_lightswitch(struct context *cnt, int diffs)
 {
     struct images *imgs = &cnt->imgs;
 
-    if (cnt->conf.lightswitch_percent < 0) cnt->conf.lightswitch_percent = 0;
-    if (cnt->conf.lightswitch_percent > 100) cnt->conf.lightswitch_percent = 100;
+    if (cnt->conf.lightswitch_percent < 0) {
+        cnt->conf.lightswitch_percent = 0;
+    }
+    if (cnt->conf.lightswitch_percent > 100) {
+        cnt->conf.lightswitch_percent = 100;
+    }
 
     /* Is lightswitch percent of the image changed? */
-    if (diffs > (imgs->motionsize * cnt->conf.lightswitch_percent / 100)) return 1;
+    if (diffs > (imgs->motionsize * cnt->conf.lightswitch_percent / 100)) {
+        return 1;
+    }
 
     return 0;
 }
@@ -1275,12 +1342,18 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
     for (y = 0; y < cnt->imgs.height; y++) {
         line = 0;
         for (x = 0; x < cnt->imgs.width; x++) {
-            if (*(out++)) line++;
+            if (*(out++)) {
+                line++;
+            }
         }
 
-        if (line > cnt->imgs.width / 18) vertlines++;
+        if (line > cnt->imgs.width / 18) {
+            vertlines++;
+        }
 
-        if (line > linediff * 2) lines++;
+        if (line > linediff * 2) {
+            lines++;
+        }
     }
 
     if (vertlines > cnt->imgs.height / 10 && lines < vertlines / 3 &&
@@ -1321,7 +1394,9 @@ void alg_update_reference_frame(struct context *cnt, int action)
     unsigned char *out = cnt->imgs.img_motion.image_norm;
 
     /* Match rate limit */
-    if (cnt->lastrate > 5) accept_timer /= (cnt->lastrate / 3);
+    if (cnt->lastrate > 5) {
+        accept_timer /= (cnt->lastrate / 3);
+    }
 
     if (action == UPDATE_REF_FRAME) { /* Black&white only for better performance. */
         threshold_ref = cnt->noise * EXCLUDE_LEVEL_PERCENT / 100;

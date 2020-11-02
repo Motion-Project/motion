@@ -126,7 +126,9 @@ static void event_beep(struct context *cnt, motion_event type ATTRIBUTE_UNUSED,
             void *ftype ATTRIBUTE_UNUSED,
             struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
-    if (!cnt->conf.quiet) printf("\a");
+    if (!cnt->conf.quiet) {
+        printf("\a");
+    }
 }
 
 /**
@@ -311,7 +313,9 @@ static void event_sqlnewfile(struct context *cnt, motion_event type  ATTRIBUTE_U
     int sqltype = (unsigned long)arg;
 
     /* Only log the file types we want */
-    if (!(cnt->conf.database_type) || (sqltype & cnt->sql_mask) == 0) return;
+    if (!(cnt->conf.database_type) || (sqltype & cnt->sql_mask) == 0) {
+        return;
+    }
 
     /*
      * We place the code in a block so we only spend time making space in memory
@@ -334,7 +338,9 @@ static void event_sqlfileclose(struct context *cnt, motion_event type  ATTRIBUTE
     int sqltype = (unsigned long)arg;
 
     /* Only log the file types we want */
-    if (!(cnt->conf.database_type) || (sqltype & cnt->sql_mask) == 0) return;
+    if (!(cnt->conf.database_type) || (sqltype & cnt->sql_mask) == 0) {
+        return;
+    }
 
     /*
      * We place the code in a block so we only spend time making space in memory
@@ -394,11 +400,11 @@ static void event_stream_put(struct context *cnt,
 
     pthread_mutex_lock(&cnt->mutex_stream);
         /* Normal stream processing */
-        if (cnt->stream_norm.cnct_count > 0){
-            if (cnt->stream_norm.jpeg_data == NULL){
+        if (cnt->stream_norm.cnct_count > 0) {
+            if (cnt->stream_norm.jpeg_data == NULL) {
                 cnt->stream_norm.jpeg_data = mymalloc(cnt->imgs.size_norm);
             }
-            if (img_data->image_norm != NULL){
+            if (img_data->image_norm != NULL) {
                 cnt->stream_norm.jpeg_size = put_picture_memory(cnt
                     ,cnt->stream_norm.jpeg_data
                     ,cnt->imgs.size_norm
@@ -410,17 +416,16 @@ static void event_stream_put(struct context *cnt,
         }
 
         /* Substream processing */
-        if (cnt->stream_sub.cnct_count > 0){
-            if (cnt->stream_sub.jpeg_data == NULL){
+        if (cnt->stream_sub.cnct_count > 0) {
+            if (cnt->stream_sub.jpeg_data == NULL) {
                 cnt->stream_sub.jpeg_data = mymalloc(cnt->imgs.size_norm);
             }
-            if (img_data->image_norm != NULL){
+            if (img_data->image_norm != NULL) {
                 /* Resulting substream image must be multiple of 8 */
                 if (((cnt->imgs.width  % 16) == 0)  &&
                     ((cnt->imgs.height % 16) == 0)) {
-
                     subsize = ((cnt->imgs.width / 2) * (cnt->imgs.height / 2) * 3 / 2);
-                    if (cnt->imgs.substream_image == NULL){
+                    if (cnt->imgs.substream_image == NULL) {
                         cnt->imgs.substream_image = mymalloc(subsize);
                     }
                     pic_scale_img(cnt->imgs.width
@@ -448,11 +453,11 @@ static void event_stream_put(struct context *cnt,
         }
 
         /* Motion stream processing */
-        if (cnt->stream_motion.cnct_count > 0){
-            if (cnt->stream_motion.jpeg_data == NULL){
+        if (cnt->stream_motion.cnct_count > 0) {
+            if (cnt->stream_motion.jpeg_data == NULL) {
                 cnt->stream_motion.jpeg_data = mymalloc(cnt->imgs.size_norm);
             }
-            if (cnt->imgs.img_motion.image_norm != NULL){
+            if (cnt->imgs.img_motion.image_norm != NULL) {
                 cnt->stream_motion.jpeg_size = put_picture_memory(cnt
                     ,cnt->stream_motion.jpeg_data
                     ,cnt->imgs.size_norm
@@ -464,11 +469,11 @@ static void event_stream_put(struct context *cnt,
         }
 
         /* Source stream processing */
-        if (cnt->stream_source.cnct_count > 0){
-            if (cnt->stream_source.jpeg_data == NULL){
+        if (cnt->stream_source.cnct_count > 0) {
+            if (cnt->stream_source.jpeg_data == NULL) {
                 cnt->stream_source.jpeg_data = mymalloc(cnt->imgs.size_norm);
             }
-            if (cnt->imgs.image_virgin.image_norm != NULL){
+            if (cnt->imgs.image_virgin.image_norm != NULL) {
                 cnt->stream_source.jpeg_size = put_picture_memory(cnt
                     ,cnt->stream_source.jpeg_data
                     ,cnt->imgs.size_norm
@@ -500,9 +505,13 @@ static void event_vlp_putpipe(struct context *cnt,
 
 const char *imageext(struct context *cnt)
 {
-    if (cnt->imgs.picture_type == IMAGE_TYPE_PPM) return "ppm";
+    if (cnt->imgs.picture_type == IMAGE_TYPE_PPM) {
+        return "ppm";
+    }
 
-    if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP) return "webp";
+    if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP) {
+        return "webp";
+    }
 
     return "jpg";
 }
@@ -596,7 +605,9 @@ static void event_image_snapshot(struct context *cnt,
     int offset = 0;
     int len = strlen(cnt->conf.snapshot_filename);
 
-    if (len >= 9) offset = len - 8;
+    if (len >= 9) {
+        offset = len - 8;
+    }
 
     if (strcmp(cnt->conf.snapshot_filename+offset, "lastsnap")) {
         char linkpath[PATH_MAX];
@@ -847,7 +858,9 @@ static void event_create_extpipe(struct context *cnt,
             } else if (errno ==  ENOENT) {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     ,_("path not found, trying to create it %s ..."), cnt->conf.target_dir);
-                if (create_path(cnt->extpipefilename) == -1) return ;
+                if (create_path(cnt->extpipefilename) == -1) {
+                    return;
+                }
             } else {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     ,_("error accesing path %s"), cnt->conf.target_dir);
@@ -856,12 +869,14 @@ static void event_create_extpipe(struct context *cnt,
         }
 
         /* Always create any path specified as file name */
-        if (create_path(cnt->extpipefilename) == -1) return ;
+        if (create_path(cnt->extpipefilename) == -1) {
+            return;
+        }
 
         mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.movie_extpipe, currenttime_tv, cnt->extpipefilename, 0);
 
         retcd = snprintf(cnt->extpipecmdline, PATH_MAX, "%s", stamp);
-        if ((retcd < 0 ) || (retcd >= PATH_MAX)){
+        if ((retcd < 0 ) || (retcd >= PATH_MAX)) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 , _("Error specifying command line: %s"), cnt->extpipecmdline);
             return;
@@ -896,7 +911,7 @@ static void event_extpipe_put(struct context *cnt,
         passthrough = util_check_passthrough(cnt);
         /* Check that is open */
         if ((cnt->extpipe_open) && (fileno(cnt->extpipe) > 0)) {
-            if ((cnt->imgs.size_high > 0) && (!passthrough)){
+            if ((cnt->imgs.size_high > 0) && (!passthrough)) {
                 if (!fwrite(img_data->image_high, cnt->imgs.size_high, 1, cnt->extpipe)) {
                     MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                         ,_("Error writing in pipe , state error %d"), ferror(cnt->extpipe));
@@ -926,7 +941,9 @@ static void event_new_video(struct context *cnt,
 
     MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO, _("Source FPS %d"), cnt->movie_fps);
 
-    if (cnt->movie_fps < 2) cnt->movie_fps = 2;
+    if (cnt->movie_fps < 2) {
+        cnt->movie_fps = 2;
+    }
 
 }
 
@@ -944,7 +961,9 @@ static void event_ffmpeg_newfile(struct context *cnt,
     long codenbr;
     int retcd;
 
-    if (!cnt->conf.movie_output && !cnt->conf.movie_output_motion) return;
+    if (!cnt->conf.movie_output && !cnt->conf.movie_output_motion) {
+        return;
+    }
 
     /*
      *  conf.mpegpath would normally be defined but if someone deleted it by control interface
@@ -1036,7 +1055,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
     }
     if (cnt->conf.movie_output) {
         cnt->ffmpeg_output = mymalloc(sizeof(struct ffmpeg));
-        if (cnt->imgs.size_high > 0){
+        if (cnt->imgs.size_high > 0) {
             cnt->ffmpeg_output->width  = cnt->imgs.width_high;
             cnt->ffmpeg_output->height = cnt->imgs.height_high;
             cnt->ffmpeg_output->high_resolution = TRUE;
@@ -1068,7 +1087,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
 
 
         retcd = ffmpeg_open(cnt->ffmpeg_output);
-        if (retcd < 0){
+        if (retcd < 0) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error opening context for movie output."));
             free(cnt->ffmpeg_output);
@@ -1105,7 +1124,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
         cnt->ffmpeg_output_motion->rtsp_data = NULL;
 
         retcd = ffmpeg_open(cnt->ffmpeg_output_motion);
-        if (retcd < 0){
+        if (retcd < 0) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("ffopen_open error creating (motion) file [%s]"), cnt->motionfilename);
             free(cnt->ffmpeg_output_motion);
@@ -1149,7 +1168,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             , tmp);
         passthrough = util_check_passthrough(cnt);
         cnt->ffmpeg_timelapse = mymalloc(sizeof(struct ffmpeg));
-        if ((cnt->imgs.size_high > 0) && (!passthrough)){
+        if ((cnt->imgs.size_high > 0) && (!passthrough)) {
             cnt->ffmpeg_timelapse->width  = cnt->imgs.width_high;
             cnt->ffmpeg_timelapse->height = cnt->imgs.height_high;
             cnt->ffmpeg_timelapse->high_resolution = TRUE;
@@ -1173,8 +1192,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
         cnt->ffmpeg_timelapse->rtsp_data = NULL;
 
         if ((strcmp(cnt->conf.timelapse_codec,"mpg") == 0) ||
-            (strcmp(cnt->conf.timelapse_codec,"swf") == 0) ){
-
+            (strcmp(cnt->conf.timelapse_codec,"swf") == 0)) {
             if (strcmp(cnt->conf.timelapse_codec,"swf") == 0) {
                 MOTION_LOG(WRN, TYPE_EVENTS, NO_ERRNO
                     ,_("The swf container for timelapse no longer supported.  Using mpg container."));
@@ -1195,7 +1213,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             retcd = ffmpeg_open(cnt->ffmpeg_timelapse);
         }
 
-        if (retcd < 0){
+        if (retcd < 0) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("ffopen_open error creating (timelapse) file [%s]"), cnt->timelapsefilename);
             free(cnt->ffmpeg_timelapse);
@@ -1217,7 +1235,7 @@ static void event_ffmpeg_put(struct context *cnt,
             void *dummy2 ATTRIBUTE_UNUSED, struct timeval *currenttime_tv)
 {
     if (cnt->ffmpeg_output) {
-        if (ffmpeg_put_image(cnt->ffmpeg_output, img_data, currenttime_tv) == -1){
+        if (ffmpeg_put_image(cnt->ffmpeg_output, img_data, currenttime_tv) == -1) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
         }
     }

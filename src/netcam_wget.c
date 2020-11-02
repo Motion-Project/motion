@@ -101,7 +101,9 @@ int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flag
                         return HG_ERROR;
                     }
                     /* If the next character is HT or SP, just continue. */
-                    if (next == '\t' || next == ' ') continue;
+                    if (next == '\t' || next == ' ') {
+                        continue;
+                    }
                 }
 
                 /*
@@ -141,7 +143,9 @@ int header_process(const char *header, const char *name,
     while (*name && (tolower (*name) == tolower (*header)))
         ++name, ++header;
 
-    if (*name || *header++ != ':') return 0;
+    if (*name || *header++ != ':') {
+        return 0;
+    }
 
     header += skip_lws (header);
     return ((*procfun) (header, arg));
@@ -164,7 +168,9 @@ int header_extract_number(const char *header, void *closure)
         result = 10 * result + (*p - '0');
 
     /* Failure if no number present. */
-    if (p == header) return 0;
+    if (p == header) {
+        return 0;
+    }
 
     /* Skip trailing whitespace. */
     p += skip_lws (p);
@@ -173,7 +179,9 @@ int header_extract_number(const char *header, void *closure)
     *(long *)closure = result;
 
     /* Indicate failure if trailing garbage is present. */
-    if (*p) return 0;
+    if (*p) {
+        return 0;
+    }
 
     return 1;
 }
@@ -271,7 +279,9 @@ int http_process_type(const char *hdr, void *arg)
     /* Locate P on `;' or the terminating zero, whichever comes first. */
     const char *p = strchr (hdr, ';');
 
-    if (!p) p = hdr + strlen (hdr);
+    if (!p) {
+        p = hdr + strlen (hdr);
+    }
 
     while (p > hdr && isspace (*(p - 1)))
         --p;
@@ -336,7 +346,9 @@ int rbuf_flush(netcam_context_ptr netcam, char *where, int maxsize)
     } else {
         int howmuch = MINVAL ((int)netcam->response->buffer_left, maxsize);
 
-        if (where) memcpy(where, netcam->response->buffer_pos, howmuch);
+        if (where) {
+            memcpy(where, netcam->response->buffer_pos, howmuch);
+        }
 
         netcam->response->buffer_left -= howmuch;
         netcam->response->buffer_pos += howmuch;
@@ -354,10 +366,14 @@ int http_result_code(const char *header)
     char *cptr;
 
     /* Assure the header starts out right. */
-    if (strncmp(header, "HTTP", 4)) return -1;
+    if (strncmp(header, "HTTP", 4)) {
+        return -1;
+    }
 
     /* Find the space following the HTTP/1.x */
-    if ((cptr = strchr(header+4, ' ')) == NULL)  return -1;
+    if ((cptr = strchr(header+4, ' ')) == NULL)  {
+        return -1;
+    }
 
     return atoi(cptr + 1);
 }

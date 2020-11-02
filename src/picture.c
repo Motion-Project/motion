@@ -403,14 +403,14 @@ static void put_webp_yuv420p_file(FILE *fp,
 {
     /* Create a config present and check for compatible library version */
     WebPConfig webp_config;
-    if (!WebPConfigPreset(&webp_config, WEBP_PRESET_DEFAULT, (float) quality)){
+    if (!WebPConfigPreset(&webp_config, WEBP_PRESET_DEFAULT, (float) quality)) {
         MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, _("libwebp version error"));
         return;
     }
 
     /* Create the input data structure and check for compatible library version */
     WebPPicture webp_image;
-    if (!WebPPictureInit(&webp_image)){
+    if (!WebPPictureInit(&webp_image)) {
         MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp version error"));
         return;
     }
@@ -418,7 +418,7 @@ static void put_webp_yuv420p_file(FILE *fp,
     /* Allocate the image buffer based on image width and height */
     webp_image.width = width;
     webp_image.height = height;
-    if (!WebPPictureAlloc(&webp_image)){
+    if (!WebPPictureAlloc(&webp_image)) {
         MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp image buffer allocation error"));
         return;
     }
@@ -639,7 +639,6 @@ void overlay_smartmask(struct context *cnt, unsigned char *out)
             if (smartmask[line + x] == 0 || smartmask[line + x + 1] == 0 ||
                 smartmask[line + width + x] == 0 ||
                 smartmask[line + width + x + 1] == 0) {
-
                 *out_v = 255;
                 *out_u = 128;
             }
@@ -650,7 +649,9 @@ void overlay_smartmask(struct context *cnt, unsigned char *out)
     out_y = out;
     /* Set colour intensity for smartmask. */
     for (i = 0; i < imgs->motionsize; i++) {
-        if (smartmask[i] == 0) *out_y = 0;
+        if (smartmask[i] == 0) {
+            *out_y = 0;
+        }
         out_y++;
     }
 }
@@ -682,7 +683,6 @@ void overlay_fixed_mask(struct context *cnt, unsigned char *out)
             if (mask[line + x] == 0 || mask[line + x + 1] == 0 ||
                 mask[line + width + x] == 0 ||
                 mask[line + width + x + 1] == 0) {
-
                 *out_v = 0;
                 *out_u = 0;
             }
@@ -693,7 +693,9 @@ void overlay_fixed_mask(struct context *cnt, unsigned char *out)
     out_y = out;
     /* Set colour intensity for mask. */
     for (i = 0; i < imgs->motionsize; i++) {
-        if (mask[i] == 0) *out_y = 0;
+        if (mask[i] == 0) {
+            *out_y = 0;
+        }
         out_y++;
     }
 }
@@ -725,7 +727,6 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
             if (labels[line + x] & 32768 || labels[line + x + 1] & 32768 ||
                 labels[line + width + x] & 32768 ||
                 labels[line + width + x + 1] & 32768) {
-
                 *out_u = 255;
                 *out_v = 128;
             }
@@ -736,7 +737,9 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
     out_y = out;
     /* Set intensity for coloured label to have better visibility. */
     for (i = 0; i < imgs->motionsize; i++) {
-        if (*labels++ & 32768) *out_y = 0;
+        if (*labels++ & 32768) {
+            *out_y = 0;
+        }
         out_y++;
     }
 }
@@ -768,7 +771,7 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
      */
     gettimeofday(&tv1, NULL);
 
-    if (!cnt->conf.stream_grey){
+    if (!cnt->conf.stream_grey) {
         return jpgutl_put_yuv420p(dest_image, image_size, image,
                                        width, height, quality, cnt ,&tv1,NULL);
     } else {
@@ -799,7 +802,7 @@ static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *im
     if (cnt->imgs.picture_type == IMAGE_TYPE_PPM) {
         put_ppm_bgr24_file(picture, image, width, height);
     } else {
-        if (dummy == 1){
+        if (dummy == 1) {
             #ifdef HAVE_WEBP
                 if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP) {
                     put_webp_yuv420p_file(picture, image, width, height, quality, cnt
@@ -871,7 +874,9 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
     /* Skip comment */
     line[0] = '#';
     while (line[0] == '#')
-        if (!fgets(line, 255, picture)) return NULL;
+        if (!fgets(line, 255, picture)) {
+            return NULL;
+        }
 
     /* Read image size */
     if (sscanf(line, "%d %d", &mask_width, &mask_height) != 2) {
@@ -883,7 +888,9 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
     /* Maximum value */
     line[0] = '#';
     while (line[0] == '#')
-        if (!fgets(line, 255, picture)) return NULL;
+        if (!fgets(line, 255, picture)) {
+            return NULL;
+        }
 
     if (sscanf(line, "%d", &maxval) != 1) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO

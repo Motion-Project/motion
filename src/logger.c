@@ -231,7 +231,7 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
     }
 
     /* Prepend the format specifier for the function name */
-    if (fncname){
+    if (fncname) {
         snprintf(usrfmt, sizeof (usrfmt),"%s: %s", "%s", fmt);
     } else {
         snprintf(usrfmt, sizeof (usrfmt),"%s",fmt);
@@ -269,10 +269,10 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
         #endif
     }
 
-    if ((!strcmp(buf,flood_msg)) && (flood_cnt <= 5000)){
+    if ((!strcmp(buf,flood_msg)) && (flood_cnt <= 5000)) {
         flood_cnt++;
     } else {
-        if (flood_cnt > 1){
+        if (flood_cnt > 1) {
             snprintf(flood_repeats,1024,"[%d:%s] [%s] [%s] Above message repeats %d times",
                      threadnr, threadname, get_log_level_str(level)
                      , get_log_type_str(type), flood_cnt-1);

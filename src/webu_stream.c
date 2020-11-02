@@ -21,8 +21,10 @@
 static void webu_stream_mjpeg_checkbuffers(struct webui_ctx *webui)
 {
     /* Allocate buffers if needed */
-    if (webui->resp_size < (size_t)webui->cnt->imgs.size_norm){
-        if (webui->resp_page   != NULL) free(webui->resp_page);
+    if (webui->resp_size < (size_t)webui->cnt->imgs.size_norm) {
+        if (webui->resp_page   != NULL) {
+            free(webui->resp_page);
+        }
         webui->resp_page   = mymalloc(webui->cnt->imgs.size_norm);
         memset(webui->resp_page,'\0',webui->cnt->imgs.size_norm);
         webui->resp_size = webui->cnt->imgs.size_norm;
@@ -48,12 +50,16 @@ static void webu_stream_mjpeg_delay(struct webui_ctx *webui)
      */
     stream_delay = ((time_curr.tv_usec - webui->time_last.tv_usec)*1000) +
         ((time_curr.tv_sec - webui->time_last.tv_sec)*1000000000);
-    if (stream_delay < 0)  stream_delay = 0;
-    if (stream_delay > 1000000000 ) stream_delay = 1000000000;
+    if (stream_delay < 0)  {
+        stream_delay = 0;
+    }
+    if (stream_delay > 1000000000 ) {
+        stream_delay = 1000000000;
+    }
 
-    if (webui->stream_fps >= 1){
+    if (webui->stream_fps >= 1) {
         stream_rate = ( (1000000000 / webui->stream_fps) - stream_delay);
-        if ((stream_rate > 0) && (stream_rate < 1000000000)){
+        if ((stream_rate > 0) && (stream_rate < 1000000000)) {
             SLEEP(0,stream_rate);
         } else if (stream_rate == 1000000000) {
             SLEEP(1,0);
@@ -73,16 +79,16 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui)
     memset(webui->resp_page, '\0', webui->resp_size);
 
     /* Assign to a local pointer the stream we want */
-    if (webui->cnct_type == WEBUI_CNCT_FULL){
+    if (webui->cnct_type == WEBUI_CNCT_FULL) {
         local_stream = &webui->cnt->stream_norm;
 
-    } else if (webui->cnct_type == WEBUI_CNCT_SUB){
+    } else if (webui->cnct_type == WEBUI_CNCT_SUB) {
         local_stream = &webui->cnt->stream_sub;
 
-    } else if (webui->cnct_type == WEBUI_CNCT_MOTION){
+    } else if (webui->cnct_type == WEBUI_CNCT_MOTION) {
         local_stream = &webui->cnt->stream_motion;
 
-    } else if (webui->cnct_type == WEBUI_CNCT_SOURCE){
+    } else if (webui->cnct_type == WEBUI_CNCT_SOURCE) {
         local_stream = &webui->cnt->stream_source;
 
     } else {
@@ -91,7 +97,7 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui)
 
     /* Copy jpg from the motion loop thread */
     pthread_mutex_lock(&webui->cnt->mutex_stream);
-        if ((!webui->cnt->detecting_motion) && (webui->cnt->conf.stream_motion)){
+        if ((!webui->cnt->detecting_motion) && (webui->cnt->conf.stream_motion)) {
             webui->stream_fps = 1;
         } else {
             webui->stream_fps = webui->cnt->conf.stream_maxrate;
@@ -131,9 +137,11 @@ static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, s
 
     (void)pos;  /*Remove compiler warning */
 
-    if (webui->cnt->webcontrol_finish) return -1;
+    if (webui->cnt->webcontrol_finish) {
+        return -1;
+    }
 
-    if ((webui->stream_pos == 0) || (webui->resp_used == 0)){
+    if ((webui->stream_pos == 0) || (webui->resp_used == 0)) {
 
         webu_stream_mjpeg_delay(webui);
 
@@ -142,7 +150,9 @@ static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, s
 
         webu_stream_mjpeg_getimg(webui);
 
-        if (webui->resp_used == 0) return 0;
+        if (webui->resp_used == 0) {
+            return 0;
+        }
     }
 
     if ((webui->resp_used - webui->stream_pos) > max) {
@@ -154,7 +164,7 @@ static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, s
     memcpy(buf, webui->resp_page + webui->stream_pos, sent_bytes);
 
     webui->stream_pos = webui->stream_pos + sent_bytes;
-    if (webui->stream_pos >= webui->resp_used){
+    if (webui->stream_pos >= webui->resp_used) {
         webui->stream_pos = 0;
     }
 
@@ -172,7 +182,7 @@ static void webu_stream_static_getimg(struct webui_ctx *webui)
     memset(webui->resp_page, '\0', webui->resp_size);
 
     pthread_mutex_lock(&webui->cnt->mutex_stream);
-        if (webui->cnt->stream_norm.jpeg_data == NULL){
+        if (webui->cnt->stream_norm.jpeg_data == NULL) {
             pthread_mutex_unlock(&webui->cnt->mutex_stream);
             return;
         }
@@ -189,13 +199,13 @@ static int webu_stream_checks(struct webui_ctx *webui)
     /* Perform edits to determine whether the user specified a valid URL
      * for the particular port
      */
-    if ((webui->cntlst != NULL) && (webui->thread_nbr >= webui->cam_threads)){
+    if ((webui->cntlst != NULL) && (webui->thread_nbr >= webui->cam_threads)) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             , _("Invalid thread specified: %s"),webui->url);
         return -1;
     }
 
-    if ((webui->cntlst != NULL) && (webui->thread_nbr < 0) && (webui->cam_threads > 1)){
+    if ((webui->cntlst != NULL) && (webui->thread_nbr < 0) && (webui->cam_threads > 1)) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             , _("Invalid thread specified: %s"),webui->url);
         return -1;
@@ -258,7 +268,7 @@ static void webu_stream_cnct_count(struct webui_ctx *webui)
         pthread_mutex_unlock(&webui->cnt->mutex_stream);
     }
 
-    if (cnct_count == 1){
+    if (cnct_count == 1) {
         /* This is the first connection so we need to wait half a sec
          * so that the motion loop on the other thread can update image
          */
@@ -273,7 +283,9 @@ int webu_stream_mjpeg(struct webui_ctx *webui)
     int retcd;
     struct MHD_Response *response;
 
-    if (webu_stream_checks(webui) == -1) return MHD_NO;
+    if (webu_stream_checks(webui) == -1) {
+        return MHD_NO;
+    }
 
     webu_stream_cnct_count(webui);
 
@@ -283,12 +295,12 @@ int webu_stream_mjpeg(struct webui_ctx *webui)
 
     response = MHD_create_response_from_callback (MHD_SIZE_UNKNOWN, 1024
         ,&webu_stream_mjpeg_response, webui, NULL);
-    if (!response){
+    if (!response) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
 
-    if (webui->cnt->conf.stream_cors_header != NULL){
+    if (webui->cnt->conf.stream_cors_header != NULL) {
         MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
             , webui->cnt->conf.stream_cors_header);
     }
@@ -309,7 +321,9 @@ int webu_stream_static(struct webui_ctx *webui)
     struct MHD_Response *response;
     char resp_used[20];
 
-    if (webu_stream_checks(webui) == -1) return MHD_NO;
+    if (webu_stream_checks(webui) == -1) {
+        return MHD_NO;
+    }
 
     webu_stream_cnct_count(webui);
 
@@ -324,12 +338,12 @@ int webu_stream_static(struct webui_ctx *webui)
 
     response = MHD_create_response_from_buffer (webui->resp_size
         ,(void *)webui->resp_page, MHD_RESPMEM_MUST_COPY);
-    if (!response){
+    if (!response) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
 
-    if (webui->cnt->conf.stream_cors_header != NULL){
+    if (webui->cnt->conf.stream_cors_header != NULL) {
         MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
             , webui->cnt->conf.stream_cors_header);
     }

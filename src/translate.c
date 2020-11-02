@@ -25,7 +25,9 @@ void translate_locale_chg(const char *langcd)
         /* Invoke external function to change locale*/
         ++_nl_msg_cat_cntr;
     #else
-        if (langcd != NULL) MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,"No native language support");
+        if (langcd != NULL) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,"No native language support");
+        }
     #endif
 }
 
@@ -58,7 +60,7 @@ void translate_init(void)
 char* translate_text(const char *msgid)
 {
     #ifdef HAVE_GETTEXT
-        if (nls_enabled){
+        if (nls_enabled) {
             return (char*)gettext(msgid);
         } else {
             return (char*)msgid;

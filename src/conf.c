@@ -2046,8 +2046,9 @@ static void conf_cmdline(struct context *cnt, int thread)
     while ((c = getopt(conf->argc, conf->argv, "bc:d:hmns?p:k:l:")) != EOF)
         switch (c) {
         case 'c':
-            if (thread == -1)
+            if (thread == -1) {
                 strcpy(cnt->conf_filename, optarg);
+            }
             break;
         case 'b':
             cnt->daemon = 1;
@@ -2110,7 +2111,9 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
 {
     unsigned int i = 0;
 
-    if (!cmd) return cnt;
+    if (!cmd) {
+        return cnt;
+    }
 
     /*
      * We search through config_params until we find a param_name that matches
@@ -2121,7 +2124,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
 
             /* If config_param is string we don't want to check arg1. */
             if (strcasecmp(config_type(&config_params[i]), "string")) {
-                if (config_params[i].conf_value && !arg1){
+                if (config_params[i].conf_value && !arg1) {
                     return cnt;
                 }
             }
@@ -2155,7 +2158,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
             MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("%s after version %s")
                 , dep_config_params[i].info, dep_config_params[i].last_version);
 
-            if (dep_config_params[i].copy != NULL){
+            if (dep_config_params[i].copy != NULL) {
                 /* If the depreciated option is a vid item, copy_video_params is called
                  * with the array index sent instead of the context structure member pointer.
                  */
@@ -2168,8 +2171,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
                     !strcmp(dep_config_params[i].name,"input") ||
                     !strcmp(dep_config_params[i].name,"norm") ||
                     !strcmp(dep_config_params[i].name,"frequency") ||
-                    !strcmp(dep_config_params[i].name,"vid_control_params") )
-                {
+                    !strcmp(dep_config_params[i].name,"vid_control_params")) {
                     cnt = copy_video_params(cnt, arg1, i);
 
                 } else if (!strcmp(dep_config_params[i].name,"netcam_decoder") ||
@@ -2179,8 +2181,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
                     !strcmp(dep_config_params[i].name,"netcam_ratehigh") ||
                     !strcmp(dep_config_params[i].name,"netcam_proxy") ||
                     !strcmp(dep_config_params[i].name,"netcam_tolerant_check") ||
-                    !strcmp(dep_config_params[i].name,"netcam_keepalive") )
-                {
+                    !strcmp(dep_config_params[i].name,"netcam_keepalive")) {
                     cnt = copy_netcam_params(cnt, arg1, i);
 
                 } else {
@@ -2219,8 +2220,8 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
     char *beg = NULL, *end = NULL;
 
     while (fgets(line, PATH_MAX-1, fp)) {
-        if (!(line[0] == '#' || line[0] == ';' || strlen(line) <  2)) {/* skipcomment */
-
+        if (!(line[0] == '#' || line[0] == ';' || strlen(line) <  2)) {
+            /* skipcomment */
             arg1 = NULL;
 
             /* Trim white space and any CR or LF at the end of the line. */
@@ -2231,7 +2232,9 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
             *(end+1) = '\0';
 
             /* If line is only whitespace we continue to the next line. */
-            if (strlen(line) == 0) continue;
+            if (strlen(line) == 0) {
+                continue;
+            }
 
             /* Trim leading whitespace from the line and find command. */
             beg = line;
@@ -2297,7 +2300,9 @@ void conf_print(struct context **cnt)
 
         conffile = myfopen(cnt[thread]->conf_filename, "w");
 
-        if (!conffile) continue;
+        if (!conffile) {
+            continue;
+        }
 
         char timestamp[32];
         time_t now = time(0);
@@ -2429,10 +2434,11 @@ struct context **conf_load(struct context **cnt)
 
     conf_cmdline(cnt[0], -1);
 
-    if (cnt[0]->conf_filename[0]) { /* User has supplied filename on Command-line. */
-      strncpy(filename, cnt[0]->conf_filename, PATH_MAX-1);
-      filename[PATH_MAX-1] = '\0';
-      fp = fopen (filename, "r");
+    if (cnt[0]->conf_filename[0]) {
+        /* User has supplied filename on Command-line. */
+        strncpy(filename, cnt[0]->conf_filename, PATH_MAX-1);
+        filename[PATH_MAX-1] = '\0';
+        fp = fopen (filename, "r");
     }
 
     if (!fp) {  /* Command-line didn't work, try current dir. */
@@ -2476,7 +2482,7 @@ struct context **conf_load(struct context **cnt)
         retcd = snprintf(cnt[0]->conf_filename
             ,sizeof(cnt[0]->conf_filename)
             ,"%s",filename);
-        if ((retcd < 0) || (retcd >= (int)sizeof(cnt[0]->conf_filename))){
+        if ((retcd < 0) || (retcd >= (int)sizeof(cnt[0]->conf_filename))) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Invalid file name %s"), filename);
         } else {
@@ -2565,10 +2571,10 @@ void conf_output_parms(struct context **cnt)
                     !strncmp(name, "webcontrol_key", 14) ||
                     !strncmp(name, "webcontrol_cert", 15) ||
                     !strncmp(name, "database_user", 13) ||
-                    !strncmp(name, "database_password", 17))
-                {
+                    !strncmp(name, "database_password", 17)) {
                     motion_log(INF, TYPE_ALL, NO_ERRNO,0
                         ,_("%-25s <redacted>"), name);
+
                 } else {
                     if (strncmp(name, "text", 4) || strncmp(value, " ", 1)) {
                         motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %s", name, value);
@@ -2577,7 +2583,9 @@ void conf_output_parms(struct context **cnt)
                     }
                 }
             } else {
-                if (t == 0) motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s ", name);
+                if (t == 0) {
+                    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s ", name);
+                }
             }
             i++;
         }
@@ -2602,7 +2610,8 @@ void malloc_strings(struct context *cnt)
     char **val;
     while (config_params[i].param_name != NULL) {
         if (config_params[i].copy == copy_string ||
-            config_params[i].copy == copy_uri) { /* if member is a string */
+            config_params[i].copy == copy_uri) {
+            /* if member is a string */
             /* val is made to point to a pointer to the current string. */
             val = (char **)((char *)cnt+config_params[i].conf_value);
 
@@ -2665,7 +2674,9 @@ static struct context **copy_bool(struct context **cnt, const char *str, int val
             *((int *)tmp) = 0;
         }
 
-        if (cnt[0]->threadnr) return cnt;
+        if (cnt[0]->threadnr) {
+            return cnt;
+        }
     }
 
     return cnt;
@@ -2694,7 +2705,9 @@ static struct context **copy_int(struct context **cnt, const char *str, int val_
         } else {
             *((int *)tmp) = atoi(str);
         }
-        if (cnt[0]->threadnr) return cnt;
+        if (cnt[0]->threadnr) {
+            return cnt;
+        }
     }
 
     return cnt;
@@ -2731,7 +2744,9 @@ struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
          * Set the option on all threads if setting the option
          * for thread 0; otherwise just set that one thread's option.
          */
-        if (cnt[0]->threadnr) return cnt;
+        if (cnt[0]->threadnr) {
+            return cnt;
+        }
     }
 
     return cnt;
@@ -2751,17 +2766,19 @@ static struct context **copy_video_params(struct context **cnt, const char *conf
 
     indx_vid = 0;
     while (config_params[indx_vid].param_name != NULL) {
-        if (!strcmp(config_params[indx_vid].param_name,"video_params")) break;
+        if (!strcmp(config_params[indx_vid].param_name,"video_params")) {
+            break;
+        }
         indx_vid++;
     }
 
-    if (strcmp(config_params[indx_vid].param_name,"video_params")){
+    if (strcmp(config_params[indx_vid].param_name,"video_params")) {
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
             ,_("Unable to locate video_params"));
         return cnt;
     }
 
-    if (config_val == NULL){
+    if (config_val == NULL) {
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
             ,_("No value provided to put into video_params"));
     }
@@ -2769,12 +2786,12 @@ static struct context **copy_video_params(struct context **cnt, const char *conf
     /* If the depreciated option is the default, then just return */
     parmval = atoi(config_val);
     if (!strcmp(dep_config_params[config_indx].name,"power_line_frequency") &&
-        (parmval == -1)){
+        (parmval == -1)) {
         return cnt;
     }
 
     if (strcmp(dep_config_params[config_indx].name,"power_line_frequency") &&
-        (parmval == 0)){
+        (parmval == 0)) {
         return cnt;
     }
 
@@ -2839,17 +2856,19 @@ static struct context **copy_netcam_params(struct context **cnt, const char *con
 
     indx = 0;
     while (config_params[indx].param_name != NULL) {
-        if (!strcmp(config_params[indx].param_name,"netcam_params")) break;
+        if (!strcmp(config_params[indx].param_name,"netcam_params")) {
+            break;
+        }
         indx++;
     }
 
-    if (strcmp(config_params[indx].param_name,"netcam_params")){
+    if (strcmp(config_params[indx].param_name,"netcam_params")) {
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
             ,_("Unable to locate netcam_params"));
         return cnt;
     }
 
-    if (config_val == NULL){
+    if (config_val == NULL) {
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
             ,_("No value provided to put into netcam_params"));
         return cnt;
@@ -2857,8 +2876,7 @@ static struct context **copy_netcam_params(struct context **cnt, const char *con
 
     /* Remove underscore from parm name and add quotes*/
     if (!strcmp(dep_config_params[config_indx].name,"netcam_use_tcp") ||
-        !strcmp(dep_config_params[config_indx].name,"rtsp_uses_tcp"))
-    {
+        !strcmp(dep_config_params[config_indx].name,"rtsp_uses_tcp")) {
         parm_len = strlen("rtsp_transport = tcp") + 1;
         parm_new = mymalloc(parm_len);
         if ( !strcmp(config_val,"on")) {
@@ -2873,8 +2891,7 @@ static struct context **copy_netcam_params(struct context **cnt, const char *con
         snprintf(parm_new, parm_len, "%s%s", "decoder = ", config_val);
 
     } else if (!strcmp(dep_config_params[config_indx].name,"netcam_rate") ||
-        !strcmp(dep_config_params[config_indx].name,"netcam_ratehigh"))
-    {
+        !strcmp(dep_config_params[config_indx].name,"netcam_ratehigh")) {
         parm_len = strlen("capture_rate = ") + strlen(config_val) + 1;
         parm_new = mymalloc(parm_len);
         snprintf(parm_new, parm_len, "%s%s", "capture_rate = ", config_val);
@@ -2901,7 +2918,7 @@ static struct context **copy_netcam_params(struct context **cnt, const char *con
     /* Recall that the current parms have already been processed by time this is called */
     i = -1;
     while (cnt[++i]) {
-        if (!strcmp(dep_config_params[config_indx].name,"netcam_ratehigh")){
+        if (!strcmp(dep_config_params[config_indx].name,"netcam_ratehigh")) {
             if (cnt[i]->conf.netcam_high_params != NULL) {
                 parm_len = strlen(cnt[i]->conf.netcam_high_params) + 1;
                 orig_parm = mymalloc(parm_len);
@@ -2966,7 +2983,9 @@ static struct context **copy_text_double(struct context **cnt, const char *str, 
             *((int *)tmp) = 1;
         }
 
-        if (cnt[0]->threadnr) return cnt;
+        if (cnt[0]->threadnr) {
+            return cnt;
+        }
     }
 
     return cnt;
@@ -2993,7 +3012,9 @@ static struct context **copy_html_output(struct context **cnt, const char *str, 
             *((int *)tmp) = 1;
         }
 
-        if (cnt[0]->threadnr) return cnt;
+        if (cnt[0]->threadnr) {
+            return cnt;
+        }
     }
 
     return cnt;
@@ -3052,7 +3073,9 @@ char *mystrcpy(char *to, const char *from)
      * same value as from.
      */
 
-    if (to != NULL) free(to);
+    if (to != NULL) {
+        free(to);
+    }
 
     return mystrdup(from);
 }
@@ -3101,10 +3124,18 @@ char *mystrdup(const char *from)
  */
 const char *config_type(config_param *configparam)
 {
-    if (configparam->copy == copy_string) return "string";
-    if (configparam->copy == copy_int)    return "int";
-    if (configparam->copy == copy_bool)   return "bool";
-    if (configparam->copy == copy_uri)    return "uri";
+    if (configparam->copy == copy_string) {
+        return "string";
+    }
+    if (configparam->copy == copy_int) {
+        return "int";
+    }
+    if (configparam->copy == copy_bool) {
+        return "bool";
+    }
+    if (configparam->copy == copy_uri) {
+        return "uri";
+    }
 
     return "unknown";
 }
@@ -3121,8 +3152,7 @@ static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
 {
     int val = config_params[parm].conf_value;
 
-    if (threadnr &&
-        *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val)) {
+    if (threadnr && *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val)) {
         return NULL;
     }
 
@@ -3177,8 +3207,7 @@ static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
     static char retval[20];
     int val = config_params[parm].conf_value;
 
-    if (threadnr &&
-        *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val)) {
+    if (threadnr && *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val)) {
         return NULL;
     }
 
@@ -3200,14 +3229,18 @@ static const char *print_camera(struct context **cnt, char **str,
     char *retval;
     unsigned int i = 0;
 
-    if (!str || threadnr) return NULL;
+    if (!str || threadnr) {
+        return NULL;
+    }
 
     retval = mymalloc(1);
     retval[0] = 0;
 
     while (cnt[++i]) {
         /* Skip config files loaded from conf directory */
-        if (cnt[i]->from_conf_dir) continue;
+        if (cnt[i]->from_conf_dir) {
+            continue;
+        }
 
         retval = myrealloc(retval, strlen(retval) + strlen(cnt[i]->conf_filename) + 10,
                            "print_camera");
@@ -3239,11 +3272,8 @@ struct context **read_camera_dir(struct context **cnt, const char *str, int val)
         while( (ep = readdir(dp)) ) {
             name_len = strlen(ep->d_name);
             if (name_len > strlen(EXTENSION) &&
-                (strncmp(EXTENSION,
-                        (ep->d_name + name_len - strlen(EXTENSION)),
-                        strlen(EXTENSION)) == 0 )
-                )
-            {
+                (strncmp(EXTENSION,(ep->d_name + name_len - strlen(EXTENSION)),
+                        cstrlen(EXTENSION)) == 0 )) {
                 memset(conf_file, '\0', sizeof(conf_file));
                 snprintf(conf_file, sizeof(conf_file) - 1, "%s/%s",
                             str, ep->d_name);
@@ -3289,7 +3319,9 @@ static struct context **config_camera(struct context **cnt, const char *str,
     int i;
     FILE *fp;
 
-    if (cnt[0]->threadnr) return cnt;
+    if (cnt[0]->threadnr) {
+        return cnt;
+    }
 
     fp = fopen(str, "r");
 
@@ -3379,7 +3411,7 @@ static void config_parms_intl()
      * it will be printed when called from the conf_load.
      */
 
-    if (FALSE){
+    if (FALSE) {
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","daemon",_("daemon"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","setup_mode",_("setup_mode"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","pid_file",_("pid_file"));

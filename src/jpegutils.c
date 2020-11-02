@@ -242,7 +242,7 @@ static boolean jpgutl_fill_input_buffer(j_decompress_ptr cinfo)
 static void jpgutl_skip_data(j_decompress_ptr cinfo, long num_bytes)
 {
     if (num_bytes > 0) {
-        if (num_bytes > (long) cinfo->src->bytes_in_buffer){
+        if (num_bytes > (long) cinfo->src->bytes_in_buffer) {
             num_bytes = (long) cinfo->src->bytes_in_buffer;
         }
         cinfo->src->next_input_byte += (size_t) num_bytes;
@@ -545,7 +545,9 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
      * only a partial image could be returned which would
      * trigger many false positive motion detections
     */
-    if (jerr.warning_seen > 2) return -1;
+    if (jerr.warning_seen > 2) {
+        return -1;
+    }
 
     return 0;
 

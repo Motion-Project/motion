@@ -123,7 +123,7 @@ static void image_ring_resize(struct context *cnt, int new_size)
                 for(i = smallest; i < new_size; i++) {
                     tmp[i].image_norm = mymalloc(cnt->imgs.size_norm);
                     memset(tmp[i].image_norm, 0x80, cnt->imgs.size_norm);  /* initialize to grey */
-                    if (cnt->imgs.size_high > 0){
+                    if (cnt->imgs.size_high > 0) {
                         tmp[i].image_high = mymalloc(cnt->imgs.size_high);
                         memset(tmp[i].image_high, 0x80, cnt->imgs.size_high);
                     }
@@ -168,7 +168,9 @@ static void image_ring_destroy(struct context *cnt)
     /* Free all image buffers */
     for (i = 0; i < cnt->imgs.image_ring_size; i++){
         free(cnt->imgs.image_ring[i].image_norm);
-        if (cnt->imgs.size_high >0 ) free(cnt->imgs.image_ring[i].image_high);
+        if (cnt->imgs.size_high >0 ) {
+            free(cnt->imgs.image_ring[i].image_high);
+        }
     }
 
     /* Free the ring */
@@ -208,7 +210,7 @@ static void image_save_as_preview(struct context *cnt, struct image_data *img)
 
     /* Copy the actual images for norm and high */
     memcpy(cnt->imgs.preview_image.image_norm, img->image_norm, cnt->imgs.size_norm);
-    if (cnt->imgs.size_high > 0){
+    if (cnt->imgs.size_high > 0) {
         memcpy(cnt->imgs.preview_image.image_high, img->image_high, cnt->imgs.size_high);
     }
 
@@ -546,8 +548,10 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
             indx = cnt->imgs.image_ring_out-1;
             do {
                 indx++;
-                if (indx == cnt->imgs.image_ring_size) indx = 0;
-                if ((cnt->imgs.image_ring[indx].flags & (IMAGE_SAVE | IMAGE_SAVED)) == IMAGE_SAVE){
+                if (indx == cnt->imgs.image_ring_size) {
+                    indx = 0;
+                }
+                if ((cnt->imgs.image_ring[indx].flags & (IMAGE_SAVE | IMAGE_SAVED)) == IMAGE_SAVE) {
                     event(cnt, EVENT_FIRSTMOTION, img, NULL, NULL, &cnt->imgs.image_ring[indx].timestamp_tv);
                     indx = cnt->imgs.image_ring_in;
                 }
@@ -830,7 +834,7 @@ static void init_mask_privacy(struct context *cnt)
 
             /* We only need the "or" mask for the U & V chrominance area.  */
             cnt->imgs.mask_privacy_uv = mymalloc((cnt->imgs.height * cnt->imgs.width) / 2);
-            if (cnt->imgs.size_high > 0){
+            if (cnt->imgs.size_high > 0) {
                 MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
                     ,_("Opening high resolution privacy mask file"));
                 rewind(picture);
@@ -855,10 +859,12 @@ static void init_mask_privacy(struct context *cnt)
 
             indx_img = 1;
             indx_max = 1;
-            if (cnt->imgs.size_high > 0) indx_max = 2;
+            if (cnt->imgs.size_high > 0) {
+                indx_max = 2;
+            }
 
             while (indx_img <= indx_max){
-                if (indx_img == 1){
+                if (indx_img == 1) {
                     start_cr = (cnt->imgs.height * cnt->imgs.width);
                     offset_cb = ((cnt->imgs.height * cnt->imgs.width)/4);
                     start_cb = start_cr + offset_cb;
@@ -880,7 +886,7 @@ static void init_mask_privacy(struct context *cnt)
                     for (indxcol = 0; indxcol < indx_width; indxcol++) {
                         y_index = indxcol + (indxrow * indx_width);
                         if (img_temp[y_index] == 0xff) {
-                            if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ){
+                            if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ) {
                                 uv_index = (indxcol/2) + ((indxrow * indx_width)/4);
                                 img_temp[start_cr + uv_index] = 0xff;
                                 img_temp[start_cb + uv_index] = 0xff;
@@ -889,7 +895,7 @@ static void init_mask_privacy(struct context *cnt)
                             }
                         } else {
                             img_temp[y_index] = 0x00;
-                            if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ){
+                            if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ) {
                                 uv_index = (indxcol/2) + ((indxrow * indx_width)/4);
                                 img_temp[start_cr + uv_index] = 0x00;
                                 img_temp[start_cb + uv_index] = 0x00;
@@ -915,18 +921,24 @@ static void init_text_scale(struct context *cnt)
      */
 
     cnt->text_scale = cnt->conf.text_scale;
-    if (cnt->text_scale <= 0) cnt->text_scale = 1;
+    if (cnt->text_scale <= 0) {
+        cnt->text_scale = 1;
+    }
 
     if ((cnt->text_scale * 10 * 2) > (cnt->imgs.width / 4)) {
         cnt->text_scale = (cnt->imgs.width / (4 * 10 * 2));
-        if (cnt->text_scale <= 0) cnt->text_scale = 1;
+        if (cnt->text_scale <= 0) {
+            cnt->text_scale = 1;
+        }
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Invalid text scale.  Adjusted to %d"), cnt->text_scale);
     }
 
     if ((cnt->text_scale * 10 * 2) > (cnt->imgs.height / 4)) {
         cnt->text_scale = (cnt->imgs.height / (4 * 10 * 2));
-        if (cnt->text_scale <= 0) cnt->text_scale = 1;
+        if (cnt->text_scale <= 0) {
+            cnt->text_scale = 1;
+        }
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Invalid text scale.  Adjusted to %d"), cnt->text_scale);
     }
@@ -971,27 +983,27 @@ static void mot_stream_deinit(struct context *cnt)
 
     pthread_mutex_destroy(&cnt->mutex_stream);
 
-    if (cnt->imgs.substream_image != NULL){
+    if (cnt->imgs.substream_image != NULL) {
         free(cnt->imgs.substream_image);
         cnt->imgs.substream_image = NULL;
     }
 
-    if (cnt->stream_norm.jpeg_data != NULL){
+    if (cnt->stream_norm.jpeg_data != NULL) {
         free(cnt->stream_norm.jpeg_data);
         cnt->stream_norm.jpeg_data = NULL;
     }
 
-    if (cnt->stream_sub.jpeg_data != NULL){
+    if (cnt->stream_sub.jpeg_data != NULL) {
         free(cnt->stream_sub.jpeg_data);
         cnt->stream_sub.jpeg_data = NULL;
     }
 
-    if (cnt->stream_motion.jpeg_data != NULL){
+    if (cnt->stream_motion.jpeg_data != NULL) {
         free(cnt->stream_motion.jpeg_data);
         cnt->stream_motion.jpeg_data = NULL;
     }
 
-    if (cnt->stream_source.jpeg_data != NULL){
+    if (cnt->stream_source.jpeg_data != NULL) {
         free(cnt->stream_source.jpeg_data);
         cnt->stream_source.jpeg_data = NULL;
     }
@@ -1070,7 +1082,7 @@ static int dbse_init_mysql(struct context *cnt)
             cnt->database_event_id = 0;
             cnt->database = mymalloc(sizeof(MYSQL));
             mysql_init(cnt->database);
-            if ((cnt->conf.database_port < 0) || (cnt->conf.database_port > 65535)){
+            if ((cnt->conf.database_port < 0) || (cnt->conf.database_port > 65535)) {
                 dbport = 0;
             } else {
                 dbport = cnt->conf.database_port;
@@ -1174,13 +1186,19 @@ static int dbse_init(struct context *cnt)
             ,_("Database backend %s"), cnt->conf.database_type);
 
         retcd = dbse_init_mysql(cnt);
-        if (retcd != 0) return retcd;
+        if (retcd != 0) {
+            return retcd;
+        }
 
         retcd = dbse_init_sqlite3(cnt);
-        if (retcd != 0) return retcd;
+        if (retcd != 0) {
+            return retcd;
+        }
 
         retcd = dbse_init_pgsql(cnt);
-        if (retcd != 0) return retcd;
+        if (retcd != 0) {
+            return retcd;
+        }
 
         /* Set the sql mask file according to the SQL config options*/
         cnt->sql_mask = cnt->conf.sql_log_picture * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
@@ -1291,10 +1309,11 @@ static int motion_init(struct context *cnt)
         cnt->conf.target_dir = mystrdup(".");
     }
 
-    if (init_camera_type(cnt) != 0 ) return -3;
+    if (init_camera_type(cnt) != 0 ) {
+        return -3;
+    }
 
-    if ((cnt->camera_type != CAMERA_TYPE_RTSP) &&
-        (cnt->movie_passthrough)) {
+    if ((cnt->camera_type != CAMERA_TYPE_RTSP) && (cnt->movie_passthrough)) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
         cnt->movie_passthrough = FALSE;
     }
@@ -1321,8 +1340,12 @@ static int motion_init(struct context *cnt)
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
             ,_("Adjusting height to next higher multiple of 8 (%d)."), cnt->conf.height);
     }
-    if (cnt->conf.width  < 64) cnt->conf.width  = 64;
-    if (cnt->conf.height < 64) cnt->conf.height = 64;
+    if (cnt->conf.width  < 64) {
+        cnt->conf.width  = 64;
+    }
+    if (cnt->conf.height < 64) {
+        cnt->conf.height = 64;
+    }
 
     /* set the device settings */
     cnt->video_dev = vid_start(cnt);
@@ -1355,7 +1378,7 @@ static int motion_init(struct context *cnt)
             ,cnt->imgs.width, cnt->imgs.height);
         return -3;
     }
-    if ((cnt->imgs.width  < 64) || (cnt->imgs.height < 64)){
+    if ((cnt->imgs.width  < 64) || (cnt->imgs.height < 64)) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
             ,cnt->imgs.width, cnt->imgs.height);
@@ -1389,7 +1412,7 @@ static int motion_init(struct context *cnt)
     cnt->imgs.labelsize = mymalloc((cnt->imgs.motionsize/2+1) * sizeof(*cnt->imgs.labelsize));
     cnt->imgs.preview_image.image_norm = mymalloc(cnt->imgs.size_norm);
     cnt->imgs.common_buffer = mymalloc(3 * cnt->imgs.width * cnt->imgs.height);
-    if (cnt->imgs.size_high > 0){
+    if (cnt->imgs.size_high > 0) {
         cnt->imgs.image_virgin.image_high = mymalloc(cnt->imgs.size_high);
         cnt->imgs.preview_image.image_high = mymalloc(cnt->imgs.size_high);
     }
@@ -1397,9 +1420,9 @@ static int motion_init(struct context *cnt)
     mot_stream_init(cnt);
 
     /* Set output picture type */
-    if (!strcmp(cnt->conf.picture_type, "ppm"))
+    if (!strcmp(cnt->conf.picture_type, "ppm")) {
         cnt->imgs.picture_type = IMAGE_TYPE_PPM;
-    else if (!strcmp(cnt->conf.picture_type, "webp")) {
+    } else if (!strcmp(cnt->conf.picture_type, "webp")) {
         #ifdef HAVE_WEBP
                 cnt->imgs.picture_type = IMAGE_TYPE_WEBP;
         #else
@@ -1408,9 +1431,9 @@ static int motion_init(struct context *cnt)
                 ,_("webp image format is not available, failing back to jpeg"));
                 cnt->imgs.picture_type = IMAGE_TYPE_JPEG;
         #endif /* HAVE_WEBP */
-    }
-    else
+    } else {
         cnt->imgs.picture_type = IMAGE_TYPE_JPEG;
+    }
 
     /*
      * Now is a good time to init rotation data. Since vid_start has been
@@ -1480,7 +1503,9 @@ static int motion_init(struct context *cnt)
     #endif /* HAVE_V4L2 && !BSD */
 
     retcd = dbse_init(cnt);
-    if (retcd != 0) return retcd;
+    if (retcd != 0) {
+        return retcd;
+    }
 
     /* Load the mask file if any */
     if (cnt->conf.mask_file) {
@@ -1527,7 +1552,7 @@ static int motion_init(struct context *cnt)
 
     /* Set threshold value */
     cnt->threshold = cnt->conf.threshold;
-    if (cnt->conf.threshold_maximum > cnt->conf.threshold ){
+    if (cnt->conf.threshold_maximum > cnt->conf.threshold ) {
         cnt->threshold_maximum = cnt->conf.threshold_maximum;
     } else {
         cnt->threshold_maximum = (cnt->imgs.height * cnt->imgs.width * 3) / 2;
@@ -1673,19 +1698,29 @@ static void motion_cleanup(struct context *cnt)
     free(cnt->imgs.smartmask_buffer);
     cnt->imgs.smartmask_buffer = NULL;
 
-    if (cnt->imgs.mask) free(cnt->imgs.mask);
+    if (cnt->imgs.mask) {
+        free(cnt->imgs.mask);
+    }
     cnt->imgs.mask = NULL;
 
-    if (cnt->imgs.mask_privacy) free(cnt->imgs.mask_privacy);
+    if (cnt->imgs.mask_privacy) {
+        free(cnt->imgs.mask_privacy);
+    }
     cnt->imgs.mask_privacy = NULL;
 
-    if (cnt->imgs.mask_privacy_uv) free(cnt->imgs.mask_privacy_uv);
+    if (cnt->imgs.mask_privacy_uv) {
+        free(cnt->imgs.mask_privacy_uv);
+    }
     cnt->imgs.mask_privacy_uv = NULL;
 
-    if (cnt->imgs.mask_privacy_high) free(cnt->imgs.mask_privacy_high);
+    if (cnt->imgs.mask_privacy_high) {
+        free(cnt->imgs.mask_privacy_high);
+    }
     cnt->imgs.mask_privacy_high = NULL;
 
-    if (cnt->imgs.mask_privacy_high_uv) free(cnt->imgs.mask_privacy_high_uv);
+    if (cnt->imgs.mask_privacy_high_uv) {
+        free(cnt->imgs.mask_privacy_high_uv);
+    }
     cnt->imgs.mask_privacy_high_uv = NULL;
 
     free(cnt->imgs.common_buffer);
@@ -1694,7 +1729,7 @@ static void motion_cleanup(struct context *cnt)
     free(cnt->imgs.preview_image.image_norm);
     cnt->imgs.preview_image.image_norm = NULL;
 
-    if (cnt->imgs.size_high > 0){
+    if (cnt->imgs.size_high > 0) {
         free(cnt->imgs.image_virgin.image_high);
         cnt->imgs.image_virgin.image_high = NULL;
 
@@ -1716,7 +1751,9 @@ static void motion_cleanup(struct context *cnt)
         cnt->mpipe = -1;
     }
 
-    if (cnt->rolling_average_data != NULL) free(cnt->rolling_average_data);
+    if (cnt->rolling_average_data != NULL) {
+        free(cnt->rolling_average_data);
+    }
 
 
     /* Cleanup the current time structure */
@@ -1734,7 +1771,9 @@ static void motion_cleanup(struct context *cnt)
 static void mlp_mask_privacy(struct context *cnt)
 {
 
-    if (cnt->imgs.mask_privacy == NULL) return;
+    if (cnt->imgs.mask_privacy == NULL) {
+        return;
+    }
 
     /*
     * This function uses long operations to process 4 (32 bit) or 8 (64 bit)
@@ -1753,7 +1792,9 @@ static void mlp_mask_privacy(struct context *cnt)
 
     indx_img = 1;
     indx_max = 1;
-    if (cnt->imgs.size_high > 0) indx_max = 2;
+    if (cnt->imgs.size_high > 0) {
+        indx_max = 2;
+    }
     increment = sizeof(unsigned long);
 
     while (indx_img <= indx_max){
@@ -1800,7 +1841,9 @@ static void mlp_mask_privacy(struct context *cnt)
         }
 
         while (--index_crcb >= 0) {
-            if (*(mask++) == 0x00) *image = 0x80; // Mask last remaining bytes.
+            if (*(mask++) == 0x00) {
+                *image = 0x80; // Mask last remaining bytes.
+            }
             image += 1;
         }
 
@@ -1997,8 +2040,7 @@ static int mlp_retry(struct context *cnt)
      */
     int size_high;
 
-    if (cnt->video_dev < 0 &&
-        cnt->currenttime % 10 == 0 && cnt->shots == 0) {
+    if (cnt->video_dev < 0 && cnt->currenttime % 10 == 0 && cnt->shots == 0) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Retrying until successful connection with camera"));
         cnt->video_dev = vid_start(cnt);
@@ -2014,7 +2056,7 @@ static int mlp_retry(struct context *cnt)
             return 1;
         }
 
-        if ((cnt->imgs.width  < 64) || (cnt->imgs.height < 64)){
+        if ((cnt->imgs.width  < 64) || (cnt->imgs.height < 64)) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
                 ,cnt->imgs.width, cnt->imgs.height);
@@ -2045,7 +2087,9 @@ static int mlp_retry(struct context *cnt)
          * and the vid_start ONLY re-populates the height/width so we can check the size here.
          */
         size_high = (cnt->imgs.width_high * cnt->imgs.height_high * 3) / 2;
-        if (cnt->imgs.size_high != size_high) return 1;
+        if (cnt->imgs.size_high != size_high) {
+            return 1;
+        }
     }
     return 0;
 }
@@ -2154,7 +2198,7 @@ static int mlp_capture(struct context *cnt)
          * First missed frame - store timestamp
          * Don't reset time when thread restarts
          */
-        if (cnt->connectionlosttime == 0){
+        if (cnt->connectionlosttime == 0) {
             cnt->connectionlosttime = cnt->currenttime;
         }
 
@@ -2281,7 +2325,6 @@ static void mlp_detection(struct context *cnt)
 
                 if ((cnt->current_image->diffs <= cnt->threshold) ||
                     (cnt->current_image->diffs > cnt->threshold_maximum)) {
-
                     cnt->current_image->diffs = 0;
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Switchfilter detected"));
                 }
@@ -2359,7 +2402,7 @@ static void mlp_tuning(struct context *cnt)
          * if we are not threshold tuning lets make sure that remote controlled
          * changes of threshold are used.
          */
-        if (cnt->conf.threshold_tune){
+        if (cnt->conf.threshold_tune) {
             alg_threshold_tune(cnt, cnt->current_image->diffs, cnt->detecting_motion);
         }
 
@@ -2369,7 +2412,7 @@ static void mlp_tuning(struct context *cnt)
          * for adding the locate rectangle
          */
         if ((cnt->current_image->diffs > cnt->threshold) &&
-            (cnt->current_image->diffs < cnt->threshold_maximum)){
+            (cnt->current_image->diffs < cnt->threshold_maximum)) {
 
             alg_locate_center_size(&cnt->imgs
                 , cnt->imgs.width
@@ -2426,7 +2469,7 @@ static void mlp_overlay(struct context *cnt)
     /* Smartmask overlay */
     if (cnt->smartmask_speed &&
         (cnt->conf.picture_output_motion || cnt->conf.movie_output_motion ||
-         cnt->conf.setup_mode || (cnt->stream_motion.cnct_count > 0))){
+         cnt->conf.setup_mode || (cnt->stream_motion.cnct_count > 0))) {
         overlay_smartmask(cnt, cnt->imgs.img_motion.image_norm);
     }
 
@@ -2642,7 +2685,7 @@ static void mlp_actions(struct context *cnt)
 
             event(cnt, EVENT_ENDMOTION, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
 
-            if (cnt->track.type){
+            if (cnt->track.type) {
                 cnt->moved = track_center(cnt, cnt->video_dev, 0, 0, 0);
             }
 
@@ -2740,7 +2783,6 @@ static void mlp_timelapse(struct context *cnt)
         if (timestamp_tm.tm_min == 0 &&
             (cnt->time_current_frame % 60 < cnt->time_last_frame % 60) &&
             cnt->shots == 0) {
-
             if (strcasecmp(cnt->conf.timelapse_mode, "manual") == 0) {
                 ;/* No action */
 
@@ -2836,7 +2878,9 @@ static void mlp_parmsupdate(struct context *cnt)
     /***** MOTION LOOP - ONCE PER SECOND PARAMETER UPDATE SECTION *****/
 
     /* Check for some config parameter changes but only every second */
-    if (cnt->shots != 0) return;
+    if (cnt->shots != 0) {
+        return;
+    }
 
     init_text_scale(cnt);  /* Initialize and validate text_scale */
 
@@ -2897,13 +2941,13 @@ static void mlp_parmsupdate(struct context *cnt)
     dbse_sqlmask_update(cnt);
 
     cnt->threshold = cnt->conf.threshold;
-    if (cnt->conf.threshold_maximum > cnt->conf.threshold ){
+    if (cnt->conf.threshold_maximum > cnt->conf.threshold ) {
         cnt->threshold_maximum = cnt->conf.threshold_maximum;
     } else {
         cnt->threshold_maximum = (cnt->imgs.height * cnt->imgs.width * 3) / 2;
     }
 
-    if (!cnt->conf.noise_tune){
+    if (!cnt->conf.noise_tune) {
         cnt->noise = cnt->conf.noise_level;
     }
 
@@ -2985,13 +3029,17 @@ static void *motion_loop(void *arg)
 {
     struct context *cnt = arg;
 
-    if (motion_init(cnt) == 0){
+    if (motion_init(cnt) == 0) {
         while (!cnt->finish || cnt->event_stop) {
             mlp_prepare(cnt);
             if (cnt->get_image) {
                 mlp_resetimages(cnt);
-                if (mlp_retry(cnt) == 1)  break;
-                if (mlp_capture(cnt) == 1)  break;
+                if (mlp_retry(cnt) == 1) {
+                    break;
+                }
+                if (mlp_capture(cnt) == 1)  {
+                    break;
+                }
                 mlp_detection(cnt);
                 mlp_tuning(cnt);
                 mlp_overlay(cnt);
@@ -3187,7 +3235,7 @@ static void motion_camera_ids(void)
     /* Set defaults */
     indx = 0;
     while (cnt_list[indx] != NULL){
-        if (cnt_list[indx]->conf.camera_id > 0){
+        if (cnt_list[indx]->conf.camera_id > 0) {
             cnt_list[indx]->camera_id = cnt_list[indx]->conf.camera_id;
         } else {
             cnt_list[indx]->camera_id = indx;
@@ -3198,16 +3246,19 @@ static void motion_camera_ids(void)
     invalid_ids = FALSE;
     indx = 0;
     while (cnt_list[indx] != NULL){
-        if (cnt_list[indx]->camera_id > 32000) invalid_ids = TRUE;
+        if (cnt_list[indx]->camera_id > 32000) {
+            invalid_ids = TRUE;
+        }
         indx2 = indx + 1;
         while (cnt_list[indx2] != NULL){
-            if (cnt_list[indx]->camera_id == cnt_list[indx2]->camera_id) invalid_ids = TRUE;
-
+            if (cnt_list[indx]->camera_id == cnt_list[indx2]->camera_id) {
+                invalid_ids = TRUE;
+            }
             indx2++;
         }
         indx++;
     }
-    if (invalid_ids){
+    if (invalid_ids) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Camara IDs are not unique or have values over 32,000.  Falling back to thread numbers"));
         indx = 0;
@@ -3407,13 +3458,13 @@ static void motion_start_thread(struct context *cnt)
     char service[6];
     pthread_attr_t thread_attr;
 
-    if (strcmp(cnt->conf_filename, "")){
+    if (strcmp(cnt->conf_filename, "")) {
         cnt->conf_filename[sizeof(cnt->conf_filename) - 1] = '\0';
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Camera ID: %d is from %s")
             ,cnt->camera_id, cnt->conf_filename);
     }
 
-    if (cnt->conf.netcam_url){
+    if (cnt->conf.netcam_url) {
         snprintf(service,6,"%s",cnt->conf.netcam_url);
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Camera ID: %d Camera Name: %s Service: %s")
             ,cnt->camera_id, cnt->conf.camera_name,service);
@@ -3443,7 +3494,9 @@ static void motion_start_thread(struct context *cnt)
         }
         /* Compare against stream ports of other threads. */
         for (i = 1; cnt_list[i]; i++) {
-            if (cnt_list[i] == cnt) continue;
+            if (cnt_list[i] == cnt) {
+                continue;
+            }
 
             if (cnt_list[i]->conf.stream_port == cnt->conf.stream_port) {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
@@ -3526,7 +3579,9 @@ static void motion_watchdog(int indx)
      * Best to just not get into a watchdog situation...
      */
 
-    if (!cnt_list[indx]->running) return;
+    if (!cnt_list[indx]->running) {
+        return;
+    }
 
     cnt_list[indx]->watchdog--;
     if (cnt_list[indx]->watchdog == 0) {
@@ -3542,15 +3597,15 @@ static void motion_watchdog(int indx)
             ,_("Thread %d - Watchdog timeout did NOT restart, killing it!")
             , cnt_list[indx]->threadnr);
         if ((cnt_list[indx]->camera_type == CAMERA_TYPE_RTSP) &&
-            (cnt_list[indx]->rtsp != NULL)){
+            (cnt_list[indx]->rtsp != NULL)) {
             pthread_cancel(cnt_list[indx]->rtsp->thread_id);
         }
         if ((cnt_list[indx]->camera_type == CAMERA_TYPE_RTSP) &&
-            (cnt_list[indx]->rtsp_high != NULL)){
+            (cnt_list[indx]->rtsp_high != NULL)) {
             pthread_cancel(cnt_list[indx]->rtsp_high->thread_id);
         }
         if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (cnt_list[indx]->netcam != NULL)){
+            (cnt_list[indx]->netcam != NULL)) {
             pthread_cancel(cnt_list[indx]->netcam->thread_id);
         }
         pthread_cancel(cnt_list[indx]->thread_id);
@@ -3558,7 +3613,7 @@ static void motion_watchdog(int indx)
 
     if (cnt_list[indx]->watchdog < WATCHDOG_KILL) {
         if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (cnt_list[indx]->rtsp != NULL)){
+            (cnt_list[indx]->rtsp != NULL)) {
             if (!cnt_list[indx]->rtsp->handler_finished &&
                 pthread_kill(cnt_list[indx]->rtsp->thread_id, 0) == ESRCH) {
                 cnt_list[indx]->rtsp->handler_finished = TRUE;
@@ -3571,7 +3626,7 @@ static void motion_watchdog(int indx)
             }
         }
         if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (cnt_list[indx]->rtsp_high != NULL)){
+            (cnt_list[indx]->rtsp_high != NULL)) {
             if (!cnt_list[indx]->rtsp_high->handler_finished &&
                 pthread_kill(cnt_list[indx]->rtsp_high->thread_id, 0) == ESRCH) {
                 cnt_list[indx]->rtsp_high->handler_finished = TRUE;
@@ -3584,7 +3639,7 @@ static void motion_watchdog(int indx)
             }
         }
         if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (cnt_list[indx]->netcam != NULL)){
+            (cnt_list[indx]->netcam != NULL)) {
             if (!cnt_list[indx]->netcam->handler_finished &&
                 pthread_kill(cnt_list[indx]->netcam->thread_id, 0) == ESRCH) {
                 pthread_mutex_lock(&global_lock);
@@ -3597,7 +3652,7 @@ static void motion_watchdog(int indx)
             }
         }
         if (cnt_list[indx]->running &&
-            pthread_kill(cnt_list[indx]->thread_id, 0) == ESRCH){
+            pthread_kill(cnt_list[indx]->thread_id, 0) == ESRCH) {
             MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
                 ,_("Thread %d - Cleaning thread.")
                 , cnt_list[indx]->threadnr);
@@ -3694,7 +3749,9 @@ int main (int argc, char **argv)
     translate_init();
 
     do {
-        if (restart) motion_restart(argc, argv);
+        if (restart) {
+            motion_restart(argc, argv);
+        }
 
         for (i = cnt_list[1] != NULL ? 1 : 0; cnt_list[i]; i++) {
             cnt_list[i]->threadnr = i ? i : 1;
@@ -3706,7 +3763,9 @@ int main (int argc, char **argv)
 
         while (1) {
             SLEEP(1, 0);
-            if (motion_check_threadcount()) break;
+            if (motion_check_threadcount()) {
+                break;
+            }
 
             for (i = (cnt_list[1] != NULL ? 1 : 0); cnt_list[i]; i++) {
                 /* Check if threads wants to be restarted */
@@ -3725,7 +3784,9 @@ int main (int argc, char **argv)
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Threads finished"));
 
         /* Rest for a while if we're supposed to restart. */
-        if (restart) SLEEP(1, 0);
+        if (restart) {
+            SLEEP(1, 0);
+        }
 
     } while (restart); /* loop if we're supposed to restart */
 
@@ -3886,14 +3947,16 @@ FILE * myfopen(const char *path, const char *mode)
 {
     /* first, just try to open the file */
     FILE *dummy = fopen(path, mode);
-    if (dummy) return dummy;
+    if (dummy) {
+        return dummy;
+    }
 
     /* could not open file... */
     /* path did not exist? */
     if (errno == ENOENT) {
 
         /* create path for file... */
-        if (create_path(path) == -1){
+        if (create_path(path) == -1) {
             return NULL;
         }
 
@@ -3926,7 +3989,7 @@ int myfclose(FILE* fh)
 {
     int rval = fclose(fh);
 
-    if (rval != 0){
+    if (rval != 0) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error closing file"));
     }
 
@@ -4105,7 +4168,7 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
                 break;
 
             case 'C': // text_event
-                if (cnt->text_event_string[0]){
+                if (cnt->text_event_string[0]) {
                     snprintf(tempstr, PATH_MAX, "%*s", width,
                         cnt->text_event_string);
                 } else {
@@ -4149,7 +4212,9 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
                     while ((*pos_userformat != '}') && (*pos_userformat != 0))
                         ++pos_userformat;
                     mystrftime_long (cnt, width, word, (int)(pos_userformat-word), tempstr);
-                    if (*pos_userformat == '\0') --pos_userformat;
+                    if (*pos_userformat == '\0') {
+                        --pos_userformat;
+                    }
                 }
                 break;
 
@@ -4199,7 +4264,7 @@ void util_threadname_set(const char *abbr, int threadnbr, const char *threadname
      */
 
     char tname[16];
-    if (abbr != NULL){
+    if (abbr != NULL) {
         snprintf(tname, sizeof(tname), "%s%d%s%s",abbr,threadnbr,
              threadname ? ":" : "",
              threadname ? threadname : "");
@@ -4241,7 +4306,7 @@ int util_check_passthrough(struct context *cnt)
         }
         return 0;
     #else
-        if (cnt->movie_passthrough){
+        if (cnt->movie_passthrough) {
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("pass-through enabled."));
             return 1;
@@ -4258,15 +4323,19 @@ void util_trim(char *parm)
 {
     int indx, indx_st, indx_en;
 
-    if (parm == NULL) return;
+    if (parm == NULL) {
+        return;
+    }
 
     indx_en = strlen(parm) - 1;
-    if (indx_en == -1) return;
+    if (indx_en == -1) {
+        return;
+    }
 
     indx_st = 0;
 
     while (isspace(parm[indx_st]) && (indx_st <= indx_en)) indx_st++;
-    if (indx_st > indx_en){
+    if (indx_st > indx_en) {
         parm[0]= '\0';
         return;
     }
@@ -4303,7 +4372,7 @@ static void util_parms_add(struct params_context *parameters
     if (parm_nm != NULL) {
         parameters->params_array[indx].param_name = (char*)mymalloc(strlen(parm_nm)+1);
         retcd = sprintf(parameters->params_array[indx].param_name,"%s",parm_nm);
-        if (retcd < 0){
+        if (retcd < 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >%s<"),parm_nm);
             free(parameters->params_array[indx].param_name);
             parameters->params_array[indx].param_name = NULL;
@@ -4315,7 +4384,7 @@ static void util_parms_add(struct params_context *parameters
     if (parm_vl != NULL) {
         parameters->params_array[indx].param_value = (char*)mymalloc(strlen(parm_vl)+1);
         retcd = sprintf(parameters->params_array[indx].param_value,"%s",parm_vl);
-        if (retcd < 0){
+        if (retcd < 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >%s<"),parm_vl);
             free(parameters->params_array[indx].param_value);
             parameters->params_array[indx].param_value = NULL;
@@ -4342,8 +4411,7 @@ static void util_parms_extract(struct params_context *parameters
     if ((indxnm_en != 0) &&
         (indxvl_st != 0) &&
         ((indxnm_en - indxnm_st) > 0) &&
-        ((indxvl_en - indxvl_st) > 0))
-    {
+        ((indxvl_en - indxvl_st) > 0)) {
         parm_nm = mymalloc(PATH_MAX);
         parm_vl = mymalloc(PATH_MAX);
 
@@ -4368,8 +4436,12 @@ static void util_parms_extract(struct params_context *parameters
 
         util_parms_add(parameters, parm_nm, parm_vl);
 
-        if (parm_nm != NULL) free(parm_nm);
-        if (parm_vl != NULL) free(parm_vl);
+        if (parm_nm != NULL) {
+            free(parm_nm);
+        }
+        if (parm_vl != NULL) {
+            free(parm_vl);
+        }
     }
 
 }
@@ -4479,7 +4551,9 @@ void util_parms_free(struct params_context *parameters)
 {
     int indx;
 
-    if (parameters == NULL) return;
+    if (parameters == NULL) {
+        return;
+    }
 
     for (indx = 0; indx < parameters->params_count; indx++)
     {
@@ -4548,7 +4622,7 @@ void util_parms_parse(struct params_context *parameters, char *confparm)
             indxvl_en = strlen(parmlne);
             if (strstr(parmlne + 1,"=") != NULL) {
                 indxnm_en = strstr(parmlne + 1,"=") - parmlne;
-                if ((size_t)indxnm_en < strlen(parmlne)){
+                if ((size_t)indxnm_en < strlen(parmlne)) {
                     indxvl_st = indxnm_en + 1;
                 }
             }
@@ -4571,8 +4645,12 @@ void util_parms_add_default(struct params_context *parameters
     dflt = TRUE;
     for (indx = 0; indx < parameters->params_count; indx++)
     {
-        if ( !strcmp(parameters->params_array[indx].param_name, parm_nm) ) dflt = FALSE;
+        if ( !strcmp(parameters->params_array[indx].param_name, parm_nm) ) {
+            dflt = FALSE;
+        }
     }
-    if (dflt == TRUE) util_parms_add(parameters, parm_nm, parm_vl);
+    if (dflt == TRUE) {
+        util_parms_add(parameters, parm_nm, parm_vl);
+    }
 
 }

@@ -96,7 +96,7 @@ static void set_video_port_format(mmalcam_context_ptr mmalcam, MMAL_ES_FORMAT_T 
     set_port_format(mmalcam, format);
     format->es->video.frame_rate.num = mmalcam->framerate;
     format->es->video.frame_rate.den = VIDEO_FRAME_RATE_DEN;
-    if (mmalcam->framerate > 30){
+    if (mmalcam->framerate > 30) {
         /* The pi noir camera could not determine autoexpose at high frame rates */
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, _("A high frame rate can cause problems with exposure of images"));
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, _("If autoexposure is not working, try a lower frame rate."));

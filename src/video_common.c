@@ -430,7 +430,7 @@ int vid_mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
         ptr_buffer = memmem(cap_map + soi_pos + 1, size - soi_pos - 1, "\xff\xd8", 2);
     }
 
-    if (soi_pos != 0){
+    if (soi_pos != 0) {
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("SOI position adjusted by %d bytes."), soi_pos);
     }
 
@@ -489,7 +489,9 @@ void vid_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
 int vid_parms_parse(struct context *cnt)
 {
 
-    if (cnt->vdev->update_params == FALSE) return 0;
+    if (cnt->vdev->update_params == FALSE) {
+        return 0;
+    }
 
     /* Put in the user specified parameters */
     util_parms_parse(cnt->vdev, cnt->conf.video_params);

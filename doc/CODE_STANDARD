@@ -120,9 +120,7 @@ GOOD EXAMPLE
 
 if ((picture=fopen(cnt->conf.mask_file, "r"))) {
     cnt->imgs.mask=get_pgm(cnt, picture, cnt->imgs.width, cnt->imgs.height);
-    fclose(picture);
 } else {
-    put_fixed_mask(cnt, cnt->conf.mask_file);
     printf("Hello world\n");
 }
 
@@ -173,22 +171,7 @@ switch (expr) {
 }
 
 RULE 5A
-if statements shall always have braces unless it easily on a single line.
-
-GOOD EXAMPLE
-
-if (finish) return;
-
-BAD EXAMPLE
-
-if ((picture=fopen(cnt->conf.mask_file, "r")))
-    fclose(picture);
-else
-    printf("Hello world\n");
-
-
-
-
+if, while and for statements shall always use braces.
 
 
 --------------------

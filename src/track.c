@@ -75,7 +75,9 @@ unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
 {
     struct coord cent;
 
-    if (!manual && !cnt->track.active) return 0;
+    if (!manual && !cnt->track.active) {
+        return 0;
+    }
 
     if (cnt->track.type == TRACK_TYPE_STEPPER) {
         unsigned int ret;
@@ -99,7 +101,7 @@ unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
     } else if (cnt->track.type == TRACK_TYPE_IOMOJO) {
         return iomojo_center(cnt, xoff, yoff);
     } else if (cnt->track.type == TRACK_TYPE_GENERIC) {
-        if (cnt->track.generic_move){
+        if (cnt->track.generic_move) {
             cent.x = -cnt->track_posx;
             cent.y = -cnt->track_posy;
             return generic_move(cnt, TRACK_CENTER, manual,0 ,0 ,&cent , NULL);
@@ -119,7 +121,9 @@ unsigned int track_move(struct context *cnt, int dev, struct coord *cent, struct
                         unsigned int manual)
 {
 
-    if (!manual && !cnt->track.active) return 0;
+    if (!manual && !cnt->track.active) {
+        return 0;
+    }
 
     if (cnt->track.type == TRACK_TYPE_STEPPER) {
         return stepper_move(cnt, cent, imgs);
@@ -286,7 +290,9 @@ static unsigned int stepper_move(struct context *cnt,
 
     data = data * cnt->track.stepsize / imgs->width;
 
-    if (data) stepper_command(cnt, cnt->track.motorx, command, data);
+    if (data) {
+        stepper_command(cnt, cnt->track.motorx, command, data);
+    }
 
     /* y-axis */
 
@@ -484,19 +490,21 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
 
         /* Move left */
         if (cent->x < imgs->width / 2) {
-            if (cnt->track.motorx_reverse)
+            if (cnt->track.motorx_reverse) {
                 command = SERVO_COMMAND_RIGHT_N;
-            else
+            } else {
                 command = SERVO_COMMAND_LEFT_N;
+            }
             data = imgs->width / 2 - cent->x;
         }
 
         /* Move right */
         if (cent->x > imgs->width / 2) {
-            if (cnt->track.motorx_reverse)
+            if (cnt->track.motorx_reverse) {
                 command = SERVO_COMMAND_LEFT_N;
-            else
+            } else {
                 command = SERVO_COMMAND_RIGHT_N;
+            }
             data = cent->x - imgs->width / 2;
         }
 
@@ -534,19 +542,21 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
 
         /* Move down */
         if (cent->y < imgs->height / 2) {
-            if (cnt->track.motory_reverse)
+            if (cnt->track.motory_reverse) {
                 command = SERVO_COMMAND_UP_N;
-            else
+            } else {
                 command = SERVO_COMMAND_DOWN_N;
+            }
             data = imgs->height / 2 - cent->y;
         }
 
         /* Move up */
         if (cent->y > imgs->height / 2) {
-            if (cnt->track.motory_reverse)
+            if (cnt->track.motory_reverse) {
                 command = SERVO_COMMAND_DOWN_N;
-            else
+            } else {
                 command = SERVO_COMMAND_UP_N;
+            }
             data = cent->y - imgs->height / 2;
         }
 
@@ -622,10 +632,11 @@ static unsigned int servo_center(struct context *cnt, int x_offset, int y_offset
         ,cnt->track.stepsize);
 
     /* x-axis */
-    if (cnt->track.motorx_reverse)
+    if (cnt->track.motorx_reverse) {
         x_offset_abs = (128 - cnt->track.homex) - (x_offset * cnt->track.stepsize) + 128;
-    else
+    } else {
         x_offset_abs = cnt->track.homex + (x_offset * cnt->track.stepsize);
+    }
 
     if (x_offset_abs <= cnt->track.maxx  && x_offset_abs >= cnt->track.minx) {
         /* Set Speed , TODO : it should be done only when speed changes */
@@ -634,10 +645,11 @@ static unsigned int servo_center(struct context *cnt, int x_offset, int y_offset
     }
 
     /* y-axis */
-    if (cnt->track.motory_reverse)
+    if (cnt->track.motory_reverse) {
         y_offset_abs = (128 - cnt->track.homey) - (y_offset * cnt->track.stepsize) + 128;
-    else
+    } else {
         y_offset_abs = cnt->track.homey + (y_offset * cnt->track.stepsize);
+    }
 
     if (y_offset_abs <= cnt->track.maxy && y_offset_abs >= cnt->track.minx) {
         /* Set Speed , TODO : it should be done only when speed changes */
@@ -660,8 +672,9 @@ static char iomojo_command(struct context *cnt, char *command, int len, unsigned
     char buffer[1];
     time_t timeout = time(NULL);
 
-    if (write(cnt->track.dev, command, len) != len)
+    if (write(cnt->track.dev, command, len) != len) {
         return 0;
+    }
 
     if (ret) {
         while (read(cnt->track.dev, buffer, 1) != 1 && time(NULL) < timeout + 2);
@@ -683,8 +696,9 @@ static void iomojo_setspeed(struct context *cnt, unsigned int speed)
     command[1] = cnt->track.iomojo_id;
     command[2] = speed;
 
-    if (iomojo_command(cnt, command, 3, 1) != IOMOJO_SETSPEED_RET)
+    if (iomojo_command(cnt, command, 3, 1) != IOMOJO_SETSPEED_RET) {
         MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO,_("Unable to set camera speed"));
+    }
 }
 
 static void iomojo_movehome(struct context *cnt)
@@ -742,11 +756,13 @@ static unsigned int iomojo_center(struct context *cnt, int x_offset, int y_offse
             y_offset *= -1;
         }
 
-        if (x_offset > 180)
+        if (x_offset > 180) {
             x_offset = 180;
+        }
 
-        if (y_offset > 60)
+        if (y_offset > 60) {
             y_offset = 60;
+        }
 
         command[0] = IOMOJO_MOVEOFFSET_CMD;
         command[1] = cnt->track.iomojo_id;
@@ -769,9 +785,11 @@ static unsigned int iomojo_move(struct context *cnt, int dev, struct coord *cent
     int nx = 0, ny = 0;
     int i;
 
-    if (dev < 0)
-        if (!iomojo_center(cnt, 0, 0))
+    if (dev < 0) {
+        if (!iomojo_center(cnt, 0, 0)) {
             return 0;
+        }
+    }
 
     if (cent->x < imgs->width / 2) {
         direction |= IOMOJO_DIRECTION_LEFT;
@@ -797,11 +815,13 @@ static unsigned int iomojo_move(struct context *cnt, int dev, struct coord *cent
     ny = ny * 72 / imgs->height;
 
     if (nx || ny) {
-        if (nx > 180)
+        if (nx > 180) {
             nx = 180;
+        }
 
-        if (ny > 60)
+        if (ny > 60) {
             ny = 60;
+        }
 
         command[0] = IOMOJO_MOVEOFFSET_CMD;
         command[1] = cnt->track.iomojo_id;
@@ -811,10 +831,11 @@ static unsigned int iomojo_move(struct context *cnt, int dev, struct coord *cent
         iomojo_command(cnt, command, 5, 0);
 
         /* Number of frames to skip while moving */
-        if (ny >= nx)
+        if (ny >= nx) {
             i = 25 * ny / 90;
-        else
+        } else {
             i = 25 * nx / 90;
+        }
         return i;
     }
 
@@ -857,17 +878,20 @@ static unsigned int lqos_center(struct context *cnt, int dev, int x_angle, int y
         cnt->track.maxy = pmr.tilt_max;
     }
 
-    if (ioctl(dev, VIDIOCPWCMPTGANGLE, &pma) == -1)
+    if (ioctl(dev, VIDIOCPWCMPTGANGLE, &pma) == -1) {
         MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
             ,_("ioctl VIDIOCPWCMPTGANGLE"));
+    }
 
     pma.absolute = 1;
 
-    if (x_angle * 100 < cnt->track.maxx && x_angle * 100 > cnt->track.minx)
+    if (x_angle * 100 < cnt->track.maxx && x_angle * 100 > cnt->track.minx) {
         pma.pan = x_angle * 100;
+    }
 
-    if (y_angle * 100 < cnt->track.maxy && y_angle * 100 > cnt->track.miny)
+    if (y_angle * 100 < cnt->track.maxy && y_angle * 100 > cnt->track.miny) {
         pma.tilt = y_angle * 100;
+    }
 
     if (ioctl(dev, VIDIOCPWCMPTSANGLE, &pma) == -1) {
         MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
@@ -891,11 +915,12 @@ static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent,
 
     /* If we are on auto track we calculate delta, otherwise we use user input in degrees times 100 */
     if (!manual) {
-        if (delta_x > imgs->width * 3/8 && delta_x < imgs->width * 5/8)
+        if (delta_x > imgs->width * 3/8 && delta_x < imgs->width * 5/8) {
             return 0;
-        if (delta_y > imgs->height * 3/8 && delta_y < imgs->height * 5/8)
+        }
+        if (delta_y > imgs->height * 3/8 && delta_y < imgs->height * 5/8) {
             return 0;
-
+        }
         move_x_degrees = delta_x * cnt->track.step_angle_x * 100 / (imgs->width / 2);
         move_y_degrees = -delta_y * cnt->track.step_angle_y * 100 / (imgs->height / 2);
     } else {
@@ -918,26 +943,31 @@ static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent,
     }
 
     /* Get current camera position */
-    if (ioctl(dev, VIDIOCPWCMPTGANGLE, &pma) == -1)
+    if (ioctl(dev, VIDIOCPWCMPTGANGLE, &pma) == -1) {
         MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
             ,_("ioctl VIDIOCPWCMPTGANGLE"));
+    }
 
 
     /*
      * Check current position of camera and see if we need to adjust
      * values down to what is left to move
      */
-    if (move_x_degrees < 0 && (cnt->track.minx - pma.pan) > move_x_degrees)
+    if (move_x_degrees < 0 && (cnt->track.minx - pma.pan) > move_x_degrees) {
         move_x_degrees = (cnt->track.minx - pma.pan);
+    }
 
-    if (move_x_degrees > 0 && (cnt->track.maxx - pma.pan) < move_x_degrees)
+    if (move_x_degrees > 0 && (cnt->track.maxx - pma.pan) < move_x_degrees) {
         move_x_degrees = (cnt->track.maxx - pma.pan);
+    }
 
-    if (move_y_degrees < 0 && (cnt->track.miny - pma.tilt) > move_y_degrees)
+    if (move_y_degrees < 0 && (cnt->track.miny - pma.tilt) > move_y_degrees) {
         move_y_degrees = (cnt->track.miny - pma.tilt);
+    }
 
-    if (move_y_degrees > 0 && (cnt->track.maxy - pma.tilt) < move_y_degrees)
+    if (move_y_degrees > 0 && (cnt->track.maxy - pma.tilt) < move_y_degrees) {
         move_y_degrees = (cnt->track.maxy - pma.tilt);
+    }
 
     /* Move camera relative to current position */
     pma.absolute = 0;
@@ -1046,11 +1076,13 @@ static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_
         ,_("INPUT_PARAM_ABS X_Angel %d, Y_Angel %d ")
         ,x_angle, y_angle);
 
-    if (x_angle <= cnt->track.maxx && x_angle >= cnt->track.minx)
+    if (x_angle <= cnt->track.maxx && x_angle >= cnt->track.minx) {
         move_x_degrees = x_angle - (cnt->track.pan_angle);
+    }
 
-    if (y_angle <= cnt->track.maxy && y_angle >= cnt->track.miny)
+    if (y_angle <= cnt->track.maxy && y_angle >= cnt->track.miny) {
         move_y_degrees = y_angle - (cnt->track.tilt_angle);
+    }
 
 
     /*
@@ -1083,8 +1115,9 @@ static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_
     }
 
     /* DWe 30.03.07 We must wait a little,before we set the next CMD, otherwise PAN is mad ... */
-    if ((move_x_degrees != 0) && (move_y_degrees != 0))
+    if ((move_x_degrees != 0) && (move_y_degrees != 0)) {
         SLEEP(1, 0);
+    }
 
     if (move_y_degrees != 0) {
         control_s.id = V4L2_CID_TILT_RELATIVE;
@@ -1185,11 +1218,12 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
 
     /* If we are on auto track we calculate delta, otherwise we use user input in degrees */
     if (!manual) {
-        if (delta_x > imgs->width * 3/8 && delta_x < imgs->width * 5/8)
+        if (delta_x > imgs->width * 3/8 && delta_x < imgs->width * 5/8) {
             return 0;
-        if (delta_y > imgs->height * 3/8 && delta_y < imgs->height * 5/8)
+        }
+        if (delta_y > imgs->height * 3/8 && delta_y < imgs->height * 5/8) {
             return 0;
-
+        }
         move_x_degrees = delta_x * cnt->track.step_angle_x / (imgs->width / 2);
         move_y_degrees = -delta_y * cnt->track.step_angle_y / (imgs->height / 2);
     } else {
@@ -1213,17 +1247,21 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
      * Check current position of camera and see if we need to adjust
      * values down to what is left to move
      */
-        if (move_x_degrees < 0 && (cnt->track.minx - cnt->track.pan_angle) > move_x_degrees)
+        if (move_x_degrees < 0 && (cnt->track.minx - cnt->track.pan_angle) > move_x_degrees) {
             move_x_degrees = cnt->track.minx - cnt->track.pan_angle;
+        }
 
-        if (move_x_degrees > 0 && (cnt->track.maxx - cnt->track.pan_angle) < move_x_degrees)
+        if (move_x_degrees > 0 && (cnt->track.maxx - cnt->track.pan_angle) < move_x_degrees) {
             move_x_degrees = cnt->track.maxx - cnt->track.pan_angle;
+        }
 
-        if (move_y_degrees < 0 && (cnt->track.miny - cnt->track.tilt_angle) > move_y_degrees)
+        if (move_y_degrees < 0 && (cnt->track.miny - cnt->track.tilt_angle) > move_y_degrees) {
             move_y_degrees = cnt->track.miny - cnt->track.tilt_angle;
+        }
 
-        if (move_y_degrees > 0 && (cnt->track.maxy - cnt->track.tilt_angle) < move_y_degrees)
+        if (move_y_degrees > 0 && (cnt->track.maxy - cnt->track.tilt_angle) < move_y_degrees) {
             move_y_degrees = cnt->track.maxy - cnt->track.tilt_angle;
+        }
     }
 
     MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
@@ -1267,8 +1305,9 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
     }
 
     /* DWe 30.03.07 We must wait a little,before we set the next CMD, otherwise PAN is mad ... */
-    if ((move_x_degrees != 0) && (move_y_degrees != 0))
+    if ((move_x_degrees != 0) && (move_y_degrees != 0)) {
         SLEEP (1, 0);
+    }
 
 
     if (move_y_degrees != 0) {
@@ -1295,11 +1334,13 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
             ,_("Before_REL_Y_Angel : x= %d , Y= %d")
             ,cnt->track.pan_angle, cnt->track.tilt_angle);
 
-        if (move_x_degrees != 0)
+        if (move_x_degrees != 0) {
             cnt->track.pan_angle += -pan.s16.pan / INCPANTILT;
+        }
 
-        if (move_y_degrees != 0)
+        if (move_y_degrees != 0) {
             cnt->track.tilt_angle += -pan.s16.tilt / INCPANTILT;
+        }
 
         MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
             ,_("After_REL_Y_Angel : x= %d , Y= %d")
@@ -1327,8 +1368,9 @@ static unsigned int generic_move(struct context *cnt, enum track_action action, 
         setsid();
 
         /* Provides data as environment variables */
-        if (manual)
+        if (manual) {
           setenv("TRACK_MANUAL", "manual", 1);
+        }
         switch (action) {
           case TRACK_CENTER:
             setenv("TRACK_ACTION", "center", 1);

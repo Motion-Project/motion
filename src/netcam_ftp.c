@@ -116,7 +116,7 @@ static int ftp_parse_response(char *buf, int len)
 
     buf++;
 
-    if (*buf == '-'){
+    if (*buf == '-') {
         return -val;
     }
 
@@ -140,19 +140,19 @@ static int ftp_get_more(ftp_context_pointer ctxt)
     int size;
 
     /* Validate that our context structure is valid. */
-    if ((ctxt == NULL) || (ctxt->control_file_desc < 0)){
+    if ((ctxt == NULL) || (ctxt->control_file_desc < 0)) {
         return -1;
     }
 
-    if ((ctxt->control_buffer_index < 0) || (ctxt->control_buffer_index > FTP_BUF_SIZE)){
+    if ((ctxt->control_buffer_index < 0) || (ctxt->control_buffer_index > FTP_BUF_SIZE)) {
         return -1;
     }
 
-    if ((ctxt->control_buffer_used < 0) || (ctxt->control_buffer_used > FTP_BUF_SIZE)){
+    if ((ctxt->control_buffer_used < 0) || (ctxt->control_buffer_used > FTP_BUF_SIZE)) {
         return -1;
     }
 
-    if (ctxt->control_buffer_index > ctxt->control_buffer_used){
+    if (ctxt->control_buffer_index > ctxt->control_buffer_used) {
         return -1;
     }
 
@@ -167,7 +167,7 @@ static int ftp_get_more(ftp_context_pointer ctxt)
 
     size = FTP_BUF_SIZE - ctxt->control_buffer_used;
 
-    if (size == 0){
+    if (size == 0) {
         return 0;
     }
 
@@ -614,8 +614,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt)
         memcpy (&((struct sockaddr_in *)&data_address)->sin_port, &ad[4], 2);
 
         /* Now try to connect to the data port. */
-        if (connect(ctxt->data_file_desc, (struct sockaddr *) &data_address,
-            data_address_length) < 0) {
+        if (connect(ctxt->data_file_desc, (struct sockaddr *) &data_address, data_address_length) < 0) {
             MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO,_("Failed to create a data connection"));
             close(ctxt->data_file_desc);
             ctxt->data_file_desc = -1;
@@ -633,8 +632,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt)
         ((struct sockaddr_in *)&data_address)->sin_port = 0;
 
         /* Bind to the socket - should give us a unique port. */
-        if (bind(ctxt->data_file_desc, (struct sockaddr *) &data_address,
-            data_address_length) < 0) {
+        if (bind(ctxt->data_file_desc, (struct sockaddr *) &data_address, data_address_length) < 0) {
             MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO,_("bind failed"));
             close(ctxt->data_file_desc);
             ctxt->data_file_desc = -1;
@@ -989,7 +987,7 @@ int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url)
      * ownership" of the string away from the URL (i.e. it won't be freed
      * when we cleanup the url structure later).
      */
-    if (strcmp(url->path,"/")){
+    if (strcmp(url->path,"/")) {
         netcam->ftp->path = mystrdup(url->path + 1);
     } else {
         netcam->ftp->path = mystrdup(url->path);

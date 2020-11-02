@@ -72,7 +72,9 @@ static int vlp_open_vidpipe(void)
 
                 if ((tfd = open(buffer, O_RDWR|O_CLOEXEC)) >= 0) {
                     strncpy(pipepath, buffer, sizeof(pipepath));
-                    if (pipe_fd >= 0) close(pipe_fd);
+                    if (pipe_fd >= 0) {
+                        close(pipe_fd);
+                    }
                     pipe_fd = tfd;
                     break;
                 }
