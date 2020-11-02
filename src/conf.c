@@ -3281,7 +3281,7 @@ struct context **read_camera_dir(struct context **cnt, const char *str, int val)
             name_len = strlen(ep->d_name);
             if (name_len > strlen(EXTENSION) &&
                 (strncmp(EXTENSION,(ep->d_name + name_len - strlen(EXTENSION)),
-                        cstrlen(EXTENSION)) == 0 )) {
+                        strlen(EXTENSION)) == 0 )) {
                 memset(conf_file, '\0', sizeof(conf_file));
                 snprintf(conf_file, sizeof(conf_file) - 1, "%s/%s",
                             str, ep->d_name);
