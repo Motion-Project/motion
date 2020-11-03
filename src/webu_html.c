@@ -648,9 +648,10 @@ static void webu_html_preview(struct webui_ctx *webui)
         "      <p id=\"id_preview\">\n");
     webu_write(webui, response);
 
-    indx_st = 1;
     if (webui->cam_threads == 1) {
         indx_st = 0;
+    } else {
+        indx_st = 1;
     }
 
     for (indx = indx_st; indx<webui->cam_threads; indx++) {
@@ -775,9 +776,10 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui)
     int indx, indx_st, preview_scale;
     struct strminfo_ctx strm_info;
 
-    indx_st = 1;
     if (webui->cam_threads == 1) {
         indx_st = 0;
+    } else {
+        indx_st = 1;
     }
 
     strm_info.cntlst = webui->cntlst;
@@ -854,10 +856,10 @@ static void webu_html_script_camera_all(struct webui_ctx *webui)
     int indx, indx_st, preview_scale;
     struct strminfo_ctx strm_info;
 
-
-    indx_st = 1;
     if (webui->cam_threads == 1) {
         indx_st = 0;
+    } else {
+        indx_st = 1;
     }
 
     strm_info.cntlst = webui->cntlst;

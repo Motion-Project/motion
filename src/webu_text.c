@@ -985,9 +985,10 @@ void webu_text_status(struct webui_ctx *webui)
     webu_text_back(webui,"/detection");
 
     if (webui->thread_nbr == 0) {
-        indx_st = 1;
         if (webui->cam_threads == 1) {
             indx_st = 0;
+        } else {
+            indx_st = 1;
         }
 
         for (indx = indx_st; indx < webui->cam_threads; indx++) {
@@ -1026,9 +1027,10 @@ void webu_text_connection(struct webui_ctx *webui)
     webu_text_camera_name(webui);
 
     if (webui->thread_nbr == 0) {
-        indx_st = 1;
         if (webui->cam_threads == 1) {
             indx_st = 0;
+        } else {
+            indx_st = 1;
         }
 
         for (indx = indx_st; indx < webui->cam_threads; indx++) {

@@ -2047,9 +2047,10 @@ int netcam_rtsp_setup(struct context *cnt)
         }
 
         indx_cam = 1;
-        indx_max = 1;
         if (cnt->conf.netcam_high_url) {
             indx_max = 2;
+        } else {
+            indx_max = 1;
         }
 
         while (indx_cam <= indx_max) {
@@ -2181,9 +2182,10 @@ void netcam_rtsp_cleanup(struct context *cnt, int init_retry_flag)
         struct rtsp_context *rtsp_data;
 
         indx_cam = 1;
-        indx_max = 1;
         if (cnt->rtsp_high) {
             indx_max = 2;
+        } else {
+            indx_max = 1;
         }
 
         while (indx_cam <= indx_max) {
