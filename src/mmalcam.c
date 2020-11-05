@@ -96,7 +96,7 @@ static void set_video_port_format(mmalcam_context_ptr mmalcam, MMAL_ES_FORMAT_T 
     set_port_format(mmalcam, format);
     format->es->video.frame_rate.num = mmalcam->framerate;
     format->es->video.frame_rate.den = VIDEO_FRAME_RATE_DEN;
-    if (mmalcam->framerate > 30){
+    if (mmalcam->framerate > 30) {
         /* The pi noir camera could not determine autoexpose at high frame rates */
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, _("A high frame rate can cause problems with exposure of images"));
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, _("If autoexposure is not working, try a lower frame rate."));
@@ -386,8 +386,9 @@ int mmalcam_next(struct context *cnt,  struct image_data *img_data)
 {
     mmalcam_context_ptr mmalcam;
 
-    if ((!cnt) || (!cnt->mmalcam))
+    if ((!cnt) || (!cnt->mmalcam)) {
         return NETCAM_FATAL_ERROR;
+    }
 
     mmalcam = cnt->mmalcam;
 
@@ -415,9 +416,10 @@ int mmalcam_next(struct context *cnt,  struct image_data *img_data)
             status = mmal_port_send_buffer(mmalcam->camera_capture_port, new_buffer);
         }
 
-        if (!new_buffer || status != MMAL_SUCCESS)
+        if (!new_buffer || status != MMAL_SUCCESS) {
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 ,_("Unable to return a buffer to the camera video port"));
+        }
     }
 
     rotate_map(cnt,img_data);

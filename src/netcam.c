@@ -109,14 +109,17 @@ void netcam_url_parse(struct url_t *parse_url, const char *text_url)
     regex_t pattbuf;
     regmatch_t matches[10];
 
-    if (!strncmp(text_url, "file", 4))
+    if (!strncmp(text_url, "file", 4)) {
         re = "(file)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
+    }
 
-    if (!strncmp(text_url, "jpeg", 4))
+    if (!strncmp(text_url, "jpeg", 4)) {
         re = "(jpeg)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
+    }
 
-    if (!strncmp(text_url, "v4l2", 4))
+    if (!strncmp(text_url, "v4l2", 4)) {
         re = "(v4l2)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
+    }
 
     /*  Note that log messages are commented out to avoid leaking info related
      *  to user/host/pass etc.  Keeing them in the code for easier debugging if
@@ -170,14 +173,15 @@ void netcam_url_parse(struct url_t *parse_url, const char *text_url)
     }
     if (((!parse_url->port) && (parse_url->service)) ||
         ((parse_url->port > 65535) && (parse_url->service))) {
-        if (!strcmp(parse_url->service, "http"))
+        if (!strcmp(parse_url->service, "http")) {
             parse_url->port = 80;
-        else if (!strcmp(parse_url->service, "ftp"))
+        } else if (!strcmp(parse_url->service, "ftp")) {
             parse_url->port = 21;
-        else if (!strcmp(parse_url->service, "rtmp"))
+        } else if (!strcmp(parse_url->service, "rtmp")) {
             parse_url->port = 1935;
-        else if (!strcmp(parse_url->service, "rtsp"))
+        } else if (!strcmp(parse_url->service, "rtsp")) {
             parse_url->port = 554;
+        }
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Using port number %d"),parse_url->port);
     }
 
@@ -340,8 +344,9 @@ static void *netcam_handler_loop(void *arg)
             /* If FTP connection, attempt to re-connect to server. */
             if (netcam->ftp) {
                 close(netcam->ftp->control_file_desc);
-                if (ftp_connect(netcam) < 0)
+                if (ftp_connect(netcam) < 0) {
                     MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Trying to re-connect"));
+                }
             }
             continue;
         }
@@ -374,8 +379,9 @@ static void *netcam_handler_loop(void *arg)
              * us, we just continue.  In either event, we clear
              * the start_capture flag set by the main loop.
              */
-            if (!netcam->start_capture)
+            if (!netcam->start_capture) {
                 pthread_cond_wait(&netcam->cap_cond, &netcam->mutex);
+            }
 
             netcam->start_capture = 0;
 
@@ -430,7 +436,9 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
 {
     struct timespec waittime;
 
-    if (!netcam) return;
+    if (!netcam) {
+        return;
+    }
 
     /*
      * This 'lock' is just a bit of "defensive" programming.  It should
@@ -440,8 +448,9 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
      */
     pthread_mutex_lock(&netcam->mutex);
 
-    if (netcam->cnt->netcam == NULL)
+    if (netcam->cnt->netcam == NULL) {
         return;
+    }
 
     /*
      * We set the netcam_context pointer in the motion main-loop context
@@ -462,8 +471,9 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
      * netcam->mutex locked.
      */
 
-    if (netcam->caps.streaming == NCS_UNSUPPORTED)
+    if (netcam->caps.streaming == NCS_UNSUPPORTED) {
         pthread_cond_signal(&netcam->cap_cond);
+    }
 
 
     /*
@@ -562,8 +572,9 @@ int netcam_next(struct context *cnt, struct image_data *img_data)
      * Here we have some more "defensive programming".  This check should
      * never be true, but if it is just return with a "fatal error".
      */
-    if ((!cnt) || (!cnt->netcam))
+    if ((!cnt) || (!cnt->netcam)) {
         return NETCAM_FATAL_ERROR;
+    }
 
     netcam = cnt->netcam;
 
@@ -591,8 +602,9 @@ int netcam_next(struct context *cnt, struct image_data *img_data)
      * approach is to just return a NULL (failed) to the caller (an
      * error message has already been produced by the libjpeg routines).
      */
-    if (setjmp(netcam->setjmp_buffer))
+    if (setjmp(netcam->setjmp_buffer)) {
         return NETCAM_GENERAL_ERROR | NETCAM_JPEG_CONV_ERROR;
+    }
 
     /* If there was no error, process the latest image buffer. */
     return netcam_proc_jpeg(netcam, img_data);
@@ -659,11 +671,9 @@ int netcam_start(struct context *cnt)
     util_parms_add_default(netcam->parameters,"keepalive","off");
     util_parms_add_default(netcam->parameters,"tolerant_check","off"); /*false*/
 
-    for (indx = 0; indx < netcam->parameters->params_count; indx++)
-    {
+    for (indx = 0; indx < netcam->parameters->params_count; indx++) {
         if ( !strcmp(netcam->parameters->params_array[indx].param_name,"proxy") &&
-             strcmp(netcam->parameters->params_array[indx].param_name,"NULL") )
-        {
+             strcmp(netcam->parameters->params_array[indx].param_name,"NULL")) {
             netcam_url_parse(&url, netcam->parameters->params_array[indx].param_value);
             if (!url.host) {
                 MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
@@ -706,8 +716,7 @@ int netcam_start(struct context *cnt)
         return -1;
     }
 
-    for (indx = 0; indx < netcam->parameters->params_count; indx++)
-    {
+    for (indx = 0; indx < netcam->parameters->params_count; indx++) {
         if (!strcmp(netcam->parameters->params_array[indx].param_name,"proxy")) {
             if (!strcmp(netcam->parameters->params_array[indx].param_name,"NULL")) {
                 netcam->connect_host = url.host;
@@ -773,7 +782,9 @@ int netcam_start(struct context *cnt)
     }
 
     netcam_url_free(&url);
-    if (retval < 0) return -1;
+    if (retval < 0) {
+        return -1;
+    }
 
     /*
      * We expect that, at this point, we should be positioned to read

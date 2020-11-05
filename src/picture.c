@@ -284,11 +284,13 @@ unsigned prepare_exif(unsigned char **exif,
     put_uint16(writing.buf, ifd0_tagcount);
     writing.buf += 2;
 
-    if (description)
+    if (description) {
         put_stringentry(&writing, TIFF_TAG_IMAGE_DESCRIPTION, description, 1);
+    }
 
-    if (datetime)
+    if (datetime) {
         put_stringentry(&writing, TIFF_TAG_DATETIME, datetime, 1);
+    }
 
     if (ifd1_tagcount > 0) {
         /* Offset of IFD1 - TIFF header + IFD0 size. */
@@ -315,14 +317,17 @@ unsigned prepare_exif(unsigned char **exif,
         memcpy(writing.buf + 2, exif_version_tag, 12); /* tag 0x9000 */
         writing.buf += 14;
 
-        if (datetime)
+        if (datetime) {
             put_stringentry(&writing, EXIF_TAG_ORIGINAL_DATETIME, datetime, 1);
+        }
 
-        if (box)
+        if (box) {
             put_subjectarea(&writing, box);
+        }
 
-        if (subtime)
+        if (subtime) {
             put_stringentry(&writing, EXIF_TAG_ORIGINAL_DATETIME_SS, subtime, 0);
+        }
 
         put_uint32(writing.buf, 0); /* Next IFD = 0 (no next IFD) */
         writing.buf += 4;
@@ -398,14 +403,14 @@ static void put_webp_yuv420p_file(FILE *fp,
 {
     /* Create a config present and check for compatible library version */
     WebPConfig webp_config;
-    if (!WebPConfigPreset(&webp_config, WEBP_PRESET_DEFAULT, (float) quality)){
+    if (!WebPConfigPreset(&webp_config, WEBP_PRESET_DEFAULT, (float) quality)) {
         MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, _("libwebp version error"));
         return;
     }
 
     /* Create the input data structure and check for compatible library version */
     WebPPicture webp_image;
-    if (!WebPPictureInit(&webp_image)){
+    if (!WebPPictureInit(&webp_image)) {
         MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp version error"));
         return;
     }
@@ -413,7 +418,7 @@ static void put_webp_yuv420p_file(FILE *fp,
     /* Allocate the image buffer based on image width and height */
     webp_image.width = width;
     webp_image.height = height;
-    if (!WebPPictureAlloc(&webp_image)){
+    if (!WebPPictureAlloc(&webp_image)) {
         MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp image buffer allocation error"));
         return;
     }
@@ -430,8 +435,9 @@ static void put_webp_yuv420p_file(FILE *fp,
     webp_image.custom_ptr = (void*) &webp_writer;
 
     /* Encode the YUV image as webp */
-    if (!WebPEncode(&webp_config, &webp_image))
+    if (!WebPEncode(&webp_config, &webp_image)) {
         MOTION_LOG(WRN, TYPE_CORE, NO_ERRNO,_("libwebp image compression error"));
+    }
 
     /* A bitstream object is needed for the muxing proces */
     WebPData webp_bitstream;
@@ -450,8 +456,9 @@ static void put_webp_yuv420p_file(FILE *fp,
     }
 
     /* Write the webp final bitstream to the file */
-    if (fwrite(webp_output.bytes, sizeof(uint8_t), webp_output.size, fp) != webp_output.size)
+    if (fwrite(webp_output.bytes, sizeof(uint8_t), webp_output.size, fp) != webp_output.size) {
         MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to save webp image to file"));
+    }
 
     #if WEBP_ENCODER_ABI_VERSION > 0x0202
         /* writer.mem must be freed by calling WebPMemoryWriterClear */
@@ -570,18 +577,21 @@ static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, i
             r = r >> 16;
             g = g >> 16;
             b = b >> 16;
-            if (r < 0)
+            if (r < 0) {
                 r = 0;
-            else if (r > 255)
+            } else if (r > 255) {
                 r = 255;
-            if (g < 0)
+            }
+            if (g < 0) {
                 g = 0;
-            else if (g > 255)
+            } else if (g > 255) {
                 g = 255;
-            if (b < 0)
+            }
+            if (b < 0) {
                 b = 0;
-            else if (b > 255)
+            } else if (b > 255) {
                 b = 255;
+            }
 
             rgb[0] = b;
             rgb[1] = g;
@@ -629,7 +639,6 @@ void overlay_smartmask(struct context *cnt, unsigned char *out)
             if (smartmask[line + x] == 0 || smartmask[line + x + 1] == 0 ||
                 smartmask[line + width + x] == 0 ||
                 smartmask[line + width + x + 1] == 0) {
-
                 *out_v = 255;
                 *out_u = 128;
             }
@@ -640,8 +649,9 @@ void overlay_smartmask(struct context *cnt, unsigned char *out)
     out_y = out;
     /* Set colour intensity for smartmask. */
     for (i = 0; i < imgs->motionsize; i++) {
-        if (smartmask[i] == 0)
+        if (smartmask[i] == 0) {
             *out_y = 0;
+        }
         out_y++;
     }
 }
@@ -673,7 +683,6 @@ void overlay_fixed_mask(struct context *cnt, unsigned char *out)
             if (mask[line + x] == 0 || mask[line + x + 1] == 0 ||
                 mask[line + width + x] == 0 ||
                 mask[line + width + x + 1] == 0) {
-
                 *out_v = 0;
                 *out_u = 0;
             }
@@ -684,8 +693,9 @@ void overlay_fixed_mask(struct context *cnt, unsigned char *out)
     out_y = out;
     /* Set colour intensity for mask. */
     for (i = 0; i < imgs->motionsize; i++) {
-        if (mask[i] == 0)
+        if (mask[i] == 0) {
             *out_y = 0;
+        }
         out_y++;
     }
 }
@@ -717,7 +727,6 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
             if (labels[line + x] & 32768 || labels[line + x + 1] & 32768 ||
                 labels[line + width + x] & 32768 ||
                 labels[line + width + x + 1] & 32768) {
-
                 *out_u = 255;
                 *out_v = 128;
             }
@@ -728,8 +737,9 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
     out_y = out;
     /* Set intensity for coloured label to have better visibility. */
     for (i = 0; i < imgs->motionsize; i++) {
-        if (*labels++ & 32768)
+        if (*labels++ & 32768) {
             *out_y = 0;
+        }
         out_y++;
     }
 }
@@ -761,7 +771,7 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
      */
     gettimeofday(&tv1, NULL);
 
-    if (!cnt->conf.stream_grey){
+    if (!cnt->conf.stream_grey) {
         return jpgutl_put_yuv420p(dest_image, image_size, image,
                                        width, height, quality, cnt ,&tv1,NULL);
     } else {
@@ -792,13 +802,17 @@ static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *im
     if (cnt->imgs.picture_type == IMAGE_TYPE_PPM) {
         put_ppm_bgr24_file(picture, image, width, height);
     } else {
-        if (dummy == 1){
+        if (dummy == 1) {
             #ifdef HAVE_WEBP
-            if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP)
-                put_webp_yuv420p_file(picture, image, width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+                if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP) {
+                    put_webp_yuv420p_file(picture, image, width, height, quality, cnt
+                            , &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+                }
             #endif /* HAVE_WEBP */
-            if (cnt->imgs.picture_type == IMAGE_TYPE_JPEG)
-                put_jpeg_yuv420p_file(picture, image, width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+            if (cnt->imgs.picture_type == IMAGE_TYPE_JPEG) {
+                put_jpeg_yuv420p_file(picture, image, width, height, quality, cnt
+                        , &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+            }
         } else {
             put_jpeg_grey_file(picture, image, width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
        }
@@ -859,9 +873,11 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 
     /* Skip comment */
     line[0] = '#';
-    while (line[0] == '#')
-        if (!fgets(line, 255, picture))
+    while (line[0] == '#') {
+        if (!fgets(line, 255, picture)) {
             return NULL;
+        }
+    }
 
     /* Read image size */
     if (sscanf(line, "%d %d", &mask_width, &mask_height) != 2) {
@@ -872,9 +888,11 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 
     /* Maximum value */
     line[0] = '#';
-    while (line[0] == '#')
-        if (!fgets(line, 255, picture))
+    while (line[0] == '#') {
+        if (!fgets(line, 255, picture)) {
             return NULL;
+        }
+    }
 
     if (sscanf(line, "%d", &maxval) != 1) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
@@ -890,11 +908,13 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
     image = mymalloc((mask_width * mask_height * 3) / 2);
 
     for (y = 0; y < mask_height; y++) {
-        if ((int)fread(&image[y * mask_width], 1, mask_width, picture) != mask_width)
+        if ((int)fread(&image[y * mask_width], 1, mask_width, picture) != mask_width) {
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Failed reading image data from pgm file"));
+        }
 
-        for (x = 0; x < mask_width; x++)
+        for (x = 0; x < mask_width; x++) {
             image[y * mask_width + x] = (int)image[y * mask_width + x] * 255 / maxval;
+        }
 
     }
 
@@ -974,16 +994,18 @@ void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsign
 {
 
     int i = 0, x, y;
-    for (y = 0; y < height_src; y+=2)
-        for (x = 0; x < width_src; x+=2)
+    for (y = 0; y < height_src; y+=2) {
+        for (x = 0; x < width_src; x+=2) {
             img_dst[i++] = img_src[y * width_src + x];
+        }
+    }
 
-    for (y = 0; y < height_src / 2; y+=2)
-       for (x = 0; x < width_src; x += 4)
-       {
+    for (y = 0; y < height_src / 2; y+=2) {
+       for (x = 0; x < width_src; x += 4) {
           img_dst[i++] = img_src[(width_src * height_src) + (y * width_src) + x];
           img_dst[i++] = img_src[(width_src * height_src) + (y * width_src) + (x + 1)];
        }
+    }
 
     return;
 }

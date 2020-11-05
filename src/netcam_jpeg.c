@@ -144,11 +144,12 @@ static void netcam_memory_src(j_decompress_ptr cinfo, char *data, int length)
 {
     netcam_src_ptr src;
 
-    if (cinfo->src == NULL)
+    if (cinfo->src == NULL) {
         cinfo->src = (struct jpeg_source_mgr *)
                      (*cinfo->mem->alloc_small)
                      ((j_common_ptr) cinfo, JPOOL_PERMANENT,
                       sizeof (netcam_source_mgr));
+    }
 
 
     src = (netcam_src_ptr)cinfo->src;
@@ -228,8 +229,9 @@ static void netcam_output_message(j_common_ptr cinfo)
      * care about.
      */
     if ((cinfo->err->msg_code != JWRN_EXTRANEOUS_DATA) &&
-        (cinfo->err->msg_code == JWRN_NOT_SEQUENTIAL) && (!netcam->netcam_tolerant_check))
+        (cinfo->err->msg_code == JWRN_NOT_SEQUENTIAL) && (!netcam->netcam_tolerant_check)) {
         netcam->jpeg_error |= 2;    /* Set flag to show problem */
+    }
 
     /*
      * Format the message according to library standards.
@@ -340,8 +342,9 @@ static int netcam_init_jpeg(netcam_context_ptr netcam, j_decompress_ptr cinfo)
     /* Start the decompressor. */
     jpeg_start_decompress(cinfo);
 
-    if (netcam->jpeg_error)
+    if (netcam->jpeg_error) {
         MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("jpeg_error %d"), netcam->jpeg_error);
+    }
 
     return netcam->jpeg_error;
 }
@@ -419,8 +422,9 @@ static int netcam_image_conv(netcam_context_ptr netcam,
 
     rotate_map(netcam->cnt, img_data);
 
-    if (netcam->jpeg_error)
+    if (netcam->jpeg_error) {
         MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("jpeg_error %d"), netcam->jpeg_error);
+    }
 
     return netcam->jpeg_error;
 }

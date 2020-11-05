@@ -95,14 +95,17 @@ static void webu_context_init(struct context **cntlst, struct context *cnt, stru
 
     /* get the number of cameras and threads */
     indx = 0;
-    if (webui->cntlst != NULL){
-        while (webui->cntlst[++indx]);
+    if (webui->cntlst != NULL) {
+        while (webui->cntlst[++indx]) {
+            continue;
+        }
     }
     webui->cam_threads = indx;
 
     webui->cam_count = indx;
-    if (indx > 1)
+    if (indx > 1) {
         webui->cam_count--;
+    }
 
     /* 1 thread, 1 camera = just motion.conf.
      * 2 thread, 1 camera, then using motion.conf plus a separate camera file */
@@ -142,28 +145,35 @@ static void webu_context_null(struct webui_ctx *webui)
     return;
 }
 
+static void webu_context_free_var(char* varin)
+{
+    if (varin != NULL) {
+        free(varin);
+    }
+}
+
 static void webu_context_free(struct webui_ctx *webui)
 {
 
-    if (webui->hostname      != NULL) free(webui->hostname);
-    if (webui->url           != NULL) free(webui->url);
-    if (webui->uri_camid     != NULL) free(webui->uri_camid);
-    if (webui->uri_cmd1      != NULL) free(webui->uri_cmd1);
-    if (webui->uri_cmd2      != NULL) free(webui->uri_cmd2);
-    if (webui->uri_parm1     != NULL) free(webui->uri_parm1);
-    if (webui->uri_value1    != NULL) free(webui->uri_value1);
-    if (webui->uri_parm2     != NULL) free(webui->uri_parm2);
-    if (webui->uri_value2    != NULL) free(webui->uri_value2);
-    if (webui->lang          != NULL) free(webui->lang);
-    if (webui->lang_full     != NULL) free(webui->lang_full);
-    if (webui->resp_page     != NULL) free(webui->resp_page);
-    if (webui->auth_user     != NULL) free(webui->auth_user);
-    if (webui->auth_pass     != NULL) free(webui->auth_pass);
-    if (webui->auth_denied   != NULL) free(webui->auth_denied);
-    if (webui->auth_opaque   != NULL) free(webui->auth_opaque);
-    if (webui->auth_realm    != NULL) free(webui->auth_realm);
-    if (webui->clientip      != NULL) free(webui->clientip);
-    if (webui->text_eol      != NULL) free(webui->text_eol);
+    webu_context_free_var(webui->hostname);
+    webu_context_free_var(webui->url);
+    webu_context_free_var(webui->uri_camid);
+    webu_context_free_var(webui->uri_cmd1);
+    webu_context_free_var(webui->uri_cmd2);
+    webu_context_free_var(webui->uri_parm1);
+    webu_context_free_var(webui->uri_value1);
+    webu_context_free_var(webui->uri_parm2);
+    webu_context_free_var(webui->uri_value2);
+    webu_context_free_var(webui->lang);
+    webu_context_free_var(webui->lang_full);
+    webu_context_free_var(webui->resp_page);
+    webu_context_free_var(webui->auth_user);
+    webu_context_free_var(webui->auth_pass);
+    webu_context_free_var(webui->auth_denied);
+    webu_context_free_var(webui->auth_opaque);
+    webu_context_free_var(webui->auth_realm);
+    webu_context_free_var(webui->clientip);
+    webu_context_free_var(webui->text_eol);
 
     webu_context_null(webui);
 
@@ -181,13 +191,13 @@ static void webu_badreq(struct webui_ctx *webui)
      * bad request response either with or without the HTML tags.
      */
     if (webui->cnt != NULL) {
-        if (webui->cnt->conf.webcontrol_interface == 1){
+        if (webui->cnt->conf.webcontrol_interface == 1) {
             webu_text_badreq(webui);
         } else {
             webu_html_badreq(webui);
         }
     } else if (webui->cntlst != NULL) {
-        if (webui->cntlst[0]->conf.webcontrol_interface == 1){
+        if (webui->cntlst[0]->conf.webcontrol_interface == 1) {
             webu_text_badreq(webui);
         } else {
             webu_html_badreq(webui);
@@ -209,11 +219,11 @@ void webu_write(struct webui_ctx *webui, const char *buf)
     resp_len = strlen(buf);
 
     temp_size = webui->resp_size;
-    while ((resp_len + webui->resp_used) > temp_size){
+    while ((resp_len + webui->resp_used) > temp_size) {
         temp_size = temp_size + (WEBUI_LEN_RESP * 10);
     }
 
-    if (temp_size > webui->resp_size){
+    if (temp_size > webui->resp_size) {
         temp_resp = mymalloc(webui->resp_size);
         memcpy(temp_resp, webui->resp_page, webui->resp_size);
         free(webui->resp_page);
@@ -242,12 +252,14 @@ static void webu_parms_edit(struct webui_ctx *webui)
      */
     int indx, is_nbr;
 
-    if (strlen(webui->uri_camid) > 0){
+    if (strlen(webui->uri_camid) > 0) {
         is_nbr = TRUE;
-        for (indx=0; indx < (int)strlen(webui->uri_camid);indx++){
-            if ((webui->uri_camid[indx] > '9') || (webui->uri_camid[indx] < '0')) is_nbr = FALSE;
+        for (indx=0; indx < (int)strlen(webui->uri_camid);indx++) {
+            if ((webui->uri_camid[indx] > '9') || (webui->uri_camid[indx] < '0')) {
+                is_nbr = FALSE;
+            }
         }
-        if (is_nbr){
+        if (is_nbr) {
             webui->thread_nbr = atoi(webui->uri_camid);
         } else {
             webui->thread_nbr = -1;
@@ -265,14 +277,14 @@ static void webu_parms_edit(struct webui_ctx *webui)
      * Also set/convert the camid into the thread number.
     */
 
-    if (webui->cntlst != NULL){
-        if (webui->thread_nbr < 0){
+    if (webui->cntlst != NULL) {
+        if (webui->thread_nbr < 0) {
             webui->cnt = webui->cntlst[0];
             webui->thread_nbr = 0;
         } else {
             indx = 0;
-            while (webui->cntlst[indx] != NULL){
-                if (webui->cntlst[indx]->camera_id == webui->thread_nbr){
+            while (webui->cntlst[indx] != NULL) {
+                if (webui->cntlst[indx]->camera_id == webui->thread_nbr) {
                     webui->thread_nbr = indx;
                     break;
                 }
@@ -311,66 +323,76 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos)
      */
     last_parm = FALSE;
     en_pos = strstr(st_pos,"?");
-    if (en_pos != NULL){
+    if (en_pos != NULL) {
         parm_len = en_pos - st_pos + 1;
-        if (parm_len >= WEBUI_LEN_PARM) return;
+        if (parm_len >= WEBUI_LEN_PARM) {
+            return;
+        }
         snprintf(webui->uri_cmd2, parm_len,"%s", st_pos);
 
         /* Get the parameter name */
         st_pos = st_pos + parm_len; /* Move past the command */
         en_pos = strstr(st_pos,"=");
-        if (en_pos == NULL){
+        if (en_pos == NULL) {
             parm_len = strlen(webui->url) - parm_len;
             last_parm = TRUE;
         } else {
             parm_len = en_pos - st_pos + 1;
         }
-        if (parm_len >= WEBUI_LEN_PARM) return;
+        if (parm_len >= WEBUI_LEN_PARM) {
+            return;
+        }
         snprintf(webui->uri_parm1, parm_len,"%s", st_pos);
 
-        if (!last_parm){
+        if (!last_parm) {
             /* Get the parameter value */
             st_pos = st_pos + parm_len; /* Move past the equals sign */
-            if (!strcasecmp(webui->uri_parm1,"x") || !strcasecmp(webui->uri_parm1,"pan") ){
+            if (!strcasecmp(webui->uri_parm1,"x") || !strcasecmp(webui->uri_parm1,"pan") ) {
                 en_pos = strstr(st_pos,"&");
             } else {
                 en_pos = NULL;
             }
-            if (en_pos == NULL){
+            if (en_pos == NULL) {
                 parm_len = strlen(webui->url) - parm_len;
                 last_parm = TRUE;
             } else {
                 parm_len = en_pos - st_pos + 1;
             }
-            if (parm_len >= WEBUI_LEN_PARM) return;
+            if (parm_len >= WEBUI_LEN_PARM) {
+                return;
+            }
             snprintf(webui->uri_value1, parm_len,"%s", st_pos);
         }
 
-        if (!last_parm){
+        if (!last_parm) {
             /* Get the next parameter name */
             st_pos = st_pos + parm_len; /* Move past the previous command */
             en_pos = strstr(st_pos,"=");
-            if (en_pos == NULL){
+            if (en_pos == NULL) {
                 parm_len = strlen(webui->url) - parm_len;
                 last_parm = TRUE;
             } else {
                 parm_len = en_pos - st_pos + 1;
             }
-            if (parm_len >= WEBUI_LEN_PARM) return;
+            if (parm_len >= WEBUI_LEN_PARM) {
+                return;
+            }
             snprintf(webui->uri_parm2, parm_len,"%s", st_pos);
         }
 
-        if (!last_parm){
+        if (!last_parm) {
             /* Get the next parameter value */
             st_pos = st_pos + parm_len;     /* Move past the equals sign */
             en_pos = strstr(st_pos,"&");
-            if (en_pos == NULL){
+            if (en_pos == NULL) {
                 parm_len = strlen(webui->url) - parm_len;
                 last_parm = TRUE;
             } else {
                 parm_len = en_pos - st_pos + 1;
             }
-            if (parm_len >= WEBUI_LEN_PARM) return;
+            if (parm_len >= WEBUI_LEN_PARM) {
+                return;
+            }
             snprintf(webui->uri_value2, parm_len,"%s", st_pos);
         }
 
@@ -418,14 +440,18 @@ static int webu_parseurl(struct webui_ctx *webui)
 
     webu_parseurl_reset(webui);
 
-    if (strlen(webui->url) == 0) return -1;
+    if (strlen(webui->url) == 0) {
+        return -1;
+    }
 
     MHD_http_unescape(webui->url);
 
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),webui->url);
 
     /* Home page */
-    if (strlen(webui->url) == 1) return 0;
+    if (strlen(webui->url) == 1) {
+        return 0;
+    }
 
     last_slash = 0;
 
@@ -434,42 +460,54 @@ static int webu_parseurl(struct webui_ctx *webui)
      * stream by using http://localhost:port/stream
      */
     st_pos = webui->url + 1; /* Move past the first "/" */
-    if (*st_pos == '-') return -1; /* Never allow a negative number */
+    if (*st_pos == '-') {
+        /* Never allow a negative number */
+        return -1;
+    }
     en_pos = strstr(st_pos,"/");
-    if (en_pos == NULL){
+    if (en_pos == NULL) {
         parm_len = strlen(webui->url);
         last_slash = 1;
     } else {
         parm_len = en_pos - st_pos + 1;
     }
-    if (parm_len >= WEBUI_LEN_PARM) return -1; /* var was malloc'd to WEBUI_LEN_PARM */
+    if (parm_len >= WEBUI_LEN_PARM) {
+        /* var was malloc'd to WEBUI_LEN_PARM */
+        return -1;
+    }
     snprintf(webui->uri_camid, parm_len,"%s", st_pos);
 
-    if (!last_slash){
+    if (!last_slash) {
         /* Get cmd1 or action */
         st_pos = st_pos + parm_len; /* Move past the camid */
         en_pos = strstr(st_pos,"/");
-        if (en_pos == NULL){
+        if (en_pos == NULL) {
             parm_len = strlen(webui->url) - parm_len ;
             last_slash = 1;
         } else {
             parm_len = en_pos - st_pos + 1;
         }
-        if (parm_len >= WEBUI_LEN_PARM) return -1; /* var was malloc'd to WEBUI_LEN_PARM */
+        if (parm_len >= WEBUI_LEN_PARM) {
+            /* var was malloc'd to WEBUI_LEN_PARM */
+            return -1;
+        }
         snprintf(webui->uri_cmd1, parm_len,"%s", st_pos);
     }
 
-    if (!last_slash){
+    if (!last_slash) {
         /* Get cmd2 or action */
         st_pos = st_pos + parm_len; /* Move past the first command */
         en_pos = strstr(st_pos,"/");
-        if (en_pos == NULL){
+        if (en_pos == NULL) {
             parm_len = strlen(webui->url) - parm_len;
             last_slash = 1;
         } else {
             parm_len = en_pos - st_pos + 1;
         }
-        if (parm_len >= WEBUI_LEN_PARM) return -1; /* var was malloc'd to WEBUI_LEN_PARM */
+        if (parm_len >= WEBUI_LEN_PARM) {
+            /* var was malloc'd to WEBUI_LEN_PARM */
+            return -1;
+        }
         snprintf(webui->uri_cmd2, parm_len,"%s", st_pos);
     }
 
@@ -503,32 +541,33 @@ void webu_process_action(struct webui_ctx *webui)
     if ((strcmp(webui->uri_cmd2,"makemovie") == 0) ||
         (strcmp(webui->uri_cmd2,"eventend") == 0)) {
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
-            while (webui->cntlst[++indx]){
+            while (webui->cntlst[++indx]) {
                 webui->cntlst[indx]->event_stop = TRUE;
             }
         } else {
             webui->cnt->event_stop = TRUE;
         }
 
-    } else if (strcmp(webui->uri_cmd2,"eventstart") == 0){
+    } else if (strcmp(webui->uri_cmd2,"eventstart") == 0) {
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
-            while (webui->cntlst[++indx]){
+            while (webui->cntlst[++indx]) {
                 webui->cntlst[indx]->event_user = TRUE;
             }
         } else {
             webui->cnt->event_user = TRUE;
         }
 
-    } else if (!strcmp(webui->uri_cmd2,"snapshot")){
+    } else if (!strcmp(webui->uri_cmd2,"snapshot")) {
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
-            while (webui->cntlst[++indx])
-            webui->cntlst[indx]->snapshot = 1;
+            while (webui->cntlst[++indx]) {
+                webui->cntlst[indx]->snapshot = 1;
+            }
         } else {
             webui->cnt->snapshot = 1;
         }
 
 
-    } else if (!strcmp(webui->uri_cmd2,"restart")){
+    } else if (!strcmp(webui->uri_cmd2,"restart")) {
         if (webui->thread_nbr == 0) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all threads"));
             webui->cntlst[0]->webcontrol_finish = TRUE;
@@ -544,9 +583,9 @@ void webu_process_action(struct webui_ctx *webui)
 
         }
 
-    } else if (!strcmp(webui->uri_cmd2,"quit")){
+    } else if (!strcmp(webui->uri_cmd2,"quit")) {
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
-            while (webui->cntlst[++indx]){
+            while (webui->cntlst[++indx]) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
                     _("Quitting thread %d"),webui->thread_nbr);
                 webui->cntlst[indx]->restart = FALSE;
@@ -563,9 +602,9 @@ void webu_process_action(struct webui_ctx *webui)
             webui->cnt->finish = TRUE;
         }
 
-    } else if (!strcmp(webui->uri_cmd2,"end")){
+    } else if (!strcmp(webui->uri_cmd2,"end")) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Motion terminating"));
-            while (webui->cntlst[indx]){
+            while (webui->cntlst[indx]) {
                 webui->cntlst[indx]->webcontrol_finish = TRUE;
                 webui->cntlst[indx]->restart = FALSE;
                 webui->cntlst[indx]->event_stop = TRUE;
@@ -575,7 +614,7 @@ void webu_process_action(struct webui_ctx *webui)
             }
 
 
-    } else if (!strcmp(webui->uri_cmd2,"start")){
+    } else if (!strcmp(webui->uri_cmd2,"start")) {
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
             do {
                 webui->cntlst[indx]->pause = 0;
@@ -583,7 +622,7 @@ void webu_process_action(struct webui_ctx *webui)
         } else {
             webui->cnt->pause = 0;
         }
-    } else if (!strcmp(webui->uri_cmd2,"pause")){
+    } else if (!strcmp(webui->uri_cmd2,"pause")) {
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
             do {
                 webui->cntlst[indx]->pause = 1;
@@ -592,14 +631,14 @@ void webu_process_action(struct webui_ctx *webui)
             webui->cnt->pause = 1;
         }
 
-    } else if (!strcmp(webui->uri_cmd2,"connection")){
+    } else if (!strcmp(webui->uri_cmd2,"connection")) {
         webu_text_connection(webui);
 
-    } else if (!strcmp(webui->uri_cmd2,"status")){
+    } else if (!strcmp(webui->uri_cmd2,"status")) {
         webu_text_status(webui);
 
     } else if ((!strcmp(webui->uri_cmd2,"write")) ||
-               (!strcmp(webui->uri_cmd2,"writeyes"))){
+               (!strcmp(webui->uri_cmd2,"writeyes"))) {
         conf_print(webui->cntlst);
 
     } else {
@@ -626,7 +665,7 @@ static int webu_process_config_set(struct webui_ctx *webui)
     snprintf(temp_name, WEBUI_LEN_PARM, "%s", webui->uri_parm1);
     indx=0;
     while (dep_config_params[indx].name != NULL) {
-        if (strcmp(dep_config_params[indx].name,webui->uri_parm1) == 0){
+        if (strcmp(dep_config_params[indx].name,webui->uri_parm1) == 0) {
             snprintf(temp_name, WEBUI_LEN_PARM, "%s", dep_config_params[indx].newname);
             break;
         }
@@ -643,14 +682,16 @@ static int webu_process_config_set(struct webui_ctx *webui)
             indx++;
             continue;
         }
-        if (!strcmp(temp_name, config_params[indx].param_name)) break;
+        if (!strcmp(temp_name, config_params[indx].param_name)) {
+            break;
+        }
         indx++;
     }
     /* If we found the parm, assign it.  If the loop above did not find the parm
      * then we ignore the request
      */
-    if (config_params[indx].param_name != NULL){
-        if (strlen(webui->uri_parm1) > 0){
+    if (config_params[indx].param_name != NULL) {
+        if (strlen(webui->uri_parm1) > 0) {
             /* This is legacy assumption on the pointers being sequential
              * We send in the original parm name so it will trigger the depreciated warnings
              * and perform any required transformations from old parm to new parm
@@ -660,14 +701,14 @@ static int webu_process_config_set(struct webui_ctx *webui)
 
             /*If we are updating vid parms, set the flag to update the device.*/
             if (!strcmp(config_params[indx].param_name, "vid_control_params") &&
-                (webui->cntlst[webui->thread_nbr]->vdev != NULL)){
+                (webui->cntlst[webui->thread_nbr]->vdev != NULL)) {
                 webui->cntlst[webui->thread_nbr]->vdev->update_params = TRUE;
             }
 
             /* If changing language, do it now */
-            if (!strcmp(config_params[indx].param_name, "native_language")){
+            if (!strcmp(config_params[indx].param_name, "native_language")) {
                 nls_enabled = webui->cntlst[webui->thread_nbr]->conf.native_language;
-                if (nls_enabled){
+                if (nls_enabled) {
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Native Language : on"));
                 } else {
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Native Language : off"));
@@ -773,20 +814,24 @@ static void webu_clientip(struct webui_ctx *webui)
     int is_ipv6;
 
     is_ipv6 = FALSE;
-    if (webui->cnt != NULL ){
-        if (webui->cnt->conf.webcontrol_ipv6) is_ipv6 = TRUE;
+    if (webui->cnt != NULL ) {
+        if (webui->cnt->conf.webcontrol_ipv6) {
+            is_ipv6 = TRUE;
+        }
     } else {
-        if (webui->cntlst[0]->conf.webcontrol_ipv6) is_ipv6 = TRUE;
+        if (webui->cntlst[0]->conf.webcontrol_ipv6) {
+            is_ipv6 = TRUE;
+        }
     }
 
     con_info = MHD_get_connection_info(webui->connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS);
-    if (is_ipv6){
+    if (is_ipv6) {
         con_socket6 = (struct sockaddr_in6 *)con_info->client_addr;
         ip_dst = inet_ntop(AF_INET6, &con_socket6->sin6_addr, client, WEBUI_LEN_URLI);
-        if (ip_dst == NULL){
+        if (ip_dst == NULL) {
             snprintf(webui->clientip, WEBUI_LEN_URLI, "%s", "Unknown");
         } else {
-            if (strncmp(client,"::ffff:",7) == 0){
+            if (strncmp(client,"::ffff:",7) == 0) {
                 snprintf(webui->clientip, WEBUI_LEN_URLI, "%s", client + 7);
             } else {
                 snprintf(webui->clientip, WEBUI_LEN_URLI, "%s", client);
@@ -795,7 +840,7 @@ static void webu_clientip(struct webui_ctx *webui)
     } else {
         con_socket4 = (struct sockaddr_in *)con_info->client_addr;
         ip_dst = inet_ntop(AF_INET, &con_socket4->sin_addr, client, WEBUI_LEN_URLI);
-        if (ip_dst == NULL){
+        if (ip_dst == NULL) {
             snprintf(webui->clientip, WEBUI_LEN_URLI, "%s", "Unknown");
         } else {
             snprintf(webui->clientip,WEBUI_LEN_URLI,"%s",client);
@@ -820,18 +865,18 @@ static void webu_hostname(struct webui_ctx *webui, int ctrl)
     int host_len;
 
     hdr = MHD_lookup_connection_value (webui->connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_HOST);
-    if (hdr != NULL){
+    if (hdr != NULL) {
         snprintf(webui->hostname, WEBUI_LEN_PARM, "%s", hdr);
         /* IPv6 addresses have :'s in them so special case them */
-        if (webui->hostname[0] == '['){
+        if (webui->hostname[0] == '[') {
             en_pos = strstr(webui->hostname, "]");
-            if (en_pos != NULL){
+            if (en_pos != NULL) {
                 host_len = en_pos - webui->hostname + 2;
                 snprintf(webui->hostname, host_len, "%s", hdr);
             }
         } else {
             en_pos = strstr(webui->hostname, ":");
-            if (en_pos != NULL){
+            if (en_pos != NULL) {
                 host_len = en_pos - webui->hostname + 1;
                 snprintf(webui->hostname, host_len, "%s", hdr);
             }
@@ -844,14 +889,14 @@ static void webu_hostname(struct webui_ctx *webui, int ctrl)
      * so we can use this protocol as we are building the html page or
      * streams.
      */
-    if (ctrl){
-        if (webui->cnt->conf.webcontrol_tls){
+    if (ctrl) {
+        if (webui->cnt->conf.webcontrol_tls) {
             snprintf(webui->hostproto,6,"%s","https");
         } else {
             snprintf(webui->hostproto,6,"%s","http");
         }
     } else {
-        if (webui->cnt->conf.stream_tls){
+        if (webui->cnt->conf.stream_tls) {
             snprintf(webui->hostproto,6,"%s","https");
         } else {
             snprintf(webui->hostproto,6,"%s","http");
@@ -872,7 +917,9 @@ static int webu_mhd_digest_fail(struct webui_ctx *webui,int signal_stale)
     response = MHD_create_response_from_buffer(strlen(webui->auth_denied)
         ,(void *)webui->auth_denied, MHD_RESPMEM_PERSISTENT);
 
-    if (response == NULL) return MHD_NO;
+    if (response == NULL) {
+        return MHD_NO;
+    }
 
     retcd = MHD_queue_auth_fail_response(webui->connection, webui->auth_realm
         ,webui->auth_opaque, response
@@ -898,13 +945,17 @@ static int webu_mhd_digest(struct webui_ctx *webui)
     }
 
     /* Check for valid user name */
-    if (strcmp(user, webui->auth_user) != 0){
+    if (strcmp(user, webui->auth_user) != 0) {
         MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
             ,_("Failed authentication from %s"), webui->clientip);
-        if (user != NULL) free(user);
+        if (user != NULL) {
+            free(user);
+        }
         return webu_mhd_digest_fail(webui, MHD_NO);
     }
-    if (user != NULL) free(user);
+    if (user != NULL) {
+        free(user);
+    }
 
     /* Check the password as well*/
     retcd = MHD_digest_auth_check(webui->connection, webui->auth_realm
@@ -935,7 +986,9 @@ static int webu_mhd_basic_fail(struct webui_ctx *webui)
     response = MHD_create_response_from_buffer(strlen(webui->auth_denied)
         ,(void *)webui->auth_denied, MHD_RESPMEM_PERSISTENT);
 
-    if (response == NULL) return MHD_NO;
+    if (response == NULL) {
+        return MHD_NO;
+    }
 
     retcd = MHD_queue_basic_auth_fail_response (webui->connection, webui->auth_realm, response);
 
@@ -954,23 +1007,34 @@ static int webu_mhd_basic(struct webui_ctx *webui)
     user = NULL;
 
     user = MHD_basic_auth_get_username_password (webui->connection, &pass);
-    if ((user == NULL) || (pass == NULL)){
-        if (user != NULL) free(user);
-        if (pass != NULL) free(pass);
+    if ((user == NULL) || (pass == NULL)) {
+        if (user != NULL) {
+            free(user);
+        }
+        if (pass != NULL) {
+            free(pass);
+        }
         return webu_mhd_basic_fail(webui);
     }
 
     if ((strcmp(user, webui->auth_user) != 0) || (strcmp(pass, webui->auth_pass) != 0)) {
         MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
             ,_("Failed authentication from %s"),webui->clientip);
-        if (user != NULL) free(user);
-        if (pass != NULL) free(pass);
-
+        if (user != NULL) {
+            free(user);
+        }
+        if (pass != NULL) {
+            free(pass);
+        }
         return webu_mhd_basic_fail(webui);
     }
 
-    if (user != NULL) free(user);
-    if (pass != NULL) free(pass);
+    if (user != NULL) {
+        free(user);
+    }
+    if (pass != NULL) {
+        free(pass);
+    }
 
     webui->authenticated = TRUE;
     return MHD_YES;
@@ -983,15 +1047,19 @@ static void webu_mhd_auth_parse(struct webui_ctx *webui, int ctrl)
     char *col_pos;
 
     /* Parse apart the user:pass provided*/
-    if (webui->auth_user != NULL) free(webui->auth_user);
-    if (webui->auth_pass != NULL) free(webui->auth_pass);
+    if (webui->auth_user != NULL) {
+        free(webui->auth_user);
+    }
+    if (webui->auth_pass != NULL) {
+        free(webui->auth_pass);
+    }
     webui->auth_user = NULL;
     webui->auth_pass = NULL;
 
     if (ctrl){
         auth_len = strlen(webui->cnt->conf.webcontrol_authentication);
         col_pos = strstr(webui->cnt->conf.webcontrol_authentication,":");
-        if (col_pos == NULL){
+        if (col_pos == NULL) {
             webui->auth_user = mymalloc(auth_len+1);
             webui->auth_pass = mymalloc(2);
             snprintf(webui->auth_user, auth_len + 1, "%s"
@@ -1007,7 +1075,7 @@ static void webu_mhd_auth_parse(struct webui_ctx *webui, int ctrl)
     } else {
         auth_len = strlen(webui->cnt->conf.stream_authentication);
         col_pos = strstr(webui->cnt->conf.stream_authentication,":");
-        if (col_pos == NULL){
+        if (col_pos == NULL) {
             webui->auth_user = mymalloc(auth_len+1);
             webui->auth_pass = mymalloc(2);
             snprintf(webui->auth_user, auth_len + 1, "%s"
@@ -1041,39 +1109,42 @@ static int webu_mhd_auth(struct webui_ctx *webui, int ctrl)
 
     snprintf(webui->auth_realm, WEBUI_LEN_PARM, "%s","Motion");
 
-    if (ctrl){
+    if (ctrl) {
         /* Authentication for the webcontrol*/
-        if (webui->cnt->conf.webcontrol_authentication == NULL){
+        if (webui->cnt->conf.webcontrol_authentication == NULL) {
             webui->authenticated = TRUE;
-            if (webui->cnt->conf.webcontrol_auth_method != 0){
+            if (webui->cnt->conf.webcontrol_auth_method != 0) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No webcontrol user:pass provided"));
             }
             return MHD_YES;
         }
 
-        if (webui->auth_user == NULL) webu_mhd_auth_parse(webui, ctrl);
-
-        if (webui->cnt->conf.webcontrol_auth_method == 1){
-            return webu_mhd_basic(webui);
-        } else if (webui->cnt->conf.webcontrol_auth_method == 2){
-            return webu_mhd_digest(webui);
+        if (webui->auth_user == NULL) {
+            webu_mhd_auth_parse(webui, ctrl);
         }
 
+        if (webui->cnt->conf.webcontrol_auth_method == 1) {
+            return webu_mhd_basic(webui);
+        } else if (webui->cnt->conf.webcontrol_auth_method == 2) {
+            return webu_mhd_digest(webui);
+        }
     } else {
         /* Authentication for the streams */
-        if (webui->cnt->conf.stream_authentication == NULL){
+        if (webui->cnt->conf.stream_authentication == NULL) {
             webui->authenticated = TRUE;
-            if (webui->cnt->conf.stream_auth_method != 0){
+            if (webui->cnt->conf.stream_auth_method != 0) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No stream user:pass provided"));
             }
             return MHD_YES;
         }
 
-        if (webui->auth_user == NULL) webu_mhd_auth_parse(webui, ctrl);
+        if (webui->auth_user == NULL) {
+            webu_mhd_auth_parse(webui, ctrl);
+        }
 
         if (webui->cnt->conf.stream_auth_method == 1) {
             return webu_mhd_basic(webui);
-        } else if (webui->cnt->conf.stream_auth_method == 2){
+        } else if (webui->cnt->conf.stream_auth_method == 2) {
             return webu_mhd_digest(webui);
         }
     }
@@ -1099,24 +1170,24 @@ static int webu_mhd_send(struct webui_ctx *webui, int ctrl)
 
     response = MHD_create_response_from_buffer (strlen(webui->resp_page)
         ,(void *)webui->resp_page, MHD_RESPMEM_PERSISTENT);
-    if (!response){
+    if (!response) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
 
-    if (webui->cnt != NULL){
-        if (ctrl){
-            if (webui->cnt->conf.webcontrol_cors_header != NULL){
+    if (webui->cnt != NULL) {
+        if (ctrl) {
+            if (webui->cnt->conf.webcontrol_cors_header != NULL) {
                 MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
                     , webui->cnt->conf.webcontrol_cors_header);
             }
-            if (webui->cnt->conf.webcontrol_interface == 1){
+            if (webui->cnt->conf.webcontrol_interface == 1) {
                 MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/plain;");
             } else {
                 MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
             }
         } else {
-            if (webui->cnt->conf.stream_cors_header != NULL){
+            if (webui->cnt->conf.stream_cors_header != NULL) {
                 MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
                     , webui->cnt->conf.stream_cors_header);
             }
@@ -1192,7 +1263,7 @@ static mymhd_retcd webu_answer_ctrl(void *cls
         return MHD_YES;
     }
 
-    if (strcmp (method, "GET") != 0){
+    if (strcmp (method, "GET") != 0) {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Invalid Method requested: %s"),method);
         return MHD_NO;
     }
@@ -1204,15 +1275,17 @@ static mymhd_retcd webu_answer_ctrl(void *cls
     webui->connection = connection;
 
     /* Throw bad URLS back to user*/
-    if ((webui->cnt ==  NULL) || (strlen(webui->url) == 0)){
+    if ((webui->cnt ==  NULL) || (strlen(webui->url) == 0)) {
         webu_badreq(webui);
         retcd = webu_mhd_send(webui, FALSE);
         return retcd;
     }
 
-    if (webui->cnt->webcontrol_finish) return MHD_NO;
+    if (webui->cnt->webcontrol_finish) {
+        return MHD_NO;
+    }
 
-    if (strlen(webui->clientip) == 0){
+    if (strlen(webui->clientip) == 0) {
         webu_clientip(webui);
     }
 
@@ -1220,7 +1293,9 @@ static mymhd_retcd webu_answer_ctrl(void *cls
 
     if (!webui->authenticated) {
         retcd = webu_mhd_auth(webui, TRUE);
-        if (!webui->authenticated) return retcd;
+        if (!webui->authenticated) {
+            return retcd;
+        }
     }
 
     if ((webui->cntlst[0]->conf.webcontrol_interface == 1) ||
@@ -1231,7 +1306,7 @@ static mymhd_retcd webu_answer_ctrl(void *cls
     }
 
     retcd = webu_mhd_send(webui, TRUE);
-    if (retcd == MHD_NO){
+    if (retcd == MHD_NO) {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed %d"),retcd);
     }
     return retcd;
@@ -1265,7 +1340,7 @@ static mymhd_retcd webu_answer_strm(void *cls
         return MHD_YES;
     }
 
-    if (strcmp (method, "GET") != 0){
+    if (strcmp (method, "GET") != 0) {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Invalid Method requested: %s"),method);
         return MHD_NO;
     }
@@ -1275,7 +1350,7 @@ static mymhd_retcd webu_answer_strm(void *cls
     webui->connection = connection;
 
     /* Throw bad URLS back to user*/
-    if ((webui->cnt ==  NULL) || (strlen(webui->url) == 0)){
+    if ((webui->cnt ==  NULL) || (strlen(webui->url) == 0)) {
         webu_badreq(webui);
         retcd = webu_mhd_send(webui, FALSE);
         return retcd;
@@ -1292,7 +1367,7 @@ static mymhd_retcd webu_answer_strm(void *cls
         return MHD_NO;
     }
 
-    if (strlen(webui->clientip) == 0){
+    if (strlen(webui->clientip) == 0) {
         webu_clientip(webui);
     }
 
@@ -1300,21 +1375,23 @@ static mymhd_retcd webu_answer_strm(void *cls
 
     if (!webui->authenticated) {
         retcd = webu_mhd_auth(webui, FALSE);
-        if (!webui->authenticated) return retcd;
+        if (!webui->authenticated) {
+            return retcd;
+        }
     }
 
     webu_answer_strm_type(webui);
 
     retcd = 0;
-    if (webui->cnct_type == WEBUI_CNCT_STATIC){
+    if (webui->cnct_type == WEBUI_CNCT_STATIC) {
         retcd = webu_stream_static(webui);
-        if (retcd == MHD_NO){
+        if (retcd == MHD_NO) {
             webu_badreq(webui);
             retcd = webu_mhd_send(webui, FALSE);
         }
     } else if (webui->cnct_type != WEBUI_CNCT_UNKNOWN) {
         retcd = webu_stream_mjpeg(webui);
-        if (retcd == MHD_NO){
+        if (retcd == MHD_NO) {
             webu_badreq(webui);
             retcd = webu_mhd_send(webui, FALSE);
         }
@@ -1323,7 +1400,7 @@ static mymhd_retcd webu_answer_strm(void *cls
         retcd = webu_mhd_send(webui, FALSE);
     }
 
-    if (retcd == MHD_NO){
+    if (retcd == MHD_NO) {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed %d"),retcd);
     }
     return retcd;
@@ -1362,7 +1439,7 @@ static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *co
     snprintf(webui->url,WEBUI_LEN_URLI,"%s",uri);
 
     retcd = webu_parseurl(webui);
-    if (retcd != 0){
+    if (retcd != 0) {
         webu_parseurl_reset(webui);
         memset(webui->url,'\0',WEBUI_LEN_URLI);
     }
@@ -1397,7 +1474,7 @@ static void *webu_mhd_init_one(void *cls, const char *uri, struct MHD_Connection
     snprintf(webui->url,WEBUI_LEN_URLI,"%s",uri);
 
     retcd = webu_parseurl(webui);
-    if (retcd != 0){
+    if (retcd != 0) {
         webu_parseurl_reset(webui);
         memset(webui->url,'\0',WEBUI_LEN_URLI);
     }
@@ -1420,27 +1497,27 @@ static void webu_mhd_deinit(void *cls
     (void)cls;
     (void)toe;
 
-    if (webui->cnct_type == WEBUI_CNCT_FULL ){
+    if (webui->cnct_type == WEBUI_CNCT_FULL ) {
         pthread_mutex_lock(&webui->cnt->mutex_stream);
             webui->cnt->stream_norm.cnct_count--;
         pthread_mutex_unlock(&webui->cnt->mutex_stream);
 
-    } else if (webui->cnct_type == WEBUI_CNCT_SUB ){
+    } else if (webui->cnct_type == WEBUI_CNCT_SUB ) {
         pthread_mutex_lock(&webui->cnt->mutex_stream);
             webui->cnt->stream_sub.cnct_count--;
         pthread_mutex_unlock(&webui->cnt->mutex_stream);
 
-    } else if (webui->cnct_type == WEBUI_CNCT_MOTION ){
+    } else if (webui->cnct_type == WEBUI_CNCT_MOTION ) {
         pthread_mutex_lock(&webui->cnt->mutex_stream);
             webui->cnt->stream_motion.cnct_count--;
         pthread_mutex_unlock(&webui->cnt->mutex_stream);
 
-    } else if (webui->cnct_type == WEBUI_CNCT_SOURCE ){
+    } else if (webui->cnct_type == WEBUI_CNCT_SOURCE ) {
         pthread_mutex_lock(&webui->cnt->mutex_stream);
             webui->cnt->stream_source.cnct_count--;
         pthread_mutex_unlock(&webui->cnt->mutex_stream);
 
-    } else if (webui->cnct_type == WEBUI_CNCT_STATIC ){
+    } else if (webui->cnct_type == WEBUI_CNCT_STATIC ) {
         pthread_mutex_lock(&webui->cnt->mutex_stream);
             webui->cnt->stream_norm.cnct_count--;
         pthread_mutex_unlock(&webui->cnt->mutex_stream);
@@ -1460,13 +1537,13 @@ static void webu_mhd_features_basic(struct mhdstart_ctx *mhdst)
     #else
         int retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_BASIC_AUTH);
-        if (retcd == MHD_YES){
+        if (retcd == MHD_YES) {
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: available"));
         } else {
-            if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method == 1)){
+            if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method == 1)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
                 mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method = 0;
-            } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method == 1)){
+            } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method == 1)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
                 mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method = 0;
             } else {
@@ -1484,13 +1561,13 @@ static void webu_mhd_features_digest(struct mhdstart_ctx *mhdst)
     #else
         int retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_DIGEST_AUTH);
-        if (retcd == MHD_YES){
+        if (retcd == MHD_YES) {
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: available"));
         } else {
-            if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method == 2)){
+            if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method == 2)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
                 mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method = 0;
-            } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method == 2)){
+            } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method == 2)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
                 mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method = 0;
             } else {
@@ -1507,18 +1584,22 @@ static void webu_mhd_features_ipv6(struct mhdstart_ctx *mhdst)
      * IPv4
      */
     #if MHD_VERSION < 0x00094400
-        if (mhdst->ipv6){
+        if (mhdst->ipv6) {
             MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old ipv6 disabled"));
-            if (mhdst->ipv6) mhdst->ipv6 = 0;
+            if (mhdst->ipv6) {
+                mhdst->ipv6 = 0;
+            }
         }
     #else
         int retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_IPv6);
-        if (retcd == MHD_YES){
+        if (retcd == MHD_YES) {
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("IPV6: available"));
         } else {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("IPV6: disabled"));
-            if (mhdst->ipv6) mhdst->ipv6 = 0;
+            if (mhdst->ipv6) {
+                mhdst->ipv6 = 0;
+            }
         }
     #endif
 }
@@ -1530,7 +1611,7 @@ static void webu_mhd_features_tls(struct mhdstart_ctx *mhdst)
      * support the ssl/tls request.
      */
     #if MHD_VERSION < 0x00094400
-        if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls)){
+        if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls)) {
             MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL/TLS disabled"));
             mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls = 0;
         } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls)) {
@@ -1540,13 +1621,13 @@ static void webu_mhd_features_tls(struct mhdstart_ctx *mhdst)
     #else
         int retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_SSL);
-        if (retcd == MHD_YES){
+        if (retcd == MHD_YES) {
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: available"));
         } else {
-            if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls)){
+            if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
                 mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls = 0;
-            } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls)){
+            } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
                 mhdst->cnt[mhdst->indxthrd]->conf.stream_tls = 0;
             } else {
@@ -1587,14 +1668,14 @@ static char *webu_mhd_loadfile(const char *fname)
         file_char = NULL;
     } else {
         infile = fopen(fname, "rb");
-        if (infile != NULL){
+        if (infile != NULL) {
             fseek(infile, 0, SEEK_END);
             file_size = ftell(infile);
-            if (file_size > 0 ){
+            if (file_size > 0 ) {
                 file_char = mymalloc(file_size +1);
                 fseek(infile, 0, SEEK_SET);
                 read_size = fread(file_char, file_size, 1, infile);
-                if (read_size > 0 ){
+                if (read_size > 0 ) {
                     file_char[file_size] = 0;
                 } else {
                     free(file_char);
@@ -1619,8 +1700,8 @@ static void webu_mhd_checktls(struct mhdstart_ctx *mhdst)
      * they also need to provide a certificate and key file.  If those are not provided
      * then we revise the configuration request for ssl/tls
      */
-    if (mhdst->ctrl){
-        if (mhdst->cnt[0]->conf.webcontrol_tls){
+    if (mhdst->ctrl) {
+        if (mhdst->cnt[0]->conf.webcontrol_tls) {
             if ((mhdst->cnt[0]->conf.webcontrol_cert == NULL) || (mhdst->tls_cert == NULL)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
@@ -1633,7 +1714,7 @@ static void webu_mhd_checktls(struct mhdstart_ctx *mhdst)
             }
         }
     } else {
-        if (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls){
+        if (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls) {
             if ((mhdst->cnt[0]->conf.webcontrol_cert == NULL) || (mhdst->tls_cert == NULL)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
@@ -1658,7 +1739,7 @@ static void webu_mhd_opts_init(struct mhdstart_ctx *mhdst)
      * each camera), then we call a different init function which only wants the single
      * motion context for that particular camera.
      */
-    if ((!mhdst->ctrl) && (mhdst->indxthrd != 0)){
+    if ((!mhdst->ctrl) && (mhdst->indxthrd != 0)) {
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_URI_LOG_CALLBACK;
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = (intptr_t)webu_mhd_init_one;
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = mhdst->cnt[mhdst->indxthrd];
@@ -1688,8 +1769,8 @@ static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst)
      * motion configuation option of localhost only.
      */
 
-    if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_localhost)){
-        if (mhdst->ipv6){
+    if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_localhost)) {
+        if (mhdst->ipv6) {
             memset(&mhdst->lpbk_ipv6, 0, sizeof(struct sockaddr_in6));
             mhdst->lpbk_ipv6.sin6_family = AF_INET6;
             mhdst->lpbk_ipv6.sin6_port = htons(mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_port);
@@ -1711,8 +1792,8 @@ static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst)
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = (struct sockaddr *)(&mhdst->lpbk_ipv4);
             mhdst->mhd_opt_nbr++;
         }
-    } else if((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_localhost)){
-        if (mhdst->ipv6){
+    } else if((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_localhost)) {
+        if (mhdst->ipv6) {
             memset(&mhdst->lpbk_ipv6, 0, sizeof(struct sockaddr_in6));
             mhdst->lpbk_ipv6.sin6_family = AF_INET6;
             mhdst->lpbk_ipv6.sin6_port = htons(mhdst->cnt[mhdst->indxthrd]->conf.stream_port);
@@ -1821,11 +1902,13 @@ static void webu_mhd_flags(struct mhdstart_ctx *mhdst)
     /* This sets the MHD startup flags based upon what user put into configuration */
     mhdst->mhd_flags = MHD_USE_THREAD_PER_CONNECTION;
 
-    if (mhdst->ipv6) mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_DUAL_STACK;
+    if (mhdst->ipv6) {
+        mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_DUAL_STACK;
+    }
 
-    if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls)){
+    if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls)) {
         mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_SSL;
-    } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls)){
+    } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls)) {
         mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_SSL;
     }
 
@@ -1858,7 +1941,7 @@ static void webu_start_ctrl(struct context **cnt)
         ,sizeof(cnt[0]->webcontrol_digest_rand),"%d",randnbr);
 
     cnt[0]->webcontrol_daemon = NULL;
-    if (cnt[0]->conf.webcontrol_port != 0 ){
+    if (cnt[0]->conf.webcontrol_port != 0 ) {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             ,_("Starting webcontrol on port %d")
             ,cnt[0]->conf.webcontrol_port);
@@ -1875,7 +1958,7 @@ static void webu_start_ctrl(struct context **cnt)
             ,MHD_OPTION_ARRAY, mhdst.mhd_ops
             ,MHD_OPTION_END);
         free(mhdst.mhd_ops);
-        if (cnt[0]->webcontrol_daemon == NULL){
+        if (cnt[0]->webcontrol_daemon == NULL) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Unable to start MHD"));
         } else {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
@@ -1884,8 +1967,12 @@ static void webu_start_ctrl(struct context **cnt)
         }
     }
 
-    if (mhdst.tls_cert != NULL) free(mhdst.tls_cert);
-    if (mhdst.tls_key  != NULL) free(mhdst.tls_key);
+    if (mhdst.tls_cert != NULL) {
+        free(mhdst.tls_cert);
+    }
+    if (mhdst.tls_key  != NULL) {
+        free(mhdst.tls_key);
+    }
 
     return;
 }
@@ -1894,10 +1981,10 @@ static void webu_strm_ntc(struct context **cnt, int indxthrd)
 {
     int indx;
 
-    if (indxthrd == 0 ){
+    if (indxthrd == 0 ) {
         if (cnt[1] != NULL) {
             indx = 1;
-            while (cnt[indx] != NULL){
+            while (cnt[indx] != NULL) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("Started camera %d stream on port/camera_id %d/%d")
                     ,cnt[indx]->camera_id
@@ -1940,10 +2027,10 @@ static void webu_start_strm(struct context **cnt)
     snprintf(cnt[0]->webstream_digest_rand
         ,sizeof(cnt[0]->webstream_digest_rand),"%d",randnbr);
 
-    while (cnt[mhdst.indxthrd] != NULL){
+    while (cnt[mhdst.indxthrd] != NULL) {
         cnt[mhdst.indxthrd]->webstream_daemon = NULL;
-        if (cnt[mhdst.indxthrd]->conf.stream_port != 0 ){
-            if (mhdst.indxthrd == 0){
+        if (cnt[mhdst.indxthrd]->conf.stream_port != 0 ) {
+            if (mhdst.indxthrd == 0) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("Starting all camera streams on port %d")
                     ,cnt[mhdst.indxthrd]->conf.stream_port);
@@ -1958,7 +2045,7 @@ static void webu_start_strm(struct context **cnt)
             webu_mhd_features(&mhdst);
             webu_mhd_opts(&mhdst);
             webu_mhd_flags(&mhdst);
-            if (mhdst.indxthrd == 0){
+            if (mhdst.indxthrd == 0) {
                 cnt[mhdst.indxthrd]->webstream_daemon = MHD_start_daemon (mhdst.mhd_flags
                     ,cnt[mhdst.indxthrd]->conf.stream_port
                     ,NULL, NULL
@@ -1974,7 +2061,7 @@ static void webu_start_strm(struct context **cnt)
                     ,MHD_OPTION_END);
             }
             free(mhdst.mhd_ops);
-            if (cnt[mhdst.indxthrd]->webstream_daemon == NULL){
+            if (cnt[mhdst.indxthrd]->webstream_daemon == NULL) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("Unable to start stream for camera %d")
                     ,cnt[mhdst.indxthrd]->camera_id);
@@ -1984,8 +2071,12 @@ static void webu_start_strm(struct context **cnt)
         }
         mhdst.indxthrd++;
     }
-    if (mhdst.tls_cert != NULL) free(mhdst.tls_cert);
-    if (mhdst.tls_key  != NULL) free(mhdst.tls_key);
+    if (mhdst.tls_cert != NULL) {
+        free(mhdst.tls_cert);
+    }
+    if (mhdst.tls_key  != NULL) {
+        free(mhdst.tls_key);
+    }
 
     return;
 }
@@ -1998,14 +2089,14 @@ static void webu_start_ports(struct context **cnt)
      */
     int indx, indx2;
 
-    if (cnt[0]->conf.webcontrol_port != 0){
+    if (cnt[0]->conf.webcontrol_port != 0) {
         indx = 0;
-        while (cnt[indx] != NULL){
-            if ((cnt[0]->conf.webcontrol_port == cnt[indx]->conf.webcontrol_port) && (indx > 0)){
+        while (cnt[indx] != NULL) {
+            if ((cnt[0]->conf.webcontrol_port == cnt[indx]->conf.webcontrol_port) && (indx > 0)) {
                 cnt[indx]->conf.webcontrol_port = 0;
             }
 
-            if (cnt[0]->conf.webcontrol_port == cnt[indx]->conf.stream_port){
+            if (cnt[0]->conf.webcontrol_port == cnt[indx]->conf.stream_port) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("Duplicate port requested %d")
                     ,cnt[indx]->conf.stream_port);
@@ -2018,12 +2109,12 @@ static void webu_start_ports(struct context **cnt)
 
     /* Now check on the stream ports */
     indx = 0;
-    while (cnt[indx] != NULL){
-        if (cnt[indx]->conf.stream_port != 0){
+    while (cnt[indx] != NULL) {
+        if (cnt[indx]->conf.stream_port != 0) {
             indx2 = indx + 1;
-            while (cnt[indx2] != NULL){
-                if (cnt[indx]->conf.stream_port == cnt[indx2]->conf.stream_port){
-                    if (indx != 0){
+            while (cnt[indx2] != NULL) {
+                if (cnt[indx]->conf.stream_port == cnt[indx2]->conf.stream_port) {
+                    if (indx != 0) {
                         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                             ,_("Duplicate port requested %d")
                             ,cnt[indx2]->conf.stream_port);
@@ -2044,15 +2135,15 @@ void webu_stop(struct context **cnt)
      */
     int indxthrd;
 
-    if (cnt[0]->webcontrol_daemon != NULL){
+    if (cnt[0]->webcontrol_daemon != NULL) {
         cnt[0]->webcontrol_finish = TRUE;
         MHD_stop_daemon (cnt[0]->webcontrol_daemon);
     }
 
 
     indxthrd = 0;
-    while (cnt[indxthrd] != NULL){
-        if (cnt[indxthrd]->webstream_daemon != NULL){
+    while (cnt[indxthrd] != NULL) {
+        if (cnt[indxthrd]->webstream_daemon != NULL) {
             cnt[indxthrd]->webcontrol_finish = TRUE;
             MHD_stop_daemon (cnt[indxthrd]->webstream_daemon);
         }
@@ -2080,7 +2171,7 @@ void webu_start(struct context **cnt)
 
 
     indxthrd = 0;
-    while (cnt[indxthrd] != NULL){
+    while (cnt[indxthrd] != NULL) {
         cnt[indxthrd]->webstream_daemon = NULL;
         cnt[indxthrd]->webcontrol_daemon = NULL;
         cnt[indxthrd]->webcontrol_finish = FALSE;

@@ -75,8 +75,9 @@ int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flag
     for (i = 0; 1; i++) {
         int res;
         /* #### Use DO_REALLOC?  */
-        if (i > bufsize - 1)
+        if (i > bufsize - 1) {
             *hdr = (char *)myrealloc(*hdr, (bufsize <<= 1), "");
+        }
 
         res = RBUF_READCHAR (netcam, *hdr + i);
 
@@ -100,8 +101,9 @@ int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flag
                         return HG_ERROR;
                     }
                     /* If the next character is HT or SP, just continue. */
-                    if (next == '\t' || next == ' ')
+                    if (next == '\t' || next == ' ') {
                         continue;
+                    }
                 }
 
                 /*
@@ -109,8 +111,9 @@ int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flag
                  * decrement I until it points to the last available
                  * whitespace.
                  */
-                while (i > 0 && isspace((*hdr)[i - 1]))
+                while (i > 0 && isspace((*hdr)[i - 1])) {
                     --i;
+                }
 
                 (*hdr)[i] = '\0';
                 break;
@@ -141,8 +144,9 @@ int header_process(const char *header, const char *name,
     while (*name && (tolower (*name) == tolower (*header)))
         ++name, ++header;
 
-    if (*name || *header++ != ':')
+    if (*name || *header++ != ':') {
         return 0;
+    }
 
     header += skip_lws (header);
     return ((*procfun) (header, arg));
@@ -161,12 +165,14 @@ int header_extract_number(const char *header, void *closure)
     const char *p = header;
     long result;
 
-    for (result = 0; isdigit (*p); p++)
+    for (result = 0; isdigit (*p); p++) {
         result = 10 * result + (*p - '0');
+    }
 
     /* Failure if no number present. */
-    if (p == header)
+    if (p == header) {
         return 0;
+    }
 
     /* Skip trailing whitespace. */
     p += skip_lws (p);
@@ -175,8 +181,9 @@ int header_extract_number(const char *header, void *closure)
     *(long *)closure = result;
 
     /* Indicate failure if trailing garbage is present. */
-    if (*p)
+    if (*p) {
         return 0;
+    }
 
     return 1;
 }
@@ -202,8 +209,9 @@ int skip_lws(const char *string)
 {
     const char *p = string;
 
-    while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n')
+    while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') {
         ++p;
+    }
 
     return p - string;
 }
@@ -243,10 +251,11 @@ void motion_base64_encode(const char *s, char *store, int length)
     }
 
     /* Pad the result if necessary... */
-    if (i == length + 1)
+    if (i == length + 1) {
         *(p - 1) = '=';
-    else if (i == length + 2)
+    } else if (i == length + 2) {
         *(p - 1) = *(p - 2) = '=';
+    }
 
     /* ...and zero-terminate it.  */
     *p = '\0';
@@ -273,11 +282,13 @@ int http_process_type(const char *hdr, void *arg)
     /* Locate P on `;' or the terminating zero, whichever comes first. */
     const char *p = strchr (hdr, ';');
 
-    if (!p)
+    if (!p) {
         p = hdr + strlen (hdr);
+    }
 
-    while (p > hdr && isspace (*(p - 1)))
+    while (p > hdr && isspace (*(p - 1))) {
         --p;
+    }
 
     *result = strdupdelim (hdr, p);
     return 1;
@@ -339,8 +350,9 @@ int rbuf_flush(netcam_context_ptr netcam, char *where, int maxsize)
     } else {
         int howmuch = MINVAL ((int)netcam->response->buffer_left, maxsize);
 
-        if (where)
+        if (where) {
             memcpy(where, netcam->response->buffer_pos, howmuch);
+        }
 
         netcam->response->buffer_left -= howmuch;
         netcam->response->buffer_pos += howmuch;
@@ -358,12 +370,14 @@ int http_result_code(const char *header)
     char *cptr;
 
     /* Assure the header starts out right. */
-    if (strncmp(header, "HTTP", 4))
+    if (strncmp(header, "HTTP", 4)) {
         return -1;
+    }
 
     /* Find the space following the HTTP/1.x */
-    if ((cptr = strchr(header+4, ' ')) == NULL)
+    if ((cptr = strchr(header+4, ' ')) == NULL)  {
         return -1;
+    }
 
     return atoi(cptr + 1);
 }
