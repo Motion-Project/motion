@@ -2798,7 +2798,10 @@ static struct context **copy_video_params(struct context **cnt, const char *conf
         return cnt;
     }
 
-    if (strcmp(dep_config_params[config_indx].name,"power_line_frequency") &&
+    if ((!strcmp(dep_config_params[config_indx].name,"brightness") ||
+         !strcmp(dep_config_params[config_indx].name,"contrast") ||
+         !strcmp(dep_config_params[config_indx].name,"saturation") ||
+         !strcmp(dep_config_params[config_indx].name,"hue")) &&
         (parmval == 0)) {
         return cnt;
     }
