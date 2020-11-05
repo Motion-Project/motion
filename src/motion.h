@@ -402,6 +402,10 @@ struct context {
     int diffs_last[THRESHOLD_TUNE_LENGTH];
     int smartmask_speed;
 
+    /* bktr and v4l2 params used for round robin */
+    int param_input;
+    long param_freq;
+    int param_norm;
 
     /* Commands to the motion thread */
     volatile unsigned int snapshot;    /* Make a snapshot */

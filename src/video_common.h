@@ -56,7 +56,7 @@ void vid_close(struct context *cnt);
 void vid_mutex_destroy(void);
 void vid_mutex_init(void);
 
-int vid_parms_parse(struct context *cnt);
+void vid_parms_parse(struct context *cnt);
 
 void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 void vid_yuv422pto420p(unsigned char *map, unsigned char *cap_map, int width, int height);
