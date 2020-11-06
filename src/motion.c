@@ -1038,7 +1038,7 @@ static void dbse_global_init(void)
         /* database_sqlite3 == NULL if not changed causes each thread to create their own
         * sqlite3 connection this will only happens when using a non-threaded sqlite version */
         cnt_list[0]->database_sqlite3=NULL;
-        if (cnt_list[0]->conf.database_type && ((!strcmp(cnt_list[0]->conf.database_type, "sqlite3")) && cnt_list[0]->conf.database_dbname)) {
+        if (cnt_list[0]->conf.database_type && ((mystreq(cnt_list[0]->conf.database_type, "sqlite3")) && cnt_list[0]->conf.database_dbname)) {
             MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
                 ,_("SQLite3 Database filename %s")
                 ,cnt_list[0]->conf.database_dbname);
@@ -1080,7 +1080,7 @@ static int dbse_init_mysql(struct context *cnt)
 
     #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
         int dbport;
-        if ((!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {
+        if ((mystreq(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {
             cnt->database_event_id = 0;
             cnt->database = mymalloc(sizeof(MYSQL));
             mysql_init(cnt->database);
@@ -1119,7 +1119,7 @@ static int dbse_init_sqlite3(struct context *cnt)
             MOTION_LOG(NTC, TYPE_DB, NO_ERRNO,_("SQLite3 using shared handle"));
             cnt->database_sqlite3 = cnt_list[0]->database_sqlite3;
 
-        } else if ((!strcmp(cnt->conf.database_type, "sqlite3")) && cnt->conf.database_dbname) {
+        } else if ((mystreq(cnt->conf.database_type, "sqlite3")) && cnt->conf.database_dbname) {
             MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
                 ,_("SQLite3 Database filename %s"), cnt->conf.database_dbname);
             if (sqlite3_open(cnt->conf.database_dbname, &cnt->database_sqlite3) != SQLITE_OK) {
@@ -1148,7 +1148,7 @@ static int dbse_init_sqlite3(struct context *cnt)
 static int dbse_init_pgsql(struct context *cnt)
 {
     #ifdef HAVE_PGSQL
-        if ((!strcmp(cnt->conf.database_type, "postgresql")) && (cnt->conf.database_dbname)) {
+        if ((mystreq(cnt->conf.database_type, "postgresql")) && (cnt->conf.database_dbname)) {
             char connstring[255];
 
             /*
@@ -1216,7 +1216,7 @@ static void dbse_deinit(struct context *cnt)
 {
     if (cnt->conf.database_type) {
         #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
-            if ( (!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {
+            if ( (mystreq(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {
                 mysql_thread_end();
                 mysql_close(cnt->database);
                 cnt->database_event_id = 0;
@@ -1224,14 +1224,14 @@ static void dbse_deinit(struct context *cnt)
         #endif /* HAVE_MYSQL HAVE_MARIADB */
 
         #ifdef HAVE_PGSQL
-                if ((!strcmp(cnt->conf.database_type, "postgresql")) && (cnt->conf.database_dbname)) {
+                if ((mystreq(cnt->conf.database_type, "postgresql")) && (cnt->conf.database_dbname)) {
                     PQfinish(cnt->database_pg);
                 }
         #endif /* HAVE_PGSQL */
 
         #ifdef HAVE_SQLITE3
                 /* Close the SQLite database */
-                if ((!strcmp(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
+                if ((mystreq(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
                     sqlite3_close(cnt->database_sqlite3);
                     cnt->database_sqlite3 = NULL;
                 }
@@ -1422,9 +1422,9 @@ static int motion_init(struct context *cnt)
     mot_stream_init(cnt);
 
     /* Set output picture type */
-    if (!strcmp(cnt->conf.picture_type, "ppm")) {
+    if (mystreq(cnt->conf.picture_type, "ppm")) {
         cnt->imgs.picture_type = IMAGE_TYPE_PPM;
-    } else if (!strcmp(cnt->conf.picture_type, "webp")) {
+    } else if (mystreq(cnt->conf.picture_type, "webp")) {
         #ifdef HAVE_WEBP
                 cnt->imgs.picture_type = IMAGE_TYPE_WEBP;
         #else
@@ -2787,30 +2787,30 @@ static void mlp_timelapse(struct context *cnt)
         if (timestamp_tm.tm_min == 0 &&
             (cnt->time_current_frame % 60 < cnt->time_last_frame % 60) &&
             cnt->shots == 0) {
-            if (strcasecmp(cnt->conf.timelapse_mode, "manual") == 0) {
+            if (mystrceq(cnt->conf.timelapse_mode, "manual")) {
                 ;/* No action */
 
             /* If we are daily, raise timelapseend event at midnight */
-            } else if (strcasecmp(cnt->conf.timelapse_mode, "daily") == 0) {
+            } else if (mystrceq(cnt->conf.timelapse_mode, "daily")) {
                 if (timestamp_tm.tm_hour == 0) {
                     event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
                 }
             /* handle the hourly case */
-            } else if (strcasecmp(cnt->conf.timelapse_mode, "hourly") == 0) {
+            } else if (mystrceq(cnt->conf.timelapse_mode, "hourly")) {
                 event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
 
             /* If we are weekly-sunday, raise timelapseend event at midnight on sunday */
-            } else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-sunday") == 0) {
+            } else if (mystrceq(cnt->conf.timelapse_mode, "weekly-sunday")) {
                 if (timestamp_tm.tm_wday == 0 && timestamp_tm.tm_hour == 0) {
                     event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
                 }
             /* If we are weekly-monday, raise timelapseend event at midnight on monday */
-            } else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-monday") == 0) {
+            } else if (mystrceq(cnt->conf.timelapse_mode, "weekly-monday")) {
                 if (timestamp_tm.tm_wday == 1 && timestamp_tm.tm_hour == 0) {
                     event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
                 }
             /* If we are monthly, raise timelapseend event at midnight on first day of month */
-            } else if (strcasecmp(cnt->conf.timelapse_mode, "monthly") == 0) {
+            } else if (mystrceq(cnt->conf.timelapse_mode, "monthly")) {
                 if (timestamp_tm.tm_mday == 1 && timestamp_tm.tm_hour == 0) {
                     event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
                 }
@@ -2888,33 +2888,33 @@ static void mlp_parmsupdate(struct context *cnt)
 
     init_text_scale(cnt);  /* Initialize and validate text_scale */
 
-    if (strcasecmp(cnt->conf.picture_output, "on") == 0) {
+    if (mystrceq(cnt->conf.picture_output, "on")) {
         cnt->new_img = NEWIMG_ON;
-    } else if (strcasecmp(cnt->conf.picture_output, "first") == 0) {
+    } else if (mystrceq(cnt->conf.picture_output, "first")) {
         cnt->new_img = NEWIMG_FIRST;
-    } else if (strcasecmp(cnt->conf.picture_output, "best") == 0) {
+    } else if (mystrceq(cnt->conf.picture_output, "best")) {
         cnt->new_img = NEWIMG_BEST;
-    } else if (strcasecmp(cnt->conf.picture_output, "center") == 0) {
+    } else if (mystrceq(cnt->conf.picture_output, "center")) {
         cnt->new_img = NEWIMG_CENTER;
     } else {
         cnt->new_img = NEWIMG_OFF;
     }
 
-    if (strcasecmp(cnt->conf.locate_motion_mode, "on") == 0) {
+    if (mystrceq(cnt->conf.locate_motion_mode, "on")) {
         cnt->locate_motion_mode = LOCATE_ON;
-    } else if (strcasecmp(cnt->conf.locate_motion_mode, "preview") == 0) {
+    } else if (mystrceq(cnt->conf.locate_motion_mode, "preview")) {
         cnt->locate_motion_mode = LOCATE_PREVIEW;
     } else {
         cnt->locate_motion_mode = LOCATE_OFF;
     }
 
-    if (strcasecmp(cnt->conf.locate_motion_style, "box") == 0) {
+    if (mystrceq(cnt->conf.locate_motion_style, "box")) {
         cnt->locate_motion_style = LOCATE_BOX;
-    } else if (strcasecmp(cnt->conf.locate_motion_style, "redbox") == 0) {
+    } else if (mystrceq(cnt->conf.locate_motion_style, "redbox")) {
         cnt->locate_motion_style = LOCATE_REDBOX;
-    } else if (strcasecmp(cnt->conf.locate_motion_style, "cross") == 0) {
+    } else if (mystrceq(cnt->conf.locate_motion_style, "cross")) {
         cnt->locate_motion_style = LOCATE_CROSS;
-    } else if (strcasecmp(cnt->conf.locate_motion_style, "redcross") == 0) {
+    } else if (mystrceq(cnt->conf.locate_motion_style, "redcross")) {
         cnt->locate_motion_style = LOCATE_REDCROSS;
     } else {
         cnt->locate_motion_style = LOCATE_BOX;
@@ -3464,7 +3464,7 @@ static void motion_start_thread(struct context *cnt)
     char service[6];
     pthread_attr_t thread_attr;
 
-    if (strcmp(cnt->conf_filename, "")) {
+    if (mystrne(cnt->conf_filename, "")) {
         cnt->conf_filename[sizeof(cnt->conf_filename) - 1] = '\0';
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Camera ID: %d is from %s")
             ,cnt->camera_id, cnt->conf_filename);
@@ -4652,7 +4652,7 @@ void util_parms_add_default(struct params_context *parameters
 
     dflt = TRUE;
     for (indx = 0; indx < parameters->params_count; indx++) {
-        if ( !strcmp(parameters->params_array[indx].param_name, parm_nm) ) {
+        if ( mystreq(parameters->params_array[indx].param_name, parm_nm) ) {
             dflt = FALSE;
         }
     }
@@ -4660,4 +4660,40 @@ void util_parms_add_default(struct params_context *parameters
         util_parms_add(parameters, parm_nm, parm_vl);
     }
 
+}
+
+/** Non case sensitive equality check for strings*/
+int mystrceq(const char *var1, const char *var2)
+{
+    if ((var1 == NULL) || (var2 == NULL)) {
+        return FALSE;
+    }
+    return (strcasecmp(var1,var2) ? FALSE : TRUE);
+}
+
+/** Non case sensitive inequality check for strings*/
+int mystrcne(const char *var1, const char *var2)
+{
+    if ((var1 == NULL) || (var2 == NULL)) {
+        return FALSE;
+    }
+    return (strcasecmp(var1,var2) ? TRUE : FALSE);
+}
+
+/** Case sensitive equality check for strings*/
+int mystreq(const char *var1, const char *var2)
+{
+    if ((var1 == NULL) || (var2 == NULL)) {
+        return FALSE;
+    }
+    return (strcmp(var1,var2) ? FALSE : TRUE);
+}
+
+/** Case sensitive inequality check for strings*/
+int mystrne(const char *var1, const char *var2)
+{
+    if ((var1 == NULL) ||(var2 == NULL)) {
+        return FALSE;
+    }
+    return (strcmp(var1,var2) ? TRUE : FALSE);
 }

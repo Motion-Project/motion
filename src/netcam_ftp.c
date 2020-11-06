@@ -991,7 +991,7 @@ int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url)
      * ownership" of the string away from the URL (i.e. it won't be freed
      * when we cleanup the url structure later).
      */
-    if (strcmp(url->path,"/")) {
+    if (mystrne(url->path,"/")) {
         netcam->ftp->path = mystrdup(url->path + 1);
     } else {
         netcam->ftp->path = mystrdup(url->path);

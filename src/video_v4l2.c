@@ -350,8 +350,8 @@ static int v4l2_parms_set(struct context *cnt, struct video_dev *curdev)
         devitem->ctrl_newval = devitem->ctrl_default;
         for (indx_user=0; indx_user<cnt->vdev->params_count; indx_user++) {
             usritem=&cnt->vdev->params_array[indx_user];
-            if ((!strcasecmp(devitem->ctrl_iddesc,usritem->param_name)) ||
-                (!strcasecmp(devitem->ctrl_name  ,usritem->param_name))) {
+            if ((mystrceq(devitem->ctrl_iddesc,usritem->param_name)) ||
+                (mystrceq(devitem->ctrl_name  ,usritem->param_name))) {
                 switch (devitem->ctrl_type) {
                 case V4L2_CTRL_TYPE_MENU:
                     /*FALLTHROUGH*/
@@ -419,16 +419,16 @@ static int v4l2_autobright(struct context *cnt, struct video_dev *curdev, int me
     for (indx = 0;indx < cnt->vdev->params_count; indx++) {
         usritem=&cnt->vdev->params_array[indx];
         if ((method == 1) &&
-            ((!strcasecmp(usritem->param_name,"brightness")) ||
-             (!strcasecmp(usritem->param_name,cid_bright)))) {
+            ((mystrceq(usritem->param_name,"brightness")) ||
+             (mystrceq(usritem->param_name,cid_bright)))) {
                target = atoi(usritem->param_value);
         } else if ((method == 2) &&
-            ((!strcasecmp(usritem->param_name,"exposure")) ||
-             (!strcasecmp(usritem->param_name,cid_exp)))) {
+            ((mystrceq(usritem->param_name,"exposure")) ||
+             (mystrceq(usritem->param_name,cid_exp)))) {
                target = atoi(usritem->param_value);
         } else if ((method == 3) &&
-            ((!strcasecmp(usritem->param_name,"exposure (absolute)")) ||
-             (!strcasecmp(usritem->param_name,cid_expabs)))) {
+            ((mystrceq(usritem->param_name,"exposure (absolute)")) ||
+             (mystrceq(usritem->param_name,cid_expabs)))) {
                target = atoi(usritem->param_value);
         }
     }
@@ -795,7 +795,7 @@ static int v4l2_pixfmt_select(struct context *cnt, struct video_dev *curdev)
 
     indx_palette = 17;
     for (indx = 0; indx < cnt->vdev->params_count; indx++) {
-        if ( !strcmp(cnt->vdev->params_array[indx].param_name, "palette")) {
+        if ( mystreq(cnt->vdev->params_array[indx].param_name, "palette")) {
             indx_palette = atoi(cnt->vdev->params_array[indx].param_value);
         };
     }
@@ -1459,7 +1459,7 @@ int v4l2_start(struct context *cnt)
         /* If device is already open and initialized use it*/
         curdev = video_devices;
         while (curdev) {
-            if (!strcmp(cnt->conf.video_device, curdev->video_device)) {
+            if (mystreq(cnt->conf.video_device, curdev->video_device)) {
                 v4l2_vdev_init(cnt);
 
                 vid_parms_parse(cnt);

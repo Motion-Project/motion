@@ -179,7 +179,7 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
     }
 
     #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
-        if (!strcmp(cnt->conf.database_type, "mysql")) {
+        if (mystreq(cnt->conf.database_type, "mysql")) {
             MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing mysql query"));
             if (mysql_query(cnt->database, sqlquery) != 0) {
                 int error_code = mysql_errno(cnt->database);
@@ -225,7 +225,7 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
 
 
     #ifdef HAVE_PGSQL
-        if (!strcmp(cnt->conf.database_type, "postgresql")) {
+        if (mystreq(cnt->conf.database_type, "postgresql")) {
             MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing postgresql query"));
             PGresult *res;
 
@@ -265,7 +265,7 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
     #endif /* HAVE_PGSQL */
 
     #ifdef HAVE_SQLITE3
-        if ((!strcmp(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
+        if ((mystreq(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
             int res;
             char *errmsg = 0;
             MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing sqlite query"));
@@ -610,7 +610,7 @@ static void event_image_snapshot(struct context *cnt,
         offset = len - 8;
     }
 
-    if (strcmp(cnt->conf.snapshot_filename+offset, "lastsnap")) {
+    if (mystrne(cnt->conf.snapshot_filename+offset, "lastsnap")) {
         char linkpath[PATH_MAX];
         const char *snappath;
         /*
@@ -993,11 +993,11 @@ static void event_ffmpeg_newfile(struct context *cnt,
       * different types of movies checking for crashes, warnings, etc.
      */
     codec = cnt->conf.movie_codec;
-    if (strcmp(codec, "ogg") == 0) {
+    if (mystreq(codec, "ogg")) {
         MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, _("The ogg container is no longer supported.  Changing to mpeg4"));
         codec = "mpeg4";
     }
-    if (strcmp(codec, "test") == 0) {
+    if (mystreq(codec, "test")) {
         MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("Running test of the various output formats."));
         codenbr = cnt->event_nr % 10;
         switch (codenbr) {
@@ -1078,7 +1078,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
         cnt->ffmpeg_output->base_pts = 0;
         cnt->ffmpeg_output->gop_cnt = 0;
         cnt->ffmpeg_output->codec_name = codec;
-        if (strcmp(cnt->conf.movie_codec, "test") == 0) {
+        if (mystreq(cnt->conf.movie_codec, "test")) {
             cnt->ffmpeg_output->test_mode = 1;
         } else {
             cnt->ffmpeg_output->test_mode = 0;
@@ -1114,7 +1114,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
         cnt->ffmpeg_output_motion->base_pts = 0;
         cnt->ffmpeg_output_motion->gop_cnt = 0;
         cnt->ffmpeg_output_motion->codec_name = codec;
-        if (strcmp(cnt->conf.movie_codec, "test") == 0) {
+        if (mystreq(cnt->conf.movie_codec, "test")) {
             cnt->ffmpeg_output_motion->test_mode = TRUE;
         } else {
             cnt->ffmpeg_output_motion->test_mode = FALSE;
@@ -1192,9 +1192,9 @@ static void event_ffmpeg_timelapse(struct context *cnt,
         cnt->ffmpeg_timelapse->passthrough = FALSE;
         cnt->ffmpeg_timelapse->rtsp_data = NULL;
 
-        if ((strcmp(cnt->conf.timelapse_codec,"mpg") == 0) ||
-            (strcmp(cnt->conf.timelapse_codec,"swf") == 0)) {
-            if (strcmp(cnt->conf.timelapse_codec,"swf") == 0) {
+        if ((mystreq(cnt->conf.timelapse_codec,"mpg")) ||
+            (mystreq(cnt->conf.timelapse_codec,"swf"))) {
+            if (mystreq(cnt->conf.timelapse_codec,"swf")) {
                 MOTION_LOG(WRN, TYPE_EVENTS, NO_ERRNO
                     ,_("The swf container for timelapse no longer supported.  Using mpg container."));
             }

@@ -158,7 +158,7 @@ static int netcam_check_close(char *header)
         return -1;
     }
 
-    if (!strcmp(type, "close")) { /* strcmp returns 0 for match. */
+    if (mystreq(type, "close")) {
         ret = 1;
     }
 
@@ -195,12 +195,12 @@ static int netcam_check_content_type(char *header)
 
     MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("Content-type %s"), content_type);
 
-    if (!strcmp(content_type, "image/jpeg")) {
+    if (mystreq(content_type, "image/jpeg")) {
         ret = 1;
-    } else if (!strcmp(content_type, "multipart/x-mixed-replace") ||
-               !strcmp(content_type, "multipart/mixed")) {
+    } else if (mystreq(content_type, "multipart/x-mixed-replace") ||
+               mystreq(content_type, "multipart/mixed")) {
         ret = 2;
-    } else if (!strcmp(content_type, "application/octet-stream")) {
+    } else if (mystreq(content_type, "application/octet-stream")) {
         ret = 3;
     } else {
         ret = 0;

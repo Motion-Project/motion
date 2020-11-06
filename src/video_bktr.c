@@ -355,16 +355,16 @@ static void bktr_picture_controls(struct context *cnt, struct video_dev *viddev)
 
     for (indx = 0;indx < cnt->vdev->params_count; indx++) {
         usritem=&cnt->vdev->params_array[indx];
-        if (!strcasecmp(usritem->param_name,"contrast")) {
+        if (mystreq(usritem->param_name,"contrast")) {
             bktr_set_contrast(dev,atoi(usritem->param_value));
         }
-        if (!strcasecmp(usritem->param_name,"hue")) {
+        if (mystreq(usritem->param_name,"hue")) {
             bktr_set_hue(dev,atoi(usritem->param_value));
         }
-        if (!strcasecmp(usritem->param_name,"brightness")) {
+        if (mystreq(usritem->param_name,"brightness")) {
             bktr_set_brightness(dev,atoi(usritem->param_value));
         }
-        if (!strcasecmp(usritem->param_name,"saturation")) {
+        if (mystreq(usritem->param_name,"saturation")) {
             bktr_set_saturation(dev,atoi(usritem->param_value));
         }
     }
@@ -705,7 +705,7 @@ void bktr_cleanup(struct context *cnt)
 
         struct video_dev *dev = viddevs;
         struct video_dev *prev = NULL;
-        
+
         /* Cleanup the v4l part */
         pthread_mutex_lock(&bktr_mutex);
 
@@ -855,7 +855,7 @@ int bktr_start(struct context *cnt)
         */
         dev = viddevs;
         while (dev) {
-            if (!strcmp(conf->video_device, dev->video_device)) {
+            if (mystreq(conf->video_device, dev->video_device)) {
                 int dummy = METEOR_CAP_STOP_CONT;
                 dev->usage_count++;
 

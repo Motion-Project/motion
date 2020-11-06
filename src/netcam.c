@@ -173,13 +173,13 @@ void netcam_url_parse(struct url_t *parse_url, const char *text_url)
     }
     if (((!parse_url->port) && (parse_url->service)) ||
         ((parse_url->port > 65535) && (parse_url->service))) {
-        if (!strcmp(parse_url->service, "http")) {
+        if (mystreq(parse_url->service, "http")) {
             parse_url->port = 80;
-        } else if (!strcmp(parse_url->service, "ftp")) {
+        } else if (mystreq(parse_url->service, "ftp")) {
             parse_url->port = 21;
-        } else if (!strcmp(parse_url->service, "rtmp")) {
+        } else if (mystreq(parse_url->service, "rtmp")) {
             parse_url->port = 1935;
-        } else if (!strcmp(parse_url->service, "rtsp")) {
+        } else if (mystreq(parse_url->service, "rtsp")) {
             parse_url->port = 554;
         }
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Using port number %d"),parse_url->port);
@@ -672,8 +672,8 @@ int netcam_start(struct context *cnt)
     util_parms_add_default(netcam->parameters,"tolerant_check","off"); /*false*/
 
     for (indx = 0; indx < netcam->parameters->params_count; indx++) {
-        if ( !strcmp(netcam->parameters->params_array[indx].param_name,"proxy") &&
-             strcmp(netcam->parameters->params_array[indx].param_name,"NULL")) {
+        if (mystreq(netcam->parameters->params_array[indx].param_name,"proxy") &&
+            mystrne(netcam->parameters->params_array[indx].param_value,"NULL")) {
             netcam_url_parse(&url, netcam->parameters->params_array[indx].param_value);
             if (!url.host) {
                 MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
@@ -709,7 +709,7 @@ int netcam_start(struct context *cnt)
         return -1;
     }
 
-    if ((!url.host) && (strcmp(url.service, "jpeg"))) {
+    if ((!url.host) && (mystrne(url.service, "jpeg"))) {
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("Invalid netcam_url for camera (%s)"), cnt->conf.camera_name);
         netcam_url_free(&url);
@@ -717,8 +717,8 @@ int netcam_start(struct context *cnt)
     }
 
     for (indx = 0; indx < netcam->parameters->params_count; indx++) {
-        if (!strcmp(netcam->parameters->params_array[indx].param_name,"proxy")) {
-            if (!strcmp(netcam->parameters->params_array[indx].param_name,"NULL")) {
+        if (mystreq(netcam->parameters->params_array[indx].param_name,"proxy")) {
+            if (mystreq(netcam->parameters->params_array[indx].param_value,"NULL")) {
                 netcam->connect_host = url.host;
                 url.host = NULL;
                 netcam->connect_port = url.port;
@@ -728,16 +728,16 @@ int netcam_start(struct context *cnt)
             }
         }
 
-        if (!strcmp(netcam->parameters->params_array[indx].param_name,"keepalive")) {
-            if (!strcmp(netcam->parameters->params_array[indx].param_value,"force")) {
+        if (mystreq(netcam->parameters->params_array[indx].param_name,"keepalive")) {
+            if (mystreq(netcam->parameters->params_array[indx].param_value,"force")) {
                 netcam->connect_http_10   = TRUE;
                 netcam->connect_http_11   = FALSE;
                 netcam->connect_keepalive = TRUE;
-            } else if (!strcmp(netcam->parameters->params_array[indx].param_value,"off")) {
+            } else if (mystreq(netcam->parameters->params_array[indx].param_value,"off")) {
                 netcam->connect_http_10   = TRUE;
                 netcam->connect_http_11   = FALSE;
                 netcam->connect_keepalive = FALSE;
-            } else if (!strcmp(netcam->parameters->params_array[indx].param_value,"on")) {
+            } else if (mystreq(netcam->parameters->params_array[indx].param_value,"on")) {
                 netcam->connect_http_10   = FALSE;
                 netcam->connect_http_11   = TRUE;
                 netcam->connect_keepalive = TRUE; /* HTTP 1.1 has keepalive by default. */
@@ -749,8 +749,8 @@ int netcam_start(struct context *cnt)
                 ,netcam->connect_keepalive ? "ON":"OFF");
         }
 
-        if (!strcmp(netcam->parameters->params_array[indx].param_name,"tolerant_check")) {
-            if (!strcmp(netcam->parameters->params_array[indx].param_value,"off")) {
+        if (mystreq(netcam->parameters->params_array[indx].param_name,"tolerant_check")) {
+            if (mystreq(netcam->parameters->params_array[indx].param_value,"off")) {
                 netcam->netcam_tolerant_check = FALSE;
             } else {
                 netcam->netcam_tolerant_check = TRUE;
@@ -763,16 +763,16 @@ int netcam_start(struct context *cnt)
     /* Initialise the netcam socket to -1 to trigger a connection by the keep-alive logic. */
     netcam->sock = -1;
 
-    if ((url.service) && (!strcmp(url.service, "http"))) {
+    if ((url.service) && (mystreq(url.service, "http"))) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("now calling netcam_setup_html()"));
         retval = netcam_setup_html(netcam, &url);
-    } else if ((url.service) && (!strcmp(url.service, "ftp"))) {
+    } else if ((url.service) && (mystreq(url.service, "ftp"))) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("now calling netcam_setup_ftp"));
         retval = netcam_setup_ftp(netcam, &url);
-    } else if ((url.service) && (!strcmp(url.service, "jpeg"))) {
+    } else if ((url.service) && (mystreq(url.service, "jpeg"))) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("now calling netcam_setup_file()"));
         retval = netcam_setup_file(netcam, &url);
-    } else if ((url.service) && (!strcmp(url.service, "mjpg"))) {
+    } else if ((url.service) && (mystreq(url.service, "mjpg"))) {
         retval = netcam_setup_mjpg(netcam, &url);
     } else {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO

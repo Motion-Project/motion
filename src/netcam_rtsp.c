@@ -445,9 +445,9 @@ static int netcam_rtsp_decode_video(struct rtsp_context *rtsp_data)
             return -1;
         }
 
-        if (!strcasecmp(rtsp_data->decoder_nm,"vaapi")) {
+        if (mystrceq(rtsp_data->decoder_nm,"vaapi")) {
             retcd = netcam_decode_vaapi(rtsp_data);
-        } else if (!strcasecmp(rtsp_data->decoder_nm,"cuda")) {
+        } else if (mystrceq(rtsp_data->decoder_nm,"cuda")) {
             retcd = netcam_decode_cuda(rtsp_data);
         } else {
             retcd = netcam_decode_sw(rtsp_data);
@@ -463,9 +463,9 @@ static int netcam_rtsp_decode_video(struct rtsp_context *rtsp_data)
             return 0;   /* This just speeds up the shutdown time */
         }
 
-        if (!strcasecmp(rtsp_data->decoder_nm,"vaapi")) {
+        if (mystrceq(rtsp_data->decoder_nm,"vaapi")) {
             retcd = netcam_decode_vaapi(rtsp_data);
-        } else if (!strcasecmp(rtsp_data->decoder_nm,"cuda")) {
+        } else if (mystrceq(rtsp_data->decoder_nm,"cuda")) {
             retcd = netcam_decode_cuda(rtsp_data);
         } else {
             retcd = netcam_decode_sw(rtsp_data);
@@ -548,7 +548,7 @@ static void netcam_hwdecoders(struct rtsp_context *rtsp_data)
 
         return;
     #else
-        if (strcasecmp(rtsp_data->decoder_nm,"NULL")) {
+        if (mystrcne(rtsp_data->decoder_nm,"NULL")) {
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: netcam_decoder %s disabled.")
                 , rtsp_data->cameratype, rtsp_data->decoder_nm);
@@ -622,7 +622,7 @@ static void netcam_rtsp_decoder_error(struct rtsp_context *rtsp_data, int retcd,
         }
     }
 
-    if (strcasecmp(rtsp_data->decoder_nm,"NULL")) {
+    if (mystrcne(rtsp_data->decoder_nm,"NULL")) {
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("%s: Decoder %s did not work.")
             ,rtsp_data->cameratype, rtsp_data->decoder_nm);
@@ -631,7 +631,7 @@ static void netcam_rtsp_decoder_error(struct rtsp_context *rtsp_data, int retcd,
             ,rtsp_data->cameratype, rtsp_data->decoder_nm);
 
         for (indx = 0; indx < rtsp_data->parameters->params_count; indx++) {
-            if ( !strcmp(rtsp_data->parameters->params_array[indx].param_name,"decoder") ) {
+            if ( mystreq(rtsp_data->parameters->params_array[indx].param_name,"decoder") ) {
                 free(rtsp_data->parameters->params_array[indx].param_value);
                 rtsp_data->parameters->params_array[indx].param_value = mymalloc(5);
                 snprintf(rtsp_data->decoder_nm, 5, "%s","NULL");
@@ -762,7 +762,7 @@ static int netcam_init_swdecoder(struct rtsp_context *rtsp_data)
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("%s: Initializing decoder"),rtsp_data->cameratype);
 
-        if (strcasecmp(rtsp_data->decoder_nm,"NULL")) {
+        if (mystrcne(rtsp_data->decoder_nm,"NULL")) {
             rtsp_data->decoder = avcodec_find_decoder_by_name(rtsp_data->decoder_nm);
             if (rtsp_data->decoder == NULL) {
                 netcam_rtsp_decoder_error(rtsp_data, 0, "avcodec_find_decoder_by_name");
@@ -835,9 +835,9 @@ static int netcam_rtsp_open_codec(struct rtsp_context *rtsp_data)
         rtsp_data->video_stream_index = retcd;
         rtsp_data->strm = rtsp_data->format_context->streams[rtsp_data->video_stream_index];
 
-        if (!strcasecmp(rtsp_data->decoder_nm,"vaapi")) {
+        if (mystrceq(rtsp_data->decoder_nm,"vaapi")) {
             retcd = netcam_init_vaapi(rtsp_data);
-        } else if (!strcasecmp(rtsp_data->decoder_nm,"cuda")){
+        } else if (mystrceq(rtsp_data->decoder_nm,"cuda")){
             retcd = netcam_init_cuda(rtsp_data);
         } else {
             retcd = netcam_init_swdecoder(rtsp_data);
@@ -878,9 +878,9 @@ static int netcam_rtsp_open_codec(struct rtsp_context *rtsp_data)
         rtsp_data->strm = rtsp_data->format_context->streams[rtsp_data->video_stream_index];
 
         /* This is currently always true for older ffmpeg until it is built */
-        if (!strcasecmp(rtsp_data->decoder_nm,"vaapi")) {
+        if (mystrceq(rtsp_data->decoder_nm,"vaapi")) {
             retcd = netcam_init_vaapi(rtsp_data);
-        } else if (!strcasecmp(rtsp_data->decoder_nm,"cuda")){
+        } else if (mystrceq(rtsp_data->decoder_nm,"cuda")){
             retcd = netcam_init_cuda(rtsp_data);
         } else {
             retcd = netcam_init_swdecoder(rtsp_data);
@@ -1353,8 +1353,8 @@ static void netcam_rtsp_set_options(struct rtsp_context *rtsp_data)
 
     /* Write the options to the context, while skipping the Motion ones */
     for (indx = 0; indx < rtsp_data->parameters->params_count; indx++) {
-        if (strcmp(rtsp_data->parameters->params_array[indx].param_name,"decoder") &&
-            strcmp(rtsp_data->parameters->params_array[indx].param_name,"capture_rate")) {
+        if (mystrne(rtsp_data->parameters->params_array[indx].param_name,"decoder") &&
+            mystrne(rtsp_data->parameters->params_array[indx].param_name,"capture_rate")) {
             av_dict_set(&rtsp_data->opts
                 , rtsp_data->parameters->params_array[indx].param_name
                 , rtsp_data->parameters->params_array[indx].param_value
@@ -1393,18 +1393,18 @@ static void netcam_rtsp_set_path (struct context *cnt, struct rtsp_context *rtsp
         userpass = mystrdup(url.userpass);
     }
 
-    if (strcmp(url.service, "v4l2") == 0) {
+    if (mystreq(url.service, "v4l2")) {
         rtsp_data->path = mymalloc(strlen(url.path) + 1);
         sprintf(rtsp_data->path, "%s",url.path);
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("Setting up v4l2 via ffmpeg netcam"));
-    } else if (strcmp(url.service, "file") == 0) {
+    } else if (mystreq(url.service, "file")) {
         rtsp_data->path = mymalloc(strlen(url.path) + 1);
         sprintf(rtsp_data->path, "%s",url.path);
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("Setting up file via ffmpeg netcam"));
     } else {
-        if (!strcmp(url.service, "mjpeg")) {
+        if (mystreq(url.service, "mjpeg")) {
             sprintf(url.service, "%s","http");
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("Setting up http via ffmpeg netcam"));
@@ -1480,14 +1480,14 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
 
     rtsp_data->capture_rate = -1;
     for (indx = 0; indx < rtsp_data->parameters->params_count; indx++) {
-        if ( !strcmp(rtsp_data->parameters->params_array[indx].param_name,"decoder")) {
+        if ( mystreq(rtsp_data->parameters->params_array[indx].param_name,"decoder")) {
             val_len = strlen(rtsp_data->parameters->params_array[indx].param_value) + 1;
             rtsp_data->decoder_nm = mymalloc(val_len);
             snprintf(rtsp_data->decoder_nm, val_len
                 , "%s",rtsp_data->parameters->params_array[indx].param_value);
         }
 
-        if ( !strcmp(rtsp_data->parameters->params_array[indx].param_name,"capture_rate")) {
+        if ( mystreq(rtsp_data->parameters->params_array[indx].param_name,"capture_rate")) {
             rtsp_data->capture_rate = atoi(rtsp_data->parameters->params_array[indx].param_value);
         }
 
