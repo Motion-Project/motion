@@ -145,7 +145,7 @@ static void v4l2_vdev_free(struct context *cnt)
     }
 }
 
-static int v4l2_vdev_init(struct context *cnt)
+static void v4l2_vdev_init(struct context *cnt)
 {
 
     /* Create the v4l2 context within the main thread context  */
@@ -155,7 +155,7 @@ static int v4l2_vdev_init(struct context *cnt)
     cnt->vdev->params_count = 0;
     cnt->vdev->update_params = TRUE;     /*Set trigger that we have updated user parameters */
 
-    return 0;
+    return;
 
 }
 
@@ -528,25 +528,16 @@ static int v4l2_input_select(struct context *cnt, struct video_dev *curdev)
     /* Set the input number for the device if applicable */
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     struct v4l2_input    input;
-    int indx, tmpinp;
 
-    tmpinp = -1;
-    for (indx = 0;indx < cnt->vdev->params_count; indx++) {
-        if ( !strcmp(cnt->vdev->params_array[indx].param_name,"input")) {
-            tmpinp = atoi(cnt->vdev->params_array[indx].param_value);
-            break;
-        }
-    }
-
-    if ((tmpinp == curdev->input) && (!curdev->starting)) {
+    if ((cnt->param_input == curdev->input) && (!curdev->starting)) {
         return 0;
     }
 
     memset(&input, 0, sizeof (struct v4l2_input));
-    if (tmpinp == -1 ) {
+    if (cnt->param_input == -1 ) {
         input.index = 0;
     } else {
-        input.index = tmpinp;
+        input.index = cnt->param_input;
     }
 
     if (xioctl(vid_source, VIDIOC_ENUMINPUT, &input) == -1) {
@@ -578,7 +569,7 @@ static int v4l2_input_select(struct context *cnt, struct video_dev *curdev)
         return -1;
     }
 
-    curdev->input        = tmpinp;
+    curdev->input        = cnt->param_input;
     curdev->device_type  = input.type;
     curdev->device_tuner = input.tuner;
 
@@ -592,17 +583,8 @@ static int v4l2_norm_select(struct context *cnt, struct video_dev *curdev)
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     struct v4l2_standard standard;
     v4l2_std_id std_id;
-    int norm, indx;
 
-    norm = 0;
-    for (indx = 0;indx < cnt->vdev->params_count; indx++) {
-        if ( !strcmp(cnt->vdev->params_array[indx].param_name,"norm")) {
-            norm = atoi(cnt->vdev->params_array[indx].param_value);
-            break;
-        }
-    }
-
-    if ((norm == curdev->norm) && (!curdev->starting)) {
+    if ((cnt->param_norm == curdev->norm) && (!curdev->starting)) {
         return 0;
     }
 
@@ -611,7 +593,7 @@ static int v4l2_norm_select(struct context *cnt, struct video_dev *curdev)
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 ,_("Device does not support specifying PAL/NTSC norm"));
         }
-        norm = std_id = 0;    // V4L2_STD_UNKNOWN = 0
+        cnt->param_norm = std_id = 0;    // V4L2_STD_UNKNOWN = 0
     }
 
     if (std_id) {
@@ -626,7 +608,7 @@ static int v4l2_norm_select(struct context *cnt, struct video_dev *curdev)
             standard.index++;
         }
 
-        switch (norm) {
+        switch (cnt->param_norm) {
         case 1:
             std_id = V4L2_STD_NTSC;
             break;
@@ -654,7 +636,7 @@ static int v4l2_norm_select(struct context *cnt, struct video_dev *curdev)
         }
     }
 
-    curdev->norm = norm;
+    curdev->norm = cnt->param_norm;
 
     return 0;
 }
@@ -666,18 +648,8 @@ static int v4l2_frequency_select(struct context *cnt, struct video_dev *curdev)
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     struct v4l2_tuner     tuner;
     struct v4l2_frequency freq;
-    int indx;
-    long usrfreq;
 
-    usrfreq = 0;
-    for (indx = 0;indx < cnt->vdev->params_count; indx++) {
-        if ( !strcmp(cnt->vdev->params_array[indx].param_name,"frequency")) {
-            usrfreq = atol(cnt->vdev->params_array[indx].param_value);
-            break;
-        }
-    }
-
-    if ((usrfreq == curdev->frequency) && (!curdev->starting)) {
+    if ((cnt->param_freq == curdev->frequency) && (!curdev->starting)) {
         return 0;
     }
 
@@ -701,7 +673,7 @@ static int v4l2_frequency_select(struct context *cnt, struct video_dev *curdev)
         memset(&freq, 0, sizeof(struct v4l2_frequency));
         freq.tuner = curdev->device_tuner;
         freq.type = V4L2_TUNER_ANALOG_TV;
-        freq.frequency = (usrfreq / 1000) * 16;
+        freq.frequency = (cnt->param_freq / 1000) * 16;
 
         if (xioctl(vid_source, VIDIOC_S_FREQUENCY, &freq) == -1) {
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
@@ -714,7 +686,7 @@ static int v4l2_frequency_select(struct context *cnt, struct video_dev *curdev)
         }
     }
 
-    curdev->frequency = usrfreq;
+    curdev->frequency = cnt->param_freq;
 
     return 0;
 }
@@ -1178,7 +1150,6 @@ static int v4l2_device_init(struct context *cnt, struct video_dev *curdev)
 {
 
     src_v4l2_t *vid_source;
-    int indx;
 
     /* Allocate memory for the state structure. */
     if (!(vid_source = calloc(sizeof(src_v4l2_t), 1))) {
@@ -1191,19 +1162,9 @@ static int v4l2_device_init(struct context *cnt, struct video_dev *curdev)
     pthread_mutex_init(&curdev->mutex, &curdev->attr);
 
     curdev->usage_count = 1;
-
-    for (indx = 0; indx < cnt->vdev->params_count; indx++) {
-        if ( !strcmp(cnt->vdev->params_array[indx].param_name, "input")) {
-            curdev->input = atoi(cnt->vdev->params_array[indx].param_value);
-        }
-        if ( !strcmp(cnt->vdev->params_array[indx].param_name, "norm")) {
-            curdev->norm = atoi(cnt->vdev->params_array[indx].param_value);
-        }
-        if ( !strcmp(cnt->vdev->params_array[indx].param_name, "frequency")) {
-            curdev->frequency = atol(cnt->vdev->params_array[indx].param_value);
-        }
-    }
-
+    curdev->input = cnt->param_input;
+    curdev->norm = cnt->param_norm;
+    curdev->frequency = cnt->param_freq;
     curdev->height = cnt->conf.height;
     curdev->width = cnt->conf.width;
 
@@ -1233,20 +1194,14 @@ static void v4l2_device_select(struct context *cnt, struct video_dev *curdev, un
         return;
     }
 
-    newvals = FALSE;
-    for (indx = 0; indx < cnt->vdev->params_count; indx++) {
-        if (!strcmp(cnt->vdev->params_array[indx].param_name, "input") &&
-            atoi(cnt->vdev->params_array[indx].param_value) != curdev->input) {
-            newvals = TRUE;
-        }
-        if (!strcmp(cnt->vdev->params_array[indx].param_name, "norm") &&
-            atoi(cnt->vdev->params_array[indx].param_value) != curdev->norm) {
-            newvals = TRUE;
-        }
-        if (!strcmp(cnt->vdev->params_array[indx].param_name, "frequency") &&
-            atol(cnt->vdev->params_array[indx].param_value) != curdev->frequency) {
-            newvals = TRUE;
-        }
+    vid_parms_parse(cnt);
+
+    if ((cnt->param_input != curdev->input) ||
+        (cnt->param_norm != curdev->norm) ||
+        (cnt->param_freq != curdev->frequency)) {
+        newvals = TRUE;
+    } else {
+        newvals = FALSE;
     }
 
     if (newvals) {
@@ -1256,9 +1211,6 @@ static void v4l2_device_select(struct context *cnt, struct video_dev *curdev, un
         }
         if (retcd == 0) {
             retcd = v4l2_frequency_select(cnt, curdev);
-        }
-        if (retcd == 0) {
-            retcd = vid_parms_parse(cnt);
         }
         if (retcd == 0) {
             retcd = v4l2_parms_set(cnt, curdev);
@@ -1286,10 +1238,7 @@ static void v4l2_device_select(struct context *cnt, struct video_dev *curdev, un
 
     } else {
         /* No round robin - we only adjust picture controls */
-        retcd = vid_parms_parse(cnt);
-        if (retcd == 0) {
-            retcd = v4l2_parms_set(cnt, curdev);
-        }
+        retcd = v4l2_parms_set(cnt, curdev);
         if (retcd == 0) {
             retcd = v4l2_autobright(cnt, curdev, cnt->conf.auto_brightness);
         }
@@ -1306,19 +1255,12 @@ static void v4l2_device_select(struct context *cnt, struct video_dev *curdev, un
 static int v4l2_device_open(struct context *cnt, struct video_dev *curdev)
 {
 
-    int fd_device, indx, usrinp;
+    int fd_device;
     /* Open the video device */
-
-    usrinp = -1;
-    for (indx = 0; indx < cnt->vdev->params_count; indx++) {
-        if ( !strcmp(cnt->vdev->params_array[indx].param_name, "input")) {
-            usrinp = atoi(cnt->vdev->params_array[indx].param_value);
-        }
-    }
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         ,_("Using videodevice %s and input %d")
-        ,cnt->conf.video_device, usrinp);
+        ,cnt->conf.video_device, cnt->param_input);
 
     /* Give the watchdog more time for this open function */
     cnt->watchdog = (WATCHDOG_TMO * 2);
@@ -1518,13 +1460,12 @@ int v4l2_start(struct context *cnt)
         curdev = video_devices;
         while (curdev) {
             if (!strcmp(cnt->conf.video_device, curdev->video_device)) {
-                retcd = v4l2_vdev_init(cnt);
-                if (retcd == 0) {
-                    retcd = vid_parms_parse(cnt);
-                }
-                if (retcd == 0) {
-                    retcd = v4l2_imgs_set(cnt, curdev);
-                }
+                v4l2_vdev_init(cnt);
+
+                vid_parms_parse(cnt);
+
+                retcd = v4l2_imgs_set(cnt, curdev);
+
                 if (retcd == 0) {
                     curdev->usage_count++;
                     retcd = curdev->fd_device;
@@ -1539,13 +1480,11 @@ int v4l2_start(struct context *cnt)
 
         curdev->starting = TRUE;
 
-        retcd = v4l2_vdev_init(cnt);
-        if (retcd == 0) {
-            retcd = vid_parms_parse(cnt);
-        }
-        if (retcd == 0) {
-            retcd = v4l2_device_init(cnt, curdev);
-        }
+        v4l2_vdev_init(cnt);
+
+        vid_parms_parse(cnt);
+
+        retcd = v4l2_device_init(cnt, curdev);
         if (retcd == 0) {
             retcd = v4l2_device_open(cnt, curdev);
         }

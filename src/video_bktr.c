@@ -344,40 +344,37 @@ static void bktr_picture_controls(struct context *cnt, struct video_dev *viddev)
 {
 
     int dev = viddev->fd_device;
-    int indx_user, retcd;
-    struct vdev_usrctrl_ctx *usritem;
+    int indx;
+    struct params_item_ctx *usritem;
 
-    if (!cnt->vdev->update_parms) {
+    if (!cnt->vdev->update_params) {
         return;
     }
 
-    retcd = vid_parms_parse(cnt);
-    if (retcd < 0) {
-        return;
-    }
+    vid_parms_parse(cnt);
 
-    for (indx_user=0; indx_user<cnt->vdev->usrctrl_count; indx_user++) {
-        usritem=&cnt->vdev->usrctrl_array[indx_user];
-        if (!strcasecmp(usritem->ctrl_name,"contrast")) {
-            bktr_set_contrast(dev,usritem->ctrl_value);
+    for (indx = 0;indx < cnt->vdev->params_count; indx++) {
+        usritem=&cnt->vdev->params_array[indx];
+        if (!strcasecmp(usritem->param_name,"contrast")) {
+            bktr_set_contrast(dev,atoi(usritem->param_value));
         }
-        if (!strcasecmp(usritem->ctrl_name,"hue")) {
-            bktr_set_hue(dev,usritem->ctrl_value);
+        if (!strcasecmp(usritem->param_name,"hue")) {
+            bktr_set_hue(dev,atoi(usritem->param_value));
         }
-        if (!strcasecmp(usritem->ctrl_name,"brightness")) {
-            bktr_set_brightness(dev,usritem->ctrl_value);
+        if (!strcasecmp(usritem->param_name,"brightness")) {
+            bktr_set_brightness(dev,atoi(usritem->param_value));
         }
-        if (!strcasecmp(usritem->ctrl_name,"saturation")) {
-            bktr_set_saturation(dev,usritem->ctrl_value);
+        if (!strcasecmp(usritem->param_name,"saturation")) {
+            bktr_set_saturation(dev,atoi(usritem->param_value));
         }
     }
 
-    cnt->vdev->update_parms = FALSE;
+    cnt->vdev->update_params = FALSE;
 
 }
 
 static unsigned char *bktr_device_init(struct video_dev *viddev, int width, int height,
-                                unsigned input, unsigned norm, long freq)
+                                int input, int norm, long freq)
 {
     int dev_bktr = viddev->fd_device;
     struct sigaction act, old;
@@ -708,8 +705,7 @@ void bktr_cleanup(struct context *cnt)
 
         struct video_dev *dev = viddevs;
         struct video_dev *prev = NULL;
-        int indx;
-
+        
         /* Cleanup the v4l part */
         pthread_mutex_lock(&bktr_mutex);
 
@@ -727,20 +723,12 @@ void bktr_cleanup(struct context *cnt)
         cnt->video_dev = -1;
 
         /* free the information we collected regarding the controls */
+         /* free the information we collected regarding the controls */
         if (cnt->vdev != NULL) {
-            if (cnt->vdev->usrctrl_count > 0) {
-                for (indx=0;indx<cnt->vdev->usrctrl_count;indx++) {
-                    free(cnt->vdev->usrctrl_array[indx].ctrl_name);
-                    cnt->vdev->usrctrl_array[indx].ctrl_name=NULL;
-                }
-            }
-            cnt->vdev->usrctrl_count = 0;
-            if (cnt->vdev->usrctrl_array != NULL) {
-                free(cnt->vdev->usrctrl_array);
-                cnt->vdev->usrctrl_array = NULL;
-            }
+            util_parms_free(cnt->vdev);
 
             free(cnt->vdev);
+            cnt->vdev = NULL;
         }
 
         if (dev == NULL) {
@@ -815,8 +803,6 @@ int bktr_start(struct context *cnt)
         struct video_dev *dev;
         int bktr_fdtuner = -1;
         int width, height, bktr_method;
-        int input, norm;
-        long frequency;
         int fd_device = -1;
 
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "[%s]", conf->video_device);
@@ -841,19 +827,6 @@ int bktr_start(struct context *cnt)
 
         width = conf->width;
         height = conf->height;
-
-        for (indx = 0; indx < cnt->vdev->params_count; indx++) {
-            if ( !strcmp(cnt->vdev->params_array[indx].param_name, "input")) {
-                input = atoi(cnt->vdev->params_array[indx].param_value);
-            }
-            if ( !strcmp(cnt->vdev->params_array[indx].param_name, "norm")) {
-                norm = atoi(cnt->vdev->params_array[indx].param_value);
-            }
-            if ( !strcmp(cnt->vdev->params_array[indx].param_name, "frequency")) {
-                frequency = atol(cnt->vdev->params_array[indx].param_value);
-            }
-        }
-
         bktr_method = METEOR_CAP_CONTINOUS;
 
         pthread_mutex_lock(&bktr_mutex);
@@ -866,11 +839,13 @@ int bktr_start(struct context *cnt)
         cnt->imgs.width = width;
         cnt->imgs.height = height;
 
-        cnt->vdev = mymalloc(sizeof(struct vdev_context));
-        memset(cnt->vdev, 0, sizeof(struct vdev_context));
-        cnt->vdev->usrctrl_array = NULL;
-        cnt->vdev->usrctrl_count = 0;
-        cnt->vdev->update_parms = TRUE;     /*Set trigger that we have updated user parameters */
+        cnt->vdev = mymalloc(sizeof(struct params_context));
+        memset(cnt->vdev, 0, sizeof(struct params_context));
+        cnt->vdev->params_array = NULL;
+        cnt->vdev->params_count = 0;
+        cnt->vdev->update_params = TRUE;     /*Set trigger to update parameters */
+
+        vid_parms_parse(cnt);
 
         /*
         * First we walk through the already discovered video devices to see
@@ -892,7 +867,7 @@ int bktr_start(struct context *cnt)
                 MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                     ,_("Reusing [%s] inputs [%d,%d] Change capture"
                     " method METEOR_CAP_SINGLE")
-                    , dev->video_device, dev->input, conf->input);
+                    , dev->video_device, dev->input, cnt->param_input);
 
                 dev->bktr_method = METEOR_CAP_SINGLE;
 
@@ -923,7 +898,9 @@ int bktr_start(struct context *cnt)
         }
 
         /* Only open tuner if conf->tuner_device has set , freq and input is 1. */
-        if ((conf->tuner_device != NULL) && (frequency > 0) && (input == BKTR_IN_TV)) {
+        if ((conf->tuner_device != NULL) &&
+            (cnt->param_freq > 0) &&
+            (cnt->param_input == BKTR_IN_TV)) {
             bktr_fdtuner = open(conf->tuner_device, O_RDWR|O_CLOEXEC);
             if (bktr_fdtuner < 0) {
                 MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("open tuner device %s"),
@@ -942,10 +919,10 @@ int bktr_start(struct context *cnt)
         dev->bktr_tuner = conf->tuner_device;
         dev->fd_device = fd_device;
         dev->bktr_fdtuner = bktr_fdtuner;
-        dev->input = input;
+        dev->input = cnt->param_input;
         dev->height = height;
         dev->width = width;
-        dev->frequency = frequency;
+        dev->frequency = cnt->param_freq;
         dev->owner = -1;
         dev->bktr_method = bktr_method;
 
@@ -961,7 +938,7 @@ int bktr_start(struct context *cnt)
         dev->bktr_curbuffer = 0;
         dev->bktr_maxbuffer = 1;
 
-        if (!bktr_device_init(dev, width, height, input, norm, frequency)) {
+        if (!bktr_device_init(dev, width, height, cnt->param_input, cnt->param_norm, cnt->param_freq)) {
             close(dev->fd_device);
             pthread_mutexattr_destroy(&dev->attr);
             pthread_mutex_destroy(&dev->mutex);
@@ -1026,8 +1003,8 @@ int bktr_next(struct context *cnt,  struct image_data *img_data)
             dev->frames = conf->roundrobin_frames;
         }
 
-        bktr_set_input(cnt, dev, img_data->image_norm, width, height, conf->input, conf->norm,
-                    conf->roundrobin_skip, conf->frequency);
+        bktr_set_input(cnt, dev, img_data->image_norm, width, height, cnt->param_input,
+                       cnt->param_norm, conf->roundrobin_skip, cnt->param_freq);
 
         ret = bktr_capture(dev, img_data->image_norm, width, height);
 

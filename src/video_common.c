@@ -486,11 +486,13 @@ void vid_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
 /* vid_parms_parse
  * Parse the video_params into an array.
 */
-int vid_parms_parse(struct context *cnt)
+void vid_parms_parse(struct context *cnt)
 {
 
+    int indx;
+
     if (cnt->vdev->update_params == FALSE) {
-        return 0;
+        return;
     }
 
     /* Put in the user specified parameters */
@@ -502,9 +504,21 @@ int vid_parms_parse(struct context *cnt)
     util_parms_add_default(cnt->vdev,"norm","0");
     util_parms_add_default(cnt->vdev,"frequency","0");
 
+    for (indx = 0; indx < cnt->vdev->params_count; indx++) {
+        if (!strcmp(cnt->vdev->params_array[indx].param_name, "input")) {
+            cnt->param_input = atoi(cnt->vdev->params_array[indx].param_value);
+        }
+        if (!strcmp(cnt->vdev->params_array[indx].param_name, "norm")) {
+            cnt->param_norm = atoi(cnt->vdev->params_array[indx].param_value);
+        }
+        if (!strcmp(cnt->vdev->params_array[indx].param_name, "frequency")) {
+            cnt->param_freq = atol(cnt->vdev->params_array[indx].param_value);
+        }
+    }
+
     cnt->vdev->update_params = FALSE;
 
-    return 0;
+    return;
 
 }
 
