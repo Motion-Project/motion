@@ -1,3 +1,19 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  *
  * conf.h - function prototypes for the config handling routines
@@ -6,8 +22,6 @@
  *
  * Copyright 2000 Jeroen Vreeken (pe1rxq@chello.nl)
  *
- * This software is licensed under the terms of the GNU General
- * Public License (GPL). Please see the file COPYING for details.
  *
  *
  */
@@ -218,15 +232,15 @@ typedef struct {
 
 extern dep_config_param dep_config_params[];
 
-struct context **conf_load(struct context **);
-struct context **copy_string(struct context **, const char *, int);
-struct context **copy_uri(struct context **, const char *, int);
-struct context **conf_cmdparse(struct context **, const char *, const char *);
-struct context **read_camera_dir(struct context **, const char *, int);
+struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char *arg1);
+void conf_print(struct context **cnt);
+struct context **conf_load(struct context **cnt);
 void conf_output_parms(struct context **cnt);
-const char *config_type(config_param *);
-void conf_print(struct context **);
-char *mystrdup(const char *);
-char *mystrcpy(char *, const char *);
+struct context **copy_string(struct context **cnt, const char *str, int val_ptr);
+struct context **copy_uri(struct context **cnt, const char *str, int val);
+const char *config_type(config_param *configparam);
+struct context **read_camera_dir(struct context **cnt, const char *str, int val);
+char *mystrcpy(char *to, const char *from);
+char *mystrdup(const char *from);
 
 #endif /* _INCLUDE_CONF_H */

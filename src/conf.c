@@ -1,14 +1,28 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
   **
   ** conf.c
   **
-  ** I originally wrote conf.c as part of the drpoxy package
+  ** I (some random person) originally wrote conf.c as part of the drpoxy package
   ** thanks to Matthew Pratt and others for their additions.
   **
   ** Copyright 1999 Jeroen Vreeken (pe1rxq@chello.nl)
   **
-  ** This software is licensed under the terms of the GNU General
-  ** Public License (GPL). Please see the file COPYING for details.
   **
   **
 */
@@ -197,19 +211,25 @@ struct config conf_template = {
 
 
 /* Forward Declares */
-static void malloc_strings(struct context *);
-static struct context **copy_bool(struct context **, const char *, int);
-static struct context **copy_int(struct context **, const char *, int);
-static struct context **config_camera(struct context **cnt, const char *str, int val);
+static void malloc_strings(struct context *cnt);
+static struct context **copy_bool(struct context **cnt, const char *str, int val_ptr);
+static struct context **copy_int(struct context **cnt, const char *str, int val_ptr);
 static struct context **copy_video_params(struct context **cnt, const char *config_val, int config_indx);
 static struct context **copy_netcam_params(struct context **cnt, const char *config_val, int config_indx);
-static struct context **copy_text_double(struct context **, const char *, int);
-static struct context **copy_html_output(struct context **, const char *, int);
+static struct context **copy_text_double(struct context **cnt, const char *str, int val_ptr);
+static struct context **copy_html_output(struct context **cnt, const char *str, int val_ptr);
 
-static const char *print_bool(struct context **, char **, int, unsigned int);
-static const char *print_int(struct context **, char **, int, unsigned int);
-static const char *print_string(struct context **, char **, int, unsigned int);
-static const char *print_camera(struct context **, char **, int, unsigned int);
+static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
+                              int parm, unsigned int threadnr);
+static const char *print_string(struct context **cnt,
+                                char **str ATTRIBUTE_UNUSED, int parm,
+                                unsigned int threadnr);
+static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
+                             int parm, unsigned int threadnr);
+static const char *print_camera(struct context **cnt, char **str,
+                                int parm ATTRIBUTE_UNUSED, unsigned int threadnr);
+
+static struct context **config_camera(struct context **cnt, const char *str, int val ATTRIBUTE_UNUSED);
 
 static void usage(void);
 static void config_parms_intl(void);
@@ -2612,7 +2632,7 @@ void conf_output_parms(struct context **cnt)
  *
  * Returns nothing.
  */
-void malloc_strings(struct context *cnt)
+static void malloc_strings(struct context *cnt)
 {
     unsigned int i = 0;
     char **val;

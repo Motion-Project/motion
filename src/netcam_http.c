@@ -1,3 +1,19 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /***********************************************************
  *  netcam_http.c
  *  Process network camera images using http protocol
@@ -7,8 +23,6 @@
  *      Christopher Price.
  *
  *      Copyright 2005, William M. Brack
- *      This software is distributed under the GNU Public license
- *      Version 2.  See also the file 'COPYING'.
  ***********************************************************/
 
 #include "translate.h"
@@ -1840,45 +1854,5 @@ int netcam_setup_file(netcam_context_ptr netcam, struct url_t *url)
     return 0;
 }
 
-/**
- * netcam_recv
- *
- *      This routine receives the next block from the netcam.  It takes care
- *      of the potential timeouts and interrupt which may occur because of
- *      the settings from setsockopt.
- *
- * Parameters:
- *
- *      netcam          Pointer to a netcam context
- *      buffptr         Pointer to the receive buffer
- *      buffsize        Length of the buffer
- *
- * Returns:
- *      If successful, the length of the message received, otherwise the
- *      error reply from the system call.
- *
- */
-ssize_t netcam_recv(netcam_context_ptr netcam, void *buffptr, size_t buffsize)
-{
-    ssize_t retval;
-    fd_set fd_r;
-    struct timeval selecttime;
-
-    if (netcam->sock < 0) {
-        return -1; /* We are not connected, it's impossible to receive data. */
-    }
-
-    FD_ZERO(&fd_r);
-    FD_SET(netcam->sock, &fd_r);
-    selecttime = netcam->timeout;
-
-    retval = select(FD_SETSIZE, &fd_r, NULL, NULL, &selecttime);
-    if (retval == 0) {
-        /* 0 means timeout */
-        return -1;
-    }
-
-    return recv(netcam->sock, buffptr, buffsize, 0);
-}
 
 
