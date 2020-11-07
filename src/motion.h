@@ -548,4 +548,10 @@ void util_parms_free(struct params_context *parameters);
 void util_parms_parse(struct params_context *parameters, char *confparm);
 void util_parms_add_default(struct params_context *parameters, const char *parm_nm, const char *parm_vl);
 
+int mystrceq(const char *var1, const char *var2);
+int mystrcne(const char *var1, const char *var2);
+int mystreq(const char *var1, const char *var2);
+int mystrne(const char *var1, const char *var2);
+
+
 #endif /* _INCLUDE_MOTION_H */

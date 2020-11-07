@@ -2121,10 +2121,10 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
      * our option given by cmd (or reach the end = NULL).
      */
     while (config_params[i].param_name != NULL) {
-        if (!strcasecmp(cmd, config_params[i].param_name)) {
+        if (mystrceq(cmd, config_params[i].param_name)) {
 
             /* If config_param is string we don't want to check arg1. */
-            if (strcasecmp(config_type(&config_params[i]), "string")) {
+            if (mystrcne(config_type(&config_params[i]), "string")) {
                 if (config_params[i].conf_value && !arg1) {
                     return cnt;
                 }
@@ -2163,26 +2163,26 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
                 /* If the depreciated option is a vid item, copy_video_params is called
                  * with the array index sent instead of the context structure member pointer.
                  */
-                if (!strcmp(dep_config_params[i].name,"brightness") ||
-                    !strcmp(dep_config_params[i].name,"contrast") ||
-                    !strcmp(dep_config_params[i].name,"saturation") ||
-                    !strcmp(dep_config_params[i].name,"hue") ||
-                    !strcmp(dep_config_params[i].name,"power_line_frequency") ||
-                    !strcmp(dep_config_params[i].name,"v4l2_palette") ||
-                    !strcmp(dep_config_params[i].name,"input") ||
-                    !strcmp(dep_config_params[i].name,"norm") ||
-                    !strcmp(dep_config_params[i].name,"frequency") ||
-                    !strcmp(dep_config_params[i].name,"vid_control_params")) {
+                if (mystreq(dep_config_params[i].name,"brightness") ||
+                    mystreq(dep_config_params[i].name,"contrast") ||
+                    mystreq(dep_config_params[i].name,"saturation") ||
+                    mystreq(dep_config_params[i].name,"hue") ||
+                    mystreq(dep_config_params[i].name,"power_line_frequency") ||
+                    mystreq(dep_config_params[i].name,"v4l2_palette") ||
+                    mystreq(dep_config_params[i].name,"input") ||
+                    mystreq(dep_config_params[i].name,"norm") ||
+                    mystreq(dep_config_params[i].name,"frequency") ||
+                    mystreq(dep_config_params[i].name,"vid_control_params")) {
                     cnt = copy_video_params(cnt, arg1, i);
 
-                } else if (!strcmp(dep_config_params[i].name,"netcam_decoder") ||
-                    !strcmp(dep_config_params[i].name,"netcam_use_tcp") ||
-                    !strcmp(dep_config_params[i].name,"rtsp_uses_tcp") ||
-                    !strcmp(dep_config_params[i].name,"netcam_rate")  ||
-                    !strcmp(dep_config_params[i].name,"netcam_ratehigh") ||
-                    !strcmp(dep_config_params[i].name,"netcam_proxy") ||
-                    !strcmp(dep_config_params[i].name,"netcam_tolerant_check") ||
-                    !strcmp(dep_config_params[i].name,"netcam_keepalive")) {
+                } else if (mystreq(dep_config_params[i].name,"netcam_decoder") ||
+                    mystreq(dep_config_params[i].name,"netcam_use_tcp") ||
+                    mystreq(dep_config_params[i].name,"rtsp_uses_tcp") ||
+                    mystreq(dep_config_params[i].name,"netcam_rate")  ||
+                    mystreq(dep_config_params[i].name,"netcam_ratehigh") ||
+                    mystreq(dep_config_params[i].name,"netcam_proxy") ||
+                    mystreq(dep_config_params[i].name,"netcam_tolerant_check") ||
+                    mystreq(dep_config_params[i].name,"netcam_keepalive")) {
                     cnt = copy_netcam_params(cnt, arg1, i);
 
                 } else {
@@ -2676,7 +2676,7 @@ static struct context **copy_bool(struct context **cnt, const char *str, int val
     while (cnt[++i]) {
         tmp = (char *)cnt[i]+(int)val_ptr;
 
-        if (!strcmp(str, "1") || !strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
+        if (mystreq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
             *((int *)tmp) = 1;
         } else {
             *((int *)tmp) = 0;
@@ -2706,9 +2706,9 @@ static struct context **copy_int(struct context **cnt, const char *str, int val_
     i = -1;
     while (cnt[++i]) {
         tmp = (char *)cnt[i]+val_ptr;
-        if (!strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
+        if (mystrceq(str, "yes") || mystrceq(str, "on")) {
             *((int *)tmp) = 1;
-        } else if (!strcasecmp(str, "no") || !strcasecmp(str, "off")) {
+        } else if (mystrceq(str, "no") || mystrceq(str, "off")) {
             *((int *)tmp) = 0;
         } else {
             *((int *)tmp) = atoi(str);
@@ -2774,13 +2774,13 @@ static struct context **copy_video_params(struct context **cnt, const char *conf
 
     indx_vid = 0;
     while (config_params[indx_vid].param_name != NULL) {
-        if (!strcmp(config_params[indx_vid].param_name,"video_params")) {
+        if (mystreq(config_params[indx_vid].param_name,"video_params")) {
             break;
         }
         indx_vid++;
     }
 
-    if (strcmp(config_params[indx_vid].param_name,"video_params")) {
+    if (mystrne(config_params[indx_vid].param_name,"video_params")) {
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
             ,_("Unable to locate video_params"));
         return cnt;
@@ -2793,24 +2793,24 @@ static struct context **copy_video_params(struct context **cnt, const char *conf
 
     /* If the depreciated option is the default, then just return */
     parmval = atoi(config_val);
-    if (!strcmp(dep_config_params[config_indx].name,"power_line_frequency") &&
+    if (mystreq(dep_config_params[config_indx].name,"power_line_frequency") &&
         (parmval == -1)) {
         return cnt;
     }
 
-    if ((!strcmp(dep_config_params[config_indx].name,"brightness") ||
-         !strcmp(dep_config_params[config_indx].name,"contrast") ||
-         !strcmp(dep_config_params[config_indx].name,"saturation") ||
-         !strcmp(dep_config_params[config_indx].name,"hue")) &&
+    if ((mystreq(dep_config_params[config_indx].name,"brightness") ||
+         mystreq(dep_config_params[config_indx].name,"contrast") ||
+         mystreq(dep_config_params[config_indx].name,"saturation") ||
+         mystreq(dep_config_params[config_indx].name,"hue")) &&
         (parmval == 0)) {
         return cnt;
     }
 
     /* Remove underscore from parm name and add quotes*/
-    if (!strcmp(dep_config_params[config_indx].name,"power_line_frequency")) {
+    if (mystreq(dep_config_params[config_indx].name,"power_line_frequency")) {
         parmname_new = mymalloc(strlen(dep_config_params[config_indx].name) + 3);
         sprintf(parmname_new,"%s","\"power line frequency\"");
-    } else if (!strcmp(dep_config_params[config_indx].name,"v4l2_palette")) {
+    } else if (mystreq(dep_config_params[config_indx].name,"v4l2_palette")) {
         parmname_new = mymalloc(strlen("palette") + 1);
         sprintf(parmname_new,"%s","palette");
     } else {
@@ -2830,7 +2830,7 @@ static struct context **copy_video_params(struct context **cnt, const char *conf
 
             free(cnt[i]->conf.video_params);
             cnt[i]->conf.video_params = mymalloc(parmnew_len);
-            if (!strcmp(dep_config_params[config_indx].name,"vid_control_params")) {
+            if (mystreq(dep_config_params[config_indx].name,"vid_control_params")) {
                 sprintf(cnt[i]->conf.video_params,"%s,%s",config_val, orig_parm);
             } else {
                 sprintf(cnt[i]->conf.video_params,"%s=%s,%s",parmname_new, config_val, orig_parm);
@@ -2839,7 +2839,7 @@ static struct context **copy_video_params(struct context **cnt, const char *conf
             free(orig_parm);
         } else {
             cnt[i]->conf.video_params = mymalloc(parmnew_len);
-            if (!strcmp(dep_config_params[config_indx].name,"vid_control_params")) {
+            if (mystreq(dep_config_params[config_indx].name,"vid_control_params")) {
                 sprintf(cnt[i]->conf.video_params,"%s", config_val);
             } else {
                 sprintf(cnt[i]->conf.video_params,"%s=%s", parmname_new, config_val);
@@ -2867,13 +2867,13 @@ static struct context **copy_netcam_params(struct context **cnt, const char *con
 
     indx = 0;
     while (config_params[indx].param_name != NULL) {
-        if (!strcmp(config_params[indx].param_name,"netcam_params")) {
+        if (mystreq(config_params[indx].param_name,"netcam_params")) {
             break;
         }
         indx++;
     }
 
-    if (strcmp(config_params[indx].param_name,"netcam_params")) {
+    if (mystrne(config_params[indx].param_name,"netcam_params")) {
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
             ,_("Unable to locate netcam_params"));
         return cnt;
@@ -2886,38 +2886,38 @@ static struct context **copy_netcam_params(struct context **cnt, const char *con
     }
 
     /* Remove underscore from parm name and add quotes*/
-    if (!strcmp(dep_config_params[config_indx].name,"netcam_use_tcp") ||
-        !strcmp(dep_config_params[config_indx].name,"rtsp_uses_tcp")) {
+    if (mystreq(dep_config_params[config_indx].name,"netcam_use_tcp") ||
+        mystreq(dep_config_params[config_indx].name,"rtsp_uses_tcp")) {
         parm_len = strlen("rtsp_transport = tcp") + 1;
         parm_new = mymalloc(parm_len);
-        if ( !strcmp(config_val,"on")) {
+        if (mystrceq(config_val,"on")) {
             snprintf(parm_new, parm_len, "%s", "rtsp_transport = tcp");
         } else {
             snprintf(parm_new, parm_len, "%s", "rtsp_transport = udp");
         }
 
-    } else if (!strcmp(dep_config_params[config_indx].name,"netcam_decoder")) {
+    } else if (mystreq(dep_config_params[config_indx].name,"netcam_decoder")) {
         parm_len = strlen("decoder = ") + strlen(config_val) + 1;
         parm_new = mymalloc(parm_len);
         snprintf(parm_new, parm_len, "%s%s", "decoder = ", config_val);
 
-    } else if (!strcmp(dep_config_params[config_indx].name,"netcam_rate") ||
-        !strcmp(dep_config_params[config_indx].name,"netcam_ratehigh")) {
+    } else if (mystreq(dep_config_params[config_indx].name,"netcam_rate") ||
+        mystreq(dep_config_params[config_indx].name,"netcam_ratehigh")) {
         parm_len = strlen("capture_rate = ") + strlen(config_val) + 1;
         parm_new = mymalloc(parm_len);
         snprintf(parm_new, parm_len, "%s%s", "capture_rate = ", config_val);
 
-    } else if (!strcmp(dep_config_params[config_indx].name,"netcam_proxy")) {
+    } else if (mystreq(dep_config_params[config_indx].name,"netcam_proxy")) {
         parm_len = strlen("proxy = ") + strlen(config_val) + 1;
         parm_new = mymalloc(parm_len);
         snprintf(parm_new, parm_len, "%s%s", "proxy = ", config_val);
 
-    } else if (!strcmp(dep_config_params[config_indx].name,"netcam_keepalive")) {
+    } else if (mystreq(dep_config_params[config_indx].name,"netcam_keepalive")) {
         parm_len = strlen("keepalive = ") + strlen(config_val) + 1;
         parm_new = mymalloc(parm_len);
         snprintf(parm_new, parm_len, "%s%s", "keepalive = ", config_val);
 
-    } else if (!strcmp(dep_config_params[config_indx].name,"netcam_tolerant_check")) {
+    } else if (mystreq(dep_config_params[config_indx].name,"netcam_tolerant_check")) {
         parm_len = strlen("tolerant_check = ") + strlen(config_val) + 1;
         parm_new = mymalloc(parm_len);
         snprintf(parm_new, parm_len, "%s%s", "tolerant_check = ", config_val);
@@ -2929,7 +2929,7 @@ static struct context **copy_netcam_params(struct context **cnt, const char *con
     /* Recall that the current parms have already been processed by time this is called */
     i = -1;
     while (cnt[++i]) {
-        if (!strcmp(dep_config_params[config_indx].name,"netcam_ratehigh")) {
+        if (mystreq(dep_config_params[config_indx].name,"netcam_ratehigh")) {
             if (cnt[i]->conf.netcam_high_params != NULL) {
                 parm_len = strlen(cnt[i]->conf.netcam_high_params) + 1;
                 orig_parm = mymalloc(parm_len);
@@ -2988,7 +2988,7 @@ static struct context **copy_text_double(struct context **cnt, const char *str, 
     while (cnt[++i]) {
         tmp = (char *)cnt[i]+(int)val_ptr;
 
-        if (!strcmp(str, "1") || !strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
+        if (mystreq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
             *((int *)tmp) = 2;
         } else {
             *((int *)tmp) = 1;
@@ -3017,7 +3017,7 @@ static struct context **copy_html_output(struct context **cnt, const char *str, 
     while (cnt[++i]) {
         tmp = (char *)cnt[i]+(int)val_ptr;
 
-        if (!strcmp(str, "1") || !strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
+        if (mystreq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
             *((int *)tmp) = 0;
         } else {
             *((int *)tmp) = 1;
@@ -3047,7 +3047,7 @@ struct context **copy_uri(struct context **cnt, const char *str, int val)
     // Getting a perfect regex for all the uri's that are possible is
     // almost impossible so if it fails, we warn the user but still accept
     // that they know what they typed and move on.
-    if (strcmp(str, "*") != 0 && regexec(&regex, str, 0, NULL, 0) == REG_NOMATCH) {
+    if (mystrne(str, "*") && regexec(&regex, str, 0, NULL, 0) == REG_NOMATCH) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("The CORS header may not be valid %s"),str);
     }
@@ -3191,11 +3191,11 @@ static const char *print_string(struct context **cnt,
     int val = config_params[parm].conf_value;
     const char **cptr0, **cptr1;
 
-    /* strcmp does not like NULL so we have to check for this also. */
+    /* Check for NULL also. */
     cptr0 = (const char **)((char *)cnt[0] + val);
     cptr1 = (const char **)((char *)cnt[threadnr] + val);
 
-    if ((threadnr) && (*cptr0 != NULL) && (*cptr1 != NULL) && (!strcmp(*cptr0, *cptr1))) {
+    if ((threadnr) && (*cptr0 != NULL) && (*cptr1 != NULL) && (mystreq(*cptr0, *cptr1))) {
         return NULL;
     }
 

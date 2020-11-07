@@ -505,13 +505,13 @@ void vid_parms_parse(struct context *cnt)
     util_parms_add_default(cnt->vdev,"frequency","0");
 
     for (indx = 0; indx < cnt->vdev->params_count; indx++) {
-        if (!strcmp(cnt->vdev->params_array[indx].param_name, "input")) {
+        if (mystreq(cnt->vdev->params_array[indx].param_name, "input")) {
             cnt->param_input = atoi(cnt->vdev->params_array[indx].param_value);
         }
-        if (!strcmp(cnt->vdev->params_array[indx].param_name, "norm")) {
+        if (mystreq(cnt->vdev->params_array[indx].param_name, "norm")) {
             cnt->param_norm = atoi(cnt->vdev->params_array[indx].param_value);
         }
-        if (!strcmp(cnt->vdev->params_array[indx].param_name, "frequency")) {
+        if (mystreq(cnt->vdev->params_array[indx].param_name, "frequency")) {
             cnt->param_freq = atol(cnt->vdev->params_array[indx].param_value);
         }
     }

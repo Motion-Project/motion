@@ -326,9 +326,9 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg)
     codec_name[codec_name_len] = 0;
 
     /* Only the newer codec and containers can handle the really fast FPS */
-    if (((strcmp(codec_name, "msmpeg4") == 0) ||
-        (strcmp(codec_name, "mpeg4") == 0) ||
-        (strcmp(codec_name, "swf") == 0) ) && (ffmpeg->fps >50)) {
+    if ((mystreq(codec_name, "msmpeg4") ||
+         mystreq(codec_name, "mpeg4") ||
+         mystreq(codec_name, "swf")) && (ffmpeg->fps >50)) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("The frame rate specified is too high for the ffmpeg movie type specified. "
             "Choose a different ffmpeg container or lower framerate."));
@@ -364,12 +364,12 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg)
         return 0;
     }
 
-    if (strcmp(codec_name, "mpeg4") == 0) {
+    if (mystreq(codec_name, "mpeg4")) {
         ffmpeg->oc->oformat = av_guess_format("avi", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.avi",basename);
     }
 
-    if (strcmp(codec_name, "msmpeg4") == 0) {
+    if (mystreq(codec_name, "msmpeg4")) {
         ffmpeg->oc->oformat = av_guess_format("avi", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.avi",basename);
         if (ffmpeg->oc->oformat) {
@@ -377,12 +377,12 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg)
         }
     }
 
-    if (strcmp(codec_name, "swf") == 0) {
+    if (mystreq(codec_name, "swf")) {
         ffmpeg->oc->oformat = av_guess_format("swf", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.swf",basename);
     }
 
-    if (strcmp(codec_name, "flv") == 0) {
+    if (mystreq(codec_name, "flv")) {
         ffmpeg->oc->oformat = av_guess_format("flv", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.flv",basename);
         if (ffmpeg->oc->oformat) {
@@ -390,7 +390,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg)
         }
     }
 
-    if (strcmp(codec_name, "ffv1") == 0) {
+    if (mystreq(codec_name, "ffv1")) {
         ffmpeg->oc->oformat = av_guess_format("avi", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.avi",basename);
         if (ffmpeg->oc->oformat) {
@@ -398,12 +398,12 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg)
         }
     }
 
-    if (strcmp(codec_name, "mov") == 0) {
+    if (mystreq(codec_name, "mov")) {
         ffmpeg->oc->oformat = av_guess_format("mov", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.mov",basename);
     }
 
-    if (strcmp(codec_name, "mp4") == 0) {
+    if (mystreq(codec_name, "mp4")) {
         ffmpeg->oc->oformat = av_guess_format("mp4", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.mp4",basename);
         if (ffmpeg->oc->oformat) {
@@ -411,7 +411,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg)
         }
     }
 
-    if (strcmp(codec_name, "mkv") == 0) {
+    if (mystreq(codec_name, "mkv")) {
         ffmpeg->oc->oformat = av_guess_format("matroska", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.mkv",basename);
         if (ffmpeg->oc->oformat) {
@@ -419,7 +419,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg)
         }
     }
 
-    if (strcmp(codec_name, "hevc") == 0) {
+    if (mystreq(codec_name, "hevc")) {
         ffmpeg->oc->oformat = av_guess_format("mp4", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.mp4",basename);
         if (ffmpeg->oc->oformat) {
@@ -732,7 +732,7 @@ static const char *ffmpeg_codec_is_blacklisted(const char *codec_name)
     i_mx = (size_t)(sizeof(blacklisted_codec)/sizeof(blacklisted_codec[0]));
 
     for (i = 0; i < i_mx; i++) {
-        if (strcmp(codec_name, blacklisted_codec[i].codec_name) == 0) {
+        if (mystreq(codec_name, blacklisted_codec[i].codec_name)) {
             return blacklisted_codec[i].reason;
         }
     }
@@ -771,11 +771,11 @@ static int ffmpeg_set_codec_preferred(struct ffmpeg *ffmpeg)
         return -1;
     }
 
-    if (strcmp(ffmpeg->codec->name, "h264_v4l2m2m") == 0) {
+    if (mystreq(ffmpeg->codec->name, "h264_v4l2m2m")) {
         ffmpeg->preferred_codec = USER_CODEC_V4L2M2M;
-    } else if (strcmp(ffmpeg->codec->name, "h264_omx") == 0) {
+    } else if (mystreq(ffmpeg->codec->name, "h264_omx")) {
         ffmpeg->preferred_codec = USER_CODEC_H264OMX;
-    } else if (strcmp(ffmpeg->codec->name, "mpeg4_omx") == 0) {
+    } else if (mystreq(ffmpeg->codec->name, "mpeg4_omx")) {
         ffmpeg->preferred_codec = USER_CODEC_MPEG4OMX;
     } else {
         ffmpeg->preferred_codec = USER_CODEC_DEFAULT;
@@ -844,12 +844,12 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg)
     **  then let the PTS display the frames correctly.
     */
     if ((ffmpeg->tlapse == TIMELAPSE_NONE) && (ffmpeg->fps <= 5)) {
-        if ((strcmp(ffmpeg->codec_name, "msmpeg4") == 0) ||
-            (strcmp(ffmpeg->codec_name, "flv")     == 0) ||
-            (strcmp(ffmpeg->codec_name, "mov") == 0) ||
-            (strcmp(ffmpeg->codec_name, "mp4") == 0) ||
-            (strcmp(ffmpeg->codec_name, "hevc") == 0) ||
-            (strcmp(ffmpeg->codec_name, "mpeg4")   == 0)) {
+        if (mystreq(ffmpeg->codec_name, "msmpeg4") ||
+            mystreq(ffmpeg->codec_name, "flv") ||
+            mystreq(ffmpeg->codec_name, "mov") ||
+            mystreq(ffmpeg->codec_name, "mp4") ||
+            mystreq(ffmpeg->codec_name, "hevc") ||
+            mystreq(ffmpeg->codec_name, "mpeg4")) {
             MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("Low fps. Encoding %d frames into a %d frames container."), ffmpeg->fps, 10);
             ffmpeg->fps = 10;
         }
@@ -868,14 +868,14 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg)
         ffmpeg->ctx_codec->pix_fmt   = MY_PIX_FMT_YUV420P;
     }
     ffmpeg->ctx_codec->max_b_frames  = 0;
-    if (strcmp(ffmpeg->codec_name, "ffv1") == 0) {
+    if (mystreq(ffmpeg->codec_name, "ffv1")) {
       ffmpeg->ctx_codec->strict_std_compliance = -2;
       ffmpeg->ctx_codec->level = 3;
     }
     ffmpeg->ctx_codec->flags |= MY_CODEC_FLAG_GLOBAL_HEADER;
 
-    if ((strcmp(ffmpeg->codec->name, "h264_omx") == 0) ||
-        (strcmp(ffmpeg->codec->name, "mpeg4_omx") == 0)) {
+    if (mystreq(ffmpeg->codec->name, "h264_omx") ||
+        mystreq(ffmpeg->codec->name, "mpeg4_omx")) {
         /* h264_omx & ffmpeg combination locks up on Raspberry Pi.
          * To use h264_omx encoder, we need to disable zerocopy.
          * More information: https://github.com/Motion-Project/motion/issues/433
@@ -1364,7 +1364,7 @@ static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg)
             return -1;
         }
 
-        if (strcmp(ffmpeg->codec_name, "mp4") != 0) {
+        if (mystrne(ffmpeg->codec_name, "mp4")) {
             MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
                 ,_("pass-through mode enabled.  Changing to MP4 container."));
             ffmpeg->codec_name = "mp4";
