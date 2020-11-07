@@ -1,9 +1,24 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*    track.h
  *
  *    Experimental motion tracking.
  *
  *    Copyright 2000, Jeroen Vreeken
- *    This program is published under the GNU Public license
  */
 
 #ifndef _INCLUDE_TRACK_H
@@ -43,8 +58,10 @@ struct trackoptions {
 
 extern struct trackoptions track_template;
 
-unsigned int track_center(struct context *, int, unsigned int, int, int);
-unsigned int track_move(struct context *, int, struct coord *, struct images *, unsigned int);
+unsigned int track_center(struct context *cnt, int dev,
+                          unsigned int manual, int xoff, int yoff);
+unsigned int track_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs,
+                        unsigned int manual);
 
 enum track_action { TRACK_CENTER, TRACK_MOVE };
 

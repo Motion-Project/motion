@@ -1,3 +1,19 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  *    netcam.h
  *
@@ -9,8 +25,6 @@
  *    Christopher Price.
  *
  *    Copyright 2005, William M. Brack
- *    This software is distributed under the GNU Public license
- *    Version 2.  See also the file 'COPYING'.
  */
 #ifndef _INCLUDE_NETCAM_H
 #define _INCLUDE_NETCAM_H
@@ -59,10 +73,10 @@
   #define ATTRIBUTE_UNUSED
 #endif
 
-/* netcam_wget.h needs to have netcam_context_ptr */
 typedef struct netcam_context *netcam_context_ptr;
 
-#include "netcam_wget.h"        /* needed for struct rbuf */
+#include "netcam_wget.h"
+#include "netcam_jpeg.h"
 
 #define NETCAM_BUFFSIZE 4096    /* Initial size reserved for a JPEG
                                   image.  If expansion is required,
@@ -243,20 +257,13 @@ typedef struct netcam_context {
 
 } netcam_context;
 
-/*
-* Declare prototypes for our external entry points
-*/
-/*     Within netcam_jpeg.c    */
-int netcam_proc_jpeg (struct netcam_context *,  struct image_data *img_data);
-void netcam_fix_jpeg_header(struct netcam_context *);
-void netcam_get_dimensions (struct netcam_context *);
-/*     Within netcam.c        */
-int netcam_start (struct context *);
+
+int netcam_start(struct context *cnt);
 int netcam_next(struct context *cnt, struct image_data *img_data);
-void netcam_cleanup (struct netcam_context *, int);
-ssize_t netcam_recv(netcam_context_ptr, void *, size_t);
+void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag);
 void netcam_url_parse(struct url_t *parse_url, const char *text_url);
 void netcam_url_free(struct url_t *parse_url);
+ssize_t netcam_recv(netcam_context_ptr netcam, void *buffptr, size_t buffsize);
 
 /**
  * Publish new image

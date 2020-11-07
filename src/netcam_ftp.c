@@ -1,11 +1,25 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  *      Much of the FTP code was inspired by the nanoftp.c module from
  *      libxml2 (Copyright Daniel Veillard, 2003).  The routines have been
  *      modified to fit the needs of the Motion project.
  *
  *      Copyright 2005, William M. Brack
- *      This software is distributed under the GNU Public license Version 2.
- *      See also the file 'COPYING'.
  *
  */
 #include "translate.h"
@@ -28,7 +42,7 @@
 * Returns:     Pointer to the newly-created structure, NULL if error.
 *
 */
-ftp_context_pointer ftp_new_context(void)
+static ftp_context_pointer ftp_new_context(void)
 {
     ftp_context_pointer ret;
 
@@ -53,7 +67,7 @@ ftp_context_pointer ftp_new_context(void)
 * Returns:     Nothing
 *
 */
-void ftp_free_context(ftp_context_pointer ctxt)
+static void ftp_free_context(ftp_context_pointer ctxt)
 {
     if (ctxt == NULL) {
         return;
@@ -753,7 +767,7 @@ static int ftp_close_connection(ftp_context_pointer ctxt)
 *
 * Returns the socket for the data connection, or <0 in case of error
 */
-int ftp_get_socket(ftp_context_pointer ctxt)
+static int ftp_get_socket(ftp_context_pointer ctxt)
 {
     char buf[300];
     int res, len;
@@ -830,7 +844,7 @@ int ftp_get_socket(ftp_context_pointer ctxt)
 * Returns      0 for success, negative error code for failure.
 *
 */
-int ftp_send_type(ftp_context_pointer ctxt, char type)
+static int ftp_send_type(ftp_context_pointer ctxt, char type)
 {
     char buf[100], utype;
     int len, res;
@@ -873,7 +887,7 @@ int ftp_send_type(ftp_context_pointer ctxt, char type)
 *              0 is an indication of an end of connection.
 *              -1 indicates a parameter error.
 */
-int ftp_read(ftp_context_pointer ctxt, void *dest, int len)
+static int ftp_read(ftp_context_pointer ctxt, void *dest, int len)
 {
     if (ctxt == NULL) {
         return -1;
