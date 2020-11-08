@@ -58,10 +58,10 @@ struct trackoptions {
 
 extern struct trackoptions track_template;
 
-unsigned int track_center(struct context *cnt, int dev,
-                          unsigned int manual, int xoff, int yoff);
-unsigned int track_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs,
-                        unsigned int manual);
+unsigned int track_center(struct context *cnt, int dev
+            , unsigned int manual, int xoff, int yoff);
+unsigned int track_move(struct context *cnt, int dev, struct coord *cent
+            , struct images *imgs, unsigned int manual);
 
 enum track_action { TRACK_CENTER, TRACK_MOVE };
 

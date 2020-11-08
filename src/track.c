@@ -62,33 +62,34 @@ struct trackoptions track_template = {
 
 static unsigned int servo_position(struct context *cnt, unsigned int motor);
 
-static unsigned int servo_center(struct context *cnt, int xoff, int yoff ATTRIBUTE_UNUSED);
-static unsigned int stepper_center(struct context *cnt, int xoff, int yoff ATTRIBUTE_UNUSED);
+static unsigned int servo_center(struct context *cnt, int xoff, int yoff);
+static unsigned int stepper_center(struct context *cnt, int xoff, int yoff);
 static unsigned int iomojo_center(struct context *cnt, int xoff, int yoff);
 
 static unsigned int stepper_move(struct context *cnt, struct coord *cent, struct images *imgs);
-static unsigned int servo_move(struct context *cnt, struct coord *cent,
-                               struct images *imgs, unsigned int manual);
+static unsigned int servo_move(struct context *cnt, struct coord *cent
+            ,struct images *imgs, unsigned int manual);
 static unsigned int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs);
 
 #ifdef HAVE_V4L2
     static unsigned int lqos_center(struct context *cnt, int dev, int xoff, int yoff);
-    static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent,
-                                struct images *imgs, unsigned int manual);
+    static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent
+                ,struct images *imgs, unsigned int manual);
     static unsigned int uvc_center(struct context *cnt, int dev, int xoff, int yoff);
-    static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
-                                struct images *imgs, unsigned int manual);
+    static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent
+                ,struct images *imgs, unsigned int manual);
 #endif /* HAVE_V4L2 */
 
-static unsigned int generic_move(struct context *cnt, enum track_action action, unsigned int manual,
-                                 int xoff, int yoff, struct coord *cent, struct images *imgs);
+static unsigned int generic_move(struct context *cnt, enum track_action action, unsigned int manual
+            , int xoff, int yoff, struct coord *cent, struct images *imgs);
 
 
 /* Add a call to your functions here: */
-unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
-                          unsigned int manual, int xoff, int yoff)
+unsigned int track_center(struct context *cnt, int dev, unsigned int manual, int xoff, int yoff)
 {
     struct coord cent;
+
+    (void)dev;
 
     if (!manual && !cnt->track.active) {
         return 0;
@@ -132,8 +133,8 @@ unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
 }
 
 /* Add a call to your functions here: */
-unsigned int track_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs,
-                        unsigned int manual)
+unsigned int track_move(struct context *cnt, int dev, struct coord *cent
+            , struct images *imgs, unsigned int manual)
 {
 
     if (!manual && !cnt->track.active) {
@@ -174,8 +175,8 @@ unsigned int track_move(struct context *cnt, int dev, struct coord *cent, struct
     http://www.lavrsen.dk/twiki/bin/view/Motion/MotionTrackerAPI
 ******************************************************************************/
 
-static unsigned int stepper_command(struct context *cnt, unsigned int motor,
-                                    unsigned int command, unsigned int data)
+static unsigned int stepper_command(struct context *cnt, unsigned int motor
+            , unsigned int command, unsigned int data)
 {
     char buffer[3];
     time_t timeout = time(NULL);
@@ -280,8 +281,7 @@ static unsigned int stepper_center(struct context *cnt, int x_offset, int y_offs
     return cnt->track.move_wait;
 }
 
-static unsigned int stepper_move(struct context *cnt,
-                                 struct coord *cent, struct images *imgs)
+static unsigned int stepper_move(struct context *cnt, struct coord *cent, struct images *imgs)
 {
     unsigned int command = 0, data = 0;
 
@@ -382,8 +382,8 @@ static int servo_open(struct context *cnt)
 }
 
 
-static unsigned int servo_command(struct context *cnt, unsigned int motor,
-                                  unsigned int command, unsigned int data)
+static unsigned int servo_command(struct context *cnt, unsigned int motor
+            , unsigned int command, unsigned int data)
 {
     unsigned char buffer[3];
     time_t timeout = time(NULL);
@@ -436,8 +436,8 @@ static unsigned int servo_position(struct context *cnt, unsigned int motor)
  *      Does relative movements to current position.
  *
  */
-static unsigned int servo_move(struct context *cnt, struct coord *cent,
-                               struct images *imgs, unsigned int manual)
+static unsigned int servo_move(struct context *cnt, struct coord *cent
+            , struct images *imgs, unsigned int manual)
 {
     unsigned int command = 0;
     unsigned int data = 0;
@@ -807,8 +807,7 @@ static unsigned int iomojo_center(struct context *cnt, int x_offset, int y_offse
     return cnt->track.move_wait;
 }
 
-static unsigned int iomojo_move(struct context *cnt, int dev, struct coord *cent,
-                                      struct images *imgs)
+static unsigned int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs)
 {
     char command[5];
     int direction = 0;
@@ -934,8 +933,8 @@ static unsigned int lqos_center(struct context *cnt, int dev, int x_angle, int y
     return cnt->track.move_wait;
 }
 
-static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent,
-                                    struct images *imgs, unsigned int manual)
+static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent
+            , struct images *imgs, unsigned int manual)
 {
     int delta_x = cent->x - (imgs->width / 2);
     int delta_y = cent->y - (imgs->height / 2);
@@ -1184,8 +1183,8 @@ static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_
     return cnt->track.move_wait;
 }
 
-static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
-                                   struct images *imgs, unsigned int manual)
+static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent
+            , struct images *imgs, unsigned int manual)
 {
     /* RELATIVE MOVING : Act.Position +/- X and Y */
 
@@ -1381,8 +1380,8 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
 }
 #endif /* HAVE_V4L2 */
 
-static unsigned int generic_move(struct context *cnt, enum track_action action, unsigned int manual,
-                                 int xoff, int yoff, struct coord *cent, struct images *imgs)
+static unsigned int generic_move(struct context *cnt, enum track_action action
+            , unsigned int manual, int xoff, int yoff, struct coord *cent, struct images *imgs)
 {
     char fmtcmd[PATH_MAX];
     cnt->track_posx += cent->x;

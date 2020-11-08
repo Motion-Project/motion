@@ -91,22 +91,6 @@ struct image_data;
 #endif
 
 
-/**
- * ATTRIBUTE_UNUSED:
- *
- * Macro used to signal to GCC unused function parameters
- */
-#ifdef __GNUC__
-    #ifdef HAVE_ANSIDECL_H
-        #include <ansidecl.h>
-    #endif
-    #ifndef ATTRIBUTE_UNUSED
-        #define ATTRIBUTE_UNUSED __attribute__((unused))
-    #endif
-#else
-    #define ATTRIBUTE_UNUSED
-#endif
-
 /*
 *  The macro below defines a version of sleep using nanosleep
 * If a signal such as SIG_CHLD interrupts the sleep we just continue sleeping
@@ -539,13 +523,13 @@ extern FILE *ptr_logfile;
 /* TLS keys below */
 extern pthread_key_t tls_key_threadnr; /* key for thread number */
 
-int http_bindsock(int, int, int);
-void * mymalloc(size_t);
-void * myrealloc(void *, size_t, const char *);
-FILE * myfopen(const char *, const char *);
-int myfclose(FILE *);
-size_t mystrftime(const struct context *, char *, size_t, const char *, const struct timeval *, const char *, int);
-int create_path(const char *);
+void *mymalloc(size_t nbytes);
+void *myrealloc(void *ptr, size_t size, const char *desc);
+FILE *myfopen(const char *path, const char *mode);
+int myfclose(FILE *fh);
+size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *userformat
+            , const struct timeval *tv1, const char *filename, int sqltype);
+int create_path(const char *path);
 
 void util_threadname_set(const char *abbr, int threadnbr, const char *threadname);
 void util_threadname_get(char *threadname);

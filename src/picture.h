@@ -28,15 +28,12 @@ void overlay_smartmask(struct context *cnt, unsigned char *out);
 void overlay_fixed_mask(struct context *cnt, unsigned char *out);
 void put_fixed_mask(struct context *cnt, const char *file);
 void overlay_largest_label(struct context *cnt, unsigned char *out);
-int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image_size, unsigned char *image,
-        int quality, int width, int height);
+int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image_size
+            , unsigned char *image, int quality, int width, int height);
 void put_picture(struct context *cnt, char *file, unsigned char *image, int ftype);
 unsigned char *get_pgm(FILE *picture, int width, int height);
 void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst);
-
-unsigned prepare_exif(unsigned char **exif,
-              const struct context *cnt,
-              const struct timeval *tv_in1,
-              const struct coord *box);
+unsigned prepare_exif(unsigned char **exif, const struct context *cnt
+            , const struct timeval *tv_in1, const struct coord *box);
 
 #endif /* _INCLUDE_PICTURE_H_ */

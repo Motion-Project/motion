@@ -2112,10 +2112,8 @@ int netcam_rtsp_setup(struct context *cnt)
         return 0;
 
     #else  /* No FFmpeg/Libav */
-        /* Stop compiler warnings */
-        if (cnt) {
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("FFmpeg/Libav not found on computer.  No RTSP support"));
-        }
+        (void)cnt;
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("No FFmpeg support"));
         return -1;
     #endif /* End #ifdef HAVE_FFMPEG */
 }
@@ -2159,10 +2157,8 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data)
         return 0;
 
     #else  /* No FFmpeg/Libav */
-        /* Stop compiler warnings */
-        if ((cnt) || (img_data)) {
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("FFmpeg/Libav not found on computer.  No RTSP support"));
-        }
+        (void)cnt;
+        (void)img_data;
         return -1;
     #endif /* End #ifdef HAVE_FFMPEG */
 }
@@ -2245,10 +2241,8 @@ void netcam_rtsp_cleanup(struct context *cnt, int init_retry_flag)
         cnt->rtsp_high = NULL;
 
     #else  /* No FFmpeg/Libav */
-        /* Stop compiler warnings */
-        if ((cnt) || (init_retry_flag)) {
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("FFmpeg/Libav not found on computer.  No RTSP support"));
-        }
+        (void)cnt;
+        (void)init_retry_flag;
         return;
     #endif /* End #ifdef HAVE_FFMPEG */
 

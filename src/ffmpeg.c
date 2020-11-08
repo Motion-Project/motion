@@ -1441,11 +1441,14 @@ static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg)
 
 }
 
-void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUTE_UNUSED, const char *fmt, va_list vl)
+void ffmpeg_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list vl)
 {
 
     char buf[1024];
     char *end;
+
+    (void)ignoreme;
+    (void)errno_flag;
 
     /* Valgrind occasionally reports use of uninitialized values in here when we interrupt
      * some rtsp functions.  The offending value is either fmt or vl and seems to be from a
@@ -1624,9 +1627,7 @@ int ffmpeg_open(struct ffmpeg *ffmpeg)
         return 0;
 
     #else /* No FFMPEG */
-        if (ffmpeg) {
-            MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("No ffmpeg functionality included"));
-        }
+        (void)ffmpeg;
         return -1;
     #endif /* HAVE_FFMPEG */
 
@@ -1656,9 +1657,7 @@ void ffmpeg_close(struct ffmpeg *ffmpeg)
         }
 
     #else
-        if (ffmpeg != NULL) {
-            free(ffmpeg);
-        }
+        (void)ffmpeg;
     #endif // HAVE_FFMPEG
 }
 
@@ -1716,9 +1715,9 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const s
         return retcd;
 
     #else
-        if (ffmpeg && img_data && tv1) {
-            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, _("No ffmpeg support"));
-        }
+        (void)ffmpeg;
+        (void)img_data;
+        (void)tv1;
         return 0;
     #endif // HAVE_FFMPEG
 }
@@ -1736,8 +1735,7 @@ void ffmpeg_reset_movie_start_time(struct ffmpeg *ffmpeg, const struct timeval *
         ffmpeg->start_time.tv_usec = tv1->tv_usec;
 
     #else
-        if (ffmpeg && tv1) {
-            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, _("No ffmpeg support"));
-        }
+        (void)ffmpeg;
+        (void)tv1;
     #endif // HAVE_FFMPEG
 }

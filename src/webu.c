@@ -1251,14 +1251,9 @@ static void webu_answer_strm_type(struct webui_ctx *webui)
 
 }
 
-static mymhd_retcd webu_answer_ctrl(void *cls
-        , struct MHD_Connection *connection
-        , const char *url
-        , const char *method
-        , const char *version
-        , const char *upload_data
-        , size_t     *upload_data_size
-        , void **ptr)
+static mymhd_retcd webu_answer_ctrl(void *cls, struct MHD_Connection *connection
+            , const char *url, const char *method, const char *version
+            , const char *upload_data, size_t *upload_data_size, void **ptr)
 {
 
     /* This function "answers" the request for a webcontrol.*/
@@ -1328,14 +1323,9 @@ static mymhd_retcd webu_answer_ctrl(void *cls
 
 }
 
-static mymhd_retcd webu_answer_strm(void *cls
-        , struct MHD_Connection *connection
-        , const char *url
-        , const char *method
-        , const char *version
-        , const char *upload_data
-        , size_t     *upload_data_size
-        , void **ptr)
+static mymhd_retcd webu_answer_strm(void *cls, struct MHD_Connection *connection
+            , const char *url, const char *method, const char *version
+            , const char *upload_data, size_t *upload_data_size, void **ptr)
 {
 
     /* Answer the request for all the streams*/
@@ -1499,10 +1489,8 @@ static void *webu_mhd_init_one(void *cls, const char *uri, struct MHD_Connection
     return webui;
 }
 
-static void webu_mhd_deinit(void *cls
-    , struct MHD_Connection *connection
-    , void **con_cls
-    , enum MHD_RequestTerminationCode toe)
+static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
+            , void **con_cls, enum MHD_RequestTerminationCode toe)
 {
     /* This is the function called as the connection is closed so we free our webui variables*/
     struct webui_ctx *webui = *con_cls;

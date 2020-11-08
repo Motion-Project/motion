@@ -27,13 +27,11 @@
 #ifndef __JPEGUTILS_H__
 #define __JPEGUTILS_H__
 
-int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
-                    unsigned int width, unsigned int height, unsigned char *volatile img_out);
+int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len
+            , unsigned int width, unsigned int height, unsigned char *volatile img_out);
+int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size, unsigned char *input_image, int width
+            , int height, int quality, struct context *cnt, struct timeval *tv1, struct coord *box);
+int jpgutl_put_grey(unsigned char *dest_image, int image_size, unsigned char *input_image, int width
+            , int height, int quality, struct context *cnt, struct timeval *tv1, struct coord *box);
 
-int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
-                   unsigned char *input_image, int width, int height, int quality,
-                   struct context *cnt, struct timeval *tv1, struct coord *box);
-int jpgutl_put_grey(unsigned char *dest_image, int image_size,
-                   unsigned char *input_image, int width, int height, int quality,
-                   struct context *cnt, struct timeval *tv1, struct coord *box);
 #endif

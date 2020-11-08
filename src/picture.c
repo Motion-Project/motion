@@ -174,10 +174,8 @@ static void put_subjectarea(struct tiff_writing *into, const struct coord *box)
  * exif data to be inserted into jpeg or webp files
  *
  */
-unsigned prepare_exif(unsigned char **exif,
-              const struct context *cnt,
-              const struct timeval *tv_in1,
-              const struct coord *box)
+unsigned prepare_exif(unsigned char **exif, const struct context *cnt
+            , const struct timeval *tv_in1, const struct coord *box)
 {
     /* description, datetime, and subtime are the values that are actually
      * put into the EXIF data
@@ -363,17 +361,14 @@ unsigned prepare_exif(unsigned char **exif,
     return marker_len;
 }
 
-
 #ifdef HAVE_WEBP
 /*
  * put_webp_exif writes the EXIF APP1 chunk to the webp file.
  * It must be called after WebPEncode() and the result
  * can then be written out to webp a file
  */
-static void put_webp_exif(WebPMux* webp_mux,
-              const struct context *cnt,
-              const struct timeval *tv1,
-              const struct coord *box)
+static void put_webp_exif(WebPMux* webp_mux, const struct context *cnt
+            , const struct timeval *tv1, const struct coord *box)
 {
     unsigned char *exif = NULL;
     unsigned exif_len = prepare_exif(&exif, cnt, tv1, box);
@@ -394,8 +389,6 @@ static void put_webp_exif(WebPMux* webp_mux,
 }
 #endif /* HAVE_WEBP */
 
-
-
 #ifdef HAVE_WEBP
 /**
  * put_webp_yuv420p_file
@@ -412,9 +405,8 @@ static void put_webp_exif(WebPMux* webp_mux,
  *
  * Returns nothing
  */
-static void put_webp_yuv420p_file(FILE *fp,
-                  unsigned char *image, int width, int height,
-                  int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
+static void put_webp_yuv420p_file(FILE *fp, unsigned char *image, int width, int height
+            , int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
 {
     /* Create a config present and check for compatible library version */
     WebPConfig webp_config;
@@ -507,10 +499,8 @@ static void put_webp_yuv420p_file(FILE *fp,
  *
  * Returns nothing
  */
-static void put_jpeg_yuv420p_file(FILE *fp,
-                  unsigned char *image, int width, int height,
-                  int quality,
-                  struct context *cnt, struct timeval *tv1, struct coord *box)
+static void put_jpeg_yuv420p_file(FILE *fp, unsigned char *image, int width, int height
+            , int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
 {
     int sz = 0;
     int image_size = cnt->imgs.size_norm;
@@ -522,7 +512,6 @@ static void put_jpeg_yuv420p_file(FILE *fp,
     free(buf);
 
 }
-
 
 /**
  * put_jpeg_grey_file
@@ -539,8 +528,7 @@ static void put_jpeg_yuv420p_file(FILE *fp,
  * Returns nothing
  */
 static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, int height,
-                  int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
-
+            int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
 {
     int sz = 0;
     int image_size = cnt->imgs.size_norm;
@@ -551,7 +539,6 @@ static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, i
 
     free(buf);
 }
-
 
 /**
  * put_ppm_bgr24_file
@@ -775,8 +762,8 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
  *
  * Returns the dest_image_size if successful. Otherwise 0.
  */
-int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image_size, unsigned char *image,
-        int quality, int width, int height)
+int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image_size
+            , unsigned char *image, int quality, int width, int height)
 {
     struct timeval tv1;
 
@@ -797,7 +784,8 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
     return 0;
 }
 
-static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, int quality, int ftype)
+static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image
+            , int quality, int ftype)
 {
     int width, height;
     int passthrough;
@@ -833,7 +821,6 @@ static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *im
        }
     }
 }
-
 
 void put_picture(struct context *cnt, char *file, unsigned char *image, int ftype)
 {

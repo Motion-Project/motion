@@ -57,22 +57,6 @@
 #include <sys/types.h>
 #include <regex.h>
 
-/**
- * ATTRIBUTE_UNUSED:
- *
- * Macro used to signal to GCC unused function parameters
- */
-#ifdef __GNUC__
-  #ifdef HAVE_ANSIDECL_H
-    #include <ansidecl.h>
-  #endif
-  #ifndef ATTRIBUTE_UNUSED
-    #define ATTRIBUTE_UNUSED __attribute__((unused))
-  #endif
-#else
-  #define ATTRIBUTE_UNUSED
-#endif
-
 typedef struct netcam_context *netcam_context_ptr;
 
 #include "netcam_wget.h"
