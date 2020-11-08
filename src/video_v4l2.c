@@ -1450,7 +1450,7 @@ void v4l2_mutex_destroy(void)
     #ifdef HAVE_V4L2
         pthread_mutex_destroy(&v4l2_mutex);
     #else
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled"));
+        return;
     #endif // HAVE_V4L2
 }
 
@@ -1558,9 +1558,8 @@ int v4l2_start(struct context *cnt)
 
         return curdev->fd_device;
     #else
-        if (!cnt) {
-            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
-        }
+        (void)cnt;
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
         return -1;
     #endif // HAVE_V4l2
 }
@@ -1630,9 +1629,7 @@ void v4l2_cleanup(struct context *cnt)
 
 
     #else
-        if (!cnt) {
-            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
-        }
+        (void)cnt;
     #endif // HAVE_V4L2
 }
 
@@ -1677,9 +1674,8 @@ int v4l2_next(struct context *cnt, struct image_data *img_data)
 
         return ret;
     #else
-        if (!cnt || !img_data) {
-            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
-        }
+        (void)cnt;
+        (void)img_data;
         return -1;
     #endif // HAVE_V4L2
 }
@@ -1734,10 +1730,8 @@ int v4l2_palette_valid(char *video_device, int v4l2_palette)
 
         return retcd;
     #else
-        /* We do not have v4l2 so we can not determine whether it is valid or not */
-        if ((video_device) || (v4l2_palette)) {
-            return 0;
-        }
+        (void)video_device;
+        (void)v4l2_palette;
         return 0;
     #endif // HAVE_V4L2
 }
@@ -1768,9 +1762,7 @@ void v4l2_palette_fourcc(int v4l2_palette, char *fourcc)
         return;
     #else
         sprintf(fourcc,"%s","NULL");
-        if (v4l2_palette) {
-            return;
-        }
+        (void)v4l2_palette;
         return;
     #endif // HAVE_V4L2
 }
@@ -1868,11 +1860,11 @@ int v4l2_parms_valid(char *video_device, int v4l2_palette, int v4l2_fps, int v4l
 
         return retcd;
     #else
-        /* We do not have v4l2 so we can not determine whether it is valid or not */
-        if ((video_device) || (v4l2_fps) || (v4l2_palette) ||
-            (v4l2_width)   || (v4l2_height)) {
-                return 0;
-        }
+        (void)video_device;
+        (void)v4l2_fps;
+        (void)v4l2_palette;
+        (void)v4l2_width;
+        (void)v4l2_height;
         return 0;
     #endif // HAVE_V4L2
 }

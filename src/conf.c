@@ -219,17 +219,12 @@ static struct context **copy_netcam_params(struct context **cnt, const char *con
 static struct context **copy_text_double(struct context **cnt, const char *str, int val_ptr);
 static struct context **copy_html_output(struct context **cnt, const char *str, int val_ptr);
 
-static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
-                              int parm, unsigned int threadnr);
-static const char *print_string(struct context **cnt,
-                                char **str ATTRIBUTE_UNUSED, int parm,
-                                unsigned int threadnr);
-static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
-                             int parm, unsigned int threadnr);
-static const char *print_camera(struct context **cnt, char **str,
-                                int parm ATTRIBUTE_UNUSED, unsigned int threadnr);
+static const char *print_bool(struct context **cnt, char **str,int parm, unsigned int threadnr);
+static const char *print_string(struct context **cnt,char **str, int parm, unsigned int threadnr);
+static const char *print_int(struct context **cnt, char **str, int parm, unsigned int threadnr);
+static const char *print_camera(struct context **cnt, char **str, int parm, unsigned int threadnr);
 
-static struct context **config_camera(struct context **cnt, const char *str, int val ATTRIBUTE_UNUSED);
+static struct context **config_camera(struct context **cnt, const char *str, int val);
 
 static void usage(void);
 static void config_parms_intl(void);
@@ -3178,10 +3173,11 @@ const char *config_type(config_param *configparam)
  *
  * Returns const char *.
  */
-static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
-                              int parm, unsigned int threadnr)
+static const char *print_bool(struct context **cnt, char **str, int parm, unsigned int threadnr)
 {
     int val = config_params[parm].conf_value;
+
+    (void)str;
 
     if (threadnr && *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val)) {
         return NULL;
@@ -3204,12 +3200,12 @@ static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
  *         If the value is the same, NULL is returned which means that
  *         the option is not written to the camera config file.
  */
-static const char *print_string(struct context **cnt,
-                                char **str ATTRIBUTE_UNUSED, int parm,
-                                unsigned int threadnr)
+static const char *print_string(struct context **cnt, char **str, int parm, unsigned int threadnr)
 {
     int val = config_params[parm].conf_value;
     const char **cptr0, **cptr1;
+
+    (void)str;
 
     /* Check for NULL also. */
     cptr0 = (const char **)((char *)cnt[0] + val);
@@ -3232,11 +3228,12 @@ static const char *print_string(struct context **cnt,
  *         If the option is the same, NULL is returned which means that
  *         the option is not written to the camera config file.
  */
-static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
-                             int parm, unsigned int threadnr)
+static const char *print_int(struct context **cnt, char **str, int parm, unsigned int threadnr)
 {
     static char retval[20];
     int val = config_params[parm].conf_value;
+
+    (void)str;
 
     if (threadnr && *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val)) {
         return NULL;
@@ -3254,11 +3251,12 @@ static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
  *
  * Returns NULL
  */
-static const char *print_camera(struct context **cnt, char **str,
-                                int parm ATTRIBUTE_UNUSED, unsigned int threadnr)
+static const char *print_camera(struct context **cnt, char **str, int parm, unsigned int threadnr)
 {
     char *retval;
     unsigned int i = 0;
+
+    (void)parm;
 
     if (!str || threadnr) {
         return NULL;
@@ -3346,11 +3344,12 @@ struct context **read_camera_dir(struct context **cnt, const char *str, int val)
  *      val  - is not used. It is defined to be function header compatible with
  *            copy_int, copy_bool and copy_string.
  */
-static struct context **config_camera(struct context **cnt, const char *str,
-                                      int val ATTRIBUTE_UNUSED)
+static struct context **config_camera(struct context **cnt, const char *str, int val)
 {
     int i;
     FILE *fp;
+
+    (void)val;
 
     if (cnt[0]->threadnr) {
         return cnt;

@@ -218,8 +218,9 @@ static void guarantee_huff_tables(j_decompress_ptr dinfo)
  * Initialize source --- called by jpeg_read_header
  * before any data is actually read.
  */
-static void jpgutl_init_source(j_decompress_ptr cinfo ATTRIBUTE_UNUSED)
+static void jpgutl_init_source(j_decompress_ptr cinfo)
 {
+    (void)cinfo;
     /* No work necessary here */
 }
 
@@ -258,8 +259,9 @@ static void jpgutl_skip_data(j_decompress_ptr cinfo, long num_bytes)
  * Terminate source --- called by jpeg_finish_decompress
  * after all data has been read.  Often a no-op.
  */
-static void jpgutl_term_source(j_decompress_ptr cinfo ATTRIBUTE_UNUSED)
+static void jpgutl_term_source(j_decompress_ptr cinfo)
 {
+    (void)cinfo;
     /* No work necessary here */
 }
 
@@ -428,10 +430,8 @@ static GLOBAL(int) _jpeg_mem_size(j_compress_ptr cinfo)
  * It must be called after jpeg_start_compress() but before
  * any image data is written by jpeg_write_scanlines().
  */
-static void put_jpeg_exif(j_compress_ptr cinfo,
-              const struct context *cnt,
-              const struct timeval *tv1,
-              const struct coord *box)
+static void put_jpeg_exif(j_compress_ptr cinfo, const struct context *cnt
+            , const struct timeval *tv1, const struct coord *box)
 {
     unsigned char *exif = NULL;
     unsigned exif_len = prepare_exif(&exif, cnt, tv1, box);
@@ -458,8 +458,8 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
  *  Return Values
  *    Success 0, Failure -1
  */
-int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
-                     unsigned int width, unsigned int height, unsigned char *volatile img_out)
+int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len
+            , unsigned int width, unsigned int height, unsigned char *volatile img_out)
 {
     JSAMPARRAY      line;           /* Array of decomp data lines */
     unsigned char  *wline;          /* Will point to line[0] */
@@ -557,9 +557,8 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
 
 }
 
-int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
-                   unsigned char *input_image, int width, int height, int quality,
-                   struct context *cnt, struct timeval *tv1, struct coord *box)
+int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size, unsigned char *input_image, int width
+            , int height, int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
 
 {
     int i, j, jpeg_image_size;
@@ -645,10 +644,8 @@ int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
     return jpeg_image_size;
 }
 
-
-int jpgutl_put_grey(unsigned char *dest_image, int image_size,
-                   unsigned char *input_image, int width, int height, int quality,
-                   struct context *cnt, struct timeval *tv1, struct coord *box)
+int jpgutl_put_grey(unsigned char *dest_image, int image_size, unsigned char *input_image, int width
+            , int height, int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
 {
     int y, dest_image_size;
     JSAMPROW row_ptr[1];

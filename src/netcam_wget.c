@@ -141,8 +141,8 @@ int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flag
  *  the whitespace, and call PROCFUN with the arguments of HEADER's
  *  contents (after the `:' and space) and ARG.  Otherwise, return 0.
  */
-int header_process(const char *header, const char *name,
-                    int (*procfun)(const char *, void *), void *arg)
+int header_process(const char *header, const char *name
+            , int (*procfun)(const char *, void *), void *arg)
 {
     /* Check whether HEADER matches NAME. */
     while (*name && (tolower (*name) == tolower (*header)))

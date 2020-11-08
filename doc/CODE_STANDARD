@@ -37,9 +37,10 @@ start in column 1.
 --------------------
 RULE 2
 If a line or statement is broken into two lines you will normally want the text
-in the 2nd line to align with text in the first line.  The alignment is done
-using spaces making the code on the following lines appear in a natural way below
-the corresponding code above. Use common sense to enhance readability.
+in the 2nd line to align with text in the first line if it enhances the readability
+of the statement.  The alignment is done using spaces making the code on the
+following lines appear in a natural way below the corresponding code above.
+Use common sense to enhance readability.
 
 Example
 /* allocate some memory and check if that succeeded or not. If it failed
@@ -97,20 +98,14 @@ type function_name(parameters)
     statements
 }
 
-Do not split the function declaration into two lines.
+For function declarations that span more than one line, a triple indent is
+generally used for the second and subsequent lines to avoid excessive lines.
+
+Do not stuff everything on a single line.  Keep the line length to less than
+100 characters.  All variable names should be seen without having to scroll.
+
 Do not put the '{' after the function declaration. Put it on an empty line
 right after. Note that this rule is only for functions.
-
-BAD EXAMPLE
-
-type
-function_name(parameters) {
-    declarations
-    declarations
-
-    statements
-    statements
-}
 
 --------------------
 RULE 5
@@ -197,10 +192,17 @@ if (var1==2||var2==3){
 
 --------------------
 RULE 7
-Comment your code
-That's worth repeating - PLEASE, PLEASE comment your code.
-We receive far too much code which is completely uncommented and where
-variable names are short and say nothing about their function.
+Comment your code but do not be verbose.  Do not literally describe what
+the code does unless it would not be obvious to someone who knows C.
+
+BAD EXAMPLES
+    while (1) {     /* 'Do forever' */
+
+    /*
+     * Now we increment the index
+     */
+    indx++;
+
 Use /* This style of comment for permament comments */ or
 /*
  * This style of comment for comments which
@@ -220,13 +222,16 @@ MACROS are in uppercase.
 camelCase (mix of upper and lower case) is not allowed because it creates too
 many typos for many two finger typers.
 
+RULE 9
+Break code into many smaller functions rather than one extremely long one.
+It is easier to follow the flow when functions are simple and concise.
 
 --------------------
 
 BEST PRACTICES
 Not rules, but these suggestions make code easier to read.
 
-Use lots of white space and empty lines to group code.
+Use white space and empty lines to group code.
 For example, large if statements are easier to read when there is an empty
 line before and after them.
 

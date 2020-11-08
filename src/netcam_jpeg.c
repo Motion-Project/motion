@@ -139,8 +139,9 @@ static void netcam_skip_input_data(j_decompress_ptr cinfo, long num_bytes)
     }
 }
 
-static void netcam_term_source(j_decompress_ptr cinfo ATTRIBUTE_UNUSED)
+static void netcam_term_source(j_decompress_ptr cinfo)
 {
+    (void)cinfo;
 }
 
 /**
@@ -376,9 +377,8 @@ static int netcam_init_jpeg(netcam_context_ptr netcam, j_decompress_ptr cinfo)
  *
  * Returns :  netcam->jpeg_error
  */
-static int netcam_image_conv(netcam_context_ptr netcam,
-                               struct jpeg_decompress_struct *cinfo,
-                                struct image_data *img_data)
+static int netcam_image_conv(netcam_context_ptr netcam, struct jpeg_decompress_struct *cinfo
+            , struct image_data *img_data)
 {
     JSAMPARRAY      line;           /* Array of decomp data lines */
     unsigned char  *wline;          /* Will point to line[0] */
@@ -550,7 +550,6 @@ void netcam_fix_jpeg_header(netcam_context_ptr netcam)
         //               __FUNCTION__, soi_position);
     }
 }
-
 
 /**
  * netcam_get_dimensions

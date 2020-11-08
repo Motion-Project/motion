@@ -72,8 +72,10 @@ static pthread_mutex_t bktr_mutex;
 
 static struct video_dev *viddevs = NULL;
 
-static void catchsignal(int sig ATTRIBUTE_UNUSED)
+static void catchsignal(int sig)
 {
+    (void)sig;
+
     bktr_frame_waiting++;
 }
 
@@ -388,8 +390,8 @@ static void bktr_picture_controls(struct context *cnt, struct video_dev *viddev)
 
 }
 
-static unsigned char *bktr_device_init(struct video_dev *viddev, int width, int height,
-                                int input, int norm, long freq)
+static unsigned char *bktr_device_init(struct video_dev *viddev, int width
+            , int height, int input, int norm, long freq)
 {
     int dev_bktr = viddev->fd_device;
     struct sigaction act, old;
@@ -652,8 +654,8 @@ static int bktr_capture(struct video_dev *viddev, unsigned char *map, int width,
     return 0;
 }
 
-static void bktr_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width,
-                          int height, int input, int norm, int skip, long freq)
+static void bktr_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map
+            , int width, int height, int input, int norm, int skip, long freq)
 {
     if (input != viddev->input || norm != viddev->norm || freq != viddev->frequency) {
         int dummy;
@@ -701,7 +703,7 @@ void bktr_mutex_init(void)
     #ifdef HAVE_BKTR
         pthread_mutex_init(&bktr_mutex, NULL);
     #else
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
+        return;
     #endif
 }
 
@@ -710,7 +712,7 @@ void bktr_mutex_destroy(void)
     #ifdef HAVE_BKTR
         pthread_mutex_destroy(&bktr_mutex);
     #else
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
+        return;
     #endif
 }
 
@@ -803,9 +805,7 @@ void bktr_cleanup(struct context *cnt)
         }
 
     #else
-        if (!cnt) {
-            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
-        }
+        (void)cnt;
     #endif
 
 }
@@ -974,9 +974,7 @@ int bktr_start(struct context *cnt)
 
         return fd_device;
     #else
-        if (!cnt) {
-            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
-        }
+        (void)cnt;
         return -1;
     #endif
 
@@ -1034,9 +1032,8 @@ int bktr_next(struct context *cnt,  struct image_data *img_data)
 
         return ret;
     #else
-        if (!cnt || !img_data) {
-            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
-        }
+        (void)cnt;
+        (void)img_data;
         return -1;
     #endif
 

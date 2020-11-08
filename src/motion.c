@@ -415,8 +415,10 @@ static void sig_handler(int signo)
  *   This function is a POSIX compliant replacement of the commonly used
  *   signal(SIGCHLD, SIG_IGN).
  */
-static void sigchild_handler(int signo ATTRIBUTE_UNUSED)
+static void sigchild_handler(int signo)
 {
+    (void)signo;
+
     #ifdef WNOHANG
         while (waitpid(-1, NULL, WNOHANG) > 0) {
             continue;
@@ -631,7 +633,6 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
  *   max_images - Max number of images to process
  *                Set to IMAGE_BUFFER_FLUSH to send/save all images in buffer
  */
-
 static void process_image_ring(struct context *cnt, unsigned int max_images)
 {
     /*
@@ -3356,7 +3357,6 @@ static void motion_ntc(void)
 
 }
 
-
 /**
  * motion_startup
  *
@@ -3846,7 +3846,7 @@ int main (int argc, char **argv)
  *
  * Returns: a pointer to the allocated memory
  */
-void * mymalloc(size_t nbytes)
+void *mymalloc(size_t nbytes)
 {
     void *dummy = calloc(nbytes, 1);
 
@@ -3964,7 +3964,7 @@ int create_path(const char *path)
  *
  * Returns: the file stream object
  */
-FILE * myfopen(const char *path, const char *mode)
+FILE *myfopen(const char *path, const char *mode)
 {
     /* first, just try to open the file */
     FILE *dummy = fopen(path, mode);
@@ -4006,7 +4006,7 @@ FILE * myfopen(const char *path, const char *mode)
  *
  * Returns: fclose() return value
  */
-int myfclose(FILE* fh)
+int myfclose(FILE *fh)
 {
     int rval = fclose(fh);
 
@@ -4046,8 +4046,7 @@ int myfclose(FILE* fh)
  * host    Replaced with the name of the local machine (see gethostname(2)).
  * fps     Equivalent to %fps.
  */
-static void mystrftime_long (const struct context *cnt,
-                             int width, const char *word, int l, char *out)
+static void mystrftime_long (const struct context *cnt, int width, const char *word, int l, char *out)
 {
 #define SPECIFIERWORD(k) ((strlen(k)==l) && (!strncmp (k, word, l)))
 
@@ -4098,8 +4097,8 @@ static void mystrftime_long (const struct context *cnt,
  *
  * Returns: number of bytes written to the string s
  */
-size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *userformat,
-                  const struct timeval *tv1, const char *filename, int sqltype)
+size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *userformat
+            , const struct timeval *tv1, const char *filename, int sqltype)
 {
     char formatstring[PATH_MAX] = "";
     char tempstring[PATH_MAX] = "";
@@ -4275,6 +4274,7 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
 
     return strftime(s, max, format, &timestamp_tm);
 }
+
 /* This is a temporary location for these util functions.  All the generic utility
  * functions will be collected here and ultimately moved into a new common "util" module
  */
@@ -4380,7 +4380,7 @@ void util_trim(char *parm)
  * Add the parsed out parameter and value to the control array.
 */
 static void util_parms_add(struct params_context *parameters
-    , const char *parm_nm, const char *parm_vl)
+            , const char *parm_nm, const char *parm_vl)
 {
     int indx, retcd;
 
@@ -4429,7 +4429,7 @@ static void util_parms_add(struct params_context *parameters
  * Extract out of the configuration string the name and values at the location specified.
 */
 static void util_parms_extract(struct params_context *parameters
-        , char *parmlne, int indxnm_st, int indxnm_en, int indxvl_st, int indxvl_en)
+            , char *parmlne, int indxnm_st, int indxnm_en, int indxvl_st, int indxvl_en)
 {
     char *parm_nm, *parm_vl;
     int retcd, chksz;
@@ -4659,8 +4659,7 @@ void util_parms_parse(struct params_context *parameters, char *confparm)
 
 }
 
-void util_parms_add_default(struct params_context *parameters
-        , const char *parm_nm, const char *parm_vl)
+void util_parms_add_default(struct params_context *parameters, const char *parm_nm, const char *parm_vl)
 {
 
     int indx, dflt;

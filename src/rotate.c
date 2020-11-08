@@ -140,8 +140,8 @@ static void flip_inplace_vertical(unsigned char *src, int width, int height)
  *
  * Returns: nothing
  */
-static void rot90cw(unsigned char *src, register unsigned char *dst, int size,
-                    int width, int height)
+static void rot90cw(unsigned char *src, register unsigned char *dst
+            ,int size, int width, int height)
 {
     unsigned char *endp;
     register unsigned char *base;
@@ -173,8 +173,8 @@ static void rot90cw(unsigned char *src, register unsigned char *dst, int size,
  *
  * Returns: nothing
  */
-static inline void rot90ccw(unsigned char *src, register unsigned char *dst,
-                            int size, int width, int height)
+static inline void rot90ccw(unsigned char *src, register unsigned char *dst
+            ,int size, int width, int height)
 {
     unsigned char *endp;
     register unsigned char *base;
