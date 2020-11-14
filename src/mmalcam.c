@@ -27,6 +27,7 @@
 
 #include "translate.h"
 #include "motion.h"
+#include "util.h"
 #include "rotate.h"
 
 #ifdef HAVE_MMAL

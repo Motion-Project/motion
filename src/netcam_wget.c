@@ -28,6 +28,9 @@
  */
 
 #include "motion.h"
+#include "util.h"
+#include "netcam.h"
+#include "netcam_wget.h"
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/socket.h>

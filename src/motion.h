@@ -27,23 +27,12 @@
 /* Forward declarations, used in functional definitions of headers */
 struct images;
 struct image_data;
+struct rtsp_context;
+struct ffmpeg;
 
 #include "config.h"
 
 /* Includes */
-#if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
-    #include <mysql.h>
-#endif
-
-#ifdef HAVE_SQLITE3
-    #include <sqlite3.h>
-#endif
-
-#ifdef HAVE_PGSQL
-    #include <libpq-fe.h>
-#endif
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #ifndef __USE_GNU
@@ -67,24 +56,60 @@ struct image_data;
 #include <stdint.h>
 #include <pthread.h>
 #include <microhttpd.h>
+#include <regex.h>
+
 
 #if defined(HAVE_PTHREAD_NP_H)
     #include <pthread_np.h>
 #endif
 
+#if defined(HAVE_MYSQL)
+    #include <mysql.h>
+#endif
+
+#if defined(HAVE_MARIADB)
+    #include <mysql.h>
+#endif
+
+#ifdef HAVE_SQLITE3
+    #include <sqlite3.h>
+#endif
+
+#ifdef HAVE_PGSQL
+    #include <libpq-fe.h>
+#endif
+
 #ifdef HAVE_FFMPEG
+
     #define MYFFVER (LIBAVFORMAT_VERSION_MAJOR * 1000)+LIBAVFORMAT_VERSION_MINOR
+
+    #include <errno.h>
+    #include <libavformat/avformat.h>
+    #include <libavutil/imgutils.h>
+    #include <libavutil/mathematics.h>
+    #include <libavdevice/avdevice.h>
+    #include <libavcodec/avcodec.h>
+    #include <libavformat/avio.h>
+    #include <libavutil/avutil.h>
+    #include <libswscale/swscale.h>
+    #if (MYFFVER >= 57083)
+        #include "libavutil/hwcontext.h"
+    #endif
 #else
     #define MYFFVER 0
 #endif
 
-#include "logger.h"
-#include "conf.h"
+#ifndef TRUE
+    #define TRUE 1
+#endif
 
+#ifndef FALSE
+    #define FALSE 0
+#endif
+
+/* Due to the pointer magic method of conf, the conf.h and track.h must stay in here */
+#include "conf.h"
 #include "track.h"
-#include "netcam.h"
-#include "netcam_rtsp.h"
-#include "ffmpeg.h"
 
 #ifdef HAVE_MMAL
     #include "mmalcam.h"
@@ -450,12 +475,16 @@ struct context {
         sqlite3 *database_sqlite3;
     #endif
 
-    #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
-        MYSQL *database;
+    #if defined(HAVE_MYSQL)
+        MYSQL *database_mysql;
+    #endif
+
+    #if defined(HAVE_MARIADB)
+        MYSQL *database_mariadb;
     #endif
 
     #ifdef HAVE_PGSQL
-        PGconn *database_pg;
+        PGconn *database_pgsql;
     #endif
 
     int movie_fps;
@@ -522,27 +551,6 @@ extern FILE *ptr_logfile;
 
 /* TLS keys below */
 extern pthread_key_t tls_key_threadnr; /* key for thread number */
-
-void *mymalloc(size_t nbytes);
-void *myrealloc(void *ptr, size_t size, const char *desc);
-FILE *myfopen(const char *path, const char *mode);
-int myfclose(FILE *fh);
-size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *userformat
-            , const struct timeval *tv1, const char *filename, int sqltype);
-int create_path(const char *path);
-
-void util_threadname_set(const char *abbr, int threadnbr, const char *threadname);
-void util_threadname_get(char *threadname);
-int util_check_passthrough(struct context *cnt);
-void util_trim(char *parm);
-void util_parms_free(struct params_context *parameters);
-void util_parms_parse(struct params_context *parameters, char *confparm);
-void util_parms_add_default(struct params_context *parameters, const char *parm_nm, const char *parm_vl);
-
-int mystrceq(const char *var1, const char *var2);
-int mystrcne(const char *var1, const char *var2);
-int mystreq(const char *var1, const char *var2);
-int mystrne(const char *var1, const char *var2);
-
+void motion_remove_pid(void);
 
 #endif /* _INCLUDE_MOTION_H */

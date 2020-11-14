@@ -23,11 +23,13 @@
  *
  */
 #include "translate.h"
-#include "motion.h"  /* Needs to come first, because _GNU_SOURCE_ set there. */
-
+#include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include <ctype.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include "netcam.h"
 #include "netcam_ftp.h"
 
 /**

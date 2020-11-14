@@ -42,7 +42,10 @@
 #include <stdio.h>
 #include "translate.h"
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include "rotate.h"
+#include "netcam.h"
 #include "netcam_rtsp.h"
 #include "video_v4l2.h"  /* Needed to validate palette for v4l2 via netcam */
 

@@ -54,6 +54,8 @@
 #include "translate.h"
 #include "config.h"
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include "jpegutils.h"
 #include "picture.h"    /* For the prepare_exif */
 #include <setjmp.h>

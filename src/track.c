@@ -23,6 +23,8 @@
 #include <math.h>
 #include "translate.h"
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 
 #ifdef HAVE_V4L2
     #if defined(HAVE_LINUX_VIDEODEV2_H)

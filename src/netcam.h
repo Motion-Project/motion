@@ -55,7 +55,6 @@
 #include <setjmp.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <regex.h>
 
 typedef struct netcam_context *netcam_context_ptr;
 

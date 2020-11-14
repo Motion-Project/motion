@@ -36,164 +36,14 @@
 
 #include "translate.h"
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
+#include "netcam.h"
+#include "netcam_rtsp.h"
+#include "ffmpeg.h"
 
 #ifdef HAVE_FFMPEG
 
-/****************************************************************************
- *  The section below is the "my" section of functions.
- *  These are designed to be extremely simple version specific
- *  variants of the libav functions.
- ****************************************************************************/
-#if ( MYFFVER > 54006)
-    #define MY_FLAG_READ       AVIO_FLAG_READ
-    #define MY_FLAG_WRITE      AVIO_FLAG_WRITE
-    #define MY_FLAG_READ_WRITE AVIO_FLAG_READ_WRITE
-#else  //Older versions
-    #define MY_FLAG_READ       URL_RDONLY
-    #define MY_FLAG_WRITE      URL_WRONLY
-    #define MY_FLAG_READ_WRITE URL_RDWR
-#endif
-
-/*********************************************/
-#if ( MYFFVER >= 56000)
-    #define MY_CODEC_ID_MSMPEG4V2 AV_CODEC_ID_MSMPEG4V2
-    #define MY_CODEC_ID_FLV1      AV_CODEC_ID_FLV1
-    #define MY_CODEC_ID_FFV1      AV_CODEC_ID_FFV1
-    #define MY_CODEC_ID_NONE      AV_CODEC_ID_NONE
-    #define MY_CODEC_ID_MPEG2VIDEO AV_CODEC_ID_MPEG2VIDEO
-    #define MY_CODEC_ID_H264      AV_CODEC_ID_H264
-    #define MY_CODEC_ID_HEVC      AV_CODEC_ID_HEVC
-#else
-    #define MY_CODEC_ID_MSMPEG4V2 CODEC_ID_MSMPEG4V2
-    #define MY_CODEC_ID_FLV1      CODEC_ID_FLV1
-    #define MY_CODEC_ID_FFV1      CODEC_ID_FFV1
-    #define MY_CODEC_ID_NONE      CODEC_ID_NONE
-    #define MY_CODEC_ID_MPEG2VIDEO CODEC_ID_MPEG2VIDEO
-    #define MY_CODEC_ID_H264      CODEC_ID_H264
-    #define MY_CODEC_ID_HEVC      CODEC_ID_H264
-#endif
-
-/*********************************************/
-#if ( MYFFVER >= 57000)
-    #define MY_CODEC_FLAG_GLOBAL_HEADER AV_CODEC_FLAG_GLOBAL_HEADER
-    #define MY_CODEC_FLAG_QSCALE        AV_CODEC_FLAG_QSCALE
-#else
-    #define MY_CODEC_FLAG_GLOBAL_HEADER CODEC_FLAG_GLOBAL_HEADER
-    #define MY_CODEC_FLAG_QSCALE        CODEC_FLAG_QSCALE
-#endif
-
-/*********************************************/
-AVFrame *my_frame_alloc(void)
-{
-    AVFrame *pic;
-    #if ( MYFFVER >= 55000)
-        pic = av_frame_alloc();
-    #else
-        pic = avcodec_alloc_frame();
-    #endif
-    return pic;
-}
-/*********************************************/
-void my_frame_free(AVFrame *frame)
-{
-    #if ( MYFFVER >= 55000)
-        av_frame_free(&frame);
-    #else
-        av_freep(&frame);
-    #endif
-}
-/*********************************************/
-int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height)
-{
-    int retcd = 0;
-    #if ( MYFFVER >= 57000)
-        int align = 1;
-        retcd = av_image_get_buffer_size(pix_fmt, width, height, align);
-    #else
-        retcd = avpicture_get_size(pix_fmt, width, height);
-    #endif
-    return retcd;
-}
-/*********************************************/
-int my_image_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum MyPixelFormat pix_fmt,int width, int height,int dest_size)
-{
-    int retcd = 0;
-    #if ( MYFFVER >= 57000)
-        int align = 1;
-        retcd = av_image_copy_to_buffer((uint8_t *)buffer_ptr,dest_size
-            ,(const uint8_t * const*)frame,frame->linesize,pix_fmt,width,height,align);
-    #else
-        retcd = avpicture_layout((const AVPicture*)frame,pix_fmt,width,height
-            ,(unsigned char *)buffer_ptr,dest_size);
-    #endif
-    return retcd;
-}
-/*********************************************/
-int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height)
-{
-    int retcd = 0;
-    #if ( MYFFVER >= 57000)
-        int align = 1;
-        retcd = av_image_fill_arrays(
-            frame->data
-            ,frame->linesize
-            ,buffer_ptr
-            ,pix_fmt
-            ,width
-            ,height
-            ,align
-        );
-    #else
-        retcd = avpicture_fill(
-            (AVPicture *)frame
-            ,buffer_ptr
-            ,pix_fmt
-            ,width
-            ,height);
-    #endif
-    return retcd;
-}
-/*********************************************/
-void my_packet_unref(AVPacket pkt)
-{
-    #if ( MYFFVER >= 57000)
-        av_packet_unref(&pkt);
-    #else
-        av_free_packet(&pkt);
-    #endif
-}
-/*********************************************/
-void my_avcodec_close(AVCodecContext *codec_context)
-{
-    #if ( MYFFVER >= 57041)
-        avcodec_free_context(&codec_context);
-    #else
-        avcodec_close(codec_context);
-    #endif
-}
-/*********************************************/
-int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt)
-{
-    #if ( MYFFVER >= 55000)
-        return av_packet_ref(dest_pkt, src_pkt);
-    #else
-        /* Old versions of libav do not support copying packet
-        * We therefore disable the pass through recording and
-        * for this function, simply do not do anything
-        */
-        if (dest_pkt == src_pkt ) {
-            return 0;
-        } else {
-            return 0;
-        }
-    #endif
-}
-/*********************************************/
-
-/****************************************************************************
- ****************************************************************************
- ****************************************************************************/
-/*********************************************/
 static void ffmpeg_free_nal(struct ffmpeg *ffmpeg)
 {
     if (ffmpeg->nal_info) {
@@ -1074,7 +924,7 @@ static int ffmpeg_set_outputfile(struct ffmpeg *ffmpeg)
         if (!(ffmpeg->oc->oformat->flags & AVFMT_NOFILE)) {
             if (avio_open(&ffmpeg->oc->pb, ffmpeg->filename, MY_FLAG_WRITE) < 0) {
                 if (errno == ENOENT) {
-                    if (create_path(ffmpeg->filename) == -1) {
+                    if (mycreate_path(ffmpeg->filename) == -1) {
                         ffmpeg_free_context(ffmpeg);
                         return -1;
                     }

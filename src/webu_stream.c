@@ -27,6 +27,8 @@
  */
 
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include "webu.h"
 #include "webu_stream.h"
 #include "translate.h"

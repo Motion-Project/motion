@@ -240,7 +240,5 @@ struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
 struct context **copy_uri(struct context **cnt, const char *str, int val);
 const char *config_type(config_param *configparam);
 struct context **read_camera_dir(struct context **cnt, const char *str, int val);
-char *mystrcpy(char *to, const char *from);
-char *mystrdup(const char *from);
 
 #endif /* _INCLUDE_CONF_H */
