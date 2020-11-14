@@ -225,7 +225,8 @@ static int dbse_init_sqlite3(struct context *cnt,struct context **cntlist)
             }
         }
     #else
-        (void)cnt;  /* Avoid compiler warnings */
+        (void)cnt;
+        (void)cntlist;
     #endif /* HAVE_SQLITE3 */
 
     return 0;
