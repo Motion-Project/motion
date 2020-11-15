@@ -20,7 +20,9 @@
  *    Copyright 2001 by Jeroen Vreeken (pe1rxq@amsat.org)
  *
  */
+
 #include "motion.h"
+#include "util.h"
 #include "draw.h"
 #include "alg.h"
 

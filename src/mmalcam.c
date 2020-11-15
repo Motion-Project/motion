@@ -27,6 +27,9 @@
 
 #include "translate.h"
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
+#include "netcam.h"
 #include "rotate.h"
 
 #ifdef HAVE_MMAL
@@ -79,6 +82,8 @@ static void check_disable_port(MMAL_PORT_T *port)
 
 static void camera_control_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 {
+    (void)port;
+
     if (buffer->cmd != MMAL_EVENT_PARAMETER_CHANGED) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("Received unexpected camera control callback event, 0x%08x"), buffer->cmd);
@@ -409,7 +414,7 @@ int mmalcam_next(struct context *cnt,  struct image_data *img_data)
     MMAL_BUFFER_HEADER_T *camera_buffer = mmal_queue_wait(mmalcam->camera_buffer_queue);
 
     if (camera_buffer->cmd == 0 && (camera_buffer->flags & MMAL_BUFFER_HEADER_FLAG_FRAME_END)
-            && camera_buffer->length >= cnt->imgs.size_norm) {
+            && (int)camera_buffer->length >= cnt->imgs.size_norm) {
         mmal_buffer_header_mem_lock(camera_buffer);
         memcpy(img_data->image_norm, camera_buffer->data, cnt->imgs.size_norm);
         mmal_buffer_header_mem_unlock(camera_buffer);

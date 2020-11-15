@@ -44,6 +44,8 @@
  */
 #include "translate.h"
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include "rotate.h"
 #include <stdint.h>
 #if defined(__APPLE__)

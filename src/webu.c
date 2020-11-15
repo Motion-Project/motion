@@ -46,6 +46,8 @@
 #include <sys/socket.h>
 
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include "webu.h"
 #include "webu_html.h"
 #include "webu_text.h"

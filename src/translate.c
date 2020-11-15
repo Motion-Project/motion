@@ -22,6 +22,7 @@
 
 #include <locale.h>
 #include "motion.h"
+#include "logger.h"
 #include "translate.h"
 
 int nls_enabled;

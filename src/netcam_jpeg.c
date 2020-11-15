@@ -28,7 +28,10 @@
  */
 #include "translate.h"
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include "rotate.h"
+#include "netcam.h"
 #include "netcam_jpeg.h"
 
 /* This is a workaround regarding these defines.  The config.h file defines

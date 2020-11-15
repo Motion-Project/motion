@@ -24,9 +24,12 @@
  */
 #include "translate.h"
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include "picture.h"
 #include "jpegutils.h"
 #include "event.h"
+#include "netcam.h"
 
 #include <assert.h>
 

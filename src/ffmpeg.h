@@ -40,24 +40,7 @@ enum USER_CODEC {
 };
 
 #ifdef HAVE_FFMPEG
-    #include <errno.h>
-    #include <libavformat/avformat.h>
-    #include <libavutil/imgutils.h>
-    #include <libavutil/mathematics.h>
-    #include <libavdevice/avdevice.h>
 
-    #if ( MYFFVER >= 56000)
-        #define MY_PIX_FMT_YUV420P   AV_PIX_FMT_YUV420P
-        #define MY_PIX_FMT_YUVJ420P  AV_PIX_FMT_YUVJ420P
-        #define MyPixelFormat AVPixelFormat
-    #else  //Old ffmpeg pixel formats
-        #define MY_PIX_FMT_YUV420P   PIX_FMT_YUV420P
-        #define MY_PIX_FMT_YUVJ420P  PIX_FMT_YUVJ420P
-        #define MyPixelFormat PixelFormat
-    #endif  //myffver >= 56000
-#endif // HAVE_FFMPEG
-
-#ifdef HAVE_FFMPEG
     struct ffmpeg {
         AVFormatContext *oc;
         AVStream *video_st;
@@ -108,19 +91,6 @@ enum USER_CODEC {
         int            passthrough;
     };
 #endif // HAVE_FFMPEG
-
-
-
-#ifdef HAVE_FFMPEG
-    AVFrame *my_frame_alloc(void);
-    void my_frame_free(AVFrame *frame);
-    void my_packet_unref(AVPacket pkt);
-    void my_avcodec_close(AVCodecContext *codec_context);
-    int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height);
-    int my_image_copy_to_buffer(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height,int dest_size);
-    int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height);
-    int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt);
-#endif /* HAVE_FFMPEG */
 
 void ffmpeg_global_init(void);
 void ffmpeg_global_deinit(void);

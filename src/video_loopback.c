@@ -24,6 +24,8 @@
  */
 #include "translate.h"
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 
 #if (defined(HAVE_V4L2)) && (!defined(BSD))
 

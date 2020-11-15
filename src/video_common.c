@@ -24,7 +24,11 @@
  */
 #include "translate.h"
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include "video_common.h"
+#include "netcam.h"
+#include "netcam_rtsp.h"
 #include "video_v4l2.h"
 #include "video_bktr.h"
 #include "jpegutils.h"

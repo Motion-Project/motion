@@ -26,7 +26,10 @@
  ***********************************************************/
 
 #include "translate.h"
-#include "motion.h"  /* Needs to come first, because _GNU_SOURCE_ set there. */
+#include "motion.h"
+#include "util.h"
+#include "logger.h"
+#include "netcam.h"
 #include "netcam_http.h"
 
 #define CONNECT_TIMEOUT        10     /* Timeout on remote connection attempt */

@@ -23,9 +23,9 @@
 
 #include "translate.h"
 #include "motion.h"
-
-#include <regex.h>                    /* For parsing of the URL */
-
+#include "util.h"
+#include "logger.h"
+#include "netcam.h"
 #include "netcam_http.h"
 #include "netcam_ftp.h"
 

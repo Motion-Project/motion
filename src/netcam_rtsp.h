@@ -34,16 +34,6 @@ struct imgsize_context {
 
 #ifdef HAVE_FFMPEG
 
-    #include <libavcodec/avcodec.h>
-    #include <libavformat/avformat.h>
-    #include <libavformat/avio.h>
-    #include <libavutil/avutil.h>
-    #include <libavutil/imgutils.h>
-    #include <libswscale/swscale.h>
-    #if (MYFFVER >= 57083)
-        #include "libavutil/hwcontext.h"
-    #endif
-
     struct packet_item{
         AVPacket                  packet;
         int64_t                   idnbr;

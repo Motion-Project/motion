@@ -25,6 +25,7 @@
  */
 
 #include "logger.h"   /* already includes motion.h */
+#include "util.h"
 #include <stdarg.h>
 
 static int log_mode = LOGMODE_SYSLOG;
