@@ -46,7 +46,7 @@ cleanall: distclean
 all-local:
 	@rm -f po/*.po\~
 
-check:
+maintainer-check:
 	./configure --with-prototype-flags                   && $(MAKE) clean && $(MAKE)
 	./configure --with-prototype-flags --without-mariadb && $(MAKE) clean && $(MAKE)
 	./configure --with-prototype-flags --without-ffmpeg  && $(MAKE) clean && $(MAKE)
