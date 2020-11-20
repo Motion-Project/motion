@@ -109,7 +109,7 @@ script:
   - if [ $TRAVIS_OS_NAME = osx ]; then
       ./configure --with-developer-flags && make;
     elif [ "$DOCKER_IMAGE" = "alpine:latest" ]; then
-      docker exec $(docker ps -aq) /bin/sh -c './configure && make check';
+      docker exec $(docker ps -aq) /bin/sh -c './configure && make maintainer-check';
     elif [ "x$DOCKER_IMAGE" != "x" ]; then
-      docker exec $(docker ps -aq) /bin/bash -c './configure && make check';
+      docker exec $(docker ps -aq) /bin/bash -c './configure && make maintainer-check';
     fi;
