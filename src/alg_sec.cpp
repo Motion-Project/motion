@@ -39,10 +39,10 @@
 
 using namespace cv;
 
-
 static void algsec_img_show(ctx_cam *cam, Mat &mat_src
-    , std::vector<Rect> &src_pos, std::vector<double> &src_weights
-    , std::string algmethod, ctx_algsec_model &algmdl){
+        , std::vector<Rect> &src_pos, std::vector<double> &src_weights
+        , std::string algmethod, ctx_algsec_model &algmdl)
+{
 
     std::vector<Rect> fltr_pos;
     std::vector<double> fltr_weights;
@@ -61,17 +61,17 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
         Rect r = src_pos[indx0];
         double w = src_weights[indx0];
 
-        for (indx1=0; indx1<src_pos.size(); indx1++){
+        for (indx1=0; indx1<src_pos.size(); indx1++) {
             if (indx1 != indx0 && (r & src_pos[indx1])==r) break;
         }
-        if ((indx1==src_pos.size()) && (w > algmdl.threshold_motion)){
+        if ((indx1==src_pos.size()) && (w > algmdl.threshold_motion)) {
             fltr_pos.push_back(r);
             fltr_weights.push_back(w);
             algmdl.isdetected = true;
         }
     }
 
-    if (algmdl.isdetected){
+    if (algmdl.isdetected) {
         for (indx0=0; indx0<fltr_pos.size(); indx0++) {
             Rect r = fltr_pos[indx0];
             r.x += cvRound(r.width*0.1);
@@ -90,7 +90,7 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
      * the first image, we rely upon the connection count to tell us whether we
      * need to expend the CPU to compress and load the secondary images */
     if ((cam->stream.secondary.cnct_count >0) ||
-        (cam->imgs.size_secondary == 0)){
+        (cam->imgs.size_secondary == 0)) {
         param[0] = cv::IMWRITE_JPEG_QUALITY;
         param[1] = 75;
         cv::imencode(".jpg", mat_src, buff, param);
@@ -101,7 +101,8 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
     }
 }
 
-static void algsec_img_roi(ctx_cam *cam, Mat &mat_src, Mat &mat_dst){
+static void algsec_img_roi(ctx_cam *cam, Mat &mat_src, Mat &mat_dst)
+{
 
     cv::Rect roi;
     int width,height, x, y;
@@ -111,25 +112,35 @@ static void algsec_img_roi(ctx_cam *cam, Mat &mat_src, Mat &mat_dst){
     width = cam->current_image->location.width;
     height= cam->current_image->location.height;
 
-    if (width > cam->imgs.height) width =cam->imgs.height;
-    if (height > cam->imgs.width) height =cam->imgs.width;
+    if (width > cam->imgs.height) {
+        width =cam->imgs.height;
+    }
+    if (height > cam->imgs.width) {
+        height =cam->imgs.width;
+    }
 
-    if (width > height){
-        height= width;
+    if (width > height) {
+        height = width;
         x = cam->current_image->location.minx;
         y = cam->current_image->location.miny - ((width - height)/2);
 
-        if (y < 0) y = 0;
-        if ((y+height) > cam->imgs.height) y = cam->imgs.height - height;
-
+        if (y < 0) {
+            y = 0;
+        }
+        if ((y+height) > cam->imgs.height) {
+            y = cam->imgs.height - height;
+        }
     } else {
         width = height;
         x = cam->current_image->location.minx - ((height - width)/2);
         y = cam->current_image->location.miny;
 
-        if (x < 0) x = 0;
-        if ((x+width) > cam->imgs.width) x = cam->imgs.width - width;
-
+        if (x < 0) {
+            x = 0;
+        }
+        if ((x+width) > cam->imgs.width) {
+            x = cam->imgs.width - width;
+        }
     }
 
     roi.x = x;
@@ -156,20 +167,21 @@ static void algsec_img_roi(ctx_cam *cam, Mat &mat_src, Mat &mat_dst){
 
 }
 
-static void algsec_detect_hog(ctx_cam *cam, ctx_algsec_model &algmdl){
+static void algsec_detect_hog(ctx_cam *cam, ctx_algsec_model &algmdl)
+{
 
     std::vector<double> detect_weights;
     std::vector<Rect> detect_pos;
     Mat mat_dst;
 
     try {
-        if (algmdl.imagetype == "color"){
+        if (algmdl.imagetype == "color") {
             /* AFAIK, the detector uses grey so users shouldn't really use this*/
             Mat mat_src = Mat(cam->imgs.height*3/2, cam->imgs.width
                 , CV_8UC1, (void*)cam->algsec->image_norm);
             cvtColor(mat_src, mat_dst, COLOR_YUV2RGB_YV12);
 
-        } else if (algmdl.imagetype == "roi"){
+        } else if (algmdl.imagetype == "roi") {
             /*Discard really small and large images */
             if ((cam->current_image->location.width < 64) ||
                 (cam->current_image->location.height < 64) ||
@@ -206,7 +218,8 @@ static void algsec_detect_hog(ctx_cam *cam, ctx_algsec_model &algmdl){
     }
 }
 
-static void algsec_detect_haar(ctx_cam *cam, ctx_algsec_model &algmdl){
+static void algsec_detect_haar(ctx_cam *cam, ctx_algsec_model &algmdl)
+{
 
     std::vector<double> detect_weights;
     std::vector<Rect> detect_pos;
@@ -214,13 +227,13 @@ static void algsec_detect_haar(ctx_cam *cam, ctx_algsec_model &algmdl){
     Mat mat_dst;
 
     try {
-        if (algmdl.imagetype == "color"){
+        if (algmdl.imagetype == "color") {
             /* AFAIK, the detector uses grey so users shouldn't really use this*/
             Mat mat_src = Mat(cam->imgs.height*3/2, cam->imgs.width
                 , CV_8UC1, (void*)cam->algsec->image_norm);
             cvtColor(mat_src, mat_dst, COLOR_YUV2RGB_YV12);
 
-        } else if (algmdl.imagetype == "roi"){
+        } else if (algmdl.imagetype == "roi") {
             /*Discard really small and large images */
             if ((cam->current_image->location.width < 64) ||
                 (cam->current_image->location.height < 64) ||
@@ -254,16 +267,17 @@ static void algsec_detect_haar(ctx_cam *cam, ctx_algsec_model &algmdl){
     }
 }
 
-static void algsec_load_haar(ctx_algsec_model &algmdl){
+static void algsec_load_haar(ctx_algsec_model &algmdl)
+{
 
     /* If loading fails, reset the method to invalidate detection */
     try {
-        if (algmdl.modelfile == ""){
+        if (algmdl.modelfile == "") {
             algmdl.method = 0;
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("No secondary model specified."));
             return;
         }
-        if (!algmdl.haar_cascade.load(algmdl.modelfile)){
+        if (!algmdl.haar_cascade.load(algmdl.modelfile)) {
             /* Loading failed, reset method*/
             algmdl.method = 0;
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
@@ -278,7 +292,8 @@ static void algsec_load_haar(ctx_algsec_model &algmdl){
     }
 }
 
-static void algsec_parms_log(ctx_algsec_model &algmdl){
+static void algsec_parms_log(ctx_algsec_model &algmdl)
+{
 
     motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %s","modelfile", algmdl.modelfile.c_str());
     motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %0.6f","threshold_motion", algmdl.threshold_motion);
@@ -297,7 +312,8 @@ static void algsec_parms_log(ctx_algsec_model &algmdl){
 
 }
 
-static void algsec_parms_defaults(ctx_algsec_model &algmdl){
+static void algsec_parms_defaults(ctx_algsec_model &algmdl)
+{
 
     algmdl.threshold_motion = 1.1;
     algmdl.imagetype = "full";
@@ -310,7 +326,7 @@ static void algsec_parms_defaults(ctx_algsec_model &algmdl){
     algmdl.haar_minsize = 8;
     algmdl.haar_minneighbors = 8;
 
-    if (algmdl.method == 1){
+    if (algmdl.method == 1) {
         algmdl.scalefactor = 1.1;
         algmdl.threshold_model = 1.4;
     } else {
@@ -343,7 +359,8 @@ static void algsec_parms_parse_microdetail(std::string &vin, ctx_algsec_model &a
 }
 
 /* Parse parm based upon equals*/
-static void algsec_parms_parse_detail(std::string &vin, ctx_algsec_model &algmdl){
+static void algsec_parms_parse_detail(std::string &vin, ctx_algsec_model &algmdl)
+{
 
     /* modelfile=/home/whatever/model.xml,threshold_motion=50*/
 
@@ -408,7 +425,7 @@ static void algsec_parms_parse(ctx_cam *cam){
     std::string tmp;
 
 
-    if (cam->algsec->models.config != ""){
+    if (cam->algsec->models.config != "") {
         st_comma = 0;
         en_comma = cam->algsec->models.config.find(',', st_comma);
         while (en_comma != std::string::npos){

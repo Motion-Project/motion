@@ -59,7 +59,8 @@ typedef struct capent {const char *cap; unsigned int code;} capentT;
         {"Last",0}
 };
 
-static int vlp_open_vidpipe(void) {
+static int vlp_open_vidpipe(void)
+{
 
     int pipe_fd = -1;
     char pipepath[255];
@@ -130,7 +131,8 @@ static int vlp_open_vidpipe(void) {
     return pipe_fd;
 }
 
-static void vlp_show_vcap(struct v4l2_capability *cap) {
+static void vlp_show_vcap(struct v4l2_capability *cap)
+{
     unsigned int vers = cap->version;
     unsigned int c    = cap->capabilities;
     int i;
@@ -147,7 +149,8 @@ static void vlp_show_vcap(struct v4l2_capability *cap) {
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "------------------------");
 }
 
-static void vlp_show_vfmt(struct v4l2_format *v) {
+static void vlp_show_vfmt(struct v4l2_format *v)
+{
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "type: type:           %d",v->type);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.width:        %d",v->fmt.pix.width);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.height:       %d",v->fmt.pix.height);
@@ -159,7 +162,8 @@ static void vlp_show_vfmt(struct v4l2_format *v) {
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "------------------------");
 }
 
-int vlp_startpipe(const char *dev_name, int width, int height) {
+int vlp_startpipe(const char *dev_name, int width, int height)
+{
     int dev;
     struct v4l2_format v;
     struct v4l2_capability vc;
@@ -219,7 +223,8 @@ int vlp_startpipe(const char *dev_name, int width, int height) {
 
 #endif /* HAVE_V4L2 && !BSD */
 
-int vlp_putpipe(int dev, unsigned char *image, int imgsize) {
+int vlp_putpipe(int dev, unsigned char *image, int imgsize)
+{
 
     #if (defined(HAVE_V4L2)) && (!defined(BSD))
         return write(dev, image, imgsize);
@@ -231,7 +236,8 @@ int vlp_putpipe(int dev, unsigned char *image, int imgsize) {
     #endif
 }
 
-void vlp_init(struct ctx_cam *cam){
+void vlp_init(struct ctx_cam *cam)
+{
 
     #if defined(HAVE_V4L2) && !defined(BSD)
         /* open video loopback devices if enabled */

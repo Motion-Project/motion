@@ -25,19 +25,6 @@
 #include "track.hpp"
 
 #ifdef HAVE_V4L2
-    /*UVC*/
-    #ifndef V4L2_CID_PAN_RELATIVE
-        #define V4L2_CID_PAN_RELATIVE                   (V4L2_CID_CAMERA_CLASS_BASE+4)
-    #endif
-    #ifndef V4L2_CID_TILT_RELATIVE
-        #define V4L2_CID_TILT_RELATIVE                  (V4L2_CID_CAMERA_CLASS_BASE+5)
-    #endif
-    #ifndef V4L2_CID_PAN_RESET
-        #define V4L2_CID_PAN_RESET                      (V4L2_CID_CAMERA_CLASS_BASE+6)
-    #endif
-    #ifndef V4L2_CID_TILT_RESET
-        #define V4L2_CID_TILT_RESET                     (V4L2_CID_CAMERA_CLASS_BASE+7)
-    #endif
     #define INCPANTILT 64 // 1 degree
     #include <linux/videodev2.h>
 #endif
@@ -46,13 +33,9 @@
 #define TRACK_TYPE_UVC          2
 
 
-/******************************************************************************
-    Logitech QuickCam Sphere camera tracking code by oBi
-    Modify by Dirk Wesenberg(Munich) 30.03.07
-    - for new API in uvcvideo
-    - add Trace-steps for investigation
-******************************************************************************/
-static int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle) {
+/**Center the uvc camera*/
+static int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle)
+{
 
     #ifdef HAVE_V4L2
         /* CALC ABSOLUTE MOVING : Act.Position +/- delta to request X and Y */
@@ -113,14 +96,11 @@ static int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle) {
             */
 
             //get mininum
-            //pan.value = queryctrl.minimum;
-
             cam->track->minx = -4480 / INCPANTILT;
             cam->track->miny = -1920 / INCPANTILT;
             //get maximum
             cam->track->maxx = 4480 / INCPANTILT;
             cam->track->maxy = 1920 / INCPANTILT;
-            //pan.value = queryctrl.maximum;
 
             cam->track->dev = dev;
             cam->track->pan_angle = 0;
@@ -138,11 +118,11 @@ static int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle) {
             ,_("INPUT_PARAM_ABS X_Angel %d, Y_Angel %d ")
             ,x_angle, y_angle);
 
-        if (x_angle <= cam->track->maxx && x_angle >= cam->track->minx){
+        if (x_angle <= cam->track->maxx && x_angle >= cam->track->minx) {
             move_x_degrees = x_angle - (cam->track->pan_angle);
         }
 
-        if (y_angle <= cam->track->maxy && y_angle >= cam->track->miny){
+        if (y_angle <= cam->track->maxy && y_angle >= cam->track->miny) {
             move_y_degrees = y_angle - (cam->track->tilt_angle);
         }
 
@@ -166,7 +146,6 @@ static int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle) {
 
         if (move_x_degrees != 0) {
             control_s.id = V4L2_CID_PAN_RELATIVE;
-            //control_s.value = pan.value;
             control_s.value = pan.s16.pan;
 
             if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
@@ -176,13 +155,12 @@ static int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle) {
         }
 
         /* DWe 30.03.07 We must wait a little,before we set the next CMD, otherwise PAN is mad ... */
-        if ((move_x_degrees != 0) && (move_y_degrees != 0)){
+        if ((move_x_degrees != 0) && (move_y_degrees != 0)) {
             SLEEP(1, 0);
         }
 
         if (move_y_degrees != 0) {
             control_s.id = V4L2_CID_TILT_RELATIVE;
-            //control_s.value = pan.value;
             control_s.value = pan.s16.tilt;
 
             if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
@@ -223,8 +201,10 @@ static int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle) {
 
 }
 
+/**Move the uvc camera*/
 static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
-            , struct ctx_images *imgs, int manual) {
+        , struct ctx_images *imgs, int manual)
+{
 
     #ifdef HAVE_V4L2
         /* RELATIVE MOVING : Act.Position +/- X and Y */
@@ -288,10 +268,10 @@ static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
 
         /* If we are on auto track we calculate delta, otherwise we use user input in degrees */
         if (!manual) {
-            if (delta_x > imgs->width * 3/8 && delta_x < imgs->width * 5/8){
+            if (delta_x > imgs->width * 3/8 && delta_x < imgs->width * 5/8) {
                 return 0;
             }
-            if (delta_y > imgs->height * 3/8 && delta_y < imgs->height * 5/8){
+            if (delta_y > imgs->height * 3/8 && delta_y < imgs->height * 5/8) {
                 return 0;
             }
 
@@ -318,19 +298,19 @@ static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
             * Check current position of camera and see if we need to adjust
             * values down to what is left to move
             */
-            if (move_x_degrees < 0 && (cam->track->minx - cam->track->pan_angle) > move_x_degrees){
+            if (move_x_degrees < 0 && (cam->track->minx - cam->track->pan_angle) > move_x_degrees) {
                 move_x_degrees = cam->track->minx - cam->track->pan_angle;
             }
 
-            if (move_x_degrees > 0 && (cam->track->maxx - cam->track->pan_angle) < move_x_degrees){
+            if (move_x_degrees > 0 && (cam->track->maxx - cam->track->pan_angle) < move_x_degrees) {
                 move_x_degrees = cam->track->maxx - cam->track->pan_angle;
             }
 
-            if (move_y_degrees < 0 && (cam->track->miny - cam->track->tilt_angle) > move_y_degrees){
+            if (move_y_degrees < 0 && (cam->track->miny - cam->track->tilt_angle) > move_y_degrees) {
                 move_y_degrees = cam->track->miny - cam->track->tilt_angle;
             }
 
-            if (move_y_degrees > 0 && (cam->track->maxy - cam->track->tilt_angle) < move_y_degrees){
+            if (move_y_degrees > 0 && (cam->track->maxy - cam->track->tilt_angle) < move_y_degrees) {
                 move_y_degrees = cam->track->maxy - cam->track->tilt_angle;
             }
         }
@@ -376,7 +356,7 @@ static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
         }
 
         /* DWe 30.03.07 We must wait a little,before we set the next CMD, otherwise PAN is mad ... */
-        if ((move_x_degrees != 0) && (move_y_degrees != 0)){
+        if ((move_x_degrees != 0) && (move_y_degrees != 0)) {
             SLEEP (1, 0);
         }
 
@@ -404,11 +384,11 @@ static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
                 ,_("Before_REL_Y_Angel : x= %d , Y= %d")
                 ,cam->track->pan_angle, cam->track->tilt_angle);
 
-            if (move_x_degrees != 0){
+            if (move_x_degrees != 0) {
                 cam->track->pan_angle += -pan.s16.pan / INCPANTILT;
             }
 
-            if (move_y_degrees != 0){
+            if (move_y_degrees != 0) {
                 cam->track->tilt_angle += -pan.s16.tilt / INCPANTILT;
             }
 
@@ -428,9 +408,10 @@ static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
     #endif /* HAVE_V4L2 */
 }
 
-
-static int generic_move(struct ctx_cam *cam, enum track_action action, int manual, int xoff
-        , int yoff, struct ctx_coord *cent, struct ctx_images *imgs) {
+/**Move the generic camera*/
+static int generic_move(struct ctx_cam *cam, enum track_action action, int manual
+        , int xoff, int yoff, struct ctx_coord *cent, struct ctx_images *imgs)
+{
 
     char fmtcmd[PATH_MAX];
     cam->track->posx += cent->x;
@@ -447,7 +428,7 @@ static int generic_move(struct ctx_cam *cam, enum track_action action, int manua
         setsid();
 
         /* Provides data as environment variables */
-        if (manual){
+        if (manual) {
           setenv("TRACK_MANUAL", "manual", 1);
         }
         switch (action) {
@@ -479,7 +460,7 @@ static int generic_move(struct ctx_cam *cam, enum track_action action, int manua
          * Close any file descriptor except console because we will
          * like to see error messages
          */
-        for (i = getdtablesize() - 1; i > 2; i--){
+        for (i = getdtablesize() - 1; i > 2; i--) {
             close(i);
         }
 
@@ -500,36 +481,43 @@ static int generic_move(struct ctx_cam *cam, enum track_action action, int manua
     return cam->conf->track_move_wait;
 }
 
-void track_init(struct ctx_cam *cam){
+/* Initialize the tracking functionality */
+void track_init(struct ctx_cam *cam)
+{
 
     cam->track = new ctx_track;
     memset(cam->track,0,sizeof(ctx_track));
 
     cam->track->dev = -1;             /* dev open */
 
-    if (cam->conf->track_type)
+    if (cam->conf->track_type) {
         cam->frame_skip = track_center(cam, cam->video_dev, 0, 0, 0);
+    }
 
 }
-void track_deinit(struct ctx_cam *cam){
+
+/* Clean up the tracking functionality */
+void track_deinit(struct ctx_cam *cam)
+{
 
     delete cam->track;
 
 }
 
-/* Add a call to your functions here: */
-int track_center(struct ctx_cam *cam, int dev,
-        int manual, int xoff, int yoff)
+/* Center the camera */
+int track_center(struct ctx_cam *cam, int dev, int manual, int xoff, int yoff)
 {
     struct ctx_coord cent;
     (void)dev;
 
-    if (!manual && !cam->conf->track_auto) return 0;
+    if (!manual && !cam->conf->track_auto) {
+        return 0;
+    }
 
-    if (cam->conf->track_type == TRACK_TYPE_UVC){
+    if (cam->conf->track_type == TRACK_TYPE_UVC) {
         return uvc_center(cam, dev, xoff, yoff);
     } else if (cam->conf->track_type == TRACK_TYPE_GENERIC) {
-        if (cam->conf->track_generic_move != ""){
+        if (cam->conf->track_generic_move != "") {
             cent.x = -cam->track->posx;
             cent.y = -cam->track->posy;
             return generic_move(cam, TRACK_CENTER, manual,0 ,0 ,&cent , NULL);
@@ -548,9 +536,11 @@ int track_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
         , struct ctx_images *imgs, int manual)
 {
 
-    if (!manual && !cam->conf->track_auto) return 0;
+    if (!manual && !cam->conf->track_auto) {
+        return 0;
+    }
 
-    if (cam->conf->track_type == TRACK_TYPE_UVC){
+    if (cam->conf->track_type == TRACK_TYPE_UVC) {
         return uvc_move(cam, dev, cent, imgs, manual);
     } else if (cam->conf->track_type == TRACK_TYPE_GENERIC) {
         if (cam->conf->track_generic_move != "") {
@@ -561,7 +551,8 @@ int track_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
     }
 
     MOTION_LOG(WRN, TYPE_TRACK, SHOW_ERRNO
-        ,_("internal error, %hu is not a known track-type"), cam->conf->track_type);
+        ,_("internal error, %hu is not a known track-type")
+        , cam->conf->track_type);
 
     return 0;
 }

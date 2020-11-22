@@ -42,11 +42,8 @@
 #include "movie.hpp"
 
 
-/****************************************************************************
- ****************************************************************************
- ****************************************************************************/
-/*********************************************/
-static void movie_free_nal(struct ctx_movie *movie){
+static void movie_free_nal(struct ctx_movie *movie)
+{
     if (movie->nal_info) {
         free(movie->nal_info);
         movie->nal_info = NULL;
@@ -54,7 +51,8 @@ static void movie_free_nal(struct ctx_movie *movie){
     }
 }
 
-static void movie_encode_nal(struct ctx_movie *movie){
+static void movie_encode_nal(struct ctx_movie *movie)
+{
     // h264_v4l2m2m has NAL units separated from the first frame, which makes
     // some players very unhappy.
     if ((movie->pkt.pts == 0) && (!(movie->pkt.flags & AV_PKT_FLAG_KEY))) {
@@ -74,7 +72,8 @@ static void movie_encode_nal(struct ctx_movie *movie){
     }
 }
 
-static int movie_timelapse_exists(const char *fname){
+static int movie_timelapse_exists(const char *fname)
+{
     FILE *file;
     file = fopen(fname, "r");
     if (file)
@@ -85,7 +84,8 @@ static int movie_timelapse_exists(const char *fname){
     return 0;
 }
 
-static int movie_timelapse_append(struct ctx_movie *movie, AVPacket pkt){
+static int movie_timelapse_append(struct ctx_movie *movie, AVPacket pkt)
+{
     FILE *file;
 
     file = fopen(movie->filename, "a");
@@ -138,7 +138,8 @@ static int movie_timelapse_append(struct ctx_movie *movie, AVPacket pkt){
     }
 #endif
 
-static void movie_free_context(struct ctx_movie *movie){
+static void movie_free_context(struct ctx_movie *movie)
+{
 
         if (movie->picture != NULL){
             myframe_free(movie->picture);
@@ -157,7 +158,8 @@ static void movie_free_context(struct ctx_movie *movie){
 
 }
 
-static int movie_get_oformat(struct ctx_movie *movie){
+static int movie_get_oformat(struct ctx_movie *movie)
+{
 
     size_t codec_name_len = strcspn(movie->codec_name, ":");
     char *codec_name =(char*) malloc(codec_name_len + 1);
@@ -293,7 +295,8 @@ static int movie_get_oformat(struct ctx_movie *movie){
     return 0;
 }
 
-static int movie_encode_video(struct ctx_movie *movie){
+static int movie_encode_video(struct ctx_movie *movie)
+{
 
     #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
         //ffmpeg version 3.1 and after
@@ -400,7 +403,8 @@ static int movie_encode_video(struct ctx_movie *movie){
 
 }
 
-static int movie_set_pts(struct ctx_movie *movie, const struct timespec *ts1){
+static int movie_set_pts(struct ctx_movie *movie, const struct timespec *ts1)
+{
 
     int64_t pts_interval;
 
@@ -439,7 +443,8 @@ static int movie_set_pts(struct ctx_movie *movie, const struct timespec *ts1){
     return 0;
 }
 
-static int movie_set_pktpts(struct ctx_movie *movie, const struct timespec *ts1){
+static int movie_set_pktpts(struct ctx_movie *movie, const struct timespec *ts1)
+{
 
     int64_t pts_interval;
 
@@ -478,7 +483,8 @@ static int movie_set_pktpts(struct ctx_movie *movie, const struct timespec *ts1)
     return 0;
 }
 
-static int movie_set_quality(struct ctx_movie *movie){
+static int movie_set_quality(struct ctx_movie *movie)
+{
 
     movie->opts = 0;
     if (movie->quality > 100) movie->quality = 100;
@@ -540,7 +546,8 @@ struct blacklist_t
     const char *reason;
 };
 
-static const char *movie_codec_is_blacklisted(const char *codec_name){
+static const char *movie_codec_is_blacklisted(const char *codec_name)
+{
 
     static struct blacklist_t blacklisted_codec[] =
     {
@@ -568,7 +575,8 @@ static const char *movie_codec_is_blacklisted(const char *codec_name){
     return NULL;
 }
 
-static int movie_set_codec_preferred(struct ctx_movie *movie){
+static int movie_set_codec_preferred(struct ctx_movie *movie)
+{
     size_t codec_name_len = strcspn(movie->codec_name, ":");
 
     movie->codec = NULL;
@@ -615,7 +623,8 @@ static int movie_set_codec_preferred(struct ctx_movie *movie){
 
 }
 
-static int movie_set_codec(struct ctx_movie *movie){
+static int movie_set_codec(struct ctx_movie *movie)
+{
 
     int retcd;
     char errstr[128];
@@ -742,7 +751,8 @@ static int movie_set_codec(struct ctx_movie *movie){
     return 0;
 }
 
-static int movie_set_stream(struct ctx_movie *movie){
+static int movie_set_stream(struct ctx_movie *movie)
+{
 
     #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
         int retcd;
@@ -822,7 +832,8 @@ static int movie_alloc_video_buffer(AVFrame *frame, int align)
 }
 
 
-static int movie_set_picture(struct ctx_movie *movie){
+static int movie_set_picture(struct ctx_movie *movie)
+{
 
     int retcd;
     char errstr[128];
@@ -860,7 +871,8 @@ static int movie_set_picture(struct ctx_movie *movie){
 
 }
 
-static int movie_set_outputfile(struct ctx_movie *movie){
+static int movie_set_outputfile(struct ctx_movie *movie)
+{
 
     int retcd;
     char errstr[128];
@@ -927,7 +939,8 @@ static int movie_set_outputfile(struct ctx_movie *movie){
 
 }
 
-static int movie_flush_codec(struct ctx_movie *movie){
+static int movie_flush_codec(struct ctx_movie *movie)
+{
 
     #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
         //ffmpeg version 3.1 and after
@@ -991,7 +1004,8 @@ static int movie_flush_codec(struct ctx_movie *movie){
 
 }
 
-static int movie_put_frame(struct ctx_movie *movie, const struct timespec *ts1){
+static int movie_put_frame(struct ctx_movie *movie, const struct timespec *ts1)
+{
     int retcd;
 
     av_init_packet(&movie->pkt);
@@ -1029,7 +1043,8 @@ static int movie_put_frame(struct ctx_movie *movie, const struct timespec *ts1){
 
 }
 
-static void movie_passthru_reset(struct ctx_movie *movie){
+static void movie_passthru_reset(struct ctx_movie *movie)
+{
     /* Reset the written flag at start of each event */
     int indx;
 
@@ -1041,7 +1056,8 @@ static void movie_passthru_reset(struct ctx_movie *movie){
 
 }
 
-static void movie_passthru_write(struct ctx_movie *movie, int indx){
+static void movie_passthru_write(struct ctx_movie *movie, int indx)
+{
     /* Write the packet in the buffer at indx to file */
     char errstr[128];
     int retcd;
@@ -1080,7 +1096,8 @@ static void movie_passthru_write(struct ctx_movie *movie, int indx){
 
 }
 
-static int movie_passthru_put(struct ctx_movie *movie, struct ctx_image_data *img_data){
+static int movie_passthru_put(struct ctx_movie *movie, struct ctx_image_data *img_data)
+{
 
     int idnbr_image, idnbr_lastwritten, idnbr_stop, idnbr_firstkey;
     int indx, indx_lastwritten, indx_firstkey;
@@ -1150,7 +1167,8 @@ static int movie_passthru_put(struct ctx_movie *movie, struct ctx_image_data *im
     return 0;
 }
 
-static int movie_passthru_codec(struct ctx_movie *movie){
+static int movie_passthru_codec(struct ctx_movie *movie)
+{
 
     int retcd;
     AVStream    *stream_in;
@@ -1235,7 +1253,8 @@ static int movie_passthru_codec(struct ctx_movie *movie){
 
 }
 
-void movie_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list vl){
+void movie_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list vl)
+{
 
     char buf[1024];
     char *end;
@@ -1267,7 +1286,8 @@ void movie_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list 
 
 }
 
-static void movie_put_pix_nv21(struct ctx_movie *movie, struct ctx_image_data *img_data){
+static void movie_put_pix_nv21(struct ctx_movie *movie, struct ctx_image_data *img_data)
+{
     unsigned char *image,*imagecr, *imagecb;
     int cr_len, x, y;
 
@@ -1293,7 +1313,8 @@ static void movie_put_pix_nv21(struct ctx_movie *movie, struct ctx_image_data *i
 
 }
 
-static void movie_put_pix_yuv420(struct ctx_movie *movie, struct ctx_image_data *img_data){
+static void movie_put_pix_yuv420(struct ctx_movie *movie, struct ctx_image_data *img_data)
+{
     unsigned char *image;
 
     if (movie->high_resolution){
@@ -1309,12 +1330,8 @@ static void movie_put_pix_yuv420(struct ctx_movie *movie, struct ctx_image_data 
 
 }
 
-
-/****************************************************************************
- ****************************************************************************
- ****************************************************************************/
-
-void movie_global_init(void){
+void movie_global_init(void)
+{
 
     MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("libavcodec  version %d.%d.%d")
         , LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO);
@@ -1344,7 +1361,8 @@ void movie_global_init(void){
 
 }
 
-void movie_global_deinit(void) {
+void movie_global_deinit(void)
+{
 
     avformat_network_deinit();
 
@@ -1360,7 +1378,8 @@ void movie_global_deinit(void) {
 
 }
 
-int movie_open(struct ctx_movie *movie){
+int movie_open(struct ctx_movie *movie)
+{
 
     int retcd;
 
@@ -1418,7 +1437,8 @@ int movie_open(struct ctx_movie *movie){
 
 }
 
-void movie_close(struct ctx_movie *movie){
+void movie_close(struct ctx_movie *movie)
+{
 
     if (movie != NULL) {
 
@@ -1442,7 +1462,8 @@ void movie_close(struct ctx_movie *movie){
 }
 
 
-int movie_put_image(struct ctx_movie *movie, struct ctx_image_data *img_data, const struct timespec *ts1){
+int movie_put_image(struct ctx_movie *movie, struct ctx_image_data *img_data, const struct timespec *ts1)
+{
 
     int retcd = 0;
     int cnt = 0;
@@ -1497,7 +1518,8 @@ int movie_put_image(struct ctx_movie *movie, struct ctx_image_data *img_data, co
 
 }
 
-void movie_reset_start_time(struct ctx_movie *movie, const struct timespec *ts1){
+void movie_reset_start_time(struct ctx_movie *movie, const struct timespec *ts1)
+{
     int64_t one_frame_interval = av_rescale_q(1,(AVRational){1, movie->fps},movie->video_st->time_base);
     if (one_frame_interval <= 0)
         one_frame_interval = 1;
@@ -1508,7 +1530,8 @@ void movie_reset_start_time(struct ctx_movie *movie, const struct timespec *ts1)
 
 }
 
-static const char* movie_init_codec(struct ctx_cam *cam){
+static const char* movie_init_codec(struct ctx_cam *cam)
+{
 
     /* The following section allows for testing of all the various containers
     * that Motion permits. The container type is pre-pended to the name of the
@@ -1544,7 +1567,8 @@ static const char* movie_init_codec(struct ctx_cam *cam){
 
 }
 
-int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1){
+int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1)
+{
     char stamp[PATH_MAX];
     const char *codec;
     int retcd;
@@ -1601,7 +1625,8 @@ int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1){
 
 }
 
-int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1){
+int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1)
+{
     char stamp[PATH_MAX];
     const char *codec;
     int retcd;
@@ -1652,7 +1677,8 @@ int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1){
 
 }
 
-int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1){
+int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1)
+{
 
     char tmp[PATH_MAX];
     const char *codec_mpg = "mpg";

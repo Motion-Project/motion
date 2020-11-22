@@ -33,7 +33,8 @@ static const char *log_level_str[] = {NULL, "EMG", "ALR", "CRT", "ERR", "WRN", "
 static struct ctx_motapp *log_motapp;  /*Used to access the parms mutex for updates*/
 
 /** Returns index of log type or 0 if not valid type. */
-static int log_get_type(const char *type) {
+static int log_get_type(const char *type)
+{
     unsigned int i, ret = 0;
     unsigned int maxtype = sizeof(log_type_str)/sizeof(const char *);
 
@@ -47,7 +48,8 @@ static int log_get_type(const char *type) {
     return ret;
 }
 
-void log_set_type(const char *new_logtype) {
+void log_set_type(const char *new_logtype)
+{
 
     if ( mystreq(new_logtype, log_type_str[log_type]) ) return;
 
@@ -57,7 +59,8 @@ void log_set_type(const char *new_logtype) {
 
 }
 
-void log_set_level(int new_loglevel) {
+void log_set_level(int new_loglevel)
+{
 
     if (new_loglevel == log_level) return;
 
@@ -68,7 +71,8 @@ void log_set_level(int new_loglevel) {
 }
 
 /** Sets mode of logging, could be using syslog or files. */
-static void log_set_mode(int mode) {
+static void log_set_mode(int mode)
+{
     int prev_mode = log_mode;
 
     log_mode = mode;
@@ -83,7 +87,8 @@ static void log_set_mode(int mode) {
 }
 
 /** Sets logfile to be used instead of syslog. */
-static void log_set_logfile(const char *logfile_name) {
+static void log_set_logfile(const char *logfile_name)
+{
     /* Setup temporary to let log if myfopen fails */
     log_set_mode(LOGMODE_SYSLOG);
 
@@ -98,7 +103,8 @@ static void log_set_logfile(const char *logfile_name) {
 }
 
 /** Return string with human readable time */
-static char *str_time(void) {
+static char *str_time(void)
+{
     static char buffer[16];
     time_t now = 0;
 
@@ -111,7 +117,8 @@ static char *str_time(void) {
  *    This routine is used for printing all informational, debug or error
  *    messages produced by any of the other motion functions.
  */
-void motion_log(int level, int type, int errno_flag,int fncname, const char *fmt, ...){
+void motion_log(int level, int type, int errno_flag,int fncname, const char *fmt, ...)
+{
     int errno_save, n;
     char buf[1024]= {0};
     char usrfmt[1024]= {0};
@@ -245,7 +252,8 @@ void motion_log(int level, int type, int errno_flag,int fncname, const char *fmt
 
 }
 
-void log_init(struct ctx_motapp *motapp){
+void log_init(struct ctx_motapp *motapp)
+{
 
     if ((motapp->log_level > ALL) ||
         (motapp->log_level == 0)) {
@@ -290,7 +298,8 @@ void log_init(struct ctx_motapp *motapp){
 
 }
 
-void log_deinit(struct ctx_motapp *motapp){
+void log_deinit(struct ctx_motapp *motapp)
+{
 
     if (logfile != NULL) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Closing logfile (%s)."),
@@ -302,7 +311,8 @@ void log_deinit(struct ctx_motapp *motapp){
 
 }
 
-void log_set_motapp(struct ctx_motapp *motapp){
+void log_set_motapp(struct ctx_motapp *motapp)
+{
     /* Need better design to avoid the need to do this.  Extern motapp to whole app? */
     log_motapp = motapp;  /* Set our static pointer used for locking parms mutex*/
 

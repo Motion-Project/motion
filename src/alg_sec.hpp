@@ -53,7 +53,7 @@ struct ctx_algsec_model {
     int                         haar_maxsize;
     bool                        isdetected;         /* Bool reset for each image as to whether a detection occurred */
     #ifdef HAVE_OPENCV
-        cv::CascadeClassifier   haar_cascade;       //Haar Cascade (if applicable)
+        cv::CascadeClassifier   haar_cascade;       /*Haar Cascade (if applicable) */
         cv::HOGDescriptor       hog;
     #endif
 };

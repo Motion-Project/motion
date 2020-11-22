@@ -286,7 +286,8 @@ static void destroy_camera_buffer_structures(ctx_mmalcam_ptr mmalcam)
  *              -1 on any failure
  */
 
-int mmalcam_start(struct ctx_cam *cam) {
+int mmalcam_start(struct ctx_cam *cam)
+{
     #ifdef HAVE_MMAL
         ctx_mmalcam_ptr mmalcam;
 
@@ -368,7 +369,8 @@ int mmalcam_start(struct ctx_cam *cam) {
  * Returns:              Nothing.
  *
  */
-void mmalcam_cleanup(struct ctx_mmalcam *mmalcam) {
+void mmalcam_cleanup(struct ctx_mmalcam *mmalcam)
+{
     #ifdef HAVE_MMAL
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("MMAL Camera cleanup"));
 
@@ -404,7 +406,8 @@ void mmalcam_cleanup(struct ctx_mmalcam *mmalcam) {
  *
  * Returns:             Error code
  */
-int mmalcam_next(struct ctx_cam *cam,  struct ctx_image_data *img_data) {
+int mmalcam_next(struct ctx_cam *cam,  struct ctx_image_data *img_data)
+{
     #ifdef HAVE_MMAL
         ctx_mmalcam_ptr mmalcam;
 

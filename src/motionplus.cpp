@@ -33,7 +33,8 @@ pthread_key_t tls_key_threadnr;
 volatile enum MOTION_SIGNAL motsignal;
 
 /** Process signals sent */
-static void motion_signal_process(struct ctx_motapp *motapp){
+static void motion_signal_process(struct ctx_motapp *motapp)
+{
     int indx;
 
     switch(motsignal){
@@ -79,7 +80,8 @@ static void motion_signal_process(struct ctx_motapp *motapp){
 }
 
 /** Handle signals sent */
-static void sig_handler(int signo) {
+static void sig_handler(int signo)
+{
 
     /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
     switch(signo) {
@@ -120,7 +122,8 @@ static void sigchild_handler(int signo)
 }
 
 /** Attach handlers to a number of signals that Motion need to catch. */
-static void setup_signals(void){
+static void setup_signals(void)
+{
     struct sigaction sig_handler_action;
     struct sigaction sigchild_action;
 
@@ -158,7 +161,8 @@ static void setup_signals(void){
 }
 
 /** Remove the process id file ( pid file ) before motion exit. */
-static void motion_remove_pid(struct ctx_motapp *motapp) {
+static void motion_remove_pid(struct ctx_motapp *motapp)
+{
 
     if ((motapp->daemon) &&
         (motapp->pid_file != "") &&
@@ -173,7 +177,8 @@ static void motion_remove_pid(struct ctx_motapp *motapp) {
 }
 
 /**  Turn Motion into a daemon through forking. */
-static void motion_daemon(struct ctx_motapp *motapp) {
+static void motion_daemon(struct ctx_motapp *motapp)
+{
     int fd;
     FILE *pidf = NULL;
     struct sigaction sig_ign_action;
@@ -259,7 +264,8 @@ static void motion_daemon(struct ctx_motapp *motapp) {
     sigaction(SIGTSTP, &sig_ign_action, NULL);
 }
 
-static void motion_shutdown(struct ctx_motapp *motapp){
+static void motion_shutdown(struct ctx_motapp *motapp)
+{
 
     motion_remove_pid(motapp);
 
@@ -275,7 +281,8 @@ static void motion_shutdown(struct ctx_motapp *motapp){
 
 }
 
-static void motion_camera_ids(struct ctx_cam **cam_list){
+static void motion_camera_ids(struct ctx_cam **cam_list)
+{
     /* Set the camera id's on the ctx_cam.  They must be unique */
     int indx, indx2;
     int invalid_ids;
@@ -313,7 +320,8 @@ static void motion_camera_ids(struct ctx_cam **cam_list){
     }
 }
 
-static void motion_ntc(void){
+static void motion_ntc(void)
+{
 
     #ifdef HAVE_V4L2
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("v4l2   : available"));
@@ -366,7 +374,8 @@ static void motion_ntc(void){
 }
 
 /** Initialize upon start up or restart */
-static void motion_startup(struct ctx_motapp *motapp, int daemonize, int argc, char *argv[]) {
+static void motion_startup(struct ctx_motapp *motapp, int daemonize, int argc, char *argv[])
+{
 
     log_set_motapp(motapp);  /* This is needed prior to any function possibly calling motion_log*/
 
@@ -408,7 +417,8 @@ static void motion_startup(struct ctx_motapp *motapp, int daemonize, int argc, c
 }
 
 /** Start a camera thread */
-static void motion_start_thread(struct ctx_motapp *motapp, int indx){
+static void motion_start_thread(struct ctx_motapp *motapp, int indx)
+{
     pthread_attr_t thread_attr;
 
     pthread_mutex_lock(&motapp->global_lock);
@@ -434,7 +444,8 @@ static void motion_start_thread(struct ctx_motapp *motapp, int indx){
 
 }
 
-static void motion_restart(struct ctx_motapp *motapp, int argc, char **argv){
+static void motion_restart(struct ctx_motapp *motapp, int argc, char **argv)
+{
 
     MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Restarting motion."));
 
@@ -449,7 +460,8 @@ static void motion_restart(struct ctx_motapp *motapp, int argc, char **argv){
 
 }
 
-static void motion_watchdog(struct ctx_motapp *motapp, int indx){
+static void motion_watchdog(struct ctx_motapp *motapp, int indx)
+{
 
     /* Notes:
      * To test scenarios, just double lock a mutex in a spawned thread.
@@ -540,7 +552,8 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx){
 
 }
 
-static int motion_check_threadcount(struct ctx_motapp *motapp){
+static int motion_check_threadcount(struct ctx_motapp *motapp)
+{
     /* Return 1 if we should break out of loop */
 
     /* It has been observed that this is not counting every
@@ -588,7 +601,8 @@ static int motion_check_threadcount(struct ctx_motapp *motapp){
 
 }
 
-static void motion_init(struct ctx_motapp *motapp){
+static void motion_init(struct ctx_motapp *motapp)
+{
 
     motapp->cam_list = NULL;
     pthread_mutex_init(&motapp->global_lock, NULL);
@@ -623,7 +637,8 @@ static void motion_init(struct ctx_motapp *motapp){
 }
 
 /** Main entry point of Motion. */
-int main (int argc, char **argv) {
+int main (int argc, char **argv)
+{
 
     int indx;
     struct ctx_motapp *motapp;

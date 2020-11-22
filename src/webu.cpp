@@ -73,7 +73,8 @@ struct mhdstart_ctx {
 };
 
 
-static void webu_context_init(struct ctx_cam **camlst, struct ctx_cam *cam, struct webui_ctx *webui) {
+static void webu_context_init(struct ctx_cam **camlst, struct ctx_cam *cam, struct webui_ctx *webui)
+{
 
     int indx;
 
@@ -127,7 +128,8 @@ static void webu_context_init(struct ctx_cam **camlst, struct ctx_cam *cam, stru
     return;
 }
 
-static void webu_context_null(struct webui_ctx *webui) {
+static void webu_context_null(struct webui_ctx *webui)
+{
     /* Null out all the pointers in our webui context */
     webui->url           = NULL;
     webui->hostname      = NULL;
@@ -153,7 +155,8 @@ static void webu_context_null(struct webui_ctx *webui) {
     return;
 }
 
-static void webu_context_free(struct webui_ctx *webui) {
+static void webu_context_free(struct webui_ctx *webui)
+{
 
     if (webui->hostname      != NULL) free(webui->hostname);
     if (webui->url           != NULL) free(webui->url);
@@ -182,7 +185,8 @@ static void webu_context_free(struct webui_ctx *webui) {
     return;
 }
 
-static void webu_badreq(struct webui_ctx *webui){
+static void webu_badreq(struct webui_ctx *webui)
+{
     /* This function is used in this webu module as a central function when there is a bad
      * request.  Since sometimes we will be unable to determine what camera context (stream
      * or camera) originated the request and we have NULL for camlist and cam, we default the
@@ -206,7 +210,8 @@ static void webu_badreq(struct webui_ctx *webui){
     }
 }
 
-void webu_write(struct webui_ctx *webui, const char *buf) {
+void webu_write(struct webui_ctx *webui, const char *buf)
+{
     /* Copy the buf data to our response buffer.  If the response buffer is not large enough to
      * accept our new data coming in, then expand it in chunks of 10
      */
@@ -238,7 +243,8 @@ void webu_write(struct webui_ctx *webui, const char *buf) {
     return;
 }
 
-static int webu_url_decode(char *urlencoded, size_t length) {
+static int webu_url_decode(char *urlencoded, size_t length)
+{
     /* We are sent a URI encoded string and this decodes it to characters
      * If the sent URL that isn't valid, then we clear out the URL
      * so it is not processed in further functions.  The "answer" functions
@@ -298,7 +304,8 @@ static int webu_url_decode(char *urlencoded, size_t length) {
 
 }
 
-static void webu_parms_edit(struct webui_ctx *webui) {
+static void webu_parms_edit(struct webui_ctx *webui)
+{
 
     /* Determine the thread number provided.
      * If no thread provided, assign it to -1
@@ -351,7 +358,8 @@ static void webu_parms_edit(struct webui_ctx *webui) {
     }
 }
 
-static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
+static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos)
+{
 
     /* Parse the parameters of the URI
      * Earlier functions have assigned the st_pos to the slash after the action and it is
@@ -444,7 +452,8 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
 
 }
 
-static void webu_parseurl_reset(struct webui_ctx *webui) {
+static void webu_parseurl_reset(struct webui_ctx *webui)
+{
 
     /* Reset the variables to empty strings*/
 
@@ -458,7 +467,8 @@ static void webu_parseurl_reset(struct webui_ctx *webui) {
 
 }
 
-static int webu_parseurl(struct webui_ctx *webui) {
+static int webu_parseurl(struct webui_ctx *webui)
+{
     /* Parse the sent URI into the commands and parameters
      * so we can check the resulting strings in later functions
      * and determine what actions to take.
@@ -556,7 +566,8 @@ static int webu_parseurl(struct webui_ctx *webui) {
 
 }
 
-void webu_process_action(struct webui_ctx *webui) {
+void webu_process_action(struct webui_ctx *webui)
+{
     /* Process the actions from the webcontrol that the user requested.  This is used
      * for both the html and text interface.  The text interface just adds a additional
      * response whereas the html just performs the action
@@ -672,7 +683,8 @@ void webu_process_action(struct webui_ctx *webui) {
     }
 }
 
-static int webu_process_config_set(struct webui_ctx *webui) {
+static int webu_process_config_set(struct webui_ctx *webui)
+{
     /* Process the request to change the configuration parameters.  Used
      * both the html and text interfaces.  If the parameter was found, then
      * we return 0 otherwise a -1 to tell the calling function whether it
@@ -743,7 +755,8 @@ static int webu_process_config_set(struct webui_ctx *webui) {
 
 }
 
-int webu_process_config(struct webui_ctx *webui) {
+int webu_process_config(struct webui_ctx *webui)
+{
 
     int retcd;
 
@@ -772,7 +785,8 @@ int webu_process_config(struct webui_ctx *webui) {
 
 }
 
-int webu_process_track(struct webui_ctx *webui) {
+int webu_process_track(struct webui_ctx *webui)
+{
     /* Call the tracking move functions as requested */
     struct ctx_coord cent;
     int retcd;
@@ -814,7 +828,8 @@ int webu_process_track(struct webui_ctx *webui) {
 
 }
 
-static void webu_clientip(struct webui_ctx *webui) {
+static void webu_clientip(struct webui_ctx *webui)
+{
     /* Extract the IP of the client that is connecting.  When the
      * user specifies Motion to use IPV6 and a IPV4 address comes to us
      * the IPv4 address is prepended with a ::ffff: We then trim that off
@@ -860,7 +875,8 @@ static void webu_clientip(struct webui_ctx *webui) {
 
 }
 
-static void webu_hostname(struct webui_ctx *webui, int ctrl) {
+static void webu_hostname(struct webui_ctx *webui, int ctrl)
+{
 
     /* use the hostname the browser used to connect to us when
      * constructing links to the stream ports. If available
@@ -915,7 +931,8 @@ static void webu_hostname(struct webui_ctx *webui, int ctrl) {
     return;
 }
 
-static int webu_mhd_digest_fail(struct webui_ctx *webui,int signal_stale) {
+static int webu_mhd_digest_fail(struct webui_ctx *webui,int signal_stale)
+{
     /* Create a denied response to user*/
     struct MHD_Response *response;
     int retcd;
@@ -936,7 +953,8 @@ static int webu_mhd_digest_fail(struct webui_ctx *webui,int signal_stale) {
     return retcd;
 }
 
-static int webu_mhd_digest(struct webui_ctx *webui) {
+static int webu_mhd_digest(struct webui_ctx *webui)
+{
     /* Perform the digest authentication.  This function gets called a couple of
      * times by MHD during the authentication process.
      */
@@ -976,7 +994,8 @@ static int webu_mhd_digest(struct webui_ctx *webui) {
 
 }
 
-static int webu_mhd_basic_fail(struct webui_ctx *webui) {
+static int webu_mhd_basic_fail(struct webui_ctx *webui)
+{
     /* Create a denied response to user*/
     struct MHD_Response *response;
     int retcd;
@@ -996,7 +1015,8 @@ static int webu_mhd_basic_fail(struct webui_ctx *webui) {
 
 }
 
-static int webu_mhd_basic(struct webui_ctx *webui) {
+static int webu_mhd_basic(struct webui_ctx *webui)
+{
     /* Perform Basic Authentication.  */
     char *user, *pass;
 
@@ -1027,7 +1047,8 @@ static int webu_mhd_basic(struct webui_ctx *webui) {
 
 }
 
-static void webu_mhd_auth_parse(struct webui_ctx *webui, int ctrl){
+static void webu_mhd_auth_parse(struct webui_ctx *webui, int ctrl)
+{
     int auth_len;
     char *col_pos;
 
@@ -1073,7 +1094,8 @@ static void webu_mhd_auth_parse(struct webui_ctx *webui, int ctrl){
 
 }
 
-static int webu_mhd_auth(struct webui_ctx *webui, int ctrl){
+static int webu_mhd_auth(struct webui_ctx *webui, int ctrl)
+{
 
     /* Set everything up for calling the authentication functions */
     unsigned int rand1,rand2;
@@ -1131,7 +1153,8 @@ static int webu_mhd_auth(struct webui_ctx *webui, int ctrl){
 
 }
 
-static int webu_mhd_send(struct webui_ctx *webui, int ctrl) {
+static int webu_mhd_send(struct webui_ctx *webui, int ctrl)
+{
     /* Send the response that we created back to the user.  Now if the user
      * provided a really bad URL, then we couldn't determine which Motion context
      * they were wanting.  In this situation, we have a webui->cam = NULL and we
@@ -1177,7 +1200,8 @@ static int webu_mhd_send(struct webui_ctx *webui, int ctrl) {
     return retcd;
 }
 
-static void webu_answer_strm_type(struct webui_ctx *webui) {
+static void webu_answer_strm_type(struct webui_ctx *webui)
+{
     /* Assign the type of stream that is being answered*/
 
     if ((mystreq(webui->uri_cmd1,"stream")) ||
@@ -1219,14 +1243,9 @@ static void webu_answer_strm_type(struct webui_ctx *webui) {
 
 }
 
-static int webu_answer_ctrl(void *cls
-        , struct MHD_Connection *connection
-        , const char *url
-        , const char *method
-        , const char *version
-        , const char *upload_data
-        , size_t     *upload_data_size
-        , void **ptr) {
+static int webu_answer_ctrl(void *cls, struct MHD_Connection *connection, const char *url, const char *method
+        , const char *version, const char *upload_data, size_t *upload_data_size, void **ptr)
+{
 
     /* This function "answers" the request for a webcontrol.*/
     int retcd;
@@ -1291,14 +1310,9 @@ static int webu_answer_ctrl(void *cls
 
 }
 
-static int webu_answer_strm(void *cls
-        , struct MHD_Connection *connection
-        , const char *url
-        , const char *method
-        , const char *version
-        , const char *upload_data
-        , size_t     *upload_data_size
-        , void **ptr) {
+static int webu_answer_strm(void *cls, struct MHD_Connection *connection, const char *url, const char *method
+        , const char *version, const char *upload_data, size_t *upload_data_size, void **ptr)
+{
 
     /* Answer the request for all the streams*/
     int retcd;
@@ -1376,7 +1390,8 @@ static int webu_answer_strm(void *cls
 
 }
 
-static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *connection) {
+static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *connection)
+{
     /* This is called at the very start of getting a request before the "answer"
      * is processed.  There are two variations of this and the difference is how
      * we call the webu_context_init.  When we are processing for the webcontrol or
@@ -1417,7 +1432,8 @@ static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *co
     return webui;
 }
 
-static void *webu_mhd_init_one(void *cls, const char *uri, struct MHD_Connection *connection) {
+static void *webu_mhd_init_one(void *cls, const char *uri, struct MHD_Connection *connection)
+{
     /* This function initializes all the webui variables as we are getting a request.  This
      * variation of the init is the one used when the user has specified a unique port number
      * for each camera.  The variation is in how the webu_context_init is invoked.  This passes
@@ -1451,10 +1467,9 @@ static void *webu_mhd_init_one(void *cls, const char *uri, struct MHD_Connection
     return webui;
 }
 
-static void webu_mhd_deinit(void *cls
-    , struct MHD_Connection *connection
-    , void **con_cls
-    , enum MHD_RequestTerminationCode toe) {
+static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
+        , void **con_cls, enum MHD_RequestTerminationCode toe)
+{
     /* This is the function called as the connection is closed so we free our webui variables*/
     struct webui_ctx *webui =(struct webui_ctx *) *con_cls;
 
@@ -1500,7 +1515,8 @@ static void webu_mhd_deinit(void *cls
     return;
 }
 
-static void webu_mhd_features_basic(struct mhdstart_ctx *mhdst){
+static void webu_mhd_features_basic(struct mhdstart_ctx *mhdst)
+{
     /* Use the MHD function to see what features it supports*/
     #if MHD_VERSION < 0x00094400
         (void)mhdst;
@@ -1523,7 +1539,8 @@ static void webu_mhd_features_basic(struct mhdstart_ctx *mhdst){
     #endif
 }
 
-static void webu_mhd_features_digest(struct mhdstart_ctx *mhdst){
+static void webu_mhd_features_digest(struct mhdstart_ctx *mhdst)
+{
     /* Use the MHD function to see what features it supports*/
     #if MHD_VERSION < 0x00094400
         (void)mhdst;
@@ -1546,7 +1563,8 @@ static void webu_mhd_features_digest(struct mhdstart_ctx *mhdst){
     #endif
 }
 
-static void webu_mhd_features_ipv6(struct mhdstart_ctx *mhdst){
+static void webu_mhd_features_ipv6(struct mhdstart_ctx *mhdst)
+{
     /* Use the MHD function to see what features it supports
      * If we have a really old version of MHD, then we will just support
      * IPv4
@@ -1568,7 +1586,8 @@ static void webu_mhd_features_ipv6(struct mhdstart_ctx *mhdst){
     #endif
 }
 
-static void webu_mhd_features_tls(struct mhdstart_ctx *mhdst){
+static void webu_mhd_features_tls(struct mhdstart_ctx *mhdst)
+{
     /* Use the MHD function to see what features it supports
      * If we have a really old version of MHD, then we will will not
      * support the ssl/tls request.
@@ -1600,7 +1619,8 @@ static void webu_mhd_features_tls(struct mhdstart_ctx *mhdst){
     #endif
 }
 
-static void webu_mhd_features(struct mhdstart_ctx *mhdst){
+static void webu_mhd_features(struct mhdstart_ctx *mhdst)
+{
     /* This function goes through at least a few of the MHD features
      * and adjusts the user parameters from the configuration as
      * needed to reflect what MHD can do
@@ -1616,7 +1636,8 @@ static void webu_mhd_features(struct mhdstart_ctx *mhdst){
 
 }
 
-static char *webu_mhd_loadfile(const char *fname){
+static char *webu_mhd_loadfile(const char *fname)
+{
     /* This function loads the requested certificate and key files into memory so we
      * can use them as needed if the user wants ssl/tls support.  If the user did not
      * specify a file in the configuration, then we return NULL.
@@ -1655,7 +1676,8 @@ static char *webu_mhd_loadfile(const char *fname){
     return file_char;
 }
 
-static void webu_mhd_checktls(struct mhdstart_ctx *mhdst){
+static void webu_mhd_checktls(struct mhdstart_ctx *mhdst)
+{
     /* This function validates that if the user requested a SSL/TLS connection, then
      * they also need to provide a certificate and key file.  If those are not provided
      * then we revise the configuration request for ssl/tls
@@ -1690,7 +1712,8 @@ static void webu_mhd_checktls(struct mhdstart_ctx *mhdst){
 
 }
 
-static void webu_mhd_opts_init(struct mhdstart_ctx *mhdst){
+static void webu_mhd_opts_init(struct mhdstart_ctx *mhdst)
+{
     /* This function sets the init function to use for the MHD connection.  If
      * the connection is related to the webcontrol or the stream specified in the
      * motion.conf file, then we pass in the full context list of all cameras.  If
@@ -1712,7 +1735,8 @@ static void webu_mhd_opts_init(struct mhdstart_ctx *mhdst){
 
 }
 
-static void webu_mhd_opts_deinit(struct mhdstart_ctx *mhdst){
+static void webu_mhd_opts_deinit(struct mhdstart_ctx *mhdst)
+{
     /* Set the MHD option on the function to call when the connection closes */
     mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_NOTIFY_COMPLETED;
     mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = (intptr_t)webu_mhd_deinit;
@@ -1721,7 +1745,8 @@ static void webu_mhd_opts_deinit(struct mhdstart_ctx *mhdst){
 
 }
 
-static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst){
+static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst)
+{
     /* Set the MHD option on the acceptable connections.  This is used to handle the
      * motion configuation option of localhost only.
      */
@@ -1775,7 +1800,8 @@ static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst){
 
 }
 
-static void webu_mhd_opts_digest(struct mhdstart_ctx *mhdst){
+static void webu_mhd_opts_digest(struct mhdstart_ctx *mhdst)
+{
     /* Set the MHD option for the type of authentication that we will be using.  This
      * function is when we are wanting to use digest authentication
      */
@@ -1808,7 +1834,8 @@ static void webu_mhd_opts_digest(struct mhdstart_ctx *mhdst){
 
 }
 
-static void webu_mhd_opts_tls(struct mhdstart_ctx *mhdst){
+static void webu_mhd_opts_tls(struct mhdstart_ctx *mhdst)
+{
     /* Set the MHD options needed when we want TLS connections */
     if ((( mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->webcontrol_tls)) ||
         ((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->stream_tls))) {
@@ -1826,7 +1853,8 @@ static void webu_mhd_opts_tls(struct mhdstart_ctx *mhdst){
 
 }
 
-static void webu_mhd_opts(struct mhdstart_ctx *mhdst){
+static void webu_mhd_opts(struct mhdstart_ctx *mhdst)
+{
     /* Set all the options we need based upon the motion configuration parameters*/
 
     mhdst->mhd_opt_nbr = 0;
@@ -1850,7 +1878,8 @@ static void webu_mhd_opts(struct mhdstart_ctx *mhdst){
 
 }
 
-static void webu_mhd_flags(struct mhdstart_ctx *mhdst){
+static void webu_mhd_flags(struct mhdstart_ctx *mhdst)
+{
 
     /* This sets the MHD startup flags based upon what user put into configuration */
     mhdst->mhd_flags = MHD_USE_THREAD_PER_CONNECTION;
@@ -1865,7 +1894,8 @@ static void webu_mhd_flags(struct mhdstart_ctx *mhdst){
 
 }
 
-static void webu_strm_ntc(struct ctx_cam **camlst, int indxthrd){
+static void webu_strm_ntc(struct ctx_cam **camlst, int indxthrd)
+{
     int indx;
 
     if (indxthrd == 0 ){
@@ -1891,7 +1921,8 @@ static void webu_strm_ntc(struct ctx_cam **camlst, int indxthrd){
     }
 }
 
-static void webu_init_ctrl(struct ctx_motapp *motapp){
+static void webu_init_ctrl(struct ctx_motapp *motapp)
+{
     /* This is the function that actually starts the MHD daemon for handling the webcontrol.
      * There are many options for MHD and they will vary depending upon what our Motion user
      * has requested in the configuration.  There are many functions in this module to assign
@@ -1949,7 +1980,8 @@ static void webu_init_ctrl(struct ctx_motapp *motapp){
     return;
 }
 
-static void webu_init_strm(struct ctx_cam **cam_list){
+static void webu_init_strm(struct ctx_cam **cam_list)
+{
     /* This function starts up the daemon for the streams. It loops through
      * all of the camera context's provided and starts streams as requested.  If
      * the thread number is zero, then it starts the full list stream context
@@ -2021,7 +2053,8 @@ static void webu_init_strm(struct ctx_cam **cam_list){
     return;
 }
 
-static void webu_init_ports(struct ctx_cam **cam_list){
+static void webu_init_ports(struct ctx_cam **cam_list)
+{
     /* Perform check for duplicate ports being specified.  The config loading will
      * duplicate ports from the motion.conf file to all the cameras so we do not
      * log these duplicates to the user and instead just silently set them to zero
@@ -2067,7 +2100,8 @@ static void webu_init_ports(struct ctx_cam **cam_list){
     }
 }
 
-void webu_deinit(struct ctx_motapp *motapp) {
+void webu_deinit(struct ctx_motapp *motapp)
+{
     /* This function is called from the main Motion loop to shutdown the
      * various MHD connections
      */
@@ -2089,7 +2123,8 @@ void webu_deinit(struct ctx_motapp *motapp) {
     }
 }
 
-void webu_init(struct ctx_motapp *motapp) {
+void webu_init(struct ctx_motapp *motapp)
+{
     /* This function is called from the main motion thread to start up the
      * webcontrol and streams.  We need to block some signals otherwise MHD
      * will not function correctly.

@@ -44,7 +44,8 @@
 #define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
 
 
-static void mlp_ring_resize(struct ctx_cam *cam, int new_size) {
+static void mlp_ring_resize(struct ctx_cam *cam, int new_size)
+{
 
     int smallest, i;
     struct ctx_image_data *tmp;
@@ -89,7 +90,8 @@ static void mlp_ring_resize(struct ctx_cam *cam, int new_size) {
     }
 }
 
-static void mlp_ring_destroy(struct ctx_cam *cam) {
+static void mlp_ring_destroy(struct ctx_cam *cam)
+{
     int i;
 
     if (cam->imgs.image_ring == NULL) return;
@@ -105,7 +107,8 @@ static void mlp_ring_destroy(struct ctx_cam *cam) {
     cam->imgs.ring_size = 0;
 }
 
-static void mlp_ring_process_debug(struct ctx_cam *cam){
+static void mlp_ring_process_debug(struct ctx_cam *cam)
+{
     char tmp[32];
     const char *t;
 
@@ -130,7 +133,8 @@ static void mlp_ring_process_debug(struct ctx_cam *cam){
 
 }
 
-static void mlp_ring_process(struct ctx_cam *cam, unsigned int max_images) {
+static void mlp_ring_process(struct ctx_cam *cam, unsigned int max_images)
+{
 
     struct ctx_image_data *saved_current_image = cam->current_image;
 
@@ -182,7 +186,8 @@ static void mlp_ring_process(struct ctx_cam *cam, unsigned int max_images) {
     cam->current_image = saved_current_image;
 }
 
-static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img) {
+static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img)
+{
 
     if (img->flags & IMAGE_TRIGGER) {
         if (cam->event_nr != cam->prev_event) {
@@ -210,7 +215,8 @@ static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img
 
 }
 
-static void mlp_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *img) {
+static void mlp_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *img)
+{
     struct ctx_config *conf = cam->conf;
     unsigned int distX, distY;
 
@@ -240,7 +246,8 @@ static void mlp_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *im
 
 }
 
-static void mlp_mask_privacy(struct ctx_cam *cam){
+static void mlp_mask_privacy(struct ctx_cam *cam)
+{
 
     if (cam->imgs.mask_privacy == NULL) return;
 
@@ -316,7 +323,8 @@ static void mlp_mask_privacy(struct ctx_cam *cam){
     }
 }
 
-static int init_camera_type(struct ctx_cam *cam){
+static int init_camera_type(struct ctx_cam *cam)
+{
 
     cam->camera_type = CAMERA_TYPE_UNKNOWN;
 
@@ -349,7 +357,8 @@ static int init_camera_type(struct ctx_cam *cam){
 }
 
 /** Get first images from camera at startup */
-static void mlp_init_firstimage(struct ctx_cam *cam) {
+static void mlp_init_firstimage(struct ctx_cam *cam)
+{
 
     int indx;
 
@@ -370,7 +379,8 @@ static void mlp_init_firstimage(struct ctx_cam *cam) {
 }
 
 /** Check the image size to determine if modulo 8 and over 64 */
-static int mlp_check_szimg(struct ctx_cam *cam){
+static int mlp_check_szimg(struct ctx_cam *cam)
+{
 
     /* Revalidate we got a valid image size */
     if ((cam->imgs.width % 8) || (cam->imgs.height % 8)) {
@@ -396,7 +406,8 @@ static int mlp_check_szimg(struct ctx_cam *cam){
 }
 
 /** Set the items required for the area detect */
-static void mlp_init_areadetect(struct ctx_cam *cam){
+static void mlp_init_areadetect(struct ctx_cam *cam)
+{
 
     /* Initialize area detection */
     cam->area_minx[0] = cam->area_minx[3] = cam->area_minx[6] = 0;
@@ -422,7 +433,8 @@ static void mlp_init_areadetect(struct ctx_cam *cam){
 }
 
 /** Allocate the required buffers */
-static void mlp_init_buffers(struct ctx_cam *cam){
+static void mlp_init_buffers(struct ctx_cam *cam)
+{
 
     cam->imgs.ref =(unsigned char*) mymalloc(cam->imgs.size_norm);
     cam->imgs.image_motion.image_norm = (unsigned char*)mymalloc(cam->imgs.size_norm);
@@ -447,7 +459,8 @@ static void mlp_init_buffers(struct ctx_cam *cam){
 
 }
 
-static void mlp_init_values(struct ctx_cam *cam) {
+static void mlp_init_values(struct ctx_cam *cam)
+{
 
     cam->event_nr=1;
 
@@ -477,7 +490,8 @@ static void mlp_init_values(struct ctx_cam *cam) {
 
 }
 
-static int mlp_init_cam_start(struct ctx_cam *cam) {
+static int mlp_init_cam_start(struct ctx_cam *cam)
+{
 
     cam->video_dev = vid_start(cam);
 
@@ -506,7 +520,8 @@ static int mlp_init_cam_start(struct ctx_cam *cam) {
 
 }
 
-static void mlp_init_ref(struct ctx_cam *cam) {
+static void mlp_init_ref(struct ctx_cam *cam)
+{
 
     memcpy(cam->imgs.image_virgin, cam->current_image->image_norm, cam->imgs.size_norm);
 
@@ -524,7 +539,8 @@ static void mlp_init_ref(struct ctx_cam *cam) {
 }
 
 /** mlp_init */
-static int mlp_init(struct ctx_cam *cam) {
+static int mlp_init(struct ctx_cam *cam)
+{
 
     mythreadname_set("ml",cam->threadnr,cam->conf->camera_name.c_str());
 
@@ -578,7 +594,8 @@ static int mlp_init(struct ctx_cam *cam) {
 }
 
 /** clean up all memory etc. from motion init */
-void mlp_cleanup(struct ctx_cam *cam) {
+void mlp_cleanup(struct ctx_cam *cam)
+{
 
     event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, NULL);
     event(cam, EVENT_ENDMOTION, NULL, NULL, NULL, NULL);
@@ -668,7 +685,8 @@ void mlp_cleanup(struct ctx_cam *cam) {
 
 }
 
-static void mlp_areadetect(struct ctx_cam *cam){
+static void mlp_areadetect(struct ctx_cam *cam)
+{
     int i, j, z = 0;
 
     if ((cam->conf->area_detect != "" ) &&
@@ -694,7 +712,8 @@ static void mlp_areadetect(struct ctx_cam *cam){
 
 }
 
-static void mlp_prepare(struct ctx_cam *cam){
+static void mlp_prepare(struct ctx_cam *cam)
+{
 
     int frame_buffer_size;
 
@@ -733,7 +752,8 @@ static void mlp_prepare(struct ctx_cam *cam){
 
 }
 
-static void mlp_resetimages(struct ctx_cam *cam){
+static void mlp_resetimages(struct ctx_cam *cam)
+{
 
     if (cam->conf->minimum_frame_time) {
         cam->minimum_frame_time_downcounter = cam->conf->minimum_frame_time;
@@ -764,7 +784,8 @@ static void mlp_resetimages(struct ctx_cam *cam){
 
 }
 
-static int mlp_retry(struct ctx_cam *cam){
+static int mlp_retry(struct ctx_cam *cam)
+{
 
     /*
      * If a camera is not available we keep on retrying every 10 seconds
@@ -813,7 +834,8 @@ static int mlp_retry(struct ctx_cam *cam){
     return 0;
 }
 
-static int mlp_capture(struct ctx_cam *cam){
+static int mlp_capture(struct ctx_cam *cam)
+{
 
     const char *tmpin;
     char tmpout[80];
@@ -896,7 +918,8 @@ static int mlp_capture(struct ctx_cam *cam){
 
 }
 
-static void mlp_detection(struct ctx_cam *cam){
+static void mlp_detection(struct ctx_cam *cam)
+{
 
     if (cam->frame_skip) {
         cam->frame_skip--;
@@ -920,7 +943,8 @@ static void mlp_detection(struct ctx_cam *cam){
 
 }
 
-static void mlp_tuning(struct ctx_cam *cam){
+static void mlp_tuning(struct ctx_cam *cam)
+{
 
     if ((cam->conf->noise_tune && cam->shots == 0) &&
           (!cam->detecting_motion && (cam->current_image->diffs <= cam->threshold))) {
@@ -947,7 +971,8 @@ static void mlp_tuning(struct ctx_cam *cam){
 
 }
 
-static void mlp_overlay(struct ctx_cam *cam){
+static void mlp_overlay(struct ctx_cam *cam)
+{
 
     char tmp[PATH_MAX];
 
@@ -1024,7 +1049,8 @@ static void mlp_overlay(struct ctx_cam *cam){
 
 }
 
-static void mlp_actions_emulate(struct ctx_cam *cam){
+static void mlp_actions_emulate(struct ctx_cam *cam)
+{
 
     int indx;
 
@@ -1046,7 +1072,8 @@ static void mlp_actions_emulate(struct ctx_cam *cam){
 
 }
 
-static void mlp_actions_motion(struct ctx_cam *cam){
+static void mlp_actions_motion(struct ctx_cam *cam)
+{
     int indx, frame_count = 0;
     int pos = cam->imgs.ring_in;
 
@@ -1084,7 +1111,8 @@ static void mlp_actions_motion(struct ctx_cam *cam){
     mlp_detected(cam, cam->video_dev, cam->current_image);
 }
 
-static void mlp_actions_event(struct ctx_cam *cam){
+static void mlp_actions_event(struct ctx_cam *cam)
+{
 
     if ((cam->conf->movie_max_time > 0) &&
         (cam->event_nr == cam->prev_event) &&
@@ -1125,7 +1153,8 @@ static void mlp_actions_event(struct ctx_cam *cam){
     }
 }
 
-static void mlp_actions(struct ctx_cam *cam){
+static void mlp_actions(struct ctx_cam *cam)
+{
 
      if ((cam->current_image->diffs > cam->threshold) &&
         (cam->current_image->diffs < cam->threshold_maximum)) {
@@ -1162,7 +1191,8 @@ static void mlp_actions(struct ctx_cam *cam){
 
 }
 
-static void mlp_setupmode(struct ctx_cam *cam){
+static void mlp_setupmode(struct ctx_cam *cam)
+{
 
     if (cam->motapp->setup_mode) {
         char msg[1024] = "\0";
@@ -1196,7 +1226,8 @@ static void mlp_setupmode(struct ctx_cam *cam){
 
 }
 
-static void mlp_snapshot(struct ctx_cam *cam){
+static void mlp_snapshot(struct ctx_cam *cam)
+{
 
     if ((cam->conf->snapshot_interval > 0 && cam->shots == 0 &&
          cam->frame_curr_ts.tv_sec % cam->conf->snapshot_interval <=
@@ -1208,7 +1239,8 @@ static void mlp_snapshot(struct ctx_cam *cam){
 
 }
 
-static void mlp_timelapse(struct ctx_cam *cam){
+static void mlp_timelapse(struct ctx_cam *cam)
+{
 
     struct tm timestamp_tm;
 
@@ -1257,7 +1289,8 @@ static void mlp_timelapse(struct ctx_cam *cam){
 
 }
 
-static void mlp_loopback(struct ctx_cam *cam){
+static void mlp_loopback(struct ctx_cam *cam)
+{
 
     if (cam->motapp->setup_mode) {
         event(cam, EVENT_IMAGE, &cam->imgs.image_motion, NULL, &cam->pipe, &cam->current_image->imgts);
@@ -1274,7 +1307,8 @@ static void mlp_loopback(struct ctx_cam *cam){
 
 }
 
-static void mlp_parmsupdate(struct ctx_cam *cam){
+static void mlp_parmsupdate(struct ctx_cam *cam)
+{
 
     /* Check for some config parameter changes but only every second */
     if (cam->shots != 0) return;
@@ -1360,7 +1394,8 @@ static void mlp_parmsupdate(struct ctx_cam *cam){
 
 }
 
-static void mlp_frametiming(struct ctx_cam *cam){
+static void mlp_frametiming(struct ctx_cam *cam)
+{
 
     int indx;
     struct timespec ts2;
@@ -1402,7 +1437,8 @@ static void mlp_frametiming(struct ctx_cam *cam){
 }
 
 /** Thread function for each camera */
-void *motion_loop(void *arg) {
+void *motion_loop(void *arg)
+{
 
     struct ctx_cam *cam =(struct ctx_cam *) arg;
 

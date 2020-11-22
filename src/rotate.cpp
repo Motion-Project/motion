@@ -65,7 +65,8 @@ static void reverse_inplace_quad(unsigned char *src, int size)
     }
 }
 
-static void flip_inplace_horizontal(unsigned char *src, int width, int height) {
+static void flip_inplace_horizontal(unsigned char *src, int width, int height)
+{
     uint8_t *nsrc, *ndst;
     uint8_t tmp;
     int l,w;
@@ -116,8 +117,7 @@ static void flip_inplace_vertical(unsigned char *src, int width, int height)
  *
  * Returns: nothing
  */
-static void rot90cw(unsigned char *src, unsigned char *dst, int size,
-                    int width, int height)
+static void rot90cw(unsigned char *src, unsigned char *dst, int size, int width, int height)
 {
     unsigned char *endp;
     unsigned char *base;
@@ -149,8 +149,7 @@ static void rot90cw(unsigned char *src, unsigned char *dst, int size,
  *
  * Returns: nothing
  */
-static inline void rot90ccw(unsigned char *src, unsigned char *dst,
-                            int size, int width, int height)
+static inline void rot90ccw(unsigned char *src, unsigned char *dst, int size, int width, int height)
 {
     unsigned char *endp;
     unsigned char *base;
@@ -178,7 +177,8 @@ static inline void rot90ccw(unsigned char *src, unsigned char *dst,
  *
  * Returns: nothing
  */
-void rotate_init(struct ctx_cam *cam){
+void rotate_init(struct ctx_cam *cam)
+{
     int size_norm, size_high;
 
     cam->rotate_data =(struct ctx_rotate*) mymalloc(sizeof(struct ctx_rotate));
@@ -268,7 +268,8 @@ void rotate_init(struct ctx_cam *cam){
  *
  * Returns: nothing
  */
-void rotate_deinit(struct ctx_cam *cam){
+void rotate_deinit(struct ctx_cam *cam)
+{
 
     if (cam->rotate_data->buffer_norm)
         free(cam->rotate_data->buffer_norm);
@@ -297,7 +298,8 @@ void rotate_deinit(struct ctx_cam *cam){
  *   0  - success
  *   -1 - failure (shouldn't happen)
  */
-int rotate_map(struct ctx_cam *cam, struct ctx_image_data *img_data){
+int rotate_map(struct ctx_cam *cam, struct ctx_image_data *img_data)
+{
     /*
      * The image format is YUV 4:2:0 planar, which has the pixel
      * data is divided in three parts:

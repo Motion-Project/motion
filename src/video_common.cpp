@@ -711,7 +711,8 @@ void vid_close(struct ctx_cam *cam)
  *     -1 if failed to open device.
  *     -3 image dimensions are not modulo 8
  */
-int vid_start(struct ctx_cam *cam) {
+int vid_start(struct ctx_cam *cam)
+{
     int dev = -1;
 
     if (cam->camera_type == CAMERA_TYPE_MMAL) {
@@ -770,7 +771,8 @@ int vid_start(struct ctx_cam *cam) {
  *    with bit 0 set            Non fatal V4L error (copy grey image and discard this image)
  *    with bit 1 set            Non fatal Netcam error
  */
-int vid_next(struct ctx_cam *cam, struct ctx_image_data *img_data){
+int vid_next(struct ctx_cam *cam, struct ctx_image_data *img_data)
+{
 
     if (cam->camera_type == CAMERA_TYPE_MMAL) {
         if (cam->mmalcam == NULL) {

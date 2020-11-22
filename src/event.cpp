@@ -69,19 +69,6 @@ const char *eventList[] = {
 };
 
 /**
- * eventToString
- *
- * returns string label of the event
- */
- /**
- * Future use debug / notification function
-static const char *eventToString(motion_event e)
-{
-    return eventList[(int)e];
-}
-*/
-
-/**
  * exec_command
  *      Execute 'command' with 'arg' as its argument.
  *      if !arg command is started with no arguments
@@ -121,8 +108,8 @@ static void exec_command(struct ctx_cam *cam, const char *command, char *filenam
 }
 
 static void event_newfile(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)cam;
     (void)evnt;
@@ -136,8 +123,8 @@ static void event_newfile(struct ctx_cam *cam, motion_event evnt
 
 
 static void event_beep(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)img_data;
@@ -158,8 +145,8 @@ static void event_beep(struct ctx_cam *cam, motion_event evnt
  *      to the config parameter.
  */
 static void on_picture_save_command(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     int filetype = (unsigned long)ftype;
 
@@ -175,8 +162,8 @@ static void on_picture_save_command(struct ctx_cam *cam, motion_event evnt
 }
 
 static void on_motion_detected_command(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)img_data;
@@ -189,8 +176,8 @@ static void on_motion_detected_command(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_sqlfirstmotion(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)img_data;
@@ -206,8 +193,8 @@ static void event_sqlfirstmotion(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_sqlnewfile(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     int sqltype = (unsigned long)ftype;
 
@@ -224,8 +211,8 @@ static void event_sqlnewfile(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_sqlfileclose(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     int sqltype = (unsigned long)ftype;
 
@@ -243,8 +230,8 @@ static void event_sqlfileclose(struct ctx_cam *cam, motion_event evnt
 }
 
 static void on_area_command(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)img_data;
@@ -257,8 +244,8 @@ static void on_area_command(struct ctx_cam *cam, motion_event evnt
 }
 
 static void on_event_start_command(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)img_data;
@@ -271,8 +258,8 @@ static void on_event_start_command(struct ctx_cam *cam, motion_event evnt
 }
 
 static void on_event_end_command(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)img_data;
@@ -285,8 +272,8 @@ static void on_event_end_command(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_stream_put(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)fname;
@@ -299,8 +286,8 @@ static void event_stream_put(struct ctx_cam *cam, motion_event evnt
 
 
 static void event_vlp_putpipe(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)fname;
@@ -321,8 +308,8 @@ const char *imageext(struct ctx_cam *cam) {
 }
 
 static void event_image_detect(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     char fullfilename[PATH_MAX];
     char filename[PATH_MAX];
@@ -352,8 +339,8 @@ static void event_image_detect(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_imagem_detect(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     char fullfilename[PATH_MAX];
     char filename[PATH_MAX];
@@ -390,8 +377,8 @@ static void event_imagem_detect(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_image_snapshot(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     char fullfilename[PATH_MAX];
     char filename[PATH_MAX];
@@ -442,8 +429,8 @@ static void event_image_snapshot(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_image_preview(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     char previewname[PATH_MAX];
     char filename[PATH_MAX];
@@ -482,8 +469,8 @@ static void event_image_preview(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_camera_lost(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)img_data;
@@ -496,8 +483,8 @@ static void event_camera_lost(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_secondary_detect(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)img_data;
@@ -512,8 +499,8 @@ static void event_secondary_detect(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_camera_found(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)img_data;
@@ -526,8 +513,8 @@ static void event_camera_found(struct ctx_cam *cam, motion_event evnt
 }
 
 static void on_movie_end_command(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     int filetype = (unsigned long) ftype;
 
@@ -540,8 +527,8 @@ static void on_movie_end_command(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_extpipe_end(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)img_data;
@@ -561,8 +548,8 @@ static void event_extpipe_end(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_create_extpipe(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     int retcd;
     char stamp[PATH_MAX] = "";
@@ -629,8 +616,8 @@ static void event_create_extpipe(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_extpipe_put(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     int passthrough;
 
@@ -662,8 +649,8 @@ static void event_extpipe_put(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_new_video(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)img_data;
@@ -682,8 +669,8 @@ static void event_new_video(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_movie_newfile(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     int retcd;
 
@@ -719,8 +706,8 @@ static void event_movie_newfile(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_movie_timelapse(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     int retcd;
 
@@ -748,8 +735,8 @@ static void event_movie_timelapse(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_movie_put(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)fname;
@@ -768,8 +755,8 @@ static void event_movie_put(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_movie_closefile(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)img_data;
@@ -793,8 +780,8 @@ static void event_movie_closefile(struct ctx_cam *cam, motion_event evnt
 }
 
 static void event_movie_timelapseend(struct ctx_cam *cam, motion_event evnt
-            ,struct ctx_image_data *img_data, char *fname
-            ,void *ftype, struct timespec *ts1) {
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
 
     (void)evnt;
     (void)img_data;
@@ -960,8 +947,8 @@ struct event_handlers event_handlers[] = {
  * as a code reading friendly solution to avoid a stream of compiler warnings in gcc 4.0.
  */
 void event(struct ctx_cam *cam, motion_event evnt
-           ,struct ctx_image_data *img_data, char *fname
-           ,void *ftype, struct timespec *ts1) {
+           ,struct ctx_image_data *img_data, char *fname,void *ftype, struct timespec *ts1)
+{
     int i=-1;
 
     while (event_handlers[++i].handler) {

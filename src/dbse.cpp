@@ -24,8 +24,8 @@
 #include "logger.hpp"
 #include "dbse.hpp"
 
-/*Edits to validate parms for database use */
-static int dbse_global_edits(struct ctx_cam **cam_list){
+static int dbse_global_edits(struct ctx_cam **cam_list)
+{
 
     int retcd = 0;
 
@@ -53,7 +53,8 @@ static int dbse_global_edits(struct ctx_cam **cam_list){
 
 }
 
-void dbse_global_deinit(struct ctx_cam **cam_list){
+void dbse_global_deinit(struct ctx_cam **cam_list)
+{
 
     int indx;
 
@@ -88,7 +89,8 @@ void dbse_global_deinit(struct ctx_cam **cam_list){
 
 }
 
-void dbse_global_init(struct ctx_cam **cam_list){
+void dbse_global_init(struct ctx_cam **cam_list)
+{
     int indx;
 
     indx = 0;
@@ -171,7 +173,8 @@ void dbse_global_init(struct ctx_cam **cam_list){
     }
 }
 
-static void dbse_init_mysql(struct ctx_cam *cam){
+static void dbse_init_mysql(struct ctx_cam *cam)
+{
 
     #if defined(HAVE_MYSQL)
         // close database to be sure that we are not leaking
@@ -210,7 +213,8 @@ static void dbse_init_mysql(struct ctx_cam *cam){
 
 }
 
-static void dbse_init_mariadb(struct ctx_cam *cam){
+static void dbse_init_mariadb(struct ctx_cam *cam)
+{
 
     #if defined(HAVE_MARIADB)
         // close database to be sure that we are not leaking
@@ -248,7 +252,8 @@ static void dbse_init_mariadb(struct ctx_cam *cam){
 
 }
 
-static void dbse_init_sqlite3(struct ctx_cam *cam){
+static void dbse_init_sqlite3(struct ctx_cam *cam)
+{
     #ifdef HAVE_SQLITE3
         if (cam->cam_list[0]->dbse->database_sqlite3 != 0) {
             MOTION_LOG(NTC, TYPE_DB, NO_ERRNO,_("SQLite3 using shared handle"));
@@ -281,7 +286,8 @@ static void dbse_init_sqlite3(struct ctx_cam *cam){
 
 }
 
-static void dbse_init_pgsql(struct ctx_cam *cam){
+static void dbse_init_pgsql(struct ctx_cam *cam)
+{
     #ifdef HAVE_PGSQL
         char connstring[255];
         /* Create the connection string.
@@ -313,7 +319,8 @@ static void dbse_init_pgsql(struct ctx_cam *cam){
     return;
 }
 
-void dbse_init(struct ctx_cam *cam){
+void dbse_init(struct ctx_cam *cam)
+{
 
     if (cam->conf->database_type != "") {
         MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
@@ -337,7 +344,8 @@ void dbse_init(struct ctx_cam *cam){
     return;
 }
 
-void dbse_deinit(struct ctx_cam *cam){
+void dbse_deinit(struct ctx_cam *cam)
+{
     if (cam->conf->database_type != "") {
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing database"));
 
@@ -372,7 +380,8 @@ void dbse_deinit(struct ctx_cam *cam){
 
 }
 
-void dbse_sqlmask_update(struct ctx_cam *cam){
+void dbse_sqlmask_update(struct ctx_cam *cam)
+{
     /*
     * Set the sql mask file according to the SQL config options
     * We update it for every frame in case the config was updated
@@ -385,7 +394,8 @@ void dbse_sqlmask_update(struct ctx_cam *cam){
 
 }
 
-static void dbse_mysql_exec(char *sqlquery,struct ctx_cam *cam, int save_id) {
+static void dbse_mysql_exec(char *sqlquery,struct ctx_cam *cam, int save_id)
+{
 
     #if defined(HAVE_MYSQL)
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing mysql query");
@@ -436,7 +446,8 @@ static void dbse_mysql_exec(char *sqlquery,struct ctx_cam *cam, int save_id) {
 
 }
 
-static void dbse_mariadb_exec(char *sqlquery,struct ctx_cam *cam, int save_id) {
+static void dbse_mariadb_exec(char *sqlquery,struct ctx_cam *cam, int save_id)
+{
 
     #if defined(HAVE_MARIADB)
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing mysql query");
@@ -487,7 +498,8 @@ static void dbse_mariadb_exec(char *sqlquery,struct ctx_cam *cam, int save_id) {
 
 }
 
-static void dbse_pgsql_exec(char *sqlquery,struct ctx_cam *cam, int save_id) {
+static void dbse_pgsql_exec(char *sqlquery,struct ctx_cam *cam, int save_id)
+{
     #ifdef HAVE_PGSQL
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing postgresql query");
         PGresult *res;
@@ -532,7 +544,8 @@ static void dbse_pgsql_exec(char *sqlquery,struct ctx_cam *cam, int save_id) {
 
 }
 
-static void dbse_sqlite3_exec(char *sqlquery,struct ctx_cam *cam, int save_id) {
+static void dbse_sqlite3_exec(char *sqlquery,struct ctx_cam *cam, int save_id)
+{
     #ifdef HAVE_SQLITE3
         int res;
         char *errmsg = 0;
@@ -553,7 +566,8 @@ static void dbse_sqlite3_exec(char *sqlquery,struct ctx_cam *cam, int save_id) {
     #endif /* HAVE_SQLITE3 */
 }
 
-void dbse_firstmotion(struct ctx_cam *cam){
+void dbse_firstmotion(struct ctx_cam *cam)
+{
 
     char sqlquery[PATH_MAX];
 
@@ -577,7 +591,8 @@ void dbse_firstmotion(struct ctx_cam *cam){
 
 }
 
-void dbse_newfile(struct ctx_cam *cam, char *filename, int sqltype, struct timespec *ts1) {
+void dbse_newfile(struct ctx_cam *cam, char *filename, int sqltype, struct timespec *ts1)
+{
     char sqlquery[PATH_MAX];
 
     mystrftime(cam, sqlquery, sizeof(sqlquery), cam->conf->sql_query.c_str(),
@@ -600,8 +615,8 @@ void dbse_newfile(struct ctx_cam *cam, char *filename, int sqltype, struct times
 
 }
 
-void dbse_fileclose(struct ctx_cam *cam, char *filename, int sqltype, struct timespec *ts1) {
-
+void dbse_fileclose(struct ctx_cam *cam, char *filename, int sqltype, struct timespec *ts1)
+{
     char sqlquery[PATH_MAX];
 
     mystrftime(cam, sqlquery, sizeof(sqlquery), cam->conf->sql_query_stop.c_str(),

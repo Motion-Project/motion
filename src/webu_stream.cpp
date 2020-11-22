@@ -36,7 +36,8 @@
 
 
 
-static void webu_stream_mjpeg_checkbuffers(struct webui_ctx *webui) {
+static void webu_stream_mjpeg_checkbuffers(struct webui_ctx *webui)
+{
     /* Allocate buffers if needed */
     if (webui->resp_size < (size_t)webui->cam->imgs.size_norm){
         if (webui->resp_page   != NULL) free(webui->resp_page);
@@ -48,7 +49,8 @@ static void webu_stream_mjpeg_checkbuffers(struct webui_ctx *webui) {
 
 }
 
-static void webu_stream_mjpeg_delay(struct webui_ctx *webui) {
+static void webu_stream_mjpeg_delay(struct webui_ctx *webui)
+{
     /* Sleep required time to get to the user requested frame
      * rate for the stream
      */
@@ -79,7 +81,8 @@ static void webu_stream_mjpeg_delay(struct webui_ctx *webui) {
 
 }
 
-static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
+static void webu_stream_mjpeg_getimg(struct webui_ctx *webui)
+{
     long jpeg_size;
     char resp_head[80];
     int  header_len;
@@ -136,7 +139,8 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
 
 }
 
-static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, size_t max){
+static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, size_t max)
+{
     /* This is the callback response function for MHD streams.  It is kept "open" and
      * in process during the entire time that the user has the stream open in the web
      * browser.  We sleep the requested amount of time between fetching images to match
@@ -180,7 +184,8 @@ static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, s
 
 }
 
-static void webu_stream_static_getimg(struct webui_ctx *webui) {
+static void webu_stream_static_getimg(struct webui_ctx *webui)
+{
     /* Obtain the current image, compress it to a JPG and put into webui->resp_page
      * for MHD to send back to user
      */
@@ -201,7 +206,8 @@ static void webu_stream_static_getimg(struct webui_ctx *webui) {
 
 }
 
-static int webu_stream_checks(struct webui_ctx *webui) {
+static int webu_stream_checks(struct webui_ctx *webui)
+{
     /* Perform edits to determine whether the user specified a valid URL
      * for the particular port
      */
@@ -242,7 +248,8 @@ static int webu_stream_checks(struct webui_ctx *webui) {
     return 0;
 }
 
-static void webu_stream_cnct_count(struct webui_ctx *webui) {
+static void webu_stream_cnct_count(struct webui_ctx *webui)
+{
     /* Increment the counters for the connections to the streams */
     int cnct_count;
 
@@ -288,7 +295,8 @@ static void webu_stream_cnct_count(struct webui_ctx *webui) {
 
 }
 
-int webu_stream_mjpeg(struct webui_ctx *webui) {
+int webu_stream_mjpeg(struct webui_ctx *webui)
+{
     /* Create the stream for the motion jpeg */
     int retcd;
     struct MHD_Response *response;
@@ -322,7 +330,8 @@ int webu_stream_mjpeg(struct webui_ctx *webui) {
     return retcd;
 }
 
-int webu_stream_static(struct webui_ctx *webui) {
+int webu_stream_static(struct webui_ctx *webui)
+{
     /* Create the response for the static image request*/
     int retcd;
     struct MHD_Response *response;
@@ -363,7 +372,8 @@ int webu_stream_static(struct webui_ctx *webui) {
     return retcd;
 }
 
-void webu_stream_init(struct ctx_cam *cam){
+void webu_stream_init(struct ctx_cam *cam)
+{
 
     /* The image buffers are allocated in event_stream_put if needed
      * NOTE:  This runs on the motion_loop thread.
@@ -398,7 +408,8 @@ void webu_stream_init(struct ctx_cam *cam){
 
 }
 
-void webu_stream_deinit(struct ctx_cam *cam){
+void webu_stream_deinit(struct ctx_cam *cam)
+{
 
     /* Need to check whether buffers were allocated since init
      * function defers the allocations to event_stream_put
@@ -439,7 +450,8 @@ void webu_stream_deinit(struct ctx_cam *cam){
 
 }
 
-static void webu_stream_getimg_norm(struct ctx_cam *cam, struct ctx_image_data *img_data){
+static void webu_stream_getimg_norm(struct ctx_cam *cam, struct ctx_image_data *img_data)
+{
     /*This is on the motion_loop thread */
     if (cam->stream.norm.jpeg_data == NULL){
         cam->stream.norm.jpeg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
@@ -457,7 +469,8 @@ static void webu_stream_getimg_norm(struct ctx_cam *cam, struct ctx_image_data *
 
 }
 
-static void webu_stream_getimg_sub(struct ctx_cam *cam, struct ctx_image_data *img_data){
+static void webu_stream_getimg_sub(struct ctx_cam *cam, struct ctx_image_data *img_data)
+{
     /*This is on the motion_loop thread */
 
     int subsize;
@@ -500,7 +513,8 @@ static void webu_stream_getimg_sub(struct ctx_cam *cam, struct ctx_image_data *i
 
 }
 
-static void webu_stream_getimg_motion(struct ctx_cam *cam){
+static void webu_stream_getimg_motion(struct ctx_cam *cam)
+{
     /*This is on the motion_loop thread */
 
     if (cam->stream.motion.jpeg_data == NULL){
@@ -519,7 +533,8 @@ static void webu_stream_getimg_motion(struct ctx_cam *cam){
 
 }
 
-static void webu_stream_getimg_source(struct ctx_cam *cam){
+static void webu_stream_getimg_source(struct ctx_cam *cam)
+{
     /*This is on the motion_loop thread */
 
     if (cam->stream.source.jpeg_data == NULL){
@@ -538,7 +553,8 @@ static void webu_stream_getimg_source(struct ctx_cam *cam){
 
 }
 
-static void webu_stream_getimg_secondary(struct ctx_cam *cam){
+static void webu_stream_getimg_secondary(struct ctx_cam *cam)
+{
     /*This is on the motion_loop thread */
 
     if (cam->imgs.size_secondary>0) {
@@ -558,7 +574,8 @@ static void webu_stream_getimg_secondary(struct ctx_cam *cam){
 
 }
 
-void webu_stream_getimg(struct ctx_cam *cam, struct ctx_image_data *img_data){
+void webu_stream_getimg(struct ctx_cam *cam, struct ctx_image_data *img_data)
+{
 
     /*This is on the motion_loop thread */
 

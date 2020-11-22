@@ -64,7 +64,8 @@ struct strminfo_ctx {
     int             motion_images;
 };
 
-static void webu_html_style_navbar(struct webui_ctx *webui) {
+static void webu_html_style_navbar(struct webui_ctx *webui)
+{
     /* Write out the style section of the web page */
     char response[WEBUI_LEN_RESP];
 
@@ -89,7 +90,8 @@ static void webu_html_style_navbar(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_style_dropdown(struct webui_ctx *webui) {
+static void webu_html_style_dropdown(struct webui_ctx *webui)
+{
     /* Write out the style section of the web page */
     char response[WEBUI_LEN_RESP];
 
@@ -138,7 +140,8 @@ static void webu_html_style_dropdown(struct webui_ctx *webui) {
     webu_write(webui, response);
 }
 
-static void webu_html_style_input(struct webui_ctx *webui) {
+static void webu_html_style_input(struct webui_ctx *webui)
+{
     /* Write out the style section of the web page */
     char response[WEBUI_LEN_RESP];
 
@@ -161,7 +164,8 @@ static void webu_html_style_input(struct webui_ctx *webui) {
     webu_write(webui, response);
 }
 
-static void webu_html_style_base(struct webui_ctx *webui) {
+static void webu_html_style_base(struct webui_ctx *webui)
+{
     /* Write out the style section of the web page */
     char response[WEBUI_LEN_RESP];
 
@@ -222,7 +226,8 @@ static void webu_html_style_base(struct webui_ctx *webui) {
     webu_write(webui, response);
 }
 
-static void webu_html_style(struct webui_ctx *webui) {
+static void webu_html_style(struct webui_ctx *webui)
+{
     /* Write out the style section of the web page */
     char response[WEBUI_LEN_RESP];
 
@@ -242,7 +247,8 @@ static void webu_html_style(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_head(struct webui_ctx *webui) {
+static void webu_html_head(struct webui_ctx *webui)
+{
     /* Write out the header section of the web page */
     char response[WEBUI_LEN_RESP];
 
@@ -259,7 +265,8 @@ static void webu_html_head(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_navbar_camera(struct webui_ctx *webui) {
+static void webu_html_navbar_camera(struct webui_ctx *webui)
+{
     /*Write out the options included in the camera dropdown */
     char response[WEBUI_LEN_RESP];
     int indx;
@@ -322,7 +329,8 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_navbar_action(struct webui_ctx *webui) {
+static void webu_html_navbar_action(struct webui_ctx *webui)
+{
     /* Write out the options included in the actions dropdown*/
     char response[WEBUI_LEN_RESP];
 
@@ -356,7 +364,8 @@ static void webu_html_navbar_action(struct webui_ctx *webui) {
     webu_write(webui, response);
 }
 
-static void webu_html_navbar(struct webui_ctx *webui) {
+static void webu_html_navbar(struct webui_ctx *webui)
+{
     /* Write the navbar section*/
     char response[WEBUI_LEN_RESP];
 
@@ -378,7 +387,8 @@ static void webu_html_navbar(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_config_notice(struct webui_ctx *webui) {
+static void webu_html_config_notice(struct webui_ctx *webui)
+{
     /* Print out the header description of which parameters are included based upon the
      * webcontrol_parms that was specified
      */
@@ -404,7 +414,8 @@ static void webu_html_config_notice(struct webui_ctx *webui) {
     webu_write(webui, response);
 }
 
-static void webu_html_h3desc(struct webui_ctx *webui) {
+static void webu_html_h3desc(struct webui_ctx *webui)
+{
     /* Write out the status description for the camera */
     char response[WEBUI_LEN_RESP];
 
@@ -429,7 +440,8 @@ static void webu_html_h3desc(struct webui_ctx *webui) {
     }
 }
 
-static void webu_html_config(struct webui_ctx *webui) {
+static void webu_html_config(struct webui_ctx *webui)
+{
 
     /* Write out the options to put into the config dropdown
      * We use html data attributes to store the values for the options
@@ -550,7 +562,8 @@ static void webu_html_config(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_track(struct webui_ctx *webui) {
+static void webu_html_track(struct webui_ctx *webui)
+{
     /* Write the section for handling the tracking function */
     char response[WEBUI_LEN_RESP];
 
@@ -583,7 +596,8 @@ static void webu_html_track(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_strminfo(struct strminfo_ctx *strm_info, int indx) {
+static void webu_html_strminfo(struct strminfo_ctx *strm_info, int indx)
+{
     /* This determines all the items we need to know to specify links and
      * stream sources for the page.  The options are 0-3 as of this writing
      * where 0 = full streams, 1 = substreams, 2 = static images and 3 is
@@ -636,7 +650,8 @@ static void webu_html_strminfo(struct strminfo_ctx *strm_info, int indx) {
 
 }
 
-static void webu_html_preview(struct webui_ctx *webui) {
+static void webu_html_preview(struct webui_ctx *webui)
+{
 
     /* Write the initial version of the preview section.  The javascript
      * will change this section when user selects a different camera */
@@ -705,7 +720,8 @@ static void webu_html_preview(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script_action(struct webui_ctx *webui) {
+static void webu_html_script_action(struct webui_ctx *webui)
+{
     /* Write the javascript action_click() function.
      * We do not have a good notification section on the page so the successful
      * submission and response is currently a empty if block for the future
@@ -770,7 +786,8 @@ static void webu_html_script_action(struct webui_ctx *webui) {
     webu_write(webui, response);
 }
 
-static void webu_html_script_camera_thread(struct webui_ctx *webui) {
+static void webu_html_script_camera_thread(struct webui_ctx *webui)
+{
     /* Write the javascript thread IF conditions of camera_click() function */
     char response[WEBUI_LEN_RESP];
     int indx, indx_st, preview_scale;
@@ -846,7 +863,8 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui) {
     return;
 }
 
-static void webu_html_script_camera_all(struct webui_ctx *webui) {
+static void webu_html_script_camera_all(struct webui_ctx *webui)
+{
     /* Write the javascript "All" IF condition of camera_click() function */
     char response[WEBUI_LEN_RESP];
     int indx, indx_st, preview_scale;
@@ -915,7 +933,8 @@ static void webu_html_script_camera_all(struct webui_ctx *webui) {
     return;
 }
 
-static void webu_html_script_camera(struct webui_ctx *webui) {
+static void webu_html_script_camera(struct webui_ctx *webui)
+{
     /* Write the javascript camera_click() function */
     char response[WEBUI_LEN_RESP];
 
@@ -942,7 +961,8 @@ static void webu_html_script_camera(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script_menucam(struct webui_ctx *webui) {
+static void webu_html_script_menucam(struct webui_ctx *webui)
+{
     /* Write the javascript display_cameras() function */
     char response[WEBUI_LEN_RESP];
 
@@ -959,7 +979,8 @@ static void webu_html_script_menucam(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script_menuact(struct webui_ctx *webui) {
+static void webu_html_script_menuact(struct webui_ctx *webui)
+{
     /* Write the javascript display_actions() function */
     char response[WEBUI_LEN_RESP];
 
@@ -976,7 +997,8 @@ static void webu_html_script_menuact(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script_evtclk(struct webui_ctx *webui) {
+static void webu_html_script_evtclk(struct webui_ctx *webui)
+{
     /* Write the javascript 'click' EventListener */
     char response[WEBUI_LEN_RESP];
 
@@ -993,7 +1015,8 @@ static void webu_html_script_evtclk(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script_cfgclk(struct webui_ctx *webui) {
+static void webu_html_script_cfgclk(struct webui_ctx *webui)
+{
     /* Write the javascript config_click function
      * We do not have a good notification section on the page so the successful
      * submission and response is currently a empty if block for the future
@@ -1043,7 +1066,8 @@ static void webu_html_script_cfgclk(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script_cfgchg(struct webui_ctx *webui) {
+static void webu_html_script_cfgchg(struct webui_ctx *webui)
+{
     /* Write the javascript option_change function */
     char response[WEBUI_LEN_RESP];
 
@@ -1060,7 +1084,8 @@ static void webu_html_script_cfgchg(struct webui_ctx *webui) {
     webu_write(webui, response);
 }
 
-static void webu_html_script_trkchg(struct webui_ctx *webui) {
+static void webu_html_script_trkchg(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
@@ -1099,7 +1124,8 @@ static void webu_html_script_trkchg(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script_trkclk(struct webui_ctx *webui) {
+static void webu_html_script_trkclk(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
     snprintf(response, sizeof (response),"%s",
         "    function track_click() {\n"
@@ -1147,7 +1173,8 @@ static void webu_html_script_trkclk(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script(struct webui_ctx *webui) {
+static void webu_html_script(struct webui_ctx *webui)
+{
     /* Write the javascripts */
     char response[WEBUI_LEN_RESP];
 
@@ -1177,7 +1204,8 @@ static void webu_html_script(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_body(struct webui_ctx *webui) {
+static void webu_html_body(struct webui_ctx *webui)
+{
     /* Write the body section of the form */
     char response[WEBUI_LEN_RESP];
 
@@ -1201,7 +1229,8 @@ static void webu_html_body(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_page(struct webui_ctx *webui) {
+static void webu_html_page(struct webui_ctx *webui)
+{
     /* Write the main page html */
     char response[WEBUI_LEN_RESP];
 
@@ -1219,7 +1248,8 @@ static void webu_html_page(struct webui_ctx *webui) {
 
 }
 
-void webu_html_badreq(struct webui_ctx *webui) {
+void webu_html_badreq(struct webui_ctx *webui)
+{
 
     char response[WEBUI_LEN_RESP];
 
@@ -1237,7 +1267,8 @@ void webu_html_badreq(struct webui_ctx *webui) {
 
 }
 
-void webu_html_main(struct webui_ctx *webui) {
+void webu_html_main(struct webui_ctx *webui)
+{
 
     /* Note some detection and config requested actions call the
      * action function.  This is because the legacy interface

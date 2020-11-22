@@ -39,10 +39,8 @@
  * It must be called after WebPEncode() and the result
  * can then be written out to webp a file
  */
-static void pic_webp_exif(WebPMux* webp_mux,
-              const struct ctx_cam *cam,
-              const struct timespec *ts1,
-              const struct ctx_coord *box)
+static void pic_webp_exif(WebPMux* webp_mux, const struct ctx_cam *cam,
+        const struct timespec *ts1, const struct ctx_coord *box)
 {
     unsigned char *exif = NULL;
     unsigned exif_len = exif_prepare(&exif, cam, ts1, box);
@@ -67,7 +65,7 @@ static void pic_webp_exif(WebPMux* webp_mux,
 
 /** Save image as webp to file */
 static void pic_save_webp(FILE *fp, unsigned char *image, int width, int height,
-                  int quality, struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box)
+        int quality, struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box)
 {
     #ifdef HAVE_WEBP
         /* Create a config present and check for compatible library version */
@@ -156,7 +154,8 @@ static void pic_save_webp(FILE *fp, unsigned char *image, int width, int height,
 
 /** Save image as yuv420p jpeg to file */
 static void pic_save_yuv420p(FILE *fp, unsigned char *image, int width, int height,
-                  int quality, struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box) {
+        int quality, struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box)
+{
 
     int sz = 0;
     int image_size = cam->imgs.size_norm;
@@ -171,7 +170,8 @@ static void pic_save_yuv420p(FILE *fp, unsigned char *image, int width, int heig
 
 /** Save image as grey jpeg to file */
 static void pic_save_grey(FILE *picture, unsigned char *image, int width, int height,
-                  int quality, struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box) {
+        int quality, struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box)
+{
 
     int sz = 0;
     int image_size = cam->imgs.size_norm;
@@ -184,7 +184,8 @@ static void pic_save_grey(FILE *picture, unsigned char *image, int width, int he
 }
 
 /** Save image as greyscale ppm image to file */
-static void pic_save_ppm(FILE *picture, unsigned char *image, int width, int height) {
+static void pic_save_ppm(FILE *picture, unsigned char *image, int width, int height)
+{
     int x, y;
     unsigned char *l = image;
     unsigned char *u = image + width * height;
@@ -243,9 +244,9 @@ static void pic_save_ppm(FILE *picture, unsigned char *image, int width, int hei
 
 
 /** Put picture into memory as jpg */
-int pic_put_memory(struct ctx_cam *cam, unsigned char* dest_image, int image_size, unsigned char *image,
-        int quality, int width, int height) {
-
+int pic_put_memory(struct ctx_cam *cam, unsigned char* dest_image, int image_size
+        , unsigned char *image, int quality, int width, int height)
+{
     struct timespec ts1;
 
     clock_gettime(CLOCK_REALTIME, &ts1);
@@ -261,8 +262,8 @@ int pic_put_memory(struct ctx_cam *cam, unsigned char* dest_image, int image_siz
 }
 
 /* Write the picture to a file */
-static void pic_write(struct ctx_cam *cam, FILE *picture, unsigned char *image, int quality, int ftype){
-
+static void pic_write(struct ctx_cam *cam, FILE *picture, unsigned char *image, int quality, int ftype)
+{
     int width, height;
     int passthrough;
 
@@ -290,7 +291,8 @@ static void pic_write(struct ctx_cam *cam, FILE *picture, unsigned char *image, 
 }
 
 /* Saves image to a file in format requested */
-void pic_save_norm(struct ctx_cam *cam, char *file, unsigned char *image, int ftype) {
+void pic_save_norm(struct ctx_cam *cam, char *file, unsigned char *image, int ftype)
+{
     FILE *picture;
 
     picture = myfopen(file, "w");
@@ -317,7 +319,8 @@ void pic_save_norm(struct ctx_cam *cam, char *file, unsigned char *image, int ft
 }
 
 /* Saves image to a file in format requested */
-void pic_save_roi(struct ctx_cam *cam, char *file, unsigned char *image) {
+void pic_save_roi(struct ctx_cam *cam, char *file, unsigned char *image)
+{
     FILE *picture;
     int image_size, sz, indxh;
     ctx_coord *bx;
@@ -380,7 +383,8 @@ void pic_save_roi(struct ctx_cam *cam, char *file, unsigned char *image) {
 }
 
 /** Get the pgm file used as fixed mask */
-unsigned char *pic_load_pgm(FILE *picture, int width, int height) {
+unsigned char *pic_load_pgm(FILE *picture, int width, int height)
+{
 
     int x, y, mask_width, mask_height, maxval;
     char line[256];
@@ -466,7 +470,8 @@ unsigned char *pic_load_pgm(FILE *picture, int width, int height) {
 }
 
 /** Write out a base mask file if needed */
-static void pic_write_mask(struct ctx_cam *cam, const char *file) {
+static void pic_write_mask(struct ctx_cam *cam, const char *file)
+{
     FILE *picture;
 
     picture = myfopen(file, "w");
@@ -504,7 +509,8 @@ static void pic_write_mask(struct ctx_cam *cam, const char *file) {
         "re-run motion to enable mask feature"), cam->conf->mask_file.c_str());
 }
 
-void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst){
+void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst)
+{
 
     int i = 0, x, y;
     for (y = 0; y < height_src; y+=2)
@@ -521,7 +527,8 @@ void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsign
     return;
 }
 
-void pic_save_preview(struct ctx_cam *cam, struct ctx_image_data *img) {
+void pic_save_preview(struct ctx_cam *cam, struct ctx_image_data *img)
+{
     unsigned char *image_norm, *image_high;
 
     /* Save our pointers to our memory locations for images*/
@@ -552,7 +559,8 @@ void pic_save_preview(struct ctx_cam *cam, struct ctx_image_data *img) {
 
 }
 
-void pic_init_privacy(struct ctx_cam *cam){
+void pic_init_privacy(struct ctx_cam *cam)
+{
 
     int indxrow, indxcol;
     int start_cr, offset_cb, start_cb;
@@ -658,7 +666,8 @@ void pic_init_privacy(struct ctx_cam *cam){
 
 }
 
-void pic_init_mask(struct ctx_cam *cam){
+void pic_init_mask(struct ctx_cam *cam)
+{
 
     FILE *picture;
 

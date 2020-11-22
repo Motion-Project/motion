@@ -1078,10 +1078,9 @@ struct draw_char draw_table[]= {
 };
 
 #define NEWLINE "\\n"
-/**
- * draw_textn
- */
-static int draw_textn(unsigned char *image, int startx,  int starty,  int width, const char *text, int len, int factor)
+
+static int draw_textn(unsigned char *image, int startx,  int starty,  int width
+        , const char *text, int len, int factor)
 {
 
     int x, y;
@@ -1137,10 +1136,8 @@ static int draw_textn(unsigned char *image, int startx,  int starty,  int width,
     return 0;
 }
 
-/**
- * draw_text
- */
-int draw_text(unsigned char *image, int width, int height, int startx, int starty, const char *text, int factor)
+int draw_text(unsigned char *image, int width, int height, int startx, int starty
+        , const char *text, int factor)
 {
     int num_nl = 0;
     const char *end, *begin;
@@ -1189,8 +1186,8 @@ int draw_text(unsigned char *image, int width, int height, int startx, int start
     return 0;
 }
 
-/** initialize_chars */
-int draw_init_chars(void) {
+int draw_init_chars(void)
+{
     unsigned int i;
     size_t draw_table_size;
 
@@ -1209,7 +1206,8 @@ int draw_init_chars(void) {
     return 0;
 }
 
-void draw_init_scale(struct ctx_cam *cam){
+void draw_init_scale(struct ctx_cam *cam)
+{
 
     /* Consider that web interface may change conf values at any moment.
      * The below can put two sections in the image so make sure that after
@@ -1238,9 +1236,8 @@ void draw_init_scale(struct ctx_cam *cam){
 
 }
 
-/** Draws a box around the movement. */
-static void draw_location(struct ctx_coord *cent, struct ctx_images *imgs, int width, unsigned char *new_var,
-                       int style, int mode)
+static void draw_location(struct ctx_coord *cent, struct ctx_images *imgs, int width
+        , unsigned char *new_var, int style, int mode)
 {
     unsigned char *out = imgs->image_motion.image_norm;
     int x, y;
@@ -1302,10 +1299,8 @@ static void draw_location(struct ctx_coord *cent, struct ctx_images *imgs, int w
     }
 }
 
-
-/** Draws a RED box around the movement. */
-static void draw_red_location(struct ctx_coord *cent, struct ctx_images *imgs, int width, unsigned char *new_var,
-                           int style, int mode)
+static void draw_red_location(struct ctx_coord *cent, struct ctx_images *imgs, int width
+        , unsigned char *new_var, int style, int mode)
 {
     unsigned char *out = imgs->image_motion.image_norm;
     unsigned char *new_u, *new_v;
@@ -1413,7 +1408,8 @@ static void draw_red_location(struct ctx_coord *cent, struct ctx_images *imgs, i
     }
 }
 
-void draw_locate_preview(struct ctx_cam *cam, struct ctx_image_data *img){
+void draw_locate_preview(struct ctx_cam *cam, struct ctx_image_data *img)
+{
     /* draw locate box here when mode = LOCATE_PREVIEW */
     if (cam->locate_motion_mode == LOCATE_PREVIEW) {
 
@@ -1433,7 +1429,8 @@ void draw_locate_preview(struct ctx_cam *cam, struct ctx_image_data *img){
     }
 }
 
-void draw_locate(struct ctx_cam *cam, struct ctx_image_data *img){
+void draw_locate(struct ctx_cam *cam, struct ctx_image_data *img)
+{
     struct ctx_images *imgs = &cam->imgs;
     struct ctx_coord *location = &img->location;
 
@@ -1455,8 +1452,8 @@ void draw_locate(struct ctx_cam *cam, struct ctx_image_data *img){
     }
 }
 
-/** Draw the smart mask on the motion images */
-void draw_smartmask(struct ctx_cam *cam, unsigned char *out) {
+void draw_smartmask(struct ctx_cam *cam, unsigned char *out)
+{
     int i, x, v, width, height, line;
     struct ctx_images *imgs = &cam->imgs;
     unsigned char *smartmask = imgs->smartmask_final;
@@ -1493,8 +1490,8 @@ void draw_smartmask(struct ctx_cam *cam, unsigned char *out) {
     }
 }
 
-/** Draw the fixed mask on the motion images */
-void draw_fixed_mask(struct ctx_cam *cam, unsigned char *out){
+void draw_fixed_mask(struct ctx_cam *cam, unsigned char *out)
+{
     int i, x, v, width, height, line;
     struct ctx_images *imgs = &cam->imgs;
     unsigned char *mask = imgs->mask;
@@ -1531,8 +1528,8 @@ void draw_fixed_mask(struct ctx_cam *cam, unsigned char *out){
     }
 }
 
-/** Draw largest label on the motion images */
-void draw_largest_label(struct ctx_cam *cam, unsigned char *out) {
+void draw_largest_label(struct ctx_cam *cam, unsigned char *out)
+{
     int i, x, v, width, height, line;
     struct ctx_images *imgs = &cam->imgs;
     int *labels = imgs->labels;

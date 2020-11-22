@@ -35,18 +35,12 @@
 /* Increment for *smartmask_buffer in alg_diff_standard. */
 #define SMARTMASK_SENSITIVITY_INCR 5
 
-#define PUSH(Y, XL, XR, DY)     /* push new segment on stack */  \
-        if (sp<stack+MAXS && Y+(DY) >= 0 && Y+(DY) < height)     \
-        {sp->y = Y; sp->xl = XL; sp->xr = XR; sp->dy = DY; sp++;}
-
-#define POP(Y, XL, XR, DY)      /* pop segment off stack */      \
-        {sp--; Y = sp->y+(DY = sp->dy); XL = sp->xl; XR = sp->xr;}
-
 typedef struct {
     short y, xl, xr, dy;
 } Segment;
 
-void alg_locate_center_size(struct ctx_images *imgs, int width, int height, struct ctx_coord *cent) {
+void alg_locate_center_size(struct ctx_images *imgs, int width, int height, struct ctx_coord *cent)
+{
     unsigned char *out = imgs->image_motion.image_norm;
     int *labels = imgs->labels;
     int x, y, centc = 0, xdist = 0, ydist = 0;
@@ -102,15 +96,17 @@ void alg_locate_center_size(struct ctx_images *imgs, int width, int height, stru
         for (y = 0; y < height; y++) {
             for (x = 0; x < width; x++) {
                 if (*(labels++) & 32768) {
-                    if (x > cent->x)
+                    if (x > cent->x) {
                         xdist += x - cent->x;
-                    else if (x < cent->x)
+                    } else if (x < cent->x) {
                         xdist += cent->x - x;
+                    }
 
-                    if (y > cent->y)
+                    if (y > cent->y) {
                         ydist += y - cent->y;
-                    else if (y < cent->y)
+                    } else if (y < cent->y) {
                         ydist += cent->y - y;
+                    }
 
                     centc++;
                 }
@@ -121,15 +117,17 @@ void alg_locate_center_size(struct ctx_images *imgs, int width, int height, stru
         for (y = 0; y < height; y++) {
             for (x = 0; x < width; x++) {
                 if (*(out++)) {
-                    if (x > cent->x)
+                    if (x > cent->x) {
                         xdist += x - cent->x;
-                    else if (x < cent->x)
+                    } else if (x < cent->x) {
                         xdist += cent->x - x;
+                    }
 
-                    if (y > cent->y)
+                    if (y > cent->y) {
                         ydist += y - cent->y;
-                    else if (y < cent->y)
+                    } else if (y < cent->y) {
                         ydist += cent->y - y;
+                    }
 
                     centc++;
                 }
@@ -150,25 +148,29 @@ void alg_locate_center_size(struct ctx_images *imgs, int width, int height, stru
         cent->maxy = cent->y + ydist / centc * 2;
     }
 
-    if (cent->maxx > width - 1)
+    if (cent->maxx > width - 1) {
         cent->maxx = width - 1;
-    else if (cent->maxx < 0)
+    } else if (cent->maxx < 0) {
         cent->maxx = 0;
+    }
 
-    if (cent->maxy > height - 1)
+    if (cent->maxy > height - 1) {
         cent->maxy = height - 1;
-    else if (cent->maxy < 0)
+    } else if (cent->maxy < 0) {
         cent->maxy = 0;
+    }
 
-    if (cent->minx > width - 1)
+    if (cent->minx > width - 1) {
         cent->minx = width - 1;
-    else if (cent->minx < 0)
+    } else if (cent->minx < 0) {
         cent->minx = 0;
+    }
 
-    if (cent->miny > height - 1)
+    if (cent->miny > height - 1) {
         cent->miny = height - 1;
-    else if (cent->miny < 0)
+    } else if (cent->miny < 0) {
         cent->miny = 0;
+    }
 
     /* Align for better locate box handling */
     cent->minx += cent->minx % 2;
@@ -188,7 +190,8 @@ void alg_locate_center_size(struct ctx_images *imgs, int width, int height, stru
 
 }
 
-void alg_noise_tune(struct ctx_cam *cam, unsigned char *new_var) {
+void alg_noise_tune(struct ctx_cam *cam, unsigned char *new_var)
+{
     struct ctx_images *imgs = &cam->imgs;
     int i;
     unsigned char *ref = imgs->ref;
@@ -201,8 +204,9 @@ void alg_noise_tune(struct ctx_cam *cam, unsigned char *new_var) {
     for (; i > 0; i--) {
         diff = ABS(*ref - *new_var);
 
-        if (mask)
+        if (mask) {
             diff = ((diff * *mask++) / 255);
+        }
 
         if (*smartmask) {
             sum += diff + 1;
@@ -214,33 +218,40 @@ void alg_noise_tune(struct ctx_cam *cam, unsigned char *new_var) {
         smartmask++;
     }
 
-    if (count > 3)  /* Avoid divide by zero. */
+    if (count > 3)  {
+        /* Avoid divide by zero. */
         sum /= count / 3;
+    }
 
     /* 5: safe, 4: regular, 3: more sensitive */
     cam->noise = 4 + (cam->noise + sum) / 2;
 }
 
-void alg_threshold_tune(struct ctx_cam *cam, int diffs, int motion) {
+void alg_threshold_tune(struct ctx_cam *cam, int diffs, int motion)
+{
     int i;
     int sum = 0, top = diffs;
 
-    if (!diffs)
+    if (!diffs) {
         return;
+    }
 
-    if (motion)
+    if (motion) {
         diffs = cam->threshold / 4;
+    }
 
     for (i = 0; i < THRESHOLD_TUNE_LENGTH - 1; i++) {
         sum += cam->diffs_last[i];
 
-        if (cam->diffs_last[i + 1] && !motion)
+        if (cam->diffs_last[i + 1] && !motion) {
             cam->diffs_last[i] = cam->diffs_last[i + 1];
-        else
+        } else {
             cam->diffs_last[i] = cam->threshold / 4;
+        }
 
-        if (cam->diffs_last[i] > top)
+        if (cam->diffs_last[i] > top) {
             top = cam->diffs_last[i];
+        }
     }
 
     sum += cam->diffs_last[i];
@@ -248,11 +259,13 @@ void alg_threshold_tune(struct ctx_cam *cam, int diffs, int motion) {
 
     sum /= THRESHOLD_TUNE_LENGTH / 4;
 
-    if (sum < top * 2)
+    if (sum < top * 2) {
         sum = top * 2;
+    }
 
-    if (sum < cam->conf->threshold)
+    if (sum < cam->conf->threshold) {
         cam->threshold = (cam->threshold + sum) / 2;
+    }
 }
 
 /*
@@ -264,16 +277,23 @@ void alg_threshold_tune(struct ctx_cam *cam, int diffs, int motion) {
  * Filled horizontal segment of scanline y for xl <= x <= xr.
  * Parent segment was on line y - dy.  dy = 1 or -1
  */
+#define PUSH(Y, XL, XR, DY)     /* push new segment on stack */  \
+        if (sp<stack+MAXS && Y+(DY) >= 0 && Y+(DY) < height)     \
+        {sp->y = Y; sp->xl = XL; sp->xr = XR; sp->dy = DY; sp++;}
+
+#define POP(Y, XL, XR, DY)      /* pop segment off stack */      \
+        {sp--; Y = sp->y+(DY = sp->dy); XL = sp->xl; XR = sp->xr;}
 
 static int alg_iflood(int x, int y, int width, int height,
-                      unsigned char *out, int *labels, int newvalue, int oldvalue)
+        unsigned char *out, int *labels, int newvalue, int oldvalue)
 {
     int l, x1, x2, dy;
     Segment stack[MAXS], *sp = stack; /* Stack of filled segments. */
     int count = 0;
 
-    if (x < 0 || x >= width || y < 0 || y >= height)
+    if (x < 0 || x >= width || y < 0 || y >= height) {
         return 0;
+    }
 
     PUSH(y, x, x, 1);      /* Needed in some cases. */
     PUSH(y + 1, x, x, -1); /* Seed segment (popped 1st). */
@@ -290,13 +310,15 @@ static int alg_iflood(int x, int y, int width, int height,
             count++;
         }
 
-        if (x >= x1)
+        if (x >= x1) {
             goto skip;
+        }
 
         l = x + 1;
 
-        if (l < x1)
+        if (l < x1) {
             PUSH(y, l, x1 - 1, -dy); /* Leak on left? */
+        }
 
         x = x1 + 1;
 
@@ -308,13 +330,12 @@ static int alg_iflood(int x, int y, int width, int height,
 
             PUSH(y, l, x - 1, dy);
 
-            if (x > x2 + 1)
+            if (x > x2 + 1) {
                 PUSH(y, x2 + 1, x - 1, -dy); /* Leak on right? */
+            }
 
         skip:
-
             for (x++; x <= x2 && !(out[y * width + x] != 0 && labels[y * width + x] == oldvalue); x++);
-
             l = x;
         } while (x <= x2);
     }
@@ -353,23 +374,21 @@ static int alg_labeling(struct ctx_cam *cam)
             }
 
             /* Already visited by alg_iflood */
-            if (labels[pixelpos] > 0)
+            if (labels[pixelpos] > 0) {
                 continue;
+            }
 
             labelsize = alg_iflood(ix, iy, width, height, out, labels, current_label, 0);
 
             if (labelsize > 0) {
-                //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Label: %i (%i) Size: %i (%i,%i)",
-                //            current_label, cam->current_image->total_labels,
-                //           labelsize, ix, iy);
-
                 /* Label above threshold? Mark it again (add 32768 to labelnumber). */
                 if (labelsize > cam->threshold) {
                     labelsize = alg_iflood(ix, iy, width, height, out, labels, current_label + 32768, current_label);
                     imgs->labelgroup_max += labelsize;
                     imgs->labels_above++;
-                } else if(max_under < labelsize)
+                } else if(max_under < labelsize) {
                     max_under = labelsize;
+                }
 
                 if (imgs->labelsize_max < labelsize) {
                     imgs->labelsize_max = labelsize;
@@ -382,10 +401,6 @@ static int alg_labeling(struct ctx_cam *cam)
         }
         pixelpos++; /* Compensate for ix < width - 1 */
     }
-
-    //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%i Labels found. Largest connected Area: %i Pixel(s). "
-    //           "Largest Label: %i", imgs->largest_label, imgs->labelsize_max,
-    //           cam->current_image->total_labels);
 
     /* Return group of significant labels or if that's none, the next largest
      * group (which is under the threshold, but especially for setup gives an
@@ -429,10 +444,11 @@ static int alg_dilate9(unsigned char *img, int width, int height, void *buffer)
         row3 = rowTemp;
 
         /* If we're at the last row, fill with zeros, otherwise copy from img. */
-        if (y == height - 1)
+        if (y == height - 1) {
             memset(row3, 0, width);
-        else
+        } else {
             memcpy(row3, yp + width, width);
+        }
 
         /* Init slots 0 and 1 in the moving window. */
         window[0] = MAX3(row1[0], row2[0], row3[0]);
@@ -454,10 +470,11 @@ static int alg_dilate9(unsigned char *img, int width, int height, void *buffer)
              * If the value is larger than the current max, use it. Otherwise,
              * calculate a new max (because the new value may not be the max.
              */
-            if (latest >= blob)
+            if (latest >= blob) {
                 blob = latest;
-            else
+            } else {
                 blob = MAX3(window[0], window[1], window[2]);
+            }
 
             /* Write the max value (blob) to the image. */
             if (blob != 0) {
@@ -466,8 +483,9 @@ static int alg_dilate9(unsigned char *img, int width, int height, void *buffer)
             }
 
             /* Wrap around the window index if necessary. */
-            if (++widx == 3)
+            if (++widx == 3) {
                 widx = 0;
+            }
         }
 
         /* Store zeros in the vertical sides. */
@@ -509,10 +527,11 @@ static int alg_dilate5(unsigned char *img, int width, int height, void *buffer)
         row3 = rowTemp;
 
         /* If we're at the last row, fill with zeros, otherwise copy from img. */
-        if (y == height - 1)
+        if (y == height - 1) {
             memset(row3, 0, width);
-        else
+        } else {
             memcpy(row3, yp + width, width);
+        }
 
         /* Init mem and set blob to force an evaluation of the entire + shape. */
         mem = MAX2(row2[0], row2[1]);
@@ -562,10 +581,11 @@ static int alg_erode9(unsigned char *img, int width, int height, void *buffer, u
         memcpy(Row1, Row2, width);
         memcpy(Row2, Row3, width);
 
-        if (y == height - 1)
+        if (y == height - 1) {
             memset(Row3, flag, width);
-        else
+        } else {
             memcpy(Row3, img + (y + 1) * width, width);
+        }
 
         for (i = width - 2; i >= 1; i--) {
             if (Row1[i - 1] == 0 ||
@@ -576,10 +596,11 @@ static int alg_erode9(unsigned char *img, int width, int height, void *buffer, u
                 Row2[i + 1] == 0 ||
                 Row3[i - 1] == 0 ||
                 Row3[i]     == 0 ||
-                Row3[i + 1] == 0)
+                Row3[i + 1] == 0) {
                 img[y * width + i] = 0;
-            else
+            } else {
                 sum++;
+            }
         }
 
         img[y * width] = img[y * width + width - 1] = flag;
@@ -603,20 +624,22 @@ static int alg_erode5(unsigned char *img, int width, int height, void *buffer, u
         memcpy(Row1, Row2, width);
         memcpy(Row2, Row3, width);
 
-        if (y == height - 1)
+        if (y == height - 1) {
             memset(Row3, flag, width);
-        else
+        } else {
             memcpy(Row3, img + (y + 1) * width, width);
+        }
 
         for (i = width - 2; i >= 1; i--) {
             if (Row1[i]     == 0 ||
                 Row2[i - 1] == 0 ||
                 Row2[i]     == 0 ||
                 Row2[i + 1] == 0 ||
-                Row3[i]     == 0)
+                Row3[i]     == 0) {
                 img[y * width + i] = 0;
-            else
+            } else {
                 sum++;
+            }
         }
 
         img[y * width] = img[y * width + width - 1] = flag;
@@ -624,11 +647,12 @@ static int alg_erode5(unsigned char *img, int width, int height, void *buffer, u
     return sum;
 }
 
-void alg_despeckle(struct ctx_cam *cam) {
+void alg_despeckle(struct ctx_cam *cam)
+{
     int diffs, width, height, done, i, len;
     unsigned char *out, *common_buffer;
 
-    if ((cam->conf->despeckle_filter == "") || cam->current_image->diffs <= 0){
+    if ((cam->conf->despeckle_filter == "") || cam->current_image->diffs <= 0) {
         if (cam->imgs.labelsize_max) cam->imgs.labelsize_max = 0;
         return;
     }
@@ -685,7 +709,8 @@ void alg_despeckle(struct ctx_cam *cam) {
     return;
 }
 
-void alg_tune_smartmask(struct ctx_cam *cam) {
+void alg_tune_smartmask(struct ctx_cam *cam)
+{
     int i, diff;
     int motionsize = cam->imgs.motionsize;
     unsigned char *smartmask = cam->imgs.smartmask;
@@ -707,17 +732,19 @@ void alg_tune_smartmask(struct ctx_cam *cam) {
         diff = smartmask_buffer[i] / sensitivity;
 
         if (diff) {
-            if (smartmask[i] <= diff + 80)
+            if (smartmask[i] <= diff + 80) {
                 smartmask[i] += diff;
-            else
+            } else {
                 smartmask[i] = 80;
+            }
             smartmask_buffer[i] %= sensitivity;
         }
         /* Transfer raw mask to the final stage when above trigger value. */
-        if (smartmask[i] > 20)
+        if (smartmask[i] > 20) {
             smartmask_final[i] = 0;
-        else
+        } else {
             smartmask_final[i] = 255;
+        }
     }
     /* Further expansion (here:erode due to inverted logic!) of the mask. */
     diff = alg_erode9(smartmask_final, cam->imgs.width, cam->imgs.height,
@@ -730,7 +757,8 @@ void alg_tune_smartmask(struct ctx_cam *cam) {
 /* Increment for *smartmask_buffer in alg_diff_standard. */
 #define SMARTMASK_SENSITIVITY_INCR 5
 
-static int alg_diff_nomask(struct ctx_cam *cam, unsigned char *new_var) {
+static int alg_diff_nomask(struct ctx_cam *cam, unsigned char *new_var)
+{
     unsigned char *ref = cam->imgs.ref;
     unsigned char *out = cam->imgs.image_motion.image_norm;
 
@@ -757,13 +785,11 @@ static int alg_diff_nomask(struct ctx_cam *cam, unsigned char *new_var) {
 
     clock_gettime(CLOCK_REALTIME, &ts2);
 
-    //MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-    //    ,"Diffs %d detected %ld - %ld", diffs,ts2.tv_sec,ts2.tv_nsec/1000);
-
     return diffs;
 }
 
-static int alg_diff_mask(struct ctx_cam *cam, unsigned char *new_img) {
+static int alg_diff_mask(struct ctx_cam *cam, unsigned char *new_img)
+{
     unsigned char *ref  = cam->imgs.ref;
     unsigned char *out  = cam->imgs.image_motion.image_norm;
     unsigned char *mask = cam->imgs.mask;
@@ -778,7 +804,7 @@ static int alg_diff_mask(struct ctx_cam *cam, unsigned char *new_img) {
 
     for (i = 0; i < imgsz; i++) {
         curdiff = abs(*ref - *new_img);
-        if (mask){
+        if (mask) {
             curdiff = ((curdiff * *mask) / 255);
             mask++;
         }
@@ -795,7 +821,8 @@ static int alg_diff_mask(struct ctx_cam *cam, unsigned char *new_img) {
     return diffs;
 }
 
-static int alg_diff_smart(struct ctx_cam *cam, unsigned char *new_img) {
+static int alg_diff_smart(struct ctx_cam *cam, unsigned char *new_img)
+{
 
     unsigned char *ref  = cam->imgs.ref;
     unsigned char *out  = cam->imgs.image_motion.image_norm;
@@ -819,7 +846,9 @@ static int alg_diff_smart(struct ctx_cam *cam, unsigned char *new_img) {
                 if (cam->event_nr != cam->prev_event) {
                     (*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
                 }
-                if (!*smartmask_final) curdiff = 0;
+                if (!*smartmask_final) {
+                    curdiff = 0;
+                }
             }
             smartmask_final++;
             smartmask_buffer++;
@@ -838,7 +867,8 @@ static int alg_diff_smart(struct ctx_cam *cam, unsigned char *new_img) {
     return diffs;
 }
 
-static int alg_diff_masksmart(struct ctx_cam *cam, unsigned char *new_img) {
+static int alg_diff_masksmart(struct ctx_cam *cam, unsigned char *new_img)
+{
     unsigned char *ref = cam->imgs.ref;
     unsigned char *out = cam->imgs.image_motion.image_norm;
     unsigned char *mask = cam->imgs.mask;
@@ -857,7 +887,7 @@ static int alg_diff_masksmart(struct ctx_cam *cam, unsigned char *new_img) {
 
     for (i = 0; i < imgsz; i++) {
         curdiff = abs(*ref - *new_img);
-        if (mask){
+        if (mask) {
             curdiff = ((curdiff * *mask) / 255);
             mask++;
         }
@@ -887,7 +917,8 @@ static int alg_diff_masksmart(struct ctx_cam *cam, unsigned char *new_img) {
 }
 
 
-static char alg_diff_fast(struct ctx_cam *cam, int max_n_changes, unsigned char *new_var) {
+static char alg_diff_fast(struct ctx_cam *cam, int max_n_changes, unsigned char *new_var)
+{
     struct ctx_images *imgs = &cam->imgs;
     int i;
     int diffs = 0;
@@ -899,7 +930,6 @@ static char alg_diff_fast(struct ctx_cam *cam, int max_n_changes, unsigned char 
     if (!step % 2) step++;
 
     max_n_changes /= step;
-
 
     i = imgs->motionsize;
 
@@ -925,7 +955,8 @@ static char alg_diff_fast(struct ctx_cam *cam, int max_n_changes, unsigned char 
     return 0;
 }
 
-static void alg_diff_standard(struct ctx_cam *cam) {
+static void alg_diff_standard(struct ctx_cam *cam)
+{
 
     if (cam->smartmask_speed == 0){
         if (cam->imgs.mask == NULL) {
@@ -943,7 +974,8 @@ static void alg_diff_standard(struct ctx_cam *cam) {
 
 }
 
-void alg_diff(struct ctx_cam *cam) {
+void alg_diff(struct ctx_cam *cam)
+{
 
     if (cam->detecting_motion || cam->motapp->setup_mode) {
         alg_diff_standard(cam);
@@ -956,7 +988,8 @@ void alg_diff(struct ctx_cam *cam) {
     }
 }
 
-void alg_lightswitch(struct ctx_cam *cam) {
+void alg_lightswitch(struct ctx_cam *cam)
+{
 
     if (cam->conf->lightswitch_percent > 1 && !cam->lost_connection) {
         if (cam->current_image->diffs > (cam->imgs.motionsize * cam->conf->lightswitch_percent / 100)) {
@@ -969,7 +1002,8 @@ void alg_lightswitch(struct ctx_cam *cam) {
     }
 }
 
-void alg_switchfilter(struct ctx_cam *cam) {
+void alg_switchfilter(struct ctx_cam *cam)
+{
 
     /* TODO:  This function needs evaluation.
      * Lots of random numbers and unknown logic
@@ -1024,7 +1058,8 @@ void alg_switchfilter(struct ctx_cam *cam) {
  *   action - UPDATE_REF_FRAME or RESET_REF_FRAME
  *
  */
-void alg_update_reference_frame(struct ctx_cam *cam, int action) {
+void alg_update_reference_frame(struct ctx_cam *cam, int action)
+{
     int accept_timer = cam->lastrate * ACCEPT_STATIC_OBJECT_TIME;
     int i, threshold_ref;
     int *ref_dyn = cam->imgs.ref_dyn;
@@ -1075,7 +1110,8 @@ void alg_update_reference_frame(struct ctx_cam *cam, int action) {
 }
 
 /*Copy in new reference frame*/
-void alg_new_update_frame(ctx_cam *cam) {
+void alg_new_update_frame(ctx_cam *cam)
+{
 
     /* There used to be a lot more to this function before.....*/
     memcpy(cam->imgs.ref, cam->imgs.image_vprvcy, cam->imgs.size_norm);
@@ -1083,7 +1119,8 @@ void alg_new_update_frame(ctx_cam *cam) {
 }
 
 /*Calculate the center location of changes*/
-static void alg_new_location_center(ctx_cam *cam) {
+static void alg_new_location_center(ctx_cam *cam)
+{
     int width = cam->imgs.width;
     int height = cam->imgs.height;
     ctx_coord *cent = &cam->current_image->location;
@@ -1117,7 +1154,8 @@ static void alg_new_location_center(ctx_cam *cam) {
 }
 
 /*Calculate distribution and variances of changes*/
-static void alg_new_location_dist(ctx_cam *cam) {
+static void alg_new_location_dist(ctx_cam *cam)
+{
     ctx_images *imgs = &cam->imgs;
     int width = cam->imgs.width;
     int height = cam->imgs.height;
@@ -1197,7 +1235,8 @@ static void alg_new_location_dist(ctx_cam *cam) {
 }
 
 /* Ensure min/max are within limits*/
-static void alg_new_location_minmax(ctx_cam *cam) {
+static void alg_new_location_minmax(ctx_cam *cam)
+{
 
     int width = cam->imgs.width;
     int height = cam->imgs.height;
@@ -1239,7 +1278,8 @@ static void alg_new_location_minmax(ctx_cam *cam) {
 }
 
 /* Determine the location and standard deviations of changes*/
-static void alg_new_location(ctx_cam *cam) {
+static void alg_new_location(ctx_cam *cam)
+{
 
     alg_new_location_center(cam);
 
@@ -1312,7 +1352,8 @@ static void alg_new_stddev(ctx_cam *cam)
 }
 
 /* Determine base differences */
-static void alg_new_diff_base(ctx_cam *cam) {
+static void alg_new_diff_base(ctx_cam *cam)
+{
 
     ctx_images *imgs = &cam->imgs;
     int indx = 0;
@@ -1349,13 +1390,13 @@ static void alg_new_diff_base(ctx_cam *cam) {
     }
     cam->current_image->diffs_raw = diffs;
     diffs_net = abs(diffs_net);
-    if (diffs_net > 0 ){
+    if (diffs_net > 0 ) {
         cam->current_image->diffs_ratio = (diffs *10) / diffs_net;
     } else {
         cam->current_image->diffs_ratio = diffs;
     }
 
-    if (cam->current_image->diffs_ratio > cam->conf->threshold_ratio){
+    if (cam->current_image->diffs_ratio > cam->conf->threshold_ratio) {
         cam->current_image->diffs = 0;
     } else {
         cam->current_image->diffs= diffs;
@@ -1364,7 +1405,8 @@ static void alg_new_diff_base(ctx_cam *cam) {
     return;
 }
 
-void alg_new_diff(ctx_cam *cam) {
+void alg_new_diff(ctx_cam *cam)
+{
 
     alg_new_diff_base(cam);
 
