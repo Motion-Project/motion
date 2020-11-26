@@ -269,29 +269,23 @@ static void algsec_detect_haar(ctx_cam *cam, ctx_algsec_model &algmdl)
 
 static void algsec_load_haar(ctx_algsec_model &algmdl)
 {
-    int indx;
-    std::string  model_file;
-
     /* If loading fails, reset the method to invalidate detection */
-    model_file = "";
     try {
-        for (indx = 0; indx < algmdl.algsec_params->params_count; indx++) {
-        }
-        if (model_file == "") {
+        if (algmdl.model_file == "") {
             algmdl.method = 0;
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("No secondary model specified."));
             return;
         }
-        if (!algmdl.haar_cascade.load(model_file)) {
+        if (!algmdl.haar_cascade.load(algmdl.model_file)) {
             /* Loading failed, reset method*/
             algmdl.method = 0;
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
-                ,model_file.c_str());
+                ,algmdl.model_file.c_str());
         };
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s"),model_file.c_str());
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s"), algmdl.model_file.c_str());
         algmdl.method = 0;
     }
 }
@@ -401,7 +395,7 @@ static void algsec_params_init(ctx_algsec_model &algmdl)
     memset(algmdl.algsec_params, 0, sizeof(struct ctx_params));
     algmdl.algsec_params->params_array = NULL;
     algmdl.algsec_params->params_count = 0;
-    algmdl.algsec_params->update_params = TRUE;     /*Set trigger that we have updated user parameters */
+    algmdl.algsec_params->update_params = TRUE;     /*Set trigger to update parameters */
 }
 
 /**Load the parms from the config to algsec struct */
@@ -463,7 +457,8 @@ static int algsec_load_models(ctx_cam *cam)
 }
 
 /**Detection thread processing loop */
-static void *algsec_handler(void *arg) {
+static void *algsec_handler(void *arg)
+{
     ctx_cam *cam = (ctx_cam*)arg;
     long interval;
 
@@ -497,8 +492,8 @@ static void *algsec_handler(void *arg) {
 }
 
 /**Start the detection thread*/
-static void algsec_start_handler(ctx_cam *cam){
-
+static void algsec_start_handler(ctx_cam *cam)
+{
     int retcd;
     pthread_attr_t handler_attribute;
 
@@ -513,12 +508,12 @@ static void algsec_start_handler(ctx_cam *cam){
     }
     pthread_attr_destroy(&handler_attribute);
     return;
-
 }
 
 #endif
 
-void algsec_init(ctx_cam *cam){
+void algsec_init(ctx_cam *cam)
+{
     /*
      * This function parses out and initializes the parameters
      * associated with the secondary detection algorithm if a
@@ -541,11 +536,11 @@ void algsec_init(ctx_cam *cam){
     #else
         (void)cam;
     #endif
-
 }
 
 /** Free algsec memory and shutdown thread */
-void algsec_deinit(ctx_cam *cam){
+void algsec_deinit(ctx_cam *cam)
+{
     #ifdef HAVE_OPENCV
         int waitcnt = 0;
 
@@ -577,7 +572,8 @@ void algsec_deinit(ctx_cam *cam){
     #endif
 }
 
-void algsec_detect(ctx_cam *cam){
+void algsec_detect(ctx_cam *cam)
+{
     /*This function runs on the camera thread */
     #ifdef HAVE_OPENCV
         if (cam->algsec->frame_cnt > 0) cam->algsec->frame_cnt--;
@@ -587,8 +583,6 @@ void algsec_detect(ctx_cam *cam){
             if (cam->algsec->detecting){
                 cam->algsec->frame_missed++;
             } else {
-                /*Get any previous detection results */
-
                 /*Copy in a new image for processing */
                 memcpy(cam->algsec->image_norm, cam->current_image->image_norm, cam->imgs.size_norm);
 
@@ -614,7 +608,6 @@ void algsec_detect(ctx_cam *cam){
     #else
         (void)cam;
     #endif
-
 }
 
 
