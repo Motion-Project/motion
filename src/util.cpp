@@ -51,10 +51,15 @@ int mystrne(const char* var1, const char* var2){
 
 void myltrim(std::string &parm)
 {
-    while (parm.substr(0,1) == " ")
+    if (parm.length() == 0 ) {
+        return;
+    }
+
+    while (parm.substr(0, 1) == " ")
     {
         if (parm.length() == 1) {
             parm="";
+            return;
         } else {
             parm = parm.substr(1);
         }
@@ -63,10 +68,15 @@ void myltrim(std::string &parm)
 
 void myrtrim(std::string &parm)
 {
+    if (parm.length() == 0 ) {
+        return;
+    }
+
     while (parm.substr(parm.length()-1,1) == " ")
     {
         if (parm.length() == 1) {
             parm="";
+            return;
         } else {
             parm = parm.substr(0,parm.length()-1);
         }
@@ -809,3 +819,302 @@ int mycopy_packet(AVPacket *dest_pkt, AVPacket *src_pkt){
     #endif
 }
 /*********************************************/
+
+static void util_parms_free(struct ctx_params *params)
+{
+    int indx_parm;
+
+    for (indx_parm=0; indx_parm<params->params_count; indx_parm++)
+    {
+        if (params->params_array[indx_parm].param_name != NULL) {
+            free(params->params_array[indx_parm].param_name);
+            params->params_array[indx_parm].param_name = NULL;
+        }
+        if (params->params_array[indx_parm].param_value != NULL) {
+            free(params->params_array[indx_parm].param_value);
+            params->params_array[indx_parm].param_value = NULL;
+        }
+    }
+
+    if (params->params_array != NULL) {
+      free(params->params_array);
+      params->params_array = NULL;
+    }
+
+    params->params_count = 0;
+
+}
+
+static void util_parms_add(struct ctx_params *params, const char *parm_nm, const char *parm_val)
+{
+    params->params_count++;
+
+    if (params->params_count == 1) {
+        params->params_array =(struct ctx_params_item *) mymalloc(sizeof(struct ctx_params_item));
+    } else {
+        params->params_array =(struct ctx_params_item *)realloc(params->params_array
+            , sizeof(struct ctx_params_item)*params->params_count);
+    }
+
+    if (parm_nm != NULL) {
+        params->params_array[params->params_count-1].param_name =(char*)mymalloc(strlen(parm_nm)+1);
+        sprintf(params->params_array[params->params_count-1].param_name,"%s",parm_nm);
+    } else {
+        params->params_array[params->params_count-1].param_name = NULL;
+    }
+
+    if (parm_val != NULL) {
+        params->params_array[params->params_count-1].param_value =(char*)mymalloc(strlen(parm_val)+1);
+        sprintf(params->params_array[params->params_count-1].param_value,"%s",parm_val);
+    } else {
+        params->params_array[params->params_count-1].param_value = NULL;
+    }
+
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Parsed: >%s< >%s<")
+        ,params->params_array[params->params_count-1].param_name
+        ,params->params_array[params->params_count-1].param_value);
+
+}
+
+static void util_parms_strip_qte(std::string &parm)
+{
+
+    if (parm.length() == 0) {
+        return;
+    }
+
+    if (parm.substr(0, 1)=="\"") {
+        if (parm.length() == 1) {
+            parm = "";
+            return;
+        } else {
+            parm = parm.substr(1);
+        }
+    }
+
+    if (parm.substr(parm.length() -1, 1)== "\"") {
+        if (parm.length() == 1) {
+            parm = "";
+            return;
+        } else {
+            parm = parm.substr(0, parm.length() - 1);
+        }
+    }
+
+}
+
+static void util_parms_extract(struct ctx_params *params, std::string &parmline
+        ,size_t indxnm_st,size_t indxnm_en,size_t indxvl_st,size_t indxvl_en)
+{
+    std::string parm_nm, parm_vl;
+
+    if ((indxnm_st != std::string::npos) &&
+        (indxnm_en != std::string::npos) &&
+        (indxvl_st != std::string::npos) &&
+        (indxvl_en != std::string::npos)) {
+
+        parm_nm = parmline.substr(indxnm_st, indxnm_en - indxnm_st + 1);
+        parm_vl = parmline.substr(indxvl_st, indxvl_en - indxvl_st + 1);
+
+        mytrim(parm_nm);
+        mytrim(parm_vl);
+
+        util_parms_strip_qte(parm_nm);
+        util_parms_strip_qte(parm_vl);
+
+        util_parms_add(params, parm_nm.c_str(), parm_vl.c_str());
+
+    }
+
+}
+
+static void util_parms_next(std::string &parmline, size_t indxnm_st, size_t indxvl_en)
+{
+    /* Cut out the parameter that was just extracted from the parmline string */
+    /* indxvl_en is right before the comma so to move past it, we need to +2*/
+    if (indxnm_st == 0) {
+        if ((indxvl_en + 2) > parmline.length() ) {
+            parmline = "";
+        } else {
+            parmline = parmline.substr(indxvl_en + 2);
+        }
+    } else {
+        if ((indxvl_en + 2) > parmline.length() ) {
+            parmline = parmline.substr(0, indxnm_st - 1);
+        } else {
+            parmline = parmline.substr(0, indxnm_st - 1) + parmline.substr(indxvl_en + 2);
+        }
+    }
+    mytrim(parmline);
+
+}
+
+void util_parms_parse_qte(struct ctx_params *params, std::string &parmline)
+{
+    size_t indxnm_st, indxnm_en;
+    size_t indxvl_st, indxvl_en;
+    size_t indxcm, indxeq;
+
+    /* Parse out all the items within quotes first */
+    while (parmline.find("\"", 0) != std::string::npos) {
+
+        indxnm_st = parmline.find("\"", 0);
+
+        indxnm_en = parmline.find("\"", indxnm_st + 1);
+        if (indxnm_en == std::string::npos) {
+            indxnm_en = parmline.length() - 1;
+        }
+
+        indxcm = parmline.find(",", indxnm_en + 1);
+        if (indxcm == std::string::npos) {
+            indxcm = parmline.length() - 1;
+        }
+
+        indxeq = parmline.find("=", indxnm_en + 1);
+        if (indxeq == std::string::npos) {
+            indxeq = parmline.length() - 1;
+        }
+
+        if (indxcm <= indxeq) {
+            /* The quoted part of the parm was the value not the name */
+            indxvl_st = indxnm_st;
+            indxvl_en = indxnm_en;
+
+            indxnm_st = parmline.find_last_of(",", indxvl_st);
+            if (indxnm_st == std::string::npos) {
+                indxnm_st = 0;
+            }
+            indxnm_st++; /* Move past the comma */
+
+            indxnm_en = parmline.find("=", indxnm_st);
+            if ((indxnm_en == std::string::npos) ||
+                (indxnm_en > indxvl_st)) {
+                indxnm_en = indxvl_st + 1;
+            }
+            indxnm_en--; /* do not include the = */
+
+        } else {
+            /* The quoted part of the parm was the name */
+            indxvl_st = parmline.find("\"",indxeq + 1);
+            indxcm = parmline.find(",", indxeq + 1);
+            if (indxcm == std::string::npos) {
+                if (indxnm_st == std::string::npos) {
+                    indxvl_st = indxeq + 1;
+                    if (indxvl_st >= parmline.length()){
+                        indxvl_st = parmline.length() - 1;
+                    }
+                    indxvl_en = parmline.length() - 1;
+                } else {
+                    /* The value is also enclosed in quotes */
+                    indxvl_en=parmline.find("\"", indxvl_st + 1);
+                    if (indxvl_en == std::string::npos) {
+                        indxvl_en = parmline.length() - 1;
+                    }
+                }
+            } else if (indxvl_st == std::string::npos) {
+                indxvl_st = indxeq + 1;
+                indxvl_en = parmline.find(",",indxvl_st) - 1;
+            } else {
+                /* The value is also enclosed in quotes */
+                indxvl_en=parmline.find("\"", indxvl_st + 1);
+                if (indxvl_en == std::string::npos) {
+                    indxvl_en = parmline.length() - 1;
+                }
+            }
+        }
+
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
+            ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+
+        util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+        util_parms_next(parmline, indxnm_st, indxvl_en);
+
+    }
+}
+
+void util_parms_parse_comma(struct ctx_params *params, std::string &parmline)
+{
+    size_t indxnm_st, indxnm_en;
+    size_t indxvl_st, indxvl_en;
+
+    while (parmline.find(",", 0) != std::string::npos) {
+        indxnm_st = 0;
+        indxnm_en = parmline.find("=", 1);
+        if (indxnm_en == std::string::npos) {
+            indxnm_en = 0;
+            indxvl_st = 0;
+        } else {
+            indxvl_st = indxnm_en + 1;  /* Position past = */
+            indxnm_en--;                /* Position before = */
+        }
+
+        if (parmline.find(",", indxvl_st) == std::string::npos) {
+            indxvl_en = parmline.length() - 1;
+        } else {
+            indxvl_en = parmline.find(",",indxvl_st) - 1;
+        }
+
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
+            ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+
+        util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+        util_parms_next(parmline, indxnm_st, indxvl_en);
+    }
+
+    /* Take care of last parameter */
+    if (parmline != "") {
+        indxnm_st = 0;
+        indxnm_en = parmline.find("=", 1);
+        if (indxnm_en == std::string::npos) {
+            /* If no value then we are done */
+            return;
+        } else {
+            indxvl_st = indxnm_en + 1;  /* Position past = */
+            indxnm_en--;                /* Position before = */
+        }
+        indxvl_en = parmline.length() - 1;
+
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
+            ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+
+        util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+        util_parms_next(parmline, indxnm_st, indxvl_en);
+    }
+
+}
+
+int util_parms_parse(struct ctx_params *params, std::string confline)
+{
+    /* Parse through the configuration option to get values
+     * The values are separated by commas but may also have
+     * double quotes around the names which include a comma.
+     * Examples:
+     * v4l2_params ID01234= 1, ID23456=2
+     * vid_control_parms "Brightness, auto" = 1, ID23456=2
+     * vid_control_parms ID23456=2, "Brightness, auto" = 1,ID2222=5
+     */
+
+    std::string parmline;
+
+    if ((params->update_params == FALSE) ||
+        (confline == "")) {
+        return 0;
+    }
+    /* We make a copy because the parsing destroys the value passed */
+    parmline = confline;
+
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Starting parsing parameters: %s"), parmline.c_str());
+
+    util_parms_free(params);
+
+    util_parms_parse_qte(params, parmline);
+
+    util_parms_parse_comma(params, parmline);
+
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Finished parsing parameters: %s"), confline.c_str());
+
+    params->update_params = FALSE;
+
+    return 0;
+
+}

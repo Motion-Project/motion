@@ -161,16 +161,15 @@ enum MOTION_SIGNAL {
     MOTION_SIGNAL_SIGTERM
 };
 
-struct ctx_usrctrl {
-    char          *ctrl_src;        /* The full parameter provided from user*/
-    char          *ctrl_name;       /* The name or description of the ID as requested by user*/
-    char          *ctrl_value;      /* The value that the user wants the control set to*/
+struct ctx_params_item {
+    char    *param_name;       /* The name or description of the ID as requested by user*/
+    char    *param_value;      /* The value that the user wants the control set to*/
 };
 
-struct ctx_vdev {
-    struct ctx_usrctrl *usrctrl_array;     /*Array of the controls the user specified*/
-    int usrctrl_count;                          /*Count of the controls the user specified*/
-    int update_parms;                           /*Bool for whether to update the parameters on the device*/
+struct ctx_params {
+    struct ctx_params_item *params_array;     /*Array of the controls the user specified*/
+    int params_count;                         /*Count of the controls the user specified*/
+    int update_params;                        /*Bool for whether to update the parameters on the device*/
 };
 
 struct ctx_coord {
@@ -288,7 +287,7 @@ struct ctx_cam {
     struct ctx_mmalcam      *mmalcam;
     struct ctx_netcam       *netcam;            /* this structure contains the context for normal RTSP connection */
     struct ctx_netcam       *netcam_high;       /* this structure contains the context for high resolution RTSP connection */
-    struct ctx_vdev         *vdev;              /* Structure for v4l2 device information */
+    struct ctx_params       *vdev;
     struct ctx_image_data   *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
     struct ctx_algsec       *algsec;
     struct ctx_rotate       *rotate_data;       /* rotation data is thread-specific */

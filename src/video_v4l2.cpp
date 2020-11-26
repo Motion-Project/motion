@@ -140,16 +140,16 @@ static void v4l2_vdev_free(struct ctx_cam *cam)
 
     /* free the information we collected regarding the controls */
     if (cam->vdev != NULL){
-        if (cam->vdev->usrctrl_count > 0){
-            for (indx=0;indx<cam->vdev->usrctrl_count;indx++){
-                free(cam->vdev->usrctrl_array[indx].ctrl_name);
-                cam->vdev->usrctrl_array[indx].ctrl_name=NULL;
+        if (cam->vdev->params_count > 0){
+            for (indx=0;indx<cam->vdev->params_count;indx++){
+                free(cam->vdev->params_array[indx].param_name);
+                cam->vdev->params_array[indx].param_name=NULL;
             }
         }
-        cam->vdev->usrctrl_count = 0;
-        if (cam->vdev->usrctrl_array != NULL){
-            free(cam->vdev->usrctrl_array);
-            cam->vdev->usrctrl_array = NULL;
+        cam->vdev->params_count = 0;
+        if (cam->vdev->params_array != NULL){
+            free(cam->vdev->params_array);
+            cam->vdev->params_array = NULL;
         }
 
         free(cam->vdev);
@@ -161,11 +161,11 @@ static int v4l2_vdev_init(struct ctx_cam *cam)
 {
 
     /* Create the v4l2 ctx_cam within the main thread ctx_cam  */
-    cam->vdev =(struct ctx_vdev*) mymalloc(sizeof(struct ctx_vdev));
-    memset(cam->vdev, 0, sizeof(struct ctx_vdev));
-    cam->vdev->usrctrl_array = NULL;
-    cam->vdev->usrctrl_count = 0;
-    cam->vdev->update_parms = TRUE;     /*Set trigger that we have updated user parameters */
+    cam->vdev =(struct ctx_params*) mymalloc(sizeof(struct ctx_params));
+    memset(cam->vdev, 0, sizeof(struct ctx_params));
+    cam->vdev->params_array = NULL;
+    cam->vdev->params_count = 0;
+    cam->vdev->update_params = TRUE;     /*Set trigger that we have updated user parameters */
 
     return 0;
 
@@ -342,41 +342,41 @@ static int v4l2_parms_set(struct ctx_cam *cam, struct video_dev *curdev)
 {
 
     struct vid_devctrl_ctx  *devitem;
-    struct ctx_usrctrl *usritem;
+    struct ctx_params_item *usritem;
     int indx_dev, indx_user;
 
     if (cam->conf->roundrobin_skip < 0) cam->conf->roundrobin_skip = 1;
 
     if (curdev->devctrl_count == 0){
-        cam->vdev->update_parms = FALSE;
+        cam->vdev->update_params = FALSE;
         return 0;
     }
 
     for (indx_dev=0; indx_dev<curdev->devctrl_count; indx_dev++ ) {
         devitem=&curdev->devctrl_array[indx_dev];
         devitem->ctrl_newval = devitem->ctrl_default;
-        for (indx_user=0; indx_user<cam->vdev->usrctrl_count; indx_user++){
-            usritem=&cam->vdev->usrctrl_array[indx_user];
-            if ((mystrceq(devitem->ctrl_iddesc,usritem->ctrl_name)) ||
-                (mystrceq(devitem->ctrl_name  ,usritem->ctrl_name))) {
+        for (indx_user=0; indx_user<cam->vdev->params_count; indx_user++){
+            usritem=&cam->vdev->params_array[indx_user];
+            if ((mystrceq(devitem->ctrl_iddesc,usritem->param_name)) ||
+                (mystrceq(devitem->ctrl_name  ,usritem->param_name))) {
                 switch (devitem->ctrl_type) {
                 case V4L2_CTRL_TYPE_MENU:
                     /*FALLTHROUGH*/
                 case V4L2_CTRL_TYPE_INTEGER:
-                    if (atoi(usritem->ctrl_value) < devitem->ctrl_minimum){
+                    if (atoi(usritem->param_value) < devitem->ctrl_minimum){
                         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
                             ,_("%s control option value %s is below minimum.  Skipping...")
-                            ,devitem->ctrl_name, usritem->ctrl_value, devitem->ctrl_minimum);
-                    } else if (atoi(usritem->ctrl_value) > devitem->ctrl_maximum){
+                            ,devitem->ctrl_name, usritem->param_value, devitem->ctrl_minimum);
+                    } else if (atoi(usritem->param_value) > devitem->ctrl_maximum){
                         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
                             ,_("%s control option value %s is above maximum.  Skipping...")
-                            ,devitem->ctrl_name, usritem->ctrl_value, devitem->ctrl_maximum);
+                            ,devitem->ctrl_name, usritem->param_value, devitem->ctrl_maximum);
                     } else {
-                        devitem->ctrl_newval = atoi(usritem->ctrl_value);
+                        devitem->ctrl_newval = atoi(usritem->param_value);
                     }
                     break;
                 case V4L2_CTRL_TYPE_BOOLEAN:
-                    devitem->ctrl_newval = usritem->ctrl_value ? 1 : 0;
+                    devitem->ctrl_newval = usritem->param_value ? 1 : 0;
                     break;
                 default:
                     MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
@@ -1055,7 +1055,7 @@ static void v4l2_device_select(struct ctx_cam *cam, struct video_dev *curdev, un
         retcd = v4l2_input_select(cam, curdev);
         if (retcd == 0) retcd = v4l2_norm_select(cam, curdev);
         if (retcd == 0) retcd = v4l2_frequency_select(cam, curdev);
-        if (retcd == 0) retcd = vid_parms_parse(cam);
+        if (retcd == 0) retcd = util_parms_parse(cam->vdev, cam->conf->v4l2_parms);
         if (retcd == 0) retcd = v4l2_parms_set(cam, curdev);
         if (retcd == 0) retcd = v4l2_ctrls_set(curdev);
         if (retcd < 0 ){
@@ -1075,7 +1075,7 @@ static void v4l2_device_select(struct ctx_cam *cam, struct video_dev *curdev, un
 
     } else {
         /* No round robin - we only adjust picture controls */
-        retcd = vid_parms_parse(cam);
+        retcd = util_parms_parse(cam->vdev, cam->conf->v4l2_parms);
         if (retcd == 0) retcd = v4l2_parms_set(cam, curdev);
         if (retcd == 0) retcd = v4l2_ctrls_set(curdev);
         if (retcd < 0 ) {
@@ -1283,7 +1283,7 @@ int v4l2_start(struct ctx_cam *cam)
         while (curdev) {
             if (mystreq(cam->conf->v4l2_device.c_str(), curdev->v4l2_device)) {
                 retcd = v4l2_vdev_init(cam);
-                if (retcd == 0) retcd = vid_parms_parse(cam);
+                if (retcd == 0) retcd = util_parms_parse(cam->vdev, cam->conf->v4l2_parms);
                 if (retcd == 0) retcd = v4l2_imgs_set(cam, curdev);
                 if (retcd == 0) {
                     curdev->usage_count++;
@@ -1310,7 +1310,7 @@ int v4l2_start(struct ctx_cam *cam)
         if (retcd == 0) retcd = v4l2_fps_set(cam, curdev);
         if (retcd == 0) retcd = v4l2_ctrls_count(curdev);
         if (retcd == 0) retcd = v4l2_ctrls_list(curdev);
-        if (retcd == 0) retcd = vid_parms_parse(cam);
+        if (retcd == 0) retcd = util_parms_parse(cam->vdev, cam->conf->v4l2_parms);
         if (retcd == 0) retcd = v4l2_parms_set(cam, curdev);
         if (retcd == 0) retcd = v4l2_ctrls_set(curdev);
         if (retcd == 0) retcd = v4l2_mmap_set(curdev);

@@ -22,8 +22,6 @@
 #ifndef _INCLUDE_MOTION_LOOP_H_
 #define _INCLUDE_MOTION_LOOP_H_
 
-struct ctx_cam;
-
 void *motion_loop(void *arg);
 void mlp_cleanup(struct ctx_cam *cam);
 

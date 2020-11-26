@@ -115,4 +115,6 @@
     int myimage_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height);
     int mycopy_packet(AVPacket *dest_pkt, AVPacket *src_pkt);
 
+    int util_parms_parse(struct ctx_params *params, std::string confline);
+
 #endif
