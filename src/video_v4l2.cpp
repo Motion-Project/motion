@@ -1051,7 +1051,7 @@ static void v4l2_device_select(struct ctx_cam *cam, struct video_dev *curdev, un
         retcd = v4l2_input_select(cam, curdev);
         if (retcd == 0) retcd = v4l2_norm_select(cam, curdev);
         if (retcd == 0) retcd = v4l2_frequency_select(cam, curdev);
-        if (retcd == 0) retcd = util_parms_parse(cam->vdev, cam->conf->v4l2_parms);
+        if (retcd == 0) retcd = util_parms_parse(cam->vdev, cam->conf->v4l2_params);
         if (retcd == 0) retcd = v4l2_parms_set(cam, curdev);
         if (retcd == 0) retcd = v4l2_ctrls_set(curdev);
         if (retcd < 0 ){
@@ -1071,7 +1071,7 @@ static void v4l2_device_select(struct ctx_cam *cam, struct video_dev *curdev, un
 
     } else {
         /* No round robin - we only adjust picture controls */
-        retcd = util_parms_parse(cam->vdev, cam->conf->v4l2_parms);
+        retcd = util_parms_parse(cam->vdev, cam->conf->v4l2_params);
         if (retcd == 0) retcd = v4l2_parms_set(cam, curdev);
         if (retcd == 0) retcd = v4l2_ctrls_set(curdev);
         if (retcd < 0 ) {
@@ -1279,7 +1279,7 @@ int v4l2_start(struct ctx_cam *cam)
         while (curdev) {
             if (mystreq(cam->conf->v4l2_device.c_str(), curdev->v4l2_device)) {
                 retcd = v4l2_vdev_init(cam);
-                if (retcd == 0) retcd = util_parms_parse(cam->vdev, cam->conf->v4l2_parms);
+                if (retcd == 0) retcd = util_parms_parse(cam->vdev, cam->conf->v4l2_params);
                 if (retcd == 0) retcd = v4l2_imgs_set(cam, curdev);
                 if (retcd == 0) {
                     curdev->usage_count++;
@@ -1306,7 +1306,7 @@ int v4l2_start(struct ctx_cam *cam)
         if (retcd == 0) retcd = v4l2_fps_set(cam, curdev);
         if (retcd == 0) retcd = v4l2_ctrls_count(curdev);
         if (retcd == 0) retcd = v4l2_ctrls_list(curdev);
-        if (retcd == 0) retcd = util_parms_parse(cam->vdev, cam->conf->v4l2_parms);
+        if (retcd == 0) retcd = util_parms_parse(cam->vdev, cam->conf->v4l2_params);
         if (retcd == 0) retcd = v4l2_parms_set(cam, curdev);
         if (retcd == 0) retcd = v4l2_ctrls_set(curdev);
         if (retcd == 0) retcd = v4l2_mmap_set(curdev);
