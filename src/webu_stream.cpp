@@ -362,7 +362,7 @@ int webu_stream_static(struct webui_ctx *webui)
             , webui->cam->conf->stream_cors_header.c_str());
     }
 
-    MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "image/jpeg;");
+    MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "image/jpeg");
     snprintf(resp_used, 20, "%9ld\r\n\r\n",(long)webui->resp_used);
     MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_LENGTH, resp_used);
 
