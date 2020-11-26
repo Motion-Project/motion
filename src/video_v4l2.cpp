@@ -119,11 +119,7 @@ static void v4l2_palette_init(palette_item *palette_array)
 
 }
 
-#if defined (BSD)
-    static int xioctl(src_v4l2_t *vid_source, unsigned long request, void *arg)
-#else
-    static int xioctl(src_v4l2_t *vid_source, int request, void *arg)
-#endif
+static int xioctl(src_v4l2_t *vid_source, unsigned long request, void *arg)
 {
     int ret;
 
