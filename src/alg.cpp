@@ -991,7 +991,7 @@ void alg_diff(struct ctx_cam *cam)
 void alg_lightswitch(struct ctx_cam *cam)
 {
 
-    if (cam->conf->lightswitch_percent > 1 && !cam->lost_connection) {
+    if (cam->conf->lightswitch_percent >= 1 && !cam->lost_connection) {
         if (cam->current_image->diffs > (cam->imgs.motionsize * cam->conf->lightswitch_percent / 100)) {
             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
             if (cam->frame_skip < (unsigned int)cam->conf->lightswitch_frames)
