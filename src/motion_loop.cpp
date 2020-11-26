@@ -1146,12 +1146,12 @@ static void mlp_actions_event(struct ctx_cam *cam)
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), cam->event_nr);
 
-            cam->event_stop = FALSE;
-            cam->event_user = FALSE;
             cam->postcap = 0;
             cam->event_nr++;
             cam->text_event_string[0] = '\0';
         }
+        cam->event_stop = FALSE;
+        cam->event_user = FALSE;
     }
 }
 
