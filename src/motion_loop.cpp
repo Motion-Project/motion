@@ -1119,11 +1119,13 @@ static void mlp_actions_event(struct ctx_cam *cam)
         ((cam->frame_curr_ts.tv_sec - cam->eventtime) >= cam->conf->movie_max_time)) {
         cam->event_stop = TRUE;
     }
+    if ((cam->conf->event_gap > 0) &&
+        ((cam->frame_curr_ts.tv_sec - cam->lasttime) >= cam->conf->event_gap)) {
+        cam->event_stop = TRUE;
+    }
 
-    if (((cam->frame_curr_ts.tv_sec - cam->lasttime >= cam->conf->event_gap) &&
-        (cam->conf->event_gap > 0)) || cam->event_stop) {
-
-        if (cam->event_nr == cam->prev_event || cam->event_stop) {
+    if (cam->event_stop) {
+        if (cam->event_nr == cam->prev_event) {
             mlp_ring_process(cam, IMAGE_BUFFER_FLUSH);
             if (cam->imgs.image_preview.diffs) {
                 event(cam, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cam->current_image->imgts);
