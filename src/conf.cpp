@@ -159,7 +159,7 @@ struct ctx_parm config_parms[] = {
     "# Name of mmal camera (e.g. vc.ril.camera for pi camera).",
     0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
     {
-    "mmalcam_control_params",
+    "mmalcam_params",
     "# Camera control parameters (see raspivid/raspistill tool documentation)",
     0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
     {
@@ -1358,17 +1358,17 @@ static void conf_edit_mmalcam_name(struct ctx_cam *cam, std::string &parm, enum 
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mmalcam_name",_("mmalcam_name"));
 }
 
-static void conf_edit_mmalcam_control_params(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_mmalcam_params(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->mmalcam_control_params = "";
+        cam->conf->mmalcam_params = "";
     } else if (pact == PARM_ACT_SET){
-        cam->conf->mmalcam_control_params = parm;
+        cam->conf->mmalcam_params = parm;
     } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->mmalcam_control_params;
+        parm = cam->conf->mmalcam_params;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mmalcam_control_params",_("mmalcam_control_params"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mmalcam_params",_("mmalcam_params"));
 }
 
 static void conf_edit_width(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
@@ -3307,7 +3307,7 @@ static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "netcam_rate"){           conf_edit_netcam_rate(cam, parm_val, pact);
     } else if (parm_nm == "netcam_ratehigh"){       conf_edit_netcam_ratehigh(cam, parm_val, pact);
     } else if (parm_nm == "mmalcam_name"){          conf_edit_mmalcam_name(cam, parm_val, pact);
-    } else if (parm_nm == "mmalcam_control_params"){conf_edit_mmalcam_control_params(cam, parm_val, pact);
+    } else if (parm_nm == "mmalcam_params"){        conf_edit_mmalcam_params(cam, parm_val, pact);
     }
 
 }

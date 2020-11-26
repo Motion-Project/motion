@@ -311,8 +311,8 @@ int mmalcam_start(struct ctx_cam *cam)
         mmalcam->height = cam->conf->height;
         mmalcam->framerate = cam->conf->framerate;
 
-        if (cam->conf->mmalcam_control_params != "") {
-            parse_camera_control_params(cam->conf->mmalcam_control_params.c_str(), mmalcam->camera_parameters);
+        if (cam->conf->mmalcam_params != "") {
+            parse_camera_control_params(cam->conf->mmalcam_params.c_str(), mmalcam->camera_parameters);
         }
 
         cam->imgs.width = mmalcam->width;

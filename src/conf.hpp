@@ -52,7 +52,7 @@
         int             netcam_ratehigh;
 
         std::string     mmalcam_name;
-        std::string     mmalcam_control_params;
+        std::string     mmalcam_params;
 
         /* Image processing configuration parameters */
         int             width;
