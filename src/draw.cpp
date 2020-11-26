@@ -1150,6 +1150,7 @@ int draw_text(unsigned char *image, int width, int height, int startx, int start
         if ((end - begin)>txtlen) txtlen = (end - begin);
         num_nl++;
         end += sizeof(NEWLINE)-1;
+        begin = end;
     }
     if (txtlen == 0) txtlen = strlen(text);
 
