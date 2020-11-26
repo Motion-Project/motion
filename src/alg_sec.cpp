@@ -269,188 +269,148 @@ static void algsec_detect_haar(ctx_cam *cam, ctx_algsec_model &algmdl)
 
 static void algsec_load_haar(ctx_algsec_model &algmdl)
 {
+    int indx;
+    std::string  model_file;
 
     /* If loading fails, reset the method to invalidate detection */
+    model_file = "";
     try {
-        if (algmdl.modelfile == "") {
+        for (indx = 0; indx < algmdl.algsec_params->params_count; indx++) {
+        }
+        if (model_file == "") {
             algmdl.method = 0;
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("No secondary model specified."));
             return;
         }
-        if (!algmdl.haar_cascade.load(algmdl.modelfile)) {
+        if (!algmdl.haar_cascade.load(model_file)) {
             /* Loading failed, reset method*/
             algmdl.method = 0;
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
-                ,algmdl.modelfile.c_str());
+                ,model_file.c_str());
         };
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
-            ,algmdl.modelfile.c_str());
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s"),model_file.c_str());
         algmdl.method = 0;
     }
 }
 
-static void algsec_parms_log(ctx_algsec_model &algmdl)
+static void algsec_params_log(ctx_algsec_model &algmdl)
 {
+    int indx;
 
-    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %s","modelfile", algmdl.modelfile.c_str());
-    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %0.6f","threshold_motion", algmdl.threshold_motion);
-    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %s","imagetype", algmdl.imagetype.c_str() );
-
-    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %0.6f","scalefactor", algmdl.scalefactor);
-    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %0.6f","threshold_model", algmdl.threshold_model);
-
-    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %d","haar_flags", algmdl.haar_flags);
-    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %d","haar_maxsize", algmdl.haar_maxsize);
-    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %d","haar_minsize", algmdl.haar_minsize);
-    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %d","haar_minneighbors", algmdl.haar_minneighbors);
-
-    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %d","hog_padding", algmdl.hog_padding);
-    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %d","hog_winstride", algmdl.hog_winstride);
+    for (indx = 0; indx < algmdl.algsec_params->params_count; indx++) {
+        motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %s"
+            ,algmdl.algsec_params->params_array[indx].param_name
+            ,algmdl.algsec_params->params_array[indx].param_value);
+    }
 
 }
 
-static void algsec_parms_defaults(ctx_algsec_model &algmdl)
+static void algsec_params_model(ctx_algsec_model &algmdl)
 {
+    /* To avoid looping through the parms for each image detection to get
+     * the parameters, we put them into variables easily found by the model.
+     * As the secondary method processing gets refined, this method will need
+     * to be adjusted to be something more efficient.
+     */
+    int indx;
+    for (indx = 0; indx < algmdl.algsec_params->params_count; indx++) {
+        if (mystreq(algmdl.algsec_params->params_array[indx].param_name,"model_file")) {
+            algmdl.model_file = algmdl.algsec_params->params_array[indx].param_value;
+        }
+        if (mystreq(algmdl.algsec_params->params_array[indx].param_name,"frame_interval")) {
+            algmdl.frame_interval = atoi(algmdl.algsec_params->params_array[indx].param_value);
+        }
+        if (mystreq(algmdl.algsec_params->params_array[indx].param_name,"imagetype")) {
+            algmdl.imagetype = algmdl.algsec_params->params_array[indx].param_value;
+        }
+        if (mystreq(algmdl.algsec_params->params_array[indx].param_name,"threshold_motion")) {
+            algmdl.threshold_motion = atof(algmdl.algsec_params->params_array[indx].param_value);
+        }
+        if (mystreq(algmdl.algsec_params->params_array[indx].param_name,"threshold_model")) {
+            algmdl.threshold_model = atof(algmdl.algsec_params->params_array[indx].param_value);
+        }
+        if (mystreq(algmdl.algsec_params->params_array[indx].param_name,"scalefactor")) {
+            algmdl.scalefactor = atof(algmdl.algsec_params->params_array[indx].param_value);
+        }
+        if (mystreq(algmdl.algsec_params->params_array[indx].param_name,"rotate")) {
+            algmdl.rotate = atoi(algmdl.algsec_params->params_array[indx].param_value);
+        }
+        if (mystreq(algmdl.algsec_params->params_array[indx].param_name,"hog_padding")) {
+            algmdl.hog_padding = atoi(algmdl.algsec_params->params_array[indx].param_value);
+        }
+        if (mystreq(algmdl.algsec_params->params_array[indx].param_name,"hog_winstride")) {
+            algmdl.hog_winstride = atoi(algmdl.algsec_params->params_array[indx].param_value);
+        }
+        if (mystreq(algmdl.algsec_params->params_array[indx].param_name,"haar_flags")) {
+            algmdl.haar_flags = atoi(algmdl.algsec_params->params_array[indx].param_value);
+        }
+        if (mystreq(algmdl.algsec_params->params_array[indx].param_name,"haar_maxsize")) {
+            algmdl.haar_maxsize = atoi(algmdl.algsec_params->params_array[indx].param_value);
+        }
+        if (mystreq(algmdl.algsec_params->params_array[indx].param_name,"haar_minsize")) {
+            algmdl.haar_minsize = atoi(algmdl.algsec_params->params_array[indx].param_value);
+        }
+        if (mystreq(algmdl.algsec_params->params_array[indx].param_name,"haar_minneighbors")) {
+            algmdl.haar_minneighbors = atoi(algmdl.algsec_params->params_array[indx].param_value);
+        }
+    }
+}
 
-    algmdl.threshold_motion = 1.1;
-    algmdl.imagetype = "full";
+static void algsec_params_defaults(ctx_algsec_model &algmdl)
+{
+    util_parms_add_default(algmdl.algsec_params, "model_file", "");
 
-    algmdl.hog_padding = 8;
-    algmdl.hog_winstride = 8;
+    util_parms_add_default(algmdl.algsec_params, "frame_interval", "5");
+    util_parms_add_default(algmdl.algsec_params, "imagetype", "full");
 
-    algmdl.haar_flags = 0;
-    algmdl.haar_maxsize = 1024;
-    algmdl.haar_minsize = 8;
-    algmdl.haar_minneighbors = 8;
-
+    util_parms_add_default(algmdl.algsec_params, "threshold_motion", "1.1");
     if (algmdl.method == 1) {
-        algmdl.scalefactor = 1.1;
-        algmdl.threshold_model = 1.4;
+        util_parms_add_default(algmdl.algsec_params, "threshold_model", "1.4");
+        util_parms_add_default(algmdl.algsec_params, "scalefactor", "1.1");
     } else {
-        algmdl.scalefactor = 1.05;
-        algmdl.threshold_model = 2;
+        util_parms_add_default(algmdl.algsec_params, "threshold_model", "2");
+        util_parms_add_default(algmdl.algsec_params, "scalefactor", "1.05");
     }
+    util_parms_add_default(algmdl.algsec_params, "rotate", "0");
+
+    util_parms_add_default(algmdl.algsec_params, "hog_padding", "8");
+    util_parms_add_default(algmdl.algsec_params, "hog_winstride", "8");
+
+    util_parms_add_default(algmdl.algsec_params, "haar_flags", "0");
+    util_parms_add_default(algmdl.algsec_params, "haar_maxsize", "1024");
+    util_parms_add_default(algmdl.algsec_params, "haar_minsize", "8");
+    util_parms_add_default(algmdl.algsec_params, "haar_minneighbors", "8");
 }
 
-/**Parse parm based upon colons*/
-static void algsec_parms_parse_microdetail(std::string &vin, ctx_algsec_model &algmdl) {
-    /* This is a place holder for now. It is thought that we will need some subparameters
-     * associated with the configuration in the future...*/
-    std::size_t st_colon, en_colon;
-    std::string tmp;
-    int indx1;
-
-    return;
-    if (vin == "") return;
-
-    en_colon = -1;
-    for (indx1=0;indx1<10;indx1++){
-        st_colon = en_colon+1;
-        en_colon = vin.find(':',st_colon);
-        tmp = vin.substr(st_colon,en_colon-st_colon);
-        (void)algmdl;  /*tbd */
-        if (en_colon == std::string::npos) return;
-    }
-
-    return;
-}
-
-/* Parse parm based upon equals*/
-static void algsec_parms_parse_detail(std::string &vin, ctx_algsec_model &algmdl)
+static void algsec_params_deinit(ctx_algsec_model &algmdl)
 {
+    if (algmdl.algsec_params != NULL){
+        util_parms_free(algmdl.algsec_params);
 
-    /* modelfile=/home/whatever/model.xml,threshold_motion=50*/
-
-    std::size_t stpos;
-    std::string tmpvar, tmpparm;
-
-    if (vin == "") return;
-
-    stpos = vin.find('=');
-    if (stpos != std::string::npos){
-
-        tmpvar = vin.substr(0, stpos);
-        tmpparm = vin.substr(stpos+1);
-        mytrim(tmpvar);
-        mytrim(tmpparm);
-
-        if (tmpvar == "modelfile"){
-            algmdl.modelfile = tmpparm;
-        } else if (tmpvar == "config"){
-            algsec_parms_parse_microdetail(tmpparm, algmdl);
-        } else if (tmpvar == "imagetype"){
-            algmdl.imagetype = tmpparm;
-        } else if (tmpvar == "rotate"){
-            algmdl.rotate = std::atoi(tmpparm.c_str());
-        } else if (tmpvar == "scalefactor"){
-            algmdl.scalefactor = std::atof(tmpparm.c_str());
-        } else if (tmpvar == "threshold_model"){
-            algmdl.threshold_model= std::atof(tmpparm.c_str());
-        } else if (tmpvar == "threshold_motion"){
-            algmdl.threshold_motion= std::atof(tmpparm.c_str());
-        }
-
-        /* Hog specific parms below */
-        /* These need edits on acceptable values.  Is this full list?*/
-        if (tmpvar == "winstride"){
-            algmdl.hog_winstride = std::atoi(tmpparm.c_str());
-        } else if (tmpvar == "padding"){
-            algmdl.hog_padding= std::atoi(tmpparm.c_str());
-        }
-
-        /* Haar specific parms below */
-        /* These need edits on acceptable values.  Is this full list?*/
-        if (tmpvar == "minneighbors"){
-            algmdl.haar_minneighbors = std::atoi(tmpparm.c_str());
-        } else if (tmpvar == "flags"){
-            algmdl.haar_flags = std::atoi(tmpparm.c_str());
-        } else if (tmpvar == "minsize"){
-            algmdl.haar_minsize = std::atoi(tmpparm.c_str());
-        } else if (tmpvar == "maxsize"){
-            algmdl.haar_maxsize= std::atoi(tmpparm.c_str());
-        }
-
+        free(algmdl.algsec_params);
+        algmdl.algsec_params = NULL;
     }
-
-    return;
 }
 
-/**Parse parms based upon commas */
-static void algsec_parms_parse(ctx_cam *cam){
-
-    std::size_t st_comma, en_comma;
-    std::string tmp;
-
-
-    if (cam->algsec->models.config != "") {
-        st_comma = 0;
-        en_comma = cam->algsec->models.config.find(',', st_comma);
-        while (en_comma != std::string::npos){
-            tmp = cam->algsec->models.config.substr(st_comma, en_comma - st_comma);
-            algsec_parms_parse_detail(tmp, cam->algsec->models);
-            st_comma = en_comma + 1;
-            en_comma = cam->algsec->models.config.find(',', st_comma);
-        }
-        tmp = cam->algsec->models.config.substr(st_comma);
-        algsec_parms_parse_detail(tmp, cam->algsec->models);
-    }
-
+static void algsec_params_init(ctx_algsec_model &algmdl)
+{
+    algmdl.algsec_params = (struct ctx_params*) mymalloc(sizeof(struct ctx_params));
+    memset(algmdl.algsec_params, 0, sizeof(struct ctx_params));
+    algmdl.algsec_params->params_array = NULL;
+    algmdl.algsec_params->params_count = 0;
+    algmdl.algsec_params->update_params = TRUE;     /*Set trigger that we have updated user parameters */
 }
 
 /**Load the parms from the config to algsec struct */
-static int algsec_load_parms(ctx_cam *cam){
-
+static int algsec_load_params(ctx_cam *cam)
+{
     cam->algsec->height = cam->imgs.height;
     cam->algsec->width = cam->imgs.width;
-
-    cam->algsec->frame_interval = cam->conf->secondary_interval;
     cam->algsec->models.method = cam->conf->secondary_method;
-    cam->algsec->models.config = cam->conf->secondary_config;
 
-    cam->algsec->frame_cnt = cam->algsec->frame_interval;
     cam->algsec->image_norm = (unsigned char*)mymalloc(cam->imgs.size_norm);
     cam->algsec->frame_missed = 0;
     cam->algsec->too_slow = 0;
@@ -461,17 +421,22 @@ static int algsec_load_parms(ctx_cam *cam){
     */
     cam->algsec->closing = true;
 
-    algsec_parms_defaults(cam->algsec->models);
+    algsec_params_init(cam->algsec->models);
 
-    algsec_parms_parse(cam);
+    util_parms_parse(cam->algsec->models.algsec_params, cam->conf->secondary_params);
 
-    algsec_parms_log(cam->algsec->models);
+    algsec_params_defaults(cam->algsec->models);
+
+    algsec_params_log(cam->algsec->models);
+
+    algsec_params_model(cam->algsec->models);
 
     return 0;
 }
 
 /**If possible preload the models and initialize them */
-static int algsec_load_models(ctx_cam *cam){
+static int algsec_load_models(ctx_cam *cam)
+{
 
     if (cam->algsec->models.method != 0){
         switch (cam->algsec->models.method) {
@@ -568,7 +533,7 @@ void algsec_init(ctx_cam *cam){
 
         pthread_mutex_init(&cam->algsec->mutex, NULL);
 
-        retcd = algsec_load_parms(cam);
+        retcd = algsec_load_params(cam);
         if (retcd == 0) retcd = algsec_load_models(cam);
         if (retcd == 0) algsec_start_handler(cam);
 
@@ -584,6 +549,8 @@ void algsec_deinit(ctx_cam *cam){
     #ifdef HAVE_OPENCV
         int waitcnt = 0;
 
+        algsec_params_deinit(cam->algsec->models);
+
         if (!cam->algsec->closing) {
             cam->algsec->closing = true;
             while ((cam->algsec->closing) && (waitcnt <1000)){
@@ -595,6 +562,7 @@ void algsec_deinit(ctx_cam *cam){
             free(cam->algsec->image_norm);
             cam->algsec->image_norm = NULL;
         }
+
         if (waitcnt == 1000){
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             ,_("Graceful shutdown of secondary detector thread failed"));
@@ -626,7 +594,7 @@ void algsec_detect(ctx_cam *cam){
 
                 /*Set the bool to detect on the new image and reset interval */
                 cam->algsec->detecting = true;
-                cam->algsec->frame_cnt = cam->algsec->frame_interval;
+                cam->algsec->frame_cnt = cam->algsec->models.frame_interval;
                 if (cam->algsec->frame_missed >10){
                     if (cam->algsec->too_slow == 0) {
                         MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO

@@ -820,7 +820,7 @@ int mycopy_packet(AVPacket *dest_pkt, AVPacket *src_pkt){
 }
 /*********************************************/
 
-static void util_parms_free(struct ctx_params *params)
+void util_parms_free(struct ctx_params *params)
 {
     int indx_parm;
 
@@ -1116,5 +1116,22 @@ int util_parms_parse(struct ctx_params *params, std::string confline)
     params->update_params = FALSE;
 
     return 0;
+
+}
+
+void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl)
+{
+
+    int indx, dflt;
+
+    dflt = TRUE;
+    for (indx = 0; indx < params->params_count; indx++) {
+        if ( mystreq(params->params_array[indx].param_name, parm_nm.c_str()) ) {
+            dflt = FALSE;
+        }
+    }
+    if (dflt == TRUE) {
+        util_parms_add(params, parm_nm.c_str(), parm_vl.c_str());
+    }
 
 }

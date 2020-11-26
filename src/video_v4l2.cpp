@@ -130,33 +130,21 @@ static int xioctl(src_v4l2_t *vid_source, unsigned long request, void *arg)
     return ret;
 }
 
-static void v4l2_vdev_free(struct ctx_cam *cam)
+static void v4l2_vdev_deinit(struct ctx_cam *cam)
 {
-    int indx;
 
-    /* free the information we collected regarding the controls */
     if (cam->vdev != NULL){
-        if (cam->vdev->params_count > 0){
-            for (indx=0;indx<cam->vdev->params_count;indx++){
-                free(cam->vdev->params_array[indx].param_name);
-                cam->vdev->params_array[indx].param_name=NULL;
-            }
-        }
-        cam->vdev->params_count = 0;
-        if (cam->vdev->params_array != NULL){
-            free(cam->vdev->params_array);
-            cam->vdev->params_array = NULL;
-        }
+        util_parms_free(cam->vdev);
 
         free(cam->vdev);
         cam->vdev = NULL;
     }
+
 }
 
 static int v4l2_vdev_init(struct ctx_cam *cam)
 {
 
-    /* Create the v4l2 ctx_cam within the main thread ctx_cam  */
     cam->vdev =(struct ctx_params*) mymalloc(sizeof(struct ctx_params));
     memset(cam->vdev, 0, sizeof(struct ctx_params));
     cam->vdev->params_array = NULL;
@@ -1319,7 +1307,7 @@ int v4l2_start(struct ctx_cam *cam)
             }
             pthread_mutexattr_destroy(&curdev->attr);
             pthread_mutex_destroy(&curdev->mutex);
-            v4l2_vdev_free(cam);
+            v4l2_vdev_deinit(cam);
             if (curdev->fd_device != -1) close(curdev->fd_device);
             free(curdev);
             pthread_mutex_unlock(&v4l2_mutex);
@@ -1361,7 +1349,7 @@ void v4l2_cleanup(struct ctx_cam *cam)
         /* Set it as closed in thread ctx_cam. */
         cam->video_dev = -1;
 
-        v4l2_vdev_free(cam);
+        v4l2_vdev_deinit(cam);
 
         if (dev == NULL) {
             MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, _("Unable to find video device"));

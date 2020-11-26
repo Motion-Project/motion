@@ -81,7 +81,7 @@
         int             threshold_tune;
         int             secondary_interval;
         int             secondary_method;
-        std::string     secondary_config;
+        std::string     secondary_params;
         int             noise_level;
         int             noise_tune;
         std::string     despeckle_filter;

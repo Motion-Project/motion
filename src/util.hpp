@@ -116,5 +116,7 @@
     int mycopy_packet(AVPacket *dest_pkt, AVPacket *src_pkt);
 
     int util_parms_parse(struct ctx_params *params, std::string confline);
+    void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl);
+    void util_parms_free(struct ctx_params *params);
 
 #endif

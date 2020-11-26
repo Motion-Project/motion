@@ -32,10 +32,14 @@
 
 
 struct ctx_algsec_model {
-    std::string                 config;             //Source config line
+    std::string                 config;             //Source params line
+    struct ctx_params           *algsec_params;
+
+
+    std::string                 model_file;
+    int                         frame_interval;
 
     int                         method;
-    std::string                 modelfile;          //Source model file
     std::string                 imagetype;
     int                         rotate;
 
@@ -62,7 +66,6 @@ struct ctx_algsec {
     pthread_t               threadid;        /* thread i.d. for a secondary detection thread (if required). */
     volatile bool           closing;
     volatile bool           detecting;
-    int                     frame_interval;
     int                     frame_cnt;
     int                     frame_missed;
     int                     too_slow;

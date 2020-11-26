@@ -265,7 +265,7 @@ struct ctx_parm config_parms[] = {
     "# The method to use for secondary detection.",
     0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
     {
-    "secondary_config",
+    "secondary_params",
     "# Full path name for the secondary model and configuration.",
     0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
     {
@@ -1807,17 +1807,17 @@ static void conf_edit_secondary_method(struct ctx_cam *cam, std::string &parm, e
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_method",_("secondary_method"));
 }
 
-static void conf_edit_secondary_config(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_secondary_params(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->secondary_config = "";
+        cam->conf->secondary_params = "";
     } else if (pact == PARM_ACT_SET){
-        cam->conf->secondary_config = parm;
+        cam->conf->secondary_params = parm;
     } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->secondary_config;
+        parm = cam->conf->secondary_params;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_config",_("secondary_config"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_params",_("secondary_params"));
 }
 
 static void conf_edit_noise_level(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
@@ -3339,7 +3339,7 @@ static void conf_edit_cat02(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "threshold_tune"){          conf_edit_threshold_tune(cam, parm_val, pact);
     } else if (parm_nm == "secondary_interval"){      conf_edit_secondary_interval(cam, parm_val, pact);
     } else if (parm_nm == "secondary_method"){        conf_edit_secondary_method(cam, parm_val, pact);
-    } else if (parm_nm == "secondary_config"){        conf_edit_secondary_config(cam, parm_val, pact);
+    } else if (parm_nm == "secondary_params"){        conf_edit_secondary_params(cam, parm_val, pact);
     } else if (parm_nm == "noise_level"){             conf_edit_noise_level(cam, parm_val, pact);
     } else if (parm_nm == "noise_tune"){              conf_edit_noise_tune(cam, parm_val, pact);
     } else if (parm_nm == "despeckle_filter"){        conf_edit_despeckle_filter(cam, parm_val, pact);
