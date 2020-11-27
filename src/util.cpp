@@ -515,7 +515,7 @@ void mythreadname_get(char *threadname){
 }
 
 int mycheck_passthrough(struct ctx_cam *cam){
-    #if (LIBAVFORMAT_VERSION_MAJOR < 55)
+    #if (MYFFVER < 55000)
         if (cam->movie_passthrough)
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("FFMPEG version too old. Disabling pass-through processing."));
@@ -675,7 +675,7 @@ char *mystrdup(const char *from)
 /*********************************************/
 AVFrame *myframe_alloc(void){
     AVFrame *pic;
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 55)
+    #if (MYFFVER >= 55000)
         pic = av_frame_alloc();
     #else
         pic = avcodec_alloc_frame();
@@ -684,7 +684,7 @@ AVFrame *myframe_alloc(void){
 }
 /*********************************************/
 void myframe_free(AVFrame *frame){
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 55)
+    #if (MYFFVER >= 55000)
         av_frame_free(&frame);
     #else
         av_freep(&frame);
@@ -693,7 +693,7 @@ void myframe_free(AVFrame *frame){
 /*********************************************/
 int myimage_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height){
     int retcd = 0;
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 57)
+    #if (MYFFVER >= 57000)
         int align = 1;
         retcd = av_image_get_buffer_size(pix_fmt, width, height, align);
     #else
@@ -704,7 +704,7 @@ int myimage_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height){
 /*********************************************/
 int myimage_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum MyPixelFormat pix_fmt,int width, int height,int dest_size){
     int retcd = 0;
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 57)
+    #if (MYFFVER >= 57000)
         int align = 1;
         retcd = av_image_copy_to_buffer((uint8_t *)buffer_ptr,dest_size
             ,(const uint8_t * const*)frame,frame->linesize,pix_fmt,width,height,align);
@@ -717,7 +717,7 @@ int myimage_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum MyPixelForm
 /*********************************************/
 int myimage_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height){
     int retcd = 0;
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 57)
+    #if (MYFFVER >= 57000)
         int align = 1;
         retcd = av_image_fill_arrays(
             frame->data
@@ -740,7 +740,7 @@ int myimage_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pi
 }
 /*********************************************/
 void mypacket_unref(AVPacket pkt){
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 57)
+    #if (MYFFVER >= 57000)
         av_packet_unref(&pkt);
     #else
         av_free_packet(&pkt);
@@ -748,7 +748,7 @@ void mypacket_unref(AVPacket pkt){
 }
 /*********************************************/
 void myavcodec_close(AVCodecContext *codec_context){
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+    #if (MYFFVER >= 57041)
         avcodec_free_context(&codec_context);
     #else
         avcodec_close(codec_context);
@@ -756,7 +756,7 @@ void myavcodec_close(AVCodecContext *codec_context){
 }
 /*********************************************/
 int mycopy_packet(AVPacket *dest_pkt, AVPacket *src_pkt){
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 55)
+    #if (MYFFVER >= 55000)
         return av_packet_ref(dest_pkt, src_pkt);
     #else
         /* Old versions of libav do not support copying packet

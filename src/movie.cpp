@@ -18,7 +18,7 @@
  */
 
 /*
- * The contents of this file has been derived from output_example.c
+ * The contents of this file has been derived from the output_example.c
  * and apiexample.c from the FFmpeg distribution.
  *
  * This file has been modified so that only major versions greater than
@@ -98,7 +98,7 @@ static int movie_timelapse_append(struct ctx_movie *movie, AVPacket pkt)
     return 0;
 }
 
-#if (LIBAVFORMAT_VERSION_MAJOR < 58)
+#if (MYFFVER < 58000)
     /* TODO Determine if this is even needed for old versions. Per
     * documentation for version 58, 'av_lockmgr_register This function does nothing'
     */
@@ -298,7 +298,7 @@ static int movie_get_oformat(struct ctx_movie *movie)
 static int movie_encode_video(struct ctx_movie *movie)
 {
 
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+    #if (MYFFVER >= 57041)
         //ffmpeg version 3.1 and after
         int retcd = 0;
         char errstr[128];
@@ -333,7 +333,7 @@ static int movie_encode_video(struct ctx_movie *movie)
 
         return 0;
 
-    #elif (LIBAVFORMAT_VERSION_MAJOR >= 55) || ((LIBAVFORMAT_VERSION_MAJOR == 54) && (LIBAVFORMAT_VERSION_MINOR > 6))
+    #elif (MYFFVER > 54006)
 
         int retcd = 0;
         char errstr[128];
@@ -551,7 +551,7 @@ static const char *movie_codec_is_blacklisted(const char *codec_name)
 
     static struct blacklist_t blacklisted_codec[] =
     {
-    #if (LIBAVFORMAT_VERSION_MAJOR < 58) || ( (LIBAVFORMAT_VERSION_MAJOR == 58) && ( (LIBAVFORMAT_VERSION_MINOR < 29) || ((LIBAVFORMAT_VERSION_MINOR == 29) && (LIBAVFORMAT_VERSION_MICRO <= 100)) ) )
+    #if (MYFFVER <= 58029)
             /* h264_omx & ffmpeg combination locks up on Raspberry Pi.
             * Newer versions of ffmpeg allow zerocopy to be disabled to workaround
             * this issue.
@@ -562,7 +562,7 @@ static const char *movie_codec_is_blacklisted(const char *codec_name)
             */
             {"h264_omx", "Codec causes lock up on your FFMpeg version"},
     #endif
-    #if (LIBAVFORMAT_VERSION_MAJOR < 57) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR < 41))
+    #if (MYFFVER < 57041)
             {"h264_v4l2m2m", "FFMpeg version is too old"},
     #endif
     };
@@ -634,7 +634,7 @@ static int movie_set_codec(struct ctx_movie *movie)
     retcd = movie_set_codec_preferred(movie);
     if (retcd != 0) return retcd;
 
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+    #if (MYFFVER >= 57041)
         //If we provide the codec to this, it results in a memory leak.  ffmpeg ticket: 5714
         movie->video_st = avformat_new_stream(movie->oc, NULL);
         if (!movie->video_st) {
@@ -755,7 +755,7 @@ static int movie_set_codec(struct ctx_movie *movie)
 static int movie_set_stream(struct ctx_movie *movie)
 {
 
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+    #if (MYFFVER >= 57041)
         int retcd;
         char errstr[128];
 
@@ -878,7 +878,7 @@ static int movie_set_outputfile(struct ctx_movie *movie)
     int retcd;
     char errstr[128];
 
-    #if (LIBAVFORMAT_VERSION_MAJOR < 58)
+    #if (MYFFVER < 58000)
         retcd = snprintf(movie->oc->filename, sizeof(movie->oc->filename), "%s", movie->filename);
         if ((retcd < 0) || (retcd >= PATH_MAX)){
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
@@ -943,7 +943,7 @@ static int movie_set_outputfile(struct ctx_movie *movie)
 static int movie_flush_codec(struct ctx_movie *movie)
 {
 
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+    #if (MYFFVER >= 57041)
         //ffmpeg version 3.1 and after
 
         int retcd;
@@ -1202,7 +1202,7 @@ static int movie_passthru_codec(struct ctx_movie *movie)
             return -1;
         }
 
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+    #if (MYFFVER >= 57041)
             stream_in = movie->netcam_data->transfer_format->streams[0];
             movie->oc->oformat->video_codec = stream_in->codecpar->codec_id;
 
@@ -1221,7 +1221,7 @@ static int movie_passthru_codec(struct ctx_movie *movie)
             }
             movie->video_st->codecpar->codec_tag  = 0;
 
-    #elif (LIBAVFORMAT_VERSION_MAJOR >= 55)
+    #elif (MYFFVER >= 55000)
 
             stream_in = movie->netcam_data->transfer_format->streams[0];
 
@@ -1339,7 +1339,7 @@ void movie_global_init(void)
     MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("libavformat version %d.%d.%d")
         , LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
 
-    #if (LIBAVFORMAT_VERSION_MAJOR < 58)
+    #if (MYFFVER < 58000)
         /* TODO: Determine if this is even needed for older versions */
         av_register_all();
         avcodec_register_all();
@@ -1349,7 +1349,7 @@ void movie_global_init(void)
     avdevice_register_all();
     av_log_set_callback(movie_avcodec_log);
 
-    #if (LIBAVFORMAT_VERSION_MAJOR < 58)
+    #if (MYFFVER < 58000)
         /* TODO: Determine if this is even needed for older versions */
         int ret;
         ret = av_lockmgr_register(movie_lockmgr_cb);
@@ -1367,7 +1367,7 @@ void movie_global_deinit(void)
 
     avformat_network_deinit();
 
-    #if (LIBAVFORMAT_VERSION_MAJOR < 58)
+    #if (MYFFVER < 58000)
         /* TODO Determine if this is even needed for old versions */
         if (av_lockmgr_register(NULL) < 0)
         {

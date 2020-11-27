@@ -534,8 +534,7 @@ static int netcam_decode_vaapi(struct ctx_netcam *netcam)
 static int netcam_decode_video(struct ctx_netcam *netcam)
 {
 
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
-
+    #if (MYFFVER >= 57041)
         int retcd;
         char errstr[128];
 
@@ -1486,7 +1485,7 @@ static int netcam_set_dimensions (struct ctx_cam *cam)
 static int netcam_copy_stream(struct ctx_netcam *netcam)
 {
     /* Make a static copy of the stream information for use in passthrough processing */
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+    #if (MYFFVER >= 57041)
         AVStream  *transfer_stream, *stream_in;
         int        retcd;
 
@@ -1508,7 +1507,7 @@ static int netcam_copy_stream(struct ctx_netcam *netcam)
 
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Stream copied for pass-through"));
         return 0;
-    #elif (LIBAVFORMAT_VERSION_MAJOR >= 55)
+    #elif (MYFFVER >= 55000)
 
         AVStream  *transfer_stream, *stream_in;
         int        retcd;

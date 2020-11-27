@@ -21,7 +21,7 @@
 #ifndef _INCLUDE_UTIL_H_
 #define _INCLUDE_UTIL_H_
 
-#if (LIBAVFORMAT_VERSION_MAJOR >= 56)
+#if (MYFFVER >= 56000)
     #define MY_PIX_FMT_YUV420P   AV_PIX_FMT_YUV420P
     #define MY_PIX_FMT_YUVJ420P  AV_PIX_FMT_YUVJ420P
     #define MyPixelFormat AVPixelFormat
@@ -31,7 +31,7 @@
     #define MyPixelFormat PixelFormat
 #endif  //Libavformat >= 56
 
-#if (LIBAVFORMAT_VERSION_MAJOR >= 55) || ((LIBAVFORMAT_VERSION_MAJOR == 54) && (LIBAVFORMAT_VERSION_MINOR > 6))
+#if (MYFFVER > 54006)
     #define MY_FLAG_READ       AVIO_FLAG_READ
     #define MY_FLAG_WRITE      AVIO_FLAG_WRITE
     #define MY_FLAG_READ_WRITE AVIO_FLAG_READ_WRITE
@@ -41,7 +41,7 @@
     #define MY_FLAG_READ_WRITE URL_RDWR
 #endif
 
-#if (LIBAVFORMAT_VERSION_MAJOR >= 56)
+#if (MYFFVER >= 56000)
     #define MY_CODEC_ID_MSMPEG4V2 AV_CODEC_ID_MSMPEG4V2
     #define MY_CODEC_ID_FLV1      AV_CODEC_ID_FLV1
     #define MY_CODEC_ID_FFV1      AV_CODEC_ID_FFV1
