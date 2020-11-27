@@ -90,24 +90,8 @@ void mytrim(std::string &parm)
 
 /**
  * mymalloc
- *
- *   Allocates some memory and checks if that succeeded or not. If it failed,
- *   do some errorlogging and bail out.
- *
- *   NOTE: Kenneth Lavrsen changed printing of size_t types so instead of using
- *   conversion specifier %zd I changed it to %llu and casted the size_t
- *   variable to unsigned long long. The reason for this nonsense is that older
- *   versions of gcc like 2.95 uses %Zd and does not understand %zd. So to avoid
- *   this mess I used a more generic way. Long long should have enough bits for
- *   64-bit machines with large memory areas.
- *
- * Parameters:
- *
- *   nbytes - no. of bytes to allocate
- *
- * Returns: a pointer to the allocated memory
  */
-void * mymalloc(size_t nbytes)
+void *mymalloc(size_t nbytes)
 {
     void *dummy = calloc(nbytes, 1);
 
@@ -122,19 +106,6 @@ void * mymalloc(size_t nbytes)
 
 /**
  * myrealloc
- *
- *   Re-allocate (i.e., resize) some memory and check if that succeeded or not.
- *   If it failed, do some errorlogging and bail out. If the new memory size
- *   is 0, the memory is freed.
- *
- * Parameters:
- *
- *   ptr  - pointer to the memory to resize/reallocate
- *   size - new memory size
- *   desc - name of the calling function
- *
- * Returns: a pointer to the reallocated memory, or NULL if the memory was
- *          freed
  */
 void *myrealloc(void *ptr, size_t size, const char *desc)
 {
@@ -208,19 +179,6 @@ int mycreate_path(const char *path)
 
 /**
  * myfopen
- *
- *   This function opens a file, if that failed because of an ENOENT error
- *   (which is: path does not exist), the path is created and then things are
- *   tried again. This is faster then trying to create that path over and over
- *   again. If someone removes the path after it was created, myfopen will
- *   recreate the path automatically.
- *
- * Parameters:
- *
- *   path - path to the file to open
- *   mode - open mode
- *
- * Returns: the file stream object
  */
 FILE * myfopen(const char *path, const char *mode)
 {
@@ -254,13 +212,7 @@ FILE * myfopen(const char *path, const char *mode)
     return dummy;
 }
 
-/**
- * myfclose
- *
- *  Motion-specific variant of fclose()
- *
- * Returns: fclose() return value
- */
+/** myfclose */
 int myfclose(FILE* fh)
 {
     int rval = fclose(fh);

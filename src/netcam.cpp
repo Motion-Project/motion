@@ -686,6 +686,7 @@ static void netcam_decoder_error(struct ctx_netcam *netcam, int retcd, const cha
 {
 
     char errstr[128];
+    int indx;
 
     if (netcam->interrupted){
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
@@ -708,9 +709,19 @@ static void netcam_decoder_error(struct ctx_netcam *netcam, int retcd, const cha
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("%s: Ignoring and removing the user requested decoder %s")
             ,netcam->cameratype, netcam->decoder_nm);
-        netcam->conf->netcam_decoder= "";
+
+        for (indx = 0; indx < netcam->params->params_count; indx++) {
+            if (mystreq(netcam->params->params_array[indx].param_name,"decoder") ) {
+                free(netcam->params->params_array[indx].param_value);
+                netcam->params->params_array[indx].param_value = (char*)mymalloc(5);
+                snprintf(netcam->decoder_nm, 5, "%s","NULL");
+                break;
+            }
+        }
+
         free(netcam->decoder_nm);
-        netcam->decoder_nm = NULL;
+        netcam->decoder_nm = (char*)mymalloc(5);
+        snprintf(netcam->decoder_nm, 5, "%s","NULL");
     }
 
 }
@@ -1079,17 +1090,6 @@ static int netcam_read_image(struct ctx_netcam *netcam)
 
     if (netcam->finish) return -1;   /* This just speeds up the shutdown time */
 
-    /* Use av_read_play to keep connection open to camera*/
-    if ((netcam->conf->netcam_use_tcp) &&
-        (netcam->framerate < (netcam->src_fps))) {
-        if (netcam->capture_nbr > ((netcam->framerate-1))) {
-            netcam->capture_nbr = 0;
-            av_read_play(netcam->format_context);
-        }
-    } else {
-        netcam->capture_nbr = 0;
-    }
-
     av_init_packet(&netcam->packet_recv);
     netcam->packet_recv.data = NULL;
     netcam->packet_recv.size = 0;
@@ -1146,7 +1146,6 @@ static int netcam_read_image(struct ctx_netcam *netcam)
             }
         }
     }
-    netcam->capture_nbr++;
     clock_gettime(CLOCK_REALTIME, &netcam->img_recv->image_time);
 
     if (!netcam->first_image) netcam->status = NETCAM_CONNECTED;
@@ -1181,6 +1180,19 @@ static int netcam_read_image(struct ctx_netcam *netcam)
             (netcam->format_context->streams[netcam->video_stream_index]->avg_frame_rate.num /
             netcam->format_context->streams[netcam->video_stream_index]->avg_frame_rate.den) +
             0.5);
+        if (netcam->capture_rate < 1) {
+            netcam->capture_rate = netcam->src_fps + 1;
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s: capture_rate not specified in netcam_params. Using %d")
+                    ,netcam->cameratype,netcam->capture_rate);
+        }
+    } else {
+        if (netcam->capture_rate < 1) {
+            netcam->capture_rate = netcam->conf->framerate;
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s: capture_rate not specified in netcam_params. Using framerate %d")
+                    ,netcam->cameratype, netcam->capture_rate);
+        }
     }
 
     return 0;
@@ -1212,117 +1224,77 @@ static int netcam_ntc(struct ctx_netcam *netcam)
 
 }
 
-static void netcam_set_http(struct ctx_netcam *netcam)
+static void netcam_set_options(struct ctx_netcam *netcam)
 {
 
-    netcam->format_context->iformat = av_find_input_format("mjpeg");
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-        ,_("%s: Setting http input_format mjpeg"),netcam->cameratype);
+    int indx;
+    char *tmpval;
 
-}
-
-static void netcam_set_rtsp(struct ctx_netcam *netcam)
-{
-
-    if (netcam->rtsp_uses_tcp) {
-        av_dict_set(&netcam->opts, "rtsp_transport", "tcp", 0);
-        av_dict_set(&netcam->opts, "allowed_media_types", "video", 0);
-        av_dict_set(&netcam->opts, "timeout", "-1", 0);
-        av_dict_set(&netcam->opts, "stimeout", "1000000", 0);
-        if (netcam->status == NETCAM_NOTCONNECTED)
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s: Setting rtsp transport to tcp"),netcam->cameratype);
-    } else {
-        av_dict_set(&netcam->opts, "rtsp_transport", "udp", 0);
-        av_dict_set(&netcam->opts, "max_delay", "500000", 0);
-        av_dict_set(&netcam->opts, "buffer_size", "2560000", 0);
-        av_dict_set(&netcam->opts, "fifo_size", "1000000", 0);
-        if (netcam->status == NETCAM_NOTCONNECTED)
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s: Setting rtsp transport to udp"),netcam->cameratype);
-    }
-}
-
-static void netcam_set_file(struct ctx_netcam *netcam)
-{
-
-    /* This is a place holder for the moment.  We will add into
-     * this function any options that must be set for ffmpeg to
-     * read a particular file.  To date, it does not need any
-     * additional options and works fine with defaults.
+    /* The log messages are a bit short in this function intentionally.
+     * The function name is printed in each message so that is being
+     * considered as part of the message.
      */
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-        ,_("%s: Setting attributes to read file"),netcam->cameratype);
+
+    tmpval = (char*)mymalloc(PATH_MAX);
+
+    if (mystreq(netcam->service, "rtsp") ||
+        mystreq(netcam->service, "rtmp")) {
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("%s: Setting rtsp/rtmp")
+            ,netcam->cameratype);
+        util_parms_add_default(netcam->params,"rtsp_transport","tcp");
+        util_parms_add_default(netcam->params,"allowed_media_types", "video");
+
+    } else if (mystreq(netcam->service, "http")) {
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s: Setting input_format mjpeg"),netcam->cameratype);
+        netcam->format_context->iformat = av_find_input_format("mjpeg");
+
+    } else if (mystreq(netcam->service, "v4l2")) {
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s: Setting input_format video4linux2"),netcam->cameratype);
+        netcam->format_context->iformat = av_find_input_format("video4linux2");
+
+        sprintf(tmpval,"%d",netcam->conf->framerate);
+        util_parms_add_default(netcam->params,"framerate", tmpval);
+
+        sprintf(tmpval,"%dx%d",netcam->conf->width, netcam->conf->height);
+        util_parms_add_default(netcam->params,"video_size", tmpval);
+
+        /* Allow a bit more time for the v4l2 device to start up */
+        //netcam->motapp-> ->watchdog = 60;
+        netcam->interruptduration = 55;
+
+    } else if (mystreq(netcam->service, "file")) {
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s: Setting up movie file"),netcam->cameratype);
+
+    } else {
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("%s: Setting up %s")
+            ,netcam->cameratype, netcam->service);
+    }
+
+    free(tmpval);
+
+    /* Write the options to the context, while skipping the Motion ones */
+    for (indx = 0; indx < netcam->params->params_count; indx++) {
+        if (mystrne(netcam->params->params_array[indx].param_name,"decoder") &&
+            mystrne(netcam->params->params_array[indx].param_name,"capture_rate")) {
+            av_dict_set(&netcam->opts
+                , netcam->params->params_array[indx].param_name
+                , netcam->params->params_array[indx].param_value
+                , 0);
+            if (netcam->status == NETCAM_NOTCONNECTED) {
+                MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("%s: option: %s = %s")
+                    ,netcam->cameratype
+                    ,netcam->params->params_array[indx].param_name
+                    ,netcam->params->params_array[indx].param_value
+                );
+            }
+        }
+    }
 
 }
 
-static void netcam_set_v4l2(struct ctx_netcam *netcam)
-{
-
-    char optsize[10], optfmt[10], optfps[10];
-    char *fourcc;
-
-    netcam->format_context->iformat = av_find_input_format("video4linux2");
-
-    fourcc=(char*)malloc(5*sizeof(char));
-
-    v4l2_palette_fourcc(netcam->v4l2_palette, fourcc);
-
-    if (mystreq(fourcc,"MJPG")) {
-        if (v4l2_palette_valid(netcam->path,netcam->v4l2_palette)){
-            sprintf(optfmt, "%s","mjpeg");
-            av_dict_set(&netcam->opts, "input_format", optfmt, 0);
-        } else {
-            sprintf(optfmt, "%s","default");
-        }
-    } else if (mystreq(fourcc,"H264")){
-        if (v4l2_palette_valid(netcam->path,netcam->v4l2_palette)){
-            sprintf(optfmt, "%s","h264");
-            av_dict_set(&netcam->opts, "input_format", optfmt, 0);
-        } else {
-            sprintf(optfmt, "%s","default");
-        }
-    } else {
-        sprintf(optfmt, "%s","default");
-    }
-
-    if (mystrne(optfmt,"default")) {
-        if (v4l2_parms_valid(netcam->path
-                             ,netcam->v4l2_palette
-                             ,netcam->framerate
-                             ,netcam->imgsize.width
-                             ,netcam->imgsize.height)) {
-            sprintf(optfps, "%d",netcam->framerate);
-            av_dict_set(&netcam->opts, "framerate", optfps, 0);
-
-            sprintf(optsize, "%dx%d",netcam->imgsize.width,netcam->imgsize.height);
-            av_dict_set(&netcam->opts, "video_size", optsize, 0);
-        } else {
-            sprintf(optfps, "%s","default");
-            sprintf(optsize, "%s","default");
-        }
-    } else {
-        sprintf(optfps, "%s","default");
-        sprintf(optsize, "%s","default");
-    }
-
-    if (netcam->status == NETCAM_NOTCONNECTED){
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: Requested v4l2_palette option: %d")
-            ,netcam->cameratype,netcam->v4l2_palette);
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: Requested FOURCC code: %s"),netcam->cameratype,fourcc);
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: Setting v4l2 input_format: %s"),netcam->cameratype,optfmt);
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: Setting v4l2 framerate: %s"),netcam->cameratype, optfps);
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: Setting v4l2 video_size: %s"),netcam->cameratype, optsize);
-    }
-
-    free(fourcc);
-
-}
 
 static void netcam_set_path (struct ctx_cam *cam, struct ctx_netcam *netcam )
 {
@@ -1337,7 +1309,7 @@ static void netcam_set_path (struct ctx_cam *cam, struct ctx_netcam *netcam )
     memset(userpass,0,PATH_MAX);
 
     if (netcam->high_resolution){
-        netcam_url_parse(&url, cam->conf->netcam_highres.c_str());
+        netcam_url_parse(&url, cam->conf->netcam_high_url.c_str());
     } else {
         netcam_url_parse(&url, cam->conf->netcam_url.c_str());
     }
@@ -1392,7 +1364,7 @@ static void netcam_set_path (struct ctx_cam *cam, struct ctx_netcam *netcam )
 static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
 {
     /* Set the parameters to be used with our camera */
-    int retcd;
+    int indx, val_len;
 
     netcam->motapp = cam->motapp;
     netcam->conf = cam->conf;
@@ -1400,29 +1372,26 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
     if (netcam->high_resolution) {
         netcam->imgsize.width = 0;
         netcam->imgsize.height = 0;
-        retcd = snprintf(netcam->cameratype,29, "%s",_("High"));
-        netcam->framerate = netcam->conf->netcam_ratehigh;
+        snprintf(netcam->cameratype, 29, "%s",_("High"));
+        netcam->params = (ctx_params*)mymalloc(sizeof(struct ctx_params));
+        netcam->params->update_params = TRUE;
+        util_parms_parse(netcam->params, cam->conf->netcam_high_params);
     } else {
         netcam->imgsize.width = cam->conf->width;
         netcam->imgsize.height = cam->conf->height;
-        retcd = snprintf(netcam->cameratype,29, "%s",_("Norm"));
-        netcam->framerate = netcam->conf->netcam_rate;
-    }
-    if ((retcd <0) || (retcd >= 30)){
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-        ,_("Error setting name of resolution %s."),netcam->cameratype);
+        snprintf(netcam->cameratype, 29, "%s",_("Norm"));
+        netcam->params = (ctx_params*)mymalloc(sizeof(struct ctx_params));
+        netcam->params->update_params = TRUE;
+        util_parms_parse(netcam->params, cam->conf->netcam_params);
     }
 
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("%s: Setting up camera."),netcam->cameratype);
 
-    mycheck_passthrough(cam); /* In case it was turned on via webcontrol */
     netcam->status = NETCAM_NOTCONNECTED;
-    netcam->rtsp_uses_tcp =cam->conf->netcam_use_tcp;
-    netcam->v4l2_palette = cam->conf->v4l2_palette;
-    netcam->src_fps =  -1; /* Default to neg so we know it has not been set */
-    if (netcam->framerate < 1) netcam->framerate = netcam->conf->framerate;
-    netcam->capture_nbr = -1;
+    cam->conf->camera_name.copy(netcam->camera_name,PATH_MAX);
+    mycheck_passthrough(cam);
+    util_parms_add_default(netcam->params,"decoder","NULL");
     netcam->img_recv =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
     netcam->img_recv->ptr =(char*) mymalloc(NETCAM_BUFFSIZE);
     netcam->img_latest =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
@@ -1433,29 +1402,39 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
     netcam->handler_finished = TRUE;
     netcam->first_image = TRUE;
     netcam->reconnect_count = 0;
-    cam->conf->camera_name.copy(netcam->camera_name,PATH_MAX);
-    if (cam->conf->netcam_decoder != ""){
-        netcam->decoder_nm = (char*) mymalloc(cam->conf->netcam_decoder.length() + 2);
-        retcd = snprintf(netcam->decoder_nm,cam->conf->netcam_decoder.length() + 1
-            ,"%s",cam->conf->netcam_decoder.c_str());
-    } else {
-        netcam->decoder_nm = NULL;
+    netcam->src_fps =  -1; /* Default to neg so we know it has not been set */
+    netcam->capture_rate = -1;
+
+    for (indx = 0; indx < netcam->params->params_count; indx++) {
+        if (mystreq(netcam->params->params_array[indx].param_name,"decoder")) {
+            val_len = strlen(netcam->params->params_array[indx].param_value) + 1;
+            netcam->decoder_nm = (char*)mymalloc(val_len);
+            snprintf(netcam->decoder_nm, val_len
+                , "%s",netcam->params->params_array[indx].param_value);
+        }
+
+        if (mystreq(netcam->params->params_array[indx].param_name,"capture_rate")) {
+            netcam->capture_rate = atoi(netcam->params->params_array[indx].param_value);
+        }
+
     }
+
+    /* If this is the norm and we have a highres, then disable passthru on the norm */
+    if ((!netcam->high_resolution) &&
+        (cam->conf->netcam_high_url != "")) {
+        netcam->passthrough = FALSE;
+    } else {
+        netcam->passthrough = mycheck_passthrough(cam);
+    }
+
     netcam->hw_type = AV_HWDEVICE_TYPE_NONE;
-    netcam->hw_pix_fmt=AV_PIX_FMT_VAAPI;  /* hardcode to avoid a global var */
+    netcam->hw_pix_fmt = AV_PIX_FMT_VAAPI;  /* hardcode to avoid a global var */
 
     snprintf(netcam->threadname, 15, "%s",_("Unknown"));
 
     clock_gettime(CLOCK_REALTIME, &netcam->interruptstarttime);
     clock_gettime(CLOCK_REALTIME, &netcam->interruptcurrenttime);
 
-    /* If this is the norm and we have a highres, then disable passthru on the norm */
-    if ((!netcam->high_resolution) &&
-        (cam->conf->netcam_highres != "")) {
-        netcam->passthrough = FALSE;
-    } else {
-        netcam->passthrough = mycheck_passthrough(cam);
-    }
     netcam->interruptduration = 5;
     netcam->interrupted = FALSE;
 
@@ -1583,37 +1562,7 @@ static int netcam_open_context(struct ctx_netcam *netcam)
 
     netcam->interruptduration = 20;
 
-    if (strncmp(netcam->service, "http", 4) == 0 ){
-        netcam_set_http(netcam);
-    } else if (strncmp(netcam->service, "rtsp", 4) == 0 ){
-        netcam_set_rtsp(netcam);
-    } else if (strncmp(netcam->service, "rtmp", 4) == 0 ){
-        netcam_set_rtsp(netcam);
-    } else if (strncmp(netcam->service, "v4l2", 4) == 0 ){
-        netcam_set_v4l2(netcam);
-    } else if (strncmp(netcam->service, "file", 4) == 0 ){
-        netcam_set_file(netcam);
-    } else {
-        av_dict_free(&netcam->opts);
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: Invalid camera service"), netcam->cameratype);
-        return -1;
-    }
-    /*
-     * There is not many av functions above this (av_dict_free?) but we are not getting clean
-     * interrupts or shutdowns via valgrind and they all point to issues with the avformat_open_input
-     * right below so we make sure that we are not in a interrupt / finish situation before calling it
-     */
-    if ((netcam->interrupted) || (netcam->finish) ){
-        if (netcam->status == NETCAM_NOTCONNECTED){
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                ,_("%s: Unable to open camera(%s)")
-                , netcam->cameratype, netcam->camera_name);
-        }
-        av_dict_free(&netcam->opts);
-        if (netcam->interrupted) netcam_close_context(netcam);
-        return -1;
-    }
+    netcam_set_options(netcam);
 
     retcd = avformat_open_input(&netcam->format_context, netcam->path, NULL, &netcam->opts);
     if ((retcd < 0) || (netcam->interrupted) || (netcam->finish) ){
@@ -1743,7 +1692,7 @@ static int netcam_connect(struct ctx_netcam *netcam)
 
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             , _("%s: Netcam capture FPS is %d.")
-            , netcam->cameratype, netcam->framerate);
+            , netcam->cameratype, netcam->capture_rate);
 
         if (netcam->src_fps > 0){
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
@@ -1755,7 +1704,7 @@ static int netcam_connect(struct ctx_netcam *netcam)
                 , netcam->cameratype);
         }
 
-        if (netcam->framerate < netcam->src_fps){
+        if (netcam->capture_rate < netcam->src_fps){
             MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
                 , _("%s: Capture FPS less than camera FPS. Decoding errors will occur.")
                 , netcam->cameratype);
@@ -1775,24 +1724,30 @@ static void netcam_shutdown(struct ctx_netcam *netcam)
         netcam_close_context(netcam);
 
         if (netcam->path != NULL) free(netcam->path);
+        netcam->path    = NULL;
 
         if (netcam->img_latest != NULL){
             free(netcam->img_latest->ptr);
             free(netcam->img_latest);
         }
+        netcam->img_latest = NULL;
+
         if (netcam->img_recv != NULL){
             free(netcam->img_recv->ptr);
             free(netcam->img_recv);
         }
+        netcam->img_recv   = NULL;
+
         if (netcam->decoder_nm != NULL){
             free(netcam->decoder_nm);
         }
-
-        netcam->path    = NULL;
-        netcam->img_latest = NULL;
-        netcam->img_recv   = NULL;
         netcam->decoder_nm = NULL;
 
+        util_parms_free(netcam->params);
+        if (netcam->params != NULL) {
+            free(netcam->params);
+        }
+        netcam->params = NULL;
     }
 
 }
@@ -1801,22 +1756,16 @@ static void netcam_handler_wait(struct ctx_netcam *netcam)
 {
     long usec_maxrate, usec_delay;
 
-    pthread_mutex_lock(&netcam->motapp->mutex_parms);
-        if (netcam->high_resolution) {
-            netcam->framerate = netcam->conf->netcam_ratehigh;
-        } else {
-            netcam->framerate = netcam->conf->netcam_rate;
-        }
-        if (netcam->framerate < 1) netcam->framerate = netcam->conf->framerate;
-    pthread_mutex_unlock(&netcam->motapp->mutex_parms);
+    if (netcam->capture_rate < 1) netcam->capture_rate = 1;
 
-    usec_maxrate = (1000000L / netcam->framerate);
+    usec_maxrate = (1000000L / netcam->capture_rate);
 
     clock_gettime(CLOCK_REALTIME, &netcam->frame_curr_tm);
 
     usec_delay = usec_maxrate -
         ((netcam->frame_curr_tm.tv_sec - netcam->frame_prev_tm.tv_sec) * 1000000L) -
         ((netcam->frame_curr_tm.tv_nsec - netcam->frame_prev_tm.tv_nsec)/1000);
+
     if ((usec_delay > 0) && (usec_delay < 1000000L)){
         SLEEP(0, usec_delay * 1000);
     }
@@ -1971,7 +1920,7 @@ int netcam_setup(struct ctx_cam *cam)
 
     indx_cam = 1;
     indx_max = 1;
-    if (cam->conf->netcam_highres != "") indx_max = 2;
+    if (cam->conf->netcam_high_url != "") indx_max = 2;
 
     while (indx_cam <= indx_max){
         if (indx_cam == 1){

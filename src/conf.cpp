@@ -131,29 +131,21 @@ struct ctx_parm config_parms[] = {
     "# The full URL of the network camera stream.",
     0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED},
     {
-    "netcam_highres",
-    "# Optional high resolution URL for rtsp/rtmp cameras only.",
+    "netcam_params",
+    "# Parameters for the network camera.",
+    0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
+    {
+    "netcam_high_url",
+    "# Optional high resolution URL for camera.",
     0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED},
+    {
+    "netcam_high_params",
+    "# Parameters for high resolution stream.",
+    0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
     {
     "netcam_userpass",
     "# Username and password for network camera. Syntax username:password",
     0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
-    {
-    "netcam_use_tcp",
-    "# Use TCP transport for RTSP/RTMP connections to camera.",
-    1, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
-    {
-    "netcam_decoder",
-    "# User specified decoder.",
-    0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED},
-    {
-    "netcam_rate",
-    "# Network camera picture capture rate.",
-    0, PARM_TYP_INT, PARM_CAT_01, WEBUI_LEVEL_LIMITED},
-    {
-    "netcam_ratehigh",
-    "# Network camera picture capture rate for the high resolution stream.",
-    0, PARM_TYP_INT, PARM_CAT_01, WEBUI_LEVEL_LIMITED},
     {
     "mmalcam_name",
     "# Name of mmal camera (e.g. vc.ril.camera for pi camera).",
@@ -1256,17 +1248,43 @@ static void conf_edit_netcam_url(struct ctx_cam *cam, std::string &parm, enum PA
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_url",_("netcam_url"));
 }
 
-static void conf_edit_netcam_highres(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_netcam_params(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->netcam_highres = "";
+        cam->conf->netcam_params = "";
     } else if (pact == PARM_ACT_SET){
-        cam->conf->netcam_highres = parm;
+        cam->conf->netcam_params = parm;
     } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->netcam_highres;
+        parm = cam->conf->netcam_params;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_highres",_("netcam_highres"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_params",_("netcam_params"));
+}
+
+static void conf_edit_netcam_high_url(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->netcam_high_url = "";
+    } else if (pact == PARM_ACT_SET){
+        cam->conf->netcam_high_url = parm;
+    } else if (pact == PARM_ACT_GET){
+        parm = cam->conf->netcam_high_url;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_high_url",_("netcam_high_url"));
+}
+
+static void conf_edit_netcam_high_params(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->netcam_high_params = "";
+    } else if (pact == PARM_ACT_SET){
+        cam->conf->netcam_high_params = parm;
+    } else if (pact == PARM_ACT_GET){
+        parm = cam->conf->netcam_high_params;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_high_params",_("netcam_high_params"));
 }
 
 static void conf_edit_netcam_userpass(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
@@ -1280,69 +1298,6 @@ static void conf_edit_netcam_userpass(struct ctx_cam *cam, std::string &parm, en
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_userpass",_("netcam_userpass"));
-}
-
-static void conf_edit_netcam_use_tcp(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    if (pact == PARM_ACT_DFLT){
-        cam->conf->netcam_use_tcp = TRUE;
-    } else if (pact == PARM_ACT_SET){
-        conf_edit_set_bool(cam->conf->netcam_use_tcp, parm);
-    } else if (pact == PARM_ACT_GET){
-        conf_edit_get_bool(parm, cam->conf->netcam_use_tcp);
-    }
-    return;
-}
-
-static void conf_edit_netcam_decoder(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    if (pact == PARM_ACT_DFLT) {
-        cam->conf->netcam_decoder = "";
-    } else if (pact == PARM_ACT_SET){
-        cam->conf->netcam_decoder = parm;
-    } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->netcam_decoder;
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_decoder",_("netcam_decoder"));
-}
-
-static void conf_edit_netcam_rate(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT){
-        cam->conf->netcam_rate = -1;
-    } else if (pact == PARM_ACT_SET){
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 1) || (parm_in > 100)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid netcam_rate %d"),parm_in);
-        } else {
-            cam->conf->netcam_rate = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET){
-        parm = std::to_string(cam->conf->netcam_rate);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_rate",_("netcam_rate"));
-}
-
-static void conf_edit_netcam_ratehigh(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT){
-        cam->conf->netcam_ratehigh = -1;
-    } else if (pact == PARM_ACT_SET){
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 1) || (parm_in > 100)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid netcam_ratehigh %d"),parm_in);
-        } else {
-            cam->conf->netcam_ratehigh = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET){
-        parm = std::to_string(cam->conf->netcam_ratehigh);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_ratehigh",_("netcam_ratehigh"));
 }
 
 static void conf_edit_mmalcam_name(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
@@ -3300,12 +3255,10 @@ static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "roundrobin_skip"){       conf_edit_roundrobin_skip(cam, parm_val, pact);
     } else if (parm_nm == "roundrobin_switchfilter"){   conf_edit_roundrobin_switchfilter(cam, parm_val, pact);
     } else if (parm_nm == "netcam_url"){            conf_edit_netcam_url(cam, parm_val, pact);
-    } else if (parm_nm == "netcam_highres"){        conf_edit_netcam_highres(cam, parm_val, pact);
+    } else if (parm_nm == "netcam_params"){         conf_edit_netcam_params(cam, parm_val, pact);
+    } else if (parm_nm == "netcam_high_url"){       conf_edit_netcam_high_url(cam, parm_val, pact);
+    } else if (parm_nm == "netcam_high_params"){    conf_edit_netcam_high_params(cam, parm_val, pact);
     } else if (parm_nm == "netcam_userpass"){       conf_edit_netcam_userpass(cam, parm_val, pact);
-    } else if (parm_nm == "netcam_use_tcp"){        conf_edit_netcam_use_tcp(cam, parm_val, pact);
-    } else if (parm_nm == "netcam_decoder"){        conf_edit_netcam_decoder(cam, parm_val, pact);
-    } else if (parm_nm == "netcam_rate"){           conf_edit_netcam_rate(cam, parm_val, pact);
-    } else if (parm_nm == "netcam_ratehigh"){       conf_edit_netcam_ratehigh(cam, parm_val, pact);
     } else if (parm_nm == "mmalcam_name"){          conf_edit_mmalcam_name(cam, parm_val, pact);
     } else if (parm_nm == "mmalcam_params"){        conf_edit_mmalcam_params(cam, parm_val, pact);
     }
@@ -3982,7 +3935,7 @@ void conf_parms_log(struct ctx_cam **cam_list)
             if (diff_val) {
                 if ((config_parms[i].parm_name == "netcam_url") ||
                     (config_parms[i].parm_name == "netcam_userpass") ||
-                    (config_parms[i].parm_name == "netcam_highres") ||
+                    (config_parms[i].parm_name == "netcam_high_url") ||
                     (config_parms[i].parm_name == "stream_cors_header") ||
                     (config_parms[i].parm_name == "stream_authentication") ||
                     (config_parms[i].parm_name == "webcontrol_authentication") ||

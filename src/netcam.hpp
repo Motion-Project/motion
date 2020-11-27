@@ -133,16 +133,16 @@ struct ctx_netcam {
 
     int                       rtsp_uses_tcp;    /* Flag from config for whether to use tcp transport */
     int                       v4l2_palette;     /* Palette from config for v4l2 devices */
-    int                       framerate;        /* Frames per second from configuration file */
+    int                       capture_rate;     /* Frames per second from configuration file */
     int                       reconnect_count;  /* Count of the times reconnection is tried*/
     int                       src_fps;          /* The fps provided from source*/
     char                      *decoder_nm;      /* User requested decoder */
-    int                       capture_nbr;      /* Picture capture number since last read */
 
     struct timespec           frame_prev_tm;    /* The time set before calling the av functions */
     struct timespec           frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
     struct ctx_motapp         *motapp;          /* Pointer to parent application context  */
     struct ctx_config         *conf;            /* Pointer to conf parms of parent cam*/
+    struct ctx_params         *params;          /* parameters for the camera */
 
     char                      threadname[16];   /* The thread name*/
     int                       threadnbr;        /* The thread number */

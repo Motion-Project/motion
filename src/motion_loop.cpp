@@ -1374,17 +1374,6 @@ static void mlp_parmsupdate(struct ctx_cam *cam)
             cam->noise = cam->conf->noise_level;
         }
 
-        if (cam->netcam != NULL){
-            pthread_mutex_lock(&cam->motapp->mutex_parms);
-                cam->netcam->framerate = cam->conf->framerate;
-            pthread_mutex_unlock(&cam->motapp->mutex_parms);
-        }
-
-        if (cam->netcam_high != NULL){
-            pthread_mutex_lock(&cam->motapp->mutex_parms);
-                cam->netcam_high->framerate = cam->conf->framerate;
-            pthread_mutex_unlock(&cam->motapp->mutex_parms);
-        }
         cam->parms_changed = false;
     }
 

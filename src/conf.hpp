@@ -44,12 +44,10 @@
         int             roundrobin_switchfilter;
 
         std::string     netcam_url;
-        std::string     netcam_highres;
+        std::string     netcam_params;
+        std::string     netcam_high_url;
+        std::string     netcam_high_params;
         std::string     netcam_userpass;
-        int             netcam_use_tcp;
-        std::string     netcam_decoder;
-        int             netcam_rate;
-        int             netcam_ratehigh;
 
         std::string     mmalcam_name;
         std::string     mmalcam_params;
