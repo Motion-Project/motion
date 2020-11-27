@@ -776,6 +776,10 @@ void util_parms_free(struct ctx_params *params)
 {
     int indx_parm;
 
+    if (params == NULL ) {
+        return;
+    }
+
     for (indx_parm=0; indx_parm<params->params_count; indx_parm++)
     {
         if (params->params_array[indx_parm].param_name != NULL) {
