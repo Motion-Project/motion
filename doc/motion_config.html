@@ -424,11 +424,11 @@
       <p></p>
       <p></p>
         camera0.conf:
-        <br /><code> videodevice /dev/video0</code>
+        <br /><code> video_device /dev/video0</code>
       <p></p>
       <p></p>
         camera1.conf:
-        <br /><code> videodevice /dev/video1</code>
+        <br /><code> video_device /dev/video1</code>
       <p></p>
       <p></p>
       <p></p>
@@ -549,9 +549,9 @@
       <p></p>
       <style>
         @media screen and (max-width: 48em) {
-          .tblalpha td:nth-of-type(1):before {content: "v3.2"; padding-right: 10px;}
-          .tblalpha td:nth-of-type(2):before {content: "v4.0"; padding-right: 10px;}
-          .tblalpha td:nth-of-type(3):before {content: "v4.1"; padding-right: 10px;}
+          .tblalpha td:nth-of-type(1):before {content: "v4.0"; padding-right: 10px;}
+          .tblalpha td:nth-of-type(2):before {content: "v4.1"; padding-right: 10px;}
+          .tblalpha td:nth-of-type(3):before {content: "v4.3"; padding-right: 10px;}
           .tblalpha td:nth-of-type(4):before {content: "Cur."; padding-right: 10px;}
         }
       </style>
@@ -562,9 +562,9 @@
         <colgroup width="25%"></colgroup>
         <colgroup width="25%"></colgroup>
         <tr>
-          <td align="left"><b>Version 3.2</b></td>
           <td align="left"><b>Version 4.0</b></td>
           <td align="left"><b>Version 4.1</b></td>
+          <td align="left"><b>Version 4.2</b></td>
           <td align="left"><b>Current Version</b></td>
         </tr>
         <tr>
@@ -580,25 +580,25 @@
           <td align="left"><a href="#auto_brightness" >auto_brightness</a></td>
         </tr>
         <tr>
-          <td align="left">thread</td>
+          <td align="left">camera</td>
           <td align="left">camera</td>
           <td align="left">camera</td>
           <td align="left"><a href="#camera" >camera</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
+          <td align="left">camera_dir</td>
           <td align="left">camera_dir</td>
           <td align="left">camera_dir</td>
           <td align="left"><a href="#camera_dir" >camera_dir</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
+          <td align="left">camera_id</td>
           <td align="left">camera_id</td>
           <td align="left">camera_id</td>
           <td align="left"><a href="#camera_id" >camera_id</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
+          <td align="left">camera_name</td>
           <td align="left">camera_name</td>
           <td align="left">camera_name</td>
           <td align="left"><a href="#camera_name" >camera_name</a></td>
@@ -610,92 +610,68 @@
           <td align="left"><a href="#daemon" >daemon</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
+          <td align="left">database_busy_timeout</td>
           <td align="left">database_busy_timeout</td>
           <td align="left">database_busy_timeout</td>
           <td align="left"><a href="#database_busy_timeout" >database_busy_timeout</a></td>
         </tr>
         <tr>
-          <td align="left">mysql_db</td>
           <td align="left">database_dbname</td>
-          <td align="left">database_dbname</td>
-          <td align="left"><a href="#database_dbname" >database_dbname</a></td>
-        </tr>
-        <tr>
-          <td align="left">pgsql_db</td>
           <td align="left">database_dbname</td>
           <td align="left">database_dbname</td>
           <td align="left"><a href="#database_dbname" >database_dbname</a></td>
         </tr>
         <tr>
-          <td align="left">mysql_host</td>
           <td align="left">database_host</td>
-          <td align="left">database_host</td>
-          <td align="left"><a href="#database_host" >database_host</a></td>
-        </tr>
-        <tr>
-          <td align="left">pgsql_host</td>
           <td align="left">database_host</td>
           <td align="left">database_host</td>
           <td align="left"><a href="#database_host" >database_host</a></td>
         </tr>
         <tr>
-          <td align="left">mysql_password</td>
           <td align="left">database_password</td>
-          <td align="left">database_password</td>
-          <td align="left"><a href="#database_password" >database_password</a></td>
-        </tr>
-        <tr>
-          <td align="left">pgsql_password</td>
           <td align="left">database_password</td>
           <td align="left">database_password</td>
           <td align="left"><a href="#database_password" >database_password</a></td>
         </tr>
         <tr>
-          <td align="left">pgsql_port</td>
+          <td align="left">database_port</td>
           <td align="left">database_port</td>
           <td align="left">database_port</td>
           <td align="left"><a href="#database_port" >database_port</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
+          <td align="left">database_type</td>
           <td align="left">database_type</td>
           <td align="left">database_type</td>
           <td align="left"><a href="#database_type" >database_type</a></td>
         </tr>
         <tr>
-          <td align="left">mysql_user</td>
           <td align="left">database_user</td>
-          <td align="left">database_user</td>
-          <td align="left"><a href="#database_user" >database_user</a></td>
-        </tr>
-        <tr>
-          <td align="left">pgsql_user</td>
           <td align="left">database_user</td>
           <td align="left">database_user</td>
           <td align="left"><a href="#database_user" >database_user</a></td>
         </tr>
         <tr>
-          <td align="left">despeckle</td>
+          <td align="left">despeckle_filter</td>
           <td align="left">despeckle_filter</td>
           <td align="left">despeckle_filter</td>
           <td align="left"><a href="#despeckle_filter" >despeckle_filter</a></td>
         </tr>
         <tr>
-          <td align="left">output_all</td>
+          <td align="left">emulate_motion</td>
           <td align="left">emulate_motion</td>
           <td align="left">emulate_motion</td>
           <td align="left"><a href="#emulate_motion" >emulate_motion</a></td>
         </tr>
         <tr>
-          <td align="left">gap</td>
+          <td align="left">event_gap</td>
           <td align="left">event_gap</td>
           <td align="left">event_gap</td>
           <td align="left"><a href="#event_gap" >event_gap</a></td>
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">flip_axis</td>
           <td align="left">flip_axis</td>
           <td align="left"><a href="#flip_axis" >flip_axis</a></td>
         </tr>
@@ -706,61 +682,49 @@
           <td align="left"><a href="#framerate" >framerate</a></td>
         </tr>
         <tr>
-          <td align="left">frequency</td>
-          <td align="left">frequency</td>
-          <td align="left">frequency</td>
-          <td align="left"><a href="#frequency" >frequency</a></td>
-        </tr>
-        <tr>
           <td align="left">height</td>
           <td align="left">height</td>
           <td align="left">height</td>
           <td align="left"><a href="#height" >height</a></td>
         </tr>
         <tr>
-          <td align="left">input</td>
-          <td align="left">input</td>
-          <td align="left">input</td>
-          <td align="left"><a href="#input" >input</a></td>
-        </tr>
-        <tr>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">lightswitch_frames</td>
           <td align="left"><a href="#lightswitch_frames" >lightswitch_frames</a></td>
         </tr>
         <tr>
           <td align="left">lightswitch</td>
           <td align="left">lightswitch</td>
-          <td align="left">lightswitch</td>
+          <td align="left">lightswitch_percent</td>
           <td align="left"><a href="#lightswitch_percent" >lightswitch_percent</a></td>
         </tr>
         <tr>
-          <td align="left">locate</td>
+          <td align="left">locate_motion_mode</td>
           <td align="left">locate_motion_mode</td>
           <td align="left">locate_motion_mode</td>
           <td align="left"><a href="#locate_motion_mode" >locate_motion_mode</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
+          <td align="left">locate_motion_style</td>
           <td align="left">locate_motion_style</td>
           <td align="left">locate_motion_style</td>
           <td align="left"><a href="#locate_motion_style" >locate_motion_style</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
           <td align="left">logfile</td>
           <td align="left">logfile</td>
+          <td align="left">log_file</td>
           <td align="left"><a href="#log_file" >log_file</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
+          <td align="left">log_level</td>
           <td align="left">log_level</td>
           <td align="left">log_level</td>
           <td align="left"><a href="#log_level" >log_level</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
+          <td align="left">log_type</td>
           <td align="left">log_type</td>
           <td align="left">log_type</td>
           <td align="left"><a href="#log_type" >log_type</a></td>
@@ -773,7 +737,7 @@
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">mask_privacy</td>
           <td align="left">mask_privacy</td>
           <td align="left"><a href="#mask_privacy" >mask_privacy</a></td>
         </tr>
@@ -790,45 +754,45 @@
           <td align="left"><a href="#minimum_motion_frames" >minimum_motion_frames</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
-          <td align="left">mmalcam_control_params</td>
-          <td align="left">mmalcam_control_params</td>
-          <td align="left"><a href="#mmalcam_control_params" >mmalcam_control_params</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
+          <td align="left">mmalcam_name</td>
           <td align="left">mmalcam_name</td>
           <td align="left">mmalcam_name</td>
           <td align="left"><a href="#mmalcam_name" >mmalcam_name</a></td>
         </tr>
         <tr>
+          <td align="left">mmalcam_control_params</td>
+          <td align="left">mmalcam_control_params</td>
+          <td align="left">mmalcam_control_params</td>
+          <td align="left"><a href="#mmalcam_params" >mmalcam_params</a></td>
+        </tr>
+        <tr>
           <td align="left">ffmpeg_bps</td>
           <td align="left">ffmpeg_bps</td>
-          <td align="left">ffmpeg_bps</td>
+          <td align="left">movie_bps</td>
           <td align="left"><a href="#movie_bps" >movie_bps</a></td>
         </tr>
         <tr>
           <td align="left">ffmpeg_video_codec</td>
           <td align="left">ffmpeg_video_codec</td>
-          <td align="left">ffmpeg_video_codec</td>
+          <td align="left">movie_codec</td>
           <td align="left"><a href="#movie_codec" >movie_codec</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
           <td align="left">ffmpeg_duplicate_frames</td>
           <td align="left">ffmpeg_duplicate_frames</td>
+          <td align="left">movie_duplicate_frames</td>
           <td align="left"><a href="#movie_duplicate_frames" >movie_duplicate_frames</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
           <td align="left">extpipe</td>
           <td align="left">extpipe</td>
+          <td align="left">movie_extpipe</td>
           <td align="left"><a href="#movie_extpipe" >movie_extpipe</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
           <td align="left">use_extpipe</td>
           <td align="left">use_extpipe</td>
+          <td align="left">movie_extpipe_use</td>
           <td align="left"><a href="#movie_extpipe_use" >movie_extpipe_use</a></td>
         </tr>
         <tr>
@@ -840,80 +804,80 @@
         <tr>
           <td align="left">max_mpeg_time</td>
           <td align="left">max_movie_time</td>
-          <td align="left">max_movie_time</td>
+          <td align="left">movie_max_time</td>
           <td align="left"><a href="#movie_max_time" >movie_max_time</a></td>
         </tr>
         <tr>
-          <td align="left">ffmpeg_cap_new</td>
           <td align="left">ffmpeg_output_movies</td>
           <td align="left">ffmpeg_output_movies</td>
+          <td align="left">movie_output</td>
           <td align="left"><a href="#movie_output" >movie_output</a></td>
         </tr>
         <tr>
-          <td align="left">ffmpeg_cap_motion</td>
           <td align="left">ffmpeg_output_debug_movies</td>
           <td align="left">ffmpeg_output_debug_movies</td>
+          <td align="left">movie_output_motion</td>
           <td align="left"><a href="#movie_output_motion" >movie_output_motion</a></td>
         </tr>
         <tr>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">movie_passthrough</td>
           <td align="left"><a href="#movie_passthrough" >movie_passthrough</a></td>
         </tr>
         <tr>
           <td align="left">ffmpeg_variable_bitrate</td>
           <td align="left">ffmpeg_variable_bitrate</td>
-          <td align="left">ffmpeg_variable_bitrate</td>
+          <td align="left">movie_quality</td>
           <td align="left"><a href="#movie_quality" >movie_quality</a></td>
         </tr>
         <tr>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">native_language</td>
           <td align="left"><a href="#native_language" >native_language</a></td>
         </tr>
         <tr>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"><a href="#netcam_decoder" >netcam_decoder</a></td>
+          <td align="left"><a href="#netcam_high_params" >netcam_high_params</a></td>
         </tr>
         <tr>
-          <td align="left"></td>
           <td align="left"></td>
           <td align="left">netcam_highres</td>
-          <td align="left"><a href="#netcam_highres" >netcam_highres</a></td>
+          <td align="left">netcam_highres</td>
+          <td align="left"><a href="#netcam_high_url" >netcam_high_url</a></td>
         </tr>
         <tr>
           <td align="left">netcam_keepalive</td>
           <td align="left">netcam_keepalive</td>
           <td align="left">netcam_keepalive</td>
-          <td align="left"><a href="#netcam_keepalive" >netcam_keepalive</a></td>
+          <td align="left"><a href="#netcam_params" >netcam_params</a></td>
         </tr>
         <tr>
           <td align="left">netcam_proxy</td>
           <td align="left">netcam_proxy</td>
           <td align="left">netcam_proxy</td>
-          <td align="left"><a href="#netcam_proxy" >netcam_proxy</a></td>
+          <td align="left"><a href="#netcam_params" >netcam_params</a></td>
         </tr>
         <tr>
           <td align="left">netcam_tolerant_check</td>
           <td align="left">netcam_tolerant_check</td>
           <td align="left">netcam_tolerant_check</td>
-          <td align="left"><a href="#netcam_tolerant_check" >netcam_tolerant_check</a></td>
+          <td align="left"><a href="#netcam_params" >netcam_params</a></td>
+        </tr>
+        <tr>
+          <td align="left">rtsp_uses_tcp<br /></td>
+          <td align="left">rtsp_uses_tcp</td>
+          <td align="left">netcam_use_tcp</td>
+          <td align="left"><a href="#netcam_params" >netcam_params</a></td>
         </tr>
         <tr>
           <td align="left">netcam_url</td>
           <td align="left">netcam_url</td>
           <td align="left">netcam_url</td>
           <td align="left"><a href="#netcam_url" >netcam_url</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left">rtsp_uses_tcp</td>
-          <td align="left">rtsp_uses_tcp</td>
-          <td align="left"><a href="#netcam_use_tcp" >netcam_use_tcp</a></td>
         </tr>
         <tr>
           <td align="left">netcam_userpass</td>
@@ -934,12 +898,6 @@
           <td align="left"><a href="#noise_tune" >noise_tune</a></td>
         </tr>
         <tr>
-          <td align="left">norm</td>
-          <td align="left">norm</td>
-          <td align="left">norm</td>
-          <td align="left"><a href="#norm" >norm</a></td>
-        </tr>
-        <tr>
           <td align="left">on_area_detected</td>
           <td align="left">on_area_detected</td>
           <td align="left">on_area_detected</td>
@@ -947,7 +905,7 @@
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">on_camera_found</td>
           <td align="left">on_camera_found</td>
           <td align="left"><a href="#on_camera_found" >on_camera_found</a></td>
         </tr>
@@ -994,31 +952,31 @@
           <td align="left"><a href="#on_picture_save" >on_picture_save</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
+          <td align="left">exif_text<br /></td>
           <td align="left">exif_text</td>
-          <td align="left">exif_text</td>
+          <td align="left">picture_exif</td>
           <td align="left"><a href="#picture_exif" >picture_exif</a></td>
         </tr>
         <tr>
-          <td align="left">output_normal</td>
           <td align="left">output_pictures</td>
           <td align="left">output_pictures</td>
+          <td align="left">picture_output</td>
           <td align="left"><a href="#picture_output" >picture_output</a></td>
         </tr>
         <tr>
-          <td align="left">output_motion</td>
           <td align="left">output_debug_pictures</td>
           <td align="left">output_debug_pictures</td>
+          <td align="left">picture_output_motion</td>
           <td align="left"><a href="#picture_output_motion" >picture_output_motion</a></td>
         </tr>
         <tr>
-          <td align="left">jpeg_filename</td>
+          <td align="left">picture_filename</td>
           <td align="left">picture_filename</td>
           <td align="left">picture_filename</td>
           <td align="left"><a href="#picture_filename" >picture_filename</a></td>
         </tr>
         <tr>
-          <td align="left">ppm</td>
+          <td align="left">picture_type</td>
           <td align="left">picture_type</td>
           <td align="left">picture_type</td>
           <td align="left"><a href="#picture_type" >picture_type</a></td>
@@ -1026,13 +984,13 @@
         <tr>
           <td align="left">quality</td>
           <td align="left">quality</td>
-          <td align="left">quality</td>
+          <td align="left">picture_quality</td>
           <td align="left"><a href="#picture_quality" >picture_quality</a></td>
         </tr>
         <tr>
           <td align="left">process_id_file</td>
           <td align="left">process_id_file</td>
-          <td align="left">process_id_file</td>
+          <td align="left">pid_file</td>
           <td align="left"><a href="#pid_file" >pid_file</a></td>
         </tr>
         <tr>
@@ -1074,7 +1032,7 @@
         <tr>
           <td align="left">switchfilter</td>
           <td align="left">switchfilter</td>
-          <td align="left">switchfilter</td>
+          <td align="left">roundrobin_switchfilter</td>
           <td align="left"><a href="#roundrobin_switchfilter" >roundrobin_switchfilter</a></td>
         </tr>
         <tr>
@@ -1102,13 +1060,13 @@
           <td align="left"><a href="#snapshot_interval" >snapshot_interval</a></td>
         </tr>
         <tr>
-          <td align="left">sql_log_mpeg</td>
+          <td align="left">sql_log_movie</td>
           <td align="left">sql_log_movie</td>
           <td align="left">sql_log_movie</td>
           <td align="left"><a href="#sql_log_movie" >sql_log_movie</a></td>
         </tr>
         <tr>
-          <td align="left">sql_log_image</td>
+          <td align="left">sql_log_picture</td>
           <td align="left">sql_log_picture</td>
           <td align="left">sql_log_picture</td>
           <td align="left"><a href="#sql_log_picture" >sql_log_picture</a></td>
@@ -1133,92 +1091,92 @@
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">sql_query_start</td>
           <td align="left">sql_query_start</td>
           <td align="left"><a href="#sql_query_start" >sql_query_start</a></td>
         </tr>
         <tr>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">sql_query_stop</td>
           <td align="left"><a href="#sql_query_stop" >sql_query_stop</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
+          <td align="left">stream_auth_method</td>
           <td align="left">stream_auth_method</td>
           <td align="left">stream_auth_method</td>
           <td align="left"><a href="#stream_auth_method" >stream_auth_method</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
+          <td align="left">stream_authentication</td>
           <td align="left">stream_authentication</td>
           <td align="left">stream_authentication</td>
           <td align="left"><a href="#stream_authentication" >stream_authentication</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
           <td align="left"></td>
           <td align="left"></td>
+          <td align="left">stream_cors_header</td>
           <td align="left"><a href="#stream_cors_header" >stream_cors_header</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
           <td align="left"></td>
           <td align="left"></td>
+          <td align="left">stream_grey</td>
           <td align="left"><a href="#stream_grey" >stream_grey</a></td>
         </tr>
         <tr>
-          <td align="left">webcam_localhost</td>
+          <td align="left">stream_localhost</td>
           <td align="left">stream_localhost</td>
           <td align="left">stream_localhost</td>
           <td align="left"><a href="#stream_localhost" >stream_localhost</a></td>
         </tr>
         <tr>
-          <td align="left">webcam_maxrate</td>
+          <td align="left">stream_maxrate</td>
           <td align="left">stream_maxrate</td>
           <td align="left">stream_maxrate</td>
           <td align="left"><a href="#stream_maxrate" >stream_maxrate</a></td>
         </tr>
         <tr>
-          <td align="left">webcam_motion</td>
+          <td align="left">stream_motion</td>
           <td align="left">stream_motion</td>
           <td align="left">stream_motion</td>
           <td align="left"><a href="#stream_motion" >stream_motion</a></td>
         </tr>
         <tr>
-          <td align="left">webcam_port</td>
+          <td align="left">stream_port</td>
           <td align="left">stream_port</td>
           <td align="left">stream_port</td>
           <td align="left"><a href="#stream_port" >stream_port</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
           <td align="left"></td>
           <td align="left"></td>
+          <td align="left">stream_preview_method</td>
           <td align="left"><a href="#stream_preview_method" >stream_preview_method</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
+          <td align="left">stream_preview_newline</td>
           <td align="left">stream_preview_newline</td>
           <td align="left">stream_preview_newline</td>
           <td align="left"><a href="#stream_preview_newline" >stream_preview_newline</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
+          <td align="left">stream_preview_scale</td>
           <td align="left">stream_preview_scale</td>
           <td align="left">stream_preview_scale</td>
           <td align="left"><a href="#stream_preview_scale" >stream_preview_scale</a></td>
         </tr>
         <tr>
-          <td align="left">webcam_quality</td>
+          <td align="left">stream_quality</td>
           <td align="left">stream_quality</td>
           <td align="left">stream_quality</td>
           <td align="left"><a href="#stream_quality" >stream_quality</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
           <td align="left"></td>
           <td align="left"></td>
+          <td align="left">stream_tls</td>
           <td align="left"><a href="#stream_tls" >stream_tls</a></td>
         </tr>
         <tr>
@@ -1254,7 +1212,7 @@
         <tr>
           <td align="left">text_double</td>
           <td align="left">text_double</td>
-          <td align="left">text_double</td>
+          <td align="left">text_scale</td>
           <td align="left"><a href="#text_scale" >text_scale</a></td>
         </tr>
         <tr>
@@ -1266,7 +1224,7 @@
         <tr>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">threshold_maximum</td>
           <td align="left"><a href="#threshold_maximum" >threshold_maximum</a></td>
         </tr>
         <tr>
@@ -1277,7 +1235,7 @@
         </tr>
         <tr>
           <td align="left">ffmpeg_video_codec</td>
-          <td align="left">ffmpeg_video_codec</td>
+          <td align="left">timelapse_codec</td>
           <td align="left">timelapse_codec</td>
           <td align="left"><a href="#timelapse_codec" >timelapse_codec</a></td>
         </tr>
@@ -1289,20 +1247,20 @@
         </tr>
           <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">timelapse_fps</td>
           <td align="left">timelapse_fps</td>
           <td align="left"><a href="#timelapse_fps" >timelapse_fps</a></td>
         </tr>
         <tr>
           <td align="left">ffmpeg_timelapse</td>
-          <td align="left">ffmpeg_timelapse</td>
+          <td align="left">timelapse_interval</td>
           <td align="left">timelapse_interval</td>
           <td align="left"><a href="#timelapse_interval" >timelapse_interval</a></td>
         </tr>
           <tr>
           <td align="left">ffmpeg_timelapse_mode</td>
-          <td align="left">ffmpeg_timelapse_mode</td>
-          <td align="left">ffmpeg_timelapse_mode</td>
+          <td align="left">timelapse_mode</td>
+          <td align="left">timelapse_mode</td>
           <td align="left"><a href="#timelapse_mode" >timelapse_mode</a></td>
         </tr>
         <tr>
@@ -1314,7 +1272,7 @@
         <tr>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">track_generic_move</td>
           <td align="left"><a href="#track_generic_move" >track_generic_move</a></td>
         </tr>
         <tr>
@@ -1393,43 +1351,73 @@
           <td align="left">tunerdevice</td>
           <td align="left">tunerdevice</td>
           <td align="left">tunerdevice</td>
-          <td align="left"><a href="#tunerdevice" >tunerdevice</a></td>
+          <td align="left"><a href="#tuner_device" >tuner_device</a></td>
+        </tr>
+        <tr>
+          <td align="left">frequency</td>
+          <td align="left">frequency</td>
+          <td align="left">frequency</td>
+          <td align="left"><a href="#video_params" >video_params</a></td>
+        </tr>
+        <tr>
+          <td align="left">input</td>
+          <td align="left">input</td>
+          <td align="left">input</td>
+          <td align="left"><a href="#video_params" >video_params</a></td>
+        </tr>
+	      <tr>
+          <td align="left">norm</td>
+          <td align="left">norm</td>
+          <td align="left">norm</td>
+          <td align="left"><a href="#video_params" >video_params</a></td>
         </tr>
         <tr>
           <td align="left">v4l2_palette</td>
           <td align="left">v4l2_palette</td>
           <td align="left">v4l2_palette</td>
-          <td align="left"><a href="#v4l2_palette" >v4l2_palette</a></td>
+          <td align="left"><a href="#video_params" >video_params</a></td>
         </tr>
         <tr>
           <td align="left">brightness</td>
           <td align="left">brightness</td>
-          <td align="left">brightness</td>
-          <td align="left"><a href="#vid_control_params" >vid_control_params</a></td>
+          <td align="left">vid_control_params</td>
+          <td align="left"><a href="#video_params" >video_params</a></td>
         </tr>
         <tr>
           <td align="left">contrast</td>
           <td align="left">contrast</td>
-          <td align="left">contrast</td>
-          <td align="left"><a href="#vid_control_params" >vid_control_params</a></td>
+          <td align="left">vid_control_params</td>
+          <td align="left"><a href="#video_params" >video_params</a></td>
         </tr>
         <tr>
           <td align="left">hue</td>
           <td align="left">hue</td>
-          <td align="left">hue</td>
-          <td align="left"><a href="#vid_control_params" >vid_control_params</a></td>
+          <td align="left">vid_control_params</td>
+          <td align="left"><a href="#video_params" >video_params</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
           <td align="left">power_line_frequency</td>
           <td align="left">power_line_frequency</td>
-          <td align="left"><a href="#vid_control_params" >vid_control_params</a></td>
+          <td align="left">vid_control_params</td>
+          <td align="left"><a href="#video_params" >video_params</a></td>
         </tr>
         <tr>
           <td align="left">saturation</td>
           <td align="left">saturation</td>
-          <td align="left">saturation</td>
-          <td align="left"><a href="#vid_control_params" >vid_control_params</a></td>
+          <td align="left">vid_control_params</td>
+          <td align="left"><a href="#video_params" >video_params</a></td>
+        </tr>
+        <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left">vid_control_params</td>
+          <td align="left"><a href="#video_params" >video_params</a></td>
+        </tr>
+        <tr>
+          <td align="left">videodevice</td>
+          <td align="left">videodevice</td>
+          <td align="left">videodevice</td>
+          <td align="left"><a href="#video_device" >video_device</a></td>
         </tr>
         <tr>
           <td align="left">video_pipe</td>
@@ -1440,23 +1428,17 @@
         <tr>
           <td align="left">motion_video_pipe</td>
           <td align="left">motion_video_pipe</td>
-          <td align="left">motion_video_pipe</td>
+          <td align="left">video_pipe_motion</td>
           <td align="left"><a href="#video_pipe_motion" >video_pipe_motion</a></td>
         </tr>
         <tr>
-          <td align="left">videodevice</td>
-          <td align="left">videodevice</td>
-          <td align="left">videodevice</td>
-          <td align="left"><a href="#videodevice" >videodevice</a></td>
-        </tr>
-        <tr>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">webcontrol_auth_method</td>
           <td align="left"><a href="#webcontrol_auth_method" >webcontrol_auth_method</a></td>
         </tr>
         <tr>
-          <td align="left">control_authentication</td>
+          <td align="left">webcontrol_authentication</td>
           <td align="left">webcontrol_authentication</td>
           <td align="left">webcontrol_authentication</td>
           <td align="left"><a href="#webcontrol_authentication" >webcontrol_authentication</a></td>
@@ -1464,47 +1446,47 @@
         <tr>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">webcontrol_cert</td>
           <td align="left"><a href="#webcontrol_cert" >webcontrol_cert</a></td>
         </tr>
         <tr>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">webcontrol_cors_header</td>
           <td align="left"><a href="#webcontrol_cors_header" >webcontrol_cors_header</a></td>
         </tr>
         <tr>
-          <td align="left">control_html_output</td>
           <td align="left">webcontrol_html_output</td>
           <td align="left">webcontrol_html_output</td>
+          <td align="left">webcontrol_interface</td>
           <td align="left"><a href="#webcontrol_interface" >webcontrol_interface</a></td>
         </tr>
         <tr>
-          <td align="left"><br /></td>
           <td align="left">ipv6_enabled</td>
           <td align="left">ipv6_enabled</td>
+          <td align="left">webcontrol_ipv6</td>
           <td align="left"><a href="#webcontrol_ipv6" >webcontrol_ipv6</a></td>
         </tr>
         <tr>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">webcontrol_key</td>
           <td align="left"><a href="#webcontrol_key" >webcontrol_key</a></td>
         </tr>
         <tr>
-          <td align="left">control_localhost</td>
+          <td align="left">webcontrol_localhost</td>
           <td align="left">webcontrol_localhost</td>
           <td align="left">webcontrol_localhost</td>
           <td align="left"><a href="#webcontrol_localhost" >webcontrol_localhost</a></td>
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">webcontrol_parms</td>
           <td align="left">webcontrol_parms</td>
           <td align="left"><a href="#webcontrol_parms" >webcontrol_parms</a></td>
         </tr>
         <tr>
-          <td align="left">control_port</td>
+          <td align="left">webcontrol_port</td>
           <td align="left">webcontrol_port</td>
           <td align="left">webcontrol_port</td>
           <td align="left"><a href="#webcontrol_port" >webcontrol_port</a></td>
@@ -1512,7 +1494,7 @@
         <tr>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">webcontrol_tls</td>
           <td align="left"><a href="#webcontrol_tls" >webcontrol_tls</a></td>
         </tr>
         <tr>
@@ -1522,27 +1504,21 @@
           <td align="left"><a href="#width" >width</td>
         </tr>
         <tr>
-          <td align="left">ffmpeg_deinterlace</td>
-          <td align="left">-Depreciated</td>
-          <td align="left">-Depreciated</td>
-          <td align="left">-Depreciated</td>
-        </tr>
-        <tr>
-          <td align="left"><br></td>
           <td align="left">sdl_threadnr</td>
           <td align="left">-Depreciated</td>
           <td align="left">-Depreciated</td>
+          <td align="left">-Depreciated</td>
         </tr>
         <tr>
-          <td align="left">webcam_limit</td>
           <td align="left">stream_limit</td>
           <td align="left">stream_limit</td>
+          <td align="left">-Depreciated</td>
           <td align="left">-Depreciated</td>
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
           <td align="left">substream_port</td>
+          <td align="left">-Depreciated</td>
           <td align="left">-Depreciated</td>
         </tr>
       </table>
@@ -1611,16 +1587,10 @@
           </colgroup>
           <tbody>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#videodevice" >videodevice</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#vid_control_params" >vid_control_params</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#v4l2_palette" >v4l2_palette</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#input" >input</a> </td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" ><a href="#norm" >norm</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#frequency" >frequency</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#video_device" >video_device</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#video_params" >video_params</a> </td>
               <td bgcolor="#edf4f9" ><a href="#auto_brightness" >auto_brightness</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#tunerdevice" >tunerdevice</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#tuner_device" >tuner_device</a> </td>
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#roundrobin_frames" >roundrobin_frames</a> </td>
@@ -1647,15 +1617,12 @@
           <tbody>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#netcam_url" >netcam_url</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#netcam_highres" >netcam_highres</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#netcam_userpass" >netcam_userpass</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#netcam_decoder" >netcam_decoder</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_params" >netcam_params</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_high_url" >netcam_high_url</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_high_params" >netcam_high_params</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#netcam_keepalive" >netcam_keepalive</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#netcam_proxy" >netcam_proxy</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#netcam_tolerant_check" >netcam_tolerant_check</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#netcam_use_tcp" >netcam_use_tcp</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_userpass" >netcam_userpass</a> </td>
             </tr>
           </tbody>
         </table>
@@ -1677,7 +1644,7 @@
           <tbody>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#mmalcam_name" >mmalcam_name</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#mmalcam_control_params" >mmalcam_control_params</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#mmalcam_params" >mmalcam_params</a> </td>
             </tr>
           </tbody>
         </table>
@@ -2413,7 +2380,7 @@
         <p></p>
         Please refer to the <a href="#Basic_Setup">Basic Setup</a> section of this guide for an additional discussion
         of Video4Linux devices and how to test and specify them correctly for Motion.
-        <h3><a name="videodevice"></a> videodevice </h3>
+        <h3><a name="video_device"></a> video_device </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
@@ -2425,12 +2392,12 @@
         See the <a href="#Basic_Setup">Basic Setup</a>
         section of this guide for an additional discussion of this option.
         <p></p>
-        This option is the preferred way to specify the video4linux device name. If the camera does
-        not work when specifying the device with this option, it is also possible to specify the device
+        This option is the usual method to specify the video4linux device name. If the camera does
+        not work when specifying it with this option, it is also possible to specify the device
         in the <a href="#netcam_url" >netcam_url</a>  with the v4l2 prefix option.  The
         <a href="#netcam_url" >netcam_url</a> option uses an alternative method to open and operate the
-        device but has fewer options available. If the <a href="#netcam_url" >netcam_url</a> is used for
-        either this alternative method or for a normal network camera, the videodevice option is ignored.
+        device which may work with this option fails.  If the <a href="#netcam_url" >netcam_url</a> is used for
+        either this alternative method or for a normal network camera, the video_device option is ignored.
         <p></p>
         Since the exact device number is set by the kernel upon boot, when there is more than one video device
         it is possible that the particular cameras that were assigned to /dev/video0 and /dev/video1 may switch. In
@@ -2454,7 +2421,7 @@
         <p></p>
 
 
-        <h3><a name="vid_control_params"></a>vid_control_params</h3>
+        <h3><a name="video_params"></a>video_params</h3>
         <p></p>
         <ul>
          <li> Type: String</li>
@@ -2462,30 +2429,35 @@
           <li> Default:  Not defined</li>
          </ul>
         <p></p>
-        For v4l2 and bktr devices, most of the configuration options are automatic.  However most devices also allow
-        the user to change certain settings to suit their needs.  The options which the camera manufacturer permits
-        the user to change are called "controls".
+        For most devices the configuration options are automatically assigned but devices also usually allow
+        the user to change certain settings to suit their needs.  The options that the camera manufacturer permits
+        the user to change are called "controls".  The <a href="#video_params" >video_params</a> option allows users
+        to specify values for these controls when Motion runs.
         <p></p>
-        The <a href="#vid_control_params" >vid_control_params</a> option allows users of Motion to change any of these
-        controls.  The specific controls that can be changed is however entirely dependent upon the device.
+        The <a href="#video_params" >video_params</a> option also allows users to specify some Motion specific
+        parameters that are used to open the camera.  In previous versions of Motion, these options were the
+        frequency, input, norm and v4l2_palette options.  These options have now been embedded into the
+        <a href="#video_params" >video_params</a> option to provide consistency.
         <p></p>
-        This option replaces the previous configuration options for:
+        The following is the list of previous Motion options that have now been replaced by the
+        <a href="#video_params" >video_params</a> option.
         <ul>
           <li> brightness</li>
           <li> contrast</li>
           <li> hue</li>
           <li> power_line_frequency</li>
           <li> saturation</li>
+          <li> frequency</li>
+          <li> input</li>
+          <li> norm</li>
+          <li> v4l2_palette</li>
         </ul>
-        <p></p>
-        This option permits the V4l2 users of Motion to change the value of any control that is available
-        to the device rather than being limited to only the 5 listed above.  For FreeBSD users with BKTR devices,
-        the options are limited to brightness, contrast, hue and saturation due to the limitations of the driver.
         <p></p>
         While it always recommended that users remove older configuration options and only use the new options,
         if users have within the configuration file any of the depreciated options list above, Motion will
-        continue to read those values and upgrade them into the new vid_control_params option.  The resulting
-        pictures from the device may however may not be comparable due to different interpretations of the values.
+        continue to read those values and upgrade them into the new <a href="#video_params" >video_params</a>
+        option.  The resulting pictures from the device may however may not be comparable due to different
+        interpretations of the values.
         <p></p>
         It is therefore highly recommended that users remove the old configuration values and calibrate their devices
         only using this new configuration option.
@@ -2495,12 +2467,11 @@
         of multiple controls can be specified by separating them with a comma.
         <p></p>
         Since the name of some controls can include a comma or spaces, names can also be specified by enclosing them
-        in double quotes.
+        in double quotes.  To help users know which controls are available for their device, the Motion log will
+        report the available controls, associated IDs and minimum/maximum values permitted when the
+        <a href="#log_level" >log_level</a> is specified as INF or higher.
         <p></p>
-        Finally, to help users know which controls are available for their device, the Motion log will report all the
-        available controls, associated IDs and minimum/maximum values permitted at the
-        <a href="#log_level" >log_level</a> of INF.
-        <p></p>
+
         e.g.  Change the <a href="#log_level" >log_level</a>
         to INF, start up Motion with the device attached and specified, let it report items to the log and then
         shut Motion down.  Within the Motion log, it will list which controls the device has that can be adjusted.
@@ -2545,19 +2516,19 @@
         <p></p>
         Example 1:  Set the gain to manual, then the gain to 50 and the brightness to 30
         <p></p>
-        <code>vid_control_params "Gain, Automatic"=1,ID09963795=50, brightness=30</code>
+        <code>video_params "Gain, Automatic"=1,ID09963795=50, brightness=30</code>
         <p></p>
         a equally valid alternative method for specifying this example would be
         <p></p>
-        <code>vid_control_params ID09963794=1,ID09963795=50, ID09963776=30</code>
+        <code>video_params ID09963794=1,ID09963795=50, ID09963776=30</code>
         <p></p>
         or another way of specifying it could be
         <p></p>
-        <code>vid_control_params ID09963794=1,"Gain"=50, "brightness"=30</code>
+        <code>video_params ID09963794=1,"Gain"=50, "brightness"=30</code>
         <p></p>
         Example 2:  Set the saturation to 50 and the contrast to 100
         <p></p>
-        <code>vid_control_params saturation=50,contrast=100</code>
+        <code>video_params saturation=50,contrast=100</code>
         <p></p>
         As can be seen in these examples, the specification can use either the control ID or the name of the
         control.  If the control name has embedded blanks or commas, then it must be enclosed in quotes.  Special
@@ -2566,21 +2537,20 @@
         delimits the end of the name for the Motion log.
         <p></p>
 
-
-        <h3><a name="v4l2_palette"></a> v4l2_palette </h3>
-        <p></p>
+        <h4> palette </h4>
         <ul>
           <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 21</li>
+          <li> Range / Valid values: 0 - 20</li>
           <li> Default: 17</li>
         </ul>
         <p></p>
-        The v4l2_palette allows the user to choose a palette to be use by Motion.  This
-        is only the <u>preferred</u> option.  If the video device does not support this preferred format,
-        Motion will loop through the available palettes to try to find one that is supported by both Motion
-        and the device.
-        Motion will report the supported palettes of the device when Motion starts when the log_level
-        is specified as NTC or higher.
+        The palette option is specified in the <a href="#video_params" >video_params</a> option and
+        allows the user to specify the preferred palette for Motion to use.  If the video device does not
+        support this preferred format, Motion will loop through the available palettes to try to find one
+        that is supported by both Motion and the device.
+        <p></p>
+        Motion will report the supported palettes of the device when Motion starts when the
+        <a href="#log_level" >log_level</a> is specified as NTC or higher.
         <p></p>
         The default of 17 is highly preferred over <u>all</u> other formats since this the native
         format that Motion uses internally.
@@ -2706,70 +2676,55 @@
               <td bgcolor="#edf4f9" align="center" >GREY</li>
               <td bgcolor="#edf4f9" align="center" >20</td>
             </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_H264</td>
-              <td bgcolor="#edf4f9" align="center" >H264</li>
-              <td bgcolor="#edf4f9" align="center" >21</td>
-            </tr>
           </tbody>
         </table>
         </div>
         <p></p>
         It is possible that after looping through all of the palette options for the camera, Motion will not
-        find a palette that is acceptable for processing.  In this situation, it is possible to use the
-        <a href="#netcam_url" >netcam_url</a> option with the v4l2 prefix.  When using the
-        <a href="#netcam_url" >netcam_url</a> option, the v4l2_palette option can be used to specify the
-        V4L2_PIX_FMT_MJPEG and V4L2_PIX_FMT_H264 options ONLY.  If any of the other palette options
-        are specified when using the <a href="#netcam_url" >netcam_url</a> the v4l2_palette option
-        is ignored and the camera default is used.
-
-        <p></p>
-        The V4L2_PIX_FMT_H264(21) option is valid ONLY when using the <a href="#netcam_url" >netcam_url</a> option.
-        When V4L2_PIX_FMT_H264(21) is specified using the videodevice, Motion will change the v4l2_palette option to the
-        default of V4L2_PIX_FMT_YUV420 (17)
+        find a palette that is acceptable for processing.  In this situation, it may be possible to be the
+        camera to work using the <a href="#netcam_url" >netcam_url</a> option with the v4l2 prefix.
         <p></p>
 
-        <h3><a name="input"></a> input </h3>
-        <p></p>
+        <h4> input </h4>
         <ul>
           <li> Type: Integer</li>
-          <li> Range / Valid values: -1, 0 - 7</li>
+          <li> Range / Valid values: -1, 0 - ? </li>
           <li> Default: -1 </li>
         </ul>
         <p></p>
-        Input channel to use expressed as an integer number starting from 0.
-        This option should normally be set to 1 for video/TV cards, and -1 for USB cameras.
-        This parameter is used only with video capture cards that have more than one input.
-        If you set the input number to values other than -1 USB cameras Motion will report
-        an error message back. For video capture cards with tuners or multiple inputs such as
-        S-VHS or Composite you may need to use this option to specify the correct input for
-        the camera. Using a external application such as VLC which allows for easier specification
-        of the input associated with the camera can assist  in determining the correct value for Motion.
+        The input option is specified in the <a href="#video_params" >video_params</a> option and
+        allows the user to specify the input channel to use for the device.
+        <p></p>
+        For USB cameras, the input option should specify -1.
+        <p></p>
+        For other devices such as capture cards, the input option is device dependent but usually starts
+        with zero.  Using an external application such as VLC can allow for easier specification
+        of the input associated with the camera.
         <p></p>
 
-        <h3><a name="norm"></a> norm </h3>
-        <p></p>
+        <h4> norm </h4>
         <ul>
           <li> Type: Integer</li>
           <li> Range / Valid values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour)</li>
           <li> Default: 0 (PAL) </li>
         </ul>
         <p></p>
-        Select the video norm of the device. Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour). Default: 0 (PAL)
-        This value is only used for capture cards using the BTTV driver.
+        The norm option is specified in the <a href="#video_params" >video_params</a> option and
+        allows the user to specify the television norm to use for the device.
         <p></p>
 
-        <h3><a name="frequency"></a> frequency </h3>
-        <p></p>
+        <h4>frequency </h4>
         <ul>
           <li> Type: Integer</li>
           <li> Range / Valid values: 0 - 999999</li>
           <li> Default: 0 (Not set)</li>
         </ul>
         <p></p>
-        The frequency to set the tuner to (kHz) per the tuner specifications.  The default is 0 meaning
-        not set.  This option is only relevant if you have a TV tuner card where you can select the tuner frequency.
-        Your tuner card must support this feature.
+        The frequency option is specified in the <a href="#video_params" >video_params</a> option and
+        allows the user to specify the frequency to use for the device.
+        <p></p>
+        The default is 0 meaning it is not set.  This option is only relevant if the device is a TV tuner
+        card where the frequency can be set.
         <p></p>
 
         <h3><a name="auto_brightness"></a> auto_brightness </h3>
@@ -2790,7 +2745,7 @@
         being adjusted.  (See methods available below)
         <p></p>
         Users can specify a different target value by specifying a value for the control in
-        the <a href="#vid_control_params">vid_control_params</a> option.
+        the <a href="#video_params">video_params</a> option.
         <p></p>
         Motion allows for three possible methods for adjusting the brightness.
         <ul>
@@ -2800,7 +2755,7 @@
         </ul>
         <p></p>
 
-        <h3><a name="tunerdevice"></a> tunerdevice </h3>
+        <h3><a name="tuner_device"></a> tuner_device </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
@@ -2878,7 +2833,7 @@
         Turns the switch filter on or off. The filter can distinguish between most switching noise and real motion. With this
         you can even set roundrobin_skip to 1 without generating much false detection.
         This is a round robin related feature used when you have a capture card with multiple inputs (controlled by the
-        'input' option) on the same videodevice.
+        'input' option) on the same video_device.
         <p></p>
         <p></p>
       </ul>
@@ -2994,13 +2949,6 @@
             A sample format for the netcam_url would be <code>v4l2:///dev/video0</code>  Internally, this
             is equivalent to running the following from the command line <code>ffplay -f v4l2 /dev/video0</code>
             <p></p>
-            Since this is not the preferred method of specifying a v4l2 device, many of the usual v4l2 controls such as
-            <a href="#vid_control_params">vid_control_params</a> are ignored.
-            The options <a href="#width">width</a>, <a href="#height">height</a> as well as two of
-            the <a href="#v4l2_palette">v4l2_palette</a> can be used.  The two options
-            for <a href="#v4l2_palette">v4l2_palette</a> which can be used are option 8 (V4L2_PIX_FMT_MJPEG) and
-            option 21 (V4L2_PIX_FMT_H264).  If any other option is selected for the <a href="#v4l2_palette">v4l2_palette</a>
-            Motion will revert to the camera default.
         </ul>
         <p></p>
 
@@ -3019,7 +2967,180 @@
 
         </ul>
 
-        <h3><a name="netcam_highres"></a> netcam_highres </h3>
+        <h3><a name="netcam_params"></a> netcam_params </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: varies by camera type</li>
+        </ul>
+        <p></p>
+        This option allows for specification of parameters to the network camera.  The format for specifying
+        parameters and values is the same as what is given in the examples for video_params.  The parameters are
+        delimited by commas and provided in the format of parameter_name = parameter_value.
+        <p></p>
+        For cameras that use the url prefix of http, ftp, mjpg, and jpeg the options permitted are limited
+        to keepalive, proxy and tolerant_check.  These parameters correspond to the options provided in previous
+        versions of Motion.
+        <p></p>
+        For cameras that use other url prefixes, the parameters permitted are those available from the
+        ffmpeg library plus a some that are specific to Motion as specified below.
+        The options of keepalive, proxy, tolerant_check are not applicable to these cameras.
+        <p></p>
+        The following summarizes some of the options.  Full descriptions of all the ffmpeg options
+        will be contained in the documentation for ffmpeg.
+        <p></p>
+
+        <h4>keepalive </h4>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: off</li>
+        </ul>
+        <p></p>
+        The keepalive option is specified in the <a href="#netcam_params" >netcam_params</a> option.
+        <p></p>
+        The setting for keep-alive of network socket, should improve performance on compatible net cameras.
+        <ul>
+        <li> off:   The historical implementation using HTTP/1.0, closing the socket after each http request.</li>
+        <li> force: Use HTTP/1.0 requests with keep alive header to reuse the same connection.</li>
+        <li> on:    Use HTTP/1.1 requests that support keep alive as default.</li>
+        </ul>
+        <p></p>
+
+        <h4>proxy </h4>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not defined</li>
+        </ul>
+        <p></p>
+        The proxy option is specified in the <a href="#netcam_params" >netcam_params</a> option.
+        <p></p>
+        URL to use for a netcam proxy server, if required. The syntax is
+        <a href="http://myproxy:portnumber" rel="nofollow" target="_top">http://myproxy:portnumber</a>
+        Use this if you need to connect to a network camera through a proxy server.
+        Example of syntax: "http://myproxy.mydomain.com:1024
+        If the proxy port number is 80 you can omit the port number. Then the syntax is use "http://myproxy.mydomain.com" .
+        Leave this option undefined if you do not use a proxy server.
+        <p></p>
+
+        <h4>tolerant_check </h4>
+        <ul>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: on, off</li>
+          <li> Default: off</li>
+        </ul>
+        <p></p>
+        The tolerant_check option is specified in the <a href="#netcam_params" >netcam_params</a> option.
+        <p></p>
+        Use less strict jpeg checks for network cameras
+        <p></p>
+
+        <h4>decoder</h4>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not defined</li>
+        </ul>
+        <p></p>
+        The decoder option is specified in the <a href="#netcam_params" >netcam_params</a> option.
+        <p></p>
+        This option is specific to the Motion software and allows for specifying a user requested decoder for the camera.
+        Motion will try to open the camera using the decoder specified by this parameter. If it not successful, it
+        will fall back to the default decoder.  This option may improve performance in certain situations for
+        certain platforms and cameras.
+        <p></p>
+        Users can find the names of the decoders on their system by going to a command prompt and
+        typing <code>ffmpeg -decoders</code> and looking for the name of the decoder with a 'D' next
+        to it and correlating this with the type of image provided from the camera.  The list of decoders
+        will correspond with how the distro built ffmpeg.  Additional decoders could also be available
+        if ffmpeg is compiled from source.
+        <p></p>
+        Additional different decoder options may also be found by reviewing the Motion log.  These
+        decoders will be shown as "available" in log when <a href="#log_level">log_level</a> is
+        specified at the INF level or higher.
+        <p></p>
+        Note that not all decoders will work with all cameras even if they are indicated as
+        available.  If the camera does not open using the requested decoder, specify a different
+        decoder or leave this parameter empty to use the default.
+        <p></p>
+
+        <h4>capture_rate </h4>
+        <ul>
+          <li> Type: int</li>
+          <li> Range / Valid values: Integer</li>
+          <li> Default: <a href="#framerate">framerate</a></li>
+        </ul>
+        <p></p>
+        The capture_rate option is specified in the <a href="#netcam_params" >netcam_params</a> option.
+        <p></p>
+        This option allows for the user to request a specific frame per second (FPS) capture rate for
+        the network camera.  This is needed at times so that the rate Motion is capturing images is in
+        sync with what the camera is sending.
+        <p></p>
+        When this value is used, it makes a slight distinction from
+        the usual interpretation of <a href="#framerate">framerate</a>.  The capture_rate will specify
+        how fast images are <u>captured and decoded</u> and the <a href="#framerate">framerate</a>
+        will specify the rate at which they are <u>processed for motion</u>.
+        <p></p>
+        For example, if the capture_rate were set to be 10 and the
+        <a href="#framerate">framerate</a> was set to be 20, what would happen is that each captured image
+        would end up going through the Motion detection / processing routines twice because that loop is
+        processing at twice the speed of the capture loop.  Conversely, if the capture_rate was set
+        to 20 and the <a href="#framerate">framerate</a> is specified as 10, then Motion will be detecting
+        and processing every other image captured.
+        <p></p>
+        The reason that the capture_rate is not systematically set to the <a href="#framerate">framerate</a>
+        within Motion has to with the camera.  Each camera will provide a stream of images usually in some
+        compression format such as H264 or H265 and provide those images at a particular FPS.  If the
+        capture and decoding FPS of Motion is set to a rate lower than the camera, decoding and disconnection
+        errors will occur.
+        <p></p>
+        To avoid the decoding and disconnection errors, it is recommended that the FPS of the camera be
+        adjusted where possible.  Generally, it is preferable to have the FPS of the camera be slightly
+        lower than the capture_rate of Motion.  This allows for the decoder to perform better and reduce
+        decode errors.  For example if the capture_rate is set at 5 and the camera is sending images at
+        30 FPS, the resulting images, processing latency, etc is going to be extremely "poor".  But if
+        the camera FPS is set at 4 instead, the results will be much better.
+        <p></p>
+        Reviews of the Motion log at the INF level can assist in determining whether a higher capture_rate is
+        required.  In particular, look for the following:
+        <ul>
+          <li> Log messages indicating what the netcam capture rate is versus the log entry
+          for the camera FPS.</li>
+          <li> The network camera is disconnecting and reconnecting frequently.</li>
+          <li> A significant number of ffmpeg_avcodec_log messages</li>
+        </ul>
+        <p></p>
+
+        <h4>rtsp_transport</h4>
+        <ul>
+          <li> Range / Valid values: tcp, udp, see ffmpeg documentation</li>
+          <li> Default: tcp</li>
+        </ul>
+        <p></p>
+        The rtsp_transport option is specified in the <a href="#netcam_params" >netcam_params</a> option.  This option
+        is from the ffmpeg libraries.
+        <p></p>
+        The rtsp_transport value of tcp is highly preferred because
+        without this option the rtsp/rtmp images are frequently corrupted and result in many false positive values and
+        images that appear to be smeared.
+        <p></p>
+
+        <h4>input_format</h4>
+        <ul>
+          <li> Range / Valid values: mjpeg, h264, see ffmpeg documentation</li>
+          <li> Default: tcp</li>
+        </ul>
+        <p></p>
+        The input_format option is specified in the <a href="#netcam_params" >netcam_params</a> option.  This option
+        is from the ffmpeg libraries.  This option is used for specifying the palette format of the camera when
+        using the v4l2 via netcam option.  The values of mjpeg and h264 correspond to the values assigned in
+        previous versions of Motion using the v4l2_palette option.
+        <p></p>
+
+        <h3><a name="netcam_high_url"></a> netcam_high_url </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
@@ -3045,6 +3166,18 @@
         only as normal resolution and the privacy mask will not be overlaid on to the high resolution images.
         <p></p>
 
+        <h3><a name="netcam_high_params"></a> netcam_params </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: varies by camera type</li>
+        </ul>
+        <p></p>
+        This option is the same as <a href="#netcam_params" >netcam_params</a> option except this option applies
+        the parameters to the high resolution camera.
+        <p></p>
+
         <h3><a name="netcam_userpass"></a> netcam_userpass </h3>
         <p></p>
         <ul>
@@ -3058,86 +3191,6 @@
         To use no authentication simply remove this option.  Digest authentication is only available for rtsp/rtmp cameras.
         <p></p>
 
-        <h3><a name="netcam_decoder"></a> netcam_decoder </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
-        </ul>
-        <p></p>
-        The user requested decoder to use for rtsp/rtmp cameras.  Motion will try to open the camera using the decoder
-        specified by this parameter. If it not successful, it will usually fall back to the default decoder.  This
-        option may improve performance in certain situations for certain platforms and cameras.  Users can find the
-        names of the decoders on their system by going to a command prompt and typing <code>ffmpeg -formats</code> and
-        looking for the name of the decoder with a 'D' next to it and correlating this with the type of image
-        provided from the camera.  Note that not all decoders will work with all cameras.  If the camera does not
-        open using the requested decoder, specify a different decoder or leave this parameter empty to use the default.
-        Additionally, ffmpeg will only list out the decoders that it was compiled to support.  Additional decoders
-        may be available if ffmpeg is compiled from source.
-        <p></p>
-
-        <h3><a name="netcam_keepalive"></a> netcam_keepalive </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: off</li>
-        </ul>
-        <p></p>
-        The setting for keep-alive of network socket, should improve performance on compatible net cameras.
-        <ul>
-        <li> off:   The historical implementation using HTTP/1.0, closing the socket after each http request.</li>
-        <li> force: Use HTTP/1.0 requests with keep alive header to reuse the same connection.</li>
-        <li> on:    Use HTTP/1.1 requests that support keep alive as default.</li>
-        </ul>
-        <p></p>
-            Motion will ignore this option for rtsp/rtmp cameras.
-        <p></p>
-
-        <h3><a name="netcam_proxy"></a> netcam_proxy </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
-        </ul>
-        <p></p>
-        URL to use for a netcam proxy server, if required. The syntax is
-        <a href="http://myproxy:portnumber" rel="nofollow" target="_top">http://myproxy:portnumber</a>
-        Use this if you need to connect to a network camera through a proxy server.
-        Example of syntax: "http://myproxy.mydomain.com:1024
-        If the proxy port number is 80 you can omit the port number. Then the syntax is use "http://myproxy.mydomain.com" .
-        Leave this option undefined if you do not use a proxy server.
-        <p></p>
-            Motion will ignore this option for rtsp/rtmp cameras.
-        <p></p>
-
-        <h3><a name="netcam_tolerant_check"></a> netcam_tolerant_check </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
-        </ul>
-        <p></p>
-        Use less strict jpeg checks for network cameras
-        <p></p>
-            Motion will ignore this option for rtsp/rtmp cameras.
-        <p></p>
-
-        <h3><a name="netcam_use_tcp"></a> netcam_use_tcp </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: on</li>
-        </ul>
-        <p></p>
-        This option specifies the transport method for rtsp/rtmp cameras.  The TCP transport is highly preferred because
-        without this option the rtsp/rtmp images are frequently corrupted and result in many false positive values and
-        images that appear to be smeared.  Off indicates that UDP will be used.
-        <p></p>
         <p></p>
       </ul>
 
@@ -3167,7 +3220,7 @@
             the <a href="#Basic_Setup">Basic Setup</a> section of this guide for further details.
         <p></p>
 
-        <h3><a name="mmalcam_control_params"></a> mmalcam_control_params</h3>
+        <h3><a name="mmalcam_params"></a> mmalcam_params</h3>
         <p></p>
         <ul>
           <li> Type: String</li>
@@ -4437,8 +4490,7 @@
         <p></p>
         For v4l2 cameras to use the movie_passthrough, they must be specified using the
         <a href="#netcam_url">netcam_url</a> parameter and the <code>v4l2</code> prefix.
-        <u>Only</u> webcams that provide mjpeg (<a href="#v4l2_palette">v4l2_palette</a> option 8)
-        or H264 (<a href="#v4l2_palette">v4l2_palette</a> option 21) will work with the
+        <u>Only</u> webcams that provide mjpeg or H264 will work with the
         <a href="#movie_passthrough">movie_passthrough</a>.
         <p></p>
 

@@ -1,3 +1,19 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef _INCLUDE_NETCAM_HTTP_H
 #define _INCLUDE_NETCAM_HTTP_H
 
@@ -17,22 +33,22 @@ typedef struct file_context {
 
 
 /*
- * MJPG Chunk header for MJPG streaming.
- * Little-endian data is read from the network.
- */
+* MJPG Chunk header for MJPG streaming.
+* Little-endian data is read from the network.
+*/
 typedef struct {
     char mh_magic[MJPG_MH_MAGIC_SIZE];     /* must contain the string MJP
-                                              not null-terminated. */
+                                            not null-terminated. */
     unsigned int mh_framesize;             /* Total size of the current
-                                              frame in bytes (~45kb on WVC200) */
+                                            frame in bytes (~45kb on WVC200) */
     unsigned short mh_framewidth;          /* Frame width in pixels */
     unsigned short mh_frameheight;         /* Frame height in pixels */
     unsigned int mh_frameoffset;           /* Offset of this chunk relative
-                                              to the beginning of frame. */
+                                            to the beginning of frame. */
     unsigned short mh_chunksize;           /* The size of the chunk data
-                                              following this header. */
+                                            following this header. */
     char mh_reserved[30];                  /* Unknown data, seems to be
-                                              constant between all headers */
+                                            constant between all headers */
 } mjpg_header;
 
 

@@ -1,3 +1,19 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  *    netcam.h
  *
@@ -9,16 +25,14 @@
  *    Christopher Price.
  *
  *    Copyright 2005, William M. Brack
- *    This software is distributed under the GNU Public license
- *    Version 2.  See also the file 'COPYING'.
  */
 #ifndef _INCLUDE_NETCAM_H
 #define _INCLUDE_NETCAM_H
 
 /* This is a workaround regarding these defines.  The config.h file defines
- * HAVE_STDLIB_H as 1 whereas the jpeglib.h just defines it without a value.
- * this causes massive warnings/error on mis-matched definitions.  We do not
- * control either of these so we have to suffer through this workaround hack
+* HAVE_STDLIB_H as 1 whereas the jpeglib.h just defines it without a value.
+* this causes massive warnings/error on mis-matched definitions.  We do not
+* control either of these so we have to suffer through this workaround hack
 */
 #if (HAVE_STDLIB_H == 1)
     #undef HAVE_STDLIB_H
@@ -41,42 +55,25 @@
 #include <setjmp.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <regex.h>
 
-/**
- * ATTRIBUTE_UNUSED:
- *
- * Macro used to signal to GCC unused function parameters
- */
-#ifdef __GNUC__
-#ifdef HAVE_ANSIDECL_H
-#include <ansidecl.h>
-#endif
-#ifndef ATTRIBUTE_UNUSED
-#define ATTRIBUTE_UNUSED __attribute__((unused))
-#endif
-#else
-#define ATTRIBUTE_UNUSED
-#endif
-
-/* netcam_wget.h needs to have netcam_context_ptr */
 typedef struct netcam_context *netcam_context_ptr;
 
-#include "netcam_wget.h"        /* needed for struct rbuf */
+#include "netcam_wget.h"
+#include "netcam_jpeg.h"
 
 #define NETCAM_BUFFSIZE 4096    /* Initial size reserved for a JPEG
-                                   image.  If expansion is required,
-                                   this value is also used for the
-                                   amount to increase. */
+                                  image.  If expansion is required,
+                                  this value is also used for the
+                                  amount to increase. */
 
 /*
- * Error return codes for netcam routines.  The values are "bit
- * significant".  All error returns will return bit 1 set to indicate
- * these are "netcam errors"; additional bits set will give more detail
- * as to what kind of error it was.
- * Bit 0 is reserved for V4L type errors.
- *
- */
+* Error return codes for netcam routines.  The values are "bit
+* significant".  All error returns will return bit 1 set to indicate
+* these are "netcam errors"; additional bits set will give more detail
+* as to what kind of error it was.
+* Bit 0 is reserved for V4L type errors.
+*
+*/
 #define NETCAM_GENERAL_ERROR       0x02          /* binary 000010 */
 #define NETCAM_NOTHING_NEW_ERROR   0x06          /* binary 000110 */
 #define NETCAM_JPEG_CONV_ERROR     0x0a          /* binary 001010 */
@@ -88,9 +85,9 @@ typedef struct netcam_context *netcam_context_ptr;
 #define NCS_BLOCK               2  /* streaming is done via MJPG-block */
 
 /*
- * struct url_t is used when parsing the user-supplied URL, as well as
- * when attempting to connect to the netcam.
- */
+* struct url_t is used when parsing the user-supplied URL, as well as
+* when attempting to connect to the netcam.
+*/
 struct url_t {
     char *service;
     char *userpass;
@@ -100,10 +97,10 @@ struct url_t {
 };
 
 /*
- * We use a special "triple-buffer" technique.  There are
- * three separate buffers (latest, receiving and jpegbuf)
- * which are each described using a struct netcam_image_buff
- */
+* We use a special "triple-buffer" technique.  There are
+* three separate buffers (latest, receiving and jpegbuf)
+* which are each described using a struct netcam_image_buff
+*/
 typedef struct netcam_image_buff {
     char *ptr;
     int content_length;
@@ -113,28 +110,28 @@ typedef struct netcam_image_buff {
 } netcam_buff;
 typedef netcam_buff *netcam_buff_ptr;
 
-struct netcam_caps {                    /* netcam capabilities: */
+extern struct netcam_caps {                    /* netcam capabilities: */
         unsigned char streaming;        /*  See the NCS_* defines */
         unsigned char content_length;   /*  0 - unsupported     */
 } caps;
 
 
 /*
- * struct netcam_context contains all the structures and other data
- * for an individual netcam.
- */
+* struct netcam_context contains all the structures and other data
+* for an individual netcam.
+*/
 typedef struct netcam_context {
-    struct context *cnt;        /* pointer to parent motion
-                                   context structure */
-
+    struct context            *cnt;         /* pointer to parent motion context structure */
+    struct params_context     *parameters;  /* User specified parameters for the camera */
+    int haveproxy;              /* bool for whether there is a proxy */
     int finish;                 /* flag to break the camera-
-                                   handling thread out of it's
-                                   infinite loop in emergency */
+                                  handling thread out of it's
+                                  infinite loop in emergency */
 
     int threadnr;               /* motion's thread number for
-                                   the camera-handling thread
-                                   (if required).  Used for
-                                   error reporting */
+                                  the camera-handling thread
+                                  (if required).  Used for
+                                  error reporting */
 
     pthread_t thread_id;        /* thread i.d. for a camera-handling thread (if required). */
 
@@ -143,8 +140,8 @@ typedef struct netcam_context {
     pthread_cond_t exiting;          /* signal for exiting thread */
 
     pthread_cond_t cap_cond;    /* pthread condition structure to
-                                   initiate next capture request (used
-                                   only with non-streaming cameras */
+                                  initiate next capture request (used
+                                  only with non-streaming cameras */
 
     pthread_cond_t pic_ready;   /* pthread condition structure used
                                     for synchronisation between the
@@ -152,64 +149,64 @@ typedef struct netcam_context {
                                     loop, showing new frame is ready */
 
     int start_capture;          /* besides our signalling condition,
-                                   we also keep a flag to assure the
-                                   camera-handler will always start
-                                   a new cycle as soon as possible,
-                                   even if it's not currently waiting
-                                   on the condition. */
+                                  we also keep a flag to assure the
+                                  camera-handler will always start
+                                  a new cycle as soon as possible,
+                                  even if it's not currently waiting
+                                  on the condition. */
 
     char *connect_host;         /* the host to connect to (may be
-                                   either the camera host, or
-                                   possibly a proxy) */
+                                  either the camera host, or
+                                  possibly a proxy) */
 
     int connect_port;           /* usually will be 80, but can be
-                                   specified as something else by
-                                   the user */
+                                  specified as something else by
+                                  the user */
 
     int connect_http_10;        /* set to TRUE if HTTP 1.0 connection
-                                   (netcam_keepalive off) */
+                                  (netcam_keepalive off) */
 
     int connect_http_11;        /* set to TRUE if HTTP 1.1 connection
-                                   (netcam_keepalive on)  */
+                                  (netcam_keepalive on)  */
 
     int connect_keepalive;      /* set to TRUE if connection maintained after
-                                   a request, otherwise FALSE to close down
-                                   the socket each time (netcam_keealive force) */
+                                  a request, otherwise FALSE to close down
+                                  the socket each time (netcam_keealive force) */
 
     int keepalive_thisconn;     /* set to TRUE if cam has sent 'Keep-Alive' in this connection */
 
     int keepalive_timeup;       /* set to TRUE if it is time to close netcam's socket,
-                                   and then re-open it with Keep-Alive set again.
-                                   Even Keep-Alive netcams need a close/open sometimes. */
+                                  and then re-open it with Keep-Alive set again.
+                                  Even Keep-Alive netcams need a close/open sometimes. */
 
     char *connect_request;      /* contains the complete string
-                                   required for connection to the
-                                   camera */
+                                  required for connection to the
+                                  camera */
 
     int sock;                   /* fd for the camera's socket.
-                                   Note that this value is also
-                                   present within the struct
-                                   rbuf *response. */
+                                  Note that this value is also
+                                  present within the struct
+                                  rbuf *response. */
 
     struct timeval timeout;     /* The current timeout setting for
-                                   the socket. */
+                                  the socket. */
 
     struct rbuf *response;      /* this structure (defined in the
-                                   netcam_wget module) contains
-                                   the context for an HTTP
-                                   connection.  Note that this
-                                   structure includes a large
-                                   buffer for the HTTP data */
+                                  netcam_wget module) contains
+                                  the context for an HTTP
+                                  connection.  Note that this
+                                  structure includes a large
+                                  buffer for the HTTP data */
 
     struct ftp_context  *ftp;        /* this structure contains the context for FTP connection */
     struct file_context *file;       /* this structure contains the context for FILE connection */
 
     int (*get_image)(netcam_context_ptr);
                                 /* Function to fetch the image from
-                                   the netcam.  It is initialised in
-                                   netcam_setup depending upon whether
-                                   the picture source is from an http
-                                   server or from an ftp server */
+                                  the netcam.  It is initialised in
+                                  netcam_setup depending upon whether
+                                  the picture source is from an http
+                                  server or from an ftp server */
 
 
     struct netcam_caps caps;    /* Type of camera */
@@ -243,20 +240,13 @@ typedef struct netcam_context {
 
 } netcam_context;
 
-/*
- * Declare prototypes for our external entry points
- */
-/*     Within netcam_jpeg.c    */
-int netcam_proc_jpeg (struct netcam_context *,  struct image_data *img_data);
-void netcam_fix_jpeg_header(struct netcam_context *);
-void netcam_get_dimensions (struct netcam_context *);
-/*     Within netcam.c        */
-int netcam_start (struct context *);
+
+int netcam_start(struct context *cnt);
 int netcam_next(struct context *cnt, struct image_data *img_data);
-void netcam_cleanup (struct netcam_context *, int);
-ssize_t netcam_recv(netcam_context_ptr, void *, size_t);
+void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag);
 void netcam_url_parse(struct url_t *parse_url, const char *text_url);
 void netcam_url_free(struct url_t *parse_url);
+ssize_t netcam_recv(netcam_context_ptr netcam, void *buffptr, size_t buffsize);
 
 /**
  * Publish new image

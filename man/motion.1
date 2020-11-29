@@ -1,4 +1,4 @@
-.TH MOTION 1 2019-02-02 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2020-10-19 "Motion" "Motion Options and Config Files"
 .SH NAME
 motion \-   Detect motion using a video4linux device or network camera
 .SH SYNOPSIS
@@ -234,7 +234,7 @@ This option accepts the conversion specifiers included at the end of this manual
 .RE
 
 .TP
-.B videodevice
+.B video_device
 .RS
 .nf
 Values: User specified string
@@ -242,14 +242,14 @@ Default: /dev/video0
 Description:
 .fi
 .RS
-String to specify the videodevice to be used for capturing.
+String to specify the video device to be used for capturing.
 The format is usually /dev/videoX where X varies depending upon the video devices connected to the computer.
 For FreeBSD certain devices use the bktr subsystem and they will use /dev/bktr0.
 .RE
 .RE
 
 .TP
-.B vid_control_params
+.B video_params
 .RS
 .nf
 Values: User specified string
@@ -257,97 +257,9 @@ Default: None
 Description:
 .fi
 .RS
-String to specify the parameters to pass in for a videodevice.  The parameters
+String to specify the parameters to pass in for a video_device.  The parameters
 permitted are dependent upon the device.  This only applies to V4L2 devices.  The
 Motion log reports all the available options for the device.
-.RE
-.RE
-
-.TP
-.B v4l2_palette
-.RS
-.nf
-Values: 0 to 21
-.RS
-V4L2_PIX_FMT_SN9C10X : 0  'S910'
-V4L2_PIX_FMT_SBGGR16 : 1  'BYR2'
-V4L2_PIX_FMT_SBGGR8  : 2  'BA81'
-V4L2_PIX_FMT_SPCA561 : 3  'S561'
-V4L2_PIX_FMT_SGBRG8  : 4  'GBRG'
-V4L2_PIX_FMT_SGRBG8  : 5  'GRBG'
-V4L2_PIX_FMT_PAC207  : 6  'P207'
-V4L2_PIX_FMT_PJPG    : 7  'PJPG'
-V4L2_PIX_FMT_MJPEG   : 8  'MJPEG'
-V4L2_PIX_FMT_JPEG    : 9  'JPEG'
-V4L2_PIX_FMT_RGB24   : 10 'RGB3'
-V4L2_PIX_FMT_SPCA501 : 11 'S501'
-V4L2_PIX_FMT_SPCA505 : 12 'S505'
-V4L2_PIX_FMT_SPCA508 : 13 'S508'
-V4L2_PIX_FMT_UYVY    : 14 'UYVY'
-V4L2_PIX_FMT_YUYV    : 15 'YUYV'
-V4L2_PIX_FMT_YUV422P : 16 '422P'
-V4L2_PIX_FMT_YUV420  : 17 'YU12'
-V4L2_PIX_FMT_Y10     : 18 'Y10'
-V4L2_PIX_FMT_Y12     : 19 'Y12'
-V4L2_PIX_FMT_GREY    : 20 'GREY'
-V4L2_PIX_FMT_H264    : 21 'H264'
-.RE
-Default: 17
-Description:
-.fi
-.RS
-The v4l2_palette option allows users to choose the preferred palette to be use by motion to capture from the video device.
-If the preferred palette is not available from the video device, Motion will attempt to use palettes that are supported.
-.RE
-.RE
-
-.TP
-.B input
-.RS
-.nf
-Values:
-.RS
-\-1 : USB Cameras
-0 : video/TV cards or uvideo(4) on OpenBSD
-1 : video/TV cards
-.RE
-Default: \-1
-Description:
-.fi
-.RS
-The video input to be used.
-.RE
-.RE
-
-.TP
-.B norm
-.RS
-.nf
-Values:
-.RS
-0 (PAL)
-1 (NTSC)
-2 (SECAM)
-3 (PAL NC no colour)
-.RE
-Default: 0 (PAL)
-Description:
-.fi
-.RS
-The video norm to use when capturing from TV tuner cards
-.RE
-.RE
-
-.TP
-.B frequency
-.RS
-.nf
-Values: Dependent upon video device
-Default: 0
-Description:
-.fi
-.RS
-The frequency to set the tuner in kHz when using a TV tuner card.
 .RE
 .RE
 
@@ -367,7 +279,7 @@ Only recommended for cameras without auto brightness.
 .RE
 
 .TP
-.B tunerdevice
+.B tuner_device
 .RS
 .nf
 Values: User Specified String
@@ -452,7 +364,20 @@ Basic authentication can be specified in the URL or via the netcam_userpass opti
 .RE
 
 .TP
-.B netcam_highres
+.B netcam_params
+.RS
+.nf
+Values: User specified string
+Default: Not Defined
+Description:
+.fi
+.RS
+User specified parameters for the network camera.
+.RE
+.RE
+
+.TP
+.B netcam_high_url
 .RS
 .nf
 Values: User specified string
@@ -478,6 +403,20 @@ Basic authentication can be specified in the URL or via the netcam_userpass opti
 .RE
 
 .TP
+.B netcam_high_params
+.RS
+.nf
+Values: User specified string
+Default: Not Defined
+Description:
+.fi
+.RS
+User specified parameters for the network camera.
+.RE
+.RE
+
+
+.TP
 .B netcam_userpass
 .RS
 .nf
@@ -489,91 +428,6 @@ Description:
 The user id and password required to access the network camera string.
 Only basic authentication is supported at this time.
 Format is in user:password format when both a user name and password are required.
-.RE
-.RE
-
-.TP
-.B netcam_decoder
-.RS
-.nf
-Values: User specified string
-Default: Not Defined
-Description:
-.fi
-.RS
-User requested decoder to use for network cameras.
-.RE
-.RE
-
-.TP
-.B netcam_keepalive
-.RS
-.nf
-Values:
-.RS
-.fi
-off:   The historical implementation using HTTP/1.0, closing the socket after each http request.
-.nf
-
-.fi
-force: Use HTTP/1.0 requests with keep alive header to reuse the same connection.
-.nf
-
-.fi
-on:    Use HTTP/1.1 requests that support keep alive as default.
-.nf
-.RE
-Default: off
-Description:
-.fi
-.RS
-This setting is to keep-alive (open) the network socket between requests.
-When used, this option should improve performance on compatible net cameras.
-This option is not applicable for the rtsp://, rtmp:// and mjpeg:// formats.
-.RE
-.RE
-
-.TP
-.B netcam_proxy
-.RS
-.nf
-Values: User specified string
-Default: Not defined
-Description:
-.fi
-.RS
-If required, the URL to use for a netcam proxy server.
-For example, "http://myproxy".
-If a port number other than 80 is needed, append to the specification.
-For examplet, "http://myproxy:1234".
-.RE
-.RE
-
-.TP
-.B netcam_tolerant_check
-.RS
-.nf
-Values: on/off
-Default: off
-Description:
-.fi
-.RS
-Use a less strict jpeg validation for network cameras.
-This can assist with cameras that have poor or buggy firmware.
-.RE
-.RE
-
-.TP
-.B netcam_use_tcp
-.RS
-.nf
-Values: on/off
-Default: on
-Description:
-.fi
-.RS
-When using a RTSP/RTMP connection for a network camera, use a TCP transport instead of UDP.
-The UDP transport frequently results in "smeared" corrupt images.
 .RE
 .RE
 
@@ -593,7 +447,7 @@ The typical value for the PI camera is vc.ril.camera
 .RE
 
 .TP
-.B mmalcam_control_params
+.B mmalcam_params
 .RS
 .nf
 Values: User specified string

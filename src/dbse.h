@@ -14,24 +14,26 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*    video_v4l2.h
+/**
+ *      dbse.h
  *
- *    Include file for video_v4l2.c
- *      Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
+ *      Headers associated with functions in the dbse.c module.
  *
  */
 
-#ifndef _INCLUDE_VIDEO_V4L2_H
-#define _INCLUDE_VIDEO_V4L2_H
+#ifndef _INCLUDE_DBSE_H
+#define _INCLUDE_DBSE_H
 
-void v4l2_mutex_init(void);
-void v4l2_mutex_destroy(void);
+void dbse_global_init(struct context **cntlist);
+void dbse_global_deinit(void);
 
-int v4l2_start(struct context *cnt);
-int v4l2_next(struct context *cnt,  struct image_data *img_data);
-void v4l2_cleanup(struct context *cnt);
-int v4l2_palette_valid(char *video_device, int v4l2_palette);
-int v4l2_parms_valid(char *video_device, int v4l2_palette, int v4l2_fps, int v4l2_width, int v4l2_height);
-void v4l2_palette_fourcc(int v4l2_palette, char *fourcc);
+int dbse_init(struct context *cnt, struct context **cntlist);
+void dbse_deinit(struct context *cnt);
 
-#endif /* _INCLUDE_VIDEO_V4L2_H */
+void dbse_sqlmask_update(struct context *cnt);
+void dbse_firstmotion(struct context *cnt);
+void dbse_newfile(struct context *cnt, char *filename, int sqltype, struct timeval *tv1);
+void dbse_fileclose(struct context *cnt, char *filename, int sqltype, struct timeval *tv1);
+
+
+#endif
