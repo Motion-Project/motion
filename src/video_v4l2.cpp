@@ -26,6 +26,45 @@
 #include "video_v4l2.hpp"
 #include <sys/mman.h>
 
+struct vid_devctrl_ctx {
+    char          *ctrl_name;       /* The name as provided by the device */
+    char          *ctrl_iddesc;     /* A motion description of the ID number for the control*/
+    int            ctrl_minimum;    /* The minimum value permitted as reported by device*/
+    int            ctrl_maximum;    /* The maximum value permitted as reported by device*/
+    int            ctrl_default;    /* The default value for the control*/
+    int            ctrl_currval;    /* The current value the control was set to */
+    int            ctrl_newval;     /* The new value to set for the control */
+    unsigned int   ctrl_id;         /* The ID number for the control as provided by the device*/
+    unsigned int   ctrl_type;       /* The type of control as reported by the device*/
+    int            ctrl_menuitem;   /* bool for whether item is a menu item description */
+};
+
+struct video_dev {
+    struct video_dev        *next;
+    int                      usage_count;
+    int                      fd_device;
+    char                     v4l2_device[PATH_MAX];
+    int                      input;
+    int                      norm;
+    int                      width;
+    int                      height;
+    unsigned long            frequency;
+    int                      fps;
+    int                      owner;
+    int                      frames;
+    int                      pixfmt_src;
+    int                      buffer_count;
+    pthread_mutex_t          mutex;
+    pthread_mutexattr_t      attr;
+    void                    *v4l2_private;
+    struct vid_devctrl_ctx  *devctrl_array;     /*Array of all the controls in the device*/
+    int                      devctrl_count;     /*Count of the controls in the device*/
+    int                      starting;          /*Bool for whether the device is just starting*/
+    int                      device_type;       /*Camera, tuner, etc as provided by driver enum*/
+    int                      device_tuner;      /*Tuner number if applicable from driver*/
+
+};
+
 
 #ifdef HAVE_V4L2
     #if defined(HAVE_LINUX_VIDEODEV2_H)

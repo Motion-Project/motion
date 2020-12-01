@@ -18,7 +18,6 @@
  */
 
 #include "motionplus.hpp"
-#include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "jpegutils.hpp"
