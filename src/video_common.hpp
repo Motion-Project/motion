@@ -57,15 +57,6 @@ struct video_dev {
     int                      device_type;       /*Camera, tuner, etc as provided by driver enum*/
     int                      device_tuner;      /*Tuner number if applicable from driver*/
 
-    /* BKTR Specific Items */
-    int            bktr_method;
-    int            bktr_bufsize;
-    const char    *bktr_tuner;
-    int            bktr_fdtuner;
-    unsigned char *bktr_buffers[2];
-    int            bktr_curbuffer;
-    int            bktr_maxbuffer;
-
 };
 
 int vid_start(struct ctx_cam *cam);
