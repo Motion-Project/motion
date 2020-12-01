@@ -38,7 +38,6 @@
 #include "util.hpp"
 #include "rotate.hpp"
 #include "netcam.hpp"
-#include "video_v4l2.hpp"  /* Needed to validate palette for v4l2 via netcam */
 #include "movie.hpp"
 
 static void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
