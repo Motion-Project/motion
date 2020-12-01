@@ -25,7 +25,7 @@
 #include "motion_loop.hpp"
 #include "rotate.hpp"
 #include "movie.hpp"
-#include "video_common.hpp"
+#include "mmalcam.hpp"
 #include "video_v4l2.hpp"
 #include "video_loopback.hpp"
 #include "netcam.hpp"
@@ -323,6 +323,105 @@ static void mlp_mask_privacy(struct ctx_cam *cam)
     }
 }
 
+void mlp_cam_close(struct ctx_cam *cam)
+{
+
+    if (cam->mmalcam) {
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling mmalcam_cleanup"));
+        mmalcam_cleanup(cam->mmalcam);
+        cam->mmalcam = NULL;
+        return;
+    }
+
+    if (cam->netcam) {
+        /* This also cleans up high resolution */
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling netcam_cleanup"));
+        netcam_cleanup(cam, 0);
+        return;
+    }
+
+    if (cam->camera_type == CAMERA_TYPE_V4L2) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Cleaning up V4L2 device"));
+        v4l2_cleanup(cam);
+        return;
+    }
+
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("No Camera device cleanup (MMAL, Netcam, V4L2)"));
+    return;
+
+}
+
+/**
+ * mlp_cam_start
+ * Returns
+ *     device number
+ *     -1 if failed to open device.
+ *     -3 image dimensions are not modulo 8
+ */
+int mlp_cam_start(struct ctx_cam *cam)
+{
+    int dev = -1;
+
+    if (cam->camera_type == CAMERA_TYPE_MMAL) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening MMAL cam"));
+        dev = mmalcam_start(cam);
+        if (dev < 0) {
+            mmalcam_cleanup(cam->mmalcam);
+            cam->mmalcam = NULL;
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("MMAL cam failed to open"));
+        }
+        return dev;
+    }
+
+    if (cam->camera_type == CAMERA_TYPE_NETCAM) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening Netcam"));
+        dev = netcam_setup(cam);
+        if (dev < 0) {
+            netcam_cleanup(cam, 1);
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Netcam failed to open"));
+        }
+        return dev;
+    }
+
+    if (cam->camera_type == CAMERA_TYPE_V4L2) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening V4L2 device"));
+        dev = v4l2_start(cam);
+        if (dev < 0) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("V4L2 device failed to open"));
+        }
+        return dev;
+    }
+
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        ,_("No Camera device specified (MMAL, Netcam, V4L2)"));
+    return dev;
+
+}
+
+int mlp_cam_next(struct ctx_cam *cam, struct ctx_image_data *img_data)
+{
+
+    if (cam->camera_type == CAMERA_TYPE_MMAL) {
+        if (cam->mmalcam == NULL) {
+            return NETCAM_GENERAL_ERROR;
+        }
+        return mmalcam_next(cam, img_data);
+    }
+
+    if (cam->camera_type == CAMERA_TYPE_NETCAM) {
+        if (cam->video_dev == -1)
+            return NETCAM_GENERAL_ERROR;
+
+        return netcam_next(cam, img_data);
+    }
+
+    if (cam->camera_type == CAMERA_TYPE_V4L2) {
+        return v4l2_next(cam, img_data);
+   }
+
+    return -2;
+}
+
 static int init_camera_type(struct ctx_cam *cam)
 {
 
@@ -365,7 +464,7 @@ static void mlp_init_firstimage(struct ctx_cam *cam)
     cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
     if (cam->video_dev >= 0) {
         for (indx = 0; indx < 5; indx++) {
-            if (vid_next(cam, cam->current_image) == 0) break;
+            if (mlp_cam_next(cam, cam->current_image) == 0) break;
             SLEEP(2, 0);
         }
 
@@ -493,7 +592,7 @@ static void mlp_init_values(struct ctx_cam *cam)
 static int mlp_init_cam_start(struct ctx_cam *cam)
 {
 
-    cam->video_dev = vid_start(cam);
+    cam->video_dev = mlp_cam_start(cam);
 
     if (cam->video_dev == -1) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
@@ -606,7 +705,7 @@ void mlp_cleanup(struct ctx_cam *cam)
 
     track_deinit(cam);
 
-    if (cam->video_dev >= 0) vid_close(cam);
+    if (cam->video_dev >= 0) mlp_cam_close(cam);
 
     free(cam->imgs.image_motion.image_norm);
     cam->imgs.image_motion.image_norm = NULL;
@@ -797,7 +896,7 @@ static int mlp_retry(struct ctx_cam *cam)
         cam->frame_curr_ts.tv_sec % 10 == 0 && cam->shots == 0) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Retrying until successful connection with camera"));
-        cam->video_dev = vid_start(cam);
+        cam->video_dev = mlp_cam_start(cam);
 
         if (cam->video_dev < 0) {
             return 1;
@@ -826,7 +925,7 @@ static int mlp_retry(struct ctx_cam *cam)
         /*
          * For high res, we check the size of buffer to determine whether to break out
          * the init_motion function allocated the buffer for high using the cam->imgs.size_high
-         * and the vid_start ONLY re-populates the height/width so we can check the size here.
+         * and the mlp_cam_start ONLY re-populates the height/width so we can check the size here.
          */
         size_high = (cam->imgs.width_high * cam->imgs.height_high * 3) / 2;
         if (cam->imgs.size_high != size_high) return 1;
@@ -839,11 +938,11 @@ static int mlp_capture(struct ctx_cam *cam)
 
     const char *tmpin;
     char tmpout[80];
-    int vid_return_code = 0;        /* Return code used when calling vid_next */
+    int vid_return_code = 0;        /* Return code used when calling mlp_cam_next */
     struct timespec ts1;
 
     if (cam->video_dev >= 0)
-        vid_return_code = vid_next(cam, cam->current_image);
+        vid_return_code = mlp_cam_next(cam, cam->current_image);
     else
         vid_return_code = 1; /* Non fatal error */
 
@@ -863,7 +962,7 @@ static int mlp_capture(struct ctx_cam *cam)
     } else if (vid_return_code < 0) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Video device fatal error - Closing video device"));
-        vid_close(cam);
+        mlp_cam_close(cam);
         memcpy(cam->current_image->image_norm, cam->imgs.image_virgin, cam->imgs.size_norm);
         cam->lost_connection = 1;
     } else {
@@ -910,7 +1009,7 @@ static int mlp_capture(struct ctx_cam *cam)
                 (cam->missing_frame_counter == (MISSING_FRAMES_TIMEOUT * 4) * cam->conf->framerate)) {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Video signal still lost - Trying to close video device"));
-                vid_close(cam);
+                mlp_cam_close(cam);
             }
         }
     }

@@ -59,10 +59,6 @@ struct video_dev {
 
 };
 
-int vid_start(struct ctx_cam *cam);
-int vid_next(struct ctx_cam *cam, struct ctx_image_data *img_data);
-void vid_close(struct ctx_cam *cam);
-
 void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 void vid_yuv422pto420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int height);
