@@ -24,7 +24,7 @@
 #include "motion_loop.hpp"
 #include "dbse.hpp"
 #include "webu.hpp"
-#include "video_common.hpp"
+#include "video_v4l2.hpp"
 #include "movie.hpp"
 #include "netcam.hpp"
 #include "draw.hpp"
@@ -277,7 +277,7 @@ static void motion_shutdown(struct ctx_motapp *motapp)
 
     conf_deinit(motapp);
 
-    vid_mutex_destroy();
+    v4l2_mutex_destroy();
 
 }
 
@@ -412,7 +412,7 @@ static void motion_startup(struct ctx_motapp *motapp, int daemonize, int argc, c
 
     webu_init(motapp);
 
-    vid_mutex_init();
+    v4l2_mutex_init();
 
 }
 

@@ -495,16 +495,6 @@ void vid_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
 
 }
 
-void vid_mutex_init(void)
-{
-    v4l2_mutex_init();
-}
-
-void vid_mutex_destroy(void)
-{
-    v4l2_mutex_destroy();
-}
-
 void vid_close(struct ctx_cam *cam)
 {
 
