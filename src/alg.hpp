@@ -25,7 +25,6 @@
     void alg_locate_center_size(struct ctx_images *, int width, int height, struct ctx_coord *);
     void alg_diff(struct ctx_cam *cam);
     void alg_lightswitch(struct ctx_cam *cam);
-    void alg_switchfilter(struct ctx_cam *cam);
     void alg_noise_tune(struct ctx_cam *cam, unsigned char *);
     void alg_threshold_tune(struct ctx_cam *cam, int, int);
     void alg_despeckle(struct ctx_cam *cam);

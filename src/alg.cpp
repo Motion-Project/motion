@@ -1002,49 +1002,6 @@ void alg_lightswitch(struct ctx_cam *cam)
     }
 }
 
-void alg_switchfilter(struct ctx_cam *cam)
-{
-
-    /* TODO:  This function needs evaluation.
-     * Lots of random numbers and unknown logic
-     */
-    int linediff;
-    unsigned char *out;
-    int y, x, line;
-    int lines = 0, vertlines = 0;
-
-    if (!cam->conf->roundrobin_switchfilter ||
-        cam->current_image->diffs < cam->threshold) return;
-
-    linediff = cam->current_image->diffs / cam->imgs.height;
-    out = cam->imgs.image_motion.image_norm;
-
-    for (y = 0; y < cam->imgs.height; y++) {
-        line = 0;
-        for (x = 0; x < cam->imgs.width; x++) {
-            if (*(out++)) line++;
-        }
-        if (line > cam->imgs.width / 18) vertlines++;
-        if (line > linediff * 2) lines++;
-    }
-
-    if (vertlines > cam->imgs.height / 10 && lines < vertlines / 3 &&
-        (vertlines > cam->imgs.height / 4 || lines - vertlines > lines / 2)) {
-        if (cam->conf->text_changes) {
-            char tmp[80];
-            sprintf(tmp, "%d %d", lines, vertlines);
-            draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height
-                , cam->imgs.width - 10, 20, tmp, cam->conf->text_scale);
-        }
-        return;
-    }
-
-    cam->current_image->diffs = 0;
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Switchfilter detected"));
-
-    return;
-}
-
 /**
  * alg_update_reference_frame
  *

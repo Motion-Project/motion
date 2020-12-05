@@ -1030,7 +1030,6 @@ static void mlp_detection(struct ctx_cam *cam)
         if (cam->conf->primary_method == 0){
             alg_diff(cam);
             alg_lightswitch(cam);
-            alg_switchfilter(cam);
             alg_despeckle(cam);
             alg_tune_smartmask(cam);
         } else if (cam->conf->primary_method == 1) {

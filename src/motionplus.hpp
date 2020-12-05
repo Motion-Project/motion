@@ -62,6 +62,14 @@ extern "C" {
     #include <libavdevice/avdevice.h>
 }
 
+#ifdef HAVE_V4L2
+    #if defined(HAVE_LINUX_VIDEODEV2_H)
+        #include <linux/videodev2.h>
+    #else
+        #include <sys/videoio.h>
+    #endif
+#endif
+
 /* Forward declarations, used in functional definitions of headers */
 struct ctx_rotate;
 struct ctx_images;
@@ -73,6 +81,7 @@ struct ctx_netcam;
 struct ctx_algsec;
 struct ctx_config;
 struct ctx_track;
+struct ctx_v4l2cam;
 
 #define MYFFVER (LIBAVFORMAT_VERSION_MAJOR * 1000)+LIBAVFORMAT_VERSION_MINOR
 
@@ -288,7 +297,7 @@ struct ctx_cam {
     struct ctx_mmalcam      *mmalcam;
     struct ctx_netcam       *netcam;            /* this structure contains the context for normal RTSP connection */
     struct ctx_netcam       *netcam_high;       /* this structure contains the context for high resolution RTSP connection */
-    struct ctx_params       *vdev;
+    struct ctx_v4l2cam      *v4l2cam;
     struct ctx_image_data   *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
     struct ctx_algsec       *algsec;
     struct ctx_rotate       *rotate_data;       /* rotation data is thread-specific */

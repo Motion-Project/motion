@@ -35,13 +35,6 @@
         /* Capture device configuration parameters */
         std::string     v4l2_device;
         std::string     v4l2_params;
-        int             v4l2_palette;
-        int             input;
-        int             norm;
-        unsigned long   frequency;
-        int             roundrobin_frames;
-        int             roundrobin_skip;
-        int             roundrobin_switchfilter;
 
         std::string     netcam_url;
         std::string     netcam_params;

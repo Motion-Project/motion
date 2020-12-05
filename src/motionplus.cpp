@@ -277,8 +277,6 @@ static void motion_shutdown(struct ctx_motapp *motapp)
 
     conf_deinit(motapp);
 
-    v4l2_mutex_destroy();
-
 }
 
 static void motion_camera_ids(struct ctx_cam **cam_list)
@@ -411,8 +409,6 @@ static void motion_startup(struct ctx_motapp *motapp, int daemonize, int argc, c
     draw_init_chars();
 
     webu_init(motapp);
-
-    v4l2_mutex_init();
 
 }
 
