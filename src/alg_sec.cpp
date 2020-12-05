@@ -425,6 +425,8 @@ static int algsec_load_params(ctx_cam *cam)
 
     algsec_params_model(cam->algsec->models);
 
+    cam->algsec->frame_cnt = cam->algsec->models.frame_interval;
+
     return 0;
 }
 
