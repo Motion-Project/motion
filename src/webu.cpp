@@ -1273,6 +1273,8 @@ static mymhd_retcd webu_answer_ctrl(void *cls, struct MHD_Connection *connection
     if ((webui->camlst[0]->conf->webcontrol_interface == 1) ||
         (webui->camlst[0]->conf->webcontrol_interface == 2)) {
         webu_text_main(webui);
+    } else if (webui->camlst[0]->conf->webcontrol_interface == 3) {
+        webu_html_user(webui);
     } else {
         webu_html_main(webui);
     }

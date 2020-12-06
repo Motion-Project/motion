@@ -491,6 +491,10 @@ struct ctx_parm config_parms[] = {
     "# The cross-origin resource sharing (CORS) header for webcontrol",
     0, PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_RESTRICTED },
     {
+    "webcontrol_html",
+    "# Full path and file name of the html file to use for the webcontrol",
+    1, PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_RESTRICTED},
+    {
     "stream_port",
     "############################################################\n"
     "# Live stream configuration parameters\n"
@@ -2438,7 +2442,7 @@ static void conf_edit_webcontrol_interface(struct ctx_cam *cam, std::string &par
         cam->conf->webcontrol_interface = 0;
     } else if (pact == PARM_ACT_SET){
         parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 2)) {
+        if ((parm_in < 0) || (parm_in > 3)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_interface %d"),parm_in);
         } else {
             cam->conf->webcontrol_interface = parm_in;
@@ -2545,6 +2549,19 @@ static void conf_edit_webcontrol_cors_header(struct ctx_cam *cam, std::string &p
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_cors_header",_("webcontrol_cors_header"));
+}
+
+static void conf_edit_webcontrol_html(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->webcontrol_html = "";
+    } else if (pact == PARM_ACT_SET){
+        cam->conf->webcontrol_html = parm;
+    } else if (pact == PARM_ACT_GET){
+        parm = cam->conf->webcontrol_html;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_html",_("webcontrol_html"));
 }
 
 static void conf_edit_stream_port(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
@@ -3203,6 +3220,7 @@ static void conf_edit_cat04(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "webcontrol_cert"){             conf_edit_webcontrol_cert(cam, parm_val, pact);
     } else if (parm_nm == "webcontrol_key"){              conf_edit_webcontrol_key(cam, parm_val, pact);
     } else if (parm_nm == "webcontrol_cors_header"){      conf_edit_webcontrol_cors_header(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_html"){             conf_edit_webcontrol_html(cam, parm_val, pact);
     } else if (parm_nm == "stream_port"){                 conf_edit_stream_port(cam, parm_val, pact);
     } else if (parm_nm == "stream_localhost"){            conf_edit_stream_localhost(cam, parm_val, pact);
     } else if (parm_nm == "stream_auth_method"){          conf_edit_stream_auth_method(cam, parm_val, pact);

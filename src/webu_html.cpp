@@ -1309,3 +1309,28 @@ void webu_html_main(struct webui_ctx *webui)
 
     return;
 }
+
+void webu_html_user(struct webui_ctx *webui)
+{
+    /* Write out the user provided html page */
+    char response[PATH_MAX];
+    FILE *fp = NULL;
+
+    fp = fopen(webui->cam->conf->webcontrol_html.c_str(), "r");
+
+    if (fp == NULL) {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            , _("Invalid user html file: %s")
+            , webui->cam->conf->webcontrol_html.c_str());
+
+        webu_html_badreq(webui);
+
+        return;
+    }
+
+    while (fgets(response, PATH_MAX-1, fp)) {
+        webu_write(webui, response);
+    }
+    myfclose(fp);
+
+}
