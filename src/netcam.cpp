@@ -700,7 +700,7 @@ static void netcam_decoder_error(struct ctx_netcam *netcam, int retcd, const cha
         }
     }
 
-    if (netcam->decoder_nm != NULL){
+    if (mystrne(netcam->decoder_nm,"NULL")) {
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("%s: Decoder %s did not work.")
             ,netcam->cameratype, netcam->decoder_nm);
@@ -712,9 +712,15 @@ static void netcam_decoder_error(struct ctx_netcam *netcam, int retcd, const cha
             if (mystreq(netcam->params->params_array[indx].param_name,"decoder") ) {
                 free(netcam->params->params_array[indx].param_value);
                 netcam->params->params_array[indx].param_value = (char*)mymalloc(5);
-                snprintf(netcam->decoder_nm, 5, "%s","NULL");
+                snprintf(netcam->params->params_array[indx].param_value, 5, "%s","NULL");
                 break;
             }
+        }
+
+        if (netcam->high_resolution) {
+            util_parms_update(netcam->params, netcam->conf->netcam_high_params);
+        } else {
+            util_parms_update(netcam->params, netcam->conf->netcam_params);
         }
 
         free(netcam->decoder_nm);
@@ -778,7 +784,7 @@ static int netcam_init_swdecoder(struct ctx_netcam *netcam)
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("%s: Initializing decoder"),netcam->cameratype);
 
-    if (netcam->decoder_nm != NULL) {
+    if (mystrne(netcam->decoder_nm,"NULL")) {
         netcam->decoder = avcodec_find_decoder_by_name(netcam->decoder_nm);
         if (netcam->decoder == NULL) {
             netcam_decoder_error(netcam, 0, "avcodec_find_decoder_by_name");

@@ -884,21 +884,24 @@ static void util_parms_extract(struct ctx_params *params, std::string &parmline
 
 }
 
+/* Cut out the parameter that was just extracted from the parmline string */
 static void util_parms_next(std::string &parmline, size_t indxnm_st, size_t indxvl_en)
 {
-    /* Cut out the parameter that was just extracted from the parmline string */
-    /* indxvl_en is right before the comma so to move past it, we need to +2*/
+    size_t indxcm;
+
+    indxcm = parmline.find(",", indxvl_en);
+
     if (indxnm_st == 0) {
-        if ((indxvl_en + 2) > parmline.length() ) {
+        if ((indxcm + 1) > parmline.length() ) {
             parmline = "";
         } else {
-            parmline = parmline.substr(indxvl_en + 2);
+            parmline = parmline.substr(indxcm + 1);
         }
     } else {
-        if ((indxvl_en + 2) > parmline.length() ) {
+        if ((indxcm + 1) > parmline.length() ) {
             parmline = parmline.substr(0, indxnm_st - 1);
         } else {
-            parmline = parmline.substr(0, indxnm_st - 1) + parmline.substr(indxvl_en + 2);
+            parmline = parmline.substr(0, indxnm_st - 1) + parmline.substr(indxcm + 1);
         }
     }
     mytrim(parmline);
@@ -939,8 +942,9 @@ void util_parms_parse_qte(struct ctx_params *params, std::string &parmline)
             indxnm_st = parmline.find_last_of(",", indxvl_st);
             if (indxnm_st == std::string::npos) {
                 indxnm_st = 0;
+            } else {
+                indxnm_st++; /* Move past the comma */
             }
-            indxnm_st++; /* Move past the comma */
 
             indxnm_en = parmline.find("=", indxnm_st);
             if ((indxnm_en == std::string::npos) ||
@@ -968,6 +972,11 @@ void util_parms_parse_qte(struct ctx_params *params, std::string &parmline)
                     }
                 }
             } else if (indxvl_st == std::string::npos) {
+                /* There are no more quotes in the line */
+                indxvl_st = indxeq + 1;
+                indxvl_en = parmline.find(",",indxvl_st) - 1;
+            } else if (indxcm < indxvl_st) {
+                /* The quotes belong to next item */
                 indxvl_st = indxeq + 1;
                 indxvl_en = parmline.find(",",indxvl_st) - 1;
             } else {
@@ -1046,8 +1055,8 @@ int util_parms_parse(struct ctx_params *params, std::string confline)
      * double quotes around the names which include a comma.
      * Examples:
      * v4l2_params ID01234= 1, ID23456=2
-     * vid_control_parms "Brightness, auto" = 1, ID23456=2
-     * vid_control_parms ID23456=2, "Brightness, auto" = 1,ID2222=5
+     * v4l2_params "Brightness, auto" = 1, ID23456=2
+     * v4l2_params ID23456=2, "Brightness, auto" = 1,ID2222=5
      */
 
     std::string parmline;
@@ -1082,12 +1091,55 @@ void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string
 
     dflt = TRUE;
     for (indx = 0; indx < params->params_count; indx++) {
-        if ( mystreq(params->params_array[indx].param_name, parm_nm.c_str()) ) {
+        if (mystreq(params->params_array[indx].param_name, parm_nm.c_str()) ) {
             dflt = FALSE;
         }
     }
     if (dflt == TRUE) {
         util_parms_add(params, parm_nm.c_str(), parm_vl.c_str());
     }
+
+}
+
+/* Update config line with the values from the params array */
+void util_parms_update(struct ctx_params *params, std::string &confline)
+{
+    int indx;
+    char *tst;
+    std::string parmline;
+
+    for (indx = 0; indx < params->params_count; indx++) {
+        if (indx == 0){
+            parmline = " ";
+        } else {
+            parmline += ",";
+        }
+        tst = strstr(params->params_array[indx].param_name," ");
+        if (tst == NULL) {
+            parmline += params->params_array[indx].param_name;
+        } else {
+            parmline += "\"";
+            parmline += params->params_array[indx].param_name;
+            parmline += "\"";
+        }
+        parmline += "=";
+
+        tst = strstr(params->params_array[indx].param_value," ");
+        if (tst == NULL) {
+            parmline += params->params_array[indx].param_value;
+        } else {
+            parmline += "\"";
+            parmline += params->params_array[indx].param_value;
+            parmline += "\"";
+        }
+
+    }
+    parmline += " ";
+
+    confline = parmline;
+
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("New config: %s"), confline.c_str());
+
+    return;
 
 }
