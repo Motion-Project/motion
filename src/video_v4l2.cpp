@@ -872,7 +872,7 @@ static int v4l2_capture_convert(ctx_cam *cam, ctx_v4l2cam *v4l2cam, unsigned cha
 
 static int v4l2_device_init(ctx_cam *cam)
 {
-    int retcd, indx;
+    int indx;
 
     cam->v4l2cam = (struct ctx_v4l2cam*)mymalloc(sizeof(struct ctx_v4l2cam));
     cam->v4l2cam->devctrl_array = NULL;
@@ -888,12 +888,7 @@ static int v4l2_device_init(ctx_cam *cam)
     cam->v4l2cam->params->params_count = 0;
     cam->v4l2cam->params->update_params = TRUE;     /*Set trigger to update the params */
 
-    retcd = util_parms_parse(cam->v4l2cam->params, cam->conf->v4l2_params);
-    if (retcd < 0) {
-        util_parms_free(cam->v4l2cam->params);
-        free(cam->v4l2cam);
-        return -1;
-    }
+    util_parms_parse(cam->v4l2cam->params, cam->conf->v4l2_params);
 
     util_parms_add_default(cam->v4l2cam->params, "input", "-1");
     util_parms_add_default(cam->v4l2cam->params, "palette", "17");
@@ -930,12 +925,7 @@ static void v4l2_device_select(ctx_cam *cam)
 
     if (cam->v4l2cam->params->update_params == TRUE) {
 
-        retcd = util_parms_parse(cam->v4l2cam->params, cam->conf->v4l2_params);
-        if (retcd < 0 ) {
-            MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-            ,_("Error parsing the user parameters"));
-            return;
-        }
+        util_parms_parse(cam->v4l2cam->params, cam->conf->v4l2_params);
 
         retcd = v4l2_parms_set(cam->v4l2cam);
         if (retcd < 0 ) {

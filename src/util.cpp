@@ -1079,7 +1079,7 @@ void util_parms_parse_comma(struct ctx_params *params, std::string &parmline)
 
 }
 
-int util_parms_parse(struct ctx_params *params, std::string confline)
+void util_parms_parse(struct ctx_params *params, std::string confline)
 {
     /* Parse through the configuration option to get values
      * The values are separated by commas but may also have
@@ -1094,7 +1094,7 @@ int util_parms_parse(struct ctx_params *params, std::string confline)
 
     if ((params->update_params == FALSE) ||
         (confline == "")) {
-        return 0;
+        return;
     }
     /* We make a copy because the parsing destroys the value passed */
     parmline = confline;
@@ -1111,7 +1111,7 @@ int util_parms_parse(struct ctx_params *params, std::string confline)
 
     params->update_params = FALSE;
 
-    return 0;
+    return;
 
 }
 
