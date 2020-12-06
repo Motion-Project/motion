@@ -26,37 +26,49 @@
 
 
 /** Non case sensitive equality check for strings*/
-int mystrceq(const char* var1, const char* var2){
-    if ((var1 == NULL) ||(var2 == NULL)) return 0;
+int mystrceq(const char* var1, const char* var2)
+{
+    if ((var1 == NULL) || (var2 == NULL)) {
+        return 0;
+    }
     return (strcasecmp(var1,var2) ? 0 : 1);
 }
 
 /** Non case sensitive inequality check for strings*/
-int mystrcne(const char* var1, const char* var2){
-    if ((var1 == NULL) ||(var2 == NULL)) return 0;
+int mystrcne(const char* var1, const char* var2)
+{
+    if ((var1 == NULL) || (var2 == NULL)) {
+        return 0;
+    }
     return (strcasecmp(var1,var2) ? 1: 0);
 }
 
 /** Case sensitive equality check for strings*/
-int mystreq(const char* var1, const char* var2){
-    if ((var1 == NULL) ||(var2 == NULL)) return 0;
+int mystreq(const char* var1, const char* var2)
+{
+    if ((var1 == NULL) || (var2 == NULL)) {
+        return 0;
+    }
     return (strcmp(var1,var2) ? 0 : 1);
 }
 
 /** Case sensitive inequality check for strings*/
-int mystrne(const char* var1, const char* var2){
-    if ((var1 == NULL) ||(var2 == NULL)) return 0;
+int mystrne(const char* var1, const char* var2)
+{
+    if ((var1 == NULL) ||(var2 == NULL)) {
+        return 0;
+    }
     return (strcmp(var1,var2) ? 1: 0);
 }
 
+/* Trim whitespace from left side */
 void myltrim(std::string &parm)
 {
     if (parm.length() == 0 ) {
         return;
     }
 
-    while (parm.substr(0, 1) == " ")
-    {
+    while (parm.substr(0, 1) == " ") {
         if (parm.length() == 1) {
             parm="";
             return;
@@ -66,14 +78,14 @@ void myltrim(std::string &parm)
     }
 }
 
+/* Trim whitespace from right side */
 void myrtrim(std::string &parm)
 {
     if (parm.length() == 0 ) {
         return;
     }
 
-    while (parm.substr(parm.length()-1,1) == " ")
-    {
+    while (parm.substr(parm.length()-1,1) == " ") {
         if (parm.length() == 1) {
             parm="";
             return;
@@ -82,15 +94,15 @@ void myrtrim(std::string &parm)
         }
     }
 }
+
+/* Trim left and right whitespace */
 void mytrim(std::string &parm)
 {
     myrtrim(parm);
     myltrim(parm);
 }
 
-/**
- * mymalloc
- */
+/** mymalloc */
 void *mymalloc(size_t nbytes)
 {
     void *dummy = calloc(nbytes, 1);
@@ -104,9 +116,7 @@ void *mymalloc(size_t nbytes)
     return dummy;
 }
 
-/**
- * myrealloc
- */
+/** myrealloc */
 void *myrealloc(void *ptr, size_t size, const char *desc)
 {
     void *dummy = NULL;
@@ -150,10 +160,11 @@ int mycreate_path(const char *path)
     char *start;
     mode_t mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
 
-    if (path[0] == '/')
+    if (path[0] == '/') {
         start = (char*)strchr(path + 1, '/');
-    else
+    } else {
         start = (char*)strchr(path, '/');
+    }
 
     while (start) {
         char *buffer = mystrdup(path);
@@ -168,8 +179,9 @@ int mycreate_path(const char *path)
 
         start = strchr(start + 1, '/');
 
-        if (!start)
+        if (!start) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("creating directory %s"), buffer);
+        }
 
         free(buffer);
     }
@@ -177,22 +189,23 @@ int mycreate_path(const char *path)
     return 0;
 }
 
-/**
- * myfopen
- */
+/** myfopen */
 FILE * myfopen(const char *path, const char *mode)
 {
     /* first, just try to open the file */
     FILE *dummy = fopen(path, mode);
-    if (dummy) return dummy;
+    if (dummy) {
+        return dummy;
+    }
 
     /* could not open file... */
     /* path did not exist? */
     if (errno == ENOENT) {
 
         /* create path for file... */
-        if (mycreate_path(path) == -1)
+        if (mycreate_path(path) == -1) {
             return NULL;
+        }
 
         /* and retry opening the file */
         dummy = fopen(path, mode);
@@ -217,8 +230,9 @@ int myfclose(FILE* fh)
 {
     int rval = fclose(fh);
 
-    if (rval != 0)
+    if (rval != 0) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error closing file"));
+    }
 
     return rval;
 }
@@ -253,9 +267,10 @@ int myfclose(FILE* fh)
  * fps     Equivalent to %fps.
  */
 static void mystrftime_long (const struct ctx_cam *cam,
-                             int width, const char *word, int l, char *out)
+        int width, const char *word, int l, char *out)
 {
-#define SPECIFIERWORD(k) ((strlen(k)==l) && (!strncmp (k, word, l)))
+
+    #define SPECIFIERWORD(k) ((strlen(k)==l) && (!strncmp (k, word, l)))
 
     if (SPECIFIERWORD("host")) {
         snprintf (out, PATH_MAX, "%*s", width, cam->hostname);
@@ -305,7 +320,7 @@ static void mystrftime_long (const struct ctx_cam *cam,
  * Returns: number of bytes written to the string s
  */
 size_t mystrftime(const struct ctx_cam *cam, char *s, size_t max, const char *userformat,
-                  const struct timespec *ts1, const char *filename, int sqltype)
+        const struct timespec *ts1, const char *filename, int sqltype)
 {
     char formatstring[PATH_MAX] = "";
     char tempstring[PATH_MAX] = "";
@@ -458,8 +473,9 @@ size_t mystrftime(const struct ctx_cam *cam, char *s, size_t max, const char *us
              * 'tempstr' to 'format'.
              */
             if (tempstr[0]) {
-                while ((*format = *tempstr++) != '\0')
+                while ((*format = *tempstr++) != '\0') {
                     ++format;
+                }
                 continue;
             }
         }
@@ -474,7 +490,8 @@ size_t mystrftime(const struct ctx_cam *cam, char *s, size_t max, const char *us
     return strftime(s, max, format, &timestamp_tm);
 }
 
-void mythreadname_set(const char *abbr, int threadnbr, const char *threadname){
+void mythreadname_set(const char *abbr, int threadnbr, const char *threadname)
+{
     /* When the abbreviation is sent in as null, that means we are being
      * provided a fully filled out thread name (usually obtained from a
      * previously called get_threadname so we set it without additional
@@ -482,7 +499,7 @@ void mythreadname_set(const char *abbr, int threadnbr, const char *threadname){
      */
 
     char tname[32];
-    if (abbr != NULL){
+    if (abbr != NULL) {
         snprintf(tname, sizeof(tname), "%s%02d%s%s",abbr,threadnbr,
              threadname ? ":" : "",
              threadname ? threadname : "");
@@ -502,8 +519,8 @@ void mythreadname_set(const char *abbr, int threadnbr, const char *threadname){
 
 }
 
-void mythreadname_get(char *threadname){
-
+void mythreadname_get(char *threadname)
+{
     #if ((!defined(BSD) && HAVE_PTHREAD_GETNAME_NP) || defined(__APPLE__))
         char currname[16];
         pthread_getname_np(pthread_self(), currname, sizeof(currname));
@@ -511,10 +528,10 @@ void mythreadname_get(char *threadname){
     #else
         snprintf(threadname, 8, "%s","Unknown");
     #endif
-
 }
 
-int mycheck_passthrough(struct ctx_cam *cam){
+int mycheck_passthrough(struct ctx_cam *cam)
+{
     #if (MYFFVER < 55000)
         if (cam->movie_passthrough)
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
@@ -530,7 +547,8 @@ int mycheck_passthrough(struct ctx_cam *cam){
 
 }
 
-static void mytranslate_locale_chg(const char *langcd){
+static void mytranslate_locale_chg(const char *langcd)
+{
     #ifdef HAVE_GETTEXT
         /* This routine is for development testing only.  It is not used for
         * regular users because once this locale is change, it changes the
@@ -546,7 +564,8 @@ static void mytranslate_locale_chg(const char *langcd){
     #endif
 }
 
-void mytranslate_init(void){
+void mytranslate_init(void)
+{
     #ifdef HAVE_GETTEXT
         mytranslate_text("", 1);
         setlocale (LC_ALL, "");
@@ -569,18 +588,19 @@ void mytranslate_init(void){
     #endif
 }
 
-char* mytranslate_text(const char *msgid, int setnls){
+char* mytranslate_text(const char *msgid, int setnls)
+{
     static int nls_enabled = TRUE;
 
     if (setnls == 0){
-        if (nls_enabled){
+        if (nls_enabled) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Disabling native language support"));
         }
         nls_enabled = FALSE;
         return NULL;
 
-    } else if (setnls == 1){
-        if (!nls_enabled){
+    } else if (setnls == 1) {
+        if (!nls_enabled) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Enabling native language support"));
         }
         nls_enabled = TRUE;
@@ -588,7 +608,7 @@ char* mytranslate_text(const char *msgid, int setnls){
 
     } else {
         #ifdef HAVE_GETTEXT
-            if (nls_enabled){
+            if (nls_enabled) {
                 return (char*)gettext(msgid);
             } else {
                 return (char*)msgid;
@@ -617,15 +637,17 @@ char* mytranslate_text(const char *msgid, int setnls){
  * when the motion program is terminated normally instead of relying on the
  * OS to clean up.
  */
-char *mystrcpy(char *to, const char *from){
+char *mystrcpy(char *to, const char *from)
+{
     /*
      * Free the memory used by the to string, if such memory exists,
      * and return a pointer to a freshly malloc()'d string with the
      * same value as from.
      */
 
-    if (to != NULL)
+    if (to != NULL) {
         free(to);
+    }
 
     return mystrdup(from);
 }
@@ -673,7 +695,8 @@ char *mystrdup(const char *from)
  ****************************************************************************/
 
 /*********************************************/
-AVFrame *myframe_alloc(void){
+AVFrame *myframe_alloc(void)
+{
     AVFrame *pic;
     #if (MYFFVER >= 55000)
         pic = av_frame_alloc();
@@ -683,7 +706,8 @@ AVFrame *myframe_alloc(void){
     return pic;
 }
 /*********************************************/
-void myframe_free(AVFrame *frame){
+void myframe_free(AVFrame *frame)
+{
     #if (MYFFVER >= 55000)
         av_frame_free(&frame);
     #else
@@ -691,7 +715,8 @@ void myframe_free(AVFrame *frame){
     #endif
 }
 /*********************************************/
-int myimage_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height){
+int myimage_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height)
+{
     int retcd = 0;
     #if (MYFFVER >= 57000)
         int align = 1;
@@ -702,7 +727,9 @@ int myimage_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height){
     return retcd;
 }
 /*********************************************/
-int myimage_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum MyPixelFormat pix_fmt,int width, int height,int dest_size){
+int myimage_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum MyPixelFormat pix_fmt
+        , int width, int height, int dest_size)
+{
     int retcd = 0;
     #if (MYFFVER >= 57000)
         int align = 1;
@@ -715,7 +742,9 @@ int myimage_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum MyPixelForm
     return retcd;
 }
 /*********************************************/
-int myimage_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height){
+int myimage_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt
+        , int width,int height)
+{
     int retcd = 0;
     #if (MYFFVER >= 57000)
         int align = 1;
@@ -739,7 +768,8 @@ int myimage_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pi
     return retcd;
 }
 /*********************************************/
-void mypacket_unref(AVPacket pkt){
+void mypacket_unref(AVPacket pkt)
+{
     #if (MYFFVER >= 57000)
         av_packet_unref(&pkt);
     #else
@@ -747,7 +777,8 @@ void mypacket_unref(AVPacket pkt){
     #endif
 }
 /*********************************************/
-void myavcodec_close(AVCodecContext *codec_context){
+void myavcodec_close(AVCodecContext *codec_context)
+{
     #if (MYFFVER >= 57041)
         avcodec_free_context(&codec_context);
     #else
@@ -755,7 +786,8 @@ void myavcodec_close(AVCodecContext *codec_context){
     #endif
 }
 /*********************************************/
-int mycopy_packet(AVPacket *dest_pkt, AVPacket *src_pkt){
+int mycopy_packet(AVPacket *dest_pkt, AVPacket *src_pkt)
+{
     #if (MYFFVER >= 55000)
         return av_packet_ref(dest_pkt, src_pkt);
     #else
@@ -780,8 +812,7 @@ void util_parms_free(struct ctx_params *params)
         return;
     }
 
-    for (indx_parm=0; indx_parm<params->params_count; indx_parm++)
-    {
+    for (indx_parm=0; indx_parm<params->params_count; indx_parm++) {
         if (params->params_array[indx_parm].param_name != NULL) {
             free(params->params_array[indx_parm].param_name);
             params->params_array[indx_parm].param_name = NULL;
@@ -1086,7 +1117,6 @@ int util_parms_parse(struct ctx_params *params, std::string confline)
 
 void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl)
 {
-
     int indx, dflt;
 
     dflt = TRUE;
