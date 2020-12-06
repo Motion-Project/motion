@@ -991,57 +991,104 @@ void util_parms_add_default(struct params_context *parameters, const char *parm_
 /* Update config line with the values from the params array */
 void util_parms_update(struct params_context *params, struct context *cnt, const char *cfgitm)
 {
-    int indx;
+    int indx, retcd;
     char *tst;
     char newline[PATH_MAX];
     char hldline[PATH_MAX];
 
     for (indx = 0; indx < params->params_count; indx++) {
         if (indx == 0){
-            snprintf(newline,PATH_MAX,"%s"," ");
-            snprintf(hldline,PATH_MAX,"%s"," ");
+            retcd = snprintf(newline, PATH_MAX , "%s", " ");
+            if ((retcd < 0) || (retcd > PATH_MAX)) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+            }
+
+            retcd = snprintf(hldline, PATH_MAX, "%s", " ");
+            if ((retcd < 0) || (retcd > PATH_MAX)) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+            }
+
         } else {
-            snprintf(newline,PATH_MAX,"%s,",hldline);
-            snprintf(hldline,PATH_MAX,"%s",newline);
+            retcd = snprintf(newline, PATH_MAX, "%s,", hldline);
+            if ((retcd < 0) || (retcd > PATH_MAX)) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+            }
+
+            retcd = snprintf(hldline, PATH_MAX, "%s", newline);
+            if ((retcd < 0) || (retcd > PATH_MAX)) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+            }
         }
 
         tst = strstr(params->params_array[indx].param_name," ");
         if (tst == NULL) {
-            snprintf(newline,PATH_MAX,"%s%s"
-                ,hldline, params->params_array[indx].param_name);
-            snprintf(hldline,PATH_MAX,"%s",newline);
+            retcd = snprintf(newline, PATH_MAX, "%s%s"
+                , hldline, params->params_array[indx].param_name);
+            if ((retcd < 0) || (retcd > PATH_MAX)) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+            }
+
+            retcd = snprintf(hldline, PATH_MAX, "%s", newline);
+            if ((retcd < 0) || (retcd > PATH_MAX)) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+            }
+
         } else {
-            snprintf(newline,PATH_MAX,"%s\"%s\""
-                ,hldline, params->params_array[indx].param_name);
-            snprintf(hldline,PATH_MAX,"%s",newline);
+            retcd = snprintf(newline, PATH_MAX, "%s\"%s\""
+                , hldline, params->params_array[indx].param_name);
+            if ((retcd < 0) || (retcd > PATH_MAX)) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+            }
+
+            retcd = snprintf(hldline, PATH_MAX, "%s", newline);
+            if ((retcd < 0) || (retcd > PATH_MAX)) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+            }
         }
 
-        snprintf(newline,PATH_MAX,"%s=%s"
-            ,hldline, params->params_array[indx].param_value);
-        snprintf(hldline,PATH_MAX,"%s",newline);
+        retcd = snprintf(newline, PATH_MAX, "%s=%s"
+            , hldline, params->params_array[indx].param_value);
+        if ((retcd < 0) || (retcd > PATH_MAX)) {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+        }
 
+        retcd = snprintf(hldline, PATH_MAX, "%s", newline);
+        if ((retcd < 0) || (retcd > PATH_MAX)) {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+        }
     }
 
-    if (mystrceq(cfgitm,"netcam_params")) {
+    if (mystrceq(cfgitm, "netcam_params")) {
         free(cnt->conf.netcam_params);
         cnt->conf.netcam_params = mymalloc(strlen(newline)+1);
-        snprintf(cnt->conf.netcam_params, strlen(newline)+1, "%s", newline);
+        retcd = snprintf(cnt->conf.netcam_params, strlen(newline)+1, "%s", newline);
+        if ((retcd < 0) || (retcd > PATH_MAX)) {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+        }
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("New netcam_params: %s"), newline);
-    } else if (mystrceq(cfgitm,"netcam_high_params")) {
+
+    } else if (mystrceq(cfgitm, "netcam_high_params")) {
         free(cnt->conf.netcam_high_params);
         cnt->conf.netcam_high_params = mymalloc(strlen(newline)+1);
-        snprintf(cnt->conf.netcam_high_params, strlen(newline)+1, "%s", newline);
+        retcd = snprintf(cnt->conf.netcam_high_params, strlen(newline)+1, "%s", newline);
+        if ((retcd < 0) || (retcd > PATH_MAX)) {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+        }
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("New netcam_high_params: %s"), newline);
-    } else if (mystrceq(cfgitm,"video_params")) {
+
+    } else if (mystrceq(cfgitm, "video_params")) {
         free(cnt->conf.video_params);
         cnt->conf.video_params = mymalloc(strlen(newline)+1);
-        snprintf(cnt->conf.video_params, strlen(newline)+1, "%s", newline);
+        retcd = snprintf(cnt->conf.video_params, strlen(newline)+1, "%s", newline);
+        if ((retcd < 0) || (retcd > PATH_MAX)) {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+        }
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("New video_params: %s"), newline);
+
     } else {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Programming error.  Unknown configuration item: %s"), cfgitm);
     }
-
 
     return;
 
