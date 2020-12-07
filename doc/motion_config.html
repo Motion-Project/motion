@@ -3127,6 +3127,20 @@
         without this option the rtsp/rtmp images are frequently corrupted and result in many false positive values and
         images that appear to be smeared.
         <p></p>
+        For some cameras, a tcp transport is not provided from the camera.  Some Motion users have reported
+        using <code>netsed</code> can workaround this limitation of the camera using the following method:
+        <p></p>
+        <small><code>
+        Instead of: netcam_url rtsp://192.168.0.51:554/onvif1
+        <br>
+        Use: netcam_url rtsp://127.0.0.1:554/onvif1
+        <br>
+        Then in a different process, start netsed to substitude AVP; with AVP/TCP;
+        <br>
+        netsed tcp 554 192.168.0.51 554 's/AVP;/AVP%2FTCP;'
+        <br>
+        </code></small>
+        <p></p>
 
         <h4>input_format</h4>
         <ul>
@@ -3885,39 +3899,35 @@
           <li> Default: 60</li>
         </ul>
         <p></p>
-        The seconds of no motion detection that triggers the end of an event.
-        An event is defined as a series of motion images taken within a short timeframe.
-        The value -1 is allowed and disables
-         events causing all Motion to be written to one single movie file and no pre_capture.
-         If set to 0, motion is running in gapless mode. An
-         event ends right after no more motion is detected and post_capture is over.
-
-        Disabling events has bad side effects on
+        The number of seconds of no motion detected that triggers the end of an event.  An event
+        is defined as a series of motion images taken within a short timeframe. An event ends
+        right after no more motion is detected and post_capture is over.
+        <p></p>
+        The value -1 is allowed and disables events causing all Motion to be written
+        to one single movie file and no pre_capture.  If set to 0, motion is
+        running in gapless mode.  Disabling events has bad side effects on
         noise_tune and smartmask. Both features can only work properly outside an event.
         When event_gap is set to -1, both features don't work properly anymore.
-        An event is defined as a series of motion images taken within a short timeframe.
-        E.g. a person walking through the room is an event that may have caused 10 single
-        jpg images to be stored. This option defines how long a pause between detected motions
-        that is needed to be defined as a new event.
-        The timer starts after the last motion is detected and <a href="#post_capture">post_capture</a> images
-        have been saved and appended to open movie files.
-        Any motion detected before the gap timer times out resets the gap timer so it starts counting over again.
-        The option 'event_gap' is important. It defines how long a period of no motion detected it takes before we say an event is over. An event is defined as a series of motion images taken within a short timeframe. E.g. a person walking through the room is an event that may have caused 10 single jpg images to be stored. Motion detected includes post_captured frames set by the 'post_capture' option. The 'gap' option defines how long a pause between detected motions that is needed to be defined as a new event. A good starting value is 60 seconds.
-        The way 'gap' works in more technical terms is:
-        <ul>
-          <li> A timer that timeouts 'event_gap' seconds after the last video frame with motion is detected.</li>
-          <li> If <a href="#post_capture">post_capture</a> is activated then the gap timer starts counting after the last image of the <a href="#post_capture">post_capture</a> buffer has been saved.</li>
-          <li> The event_gap timer is reset and starts all over each time new motion is detected, so you will not miss any action by having a short 'gap' value. It will just create more events (e.g. more mpegs files)</li>
-        </ul>
+        <p></p>
+        For example, a person walking through a room starts an event.  During the event many single
+        images will be detected as movement.  Once the movement has stopped being detected, the
+        <a href="#post_capture">post_capture</a> starts.  Then once that is finished, the timer starts
+        as specified in event_gap.
+        <p></p>
+        If any motion is detected before the timer finishes, the existing event continues and the
+        timer is reset.  If no motion is detected during the time, the event ends.
+        <p></p>
         The event_gap value impacts many functions in Motion.
         <ul>
           <li> When the timer runs out the event number is increased by one next time motion is detected.
                When you use the %v conversion specifier in filenames or text features this means that the
                number in filename or text increased by one.</li>
-          <li> The <a href="#pre_capture">pre_capture</a> feature only works at the beginning of an event. So if you have a very large 'event_gap'
-               value <a href="#pre_capture">pre_capture</a> is not working very often.</li>
-          <li> When you make movies using the ffmpeg features a new movie file is started at the beginning of an event
-               when the first motion is detected. When 'event_gap' seconds has passed without motion (and post_captured frames
+          <li> The <a href="#pre_capture">pre_capture</a> feature only works at the beginning of an event.
+               So if you have a very large 'event_gap' value <a href="#pre_capture">pre_capture</a> is
+               not working very often.</li>
+          <li> When you make movies a new file is started at the beginning of an event
+               when the first motion is detected. When 'event_gap' seconds has passed without
+               motion (and post_captured frames
                saved) the movie files are completed and closed.</li>
           <li> Do not use large event_gap values to generate one large movie file.
                If Motion stops working this movie file never gets properly completed and closed
@@ -5509,7 +5519,7 @@
         <p></p>
         Sample Query
         <p></p>
-        update security_events set event_end_time_stamp='%Y-%m-%d %T' where filename='%f'
+        update security_events set movie_end_time_stamp='%Y-%m-%d %T' where filename='%f'
         <p></p>
         <p></p>
 
