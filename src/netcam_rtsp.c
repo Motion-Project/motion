@@ -651,10 +651,10 @@ static void netcam_rtsp_decoder_error(struct rtsp_context *rtsp_data, int retcd,
             ,rtsp_data->cameratype, rtsp_data->decoder_nm);
 
         for (indx = 0; indx < rtsp_data->parameters->params_count; indx++) {
-            if ( mystreq(rtsp_data->parameters->params_array[indx].param_name,"decoder") ) {
+            if (mystreq(rtsp_data->parameters->params_array[indx].param_name,"decoder") ) {
                 free(rtsp_data->parameters->params_array[indx].param_value);
                 rtsp_data->parameters->params_array[indx].param_value = mymalloc(5);
-                snprintf(rtsp_data->decoder_nm, 5, "%s","NULL");
+                snprintf(rtsp_data->parameters->params_array[indx].param_value, 5, "%s","NULL");
                 break;
             }
         }
@@ -662,6 +662,12 @@ static void netcam_rtsp_decoder_error(struct rtsp_context *rtsp_data, int retcd,
         free(rtsp_data->decoder_nm);
         rtsp_data->decoder_nm = mymalloc(5);
         snprintf(rtsp_data->decoder_nm, 5, "%s","NULL");
+
+        if (rtsp_data->high_resolution) {
+            util_parms_update(rtsp_data->parameters, rtsp_data->cnt, "netcam_high_params");
+        } else {
+            util_parms_update(rtsp_data->parameters, rtsp_data->cnt, "netcam_params");
+        }
     }
 
 }
