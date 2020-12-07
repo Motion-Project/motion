@@ -1905,7 +1905,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "vid_control_params",
-    "4.3.1",
+    "4.3.2",
     "\"vid_control_params\" replaced with \"video_params\"",
     CONF_OFFSET(video_params),
     "video_params",
@@ -1913,7 +1913,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "v4l2_palette",
-    "4.3.1",
+    "4.3.2",
     "\"v4l2_palette\" replaced with \"video_params\"",
     CONF_OFFSET(video_params),
     "video_params",
@@ -1921,7 +1921,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "input",
-    "4.3.1",
+    "4.3.2",
     "\"input\" replaced with \"video_params\"",
     CONF_OFFSET(video_params),
     "video_params",
@@ -1929,7 +1929,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "norm",
-    "4.3.1",
+    "4.3.2",
     "\"norm\" replaced with \"video_params\"",
     CONF_OFFSET(video_params),
     "video_params",
@@ -1937,7 +1937,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "frequency",
-    "4.3.1",
+    "4.3.2",
     "\"frequency\" replaced with \"video_params\"",
     CONF_OFFSET(video_params),
     "video_params",
@@ -1945,7 +1945,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "rtsp_uses_tcp",
-    "4.3.1",
+    "4.3.2",
     "\"rtsp_uses_tcp\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
@@ -1953,7 +1953,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "netcam_use_tcp",
-    "4.3.1",
+    "4.3.2",
     "\"netcam_use_tcp\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
@@ -1961,7 +1961,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "netcam_rate",
-    "4.3.1",
+    "4.3.2",
     "\"netcam_rate\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
@@ -1969,7 +1969,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "netcam_ratehigh",
-    "4.3.1",
+    "4.3.2",
     "\"netcam_ratehigh\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
@@ -1977,7 +1977,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "netcam_decoder",
-    "4.3.1",
+    "4.3.2",
     "\"netcam_decoder\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
@@ -1985,7 +1985,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "netcam_proxy",
-    "4.3.1",
+    "4.3.2",
     "\"netcam_proxy\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
@@ -1993,7 +1993,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "netcam_keepalive",
-    "4.3.1",
+    "4.3.2",
     "\"netcam_keepalive\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
@@ -2001,7 +2001,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "netcam_tolerant_check",
-    "4.3.1",
+    "4.3.2",
     "\"netcam_tolerant_check\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
@@ -2009,7 +2009,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "videodevice",
-    "4.3.1",
+    "4.3.2",
     "\"videodevice\" replaced with \"video_device\"",
     CONF_OFFSET(video_device),
     "video_device",
@@ -2017,7 +2017,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "tunerdevice",
-    "4.3.1",
+    "4.3.2",
     "\"tunerdevice\" replaced with \"tuner_device\"",
     CONF_OFFSET(tuner_device),
     "tuner_device",
@@ -2025,7 +2025,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "mmalcam_control_params",
-    "4.3.1",
+    "4.3.2",
     "\"mmalcam_control_params\" replaced with \"mmalcam_params\"",
     CONF_OFFSET(mmalcam_params),
     "mmalcam_params",
@@ -2033,7 +2033,7 @@ dep_config_param dep_config_params[] = {
     },
     {
     "netcam_highres",
-    "4.3.1",
+    "4.3.2",
     "\"netcam_highres\" replaced with \"netcam_high_url\"",
     CONF_OFFSET(netcam_high_url),
     "netcam_high_url",
