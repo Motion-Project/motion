@@ -1125,6 +1125,11 @@ static void mlp_overlay(struct ctx_cam *cam)
             draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
                 cam->imgs.width - 10, cam->imgs.height - (30 * cam->text_scale),
                 tmp, cam->text_scale);
+            sprintf(tmp, "center %d x %d", cam->current_image->location.x , cam->current_image->location.y );
+            draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
+                cam->imgs.width - 10, cam->imgs.height - (10 * cam->text_scale),
+                tmp, cam->text_scale);
+
         }
     }
 
@@ -1538,12 +1543,8 @@ void *motion_loop(void *arg)
                 mlp_resetimages(cam);
                 if (mlp_retry(cam) == 1)  break;
                 if (mlp_capture(cam) == 1)  break;
-                if (cam->shots == 0){
-                    mlp_detection(cam);
-                    mlp_tuning(cam);
-                } else {
-                    cam->current_image->diffs = cam->previous_diffs;
-                }
+                mlp_detection(cam);
+                mlp_tuning(cam);
                 mlp_overlay(cam);
                 mlp_actions(cam);
                 mlp_setupmode(cam);
@@ -1552,7 +1553,6 @@ void *motion_loop(void *arg)
             mlp_timelapse(cam);
             mlp_loopback(cam);
             mlp_parmsupdate(cam);
-//            mythreadname_set("ml15",cam->threadnr,cam->conf->camera_name.c_str());
             mlp_frametiming(cam);
         }
     }

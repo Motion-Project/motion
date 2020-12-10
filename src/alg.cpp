@@ -1251,14 +1251,15 @@ static void alg_new_stddev(ctx_cam *cam)
 
     long chk_stddev;
 
-    /*
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "dev_x %d dev_y %d dev_xy %d, diff %d ratio %d"
+    return;
+
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "dev_x %d dev_y %d dev_xy %d, diff %d ratio %d"
         , cam->current_image->location.stddev_x
         , cam->current_image->location.stddev_y
         , cam->current_image->location.stddev_xy
         , cam->current_image->diffs
         , cam->current_image->diffs_ratio);
-    */
+
 
     if (cam->conf->threshold_sdevx > 0) {
         if (cam->current_image->location.stddev_x > cam->conf->threshold_sdevx) {
@@ -1275,6 +1276,10 @@ static void alg_new_stddev(ctx_cam *cam)
             cam->current_image->diffs = 0;
             return;
         }
+    }
+
+    if (cam->current_image->diffs_ratio < cam->conf->threshold_ratio) {
+        cam->current_image->diffs = 0;
     }
 
     /* Default standard deviation testing.  The 8 is just a developer choice of
@@ -1346,17 +1351,13 @@ static void alg_new_diff_base(ctx_cam *cam)
         new_var++;
     }
     cam->current_image->diffs_raw = diffs;
+    cam->current_image->diffs = diffs;
+
     diffs_net = abs(diffs_net);
     if (diffs_net > 0 ) {
         cam->current_image->diffs_ratio = (diffs *10) / diffs_net;
     } else {
-        cam->current_image->diffs_ratio = diffs;
-    }
-
-    if (cam->current_image->diffs_ratio > cam->conf->threshold_ratio) {
-        cam->current_image->diffs = 0;
-    } else {
-        cam->current_image->diffs= diffs;
+        cam->current_image->diffs_ratio = 0;
     }
 
     return;
