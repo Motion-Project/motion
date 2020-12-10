@@ -325,7 +325,6 @@ void pic_save_roi(struct ctx_cam *cam, char *file, unsigned char *image)
     int image_size, sz, indxh;
     ctx_coord *bx;
     unsigned char *buf, *img;
-    int width,height, x, y;
 
     bx = &cam->current_image->location;
 
@@ -338,39 +337,17 @@ void pic_save_roi(struct ctx_cam *cam, char *file, unsigned char *image)
         return;
     }
 
-    /* Lets make the box square */
-
-    width = bx->width;
-    height= bx->height;
-
-    if (width > cam->imgs.height) width =cam->imgs.height;
-    if (height > cam->imgs.width) height =cam->imgs.width;
-
-    if (width > height){
-        height= width;
-        x = bx->minx;
-        y = bx->miny - ((width - height)/2);
-        if (y < 0) y = 0;
-        if ((y+height) > cam->imgs.height) y = cam->imgs.height - height;
-    } else {
-        width = height;
-        x = bx->minx - ((height - width)/2);
-        y = bx->miny;
-        if (x < 0) x = 0;
-        if ((x+width) > cam->imgs.width) x = cam->imgs.width - width;
-    }
-
-    image_size = width * height;
+    image_size = bx->width * bx->height;
 
     buf =(unsigned char*) mymalloc(image_size);
     img =(unsigned char*) mymalloc(image_size);
 
-    for (indxh=y; indxh<y+height; indxh++){
-        memcpy(img+((indxh-y)*width), image+(indxh*cam->imgs.width)+x, width);
+    for (indxh=bx->miny; indxh< bx->miny + bx->height; indxh++){
+        memcpy(img+((indxh - bx->miny)* bx->width), image+(indxh*cam->imgs.width) + bx->minx, bx->width);
     }
 
     sz = jpgutl_put_grey(buf, image_size, img
-        ,width, height
+        , bx->width, bx->height
         ,cam->conf->picture_quality, cam
         ,&(cam->current_image->imgts), bx);
 
