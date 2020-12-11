@@ -351,7 +351,7 @@ int webu_stream_static(struct webui_ctx *webui)
         return MHD_NO;
     }
 
-    response = MHD_create_response_from_buffer (webui->resp_size
+    response = MHD_create_response_from_buffer (webui->resp_used
         ,(void *)webui->resp_page, MHD_RESPMEM_MUST_COPY);
     if (!response) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
