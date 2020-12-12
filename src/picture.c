@@ -392,7 +392,6 @@ static void put_webp_exif(WebPMux* webp_mux, const struct context *cnt
 }
 #endif /* HAVE_WEBP */
 
-#ifdef HAVE_WEBP
 /**
  * put_webp_yuv420p_file
  *      Converts an YUV420P coded image to a webp image and writes
@@ -411,81 +410,91 @@ static void put_webp_exif(WebPMux* webp_mux, const struct context *cnt
 static void put_webp_yuv420p_file(FILE *fp, unsigned char *image, int width, int height
             , int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
 {
-    /* Create a config present and check for compatible library version */
-    WebPConfig webp_config;
-    if (!WebPConfigPreset(&webp_config, WEBP_PRESET_DEFAULT, (float) quality)) {
-        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, _("libwebp version error"));
-        return;
-    }
+    #ifdef HAVE_WEBP
+        /* Create a config present and check for compatible library version */
+        WebPConfig webp_config;
+        if (!WebPConfigPreset(&webp_config, WEBP_PRESET_DEFAULT, (float) quality)) {
+            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, _("libwebp version error"));
+            return;
+        }
 
-    /* Create the input data structure and check for compatible library version */
-    WebPPicture webp_image;
-    if (!WebPPictureInit(&webp_image)) {
-        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp version error"));
-        return;
-    }
+        /* Create the input data structure and check for compatible library version */
+        WebPPicture webp_image;
+        if (!WebPPictureInit(&webp_image)) {
+            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp version error"));
+            return;
+        }
 
-    /* Allocate the image buffer based on image width and height */
-    webp_image.width = width;
-    webp_image.height = height;
-    if (!WebPPictureAlloc(&webp_image)) {
-        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp image buffer allocation error"));
-        return;
-    }
+        /* Allocate the image buffer based on image width and height */
+        webp_image.width = width;
+        webp_image.height = height;
+        if (!WebPPictureAlloc(&webp_image)) {
+            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp image buffer allocation error"));
+            return;
+        }
 
-    /* Map the input YUV420P buffer as individual Y, U and V pointers */
-    webp_image.y = image;
-    webp_image.u = image + width * height;
-    webp_image.v = webp_image.u + (width * height) / 4;
+        /* Map the input YUV420P buffer as individual Y, U and V pointers */
+        webp_image.y = image;
+        webp_image.u = image + width * height;
+        webp_image.v = webp_image.u + (width * height) / 4;
 
-    /* Setup the memory writting method */
-    WebPMemoryWriter webp_writer;
-    WebPMemoryWriterInit(&webp_writer);
-    webp_image.writer = WebPMemoryWrite;
-    webp_image.custom_ptr = (void*) &webp_writer;
+        /* Setup the memory writting method */
+        WebPMemoryWriter webp_writer;
+        WebPMemoryWriterInit(&webp_writer);
+        webp_image.writer = WebPMemoryWrite;
+        webp_image.custom_ptr = (void*) &webp_writer;
 
-    /* Encode the YUV image as webp */
-    if (!WebPEncode(&webp_config, &webp_image)) {
-        MOTION_LOG(WRN, TYPE_CORE, NO_ERRNO,_("libwebp image compression error"));
-    }
+        /* Encode the YUV image as webp */
+        if (!WebPEncode(&webp_config, &webp_image)) {
+            MOTION_LOG(WRN, TYPE_CORE, NO_ERRNO,_("libwebp image compression error"));
+        }
 
-    /* A bitstream object is needed for the muxing proces */
-    WebPData webp_bitstream;
-    webp_bitstream.bytes = webp_writer.mem;
-    webp_bitstream.size = webp_writer.size;
+        /* A bitstream object is needed for the muxing proces */
+        WebPData webp_bitstream;
+        webp_bitstream.bytes = webp_writer.mem;
+        webp_bitstream.size = webp_writer.size;
 
-    /* Create a mux from the prepared image data */
-    WebPMux* webp_mux = WebPMuxCreate(&webp_bitstream, 1);
-    put_webp_exif(webp_mux, cnt, tv1, box);
+        /* Create a mux from the prepared image data */
+        WebPMux* webp_mux = WebPMuxCreate(&webp_bitstream, 1);
+        put_webp_exif(webp_mux, cnt, tv1, box);
 
-    /* Add Exif data to the webp image data */
-    WebPData webp_output;
-    WebPMuxError err = WebPMuxAssemble(webp_mux, &webp_output);
-    if (err != WEBP_MUX_OK) {
-        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to assemble webp image"));
-    }
+        /* Add Exif data to the webp image data */
+        WebPData webp_output;
+        WebPMuxError err = WebPMuxAssemble(webp_mux, &webp_output);
+        if (err != WEBP_MUX_OK) {
+            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to assemble webp image"));
+        }
 
-    /* Write the webp final bitstream to the file */
-    if (fwrite(webp_output.bytes, sizeof(uint8_t), webp_output.size, fp) != webp_output.size) {
-        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to save webp image to file"));
-    }
+        /* Write the webp final bitstream to the file */
+        if (fwrite(webp_output.bytes, sizeof(uint8_t), webp_output.size, fp) != webp_output.size) {
+            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to save webp image to file"));
+        }
 
-    #if WEBP_ENCODER_ABI_VERSION > 0x0202
-        /* writer.mem must be freed by calling WebPMemoryWriterClear */
-        WebPMemoryWriterClear(&webp_writer);
+        #if WEBP_ENCODER_ABI_VERSION > 0x0202
+            /* writer.mem must be freed by calling WebPMemoryWriterClear */
+            WebPMemoryWriterClear(&webp_writer);
+        #else
+            /* writer.mem must be freed by calling 'free(writer.mem)' */
+            free(webp_writer.mem);
+        #endif /* WEBP_ENCODER_ABI_VERSION */
+
+        /* free the memory used by webp for image data */
+        WebPPictureFree(&webp_image);
+        /* free the memory used by webp mux object */
+        WebPMuxDelete(webp_mux);
+        /* free the memory used by webp for output data */
+        WebPDataClear(&webp_output);
     #else
-        /* writer.mem must be freed by calling 'free(writer.mem)' */
-        free(webp_writer.mem);
-    #endif /* WEBP_ENCODER_ABI_VERSION */
-
-    /* free the memory used by webp for image data */
-    WebPPictureFree(&webp_image);
-    /* free the memory used by webp mux object */
-    WebPMuxDelete(webp_mux);
-    /* free the memory used by webp for output data */
-    WebPDataClear(&webp_output);
+        (void)fp;
+        (void)image;
+        (void)width;
+        (void)height;
+        (void)quality;
+        (void)cnt;
+        (void)tv1;
+        (void)box;
+    #endif /* HAVE_WEBP */
 }
-#endif /* HAVE_WEBP */
 
 /**
  * put_jpeg_yuv420p_file
@@ -790,11 +799,7 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
 static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image
             , int quality, int ftype)
 {
-    int width, height;
-    int passthrough;
-    int dummy = 1;
-
-    /* See comment in put_picture_memory regarding dummy*/
+    int width, height, passthrough;
 
     passthrough = util_check_passthrough(cnt);
     if ((ftype == FTYPE_IMAGE) && (cnt->imgs.size_high > 0) && (!passthrough)) {
@@ -807,22 +812,20 @@ static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *im
 
     if (cnt->imgs.picture_type == IMAGE_TYPE_PPM) {
         put_ppm_bgr24_file(picture, image, width, height);
+
+    } else if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP) {
+        put_webp_yuv420p_file(picture, image, width, height, quality, cnt
+            , &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+
+    } else if (cnt->imgs.picture_type == IMAGE_TYPE_GREY) {
+        put_jpeg_grey_file(picture, image, width, height, quality, cnt
+            , &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+
     } else {
-        if (dummy == 1) {
-            #ifdef HAVE_WEBP
-                if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP) {
-                    put_webp_yuv420p_file(picture, image, width, height, quality, cnt
-                            , &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
-                }
-            #endif /* HAVE_WEBP */
-            if (cnt->imgs.picture_type == IMAGE_TYPE_JPEG) {
-                put_jpeg_yuv420p_file(picture, image, width, height, quality, cnt
-                        , &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
-            }
-        } else {
-            put_jpeg_grey_file(picture, image, width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
-       }
+        put_jpeg_yuv420p_file(picture, image, width, height, quality, cnt
+            , &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
     }
+
 }
 
 void put_picture(struct context *cnt, char *file, unsigned char *image, int ftype)

@@ -172,6 +172,7 @@ struct ffmpeg;
 #define IMAGE_TYPE_JPEG        0
 #define IMAGE_TYPE_PPM         1
 #define IMAGE_TYPE_WEBP        2
+#define IMAGE_TYPE_GREY        3
 
 /* Filetype defines */
 #define FTYPE_IMAGE            1
