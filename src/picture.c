@@ -799,10 +799,7 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
 static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image
             , int quality, int ftype)
 {
-    int width, height;
-    int passthrough;
-
-    /* See comment in put_picture_memory regarding dummy*/
+    int width, height, passthrough;
 
     passthrough = util_check_passthrough(cnt);
     if ((ftype == FTYPE_IMAGE) && (cnt->imgs.size_high > 0) && (!passthrough)) {
@@ -815,17 +812,20 @@ static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *im
 
     if (cnt->imgs.picture_type == IMAGE_TYPE_PPM) {
         put_ppm_bgr24_file(picture, image, width, height);
+
+    } else if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP) {
+        put_webp_yuv420p_file(picture, image, width, height, quality, cnt
+            , &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+
+    } else if (cnt->imgs.picture_type == IMAGE_TYPE_GREY) {
+        put_jpeg_grey_file(picture, image, width, height, quality, cnt
+            , &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+
     } else {
-        if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP) {
-            put_webp_yuv420p_file(picture, image, width, height, quality, cnt
-                    , &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
-        } else if (cnt->imgs.picture_type == IMAGE_TYPE_GREY) {
-            put_jpeg_grey_file(picture, image, width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
-        } else {
-            put_jpeg_yuv420p_file(picture, image, width, height, quality, cnt
-                    , &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
-        }
+        put_jpeg_yuv420p_file(picture, image, width, height, quality, cnt
+            , &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
     }
+
 }
 
 void put_picture(struct context *cnt, char *file, unsigned char *image, int ftype)
