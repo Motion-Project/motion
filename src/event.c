@@ -501,6 +501,7 @@ static void event_image_snapshot(struct context *cnt, motion_event eventtype
     char filepath[PATH_MAX];
     int offset = 0;
     int len = strlen(cnt->conf.snapshot_filename);
+    int passthrough;
 
     (void)eventtype;
     (void)filename;
@@ -532,7 +533,13 @@ static void event_image_snapshot(struct context *cnt, motion_event eventtype
             , cnt->conf.target_dir
             , (int)(PATH_MAX-1-strlen(cnt->conf.target_dir))
             , fname);
-        put_picture(cnt, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
+
+        passthrough = util_check_passthrough(cnt);
+        if ((cnt->imgs.size_high > 0) && (!passthrough)) {
+            put_picture(cnt, fullfilename, img_data->image_high, FTYPE_IMAGE_SNAPSHOT);
+        } else {
+            put_picture(cnt, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
+        }
         event(cnt, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE_SNAPSHOT, tv1);
 
         /*
@@ -561,7 +568,14 @@ static void event_image_snapshot(struct context *cnt, motion_event eventtype
             , (int)(PATH_MAX-1-strlen(cnt->conf.target_dir))
             , fname);
         remove(fullfilename);
-        put_picture(cnt, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
+
+        passthrough = util_check_passthrough(cnt);
+        if ((cnt->imgs.size_high > 0) && (!passthrough)) {
+            put_picture(cnt, fullfilename, img_data->image_high, FTYPE_IMAGE_SNAPSHOT);
+        } else {
+            put_picture(cnt, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
+        }
+
         event(cnt, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE_SNAPSHOT, tv1);
     }
 
