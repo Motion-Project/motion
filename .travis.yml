@@ -11,9 +11,11 @@
 #  so that if it appears again for distro, it won't hang our testing matrix.
 #
 
-sudo: required
+dist: xenial
+os: linux
+language: ruby
 
-matrix:
+jobs:
   include:
   - os: osx
     osx_image: xcode12.2
