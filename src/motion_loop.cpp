@@ -41,8 +41,6 @@
 #include "draw.hpp"
 #include "webu_stream.hpp"
 
-#define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
-
 
 static void mlp_ring_resize(struct ctx_cam *cam, int new_size)
 {
@@ -133,7 +131,7 @@ static void mlp_ring_process_debug(struct ctx_cam *cam)
 
 }
 
-static void mlp_ring_process(struct ctx_cam *cam, unsigned int max_images)
+static void mlp_ring_process(struct ctx_cam *cam)
 {
 
     struct ctx_image_data *saved_current_image = cam->current_image;
@@ -176,11 +174,6 @@ static void mlp_ring_process(struct ctx_cam *cam, unsigned int max_images)
             cam->imgs.ring_out = 0;
         }
 
-        /* TODO mlp_action requests this....only wants two images...but why?*/
-        if (max_images != IMAGE_BUFFER_FLUSH) {
-            max_images--;
-            if (max_images == 0) break;
-        }
     } while (cam->imgs.ring_out != cam->imgs.ring_in);
 
     cam->current_image = saved_current_image;
@@ -1229,7 +1222,6 @@ static void mlp_actions_event(struct ctx_cam *cam)
 
     if (cam->event_stop) {
         if (cam->event_nr == cam->prev_event) {
-            mlp_ring_process(cam, IMAGE_BUFFER_FLUSH);
             if (cam->imgs.image_preview.diffs) {
                 event(cam, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cam->current_image->imgts);
                 cam->imgs.image_preview.diffs = 0;
@@ -1287,12 +1279,9 @@ static void mlp_actions(struct ctx_cam *cam)
 
     mlp_areadetect(cam);
 
+    mlp_ring_process(cam);
+
     mlp_actions_event(cam);
-
-    /* Save/send to movie some images */
-    /* But why?  And why just two images from the ring? Didn't other functions flush already?*/
-    mlp_ring_process(cam, 2);
-
 
 }
 
