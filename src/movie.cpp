@@ -98,46 +98,6 @@ static int movie_timelapse_append(struct ctx_movie *movie, AVPacket pkt)
     return 0;
 }
 
-#if (MYFFVER < 58000)
-    /* TODO Determine if this is even needed for old versions. Per
-    * documentation for version 58, 'av_lockmgr_register This function does nothing'
-    */
-    static int movie_lockmgr_cb(void **arg, enum AVLockOp op){
-        pthread_mutex_t *mutex = (pthread_mutex_t*)*arg;
-        int err;
-
-        switch (op) {
-        case AV_LOCK_CREATE:
-            mutex =(pthread_mutex_t*) malloc(sizeof(*mutex));
-            if (!mutex)
-                return AVERROR(ENOMEM);
-            if ((err = pthread_mutex_init(mutex, NULL))) {
-                free(mutex);
-                return AVERROR(err);
-            }
-            *arg = mutex;
-            return 0;
-        case AV_LOCK_OBTAIN:
-            if ((err = pthread_mutex_lock(mutex)))
-                return AVERROR(err);
-
-            return 0;
-        case AV_LOCK_RELEASE:
-            if ((err = pthread_mutex_unlock(mutex)))
-                return AVERROR(err);
-
-            return 0;
-        case AV_LOCK_DESTROY:
-            if (mutex)
-                pthread_mutex_destroy(mutex);
-            free(mutex);
-            *arg = NULL;
-            return 0;
-        }
-        return 1;
-    }
-#endif
-
 static void movie_free_context(struct ctx_movie *movie)
 {
 
@@ -1340,7 +1300,6 @@ void movie_global_init(void)
         , LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
 
     #if (MYFFVER < 58000)
-        /* TODO: Determine if this is even needed for older versions */
         av_register_all();
         avcodec_register_all();
     #endif
@@ -1348,17 +1307,6 @@ void movie_global_init(void)
     avformat_network_init();
     avdevice_register_all();
     av_log_set_callback(movie_avcodec_log);
-
-    #if (MYFFVER < 58000)
-        /* TODO: Determine if this is even needed for older versions */
-        int ret;
-        ret = av_lockmgr_register(movie_lockmgr_cb);
-        if (ret < 0)
-        {
-            MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, _("av_lockmgr_register failed (%d)"), ret);
-            exit(1);
-        }
-    #endif
 
 }
 
