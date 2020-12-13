@@ -450,76 +450,83 @@ static void netcam_pktarray_add(struct ctx_netcam *netcam)
 
 static int netcam_decode_sw(struct ctx_netcam *netcam)
 {
+    #if (MYFFVER >= 57041)
+        int retcd;
+        char errstr[128];
 
-    int retcd;
-    char errstr[128];
-
-    retcd = avcodec_receive_frame(netcam->codec_context, netcam->frame);
-    if ((netcam->interrupted) || (netcam->finish) || (retcd < 0) ){
-        if (retcd == AVERROR(EAGAIN)){
-            retcd = 0;
-        } else if (retcd == AVERROR_INVALIDDATA) {
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s: Ignoring packet with invalid data")
-                ,netcam->cameratype);
-            retcd = 0;
-        } else if (retcd < 0) {
-            av_strerror(retcd, errstr, sizeof(errstr));
+        retcd = avcodec_receive_frame(netcam->codec_context, netcam->frame);
+        if ((netcam->interrupted) || (netcam->finish) || (retcd < 0) ){
+            if (retcd == AVERROR(EAGAIN)){
+                retcd = 0;
+            } else if (retcd == AVERROR_INVALIDDATA) {
                 MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s: Rec frame error: %s")
-                    ,netcam->cameratype, errstr);
-            retcd = -1;
-        } else {
-            retcd = -1;
+                    ,_("%s: Ignoring packet with invalid data")
+                    ,netcam->cameratype);
+                retcd = 0;
+            } else if (retcd < 0) {
+                av_strerror(retcd, errstr, sizeof(errstr));
+                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                        ,_("%s: Rec frame error: %s")
+                        ,netcam->cameratype, errstr);
+                retcd = -1;
+            } else {
+                retcd = -1;
+            }
+            return retcd;
         }
-        return retcd;
-    }
 
-    return 1;
-
+        return 1;
+    #else
+        (void)netcam;
+        return -1;
+    #endif
 }
 
 static int netcam_decode_vaapi(struct ctx_netcam *netcam)
 {
+    #if ( MYFFVER >= 57083)
+        int retcd;
+        char errstr[128];
+        AVFrame *hw_frame = NULL;
 
-    int retcd;
-    char errstr[128];
-    AVFrame *hw_frame = NULL;
+        hw_frame = myframe_alloc();
 
-    hw_frame = myframe_alloc();
-
-    retcd = avcodec_receive_frame(netcam->codec_context, hw_frame);
-    if ((netcam->interrupted) || (netcam->finish) || (retcd < 0) ){
-        if (retcd == AVERROR(EAGAIN)){
-            retcd = 0;
-        } else if (retcd == AVERROR_INVALIDDATA) {
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s: Ignoring packet with invalid data")
-                ,netcam->cameratype);
-            retcd = 0;
-        } else if (retcd < 0) {
-            av_strerror(retcd, errstr, sizeof(errstr));
+        retcd = avcodec_receive_frame(netcam->codec_context, hw_frame);
+        if ((netcam->interrupted) || (netcam->finish) || (retcd < 0) ){
+            if (retcd == AVERROR(EAGAIN)){
+                retcd = 0;
+            } else if (retcd == AVERROR_INVALIDDATA) {
                 MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s: Rec frame error: %s")
-                    ,netcam->cameratype, errstr);
-            retcd = -1;
-        } else {
-            retcd = -1;
+                    ,_("%s: Ignoring packet with invalid data")
+                    ,netcam->cameratype);
+                retcd = 0;
+            } else if (retcd < 0) {
+                av_strerror(retcd, errstr, sizeof(errstr));
+                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                        ,_("%s: Rec frame error: %s")
+                        ,netcam->cameratype, errstr);
+                retcd = -1;
+            } else {
+                retcd = -1;
+            }
+            myframe_free(hw_frame);
+            return retcd;
+        }
+        netcam->frame->format=AV_PIX_FMT_YUV420P;
+        retcd = av_hwframe_transfer_data(netcam->frame, hw_frame, 0);
+        if (retcd < 0) {
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: Error transferring HW decoded to system memory")
+                ,netcam->cameratype);
+            return -1;
         }
         myframe_free(hw_frame);
-        return retcd;
-    }
-    netcam->frame->format=AV_PIX_FMT_YUV420P;
-    retcd = av_hwframe_transfer_data(netcam->frame, hw_frame, 0);
-    if (retcd < 0) {
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: Error transferring HW decoded to system memory")
-            ,netcam->cameratype);
-        return -1;
-    }
-    myframe_free(hw_frame);
 
-    return 1;
+        return 1;
+    #else
+        (void)netcam;
+        return -1;
+    #endif
 }
 
 /* netcam_decode_video
@@ -532,7 +539,6 @@ static int netcam_decode_vaapi(struct ctx_netcam *netcam)
 
 static int netcam_decode_video(struct ctx_netcam *netcam)
 {
-
     #if (MYFFVER >= 57041)
         int retcd;
         char errstr[128];
@@ -579,6 +585,9 @@ static int netcam_decode_video(struct ctx_netcam *netcam)
         int check = 0;
         char errstr[128];
 
+        (void)netcam_decode_sw;
+        (void)netcam_decode_vaapi;
+
         if (netcam->finish) return 0;   /* This just speeds up the shutdown time */
 
         retcd = avcodec_decode_video2(netcam->codec_context, netcam->frame, &check, &netcam->packet_recv);
@@ -598,7 +607,6 @@ static int netcam_decode_video(struct ctx_netcam *netcam)
         if (check == 0 || retcd == 0) return 0;
 
         return 1;
-
     #endif
 
 }
@@ -641,48 +649,57 @@ static int netcam_decode_packet(struct ctx_netcam *netcam)
 
 static void netcam_hwdecoders(struct ctx_netcam *netcam)
 {
+    #if ( MYFFVER >= 57083)
+        /* High Res pass through does not decode images into frames*/
+        if (netcam->high_resolution && netcam->passthrough) return;
 
-    /* High Res pass through does not decode images into frames*/
-    if (netcam->high_resolution && netcam->passthrough) return;
-
-    if ((netcam->hw_type == AV_HWDEVICE_TYPE_NONE) && (netcam->first_image)) {
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: HW Devices: ")
-            , netcam->cameratype);
-        while((netcam->hw_type = av_hwdevice_iterate_types(netcam->hw_type)) != AV_HWDEVICE_TYPE_NONE){
-            if (netcam->hw_type == AV_HWDEVICE_TYPE_VAAPI) {
-                MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s: %s (available)")
-                    , netcam->cameratype
-                    , av_hwdevice_get_type_name(netcam->hw_type));
-            } else {
-                MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s: %s (not implemented)")
-                    , netcam->cameratype
-                    , av_hwdevice_get_type_name(netcam->hw_type));
+        if ((netcam->hw_type == AV_HWDEVICE_TYPE_NONE) && (netcam->first_image)) {
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: HW Devices: ")
+                , netcam->cameratype);
+            while((netcam->hw_type = av_hwdevice_iterate_types(netcam->hw_type)) != AV_HWDEVICE_TYPE_NONE){
+                if (netcam->hw_type == AV_HWDEVICE_TYPE_VAAPI) {
+                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                        ,_("%s: %s (available)")
+                        , netcam->cameratype
+                        , av_hwdevice_get_type_name(netcam->hw_type));
+                } else {
+                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                        ,_("%s: %s (not implemented)")
+                        , netcam->cameratype
+                        , av_hwdevice_get_type_name(netcam->hw_type));
+                }
             }
         }
-    }
+        return;
+    #else
+        (void)netcam;
+        return;
+    #endif
 
-    return;
 }
 
 static enum AVPixelFormat netcam_getfmt_vaapi(AVCodecContext *avctx, const enum AVPixelFormat *pix_fmts)
 {
-    const enum AVPixelFormat *p;
-    (void)avctx;
+    #if ( MYFFVER >= 57083)
+        const enum AVPixelFormat *p;
+        (void)avctx;
 
-    for (p = pix_fmts; *p != -1; p++) {
-        if (*p == AV_PIX_FMT_VAAPI) return *p;
-    }
+        for (p = pix_fmts; *p != -1; p++) {
+            if (*p == AV_PIX_FMT_VAAPI) return *p;
+        }
 
-    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Failed to get vaapi pix format"));
-    return AV_PIX_FMT_NONE;
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Failed to get vaapi pix format"));
+        return AV_PIX_FMT_NONE;
+    #else
+        (void)avctx;
+        (void)pix_fmts;
+        return AV_PIX_FMT_NONE;
+    #endif
 }
 
 static void netcam_decoder_error(struct ctx_netcam *netcam, int retcd, const char* fnc_nm)
 {
-
     char errstr[128];
     int indx;
 
@@ -732,131 +749,179 @@ static void netcam_decoder_error(struct ctx_netcam *netcam, int retcd, const cha
 
 static int netcam_init_vaapi(struct ctx_netcam *netcam)
 {
+    #if ( MYFFVER >= 57083)
+        int retcd;
 
-    int retcd;
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s: Initializing vaapi decoder"),netcam->cameratype);
 
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-        ,_("%s: Initializing vaapi decoder"),netcam->cameratype);
+        netcam->hw_type = av_hwdevice_find_type_by_name("vaapi");
+        if (netcam->hw_type == AV_HWDEVICE_TYPE_NONE){
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("%s: Unable to find vaapi hw device")
+                , netcam->cameratype);
+            netcam_decoder_error(netcam, 0, "av_hwdevice");
+            return -1;
+        }
 
-    netcam->hw_type = av_hwdevice_find_type_by_name("vaapi");
-    if (netcam->hw_type == AV_HWDEVICE_TYPE_NONE){
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("%s: Unable to find vaapi hw device")
-            , netcam->cameratype);
-        netcam_decoder_error(netcam, 0, "av_hwdevice");
+        netcam->codec_context = avcodec_alloc_context3(netcam->decoder);
+        if ((netcam->codec_context == NULL) || (netcam->interrupted)){
+            netcam_decoder_error(netcam, 0, "avcodec_alloc_context3");
+            return -1;
+        }
+
+        retcd = avcodec_parameters_to_context(netcam->codec_context,netcam->strm->codecpar);
+        if ((retcd < 0) || (netcam->interrupted)) {
+            netcam_decoder_error(netcam, retcd, "avcodec_parameters_to_context");
+            return -1;
+        }
+
+        netcam->hw_pix_fmt = AV_PIX_FMT_VAAPI;
+        netcam->codec_context->get_format  = netcam_getfmt_vaapi;
+        av_opt_set_int(netcam->codec_context, "refcounted_frames", 1, 0);
+        netcam->codec_context->sw_pix_fmt = AV_PIX_FMT_YUV420P;
+        netcam->codec_context->hwaccel_flags=
+            AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH |
+            AV_HWACCEL_FLAG_IGNORE_LEVEL;
+
+        retcd = av_hwdevice_ctx_create(&netcam->hw_device_ctx, netcam->hw_type, NULL, NULL, 0);
+        if (retcd < 0){
+            netcam_decoder_error(netcam, retcd, "hwctx");
+            return -1;
+        }
+        netcam->codec_context->hw_device_ctx = av_buffer_ref(netcam->hw_device_ctx);
+
+        return 0;
+    #else
+        (void)netcam;
+        (void)netcam_getfmt_vaapi;
         return -1;
-    }
-
-    netcam->codec_context = avcodec_alloc_context3(netcam->decoder);
-    if ((netcam->codec_context == NULL) || (netcam->interrupted)){
-        netcam_decoder_error(netcam, 0, "avcodec_alloc_context3");
-        return -1;
-    }
-
-    retcd = avcodec_parameters_to_context(netcam->codec_context,netcam->strm->codecpar);
-    if ((retcd < 0) || (netcam->interrupted)) {
-        netcam_decoder_error(netcam, retcd, "avcodec_parameters_to_context");
-        return -1;
-    }
-
-    netcam->hw_pix_fmt = AV_PIX_FMT_VAAPI;
-    netcam->codec_context->get_format  = netcam_getfmt_vaapi;
-    av_opt_set_int(netcam->codec_context, "refcounted_frames", 1, 0);
-    netcam->codec_context->sw_pix_fmt = AV_PIX_FMT_YUV420P;
-    netcam->codec_context->hwaccel_flags=
-        AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH |
-        AV_HWACCEL_FLAG_IGNORE_LEVEL;
-
-    retcd = av_hwdevice_ctx_create(&netcam->hw_device_ctx, netcam->hw_type, NULL, NULL, 0);
-    if (retcd < 0){
-        netcam_decoder_error(netcam, retcd, "hwctx");
-        return -1;
-    }
-    netcam->codec_context->hw_device_ctx = av_buffer_ref(netcam->hw_device_ctx);
-
-    return 0;
+    #endif
 }
 
 static int netcam_init_swdecoder(struct ctx_netcam *netcam)
 {
+    #if ( MYFFVER >= 57041)
+        int retcd;
 
-    int retcd;
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s: Initializing decoder"),netcam->cameratype);
 
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-        ,_("%s: Initializing decoder"),netcam->cameratype);
-
-    if (mystrne(netcam->decoder_nm,"NULL")) {
-        netcam->decoder = avcodec_find_decoder_by_name(netcam->decoder_nm);
-        if (netcam->decoder == NULL) {
-            netcam_decoder_error(netcam, 0, "avcodec_find_decoder_by_name");
-        } else {
-            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("%s: Using decoder %s")
-                ,netcam->cameratype, netcam->decoder_nm);
+        if (mystrne(netcam->decoder_nm,"NULL")) {
+            netcam->decoder = avcodec_find_decoder_by_name(netcam->decoder_nm);
+            if (netcam->decoder == NULL) {
+                netcam_decoder_error(netcam, 0, "avcodec_find_decoder_by_name");
+            } else {
+                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("%s: Using decoder %s")
+                    ,netcam->cameratype, netcam->decoder_nm);
+            }
         }
-    }
-    if (netcam->decoder == NULL) {
-        netcam->decoder = avcodec_find_decoder(netcam->strm->codecpar->codec_id);
-    }
-    if ((netcam->decoder == NULL) || (netcam->interrupted)){
-        netcam_decoder_error(netcam, 0, "avcodec_find_decoder");
-        return -1;
-    }
+        if (netcam->decoder == NULL) {
+            netcam->decoder = avcodec_find_decoder(netcam->strm->codecpar->codec_id);
+        }
+        if ((netcam->decoder == NULL) || (netcam->interrupted)){
+            netcam_decoder_error(netcam, 0, "avcodec_find_decoder");
+            return -1;
+        }
 
-    netcam->codec_context = avcodec_alloc_context3(netcam->decoder);
-    if ((netcam->codec_context == NULL) || (netcam->interrupted)){
-        netcam_decoder_error(netcam, 0, "avcodec_alloc_context3");
-        return -1;
-    }
+        netcam->codec_context = avcodec_alloc_context3(netcam->decoder);
+        if ((netcam->codec_context == NULL) || (netcam->interrupted)){
+            netcam_decoder_error(netcam, 0, "avcodec_alloc_context3");
+            return -1;
+        }
 
-    retcd = avcodec_parameters_to_context(netcam->codec_context, netcam->strm->codecpar);
-    if ((retcd < 0) || (netcam->interrupted)) {
-        netcam_decoder_error(netcam, retcd, "avcodec_parameters_to_context");
-        return -1;
-    }
+        retcd = avcodec_parameters_to_context(netcam->codec_context, netcam->strm->codecpar);
+        if ((retcd < 0) || (netcam->interrupted)) {
+            netcam_decoder_error(netcam, retcd, "avcodec_parameters_to_context");
+            return -1;
+        }
 
-    netcam->codec_context->error_concealment = FF_EC_GUESS_MVS | FF_EC_DEBLOCK;
-    netcam->codec_context->err_recognition = AV_EF_EXPLODE;
+        netcam->codec_context->error_concealment = FF_EC_GUESS_MVS | FF_EC_DEBLOCK;
+        netcam->codec_context->err_recognition = AV_EF_EXPLODE;
 
-    return 0;
+        return 0;
+    #else
+        int retcd;
+        netcam->codec_context = netcam->strm->codec;
+        netcam->decoder = avcodec_find_decoder(netcam->codec_context->codec_id);
+        if ((netcam->decoder == NULL) || (netcam->interrupted)) {
+            netcam_decoder_error(netcam, 0, "avcodec_find_decoder");
+            return -1;
+        }
+        retcd = avcodec_open2(netcam->codec_context, netcam->decoder, NULL);
+        if ((retcd < 0) || (netcam->interrupted)) {
+            netcam_decoder_error(netcam, retcd, "avcodec_open2");
+            return -1;
+        }
+        return 0;
+    #endif
+
 }
 
 static int netcam_open_codec(struct ctx_netcam *netcam)
 {
+    #if ( MYFFVER >= 57041)
 
-    int retcd;
+        int retcd;
 
-    if (netcam->finish) return -1;   /* This just speeds up the shutdown time */
+        if (netcam->finish) return -1;   /* This just speeds up the shutdown time */
 
-    netcam_hwdecoders(netcam);
+        netcam_hwdecoders(netcam);
 
-    netcam->decoder = NULL;
-    retcd = av_find_best_stream(netcam->format_context
-                , AVMEDIA_TYPE_VIDEO, -1, -1, &netcam->decoder, 0);
-    if ((retcd < 0) || (netcam->interrupted)){
-        netcam_decoder_error(netcam, retcd, "av_find_best_stream");
-        return -1;
-    }
-    netcam->video_stream_index = retcd;
-    netcam->strm = netcam->format_context->streams[netcam->video_stream_index];
-
-    if (mystrceq(netcam->decoder_nm,"vaapi")){
-        if (netcam_init_vaapi(netcam) < 0){
-            netcam_decoder_error(netcam, retcd, "hwvaapi_init");
+        netcam->decoder = NULL;
+        retcd = av_find_best_stream(netcam->format_context
+                    , AVMEDIA_TYPE_VIDEO, -1, -1, &netcam->decoder, 0);
+        if ((retcd < 0) || (netcam->interrupted)){
+            netcam_decoder_error(netcam, retcd, "av_find_best_stream");
             return -1;
         }
-    } else {
-        netcam_init_swdecoder(netcam);
-    }
+        netcam->video_stream_index = retcd;
+        netcam->strm = netcam->format_context->streams[netcam->video_stream_index];
 
-    retcd = avcodec_open2(netcam->codec_context, netcam->decoder, NULL);
-    if ((retcd < 0) || (netcam->interrupted)){
-        netcam_decoder_error(netcam, retcd, "avcodec_open2");
-        return -1;
-    }
+        if (mystrceq(netcam->decoder_nm,"vaapi")){
+            if (netcam_init_vaapi(netcam) < 0){
+                netcam_decoder_error(netcam, retcd, "hwvaapi_init");
+                return -1;
+            }
+        } else {
+            netcam_init_swdecoder(netcam);
+        }
 
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-        ,_("%s: Decoder opened"),netcam->cameratype);
+        retcd = avcodec_open2(netcam->codec_context, netcam->decoder, NULL);
+        if ((retcd < 0) || (netcam->interrupted)){
+            netcam_decoder_error(netcam, retcd, "avcodec_open2");
+            return -1;
+        }
 
-    return 0;
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s: Decoder opened"),netcam->cameratype);
+
+        return 0;
+    #else
+        int retcd;
+
+        (void)netcam_init_vaapi;
+
+        if (netcam->finish) {
+            /* This just speeds up the shutdown time */
+            return -1;
+        }
+
+        netcam_hwdecoders(netcam);
+        netcam->decoder = NULL;
+
+        retcd = av_find_best_stream(netcam->format_context, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
+        if ((retcd < 0) || (netcam->interrupted)) {
+            netcam_decoder_error(netcam, retcd, "av_find_best_stream");
+            return -1;
+        }
+        netcam->video_stream_index = retcd;
+        netcam->strm = netcam->format_context->streams[netcam->video_stream_index];
+
+        retcd = netcam_init_swdecoder(netcam);
+
+        return retcd;
+    #endif
+
 }
 
 static struct ctx_netcam *netcam_new_context(void)
@@ -1430,9 +1495,6 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
     } else {
         netcam->passthrough = mycheck_passthrough(cam);
     }
-
-    netcam->hw_type = AV_HWDEVICE_TYPE_NONE;
-    netcam->hw_pix_fmt = AV_PIX_FMT_VAAPI;  /* hardcode to avoid a global var */
 
     snprintf(netcam->threadname, 15, "%s",_("Unknown"));
 
