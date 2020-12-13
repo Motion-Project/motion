@@ -139,18 +139,6 @@ static int movie_get_oformat(struct ctx_movie *movie)
     memcpy(codec_name, movie->codec_name, codec_name_len);
     codec_name[codec_name_len] = 0;
 
-    /* Only the newer codec and containers can handle the really fast FPS */
-    if (((mystreq(codec_name, "msmpeg4")) ||
-        (mystreq(codec_name, "mpeg4")) ||
-        (mystreq(codec_name, "swf")) ) && (movie->fps >50)){
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-            ,_("The frame rate specified is too high for the movie movie type specified. "
-            "Choose a different movie container or lower framerate."));
-        movie_free_context(movie);
-        free(codec_name);
-        return -1;
-    }
-
     retcd = snprintf(basename,PATH_MAX,"%s",movie->filename);
     if ((retcd < 0) || (retcd >= PATH_MAX)){
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
@@ -176,37 +164,22 @@ static int movie_get_oformat(struct ctx_movie *movie)
         return 0;
     }
 
-    if (mystreq(codec_name, "mpeg4")) {
-        movie->oc->oformat = av_guess_format("avi", NULL, NULL);
-        retcd = snprintf(movie->filename,PATH_MAX,"%s.avi",basename);
-    }
-
-    if (mystreq(codec_name, "msmpeg4")) {
-        movie->oc->oformat = av_guess_format("avi", NULL, NULL);
-        retcd = snprintf(movie->filename,PATH_MAX,"%s.avi",basename);
-        if (movie->oc->oformat) movie->oc->oformat->video_codec = MY_CODEC_ID_MSMPEG4V2;
-    }
-
-    if (mystreq(codec_name, "swf")) {
-        movie->oc->oformat = av_guess_format("swf", NULL, NULL);
-        retcd = snprintf(movie->filename,PATH_MAX,"%s.swf",basename);
-    }
-
     if (mystreq(codec_name, "flv")) {
         movie->oc->oformat = av_guess_format("flv", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.flv",basename);
         if (movie->oc->oformat) movie->oc->oformat->video_codec = MY_CODEC_ID_FLV1;
     }
 
-    if (mystreq(codec_name, "ffv1")) {
-        movie->oc->oformat = av_guess_format("avi", NULL, NULL);
-        retcd = snprintf(movie->filename,PATH_MAX,"%s.avi",basename);
-        if (movie->oc->oformat) movie->oc->oformat->video_codec = MY_CODEC_ID_FFV1;
+    if (mystreq(codec_name, "ogg")) {
+        movie->oc->oformat = av_guess_format("ogg", NULL, NULL);
+        retcd = snprintf(movie->filename,PATH_MAX,"%s.ogg",basename);
+        if (movie->oc->oformat) movie->oc->oformat->video_codec = MY_CODEC_ID_THEORA;
     }
 
-    if (mystreq(codec_name, "mov")) {
-        movie->oc->oformat = av_guess_format("mov", NULL, NULL);
-        retcd = snprintf(movie->filename,PATH_MAX,"%s.mov",basename);
+    if (mystreq(codec_name, "vp8")) {
+        movie->oc->oformat = av_guess_format("webm", NULL, NULL);
+        retcd = snprintf(movie->filename,PATH_MAX,"%s.webm",basename);
+        if (movie->oc->oformat) movie->oc->oformat->video_codec = MY_CODEC_ID_VP8;
     }
 
     if (mystreq(codec_name, "mp4")) {
@@ -273,9 +246,6 @@ static int movie_encode_video(struct ctx_movie *movie)
         retcd = avcodec_receive_packet(movie->ctx_codec, &movie->pkt);
         if (retcd == AVERROR(EAGAIN)){
             //Buffered packet.  Throw special return code
-            av_strerror(retcd, errstr, sizeof(errstr));
-            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
-                ,_("Receive packet threw EAGAIN returning -2 code :%s"),errstr);
             mypacket_unref(movie->pkt);
             return -2;
         }
@@ -637,12 +607,9 @@ static int movie_set_codec(struct ctx_movie *movie)
     **  then let the PTS display the frames correctly.
     */
     if ((movie->tlapse == TIMELAPSE_NONE) && (movie->fps <= 5)){
-        if ((mystreq(movie->codec_name, "msmpeg4")) ||
-            (mystreq(movie->codec_name, "flv")) ||
-            (mystreq(movie->codec_name, "mov")) ||
-            (mystreq(movie->codec_name, "mp4")) ||
-            (mystreq(movie->codec_name, "hevc")) ||
-            (mystreq(movie->codec_name, "mpeg4"))) {
+        if (mystreq(movie->codec_name, "flv") ||
+            mystreq(movie->codec_name, "mp4") ||
+            mystreq(movie->codec_name, "hevc")) {
             MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "Low fps. Encoding %d frames into a %d frames container.", movie->fps, 10);
             movie->fps = 10;
         }
@@ -1493,23 +1460,19 @@ static const char* movie_init_codec(struct ctx_cam *cam)
     */
     int codenbr;
 
-    if (cam->conf->movie_codec == "ogg") {
-        MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, "The ogg container is no longer supported.  Changing to mpeg4");
-        return "mpeg4";
-    }
     if (cam->conf->movie_codec == "test") {
         MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "Running test of the various output formats.");
         codenbr = cam->event_nr % 10;
-        if (codenbr == 1)      return "mpeg4";
-        else if (codenbr == 2) return "msmpeg4";
-        else if (codenbr == 3) return "swf";
-        else if (codenbr == 4) return "flv";
-        else if (codenbr == 5) return "ffv1";
-        else if (codenbr == 6) return "mov";
-        else if (codenbr == 7) return "mp4";
-        else if (codenbr == 8) return "mkv";
-        else if (codenbr == 9) return "hevc";
-        else                   return "msmpeg4";
+        if (codenbr == 1)      return "flv";
+        else if (codenbr == 2) return "ogg";
+        else if (codenbr == 3) return "vp8";
+        else if (codenbr == 4) return "mp4";
+        else if (codenbr == 5) return "mkv";
+        else if (codenbr == 6) return "hevc";
+        else if (codenbr == 7) return "flv";
+        else if (codenbr == 8) return "ogg";
+        else if (codenbr == 9) return "vp8";
+        else                   return "mkv";
     }
 
     return cam->conf->movie_codec.c_str();
@@ -1628,20 +1591,21 @@ int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1)
 
 int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1)
 {
-
     char tmp[PATH_MAX];
     const char *codec_mpg = "mpg";
-    const char *codec_mpeg = "mpeg4";
+    const char *codec_mkv = "mkv";
     int retcd;
 
     cam->movie_timelapse =(struct ctx_movie*)mymalloc(sizeof(struct ctx_movie));
     mystrftime(cam, tmp, sizeof(tmp), cam->conf->timelapse_filename.c_str(), ts1, NULL, 0);
 
-    snprintf(cam->movie_timelapse->filename, PATH_MAX - 4, "%.*s/%.*s"
-        , (int)(PATH_MAX-5-strlen(tmp))
-        , cam->conf->target_dir.c_str()
-        , (int)(PATH_MAX-5-strlen(cam->conf->target_dir.c_str()))
-        , tmp);
+    retcd = snprintf(cam->movie_timelapse->filename, PATH_MAX, "%s/%s"
+        , cam->conf->target_dir.c_str(), tmp);
+    if (retcd > PATH_MAX) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            , _("Error setting timelapse file name %s"), tmp);
+    }
+
     if ((cam->imgs.size_high > 0) && (!cam->movie_passthrough)){
         cam->movie_timelapse->width  = cam->imgs.width_high;
         cam->movie_timelapse->height = cam->imgs.height_high;
@@ -1664,14 +1628,7 @@ int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1)
     cam->movie_timelapse->passthrough = FALSE;
     cam->movie_timelapse->netcam_data = NULL;
 
-    if ((cam->conf->timelapse_codec =="mpg") ||
-        (cam->conf->timelapse_codec =="swf") ){
-
-        if (cam->conf->timelapse_codec =="swf") {
-            MOTION_LOG(WRN, TYPE_EVENTS, NO_ERRNO
-                ,_("The swf container for timelapse no longer supported.  Using mpg container."));
-        }
-
+    if (cam->conf->timelapse_codec == "mpg") {
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Timelapse using mpg codec."));
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Events will be appended to file"));
 
@@ -1683,7 +1640,7 @@ int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1)
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Events will be trigger new files"));
 
         cam->movie_timelapse->tlapse = TIMELAPSE_NEW;
-        cam->movie_timelapse->codec_name = codec_mpeg;
+        cam->movie_timelapse->codec_name = codec_mkv;
         retcd = movie_open(cam->movie_timelapse);
     }
 
