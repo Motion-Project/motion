@@ -30,7 +30,7 @@ doc_DATA = \
 ###################################################################
 cleanall: distclean
 	@rm -rf autom4te.cache m4
-	@rm -f config.h.in config.h.in~ aclocal.m4 config.sub ABOUT-NLS missing
+	@rm -f config.hpp.in config.hpp.in~ aclocal.m4 config.sub ABOUT-NLS missing
 	@rm -f compile config.guess config.rpath configure depcomp install-sh
 	@rm -f po/en@boldquot.header po/en@quot.header po/insert-header.sin
 	@rm -f po/Makevars.template po/quot.sed po/remove-potcdate.sin
