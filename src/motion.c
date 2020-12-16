@@ -41,8 +41,6 @@
 #include "dbse.h"
 
 
-#define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
-
 /**
  * tls_key_threadnr
  *
@@ -635,10 +633,8 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
  * Parameters:
  *
  *   cnt        - current thread's context struct
- *   max_images - Max number of images to process
- *                Set to IMAGE_BUFFER_FLUSH to send/save all images in buffer
  */
-static void process_image_ring(struct context *cnt, unsigned int max_images)
+static void process_image_ring(struct context *cnt)
 {
     /*
      * We are going to send an event, in the events there is still
@@ -763,14 +759,6 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
         /* Increment to image after last sended */
         if (++cnt->imgs.image_ring_out >= cnt->imgs.image_ring_size) {
             cnt->imgs.image_ring_out = 0;
-        }
-
-        if (max_images != IMAGE_BUFFER_FLUSH) {
-            max_images--;
-            /* breakout if we have done max_images */
-            if (max_images == 0) {
-                break;
-            }
         }
 
         /* loop until out and in is same e.g. buffer empty */
@@ -2438,6 +2426,8 @@ static void mlp_actions(struct context *cnt)
 
     mlp_areadetect(cnt);
 
+    process_image_ring(cnt);
+
     /* Check for movie length */
     if ((cnt->conf.movie_max_time > 0) &&
         (cnt->event_nr == cnt->prev_event) &&
@@ -2456,8 +2446,6 @@ static void mlp_actions(struct context *cnt)
         if (cnt->event_nr == cnt->prev_event) {
             /* When prev_event = event_nr, there is currently
              * an event occurring so trigger ending events */
-
-            process_image_ring(cnt, IMAGE_BUFFER_FLUSH);  /* Flush image buffer */
 
             /* Save preview_shot here at the end of event */
             if (cnt->imgs.preview_image.diffs) {
@@ -2485,9 +2473,6 @@ static void mlp_actions(struct context *cnt)
         cnt->event_stop = FALSE;
         cnt->event_user = FALSE;
     }
-
-    /* Save/send to movie some images */
-    process_image_ring(cnt, 2);
 
 }
 
