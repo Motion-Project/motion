@@ -87,6 +87,12 @@
                 while (nanosleep(&ts1, &ts1) == -1); \
         }
 
+    #if MHD_VERSION >= 0x00097002
+        typedef enum MHD_Result mhdrslt; /* Version independent return result from MHD */
+    #else
+        typedef int             mhdrslt; /* Version independent return result from MHD */
+    #endif
+
     void * mymalloc(size_t);
     void * myrealloc(void *, size_t, const char *);
     FILE * myfopen(const char *, const char *);

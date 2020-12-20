@@ -295,10 +295,10 @@ static void webu_stream_cnct_count(struct webui_ctx *webui)
 
 }
 
-int webu_stream_mjpeg(struct webui_ctx *webui)
+mhdrslt webu_stream_mjpeg(struct webui_ctx *webui)
 {
     /* Create the stream for the motion jpeg */
-    int retcd;
+    mhdrslt retcd;
     struct MHD_Response *response;
 
     if (webu_stream_checks(webui) == -1) return MHD_NO;
@@ -330,10 +330,10 @@ int webu_stream_mjpeg(struct webui_ctx *webui)
     return retcd;
 }
 
-int webu_stream_static(struct webui_ctx *webui)
+mhdrslt webu_stream_static(struct webui_ctx *webui)
 {
     /* Create the response for the static image request*/
-    int retcd;
+    mhdrslt retcd;
     struct MHD_Response *response;
     char resp_used[20];
 
