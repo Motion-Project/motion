@@ -87,7 +87,6 @@ struct ctx_v4l2cam;
 
 #define THRESHOLD_TUNE_LENGTH  256
 #define MISSING_FRAMES_TIMEOUT  30  /* Frame count before grey lost image is used */
-#define WATCHDOG_KILL          -10   /* 10 sec grace period before calling thread cancel */
 
 /* Filetype defines */
 #define FTYPE_IMAGE            1

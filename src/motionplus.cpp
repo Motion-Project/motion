@@ -480,7 +480,7 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
         motapp->cam_list[indx]->finish_cam = TRUE;
     }
 
-    if (motapp->cam_list[indx]->watchdog == WATCHDOG_KILL) {
+    if (motapp->cam_list[indx]->watchdog == (0 - motapp->cam_list[indx]->conf->watchdog_kill) ) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Thread %d - Watchdog timeout did NOT restart, killing it!")
             , motapp->cam_list[indx]->threadnr);
@@ -495,7 +495,7 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
         pthread_cancel(motapp->cam_list[indx]->thread_id);
     }
 
-    if (motapp->cam_list[indx]->watchdog < WATCHDOG_KILL) {
+    if (motapp->cam_list[indx]->watchdog < (0 - motapp->cam_list[indx]->conf->watchdog_kill)) {
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
             ,_("Thread %d - Watchdog kill!")
             , motapp->cam_list[indx]->threadnr);
