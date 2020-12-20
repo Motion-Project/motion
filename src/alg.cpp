@@ -30,7 +30,6 @@
 #define DIFF(x, y)         (ABS((x)-(y)))
 #define NDIFF(x, y)        (ABS(x) * NORM / (ABS(x) + 2 * DIFF(x, y)))
 #define MAXS 10000               /* max depth of stack */
-#define ACCEPT_STATIC_OBJECT_TIME 10  /* Seconds */
 #define EXCLUDE_LEVEL_PERCENT 20
 /* Increment for *smartmask_buffer in alg_diff_standard. */
 #define SMARTMASK_SENSITIVITY_INCR 5
@@ -1017,7 +1016,7 @@ void alg_lightswitch(struct ctx_cam *cam)
  */
 void alg_update_reference_frame(struct ctx_cam *cam, int action)
 {
-    int accept_timer = cam->lastrate * ACCEPT_STATIC_OBJECT_TIME;
+    int accept_timer = cam->lastrate * cam->conf->static_object_time;
     int i, threshold_ref;
     int *ref_dyn = cam->imgs.ref_dyn;
     unsigned char *image_virgin = cam->imgs.image_vprvcy;

@@ -282,8 +282,11 @@ struct ctx_parm config_parms[] = {
     {
     "minimum_motion_frames",
     "# Number of images that must contain motion to trigger an event.",
-    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED
-    },
+    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED},
+    {
+    "static_object_time",
+    "# Amount of time that must elapse before a new object is accepted into the image.",
+    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED},
     {
     "event_gap",
     "# Gap in seconds of no motion detected that triggers the end of an event.",
@@ -1852,6 +1855,25 @@ static void conf_edit_minimum_motion_frames(struct ctx_cam *cam, std::string &pa
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","minimum_motion_frames",_("minimum_motion_frames"));
 }
 
+static void conf_edit_static_object_time(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    int parm_in;
+    if (pact == PARM_ACT_DFLT){
+        cam->conf->static_object_time = 10;
+    } else if (pact == PARM_ACT_SET){
+        parm_in = atoi(parm.c_str());
+        if (parm_in < 1) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid static_object_time %d"),parm_in);
+        } else {
+            cam->conf->static_object_time = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET){
+        parm = std::to_string(cam->conf->static_object_time);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","static_object_time",_("static_object_time"));
+}
+
 static void conf_edit_event_gap(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
@@ -3229,6 +3251,7 @@ static void conf_edit_cat02(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "lightswitch_percent"){     conf_edit_lightswitch_percent(cam, parm_val, pact);
     } else if (parm_nm == "lightswitch_frames"){      conf_edit_lightswitch_frames(cam, parm_val, pact);
     } else if (parm_nm == "minimum_motion_frames"){   conf_edit_minimum_motion_frames(cam, parm_val, pact);
+    } else if (parm_nm == "static_object_time"){      conf_edit_static_object_time(cam, parm_val, pact);
     } else if (parm_nm == "event_gap"){               conf_edit_event_gap(cam, parm_val, pact);
     } else if (parm_nm == "pre_capture"){             conf_edit_pre_capture(cam, parm_val, pact);
     } else if (parm_nm == "post_capture"){            conf_edit_post_capture(cam, parm_val, pact);

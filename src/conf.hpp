@@ -86,6 +86,7 @@
         int             lightswitch_percent;
         int             lightswitch_frames;
         int             minimum_motion_frames;
+        int             static_object_time;
         int             event_gap;
         int             pre_capture;
         int             post_capture;
