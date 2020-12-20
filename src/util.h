@@ -85,6 +85,12 @@
 
 #endif /* HAVE_FFMPEG */
 
+#if MHD_VERSION >= 0x00097002
+    typedef enum MHD_Result mymhd_retcd;
+#else
+    typedef int mymhd_retcd;
+#endif
+
 void *mymalloc(size_t nbytes);
 void *myrealloc(void *ptr, size_t size, const char *desc);
 FILE *myfopen(const char *path, const char *mode);
