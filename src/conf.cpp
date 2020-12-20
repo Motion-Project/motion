@@ -84,11 +84,14 @@ struct ctx_parm config_parms[] = {
     "camera_id",
     "# Numeric identifier for the camera.",
     0, PARM_TYP_INT,PARM_CAT_01,WEBUI_LEVEL_ADVANCED},
-    /* camera and camera_dir must be last in this list */
     {
     "target_dir",
     "# Target directory for pictures, snapshots and movies",
     0,PARM_TYP_STRING,PARM_CAT_01, WEBUI_LEVEL_LIMITED },
+    {
+    "watchdog_tmo",
+    "# Timeout in seconds for thread response.",
+    0, PARM_TYP_INT,PARM_CAT_01,WEBUI_LEVEL_LIMITED},
     {
     "v4l2_device",
     "# Video device (e.g. /dev/video0) to be used for capturing.",
@@ -1056,6 +1059,25 @@ static void conf_edit_target_dir(struct ctx_cam *cam, std::string &parm, enum PA
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","target_dir",_("target_dir"));
+}
+
+static void conf_edit_watchdog_tmo(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    int parm_in;
+    if (pact == PARM_ACT_DFLT){
+        cam->conf->watchdog_tmo = 30;
+    } else if (pact == PARM_ACT_SET){
+        parm_in = atoi(parm.c_str());
+        if (parm_in < 1) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid watchdog timeout %d"),parm_in);
+        } else {
+            cam->conf->watchdog_tmo = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET){
+        parm = std::to_string(cam->conf->watchdog_tmo);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","watchdog_tmo",_("watchdog_tmo"));
 }
 
 static void conf_edit_v4l2_device(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
@@ -3107,6 +3129,7 @@ static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "camera_name"){           conf_edit_camera_name(cam, parm_val, pact);
     } else if (parm_nm == "camera_id"){             conf_edit_camera_id(cam, parm_val, pact);
     } else if (parm_nm == "target_dir"){            conf_edit_target_dir(cam, parm_val, pact);
+    } else if (parm_nm == "watchdog_tmo"){          conf_edit_watchdog_tmo(cam, parm_val, pact);
     } else if (parm_nm == "v4l2_device"){           conf_edit_v4l2_device(cam, parm_val, pact);
     } else if (parm_nm == "v4l2_params"){           conf_edit_v4l2_params(cam, parm_val, pact);
     } else if (parm_nm == "netcam_url"){            conf_edit_netcam_url(cam, parm_val, pact);

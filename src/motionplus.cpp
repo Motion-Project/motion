@@ -421,10 +421,6 @@ static void motion_start_thread(struct ctx_motapp *motapp, int indx)
         motapp->threads_running++;
     pthread_mutex_unlock(&motapp->global_lock);
 
-    motapp->cam_list[indx]->restart_cam = TRUE;
-    motapp->cam_list[indx]->watchdog = WATCHDOG_TMO;
-    motapp->cam_list[indx]->running_cam = TRUE;
-
     pthread_attr_init(&thread_attr);
     pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
 

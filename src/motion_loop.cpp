@@ -809,7 +809,7 @@ static void mlp_prepare(struct ctx_cam *cam)
 
     int frame_buffer_size;
 
-    cam->watchdog = WATCHDOG_TMO;
+    cam->watchdog = cam->conf->watchdog_tmo;
 
     cam->frame_last_ts.tv_sec = cam->frame_curr_ts.tv_sec;
     cam->frame_last_ts.tv_nsec = cam->frame_curr_ts.tv_nsec;
@@ -1522,8 +1522,11 @@ static void mlp_frametiming(struct ctx_cam *cam)
 /** Thread function for each camera */
 void *motion_loop(void *arg)
 {
-
     struct ctx_cam *cam =(struct ctx_cam *) arg;
+
+    cam->restart_cam = TRUE;
+    cam->watchdog = cam->conf->watchdog_tmo;
+    cam->running_cam = TRUE;
 
     if (mlp_init(cam) == 0){
         while (!cam->finish_cam || cam->event_stop) {
