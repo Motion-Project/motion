@@ -33,6 +33,7 @@
         std::string     target_dir;
         int             watchdog_tmo;
         int             watchdog_kill;
+        int             camera_tmo;
 
         /* Capture device configuration parameters */
         std::string     v4l2_device;

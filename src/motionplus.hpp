@@ -86,7 +86,6 @@ struct ctx_v4l2cam;
 #define MYFFVER (LIBAVFORMAT_VERSION_MAJOR * 1000)+LIBAVFORMAT_VERSION_MINOR
 
 #define THRESHOLD_TUNE_LENGTH  256
-#define MISSING_FRAMES_TIMEOUT  30  /* Frame count before grey lost image is used */
 
 /* Filetype defines */
 #define FTYPE_IMAGE            1

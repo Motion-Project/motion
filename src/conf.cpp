@@ -85,6 +85,10 @@ struct ctx_parm config_parms[] = {
     "# Numeric identifier for the camera.",
     0, PARM_TYP_INT,PARM_CAT_01,WEBUI_LEVEL_ADVANCED},
     {
+    "camera_tmo",
+    "# Timeout for camera lost connection.",
+    0, PARM_TYP_INT,PARM_CAT_01,WEBUI_LEVEL_LIMITED},
+    {
     "target_dir",
     "# Target directory for pictures, snapshots and movies",
     0,PARM_TYP_STRING,PARM_CAT_01, WEBUI_LEVEL_LIMITED },
@@ -1037,6 +1041,25 @@ static void conf_edit_camera_id(struct ctx_cam *cam, std::string &parm, enum PAR
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera_id",_("camera_id"));
+}
+
+static void conf_edit_camera_tmo(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    int parm_in;
+    if (pact == PARM_ACT_DFLT){
+        cam->conf->camera_tmo = 30;
+    } else if (pact == PARM_ACT_SET){
+        parm_in = atoi(parm.c_str());
+        if (parm_in < 1) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid camera_tmo %d"),parm_in);
+        } else {
+            cam->conf->camera_tmo = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET){
+        parm = std::to_string(cam->conf->camera_id);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera_tmo",_("camera_tmo"));
 }
 
 static void conf_edit_camera_dir(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
@@ -3151,6 +3174,7 @@ static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "camera_dir"){            conf_edit_camera_dir(cam, parm_val, pact);
     } else if (parm_nm == "camera_name"){           conf_edit_camera_name(cam, parm_val, pact);
     } else if (parm_nm == "camera_id"){             conf_edit_camera_id(cam, parm_val, pact);
+    } else if (parm_nm == "camera_tmo"){            conf_edit_camera_tmo(cam, parm_val, pact);
     } else if (parm_nm == "target_dir"){            conf_edit_target_dir(cam, parm_val, pact);
     } else if (parm_nm == "watchdog_tmo"){          conf_edit_watchdog_tmo(cam, parm_val, pact);
     } else if (parm_nm == "watchdog_kill"){         conf_edit_watchdog_kill(cam, parm_val, pact);
