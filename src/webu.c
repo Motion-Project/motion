@@ -69,13 +69,6 @@ struct mhdstart_ctx {
     struct sockaddr_in6     lpbk_ipv6;
 };
 
-#if MHD_VERSION >= 0x00097002
-    typedef enum MHD_Result mymhd_retcd;
-#else
-    typedef int mymhd_retcd;
-#endif
-
-
 static void webu_context_init(struct context **cntlst, struct context *cnt, struct webui_ctx *webui)
 {
 
@@ -922,11 +915,11 @@ static void webu_hostname(struct webui_ctx *webui, int ctrl)
     return;
 }
 
-static int webu_mhd_digest_fail(struct webui_ctx *webui,int signal_stale)
+static mymhd_retcd webu_mhd_digest_fail(struct webui_ctx *webui,int signal_stale)
 {
     /* Create a denied response to user*/
     struct MHD_Response *response;
-    int retcd;
+    mymhd_retcd retcd;
 
     webui->authenticated = FALSE;
 
@@ -946,7 +939,7 @@ static int webu_mhd_digest_fail(struct webui_ctx *webui,int signal_stale)
     return retcd;
 }
 
-static int webu_mhd_digest(struct webui_ctx *webui)
+static mymhd_retcd webu_mhd_digest(struct webui_ctx *webui)
 {
     /* Perform the digest authentication.  This function gets called a couple of
      * times by MHD during the authentication process.
@@ -991,7 +984,7 @@ static int webu_mhd_digest(struct webui_ctx *webui)
 
 }
 
-static int webu_mhd_basic_fail(struct webui_ctx *webui)
+static mymhd_retcd webu_mhd_basic_fail(struct webui_ctx *webui)
 {
     /* Create a denied response to user*/
     struct MHD_Response *response;
@@ -1010,11 +1003,15 @@ static int webu_mhd_basic_fail(struct webui_ctx *webui)
 
     MHD_destroy_response(response);
 
-    return retcd;
+    if (retcd == MHD_YES) {
+        return MHD_YES;
+    } else {
+        return MHD_NO;
+    }
 
 }
 
-static int webu_mhd_basic(struct webui_ctx *webui)
+static mymhd_retcd webu_mhd_basic(struct webui_ctx *webui)
 {
     /* Perform Basic Authentication.  */
     char *user, *pass;
@@ -1109,7 +1106,7 @@ static void webu_mhd_auth_parse(struct webui_ctx *webui, int ctrl)
 
 }
 
-static int webu_mhd_auth(struct webui_ctx *webui, int ctrl)
+static mymhd_retcd webu_mhd_auth(struct webui_ctx *webui, int ctrl)
 {
 
     /* Set everything up for calling the authentication functions */
@@ -1171,7 +1168,7 @@ static int webu_mhd_auth(struct webui_ctx *webui, int ctrl)
 
 }
 
-static int webu_mhd_send(struct webui_ctx *webui, int ctrl)
+static mymhd_retcd webu_mhd_send(struct webui_ctx *webui, int ctrl)
 {
     /* Send the response that we created back to the user.  Now if the user
      * provided a really bad URL, then we couldn't determine which Motion context
@@ -1182,7 +1179,7 @@ static int webu_mhd_send(struct webui_ctx *webui, int ctrl)
      * The ctrl parameter is a boolean which just says whether the request is for
      * the webcontrol versus stream
      */
-    int retcd;
+    mymhd_retcd retcd;
     struct MHD_Response *response;
 
     response = MHD_create_response_from_buffer (strlen(webui->resp_page)
@@ -1259,7 +1256,7 @@ static mymhd_retcd webu_answer_ctrl(void *cls, struct MHD_Connection *connection
 {
 
     /* This function "answers" the request for a webcontrol.*/
-    int retcd;
+    mymhd_retcd retcd;
     struct webui_ctx *webui = *ptr;
 
     /* Eliminate compiler warnings */
@@ -1331,7 +1328,7 @@ static mymhd_retcd webu_answer_strm(void *cls, struct MHD_Connection *connection
 {
 
     /* Answer the request for all the streams*/
-    int retcd;
+    mymhd_retcd retcd;
     struct webui_ctx *webui = *ptr;
 
     /* Eliminate compiler warnings */
@@ -1389,7 +1386,6 @@ static mymhd_retcd webu_answer_strm(void *cls, struct MHD_Connection *connection
 
     webu_answer_strm_type(webui);
 
-    retcd = 0;
     if (webui->cnct_type == WEBUI_CNCT_STATIC) {
         retcd = webu_stream_static(webui);
         if (retcd == MHD_NO) {
