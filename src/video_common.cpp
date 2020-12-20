@@ -22,17 +22,11 @@
 #include "util.hpp"
 #include "jpegutils.hpp"
 
-typedef unsigned char uint8_t;
-typedef unsigned short int uint16_t;
-typedef unsigned int uint32_t;
-
-#define CLAMP(x)  ((x) < 0 ? 0 : ((x) > 255) ? 255 : (x))
-
 typedef struct {
     int is_abs;
     int len;
     int val;
-} code_table_t;
+} code_table;
 
 /**
  * sonix_decompress_init
@@ -42,9 +36,8 @@ typedef struct {
  *   present at the MSB of byte x.
  *
  */
-static void vid_sonix_decompress_init(code_table_t * table)
+static void vid_sonix_decompress_init(code_table *table)
 {
-
     int i;
     int is_abs, val, len;
 
@@ -109,7 +102,7 @@ static void vid_sonix_decompress_init(code_table_t * table)
  *         Returns <0 if operation failed.
  *
  */
-int vid_sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int height)
+int vid_sonix_decompress(unsigned char *img_dst, unsigned char *img_src, int width, int height)
 {
     int row, col;
     int val;
@@ -118,14 +111,12 @@ int vid_sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int
     unsigned char *addr;
 
     /* Local storage */
-    static code_table_t table[256];
+    static code_table table[256];
     static int init_done = 0;
 
     if (!init_done) {
         init_done = 1;
         vid_sonix_decompress_init(table);
-        /* Do sonix_decompress_init first! */
-        //return -1; // so it has been done and now fall through
     }
 
     bitpos = 0;
@@ -135,22 +126,22 @@ int vid_sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int
 
         /* First two pixels in first two rows are stored as raw 8-bit. */
         if (row < 2) {
-            addr = inp + (bitpos >> 3);
+            addr = img_src + (bitpos >> 3);
             code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
             bitpos += 8;
-            *outp++ = code;
+            *img_dst++ = code;
 
-            addr = inp + (bitpos >> 3);
+            addr = img_src + (bitpos >> 3);
             code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
             bitpos += 8;
-            *outp++ = code;
+            *img_dst++ = code;
 
             col += 2;
         }
 
         while (col < width) {
             /* Get bitcode from bitstream. */
-            addr = inp + (bitpos >> 3);
+            addr = img_src + (bitpos >> 3);
             code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
 
             /* Update bit position. */
@@ -162,18 +153,24 @@ int vid_sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int
                 /* Value is relative to top and left pixel. */
                 if (col < 2) {
                     /* Left column: relative to top pixel. */
-                    val += outp[-2 * width];
+                    val += img_dst[-2 * width];
                 } else if (row < 2) {
                     /* Top row: relative to left pixel. */
-                    val += outp[-2];
+                    val += img_dst[-2];
                 } else {
                     /* Main area: average of left pixel and top pixel. */
-                    val += (outp[-2] + outp[-2 * width]) / 2;
+                    val += (img_dst[-2] + img_dst[-2 * width]) / 2;
                 }
             }
 
             /* Store pixel */
-            *outp++ = CLAMP(val);
+            if (val < 0) {
+                *img_dst++ = 0;
+            } else if (val > 255) {
+                *img_dst++ = 255;
+            } else {
+                *img_dst++ = val;
+            }
             col++;
         }
     }
@@ -189,18 +186,18 @@ int vid_sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int
  * Takafumi Mizuno <taka-qce@ls-a.jp>
  *
  */
-void vid_bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long int height)
+void vid_bayer2rgb24(unsigned char *img_dst, unsigned char *img_src, long int width, long int height)
 {
     long int i;
     unsigned char *rawpt, *scanpt;
     long int size;
 
-    rawpt = src;
-    scanpt = dst;
+    rawpt = img_src;
+    scanpt = img_dst;
     size = width * height;
 
     for (i = 0; i < size; i++) {
-        if (((i / width) & 1) == 0) {    // %2 changed to & 1
+        if (((i / width) & 1) == 0) {
             if ((i & 1) == 0) {
                 /* B */
                 if ((i > width) && ((i % width) > 0)) {
@@ -262,22 +259,22 @@ void vid_bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, lon
 
 }
 
-void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height)
+void vid_yuv422to420p(unsigned char *img_dst, unsigned char *img_src, int width, int height)
 {
     unsigned char *src, *dest, *src2, *dest2;
     int i, j;
 
     /* Create the Y plane. */
-    src = cap_map;
-    dest = map;
+    src = img_src;
+    dest = img_dst;
     for (i = width * height; i > 0; i--) {
         *dest++ = *src;
         src += 2;
     }
     /* Create U and V planes. */
-    src = cap_map + 1;
-    src2 = cap_map + width * 2 + 1;
-    dest = map + width * height;
+    src = img_src + 1;
+    src2 = img_src + width * 2 + 1;
+    dest = img_dst + width * height;
     dest2 = dest + (width * height) / 4;
     for (i = height / 2; i > 0; i--) {
         for (j = width / 2; j > 0; j--) {
@@ -295,7 +292,7 @@ void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int
     }
 }
 
-void vid_yuv422pto420p(unsigned char *map, unsigned char *cap_map, int width, int height)
+void vid_yuv422pto420p(unsigned char *img_dst, unsigned char *img_src, int width, int height)
 {
     unsigned char *src, *dest, *dest2;
     unsigned char *src_u, *src_u2, *src_v, *src_v2;
@@ -303,17 +300,17 @@ void vid_yuv422pto420p(unsigned char *map, unsigned char *cap_map, int width, in
     int i, j;
     /*Planar version of 422 */
     /* Create the Y plane. */
-    src = cap_map;
-    dest = map;
+    src = img_src;
+    dest = img_dst;
     for (i = width * height; i > 0; i--) {
         *dest++ = *src++;
     }
 
     /* Create U and V planes. */
-    dest = map + width * height;
+    dest = img_dst + width * height;
     dest2 = dest + (width * height) / 4;
     for (i = 0; i< (height / 2); i++) {
-        src_u = cap_map + (width * height) + ((i*2) * (width/2));
+        src_u = img_src + (width * height) + ((i*2) * (width/2));
         src_u2 = src_u  + (width/2);
         src_v = src_u + (width/2 * height);
         src_v2 = src_v  + (width/2);
@@ -332,52 +329,52 @@ void vid_yuv422pto420p(unsigned char *map, unsigned char *cap_map, int width, in
     }
 }
 
-void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int height)
+void vid_uyvyto420p(unsigned char *img_dst, unsigned char *img_src, int width, int height)
 {
-    uint8_t *pY = map;
-    uint8_t *pU = pY + (width * height);
-    uint8_t *pV = pU + (width * height) / 4;
-    uint32_t uv_offset = width * 2 * sizeof(uint8_t);
+    unsigned char *pY = img_dst;
+    unsigned char *pU = pY + (width * height);
+    unsigned char *pV = pU + (width * height) / 4;
+    unsigned int uv_offset = width * 2 * sizeof(unsigned char);
     int ix, jx;
 
     for (ix = 0; ix < height; ix++) {
         for (jx = 0; jx < width; jx += 2) {
-            uint16_t calc;
+            unsigned short int calc;
 
             if ((ix&1) == 0) {
-                calc = *cap_map;
-                calc += *(cap_map + uv_offset);
+                calc = *img_src;
+                calc += *(img_src + uv_offset);
                 calc /= 2;
-                *pU++ = (uint8_t) calc;
+                *pU++ = (unsigned char) calc;
             }
 
-            cap_map++;
-            *pY++ = *cap_map++;
+            img_src++;
+            *pY++ = *img_src++;
 
             if ((ix&1) == 0) {
-                calc = *cap_map;
-                calc += *(cap_map + uv_offset);
+                calc = *img_src;
+                calc += *(img_src + uv_offset);
                 calc /= 2;
-                *pV++ = (uint8_t) calc;
+                *pV++ = (unsigned char) calc;
             }
 
-            cap_map++;
-            *pY++ = *cap_map++;
+            img_src++;
+            *pY++ = *img_src++;
         }
     }
 }
 
-void vid_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height)
+void vid_rgb24toyuv420p(unsigned char *img_dst, unsigned char *img_src, int width, int height)
 {
     unsigned char *y, *u, *v;
     unsigned char *r, *g, *b;
     int i, loop;
 
-    r = cap_map;
+    r = img_src;
     g = r + 1;
     b = g + 1;
 
-    y = map;
+    y = img_dst;
     u = y + width * height;
     v = u + (width * height) / 4;
     memset(u, 0, width * height / 4);
@@ -417,13 +414,13 @@ void vid_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, i
  *  2  if jpeg lib threw a "corrupt jpeg data" warning.
  *     in this case, "a damaged output image is likely."
  */
-int vid_mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height, unsigned int size)
+int vid_mjpegtoyuv420p(unsigned char *img_dst, unsigned char *img_src, int width, int height, unsigned int size)
 {
     unsigned char *ptr_buffer;
     size_t soi_pos = 0;
     int ret = 0;
 
-    ptr_buffer =(unsigned char*) memmem(cap_map, size, "\xff\xd8", 2);
+    ptr_buffer =(unsigned char*) memmem(img_src, size, "\xff\xd8", 2);
     if (ptr_buffer == NULL) {
         MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO,_("Corrupt image ... continue"));
         return 1;
@@ -433,18 +430,18 @@ int vid_mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
      Move the pointer to the last SOI in the buffer and proceed.
     */
     while (ptr_buffer != NULL && ((size - soi_pos - 1) > 2) ){
-        soi_pos = ptr_buffer - cap_map;
-        ptr_buffer =(unsigned char*) memmem(cap_map + soi_pos + 1, size - soi_pos - 1, "\xff\xd8", 2);
+        soi_pos = ptr_buffer - img_src;
+        ptr_buffer =(unsigned char*) memmem(img_src + soi_pos + 1, size - soi_pos - 1, "\xff\xd8", 2);
     }
 
     if (soi_pos != 0){
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("SOI position adjusted by %d bytes."), soi_pos);
     }
 
-    memmove(cap_map, cap_map + soi_pos, size - soi_pos);
+    memmove(img_src, img_src + soi_pos, size - soi_pos);
     size -= soi_pos;
 
-    ret = jpgutl_decode_jpeg(cap_map,size, width, height, map);
+    ret = jpgutl_decode_jpeg(img_src,size, width, height, img_dst);
 
     if (ret == -1) {
         MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO,_("Corrupt image ... continue"));
@@ -453,7 +450,7 @@ int vid_mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
     return ret;
 }
 
-void vid_y10torgb24(unsigned char *map, unsigned char *cap_map, int width, int height, int shift)
+void vid_y10torgb24(unsigned char *img_dst, unsigned char *img_src, int width, int height, int shift)
 {
     /* Source code: raw2rgbpnm project */
     /* url: http://salottisipuli.retiisi.org.uk/cgi-bin/gitweb.cgi?p=~sailus/raw2rgbpnm.git;a=summary */
@@ -473,20 +470,20 @@ void vid_y10torgb24(unsigned char *map, unsigned char *cap_map, int width, int h
 
     for (src_y = 0, dst_y = 0; dst_y < src_size[1]; src_y++, dst_y++) {
         for (src_x = 0, dst_x = 0; dst_x < src_size[0]; src_x++, dst_x++) {
-            a = (cap_map[src_y*src_stride + src_x*2+0] |
-                (cap_map[src_y*src_stride + src_x*2+1] << 8)) >> shift;
-            map[dst_y*rgb_stride+3*dst_x+0] = a;
-            map[dst_y*rgb_stride+3*dst_x+1] = a;
-            map[dst_y*rgb_stride+3*dst_x+2] = a;
+            a = (img_src[src_y*src_stride + src_x*2+0] |
+                (img_src[src_y*src_stride + src_x*2+1] << 8)) >> shift;
+            img_dst[dst_y*rgb_stride+3*dst_x+0] = a;
+            img_dst[dst_y*rgb_stride+3*dst_x+1] = a;
+            img_dst[dst_y*rgb_stride+3*dst_x+2] = a;
         }
     }
 }
 
-void vid_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height)
+void vid_greytoyuv420p(unsigned char *img_dst, unsigned char *img_src, int width, int height)
 {
 
-    memcpy(map, cap_map, (width*height));
-    memset(map+(width*height), 128, (width * height) / 2);
+    memcpy(img_dst, img_src, (width*height));
+    memset(img_dst+(width*height), 128, (width * height) / 2);
 
 }
 
