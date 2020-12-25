@@ -5104,19 +5104,23 @@
           <li><code>{camid}</code> The <a href="#camera_id">camera_id</a> of the camera.</li>
         </ul>
         <p></p>
-	      <ul>
-	        <li><code>{IP}:{port0}/{camid}/</code> Primary stream for the camera</li>
+        <ul>
+          <li><code>{IP}:{port0}/cameras.json</code> JSON object with IDs and names of all cameras</li>
+          <li><code>{IP}:{port0}/status.json</code> JSON object with information about all cameras</li>
+          <li><code>{IP}:{port0}/{camid}/</code> Primary stream for the camera</li>
           <li><code>{IP}:{port0}/{camid}/stream</code> Primary stream for the camera</li>
           <li><code>{IP}:{port0}/{camid}/substream</code> Sub-stream for the camera</li>
           <li><code>{IP}:{port0}/{camid}/motion</code> Motion image stream for the camera</li>
           <li><code>{IP}:{port0}/{camid}/source</code> Source image from the camera</li>
           <li><code>{IP}:{port0}/{camid}/current</code> Static JPG for the camera</li>
+          <li><code>{IP}:{port0}/{camid}/status.json</code> JSON object with information about the camera</li>
           <li><code>{IP}:{portX}/</code> Primary stream for the camera running on port {portX}</li>
           <li><code>{IP}:{portX}/stream</code> Primary stream for the camera running on port {portX}</li>
           <li><code>{IP}:{portX}/substream</code> Sub-stream for the camera running on port {portX}</li>
           <li><code>{IP}:{portX}/motion</code> Motion image stream for the camera running on port {portX}</li>
           <li><code>{IP}:{portX}/source</code> Source image from the camera running on port {portX}</li>
           <li><code>{IP}:{portX}/current</code> Static JPG for the camera running on port {portX}</li>
+          <li><code>{IP}:{portX}/status.json</code> JSON object with information about the camera running on port {portX}</li>
         </ul>
 
         <h3><a name="stream_port"></a> stream_port </h3>
