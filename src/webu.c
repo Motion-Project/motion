@@ -1215,6 +1215,12 @@ static mymhd_retcd webu_mhd_send(struct webui_ctx *webui, int ctrl)
                                          "application/json;");
                 break;
 
+            case WEBUI_CNCT_METRICS:
+                MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE,
+                                         "application/openmetrics-text; version=1.0.0;"
+                                         " charset=utf-8");
+                break;
+
             default:
                 MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
                 break;
@@ -1268,6 +1274,14 @@ static void webu_answer_strm_type(struct webui_ctx *webui)
     } else if (strcmp(webui->uri_cmd1, "status.json") == 0 &&
                strlen(webui->uri_cmd2) == 0) {
         webui->cnct_type = WEBUI_CNCT_STATUS_ONE;
+
+    } else if (strcmp(webui->uri_camid, "metrics") == 0 &&
+               strlen(webui->uri_cmd1) == 0) {
+        webui->cnct_type = WEBUI_CNCT_METRICS;
+
+    } else if (strcmp(webui->uri_cmd1, "metrics") == 0 &&
+               strlen(webui->uri_cmd2) == 0) {
+        webui->cnct_type = WEBUI_CNCT_METRICS;
 
     } else if ((strlen(webui->uri_camid) > 0) &&
                (strlen(webui->uri_cmd1) == 0)) {
@@ -1416,6 +1430,8 @@ static mymhd_retcd webu_answer_strm(void *cls, struct MHD_Connection *connection
     webu_answer_strm_type(webui);
 
     switch (webui->cnct_type) {
+    case WEBUI_CNCT_METRICS:
+        /*FALLTHROUGH*/
     case WEBUI_CNCT_STATUS_LIST:
         /*FALLTHROUGH*/
     case WEBUI_CNCT_STATUS_ONE:

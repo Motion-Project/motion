@@ -10,6 +10,7 @@
 
 #include <ctype.h>
 #include <inttypes.h>
+#include <stddef.h>
 
 #include "motion.h"
 #include "webu.h"
@@ -208,6 +209,212 @@ static void webu_status_one(struct webui_ctx *webui) {
     webu_status_write_list(webui, "camera_status", webu_json_cam_status_single);
 }
 
+/* Conservatively encode characters in an array as an OpenMetrics label value */
+static void webu_metrics_write_string(struct webui_ctx *webui, const char *str) {
+    const char *ptr;
+    char cur, buf[2];
+
+    webu_write(webui, "\"");
+
+    if (str) {
+        for (ptr = str; *ptr != '\0'; ++ptr) {
+            cur = *ptr;
+
+            switch (cur) {
+            case '\n':
+                webu_write(webui, "\\n");
+                continue;
+            case '"':
+                webu_write(webui, "\\\"");
+                continue;
+            case '\\':
+                webu_write(webui, "\\\\");
+                continue;
+            }
+
+            /* TODO: Encode non-ASCII characters correctly as UTF-8 */
+            if (cur & ~0x7F) {
+                cur = '?';
+            }
+
+            buf[0] = cur;
+            buf[1] = '\0';
+
+            webu_write(webui, buf);
+        }
+    }
+
+    webu_write(webui, "\"");
+}
+
+/*
+ * Metrics in OpenMetrics format, compatible with Prometheus.
+ *
+ * https://openmetrics.io/
+ * https://datatracker.ietf.org/doc/draft-richih-opsawg-openmetrics/
+ */
+static void webu_status_metrics(struct webui_ctx *webui) {
+    const struct {
+        const char *name;
+        const char *help;
+        size_t offset;
+    } timestamps[] = {
+        {
+            "motion_camera_image_save_timestamp_seconds",
+            "Last time an image was saved to persistent storage",
+            offsetof(struct context, lasttime),
+        },
+        {
+            "motion_camera_event_timestamp_seconds",
+            "Time of most recent detected event",
+            offsetof(struct context, eventtime),
+        },
+        {
+            "motion_camera_connection_lost_timestamp_seconds",
+            "Most recent connection loss",
+            offsetof(struct context, connectionlosttime),
+        },
+        { NULL },
+    }, *cur_timestamp;
+    struct context *cntone[2];
+    struct context **cntlst;
+    char buf[WEBUI_LEN_RESP];
+
+    if (webui->thread_nbr == 0) {
+        if (webui->cam_threads == 1) {
+            cntlst = webui->cntlst;
+        } else {
+            cntlst = &webui->cntlst[1];
+        }
+    } else {
+        cntone[0] = webui->cnt;
+        cntone[1] = NULL;
+        cntlst = cntone;
+    }
+
+    webu_write(webui,
+               "# TYPE motion info\n"
+               "motion_info{version="
+               );
+    webu_metrics_write_string(webui, VERSION);
+    webu_write(webui, "} 1\n");
+
+    webu_write(webui, "# TYPE motion_camera info\n");
+
+    for (struct context **cntp = cntlst; *cntp != NULL; ++cntp) {
+        struct context *cnt = *cntp;
+
+        snprintf(buf, sizeof(buf), "motion_camera_info{id=\"%d\",name=", cnt->camera_id);
+
+        webu_write(webui, buf);
+        webu_metrics_write_string(webui, cnt->conf.camera_name);
+        webu_write(webui, "} 1\n");
+    }
+
+    webu_write(webui,
+               "# TYPE motion_camera_image_width_pixels gauge\n"
+               "# UNIT motion_camera_image_width_pixels pixels\n");
+
+    for (struct context **cntp = cntlst; *cntp != NULL; ++cntp) {
+        struct context *cnt = *cntp;
+
+        snprintf(buf, sizeof(buf), "motion_camera_image_width_pixels{id=\"%d\"} %d\n",
+                 cnt->camera_id, cnt->imgs.width);
+
+        webu_write(webui, buf);
+    }
+
+    webu_write(webui,
+               "# TYPE motion_camera_image_height_pixels gauge\n"
+               "# UNIT motion_camera_image_height_pixels pixels\n");
+
+    for (struct context **cntp = cntlst; *cntp != NULL; ++cntp) {
+        struct context *cnt = *cntp;
+
+        snprintf(buf, sizeof(buf), "motion_camera_image_height_pixels{id=\"%d\"} %d\n",
+                 cnt->camera_id, cnt->imgs.height);
+
+        webu_write(webui, buf);
+    }
+
+    webu_write(webui,
+               "# TYPE motion_camera_fps gauge\n"
+               "# HELP motion_camera_fps Image frames per second\n");
+
+    for (struct context **cntp = cntlst; *cntp != NULL; ++cntp) {
+        struct context *cnt = *cntp;
+
+        snprintf(buf, sizeof(buf),
+                 "motion_camera_fps{id=\"%d\"} %d\n",
+                 cnt->camera_id, cnt->lastrate);
+
+        webu_write(webui, buf);
+    }
+
+    webu_write(webui, "# TYPE motion_camera_connected gauge\n");
+
+    for (struct context **cntp = cntlst; *cntp != NULL; ++cntp) {
+        struct context *cnt = *cntp;
+
+        snprintf(buf, sizeof(buf),
+                 "motion_camera_connected{id=\"%d\"} %d\n",
+                 cnt->camera_id, cnt->lost_connection == 0 ? 1 : 0);
+
+        webu_write(webui, buf);
+    }
+
+    webu_write(webui,
+               "# TYPE motion_camera_running gauge\n"
+               "# HELP motion_camera_running Running status of per-camera thread\n");
+
+    for (struct context **cntp = cntlst; *cntp != NULL; ++cntp) {
+        struct context *cnt = *cntp;
+
+        snprintf(buf, sizeof(buf),
+                 "motion_camera_running{id=\"%d\"} %d\n",
+                 cnt->camera_id, cnt->running ? 1 : 0);
+
+        webu_write(webui, buf);
+    }
+
+    webu_write(webui, "# TYPE motion_camera_detection_active gauge\n");
+
+    for (struct context **cntp = cntlst; *cntp != NULL; ++cntp) {
+        struct context *cnt = *cntp;
+
+        snprintf(buf, sizeof(buf),
+                 "motion_camera_detection_active{id=\"%d\"} %d\n",
+                 cnt->camera_id, cnt->pause ? 0 : 1);
+
+        webu_write(webui, buf);
+    }
+
+    for (cur_timestamp = timestamps; cur_timestamp && cur_timestamp->name;
+         ++cur_timestamp) {
+        snprintf(buf, sizeof(buf),
+                 "# TYPE %s gauge\n"
+                 "# UNIT %s seconds\n"
+                 "# HELP %s %s\n",
+                 cur_timestamp->name, cur_timestamp->name, cur_timestamp->name,
+                 cur_timestamp->help);
+
+        webu_write(webui, buf);
+
+        for (struct context **cntp = cntlst; *cntp != NULL; ++cntp) {
+            struct context *cnt = *cntp;
+            const time_t value = *(time_t *)(((char *)cnt) + cur_timestamp->offset);
+
+            snprintf(buf, sizeof(buf),
+                     "%s{id=\"%d\"} %" PRId64 "\n",
+                     cur_timestamp->name, cnt->camera_id, (int64_t)value);
+
+            webu_write(webui, buf);
+        }
+    }
+
+    webu_write(webui, "# EOF\n");
+}
+
 static void webu_status_badreq(struct webui_ctx *webui) {
     webu_write(webui, "{ \"error\": \"Server did not understand the request\" }");
 }
@@ -220,6 +427,10 @@ void webu_status_main(struct webui_ctx *webui) {
 
     case WEBUI_CNCT_STATUS_ONE:
         webu_status_one(webui);
+        break;
+
+    case WEBUI_CNCT_METRICS:
+        webu_status_metrics(webui);
         break;
 
     default:
