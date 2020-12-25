@@ -1212,7 +1212,7 @@ static mymhd_retcd webu_mhd_send(struct webui_ctx *webui, int ctrl)
                 /*FALLTHROUGH*/
             case WEBUI_CNCT_STATUS_ONE:
                 MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE,
-                                         "application/json;");
+                                         "application/json");
                 break;
 
             default:
