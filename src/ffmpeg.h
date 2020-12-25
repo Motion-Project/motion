@@ -1,3 +1,19 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef _INCLUDE_FFMPEG_H_
 #define _INCLUDE_FFMPEG_H_
 
@@ -25,90 +41,56 @@ enum USER_CODEC {
 
 #ifdef HAVE_FFMPEG
 
-#include <errno.h>
-#include <libavformat/avformat.h>
-#include <libavutil/imgutils.h>
-#include <libavutil/mathematics.h>
-#include <libavdevice/avdevice.h>
-
-#if (LIBAVFORMAT_VERSION_MAJOR >= 56)
-#define MY_PIX_FMT_YUV420P   AV_PIX_FMT_YUV420P
-#define MY_PIX_FMT_YUVJ420P  AV_PIX_FMT_YUVJ420P
-#define MyPixelFormat AVPixelFormat
-#else  //Old ffmpeg pixel formats
-#define MY_PIX_FMT_YUV420P   PIX_FMT_YUV420P
-#define MY_PIX_FMT_YUVJ420P  PIX_FMT_YUVJ420P
-#define MyPixelFormat PixelFormat
-#endif  //Libavformat >= 56
-
-#endif // HAVE_FFMPEG
-
-#ifdef HAVE_FFMPEG
-struct ffmpeg {
-    AVFormatContext *oc;
-    AVStream *video_st;
-    AVCodecContext *ctx_codec;
-    AVCodec *codec;
-    AVPacket pkt;
-    AVFrame *picture;       /* contains default image pointers */
-    AVDictionary *opts;
-    struct rtsp_context *rtsp_data;
-    int width;
-    int height;
-    enum TIMELAPSE_TYPE tlapse;
-    int fps;
-    int bps;
-    char *filename;
-    int quality;
-    const char *codec_name;
-    int64_t last_pts;
-    int64_t base_pts;
-    int test_mode;
-    int gop_cnt;
-    struct timeval start_time;
-    int            high_resolution;
-    int            motion_images;
-    int            passthrough;
-    enum USER_CODEC     preferred_codec;
-    char *nal_info;
-    int  nal_info_len;
-};
+    struct ffmpeg {
+        AVFormatContext *oc;
+        AVStream *video_st;
+        AVCodecContext *ctx_codec;
+        AVCodec *codec;
+        AVPacket pkt;
+        AVFrame *picture;       /* contains default image pointers */
+        AVDictionary *opts;
+        struct rtsp_context *rtsp_data;
+        int width;
+        int height;
+        enum TIMELAPSE_TYPE tlapse;
+        int fps;
+        int bps;
+        char *filename;
+        int quality;
+        const char *codec_name;
+        int64_t last_pts;
+        int64_t base_pts;
+        int test_mode;
+        int gop_cnt;
+        struct timeval start_time;
+        int            high_resolution;
+        int            motion_images;
+        int            passthrough;
+        enum USER_CODEC     preferred_codec;
+        char *nal_info;
+        int  nal_info_len;
+    };
 #else
-struct ffmpeg {
-    struct rtsp_context *rtsp_data;
-    int width;
-    int height;
-    enum TIMELAPSE_TYPE tlapse;
-    int fps;
-    int bps;
-    char *filename;
-    int quality;
-    const char *codec_name;
-    int64_t last_pts;
-    int64_t base_pts;
-    int test_mode;
-    int gop_cnt;
-    struct timeval start_time;
-    int            high_resolution;
-    int            motion_images;
-    int            passthrough;
-};
+    struct ffmpeg {
+        struct rtsp_context *rtsp_data;
+        int width;
+        int height;
+        enum TIMELAPSE_TYPE tlapse;
+        int fps;
+        int bps;
+        char *filename;
+        int quality;
+        const char *codec_name;
+        int64_t last_pts;
+        int64_t base_pts;
+        int test_mode;
+        int gop_cnt;
+        struct timeval start_time;
+        int            high_resolution;
+        int            motion_images;
+        int            passthrough;
+    };
 #endif // HAVE_FFMPEG
-
-
-
-#ifdef HAVE_FFMPEG
-
-AVFrame *my_frame_alloc(void);
-void my_frame_free(AVFrame *frame);
-void my_packet_unref(AVPacket pkt);
-void my_avcodec_close(AVCodecContext *codec_context);
-int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height);
-int my_image_copy_to_buffer(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height,int dest_size);
-int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height);
-int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt);
-
-#endif /* HAVE_FFMPEG */
 
 void ffmpeg_global_init(void);
 void ffmpeg_global_deinit(void);

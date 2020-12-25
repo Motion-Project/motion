@@ -1,3 +1,19 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  *      logger.c
  *
@@ -5,12 +21,11 @@
  *
  *      Copyright 2005, William M. Brack
  *      Copyright 2008 by Angel Carpintero  (motiondevelop@gmail.com)
- *      This software is distributed under the GNU Public License Version 2
- *      See also the file 'COPYING'.
  *
  */
 
 #include "logger.h"   /* already includes motion.h */
+#include "util.h"
 #include <stdarg.h>
 
 static int log_mode = LOGMODE_SYSLOG;
@@ -102,11 +117,13 @@ void set_log_mode(int mode)
     log_mode = mode;
     //printf("set log mode %d\n", mode);
 
-    if (mode == LOGMODE_SYSLOG && prev_mode != LOGMODE_SYSLOG)
+    if (mode == LOGMODE_SYSLOG && prev_mode != LOGMODE_SYSLOG) {
         openlog("motion", LOG_PID, LOG_USER);
+    }
 
-    if (mode != LOGMODE_SYSLOG && prev_mode == LOGMODE_SYSLOG)
+    if (mode != LOGMODE_SYSLOG && prev_mode == LOGMODE_SYSLOG) {
         closelog();
+    }
 }
 
 /**
@@ -123,8 +140,9 @@ FILE * set_logfile(const char *logfile_name)
     logfile = myfopen(logfile_name, "a");
 
     /* If logfile was opened correctly */
-    if (logfile)
+    if (logfile) {
         set_log_mode(LOGMODE_FILE);
+    }
 
     return logfile;
 }
@@ -167,15 +185,16 @@ static char *str_time(void)
  * Returns:
  *                     Nothing
  */
-void motion_log(int level, unsigned int type, int errno_flag,int fncname, const char *fmt, ...){
+void motion_log(int level, unsigned int type, int errno_flag,int fncname, const char *fmt, ...)
+{
     int errno_save, n;
     char buf[1024];
     char usrfmt[1024];
 
-/* GNU-specific strerror_r() */
-#if (!defined(XSI_STRERROR_R))
-    char msg_buf[100];
-#endif
+    /* GNU-specific strerror_r() */
+    #if (!defined(XSI_STRERROR_R))
+        char msg_buf[100];
+    #endif
     va_list ap;
     int threadnr;
 
@@ -185,12 +204,14 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
 
 
     /* Exit if level is greater than log_level */
-    if ((unsigned int)level > log_level)
+    if ((unsigned int)level > log_level) {
         return;
+    }
 
     /* Exit if type is not equal to log_type and not TYPE_ALL */
-    if ((log_type != TYPE_ALL) && (type != log_type))
+    if ((log_type != TYPE_ALL) && (type != log_type)) {
         return;
+    }
 
     //printf("log_type %d, type %d level %d\n", log_type, type, level);
 
@@ -225,7 +246,7 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
     }
 
     /* Prepend the format specifier for the function name */
-    if (fncname){
+    if (fncname) {
         snprintf(usrfmt, sizeof (usrfmt),"%s: %s", "%s", fmt);
     } else {
         snprintf(usrfmt, sizeof (usrfmt),"%s",fmt);
@@ -254,19 +275,19 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
          * version of strerror_r, which doesn't actually put the message into
          * my buffer :-(.  I have put in a 'hack' to get around this.
          */
-#if defined(XSI_STRERROR_R)
-        /* XSI-compliant strerror_r() */
-        strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
-#else
-        /* GNU-specific strerror_r() */
-        strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
-#endif
+        #if defined(XSI_STRERROR_R)
+            /* XSI-compliant strerror_r() */
+            strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
+        #else
+            /* GNU-specific strerror_r() */
+            strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
+        #endif
     }
 
-    if ((!strcmp(buf,flood_msg)) && (flood_cnt <= 5000)){
+    if ((mystreq(buf,flood_msg)) && (flood_cnt <= 5000)) {
         flood_cnt++;
     } else {
-        if (flood_cnt > 1){
+        if (flood_cnt > 1) {
             snprintf(flood_repeats,1024,"[%d:%s] [%s] [%s] Above message repeats %d times",
                      threadnr, threadname, get_log_level_str(level)
                      , get_log_type_str(type), flood_cnt-1);

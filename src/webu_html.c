@@ -1,10 +1,23 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  *    webu_html.c
  *
  *    Create the html for the webcontrol page
- *
- *    This software is distributed under the GNU Public License Version 2
- *    See also the file 'COPYING'.
  *
  *    Functional naming scheme
  *        webu_html* - Functions that create the display webcontrol page.
@@ -34,6 +47,8 @@
  */
 
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include "webu.h"
 #include "webu_html.h"
 #include "translate.h"
@@ -49,7 +64,8 @@ struct strminfo_ctx {
     int             motion_images;
 };
 
-static void webu_html_style_navbar(struct webui_ctx *webui) {
+static void webu_html_style_navbar(struct webui_ctx *webui)
+{
     /* Write out the style section of the web page */
     char response[WEBUI_LEN_RESP];
 
@@ -74,7 +90,8 @@ static void webu_html_style_navbar(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_style_dropdown(struct webui_ctx *webui) {
+static void webu_html_style_dropdown(struct webui_ctx *webui)
+{
     /* Write out the style section of the web page */
     char response[WEBUI_LEN_RESP];
 
@@ -123,7 +140,8 @@ static void webu_html_style_dropdown(struct webui_ctx *webui) {
     webu_write(webui, response);
 }
 
-static void webu_html_style_input(struct webui_ctx *webui) {
+static void webu_html_style_input(struct webui_ctx *webui)
+{
     /* Write out the style section of the web page */
     char response[WEBUI_LEN_RESP];
 
@@ -146,7 +164,8 @@ static void webu_html_style_input(struct webui_ctx *webui) {
     webu_write(webui, response);
 }
 
-static void webu_html_style_base(struct webui_ctx *webui) {
+static void webu_html_style_base(struct webui_ctx *webui)
+{
     /* Write out the style section of the web page */
     char response[WEBUI_LEN_RESP];
 
@@ -207,7 +226,8 @@ static void webu_html_style_base(struct webui_ctx *webui) {
     webu_write(webui, response);
 }
 
-static void webu_html_style(struct webui_ctx *webui) {
+static void webu_html_style(struct webui_ctx *webui)
+{
     /* Write out the style section of the web page */
     char response[WEBUI_LEN_RESP];
 
@@ -227,7 +247,8 @@ static void webu_html_style(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_head(struct webui_ctx *webui) {
+static void webu_html_head(struct webui_ctx *webui)
+{
     /* Write out the header section of the web page */
     char response[WEBUI_LEN_RESP];
 
@@ -244,14 +265,15 @@ static void webu_html_head(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_navbar_camera(struct webui_ctx *webui) {
+static void webu_html_navbar_camera(struct webui_ctx *webui)
+{
     /*Write out the options included in the camera dropdown */
     char response[WEBUI_LEN_RESP];
     int indx;
 
-    if (webui->cam_threads == 1){
+    if (webui->cam_threads == 1) {
         /* Only Motion.conf file */
-        if (webui->cntlst[0]->conf.camera_name == NULL){
+        if (webui->cntlst[0]->conf.camera_name == NULL) {
             snprintf(response, sizeof (response),
                 "    <div class=\"dropdown\">\n"
                 "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
@@ -272,7 +294,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
                 ,webui->cntlst[0]->conf.camera_name);
             webu_write(webui, response);
         }
-    } else if (webui->cam_threads > 1){
+    } else if (webui->cam_threads > 1) {
         /* Motion.conf + separate camera.conf file */
         snprintf(response, sizeof (response),
             "    <div class=\"dropdown\">\n"
@@ -283,8 +305,8 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
             ,_("All"));
         webu_write(webui, response);
 
-        for (indx=1;indx <= webui->cam_count;indx++){
-            if (webui->cntlst[indx]->conf.camera_name == NULL){
+        for (indx=1;indx <= webui->cam_count;indx++) {
+            if (webui->cntlst[indx]->conf.camera_name == NULL) {
                 snprintf(response, sizeof (response),
                     "        <a onclick=\"camera_click('cam_%05d');\">%s %d</a>\n"
                     ,webui->cntlst[indx]->camera_id
@@ -307,7 +329,8 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_navbar_action(struct webui_ctx *webui) {
+static void webu_html_navbar_action(struct webui_ctx *webui)
+{
     /* Write out the options included in the actions dropdown*/
     char response[WEBUI_LEN_RESP];
 
@@ -341,7 +364,8 @@ static void webu_html_navbar_action(struct webui_ctx *webui) {
     webu_write(webui, response);
 }
 
-static void webu_html_navbar(struct webui_ctx *webui) {
+static void webu_html_navbar(struct webui_ctx *webui)
+{
     /* Write the navbar section*/
     char response[WEBUI_LEN_RESP];
 
@@ -363,21 +387,22 @@ static void webu_html_navbar(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_config_notice(struct webui_ctx *webui) {
+static void webu_html_config_notice(struct webui_ctx *webui)
+{
     /* Print out the header description of which parameters are included based upon the
      * webcontrol_parms that was specified
      */
     char response[WEBUI_LEN_RESP];
 
-    if (webui->cntlst[0]->conf.webcontrol_parms == 0){
+    if (webui->cntlst[0]->conf.webcontrol_parms == 0) {
         snprintf(response, sizeof (response),
             "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 0 (%s)</h4>\n"
             ,_("No Configuration Options"));
-    } else if (webui->cntlst[0]->conf.webcontrol_parms == 1){
+    } else if (webui->cntlst[0]->conf.webcontrol_parms == 1) {
         snprintf(response, sizeof (response),
             "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 1 (%s)</h4>\n"
             ,_("Limited Configuration Options"));
-    } else if (webui->cntlst[0]->conf.webcontrol_parms == 2){
+    } else if (webui->cntlst[0]->conf.webcontrol_parms == 2) {
         snprintf(response, sizeof (response),
             "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 2 (%s)</h4>\n"
             ,_("Advanced Configuration Options"));
@@ -389,11 +414,12 @@ static void webu_html_config_notice(struct webui_ctx *webui) {
     webu_write(webui, response);
 }
 
-static void webu_html_h3desc(struct webui_ctx *webui) {
+static void webu_html_h3desc(struct webui_ctx *webui)
+{
     /* Write out the status description for the camera */
     char response[WEBUI_LEN_RESP];
 
-    if (webui->cam_threads == 1){
+    if (webui->cam_threads == 1) {
         snprintf(response, sizeof (response),
             "  <div id=\"id_header\">\n"
             "    <h3 id='h3_cam' data-cam=\"cam_all00\" class='header-center'>%s (%s)</h3>\n"
@@ -414,7 +440,8 @@ static void webu_html_h3desc(struct webui_ctx *webui) {
     }
 }
 
-static void webu_html_config(struct webui_ctx *webui) {
+static void webu_html_config(struct webui_ctx *webui)
+{
 
     /* Write out the options to put into the config dropdown
      * We use html data attributes to store the values for the options
@@ -449,10 +476,10 @@ static void webu_html_config(struct webui_ctx *webui) {
      */
     val_temp=malloc(PATH_MAX);
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_params[indx_parm].param_name != NULL) {
 
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
-            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER)){
+            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER)) {
             indx_parm++;
             continue;
         }
@@ -465,15 +492,15 @@ static void webu_html_config(struct webui_ctx *webui) {
         webu_write(webui, response);
 
         memset(val_temp,'\0',PATH_MAX);
-        if (val_main != NULL){
+        if (val_main != NULL) {
             snprintf(response, sizeof (response),"%s", val_main);
             webu_write(webui, response);
             snprintf(val_temp, PATH_MAX,"%s", val_main);
         }
 
         /* Loop through all the treads and see if any have a different value from motion.conf */
-        if (webui->cam_threads > 1){
-            for (indx=1;indx <= webui->cam_count;indx++){
+        if (webui->cam_threads > 1) {
+            for (indx=1;indx <= webui->cam_count;indx++) {
                 val_thread=config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, indx);
                 diff_vals = FALSE;
                 if (((strlen(val_temp) == 0) && (val_thread == NULL)) ||
@@ -482,9 +509,11 @@ static void webu_html_config(struct webui_ctx *webui) {
                 } else if (((strlen(val_temp) == 0) && (val_thread != NULL)) ) {
                     diff_vals = TRUE;
                 } else {
-                    if (strcasecmp(val_temp, val_thread)) diff_vals = TRUE;
+                    if (strcasecmp(val_temp, val_thread)) {
+                        diff_vals = TRUE;
+                    }
                 }
-                if (diff_vals){
+                if (diff_vals) {
                     snprintf(response, sizeof (response),"%s","\" \\ \n");
                     webu_write(webui, response);
 
@@ -492,7 +521,7 @@ static void webu_html_config(struct webui_ctx *webui) {
                         "           data-cam_%05d=\""
                         ,webui->cntlst[indx]->camera_id);
                     webu_write(webui, response);
-                    if (val_thread != NULL){
+                    if (val_thread != NULL) {
                         snprintf(response, sizeof (response),"%s", val_thread);
                         webu_write(webui, response);
                     }
@@ -500,9 +529,9 @@ static void webu_html_config(struct webui_ctx *webui) {
             }
         }
         /* Terminate the open quote and option.  For foreign language put hint in ()  */
-        if (!strcasecmp(webui->lang,"en") ||
-            !strcasecmp(config_params[indx_parm].param_name
-                ,_(config_params[indx_parm].param_name))){
+        if (mystrceq(webui->lang,"en") ||
+            mystrceq(config_params[indx_parm].param_name
+                ,_(config_params[indx_parm].param_name))) {
             snprintf(response, sizeof (response),"\" >%s</option>\n",
                 config_params[indx_parm].param_name);
             webu_write(webui, response);
@@ -529,7 +558,8 @@ static void webu_html_config(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_track(struct webui_ctx *webui) {
+static void webu_html_track(struct webui_ctx *webui)
+{
     /* Write the section for handling the tracking function */
     char response[WEBUI_LEN_RESP];
 
@@ -562,7 +592,8 @@ static void webu_html_track(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_strminfo(struct strminfo_ctx *strm_info, int indx) {
+static void webu_html_strminfo(struct strminfo_ctx *strm_info, int indx)
+{
     /* This determines all the items we need to know to specify links and
      * stream sources for the page.  The options are 0-3 as of this writing
      * where 0 = full streams, 1 = substreams, 2 = static images and 3 is
@@ -570,60 +601,52 @@ static void webu_html_strminfo(struct strminfo_ctx *strm_info, int indx) {
      * what images are to be sent but also whether we have tls/ssl.
      * There are WAY too many options for this.
     */
-    if (strm_info->cntlst[indx]->conf.stream_preview_method == 99){
-        snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
-        snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","");
-        snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","");
+    /* If using the main port,we need to insert a thread number into url*/
+    if (strm_info->cntlst[0]->conf.stream_port != 0) {
+        snprintf(strm_info->lnk_camid,WEBUI_LEN_LNK,"/%d"
+            ,strm_info->cntlst[indx]->camera_id);
+        strm_info->port = strm_info->cntlst[0]->conf.stream_port;
+        if (strm_info->cntlst[0]->conf.stream_tls) {
+            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
+        } else {
+            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
+        }
+    } else {
         snprintf(strm_info->lnk_camid,WEBUI_LEN_LNK,"%s","");
         strm_info->port = strm_info->cntlst[indx]->conf.stream_port;
-    } else {
-        /* If using the main port,we need to insert a thread number into url*/
-        if (strm_info->cntlst[0]->conf.stream_port != 0) {
-            snprintf(strm_info->lnk_camid,WEBUI_LEN_LNK,"/%d"
-                ,strm_info->cntlst[indx]->camera_id);
-            strm_info->port = strm_info->cntlst[0]->conf.stream_port;
-            if (strm_info->cntlst[0]->conf.stream_tls) {
-                snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
-            } else {
-                snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
-            }
+        if (strm_info->cntlst[indx]->conf.stream_tls) {
+            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
         } else {
-            snprintf(strm_info->lnk_camid,WEBUI_LEN_LNK,"%s","");
-            strm_info->port = strm_info->cntlst[indx]->conf.stream_port;
-            if (strm_info->cntlst[indx]->conf.stream_tls) {
-                snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
-            } else {
-                snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
-            }
-        }
-        if (strm_info->motion_images){
-            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/motion");
-            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/motion");
-        } else {
-            /* Assign what images and links we want */
-            if (strm_info->cntlst[indx]->conf.stream_preview_method == 1){
-                /* Substream for preview */
-                snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
-                snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/substream");
-            } else if (strm_info->cntlst[indx]->conf.stream_preview_method == 2){
-                /* Static image for preview */
-                snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
-                snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/current");
-            } else if (strm_info->cntlst[indx]->conf.stream_preview_method == 4){
-                /* Source image for preview */
-                snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/source");
-                snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/source");
-            } else {
-                /* Full stream for preview (method 0 or 3)*/
-                snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
-                snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/stream");
-            }
+            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
         }
     }
-
+    if (strm_info->motion_images) {
+        snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/motion");
+        snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/motion");
+    } else {
+        /* Assign what images and links we want */
+        if (strm_info->cntlst[indx]->conf.stream_preview_method == 1) {
+            /* Substream for preview */
+            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
+            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/substream");
+        } else if (strm_info->cntlst[indx]->conf.stream_preview_method == 2) {
+            /* Static image for preview */
+            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
+            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/current");
+        } else if (strm_info->cntlst[indx]->conf.stream_preview_method == 4) {
+            /* Source image for preview */
+            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/source");
+            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/source");
+        } else {
+            /* Full stream for preview (method 0 or 3)*/
+            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
+            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/stream");
+        }
+    }
 }
 
-static void webu_html_preview(struct webui_ctx *webui) {
+static void webu_html_preview(struct webui_ctx *webui)
+{
 
     /* Write the initial version of the preview section.  The javascript
      * will change this section when user selects a different camera */
@@ -640,16 +663,19 @@ static void webu_html_preview(struct webui_ctx *webui) {
         "      <p id=\"id_preview\">\n");
     webu_write(webui, response);
 
-    indx_st = 1;
-    if (webui->cam_threads == 1) indx_st = 0;
+    if (webui->cam_threads == 1) {
+        indx_st = 0;
+    } else {
+        indx_st = 1;
+    }
 
-    for (indx = indx_st; indx<webui->cam_threads; indx++){
-        if (webui->cntlst[indx]->conf.stream_preview_newline){
+    for (indx = indx_st; indx<webui->cam_threads; indx++) {
+        if (webui->cntlst[indx]->conf.stream_preview_newline) {
             snprintf(response, sizeof (response),"%s","      <br>\n");
             webu_write(webui, response);
         }
 
-        if (webui->cntlst[indx]->conf.stream_preview_method == 3){
+        if (webui->cntlst[indx]->conf.stream_preview_method == 3) {
             preview_scale = 45;
         } else {
             preview_scale = webui->cntlst[indx]->conf.stream_preview_scale;
@@ -667,7 +693,7 @@ static void webu_html_preview(struct webui_ctx *webui) {
             ,preview_scale);
         webu_write(webui, response);
 
-        if (webui->cntlst[indx]->conf.stream_preview_method == 3){
+        if (webui->cntlst[indx]->conf.stream_preview_method == 3) {
             strm_info.motion_images = TRUE;
             webu_html_strminfo(&strm_info,indx);
             snprintf(response, sizeof (response),
@@ -692,7 +718,8 @@ static void webu_html_preview(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script_action(struct webui_ctx *webui) {
+static void webu_html_script_action(struct webui_ctx *webui)
+{
     /* Write the javascript action_click() function.
      * We do not have a good notification section on the page so the successful
      * submission and response is currently a empty if block for the future
@@ -708,10 +735,10 @@ static void webu_html_script_action(struct webui_ctx *webui) {
 
     snprintf(response, sizeof (response),"%s",
         "    function action_click(actval) {\n"
-        "      if (actval == \"config\"){\n"
+        "      if (actval == \"config\") {\n"
         "        document.getElementById('trk_form').style.display=\"none\";\n"
         "        document.getElementById('cfg_form').style.display=\"inline\";\n"
-        "      } else if (actval == \"track\"){\n"
+        "      } else if (actval == \"track\") {\n"
         "        document.getElementById('cfg_form').style.display=\"none\";\n"
         "        document.getElementById('trk_form').style.display=\"inline\";\n"
         "      } else {\n"
@@ -733,7 +760,7 @@ static void webu_html_script_action(struct webui_ctx *webui) {
     webu_write(webui, response);
 
     snprintf(response, sizeof (response),
-        "        if (camnbr == \"all00\"){\n"
+        "        if (camnbr == \"all00\") {\n"
         "          url = url + \"%05d\";\n"
         "        } else {\n"
         "          url = url + camnbr;\n"
@@ -757,24 +784,28 @@ static void webu_html_script_action(struct webui_ctx *webui) {
     webu_write(webui, response);
 }
 
-static void webu_html_script_camera_thread(struct webui_ctx *webui) {
+static void webu_html_script_camera_thread(struct webui_ctx *webui)
+{
     /* Write the javascript thread IF conditions of camera_click() function */
     char response[WEBUI_LEN_RESP];
     int indx, indx_st, preview_scale;
     struct strminfo_ctx strm_info;
 
-    indx_st = 1;
-    if (webui->cam_threads == 1) indx_st = 0;
+    if (webui->cam_threads == 1) {
+        indx_st = 0;
+    } else {
+        indx_st = 1;
+    }
 
     strm_info.cntlst = webui->cntlst;
 
-    for (indx = indx_st; indx<webui->cam_threads; indx++){
+    for (indx = indx_st; indx<webui->cam_threads; indx++) {
         snprintf(response, sizeof (response),
-            "      if (camid == \"cam_%05d\"){\n"
+            "      if (camid == \"cam_%05d\") {\n"
             ,webui->cntlst[indx]->camera_id);
         webu_write(webui, response);
 
-        if (webui->cntlst[indx]->conf.stream_preview_method == 3){
+        if (webui->cntlst[indx]->conf.stream_preview_method == 3) {
             preview_scale = 45;
         } else {
             preview_scale = 95;
@@ -791,7 +822,7 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui) {
             ,strm_info.lnk_camid, strm_info.lnk_src, preview_scale);
         webu_write(webui, response);
 
-        if (webui->cntlst[indx]->conf.stream_preview_method == 3){
+        if (webui->cntlst[indx]->conf.stream_preview_method == 3) {
             strm_info.motion_images = TRUE;
             webu_html_strminfo(&strm_info, indx);
             snprintf(response, sizeof (response),
@@ -804,7 +835,7 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui) {
             webu_write(webui, response);
         }
 
-        if (webui->cntlst[indx]->conf.camera_name == NULL){
+        if (webui->cntlst[indx]->conf.camera_name == NULL) {
             snprintf(response, sizeof (response),
                 "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
                 " class='header-center' >%s %d (%s)</h3>\"\n"
@@ -833,33 +864,36 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui) {
     return;
 }
 
-static void webu_html_script_camera_all(struct webui_ctx *webui) {
+static void webu_html_script_camera_all(struct webui_ctx *webui)
+{
     /* Write the javascript "All" IF condition of camera_click() function */
     char response[WEBUI_LEN_RESP];
     int indx, indx_st, preview_scale;
     struct strminfo_ctx strm_info;
 
-
-    indx_st = 1;
-    if (webui->cam_threads == 1) indx_st = 0;
+    if (webui->cam_threads == 1) {
+        indx_st = 0;
+    } else {
+        indx_st = 1;
+    }
 
     strm_info.cntlst = webui->cntlst;
 
-    snprintf(response, sizeof (response), "      if (camid == \"cam_all00\"){\n");
+    snprintf(response, sizeof (response), "      if (camid == \"cam_all00\") {\n");
     webu_write(webui, response);
 
-    for (indx = indx_st; indx<webui->cam_threads; indx++){
-        if (indx == indx_st){
+    for (indx = indx_st; indx<webui->cam_threads; indx++) {
+        if (indx == indx_st) {
             snprintf(response, sizeof (response),"%s","        preview = \"\";\n");
             webu_write(webui, response);
         }
 
-        if (webui->cntlst[indx]->conf.stream_preview_newline){
+        if (webui->cntlst[indx]->conf.stream_preview_newline) {
             snprintf(response, sizeof (response),"%s","        preview = preview + \"      <br>\";\n");
             webu_write(webui, response);
         }
 
-        if (webui->cntlst[indx]->conf.stream_preview_method == 3){
+        if (webui->cntlst[indx]->conf.stream_preview_method == 3) {
             preview_scale = 45;
         } else {
             preview_scale = webui->cntlst[indx]->conf.stream_preview_scale;
@@ -877,7 +911,7 @@ static void webu_html_script_camera_all(struct webui_ctx *webui) {
             ,preview_scale);
         webu_write(webui, response);
 
-        if (webui->cntlst[indx]->conf.stream_preview_method == 3){
+        if (webui->cntlst[indx]->conf.stream_preview_method == 3) {
             strm_info.motion_images = TRUE;
             webu_html_strminfo(&strm_info, indx);
             snprintf(response, sizeof (response),
@@ -902,7 +936,8 @@ static void webu_html_script_camera_all(struct webui_ctx *webui) {
     return;
 }
 
-static void webu_html_script_camera(struct webui_ctx *webui) {
+static void webu_html_script_camera(struct webui_ctx *webui)
+{
     /* Write the javascript camera_click() function */
     char response[WEBUI_LEN_RESP];
 
@@ -929,14 +964,15 @@ static void webu_html_script_camera(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script_menucam(struct webui_ctx *webui) {
+static void webu_html_script_menucam(struct webui_ctx *webui)
+{
     /* Write the javascript display_cameras() function */
     char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "    function display_cameras() {\n"
         "      document.getElementById('act_btn').style.display = 'none';\n"
-        "      if (document.getElementById('cam_btn').style.display == 'block'){\n"
+        "      if (document.getElementById('cam_btn').style.display == 'block') {\n"
         "        document.getElementById('cam_btn').style.display = 'none';\n"
         "      } else {\n"
         "        document.getElementById('cam_btn').style.display = 'block';\n"
@@ -946,14 +982,15 @@ static void webu_html_script_menucam(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script_menuact(struct webui_ctx *webui) {
+static void webu_html_script_menuact(struct webui_ctx *webui)
+{
     /* Write the javascript display_actions() function */
     char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "    function display_actions() {\n"
         "      document.getElementById('cam_btn').style.display = 'none';\n"
-        "      if (document.getElementById('act_btn').style.display == 'block'){\n"
+        "      if (document.getElementById('act_btn').style.display == 'block') {\n"
         "        document.getElementById('act_btn').style.display = 'none';\n"
         "      } else {\n"
         "        document.getElementById('act_btn').style.display = 'block';\n"
@@ -963,7 +1000,8 @@ static void webu_html_script_menuact(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script_evtclk(struct webui_ctx *webui) {
+static void webu_html_script_evtclk(struct webui_ctx *webui)
+{
     /* Write the javascript 'click' EventListener */
     char response[WEBUI_LEN_RESP];
 
@@ -980,7 +1018,8 @@ static void webu_html_script_evtclk(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script_cfgclk(struct webui_ctx *webui) {
+static void webu_html_script_cfgclk(struct webui_ctx *webui)
+{
     /* Write the javascript config_click function
      * We do not have a good notification section on the page so the successful
      * submission and response is currently a empty if block for the future
@@ -1006,7 +1045,7 @@ static void webu_html_script_cfgclk(struct webui_ctx *webui) {
 
     snprintf(response, sizeof (response),
         "      var optval=encodeURI(baseval);\n"
-        "      if (camnbr == \"all00\"){\n"
+        "      if (camnbr == \"all00\") {\n"
         "        url = url + \"%05d\";\n"
         "      } else {\n"
         "        url = url + camnbr;\n"
@@ -1030,7 +1069,8 @@ static void webu_html_script_cfgclk(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script_cfgchg(struct webui_ctx *webui) {
+static void webu_html_script_cfgchg(struct webui_ctx *webui)
+{
     /* Write the javascript option_change function */
     char response[WEBUI_LEN_RESP];
 
@@ -1039,7 +1079,7 @@ static void webu_html_script_cfgchg(struct webui_ctx *webui) {
         "      var camSel = 'data-'+ document.getElementById('h3_cam').getAttribute('data-cam');\n"
         "      var opts = document.getElementById('cfg_parms');\n"
         "      var optval = opts.options[opts.selectedIndex].getAttribute(camSel);\n"
-        "      if (optval == null){\n"
+        "      if (optval == null) {\n"
         "        optval = opts.options[opts.selectedIndex].getAttribute('data-cam_all00');\n"
         "      }\n"
         "      document.getElementById('cfg_value').value = optval;\n"
@@ -1047,14 +1087,15 @@ static void webu_html_script_cfgchg(struct webui_ctx *webui) {
     webu_write(webui, response);
 }
 
-static void webu_html_script_trkchg(struct webui_ctx *webui) {
+static void webu_html_script_trkchg(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "    function track_change() {\n"
         "      var opts = document.getElementById('trk_option');\n"
         "      var optval = opts.options[opts.selectedIndex].getAttribute('data-trk');\n"
-        "      if (optval == 'pan'){\n"
+        "      if (optval == 'pan') {\n"
         "        document.getElementById('trk_panx').disabled=false;\n"
         "        document.getElementById('trk_tilty').disabled = false;\n"
         "        document.getElementById('trk_lblx').style.display='none';\n"
@@ -1064,7 +1105,7 @@ static void webu_html_script_trkchg(struct webui_ctx *webui) {
     webu_write(webui, response);
 
     snprintf(response, sizeof (response),"%s",
-        "      } else if (optval =='abs'){\n"
+        "      } else if (optval =='abs') {\n"
         "        document.getElementById('trk_panx').disabled=false;\n"
         "        document.getElementById('trk_tilty').disabled = false;\n"
         "        document.getElementById('trk_lblx').value = 'X';\n"
@@ -1086,7 +1127,8 @@ static void webu_html_script_trkchg(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script_trkclk(struct webui_ctx *webui) {
+static void webu_html_script_trkclk(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
     snprintf(response, sizeof (response),"%s",
         "    function track_click() {\n"
@@ -1106,7 +1148,7 @@ static void webu_html_script_trkclk(struct webui_ctx *webui) {
     webu_write(webui, response);
 
     snprintf(response, sizeof (response),
-        "      if (camnbr == \"all00\"){\n"
+        "      if (camnbr == \"all00\") {\n"
         "        url = url + \"%05d\";\n"
         "      } else {\n"
         "        url = url + camnbr;\n"
@@ -1116,7 +1158,7 @@ static void webu_html_script_trkclk(struct webui_ctx *webui) {
 
     snprintf(response, sizeof (response),"%s",
 
-        "      if (optsel == 'pan'){\n"
+        "      if (optsel == 'pan') {\n"
         "        url = url + '/track/set?pan=' + optval1 + '&tilt=' + optval2;\n"
         "      } else if (optsel == 'abs') {\n"
         "        url = url + '/track/set?x=' + optval1 + '&y=' + optval2;\n"
@@ -1134,7 +1176,8 @@ static void webu_html_script_trkclk(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_script(struct webui_ctx *webui) {
+static void webu_html_script(struct webui_ctx *webui)
+{
     /* Write the javascripts */
     char response[WEBUI_LEN_RESP];
 
@@ -1164,7 +1207,8 @@ static void webu_html_script(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_body(struct webui_ctx *webui) {
+static void webu_html_body(struct webui_ctx *webui)
+{
     /* Write the body section of the form */
     char response[WEBUI_LEN_RESP];
 
@@ -1188,7 +1232,8 @@ static void webu_html_body(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_page(struct webui_ctx *webui) {
+static void webu_html_page(struct webui_ctx *webui)
+{
     /* Write the main page html */
     char response[WEBUI_LEN_RESP];
 
@@ -1206,7 +1251,8 @@ static void webu_html_page(struct webui_ctx *webui) {
 
 }
 
-void webu_html_badreq(struct webui_ctx *webui) {
+void webu_html_badreq(struct webui_ctx *webui)
+{
 
     char response[WEBUI_LEN_RESP];
 
@@ -1224,7 +1270,8 @@ void webu_html_badreq(struct webui_ctx *webui) {
 
 }
 
-void webu_html_main(struct webui_ctx *webui) {
+void webu_html_main(struct webui_ctx *webui)
+{
 
     /* Note some detection and config requested actions call the
      * action function.  This is because the legacy interface
@@ -1238,20 +1285,20 @@ void webu_html_main(struct webui_ctx *webui) {
     if (strlen(webui->uri_camid) == 0){
         webu_html_page(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"write"))) {
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"write"))) {
         webu_process_action(webui);
 
-    } else if (!strcmp(webui->uri_cmd1,"config")) {
+    } else if (mystreq(webui->uri_cmd1,"config")) {
         retcd = webu_process_config(webui);
 
-    } else if (!strcmp(webui->uri_cmd1,"action")){
+    } else if (mystreq(webui->uri_cmd1,"action")) {
         webu_process_action(webui);
 
-    } else if (!strcmp(webui->uri_cmd1,"detection")){
+    } else if (mystreq(webui->uri_cmd1,"detection")) {
         webu_process_action(webui);
 
-    } else if (!strcmp(webui->uri_cmd1,"track")){
+    } else if (mystreq(webui->uri_cmd1,"track")) {
         retcd = webu_process_track(webui);
 
     } else{
@@ -1261,7 +1308,9 @@ void webu_html_main(struct webui_ctx *webui) {
         retcd = -1;
     }
 
-    if (retcd < 0) webu_html_badreq(webui);
+    if (retcd < 0) {
+        webu_html_badreq(webui);
+    }
 
     return;
 }

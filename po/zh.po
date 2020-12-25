@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-10-27 22:19-0600\n"
-"PO-Revision-Date: 2019-12-01 12:41-0700\n"
+"POT-Creation-Date: 2019-12-29 16:29-0700\n"
+"PO-Revision-Date: 2020-01-12 17:52-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: zh\n"
@@ -15,6 +15,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.0.6\n"
+
+#: src/conf.c
+#, c-format
+msgid "%s after version %s"
+msgstr "版本 %s 之后的 %s"
 
 #: src/conf.c
 #, c-format
@@ -753,6 +758,14 @@ msgid "File of type %ld saved to: %s"
 msgstr " %ld类型的文件已保存到： %s"
 
 #: src/event.c
+msgid "Ignoring empty sql query"
+msgstr "忽略空的SQL查询"
+
+#: src/event.c
+msgid "Executing mysql query"
+msgstr "执行mysql查询"
+
+#: src/event.c
 #, c-format
 msgid "Mysql query failed %s error code %d"
 msgstr "MySQL查询失败 %s错误代码 %d"
@@ -760,8 +773,7 @@ msgstr "MySQL查询失败 %s错误代码 %d"
 #: src/event.c
 #, c-format
 msgid ""
-"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error "
-"was %s"
+"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error was %s"
 msgstr "无法通过用户 %s MySQL错误重新连接到主机 %s上的MySQL数据库 %s是 %s"
 
 #: src/event.c
@@ -773,6 +785,10 @@ msgstr "重新连接到Mysql数据库' %s'成功"
 #, c-format
 msgid "after re-connection Mysql query failed %s error code %d"
 msgstr "重新连接MySQL查询后失败 %s错误代码 %d"
+
+#: src/event.c
+msgid "Executing postgresql query"
+msgstr "执行PostgreSQL查询"
 
 #: src/event.c src/motion.c
 #, c-format
@@ -788,6 +804,15 @@ msgstr "重新连接到PostgreSQL数据库' %s'失败： %s"
 #, c-format
 msgid "Re-Connection to PostgreSQL database '%s' Succeed"
 msgstr "重新连接到PostgreSQL数据库' %s'成功"
+
+#: src/event.c
+#, c-format
+msgid "PGSQL query failed: [%s]  %s %s"
+msgstr "PGSQL查询失败：[%s] %s %s"
+
+#: src/event.c
+msgid "Executing sqlite query"
+msgstr "执行sqlite查询"
 
 #: src/event.c
 #, c-format
@@ -825,6 +850,11 @@ msgstr "正在关闭：extpipe文件描述 %d，错误状态为 %d"
 
 #: src/event.c
 #, c-format
+msgid "pclose return: %d"
+msgstr "pclose返回：%d"
+
+#: src/event.c
+#, c-format
 msgid "moviepath: %s"
 msgstr "电影路径： %s"
 
@@ -854,6 +884,11 @@ msgid "pipe: %s"
 msgstr "管道： %s"
 
 #: src/event.c
+#, c-format
+msgid "cnt->moviefps: %d"
+msgstr "cnt-> moviefps：%d"
+
+#: src/event.c
 msgid "popen failed"
 msgstr "弹出失败"
 
@@ -877,6 +912,14 @@ msgid "Source FPS %d"
 msgstr "来源FPS %d"
 
 #: src/event.c
+msgid "The ogg container is no longer supported.  Changing to mpeg4"
+msgstr "不再支持ogg容器。更改为mpeg4"
+
+#: src/event.c
+msgid "Running test of the various output formats."
+msgstr "各种输出格式的运行测试。"
+
+#: src/event.c
 msgid "Error opening context for movie output."
 msgstr "打开电影输出的上下文时出错。"
 
@@ -886,8 +929,7 @@ msgid "ffopen_open error creating (motion) file [%s]"
 msgstr "ffopen打开错误创建（运动）文件[ %s]"
 
 #: src/event.c
-msgid ""
-"The swf container for timelapse no longer supported.  Using mpg container."
+msgid "The swf container for timelapse no longer supported.  Using mpg container."
 msgstr "不再支持用于延时拍摄的swf容器。使用mpg容器。"
 
 #: src/event.c
@@ -921,10 +963,9 @@ msgstr "无法为编解码器名称分配内存"
 
 #: src/ffmpeg.c
 msgid ""
-"The frame rate specified is too high for the ffmpeg movie type specified. "
-"Choose a different ffmpeg container or lower framerate."
-msgstr ""
-"对于指定的ffmpeg电影类型，指定的帧率太高。选择其他ffmpeg容器或较低的帧速率。"
+"The frame rate specified is too high for the ffmpeg movie type specified. Choose a "
+"different ffmpeg container or lower framerate."
+msgstr "对于指定的ffmpeg电影类型，指定的帧率太高。选择其他ffmpeg容器或较低的帧速率。"
 
 #: src/ffmpeg.c
 msgid "Error setting base file name"
@@ -984,8 +1025,7 @@ msgstr "糟糕的时机！！跳帧。"
 #: src/ffmpeg.c
 #, c-format
 msgid ""
-"PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change "
-"%d"
+"PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change %d"
 msgstr "PTS %<PRId64>基本PTS %<PRId64> ms间隔 %<PRId64>时基 %d- %d更改 %d"
 
 #: src/ffmpeg.c
@@ -1020,6 +1060,11 @@ msgstr "无法分配流"
 #: src/ffmpeg.c
 msgid "Failed to allocate decoder!"
 msgstr "分配解码器失败！"
+
+#: src/ffmpeg.c
+#, c-format
+msgid "Low fps. Encoding %d frames into a %d frames container."
+msgstr "低fps。将%d个帧编码到%d个帧容器中。"
 
 #: src/ffmpeg.c
 msgid "Unable to set quality"
@@ -1093,6 +1138,11 @@ msgstr "编写视频帧时出错"
 
 #: src/ffmpeg.c
 #, c-format
+msgid "av_copy_packet: %s"
+msgstr "av_copy_packet：%s"
+
+#: src/ffmpeg.c
+#, c-format
 msgid "Error while writing video frame: %s"
 msgstr "编写视频帧时出错： %s"
 
@@ -1119,6 +1169,10 @@ msgstr "无法复制编解码器参数"
 #: src/ffmpeg.c
 msgid "Pass-through disabled.  ffmpeg too old"
 msgstr "传递功能已禁用。ffmpeg太旧了"
+
+#: src/ffmpeg.c
+msgid "Pass-through stream opened"
+msgstr "直通流已打开"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1535,8 +1589,8 @@ msgstr "重试直到成功连接相机"
 #: src/motion.c
 msgid ""
 "Camera has finally become available\n"
-"Camera image has different width and heightfrom what is in the config file. "
-"You should fix that\n"
+"Camera image has different width and heightfrom what is in the config file. You "
+"should fix that\n"
 "Restarting Motion thread to reinitialize all image buffers to new picture "
 "dimensions"
 msgstr ""
@@ -1639,8 +1693,8 @@ msgstr "已创建进程ID文件 %s。进程ID为 %d"
 
 #: src/motion.c
 msgid ""
-"Camara IDs are not unique or have values over 32,000.  Falling back to "
-"thread numbers"
+"Camara IDs are not unique or have values over 32,000.  Falling back to thread "
+"numbers"
 msgstr "Camara ID不是唯一的，或值超过32,000。退回线程号"
 
 #: src/motion.c
@@ -1741,6 +1795,11 @@ msgstr "退出运动，无法创建日志文件 %s"
 #: src/motion.c
 msgid "Logging to syslog"
 msgstr "记录到系统日志"
+
+#: src/motion.c
+#, c-format
+msgid "Motion %s Started"
+msgstr "运动 %s 已开始"
 
 #: src/motion.c
 #, c-format
@@ -1907,8 +1966,8 @@ msgid ""
 "Closing netcam socket as Keep-Alive time is up (camera sent Close field). A "
 "reconnect should happen."
 msgstr ""
-"当\"保持活动\"时间到时，关闭netcam套接字（摄像机发送\"关闭\"字段）。一种重新"
-"连接应该发生。"
+"当\"保持活动\"时间到时，关闭netcam套接字（摄像机发送\"关闭\"字段）。一种重新连接应"
+"该发生。"
 
 #: src/netcam.c
 msgid "re-opening camera (non-streaming)"
@@ -1979,11 +2038,10 @@ msgstr "摄像头（ %s）的无效摄像头URL"
 #: src/netcam.c
 #, c-format
 msgid ""
-"Netcam_http parameter '%s' converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-"
-"Alive %s."
+"Netcam_http parameter '%s' converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive "
+"%s."
 msgstr ""
-"Netcam http参数' %s'转换为标志：HTTP / 1.0： %s HTTP / 1.1： %s Keep-有效 "
-"%s。"
+"Netcam http参数' %s'转换为标志：HTTP / 1.0： %s HTTP / 1.1： %s Keep-有效 %s。"
 
 #: src/netcam.c
 msgid "now calling netcam_setup_html()"
@@ -1999,8 +2057,7 @@ msgstr "现在调用netcam设置文件（）"
 
 #: src/netcam.c
 #, c-format
-msgid ""
-"Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or jpeg."
+msgid "Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or jpeg."
 msgstr "无效的网络摄像头服务' %s'-必须为http，ftp，mjpg，mjpeg，v4l2或jpeg。"
 
 #: src/netcam.c src/netcam_rtsp.c
@@ -2193,8 +2250,7 @@ msgstr "在标头中找不到边界字符串"
 
 #: src/netcam_http.c
 msgid ""
-"Streaming camera probably using MJPG-blocks, consider using mjpg:// "
-"netcam_url."
+"Streaming camera probably using MJPG-blocks, consider using mjpg:// netcam_url."
 msgstr "流相机可能使用MJPG块，请考虑使用mjpg：//网络摄像头网址。"
 
 #: src/netcam_http.c
@@ -2216,14 +2272,14 @@ msgstr "找到Conn：关闭标头（' %s'）"
 
 #: src/netcam_http.c
 msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
-"Motion removes keepalive."
+"Both 'Connection: Keep-Alive' and 'Connection: close' header received. Motion "
+"removes keepalive."
 msgstr "收到\"连接：保持活动\"和\"连接：关闭\"标头。运动会删除keepalive。"
 
 #: src/netcam_http.c
 msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
-"Motion continues unchanged."
+"Both 'Connection: Keep-Alive' and 'Connection: close' header received. Motion "
+"continues unchanged."
 msgstr "收到\"连接：保持活动\"和\"连接：关闭\"标头。运动继续保持不变。"
 
 #: src/netcam_http.c
@@ -2290,15 +2346,15 @@ msgstr "没有keepalive，创建了新的套接字fd %d"
 
 #: src/netcam_http.c
 msgid ""
-"with keepalive set, invalid socket.This could be the first time. Creating a "
-"new one failed."
+"with keepalive set, invalid socket.This could be the first time. Creating a new "
+"one failed."
 msgstr "设置了keepalive，无效的套接字。这可能是第一次。创建一个新的失败了。"
 
 #: src/netcam_http.c
 #, c-format
 msgid ""
-"with keepalive set, invalid socket.This could be first time, created a new "
-"one with fd %d"
+"with keepalive set, invalid socket.This could be first time, created a new one "
+"with fd %d"
 msgstr "设置了keepalive，套接字无效。这可能是第一次，创建了一个新的一个与fd %d"
 
 #: src/netcam_http.c
@@ -2402,8 +2458,8 @@ msgstr "Netcam具有标志：HTTP / 1.0： %s HTTP / 1.1： %s保持活动 %s。
 
 #: src/netcam_http.c
 msgid ""
-"Removed netcam_keepalive flag due to proxy set.Proxy is incompatible with "
-"Keep-Alive."
+"Removed netcam_keepalive flag due to proxy set.Proxy is incompatible with Keep-"
+"Alive."
 msgstr "由于代理设置而删除了netcam keepalive标志。代理与活着。"
 
 #: src/netcam_http.c
@@ -2540,8 +2596,8 @@ msgstr "返回码 %d"
 #: src/netcam_jpeg.c
 #, c-format
 msgid ""
-"Camera width/height mismatch with JPEG image -  expected %dx%d, JPEG %dx%d "
-"retval %d"
+"Camera width/height mismatch with JPEG image -  expected %dx%d, JPEG %dx%d retval "
+"%d"
 msgstr "相机宽度/高度与JPEG图像不匹配-预期 %dx %d，JPEG %dx %dretval %d"
 
 #: src/netcam_jpeg.c
@@ -2913,6 +2969,20 @@ msgid "%s: Waiting for first image from the handler."
 msgstr " %s：等待处理程序中的第一张图像。"
 
 #: src/netcam_rtsp.c
+#, c-format
+msgid "Requested frame rate %d FPS is less than camera frame rate %d FPS"
+msgstr "请求的帧速率%d FPS小于相机帧速率%d FPS"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "Increasing capture rate to %d FPS to match camera."
+msgstr "将捕获率提高到%d FPS以匹配相机。"
+
+#: src/netcam_rtsp.c
+msgid "To lower CPU, change camera FPS to lower rate and decrease I frame interval."
+msgstr "要降低CPU，请将摄像机FPS更改为较低的速率并减小I帧间隔。"
+
+#: src/netcam_rtsp.c
 msgid "unable to create rtsp context"
 msgstr "无法创建rtsp上下文"
 
@@ -2996,6 +3066,10 @@ msgstr "pgm文件中的读取大小失败"
 #: src/picture.c
 msgid "Failed reading maximum value in pgm file"
 msgstr "读取pgm文件中的最大值失败"
+
+#: src/picture.c
+msgid "Failed reading image data from pgm file"
+msgstr "无法从pgm文件读取图像数据"
 
 #: src/picture.c
 msgid "The mask file specified is not the same size as image from camera."
@@ -3124,8 +3198,7 @@ msgstr "X偏移 %d"
 #: src/track.c
 #, c-format
 msgid ""
-"X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command "
-"%d"
+"X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command %d"
 msgstr ""
 "X cent-> x %d，cent-> y %d，reversex %d，reversey %d motorx %d data %d命令 %d"
 
@@ -3137,16 +3210,14 @@ msgstr "Y偏移 %d"
 #: src/track.c
 #, c-format
 msgid ""
-"Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command "
-"%d"
-msgstr ""
-"Y cent-> x %d，cent-> y %d，reversex %d，reversey %d电机 %d数据 %d命令 %d"
+"Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command %d"
+msgstr "Y cent-> x %d，cent-> y %d，reversex %d，reversey %d电机 %d数据 %d命令 %d"
 
 #: src/track.c
 #, c-format
 msgid ""
-"X-offset %d, Y-offset %d, x-position %d. y-position %d,reversex %d, reversey "
-"%d , stepsize %d"
+"X-offset %d, Y-offset %d, x-position %d. y-position %d,reversex %d, reversey %d , "
+"stepsize %d"
 msgstr "X偏移 %d，Y偏移 %d，x位置 %d。y位置 %d，反向x %d，反向 %d，逐步调整 %d"
 
 #: src/track.c
@@ -3523,7 +3594,7 @@ msgstr "未指定摄像头设备（MMAL，Netcam，V4L2，BKTR）"
 #: src/video_loopback.c
 #, c-format
 msgid "Failed to open '%s'"
-msgstr "无法打开\" %s\""
+msgstr "无法打开 '%s' "
 
 #: src/video_loopback.c
 #, c-format
@@ -3610,10 +3681,9 @@ msgstr "控件类型尚不支持"
 #: src/video_v4l2.c
 #, c-format
 msgid ""
-"Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input "
-"value in conf by -1"
-msgstr ""
-"无法查询输入 %d。VIDIOC ENUMINPUT，如果您使用WEBCAM更改输入conf中的值是-1"
+"Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input value "
+"in conf by -1"
+msgstr "无法查询输入 %d。VIDIOC ENUMINPUT，如果您使用WEBCAM更改输入conf中的值是-1"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3728,8 +3798,7 @@ msgid "Adjusting to height (%d)"
 msgstr "调整至高度（ %d）"
 
 #: src/video_v4l2.c
-msgid ""
-"H264(21) format not supported via videodevice.  Changing to default palette"
+msgid "H264(21) format not supported via videodevice.  Changing to default palette"
 msgstr "视频设备不支持H264（21）格式。更改为默认调色板"
 
 #: src/video_v4l2.c
@@ -4200,5 +4269,5 @@ msgstr "无法获取图像流。"
 
 #: src/webu_text.c
 #, c-format
-msgid "'%s' option is depreciated.  New option name is `%s'"
-msgstr "' %s'选项已弃用。新选项名称为\" %s\""
+msgid "'%s' option is depreciated.  New option name is '%s'"
+msgstr "' %s'选项已弃用。新选项名称为 '%s'"

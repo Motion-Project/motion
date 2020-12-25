@@ -1,16 +1,34 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*      video_common.c
  *
  *      Video stream functions for motion.
  *      Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
  *                2006 by Krzysztof Blaszkowski (kb@sysmikro.com.pl)
  *                2007 by Angel Carpintero (motiondevelop@gmail.com)
- *      This software is distributed under the GNU public license version 2
- *      See also the file 'COPYING'.
  *
  */
 #include "translate.h"
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include "video_common.h"
+#include "netcam.h"
+#include "netcam_rtsp.h"
 #include "video_v4l2.h"
 #include "video_bktr.h"
 #include "jpegutils.h"
@@ -425,12 +443,12 @@ int vid_mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
      Some cameras are sending multiple SOIs in the buffer.
      Move the pointer to the last SOI in the buffer and proceed.
     */
-    while (ptr_buffer != NULL && ((size - soi_pos - 1) > 2) ){
+    while (ptr_buffer != NULL && ((size - soi_pos - 1) > 2)) {
         soi_pos = ptr_buffer - cap_map;
         ptr_buffer = memmem(cap_map + soi_pos + 1, size - soi_pos - 1, "\xff\xd8", 2);
     }
 
-    if (soi_pos != 0){
+    if (soi_pos != 0) {
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("SOI position adjusted by %d bytes."), soi_pos);
     }
 
@@ -483,156 +501,42 @@ void vid_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
 
 }
 
-static void vid_parms_add(struct vdev_context *vdevctx, char *config_name, char *config_val){
+/* vid_parms_parse
+ * Parse the video_params into an array.
+*/
+void vid_parms_parse(struct context *cnt)
+{
 
-    /* Add the parameter and value to our user control array*/
-    struct vdev_usrctrl_ctx *tmp;
     int indx;
 
-    tmp = mymalloc(sizeof(struct vdev_usrctrl_ctx)*(vdevctx->usrctrl_count+1));
-    for (indx=0;indx<vdevctx->usrctrl_count;indx++){
-        tmp[indx].ctrl_name = mymalloc(strlen(vdevctx->usrctrl_array[indx].ctrl_name)+1);
-        sprintf(tmp[indx].ctrl_name,"%s",vdevctx->usrctrl_array[indx].ctrl_name);
-        free(vdevctx->usrctrl_array[indx].ctrl_name);
-        vdevctx->usrctrl_array[indx].ctrl_name=NULL;
-        tmp[indx].ctrl_value = vdevctx->usrctrl_array[indx].ctrl_value;
-    }
-    if (vdevctx->usrctrl_array != NULL){
-      free(vdevctx->usrctrl_array);
-      vdevctx->usrctrl_array =  NULL;
+    if (cnt->vdev->update_params == FALSE) {
+        return;
     }
 
-    vdevctx->usrctrl_array = tmp;
-    vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_name = mymalloc(strlen(config_name)+1);
-    sprintf(vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_name,"%s",config_name);
-    vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_value=atoi(config_val);
-    vdevctx->usrctrl_count++;
+    /* Put in the user specified parameters */
+    util_parms_parse(cnt->vdev, cnt->conf.video_params);
 
-}
+    /* Now add any missing default items */
+    util_parms_add_default(cnt->vdev,"palette","17");
+    util_parms_add_default(cnt->vdev,"input","-1");
+    util_parms_add_default(cnt->vdev,"norm","0");
+    util_parms_add_default(cnt->vdev,"frequency","0");
 
-int vid_parms_parse(struct context *cnt){
-
-    /* Parse through the configuration option to get values
-     * The values are separated by commas but may also have
-     * double quotes around the names which include a comma.
-     * Examples:
-     * vid_control_parms ID01234= 1, ID23456=2
-     * vid_control_parms "Brightness, auto" = 1, ID23456=2
-     * vid_control_parms ID23456=2, "Brightness, auto" = 1,ID2222=5
-     */
-    int indx_parm;
-    int parmval_st , parmval_len;
-    int parmdesc_st, parmdesc_len;
-    int qte_open;
-    struct vdev_context *vdevctx;
-    char tst;
-    char *parmdesc, *parmval;
-
-    if (!cnt->vdev->update_parms) return 0;
-
-    vdevctx = cnt->vdev;
-
-    for (indx_parm=0;indx_parm<vdevctx->usrctrl_count;indx_parm++){
-        free(vdevctx->usrctrl_array[indx_parm].ctrl_name);
-        vdevctx->usrctrl_array[indx_parm].ctrl_name=NULL;
-    }
-    if (vdevctx->usrctrl_array != NULL){
-      free(vdevctx->usrctrl_array);
-      vdevctx->usrctrl_array = NULL;
-    }
-    vdevctx->usrctrl_count = 0;
-
-    if (cnt->conf.vid_control_params != NULL){
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Parsing controls: %s"),cnt->conf.vid_control_params);
-
-        indx_parm = 0;
-        parmdesc_st  = parmval_st  = -1;
-        parmdesc_len = parmval_len = 0;
-        qte_open = FALSE;
-        parmdesc = parmval = NULL;
-        tst = cnt->conf.vid_control_params[indx_parm];
-        while (tst != '\0') {
-            if (!qte_open) {
-                if (tst == '\"') {                    /* This is the opening quotation */
-                    qte_open = TRUE;
-                    parmdesc_st = indx_parm + 1;
-                    parmval_st  = -1;
-                    parmdesc_len = parmval_len = 0;
-                    if (parmdesc != NULL) free(parmdesc);
-                    if (parmval  != NULL) free(parmval);
-                    parmdesc = parmval = NULL;
-                } else if (tst == ','){               /* Designator for next parm*/
-                    if ((parmval_st >= 0) && (parmval_len > 0)){
-                        if (parmval  != NULL) free(parmval);
-                        parmval = mymalloc(parmval_len);
-                        snprintf(parmval, parmval_len,"%s",&cnt->conf.vid_control_params[parmval_st]);
-                    }
-                    parmdesc_st  = indx_parm + 1;
-                    parmval_st  = -1;
-                    parmdesc_len = parmval_len = 0;
-                } else if (tst == '='){               /* Designator for end of desc and start of value*/
-                    if ((parmdesc_st >= 0) && (parmdesc_len > 0)) {
-                        if (parmdesc != NULL) free(parmdesc);
-                        parmdesc = mymalloc(parmdesc_len);
-                        snprintf(parmdesc, parmdesc_len,"%s",&cnt->conf.vid_control_params[parmdesc_st]);
-                    }
-                    parmdesc_st = -1;
-                    parmval_st = indx_parm + 1;
-                    parmdesc_len = parmval_len = 0;
-                    if (parmval != NULL) free(parmval);
-                    parmval = NULL;
-                } else if (tst == ' '){               /* Skip leading spaces */
-                    if (indx_parm == parmdesc_st) parmdesc_st++;
-                    if (indx_parm == parmval_st) parmval_st++;
-                } else if (tst != ' '){               /* Revise the length making sure it is not a space*/
-                    parmdesc_len = indx_parm - parmdesc_st + 2;
-                    parmval_len = indx_parm - parmval_st + 2;
-                    if (parmdesc_st == -1) parmdesc_st = indx_parm;
-                }
-            } else if (tst == '\"') {                /* This is the closing quotation */
-                parmdesc_len = indx_parm - parmdesc_st + 1;
-                if (parmdesc_len > 0 ){
-                    if (parmdesc != NULL) free(parmdesc);
-                    parmdesc = mymalloc(parmdesc_len);
-                    snprintf(parmdesc, parmdesc_len,"%s",&cnt->conf.vid_control_params[parmdesc_st]);
-                }
-                parmdesc_st = -1;
-                parmval_st = indx_parm + 1;
-                parmdesc_len = parmval_len = 0;
-                if (parmval != NULL) free(parmval);
-                parmval = NULL;
-                qte_open = FALSE;   /* Reset the open/close on quotation */
-            }
-            if ((parmdesc != NULL) && (parmval  != NULL)){
-                vid_parms_add(vdevctx, parmdesc, parmval);
-                free(parmdesc);
-                free(parmval);
-                parmdesc = parmval = NULL;
-            }
-
-            indx_parm++;
-            tst = cnt->conf.vid_control_params[indx_parm];
+    for (indx = 0; indx < cnt->vdev->params_count; indx++) {
+        if (mystreq(cnt->vdev->params_array[indx].param_name, "input")) {
+            cnt->param_input = atoi(cnt->vdev->params_array[indx].param_value);
         }
-        /* Process the last parameter */
-        if ((parmval_st >= 0) && (parmval_len > 0)){
-            if (parmval  != NULL) free(parmval);
-            parmval = mymalloc(parmval_len+1);
-            snprintf(parmval, parmval_len,"%s",&cnt->conf.vid_control_params[parmval_st]);
+        if (mystreq(cnt->vdev->params_array[indx].param_name, "norm")) {
+            cnt->param_norm = atoi(cnt->vdev->params_array[indx].param_value);
         }
-        if ((parmdesc != NULL) && (parmval  != NULL)){
-            vid_parms_add(vdevctx, parmdesc, parmval);
-            free(parmdesc);
-            free(parmval);
-            parmdesc = parmval = NULL;
+        if (mystreq(cnt->vdev->params_array[indx].param_name, "frequency")) {
+            cnt->param_freq = atol(cnt->vdev->params_array[indx].param_value);
         }
-
-        if (parmdesc != NULL) free(parmdesc);
-        if (parmval  != NULL) free(parmval);
     }
 
-    cnt->vdev->update_parms = FALSE;
+    cnt->vdev->update_params = FALSE;
 
-    return 0;
+    return;
 
 }
 
@@ -648,16 +552,17 @@ void vid_mutex_destroy(void)
     bktr_mutex_destroy();
 }
 
-void vid_close(struct context *cnt) {
+void vid_close(struct context *cnt)
+{
 
-#ifdef HAVE_MMAL
-    if (cnt->mmalcam) {
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling mmalcam_cleanup"));
-        mmalcam_cleanup(cnt->mmalcam);
-        cnt->mmalcam = NULL;
-        return;
-    }
-#endif
+    #ifdef HAVE_MMAL
+        if (cnt->mmalcam) {
+            MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling mmalcam_cleanup"));
+            mmalcam_cleanup(cnt->mmalcam);
+            cnt->mmalcam = NULL;
+            return;
+        }
+    #endif
 
     if (cnt->netcam) {
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling netcam_cleanup"));
@@ -712,21 +617,22 @@ void vid_close(struct context *cnt) {
  *     -1 if failed to open device.
  *     -3 image dimensions are not modulo 8
  */
-int vid_start(struct context *cnt) {
+int vid_start(struct context *cnt)
+{
     int dev = -1;
 
-#ifdef HAVE_MMAL
-    if (cnt->camera_type == CAMERA_TYPE_MMAL) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening MMAL cam"));
-        dev = mmalcam_start(cnt);
-        if (dev < 0) {
-            mmalcam_cleanup(cnt->mmalcam);
-            cnt->mmalcam = NULL;
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("MMAL cam failed to open"));
+    #ifdef HAVE_MMAL
+        if (cnt->camera_type == CAMERA_TYPE_MMAL) {
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening MMAL cam"));
+            dev = mmalcam_start(cnt);
+            if (dev < 0) {
+                mmalcam_cleanup(cnt->mmalcam);
+                cnt->mmalcam = NULL;
+                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("MMAL cam failed to open"));
+            }
+            return dev;
         }
-        return dev;
-    }
-#endif
+    #endif
 
     if (cnt->camera_type == CAMERA_TYPE_NETCAM) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening Netcam"));
@@ -793,27 +699,30 @@ int vid_start(struct context *cnt) {
  *    with bit 0 set            Non fatal V4L error (copy grey image and discard this image)
  *    with bit 1 set            Non fatal Netcam error
  */
-int vid_next(struct context *cnt, struct image_data *img_data){
+int vid_next(struct context *cnt, struct image_data *img_data)
+{
 
-#ifdef HAVE_MMAL
-     if (cnt->camera_type == CAMERA_TYPE_MMAL) {
-        if (cnt->mmalcam == NULL) {
-            return NETCAM_GENERAL_ERROR;
+    #ifdef HAVE_MMAL
+        if (cnt->camera_type == CAMERA_TYPE_MMAL) {
+            if (cnt->mmalcam == NULL) {
+                return NETCAM_GENERAL_ERROR;
+            }
+            return mmalcam_next(cnt, img_data);
         }
-        return mmalcam_next(cnt, img_data);
-    }
-#endif
+    #endif
 
     if (cnt->camera_type == CAMERA_TYPE_NETCAM) {
-        if (cnt->video_dev == -1)
+        if (cnt->video_dev == -1) {
             return NETCAM_GENERAL_ERROR;
+        }
 
         return netcam_next(cnt, img_data);
     }
 
     if (cnt->camera_type == CAMERA_TYPE_RTSP) {
-        if (cnt->video_dev == -1)
+        if (cnt->video_dev == -1) {
             return NETCAM_GENERAL_ERROR;
+        }
 
         return netcam_rtsp_next(cnt, img_data);
     }

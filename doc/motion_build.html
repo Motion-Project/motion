@@ -196,15 +196,15 @@
       </ul>
       FreeBSD
       <ul>
-          <code><strong>sudo pkg install autoconf pkgconf automake autopoint gmake git ffmpeg gettext libmicrohttpd </strong></code>
+          <code><strong>sudo pkg install autoconf pkgconf automake git ffmpeg gettext libmicrohttpd </strong></code>
           <p></p>
           <code><strong>cd ~</strong></code>
           <br /><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
           <br /><code><strong>cd motion</strong></code>
           <br /><code><strong>autoreconf -fiv</strong></code>
           <br /><code><strong>./configure</strong></code>
-          <br /><code><strong>gmake</strong></code>
-          <br /><code><strong>gmake install</strong></code>
+          <br /><code><strong>make</strong></code>
+          <br /><code><strong>sudo make install</strong></code>
           <p></p>
       </ul>
       Mac OS X
@@ -382,7 +382,7 @@
         <li>Required packages</li>
           <ul>
             <p></p>
-            <code><strong> sudo pkg install autoconf pkgconf automake autopoint gmake git gettext libmicrohttpd</strong></code>
+            <code><strong> sudo pkg install autoconf pkgconf automake git gettext libmicrohttpd</strong></code>
             <p></p>
           </ul>
         <li>Optional packages</li>
@@ -456,11 +456,13 @@
       <p></p>
       <p></p>
 
-      <h4><a name="BUILD_CENTOS"></a>CentOS 7</a> </h4>
+      <h4><a name="BUILD_CENTOS"></a>CentOS 8</a> </h4>
       <ul>
         <li>Required</li>
         <ul>
           <p></p>
+          <code><strong>sudo yum install dnf-plugins-core</strong></code>
+          <code><strong>yum config-manager --set-enabled PowerTools</strong></code>
           <code><strong>sudo yum groupinstall 'Development Tools'</strong></code>
           <p></p>
           <code><strong>sudo yum install libjpeg-turbo libjpeg-turbo-devel gettext libmicrohttpd-devel</strong></code>
@@ -474,7 +476,7 @@
           <li>FFMpeg Functionality(Required for creating movies, using network cameras, etc.  SEE NOTE BELOW!)</li>
           <ul>
             <p></p>
-            <code><strong>sudo yum localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-7.noarch.rpm</strong></code>
+            <code><strong>sudo yum localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm</strong></code>
             <p></p>
             <code><strong>sudo yum install ffmpeg ffmpeg-devel</strong></code>
             <p></p>
@@ -488,13 +490,13 @@
           <li>MariaDB database functionality</li>
           <ul>
             <p></p>
-            <code><strong>Not known by author</strong></code>
+            <code><strong>sudo yum install mariadb-devel</strong></code>
             <p></p>
           </ul>
           <li>PostgreSQL database functionality</li>
           <ul>
             <p></p>
-            <code><strong>Not known by author</strong></code>
+            <code><strong>sudo yum install postgresql-devel</strong></code>
             <p></p>
           </ul>
           <li>SQLite3 database functionality</li>
@@ -506,7 +508,7 @@
           <li>Webp Image Support</li>
           <ul>
             <p></p>
-            <code><strong>Not known by author</strong></code>
+            <code><strong>sudo yum install libwebp-devel</strong></code>
             <p></p>
           </ul>
         </ul>
@@ -843,7 +845,7 @@
     <ul>
       Once the configure script has successfully finished and indicates all options desired, a 'makefile' is created.
       The makefile builds the Motion program and links in all of the required libraries. To run the makefile on most
-      distributions, type: <code>make</code>  For FreeBSD distributions use <code>gmake</code>
+      distributions, type: <code>make</code>
       <p></p>
       The makefile will go through each of the files and compile them.  Depending upon the source code obtained, there may be
       warnings or usually none.
@@ -877,8 +879,7 @@
 
     <h3><a name="Make_Install"></a>  Make Install </h3>
     <ul>
-      For most distributions type <code>make install</code> to install the files.  For FreeBSD systems, use
-      <code>gmake install</code>
+      Type <code>make install</code> to install the files.
       <p></p>
       These commands create the required directories and copy the files into the following locations. (default directories):
       <ul>
@@ -939,7 +940,7 @@
       </dl>
       <p></p>
        <dl>
-        <dt> <strong>make check</strong> </dt>
+        <dt> <strong>maintainer-check</strong> </dt>
         <dd> Executes multiple configure and make using the developer flags for various combinations of the configure flags</dd>
       </dl>
       <p></p>

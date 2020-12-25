@@ -1,5 +1,6 @@
 AC_INIT(motion, esyscmd(['./scripts/version.sh']))
 AM_INIT_AUTOMAKE([subdir-objects foreign])
+AM_MAINTAINER_MODE([enable])
 AC_PROG_CC
 AC_PROG_CXX
 AC_GNU_SOURCE
@@ -9,7 +10,7 @@ AC_CANONICAL_HOST
 AC_CONFIG_MACRO_DIR([m4])
 
 AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION([0.18])
+AM_GNU_GETTEXT_VERSION([0.19])
 
 ##############################################################################
 ###  Check additional system headers
@@ -36,7 +37,7 @@ AS_IF([test "${PKGCONFIG}" = "no" ],[
 ###  Check pthread
 ##############################################################################
 AC_CHECK_HEADERS(pthread.h,,AC_MSG_ERROR([pthread is required.]))
-CFLAGS="${CFLAGS} -D_THREAD_SAFE "
+TEMP_CFLAGS="-D_THREAD_SAFE"
 LIBS="$LIBS -pthread "
 
 ##############################################################################
@@ -464,9 +465,9 @@ AS_IF([test "${PROTOTYPE_FLAGS}" = "yes"], [
 )
 
 
-CFLAGS="$CFLAGS $TEMP_CFLAGS"
+AC_SUBST(AM_CFLAGS, "$TEMP_CFLAGS")
 LIBS="$LIBS $TEMP_LIBS"
-LDFLAGS="$TEMP_LDFLAGS"
+AC_SUBST(AM_LDFLAGS, "$TEMP_LDFLAGS")
 
 AC_CONFIG_FILES([
 	Makefile
@@ -494,11 +495,11 @@ echo "      Configure status       "
 echo "      ${PACKAGE_NAME} ${PACKAGE_VERSION}"
 echo "   **************************"
 echo
-echo "CFLAGS: $CFLAGS"
+echo "CFLAGS: $TEMP_CFLAGS $CFLAGS"
 echo
 echo "LIBS: $LIBS"
 echo
-echo "LDFLAGS: $LDFLAGS"
+echo "LDFLAGS: $TEMP_LDFLAGS $LDFLAGS"
 echo
 echo
 echo "OS                  : $host_os"

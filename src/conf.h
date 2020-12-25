@@ -1,3 +1,19 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  *
  * conf.h - function prototypes for the config handling routines
@@ -6,8 +22,6 @@
  *
  * Copyright 2000 Jeroen Vreeken (pe1rxq@chello.nl)
  *
- * This software is licensed under the terms of the GNU General
- * Public License (GPL). Please see the file COPYING for details.
  *
  *
  */
@@ -16,8 +30,8 @@
 #define _INCLUDE_CONF_H
 
 /*
- * More parameters may be added later.
- */
+* More parameters may be added later.
+*/
 struct config {
     /* Overall system configuration parameters */
     /* daemon is directly cast into the cnt context rather than conf */
@@ -35,11 +49,7 @@ struct config {
 
     /* Capture device configuration parameters */
     const char      *video_device;
-    char            *vid_control_params;
-    int             v4l2_palette;
-    int             input;
-    int             norm;
-    unsigned long   frequency;
+    char            *video_params;
     int             auto_brightness;
     const char      *tuner_device;
     int             roundrobin_frames;
@@ -47,16 +57,13 @@ struct config {
     int             roundrobin_switchfilter;
 
     const char      *netcam_url;
-    const char      *netcam_highres;
+    char            *netcam_params;
+    const char      *netcam_high_url;
+    char            *netcam_high_params;
     const char      *netcam_userpass;
-    const char      *netcam_keepalive;
-    const char      *netcam_proxy;
-    int             netcam_tolerant_check;
-    int             netcam_use_tcp;
-    char            *netcam_decoder;
 
     const char      *mmalcam_name;
-    const char      *mmalcam_control_params;
+    const char      *mmalcam_params;
 
     /* Image processing configuration parameters */
     int             width;
@@ -225,15 +232,13 @@ typedef struct {
 
 extern dep_config_param dep_config_params[];
 
-struct context **conf_load(struct context **);
-struct context **copy_string(struct context **, const char *, int);
-struct context **copy_uri(struct context **, const char *, int);
-struct context **conf_cmdparse(struct context **, const char *, const char *);
-struct context **read_camera_dir(struct context **, const char *, int);
+struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char *arg1);
+void conf_print(struct context **cnt);
+struct context **conf_load(struct context **cnt);
 void conf_output_parms(struct context **cnt);
-const char *config_type(config_param *);
-void conf_print(struct context **);
-char *mystrdup(const char *);
-char *mystrcpy(char *, const char *);
+struct context **copy_string(struct context **cnt, const char *str, int val_ptr);
+struct context **copy_uri(struct context **cnt, const char *str, int val);
+const char *config_type(config_param *configparam);
+struct context **read_camera_dir(struct context **cnt, const char *str, int val);
 
 #endif /* _INCLUDE_CONF_H */

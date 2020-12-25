@@ -1,3 +1,19 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  *    rotate.h
  *
@@ -5,13 +21,9 @@
  *
  *    Copyright 2004-2005, Per Jonsson (per@pjd.nu)
  *
- *    This software is distributed under the GNU Public license
- *    Version 2.  See also the file 'COPYING'.
  */
 #ifndef _INCLUDE_ROTATE_H
 #define _INCLUDE_ROTATE_H
-
-#include "motion.h" /* for struct context */
 
 /**
  * rotate_init

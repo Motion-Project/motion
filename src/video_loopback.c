@@ -1,15 +1,31 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  *    video_loopback.c
  *
  *    Video loopback functions for motion.
  *    Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
  *    Copyright 2008 by Angel Carpintero (motiondevelop@gmail.com)
- *    This software is distributed under the GNU public license version 2
- *    See also the file 'COPYING'.
  *
  */
 #include "translate.h"
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 
 #if (defined(HAVE_V4L2)) && (!defined(BSD))
 
@@ -72,7 +88,9 @@ static int vlp_open_vidpipe(void)
 
                 if ((tfd = open(buffer, O_RDWR|O_CLOEXEC)) >= 0) {
                     strncpy(pipepath, buffer, sizeof(pipepath));
-                    if (pipe_fd >= 0) close(pipe_fd);
+                    if (pipe_fd >= 0) {
+                        close(pipe_fd);
+                    }
                     pipe_fd = tfd;
                     break;
                 }
@@ -83,8 +101,9 @@ static int vlp_open_vidpipe(void)
 
     closedir(dir);
 
-    if (pipe_fd >= 0)
-      MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opened %s as pipe output"), pipepath);
+    if (pipe_fd >= 0) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opened %s as pipe output"), pipepath);
+    }
 
     return pipe_fd;
 }
@@ -120,7 +139,8 @@ typedef struct capent {const char *cap; int code;} capentT;
         {"Last",0}
 };
 
-static void vlp_show_vcap(struct v4l2_capability *cap) {
+static void vlp_show_vcap(struct v4l2_capability *cap)
+{
     unsigned int vers = cap->version;
     unsigned int c    = cap->capabilities;
     int i;
@@ -131,13 +151,16 @@ static void vlp_show_vcap(struct v4l2_capability *cap) {
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.bus_info: %s",cap->bus_info);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.card:     %u.%u.%u",(vers >> 16) & 0xFF,(vers >> 8) & 0xFF,vers & 0xFF);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Device capabilities");
-    for (i=0;cap_list[i].code;i++)
-        if (c & cap_list[i].code)
+    for (i=0;cap_list[i].code;i++) {
+        if (c & cap_list[i].code) {
             MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s",cap_list[i].cap);
+        }
+    }
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "------------------------");
 }
 
-static void vlp_show_vfmt(struct v4l2_format *v) {
+static void vlp_show_vfmt(struct v4l2_format *v)
+{
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "type: type:           %d",v->type);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.width:        %d",v->fmt.pix.width);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.height:       %d",v->fmt.pix.height);
@@ -155,7 +178,7 @@ int vlp_startpipe(const char *dev_name, int width, int height)
     struct v4l2_format v;
     struct v4l2_capability vc;
 
-    if (!strcmp(dev_name, "-")) {
+    if (mystreq(dev_name, "-")) {
         dev = vlp_open_vidpipe();
     } else {
         dev = open(dev_name, O_RDWR|O_CLOEXEC);

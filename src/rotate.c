@@ -1,12 +1,25 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  *    rotate.c
  *
  *    Module for handling image rotation.
  *
  *    Copyright 2004-2005, Per Jonsson (per@pjd.nu)
- *
- *    This software is distributed under the GNU Public license
- *    Version 2.  See also the file 'COPYING'.
  *
  *    Image rotation is a feature of Motion that can be used when the
  *    camera is mounted upside-down or on the side. The module only
@@ -30,22 +43,25 @@
  *      v1 (28-Aug-2004) - initial version
  */
 #include "translate.h"
+#include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include "rotate.h"
 #include <stdint.h>
 #if defined(__APPLE__)
-#include <libkern/OSByteOrder.h>
-#define bswap_32(x) OSSwapInt32(x)
+    #include <libkern/OSByteOrder.h>
+    #define bswap_32(x) OSSwapInt32(x)
 #elif defined(__FreeBSD__)
-#include <sys/endian.h>
-#define bswap_32(x) bswap32(x)
+    #include <sys/endian.h>
+    #define bswap_32(x) bswap32(x)
 #elif defined(__OpenBSD__)
-#include <sys/types.h>
-#define bswap_32(x) swap32(x)
+    #include <sys/types.h>
+    #define bswap_32(x) swap32(x)
 #elif defined(__NetBSD__)
-#include <sys/bswap.h>
-#define bswap_32(x) bswap32(x)
+    #include <sys/bswap.h>
+    #define bswap_32(x) bswap32(x)
 #else
-#include <byteswap.h>
+    #include <byteswap.h>
 #endif
 
 /**
@@ -74,7 +90,8 @@ static void reverse_inplace_quad(unsigned char *src, int size)
     }
 }
 
-static void flip_inplace_horizontal(unsigned char *src, int width, int height) {
+static void flip_inplace_horizontal(unsigned char *src, int width, int height)
+{
     uint8_t *nsrc, *ndst;
     register uint8_t tmp;
     int l,w;
@@ -125,8 +142,8 @@ static void flip_inplace_vertical(unsigned char *src, int width, int height)
  *
  * Returns: nothing
  */
-static void rot90cw(unsigned char *src, register unsigned char *dst, int size,
-                    int width, int height)
+static void rot90cw(unsigned char *src, register unsigned char *dst
+            ,int size, int width, int height)
 {
     unsigned char *endp;
     register unsigned char *base;
@@ -135,9 +152,9 @@ static void rot90cw(unsigned char *src, register unsigned char *dst, int size,
     endp = src + size;
     for (base = endp - width; base < endp; base++) {
         src = base;
-        for (j = 0; j < height; j++, src -= width)
+        for (j = 0; j < height; j++, src -= width) {
             *dst++ = *src;
-
+        }
     }
 }
 
@@ -158,8 +175,8 @@ static void rot90cw(unsigned char *src, register unsigned char *dst, int size,
  *
  * Returns: nothing
  */
-static inline void rot90ccw(unsigned char *src, register unsigned char *dst,
-                            int size, int width, int height)
+static inline void rot90ccw(unsigned char *src, register unsigned char *dst
+            ,int size, int width, int height)
 {
     unsigned char *endp;
     register unsigned char *base;
@@ -169,9 +186,9 @@ static inline void rot90ccw(unsigned char *src, register unsigned char *dst,
     dst = dst + size - 1;
     for (base = endp - width; base < endp; base++) {
         src = base;
-        for (j = 0; j < height; j++, src -= width)
+        for (j = 0; j < height; j++, src -= width) {
             *dst-- = *src;
-
+        }
     }
 }
 
@@ -187,7 +204,8 @@ static inline void rot90ccw(unsigned char *src, register unsigned char *dst,
  *
  * Returns: nothing
  */
-void rotate_init(struct context *cnt){
+void rotate_init(struct context *cnt)
+{
     int size_norm, size_high;
 
     /* Make sure buffer_norm isn't freed if it hasn't been allocated. */
@@ -251,15 +269,19 @@ void rotate_init(struct context *cnt){
      * If we're not rotating, let's exit once we have setup the capture dimensions
      * and output dimensions properly.
      */
-    if (cnt->rotate_data.degrees == 0) return;
+    if (cnt->rotate_data.degrees == 0) {
+        return;
+    }
 
     /*
      * Allocate memory if rotating 90 or 270 degrees, because those rotations
      * cannot be performed in-place (they can, but it would be too slow).
      */
-    if ((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270)){
+    if ((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270)) {
         cnt->rotate_data.buffer_norm = mymalloc(size_norm);
-        if (size_high > 0 ) cnt->rotate_data.buffer_high = mymalloc(size_high);
+        if (size_high > 0) {
+            cnt->rotate_data.buffer_high = mymalloc(size_high);
+        }
     }
 
 }
@@ -275,13 +297,16 @@ void rotate_init(struct context *cnt){
  *
  * Returns: nothing
  */
-void rotate_deinit(struct context *cnt){
+void rotate_deinit(struct context *cnt)
+{
 
-    if (cnt->rotate_data.buffer_norm)
+    if (cnt->rotate_data.buffer_norm) {
         free(cnt->rotate_data.buffer_norm);
+    }
 
-    if (cnt->rotate_data.buffer_high)
+    if (cnt->rotate_data.buffer_high) {
         free(cnt->rotate_data.buffer_high);
+    }
 }
 
 /**
@@ -299,7 +324,8 @@ void rotate_deinit(struct context *cnt){
  *   0  - success
  *   -1 - failure (shouldn't happen)
  */
-int rotate_map(struct context *cnt, struct image_data *img_data){
+int rotate_map(struct context *cnt, struct image_data *img_data)
+{
     /*
      * The image format is YUV 4:2:0 planar, which has the pixel
      * data is divided in three parts:
@@ -316,11 +342,15 @@ int rotate_map(struct context *cnt, struct image_data *img_data){
     unsigned char *img;
     unsigned char *temp_buff;
 
-    if (cnt->rotate_data.degrees == 0 && cnt->rotate_data.axis == FLIP_TYPE_NONE) return 0;
+    if (cnt->rotate_data.degrees == 0 && cnt->rotate_data.axis == FLIP_TYPE_NONE) {
+        return 0;
+    }
 
     indx = 0;
     indx_max = 0;
-    if ((cnt->rotate_data.capture_width_high != 0) && (cnt->rotate_data.capture_height_high != 0)) indx_max = 1;
+    if ((cnt->rotate_data.capture_width_high != 0) && (cnt->rotate_data.capture_height_high != 0)) {
+        indx_max = 1;
+    }
 
     while (indx <= indx_max) {
         deg = cnt->rotate_data.degrees;
@@ -328,7 +358,7 @@ int rotate_map(struct context *cnt, struct image_data *img_data){
         wh4 = 0;
         w2 = 0;
         h2 = 0;
-        if (indx == 0 ){
+        if (indx == 0) {
             img = img_data->image_norm;
             width = cnt->rotate_data.capture_width_norm;
             height = cnt->rotate_data.capture_height_norm;

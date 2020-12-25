@@ -1,3 +1,19 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  * mmalcam.c
  *
@@ -6,13 +22,14 @@
  *    Built upon functionality from the Raspberry Pi userland utility raspivid.
  *
  *    Copyright 2013 by Nicholas Tuckett
- *    This software is distributed under the GNU public license version 2
- *    See also the file 'COPYING'.
  *
  */
 
 #include "translate.h"
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
+#include "netcam.h"
 #include "rotate.h"
 
 #ifdef HAVE_MMAL
@@ -39,12 +56,12 @@
 
 const int MAX_BITRATE = 30000000; // 30Mbits/s
 
-static void parse_camera_control_params(const char *control_params_str, RASPICAM_CAMERA_PARAMETERS *camera_params)
+static void parse_camera_params(const char *params_str, RASPICAM_CAMERA_PARAMETERS *camera_params)
 {
-    char *control_params_tok = alloca(strlen(control_params_str) + 1);
-    strcpy(control_params_tok, control_params_str);
+    char *params_tok = alloca(strlen(params_str) + 1);
+    strcpy(params_tok, params_str);
 
-    char *next_param = strtok(control_params_tok, " ");
+    char *next_param = strtok(params_tok, " ");
 
     while (next_param != NULL) {
         char *param_val = strtok(NULL, " ");
@@ -65,6 +82,8 @@ static void check_disable_port(MMAL_PORT_T *port)
 
 static void camera_control_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 {
+    (void)port;
+
     if (buffer->cmd != MMAL_EVENT_PARAMETER_CHANGED) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("Received unexpected camera control callback event, 0x%08x"), buffer->cmd);
@@ -96,7 +115,7 @@ static void set_video_port_format(mmalcam_context_ptr mmalcam, MMAL_ES_FORMAT_T 
     set_port_format(mmalcam, format);
     format->es->video.frame_rate.num = mmalcam->framerate;
     format->es->video.frame_rate.den = VIDEO_FRAME_RATE_DEN;
-    if (mmalcam->framerate > 30){
+    if (mmalcam->framerate > 30) {
         /* The pi noir camera could not determine autoexpose at high frame rates */
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, _("A high frame rate can cause problems with exposure of images"));
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, _("If autoexposure is not working, try a lower frame rate."));
@@ -296,8 +315,8 @@ int mmalcam_start(struct context *cnt)
     mmalcam->height = cnt->conf.height;
     mmalcam->framerate = cnt->conf.framerate;
 
-    if (cnt->conf.mmalcam_control_params) {
-        parse_camera_control_params(cnt->conf.mmalcam_control_params, mmalcam->camera_parameters);
+    if (cnt->conf.mmalcam_params) {
+        parse_camera_params(cnt->conf.mmalcam_params, mmalcam->camera_parameters);
     }
 
     cnt->imgs.width = mmalcam->width;
@@ -386,15 +405,16 @@ int mmalcam_next(struct context *cnt,  struct image_data *img_data)
 {
     mmalcam_context_ptr mmalcam;
 
-    if ((!cnt) || (!cnt->mmalcam))
+    if ((!cnt) || (!cnt->mmalcam)) {
         return NETCAM_FATAL_ERROR;
+    }
 
     mmalcam = cnt->mmalcam;
 
     MMAL_BUFFER_HEADER_T *camera_buffer = mmal_queue_wait(mmalcam->camera_buffer_queue);
 
     if (camera_buffer->cmd == 0 && (camera_buffer->flags & MMAL_BUFFER_HEADER_FLAG_FRAME_END)
-            && camera_buffer->length >= cnt->imgs.size_norm) {
+            && (int)camera_buffer->length >= cnt->imgs.size_norm) {
         mmal_buffer_header_mem_lock(camera_buffer);
         memcpy(img_data->image_norm, camera_buffer->data, cnt->imgs.size_norm);
         mmal_buffer_header_mem_unlock(camera_buffer);
@@ -415,9 +435,10 @@ int mmalcam_next(struct context *cnt,  struct image_data *img_data)
             status = mmal_port_send_buffer(mmalcam->camera_capture_port, new_buffer);
         }
 
-        if (!new_buffer || status != MMAL_SUCCESS)
+        if (!new_buffer || status != MMAL_SUCCESS) {
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 ,_("Unable to return a buffer to the camera video port"));
+        }
     }
 
     rotate_map(cnt,img_data);

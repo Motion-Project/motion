@@ -1,3 +1,19 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  *  jpegutils.c: Some Utility programs for dealing with JPEG encoded images
  *
@@ -8,19 +24,6 @@
  *  based on jdatasrc.c and jdatadst.c from the Independent
  *  JPEG Group's software by Thomas G. Lane
  *
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License
- *  as published by the Free Software Foundation; either version 2
- *  of the License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
  /*
@@ -51,6 +54,8 @@
 #include "translate.h"
 #include "config.h"
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include "jpegutils.h"
 #include "picture.h"    /* For the prepare_exif */
 #include <setjmp.h>
@@ -96,12 +101,14 @@ struct jpgutl_error_mgr {
 };
 
 /*  These huffman tables are required by the old jpeg libs included with 14.04 */
-static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr, const UINT8 *bits, const UINT8 *val){
-/* Define a Huffman table */
+static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr, const UINT8 *bits, const UINT8 *val)
+{
+    /* Define a Huffman table */
     int nsymbols, len;
 
-    if (*htblptr == NULL)
+    if (*htblptr == NULL) {
         *htblptr = jpeg_alloc_huff_table((j_common_ptr) dinfo);
+    }
 
     /* Copy the number-of-symbols-of-each-code-length counts. */
     memcpy((*htblptr)->bits, bits, sizeof((*htblptr)->bits));
@@ -113,18 +120,21 @@ static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr, const UI
      */
     nsymbols = 0;
 
-    for (len = 1; len <= 16; len++)
+    for (len = 1; len <= 16; len++) {
         nsymbols += bits[len];
+    }
 
-    if (nsymbols < 1 || nsymbols > 256)
+    if (nsymbols < 1 || nsymbols > 256) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("%s: Given jpeg buffer was too small"));
+    }
 
     memcpy((*htblptr)->huffval, val, nsymbols * sizeof(UINT8));
 }
 
-static void std_huff_tables (j_decompress_ptr dinfo){
-/* Set up the standard Huffman tables (cf. JPEG standard section K.3) */
-/* IMPORTANT: these are only valid for 8-bit data precision! */
+static void std_huff_tables (j_decompress_ptr dinfo)
+{
+    /* Set up the standard Huffman tables (cf. JPEG standard section K.3) */
+    /* IMPORTANT: these are only valid for 8-bit data precision! */
 
     static const UINT8 bits_dc_luminance[17] =
     { /* 0-base */ 0, 0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 };
@@ -210,8 +220,9 @@ static void guarantee_huff_tables(j_decompress_ptr dinfo)
  * Initialize source --- called by jpeg_read_header
  * before any data is actually read.
  */
-static void jpgutl_init_source(j_decompress_ptr cinfo ATTRIBUTE_UNUSED)
+static void jpgutl_init_source(j_decompress_ptr cinfo)
 {
+    (void)cinfo;
     /* No work necessary here */
 }
 
@@ -238,8 +249,9 @@ static boolean jpgutl_fill_input_buffer(j_decompress_ptr cinfo)
 static void jpgutl_skip_data(j_decompress_ptr cinfo, long num_bytes)
 {
     if (num_bytes > 0) {
-        if (num_bytes > (long) cinfo->src->bytes_in_buffer)
+        if (num_bytes > (long) cinfo->src->bytes_in_buffer) {
             num_bytes = (long) cinfo->src->bytes_in_buffer;
+        }
         cinfo->src->next_input_byte += (size_t) num_bytes;
         cinfo->src->bytes_in_buffer -= (size_t) num_bytes;
     }
@@ -249,8 +261,9 @@ static void jpgutl_skip_data(j_decompress_ptr cinfo, long num_bytes)
  * Terminate source --- called by jpeg_finish_decompress
  * after all data has been read.  Often a no-op.
  */
-static void jpgutl_term_source(j_decompress_ptr cinfo ATTRIBUTE_UNUSED)
+static void jpgutl_term_source(j_decompress_ptr cinfo)
 {
+    (void)cinfo;
     /* No work necessary here */
 }
 
@@ -419,10 +432,8 @@ static GLOBAL(int) _jpeg_mem_size(j_compress_ptr cinfo)
  * It must be called after jpeg_start_compress() but before
  * any image data is written by jpeg_write_scanlines().
  */
-static void put_jpeg_exif(j_compress_ptr cinfo,
-              const struct context *cnt,
-              const struct timeval *tv1,
-              const struct coord *box)
+static void put_jpeg_exif(j_compress_ptr cinfo, const struct context *cnt
+            , const struct timeval *tv1, const struct coord *box)
 {
     unsigned char *exif = NULL;
     unsigned exif_len = prepare_exif(&exif, cnt, tv1, box);
@@ -449,8 +460,8 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
  *  Return Values
  *    Success 0, Failure -1
  */
-int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
-                     unsigned int width, unsigned int height, unsigned char *volatile img_out)
+int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len
+            , unsigned int width, unsigned int height, unsigned char *volatile img_out)
 {
     JSAMPARRAY      line;           /* Array of decomp data lines */
     unsigned char  *wline;          /* Will point to line[0] */
@@ -540,15 +551,16 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
      * only a partial image could be returned which would
      * trigger many false positive motion detections
     */
-    if (jerr.warning_seen > 2) return -1;
+    if (jerr.warning_seen > 2) {
+        return -1;
+    }
 
     return 0;
 
 }
 
-int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
-                   unsigned char *input_image, int width, int height, int quality,
-                   struct context *cnt, struct timeval *tv1, struct coord *box)
+int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size, unsigned char *input_image, int width
+            , int height, int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
 
 {
     int i, j, jpeg_image_size;
@@ -587,9 +599,9 @@ int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
     jpeg_set_colorspace(&cinfo, JCS_YCbCr);
 
     cinfo.raw_data_in = TRUE; // Supply downsampled data
-#if JPEG_LIB_VERSION >= 70
-    cinfo.do_fancy_downsampling = FALSE;  // Fix segfault with v7
-#endif
+    #if JPEG_LIB_VERSION >= 70
+        cinfo.do_fancy_downsampling = FALSE;  // Fix segfault with v7
+    #endif
     cinfo.comp_info[0].h_samp_factor = 2;
     cinfo.comp_info[0].v_samp_factor = 2;
     cinfo.comp_info[1].h_samp_factor = 1;
@@ -634,10 +646,8 @@ int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
     return jpeg_image_size;
 }
 
-
-int jpgutl_put_grey(unsigned char *dest_image, int image_size,
-                   unsigned char *input_image, int width, int height, int quality,
-                   struct context *cnt, struct timeval *tv1, struct coord *box)
+int jpgutl_put_grey(unsigned char *dest_image, int image_size, unsigned char *input_image, int width
+            , int height, int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
 {
     int y, dest_image_size;
     JSAMPROW row_ptr[1];

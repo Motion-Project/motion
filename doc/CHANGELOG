@@ -1,3 +1,28 @@
+Summary of changes for version 4.3.0 are below
+   * Implement default for non ascii characters
+   * Removed poll requirement for MHD
+   * Updated translations
+   * Revise directory structure, autotools, makefile
+   * Revised tesing for travis
+   * Updated MMAL camera
+   * Optional processing for OMX
+   * Fix movie start times
+   * Optional h264_v4l2m2m
+   * set fps on v4l2 devices.
+   * Option for videoio.h
+   * JPEG code clean up
+   * Fix substrem processing for non modulo 16
+   * Ignore invalid data sent from cameras.
+   * Adjust the netcam handler wait and processing
+   * Answer incorrect web requests.
+   * Implement delay upon reconnect
+   * Fix filetype specified for snapshots
+   * Enhancements the service file.
+   * Output to log the ext pipe command
+   * Documentation fix for minimum_frame_time
+   * Documentation clarification for lightswitch
+   * Documentation fix for colon versus semi-colon
+   * Fix vbr calculations for high frame rates
 Summary of changes for version 4.2.2 are below
    * Update version number to 4.2.2/Changelog
    * Resolve compile problem for OpenBSD

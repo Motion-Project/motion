@@ -1,10 +1,23 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  *    webu_text.c
  *
  *    Create the text(programatic) interface Motion
- *
- *    This software is distributed under the GNU Public License Version 2
- *    See also the file 'COPYING'.
  *
  *    This module processes the requests associated with the text inferface
  *    of the webcontrol.  This interface is intended to be used by programs
@@ -20,11 +33,14 @@
  */
 
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include "webu.h"
 #include "webu_text.h"
 #include "translate.h"
 
-static void webu_text_seteol(struct webui_ctx *webui) {
+static void webu_text_seteol(struct webui_ctx *webui)
+{
     /* Set the end of line character for text interface */
     if (webui->cntlst[0]->conf.webcontrol_interface == 2) {
         snprintf(webui->text_eol, WEBUI_LEN_PARM,"%s","<br>");
@@ -34,10 +50,11 @@ static void webu_text_seteol(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_camera_name(struct webui_ctx *webui) {
+static void webu_text_camera_name(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
-    if (webui->cntlst[webui->thread_nbr]->conf.camera_name == NULL){
+    if (webui->cntlst[webui->thread_nbr]->conf.camera_name == NULL) {
         snprintf(response,sizeof(response),
             "Camera %s %s\n"
             ,webui->uri_camid,webui->text_eol
@@ -53,7 +70,8 @@ static void webu_text_camera_name(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_back(struct webui_ctx *webui, const char *prevuri) {
+static void webu_text_back(struct webui_ctx *webui, const char *prevuri)
+{
     char response[WEBUI_LEN_RESP];
 
     if (webui->cntlst[0]->conf.webcontrol_interface == 2) {
@@ -66,7 +84,8 @@ static void webu_text_back(struct webui_ctx *webui, const char *prevuri) {
 
 }
 
-static void webu_text_header(struct webui_ctx *webui) {
+static void webu_text_header(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     if (webui->cntlst[0]->conf.webcontrol_interface == 2) {
@@ -80,7 +99,8 @@ static void webu_text_header(struct webui_ctx *webui) {
     }
 }
 
-static void webu_text_trailer(struct webui_ctx *webui) {
+static void webu_text_trailer(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     if (webui->cntlst[0]->conf.webcontrol_interface == 2) {
@@ -92,7 +112,8 @@ static void webu_text_trailer(struct webui_ctx *webui) {
 
 }
 
-void webu_text_badreq(struct webui_ctx *webui) {
+void webu_text_badreq(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     webu_text_header(webui);
@@ -107,7 +128,8 @@ void webu_text_badreq(struct webui_ctx *webui) {
     return;
 }
 
-static void webu_text_page_raw(struct webui_ctx *webui) {
+static void webu_text_page_raw(struct webui_ctx *webui)
+{
     /* Write the main page text */
     char response[WEBUI_LEN_RESP];
     int indx;
@@ -119,7 +141,7 @@ static void webu_text_page_raw(struct webui_ctx *webui) {
     );
     webu_write(webui, response);
 
-    if (webui->cam_threads > 1){
+    if (webui->cam_threads > 1) {
         for (indx = 1; indx < webui->cam_threads; indx++) {
             snprintf(response, sizeof (response),
                 "%d \n"
@@ -131,7 +153,8 @@ static void webu_text_page_raw(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_page_basic(struct webui_ctx *webui) {
+static void webu_text_page_basic(struct webui_ctx *webui)
+{
     /* Write the main page text */
     char response[WEBUI_LEN_RESP];
     int indx;
@@ -144,9 +167,9 @@ static void webu_text_page_basic(struct webui_ctx *webui) {
         ,webui->cntlst[0]->camera_id);
     webu_write(webui, response);
 
-    if (webui->cam_threads > 1){
+    if (webui->cam_threads > 1) {
         for (indx = 1; indx < webui->cam_threads; indx++) {
-            if (webui->cntlst[indx]->conf.camera_name == NULL){
+            if (webui->cntlst[indx]->conf.camera_name == NULL) {
                 snprintf(response, sizeof (response),
                     "<a href='/%d/'>Camera %d</a><br>\n"
                     , webui->cntlst[indx]->camera_id
@@ -165,24 +188,25 @@ static void webu_text_page_basic(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_list_raw(struct webui_ctx *webui) {
+static void webu_text_list_raw(struct webui_ctx *webui)
+{
     /* Write out the options and values */
     char response[WEBUI_LEN_RESP];
     int indx_parm;
     const char *val_parm;
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_params[indx_parm].param_name != NULL) {
 
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
-            ((webui->thread_nbr != 0) && (config_params[indx_parm].main_thread != 0))){
+            ((webui->thread_nbr != 0) && (config_params[indx_parm].main_thread != 0))) {
             indx_parm++;
             continue;
         }
 
         val_parm = config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, webui->thread_nbr);
-        if (val_parm == NULL){
+        if (val_parm == NULL) {
             val_parm = config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, 0);
         }
         snprintf(response, sizeof (response),
@@ -197,7 +221,8 @@ static void webu_text_list_raw(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_list_basic(struct webui_ctx *webui) {
+static void webu_text_list_basic(struct webui_ctx *webui)
+{
     /* Write out the options and values */
     char response[WEBUI_LEN_RESP];
     int indx_parm;
@@ -217,17 +242,17 @@ static void webu_text_list_basic(struct webui_ctx *webui) {
     webu_write(webui, response);
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_params[indx_parm].param_name != NULL) {
 
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
-            ((webui->thread_nbr != 0) && (config_params[indx_parm].main_thread != 0))){
+            ((webui->thread_nbr != 0) && (config_params[indx_parm].main_thread != 0))) {
             indx_parm++;
             continue;
         }
 
         val_parm = config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, webui->thread_nbr);
-        if (val_parm == NULL){
+        if (val_parm == NULL) {
             val_parm = config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, 0);
         }
         snprintf(response, sizeof (response),
@@ -248,7 +273,8 @@ static void webu_text_list_basic(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_set_menu(struct webui_ctx *webui) {
+static void webu_text_set_menu(struct webui_ctx *webui)
+{
 
     /* Write out the options and values to allow user to set them*/
     char response[WEBUI_LEN_RESP];
@@ -273,17 +299,17 @@ static void webu_text_set_menu(struct webui_ctx *webui) {
     webu_write(webui, response);
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_params[indx_parm].param_name != NULL) {
 
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
-            ((webui->thread_nbr != 0) && (config_params[indx_parm].main_thread != 0))){
+            ((webui->thread_nbr != 0) && (config_params[indx_parm].main_thread != 0))) {
             indx_parm++;
             continue;
         }
 
         val_parm = config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, webui->thread_nbr);
-        if (val_parm == NULL){
+        if (val_parm == NULL) {
             val_parm = config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, 0);
         }
         snprintf(response, sizeof(response),
@@ -311,7 +337,8 @@ static void webu_text_set_menu(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_set_query(struct webui_ctx *webui) {
+static void webu_text_set_query(struct webui_ctx *webui)
+{
 
     /* Write out the options and values to allow user to set them*/
     char response[WEBUI_LEN_RESP];
@@ -325,18 +352,18 @@ static void webu_text_set_query(struct webui_ctx *webui) {
     webu_text_camera_name(webui);
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_params[indx_parm].param_name != NULL) {
 
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             ((webui->thread_nbr != 0) && (config_params[indx_parm].main_thread != 0)) ||
-            (strcmp(webui->uri_parm1, config_params[indx_parm].param_name))) {
+            (mystrne(webui->uri_parm1, config_params[indx_parm].param_name))) {
             indx_parm++;
             continue;
         }
 
         val_parm = config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, webui->thread_nbr);
-        if (val_parm == NULL){
+        if (val_parm == NULL) {
             val_parm = config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, 0);
         }
 
@@ -359,7 +386,8 @@ static void webu_text_set_query(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_set_assign(struct webui_ctx *webui) {
+static void webu_text_set_assign(struct webui_ctx *webui)
+{
     /* Set a particular configuration parameter to desired value */
 
     char response[WEBUI_LEN_RESP];
@@ -367,7 +395,7 @@ static void webu_text_set_assign(struct webui_ctx *webui) {
 
     retcd = webu_process_config(webui);
 
-    if (retcd == 0){
+    if (retcd == 0) {
         webu_text_header(webui);
 
         webu_text_back(webui,"/config");
@@ -388,7 +416,8 @@ static void webu_text_set_assign(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_get_menu(struct webui_ctx *webui) {
+static void webu_text_get_menu(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
     int indx_parm;
 
@@ -405,11 +434,11 @@ static void webu_text_get_menu(struct webui_ctx *webui) {
     webu_write(webui, response);
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_params[indx_parm].param_name != NULL) {
 
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
-            ((webui->thread_nbr != 0) && (config_params[indx_parm].main_thread != 0))){
+            ((webui->thread_nbr != 0) && (config_params[indx_parm].main_thread != 0))) {
             indx_parm++;
             continue;
         }
@@ -435,7 +464,8 @@ static void webu_text_get_menu(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_quit(struct webui_ctx *webui) {
+static void webu_text_action_quit(struct webui_ctx *webui)
+{
     /* Shut down motion or the associated thread */
     char response[WEBUI_LEN_RESP];
 
@@ -453,7 +483,8 @@ static void webu_text_action_quit(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_makemovie(struct webui_ctx *webui) {
+static void webu_text_action_makemovie(struct webui_ctx *webui)
+{
     /* end the event.  Legacy api name*/
 
     char response[WEBUI_LEN_RESP];
@@ -475,7 +506,8 @@ static void webu_text_action_makemovie(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_eventstart(struct webui_ctx *webui) {
+static void webu_text_action_eventstart(struct webui_ctx *webui)
+{
     /* Start the event*/
 
     char response[WEBUI_LEN_RESP];
@@ -497,7 +529,8 @@ static void webu_text_action_eventstart(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_eventend(struct webui_ctx *webui) {
+static void webu_text_action_eventend(struct webui_ctx *webui)
+{
     /* End any active event*/
 
     char response[WEBUI_LEN_RESP];
@@ -519,7 +552,8 @@ static void webu_text_action_eventend(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_snapshot(struct webui_ctx *webui) {
+static void webu_text_action_snapshot(struct webui_ctx *webui)
+{
     /* trigger a snapshot*/
 
     char response[WEBUI_LEN_RESP];
@@ -541,7 +575,8 @@ static void webu_text_action_snapshot(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_restart(struct webui_ctx *webui) {
+static void webu_text_action_restart(struct webui_ctx *webui)
+{
     /* Restart*/
 
     char response[WEBUI_LEN_RESP];
@@ -562,7 +597,8 @@ static void webu_text_action_restart(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_start(struct webui_ctx *webui) {
+static void webu_text_action_start(struct webui_ctx *webui)
+{
     /* un-pause the camera*/
 
     char response[WEBUI_LEN_RESP];
@@ -584,7 +620,8 @@ static void webu_text_action_start(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_pause(struct webui_ctx *webui) {
+static void webu_text_action_pause(struct webui_ctx *webui)
+{
     /* pause the camera*/
 
     char response[WEBUI_LEN_RESP];
@@ -606,7 +643,8 @@ static void webu_text_action_pause(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action_write(struct webui_ctx *webui) {
+static void webu_text_action_write(struct webui_ctx *webui)
+{
     /* write the parms to file*/
 
     char response[WEBUI_LEN_RESP];
@@ -628,36 +666,37 @@ static void webu_text_action_write(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_action(struct webui_ctx *webui) {
+static void webu_text_action(struct webui_ctx *webui)
+{
     /* Call the action functions */
 
-    if (!strcmp(webui->uri_cmd2,"makemovie")){
+    if (mystreq(webui->uri_cmd2,"makemovie")) {
         webu_text_action_makemovie(webui);
 
-    } else if (strcmp(webui->uri_cmd2,"eventstart") == 0){
+    } else if (mystreq(webui->uri_cmd2,"eventstart")) {
         webu_text_action_eventstart(webui);
 
-    } else if (!strcmp(webui->uri_cmd2,"eventend")){
+    } else if (mystreq(webui->uri_cmd2,"eventend")) {
         webu_text_action_eventend(webui);
 
-    } else if (!strcmp(webui->uri_cmd2,"snapshot")){
+    } else if (mystreq(webui->uri_cmd2,"snapshot")) {
         webu_text_action_snapshot(webui);
 
-    } else if (!strcmp(webui->uri_cmd2,"restart")){
+    } else if (mystreq(webui->uri_cmd2,"restart")) {
         webu_text_action_restart(webui);
 
-    } else if (!strcmp(webui->uri_cmd2,"start")){
+    } else if (mystreq(webui->uri_cmd2,"start")) {
         webu_text_action_start(webui);
 
-    } else if (!strcmp(webui->uri_cmd2,"pause")){
+    } else if (mystreq(webui->uri_cmd2,"pause")) {
         webu_text_action_pause(webui);
 
-    } else if ((!strcmp(webui->uri_cmd2,"quit")) ||
-               (!strcmp(webui->uri_cmd2,"end"))){
+    } else if ((mystreq(webui->uri_cmd2,"quit")) ||
+               (mystreq(webui->uri_cmd2,"end"))) {
         webu_text_action_quit(webui);
 
-    } else if ((!strcmp(webui->uri_cmd2,"write")) ||
-               (!strcmp(webui->uri_cmd2,"writeyes"))){
+    } else if ((mystreq(webui->uri_cmd2,"write")) ||
+               (mystreq(webui->uri_cmd2,"writeyes"))) {
         webu_text_action_write(webui);
 
     } else {
@@ -670,7 +709,8 @@ static void webu_text_action(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_track_pantilt(struct webui_ctx *webui) {
+static void webu_text_track_pantilt(struct webui_ctx *webui)
+{
     /* Call the track function */
     char response[WEBUI_LEN_RESP];
 
@@ -697,13 +737,14 @@ static void webu_text_track_pantilt(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_track(struct webui_ctx *webui) {
+static void webu_text_track(struct webui_ctx *webui)
+{
     /* Call the track function */
     char response[WEBUI_LEN_RESP];
     int retcd;
 
     retcd = webu_process_track(webui);
-    if (retcd == 0){
+    if (retcd == 0) {
         webu_text_header(webui);
 
         webu_text_back(webui,"/track");
@@ -725,7 +766,8 @@ static void webu_text_track(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_menu(struct webui_ctx *webui) {
+static void webu_text_menu(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     webu_text_header(webui);
@@ -749,7 +791,8 @@ static void webu_text_menu(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_menu_config(struct webui_ctx *webui) {
+static void webu_text_menu_config(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     webu_text_header(webui);
@@ -770,7 +813,8 @@ static void webu_text_menu_config(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_menu_action(struct webui_ctx *webui) {
+static void webu_text_menu_action(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     webu_text_header(webui);
@@ -793,7 +837,8 @@ static void webu_text_menu_action(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_menu_detection(struct webui_ctx *webui) {
+static void webu_text_menu_detection(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     webu_text_header(webui);
@@ -815,7 +860,8 @@ static void webu_text_menu_detection(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_menu_track(struct webui_ctx *webui) {
+static void webu_text_menu_track(struct webui_ctx *webui)
+{
     char response[WEBUI_LEN_RESP];
 
     webu_text_header(webui);
@@ -835,21 +881,22 @@ static void webu_text_menu_track(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_submenu(struct webui_ctx *webui) {
+static void webu_text_submenu(struct webui_ctx *webui)
+{
 
-    if ((!strcmp(webui->uri_cmd1,"config")) &&
+    if ((mystreq(webui->uri_cmd1,"config")) &&
         (strlen(webui->uri_cmd2) == 0)) {
         webu_text_menu_config(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"action")) &&
+    } else if ((mystreq(webui->uri_cmd1,"action")) &&
                 (strlen(webui->uri_cmd2) == 0)) {
         webu_text_menu_action(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
+    } else if ((mystreq(webui->uri_cmd1,"detection")) &&
                 (strlen(webui->uri_cmd2) == 0)) {
         webu_text_menu_detection(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"track")) &&
+    } else if ((mystreq(webui->uri_cmd1,"track")) &&
                 (strlen(webui->uri_cmd2) == 0)) {
         webu_text_menu_track(webui);
 
@@ -862,7 +909,8 @@ static void webu_text_submenu(struct webui_ctx *webui) {
 
 }
 
-void webu_text_get_query(struct webui_ctx *webui) {
+void webu_text_get_query(struct webui_ctx *webui)
+{
     /* Write out the option value for one parm */
     char response[WEBUI_LEN_RESP];
     int indx_parm;
@@ -876,7 +924,7 @@ void webu_text_get_query(struct webui_ctx *webui) {
     snprintf(temp_name, WEBUI_LEN_PARM, "%s", webui->uri_value1);
     indx_parm=0;
     while (dep_config_params[indx_parm].name != NULL) {
-        if (strcmp(dep_config_params[indx_parm].name, webui->uri_value1) == 0){
+        if (mystreq(dep_config_params[indx_parm].name, webui->uri_value1)) {
             snprintf(temp_name, WEBUI_LEN_PARM, "%s", dep_config_params[indx_parm].newname);
             break;
         }
@@ -884,24 +932,24 @@ void webu_text_get_query(struct webui_ctx *webui) {
     }
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_params[indx_parm].param_name != NULL) {
 
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
-            strcmp(webui->uri_parm1,"query") ||
-            strcmp(temp_name, config_params[indx_parm].param_name)){
+            mystrne(webui->uri_parm1,"query") ||
+            mystrne(temp_name, config_params[indx_parm].param_name)) {
             indx_parm++;
             continue;
         }
 
         val_parm = config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, webui->thread_nbr);
-        if (val_parm == NULL){
+        if (val_parm == NULL) {
             val_parm = config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, 0);
         }
 
-        if (strcmp(webui->uri_value1, config_params[indx_parm].param_name) != 0){
+        if (mystrne(webui->uri_value1, config_params[indx_parm].param_name)) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-            , _("'%s' option is depreciated.  New option name is `%s'")
+            , _("'%s' option is depreciated.  New option name is '%s'")
             ,webui->uri_value1, config_params[indx_parm].param_name);
         }
 
@@ -934,13 +982,14 @@ void webu_text_get_query(struct webui_ctx *webui) {
         break;
     }
 
-    if (config_params[indx_parm].param_name == NULL){
+    if (config_params[indx_parm].param_name == NULL) {
         webu_text_badreq(webui);
     }
 
 }
 
-void webu_text_status(struct webui_ctx *webui) {
+void webu_text_status(struct webui_ctx *webui)
+{
     /* Write out the pause/active status */
 
     char response[WEBUI_LEN_RESP];
@@ -950,9 +999,12 @@ void webu_text_status(struct webui_ctx *webui) {
 
     webu_text_back(webui,"/detection");
 
-    if (webui->thread_nbr == 0){
-        indx_st = 1;
-        if (webui->cam_threads == 1) indx_st = 0;
+    if (webui->thread_nbr == 0) {
+        if (webui->cam_threads == 1) {
+            indx_st = 0;
+        } else {
+            indx_st = 1;
+        }
 
         for (indx = indx_st; indx < webui->cam_threads; indx++) {
             snprintf(response, sizeof(response),
@@ -977,7 +1029,8 @@ void webu_text_status(struct webui_ctx *webui) {
     webu_text_trailer(webui);
 }
 
-void webu_text_connection(struct webui_ctx *webui) {
+void webu_text_connection(struct webui_ctx *webui)
+{
     /* Write out the connection status */
     char response[WEBUI_LEN_RESP];
     int indx, indx_st;
@@ -988,9 +1041,12 @@ void webu_text_connection(struct webui_ctx *webui) {
 
     webu_text_camera_name(webui);
 
-    if (webui->thread_nbr == 0){
-        indx_st = 1;
-        if (webui->cam_threads == 1) indx_st = 0;
+    if (webui->thread_nbr == 0) {
+        if (webui->cam_threads == 1) {
+            indx_st = 0;
+        } else {
+            indx_st = 1;
+        }
 
         for (indx = indx_st; indx < webui->cam_threads; indx++) {
             snprintf(response,sizeof(response)
@@ -1019,7 +1075,8 @@ void webu_text_connection(struct webui_ctx *webui) {
     webu_text_trailer(webui);
 }
 
-void webu_text_list(struct webui_ctx *webui) {
+void webu_text_list(struct webui_ctx *webui)
+{
 
     if (webui->cntlst[0]->conf.webcontrol_interface == 2) {
         webu_text_list_basic(webui);
@@ -1029,13 +1086,14 @@ void webu_text_list(struct webui_ctx *webui) {
 
 }
 
-void webu_text_main(struct webui_ctx *webui) {
+void webu_text_main(struct webui_ctx *webui)
+{
 
     /* Main entry point for processing requests for the text interface */
 
     webu_text_seteol(webui);
 
-    if (strlen(webui->uri_camid) == 0){
+    if (strlen(webui->uri_camid) == 0) {
         if (webui->cntlst[0]->conf.webcontrol_interface == 2) {
             webu_text_page_basic(webui);
         } else {
@@ -1048,71 +1106,71 @@ void webu_text_main(struct webui_ctx *webui) {
     } else if (strlen(webui->uri_cmd2) == 0) {
         webu_text_submenu(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"set")) &&
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"set")) &&
                (strlen(webui->uri_parm1) == 0)) {
         webu_text_set_menu(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"set")) &&
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"set")) &&
                (strlen(webui->uri_parm1) > 0) &&
                (strlen(webui->uri_value1) == 0) ) {
         webu_text_set_query(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"set"))) {
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"set"))) {
         webu_text_set_assign(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"write"))) {
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"write"))) {
         webu_text_action(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"list"))) {
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"list"))) {
         webu_text_list(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"get")) &&
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"get")) &&
                (strlen(webui->uri_parm1) == 0)) {
         webu_text_get_menu(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"get"))) {
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"get"))) {
         webu_text_get_query(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
-               (!strcmp(webui->uri_cmd2,"status"))) {
+    } else if ((mystreq(webui->uri_cmd1,"detection")) &&
+               (mystreq(webui->uri_cmd2,"status"))) {
         webu_text_status(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
-               (!strcmp(webui->uri_cmd2,"connection"))) {
+    } else if ((mystreq(webui->uri_cmd1,"detection")) &&
+               (mystreq(webui->uri_cmd2,"connection"))) {
         webu_text_connection(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
-               (!strcmp(webui->uri_cmd2,"start"))) {
+    } else if ((mystreq(webui->uri_cmd1,"detection")) &&
+               (mystreq(webui->uri_cmd2,"start"))) {
         webu_text_action(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
-               (!strcmp(webui->uri_cmd2,"pause"))) {
+    } else if ((mystreq(webui->uri_cmd1,"detection")) &&
+               (mystreq(webui->uri_cmd2,"pause"))) {
         webu_text_action(webui);
 
-    } else if ((strcmp(webui->uri_cmd1,"action") == 0) &&
-               (strcmp(webui->uri_cmd2,"quit") == 0)){
+    } else if ((mystreq(webui->uri_cmd1,"action")) &&
+               (mystreq(webui->uri_cmd2,"quit"))) {
         webu_text_action(webui);
 
-    } else if ((strcmp(webui->uri_cmd1,"action") == 0) &&
-               (strcmp(webui->uri_cmd2,"end") == 0)){
+    } else if ((mystreq(webui->uri_cmd1,"action")) &&
+               (mystreq(webui->uri_cmd2,"end"))) {
         webu_text_action(webui);
 
-    } else if (!strcmp(webui->uri_cmd1,"action")) {
+    } else if (mystreq(webui->uri_cmd1,"action")) {
         webu_text_action(webui);
 
-    } else if ((strcmp(webui->uri_cmd1,"track") == 0) &&
-               (strcmp(webui->uri_cmd2,"set") == 0) &&
+    } else if ((mystreq(webui->uri_cmd1,"track")) &&
+               (mystreq(webui->uri_cmd2,"set")) &&
                (strlen(webui->uri_parm1) == 0)) {
         webu_text_track_pantilt(webui);
 
-    } else if ((strcmp(webui->uri_cmd1,"track") == 0)){
+    } else if ((mystreq(webui->uri_cmd1,"track"))) {
         webu_text_track(webui);
 
     } else{

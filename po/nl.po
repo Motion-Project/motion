@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-10-27 22:19-0600\n"
-"PO-Revision-Date: 2019-12-01 11:09-0700\n"
+"POT-Creation-Date: 2020-01-12 17:18-0700\n"
+"PO-Revision-Date: 2020-01-12 17:51-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: nl\n"
@@ -15,6 +15,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.0.6\n"
+
+#: src/conf.c
+#, c-format
+msgid "%s after version %s"
+msgstr "%s na versie %s"
 
 #: src/conf.c
 #, c-format
@@ -753,15 +758,26 @@ msgid "File of type %ld saved to: %s"
 msgstr "Bestand van het type %ld opgeslagen in: %s"
 
 #: src/event.c
+msgid "Ignoring empty sql query"
+msgstr "Negeren van lege sql-query"
+
+#: src/event.c
+msgid "Executing mysql query"
+msgstr "MySQL-query uitvoeren"
+
+#: src/event.c
 #, c-format
 msgid "Mysql query failed %s error code %d"
 msgstr "MySQL-zoekopdracht is mislukt %s foutcode %d"
 
 #: src/event.c
 #, c-format
-msgid "Cannot reconnect to MySQL database %s on host %s with user %s MySQL error was %s"
+msgid ""
+"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error "
+"was %s"
 msgstr ""
-"Kan niet opnieuw verbinding maken met MySQL-database %s op host %s met MySQL-fout gebruiker %swas %s"
+"Kan niet opnieuw verbinding maken met MySQL-database %s op host %s met "
+"MySQL- fout gebruiker %s was %s"
 
 #: src/event.c
 #, c-format
@@ -772,6 +788,10 @@ msgstr "Re-Connection to Mysql database ' %s' geslaagd"
 #, c-format
 msgid "after re-connection Mysql query failed %s error code %d"
 msgstr "na opnieuw verbinden Mysql-query mislukt %s foutcode %d"
+
+#: src/event.c
+msgid "Executing postgresql query"
+msgstr "Postgresql-query uitvoeren"
 
 #: src/event.c src/motion.c
 #, c-format
@@ -787,6 +807,15 @@ msgstr "Herverbinding met PostgreSQL-database ' %s' is mislukt: %s"
 #, c-format
 msgid "Re-Connection to PostgreSQL database '%s' Succeed"
 msgstr "Re-Connection to PostgreSQL database ' %s' geslaagd"
+
+#: src/event.c
+#, c-format
+msgid "PGSQL query failed: [%s]  %s %s"
+msgstr "PGSQL-zoekopdracht is mislukt: [%s] %s %s"
+
+#: src/event.c
+msgid "Executing sqlite query"
+msgstr "Sqlite-query uitvoeren"
 
 #: src/event.c
 #, c-format
@@ -824,6 +853,11 @@ msgstr "SLUITEN: extpipe-bestand desc %d, foutstatus %d"
 
 #: src/event.c
 #, c-format
+msgid "pclose return: %d"
+msgstr "pclose rendement: %d"
+
+#: src/event.c
+#, c-format
 msgid "moviepath: %s"
 msgstr "filmpad: %s"
 
@@ -853,6 +887,11 @@ msgid "pipe: %s"
 msgstr "pijp: %s"
 
 #: src/event.c
+#, c-format
+msgid "cnt->moviefps: %d"
+msgstr "cnt-> moviefps: %d"
+
+#: src/event.c
 msgid "popen failed"
 msgstr "popen mislukt"
 
@@ -876,6 +915,14 @@ msgid "Source FPS %d"
 msgstr "Bron FPS %d"
 
 #: src/event.c
+msgid "The ogg container is no longer supported.  Changing to mpeg4"
+msgstr "De ogg-container wordt niet langer ondersteund. Wijzigen naar mpeg4"
+
+#: src/event.c
+msgid "Running test of the various output formats."
+msgstr "Lopende test van de verschillende uitvoerformaten."
+
+#: src/event.c
 msgid "Error opening context for movie output."
 msgstr "Fout bij openen van context voor filmuitvoer."
 
@@ -885,8 +932,11 @@ msgid "ffopen_open error creating (motion) file [%s]"
 msgstr "ffopen open fout bij het maken van (beweging) bestand [ %s]"
 
 #: src/event.c
-msgid "The swf container for timelapse no longer supported.  Using mpg container."
-msgstr "De swf-container voor timelapse wordt niet langer ondersteund. Gebruik mpg container."
+msgid ""
+"The swf container for timelapse no longer supported.  Using mpg container."
+msgstr ""
+"De swf-container voor timelapse wordt niet langer ondersteund. Gebruik mpg "
+"container."
 
 #: src/event.c
 msgid "Timelapse using mpg codec."
@@ -919,11 +969,11 @@ msgstr "Kan geheugen niet toewijzen voor codecnaam"
 
 #: src/ffmpeg.c
 msgid ""
-"The frame rate specified is too high for the ffmpeg movie type specified. Choose a different ffmpeg "
-"container or lower framerate."
+"The frame rate specified is too high for the ffmpeg movie type specified. "
+"Choose a different ffmpeg container or lower framerate."
 msgstr ""
-"De opgegeven framesnelheid is te hoog voor het opgegeven ffmpeg-filmtype.Kies een andere ffmpeg-"
-"container of lagere framerate."
+"De opgegeven framesnelheid is te hoog voor het opgegeven ffmpeg-filmtype. "
+"Kies een andere ffmpeg-container of lagere framerate."
 
 #: src/ffmpeg.c
 msgid "Error setting base file name"
@@ -974,7 +1024,8 @@ msgstr "Fout bij het coderen van video"
 #: src/ffmpeg.c
 #, c-format
 msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d"
-msgstr "PTS %<PRId64> Basis PTS %<PRId64> ms interval %<PRId64> tijdbasis %d- %d"
+msgstr ""
+"PTS %<PRId64> Basis PTS %<PRId64> ms interval %<PRId64> tijdbasis %d- %d"
 
 #: src/ffmpeg.c
 msgid "BAD TIMING!! Frame skipped."
@@ -982,8 +1033,12 @@ msgstr "SLECHTE TIMING!! Frame overgeslagen."
 
 #: src/ffmpeg.c
 #, c-format
-msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change %d"
-msgstr "PTS %<PRId64> Basis PTS %<PRId64> ms interval %<PRId64> tijdbasis %d- %d Wijzigen%d"
+msgid ""
+"PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change "
+"%d"
+msgstr ""
+"PTS %<PRId64> Basis PTS %<PRId64> ms interval %<PRId64> tijdbasis %d- %d "
+"Wijzigen %d"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1017,6 +1072,11 @@ msgstr "Kan stream niet toewijzen"
 #: src/ffmpeg.c
 msgid "Failed to allocate decoder!"
 msgstr "Kan decoder niet toewijzen!"
+
+#: src/ffmpeg.c
+#, c-format
+msgid "Low fps. Encoding %d frames into a %d frames container."
+msgstr "Lage fps. %d frames coderen in een %d frames container."
 
 #: src/ffmpeg.c
 msgid "Unable to set quality"
@@ -1090,6 +1150,11 @@ msgstr "Fout tijdens het schrijven van videoframe"
 
 #: src/ffmpeg.c
 #, c-format
+msgid "av_copy_packet: %s"
+msgstr "av_copy_packet: %s"
+
+#: src/ffmpeg.c
+#, c-format
 msgid "Error while writing video frame: %s"
 msgstr "Fout bij het schrijven van videoframe: %s"
 
@@ -1116,6 +1181,10 @@ msgstr "Kan codec-parameters niet kopiëren"
 #: src/ffmpeg.c
 msgid "Pass-through disabled.  ffmpeg too old"
 msgstr "Doorvoer uitgeschakeld. ffmpeg te oud"
+
+#: src/ffmpeg.c
+msgid "Pass-through stream opened"
+msgstr "Doorvoerstroom geopend"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1188,11 +1257,14 @@ msgstr "Onverwachte terugbelgebeurtenis van camerabesturing, 0x %08x"
 
 #: src/mmalcam.c
 msgid "A high frame rate can cause problems with exposure of images"
-msgstr "Een hoge framesnelheid kan problemen veroorzaken met de belichting van afbeeldingen"
+msgstr ""
+"Een hoge framesnelheid kan problemen veroorzaken met de belichting van "
+"afbeeldingen"
 
 #: src/mmalcam.c
 msgid "If autoexposure is not working, try a lower frame rate."
-msgstr "Als automatische belichting niet werkt, probeer dan een lagere framesnelheid."
+msgstr ""
+"Als automatische belichting niet werkt, probeer dan een lagere framesnelheid."
 
 #: src/mmalcam.c
 #, c-format
@@ -1320,7 +1392,8 @@ msgstr "Fout bij het openen van maskerbestand %s"
 
 #: src/motion.c
 msgid "Failed to read mask privacy image. Mask privacy feature disabled."
-msgstr "Kan maskerprivacyafbeelding niet lezen. Maskerprivacyfunctie uitgeschakeld."
+msgstr ""
+"Kan maskerprivacyafbeelding niet lezen. Maskerprivacyfunctie uitgeschakeld."
 
 #: src/motion.c
 #, c-format
@@ -1380,7 +1453,8 @@ msgstr "time-out database bezig  %s mislukt"
 #: src/motion.c
 #, c-format
 msgid "Cannot connect to MySQL database %s on host %s with user %s"
-msgstr "Kan geen verbinding maken met MySQL-database %s op host %s met gebruiker %s"
+msgstr ""
+"Kan geen verbinding maken met MySQL-database %s op host %s met gebruiker %s"
 
 #: src/motion.c
 #, c-format
@@ -1449,7 +1523,8 @@ msgstr "Kan het eerste beeld niet ophalen van de camera"
 
 #: src/motion.c
 msgid "Motion continues using width and height from config file(s)"
-msgstr "Beweging blijft breedte en hoogte gebruiken van configuratiebestand (en)"
+msgstr ""
+"Beweging blijft breedte en hoogte gebruiken van configuratiebestand (en)"
 
 #: src/motion.c
 msgid "Motion only supports width and height modulo 8"
@@ -1458,12 +1533,15 @@ msgstr "Motion ondersteunt alleen breedte en hoogte modulo 8"
 #: src/motion.c
 #, c-format
 msgid "Image width (%d) or height(%d) requested is not modulo 8."
-msgstr "De gevraagde afbeeldingsbreedte ( %d) of hoogte ( %d) is niet modulo 8."
+msgstr ""
+"De gevraagde afbeeldingsbreedte ( %d) of hoogte ( %d) is niet modulo 8."
 
 #: src/motion.c
 #, c-format
 msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
-msgstr "Motion ondersteunt alleen breedte en hoogte groter dan of gelijk aan 64 %dx %d"
+msgstr ""
+"Motion ondersteunt alleen breedte en hoogte groter dan of gelijk aan 64 %d x "
+"%d"
 
 #: src/motion.c
 msgid "Substream not available.  Image sizes not modulo 16."
@@ -1532,13 +1610,16 @@ msgstr "Nieuwe poging tot succesvolle verbinding met camera"
 #: src/motion.c
 msgid ""
 "Camera has finally become available\n"
-"Camera image has different width and heightfrom what is in the config file. You should fix that\n"
-"Restarting Motion thread to reinitialize all image buffers to new picture dimensions"
+"Camera image has different width and heightfrom what is in the config file. "
+"You should fix that\n"
+"Restarting Motion thread to reinitialize all image buffers to new picture "
+"dimensions"
 msgstr ""
 "Camera is eindelijk beschikbaar \n"
-"Het camerabeeld heeft een andere breedte en hoogte dan in het configuratiebestand.U moet dat oplossen \n"
-"Opnieuw starten van bewegingsdraad om alle beeldbuffers opnieuw te initialiseren naar een nieuwe "
-"fotodimensies"
+"Het camerabeeld heeft een andere breedte en hoogte dan in het "
+"configuratiebestand.U moet dat oplossen \n"
+"Opnieuw starten van bewegingsdraad om alle beeldbuffers opnieuw te "
+"initialiseren naar een nieuwe fotodimensies"
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -1550,7 +1631,9 @@ msgstr "Fatale fout videoapparaat - Videoapparaat wordt gesloten"
 
 #: src/motion.c
 msgid "Restarting Motion thread to reinitialize all image buffers"
-msgstr "Opnieuw starten van bewegingsdraad om alle beeldbuffers opnieuw te initialiseren"
+msgstr ""
+"Opnieuw starten van bewegingsdraad om alle beeldbuffers opnieuw te "
+"initialiseren"
 
 #: src/motion.c
 msgid "Video signal lost - Adding grey image"
@@ -1558,7 +1641,8 @@ msgstr "Videosignaal verloren - grijs beeld toevoegen"
 
 #: src/motion.c
 msgid "Video signal still lost - Trying to close video device"
-msgstr "Videosignaal nog steeds verloren - Probeert het videoapparaat te sluiten"
+msgstr ""
+"Videosignaal nog steeds verloren - Probeert het videoapparaat te sluiten"
 
 #: src/motion.c
 msgid "Lightswitch detected"
@@ -1634,8 +1718,12 @@ msgid "Created process id file %s. Process ID is %d"
 msgstr "Aangemaakt proces id-bestand %s. Proces-ID is %d"
 
 #: src/motion.c
-msgid "Camara IDs are not unique or have values over 32,000.  Falling back to thread numbers"
-msgstr "Camara ID's zijn niet uniek of hebben waarden van meer dan 32.000. Terugvallen opdraad nummers"
+msgid ""
+"Camara IDs are not unique or have values over 32,000.  Falling back to "
+"thread numbers"
+msgstr ""
+"Camara ID's zijn niet uniek of hebben waarden van meer dan 32.000. "
+"Terugvallen opdraad nummers"
 
 #: src/motion.c
 msgid "v4l2   : available"
@@ -1738,6 +1826,11 @@ msgstr "Inloggen op syslog"
 
 #: src/motion.c
 #, c-format
+msgid "Motion %s Started"
+msgstr "Beweging %s gestart"
+
+#: src/motion.c
+#, c-format
 msgid "Using default log type (%s)"
 msgstr "Standaard logboektype gebruiken ( %s)"
 
@@ -1772,7 +1865,8 @@ msgstr "Camera-ID: %d Cameranaam: %s Apparaat: %s"
 #: src/motion.c
 #, c-format
 msgid "Stream port number %d for thread %d conflicts with the control port"
-msgstr "Streampoortnummer %d voor thread %d conflicteert met de besturingspoort"
+msgstr ""
+"Streampoortnummer %d voor thread %d conflicteert met de besturingspoort"
 
 #: src/motion.c
 #, c-format
@@ -1800,7 +1894,9 @@ msgstr "Thread %d - Time-out watchdog. Probeer een sierlijke herstart te doen"
 #: src/motion.c
 #, c-format
 msgid "Thread %d - Watchdog timeout did NOT restart, killing it!"
-msgstr "Thread %d - Time-out van Watchdog is NIET opnieuw gestart, waardoor deze is gedood!"
+msgstr ""
+"Thread %d - Time-out van Watchdog is NIET opnieuw gestart, waardoor deze is "
+"gedood!"
 
 #: src/motion.c
 #, c-format
@@ -1838,12 +1934,15 @@ msgstr "Kan %llu bytes geheugen niet toewijzen!"
 #: src/motion.c
 #, c-format
 msgid "Warning! Function %s tries to resize memoryblock at %p to 0 bytes!"
-msgstr "Waarschuwing! Functie %s probeert het geheugenblok te wijzigen van %p tot 0 bytes!"
+msgstr ""
+"Waarschuwing! Functie %s probeert het geheugenblok te wijzigen van %p tot 0 "
+"bytes!"
 
 #: src/motion.c
 #, c-format
 msgid "Could not resize memory-block at offset %p to %llu bytes (function %s)!"
-msgstr "Kan het geheugenblok niet wijzigen bij offset %p tot %llu bytes (functie %s)!"
+msgstr ""
+"Kan het geheugenblok niet wijzigen bij offset %p tot %llu bytes (functie %s)!"
 
 #: src/motion.c
 #, c-format
@@ -1898,10 +1997,11 @@ msgstr "Camerahandler-thread [ %d] is gestart"
 
 #: src/netcam.c
 msgid ""
-"Closing netcam socket as Keep-Alive time is up (camera sent Close field). A reconnect should happen."
+"Closing netcam socket as Keep-Alive time is up (camera sent Close field). A "
+"reconnect should happen."
 msgstr ""
-"Netcam-aansluiting wordt gesloten als Keep-Alive-tijd is verstreken (camera is verzonden Sluit veld). "
-"EENopnieuw verbinden zou moeten gebeuren."
+"Netcam-aansluiting wordt gesloten als Keep-Alive-tijd is verstreken (camera "
+"is verzonden Sluit veld). EENopnieuw verbinden zou moeten gebeuren."
 
 #: src/netcam.c
 msgid "re-opening camera (non-streaming)"
@@ -1971,9 +2071,12 @@ msgstr "Ongeldige netcam-URL voor camera ( %s)"
 
 #: src/netcam.c
 #, c-format
-msgid "Netcam_http parameter '%s' converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s."
+msgid ""
+"Netcam_http parameter '%s' converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-"
+"Alive %s."
 msgstr ""
-"Netcam http parameter ' %s' converteert naar vlaggen: HTTP / 1.0: %s HTTP / 1.1: %s Keep-Levend %s."
+"Netcam http parameter ' %s' converteert naar vlaggen: HTTP / 1.0: %s HTTP / "
+"1.1: %s Keep-Levend %s."
 
 #: src/netcam.c
 msgid "now calling netcam_setup_html()"
@@ -1989,8 +2092,11 @@ msgstr "roept nu het configuratiebestand van netcam aan ()"
 
 #: src/netcam.c
 #, c-format
-msgid "Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or jpeg."
-msgstr "Ongeldige netcam-service ' %s' - moet http, ftp, mjpg, mjpeg, v4l2 of jpeg zijn."
+msgid ""
+"Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or jpeg."
+msgstr ""
+"Ongeldige netcam-service ' %s' - moet http, ftp, mjpg, mjpeg, v4l2 of jpeg "
+"zijn."
 
 #: src/netcam.c src/netcam_rtsp.c
 #, c-format
@@ -2113,12 +2219,15 @@ msgstr "Inhoudstype %s"
 
 #: src/netcam_http.c
 msgid "Error reading image header, streaming mode (1). Null header."
-msgstr "Fout bij lezen van afbeeldingskoptekst, streamingmodus (1). Null header."
+msgstr ""
+"Fout bij lezen van afbeeldingskoptekst, streamingmodus (1). Null header."
 
 #: src/netcam_http.c
 #, c-format
 msgid "Error reading image header, streaming mode (1). Unknown header '%s'"
-msgstr "Fout bij lezen van afbeeldingskoptekst, streamingmodus (1). Onbekende kop ' %s'"
+msgstr ""
+"Fout bij lezen van afbeeldingskoptekst, streamingmodus (1). Onbekende kop "
+"'%s' "
 
 #: src/netcam_http.c
 msgid "Error reading image header (2)"
@@ -2157,7 +2266,8 @@ msgstr "HTTP-resultaatcode %d"
 
 #: src/netcam_http.c
 msgid "Removed netcam Keep-Alive flag due to apparent closed HTTP connection."
-msgstr "Netcam Keep-Alive-vlag verwijderd vanwege kennelijk gesloten HTTP-verbinding."
+msgstr ""
+"Netcam Keep-Alive-vlag verwijderd vanwege kennelijk gesloten HTTP-verbinding."
 
 #: src/netcam_http.c
 msgid "Non-streaming camera (keep-alive set)"
@@ -2181,9 +2291,12 @@ msgid "Boundary string not found in header"
 msgstr "Grensreeks niet gevonden in koptekst"
 
 #: src/netcam_http.c
-msgid "Streaming camera probably using MJPG-blocks, consider using mjpg:// netcam_url."
+msgid ""
+"Streaming camera probably using MJPG-blocks, consider using mjpg:// "
+"netcam_url."
 msgstr ""
-"Streaming camera waarschijnlijk met behulp van MJPG-blokken, overweeg het gebruik van mjpg: //netcam url."
+"Streaming camera waarschijnlijk met behulp van MJPG-blokken, overweeg het "
+"gebruik van mjpg: //netcam url."
 
 #: src/netcam_http.c
 msgid "Unrecognized content type"
@@ -2203,16 +2316,20 @@ msgid "Found Conn: close header ('%s')"
 msgstr "Conn gevonden: koptekst sluiten (' %s')"
 
 #: src/netcam_http.c
-msgid "Both 'Connection: Keep-Alive' and 'Connection: close' header received. Motion removes keepalive."
+msgid ""
+"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
+"Motion removes keepalive."
 msgstr ""
-"Zowel de 'Connection: Keep-Alive' als de 'Connection: close' header ontvangen.Beweging verwijdert "
-"keepalive."
+"Zowel de 'Connection: Keep-Alive' als de 'Connection: close' header "
+"ontvangen.Beweging verwijdert keepalive."
 
 #: src/netcam_http.c
-msgid "Both 'Connection: Keep-Alive' and 'Connection: close' header received. Motion continues unchanged."
+msgid ""
+"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
+"Motion continues unchanged."
 msgstr ""
-"Zowel de 'Connection: Keep-Alive' als de 'Connection: close' header ontvangen.Beweging blijft "
-"ongewijzigd."
+"Zowel de 'Connection: Keep-Alive' als de 'Connection: close' header "
+"ontvangen.Beweging blijft ongewijzigd."
 
 #: src/netcam_http.c
 msgid "Received a Keep-Alive field in this set of headers."
@@ -2223,30 +2340,34 @@ msgid ""
 "No 'Connection: Keep-Alive' nor 'Connection: close' header received.\n"
 " Motion removes keepalive."
 msgstr ""
-"Geen 'Connection: Keep-Alive' of 'Connection: close' header ontvangen. \\NBeweging verwijdert keepalive."
+"Geen 'Connection: Keep-Alive' of 'Connection: close' header ontvangen.\n"
+" Beweging verwijdert keepalive. "
 
 #: src/netcam_http.c
 msgid ""
 "No 'Connection: Keep-Alive' nor 'Connection: close' header received.\n"
 " Motion continues unchanged."
 msgstr ""
-"Geen 'Connection: Keep-Alive' of 'Connection: close' header ontvangen. \\NBeweging blijft ongewijzigd."
+"Geen 'Connection: Keep-Alive' of 'Connection: close' header ontvangen. \n"
+" Beweging blijft ongewijzigd."
 
 #: src/netcam_http.c
 msgid ""
 "Removed netcam Keep-Alive flag because 'Connection: close' header received.\n"
 " Netcam does not support Keep-Alive. Motion continues in non-Keep-Alive."
 msgstr ""
-"Netcam Keep-Alive-vlag verwijderd omdat de kop 'Verbinding: sluiten' is ontvangen. \\NNetcam ondersteunt "
-"Keep-Alive niet. Beweging gaat door in non-Keep-Alive."
+"Netcam Keep-Alive-vlag verwijderd omdat de kop 'Verbinding: sluiten' is "
+"ontvangen. \n"
+" Netcam ondersteunt Keep-Alive niet. Beweging gaat door in non-Keep-Alive."
 
 #: src/netcam_http.c
 msgid ""
 "Keep-Alive has reached end of valid period.\n"
 "Motion will close netcam, then resume Keep-Alive with a new socket."
 msgstr ""
-"Keep-Alive heeft het einde van de geldige periode bereikt. \\NMotion sluit netcam en hervat Keep-Alive "
-"met een nieuwe socket."
+"Keep-Alive heeft het einde van de geldige periode bereikt. \n"
+" \n"
+" Motion sluit netcam en hervat Keep-Alive met een nieuwe socket."
 
 #: src/netcam_http.c
 msgid "disconnect"
@@ -2275,14 +2396,21 @@ msgid "with no keepalive, new socket created fd %d"
 msgstr "zonder keepalive, nieuwe socket gemaakt fd %d"
 
 #: src/netcam_http.c
-msgid "with keepalive set, invalid socket.This could be the first time. Creating a new one failed."
+msgid ""
+"with keepalive set, invalid socket.This could be the first time. Creating a "
+"new one failed."
 msgstr ""
-"met keepalive set, ongeldige socket. Dit zou de eerste keer kunnen zijn. Een makennieuwe is mislukt."
+"met keepalive set, ongeldige socket. Dit zou de eerste keer kunnen zijn. Een "
+"makennieuwe is mislukt."
 
 #: src/netcam_http.c
 #, c-format
-msgid "with keepalive set, invalid socket.This could be first time, created a new one with fd %d"
-msgstr "met keepalive set, ongeldige socket. Dit zou voor het eerst een nieuwe kunnen zijnéén met fd %d"
+msgid ""
+"with keepalive set, invalid socket.This could be first time, created a new "
+"one with fd %d"
+msgstr ""
+"met keepalive set, ongeldige socket. Dit zou voor het eerst een nieuwe "
+"kunnen zijnéén met fd %d"
 
 #: src/netcam_http.c
 #, c-format
@@ -2368,7 +2496,9 @@ msgstr "probeert verbinding te maken, tijd # %d"
 
 #: src/netcam_http.c
 msgid "Failed to open camera - check your config and that netcamera is online"
-msgstr "Kan camera niet openen - controleer uw configuratie en dat de netcamera online is"
+msgstr ""
+"Kan camera niet openen - controleer uw configuratie en dat de netcamera "
+"online is"
 
 #: src/netcam_http.c
 msgid "Error reading first header - re-trying"
@@ -2384,8 +2514,12 @@ msgid "Netcam has flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s."
 msgstr "Netcam heeft vlaggen: HTTP / 1.0: %s HTTP / 1.1: %s Keep-Alive %s."
 
 #: src/netcam_http.c
-msgid "Removed netcam_keepalive flag due to proxy set.Proxy is incompatible with Keep-Alive."
-msgstr "Netcam keepalive vlag verwijderd vanwege proxyset. Proxy is niet compatibel metIn leven houden."
+msgid ""
+"Removed netcam_keepalive flag due to proxy set.Proxy is incompatible with "
+"Keep-Alive."
+msgstr ""
+"Netcam keepalive vlag verwijderd vanwege proxyset. Proxy is niet compatibel "
+"metIn leven houden."
 
 #: src/netcam_http.c
 msgid "Failed to read first stream header - giving up for now"
@@ -2520,9 +2654,12 @@ msgstr "retourcode %d"
 
 #: src/netcam_jpeg.c
 #, c-format
-msgid "Camera width/height mismatch with JPEG image -  expected %dx%d, JPEG %dx%d retval %d"
+msgid ""
+"Camera width/height mismatch with JPEG image -  expected %dx%d, JPEG %dx%d "
+"retval %d"
 msgstr ""
-"Camerabreedte / hoogte komt niet overeen met JPEG-afbeelding - verwacht %dx %d, JPEG %dx %dretval %d"
+"Camerabreedte / hoogte komt niet overeen met JPEG-afbeelding - verwacht %dx"
+"%d, JPEG %dx%d retval %d"
 
 #: src/netcam_jpeg.c
 #, c-format
@@ -2893,6 +3030,25 @@ msgid "%s: Waiting for first image from the handler."
 msgstr "%s: Wachten op eerste afbeelding van de handler."
 
 #: src/netcam_rtsp.c
+#, c-format
+msgid "Requested frame rate %d FPS is less than camera frame rate %d FPS"
+msgstr ""
+"Gevraagde beeldsnelheid %d FPS is lager dan de beeldsnelheid %d FPS van de "
+"camera"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "Increasing capture rate to %d FPS to match camera."
+msgstr "De opnamesnelheid verhogen naar %d FPS om bij de camera te passen."
+
+#: src/netcam_rtsp.c
+msgid ""
+"To lower CPU, change camera FPS to lower rate and decrease I frame interval."
+msgstr ""
+"Om de CPU te verlagen, wijzigt u de camera-FPS naar een lagere snelheid en "
+"verlaagt ik het frame-interval."
+
+#: src/netcam_rtsp.c
 msgid "unable to create rtsp context"
 msgstr "kan geen rtsp-context maken"
 
@@ -2952,8 +3108,9 @@ msgid ""
 "Can't write picture to file %s - check access rights to target directory\n"
 "Thread is going to finish due to this fatal error"
 msgstr ""
-"Kan afbeelding niet naar bestand %s schrijven - controleer toegangsrechten tot doelmap \n"
-"Discussie gaat eindigen vanwege deze fatale fout"
+"Kan afbeelding niet naar bestand %s schrijven - controleer toegangsrechten "
+"tot doelmap \n"
+" Discussie gaat eindigen vanwege deze fatale fout "
 
 #: src/picture.c
 #, c-format
@@ -2978,18 +3135,26 @@ msgid "Failed reading maximum value in pgm file"
 msgstr "Het lezen van de maximale waarde in het pgm-bestand is mislukt"
 
 #: src/picture.c
+msgid "Failed reading image data from pgm file"
+msgstr "Het lezen van afbeeldingsgegevens uit het pgm-bestand is mislukt"
+
+#: src/picture.c
 msgid "The mask file specified is not the same size as image from camera."
-msgstr "Het opgegeven maskerbestand heeft niet dezelfde grootte als het beeld van de camera."
+msgstr ""
+"Het opgegeven maskerbestand heeft niet dezelfde grootte als het beeld van de "
+"camera."
 
 #: src/picture.c
 #, c-format
 msgid "Attempting to resize mask image from %dx%d to %dx%d"
-msgstr "Poging om het formaat van het maskerbeeld te wijzigen van %dx %d tot %dx %d"
+msgstr ""
+"Poging om het formaat van het maskerbeeld te wijzigen van %dx %d tot %dx %d"
 
 #: src/picture.c
 #, c-format
 msgid "can't write mask file %s - check access rights to target directory"
-msgstr "kan maskerbestand %s niet schrijven - controleer toegangsrechten tot doelmap"
+msgstr ""
+"kan maskerbestand %s niet schrijven - controleer toegangsrechten tot doelmap"
 
 #: src/picture.c
 #, c-format
@@ -3007,7 +3172,8 @@ msgid ""
 "Please edit this file and re-run motion to enable mask feature"
 msgstr ""
 "Leeg masker %s maken \n"
-"Bewerk dit bestand en voer de beweging opnieuw uit om de maskerfunctie in te schakelen"
+" Bewerk dit bestand en voer de beweging opnieuw uit om de maskerfunctie in "
+"te schakelen "
 
 #: src/rotate.c
 #, c-format
@@ -3103,8 +3269,12 @@ msgstr "X offset %d"
 
 #: src/track.c
 #, c-format
-msgid "X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command %d"
-msgstr "X cent-> x %d, cent-> y %d, reversex %d, reversey %d motorx %d data %d commando%d"
+msgid ""
+"X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command "
+"%d"
+msgstr ""
+"X cent-> x %d, cent-> y %d, reversex %d, reversey %d motorx %d data %d "
+"commando %d "
 
 #: src/track.c
 #, c-format
@@ -3113,13 +3283,21 @@ msgstr "Y offset %d"
 
 #: src/track.c
 #, c-format
-msgid "Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command %d"
-msgstr "Y cent-> x %d, cent-> y %d, reversex %d, reversey %d motory %d data %d commando%d"
+msgid ""
+"Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command "
+"%d"
+msgstr ""
+"Y cent-> x %d, cent-> y %d, reversex %d, reversey %d motory %d data %d "
+"commando %d"
 
 #: src/track.c
 #, c-format
-msgid "X-offset %d, Y-offset %d, x-position %d. y-position %d,reversex %d, reversey %d , stepsize %d"
-msgstr "X-offset %d, Y-offset %d, x-positie %d. y-positie %d, reversex %d, reversey%d, stapgrootte %d"
+msgid ""
+"X-offset %d, Y-offset %d, x-position %d. y-position %d,reversex %d, reversey "
+"%d , stepsize %d"
+msgstr ""
+"X-offset %d, Y-offset %d, x-positie %d. y-positie %d, reversex %d, reversey "
+"%d, stapgrootte %d"
 
 #: src/track.c
 msgid "Return byte timeout!"
@@ -3295,7 +3473,9 @@ msgstr "METEORSINPUT %d ongeldig - Composiet %d proberen"
 
 #: src/video_bktr.c
 msgid "BT848SFMT, Couldn't set the input format, try again with default"
-msgstr "BT848SFMT, Kon het invoerformaat niet instellen, probeer het opnieuw standaard"
+msgstr ""
+"BT848SFMT, Kon het invoerformaat niet instellen, probeer het opnieuw "
+"standaard"
 
 #: src/video_bktr.c
 msgid "BT848SFMT, Couldn't set the input format either default"
@@ -3375,7 +3555,8 @@ msgstr "Videoapparaat %s wordt gesloten"
 #: src/video_bktr.c src/video_v4l2.c
 #, c-format
 msgid "Still %d users of video device %s, so we don't close it now"
-msgstr "Nog steeds %d gebruikers van videoapparaat %s, dus we sluiten het nu niet"
+msgstr ""
+"Nog steeds %d gebruikers van videoapparaat %s, dus we sluiten het nu niet"
 
 #: src/video_bktr.c src/video_v4l2.c
 #, c-format
@@ -3394,7 +3575,9 @@ msgstr "Stoppen met vastleggen"
 #: src/video_bktr.c
 #, c-format
 msgid "Reusing [%s] inputs [%d,%d] Change capture method METEOR_CAP_SINGLE"
-msgstr "[ %s] -ingangen opnieuw gebruiken [ %d, %d] Opnamemethode wijzigen METEOR CAP SINGLE"
+msgstr ""
+"[ %s] -ingangen opnieuw gebruiken [ %d, %d] Opnamemethode wijzigen "
+"METEOR_CAP_SINGLE"
 
 #: src/video_bktr.c
 msgid "VIDEO_PALETTE_YUV420P setting imgs.size_norm and imgs.motionsize"
@@ -3581,10 +3764,12 @@ msgstr "besturingstype nog niet ondersteund"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input value in conf by -1"
+msgid ""
+"Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input "
+"value in conf by -1"
 msgstr ""
-"Kan invoer %d niet opvragen. VIDIOC ENUMINPUT, als u een WEBCAM-wijzigingsinvoer gebruiktwaarde in conf "
-"met -1"
+"Kan invoer %d niet opvragen. VIDIOC ENUMINPUT, als u een WEBCAM-"
+"wijzigingsinvoer gebruiktwaarde in conf met -1"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3668,13 +3853,16 @@ msgstr "Aangepaste resolutie niet modulo 8."
 
 #: src/video_v4l2.c
 msgid "Specify different palette or width/height in config file."
-msgstr "Geef een ander palet of breedte / hoogte op in het configuratiebestand."
+msgstr ""
+"Geef een ander palet of breedte / hoogte op in het configuratiebestand."
 
 #: src/video_v4l2.c
 msgid ""
 "Error setting pixel format.\n"
 "VIDIOC_S_FMT: "
-msgstr "Fout bij het instellen van de pixelindeling. \\NVIDIOC S FMT:"
+msgstr ""
+"Fout bij het instellen van de pixelindeling. \n"
+" VIDIOC S FMT: "
 
 #: src/video_v4l2.c
 #, c-format
@@ -3697,8 +3885,11 @@ msgid "Adjusting to height (%d)"
 msgstr "Aanpassen aan hoogte ( %d)"
 
 #: src/video_v4l2.c
-msgid "H264(21) format not supported via videodevice.  Changing to default palette"
-msgstr "H264 (21) -indeling niet ondersteund via videotoestel. Wijzigen naar standaardpalet"
+msgid ""
+"H264(21) format not supported via videodevice.  Changing to default palette"
+msgstr ""
+"H264 (21) -indeling niet ondersteund via videotoestel. Wijzigen naar "
+"standaardpalet"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3754,7 +3945,7 @@ msgid ""
 "VIDIOC_QUERYBUF: "
 msgstr ""
 "Fout bij het opvragen van buffer %i \n"
-"VIDIOC QUERYBUF:"
+" VIDIOC QUERYBUF: "
 
 #: src/video_v4l2.c
 #, c-format
@@ -3968,11 +4159,15 @@ msgstr "Fout bij lezen van bestand voor SSL / TLS-ondersteuning."
 
 #: src/webu.c
 msgid "SSL/TLS requested but no cert file provided.  SSL/TLS disabled"
-msgstr "SSL / TLS aangevraagd maar geen cert-bestand verstrekt. SSL / TLS uitgeschakeld"
+msgstr ""
+"SSL / TLS aangevraagd maar geen cert-bestand verstrekt. SSL / TLS "
+"uitgeschakeld"
 
 #: src/webu.c
 msgid "SSL/TLS requested but no key file provided.  SSL/TLS disabled"
-msgstr "SSL / TLS aangevraagd maar geen sleutelbestand opgegeven. SSL / TLS uitgeschakeld"
+msgstr ""
+"SSL / TLS aangevraagd maar geen sleutelbestand opgegeven. SSL / TLS "
+"uitgeschakeld"
 
 #: src/webu.c
 #, c-format
@@ -4155,7 +4350,9 @@ msgstr "Ongeldige URL voor een cameraspecifieke poort: %s"
 #: src/webu_stream.c
 #, c-format
 msgid "URL for thread 0 is not valid when using camera specific files.: %s"
-msgstr "URL voor thread 0 is niet geldig bij gebruik van cameraspecifieke bestanden .: %s"
+msgstr ""
+"URL voor thread 0 is niet geldig bij gebruik van cameraspecifieke "
+"bestanden .: %s"
 
 #: src/webu_stream.c
 #, c-format
@@ -4168,5 +4365,5 @@ msgstr "Kon afbeelding niet streamen."
 
 #: src/webu_text.c
 #, c-format
-msgid "'%s' option is depreciated.  New option name is `%s'"
-msgstr "' %s' optie wordt afgeschreven. Nieuwe optienaam is ` %s '"
+msgid "'%s' option is depreciated.  New option name is '%s'"
+msgstr "' %s' optie wordt afgeschreven. Nieuwe optienaam is '%s'"

@@ -1,3 +1,19 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef PWC_IOCTL_H
 #define PWC_IOCTL_H
 
@@ -10,19 +26,6 @@
    The decompression routines have been implemented by reverse-engineering the
    Nemosoft binary pwcx module. Caveat emptor.
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 /* This is pwc-ioctl.h belonging to PWC 10.0.10
@@ -53,8 +56,8 @@
  */
 
 #if defined(__linux__)
-#include <linux/types.h>
-#include <linux/version.h>
+    #include <linux/types.h>
+    #include <linux/version.h>
 #endif
 
  /* Enumeration of image sizes */
@@ -305,23 +308,23 @@ struct pwc_table_init_buffer {
 
 #if (defined(HAVE_V4L2)) && defined(__linux__)
 
-#define V4L2_CID_PRIVATE_SAVE_USER       (V4L2_CID_PRIVATE_BASE + 0)
-#define V4L2_CID_PRIVATE_RESTORE_USER    (V4L2_CID_PRIVATE_BASE + 1)
-#define V4L2_CID_PRIVATE_RESTORE_FACTORY (V4L2_CID_PRIVATE_BASE + 2)
-#define V4L2_CID_PRIVATE_COLOUR_MODE     (V4L2_CID_PRIVATE_BASE + 3)
-#define V4L2_CID_PRIVATE_AUTOCONTOUR     (V4L2_CID_PRIVATE_BASE + 4)
-#define V4L2_CID_PRIVATE_CONTOUR         (V4L2_CID_PRIVATE_BASE + 5)
-#define V4L2_CID_PRIVATE_BACKLIGHT       (V4L2_CID_PRIVATE_BASE + 6)
-#define V4L2_CID_PRIVATE_FLICKERLESS     (V4L2_CID_PRIVATE_BASE + 7)
-#define V4L2_CID_PRIVATE_NOISE_REDUCTION (V4L2_CID_PRIVATE_BASE + 8)
+    #define V4L2_CID_PRIVATE_SAVE_USER       (V4L2_CID_PRIVATE_BASE + 0)
+    #define V4L2_CID_PRIVATE_RESTORE_USER    (V4L2_CID_PRIVATE_BASE + 1)
+    #define V4L2_CID_PRIVATE_RESTORE_FACTORY (V4L2_CID_PRIVATE_BASE + 2)
+    #define V4L2_CID_PRIVATE_COLOUR_MODE     (V4L2_CID_PRIVATE_BASE + 3)
+    #define V4L2_CID_PRIVATE_AUTOCONTOUR     (V4L2_CID_PRIVATE_BASE + 4)
+    #define V4L2_CID_PRIVATE_CONTOUR         (V4L2_CID_PRIVATE_BASE + 5)
+    #define V4L2_CID_PRIVATE_BACKLIGHT       (V4L2_CID_PRIVATE_BASE + 6)
+    #define V4L2_CID_PRIVATE_FLICKERLESS     (V4L2_CID_PRIVATE_BASE + 7)
+    #define V4L2_CID_PRIVATE_NOISE_REDUCTION (V4L2_CID_PRIVATE_BASE + 8)
 
-struct pwc_raw_frame {
-   __le16 type;           /* type of the webcam */
-   __le16 vbandlength;    /* Size of 4lines compressed (used by the decompressor) */
-   __u8   cmd[4];         /* the four byte of the command (in case of nala,
-                             only the first 3 bytes is filled) */
-   __u8   rawframe[0];    /* frame_size = H/4*vbandlength */
-} __attribute__ ((packed));
+    struct pwc_raw_frame {
+      __le16 type;           /* type of the webcam */
+      __le16 vbandlength;    /* Size of 4lines compressed (used by the decompressor) */
+      __u8   cmd[4];         /* the four byte of the command (in case of nala,
+                                only the first 3 bytes is filled) */
+      __u8   rawframe[0];    /* frame_size = H/4*vbandlength */
+    } __attribute__ ((packed));
 
 #endif /*  HAVE_V4L2 && __linux__ */
 

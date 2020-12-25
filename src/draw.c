@@ -1,16 +1,32 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  *    draw.c
  *
  *    Routines for drawing text on images
  *
  *    Copyright 2000, Jeroen Vreeken
- *    This program is published under the GNU public license version 2
- *    See also the file 'COPYING'
  *
  */
 
 #include <ctype.h>
 #include "motion.h"
+#include "util.h"
+#include "draw.h"
 
 /* Highest ascii value is 126 (~) */
 #define ASCII_MAX 127
@@ -1076,13 +1092,17 @@ static int draw_textn(unsigned char *image, int startx,  int starty,  int width,
     int pos, line_offset, next_char_offs;
     unsigned char *image_ptr, *char_ptr;
 
-    if (startx > width / 2)
+    if (startx > width / 2) {
         startx -= len * (6 * factor);
+    }
 
-    if (startx + len * 6 * factor >= width)
+    if (startx + len * 6 * factor >= width) {
         len = (width-startx-1)/(6*factor);
+    }
 
-    if ((startx < 1) || (starty < 1) || (len < 1)) return 0;
+    if ((startx < 1) || (starty < 1) || (len < 1)) {
+        return 0;
+    }
 
     line_offset = width - (7 * factor);
     next_char_offs = (width * 8 * factor) - (6 * factor);
@@ -1092,16 +1112,14 @@ static int draw_textn(unsigned char *image, int startx,  int starty,  int width,
     for (pos = 0; pos < len; pos++) {
         int pos_check = (int)text[pos];
 
+        if ((pos_check <0) || (pos_check >127)) {
+            pos_check = 45; /* Use a - for non ascii characters*/
+        }
+
         char_ptr = char_arr_ptr[pos_check];
 
         for (y = 0; y < 8 * factor; y++) {
             for (x = 0; x < 7 * factor; x++) {
-
-                if (pos_check < 0) {
-                    image_ptr++;
-                    continue;
-                }
-
                 char_ptr = char_arr_ptr[pos_check] + y/factor*7 + x/factor;
 
                 switch(*char_ptr) {
@@ -1138,23 +1156,32 @@ int draw_text(unsigned char *image, int width, int height, int startx, int start
     begin = end = text;
     txtlen = 0;
     while ((end = strstr(end, NEWLINE))) {
-        if ((end - begin)>txtlen) txtlen = (end - begin);
+        if ((end - begin)>txtlen) {
+            txtlen = (end - begin);
+        }
         num_nl++;
         end += sizeof(NEWLINE)-1;
+        begin = end;
     }
-    if (txtlen == 0) txtlen = strlen(text);
+    if (txtlen == 0) {
+        txtlen = strlen(text);
+    }
 
     /* Adjust the factor if it is out of bounds
      * txtlen at this point is the approx length of longest line
     */
-    if ((txtlen * 7 * factor) > width){
+    if ((txtlen * 7 * factor) > width) {
         factor = (width / (txtlen * 7));
-        if (factor <= 0) factor = 1;
+        if (factor <= 0) {
+            factor = 1;
+        }
     }
 
-    if (((num_nl+1) * 8 * factor) > height){
+    if (((num_nl+1) * 8 * factor) > height) {
         factor = (height / ((num_nl+1) * 8));
-        if (factor <= 0) factor = 1;
+        if (factor <= 0) {
+            factor = 1;
+        }
     }
 
     line_space = factor * 9;
