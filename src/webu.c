@@ -1206,18 +1206,11 @@ static mymhd_retcd webu_mhd_send(struct webui_ctx *webui, int ctrl)
                 MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
                     , webui->cnt->conf.stream_cors_header);
             }
-
-            switch (webui->cnct_type) {
-            case WEBUI_CNCT_STATUS_LIST:
-                /*FALLTHROUGH*/
-            case WEBUI_CNCT_STATUS_ONE:
-                MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE,
-                                         "application/json");
-                break;
-
-            default:
+            if ((webui->cnct_type == WEBUI_CNCT_STATUS_LIST) ||
+                (webui->cnct_type == WEBUI_CNCT_STATUS_ONE)) {
+                MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "application/json");
+            } else {
                 MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
-                break;
             }
         }
     }
@@ -1253,19 +1246,19 @@ static void webu_answer_strm_type(struct webui_ctx *webui)
                mystreq(webui->uri_camid,"current")) {
         webui->cnct_type = WEBUI_CNCT_STATIC;
 
-    } else if (strcmp(webui->uri_camid, "cameras.json") == 0 &&
+    } else if (mystreq(webui->uri_camid, "cameras.json") &&
                strlen(webui->uri_cmd1) == 0) {
         webui->cnct_type = WEBUI_CNCT_STATUS_LIST;
 
-    } else if (strcmp(webui->uri_cmd1, "cameras.json") == 0 &&
+    } else if (mystreq(webui->uri_cmd1, "cameras.json") &&
                strlen(webui->uri_cmd2) == 0) {
         webui->cnct_type = WEBUI_CNCT_STATUS_LIST;
 
-    } else if (strcmp(webui->uri_camid, "status.json") == 0 &&
+    } else if (mystreq(webui->uri_camid, "status.json") &&
                strlen(webui->uri_cmd1) == 0) {
         webui->cnct_type = WEBUI_CNCT_STATUS_ONE;
 
-    } else if (strcmp(webui->uri_cmd1, "status.json") == 0 &&
+    } else if (mystreq(webui->uri_cmd1, "status.json") &&
                strlen(webui->uri_cmd2) == 0) {
         webui->cnct_type = WEBUI_CNCT_STATUS_ONE;
 
@@ -1389,14 +1382,16 @@ static mymhd_retcd webu_answer_strm(void *cls, struct MHD_Connection *connection
         return retcd;
     }
 
-    /* Do not answer a request until the motion loop has completed at least once */
+    /* Do not answer a request until the motion loop has completed at least once.
+     * Required for the Motioneye application
+    */
     if (webui->cnt->passflag == 0) {
         MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Stream picture is not ready yet"));
         return MHD_NO;
     }
 
     if (webui->cnt->webcontrol_finish) {
-        MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Stream is about to finish"));
+        MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Stream process requested to finish."));
         return MHD_NO;
     }
 
@@ -1415,28 +1410,12 @@ static mymhd_retcd webu_answer_strm(void *cls, struct MHD_Connection *connection
 
     webu_answer_strm_type(webui);
 
-    switch (webui->cnct_type) {
-    case WEBUI_CNCT_STATUS_LIST:
-        /*FALLTHROUGH*/
-    case WEBUI_CNCT_STATUS_ONE:
-        webu_status_main(webui);
-
-        retcd = webu_mhd_send(webui, FALSE);
-        if (retcd == MHD_NO){
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed %d"), retcd);
-        }
-
-        return retcd;
-
-    default:
-        break;
-    }
-
-    /* Do not answer a request until the motion loop has completed at least once */
-    if (webui->cnt->passflag == 0) return MHD_NO;
-
     retcd = 0;
-    if (webui->cnct_type == WEBUI_CNCT_STATIC){
+    if ((webui->cnct_type == WEBUI_CNCT_STATUS_LIST) ||
+        (webui->cnct_type == WEBUI_CNCT_STATUS_ONE)) {
+        webu_status_main(webui);
+        retcd = webu_mhd_send(webui, FALSE);
+    } else if (webui->cnct_type == WEBUI_CNCT_STATIC) {
         retcd = webu_stream_static(webui);
         if (retcd == MHD_NO) {
             webu_badreq(webui);
@@ -1454,7 +1433,7 @@ static mymhd_retcd webu_answer_strm(void *cls, struct MHD_Connection *connection
     }
 
     if (retcd == MHD_NO) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed %d"),retcd);
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Send page failed."));
     }
     return retcd;
 
