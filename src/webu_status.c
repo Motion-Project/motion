@@ -1,10 +1,23 @@
+/*   This file is part of Motion.
+ *
+ *   Motion is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Motion is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  *    webu_status.c
  *
  *    Status reports in JSON format via stream HTTP endpoint.
- *
- *    This software is distributed under the GNU Public License Version 2
- *    See also the file 'COPYING'.
  *
  */
 
@@ -16,7 +29,8 @@
 #include "webu_status.h"
 
 /* Conservatively encode characters in an array as a JSON string */
-static void webu_json_write_string(struct webui_ctx *webui, const char *str) {
+static void webu_json_write_string(struct webui_ctx *webui, const char *str)
+{
     const char *ptr;
     char cur, buf[8];
 
@@ -54,7 +68,8 @@ static void webu_json_write_string(struct webui_ctx *webui, const char *str) {
 }
 
 /* Write time_t as seconds since Unix epoch */
-static void webu_json_write_timestamp(struct webui_ctx *webui, time_t ts) {
+static void webu_json_write_timestamp(struct webui_ctx *webui, time_t ts)
+{
     char buf[32];
 
     snprintf(buf, sizeof(buf), "%" PRId64, (int64_t)ts);
@@ -63,7 +78,8 @@ static void webu_json_write_timestamp(struct webui_ctx *webui, time_t ts) {
 }
 
 /* Write duration of time between two time_t */
-static void webu_json_write_timestamp_elapsed(struct webui_ctx *webui, time_t ts, time_t since) {
+static void webu_json_write_timestamp_elapsed(struct webui_ctx *webui, time_t ts, time_t since)
+{
     char buf[32];
     double elapsed;
 
@@ -75,7 +91,8 @@ static void webu_json_write_timestamp_elapsed(struct webui_ctx *webui, time_t ts
 }
 
 /* Write time_t as ISO-8601-formatted string */
-static void webu_json_write_timestamp_iso8601(struct webui_ctx *webui, time_t ts) {
+static void webu_json_write_timestamp_iso8601(struct webui_ctx *webui, time_t ts)
+{
     char buf[32];
     struct tm timestamp_tm;
 
@@ -86,14 +103,17 @@ static void webu_json_write_timestamp_iso8601(struct webui_ctx *webui, time_t ts
     webu_json_write_string(webui, buf);
 }
 
-static void webu_status_write_list(struct webui_ctx *webui,
-                                   const char *toplevel_key,
-                                   void (*callback)(struct webui_ctx *, struct context *)) {
+static void webu_status_write_list(struct webui_ctx *webui, const char *toplevel_key
+        , void (*callback)(struct webui_ctx *, struct context *))
+{
     int indx, indx_st;
 
     if (webui->thread_nbr == 0) {
-        indx_st = 1;
-        if (webui->cam_threads == 1) indx_st = 0;
+        if (webui->cam_threads == 1) {
+            indx_st = 0;
+        } else {
+            indx_st = 1;
+        }
 
         webu_write(webui, "{\"");
         webu_write(webui, toplevel_key);
@@ -113,7 +133,8 @@ static void webu_status_write_list(struct webui_ctx *webui,
     }
 }
 
-static void webu_json_cam_list_single(struct webui_ctx *webui, struct context *cnt) {
+static void webu_json_cam_list_single(struct webui_ctx *webui, struct context *cnt)
+{
     char buf[WEBUI_LEN_RESP];
 
     snprintf(buf, sizeof(buf), "{\"id\": %d, \"name\": ", cnt->camera_id);
@@ -129,12 +150,14 @@ static void webu_json_cam_list_single(struct webui_ctx *webui, struct context *c
     webu_write(webui, "}");
 }
 
-static void webu_status_list(struct webui_ctx *webui) {
+static void webu_status_list(struct webui_ctx *webui)
+{
     webu_status_write_list(webui, "cameras", webu_json_cam_list_single);
 }
 
 /* Describe a single camera status */
-static void webu_json_cam_status_single(struct webui_ctx *webui, struct context *cnt) {
+static void webu_json_cam_status_single(struct webui_ctx *webui, struct context *cnt)
+{
     char buf[WEBUI_LEN_RESP];
     const struct {
         const char *name;
@@ -204,15 +227,18 @@ static void webu_json_cam_status_single(struct webui_ctx *webui, struct context 
     webu_write(webui, "}\n");
 }
 
-static void webu_status_one(struct webui_ctx *webui) {
+static void webu_status_one(struct webui_ctx *webui)
+{
     webu_status_write_list(webui, "camera_status", webu_json_cam_status_single);
 }
 
-static void webu_status_badreq(struct webui_ctx *webui) {
+static void webu_status_badreq(struct webui_ctx *webui)
+{
     webu_write(webui, "{ \"error\": \"Server did not understand the request\" }");
 }
 
-void webu_status_main(struct webui_ctx *webui) {
+void webu_status_main(struct webui_ctx *webui)
+{
     switch (webui->cnct_type) {
     case WEBUI_CNCT_STATUS_LIST:
         webu_status_list(webui);
