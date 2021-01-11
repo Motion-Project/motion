@@ -298,7 +298,7 @@ static int movie_encode_video(struct ctx_movie *movie)
         video_outbuf_size = (movie->ctx_codec->width +16) * (movie->ctx_codec->height +16) * 1;
         video_outbuf =(uint8_t *) mymalloc(video_outbuf_size);
 
-        retcd = avcodec_encode_video(movie->video_st->codec, video_outbuf, video_outbuf_size, movie->picture);
+        retcd = avcodec_encode_video(movie->strm_video->codec, video_outbuf, video_outbuf_size, movie->picture);
         if (retcd < 0 ){
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error encoding video"));
             mypacket_unref(movie->pkt);
@@ -352,13 +352,13 @@ static int movie_set_pts(struct ctx_movie *movie, const struct timespec *ts1)
             // This is the very first frame, ensure PTS is zero
             movie->picture->pts = 0;
         } else
-            movie->picture->pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},movie->video_st->time_base) + movie->base_pts;
+            movie->picture->pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},movie->strm_video->time_base) + movie->base_pts;
 
         if (movie->test_mode == TRUE){
             MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
                 ,_("PTS %" PRId64 " Base PTS %" PRId64 " ms interval %" PRId64 " timebase %d-%d")
                 ,movie->picture->pts,movie->base_pts,pts_interval
-                ,movie->video_st->time_base.num,movie->video_st->time_base.den);
+                ,movie->strm_video->time_base.num,movie->strm_video->time_base.den);
         }
 
         if (movie->picture->pts <= movie->last_pts){
@@ -369,46 +369,6 @@ static int movie_set_pts(struct ctx_movie *movie, const struct timespec *ts1)
             return -1;
         }
         movie->last_pts = movie->picture->pts;
-    }
-    return 0;
-}
-
-static int movie_set_pktpts(struct ctx_movie *movie, const struct timespec *ts1)
-{
-
-    int64_t pts_interval;
-
-    if (movie->tlapse != TIMELAPSE_NONE) {
-        movie->last_pts++;
-        movie->pkt.pts = movie->last_pts;
-    } else {
-        pts_interval = ((1000000L * (ts1->tv_sec - movie->start_time.tv_sec)) + (ts1->tv_nsec/1000) - (movie->start_time.tv_nsec/1000));
-        if (pts_interval < 0){
-            /* This can occur when we have pre-capture frames.  Reset start time of video. */
-            movie_reset_start_time(movie, ts1);
-            pts_interval = 0;
-        }
-        movie->pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},movie->video_st->time_base) + movie->base_pts;
-
-        if (movie->test_mode == TRUE){
-            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
-                       ,_("PTS %" PRId64 " Base PTS %" PRId64 " ms interval %" PRId64 " timebase %d-%d Change %d")
-                       ,movie->pkt.pts
-                       ,movie->base_pts,pts_interval
-                       ,movie->video_st->time_base.num
-                       ,movie->video_st->time_base.den
-                       ,(movie->pkt.pts-movie->last_pts) );
-        }
-
-        if (movie->pkt.pts <= movie->last_pts){
-            //We have a problem with our motion loop timing and sending frames or the rounding into the PTS.
-            if (movie->test_mode == TRUE){
-                MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("BAD TIMING!! Frame skipped."));
-            }
-            return -1;
-        }
-        movie->last_pts = movie->pkt.pts;
-        movie->pkt.dts=movie->pkt.pts;
     }
     return 0;
 }
@@ -566,8 +526,8 @@ static int movie_set_codec(struct ctx_movie *movie)
 
     #if (MYFFVER >= 57041)
         //If we provide the codec to this, it results in a memory leak.  ffmpeg ticket: 5714
-        movie->video_st = avformat_new_stream(movie->oc, NULL);
-        if (!movie->video_st) {
+        movie->strm_video = avformat_new_stream(movie->oc, NULL);
+        if (!movie->strm_video) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
             movie_free_context(movie);
             return -1;
@@ -579,13 +539,13 @@ static int movie_set_codec(struct ctx_movie *movie)
             return -1;
         }
     #else
-        movie->video_st = avformat_new_stream(movie->oc, movie->codec);
-        if (!movie->video_st) {
+        movie->strm_video = avformat_new_stream(movie->oc, movie->codec);
+        if (!movie->strm_video) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
             movie_free_context(movie);
             return -1;
         }
-        movie->ctx_codec = movie->video_st->codec;
+        movie->ctx_codec = movie->strm_video->codec;
     #endif
 
 
@@ -686,7 +646,7 @@ static int movie_set_stream(struct ctx_movie *movie)
         int retcd;
         char errstr[128];
 
-        retcd = avcodec_parameters_from_context(movie->video_st->codecpar,movie->ctx_codec);
+        retcd = avcodec_parameters_from_context(movie->strm_video->codecpar,movie->ctx_codec);
         if (retcd < 0) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
@@ -696,7 +656,7 @@ static int movie_set_stream(struct ctx_movie *movie)
         }
     #endif
 
-    movie->video_st->time_base = (AVRational){1, movie->fps};
+    movie->strm_video->time_base = (AVRational){1, movie->fps};
 
     return 0;
 
@@ -971,9 +931,9 @@ static int movie_put_frame(struct ctx_movie *movie, const struct timespec *ts1)
 
 }
 
+/* Reset the written flag and movie start time at opening of each event */
 static void movie_passthru_reset(struct ctx_movie *movie)
 {
-    /* Reset the written flag at start of each event */
     int indx;
 
     pthread_mutex_lock(&movie->netcam_data->mutex_pktarray);
@@ -982,6 +942,36 @@ static void movie_passthru_reset(struct ctx_movie *movie)
         }
     pthread_mutex_unlock(&movie->netcam_data->mutex_pktarray);
 
+}
+
+
+static int movie_passthru_pktpts(struct ctx_movie *movie)
+{
+    int64_t ts_interval;
+    AVRational tmpbase;
+    int indx;
+
+    if (movie->pkt.stream_index == movie->netcam_data->audio_stream_index) {
+        tmpbase = movie->strm_audio->time_base;
+        indx = movie->netcam_data->audio_stream_index;
+    } else {
+        tmpbase = movie->strm_video->time_base;
+        indx = movie->netcam_data->video_stream_index;
+    }
+
+    ts_interval = movie->pkt.pts;
+    movie->pkt.pts = av_rescale_q(ts_interval
+        , movie->netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
+
+    ts_interval = movie->pkt.dts;
+    movie->pkt.dts = av_rescale_q(ts_interval
+        , movie->netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
+
+    ts_interval = movie->pkt.duration;
+    movie->pkt.duration = av_rescale_q(ts_interval
+        , movie->netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
+
+    return 0;
 }
 
 static void movie_passthru_write(struct ctx_movie *movie, int indx)
@@ -994,7 +984,6 @@ static void movie_passthru_write(struct ctx_movie *movie, int indx)
     movie->pkt.data = NULL;
     movie->pkt.size = 0;
 
-
     movie->netcam_data->pktarray[indx].iswritten = TRUE;
 
     retcd = mycopy_packet(&movie->pkt, &movie->netcam_data->pktarray[indx].packet);
@@ -1005,13 +994,11 @@ static void movie_passthru_write(struct ctx_movie *movie, int indx)
         return;
     }
 
-    retcd = movie_set_pktpts(movie, &movie->netcam_data->pktarray[indx].timestamp_ts);
+    retcd = movie_passthru_pktpts(movie);
     if (retcd < 0) {
         mypacket_unref(movie->pkt);
         return;
     }
-
-    movie->pkt.stream_index = 0;
 
     retcd = av_write_frame(movie->oc, &movie->pkt);
     mypacket_unref(movie->pkt);
@@ -1026,7 +1013,6 @@ static void movie_passthru_write(struct ctx_movie *movie, int indx)
 
 static int movie_passthru_put(struct ctx_movie *movie, struct ctx_image_data *img_data)
 {
-
     int idnbr_image, idnbr_lastwritten, idnbr_stop, idnbr_firstkey;
     int indx, indx_lastwritten, indx_firstkey;
 
@@ -1095,90 +1081,164 @@ static int movie_passthru_put(struct ctx_movie *movie, struct ctx_image_data *im
     return 0;
 }
 
-static int movie_passthru_codec(struct ctx_movie *movie)
+static int movie_passthru_streams_video(struct ctx_movie *movie, AVStream *stream_in)
 {
+    int         retcd;
 
-    int retcd;
-    AVStream    *stream_in;
+    movie->strm_video = avformat_new_stream(movie->oc, NULL);
+    if (!movie->strm_video) {
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc video stream"));
+        return -1;
+    }
+
+    retcd = avcodec_parameters_copy(movie->strm_video->codecpar, stream_in->codecpar);
+    if (retcd < 0) {
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to copy video codec parameters"));
+        return -1;
+    }
+
+    movie->strm_video->codecpar->codec_tag  = 0;
+    movie->strm_video->time_base = stream_in->time_base;
+
+    MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+        , _("video timebase %d/%d")
+        , movie->strm_video->time_base.num
+        , movie->strm_video->time_base.den);
+
+    return 0;
+}
+
+static int movie_passthru_streams_audio(struct ctx_movie *movie, AVStream *stream_in)
+{
+    int         retcd;
+
+    movie->strm_audio = avformat_new_stream(movie->oc, NULL);
+    if (!movie->strm_audio) {
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc audio stream"));
+        return -1;
+    }
+
+    retcd = avcodec_parameters_copy(movie->strm_audio->codecpar, stream_in->codecpar);
+    if (retcd < 0) {
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to copy audio codec parameters"));
+        return -1;
+    }
+
+    movie->strm_audio->codecpar->codec_tag  = 0;
+    movie->strm_audio->time_base = stream_in->time_base;
+    movie->strm_audio->r_frame_rate = stream_in->time_base;
+    movie->strm_audio->avg_frame_rate= stream_in->time_base;
+    movie->strm_audio->codecpar->format = stream_in->codecpar->format;
+    movie->strm_audio->codecpar->sample_rate = stream_in->codecpar->sample_rate;
+
+    MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+        , _("audio timebase %d/%d")
+        , movie->strm_audio->time_base.num
+        , movie->strm_audio->time_base.den);
+    return 0;
+}
+
+static int movie_passthru_streams(struct ctx_movie *movie)
+{
+    #if (MYFFVER >= 57041)
+        int         retcd, indx;
+        AVStream    *stream_in;
+
+        pthread_mutex_lock(&movie->netcam_data->mutex_transfer);
+            for (indx= 0; indx < (int)movie->netcam_data->transfer_format->nb_streams; indx++) {
+                stream_in = movie->netcam_data->transfer_format->streams[indx];
+                movie->oc->oformat->video_codec = stream_in->codecpar->codec_id;
+                if (stream_in->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+                    retcd = movie_passthru_streams_video(movie, stream_in);
+                } else if (stream_in->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+                    retcd = movie_passthru_streams_audio(movie, stream_in);
+                }
+                if (retcd < 0) {
+                    pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
+                    return retcd;
+                }
+            }
+        pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
+
+        return 0;
+    #else
+        /* This is disabled in the check_passthrough but we need it here for compiling */
+        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("Pass-through disabled.  ffmpeg too old"));
+        return -1;
+    #endif
+}
+
+static int movie_passthru_check(struct ctx_movie *movie)
+{
+    if ((movie->netcam_data->status == NETCAM_NOTCONNECTED  ) ||
+        (movie->netcam_data->status == NETCAM_RECONNECTING  ) ){
+        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
+            ,_("rtsp camera not ready for pass-through."));
+        return -1;
+    }
 
     if (movie->netcam_data == NULL){
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("RTSP context not available."));
         return -1;
     }
 
-    pthread_mutex_lock(&movie->netcam_data->mutex_transfer);
+    movie_passthru_reset(movie);
 
-        if ((movie->netcam_data->status == NETCAM_NOTCONNECTED  ) ||
-            (movie->netcam_data->status == NETCAM_RECONNECTING  ) ){
-            MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
-                ,_("rtsp camera not ready for pass-through."));
-            pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
-            return -1;
-        }
+    return 0;
+}
 
+static int movie_passthru_open(struct ctx_movie *movie)
+{
+    int retcd;
+
+    retcd = movie_passthru_check(movie);
+    if (retcd < 0) {
+        return retcd;
+    }
+
+    movie->oc = avformat_alloc_context();
+    if (!movie->oc) {
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not allocate output context"));
+        movie_free_context(movie);
+        return -1;
+    }
+
+    /*
         if (mystrne(movie->codec_name, "mp4")){
             MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
                 ,_("pass-through mode enabled.  Changing to MP4 container."));
             movie->codec_name = "mp4";
         }
+    */
 
-        retcd = movie_get_oformat(movie);
-        if (retcd < 0 ) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get codec!"));
-            pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
-            return -1;
-        }
+    retcd = movie_get_oformat(movie);
+    if (retcd < 0 ) {
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get output format!"));
+        return -1;
+    }
 
-    #if (MYFFVER >= 57041)
-            stream_in = movie->netcam_data->transfer_format->streams[0];
-            movie->oc->oformat->video_codec = stream_in->codecpar->codec_id;
+    retcd = movie_passthru_streams(movie);
+    if (retcd < 0 ) {
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get streams!"));
+        return -1;
+    }
 
-            movie->video_st = avformat_new_stream(movie->oc, NULL);
-            if (!movie->video_st) {
-                MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
-                pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
-                return -1;
-            }
+    retcd = movie_set_outputfile(movie);
+    if (retcd < 0){
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the output file"));
+        return -1;
+    }
 
-            retcd = avcodec_parameters_copy(movie->video_st->codecpar, stream_in->codecpar);
-            if (retcd < 0){
-                MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to copy codec parameters"));
-                pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
-                return -1;
-            }
-            movie->video_st->codecpar->codec_tag  = 0;
+    MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+        , _("Timebase after open audio: %d/%d video: %d/%d")
+        , movie->strm_audio->time_base.num
+        , movie->strm_audio->time_base.den
+        , movie->strm_video->time_base.num
+        , movie->strm_video->time_base.den);
 
-    #elif (MYFFVER >= 55000)
-
-            stream_in = movie->netcam_data->transfer_format->streams[0];
-
-            movie->video_st = avformat_new_stream(movie->oc, stream_in->codec->codec);
-            if (!movie->video_st) {
-                MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
-                pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
-                return -1;
-            }
-
-            retcd = avcodec_copy_context(movie->video_st->codec, stream_in->codec);
-            if (retcd < 0){
-                MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to copy codec parameters"));
-                pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
-                return -1;
-            }
-            movie->video_st->codec->flags     |= MY_CODEC_FLAG_GLOBAL_HEADER;
-            movie->video_st->codec->codec_tag  = 0;
-    #else
-            /* This is disabled in the util_check_passthrough but we need it here for compiling */
-            pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
-            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("Pass-through disabled.  ffmpeg too old"));
-            return -1;
-    #endif
-
-        movie->video_st->time_base         = stream_in->time_base;
-    pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
     MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "Pass-through stream opened");
-    return 0;
 
+    return 0;
 }
 
 void movie_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list vl)
@@ -1296,8 +1356,17 @@ void movie_global_deinit(void)
 
 int movie_open(struct ctx_movie *movie)
 {
-
     int retcd;
+
+    if (movie->passthrough) {
+        retcd = movie_passthru_open(movie);
+        if (retcd < 0 ) {
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not setup passthrough!"));
+            movie_free_context(movie);
+            return -1;
+        }
+        return 0;
+    }
 
     movie->oc = avformat_alloc_context();
     if (!movie->oc) {
@@ -1306,41 +1375,29 @@ int movie_open(struct ctx_movie *movie)
         return -1;
     }
 
-    if (movie->passthrough) {
-        retcd = movie_passthru_codec(movie);
-        if (retcd < 0 ) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not setup passthru!"));
-            movie_free_context(movie);
-            return -1;
-        }
+    retcd = movie_get_oformat(movie);
+    if (retcd < 0 ) {
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get codec!"));
+        movie_free_context(movie);
+        return -1;
+    }
 
-        movie_passthru_reset(movie);
+    retcd = movie_set_codec(movie);
+    if (retcd < 0 ) {
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Failed to allocate codec!"));
+        return -1;
+    }
 
-    } else {
-        retcd = movie_get_oformat(movie);
-        if (retcd < 0 ) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get codec!"));
-            movie_free_context(movie);
-            return -1;
-        }
+    retcd = movie_set_stream(movie);
+    if (retcd < 0){
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the stream"));
+        return -1;
+    }
 
-        retcd = movie_set_codec(movie);
-        if (retcd < 0 ) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Failed to allocate codec!"));
-            return -1;
-        }
-
-        retcd = movie_set_stream(movie);
-        if (retcd < 0){
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the stream"));
-            return -1;
-        }
-
-        retcd = movie_set_picture(movie);
-        if (retcd < 0){
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the stream"));
-            return -1;
-        }
+    retcd = movie_set_picture(movie);
+    if (retcd < 0){
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the stream"));
+        return -1;
     }
 
     retcd = movie_set_outputfile(movie);
@@ -1436,7 +1493,7 @@ int movie_put_image(struct ctx_movie *movie, struct ctx_image_data *img_data, co
 
 void movie_reset_start_time(struct ctx_movie *movie, const struct timespec *ts1)
 {
-    int64_t one_frame_interval = av_rescale_q(1,(AVRational){1, movie->fps},movie->video_st->time_base);
+    int64_t one_frame_interval = av_rescale_q(1,(AVRational){1, movie->fps}, movie->strm_video->time_base);
     if (one_frame_interval <= 0)
         one_frame_interval = 1;
     movie->base_pts = movie->last_pts + one_frame_interval;

@@ -47,7 +47,8 @@ enum USER_CODEC {
 
 struct ctx_movie {
     AVFormatContext *oc;
-    AVStream *video_st;
+    AVStream *strm_video;
+    AVStream *strm_audio;
     AVCodecContext *ctx_codec;
     AVCodec *codec;
     AVPacket pkt;

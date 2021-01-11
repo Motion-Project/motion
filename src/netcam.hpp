@@ -105,6 +105,8 @@ struct ctx_netcam {
     AVDictionary             *opts;                  /* AVOptions when opening the format context */
     int                       swsframe_size;         /* The size of the image after resizing */
     int                       video_stream_index;    /* Stream index associated with video from camera */
+    int                       audio_stream_index;    /* Stream index associated with video from camera */
+
     enum AVHWDeviceType       hw_type;
     enum AVPixelFormat        hw_pix_fmt;
     AVBufferRef               *hw_device_ctx;

@@ -532,17 +532,18 @@ void mythreadname_get(char *threadname)
 
 int mycheck_passthrough(struct ctx_cam *cam)
 {
-    #if (MYFFVER < 55000)
-        if (cam->movie_passthrough)
+    #if (MYFFVER >= 57041)
+        if (cam->movie_passthrough) {
+            return true;
+        } else {
+            return false;
+        }
+    #else
+        if (cam->movie_passthrough) {
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("FFMPEG version too old. Disabling pass-through processing."));
-        return 0;
-    #else
-        if (cam->movie_passthrough){
-            return 1;
-        } else {
-            return 0;
         }
+        return 0;
     #endif
 
 }
