@@ -53,76 +53,78 @@ static int dbse_global_edits(struct ctx_cam **cam_list)
 
 }
 
-void dbse_global_deinit(struct ctx_cam **cam_list)
+void dbse_global_deinit(struct ctx_motapp *motapp)
 {
 
     int indx;
 
     #if defined(HAVE_MYSQL)
-        if (cam_list[0]->conf->database_type != "") {
+        if (motapp->cam_list[0]->conf->database_type != "") {
             if ((cam_list[0]->conf->database_type == "mysql")) {
                 MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing MYSQL"));
                 mysql_library_end();
             }
         }
     #else
-        (void)cam_list;
+        (void)motapp;
     #endif /* HAVE_MYSQL */
 
     #if defined(HAVE_MARIADB)
-        if (cam_list[0]->conf->database_type != "") {
-            if ((cam_list[0]->conf->database_type == "mariadb")) {
+        if (motapp->cam_list[0]->conf->database_type != "") {
+            if ((motapp->cam_list[0]->conf->database_type == "mariadb")) {
                 MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing MYSQL"));
                 mysql_library_end();
             }
         }
     #else
-        (void)cam_list;
+        (void)motapp;
     #endif /* HAVE_MYSQL */
 
     indx = 0;
-    while (cam_list[indx] != NULL){
-        if (cam_list[indx]->dbse != NULL) free(cam_list[indx]->dbse);
-        cam_list[indx]->dbse = NULL;
+    while (motapp->cam_list[indx] != NULL){
+        if (motapp->cam_list[indx]->dbse != NULL) {
+            free(motapp->cam_list[indx]->dbse);
+        }
+        motapp->cam_list[indx]->dbse = NULL;
         indx++;
     }
 
 }
 
-void dbse_global_init(struct ctx_cam **cam_list)
+void dbse_global_init(struct ctx_motapp *motapp)
 {
     int indx;
 
     indx = 0;
-    while (cam_list[indx] != NULL){
-        cam_list[indx]->dbse = (struct ctx_dbse *)mymalloc(sizeof(struct ctx_dbse));
+    while (motapp->cam_list[indx] != NULL) {
+        motapp->cam_list[indx]->dbse = (struct ctx_dbse *)mymalloc(sizeof(struct ctx_dbse));
         indx++;
     }
 
-    if (cam_list[0]->conf->database_type != "") {
-        if (dbse_global_edits(cam_list) == -1) return;
+    if (motapp->cam_list[0]->conf->database_type != "") {
+        if (dbse_global_edits(motapp->cam_list) == -1) return;
 
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("Initializing database"));
         /* Initialize all the database items */
         #if defined(HAVE_MYSQL)
-            if ((cam_list[0]->conf->database_type == "mysql")) {
+            if ((motapp->cam_list[0]->conf->database_type == "mysql")) {
                 if (mysql_library_init(0, NULL, NULL)) {
                     MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                         ,_("Could not initialize database %s")
-                        ,cam_list[0]->conf->database_type.c_str());
-                    cam_list[0]->conf->database_type = "";
+                        ,motapp->cam_list[0]->conf->database_type.c_str());
+                    motapp->cam_list[0]->conf->database_type = "";
                     return;
                 }
             }
         #endif /* HAVE_MYSQL */
 
         #if defined(HAVE_MARIADB)
-            if ((cam_list[0]->conf->database_type == "mariadb")) {
+            if ((motapp->cam_list[0]->conf->database_type == "mariadb")) {
                 if (mysql_library_init(0, NULL, NULL)) {
                     MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                         ,_("Could not initialize database %s")
-                        ,cam_list[0]->conf->database_type.c_str());
-                    cam_list[0]->conf->database_type = "";
+                        ,motapp->cam_list[0]->conf->database_type.c_str());
+                    motapp->cam_list[0]->conf->database_type = "";
                     return;
                 }
             }
@@ -131,41 +133,43 @@ void dbse_global_init(struct ctx_cam **cam_list)
         #ifdef HAVE_SQLITE3
             /* database_sqlite3 == NULL if not changed causes each thread to create their own
             * sqlite3 connection this will only happens when using a non-threaded sqlite version */
-            cam_list[0]->dbse->database_sqlite3=NULL;
-            if ((cam_list[0]->conf->database_type == "sqlite3") &&
-                (cam_list[0]->conf->database_dbname != "")) {
+            motapp->cam_list[0]->dbse->database_sqlite3=NULL;
+            if ((motapp->cam_list[0]->conf->database_type == "sqlite3") &&
+                (motapp->cam_list[0]->conf->database_dbname != "")) {
                 MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
                     ,_("SQLite3 Database filename %s")
-                    ,cam_list[0]->conf->database_dbname.c_str());
+                    ,motapp->cam_list[0]->conf->database_dbname.c_str());
 
                 int thread_safe = sqlite3_threadsafe();
                 if (thread_safe > 0) {
                     MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, _("SQLite3 is threadsafe"));
                     MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, _("SQLite3 serialized %s")
                         ,(sqlite3_config(SQLITE_CONFIG_SERIALIZED)?_("FAILED"):_("SUCCESS")));
-                    if (sqlite3_open(cam_list[0]->conf->database_dbname.c_str(), &cam_list[0]->dbse->database_sqlite3) != SQLITE_OK) {
+                    if (sqlite3_open(motapp->cam_list[0]->conf->database_dbname.c_str()
+                        , &motapp->cam_list[0]->dbse->database_sqlite3) != SQLITE_OK) {
                         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                             ,_("Can't open database %s : %s")
-                            ,cam_list[0]->conf->database_dbname.c_str()
-                            ,sqlite3_errmsg(cam_list[0]->dbse->database_sqlite3));
-                        sqlite3_close(cam_list[0]->dbse->database_sqlite3);
+                            ,motapp->cam_list[0]->conf->database_dbname.c_str()
+                            ,sqlite3_errmsg(motapp->cam_list[0]->dbse->database_sqlite3));
+                        sqlite3_close(motapp->cam_list[0]->dbse->database_sqlite3);
                         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                             ,_("Could not initialize database %s")
-                            ,cam_list[0]->conf->database_dbname.c_str());
-                        cam_list[0]->conf->database_type = "";
+                            ,motapp->cam_list[0]->conf->database_dbname.c_str());
+                        motapp->cam_list[0]->conf->database_type = "";
                         return;
                     }
                     MOTION_LOG(NTC, TYPE_DB, NO_ERRNO,_("database_busy_timeout %d msec"),
-                            cam_list[0]->conf->database_busy_timeout);
-                    if (sqlite3_busy_timeout(cam_list[0]->dbse->database_sqlite3, cam_list[0]->conf->database_busy_timeout) != SQLITE_OK)
+                            motapp->cam_list[0]->conf->database_busy_timeout);
+                    if (sqlite3_busy_timeout(motapp->cam_list[0]->dbse->database_sqlite3
+                        , motapp->cam_list[0]->conf->database_busy_timeout) != SQLITE_OK)
                         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO,_("database_busy_timeout failed %s")
-                            ,sqlite3_errmsg(cam_list[0]->dbse->database_sqlite3));
+                            ,sqlite3_errmsg(motapp->cam_list[0]->dbse->database_sqlite3));
                 }
             }
             /* Cascade to all threads */
             indx = 1;
-            while (cam_list[indx] != NULL) {
-                cam_list[indx]->dbse->database_sqlite3 = cam_list[0]->dbse->database_sqlite3;
+            while (motapp->cam_list[indx] != NULL) {
+                motapp->cam_list[indx]->dbse->database_sqlite3 = motapp->cam_list[0]->dbse->database_sqlite3;
                 indx++;
             }
 
@@ -236,7 +240,7 @@ static void dbse_init_mariadb(struct ctx_cam *cam)
                 ,_("MySQL error was %s"), mysql_error(cam->dbse->database_mariadb));
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 ,_("Disabling database functionality"));
-            dbse_global_deinit(cam->cam_list);
+            dbse_global_deinit(cam->motapp);
             cam->conf->database_type = "";
             return;
         }
@@ -255,9 +259,9 @@ static void dbse_init_mariadb(struct ctx_cam *cam)
 static void dbse_init_sqlite3(struct ctx_cam *cam)
 {
     #ifdef HAVE_SQLITE3
-        if (cam->cam_list[0]->dbse->database_sqlite3 != 0) {
+        if (cam->motapp->cam_list[0]->dbse->database_sqlite3 != 0) {
             MOTION_LOG(NTC, TYPE_DB, NO_ERRNO,_("SQLite3 using shared handle"));
-            cam->dbse->database_sqlite3 = cam->cam_list[0]->dbse->database_sqlite3;
+            cam->dbse->database_sqlite3 = cam->motapp->cam_list[0]->dbse->database_sqlite3;
         } else {
             MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
                 ,_("SQLite3 Database filename %s"), cam->conf->database_dbname.c_str());

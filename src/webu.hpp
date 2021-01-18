@@ -74,9 +74,9 @@
         struct timespec time_last;         /* Keep track of processing time for stream thread*/
         int             mhd_first;         /* Boolean for whether it is the first connection*/
 
-        struct MHD_Connection  *connection; /* The MHD connection value from the client */
-        struct ctx_cam        **camlst;     /* The ctx_cam list of all cameras */
-        struct ctx_cam         *cam;        /* The ctx_cam information for the camera requested */
+        struct MHD_Connection   *connection; /* The MHD connection value from the client */
+        struct ctx_motapp       *motapp;
+        struct ctx_cam          *cam;        /* The ctx_cam information for the camera requested */
 
     };
 

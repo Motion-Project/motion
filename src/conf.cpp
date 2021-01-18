@@ -33,7 +33,7 @@ enum PARM_ACT{
 };
 
 /* Forward Declares */
-void conf_process(struct ctx_motapp *motapp, FILE *fp, int threadnbr);
+void conf_process(struct ctx_motapp *motapp, bool ismotapp, FILE *fp, int threadnbr);
 
 /*Configuration parameters */
 struct ctx_parm config_parms[] = {
@@ -1059,7 +1059,7 @@ static void conf_edit_camera_tmo(struct ctx_cam *cam, std::string &parm, enum PA
             cam->conf->camera_tmo = parm_in;
         }
     } else if (pact == PARM_ACT_GET){
-        parm = std::to_string(cam->conf->camera_id);
+        parm = std::to_string(cam->conf->camera_tmo);
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera_tmo",_("camera_tmo"));
@@ -3174,9 +3174,10 @@ static void conf_edit_track_step_angle_y(struct ctx_cam *cam, std::string &parm,
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_step_angle_y",_("track_step_angle_y"));
 }
 
-static void conf_edit_cat00(struct ctx_motapp *motapp, std::string cmd, std::string &parm_val, enum PARM_ACT pact)
+/* Application level parameters */
+static void conf_edit_cat00(struct ctx_motapp *motapp, std::string cmd
+        , std::string &parm_val, enum PARM_ACT pact)
 {
-
     if (cmd == "daemon") {                        conf_edit_daemon(motapp, parm_val, pact);
     } else if (cmd == "conf_filename"){           conf_edit_conf_filename(motapp, parm_val, pact);
     } else if (cmd == "setup_mode") {             conf_edit_setup_mode(motapp, parm_val, pact);
@@ -3189,9 +3190,9 @@ static void conf_edit_cat00(struct ctx_motapp *motapp, std::string cmd, std::str
 
 }
 
-static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm, std::string &parm_val, enum PARM_ACT pact)
+static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
 {
-
     if (parm_nm == "quiet"){                        conf_edit_quiet(cam, parm_val, pact);
     } else if (parm_nm == "camera_dir"){            conf_edit_camera_dir(cam, parm_val, pact);
     } else if (parm_nm == "camera_name"){           conf_edit_camera_name(cam, parm_val, pact);
@@ -3213,9 +3214,9 @@ static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm, std::strin
 
 }
 
-static void conf_edit_cat02(struct ctx_cam *cam, std::string parm_nm, std::string &parm_val, enum PARM_ACT pact)
+static void conf_edit_cat02(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
 {
-
     if (parm_nm == "width"){                          conf_edit_width(cam, parm_val, pact);
     } else if (parm_nm == "height"){                  conf_edit_height(cam, parm_val, pact);
     } else if (parm_nm == "framerate"){               conf_edit_framerate(cam, parm_val, pact);
@@ -3259,9 +3260,9 @@ static void conf_edit_cat02(struct ctx_cam *cam, std::string parm_nm, std::strin
 
 }
 
-static void conf_edit_cat03(struct ctx_cam *cam, std::string parm_nm, std::string &parm_val, enum PARM_ACT pact)
+static void conf_edit_cat03(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
 {
-
     if (parm_nm == "on_event_start"){                 conf_edit_on_event_start(cam, parm_val, pact);
     } else if (parm_nm == "on_event_end"){            conf_edit_on_event_end(cam, parm_val, pact);
     } else if (parm_nm == "on_picture_save"){         conf_edit_on_picture_save(cam, parm_val, pact);
@@ -3301,7 +3302,8 @@ static void conf_edit_cat03(struct ctx_cam *cam, std::string parm_nm, std::strin
 
 }
 
-static void conf_edit_cat04(struct ctx_cam *cam, std::string parm_nm, std::string &parm_val, enum PARM_ACT pact)
+static void conf_edit_cat04(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
 {
     if (parm_nm == "webcontrol_port"){                    conf_edit_webcontrol_port(cam, parm_val, pact);
     } else if (parm_nm == "webcontrol_ipv6"){             conf_edit_webcontrol_ipv6(cam, parm_val, pact);
@@ -3406,7 +3408,7 @@ static void conf_edit_dflt_cam(struct ctx_cam *cam)
 
 }
 
-int conf_edit_set_active(struct ctx_motapp *motapp, int threadnbr
+int conf_edit_set_active(struct ctx_motapp *motapp, bool ismotapp, int threadnbr
         , std::string parm_nm, std::string parm_val)
 {
     int indx;
@@ -3416,10 +3418,11 @@ int conf_edit_set_active(struct ctx_motapp *motapp, int threadnbr
     while (config_parms[indx].parm_name != "") {
         if (parm_nm ==  config_parms[indx].parm_name) {
             pcat = config_parms[indx].parm_cat;
-            if (pcat == PARM_CAT_00) {
+            if ((ismotapp == true) && (pcat == PARM_CAT_00)) {
                 motapp->parms_changed = true;
                 conf_edit_cat00(motapp, parm_nm, parm_val, PARM_ACT_SET);
-            } else if ((config_parms[indx].parm_cat != PARM_CAT_00) && (threadnbr != -1)) {
+
+            } else if ((ismotapp == false) && (pcat != PARM_CAT_00)) {
                 motapp->cam_list[threadnbr]->parms_changed = true;
                 if (pcat == PARM_CAT_01) {
                     conf_edit_cat01(motapp->cam_list[threadnbr], parm_nm, parm_val, PARM_ACT_SET);
@@ -3460,7 +3463,7 @@ static void conf_edit_depr_vid(struct ctx_motapp *motapp, int threadnbr
             parm_new = parm_curr +", " + parm_nm + "=" + parm_val;
         }
     }
-    conf_edit_set_active(motapp, threadnbr, newname, parm_new);
+    conf_edit_set_active(motapp, false, threadnbr, newname, parm_new);
 
 }
 
@@ -3474,7 +3477,7 @@ static void conf_edit_depr_web(struct ctx_motapp *motapp, int threadnbr
     } else {
         parm_new = "1";
     }
-    conf_edit_set_active(motapp, threadnbr, newname, parm_new);
+    conf_edit_set_active(motapp, false, threadnbr, newname, parm_new);
 }
 
 static void conf_edit_depr_tdbl(struct ctx_motapp *motapp, int threadnbr
@@ -3487,11 +3490,11 @@ static void conf_edit_depr_tdbl(struct ctx_motapp *motapp, int threadnbr
     } else {
         parm_new = "1";
     }
-    conf_edit_set_active(motapp, threadnbr, newname, parm_new);
+    conf_edit_set_active(motapp, false, threadnbr, newname, parm_new);
 }
 
 
-static int conf_edit_set_depr(struct ctx_motapp *motapp, int threadnbr
+static int conf_edit_set_depr(struct ctx_motapp *motapp, bool ismotapp, int threadnbr
         ,std::string &parm_nm, std::string &parm_val)
 {
     int indx;
@@ -3517,7 +3520,7 @@ static int conf_edit_set_depr(struct ctx_motapp *motapp, int threadnbr
                 conf_edit_depr_tdbl(motapp, threadnbr, config_parms_depr[indx].newname, parm_val);
 
             } else {
-                conf_edit_set_active(motapp, threadnbr, config_parms_depr[indx].newname, parm_val);
+                conf_edit_set_active(motapp, ismotapp, threadnbr, config_parms_depr[indx].newname, parm_val);
             }
             return 0;
         }
@@ -3561,58 +3564,64 @@ void conf_edit_get(struct ctx_cam *cam, std::string parm_nm, char *parm_chr, enu
 
 }
 
-void conf_edit_set(struct ctx_motapp *motapp, int threadnbr
+/* parm_name and parm_val as string */
+void conf_edit_set(struct ctx_motapp *motapp, bool ismotapp, int threadnbr
         ,std::string parm_nm, std::string parm_val)
 {
-    if (conf_edit_set_active(motapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_active(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
 
-    if (conf_edit_set_depr(motapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_depr(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
 
-    if (threadnbr != -1){
+    if (ismotapp == false){
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), parm_nm.c_str());
     }
 
 }
-void conf_edit_set(struct ctx_motapp *motapp, int threadnbr
+
+/* parm_name as char pointer and parm_val as string */
+void conf_edit_set(struct ctx_motapp *motapp, bool ismotapp, int threadnbr
         ,const char *parm_nm_chr, std::string parm_val)
 {
     std::string parm_nm(parm_nm_chr);
 
-    if (conf_edit_set_active(motapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_active(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
 
-    if (conf_edit_set_depr(motapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_depr(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
 
-    if (threadnbr != -1){
+    if (ismotapp == false){
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), parm_nm.c_str());
     }
 
 }
 
-void conf_edit_set(struct ctx_motapp *motapp, int threadnbr
+/* parm_name as string and parm_val as char pointer */
+void conf_edit_set(struct ctx_motapp *motapp, bool ismotapp, int threadnbr
         ,std::string parm_nm, const char *parm_val_chr)
 {
     std::string parm_val(parm_val_chr);
 
-    if (conf_edit_set_active(motapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_active(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
 
-    if (conf_edit_set_depr(motapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_depr(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
 
-    if (threadnbr != -1){
+    if (ismotapp == false){
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), parm_nm.c_str());
     }
 
 }
-void conf_edit_set(struct ctx_motapp *motapp, int threadnbr
+
+/* parm_name and parm_val as char pointers */
+void conf_edit_set(struct ctx_motapp *motapp, bool ismotapp, int threadnbr
         ,const char *parm_nm_chr, const char *parm_val_chr)
 {
     std::string parm_val(parm_val_chr);
     std::string parm_nm(parm_nm_chr);
 
-    if (conf_edit_set_active(motapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_active(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
 
-    if (conf_edit_set_depr(motapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_depr(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
 
-    if (threadnbr != -1){
+    if (ismotapp == false){
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), parm_nm.c_str());
     }
 
@@ -3646,28 +3655,28 @@ static void conf_cmdline(struct ctx_motapp *motapp)
     while ((c = getopt(motapp->argc, motapp->argv, "bc:d:hmns?p:k:l:")) != EOF)
         switch (c) {
         case 'c':
-            conf_edit_set(motapp, -1, "conf_filename", optarg);
+            conf_edit_set(motapp, true, 0, "conf_filename", optarg);
             break;
         case 'b':
-            conf_edit_set(motapp, -1, "daemon", "on");
+            conf_edit_set(motapp, true, 0, "daemon", "on");
             break;
         case 'n':
-            conf_edit_set(motapp, -1, "daemon", "off");
+            conf_edit_set(motapp, true, 0, "daemon", "off");
             break;
         case 's':
-            conf_edit_set(motapp, -1, "setup_mode", "on");
+            conf_edit_set(motapp, true, 0, "setup_mode", "on");
             break;
         case 'd':
-            conf_edit_set(motapp, -1, "log_level", optarg);
+            conf_edit_set(motapp, true, 0, "log_level", optarg);
             break;
         case 'k':
-            conf_edit_set(motapp, -1, "log_type", optarg);
+            conf_edit_set(motapp, true, 0, "log_type", optarg);
             break;
         case 'p':
-            conf_edit_set(motapp, -1, "pid_file", optarg);
+            conf_edit_set(motapp, true, 0, "pid_file", optarg);
             break;
         case 'l':
-            conf_edit_set(motapp, -1, "log_file", optarg);
+            conf_edit_set(motapp, true, 0, "log_file", optarg);
             break;
         case 'm':
             motapp->pause = TRUE;
@@ -3682,21 +3691,59 @@ static void conf_cmdline(struct ctx_motapp *motapp)
     optind = 1;
 }
 
-static void conf_parm_camera(struct ctx_motapp *motapp, std::string str)
+/* Add in a default filename for the last camera config if it wasn't provided. */
+static void conf_camera_filenm(struct ctx_motapp *motapp)
 {
-
-    int indx_cams, indx;
-    std::string parm_val;
+    int indx_cam, indx;
+    std::string src_nm, fullnm;
     FILE *fp;
 
-    fp = fopen(str.c_str(), "r");
-    if (!fp) {
-        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
-            ,_("Camera config file %s not found"), str.c_str());
-        return;
-    }
+    src_nm = motapp->cam_list[0]->conf_filename;
+    src_nm= src_nm.substr(0, src_nm.find_last_of("/")+1 );
 
-    /* Find the current number of threads defined. */
+    indx = 1;
+    while (TRUE) {
+        fullnm = src_nm + "camera" + std::to_string(indx) + ".conf";
+        /*
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Trying %s"), fullnm.c_str());
+        */
+
+        indx_cam = 0;
+        while (motapp->cam_list[indx_cam] != NULL) {
+            if (fullnm == motapp->cam_list[indx_cam]->conf_filename) {
+                break;
+            }
+            indx_cam++;
+        }
+        if (motapp->cam_list[indx_cam] == NULL) {
+            fp = fopen(fullnm.c_str(), "r");
+            if (fp) {
+                myfclose(fp);
+            } else {
+                break;
+            }
+        }
+        indx++;
+    }
+    /* Name does not match others nor is an existing file */
+    indx_cam = 0;
+    while (motapp->cam_list[indx_cam] != NULL) {
+        indx_cam++;
+    }
+    fullnm.copy(motapp->cam_list[indx_cam-1]->conf_filename, PATH_MAX);
+
+    /*
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Cam %d Using %s"), indx_cam - 1
+        ,motapp->cam_list[indx_cam-1]->conf_filename);
+    */
+}
+
+void conf_camera_add(struct ctx_motapp *motapp)
+{
+    int indx_cams, indx;
+    std::string parm_val;
+
+    /* Find the number of cameras defined. */
     indx_cams = 0;
     while (motapp->cam_list[indx_cams] != NULL){
         indx_cams++;
@@ -3713,31 +3760,54 @@ static void conf_parm_camera(struct ctx_motapp *motapp, std::string str)
 
     motapp->cam_list[indx_cams + 1] = NULL;
 
+    motapp->cam_list[indx_cams]->motapp = motapp;
+
     conf_edit_dflt_cam(motapp->cam_list[indx_cams]);
 
     indx = 0;
     while (config_parms[indx].parm_name != "") {
-        conf_edit_get(motapp->cam_list[0],config_parms[indx].parm_name
-            ,parm_val, config_parms[indx].parm_cat);
-        conf_edit_set(motapp,indx_cams, config_parms[indx].parm_name, parm_val);
+
+        conf_edit_get(motapp->cam_list[0], config_parms[indx].parm_name
+            , parm_val, config_parms[indx].parm_cat);
+
+        conf_edit_set(motapp, false, indx_cams, config_parms[indx].parm_name, parm_val);
+
         indx++;
     }
 
-    /* Process the camera's config file and notify user on console. */
+    conf_camera_filenm(motapp);
+
+}
+
+static void conf_parm_camera(struct ctx_motapp *motapp, std::string filename)
+{
+    int indx_cam;
+    FILE *fp;
+
+    fp = fopen(filename.c_str(), "r");
+    if (!fp) {
+        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
+            ,_("Camera config file %s not found"), filename.c_str());
+        return;
+    }
+
+    conf_camera_add(motapp);
+
+    /* Find the number of cameras defined. */
+    indx_cam = 0;
+    while (motapp->cam_list[indx_cam] != NULL) {
+        indx_cam++;
+    }
+    indx_cam--;
+
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-        ,_("Processing camera config file %s"), str.c_str());
-    str.copy(motapp->cam_list[indx_cams]->conf_filename,PATH_MAX);
-    conf_process(motapp, fp, indx_cams);
+        ,_("Processing camera config file %s"), filename.c_str());
+
+    filename.copy(motapp->cam_list[indx_cam]->conf_filename, PATH_MAX);
+
+    conf_process(motapp, false, fp, indx_cam);
 
     myfclose(fp);
-
-    /*Cascade new pointers to all cameras. */
-    indx_cams = 0;
-    while (motapp->cam_list[indx_cams] != NULL){
-        motapp->cam_list[indx_cams]->motapp = motapp;
-        motapp->cam_list[indx_cams]->cam_list = motapp->cam_list;
-        indx_cams++;
-    }
 
     return;
 }
@@ -3780,13 +3850,13 @@ static void conf_parm_camera_dir(struct ctx_motapp *motapp, std::string str)
     }
 
     /* Store the given config value to allow writing it out */
-    conf_edit_set(motapp, 0, "camera_dir", str);
+    conf_edit_set(motapp, false, 0, "camera_dir", str);
 
     return;
 }
 
 /** Process each line from the config file. */
-void conf_process(struct ctx_motapp *motapp, FILE *fp, int threadnbr)
+void conf_process(struct ctx_motapp *motapp, bool ismotapp,  FILE *fp, int threadnbr)
 {
 
     char line[PATH_MAX], *cmd = NULL, *arg1 = NULL;
@@ -3843,16 +3913,12 @@ void conf_process(struct ctx_motapp *motapp, FILE *fp, int threadnbr)
                 parm_val= std::string(arg1);
             }
 
-            if (threadnbr == -1){
-                conf_edit_set(motapp, threadnbr,parm_nm, parm_val);
-            } else {
-                if (mystreq(cmd,"camera_dir")) {
-                    if (threadnbr == 0) conf_parm_camera_dir(motapp, parm_val);
-                } else if (mystreq(cmd,"camera")) {
-                    if (threadnbr == 0) conf_parm_camera(motapp, parm_val);
-                } else {
-                    conf_edit_set(motapp, threadnbr, parm_nm, parm_val);
-                }
+            if (mystreq(cmd,"camera_dir") && (threadnbr == 0) && (ismotapp == FALSE) ) {
+                conf_parm_camera_dir(motapp, parm_val);
+            } else if (mystreq(cmd,"camera") && (threadnbr == 0) && (ismotapp == FALSE)) {
+                conf_parm_camera(motapp, parm_val);
+            } else if (mystrne(cmd,"camera") && mystrne(cmd,"camera_dir")) {
+                conf_edit_set(motapp, ismotapp, threadnbr, parm_nm, parm_val);
             }
         }
     }
@@ -3917,66 +3983,94 @@ void conf_parms_log(struct ctx_cam **cam_list)
 /**  Write the configuration(s) to file */
 void conf_parms_write(struct ctx_cam **cam_list)
 {
-    std::string parm_val;
-    int i, thread;
+    std::string parm_val, parm_main;
+    int indx, indx2,  indx_cam;
     char timestamp[32];
     FILE *conffile;
 
-    for (thread = 0; cam_list[thread]; thread++) {
+    for (indx_cam = 0; cam_list[indx_cam]; indx_cam++) {
+        /*
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Writing config file to %s")
-            ,cam_list[thread]->conf_filename);
+            ,cam_list[indx_cam]->conf_filename);
+        */
+        conffile = myfopen(cam_list[indx_cam]->conf_filename, "w");
 
-        conffile = myfopen(cam_list[thread]->conf_filename, "w");
-
-        if (!conffile) continue;
+        if (!conffile) {
+            continue;
+        }
 
         time_t now = time(0);
         strftime(timestamp, 32, "%Y-%m-%dT%H:%M:%S", localtime(&now));
 
-        fprintf(conffile, "# %s\n", cam_list[thread]->conf_filename);
+        fprintf(conffile, "# %s\n", cam_list[indx_cam]->conf_filename);
         fprintf(conffile, "#\n# This config file was generated by MotionPlus " VERSION "\n");
         fprintf(conffile, "# at %s\n", timestamp);
         fprintf(conffile, "\n\n");
 
-        i = 0;
-        while (config_parms[i].parm_name != ""){
-            conf_edit_get(cam_list[i], config_parms[i].parm_name
-                    , parm_val, config_parms[i].parm_cat);
-            /* If config parameter has a value (not NULL) print it to the config file. */
-            if (parm_val != "") {
-                fprintf(conffile, "%s\n", config_parms[i].parm_help.c_str());
-                /*
-                 * If the option is a text_* and first char is a space put
-                 * quotation marks around to allow leading spaces.
-                 */
-                if ((config_parms[i].parm_name.compare(0,4,"text") == 0) ||
-                    (parm_val.compare(0,1," ") == 0)){
-                    fprintf(conffile, "%s %s\n\n", config_parms[i].parm_name.c_str(), parm_val.c_str());
-                } else {
-                    fprintf(conffile, "%s \"%s\"\n\n", config_parms[i].parm_name.c_str(), parm_val.c_str());
-                }
-            } else {
-                if (thread == 0) {
-                    char value[PATH_MAX];
-                    /* The 'camera_dir' option should keep the installed default value */
-                    if (config_parms[i].parm_name == "camera_dir"){
-                        sprintf(value, "%s", sysconfdir "/conf.d");
-                    } else {
-                        sprintf(value, "%s", "value");
-                    }
+        indx = 0;
+        while (config_parms[indx].parm_name != ""){
+            conf_edit_get(cam_list[indx_cam], config_parms[indx].parm_name
+                    , parm_val, config_parms[indx].parm_cat);
+            conf_edit_get(cam_list[0], config_parms[indx].parm_name
+                    , parm_main, config_parms[indx].parm_cat);
 
-                    fprintf(conffile, "%s\n", config_parms[i].parm_help.c_str());
-                    fprintf(conffile, "; %s %s\n\n", config_parms[i].parm_name.c_str(), value);
+            if ((config_parms[indx].parm_name != "camera") &&
+                (config_parms[indx].parm_name != "camera_dir") &&
+                ((indx_cam == 0) || (parm_val != parm_main))) {
+
+                fprintf(conffile, "%s\n", config_parms[indx].parm_help.c_str());
+                /* If there are embedded spaces, enclose in quotes */
+                if (parm_val.compare(0, 1, " ") == 0) {
+                    fprintf(conffile, "%s \"%s\"\n\n"
+                        , config_parms[indx].parm_name.c_str(), parm_val.c_str());
+                } else {
+                    fprintf(conffile, "%s %s\n\n"
+                        , config_parms[indx].parm_name.c_str(), parm_val.c_str());
                 }
             }
-            i++;
+            if ((config_parms[indx].parm_name == "camera") && (indx_cam == 0)) {
+                fprintf(conffile, "%s\n", config_parms[indx].parm_help.c_str());
+                if (cam_list[0]->from_conf_dir == FALSE) {
+                    indx2 = 1;
+                    while (cam_list[indx2] != NULL) {
+                        if (parm_val.compare(0, 1, " ") == 0) {
+                            fprintf(conffile, "%s \"%s\"\n\n"
+                                , config_parms[indx].parm_name.c_str(), cam_list[indx2]->conf_filename);
+                        } else {
+                            fprintf(conffile, "%s %s\n\n"
+                                , config_parms[indx].parm_name.c_str(), cam_list[indx2]->conf_filename);
+                        }
+                        indx2++;
+                    }
+                }
+            }
+            if ((config_parms[indx].parm_name == "camera_dir") && (indx_cam == 0)) {
+                fprintf(conffile, "%s\n", config_parms[indx].parm_help.c_str());
+                if (parm_val == "") {
+                    parm_val = cam_list[0]->conf_filename;
+                    parm_val = parm_val.substr(0, parm_val.find_last_of("/")+1) + "conf.d";
+                }
+                if (parm_val.compare(0, 1, " ") == 0) {
+                    fprintf(conffile, "%s \"%s\"\n\n"
+                        , config_parms[indx].parm_name.c_str(), parm_val.c_str());
+                } else {
+                    fprintf(conffile, "%s %s\n\n"
+                        , config_parms[indx].parm_name.c_str(), parm_val.c_str());
+                }
+            }
+            indx++;
         }
 
         fprintf(conffile, "\n");
         myfclose(conffile);
         conffile = NULL;
+
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            ,_("Configuration written to %s")
+            ,cam_list[indx_cam]->conf_filename);
     }
+
 }
 
 void conf_init_app(struct ctx_motapp *motapp, int argc, char *argv[])
@@ -4023,10 +4117,9 @@ void conf_init_app(struct ctx_motapp *motapp, int argc, char *argv[])
 
     /* Now we process the motionplus.conf config file and close it. */
     if (fp) {
+        conf_edit_set(motapp, true, 0, "conf_filename", filename);
 
-        conf_edit_set(motapp, -1, "conf_filename", filename);
-
-        conf_process(motapp, fp, -1);
+        conf_process(motapp, true, fp, 0);
 
         myfclose(fp);
 
@@ -4052,7 +4145,6 @@ void conf_init_cams(struct ctx_motapp *motapp)
     motapp->cam_list[1] = NULL;
 
     motapp->cam_list[0]->motapp = motapp;
-    motapp->cam_list[0]->cam_list = motapp->cam_list;
     motapp->cam_list[0]->conf = new ctx_config;
 
     conf_edit_dflt_cam(motapp->cam_list[0]);
@@ -4065,11 +4157,15 @@ void conf_init_cams(struct ctx_motapp *motapp)
     if (fp) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Processing thread 0 - config file %s"), motapp->conf_filename.c_str());
-        conf_process(motapp, fp, 0);
+        conf_process(motapp, false, fp, 0);
         myfclose(fp);
     } else {
         MOTION_LOG(CRT, TYPE_ALL, NO_ERRNO
             ,_("No config file to process, using default values"));
+    }
+
+    if (motapp->cam_list[1] == NULL) {
+        conf_camera_add(motapp);
     }
 
     indx=0;

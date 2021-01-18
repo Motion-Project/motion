@@ -323,6 +323,7 @@ void mlp_cam_close(struct ctx_cam *cam)
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling mmalcam_cleanup"));
         mmalcam_cleanup(cam->mmalcam);
         cam->mmalcam = NULL;
+        cam->running_cam = FALSE;
         return;
     }
 

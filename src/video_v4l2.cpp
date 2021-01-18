@@ -1169,7 +1169,7 @@ void v4l2_cleanup(ctx_cam *cam)
 
         free(cam->v4l2cam);
         cam->v4l2cam = NULL;
-
+        cam->running_cam = FALSE;
     #else
         (void)cam;
     #endif // HAVE_V4L2

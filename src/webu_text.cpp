@@ -24,7 +24,7 @@
  *    are available as the HTML as well as a few more.
  *      Additional functions not directly available via HTML
  *          get:    Returns the value of a parameter.
- *          quit:   Terminates MotionPlus
+ *          stop:   Stops the camera thread
  *          list:   Lists all the configuration parameters and values
  *          status  Whether the camera is in pause mode.
  *          connection  Whether the camera connection is working
@@ -41,7 +41,7 @@
 static void webu_text_seteol(struct webui_ctx *webui)
 {
     /* Set the end of line character for text interface */
-    if (webui->camlst[0]->conf->webcontrol_interface == 2) {
+    if (webui->motapp->cam_list[0]->conf->webcontrol_interface == 2) {
         snprintf(webui->text_eol, WEBUI_LEN_PARM,"%s","<br>");
     } else {
         snprintf(webui->text_eol, WEBUI_LEN_PARM,"%s","");
@@ -53,7 +53,7 @@ static void webu_text_camera_name(struct webui_ctx *webui)
 {
     char response[WEBUI_LEN_RESP];
 
-    if (webui->camlst[webui->thread_nbr]->conf->camera_name == ""){
+    if (webui->motapp->cam_list[webui->thread_nbr]->conf->camera_name == ""){
         snprintf(response,sizeof(response),
             "Camera %s %s\n"
             ,webui->uri_camid,webui->text_eol
@@ -61,7 +61,7 @@ static void webu_text_camera_name(struct webui_ctx *webui)
     } else {
         snprintf(response,sizeof(response),
             "Camera %s %s\n"
-            ,webui->camlst[webui->thread_nbr]->conf->camera_name.c_str()
+            ,webui->motapp->cam_list[webui->thread_nbr]->conf->camera_name.c_str()
             ,webui->text_eol
         );
     }
@@ -73,7 +73,7 @@ static void webu_text_back(struct webui_ctx *webui, const char *prevuri)
 {
     char response[WEBUI_LEN_RESP];
 
-    if (webui->camlst[0]->conf->webcontrol_interface == 2) {
+    if (webui->motapp->cam_list[0]->conf->webcontrol_interface == 2) {
         snprintf(response,sizeof(response),
             "<a href=/%s%s><- back</a><br><br>\n"
             ,webui->uri_camid, prevuri
@@ -87,7 +87,7 @@ static void webu_text_header(struct webui_ctx *webui)
 {
     char response[WEBUI_LEN_RESP];
 
-    if (webui->camlst[0]->conf->webcontrol_interface == 2) {
+    if (webui->motapp->cam_list[0]->conf->webcontrol_interface == 2) {
         snprintf(response, sizeof (response),"%s",
             "<!DOCTYPE html>\n"
             "<html>\n"
@@ -102,7 +102,7 @@ static void webu_text_trailer(struct webui_ctx *webui)
 {
     char response[WEBUI_LEN_RESP];
 
-    if (webui->camlst[0]->conf->webcontrol_interface == 2) {
+    if (webui->motapp->cam_list[0]->conf->webcontrol_interface == 2) {
         snprintf(response, sizeof (response),"%s",
             "</body>\n"
             "</html>\n");
@@ -144,7 +144,7 @@ static void webu_text_page_raw(struct webui_ctx *webui)
         for (indx = 1; indx < webui->cam_threads; indx++) {
             snprintf(response, sizeof (response),
                 "%d \n"
-                ,webui->camlst[indx]->camera_id
+                ,webui->motapp->cam_list[indx]->camera_id
             );
             webu_write(webui, response);
         }
@@ -163,22 +163,22 @@ static void webu_text_page_basic(struct webui_ctx *webui)
         "MotionPlus " VERSION " Running [%d] Camera%s<br>\n"
         "<a href='/%d/'>All</a><br>\n"
         ,webui->cam_count, (webui->cam_count > 1 ? "s" : "")
-        ,webui->camlst[0]->camera_id);
+        ,webui->motapp->cam_list[0]->camera_id);
     webu_write(webui, response);
 
     if (webui->cam_threads > 1){
         for (indx = 1; indx < webui->cam_threads; indx++) {
-            if (webui->camlst[indx]->conf->camera_name == ""){
+            if (webui->motapp->cam_list[indx]->conf->camera_name == ""){
                 snprintf(response, sizeof (response),
                     "<a href='/%d/'>Camera %d</a><br>\n"
-                    , webui->camlst[indx]->camera_id
+                    , webui->motapp->cam_list[indx]->camera_id
                     , indx);
                 webu_write(webui, response);
             } else {
                 snprintf(response, sizeof (response),
                     "<a href='/%d/'>Camera %s</a><br>\n"
-                    , webui->camlst[indx]->camera_id
-                    ,webui->camlst[indx]->conf->camera_name.c_str());
+                    , webui->motapp->cam_list[indx]->camera_id
+                    ,webui->motapp->cam_list[indx]->conf->camera_name.c_str());
                 webu_write(webui, response);
             }
         }
@@ -197,17 +197,17 @@ static void webu_text_list_raw(struct webui_ctx *webui)
     indx_parm = 0;
     while (config_parms[indx_parm].parm_name != ""){
 
-        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
+        if ((config_parms[indx_parm].webui_level > webui->motapp->cam_list[0]->conf->webcontrol_parms) ||
             (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             ((webui->thread_nbr != 0) && (config_parms[indx_parm].main_thread != 0))){
             indx_parm++;
             continue;
         }
 
-        conf_edit_get(webui->camlst[webui->thread_nbr], config_parms[indx_parm].parm_name
+        conf_edit_get(webui->motapp->cam_list[webui->thread_nbr], config_parms[indx_parm].parm_name
             , val_parm, config_parms[indx_parm].parm_cat);
         if (val_parm == NULL){
-            conf_edit_get(webui->camlst[0], config_parms[indx_parm].parm_name
+            conf_edit_get(webui->motapp->cam_list[0], config_parms[indx_parm].parm_name
                 , val_parm, config_parms[indx_parm].parm_cat);
         }
         retcd = snprintf(response, sizeof (response),
@@ -246,17 +246,17 @@ static void webu_text_list_basic(struct webui_ctx *webui)
     indx_parm = 0;
     while (config_parms[indx_parm].parm_name != ""){
 
-        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
+        if ((config_parms[indx_parm].webui_level > webui->motapp->cam_list[0]->conf->webcontrol_parms) ||
             (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             ((webui->thread_nbr != 0) && (config_parms[indx_parm].main_thread != 0))){
             indx_parm++;
             continue;
         }
 
-        conf_edit_get(webui->camlst[webui->thread_nbr], config_parms[indx_parm].parm_name
+        conf_edit_get(webui->motapp->cam_list[webui->thread_nbr], config_parms[indx_parm].parm_name
             , val_parm, config_parms[indx_parm].parm_cat);
         if (val_parm == NULL){
-            conf_edit_get(webui->camlst[0], config_parms[indx_parm].parm_name
+            conf_edit_get(webui->motapp->cam_list[0], config_parms[indx_parm].parm_name
                 , val_parm, config_parms[indx_parm].parm_cat);
         }
         retcd = snprintf(response, sizeof (response),
@@ -306,17 +306,17 @@ static void webu_text_set_menu(struct webui_ctx *webui)
     indx_parm = 0;
     while (config_parms[indx_parm].parm_name != ""){
 
-        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
+        if ((config_parms[indx_parm].webui_level > webui->motapp->cam_list[0]->conf->webcontrol_parms) ||
             (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             ((webui->thread_nbr != 0) && (config_parms[indx_parm].main_thread != 0))){
             indx_parm++;
             continue;
         }
 
-        conf_edit_get(webui->camlst[webui->thread_nbr], config_parms[indx_parm].parm_name
+        conf_edit_get(webui->motapp->cam_list[webui->thread_nbr], config_parms[indx_parm].parm_name
             , val_parm, config_parms[indx_parm].parm_cat);
         if (val_parm == NULL){
-            conf_edit_get(webui->camlst[0], config_parms[indx_parm].parm_name
+            conf_edit_get(webui->motapp->cam_list[0], config_parms[indx_parm].parm_name
                 , val_parm, config_parms[indx_parm].parm_cat);
         }
         snprintf(response, sizeof(response),
@@ -361,7 +361,7 @@ static void webu_text_set_query(struct webui_ctx *webui)
     indx_parm = 0;
     while (config_parms[indx_parm].parm_name != ""){
 
-        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
+        if ((config_parms[indx_parm].webui_level > webui->motapp->cam_list[0]->conf->webcontrol_parms) ||
             (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             ((webui->thread_nbr != 0) && (config_parms[indx_parm].main_thread != 0)) ||
             (mystrne(webui->uri_parm1, config_parms[indx_parm].parm_name.c_str()))) {
@@ -369,10 +369,10 @@ static void webu_text_set_query(struct webui_ctx *webui)
             continue;
         }
 
-        conf_edit_get(webui->camlst[webui->thread_nbr], config_parms[indx_parm].parm_name
+        conf_edit_get(webui->motapp->cam_list[webui->thread_nbr], config_parms[indx_parm].parm_name
             , val_parm, config_parms[indx_parm].parm_cat);
         if (val_parm == NULL){
-            conf_edit_get(webui->camlst[0], config_parms[indx_parm].parm_name
+            conf_edit_get(webui->motapp->cam_list[0], config_parms[indx_parm].parm_name
                 , val_parm, config_parms[indx_parm].parm_cat);
         }
         retcd = snprintf(response, sizeof (response),
@@ -445,7 +445,7 @@ static void webu_text_get_menu(struct webui_ctx *webui)
     indx_parm = 0;
     while (config_parms[indx_parm].parm_name != ""){
 
-        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
+        if ((config_parms[indx_parm].webui_level > webui->motapp->cam_list[0]->conf->webcontrol_parms) ||
             (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             ((webui->thread_nbr != 0) && (config_parms[indx_parm].main_thread != 0))){
             indx_parm++;
@@ -473,7 +473,7 @@ static void webu_text_get_menu(struct webui_ctx *webui)
 
 }
 
-static void webu_text_action_quit(struct webui_ctx *webui)
+static void webu_text_action_stop(struct webui_ctx *webui)
 {
     /* Shut down MotionPlus or the associated thread */
     char response[WEBUI_LEN_RESP];
@@ -484,7 +484,7 @@ static void webu_text_action_quit(struct webui_ctx *webui)
 
     webu_text_header(webui);
     snprintf(response,sizeof(response),
-        "quit in progress ... bye %s\nDone %s\n"
+        "Stopping camera ... bye %s\nDone %s\n"
         ,webui->text_eol, webui->text_eol
     );
     webu_write(webui, response);
@@ -561,10 +561,9 @@ static void webu_text_action_eventend(struct webui_ctx *webui)
 
 }
 
+/* trigger a snapshot*/
 static void webu_text_action_snapshot(struct webui_ctx *webui)
 {
-    /* trigger a snapshot*/
-
     char response[WEBUI_LEN_RESP];
 
     webu_process_action(webui);
@@ -584,10 +583,9 @@ static void webu_text_action_snapshot(struct webui_ctx *webui)
 
 }
 
+/* Restart*/
 static void webu_text_action_restart(struct webui_ctx *webui)
 {
-    /* Restart*/
-
     char response[WEBUI_LEN_RESP];
 
     webu_process_action(webui);
@@ -606,9 +604,49 @@ static void webu_text_action_restart(struct webui_ctx *webui)
 
 }
 
-static void webu_text_action_start(struct webui_ctx *webui)
+static void webu_text_action_add(struct webui_ctx *webui)
 {
-    /* un-pause the camera*/
+    char response[WEBUI_LEN_RESP];
+
+    webu_process_action(webui);
+
+    webu_text_header(webui);
+
+    webu_text_back(webui,"/action");
+
+    snprintf(response,sizeof(response)
+        ,"Camera added %s\nDone%s\n"
+        ,webui->text_eol,webui->text_eol
+    );
+    webu_write(webui, response);
+
+    webu_text_trailer(webui);
+
+}
+
+static void webu_text_action_delete(struct webui_ctx *webui)
+{
+    char response[WEBUI_LEN_RESP];
+
+    webu_process_action(webui);
+
+    webu_text_header(webui);
+
+    webu_text_back(webui,"/action");
+
+    snprintf(response,sizeof(response)
+        ,"Camera delete %s\nDone%s\n"
+        ,webui->text_eol,webui->text_eol
+    );
+    webu_write(webui, response);
+
+    webu_text_trailer(webui);
+
+}
+
+static void webu_text_action_resume(struct webui_ctx *webui)
+{
+    /* Resume detection on the camera*/
 
     char response[WEBUI_LEN_RESP];
 
@@ -629,10 +667,9 @@ static void webu_text_action_start(struct webui_ctx *webui)
 
 }
 
+/* pause the motion detection on the camera*/
 static void webu_text_action_pause(struct webui_ctx *webui)
 {
-    /* pause the camera*/
-
     char response[WEBUI_LEN_RESP];
 
     webu_process_action(webui);
@@ -652,10 +689,9 @@ static void webu_text_action_pause(struct webui_ctx *webui)
 
 }
 
+/* write the parms to file*/
 static void webu_text_action_write(struct webui_ctx *webui)
 {
-    /* write the parms to file*/
-
     char response[WEBUI_LEN_RESP];
 
     webu_process_action(webui);
@@ -694,19 +730,25 @@ static void webu_text_action(struct webui_ctx *webui)
     } else if (mystreq(webui->uri_cmd2,"restart")){
         webu_text_action_restart(webui);
 
-    } else if (mystreq(webui->uri_cmd2,"start")){
-        webu_text_action_start(webui);
+    } else if (mystreq(webui->uri_cmd2,"resume")){
+        webu_text_action_resume(webui);
 
     } else if (mystreq(webui->uri_cmd2,"pause")){
         webu_text_action_pause(webui);
 
-    } else if ((mystreq(webui->uri_cmd2,"quit")) ||
+    } else if ((mystreq(webui->uri_cmd2,"stop")) ||
                (mystreq(webui->uri_cmd2,"end"))){
-        webu_text_action_quit(webui);
+        webu_text_action_stop(webui);
 
     } else if ((mystreq(webui->uri_cmd2,"write")) ||
                (mystreq(webui->uri_cmd2,"writeyes"))){
         webu_text_action_write(webui);
+
+    } else if (mystreq(webui->uri_cmd2,"add")){
+        webu_text_action_add(webui);
+
+    } else if (mystreq(webui->uri_cmd2,"delete")){
+        webu_text_action_delete(webui);
 
     } else {
         webu_text_badreq(webui);
@@ -836,7 +878,7 @@ static void webu_text_menu_action(struct webui_ctx *webui)
         "<a href=/%s/action/eventend>eventend</a><br>"
         "<a href=/%s/action/snapshot>snapshot</a><br>"
         "<a href=/%s/action/restart>restart</a><br>"
-        "<a href=/%s/action/quit>quit</a><br>"
+        "<a href=/%s/action/stop>stop</a><br>"
         "<a href=/%s/action/end>end</a><br>"
         ,webui->uri_camid, webui->uri_camid, webui->uri_camid
         ,webui->uri_camid, webui->uri_camid, webui->uri_camid
@@ -858,7 +900,7 @@ static void webu_text_menu_detection(struct webui_ctx *webui)
 
     snprintf(response,sizeof(response),
         "<a href=/%s/detection/status>status</a><br>"
-        "<a href=/%s/detection/start>start</a><br>"
+        "<a href=/%s/detection/resume>resume</a><br>"
         "<a href=/%s/detection/pause>pause</a><br>"
         "<a href=/%s/detection/connection>connection</a><br>"
         ,webui->uri_camid, webui->uri_camid
@@ -943,7 +985,7 @@ void webu_text_get_query(struct webui_ctx *webui)
     indx_parm = 0;
     while (config_parms[indx_parm].parm_name != ""){
 
-        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
+        if ((config_parms[indx_parm].webui_level > webui->motapp->cam_list[0]->conf->webcontrol_parms) ||
             (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             mystrne(webui->uri_parm1,"query") ||
             mystrne(temp_name, config_parms[indx_parm].parm_name.c_str())){
@@ -951,10 +993,10 @@ void webu_text_get_query(struct webui_ctx *webui)
             continue;
         }
 
-        conf_edit_get(webui->camlst[webui->thread_nbr], config_parms[indx_parm].parm_name
+        conf_edit_get(webui->motapp->cam_list[webui->thread_nbr], config_parms[indx_parm].parm_name
             , val_parm, config_parms[indx_parm].parm_cat);
         if (val_parm == NULL){
-            conf_edit_get(webui->camlst[0], config_parms[indx_parm].parm_name
+            conf_edit_get(webui->motapp->cam_list[0], config_parms[indx_parm].parm_name
                 , val_parm, config_parms[indx_parm].parm_cat);
         }
         if (mystrne(webui->uri_value1, config_parms[indx_parm].parm_name.c_str())){
@@ -969,7 +1011,7 @@ void webu_text_get_query(struct webui_ctx *webui)
 
         webu_text_camera_name(webui);
 
-        if (webui->camlst[0]->conf->webcontrol_interface == 2) {
+        if (webui->motapp->cam_list[0]->conf->webcontrol_interface == 2) {
             retcd = snprintf(response, sizeof (response),
                 "<ul>\n"
                 "  <li>%s = %s </li>\n"
@@ -1018,9 +1060,9 @@ void webu_text_status(struct webui_ctx *webui)
         for (indx = indx_st; indx < webui->cam_threads; indx++) {
             snprintf(response, sizeof(response),
                 "Camera %d Detection status %s %s\n"
-                ,webui->camlst[indx]->camera_id
-                ,(!webui->camlst[indx]->running_cam)? "NOT RUNNING":
-                (webui->camlst[indx]->pause)? "PAUSE":"ACTIVE"
+                ,webui->motapp->cam_list[indx]->camera_id
+                ,(!webui->motapp->cam_list[indx]->running_cam)? "NOT RUNNING":
+                (webui->motapp->cam_list[indx]->pause)? "PAUSE":"ACTIVE"
                 ,webui->text_eol
             );
             webu_write(webui, response);
@@ -1057,11 +1099,11 @@ void webu_text_connection(struct webui_ctx *webui)
         for (indx = indx_st; indx < webui->cam_threads; indx++) {
             snprintf(response,sizeof(response)
                 , "Camera %d%s%s %s %s\n"
-                ,webui->camlst[indx]->camera_id
-                ,webui->camlst[indx]->conf->camera_name!="" ? " -- " : ""
-                ,webui->camlst[indx]->conf->camera_name!="" ? webui->camlst[indx]->conf->camera_name.c_str() : ""
-                ,(!webui->camlst[indx]->running_cam)? "NOT RUNNING" :
-                (webui->camlst[indx]->lost_connection)? "Lost connection": "Connection OK"
+                ,webui->motapp->cam_list[indx]->camera_id
+                ,webui->motapp->cam_list[indx]->conf->camera_name!="" ? " -- " : ""
+                ,webui->motapp->cam_list[indx]->conf->camera_name!="" ? webui->motapp->cam_list[indx]->conf->camera_name.c_str() : ""
+                ,(!webui->motapp->cam_list[indx]->running_cam)? "NOT RUNNING" :
+                (webui->motapp->cam_list[indx]->lost_connection)? "Lost connection": "Connection OK"
                 ,webui->text_eol
             );
             webu_write(webui, response);
@@ -1084,7 +1126,7 @@ void webu_text_connection(struct webui_ctx *webui)
 void webu_text_list(struct webui_ctx *webui)
 {
 
-    if (webui->camlst[0]->conf->webcontrol_interface == 2) {
+    if (webui->motapp->cam_list[0]->conf->webcontrol_interface == 2) {
         webu_text_list_basic(webui);
     } else {
         webu_text_list_raw(webui);
@@ -1099,8 +1141,10 @@ void webu_text_main(struct webui_ctx *webui)
 
     webu_text_seteol(webui);
 
-    if (strlen(webui->uri_camid) == 0){
-        if (webui->camlst[0]->conf->webcontrol_interface == 2) {
+    pthread_mutex_lock(&webui->motapp->mutex_camlst);
+
+    if (strlen(webui->uri_camid) == 0) {
+        if (webui->motapp->cam_list[0]->conf->webcontrol_interface == 2) {
             webu_text_page_basic(webui);
         } else {
             webu_text_page_raw(webui);
@@ -1153,7 +1197,7 @@ void webu_text_main(struct webui_ctx *webui)
         webu_text_connection(webui);
 
     } else if ((mystreq(webui->uri_cmd1,"detection")) &&
-               (mystreq(webui->uri_cmd2,"start"))) {
+               (mystreq(webui->uri_cmd2,"resume"))) {
         webu_text_action(webui);
 
     } else if ((mystreq(webui->uri_cmd1,"detection")) &&
@@ -1161,7 +1205,7 @@ void webu_text_main(struct webui_ctx *webui)
         webu_text_action(webui);
 
     } else if ((mystreq(webui->uri_cmd1,"action")) &&
-               (mystreq(webui->uri_cmd2,"quit"))){
+               (mystreq(webui->uri_cmd2,"stop"))){
         webu_text_action(webui);
 
     } else if ((mystreq(webui->uri_cmd1,"action")) &&
@@ -1185,6 +1229,7 @@ void webu_text_main(struct webui_ctx *webui)
             ,webui->uri_camid, webui->uri_cmd1, webui->uri_cmd2);
         webu_text_badreq(webui);
     }
+    pthread_mutex_unlock(&webui->motapp->mutex_camlst);
 
     return;
 }

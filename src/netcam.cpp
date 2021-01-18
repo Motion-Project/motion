@@ -876,10 +876,10 @@ static int netcam_open_codec(struct ctx_netcam *netcam)
         retcd = av_find_best_stream(netcam->format_context
                     , AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
         if ((retcd < 0) || (netcam->interrupted)){
-            netcam_decoder_error(netcam, retcd, "Audio av_find_best_stream");
-            return -1;
+            netcam->audio_stream_index = -1;
+        } else {
+            netcam->audio_stream_index = retcd;
         }
-        netcam->audio_stream_index = retcd;
 
         netcam->decoder = NULL;
         retcd = av_find_best_stream(netcam->format_context
@@ -2165,6 +2165,6 @@ void netcam_cleanup(struct ctx_cam *cam, int init_retry_flag)
     }
     cam->netcam = NULL;
     cam->netcam_high = NULL;
-
+    cam->running_cam = FALSE;
 }
 

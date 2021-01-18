@@ -184,11 +184,9 @@ static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, s
 
 }
 
+/* Obtain the current image, compress it to a JPG and put into webui->resp_page */
 static void webu_stream_static_getimg(struct webui_ctx *webui)
 {
-    /* Obtain the current image, compress it to a JPG and put into webui->resp_page
-     * for MHD to send back to user
-     */
     webui->resp_used = 0;
 
     memset(webui->resp_page, '\0', webui->resp_size);
@@ -206,51 +204,57 @@ static void webu_stream_static_getimg(struct webui_ctx *webui)
 
 }
 
+/* Determine whether the user specified a valid URL for the particular port */
 static int webu_stream_checks(struct webui_ctx *webui)
 {
-    /* Perform edits to determine whether the user specified a valid URL
-     * for the particular port
-     */
-    if ((webui->camlst != NULL) && (webui->thread_nbr >= webui->cam_threads)){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            , _("Invalid thread specified: %s"),webui->url);
-        return -1;
-    }
+    pthread_mutex_lock(&webui->motapp->mutex_camlst);
+        if ((webui->motapp->cam_list != NULL) && (webui->thread_nbr >= webui->cam_threads)){
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                , _("Invalid thread specified: %s"),webui->url);
+            pthread_mutex_unlock(&webui->motapp->mutex_camlst);
+            return -1;
+        }
 
-    if ((webui->camlst != NULL) && (webui->thread_nbr < 0) && (webui->cam_threads > 1)){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            , _("Invalid thread specified: %s"),webui->url);
-        return -1;
-    }
+        if ((webui->motapp->cam_list != NULL) && (webui->thread_nbr < 0) && (webui->cam_threads > 1)){
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                , _("Invalid thread specified: %s"),webui->url);
+            pthread_mutex_unlock(&webui->motapp->mutex_camlst);
+            return -1;
+        }
 
-    /* Thread numbers are not used for ctx_cam specific ports. */
-    if ((webui->camlst == NULL) && (webui->thread_nbr >= 0)) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            , _("Invalid URL for a camera specific port: %s"),webui->url);
-        return -1;
-    }
+        /* Thread numbers are not used for ctx_cam specific ports. */
+        if ((webui->motapp->cam_list == NULL) && (webui->thread_nbr >= 0)) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                , _("Invalid URL for a camera specific port: %s"),webui->url);
+            pthread_mutex_unlock(&webui->motapp->mutex_camlst);
+            return -1;
+        }
 
-    /* If multiple threads then thread zero is invalid. */
-    if ((webui->cam_threads > 1) && (webui->thread_nbr == 0)) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            , _("URL for thread 0 is not valid when using camera specific files.: %s")
-            ,webui->url);
-        return -1;
-    }
+        /* If multiple threads then thread zero is invalid. */
+        if ((webui->cam_threads > 1) && (webui->thread_nbr == 0)) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                , _("URL for thread 0 is not valid when using camera specific files.: %s")
+                ,webui->url);
+            pthread_mutex_unlock(&webui->motapp->mutex_camlst);
+            return -1;
+        }
 
-    /* Thread numbers are not used for ctx_cam specific ports. */
-    if ((webui->camlst == NULL) && (strlen(webui->uri_cmd1) > 0)) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            , _("Bad URL for a camera specific port: %s"),webui->url);
-        return -1;
-    }
+        /* Thread numbers are not used for ctx_cam specific ports. */
+        if ((webui->motapp->cam_list == NULL) && (strlen(webui->uri_cmd1) > 0)) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                , _("Bad URL for a camera specific port: %s"),webui->url);
+            pthread_mutex_unlock(&webui->motapp->mutex_camlst);
+            return -1;
+        }
+
+    pthread_mutex_unlock(&webui->motapp->mutex_camlst);
 
     return 0;
 }
 
+/* Increment the counters for the connections to the streams */
 static void webu_stream_cnct_count(struct webui_ctx *webui)
 {
-    /* Increment the counters for the connections to the streams */
     int cnct_count;
 
     cnct_count = 0;

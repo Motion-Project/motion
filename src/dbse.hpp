@@ -62,8 +62,8 @@ struct ctx_dbse {
 
 };
 
-void dbse_global_deinit(struct ctx_cam **cam_list);
-void dbse_global_init(struct ctx_cam **cam_list);
+void dbse_global_deinit(struct ctx_motapp *motapp);
+void dbse_global_init(struct ctx_motapp *motapp);
 void dbse_init(struct ctx_cam *cam);
 void dbse_deinit(struct ctx_cam *cam);
 void dbse_sqlmask_update(struct ctx_cam *cam);

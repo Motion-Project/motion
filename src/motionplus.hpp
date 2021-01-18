@@ -282,7 +282,6 @@ struct ctx_stream {
 struct ctx_cam {
 
     struct ctx_motapp       *motapp;
-    struct ctx_cam          **cam_list;
     char                    conf_filename[PATH_MAX];
     int                     from_conf_dir;
     int                     threadnr;
@@ -394,6 +393,8 @@ struct ctx_motapp {
     volatile int        threads_running;
     volatile int        finish_all;
     volatile int        restart_all;
+    volatile int        cam_add;        /* Bool for whether to add a camera to the list */
+    volatile int        cam_delete;     /* 0 for no action, other numbers specify camera to remove */
 
     int                 argc;
     char                **argv;
@@ -411,11 +412,17 @@ struct ctx_motapp {
 
     volatile int        webcontrol_running;
     volatile int        webcontrol_finish;
-
     struct MHD_Daemon   *webcontrol_daemon;
     char                webcontrol_digest_rand[8];
+
+    volatile int        webstream_running;
+    volatile int        webstream_finish;
+    struct MHD_Daemon   *webstream_daemon;          /*Picture stream when using single port */
+    char                webstream_digest_rand[8];   /*Digest for the stream when using single port*/
+
     int                 parms_changed;      /*bool indicating if the parms have changed */
     pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */
+    pthread_mutex_t     mutex_camlst;      /* Lock the list of cams while adding/removing */
 
 };
 
