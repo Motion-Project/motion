@@ -25,7 +25,7 @@
 #define _INCLUDE_DBSE_H
 
 void dbse_global_init(struct context **cntlist);
-void dbse_global_deinit(void);
+void dbse_global_deinit(struct context **cntlist);
 
 int dbse_init(struct context *cnt, struct context **cntlist);
 void dbse_deinit(struct context *cnt);

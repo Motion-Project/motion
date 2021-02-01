@@ -31,20 +31,37 @@
  * dbse_global_deinit
  *
  */
-void dbse_global_deinit(void)
+void dbse_global_deinit(struct context **cntlist)
 {
+    struct context *cnt;
+    int i;
+
     #if defined(HAVE_MYSQL)
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing MYSQL"));
-        mysql_library_end();
-    #endif /* HAVE_MYSQL HAVE_MARIADB */
+        for (cnt=cntlist[i=0]; cnt; cnt=cntlist[++i]) {
+            if (mystreq(cnt->conf.database_type, "mysql")) {
+                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing MySQL library"));
+                mysql_library_end();
+                break;
+            }
+        }
+    #endif /* HAVE_MYSQL */
 
     #if defined(HAVE_MARIADB)
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing Mariadb"));
-        mysql_library_end();
-    #endif /* HAVE_MYSQL HAVE_MARIADB */
+        for (cnt=cntlist[i=0]; cnt; cnt=cntlist[++i]) {
+            if (mystreq(cnt->conf.database_type, "mariadb")) {
+                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing MariaDB library"));
+                mysql_library_end();
+                break;
+            }
+        }
+    #endif /* HAVE_MARIADB */
 
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Database closed"));
-
+    for (cnt=cntlist[i=0]; cnt; cnt=cntlist[++i]) {
+        if (cnt->conf.database_type) {
+            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Database closed"));
+            break;
+        }
+    }
 }
 
 /**
@@ -53,21 +70,31 @@ void dbse_global_deinit(void)
  */
 void dbse_global_init(struct context **cntlist)
 {
+struct context *cnt;
+    int i;
 
     MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("Initializing database"));
 
-   /* Initialize all the database items */
+    /* Initialize all the database items; different camera threads can use different DBMSs */
     #if defined(HAVE_MYSQL)
-        if (mysql_library_init(0, NULL, NULL)) {
-            fprintf(stderr, "Could not initialize MySQL library\n");
-            exit(1);
+        for (cnt=cntlist[i=0]; cnt; cnt=cntlist[++i]) {
+            if (mystreq(cnt->conf.database_type, "mysql") && mysql_library_init(0, NULL, NULL)) {
+                fprintf(stderr, "Could not initialize MySQL library\n");
+                exit(1);
+            } else {
+                break;
+            }
         }
     #endif /* HAVE_MYSQL */
 
     #if defined(HAVE_MARIADB)
-        if (mysql_library_init(0, NULL, NULL)) {
-            fprintf(stderr, "Could not initialize Mariadb library\n");
-            exit(1);
+        for (cnt=cntlist[i=0]; cnt; cnt=cntlist[++i]) {
+            if (mystreq(cnt->conf.database_type, "mariadb") && mysql_library_init(0, NULL, NULL)) {
+                fprintf(stderr, "Could not initialize MariaDB library\n");
+                exit(1);
+            } else {
+                break;
+            }
         }
     #endif /* HAVE_MARIADB */
 
@@ -88,7 +115,7 @@ void dbse_global_init(struct context **cntlist)
                     ,(sqlite3_config(SQLITE_CONFIG_SERIALIZED)?_("FAILED"):_("SUCCESS")));
                 if (sqlite3_open( cntlist[0]->conf.database_dbname, &cntlist[0]->database_sqlite3) != SQLITE_OK) {
                     MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                        ,_("Can't open database %s : %s")
+                        ,_("Can't open SQLite3 database %s : %s")
                         ,cntlist[0]->conf.database_dbname
                         ,sqlite3_errmsg( cntlist[0]->database_sqlite3));
                     sqlite3_close( cntlist[0]->database_sqlite3);
@@ -175,11 +202,11 @@ static int dbse_init_mariadb(struct context *cnt)
             if (!mysql_real_connect(cnt->database_mariadb, cnt->conf.database_host, cnt->conf.database_user,
                 cnt->conf.database_password, cnt->conf.database_dbname, dbport, NULL, 0)) {
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                    ,_("Cannot connect to Mariadb database %s on host %s with user %s")
+                    ,_("Cannot connect to MariaDB database %s on host %s with user %s")
                     ,cnt->conf.database_dbname, cnt->conf.database_host
                     ,cnt->conf.database_user);
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                    ,_("Mariadb error was %s"), mysql_error(cnt->database_mariadb));
+                    ,_("MariaDB error was %s"), mysql_error(cnt->database_mariadb));
                 return -2;
             }
             #if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
@@ -211,7 +238,7 @@ static int dbse_init_sqlite3(struct context *cnt,struct context **cntlist)
                 ,_("SQLite3 Database filename %s"), cnt->conf.database_dbname);
             if (sqlite3_open(cnt->conf.database_dbname, &cnt->database_sqlite3) != SQLITE_OK) {
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                    ,_("Can't open database %s : %s")
+                    ,_("Can't open SQLite3 database %s : %s")
                     ,cnt->conf.database_dbname, sqlite3_errmsg(cnt->database_sqlite3));
                 sqlite3_close(cnt->database_sqlite3);
                 return -2;
@@ -372,12 +399,12 @@ static void dbse_exec_mysql(char *sqlquery, struct context *cnt, int save_id)
 {
     #if defined(HAVE_MYSQL)
         if (mystreq(cnt->conf.database_type, "mysql")) {
-            MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing mysql query"));
+            MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing MySQL query"));
             if (mysql_query(cnt->database_mysql, sqlquery) != 0) {
                 int error_code = mysql_errno(cnt->database_mysql);
 
                 MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
-                    ,_("Mysql query failed %s error code %d")
+                    ,_("MySQL query failed %s error code %d")
                     ,mysql_error(cnt->database_mysql), error_code);
                 /* Try to reconnect ONCE if fails continue and discard this sql query */
                 if (error_code >= 2000) {
@@ -398,12 +425,12 @@ static void dbse_exec_mysql(char *sqlquery, struct context *cnt, int save_id)
                             mysql_error(cnt->database_mysql));
                     } else {
                         MOTION_LOG(INF, TYPE_DB, NO_ERRNO
-                            ,_("Re-Connection to Mysql database '%s' Succeed")
+                            ,_("Re-Connection to MySQL database '%s' Succeed")
                             ,cnt->conf.database_dbname);
                         if (mysql_query(cnt->database_mysql, sqlquery) != 0) {
                             int error_my = mysql_errno(cnt->database_mysql);
                             MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
-                                ,_("after re-connection Mysql query failed %s error code %d")
+                                ,_("after re-connection MySQL query failed %s error code %d")
                                 ,mysql_error(cnt->database_mysql), error_my);
                         }
                     }
@@ -428,12 +455,12 @@ static void dbse_exec_mariadb(char *sqlquery, struct context *cnt, int save_id)
 {
     #if defined(HAVE_MARIADB)
         if (mystreq(cnt->conf.database_type, "mariadb")) {
-            MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing mariadb query"));
+            MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing MariaDB query"));
             if (mysql_query(cnt->database_mariadb, sqlquery) != 0) {
                 int error_code = mysql_errno(cnt->database_mariadb);
 
                 MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
-                    ,_("Mariadb query failed %s error code %d")
+                    ,_("MariaDB query failed %s error code %d")
                     ,mysql_error(cnt->database_mariadb), error_code);
                 /* Try to reconnect ONCE if fails continue and discard this sql query */
                 if (error_code >= 2000) {
@@ -447,19 +474,19 @@ static void dbse_exec_mariadb(char *sqlquery, struct context *cnt, int save_id)
                                             cnt->conf.database_user, cnt->conf.database_password,
                                             cnt->conf.database_dbname, 0, NULL, 0)) {
                         MOTION_LOG(ALR, TYPE_DB, NO_ERRNO
-                            ,_("Cannot reconnect to Mariadb"
-                            " database %s on host %s with user %s Mariadb error was %s"),
+                            ,_("Cannot reconnect to MariaDB"
+                            " database %s on host %s with user %s MariaDB error was %s"),
                             cnt->conf.database_dbname,
                             cnt->conf.database_host, cnt->conf.database_user,
                             mysql_error(cnt->database_mariadb));
                     } else {
                         MOTION_LOG(INF, TYPE_DB, NO_ERRNO
-                            ,_("Re-Connection to Mariadb database '%s' Succeed")
+                            ,_("Re-Connection to MariaDB database '%s' Succeed")
                             ,cnt->conf.database_dbname);
                         if (mysql_query(cnt->database_mariadb, sqlquery) != 0) {
                             int error_my = mysql_errno(cnt->database_mariadb);
                             MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
-                                ,_("after re-connection Mariadb query failed %s error code %d")
+                                ,_("after re-connection MariaDB query failed %s error code %d")
                                 ,mysql_error(cnt->database_mariadb), error_my);
                         }
                     }
@@ -506,7 +533,7 @@ static void dbse_exec_pgsql(char *sqlquery, struct context *cnt, int save_id)
 
             /* attempt sqlquery unless previous DB session break recovery failed */
             if (cnt->eid_db_format > dbeid_recovery) {
-              MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing postgresql query"));
+              MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing PostgreSQL query"));
               res  = PQexec(cnt->database_pgsql, sqlquery);
               estat = PQresultStatus(res);
             } else {
@@ -593,10 +620,10 @@ static void dbse_exec_sqlite3(char *sqlquery, struct context *cnt, int save_id)
         if ((mystreq(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
             int res;
             char *errmsg = 0;
-            MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing sqlite query"));
+            MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing SQLite3 query"));
             res = sqlite3_exec(cnt->database_sqlite3, sqlquery, NULL, 0, &errmsg);
             if (res != SQLITE_OK ) {
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("SQLite error was %s"), errmsg);
+                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("SQLite3 error was %s"), errmsg);
                 sqlite3_free(errmsg);
                 if (save_id) {
                     cnt->database_event_id = 0;

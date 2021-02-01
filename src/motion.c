@@ -3570,7 +3570,7 @@ int main (int argc, char **argv)
 
     ffmpeg_global_deinit();
 
-    dbse_global_deinit();
+    dbse_global_deinit(cnt_list);
 
     motion_shutdown();
 
