@@ -263,6 +263,8 @@ static int dbse_init_pgsql(struct context *cnt)
                 ,cnt->conf.database_dbname, PQerrorMessage(cnt->database_pgsql));
                 return -2;
             }
+            cnt->eid_db_format = dbeid_undetermined;
+            cnt->database_event_id = 0;
         }
     #else
         (void)cnt;  /* Avoid compiler warnings */
@@ -329,6 +331,8 @@ void dbse_deinit(struct context *cnt)
         #ifdef HAVE_PGSQL
                 if ((mystreq(cnt->conf.database_type, "postgresql")) && (cnt->conf.database_dbname)) {
                     PQfinish(cnt->database_pgsql);
+                    cnt->database_pgsql = NULL;
+                    cnt->database_event_id = 0;
                 }
         #endif /* HAVE_PGSQL */
 
@@ -480,42 +484,96 @@ static void dbse_exec_mariadb(char *sqlquery, struct context *cnt, int save_id)
 static void dbse_exec_pgsql(char *sqlquery, struct context *cnt, int save_id)
 {
     #ifdef HAVE_PGSQL
-        if (mystreq(cnt->conf.database_type, "postgresql")) {
-            MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing postgresql query"));
+        if (mystreq(cnt->conf.database_type, "postgresql") && cnt->database_pgsql) {
             PGresult *res;
+            ExecStatusType estat;
+            PostgresPollingStatusType pstat;
 
-            res = PQexec(cnt->database_pgsql, sqlquery);
-
-            if (PQstatus(cnt->database_pgsql) == CONNECTION_BAD) {
-
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                    ,_("Connection to PostgreSQL database '%s' failed: %s")
-                    ,cnt->conf.database_dbname, PQerrorMessage(cnt->database_pgsql));
-
-            // This function will close the connection to the server and attempt to reestablish a new connection to the same server,
-            // using all the same parameters previously used. This may be useful for error recovery if a working connection is lost
-                PQreset(cnt->database_pgsql);
-
-                if (PQstatus(cnt->database_pgsql) == CONNECTION_BAD) {
-                    MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                        ,_("Re-Connection to PostgreSQL database '%s' failed: %s")
-                        ,cnt->conf.database_dbname, PQerrorMessage(cnt->database_pgsql));
-                } else {
-                    MOTION_LOG(INF, TYPE_DB, NO_ERRNO
-                        ,_("Re-Connection to PostgreSQL database '%s' Succeed")
+            if (cnt->eid_db_format == dbeid_recovery) {
+                /* lost DB session recovery pending */
+                pstat = PQresetPoll(cnt->database_pgsql);
+                if (pstat == PGRES_POLLING_OK) {
+                    MOTION_LOG(WRN, TYPE_DB, NO_ERRNO
+                        ,_("Re-connected to PostgreSQL database '%s'")
                         ,cnt->conf.database_dbname);
+                    cnt->eid_db_format = dbeid_undetermined;  /* reinit eid logic */
+                } else if (pstat == PGRES_POLLING_FAILED) {
+                    cnt->eid_db_format = dbeid_rec_fail;  /* retry PGresetStart() */
+                } else {  /* session recovery in process but not complete */
+                    return;  /* discard this sqlquery; check again on next one */
                 }
+            }
 
-            } else if (!(PQresultStatus(res) == PGRES_COMMAND_OK || PQresultStatus(res) == PGRES_TUPLES_OK)) {
+            /* attempt sqlquery unless previous DB session break recovery failed */
+            if (cnt->eid_db_format > dbeid_recovery) {
+              MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing postgresql query"));
+              res  = PQexec(cnt->database_pgsql, sqlquery);
+              estat = PQresultStatus(res);
+            } else {
+              res = NULL;  /* skip PQclear() below */
+            }
+
+            if (PQstatus(cnt->database_pgsql) != PGSQL_CONNECTION_OK) {  /* DB session break! */
+                /* Non-blocking broken session recovery (PGSQL Doc.sec.32.1; PGSQL>v9, 33.1)
+                 * Note: to avoid blocking, each sqlquery during a session break is discarded. */
+                if (cnt->eid_db_format != dbeid_rec_fail) {  /* log only first attempt */
+                    MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+                        ,_("Attempting reconnect to PostgreSQL database '%s': %s")
+                        ,cnt->conf.database_dbname, PQerrorMessage(cnt->database_pgsql));
+                }
+                if (PQresetStart(cnt->database_pgsql)) {  /* reset request delivered */
+                    cnt->eid_db_format = dbeid_recovery;  /* suspend SQL operations */
+                } else {  /* reset request fails if PGSQL server is (temporarily?) unreachable */
+                    cnt->eid_db_format = dbeid_rec_fail;  /* try again next sqlquery */
+                }
+            } else if (!(estat == PGRES_COMMAND_OK || estat == PGRES_TUPLES_OK)) {
                 MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, _("PGSQL query failed: [%s]  %s %s"),
-                        sqlquery, PQresStatus(PQresultStatus(res)), PQresultErrorMessage(res));
+                    sqlquery, PQresStatus(PQresultStatus(res)), PQresultErrorMessage(res));
+            } else if (save_id) {
+                /* sqlquery processing is complete unless it potentially returns an event ID value;
+                 * save_id optionally allows SQL INSERT RETURNING a single positive integer value,
+                 * e.g., an auto-incremented unique row ID. */
+                if (cnt->eid_db_format < dbeid_undetermined) {
+                    /* A previous successful sqlquery returned nothing or an invalid value. This
+                     * is either intended or a non-transient flaw in a table schema or sqlquery. */
+                } else {
+                    if (estat == PGRES_TUPLES_OK) {  /* returned DB record set (possibly empty) */
+                        if (PQntuples(res) == 1 && PQnfields(res) == 1 && !PQgetisnull(res, 0, 0) && \
+                            ((cnt->eid_db_format=PQfformat(res, 0)) == 0)) {  /* got one char string */
+                            /* PQfformat()==0: null-term string, guaranteed unless DECLARE CURSOR BINARY
+                             * or extended query protocol (PGSQL Doc.sec.51.2.2; PGSQL>v9, 52.2.2) */
+                            char *eid_db_val;
+                            char *endptr;
+                            eid_db_val = PQgetvalue(res, 0, 0);
+                            MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("INSERT ... RETURNING VALUE=\"%s\""),
+                                eid_db_val);
+                            cnt->database_event_id = strtoll(eid_db_val, &endptr, 10);
+                            /* "unsigned" dcl overriden by cast, else "<1" test fails if negative */
+                            if (*endptr != '\0' || (long long)cnt->database_event_id < 1) {
+                                /* not numeric or not positive or not integer */
+                                cnt->eid_db_format = dbeid_not_valid;  /* abandon event ID retrieval */
+                            }
+                        } else if (PQntuples(res) < 1) {  /* returned empty record set */
+                            cnt->eid_db_format = dbeid_no_return;
+                        } else {  /* returned NULL, BINARY value, multiple values, or muliple records */
+                            cnt->eid_db_format = dbeid_not_valid;  /* abandon event ID retrieval */
+                        }
+                    } else {  /* nothing returned; OK if %{dbeventid} never used */
+                        cnt->eid_db_format = dbeid_no_return;
+                    }
+                    if (cnt->eid_db_format == dbeid_not_valid) {
+                        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("Invalid event ID returned by SQL query \"%s\""),
+                        sqlquery);
+                    }
+                    if (cnt->eid_db_format && cnt-> database_event_id) {
+                        /* retrieval failed; nullify any earlier retrieved value */
+                        cnt->database_event_id = 0;
+                    }
+                }
             }
-            if (save_id) {
-                //ToDO:  Find the equivalent option for pgsql
-                cnt->database_event_id = 0;
+            if (res) {
+                PQclear(res);
             }
-
-            PQclear(res);
         }
     #else
         (void)sqlquery;
@@ -540,10 +598,11 @@ static void dbse_exec_sqlite3(char *sqlquery, struct context *cnt, int save_id)
             if (res != SQLITE_OK ) {
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("SQLite error was %s"), errmsg);
                 sqlite3_free(errmsg);
-            }
-            if (save_id) {
-                //ToDO:  Find the equivalent option for sqlite3
-                cnt->database_event_id = 0;
+                if (save_id) {
+                    cnt->database_event_id = 0;
+                }
+            } else if (save_id) {
+                cnt->database_event_id = sqlite3_last_insert_rowid(cnt->database_sqlite3);
             }
 
         }
