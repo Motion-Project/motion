@@ -35,10 +35,9 @@
 #include "alg_sec.hpp"
 
 
-
+/* Allocate buffers if needed */
 static void webu_stream_mjpeg_checkbuffers(struct webui_ctx *webui)
 {
-    /* Allocate buffers if needed */
     if (webui->resp_size < (size_t)webui->cam->imgs.size_norm){
         if (webui->resp_page   != NULL) free(webui->resp_page);
         webui->resp_page   =(char*) mymalloc(webui->cam->imgs.size_norm);
@@ -49,12 +48,9 @@ static void webu_stream_mjpeg_checkbuffers(struct webui_ctx *webui)
 
 }
 
+/* Sleep required time to get to the user requested framerate for the stream */
 static void webu_stream_mjpeg_delay(struct webui_ctx *webui)
 {
-    /* Sleep required time to get to the user requested frame
-     * rate for the stream
-     */
-
     long   stream_rate;
     struct timespec time_curr;
     long   stream_delay;
@@ -200,6 +196,7 @@ static void webu_stream_static_getimg(struct webui_ctx *webui)
             ,webui->cam->stream.norm.jpeg_data
             ,webui->cam->stream.norm.jpeg_size);
         webui->resp_used = webui->cam->stream.norm.jpeg_size;
+        webui->cam->stream.norm.consumed = true;
     pthread_mutex_unlock(&webui->cam->stream.mutex);
 
 }
@@ -320,13 +317,16 @@ mhdrslt webu_stream_mjpeg(struct webui_ctx *webui)
         return MHD_NO;
     }
 
+    MHD_add_response_header(response, MHD_HTTP_HEADER_CACHE_CONTROL, "no-store");
+
     if (webui->cam->conf->stream_cors_header != ""){
-        MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
+        MHD_add_response_header(response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
             , webui->cam->conf->stream_cors_header.c_str());
     }
 
-    MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE
+    MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE
         , "multipart/x-mixed-replace; boundary=BoundaryString");
+
 
     retcd = MHD_queue_response (webui->connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
@@ -342,6 +342,8 @@ mhdrslt webu_stream_static(struct webui_ctx *webui)
     char resp_used[20];
 
     if (webu_stream_checks(webui) == -1) return MHD_NO;
+
+    webui->cam->stream.norm.consumed = true;
 
     webu_stream_cnct_count(webui);
 
@@ -360,6 +362,8 @@ mhdrslt webu_stream_static(struct webui_ctx *webui)
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
+
+    MHD_add_response_header(response, MHD_HTTP_HEADER_CACHE_CONTROL, "no-store");
 
     if (webui->cam->conf->stream_cors_header != ""){
         MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN

@@ -1326,6 +1326,10 @@ void webu_html_main(struct webui_ctx *webui)
         } else if (mystreq(webui->uri_cmd1,"track")){
             retcd = webu_process_track(webui);
 
+        } else if ((mystreq(webui->uri_cmd1,"config.json")) ||
+            (mystreq(webui->uri_camid,"config.json"))) {
+            retcd = webu_process_json(webui);
+
         } else{
             MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
                 _("Invalid action requested: >%s< >%s< >%s<")

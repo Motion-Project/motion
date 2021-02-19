@@ -53,7 +53,6 @@
 #include "video_v4l2.hpp"
 
 
-
 /* Context to pass the parms to functions to start mhd */
 struct mhdstart_ctx {
     struct ctx_motapp       *motapp;
@@ -98,9 +97,12 @@ static void webu_context_init(struct ctx_motapp *motapp, struct ctx_cam *cam, st
     webui->stream_pos    = 0;                   /* Stream position of image being sent */
     webui->stream_fps    = 1;                   /* Stream rate */
     webui->resp_page     = (char*)mymalloc(webui->resp_size);      /* The response being constructed */
+    webui->post_info     = NULL;
+    webui->post_sz       = 0;
     webui->motapp        = motapp;              /* The motion application context */
     webui->cam           = cam;                 /* The context pointer for a single camera */
     webui->cnct_type     = WEBUI_CNCT_UNKNOWN;
+    webui->resptype      = 0;   /* Default to html response */
 
     /* get the number of cameras and threads */
     indx = 0;
@@ -137,6 +139,8 @@ static void webu_free_var(char *parm)
 
 static void webu_context_free(struct webui_ctx *webui)
 {
+    int indx;
+
     webu_free_var(webui->hostname);
     webu_free_var(webui->url);
     webu_free_var(webui->uri_camid);
@@ -157,6 +161,13 @@ static void webu_context_free(struct webui_ctx *webui)
     webu_free_var(webui->clientip);
     webu_free_var(webui->text_eol);
 
+    for (indx = 0; indx<webui->post_sz; indx++) {
+        webu_free_var(webui->post_info[indx].key_nm);
+        webu_free_var(webui->post_info[indx].key_val);
+    }
+    free(webui->post_info);
+    webui->post_info = NULL;
+
     free(webui);
 
     return;
@@ -170,18 +181,8 @@ static void webu_badreq(struct webui_ctx *webui)
      * response to be HTML.  Otherwise, we do know the type and we send back to the user the
      * bad request response either with or without the HTML tags.
      */
-    if (webui->cam != NULL) {
-        if (webui->cam->conf->webcontrol_interface == 1) {
-            webu_text_badreq(webui);
-        } else {
-            webu_html_badreq(webui);
-        }
-    } else if (webui->motapp->cam_list != NULL) {
-        if (webui->motapp->cam_list[0]->conf->webcontrol_interface == 1) {
-            webu_text_badreq(webui);
-        } else {
-            webu_html_badreq(webui);
-        }
+    if (webui->resptype == 1) {
+        webu_text_badreq(webui);
     } else {
         webu_html_badreq(webui);
     }
@@ -274,6 +275,15 @@ static void webu_parms_edit(struct webui_ctx *webui)
             webui->cam = webui->motapp->cam_list[indx];
         }
     }
+
+    if (webui->cam != NULL) {
+        if (webui->cam->conf->webcontrol_interface == 1) {
+            webui->resptype = 1;
+        } else {
+            webui->resptype = 0;
+        }
+    }
+
 }
 
 static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos)
@@ -811,6 +821,346 @@ static int webu_process_config_set(struct webui_ctx *webui)
 
 }
 
+static void webu_process_json_parm(struct webui_ctx *webui, int indx_cam, int indx_parm)
+{
+    int indx_orig, indx_val;
+    char response[WEBUI_LEN_RESP];
+    char parm_orig[PATH_MAX], parm_val[PATH_MAX], parm_list[PATH_MAX];
+
+    memset(parm_orig, '\0',PATH_MAX);
+    memset(parm_val, '\0',PATH_MAX);
+    memset(parm_list, '\0',PATH_MAX);
+
+    conf_edit_get(webui->motapp->cam_list[indx_cam]
+        , config_parms[indx_parm].parm_name.c_str()
+        , parm_orig
+        , config_parms[indx_parm].parm_cat);
+
+    if (strstr(parm_orig, "\"")) {
+        indx_val = 0;
+        for (indx_orig = 0; indx_orig < (int)strlen(parm_orig); indx_orig++){
+            if (parm_orig[indx_orig] == '"') {
+                parm_val[indx_val] = '\\';
+                indx_val++;
+            }
+            parm_val[indx_val] = parm_orig[indx_orig];
+            indx_val++;
+            if (indx_val == PATH_MAX) {
+                break;
+            }
+        }
+    } else {
+        memcpy(parm_val, parm_orig, PATH_MAX);
+    }
+
+    if (config_parms[indx_parm].parm_type == PARM_TYP_INT) {
+        snprintf(response, sizeof (response)
+            , "\"%s\":{\"value\": %s,\"enabled\":true"
+              ",\"category\":%d, \"type\":\"%s\"}"
+            , config_parms[indx_parm].parm_name.c_str()
+            , parm_val
+            , config_parms[indx_parm].parm_cat
+            , conf_type_desc(config_parms[indx_parm].parm_type).c_str()
+            );
+    } else if (config_parms[indx_parm].parm_type == PARM_TYP_BOOL) {
+        if (mystreq(parm_val, "on")) {
+            snprintf(response, sizeof (response)
+                , "\"%s\":{\"value\": true,\"enabled\":true"
+                  ",\"category\":%d, \"type\":\"%s\"}"
+                , config_parms[indx_parm].parm_name.c_str()
+                , config_parms[indx_parm].parm_cat
+                , conf_type_desc(config_parms[indx_parm].parm_type).c_str()
+                );
+        } else {
+            snprintf(response, sizeof (response)
+                , "\"%s\":{\"value\": false,\"enabled\":true"
+                  ",\"category\":%d, \"type\":\"%s\"}"
+                , config_parms[indx_parm].parm_name.c_str()
+                , config_parms[indx_parm].parm_cat
+                , conf_type_desc(config_parms[indx_parm].parm_type).c_str()
+                );
+        }
+    } else if (config_parms[indx_parm].parm_type == PARM_TYP_LIST) {
+        conf_edit_list(webui->motapp->cam_list[indx_cam]
+            , config_parms[indx_parm].parm_name.c_str()
+            , parm_list
+            , config_parms[indx_parm].parm_cat);
+
+        snprintf(response, sizeof (response)
+            , "\"%s\":{\"value\": \"%s\",\"enabled\":true"
+              ",\"category\":%d, \"type\":\"%s\",\"list\":%s }"
+            , config_parms[indx_parm].parm_name.c_str()
+            , parm_val
+            , config_parms[indx_parm].parm_cat
+            , conf_type_desc(config_parms[indx_parm].parm_type).c_str()
+            , parm_list
+            );
+
+    } else {
+        snprintf(response, sizeof (response)
+            , "\"%s\":{\"value\": \"%s\",\"enabled\":true"
+              ",\"category\":%d, \"type\":\"%s\"}"
+            , config_parms[indx_parm].parm_name.c_str()
+            , parm_val
+            , config_parms[indx_parm].parm_cat
+            , conf_type_desc(config_parms[indx_parm].parm_type).c_str()
+            );
+    }
+    webu_write(webui, response);
+
+}
+
+static void webu_process_json_parms(struct webui_ctx *webui, int indx_cam)
+{
+    int indx_parm, first;
+    char response[WEBUI_LEN_RESP];
+
+    indx_parm = 0;
+    first = true;
+    while ((config_parms[indx_parm].parm_name != "") ) {
+        if ((config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER)) {
+            indx_parm++;
+            continue;
+        }
+        if (first) {
+            first = false;
+            snprintf(response, sizeof (response), "%s","{");
+            webu_write(webui, response);
+        } else {
+            snprintf(response, sizeof (response), "%s",",");
+            webu_write(webui, response);
+        }
+        if (config_parms[indx_parm].webui_level > webui->motapp->cam_list[0]->conf->webcontrol_parms) {
+            snprintf(response, sizeof (response)
+                , "\"%s\":{\"value\":\"\",\"enabled\":false"
+                  ",\"category\":%d, \"type\":\"%s\"}"
+                , config_parms[indx_parm].parm_name.c_str()
+                , config_parms[indx_parm].parm_cat
+                , conf_type_desc(config_parms[indx_parm].parm_type).c_str()
+                );
+            webu_write(webui, response);
+        } else {
+           webu_process_json_parm(webui, indx_cam, indx_parm);
+        }
+        indx_parm++;
+    }
+    snprintf(response, sizeof (response), "%s","}");
+    webu_write(webui, response);
+
+}
+
+static void webu_process_json_config(struct webui_ctx *webui)
+{
+    int indx_cam, first;
+    char response[WEBUI_LEN_RESP];
+
+    indx_cam = 0;
+    first = true;
+    while (webui->motapp->cam_list[indx_cam] != NULL) {
+        if (first) {
+            first = false;
+            snprintf(response, sizeof (response), "%s","{");
+            webu_write(webui, response);
+        } else {
+            snprintf(response, sizeof (response), "%s",",");
+            webu_write(webui, response);
+        }
+        snprintf(response, sizeof (response)
+            , "\"cam%d\": ",webui->motapp->cam_list[indx_cam]->conf->camera_id);
+        webu_write(webui, response);
+
+        webu_process_json_parms(webui, indx_cam);
+
+        indx_cam++;
+    }
+    snprintf(response, sizeof (response), "%s","}");
+    webu_write(webui, response);
+
+    return;
+
+}
+
+static void webu_process_json_cameras(struct webui_ctx *webui)
+{
+    int indx_cam;
+    char response[WEBUI_LEN_RESP];
+
+    /* Get the count */
+    indx_cam = 0;
+    while (webui->motapp->cam_list[indx_cam] != NULL) {
+        indx_cam++;
+    }
+    snprintf(response, sizeof (response)
+        ,"{\"count\" : %d", indx_cam - 1);
+    webu_write(webui, response);
+
+    indx_cam = 0;
+    while (webui->motapp->cam_list[indx_cam] != NULL) {
+        snprintf(response, sizeof(response), ",\"%d\": ", indx_cam) ;
+        webu_write(webui, response);
+
+        if (indx_cam == 0) {
+            snprintf(response, sizeof(response), "{\"name\": \"default\" ");
+        } else if (webui->motapp->cam_list[indx_cam]->conf->camera_name == "") {
+            snprintf(response, sizeof(response), "{\"name\": \"camera %d\" "
+                , webui->motapp->cam_list[indx_cam]->conf->camera_id);
+        } else {
+            snprintf(response, sizeof(response), "{\"name\": \"%s\" "
+                , webui->motapp->cam_list[indx_cam]->conf->camera_name.c_str());
+        }
+        webu_write(webui, response);
+
+        snprintf(response, sizeof(response), ",\"id\": %d "
+            , webui->motapp->cam_list[indx_cam]->conf->camera_id);
+        webu_write(webui, response);
+
+        if (indx_cam == 0) {
+            snprintf(response, sizeof(response), "%s","}");
+        } else {
+            if (webui->motapp->cam_list[0]->conf->stream_port != 0) {
+                snprintf(response, sizeof(response)
+                    , ",\"url\": \"%s://%s:%d/%d/\"} "
+                    , webui->hostproto, webui->hostname
+                    , webui->motapp->cam_list[0]->conf->stream_port
+                    , webui->motapp->cam_list[indx_cam]->conf->camera_id);
+            } else {
+                snprintf(response, sizeof(response)
+                    , ",\"url\": \"%s://%s:%d/\"} "
+                    , webui->hostproto
+                    , webui->hostname
+                    , webui->motapp->cam_list[indx_cam]->conf->stream_port);
+            }
+        }
+        webu_write(webui, response);
+
+        indx_cam++;
+    }
+    snprintf(response, sizeof (response), "%s","}");
+    webu_write(webui, response);
+
+    return;
+
+}
+
+static void webu_process_json_categories(struct webui_ctx *webui)
+{
+    int indx_cat;
+    char response[WEBUI_LEN_RESP];
+
+    snprintf(response, sizeof(response),"%s","{");
+    webu_write(webui, response);
+
+    indx_cat = 0;
+    while (indx_cat != PARM_CAT_MAX) {
+        if (indx_cat != 0) {
+            snprintf(response, sizeof(response),"%s",",");
+            webu_write(webui, response);
+        }
+        snprintf(response, sizeof(response), "\"%d\": ", indx_cat) ;
+        webu_write(webui, response);
+
+        if (indx_cat == PARM_CAT_00) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"system\",\"display\":\"System\"}");
+        } else if (indx_cat == PARM_CAT_01) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"camera\",\"display\":\"Camera\"}");
+        } else if (indx_cat == PARM_CAT_02) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"source\",\"display\":\"Camera Source\"}");
+        } else if (indx_cat == PARM_CAT_03) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"image\",\"display\":\"Image\"}");
+        } else if (indx_cat == PARM_CAT_04) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"overlay\",\"display\":\"Overlays\"}");
+        } else if (indx_cat == PARM_CAT_05) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"method\",\"display\":\"Method\"}");
+        } else if (indx_cat == PARM_CAT_06) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"masks\",\"display\":\"Masks\"}");
+        } else if (indx_cat == PARM_CAT_07) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"detect\",\"display\":\"Detection\"}");
+        } else if (indx_cat == PARM_CAT_08) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"scripts\",\"display\":\"Scripts\"}");
+        } else if (indx_cat == PARM_CAT_09) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"picture\",\"display\":\"Picture\"}");
+        } else if (indx_cat == PARM_CAT_10) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"movie\",\"display\":\"Movie\"}");
+        } else if (indx_cat == PARM_CAT_11) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"timelapse\",\"display\":\"Timelapse\"}");
+        } else if (indx_cat == PARM_CAT_12) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"pipes\",\"display\":\"Pipes\"}");
+        } else if (indx_cat == PARM_CAT_13) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"webcontrol\",\"display\":\"Web Control\"}");
+        } else if (indx_cat == PARM_CAT_14) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"streams\",\"display\":\"Web Stream\"}");
+        } else if (indx_cat == PARM_CAT_15) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"database\",\"display\":\"Database\"}");
+        } else if (indx_cat == PARM_CAT_16) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"sql\",\"display\":\"SQL\"}");
+        } else if (indx_cat == PARM_CAT_17) {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"track\",\"display\":\"Tracking\"}");
+        } else {
+            snprintf(response, sizeof(response),"%s"
+                , "{\"name\":\"unk\",\"display\":\"Unknown\"}");
+        }
+        webu_write(webui, response);
+
+        indx_cat++;
+    }
+
+    snprintf(response, sizeof(response), "%s","}");
+    webu_write(webui, response);
+
+    return;
+
+}
+
+int webu_process_json(struct webui_ctx *webui)
+{
+    char response[WEBUI_LEN_RESP];
+
+    webui->resptype = 2;
+
+    snprintf(response, sizeof (response),"%s"
+        ,"{\"version\" : \"" VERSION "\"");
+    webu_write(webui, response);
+
+    snprintf(response, sizeof (response), "%s",",\"cameras\" : ");
+    webu_write(webui, response);
+
+    webu_process_json_cameras(webui);
+
+    snprintf(response, sizeof (response), "%s",",\"configuration\" : ");
+    webu_write(webui, response);
+
+    webu_process_json_config(webui);
+
+    snprintf(response, sizeof (response), "%s",",\"categories\" : ");
+    webu_write(webui, response);
+
+    webu_process_json_categories(webui);
+
+    snprintf(response, sizeof (response), "%s","}");
+    webu_write(webui, response);
+
+    return 0;
+
+}
+
 int webu_process_config(struct webui_ctx *webui)
 {
 
@@ -1255,8 +1605,13 @@ static mhdrslt webu_mhd_send(struct webui_ctx *webui, int ctrl)
                 MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
                     , webui->cam->conf->webcontrol_cors_header.c_str());
             }
-            if (webui->cam->conf->webcontrol_interface == 1) {
+
+            if (webui->resptype == 0) {
+                MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
+            } else if (webui->resptype == 1) {
                 MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/plain;");
+            } else if (webui->resptype == 2) {
+                MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "application/json;");
             } else {
                 MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
             }
@@ -1317,37 +1672,127 @@ static void webu_answer_strm_type(struct webui_ctx *webui)
 
 }
 
-/* Answer the connection request for the webcontrol*/
-static mhdrslt webu_answer_ctrl(void *cls, struct MHD_Connection *connection, const char *url
-        , const char *method, const char *version, const char *upload_data, size_t *upload_data_size
-        , void **ptr)
+/* Process the post data command */
+static mhdrslt webu_answer_ctrl_post(struct webui_ctx *webui)
 {
     mhdrslt retcd;
-    struct webui_ctx *webui =(struct webui_ctx *) *ptr;
+    int indx;
 
-    /* Eliminate compiler warnings */
-    (void)cls;
-    (void)url;
-    (void)version;
-    (void)upload_data;
-    (void)upload_data_size;
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"processing post");
 
-    /* Per MHD docs, this is called twice and we should process the second call */
-    if (webui->mhd_first) {
-        webui->mhd_first = FALSE;
+    /* TODO:  Handle more commands sent from the web page */
+
+    if (webui->post_cmd == 1) {
+        for (indx = 0; indx < webui->post_sz; indx++) {
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"key: %s  value: %s  size: %ld "
+                , webui->post_info[indx].key_nm
+                , webui->post_info[indx].key_val
+                , webui->post_info[indx].key_sz
+            );
+        }
+    }
+
+    webu_html_main(webui);
+
+    retcd = webu_mhd_send(webui, true);
+    if (retcd == MHD_NO) {
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"send post page failed");
+    }
+
+    return MHD_YES;
+
+}
+
+/*Append more data on to an existing entry in the post info structure */
+static void webu_iterate_post_append(struct webui_ctx *webui, int indx
+        , const char *data, size_t datasz)
+{
+
+    webui->post_info[indx].key_val = (char*)realloc(
+        webui->post_info[indx].key_val
+        , webui->post_info[indx].key_sz + datasz + 1);
+
+    memset(webui->post_info[indx].key_val +
+        webui->post_info[indx].key_sz, 0, datasz + 1);
+
+    if (datasz > 0) {
+        memcpy(webui->post_info[indx].key_val +
+            webui->post_info[indx].key_sz, data, datasz);
+    }
+
+    webui->post_info[indx].key_sz += datasz;
+
+}
+
+/*Create new entry in the post info structure */
+static void webu_iterate_post_new(struct webui_ctx *webui, const char *key
+        , const char *data, size_t datasz)
+{
+    int retcd;
+
+    webui->post_sz++;
+    if (webui->post_sz == 1) {
+        webui->post_info = (ctx_key *)malloc(sizeof(struct ctx_key));
+    } else {
+        webui->post_info = (ctx_key *)realloc(webui->post_info
+            , webui->post_sz * sizeof(struct ctx_key));
+    }
+
+    webui->post_info[webui->post_sz-1].key_nm = (char*)malloc(strlen(key)+1);
+    retcd = snprintf(webui->post_info[webui->post_sz-1].key_nm, strlen(key)+1, "%s", key);
+
+    webui->post_info[webui->post_sz-1].key_val = (char*)malloc(datasz+1);
+    memset(webui->post_info[webui->post_sz-1].key_val,0,datasz+1);
+    if (datasz > 0) {
+        memcpy(webui->post_info[webui->post_sz-1].key_val, data, datasz);
+    }
+
+    webui->post_info[webui->post_sz-1].key_sz = datasz;
+
+    if (retcd < 0) {
+        printf("Error processing post data\n");
+    }
+
+}
+
+static mhdrslt webu_iterate_post (void *ptr, enum MHD_ValueKind kind
+        , const char *key, const char *filename, const char *content_type
+        , const char *transfer_encoding, const char *data, uint64_t off, size_t datasz)
+{
+    struct webui_ctx *webui = (webui_ctx *)ptr;
+    (void) kind;               /* Unused. Silent compiler warning. */
+    (void) filename;           /* Unused. Silent compiler warning. */
+    (void) content_type;       /* Unused. Silent compiler warning. */
+    (void) transfer_encoding;  /* Unused. Silent compiler warning. */
+    (void) off;                /* Unused. Silent compiler warning. */
+    int indx;
+
+    if (mystreq(key, "cmdid")) {
+        webui->post_cmd = atoi(data);
+    } else if (mystreq(key, "trailer") && (datasz ==0)) {
         return MHD_YES;
     }
 
-    if (mystrne(method, "GET")) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Invalid Method requested: %s"),method);
-        return MHD_NO;
+    for (indx=0; indx < webui->post_sz; indx++) {
+        if (mystreq(webui->post_info[indx].key_nm, key)) {
+            break;
+        }
+    }
+    if (indx < webui->post_sz) {
+        webu_iterate_post_append(webui, indx, data, datasz);
+    } else {
+        webu_iterate_post_new(webui, key, data, datasz);
     }
 
-    webui->cnct_type = WEBUI_CNCT_CONTROL;
+    return MHD_YES;
+}
 
-    mythreadname_set("wu", 0,NULL);
 
-    webui->connection = connection;
+static mhdrslt webu_answer_ctrl_get(struct webui_ctx *webui)
+{
+    int retcd;
+
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"processing get");
 
     /* Throw bad URLS back to user*/
     if ((webui->cam ==  NULL) || (strlen(webui->url) == 0)) {
@@ -1387,15 +1832,66 @@ static mhdrslt webu_answer_ctrl(void *cls, struct MHD_Connection *connection, co
 
     }
 
-    //if (mystrne(webui->uri_cmd2,"delete")) {
-        retcd = webu_mhd_send(webui, TRUE);
-        if (retcd == MHD_NO) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
+    retcd = webu_mhd_send(webui, TRUE);
+    if (retcd == MHD_NO) {
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
+    }
+
+    return retcd;
+
+}
+
+/* Answer the connection request for the webcontrol*/
+static mhdrslt webu_answer_ctrl(void *cls, struct MHD_Connection *connection, const char *url
+        , const char *method, const char *version, const char *upload_data, size_t *upload_data_size
+        , void **ptr)
+{
+    mhdrslt retcd;
+    struct webui_ctx *webui =(struct webui_ctx *) *ptr;
+
+    /* Eliminate compiler warnings */
+    (void)cls;
+    (void)url;
+    (void)version;
+    (void)upload_data;
+    (void)upload_data_size;
+
+    /* Per MHD docs, this is called twice and we should process the second call */
+    webui->cnct_type = WEBUI_CNCT_CONTROL;
+
+    mythreadname_set("wu", 0,NULL);
+
+    webui->connection = connection;
+
+    if (webui->mhd_first) {
+        webui->mhd_first = FALSE;
+        if (mystreq(method,"POST")) {
+            webui->postprocessor = MHD_create_post_processor (webui->connection
+                , POSTBUFFERSIZE, webu_iterate_post, (void *)webui);
+            if (webui->postprocessor == NULL) {
+                return MHD_NO;
+            }
+            webui->cnct_method = WEBUI_METHOD_POST;
+        } else {
+            webui->cnct_method = WEBUI_METHOD_GET;
         }
-        return retcd;
-    //} else {
-    //    return MHD_NO;
-   // }
+
+        return MHD_YES;
+    }
+
+    if (mystreq(method,"POST")) {
+        if (*upload_data_size != 0) {
+            retcd = MHD_post_process (webui->postprocessor, upload_data, *upload_data_size);
+            *upload_data_size = 0;
+        } else {
+            retcd = webu_answer_ctrl_post(webui);
+        }
+    } else {
+        retcd = webu_answer_ctrl_get(webui);
+    }
+
+    return retcd;
+
 }
 
 /* Answer the connection request for a stream */
@@ -1606,7 +2102,12 @@ static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
 
     }
 
-    webu_context_free(webui);
+    if (webui != NULL) {
+        if (webui->cnct_method == WEBUI_METHOD_POST) {
+            MHD_destroy_post_processor (webui->postprocessor);
+        }
+        webu_context_free(webui);
+    }
 
     return;
 }

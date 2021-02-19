@@ -192,6 +192,7 @@
         std::string     track_generic_move;
     };
 
+    /* Categories for he edits and display on web interface*/
     enum PARM_CAT{
         PARM_CAT_00
         ,PARM_CAT_01
@@ -199,20 +200,34 @@
         ,PARM_CAT_03
         ,PARM_CAT_04
         ,PARM_CAT_05
+        ,PARM_CAT_06
+        ,PARM_CAT_07
+        ,PARM_CAT_08
+        ,PARM_CAT_09
+        ,PARM_CAT_10
+        ,PARM_CAT_11
+        ,PARM_CAT_12
+        ,PARM_CAT_13
+        ,PARM_CAT_14
+        ,PARM_CAT_15
+        ,PARM_CAT_16
+        ,PARM_CAT_17
+        ,PARM_CAT_MAX
     };
     enum PARM_TYP{
         PARM_TYP_STRING
-        ,PARM_TYP_INT
-        ,PARM_TYP_BOOL
+        , PARM_TYP_INT
+        , PARM_TYP_LIST
+        , PARM_TYP_BOOL
     };
 
     /** Current parameters in the config file */
     struct ctx_parm {
-        const std::string   parm_name;     /* name for this parameter                  */
-        const std::string   parm_help;     /* short explanation for parameter          */
+        const std::string   parm_name;      /* name for this parameter                  */
+        const std::string   parm_help;      /* short explanation for parameter          */
         int                 main_thread;    /* belong only to main thread when value>0  */
-        enum PARM_TYP       parm_type;      /* char string of either bool,int,string,etc.  */
-        enum PARM_CAT       parm_cat;
+        enum PARM_TYP       parm_type;      /* enum of parm_typ for bool,int or string. */
+        enum PARM_CAT       parm_cat;       /* enum of parm_cat for 00 to 05 for grouping. */
         int                 webui_level;    /* Enum to display in webui: 0,1,2,3,99(always to never)*/
     };
 
@@ -247,5 +262,12 @@
             , std::string &parm_val, enum PARM_CAT parm_cat);
     void conf_edit_get(struct ctx_cam *cam, std::string parm_nm
             , char *parm_chr, enum PARM_CAT parm_cat);
+
+    void conf_edit_list(struct ctx_cam *cam, std::string parm_nm
+            , std::string &parm_val, enum PARM_CAT parm_cat);
+    void conf_edit_list(struct ctx_cam *cam, std::string parm_nm
+            , char *parm_chr, enum PARM_CAT parm_cat);
+
+    std::string conf_type_desc(enum PARM_TYP ptype);
 
 #endif /* _INCLUDE_CONF_H */

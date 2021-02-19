@@ -28,8 +28,9 @@
 
 enum PARM_ACT{
     PARM_ACT_DFLT
-    ,PARM_ACT_SET
-    ,PARM_ACT_GET
+    , PARM_ACT_SET
+    , PARM_ACT_GET
+    , PARM_ACT_LIST
 };
 
 /* Forward Declares */
@@ -43,39 +44,46 @@ struct ctx_parm config_parms[] = {
     "# System control configuration parameters\n"
     "############################################################\n\n"
     "# Start in daemon (background) mode and release terminal.",
-    1 ,PARM_TYP_BOOL,PARM_CAT_00,WEBUI_LEVEL_ADVANCED},
+    1, PARM_TYP_BOOL, PARM_CAT_00, WEBUI_LEVEL_ADVANCED},
     {
     "setup_mode",
     "# Start in Setup-Mode, daemon disabled.",
-    0 ,PARM_TYP_BOOL ,PARM_CAT_00,WEBUI_LEVEL_ADVANCED},
+    0, PARM_TYP_BOOL, PARM_CAT_00, WEBUI_LEVEL_ADVANCED},
     {
     "conf_filename",
     "# Configuration file name.",
-    1 ,PARM_TYP_STRING ,PARM_CAT_00,WEBUI_LEVEL_ADVANCED},
+    1, PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_ADVANCED},
     {
     "pid_file",
     "# File to store the process ID.",
-    1 ,PARM_TYP_STRING ,PARM_CAT_00,WEBUI_LEVEL_ADVANCED},
+    1, PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_ADVANCED},
     {
     "log_file",
     "# File to write logs messages into.  If not defined stderr and syslog is used.",
-    1, PARM_TYP_STRING, PARM_CAT_00 , WEBUI_LEVEL_ADVANCED},
+    1, PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_ADVANCED},
     {
     "log_level",
     "# Level of log messages [1..9] (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL).",
-    1, PARM_TYP_INT, PARM_CAT_00, WEBUI_LEVEL_LIMITED},
+    1, PARM_TYP_LIST, PARM_CAT_00, WEBUI_LEVEL_LIMITED},
     {
     "log_type",
     "# Filter to log messages by type (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL).",
-    1, PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_LIMITED},
+    1, PARM_TYP_LIST, PARM_CAT_00, WEBUI_LEVEL_LIMITED},
+    {
+    "native_language",
+    "# Native language support.",
+    1, PARM_TYP_BOOL, PARM_CAT_00, WEBUI_LEVEL_LIMITED},
+
     {
     "quiet",
     "# Do not sound beeps when detecting motion",
     0, PARM_TYP_BOOL, PARM_CAT_01, WEBUI_LEVEL_LIMITED},
     {
-    "native_language",
-    "# Native language support.",
-    1, PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_LIMITED},
+    "camera_dir",
+    "##############################################################\n"
+    "# Directory to read '.conf' files for cameras.\n"
+    "##############################################################",
+    1, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
     {
     "camera_name",
     "# User defined name for the camera.",
@@ -83,585 +91,596 @@ struct ctx_parm config_parms[] = {
     {
     "camera_id",
     "# Numeric identifier for the camera.",
-    0, PARM_TYP_INT,PARM_CAT_01,WEBUI_LEVEL_ADVANCED},
+    0,PARM_TYP_INT, PARM_CAT_01, WEBUI_LEVEL_ADVANCED},
     {
     "camera_tmo",
     "# Timeout for camera lost connection.",
-    0, PARM_TYP_INT,PARM_CAT_01,WEBUI_LEVEL_LIMITED},
+    0,PARM_TYP_INT, PARM_CAT_01, WEBUI_LEVEL_LIMITED},
     {
     "target_dir",
     "# Target directory for pictures, snapshots and movies",
-    0,PARM_TYP_STRING,PARM_CAT_01, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {
     "watchdog_tmo",
     "# Timeout in seconds for thread response.",
-    0, PARM_TYP_INT,PARM_CAT_01,WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_INT, PARM_CAT_01, WEBUI_LEVEL_LIMITED},
     {
     "watchdog_kill",
     "# Timeout before forcefully killing the thread.",
-    0, PARM_TYP_INT,PARM_CAT_01,WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_INT, PARM_CAT_01, WEBUI_LEVEL_LIMITED},
+
     {
     "v4l2_device",
     "# Video device (e.g. /dev/video0) to be used for capturing.",
-    0,PARM_TYP_STRING,PARM_CAT_01,WEBUI_LEVEL_ADVANCED
+    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED
     },
     {
     "v4l2_params",
     "# Parameters to control video device.  See motionplus_guide.html",
-    0,PARM_TYP_STRING,PARM_CAT_01,WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED},
     {
     "netcam_url",
     "# The full URL of the network camera stream.",
-    0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED},
+    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED},
     {
     "netcam_params",
     "# Parameters for the network camera.",
-    0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
     {
     "netcam_high_url",
     "# Optional high resolution URL for camera.",
-    0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED},
+    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED},
     {
     "netcam_high_params",
     "# Parameters for high resolution stream.",
-    0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
     {
     "netcam_userpass",
     "# Username and password for network camera. Syntax username:password",
-    0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
     {
     "mmalcam_name",
     "# Name of mmal camera (e.g. vc.ril.camera for pi camera).",
-    0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
     {
     "mmalcam_params",
     "# Camera control parameters (see raspivid/raspistill tool documentation)",
-    0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
     {
+
     "width",
     "############################################################\n"
     "# Image Processing configuration parameters\n"
     "############################################################\n\n"
     "# Image width in pixels.",
-    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_ADVANCED },
     {
     "height",
     "# Image height in pixels.",
-    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_ADVANCED},
+    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_ADVANCED},
     {
     "framerate",
     "# Maximum number of frames to be captured per second.",
-    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
     {
     "minimum_frame_time",
     "# Mimimum frame time.",
-    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
     {
     "rotate",
     "# Number of degrees to rotate image.",
-    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_LIST, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
     {
     "flip_axis",
     "# Flip image over a given axis",
-    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_LIST, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+
     {
     "locate_motion_mode",
     "# Draw a locate box around the moving object.",
-    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_LIST, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
     {
     "locate_motion_style",
     "# Set the look and style of the locate box.",
-    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_LIST, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
     {
     "text_left",
     "# Text to be overlayed in the lower left corner of images",
-    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
     {
     "text_right",
     "# Text to be overlayed in the lower right corner of images.",
-    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
     {
     "text_changes",
     "# Overlay number of changed pixels in upper right corner of images.",
-    0,PARM_TYP_BOOL, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_BOOL, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
     {
     "text_scale",
     "# Scale factor for text overlayed on images.",
-    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_LIST, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
     {
     "text_event",
     "# The special event conversion specifier %C",
-    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+
     {
     "emulate_motion",
     "############################################################\n"
     "# Motion detection configuration parameters\n"
     "############################################################\n\n"
     "# Always save pictures and movies even if there was no motion.",
-    0,PARM_TYP_BOOL, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_BOOL, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {
     "primary_method",
     "# Primary method to be used for detection.",
-    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {
     "threshold",
     "# Threshold for number of changed pixels that triggers motion.",
-    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {
     "threshold_maximum",
     "# The maximum threshold for number of changed pixels that triggers motion.",
-    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {
     "threshold_sdevx",
     "# The maximum standard deviation of the width of motion to center.",
-    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {
     "threshold_sdevy",
     "# The maximum standard deviation of the height of motion to center.",
-    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {
     "threshold_sdevxy",
     "# The maximum standard deviation of the distance of motion to center.",
-    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {
     "threshold_ratio",
     "# The maximum ratio between total pixels changed versus change in same brightness level(times 10).",
-    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {
     "threshold_tune",
     "# Enable tuning of the threshold down if possible.",
-    0,PARM_TYP_BOOL, PARM_CAT_02, WEBUI_LEVEL_LIMITED},
+    0,PARM_TYP_BOOL, PARM_CAT_05, WEBUI_LEVEL_LIMITED},
     {
     "secondary_interval",
     "# The interval between secondary detections.",
-    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {
     "secondary_method",
     "# The method to use for secondary detection.",
-    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {
     "secondary_params",
     "# Full path name for the secondary model and configuration.",
-    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+
     {
     "noise_level",
     "# Noise threshold for the motion detection.",
-    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_INT, PARM_CAT_06, WEBUI_LEVEL_LIMITED },
     {
     "noise_tune",
     "# Automatically tune the noise threshold",
-    0,PARM_TYP_BOOL, PARM_CAT_02, WEBUI_LEVEL_LIMITED},
+    0,PARM_TYP_BOOL, PARM_CAT_06, WEBUI_LEVEL_LIMITED},
     {
     "despeckle_filter",
     "# Despeckle the image using (E/e)rode or (D/d)ilate or (l)abel.",
-    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_STRING, PARM_CAT_06, WEBUI_LEVEL_LIMITED },
     {
     "area_detect",
     "# Area number used to trigger the on_area_detected script.",
-    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_STRING, PARM_CAT_06, WEBUI_LEVEL_LIMITED },
     {
     "mask_file",
     "# Full path and file name for motion detection mask PGM file.",
-    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
+    0,PARM_TYP_STRING, PARM_CAT_06, WEBUI_LEVEL_ADVANCED },
     {
     "mask_privacy",
     "# Full path and file name for privacy mask PGM file.",
-    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
+    0,PARM_TYP_STRING, PARM_CAT_06, WEBUI_LEVEL_ADVANCED },
     {
     "smart_mask_speed",
     "# The value defining how slow or fast the smart motion mask created and used.",
-    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_06, WEBUI_LEVEL_LIMITED },
+
     {
     "lightswitch_percent",
     "# Percentage of image that triggers a lightswitch detected.",
-    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_INT, PARM_CAT_07, WEBUI_LEVEL_LIMITED},
     {
     "lightswitch_frames",
     "# When lightswitch is detected, ignore this many frames",
-    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_07, WEBUI_LEVEL_LIMITED },
     {
     "minimum_motion_frames",
     "# Number of images that must contain motion to trigger an event.",
-    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_INT, PARM_CAT_07, WEBUI_LEVEL_LIMITED},
     {
     "static_object_time",
     "# Amount of time that must elapse before a new object is accepted into the image.",
-    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_INT, PARM_CAT_07, WEBUI_LEVEL_LIMITED},
     {
     "event_gap",
     "# Gap in seconds of no motion detected that triggers the end of an event.",
-    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_07, WEBUI_LEVEL_LIMITED },
     {
     "pre_capture",
     "# The number of pre-captured (buffered) pictures from before motion.",
-    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_07, WEBUI_LEVEL_LIMITED },
     {
     "post_capture",
     "# Number of frames to capture after motion is no longer detected.",
-    0, PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_07, WEBUI_LEVEL_LIMITED },
+
     {
     "on_event_start",
     "############################################################\n"
     "# Script execution configuration parameters\n"
     "############################################################\n\n"
     "# Command to be executed when an event starts.",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_RESTRICTED },
+    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
     {
     "on_event_end",
     "# Command to be executed when an event ends.",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_RESTRICTED},
+    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED},
     {
     "on_picture_save",
     "# Command to be executed when a picture is saved.",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_RESTRICTED },
+    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
     {
     "on_area_detected",
     "# Command to be executed when motion in a predefined area is detected",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_RESTRICTED },
+    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
     {
     "on_motion_detected",
     "# Command to be executed when motion is detected",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_RESTRICTED },
+    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
     {
     "on_movie_start",
     "# Command to be executed when a movie file is created.",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_RESTRICTED},
+    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED},
     {
     "on_movie_end",
     "# Command to be executed when a movie file is closed.",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_RESTRICTED },
+    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
     {
     "on_camera_lost",
     "# Command to be executed when a camera can't be opened or if it is lost",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_RESTRICTED },
+    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
     {
     "on_camera_found",
     "# Command to be executed when a camera that was lost has been found.",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_RESTRICTED},
+    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED},
     {
     "on_secondary_detect",
     "# Command to be executed when the secondary detection has triggered.",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_RESTRICTED},
+    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED},
+
     {
     "picture_output",
     "############################################################\n"
     "# Picture output configuration parameters\n"
     "############################################################\n\n"
     "# Output pictures when motion is detected",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
     {
     "picture_output_motion",
     "# Output pictures with only the pixels moving object (ghost images)",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
     {
     "picture_type",
     "# Format for the output pictures.",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_STRING, PARM_CAT_09, WEBUI_LEVEL_LIMITED},
     {
     "picture_quality",
     "# The quality (in percent) to be used in the picture compression",
-    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
     {
     "picture_exif",
     "# Text to include in a JPEG EXIF comment",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
     {
     "picture_filename",
     "# File name(without extension) for pictures relative to target directory",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
     {
     "snapshot_interval",
     "############################################################\n"
     "# Snapshot output configuration parameters\n"
     "############################################################\n\n"
     "# Make automated snapshot every N seconds",
-    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
     {
     "snapshot_filename",
     "# File name(without extension) for snapshots relative to target directory",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_STRING, PARM_CAT_09, WEBUI_LEVEL_LIMITED},
+
     {
     "movie_output",
     "############################################################\n"
     "# Movie output configuration parameters\n"
     "############################################################\n\n"
     "# Create movies of motion events.",
-    0, PARM_TYP_BOOL, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_BOOL, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {
     "movie_output_motion",
     "# Create movies of moving pixels of motion events.",
-    0, PARM_TYP_BOOL, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_BOOL, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {
     "movie_max_time",
     "# Maximum length of movie in seconds.",
-    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {
     "movie_bps",
     "# The fixed bitrate to be used by the movie encoder. Ignore quality setting",
-    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {
     "movie_quality",
     "# The encoding quality of the movie. (0=use bitrate. 1=worst quality, 100=best)",
-    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {
     "movie_codec",
     "# Container/Codec to used for the movie. See motionplus_guide.html",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {
     "movie_passthrough",
     "# Pass through from the camera to the movie without decode/encoding.",
-    0, PARM_TYP_BOOL, PARM_CAT_03, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_BOOL, PARM_CAT_10, WEBUI_LEVEL_ADVANCED },
     {
     "movie_filename",
     "# File name(without extension) for movies relative to target directory",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {
     "movie_extpipe_use",
     "# Use pipe and external encoder for creating movies.",
-    0, PARM_TYP_BOOL, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_BOOL, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {
     "movie_extpipe",
     "# Full path and options for external encoder of movies from raw images",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_RESTRICTED },
+    0, PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_RESTRICTED },
+
     {
     "timelapse_interval",
     "############################################################\n"
     "# Timelapse output configuration parameters\n"
     "############################################################\n\n"
     "# Interval in seconds between timelapse captures.",
-    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_11, WEBUI_LEVEL_LIMITED },
     {
     "timelapse_mode",
     "# Timelapse file rollover mode. See motionplus_guide.html for options and uses.",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_STRING, PARM_CAT_11, WEBUI_LEVEL_LIMITED},
     {
     "timelapse_fps",
     "# Frame rate for timelapse playback",
-    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_11, WEBUI_LEVEL_LIMITED },
     {
     "timelapse_codec",
     "# Container/Codec for timelapse movie.",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_STRING, PARM_CAT_11, WEBUI_LEVEL_LIMITED},
     {
     "timelapse_filename",
     "# File name(without extension) for timelapse movies relative to target directory",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_STRING, PARM_CAT_11, WEBUI_LEVEL_LIMITED},
+
     {
     "video_pipe",
     "############################################################\n"
     "# Loopback pipe configuration parameters\n"
     "############################################################\n\n"
     "# v4l2 loopback device to receive normal images",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_12, WEBUI_LEVEL_LIMITED },
     {
     "video_pipe_motion",
     "# v4l2 loopback device to receive motion images",
-    0, PARM_TYP_STRING, PARM_CAT_03, WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_STRING, PARM_CAT_12, WEBUI_LEVEL_LIMITED},
+
     {
     "webcontrol_port",
     "############################################################\n"
     "# Webcontrol configuration parameters\n"
     "############################################################\n\n"
     "# Port number used for the webcontrol.",
-    1, PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_ADVANCED},
+    1, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED},
     {
     "webcontrol_ipv6",
     "# Enable IPv6 addresses.",
-    0, PARM_TYP_BOOL, PARM_CAT_04, WEBUI_LEVEL_ADVANCED},
+    0, PARM_TYP_BOOL, PARM_CAT_13, WEBUI_LEVEL_ADVANCED},
     {
     "webcontrol_localhost",
     "# Restrict webcontrol connections to the localhost.",
-    1, PARM_TYP_BOOL, PARM_CAT_04, WEBUI_LEVEL_ADVANCED },
+    1, PARM_TYP_BOOL, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
     {
     "webcontrol_parms",
     "# Type of configuration options to allow via the webcontrol.",
-    1, PARM_TYP_INT, PARM_CAT_04, WEBUI_LEVEL_NEVER},
+    1, PARM_TYP_INT, PARM_CAT_13, WEBUI_LEVEL_NEVER},
     {
     "webcontrol_interface",
     "# Method that webcontrol should use for interface with user.",
-    1, PARM_TYP_INT, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+    1, PARM_TYP_INT, PARM_CAT_13, WEBUI_LEVEL_LIMITED },
     {
     "webcontrol_auth_method",
     "# The authentication method for the webcontrol",
-    0, PARM_TYP_INT, PARM_CAT_04, WEBUI_LEVEL_RESTRICTED},
+    0, PARM_TYP_INT, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED},
     {
     "webcontrol_authentication",
     "# Authentication string for the webcontrol. Syntax username:password",
-    1, PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_RESTRICTED},
+    1, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED},
     {
     "webcontrol_tls",
     "# Use ssl / tls for the webcontrol",
-    0, PARM_TYP_BOOL, PARM_CAT_04, WEBUI_LEVEL_RESTRICTED },
+    0, PARM_TYP_BOOL, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
     {
     "webcontrol_cert",
     "# Full path and file name of the certificate file for tls",
-    1, PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_RESTRICTED},
+    1, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED},
     {
     "webcontrol_key",
     "# Full path and file name of the key file for tls",
-    1, PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_RESTRICTED},
+    1, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED},
     {
     "webcontrol_cors_header",
     "# The cross-origin resource sharing (CORS) header for webcontrol",
-    0, PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_RESTRICTED },
+    0, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
     {
     "webcontrol_html",
     "# Full path and file name of the html file to use for the webcontrol",
-    1, PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_RESTRICTED},
+    1, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED},
+
     {
     "stream_port",
     "############################################################\n"
     "# Live stream configuration parameters\n"
     "############################################################\n\n"
     "# The port number for the live stream.",
-    0, PARM_TYP_INT, PARM_CAT_04, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_INT, PARM_CAT_14, WEBUI_LEVEL_ADVANCED },
     {
     "stream_localhost",
     "# Restrict stream connections to the localhost.",
-    0, PARM_TYP_BOOL, PARM_CAT_04, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_BOOL, PARM_CAT_14, WEBUI_LEVEL_ADVANCED },
     {
     "stream_auth_method",
     "# Authentication method for live stream.",
-    0, PARM_TYP_INT, PARM_CAT_04, WEBUI_LEVEL_RESTRICTED},
+    0, PARM_TYP_INT, PARM_CAT_14, WEBUI_LEVEL_RESTRICTED},
     {
     "stream_authentication",
     "# The authentication string for the stream. Syntax username:password",
-    1, PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_RESTRICTED },
+    1, PARM_TYP_STRING, PARM_CAT_14, WEBUI_LEVEL_RESTRICTED },
     {
     "stream_tls",
     "# Use ssl / tls for stream.",
-    0, PARM_TYP_BOOL, PARM_CAT_04, WEBUI_LEVEL_RESTRICTED },
+    0, PARM_TYP_BOOL, PARM_CAT_14, WEBUI_LEVEL_RESTRICTED },
     {
     "stream_cors_header",
     "# The cross-origin resource sharing (CORS) header for the stream",
-    0, PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_RESTRICTED },
+    0, PARM_TYP_STRING, PARM_CAT_14, WEBUI_LEVEL_RESTRICTED },
     {
     "stream_preview_scale",
     "# Percentage to scale the stream image on the webcontrol.",
-    0, PARM_TYP_INT, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {
     "stream_preview_newline",
     "# Have the stream image start on a new line of the webcontrol",
-    0, PARM_TYP_BOOL, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_BOOL, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {
     "stream_preview_method",
     "# Method for showing stream on webcontrol.",
-    0, PARM_TYP_INT, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {
     "stream_quality",
     "# Quality of the jpeg images produced for stream.",
-    0, PARM_TYP_INT, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {
     "stream_grey",
     "# Provide the stream images in black and white",
-    0, PARM_TYP_BOOL, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_BOOL, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {
     "stream_motion",
     "# Output frames at 1 fps when no motion is detected.",
-    0, PARM_TYP_BOOL, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_BOOL, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {
     "stream_maxrate",
     "# Maximum framerate of images provided for stream",
-    0, PARM_TYP_INT, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
+
     {
     "database_type",
     "############################################################\n"
     "# Database and SQL Configuration parameters\n"
     "############################################################\n\n"
     "# The type of database being used if any.",
-    0, PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_ADVANCED},
+    0, PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_ADVANCED},
     {
     "database_dbname",
     "# Database name to use. For sqlite3, the full path and name.",
-    0, PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
     {
     "database_host",
     "# The host on which the database is located",
-    0, PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
     {
     "database_port",
     "# Port used by the database.",
-    0, PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_INT, PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
     {
     "database_user",
     "# User account name for database.",
-    0, PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_RESTRICTED },
+    0, PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_RESTRICTED },
     {
     "database_password",
     "# User password for database.",
-    0, PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_RESTRICTED },
+    0, PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_RESTRICTED },
     {
     "database_busy_timeout",
     "# Database wait for unlock time",
-    0, PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_INT, PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
+
     {
     "sql_log_picture",
     "# Log to the database when creating motion triggered image file",
-    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_BOOL, PARM_CAT_16, WEBUI_LEVEL_LIMITED },
     {
     "sql_log_snapshot",
     "# Log to the database when creating a snapshot image file",
-    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED},
+    0,PARM_TYP_BOOL, PARM_CAT_16, WEBUI_LEVEL_LIMITED},
     {
     "sql_log_movie",
     "# Log to the database when creating motion triggered movie file",
-    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    0,PARM_TYP_BOOL, PARM_CAT_16, WEBUI_LEVEL_LIMITED },
     {
     "sql_log_timelapse",
     "# Log to the database when creating timelapse movie file",
-    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED},
+    0,PARM_TYP_BOOL, PARM_CAT_16, WEBUI_LEVEL_LIMITED},
     {
     "sql_query_start",
     "# SQL query at event start.  See motionplus_guide.html",
-    0, PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED },
     {
     "sql_query_stop",
     "# SQL query at event stop.  See motionplus_guide.html",
-    0, PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED },
     {
     "sql_query",
     "# SQL query string that is sent to the database.  See motionplus_guide.html",
-    0, PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_ADVANCED},
+    0, PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED},
+
     {
     "track_type",
     "############################################################\n"
     "# Tracking configuration parameters\n"
     "############################################################\n\n"
     "# Method used by tracking camera. See motionplus_guide.html",
-    0, PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
     {
     "track_auto",
     "# Enable auto tracking",
-    0, PARM_TYP_BOOL, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_BOOL, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
     {
     "track_move_wait",
     "# Delay to wait for after tracking movement as number of picture frames.",
-    0, PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
     {
     "track_generic_move",
     "# Command to execute to move a camera in generic tracking mode",
-    0, PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
     {
     "track_step_angle_x",
     "# Angle in degrees the camera moves per step on the X-axis with auto-track",
-    0, PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
     {
     "track_step_angle_y",
     "# Angle in degrees the camera moves per step on the Y-axis with auto-track.",
-    0, PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_INT, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
     {
     "camera",
     "##############################################################\n"
     "# Camera config files - One for each camera.\n"
     "##############################################################",
-    1, PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_ADVANCED },
+    1, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
     /* using a conf.d style camera addition */
-    {
-    "camera_dir",
-    "##############################################################\n"
-    "# Directory to read '.conf' files for cameras.\n"
-    "##############################################################",
-    1, PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_ADVANCED },
+
     { "", "", 0, (enum PARM_TYP)0, (enum PARM_CAT)0, (enum WEBUI_LEVEL)0 }
 };
 
@@ -958,7 +977,13 @@ static void conf_edit_log_level(struct ctx_motapp *motapp, std::string &parm, en
         }
     } else if (pact == PARM_ACT_GET){
         parm = std::to_string(motapp->log_level);
+    } else if (pact == PARM_ACT_LIST){
+        parm = "[";
+        parm = parm + "\"1\",\"2\",\"3\",\"4\",\"5\"";
+        parm = parm + ",\"6\",\"7\",\"8\",\"9\"";
+        parm = parm + "]";
     }
+
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","log_level",_("log_level"));
 }
@@ -979,6 +1004,11 @@ static void conf_edit_log_type(struct ctx_motapp *motapp, std::string &parm, enu
         }
     } else if (pact == PARM_ACT_GET){
         parm = motapp->log_type_str;
+    } else if (pact == PARM_ACT_LIST){
+        parm = "[";
+        parm = parm + "\"ALL\",\"COR\",\"STR\",\"ENC\",\"NET\"";
+        parm = parm + ",\"DBL\",\"EVT\",\"TRK\",\"VID\"";
+        parm = parm + "]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","log_type",_("log_type"));
@@ -1029,12 +1059,19 @@ static void conf_edit_camera_name(struct ctx_cam *cam, std::string &parm, enum P
 
 static void conf_edit_camera_id(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    int parm_in;
-    if (pact == PARM_ACT_DFLT){
-        cam->conf->camera_id = 0;
+    int parm_in, minval;
+
+    if (cam->motapp->cam_list[0] == cam) {
+        minval = 0;
+    } else {
+        minval = 1;
+    }
+
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->camera_id = minval;
     } else if (pact == PARM_ACT_SET){
         parm_in = atoi(parm.c_str());
-        if (parm_in < 0) {
+        if (parm_in < minval) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid camera_id %d"),parm_in);
         } else {
             cam->conf->camera_id = parm_in;
@@ -1351,6 +1388,8 @@ static void conf_edit_rotate(struct ctx_cam *cam, std::string &parm, enum PARM_A
         }
     } else if (pact == PARM_ACT_GET){
         parm = std::to_string(cam->conf->rotate);
+    } else if (pact == PARM_ACT_LIST) {
+        parm = "[\"0\",\"90\",\"180\",\"270\"]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","rotate",_("rotate"));
@@ -1370,6 +1409,9 @@ static void conf_edit_flip_axis(struct ctx_cam *cam, std::string &parm, enum PAR
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->flip_axis;
+    } else if (pact == PARM_ACT_LIST) {
+        parm = "[\"none\",\"v\",\"h\"]";
+
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","flip_axis",_("flip_axis"));
@@ -1389,6 +1431,8 @@ static void conf_edit_locate_motion_mode(struct ctx_cam *cam, std::string &parm,
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->locate_motion_mode;
+    } else if (pact == PARM_ACT_LIST) {
+        parm = "[\"off\",\"on\",\"preview\"]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","locate_motion_mode",_("locate_motion_mode"));
@@ -1409,6 +1453,8 @@ static void conf_edit_locate_motion_style(struct ctx_cam *cam, std::string &parm
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->locate_motion_style;
+    } else if (pact == PARM_ACT_LIST) {
+        parm = "[\"box\",\"redbox\",\"cross\",\"redcross\"]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","locate_motion_style",_("locate_motion_style"));
@@ -1467,6 +1513,11 @@ static void conf_edit_text_scale(struct ctx_cam *cam, std::string &parm, enum PA
         }
     } else if (pact == PARM_ACT_GET){
         parm = std::to_string(cam->conf->text_scale);
+    } else if (pact == PARM_ACT_LIST){
+        parm = "[";
+        parm = parm + "\"1\",\"2\",\"3\",\"4\",\"5\"";
+        parm = parm + ",\"6\",\"7\",\"8\",\"9\",\"10\"";
+        parm = parm + "]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","text_scale",_("text_scale"));
@@ -3201,7 +3252,15 @@ static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "target_dir"){            conf_edit_target_dir(cam, parm_val, pact);
     } else if (parm_nm == "watchdog_tmo"){          conf_edit_watchdog_tmo(cam, parm_val, pact);
     } else if (parm_nm == "watchdog_kill"){         conf_edit_watchdog_kill(cam, parm_val, pact);
-    } else if (parm_nm == "v4l2_device"){           conf_edit_v4l2_device(cam, parm_val, pact);
+    }
+
+}
+
+static void conf_edit_cat02(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
+{
+
+    if (parm_nm == "v4l2_device"){           conf_edit_v4l2_device(cam, parm_val, pact);
     } else if (parm_nm == "v4l2_params"){           conf_edit_v4l2_params(cam, parm_val, pact);
     } else if (parm_nm == "netcam_url"){            conf_edit_netcam_url(cam, parm_val, pact);
     } else if (parm_nm == "netcam_params"){         conf_edit_netcam_params(cam, parm_val, pact);
@@ -3214,7 +3273,7 @@ static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm
 
 }
 
-static void conf_edit_cat02(struct ctx_cam *cam, std::string parm_nm
+static void conf_edit_cat03(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
     if (parm_nm == "width"){                          conf_edit_width(cam, parm_val, pact);
@@ -3223,14 +3282,28 @@ static void conf_edit_cat02(struct ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "minimum_frame_time"){      conf_edit_minimum_frame_time(cam, parm_val, pact);
     } else if (parm_nm == "rotate"){                  conf_edit_rotate(cam, parm_val, pact);
     } else if (parm_nm == "flip_axis"){               conf_edit_flip_axis(cam, parm_val, pact);
-    } else if (parm_nm == "locate_motion_mode"){      conf_edit_locate_motion_mode(cam, parm_val, pact);
+    }
+
+}
+
+static void conf_edit_cat04(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
+{
+    if (parm_nm == "locate_motion_mode"){      conf_edit_locate_motion_mode(cam, parm_val, pact);
     } else if (parm_nm == "locate_motion_style"){     conf_edit_locate_motion_style(cam, parm_val, pact);
     } else if (parm_nm == "text_left"){               conf_edit_text_left(cam, parm_val, pact);
     } else if (parm_nm == "text_right"){              conf_edit_text_right(cam, parm_val, pact);
     } else if (parm_nm == "text_changes"){            conf_edit_text_changes(cam, parm_val, pact);
     } else if (parm_nm == "text_scale"){              conf_edit_text_scale(cam, parm_val, pact);
     } else if (parm_nm == "text_event"){              conf_edit_text_event(cam, parm_val, pact);
-    } else if (parm_nm == "emulate_motion"){          conf_edit_emulate_motion(cam, parm_val, pact);
+    }
+
+}
+
+static void conf_edit_cat05(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
+{
+    if (parm_nm == "emulate_motion"){          conf_edit_emulate_motion(cam, parm_val, pact);
     } else if (parm_nm == "primary_method"){          conf_edit_primary_method(cam, parm_val, pact);
     } else if (parm_nm == "threshold"){               conf_edit_threshold(cam, parm_val, pact);
     } else if (parm_nm == "threshold_maximum"){       conf_edit_threshold_maximum(cam, parm_val, pact);
@@ -3242,14 +3315,28 @@ static void conf_edit_cat02(struct ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "secondary_interval"){      conf_edit_secondary_interval(cam, parm_val, pact);
     } else if (parm_nm == "secondary_method"){        conf_edit_secondary_method(cam, parm_val, pact);
     } else if (parm_nm == "secondary_params"){        conf_edit_secondary_params(cam, parm_val, pact);
-    } else if (parm_nm == "noise_level"){             conf_edit_noise_level(cam, parm_val, pact);
+    }
+
+}
+
+static void conf_edit_cat06(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
+{
+    if (parm_nm == "noise_level"){             conf_edit_noise_level(cam, parm_val, pact);
     } else if (parm_nm == "noise_tune"){              conf_edit_noise_tune(cam, parm_val, pact);
     } else if (parm_nm == "despeckle_filter"){        conf_edit_despeckle_filter(cam, parm_val, pact);
     } else if (parm_nm == "area_detect"){             conf_edit_area_detect(cam, parm_val, pact);
     } else if (parm_nm == "mask_file"){               conf_edit_mask_file(cam, parm_val, pact);
     } else if (parm_nm == "mask_privacy"){            conf_edit_mask_privacy(cam, parm_val, pact);
     } else if (parm_nm == "smart_mask_speed"){        conf_edit_smart_mask_speed(cam, parm_val, pact);
-    } else if (parm_nm == "lightswitch_percent"){     conf_edit_lightswitch_percent(cam, parm_val, pact);
+    }
+
+}
+
+static void conf_edit_cat07(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
+{
+    if (parm_nm == "lightswitch_percent"){     conf_edit_lightswitch_percent(cam, parm_val, pact);
     } else if (parm_nm == "lightswitch_frames"){      conf_edit_lightswitch_frames(cam, parm_val, pact);
     } else if (parm_nm == "minimum_motion_frames"){   conf_edit_minimum_motion_frames(cam, parm_val, pact);
     } else if (parm_nm == "static_object_time"){      conf_edit_static_object_time(cam, parm_val, pact);
@@ -3260,7 +3347,7 @@ static void conf_edit_cat02(struct ctx_cam *cam, std::string parm_nm
 
 }
 
-static void conf_edit_cat03(struct ctx_cam *cam, std::string parm_nm
+static void conf_edit_cat08(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
     if (parm_nm == "on_event_start"){                 conf_edit_on_event_start(cam, parm_val, pact);
@@ -3273,7 +3360,14 @@ static void conf_edit_cat03(struct ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "on_camera_lost"){          conf_edit_on_camera_lost(cam, parm_val, pact);
     } else if (parm_nm == "on_camera_found"){         conf_edit_on_camera_found(cam, parm_val, pact);
     } else if (parm_nm == "on_secondary_detect"){     conf_edit_on_secondary_detect(cam, parm_val, pact);
-    } else if (parm_nm == "picture_output"){          conf_edit_picture_output(cam, parm_val, pact);
+    }
+
+}
+
+static void conf_edit_cat09(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
+{
+    if (parm_nm == "picture_output"){          conf_edit_picture_output(cam, parm_val, pact);
     } else if (parm_nm == "picture_output_motion"){   conf_edit_picture_output_motion(cam, parm_val, pact);
     } else if (parm_nm == "picture_type"){            conf_edit_picture_type(cam, parm_val, pact);
     } else if (parm_nm == "picture_quality"){         conf_edit_picture_quality(cam, parm_val, pact);
@@ -3281,7 +3375,14 @@ static void conf_edit_cat03(struct ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "picture_filename"){        conf_edit_picture_filename(cam, parm_val, pact);
     } else if (parm_nm == "snapshot_interval"){       conf_edit_snapshot_interval(cam, parm_val, pact);
     } else if (parm_nm == "snapshot_filename"){       conf_edit_snapshot_filename(cam, parm_val, pact);
-    } else if (parm_nm == "movie_output"){            conf_edit_movie_output(cam, parm_val, pact);
+    }
+
+}
+
+static void conf_edit_cat10(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
+{
+    if (parm_nm == "movie_output"){            conf_edit_movie_output(cam, parm_val, pact);
     } else if (parm_nm == "movie_output_motion"){     conf_edit_movie_output_motion(cam, parm_val, pact);
     } else if (parm_nm == "movie_max_time"){          conf_edit_movie_max_time(cam, parm_val, pact);
     } else if (parm_nm == "movie_bps"){               conf_edit_movie_bps(cam, parm_val, pact);
@@ -3291,18 +3392,32 @@ static void conf_edit_cat03(struct ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "movie_filename"){          conf_edit_movie_filename(cam, parm_val, pact);
     } else if (parm_nm == "movie_extpipe_use"){       conf_edit_movie_extpipe_use(cam, parm_val, pact);
     } else if (parm_nm == "movie_extpipe"){           conf_edit_movie_extpipe(cam, parm_val, pact);
-    } else if (parm_nm == "timelapse_interval"){      conf_edit_timelapse_interval(cam, parm_val, pact);
+    }
+
+}
+
+static void conf_edit_cat11(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
+{
+    if (parm_nm == "timelapse_interval"){      conf_edit_timelapse_interval(cam, parm_val, pact);
     } else if (parm_nm == "timelapse_mode"){          conf_edit_timelapse_mode(cam, parm_val, pact);
     } else if (parm_nm == "timelapse_fps"){           conf_edit_timelapse_fps(cam, parm_val, pact);
     } else if (parm_nm == "timelapse_codec"){         conf_edit_timelapse_codec(cam, parm_val, pact);
     } else if (parm_nm == "timelapse_filename"){      conf_edit_timelapse_filename(cam, parm_val, pact);
-    } else if (parm_nm == "video_pipe"){              conf_edit_video_pipe(cam, parm_val, pact);
+    }
+
+}
+
+static void conf_edit_cat12(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
+{
+    if (parm_nm == "video_pipe"){              conf_edit_video_pipe(cam, parm_val, pact);
     } else if (parm_nm == "video_pipe_motion"){       conf_edit_video_pipe_motion(cam, parm_val, pact);
     }
 
 }
 
-static void conf_edit_cat04(struct ctx_cam *cam, std::string parm_nm
+static void conf_edit_cat13(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
     if (parm_nm == "webcontrol_port"){                    conf_edit_webcontrol_port(cam, parm_val, pact);
@@ -3317,7 +3432,14 @@ static void conf_edit_cat04(struct ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "webcontrol_key"){              conf_edit_webcontrol_key(cam, parm_val, pact);
     } else if (parm_nm == "webcontrol_cors_header"){      conf_edit_webcontrol_cors_header(cam, parm_val, pact);
     } else if (parm_nm == "webcontrol_html"){             conf_edit_webcontrol_html(cam, parm_val, pact);
-    } else if (parm_nm == "stream_port"){                 conf_edit_stream_port(cam, parm_val, pact);
+    }
+
+}
+
+static void conf_edit_cat14(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
+{
+    if (parm_nm == "stream_port"){                 conf_edit_stream_port(cam, parm_val, pact);
     } else if (parm_nm == "stream_localhost"){            conf_edit_stream_localhost(cam, parm_val, pact);
     } else if (parm_nm == "stream_auth_method"){          conf_edit_stream_auth_method(cam, parm_val, pact);
     } else if (parm_nm == "stream_authentication"){       conf_edit_stream_authentication(cam, parm_val, pact);
@@ -3334,7 +3456,7 @@ static void conf_edit_cat04(struct ctx_cam *cam, std::string parm_nm
 
 }
 
-static void conf_edit_cat05(struct ctx_cam *cam, std::string parm_nm, std::string &parm_val, enum PARM_ACT pact)
+static void conf_edit_cat15(struct ctx_cam *cam, std::string parm_nm, std::string &parm_val, enum PARM_ACT pact)
 {
     if (parm_nm == "database_type"){                  conf_edit_database_type(cam, parm_val, pact);
     } else if (parm_nm == "database_dbname"){         conf_edit_database_dbname(cam, parm_val, pact);
@@ -3343,14 +3465,28 @@ static void conf_edit_cat05(struct ctx_cam *cam, std::string parm_nm, std::strin
     } else if (parm_nm == "database_user"){           conf_edit_database_user(cam, parm_val, pact);
     } else if (parm_nm == "database_password"){       conf_edit_database_password(cam, parm_val, pact);
     } else if (parm_nm == "database_busy_timeout"){   conf_edit_database_busy_timeout(cam, parm_val, pact);
-    } else if (parm_nm == "sql_log_picture"){         conf_edit_sql_log_picture(cam, parm_val, pact);
+    }
+
+}
+
+static void conf_edit_cat16(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
+{
+    if (parm_nm == "sql_log_picture"){         conf_edit_sql_log_picture(cam, parm_val, pact);
     } else if (parm_nm == "sql_log_snapshot"){        conf_edit_sql_log_snapshot(cam, parm_val, pact);
     } else if (parm_nm == "sql_log_movie"){           conf_edit_sql_log_movie(cam, parm_val, pact);
     } else if (parm_nm == "sql_log_timelapse"){       conf_edit_sql_log_timelapse(cam, parm_val, pact);
     } else if (parm_nm == "sql_query_start"){         conf_edit_sql_query_start(cam, parm_val, pact);
     } else if (parm_nm == "sql_query_stop"){          conf_edit_sql_query_stop(cam, parm_val, pact);
     } else if (parm_nm == "sql_query"){               conf_edit_sql_query(cam, parm_val, pact);
-    } else if (parm_nm == "track_type"){              conf_edit_track_type(cam, parm_val, pact);
+    }
+
+}
+
+static void conf_edit_cat17(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
+{
+    if (parm_nm == "track_type"){              conf_edit_track_type(cam, parm_val, pact);
     } else if (parm_nm == "track_auto"){              conf_edit_track_auto(cam, parm_val, pact);
     } else if (parm_nm == "track_move_wait"){         conf_edit_track_move_wait(cam, parm_val, pact);
     } else if (parm_nm == "track_generic_move"){      conf_edit_track_generic_move(cam, parm_val, pact);
@@ -3359,6 +3495,33 @@ static void conf_edit_cat05(struct ctx_cam *cam, std::string parm_nm, std::strin
     }
 
 }
+
+static void conf_edit_cat(struct ctx_cam *cam, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact, enum PARM_CAT pcat)
+{
+
+    if (pcat == PARM_CAT_01) {          conf_edit_cat01(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_02) {   conf_edit_cat02(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_03) {   conf_edit_cat03(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_04) {   conf_edit_cat04(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_05) {   conf_edit_cat05(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_06) {   conf_edit_cat06(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_07) {   conf_edit_cat07(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_08) {   conf_edit_cat08(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_09) {   conf_edit_cat09(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_10) {   conf_edit_cat10(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_11) {   conf_edit_cat11(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_12) {   conf_edit_cat12(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_13) {   conf_edit_cat13(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_14) {   conf_edit_cat14(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_15) {   conf_edit_cat15(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_16) {   conf_edit_cat16(cam,parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_17) {   conf_edit_cat17(cam,parm_nm, parm_val, pact);
+
+    }
+
+}
+
 
 static void conf_edit_dflt_app(struct ctx_motapp *motapp)
 {
@@ -3391,17 +3554,7 @@ static void conf_edit_dflt_cam(struct ctx_cam *cam)
     while (config_parms[indx].parm_name != "") {
         pcat = config_parms[indx].parm_cat;
         if ((config_parms[indx].parm_cat != PARM_CAT_00)) {
-            if (pcat == PARM_CAT_01) {
-                conf_edit_cat01(cam, config_parms[indx].parm_name, dflt,PARM_ACT_DFLT);
-            } else if (pcat == PARM_CAT_02) {
-                conf_edit_cat02(cam, config_parms[indx].parm_name, dflt, PARM_ACT_DFLT);
-            } else if (pcat == PARM_CAT_03) {
-                conf_edit_cat03(cam, config_parms[indx].parm_name, dflt, PARM_ACT_DFLT);
-            } else if (pcat == PARM_CAT_04) {
-                conf_edit_cat04(cam, config_parms[indx].parm_name, dflt, PARM_ACT_DFLT);
-            } else if (pcat == PARM_CAT_05) {
-                conf_edit_cat05(cam, config_parms[indx].parm_name, dflt, PARM_ACT_DFLT);
-            }
+            conf_edit_cat(cam, config_parms[indx].parm_name, dflt, PARM_ACT_DFLT, pcat);
         }
         indx++;
     }
@@ -3424,17 +3577,9 @@ int conf_edit_set_active(struct ctx_motapp *motapp, bool ismotapp, int threadnbr
 
             } else if ((ismotapp == false) && (pcat != PARM_CAT_00)) {
                 motapp->cam_list[threadnbr]->parms_changed = true;
-                if (pcat == PARM_CAT_01) {
-                    conf_edit_cat01(motapp->cam_list[threadnbr], parm_nm, parm_val, PARM_ACT_SET);
-                } else if (pcat == PARM_CAT_02) {
-                    conf_edit_cat02(motapp->cam_list[threadnbr], parm_nm, parm_val, PARM_ACT_SET);
-                } else if (pcat == PARM_CAT_03) {
-                    conf_edit_cat03(motapp->cam_list[threadnbr], parm_nm, parm_val, PARM_ACT_SET);
-                } else if (pcat == PARM_CAT_04) {
-                    conf_edit_cat04(motapp->cam_list[threadnbr], parm_nm, parm_val, PARM_ACT_SET);
-                } else if (pcat == PARM_CAT_05) {
-                    conf_edit_cat05(motapp->cam_list[threadnbr], parm_nm, parm_val, PARM_ACT_SET);
-                }
+                conf_edit_cat(motapp->cam_list[threadnbr], parm_nm
+                    , parm_val, PARM_ACT_SET, pcat);
+
             }
             return 0;
         }
@@ -3531,15 +3676,10 @@ static int conf_edit_set_depr(struct ctx_motapp *motapp, bool ismotapp, int thre
 
 void conf_edit_get(struct ctx_cam *cam, std::string parm_nm, std::string &parm_val, enum PARM_CAT parm_cat)
 {
-    if (parm_cat == PARM_CAT_00) {         conf_edit_cat00(cam->motapp, parm_nm, parm_val, PARM_ACT_GET);
-    } else if (parm_cat == PARM_CAT_01) {  conf_edit_cat01(cam, parm_nm, parm_val, PARM_ACT_GET);
-    } else if (parm_cat == PARM_CAT_02) {  conf_edit_cat02(cam, parm_nm, parm_val, PARM_ACT_GET);
-    } else if (parm_cat == PARM_CAT_03) {  conf_edit_cat03(cam, parm_nm, parm_val, PARM_ACT_GET);
-    } else if (parm_cat == PARM_CAT_04) {  conf_edit_cat04(cam, parm_nm, parm_val, PARM_ACT_GET);
-    } else if (parm_cat == PARM_CAT_05) {  conf_edit_cat05(cam, parm_nm, parm_val, PARM_ACT_GET);
+    if (parm_cat == PARM_CAT_00) {
+        conf_edit_cat00(cam->motapp, parm_nm, parm_val, PARM_ACT_GET);
     } else {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,"%s",_("Program coding error"));
-        parm_val = "";
+        conf_edit_cat(cam, parm_nm, parm_val, PARM_ACT_GET, parm_cat);
     }
 
 }
@@ -3549,18 +3689,13 @@ void conf_edit_get(struct ctx_cam *cam, std::string parm_nm, char *parm_chr, enu
 {
     std::string parm_val(parm_chr);
 
-    if (parm_cat == PARM_CAT_00) {         conf_edit_cat00(cam->motapp, parm_nm, parm_val, PARM_ACT_GET);
-    } else if (parm_cat == PARM_CAT_01) {  conf_edit_cat01(cam, parm_nm, parm_val, PARM_ACT_GET);
-    } else if (parm_cat == PARM_CAT_02) {  conf_edit_cat02(cam, parm_nm, parm_val, PARM_ACT_GET);
-    } else if (parm_cat == PARM_CAT_03) {  conf_edit_cat03(cam, parm_nm, parm_val, PARM_ACT_GET);
-    } else if (parm_cat == PARM_CAT_04) {  conf_edit_cat04(cam, parm_nm, parm_val, PARM_ACT_GET);
-    } else if (parm_cat == PARM_CAT_05) {  conf_edit_cat05(cam, parm_nm, parm_val, PARM_ACT_GET);
+    if (parm_cat == PARM_CAT_00) {
+        conf_edit_cat00(cam->motapp, parm_nm, parm_val, PARM_ACT_GET);
     } else {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,"%s",_("Program coding error"));
-        parm_val = "";
+        conf_edit_cat(cam, parm_nm, parm_val, PARM_ACT_GET, parm_cat);
     }
 
-    parm_val.copy(parm_chr,512);
+    parm_val.copy(parm_chr, 512);
 
 }
 
@@ -3625,6 +3760,41 @@ void conf_edit_set(struct ctx_motapp *motapp, bool ismotapp, int threadnbr
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), parm_nm.c_str());
     }
 
+}
+
+void conf_edit_list(struct ctx_cam *cam, std::string parm_nm, std::string &parm_val, enum PARM_CAT parm_cat)
+{
+    if (parm_cat == PARM_CAT_00) {
+        conf_edit_cat00(cam->motapp, parm_nm, parm_val, PARM_ACT_LIST);
+    } else {
+        conf_edit_cat(cam, parm_nm, parm_val, PARM_ACT_LIST, parm_cat);
+    }
+
+}
+
+/* Interim overload until webu goes to c++ with std::string */
+void conf_edit_list(struct ctx_cam *cam, std::string parm_nm, char *parm_chr, enum PARM_CAT parm_cat)
+{
+    std::string parm_val(parm_chr);
+
+    if (parm_cat == PARM_CAT_00) {
+        conf_edit_cat00(cam->motapp, parm_nm, parm_val, PARM_ACT_LIST);
+    } else {
+        conf_edit_cat(cam, parm_nm, parm_val, PARM_ACT_LIST, parm_cat);
+    }
+
+    parm_val.copy(parm_chr, 512);
+
+}
+
+std::string conf_type_desc(enum PARM_TYP ptype)
+{
+    if (ptype == PARM_TYP_BOOL) {           return "bool";
+    } else if (ptype == PARM_TYP_INT) {     return "int";
+    } else if (ptype == PARM_TYP_LIST) {    return "list";
+    } else if (ptype == PARM_TYP_STRING) {  return "string";
+    } else {                                return "error";
+    }
 }
 
 /** Prints usage and options allowed from Command-line. */
@@ -3766,12 +3936,12 @@ void conf_camera_add(struct ctx_motapp *motapp)
 
     indx = 0;
     while (config_parms[indx].parm_name != "") {
+        if (mystrne(config_parms[indx].parm_name.c_str(),"camera_id")) {
+            conf_edit_get(motapp->cam_list[0], config_parms[indx].parm_name
+                , parm_val, config_parms[indx].parm_cat);
 
-        conf_edit_get(motapp->cam_list[0], config_parms[indx].parm_name
-            , parm_val, config_parms[indx].parm_cat);
-
-        conf_edit_set(motapp, false, indx_cams, config_parms[indx].parm_name, parm_val);
-
+            conf_edit_set(motapp, false, indx_cams, config_parms[indx].parm_name, parm_val);
+        }
         indx++;
     }
 
@@ -3933,7 +4103,7 @@ void conf_parms_log(struct ctx_cam **cam_list)
     std::string parm_val, parm_main;
 
     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
-        ,_("Writing configuration parameters from all files"));
+        ,_("Logging configuration parameters from all files"));
     threadnbr = 0;
     while (cam_list[threadnbr]!= NULL){
         motion_log(INF, TYPE_ALL, NO_ERRNO,0
