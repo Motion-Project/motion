@@ -43,7 +43,7 @@ static void motion_signal_process(struct ctx_motapp *motapp)
             indx = 0;
             while (motapp->cam_list[indx] != NULL) {
                 if (motapp->cam_list[indx]->conf->snapshot_interval){
-                    motapp->cam_list[indx]->snapshot = TRUE;
+                    motapp->cam_list[indx]->snapshot = true;
                 }
                 indx++;
             }
@@ -53,26 +53,26 @@ static void motion_signal_process(struct ctx_motapp *motapp)
         if (motapp->cam_list != NULL) {
             indx = 0;
             while (motapp->cam_list[indx] != NULL){
-                motapp->cam_list[indx]->event_stop = TRUE;
+                motapp->cam_list[indx]->event_stop = true;
                 indx++;
             }
         }
         break;
     case MOTION_SIGNAL_SIGHUP:      /* Restart the threads */
-        motapp->restart_all = TRUE;
+        motapp->restart_all = true;
         /*FALLTHROUGH*/
     case MOTION_SIGNAL_SIGTERM:     /* Quit application */
         if (motapp->cam_list != NULL) {
             indx = 0;
             while (motapp->cam_list[indx]) {
-                motapp->webcontrol_finish = TRUE;
-                motapp->cam_list[indx]->event_stop = TRUE;
-                motapp->cam_list[indx]->finish_cam = TRUE;
-                motapp->cam_list[indx]->restart_cam = FALSE;
+                motapp->webcontrol_finish = true;
+                motapp->cam_list[indx]->event_stop = true;
+                motapp->cam_list[indx]->finish_cam = true;
+                motapp->cam_list[indx]->restart_cam = false;
                 indx++;
             }
         }
-        motapp->finish_all = TRUE;
+        motapp->finish_all = true;
     default:
         break;
     }
@@ -166,7 +166,7 @@ static void motion_remove_pid(struct ctx_motapp *motapp)
 
     if ((motapp->daemon) &&
         (motapp->pid_file != "") &&
-        (motapp->restart_all == FALSE)) {
+        (motapp->restart_all == false)) {
         if (!unlink(motapp->pid_file.c_str())){
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Removed process id file (pid file)."));
         } else{
@@ -266,7 +266,6 @@ static void motion_daemon(struct ctx_motapp *motapp)
 
 static void motion_shutdown(struct ctx_motapp *motapp)
 {
-
     motion_remove_pid(motapp);
 
     log_deinit(motapp);
@@ -296,13 +295,13 @@ static void motion_camera_ids(struct ctx_cam **cam_list)
         indx++;
     }
 
-    invalid_ids = FALSE;
+    invalid_ids = false;
     indx = 0;
     while (cam_list[indx] != NULL){
-        if (cam_list[indx]->camera_id > 32000) invalid_ids = TRUE;
+        if (cam_list[indx]->camera_id > 32000) invalid_ids = true;
         indx2 = indx + 1;
         while (cam_list[indx2] != NULL){
-            if (cam_list[indx]->camera_id == cam_list[indx2]->camera_id) invalid_ids = TRUE;
+            if (cam_list[indx]->camera_id == cam_list[indx2]->camera_id) invalid_ids = true;
             indx2++;
         }
         indx++;
@@ -427,7 +426,7 @@ static void motion_start_thread(struct ctx_motapp *motapp, int indx)
     if (pthread_create(&motapp->cam_list[indx]->thread_id
             , &thread_attr, &motion_loop, motapp->cam_list[indx])) {
         /* thread create failed, undo running state */
-        motapp->cam_list[indx]->running_cam = FALSE;
+        motapp->cam_list[indx]->running_cam = false;
         pthread_mutex_lock(&motapp->global_lock);
             motapp->threads_running--;
         pthread_mutex_unlock(&motapp->global_lock);
@@ -445,10 +444,10 @@ static void motion_restart(struct ctx_motapp *motapp, int argc, char **argv)
 
     SLEEP(2, 0);
 
-    motion_startup(motapp, FALSE, argc, argv);
+    motion_startup(motapp, false, argc, argv);
     MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Motion restarted"));
 
-    motapp->restart_all = FALSE;
+    motapp->restart_all = false;
 
 }
 
@@ -477,8 +476,8 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Thread %d - Watchdog timeout. Trying to do a graceful restart")
             , motapp->cam_list[indx]->threadnr);
-        motapp->cam_list[indx]->event_stop = TRUE; /* Trigger end of event */
-        motapp->cam_list[indx]->finish_cam = TRUE;
+        motapp->cam_list[indx]->event_stop = true; /* Trigger end of event */
+        motapp->cam_list[indx]->finish_cam = true;
     }
 
     if (motapp->cam_list[indx]->watchdog == (0 - motapp->cam_list[indx]->conf->watchdog_kill) ) {
@@ -505,11 +504,11 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
             (motapp->cam_list[indx]->netcam != NULL)){
             if (!motapp->cam_list[indx]->netcam->handler_finished &&
                 pthread_kill(motapp->cam_list[indx]->netcam->thread_id, 0) == ESRCH) {
-                motapp->cam_list[indx]->netcam->handler_finished = TRUE;
+                motapp->cam_list[indx]->netcam->handler_finished = true;
                 pthread_mutex_lock(&motapp->global_lock);
                     motapp->threads_running--;
                 pthread_mutex_unlock(&motapp->global_lock);
-                netcam_cleanup(motapp->cam_list[indx],FALSE);
+                netcam_cleanup(motapp->cam_list[indx],false);
             } else {
                 pthread_kill(motapp->cam_list[indx]->netcam->thread_id, SIGVTALRM);
             }
@@ -518,11 +517,11 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
             (motapp->cam_list[indx]->netcam_high != NULL)){
             if (!motapp->cam_list[indx]->netcam_high->handler_finished &&
                 pthread_kill(motapp->cam_list[indx]->netcam_high->thread_id, 0) == ESRCH) {
-                motapp->cam_list[indx]->netcam_high->handler_finished = TRUE;
+                motapp->cam_list[indx]->netcam_high->handler_finished = true;
                 pthread_mutex_lock(&motapp->global_lock);
                     motapp->threads_running--;
                 pthread_mutex_unlock(&motapp->global_lock);
-                netcam_cleanup(motapp->cam_list[indx], FALSE);
+                netcam_cleanup(motapp->cam_list[indx], false);
             } else {
                 pthread_kill(motapp->cam_list[indx]->netcam_high->thread_id, SIGVTALRM);
             }
@@ -536,8 +535,8 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
                 motapp->threads_running--;
             pthread_mutex_unlock(&motapp->global_lock);
             mlp_cleanup(motapp->cam_list[indx]);
-            motapp->cam_list[indx]->running_cam = FALSE;
-            motapp->cam_list[indx]->finish_cam = FALSE;
+            motapp->cam_list[indx]->running_cam = false;
+            motapp->cam_list[indx]->finish_cam = false;
         } else {
             pthread_kill(motapp->cam_list[indx]->thread_id,SIGVTALRM);
         }
@@ -565,21 +564,9 @@ static int motion_check_threadcount(struct ctx_motapp *motapp)
         }
     }
 
-    /* If the web control/streams are in finish/shutdown, we
-     * do not want to count them.  They will be completely closed
-     * by the process outside of loop that is checking the counts
-     * of threads.  If the webcontrol is not in a finish / shutdown
-     * then we want to keep them in the tread count to allow user
-     * to restart the cameras and keep Motion running.
-     */
-    indx = 0;
-    while (motapp->cam_list[indx] != NULL){
-        if ((motapp->webcontrol_finish == FALSE) &&
-            ((motapp->webcontrol_daemon != NULL) ||
-             (motapp->cam_list[indx]->stream.daemon != NULL))) {
-            thrdcnt++;
-        }
-        indx++;
+    if ((motapp->webcontrol_finish == false) &&
+        (motapp->webcontrol_daemon != NULL)) {
+        thrdcnt++;
     }
 
     if (((thrdcnt == 0) && motapp->finish_all) ||
@@ -603,30 +590,30 @@ static void motion_init(struct ctx_motapp *motapp)
     pthread_mutex_init(&motapp->mutex_camlst, NULL);
 
     motapp->threads_running = 0;
-    motapp->finish_all = FALSE;
-    motapp->restart_all = FALSE;
+    motapp->finish_all = false;
+    motapp->restart_all = false;
 
     motapp->argc = 0;
     motapp->argv = NULL;
 
-    motapp->daemon = FALSE;
+    motapp->daemon = false;
     motapp->conf_filename="";
     motapp->pid_file="";
     motapp->log_file="";
     motapp->log_type_str="";
     motapp->log_level=0;
     motapp->log_type=0;
-    motapp->setup_mode = FALSE;
-    motapp->pause = FALSE;
-    motapp->native_language = FALSE;
+    motapp->setup_mode = false;
+    motapp->pause = false;
+    motapp->native_language = false;
 
-    motapp->cam_add = FALSE;
+    motapp->cam_add = false;
     motapp->cam_delete = 0;
 
-    motapp->webcontrol_running = FALSE;
-    motapp->webcontrol_finish = FALSE;
+    motapp->webcontrol_running = false;
+    motapp->webcontrol_finish = false;
     motapp->webcontrol_daemon = NULL;
-    memset(motapp->webcontrol_digest_rand,0,8);
+    memset(motapp->webcontrol_digest_rand, 0, sizeof(motapp->webcontrol_digest_rand));
 
     pthread_key_create(&tls_key_threadnr, NULL);
     pthread_setspecific(tls_key_threadnr, (void *)(0));
@@ -638,7 +625,7 @@ static void motion_cam_add(struct ctx_motapp *motapp)
 {
     int indx_cam, indx;
 
-    if (motapp->cam_add == FALSE) {
+    if (motapp->cam_add == false) {
         return;
     }
 
@@ -660,9 +647,8 @@ static void motion_cam_add(struct ctx_motapp *motapp)
     motapp->cam_list[indx_cam]->camera_id = indx;
     motapp->cam_list[indx_cam]->dbse = (struct ctx_dbse *)mymalloc(sizeof(struct ctx_dbse));
     motapp->cam_list[indx_cam]->conf->webcontrol_port = 0;
-    motapp->cam_list[indx_cam]->conf->stream_port = 0;
 
-    motapp->cam_add = FALSE;
+    motapp->cam_add = false;
 
 }
 
@@ -686,12 +672,6 @@ static void motion_cam_delete(struct ctx_motapp *motapp)
             ,_("Invalid camera specified for deletion. %d"), motapp->cam_delete);
         return;
     }
-
-    /* Stop stream if needed */
-    if (motapp->cam_list[motapp->cam_delete]->stream.daemon != NULL) {
-        MHD_stop_daemon (motapp->cam_list[motapp->cam_delete]->stream.daemon);
-    }
-    motapp->cam_list[motapp->cam_delete]->stream.daemon = NULL;
 
     /* Free database context */
     if (motapp->cam_list[motapp->cam_delete]->dbse != NULL) {
@@ -742,11 +722,11 @@ int main (int argc, char **argv)
 
     setup_signals();
 
-    motion_startup(motapp, TRUE, argc, argv);
+    motion_startup(motapp, true, argc, argv);
 
     movie_global_init();
 
-    while (TRUE) {
+    while (true) {
 
         if (motapp->restart_all) {
             motion_restart(motapp, argc, argv);
@@ -760,7 +740,7 @@ int main (int argc, char **argv)
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Waiting for threads to finish, pid: %d"), getpid());
 
-        while (TRUE) {
+        while (true) {
             SLEEP(1, 0);
 
             if (motion_check_threadcount(motapp)) {
@@ -791,7 +771,7 @@ int main (int argc, char **argv)
         /* If there are no cameras running, this allows for adding */
         motion_cam_add(motapp);
 
-        motapp->finish_all = FALSE;
+        motapp->finish_all = false;
 
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Threads finished"));
 

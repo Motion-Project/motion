@@ -308,6 +308,7 @@ static void netcam_null_context(struct ctx_netcam *netcam)
     netcam->format_context  = NULL;
     netcam->transfer_format = NULL;
     netcam->hw_device_ctx   = NULL;
+    netcam->pktarray        = NULL;
 
 }
 
@@ -380,8 +381,8 @@ static void netcam_pktarray_resize(struct ctx_cam *cam, int is_highres)
                 tmp[indx].packet.data=NULL;
                 tmp[indx].packet.size=0;
                 tmp[indx].idnbr = 0;
-                tmp[indx].iskey = FALSE;
-                tmp[indx].iswritten = FALSE;
+                tmp[indx].iskey = false;
+                tmp[indx].iswritten = false;
             }
 
             if (netcam->pktarray != NULL) free(netcam->pktarray);
@@ -429,18 +430,18 @@ static void netcam_pktarray_add(struct ctx_netcam *netcam)
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: av_copy_packet: %s ,Interrupt: %s")
                 ,netcam->cameratype
-                ,errstr, netcam->interrupted ? _("True"):_("False"));
+                ,errstr, netcam->interrupted ? _("true"):_("false"));
             mypacket_unref(netcam->pktarray[indx_next].packet);
             netcam->pktarray[indx_next].packet.data = NULL;
             netcam->pktarray[indx_next].packet.size = 0;
         }
 
         if (netcam->pktarray[indx_next].packet.flags & AV_PKT_FLAG_KEY) {
-            netcam->pktarray[indx_next].iskey = TRUE;
+            netcam->pktarray[indx_next].iskey = true;
         } else {
-            netcam->pktarray[indx_next].iskey = FALSE;
+            netcam->pktarray[indx_next].iskey = false;
         }
-        netcam->pktarray[indx_next].iswritten = FALSE;
+        netcam->pktarray[indx_next].iswritten = false;
         clock_gettime(CLOCK_REALTIME, &netcam->pktarray[indx_next].timestamp_ts);
 
         netcam->pktarray_index = indx_next;
@@ -955,22 +956,22 @@ static int netcam_interrupt(void *ctx)
     struct ctx_netcam *netcam = (struct ctx_netcam *)ctx;
 
     if (netcam->finish){
-        netcam->interrupted = TRUE;
-        return TRUE;
+        netcam->interrupted = true;
+        return true;
     }
 
     if (netcam->status == NETCAM_CONNECTED) {
-        return FALSE;
+        return false;
     } else if (netcam->status == NETCAM_READINGIMAGE) {
         clock_gettime(CLOCK_REALTIME, &netcam->interruptcurrenttime);
         if ((netcam->interruptcurrenttime.tv_sec - netcam->interruptstarttime.tv_sec ) > netcam->interruptduration){
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Camera reading (%s) timed out")
                 , netcam->cameratype, netcam->camera_name);
-            netcam->interrupted = TRUE;
-            return TRUE;
+            netcam->interrupted = true;
+            return true;
         } else{
-            return FALSE;
+            return false;
         }
     } else {
         /* This is for NOTCONNECTED and RECONNECTING status.  We give these
@@ -983,15 +984,15 @@ static int netcam_interrupt(void *ctx)
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Camera (%s) timed out")
                 , netcam->cameratype, netcam->camera_name);
-            netcam->interrupted = TRUE;
-            return TRUE;
+            netcam->interrupted = true;
+            return true;
         } else{
-            return FALSE;
+            return false;
         }
     }
 
     /* should not be possible to get here */
-    return FALSE;
+    return false;
 }
 
 static int netcam_open_sws(struct ctx_netcam *netcam)
@@ -1177,7 +1178,7 @@ static int netcam_read_image(struct ctx_netcam *netcam)
     netcam->packet_recv.data = NULL;
     netcam->packet_recv.size = 0;
 
-    netcam->interrupted=FALSE;
+    netcam->interrupted=false;
     clock_gettime(CLOCK_REALTIME, &netcam->interruptstarttime);
     netcam->interruptduration = 10;
 
@@ -1185,7 +1186,7 @@ static int netcam_read_image(struct ctx_netcam *netcam)
     netcam->img_recv->used = 0;
     size_decoded = 0;
     errcnt = 0;
-    haveimage = FALSE;
+    haveimage = false;
 
     while ((!haveimage) && (!netcam->interrupted)) {
         retcd = av_read_frame(netcam->format_context, &netcam->packet_recv);
@@ -1219,7 +1220,7 @@ static int netcam_read_image(struct ctx_netcam *netcam)
                 }
             }
             if (size_decoded > 0 ){
-                haveimage = TRUE;
+                haveimage = true;
             } else if (size_decoded == 0){
                 /* Did not fail, just didn't get anything.  Try again */
                 mypacket_unref(netcam->packet_recv);
@@ -1466,14 +1467,14 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
         netcam->imgsize.height = 0;
         snprintf(netcam->cameratype, 29, "%s",_("High"));
         netcam->params = (ctx_params*)mymalloc(sizeof(struct ctx_params));
-        netcam->params->update_params = TRUE;
+        netcam->params->update_params = true;
         util_parms_parse(netcam->params, cam->conf->netcam_high_params);
     } else {
         netcam->imgsize.width = cam->conf->width;
         netcam->imgsize.height = cam->conf->height;
         snprintf(netcam->cameratype, 29, "%s",_("Norm"));
         netcam->params = (ctx_params*)mymalloc(sizeof(struct ctx_params));
-        netcam->params->update_params = TRUE;
+        netcam->params->update_params = true;
         util_parms_parse(netcam->params, cam->conf->netcam_params);
     }
 
@@ -1491,8 +1492,8 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
     netcam->pktarray_size = 0;
     netcam->pktarray_index = -1;
     netcam->pktarray = NULL;
-    netcam->handler_finished = TRUE;
-    netcam->first_image = TRUE;
+    netcam->handler_finished = true;
+    netcam->first_image = true;
     netcam->reconnect_count = 0;
     netcam->src_fps =  -1; /* Default to neg so we know it has not been set */
     netcam->capture_rate = -1;
@@ -1514,7 +1515,7 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
     /* If this is the norm and we have a highres, then disable passthru on the norm */
     if ((!netcam->high_resolution) &&
         (cam->conf->netcam_high_url != "")) {
-        netcam->passthrough = FALSE;
+        netcam->passthrough = false;
     } else {
         netcam->passthrough = mycheck_passthrough(cam);
     }
@@ -1525,7 +1526,7 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
     clock_gettime(CLOCK_REALTIME, &netcam->interruptcurrenttime);
 
     netcam->interruptduration = 5;
-    netcam->interrupted = FALSE;
+    netcam->interrupted = false;
 
     clock_gettime(CLOCK_REALTIME, &netcam->frame_curr_tm);
     clock_gettime(CLOCK_REALTIME, &netcam->frame_prev_tm);
@@ -1631,7 +1632,7 @@ static int netcam_open_context(struct ctx_netcam *netcam)
     netcam->format_context = avformat_alloc_context();
     netcam->format_context->interrupt_callback.callback = netcam_interrupt;
     netcam->format_context->interrupt_callback.opaque = netcam;
-    netcam->interrupted = FALSE;
+    netcam->interrupted = false;
 
     clock_gettime(CLOCK_REALTIME, &netcam->interruptstarttime);
 
@@ -1724,7 +1725,7 @@ static int netcam_open_context(struct ctx_netcam *netcam)
                     ,_("%s: Failed to copy stream for pass-through.")
                     ,netcam->cameratype);
             }
-            netcam->passthrough = FALSE;
+            netcam->passthrough = false;
         }
     }
 
@@ -1889,7 +1890,7 @@ static void *netcam_handler(void *arg)
 
     struct ctx_netcam *netcam =(struct ctx_netcam *) arg;
 
-    netcam->handler_finished = FALSE;
+    netcam->handler_finished = false;
 
     mythreadname_set("nc",netcam->threadnbr, netcam->camera_name);
 
@@ -1927,7 +1928,7 @@ static void *netcam_handler(void *arg)
 
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("%s: Exiting"),netcam->cameratype);
-    netcam->handler_finished = TRUE;
+    netcam->handler_finished = true;
 
     pthread_exit(NULL);
 }
@@ -2006,7 +2007,7 @@ int netcam_setup(struct ctx_cam *cam)
                 return -1;
             }
             netcam = cam->netcam;
-            netcam->high_resolution = FALSE;           /* Set flag for this being the normal resolution camera */
+            netcam->high_resolution = false;           /* Set flag for this being the normal resolution camera */
         } else {
             cam->netcam_high = netcam_new_context();
             if (cam->netcam_high == NULL) {
@@ -2015,7 +2016,7 @@ int netcam_setup(struct ctx_cam *cam)
                 return -1;
             }
             netcam = cam->netcam_high;
-            netcam->high_resolution = TRUE;            /* Set flag for this being the high resolution camera */
+            netcam->high_resolution = true;            /* Set flag for this being the high resolution camera */
         }
 
         netcam_null_context(netcam);
@@ -2034,7 +2035,7 @@ int netcam_setup(struct ctx_cam *cam)
         /* When running dual, there seems to be contamination across norm/high with codec functions. */
         netcam_close_context(netcam);       /* Close in this thread to open it again within handler thread */
         netcam->status = NETCAM_RECONNECTING;      /* Set as reconnecting to avoid excess messages when starting */
-        netcam->first_image = FALSE;             /* Set flag that we are not processing our first image */
+        netcam->first_image = false;             /* Set flag that we are not processing our first image */
 
         /* For normal resolution, we resize the image to the config parms so we do not need
          * to set the dimension parameters here (it is done in the set_parms).  For high res
@@ -2064,7 +2065,7 @@ int netcam_next(struct ctx_cam *cam, struct ctx_image_data *img_data)
             return 1;
         }
     pthread_mutex_lock(&cam->netcam->mutex);
-        netcam_pktarray_resize(cam, FALSE);
+        netcam_pktarray_resize(cam, false);
         memcpy(img_data->image_norm
                , cam->netcam->img_latest->ptr
                , cam->netcam->img_latest->used);
@@ -2076,7 +2077,7 @@ int netcam_next(struct ctx_cam *cam, struct ctx_image_data *img_data)
             (cam->netcam_high->status == NETCAM_NOTCONNECTED)) return 1;
 
         pthread_mutex_lock(&cam->netcam_high->mutex);
-            netcam_pktarray_resize(cam, TRUE);
+            netcam_pktarray_resize(cam, true);
             if (!(cam->netcam_high->high_resolution && cam->netcam_high->passthrough)) {
                 memcpy(img_data->image_high
                        ,cam->netcam_high->img_latest->ptr
@@ -2124,7 +2125,7 @@ void netcam_cleanup(struct ctx_cam *cam, int init_retry_flag)
              * This is shutting down the thread so for the moment, we are not worrying about the
              * cross threading and protecting these variables with mutex's
             */
-            netcam->finish = TRUE;
+            netcam->finish = true;
             netcam->interruptduration = 0;
             wait_counter = 0;
             while ((!netcam->handler_finished) && (wait_counter < 10)) {
@@ -2165,6 +2166,8 @@ void netcam_cleanup(struct ctx_cam *cam, int init_retry_flag)
     }
     cam->netcam = NULL;
     cam->netcam_high = NULL;
-    cam->running_cam = FALSE;
+    if (init_retry_flag == false) {
+        cam->running_cam = false;
+    }
 }
 

@@ -17,34 +17,6 @@
  *    Copyright 2020 MotionMrDave@gmail.com
 */
 
-/*
- *    Functional naming scheme
- *        webu_html* - Functions that create the display webcontrol page.
- *        webu_html_main        - Entry point from webu_ans_ctrl(in webu.c)
- *        webu_html_page        - Create the web page
- *          webu_html_head      - Header section of the page
- *            webu_html_style*  - The style section of the web page
- *          webu_html_body      - Calls all the functions to create the body
- *            webu_html_navbar* - The navbar section of the web page
- *            webu_html_config* - config parms of page
- *            webu_html_track*  - Tracking functions
- *            webu_html_script* - The javascripts of the web page
- *
- *    To debug, run code, open page, view source and make copy of html
- *    into a local file to revise changes then determine applicable section(s)
- *    in this code to modify to match modified version.
- *    Known HTML Issues:
- *      Single and double quotes are not consistently used.
- *      HTML ids do not follow any naming convention.
- *      After clicking restart, do something...Try to connect again?
- *
- *    Additional functionality considerations:
- *      Notification to user of items that require restart when changed.
- *      Notification to user that item successfully implemented (config change/tracking)
- *      List MotionPlus parms somewhere so they can be found by xgettext
- *
- */
-
 #include "motionplus.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
@@ -53,129 +25,164 @@
 #include "webu_html.hpp"
 
 
-/* struct to save information regarding the links to include in html page */
-struct strminfo_ctx {
-    struct ctx_cam  **camlst;
-    char            lnk_ref[WEBUI_LEN_LNK];
-    char            lnk_src[WEBUI_LEN_LNK];
-    char            lnk_camid[WEBUI_LEN_LNK];
-    char            proto[WEBUI_LEN_LNK];
-    int             port;
-    int             motion_images;
-};
-
+/* Create the CSS styles used in the navigation bar/side of the page */
 static void webu_html_style_navbar(struct webui_ctx *webui)
 {
-    /* Write out the style section of the web page */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    .navbar {\n"
-        "      overflow: hidden;\n"
-        "      background-color: #333;\n"
-        "      font-family: Arial;\n"
+    webui->resp_page +=
+        "    .sidenav {\n"
+        "      height: 100%;\n"
+        "      width: 10rem;\n"
+        "      position: fixed;\n"
+        "      z-index: 1;\n"
+        "      top: 0;\n"
+        "      left: 0;\n"
+        "      background-color: lightgrey;\n"
+        "      overflow-x: hidden;\n"
+        "      overflow: auto;\n"
         "    }\n"
-        "    .navbar a {\n"
-        "      float: left;\n"
-        "      font-size: 16px;\n"
-        "      color: white;\n"
-        "      text-align: center;\n"
-        "      padding: 14px 16px;\n"
+        "    .sidenav a, .dropbtn {\n"
+        "      padding: 0.5rem 0rem 0.5em 1rem;\n"
         "      text-decoration: none;\n"
-        "    }\n"
-        "    .navbar a:hover, {\n"
-        "      background-color: darkgray;\n"
-        "    }\n");
-    webu_write(webui, response);
-
-}
-
-static void webu_html_style_dropdown(struct webui_ctx *webui)
-{
-    /* Write out the style section of the web page */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    .dropdown {\n"
-        "      float: left;\n"
-        "      overflow: hidden;\n"
-        "    }\n"
-        "    .dropdown .dropbtn {\n"
-        "      font-size: 16px;\n"
+        "      font-size: 1rem;\n"
+        "      display: block;\n"
         "      border: none;\n"
+        "      background: none;\n"
+        "      width:100%;\n"
+        "      text-align: left;\n"
+        "      cursor: pointer;\n"
         "      outline: none;\n"
+        "      color: black;\n"
+        "      background-color: lightgray;\n"
+        "    }\n"
+        "    .sidenav a:hover, .dropbtn:hover {\n"
+        "      background-color: #555;\n"
         "      color: white;\n"
-        "      padding: 14px 16px;\n"
-        "      background-color: inherit;\n"
-        "      font-family: inherit;\n"
-        "      margin: 0;\n"
         "    }\n"
         "    .dropdown-content {\n"
         "      display: none;\n"
-        "      position: absolute;\n"
-        "      background-color: #f9f9f9;\n"
-        "      min-width: 160px;\n"
-        "      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);\n"
-        "      z-index: 1;\n"
+        "      background-color:lightgray;\n"
+        "      padding-left: 1rem;\n"
         "    }\n"
-        "    .dropdown-content a {\n"
-        "      float: none;\n"
-        "      color: black;\n"
-        "      padding: 12px 16px;\n"
+        "    .actionbtn {\n"
+        "      padding: 0.25rem;\n"
         "      text-decoration: none;\n"
+        "      font-size: 0.5rem;\n"
         "      display: block;\n"
-        "      text-align: left;\n"
-        "    }\n"
-        "    .dropdown-content a:hover {\n"
+        "      border: none;\n"
+        "      background: none;\n"
+        "      width: 3rem;\n"
+        "      text-align: center;\n"
+        "      cursor: pointer;\n"
+        "      outline: none;\n"
+        "      color: black;\n"
         "      background-color: lightgray;\n"
-        "    }\n"
-        "    .dropdown:hover .dropbtn {\n"
-        "      background-color: darkgray;\n"
-        "    }\n"
-        "    .border {\n"
-        "      border-width: 2px;\n"
-        "      border-color: white;\n"
-        "      border-style: solid;\n"
-        "    }\n");
-    webu_write(webui, response);
+        "    }\n";
+
 }
 
-static void webu_html_style_input(struct webui_ctx *webui)
+/* Create the css styles used in the config sections */
+static void webu_html_style_config(struct webui_ctx *webui)
 {
-    /* Write out the style section of the web page */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    input , select  {\n"
-        "      width: 25%;\n"
-        "      padding: 5px;\n"
-        "      margin: 0;\n"
-        "      display: inline-block;\n"
-        "      border: 1px solid #ccc;\n"
-        "      border-radius: 4px;\n"
-        "      box-sizing: border-box;\n"
-        "      height: 50%;\n"
-        "      font-size: 75%;\n"
-        "      margin-bottom: 5px;\n"
+    webui->resp_page +=
+        "    .cls_config {\n"
+        "      background-color: #000000;\n"
+        "      color: #fff;\n"
+        "      text-align: center;\n"
+        "      margin-top: 0rem;\n"
+        "      margin-bottom: 0rem;\n"
+        "      font-weight: normal;\n"
+        "      font-size: 0.90rem;\n"
         "    }\n"
-        "    .frm-input{\n"
-        "      text-align:center;\n"
-        "    }\n");
-    webu_write(webui, response);
+        "   .cls_config table {\n"
+        "      display: table;\n"
+        "      border-spacing: 1rem;\n"
+        "      margin: auto;\n"
+        "    }\n"
+        "   .cls_config label {\n"
+        "      padding: 0rem;\n"
+        "      text-align: right;\n"
+        "      width: 10rem;\n"
+        "      height: 2.5rem;\n"
+        "    }\n"
+        "   .cls_config textarea {\n"
+        "      margin: auto;\n"
+        "      text-align: center;\n"
+        "      width: 15.5rem;\n"
+        "      height: 2.5rem;\n"
+        "    }\n"
+        "    .cls_drop {\n"
+        "      padding: 0rem;\n"
+        "      text-align: right;\n"
+        "      width: 10rem;\n"
+        "      height: 2.25rem;\n"
+        "    }\n"
+        "    .cls_text {\n"
+        "      padding: 0rem;\n"
+        "      width: 10em;\n"
+        "      text-align: right;\n"
+        "    }\n"
+        "    .cls_text_nbr {\n"
+        "      padding: 0rem;\n"
+        "      width: 10rem;\n"
+        "      text-align: right;\n"
+        "    }\n"
+        "    .cls_text_wide {\n"
+        "      padding: 0rem;\n"
+        "      height: 3rem;\n"
+        "      width: 20rem;\n"
+        "      text-align: right;\n"
+        "    }\n"
+        "    .cls_camdrop {\n"
+        "      /* Only used to identify all the cam drops on page */\n"
+        "    }\n"
+        "    .arrow {\n"
+        "      border: solid black;\n"
+        "      border-width: 0 1rem 1rem 0;\n"
+        "      border: double black;\n"
+        "      border-width: 0 0.75rem 0.75rem 0;\n"
+        "      display: inline-block;\n"
+        "      padding: 1rem;\n"
+        "      font-size: 0.5rem;\n"
+        "    }\n"
+        "    .right {\n"
+        "      transform: rotate(-45deg);\n"
+        "      -webkit-transform: rotate(-45deg);\n"
+        "    }\n"
+        "    .left {\n"
+        "      transform: rotate(135deg);\n"
+        "      -webkit-transform: rotate(135deg);\n"
+        "    }\n"
+        "    .up {\n"
+        "      transform: rotate(-135deg);\n"
+        "      -webkit-transform: rotate(-135deg);\n"
+        "    }\n"
+        "    .down {\n"
+        "      transform: rotate(45deg);\n"
+        "      -webkit-transform: rotate(45deg);\n"
+        "    }\n"
+        "    .zoombtn {\n"
+        "      font-size:1.25rem;\n"
+        "      width: 3rem;\n"
+        "      height: 1.5rem;\n"
+        "      margin: 0;\n"
+        "    }\n";
+
 }
 
+/* Write out the starting style section of the web page */
 static void webu_html_style_base(struct webui_ctx *webui)
 {
-    /* Write out the style section of the web page */
-    char response[WEBUI_LEN_RESP];
 
-    snprintf(response, sizeof (response),"%s",
-        "    * {margin: 0; padding: 0; }\n"
+    webui->resp_page +=
+        "    * {\n"
+        "      margin: 0;\n"
+        "      padding: 0;\n"
+        "    }\n"
         "    body {\n"
         "      padding: 0;\n"
         "      margin: 0;\n"
         "      font-family: Arial, Helvetica, sans-serif;\n"
-        "      font-size: 16px;\n"
+        "      font-size: 1rem;\n"
         "      line-height: 1;\n"
         "      color: #606c71;\n"
         "      background-color: #159957;\n"
@@ -184,34 +191,21 @@ static void webu_html_style_base(struct webui_ctx *webui)
         "      margin-right:0.5% ;\n"
         "      width: device-width ;\n"
         "    }\n"
-        "    img {\n"
-        "      max-width: 100%;\n"
-        "      max-height: 100%;\n"
-        "      height: auto;\n"
-        "    }\n"
         "    .page-header {\n"
         "      color: #fff;\n"
         "      text-align: center;\n"
         "      margin-top: 0rem;\n"
         "      margin-bottom: 0rem;\n"
         "      font-weight: normal;\n"
-        "    }\n");
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),"%s",
-        "    .page-header h4 {\n"
-        "      height: 2px;\n"
+        "    }\n"
+        "    .page-header h3 {\n"
+        "      height: 2rem;\n"
         "      padding: 0;\n"
-        "      margin: 1rem 0;\n"
+        "      margin: 1rem;\n"
         "      border: 0;\n"
         "    }\n"
-        "    .main-content {\n"
-        "      background-color: #000000;\n"
-        "      text-align: center;\n"
-        "      margin-top: 0rem;\n"
-        "      margin-bottom: 0rem;\n"
-        "      font-weight: normal;\n"
-        "      font-size: 0.90em;\n"
+        "    h3 {\n"
+        "      margin-left: 10rem;\n"
         "    }\n"
         "    .header-right{\n"
         "      float: right;\n"
@@ -220,1127 +214,617 @@ static void webu_html_style_base(struct webui_ctx *webui)
         "    .header-center {\n"
         "      text-align: center;\n"
         "      color: white;\n"
-        "      margin-top: 10px;\n"
-        "      margin-bottom: 10px;\n"
-        "    }\n");
-    webu_write(webui, response);
+        "      margin-top: 1rem;\n"
+        "      margin-bottom: 1rem;\n"
+        "    }\n"
+        "    .border {\n"
+        "      border-width: 1rem;\n"
+        "      border-color: white;\n"
+        "      border-style: solid;\n"
+        "    }\n";
+
 }
 
+/* Write out the style section of the web page */
 static void webu_html_style(struct webui_ctx *webui)
 {
-    /* Write out the style section of the web page */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s", "  <style>\n");
-    webu_write(webui, response);
+    webui->resp_page += "  <style>\n";
 
     webu_html_style_base(webui);
 
     webu_html_style_navbar(webui);
 
-    webu_html_style_input(webui);
+    webu_html_style_config(webui);
 
-    webu_html_style_dropdown(webui);
-
-    snprintf(response, sizeof (response),"%s", "  </style>\n");
-    webu_write(webui, response);
+    webui->resp_page += "  </style>\n";
 
 }
 
+/* Create the header section of the page */
 static void webu_html_head(struct webui_ctx *webui)
 {
-    /* Write out the header section of the web page */
-    char response[WEBUI_LEN_RESP];
 
-    snprintf(response, sizeof (response),"%s","<head>\n"
-        "  <meta charset=\"UTF-8\">\n"
-        "  <title>MotionPlus</title>\n"
-        "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n");
-    webu_write(webui, response);
+    webui->resp_page += "<head> \n"
+        "<meta charset='UTF-8'> \n"
+        "<title>MotionPlus</title> \n"
+        "<meta name='viewport' content='width=device-width, initial-scale=1'> \n";
 
     webu_html_style(webui);
 
-    snprintf(response, sizeof (response),"%s", "</head>\n");
-    webu_write(webui, response);
+    webui->resp_page += "</head>\n\n";
 
 }
 
-static void webu_html_navbar_camera(struct webui_ctx *webui)
-{
-    /*Write out the options included in the camera dropdown */
-    char response[WEBUI_LEN_RESP];
-    int indx;
-
-    if (webui->cam_threads == 1){
-        /* Only MotionPlus.conf file */
-        if (webui->motapp->cam_list[0]->conf->camera_name == ""){
-            snprintf(response, sizeof (response),
-                "    <div class=\"dropdown\">\n"
-                "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
-                "      <div id='cam_btn' class=\"dropdown-content\">\n"
-                "        <a onclick=\"camera_click('cam_%05d');\">%s 1</a>\n"
-                ,_("Cameras")
-                ,webui->motapp->cam_list[0]->camera_id
-                ,_("Camera"));
-            webu_write(webui, response);
-        } else {
-            snprintf(response, sizeof (response),
-                "    <div class=\"dropdown\">\n"
-                "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
-                "      <div id='cam_btn' class=\"dropdown-content\">\n"
-                "        <a onclick=\"camera_click('cam_%05d');\">%s</a>\n"
-                ,_("Cameras")
-                ,webui->motapp->cam_list[0]->camera_id
-                ,webui->motapp->cam_list[0]->conf->camera_name.c_str());
-            webu_write(webui, response);
-        }
-    } else if (webui->cam_threads > 1){
-        /* MotionPlus.conf + separate camera.conf file */
-        snprintf(response, sizeof (response),
-            "    <div class=\"dropdown\">\n"
-            "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
-            "      <div id='cam_btn' class=\"dropdown-content\">\n"
-            "        <a onclick=\"camera_click('cam_all00');\">%s</a>\n"
-            ,_("Cameras")
-            ,_("All"));
-        webu_write(webui, response);
-
-        for (indx=1;indx <= webui->cam_count;indx++){
-            if (webui->motapp->cam_list[indx]->conf->camera_name == ""){
-                snprintf(response, sizeof (response),
-                    "        <a onclick=\"camera_click('cam_%05d');\">%s %d</a>\n"
-                    ,webui->motapp->cam_list[indx]->camera_id
-                    , _("Camera"), webui->motapp->cam_list[indx]->camera_id);
-            } else {
-                snprintf(response, sizeof (response),
-                    "        <a onclick=\"camera_click('cam_%05d');\">%s</a>\n"
-                    ,webui->motapp->cam_list[indx]->camera_id
-                    ,webui->motapp->cam_list[indx]->conf->camera_name.c_str()
-                );
-            }
-            webu_write(webui, response);
-        }
-    }
-
-    snprintf(response, sizeof (response),"%s",
-        "      </div>\n"
-        "    </div>\n");
-    webu_write(webui, response);
-
-}
-
-static void webu_html_navbar_action(struct webui_ctx *webui)
-{
-    /* Write out the options included in the actions dropdown*/
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),
-        "    <div class=\"dropdown\">\n"
-        "      <button onclick='display_actions()' id=\"act_drop\" class=\"dropbtn\">%s</button>\n"
-        "      <div id='act_btn' class=\"dropdown-content\">\n"
-        "        <a onclick=\"action_click('/action/eventstart');\">%s</a>\n"
-        "        <a onclick=\"action_click('/action/eventend');\">%s</a>\n"
-        "        <a onclick=\"action_click('/action/snapshot');\">%s</a>\n"
-        "        <a onclick=\"action_click('/action/add');\">%s</a>\n"
-        "        <a onclick=\"action_click('/action/delete');\">%s</a>\n"
-        "        <a onclick=\"action_click('config');\">%s</a>\n"
-        "        <a onclick=\"action_click('/config/write');\">%s</a>\n"
-        "        <a onclick=\"action_click('track');\">%s</a>\n"
-        "        <a onclick=\"action_click('/detection/pause');\">%s</a>\n"
-        "        <a onclick=\"action_click('/detection/resume');\">%s</a>\n"
-        "        <a onclick=\"action_click('/action/restart');\">%s</a>\n"
-        "        <a onclick=\"action_click('/action/stop');\">%s</a>\n"
-        "      </div>\n"
-        "    </div>\n"
-        ,_("Action")
-        ,_("Start Event")
-        ,_("End Event")
-        ,_("Snapshot")
-        ,_("Add")
-        ,_("Delete")
-        ,_("Change Configuration")
-        ,_("Write Configuration")
-        ,_("Tracking")
-        ,_("Pause")
-        ,_("Resume")
-        ,_("Restart")
-        ,_("Stop"));
-    webu_write(webui, response);
-}
-
+/* Create the navigation bar section of the page */
 static void webu_html_navbar(struct webui_ctx *webui)
 {
-    /* Write the navbar section*/
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "  <div class=\"navbar\">\n");
-    webu_write(webui, response);
-
-    webu_html_navbar_camera(webui);
-
-    webu_html_navbar_action(webui);
-
-    snprintf(response, sizeof (response),
-        "    <a href=\"https://motion-project.github.io/motion_guide.html\" "
-        " target=\"_blank\">%s</a>\n"
-        "    <p class=\"header-right\">MotionPlus " VERSION "</p>\n"
-        "  </div>\n"
-        ,_("Help"));
-    webu_write(webui, response);
-
-}
-
-static void webu_html_config_notice(struct webui_ctx *webui)
-{
-    /* Print out the header description of which parameters are included based upon the
-     * webcontrol_parms that was specified
-     */
-    char response[WEBUI_LEN_RESP];
-
-    if (webui->motapp->cam_list[0]->conf->webcontrol_parms == 0){
-        snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 0 (%s)</h4>\n"
-            ,_("No Configuration Options"));
-    } else if (webui->motapp->cam_list[0]->conf->webcontrol_parms == 1){
-        snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 1 (%s)</h4>\n"
-            ,_("Limited Configuration Options"));
-    } else if (webui->motapp->cam_list[0]->conf->webcontrol_parms == 2){
-        snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 2 (%s)</h4>\n"
-            ,_("Advanced Configuration Options"));
-    } else{
-        snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 3 (%s)</h4>\n"
-            ,_("Restricted Configuration Options"));
-    }
-    webu_write(webui, response);
-}
-
-static void webu_html_h3desc(struct webui_ctx *webui)
-{
-    /* Write out the status description for the camera */
-    char response[WEBUI_LEN_RESP];
-
-    if (webui->cam_threads == 1){
-        snprintf(response, sizeof (response),
-            "  <div id=\"id_header\">\n"
-            "    <h3 id='h3_cam' data-cam=\"cam_all00\" class='header-center'>%s (%s)</h3>\n"
-            "  </div>\n"
-            ,_("All Cameras")
-            ,(!webui->motapp->cam_list[0]->running_cam)? _("Not running") :
-                (webui->motapp->cam_list[0]->lost_connection)? _("Lost connection"):
-                (webui->motapp->cam_list[0]->pause)? _("Paused"):_("Active")
-            );
-        webu_write(webui,response);
-    } else {
-        snprintf(response, sizeof (response),
-            "  <div id=\"id_header\">\n"
-            "    <h3 id='h3_cam' data-cam=\"cam_all00\" class='header-center'>%s</h3>\n"
-            "  </div>\n"
-            ,_("All Cameras"));
-        webu_write(webui,response);
-    }
-}
-
-static void webu_html_config(struct webui_ctx *webui)
-{
-
-    /* Write out the options to put into the config dropdown
-     * We use html data attributes to store the values for the options
-     * We always set a cam_all00 attribute and if the value if different for
-     * any of our cameras, then we also add a cam_xxxxx which has the config
-     * value for camera xxxxx  The javascript then decodes these to display
-     */
-
-    char response[WEBUI_LEN_RESP];
-    int indx_parm, indx, diff_vals, retcd;
-    char val_main[PATH_MAX], val_thread[PATH_MAX];
-    char *val_temp;
-
-
-    snprintf(response, sizeof (response),"%s",
-        "  <div id='cfg_form' style=\"display:none\">\n");
-    webu_write(webui, response);
-
-    webu_html_config_notice(webui);
-
-    snprintf(response, sizeof (response),
-        "    <form class=\"frm-input\">\n"
-        "      <select id='cfg_parms' name='onames' "
-        " autocomplete='off' onchange='config_change();'>\n"
-        "        <option value='default' data-cam_all00=\"\" >%s</option>\n"
-        ,_("Select option"));
-    webu_write(webui, response);
-
-    /* The config_params[indx_parm].print reuses the buffer so create a
-     * temporary variable for storing our parameter from main to compare
-     * to the thread specific value
-     */
-    val_temp=(char*) malloc(PATH_MAX);
-    indx_parm = 0;
-    while (config_parms[indx_parm].parm_name != ""){
-
-        if ((config_parms[indx_parm].webui_level > webui->motapp->cam_list[0]->conf->webcontrol_parms) ||
-            (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER)){
-            indx_parm++;
-            continue;
-        }
-
-        memset(val_main,'\0',PATH_MAX);
-        conf_edit_get(webui->motapp->cam_list[0], config_parms[indx_parm].parm_name
-            , val_main, config_parms[indx_parm].parm_cat);
-
-        snprintf(response, sizeof (response),
-            "        <option value='%s' data-cam_all00=\""
-            , config_parms[indx_parm].parm_name.c_str());
-        webu_write(webui, response);
-
-        memset(val_temp,'\0',PATH_MAX);
-        if (val_main != NULL){
-            retcd= snprintf(response, sizeof (response),"%s", val_main);
-            if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
-            webu_write(webui, response);
-            snprintf(val_temp, PATH_MAX,"%s", val_main);
-        }
-
-        /* Loop through all the treads and see if any have a different value from motionplus.conf */
-        if (webui->cam_threads > 1){
-            for (indx=1;indx <= webui->cam_count;indx++){
-                memset(val_thread,'\0',PATH_MAX);
-                conf_edit_get(webui->motapp->cam_list[indx], config_parms[indx_parm].parm_name
-                    , val_thread, config_parms[indx_parm].parm_cat);
-                diff_vals = FALSE;
-                if (((strlen(val_temp) == 0) && (val_thread == NULL)) ||
-                    ((strlen(val_temp) != 0) && (val_thread == NULL))) {
-                    diff_vals = FALSE;
-                } else if (((strlen(val_temp) == 0) && (val_thread != NULL)) ) {
-                    diff_vals = TRUE;
-                } else {
-                    if (mystrcne(val_temp, val_thread)) diff_vals = TRUE;
-                }
-                if (diff_vals){
-                    snprintf(response, sizeof (response),"%s","\" \\ \n");
-                    webu_write(webui, response);
-
-                    snprintf(response, sizeof (response),
-                        "           data-cam_%05d=\""
-                        ,webui->motapp->cam_list[indx]->camera_id);
-                    webu_write(webui, response);
-                    if (val_thread != NULL){
-                        retcd = snprintf(response, sizeof (response),"%s", val_thread);
-                        if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
-                        webu_write(webui, response);
-                    }
-                }
-            }
-        }
-        /* Terminate the open quote and option.  For foreign language put hint in ()  */
-        if (mystrceq(webui->lang,"en") ||
-            mystrceq(config_parms[indx_parm].parm_name.c_str()
-                ,_(config_parms[indx_parm].parm_name.c_str()))){
-            snprintf(response, sizeof (response),"\" >%s</option>\n",
-                config_parms[indx_parm].parm_name.c_str());
-            webu_write(webui, response);
-        } else {
-            snprintf(response, sizeof (response),"\" >%s (%s)</option>\n",
-                config_parms[indx_parm].parm_name.c_str()
-                ,_(config_parms[indx_parm].parm_name.c_str()));
-            webu_write(webui, response);
-        }
-
-        indx_parm++;
-    }
-
-    free(val_temp);
-
-    snprintf(response, sizeof (response),
-        "      </select>\n"
-        "      <input type=\"text\"   id=\"cfg_value\" >\n"
-        "      <input type='button' id='cfg_button' value='%s' onclick='config_click()'>\n"
-        "    </form>\n"
-        "  </div>\n"
-        ,_("Save"));
-    webu_write(webui, response);
+    webui->resp_page +=
+        "  <div id=\"divnav_main\" class=\"sidenav\">\n"
+        "    <div id=\"divnav_version\">\n"
+        "      <a>MotionPlus 0.0.1</a>\n"
+        "    </div>\n"
+        "    <button onclick='display_cameras()' "
+            " id='cam_btn' class='dropbtn'>Cameras</button>\n"
+        "    <div id='divnav_cam' class='dropdown-content'>\n"
+        "      <!-- Filled in by script -->\n"
+        "    </div>\n"
+        "    <button\n"
+        "      onclick='display_config()' id='cfg_btn' class='dropbtn'>\n"
+        "      Configuration\n"
+        "    </button>\n"
+        "    <div id='divnav_config' class='dropdown-content'>\n"
+        "      <!-- Filled in by script -->\n"
+        "    </div>\n"
+        "  </div>\n\n";
 
 }
 
-static void webu_html_track(struct webui_ctx *webui)
+/* Create the javascript function dropchange_cam */
+static void webu_html_script_dropchange_cam(struct webui_ctx *webui)
 {
-    /* Write the section for handling the tracking function */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),
-        "  <div id='trk_form' style='display:none'>\n"
-        "    <form class='frm-input'>\n"
-        "      <select id='trk_option' name='trkopt'  autocomplete='off' "
-        " style='width:20%%' onchange='track_change();'>\n"
-        "        <option value='pan/tilt' data-trk='pan' >%s</option>\n"
-        "        <option value='absolute' data-trk='abs' >%s</option>\n"
-        "        <option value='center' data-trk='ctr' >%s</option>\n"
-        "      </select>\n"
-        "      <label id='trk_lblpan' style='color:white; display:inline' >%s</label>\n"
-        "      <label id='trk_lblx'   style='color:white; display:none' >X</label>\n"
-        "      <input type='text'   id='trk_panx' style='width:10%%' >\n"
-        "      <label id='trk_lbltilt' style='color:white; display:inline' >%s</label>\n"
-        "      <label id='trk_lbly'   style='color:white; display:none' >Y</label>\n"
-        "      <input type='text'   id='trk_tilty' style='width:10%%' >\n"
-        "      <input type='button' id='trk_button' value='%s' "
-        " style='width:10%%' onclick='track_click()'>\n"
-        "    </form>\n"
-        "  </div>\n"
-        ,_("Pan/Tilt")
-        ,_("Absolute Change")
-        ,_("Center")
-        ,_("Pan")
-        ,_("Tilt")
-        ,_("Save"));
-    webu_write(webui, response);
-
+    webui->resp_page +=
+        "    /*Cascade camera change in one dropdown to all the others*/\n"
+        "    function dropchange_cam(camobj) {\n"
+        "      assign_vals(camobj.value);\n\n"
+        "      var sect = document.getElementsByName('camdrop');\n"
+        "      for (var indx = 0; indx < sect.length; indx++) {\n"
+        "        sect.item(indx).selectedIndex =camobj.selectedIndex;\n"
+        "      }\n"
+        "    }\n\n";
 }
 
-static void webu_html_strminfo(struct strminfo_ctx *strm_info, int indx)
+/* Create the javascript function submit_config */
+static void webu_html_script_submit_config(struct webui_ctx *webui)
 {
-    /* This determines all the items we need to know to specify links and
-     * stream sources for the page.  The options are 0-3 as of this writing
-     * where 0 = full streams, 1 = substreams, 2 = static images and 3 is
-     * the legacy code for creating streams.  So we need to assign not only
-     * what images are to be sent but also whether we have tls/ssl.
-     * There are WAY too many options for this.
-    */
-    /* If using the main port,we need to insert a thread number into url*/
-    if (strm_info->camlst[0]->conf->stream_port != 0) {
-        snprintf(strm_info->lnk_camid,WEBUI_LEN_LNK,"/%d"
-            ,strm_info->camlst[indx]->camera_id);
-        strm_info->port = strm_info->camlst[0]->conf->stream_port;
-        if (strm_info->camlst[0]->conf->stream_tls) {
-            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
-        } else {
-            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
-        }
-    } else {
-        snprintf(strm_info->lnk_camid,WEBUI_LEN_LNK,"%s","");
-        strm_info->port = strm_info->camlst[indx]->conf->stream_port;
-        if (strm_info->camlst[indx]->conf->stream_tls) {
-            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
-        } else {
-            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
-        }
-    }
-    if (strm_info->motion_images){
-        snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/motion");
-        snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/motion");
-    } else {
-        /* Assign what images and links we want */
-        if (strm_info->camlst[indx]->conf->stream_preview_method == 1){
-            /* Substream for preview */
-            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
-            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/substream");
-        } else if (strm_info->camlst[indx]->conf->stream_preview_method == 2){
-            /* Static image for preview */
-            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
-            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/current");
-        } else if (strm_info->camlst[indx]->conf->stream_preview_method == 4){
-            /* Source image for preview */
-            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/source");
-            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/source");
-        } else {
-            /* Full stream for preview (method 0 or 3)*/
-            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
-            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/stream");
-        }
-    }
-
-}
-
-static void webu_html_preview(struct webui_ctx *webui)
-{
-
-    /* Write the initial version of the preview section.  The javascript
-     * will change this section when user selects a different camera */
-    char response[WEBUI_LEN_RESP];
-    int indx, indx_st, preview_scale;
-    struct strminfo_ctx strm_info;
-
-    strm_info.camlst = webui->motapp->cam_list;
-
-    snprintf(response, sizeof (response),"%s",
-        "  <div id=\"liveview\">\n"
-        "    <section class=\"main-content\">\n"
-        "      <br>\n"
-        "      <p id=\"id_preview\">\n");
-    webu_write(webui, response);
-
-    indx_st = 1;
-    if (webui->cam_threads == 1) indx_st = 0;
-
-    for (indx = indx_st; indx<webui->cam_threads; indx++){
-        if (webui->motapp->cam_list[indx]->conf->stream_preview_newline){
-            snprintf(response, sizeof (response),"%s","      <br>\n");
-            webu_write(webui, response);
-        }
-
-        if (webui->motapp->cam_list[indx]->conf->stream_preview_method == 3){
-            preview_scale = 45;
-        } else {
-            preview_scale = webui->motapp->cam_list[indx]->conf->stream_preview_scale;
-        }
-
-        strm_info.motion_images = FALSE;
-        webu_html_strminfo(&strm_info,indx);
-        snprintf(response, sizeof (response),
-            "      <a href=%s://%s:%d%s%s> "
-            " <img src=%s://%s:%d%s%s border=0 width=%d%%></a>\n"
-            ,strm_info.proto, webui->hostname, strm_info.port
-            ,strm_info.lnk_camid, strm_info.lnk_ref
-            ,strm_info.proto, webui->hostname, strm_info.port
-            ,strm_info.lnk_camid, strm_info.lnk_src
-            ,preview_scale);
-        webu_write(webui, response);
-
-        if (webui->motapp->cam_list[indx]->conf->stream_preview_method == 3){
-            strm_info.motion_images = TRUE;
-            webu_html_strminfo(&strm_info,indx);
-            snprintf(response, sizeof (response),
-                "      <a href=%s://%s:%d%s%s> "
-                " <img src=%s://%s:%d%s%s class=border width=%d%%></a>\n"
-                ,strm_info.proto, webui->hostname, strm_info.port
-                ,strm_info.lnk_camid, strm_info.lnk_ref
-                ,strm_info.proto, webui->hostname, strm_info.port
-                ,strm_info.lnk_camid, strm_info.lnk_src
-                ,preview_scale);
-            webu_write(webui, response);
-        }
-
-    }
-
-    snprintf(response, sizeof (response),"%s",
-        "      </p>\n"
-        "      <br>\n"
-        "    </section>\n"
-        "  </div>\n");
-    webu_write(webui, response);
-
-}
-
-static void webu_html_script_action(struct webui_ctx *webui)
-{
-    /* Write the javascript action_click() function.
-     * We do not have a good notification section on the page so the successful
-     * submission and response is currently a empty if block for the future
-     * enhancement to somehow notify the user everything worked */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function event_reloadpage() {\n"
-        "      window.location.reload();\n"
-        "    }\n\n"
-    );
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),"%s",
-        "    function action_click(actval) {\n"
-        "      if (actval == \"config\"){\n"
-        "        document.getElementById('trk_form').style.display=\"none\";\n"
-        "        document.getElementById('cfg_form').style.display=\"inline\";\n"
-        "      } else if (actval == \"track\"){\n"
-        "        document.getElementById('cfg_form').style.display=\"none\";\n"
-        "        document.getElementById('trk_form').style.display=\"inline\";\n"
-        "      } else {\n"
-        "        document.getElementById('cfg_form').style.display=\"none\";\n"
-        "        document.getElementById('trk_form').style.display=\"none\";\n"
-        "        var camstr = document.getElementById('h3_cam').getAttribute('data-cam');\n"
-        "        var camnbr = camstr.substring(4,9);\n"
-        "        var http = new XMLHttpRequest();\n"
-        "        if ((actval == \"/detection/pause\") || (actval == \"/detection/resume\")) {\n"
-        "          http.addEventListener('load', event_reloadpage); \n"
-        "        }\n"
-    );
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),
-        "        var url = \"%s://%s:%d/\"; \n"
-        ,webui->hostproto, webui->hostname
-        ,webui->motapp->cam_list[0]->conf->webcontrol_port);
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),
-        "        if (camnbr == \"all00\"){\n"
-        "          url = url + \"%05d\";\n"
-        "        } else {\n"
-        "          url = url + camnbr;\n"
-        "        }\n"
-        "        url = url + actval;\n"
-       ,webui->motapp->cam_list[0]->camera_id);
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),"%s",
-        "        http.open(\"GET\", url, true);\n"
-        "        http.onreadystatechange = function() {\n"
-        "          if(http.readyState == 4 && http.status == 200) {\n"
+    webui->resp_page +=
+        "    function submit_config(category) {\n"
+        "      var formData = new FormData();\n"
+        "      var camid = document.getElementsByName('camdrop')[0].value;\n"
+        "      var pCfg = pData['configuration']['cam'+camid];\n\n"
+        "      formData.append('command', 'config');\n"
+        "      formData.append('camid', camid);\n\n"
+        "      for (jkey in pCfg) {\n"
+        "        if (document.getElementsByName(jkey)[0] != null) {\n"
+        "          if (pCfg[jkey].category == category) {\n"
+        "            if (document.getElementsByName(jkey)[0].type == 'checkbox') {\n"
+        "              formData.append(jkey, document.getElementsByName(jkey)[0].checked);\n"
+        "            } else {\n"
+        "              formData.append(jkey, document.getElementsByName(jkey)[0].value);\n"
+        "            }\n"
         "          }\n"
         "        }\n"
-        "        http.send(null);\n"
         "      }\n"
-        "      document.getElementById('act_btn').style.display=\"none\"; \n"
-        "      document.getElementById('cfg_value').value = '';\n"
-        "      document.getElementById('cfg_parms').value = 'default';\n"
-        "    }\n\n");
-    webu_write(webui, response);
+        "      var request = new XMLHttpRequest();\n"
+        "      request.open('POST', '" + webui->hostfull + "');\n"
+        "      request.send(formData);\n\n"
+        "    }\n\n";
 }
 
-static void webu_html_script_camera_thread(struct webui_ctx *webui)
+/* Create the javascript function config_hideall */
+static void webu_html_script_config_hideall(struct webui_ctx *webui)
 {
-    /* Write the javascript thread IF conditions of camera_click() function */
-    char response[WEBUI_LEN_RESP];
-    int indx, indx_st, preview_scale;
-    struct strminfo_ctx strm_info;
-
-    indx_st = 1;
-    if (webui->cam_threads == 1) indx_st = 0;
-
-    strm_info.camlst = webui->motapp->cam_list;
-
-    for (indx = indx_st; indx<webui->cam_threads; indx++){
-        snprintf(response, sizeof (response),
-            "      if (camid == \"cam_%05d\"){\n"
-            ,webui->motapp->cam_list[indx]->camera_id);
-        webu_write(webui, response);
-
-        if (webui->motapp->cam_list[indx]->conf->stream_preview_method == 3){
-            preview_scale = 45;
-        } else {
-            preview_scale = 95;
-        }
-
-        strm_info.motion_images = FALSE;
-        webu_html_strminfo(&strm_info, indx);
-        snprintf(response, sizeof (response),
-            "        preview=\"<a href=%s://%s:%d%s%s> "
-            " <img src=%s://%s:%d%s%s/ border=0 width=%d%%></a>\"  \n"
-            ,strm_info.proto, webui->hostname, strm_info.port
-            ,strm_info.lnk_camid, strm_info.lnk_ref
-            ,strm_info.proto, webui->hostname,strm_info.port
-            ,strm_info.lnk_camid, strm_info.lnk_src, preview_scale);
-        webu_write(webui, response);
-
-        if (webui->motapp->cam_list[indx]->conf->stream_preview_method == 3){
-            strm_info.motion_images = TRUE;
-            webu_html_strminfo(&strm_info, indx);
-            snprintf(response, sizeof (response),
-                "        preview=preview + \"<a href=%s://%s:%d%s%s> "
-                " <img src=%s://%s:%d%s%s/ class=border width=%d%%></a>\"  \n"
-                ,strm_info.proto, webui->hostname, strm_info.port
-                ,strm_info.lnk_camid, strm_info.lnk_ref
-                ,strm_info.proto, webui->hostname,strm_info.port
-                ,strm_info.lnk_camid, strm_info.lnk_src, preview_scale);
-            webu_write(webui, response);
-        }
-
-        if (webui->motapp->cam_list[indx]->conf->camera_name == ""){
-            snprintf(response, sizeof (response),
-                "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
-                " class='header-center' >%s %d (%s)</h3>\"\n"
-                ,_("Camera")
-                , webui->motapp->cam_list[indx]->camera_id
-                ,(!webui->motapp->cam_list[indx]->running_cam)? _("Not running") :
-                 (webui->motapp->cam_list[indx]->lost_connection)? _("Lost connection"):
-                 (webui->motapp->cam_list[indx]->pause)? _("Paused"):_("Active")
-             );
-        } else {
-            snprintf(response, sizeof (response),
-                "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
-                " class='header-center' >%s (%s)</h3>\"\n"
-                , webui->motapp->cam_list[indx]->conf->camera_name.c_str()
-                ,(!webui->motapp->cam_list[indx]->running_cam)? _("Not running") :
-                 (webui->motapp->cam_list[indx]->lost_connection)? _("Lost connection"):
-                 (webui->motapp->cam_list[indx]->pause)? _("Paused"):_("Active")
-                );
-        }
-        webu_write(webui, response);
-
-        snprintf(response, sizeof (response),"%s","      }\n");
-        webu_write(webui, response);
-    }
-
-    return;
-}
-
-static void webu_html_script_camera_all(struct webui_ctx *webui)
-{
-    /* Write the javascript "All" IF condition of camera_click() function */
-    char response[WEBUI_LEN_RESP];
-    int indx, indx_st, preview_scale;
-    struct strminfo_ctx strm_info;
-
-
-    indx_st = 1;
-    if (webui->cam_threads == 1) indx_st = 0;
-
-    strm_info.camlst = webui->motapp->cam_list;
-
-    snprintf(response, sizeof (response), "      if (camid == \"cam_all00\"){\n");
-    webu_write(webui, response);
-
-    for (indx = indx_st; indx<webui->cam_threads; indx++){
-        if (indx == indx_st){
-            snprintf(response, sizeof (response),"%s","        preview = \"\";\n");
-            webu_write(webui, response);
-        }
-
-        if (webui->motapp->cam_list[indx]->conf->stream_preview_newline){
-            snprintf(response, sizeof (response),"%s","        preview = preview + \"      <br>\";\n");
-            webu_write(webui, response);
-        }
-
-        if (webui->motapp->cam_list[indx]->conf->stream_preview_method == 3){
-            preview_scale = 45;
-        } else {
-            preview_scale = webui->motapp->cam_list[indx]->conf->stream_preview_scale;
-        }
-
-        strm_info.motion_images = FALSE;
-        webu_html_strminfo(&strm_info, indx);
-        snprintf(response, sizeof (response),
-            "        preview = preview + \"<a href=%s://%s:%d%s%s> "
-            " <img src=%s://%s:%d%s%s border=0 width=%d%%></a>\"; \n"
-            ,strm_info.proto, webui->hostname, strm_info.port
-            ,strm_info.lnk_camid, strm_info.lnk_ref
-            ,strm_info.proto, webui->hostname, strm_info.port
-            ,strm_info.lnk_camid, strm_info.lnk_src
-            ,preview_scale);
-        webu_write(webui, response);
-
-        if (webui->motapp->cam_list[indx]->conf->stream_preview_method == 3){
-            strm_info.motion_images = TRUE;
-            webu_html_strminfo(&strm_info, indx);
-            snprintf(response, sizeof (response),
-                "        preview = preview + \"<a href=%s://%s:%d%s%s> "
-                " <img src=%s://%s:%d%s%s class=border width=%d%%></a>\"; \n"
-                ,strm_info.proto, webui->hostname, strm_info.port
-                ,strm_info.lnk_camid, strm_info.lnk_ref
-                ,strm_info.proto, webui->hostname, strm_info.port
-                ,strm_info.lnk_camid, strm_info.lnk_src
-                ,preview_scale);
-            webu_write(webui, response);
-        }
-    }
-
-    snprintf(response, sizeof (response),
-        "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
-        " class='header-center' >%s</h3>\"\n"
+    webui->resp_page +=
+        "    function config_hideall() {\n"
+        "      var sect = document.getElementsByClassName('cls_config');\n"
+        "      for (var i = 0; i < sect.length; i++) {\n"
+        "        sect.item(i).style.display='none';\n"
         "      }\n"
-        ,_("All Cameras"));
-    webu_write(webui, response);
-
-    return;
+        "      return;\n"
+        "    }\n\n";
 }
 
-static void webu_html_script_camera(struct webui_ctx *webui)
+/* Create the javascript function config_click */
+static void webu_html_script_config_click(struct webui_ctx *webui)
 {
-    /* Write the javascript camera_click() function */
-    char response[WEBUI_LEN_RESP];
+    webui->resp_page +=
+        "    function config_click(actval) {\n"
+        "      config_hideall();\n"
+        "      document.getElementById('div_cam').style.display='none';\n"
+        "      document.getElementById('div_config').style.display='inline';\n"
+        "	   document.getElementById('div_' + actval).style.display='inline';\n"
+        "    }\n\n";
+}
 
-    snprintf(response, sizeof (response),"%s",
-        "    function camera_click(camid) {\n"
-        "      var preview = \"\";\n"
-        "      var header = \"\";\n");
-    webu_write(webui, response);
-
-    webu_html_script_camera_thread(webui);
-
-    webu_html_script_camera_all(webui);
-
-    snprintf(response, sizeof (response),"%s",
-        "      document.getElementById(\"id_preview\").innerHTML = preview; \n"
-        "      document.getElementById(\"id_header\").innerHTML = header; \n"
-        "      document.getElementById('cfg_form').style.display=\"none\"; \n"
-        "      document.getElementById('trk_form').style.display=\"none\"; \n"
-        "      document.getElementById('cam_btn').style.display=\"none\"; \n"
-        "      document.getElementById('cfg_value').value = '';\n"
-        "      document.getElementById('cfg_parms').value = 'default';\n"
-        "    }\n\n");
-    webu_write(webui, response);
+/* Create the javascript function assign_version */
+static void webu_html_script_assign_version(struct webui_ctx *webui)
+{
+    webui->resp_page +=
+        "    function assign_version() {\n"
+        "      var verstr ='<a>MotionPlus \\n'+pData['version'] +'</a>';\n"
+        "      document.getElementById('divnav_version').innerHTML = verstr;\n"
+        "    }\n\n";
 
 }
 
-static void webu_html_script_menucam(struct webui_ctx *webui)
+/* Create the javascript function assign_cams */
+static void webu_html_script_assign_cams(struct webui_ctx *webui)
 {
-    /* Write the javascript display_cameras() function */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function display_cameras() {\n"
-        "      document.getElementById('act_btn').style.display = 'none';\n"
-        "      if (document.getElementById('cam_btn').style.display == 'block'){\n"
-        "        document.getElementById('cam_btn').style.display = 'none';\n"
-        "      } else {\n"
-        "        document.getElementById('cam_btn').style.display = 'block';\n"
+    webui->resp_page +=
+        "    function assign_cams() {\n"
+        "      var camcnt = pData['cameras']['count'];\n"
+        "      var html_drop = \"\\n\";\n"
+        "      var html_nav = \"\\n\";\n\n"
+        "      html_drop += \" <select class='cls_drop' \";\n"
+        "      html_drop += \" onchange='dropchange_cam(this)' \";\n"
+        "      html_drop += \" name='camdrop'>\\n\";\n\n"
+        "      for (var indx = 0; indx <= camcnt; indx++) {\n"
+        "        if (indx == 0) {\n"
+        "          html_nav += \"<a onclick='camera_click(\" + indx +\");'>\";\n"
+        "          html_nav += \"All Cameras</a>\\n\";\n"
+        "        } else {\n"
+        "          html_nav += \"<a onclick='camera_click(\" + indx + \");'>\";\n"
+        "          html_nav += pData[\"cameras\"][indx][\"name\"] + \"</a>\\n\";\n"
+        "        }\n\n"
+        "        html_drop += \"<option \";\n"
+        "        html_drop += \" value='\"+pData[\"cameras\"][indx][\"id\"]+\"'>\";\n"
+        "        html_drop += pData[\"cameras\"][indx][\"name\"];\n"
+        "        html_drop += \"</option>\\n\";\n"
         "      }\n"
-        "    }\n\n");
-    webu_write(webui, response);
-
+        "      html_drop += \" </select>\\n\";\n\n"
+        "      var sect = document.getElementsByClassName(\"cls_camdrop\");\n"
+        "      for (indx = 0; indx < sect.length; indx++) {\n"
+        "        sect.item(indx).innerHTML = html_drop;\n"
+        "      }\n\n"
+        "      document.getElementById(\"divnav_cam\").innerHTML = html_nav;\n\n"
+        "      return;\n"
+        "    }\n\n";
 }
 
-static void webu_html_script_menuact(struct webui_ctx *webui)
+/* Create the javascript function assign_vals */
+static void webu_html_script_assign_vals(struct webui_ctx *webui)
 {
-    /* Write the javascript display_actions() function */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function display_actions() {\n"
-        "      document.getElementById('cam_btn').style.display = 'none';\n"
-        "      if (document.getElementById('act_btn').style.display == 'block'){\n"
-        "        document.getElementById('act_btn').style.display = 'none';\n"
-        "      } else {\n"
-        "        document.getElementById('act_btn').style.display = 'block';\n"
-        "      }\n"
-        "    }\n\n");
-    webu_write(webui, response);
-
-}
-
-static void webu_html_script_evtclk(struct webui_ctx *webui)
-{
-    /* Write the javascript 'click' EventListener */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    document.addEventListener('click', function(event) {\n"
-        "      const dropCam = document.getElementById('cam_drop');\n"
-        "      const dropAct = document.getElementById('act_drop');\n"
-        "      if (!dropCam.contains(event.target) && !dropAct.contains(event.target)) {\n"
-        "        document.getElementById('cam_btn').style.display = 'none';\n"
-        "        document.getElementById('act_btn').style.display = 'none';\n"
-        "      }\n"
-        "    });\n\n");
-    webu_write(webui, response);
-
-}
-
-static void webu_html_script_cfgclk(struct webui_ctx *webui)
-{
-    /* Write the javascript config_click function
-     * We do not have a good notification section on the page so the successful
-     * submission and response is currently a empty if block for the future
-     * enhancement to somehow notify the user everything worked */
-
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function config_click() {\n"
-        "      var camstr = document.getElementById('h3_cam').getAttribute('data-cam');\n"
-        "      var camnbr = camstr.substring(4,9);\n"
-        "      var opts = document.getElementById('cfg_parms');\n"
-        "      var optsel = opts.options[opts.selectedIndex].value;\n"
-        "      var baseval = document.getElementById('cfg_value').value;\n"
-        "      var http = new XMLHttpRequest();\n");
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),
-        "      var url = \"%s://%s:%d/\"; \n"
-        ,webui->hostproto, webui->hostname
-        ,webui->motapp->cam_list[0]->conf->webcontrol_port);
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),
-        "      var optval=encodeURI(baseval);\n"
-        "      if (camnbr == \"all00\"){\n"
-        "        url = url + \"%05d\";\n"
-        "      } else {\n"
-        "        url = url + camnbr;\n"
-        "      }\n"
-        ,webui->motapp->cam_list[0]->camera_id);
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),"%s",
-        "      url = url + \"/config/set?\" + optsel + \"=\" + optval;\n"
-        "      http.open(\"GET\", url, true);\n"
-        "      http.onreadystatechange = function() {\n"
-        "        if(http.readyState == 4 && http.status == 200) {\n"
+    webui->resp_page +=
+        "    function assign_vals(camid) {\n"
+        "      var pCfg = pData[\"configuration\"][\"cam\"+camid];\n\n"
+        "      for (jkey in pCfg) {\n"
+        "        if (document.getElementsByName(jkey)[0] != null) {\n"
+        "          if (pCfg[jkey].enabled) {\n"
+        "            document.getElementsByName(jkey)[0].disabled = false;\n"
+        "            if (document.getElementsByName(jkey)[0].type == \"checkbox\") {\n"
+        "              document.getElementsByName(jkey)[0].checked = pCfg[jkey].value;\n"
+        "            } else {\n"
+        "              document.getElementsByName(jkey)[0].value = pCfg[jkey].value;\n"
+        "            }\n"
+        "          } else {\n"
+        "            document.getElementsByName(jkey)[0].disabled = true;\n"
+        "            document.getElementsByName(jkey)[0].value = '';\n"
+        "          }\n"
+        "        } else {\n"
+        "          console.log('Uncoded ' + jkey + ' : ' + pCfg[jkey].value);\n"
         "        }\n"
         "      }\n"
-        "      http.send(null);\n"
-        "      document.getElementById('cfg_value').value = \"\";\n"
-        "      opts.options[opts.selectedIndex].setAttribute('data-'+camstr,baseval);\n"
-        "      opts.value = 'default';\n"
-        "    }\n\n");
-    webu_write(webui, response);
-
+        "    }\n\n";
 }
 
-static void webu_html_script_cfgchg(struct webui_ctx *webui)
+/* Create the javascript function assign_config */
+static void webu_html_script_assign_config(struct webui_ctx *webui)
 {
-    /* Write the javascript option_change function */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function config_change() {\n"
-        "      var camSel = 'data-'+ document.getElementById('h3_cam').getAttribute('data-cam');\n"
-        "      var opts = document.getElementById('cfg_parms');\n"
-        "      var optval = opts.options[opts.selectedIndex].getAttribute(camSel);\n"
-        "      if (optval == null){\n"
-        "        optval = opts.options[opts.selectedIndex].getAttribute('data-cam_all00');\n"
+    webui->resp_page +=
+        "    function assign_config() {\n"
+        "      var pCfg = pData['configuration']['cam0'];\n"
+        "      var pCat = pData['categories'];\n"
+        "      var html_cfg = \"\";\n"
+        "      var html_nav = \"\\n\";\n"
+        "      var indx_lst = 0;\n\n"
+        "      for (jcat in pCat) {\n"
+        "        html_nav += \"<a onclick=\\\"config_click('\";\n"
+        "        html_nav += pCat[jcat][\"name\"]+\"');\\\">\";\n"
+        "        html_nav += pCat[jcat][\"display\"]+\"</a>\\n\";\n\n"
+        "        html_cfg += \"<div id='div_\";\n"
+        "        html_cfg += pCat[jcat][\"name\"];\n"
+        "        html_cfg += \"' style='display:none' class='cls_config'>\\n\";\n"
+        "        html_cfg += \"<h3>\";\n"
+        "        html_cfg += pCat[jcat][\"display\"];\n"
+        "        html_cfg += \" Parameters</h3>\\n\";\n"
+        "        html_cfg += \"<table><tr> <td><label for 'camdrop'>camera</label></td>\\n\";\n"
+        "        html_cfg += \"<td class='cls_camdrop'>\";\n"
+        "        html_cfg += \"<select class='cls_drop' \";\n"
+        "        html_cfg += \"onchange='dropchange_cam.call(this)' \";\n"
+        "        html_cfg += \"name='camdrop'>\\n\";\n"
+        "        html_cfg += \"<option value='0000'>default</option>\\n\";\n"
+        "        html_cfg += \"</select></td></tr>\\n\";\n\n"
+        "        for (jkey in pCfg) {\n"
+        "          if (pCfg[jkey][\"category\"] == jcat) {\n"
+        "            html_cfg += \"<tr><td><label for='\";\n"
+        "            html_cfg += jkey + \"'>\"+jkey+\"</label></td>\\n\";\n\n"
+        "            if (pCfg[jkey][\"type\"] == \"string\") {\n"
+        "              html_cfg += \"<td><textarea name='\";\n"
+        "              html_cfg += jkey+\"'></textarea></td>\";\n\n"
+        "            } else if (pCfg[jkey][\"type\"] == \"bool\") {\n"
+        "              html_cfg += \"<td><input class='cfg_check' \";\n"
+        "              html_cfg += \" type='checkbox' name='\";\n"
+        "              html_cfg += jkey+\"'></td>\";\n\n"
+        "            } else if (pCfg[jkey][\"type\"] == \"int\") {\n"
+        "              html_cfg += \"<td><input class='cls_text_nbr' \";\n"
+        "              html_cfg += \"type='text' name='\";\n"
+        "              html_cfg += jkey+\"'></td>\";\n\n"
+        "            } else if (pCfg[jkey][\"type\"] == \"list\") {\n"
+        "              html_cfg += \"<td><select class='cls_drop' \";\n"
+        "              html_cfg += \" name='\"+jkey+\"'  autocomplete='off'>\";\n\n"
+        "              for (indx_lst=0; indx_lst < pCfg[jkey][\"list\"].length; indx_lst++) {\n"
+        "                html_cfg += \"<option value='\";\n"
+        "                html_cfg += pCfg[jkey][\"list\"][indx_lst] + \"'>\";\n"
+        "                html_cfg += pCfg[jkey][\"list\"][indx_lst] + \"</option>\\n\";\n"
+        "              }\n"
+        "              html_cfg += \"</select></td>\";\n"
+        "            }\n"
+        "            html_cfg += \"</tr>\\n\";\n"
+        "          }\n"
+        "        }\n"
+        "        html_cfg += \"<tr><td><input type='hidden' name='trailer' value='null'></td>\\n\";\n"
+        "        html_cfg += \"<td> <button onclick='submit_config(\";\n"
+        "        html_cfg += jcat + \")'>Submit</button></td></tr>\\n\";\n"
+        "        html_cfg += \"</table></div>\\n\";\n"
         "      }\n"
-        "      document.getElementById('cfg_value').value = optval;\n"
-        "    }\n\n");
-    webu_write(webui, response);
+        "      document.getElementById(\"div_config\").innerHTML = html_cfg;\n"
+        "      document.getElementById(\"divnav_config\").innerHTML = html_nav;\n\n"
+        "    }\n\n";
 }
 
-static void webu_html_script_trkchg(struct webui_ctx *webui)
+/* Create the javascript function init_form */
+static void webu_html_script_initform(struct webui_ctx *webui)
 {
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function track_change() {\n"
-        "      var opts = document.getElementById('trk_option');\n"
-        "      var optval = opts.options[opts.selectedIndex].getAttribute('data-trk');\n"
-        "      if (optval == 'pan'){\n"
-        "        document.getElementById('trk_panx').disabled=false;\n"
-        "        document.getElementById('trk_tilty').disabled = false;\n"
-        "        document.getElementById('trk_lblx').style.display='none';\n"
-        "        document.getElementById('trk_lbly').style.display='none';\n"
-        "        document.getElementById('trk_lblpan').style.display='inline';\n"
-        "        document.getElementById('trk_lbltilt').style.display='inline';\n");
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),"%s",
-        "      } else if (optval =='abs'){\n"
-        "        document.getElementById('trk_panx').disabled=false;\n"
-        "        document.getElementById('trk_tilty').disabled = false;\n"
-        "        document.getElementById('trk_lblx').value = 'X';\n"
-        "        document.getElementById('trk_lbly').value = 'Y';\n"
-        "        document.getElementById('trk_lblpan').style.display='none';\n"
-        "        document.getElementById('trk_lbltilt').style.display='none';\n"
-        "        document.getElementById('trk_lblx').style.display='inline';\n"
-        "        document.getElementById('trk_lbly').style.display='inline';\n");
-    webu_write(webui, response);
-
-   snprintf(response, sizeof (response),"%s",
-        "      } else {\n"
-        "        document.getElementById('cfg_form').style.display='none';\n"
-        "        document.getElementById('trk_panx').disabled=true;\n"
-        "        document.getElementById('trk_tilty').disabled = true;\n"
-        "      }\n"
-        "    }\n\n");
-    webu_write(webui, response);
-
+    webui->resp_page +=
+        "    function initform() {\n"
+        "      var xmlhttp = new XMLHttpRequest();\n"
+        "      xmlhttp.onreadystatechange = function() {\n"
+        "        if (this.readyState == 4 && this.status == 200) {\n"
+        "          pData = JSON.parse(this.responseText);\n"
+        "          assign_config();\n"
+        "          assign_version();\n"
+        "          assign_vals(0);\n"
+        "          assign_cams();\n"
+        "        }\n"
+        "      };\n"
+        "      xmlhttp.open('GET', '" + webui->hostfull + "/config.json', true);\n"
+        "      xmlhttp.send();\n"
+        "    }\n\n";
 }
 
-static void webu_html_script_trkclk(struct webui_ctx *webui)
+/* Create the javascript function display_cameras */
+static void webu_html_script_display_cameras(struct webui_ctx *webui)
 {
-    char response[WEBUI_LEN_RESP];
-    snprintf(response, sizeof (response),"%s",
-        "    function track_click() {\n"
-        "      var camstr = document.getElementById('h3_cam').getAttribute('data-cam');\n"
-        "      var camnbr = camstr.substring(4,9);\n"
-        "      var opts = document.getElementById('trk_option');\n"
-        "      var optsel = opts.options[opts.selectedIndex].getAttribute('data-trk');\n"
-        "      var optval1 = document.getElementById('trk_panx').value;\n"
-        "      var optval2 = document.getElementById('trk_tilty').value;\n"
-        "      var http = new XMLHttpRequest();\n");
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),
-        "      var url = \"%s://%s:%d/\"; \n"
-        ,webui->hostproto, webui->hostname
-        ,webui->motapp->cam_list[0]->conf->webcontrol_port);
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),
-        "      if (camnbr == \"all00\"){\n"
-        "        url = url + \"%05d\";\n"
+    webui->resp_page +=
+        "    function display_cameras() {\n"
+        "      document.getElementById('divnav_config').style.display = 'none';\n"
+        "      if (document.getElementById('divnav_cam').style.display == 'block'){\n"
+        "        document.getElementById('divnav_cam').style.display = 'none';\n"
         "      } else {\n"
-        "        url = url + camnbr;\n"
+        "        document.getElementById('divnav_cam').style.display = 'block';\n"
         "      }\n"
-        ,webui->motapp->cam_list[0]->camera_id);
-    webu_write(webui, response);
+        "    }\n\n";
+}
 
-    snprintf(response, sizeof (response),"%s",
-
-        "      if (optsel == 'pan'){\n"
-        "        url = url + '/track/set?pan=' + optval1 + '&tilt=' + optval2;\n"
-        "      } else if (optsel == 'abs') {\n"
-        "        url = url + '/track/set?x=' + optval1 + '&y=' + optval2;\n"
+/* Create the javascript function display_config */
+static void webu_html_script_display_config(struct webui_ctx *webui)
+{
+    webui->resp_page +=
+        "    function display_config() {\n"
+        "      document.getElementById('divnav_cam').style.display = 'none';\n"
+        "      if (document.getElementById('divnav_config').style.display == 'block') {\n"
+        "        document.getElementById('divnav_config').style.display = 'none';\n"
         "      } else {\n"
-        "        url = url + '/track/center'\n"
+        "        document.getElementById('divnav_config').style.display = 'block';\n"
         "      }\n"
-        "      http.open(\"GET\", url, true);\n"
-        "      http.onreadystatechange = function() {\n"
-        "        if(http.readyState == 4 && http.status == 200) {\n"
-        "         }\n"
+        "    }\n\n";
+}
+
+/* Create the action_click javascript function */
+static void webu_html_script_action_click(struct webui_ctx *webui)
+{
+    webui->resp_page +=
+        "    function action_click(actval) {\n\n"
+        "      config_hideall();\n\n"
+        "      var formData = new FormData();\n"
+        "      var camid = pData['cameras'][gIndexCam]['id'];\n\n"
+        "      formData.append('command', actval);\n"
+        "      formData.append('camid', camid);\n\n"
+        "      var request = new XMLHttpRequest();\n"
+        "      request.open('POST', '" + webui->hostfull + "');\n"
+        "      request.send(formData);\n\n"
+        "      return;\n"
+        "    }\n\n";
+}
+
+/* Create the camera_click javascript function */
+static void webu_html_script_camera_click(struct webui_ctx *webui)
+{
+    webui->resp_page +=
+        "   function camera_click(index_cam) {\n\n"
+        "      var html_preview = \"\";\n"
+        "      var camid;\n\n"
+        "      config_hideall();\n\n"
+        "      gIndexCam = index_cam;\n\n"
+        "      html_preview += \"<table style='float: left' >\";\n"
+        "      html_preview += \"<tr></tr><tr>\\n\";\n"
+
+        "      html_preview += \"<td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"action_click('eventstart');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
+        "      html_preview += \">Start Event</button></td> \\n\";\n"
+
+        "      html_preview += \"<td>&nbsp;&nbsp;</td>\\n\";\n"
+
+        "      html_preview += \"<td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"action_click('eventend');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
+        "      html_preview += \">End Event</button></td> \\n\";\n"
+
+        "      html_preview += \"</tr><tr></tr><tr>\\n\";\n"
+
+        "      html_preview += \"<td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"action_click('pause');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
+        "      html_preview += \">Pause</button></td> \\n\";\n"
+
+        "      html_preview += \"<td>&nbsp;&nbsp;</td>\\n\";\n"
+
+        "      html_preview += \"<td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"action_click('unpause');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
+        "      html_preview += \">Unpause</button></td> \\n\";\n"
+
+        "      html_preview += \"</tr><tr></tr><tr>\\n\";\n"
+        "      html_preview += \"<td>&nbsp;&nbsp;</td>\\n\";\n"
+
+        "      html_preview += \"<td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"action_click('snapshot');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
+        "      html_preview += \">Snapshot</button></td> \\n\";\n"
+
+        "      html_preview += \"</tr><tr></tr><tr>\\n\";\n"
+
+        "      html_preview += \"<td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"action_click('stop');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
+        "      html_preview += \">Stop</button></td> \\n\";\n"
+
+        "      html_preview += \"<td>&nbsp;&nbsp;</td>\\n\";\n"
+
+        "      html_preview += \"<td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"action_click('restart');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
+        "      html_preview += \">Restart</button></td> \\n\";\n"
+
+        "      html_preview += \"</tr>\\n\";\n"
+
+
+        "      if (gIndexCam > 0) {\n"
+        "        camid = pData['cameras'][index_cam].id;\n"
+        "        html_preview += \"<tr><td>&nbsp&nbsp</td><td>&nbsp&nbsp</td></tr>\\n\";\n"
+        "        html_preview += \"<tr><td></td><td><button class='arrow up'></button></td></tr>\\n\";\n"
+        "        html_preview += \"<tr><td><button class='arrow left'></button></td><td></td>\\n\";\n"
+        "        html_preview += \"<td><button class='arrow right'></button></td><td>&nbsp&nbsp</td><tr>\\n\";\n"
+        "        html_preview += \"<tr><td></td><td><button class='arrow down'></button></td></tr>\\n\";\n"
+        "        html_preview += \"<tr><td>&nbsp&nbsp</td><td>&nbsp&nbsp</td></tr>\\n\";\n"
+        "        html_preview += \"<tr><td></td><td><button class='zoombtn'>+</button></td></tr>\\n\";\n"
+        "        html_preview += \"<tr><td></td><td><button class='zoombtn'>-</button></td></tr>\\n\";\n"
+        "        html_preview += \"<tr><td>&nbsp&nbsp</td><td>&nbsp&nbsp</td></tr>\\n\";\n"
+
+        "        html_preview += \"</table>\";\n"
+        "        if (pData['configuration']['cam'+camid].stream_preview_method.value == 1) {\n"
+        "          html_preview += \"<a><img id='pic\" + gIndexCam + \"' src=\";\n"
+        "          html_preview += pData['cameras'][gIndexCam]['url'];\n"
+        "          html_preview += \"static/stream/t\" + new Date().getTime();\n"
+        "          html_preview += \" border=0 width=55%></a>\\n\";\n"
+        "        } else { \n"
+        "          html_preview += \"<a><img id='pic\" + gIndexCam + \"' src=\";\n"
+        "          html_preview += pData['cameras'][gIndexCam]['url'];\n"
+        "          html_preview += \"mjpg/stream\" ;\n"
+        "          html_preview += \" border=0 width=55%></a>\\n\";\n"
+        "        }\n"
+        "        document.getElementById('div_config').style.display='none';\n"
+        "        document.getElementById('div_cam').style.display='block';\n"
+        "        document.getElementById('div_cam').innerHTML = html_preview;\n\n"
+        "      } else if (gIndexCam == 0) {\n"
+        "        var camcnt = pData['cameras']['count'];\n"
+        "        html_preview += \"</table>\";\n"
+        "        for (var indx = 1; indx <= camcnt; indx++) {\n"
+        "          camid = pData['cameras'][indx].id;\n"
+        "          if (pData['configuration']['cam'+camid].stream_preview_method.value == 1) {\n"
+        "            html_preview += \"<a><img id='pic\" + indx + \"' src=\"\n"
+        "            html_preview += pData['cameras'][indx]['url'];\n"
+        "            html_preview += \"static/stream/t\" + new Date().getTime();\n"
+        "            html_preview += \" border=0 width=\"\n"
+        "            html_preview += pData['configuration']['cam'+camid].stream_preview_scale.value;\n"
+        "            html_preview += \"%></a>\\n\";\n"
+        "            if (pData['configuration']['cam'+camid].stream_preview_newline.value == true) {\n"
+        "              html_preview += \"<br>\\n\";\n"
+        "            }\n"
+        "          } else { \n"
+        "            html_preview += \"<a><img id='pic\" + indx + \"' src=\"\n"
+        "            html_preview += pData['cameras'][indx]['url'];\n"
+        "            html_preview += \"mjpg/stream\" ;\n"
+        "            html_preview += \" border=0 width=\"\n"
+        "            html_preview += pData['configuration']['cam'+camid].stream_preview_scale.value;\n"
+        "            html_preview += \"%></a>\\n\";\n"
+        "            if (pData['configuration']['cam'+camid].stream_preview_newline.value == true) {\n"
+        "              html_preview += \"<br>\\n\";\n"
+        "            }\n"
+        "          } \n"
+        "        }\n"
+        "        document.getElementById('div_config').style.display='none';\n"
+        "        document.getElementById('div_cam').style.display='block';\n"
+        "        document.getElementById('div_cam').innerHTML = html_preview;\n"
+        "      }\n\n"
+        "      timer.start();\n\n"
+        "    }\n\n";
+}
+
+/* Create the timer_function javascript function */
+static void webu_html_script_timer_function(struct webui_ctx *webui)
+{
+    webui->resp_page +=
+        "    function Timer(fn, t) {\n"
+        "      var timerObj = setInterval(fn, t);\n"
+        "      this.stop = function() {\n"
+        "        if (timerObj) {\n"
+        "            clearInterval(timerObj);\n"
+        "            timerObj = null;\n"
+        "        }\n"
+        "        return this;\n"
         "      }\n"
-        "      http.send(null);\n"
-        "    }\n\n");
-    webu_write(webui, response);
+        "      this.start = function() {\n"
+        "        if (!timerObj) {\n"
+        "            this.stop();\n"
+        "            timerObj = setInterval(fn, t);\n"
+        "        }\n"
+        "        return this;\n"
+        "      }\n"
+        "    }\n\n";
 
 }
 
+/* Create the pictimer_function javascript function */
+static void webu_html_script_timer_pic(struct webui_ctx *webui)
+{
+    webui->resp_page +=
+        "    var timer = new Timer(function() {\n"
+        "      var picurl = \"\";\n"
+        "      var img = new Image();\n\n"
+        "      var camid;\n\n"
+        "      if (gIndexCam > 0) {\n"
+        "        camid = pData['cameras'][gIndexCam]['id'];\n\n"
+        "        if (pData['configuration']['cam'+camid].stream_preview_method.value == 1) {\n"
+        "          picurl = pData['cameras'][gIndexCam]['url'] + \"static/stream/t\" + new Date().getTime();\n"
+        "          img.src = picurl;\n"
+        "          document.getElementById('pic'+gIndexCam).src = picurl;\n"
+        "         }\n "
+        "      } else if (gIndexCam == 0) {\n"
+        "        var camcnt = pData['cameras']['count'];\n"
+        "        for (var indx = 1; indx <= camcnt; indx++) {\n"
+        "          camid = pData['cameras'][indx]['id'];\n\n"
+        "          if (pData['configuration']['cam'+camid].stream_preview_method.value == 1) {\n"
+        "            picurl = pData['cameras'][indx]['url'] + \"static/stream/t\" + new Date().getTime();\n"
+        "            img.src = picurl;\n"
+        "            document.getElementById('pic'+indx).src = picurl;\n"
+        "          }\n"
+        "        }\n"
+        "      }\n"
+        "    }, 1000);\n\n";
+
+}
+
+/* Call all the functions to create the java scripts of page*/
 static void webu_html_script(struct webui_ctx *webui)
 {
-    /* Write the javascripts */
-    char response[WEBUI_LEN_RESP];
+    webui->resp_page += "  <script>\n"
+        "    var pData;\n"
+        "    var gIndexCam;\n\n";
 
-    snprintf(response, sizeof (response),"%s", "  <script>\n");
-    webu_write(webui, response);
+    webu_html_script_submit_config(webui);
+    webu_html_script_dropchange_cam(webui);
+    webu_html_script_config_hideall(webui);
+    webu_html_script_config_click(webui);
+    webu_html_script_assign_version(webui);
+    webu_html_script_assign_cams(webui);
+    webu_html_script_assign_vals(webui);
+    webu_html_script_assign_config(webui);
+    webu_html_script_initform(webui);
+    webu_html_script_display_cameras(webui);
+    webu_html_script_display_config(webui);
+    webu_html_script_action_click(webui);
+    webu_html_script_camera_click(webui);
+    webu_html_script_timer_function(webui);
+    webu_html_script_timer_pic(webui);
 
-    webu_html_script_action(webui);
-
-    webu_html_script_camera(webui);
-
-    webu_html_script_cfgclk(webui);
-
-    webu_html_script_cfgchg(webui);
-
-    webu_html_script_trkclk(webui);
-
-    webu_html_script_trkchg(webui);
-
-    webu_html_script_menucam(webui);
-
-    webu_html_script_menuact(webui);
-
-    webu_html_script_evtclk(webui);
-
-    snprintf(response, sizeof (response),"%s", "  </script>\n");
-    webu_write(webui, response);
+    webui->resp_page += "  </script>\n\n";
 
 }
 
+/* Create the body section of the web page */
 static void webu_html_body(struct webui_ctx *webui)
 {
-    /* Write the body section of the form */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s","<body class=\"body\">\n");
-    webu_write(webui, response);
+    webui->resp_page += "<body class='body' onload='initform()'>\n";
 
     webu_html_navbar(webui);
 
-    webu_html_h3desc(webui);
-
-    webu_html_config(webui);
-
-    webu_html_track(webui);
-
-    webu_html_preview(webui);
+    webui->resp_page +=
+        "  <div id='div_cam' style='margin-left:11rem' >\n"
+        "    <!-- Filled in by script -->\n"
+        "  </div>\n\n"
+        "  <div id='div_config'>\n"
+        "    <!-- Filled in by script -->\n"
+        "  </div>\n\n";
 
     webu_html_script(webui);
 
-    snprintf(response, sizeof (response),"%s", "</body>\n");
-    webu_write(webui, response);
+    webui->resp_page += "</body>\n";
 
 }
 
-static void webu_html_page(struct webui_ctx *webui)
+/* Create the default motionplus page */
+void webu_html_page(struct webui_ctx *webui)
 {
-    /* Write the main page html */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),
-        "<!DOCTYPE html>\n"
-        "<html lang=\"%s\">\n",webui->lang);
-    webu_write(webui, response);
+    webui->resp_page += "<!DOCTYPE html>\n"
+        "<html lang='" + webui->lang + "'>\n";
 
     webu_html_head(webui);
 
     webu_html_body(webui);
 
-    snprintf(response, sizeof (response),"%s", "</html>\n");
-    webu_write(webui, response);
-
+    webui->resp_page += "</html>\n";
 }
 
+/*Create the bad request page*/
 void webu_html_badreq(struct webui_ctx *webui)
 {
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
+    webui->resp_page =
         "<!DOCTYPE html>\n"
         "<html>\n"
         "<body>\n"
         "<p>Bad Request</p>\n"
         "<p>The server did not understand your request.</p>\n"
         "</body>\n"
-        "</html>\n");
-    webu_write(webui, response);
-
-    return;
+        "</html>\n";
 
 }
 
 /* Load a user provided html page */
-static void webu_html_user(struct webui_ctx *webui)
+void webu_html_user(struct webui_ctx *webui)
 {
     char response[PATH_MAX];
     FILE *fp = NULL;
 
-    fp = fopen(webui->cam->conf->webcontrol_html.c_str(), "r");
+    fp = fopen(webui->motapp->cam_list[0]->conf->webcontrol_html.c_str(), "r");
 
     if (fp == NULL) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             , _("Invalid user html file: %s")
-            , webui->cam->conf->webcontrol_html.c_str());
+            , webui->motapp->cam_list[0]->conf->webcontrol_html.c_str());
 
         webu_html_badreq(webui);
 
         return;
     }
 
+    webui->resp_page = "";
     while (fgets(response, PATH_MAX-1, fp)) {
-        webu_write(webui, response);
+        webui->resp_page += response;
     }
+
     myfclose(fp);
 
 }
 
-/* Entry point for providing the html version of web page */
-void webu_html_main(struct webui_ctx *webui)
-{
-    int retcd;
-
-    pthread_mutex_lock(&webui->motapp->mutex_camlst);
-
-        retcd = 0;
-        if (strlen(webui->uri_camid) == 0) {
-            if (webui->motapp->cam_list[0]->conf->webcontrol_interface == 3) {
-                webu_html_user(webui);
-            } else {
-                webu_html_page(webui);
-            }
-
-        } else if ((mystreq(webui->uri_cmd1,"config")) &&
-                (mystreq(webui->uri_cmd2,"write"))) {
-            webu_process_action(webui);
-
-        } else if (mystreq(webui->uri_cmd1,"config")) {
-            retcd = webu_process_config(webui);
-
-        } else if (mystreq(webui->uri_cmd1,"action")){
-            webu_process_action(webui);
-
-        } else if (mystreq(webui->uri_cmd1,"detection")){
-            webu_process_action(webui);
-
-        } else if (mystreq(webui->uri_cmd1,"track")){
-            retcd = webu_process_track(webui);
-
-        } else if ((mystreq(webui->uri_cmd1,"config.json")) ||
-            (mystreq(webui->uri_camid,"config.json"))) {
-            retcd = webu_process_json(webui);
-
-        } else{
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
-                _("Invalid action requested: >%s< >%s< >%s<")
-                ,webui->uri_camid, webui->uri_cmd1, webui->uri_cmd2);
-            retcd = -1;
-        }
-
-        if (retcd < 0) webu_html_badreq(webui);
-
-    pthread_mutex_unlock(&webui->motapp->mutex_camlst);
-
-    return;
-}
 

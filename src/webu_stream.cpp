@@ -17,14 +17,6 @@
  *    Copyright 2020 MotionMrDave@gmail.com
 */
 
-/*
- *    Functional naming scheme
- *    webu_stream*      - All functions in this module
- *    webu_stream_mjpeg*    - Create the motion-jpeg stream for the user
- *    webu_stream_static*   - Create the static jpg image for the user.
- *    webu_stream_checks    - Edit/validate request from user
- */
-
 #include "motionplus.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
@@ -39,9 +31,12 @@
 static void webu_stream_mjpeg_checkbuffers(struct webui_ctx *webui)
 {
     if (webui->resp_size < (size_t)webui->cam->imgs.size_norm){
-        if (webui->resp_page   != NULL) free(webui->resp_page);
-        webui->resp_page   =(char*) mymalloc(webui->cam->imgs.size_norm);
-        memset(webui->resp_page,'\0',webui->cam->imgs.size_norm);
+        if (webui->resp_image   != NULL) {
+            free(webui->resp_image);
+            webui->resp_image = NULL;
+        }
+        webui->resp_image   =(char*) mymalloc(webui->cam->imgs.size_norm);
+        memset(webui->resp_image,'\0',webui->cam->imgs.size_norm);
         webui->resp_size = webui->cam->imgs.size_norm;
         webui->resp_used = 0;
     }
@@ -84,7 +79,7 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui)
     int  header_len;
     struct ctx_stream_data *local_stream;
 
-    memset(webui->resp_page, '\0', webui->resp_size);
+    memset(webui->resp_image, '\0', webui->resp_size);
 
     /* Assign to a local pointer the stream we want */
     if (webui->cnct_type == WEBUI_CNCT_FULL){
@@ -108,10 +103,11 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui)
 
     /* Copy jpg from the motion loop thread */
     pthread_mutex_lock(&webui->cam->stream.mutex);
-        if ((!webui->cam->detecting_motion) && (webui->cam->conf->stream_motion)){
+        if ((!webui->cam->detecting_motion) &&
+            (webui->motapp->cam_list[webui->threadnbr]->conf->stream_motion)){
             webui->stream_fps = 1;
         } else {
-            webui->stream_fps = webui->cam->conf->stream_maxrate;
+            webui->stream_fps = webui->motapp->cam_list[webui->threadnbr]->conf->stream_maxrate;
         }
         if (local_stream->jpeg_data == NULL) {
             pthread_mutex_unlock(&webui->cam->stream.mutex);
@@ -123,18 +119,19 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui)
             "Content-type: image/jpeg\r\n"
             "Content-Length: %9ld\r\n\r\n"
             ,jpeg_size);
-        memcpy(webui->resp_page, resp_head, header_len);
-        memcpy(webui->resp_page + header_len
+        memcpy(webui->resp_image, resp_head, header_len);
+        memcpy(webui->resp_image + header_len
             ,local_stream->jpeg_data
             ,jpeg_size);
         /* Copy in the terminator after the jpg data at the end*/
-        memcpy(webui->resp_page + header_len + jpeg_size,"\r\n",2);
+        memcpy(webui->resp_image + header_len + jpeg_size,"\r\n",2);
         webui->resp_used = header_len + jpeg_size + 2;
         local_stream->consumed = true;
     pthread_mutex_unlock(&webui->cam->stream.mutex);
 
 }
 
+/* Callback function for mhd to get stream */
 static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, size_t max)
 {
     /* This is the callback response function for MHD streams.  It is kept "open" and
@@ -169,7 +166,7 @@ static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, s
         sent_bytes = webui->resp_used - webui->stream_pos;
     }
 
-    memcpy(buf, webui->resp_page + webui->stream_pos, sent_bytes);
+    memcpy(buf, webui->resp_image + webui->stream_pos, sent_bytes);
 
     webui->stream_pos = webui->stream_pos + sent_bytes;
     if (webui->stream_pos >= webui->resp_used){
@@ -180,23 +177,45 @@ static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, s
 
 }
 
-/* Obtain the current image, compress it to a JPG and put into webui->resp_page */
+/* Obtain the current image, compress it to a JPG and put into webui->resp_image */
 static void webu_stream_static_getimg(struct webui_ctx *webui)
 {
-    webui->resp_used = 0;
 
-    memset(webui->resp_page, '\0', webui->resp_size);
+    struct ctx_stream_data *local_stream;
+
+    webui->resp_used = 0;
+    memset(webui->resp_image, '\0', webui->resp_size);
+
+    /* Assign to a local pointer the stream we want */
+    if (webui->cnct_type == WEBUI_CNCT_FULL){
+        local_stream = &webui->cam->stream.norm;
+
+    } else if (webui->cnct_type == WEBUI_CNCT_SUB){
+        local_stream = &webui->cam->stream.sub;
+
+    } else if (webui->cnct_type == WEBUI_CNCT_MOTION){
+        local_stream = &webui->cam->stream.motion;
+
+    } else if (webui->cnct_type == WEBUI_CNCT_SOURCE){
+        local_stream = &webui->cam->stream.source;
+
+    } else if (webui->cnct_type == WEBUI_CNCT_SECONDARY){
+        local_stream = &webui->cam->stream.secondary;
+
+    } else {
+        return;
+    }
 
     pthread_mutex_lock(&webui->cam->stream.mutex);
-        if (webui->cam->stream.norm.jpeg_data == NULL){
+        if (local_stream->jpeg_data == NULL){
             pthread_mutex_unlock(&webui->cam->stream.mutex);
             return;
         }
-        memcpy(webui->resp_page
-            ,webui->cam->stream.norm.jpeg_data
-            ,webui->cam->stream.norm.jpeg_size);
-        webui->resp_used = webui->cam->stream.norm.jpeg_size;
-        webui->cam->stream.norm.consumed = true;
+        memcpy(webui->resp_image
+            ,local_stream->jpeg_data
+            ,local_stream->jpeg_size);
+        webui->resp_used =local_stream->jpeg_size;
+        local_stream->consumed = true;
     pthread_mutex_unlock(&webui->cam->stream.mutex);
 
 }
@@ -205,41 +224,16 @@ static void webu_stream_static_getimg(struct webui_ctx *webui)
 static int webu_stream_checks(struct webui_ctx *webui)
 {
     pthread_mutex_lock(&webui->motapp->mutex_camlst);
-        if ((webui->motapp->cam_list != NULL) && (webui->thread_nbr >= webui->cam_threads)){
+        if (webui->threadnbr >= webui->cam_threads) {
             MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
                 , _("Invalid thread specified: %s"),webui->url);
             pthread_mutex_unlock(&webui->motapp->mutex_camlst);
             return -1;
         }
 
-        if ((webui->motapp->cam_list != NULL) && (webui->thread_nbr < 0) && (webui->cam_threads > 1)){
+        if (webui->threadnbr <= 0) {
             MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
                 , _("Invalid thread specified: %s"),webui->url);
-            pthread_mutex_unlock(&webui->motapp->mutex_camlst);
-            return -1;
-        }
-
-        /* Thread numbers are not used for ctx_cam specific ports. */
-        if ((webui->motapp->cam_list == NULL) && (webui->thread_nbr >= 0)) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-                , _("Invalid URL for a camera specific port: %s"),webui->url);
-            pthread_mutex_unlock(&webui->motapp->mutex_camlst);
-            return -1;
-        }
-
-        /* If multiple threads then thread zero is invalid. */
-        if ((webui->cam_threads > 1) && (webui->thread_nbr == 0)) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-                , _("URL for thread 0 is not valid when using camera specific files.: %s")
-                ,webui->url);
-            pthread_mutex_unlock(&webui->motapp->mutex_camlst);
-            return -1;
-        }
-
-        /* Thread numbers are not used for ctx_cam specific ports. */
-        if ((webui->motapp->cam_list == NULL) && (strlen(webui->uri_cmd1) > 0)) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-                , _("Bad URL for a camera specific port: %s"),webui->url);
             pthread_mutex_unlock(&webui->motapp->mutex_camlst);
             return -1;
         }
@@ -280,7 +274,7 @@ static void webu_stream_cnct_count(struct webui_ctx *webui)
         pthread_mutex_unlock(&webui->cam->stream.mutex);
 
     } else {
-        /* Stream, Static */
+        /* Stream */
         pthread_mutex_lock(&webui->cam->stream.mutex);
             webui->cam->stream.norm.cnct_count++;
             cnct_count = webui->cam->stream.norm.cnct_count;
@@ -296,7 +290,38 @@ static void webu_stream_cnct_count(struct webui_ctx *webui)
 
 }
 
-mhdrslt webu_stream_mjpeg(struct webui_ctx *webui)
+/* Assign the type of stream that is being answered*/
+static void webu_stream_type(struct webui_ctx *webui)
+{
+    if (webui->uri_cmd2 == "stream") {
+        webui->cnct_type = WEBUI_CNCT_FULL;
+
+    } else if (webui->uri_cmd2 == "substream") {
+        webui->cnct_type = WEBUI_CNCT_SUB;
+
+    } else if (webui->uri_cmd2 == "motion") {
+        webui->cnct_type = WEBUI_CNCT_MOTION;
+
+    } else if (webui->uri_cmd2 == "source") {
+        webui->cnct_type = WEBUI_CNCT_SOURCE;
+
+    } else if (webui->uri_cmd2 == "secondary") {
+        if (webui->cam->algsec_inuse) {
+            webui->cnct_type = WEBUI_CNCT_SECONDARY;
+        } else {
+            webui->cnct_type = WEBUI_CNCT_UNKNOWN;
+        }
+
+    } else if (webui->uri_cmd2 == "") {
+        webui->cnct_type = WEBUI_CNCT_FULL;
+
+    } else {
+        webui->cnct_type = WEBUI_CNCT_UNKNOWN;
+    }
+
+}
+
+static mhdrslt webu_stream_mjpeg(struct webui_ctx *webui)
 {
     /* Create the stream for the motion jpeg */
     mhdrslt retcd;
@@ -317,11 +342,9 @@ mhdrslt webu_stream_mjpeg(struct webui_ctx *webui)
         return MHD_NO;
     }
 
-    MHD_add_response_header(response, MHD_HTTP_HEADER_CACHE_CONTROL, "no-store");
-
-    if (webui->cam->conf->stream_cors_header != ""){
+    if (webui->motapp->cam_list[0]->conf->webcontrol_cors_header != ""){
         MHD_add_response_header(response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-            , webui->cam->conf->stream_cors_header.c_str());
+            , webui->motapp->cam_list[0]->conf->webcontrol_cors_header.c_str());
     }
 
     MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE
@@ -334,16 +357,14 @@ mhdrslt webu_stream_mjpeg(struct webui_ctx *webui)
     return retcd;
 }
 
-mhdrslt webu_stream_static(struct webui_ctx *webui)
+/* Create the response for the static image request*/
+static mhdrslt webu_stream_static(struct webui_ctx *webui)
 {
-    /* Create the response for the static image request*/
     mhdrslt retcd;
     struct MHD_Response *response;
     char resp_used[20];
 
     if (webu_stream_checks(webui) == -1) return MHD_NO;
-
-    webui->cam->stream.norm.consumed = true;
 
     webu_stream_cnct_count(webui);
 
@@ -357,17 +378,15 @@ mhdrslt webu_stream_static(struct webui_ctx *webui)
     }
 
     response = MHD_create_response_from_buffer (webui->resp_size
-        ,(void *)webui->resp_page, MHD_RESPMEM_MUST_COPY);
+        ,(void *)webui->resp_image, MHD_RESPMEM_MUST_COPY);
     if (!response){
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
 
-    MHD_add_response_header(response, MHD_HTTP_HEADER_CACHE_CONTROL, "no-store");
-
-    if (webui->cam->conf->stream_cors_header != ""){
+    if (webui->motapp->cam_list[0]->conf->webcontrol_cors_header != ""){
         MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-            , webui->cam->conf->stream_cors_header.c_str());
+            , webui->motapp->cam_list[0]->conf->webcontrol_cors_header.c_str());
     }
 
     MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "image/jpeg");
@@ -380,12 +399,31 @@ mhdrslt webu_stream_static(struct webui_ctx *webui)
     return retcd;
 }
 
+/* Entry point for answering stream*/
+mhdrslt webu_stream_main(struct webui_ctx *webui)
+{
+    mhdrslt retcd;
+
+    if (webui->cam->passflag == 0) {
+        return MHD_NO;
+    }
+
+    webu_stream_type(webui);
+
+    if (webui->uri_cmd1 == "static") {
+        retcd = webu_stream_static(webui);
+    } else {
+        retcd = webu_stream_mjpeg(webui);
+    }
+
+    return retcd;
+}
+
+/* Initial the stream context items for the camera */
 void webu_stream_init(struct ctx_cam *cam)
 {
+    /* NOTE:  This runs on the motion_loop thread. */
 
-    /* The image buffers are allocated in event_stream_put if needed
-     * NOTE:  This runs on the motion_loop thread.
-    */
     pthread_mutex_init(&cam->stream.mutex, NULL);
 
     cam->imgs.image_substream = NULL;
@@ -393,36 +431,34 @@ void webu_stream_init(struct ctx_cam *cam)
     cam->stream.norm.jpeg_size = 0;
     cam->stream.norm.jpeg_data = NULL;
     cam->stream.norm.cnct_count = 0;
-    cam->stream.norm.consumed = false;
+    cam->stream.norm.consumed = true;
 
     cam->stream.sub.jpeg_size = 0;
     cam->stream.sub.jpeg_data = NULL;
     cam->stream.sub.cnct_count = 0;
-    cam->stream.sub.consumed = false;
+    cam->stream.sub.consumed = true;
 
     cam->stream.motion.jpeg_size = 0;
     cam->stream.motion.jpeg_data = NULL;
     cam->stream.motion.cnct_count = 0;
-    cam->stream.motion.consumed = false;
+    cam->stream.motion.consumed = true;
 
     cam->stream.source.jpeg_size = 0;
     cam->stream.source.jpeg_data = NULL;
     cam->stream.source.cnct_count = 0;
-    cam->stream.source.consumed = false;
+    cam->stream.source.consumed = true;
 
     cam->stream.secondary.jpeg_size = 0;
     cam->stream.secondary.jpeg_data = NULL;
     cam->stream.secondary.cnct_count = 0;
+    cam->stream.source.consumed = true;
 
 }
 
+/* Free the stream buffers and mutex for shutdown */
 void webu_stream_deinit(struct ctx_cam *cam)
 {
-
-    /* Need to check whether buffers were allocated since init
-     * function defers the allocations to event_stream_put
-     * NOTE:  This runs on the motion_loop thread.
-    */
+    /* NOTE:  This runs on the motion_loop thread. */
 
     pthread_mutex_destroy(&cam->stream.mutex);
 
@@ -458,6 +494,7 @@ void webu_stream_deinit(struct ctx_cam *cam)
 
 }
 
+/* Get a normal image from the motion loop and compress it*/
 static void webu_stream_getimg_norm(struct ctx_cam *cam, struct ctx_image_data *img_data)
 {
     /*This is on the motion_loop thread */
@@ -477,6 +514,7 @@ static void webu_stream_getimg_norm(struct ctx_cam *cam, struct ctx_image_data *
 
 }
 
+/* Get a substream image from the motion loop and compress it*/
 static void webu_stream_getimg_sub(struct ctx_cam *cam, struct ctx_image_data *img_data)
 {
     /*This is on the motion_loop thread */
@@ -521,6 +559,7 @@ static void webu_stream_getimg_sub(struct ctx_cam *cam, struct ctx_image_data *i
 
 }
 
+/* Get a motion image from the motion loop and compress it*/
 static void webu_stream_getimg_motion(struct ctx_cam *cam)
 {
     /*This is on the motion_loop thread */
@@ -541,6 +580,7 @@ static void webu_stream_getimg_motion(struct ctx_cam *cam)
 
 }
 
+/* Get a source image from the motion loop and compress it*/
 static void webu_stream_getimg_source(struct ctx_cam *cam)
 {
     /*This is on the motion_loop thread */
@@ -561,6 +601,7 @@ static void webu_stream_getimg_source(struct ctx_cam *cam)
 
 }
 
+/* Get a secondary image from the motion loop and compress it*/
 static void webu_stream_getimg_secondary(struct ctx_cam *cam)
 {
     /*This is on the motion_loop thread */
@@ -582,6 +623,7 @@ static void webu_stream_getimg_secondary(struct ctx_cam *cam)
 
 }
 
+/* Get image from the motion loop and compress it*/
 void webu_stream_getimg(struct ctx_cam *cam, struct ctx_image_data *img_data)
 {
 

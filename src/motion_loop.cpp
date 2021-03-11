@@ -330,7 +330,7 @@ void mlp_cam_close(struct ctx_cam *cam)
     if (cam->netcam) {
         /* This also cleans up high resolution */
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling netcam_cleanup"));
-        netcam_cleanup(cam, 0);
+        netcam_cleanup(cam, false);
         return;
     }
 
@@ -371,7 +371,7 @@ int mlp_cam_start(struct ctx_cam *cam)
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening Netcam"));
         dev = netcam_setup(cam);
         if (dev < 0) {
-            netcam_cleanup(cam, 1);
+            netcam_cleanup(cam, true);
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Netcam failed to open"));
         }
         return dev;
@@ -555,7 +555,8 @@ static void mlp_init_buffers(struct ctx_cam *cam)
 static void mlp_init_values(struct ctx_cam *cam)
 {
 
-    cam->event_nr=1;
+    cam->event_nr = 1;
+    cam->prev_event = 0;
 
     clock_gettime(CLOCK_REALTIME, &cam->frame_curr_ts);
     clock_gettime(CLOCK_REALTIME, &cam->frame_last_ts);
@@ -634,6 +635,7 @@ static void mlp_init_ref(struct ctx_cam *cam)
 /** mlp_init */
 static int mlp_init(struct ctx_cam *cam)
 {
+    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("initialize."));
 
     mythreadname_set("ml",cam->threadnr,cam->conf->camera_name.c_str());
 

@@ -17,11 +17,9 @@
  *    Copyright 2020 MotionMrDave@gmail.com
 */
 
-#ifndef _INCLUDE_WEBU_HTML_H_
-#define _INCLUDE_WEBU_HTML_H_
+#ifndef _INCLUDE_WEBU_JSON_H_
+#define _INCLUDE_WEBU_JSON_H_
 
-    void webu_html_badreq(struct webui_ctx *webui);
-    void webu_html_user(struct webui_ctx *webui);
-    void webu_html_page(struct webui_ctx *webui);
+    void webu_json_config(struct webui_ctx *webui);
 
 #endif

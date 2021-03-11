@@ -153,12 +153,6 @@
         std::string     webcontrol_html;
 
         /* Live stream configuration parameters */
-        int             stream_port;
-        int             stream_localhost;
-        int             stream_auth_method;
-        std::string     stream_authentication;
-        int             stream_tls;
-        std::string     stream_cors_header;
         int             stream_preview_scale;
         int             stream_preview_newline;
         int             stream_preview_method;
@@ -227,7 +221,7 @@
         const std::string   parm_help;      /* short explanation for parameter          */
         int                 main_thread;    /* belong only to main thread when value>0  */
         enum PARM_TYP       parm_type;      /* enum of parm_typ for bool,int or string. */
-        enum PARM_CAT       parm_cat;       /* enum of parm_cat for 00 to 05 for grouping. */
+        enum PARM_CAT       parm_cat;       /* enum of parm_cat for grouping. */
         int                 webui_level;    /* Enum to display in webui: 0,1,2,3,99(always to never)*/
     };
 
@@ -246,7 +240,7 @@
     void conf_init_cams(struct ctx_motapp *motapp);
     void conf_deinit(struct ctx_motapp *motapp);
     void conf_parms_log(struct ctx_cam **cam_list);
-    void conf_parms_write(struct ctx_cam **cam_list);
+    void conf_parms_write(struct ctx_motapp *motapp);
     void conf_camera_add(struct ctx_motapp *motapp);
 
     void conf_edit_set(struct ctx_motapp *motapp, bool ismotapp, int threadnbr

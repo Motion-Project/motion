@@ -530,34 +530,10 @@ struct ctx_parm config_parms[] = {
     1, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED},
 
     {
-    "stream_port",
+    "stream_preview_scale",
     "############################################################\n"
     "# Live stream configuration parameters\n"
     "############################################################\n\n"
-    "# The port number for the live stream.",
-    0, PARM_TYP_INT, PARM_CAT_14, WEBUI_LEVEL_ADVANCED },
-    {
-    "stream_localhost",
-    "# Restrict stream connections to the localhost.",
-    0, PARM_TYP_BOOL, PARM_CAT_14, WEBUI_LEVEL_ADVANCED },
-    {
-    "stream_auth_method",
-    "# Authentication method for live stream.",
-    0, PARM_TYP_INT, PARM_CAT_14, WEBUI_LEVEL_RESTRICTED},
-    {
-    "stream_authentication",
-    "# The authentication string for the stream. Syntax username:password",
-    1, PARM_TYP_STRING, PARM_CAT_14, WEBUI_LEVEL_RESTRICTED },
-    {
-    "stream_tls",
-    "# Use ssl / tls for stream.",
-    0, PARM_TYP_BOOL, PARM_CAT_14, WEBUI_LEVEL_RESTRICTED },
-    {
-    "stream_cors_header",
-    "# The cross-origin resource sharing (CORS) header for the stream",
-    0, PARM_TYP_STRING, PARM_CAT_14, WEBUI_LEVEL_RESTRICTED },
-    {
-    "stream_preview_scale",
     "# Percentage to scale the stream image on the webcontrol.",
     0, PARM_TYP_INT, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {
@@ -2705,110 +2681,6 @@ static void conf_edit_webcontrol_html(struct ctx_cam *cam, std::string &parm, en
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_html",_("webcontrol_html"));
 }
 
-static void conf_edit_stream_port(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT){
-        cam->conf->stream_port = 0;
-    } else if (pact == PARM_ACT_SET){
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 65535)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid stream_port %d"),parm_in);
-        } else {
-            cam->conf->stream_port = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET){
-        parm = std::to_string(cam->conf->stream_port);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_port",_("stream_port"));
-}
-
-static void conf_edit_stream_localhost(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    if (pact == PARM_ACT_DFLT){
-        cam->conf->stream_localhost = TRUE;
-    } else if (pact == PARM_ACT_SET){
-        conf_edit_set_bool(cam->conf->stream_localhost, parm);
-    } else if (pact == PARM_ACT_GET){
-        conf_edit_get_bool(parm, cam->conf->stream_localhost);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_localhost",_("stream_localhost"));
-}
-
-static void conf_edit_stream_auth_method(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT){
-        cam->conf->stream_auth_method = 0;
-    } else if (pact == PARM_ACT_SET){
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 2)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid stream_auth_method %d"),parm_in);
-        } else {
-            cam->conf->stream_auth_method = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET){
-        parm = std::to_string(cam->conf->stream_auth_method);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_auth_method",_("stream_auth_method"));
-}
-
-static void conf_edit_stream_authentication(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    if (pact == PARM_ACT_DFLT) {
-        cam->conf->stream_authentication = "";
-    } else if (pact == PARM_ACT_SET){
-        cam->conf->stream_authentication = parm;
-    } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->stream_authentication;
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_authentication",_("stream_authentication"));
-}
-
-static void conf_edit_stream_tls(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    if (pact == PARM_ACT_DFLT){
-        cam->conf->stream_tls = FALSE;
-    } else if (pact == PARM_ACT_SET){
-        conf_edit_set_bool(cam->conf->stream_tls, parm);
-    } else if (pact == PARM_ACT_GET){
-        conf_edit_get_bool(parm, cam->conf->stream_tls);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_tls",_("stream_tls"));
-}
-
-static void conf_edit_stream_cors_header(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    int retcd;
-    if (pact == PARM_ACT_DFLT) {
-        cam->conf->stream_cors_header = "";
-    } else if (pact == PARM_ACT_SET){
-        const char *regex_str = "(http|https)://(((.*):(.*))@)?([^/:]|[-_.a-z0-9]+)(:([0-9]+))?($|(/[^*]*))";
-        regex_t regex;
-        if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Error compiling regex in copy_uri"));
-            return;
-        }
-        /* We only warn on this since regex may not perfectly edit uris */
-        retcd = regexec(&regex, parm.c_str(), 0, NULL, 0);
-        if ((parm != "*") && (parm != "") && (retcd == REG_NOMATCH)) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Possibly invalid stream_cors_header"));
-        }
-
-        cam->conf->stream_cors_header = parm;
-        regfree(&regex);
-    } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->stream_cors_header;
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_cors_header",_("stream_cors_header"));
-}
-
 static void conf_edit_stream_preview_scale(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
@@ -3439,13 +3311,7 @@ static void conf_edit_cat13(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat14(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "stream_port"){                 conf_edit_stream_port(cam, parm_val, pact);
-    } else if (parm_nm == "stream_localhost"){            conf_edit_stream_localhost(cam, parm_val, pact);
-    } else if (parm_nm == "stream_auth_method"){          conf_edit_stream_auth_method(cam, parm_val, pact);
-    } else if (parm_nm == "stream_authentication"){       conf_edit_stream_authentication(cam, parm_val, pact);
-    } else if (parm_nm == "stream_tls"){                  conf_edit_stream_tls(cam, parm_val, pact);
-    } else if (parm_nm == "stream_cors_header"){          conf_edit_stream_cors_header(cam, parm_val, pact);
-    } else if (parm_nm == "stream_preview_scale"){        conf_edit_stream_preview_scale(cam, parm_val, pact);
+    if (parm_nm == "stream_preview_scale"){        conf_edit_stream_preview_scale(cam, parm_val, pact);
     } else if (parm_nm == "stream_preview_newline"){      conf_edit_stream_preview_newline(cam, parm_val, pact);
     } else if (parm_nm == "stream_preview_method"){       conf_edit_stream_preview_method(cam, parm_val, pact);
     } else if (parm_nm == "stream_quality"){              conf_edit_stream_quality(cam, parm_val, pact);
@@ -4122,8 +3988,6 @@ void conf_parms_log(struct ctx_cam **cam_list)
                 if ((config_parms[i].parm_name == "netcam_url") ||
                     (config_parms[i].parm_name == "netcam_userpass") ||
                     (config_parms[i].parm_name == "netcam_high_url") ||
-                    (config_parms[i].parm_name == "stream_cors_header") ||
-                    (config_parms[i].parm_name == "stream_authentication") ||
                     (config_parms[i].parm_name == "webcontrol_authentication") ||
                     (config_parms[i].parm_name == "webcontrol_cors_header") ||
                     (config_parms[i].parm_name == "webcontrol_key") ||
@@ -4151,20 +4015,20 @@ void conf_parms_log(struct ctx_cam **cam_list)
 }
 
 /**  Write the configuration(s) to file */
-void conf_parms_write(struct ctx_cam **cam_list)
+void conf_parms_write(struct ctx_motapp *motapp)
 {
     std::string parm_val, parm_main;
     int indx, indx2,  indx_cam;
     char timestamp[32];
     FILE *conffile;
 
-    for (indx_cam = 0; cam_list[indx_cam]; indx_cam++) {
+    for (indx_cam = 0; motapp->cam_list[indx_cam]; indx_cam++) {
         /*
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Writing config file to %s")
             ,cam_list[indx_cam]->conf_filename);
         */
-        conffile = myfopen(cam_list[indx_cam]->conf_filename, "w");
+        conffile = myfopen(motapp->cam_list[indx_cam]->conf_filename, "w");
 
         if (!conffile) {
             continue;
@@ -4173,16 +4037,16 @@ void conf_parms_write(struct ctx_cam **cam_list)
         time_t now = time(0);
         strftime(timestamp, 32, "%Y-%m-%dT%H:%M:%S", localtime(&now));
 
-        fprintf(conffile, "# %s\n", cam_list[indx_cam]->conf_filename);
+        fprintf(conffile, "# %s\n", motapp->cam_list[indx_cam]->conf_filename);
         fprintf(conffile, "#\n# This config file was generated by MotionPlus " VERSION "\n");
         fprintf(conffile, "# at %s\n", timestamp);
         fprintf(conffile, "\n\n");
 
         indx = 0;
         while (config_parms[indx].parm_name != ""){
-            conf_edit_get(cam_list[indx_cam], config_parms[indx].parm_name
+            conf_edit_get(motapp->cam_list[indx_cam], config_parms[indx].parm_name
                     , parm_val, config_parms[indx].parm_cat);
-            conf_edit_get(cam_list[0], config_parms[indx].parm_name
+            conf_edit_get(motapp->cam_list[0], config_parms[indx].parm_name
                     , parm_main, config_parms[indx].parm_cat);
 
             if ((config_parms[indx].parm_name != "camera") &&
@@ -4201,15 +4065,17 @@ void conf_parms_write(struct ctx_cam **cam_list)
             }
             if ((config_parms[indx].parm_name == "camera") && (indx_cam == 0)) {
                 fprintf(conffile, "%s\n", config_parms[indx].parm_help.c_str());
-                if (cam_list[0]->from_conf_dir == FALSE) {
+                if (motapp->cam_list[0]->from_conf_dir == FALSE) {
                     indx2 = 1;
-                    while (cam_list[indx2] != NULL) {
+                    while (motapp->cam_list[indx2] != NULL) {
                         if (parm_val.compare(0, 1, " ") == 0) {
                             fprintf(conffile, "%s \"%s\"\n\n"
-                                , config_parms[indx].parm_name.c_str(), cam_list[indx2]->conf_filename);
+                                , config_parms[indx].parm_name.c_str()
+                                , motapp->cam_list[indx2]->conf_filename);
                         } else {
                             fprintf(conffile, "%s %s\n\n"
-                                , config_parms[indx].parm_name.c_str(), cam_list[indx2]->conf_filename);
+                                , config_parms[indx].parm_name.c_str()
+                                , motapp->cam_list[indx2]->conf_filename);
                         }
                         indx2++;
                     }
@@ -4218,7 +4084,7 @@ void conf_parms_write(struct ctx_cam **cam_list)
             if ((config_parms[indx].parm_name == "camera_dir") && (indx_cam == 0)) {
                 fprintf(conffile, "%s\n", config_parms[indx].parm_help.c_str());
                 if (parm_val == "") {
-                    parm_val = cam_list[0]->conf_filename;
+                    parm_val = motapp->cam_list[0]->conf_filename;
                     parm_val = parm_val.substr(0, parm_val.find_last_of("/")+1) + "conf.d";
                 }
                 if (parm_val.compare(0, 1, " ") == 0) {
@@ -4237,8 +4103,8 @@ void conf_parms_write(struct ctx_cam **cam_list)
         conffile = NULL;
 
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,_("Configuration written to %s")
-            ,cam_list[indx_cam]->conf_filename);
+            , _("Configuration written to %s")
+            , motapp->cam_list[indx_cam]->conf_filename);
     }
 
 }

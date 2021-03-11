@@ -264,10 +264,6 @@ struct ctx_stream_data {
 
 struct ctx_stream {
     pthread_mutex_t         mutex;
-    struct MHD_Daemon       *daemon;
-    char                    digest_rand[8];
-    int                     finish;
-
     struct ctx_stream_data  norm;       /* Copy of the image to use for web stream*/
     struct ctx_stream_data  sub;        /* Copy of the image to use for web stream*/
     struct ctx_stream_data  motion;     /* Copy of the image to use for web stream*/
@@ -413,12 +409,7 @@ struct ctx_motapp {
     volatile int        webcontrol_running;
     volatile int        webcontrol_finish;
     struct MHD_Daemon   *webcontrol_daemon;
-    char                webcontrol_digest_rand[8];
-
-    volatile int        webstream_running;
-    volatile int        webstream_finish;
-    struct MHD_Daemon   *webstream_daemon;          /*Picture stream when using single port */
-    char                webstream_digest_rand[8];   /*Digest for the stream when using single port*/
+    char                webcontrol_digest_rand[12];
 
     int                 parms_changed;      /*bool indicating if the parms have changed */
     pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */
