@@ -409,74 +409,13 @@ static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
 }
 
 /**Move the generic camera*/
-static int generic_move(struct ctx_cam *cam, enum track_action action, int manual
-        , int xoff, int yoff, struct ctx_coord *cent, struct ctx_images *imgs)
+static int generic_move(struct ctx_cam *cam, struct ctx_coord *cent)
 {
 
-    char fmtcmd[PATH_MAX];
     cam->track->posx += cent->x;
     cam->track->posy += cent->y;
 
-    mystrftime(cam, fmtcmd, sizeof(fmtcmd), cam->conf->track_generic_move.c_str()
-        , &cam->current_image->imgts, NULL, 0);
-
-    if (!fork()) {
-        int i;
-        char buf[12];
-
-        /* Detach from parent */
-        setsid();
-
-        /* Provides data as environment variables */
-        if (manual) {
-          setenv("TRACK_MANUAL", "manual", 1);
-        }
-        switch (action) {
-          case TRACK_CENTER:
-            setenv("TRACK_ACTION", "center", 1);
-            sprintf(buf, "%d", xoff);    setenv("TRACK_XOFF", buf, 1);
-            sprintf(buf, "%d", yoff);    setenv("TRACK_YOFF", buf, 1);
-            break;
-          case TRACK_MOVE:
-            setenv("TRACK_ACTION", "move", 1);
-            if (cent) {
-              sprintf(buf, "%d", cent->x);          setenv("TRACK_CENT_X", buf, 1);
-              sprintf(buf, "%d", cent->y);          setenv("TRACK_CENT_Y", buf, 1);
-              sprintf(buf, "%d", cent->width);      setenv("TRACK_CENT_WIDTH", buf, 1);
-              sprintf(buf, "%d", cent->height);     setenv("TRACK_CENT_HEIGHT", buf, 1);
-              sprintf(buf, "%d", cent->minx);       setenv("TRACK_CENT_MINX", buf, 1);
-              sprintf(buf, "%d", cent->maxx);       setenv("TRACK_CENT_MAXX", buf, 1);
-              sprintf(buf, "%d", cent->miny);       setenv("TRACK_CENT_MINY", buf, 1);
-              sprintf(buf, "%d", cent->maxy);       setenv("TRACK_CENT_MAXY", buf, 1);
-            }
-            if (imgs) {
-              sprintf(buf, "%d", imgs->width);      setenv("TRACK_IMGS_WIDTH", buf, 1);
-              sprintf(buf, "%d", imgs->height);     setenv("TRACK_IMGS_HEIGHT", buf, 1);
-              sprintf(buf, "%d", imgs->motionsize); setenv("TRACK_IMGS_MOTIONSIZE", buf, 1);
-            }
-        }
-
-        /*
-         * Close any file descriptor except console because we will
-         * like to see error messages
-         */
-        for (i = getdtablesize() - 1; i > 2; i--) {
-            close(i);
-        }
-
-        execl("/bin/sh", "sh", "-c", fmtcmd, " &", (char *)NULL);
-
-        /* if above function succeeds the program never reach here */
-        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
-            ,_("Unable to start external command '%s'")
-            ,cam->conf->track_generic_move.c_str());
-
-        exit(1);
-    }
-
-    MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO
-        ,_("Executing external command '%s'")
-        , fmtcmd);
+    util_exec_command(cam, cam->conf->track_generic_move.c_str(), NULL, 0);
 
     return cam->conf->track_move_wait;
 }
@@ -520,7 +459,7 @@ int track_center(struct ctx_cam *cam, int dev, int manual, int xoff, int yoff)
         if (cam->conf->track_generic_move != "") {
             cent.x = -cam->track->posx;
             cent.y = -cam->track->posy;
-            return generic_move(cam, TRACK_CENTER, manual,0 ,0 ,&cent , NULL);
+            return generic_move(cam, &cent);
         } else {
             return 10;
         }
@@ -544,7 +483,7 @@ int track_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
         return uvc_move(cam, dev, cent, imgs, manual);
     } else if (cam->conf->track_type == TRACK_TYPE_GENERIC) {
         if (cam->conf->track_generic_move != "") {
-            return generic_move(cam, TRACK_MOVE, manual, 0, 0, cent, imgs);
+            return generic_move(cam, cent);
         } else {
             return cam->conf->track_move_wait;
         }

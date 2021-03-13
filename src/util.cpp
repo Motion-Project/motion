@@ -1174,3 +1174,42 @@ void util_parms_update(struct ctx_params *params, std::string &confline)
     return;
 
 }
+
+/**
+ * util_exec_command
+ *      Execute 'command' with 'arg' as its argument.
+ *      if !arg command is started with no arguments
+ *      Before we call execl we need to close all the file handles
+ *      that the fork inherited from the parent in order not to pass
+ *      the open handles on to the shell
+ */
+void util_exec_command(struct ctx_cam *cam, const char *command, char *filename, int filetype)
+{
+    char stamp[PATH_MAX];
+    mystrftime(cam, stamp, sizeof(stamp), command, &cam->current_image->imgts, filename, filetype);
+
+    if (!fork()) {
+        int i;
+
+        /* Detach from parent */
+        setsid();
+
+        /*
+         * Close any file descriptor except console because we will
+         * like to see error messages
+         */
+        for (i = getdtablesize() - 1; i > 2; i--)
+            close(i);
+
+        execl("/bin/sh", "sh", "-c", stamp, " &",(char*)NULL);
+
+        /* if above function succeeds the program never reach here */
+        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+            ,_("Unable to start external command '%s'"), stamp);
+
+        exit(1);
+    }
+
+    MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO
+        ,_("Executing external command '%s'"), stamp);
+}

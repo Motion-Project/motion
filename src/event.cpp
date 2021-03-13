@@ -68,45 +68,6 @@ const char *eventList[] = {
     "EVENT_LAST"
 };
 
-/**
- * exec_command
- *      Execute 'command' with 'arg' as its argument.
- *      if !arg command is started with no arguments
- *      Before we call execl we need to close all the file handles
- *      that the fork inherited from the parent in order not to pass
- *      the open handles on to the shell
- */
-static void exec_command(struct ctx_cam *cam, const char *command, char *filename, int filetype)
-{
-    char stamp[PATH_MAX];
-    mystrftime(cam, stamp, sizeof(stamp), command, &cam->current_image->imgts, filename, filetype);
-
-    if (!fork()) {
-        int i;
-
-        /* Detach from parent */
-        setsid();
-
-        /*
-         * Close any file descriptor except console because we will
-         * like to see error messages
-         */
-        for (i = getdtablesize() - 1; i > 2; i--)
-            close(i);
-
-        execl("/bin/sh", "sh", "-c", stamp, " &",(char*)NULL);
-
-        /* if above function succeeds the program never reach here */
-        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
-            ,_("Unable to start external command '%s'"), stamp);
-
-        exit(1);
-    }
-
-    MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO
-        ,_("Executing external command '%s'"), stamp);
-}
-
 static void event_newfile(struct ctx_cam *cam, motion_event evnt
         ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
 {
@@ -155,10 +116,10 @@ static void on_picture_save_command(struct ctx_cam *cam, motion_event evnt
     (void)ts1;
 
     if ((filetype & FTYPE_IMAGE_ANY) != 0 && (cam->conf->on_picture_save != ""))
-        exec_command(cam, cam->conf->on_picture_save.c_str(), fname, filetype);
+        util_exec_command(cam, cam->conf->on_picture_save.c_str(), fname, filetype);
 
     if ((filetype & FTYPE_MPEG_ANY) != 0 && (cam->conf->on_movie_start != ""))
-        exec_command(cam, cam->conf->on_movie_start.c_str(), fname, filetype);
+        util_exec_command(cam, cam->conf->on_movie_start.c_str(), fname, filetype);
 }
 
 static void on_motion_detected_command(struct ctx_cam *cam, motion_event evnt
@@ -172,7 +133,7 @@ static void on_motion_detected_command(struct ctx_cam *cam, motion_event evnt
     (void)ts1;
 
     if (cam->conf->on_motion_detected != "")
-        exec_command(cam, cam->conf->on_motion_detected.c_str(), NULL, 0);
+        util_exec_command(cam, cam->conf->on_motion_detected.c_str(), NULL, 0);
 }
 
 static void event_sqlfirstmotion(struct ctx_cam *cam, motion_event evnt
@@ -240,7 +201,7 @@ static void on_area_command(struct ctx_cam *cam, motion_event evnt
     (void)ts1;
 
     if (cam->conf->on_area_detected != "")
-        exec_command(cam, cam->conf->on_area_detected.c_str(), NULL, 0);
+        util_exec_command(cam, cam->conf->on_area_detected.c_str(), NULL, 0);
 }
 
 static void on_event_start_command(struct ctx_cam *cam, motion_event evnt
@@ -254,7 +215,7 @@ static void on_event_start_command(struct ctx_cam *cam, motion_event evnt
     (void)ts1;
 
     if (cam->conf->on_event_start != "")
-        exec_command(cam, cam->conf->on_event_start.c_str(), NULL, 0);
+        util_exec_command(cam, cam->conf->on_event_start.c_str(), NULL, 0);
 }
 
 static void on_event_end_command(struct ctx_cam *cam, motion_event evnt
@@ -268,7 +229,7 @@ static void on_event_end_command(struct ctx_cam *cam, motion_event evnt
     (void)ts1;
 
     if (cam->conf->on_event_end != "")
-        exec_command(cam, cam->conf->on_event_end.c_str(), NULL, 0);
+        util_exec_command(cam, cam->conf->on_event_end.c_str(), NULL, 0);
 }
 
 static void event_stream_put(struct ctx_cam *cam, motion_event evnt
@@ -479,7 +440,7 @@ static void event_camera_lost(struct ctx_cam *cam, motion_event evnt
     (void)ts1;
 
     if (cam->conf->on_camera_lost != "")
-        exec_command(cam, cam->conf->on_camera_lost.c_str(), NULL, 0);
+        util_exec_command(cam, cam->conf->on_camera_lost.c_str(), NULL, 0);
 }
 
 static void event_secondary_detect(struct ctx_cam *cam, motion_event evnt
@@ -495,7 +456,7 @@ static void event_secondary_detect(struct ctx_cam *cam, motion_event evnt
     MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO,_("Event secondary detect"));
 
     if (cam->conf->on_secondary_detect != "")
-        exec_command(cam, cam->conf->on_secondary_detect.c_str(), NULL, 0);
+        util_exec_command(cam, cam->conf->on_secondary_detect.c_str(), NULL, 0);
 }
 
 static void event_camera_found(struct ctx_cam *cam, motion_event evnt
@@ -509,7 +470,7 @@ static void event_camera_found(struct ctx_cam *cam, motion_event evnt
     (void)ts1;
 
     if (cam->conf->on_camera_found != "")
-        exec_command(cam, cam->conf->on_camera_found.c_str(), NULL, 0);
+        util_exec_command(cam, cam->conf->on_camera_found.c_str(), NULL, 0);
 }
 
 static void on_movie_end_command(struct ctx_cam *cam, motion_event evnt
@@ -523,7 +484,7 @@ static void on_movie_end_command(struct ctx_cam *cam, motion_event evnt
     (void)ts1;
 
     if ((filetype & FTYPE_MPEG_ANY) && (cam->conf->on_movie_end != ""))
-        exec_command(cam, cam->conf->on_movie_end.c_str(), fname, filetype);
+        util_exec_command(cam, cam->conf->on_movie_end.c_str(), fname, filetype);
 }
 
 static void event_extpipe_end(struct ctx_cam *cam, motion_event evnt

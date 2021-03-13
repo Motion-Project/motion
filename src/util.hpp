@@ -99,6 +99,7 @@
     int myfclose(FILE *);
     size_t mystrftime(const struct ctx_cam *, char *, size_t, const char *, const struct timespec *, const char *, int);
     int mycreate_path(const char *);
+    void util_exec_command(struct ctx_cam *cam, const char *command, char *filename, int filetype);
 
     void mythreadname_set(const char *abbr, int threadnbr, const char *threadname);
     void mythreadname_get(char *threadname);
@@ -131,5 +132,6 @@
     void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl);
     void util_parms_free(struct ctx_params *params);
     void util_parms_update(struct ctx_params *params, std::string &confline);
+
 
 #endif
