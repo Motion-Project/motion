@@ -18,4 +18,5 @@ src/video_v4l2.cpp
 src/webu.cpp
 src/webu_html.cpp
 src/webu_stream.cpp
-src/webu_text.cpp
+src/webu_json.cpp
+src/webu_post.cpp
