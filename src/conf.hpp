@@ -178,12 +178,9 @@
         std::string     sql_query_stop;
         std::string     sql_query;
 
-        int             track_type;
         int             track_auto;
-        int             track_step_angle_x;
-        int             track_step_angle_y;
         int             track_move_wait;
-        std::string     track_generic_move;
+        std::string     track_move_command;
     };
 
     /* Categories for he edits and display on web interface*/

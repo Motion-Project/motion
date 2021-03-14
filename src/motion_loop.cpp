@@ -32,7 +32,6 @@
 #include "conf.hpp"
 #include "alg.hpp"
 #include "alg_sec.hpp"
-#include "track.hpp"
 #include "event.hpp"
 #include "picture.hpp"
 #include "rotate.hpp"
@@ -208,7 +207,30 @@ static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img
 
 }
 
-static void mlp_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *img)
+static void mlp_track_center(struct ctx_cam *cam)
+{
+
+    if ((cam->conf->track_auto) && (cam->conf->track_move_command != "")) {
+        cam->track_posx = 0;
+        cam->track_posy = 0;
+        util_exec_command(cam, cam->conf->track_move_command.c_str(), NULL, 0);
+        cam->frame_skip = cam->conf->track_move_wait;
+    }
+
+}
+
+static void mlp_track_move(struct ctx_cam *cam, struct ctx_coord *cent)
+{
+
+    if ((cam->conf->track_auto) && (cam->conf->track_move_command != "")) {
+            cam->track_posx += cent->x;
+            cam->track_posy += cent->y;
+            util_exec_command(cam, cam->conf->track_move_command.c_str(), NULL, 0);
+            cam->frame_skip = cam->conf->track_move_wait;
+    }
+}
+
+static void mlp_detected(struct ctx_cam *cam, struct ctx_image_data *img)
 {
     struct ctx_config *conf = cam->conf;
     unsigned int distX, distY;
@@ -233,9 +255,7 @@ static void mlp_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *im
         }
     }
 
-    if (cam->conf->track_type && cam->conf->track_auto){
-        cam->frame_skip = track_move(cam, dev, &img->location, &cam->imgs, 0);
-    }
+    mlp_track_move(cam, &img->location);
 
 }
 
@@ -671,8 +691,6 @@ static int mlp_init(struct ctx_cam *cam)
 
     pic_init_privacy(cam);
 
-    track_init(cam);
-
     mlp_init_areadetect(cam);
 
     mlp_init_ref(cam);
@@ -698,8 +716,6 @@ void mlp_cleanup(struct ctx_cam *cam)
     webu_stream_deinit(cam);
 
     algsec_deinit(cam);
-
-    track_deinit(cam);
 
     if (cam->video_dev >= 0) mlp_cam_close(cam);
 
@@ -1167,7 +1183,7 @@ static void mlp_actions_emulate(struct ctx_cam *cam)
         cam->imgs.image_ring[indx].flags |= IMAGE_SAVE;
     }
 
-    mlp_detected(cam, cam->video_dev, cam->current_image);
+    mlp_detected(cam, cam->current_image);
 
 }
 
@@ -1207,7 +1223,7 @@ static void mlp_actions_motion(struct ctx_cam *cam)
         cam->current_image->flags |= IMAGE_PRECAP;
     }
 
-    mlp_detected(cam, cam->video_dev, cam->current_image);
+    mlp_detected(cam, cam->current_image);
 }
 
 static void mlp_actions_event(struct ctx_cam *cam)
@@ -1231,9 +1247,7 @@ static void mlp_actions_event(struct ctx_cam *cam)
             }
             event(cam, EVENT_ENDMOTION, NULL, NULL, NULL, &cam->current_image->imgts);
 
-            if (cam->conf->track_type) {
-                cam->frame_skip = track_center(cam, cam->video_dev, 0, 0, 0);
-            }
+            mlp_track_center(cam);
 
             if (cam->algsec_inuse){
                 if (cam->algsec->isdetected){

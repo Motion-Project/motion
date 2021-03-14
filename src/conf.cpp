@@ -623,14 +623,10 @@ struct ctx_parm config_parms[] = {
     0, PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED},
 
     {
-    "track_type",
+    "track_auto",
     "############################################################\n"
     "# Tracking configuration parameters\n"
     "############################################################\n\n"
-    "# Method used by tracking camera. See motionplus_guide.html",
-    0, PARM_TYP_INT, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
-    {
-    "track_auto",
     "# Enable auto tracking",
     0, PARM_TYP_BOOL, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
     {
@@ -638,17 +634,9 @@ struct ctx_parm config_parms[] = {
     "# Delay to wait for after tracking movement as number of picture frames.",
     0, PARM_TYP_INT, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
     {
-    "track_generic_move",
+    "track_move_command",
     "# Command to execute to move a camera in generic tracking mode",
     0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
-    {
-    "track_step_angle_x",
-    "# Angle in degrees the camera moves per step on the X-axis with auto-track",
-    0, PARM_TYP_INT, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
-    {
-    "track_step_angle_y",
-    "# Angle in degrees the camera moves per step on the Y-axis with auto-track.",
-    0, PARM_TYP_INT, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
     {
     "camera",
     "##############################################################\n"
@@ -2995,25 +2983,6 @@ static void conf_edit_sql_query(struct ctx_cam *cam, std::string &parm, enum PAR
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_query",_("sql_query"));
 }
 
-static void conf_edit_track_type(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT){
-        cam->conf->track_type = 0;
-    } else if (pact == PARM_ACT_SET){
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 5)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid track_type %d"),parm_in);
-        } else {
-            cam->conf->track_type = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET){
-        parm = std::to_string(cam->conf->track_type);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_type",_("track_type"));
-}
-
 static void conf_edit_track_auto(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT){
@@ -3046,55 +3015,17 @@ static void conf_edit_track_move_wait(struct ctx_cam *cam, std::string &parm, en
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_move_wait",_("track_move_wait"));
 }
 
-static void conf_edit_track_generic_move(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_track_move_command(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->track_generic_move = "";
+        cam->conf->track_move_command = "";
     } else if (pact == PARM_ACT_SET){
-        cam->conf->track_generic_move = parm;
+        cam->conf->track_move_command = parm;
     } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->track_generic_move;
+        parm = cam->conf->track_move_command;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_generic_move",_("track_generic_move"));
-}
-
-static void conf_edit_track_step_angle_x(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT){
-        cam->conf->track_step_angle_x = 0;
-    } else if (pact == PARM_ACT_SET){
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 2147483647)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid track_step_angle_x %d"),parm_in);
-        } else {
-            cam->conf->track_step_angle_x = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET){
-        parm = std::to_string(cam->conf->track_step_angle_x);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_step_angle_x",_("track_step_angle_x"));
-}
-
-static void conf_edit_track_step_angle_y(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT){
-        cam->conf->track_step_angle_y = 0;
-    } else if (pact == PARM_ACT_SET){
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 2147483647)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid track_step_angle_y %d"),parm_in);
-        } else {
-            cam->conf->track_step_angle_y = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET){
-        parm = std::to_string(cam->conf->track_step_angle_y);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_step_angle_y",_("track_step_angle_y"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_move_command",_("track_move_command"));
 }
 
 /* Application level parameters */
@@ -3352,12 +3283,9 @@ static void conf_edit_cat16(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat17(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "track_type"){              conf_edit_track_type(cam, parm_val, pact);
-    } else if (parm_nm == "track_auto"){              conf_edit_track_auto(cam, parm_val, pact);
+    if (parm_nm == "track_auto"){                     conf_edit_track_auto(cam, parm_val, pact);
     } else if (parm_nm == "track_move_wait"){         conf_edit_track_move_wait(cam, parm_val, pact);
-    } else if (parm_nm == "track_generic_move"){      conf_edit_track_generic_move(cam, parm_val, pact);
-    } else if (parm_nm == "track_step_angle_x"){      conf_edit_track_step_angle_x(cam, parm_val, pact);
-    } else if (parm_nm == "track_step_angle_y"){      conf_edit_track_step_angle_y(cam, parm_val, pact);
+    } else if (parm_nm == "track_move_command"){      conf_edit_track_move_command(cam, parm_val, pact);
     }
 
 }

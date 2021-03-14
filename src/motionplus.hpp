@@ -80,7 +80,6 @@ struct ctx_movie;
 struct ctx_netcam;
 struct ctx_algsec;
 struct ctx_config;
-struct ctx_track;
 struct ctx_v4l2cam;
 
 #define MYFFVER (LIBAVFORMAT_VERSION_MAJOR * 1000)+LIBAVFORMAT_VERSION_MINOR
@@ -284,7 +283,6 @@ struct ctx_cam {
     pthread_t               thread_id;
 
     struct ctx_config       *conf;
-    struct ctx_track        *track;
     struct ctx_images       imgs;
     struct ctx_mmalcam      *mmalcam;
     struct ctx_netcam       *netcam;            /* this structure contains the context for normal RTSP connection */

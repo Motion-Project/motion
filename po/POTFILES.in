@@ -11,7 +11,6 @@ src/motionplus.cpp
 src/netcam.cpp
 src/picture.cpp
 src/rotate.cpp
-src/track.cpp
 src/video_common.cpp
 src/video_loopback.cpp
 src/video_v4l2.cpp
