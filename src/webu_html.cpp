@@ -612,13 +612,39 @@ static void webu_html_script_camera_click(struct webui_ctx *webui)
         "      if (gIndexCam > 0) {\n"
         "        camid = pData['cameras'][index_cam].id;\n"
         "        html_preview += \"<tr><td>&nbsp&nbsp</td><td>&nbsp&nbsp</td></tr>\\n\";\n"
-        "        html_preview += \"<tr><td></td><td><button class='arrow up'></button></td></tr>\\n\";\n"
-        "        html_preview += \"<tr><td><button class='arrow left'></button></td><td></td>\\n\";\n"
-        "        html_preview += \"<td><button class='arrow right'></button></td><td>&nbsp&nbsp</td><tr>\\n\";\n"
-        "        html_preview += \"<tr><td></td><td><button class='arrow down'></button></td></tr>\\n\";\n"
+
+        "        html_preview += \"<tr><td></td><td><button \\n\";\n"
+        "        html_preview += \"onclick=\\\"action_ptz('tilt_up');\\\" \\n\";\n"
+        "        html_preview += \"class=\\\"arrow up\\\" \\n\";\n"
+        "        html_preview += \"></button></td></tr> \\n\";\n"
+
+        "        html_preview += \"<tr><td><button \\n\";\n"
+        "        html_preview += \"onclick=\\\"action_ptz('pan_left');\\\" \\n\";\n"
+        "        html_preview += \"class=\\\"arrow left\\\" \\n\";\n"
+        "        html_preview += \"></button></td><td></td> \\n\";\n"
+
+        "        html_preview += \"<td><button \\n\";\n"
+        "        html_preview += \"onclick=\\\"action_ptz('pan_right');\\\" \\n\";\n"
+        "        html_preview += \"class=\\\"arrow right\\\" \\n\";\n"
+        "        html_preview += \"></button></td><td>&nbsp&nbsp</td></tr> \\n\";\n"
+
+        "        html_preview += \"<tr><td></td><td><button \\n\";\n"
+        "        html_preview += \"onclick=\\\"action_ptz('tilt_down');\\\" \\n\";\n"
+        "        html_preview += \"class=\\\"arrow down\\\" \\n\";\n"
+        "        html_preview += \"></button></td></tr> \\n\";\n"
+
         "        html_preview += \"<tr><td>&nbsp&nbsp</td><td>&nbsp&nbsp</td></tr>\\n\";\n"
-        "        html_preview += \"<tr><td></td><td><button class='zoombtn'>+</button></td></tr>\\n\";\n"
-        "        html_preview += \"<tr><td></td><td><button class='zoombtn'>-</button></td></tr>\\n\";\n"
+
+        "        html_preview += \"<tr><td></td><td><button \\n\";\n"
+        "        html_preview += \"onclick=\\\"action_ptz('zoom_in');\\\" \\n\";\n"
+        "        html_preview += \"class=\\\"zoombtn\\\" \\n\";\n"
+        "        html_preview += \">+</button></td></tr> \\n\";\n"
+
+        "        html_preview += \"<tr><td></td><td><button \\n\";\n"
+        "        html_preview += \"onclick=\\\"action_ptz('zoom_out');\\\" \\n\";\n"
+        "        html_preview += \"class=\\\"zoombtn\\\" \\n\";\n"
+        "        html_preview += \">-</button></td></tr> \\n\";\n"
+
         "        html_preview += \"<tr><td>&nbsp&nbsp</td><td>&nbsp&nbsp</td></tr>\\n\";\n"
 
         "        html_preview += \"</table>\";\n"
@@ -725,6 +751,22 @@ static void webu_html_script_timer_pic(struct webui_ctx *webui)
 
 }
 
+/* Create the pictimer_function javascript function */
+static void webu_html_script_ptz(struct webui_ctx *webui)
+{
+    webui->resp_page +=
+        "    function action_ptz(actval) {\n\n"
+        "      var formData = new FormData();\n"
+        "      var camid = pData['cameras'][gIndexCam]['id'];\n\n"
+        "      formData.append('command', actval);\n"
+        "      formData.append('camid', camid);\n\n"
+        "      var request = new XMLHttpRequest();\n"
+        "      request.open('POST', '" + webui->hostfull + "');\n"
+        "      request.send(formData);\n\n"
+        "      return;\n"
+        "    }\n\n";
+}
+
 /* Call all the functions to create the java scripts of page*/
 static void webu_html_script(struct webui_ctx *webui)
 {
@@ -747,6 +789,7 @@ static void webu_html_script(struct webui_ctx *webui)
     webu_html_script_camera_click(webui);
     webu_html_script_timer_function(webui);
     webu_html_script_timer_pic(webui);
+    webu_html_script_ptz(webui);
 
     webui->resp_page += "  </script>\n\n";
 

@@ -623,19 +623,43 @@ struct ctx_parm config_parms[] = {
     0, PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED},
 
     {
-    "track_auto",
+    "ptz_auto_track",
     "############################################################\n"
-    "# Tracking configuration parameters\n"
+    "# Pan, Tilt, Zoom configuration parameters\n"
     "############################################################\n\n"
     "# Enable auto tracking",
     0, PARM_TYP_BOOL, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
     {
-    "track_move_wait",
-    "# Delay to wait for after tracking movement as number of picture frames.",
+    "ptz_wait",
+    "# Frame count to delay after a PTZ action.",
     0, PARM_TYP_INT, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
     {
-    "track_move_command",
-    "# Command to execute to move a camera in generic tracking mode",
+    "ptz_move_track",
+    "# Command to execute for auto tracking ",
+    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
+    {
+    "ptz_pan_left",
+    "# Command to execute for moving camera left",
+    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
+    {
+    "ptz_pan_right",
+    "# Command to execute for moving camera right ",
+    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
+    {
+    "ptz_tilt_up",
+    "# Command to execute for moving camera up ",
+    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
+    {
+    "ptz_tilt_down",
+    "# Command to execute for moving camera down ",
+    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
+    {
+    "ptz_zoom_in",
+    "# Command to execute for zooming the camera in ",
+    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
+    {
+    "ptz_zoom_out",
+    "# Command to execute for zooming camera out ",
     0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
     {
     "camera",
@@ -2983,49 +3007,127 @@ static void conf_edit_sql_query(struct ctx_cam *cam, std::string &parm, enum PAR
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_query",_("sql_query"));
 }
 
-static void conf_edit_track_auto(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_ptz_auto_track(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT){
-        cam->conf->track_auto = FALSE;
+        cam->conf->ptz_auto_track = FALSE;
     } else if (pact == PARM_ACT_SET){
-        conf_edit_set_bool(cam->conf->track_auto, parm);
+        conf_edit_set_bool(cam->conf->ptz_auto_track, parm);
     } else if (pact == PARM_ACT_GET){
-        conf_edit_get_bool(parm, cam->conf->track_auto);
+        conf_edit_get_bool(parm, cam->conf->ptz_auto_track);
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_auto",_("track_auto"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_auto_track",_("ptz_auto_track"));
 }
 
-static void conf_edit_track_move_wait(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_ptz_wait(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT){
-        cam->conf->track_move_wait = 0;
+        cam->conf->ptz_wait = 0;
     } else if (pact == PARM_ACT_SET){
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid track_move_wait %d"),parm_in);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid ptz_wait %d"),parm_in);
         } else {
-            cam->conf->track_move_wait = parm_in;
+            cam->conf->ptz_wait = parm_in;
         }
     } else if (pact == PARM_ACT_GET){
-        parm = std::to_string(cam->conf->track_move_wait);
+        parm = std::to_string(cam->conf->ptz_wait);
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_move_wait",_("track_move_wait"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_wait",_("ptz_wait"));
 }
 
-static void conf_edit_track_move_command(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_ptz_move_track(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->track_move_command = "";
+        cam->conf->ptz_move_track = "";
     } else if (pact == PARM_ACT_SET){
-        cam->conf->track_move_command = parm;
+        cam->conf->ptz_move_track = parm;
     } else if (pact == PARM_ACT_GET){
-        parm = cam->conf->track_move_command;
+        parm = cam->conf->ptz_move_track;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_move_command",_("track_move_command"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_move_track",_("ptz_move_track"));
+}
+
+static void conf_edit_ptz_pan_left(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->ptz_pan_left = "";
+    } else if (pact == PARM_ACT_SET){
+        cam->conf->ptz_pan_left = parm;
+    } else if (pact == PARM_ACT_GET){
+        parm = cam->conf->ptz_pan_left;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_pan_left",_("ptz_pan_left"));
+}
+
+static void conf_edit_ptz_pan_right(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->ptz_pan_right = "";
+    } else if (pact == PARM_ACT_SET){
+        cam->conf->ptz_pan_right = parm;
+    } else if (pact == PARM_ACT_GET){
+        parm = cam->conf->ptz_pan_right;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_pan_right",_("ptz_pan_right"));
+}
+
+static void conf_edit_ptz_tilt_up(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->ptz_tilt_up = "";
+    } else if (pact == PARM_ACT_SET){
+        cam->conf->ptz_tilt_up = parm;
+    } else if (pact == PARM_ACT_GET){
+        parm = cam->conf->ptz_tilt_up;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_tilt_up",_("ptz_tilt_up"));
+}
+
+static void conf_edit_ptz_tilt_down(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->ptz_tilt_down = "";
+    } else if (pact == PARM_ACT_SET){
+        cam->conf->ptz_tilt_down = parm;
+    } else if (pact == PARM_ACT_GET){
+        parm = cam->conf->ptz_tilt_down;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_tilt_down",_("ptz_tilt_down"));
+}
+
+static void conf_edit_ptz_zoom_in(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->ptz_zoom_in = "";
+    } else if (pact == PARM_ACT_SET){
+        cam->conf->ptz_zoom_in = parm;
+    } else if (pact == PARM_ACT_GET){
+        parm = cam->conf->ptz_zoom_in;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_zoom_in",_("ptz_zoom_in"));
+}
+
+static void conf_edit_ptz_zoom_out(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->ptz_zoom_out = "";
+    } else if (pact == PARM_ACT_SET){
+        cam->conf->ptz_zoom_out = parm;
+    } else if (pact == PARM_ACT_GET){
+        parm = cam->conf->ptz_zoom_out;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_zoom_out",_("ptz_zoom_out"));
 }
 
 /* Application level parameters */
@@ -3283,9 +3385,15 @@ static void conf_edit_cat16(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat17(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "track_auto"){                     conf_edit_track_auto(cam, parm_val, pact);
-    } else if (parm_nm == "track_move_wait"){         conf_edit_track_move_wait(cam, parm_val, pact);
-    } else if (parm_nm == "track_move_command"){      conf_edit_track_move_command(cam, parm_val, pact);
+    if (parm_nm == "ptz_auto_track"){           conf_edit_ptz_auto_track(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_wait"){          conf_edit_ptz_wait(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_move_track"){    conf_edit_ptz_move_track(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_pan_left"){      conf_edit_ptz_pan_left(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_pan_right"){     conf_edit_ptz_pan_right(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_tilt_up"){       conf_edit_ptz_tilt_up(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_tilt_down"){     conf_edit_ptz_tilt_down(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_zoom_in"){       conf_edit_ptz_zoom_in(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_zoom_out"){      conf_edit_ptz_zoom_out(cam, parm_val, pact);
     }
 
 }

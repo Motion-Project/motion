@@ -96,7 +96,7 @@ static void webu_post_cam_delete(struct webui_ctx *webui)
 }
 
 /* Get the command and thread number from the post data */
-void webu_post_cmdthr(struct webui_ctx *webui)
+void webu_post_cmdthrd(struct webui_ctx *webui)
 {
     int indx, camid;
 
@@ -351,11 +351,44 @@ static void webu_post_config(struct webui_ctx *webui)
 
 }
 
+/* Process the ptz action */
+void webu_post_ptz(struct webui_ctx *webui)
+{
+    struct ctx_cam *cam;
+
+    cam = webui->motapp->cam_list[webui->threadnbr];
+
+    if ((webui->post_cmd == "pan_left") && (cam->conf->ptz_pan_left != "")) {
+        util_exec_command(cam, cam->conf->ptz_pan_left.c_str(), NULL, 0);
+
+    } else if ((webui->post_cmd == "pan_right") && (cam->conf->ptz_pan_right != "")) {
+        util_exec_command(cam, cam->conf->ptz_pan_right.c_str(), NULL, 0);
+
+    } else if ((webui->post_cmd == "tilt_up") && (cam->conf->ptz_tilt_up != "")) {
+        util_exec_command(cam, cam->conf->ptz_tilt_up.c_str(), NULL, 0);
+
+    } else if ((webui->post_cmd == "tilt_down") && (cam->conf->ptz_tilt_down != "")) {
+        util_exec_command(cam, cam->conf->ptz_tilt_down.c_str(), NULL, 0);
+
+    } else if ((webui->post_cmd == "zoom_in") && (cam->conf->ptz_zoom_in != "")) {
+        util_exec_command(cam, cam->conf->ptz_zoom_in.c_str(), NULL, 0);
+
+    } else if ((webui->post_cmd == "zoom_out") && (cam->conf->ptz_zoom_out != "")) {
+        util_exec_command(cam, cam->conf->ptz_zoom_out.c_str(), NULL, 0);
+
+    } else {
+        return;
+    }
+
+    cam->frame_skip = cam->conf->ptz_wait;
+
+}
+
 /* Process the actions from the webcontrol that the user requested */
 void webu_post_main(struct webui_ctx *webui)
 {
 
-    webu_post_cmdthr(webui);
+    webu_post_cmdthrd(webui);
 
     if ((webui->post_cmd == "") || (webui->threadnbr == -1)) {
         return;
@@ -393,6 +426,15 @@ void webu_post_main(struct webui_ctx *webui)
 
     } else if (webui->post_cmd == "config") {
         webu_post_config(webui);
+
+    } else if (
+        (webui->post_cmd == "pan_left") ||
+        (webui->post_cmd == "pan_right") ||
+        (webui->post_cmd == "tilt_up") ||
+        (webui->post_cmd == "tilt_down") ||
+        (webui->post_cmd == "zoom_in") ||
+        (webui->post_cmd == "zoom_out")) {
+        webu_post_ptz(webui);
 
     } else {
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO

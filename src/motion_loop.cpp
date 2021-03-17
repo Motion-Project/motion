@@ -210,11 +210,11 @@ static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img
 static void mlp_track_center(struct ctx_cam *cam)
 {
 
-    if ((cam->conf->track_auto) && (cam->conf->track_move_command != "")) {
+    if ((cam->conf->ptz_auto_track) && (cam->conf->ptz_move_track != "")) {
         cam->track_posx = 0;
         cam->track_posy = 0;
-        util_exec_command(cam, cam->conf->track_move_command.c_str(), NULL, 0);
-        cam->frame_skip = cam->conf->track_move_wait;
+        util_exec_command(cam, cam->conf->ptz_move_track.c_str(), NULL, 0);
+        cam->frame_skip = cam->conf->ptz_wait;
     }
 
 }
@@ -222,11 +222,11 @@ static void mlp_track_center(struct ctx_cam *cam)
 static void mlp_track_move(struct ctx_cam *cam, struct ctx_coord *cent)
 {
 
-    if ((cam->conf->track_auto) && (cam->conf->track_move_command != "")) {
+    if ((cam->conf->ptz_auto_track) && (cam->conf->ptz_move_track != "")) {
             cam->track_posx += cent->x;
             cam->track_posy += cent->y;
-            util_exec_command(cam, cam->conf->track_move_command.c_str(), NULL, 0);
-            cam->frame_skip = cam->conf->track_move_wait;
+            util_exec_command(cam, cam->conf->ptz_move_track.c_str(), NULL, 0);
+            cam->frame_skip = cam->conf->ptz_wait;
     }
 }
 

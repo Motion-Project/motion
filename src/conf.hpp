@@ -178,9 +178,16 @@
         std::string     sql_query_stop;
         std::string     sql_query;
 
-        int             track_auto;
-        int             track_move_wait;
-        std::string     track_move_command;
+        int             ptz_auto_track;         /* Bool to enable auto tracking */
+        int             ptz_wait;               /* Frames to wait after a PTZ move */
+        std::string     ptz_move_track;         /* Auto tracking command */
+        std::string     ptz_pan_left;           /* Pan left command */
+        std::string     ptz_pan_right;          /* Pan right command */
+        std::string     ptz_tilt_up;            /* Tilt up command */
+        std::string     ptz_tilt_down;          /* Tilt down command */
+        std::string     ptz_zoom_in;            /* Zoom in command */
+        std::string     ptz_zoom_out;           /* Zoom out command */
+
     };
 
     /* Categories for he edits and display on web interface*/
