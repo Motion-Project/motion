@@ -545,6 +545,14 @@ struct ctx_parm config_parms[] = {
     "# Method for showing stream on webcontrol.",
     0, PARM_TYP_INT, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {
+    "stream_preview_actions",
+    "# Show the action buttons on the webcontrol for the camera.",
+    0, PARM_TYP_BOOL, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
+    {
+    "stream_preview_ptz",
+    "# Show the PTZ buttons on the webcontrol for the camera.",
+    0, PARM_TYP_BOOL, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
+    {
     "stream_quality",
     "# Quality of the jpeg images produced for stream.",
     0, PARM_TYP_INT, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
@@ -2744,6 +2752,32 @@ static void conf_edit_stream_preview_method(struct ctx_cam *cam, std::string &pa
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_method",_("stream_preview_method"));
 }
 
+static void conf_edit_stream_preview_actions(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT){
+        cam->conf->stream_preview_actions = true;
+    } else if (pact == PARM_ACT_SET){
+        conf_edit_set_bool(cam->conf->stream_preview_actions, parm);
+    } else if (pact == PARM_ACT_GET){
+        conf_edit_get_bool(parm, cam->conf->stream_preview_actions);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_actions",_("stream_preview_actions"));
+}
+
+static void conf_edit_stream_preview_ptz(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT){
+        cam->conf->stream_preview_ptz = true;
+    } else if (pact == PARM_ACT_SET){
+        conf_edit_set_bool(cam->conf->stream_preview_ptz, parm);
+    } else if (pact == PARM_ACT_GET){
+        conf_edit_get_bool(parm, cam->conf->stream_preview_ptz);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_ptz",_("stream_preview_ptz"));
+}
+
 static void conf_edit_stream_quality(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
@@ -3344,9 +3378,11 @@ static void conf_edit_cat13(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat14(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "stream_preview_scale"){        conf_edit_stream_preview_scale(cam, parm_val, pact);
+    if (parm_nm == "stream_preview_scale"){               conf_edit_stream_preview_scale(cam, parm_val, pact);
     } else if (parm_nm == "stream_preview_newline"){      conf_edit_stream_preview_newline(cam, parm_val, pact);
     } else if (parm_nm == "stream_preview_method"){       conf_edit_stream_preview_method(cam, parm_val, pact);
+    } else if (parm_nm == "stream_preview_actions"){      conf_edit_stream_preview_actions(cam, parm_val, pact);
+    } else if (parm_nm == "stream_preview_ptz"){          conf_edit_stream_preview_ptz(cam, parm_val, pact);
     } else if (parm_nm == "stream_quality"){              conf_edit_stream_quality(cam, parm_val, pact);
     } else if (parm_nm == "stream_grey"){                 conf_edit_stream_grey(cam, parm_val, pact);
     } else if (parm_nm == "stream_motion"){               conf_edit_stream_motion(cam, parm_val, pact);

@@ -559,14 +559,15 @@ static mhdrslt webu_answer_post(struct webui_ctx *webui)
 
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,"processing post");
 
-    webu_post_main(webui);
+    pthread_mutex_lock(&webui->motapp->mutex_post);
+        webu_post_main(webui);
+    pthread_mutex_unlock(&webui->motapp->mutex_post);
 
     if (webui->motapp->cam_list[0]->conf->webcontrol_interface == 3) {
         webu_html_user(webui);
     } else {
         webu_html_page(webui);
     }
-
 
     retcd = webu_mhd_send(webui);
     if (retcd == MHD_NO) {
@@ -700,18 +701,24 @@ static mhdrslt webu_answer_get(struct webui_ctx *webui)
 
     } else if ((webui->uri_camid == "config.json") ||
                (webui->uri_cmd1 == "config.json")) {
-        webu_json_config(webui);
+
+        pthread_mutex_lock(&webui->motapp->mutex_post);
+            webu_json_config(webui);
+        pthread_mutex_unlock(&webui->motapp->mutex_post);
+
         retcd = webu_mhd_send(webui);
         if (retcd == MHD_NO) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
         }
 
     } else {
-        if (webui->motapp->cam_list[0]->conf->webcontrol_interface == 3) {
-            webu_html_user(webui);
-        } else {
-            webu_html_page(webui);
-        }
+        pthread_mutex_lock(&webui->motapp->mutex_post);
+            if (webui->motapp->cam_list[0]->conf->webcontrol_interface == 3) {
+                webu_html_user(webui);
+            } else {
+                webu_html_page(webui);
+            }
+        pthread_mutex_unlock(&webui->motapp->mutex_post);
 
         retcd = webu_mhd_send(webui);
         if (retcd == MHD_NO) {

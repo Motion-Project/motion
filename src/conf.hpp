@@ -156,6 +156,8 @@
         int             stream_preview_scale;
         int             stream_preview_newline;
         int             stream_preview_method;
+        int             stream_preview_actions;
+        int             stream_preview_ptz;
         int             stream_quality;
         int             stream_grey;
         int             stream_motion;

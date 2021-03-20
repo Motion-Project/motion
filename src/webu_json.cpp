@@ -158,7 +158,7 @@ static void webu_json_config_cam_parms(struct webui_ctx *webui)
             webui->resp_page += ",";
         }
         webui->resp_page += "\"cam" +
-            std::to_string(webui->motapp->cam_list[indx_cam]->conf->camera_id) + "\": ";
+            std::to_string(webui->motapp->cam_list[indx_cam]->camera_id) + "\": ";
 
         webu_json_config_parms(webui, indx_cam);
 
@@ -190,21 +190,21 @@ static void webu_json_config_cam_list(struct webui_ctx *webui)
             webui->resp_page += "{\"name\": \"default\" ";
         } else if (webui->motapp->cam_list[indx_cam]->conf->camera_name == "") {
             webui->resp_page += "{\"name\": \"camera " +
-                std::to_string(webui->motapp->cam_list[indx_cam]->conf->camera_id) + "\"";
+                std::to_string(webui->motapp->cam_list[indx_cam]->camera_id) + "\"";
         } else {
             webui->resp_page += "{\"name\": \"" +
                 webui->motapp->cam_list[indx_cam]->conf->camera_name + "\"";
         }
 
         webui->resp_page += ",\"id\": " +
-            std::to_string(webui->motapp->cam_list[indx_cam]->conf->camera_id);
+            std::to_string(webui->motapp->cam_list[indx_cam]->camera_id);
 
         if (indx_cam == 0) {
             webui->resp_page += "}";
         } else {
             webui->resp_page +=
                 ",\"url\": \"" + webui->hostfull +
-                "/" + std::to_string(webui->motapp->cam_list[indx_cam]->conf->camera_id) +
+                "/" + std::to_string(webui->motapp->cam_list[indx_cam]->camera_id) +
                 "/\"} ";
         }
 
@@ -234,7 +234,7 @@ static void webu_json_config_categories(struct webui_ctx *webui)
         } else if (indx_cat == PARM_CAT_01) {
             webui->resp_page += "{\"name\":\"camera\",\"display\":\"Camera\"}";
         } else if (indx_cat == PARM_CAT_02) {
-            webui->resp_page += "{\"name\":\"source\",\"display\":\"Camera Source\"}";
+            webui->resp_page += "{\"name\":\"source\",\"display\":\"Source\"}";
         } else if (indx_cat == PARM_CAT_03) {
             webui->resp_page += "{\"name\":\"image\",\"display\":\"Image\"}";
         } else if (indx_cat == PARM_CAT_04) {

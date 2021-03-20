@@ -41,7 +41,7 @@ static void webu_post_cam_add(struct webui_ctx *webui)
     }
 
     if (indx == maxcnt) {
-        webui->motapp->cam_add = true;
+        webui->motapp->cam_add = false;
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error adding camera.  Timed out");
         return;
     }
@@ -60,6 +60,7 @@ static void webu_post_cam_delete(struct webui_ctx *webui)
     } else {
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Deleting camera.");
     }
+
 
     maxcnt = 100;
 
@@ -394,6 +395,7 @@ void webu_post_main(struct webui_ctx *webui)
         return;
     }
 
+
     if (webui->post_cmd == "eventend") {
         webu_post_action_eventend(webui);
 
@@ -415,13 +417,13 @@ void webu_post_main(struct webui_ctx *webui)
     } else if (webui->post_cmd == "stop") {
         webu_post_action_stop(webui);
 
-    } else if (webui->post_cmd == "write") {
+    } else if (webui->post_cmd == "config_write") {
         conf_parms_write(webui->motapp);
 
-    } else if (webui->post_cmd == "add") {
+    } else if (webui->post_cmd == "camera_add") {
         webu_post_cam_add(webui);
 
-    } else if (webui->post_cmd == "delete") {
+    } else if (webui->post_cmd == "camera_delete") {
         webu_post_cam_delete(webui);
 
     } else if (webui->post_cmd == "config") {
@@ -440,7 +442,6 @@ void webu_post_main(struct webui_ctx *webui)
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO
             , _("Invalid action requested: command: >%s< threadnbr : >%d< ")
             , webui->post_cmd.c_str(), webui->threadnbr);
-        return;
     }
 
 }

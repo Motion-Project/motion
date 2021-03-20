@@ -411,7 +411,9 @@ struct ctx_motapp {
 
     int                 parms_changed;      /*bool indicating if the parms have changed */
     pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */
-    pthread_mutex_t     mutex_camlst;      /* Lock the list of cams while adding/removing */
+    pthread_mutex_t     mutex_camlst;       /* Lock the list of cams while adding/removing */
+    pthread_mutex_t     mutex_post;         /* mutex to allow for processing of post actions*/
+
 
 };
 

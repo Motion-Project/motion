@@ -588,6 +588,7 @@ static void motion_init(struct ctx_motapp *motapp)
     pthread_mutex_init(&motapp->global_lock, NULL);
     pthread_mutex_init(&motapp->mutex_parms, NULL);
     pthread_mutex_init(&motapp->mutex_camlst, NULL);
+    pthread_mutex_init(&motapp->mutex_post, NULL);
 
     motapp->threads_running = 0;
     motapp->finish_all = false;
@@ -645,6 +646,7 @@ static void motion_cam_add(struct ctx_motapp *motapp)
     indx_cam--;
 
     motapp->cam_list[indx_cam]->camera_id = indx;
+    motapp->cam_list[indx_cam]->conf->camera_id = indx;
     motapp->cam_list[indx_cam]->dbse = (struct ctx_dbse *)mymalloc(sizeof(struct ctx_dbse));
     motapp->cam_list[indx_cam]->conf->webcontrol_port = 0;
 
@@ -791,6 +793,8 @@ int main (int argc, char **argv)
     pthread_key_delete(tls_key_threadnr);
     pthread_mutex_destroy(&motapp->global_lock);
     pthread_mutex_destroy(&motapp->mutex_parms);
+    pthread_mutex_destroy(&motapp->mutex_camlst);
+    pthread_mutex_destroy(&motapp->mutex_post);
 
     delete motapp;
 
