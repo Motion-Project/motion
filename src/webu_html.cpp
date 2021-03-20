@@ -314,8 +314,24 @@ static void webu_html_script_send_config(struct webui_ctx *webui)
     webui->resp_page +=
         "    function send_config(category) {\n"
         "      var formData = new FormData();\n"
+        "      var request = new XMLHttpRequest();\n"
+        "      var xmlhttp = new XMLHttpRequest();\n"
         "      var camid = document.getElementsByName('camdrop')[0].value;\n"
         "      var pCfg = pData['configuration']['cam'+camid];\n\n"
+
+        "      xmlhttp.onreadystatechange = function() {\n"
+        "        if (this.readyState == 4 && this.status == 200) {\n"
+        "          pData = JSON.parse(this.responseText);\n"
+        "        }\n"
+        "      };\n"
+
+        "      request.onreadystatechange = function() {\n"
+        "        if (this.readyState == 4 && this.status == 200) {\n"
+        "          xmlhttp.open('GET', '" + webui->hostfull + "/config.json');\n"
+        "          xmlhttp.send();\n\n"
+        "        }\n"
+        "      };\n"
+
         "      formData.append('command', 'config');\n"
         "      formData.append('camid', camid);\n\n"
         "      for (jkey in pCfg) {\n"
@@ -329,7 +345,6 @@ static void webu_html_script_send_config(struct webui_ctx *webui)
         "          }\n"
         "        }\n"
         "      }\n"
-        "      var request = new XMLHttpRequest();\n"
         "      request.open('POST', '" + webui->hostfull + "');\n"
         "      request.send(formData);\n\n"
         "    }\n\n";
