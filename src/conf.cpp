@@ -279,7 +279,7 @@ struct ctx_parm config_parms[] = {
     {
     "smart_mask_speed",
     "# The value defining how slow or fast the smart motion mask created and used.",
-    0, PARM_TYP_INT, PARM_CAT_06, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_LIST, PARM_CAT_06, WEBUI_LEVEL_LIMITED },
 
     {
     "lightswitch_percent",
@@ -360,15 +360,15 @@ struct ctx_parm config_parms[] = {
     "# Picture output configuration parameters\n"
     "############################################################\n\n"
     "# Output pictures when motion is detected",
-    0, PARM_TYP_STRING, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_LIST, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
     {
     "picture_output_motion",
     "# Output pictures with only the pixels moving object (ghost images)",
-    0, PARM_TYP_STRING, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_LIST, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
     {
     "picture_type",
     "# Format for the output pictures.",
-    0, PARM_TYP_STRING, PARM_CAT_09, WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_LIST, PARM_CAT_09, WEBUI_LEVEL_LIMITED},
     {
     "picture_quality",
     "# The quality (in percent) to be used in the picture compression",
@@ -447,7 +447,7 @@ struct ctx_parm config_parms[] = {
     {
     "timelapse_mode",
     "# Timelapse file rollover mode. See motionplus_guide.html for options and uses.",
-    0, PARM_TYP_STRING, PARM_CAT_11, WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_LIST, PARM_CAT_11, WEBUI_LEVEL_LIMITED},
     {
     "timelapse_fps",
     "# Frame rate for timelapse playback",
@@ -455,7 +455,7 @@ struct ctx_parm config_parms[] = {
     {
     "timelapse_codec",
     "# Container/Codec for timelapse movie.",
-    0, PARM_TYP_STRING, PARM_CAT_11, WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_LIST, PARM_CAT_11, WEBUI_LEVEL_LIMITED},
     {
     "timelapse_filename",
     "# File name(without extension) for timelapse movies relative to target directory",
@@ -479,7 +479,7 @@ struct ctx_parm config_parms[] = {
     "# Webcontrol configuration parameters\n"
     "############################################################\n\n"
     "# Port number used for the webcontrol.",
-    1, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED},
+    1, PARM_TYP_INT, PARM_CAT_13, WEBUI_LEVEL_ADVANCED},
     {
     "webcontrol_ipv6",
     "# Enable IPv6 addresses.",
@@ -491,15 +491,15 @@ struct ctx_parm config_parms[] = {
     {
     "webcontrol_parms",
     "# Type of configuration options to allow via the webcontrol.",
-    1, PARM_TYP_INT, PARM_CAT_13, WEBUI_LEVEL_NEVER},
+    1, PARM_TYP_LIST, PARM_CAT_13, WEBUI_LEVEL_NEVER},
     {
     "webcontrol_interface",
     "# Method that webcontrol should use for interface with user.",
-    1, PARM_TYP_INT, PARM_CAT_13, WEBUI_LEVEL_LIMITED },
+    1, PARM_TYP_LIST, PARM_CAT_13, WEBUI_LEVEL_LIMITED },
     {
     "webcontrol_auth_method",
     "# The authentication method for the webcontrol",
-    0, PARM_TYP_INT, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED},
+    0, PARM_TYP_LIST, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED},
     {
     "webcontrol_authentication",
     "# Authentication string for the webcontrol. Syntax username:password",
@@ -539,7 +539,7 @@ struct ctx_parm config_parms[] = {
     {
     "stream_preview_method",
     "# Method for showing stream on webcontrol.",
-    0, PARM_TYP_INT, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_LIST, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {
     "stream_preview_actions",
     "# Show the action buttons on the webcontrol for the camera.",
@@ -571,7 +571,7 @@ struct ctx_parm config_parms[] = {
     "# Database and SQL Configuration parameters\n"
     "############################################################\n\n"
     "# The type of database being used if any.",
-    0, PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_ADVANCED},
+    0, PARM_TYP_LIST, PARM_CAT_15, WEBUI_LEVEL_ADVANCED},
     {
     "database_dbname",
     "# Database name to use. For sqlite3, the full path and name.",
@@ -1823,6 +1823,11 @@ static void conf_edit_smart_mask_speed(struct ctx_cam *cam, std::string &parm, e
         }
     } else if (pact == PARM_ACT_GET){
         parm = std::to_string(cam->conf->smart_mask_speed);
+    } else if (pact == PARM_ACT_LIST){
+        parm = "[";
+        parm = parm +  "\"0\",\"1\",\"2\",\"3\",\"4\",\"5\"";
+        parm = parm + ",\"6\",\"7\",\"8\",\"9\",\"10\"";
+        parm = parm + "]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","smart_mask_speed",_("smart_mask_speed"));
@@ -2106,6 +2111,10 @@ static void conf_edit_picture_output(struct ctx_cam *cam, std::string &parm, enu
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->picture_output;
+    } else if (pact == PARM_ACT_LIST){
+        parm = "[";
+        parm = parm +  "\"on\",\"off\",\"first\",\"best\"";
+        parm = parm + "]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_output",_("picture_output"));
@@ -2125,6 +2134,10 @@ static void conf_edit_picture_output_motion(struct ctx_cam *cam, std::string &pa
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->picture_output;
+    } else if (pact == PARM_ACT_LIST){
+        parm = "[";
+        parm = parm +  "\"on\",\"off\",\"roi\"";
+        parm = parm + "]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_output_motion",_("picture_output_motion"));
@@ -2144,6 +2157,10 @@ static void conf_edit_picture_type(struct ctx_cam *cam, std::string &parm, enum 
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->picture_type;
+    } else if (pact == PARM_ACT_LIST){
+        parm = "[";
+        parm = parm +  "\"jpeg\",\"webp\",\"ppm\"";
+        parm = parm + "]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_type",_("picture_type"));
@@ -2409,6 +2426,11 @@ static void conf_edit_timelapse_mode(struct ctx_cam *cam, std::string &parm, enu
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->timelapse_mode;
+    } else if (pact == PARM_ACT_LIST){
+        parm = "[";
+        parm = parm +  "\"hourly\",\"daily\",\"weekly-sunday\"";
+        parm = parm + ",\"weekly-monday\",\"monthly\",\"manual\"";
+        parm = parm + "]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_mode",_("timelapse_mode"));
@@ -2447,6 +2469,10 @@ static void conf_edit_timelapse_codec(struct ctx_cam *cam, std::string &parm, en
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->timelapse_codec;
+    } else if (pact == PARM_ACT_LIST){
+        parm = "[";
+        parm = parm +  "\"mpg\",\"mpeg4\"";
+        parm = parm + "]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_codec",_("timelapse_codec"));
@@ -2550,6 +2576,10 @@ static void conf_edit_webcontrol_parms(struct ctx_cam *cam, std::string &parm, e
         }
     } else if (pact == PARM_ACT_GET){
         parm = std::to_string(cam->conf->webcontrol_parms);
+    } else if (pact == PARM_ACT_LIST){
+        parm = "[";
+        parm = parm +  "\"0\",\"1\",\"2\",\"3\"";
+        parm = parm + "]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_parms",_("webcontrol_parms"));
@@ -2569,6 +2599,10 @@ static void conf_edit_webcontrol_interface(struct ctx_cam *cam, std::string &par
         }
     } else if (pact == PARM_ACT_GET){
         parm = std::to_string(cam->conf->webcontrol_interface);
+    } else if (pact == PARM_ACT_LIST){
+        parm = "[";
+        parm = parm +  "\"0\",\"1\",\"2\",\"3\"";
+        parm = parm + "]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_interface",_("webcontrol_interface"));
@@ -2588,6 +2622,10 @@ static void conf_edit_webcontrol_auth_method(struct ctx_cam *cam, std::string &p
         }
     } else if (pact == PARM_ACT_GET){
         parm = std::to_string(cam->conf->webcontrol_auth_method);
+    } else if (pact == PARM_ACT_LIST){
+        parm = "[";
+        parm = parm +  "\"0\",\"1\",\"2\"";
+        parm = parm + "]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_auth_method",_("webcontrol_auth_method"));
@@ -2730,6 +2768,10 @@ static void conf_edit_stream_preview_method(struct ctx_cam *cam, std::string &pa
         }
     } else if (pact == PARM_ACT_GET){
         parm = std::to_string(cam->conf->stream_preview_method);
+    } else if (pact == PARM_ACT_LIST){
+        parm = "[";
+        parm = parm +  "\"0\",\"1\",\"2\",\"3\",\"4\"";
+        parm = parm + "]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_method",_("stream_preview_method"));
@@ -2838,6 +2880,10 @@ static void conf_edit_database_type(struct ctx_cam *cam, std::string &parm, enum
         }
     } else if (pact == PARM_ACT_GET){
         parm = cam->conf->database_type;
+    } else if (pact == PARM_ACT_LIST){
+        parm = "[";
+        parm = parm +  "\"\",\"mysql\",\"mariadb\",\"postgresql\",\"sqlite3\"";
+        parm = parm + "]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","database_type",_("database_type"));
