@@ -75,10 +75,6 @@ struct ctx_parm config_parms[] = {
     1, PARM_TYP_BOOL, PARM_CAT_00, WEBUI_LEVEL_LIMITED},
 
     {
-    "quiet",
-    "# Do not sound beeps when detecting motion",
-    0, PARM_TYP_BOOL, PARM_CAT_01, WEBUI_LEVEL_LIMITED},
-    {
     "camera_dir",
     "##############################################################\n"
     "# Directory to read '.conf' files for cameras.\n"
@@ -1026,19 +1022,6 @@ static void conf_edit_native_language(struct ctx_motapp *motapp, std::string &pa
 /************************************************************************/
 /************************************************************************/
 /************************************************************************/
-
-static void conf_edit_quiet(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    if (pact == PARM_ACT_DFLT){
-        cam->conf->quiet = TRUE;
-    } else if (pact == PARM_ACT_SET){
-        conf_edit_set_bool(cam->conf->quiet, parm);
-    } else if (pact == PARM_ACT_GET){
-        conf_edit_get_bool(parm, cam->conf->quiet);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","quiet",_("quiet"));
-}
 
 static void conf_edit_camera_name(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
@@ -3183,8 +3166,7 @@ static void conf_edit_cat00(struct ctx_motapp *motapp, std::string cmd
 static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "quiet"){                        conf_edit_quiet(cam, parm_val, pact);
-    } else if (parm_nm == "camera_dir"){            conf_edit_camera_dir(cam, parm_val, pact);
+    if (parm_nm == "camera_dir"){                   conf_edit_camera_dir(cam, parm_val, pact);
     } else if (parm_nm == "camera_name"){           conf_edit_camera_name(cam, parm_val, pact);
     } else if (parm_nm == "camera_id"){             conf_edit_camera_id(cam, parm_val, pact);
     } else if (parm_nm == "camera_tmo"){            conf_edit_camera_tmo(cam, parm_val, pact);

@@ -26,7 +26,6 @@
 
     struct ctx_config {
         /* Overall system configuration parameters */
-        int             quiet;
         std::string     camera_name;
         int             camera_id;
         std::string     camera_dir;

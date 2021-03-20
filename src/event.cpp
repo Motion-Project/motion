@@ -83,20 +83,6 @@ static void event_newfile(struct ctx_cam *cam, motion_event evnt
 }
 
 
-static void event_beep(struct ctx_cam *cam, motion_event evnt
-        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
-{
-
-    (void)evnt;
-    (void)img_data;
-    (void)fname;
-    (void)ftype;
-    (void)ts1;
-
-    if (!cam->conf->quiet)
-        printf("\a");
-}
-
 /**
  * on_picture_save_command
  *      handles both on_picture_save and on_movie_start
@@ -774,10 +760,6 @@ struct event_handlers event_handlers[] = {
     {
     EVENT_FILECREATE,
     event_newfile
-    },
-    {
-    EVENT_MOTION,
-    event_beep
     },
     {
     EVENT_MOTION,
