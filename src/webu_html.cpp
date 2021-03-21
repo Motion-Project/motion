@@ -47,7 +47,7 @@ static void webu_html_style_navbar(struct webui_ctx *webui)
         "      display: block;\n"
         "      border: none;\n"
         "      background: none;\n"
-        "      width:100%;\n"
+        "      width:90%;\n"
         "      text-align: left;\n"
         "      cursor: pointer;\n"
         "      outline: none;\n"
@@ -58,6 +58,34 @@ static void webu_html_style_navbar(struct webui_ctx *webui)
         "      background-color: #555;\n"
         "      color: white;\n"
         "    }\n"
+        "    .sidenav .closebtn {\n"
+        "      color: black;\n"
+        "      top: 0;\n"
+        "      margin-left: 80%;\n"
+        "      width: 1rem;\n"
+        "      font-size: 1rem;\n"
+        "      background-color: lightgray;\n"
+        "    }\n"
+        "   .sidenav .closebtn:hover {\n"
+        "      background-color: lightgray;\n"
+        "      color: white;\n"
+        "    }\n"
+        "    .menubtn {\n"
+        "      top: 0;\n"
+        "      width: 1rem;\n"
+        "      margin-left: 0.5rem;\n"
+        "      margin-bottom: 0.25rem;\n"
+        "      font-size: 1.5rem;\n"
+        "      color:black;\n"
+        "      transform: rotate(90deg);\n"
+        "      -webkit-transform: rotate(90deg);\n"
+        "      background-color: transparent;\n"
+        "      border-color: transparent;\n"
+        "    }\n"
+        "    .menubtn:hover {\n"
+        "      color: white;\n"
+        "    }\n"
+
         "    .dropdown-content {\n"
         "      display: none;\n"
         "      background-color:lightgray;\n"
@@ -265,6 +293,7 @@ static void webu_html_navbar(struct webui_ctx *webui)
 {
     webui->resp_page +=
         "  <div id=\"divnav_main\" class=\"sidenav\">\n"
+        "    <a class='closebtn' onclick='nav_close()'>X</a>\n"
         "    <div id=\"divnav_version\">\n"
         "      <a>MotionPlus 0.0.1</a>\n"
         "    </div>\n"
@@ -284,27 +313,40 @@ static void webu_html_navbar(struct webui_ctx *webui)
 
 }
 
-/* Create the javascript function dropchange_cam */
-static void webu_html_script_dropchange_cam(struct webui_ctx *webui)
+/* Create the body main section of the page */
+static void webu_html_divmain(struct webui_ctx *webui)
 {
     webui->resp_page +=
-        "    /*Cascade camera change in one dropdown to all the others*/\n"
-        "    function dropchange_cam(camobj) {\n"
-        "      var indx;\n\n"
+        "  <div id='divmain' style='margin-left:10rem' >\n"
+        "    <button id='menu_btn' \n"
+        "      onclick='nav_open();' \n"
+        "      style='display:none' \n"
+        "      class='menubtn'>|||</button>\n"
+        "    <p></p>\n"
+        "    <div id='div_cam' >\n"
+        "      <!-- Filled in by script -->\n"
+        "    </div>\n\n"
+        "    <div id='div_config'>\n"
+        "      <!-- Filled in by script -->\n"
+        "    </div>\n\n"
+        "  </div>\n\n";
 
-        "      assign_vals(camobj.value);\n\n"
+}
 
-        "      var sect = document.getElementsByName('camdrop');\n"
-        "      for (indx = 0; indx < sect.length; indx++) {\n"
-        "        sect.item(indx).selectedIndex =camobj.selectedIndex;\n"
-        "      }\n\n"
+/* Create the javascript function send_config */
+static void webu_html_script_nav(struct webui_ctx *webui)
+{
+    webui->resp_page +=
+        "    function nav_open() {\n"
+        "      document.getElementById('divnav_main').style.width = '10rem';\n"
+        "      document.getElementById('divmain').style.marginLeft = '10rem';\n"
+        "      document.getElementById('menu_btn').style.display= 'none';\n"
+        "    }\n\n"
 
-        "      for (indx = 0; indx <= pData['cameras']['count']; indx++) {\n"
-        "        if (pData['cameras'][indx]['id'] == camobj.value) {\n"
-        "          gIndexCam = indx;\n"
-        "        }\n"
-        "      }\n\n"
-
+        "    function nav_close() {\n"
+        "      document.getElementById('divnav_main').style.width = '0rem';\n"
+        "      document.getElementById('divmain').style.marginLeft = '0rem';\n"
+        "      document.getElementById('menu_btn').style.display= 'inline';\n"
         "    }\n\n";
 }
 
@@ -406,6 +448,30 @@ static void webu_html_script_send_reload(struct webui_ctx *webui)
 
         "      request.open('POST', '" + webui->hostfull + "');\n"
         "      request.send(formData);\n\n"
+
+        "    }\n\n";
+}
+
+/* Create the javascript function dropchange_cam */
+static void webu_html_script_dropchange_cam(struct webui_ctx *webui)
+{
+    webui->resp_page +=
+        "    /*Cascade camera change in one dropdown to all the others*/\n"
+        "    function dropchange_cam(camobj) {\n"
+        "      var indx;\n\n"
+
+        "      assign_vals(camobj.value);\n\n"
+
+        "      var sect = document.getElementsByName('camdrop');\n"
+        "      for (indx = 0; indx < sect.length; indx++) {\n"
+        "        sect.item(indx).selectedIndex =camobj.selectedIndex;\n"
+        "      }\n\n"
+
+        "      for (indx = 0; indx <= pData['cameras']['count']; indx++) {\n"
+        "        if (pData['cameras'][indx]['id'] == camobj.value) {\n"
+        "          gIndexCam = indx;\n"
+        "        }\n"
+        "      }\n\n"
 
         "    }\n\n";
 }
@@ -742,6 +808,14 @@ static void webu_html_script_camera_buttons_action(struct webui_ctx *webui)
 
         "      html_preview += \"<tr></tr><tr>\\n\";\n"
 
+        "      html_preview += \"<td>&nbsp;&nbsp;</td>\\n\";\n"
+        "      html_preview += \"<td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"send_action('snapshot');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
+        "      html_preview += \">Snapshot</button></td> \\n\";\n"
+
+        "      html_preview += \"</tr><tr></tr><tr>\\n\";\n"
+
         "      html_preview += \"<td><button \\n\";\n"
         "      html_preview += \"onclick=\\\"send_action('eventstart');\\\" \\n\";\n"
         "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
@@ -767,14 +841,6 @@ static void webu_html_script_camera_buttons_action(struct webui_ctx *webui)
         "      html_preview += \"onclick=\\\"send_action('unpause');\\\" \\n\";\n"
         "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
         "      html_preview += \">Unpause</button></td> \\n\";\n"
-
-        "      html_preview += \"</tr><tr></tr><tr>\\n\";\n"
-        "      html_preview += \"<td>&nbsp;&nbsp;</td>\\n\";\n"
-
-        "      html_preview += \"<td><button \\n\";\n"
-        "      html_preview += \"onclick=\\\"send_action('snapshot');\\\" \\n\";\n"
-        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
-        "      html_preview += \">Snapshot</button></td> \\n\";\n"
 
         "      html_preview += \"</tr><tr></tr><tr>\\n\";\n"
 
@@ -983,6 +1049,8 @@ static void webu_html_script(struct webui_ctx *webui)
         "    var pData;\n"
         "    var gIndexCam;\n\n";
 
+    webu_html_script_nav(webui);
+
     webu_html_script_send_config(webui);
     webu_html_script_send_action(webui);
     webu_html_script_send_reload(webui);
@@ -1020,13 +1088,7 @@ static void webu_html_body(struct webui_ctx *webui)
 
     webu_html_navbar(webui);
 
-    webui->resp_page +=
-        "  <div id='div_cam' style='margin-left:11rem' >\n"
-        "    <!-- Filled in by script -->\n"
-        "  </div>\n\n"
-        "  <div id='div_config'>\n"
-        "    <!-- Filled in by script -->\n"
-        "  </div>\n\n";
+    webu_html_divmain(webui);
 
     webu_html_script(webui);
 
