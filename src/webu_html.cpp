@@ -302,6 +302,11 @@ static void webu_html_navbar(struct webui_ctx *webui)
         "    <div id='divnav_cam' class='dropdown-content'>\n"
         "      <!-- Filled in by script -->\n"
         "    </div>\n"
+        "    <button onclick='display_actions()' "
+            " id='actions_btn' class='dropbtn'>Actions</button>\n"
+        "    <div id='divnav_actions' class='dropdown-content'>\n"
+        "      <!-- Filled in by script -->\n"
+        "    </div>\n"
         "    <button\n"
         "      onclick='display_config()' id='cfg_btn' class='dropbtn'>\n"
         "      Configuration\n"
@@ -397,6 +402,12 @@ static void webu_html_script_send_action(struct webui_ctx *webui)
 {
     webui->resp_page +=
         "    function send_action(actval) {\n\n"
+
+        "      var dsp_cam = document.getElementById('div_cam').style.display;\n"
+        "      if ((dsp_cam == 'none' || dsp_cam == '') && (actval != 'config_write')) {\n"
+        "        return;\n"
+        "      }\n\n"
+
         "      var formData = new FormData();\n"
         "      var camid = pData['cameras'][gIndexCam]['id'];\n\n"
         "      formData.append('command', actval);\n"
@@ -546,6 +557,63 @@ static void webu_html_script_assign_cams(struct webui_ctx *webui)
         "    }\n\n";
 }
 
+/* Create the javascript function assign_actions */
+static void webu_html_script_assign_actions(struct webui_ctx *webui)
+{
+    webui->resp_page +=
+        "    function assign_actions() {\n"
+        "      var html_actions = \"\\n\";\n"
+        "      html_actions += \"  \";\n"
+
+        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+        "      html_actions += \"'snapshot');\\\">\";\n"
+        "      html_actions += \"Snapshot</a>\\n\";\n\n"
+
+        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+        "      html_actions += \"'eventstart');\\\">\";\n"
+        "      html_actions += \"Start Event</a>\\n\";\n\n"
+
+        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+        "      html_actions += \"'eventend');\\\">\";\n"
+        "      html_actions += \"End Event</a>\\n\";\n\n"
+
+        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+        "      html_actions += \"'pause');\\\">\";\n"
+        "      html_actions += \"Pause</a>\\n\";\n\n"
+
+        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+        "      html_actions += \"'unpause');\\\">\";\n"
+        "      html_actions += \"Unpause</a>\\n\";\n\n"
+
+        "      html_actions += \"<a onclick=\\\"send_reload(\";\n"
+        "      html_actions += \"'camera_add');\\\">\";\n"
+        "      html_actions += \"Add Camera</a>\\n\";\n\n"
+
+        "      html_actions += \"<a onclick=\\\"send_reload(\";\n"
+        "      html_actions += \"'camera_delete');\\\">\";\n"
+        "      html_actions += \"Delete Camera</a>\\n\";\n\n"
+
+        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+        "      html_actions += \"'config_write');\\\">\";\n"
+        "      html_actions += \"Save Config</a>\\n\";\n\n"
+
+        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+        "      html_actions += \"'stop');\\\">\";\n"
+        "      html_actions += \"Stop</a>\\n\";\n\n"
+
+        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+        "      html_actions += \"'restart');\\\">\";\n"
+        "      html_actions += \"Start/Restart</a>\\n\";\n\n"
+
+        "      document.getElementById(\"divnav_actions\").innerHTML = html_actions;\n\n"
+        "      return;\n"
+
+        "    }\n\n";
+
+
+}
+
+
 /* Create the javascript function assign_vals */
 static void webu_html_script_assign_vals(struct webui_ctx *webui)
 {
@@ -573,7 +641,6 @@ static void webu_html_script_assign_vals(struct webui_ctx *webui)
         "    }\n\n";
 }
 
-
 /* Create the javascript function assign_config_nav */
 static void webu_html_script_assign_config_nav(struct webui_ctx *webui)
 {
@@ -582,10 +649,6 @@ static void webu_html_script_assign_config_nav(struct webui_ctx *webui)
         "      var pCfg = pData['configuration']['cam0'];\n"
         "      var pCat = pData['categories'];\n"
         "      var html_nav = \"\\n\";\n\n"
-
-        "      html_nav += \"<a onclick=\\\"config_click(\";\n"
-        "      html_nav += \"'setup');\\\">\";\n"
-        "      html_nav += \"Setup</a>\\n\";\n\n"
 
         "      for (jcat in pCat) {\n"
         "        html_nav += \"<a onclick=\\\"config_click('\";\n"
@@ -638,59 +701,6 @@ static void webu_html_script_assign_config_item(struct webui_ctx *webui)
 }
 
 /* Create the javascript function assign_config_cat */
-static void webu_html_script_assign_config_setup(struct webui_ctx *webui)
-{
-    webui->resp_page +=
-        "    function assign_config_setup() {\n"
-        "      var html_cfg = \"\";\n\n"
-
-        "      html_cfg += \"<div id='div_setup' \";\n"
-        "      html_cfg += \"style='display:none' class='cls_config'>\\n\";\n"
-        "      html_cfg += \"<h3>\";\n"
-        "      html_cfg += \"System Setup</h3>\\n\";\n"
-        "      html_cfg += \"<table><tr> <td><label for 'camdrop'>camera</label></td>\\n\";\n"
-        "      html_cfg += \"<td class='cls_camdrop'>\";\n"
-        "      html_cfg += \"<select class='cls_drop' \";\n"
-        "      html_cfg += \"onchange='dropchange_cam.call(this)' \";\n"
-        "      html_cfg += \"name='camdrop'>\\n\";\n"
-        "      html_cfg += \"<option value='0000'>default</option>\\n\";\n"
-        "      html_cfg += \"</select></td></tr>\\n\";\n\n"
-
-        "      html_cfg += \"<tr><td></td></tr>\";\n"
-
-        "      html_cfg += \"<tr><td></td></tr>\";\n"
-        "      html_cfg += \"<tr><td>&nbsp</td><td> <button class='cls_button' \";\n"
-        "      html_cfg += \" onclick=\\\"send_reload('camera_add')\\\" \";\n"
-        "      html_cfg += \">Add Camera</button></td></tr>\\n\";\n"
-
-        "      html_cfg += \"<tr><td></td></tr>\";\n"
-        "      html_cfg += \"<tr><td>&nbsp</td><td> <button class='cls_button' \";\n"
-        "      html_cfg += \" onclick=\\\"send_reload('camera_delete')\\\" \";\n"
-        "      html_cfg += \">Delete Camera</button></td></tr>\\n\";\n"
-
-        "      html_cfg += \"<tr><td></td></tr>\";\n"
-        "      html_cfg += \"<tr><td>&nbsp</td><td> <button class='cls_button' \";\n"
-        "      html_cfg += \" onclick=\\\"send_action('config_write')\\\" \";\n"
-        "      html_cfg += \">Save Configuration</button></td></tr>\\n\";\n"
-
-        "      html_cfg += \"<tr><td></td></tr>\";\n"
-        "      html_cfg += \"<tr><td>&nbsp</td><td> <button class='cls_button' \";\n"
-        "      html_cfg += \" onclick=\\\"send_action('stop')\\\" \";\n"
-        "      html_cfg += \">Stop</button></td></tr>\\n\";\n"
-
-        "      html_cfg += \"<tr><td></td></tr>\";\n"
-        "      html_cfg += \"<tr><td>&nbsp</td><td> <button class='cls_button' \";\n"
-        "      html_cfg += \" onclick=\\\"send_action('restart')\\\" \";\n"
-        "      html_cfg += \">(Re)Start</button></td></tr>\\n\";\n"
-
-        "      html_cfg += \"</table></div>\\n\";\n\n"
-
-        "      return html_cfg;\n\n"
-
-        "    }\n";
-}
-
-/* Create the javascript function assign_config_cat */
 static void webu_html_script_assign_config_cat(struct webui_ctx *webui)
 {
     webui->resp_page +=
@@ -698,8 +708,6 @@ static void webu_html_script_assign_config_cat(struct webui_ctx *webui)
         "      var pCfg = pData['configuration']['cam0'];\n"
         "      var pCat = pData['categories'];\n"
         "      var html_cfg = \"\";\n\n"
-
-        "      html_cfg += assign_config_setup();\n\n"
 
         "      html_cfg += \"<div id='div_\";\n"
         "      html_cfg += pCat[jcat][\"name\"];\n"
@@ -763,6 +771,7 @@ static void webu_html_script_initform(struct webui_ctx *webui)
         "          assign_version();\n"
         "          assign_vals(0);\n"
         "          assign_cams();\n"
+        "          assign_actions();\n"
         "        }\n"
         "      };\n"
         "      xmlhttp.open('GET', '" + webui->hostfull + "/config.json');\n"
@@ -776,6 +785,7 @@ static void webu_html_script_display_cameras(struct webui_ctx *webui)
     webui->resp_page +=
         "    function display_cameras() {\n"
         "      document.getElementById('divnav_config').style.display = 'none';\n"
+        "      document.getElementById('divnav_actions').style.display = 'none';\n"
         "      if (document.getElementById('divnav_cam').style.display == 'block'){\n"
         "        document.getElementById('divnav_cam').style.display = 'none';\n"
         "      } else {\n"
@@ -790,6 +800,7 @@ static void webu_html_script_display_config(struct webui_ctx *webui)
     webui->resp_page +=
         "    function display_config() {\n"
         "      document.getElementById('divnav_cam').style.display = 'none';\n"
+        "      document.getElementById('divnav_actions').style.display = 'none';\n"
         "      if (document.getElementById('divnav_config').style.display == 'block') {\n"
         "        document.getElementById('divnav_config').style.display = 'none';\n"
         "      } else {\n"
@@ -798,72 +809,22 @@ static void webu_html_script_display_config(struct webui_ctx *webui)
         "    }\n\n";
 }
 
-/* Create the camera_buttons_action javascript function */
-static void webu_html_script_camera_buttons_action(struct webui_ctx *webui)
+/* Create the javascript function display_actions */
+static void webu_html_script_display_actions(struct webui_ctx *webui)
 {
-
     webui->resp_page +=
-        "   function camera_buttons_action() {\n\n"
-        "      var html_preview = \"\";\n"
-
-        "      html_preview += \"<tr></tr><tr>\\n\";\n"
-
-        "      html_preview += \"<td>&nbsp;&nbsp;</td>\\n\";\n"
-        "      html_preview += \"<td><button \\n\";\n"
-        "      html_preview += \"onclick=\\\"send_action('snapshot');\\\" \\n\";\n"
-        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
-        "      html_preview += \">Snapshot</button></td> \\n\";\n"
-
-        "      html_preview += \"</tr><tr></tr><tr>\\n\";\n"
-
-        "      html_preview += \"<td><button \\n\";\n"
-        "      html_preview += \"onclick=\\\"send_action('eventstart');\\\" \\n\";\n"
-        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
-        "      html_preview += \">Start Event</button></td> \\n\";\n"
-
-        "      html_preview += \"<td>&nbsp;&nbsp;</td>\\n\";\n"
-
-        "      html_preview += \"<td><button \\n\";\n"
-        "      html_preview += \"onclick=\\\"send_action('eventend');\\\" \\n\";\n"
-        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
-        "      html_preview += \">End Event</button></td> \\n\";\n"
-
-        "      html_preview += \"</tr><tr></tr><tr>\\n\";\n"
-
-        "      html_preview += \"<td><button \\n\";\n"
-        "      html_preview += \"onclick=\\\"send_action('pause');\\\" \\n\";\n"
-        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
-        "      html_preview += \">Pause</button></td> \\n\";\n"
-
-        "      html_preview += \"<td>&nbsp;&nbsp;</td>\\n\";\n"
-
-        "      html_preview += \"<td><button \\n\";\n"
-        "      html_preview += \"onclick=\\\"send_action('unpause');\\\" \\n\";\n"
-        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
-        "      html_preview += \">Unpause</button></td> \\n\";\n"
-
-        "      html_preview += \"</tr><tr></tr><tr>\\n\";\n"
-
-        "      html_preview += \"<td><button \\n\";\n"
-        "      html_preview += \"onclick=\\\"send_action('stop');\\\" \\n\";\n"
-        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
-        "      html_preview += \">Stop</button></td> \\n\";\n"
-
-        "      html_preview += \"<td>&nbsp;&nbsp;</td>\\n\";\n"
-
-        "      html_preview += \"<td><button \\n\";\n"
-        "      html_preview += \"onclick=\\\"send_action('restart');\\\" \\n\";\n"
-        "      html_preview += \"class=\\\"actionbtn\\\" \\n\";\n"
-        "      html_preview += \">Restart</button></td> \\n\";\n"
-
-        "      html_preview += \"</tr>\\n\";\n\n"
-
-        "      return html_preview;\n\n"
+        "    function display_actions() {\n"
+        "      document.getElementById('divnav_cam').style.display = 'none';\n"
+        "      document.getElementById('divnav_config').style.display = 'none';\n"
+         "     if (document.getElementById('divnav_actions').style.display == 'block') {\n"
+        "        document.getElementById('divnav_actions').style.display = 'none';\n"
+        "      } else {\n"
+        "        document.getElementById('divnav_actions').style.display = 'block';\n"
+        "      }\n"
         "    }\n\n";
-
 }
 
-/* Create the camera_buttons_action javascript function */
+/* Create the camera_buttons_ptz javascript function */
 static void webu_html_script_camera_buttons_ptz(struct webui_ctx *webui)
 {
 
@@ -871,6 +832,7 @@ static void webu_html_script_camera_buttons_ptz(struct webui_ctx *webui)
         "   function camera_buttons_ptz() {\n\n"
         "      var html_preview = \"\";\n"
 
+        "      html_preview += \"<table style='float: left' >\";\n"
         "      html_preview += \"<tr><td>&nbsp&nbsp</td><td>&nbsp&nbsp</td></tr>\\n\";\n"
 
         "      html_preview += \"<tr><td></td><td><button \\n\";\n"
@@ -886,29 +848,54 @@ static void webu_html_script_camera_buttons_ptz(struct webui_ctx *webui)
         "      html_preview += \"<td><button \\n\";\n"
         "      html_preview += \"onclick=\\\"send_action('pan_right');\\\" \\n\";\n"
         "      html_preview += \"class=\\\"arrow right\\\" \\n\";\n"
-        "      html_preview += \"></button></td><td>&nbsp&nbsp</td></tr> \\n\";\n"
+        "      html_preview += \"></button></td><td>&nbsp&nbsp</td> \\n\";\n"
+
+        "      html_preview += \"<td>&nbsp</td><td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"send_action('zoom_in');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"zoombtn\\\" \\n\";\n"
+        "      html_preview += \">+</button></td> \\n\";\n"
+
+        "      html_preview += \"<td>&nbsp</td><td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"send_action('zoom_out');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"zoombtn\\\" \\n\";\n"
+        "      html_preview += \">-</button></td></tr> \\n\";\n"
 
         "      html_preview += \"<tr><td></td><td><button \\n\";\n"
         "      html_preview += \"onclick=\\\"send_action('tilt_down');\\\" \\n\";\n"
         "      html_preview += \"class=\\\"arrow down\\\" \\n\";\n"
         "      html_preview += \"></button></td></tr> \\n\";\n"
-
         "      html_preview += \"<tr><td>&nbsp&nbsp</td><td>&nbsp&nbsp</td></tr>\\n\";\n"
-
-        "      html_preview += \"<tr><td></td><td><button \\n\";\n"
-        "      html_preview += \"onclick=\\\"send_action('zoom_in');\\\" \\n\";\n"
-        "      html_preview += \"class=\\\"zoombtn\\\" \\n\";\n"
-        "      html_preview += \">+</button></td></tr> \\n\";\n"
-
-        "      html_preview += \"<tr><td></td><td><button \\n\";\n"
-        "      html_preview += \"onclick=\\\"send_action('zoom_out');\\\" \\n\";\n"
-        "      html_preview += \"class=\\\"zoombtn\\\" \\n\";\n"
-        "      html_preview += \">-</button></td></tr> \\n\";\n"
-
-        "      html_preview += \"<tr><td>&nbsp&nbsp</td><td>&nbsp&nbsp</td></tr>\\n\";\n"
+        "      html_preview += \"</table><p></p>\";\n"
 
         "      return html_preview;\n\n"
 
+        "    }\n\n";
+
+}
+
+/* Create the image_pantilt javascript function */
+static void webu_html_script_image_pantilt(struct webui_ctx *webui)
+{
+    webui->resp_page +=
+        "   function image_pantilt() {\n\n"
+        "        document.getElementById('pic'+ gIndexCam).addEventListener('click',function(event){\n"
+        "          bounds=this.getBoundingClientRect();\n"
+        "          var x = Math.floor(event.pageX - bounds.left - window.scrollX);\n"
+        "          var y = Math.floor(event.pageY - bounds.top - window.scrollY);\n"
+        "          var w = Math.floor(bounds.width);\n"
+        "          var h = Math.floor(bounds.height);\n"
+        "          var qtr_x = Math.floor(bounds.width/4);\n"
+        "          var qtr_y = Math.floor(bounds.height/4);\n"
+        "          if ((x > qtr_x) && (x < (w - qtr_x)) && (y < qtr_y)) {\n"
+        "            send_action('tilt_up');\n"
+        "          } else if ((x > qtr_x) && (x < (w - qtr_x)) && (y >(h - qtr_y))) {\n"
+        "            send_action('tilt_down');\n"
+        "          } else if ((x < qtr_x) && (y > qtr_y) && (y < (h - qtr_y))) {\n"
+        "            send_action('pan_left');\n"
+        "          } else if ((x >(w - qtr_x)) && (y > qtr_y) && (y < (h - qtr_y))) {\n"
+        "            send_action('pan_right');\n"
+        "          }\n"
+        "        });\n"
         "    }\n\n";
 
 }
@@ -926,32 +913,25 @@ static void webu_html_script_camera_click(struct webui_ctx *webui)
         "      if (gIndexCam > 0) {\n"
         "        camid = pData['cameras'][index_cam].id;\n\n"
 
-        "        if ((pData['configuration']['cam'+camid].stream_preview_actions.value == true) || \n"
-        "            (pData['configuration']['cam'+camid].stream_preview_ptz.value == true)) {\n"
-        "          html_preview += \"<table style='float: left' >\";\n"
-        "          if (pData['configuration']['cam'+camid].stream_preview_actions.value == true) {\n"
-        "            html_preview += camera_buttons_action();\n"
-        "          }\n"
-        "          if (pData['configuration']['cam'+camid].stream_preview_ptz.value == true) {\n"
-        "            html_preview += camera_buttons_ptz();\n"
-        "          }\n"
-        "          html_preview += \"</table>\";\n"
+        "        if ((pData['configuration']['cam'+camid].stream_preview_ptz.value == true)) {\n"
+        "          html_preview += camera_buttons_ptz();\n"
         "        }\n\n"
 
         "        if (pData['configuration']['cam'+camid].stream_preview_method.value == 1) {\n"
         "          html_preview += \"<a><img id='pic\" + gIndexCam + \"' src=\";\n"
         "          html_preview += pData['cameras'][gIndexCam]['url'];\n"
         "          html_preview += \"static/stream/t\" + new Date().getTime();\n"
-        "          html_preview += \" border=0 width=55%></a>\\n\";\n"
+        "          html_preview += \" border=0 width=95%></a>\\n\";\n"
         "        } else { \n"
         "          html_preview += \"<a><img id='pic\" + gIndexCam + \"' src=\";\n"
         "          html_preview += pData['cameras'][gIndexCam]['url'];\n"
         "          html_preview += \"mjpg/stream\" ;\n"
-        "          html_preview += \" border=0 width=55%></a>\\n\";\n"
+        "          html_preview += \" border=0 width=95%></a>\\n\";\n"
         "        }\n"
         "        document.getElementById('div_config').style.display='none';\n"
         "        document.getElementById('div_cam').style.display='block';\n"
         "        document.getElementById('div_cam').innerHTML = html_preview;\n\n"
+        "        image_pantilt();\n\n"
 
         "      } else if (gIndexCam == 0) {\n"
         "        var camcnt = pData['cameras']['count'];\n"
@@ -1061,18 +1041,20 @@ static void webu_html_script(struct webui_ctx *webui)
 
     webu_html_script_assign_version(webui);
     webu_html_script_assign_cams(webui);
+    webu_html_script_assign_actions(webui);
     webu_html_script_assign_vals(webui);
     webu_html_script_assign_config_nav(webui);
     webu_html_script_assign_config_item(webui);
-    webu_html_script_assign_config_setup(webui);
     webu_html_script_assign_config_cat(webui);
     webu_html_script_assign_config(webui);
 
     webu_html_script_initform(webui);
     webu_html_script_display_cameras(webui);
     webu_html_script_display_config(webui);
-    webu_html_script_camera_buttons_action(webui);
+    webu_html_script_display_actions(webui);
+
     webu_html_script_camera_buttons_ptz(webui);
+    webu_html_script_image_pantilt(webui);
     webu_html_script_camera_click(webui);
     webu_html_script_timer_function(webui);
     webu_html_script_timer_pic(webui);
