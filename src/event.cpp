@@ -101,11 +101,13 @@ static void on_picture_save_command(struct ctx_cam *cam, motion_event evnt
     (void)img_data;
     (void)ts1;
 
-    if ((filetype & FTYPE_IMAGE_ANY) != 0 && (cam->conf->on_picture_save != ""))
+    if ((filetype & FTYPE_IMAGE_ANY) != 0 && (cam->conf->on_picture_save != "")) {
         util_exec_command(cam, cam->conf->on_picture_save.c_str(), fname, filetype);
+    }
 
-    if ((filetype & FTYPE_MPEG_ANY) != 0 && (cam->conf->on_movie_start != ""))
+    if ((filetype & FTYPE_MPEG_ANY) != 0 && (cam->conf->on_movie_start != "")) {
         util_exec_command(cam, cam->conf->on_movie_start.c_str(), fname, filetype);
+    }
 }
 
 static void on_motion_detected_command(struct ctx_cam *cam, motion_event evnt
@@ -118,8 +120,9 @@ static void on_motion_detected_command(struct ctx_cam *cam, motion_event evnt
     (void)ftype;
     (void)ts1;
 
-    if (cam->conf->on_motion_detected != "")
+    if (cam->conf->on_motion_detected != "") {
         util_exec_command(cam, cam->conf->on_motion_detected.c_str(), NULL, 0);
+    }
 }
 
 static void event_sqlfirstmotion(struct ctx_cam *cam, motion_event evnt
@@ -149,7 +152,7 @@ static void event_sqlnewfile(struct ctx_cam *cam, motion_event evnt
     (void)img_data;
 
     /* Only log the file types we want */
-    if ((cam->conf->database_type == "") || (sqltype & cam->dbse->sql_mask) == 0){
+    if ((cam->conf->database_type == "") || (sqltype & cam->dbse->sql_mask) == 0) {
         return;
     } else {
         dbse_newfile(cam, fname, sqltype, ts1);
@@ -167,7 +170,7 @@ static void event_sqlfileclose(struct ctx_cam *cam, motion_event evnt
     (void)img_data;
 
     /* Only log the file types we want */
-    if ((cam->conf->database_type == "") || (sqltype & cam->dbse->sql_mask) == 0){
+    if ((cam->conf->database_type == "") || (sqltype & cam->dbse->sql_mask) == 0) {
         return;
     } else {
         dbse_fileclose(cam, fname, sqltype, ts1);
@@ -186,8 +189,9 @@ static void on_area_command(struct ctx_cam *cam, motion_event evnt
     (void)ftype;
     (void)ts1;
 
-    if (cam->conf->on_area_detected != "")
+    if (cam->conf->on_area_detected != "") {
         util_exec_command(cam, cam->conf->on_area_detected.c_str(), NULL, 0);
+    }
 }
 
 static void on_event_start_command(struct ctx_cam *cam, motion_event evnt
@@ -200,8 +204,9 @@ static void on_event_start_command(struct ctx_cam *cam, motion_event evnt
     (void)ftype;
     (void)ts1;
 
-    if (cam->conf->on_event_start != "")
+    if (cam->conf->on_event_start != "") {
         util_exec_command(cam, cam->conf->on_event_start.c_str(), NULL, 0);
+    }
 }
 
 static void on_event_end_command(struct ctx_cam *cam, motion_event evnt
@@ -214,8 +219,9 @@ static void on_event_end_command(struct ctx_cam *cam, motion_event evnt
     (void)ftype;
     (void)ts1;
 
-    if (cam->conf->on_event_end != "")
+    if (cam->conf->on_event_end != "") {
         util_exec_command(cam, cam->conf->on_event_end.c_str(), NULL, 0);
+    }
 }
 
 static void event_stream_put(struct ctx_cam *cam, motion_event evnt
@@ -241,9 +247,10 @@ static void event_vlp_putpipe(struct ctx_cam *cam, motion_event evnt
     (void)ts1;
 
     if (*(int *)ftype >= 0) {
-        if (vlp_putpipe(*(int *)ftype, img_data->image_norm, cam->imgs.size_norm) == -1)
+        if (vlp_putpipe(*(int *)ftype, img_data->image_norm, cam->imgs.size_norm) == -1) {
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                 ,_("Failed to put image into video pipe"));
+        }
     }
 }
 
@@ -270,7 +277,7 @@ static void event_image_detect(struct ctx_cam *cam, motion_event evnt
         mystrftime(cam, filename, sizeof(filename), cam->conf->picture_filename.c_str(), ts1, NULL, 0);
         retcd = snprintf(fullfilename, PATH_MAX, "%s/%s.%s"
             , cam->conf->target_dir.c_str(), filename, imageext(cam));
-        if ((retcd < 0) || (retcd >= PATH_MAX)){
+        if ((retcd < 0) || (retcd >= PATH_MAX)) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating image file name"));
             return;
@@ -302,7 +309,7 @@ static void event_imagem_detect(struct ctx_cam *cam, motion_event evnt
         mystrftime(cam, filename, sizeof(filename), cam->conf->picture_filename.c_str(), ts1, NULL, 0);
         retcd = snprintf(fullfilename, PATH_MAX, "%s/%sm.%s"
             , cam->conf->target_dir.c_str(), filename, imageext(cam));
-        if ((retcd < 0) || (retcd >= PATH_MAX)){
+        if ((retcd < 0) || (retcd >= PATH_MAX)) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating image motion file name"));
             return;
@@ -313,7 +320,7 @@ static void event_imagem_detect(struct ctx_cam *cam, motion_event evnt
         mystrftime(cam, filename, sizeof(filename), cam->conf->picture_filename.c_str(), ts1, NULL, 0);
         retcd = snprintf(fullfilename, PATH_MAX, "%s/%sr.%s"
             , cam->conf->target_dir.c_str(), filename, imageext(cam));
-        if ((retcd < 0) || (retcd >= PATH_MAX)){
+        if ((retcd < 0) || (retcd >= PATH_MAX)) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating image motion roi file name"));
             return;
@@ -338,15 +345,21 @@ static void event_image_snapshot(struct ctx_cam *cam, motion_event evnt
     (void)ftype;
 
     offset = cam->conf->snapshot_filename.length() - 8;
-    if (offset < 0) offset = 1;
+    if (offset < 0) {
+        offset = 1;
+    }
 
     if (cam->conf->snapshot_filename.compare(offset, 8, "lastsnap") != 0) {
         mystrftime(cam, filepath, sizeof(filepath), cam->conf->snapshot_filename.c_str(), ts1, NULL, 0);
         retcd = snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cam));
-        if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+        if (retcd <0) {
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+        }
 
         retcd =snprintf(fullfilename, PATH_MAX, "%s/%s", cam->conf->target_dir.c_str(), filename);
-        if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+        if (retcd <0) {
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+        }
 
         pic_save_norm(cam, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
         event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE_SNAPSHOT, ts1);
@@ -362,10 +375,14 @@ static void event_image_snapshot(struct ctx_cam *cam, motion_event evnt
     } else {
         mystrftime(cam, filepath, sizeof(filepath), cam->conf->snapshot_filename.c_str(), ts1, NULL, 0);
         retcd = snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cam));
-        if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+        if (retcd <0) {
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+        }
 
         retcd = snprintf(fullfilename, PATH_MAX, "%s/%s", cam->conf->target_dir.c_str(), filename);
-        if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+        if (retcd <0) {
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+        }
 
         remove(fullfilename);
         pic_save_norm(cam, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
@@ -397,7 +414,7 @@ static void event_image_preview(struct ctx_cam *cam, motion_event evnt
             , &cam->imgs.image_preview.imgts, NULL, 0);
         retcd = snprintf(previewname, PATH_MAX, "%s/%s.%s"
             , cam->conf->target_dir.c_str(), filename, imageext(cam));
-        if ((retcd < 0) || (retcd >= PATH_MAX)){
+        if ((retcd < 0) || (retcd >= PATH_MAX)) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating preview file name"));
             return;
@@ -425,8 +442,9 @@ static void event_camera_lost(struct ctx_cam *cam, motion_event evnt
     (void)ftype;
     (void)ts1;
 
-    if (cam->conf->on_camera_lost != "")
+    if (cam->conf->on_camera_lost != "") {
         util_exec_command(cam, cam->conf->on_camera_lost.c_str(), NULL, 0);
+    }
 }
 
 static void event_secondary_detect(struct ctx_cam *cam, motion_event evnt
@@ -441,8 +459,9 @@ static void event_secondary_detect(struct ctx_cam *cam, motion_event evnt
 
     MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO,_("Event secondary detect"));
 
-    if (cam->conf->on_secondary_detect != "")
+    if (cam->conf->on_secondary_detect != "") {
         util_exec_command(cam, cam->conf->on_secondary_detect.c_str(), NULL, 0);
+    }
 }
 
 static void event_camera_found(struct ctx_cam *cam, motion_event evnt
@@ -455,8 +474,9 @@ static void event_camera_found(struct ctx_cam *cam, motion_event evnt
     (void)ftype;
     (void)ts1;
 
-    if (cam->conf->on_camera_found != "")
+    if (cam->conf->on_camera_found != "") {
         util_exec_command(cam, cam->conf->on_camera_found.c_str(), NULL, 0);
+    }
 }
 
 static void on_movie_end_command(struct ctx_cam *cam, motion_event evnt
@@ -469,8 +489,9 @@ static void on_movie_end_command(struct ctx_cam *cam, motion_event evnt
     (void)img_data;
     (void)ts1;
 
-    if ((filetype & FTYPE_MPEG_ANY) && (cam->conf->on_movie_end != ""))
+    if ((filetype & FTYPE_MPEG_ANY) && (cam->conf->on_movie_end != "")) {
         util_exec_command(cam, cam->conf->on_movie_end.c_str(), fname, filetype);
+    }
 }
 
 static void event_extpipe_end(struct ctx_cam *cam, motion_event evnt
@@ -510,7 +531,9 @@ static void event_create_extpipe(struct ctx_cam *cam, motion_event evnt
         mystrftime(cam, stamp, sizeof(stamp), cam->conf->movie_filename.c_str(), ts1, NULL, 0);
         retcd = snprintf(cam->extpipefilename, PATH_MAX - 4, "%s/%s"
             , cam->conf->target_dir.c_str(), stamp);
-        if (retcd <0) MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+        if (retcd <0) {
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+        }
 
         if (access(cam->conf->target_dir.c_str(), W_OK)!= 0) {
             /* Permission denied */
@@ -522,8 +545,9 @@ static void event_create_extpipe(struct ctx_cam *cam, motion_event evnt
             } else if (errno ==  ENOENT) {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     ,_("path not found, trying to create it %s ..."), cam->conf->target_dir.c_str());
-                if (mycreate_path(cam->extpipefilename) == -1)
+                if (mycreate_path(cam->extpipefilename) == -1) {
                     return ;
+                }
             }
             else {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
@@ -533,14 +557,15 @@ static void event_create_extpipe(struct ctx_cam *cam, motion_event evnt
         }
 
         /* Always create any path specified as file name */
-        if (mycreate_path(cam->extpipefilename) == -1)
+        if (mycreate_path(cam->extpipefilename) == -1) {
             return ;
+        }
 
         mystrftime(cam, stamp, sizeof(stamp), cam->conf->movie_extpipe.c_str()
             , ts1, cam->extpipefilename, 0);
 
         retcd = snprintf(cam->extpipecmdline, PATH_MAX, "%s", stamp);
-        if ((retcd < 0 ) || (retcd >= PATH_MAX)){
+        if ((retcd < 0 ) || (retcd >= PATH_MAX)) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 , _("Error specifying command line: %s"), cam->extpipecmdline);
             return;
@@ -579,14 +604,16 @@ static void event_extpipe_put(struct ctx_cam *cam, motion_event evnt
         passthrough = mycheck_passthrough(cam);
         /* Check that is open */
         if ((cam->extpipe_open) && (fileno(cam->extpipe) > 0)) {
-            if ((cam->imgs.size_high > 0) && (!passthrough)){
-                if (!fwrite(img_data->image_high, cam->imgs.size_high, 1, cam->extpipe))
+            if ((cam->imgs.size_high > 0) && (!passthrough)) {
+                if (!fwrite(img_data->image_high, cam->imgs.size_high, 1, cam->extpipe)) {
                     MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                         ,_("Error writing in pipe , state error %d"), ferror(cam->extpipe));
+                }
             } else {
-                if (!fwrite(img_data->image_norm, cam->imgs.size_norm, 1, cam->extpipe))
+                if (!fwrite(img_data->image_norm, cam->imgs.size_norm, 1, cam->extpipe)) {
                     MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                         ,_("Error writing in pipe , state error %d"), ferror(cam->extpipe));
+                }
            }
         } else {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
@@ -611,7 +638,9 @@ static void event_new_video(struct ctx_cam *cam, motion_event evnt
 
     MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO, _("Source FPS %d"), cam->movie_fps);
 
-    if (cam->movie_fps < 2) cam->movie_fps = 2;
+    if (cam->movie_fps < 2) {
+        cam->movie_fps = 2;
+    }
 
 }
 
@@ -626,11 +655,13 @@ static void event_movie_newfile(struct ctx_cam *cam, motion_event evnt
     (void)fname;
     (void)ftype;
 
-    if (!cam->conf->movie_output && !cam->conf->movie_output_motion) return;
+    if (!cam->conf->movie_output && !cam->conf->movie_output_motion) {
+        return;
+    }
 
     if (cam->conf->movie_output) {
         retcd = movie_init_norm(cam, ts1);
-        if (retcd < 0){
+        if (retcd < 0) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error opening ctx_cam for movie output."));
             free(cam->movie_norm);
@@ -642,7 +673,7 @@ static void event_movie_newfile(struct ctx_cam *cam, motion_event evnt
 
     if (cam->conf->movie_output_motion) {
         retcd = movie_init_motion(cam, ts1);
-        if (retcd < 0){
+        if (retcd < 0) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating motion file [%s]"), cam->movie_motion->filename);
             free(cam->movie_motion);
@@ -664,7 +695,7 @@ static void event_movie_timelapse(struct ctx_cam *cam, motion_event evnt
 
     if (!cam->movie_timelapse) {
         retcd = movie_init_timelapse(cam, ts1);
-        if (retcd < 0){
+        if (retcd < 0) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating timelapse file [%s]"), cam->movie_timelapse->filename);
             free(cam->movie_timelapse);
@@ -690,7 +721,7 @@ static void event_movie_put(struct ctx_cam *cam, motion_event evnt
     (void)ftype;
 
     if (cam->movie_norm) {
-        if (movie_put_image(cam->movie_norm, img_data, ts1) == -1){
+        if (movie_put_image(cam->movie_norm, img_data, ts1) == -1) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
         }
     }
@@ -895,7 +926,8 @@ void event(struct ctx_cam *cam, motion_event evnt
     int i=-1;
 
     while (event_handlers[++i].handler) {
-        if (evnt == event_handlers[i].type)
+        if (evnt == event_handlers[i].type) {
             event_handlers[i].handler(cam, evnt, img_data, fname, ftype, ts1);
+        }
     }
 }

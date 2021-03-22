@@ -62,7 +62,9 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
         double w = src_weights[indx0];
 
         for (indx1=0; indx1<src_pos.size(); indx1++) {
-            if (indx1 != indx0 && (r & src_pos[indx1])==r) break;
+            if (indx1 != indx0 && (r & src_pos[indx1])==r) {
+                break;
+            }
         }
         if ((indx1==src_pos.size()) && (w > algmdl.threshold_motion)) {
             fltr_pos.push_back(r);
@@ -482,7 +484,9 @@ static void *algsec_handler(void *arg)
             }
             cam->algsec->detecting = false;
             /*Set the event based isdetected bool */
-            if (cam->algsec->models.isdetected) cam->algsec->isdetected = true;
+            if (cam->algsec->models.isdetected) {
+                cam->algsec->isdetected = true;
+            }
         } else {
             SLEEP(0,interval)
         }
@@ -578,7 +582,9 @@ void algsec_detect(ctx_cam *cam)
 {
     /*This function runs on the camera thread */
     #ifdef HAVE_OPENCV
-        if (cam->algsec->frame_cnt > 0) cam->algsec->frame_cnt--;
+        if (cam->algsec->frame_cnt > 0) {
+            cam->algsec->frame_cnt--;
+        }
 
         if (cam->algsec->frame_cnt == 0){
 

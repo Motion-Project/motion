@@ -70,8 +70,9 @@ static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr, const UI
 /* Define a Huffman table */
     int nsymbols, len;
 
-    if (*htblptr == NULL)
+    if (*htblptr == NULL) {
         *htblptr = jpeg_alloc_huff_table((j_common_ptr) dinfo);
+    }
 
     /* Copy the number-of-symbols-of-each-code-length counts. */
     memcpy((*htblptr)->bits, bits, sizeof((*htblptr)->bits));
@@ -86,8 +87,9 @@ static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr, const UI
     for (len = 1; len <= 16; len++)
         nsymbols += bits[len];
 
-    if (nsymbols < 1 || nsymbols > 256)
+    if (nsymbols < 1 || nsymbols > 256) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("%s: Given jpeg buffer was too small"));
+    }
 
     memcpy((*htblptr)->huffval, val, nsymbols * sizeof(UINT8));
 }
@@ -209,8 +211,9 @@ static boolean jpgutl_fill_input_buffer(j_decompress_ptr cinfo)
 static void jpgutl_skip_data(j_decompress_ptr cinfo, long num_bytes)
 {
     if (num_bytes > 0) {
-        if (num_bytes > (long) cinfo->src->bytes_in_buffer)
+        if (num_bytes > (long) cinfo->src->bytes_in_buffer) {
             num_bytes = (long) cinfo->src->bytes_in_buffer;
+        }
         cinfo->src->next_input_byte += (size_t) num_bytes;
         cinfo->src->bytes_in_buffer -= (size_t) num_bytes;
     }
@@ -510,7 +513,9 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
      * only a partial image could be returned which would
      * trigger many false positive motion detections
     */
-    if (jerr.warning_seen > 2) return -1;
+    if (jerr.warning_seen > 2) {
+        return -1;
+    }
 
     return 0;
 

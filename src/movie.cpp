@@ -59,10 +59,11 @@ static void movie_encode_nal(struct ctx_movie *movie)
         movie_free_nal(movie);
         movie->nal_info_len = movie->pkt.size;
         movie->nal_info =(char*) malloc(movie->nal_info_len);
-        if (movie->nal_info)
+        if (movie->nal_info) {
             memcpy(movie->nal_info, &movie->pkt.data[0], movie->nal_info_len);
-        else
+        } else {
             movie->nal_info_len = 0;
+        }
     } else if (movie->nal_info) {
         int old_size = movie->pkt.size;
         av_grow_packet(&movie->pkt, movie->nal_info_len);
@@ -76,8 +77,7 @@ static int movie_timelapse_exists(const char *fname)
 {
     FILE *file;
     file = fopen(fname, "r");
-    if (file)
-    {
+    if (file) {
         fclose(file);
         return 1;
     }
@@ -89,7 +89,9 @@ static int movie_timelapse_append(struct ctx_movie *movie, AVPacket pkt)
     FILE *file;
 
     file = fopen(movie->filename, "a");
-    if (!file) return -1;
+    if (!file) {
+        return -1;
+    }
 
     fwrite(pkt.data,1,pkt.size,file);
 
@@ -101,17 +103,17 @@ static int movie_timelapse_append(struct ctx_movie *movie, AVPacket pkt)
 static void movie_free_context(struct ctx_movie *movie)
 {
 
-        if (movie->picture != NULL){
+        if (movie->picture != NULL) {
             myframe_free(movie->picture);
             movie->picture = NULL;
         }
 
-        if (movie->ctx_codec != NULL){
+        if (movie->ctx_codec != NULL) {
             myavcodec_close(movie->ctx_codec);
             movie->ctx_codec = NULL;
         }
 
-        if (movie->oc != NULL){
+        if (movie->oc != NULL) {
             avformat_free_context(movie->oc);
             movie->oc = NULL;
         }
@@ -140,7 +142,7 @@ static int movie_get_oformat(struct ctx_movie *movie)
     codec_name[codec_name_len] = 0;
 
     retcd = snprintf(basename,PATH_MAX,"%s",movie->filename);
-    if ((retcd < 0) || (retcd >= PATH_MAX)){
+    if ((retcd < 0) || (retcd >= PATH_MAX)) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Error setting base file name"));
         movie_free_context(movie);
@@ -148,12 +150,14 @@ static int movie_get_oformat(struct ctx_movie *movie)
         return -1;
     }
 
-    if (movie->tlapse == TIMELAPSE_APPEND){
+    if (movie->tlapse == TIMELAPSE_APPEND) {
         movie->oc->oformat = av_guess_format ("mpeg2video", NULL, NULL);
-        if (movie->oc->oformat) movie->oc->oformat->video_codec = MY_CODEC_ID_MPEG2VIDEO;
+        if (movie->oc->oformat) {
+            movie->oc->oformat->video_codec = MY_CODEC_ID_MPEG2VIDEO;
+        }
         retcd = snprintf(movie->filename,PATH_MAX,"%s.mpg",basename);
         if ((!movie->oc->oformat) ||
-            (retcd < 0) || (retcd >= PATH_MAX)){
+            (retcd < 0) || (retcd >= PATH_MAX)) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                 ,_("Error setting timelapse append for codec %s"), codec_name);
             movie_free_context(movie);
@@ -167,41 +171,53 @@ static int movie_get_oformat(struct ctx_movie *movie)
     if (mystreq(codec_name, "flv")) {
         movie->oc->oformat = av_guess_format("flv", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.flv",basename);
-        if (movie->oc->oformat) movie->oc->oformat->video_codec = MY_CODEC_ID_FLV1;
+        if (movie->oc->oformat) {
+            movie->oc->oformat->video_codec = MY_CODEC_ID_FLV1;
+        }
     }
 
     if (mystreq(codec_name, "ogg")) {
         movie->oc->oformat = av_guess_format("ogg", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.ogg",basename);
-        if (movie->oc->oformat) movie->oc->oformat->video_codec = MY_CODEC_ID_THEORA;
+        if (movie->oc->oformat) {
+            movie->oc->oformat->video_codec = MY_CODEC_ID_THEORA;
+        }
     }
 
     if (mystreq(codec_name, "vp8")) {
         movie->oc->oformat = av_guess_format("webm", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.webm",basename);
-        if (movie->oc->oformat) movie->oc->oformat->video_codec = MY_CODEC_ID_VP8;
+        if (movie->oc->oformat) {
+            movie->oc->oformat->video_codec = MY_CODEC_ID_VP8;
+        }
     }
 
     if (mystreq(codec_name, "mp4")) {
         movie->oc->oformat = av_guess_format("mp4", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.mp4",basename);
-        if (movie->oc->oformat) movie->oc->oformat->video_codec = MY_CODEC_ID_H264;
+        if (movie->oc->oformat) {
+            movie->oc->oformat->video_codec = MY_CODEC_ID_H264;
+        }
     }
 
     if (mystreq(codec_name, "mkv")) {
         movie->oc->oformat = av_guess_format("matroska", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.mkv",basename);
-        if (movie->oc->oformat) movie->oc->oformat->video_codec = MY_CODEC_ID_H264;
+        if (movie->oc->oformat) {
+            movie->oc->oformat->video_codec = MY_CODEC_ID_H264;
+        }
     }
 
     if (mystreq(codec_name, "hevc")) {
         movie->oc->oformat = av_guess_format("mp4", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.mp4",basename);
-        if (movie->oc->oformat) movie->oc->oformat->video_codec = MY_CODEC_ID_HEVC;
+        if (movie->oc->oformat) {
+            movie->oc->oformat->video_codec = MY_CODEC_ID_HEVC;
+        }
     }
 
     //Check for valid results
-    if ((retcd < 0) || (retcd >= PATH_MAX)){
+    if ((retcd < 0) || (retcd >= PATH_MAX)) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Error setting file name"));
         movie_free_context(movie);
@@ -237,19 +253,19 @@ static int movie_encode_video(struct ctx_movie *movie)
         char errstr[128];
 
         retcd = avcodec_send_frame(movie->ctx_codec, movie->picture);
-        if (retcd < 0 ){
+        if (retcd < 0 ) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                 ,_("Error sending frame for encoding:%s"),errstr);
             return -1;
         }
         retcd = avcodec_receive_packet(movie->ctx_codec, &movie->pkt);
-        if (retcd == AVERROR(EAGAIN)){
+        if (retcd == AVERROR(EAGAIN)) {
             //Buffered packet.  Throw special return code
             mypacket_unref(movie->pkt);
             return -2;
         }
-        if (retcd < 0 ){
+        if (retcd < 0 ) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                 ,_("Error receiving encoded packet video:%s"),errstr);
@@ -257,7 +273,7 @@ static int movie_encode_video(struct ctx_movie *movie)
             return -1;
         }
 
-        if (movie->preferred_codec == USER_CODEC_V4L2M2M){
+        if (movie->preferred_codec == USER_CODEC_V4L2M2M) {
             movie_encode_nal(movie);
         }
 
@@ -270,20 +286,20 @@ static int movie_encode_video(struct ctx_movie *movie)
         int got_packet_ptr;
 
         retcd = avcodec_encode_video2(movie->ctx_codec, &movie->pkt, movie->picture, &got_packet_ptr);
-        if (retcd < 0 ){
+        if (retcd < 0 ) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error encoding video:%s"),errstr);
             //Packet is freed upon failure of encoding
             return -1;
         }
-        if (got_packet_ptr == 0){
+        if (got_packet_ptr == 0) {
             //Buffered packet.  Throw special return code
             mypacket_unref(movie->pkt);
             return -2;
         }
 
         /* This kills compiler warnings.  Nal setting is only for recent movie versions*/
-        if (movie->preferred_codec == USER_CODEC_V4L2M2M){
+        if (movie->preferred_codec == USER_CODEC_V4L2M2M) {
             movie_encode_nal(movie);
         }
 
@@ -299,12 +315,12 @@ static int movie_encode_video(struct ctx_movie *movie)
         video_outbuf =(uint8_t *) mymalloc(video_outbuf_size);
 
         retcd = avcodec_encode_video(movie->strm_video->codec, video_outbuf, video_outbuf_size, movie->picture);
-        if (retcd < 0 ){
+        if (retcd < 0 ) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error encoding video"));
             mypacket_unref(movie->pkt);
             return -1;
         }
-        if (retcd == 0 ){
+        if (retcd == 0 ) {
             // No bytes encoded => buffered=>special handling
             mypacket_unref(movie->pkt);
             return -2;
@@ -314,8 +330,9 @@ static int movie_encode_video(struct ctx_movie *movie)
         movie->pkt.size = retcd;
         movie->pkt.data = video_outbuf;
 
-        if (movie->picture->key_frame == 1)
-        movie->pkt.flags |= AV_PKT_FLAG_KEY;
+        if (movie->picture->key_frame == 1) {
+            movie->pkt.flags |= AV_PKT_FLAG_KEY;
+        }
 
         movie->pkt.pts = movie->picture->pts;
         movie->pkt.dts = movie->pkt.pts;
@@ -323,7 +340,7 @@ static int movie_encode_video(struct ctx_movie *movie)
         free(video_outbuf);
 
         /* This kills compiler warnings.  Nal setting is only for recent movie versions*/
-        if (movie->preferred_codec == USER_CODEC_V4L2M2M){
+        if (movie->preferred_codec == USER_CODEC_V4L2M2M) {
             movie_encode_nal(movie);
         }
 
@@ -343,7 +360,7 @@ static int movie_set_pts(struct ctx_movie *movie, const struct timespec *ts1)
         movie->picture->pts = movie->last_pts;
     } else {
         pts_interval = ((1000000L * (ts1->tv_sec - movie->start_time.tv_sec)) + (ts1->tv_nsec/1000) - (movie->start_time.tv_nsec/1000));
-        if (pts_interval < 0){
+        if (pts_interval < 0) {
             /* This can occur when we have pre-capture frames.  Reset start time of video. */
             movie_reset_start_time(movie, ts1);
             pts_interval = 0;
@@ -354,16 +371,16 @@ static int movie_set_pts(struct ctx_movie *movie, const struct timespec *ts1)
         } else
             movie->picture->pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},movie->strm_video->time_base) + movie->base_pts;
 
-        if (movie->test_mode == TRUE){
+        if (movie->test_mode == TRUE) {
             MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
                 ,_("PTS %" PRId64 " Base PTS %" PRId64 " ms interval %" PRId64 " timebase %d-%d")
                 ,movie->picture->pts,movie->base_pts,pts_interval
                 ,movie->strm_video->time_base.num,movie->strm_video->time_base.den);
         }
 
-        if (movie->picture->pts <= movie->last_pts){
+        if (movie->picture->pts <= movie->last_pts) {
             //We have a problem with our motion loop timing and sending frames or the rounding into the PTS.
-            if (movie->test_mode == TRUE){
+            if (movie->test_mode == TRUE) {
                 MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("BAD TIMING!! Frame skipped."));
             }
             return -1;
@@ -377,11 +394,14 @@ static int movie_set_quality(struct ctx_movie *movie)
 {
 
     movie->opts = 0;
-    if (movie->quality > 100) movie->quality = 100;
+    if (movie->quality > 100) {
+        movie->quality = 100;
+    }
     if (movie->ctx_codec->codec_id == MY_CODEC_ID_H264 ||
-        movie->ctx_codec->codec_id == MY_CODEC_ID_HEVC){
-        if (movie->quality <= 0)
+        movie->ctx_codec->codec_id == MY_CODEC_ID_HEVC) {
+        if (movie->quality <= 0) {
             movie->quality = 45; // default to 45% quality
+        }
 
         /* This next if statement needs validation.  Are mpeg4omx
          * and v4l2m2m even MY_CODEC_ID_H264 or MY_CODEC_ID_HEVC
@@ -394,8 +414,10 @@ static int movie_set_quality(struct ctx_movie *movie)
             // bit_rate = movie->width * movie->height * movie->fps * quality_factor
             movie->quality = (int)(((int64_t)movie->width * movie->height * movie->fps * movie->quality) >> 7);
             // Clip bit rate to min
-            if (movie->quality < 4000) // magic number
+            if (movie->quality < 4000) {
+                // magic number
                 movie->quality = 4000;
+            }
             movie->ctx_codec->profile = FF_PROFILE_H264_HIGH;
             movie->ctx_codec->bit_rate = movie->quality;
             av_dict_set(&movie->opts, "preset", "ultrafast", 0);
@@ -418,7 +440,7 @@ static int movie_set_quality(struct ctx_movie *movie)
         }
     } else {
         /* The selection of 8000 is a subjective number based upon viewing output files */
-        if (movie->quality > 0){
+        if (movie->quality > 0) {
             movie->quality =(int)(((100-movie->quality)*(100-movie->quality)*(100-movie->quality) * 8000) / 1000000) + 1;
             movie->ctx_codec->flags |= MY_CODEC_FLAG_QSCALE;
             movie->ctx_codec->global_quality=movie->quality;
@@ -460,8 +482,9 @@ static const char *movie_codec_is_blacklisted(const char *codec_name)
 
     i_mx = (size_t)(sizeof(blacklisted_codec)/sizeof(blacklisted_codec[0]));
     for (i = 0; i < i_mx; i++) {
-        if (mystreq(codec_name, blacklisted_codec[i].codec_name))
+        if (mystreq(codec_name, blacklisted_codec[i].codec_name)) {
             return blacklisted_codec[i].reason;
+        }
     }
     return NULL;
 }
@@ -488,8 +511,9 @@ static int movie_set_codec_preferred(struct ctx_movie *movie)
             }
         }
     }
-    if (!movie->codec)
+    if (!movie->codec) {
         movie->codec = avcodec_find_encoder(movie->oc->oformat->video_codec);
+    }
     if (!movie->codec) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Codec %s not found"), movie->codec_name);
@@ -497,18 +521,19 @@ static int movie_set_codec_preferred(struct ctx_movie *movie)
         return -1;
     }
 
-    if (mystreq(movie->codec->name, "h264_v4l2m2m")){
+    if (mystreq(movie->codec->name, "h264_v4l2m2m")) {
         movie->preferred_codec = USER_CODEC_V4L2M2M;
-    } else if (mystreq(movie->codec->name, "h264_omx")){
+    } else if (mystreq(movie->codec->name, "h264_omx")) {
         movie->preferred_codec = USER_CODEC_H264OMX;
-    } else if (mystreq(movie->codec->name, "mpeg4_omx")){
+    } else if (mystreq(movie->codec->name, "mpeg4_omx")) {
         movie->preferred_codec = USER_CODEC_MPEG4OMX;
     } else {
         movie->preferred_codec = USER_CODEC_DEFAULT;
     }
 
-    if (movie->codec_name[codec_name_len])
+    if (movie->codec_name[codec_name_len]) {
         MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO,_("Using codec %s"), movie->codec->name);
+    }
 
     return 0;
 
@@ -522,7 +547,9 @@ static int movie_set_codec(struct ctx_movie *movie)
     int chkrate;
 
     retcd = movie_set_codec_preferred(movie);
-    if (retcd != 0) return retcd;
+    if (retcd != 0) {
+        return retcd;
+    }
 
     #if (MYFFVER >= 57041)
         //If we provide the codec to this, it results in a memory leak.  ffmpeg ticket: 5714
@@ -552,9 +579,9 @@ static int movie_set_codec(struct ctx_movie *movie)
     if (movie->tlapse != TIMELAPSE_NONE) {
         movie->ctx_codec->gop_size = 1;
     } else {
-        if (movie->fps <= 5){
+        if (movie->fps <= 5) {
             movie->ctx_codec->gop_size = 1;
-        } else if (movie->fps > 30){
+        } else if (movie->fps > 30) {
             movie->ctx_codec->gop_size = 15;
         } else {
             movie->ctx_codec->gop_size = (movie->fps / 2);
@@ -566,7 +593,7 @@ static int movie_set_codec(struct ctx_movie *movie)
     **  a very poor quality playback.  We can set the FPS to a higher number and
     **  then let the PTS display the frames correctly.
     */
-    if ((movie->tlapse == TIMELAPSE_NONE) && (movie->fps <= 5)){
+    if ((movie->tlapse == TIMELAPSE_NONE) && (movie->fps <= 5)) {
         if (mystreq(movie->codec_name, "flv") ||
             mystreq(movie->codec_name, "mp4") ||
             mystreq(movie->codec_name, "hevc")) {
@@ -582,13 +609,13 @@ static int movie_set_codec(struct ctx_movie *movie)
     movie->ctx_codec->height        = movie->height;
     movie->ctx_codec->time_base.num = 1;
     movie->ctx_codec->time_base.den = movie->fps;
-    if (movie->preferred_codec == USER_CODEC_V4L2M2M){
+    if (movie->preferred_codec == USER_CODEC_V4L2M2M) {
         movie->ctx_codec->pix_fmt   = AV_PIX_FMT_NV21;
     } else {
         movie->ctx_codec->pix_fmt   = MY_PIX_FMT_YUV420P;
     }
     movie->ctx_codec->max_b_frames  = 0;
-    if (mystreq(movie->codec_name, "ffv1")){
+    if (mystreq(movie->codec_name, "ffv1")) {
       movie->ctx_codec->strict_std_compliance = -2;
       movie->ctx_codec->level = 3;
     }
@@ -604,7 +631,7 @@ static int movie_set_codec(struct ctx_movie *movie)
     }
 
     retcd = movie_set_quality(movie);
-    if (retcd < 0){
+    if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to set quality"));
         return -1;
     }
@@ -625,7 +652,7 @@ static int movie_set_codec(struct ctx_movie *movie)
             retcd = avcodec_open2(movie->ctx_codec, movie->codec, &movie->opts);
             chkrate++;
         }
-        if (retcd < 0){
+        if (retcd < 0) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not open codec %s"),errstr);
             av_dict_free(&movie->opts);
@@ -669,23 +696,28 @@ static int movie_alloc_video_buffer(AVFrame *frame, int align)
     int ret, i, padded_height;
     int plane_padding = FFMAX(16 + 16/*STRIDE_ALIGN*/, align);
 
-    if (!desc)
+    if (!desc) {
         return AVERROR(EINVAL);
+    }
 
-    if ((ret = av_image_check_size(frame->width, frame->height, 0, NULL)) < 0)
+    if ((ret = av_image_check_size(frame->width, frame->height, 0, NULL)) < 0) {
         return ret;
+    }
 
     if (!frame->linesize[0]) {
-        if (align <= 0)
+        if (align <= 0) {
             align = 32; /* STRIDE_ALIGN. Should be av_cpu_max_align() */
+        }
 
         for(i=1; i<=align; i+=i) {
             ret = av_image_fill_linesizes(frame->linesize,(enum AVPixelFormat) frame->format,
                                           FFALIGN(frame->width, i));
-            if (ret < 0)
+            if (ret < 0) {
                 return ret;
-            if (!(frame->linesize[0] & (align-1)))
+            }
+            if (!(frame->linesize[0] & (align-1))) {
                 break;
+            }
         }
 
         for (i = 0; i < 4 && frame->linesize[i]; i++)
@@ -693,9 +725,14 @@ static int movie_alloc_video_buffer(AVFrame *frame, int align)
     }
 
     padded_height = FFALIGN(frame->height, 32);
-    if ((ret = av_image_fill_pointers(frame->data,(enum AVPixelFormat) frame->format, padded_height,
-                                      NULL, frame->linesize)) < 0)
+    ret = av_image_fill_pointers(frame->data
+            ,(enum AVPixelFormat) frame->format
+            , padded_height
+            , NULL
+            , frame->linesize);
+    if (ret < 0) {
         return ret;
+    }
 
     frame->buf[0] = av_buffer_alloc(ret + 4*plane_padding);
     if (!frame->buf[0]) {
@@ -734,8 +771,9 @@ static int movie_set_picture(struct ctx_movie *movie)
     }
 
     /* Take care of variable bitrate setting. */
-    if (movie->quality)
+    if (movie->quality) {
         movie->picture->quality = movie->quality;
+    }
 
     movie->picture->linesize[0] = movie->ctx_codec->width;
     movie->picture->linesize[1] = movie->ctx_codec->width / 2;
@@ -767,7 +805,7 @@ static int movie_set_outputfile(struct ctx_movie *movie)
 
     #if (MYFFVER < 58000)
         retcd = snprintf(movie->oc->filename, sizeof(movie->oc->filename), "%s", movie->filename);
-        if ((retcd < 0) || (retcd >= PATH_MAX)){
+        if ((retcd < 0) || (retcd >= PATH_MAX)) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                 ,_("Error setting file name"));
             return -1;
@@ -809,7 +847,7 @@ static int movie_set_outputfile(struct ctx_movie *movie)
          * items here
          */
         retcd = avformat_write_header(movie->oc, NULL);
-        if (retcd < 0){
+        if (retcd < 0) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                 ,_("Could not write movie header %s"),errstr);
@@ -837,7 +875,7 @@ static int movie_flush_codec(struct ctx_movie *movie)
         int recv_cd = 0;
         char errstr[128];
 
-        if (movie->passthrough){
+        if (movie->passthrough) {
             return 0;
         }
 
@@ -845,7 +883,7 @@ static int movie_flush_codec(struct ctx_movie *movie)
         recv_cd = 0;
         if (movie->tlapse == TIMELAPSE_NONE) {
             retcd = avcodec_send_frame(movie->ctx_codec, NULL);
-            if (retcd < 0 ){
+            if (retcd < 0 ) {
                 av_strerror(retcd, errstr, sizeof(errstr));
                 MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                     ,_("Error entering draining mode:%s"),errstr);
@@ -856,8 +894,8 @@ static int movie_flush_codec(struct ctx_movie *movie)
                 movie->pkt.data = NULL;
                 movie->pkt.size = 0;
                 recv_cd = avcodec_receive_packet(movie->ctx_codec, &movie->pkt);
-                if (recv_cd != AVERROR_EOF){
-                    if (recv_cd < 0){
+                if (recv_cd != AVERROR_EOF) {
+                    if (recv_cd < 0) {
                         av_strerror(recv_cd, errstr, sizeof(errstr));
                         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                             ,_("Error draining codec:%s"),errstr);
@@ -908,8 +946,8 @@ static int movie_put_frame(struct ctx_movie *movie, const struct timespec *ts1)
     }
 
     retcd = movie_encode_video(movie);
-    if (retcd != 0){
-        if (retcd != -2){
+    if (retcd != 0) {
+        if (retcd != -2) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error while encoding picture"));
         }
         mypacket_unref(movie->pkt);
@@ -1016,14 +1054,16 @@ static int movie_passthru_put(struct ctx_movie *movie, struct ctx_image_data *im
     int idnbr_image, idnbr_lastwritten, idnbr_stop, idnbr_firstkey;
     int indx, indx_lastwritten, indx_firstkey;
 
-    if (movie->netcam_data == NULL) return -1;
+    if (movie->netcam_data == NULL) {
+        return -1;
+    }
 
     if ((movie->netcam_data->status == NETCAM_NOTCONNECTED  ) ||
-        (movie->netcam_data->status == NETCAM_RECONNECTING  ) ){
+        (movie->netcam_data->status == NETCAM_RECONNECTING  ) ) {
         return 0;
     }
 
-    if (movie->high_resolution){
+    if (movie->high_resolution) {
         idnbr_image = img_data->idnbr_high;
     } else {
         idnbr_image = img_data->idnbr_norm;
@@ -1038,27 +1078,27 @@ static int movie_passthru_put(struct ctx_movie *movie, struct ctx_image_data *im
 
         for(indx = 0; indx < movie->netcam_data->pktarray_size; indx++) {
             if ((movie->netcam_data->pktarray[indx].iswritten) &&
-                (movie->netcam_data->pktarray[indx].idnbr > idnbr_lastwritten)){
+                (movie->netcam_data->pktarray[indx].idnbr > idnbr_lastwritten)) {
                 idnbr_lastwritten=movie->netcam_data->pktarray[indx].idnbr;
                 indx_lastwritten = indx;
             }
             if ((movie->netcam_data->pktarray[indx].idnbr >  idnbr_stop) &&
-                (movie->netcam_data->pktarray[indx].idnbr <= idnbr_image)){
+                (movie->netcam_data->pktarray[indx].idnbr <= idnbr_image)) {
                 idnbr_stop=movie->netcam_data->pktarray[indx].idnbr;
             }
             if ((movie->netcam_data->pktarray[indx].iskey) &&
-                (movie->netcam_data->pktarray[indx].idnbr <= idnbr_firstkey)){
+                (movie->netcam_data->pktarray[indx].idnbr <= idnbr_firstkey)) {
                     idnbr_firstkey=movie->netcam_data->pktarray[indx].idnbr;
                     indx_firstkey = indx;
             }
         }
 
-        if (idnbr_stop == 0){
+        if (idnbr_stop == 0) {
             pthread_mutex_unlock(&movie->netcam_data->mutex_pktarray);
             return 0;
         }
 
-        if (indx_lastwritten != -1){
+        if (indx_lastwritten != -1) {
             indx = indx_lastwritten;
         } else if (indx_firstkey != -1) {
             indx = indx_firstkey;
@@ -1073,9 +1113,13 @@ static int movie_passthru_put(struct ctx_movie *movie, struct ctx_image_data *im
                 (movie->netcam_data->pktarray[indx].idnbr <= idnbr_image)) {
                 movie_passthru_write(movie, indx);
             }
-            if (movie->netcam_data->pktarray[indx].idnbr == idnbr_stop) break;
+            if (movie->netcam_data->pktarray[indx].idnbr == idnbr_stop) {
+                break;
+            }
             indx++;
-            if (indx == movie->netcam_data->pktarray_size ) indx = 0;
+            if (indx == movie->netcam_data->pktarray_size ) {
+                indx = 0;
+            }
         }
     pthread_mutex_unlock(&movie->netcam_data->mutex_pktarray);
     return 0;
@@ -1171,13 +1215,13 @@ static int movie_passthru_streams(struct ctx_movie *movie)
 static int movie_passthru_check(struct ctx_movie *movie)
 {
     if ((movie->netcam_data->status == NETCAM_NOTCONNECTED  ) ||
-        (movie->netcam_data->status == NETCAM_RECONNECTING  ) ){
+        (movie->netcam_data->status == NETCAM_RECONNECTING  )) {
         MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
             ,_("rtsp camera not ready for pass-through."));
         return -1;
     }
 
-    if (movie->netcam_data == NULL){
+    if (movie->netcam_data == NULL) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("RTSP context not available."));
         return -1;
     }
@@ -1224,7 +1268,7 @@ static int movie_passthru_open(struct ctx_movie *movie)
     }
 
     retcd = movie_set_outputfile(movie);
-    if (retcd < 0){
+    if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the output file"));
         return -1;
     }
@@ -1258,14 +1302,13 @@ void movie_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list 
      * are not necessarily our errors.
      */
 
-    if (errno_flag <= AV_LOG_WARNING){
+    if (errno_flag <= AV_LOG_WARNING) {
         retcd = vsnprintf(buf, sizeof(buf), fmt, vl);
-        if (retcd >=1024){
+        if (retcd >=1024) {
             MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, "av message truncated %d bytes",(retcd - 1024));
         }
         end = buf + strlen(buf);
-        if (end > buf && end[-1] == '\n')
-        {
+        if (end > buf && end[-1] == '\n') {
             *--end = 0;
         }
 
@@ -1279,7 +1322,7 @@ static void movie_put_pix_nv21(struct ctx_movie *movie, struct ctx_image_data *i
     unsigned char *image,*imagecr, *imagecb;
     int cr_len, x, y;
 
-    if (movie->high_resolution){
+    if (movie->high_resolution) {
         image = img_data->image_high;
     } else {
         image = img_data->image_norm;
@@ -1305,7 +1348,7 @@ static void movie_put_pix_yuv420(struct ctx_movie *movie, struct ctx_image_data 
 {
     unsigned char *image;
 
-    if (movie->high_resolution){
+    if (movie->high_resolution) {
         image = img_data->image_high;
     } else {
         image = img_data->image_norm;
@@ -1344,8 +1387,7 @@ void movie_global_deinit(void)
 
     #if (MYFFVER < 58000)
         /* TODO Determine if this is even needed for old versions */
-        if (av_lockmgr_register(NULL) < 0)
-        {
+        if (av_lockmgr_register(NULL) < 0) {
             MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
                 ,_("av_lockmgr_register reset failed on cleanup"));
         }
@@ -1389,19 +1431,19 @@ int movie_open(struct ctx_movie *movie)
     }
 
     retcd = movie_set_stream(movie);
-    if (retcd < 0){
+    if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the stream"));
         return -1;
     }
 
     retcd = movie_set_picture(movie);
-    if (retcd < 0){
+    if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the stream"));
         return -1;
     }
 
     retcd = movie_set_outputfile(movie);
-    if (retcd < 0){
+    if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the stream"));
         return -1;
     }
@@ -1415,10 +1457,10 @@ void movie_close(struct ctx_movie *movie)
 
     if (movie != NULL) {
 
-        if (movie_flush_codec(movie) < 0){
+        if (movie_flush_codec(movie) < 0) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error flushing codec"));
         }
-        if (movie->oc->pb != NULL){
+        if (movie->oc->pb != NULL) {
             if (movie->tlapse != TIMELAPSE_APPEND) {
                 av_write_trailer(movie->oc);
             }
@@ -1456,7 +1498,7 @@ int movie_put_image(struct ctx_movie *movie, struct ctx_image_data *img_data, co
         }
 
         movie->gop_cnt ++;
-        if (movie->gop_cnt == movie->ctx_codec->gop_size ){
+        if (movie->gop_cnt == movie->ctx_codec->gop_size ) {
             movie->picture->pict_type = AV_PICTURE_TYPE_I;
             movie->picture->key_frame = 1;
             movie->gop_cnt = 0;
@@ -1474,14 +1516,14 @@ int movie_put_image(struct ctx_movie *movie, struct ctx_image_data *img_data, co
         while ((retcd == -2) && (movie->tlapse != TIMELAPSE_NONE)) {
             retcd = movie_put_frame(movie, ts1);
             cnt++;
-            if (cnt > 50){
+            if (cnt > 50) {
                 MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                     ,_("Excessive attempts to clear buffered packet"));
                 retcd = -1;
             }
         }
         //non timelapse buffered is ok
-        if (retcd == -2){
+        if (retcd == -2) {
             retcd = 0;
             MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, _("Buffered packet"));
         }
@@ -1494,8 +1536,9 @@ int movie_put_image(struct ctx_movie *movie, struct ctx_image_data *img_data, co
 void movie_reset_start_time(struct ctx_movie *movie, const struct timespec *ts1)
 {
     int64_t one_frame_interval = av_rescale_q(1,(AVRational){1, movie->fps}, movie->strm_video->time_base);
-    if (one_frame_interval <= 0)
+    if (one_frame_interval <= 0) {
         one_frame_interval = 1;
+    }
     movie->base_pts = movie->last_pts + one_frame_interval;
 
     movie->start_time.tv_sec = ts1->tv_sec;
@@ -1520,16 +1563,27 @@ static const char* movie_init_codec(struct ctx_cam *cam)
     if (cam->conf->movie_codec == "test") {
         MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "Running test of the various output formats.");
         codenbr = cam->event_nr % 10;
-        if (codenbr == 1)      return "flv";
-        else if (codenbr == 2) return "ogg";
-        else if (codenbr == 3) return "vp8";
-        else if (codenbr == 4) return "mp4";
-        else if (codenbr == 5) return "mkv";
-        else if (codenbr == 6) return "hevc";
-        else if (codenbr == 7) return "flv";
-        else if (codenbr == 8) return "ogg";
-        else if (codenbr == 9) return "vp8";
-        else                   return "mkv";
+        if (codenbr == 1) {
+            return "flv";
+        } else if (codenbr == 2) {
+            return "ogg";
+        } else if (codenbr == 3) {
+            return "vp8";
+        } else if (codenbr == 4) {
+            return "mp4";
+        } else if (codenbr == 5) {
+            return "mkv";
+        } else if (codenbr == 6) {
+            return "hevc";
+        } else if (codenbr == 7) {
+            return "flv";
+        } else if (codenbr == 8) {
+            return "ogg";
+        } else if (codenbr == 9) {
+            return "vp8";
+        } else                   {
+            return "mkv";
+        }
     }
 
     return cam->conf->movie_codec.c_str();
@@ -1554,12 +1608,12 @@ int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1)
         retcd = snprintf(cam->movie_norm->filename, PATH_MAX, "%s/%s"
             , cam->conf->target_dir.c_str(), stamp);
     }
-    if ((retcd < 0) || (retcd >= PATH_MAX)){
+    if ((retcd < 0) || (retcd >= PATH_MAX)) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Error setting file name"));
         return -1;
     }
-    if (cam->imgs.size_high > 0){
+    if (cam->imgs.size_high > 0) {
         cam->movie_norm->width  = cam->imgs.width_high;
         cam->movie_norm->height = cam->imgs.height_high;
         cam->movie_norm->high_resolution = TRUE;
@@ -1611,7 +1665,7 @@ int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1)
         retcd = snprintf(cam->movie_motion->filename, PATH_MAX, "%s/%sm"
             , cam->conf->target_dir.c_str(), stamp);
     }
-    if ((retcd < 0) || (retcd >= PATH_MAX)){
+    if ((retcd < 0) || (retcd >= PATH_MAX)) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Error setting file name"));
         return -1;
@@ -1663,7 +1717,7 @@ int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1)
             , _("Error setting timelapse file name %s"), tmp);
     }
 
-    if ((cam->imgs.size_high > 0) && (!cam->movie_passthrough)){
+    if ((cam->imgs.size_high > 0) && (!cam->movie_passthrough)) {
         cam->movie_timelapse->width  = cam->imgs.width_high;
         cam->movie_timelapse->height = cam->imgs.height_high;
         cam->movie_timelapse->high_resolution = TRUE;

@@ -42,7 +42,7 @@ static void motion_signal_process(struct ctx_motapp *motapp)
         if (motapp->cam_list != NULL) {
             indx = 0;
             while (motapp->cam_list[indx] != NULL) {
-                if (motapp->cam_list[indx]->conf->snapshot_interval){
+                if (motapp->cam_list[indx]->conf->snapshot_interval) {
                     motapp->cam_list[indx]->snapshot = true;
                 }
                 indx++;
@@ -167,7 +167,7 @@ static void motion_remove_pid(struct ctx_motapp *motapp)
     if ((motapp->daemon) &&
         (motapp->pid_file != "") &&
         (motapp->restart_all == false)) {
-        if (!unlink(motapp->pid_file.c_str())){
+        if (!unlink(motapp->pid_file.c_str())) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Removed process id file (pid file)."));
         } else{
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error removing pid file"));
@@ -222,7 +222,7 @@ static void motion_daemon(struct ctx_motapp *motapp)
      * Changing dir to root enables people to unmount a disk
      * without having to stop Motion
      */
-    if (chdir("/")){
+    if (chdir("/")) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Could not change directory"));
     }
 
@@ -253,7 +253,7 @@ static void motion_daemon(struct ctx_motapp *motapp)
     }
 
     /* Now it is safe to add the PID creation to the logs */
-    if (pidf){
+    if (pidf) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Created process id file %s. Process ID is %d")
             ,motapp->pid_file.c_str(), getpid());
@@ -287,7 +287,7 @@ static void motion_camera_ids(struct ctx_cam **cam_list)
     /* Set defaults */
     indx = 0;
     while (cam_list[indx] != NULL){
-        if (cam_list[indx]->conf->camera_id > 0){
+        if (cam_list[indx]->conf->camera_id > 0) {
             cam_list[indx]->camera_id = cam_list[indx]->conf->camera_id;
         } else {
             cam_list[indx]->camera_id = indx;
@@ -298,15 +298,19 @@ static void motion_camera_ids(struct ctx_cam **cam_list)
     invalid_ids = false;
     indx = 0;
     while (cam_list[indx] != NULL){
-        if (cam_list[indx]->camera_id > 32000) invalid_ids = true;
+        if (cam_list[indx]->camera_id > 32000) {
+            invalid_ids = true;
+        }
         indx2 = indx + 1;
         while (cam_list[indx2] != NULL){
-            if (cam_list[indx]->camera_id == cam_list[indx2]->camera_id) invalid_ids = true;
+            if (cam_list[indx]->camera_id == cam_list[indx2]->camera_id) {
+                invalid_ids = true;
+            }
             indx2++;
         }
         indx++;
     }
-    if (invalid_ids){
+    if (invalid_ids) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Camara IDs are not unique or have values over 32,000.  Falling back to thread numbers"));
         indx = 0;
@@ -393,7 +397,7 @@ static void motion_startup(struct ctx_motapp *motapp, int daemonize, int argc, c
         }
     }
 
-    if (motapp->setup_mode){
+    if (motapp->setup_mode) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Motion running in setup mode."));
     }
 
@@ -469,7 +473,9 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
      * Best to just not get into a watchdog situation...
      */
 
-    if (!motapp->cam_list[indx]->running_cam) return;
+    if (!motapp->cam_list[indx]->running_cam) {
+        return;
+    }
 
     motapp->cam_list[indx]->watchdog--;
     if (motapp->cam_list[indx]->watchdog == 0) {
@@ -485,11 +491,11 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
             ,_("Thread %d - Watchdog timeout did NOT restart, killing it!")
             , motapp->cam_list[indx]->threadnr);
         if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (motapp->cam_list[indx]->netcam != NULL)){
+            (motapp->cam_list[indx]->netcam != NULL)) {
             pthread_cancel(motapp->cam_list[indx]->netcam->thread_id);
         }
         if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (motapp->cam_list[indx]->netcam_high != NULL)){
+            (motapp->cam_list[indx]->netcam_high != NULL)) {
             pthread_cancel(motapp->cam_list[indx]->netcam_high->thread_id);
         }
         pthread_cancel(motapp->cam_list[indx]->thread_id);
@@ -501,7 +507,7 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
             , motapp->cam_list[indx]->threadnr);
 
         if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (motapp->cam_list[indx]->netcam != NULL)){
+            (motapp->cam_list[indx]->netcam != NULL)) {
             if (!motapp->cam_list[indx]->netcam->handler_finished &&
                 pthread_kill(motapp->cam_list[indx]->netcam->thread_id, 0) == ESRCH) {
                 motapp->cam_list[indx]->netcam->handler_finished = true;
@@ -514,7 +520,7 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
             }
         }
         if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (motapp->cam_list[indx]->netcam_high != NULL)){
+            (motapp->cam_list[indx]->netcam_high != NULL)) {
             if (!motapp->cam_list[indx]->netcam_high->handler_finished &&
                 pthread_kill(motapp->cam_list[indx]->netcam_high->thread_id, 0) == ESRCH) {
                 motapp->cam_list[indx]->netcam_high->handler_finished = true;
@@ -527,7 +533,7 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
             }
         }
         if (motapp->cam_list[indx]->running_cam &&
-            pthread_kill(motapp->cam_list[indx]->thread_id, 0) == ESRCH){
+            pthread_kill(motapp->cam_list[indx]->thread_id, 0) == ESRCH) {
             MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
                 ,_("Thread %d - Cleaning thread.")
                 , motapp->cam_list[indx]->threadnr);
@@ -559,7 +565,7 @@ static int motion_check_threadcount(struct ctx_motapp *motapp)
     thrdcnt = 0;
 
     for (indx = (motapp->cam_list[1] != NULL ? 1 : 0); motapp->cam_list[indx]; indx++) {
-        if (motapp->cam_list[indx]->running_cam || motapp->cam_list[indx]->restart_cam){
+        if (motapp->cam_list[indx]->running_cam || motapp->cam_list[indx]->restart_cam) {
             thrdcnt++;
         }
     }

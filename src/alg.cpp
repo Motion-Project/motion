@@ -652,7 +652,9 @@ void alg_despeckle(struct ctx_cam *cam)
     unsigned char *out, *common_buffer;
 
     if ((cam->conf->despeckle_filter == "") || cam->current_image->diffs <= 0) {
-        if (cam->imgs.labelsize_max) cam->imgs.labelsize_max = 0;
+        if (cam->imgs.labelsize_max) {
+            cam->imgs.labelsize_max = 0;
+        }
         return;
     }
 
@@ -671,12 +673,16 @@ void alg_despeckle(struct ctx_cam *cam)
         switch (cam->conf->despeckle_filter[i]) {
         case 'E':
             diffs = alg_erode9(out, width, height, common_buffer, 0);
-            if (diffs == 0) i = len;
+            if (diffs == 0) {
+                i = len;
+            }
             done = 1;
             break;
         case 'e':
             diffs = alg_erode5(out, width, height, common_buffer, 0);
-            if (diffs == 0) i = len;
+            if (diffs == 0) {
+                i = len;
+            }
             done = 1;
             break;
         case 'D':
@@ -698,7 +704,9 @@ void alg_despeckle(struct ctx_cam *cam)
 
     /* If conf.despeckle_filter contains any valid action EeDdl */
     if (done) {
-        if (done != 2) cam->imgs.labelsize_max = 0; // Disable Labeling
+        if (done != 2) {
+            cam->imgs.labelsize_max = 0; // Disable Labeling
+        }
         cam->current_image->diffs = diffs;
         return;
     } else {
@@ -725,8 +733,9 @@ void alg_tune_smartmask(struct ctx_cam *cam)
 
     for (i = 0; i < motionsize; i++) {
         /* Decrease smart_mask sensitivity every 5*speed seconds only. */
-        if (smartmask[i] > 0)
+        if (smartmask[i] > 0) {
             smartmask[i]--;
+        }
         /* Increase smart_mask sensitivity based on the buffered values. */
         diff = smartmask_buffer[i] / sensitivity;
 
@@ -896,7 +905,9 @@ static int alg_diff_masksmart(struct ctx_cam *cam, unsigned char *new_img)
                 if (cam->event_nr != cam->prev_event) {
                     (*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
                 }
-                if (!*smartmask_final) curdiff = 0;
+                if (!*smartmask_final) {
+                    curdiff = 0;
+                }
             }
             smartmask_final++;
             smartmask_buffer++;
@@ -926,7 +937,9 @@ static char alg_diff_fast(struct ctx_cam *cam, int max_n_changes, unsigned char 
     unsigned char *ref = imgs->ref;
     int curdiff;
 
-    if (!step % 2) step++;
+    if (!step % 2) {
+        step++;
+    }
 
     max_n_changes /= step;
 
@@ -936,7 +949,7 @@ static char alg_diff_fast(struct ctx_cam *cam, int max_n_changes, unsigned char 
         curdiff = abs(*ref - *new_var); /* Using a temp variable is 12% faster. */
         if (curdiff >  noise) {
             diffs++;
-            if (diffs > max_n_changes){
+            if (diffs > max_n_changes) {
 
                 //MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 //,"Lots of fast diffs %d detected.", diffs);
@@ -957,7 +970,7 @@ static char alg_diff_fast(struct ctx_cam *cam, int max_n_changes, unsigned char 
 static void alg_diff_standard(struct ctx_cam *cam)
 {
 
-    if (cam->smartmask_speed == 0){
+    if (cam->smartmask_speed == 0) {
         if (cam->imgs.mask == NULL) {
             cam->current_image->diffs = alg_diff_nomask(cam, cam->imgs.image_vprvcy);
         } else {
@@ -993,8 +1006,9 @@ void alg_lightswitch(struct ctx_cam *cam)
     if (cam->conf->lightswitch_percent >= 1 && !cam->lost_connection) {
         if (cam->current_image->diffs > (cam->imgs.motionsize * cam->conf->lightswitch_percent / 100)) {
             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
-            if (cam->frame_skip < (unsigned int)cam->conf->lightswitch_frames)
+            if (cam->frame_skip < (unsigned int)cam->conf->lightswitch_frames) {
                 cam->frame_skip = (unsigned int)cam->conf->lightswitch_frames;
+            }
             cam->current_image->diffs = 0;
             alg_update_reference_frame(cam, RESET_REF_FRAME);
         }
@@ -1024,8 +1038,10 @@ void alg_update_reference_frame(struct ctx_cam *cam, int action)
     unsigned char *smartmask = cam->imgs.smartmask_final;
     unsigned char *out = cam->imgs.image_motion.image_norm;
 
-    if (cam->lastrate > 5) /* Match rate limit */
+    if (cam->lastrate > 5) {
+        /* Match rate limit */
         accept_timer /= (cam->lastrate / 3);
+    }
 
     if (action == UPDATE_REF_FRAME) { /* Black&white only for better performance. */
         threshold_ref = cam->noise * EXCLUDE_LEVEL_PERCENT / 100;
@@ -1102,10 +1118,18 @@ static void alg_new_location_center(ctx_cam *cam)
     }
 
     /* This allows for the redcross and boxes to be drawn*/
-    if (cent->x < 10) cent->x = 15;
-    if (cent->y < 10) cent->y = 15;
-    if ((cent->x + 10) > width) cent->x = width - 15;
-    if ((cent->y + 10) > height) cent->y = height - 15;
+    if (cent->x < 10) {
+        cent->x = 15;
+    }
+    if (cent->y < 10) {
+        cent->y = 15;
+    }
+    if ((cent->x + 10) > width) {
+        cent->x = width - 15;
+    }
+    if ((cent->y + 10) > height) {
+        cent->y = height - 15;
+    }
 
 }
 
@@ -1141,15 +1165,15 @@ static void alg_new_location_dist(ctx_cam *cam)
                 /* ToDo: We should store this number for the variance calc...*/
                 distance_mean += sqrt(pow((x - cent->x), 2) + pow((y - cent->y), 2));
 
-                if (x > cent->x){
+                if (x > cent->x) {
                     xdist += x - cent->x;
-                } else if (x < cent->x){
+                } else if (x < cent->x) {
                     xdist += cent->x - x;
                 }
 
-                if (y > cent->y){
+                if (y > cent->y) {
                     ydist += y - cent->y;
-                } else if (y < cent->y){
+                } else if (y < cent->y) {
                     ydist += cent->y - y;
                 }
 
@@ -1198,27 +1222,27 @@ static void alg_new_location_minmax(ctx_cam *cam)
     int height = cam->imgs.height;
     ctx_coord *cent = &cam->current_image->location;
 
-    if (cent->maxx > width - 1){
+    if (cent->maxx > width - 1) {
         cent->maxx = width - 1;
-    } else if (cent->maxx < 0){
+    } else if (cent->maxx < 0) {
         cent->maxx = 0;
     }
 
-    if (cent->maxy > height - 1){
+    if (cent->maxy > height - 1) {
         cent->maxy = height - 1;
-    } else if (cent->maxy < 0){
+    } else if (cent->maxy < 0) {
         cent->maxy = 0;
     }
 
-    if (cent->minx > width - 1){
+    if (cent->minx > width - 1) {
         cent->minx = width - 1;
-    } else if (cent->minx < 0){
+    } else if (cent->minx < 0) {
         cent->minx = 0;
     }
 
-    if (cent->miny > height - 1){
+    if (cent->miny > height - 1) {
         cent->miny = height - 1;
-    } else if (cent->miny < 0){
+    } else if (cent->miny < 0) {
         cent->miny = 0;
     }
 

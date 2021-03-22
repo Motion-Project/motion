@@ -434,7 +434,7 @@ int vid_mjpegtoyuv420p(unsigned char *img_dst, unsigned char *img_src, int width
         ptr_buffer =(unsigned char*) memmem(img_src + soi_pos + 1, size - soi_pos - 1, "\xff\xd8", 2);
     }
 
-    if (soi_pos != 0){
+    if (soi_pos != 0) {
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("SOI position adjusted by %d bytes."), soi_pos);
     }
 

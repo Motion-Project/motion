@@ -49,7 +49,7 @@ static void mlp_ring_resize(struct ctx_cam *cam, int new_size)
 
     if (cam->event_nr != cam->prev_event) {
 
-        if (new_size < cam->imgs.ring_size){
+        if (new_size < cam->imgs.ring_size) {
             smallest = new_size;
         } else {
             smallest = cam->imgs.ring_size;
@@ -61,14 +61,14 @@ static void mlp_ring_resize(struct ctx_cam *cam, int new_size)
 
             tmp =(struct ctx_image_data*) mymalloc(new_size * sizeof(struct ctx_image_data));
 
-            if (smallest > 0){
+            if (smallest > 0) {
                 memcpy(tmp, cam->imgs.image_ring, sizeof(struct ctx_image_data) * smallest);
             }
 
             for(i = smallest; i < new_size; i++) {
                 tmp[i].image_norm =(unsigned char*) mymalloc(cam->imgs.size_norm);
                 memset(tmp[i].image_norm, 0x80, cam->imgs.size_norm);  /* initialize to grey */
-                if (cam->imgs.size_high > 0){
+                if (cam->imgs.size_high > 0) {
                     tmp[i].image_high =(unsigned char*) mymalloc(cam->imgs.size_high);
                     memset(tmp[i].image_high, 0x80, cam->imgs.size_high);
                 }
@@ -91,11 +91,15 @@ static void mlp_ring_destroy(struct ctx_cam *cam)
 {
     int i;
 
-    if (cam->imgs.image_ring == NULL) return;
+    if (cam->imgs.image_ring == NULL) {
+        return;
+    }
 
-    for (i = 0; i < cam->imgs.ring_size; i++){
+    for (i = 0; i < cam->imgs.ring_size; i++) {
         free(cam->imgs.image_ring[i].image_norm);
-        if (cam->imgs.size_high >0 ) free(cam->imgs.image_ring[i].image_high);
+        if (cam->imgs.size_high >0 ) {
+            free(cam->imgs.image_ring[i].image_high);
+        }
     }
     free(cam->imgs.image_ring);
 
@@ -109,13 +113,13 @@ static void mlp_ring_process_debug(struct ctx_cam *cam)
     char tmp[32];
     const char *t;
 
-    if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_TRIGGER){
+    if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_TRIGGER) {
         t = "Trigger";
-    } else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_MOTION){
+    } else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_MOTION) {
         t = "Motion";
-    } else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_PRECAP){
+    } else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_PRECAP) {
         t = "Precap";
-    } else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_POSTCAP){
+    } else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_POSTCAP) {
         t = "Postcap";
     } else {
         t = "Other";
@@ -136,20 +140,22 @@ static void mlp_ring_process(struct ctx_cam *cam)
     struct ctx_image_data *saved_current_image = cam->current_image;
 
     do {
-        if ((cam->imgs.image_ring[cam->imgs.ring_out].flags & (IMAGE_SAVE | IMAGE_SAVED)) != IMAGE_SAVE){
+        if ((cam->imgs.image_ring[cam->imgs.ring_out].flags & (IMAGE_SAVE | IMAGE_SAVED)) != IMAGE_SAVE) {
             break;
         }
 
         cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_out];
 
         if (cam->imgs.image_ring[cam->imgs.ring_out].shot < cam->conf->framerate) {
-            if (cam->motapp->log_level >= DBG) mlp_ring_process_debug(cam);
+            if (cam->motapp->log_level >= DBG) {
+                mlp_ring_process_debug(cam);
+            }
 
             event(cam, EVENT_IMAGE_DETECTED,
               &cam->imgs.image_ring[cam->imgs.ring_out], NULL, NULL,
               &cam->imgs.image_ring[cam->imgs.ring_out].imgts);
 
-            if (cam->movie_last_shot >= 0){
+            if (cam->movie_last_shot >= 0) {
                 cam->movie_last_shot = cam->imgs.image_ring[cam->imgs.ring_out].shot;
             }
         }
@@ -196,7 +202,7 @@ static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
                        cam->event_nr);
 
-            if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)){
+            if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)) {
                 pic_save_preview(cam, img);
             }
 
@@ -247,10 +253,10 @@ static void mlp_detected(struct ctx_cam *cam, struct ctx_image_data *img)
     mlp_detected_trigger(cam, img);
 
     if (img->shot < conf->framerate) {
-        if (conf->stream_motion && !cam->motapp->setup_mode && img->shot != 1){
+        if (conf->stream_motion && !cam->motapp->setup_mode && img->shot != 1) {
             event(cam, EVENT_STREAM, img, NULL, NULL, &img->imgts);
         }
-        if (conf->picture_output_motion != "off"){
+        if (conf->picture_output_motion != "off") {
             event(cam, EVENT_IMAGEM_DETECTED, NULL, NULL, NULL, &img->imgts);
         }
     }
@@ -262,7 +268,9 @@ static void mlp_detected(struct ctx_cam *cam, struct ctx_image_data *img)
 static void mlp_mask_privacy(struct ctx_cam *cam)
 {
 
-    if (cam->imgs.mask_privacy == NULL) return;
+    if (cam->imgs.mask_privacy == NULL) {
+        return;
+    }
 
     /*
     * This function uses long operations to process 4 (32 bit) or 8 (64 bit)
@@ -280,11 +288,14 @@ static void mlp_mask_privacy(struct ctx_cam *cam)
     int indx_max;                /* 1 if we are only doing norm, 2 if we are doing both norm and high */
 
     indx_img = 1;
-    indx_max = 1;
-    if (cam->imgs.size_high > 0) indx_max = 2;
+    if (cam->imgs.size_high > 0) {
+        indx_max = 2;
+    } else {
+        indx_max = 1;
+    }
     increment = sizeof(unsigned long);
 
-    while (indx_img <= indx_max){
+    while (indx_img <= indx_max) {
         if (indx_img == 1) {
             /* Normal Resolution */
             index_y = cam->imgs.height * cam->imgs.width;
@@ -328,7 +339,9 @@ static void mlp_mask_privacy(struct ctx_cam *cam)
         }
 
         while (--index_crcb >= 0) {
-            if (*(mask++) == 0x00) *image = 0x80; // Mask last remaining bytes.
+            if (*(mask++) == 0x00) {
+                *image = 0x80; // Mask last remaining bytes.
+            }
             image += 1;
         }
 
@@ -423,9 +436,9 @@ int mlp_cam_next(struct ctx_cam *cam, struct ctx_image_data *img_data)
     }
 
     if (cam->camera_type == CAMERA_TYPE_NETCAM) {
-        if (cam->video_dev == -1)
+        if (cam->video_dev == -1) {
             return NETCAM_GENERAL_ERROR;
-
+        }
         return netcam_next(cam, img_data);
     }
 
@@ -478,12 +491,15 @@ static void mlp_init_firstimage(struct ctx_cam *cam)
     cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
     if (cam->video_dev >= 0) {
         for (indx = 0; indx < 5; indx++) {
-            if (mlp_cam_next(cam, cam->current_image) == 0) break;
+            if (mlp_cam_next(cam, cam->current_image) == 0) {
+                break;
+            }
             SLEEP(2, 0);
         }
 
         if (indx >= 5) {
-            memset(cam->current_image->image_norm, 0x80, cam->imgs.size_norm);       /* initialize to grey */
+            memset(cam->current_image->image_norm, 0x80, cam->imgs.size_norm);
+            /* initialize to grey */
             draw_text(cam->current_image->image_norm , cam->imgs.width, cam->imgs.height,
                       10, 20, "Error capturing first image", cam->text_scale);
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error capturing first image"));
@@ -502,7 +518,7 @@ static int mlp_check_szimg(struct ctx_cam *cam)
             ,cam->imgs.width, cam->imgs.height);
         return -1;
     }
-    if ((cam->imgs.width  < 64) || (cam->imgs.height < 64)){
+    if ((cam->imgs.width  < 64) || (cam->imgs.height < 64)) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
             ,cam->imgs.width, cam->imgs.height);
@@ -562,7 +578,7 @@ static void mlp_init_buffers(struct ctx_cam *cam)
     cam->imgs.image_preview.image_norm =(unsigned char*) mymalloc(cam->imgs.size_norm);
     cam->imgs.common_buffer =(unsigned char*) mymalloc(3 * cam->imgs.width * cam->imgs.height);
     cam->imgs.image_secondary =(unsigned char*) mymalloc(3 * cam->imgs.width * cam->imgs.height);
-    if (cam->imgs.size_high > 0){
+    if (cam->imgs.size_high > 0) {
         cam->imgs.image_preview.image_high =(unsigned char*) mymalloc(cam->imgs.size_high);
     }
 
@@ -584,7 +600,7 @@ static void mlp_init_values(struct ctx_cam *cam)
     cam->noise = cam->conf->noise_level;
 
     cam->threshold = cam->conf->threshold;
-    if (cam->conf->threshold_maximum > cam->conf->threshold ){
+    if (cam->conf->threshold_maximum > cam->conf->threshold ) {
         cam->threshold_maximum = cam->conf->threshold_maximum;
     } else {
         cam->threshold_maximum = (cam->imgs.height * cam->imgs.width * 3) / 2;
@@ -643,7 +659,7 @@ static void mlp_init_ref(struct ctx_cam *cam)
 
     memcpy(cam->imgs.image_vprvcy, cam->current_image->image_norm, cam->imgs.size_norm);
 
-    if (cam->conf->primary_method == 0){
+    if (cam->conf->primary_method == 0) {
         alg_update_reference_frame(cam, RESET_REF_FRAME);
     } else if (cam->conf->primary_method == 1) {
         //alg_new_update_frame(cam);
@@ -661,13 +677,19 @@ static int mlp_init(struct ctx_cam *cam)
 
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cam->threadnr));
 
-    if (init_camera_type(cam) != 0 ) return -1;
+    if (init_camera_type(cam) != 0 ) {
+        return -1;
+    }
 
     mlp_init_values(cam);
 
-    if (mlp_init_cam_start(cam) != 0) return -1;
+    if (mlp_init_cam_start(cam) != 0) {
+        return -1;
+    }
 
-    if (mlp_check_szimg(cam) != 0) return -1;
+    if (mlp_check_szimg(cam) != 0) {
+        return -1;
+    }
 
     mlp_ring_resize(cam, 1); /* Create a initial precapture ring buffer with 1 frame */
 
@@ -717,7 +739,9 @@ void mlp_cleanup(struct ctx_cam *cam)
 
     algsec_deinit(cam);
 
-    if (cam->video_dev >= 0) mlp_cam_close(cam);
+    if (cam->video_dev >= 0) {
+        mlp_cam_close(cam);
+    }
 
     free(cam->imgs.image_motion.image_norm);
     cam->imgs.image_motion.image_norm = NULL;
@@ -749,19 +773,29 @@ void mlp_cleanup(struct ctx_cam *cam)
     free(cam->imgs.smartmask_buffer);
     cam->imgs.smartmask_buffer = NULL;
 
-    if (cam->imgs.mask) free(cam->imgs.mask);
+    if (cam->imgs.mask) {
+        free(cam->imgs.mask);
+    }
     cam->imgs.mask = NULL;
 
-    if (cam->imgs.mask_privacy) free(cam->imgs.mask_privacy);
+    if (cam->imgs.mask_privacy) {
+        free(cam->imgs.mask_privacy);
+    }
     cam->imgs.mask_privacy = NULL;
 
-    if (cam->imgs.mask_privacy_uv) free(cam->imgs.mask_privacy_uv);
+    if (cam->imgs.mask_privacy_uv) {
+        free(cam->imgs.mask_privacy_uv);
+    }
     cam->imgs.mask_privacy_uv = NULL;
 
-    if (cam->imgs.mask_privacy_high) free(cam->imgs.mask_privacy_high);
+    if (cam->imgs.mask_privacy_high) {
+        free(cam->imgs.mask_privacy_high);
+    }
     cam->imgs.mask_privacy_high = NULL;
 
-    if (cam->imgs.mask_privacy_high_uv) free(cam->imgs.mask_privacy_high_uv);
+    if (cam->imgs.mask_privacy_high_uv) {
+        free(cam->imgs.mask_privacy_high_uv);
+    }
     cam->imgs.mask_privacy_high_uv = NULL;
 
     free(cam->imgs.common_buffer);
@@ -773,7 +807,7 @@ void mlp_cleanup(struct ctx_cam *cam)
     free(cam->imgs.image_preview.image_norm);
     cam->imgs.image_preview.image_norm = NULL;
 
-    if (cam->imgs.size_high > 0){
+    if (cam->imgs.size_high > 0) {
         free(cam->imgs.image_preview.image_high);
         cam->imgs.image_preview.image_high = NULL;
     }
@@ -834,13 +868,15 @@ static void mlp_prepare(struct ctx_cam *cam)
     cam->frame_last_ts.tv_nsec = cam->frame_curr_ts.tv_nsec;
     clock_gettime(CLOCK_REALTIME, &cam->frame_curr_ts);
 
-    if (cam->conf->pre_capture < 0)
+    if (cam->conf->pre_capture < 0) {
         cam->conf->pre_capture = 0;
+    }
 
     frame_buffer_size = cam->conf->pre_capture + cam->conf->minimum_motion_frames;
 
-    if (cam->imgs.ring_size != frame_buffer_size)
+    if (cam->imgs.ring_size != frame_buffer_size) {
         mlp_ring_resize(cam, frame_buffer_size);
+    }
 
     if (cam->frame_last_ts.tv_sec != cam->frame_curr_ts.tv_sec) {
         cam->lastrate = cam->shots + 1;
@@ -848,8 +884,9 @@ static void mlp_prepare(struct ctx_cam *cam)
 
         if (cam->conf->minimum_frame_time) {
             cam->minimum_frame_time_downcounter--;
-            if (cam->minimum_frame_time_downcounter == 0)
+            if (cam->minimum_frame_time_downcounter == 0) {
                 cam->get_image = 1;
+            }
         } else {
             cam->get_image = 1;
         }
@@ -857,8 +894,9 @@ static void mlp_prepare(struct ctx_cam *cam)
 
     cam->shots++;
 
-    if (cam->startup_frames > 0)
+    if (cam->startup_frames > 0) {
         cam->startup_frames--;
+    }
 
 
 }
@@ -872,13 +910,15 @@ static void mlp_resetimages(struct ctx_cam *cam)
     }
 
     /* ring_buffer_in is pointing to current pos, update before put in a new image */
-    if (++cam->imgs.ring_in >= cam->imgs.ring_size)
+    if (++cam->imgs.ring_in >= cam->imgs.ring_size) {
         cam->imgs.ring_in = 0;
+    }
 
     /* Check if we have filled the ring buffer, throw away last image */
     if (cam->imgs.ring_in == cam->imgs.ring_out) {
-        if (++cam->imgs.ring_out >= cam->imgs.ring_size)
+        if (++cam->imgs.ring_out >= cam->imgs.ring_size) {
             cam->imgs.ring_out = 0;
+        }
     }
 
     cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
@@ -914,7 +954,9 @@ static int mlp_retry(struct ctx_cam *cam)
             return 1;
         }
 
-        if (mlp_check_szimg(cam) != 0) return 1;
+        if (mlp_check_szimg(cam) != 0) {
+            return 1;
+        }
 
         /*
          * If the netcam has different dimensions than in the config file
@@ -940,7 +982,9 @@ static int mlp_retry(struct ctx_cam *cam)
          * and the mlp_cam_start ONLY re-populates the height/width so we can check the size here.
          */
         size_high = (cam->imgs.width_high * cam->imgs.height_high * 3) / 2;
-        if (cam->imgs.size_high != size_high) return 1;
+        if (cam->imgs.size_high != size_high) {
+            return 1;
+        }
     }
     return 0;
 }
@@ -953,10 +997,11 @@ static int mlp_capture(struct ctx_cam *cam)
     int vid_return_code = 0;        /* Return code used when calling mlp_cam_next */
     struct timespec ts1;
 
-    if (cam->video_dev >= 0)
+    if (cam->video_dev >= 0) {
         vid_return_code = mlp_cam_next(cam, cam->current_image);
-    else
+    } else {
         vid_return_code = 1; /* Non fatal error */
+    }
 
     if (vid_return_code == 0) {
         cam->lost_connection = 0;
@@ -986,7 +1031,7 @@ static int mlp_capture(struct ctx_cam *cam)
             return 1;
         }
 
-        if (cam->connectionlosttime == 0){
+        if (cam->connectionlosttime == 0) {
             cam->connectionlosttime = cam->frame_curr_ts.tv_sec;
         }
 
@@ -998,10 +1043,11 @@ static int mlp_capture(struct ctx_cam *cam)
         } else {
             cam->lost_connection = 1;
 
-            if (cam->video_dev >= 0)
+            if (cam->video_dev >= 0) {
                 tmpin = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
-            else
+            } else {
                 tmpin = "UNABLE TO OPEN VIDEO DEVICE\\nSINCE %Y-%m-%d %T";
+            }
 
             ts1.tv_sec=cam->connectionlosttime;
             ts1.tv_nsec = 0;
@@ -1039,7 +1085,7 @@ static void mlp_detection(struct ctx_cam *cam)
     }
 
     if ( !cam->pause ) {
-        if (cam->conf->primary_method == 0){
+        if (cam->conf->primary_method == 0) {
             alg_diff(cam);
             alg_lightswitch(cam);
             alg_despeckle(cam);
@@ -1061,12 +1107,12 @@ static void mlp_tuning(struct ctx_cam *cam)
         alg_noise_tune(cam, cam->imgs.image_vprvcy);
     }
 
-    if (cam->conf->threshold_tune){
+    if (cam->conf->threshold_tune) {
         alg_threshold_tune(cam, cam->current_image->diffs, cam->detecting_motion);
     }
 
     if ((cam->current_image->diffs > cam->threshold) &&
-        (cam->current_image->diffs < cam->threshold_maximum)){
+        (cam->current_image->diffs < cam->threshold_maximum)) {
         alg_locate_center_size(&cam->imgs
             , cam->imgs.width
             , cam->imgs.height
@@ -1090,35 +1136,38 @@ static void mlp_overlay(struct ctx_cam *cam)
         ((cam->conf->picture_output_motion != "off") ||
         cam->conf->movie_output_motion ||
         cam->motapp->setup_mode ||
-        (cam->stream.motion.cnct_count > 0)))
+        (cam->stream.motion.cnct_count > 0))) {
         draw_smartmask(cam, cam->imgs.image_motion.image_norm);
+    }
 
     if (cam->imgs.largest_label &&
         ((cam->conf->picture_output_motion != "off") ||
         cam->conf->movie_output_motion ||
         cam->motapp->setup_mode ||
-        (cam->stream.motion.cnct_count > 0)))
+        (cam->stream.motion.cnct_count > 0))) {
         draw_largest_label(cam, cam->imgs.image_motion.image_norm);
+    }
 
     if (cam->imgs.mask &&
         ((cam->conf->picture_output_motion != "off") ||
         cam->conf->movie_output_motion ||
         cam->motapp->setup_mode ||
-        (cam->stream.motion.cnct_count > 0)))
+        (cam->stream.motion.cnct_count > 0))) {
         draw_fixed_mask(cam, cam->imgs.image_motion.image_norm);
+    }
 
     if (cam->conf->text_changes) {
-        if (!cam->pause)
+        if (!cam->pause) {
             sprintf(tmp, "%d", cam->current_image->diffs);
-        else
+        } else {
             sprintf(tmp, "-");
-
+        }
         draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
                   cam->imgs.width - 10, 10, tmp, cam->text_scale);
     }
 
     if (cam->motapp->setup_mode || (cam->stream.motion.cnct_count > 0)) {
-        if (cam->conf->primary_method == 0){
+        if (cam->conf->primary_method == 0) {
             sprintf(tmp, "D:%5d L:%3d N:%3d", cam->current_image->diffs,
                 cam->current_image->total_labels, cam->noise);
             draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
@@ -1169,8 +1218,9 @@ static void mlp_actions_emulate(struct ctx_cam *cam)
 
     int indx;
 
-    if ( (cam->detecting_motion == FALSE) && (cam->movie_norm != NULL) )
+    if ( (cam->detecting_motion == FALSE) && (cam->movie_norm != NULL) ) {
         movie_reset_start_time(cam->movie_norm, &cam->current_image->imgts);
+    }
 
     cam->detecting_motion = TRUE;
     if (cam->conf->post_capture > 0) {
@@ -1179,7 +1229,7 @@ static void mlp_actions_emulate(struct ctx_cam *cam)
 
     cam->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
     /* Mark all images in image_ring to be saved */
-    for (indx = 0; indx < cam->imgs.ring_size; indx++){
+    for (indx = 0; indx < cam->imgs.ring_size; indx++) {
         cam->imgs.image_ring[indx].flags |= IMAGE_SAVE;
     }
 
@@ -1193,8 +1243,10 @@ static void mlp_actions_motion(struct ctx_cam *cam)
     int pos = cam->imgs.ring_in;
 
     for (indx = 0; indx < cam->conf->minimum_motion_frames; indx++) {
-        if (cam->imgs.image_ring[pos].flags & IMAGE_MOTION) frame_count++;
-        if (pos == 0){
+        if (cam->imgs.image_ring[pos].flags & IMAGE_MOTION) {
+            frame_count++;
+        }
+        if (pos == 0) {
             pos = cam->imgs.ring_size-1;
         } else {
             pos--;
@@ -1205,13 +1257,13 @@ static void mlp_actions_motion(struct ctx_cam *cam)
 
         cam->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
 
-        if ( (cam->detecting_motion == FALSE) && (cam->movie_norm != NULL) ){
+        if ( (cam->detecting_motion == FALSE) && (cam->movie_norm != NULL) ) {
             movie_reset_start_time(cam->movie_norm, &cam->current_image->imgts);
         }
         cam->detecting_motion = TRUE;
         cam->postcap = cam->conf->post_capture;
 
-        for (indx = 0; indx < cam->imgs.ring_size; indx++){
+        for (indx = 0; indx < cam->imgs.ring_size; indx++) {
             cam->imgs.image_ring[indx].flags |= IMAGE_SAVE;
         }
 
@@ -1249,8 +1301,8 @@ static void mlp_actions_event(struct ctx_cam *cam)
 
             mlp_track_center(cam);
 
-            if (cam->algsec_inuse){
-                if (cam->algsec->isdetected){
+            if (cam->algsec_inuse) {
+                if (cam->algsec->isdetected) {
                     event(cam, EVENT_SECDETECT, NULL, NULL, NULL, &cam->current_image->imgts);
                 }
                 cam->algsec->isdetected = false;
@@ -1284,15 +1336,19 @@ static void mlp_actions(struct ctx_cam *cam)
         cam->postcap--;
     } else {
         cam->current_image->flags |= IMAGE_PRECAP;
-        if ((cam->conf->event_gap == 0) && cam->detecting_motion)  cam->event_stop = TRUE;
+        if ((cam->conf->event_gap == 0) && cam->detecting_motion) {
+            cam->event_stop = TRUE;
+        }
         cam->detecting_motion = FALSE;
     }
 
-    if (cam->current_image->flags & IMAGE_SAVE){
+    if (cam->current_image->flags & IMAGE_SAVE) {
         cam->lasttime = cam->current_image->imgts.tv_sec;
     }
 
-    if (cam->detecting_motion) algsec_detect(cam);
+    if (cam->detecting_motion) {
+        algsec_detect(cam);
+    }
 
     mlp_areadetect(cam);
 
@@ -1362,23 +1418,24 @@ static void mlp_timelapse(struct ctx_cam *cam)
             (cam->frame_curr_ts.tv_sec % 60 < cam->frame_last_ts.tv_sec % 60) &&
             cam->shots == 0) {
 
-            if (cam->conf->timelapse_mode == "daily"){
-                if (timestamp_tm.tm_hour == 0)
+            if (cam->conf->timelapse_mode == "daily") {
+                if (timestamp_tm.tm_hour == 0) {
                     event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
-            } else if (cam->conf->timelapse_mode == "hourly"){
+                }
+            } else if (cam->conf->timelapse_mode == "hourly") {
                 event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
-            } else if (cam->conf->timelapse_mode == "weekly-sunday"){
-                if (timestamp_tm.tm_wday == 0 &&
-                    timestamp_tm.tm_hour == 0)
+            } else if (cam->conf->timelapse_mode == "weekly-sunday") {
+                if (timestamp_tm.tm_wday == 0 && timestamp_tm.tm_hour == 0) {
                     event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
-            } else if (cam->conf->timelapse_mode == "weekly-monday"){
-                if (timestamp_tm.tm_wday == 1 &&
-                    timestamp_tm.tm_hour == 0)
+                }
+            } else if (cam->conf->timelapse_mode == "weekly-monday") {
+                if (timestamp_tm.tm_wday == 1 && timestamp_tm.tm_hour == 0) {
                     event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
-            } else if (cam->conf->timelapse_mode == "monthly"){
-                if (timestamp_tm.tm_mday == 1 &&
-                    timestamp_tm.tm_hour == 0)
+                }
+            } else if (cam->conf->timelapse_mode == "monthly") {
+                if (timestamp_tm.tm_mday == 1 && timestamp_tm.tm_hour == 0) {
                     event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
+                }
             }
         }
 
@@ -1409,7 +1466,7 @@ static void mlp_loopback(struct ctx_cam *cam)
     } else {
         event(cam, EVENT_IMAGE, cam->current_image, NULL, &cam->pipe, &cam->current_image->imgts);
 
-        if (!cam->conf->stream_motion || cam->shots == 0){
+        if (!cam->conf->stream_motion || cam->shots == 0) {
             event(cam, EVENT_STREAM, cam->current_image, NULL, NULL, &cam->current_image->imgts);
         }
     }
@@ -1422,18 +1479,20 @@ static void mlp_parmsupdate(struct ctx_cam *cam)
 {
 
     /* Check for some config parameter changes but only every second */
-    if (cam->shots != 0) return;
+    if (cam->shots != 0) {
+        return;
+    }
 
     if (cam->parms_changed ) {
         draw_init_scale(cam);  /* Initialize and validate text_scale */
 
-        if (cam->conf->picture_output == "on"){
+        if (cam->conf->picture_output == "on") {
             cam->new_img = NEWIMG_ON;
-        } else if (cam->conf->picture_output == "first"){
+        } else if (cam->conf->picture_output == "first") {
             cam->new_img = NEWIMG_FIRST;
-        } else if (cam->conf->picture_output == "best"){
+        } else if (cam->conf->picture_output == "best") {
             cam->new_img = NEWIMG_BEST;
-        } else if (cam->conf->picture_output == "center"){
+        } else if (cam->conf->picture_output == "center") {
             cam->new_img = NEWIMG_CENTER;
         } else {
             cam->new_img = NEWIMG_OFF;
@@ -1441,19 +1500,19 @@ static void mlp_parmsupdate(struct ctx_cam *cam)
 
         if (cam->conf->locate_motion_mode == "on") {
             cam->locate_motion_mode = LOCATE_ON;
-        } else if (cam->conf->locate_motion_mode == "preview"){
+        } else if (cam->conf->locate_motion_mode == "preview") {
             cam->locate_motion_mode = LOCATE_PREVIEW;
         } else {
             cam->locate_motion_mode = LOCATE_OFF;
         }
 
-        if (cam->conf->locate_motion_style == "box"){
+        if (cam->conf->locate_motion_style == "box") {
             cam->locate_motion_style = LOCATE_BOX;
-        } else if (cam->conf->locate_motion_style == "redbox"){
+        } else if (cam->conf->locate_motion_style == "redbox") {
             cam->locate_motion_style = LOCATE_REDBOX;
-        } else if (cam->conf->locate_motion_style == "cross"){
+        } else if (cam->conf->locate_motion_style == "cross") {
             cam->locate_motion_style = LOCATE_CROSS;
-        } else if (cam->conf->locate_motion_style == "redcross"){
+        } else if (cam->conf->locate_motion_style == "redcross") {
             cam->locate_motion_style = LOCATE_REDCROSS;
         } else {
             cam->locate_motion_style = LOCATE_BOX;
@@ -1473,13 +1532,13 @@ static void mlp_parmsupdate(struct ctx_cam *cam)
         dbse_sqlmask_update(cam);
 
         cam->threshold = cam->conf->threshold;
-        if (cam->conf->threshold_maximum > cam->conf->threshold ){
+        if (cam->conf->threshold_maximum > cam->conf->threshold ) {
             cam->threshold_maximum = cam->conf->threshold_maximum;
         } else {
             cam->threshold_maximum = (cam->imgs.height * cam->imgs.width * 3) / 2;
         }
 
-        if (!cam->conf->noise_tune){
+        if (!cam->conf->noise_tune) {
             cam->noise = cam->conf->noise_level;
         }
 
@@ -1502,7 +1561,7 @@ static void mlp_frametiming(struct ctx_cam *cam)
     int64_t avgtime;
 
     /* Shuffle the last wait times*/
-    for (indx=0; indx<AVGCNT-1; indx++){
+    for (indx=0; indx<AVGCNT-1; indx++) {
         cam->frame_wait[indx]=cam->frame_wait[indx+1];
     }
 
@@ -1519,7 +1578,7 @@ static void mlp_frametiming(struct ctx_cam *cam)
             ((ts2.tv_nsec - cam->frame_curr_ts.tv_nsec)/1000);
 
     avgtime = 0;
-    for (indx=0; indx<AVGCNT; indx++){
+    for (indx=0; indx<AVGCNT; indx++) {
         avgtime = avgtime + cam->frame_wait[indx];
     }
     avgtime = (avgtime/AVGCNT);
@@ -1545,13 +1604,17 @@ void *motion_loop(void *arg)
     cam->watchdog = cam->conf->watchdog_tmo;
     cam->running_cam = TRUE;
 
-    if (mlp_init(cam) == 0){
+    if (mlp_init(cam) == 0) {
         while (!cam->finish_cam || cam->event_stop) {
             mlp_prepare(cam);
             if (cam->get_image) {
                 mlp_resetimages(cam);
-                if (mlp_retry(cam) == 1)  break;
-                if (mlp_capture(cam) == 1)  break;
+                if (mlp_retry(cam) == 1) {
+                    break;
+                }
+                if (mlp_capture(cam) == 1) {
+                    break;
+                }
                 mlp_detection(cam);
                 mlp_tuning(cam);
                 mlp_overlay(cam);

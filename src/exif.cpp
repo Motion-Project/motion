@@ -287,11 +287,13 @@ unsigned exif_prepare(unsigned char **exif, const struct ctx_cam *cam,
     put_uint16(writing.buf, ifd0_tagcount);
     writing.buf += 2;
 
-    if (description)
+    if (description) {
         put_stringentry(&writing, TIFF_TAG_IMAGE_DESCRIPTION, description, 1);
+    }
 
-    if (datetime)
+    if (datetime) {
         put_stringentry(&writing, TIFF_TAG_DATETIME, datetime, 1);
+    }
 
     if (ifd1_tagcount > 0) {
         /* Offset of IFD1 - TIFF header + IFD0 size. */
@@ -318,14 +320,17 @@ unsigned exif_prepare(unsigned char **exif, const struct ctx_cam *cam,
         memcpy(writing.buf + 2, exif_version_tag, 12); /* tag 0x9000 */
         writing.buf += 14;
 
-        if (datetime)
+        if (datetime) {
             put_stringentry(&writing, EXIF_TAG_ORIGINAL_DATETIME, datetime, 1);
+        }
 
-        if (box)
+        if (box) {
             put_subjectarea(&writing, box);
+        }
 
-        if (subtime)
+        if (subtime) {
             put_stringentry(&writing, EXIF_TAG_ORIGINAL_DATETIME_SS, subtime, 0);
+        }
 
         put_uint32(writing.buf, 0); /* Next IFD = 0 (no next IFD) */
         writing.buf += 4;

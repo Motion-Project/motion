@@ -410,11 +410,12 @@ size_t mystrftime(const struct ctx_cam *cam, char *s, size_t max, const char *us
                 break;
 
             case 'C': // text_event
-                if (cam->text_event_string[0])
+                if (cam->text_event_string[0]) {
                     snprintf(tempstr, PATH_MAX, "%*s", width,
                         cam->text_event_string);
-                else
+                } else {
                     ++pos_userformat;
+                }
                 break;
 
             case 'w': // picture width
@@ -432,17 +433,19 @@ size_t mystrftime(const struct ctx_cam *cam, char *s, size_t max, const char *us
                     break;
                 }
 
-                if (filename)
+                if (filename) {
                     snprintf(tempstr, PATH_MAX, "%*s", width, filename);
-                else
+                } else {
                     ++pos_userformat;
+                }
                 break;
 
             case 'n': // sqltype
-                if (sqltype)
+                if (sqltype) {
                     sprintf(tempstr, "%*d", width, sqltype);
-                else
+                } else {
                     ++pos_userformat;
+                }
                 break;
 
             case '{': // long format specifier word.
@@ -451,15 +454,18 @@ size_t mystrftime(const struct ctx_cam *cam, char *s, size_t max, const char *us
                     while ((*pos_userformat != '}') && (*pos_userformat != 0))
                         ++pos_userformat;
                     mystrftime_long (cam, width, word, (int)(pos_userformat-word), tempstr);
-                    if (*pos_userformat == '\0') --pos_userformat;
+                    if (*pos_userformat == '\0') {
+                        --pos_userformat;
+                    }
                 }
                 break;
 
             case '$': // thread name
-                if (cam->conf->camera_name != "")
+                if (cam->conf->camera_name != "") {
                     cam->conf->camera_name.copy(tempstr, PATH_MAX);
-                else
+                } else {
                     ++pos_userformat;
+                }
                 break;
 
             default: // Any other code is copied with the %-sign
@@ -561,7 +567,9 @@ static void mytranslate_locale_chg(const char *langcd)
         /* Invoke external function to change locale*/
         ++_nl_msg_cat_cntr;
     #else
-        if (langcd != NULL) MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,"No native language support");
+        if (langcd != NULL) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,"No native language support");
+        }
     #endif
 }
 
@@ -593,7 +601,7 @@ char* mytranslate_text(const char *msgid, int setnls)
 {
     static int nls_enabled = TRUE;
 
-    if (setnls == 0){
+    if (setnls == 0) {
         if (nls_enabled) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Disabling native language support"));
         }
@@ -796,7 +804,7 @@ int mycopy_packet(AVPacket *dest_pkt, AVPacket *src_pkt)
         * We therefore disable the pass through recording and
         * for this function, simply do not do anything
         */
-        if (dest_pkt == src_pkt ){
+        if (dest_pkt == src_pkt ) {
             return 0;
         } else {
             return 0;
@@ -992,7 +1000,7 @@ void util_parms_parse_qte(struct ctx_params *params, std::string &parmline)
             if (indxcm == std::string::npos) {
                 if (indxnm_st == std::string::npos) {
                     indxvl_st = indxeq + 1;
-                    if (indxvl_st >= parmline.length()){
+                    if (indxvl_st >= parmline.length()) {
                         indxvl_st = parmline.length() - 1;
                     }
                     indxvl_en = parmline.length() - 1;
@@ -1140,7 +1148,7 @@ void util_parms_update(struct ctx_params *params, std::string &confline)
     std::string parmline;
 
     for (indx = 0; indx < params->params_count; indx++) {
-        if (indx == 0){
+        if (indx == 0) {
             parmline = " ";
         } else {
             parmline += ",";

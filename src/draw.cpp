@@ -1087,13 +1087,17 @@ static int draw_textn(unsigned char *image, int startx,  int starty,  int width
     int pos, line_offset, next_char_offs;
     unsigned char *image_ptr, *char_ptr;
 
-    if (startx > width / 2)
+    if (startx > width / 2) {
         startx -= len * (6 * factor);
+    }
 
-    if (startx + len * 6 * factor >= width)
+    if (startx + len * 6 * factor >= width) {
         len = (width-startx-1)/(6*factor);
+    }
 
-    if ((startx < 1) || (starty < 1) || (len < 1)) return 0;
+    if ((startx < 1) || (starty < 1) || (len < 1)) {
+        return 0;
+    }
 
     line_offset = width - (7 * factor);
     next_char_offs = (width * 8 * factor) - (6 * factor);
@@ -1147,24 +1151,32 @@ int draw_text(unsigned char *image, int width, int height, int startx, int start
     begin = end = text;
     txtlen = 0;
     while ((end = strstr(end, NEWLINE))) {
-        if ((end - begin)>txtlen) txtlen = (end - begin);
+        if ((end - begin)>txtlen) {
+            txtlen = (end - begin);
+        }
         num_nl++;
         end += sizeof(NEWLINE)-1;
         begin = end;
     }
-    if (txtlen == 0) txtlen = strlen(text);
+    if (txtlen == 0) {
+        txtlen = strlen(text);
+    }
 
     /* Adjust the factor if it is out of bounds
      * txtlen at this point is the approx length of longest line
     */
-    if ((txtlen * 7 * factor) > width){
+    if ((txtlen * 7 * factor) > width) {
         factor = (width / (txtlen * 7));
-        if (factor <= 0) factor = 1;
+        if (factor <= 0) {
+            factor = 1;
+        }
     }
 
-    if (((num_nl+1) * 8 * factor) > height){
+    if (((num_nl+1) * 8 * factor) > height) {
         factor = (height / ((num_nl+1) * 8));
-        if (factor <= 0) factor = 1;
+        if (factor <= 0) {
+            factor = 1;
+        }
     }
 
     line_space = factor * 9;
@@ -1216,18 +1228,24 @@ void draw_init_scale(struct ctx_cam *cam)
      */
 
     cam->text_scale = cam->conf->text_scale;
-    if (cam->text_scale <= 0) cam->text_scale = 1;
+    if (cam->text_scale <= 0) {
+        cam->text_scale = 1;
+    }
 
     if ((cam->text_scale * 10 * 2) > (cam->imgs.width / 4)) {
         cam->text_scale = (cam->imgs.width / (4 * 10 * 2));
-        if (cam->text_scale <= 0) cam->text_scale = 1;
+        if (cam->text_scale <= 0) {
+            cam->text_scale = 1;
+        }
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Invalid text scale.  Adjusted to %d"), cam->text_scale);
     }
 
     if ((cam->text_scale * 10 * 2) > (cam->imgs.height / 4)) {
         cam->text_scale = (cam->imgs.height / (4 * 10 * 2));
-        if (cam->text_scale <= 0) cam->text_scale = 1;
+        if (cam->text_scale <= 0) {
+            cam->text_scale = 1;
+        }
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Invalid text scale.  Adjusted to %d"), cam->text_scale);
     }
@@ -1485,8 +1503,9 @@ void draw_smartmask(struct ctx_cam *cam, unsigned char *out)
     out_y = out;
     /* Set colour intensity for smartmask. */
     for (i = 0; i < imgs->motionsize; i++) {
-        if (smartmask[i] == 0)
+        if (smartmask[i] == 0) {
             *out_y = 0;
+        }
         out_y++;
     }
 }
@@ -1523,8 +1542,9 @@ void draw_fixed_mask(struct ctx_cam *cam, unsigned char *out)
     out_y = out;
     /* Set colour intensity for mask. */
     for (i = 0; i < imgs->motionsize; i++) {
-        if (mask[i] == 0)
+        if (mask[i] == 0) {
             *out_y = 0;
+        }
         out_y++;
     }
 }
@@ -1561,8 +1581,9 @@ void draw_largest_label(struct ctx_cam *cam, unsigned char *out)
     out_y = out;
     /* Set intensity for coloured label to have better visibility. */
     for (i = 0; i < imgs->motionsize; i++) {
-        if (*labels++ & 32768)
+        if (*labels++ & 32768) {
             *out_y = 0;
+        }
         out_y++;
     }
 }

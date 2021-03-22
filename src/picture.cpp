@@ -70,14 +70,14 @@ static void pic_save_webp(FILE *fp, unsigned char *image, int width, int height,
     #ifdef HAVE_WEBP
         /* Create a config present and check for compatible library version */
         WebPConfig webp_config;
-        if (!WebPConfigPreset(&webp_config, WEBP_PRESET_DEFAULT, (float) quality)){
+        if (!WebPConfigPreset(&webp_config, WEBP_PRESET_DEFAULT, (float) quality)) {
             MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, _("libwebp version error"));
             return;
         }
 
         /* Create the input data structure and check for compatible library version */
         WebPPicture webp_image;
-        if (!WebPPictureInit(&webp_image)){
+        if (!WebPPictureInit(&webp_image)) {
             MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp version error"));
             return;
         }
@@ -85,7 +85,7 @@ static void pic_save_webp(FILE *fp, unsigned char *image, int width, int height,
         /* Allocate the image buffer based on image width and height */
         webp_image.width = width;
         webp_image.height = height;
-        if (!WebPPictureAlloc(&webp_image)){
+        if (!WebPPictureAlloc(&webp_image)) {
             MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp image buffer allocation error"));
             return;
         }
@@ -102,9 +102,9 @@ static void pic_save_webp(FILE *fp, unsigned char *image, int width, int height,
         webp_image.custom_ptr = (void*) &webp_writer;
 
         /* Encode the YUV image as webp */
-        if (!WebPEncode(&webp_config, &webp_image))
+        if (!WebPEncode(&webp_config, &webp_image)) {
             MOTION_LOG(WRN, TYPE_CORE, NO_ERRNO,_("libwebp image compression error"));
-
+        }
         /* A bitstream object is needed for the muxing proces */
         WebPData webp_bitstream;
         webp_bitstream.bytes = webp_writer.mem;
@@ -122,8 +122,9 @@ static void pic_save_webp(FILE *fp, unsigned char *image, int width, int height,
         }
 
         /* Write the webp final bitstream to the file */
-        if (fwrite(webp_output.bytes, sizeof(uint8_t), webp_output.size, fp) != webp_output.size)
+        if (fwrite(webp_output.bytes, sizeof(uint8_t), webp_output.size, fp) != webp_output.size) {
             MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to save webp image to file"));
+        }
 
         #if WEBP_ENCODER_ABI_VERSION > 0x0202
             /* writer.mem must be freed by calling WebPMemoryWriterClear */
@@ -210,18 +211,24 @@ static void pic_save_ppm(FILE *picture, unsigned char *image, int width, int hei
             r = r >> 16;
             g = g >> 16;
             b = b >> 16;
-            if (r < 0)
+
+            if (r < 0) {
                 r = 0;
-            else if (r > 255)
+            } else if (r > 255) {
                 r = 255;
-            if (g < 0)
+            }
+
+            if (g < 0) {
                 g = 0;
-            else if (g > 255)
+            } else if (g > 255) {
                 g = 255;
-            if (b < 0)
+            }
+
+            if (b < 0) {
                 b = 0;
-            else if (b > 255)
+            } else if (b > 255) {
                 b = 255;
+            }
 
             rgb[0] = b;
             rgb[1] = g;
@@ -250,7 +257,7 @@ int pic_put_memory(struct ctx_cam *cam, unsigned char* dest_image, int image_siz
     struct timespec ts1;
 
     clock_gettime(CLOCK_REALTIME, &ts1);
-    if (!cam->conf->stream_grey){
+    if (!cam->conf->stream_grey) {
         return jpgutl_put_yuv420p(dest_image, image_size, image,
                                 width, height, quality, cam ,&ts1, NULL);
     } else {
@@ -328,7 +335,9 @@ void pic_save_roi(struct ctx_cam *cam, char *file, unsigned char *image)
 
     bx = &cam->current_image->location;
 
-    if ((bx->width <64) || (bx->height <64)) return;
+    if ((bx->width <64) || (bx->height <64)) {
+        return;
+    }
 
     picture = myfopen(file, "w");
     if (!picture) {
@@ -383,8 +392,9 @@ unsigned char *pic_load_pgm(FILE *picture, int width, int height)
     /* Skip comment */
     line[0] = '#';
     while (line[0] == '#')
-        if (!fgets(line, 255, picture))
+        if (!fgets(line, 255, picture)) {
             return NULL;
+        }
 
     /* Read image size */
     if (sscanf(line, "%d %d", &mask_width, &mask_height) != 2) {
@@ -396,8 +406,9 @@ unsigned char *pic_load_pgm(FILE *picture, int width, int height)
     /* Maximum value */
     line[0] = '#';
     while (line[0] == '#')
-        if (!fgets(line, 255, picture))
+        if (!fgets(line, 255, picture)) {
             return NULL;
+        }
 
     if (sscanf(line, "%d", &maxval) != 1) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
@@ -413,11 +424,13 @@ unsigned char *pic_load_pgm(FILE *picture, int width, int height)
     image =(unsigned char*) mymalloc((mask_width * mask_height * 3) / 2);
 
     for (y = 0; y < mask_height; y++) {
-        if ((int)fread(&image[y * mask_width], 1, mask_width, picture) != mask_width)
+        if ((int)fread(&image[y * mask_width], 1, mask_width, picture) != mask_width) {
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Failed reading image data from pgm file");
+        }
 
-        for (x = 0; x < mask_width; x++)
+        for (x = 0; x < mask_width; x++) {
             image[y * mask_width + x] = (int)image[y * mask_width + x] * 255 / maxval;
+        }
 
     }
 
@@ -521,7 +534,7 @@ void pic_save_preview(struct ctx_cam *cam, struct ctx_image_data *img)
 
     /* Copy the actual images for norm and high */
     memcpy(cam->imgs.image_preview.image_norm, img->image_norm, cam->imgs.size_norm);
-    if (cam->imgs.size_high > 0){
+    if (cam->imgs.size_high > 0) {
         memcpy(cam->imgs.image_preview.image_high, img->image_high, cam->imgs.size_high);
     }
 
@@ -529,8 +542,9 @@ void pic_save_preview(struct ctx_cam *cam, struct ctx_image_data *img)
      * If we set output_all to yes and during the event
      * there is no image with motion, diffs is 0, we are not going to save the preview event
      */
-    if (cam->imgs.image_preview.diffs == 0)
+    if (cam->imgs.image_preview.diffs == 0) {
         cam->imgs.image_preview.diffs = 1;
+    }
 
     draw_locate_preview(cam, img);
 
@@ -567,7 +581,7 @@ void pic_init_privacy(struct ctx_cam *cam)
 
             /* We only need the "or" mask for the U & V chrominance area.  */
             cam->imgs.mask_privacy_uv =(unsigned char*) mymalloc((cam->imgs.height * cam->imgs.width) / 2);
-            if (cam->imgs.size_high > 0){
+            if (cam->imgs.size_high > 0) {
                 MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
                     ,_("Opening high resolution privacy mask file"));
                 rewind(picture);
@@ -591,11 +605,14 @@ void pic_init_privacy(struct ctx_cam *cam)
             ,_("Mask privacy file \"%s\" loaded."), cam->conf->mask_privacy.c_str());
 
             indx_img = 1;
-            indx_max = 1;
-            if (cam->imgs.size_high > 0) indx_max = 2;
+            if (cam->imgs.size_high > 0) {
+                indx_max = 2;
+            } else {
+                indx_max = 1;
+            }
 
             while (indx_img <= indx_max){
-                if (indx_img == 1){
+                if (indx_img == 1) {
                     start_cr = (cam->imgs.height * cam->imgs.width);
                     offset_cb = ((cam->imgs.height * cam->imgs.width)/4);
                     start_cb = start_cr + offset_cb;
@@ -617,7 +634,7 @@ void pic_init_privacy(struct ctx_cam *cam)
                     for (indxcol = 0; indxcol < indx_width; indxcol++) {
                         y_index = indxcol + (indxrow * indx_width);
                         if (img_temp[y_index] == 0xff) {
-                            if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ){
+                            if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ) {
                                 uv_index = (indxcol/2) + ((indxrow * indx_width)/4);
                                 img_temp[start_cr + uv_index] = 0xff;
                                 img_temp[start_cb + uv_index] = 0xff;
@@ -626,7 +643,7 @@ void pic_init_privacy(struct ctx_cam *cam)
                             }
                         } else {
                             img_temp[y_index] = 0x00;
-                            if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ){
+                            if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ) {
                                 uv_index = (indxcol/2) + ((indxrow * indx_width)/4);
                                 img_temp[start_cr + uv_index] = 0x00;
                                 img_temp[start_cb + uv_index] = 0x00;

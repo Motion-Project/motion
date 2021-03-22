@@ -244,15 +244,19 @@ void rotate_init(struct ctx_cam *cam)
      * If we're not rotating, let's exit once we have setup the capture dimensions
      * and output dimensions properly.
      */
-    if (cam->rotate_data->degrees == 0) return;
+    if (cam->rotate_data->degrees == 0) {
+        return;
+    }
 
     /*
      * Allocate memory if rotating 90 or 270 degrees, because those rotations
      * cannot be performed in-place (they can, but it would be too slow).
      */
-    if ((cam->rotate_data->degrees == 90) || (cam->rotate_data->degrees == 270)){
+    if ((cam->rotate_data->degrees == 90) || (cam->rotate_data->degrees == 270)) {
         cam->rotate_data->buffer_norm =(unsigned char*) mymalloc(size_norm);
-        if (size_high > 0 ) cam->rotate_data->buffer_high =(unsigned char*) mymalloc(size_high);
+        if (size_high > 0 ) {
+            cam->rotate_data->buffer_high =(unsigned char*) mymalloc(size_high);
+        }
     }
 
 }
@@ -271,13 +275,15 @@ void rotate_init(struct ctx_cam *cam)
 void rotate_deinit(struct ctx_cam *cam)
 {
 
-    if (cam->rotate_data->buffer_norm)
+    if (cam->rotate_data->buffer_norm) {
         free(cam->rotate_data->buffer_norm);
+    }
 
-    if (cam->rotate_data->buffer_high)
+    if (cam->rotate_data->buffer_high) {
         free(cam->rotate_data->buffer_high);
+    }
 
-    if (cam->rotate_data != NULL){
+    if (cam->rotate_data != NULL) {
         free(cam->rotate_data);
         cam->rotate_data = NULL;
     }
@@ -316,11 +322,16 @@ int rotate_map(struct ctx_cam *cam, struct ctx_image_data *img_data)
     unsigned char *img;
     unsigned char *temp_buff;
 
-    if (cam->rotate_data->degrees == 0 && cam->rotate_data->axis == FLIP_TYPE_NONE) return 0;
+    if (cam->rotate_data->degrees == 0 && cam->rotate_data->axis == FLIP_TYPE_NONE) {
+        return 0;
+    }
 
     indx = 0;
-    indx_max = 0;
-    if ((cam->rotate_data->capture_width_high != 0) && (cam->rotate_data->capture_height_high != 0)) indx_max = 1;
+    if ((cam->rotate_data->capture_width_high != 0) && (cam->rotate_data->capture_height_high != 0)) {
+        indx_max = 1;
+    } else {
+        indx_max = 0;
+    }
 
     while (indx <= indx_max) {
         deg = cam->rotate_data->degrees;
@@ -328,7 +339,7 @@ int rotate_map(struct ctx_cam *cam, struct ctx_image_data *img_data)
         wh4 = 0;
         w2 = 0;
         h2 = 0;
-        if (indx == 0 ){
+        if (indx == 0 ) {
             img = img_data->image_norm;
             width = cam->rotate_data->capture_width_norm;
             height = cam->rotate_data->capture_height_norm;

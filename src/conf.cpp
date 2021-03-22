@@ -879,7 +879,7 @@ static void conf_edit_set_bool(int &parm_dest, std::string &parm_in)
 
 static void conf_edit_get_bool(std::string &parm_dest, int &parm_in)
 {
-    if (parm_in == TRUE){
+    if (parm_in == TRUE) {
         parm_dest = "on";
     } else {
         parm_dest = "off";
@@ -888,11 +888,11 @@ static void conf_edit_get_bool(std::string &parm_dest, int &parm_in)
 
 static void conf_edit_daemon(struct ctx_motapp *motapp, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         motapp->daemon = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(motapp->daemon, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, motapp->daemon);
     }
     return;
@@ -901,11 +901,11 @@ static void conf_edit_daemon(struct ctx_motapp *motapp, std::string &parm, enum 
 
 static void conf_edit_setup_mode(struct ctx_motapp *motapp, std::string &parm, int pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         motapp->setup_mode = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(motapp->setup_mode, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, motapp->setup_mode);
     }
     return;
@@ -916,9 +916,9 @@ static void conf_edit_conf_filename(struct ctx_motapp *motapp, std::string &parm
 {
     if (pact == PARM_ACT_DFLT) {
         motapp->conf_filename = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         motapp->conf_filename = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = motapp->conf_filename;
     }
     return;
@@ -929,9 +929,9 @@ static void conf_edit_pid_file(struct ctx_motapp *motapp, std::string &parm, int
 {
     if (pact == PARM_ACT_DFLT) {
         motapp->pid_file = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         motapp->pid_file = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = motapp->pid_file;
     }
     return;
@@ -942,9 +942,9 @@ static void conf_edit_log_file(struct ctx_motapp *motapp, std::string &parm, enu
 {
     if (pact == PARM_ACT_DFLT) {
         motapp->log_file = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         motapp->log_file = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = motapp->log_file;
     }
     return;
@@ -954,18 +954,18 @@ static void conf_edit_log_file(struct ctx_motapp *motapp, std::string &parm, enu
 static void conf_edit_log_level(struct ctx_motapp *motapp, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         motapp->log_level = 6;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 9)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid log_level %d"),parm_in);
         } else {
             motapp->log_level = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(motapp->log_level);
-    } else if (pact == PARM_ACT_LIST){
+    } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm + "\"1\",\"2\",\"3\",\"4\",\"5\"";
         parm = parm + ",\"6\",\"7\",\"8\",\"9\"";
@@ -978,9 +978,9 @@ static void conf_edit_log_level(struct ctx_motapp *motapp, std::string &parm, en
 
 static void conf_edit_log_type(struct ctx_motapp *motapp, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         motapp->log_type_str = "ALL";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         if ((parm == "ALL") || (parm == "COR") ||
             (parm == "STR") || (parm == "ENC") ||
             (parm == "NET") || (parm == "DBL") ||
@@ -990,9 +990,9 @@ static void conf_edit_log_type(struct ctx_motapp *motapp, std::string &parm, enu
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid log_type %s"),parm.c_str());
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = motapp->log_type_str;
-    } else if (pact == PARM_ACT_LIST){
+    } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm + "\"ALL\",\"COR\",\"STR\",\"ENC\",\"NET\"";
         parm = parm + ",\"DBL\",\"EVT\",\"TRK\",\"VID\"";
@@ -1004,11 +1004,11 @@ static void conf_edit_log_type(struct ctx_motapp *motapp, std::string &parm, enu
 
 static void conf_edit_native_language(struct ctx_motapp *motapp, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         motapp->native_language = TRUE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(motapp->native_language, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, motapp->native_language);
     }
     return;
@@ -1023,9 +1023,9 @@ static void conf_edit_camera_name(struct ctx_cam *cam, std::string &parm, enum P
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->camera_name= "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->camera_name = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->camera_name;
     }
     return;
@@ -1044,14 +1044,14 @@ static void conf_edit_camera_id(struct ctx_cam *cam, std::string &parm, enum PAR
 
     if (pact == PARM_ACT_DFLT) {
         cam->conf->camera_id = minval;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if (parm_in < minval) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid camera_id %d"),parm_in);
         } else {
             cam->conf->camera_id = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->camera_id);
     }
     return;
@@ -1061,16 +1061,16 @@ static void conf_edit_camera_id(struct ctx_cam *cam, std::string &parm, enum PAR
 static void conf_edit_camera_tmo(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->camera_tmo = 30;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if (parm_in < 1) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid camera_tmo %d"),parm_in);
         } else {
             cam->conf->camera_tmo = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->camera_tmo);
     }
     return;
@@ -1081,9 +1081,9 @@ static void conf_edit_camera_dir(struct ctx_cam *cam, std::string &parm, enum PA
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->camera_dir = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->camera_dir = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->camera_dir;
     }
     return;
@@ -1094,9 +1094,9 @@ static void conf_edit_target_dir(struct ctx_cam *cam, std::string &parm, enum PA
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->target_dir = ".";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->target_dir = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->target_dir;
     }
     return;
@@ -1106,16 +1106,16 @@ static void conf_edit_target_dir(struct ctx_cam *cam, std::string &parm, enum PA
 static void conf_edit_watchdog_tmo(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->watchdog_tmo = 30;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if (parm_in < 1) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid watchdog timeout %d"),parm_in);
         } else {
             cam->conf->watchdog_tmo = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->watchdog_tmo);
     }
     return;
@@ -1125,16 +1125,16 @@ static void conf_edit_watchdog_tmo(struct ctx_cam *cam, std::string &parm, enum 
 static void conf_edit_watchdog_kill(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->watchdog_kill = 10;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if (parm_in < 1) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid watchdog kill timeout %d"),parm_in);
         } else {
             cam->conf->watchdog_kill = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->watchdog_kill);
     }
     return;
@@ -1145,9 +1145,9 @@ static void conf_edit_v4l2_device(struct ctx_cam *cam, std::string &parm, enum P
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->v4l2_device = "/dev/video0";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->v4l2_device = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->v4l2_device;
     }
     return;
@@ -1158,9 +1158,9 @@ static void conf_edit_v4l2_params(struct ctx_cam *cam, std::string &parm, enum P
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->v4l2_params = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->v4l2_params = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->v4l2_params;
     }
     return;
@@ -1171,9 +1171,9 @@ static void conf_edit_netcam_url(struct ctx_cam *cam, std::string &parm, enum PA
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->netcam_url = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->netcam_url = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->netcam_url;
     }
     return;
@@ -1184,9 +1184,9 @@ static void conf_edit_netcam_params(struct ctx_cam *cam, std::string &parm, enum
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->netcam_params = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->netcam_params = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->netcam_params;
     }
     return;
@@ -1197,9 +1197,9 @@ static void conf_edit_netcam_high_url(struct ctx_cam *cam, std::string &parm, en
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->netcam_high_url = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->netcam_high_url = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->netcam_high_url;
     }
     return;
@@ -1210,9 +1210,9 @@ static void conf_edit_netcam_high_params(struct ctx_cam *cam, std::string &parm,
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->netcam_high_params = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->netcam_high_params = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->netcam_high_params;
     }
     return;
@@ -1223,9 +1223,9 @@ static void conf_edit_netcam_userpass(struct ctx_cam *cam, std::string &parm, en
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->netcam_userpass = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->netcam_userpass = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->netcam_userpass;
     }
     return;
@@ -1236,9 +1236,9 @@ static void conf_edit_mmalcam_name(struct ctx_cam *cam, std::string &parm, enum 
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->mmalcam_name = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->mmalcam_name = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->mmalcam_name;
     }
     return;
@@ -1249,9 +1249,9 @@ static void conf_edit_mmalcam_params(struct ctx_cam *cam, std::string &parm, enu
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->mmalcam_params = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->mmalcam_params = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->mmalcam_params;
     }
     return;
@@ -1261,9 +1261,9 @@ static void conf_edit_mmalcam_params(struct ctx_cam *cam, std::string &parm, enu
 static void conf_edit_width(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->width = 640;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 64) || (parm_in > 9999)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid width %d"),parm_in);
@@ -1277,7 +1277,7 @@ static void conf_edit_width(struct ctx_cam *cam, std::string &parm, enum PARM_AC
         } else {
             cam->conf->width = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->width);
     }
     return;
@@ -1287,9 +1287,9 @@ static void conf_edit_width(struct ctx_cam *cam, std::string &parm, enum PARM_AC
 static void conf_edit_height(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->height = 480;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 64) || (parm_in > 9999)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid height %d"),parm_in);
@@ -1303,7 +1303,7 @@ static void conf_edit_height(struct ctx_cam *cam, std::string &parm, enum PARM_A
         } else {
             cam->conf->height = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->height);
     }
     return;
@@ -1313,16 +1313,16 @@ static void conf_edit_height(struct ctx_cam *cam, std::string &parm, enum PARM_A
 static void conf_edit_framerate(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->framerate = 15;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 2) || (parm_in > 100)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid framerate %d"),parm_in);
         } else {
             cam->conf->framerate = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->framerate);
     }
     return;
@@ -1332,16 +1332,16 @@ static void conf_edit_framerate(struct ctx_cam *cam, std::string &parm, enum PAR
 static void conf_edit_minimum_frame_time(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->minimum_frame_time = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid minimum_frame_time %d"),parm_in);
         } else {
             cam->conf->minimum_frame_time = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->minimum_frame_time);
     }
     return;
@@ -1351,9 +1351,9 @@ static void conf_edit_minimum_frame_time(struct ctx_cam *cam, std::string &parm,
 static void conf_edit_rotate(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->rotate = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in != 0) && (parm_in != 90) &&
             (parm_in != 180) && (parm_in != 270) ) {
@@ -1361,7 +1361,7 @@ static void conf_edit_rotate(struct ctx_cam *cam, std::string &parm, enum PARM_A
         } else {
             cam->conf->rotate = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->rotate);
     } else if (pact == PARM_ACT_LIST) {
         parm = "[\"0\",\"90\",\"180\",\"270\"]";
@@ -1374,7 +1374,7 @@ static void conf_edit_flip_axis(struct ctx_cam *cam, std::string &parm, enum PAR
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->flip_axis = "none";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         if ((parm == "none") || (parm == "v") || (parm == "h")) {
             cam->conf->flip_axis = parm;
         } else if (parm == "") {
@@ -1382,7 +1382,7 @@ static void conf_edit_flip_axis(struct ctx_cam *cam, std::string &parm, enum PAR
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid flip_axis %s"), parm.c_str());
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->flip_axis;
     } else if (pact == PARM_ACT_LIST) {
         parm = "[\"none\",\"v\",\"h\"]";
@@ -1396,7 +1396,7 @@ static void conf_edit_locate_motion_mode(struct ctx_cam *cam, std::string &parm,
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->locate_motion_mode = "off";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         if ((parm == "off") || (parm == "on") || (parm == "preview")) {
             cam->conf->locate_motion_mode = parm;
         } else if (parm == "") {
@@ -1404,7 +1404,7 @@ static void conf_edit_locate_motion_mode(struct ctx_cam *cam, std::string &parm,
         } else {
           MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid locate_motion_mode %s"), parm.c_str());
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->locate_motion_mode;
     } else if (pact == PARM_ACT_LIST) {
         parm = "[\"off\",\"on\",\"preview\"]";
@@ -1417,7 +1417,7 @@ static void conf_edit_locate_motion_style(struct ctx_cam *cam, std::string &parm
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->locate_motion_style = "box";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         if ((parm == "box") || (parm == "redbox") ||
             (parm == "cross") || (parm == "redcross"))  {
             cam->conf->locate_motion_style = parm;
@@ -1426,7 +1426,7 @@ static void conf_edit_locate_motion_style(struct ctx_cam *cam, std::string &parm
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid locate_motion_style %s"), parm.c_str());
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->locate_motion_style;
     } else if (pact == PARM_ACT_LIST) {
         parm = "[\"box\",\"redbox\",\"cross\",\"redcross\"]";
@@ -1439,9 +1439,9 @@ static void conf_edit_text_left(struct ctx_cam *cam, std::string &parm, enum PAR
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->text_left = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->text_left = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->text_left;
     }
     return;
@@ -1452,9 +1452,9 @@ static void conf_edit_text_right(struct ctx_cam *cam, std::string &parm, enum PA
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->text_right = "%Y-%m-%d\\n%T";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->text_right = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->text_right;
     }
     return;
@@ -1463,11 +1463,11 @@ static void conf_edit_text_right(struct ctx_cam *cam, std::string &parm, enum PA
 
 static void conf_edit_text_changes(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->text_changes = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->text_changes, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->text_changes);
     }
     return;
@@ -1477,18 +1477,18 @@ static void conf_edit_text_changes(struct ctx_cam *cam, std::string &parm, enum 
 static void conf_edit_text_scale(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->text_scale = 1;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 10)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid text_scale %d"),parm_in);
         } else {
             cam->conf->text_scale = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->text_scale);
-    } else if (pact == PARM_ACT_LIST){
+    } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm + "\"1\",\"2\",\"3\",\"4\",\"5\"";
         parm = parm + ",\"6\",\"7\",\"8\",\"9\",\"10\"";
@@ -1502,9 +1502,9 @@ static void conf_edit_text_event(struct ctx_cam *cam, std::string &parm, enum PA
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->text_event = "%Y%m%d%H%M%S";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->text_event = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->text_event;
     }
     return;
@@ -1513,11 +1513,11 @@ static void conf_edit_text_event(struct ctx_cam *cam, std::string &parm, enum PA
 
 static void conf_edit_emulate_motion(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->emulate_motion = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->emulate_motion, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->emulate_motion);
     }
     return;
@@ -1527,16 +1527,16 @@ static void conf_edit_emulate_motion(struct ctx_cam *cam, std::string &parm, enu
 static void conf_edit_primary_method(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->primary_method = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid primary method %d"),parm_in);
         } else {
             cam->conf->primary_method = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->primary_method);
     }
     return;
@@ -1546,16 +1546,16 @@ static void conf_edit_primary_method(struct ctx_cam *cam, std::string &parm, enu
 static void conf_edit_threshold(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->threshold = 1500;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 2147483647)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold %d"),parm_in);
         } else {
             cam->conf->threshold = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->threshold);
     }
     return;
@@ -1565,16 +1565,16 @@ static void conf_edit_threshold(struct ctx_cam *cam, std::string &parm, enum PAR
 static void conf_edit_threshold_maximum(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->threshold_maximum = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) ) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_maximum %d"),parm_in);
         } else {
             cam->conf->threshold_maximum = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->threshold_maximum);
     }
     return;
@@ -1584,16 +1584,16 @@ static void conf_edit_threshold_maximum(struct ctx_cam *cam, std::string &parm, 
 static void conf_edit_threshold_sdevx(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->threshold_sdevx = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) ) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_sdevx %d"),parm_in);
         } else {
             cam->conf->threshold_sdevx = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->threshold_sdevx);
     }
     return;
@@ -1603,16 +1603,16 @@ static void conf_edit_threshold_sdevx(struct ctx_cam *cam, std::string &parm, en
 static void conf_edit_threshold_sdevy(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->threshold_sdevy = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) ) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_sdevy %d"),parm_in);
         } else {
             cam->conf->threshold_sdevy = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->threshold_sdevy);
     }
     return;
@@ -1622,16 +1622,16 @@ static void conf_edit_threshold_sdevy(struct ctx_cam *cam, std::string &parm, en
 static void conf_edit_threshold_sdevxy(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->threshold_sdevxy = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) ) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_sdevxy %d"),parm_in);
         } else {
             cam->conf->threshold_sdevxy = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->threshold_sdevxy);
     }
     return;
@@ -1641,16 +1641,16 @@ static void conf_edit_threshold_sdevxy(struct ctx_cam *cam, std::string &parm, e
 static void conf_edit_threshold_ratio(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->threshold_ratio = 999999; /* Arbitrary large value */
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) ) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_ratio %d"),parm_in);
         } else {
             cam->conf->threshold_ratio = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->threshold_ratio);
     }
     return;
@@ -1659,11 +1659,11 @@ static void conf_edit_threshold_ratio(struct ctx_cam *cam, std::string &parm, en
 
 static void conf_edit_threshold_tune(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->threshold_tune = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->threshold_tune, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->threshold_tune);
     }
     return;
@@ -1673,16 +1673,16 @@ static void conf_edit_threshold_tune(struct ctx_cam *cam, std::string &parm, enu
 static void conf_edit_secondary_interval(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->secondary_interval = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) ) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid secondary_interval %d"),parm_in);
         } else {
             cam->conf->secondary_interval = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->secondary_interval);
     }
     return;
@@ -1692,16 +1692,16 @@ static void conf_edit_secondary_interval(struct ctx_cam *cam, std::string &parm,
 static void conf_edit_secondary_method(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->secondary_method = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) ) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid secondary_method %d"),parm_in);
         } else {
             cam->conf->secondary_method = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->secondary_method);
     }
     return;
@@ -1712,9 +1712,9 @@ static void conf_edit_secondary_params(struct ctx_cam *cam, std::string &parm, e
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->secondary_params = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->secondary_params = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->secondary_params;
     }
     return;
@@ -1724,16 +1724,16 @@ static void conf_edit_secondary_params(struct ctx_cam *cam, std::string &parm, e
 static void conf_edit_noise_level(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->noise_level = 32;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 255)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid noise_level %d"),parm_in);
         } else {
             cam->conf->noise_level = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->noise_level);
     }
     return;
@@ -1742,11 +1742,11 @@ static void conf_edit_noise_level(struct ctx_cam *cam, std::string &parm, enum P
 
 static void conf_edit_noise_tune(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->noise_tune = TRUE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->noise_tune, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->noise_tune);
     }
     return;
@@ -1757,9 +1757,9 @@ static void conf_edit_despeckle_filter(struct ctx_cam *cam, std::string &parm, e
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->despeckle_filter = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->despeckle_filter = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->despeckle_filter;
     }
     return;
@@ -1770,9 +1770,9 @@ static void conf_edit_area_detect(struct ctx_cam *cam, std::string &parm, enum P
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->area_detect = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->area_detect = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->area_detect;
     }
     return;
@@ -1783,9 +1783,9 @@ static void conf_edit_mask_file(struct ctx_cam *cam, std::string &parm, enum PAR
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->mask_file = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->mask_file = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->mask_file;
     }
     return;
@@ -1796,9 +1796,9 @@ static void conf_edit_mask_privacy(struct ctx_cam *cam, std::string &parm, enum 
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->mask_privacy = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->mask_privacy = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->mask_privacy;
     }
     return;
@@ -1808,18 +1808,18 @@ static void conf_edit_mask_privacy(struct ctx_cam *cam, std::string &parm, enum 
 static void conf_edit_smart_mask_speed(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->smart_mask_speed = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 10)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid smart_mask_speed %d"),parm_in);
         } else {
             cam->conf->smart_mask_speed = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->smart_mask_speed);
-    } else if (pact == PARM_ACT_LIST){
+    } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm +  "\"0\",\"1\",\"2\",\"3\",\"4\",\"5\"";
         parm = parm + ",\"6\",\"7\",\"8\",\"9\",\"10\"";
@@ -1832,16 +1832,16 @@ static void conf_edit_smart_mask_speed(struct ctx_cam *cam, std::string &parm, e
 static void conf_edit_lightswitch_percent(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->lightswitch_percent = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 100)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid lightswitch_percent %d"),parm_in);
         } else {
             cam->conf->lightswitch_percent = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->lightswitch_percent);
     }
     return;
@@ -1851,16 +1851,16 @@ static void conf_edit_lightswitch_percent(struct ctx_cam *cam, std::string &parm
 static void conf_edit_lightswitch_frames(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->lightswitch_frames = 5;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 1000)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid lightswitch_frames %d"),parm_in);
         } else {
             cam->conf->lightswitch_frames = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->lightswitch_frames);
     }
     return;
@@ -1870,16 +1870,16 @@ static void conf_edit_lightswitch_frames(struct ctx_cam *cam, std::string &parm,
 static void conf_edit_minimum_motion_frames(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->minimum_motion_frames = 1;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 10000)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid minimum_motion_frames %d"),parm_in);
         } else {
             cam->conf->minimum_motion_frames = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->minimum_motion_frames);
     }
     return;
@@ -1889,16 +1889,16 @@ static void conf_edit_minimum_motion_frames(struct ctx_cam *cam, std::string &pa
 static void conf_edit_static_object_time(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->static_object_time = 10;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if (parm_in < 1) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid static_object_time %d"),parm_in);
         } else {
             cam->conf->static_object_time = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->static_object_time);
     }
     return;
@@ -1908,16 +1908,16 @@ static void conf_edit_static_object_time(struct ctx_cam *cam, std::string &parm,
 static void conf_edit_event_gap(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->event_gap = 60;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid event_gap %d"),parm_in);
         } else {
             cam->conf->event_gap = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->event_gap);
     }
     return;
@@ -1927,16 +1927,16 @@ static void conf_edit_event_gap(struct ctx_cam *cam, std::string &parm, enum PAR
 static void conf_edit_pre_capture(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->pre_capture = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 1000)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid pre_capture %d"),parm_in);
         } else {
             cam->conf->pre_capture = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->pre_capture);
     }
     return;
@@ -1946,16 +1946,16 @@ static void conf_edit_pre_capture(struct ctx_cam *cam, std::string &parm, enum P
 static void conf_edit_post_capture(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->post_capture = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid post_capture %d"),parm_in);
         } else {
             cam->conf->post_capture = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->post_capture);
     }
     return;
@@ -1966,9 +1966,9 @@ static void conf_edit_on_event_start(struct ctx_cam *cam, std::string &parm, enu
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->on_event_start = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->on_event_start = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->on_event_start;
     }
     return;
@@ -1979,9 +1979,9 @@ static void conf_edit_on_event_end(struct ctx_cam *cam, std::string &parm, enum 
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->on_event_end = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->on_event_end = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->on_event_end;
     }
     return;
@@ -1992,9 +1992,9 @@ static void conf_edit_on_picture_save(struct ctx_cam *cam, std::string &parm, en
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->on_picture_save = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->on_picture_save = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->on_picture_save;
     }
     return;
@@ -2005,9 +2005,9 @@ static void conf_edit_on_area_detected(struct ctx_cam *cam, std::string &parm, e
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->on_area_detected = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->on_area_detected = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->on_area_detected;
     }
     return;
@@ -2018,9 +2018,9 @@ static void conf_edit_on_motion_detected(struct ctx_cam *cam, std::string &parm,
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->on_motion_detected = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->on_motion_detected = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->on_motion_detected;
     }
     return;
@@ -2031,9 +2031,9 @@ static void conf_edit_on_movie_start(struct ctx_cam *cam, std::string &parm, enu
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->on_movie_start = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->on_movie_start = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->on_movie_start;
     }
     return;
@@ -2044,9 +2044,9 @@ static void conf_edit_on_movie_end(struct ctx_cam *cam, std::string &parm, enum 
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->on_movie_end = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->on_movie_end = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->on_movie_end;
     }
     return;
@@ -2057,9 +2057,9 @@ static void conf_edit_on_camera_lost(struct ctx_cam *cam, std::string &parm, enu
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->on_camera_lost = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->on_camera_lost = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->on_camera_lost;
     }
     return;
@@ -2070,9 +2070,9 @@ static void conf_edit_on_camera_found(struct ctx_cam *cam, std::string &parm, en
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->on_camera_found = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->on_camera_found = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->on_camera_found;
     }
     return;
@@ -2083,9 +2083,9 @@ static void conf_edit_on_secondary_detect(struct ctx_cam *cam, std::string &parm
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->on_secondary_detect = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->on_secondary_detect = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->on_secondary_detect;
     }
     return;
@@ -2096,7 +2096,7 @@ static void conf_edit_picture_output(struct ctx_cam *cam, std::string &parm, enu
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->picture_output = "off";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         if ((parm == "on") || (parm == "off") ||
             (parm == "first") || (parm == "best"))  {
             cam->conf->picture_output = parm;
@@ -2105,9 +2105,9 @@ static void conf_edit_picture_output(struct ctx_cam *cam, std::string &parm, enu
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_output %s"), parm.c_str());
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->picture_output;
-    } else if (pact == PARM_ACT_LIST){
+    } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm +  "\"on\",\"off\",\"first\",\"best\"";
         parm = parm + "]";
@@ -2120,7 +2120,7 @@ static void conf_edit_picture_output_motion(struct ctx_cam *cam, std::string &pa
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->picture_output_motion = "off";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         if ((parm == "on") || (parm == "off") || (parm == "roi"))  {
             cam->conf->picture_output_motion = parm;
         } else if (parm == "") {
@@ -2128,9 +2128,9 @@ static void conf_edit_picture_output_motion(struct ctx_cam *cam, std::string &pa
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_output_motion %s"), parm.c_str());
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->picture_output;
-    } else if (pact == PARM_ACT_LIST){
+    } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm +  "\"on\",\"off\",\"roi\"";
         parm = parm + "]";
@@ -2143,7 +2143,7 @@ static void conf_edit_picture_type(struct ctx_cam *cam, std::string &parm, enum 
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->picture_type = "jpeg";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         if ((parm == "jpeg") || (parm == "webp") || (parm == "ppm"))  {
             cam->conf->picture_type = parm;
         } else if (parm == "") {
@@ -2151,9 +2151,9 @@ static void conf_edit_picture_type(struct ctx_cam *cam, std::string &parm, enum 
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_type %s"), parm.c_str());
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->picture_type;
-    } else if (pact == PARM_ACT_LIST){
+    } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm +  "\"jpeg\",\"webp\",\"ppm\"";
         parm = parm + "]";
@@ -2165,16 +2165,16 @@ static void conf_edit_picture_type(struct ctx_cam *cam, std::string &parm, enum 
 static void conf_edit_picture_quality(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->picture_quality = 75;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 100)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_quality %d"),parm_in);
         } else {
             cam->conf->picture_quality = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->picture_quality);
     }
     return;
@@ -2185,9 +2185,9 @@ static void conf_edit_picture_exif(struct ctx_cam *cam, std::string &parm, enum 
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->picture_exif = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->picture_exif = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->picture_exif;
     }
     return;
@@ -2198,9 +2198,9 @@ static void conf_edit_picture_filename(struct ctx_cam *cam, std::string &parm, e
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->picture_filename = "%v-%Y%m%d%H%M%S-%q";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->picture_filename = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->picture_filename;
     }
     return;
@@ -2210,16 +2210,16 @@ static void conf_edit_picture_filename(struct ctx_cam *cam, std::string &parm, e
 static void conf_edit_snapshot_interval(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->snapshot_interval = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid snapshot_interval %d"),parm_in);
         } else {
             cam->conf->snapshot_interval = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->snapshot_interval);
     }
     return;
@@ -2230,9 +2230,9 @@ static void conf_edit_snapshot_filename(struct ctx_cam *cam, std::string &parm, 
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->snapshot_filename = "%v-%Y%m%d%H%M%S-snapshot";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->snapshot_filename = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->snapshot_filename;
     }
     return;
@@ -2241,11 +2241,11 @@ static void conf_edit_snapshot_filename(struct ctx_cam *cam, std::string &parm, 
 
 static void conf_edit_movie_output(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->movie_output = TRUE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->movie_output, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->movie_output);
     }
     return;
@@ -2254,11 +2254,11 @@ static void conf_edit_movie_output(struct ctx_cam *cam, std::string &parm, enum 
 
 static void conf_edit_movie_output_motion(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->movie_output_motion = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->movie_output_motion, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->movie_output_motion);
     }
     return;
@@ -2268,16 +2268,16 @@ static void conf_edit_movie_output_motion(struct ctx_cam *cam, std::string &parm
 static void conf_edit_movie_max_time(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->movie_max_time = 120;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid movie_max_time %d"),parm_in);
         } else {
             cam->conf->movie_max_time = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->movie_max_time);
     }
     return;
@@ -2287,16 +2287,16 @@ static void conf_edit_movie_max_time(struct ctx_cam *cam, std::string &parm, enu
 static void conf_edit_movie_bps(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->movie_bps = 400000;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 9999999)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid movie_bps %d"),parm_in);
         } else {
             cam->conf->movie_bps = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->movie_bps);
     }
     return;
@@ -2306,16 +2306,16 @@ static void conf_edit_movie_bps(struct ctx_cam *cam, std::string &parm, enum PAR
 static void conf_edit_movie_quality(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->movie_quality = 60;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 100)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid movie_quality %d"),parm_in);
         } else {
             cam->conf->movie_quality = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->movie_quality);
     }
     return;
@@ -2326,9 +2326,9 @@ static void conf_edit_movie_codec(struct ctx_cam *cam, std::string &parm, enum P
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->movie_codec = "mkv";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->movie_codec = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->movie_codec;
     }
     return;
@@ -2337,11 +2337,11 @@ static void conf_edit_movie_codec(struct ctx_cam *cam, std::string &parm, enum P
 
 static void conf_edit_movie_passthrough(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->movie_passthrough = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->movie_passthrough, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->movie_passthrough);
     }
     return;
@@ -2352,9 +2352,9 @@ static void conf_edit_movie_filename(struct ctx_cam *cam, std::string &parm, enu
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->movie_filename = "%v-%Y%m%d%H%M%S";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->movie_filename = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->movie_filename;
     }
     return;
@@ -2363,11 +2363,11 @@ static void conf_edit_movie_filename(struct ctx_cam *cam, std::string &parm, enu
 
 static void conf_edit_movie_extpipe_use(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->movie_extpipe_use = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->movie_extpipe_use, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->movie_extpipe_use);
     }
     return;
@@ -2378,9 +2378,9 @@ static void conf_edit_movie_extpipe(struct ctx_cam *cam, std::string &parm, enum
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->movie_extpipe = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->movie_extpipe = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->movie_extpipe;
     }
     return;
@@ -2390,16 +2390,16 @@ static void conf_edit_movie_extpipe(struct ctx_cam *cam, std::string &parm, enum
 static void conf_edit_timelapse_interval(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->timelapse_interval = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_interval %d"),parm_in);
         } else {
             cam->conf->timelapse_interval = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->timelapse_interval);
     }
     return;
@@ -2410,7 +2410,7 @@ static void conf_edit_timelapse_mode(struct ctx_cam *cam, std::string &parm, enu
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->timelapse_mode = "daily";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         if ((parm == "hourly") || (parm == "daily") ||
             (parm == "weekly-sunday") || (parm == "weekly-monday") ||
             (parm == "monthly") || (parm == "manual"))  {
@@ -2420,9 +2420,9 @@ static void conf_edit_timelapse_mode(struct ctx_cam *cam, std::string &parm, enu
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_mode %s"), parm.c_str());
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->timelapse_mode;
-    } else if (pact == PARM_ACT_LIST){
+    } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm +  "\"hourly\",\"daily\",\"weekly-sunday\"";
         parm = parm + ",\"weekly-monday\",\"monthly\",\"manual\"";
@@ -2435,16 +2435,16 @@ static void conf_edit_timelapse_mode(struct ctx_cam *cam, std::string &parm, enu
 static void conf_edit_timelapse_fps(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->timelapse_fps = 30;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 2) || (parm_in > 100)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_fps %d"),parm_in);
         } else {
             cam->conf->timelapse_fps = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->timelapse_fps);
     }
     return;
@@ -2455,7 +2455,7 @@ static void conf_edit_timelapse_codec(struct ctx_cam *cam, std::string &parm, en
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->timelapse_codec = "mpg";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         if ((parm == "mpg") || (parm == "mpeg4"))  {
             cam->conf->timelapse_codec = parm;
         } else if (parm == "") {
@@ -2463,9 +2463,9 @@ static void conf_edit_timelapse_codec(struct ctx_cam *cam, std::string &parm, en
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_codec %s"), parm.c_str());
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->timelapse_codec;
-    } else if (pact == PARM_ACT_LIST){
+    } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm +  "\"mpg\",\"mpeg4\"";
         parm = parm + "]";
@@ -2478,9 +2478,9 @@ static void conf_edit_timelapse_filename(struct ctx_cam *cam, std::string &parm,
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->timelapse_filename = "%Y%m%d-timelapse";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->timelapse_filename = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->timelapse_filename;
     }
     return;
@@ -2491,9 +2491,9 @@ static void conf_edit_video_pipe(struct ctx_cam *cam, std::string &parm, enum PA
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->video_pipe = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->video_pipe = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->video_pipe;
     }
     return;
@@ -2504,9 +2504,9 @@ static void conf_edit_video_pipe_motion(struct ctx_cam *cam, std::string &parm, 
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->video_pipe_motion = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->video_pipe_motion = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->video_pipe_motion;
     }
     return;
@@ -2516,16 +2516,16 @@ static void conf_edit_video_pipe_motion(struct ctx_cam *cam, std::string &parm, 
 static void conf_edit_webcontrol_port(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->webcontrol_port = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 65535)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_port %d"),parm_in);
         } else {
             cam->conf->webcontrol_port = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->webcontrol_port);
     }
     return;
@@ -2534,11 +2534,11 @@ static void conf_edit_webcontrol_port(struct ctx_cam *cam, std::string &parm, en
 
 static void conf_edit_webcontrol_ipv6(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->webcontrol_ipv6 = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->webcontrol_ipv6, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->webcontrol_ipv6);
     }
     return;
@@ -2547,11 +2547,11 @@ static void conf_edit_webcontrol_ipv6(struct ctx_cam *cam, std::string &parm, en
 
 static void conf_edit_webcontrol_localhost(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->webcontrol_localhost = TRUE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->webcontrol_localhost, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->webcontrol_localhost);
     }
     return;
@@ -2561,18 +2561,18 @@ static void conf_edit_webcontrol_localhost(struct ctx_cam *cam, std::string &par
 static void conf_edit_webcontrol_parms(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->webcontrol_parms = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 3)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_parms %d"),parm_in);
         } else {
             cam->conf->webcontrol_parms = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->webcontrol_parms);
-    } else if (pact == PARM_ACT_LIST){
+    } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm +  "\"0\",\"1\",\"2\",\"3\"";
         parm = parm + "]";
@@ -2584,18 +2584,18 @@ static void conf_edit_webcontrol_parms(struct ctx_cam *cam, std::string &parm, e
 static void conf_edit_webcontrol_interface(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->webcontrol_interface = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 3)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_interface %d"),parm_in);
         } else {
             cam->conf->webcontrol_interface = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->webcontrol_interface);
-    } else if (pact == PARM_ACT_LIST){
+    } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm +  "\"0\",\"1\",\"2\",\"3\"";
         parm = parm + "]";
@@ -2607,18 +2607,18 @@ static void conf_edit_webcontrol_interface(struct ctx_cam *cam, std::string &par
 static void conf_edit_webcontrol_auth_method(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->webcontrol_auth_method = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_auth_method %d"),parm_in);
         } else {
             cam->conf->webcontrol_auth_method = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->webcontrol_auth_method);
-    } else if (pact == PARM_ACT_LIST){
+    } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm +  "\"0\",\"1\",\"2\"";
         parm = parm + "]";
@@ -2631,9 +2631,9 @@ static void conf_edit_webcontrol_authentication(struct ctx_cam *cam, std::string
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->webcontrol_authentication = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->webcontrol_authentication = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->webcontrol_authentication;
     }
     return;
@@ -2642,11 +2642,11 @@ static void conf_edit_webcontrol_authentication(struct ctx_cam *cam, std::string
 
 static void conf_edit_webcontrol_tls(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->webcontrol_tls = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->webcontrol_tls, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->webcontrol_tls);
     }
     return;
@@ -2657,9 +2657,9 @@ static void conf_edit_webcontrol_cert(struct ctx_cam *cam, std::string &parm, en
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->webcontrol_cert = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->webcontrol_cert = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->webcontrol_cert;
     }
     return;
@@ -2670,9 +2670,9 @@ static void conf_edit_webcontrol_key(struct ctx_cam *cam, std::string &parm, enu
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->webcontrol_key = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->webcontrol_key = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->webcontrol_key;
     }
     return;
@@ -2684,7 +2684,7 @@ static void conf_edit_webcontrol_cors_header(struct ctx_cam *cam, std::string &p
     int retcd;
     if (pact == PARM_ACT_DFLT) {
         cam->conf->webcontrol_cors_header = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         const char *regex_str = "(http|https)://(((.*):(.*))@)?([^/:]|[-_.a-z0-9]+)(:([0-9]+))?($|(/[^*]*))";
         regex_t regex;
         if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
@@ -2698,7 +2698,7 @@ static void conf_edit_webcontrol_cors_header(struct ctx_cam *cam, std::string &p
         }
         cam->conf->webcontrol_cors_header = parm;
         regfree(&regex);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->webcontrol_cors_header;
     }
     return;
@@ -2709,9 +2709,9 @@ static void conf_edit_webcontrol_html(struct ctx_cam *cam, std::string &parm, en
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->webcontrol_html = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->webcontrol_html = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->webcontrol_html;
     }
     return;
@@ -2721,16 +2721,16 @@ static void conf_edit_webcontrol_html(struct ctx_cam *cam, std::string &parm, en
 static void conf_edit_stream_preview_scale(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->stream_preview_scale = 25;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 1000)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid stream_preview_scale %d"),parm_in);
         } else {
             cam->conf->stream_preview_scale = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->stream_preview_scale);
     }
     return;
@@ -2739,11 +2739,11 @@ static void conf_edit_stream_preview_scale(struct ctx_cam *cam, std::string &par
 
 static void conf_edit_stream_preview_newline(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->stream_preview_newline = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->stream_preview_newline, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->stream_preview_newline);
     }
     return;
@@ -2753,18 +2753,18 @@ static void conf_edit_stream_preview_newline(struct ctx_cam *cam, std::string &p
 static void conf_edit_stream_preview_method(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->stream_preview_method = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 4)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid stream_preview_method %d"),parm_in);
         } else {
             cam->conf->stream_preview_method = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->stream_preview_method);
-    } else if (pact == PARM_ACT_LIST){
+    } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm +  "\"0\",\"1\",\"2\",\"3\",\"4\"";
         parm = parm + "]";
@@ -2775,11 +2775,11 @@ static void conf_edit_stream_preview_method(struct ctx_cam *cam, std::string &pa
 
 static void conf_edit_stream_preview_ptz(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->stream_preview_ptz = true;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->stream_preview_ptz, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->stream_preview_ptz);
     }
     return;
@@ -2789,16 +2789,16 @@ static void conf_edit_stream_preview_ptz(struct ctx_cam *cam, std::string &parm,
 static void conf_edit_stream_quality(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->stream_quality = 50;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 100)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid stream_quality %d"),parm_in);
         } else {
             cam->conf->stream_quality = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->stream_quality);
     }
     return;
@@ -2807,11 +2807,11 @@ static void conf_edit_stream_quality(struct ctx_cam *cam, std::string &parm, enu
 
 static void conf_edit_stream_grey(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->stream_grey = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->stream_grey, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->stream_grey);
     }
     return;
@@ -2820,11 +2820,11 @@ static void conf_edit_stream_grey(struct ctx_cam *cam, std::string &parm, enum P
 
 static void conf_edit_stream_motion(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->stream_motion = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->stream_motion, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->stream_motion);
     }
     return;
@@ -2834,16 +2834,16 @@ static void conf_edit_stream_motion(struct ctx_cam *cam, std::string &parm, enum
 static void conf_edit_stream_maxrate(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->stream_maxrate = 1;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 100)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid stream_maxrate %d"),parm_in);
         } else {
             cam->conf->stream_maxrate = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->stream_maxrate);
     }
     return;
@@ -2854,16 +2854,16 @@ static void conf_edit_database_type(struct ctx_cam *cam, std::string &parm, enum
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->database_type = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         if ((parm == "mysql") || (parm == "mariadb") || (parm == "") ||
             (parm == "postgresql") || (parm == "sqlite3")) {
             cam->conf->database_type = parm;
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid database_type %s"), parm.c_str());
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->database_type;
-    } else if (pact == PARM_ACT_LIST){
+    } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm +  "\"\",\"mysql\",\"mariadb\",\"postgresql\",\"sqlite3\"";
         parm = parm + "]";
@@ -2876,9 +2876,9 @@ static void conf_edit_database_dbname(struct ctx_cam *cam, std::string &parm, en
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->database_dbname = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->database_dbname = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->database_dbname;
     }
     return;
@@ -2889,9 +2889,9 @@ static void conf_edit_database_host(struct ctx_cam *cam, std::string &parm, enum
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->database_host = "localhost";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->database_host = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->database_host;
     }
     return;
@@ -2901,16 +2901,16 @@ static void conf_edit_database_host(struct ctx_cam *cam, std::string &parm, enum
 static void conf_edit_database_port(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->database_port = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 65535)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid database_port %d"),parm_in);
         } else {
             cam->conf->database_port = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->database_port);
     }
     return;
@@ -2921,9 +2921,9 @@ static void conf_edit_database_user(struct ctx_cam *cam, std::string &parm, enum
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->database_user = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->database_user = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->database_user;
     }
     return;
@@ -2934,9 +2934,9 @@ static void conf_edit_database_password(struct ctx_cam *cam, std::string &parm, 
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->database_password = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->database_password = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->database_password;
     }
     return;
@@ -2946,16 +2946,16 @@ static void conf_edit_database_password(struct ctx_cam *cam, std::string &parm, 
 static void conf_edit_database_busy_timeout(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->database_busy_timeout = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 10000)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid database_busy_timeout %d"),parm_in);
         } else {
             cam->conf->database_busy_timeout = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->database_busy_timeout);
     }
     return;
@@ -2964,11 +2964,11 @@ static void conf_edit_database_busy_timeout(struct ctx_cam *cam, std::string &pa
 
 static void conf_edit_sql_log_picture(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->sql_log_picture = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->sql_log_picture, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->sql_log_picture);
     }
     return;
@@ -2977,11 +2977,11 @@ static void conf_edit_sql_log_picture(struct ctx_cam *cam, std::string &parm, en
 
 static void conf_edit_sql_log_snapshot(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->sql_log_snapshot = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->sql_log_snapshot, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->sql_log_snapshot);
     }
     return;
@@ -2990,11 +2990,11 @@ static void conf_edit_sql_log_snapshot(struct ctx_cam *cam, std::string &parm, e
 
 static void conf_edit_sql_log_movie(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->sql_log_movie = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->sql_log_movie, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->sql_log_movie);
     }
     return;
@@ -3003,11 +3003,11 @@ static void conf_edit_sql_log_movie(struct ctx_cam *cam, std::string &parm, enum
 
 static void conf_edit_sql_log_timelapse(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->sql_log_timelapse = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->sql_log_timelapse, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->sql_log_timelapse);
     }
     return;
@@ -3018,9 +3018,9 @@ static void conf_edit_sql_query_start(struct ctx_cam *cam, std::string &parm, en
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->sql_query_start = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->sql_query_start = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->sql_query_start;
     }
     return;
@@ -3031,9 +3031,9 @@ static void conf_edit_sql_query_stop(struct ctx_cam *cam, std::string &parm, enu
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->sql_query_stop = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->sql_query_stop = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->sql_query_stop;
     }
     return;
@@ -3044,9 +3044,9 @@ static void conf_edit_sql_query(struct ctx_cam *cam, std::string &parm, enum PAR
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->sql_query = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->sql_query = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->sql_query;
     }
     return;
@@ -3055,11 +3055,11 @@ static void conf_edit_sql_query(struct ctx_cam *cam, std::string &parm, enum PAR
 
 static void conf_edit_ptz_auto_track(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->ptz_auto_track = FALSE;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->ptz_auto_track, parm);
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         conf_edit_get_bool(parm, cam->conf->ptz_auto_track);
     }
     return;
@@ -3069,16 +3069,16 @@ static void conf_edit_ptz_auto_track(struct ctx_cam *cam, std::string &parm, enu
 static void conf_edit_ptz_wait(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
-    if (pact == PARM_ACT_DFLT){
+    if (pact == PARM_ACT_DFLT) {
         cam->conf->ptz_wait = 0;
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid ptz_wait %d"),parm_in);
         } else {
             cam->conf->ptz_wait = parm_in;
         }
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->ptz_wait);
     }
     return;
@@ -3089,9 +3089,9 @@ static void conf_edit_ptz_move_track(struct ctx_cam *cam, std::string &parm, enu
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->ptz_move_track = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->ptz_move_track = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->ptz_move_track;
     }
     return;
@@ -3102,9 +3102,9 @@ static void conf_edit_ptz_pan_left(struct ctx_cam *cam, std::string &parm, enum 
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->ptz_pan_left = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->ptz_pan_left = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->ptz_pan_left;
     }
     return;
@@ -3115,9 +3115,9 @@ static void conf_edit_ptz_pan_right(struct ctx_cam *cam, std::string &parm, enum
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->ptz_pan_right = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->ptz_pan_right = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->ptz_pan_right;
     }
     return;
@@ -3128,9 +3128,9 @@ static void conf_edit_ptz_tilt_up(struct ctx_cam *cam, std::string &parm, enum P
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->ptz_tilt_up = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->ptz_tilt_up = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->ptz_tilt_up;
     }
     return;
@@ -3141,9 +3141,9 @@ static void conf_edit_ptz_tilt_down(struct ctx_cam *cam, std::string &parm, enum
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->ptz_tilt_down = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->ptz_tilt_down = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->ptz_tilt_down;
     }
     return;
@@ -3154,9 +3154,9 @@ static void conf_edit_ptz_zoom_in(struct ctx_cam *cam, std::string &parm, enum P
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->ptz_zoom_in = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->ptz_zoom_in = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->ptz_zoom_in;
     }
     return;
@@ -3167,9 +3167,9 @@ static void conf_edit_ptz_zoom_out(struct ctx_cam *cam, std::string &parm, enum 
 {
     if (pact == PARM_ACT_DFLT) {
         cam->conf->ptz_zoom_out = "";
-    } else if (pact == PARM_ACT_SET){
+    } else if (pact == PARM_ACT_SET) {
         cam->conf->ptz_zoom_out = parm;
-    } else if (pact == PARM_ACT_GET){
+    } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->ptz_zoom_out;
     }
     return;
@@ -3180,14 +3180,14 @@ static void conf_edit_ptz_zoom_out(struct ctx_cam *cam, std::string &parm, enum 
 static void conf_edit_cat00(struct ctx_motapp *motapp, std::string cmd
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (cmd == "daemon") {                        conf_edit_daemon(motapp, parm_val, pact);
-    } else if (cmd == "conf_filename"){           conf_edit_conf_filename(motapp, parm_val, pact);
-    } else if (cmd == "setup_mode") {             conf_edit_setup_mode(motapp, parm_val, pact);
-    } else if (cmd == "pid_file"){                conf_edit_pid_file(motapp, parm_val, pact);
-    } else if (cmd == "log_file"){                conf_edit_log_file(motapp, parm_val, pact);
-    } else if (cmd == "log_level"){               conf_edit_log_level(motapp, parm_val, pact);
-    } else if (cmd == "log_type"){                conf_edit_log_type(motapp, parm_val, pact);
-    } else if (cmd == "native_language"){         conf_edit_native_language(motapp, parm_val, pact);
+    if (cmd == "daemon") {                         conf_edit_daemon(motapp, parm_val, pact);
+    } else if (cmd == "conf_filename") {           conf_edit_conf_filename(motapp, parm_val, pact);
+    } else if (cmd == "setup_mode") {              conf_edit_setup_mode(motapp, parm_val, pact);
+    } else if (cmd == "pid_file") {                conf_edit_pid_file(motapp, parm_val, pact);
+    } else if (cmd == "log_file") {                conf_edit_log_file(motapp, parm_val, pact);
+    } else if (cmd == "log_level") {               conf_edit_log_level(motapp, parm_val, pact);
+    } else if (cmd == "log_type") {                conf_edit_log_type(motapp, parm_val, pact);
+    } else if (cmd == "native_language") {         conf_edit_native_language(motapp, parm_val, pact);
     }
 
 }
@@ -3195,13 +3195,13 @@ static void conf_edit_cat00(struct ctx_motapp *motapp, std::string cmd
 static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "camera_dir"){                   conf_edit_camera_dir(cam, parm_val, pact);
-    } else if (parm_nm == "camera_name"){           conf_edit_camera_name(cam, parm_val, pact);
-    } else if (parm_nm == "camera_id"){             conf_edit_camera_id(cam, parm_val, pact);
-    } else if (parm_nm == "camera_tmo"){            conf_edit_camera_tmo(cam, parm_val, pact);
-    } else if (parm_nm == "target_dir"){            conf_edit_target_dir(cam, parm_val, pact);
-    } else if (parm_nm == "watchdog_tmo"){          conf_edit_watchdog_tmo(cam, parm_val, pact);
-    } else if (parm_nm == "watchdog_kill"){         conf_edit_watchdog_kill(cam, parm_val, pact);
+    if (parm_nm == "camera_dir") {                   conf_edit_camera_dir(cam, parm_val, pact);
+    } else if (parm_nm == "camera_name") {           conf_edit_camera_name(cam, parm_val, pact);
+    } else if (parm_nm == "camera_id") {             conf_edit_camera_id(cam, parm_val, pact);
+    } else if (parm_nm == "camera_tmo") {            conf_edit_camera_tmo(cam, parm_val, pact);
+    } else if (parm_nm == "target_dir") {            conf_edit_target_dir(cam, parm_val, pact);
+    } else if (parm_nm == "watchdog_tmo") {          conf_edit_watchdog_tmo(cam, parm_val, pact);
+    } else if (parm_nm == "watchdog_kill") {         conf_edit_watchdog_kill(cam, parm_val, pact);
     }
 
 }
@@ -3210,15 +3210,15 @@ static void conf_edit_cat02(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
 
-    if (parm_nm == "v4l2_device"){           conf_edit_v4l2_device(cam, parm_val, pact);
-    } else if (parm_nm == "v4l2_params"){           conf_edit_v4l2_params(cam, parm_val, pact);
-    } else if (parm_nm == "netcam_url"){            conf_edit_netcam_url(cam, parm_val, pact);
-    } else if (parm_nm == "netcam_params"){         conf_edit_netcam_params(cam, parm_val, pact);
-    } else if (parm_nm == "netcam_high_url"){       conf_edit_netcam_high_url(cam, parm_val, pact);
-    } else if (parm_nm == "netcam_high_params"){    conf_edit_netcam_high_params(cam, parm_val, pact);
-    } else if (parm_nm == "netcam_userpass"){       conf_edit_netcam_userpass(cam, parm_val, pact);
-    } else if (parm_nm == "mmalcam_name"){          conf_edit_mmalcam_name(cam, parm_val, pact);
-    } else if (parm_nm == "mmalcam_params"){        conf_edit_mmalcam_params(cam, parm_val, pact);
+    if (parm_nm == "v4l2_device") {                  conf_edit_v4l2_device(cam, parm_val, pact);
+    } else if (parm_nm == "v4l2_params") {           conf_edit_v4l2_params(cam, parm_val, pact);
+    } else if (parm_nm == "netcam_url") {            conf_edit_netcam_url(cam, parm_val, pact);
+    } else if (parm_nm == "netcam_params") {         conf_edit_netcam_params(cam, parm_val, pact);
+    } else if (parm_nm == "netcam_high_url") {       conf_edit_netcam_high_url(cam, parm_val, pact);
+    } else if (parm_nm == "netcam_high_params") {    conf_edit_netcam_high_params(cam, parm_val, pact);
+    } else if (parm_nm == "netcam_userpass") {       conf_edit_netcam_userpass(cam, parm_val, pact);
+    } else if (parm_nm == "mmalcam_name") {          conf_edit_mmalcam_name(cam, parm_val, pact);
+    } else if (parm_nm == "mmalcam_params") {        conf_edit_mmalcam_params(cam, parm_val, pact);
     }
 
 }
@@ -3226,12 +3226,12 @@ static void conf_edit_cat02(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat03(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "width"){                          conf_edit_width(cam, parm_val, pact);
-    } else if (parm_nm == "height"){                  conf_edit_height(cam, parm_val, pact);
-    } else if (parm_nm == "framerate"){               conf_edit_framerate(cam, parm_val, pact);
-    } else if (parm_nm == "minimum_frame_time"){      conf_edit_minimum_frame_time(cam, parm_val, pact);
-    } else if (parm_nm == "rotate"){                  conf_edit_rotate(cam, parm_val, pact);
-    } else if (parm_nm == "flip_axis"){               conf_edit_flip_axis(cam, parm_val, pact);
+    if (parm_nm == "width") {                          conf_edit_width(cam, parm_val, pact);
+    } else if (parm_nm == "height") {                  conf_edit_height(cam, parm_val, pact);
+    } else if (parm_nm == "framerate") {               conf_edit_framerate(cam, parm_val, pact);
+    } else if (parm_nm == "minimum_frame_time") {      conf_edit_minimum_frame_time(cam, parm_val, pact);
+    } else if (parm_nm == "rotate") {                  conf_edit_rotate(cam, parm_val, pact);
+    } else if (parm_nm == "flip_axis") {               conf_edit_flip_axis(cam, parm_val, pact);
     }
 
 }
@@ -3239,13 +3239,13 @@ static void conf_edit_cat03(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat04(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "locate_motion_mode"){      conf_edit_locate_motion_mode(cam, parm_val, pact);
-    } else if (parm_nm == "locate_motion_style"){     conf_edit_locate_motion_style(cam, parm_val, pact);
-    } else if (parm_nm == "text_left"){               conf_edit_text_left(cam, parm_val, pact);
-    } else if (parm_nm == "text_right"){              conf_edit_text_right(cam, parm_val, pact);
-    } else if (parm_nm == "text_changes"){            conf_edit_text_changes(cam, parm_val, pact);
-    } else if (parm_nm == "text_scale"){              conf_edit_text_scale(cam, parm_val, pact);
-    } else if (parm_nm == "text_event"){              conf_edit_text_event(cam, parm_val, pact);
+    if (parm_nm == "locate_motion_mode") {             conf_edit_locate_motion_mode(cam, parm_val, pact);
+    } else if (parm_nm == "locate_motion_style") {     conf_edit_locate_motion_style(cam, parm_val, pact);
+    } else if (parm_nm == "text_left") {               conf_edit_text_left(cam, parm_val, pact);
+    } else if (parm_nm == "text_right") {              conf_edit_text_right(cam, parm_val, pact);
+    } else if (parm_nm == "text_changes") {            conf_edit_text_changes(cam, parm_val, pact);
+    } else if (parm_nm == "text_scale") {              conf_edit_text_scale(cam, parm_val, pact);
+    } else if (parm_nm == "text_event") {              conf_edit_text_event(cam, parm_val, pact);
     }
 
 }
@@ -3253,18 +3253,18 @@ static void conf_edit_cat04(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat05(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "emulate_motion"){          conf_edit_emulate_motion(cam, parm_val, pact);
-    } else if (parm_nm == "primary_method"){          conf_edit_primary_method(cam, parm_val, pact);
-    } else if (parm_nm == "threshold"){               conf_edit_threshold(cam, parm_val, pact);
-    } else if (parm_nm == "threshold_maximum"){       conf_edit_threshold_maximum(cam, parm_val, pact);
-    } else if (parm_nm == "threshold_sdevx"){         conf_edit_threshold_sdevx(cam, parm_val, pact);
-    } else if (parm_nm == "threshold_sdevy"){         conf_edit_threshold_sdevy(cam, parm_val, pact);
-    } else if (parm_nm == "threshold_sdevxy"){        conf_edit_threshold_sdevxy(cam, parm_val, pact);
-    } else if (parm_nm == "threshold_ratio"){         conf_edit_threshold_ratio(cam, parm_val, pact);
-    } else if (parm_nm == "threshold_tune"){          conf_edit_threshold_tune(cam, parm_val, pact);
-    } else if (parm_nm == "secondary_interval"){      conf_edit_secondary_interval(cam, parm_val, pact);
-    } else if (parm_nm == "secondary_method"){        conf_edit_secondary_method(cam, parm_val, pact);
-    } else if (parm_nm == "secondary_params"){        conf_edit_secondary_params(cam, parm_val, pact);
+    if (parm_nm == "emulate_motion") {                 conf_edit_emulate_motion(cam, parm_val, pact);
+    } else if (parm_nm == "primary_method") {          conf_edit_primary_method(cam, parm_val, pact);
+    } else if (parm_nm == "threshold") {               conf_edit_threshold(cam, parm_val, pact);
+    } else if (parm_nm == "threshold_maximum") {       conf_edit_threshold_maximum(cam, parm_val, pact);
+    } else if (parm_nm == "threshold_sdevx") {         conf_edit_threshold_sdevx(cam, parm_val, pact);
+    } else if (parm_nm == "threshold_sdevy") {         conf_edit_threshold_sdevy(cam, parm_val, pact);
+    } else if (parm_nm == "threshold_sdevxy") {        conf_edit_threshold_sdevxy(cam, parm_val, pact);
+    } else if (parm_nm == "threshold_ratio") {         conf_edit_threshold_ratio(cam, parm_val, pact);
+    } else if (parm_nm == "threshold_tune") {          conf_edit_threshold_tune(cam, parm_val, pact);
+    } else if (parm_nm == "secondary_interval") {      conf_edit_secondary_interval(cam, parm_val, pact);
+    } else if (parm_nm == "secondary_method") {        conf_edit_secondary_method(cam, parm_val, pact);
+    } else if (parm_nm == "secondary_params") {        conf_edit_secondary_params(cam, parm_val, pact);
     }
 
 }
@@ -3272,13 +3272,13 @@ static void conf_edit_cat05(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat06(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "noise_level"){             conf_edit_noise_level(cam, parm_val, pact);
-    } else if (parm_nm == "noise_tune"){              conf_edit_noise_tune(cam, parm_val, pact);
-    } else if (parm_nm == "despeckle_filter"){        conf_edit_despeckle_filter(cam, parm_val, pact);
-    } else if (parm_nm == "area_detect"){             conf_edit_area_detect(cam, parm_val, pact);
-    } else if (parm_nm == "mask_file"){               conf_edit_mask_file(cam, parm_val, pact);
-    } else if (parm_nm == "mask_privacy"){            conf_edit_mask_privacy(cam, parm_val, pact);
-    } else if (parm_nm == "smart_mask_speed"){        conf_edit_smart_mask_speed(cam, parm_val, pact);
+    if (parm_nm == "noise_level") {                    conf_edit_noise_level(cam, parm_val, pact);
+    } else if (parm_nm == "noise_tune") {              conf_edit_noise_tune(cam, parm_val, pact);
+    } else if (parm_nm == "despeckle_filter") {        conf_edit_despeckle_filter(cam, parm_val, pact);
+    } else if (parm_nm == "area_detect") {             conf_edit_area_detect(cam, parm_val, pact);
+    } else if (parm_nm == "mask_file") {               conf_edit_mask_file(cam, parm_val, pact);
+    } else if (parm_nm == "mask_privacy") {            conf_edit_mask_privacy(cam, parm_val, pact);
+    } else if (parm_nm == "smart_mask_speed") {        conf_edit_smart_mask_speed(cam, parm_val, pact);
     }
 
 }
@@ -3286,13 +3286,13 @@ static void conf_edit_cat06(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat07(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "lightswitch_percent"){     conf_edit_lightswitch_percent(cam, parm_val, pact);
-    } else if (parm_nm == "lightswitch_frames"){      conf_edit_lightswitch_frames(cam, parm_val, pact);
-    } else if (parm_nm == "minimum_motion_frames"){   conf_edit_minimum_motion_frames(cam, parm_val, pact);
-    } else if (parm_nm == "static_object_time"){      conf_edit_static_object_time(cam, parm_val, pact);
-    } else if (parm_nm == "event_gap"){               conf_edit_event_gap(cam, parm_val, pact);
-    } else if (parm_nm == "pre_capture"){             conf_edit_pre_capture(cam, parm_val, pact);
-    } else if (parm_nm == "post_capture"){            conf_edit_post_capture(cam, parm_val, pact);
+    if (parm_nm == "lightswitch_percent") {            conf_edit_lightswitch_percent(cam, parm_val, pact);
+    } else if (parm_nm == "lightswitch_frames") {      conf_edit_lightswitch_frames(cam, parm_val, pact);
+    } else if (parm_nm == "minimum_motion_frames") {   conf_edit_minimum_motion_frames(cam, parm_val, pact);
+    } else if (parm_nm == "static_object_time") {      conf_edit_static_object_time(cam, parm_val, pact);
+    } else if (parm_nm == "event_gap") {               conf_edit_event_gap(cam, parm_val, pact);
+    } else if (parm_nm == "pre_capture") {             conf_edit_pre_capture(cam, parm_val, pact);
+    } else if (parm_nm == "post_capture") {            conf_edit_post_capture(cam, parm_val, pact);
     }
 
 }
@@ -3300,16 +3300,16 @@ static void conf_edit_cat07(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat08(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "on_event_start"){                 conf_edit_on_event_start(cam, parm_val, pact);
-    } else if (parm_nm == "on_event_end"){            conf_edit_on_event_end(cam, parm_val, pact);
-    } else if (parm_nm == "on_picture_save"){         conf_edit_on_picture_save(cam, parm_val, pact);
-    } else if (parm_nm == "on_area_detected"){        conf_edit_on_area_detected(cam, parm_val, pact);
-    } else if (parm_nm == "on_motion_detected"){      conf_edit_on_motion_detected(cam, parm_val, pact);
-    } else if (parm_nm == "on_movie_start"){          conf_edit_on_movie_start(cam, parm_val, pact);
-    } else if (parm_nm == "on_movie_end"){            conf_edit_on_movie_end(cam, parm_val, pact);
-    } else if (parm_nm == "on_camera_lost"){          conf_edit_on_camera_lost(cam, parm_val, pact);
-    } else if (parm_nm == "on_camera_found"){         conf_edit_on_camera_found(cam, parm_val, pact);
-    } else if (parm_nm == "on_secondary_detect"){     conf_edit_on_secondary_detect(cam, parm_val, pact);
+    if (parm_nm == "on_event_start") {                 conf_edit_on_event_start(cam, parm_val, pact);
+    } else if (parm_nm == "on_event_end") {            conf_edit_on_event_end(cam, parm_val, pact);
+    } else if (parm_nm == "on_picture_save") {         conf_edit_on_picture_save(cam, parm_val, pact);
+    } else if (parm_nm == "on_area_detected") {        conf_edit_on_area_detected(cam, parm_val, pact);
+    } else if (parm_nm == "on_motion_detected") {      conf_edit_on_motion_detected(cam, parm_val, pact);
+    } else if (parm_nm == "on_movie_start") {          conf_edit_on_movie_start(cam, parm_val, pact);
+    } else if (parm_nm == "on_movie_end") {            conf_edit_on_movie_end(cam, parm_val, pact);
+    } else if (parm_nm == "on_camera_lost") {          conf_edit_on_camera_lost(cam, parm_val, pact);
+    } else if (parm_nm == "on_camera_found") {         conf_edit_on_camera_found(cam, parm_val, pact);
+    } else if (parm_nm == "on_secondary_detect") {     conf_edit_on_secondary_detect(cam, parm_val, pact);
     }
 
 }
@@ -3317,14 +3317,14 @@ static void conf_edit_cat08(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat09(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "picture_output"){          conf_edit_picture_output(cam, parm_val, pact);
-    } else if (parm_nm == "picture_output_motion"){   conf_edit_picture_output_motion(cam, parm_val, pact);
-    } else if (parm_nm == "picture_type"){            conf_edit_picture_type(cam, parm_val, pact);
-    } else if (parm_nm == "picture_quality"){         conf_edit_picture_quality(cam, parm_val, pact);
-    } else if (parm_nm == "picture_exif"){            conf_edit_picture_exif(cam, parm_val, pact);
-    } else if (parm_nm == "picture_filename"){        conf_edit_picture_filename(cam, parm_val, pact);
-    } else if (parm_nm == "snapshot_interval"){       conf_edit_snapshot_interval(cam, parm_val, pact);
-    } else if (parm_nm == "snapshot_filename"){       conf_edit_snapshot_filename(cam, parm_val, pact);
+    if (parm_nm == "picture_output") {                 conf_edit_picture_output(cam, parm_val, pact);
+    } else if (parm_nm == "picture_output_motion") {   conf_edit_picture_output_motion(cam, parm_val, pact);
+    } else if (parm_nm == "picture_type") {            conf_edit_picture_type(cam, parm_val, pact);
+    } else if (parm_nm == "picture_quality") {         conf_edit_picture_quality(cam, parm_val, pact);
+    } else if (parm_nm == "picture_exif") {            conf_edit_picture_exif(cam, parm_val, pact);
+    } else if (parm_nm == "picture_filename") {        conf_edit_picture_filename(cam, parm_val, pact);
+    } else if (parm_nm == "snapshot_interval") {       conf_edit_snapshot_interval(cam, parm_val, pact);
+    } else if (parm_nm == "snapshot_filename") {       conf_edit_snapshot_filename(cam, parm_val, pact);
     }
 
 }
@@ -3332,16 +3332,16 @@ static void conf_edit_cat09(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat10(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "movie_output"){            conf_edit_movie_output(cam, parm_val, pact);
-    } else if (parm_nm == "movie_output_motion"){     conf_edit_movie_output_motion(cam, parm_val, pact);
-    } else if (parm_nm == "movie_max_time"){          conf_edit_movie_max_time(cam, parm_val, pact);
-    } else if (parm_nm == "movie_bps"){               conf_edit_movie_bps(cam, parm_val, pact);
-    } else if (parm_nm == "movie_quality"){           conf_edit_movie_quality(cam, parm_val, pact);
-    } else if (parm_nm == "movie_codec"){             conf_edit_movie_codec(cam, parm_val, pact);
-    } else if (parm_nm == "movie_passthrough"){       conf_edit_movie_passthrough(cam, parm_val, pact);
-    } else if (parm_nm == "movie_filename"){          conf_edit_movie_filename(cam, parm_val, pact);
-    } else if (parm_nm == "movie_extpipe_use"){       conf_edit_movie_extpipe_use(cam, parm_val, pact);
-    } else if (parm_nm == "movie_extpipe"){           conf_edit_movie_extpipe(cam, parm_val, pact);
+    if (parm_nm == "movie_output") {                   conf_edit_movie_output(cam, parm_val, pact);
+    } else if (parm_nm == "movie_output_motion") {     conf_edit_movie_output_motion(cam, parm_val, pact);
+    } else if (parm_nm == "movie_max_time") {          conf_edit_movie_max_time(cam, parm_val, pact);
+    } else if (parm_nm == "movie_bps") {               conf_edit_movie_bps(cam, parm_val, pact);
+    } else if (parm_nm == "movie_quality") {           conf_edit_movie_quality(cam, parm_val, pact);
+    } else if (parm_nm == "movie_codec") {             conf_edit_movie_codec(cam, parm_val, pact);
+    } else if (parm_nm == "movie_passthrough") {       conf_edit_movie_passthrough(cam, parm_val, pact);
+    } else if (parm_nm == "movie_filename") {          conf_edit_movie_filename(cam, parm_val, pact);
+    } else if (parm_nm == "movie_extpipe_use") {       conf_edit_movie_extpipe_use(cam, parm_val, pact);
+    } else if (parm_nm == "movie_extpipe") {           conf_edit_movie_extpipe(cam, parm_val, pact);
     }
 
 }
@@ -3349,11 +3349,11 @@ static void conf_edit_cat10(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat11(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "timelapse_interval"){      conf_edit_timelapse_interval(cam, parm_val, pact);
-    } else if (parm_nm == "timelapse_mode"){          conf_edit_timelapse_mode(cam, parm_val, pact);
-    } else if (parm_nm == "timelapse_fps"){           conf_edit_timelapse_fps(cam, parm_val, pact);
-    } else if (parm_nm == "timelapse_codec"){         conf_edit_timelapse_codec(cam, parm_val, pact);
-    } else if (parm_nm == "timelapse_filename"){      conf_edit_timelapse_filename(cam, parm_val, pact);
+    if (parm_nm == "timelapse_interval") {             conf_edit_timelapse_interval(cam, parm_val, pact);
+    } else if (parm_nm == "timelapse_mode") {          conf_edit_timelapse_mode(cam, parm_val, pact);
+    } else if (parm_nm == "timelapse_fps") {           conf_edit_timelapse_fps(cam, parm_val, pact);
+    } else if (parm_nm == "timelapse_codec") {         conf_edit_timelapse_codec(cam, parm_val, pact);
+    } else if (parm_nm == "timelapse_filename") {      conf_edit_timelapse_filename(cam, parm_val, pact);
     }
 
 }
@@ -3361,8 +3361,8 @@ static void conf_edit_cat11(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat12(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "video_pipe"){              conf_edit_video_pipe(cam, parm_val, pact);
-    } else if (parm_nm == "video_pipe_motion"){       conf_edit_video_pipe_motion(cam, parm_val, pact);
+    if (parm_nm == "video_pipe") {                     conf_edit_video_pipe(cam, parm_val, pact);
+    } else if (parm_nm == "video_pipe_motion") {       conf_edit_video_pipe_motion(cam, parm_val, pact);
     }
 
 }
@@ -3370,18 +3370,18 @@ static void conf_edit_cat12(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat13(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "webcontrol_port"){                    conf_edit_webcontrol_port(cam, parm_val, pact);
-    } else if (parm_nm == "webcontrol_ipv6"){             conf_edit_webcontrol_ipv6(cam, parm_val, pact);
-    } else if (parm_nm == "webcontrol_localhost"){        conf_edit_webcontrol_localhost(cam, parm_val, pact);
-    } else if (parm_nm == "webcontrol_parms"){            conf_edit_webcontrol_parms(cam, parm_val, pact);
-    } else if (parm_nm == "webcontrol_interface"){        conf_edit_webcontrol_interface(cam, parm_val, pact);
-    } else if (parm_nm == "webcontrol_auth_method"){      conf_edit_webcontrol_auth_method(cam, parm_val, pact);
-    } else if (parm_nm == "webcontrol_authentication"){   conf_edit_webcontrol_authentication(cam, parm_val, pact);
-    } else if (parm_nm == "webcontrol_tls"){              conf_edit_webcontrol_tls(cam, parm_val, pact);
-    } else if (parm_nm == "webcontrol_cert"){             conf_edit_webcontrol_cert(cam, parm_val, pact);
-    } else if (parm_nm == "webcontrol_key"){              conf_edit_webcontrol_key(cam, parm_val, pact);
-    } else if (parm_nm == "webcontrol_cors_header"){      conf_edit_webcontrol_cors_header(cam, parm_val, pact);
-    } else if (parm_nm == "webcontrol_html"){             conf_edit_webcontrol_html(cam, parm_val, pact);
+    if (parm_nm == "webcontrol_port") {                    conf_edit_webcontrol_port(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_ipv6") {             conf_edit_webcontrol_ipv6(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_localhost") {        conf_edit_webcontrol_localhost(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_parms") {            conf_edit_webcontrol_parms(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_interface") {        conf_edit_webcontrol_interface(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_auth_method") {      conf_edit_webcontrol_auth_method(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_authentication") {   conf_edit_webcontrol_authentication(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_tls") {              conf_edit_webcontrol_tls(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_cert") {             conf_edit_webcontrol_cert(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_key") {              conf_edit_webcontrol_key(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_cors_header") {      conf_edit_webcontrol_cors_header(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_html") {             conf_edit_webcontrol_html(cam, parm_val, pact);
     }
 
 }
@@ -3389,27 +3389,27 @@ static void conf_edit_cat13(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat14(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "stream_preview_scale"){               conf_edit_stream_preview_scale(cam, parm_val, pact);
-    } else if (parm_nm == "stream_preview_newline"){      conf_edit_stream_preview_newline(cam, parm_val, pact);
-    } else if (parm_nm == "stream_preview_method"){       conf_edit_stream_preview_method(cam, parm_val, pact);
-    } else if (parm_nm == "stream_preview_ptz"){          conf_edit_stream_preview_ptz(cam, parm_val, pact);
-    } else if (parm_nm == "stream_quality"){              conf_edit_stream_quality(cam, parm_val, pact);
-    } else if (parm_nm == "stream_grey"){                 conf_edit_stream_grey(cam, parm_val, pact);
-    } else if (parm_nm == "stream_motion"){               conf_edit_stream_motion(cam, parm_val, pact);
-    } else if (parm_nm == "stream_maxrate"){              conf_edit_stream_maxrate(cam, parm_val, pact);
+    if (parm_nm == "stream_preview_scale") {               conf_edit_stream_preview_scale(cam, parm_val, pact);
+    } else if (parm_nm == "stream_preview_newline") {      conf_edit_stream_preview_newline(cam, parm_val, pact);
+    } else if (parm_nm == "stream_preview_method") {       conf_edit_stream_preview_method(cam, parm_val, pact);
+    } else if (parm_nm == "stream_preview_ptz") {          conf_edit_stream_preview_ptz(cam, parm_val, pact);
+    } else if (parm_nm == "stream_quality") {              conf_edit_stream_quality(cam, parm_val, pact);
+    } else if (parm_nm == "stream_grey") {                 conf_edit_stream_grey(cam, parm_val, pact);
+    } else if (parm_nm == "stream_motion") {               conf_edit_stream_motion(cam, parm_val, pact);
+    } else if (parm_nm == "stream_maxrate") {              conf_edit_stream_maxrate(cam, parm_val, pact);
     }
 
 }
 
 static void conf_edit_cat15(struct ctx_cam *cam, std::string parm_nm, std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "database_type"){                  conf_edit_database_type(cam, parm_val, pact);
-    } else if (parm_nm == "database_dbname"){         conf_edit_database_dbname(cam, parm_val, pact);
-    } else if (parm_nm == "database_host"){           conf_edit_database_host(cam, parm_val, pact);
-    } else if (parm_nm == "database_port"){           conf_edit_database_port(cam, parm_val, pact);
-    } else if (parm_nm == "database_user"){           conf_edit_database_user(cam, parm_val, pact);
-    } else if (parm_nm == "database_password"){       conf_edit_database_password(cam, parm_val, pact);
-    } else if (parm_nm == "database_busy_timeout"){   conf_edit_database_busy_timeout(cam, parm_val, pact);
+    if (parm_nm == "database_type") {                  conf_edit_database_type(cam, parm_val, pact);
+    } else if (parm_nm == "database_dbname") {         conf_edit_database_dbname(cam, parm_val, pact);
+    } else if (parm_nm == "database_host") {           conf_edit_database_host(cam, parm_val, pact);
+    } else if (parm_nm == "database_port") {           conf_edit_database_port(cam, parm_val, pact);
+    } else if (parm_nm == "database_user") {           conf_edit_database_user(cam, parm_val, pact);
+    } else if (parm_nm == "database_password") {       conf_edit_database_password(cam, parm_val, pact);
+    } else if (parm_nm == "database_busy_timeout") {   conf_edit_database_busy_timeout(cam, parm_val, pact);
     }
 
 }
@@ -3417,13 +3417,13 @@ static void conf_edit_cat15(struct ctx_cam *cam, std::string parm_nm, std::strin
 static void conf_edit_cat16(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "sql_log_picture"){         conf_edit_sql_log_picture(cam, parm_val, pact);
-    } else if (parm_nm == "sql_log_snapshot"){        conf_edit_sql_log_snapshot(cam, parm_val, pact);
-    } else if (parm_nm == "sql_log_movie"){           conf_edit_sql_log_movie(cam, parm_val, pact);
-    } else if (parm_nm == "sql_log_timelapse"){       conf_edit_sql_log_timelapse(cam, parm_val, pact);
-    } else if (parm_nm == "sql_query_start"){         conf_edit_sql_query_start(cam, parm_val, pact);
-    } else if (parm_nm == "sql_query_stop"){          conf_edit_sql_query_stop(cam, parm_val, pact);
-    } else if (parm_nm == "sql_query"){               conf_edit_sql_query(cam, parm_val, pact);
+    if (parm_nm == "sql_log_picture") {                conf_edit_sql_log_picture(cam, parm_val, pact);
+    } else if (parm_nm == "sql_log_snapshot") {        conf_edit_sql_log_snapshot(cam, parm_val, pact);
+    } else if (parm_nm == "sql_log_movie") {           conf_edit_sql_log_movie(cam, parm_val, pact);
+    } else if (parm_nm == "sql_log_timelapse") {       conf_edit_sql_log_timelapse(cam, parm_val, pact);
+    } else if (parm_nm == "sql_query_start") {         conf_edit_sql_query_start(cam, parm_val, pact);
+    } else if (parm_nm == "sql_query_stop") {          conf_edit_sql_query_stop(cam, parm_val, pact);
+    } else if (parm_nm == "sql_query") {               conf_edit_sql_query(cam, parm_val, pact);
     }
 
 }
@@ -3431,15 +3431,15 @@ static void conf_edit_cat16(struct ctx_cam *cam, std::string parm_nm
 static void conf_edit_cat17(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "ptz_auto_track"){           conf_edit_ptz_auto_track(cam, parm_val, pact);
-    } else if (parm_nm == "ptz_wait"){          conf_edit_ptz_wait(cam, parm_val, pact);
-    } else if (parm_nm == "ptz_move_track"){    conf_edit_ptz_move_track(cam, parm_val, pact);
-    } else if (parm_nm == "ptz_pan_left"){      conf_edit_ptz_pan_left(cam, parm_val, pact);
-    } else if (parm_nm == "ptz_pan_right"){     conf_edit_ptz_pan_right(cam, parm_val, pact);
-    } else if (parm_nm == "ptz_tilt_up"){       conf_edit_ptz_tilt_up(cam, parm_val, pact);
-    } else if (parm_nm == "ptz_tilt_down"){     conf_edit_ptz_tilt_down(cam, parm_val, pact);
-    } else if (parm_nm == "ptz_zoom_in"){       conf_edit_ptz_zoom_in(cam, parm_val, pact);
-    } else if (parm_nm == "ptz_zoom_out"){      conf_edit_ptz_zoom_out(cam, parm_val, pact);
+    if (parm_nm == "ptz_auto_track") {           conf_edit_ptz_auto_track(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_wait") {          conf_edit_ptz_wait(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_move_track") {    conf_edit_ptz_move_track(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_pan_left") {      conf_edit_ptz_pan_left(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_pan_right") {     conf_edit_ptz_pan_right(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_tilt_up") {       conf_edit_ptz_tilt_up(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_tilt_down") {     conf_edit_ptz_tilt_down(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_zoom_in") {       conf_edit_ptz_zoom_in(cam, parm_val, pact);
+    } else if (parm_nm == "ptz_zoom_out") {      conf_edit_ptz_zoom_out(cam, parm_val, pact);
     }
 
 }
@@ -3543,14 +3543,14 @@ static void conf_edit_depr_vid(struct ctx_motapp *motapp, int threadnbr
     std::string parm_curr, parm_new;
 
     conf_edit_v4l2_params(motapp->cam_list[threadnbr], parm_curr, PARM_ACT_GET);
-    if (parm_curr == ""){
-        if (parm_nm == "power_line_frequency"){
+    if (parm_curr == "") {
+        if (parm_nm == "power_line_frequency") {
             parm_new = "\"power line frequency\"=" + parm_val;
         } else {
             parm_new = parm_nm + "=" + parm_val;
         }
     } else {
-        if (parm_nm == "power_line_frequency"){
+        if (parm_nm == "power_line_frequency") {
             parm_new = parm_curr + ", \"power line frequency\"=" + parm_val;
         } else {
             parm_new = parm_curr +", " + parm_nm + "=" + parm_val;
@@ -3651,11 +3651,15 @@ void conf_edit_get(struct ctx_cam *cam, std::string parm_nm, char *parm_chr, enu
 void conf_edit_set(struct ctx_motapp *motapp, bool ismotapp, int threadnbr
         ,std::string parm_nm, std::string parm_val)
 {
-    if (conf_edit_set_active(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_active(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) {
+        return;
+    }
 
-    if (conf_edit_set_depr(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_depr(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) {
+        return;
+    }
 
-    if (ismotapp == false){
+    if (ismotapp == false) {
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), parm_nm.c_str());
     }
 
@@ -3667,11 +3671,15 @@ void conf_edit_set(struct ctx_motapp *motapp, bool ismotapp, int threadnbr
 {
     std::string parm_nm(parm_nm_chr);
 
-    if (conf_edit_set_active(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_active(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) {
+        return;
+    }
 
-    if (conf_edit_set_depr(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_depr(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) {
+        return;
+    }
 
-    if (ismotapp == false){
+    if (ismotapp == false) {
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), parm_nm.c_str());
     }
 
@@ -3683,11 +3691,15 @@ void conf_edit_set(struct ctx_motapp *motapp, bool ismotapp, int threadnbr
 {
     std::string parm_val(parm_val_chr);
 
-    if (conf_edit_set_active(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_active(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) {
+        return;
+    }
 
-    if (conf_edit_set_depr(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_depr(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) {
+        return;
+    }
 
-    if (ismotapp == false){
+    if (ismotapp == false) {
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), parm_nm.c_str());
     }
 
@@ -3700,11 +3712,15 @@ void conf_edit_set(struct ctx_motapp *motapp, bool ismotapp, int threadnbr
     std::string parm_val(parm_val_chr);
     std::string parm_nm(parm_nm_chr);
 
-    if (conf_edit_set_active(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_active(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) {
+        return;
+    }
 
-    if (conf_edit_set_depr(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) return;
+    if (conf_edit_set_depr(motapp, ismotapp, threadnbr, parm_nm, parm_val) == 0) {
+        return;
+    }
 
-    if (ismotapp == false){
+    if (ismotapp == false) {
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), parm_nm.c_str());
     }
 
@@ -3863,7 +3879,7 @@ void conf_camera_add(struct ctx_motapp *motapp)
 
     /* Find the number of cameras defined. */
     indx_cams = 0;
-    while (motapp->cam_list[indx_cams] != NULL){
+    while (motapp->cam_list[indx_cams] != NULL) {
         indx_cams++;
     };
 
@@ -3987,21 +4003,23 @@ void conf_process(struct ctx_motapp *motapp, bool ismotapp,  FILE *fp, int threa
 
             /* Trim white space and any CR or LF at the end of the line. */
             end = line + strlen(line) - 1; /* Point to the last non-null character in the string. */
-            while (end >= line && (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r')){
+            while (end >= line && (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r')) {
                 end--;
             }
             *(end+1) = '\0';
 
-            if (strlen(line) == 0) continue;
+            if (strlen(line) == 0) {
+                continue;
+            }
 
             /* Trim leading whitespace from the line and find command. */
             beg = line;
-            while (*beg == ' ' || *beg == '\t'){
+            while (*beg == ' ' || *beg == '\t') {
                 beg++;
             }
             cmd = beg; /* Command starts here. */
 
-            while (*beg != ' ' && *beg != '\t' && *beg != '=' && *beg != '\0'){
+            while (*beg != ' ' && *beg != '\t' && *beg != '=' && *beg != '\0') {
                 beg++;
             }
             *beg = '\0'; /* Command string terminates here. */
@@ -4010,7 +4028,7 @@ void conf_process(struct ctx_motapp *motapp, bool ismotapp,  FILE *fp, int threa
             beg++;
 
             if (strlen(beg) > 0) {
-                while (*beg == ' ' || *beg == '\t' || *beg == '=' || *beg == '\n' || *beg == '\r'){
+                while (*beg == ' ' || *beg == '\t' || *beg == '=' || *beg == '\n' || *beg == '\r') {
                     beg++;
                 }
 
@@ -4025,7 +4043,7 @@ void conf_process(struct ctx_motapp *motapp, bool ismotapp,  FILE *fp, int threa
             }
             /* Ignore camera/dir in sub files */
             parm_nm = std::string(cmd);
-            if (arg1 == NULL){
+            if (arg1 == NULL) {
                 parm_val= std::string("");
             } else {
                 parm_val= std::string(arg1);
@@ -4053,7 +4071,7 @@ void conf_parms_log(struct ctx_cam **cam_list)
     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
         ,_("Logging configuration parameters from all files"));
     threadnbr = 0;
-    while (cam_list[threadnbr]!= NULL){
+    while (cam_list[threadnbr]!= NULL) {
         motion_log(INF, TYPE_ALL, NO_ERRNO,0
             ,_("Camera %d - Config file: %s"), threadnbr, cam_list[threadnbr]->conf_filename);
         i = 0;
@@ -4061,10 +4079,12 @@ void conf_parms_log(struct ctx_cam **cam_list)
             diff_val = TRUE;
             conf_edit_get(cam_list[threadnbr], config_parms[i].parm_name
                 , parm_val ,config_parms[i].parm_cat);
-            if (threadnbr > 0){
+            if (threadnbr > 0) {
                 conf_edit_get(cam_list[0], config_parms[i].parm_name
                     , parm_main ,config_parms[i].parm_cat);
-                if (parm_val == parm_main) diff_val = FALSE;
+                if (parm_val == parm_main) {
+                    diff_val = FALSE;
+                }
             }
             if (diff_val) {
                 if ((config_parms[i].parm_name == "netcam_url") ||
@@ -4081,7 +4101,7 @@ void conf_parms_log(struct ctx_cam **cam_list)
                         ,_("%-25s <redacted>"), config_parms[i].parm_name.c_str());
                 } else {
                     if ((config_parms[i].parm_name.compare(0,4,"text") == 0) ||
-                        (parm_val.compare(0,1, " ") != 0)){
+                        (parm_val.compare(0,1, " ") != 0)) {
                         motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %s"
                             , config_parms[i].parm_name.c_str(), parm_val.c_str());
                     } else {
@@ -4125,7 +4145,7 @@ void conf_parms_write(struct ctx_motapp *motapp)
         fprintf(conffile, "\n\n");
 
         indx = 0;
-        while (config_parms[indx].parm_name != ""){
+        while (config_parms[indx].parm_name != "") {
             conf_edit_get(motapp->cam_list[indx_cam], config_parms[indx].parm_name
                     , parm_val, config_parms[indx].parm_cat);
             conf_edit_get(motapp->cam_list[0], config_parms[indx].parm_name
@@ -4228,7 +4248,7 @@ void conf_init_app(struct ctx_motapp *motapp, int argc, char *argv[])
         fp = fopen(filename.c_str(), "r");
     }
 
-    if (!fp){
+    if (!fp) {
         MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
             ,_("could not open configfile %s"), filename.c_str());
     }
@@ -4287,7 +4307,7 @@ void conf_init_cams(struct ctx_motapp *motapp)
     }
 
     indx=0;
-    while (motapp->cam_list[indx] != NULL){
+    while (motapp->cam_list[indx] != NULL) {
         motapp->cam_list[indx]->pause = motapp->pause;
         motapp->cam_list[indx]->threadnr = indx;
         indx++;
@@ -4301,7 +4321,7 @@ void conf_deinit(struct ctx_motapp *motapp)
     int indx;
 
     indx = 0;
-    while (motapp->cam_list[indx] != NULL){
+    while (motapp->cam_list[indx] != NULL) {
         delete motapp->cam_list[indx]->conf;
         delete motapp->cam_list[indx];
         indx++;

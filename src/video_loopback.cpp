@@ -114,7 +114,9 @@ static int vlp_open_vidpipe(void)
 
                 if ((tfd = open(buffer, O_RDWR|O_CLOEXEC)) >= 0) {
                     strncpy(pipepath, buffer, sizeof(pipepath));
-                    if (pipe_fd >= 0) close(pipe_fd);
+                    if (pipe_fd >= 0) {
+                        close(pipe_fd);
+                    }
                     pipe_fd = tfd;
                     break;
                 }
@@ -125,8 +127,9 @@ static int vlp_open_vidpipe(void)
 
     closedir(dir);
 
-    if (pipe_fd >= 0)
+    if (pipe_fd >= 0) {
       MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opened %s as pipe output"), pipepath);
+    }
 
     return pipe_fd;
 }
@@ -143,9 +146,11 @@ static void vlp_show_vcap(struct v4l2_capability *cap)
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.bus_info: %s",cap->bus_info);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.card:     %u.%u.%u",(vers >> 16) & 0xFF,(vers >> 8) & 0xFF,vers & 0xFF);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Device capabilities");
-    for (i=0;cap_list[i].code;i++)
-        if (c & cap_list[i].code)
+    for (i=0;cap_list[i].code;i++) {
+        if (c & cap_list[i].code) {
             MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s",cap_list[i].cap);
+        }
+    }
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "------------------------");
 }
 

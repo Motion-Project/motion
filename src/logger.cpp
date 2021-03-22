@@ -51,7 +51,9 @@ static int log_get_type(const char *type)
 void log_set_type(const char *new_logtype)
 {
 
-    if ( mystreq(new_logtype, log_type_str[log_type]) ) return;
+    if ( mystreq(new_logtype, log_type_str[log_type]) ) {
+        return;
+    }
 
     pthread_mutex_lock(&log_motapp->mutex_parms);
         log_type = log_get_type(new_logtype);
@@ -62,7 +64,9 @@ void log_set_type(const char *new_logtype)
 void log_set_level(int new_loglevel)
 {
 
-    if (new_loglevel == log_level) return;
+    if (new_loglevel == log_level) {
+        return;
+    }
 
     pthread_mutex_lock(&log_motapp->mutex_parms);
         log_level = new_loglevel;
@@ -77,11 +81,11 @@ static void log_set_mode(int mode)
 
     log_mode = mode;
 
-    if (mode == LOGMODE_SYSLOG && prev_mode != LOGMODE_SYSLOG){
+    if (mode == LOGMODE_SYSLOG && prev_mode != LOGMODE_SYSLOG) {
         openlog("motion", LOG_PID, LOG_USER);
     }
 
-    if (mode != LOGMODE_SYSLOG && prev_mode == LOGMODE_SYSLOG){
+    if (mode != LOGMODE_SYSLOG && prev_mode == LOGMODE_SYSLOG) {
         closelog();
     }
 }
@@ -95,7 +99,7 @@ static void log_set_logfile(const char *logfile_name)
     logfile = myfopen(logfile_name, "a");
 
     /* If logfile was opened correctly */
-    if (logfile){
+    if (logfile) {
         log_set_mode(LOGMODE_FILE);
     }
 
@@ -139,8 +143,12 @@ void motion_log(int level, int type, int errno_flag,int fncname, const char *fmt
     pthread_mutex_unlock(&log_motapp->mutex_parms);
 
     /*Exit if not our level or type */
-    if (level > applvl) return;
-    if ((apptyp != TYPE_ALL) && (apptyp != type)) return;
+    if (level > applvl) {
+        return;
+    }
+    if ((apptyp != TYPE_ALL) && (apptyp != type)) {
+        return;
+    }
 
     threadnr = (unsigned long)pthread_getspecific(tls_key_threadnr);
 
@@ -161,7 +169,7 @@ void motion_log(int level, int type, int errno_flag,int fncname, const char *fmt
     }
 
     /* Prepend the format specifier for the function name */
-    if (fncname){
+    if (fncname) {
         snprintf(usrfmt, sizeof (usrfmt),"%s: %s", "%s", fmt);
     } else {
         snprintf(usrfmt, sizeof (usrfmt),"%s",fmt);
@@ -200,10 +208,10 @@ void motion_log(int level, int type, int errno_flag,int fncname, const char *fmt
         #endif
     }
 
-    if ((mystreq(buf,flood_msg)) && (flood_cnt <= 5000)){
+    if ((mystreq(buf,flood_msg)) && (flood_cnt <= 5000)) {
         flood_cnt++;
     } else {
-        if (flood_cnt > 1){
+        if (flood_cnt > 1) {
             if (log_mode == LOGMODE_FILE) {
                 snprintf(flood_repeats,1024,"%s [%s] [%s] [%02d:%s] Above message repeats %d times"
                     , str_time(), log_level_str[level], log_type_str[type]

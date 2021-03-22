@@ -29,7 +29,7 @@ static int dbse_global_edits(struct ctx_cam **cam_list)
 
     int retcd = 0;
 
-    if (cam_list[0]->conf->database_dbname == ""){
+    if (cam_list[0]->conf->database_dbname == "") {
         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 ,_("Invalid database name"));
         retcd = -1;
@@ -37,13 +37,13 @@ static int dbse_global_edits(struct ctx_cam **cam_list)
     if ((((cam_list[0]->conf->database_type == "mysql")) ||
          ((cam_list[0]->conf->database_type == "mariadb")) ||
          ((cam_list[0]->conf->database_type == "pgsql"))) &&
-        (cam_list[0]->conf->database_port == 0)){
+        (cam_list[0]->conf->database_port == 0)) {
         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 ,_("Must specify database port for mysql/mariadb/pgsql"));
         retcd = -1;
     }
 
-    if (retcd == -1){
+    if (retcd == -1) {
         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 ,_("Database functionality disabled."));
         cam_list[0]->conf->database_type = "";
@@ -81,7 +81,7 @@ void dbse_global_deinit(struct ctx_motapp *motapp)
     #endif /* HAVE_MYSQL */
 
     indx = 0;
-    while (motapp->cam_list[indx] != NULL){
+    while (motapp->cam_list[indx] != NULL) {
         if (motapp->cam_list[indx]->dbse != NULL) {
             free(motapp->cam_list[indx]->dbse);
         }
@@ -102,7 +102,9 @@ void dbse_global_init(struct ctx_motapp *motapp)
     }
 
     if (motapp->cam_list[0]->conf->database_type != "") {
-        if (dbse_global_edits(motapp->cam_list) == -1) return;
+        if (dbse_global_edits(motapp->cam_list) == -1) {
+            return;
+        }
 
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("Initializing database"));
         /* Initialize all the database items */
