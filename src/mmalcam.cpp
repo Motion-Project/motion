@@ -14,7 +14,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
  *
- *    Copyright 2020 MotionMrDave@gmail.com
+ *    Copyright 2020-2021 MotionMrDave@gmail.com
  *    Copyright 2013 by Nicholas Tuckett
  *
  */
