@@ -24,5 +24,7 @@
 #ifndef _INCLUDE_EXIF_H_
 #define _INCLUDE_EXIF_H_
 
-    unsigned exif_prepare(unsigned char **, const struct ctx_cam *cam, const struct timespec *, const struct ctx_coord *);
+    unsigned exif_prepare(unsigned char **exif, const struct ctx_cam *cam,
+        const struct timespec *ts_in1, const struct ctx_coord *box);
+
 #endif

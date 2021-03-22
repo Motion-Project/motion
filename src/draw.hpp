@@ -21,7 +21,6 @@
 #ifndef _INCLUDE_DRAW_H_
 #define _INCLUDE_DRAW_H_
 
-/* date/time drawing, draw.c */
     int draw_text(unsigned char *image,
               int width, int height,
               int startx, int starty,
@@ -31,8 +30,8 @@
 
     void draw_locate_preview(struct ctx_cam *cam, struct ctx_image_data *img);
     void draw_locate(struct ctx_cam *cam, struct ctx_image_data *img);
-    void draw_smartmask(struct ctx_cam *cam, unsigned char *);
-    void draw_fixed_mask(struct ctx_cam *cam, unsigned char *);
-    void draw_largest_label(struct ctx_cam *cam, unsigned char *);
+    void draw_smartmask(struct ctx_cam *cam, unsigned char *out);
+    void draw_fixed_mask(struct ctx_cam *cam, unsigned char *out);
+    void draw_largest_label(struct ctx_cam *cam, unsigned char *out);
 
 #endif

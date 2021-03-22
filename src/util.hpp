@@ -93,12 +93,14 @@
         typedef int             mhdrslt; /* Version independent return result from MHD */
     #endif
 
-    void * mymalloc(size_t);
-    void * myrealloc(void *, size_t, const char *);
-    FILE * myfopen(const char *, const char *);
-    int myfclose(FILE *);
-    size_t mystrftime(const struct ctx_cam *, char *, size_t, const char *, const struct timespec *, const char *, int);
-    int mycreate_path(const char *);
+
+    void *mymalloc(size_t nbytes);
+    void *myrealloc(void *ptr, size_t size, const char *desc);
+    int mycreate_path(const char *path);
+    FILE *myfopen(const char *path, const char *mode);
+    int myfclose(FILE *fh);
+    size_t mystrftime(const struct ctx_cam *cam, char *s, size_t max, const char *userformat,
+        const struct timespec *ts1, const char *filename, int sqltype);
     void util_exec_command(struct ctx_cam *cam, const char *command, char *filename, int filetype);
 
     void mythreadname_set(const char *abbr, int threadnbr, const char *threadname);
@@ -112,8 +114,8 @@
     int mystrcne(const char* var1, const char* var2);
     int mystreq(const char* var1, const char* var2);
     int mystrne(const char* var1, const char* var2);
-    char *mystrdup(const char *);
-    char *mystrcpy(char *, const char *);
+    char *mystrdup(const char *from);
+    char *mystrcpy(char *to, const char *from);
     void myltrim(std::string &parm);
     void myrtrim(std::string &parm);
     void mytrim(std::string &parm);

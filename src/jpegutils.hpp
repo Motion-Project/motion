@@ -23,9 +23,12 @@
 #define __JPEGUTILS_H__
 
     int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
-                        unsigned int width, unsigned int height, unsigned char *volatile img_out);
-
-    int jpgutl_put_yuv420p(unsigned char *, int image, unsigned char *, int, int, int, struct ctx_cam *cam, struct timespec *, struct ctx_coord *);
-    int jpgutl_put_grey(unsigned char *, int image, unsigned char *, int, int, int, struct ctx_cam *cam, struct timespec *, struct ctx_coord *);
+        unsigned int width, unsigned int height, unsigned char *volatile img_out);
+    int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
+        unsigned char *input_image, int width, int height, int quality,
+        struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box);
+    int jpgutl_put_grey(unsigned char *dest_image, int image_size,
+        unsigned char *input_image, int width, int height, int quality,
+        struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box);
 
 #endif
