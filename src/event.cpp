@@ -30,18 +30,6 @@
 #include "video_common.hpp"
 #include "webu_stream.hpp"
 
-/* Various functions (most doing the actual action)
- * TODO Items:
- * Rework the snprintf uses.
- * Edit directories so they can never be null and eliminate defaults from here
- * Move the movie initialize stuff to movie module
- * eliminate #if for v4l2
- * Eliminate #IF for database items
- * Move database functions out of here.
- * Move stream stuff to webu_stream
- * Use (void) alternative for ATTRIBUTE_UNUSED
- */
-
 const char *eventList[] = {
     "NULL",
     "EVENT_FILECREATE",
