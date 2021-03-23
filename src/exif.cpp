@@ -345,7 +345,7 @@ unsigned exif_prepare(unsigned char **exif, const struct ctx_cam *cam,
     /* assert we didn't underestimate the original buffer size */
     assert(marker_len <= buffer_size);
 
-    free(description);
+    util_free_var(description);
 
     *exif = marker;
     return marker_len;

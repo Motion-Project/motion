@@ -382,11 +382,9 @@ void mmalcam_cleanup(struct ctx_mmalcam *mmalcam)
                 destroy_camera_component(mmalcam);
             }
 
-            if (mmalcam->camera_parameters) {
-                free(mmalcam->camera_parameters);
-            }
+            util_free_var(mmalcam->camera_parameters);
 
-            free(mmalcam);
+            util_free_var(mmalcam);
         }
     #else
         (void)mmalcam;

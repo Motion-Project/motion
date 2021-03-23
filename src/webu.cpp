@@ -96,32 +96,22 @@ static void webu_context_init(struct ctx_motapp *motapp, struct webui_ctx *webui
     return;
 }
 
-/* Free a char variable and set to null */
-static void webu_free_var(char *parm)
-{
-    if (parm != NULL) {
-        free(parm);
-    }
-    parm = NULL;
-}
-
 /* Free the variables in the webui context */
 static void webu_context_free(struct webui_ctx *webui)
 {
     int indx;
 
-    webu_free_var(webui->auth_user);
-    webu_free_var(webui->auth_pass);
-    webu_free_var(webui->auth_opaque);
-    webu_free_var(webui->auth_realm);
-    webu_free_var(webui->resp_image);
+    util_free_var(webui->auth_user);
+    util_free_var(webui->auth_pass);
+    util_free_var(webui->auth_opaque);
+    util_free_var(webui->auth_realm);
+    util_free_var(webui->resp_image);
 
     for (indx = 0; indx<webui->post_sz; indx++) {
-        webu_free_var(webui->post_info[indx].key_nm);
-        webu_free_var(webui->post_info[indx].key_val);
+        util_free_var(webui->post_info[indx].key_nm);
+        util_free_var(webui->post_info[indx].key_val);
     }
-    free(webui->post_info);
-    webui->post_info = NULL;
+    util_free_var(webui->post_info);
 
     delete webui;
 
@@ -365,14 +355,10 @@ static mhdrslt webu_mhd_digest(struct webui_ctx *webui)
     if (mystrne(user, webui->auth_user)) {
         MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
             ,_("Failed authentication from %s"), webui->clientip.c_str());
-        if (user != NULL) {
-            free(user);
-        }
+        util_free_var(user);
         return webu_mhd_digest_fail(webui, MHD_NO);
     }
-    if (user != NULL) {
-        free(user);
-    }
+    util_free_var(user);
 
     /* Check the password as well*/
     retcd = MHD_digest_auth_check(webui->connection, webui->auth_realm
@@ -432,21 +418,21 @@ static mhdrslt webu_mhd_basic(struct webui_ctx *webui)
 
     user = MHD_basic_auth_get_username_password (webui->connection, &pass);
     if ((user == NULL) || (pass == NULL)) {
-        webu_free_var(user);
-        webu_free_var(pass);
+        util_free_var(user);
+        util_free_var(pass);
         return webu_mhd_basic_fail(webui);
     }
 
     if ((mystrne(user, webui->auth_user)) || (mystrne(pass, webui->auth_pass))) {
         MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
             ,_("Failed authentication from %s"),webui->clientip.c_str());
-        webu_free_var(user);
-        webu_free_var(pass);
+        util_free_var(user);
+        util_free_var(pass);
         return webu_mhd_basic_fail(webui);
     }
 
-    webu_free_var(user);
-    webu_free_var(pass);
+    util_free_var(user);
+    util_free_var(pass);
 
     webui->authenticated = true;
 
@@ -460,8 +446,8 @@ static void webu_mhd_auth_parse(struct webui_ctx *webui)
     int auth_len;
     char *col_pos;
 
-    webu_free_var(webui->auth_user);
-    webu_free_var(webui->auth_pass);
+    util_free_var(webui->auth_user);
+    util_free_var(webui->auth_pass);
 
     auth_len = webui->motapp->cam_list[0]->conf->webcontrol_authentication.length();
     col_pos =(char*) strstr(webui->motapp->cam_list[0]->conf->webcontrol_authentication.c_str() ,":");

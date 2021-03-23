@@ -82,10 +82,7 @@ void dbse_global_deinit(struct ctx_motapp *motapp)
 
     indx = 0;
     while (motapp->cam_list[indx] != NULL) {
-        if (motapp->cam_list[indx]->dbse != NULL) {
-            free(motapp->cam_list[indx]->dbse);
-        }
-        motapp->cam_list[indx]->dbse = NULL;
+        util_free_var(motapp->cam_list[indx]->dbse);
         indx++;
     }
 

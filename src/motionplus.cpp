@@ -681,11 +681,7 @@ static void motion_cam_delete(struct ctx_motapp *motapp)
         return;
     }
 
-    /* Free database context */
-    if (motapp->cam_list[motapp->cam_delete]->dbse != NULL) {
-        free(motapp->cam_list[motapp->cam_delete]->dbse);
-    }
-    motapp->cam_list[motapp->cam_delete]->dbse = NULL;
+    util_free_var(motapp->cam_list[motapp->cam_delete]->dbse);
 
     /* Delete the config context */
     delete motapp->cam_list[motapp->cam_delete]->conf;
@@ -708,7 +704,7 @@ static void motion_cam_delete(struct ctx_motapp *motapp)
 
     /* Swap out the old list with the new */
     pthread_mutex_lock(&motapp->mutex_camlst);
-        free(motapp->cam_list);
+        util_free_var(motapp->cam_list);
         motapp->cam_list = tmp;
     pthread_mutex_unlock(&motapp->mutex_camlst);
 

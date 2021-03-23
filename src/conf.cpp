@@ -4327,8 +4327,7 @@ void conf_deinit(struct ctx_motapp *motapp)
         indx++;
     }
 
-    free(motapp->cam_list);
-    motapp->cam_list = NULL;
+    util_free_var(motapp->cam_list);
 
 }
 

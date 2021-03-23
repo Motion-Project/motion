@@ -554,7 +554,7 @@ static int v4l2_set_palette(ctx_v4l2cam *v4l2cam)
     if ((indx_palette >= 0) && (indx_palette <= V4L2_PALETTE_COUNT_MAX)) {
         retcd = v4l2_set_pixfmt(v4l2cam, palette_array[indx_palette].v4l2id);
         if (retcd >= 0) {
-            free(palette_array);
+            util_free_var(palette_array);
             return 0;
         }
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
@@ -598,7 +598,7 @@ static int v4l2_set_palette(ctx_v4l2cam *v4l2cam)
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 ,_("Selected palette %s")
                 ,palette_array[indx_palette].fourcc);
-            free(palette_array);
+            util_free_var(palette_array);
             return 0;
         }
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
@@ -609,7 +609,7 @@ static int v4l2_set_palette(ctx_v4l2cam *v4l2cam)
     MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
         ,_("Unable to find a compatible palette format."));
 
-    free(palette_array);
+    util_free_var(palette_array);
 
     return -1;
 
@@ -668,8 +668,7 @@ static int v4l2_set_mmap(ctx_v4l2cam *v4l2cam)
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
                 ,_("Error querying buffer %i\nVIDIOC_QUERYBUF: ")
                 ,buffer_index);
-            free(v4l2cam->buffers);
-            v4l2cam->buffers = NULL;
+            util_free_var(v4l2cam->buffers);
             return -1;
         }
 
@@ -680,8 +679,7 @@ static int v4l2_set_mmap(ctx_v4l2cam *v4l2cam)
         if (v4l2cam->buffers[buffer_index].ptr == MAP_FAILED) {
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
                 ,_("Error mapping buffer %i mmap"), buffer_index);
-            free(v4l2cam->buffers);
-            v4l2cam->buffers = NULL;
+            util_free_var(v4l2cam->buffers);
             return -1;
         }
 
@@ -1085,7 +1083,7 @@ static void v4l2_log_formats(ctx_v4l2cam *v4l2cam)
             dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         }
 
-        free(palette_array);
+        util_free_var(palette_array);
 
         return;
 }
@@ -1147,28 +1145,23 @@ void v4l2_cleanup(ctx_cam *cam)
             for (indx = 0; indx < (int)cam->v4l2cam->req.count; indx++){
                 munmap(cam->v4l2cam->buffers[indx].ptr, cam->v4l2cam->buffers[indx].size);
             }
-            free(cam->v4l2cam->buffers);
-            cam->v4l2cam->buffers = NULL;
+            util_free_var(cam->v4l2cam->buffers);
         }
 
         if (cam->v4l2cam->devctrl_count != 0) {
             for (indx = 0; indx < cam->v4l2cam->devctrl_count; indx++){
-                free(cam->v4l2cam->devctrl_array[indx].ctrl_iddesc);
-                free(cam->v4l2cam->devctrl_array[indx].ctrl_name);
-                cam->v4l2cam->devctrl_array[indx].ctrl_iddesc = NULL;
-                cam->v4l2cam->devctrl_array[indx].ctrl_name = NULL;
+                util_free_var(cam->v4l2cam->devctrl_array[indx].ctrl_iddesc);
+                util_free_var(cam->v4l2cam->devctrl_array[indx].ctrl_name);
             }
-            free(cam->v4l2cam->devctrl_array);
-            cam->v4l2cam->devctrl_array = NULL;
+            util_free_var(cam->v4l2cam->devctrl_array);
         }
         cam->v4l2cam->devctrl_count=0;
 
         util_parms_free(cam->v4l2cam->params);
 
-        free(cam->v4l2cam->params);
+        util_free_var(cam->v4l2cam->params);
 
-        free(cam->v4l2cam);
-        cam->v4l2cam = NULL;
+        util_free_var(cam->v4l2cam);
         cam->running_cam = FALSE;
     #else
         (void)cam;
