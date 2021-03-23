@@ -920,12 +920,8 @@ static int movie_flush_codec(struct ctx_movie *movie)
         }
         return 0;
     #else
-        /* Dummy to kill warnings.  No draining in older ffmpeg versions */
-        if (movie) {
-            return 0;
-        } else{
-            return 0;
-        }
+        (void)movie;
+        return 0;
     #endif
 
 }
