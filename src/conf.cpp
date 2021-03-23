@@ -2097,7 +2097,7 @@ static void conf_edit_picture_output(struct ctx_cam *cam, std::string &parm, enu
     if (pact == PARM_ACT_DFLT) {
         cam->conf->picture_output = "off";
     } else if (pact == PARM_ACT_SET) {
-        if ((parm == "on") || (parm == "off") ||
+        if ((parm == "on") || (parm == "off") || (parm == "center") ||
             (parm == "first") || (parm == "best"))  {
             cam->conf->picture_output = parm;
         } else if (parm == "") {
@@ -2109,7 +2109,7 @@ static void conf_edit_picture_output(struct ctx_cam *cam, std::string &parm, enu
         parm = cam->conf->picture_output;
     } else if (pact == PARM_ACT_LIST) {
         parm = "[";
-        parm = parm +  "\"on\",\"off\",\"first\",\"best\"";
+        parm = parm +  "\"on\",\"off\",\"first\",\"best\",\"center\" ";
         parm = parm + "]";
     }
     return;
