@@ -49,6 +49,10 @@ static void webu_stream_mjpeg_delay(struct webui_ctx *webui)
     struct timespec time_curr;
     long   stream_delay;
 
+    if (webui->cam->motapp->webcontrol_finish) {
+        return;
+    }
+
     clock_gettime(CLOCK_REALTIME, &time_curr);
 
     /* The stream rate MUST be less than 1000000000 otherwise undefined behaviour
@@ -81,6 +85,10 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui)
     char resp_head[80];
     int  header_len;
     struct ctx_stream_data *local_stream;
+
+    if (webui->cam->motapp->webcontrol_finish) {
+        return;
+    }
 
     memset(webui->resp_image, '\0', webui->resp_size);
 

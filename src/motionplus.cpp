@@ -62,10 +62,12 @@ static void motion_signal_process(struct ctx_motapp *motapp)
         motapp->restart_all = true;
         /*FALLTHROUGH*/
     case MOTION_SIGNAL_SIGTERM:     /* Quit application */
+
+        motapp->webcontrol_finish = true;
+
         if (motapp->cam_list != NULL) {
             indx = 0;
             while (motapp->cam_list[indx]) {
-                motapp->webcontrol_finish = true;
                 motapp->cam_list[indx]->event_stop = true;
                 motapp->cam_list[indx]->finish_cam = true;
                 motapp->cam_list[indx]->restart_cam = false;
