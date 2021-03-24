@@ -46,34 +46,34 @@ enum USER_CODEC {
 
 
 struct ctx_movie {
-    AVFormatContext *oc;
-    AVStream *strm_video;
-    AVStream *strm_audio;
-    AVCodecContext *ctx_codec;
-    AVCodec *codec;
-    AVPacket pkt;
-    AVFrame *picture;       /* contains default image pointers */
-    AVDictionary *opts;
-    struct ctx_netcam *netcam_data;
-    int width;
-    int height;
+    AVFormatContext     *oc;
+    AVStream            *strm_video;
+    AVStream            *strm_audio;
+    AVCodecContext      *ctx_codec;
+    AVCodec             *codec;
+    AVPacket            pkt;
+    AVFrame             *picture;       /* contains default image pointers */
+    AVDictionary        *opts;
+    struct ctx_netcam   *netcam_data;
+    int                 width;
+    int                 height;
     enum TIMELAPSE_TYPE tlapse;
-    int fps;
-    int bps;
-    char filename[PATH_MAX];
-    int quality;
-    const char *codec_name;
-    int64_t last_pts;
-    int64_t base_pts;
-    int test_mode;
-    int gop_cnt;
-    struct timespec start_time;
-    int            high_resolution;
-    int            motion_images;
-    int            passthrough;
+    int                 fps;
+    int                 bps;
+    char                filename[PATH_MAX];
+    int                 quality;
+    const char          *codec_name;
+    int64_t             last_pts;
+    int64_t             base_pts;
+    int                 test_mode;
+    int                 gop_cnt;
+    struct timespec     start_time;
+    int                 high_resolution;
+    int                 motion_images;
+    int                 passthrough;
     enum USER_CODEC     preferred_codec;
-    char *nal_info;
-    int  nal_info_len;
+    char                *nal_info;
+    int                 nal_info_len;
 };
 
 
