@@ -110,7 +110,8 @@ static void webu_json_config_item(struct webui_ctx *webui, int indx_cam, int ind
 
 static void webu_json_config_parms(struct webui_ctx *webui, int indx_cam)
 {
-    int indx_parm, first;
+    int indx_parm;
+    bool first;
     std::string response;
 
     indx_parm = 0;
@@ -146,7 +147,8 @@ static void webu_json_config_parms(struct webui_ctx *webui, int indx_cam)
 
 static void webu_json_config_cam_parms(struct webui_ctx *webui)
 {
-    int indx_cam, first;
+    int indx_cam;
+    bool first;
 
     indx_cam = 0;
     first = true;

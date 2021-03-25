@@ -58,12 +58,12 @@
         std::string     locate_motion_style;
         std::string     text_left;
         std::string     text_right;
-        int             text_changes;
+        bool            text_changes;
         int             text_scale;
         std::string     text_event;
 
         /* Motion detection configuration parameters */
-        int             emulate_motion;
+        bool            emulate_motion;
         int             primary_method;
         int             threshold;
         int             threshold_maximum;
@@ -71,12 +71,12 @@
         int             threshold_sdevy;
         int             threshold_sdevxy;
         int             threshold_ratio;
-        int             threshold_tune;
+        bool            threshold_tune;
         int             secondary_interval;
         int             secondary_method;
         std::string     secondary_params;
         int             noise_level;
-        int             noise_tune;
+        bool            noise_tune;
         std::string     despeckle_filter;
         std::string     area_detect;
         std::string     mask_file;
@@ -115,15 +115,15 @@
         std::string     snapshot_filename;
 
         /* Movie output configuration parameters */
-        int             movie_output;
-        int             movie_output_motion;
+        bool            movie_output;
+        bool            movie_output_motion;
         int             movie_max_time;
         int             movie_bps;
         int             movie_quality;
         std::string     movie_codec;
-        int             movie_passthrough;
+        bool            movie_passthrough;
         std::string     movie_filename;
-        int             movie_extpipe_use;
+        bool            movie_extpipe_use;
         std::string     movie_extpipe;
 
         /* Timelapse movie configuration parameters */
@@ -139,13 +139,13 @@
 
         /* Webcontrol configuration parameters */
         int             webcontrol_port;
-        int             webcontrol_ipv6;
-        int             webcontrol_localhost;
+        bool            webcontrol_ipv6;
+        bool            webcontrol_localhost;
         int             webcontrol_parms;
         int             webcontrol_interface;
         int             webcontrol_auth_method;
         std::string     webcontrol_authentication;
-        int             webcontrol_tls;
+        bool            webcontrol_tls;
         std::string     webcontrol_cert;
         std::string     webcontrol_key;
         std::string     webcontrol_cors_header;
@@ -153,12 +153,12 @@
 
         /* Live stream configuration parameters */
         int             stream_preview_scale;
-        int             stream_preview_newline;
+        bool            stream_preview_newline;
         int             stream_preview_method;
-        int             stream_preview_ptz;
+        bool            stream_preview_ptz;
         int             stream_quality;
-        int             stream_grey;
-        int             stream_motion;
+        bool            stream_grey;
+        bool            stream_motion;
         int             stream_maxrate;
 
         /* Database and SQL configuration parameters */
@@ -170,15 +170,15 @@
         std::string     database_password;
         int             database_busy_timeout;
 
-        int             sql_log_picture;
-        int             sql_log_snapshot;
-        int             sql_log_movie;
-        int             sql_log_timelapse;
+        bool            sql_log_picture;
+        bool            sql_log_snapshot;
+        bool            sql_log_movie;
+        bool            sql_log_timelapse;
         std::string     sql_query_start;
         std::string     sql_query_stop;
         std::string     sql_query;
 
-        int             ptz_auto_track;         /* Bool to enable auto tracking */
+        bool            ptz_auto_track;         /* Bool to enable auto tracking */
         int             ptz_wait;               /* Frames to wait after a PTZ move */
         std::string     ptz_move_track;         /* Auto tracking command */
         std::string     ptz_pan_left;           /* Pan left command */

@@ -43,7 +43,7 @@ struct ctx_v4l2cam_ctrl {
     int             ctrl_newval;     /* The new value to set for the control */
     unsigned int    ctrl_id;         /* The ID number for the control as provided by the device*/
     unsigned int    ctrl_type;       /* The type of control as reported by the device*/
-    int             ctrl_menuitem;   /* bool for whether item is a menu item description */
+    bool            ctrl_menuitem;   /* bool for whether item is a menu item description */
 };
 
 struct ctx_v4l2cam {
@@ -64,7 +64,7 @@ struct ctx_v4l2cam {
     struct ctx_params       *params;               /*User parameters for the camera */
     video_buff              *buffers;
     int                     pframe;
-    volatile unsigned int   *finish;                /* End the thread */
+    volatile bool           finish;                /* End the thread */
     #ifdef HAVE_V4L2
         struct v4l2_capability cap;
         struct v4l2_format src_fmt;

@@ -536,7 +536,7 @@ void mythreadname_get(char *threadname)
     #endif
 }
 
-int mycheck_passthrough(struct ctx_cam *cam)
+bool mycheck_passthrough(struct ctx_cam *cam)
 {
     #if (MYFFVER >= 57041)
         if (cam->movie_passthrough) {
@@ -549,7 +549,7 @@ int mycheck_passthrough(struct ctx_cam *cam)
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("FFMPEG version too old. Disabling pass-through processing."));
         }
-        return 0;
+        return false;
     #endif
 
 }
@@ -599,20 +599,20 @@ void mytranslate_init(void)
 
 char* mytranslate_text(const char *msgid, int setnls)
 {
-    static int nls_enabled = TRUE;
+    static bool nls_enabled = true;
 
     if (setnls == 0) {
         if (nls_enabled) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Disabling native language support"));
         }
-        nls_enabled = FALSE;
+        nls_enabled = false;
         return NULL;
 
     } else if (setnls == 1) {
         if (!nls_enabled) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Enabling native language support"));
         }
-        nls_enabled = TRUE;
+        nls_enabled = true;
         return NULL;
 
     } else {
@@ -1101,7 +1101,7 @@ void util_parms_parse(struct ctx_params *params, std::string confline)
 
     std::string parmline;
 
-    if ((params->update_params == FALSE) ||
+    if ((params->update_params == false) ||
         (confline == "")) {
         return;
     }
@@ -1118,7 +1118,7 @@ void util_parms_parse(struct ctx_params *params, std::string confline)
 
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Finished parsing parameters: %s"), confline.c_str());
 
-    params->update_params = FALSE;
+    params->update_params = false;
 
     return;
 
@@ -1126,15 +1126,16 @@ void util_parms_parse(struct ctx_params *params, std::string confline)
 
 void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl)
 {
-    int indx, dflt;
+    int indx;
+    bool dflt;
 
-    dflt = TRUE;
+    dflt = true;
     for (indx = 0; indx < params->params_count; indx++) {
         if (mystreq(params->params_array[indx].param_name, parm_nm.c_str()) ) {
-            dflt = FALSE;
+            dflt = false;
         }
     }
-    if (dflt == TRUE) {
+    if (dflt == true) {
         util_parms_add(params, parm_nm.c_str(), parm_vl.c_str());
     }
 

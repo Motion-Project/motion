@@ -118,8 +118,6 @@ struct ctx_v4l2cam;
 #define UPDATE_REF_FRAME  1
 #define RESET_REF_FRAME   2
 
-#define TRUE              1
-#define FALSE             0
 #define AVGCNT            30
 
 /*
@@ -175,7 +173,7 @@ struct ctx_params_item {
 struct ctx_params {
     struct ctx_params_item *params_array;     /*Array of the controls the user specified*/
     int params_count;                         /*Count of the controls the user specified*/
-    int update_params;                        /*Bool for whether to update the parameters on the device*/
+    bool update_params;                       /*Bool for whether to update the parameters on the device*/
 };
 
 struct ctx_coord {
@@ -278,7 +276,7 @@ struct ctx_cam {
 
     struct ctx_motapp       *motapp;
     char                    conf_filename[PATH_MAX];
-    int                     from_conf_dir;
+    bool                    from_conf_dir;
     int                     threadnr;
     pthread_t               thread_id;
 
@@ -299,7 +297,7 @@ struct ctx_cam {
 
     FILE                    *extpipe;
     int                     extpipe_open;
-    int                     algsec_inuse;        /*Bool for whether we have secondary detection*/
+    bool                    algsec_inuse;        /*Bool for whether we have secondary detection*/
     int                     track_posx;
     int                     track_posy;
     int                     camera_id;
@@ -313,12 +311,12 @@ struct ctx_cam {
     int                     diffs_last[THRESHOLD_TUNE_LENGTH];
     int                     smartmask_speed;
 
-    volatile unsigned int   snapshot;    /* Make a snapshot */
-    volatile unsigned int   event_stop;  /* Boolean for whether to stop a event */
-    volatile unsigned int   event_user;  /* Boolean for whether to user triggered an event */
-    volatile unsigned int   finish_cam;      /* End the thread */
-    volatile unsigned int   restart_cam;     /* Restart the thread when it ends */
-    volatile unsigned int   running_cam;
+    volatile bool           snapshot;    /* Make a snapshot */
+    volatile bool           event_stop;  /* Boolean for whether to stop a event */
+    volatile bool           event_user;  /* Boolean for whether to user triggered an event */
+    volatile bool           finish_cam;      /* End the thread */
+    volatile bool           restart_cam;     /* Restart the thread when it ends */
+    bool                    running_cam;
     volatile int            watchdog;
 
     int                     event_nr;
@@ -330,7 +328,7 @@ struct ctx_cam {
     int                     postcap;                             /* downcounter, frames left to to send post event */
     int                     shots;
     int                     ref_lag;
-    unsigned int            detecting_motion;
+    bool                    detecting_motion;
     long                    frame_wait[AVGCNT];   /* Last wait times through motion loop*/
 
     struct timespec         frame_curr_ts;
@@ -342,7 +340,7 @@ struct ctx_cam {
     unsigned int            lastrate;
     unsigned int            startup_frames;
     unsigned int            frame_skip;
-    unsigned int            pause;
+    volatile bool           pause;
     int                     missing_frame_counter;               /* counts failed attempts to fetch picture frame from camera */
     unsigned int            lost_connection;
 
@@ -357,7 +355,7 @@ struct ctx_cam {
     char                    extpipefilename[PATH_MAX];
     char                    extpipecmdline[PATH_MAX];
     int                     movie_last_shot;
-    int                     movie_passthrough;
+    bool                    movie_passthrough;
     char                    timelapsefilename[PATH_MAX];
     char                    motionfilename[PATH_MAX];
 
@@ -374,7 +372,7 @@ struct ctx_cam {
     unsigned int            passflag;  //only purpose is to flag first frame vs all others.....
 
     pthread_mutex_t         parms_lock;
-    int                     parms_changed;      /*bool indicating if the parms have changed */
+    bool                    parms_changed;      /*bool indicating if the parms have changed */
 
 };
 
@@ -385,31 +383,31 @@ struct ctx_motapp {
     pthread_mutex_t     global_lock;
 
     volatile int        threads_running;
-    volatile int        finish_all;
-    volatile int        restart_all;
-    volatile int        cam_add;        /* Bool for whether to add a camera to the list */
+    volatile bool       finish_all;
+    volatile bool       restart_all;
+    volatile bool       cam_add;        /* Bool for whether to add a camera to the list */
     volatile int        cam_delete;     /* 0 for no action, other numbers specify camera to remove */
 
     int                 argc;
     char                **argv;
 
-    int                 daemon;
+    bool                daemon;
     std::string         conf_filename;
     std::string         pid_file;
     std::string         log_file;
     std::string         log_type_str;
     int                 log_level;
     int                 log_type;
-    int                 setup_mode;
-    int                 pause;
-    int                 native_language;
+    bool                setup_mode;
+    bool                pause;
+    bool                native_language;
 
     volatile int        webcontrol_running;
     volatile int        webcontrol_finish;
     struct MHD_Daemon   *webcontrol_daemon;
     char                webcontrol_digest_rand[12];
 
-    int                 parms_changed;      /*bool indicating if the parms have changed */
+    bool                parms_changed;      /*bool indicating if the parms have changed */
     pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */
     pthread_mutex_t     mutex_camlst;       /* Lock the list of cams while adding/removing */
     pthread_mutex_t     mutex_post;         /* mutex to allow for processing of post actions*/

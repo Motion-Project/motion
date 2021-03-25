@@ -868,18 +868,18 @@ struct ctx_parm_depr config_parms_depr[] = {
     { "","","",""}
 };
 
-static void conf_edit_set_bool(int &parm_dest, std::string &parm_in)
+static void conf_edit_set_bool(bool &parm_dest, std::string &parm_in)
 {
     if ((parm_in == "1") || (parm_in == "yes") || (parm_in == "on") || (parm_in == "true") ) {
-        parm_dest = TRUE;
+        parm_dest = true;
     } else {
-        parm_dest = FALSE;
+        parm_dest = false;
     }
 }
 
-static void conf_edit_get_bool(std::string &parm_dest, int &parm_in)
+static void conf_edit_get_bool(std::string &parm_dest, bool &parm_in)
 {
-    if (parm_in == TRUE) {
+    if (parm_in == true) {
         parm_dest = "on";
     } else {
         parm_dest = "off";
@@ -889,7 +889,7 @@ static void conf_edit_get_bool(std::string &parm_dest, int &parm_in)
 static void conf_edit_daemon(struct ctx_motapp *motapp, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        motapp->daemon = FALSE;
+        motapp->daemon = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(motapp->daemon, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -902,7 +902,7 @@ static void conf_edit_daemon(struct ctx_motapp *motapp, std::string &parm, enum 
 static void conf_edit_setup_mode(struct ctx_motapp *motapp, std::string &parm, int pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        motapp->setup_mode = FALSE;
+        motapp->setup_mode = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(motapp->setup_mode, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -1005,7 +1005,7 @@ static void conf_edit_log_type(struct ctx_motapp *motapp, std::string &parm, enu
 static void conf_edit_native_language(struct ctx_motapp *motapp, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        motapp->native_language = TRUE;
+        motapp->native_language = true;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(motapp->native_language, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -1464,7 +1464,7 @@ static void conf_edit_text_right(struct ctx_cam *cam, std::string &parm, enum PA
 static void conf_edit_text_changes(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->text_changes = FALSE;
+        cam->conf->text_changes = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->text_changes, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -1514,7 +1514,7 @@ static void conf_edit_text_event(struct ctx_cam *cam, std::string &parm, enum PA
 static void conf_edit_emulate_motion(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->emulate_motion = FALSE;
+        cam->conf->emulate_motion = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->emulate_motion, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -1660,7 +1660,7 @@ static void conf_edit_threshold_ratio(struct ctx_cam *cam, std::string &parm, en
 static void conf_edit_threshold_tune(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->threshold_tune = FALSE;
+        cam->conf->threshold_tune = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->threshold_tune, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -1743,7 +1743,7 @@ static void conf_edit_noise_level(struct ctx_cam *cam, std::string &parm, enum P
 static void conf_edit_noise_tune(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->noise_tune = TRUE;
+        cam->conf->noise_tune = true;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->noise_tune, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -2242,7 +2242,7 @@ static void conf_edit_snapshot_filename(struct ctx_cam *cam, std::string &parm, 
 static void conf_edit_movie_output(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->movie_output = TRUE;
+        cam->conf->movie_output = true;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->movie_output, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -2255,7 +2255,7 @@ static void conf_edit_movie_output(struct ctx_cam *cam, std::string &parm, enum 
 static void conf_edit_movie_output_motion(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->movie_output_motion = FALSE;
+        cam->conf->movie_output_motion = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->movie_output_motion, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -2338,7 +2338,7 @@ static void conf_edit_movie_codec(struct ctx_cam *cam, std::string &parm, enum P
 static void conf_edit_movie_passthrough(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->movie_passthrough = FALSE;
+        cam->conf->movie_passthrough = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->movie_passthrough, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -2364,7 +2364,7 @@ static void conf_edit_movie_filename(struct ctx_cam *cam, std::string &parm, enu
 static void conf_edit_movie_extpipe_use(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->movie_extpipe_use = FALSE;
+        cam->conf->movie_extpipe_use = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->movie_extpipe_use, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -2535,7 +2535,7 @@ static void conf_edit_webcontrol_port(struct ctx_cam *cam, std::string &parm, en
 static void conf_edit_webcontrol_ipv6(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->webcontrol_ipv6 = FALSE;
+        cam->conf->webcontrol_ipv6 = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->webcontrol_ipv6, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -2548,7 +2548,7 @@ static void conf_edit_webcontrol_ipv6(struct ctx_cam *cam, std::string &parm, en
 static void conf_edit_webcontrol_localhost(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->webcontrol_localhost = TRUE;
+        cam->conf->webcontrol_localhost = true;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->webcontrol_localhost, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -2643,7 +2643,7 @@ static void conf_edit_webcontrol_authentication(struct ctx_cam *cam, std::string
 static void conf_edit_webcontrol_tls(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->webcontrol_tls = FALSE;
+        cam->conf->webcontrol_tls = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->webcontrol_tls, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -2740,7 +2740,7 @@ static void conf_edit_stream_preview_scale(struct ctx_cam *cam, std::string &par
 static void conf_edit_stream_preview_newline(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->stream_preview_newline = FALSE;
+        cam->conf->stream_preview_newline = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->stream_preview_newline, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -2808,7 +2808,7 @@ static void conf_edit_stream_quality(struct ctx_cam *cam, std::string &parm, enu
 static void conf_edit_stream_grey(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->stream_grey = FALSE;
+        cam->conf->stream_grey = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->stream_grey, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -2821,7 +2821,7 @@ static void conf_edit_stream_grey(struct ctx_cam *cam, std::string &parm, enum P
 static void conf_edit_stream_motion(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->stream_motion = FALSE;
+        cam->conf->stream_motion = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->stream_motion, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -2965,7 +2965,7 @@ static void conf_edit_database_busy_timeout(struct ctx_cam *cam, std::string &pa
 static void conf_edit_sql_log_picture(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->sql_log_picture = FALSE;
+        cam->conf->sql_log_picture = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->sql_log_picture, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -2978,7 +2978,7 @@ static void conf_edit_sql_log_picture(struct ctx_cam *cam, std::string &parm, en
 static void conf_edit_sql_log_snapshot(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->sql_log_snapshot = FALSE;
+        cam->conf->sql_log_snapshot = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->sql_log_snapshot, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -2991,7 +2991,7 @@ static void conf_edit_sql_log_snapshot(struct ctx_cam *cam, std::string &parm, e
 static void conf_edit_sql_log_movie(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->sql_log_movie = FALSE;
+        cam->conf->sql_log_movie = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->sql_log_movie, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -3004,7 +3004,7 @@ static void conf_edit_sql_log_movie(struct ctx_cam *cam, std::string &parm, enum
 static void conf_edit_sql_log_timelapse(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->sql_log_timelapse = FALSE;
+        cam->conf->sql_log_timelapse = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->sql_log_timelapse, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -3056,7 +3056,7 @@ static void conf_edit_sql_query(struct ctx_cam *cam, std::string &parm, enum PAR
 static void conf_edit_ptz_auto_track(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->ptz_auto_track = FALSE;
+        cam->conf->ptz_auto_track = false;
     } else if (pact == PARM_ACT_SET) {
         conf_edit_set_bool(cam->conf->ptz_auto_track, parm);
     } else if (pact == PARM_ACT_GET) {
@@ -3813,7 +3813,7 @@ static void conf_cmdline(struct ctx_motapp *motapp)
             conf_edit_set(motapp, true, 0, "log_file", optarg);
             break;
         case 'm':
-            motapp->pause = TRUE;
+            motapp->pause = true;
             break;
         case 'h':
         case '?':
@@ -3836,7 +3836,7 @@ static void conf_camera_filenm(struct ctx_motapp *motapp)
     src_nm= src_nm.substr(0, src_nm.find_last_of("/")+1 );
 
     indx = 1;
-    while (TRUE) {
+    while (true) {
         fullnm = src_nm + "camera" + std::to_string(indx) + ".conf";
         /*
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Trying %s"), fullnm.c_str());
@@ -3974,7 +3974,7 @@ static void conf_parm_camera_dir(struct ctx_motapp *motapp, std::string str)
                  */
                 i = 0;
                 while (motapp->cam_list[++i]);
-                motapp->cam_list[i-1]->from_conf_dir = TRUE;
+                motapp->cam_list[i-1]->from_conf_dir = true;
             }
         }
         closedir(dp);
@@ -4049,9 +4049,9 @@ void conf_process(struct ctx_motapp *motapp, bool ismotapp,  FILE *fp, int threa
                 parm_val= std::string(arg1);
             }
 
-            if (mystreq(cmd,"camera_dir") && (threadnbr == 0) && (ismotapp == FALSE) ) {
+            if (mystreq(cmd,"camera_dir") && (threadnbr == 0) && (ismotapp == false) ) {
                 conf_parm_camera_dir(motapp, parm_val);
-            } else if (mystreq(cmd,"camera") && (threadnbr == 0) && (ismotapp == FALSE)) {
+            } else if (mystreq(cmd,"camera") && (threadnbr == 0) && (ismotapp == false)) {
                 conf_parm_camera(motapp, parm_val);
             } else if (mystrne(cmd,"camera") && mystrne(cmd,"camera_dir")) {
                 conf_edit_set(motapp, ismotapp, threadnbr, parm_nm, parm_val);
@@ -4065,7 +4065,8 @@ void conf_process(struct ctx_motapp *motapp, bool ismotapp,  FILE *fp, int threa
 /**  Write the configuration(s) to the log */
 void conf_parms_log(struct ctx_cam **cam_list)
 {
-    int i, threadnbr, diff_val;
+    int i, threadnbr;
+    bool diff_val;
     std::string parm_val, parm_main;
 
     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
@@ -4076,14 +4077,14 @@ void conf_parms_log(struct ctx_cam **cam_list)
             ,_("Camera %d - Config file: %s"), threadnbr, cam_list[threadnbr]->conf_filename);
         i = 0;
         while (config_parms[i].parm_name != "") {
-            diff_val = TRUE;
+            diff_val = true;
             conf_edit_get(cam_list[threadnbr], config_parms[i].parm_name
                 , parm_val ,config_parms[i].parm_cat);
             if (threadnbr > 0) {
                 conf_edit_get(cam_list[0], config_parms[i].parm_name
                     , parm_main ,config_parms[i].parm_cat);
                 if (parm_val == parm_main) {
-                    diff_val = FALSE;
+                    diff_val = false;
                 }
             }
             if (diff_val) {
@@ -4167,7 +4168,7 @@ void conf_parms_write(struct ctx_motapp *motapp)
             }
             if ((config_parms[indx].parm_name == "camera") && (indx_cam == 0)) {
                 fprintf(conffile, "%s\n", config_parms[indx].parm_help.c_str());
-                if (motapp->cam_list[0]->from_conf_dir == FALSE) {
+                if (motapp->cam_list[0]->from_conf_dir == false) {
                     indx2 = 1;
                     while (motapp->cam_list[indx2] != NULL) {
                         if (parm_val.compare(0, 1, " ") == 0) {

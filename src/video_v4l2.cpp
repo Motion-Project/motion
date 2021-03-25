@@ -176,7 +176,7 @@ static void v4l2_ctrls_list(ctx_v4l2cam *v4l2cam)
         v4l2cam->devctrl_array[indx_ctrl].ctrl_default = vid_ctrl.default_value;
         v4l2cam->devctrl_array[indx_ctrl].ctrl_currval = vid_ctrl.default_value;
         v4l2cam->devctrl_array[indx_ctrl].ctrl_newval = vid_ctrl.default_value;
-        v4l2cam->devctrl_array[indx_ctrl].ctrl_menuitem = FALSE;
+        v4l2cam->devctrl_array[indx_ctrl].ctrl_menuitem = false;
 
         v4l2cam->devctrl_array[indx_ctrl].ctrl_name =(char*) malloc(32);
         sprintf(v4l2cam->devctrl_array[indx_ctrl].ctrl_name,"%s",vid_ctrl.name);
@@ -197,7 +197,7 @@ static void v4l2_ctrls_list(ctx_v4l2cam *v4l2cam)
                     indx_ctrl++;
                     v4l2cam->devctrl_array[indx_ctrl].ctrl_id = vid_ctrl.id;
                     v4l2cam->devctrl_array[indx_ctrl].ctrl_type = 0;
-                    v4l2cam->devctrl_array[indx_ctrl].ctrl_menuitem = TRUE;
+                    v4l2cam->devctrl_array[indx_ctrl].ctrl_menuitem = true;
 
                     v4l2cam->devctrl_array[indx_ctrl].ctrl_name =(char*) malloc(32);
                     sprintf(v4l2cam->devctrl_array[indx_ctrl].ctrl_name,"%s",vid_menu.name);
@@ -261,7 +261,7 @@ static int v4l2_parms_set(ctx_v4l2cam *v4l2cam)
     int indx_dev, indx_user;
 
     if (v4l2cam->devctrl_count == 0) {
-        v4l2cam->params->update_params = FALSE;
+        v4l2cam->params->update_params = false;
         return 0;
     }
 
@@ -891,14 +891,14 @@ static int v4l2_device_init(ctx_cam *cam)
     cam->v4l2cam->devctrl_count = 0;
     cam->v4l2cam->buffer_count= 0;
     cam->v4l2cam->pframe = -1;
-    cam->v4l2cam->finish = &cam->finish_cam;
+    cam->v4l2cam->finish = cam->finish_cam;
     cam->v4l2cam->buffers = NULL;
 
     cam->v4l2cam->params =(struct ctx_params*) mymalloc(sizeof(struct ctx_params));
     memset(cam->v4l2cam->params, 0, sizeof(struct ctx_params));
     cam->v4l2cam->params->params_array = NULL;
     cam->v4l2cam->params->params_count = 0;
-    cam->v4l2cam->params->update_params = TRUE;     /*Set trigger to update the params */
+    cam->v4l2cam->params->update_params = true;     /*Set trigger to update the params */
 
     util_parms_parse(cam->v4l2cam->params, cam->conf->v4l2_params);
 
@@ -935,7 +935,7 @@ static void v4l2_device_select(ctx_cam *cam)
 {
     int retcd;
 
-    if (cam->v4l2cam->params->update_params == TRUE) {
+    if (cam->v4l2cam->params->update_params == true) {
 
         util_parms_parse(cam->v4l2cam->params, cam->conf->v4l2_params);
 
@@ -1193,7 +1193,7 @@ void v4l2_cleanup(ctx_cam *cam)
         }
         cam->v4l2cam = NULL;
 
-        cam->running_cam = FALSE;
+        cam->running_cam = false;
     #else
         (void)cam;
     #endif // HAVE_V4L2

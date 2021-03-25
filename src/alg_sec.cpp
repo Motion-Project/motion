@@ -398,7 +398,7 @@ static void algsec_params_init(ctx_algsec_model &algmdl)
     memset(algmdl.algsec_params, 0, sizeof(struct ctx_params));
     algmdl.algsec_params->params_array = NULL;
     algmdl.algsec_params->params_count = 0;
-    algmdl.algsec_params->update_params = TRUE;     /*Set trigger to update parameters */
+    algmdl.algsec_params->update_params = true;     /*Set trigger to update parameters */
 }
 
 /**Load the parms from the config to algsec struct */
@@ -452,10 +452,10 @@ static int algsec_load_models(ctx_cam *cam)
 
     /* If model fails to load, it sets method to zero*/
     if (cam->algsec->models.method != 0){
-        cam->algsec_inuse = TRUE;
+        cam->algsec_inuse = true;
         return 0;
     } else {
-        cam->algsec_inuse = FALSE;
+        cam->algsec_inuse = false;
         return -1;
     }
 

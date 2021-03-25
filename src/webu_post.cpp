@@ -337,10 +337,10 @@ static void webu_post_config(struct webui_ctx *webui)
                 /* If changing language, do it now */
                 if (config_parms[indx2].parm_name == "native_language") {
                     if (webui->motapp->native_language) {
-                        mytranslate_text("", true);
+                        mytranslate_text("", 1);
                         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Native Language : on"));
                     } else {
-                        mytranslate_text("", false);
+                        mytranslate_text("", 0);
                         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Native Language : off"));
                     }
                 }

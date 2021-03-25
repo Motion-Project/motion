@@ -65,12 +65,12 @@ struct ctx_movie {
     const char          *codec_name;
     int64_t             last_pts;
     int64_t             base_pts;
-    int                 test_mode;
+    bool                test_mode;
     int                 gop_cnt;
     struct timespec     start_time;
-    int                 high_resolution;
-    int                 motion_images;
-    int                 passthrough;
+    bool                high_resolution;
+    bool                motion_images;
+    bool                passthrough;
     enum USER_CODEC     preferred_codec;
     char                *nal_info;
     int                 nal_info_len;

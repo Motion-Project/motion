@@ -367,7 +367,7 @@ void mlp_cam_close(struct ctx_cam *cam)
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling mmalcam_cleanup"));
         mmalcam_cleanup(cam->mmalcam);
         cam->mmalcam = NULL;
-        cam->running_cam = FALSE;
+        cam->running_cam = false;
         return;
     }
 
@@ -628,7 +628,7 @@ static void mlp_init_values(struct ctx_cam *cam)
     if ((cam->camera_type != CAMERA_TYPE_NETCAM) &&
         (cam->movie_passthrough)) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
-        cam->movie_passthrough = FALSE;
+        cam->movie_passthrough = false;
     }
 
 }
@@ -1266,11 +1266,11 @@ static void mlp_actions_emulate(struct ctx_cam *cam)
 
     int indx;
 
-    if ( (cam->detecting_motion == FALSE) && (cam->movie_norm != NULL) ) {
+    if ( (cam->detecting_motion == false) && (cam->movie_norm != NULL) ) {
         movie_reset_start_time(cam->movie_norm, &cam->current_image->imgts);
     }
 
-    cam->detecting_motion = TRUE;
+    cam->detecting_motion = true;
     if (cam->conf->post_capture > 0) {
         cam->postcap = cam->conf->post_capture;
     }
@@ -1305,10 +1305,10 @@ static void mlp_actions_motion(struct ctx_cam *cam)
 
         cam->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
 
-        if ( (cam->detecting_motion == FALSE) && (cam->movie_norm != NULL) ) {
+        if ( (cam->detecting_motion == false) && (cam->movie_norm != NULL) ) {
             movie_reset_start_time(cam->movie_norm, &cam->current_image->imgts);
         }
-        cam->detecting_motion = TRUE;
+        cam->detecting_motion = true;
         cam->postcap = cam->conf->post_capture;
 
         for (indx = 0; indx < cam->imgs.ring_size; indx++) {
@@ -1332,11 +1332,11 @@ static void mlp_actions_event(struct ctx_cam *cam)
     if ((cam->conf->movie_max_time > 0) &&
         (cam->event_nr == cam->prev_event) &&
         ((cam->frame_curr_ts.tv_sec - cam->eventtime) >= cam->conf->movie_max_time)) {
-        cam->event_stop = TRUE;
+        cam->event_stop = true;
     }
     if ((cam->conf->event_gap > 0) &&
         ((cam->frame_curr_ts.tv_sec - cam->lasttime) >= cam->conf->event_gap)) {
-        cam->event_stop = TRUE;
+        cam->event_stop = true;
     }
 
     if (cam->event_stop) {
@@ -1365,8 +1365,8 @@ static void mlp_actions_event(struct ctx_cam *cam)
             cam->event_nr++;
             cam->text_event_string[0] = '\0';
         }
-        cam->event_stop = FALSE;
-        cam->event_user = FALSE;
+        cam->event_stop = false;
+        cam->event_user = false;
     }
 }
 
@@ -1388,9 +1388,9 @@ static void mlp_actions(struct ctx_cam *cam)
     } else {
         cam->current_image->flags |= IMAGE_PRECAP;
         if ((cam->conf->event_gap == 0) && cam->detecting_motion) {
-            cam->event_stop = TRUE;
+            cam->event_stop = true;
         }
-        cam->detecting_motion = FALSE;
+        cam->detecting_motion = false;
     }
 
     if (cam->current_image->flags & IMAGE_SAVE) {
@@ -1651,9 +1651,9 @@ void *motion_loop(void *arg)
 {
     struct ctx_cam *cam =(struct ctx_cam *) arg;
 
-    cam->restart_cam = TRUE;
+    cam->restart_cam = true;
     cam->watchdog = cam->conf->watchdog_tmo;
-    cam->running_cam = TRUE;
+    cam->running_cam = true;
 
     if (mlp_init(cam) == 0) {
         while (!cam->finish_cam || cam->event_stop) {

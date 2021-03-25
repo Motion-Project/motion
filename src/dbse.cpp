@@ -208,7 +208,7 @@ static void dbse_init_mysql(struct ctx_cam *cam)
             return;
         }
         #if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
-            my_bool my_true = TRUE;
+            my_bool my_true = true;
             mysql_options(cam->dbse->database_mysql, MYSQL_OPT_RECONNECT, &my_true);
         #endif
     #else
@@ -247,7 +247,7 @@ static void dbse_init_mariadb(struct ctx_cam *cam)
             return;
         }
         #if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
-            my_bool my_true = TRUE;
+            my_bool my_true = true;
             mysql_options(cam->dbse->database_mariadb, MYSQL_OPT_RECONNECT, &my_true);
         #endif
     #else

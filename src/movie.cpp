@@ -396,7 +396,7 @@ static int movie_set_pts(struct ctx_movie *movie, const struct timespec *ts1)
         } else
             movie->picture->pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},movie->strm_video->time_base) + movie->base_pts;
 
-        if (movie->test_mode == TRUE) {
+        if (movie->test_mode == true) {
             MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
                 ,_("PTS %" PRId64 " Base PTS %" PRId64 " ms interval %" PRId64 " timebase %d-%d")
                 ,movie->picture->pts,movie->base_pts,pts_interval
@@ -405,7 +405,7 @@ static int movie_set_pts(struct ctx_movie *movie, const struct timespec *ts1)
 
         if (movie->picture->pts <= movie->last_pts) {
             //We have a problem with our motion loop timing and sending frames or the rounding into the PTS.
-            if (movie->test_mode == TRUE) {
+            if (movie->test_mode == true) {
                 MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("BAD TIMING!! Frame skipped."));
             }
             return -1;
@@ -997,7 +997,7 @@ static void movie_passthru_reset(struct ctx_movie *movie)
 
     pthread_mutex_lock(&movie->netcam_data->mutex_pktarray);
         for(indx = 0; indx < movie->netcam_data->pktarray_size; indx++) {
-            movie->netcam_data->pktarray[indx].iswritten = FALSE;
+            movie->netcam_data->pktarray[indx].iswritten = false;
         }
     pthread_mutex_unlock(&movie->netcam_data->mutex_pktarray);
 
@@ -1043,7 +1043,7 @@ static void movie_passthru_write(struct ctx_movie *movie, int indx)
     movie->pkt.data = NULL;
     movie->pkt.size = 0;
 
-    movie->netcam_data->pktarray[indx].iswritten = TRUE;
+    movie->netcam_data->pktarray[indx].iswritten = true;
 
     retcd = mycopy_packet(&movie->pkt, &movie->netcam_data->pktarray[indx].packet);
     if (retcd < 0) {
@@ -1127,7 +1127,7 @@ static int movie_passthru_put(struct ctx_movie *movie, struct ctx_image_data *im
             indx = 0;
         }
 
-        while (TRUE){
+        while (true){
             if ((!movie->netcam_data->pktarray[indx].iswritten) &&
                 (movie->netcam_data->pktarray[indx].packet.size > 0) &&
                 (movie->netcam_data->pktarray[indx].idnbr >  idnbr_lastwritten) &&
@@ -1638,12 +1638,12 @@ int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1)
     if (cam->imgs.size_high > 0) {
         cam->movie_norm->width  = cam->imgs.width_high;
         cam->movie_norm->height = cam->imgs.height_high;
-        cam->movie_norm->high_resolution = TRUE;
+        cam->movie_norm->high_resolution = true;
         cam->movie_norm->netcam_data = cam->netcam_high;
     } else {
         cam->movie_norm->width  = cam->imgs.width;
         cam->movie_norm->height = cam->imgs.height;
-        cam->movie_norm->high_resolution = FALSE;
+        cam->movie_norm->high_resolution = true;
         cam->movie_norm->netcam_data = cam->netcam;
     }
     cam->movie_norm->tlapse = TIMELAPSE_NONE;
@@ -1657,9 +1657,9 @@ int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1)
     cam->movie_norm->gop_cnt = 0;
     cam->movie_norm->codec_name = codec;
     if (cam->conf->movie_codec == "test") {
-        cam->movie_norm->test_mode = TRUE;
+        cam->movie_norm->test_mode = true;
     } else {
-        cam->movie_norm->test_mode = FALSE;
+        cam->movie_norm->test_mode = false;
     }
     cam->movie_norm->motion_images = 0;
     cam->movie_norm->passthrough = cam->movie_passthrough;
@@ -1707,13 +1707,13 @@ int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1)
     cam->movie_motion->gop_cnt = 0;
     cam->movie_motion->codec_name = codec;
     if (cam->conf->movie_codec == "test") {
-        cam->movie_motion->test_mode = TRUE;
+        cam->movie_motion->test_mode = true;
     } else {
-        cam->movie_motion->test_mode = FALSE;
+        cam->movie_motion->test_mode = false;
     }
-    cam->movie_motion->motion_images = TRUE;
-    cam->movie_motion->passthrough = FALSE;
-    cam->movie_motion->high_resolution = FALSE;
+    cam->movie_motion->motion_images = true;
+    cam->movie_motion->passthrough = false;
+    cam->movie_motion->high_resolution = false;
     cam->movie_motion->netcam_data = NULL;
 
     retcd = movie_open(cam->movie_motion);
@@ -1742,11 +1742,11 @@ int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1)
     if ((cam->imgs.size_high > 0) && (!cam->movie_passthrough)) {
         cam->movie_timelapse->width  = cam->imgs.width_high;
         cam->movie_timelapse->height = cam->imgs.height_high;
-        cam->movie_timelapse->high_resolution = TRUE;
+        cam->movie_timelapse->high_resolution = true;
     } else {
         cam->movie_timelapse->width  = cam->imgs.width;
         cam->movie_timelapse->height = cam->imgs.height;
-        cam->movie_timelapse->high_resolution = FALSE;
+        cam->movie_timelapse->high_resolution = false;
     }
     cam->movie_timelapse->fps = cam->conf->timelapse_fps;
     cam->movie_timelapse->bps = cam->conf->movie_bps;
@@ -1755,10 +1755,10 @@ int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1)
     cam->movie_timelapse->start_time.tv_nsec = ts1->tv_nsec;
     cam->movie_timelapse->last_pts = -1;
     cam->movie_timelapse->base_pts = 0;
-    cam->movie_timelapse->test_mode = FALSE;
+    cam->movie_timelapse->test_mode = false;
     cam->movie_timelapse->gop_cnt = 0;
-    cam->movie_timelapse->motion_images = FALSE;
-    cam->movie_timelapse->passthrough = FALSE;
+    cam->movie_timelapse->motion_images = false;
+    cam->movie_timelapse->passthrough = false;
     cam->movie_timelapse->netcam_data = NULL;
 
     if (cam->conf->timelapse_codec == "mpg") {

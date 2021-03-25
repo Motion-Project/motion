@@ -82,8 +82,8 @@ extern "C" {
 struct packet_item{
     AVPacket                  packet;
     int64_t                   idnbr;
-    int                       iskey;
-    int                       iswritten;
+    bool                      iskey;
+    bool                      iswritten;
     struct timespec           timestamp_ts;
 };
 
@@ -120,12 +120,12 @@ struct ctx_netcam {
     netcam_buff_ptr           img_recv;         /* The image buffer that is currently being processed */
     netcam_buff_ptr           img_latest;       /* The most recent image buffer that finished processing */
 
-    int                       interrupted;      /* Boolean for whether interrupt has been tripped */
-    int                       finish;           /* Boolean for whether we are finishing the application */
-    int                       high_resolution;  /* Boolean for whether this context is the Norm or High */
-    int                       handler_finished; /* Boolean for whether the handler is running or not */
-    int                       first_image;      /* Boolean for whether we have captured the first image */
-    int                       passthrough;      /* Boolean for whether we are doing pass-through processing */
+    bool                      interrupted;      /* Boolean for whether interrupt has been tripped */
+    bool                      finish;           /* Boolean for whether we are finishing the application */
+    bool                      high_resolution;  /* Boolean for whether this context is the Norm or High */
+    bool                      handler_finished; /* Boolean for whether the handler is running or not */
+    bool                      first_image;      /* Boolean for whether we have captured the first image */
+    bool                      passthrough;      /* Boolean for whether we are doing pass-through processing */
 
     char                     *path;             /* The connection string to use for the camera */
     char                      service[5];       /* String specifying the type of camera http, rtsp, v4l2 */
@@ -158,6 +158,6 @@ struct ctx_netcam {
 
 int netcam_setup(struct ctx_cam *cam);
 int netcam_next(struct ctx_cam *cam, struct ctx_image_data *img_data);
-void netcam_cleanup(struct ctx_cam *cam, int init_retry_flag);
+void netcam_cleanup(struct ctx_cam *cam, bool init_retry_flag);
 
 #endif /* _INCLUDE_NETCAM_H */

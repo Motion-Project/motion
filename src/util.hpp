@@ -105,7 +105,7 @@
 
     void mythreadname_set(const char *abbr, int threadnbr, const char *threadname);
     void mythreadname_get(char *threadname);
-    int mycheck_passthrough(struct ctx_cam *cam);
+    bool mycheck_passthrough(struct ctx_cam *cam);
 
     char* mytranslate_text(const char *msgid, int setnls);
     void mytranslate_init(void);

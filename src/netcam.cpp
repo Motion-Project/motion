@@ -333,7 +333,7 @@ static void netcam_close_context(struct ctx_netcam *netcam)
 
 }
 
-static void netcam_pktarray_resize(struct ctx_cam *cam, int is_highres)
+static void netcam_pktarray_resize(struct ctx_cam *cam, bool is_highres)
 {
     /* This is called from netcam_next and is on the motion loop thread
      * The netcam->mutex is locked around the call to this function.
@@ -977,6 +977,7 @@ static struct ctx_netcam *netcam_new_context(void)
 
 static int netcam_interrupt(void *ctx)
 {
+    /* Must return as an int since this is a callback to a C function */
     struct ctx_netcam *netcam = (struct ctx_netcam *)ctx;
 
     if (netcam->finish) {
@@ -1198,7 +1199,8 @@ static int netcam_resize(struct ctx_netcam *netcam)
 static int netcam_read_image(struct ctx_netcam *netcam)
 {
 
-    int  size_decoded, retcd, haveimage, errcnt;
+    int  size_decoded, retcd, errcnt;
+    bool haveimage;
     char errstr[128];
     netcam_buff *xchg;
 
@@ -2162,7 +2164,7 @@ int netcam_next(struct ctx_cam *cam, struct ctx_image_data *img_data)
     return 0;
 }
 
-void netcam_cleanup(struct ctx_cam *cam, int init_retry_flag)
+void netcam_cleanup(struct ctx_cam *cam, bool init_retry_flag)
 {
 
      /*
