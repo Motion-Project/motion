@@ -652,7 +652,10 @@ static void event_movie_newfile(struct ctx_cam *cam, motion_event evnt
         if (retcd < 0) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error opening ctx_cam for movie output."));
-            util_free_var(cam->movie_norm);
+            if (cam->movie_norm != NULL) {
+                free(cam->movie_norm);
+            }
+            cam->movie_norm  = NULL;
             return;
         }
         event(cam, EVENT_FILECREATE, NULL, cam->movie_norm->filename, (void *)FTYPE_MPEG, ts1);
@@ -663,7 +666,10 @@ static void event_movie_newfile(struct ctx_cam *cam, motion_event evnt
         if (retcd < 0) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating motion file [%s]"), cam->movie_motion->filename);
-            util_free_var(cam->movie_motion);
+            if (cam->movie_motion != NULL) {
+                free(cam->movie_motion);
+            }
+            cam->movie_motion = NULL;
             return;
         }
     }
@@ -684,7 +690,10 @@ static void event_movie_timelapse(struct ctx_cam *cam, motion_event evnt
         if (retcd < 0) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating timelapse file [%s]"), cam->movie_timelapse->filename);
-            util_free_var(cam->movie_timelapse);
+            if (cam->movie_timelapse != NULL) {
+                free(cam->movie_timelapse);
+            }
+            cam->movie_timelapse = NULL;
             return;
         }
         event(cam, EVENT_FILECREATE, NULL, cam->movie_timelapse->filename
@@ -728,13 +737,19 @@ static void event_movie_closefile(struct ctx_cam *cam, motion_event evnt
 
     if (cam->movie_norm) {
         movie_close(cam->movie_norm);
-        util_free_var(cam->movie_norm);
+        if (cam->movie_norm != NULL) {
+            free(cam->movie_norm);
+        }
+        cam->movie_norm = NULL;
         event(cam, EVENT_FILECLOSE, NULL, cam->newfilename, (void *)FTYPE_MPEG, ts1);
     }
 
     if (cam->movie_motion) {
         movie_close(cam->movie_motion);
-        util_free_var(cam->movie_motion);
+        if (cam->movie_motion != NULL) {
+            free(cam->movie_motion);
+        }
+        cam->movie_motion = NULL;
         event(cam, EVENT_FILECLOSE, NULL, cam->motionfilename, (void *)FTYPE_MPEG_MOTION, ts1);
     }
 
@@ -751,7 +766,10 @@ static void event_movie_timelapseend(struct ctx_cam *cam, motion_event evnt
 
     if (cam->movie_timelapse) {
         movie_close(cam->movie_timelapse);
-        util_free_var(cam->movie_timelapse);
+        if (cam->movie_timelapse != NULL) {
+            free(cam->movie_timelapse);
+        }
+        cam->movie_timelapse = NULL;
         event(cam, EVENT_FILECLOSE, NULL, cam->timelapsefilename, (void *)FTYPE_MPEG_TIMELAPSE, ts1);
     }
 }

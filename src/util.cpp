@@ -1222,12 +1222,3 @@ void util_exec_command(struct ctx_cam *cam, const char *command, char *filename,
         ,_("Executing external command '%s'"), stamp);
 }
 
-/* Free a pointer and set to null */
-void util_free_var(void *parm)
-{
-    if (parm != NULL) {
-        free(parm);
-    }
-    parm = NULL;
-}
-

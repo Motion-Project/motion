@@ -132,8 +132,9 @@
 
     void util_parms_parse(struct ctx_params *params, std::string confline);
     void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl);
+
     void util_parms_free(struct ctx_params *params);
     void util_parms_update(struct ctx_params *params, std::string &confline);
-    void util_free_var(void *parm);
+
 
 #endif

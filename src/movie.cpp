@@ -45,7 +45,8 @@
 static void movie_free_nal(struct ctx_movie *movie)
 {
     if (movie->nal_info) {
-        util_free_var(movie->nal_info);
+        free(movie->nal_info);
+        movie->nal_info = NULL;
         movie->nal_info_len = 0;
     }
 }
@@ -145,7 +146,10 @@ static int movie_get_oformat(struct ctx_movie *movie)
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Error setting base file name"));
         movie_free_context(movie);
-        util_free_var(codec_name);
+        if (codec_name != NULL) {
+            free(codec_name);
+        }
+        codec_name = NULL;
         return -1;
     }
 
@@ -160,10 +164,16 @@ static int movie_get_oformat(struct ctx_movie *movie)
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                 ,_("Error setting timelapse append for codec %s"), codec_name);
             movie_free_context(movie);
-            util_free_var(codec_name);
+            if (codec_name != NULL) {
+                free(codec_name);
+            }
+            codec_name = NULL;
             return -1;
         }
-        util_free_var(codec_name);
+        if (codec_name != NULL) {
+            free(codec_name);
+        }
+        codec_name = NULL;
         return 0;
     }
 
@@ -220,7 +230,10 @@ static int movie_get_oformat(struct ctx_movie *movie)
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Error setting file name"));
         movie_free_context(movie);
-        util_free_var(codec_name);
+        if (codec_name != NULL) {
+            free(codec_name);
+        }
+        codec_name = NULL;
         return -1;
     }
 
@@ -228,18 +241,28 @@ static int movie_get_oformat(struct ctx_movie *movie)
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("codec option value %s is not supported"), codec_name);
         movie_free_context(movie);
-        util_free_var(codec_name);
+        if (codec_name != NULL) {
+            free(codec_name);
+        }
+        codec_name = NULL;
         return -1;
     }
 
     if (movie->oc->oformat->video_codec == MY_CODEC_ID_NONE) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get the codec"));
         movie_free_context(movie);
-        util_free_var(codec_name);
+        if (codec_name != NULL) {
+            free(codec_name);
+        }
+        codec_name = NULL;
         return -1;
     }
 
-    util_free_var(codec_name);
+    if (codec_name != NULL) {
+        free(codec_name);
+    }
+    codec_name = NULL;
+
     return 0;
 }
 
@@ -336,7 +359,10 @@ static int movie_encode_video(struct ctx_movie *movie)
         movie->pkt.pts = movie->picture->pts;
         movie->pkt.dts = movie->pkt.pts;
 
-        util_free_var(video_outbuf);
+        if (video_outbuf != NULL) {
+            free(video_outbuf);
+        }
+        video_outbuf = NULL;
 
         /* This kills compiler warnings.  Nal setting is only for recent movie versions*/
         if (movie->preferred_codec == USER_CODEC_V4L2M2M) {
@@ -1455,13 +1481,15 @@ void movie_close(struct ctx_movie *movie)
         if (movie_flush_codec(movie) < 0) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error flushing codec"));
         }
-        if (movie->oc->pb != NULL) {
-            if (movie->tlapse != TIMELAPSE_APPEND) {
-                av_write_trailer(movie->oc);
-            }
-            if (!(movie->oc->oformat->flags & AVFMT_NOFILE)) {
+        if (movie->oc != NULL) {
+            if (movie->oc->pb != NULL) {
                 if (movie->tlapse != TIMELAPSE_APPEND) {
-                    avio_close(movie->oc->pb);
+                    av_write_trailer(movie->oc);
+                }
+                if (!(movie->oc->oformat->flags & AVFMT_NOFILE)) {
+                    if (movie->tlapse != TIMELAPSE_APPEND) {
+                        avio_close(movie->oc->pb);
+                    }
                 }
             }
         }
@@ -1477,7 +1505,6 @@ int movie_put_image(struct ctx_movie *movie, struct ctx_image_data *img_data, co
 
     int retcd = 0;
     int cnt = 0;
-
 
     if (movie->passthrough) {
         retcd = movie_passthru_put(movie, img_data);
