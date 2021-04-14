@@ -2431,8 +2431,8 @@ static void mlp_actions(struct context *cnt)
     /* Check for movie length */
     if ((cnt->conf.movie_max_time > 0) &&
         (cnt->event_nr == cnt->prev_event) &&
-        ((cnt->currenttime - cnt->eventtime) >= cnt->conf.movie_max_time)) {
-        cnt->event_stop = TRUE;
+        (cnt->current_image->timestamp_tv.tv_sec - cnt->movietime >= cnt->conf.movie_max_time)) {
+        event(cnt, EVENT_MAX_MOVIE, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
     }
 
     /* Check event gap */

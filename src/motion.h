@@ -455,6 +455,7 @@ struct context {
     time_t currenttime;
     time_t lasttime;
     time_t eventtime;
+    time_t movietime;
     time_t connectionlosttime;               /* timestamp from connection lost */
 
     unsigned int lastrate;
