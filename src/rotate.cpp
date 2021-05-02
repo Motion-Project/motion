@@ -275,6 +275,10 @@ void rotate_init(struct ctx_cam *cam)
 void rotate_deinit(struct ctx_cam *cam)
 {
 
+    if (cam->rotate_data == NULL) {
+        return;
+    }
+
     if (cam->rotate_data->buffer_norm) {
         free(cam->rotate_data->buffer_norm);
     }

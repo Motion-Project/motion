@@ -641,12 +641,7 @@ static int mlp_init_cam_start(struct ctx_cam *cam)
     if (cam->video_dev == -1) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Could not fetch initial image from camera "));
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
-            ,_("Motion continues using width and height from config file(s)"));
-        cam->imgs.width = cam->conf->width;
-        cam->imgs.height = cam->conf->height;
-        cam->imgs.size_norm = cam->conf->width * cam->conf->height * 3 / 2;
-        cam->imgs.motionsize = cam->conf->width * cam->conf->height;
+        return -1;
     } else if (cam->video_dev == -2) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Could not fetch initial image from camera "));
@@ -1651,9 +1646,13 @@ void *motion_loop(void *arg)
 {
     struct ctx_cam *cam =(struct ctx_cam *) arg;
 
-    cam->restart_cam = true;
-    cam->watchdog = cam->conf->watchdog_tmo;
     cam->running_cam = true;
+
+    pthread_mutex_lock(&cam->motapp->global_lock);
+        cam->motapp->threads_running++;
+    pthread_mutex_unlock(&cam->motapp->global_lock);
+
+    cam->watchdog = cam->conf->watchdog_tmo;
 
     if (mlp_init(cam) == 0) {
         while (!cam->finish_cam || cam->event_stop) {
@@ -1689,8 +1688,7 @@ void *motion_loop(void *arg)
         cam->motapp->threads_running--;
     pthread_mutex_unlock(&cam->motapp->global_lock);
 
-    cam->running_cam = 0;
-    cam->finish_cam = 0;
+    cam->running_cam = false;
 
     pthread_exit(NULL);
 }

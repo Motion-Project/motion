@@ -551,6 +551,10 @@ void algsec_deinit(ctx_cam *cam)
     #ifdef HAVE_OPENCV
         int waitcnt = 0;
 
+        if (cam->algsec == NULL) {
+            return;
+        }
+
         algsec_params_deinit(cam->algsec->models);
 
         if (!cam->algsec->closing) {

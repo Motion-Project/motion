@@ -1188,6 +1188,12 @@ void v4l2_cleanup(ctx_cam *cam)
         cam->v4l2cam->devctrl_count=0;
 
         util_parms_free(cam->v4l2cam->params);
+
+        if (cam->v4l2cam->params != NULL) {
+            free(cam->v4l2cam->params);
+            cam->v4l2cam->params = NULL;
+        }
+
         if (cam->v4l2cam != NULL) {
             free(cam->v4l2cam);
         }

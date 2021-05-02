@@ -420,23 +420,21 @@ static void motion_startup(struct ctx_motapp *motapp, int daemonize, int argc, c
 /** Start a camera thread */
 static void motion_start_thread(struct ctx_motapp *motapp, int indx)
 {
-    pthread_attr_t thread_attr;
+    int retcd;
 
-    pthread_mutex_lock(&motapp->global_lock);
-        motapp->threads_running++;
-    pthread_mutex_unlock(&motapp->global_lock);
+    pthread_attr_t thread_attr;
 
     pthread_attr_init(&thread_attr);
     pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
 
-    if (pthread_create(&motapp->cam_list[indx]->thread_id
-            , &thread_attr, &motion_loop, motapp->cam_list[indx])) {
-        /* thread create failed, undo running state */
-        motapp->cam_list[indx]->running_cam = false;
-        pthread_mutex_lock(&motapp->global_lock);
-            motapp->threads_running--;
-        pthread_mutex_unlock(&motapp->global_lock);
+    motapp->cam_list[indx]->restart_cam = true;
+
+    retcd = pthread_create(&motapp->cam_list[indx]->thread_id
+                , &thread_attr, &motion_loop, motapp->cam_list[indx]);
+    if (retcd != 0) {
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start thread for motion loop."));
     }
+
     pthread_attr_destroy(&thread_attr);
 
 }
