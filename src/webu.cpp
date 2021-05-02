@@ -32,7 +32,6 @@
 #include "webu_post.hpp"
 #include "video_v4l2.hpp"
 
-
 /* Context to pass the parms to functions to start mhd */
 struct mhdstart_ctx {
     struct ctx_motapp       *motapp;
@@ -50,6 +49,7 @@ struct mhdstart_ctx {
 static void webu_context_init(struct ctx_motapp *motapp, struct webui_ctx *webui)
 {
     int indx;
+    char *tmplang;
 
     webui->url           = "";
     webui->uri_camid     = "";
@@ -91,7 +91,12 @@ static void webu_context_init(struct ctx_motapp *motapp, struct webui_ctx *webui
         webui->cam_count--;
     }
 
-    webui->lang.assign(getenv("LANGUAGE"), 2);
+    tmplang = setlocale(LC_ALL, NULL);
+    if (tmplang == NULL) {
+        webui->lang = "en";
+    } else {
+        webui->lang.assign(tmplang, 2);
+    }
 
     return;
 }
