@@ -1294,12 +1294,14 @@ static int movie_passthru_open(struct ctx_movie *movie)
         return -1;
     }
 
-    MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
-        , _("Timebase after open audio: %d/%d video: %d/%d")
-        , movie->strm_audio->time_base.num
-        , movie->strm_audio->time_base.den
-        , movie->strm_video->time_base.num
-        , movie->strm_video->time_base.den);
+    if (movie->strm_audio != NULL) {
+        MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+            , _("Timebase after open audio: %d/%d video: %d/%d")
+            , movie->strm_audio->time_base.num
+            , movie->strm_audio->time_base.den
+            , movie->strm_video->time_base.num
+            , movie->strm_video->time_base.den);
+    }
 
     MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "Pass-through stream opened");
 
