@@ -120,7 +120,7 @@ void netcam_url_parse(struct url_t *parse_url, const char *text_url)
     char *s;
     int i;
 
-    const char *re = "(http|ftp|mjpg|mjpeg|rtsp|rtmp)://(((.*):(.*))@)?"
+    const char *re = "(http|ftp|mjpg|mjpeg|rtsp|rtmp|rtsps)://(((.*):(.*))@)?"
                      "([^/:]|[-_.a-z0-9]+)(:([0-9]+))?($|(/[^*]*))";
     regex_t pattbuf;
     regmatch_t matches[10];
