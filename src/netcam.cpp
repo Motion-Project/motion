@@ -313,7 +313,6 @@ static void netcam_null_context(struct ctx_netcam *netcam)
     netcam->format_context  = NULL;
     netcam->transfer_format = NULL;
     netcam->hw_device_ctx   = NULL;
-    netcam->pktarray        = NULL;
 
 }
 
