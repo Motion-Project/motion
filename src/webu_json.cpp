@@ -134,8 +134,12 @@ static void webu_json_config_parms(struct webui_ctx *webui, int indx_cam)
                 " \"value\":\"\"" +
                 ",\"enabled\":false" +
                 ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
-                ",\"type\":\""+ conf_type_desc(config_parms[indx_parm].parm_type) + "\"" +
-                "}";
+                ",\"type\":\""+ conf_type_desc(config_parms[indx_parm].parm_type) + "\"";
+
+            if (config_parms[indx_parm].parm_type == PARM_TYP_LIST) {
+                webui->resp_page += ",\"list\":[\"na\"]";
+            }
+            webui->resp_page +="}";
         } else {
            webu_json_config_item(webui, indx_cam, indx_parm);
         }
