@@ -48,7 +48,7 @@ struct ctx_parm config_parms[] = {
     {
     "setup_mode",
     "# Start in Setup-Mode, daemon disabled.",
-    0, PARM_TYP_BOOL, PARM_CAT_00, WEBUI_LEVEL_ADVANCED},
+    0, PARM_TYP_BOOL, PARM_CAT_00, WEBUI_LEVEL_LIMITED},
     {
     "conf_filename",
     "# Configuration file name.",
@@ -83,11 +83,11 @@ struct ctx_parm config_parms[] = {
     {
     "camera_name",
     "# User defined name for the camera.",
-    0, PARM_TYP_STRING,PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_STRING,PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {
     "camera_id",
     "# Numeric identifier for the camera.",
-    0,PARM_TYP_INT, PARM_CAT_01, WEBUI_LEVEL_ADVANCED},
+    0,PARM_TYP_INT, PARM_CAT_01, WEBUI_LEVEL_LIMITED},
     {
     "camera_tmo",
     "# Timeout for camera lost connection.",
@@ -95,7 +95,7 @@ struct ctx_parm config_parms[] = {
     {
     "target_dir",
     "# Target directory for pictures, snapshots and movies",
-    0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
     {
     "watchdog_tmo",
     "# Timeout in seconds for thread response.",
@@ -113,7 +113,7 @@ struct ctx_parm config_parms[] = {
     {
     "v4l2_params",
     "# Parameters to control video device.  See motionplus_guide.html",
-    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED},
+    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED},
     {
     "netcam_url",
     "# The full URL of the network camera stream.",
@@ -149,11 +149,11 @@ struct ctx_parm config_parms[] = {
     "# Image Processing configuration parameters\n"
     "############################################################\n\n"
     "# Image width in pixels.",
-    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
     {
     "height",
     "# Image height in pixels.",
-    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_ADVANCED},
+    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED},
     {
     "framerate",
     "# Maximum number of frames to be captured per second.",
@@ -423,7 +423,7 @@ struct ctx_parm config_parms[] = {
     {
     "movie_passthrough",
     "# Pass through from the camera to the movie without decode/encoding.",
-    0, PARM_TYP_BOOL, PARM_CAT_10, WEBUI_LEVEL_ADVANCED },
+    0, PARM_TYP_BOOL, PARM_CAT_10, WEBUI_LEVEL_LIMITED},
     {
     "movie_filename",
     "# File name(without extension) for movies relative to target directory",
@@ -431,7 +431,7 @@ struct ctx_parm config_parms[] = {
     {
     "movie_extpipe_use",
     "# Use pipe and external encoder for creating movies.",
-    0, PARM_TYP_BOOL, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_BOOL, PARM_CAT_10, WEBUI_LEVEL_RESTRICTED },
     {
     "movie_extpipe",
     "# Full path and options for external encoder of movies from raw images",
@@ -495,7 +495,7 @@ struct ctx_parm config_parms[] = {
     {
     "webcontrol_interface",
     "# Method that webcontrol should use for interface with user.",
-    1, PARM_TYP_LIST, PARM_CAT_13, WEBUI_LEVEL_LIMITED },
+    1, PARM_TYP_LIST, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
     {
     "webcontrol_auth_method",
     "# The authentication method for the webcontrol",
@@ -519,11 +519,11 @@ struct ctx_parm config_parms[] = {
     {
     "webcontrol_cors_header",
     "# The cross-origin resource sharing (CORS) header for webcontrol",
-    0, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
+    0, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
     {
     "webcontrol_html",
     "# Full path and file name of the html file to use for the webcontrol",
-    1, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED},
+    1, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED},
 
     {
     "stream_preview_scale",
@@ -636,31 +636,31 @@ struct ctx_parm config_parms[] = {
     {
     "ptz_move_track",
     "# Command to execute for auto tracking ",
-    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
     {
     "ptz_pan_left",
     "# Command to execute for moving camera left",
-    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
     {
     "ptz_pan_right",
     "# Command to execute for moving camera right ",
-    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
     {
     "ptz_tilt_up",
     "# Command to execute for moving camera up ",
-    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
     {
     "ptz_tilt_down",
     "# Command to execute for moving camera down ",
-    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
     {
     "ptz_zoom_in",
     "# Command to execute for zooming the camera in ",
-    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
     {
     "ptz_zoom_out",
     "# Command to execute for zooming camera out ",
-    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
+    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
     {
     "camera",
     "##############################################################\n"
