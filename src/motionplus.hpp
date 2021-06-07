@@ -48,6 +48,7 @@
 #include <pthread.h>
 #include <microhttpd.h>
 #include <string>
+#include <list>
 
 #if defined(HAVE_PTHREAD_NP_H)
     #include <pthread_np.h>
@@ -163,6 +164,12 @@ enum MOTION_SIGNAL {
     MOTION_SIGNAL_USR1,
     MOTION_SIGNAL_SIGHUP,
     MOTION_SIGNAL_SIGTERM
+};
+
+struct ctx_failauth {
+    std::string                 clientip;
+    int                         attempt_nbr;
+    struct timespec             attempt_time;
 };
 
 struct ctx_params_item {
@@ -402,10 +409,12 @@ struct ctx_motapp {
     bool                pause;
     bool                native_language;
 
-    volatile int        webcontrol_running;
-    volatile int        webcontrol_finish;
-    struct MHD_Daemon   *webcontrol_daemon;
-    char                webcontrol_digest_rand[12];
+    volatile int                webcontrol_running;
+    volatile int                webcontrol_finish;
+    struct MHD_Daemon           *webcontrol_daemon;
+    char                        webcontrol_digest_rand[12];
+    std::list<ctx_failauth>     webcontrol_failauth;       /* C++ list of ips that failed authentication */
+
 
     bool                parms_changed;      /*bool indicating if the parms have changed */
     pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */

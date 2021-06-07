@@ -307,7 +307,6 @@ static void webu_clientip(struct ctx_webui *webui)
             webui->clientip.assign(client);
         }
     }
-    MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),webui->clientip.c_str());
 
 }
 
@@ -340,6 +339,91 @@ static void webu_hostname(struct ctx_webui *webui)
     MOTION_LOG(DBG,TYPE_ALL, NO_ERRNO, _("Full Host:  %s"), webui->hostfull.c_str());
 
     return;
+}
+
+/* Log the failed authentication check */
+static void webu_failauth_log(struct ctx_webui *webui)
+{
+    timespec                            tm_cnct;
+    struct ctx_failauth                 failauth;
+    std::list<ctx_failauth>::iterator   it;
+
+    MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
+            ,_("Failed authentication from %s"), webui->clientip.c_str());
+
+    clock_gettime(CLOCK_REALTIME, &tm_cnct);
+
+    it = webui->motapp->webcontrol_failauth.begin();
+    while (it != webui->motapp->webcontrol_failauth.end()) {
+        if (it->clientip == webui->clientip) {
+            it->attempt_nbr++;
+            it->attempt_time.tv_sec =tm_cnct.tv_sec;
+            return;
+        }
+        it++;
+    }
+
+    failauth.clientip = webui->clientip;
+    failauth.attempt_nbr = 1;
+    failauth.attempt_time = tm_cnct;
+
+    webui->motapp->webcontrol_failauth.push_back(failauth);
+
+    return;
+
+}
+
+/* Log the failed authentication check */
+static void webu_failauth_reset(struct ctx_webui *webui)
+{
+    timespec                            tm_cnct;
+    std::list<ctx_failauth>::iterator   it;
+
+    clock_gettime(CLOCK_REALTIME, &tm_cnct);
+    it = webui->motapp->webcontrol_failauth.begin();
+    while (it != webui->motapp->webcontrol_failauth.end()) {
+        if ((it->clientip == webui->clientip) ||
+            ((tm_cnct.tv_sec - it->attempt_time.tv_sec) >= 600)) {
+            it = webui->motapp->webcontrol_failauth.erase(it);
+        } else {
+            it++;
+        }
+    }
+
+    return;
+
+}
+
+/* Check for ips with excessive failed authentication attempts */
+static mhdrslt webu_failauth_check(struct ctx_webui *webui)
+{
+    timespec    tm_cnct;
+    std::list<ctx_failauth>::iterator it;
+
+    if (webui->motapp->webcontrol_failauth.size() == 0) {
+        return MHD_YES;
+    }
+
+    clock_gettime(CLOCK_REALTIME, &tm_cnct);
+    it = webui->motapp->webcontrol_failauth.begin();
+    while (it != webui->motapp->webcontrol_failauth.end()) {
+        if ((it->clientip == webui->clientip) &&
+            ((tm_cnct.tv_sec - it->attempt_time.tv_sec) < 600) &&
+            (it->attempt_nbr > 5)) {
+MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
+            ,_("ignoring attempt from %s"), webui->clientip.c_str());
+
+            it->attempt_time = tm_cnct;
+            return MHD_NO;
+        } else if ((tm_cnct.tv_sec - it->attempt_time.tv_sec) >= 600) {
+            it = webui->motapp->webcontrol_failauth.erase(it);
+        } else {
+            it++;
+        }
+    }
+
+    return MHD_YES;
+
 }
 
 /* Create a authorization denied response to user*/
@@ -386,8 +470,7 @@ static mhdrslt webu_mhd_digest(struct ctx_webui *webui)
 
     /* Check for valid user name */
     if (mystrne(user, webui->auth_user)) {
-        MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
-            ,_("Failed authentication from %s"), webui->clientip.c_str());
+        webu_failauth_log(webui);
         if (user != NULL) {
             free(user);
         }
@@ -404,8 +487,7 @@ static mhdrslt webu_mhd_digest(struct ctx_webui *webui)
         , webui->auth_user, webui->auth_pass, 300);
 
     if (retcd == MHD_NO) {
-        MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
-            ,_("Failed authentication from %s"), webui->clientip.c_str());
+        webu_failauth_log(webui);
     }
 
     if ( (retcd == MHD_INVALID_NONCE) || (retcd == MHD_NO) )  {
@@ -469,8 +551,7 @@ static mhdrslt webu_mhd_basic(struct ctx_webui *webui)
     }
 
     if ((mystrne(user, webui->auth_user)) || (mystrne(pass, webui->auth_pass))) {
-        MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
-            ,_("Failed authentication from %s"),webui->clientip.c_str());
+        webu_failauth_log(webui);
         if (user != NULL) {
             free(user);
         }
@@ -754,6 +835,7 @@ static mhdrslt webu_answer_get(struct ctx_webui *webui)
 
 }
 
+
 /* Answer the connection request for the webcontrol*/
 static mhdrslt webu_answer(void *cls, struct MHD_Connection *connection, const char *url
         , const char *method, const char *version, const char *upload_data, size_t *upload_data_size
@@ -787,6 +869,10 @@ static mhdrslt webu_answer(void *cls, struct MHD_Connection *connection, const c
         webu_clientip(webui);
     }
 
+    if (webu_failauth_check(webui) == MHD_NO) {
+        return MHD_NO;
+    }
+
     webu_hostname(webui);
 
     if (!webui->authenticated) {
@@ -795,6 +881,10 @@ static mhdrslt webu_answer(void *cls, struct MHD_Connection *connection, const c
             return retcd;
         }
     }
+
+    webu_failauth_reset(webui);
+
+    MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),webui->clientip.c_str());
 
     if (webui->mhd_first) {
         webui->mhd_first = false;
