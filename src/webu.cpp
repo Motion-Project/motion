@@ -713,31 +713,6 @@ static mhdrslt webu_answer_get(struct webui_ctx *webui)
 
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,"processing get");
 
-    /* Throw bad URLS back to user*/
-    if ((webui->cam ==  NULL) || (webui->url.length() == 0)) {
-        webu_html_badreq(webui);
-        retcd = webu_mhd_send(webui);
-        return retcd;
-    }
-
-    if (webui->cam->finish_cam) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
-        return MHD_NO;
-    }
-
-    if (webui->clientip.length() == 0) {
-        webu_clientip(webui);
-    }
-
-    webu_hostname(webui);
-
-    if (!webui->authenticated) {
-        retcd = webu_mhd_auth(webui);
-        if (!webui->authenticated) {
-            return retcd;
-        }
-    }
-
     retcd = MHD_NO;
     if ((webui->uri_cmd1 == "mjpg") ||
         (webui->uri_cmd1 == "static")) {
@@ -794,8 +769,32 @@ static mhdrslt webu_answer(void *cls, struct MHD_Connection *connection, const c
     webui_ctx *webui =(struct webui_ctx *) *ptr;
 
     webui->cnct_type = WEBUI_CNCT_CONTROL;
-
     webui->connection = connection;
+
+    /* Throw bad URLS back to user*/
+    if ((webui->cam ==  NULL) || (webui->url.length() == 0)) {
+        webu_html_badreq(webui);
+        retcd = webu_mhd_send(webui);
+        return retcd;
+    }
+
+    if (webui->cam->finish_cam) {
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
+        return MHD_NO;
+    }
+
+    if (webui->clientip.length() == 0) {
+        webu_clientip(webui);
+    }
+
+    webu_hostname(webui);
+
+    if (!webui->authenticated) {
+        retcd = webu_mhd_auth(webui);
+        if (!webui->authenticated) {
+            return retcd;
+        }
+    }
 
     if (webui->mhd_first) {
         webui->mhd_first = false;
