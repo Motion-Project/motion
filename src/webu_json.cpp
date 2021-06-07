@@ -27,11 +27,17 @@
 static void webu_json_config_item(struct webui_ctx *webui, int indx_cam, int indx_parm)
 {
     int indx;
-    std::string parm_orig, parm_val, parm_list;
+    std::string parm_orig, parm_val, parm_list, parm_enable;
 
     parm_orig = "";
     parm_val = "";
     parm_list = "";
+
+    if (webui->motapp->cam_list[0]->conf->webcontrol_parms < WEBUI_LEVEL_LIMITED) {
+        parm_enable = "false";
+    } else {
+        parm_enable = "true";
+    }
 
     conf_edit_get(webui->motapp->cam_list[indx_cam]
         , config_parms[indx_parm].parm_name
@@ -54,7 +60,7 @@ static void webu_json_config_item(struct webui_ctx *webui, int indx_cam, int ind
             "\"" + config_parms[indx_parm].parm_name + "\"" +
             ":{" +
             " \"value\":" + parm_val +
-            ",\"enabled\":true" +
+            ",\"enabled\":" + parm_enable +
             ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
             ",\"type\":\"" + conf_type_desc(config_parms[indx_parm].parm_type) + "\"" +
             "}";
@@ -65,7 +71,7 @@ static void webu_json_config_item(struct webui_ctx *webui, int indx_cam, int ind
                 "\"" + config_parms[indx_parm].parm_name + "\"" +
                 ":{" +
                 " \"value\":true" +
-                ",\"enabled\":true" +
+                ",\"enabled\":" + parm_enable +
                 ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
                 ",\"type\":\"" + conf_type_desc(config_parms[indx_parm].parm_type) + "\""+
                 "}";
@@ -74,7 +80,7 @@ static void webu_json_config_item(struct webui_ctx *webui, int indx_cam, int ind
                 "\"" + config_parms[indx_parm].parm_name + "\"" +
                 ":{" +
                 " \"value\":false" +
-                ",\"enabled\":true" +
+                ",\"enabled\":" + parm_enable +
                 ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
                 ",\"type\":\"" + conf_type_desc(config_parms[indx_parm].parm_type) + "\"" +
                 "}";
@@ -89,7 +95,7 @@ static void webu_json_config_item(struct webui_ctx *webui, int indx_cam, int ind
             "\"" + config_parms[indx_parm].parm_name + "\"" +
             ":{" +
             " \"value\": \"" + parm_val + "\"" +
-            ",\"enabled\":true" +
+            ",\"enabled\":" + parm_enable +
             ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
             ",\"type\":\"" + conf_type_desc(config_parms[indx_parm].parm_type) + "\"" +
             ",\"list\":" + parm_list +
@@ -100,7 +106,7 @@ static void webu_json_config_item(struct webui_ctx *webui, int indx_cam, int ind
             "\"" + config_parms[indx_parm].parm_name + "\"" +
             ":{" +
             " \"value\":\"" + parm_val + "\"" +
-            ",\"enabled\":true"+
+            ",\"enabled\":" + parm_enable +
             ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
             ",\"type\":\""+ conf_type_desc(config_parms[indx_parm].parm_type) + "\"" +
             "}";
@@ -127,7 +133,11 @@ static void webu_json_config_parms(struct webui_ctx *webui, int indx_cam)
         } else {
             webui->resp_page += ",";
         }
-        if (config_parms[indx_parm].webui_level > webui->motapp->cam_list[0]->conf->webcontrol_parms) {
+        /* Allow limited parameters to be read only to the web page */
+        if ((config_parms[indx_parm].webui_level >
+                webui->motapp->cam_list[0]->conf->webcontrol_parms) &&
+            (config_parms[indx_parm].webui_level > WEBUI_LEVEL_LIMITED)) {
+
             webui->resp_page +=
                 "\""+config_parms[indx_parm].parm_name+"\"" +
                 ":{" +
