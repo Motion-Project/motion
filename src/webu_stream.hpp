@@ -20,12 +20,12 @@
 #ifndef _INCLUDE_WEBU_STREAM_H_
 #define _INCLUDE_WEBU_STREAM_H_
 
-    struct webui_ctx;
+    struct ctx_webui;
 
     void webu_stream_init(struct ctx_cam *cam);
     void webu_stream_deinit(struct ctx_cam *cam);
     void webu_stream_getimg(struct ctx_cam *cam, struct ctx_image_data *img_data);
 
-    mhdrslt webu_stream_main(struct webui_ctx *webui);
+    mhdrslt webu_stream_main(struct ctx_webui *webui);
 
 #endif

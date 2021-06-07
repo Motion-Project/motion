@@ -28,7 +28,7 @@
 
 
 /* Allocate buffers if needed */
-static void webu_stream_mjpeg_checkbuffers(struct webui_ctx *webui)
+static void webu_stream_mjpeg_checkbuffers(struct ctx_webui *webui)
 {
     if (webui->resp_size < (size_t)webui->cam->imgs.size_norm) {
         if (webui->resp_image   != NULL) {
@@ -46,7 +46,7 @@ static void webu_stream_mjpeg_checkbuffers(struct webui_ctx *webui)
 }
 
 /* Sleep required time to get to the user requested framerate for the stream */
-static void webu_stream_mjpeg_delay(struct webui_ctx *webui)
+static void webu_stream_mjpeg_delay(struct ctx_webui *webui)
 {
     long   stream_rate;
     struct timespec time_curr;
@@ -82,7 +82,7 @@ static void webu_stream_mjpeg_delay(struct webui_ctx *webui)
 
 }
 
-static void webu_stream_mjpeg_getimg(struct webui_ctx *webui)
+static void webu_stream_mjpeg_getimg(struct ctx_webui *webui)
 {
     long jpeg_size;
     char resp_head[80];
@@ -155,7 +155,7 @@ static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, s
      * a single image so we can write what we can to the buffer and pick up remaining bytes
      * to send based upon the stream position
      */
-    struct webui_ctx *webui =(struct webui_ctx *)cls;
+    struct ctx_webui *webui =(struct ctx_webui *)cls;
     size_t sent_bytes;
 
     (void)pos;  /*Remove compiler warning */
@@ -196,7 +196,7 @@ static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, s
 }
 
 /* Obtain the current image, compress it to a JPG and put into webui->resp_image */
-static void webu_stream_static_getimg(struct webui_ctx *webui)
+static void webu_stream_static_getimg(struct ctx_webui *webui)
 {
 
     struct ctx_stream_data *local_stream;
@@ -239,7 +239,7 @@ static void webu_stream_static_getimg(struct webui_ctx *webui)
 }
 
 /* Determine whether the user specified a valid URL for the particular port */
-static int webu_stream_checks(struct webui_ctx *webui)
+static int webu_stream_checks(struct ctx_webui *webui)
 {
     pthread_mutex_lock(&webui->motapp->mutex_camlst);
         if (webui->threadnbr >= webui->cam_threads) {
@@ -262,7 +262,7 @@ static int webu_stream_checks(struct webui_ctx *webui)
 }
 
 /* Increment the counters for the connections to the streams */
-static void webu_stream_cnct_count(struct webui_ctx *webui)
+static void webu_stream_cnct_count(struct ctx_webui *webui)
 {
     int cnct_count;
 
@@ -309,7 +309,7 @@ static void webu_stream_cnct_count(struct webui_ctx *webui)
 }
 
 /* Assign the type of stream that is being answered*/
-static void webu_stream_type(struct webui_ctx *webui)
+static void webu_stream_type(struct ctx_webui *webui)
 {
     if (webui->uri_cmd2 == "stream") {
         webui->cnct_type = WEBUI_CNCT_FULL;
@@ -339,7 +339,7 @@ static void webu_stream_type(struct webui_ctx *webui)
 
 }
 
-static mhdrslt webu_stream_mjpeg(struct webui_ctx *webui)
+static mhdrslt webu_stream_mjpeg(struct ctx_webui *webui)
 {
     /* Create the stream for the motion jpeg */
     mhdrslt retcd;
@@ -378,7 +378,7 @@ static mhdrslt webu_stream_mjpeg(struct webui_ctx *webui)
 }
 
 /* Create the response for the static image request*/
-static mhdrslt webu_stream_static(struct webui_ctx *webui)
+static mhdrslt webu_stream_static(struct ctx_webui *webui)
 {
     mhdrslt retcd;
     struct MHD_Response *response;
@@ -422,7 +422,7 @@ static mhdrslt webu_stream_static(struct webui_ctx *webui)
 }
 
 /* Entry point for answering stream*/
-mhdrslt webu_stream_main(struct webui_ctx *webui)
+mhdrslt webu_stream_main(struct ctx_webui *webui)
 {
     mhdrslt retcd;
 

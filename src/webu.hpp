@@ -55,7 +55,7 @@
         size_t                      key_sz;         /* The size of the value */
     };
 
-    struct webui_ctx {
+    struct ctx_webui {
         std::string                 url;            /* The URL sent from the client */
         std::string                 uri_camid;      /* Parsed camera number from the url eg /camid/cmd1/cmd2 */
         std::string                 uri_cmd1;       /* Parsed command1 from the url eg /camid/cmd1/cmd2 */

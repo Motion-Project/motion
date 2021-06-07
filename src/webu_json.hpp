@@ -20,6 +20,6 @@
 #ifndef _INCLUDE_WEBU_JSON_H_
 #define _INCLUDE_WEBU_JSON_H_
 
-    void webu_json_config(struct webui_ctx *webui);
+    void webu_json_config(struct ctx_webui *webui);
 
 #endif

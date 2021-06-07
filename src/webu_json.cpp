@@ -24,7 +24,7 @@
 #include "webu.hpp"
 #include "webu_json.hpp"
 
-static void webu_json_config_item(struct webui_ctx *webui, int indx_cam, int indx_parm)
+static void webu_json_config_item(struct ctx_webui *webui, int indx_cam, int indx_parm)
 {
     int indx;
     std::string parm_orig, parm_val, parm_list, parm_enable;
@@ -114,7 +114,7 @@ static void webu_json_config_item(struct webui_ctx *webui, int indx_cam, int ind
 
 }
 
-static void webu_json_config_parms(struct webui_ctx *webui, int indx_cam)
+static void webu_json_config_parms(struct ctx_webui *webui, int indx_cam)
 {
     int indx_parm;
     bool first;
@@ -159,7 +159,7 @@ static void webu_json_config_parms(struct webui_ctx *webui, int indx_cam)
 
 }
 
-static void webu_json_config_cam_parms(struct webui_ctx *webui)
+static void webu_json_config_cam_parms(struct ctx_webui *webui)
 {
     int indx_cam;
     bool first;
@@ -186,7 +186,7 @@ static void webu_json_config_cam_parms(struct webui_ctx *webui)
 
 }
 
-static void webu_json_config_cam_list(struct webui_ctx *webui)
+static void webu_json_config_cam_list(struct ctx_webui *webui)
 {
     int indx_cam;
     std::string response;
@@ -232,7 +232,7 @@ static void webu_json_config_cam_list(struct webui_ctx *webui)
 
 }
 
-static void webu_json_config_categories(struct webui_ctx *webui)
+static void webu_json_config_categories(struct ctx_webui *webui)
 {
     int indx_cat;
 
@@ -293,7 +293,7 @@ static void webu_json_config_categories(struct webui_ctx *webui)
 
 }
 
-void webu_json_config(struct webui_ctx *webui)
+void webu_json_config(struct ctx_webui *webui)
 {
     webui->resp_type = WEBUI_RESP_JSON;
 

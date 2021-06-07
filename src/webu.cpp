@@ -46,7 +46,7 @@ struct mhdstart_ctx {
 };
 
 /* Set defaults for the webui context */
-static void webu_context_init(struct ctx_motapp *motapp, struct webui_ctx *webui)
+static void webu_context_init(struct ctx_motapp *motapp, struct ctx_webui *webui)
 {
     int indx;
     char *tmplang;
@@ -102,7 +102,7 @@ static void webu_context_init(struct ctx_motapp *motapp, struct webui_ctx *webui
 }
 
 /* Free the variables in the webui context */
-static void webu_context_free(struct webui_ctx *webui)
+static void webu_context_free(struct ctx_webui *webui)
 {
     int indx;
 
@@ -152,7 +152,7 @@ static void webu_context_free(struct webui_ctx *webui)
 }
 
 /* Edit the parameters specified in the url sent */
-static void webu_parms_edit(struct webui_ctx *webui)
+static void webu_parms_edit(struct ctx_webui *webui)
 {
     int indx, is_nbr;
 
@@ -197,7 +197,7 @@ static void webu_parms_edit(struct webui_ctx *webui)
 }
 
 /* Extract the camid and cmds from the url */
-static int webu_parseurl(struct webui_ctx *webui)
+static int webu_parseurl(struct ctx_webui *webui)
 {
     int retcd;
     char *tmpurl;
@@ -272,7 +272,7 @@ static int webu_parseurl(struct webui_ctx *webui)
 }
 
 /* Log the ip of the client connecting*/
-static void webu_clientip(struct webui_ctx *webui)
+static void webu_clientip(struct ctx_webui *webui)
 {
     const union MHD_ConnectionInfo *con_info;
     char client[WEBUI_LEN_URLI];
@@ -312,7 +312,7 @@ static void webu_clientip(struct webui_ctx *webui)
 }
 
 /* Get the hostname */
-static void webu_hostname(struct webui_ctx *webui)
+static void webu_hostname(struct ctx_webui *webui)
 {
     const char *hdr;
     std::string hostname;
@@ -343,7 +343,7 @@ static void webu_hostname(struct webui_ctx *webui)
 }
 
 /* Create a authorization denied response to user*/
-static mhdrslt webu_mhd_digest_fail(struct webui_ctx *webui,int signal_stale)
+static mhdrslt webu_mhd_digest_fail(struct ctx_webui *webui,int signal_stale)
 {
     struct MHD_Response *response;
     mhdrslt retcd;
@@ -370,7 +370,7 @@ static mhdrslt webu_mhd_digest_fail(struct webui_ctx *webui,int signal_stale)
 }
 
 /* Perform digest authentication */
-static mhdrslt webu_mhd_digest(struct webui_ctx *webui)
+static mhdrslt webu_mhd_digest(struct ctx_webui *webui)
 {
     /* This function gets called a couple of
      * times by MHD during the authentication process.
@@ -418,7 +418,7 @@ static mhdrslt webu_mhd_digest(struct webui_ctx *webui)
 }
 
 /* Create a authorization denied response to user*/
-static mhdrslt webu_mhd_basic_fail(struct webui_ctx *webui)
+static mhdrslt webu_mhd_basic_fail(struct ctx_webui *webui)
 {
     struct MHD_Response *response;
     int retcd;
@@ -448,7 +448,7 @@ static mhdrslt webu_mhd_basic_fail(struct webui_ctx *webui)
 }
 
 /* Perform Basic Authentication.  */
-static mhdrslt webu_mhd_basic(struct webui_ctx *webui)
+static mhdrslt webu_mhd_basic(struct ctx_webui *webui)
 {
     char *user, *pass;
 
@@ -498,7 +498,7 @@ static mhdrslt webu_mhd_basic(struct webui_ctx *webui)
 }
 
 /* Parse apart the user:pass provided*/
-static void webu_mhd_auth_parse(struct webui_ctx *webui)
+static void webu_mhd_auth_parse(struct ctx_webui *webui)
 {
     int auth_len;
     char *col_pos;
@@ -531,7 +531,7 @@ static void webu_mhd_auth_parse(struct webui_ctx *webui)
 }
 
 /* Initialize for authorization */
-static mhdrslt webu_mhd_auth(struct webui_ctx *webui)
+static mhdrslt webu_mhd_auth(struct ctx_webui *webui)
 {
     unsigned int rand1,rand2;
 
@@ -567,7 +567,7 @@ static mhdrslt webu_mhd_auth(struct webui_ctx *webui)
 }
 
 /* Send the response that we created back to the user.  */
-static mhdrslt webu_mhd_send(struct webui_ctx *webui)
+static mhdrslt webu_mhd_send(struct ctx_webui *webui)
 {
     mhdrslt retcd;
     struct MHD_Response *response;
@@ -602,7 +602,7 @@ static mhdrslt webu_mhd_send(struct webui_ctx *webui)
 
 
 /* Process the post data command */
-static mhdrslt webu_answer_post(struct webui_ctx *webui)
+static mhdrslt webu_answer_post(struct ctx_webui *webui)
 {
     mhdrslt retcd;
 
@@ -628,7 +628,7 @@ static mhdrslt webu_answer_post(struct webui_ctx *webui)
 }
 
 /*Append more data on to an existing entry in the post info structure */
-static void webu_iterate_post_append(struct webui_ctx *webui, int indx
+static void webu_iterate_post_append(struct ctx_webui *webui, int indx
         , const char *data, size_t datasz)
 {
 
@@ -649,7 +649,7 @@ static void webu_iterate_post_append(struct webui_ctx *webui, int indx
 }
 
 /*Create new entry in the post info structure */
-static void webu_iterate_post_new(struct webui_ctx *webui, const char *key
+static void webu_iterate_post_new(struct ctx_webui *webui, const char *key
         , const char *data, size_t datasz)
 {
     int retcd;
@@ -689,7 +689,7 @@ static mhdrslt webu_iterate_post (void *ptr, enum MHD_ValueKind kind
     (void) transfer_encoding;
     (void) off;
 
-    struct webui_ctx *webui = (webui_ctx *)ptr;
+    struct ctx_webui *webui = (ctx_webui *)ptr;
     int indx;
 
     for (indx=0; indx < webui->post_sz; indx++) {
@@ -707,7 +707,7 @@ static mhdrslt webu_iterate_post (void *ptr, enum MHD_ValueKind kind
 }
 
 /* Answer the get request from the user */
-static mhdrslt webu_answer_get(struct webui_ctx *webui)
+static mhdrslt webu_answer_get(struct ctx_webui *webui)
 {
     int retcd;
 
@@ -766,7 +766,7 @@ static mhdrslt webu_answer(void *cls, struct MHD_Connection *connection, const c
     (void)upload_data_size;
 
     mhdrslt retcd;
-    webui_ctx *webui =(struct webui_ctx *) *ptr;
+    ctx_webui *webui =(struct ctx_webui *) *ptr;
 
     webui->cnct_type = WEBUI_CNCT_CONTROL;
     webui->connection = connection;
@@ -831,14 +831,14 @@ static mhdrslt webu_answer(void *cls, struct MHD_Connection *connection, const c
 static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *connection)
 {
     struct ctx_motapp *motapp = (struct ctx_motapp *)cls;
-    struct webui_ctx *webui;
+    struct ctx_webui *webui;
     int retcd;
 
     (void)connection;
 
     mythreadname_set("wc", 0, NULL);
 
-    webui = new webui_ctx;
+    webui = new ctx_webui;
 
     webu_context_init(motapp, webui);
 
@@ -862,7 +862,7 @@ static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *co
 static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
         , void **con_cls, enum MHD_RequestTerminationCode toe)
 {
-    struct webui_ctx *webui =(struct webui_ctx *) *con_cls;
+    struct ctx_webui *webui =(struct ctx_webui *) *con_cls;
 
     (void)connection;
     (void)cls;

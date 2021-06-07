@@ -25,7 +25,7 @@
 #include "webu_post.hpp"
 
 /* Process the add camera action */
-static void webu_post_cam_add(struct webui_ctx *webui)
+static void webu_post_cam_add(struct ctx_webui *webui)
 {
     int indx, maxcnt;
 
@@ -50,7 +50,7 @@ static void webu_post_cam_add(struct webui_ctx *webui)
 
 }
 /* Process the delete camera action */
-static void webu_post_cam_delete(struct webui_ctx *webui)
+static void webu_post_cam_delete(struct ctx_webui *webui)
 {
     int indx, maxcnt;
 
@@ -97,7 +97,7 @@ static void webu_post_cam_delete(struct webui_ctx *webui)
 }
 
 /* Get the command and thread number from the post data */
-void webu_post_cmdthrd(struct webui_ctx *webui)
+void webu_post_cmdthrd(struct ctx_webui *webui)
 {
     int indx, camid;
 
@@ -148,7 +148,7 @@ void webu_post_cmdthrd(struct webui_ctx *webui)
 }
 
 /* Process the event end action */
-void webu_post_action_eventend(struct webui_ctx *webui)
+void webu_post_action_eventend(struct ctx_webui *webui)
 {
     int indx;
 
@@ -165,7 +165,7 @@ void webu_post_action_eventend(struct webui_ctx *webui)
 }
 
 /* Process the event start action */
-void webu_post_action_eventstart(struct webui_ctx *webui)
+void webu_post_action_eventstart(struct ctx_webui *webui)
 {
     int indx;
 
@@ -182,7 +182,7 @@ void webu_post_action_eventstart(struct webui_ctx *webui)
 }
 
 /* Process the snapshot action */
-void webu_post_action_snapshot(struct webui_ctx *webui)
+void webu_post_action_snapshot(struct ctx_webui *webui)
 {
     int indx;
 
@@ -199,7 +199,7 @@ void webu_post_action_snapshot(struct webui_ctx *webui)
 }
 
 /* Process the pause action */
-void webu_post_action_pause(struct webui_ctx *webui)
+void webu_post_action_pause(struct ctx_webui *webui)
 {
     int indx;
 
@@ -216,7 +216,7 @@ void webu_post_action_pause(struct webui_ctx *webui)
 }
 
 /* Process the unpause action */
-void webu_post_action_unpause(struct webui_ctx *webui)
+void webu_post_action_unpause(struct ctx_webui *webui)
 {
     int indx;
 
@@ -233,7 +233,7 @@ void webu_post_action_unpause(struct webui_ctx *webui)
 }
 
 /* Process the restart action */
-void webu_post_action_restart(struct webui_ctx *webui)
+void webu_post_action_restart(struct ctx_webui *webui)
 {
     int indx;
 
@@ -259,7 +259,7 @@ void webu_post_action_restart(struct webui_ctx *webui)
 }
 
 /* Process the stop action */
-void webu_post_action_stop(struct webui_ctx *webui)
+void webu_post_action_stop(struct ctx_webui *webui)
 {
     int indx;
 
@@ -287,7 +287,7 @@ void webu_post_action_stop(struct webui_ctx *webui)
 }
 
 /* Process the configuration parameters */
-static void webu_post_config(struct webui_ctx *webui)
+static void webu_post_config(struct ctx_webui *webui)
 {
     int indx, indx2;
     bool ismotapp;
@@ -353,7 +353,7 @@ static void webu_post_config(struct webui_ctx *webui)
 }
 
 /* Process the ptz action */
-void webu_post_ptz(struct webui_ctx *webui)
+void webu_post_ptz(struct ctx_webui *webui)
 {
     struct ctx_cam *cam;
 
@@ -386,7 +386,7 @@ void webu_post_ptz(struct webui_ctx *webui)
 }
 
 /* Process the actions from the webcontrol that the user requested */
-void webu_post_main(struct webui_ctx *webui)
+void webu_post_main(struct ctx_webui *webui)
 {
 
     webu_post_cmdthrd(webui);

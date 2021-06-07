@@ -20,6 +20,6 @@
 #ifndef _INCLUDE_WEBU_POST_H_
 #define _INCLUDE_WEBU_POST_H_
 
-    void webu_post_main(struct webui_ctx *webui);
+    void webu_post_main(struct ctx_webui *webui);
 
 #endif

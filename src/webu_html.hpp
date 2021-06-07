@@ -20,8 +20,8 @@
 #ifndef _INCLUDE_WEBU_HTML_H_
 #define _INCLUDE_WEBU_HTML_H_
 
-    void webu_html_badreq(struct webui_ctx *webui);
-    void webu_html_user(struct webui_ctx *webui);
-    void webu_html_page(struct webui_ctx *webui);
+    void webu_html_badreq(struct ctx_webui *webui);
+    void webu_html_user(struct ctx_webui *webui);
+    void webu_html_page(struct ctx_webui *webui);
 
 #endif
