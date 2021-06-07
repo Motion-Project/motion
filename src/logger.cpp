@@ -213,12 +213,12 @@ void motion_log(int level, int type, int errno_flag,int fncname, const char *fmt
     } else {
         if (flood_cnt > 1) {
             if (log_mode == LOGMODE_FILE) {
-                snprintf(flood_repeats,1024,"%s [%s] [%s] [%02d:%s] Above message repeats %d times"
+                snprintf(flood_repeats,1024,"%s [%s][%s][%02d:%s] Above message repeats %d times"
                     , str_time(), log_level_str[level], log_type_str[type]
                     , threadnr, threadname
                     , flood_cnt-1);
             } else {
-                snprintf(flood_repeats,1024,"[%s] [%s] [%02d:%s] Above message repeats %d times"
+                snprintf(flood_repeats,1024,"[%s][%s][%02d:%s] Above message repeats %d times"
                     , log_level_str[level], log_type_str[type]
                     , threadnr, threadname
                     , flood_cnt-1);
