@@ -1198,7 +1198,7 @@ static int netcam_resize(struct ctx_netcam *netcam)
 static int netcam_read_image(struct ctx_netcam *netcam)
 {
 
-    int  size_decoded, retcd, errcnt;
+    int  size_decoded, retcd, errcnt, nodata;
     bool haveimage;
     char errstr[128];
     netcam_buff *xchg;
@@ -1220,6 +1220,7 @@ static int netcam_read_image(struct ctx_netcam *netcam)
     size_decoded = 0;
     errcnt = 0;
     haveimage = false;
+    nodata = 0;
 
     while ((!haveimage) && (!netcam->interrupted)) {
         retcd = av_read_frame(netcam->format_context, &netcam->packet_recv);
@@ -1262,6 +1263,14 @@ static int netcam_read_image(struct ctx_netcam *netcam)
                 av_init_packet(&netcam->packet_recv);
                 netcam->packet_recv.data = NULL;
                 netcam->packet_recv.size = 0;
+
+                /* The 1000 is arbitrary */
+                nodata++;
+                if (nodata > 1000) {
+                    netcam_close_context(netcam);
+                    return -1;
+                }
+
             } else {
                 mypacket_unref(netcam->packet_recv);
                 netcam_close_context(netcam);
@@ -1926,15 +1935,22 @@ static void netcam_handler_reconnect(struct ctx_netcam *netcam)
     if (retcd < 0) {
         if (netcam->reconnect_count < 100) {
             netcam->reconnect_count++;
-        } else if (netcam->reconnect_count == 100) {
+        } else if ((netcam->reconnect_count >= 100) && (netcam->reconnect_count <= 199)) {
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Camera did not reconnect."), netcam->cameratype);
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Checking for camera every 10 seconds."),netcam->cameratype);
             netcam->reconnect_count++;
             SLEEP(10,0);
+        } else if (netcam->reconnect_count >= 200) {
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: Camera did not reconnect."), netcam->cameratype);
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: Checking for camera every 10 minutes."),netcam->cameratype);
+            SLEEP(600,0);
         } else {
-            SLEEP(10,0);
+            netcam->reconnect_count++;
+            SLEEP(600,0);
         }
     } else {
         netcam->reconnect_count = 0;
