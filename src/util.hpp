@@ -42,7 +42,7 @@
 #endif
 
 #if (MYFFVER >= 56000)
-    #define MY_CODEC_ID_MSMPEG4V2 AV_CODEC_ID_MSMPEG4V2
+    #define MY_CODEC_ID_MSMPEG4V2  AV_CODEC_ID_MSMPEG4V2
     #define MY_CODEC_ID_FLV1       AV_CODEC_ID_FLV1
     #define MY_CODEC_ID_FFV1       AV_CODEC_ID_FFV1
     #define MY_CODEC_ID_NONE       AV_CODEC_ID_NONE
@@ -71,6 +71,12 @@
 #else
     #define MY_CODEC_FLAG_GLOBAL_HEADER CODEC_FLAG_GLOBAL_HEADER
     #define MY_CODEC_FLAG_QSCALE        CODEC_FLAG_QSCALE
+#endif
+
+#if (LIBAVCODEC_VERSION_MAJOR >= 59)
+    typedef const AVCodec myAVCodec; /* Version independent for AVCodec*/
+#else
+    typedef AVCodec myAVCodec; /* Version independent for AVCodec*/
 #endif
 
 #ifdef HAVE_GETTEXT
@@ -123,12 +129,13 @@
 
     AVFrame *myframe_alloc(void);
     void myframe_free(AVFrame *frame);
-    void mypacket_unref(AVPacket pkt);
+    void mypacket_free(AVPacket *pkt);
     void myavcodec_close(AVCodecContext *codec_context);
     int myimage_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height);
     int myimage_copy_to_buffer(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height,int dest_size);
     int myimage_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height);
     int mycopy_packet(AVPacket *dest_pkt, AVPacket *src_pkt);
+    AVPacket *mypacket_alloc(AVPacket *pkt);
 
     void util_parms_parse(struct ctx_params *params, std::string confline);
     void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl);

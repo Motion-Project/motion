@@ -267,6 +267,12 @@ static void netcam_url_free(struct url_t *parse_url)
     parse_url->path = NULL;
 }
 
+static void netcam_free_pkt(struct ctx_netcam *netcam)
+{
+    mypacket_free(netcam->packet_recv);
+    netcam->packet_recv = NULL;
+}
+
 static int netcam_check_pixfmt(struct ctx_netcam *netcam)
 {
     /* Determine if the format is YUV420P */
@@ -289,9 +295,8 @@ static void netcam_pktarray_free(struct ctx_netcam *netcam)
     pthread_mutex_lock(&netcam->mutex_pktarray);
         if (netcam->pktarray_size > 0) {
             for(indx = 0; indx < netcam->pktarray_size; indx++) {
-                if (netcam->pktarray[indx].packet.data != NULL) {
-                    mypacket_unref(netcam->pktarray[indx].packet);
-                }
+                mypacket_free(netcam->pktarray[indx].packet);
+                netcam->pktarray[indx].packet = NULL;
             }
         }
         free(netcam->pktarray);
@@ -385,9 +390,8 @@ static void netcam_pktarray_resize(struct ctx_cam *cam, bool is_highres)
                 memcpy(tmp, netcam->pktarray, sizeof(struct packet_item) * netcam->pktarray_size);
             }
             for(indx = netcam->pktarray_size; indx < newsize; indx++) {
-                av_init_packet(&tmp[indx].packet);
-                tmp[indx].packet.data=NULL;
-                tmp[indx].packet.size=0;
+                tmp[indx].packet = NULL;
+                tmp[indx].packet = mypacket_alloc(tmp[indx].packet);
                 tmp[indx].idnbr = 0;
                 tmp[indx].iskey = false;
                 tmp[indx].iswritten = false;
@@ -429,24 +433,22 @@ static void netcam_pktarray_add(struct ctx_netcam *netcam)
 
         netcam->pktarray[indx_next].idnbr = netcam->idnbr;
 
-        mypacket_unref(netcam->pktarray[indx_next].packet);
-        av_init_packet(&netcam->pktarray[indx_next].packet);
-        netcam->pktarray[indx_next].packet.data = NULL;
-        netcam->pktarray[indx_next].packet.size = 0;
+        mypacket_free(netcam->pktarray[indx_next].packet);
+        netcam->pktarray[indx_next].packet = NULL;
+        netcam->pktarray[indx_next].packet = mypacket_alloc(netcam->pktarray[indx_next].packet);
 
-        retcd = mycopy_packet(&netcam->pktarray[indx_next].packet, &netcam->packet_recv);
+        retcd = mycopy_packet(netcam->pktarray[indx_next].packet, netcam->packet_recv);
         if ((netcam->interrupted) || (retcd < 0)) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: av_copy_packet: %s ,Interrupt: %s")
                 ,netcam->cameratype
                 ,errstr, netcam->interrupted ? _("true"):_("false"));
-            mypacket_unref(netcam->pktarray[indx_next].packet);
-            netcam->pktarray[indx_next].packet.data = NULL;
-            netcam->pktarray[indx_next].packet.size = 0;
+            mypacket_free(netcam->pktarray[indx_next].packet);
+            netcam->pktarray[indx_next].packet = NULL;
         }
 
-        if (netcam->pktarray[indx_next].packet.flags & AV_PKT_FLAG_KEY) {
+        if (netcam->pktarray[indx_next].packet->flags & AV_PKT_FLAG_KEY) {
             netcam->pktarray[indx_next].iskey = true;
         } else {
             netcam->pktarray[indx_next].iskey = false;
@@ -563,7 +565,7 @@ static int netcam_decode_video(struct ctx_netcam *netcam)
             return 0;   /* This just speeds up the shutdown time */
         }
 
-        retcd = avcodec_send_packet(netcam->codec_context, &netcam->packet_recv);
+        retcd = avcodec_send_packet(netcam->codec_context, netcam->packet_recv);
         if ((netcam->interrupted) || (netcam->finish)) {
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Interrupted or finish on send")
@@ -637,7 +639,7 @@ static int netcam_decode_packet(struct ctx_netcam *netcam)
         return -1;   /* This just speeds up the shutdown time */
     }
 
-    if (netcam->packet_recv.stream_index == netcam->audio_stream_index) {
+    if (netcam->packet_recv->stream_index == netcam->audio_stream_index) {
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             ,_("%s: Error decoding video packet...it is audio")
             ,netcam->cameratype);
@@ -1207,9 +1209,7 @@ static int netcam_read_image(struct ctx_netcam *netcam)
         return -1;   /* This just speeds up the shutdown time */
     }
 
-    av_init_packet(&netcam->packet_recv);
-    netcam->packet_recv.data = NULL;
-    netcam->packet_recv.size = 0;
+    netcam->packet_recv = mypacket_alloc(netcam->packet_recv);
 
     netcam->interrupted=false;
     clock_gettime(CLOCK_REALTIME, &netcam->interruptstarttime);
@@ -1223,7 +1223,7 @@ static int netcam_read_image(struct ctx_netcam *netcam)
     nodata = 0;
 
     while ((!haveimage) && (!netcam->interrupted)) {
-        retcd = av_read_frame(netcam->format_context, &netcam->packet_recv);
+        retcd = av_read_frame(netcam->format_context, netcam->packet_recv);
         if (retcd < 0 ) {
             errcnt++;
         }
@@ -1238,17 +1238,17 @@ static int netcam_read_image(struct ctx_netcam *netcam)
                     ,_("%s: av_read_frame: %s" )
                     ,netcam->cameratype,errstr);
             }
-            mypacket_unref(netcam->packet_recv);
+            netcam_free_pkt(netcam);
             netcam_close_context(netcam);
             return -1;
         } else {
             errcnt = 0;
-            if ((netcam->packet_recv.stream_index == netcam->video_stream_index) ||
-                (netcam->packet_recv.stream_index == netcam->audio_stream_index)) {
+            if ((netcam->packet_recv->stream_index == netcam->video_stream_index) ||
+                (netcam->packet_recv->stream_index == netcam->audio_stream_index)) {
                 /* For a high resolution pass-through we don't decode the image */
                 if ((netcam->high_resolution && netcam->passthrough) ||
-                    (netcam->packet_recv.stream_index != netcam->video_stream_index)) {
-                    if (netcam->packet_recv.data != NULL) {
+                    (netcam->packet_recv->stream_index != netcam->video_stream_index)) {
+                    if (netcam->packet_recv->data != NULL) {
                         size_decoded = 1;
                     }
                 } else {
@@ -1259,10 +1259,8 @@ static int netcam_read_image(struct ctx_netcam *netcam)
                 haveimage = true;
             } else if (size_decoded == 0) {
                 /* Did not fail, just didn't get anything.  Try again */
-                mypacket_unref(netcam->packet_recv);
-                av_init_packet(&netcam->packet_recv);
-                netcam->packet_recv.data = NULL;
-                netcam->packet_recv.size = 0;
+                netcam_free_pkt(netcam);
+                netcam->packet_recv = mypacket_alloc(netcam->packet_recv);
 
                 /* The 1000 is arbitrary */
                 nodata++;
@@ -1272,7 +1270,7 @@ static int netcam_read_image(struct ctx_netcam *netcam)
                 }
 
             } else {
-                mypacket_unref(netcam->packet_recv);
+                netcam_free_pkt(netcam);
                 netcam_close_context(netcam);
                 return -1;
             }
@@ -1286,13 +1284,13 @@ static int netcam_read_image(struct ctx_netcam *netcam)
 
     /* Skip resize/pix format for high pass-through */
     if (!(netcam->high_resolution && netcam->passthrough) &&
-        (netcam->packet_recv.stream_index == netcam->video_stream_index)) {
+        (netcam->packet_recv->stream_index == netcam->video_stream_index)) {
 
         if ((netcam->imgsize.width  != netcam->frame->width) ||
             (netcam->imgsize.height != netcam->frame->height) ||
             (netcam_check_pixfmt(netcam) != 0)) {
             if (netcam_resize(netcam) < 0) {
-                mypacket_unref(netcam->packet_recv);
+                netcam_free_pkt(netcam);
                 netcam_close_context(netcam);
                 return -1;
             }
@@ -1305,14 +1303,14 @@ static int netcam_read_image(struct ctx_netcam *netcam)
             netcam_pktarray_add(netcam);
         }
         if (!(netcam->high_resolution && netcam->passthrough) &&
-            (netcam->packet_recv.stream_index == netcam->video_stream_index)) {
+            (netcam->packet_recv->stream_index == netcam->video_stream_index)) {
             xchg = netcam->img_latest;
             netcam->img_latest = netcam->img_recv;
             netcam->img_recv = xchg;
         }
     pthread_mutex_unlock(&netcam->mutex);
 
-    mypacket_unref(netcam->packet_recv);
+    netcam_free_pkt(netcam);
 
     if (netcam->format_context->streams[netcam->video_stream_index]->avg_frame_rate.den > 0) {
         netcam->src_fps = (
@@ -1542,6 +1540,7 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
     netcam->pktarray_size = 0;
     netcam->pktarray_index = -1;
     netcam->pktarray = NULL;
+    netcam->packet_recv = NULL;
     netcam->handler_finished = true;
     netcam->first_image = true;
     netcam->reconnect_count = 0;

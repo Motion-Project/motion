@@ -50,8 +50,8 @@ struct ctx_movie {
     AVStream            *strm_video;
     AVStream            *strm_audio;
     AVCodecContext      *ctx_codec;
-    AVCodec             *codec;
-    AVPacket            pkt;
+    myAVCodec           *codec;
+    AVPacket            *pkt;
     AVFrame             *picture;       /* contains default image pointers */
     AVDictionary        *opts;
     struct ctx_netcam   *netcam_data;

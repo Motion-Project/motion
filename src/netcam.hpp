@@ -80,7 +80,7 @@ extern "C" {
     #include "libavutil/mem.h"
 }
 struct packet_item{
-    AVPacket                  packet;
+    AVPacket                 *packet;
     int64_t                   idnbr;
     bool                      iskey;
     bool                      iswritten;
@@ -96,7 +96,7 @@ struct ctx_netcam {
     AVFrame                  *swsframe_in;           /* Used when resizing image sent from camera */
     AVFrame                  *swsframe_out;          /* Used when resizing image sent from camera */
     struct SwsContext        *swsctx;                /* Context for the resizing of the image */
-    AVPacket                  packet_recv;           /* The packet that is currently being processed */
+    AVPacket                 *packet_recv;           /* The packet that is currently being processed */
     AVFormatContext          *transfer_format;       /* Format context just for transferring to pass-through */
     struct packet_item       *pktarray;              /* Pointer to array of packets for passthru processing */
     int                       pktarray_size;         /* The number of packets in array.  1 based */
@@ -109,8 +109,8 @@ struct ctx_netcam {
 
     enum AVHWDeviceType       hw_type;
     enum AVPixelFormat        hw_pix_fmt;
-    AVBufferRef               *hw_device_ctx;
-    AVCodec                   *decoder;
+    AVBufferRef              *hw_device_ctx;
+    myAVCodec                *decoder;
 
     enum NETCAM_STATUS        status;                /* Status of whether the camera is connecting, closed, etc*/
     struct timespec           interruptstarttime;    /* The time set before calling the av functions */
