@@ -76,12 +76,13 @@
 
     AVFrame *my_frame_alloc(void);
     void my_frame_free(AVFrame *frame);
-    void my_packet_unref(AVPacket pkt);
+    void my_packet_free(AVPacket *pkt);
     void my_avcodec_close(AVCodecContext *codec_context);
     int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height);
     int my_image_copy_to_buffer(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height,int dest_size);
     int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height);
     int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt);
+    AVPacket *my_packet_alloc(AVPacket *pkt);
 
 #endif /* HAVE_FFMPEG */
 

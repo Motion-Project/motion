@@ -44,6 +44,12 @@
 
 #ifdef HAVE_FFMPEG
 
+static void movie_free_pkt(struct ffmpeg *ffmpeg)
+{
+    my_packet_free(ffmpeg->pkt);
+    ffmpeg->pkt = NULL;
+}
+
 static void ffmpeg_free_nal(struct ffmpeg *ffmpeg)
 {
     if (ffmpeg->nal_info) {
@@ -57,20 +63,20 @@ static int ffmpeg_encode_nal(struct ffmpeg *ffmpeg)
 {
     // h264_v4l2m2m has NAL units separated from the first frame, which makes
     // some players very unhappy.
-    if ((ffmpeg->pkt.pts == 0) && (!(ffmpeg->pkt.flags & AV_PKT_FLAG_KEY))) {
+    if ((ffmpeg->pkt->pts == 0) && (!(ffmpeg->pkt->flags & AV_PKT_FLAG_KEY))) {
         ffmpeg_free_nal(ffmpeg);
-        ffmpeg->nal_info_len = ffmpeg->pkt.size;
+        ffmpeg->nal_info_len = ffmpeg->pkt->size;
         ffmpeg->nal_info = malloc(ffmpeg->nal_info_len);
         if (ffmpeg->nal_info) {
-            memcpy(ffmpeg->nal_info, &ffmpeg->pkt.data[0], ffmpeg->nal_info_len);
+            memcpy(ffmpeg->nal_info, &ffmpeg->pkt->data[0], ffmpeg->nal_info_len);
             return 1;
         } else
             ffmpeg->nal_info_len = 0;
     } else if (ffmpeg->nal_info) {
-        int old_size = ffmpeg->pkt.size;
-        av_grow_packet(&ffmpeg->pkt, ffmpeg->nal_info_len);
-        memmove(&ffmpeg->pkt.data[ffmpeg->nal_info_len], &ffmpeg->pkt.data[0], old_size);
-        memcpy(&ffmpeg->pkt.data[0], ffmpeg->nal_info, ffmpeg->nal_info_len);
+        int old_size = ffmpeg->pkt->size;
+        av_grow_packet(ffmpeg->pkt, ffmpeg->nal_info_len);
+        memmove(&ffmpeg->pkt->data[ffmpeg->nal_info_len], &ffmpeg->pkt->data[0], old_size);
+        memcpy(&ffmpeg->pkt->data[0], ffmpeg->nal_info, ffmpeg->nal_info_len);
         ffmpeg_free_nal(ffmpeg);
     }
     return 0;
@@ -87,7 +93,7 @@ static int ffmpeg_timelapse_exists(const char *fname)
     return 0;
 }
 
-static int ffmpeg_timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt)
+static int ffmpeg_timelapse_append(struct ffmpeg *ffmpeg, AVPacket *pkt)
 {
     FILE *file;
 
@@ -96,7 +102,7 @@ static int ffmpeg_timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt)
         return -1;
     }
 
-    fwrite(pkt.data,1,pkt.size,file);
+    fwrite(pkt->data, 1, pkt->size,file);
 
     fclose(file);
 
@@ -332,13 +338,13 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg)
                 ,_("Error sending frame for encoding:%s"),errstr);
             return -1;
         }
-        retcd = avcodec_receive_packet(ffmpeg->ctx_codec, &ffmpeg->pkt);
+        retcd = avcodec_receive_packet(ffmpeg->ctx_codec, ffmpeg->pkt);
         if (retcd == AVERROR(EAGAIN)) {
             //Buffered packet.  Throw special return code
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
                 ,_("Receive packet threw EAGAIN returning -2 code :%s"),errstr);
-            my_packet_unref(ffmpeg->pkt);
+            movie_free_pkt(ffmpeg);
             return -2;
         }
         if (retcd < 0 ) {
@@ -363,7 +369,7 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg)
         char errstr[128];
         int got_packet_ptr;
 
-        retcd = avcodec_encode_video2(ffmpeg->ctx_codec, &ffmpeg->pkt, ffmpeg->picture, &got_packet_ptr);
+        retcd = avcodec_encode_video2(ffmpeg->ctx_codec, ffmpeg->pkt, ffmpeg->picture, &got_packet_ptr);
         if (retcd < 0 ) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error encoding video:%s"),errstr);
@@ -372,7 +378,7 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg)
         }
         if (got_packet_ptr == 0) {
             //Buffered packet.  Throw special return code
-            my_packet_unref(ffmpeg->pkt);
+            movie_free_pkt(ffmpeg);
             return -2;
         }
 
@@ -398,25 +404,25 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg)
         retcd = avcodec_encode_video(ffmpeg->video_st->codec, video_outbuf, video_outbuf_size, ffmpeg->picture);
         if (retcd < 0 ) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error encoding video"));
-            my_packet_unref(ffmpeg->pkt);
+            movie_free_pkt(ffmpeg);
             return -1;
         }
         if (retcd == 0 ) {
             // No bytes encoded => buffered=>special handling
-            my_packet_unref(ffmpeg->pkt);
+            movie_free_pkt(ffmpeg);
             return -2;
         }
 
         // Encoder did not provide metadata, set it up manually
-        ffmpeg->pkt.size = retcd;
-        ffmpeg->pkt.data = video_outbuf;
+        ffmpeg->pkt->size = retcd;
+        ffmpeg->pkt->data = video_outbuf;
 
         if (ffmpeg->picture->key_frame == 1) {
-            ffmpeg->pkt.flags |= AV_PKT_FLAG_KEY;
+            ffmpeg->pkt->flags |= AV_PKT_FLAG_KEY;
         }
 
-        ffmpeg->pkt.pts = ffmpeg->picture->pts;
-        ffmpeg->pkt.dts = ffmpeg->pkt.pts;
+        ffmpeg->pkt->pts = ffmpeg->picture->pts;
+        ffmpeg->pkt->dts = ffmpeg->pkt->pts;
 
         free(video_outbuf);
 
@@ -480,7 +486,7 @@ static int ffmpeg_set_pktpts(struct ffmpeg *ffmpeg, const struct timeval *tv1)
 
     if (ffmpeg->tlapse != TIMELAPSE_NONE) {
         ffmpeg->last_pts++;
-        ffmpeg->pkt.pts = ffmpeg->last_pts;
+        ffmpeg->pkt->pts = ffmpeg->last_pts;
     } else {
         pts_interval = ((1000000L * (tv1->tv_sec - ffmpeg->start_time.tv_sec)) + tv1->tv_usec - ffmpeg->start_time.tv_usec);
         if (pts_interval < 0) {
@@ -488,27 +494,27 @@ static int ffmpeg_set_pktpts(struct ffmpeg *ffmpeg, const struct timeval *tv1)
             ffmpeg_reset_movie_start_time(ffmpeg, tv1);
             pts_interval = 0;
         }
-        ffmpeg->pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base) + ffmpeg->base_pts;
+        ffmpeg->pkt->pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base) + ffmpeg->base_pts;
 
         if (ffmpeg->test_mode == TRUE) {
             MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
                        ,_("PTS %"PRId64" Base PTS %"PRId64" ms interval %"PRId64" timebase %d-%d Change %d")
-                       ,ffmpeg->pkt.pts
+                       ,ffmpeg->pkt->pts
                        ,ffmpeg->base_pts,pts_interval
                        ,ffmpeg->video_st->time_base.num
                        ,ffmpeg->video_st->time_base.den
-                       ,(ffmpeg->pkt.pts-ffmpeg->last_pts) );
+                       ,(ffmpeg->pkt->pts-ffmpeg->last_pts) );
         }
 
-        if (ffmpeg->pkt.pts <= ffmpeg->last_pts) {
+        if (ffmpeg->pkt->pts <= ffmpeg->last_pts) {
             //We have a problem with our motion loop timing and sending frames or the rounding into the PTS.
             if (ffmpeg->test_mode == TRUE) {
                 MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("BAD TIMING!! Frame skipped."));
             }
             return -1;
         }
-        ffmpeg->last_pts = ffmpeg->pkt.pts;
-        ffmpeg->pkt.dts=ffmpeg->pkt.pts;
+        ffmpeg->last_pts = ffmpeg->pkt->pts;
+        ffmpeg->pkt->dts=ffmpeg->pkt->pts;
     }
     return 0;
 }
@@ -997,32 +1003,30 @@ static int ffmpeg_flush_codec(struct ffmpeg *ffmpeg)
                 return -1;
             }
             while (recv_cd != AVERROR_EOF) {
-                av_init_packet(&ffmpeg->pkt);
-                ffmpeg->pkt.data = NULL;
-                ffmpeg->pkt.size = 0;
-                recv_cd = avcodec_receive_packet(ffmpeg->ctx_codec, &ffmpeg->pkt);
+                ffmpeg->pkt = my_packet_alloc(ffmpeg->pkt);
+                recv_cd = avcodec_receive_packet(ffmpeg->ctx_codec, ffmpeg->pkt);
                 if (recv_cd != AVERROR_EOF) {
                     if (recv_cd < 0) {
                         av_strerror(recv_cd, errstr, sizeof(errstr));
                         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                             ,_("Error draining codec:%s"),errstr);
-                        my_packet_unref(ffmpeg->pkt);
+                        movie_free_pkt(ffmpeg);
                         return -1;
                     }
                     // v4l2_m2m encoder uses pts 0 and size 0 to indicate AVERROR_EOF
-                    if ((ffmpeg->pkt.pts == 0) || (ffmpeg->pkt.size == 0)) {
+                    if ((ffmpeg->pkt->pts == 0) || (ffmpeg->pkt->size == 0)) {
                         recv_cd = AVERROR_EOF;
-                        my_packet_unref(ffmpeg->pkt);
+                        movie_free_pkt(ffmpeg);
                         continue;
                     }
-                    retcd = av_write_frame(ffmpeg->oc, &ffmpeg->pkt);
+                    retcd = av_write_frame(ffmpeg->oc, ffmpeg->pkt);
                     if (retcd < 0) {
                         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                             ,_("Error writing draining video frame"));
                         return -1;
                     }
                 }
-                my_packet_unref(ffmpeg->pkt);
+                movie_free_pkt(ffmpeg);
             }
         }
         return 0;
@@ -1041,14 +1045,12 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1)
 {
     int retcd;
 
-    av_init_packet(&ffmpeg->pkt);
-    ffmpeg->pkt.data = NULL;
-    ffmpeg->pkt.size = 0;
+    ffmpeg->pkt = my_packet_alloc(ffmpeg->pkt);
 
     retcd = ffmpeg_set_pts(ffmpeg, tv1);
     if (retcd < 0) {
         //If there is an error, it has already been reported.
-        my_packet_unref(ffmpeg->pkt);
+        movie_free_pkt(ffmpeg);
         return 0;
     }
 
@@ -1057,16 +1059,16 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1)
         if (retcd != -2) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error while encoding picture"));
         }
-        my_packet_unref(ffmpeg->pkt);
+        movie_free_pkt(ffmpeg);
         return retcd;
     }
 
     if (ffmpeg->tlapse == TIMELAPSE_APPEND) {
         retcd = ffmpeg_timelapse_append(ffmpeg, ffmpeg->pkt);
     } else {
-        retcd = av_write_frame(ffmpeg->oc, &ffmpeg->pkt);
+        retcd = av_write_frame(ffmpeg->oc, ffmpeg->pkt);
     }
-    my_packet_unref(ffmpeg->pkt);
+    movie_free_pkt(ffmpeg);
 
     if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error while writing video frame"));
@@ -1095,31 +1097,27 @@ static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx)
     char errstr[128];
     int retcd;
 
-    av_init_packet(&ffmpeg->pkt);
-    ffmpeg->pkt.data = NULL;
-    ffmpeg->pkt.size = 0;
-
-
+    ffmpeg->pkt = my_packet_alloc(ffmpeg->pkt);
     ffmpeg->rtsp_data->pktarray[indx].iswritten = TRUE;
 
-    retcd = my_copy_packet(&ffmpeg->pkt, &ffmpeg->rtsp_data->pktarray[indx].packet);
+    retcd = my_copy_packet(ffmpeg->pkt, ffmpeg->rtsp_data->pktarray[indx].packet);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("av_copy_packet: %s"),errstr);
-        my_packet_unref(ffmpeg->pkt);
+        movie_free_pkt(ffmpeg);
         return;
     }
 
     retcd = ffmpeg_set_pktpts(ffmpeg, &ffmpeg->rtsp_data->pktarray[indx].timestamp_tv);
     if (retcd < 0) {
-        my_packet_unref(ffmpeg->pkt);
+        movie_free_pkt(ffmpeg);
         return;
     }
 
-    ffmpeg->pkt.stream_index = 0;
+    ffmpeg->pkt->stream_index = 0;
 
-    retcd = av_write_frame(ffmpeg->oc, &ffmpeg->pkt);
-    my_packet_unref(ffmpeg->pkt);
+    retcd = av_write_frame(ffmpeg->oc, ffmpeg->pkt);
+    movie_free_pkt(ffmpeg);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
@@ -1189,7 +1187,7 @@ static int ffmpeg_passthru_put(struct ffmpeg *ffmpeg, struct image_data *img_dat
 
         while (TRUE) {
             if ((!ffmpeg->rtsp_data->pktarray[indx].iswritten) &&
-                (ffmpeg->rtsp_data->pktarray[indx].packet.size > 0) &&
+                (ffmpeg->rtsp_data->pktarray[indx].packet->size > 0) &&
                 (ffmpeg->rtsp_data->pktarray[indx].idnbr >  idnbr_lastwritten) &&
                 (ffmpeg->rtsp_data->pktarray[indx].idnbr <= idnbr_image)) {
                 ffmpeg_passthru_write(ffmpeg, indx);

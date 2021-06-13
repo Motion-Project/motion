@@ -35,7 +35,7 @@ struct imgsize_context {
 #ifdef HAVE_FFMPEG
 
     struct packet_item{
-        AVPacket                  packet;
+        AVPacket                 *packet;
         int64_t                   idnbr;
         int                       iskey;
         int                       iswritten;
@@ -50,7 +50,7 @@ struct imgsize_context {
         AVFrame                  *swsframe_in;           /* Used when resizing image sent from camera */
         AVFrame                  *swsframe_out;          /* Used when resizing image sent from camera */
         struct SwsContext        *swsctx;                /* Context for the resizing of the image */
-        AVPacket                  packet_recv;           /* The packet that is currently being processed */
+        AVPacket                 *packet_recv;           /* The packet that is currently being processed */
         AVFormatContext          *transfer_format;       /* Format context just for transferring to pass-through */
         struct packet_item       *pktarray;              /* Pointer to array of packets for passthru processing */
         int                       pktarray_size;         /* The number of packets in array.  1 based */

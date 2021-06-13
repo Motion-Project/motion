@@ -100,12 +100,14 @@ int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat p
     return retcd;
 }
 /*********************************************/
-void my_packet_unref(AVPacket pkt)
+void my_packet_free(AVPacket *pkt)
 {
-    #if ( MYFFVER >= 57000)
-        av_packet_unref(&pkt);
+    #if (MYFFVER >= 58076)
+        av_packet_free(&pkt);
+    #elif (MYFFVER >= 57000)
+        av_packet_unref(pkt);
     #else
-        av_free_packet(&pkt);
+        av_free_packet(pkt);
     #endif
 }
 /*********************************************/
@@ -132,6 +134,22 @@ int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt)
         } else {
             return 0;
         }
+    #endif
+}
+
+/*********************************************/
+AVPacket *my_packet_alloc(AVPacket *pkt)
+{
+    #if (MYFFVER >= 58076)
+        if (pkt != NULL) {
+            my_packet_free(pkt);
+        };
+        return av_packet_alloc();
+    #else
+        av_init_packet(pkt);
+        pkt->data = NULL;
+        pkt->size = 0;
+        return pkt;
     #endif
 }
 
