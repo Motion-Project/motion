@@ -64,7 +64,7 @@ struct imgsize_context {
             enum AVPixelFormat        hw_pix_fmt;
             AVBufferRef               *hw_device_ctx;
         #endif
-        AVCodec                   *decoder;
+        my_AVCodec               *decoder;
 
         enum RTSP_STATUS          status;                /* Status of whether the camera is connecting, closed, etc*/
         struct timeval            interruptstarttime;    /* The time set before calling the av functions */

@@ -45,7 +45,7 @@ enum USER_CODEC {
         AVFormatContext *oc;
         AVStream *video_st;
         AVCodecContext *ctx_codec;
-        AVCodec *codec;
+        my_AVCodec      *codec;
         AVPacket *pkt;
         AVFrame *picture;       /* contains default image pointers */
         AVDictionary *opts;
