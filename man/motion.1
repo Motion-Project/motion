@@ -1687,7 +1687,7 @@ Limit stream to 1 fps when no motion is being detected.
 .B database_type
 .RS
 .nf
-Values: mysql, postgresql, sqlite3
+Values: mysql, mariadb, postgresql, sqlite3
 Default: Not defined
 Description:
 .fi
@@ -1705,7 +1705,8 @@ Default: Not defined
 Description:
 .fi
 .RS
-The name of the database being used (dbname).  For Sqlite3, the full path to the database.
+The name of the database being used (dbname).
+For SQLite3, the full path to the database.
 .RE
 .RE
 
@@ -1718,7 +1719,9 @@ Default: localhost
 Description:
 .fi
 .RS
-The name of the host on which the database is running.
+The hostname, DNS name, or IP address at which the database is running.
+Optionally for PostgreSQL, full path of the local directory containing its Unix domain pipe.
+For SQLite3, ignored.
 .RE
 .RE
 
@@ -1731,8 +1734,9 @@ Default: Not defined
 Description:
 .fi
 .RS
-The port to use in order to access the database.
-Default ports: mysql 3306 , postgresql 5432
+TCP port number used for database access.
+For SQLite3, ignored.
+Default ports used by DBMSs: MySQL & MariaDB, 3306; PostgreSQL, 5432.
 .RE
 .RE
 
@@ -1746,7 +1750,8 @@ Default: Not Defined
 Description:
 .fi
 .RS
-The username to access the database
+The username to access the database.
+For SQLite3, ignored.
 .RE
 .RE
 
@@ -1760,6 +1765,7 @@ Description:
 .fi
 .RS
 The database password for the user to access the database.
+For SQLite3, ignored.
 .RE
 .RE
 
@@ -1772,7 +1778,7 @@ Default: 0
 Description:
 .fi
 .RS
-Database wait time in milliseconds for locked database to be unlocked before returning database locked error
+SQLite3 only: database wait time in milliseconds for locked database to be unlocked before returning database locked error
 .RE
 .RE
 
@@ -1829,6 +1835,36 @@ Log to the database when creating timelapse movies file
 .RE
 
 .TP
+.B sql_query
+.RS
+.nf
+Values: User defined string
+Default: Not defined
+Description:
+.fi
+.RS
+SQL statement to execute when Motion saves an image file or begins recording a movie and the corresponding file type's sql_log_* configuration option is set on.
+Use same conversion specifiers as for text features.
+Additional special conversion specifiers are:
+.RS
+%n = the number representing the file_type
+%f = filename with full path
+.RE
+Sample table set up (not sql_query):
+.RS
+Mysql:  CREATE TABLE security (camera INTEGER NOT NULL, filename CHAR(80) NOT NULL, frame INTEGER, file_type INTEGER NOT NULL, time_stamp DATETIME NOT NULL, text_event CHAR(255));
+.RE
+.RS
+Postgresql: CREATE TABLE security (camera INTEGER NOT NULL, filename VARCHAR NOT NULL, frame INTEGER, file_type INTEGER NOT NULL, time_stamp TIMESTAMP NOT NULL, text_event VARCHAR);
+.RE
+Sample sql_query
+.RS
+INSERT INTO security(camera, filename, frame, file_type, time_stamp, text_event) VALUES(%t, '%f', %q, %n, '%Y-%m-%d %T', '%C')
+.RE
+.RE
+.RE
+
+.TP
 .B sql_query_start
 .RS
 .nf
@@ -1837,9 +1873,9 @@ Default: Not defined
 Description:
 .fi
 .RS
-SQL statement to execute at the start of a event.
-For mysql databases a unique id is returned in the dbeventid conversion specifier but for
-other databases, the dbeventid conversion specifier is assigned to zero.
+SQL statement to execute at the start of a motion event.
+When the related table schema (and, for PostgreSQL, a RETURNING clause included in this statement) provide for it, the database generates a table-unique event ID that is returned and substituted for the %{dbeventid} conversion specifier.
+When no valid value is returned, %{dbeventid} is replaced by zero.
 .RE
 .RE
 .RE
@@ -1853,37 +1889,7 @@ Default: Not defined
 Description:
 .fi
 .RS
-SQL statement to execute at the end of a event.
-.RE
-.RE
-.RE
-
-.TP
-.B sql_query
-.RS
-.nf
-Values: User defined string
-Default: Not defined
-Description:
-.fi
-.RS
-SQL statement to execute when a event occurs.
-Use same conversion specifiers as for text features
-Additional special conversion specifiers are
-.RS
-%n = the number representing the file_type
-%f = filename with full path
-.RE
-Sample table set up (not sql_query):
-.RS
-Mysql:  CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp(14), event_time_stamp timestamp(14));
-.RE
-.RS
-Postgresql: CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp without time zone, event_time_stamp timestamp without time zone);
-.RE
-Sample sql_query
-.RS
-insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
+SQL statement to execute upon closure of a motion event movie or timelapse movie file, provided the corresponding file type's sql_log_* configuration option is set on.
 .RE
 .RE
 .RE

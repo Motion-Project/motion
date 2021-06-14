@@ -1430,8 +1430,12 @@ static int motion_init(struct context *cnt)
 static void motion_cleanup(struct context *cnt)
 {
 
-    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, NULL);
-    event(cnt, EVENT_ENDMOTION, NULL, NULL, NULL, NULL);
+    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
+    if (cnt->event_nr == cnt->prev_event) {
+      /* run only if event active; else, may overwrite last event's data */
+      event(cnt, EVENT_ENDMOTION, NULL, NULL, NULL,  &cnt->current_image->timestamp_tv);
+      cnt->event_nr++;
+    }
 
     mot_stream_deinit(cnt);
 
@@ -2431,8 +2435,8 @@ static void mlp_actions(struct context *cnt)
     /* Check for movie length */
     if ((cnt->conf.movie_max_time > 0) &&
         (cnt->event_nr == cnt->prev_event) &&
-        ((cnt->currenttime - cnt->eventtime) >= cnt->conf.movie_max_time)) {
-        cnt->event_stop = TRUE;
+        (cnt->current_image->timestamp_tv.tv_sec - cnt->movietime >= cnt->conf.movie_max_time)) {
+        event(cnt, EVENT_MAX_MOVIE, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
     }
 
     /* Check event gap */
@@ -3566,7 +3570,7 @@ int main (int argc, char **argv)
 
     ffmpeg_global_deinit();
 
-    dbse_global_deinit();
+    dbse_global_deinit(cnt_list);
 
     motion_shutdown();
 

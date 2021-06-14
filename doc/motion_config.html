@@ -5327,36 +5327,93 @@
 
       <h3><a name="OptDetail_Database"></a>Database</h3>
       <ul>
-        Motion can be compiled with MySQL, PostgreSQL or SQLite3 database support.
-        When enabled Motion can be configured to add a record to a table in the database
-        as specified by the sql_query. The query can contain the fields that are used and the
-        values are given by using <a href="#conversion_specifiers">Conversion Specifiers</a> for dynamic data like
-        the filename, time, number of detected pixels etc.
-        Motion does not place any binary images in the database and it cannot remove old records.
+        Motion can record many details of its images, movies, and events in a database.
+        Support for one or more of the Database Management Systems (DBMS) MySQL, MariaDB,
+        PostgreSQL, and SQLite3 may be incorporated when Motion is built from source.
+        Many Linux distributions provide packages to selectively incorporate most or all
+        of Motion's DBMS support.
+        Configuration option <a href="#database_type">database_type</a> specifies which DBMS,
+        if any, is used in a given Motion run.
         <p></p>
-        Motion only adds records to the database when files are created.
-        The database contains records of saved files which means to get a
-        record in the database the feature that enables for example motion
-        detection, timelapse, snapshots etc must be enabled.
-        The sql_log options define which types of files are logged in the database.
+        When a Motion installation includes DBMS support, SQL statements to insert or update
+        database records may be specified using Motion's
+        <a href="#OptTopic_Database">database configuration options</a>
+        <a href="#sql_query">sql_query</a>, <a href="#sql_query_start">sql_query_start</a>, and
+        <a href="#sql_query_stop">sql_query_stop</a>.
+        These SQL statements may record dynamic image, movie, and event data
+        in database tables using <a href="#conversion_specifiers">Conversion Specifiers</a>
+        for data elements like filename, time, number of changed pixels detected etc.
+        Motion does <em>not</em> record images or movies themselves in a database.
         <p></p>
-        The following are sample create table queries for different databases.
+        Motion can insert or update database records when it creates image or movie files,
+        when it recognizes the beginning of a motion event, and when it closes movie files
+        at the end of a motion event.
+        <a href="#sql_query">sql_query</a> and <a href="#sql_query_stop">sql_query_stop</a>
+        are executed only for the image and movie file types enabled by their respective sql_log_*
+        configuration options.
+        The sql_log_* options do <em>not</em> impact <a href="#sql_query_start">sql_query_start</a>,
+        which, if specified, is always executed at event start.
         <p></p>
-        Mysql : CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp(14), event_time_stamp timestamp(14));
+        Configuration option <a href="#sql_query_start">sql_query_start</a> allows motion-detected
+        events to be assigned unique event IDs and recorded in the database independently from
+        Motion's recording of images and movies.
+        When this SQL statement and the related database table schema are so configured, the
+        database assigns an event ID that is globally unique within its table and returns the ID
+        to the motion thread that recorded the event.
+        The conversion specifier %{dbeventid} may then be included in subsequently executed
+        <a href="#sql_query">sql_query</a> and <a href="#sql_query_stop">sql_query_stop</a>
+        statements to insert that event ID into database records created for associated files or
+        to control updates of event-related records.
+        For example, <a href="#sql_query_stop">sql_query_stop</a> may specify a SQL UPDATE statement
+        that inserts event end time into a recently-started event's record. (Note that Motion's "event"
+        data item, conversion specifier %v, is unique only within a given camera and Motion run).
         <p></p>
-        Postgresql : CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp without time zone, event_time_stamp timestamp without time zone);
+        Motion does not provide for deletion of the database records it creates nor for the
+        images and movies they catalog.
+        Other user-provided scripts or software may analyze, search, display,
+        and purge database records and related images and movies.
         <p></p>
-        MySQL to use the dbeventid, sql_query_start
+        Example SQL statements defining a database table to record Motion file details:
         <p></p>
-        CREATE TABLE security_file (file_id int primary key auto_increment, event_id int foreign key, filename text not null, frame int, file_type int, time_stamp timestamp(14));\n"
+        MySQL; MariaDB : <code>CREATE TABLE security (camera INTEGER NOT NULL,
+          filename VARCHAR(255) NOT NULL, file_type INTEGER NOT NULL,
+          time_stamp DATETIME NOT NULL, frame INTEGER, motion_event INTEGER,
+          movie_end DATETIME);</code>
         <p></p>
-
+        Postgresql : <code>CREATE TABLE security (camera INTEGER NOT NULL,
+          filename VARCHAR NOT NULL, file_type INTEGER NOT NULL,
+          time_stamp TIMESTAMP NOT NULL, frame INTEGER, motion_event INTEGER,
+          movie_end TIMESTAMP);</code>
+        <p></p>
+        Sample SQL defining a table for Motion-recognized events, each with a unique <code>%{dbeventid}</code> ID:
+        <p></p>
+        MySQL; MariaDB : <code>CREATE TABLE event (event_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+          camera INTEGER NOT NULL, event_start DATETIME NOT NULL, event_stop DATETIME,
+          motion_event INTEGER NOT NULL, event_text VARCHAR(255));</code>
+        <p></p>
+        SQLite3 : <code>CREATE TABLE event (event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+          camera INTEGER NOT NULL, event_start REAL NOT NULL, event_stop REAL,
+          motion_event INTEGER NOT NULL, event_text TEXT);</code>
+          (SQLite3 has no native timestamp data type; REAL supports timestamps down to microsecond precision.)
+        <p></p>
+        PostgreSQL : <code>
+        CREATE TABLE event (event_id SERIAL PRIMARY KEY, camera INTEGER NOT NULL,
+          event_start TIMESTAMP NOT NULL, event_stop TIMESTAMP, motion_event INTEGER NOT NULL,
+          motion_pixels INTEGER, motion_x INTEGER, motion_y INTEGER, event_text VARCHAR);</code><br/>
+        sql_query_start <code>INSERT INTO event values (DEFAULT, %t, '%Y-%m-%d %T', NULL, %v,
+          %D, %K, %L, %C) RETURNING event_id</code><br/>
+        sql_query_stop <code>UPDATE event SET event_stop='%Y-%m-%d %T' WHERE %n=8 AND
+          event_id=%{dbeventid} AND event_stop IS NULL</code>
+          (assumes <a href="#movie_output">movie_output</a> and
+          <a href="#sql_log_movie">sql_log_movie</a> are enabled)
+        <p></p>
 
         <h3><a name="database_type"></a> database_type </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
-          <li> Range / Valid values: mysql, postgresql, sqlite3</li>
+          <li> Range / Valid values: <code>mysql</code>, <code>mariadb</code>,
+          <code>postgresql</code>, <code>sqlite3</code></li>
           <li> Default: Not defined</li>
         </ul>
         <p></p>
@@ -5371,7 +5428,8 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The name of the database.  For Sqlite3, the full path and name to the database.
+        Name of a database (SQLite3: full path to the database file) containing preexisting table(s) created
+        with schema(s) consistent with any SQL statements specified by sql_query* configuration options.
         <p></p>
 
         <h3><a name="database_host"></a> database_host </h3>
@@ -5382,7 +5440,9 @@
           <li> Default: localhost</li>
         </ul>
         <p></p>
-        The host on which the database is located
+        The host on which the database is located.  Hostname, domain name, or IP address.
+        Optionally for PostgreSQL, full path of the local directory containing its Unix domain
+        pipe; e.g., <code>/var/run/postgresql</code>. Ignored for SQLite3.
         <p></p>
 
         <h3><a name="database_port"></a> database_port </h3>
@@ -5393,7 +5453,7 @@
           <li> Default: 0</li>
         </ul>
         <p></p>
-        The port number that is used for the database.  Typical values are: mysql=3306 and postgresql=5432
+        The port number that is used for the database. Ignored for SQLite3. Typical values are: mysql=3306 and postgresql=5432
         <p></p>
 
         <h3><a name="database_user"></a> database_user </h3>
@@ -5404,7 +5464,7 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The user account name for database
+        The user account name for database. Ignored for SQLite3.
         <p></p>
 
         <h3><a name="database_password"></a> database_password </h3>
@@ -5415,19 +5475,20 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The user password for database
+        The user password for database. Ignored for SQLite3.
         <p></p>
 
         <h3><a name="database_busy_timeout"></a> database_busy_timeout </h3>
         <p></p>
         <ul>
           <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 1000's</li>
-          <li> Default: 0</li>
+          <li> Range / Valid values: 0 or more, millisec.</li>
+          <li> Default: 0, immediate timeout</li>
         </ul>
         <p></p>
-        If the database is busy when the request is issued, this parameter indicates the time to
-        wait before issuing a timeout message.
+        SQLite3 only. If a required SQLite3 table is locked when a Motion thread issues a
+        SQL statement, the maximum time it may block the camera's Motion thread before
+        that SQL statement is abandoned.
         <p></p>
         <p></p>
 
@@ -5440,7 +5501,7 @@
           <li> Default: off</li>
         </ul>
         <p></p>
-        Log to the database when Motion triggers a image file to be saved.
+        Log to the database when Motion triggers an image file to be saved.
         <p></p>
 
         <h3><a name="sql_log_snapshot"></a> sql_log_snapshot </h3>
@@ -5462,7 +5523,7 @@
           <li> Default: off</li>
         </ul>
         <p></p>
-        Log to the database when creating motion triggered movie file.
+        Log to the database when creating a motion triggered movie file.
         <p></p>
 
         <h3><a name="sql_log_timelapse"></a> sql_log_timelapse </h3>
@@ -5473,7 +5534,34 @@
           <li> Default: off</li>
         </ul>
         <p></p>
-        Log to the database when creating timelapse movie file
+        Log to the database when creating a timelapse movie file
+        <p></p>
+
+        <h3><a name="sql_query"></a> sql_query </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not defined</li>
+        </ul>
+        <p></p>
+        SQL statement (typically INSERT) to a database table when a sql_log_* image file is recorded
+        or movie file recording begins.
+        <p></p>
+        <p></p>
+        You can use <a href="#conversion_specifiers">Conversion Specifiers</a>
+        within the query.
+        <p></p>
+        <p></p>
+        Sample Queries (depend upon the table provided):
+        <p></p>
+        <code>INSERT INTO security(camera, filename, frame, file_type, time_stamp, text_event)
+          VALUES(%t, '%f', %q, %n, '%Y-%m-%d %T', '%C')</code><br/>
+        <code>INSERT IGNORE INTO security(camera, file_name, year, month, day, hour, minute)
+          VALUES (8, '%f', %Y, %m,%d, %H, %M)</code><br/>
+        <code>INSERT INTO security(camera, event_id, filename, frame, file_type, time_stamp)
+          VALUES(%t, %{dbeventid}, '%f', %q, %n, '%Y-%m-%d %T')</code>
+        <p></p>
         <p></p>
 
         <h3><a name="sql_query_start"></a> sql_query_start </h3>
@@ -5484,25 +5572,30 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        SQL query that executes against the event table which tracks the unique events of motion.
+        SQL statement (typically INSERT) executed when a motion event is recognized.
+        This can be used, for example, to record event start times and generate unique event IDs.
         <p></p>
-        Once the new record is added to this table, the mysql function <code><b>mysql_insert_id</b></code> is then
-        executed to provide the key back into the <code>dbeventid</code> specifier.
-        <p></p>
-        The <code>dbeventid</code> specifier can then be used in the <code>sql_query</code> as a parameter
-        to that query for inserting into the table.
-        <p></p>
-        Although this query is run for all the different database options, the <code>dbeventid</code> is
-        only set for mysql databases.  For the other databases, the <code>dbeventid</code> is always set
-        to zero.
+        You can use <a href="#conversion_specifiers">Conversion Specifiers</a> in this statement.
         <p></p>
         <p></p>
-        You can use <a href="#conversion_specifiers">Conversion Specifiers</a> within the query.
+        Upon successful INSERTion of a record into a database table whose schema generates
+        a positive integer ID for each new record, the returned <code>mysql_insert_id()</code>,
+        <code>sqlite3_last_insert_rowid()</code>, or PostgreSQL <code>INSERT ... RETURNING</code>
+        value is saved until the next <code>sql_query_start</code> is executed
+        for the same camera.
+        <code>%{dbeventid}</code> can then be used as a value in <code>sql_query</code>
+        or <code>sql_query_stop</code> statements.
+        To obtain <code>%{dbeventid}</code> for PostgreSQL, an INSERT statement must include a
+        <code>RETURNING</code> clause that yields a single positive integer value.
+        Absent a valid ID value returned by the database, <code>%{dbeventid}</code> yields zero.
         <p></p>
+        Sample Queries (presuming the schema of table <code>event</code> defines a column that generates unique IDs):
         <p></p>
-        Sample Query
+        MySQL; MariaDB; SQLite3:
+        <code>INSERT INTO event(camera, event_start) VALUES(%t, '%Y-%m-%d %T')</code>
         <p></p>
-        insert into security_events(camera, event_time_stamp) values('%t', '%Y-%m-%d %T')"
+        PostgreSQL:
+        <code>INSERT INTO event(camera, event_start) VALUES(%t, '%Y-%m-%d %T') RETURNING event_id</code><br/>
         <p></p>
         <p></p>
 
@@ -5514,39 +5607,22 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        SQL query that executes after a movie has finished.
-        This can be used to for example update the events table with an end timestamp for the recording.
+        SQL statement (typically INSERT or UPDATE) executed when Motion stops recording a motion-triggered
+        or timelapse movie.
+        For example, this can update an events table with an event end timestamp, provided that
+        <a href="#movie_output">movie_output</a> and <a href="#sql_log_movie">sql_log_movie</a> are enabled.
         <p></p>
         <p></p>
-        You can use <a href="#conversion_specifiers">Conversion Specifiers</a> within the query.
+        You can use <a href="#conversion_specifiers">Conversion Specifiers</a> in this statement.
+        File type (conversion specifier <code>%n</code>) allows distinction between motion movie end
+        and timelapse movie end.
         <p></p>
         <p></p>
-        Sample Query
+        Sample Queries:
         <p></p>
-        update security_events set movie_end_time_stamp='%Y-%m-%d %T' where filename='%f'
-        <p></p>
-        <p></p>
-
-        <h3><a name="sql_query"></a> sql_query </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
-        </ul>
-        <p></p>
-        SQL query string that is sent to the database when the sql_log_* item is triggered.
-        <p></p>
-        <p></p>
-        You can use <a href="#conversion_specifiers">Conversion Specifiers</a>
-        within the query.
-        <p></p>
-        <p></p>
-        Sample Queries (depend upon the table created)
-        <p></p>
-        <br />insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
-        <br />insert or ignore into images (camera_nbr, file_name, year, month, day, hour, minute) values (8, '%f', '%Y','%m','%d','%H','%M')
-        <br />insert into security_file(camera, event_id, filename, frame, file_type, time_stamp) values('%t', '%{dbeventid}', '%f', '%q', '%n', '%Y-%m-%d %T')"
+        <code>UPDATE security SET movie_end='%Y-%m-%d %T' WHERE filename='%f'</code><br/>
+        <code>UPDATE event SET event_stop='%Y-%m-%d %T' WHERE %n=8 AND event_id=%{dbeventid}
+          AND event_stop IS NULL</code>
         <p></p>
         <p></p>
 
