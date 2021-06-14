@@ -358,7 +358,9 @@ static int netcam_init_jpeg(netcam_context_ptr netcam, j_decompress_ptr cinfo)
     jpeg_read_header(cinfo, TRUE);
 
     /* Override the desired colour space. */
-    cinfo->out_color_space = JCS_YCbCr;
+    if (cinfo->out_color_space != JCS_GRAYSCALE) {
+        cinfo->out_color_space = JCS_YCbCr;
+    }
 
     /* Start the decompressor. */
     jpeg_start_decompress(cinfo);
@@ -421,19 +423,29 @@ static int netcam_image_conv(netcam_context_ptr netcam, struct jpeg_decompress_s
     while (cinfo->output_scanline < height) {
         jpeg_read_scanlines(cinfo, line, 1);
 
-        for (i = 0; i < linesize; i += 3) {
-            pic[i / 3] = wline[i];
-            if (i & 1) {
-                upic[(i / 3) / 2] = wline[i + 1];
-                vpic[(i / 3) / 2] = wline[i + 2];
+        if (cinfo->out_color_space == JCS_GRAYSCALE) {
+
+            for (i = 0; i < cinfo->output_width; i++) {
+                pic[i] = wline[i];
             }
-        }
+            pic += cinfo->output_width;
 
-        pic += linesize / 3;
+        } else {
 
-        if (y++ & 1) {
-            upic += width / 2;
-            vpic += width / 2;
+            for (i = 0; i < linesize; i += 3) {
+                pic[i / 3] = wline[i];
+                if (i & 1) {
+                    upic[(i / 3) / 2] = wline[i + 1];
+                    vpic[(i / 3) / 2] = wline[i + 2];
+                }
+            }
+
+            pic += linesize / 3;
+
+            if (y++ & 1) {
+                upic += width / 2;
+                vpic += width / 2;
+            }
         }
     }
 
