@@ -1493,6 +1493,7 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     rtsp_data->pktarray_size = 0;
     rtsp_data->pktarray_index = -1;
     rtsp_data->pktarray = NULL;
+    rtsp_data->packet_recv = NULL;
     rtsp_data->handler_finished = TRUE;
     rtsp_data->first_image = TRUE;
     rtsp_data->reconnect_count = 0;
