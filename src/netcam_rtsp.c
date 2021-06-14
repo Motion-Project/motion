@@ -53,6 +53,12 @@
 
 #include "ffmpeg.h"
 
+static void netcam_free_pkt(struct rtsp_context *rtsp_data)
+{
+    my_packet_free(rtsp_data->packet_recv);
+    rtsp_data->packet_recv = NULL;
+}
+
 static int netcam_rtsp_check_pixfmt(struct rtsp_context *rtsp_data)
 {
     /* Determine if the format is YUV420P */
@@ -75,9 +81,7 @@ static void netcam_rtsp_pktarray_free(struct rtsp_context *rtsp_data)
     pthread_mutex_lock(&rtsp_data->mutex_pktarray);
         if (rtsp_data->pktarray_size > 0) {
             for(indx = 0; indx < rtsp_data->pktarray_size; indx++) {
-                if (rtsp_data->pktarray[indx].packet.data != NULL) {
-                    my_packet_unref(rtsp_data->pktarray[indx].packet);
-                }
+                my_packet_free(rtsp_data->pktarray[indx].packet);
             }
         }
         free(rtsp_data->pktarray);
@@ -188,9 +192,7 @@ static void netcam_rtsp_pktarray_resize(struct context *cnt, int is_highres)
                 memcpy(tmp, rtsp_data->pktarray, sizeof(struct packet_item) * rtsp_data->pktarray_size);
             }
             for(indx = rtsp_data->pktarray_size; indx < newsize; indx++) {
-                av_init_packet(&tmp[indx].packet);
-                tmp[indx].packet.data=NULL;
-                tmp[indx].packet.size=0;
+                tmp[indx].packet = my_packet_alloc(tmp[indx].packet);
                 tmp[indx].idnbr = 0;
                 tmp[indx].iskey = FALSE;
                 tmp[indx].iswritten = FALSE;
@@ -232,24 +234,21 @@ static void netcam_rtsp_pktarray_add(struct rtsp_context *rtsp_data)
 
         rtsp_data->pktarray[indx_next].idnbr = rtsp_data->idnbr;
 
-        my_packet_unref(rtsp_data->pktarray[indx_next].packet);
-        av_init_packet(&rtsp_data->pktarray[indx_next].packet);
-        rtsp_data->pktarray[indx_next].packet.data = NULL;
-        rtsp_data->pktarray[indx_next].packet.size = 0;
-
-        retcd = my_copy_packet(&rtsp_data->pktarray[indx_next].packet, &rtsp_data->packet_recv);
+        my_packet_free(rtsp_data->pktarray[indx_next].packet);
+        rtsp_data->pktarray[indx_next].packet = my_packet_alloc(rtsp_data->pktarray[indx_next].packet);
+        retcd = my_copy_packet(rtsp_data->pktarray[indx_next].packet, rtsp_data->packet_recv);
         if ((rtsp_data->interrupted) || (retcd < 0)) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: av_copy_packet: %s ,Interrupt: %s")
                 ,rtsp_data->cameratype
                 ,errstr, rtsp_data->interrupted ? _("True"):_("False"));
-            my_packet_unref(rtsp_data->pktarray[indx_next].packet);
-            rtsp_data->pktarray[indx_next].packet.data = NULL;
-            rtsp_data->pktarray[indx_next].packet.size = 0;
+            my_packet_free(rtsp_data->pktarray[indx_next].packet);
+            rtsp_data->pktarray[indx_next].packet->data = NULL;
+            rtsp_data->pktarray[indx_next].packet->size = 0;
         }
 
-        if (rtsp_data->pktarray[indx_next].packet.flags & AV_PKT_FLAG_KEY) {
+        if (rtsp_data->pktarray[indx_next].packet->flags & AV_PKT_FLAG_KEY) {
             rtsp_data->pktarray[indx_next].iskey = TRUE;
         } else {
             rtsp_data->pktarray[indx_next].iskey = FALSE;
@@ -295,7 +294,7 @@ static int netcam_decode_sw(struct rtsp_context *rtsp_data)
         int retcd, check=0;
         char errstr[128];
 
-        retcd = avcodec_decode_video2(rtsp_data->codec_context, rtsp_data->frame, &check, &rtsp_data->packet_recv);
+        retcd = avcodec_decode_video2(rtsp_data->codec_context, rtsp_data->frame, &check, rtsp_data->packet_recv);
         if ((rtsp_data->interrupted) || (rtsp_data->finish)) {
             return -1;
         }
@@ -449,7 +448,7 @@ static int netcam_rtsp_decode_video(struct rtsp_context *rtsp_data)
             return 0;
         }
 
-        retcd = avcodec_send_packet(rtsp_data->codec_context, &rtsp_data->packet_recv);
+        retcd = avcodec_send_packet(rtsp_data->codec_context, rtsp_data->packet_recv);
         if ((rtsp_data->interrupted) || (rtsp_data->finish)) {
             return -1;
         }
@@ -1150,9 +1149,7 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data)
         return -1;
     }
 
-    av_init_packet(&rtsp_data->packet_recv);
-    rtsp_data->packet_recv.data = NULL;
-    rtsp_data->packet_recv.size = 0;
+    rtsp_data->packet_recv = my_packet_alloc(rtsp_data->packet_recv);
 
     rtsp_data->interrupted=FALSE;
     if (gettimeofday(&rtsp_data->interruptstarttime, NULL) < 0) {
@@ -1170,7 +1167,7 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data)
      * with a fail code to either end the program or possibly try to reconnnect to camera
     */
     while ((!haveimage) && (!rtsp_data->interrupted)) {
-        retcd = av_read_frame(rtsp_data->format_context, &rtsp_data->packet_recv);
+        retcd = av_read_frame(rtsp_data->format_context, rtsp_data->packet_recv);
         if (retcd < 0 ) {
             errcnt++;
         }
@@ -1184,15 +1181,15 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data)
                     ,_("%s: av_read_frame: %s")
                     ,rtsp_data->cameratype, errstr);
             }
-            my_packet_unref(rtsp_data->packet_recv);
+            netcam_free_pkt(rtsp_data);
             netcam_rtsp_close_context(rtsp_data);
             return -1;
         } else {
             errcnt = 0;
-            if (rtsp_data->packet_recv.stream_index == rtsp_data->video_stream_index) {
+            if (rtsp_data->packet_recv->stream_index == rtsp_data->video_stream_index) {
                 /* For a high resolution pass-through we don't decode the image */
                 if (rtsp_data->high_resolution && rtsp_data->passthrough) {
-                    if (rtsp_data->packet_recv.data != NULL) {
+                    if (rtsp_data->packet_recv->data != NULL) {
                         size_decoded = 1;
                     }
                 } else {
@@ -1204,12 +1201,10 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data)
                 haveimage = TRUE;
             } else if (size_decoded == 0) {
                 /* Did not fail, just didn't get anything.  Try again */
-                my_packet_unref(rtsp_data->packet_recv);
-                av_init_packet(&rtsp_data->packet_recv);
-                rtsp_data->packet_recv.data = NULL;
-                rtsp_data->packet_recv.size = 0;
+                netcam_free_pkt(rtsp_data);
+                rtsp_data->packet_recv = my_packet_alloc(rtsp_data->packet_recv);
             } else {
-                my_packet_unref(rtsp_data->packet_recv);
+                netcam_free_pkt(rtsp_data);
                 netcam_rtsp_close_context(rtsp_data);
                 return -1;
             }
@@ -1233,7 +1228,7 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data)
             (rtsp_data->imgsize.height != rtsp_data->frame->height) ||
             (netcam_rtsp_check_pixfmt(rtsp_data) != 0)) {
             if (netcam_rtsp_resize(rtsp_data) < 0) {
-                my_packet_unref(rtsp_data->packet_recv);
+                netcam_free_pkt(rtsp_data);
                 netcam_rtsp_close_context(rtsp_data);
                 return -1;
             }
@@ -1252,7 +1247,7 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data)
         }
     pthread_mutex_unlock(&rtsp_data->mutex);
 
-    my_packet_unref(rtsp_data->packet_recv);
+    netcam_free_pkt(rtsp_data);
 
     if (rtsp_data->format_context->streams[rtsp_data->video_stream_index]->avg_frame_rate.den > 0) {
         rtsp_data->src_fps = (
@@ -1498,6 +1493,7 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     rtsp_data->pktarray_size = 0;
     rtsp_data->pktarray_index = -1;
     rtsp_data->pktarray = NULL;
+    rtsp_data->packet_recv = NULL;
     rtsp_data->handler_finished = TRUE;
     rtsp_data->first_image = TRUE;
     rtsp_data->reconnect_count = 0;
