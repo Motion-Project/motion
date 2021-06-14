@@ -66,12 +66,18 @@
     #endif
 
     /*********************************************/
-    #if ( MYFFVER >= 57000)
+    #if (MYFFVER >= 57000)
         #define MY_CODEC_FLAG_GLOBAL_HEADER AV_CODEC_FLAG_GLOBAL_HEADER
         #define MY_CODEC_FLAG_QSCALE        AV_CODEC_FLAG_QSCALE
     #else
         #define MY_CODEC_FLAG_GLOBAL_HEADER CODEC_FLAG_GLOBAL_HEADER
         #define MY_CODEC_FLAG_QSCALE        CODEC_FLAG_QSCALE
+    #endif
+
+    #if  (MYFFVER >= 59000)
+        typedef const AVCodec my_AVCodec; /* Version independent for AVCodec*/
+    #else
+        typedef AVCodec my_AVCodec; /* Version independent for AVCodec*/
     #endif
 
     AVFrame *my_frame_alloc(void);

@@ -28,6 +28,7 @@
 
 #ifdef HAVE_FFMPEG
 
+
 /*********************************************/
 AVFrame *my_frame_alloc(void)
 {

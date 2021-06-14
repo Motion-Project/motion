@@ -218,7 +218,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg)
     if (ffmpeg->tlapse == TIMELAPSE_APPEND) {
         ffmpeg->oc->oformat = av_guess_format ("mpeg2video", NULL, NULL);
         if (ffmpeg->oc->oformat) {
-            ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_MPEG2VIDEO;
+            ffmpeg->oc->video_codec_id = MY_CODEC_ID_MPEG2VIDEO;
         }
 
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.mpg",basename);
@@ -242,7 +242,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg)
         ffmpeg->oc->oformat = av_guess_format("avi", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.avi",basename);
         if (ffmpeg->oc->oformat) {
-            ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_MSMPEG4V2;
+            ffmpeg->oc->video_codec_id = MY_CODEC_ID_MSMPEG4V2;
         }
     }
 
@@ -255,7 +255,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg)
         ffmpeg->oc->oformat = av_guess_format("flv", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.flv",basename);
         if (ffmpeg->oc->oformat) {
-            ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_FLV1;
+            ffmpeg->oc->video_codec_id = MY_CODEC_ID_FLV1;
         }
     }
 
@@ -263,7 +263,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg)
         ffmpeg->oc->oformat = av_guess_format("avi", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.avi",basename);
         if (ffmpeg->oc->oformat) {
-            ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_FFV1;
+            ffmpeg->oc->video_codec_id = MY_CODEC_ID_FFV1;
         }
     }
 
@@ -276,7 +276,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg)
         ffmpeg->oc->oformat = av_guess_format("mp4", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.mp4",basename);
         if (ffmpeg->oc->oformat) {
-            ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_H264;
+            ffmpeg->oc->video_codec_id = MY_CODEC_ID_H264;
         }
     }
 
@@ -284,16 +284,14 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg)
         ffmpeg->oc->oformat = av_guess_format("matroska", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.mkv",basename);
         if (ffmpeg->oc->oformat) {
-            ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_H264;
+            ffmpeg->oc->video_codec_id = MY_CODEC_ID_H264;
         }
     }
 
     if (mystreq(codec_name, "hevc")) {
         ffmpeg->oc->oformat = av_guess_format("mp4", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.mp4",basename);
-        if (ffmpeg->oc->oformat) {
-            ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_HEVC;
-        }
+        ffmpeg->oc->video_codec_id = MY_CODEC_ID_HEVC;
     }
 
     //Check for valid results
@@ -622,7 +620,7 @@ static int ffmpeg_set_codec_preferred(struct ffmpeg *ffmpeg)
         } else {
             ffmpeg->codec = avcodec_find_encoder_by_name(&ffmpeg->codec_name[codec_name_len+1]);
             if ((ffmpeg->oc->oformat) && (ffmpeg->codec != NULL)) {
-                    ffmpeg->oc->oformat->video_codec = ffmpeg->codec->id;
+                    ffmpeg->oc->video_codec_id = ffmpeg->codec->id;
             } else if (ffmpeg->codec == NULL) {
                 MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO
                     ,_("Preferred codec %s not found")
@@ -1240,7 +1238,7 @@ static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg)
 
     #if ( MYFFVER >= 57041)
             stream_in = ffmpeg->rtsp_data->transfer_format->streams[0];
-            ffmpeg->oc->oformat->video_codec = stream_in->codecpar->codec_id;
+            ffmpeg->oc->video_codec_id = stream_in->codecpar->codec_id;
 
             ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, NULL);
             if (!ffmpeg->video_st) {
