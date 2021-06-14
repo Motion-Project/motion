@@ -538,6 +538,7 @@ static void dbse_exec_pgsql(char *sqlquery, struct context *cnt, int save_id)
               estat = PQresultStatus(res);
             } else {
               res = NULL;  /* skip PQclear() below */
+              estat = PGRES_NONFATAL_ERROR;
             }
 
             if (PQstatus(cnt->database_pgsql) != PGSQL_CONNECTION_OK) {  /* DB session break! */
