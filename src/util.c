@@ -371,6 +371,13 @@ static void mystrftime_long (const struct context *cnt, int width, const char *w
         return;
     }
     if (SPECIFIERWORD("dbeventid")) {
+        #ifdef HAVE_PGSQL
+            if (cnt->eid_db_format == dbeid_no_return) {
+                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO,
+                    _("Used %{dbeventid} but sql_query_start returned no valid event ID"));
+                ((struct context *)cnt)->eid_db_format = dbeid_use_error;
+            }
+        #endif
         sprintf(out, "%*llu", width, cnt->database_event_id);
         return;
     }
@@ -544,7 +551,7 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
                     while ((*pos_userformat != '}') && (*pos_userformat != 0)) {
                         ++pos_userformat;
                     }
-                    mystrftime_long (cnt, width, word, (int)(pos_userformat-word), tempstr);
+                    mystrftime_long ((struct context *)cnt, width, word, (int)(pos_userformat-word), tempstr);
                     if (*pos_userformat == '\0') {
                         --pos_userformat;
                     }

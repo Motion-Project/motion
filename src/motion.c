@@ -1430,8 +1430,12 @@ static int motion_init(struct context *cnt)
 static void motion_cleanup(struct context *cnt)
 {
 
-    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, NULL);
-    event(cnt, EVENT_ENDMOTION, NULL, NULL, NULL, NULL);
+    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
+    if (cnt->event_nr == cnt->prev_event) {
+      /* run only if event active; else, may overwrite last event's data */
+      event(cnt, EVENT_ENDMOTION, NULL, NULL, NULL,  &cnt->current_image->timestamp_tv);
+      cnt->event_nr++;
+    }
 
     mot_stream_deinit(cnt);
 
@@ -3566,7 +3570,7 @@ int main (int argc, char **argv)
 
     ffmpeg_global_deinit();
 
-    dbse_global_deinit();
+    dbse_global_deinit(cnt_list);
 
     motion_shutdown();
 
