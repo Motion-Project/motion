@@ -425,7 +425,7 @@ static int netcam_image_conv(netcam_context_ptr netcam, struct jpeg_decompress_s
 
         if (cinfo->out_color_space == JCS_GRAYSCALE) {
 
-            for (i = 0; i < cinfo->output_width; i++) {
+            for (i = 0; i < (int)cinfo->output_width; i++) {
                 pic[i] = wline[i];
             }
             pic += cinfo->output_width;
