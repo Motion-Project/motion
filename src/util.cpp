@@ -779,10 +779,8 @@ int myimage_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pi
 /*********************************************/
 void mypacket_free(AVPacket *pkt)
 {
-    #if (MYFFVER >= 58076)
+    #if (MYFFVER >= 57041)
         av_packet_free(&pkt);
-    #elif (MYFFVER >= 57000)
-        av_packet_unref(pkt);
     #else
         av_free_packet(pkt);
     #endif
@@ -817,12 +815,11 @@ int mycopy_packet(AVPacket *dest_pkt, AVPacket *src_pkt)
 /*********************************************/
 AVPacket *mypacket_alloc(AVPacket *pkt)
 {
-    #if (MYFFVER >= 58076)
-        if (pkt != NULL) {
-            mypacket_free(pkt);
-        };
-        return av_packet_alloc();
-    #else
+    if (pkt != NULL) {
+        mypacket_free(pkt);
+    };
+    pkt = av_packet_alloc();
+    #if (MYFFVER < 58076)
         av_init_packet(pkt);
         pkt->data = NULL;
         pkt->size = 0;

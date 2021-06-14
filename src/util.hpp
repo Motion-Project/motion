@@ -74,9 +74,9 @@
 #endif
 
 #if (LIBAVCODEC_VERSION_MAJOR >= 59)
-    typedef const AVCodec myAVCodec; /* Version independent for AVCodec*/
+    typedef const AVCodec myAVCodec; /* Version independent definition for AVCodec*/
 #else
-    typedef AVCodec myAVCodec; /* Version independent for AVCodec*/
+    typedef AVCodec myAVCodec; /* Version independent definition for AVCodec*/
 #endif
 
 #ifdef HAVE_GETTEXT
