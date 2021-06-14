@@ -67,7 +67,8 @@ const char *eventList[] = {
     "EVENT_CAMERA_LOST",
     "EVENT_CAMERA_FOUND",
     "EVENT_FFMPEG_PUT",
-    "EVENT_LAST"
+    "EVENT_LAST",
+    "EVENT_MAX_MOVIE"
 };
 
 /**
@@ -877,8 +878,8 @@ static void event_new_video(struct context *cnt, motion_event eventtype
     (void)tv1;
 
     cnt->movie_last_shot = -1;
-
     cnt->movie_fps = cnt->lastrate;
+    cnt->movietime = tv1->tv_sec;
 
     MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO, _("Source FPS %d"), cnt->movie_fps);
 
@@ -1369,6 +1370,26 @@ struct event_handlers event_handlers[] = {
     {
     EVENT_CAMERA_FOUND,
     event_camera_found
+    },
+    {
+    EVENT_MAX_MOVIE,
+    event_ffmpeg_closefile
+    },
+    {
+    EVENT_MAX_MOVIE,
+    event_extpipe_end
+    },
+    {
+    EVENT_MAX_MOVIE,
+    event_new_video
+    },
+    {
+    EVENT_MAX_MOVIE,
+    event_ffmpeg_newfile
+    },
+    {
+    EVENT_MAX_MOVIE,
+    event_create_extpipe
     },
     {0, NULL}
 };
