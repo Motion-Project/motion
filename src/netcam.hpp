@@ -106,6 +106,7 @@ struct ctx_netcam {
     int                       swsframe_size;         /* The size of the image after resizing */
     int                       video_stream_index;    /* Stream index associated with video from camera */
     int                       audio_stream_index;    /* Stream index associated with video from camera */
+    int                       last_stream_index;     /* Index of the last packet read */
 
     enum AVHWDeviceType       hw_type;
     enum AVPixelFormat        hw_pix_fmt;

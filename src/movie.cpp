@@ -1010,29 +1010,48 @@ static void movie_passthru_reset(struct ctx_movie *movie)
 
 static int movie_passthru_pktpts(struct ctx_movie *movie)
 {
-    int64_t ts_interval;
+    int64_t ts_interval, base_pdts;
     AVRational tmpbase;
     int indx;
 
     if (movie->pkt->stream_index == movie->netcam_data->audio_stream_index) {
         tmpbase = movie->strm_audio->time_base;
         indx = movie->netcam_data->audio_stream_index;
+        base_pdts = movie->pass_audio_base;
     } else {
         tmpbase = movie->strm_video->time_base;
         indx = movie->netcam_data->video_stream_index;
+        base_pdts = movie->pass_video_base;
     }
 
-    ts_interval = movie->pkt->pts;
+    if (movie->pkt->pts < base_pdts) {
+        ts_interval = 0;
+    } else {
+        ts_interval = movie->pkt->pts - base_pdts;
+    }
     movie->pkt->pts = av_rescale_q(ts_interval
         , movie->netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
 
-    ts_interval = movie->pkt->dts;
+    if (movie->pkt->dts < base_pdts) {
+        ts_interval = 0;
+    } else {
+        ts_interval = movie->pkt->dts - base_pdts;
+    }
     movie->pkt->dts = av_rescale_q(ts_interval
         , movie->netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
 
     ts_interval = movie->pkt->duration;
     movie->pkt->duration = av_rescale_q(ts_interval
         , movie->netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
+
+    /*
+    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
+        ,_("base PTS %" PRId64 " new PTS %" PRId64 " srcbase %d-%d newbase %d-%d")
+        ,ts_interval, movie->pkt->duration
+        ,movie->netcam_data->transfer_format->streams[indx]->time_base.num
+        ,movie->netcam_data->transfer_format->streams[indx]->time_base.den
+        ,tmpbase.num, tmpbase.den);
+    */
 
     return 0;
 }
@@ -1071,10 +1090,60 @@ static void movie_passthru_write(struct ctx_movie *movie, int indx)
 
 }
 
+static void movie_passthru_minpts(struct ctx_movie *movie)
+{
+
+    int indx, indx_audio, indx_video;
+
+    movie->pass_audio_base = 0;
+    movie->pass_video_base = 0;
+
+    pthread_mutex_lock(&movie->netcam_data->mutex_pktarray);
+        indx_audio =  movie->netcam_data->audio_stream_index;
+        indx_video =  movie->netcam_data->video_stream_index;
+
+        for (indx = 0; indx < movie->netcam_data->pktarray_size; indx++) {
+            if (movie->netcam_data->pktarray[indx].packet->stream_index == indx_audio) {
+                movie->pass_audio_base = movie->netcam_data->pktarray[indx].packet->pts;
+            };
+            if (movie->netcam_data->pktarray[indx].packet->stream_index == indx_video) {
+                movie->pass_video_base = movie->netcam_data->pktarray[indx].packet->pts;
+            };
+        }
+        for (indx = 0; indx < movie->netcam_data->pktarray_size; indx++) {
+            if ((movie->netcam_data->pktarray[indx].packet->stream_index == indx_audio) &&
+                (movie->netcam_data->pktarray[indx].packet->pts < movie->pass_audio_base)) {
+                movie->pass_audio_base = movie->netcam_data->pktarray[indx].packet->pts;
+            };
+            if ((movie->netcam_data->pktarray[indx].packet->stream_index == indx_audio) &&
+                (movie->netcam_data->pktarray[indx].packet->dts < movie->pass_audio_base)) {
+                movie->pass_audio_base = movie->netcam_data->pktarray[indx].packet->dts;
+            };
+            if ((movie->netcam_data->pktarray[indx].packet->stream_index == indx_video) &&
+                (movie->netcam_data->pktarray[indx].packet->pts < movie->pass_video_base)) {
+                movie->pass_video_base = movie->netcam_data->pktarray[indx].packet->pts;
+            };
+            if ((movie->netcam_data->pktarray[indx].packet->stream_index == indx_video) &&
+                (movie->netcam_data->pktarray[indx].packet->dts < movie->pass_video_base)) {
+                movie->pass_video_base = movie->netcam_data->pktarray[indx].packet->dts;
+            };
+        }
+    pthread_mutex_unlock(&movie->netcam_data->mutex_pktarray);
+
+    if (movie->pass_audio_base < 0) {
+         movie->pass_audio_base = 0;
+    }
+
+    if (movie->pass_video_base < 0) {
+        movie->pass_video_base = 0;
+    }
+
+}
+
 static int movie_passthru_put(struct ctx_movie *movie, struct ctx_image_data *img_data)
 {
     int idnbr_image, idnbr_lastwritten, idnbr_stop, idnbr_firstkey;
-    int indx, indx_lastwritten, indx_firstkey;
+    int indx, indx_lastwritten, indx_firstkey, indx_video;
 
     if (movie->netcam_data == NULL) {
         return -1;
@@ -1097,19 +1166,23 @@ static int movie_passthru_put(struct ctx_movie *movie, struct ctx_image_data *im
         idnbr_stop = 0;
         indx_lastwritten = -1;
         indx_firstkey = -1;
+        indx_video = movie->netcam_data->video_stream_index;
 
         for(indx = 0; indx < movie->netcam_data->pktarray_size; indx++) {
             if ((movie->netcam_data->pktarray[indx].iswritten) &&
-                (movie->netcam_data->pktarray[indx].idnbr > idnbr_lastwritten)) {
+                (movie->netcam_data->pktarray[indx].idnbr > idnbr_lastwritten) &&
+                (movie->netcam_data->pktarray[indx].packet->stream_index == indx_video)) {
                 idnbr_lastwritten=movie->netcam_data->pktarray[indx].idnbr;
                 indx_lastwritten = indx;
             }
             if ((movie->netcam_data->pktarray[indx].idnbr >  idnbr_stop) &&
-                (movie->netcam_data->pktarray[indx].idnbr <= idnbr_image)) {
+                (movie->netcam_data->pktarray[indx].idnbr <= idnbr_image)&&
+                (movie->netcam_data->pktarray[indx].packet->stream_index == indx_video)) {
                 idnbr_stop=movie->netcam_data->pktarray[indx].idnbr;
             }
             if ((movie->netcam_data->pktarray[indx].iskey) &&
-                (movie->netcam_data->pktarray[indx].idnbr <= idnbr_firstkey)) {
+                (movie->netcam_data->pktarray[indx].idnbr <= idnbr_firstkey)&&
+                (movie->netcam_data->pktarray[indx].packet->stream_index == indx_video)) {
                     idnbr_firstkey=movie->netcam_data->pktarray[indx].idnbr;
                     indx_firstkey = indx;
             }
@@ -1149,7 +1222,7 @@ static int movie_passthru_put(struct ctx_movie *movie, struct ctx_image_data *im
 
 static int movie_passthru_streams_video(struct ctx_movie *movie, AVStream *stream_in)
 {
-    int         retcd;
+    int retcd;
 
     movie->strm_video = avformat_new_stream(movie->oc, NULL);
     if (!movie->strm_video) {
@@ -1165,11 +1238,14 @@ static int movie_passthru_streams_video(struct ctx_movie *movie, AVStream *strea
 
     movie->strm_video->codecpar->codec_tag  = 0;
     movie->strm_video->time_base = stream_in->time_base;
+    movie->strm_video->avg_frame_rate = stream_in->avg_frame_rate;
 
     MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
-        , _("video timebase %d/%d")
+        , _("video timebase %d/%d fps %d/%d")
         , movie->strm_video->time_base.num
-        , movie->strm_video->time_base.den);
+        , movie->strm_video->time_base.den
+        , movie->strm_video->avg_frame_rate.num
+        , movie->strm_video->avg_frame_rate.den);
 
     return 0;
 }
@@ -1196,6 +1272,7 @@ static int movie_passthru_streams_audio(struct ctx_movie *movie, AVStream *strea
     movie->strm_audio->avg_frame_rate= stream_in->time_base;
     movie->strm_audio->codecpar->format = stream_in->codecpar->format;
     movie->strm_audio->codecpar->sample_rate = stream_in->codecpar->sample_rate;
+    movie->strm_audio->avg_frame_rate = stream_in->avg_frame_rate;
 
     MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
         , _("audio timebase %d/%d")
@@ -1269,13 +1346,13 @@ static int movie_passthru_open(struct ctx_movie *movie)
         return -1;
     }
 
-    /*
-        if (mystrne(movie->codec_name, "mp4")){
-            MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
-                ,_("pass-through mode enabled.  Changing to MP4 container."));
-            movie->codec_name = "mp4";
-        }
-    */
+    if (mystrne(movie->codec_name, "mp4") && mystrne(movie->codec_name, "mkv")) {
+        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
+            ,_("Changing to MP4 container for pass-through."));
+        movie->codec_name = "mp4";
+    }
+
+    movie_passthru_minpts(movie);
 
     retcd = movie_get_oformat(movie);
     if (retcd < 0 ) {
@@ -1501,7 +1578,6 @@ void movie_close(struct ctx_movie *movie)
     }
 
 }
-
 
 int movie_put_image(struct ctx_movie *movie, struct ctx_image_data *img_data, const struct timespec *ts1)
 {

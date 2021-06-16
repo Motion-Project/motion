@@ -65,6 +65,8 @@ struct ctx_movie {
     const char          *codec_name;
     int64_t             last_pts;
     int64_t             base_pts;
+    int64_t             pass_audio_base;
+    int64_t             pass_video_base;
     bool                test_mode;
     int                 gop_cnt;
     struct timespec     start_time;

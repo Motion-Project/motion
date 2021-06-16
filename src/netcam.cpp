@@ -1277,6 +1277,7 @@ static int netcam_read_image(struct ctx_netcam *netcam)
         }
     }
     clock_gettime(CLOCK_REALTIME, &netcam->img_recv->image_time);
+    netcam->last_stream_index = netcam->packet_recv->stream_index;
 
     if (!netcam->first_image) {
         netcam->status = NETCAM_CONNECTED;
@@ -1546,6 +1547,9 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
     netcam->reconnect_count = 0;
     netcam->src_fps =  -1; /* Default to neg so we know it has not been set */
     netcam->capture_rate = -1;
+    netcam->video_stream_index = -1;
+    netcam->audio_stream_index = -1;
+    netcam->last_stream_index = -1;
 
     for (indx = 0; indx < netcam->params->params_count; indx++) {
         if (mystreq(netcam->params->params_array[indx].param_name,"decoder")) {
@@ -1648,6 +1652,7 @@ static int netcam_copy_stream(struct ctx_netcam *netcam)
                         return -1;
                     }
                     transfer_stream->time_base = stream_in->time_base;
+                    transfer_stream->avg_frame_rate = stream_in->avg_frame_rate;
                 }
             }
         pthread_mutex_unlock(&netcam->mutex_transfer);
@@ -1849,6 +1854,19 @@ static int netcam_connect(struct ctx_netcam *netcam)
                 , _("%s: Capture FPS should be greater than camera FPS.")
                 , netcam->cameratype);
         }
+
+        if (netcam->audio_stream_index != -1) {
+            /* The following is not technically precise but we want to convey in simple terms
+            * that the capture rate must go faster to account for the additional packets read
+            * for the audio stream.  The technically correct process is that our wait timer in
+            * the handler is only triggered when the last packet is a video stream
+            */
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: An audio stream was detected.  Capture_rate increased to compensate.")
+                ,netcam->cameratype);
+        }
+
+
     }
 
     return 0;
@@ -1985,7 +2003,9 @@ static void *netcam_handler(void *arg)
                 }
                 continue;
             }
-            netcam_handler_wait(netcam);
+            if (netcam->last_stream_index == netcam->video_stream_index) {
+                netcam_handler_wait(netcam);
+            }
         }
     }
 
