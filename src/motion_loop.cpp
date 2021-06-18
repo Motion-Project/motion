@@ -679,7 +679,7 @@ static void mlp_init_ref(struct ctx_cam *cam)
 /** mlp_init */
 static int mlp_init(struct ctx_cam *cam)
 {
-    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("initialize."));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("initialize loop"));
 
     mythreadname_set("ml",cam->threadnr,cam->conf->camera_name.c_str());
 
@@ -1647,6 +1647,7 @@ void *motion_loop(void *arg)
     struct ctx_cam *cam =(struct ctx_cam *) arg;
 
     cam->running_cam = true;
+    cam->finish_cam = false;
 
     pthread_mutex_lock(&cam->motapp->global_lock);
         cam->motapp->threads_running++;
@@ -1655,7 +1656,7 @@ void *motion_loop(void *arg)
     cam->watchdog = cam->conf->watchdog_tmo;
 
     if (mlp_init(cam) == 0) {
-        while (!cam->finish_cam || cam->event_stop) {
+        while (cam->finish_cam == false) {
             mlp_prepare(cam);
             if (cam->get_image) {
                 mlp_resetimages(cam);
@@ -1689,6 +1690,7 @@ void *motion_loop(void *arg)
     pthread_mutex_unlock(&cam->motapp->global_lock);
 
     cam->running_cam = false;
+    cam->finish_cam = true;
 
     pthread_exit(NULL);
 }
