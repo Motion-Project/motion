@@ -159,16 +159,13 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
     char *s;
     int i;
 
-    const char *re = "(http|ftp|mjpg|mjpeg|rtsp|rtmp)://(((.*):(.*))@)?"
+    const char *re = "(.*)://(((.*):(.*))@)?"
                      "([^/:]|[-_.a-z0-9]+)(:([0-9]+))?($|(/[^*]*))";
     regex_t pattbuf;
     regmatch_t matches[10];
 
     if (!strncmp(text_url, "file", 4)) {
         re = "(file)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
-    }
-    if (!strncmp(text_url, "jpeg", 4)) {
-        re = "(jpeg)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
     }
     if (!strncmp(text_url, "v4l2", 4)) {
         re = "(v4l2)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
@@ -1380,13 +1377,15 @@ static void netcam_set_options(struct ctx_netcam *netcam)
     tmpval = (char*)mymalloc(PATH_MAX);
 
     if (mystreq(netcam->service, "rtsp") ||
+        mystreq(netcam->service, "rtsps") ||
         mystreq(netcam->service, "rtmp")) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("%s: Setting rtsp/rtmp")
             ,netcam->cameratype);
         util_parms_add_default(netcam->params,"rtsp_transport","tcp");
         //util_parms_add_default(netcam->params,"allowed_media_types", "video");
 
-    } else if (mystreq(netcam->service, "http")) {
+    } else if (mystreq(netcam->service, "http") ||
+            mystreq(netcam->service, "https")) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("%s: Setting input_format mjpeg"),netcam->cameratype);
         netcam->format_context->iformat = av_find_input_format("mjpeg");
@@ -1476,14 +1475,8 @@ static void netcam_set_path (struct ctx_cam *cam, struct ctx_netcam *netcam )
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("Setting up file"));
     } else {
-        if (mystreq(url.service, "mjpeg")) {
-            sprintf(url.service, "%s","http");
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("Setting up http"));
-        } else {
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("Setting up %s "),url.service);
-        }
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("Setting up %s "),url.service);
         if (userpass != NULL) {
             netcam->path =(char*) mymalloc(strlen(url.service) + 3 + strlen(userpass)
                   + 1 + strlen(url.host) + 6 + strlen(url.path) + 2 );

@@ -471,14 +471,7 @@ static int init_camera_type(struct ctx_cam *cam)
     }
 
     if (cam->conf->netcam_url != "") {
-        if ((cam->conf->netcam_url.compare(0,5,"mjpeg") == 0) ||
-            (cam->conf->netcam_url.compare(0,4,"http") == 0) ||
-            (cam->conf->netcam_url.compare(0,4,"v4l2") == 0) ||
-            (cam->conf->netcam_url.compare(0,4,"file") == 0) ||
-            (cam->conf->netcam_url.compare(0,4,"rtmp") == 0) ||
-            (cam->conf->netcam_url.compare(0,4,"rtsp") == 0)) {
-            cam->camera_type = CAMERA_TYPE_NETCAM;
-        }
+        cam->camera_type = CAMERA_TYPE_NETCAM;
         return 0;
     }
 
