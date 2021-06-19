@@ -222,8 +222,6 @@
     /** Current parameters in the config file */
     struct ctx_parm {
         const std::string   parm_name;      /* name for this parameter                  */
-        const std::string   parm_help;      /* short explanation for parameter          */
-        int                 main_thread;    /* belong only to main thread when value>0  */
         enum PARM_TYP       parm_type;      /* enum of parm_typ for bool,int or string. */
         enum PARM_CAT       parm_cat;       /* enum of parm_cat for grouping. */
         int                 webui_level;    /* Enum to display in webui: 0,1,2,3,99(always to never)*/
@@ -267,5 +265,6 @@
             , char *parm_chr, enum PARM_CAT parm_cat);
 
     std::string conf_type_desc(enum PARM_TYP ptype);
+    std::string conf_cat_desc(enum PARM_CAT pcat, bool shrt);
 
 #endif /* _INCLUDE_CONF_H */

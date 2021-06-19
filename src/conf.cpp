@@ -38,638 +38,167 @@ void conf_process(struct ctx_motapp *motapp, bool ismotapp, FILE *fp, int thread
 
 /*Configuration parameters */
 struct ctx_parm config_parms[] = {
-    {
-    "daemon",
-    "############################################################\n"
-    "# System control configuration parameters\n"
-    "############################################################\n\n"
-    "# Start in daemon (background) mode and release terminal.",
-    1, PARM_TYP_BOOL, PARM_CAT_00, WEBUI_LEVEL_ADVANCED},
-    {
-    "setup_mode",
-    "# Start in Setup-Mode, daemon disabled.",
-    0, PARM_TYP_BOOL, PARM_CAT_00, WEBUI_LEVEL_LIMITED},
-    {
-    "conf_filename",
-    "# Configuration file name.",
-    1, PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_ADVANCED},
-    {
-    "pid_file",
-    "# File to store the process ID.",
-    1, PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_ADVANCED},
-    {
-    "log_file",
-    "# File to write logs messages into.  If not defined stderr and syslog is used.",
-    1, PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_ADVANCED},
-    {
-    "log_level",
-    "# Level of log messages [1..9] (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL).",
-    1, PARM_TYP_LIST, PARM_CAT_00, WEBUI_LEVEL_LIMITED},
-    {
-    "log_type",
-    "# Filter to log messages by type (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL).",
-    1, PARM_TYP_LIST, PARM_CAT_00, WEBUI_LEVEL_LIMITED},
-    {
-    "native_language",
-    "# Native language support.",
-    1, PARM_TYP_BOOL, PARM_CAT_00, WEBUI_LEVEL_LIMITED},
+    {"daemon",                    PARM_TYP_BOOL,   PARM_CAT_00, WEBUI_LEVEL_ADVANCED },
+    {"setup_mode",                PARM_TYP_BOOL,   PARM_CAT_00, WEBUI_LEVEL_LIMITED },
+    {"conf_filename",             PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_ADVANCED },
+    {"pid_file",                  PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_ADVANCED },
+    {"log_file",                  PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_ADVANCED },
+    {"log_level",                 PARM_TYP_LIST,   PARM_CAT_00, WEBUI_LEVEL_LIMITED },
+    {"log_type",                  PARM_TYP_LIST,   PARM_CAT_00, WEBUI_LEVEL_LIMITED },
+    {"native_language",           PARM_TYP_BOOL,   PARM_CAT_00, WEBUI_LEVEL_LIMITED },
 
-    {
-    "camera_dir",
-    "##############################################################\n"
-    "# Directory to read '.conf' files for cameras.\n"
-    "##############################################################",
-    1, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
-    {
-    "camera_name",
-    "# User defined name for the camera.",
-    0, PARM_TYP_STRING,PARM_CAT_01, WEBUI_LEVEL_LIMITED },
-    {
-    "camera_id",
-    "# Numeric identifier for the camera.",
-    0,PARM_TYP_INT, PARM_CAT_01, WEBUI_LEVEL_LIMITED},
-    {
-    "camera_tmo",
-    "# Timeout for camera lost connection.",
-    0,PARM_TYP_INT, PARM_CAT_01, WEBUI_LEVEL_LIMITED},
-    {
-    "target_dir",
-    "# Target directory for pictures, snapshots and movies",
-    0, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
-    {
-    "watchdog_tmo",
-    "# Timeout in seconds for thread response.",
-    0, PARM_TYP_INT, PARM_CAT_01, WEBUI_LEVEL_LIMITED},
-    {
-    "watchdog_kill",
-    "# Timeout before forcefully killing the thread.",
-    0, PARM_TYP_INT, PARM_CAT_01, WEBUI_LEVEL_LIMITED},
+    {"camera_name",               PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_LIMITED },
+    {"camera_id",                 PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
+    {"camera_tmo",                PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
+    {"target_dir",                PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
+    {"watchdog_tmo",              PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
+    {"watchdog_kill",             PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
+    {"camera_dir",                PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
+    {"camera",                    PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
 
-    {
-    "v4l2_device",
-    "# Video device (e.g. /dev/video0) to be used for capturing.",
-    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "v4l2_params",
-    "# Parameters to control video device.  See motionplus_guide.html",
-    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED},
-    {
-    "netcam_url",
-    "# The full URL of the network camera stream.",
-    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED},
-    {
-    "netcam_params",
-    "# Parameters for the network camera.",
-    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
-    {
-    "netcam_high_url",
-    "# Optional high resolution URL for camera.",
-    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED},
-    {
-    "netcam_high_params",
-    "# Parameters for high resolution stream.",
-    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
-    {
-    "netcam_userpass",
-    "# Username and password for network camera. Syntax username:password",
-    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
-    {
-    "mmalcam_name",
-    "# Name of mmal camera (e.g. vc.ril.camera for pi camera).",
-    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
-    {
-    "mmalcam_params",
-    "# Camera control parameters (see raspivid/raspistill tool documentation)",
-    0, PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
-    {
+    {"v4l2_device",               PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
+    {"v4l2_params",               PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
+    {"netcam_url",                PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
+    {"netcam_params",             PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
+    {"netcam_high_url",           PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
+    {"netcam_high_params",        PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
+    {"netcam_userpass",           PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
+    {"mmalcam_name",              PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
+    {"mmalcam_params",            PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
 
-    "width",
-    "############################################################\n"
-    "# Image Processing configuration parameters\n"
-    "############################################################\n\n"
-    "# Image width in pixels.",
-    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
-    {
-    "height",
-    "# Image height in pixels.",
-    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED},
-    {
-    "framerate",
-    "# Maximum number of frames to be captured per second.",
-    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
-    {
-    "minimum_frame_time",
-    "# Mimimum frame time.",
-    0, PARM_TYP_INT, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
-    {
-    "rotate",
-    "# Number of degrees to rotate image.",
-    0, PARM_TYP_LIST, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
-    {
-    "flip_axis",
-    "# Flip image over a given axis",
-    0, PARM_TYP_LIST, PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    {"width",                     PARM_TYP_INT,    PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    {"height",                    PARM_TYP_INT,    PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    {"framerate",                 PARM_TYP_INT,    PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    {"minimum_frame_time",        PARM_TYP_INT,    PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    {"rotate",                    PARM_TYP_LIST,   PARM_CAT_03, WEBUI_LEVEL_LIMITED },
+    {"flip_axis",                 PARM_TYP_LIST,   PARM_CAT_03, WEBUI_LEVEL_LIMITED },
 
-    {
-    "locate_motion_mode",
-    "# Draw a locate box around the moving object.",
-    0, PARM_TYP_LIST, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
-    {
-    "locate_motion_style",
-    "# Set the look and style of the locate box.",
-    0, PARM_TYP_LIST, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
-    {
-    "text_left",
-    "# Text to be overlayed in the lower left corner of images",
-    0,PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
-    {
-    "text_right",
-    "# Text to be overlayed in the lower right corner of images.",
-    0,PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
-    {
-    "text_changes",
-    "# Overlay number of changed pixels in upper right corner of images.",
-    0,PARM_TYP_BOOL, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
-    {
-    "text_scale",
-    "# Scale factor for text overlayed on images.",
-    0,PARM_TYP_LIST, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
-    {
-    "text_event",
-    "# The special event conversion specifier %C",
-    0,PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+    {"locate_motion_mode",        PARM_TYP_LIST,   PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+    {"locate_motion_style",       PARM_TYP_LIST,   PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+    {"text_left",                 PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+    {"text_right",                PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+    {"text_changes",              PARM_TYP_BOOL,   PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+    {"text_scale",                PARM_TYP_LIST,   PARM_CAT_04, WEBUI_LEVEL_LIMITED },
+    {"text_event",                PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
 
-    {
-    "emulate_motion",
-    "############################################################\n"
-    "# Motion detection configuration parameters\n"
-    "############################################################\n\n"
-    "# Always save pictures and movies even if there was no motion.",
-    0,PARM_TYP_BOOL, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
-    {
-    "primary_method",
-    "# Primary method to be used for detection.",
-    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
-    {
-    "threshold",
-    "# Threshold for number of changed pixels that triggers motion.",
-    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
-    {
-    "threshold_maximum",
-    "# The maximum threshold for number of changed pixels that triggers motion.",
-    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
-    {
-    "threshold_sdevx",
-    "# The maximum standard deviation of the width of motion to center.",
-    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
-    {
-    "threshold_sdevy",
-    "# The maximum standard deviation of the height of motion to center.",
-    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
-    {
-    "threshold_sdevxy",
-    "# The maximum standard deviation of the distance of motion to center.",
-    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
-    {
-    "threshold_ratio",
-    "# The maximum ratio between total pixels changed versus change in same brightness level(times 10).",
-    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
-    {
-    "threshold_tune",
-    "# Enable tuning of the threshold down if possible.",
-    0,PARM_TYP_BOOL, PARM_CAT_05, WEBUI_LEVEL_LIMITED},
-    {
-    "secondary_interval",
-    "# The interval between secondary detections.",
-    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
-    {
-    "secondary_method",
-    "# The method to use for secondary detection.",
-    0,PARM_TYP_INT, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
-    {
-    "secondary_params",
-    "# Full path name for the secondary model and configuration.",
-    0,PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    {"emulate_motion",            PARM_TYP_BOOL,   PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    {"primary_method",            PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    {"threshold",                 PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    {"threshold_maximum",         PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    {"threshold_sdevx",           PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    {"threshold_sdevy",           PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    {"threshold_sdevxy",          PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    {"threshold_ratio",           PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    {"threshold_tune",            PARM_TYP_BOOL,   PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    {"secondary_interval",        PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    {"secondary_method",          PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    {"secondary_params",          PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
 
-    {
-    "noise_level",
-    "# Noise threshold for the motion detection.",
-    0,PARM_TYP_INT, PARM_CAT_06, WEBUI_LEVEL_LIMITED },
-    {
-    "noise_tune",
-    "# Automatically tune the noise threshold",
-    0,PARM_TYP_BOOL, PARM_CAT_06, WEBUI_LEVEL_LIMITED},
-    {
-    "despeckle_filter",
-    "# Despeckle the image using (E/e)rode or (D/d)ilate or (l)abel.",
-    0,PARM_TYP_STRING, PARM_CAT_06, WEBUI_LEVEL_LIMITED },
-    {
-    "area_detect",
-    "# Area number used to trigger the on_area_detected script.",
-    0,PARM_TYP_STRING, PARM_CAT_06, WEBUI_LEVEL_LIMITED },
-    {
-    "mask_file",
-    "# Full path and file name for motion detection mask PGM file.",
-    0,PARM_TYP_STRING, PARM_CAT_06, WEBUI_LEVEL_ADVANCED },
-    {
-    "mask_privacy",
-    "# Full path and file name for privacy mask PGM file.",
-    0,PARM_TYP_STRING, PARM_CAT_06, WEBUI_LEVEL_ADVANCED },
-    {
-    "smart_mask_speed",
-    "# The value defining how slow or fast the smart motion mask created and used.",
-    0, PARM_TYP_LIST, PARM_CAT_06, WEBUI_LEVEL_LIMITED },
+    {"noise_level",               PARM_TYP_INT,    PARM_CAT_06, WEBUI_LEVEL_LIMITED },
+    {"noise_tune",                PARM_TYP_BOOL,   PARM_CAT_06, WEBUI_LEVEL_LIMITED },
+    {"despeckle_filter",          PARM_TYP_STRING, PARM_CAT_06, WEBUI_LEVEL_LIMITED },
+    {"area_detect",               PARM_TYP_STRING, PARM_CAT_06, WEBUI_LEVEL_LIMITED },
+    {"mask_file",                 PARM_TYP_STRING, PARM_CAT_06, WEBUI_LEVEL_ADVANCED },
+    {"mask_privacy",              PARM_TYP_STRING, PARM_CAT_06, WEBUI_LEVEL_ADVANCED },
+    {"smart_mask_speed",          PARM_TYP_LIST,   PARM_CAT_06, WEBUI_LEVEL_LIMITED },
 
-    {
-    "lightswitch_percent",
-    "# Percentage of image that triggers a lightswitch detected.",
-    0, PARM_TYP_INT, PARM_CAT_07, WEBUI_LEVEL_LIMITED},
-    {
-    "lightswitch_frames",
-    "# When lightswitch is detected, ignore this many frames",
-    0, PARM_TYP_INT, PARM_CAT_07, WEBUI_LEVEL_LIMITED },
-    {
-    "minimum_motion_frames",
-    "# Number of images that must contain motion to trigger an event.",
-    0, PARM_TYP_INT, PARM_CAT_07, WEBUI_LEVEL_LIMITED},
-    {
-    "static_object_time",
-    "# Amount of time that must elapse before a new object is accepted into the image.",
-    0, PARM_TYP_INT, PARM_CAT_07, WEBUI_LEVEL_LIMITED},
-    {
-    "event_gap",
-    "# Gap in seconds of no motion detected that triggers the end of an event.",
-    0, PARM_TYP_INT, PARM_CAT_07, WEBUI_LEVEL_LIMITED },
-    {
-    "pre_capture",
-    "# The number of pre-captured (buffered) pictures from before motion.",
-    0, PARM_TYP_INT, PARM_CAT_07, WEBUI_LEVEL_LIMITED },
-    {
-    "post_capture",
-    "# Number of frames to capture after motion is no longer detected.",
-    0, PARM_TYP_INT, PARM_CAT_07, WEBUI_LEVEL_LIMITED },
+    {"lightswitch_percent",       PARM_TYP_INT,    PARM_CAT_07, WEBUI_LEVEL_LIMITED },
+    {"lightswitch_frames",        PARM_TYP_INT,    PARM_CAT_07, WEBUI_LEVEL_LIMITED },
+    {"minimum_motion_frames",     PARM_TYP_INT,    PARM_CAT_07, WEBUI_LEVEL_LIMITED },
+    {"static_object_time",        PARM_TYP_INT,    PARM_CAT_07, WEBUI_LEVEL_LIMITED },
+    {"event_gap",                 PARM_TYP_INT,    PARM_CAT_07, WEBUI_LEVEL_LIMITED },
+    {"pre_capture",               PARM_TYP_INT,    PARM_CAT_07, WEBUI_LEVEL_LIMITED },
+    {"post_capture",              PARM_TYP_INT,    PARM_CAT_07, WEBUI_LEVEL_LIMITED },
 
-    {
-    "on_event_start",
-    "############################################################\n"
-    "# Script execution configuration parameters\n"
-    "############################################################\n\n"
-    "# Command to be executed when an event starts.",
-    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
-    {
-    "on_event_end",
-    "# Command to be executed when an event ends.",
-    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED},
-    {
-    "on_picture_save",
-    "# Command to be executed when a picture is saved.",
-    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
-    {
-    "on_area_detected",
-    "# Command to be executed when motion in a predefined area is detected",
-    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
-    {
-    "on_motion_detected",
-    "# Command to be executed when motion is detected",
-    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
-    {
-    "on_movie_start",
-    "# Command to be executed when a movie file is created.",
-    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED},
-    {
-    "on_movie_end",
-    "# Command to be executed when a movie file is closed.",
-    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
-    {
-    "on_camera_lost",
-    "# Command to be executed when a camera can't be opened or if it is lost",
-    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
-    {
-    "on_camera_found",
-    "# Command to be executed when a camera that was lost has been found.",
-    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED},
-    {
-    "on_secondary_detect",
-    "# Command to be executed when the secondary detection has triggered.",
-    0, PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED},
+    {"on_event_start",            PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
+    {"on_event_end",              PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
+    {"on_picture_save",           PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
+    {"on_area_detected",          PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
+    {"on_motion_detected",        PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
+    {"on_movie_start",            PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
+    {"on_movie_end",              PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
+    {"on_camera_lost",            PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
+    {"on_camera_found",           PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
+    {"on_secondary_detect",       PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
 
-    {
-    "picture_output",
-    "############################################################\n"
-    "# Picture output configuration parameters\n"
-    "############################################################\n\n"
-    "# Output pictures when motion is detected",
-    0, PARM_TYP_LIST, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
-    {
-    "picture_output_motion",
-    "# Output pictures with only the pixels moving object (ghost images)",
-    0, PARM_TYP_LIST, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
-    {
-    "picture_type",
-    "# Format for the output pictures.",
-    0, PARM_TYP_LIST, PARM_CAT_09, WEBUI_LEVEL_LIMITED},
-    {
-    "picture_quality",
-    "# The quality (in percent) to be used in the picture compression",
-    0, PARM_TYP_INT, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
-    {
-    "picture_exif",
-    "# Text to include in a JPEG EXIF comment",
-    0, PARM_TYP_STRING, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
-    {
-    "picture_filename",
-    "# File name(without extension) for pictures relative to target directory",
-    0, PARM_TYP_STRING, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
-    {
-    "snapshot_interval",
-    "############################################################\n"
-    "# Snapshot output configuration parameters\n"
-    "############################################################\n\n"
-    "# Make automated snapshot every N seconds",
-    0, PARM_TYP_INT, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
-    {
-    "snapshot_filename",
-    "# File name(without extension) for snapshots relative to target directory",
-    0, PARM_TYP_STRING, PARM_CAT_09, WEBUI_LEVEL_LIMITED},
+    {"picture_output",            PARM_TYP_LIST,   PARM_CAT_09, WEBUI_LEVEL_LIMITED },
+    {"picture_output_motion",     PARM_TYP_LIST,   PARM_CAT_09, WEBUI_LEVEL_LIMITED },
+    {"picture_type",              PARM_TYP_LIST,   PARM_CAT_09, WEBUI_LEVEL_LIMITED },
+    {"picture_quality",           PARM_TYP_INT,    PARM_CAT_09, WEBUI_LEVEL_LIMITED },
+    {"picture_exif",              PARM_TYP_STRING, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
+    {"picture_filename",          PARM_TYP_STRING, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
+    {"snapshot_interval",         PARM_TYP_INT,    PARM_CAT_09, WEBUI_LEVEL_LIMITED },
+    {"snapshot_filename",         PARM_TYP_STRING, PARM_CAT_09, WEBUI_LEVEL_LIMITED },
 
-    {
-    "movie_output",
-    "############################################################\n"
-    "# Movie output configuration parameters\n"
-    "############################################################\n\n"
-    "# Create movies of motion events.",
-    0, PARM_TYP_BOOL, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
-    {
-    "movie_output_motion",
-    "# Create movies of moving pixels of motion events.",
-    0, PARM_TYP_BOOL, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
-    {
-    "movie_max_time",
-    "# Maximum length of movie in seconds.",
-    0, PARM_TYP_INT, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
-    {
-    "movie_bps",
-    "# The fixed bitrate to be used by the movie encoder. Ignore quality setting",
-    0, PARM_TYP_INT, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
-    {
-    "movie_quality",
-    "# The encoding quality of the movie. (0=use bitrate. 1=worst quality, 100=best)",
-    0, PARM_TYP_INT, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
-    {
-    "movie_codec",
-    "# Container/Codec to used for the movie. See motionplus_guide.html",
-    0, PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
-    {
-    "movie_passthrough",
-    "# Pass through from the camera to the movie without decode/encoding.",
-    0, PARM_TYP_BOOL, PARM_CAT_10, WEBUI_LEVEL_LIMITED},
-    {
-    "movie_filename",
-    "# File name(without extension) for movies relative to target directory",
-    0, PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
-    {
-    "movie_extpipe_use",
-    "# Use pipe and external encoder for creating movies.",
-    0, PARM_TYP_BOOL, PARM_CAT_10, WEBUI_LEVEL_RESTRICTED },
-    {
-    "movie_extpipe",
-    "# Full path and options for external encoder of movies from raw images",
-    0, PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_RESTRICTED },
+    {"movie_output",              PARM_TYP_BOOL,   PARM_CAT_10, WEBUI_LEVEL_LIMITED },
+    {"movie_output_motion",       PARM_TYP_BOOL,   PARM_CAT_10, WEBUI_LEVEL_LIMITED },
+    {"movie_max_time",            PARM_TYP_INT,    PARM_CAT_10, WEBUI_LEVEL_LIMITED },
+    {"movie_bps",                 PARM_TYP_INT,    PARM_CAT_10, WEBUI_LEVEL_LIMITED },
+    {"movie_quality",             PARM_TYP_INT,    PARM_CAT_10, WEBUI_LEVEL_LIMITED },
+    {"movie_codec",               PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
+    {"movie_passthrough",         PARM_TYP_BOOL,   PARM_CAT_10, WEBUI_LEVEL_LIMITED },
+    {"movie_filename",            PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
+    {"movie_extpipe_use",         PARM_TYP_BOOL,   PARM_CAT_10, WEBUI_LEVEL_RESTRICTED },
+    {"movie_extpipe",             PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_RESTRICTED },
 
-    {
-    "timelapse_interval",
-    "############################################################\n"
-    "# Timelapse output configuration parameters\n"
-    "############################################################\n\n"
-    "# Interval in seconds between timelapse captures.",
-    0, PARM_TYP_INT, PARM_CAT_11, WEBUI_LEVEL_LIMITED },
-    {
-    "timelapse_mode",
-    "# Timelapse file rollover mode. See motionplus_guide.html for options and uses.",
-    0, PARM_TYP_LIST, PARM_CAT_11, WEBUI_LEVEL_LIMITED},
-    {
-    "timelapse_fps",
-    "# Frame rate for timelapse playback",
-    0, PARM_TYP_INT, PARM_CAT_11, WEBUI_LEVEL_LIMITED },
-    {
-    "timelapse_codec",
-    "# Container/Codec for timelapse movie.",
-    0, PARM_TYP_LIST, PARM_CAT_11, WEBUI_LEVEL_LIMITED},
-    {
-    "timelapse_filename",
-    "# File name(without extension) for timelapse movies relative to target directory",
-    0, PARM_TYP_STRING, PARM_CAT_11, WEBUI_LEVEL_LIMITED},
+    {"timelapse_interval",        PARM_TYP_INT,    PARM_CAT_11, WEBUI_LEVEL_LIMITED },
+    {"timelapse_mode",            PARM_TYP_LIST,   PARM_CAT_11, WEBUI_LEVEL_LIMITED },
+    {"timelapse_fps",             PARM_TYP_INT,    PARM_CAT_11, WEBUI_LEVEL_LIMITED },
+    {"timelapse_codec",           PARM_TYP_LIST,   PARM_CAT_11, WEBUI_LEVEL_LIMITED },
+    {"timelapse_filename",        PARM_TYP_STRING, PARM_CAT_11, WEBUI_LEVEL_LIMITED },
 
-    {
-    "video_pipe",
-    "############################################################\n"
-    "# Loopback pipe configuration parameters\n"
-    "############################################################\n\n"
-    "# v4l2 loopback device to receive normal images",
-    0, PARM_TYP_STRING, PARM_CAT_12, WEBUI_LEVEL_LIMITED },
-    {
-    "video_pipe_motion",
-    "# v4l2 loopback device to receive motion images",
-    0, PARM_TYP_STRING, PARM_CAT_12, WEBUI_LEVEL_LIMITED},
+    {"video_pipe",                PARM_TYP_STRING, PARM_CAT_12, WEBUI_LEVEL_LIMITED },
+    {"video_pipe_motion",         PARM_TYP_STRING, PARM_CAT_12, WEBUI_LEVEL_LIMITED },
 
-    {
-    "webcontrol_port",
-    "############################################################\n"
-    "# Webcontrol configuration parameters\n"
-    "############################################################\n\n"
-    "# Port number used for the webcontrol.",
-    1, PARM_TYP_INT, PARM_CAT_13, WEBUI_LEVEL_ADVANCED},
-    {
-    "webcontrol_ipv6",
-    "# Enable IPv6 addresses.",
-    0, PARM_TYP_BOOL, PARM_CAT_13, WEBUI_LEVEL_ADVANCED},
-    {
-    "webcontrol_localhost",
-    "# Restrict webcontrol connections to the localhost.",
-    1, PARM_TYP_BOOL, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
-    {
-    "webcontrol_parms",
-    "# Type of configuration options to allow via the webcontrol.",
-    1, PARM_TYP_LIST, PARM_CAT_13, WEBUI_LEVEL_NEVER},
-    {
-    "webcontrol_interface",
-    "# Method that webcontrol should use for interface with user.",
-    1, PARM_TYP_LIST, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
-    {
-    "webcontrol_auth_method",
-    "# The authentication method for the webcontrol",
-    0, PARM_TYP_LIST, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED},
-    {
-    "webcontrol_authentication",
-    "# Authentication string for the webcontrol. Syntax username:password",
-    1, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED},
-    {
-    "webcontrol_tls",
-    "# Use ssl / tls for the webcontrol",
-    0, PARM_TYP_BOOL, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
-    {
-    "webcontrol_cert",
-    "# Full path and file name of the certificate file for tls",
-    1, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED},
-    {
-    "webcontrol_key",
-    "# Full path and file name of the key file for tls",
-    1, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED},
-    {
-    "webcontrol_cors_header",
-    "# The cross-origin resource sharing (CORS) header for webcontrol",
-    0, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
-    {
-    "webcontrol_html",
-    "# Full path and file name of the html file to use for the webcontrol",
-    1, PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED},
+    {"webcontrol_port",           PARM_TYP_INT,    PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
+    {"webcontrol_ipv6",           PARM_TYP_BOOL,   PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
+    {"webcontrol_localhost",      PARM_TYP_BOOL,   PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
+    {"webcontrol_parms",          PARM_TYP_LIST,   PARM_CAT_13, WEBUI_LEVEL_NEVER},
+    {"webcontrol_interface",      PARM_TYP_LIST,   PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
+    {"webcontrol_auth_method",    PARM_TYP_LIST,   PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
+    {"webcontrol_authentication", PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
+    {"webcontrol_tls",            PARM_TYP_BOOL,   PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
+    {"webcontrol_cert",           PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
+    {"webcontrol_key",            PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
+    {"webcontrol_cors_header",    PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
+    {"webcontrol_html",           PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
 
-    {
-    "stream_preview_scale",
-    "############################################################\n"
-    "# Live stream configuration parameters\n"
-    "############################################################\n\n"
-    "# Percentage to scale the stream image on the webcontrol.",
-    0, PARM_TYP_INT, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
-    {
-    "stream_preview_newline",
-    "# Have the stream image start on a new line of the webcontrol",
-    0, PARM_TYP_BOOL, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
-    {
-    "stream_preview_method",
-    "# Method for showing stream on webcontrol.",
-    0, PARM_TYP_LIST, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
-    {
-    "stream_preview_ptz",
-    "# Show the PTZ buttons on the webcontrol for the camera.",
-    0, PARM_TYP_BOOL, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
-    {
-    "stream_quality",
-    "# Quality of the jpeg images produced for stream.",
-    0, PARM_TYP_INT, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
-    {
-    "stream_grey",
-    "# Provide the stream images in black and white",
-    0, PARM_TYP_BOOL, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
-    {
-    "stream_motion",
-    "# Output frames at 1 fps when no motion is detected.",
-    0, PARM_TYP_BOOL, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
-    {
-    "stream_maxrate",
-    "# Maximum framerate of images provided for stream",
-    0, PARM_TYP_INT, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
+    {"stream_preview_scale",      PARM_TYP_INT,    PARM_CAT_14, WEBUI_LEVEL_LIMITED },
+    {"stream_preview_newline",    PARM_TYP_BOOL,   PARM_CAT_14, WEBUI_LEVEL_LIMITED },
+    {"stream_preview_method",     PARM_TYP_LIST,   PARM_CAT_14, WEBUI_LEVEL_LIMITED },
+    {"stream_preview_ptz",        PARM_TYP_BOOL,   PARM_CAT_14, WEBUI_LEVEL_LIMITED },
+    {"stream_quality",            PARM_TYP_INT,    PARM_CAT_14, WEBUI_LEVEL_LIMITED },
+    {"stream_grey",               PARM_TYP_BOOL,   PARM_CAT_14, WEBUI_LEVEL_LIMITED },
+    {"stream_motion",             PARM_TYP_BOOL,   PARM_CAT_14, WEBUI_LEVEL_LIMITED },
+    {"stream_maxrate",            PARM_TYP_INT,    PARM_CAT_14, WEBUI_LEVEL_LIMITED },
 
-    {
-    "database_type",
-    "############################################################\n"
-    "# Database and SQL Configuration parameters\n"
-    "############################################################\n\n"
-    "# The type of database being used if any.",
-    0, PARM_TYP_LIST, PARM_CAT_15, WEBUI_LEVEL_ADVANCED},
-    {
-    "database_dbname",
-    "# Database name to use. For sqlite3, the full path and name.",
-    0, PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
-    {
-    "database_host",
-    "# The host on which the database is located",
-    0, PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
-    {
-    "database_port",
-    "# Port used by the database.",
-    0, PARM_TYP_INT, PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
-    {
-    "database_user",
-    "# User account name for database.",
-    0, PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_RESTRICTED },
-    {
-    "database_password",
-    "# User password for database.",
-    0, PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_RESTRICTED },
-    {
-    "database_busy_timeout",
-    "# Database wait for unlock time",
-    0, PARM_TYP_INT, PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
+    {"database_type",             PARM_TYP_LIST,   PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
+    {"database_dbname",           PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
+    {"database_host",             PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
+    {"database_port",             PARM_TYP_INT,    PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
+    {"database_user",             PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_RESTRICTED },
+    {"database_password",         PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_RESTRICTED },
+    {"database_busy_timeout",     PARM_TYP_INT,    PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
 
-    {
-    "sql_log_picture",
-    "# Log to the database when creating motion triggered image file",
-    0,PARM_TYP_BOOL, PARM_CAT_16, WEBUI_LEVEL_LIMITED },
-    {
-    "sql_log_snapshot",
-    "# Log to the database when creating a snapshot image file",
-    0,PARM_TYP_BOOL, PARM_CAT_16, WEBUI_LEVEL_LIMITED},
-    {
-    "sql_log_movie",
-    "# Log to the database when creating motion triggered movie file",
-    0,PARM_TYP_BOOL, PARM_CAT_16, WEBUI_LEVEL_LIMITED },
-    {
-    "sql_log_timelapse",
-    "# Log to the database when creating timelapse movie file",
-    0,PARM_TYP_BOOL, PARM_CAT_16, WEBUI_LEVEL_LIMITED},
-    {
-    "sql_query_start",
-    "# SQL query at event start.  See motionplus_guide.html",
-    0, PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED },
-    {
-    "sql_query_stop",
-    "# SQL query at event stop.  See motionplus_guide.html",
-    0, PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED },
-    {
-    "sql_query",
-    "# SQL query string that is sent to the database.  See motionplus_guide.html",
-    0, PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED},
+    {"sql_log_picture",           PARM_TYP_BOOL,   PARM_CAT_16, WEBUI_LEVEL_LIMITED },
+    {"sql_log_snapshot",          PARM_TYP_BOOL,   PARM_CAT_16, WEBUI_LEVEL_LIMITED},
+    {"sql_log_movie",             PARM_TYP_BOOL,   PARM_CAT_16, WEBUI_LEVEL_LIMITED },
+    {"sql_log_timelapse",         PARM_TYP_BOOL,   PARM_CAT_16, WEBUI_LEVEL_LIMITED},
+    {"sql_query_start",           PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED },
+    {"sql_query_stop",            PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED },
+    {"sql_query",                 PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED},
 
-    {
-    "ptz_auto_track",
-    "############################################################\n"
-    "# Pan, Tilt, Zoom configuration parameters\n"
-    "############################################################\n\n"
-    "# Enable auto tracking",
-    0, PARM_TYP_BOOL, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
-    {
-    "ptz_wait",
-    "# Frame count to delay after a PTZ action.",
-    0, PARM_TYP_INT, PARM_CAT_17, WEBUI_LEVEL_LIMITED },
-    {
-    "ptz_move_track",
-    "# Command to execute for auto tracking ",
-    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
-    {
-    "ptz_pan_left",
-    "# Command to execute for moving camera left",
-    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
-    {
-    "ptz_pan_right",
-    "# Command to execute for moving camera right ",
-    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
-    {
-    "ptz_tilt_up",
-    "# Command to execute for moving camera up ",
-    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
-    {
-    "ptz_tilt_down",
-    "# Command to execute for moving camera down ",
-    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
-    {
-    "ptz_zoom_in",
-    "# Command to execute for zooming the camera in ",
-    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
-    {
-    "ptz_zoom_out",
-    "# Command to execute for zooming camera out ",
-    0, PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
-    {
-    "camera",
-    "##############################################################\n"
-    "# Camera config files - One for each camera.\n"
-    "##############################################################",
-    1, PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
-    /* using a conf.d style camera addition */
+    {"ptz_auto_track",            PARM_TYP_BOOL,   PARM_CAT_17, WEBUI_LEVEL_LIMITED },
+    {"ptz_wait",                  PARM_TYP_INT,    PARM_CAT_17, WEBUI_LEVEL_LIMITED },
+    {"ptz_move_track",            PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
+    {"ptz_pan_left",              PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
+    {"ptz_pan_right",             PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
+    {"ptz_tilt_up",               PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
+    {"ptz_tilt_down",             PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
+    {"ptz_zoom_in",               PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
+    {"ptz_zoom_out",              PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
 
-    { "", "", 0, (enum PARM_TYP)0, (enum PARM_CAT)0, (enum WEBUI_LEVEL)0 }
+    { "", (enum PARM_TYP)0, (enum PARM_CAT)0, (enum WEBUI_LEVEL)0 }
 };
 
 /*
@@ -3761,6 +3290,54 @@ std::string conf_type_desc(enum PARM_TYP ptype)
     }
 }
 
+/* Return a string describing the parameter category */
+std::string conf_cat_desc(enum PARM_CAT pcat, bool shrt) {
+
+    if (shrt) {
+        if (pcat == PARM_CAT_00)        { return "system";
+        } else if (pcat == PARM_CAT_01) { return "camera";
+        } else if (pcat == PARM_CAT_02) { return "source";
+        } else if (pcat == PARM_CAT_03) { return "image";
+        } else if (pcat == PARM_CAT_04) { return "overlay";
+        } else if (pcat == PARM_CAT_05) { return "method";
+        } else if (pcat == PARM_CAT_06) { return "masks";
+        } else if (pcat == PARM_CAT_07) { return "detect";
+        } else if (pcat == PARM_CAT_08) { return "scripts";
+        } else if (pcat == PARM_CAT_09) { return "picture";
+        } else if (pcat == PARM_CAT_10) { return "movie";
+        } else if (pcat == PARM_CAT_11) { return "timelapse";
+        } else if (pcat == PARM_CAT_12) { return "pipes";
+        } else if (pcat == PARM_CAT_13) { return "webcontrol";
+        } else if (pcat == PARM_CAT_14) { return "streams";
+        } else if (pcat == PARM_CAT_15) { return "database";
+        } else if (pcat == PARM_CAT_16) { return "sql";
+        } else if (pcat == PARM_CAT_17) { return "track";
+        } else { return "unk";
+        }
+    } else {
+        if (pcat == PARM_CAT_00)        { return "System";
+        } else if (pcat == PARM_CAT_01) { return "Camera";
+        } else if (pcat == PARM_CAT_02) { return "Source";
+        } else if (pcat == PARM_CAT_03) { return "Image";
+        } else if (pcat == PARM_CAT_04) { return "Overlays";
+        } else if (pcat == PARM_CAT_05) { return "Method";
+        } else if (pcat == PARM_CAT_06) { return "Masks";
+        } else if (pcat == PARM_CAT_07) { return "Detection";
+        } else if (pcat == PARM_CAT_08) { return "Scripts";
+        } else if (pcat == PARM_CAT_09) { return "Picture";
+        } else if (pcat == PARM_CAT_10) { return "Movie";
+        } else if (pcat == PARM_CAT_11) { return "Timelapse";
+        } else if (pcat == PARM_CAT_12) { return "Pipes";
+        } else if (pcat == PARM_CAT_13) { return "Web Control";
+        } else if (pcat == PARM_CAT_14) { return "Web Stream";
+        } else if (pcat == PARM_CAT_15) { return "Database";
+        } else if (pcat == PARM_CAT_16) { return "SQL";
+        } else if (pcat == PARM_CAT_17) { return "Tracking";
+        } else { return "Other";
+        }
+    }
+}
+
 /** Prints usage and options allowed from Command-line. */
 static void usage(void)
 {
@@ -4121,11 +3698,12 @@ void conf_parms_log(struct ctx_cam **cam_list)
 void conf_parms_write(struct ctx_motapp *motapp)
 {
     std::string parm_val, parm_main;
-    int indx, indx2,  indx_cam;
+    int indx, indx_cam, indx_next;
     char timestamp[32];
     FILE *conffile;
 
-    for (indx_cam = 0; motapp->cam_list[indx_cam]; indx_cam++) {
+    indx_cam = 0;
+    while (motapp->cam_list[indx_cam] != NULL) {
         /*
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Writing config file to %s")
@@ -4140,12 +3718,13 @@ void conf_parms_write(struct ctx_motapp *motapp)
         time_t now = time(0);
         strftime(timestamp, 32, "%Y-%m-%dT%H:%M:%S", localtime(&now));
 
-        fprintf(conffile, "# %s\n", motapp->cam_list[indx_cam]->conf_filename);
-        fprintf(conffile, "#\n# This config file was generated by MotionPlus " VERSION "\n");
-        fprintf(conffile, "# at %s\n", timestamp);
+        fprintf(conffile, "; %s\n", motapp->cam_list[indx_cam]->conf_filename);
+        fprintf(conffile, ";\n; This config file was generated by MotionPlus " VERSION "\n");
+        fprintf(conffile, "; at %s\n", timestamp);
         fprintf(conffile, "\n\n");
 
         indx = 0;
+        indx_next = -1;
         while (config_parms[indx].parm_name != "") {
             conf_edit_get(motapp->cam_list[indx_cam], config_parms[indx].parm_name
                     , parm_val, config_parms[indx].parm_cat);
@@ -4154,51 +3733,65 @@ void conf_parms_write(struct ctx_motapp *motapp)
 
             if ((config_parms[indx].parm_name != "camera") &&
                 (config_parms[indx].parm_name != "camera_dir") &&
+                (config_parms[indx].parm_name != "conf_filename") &&
                 ((indx_cam == 0) || (parm_val != parm_main))) {
 
-                fprintf(conffile, "%s\n", config_parms[indx].parm_help.c_str());
+                if (indx_next != (int)config_parms[indx].parm_cat) {
+                    fprintf(conffile,"\n%s",";*************************************************\n");
+                    fprintf(conffile,"%s%s\n", ";*****   "
+                        , conf_cat_desc(config_parms[indx].parm_cat,false).c_str());
+                    fprintf(conffile,"%s",";*************************************************\n");
+                    indx_next = (int)config_parms[indx].parm_cat;
+                }
+
                 /* If there are embedded spaces, enclose in quotes */
                 if (parm_val.compare(0, 1, " ") == 0) {
-                    fprintf(conffile, "%s \"%s\"\n\n"
+                    fprintf(conffile, "%s \"%s\"\n"
                         , config_parms[indx].parm_name.c_str(), parm_val.c_str());
                 } else {
-                    fprintf(conffile, "%s %s\n\n"
-                        , config_parms[indx].parm_name.c_str(), parm_val.c_str());
-                }
-            }
-            if ((config_parms[indx].parm_name == "camera") && (indx_cam == 0)) {
-                fprintf(conffile, "%s\n", config_parms[indx].parm_help.c_str());
-                if (motapp->cam_list[0]->from_conf_dir == false) {
-                    indx2 = 1;
-                    while (motapp->cam_list[indx2] != NULL) {
-                        if (parm_val.compare(0, 1, " ") == 0) {
-                            fprintf(conffile, "%s \"%s\"\n\n"
-                                , config_parms[indx].parm_name.c_str()
-                                , motapp->cam_list[indx2]->conf_filename);
-                        } else {
-                            fprintf(conffile, "%s %s\n\n"
-                                , config_parms[indx].parm_name.c_str()
-                                , motapp->cam_list[indx2]->conf_filename);
-                        }
-                        indx2++;
-                    }
-                }
-            }
-            if ((config_parms[indx].parm_name == "camera_dir") && (indx_cam == 0)) {
-                fprintf(conffile, "%s\n", config_parms[indx].parm_help.c_str());
-                if (parm_val == "") {
-                    parm_val = motapp->cam_list[0]->conf_filename;
-                    parm_val = parm_val.substr(0, parm_val.find_last_of("/")+1) + "conf.d";
-                }
-                if (parm_val.compare(0, 1, " ") == 0) {
-                    fprintf(conffile, "%s \"%s\"\n\n"
-                        , config_parms[indx].parm_name.c_str(), parm_val.c_str());
-                } else {
-                    fprintf(conffile, "%s %s\n\n"
+                    fprintf(conffile, "%s %s\n"
                         , config_parms[indx].parm_name.c_str(), parm_val.c_str());
                 }
             }
             indx++;
+        }
+
+        /* Write out the camera_dir and camera last */
+        if (indx_cam == 0) {
+            fprintf(conffile, "%s","\n");
+            indx = 0;
+            while (config_parms[indx].parm_name != "") {
+                if (config_parms[indx].parm_name == "camera_dir") {
+                    conf_edit_get(motapp->cam_list[indx_cam], config_parms[indx].parm_name
+                        , parm_val, config_parms[indx].parm_cat);
+                    if (parm_val == "") {
+                        parm_val = motapp->cam_list[0]->conf_filename;
+                        parm_val = parm_val.substr(0, parm_val.find_last_of("/")+1) + "conf.d";
+                    }
+                    if (parm_val.compare(0, 1, " ") == 0) {
+                        fprintf(conffile, "%s \"%s\"\n"
+                            , config_parms[indx].parm_name.c_str(), parm_val.c_str());
+                    } else {
+                        fprintf(conffile, "%s %s\n"
+                            , config_parms[indx].parm_name.c_str(), parm_val.c_str());
+                    }
+                }
+                indx++;
+            }
+            if (motapp->cam_list[0]->from_conf_dir == false) {
+                fprintf(conffile, "%s","\n");
+                indx = 1;
+                while (motapp->cam_list[indx] != NULL) {
+                    if (parm_val.compare(0, 1, " ") == 0) {
+                        fprintf(conffile, "camera \"%s\"\n"
+                            , motapp->cam_list[indx]->conf_filename);
+                    } else {
+                        fprintf(conffile, "camera %s\n"
+                            , motapp->cam_list[indx]->conf_filename);
+                    }
+                    indx++;
+                }
+            }
         }
 
         fprintf(conffile, "\n");
@@ -4208,6 +3801,8 @@ void conf_parms_write(struct ctx_motapp *motapp)
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             , _("Configuration written to %s")
             , motapp->cam_list[indx_cam]->conf_filename);
+
+        indx_cam++;
     }
 
 }

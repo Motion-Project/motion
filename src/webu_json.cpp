@@ -235,6 +235,7 @@ static void webu_json_config_cam_list(struct ctx_webui *webui)
 static void webu_json_config_categories(struct ctx_webui *webui)
 {
     int indx_cat;
+    std::string catnm_short, catnm_long;
 
     webui->resp_page += "{";
 
@@ -245,45 +246,11 @@ static void webu_json_config_categories(struct ctx_webui *webui)
         }
         webui->resp_page += "\"" + std::to_string(indx_cat) + "\": ";
 
-        if (indx_cat == PARM_CAT_00) {
-            webui->resp_page += "{\"name\":\"system\",\"display\":\"System\"}";
-        } else if (indx_cat == PARM_CAT_01) {
-            webui->resp_page += "{\"name\":\"camera\",\"display\":\"Camera\"}";
-        } else if (indx_cat == PARM_CAT_02) {
-            webui->resp_page += "{\"name\":\"source\",\"display\":\"Source\"}";
-        } else if (indx_cat == PARM_CAT_03) {
-            webui->resp_page += "{\"name\":\"image\",\"display\":\"Image\"}";
-        } else if (indx_cat == PARM_CAT_04) {
-            webui->resp_page += "{\"name\":\"overlay\",\"display\":\"Overlays\"}";
-        } else if (indx_cat == PARM_CAT_05) {
-            webui->resp_page += "{\"name\":\"method\",\"display\":\"Method\"}";
-        } else if (indx_cat == PARM_CAT_06) {
-            webui->resp_page += "{\"name\":\"masks\",\"display\":\"Masks\"}";
-        } else if (indx_cat == PARM_CAT_07) {
-            webui->resp_page += "{\"name\":\"detect\",\"display\":\"Detection\"}";
-        } else if (indx_cat == PARM_CAT_08) {
-            webui->resp_page += "{\"name\":\"scripts\",\"display\":\"Scripts\"}";
-        } else if (indx_cat == PARM_CAT_09) {
-            webui->resp_page += "{\"name\":\"picture\",\"display\":\"Picture\"}";
-        } else if (indx_cat == PARM_CAT_10) {
-            webui->resp_page += "{\"name\":\"movie\",\"display\":\"Movie\"}";
-        } else if (indx_cat == PARM_CAT_11) {
-            webui->resp_page += "{\"name\":\"timelapse\",\"display\":\"Timelapse\"}";
-        } else if (indx_cat == PARM_CAT_12) {
-            webui->resp_page += "{\"name\":\"pipes\",\"display\":\"Pipes\"}";
-        } else if (indx_cat == PARM_CAT_13) {
-            webui->resp_page += "{\"name\":\"webcontrol\",\"display\":\"Web Control\"}";
-        } else if (indx_cat == PARM_CAT_14) {
-            webui->resp_page += "{\"name\":\"streams\",\"display\":\"Web Stream\"}";
-        } else if (indx_cat == PARM_CAT_15) {
-            webui->resp_page += "{\"name\":\"database\",\"display\":\"Database\"}";
-        } else if (indx_cat == PARM_CAT_16) {
-            webui->resp_page += "{\"name\":\"sql\",\"display\":\"SQL\"}";
-        } else if (indx_cat == PARM_CAT_17) {
-            webui->resp_page += "{\"name\":\"track\",\"display\":\"Tracking\"}";
-        } else {
-            webui->resp_page += "{\"name\":\"unk\",\"display\":\"Unknown\"}";
-        }
+        catnm_long = conf_cat_desc((enum PARM_CAT)indx_cat, false);
+        catnm_short = conf_cat_desc((enum PARM_CAT)indx_cat, true);
+
+        webui->resp_page += "{\"name\":\"" + catnm_short + "\",\"display\":\"" + catnm_long + "\"}";
+
         indx_cat++;
     }
 
