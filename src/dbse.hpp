@@ -21,8 +21,8 @@
 /*
  *    Header files for the database functionality.
  */
-#ifndef _INCLUDE_DBSE_H_
-#define _INCLUDE_DBSE_H_
+#ifndef _INCLUDE_DBSE_HPP_
+#define _INCLUDE_DBSE_HPP_
 
 #ifdef HAVE_MYSQL
     #include <mysql.h>
@@ -71,4 +71,4 @@ void dbse_firstmotion(struct ctx_cam *cam);
 void dbse_newfile(struct ctx_cam *cam, char *filename, int sqltype, struct timespec *ts1);
 void dbse_fileclose(struct ctx_cam *cam, char *filename, int sqltype, struct timespec *ts1);
 
-#endif
+#endif /* _INCLUDE_DBSE_HPP_ */

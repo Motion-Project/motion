@@ -18,8 +18,8 @@
  */
 
 
-#ifndef _INCLUDE_DRAW_H_
-#define _INCLUDE_DRAW_H_
+#ifndef _INCLUDE_DRAW_HPP_
+#define _INCLUDE_DRAW_HPP_
 
     int draw_text(unsigned char *image,
               int width, int height,
@@ -34,4 +34,4 @@
     void draw_fixed_mask(struct ctx_cam *cam, unsigned char *out);
     void draw_largest_label(struct ctx_cam *cam, unsigned char *out);
 
-#endif
+#endif /* _INCLUDE_DRAW_HPP_ */

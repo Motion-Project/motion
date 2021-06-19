@@ -19,8 +19,8 @@
 */
 
 
-#ifndef _INCLUDE_MOTION_H
-#define _INCLUDE_MOTION_H
+#ifndef _INCLUDE_MOTIONPLUS_HPP_
+#define _INCLUDE_MOTIONPLUS_HPP_
 
 #include "config.hpp"
 
@@ -426,4 +426,4 @@ struct ctx_motapp {
 
 extern pthread_key_t tls_key_threadnr; /* key for thread number */
 
-#endif /* _INCLUDE_MOTION_H */
+#endif /* _INCLUDE_MOTIONPLUS_HPP_ */

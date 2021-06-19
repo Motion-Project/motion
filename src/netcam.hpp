@@ -19,8 +19,8 @@
 */
 
 
-#ifndef _INCLUDE_NETCAM_H
-#define _INCLUDE_NETCAM_H
+#ifndef _INCLUDE_NETCAM_HPP_
+#define _INCLUDE_NETCAM_HPP_
 
 struct context;
 struct image_data;
@@ -161,4 +161,4 @@ int netcam_setup(struct ctx_cam *cam);
 int netcam_next(struct ctx_cam *cam, struct ctx_image_data *img_data);
 void netcam_cleanup(struct ctx_cam *cam, bool init_retry_flag);
 
-#endif /* _INCLUDE_NETCAM_H */
+#endif /* _INCLUDE_NETCAM_HPP_ */

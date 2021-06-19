@@ -19,10 +19,10 @@
 */
 
 
-#ifndef _INCLUDE_MOTION_LOOP_H_
-#define _INCLUDE_MOTION_LOOP_H_
+#ifndef _INCLUDE_MOTION_LOOP_HPP_
+#define _INCLUDE_MOTION_LOOP_HPP_
 
 void *motion_loop(void *arg);
 void mlp_cleanup(struct ctx_cam *cam);
 
-#endif
+#endif /* _INCLUDE_MOTION_LOOP_HPP_ */

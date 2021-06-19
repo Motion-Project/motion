@@ -16,8 +16,8 @@
  *
  *    Copyright 2020-2021 MotionMrDave@gmail.com
  */
-#ifndef _INCLUDE_ROTATE_H
-#define _INCLUDE_ROTATE_H
+#ifndef _INCLUDE_ROTATE_HPP_
+#define _INCLUDE_ROTATE_HPP_
 
     struct ctx_cam;
 
@@ -38,4 +38,4 @@
     void rotate_deinit(struct ctx_cam *cam);
     int rotate_map(struct ctx_cam *cam, struct ctx_image_data *img_data);
 
-#endif
+#endif /* _INCLUDE_ROTATE_HPP_ */

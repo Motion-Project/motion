@@ -17,11 +17,11 @@
  *    Copyright 2020-2021 MotionMrDave@gmail.com
 */
 
-#ifndef _INCLUDE_WEBU_HTML_H_
-#define _INCLUDE_WEBU_HTML_H_
+#ifndef _INCLUDE_WEBU_HTML_HPP_
+#define _INCLUDE_WEBU_HTML_HPP_
 
     void webu_html_badreq(struct ctx_webui *webui);
     void webu_html_user(struct ctx_webui *webui);
     void webu_html_page(struct ctx_webui *webui);
 
-#endif
+#endif /* _INCLUDE_WEBU_HTML_HPP_ */

@@ -18,8 +18,8 @@
  *
 */
 
-#ifndef _INCLUDE_UTIL_H_
-#define _INCLUDE_UTIL_H_
+#ifndef _INCLUDE_UTIL_HPP_
+#define _INCLUDE_UTIL_HPP_
 
 #if (MYFFVER >= 56000)
     #define MY_PIX_FMT_YUV420P   AV_PIX_FMT_YUV420P
@@ -144,4 +144,4 @@
     void util_parms_update(struct ctx_params *params, std::string &confline);
 
 
-#endif
+#endif /* _INCLUDE_UTIL_HPP_ */

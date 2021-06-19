@@ -17,9 +17,9 @@
  *    Copyright 2020-2021 MotionMrDave@gmail.com
 */
 
-#ifndef _INCLUDE_WEBU_JSON_H_
-#define _INCLUDE_WEBU_JSON_H_
+#ifndef _INCLUDE_WEBU_JSON_HPP_
+#define _INCLUDE_WEBU_JSON_HPP_
 
     void webu_json_config(struct ctx_webui *webui);
 
-#endif
+#endif /* _INCLUDE_WEBU_JSON_HPP_ */

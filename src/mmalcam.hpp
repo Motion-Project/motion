@@ -18,8 +18,8 @@
  *    Copyright 2013 by Nicholas Tuckett
  */
 
-#ifndef MMALCAM_H_
-#define MMALCAM_H_
+#ifndef _INCLUDE_MMALCAM_HPP_
+#define _INCLUDE_MMALCAM_HPP_
 
     typedef struct ctx_mmalcam *ctx_mmalcam_ptr;
 
@@ -42,4 +42,4 @@
     int mmalcam_next (struct ctx_cam *cam, struct ctx_image_data *img_data);
     void mmalcam_cleanup (struct ctx_mmalcam *mmalcam);
 
-#endif /* MMALCAM_H_ */
+#endif /* _INCLUDE_MMALCAM_HPP_ */

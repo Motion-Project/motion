@@ -16,10 +16,10 @@
  *
  *    Copyright 2020-2021 MotionMrDave@gmail.com
  */
-#ifndef _INCLUDE_VIDEO_LOOPBACK_H
-#define _INCLUDE_VIDEO_LOOPBACK_H
+#ifndef _INCLUDE_VIDEO_LOOPBACK_HPP_
+#define _INCLUDE_VIDEO_LOOPBACK_HPP_
 
     int vlp_startpipe(const char *dev_name, int width, int height);
     int vlp_putpipe(int dev, unsigned char *image, int imgsize);
     void vlp_init(struct ctx_cam *cam);
-#endif
+#endif /* _INCLUDE_VIDEO_LOOPBACK_HPP_ */

@@ -19,8 +19,8 @@
 */
 
 
-#ifndef __JPEGUTILS_H__
-#define __JPEGUTILS_H__
+#ifndef _INCLUDE_JPEGUTILS_HPP_
+#define _INCLUDE_JPEGUTILS_HPP_
 
     int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
         unsigned int width, unsigned int height, unsigned char *volatile img_out);
@@ -31,4 +31,4 @@
         unsigned char *input_image, int width, int height, int quality,
         struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box);
 
-#endif
+#endif /*  _INCLUDE_JPEGUTILS_HPP_ */

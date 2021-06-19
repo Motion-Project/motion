@@ -17,8 +17,8 @@
  *    Copyright 2020-2021 MotionMrDave@gmail.com
  */
 
-#ifndef _INCLUDE_ALG_H
-#define _INCLUDE_ALG_H
+#ifndef _INCLUDE_ALG_HPP_
+#define _INCLUDE_ALG_HPP_
 
     struct ctx_coord;
 
@@ -34,4 +34,4 @@
     void alg_new_diff(ctx_cam *cam);
 
 
-#endif /* _INCLUDE_ALG_H */
+#endif /* _INCLUDE_ALG_HPP_ */

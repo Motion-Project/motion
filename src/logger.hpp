@@ -16,8 +16,8 @@
  *
  *    Copyright 2020-2021 MotionMrDave@gmail.com
  */
-#ifndef _INCLUDE_LOGGER_H_
-#define _INCLUDE_LOGGER_H_
+#ifndef _INCLUDE_LOGGER_HPP_
+#define _INCLUDE_LOGGER_HPP_
 
     struct ctx_cam;
 
@@ -64,4 +64,4 @@
     void log_set_type(const char *new_logtype);
     void log_set_motapp(struct ctx_motapp *motapp);
 
-#endif
+#endif /* _INCLUDE_LOGGER_HPP_ */

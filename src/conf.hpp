@@ -18,8 +18,8 @@
  */
 
 
-#ifndef _INCLUDE_CONF_H
-#define _INCLUDE_CONF_H
+#ifndef _INCLUDE_CONF_HPP_
+#define _INCLUDE_CONF_HPP_
 
     struct ctx_cam;
     struct ctx_motapp;
@@ -267,4 +267,4 @@
     std::string conf_type_desc(enum PARM_TYP ptype);
     std::string conf_cat_desc(enum PARM_CAT pcat, bool shrt);
 
-#endif /* _INCLUDE_CONF_H */
+#endif /* _INCLUDE_CONF_HPP_ */

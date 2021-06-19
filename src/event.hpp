@@ -16,8 +16,8 @@
  *
  *    Copyright 2020-2021 MotionMrDave@gmail.com
  */
-#ifndef _INCLUDE_EVENT_H_
-#define _INCLUDE_EVENT_H_
+#ifndef _INCLUDE_EVENT_HPP_
+#define _INCLUDE_EVENT_HPP_
 
 typedef enum {
     EVENT_FILECREATE = 1,
@@ -51,4 +51,4 @@ void event(struct ctx_cam *cam, motion_event evnt
            ,struct ctx_image_data *img_data, char *fname,void *ftype, struct timespec *ts1);
 const char * imageext(struct ctx_cam *cam);
 
-#endif /* _INCLUDE_EVENT_H_ */
+#endif /* _INCLUDE_EVENT_HPP_ */

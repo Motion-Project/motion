@@ -17,8 +17,8 @@
  *    Copyright 2020-2021 MotionMrDave@gmail.com
 */
 
-#ifndef _INCLUDE_WEBU_STREAM_H_
-#define _INCLUDE_WEBU_STREAM_H_
+#ifndef _INCLUDE_WEBU_STREAM_HPP_
+#define _INCLUDE_WEBU_STREAM_HPP_
 
     struct ctx_webui;
 
@@ -28,4 +28,4 @@
 
     mhdrslt webu_stream_main(struct ctx_webui *webui);
 
-#endif
+#endif /* _INCLUDE_WEBU_STREAM_HPP_ */

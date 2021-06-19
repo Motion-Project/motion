@@ -18,8 +18,8 @@
  *    Copyright 2020-2021 MotionMrDave@gmail.com
  */
 
-#ifndef _INCLUDE_ALG_SEC_H
-#define _INCLUDE_ALG_SEC_H
+#ifndef _INCLUDE_ALG_SEC_HPP_
+#define _INCLUDE_ALG_SEC_HPP_
 
 
 #include <string>
@@ -82,4 +82,4 @@ void algsec_detect(ctx_cam *cam);
 void algsec_init(ctx_cam *cam);
 void algsec_deinit(ctx_cam *cam);
 
-#endif
+#endif /*_INCLUDE_ALG_SEC_HPP_*/

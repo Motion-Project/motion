@@ -17,8 +17,8 @@
  *    Copyright 2020-2021 MotionMrDave@gmail.com
 */
 
-#ifndef _INCLUDE_VIDEO_V4L2_H
-#define _INCLUDE_VIDEO_V4L2_H
+#ifndef _INCLUDE_VIDEO_V4L2_HPP_
+#define _INCLUDE_VIDEO_V4L2_HPP_
 
 typedef struct video_image_buff {
     unsigned char   *ptr;
@@ -78,4 +78,4 @@ struct ctx_v4l2cam {
     int v4l2_next(struct ctx_cam *cam,  struct ctx_image_data *img_data);
     void v4l2_cleanup(struct ctx_cam *cam);
 
-#endif /* _INCLUDE_VIDEO_V4L2_H */
+#endif /* _INCLUDE_VIDEO_V4L2_HPP_ */

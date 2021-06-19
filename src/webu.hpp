@@ -17,8 +17,8 @@
  *    Copyright 2020-2021 MotionMrDave@gmail.com
 */
 
-#ifndef _INCLUDE_WEBU_H_
-#define _INCLUDE_WEBU_H_
+#ifndef _INCLUDE_WEBU_HPP_
+#define _INCLUDE_WEBU_HPP_
 
     /* Some defines of lengths for our buffers */
     #define WEBUI_LEN_PARM 512          /* Parameters specified */
@@ -102,4 +102,4 @@
     void webu_init(struct ctx_motapp *motapp);
     void webu_deinit(struct ctx_motapp *motapp);
 
-#endif
+#endif /* _INCLUDE_WEBU_HPP_ */

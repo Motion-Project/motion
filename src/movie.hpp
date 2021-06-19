@@ -19,8 +19,8 @@
 */
 
 
-#ifndef _INCLUDE_MOVIE_H_
-#define _INCLUDE_MOVIE_H_
+#ifndef _INCLUDE_MOVIE_HPP_
+#define _INCLUDE_MOVIE_HPP_
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -91,4 +91,4 @@ int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1);
 int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1);
 int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1);
 
-#endif /* _INCLUDE_MOVIE_H_ */
+#endif /* #define _INCLUDE_MOVIE_HPP_ */

@@ -17,8 +17,8 @@
  *    Copyright 2020-2021 MotionMrDave@gmail.com
 */
 
-#ifndef _INCLUDE_VIDEO_COMMON_H
-#define _INCLUDE_VIDEO_COMMON_H
+#ifndef _INCLUDE_VIDEO_COMMON_HPP_
+#define _INCLUDE_VIDEO_COMMON_HPP_
 
 void vid_yuv422to420p(unsigned char *img_dest, unsigned char *img_src, int width, int height);
 void vid_yuv422pto420p(unsigned char *img_dest, unsigned char *img_src, int width, int height);
@@ -30,4 +30,4 @@ void vid_greytoyuv420p(unsigned char *img_dest, unsigned char *img_src, int widt
 int vid_sonix_decompress(unsigned char *img_dest, unsigned char *img_src, int width, int height);
 int vid_mjpegtoyuv420p(unsigned char *img_dest, unsigned char *img_src, int width, int height, unsigned int size);
 
-#endif
+#endif /* _INCLUDE_VIDEO_COMMON_HPP_ */

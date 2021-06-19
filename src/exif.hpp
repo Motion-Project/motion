@@ -21,10 +21,10 @@
 /*
  *    Header files for the exif functionality.
  */
-#ifndef _INCLUDE_EXIF_H_
-#define _INCLUDE_EXIF_H_
+#ifndef _INCLUDE_EXIF_HPP_
+#define _INCLUDE_EXIF_HPP_
 
     unsigned exif_prepare(unsigned char **exif, const struct ctx_cam *cam,
         const struct timespec *ts_in1, const struct ctx_coord *box);
 
-#endif
+#endif  /* _INCLUDE_EXIF_HPP_ */

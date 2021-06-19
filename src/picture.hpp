@@ -17,8 +17,8 @@
  *    Copyright 2020-2021 MotionMrDave@gmail.com
  *
 */
-#ifndef _INCLUDE_PICTURE_H_
-#define _INCLUDE_PICTURE_H_
+#ifndef _INCLUDE_PICTURE_HPP_
+#define _INCLUDE_PICTURE_HPP_
 
     struct ctx_cam;
 
@@ -32,4 +32,4 @@
     void pic_init_privacy(struct ctx_cam *cam);
     void pic_init_mask(struct ctx_cam *cam);
 
-#endif /* _INCLUDE_PICTURE_H_ */
+#endif /* _INCLUDE_PICTURE_HPP_ */
