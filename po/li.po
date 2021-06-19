@@ -5,9 +5,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
-"Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-10-30 20:07-0600\n"
-"PO-Revision-Date: 2019-11-22 22:08-0700\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-18 21:32-0600\n"
+"PO-Revision-Date: 2021-06-18 21:46-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: li\n"
@@ -16,1696 +16,3457 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.0.6\n"
 
-#: src/alg.cpp src/conf.cpp
-#, c-format
-msgid "Camera directory config %s not found"
-msgstr "Kameros katalogo konfigūracija %s nerasta"
-
-#: src/conf.cpp
-msgid "Writing configuration parameters from all files"
-msgstr "Konfigūracijos parametrų rašymas iš visų failų"
-
-#: src/conf.cpp
-#, c-format
-msgid "Writing config file to %s"
-msgstr "Konfigūravimo failo rašymas %s"
-
-#: src/conf.cpp
-#, c-format
-msgid "could not open configfile %s"
+#: src/alg.cpp:1008
+msgid "Lightswitch detected"
 msgstr ""
 
-#: src/conf.cpp
-msgid "No config file to process, using default values"
-msgstr "Nėra apdorojamas konfigūracijos failas, naudojant numatytąsias vertes"
-
-#: src/conf.cpp
+#: src/alg_sec.cpp:217 src/alg_sec.cpp:266 src/alg_sec.cpp:289
 #, c-format
-msgid "Processing thread 0 - config file %s"
-msgstr "0 gijos apdorojimas - konfigūracijos failas %s"
+msgid "Error %s"
+msgstr ""
+
+#: src/alg_sec.cpp:218 src/alg_sec.cpp:267
+msgid "Disabling secondary detection"
+msgstr ""
+
+#: src/alg_sec.cpp:278
+msgid "No secondary model specified."
+msgstr ""
+
+#: src/alg_sec.cpp:284 src/alg_sec.cpp:290
+#, c-format
+#| msgid "Failed to open '%s'"
+msgid "Failed loading model %s"
+msgstr ""
+
+#: src/alg_sec.cpp:470
+#| msgid "Start"
+msgid "Starting."
+msgstr ""
+
+#: src/alg_sec.cpp:496
+msgid "Exiting."
+msgstr ""
+
+#: src/alg_sec.cpp:513
+#| msgid "%s: Error starting handler thread"
+msgid "Error starting algsec handler thread"
+msgstr ""
+
+#: src/alg_sec.cpp:576
+msgid "Graceful shutdown of secondary detector thread failed"
+msgstr ""
+
+#: src/alg_sec.cpp:610
+msgid "Your computer is too slow for these settings."
+msgstr ""
+
+#: src/alg_sec.cpp:613
+msgid "Missed many frames for secondary detection."
+msgstr ""
+
+#: src/alg_sec.cpp:615
+msgid "Your computer is too slow."
+msgstr ""
+
+#: src/conf.cpp:428
+msgid "daemon"
+msgstr ""
 
 # Configuration Option Hints
-#: src/conf_edit.cpp
+#: src/conf.cpp:441
 msgid "setup_mode"
 msgstr "Konfigūravimo režimas"
 
-#: src/conf_edit.cpp
-#, fuzzy
+#: src/conf.cpp:454 src/conf.cpp:480
+msgid "log_file"
+msgstr ""
+
+#: src/conf.cpp:467
+msgid "pid_file"
+msgstr ""
+
+#: src/conf.cpp:491
+#, c-format
+msgid "Invalid log_level %d"
+msgstr ""
+
+#: src/conf.cpp:505
+msgid "log_level"
+msgstr ""
+
+#: src/conf.cpp:520
+#, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid log_type %s"
+msgstr ""
+
+#: src/conf.cpp:531
+msgid "log_type"
+msgstr ""
+
+#: src/conf.cpp:544
+msgid "native_language"
+msgstr ""
+
+#: src/conf.cpp:561
+msgid "camera_name"
+msgstr ""
+
+#: src/conf.cpp:579
+#, c-format
+#| msgid "%s: Invalid camera service"
+msgid "Invalid camera_id %d"
+msgstr ""
+
+#: src/conf.cpp:587
 msgid "camera_id"
-msgstr "Kamera"
+msgstr ""
 
-#: src/conf_edit.cpp
-#, fuzzy
+#: src/conf.cpp:598
+#, c-format
+#| msgid "%s: Invalid camera service"
+msgid "Invalid camera_tmo %d"
+msgstr ""
+
+#: src/conf.cpp:606
+msgid "camera_tmo"
+msgstr ""
+
+#: src/conf.cpp:619
 msgid "camera_dir"
-msgstr "Kamera"
+msgstr ""
 
-#: src/conf_edit.cpp src/netcam.cpp
+#: src/conf.cpp:632
+msgid "target_dir"
+msgstr ""
+
+#: src/conf.cpp:643
+#, c-format
+#| msgid "Invalid Method requested: %s"
+msgid "Invalid watchdog timeout %d"
+msgstr ""
+
+#: src/conf.cpp:651
+msgid "watchdog_tmo"
+msgstr ""
+
+#: src/conf.cpp:662
+#, c-format
+msgid "Invalid watchdog kill timeout %d"
+msgstr ""
+
+#: src/conf.cpp:670
+msgid "watchdog_kill"
+msgstr ""
+
+#: src/conf.cpp:683
+msgid "v4l2_device"
+msgstr ""
+
+#: src/conf.cpp:696
+msgid "v4l2_params"
+msgstr ""
+
+#: src/conf.cpp:709
+msgid "netcam_url"
+msgstr ""
+
+#: src/conf.cpp:722
+msgid "netcam_params"
+msgstr ""
+
+#: src/conf.cpp:735
+msgid "netcam_high_url"
+msgstr ""
+
+#: src/conf.cpp:748
+msgid "netcam_high_params"
+msgstr ""
+
+#: src/conf.cpp:761
+msgid "netcam_userpass"
+msgstr ""
+
+#: src/conf.cpp:774
+msgid "mmalcam_name"
+msgstr ""
+
+#: src/conf.cpp:787
+msgid "mmalcam_params"
+msgstr ""
+
+#: src/conf.cpp:798
+#, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid width %d"
+msgstr ""
+
+#: src/conf.cpp:801 src/netcam.cpp:1605
 #, c-format
 msgid "Image width (%d) requested is not modulo 8."
 msgstr "Prašomas vaizdo plotis (%d) nėra 8 modulio."
 
-#: src/conf_edit.cpp src/netcam.cpp
+#: src/conf.cpp:804
 #, c-format
 msgid "Adjusting width to next higher multiple of 8 (%d)."
 msgstr "Reguliuojamas plotis iki kito aukštesnio kartotinio 8 (%d)."
 
-#: src/conf_edit.cpp src/netcam.cpp
+#: src/conf.cpp:813
+msgid "width"
+msgstr ""
+
+#: src/conf.cpp:824
+#, c-format
+msgid "Invalid height %d"
+msgstr ""
+
+#: src/conf.cpp:827 src/netcam.cpp:1614
 #, c-format
 msgid "Image height (%d) requested is not modulo 8."
 msgstr "Reikalaujamas vaizdo aukštis (%d) nėra 8 modulio."
 
-#: src/conf_edit.cpp src/netcam.cpp
+#: src/conf.cpp:830 src/netcam.cpp:1617
 #, c-format
 msgid "Adjusting height to next higher multiple of 8 (%d)."
 msgstr "Aukščio reguliavimas kitam aukštesniam 8 (%d) kartotiniui."
 
-#: src/conf_edit.cpp
-#, fuzzy
-msgid "framerate"
-msgstr "Kamera"
+#: src/conf.cpp:839
+msgid "height"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:850
 #, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid framerate %d"
+msgstr ""
+
+#: src/conf.cpp:858
+msgid "framerate"
+msgstr ""
+
+#: src/conf.cpp:869
+#, c-format
+msgid "Invalid minimum_frame_time %d"
+msgstr ""
+
+#: src/conf.cpp:877
+msgid "minimum_frame_time"
+msgstr ""
+
+#: src/conf.cpp:889
+#, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid rotate %d"
+msgstr ""
+
+#: src/conf.cpp:899
+msgid "rotate"
+msgstr ""
+
+#: src/conf.cpp:912
+#, c-format
+msgid "Invalid flip_axis %s"
+msgstr ""
+
+#: src/conf.cpp:921
+msgid "flip_axis"
+msgstr ""
+
+#: src/conf.cpp:934
+#, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid locate_motion_mode %s"
+msgstr ""
+
+#: src/conf.cpp:942
+#| msgid "on_motion_detected"
+msgid "locate_motion_mode"
+msgstr ""
+
+#: src/conf.cpp:956
+#, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid locate_motion_style %s"
+msgstr ""
+
+#: src/conf.cpp:964
+msgid "locate_motion_style"
+msgstr ""
+
+#: src/conf.cpp:977
+msgid "text_left"
+msgstr ""
+
+#: src/conf.cpp:990
+msgid "text_right"
+msgstr ""
+
+#: src/conf.cpp:1003
+msgid "text_changes"
+msgstr ""
+
+#: src/conf.cpp:1014
+#, c-format
+#| msgid "Invalid text scale.  Adjusted to %d"
+msgid "Invalid text_scale %d"
+msgstr ""
+
+#: src/conf.cpp:1027
+msgid "text_scale"
+msgstr ""
+
+#: src/conf.cpp:1040
+msgid "text_event"
+msgstr ""
+
+#: src/conf.cpp:1053
+msgid "emulate_motion"
+msgstr ""
+
+#: src/conf.cpp:1064
+#, c-format
+#| msgid "Invalid picture_output %s"
+msgid "Invalid primary method %d"
+msgstr ""
+
+#: src/conf.cpp:1072
+msgid "primary_method"
+msgstr ""
+
+#: src/conf.cpp:1083
+#, c-format
+#| msgid "Invalid thread specified: %s"
+msgid "Invalid threshold %d"
+msgstr ""
+
+#: src/conf.cpp:1091
+msgid "threshold"
+msgstr ""
+
+#: src/conf.cpp:1102
+#, c-format
+msgid "Invalid threshold_maximum %d"
+msgstr ""
+
+#: src/conf.cpp:1110
+msgid "threshold_maximum"
+msgstr ""
+
+#: src/conf.cpp:1121
+#, c-format
+#| msgid "Invalid thread specified: %s"
+msgid "Invalid threshold_sdevx %d"
+msgstr ""
+
+#: src/conf.cpp:1129
 msgid "threshold_sdevx"
 msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1140
 #, c-format
+#| msgid "Invalid thread specified: %s"
+msgid "Invalid threshold_sdevy %d"
+msgstr ""
+
+#: src/conf.cpp:1148
+msgid "threshold_sdevy"
+msgstr ""
+
+#: src/conf.cpp:1159
+#, c-format
+#| msgid "Invalid thread specified: %s"
+msgid "Invalid threshold_sdevxy %d"
+msgstr ""
+
+#: src/conf.cpp:1167
+msgid "threshold_sdevxy"
+msgstr ""
+
+#: src/conf.cpp:1178
+#, c-format
+msgid "Invalid threshold_ratio %d"
+msgstr ""
+
+#: src/conf.cpp:1186
+msgid "threshold_ratio"
+msgstr ""
+
+#: src/conf.cpp:1199
+msgid "threshold_tune"
+msgstr ""
+
+#: src/conf.cpp:1210
+#, c-format
+msgid "Invalid secondary_interval %d"
+msgstr ""
+
+#: src/conf.cpp:1218
+msgid "secondary_interval"
+msgstr ""
+
+#: src/conf.cpp:1229
+#, c-format
+#| msgid "Invalid Method requested: %s"
+msgid "Invalid secondary_method %d"
+msgstr ""
+
+#: src/conf.cpp:1237
+msgid "secondary_method"
+msgstr ""
+
+#: src/conf.cpp:1250
+msgid "secondary_params"
+msgstr ""
+
+#: src/conf.cpp:1261
+#, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid noise_level %d"
+msgstr ""
+
+#: src/conf.cpp:1269
+msgid "noise_level"
+msgstr ""
+
+#: src/conf.cpp:1282
+msgid "noise_tune"
+msgstr ""
+
+#: src/conf.cpp:1295
+msgid "despeckle_filter"
+msgstr ""
+
+#: src/conf.cpp:1308
+#| msgid "on_area_detected"
+msgid "area_detect"
+msgstr ""
+
+#: src/conf.cpp:1321
+msgid "mask_file"
+msgstr ""
+
+#: src/conf.cpp:1334
+msgid "mask_privacy"
+msgstr ""
+
+#: src/conf.cpp:1345
+#, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid smart_mask_speed %d"
+msgstr ""
+
+#: src/conf.cpp:1358
+msgid "smart_mask_speed"
+msgstr ""
+
+#: src/conf.cpp:1369
+#, c-format
+msgid "Invalid lightswitch_percent %d"
+msgstr ""
+
+#: src/conf.cpp:1377
+msgid "lightswitch_percent"
+msgstr ""
+
+#: src/conf.cpp:1388
+#, c-format
+msgid "Invalid lightswitch_frames %d"
+msgstr ""
+
+#: src/conf.cpp:1396
+msgid "lightswitch_frames"
+msgstr ""
+
+#: src/conf.cpp:1407
+#, c-format
+msgid "Invalid minimum_motion_frames %d"
+msgstr ""
+
+#: src/conf.cpp:1415
+msgid "minimum_motion_frames"
+msgstr ""
+
+#: src/conf.cpp:1426
+#, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid static_object_time %d"
+msgstr ""
+
+#: src/conf.cpp:1434
+msgid "static_object_time"
+msgstr ""
+
+#: src/conf.cpp:1445
+#, c-format
+msgid "Invalid event_gap %d"
+msgstr ""
+
+#: src/conf.cpp:1453
+#| msgid "on_event_start"
+msgid "event_gap"
+msgstr ""
+
+#: src/conf.cpp:1464
+#, c-format
+#| msgid "Invalid picture_output %s"
+msgid "Invalid pre_capture %d"
+msgstr ""
+
+#: src/conf.cpp:1472
+msgid "pre_capture"
+msgstr ""
+
+#: src/conf.cpp:1483
+#, c-format
+#| msgid "Invalid picture_output %s"
+msgid "Invalid post_capture %d"
+msgstr ""
+
+#: src/conf.cpp:1491
+msgid "post_capture"
+msgstr ""
+
+#: src/conf.cpp:1504
 msgid "on_event_start"
 msgstr "renginio pradžioje"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1517
 msgid "on_event_end"
 msgstr "renginio pabaigoje"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1530
 msgid "on_picture_save"
 msgstr "išsaugoti paveikslėlyje"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1543
 msgid "on_area_detected"
 msgstr "aptiktame plote"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1556
 msgid "on_motion_detected"
 msgstr "aptiktas judesys"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1569
+#| msgid "on_event_start"
+msgid "on_movie_start"
+msgstr ""
+
+#: src/conf.cpp:1582
+#| msgid "on_event_end"
+msgid "on_movie_end"
+msgstr ""
+
+#: src/conf.cpp:1595
 msgid "on_camera_lost"
 msgstr "dingo kamera"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1608
 msgid "on_camera_found"
 msgstr "rastas fotoaparatas"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1621
+#| msgid "on_area_detected"
+msgid "on_secondary_detect"
+msgstr ""
+
+#: src/conf.cpp:1635
 #, c-format
 msgid "Invalid picture_output %s"
 msgstr "Netinkama vaizdo išvestis %s"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1645
 msgid "picture_output"
 msgstr "vaizdo išvestis"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1658
+#, c-format
+#| msgid "Invalid picture_output %s"
+msgid "Invalid picture_output_motion %s"
+msgstr ""
+
+#: src/conf.cpp:1668
 msgid "picture_output_motion"
 msgstr "vaizdo išvesties judesys"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1681
 #, c-format
+#| msgid "Invalid picture_output %s"
+msgid "Invalid picture_type %s"
+msgstr ""
+
+#: src/conf.cpp:1691
 msgid "picture_type"
 msgstr "paveikslėlio tipas"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1702
 #, c-format
+#| msgid "Invalid picture_output %s"
+msgid "Invalid picture_quality %d"
+msgstr ""
+
+#: src/conf.cpp:1710
+#| msgid "picture_type"
+msgid "picture_quality"
+msgstr ""
+
+#: src/conf.cpp:1723
 msgid "picture_exif"
 msgstr "picture exif"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1736
 msgid "picture_filename"
 msgstr "paveikslėlio failo vardas"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1747
 #, c-format
+msgid "Invalid snapshot_interval %d"
+msgstr ""
+
+#: src/conf.cpp:1755
+msgid "snapshot_interval"
+msgstr ""
+
+#: src/conf.cpp:1768
+#| msgid "picture_filename"
+msgid "snapshot_filename"
+msgstr ""
+
+#: src/conf.cpp:1781
+#| msgid "picture_output"
+msgid "movie_output"
+msgstr ""
+
+#: src/conf.cpp:1794
+#| msgid "picture_output_motion"
+msgid "movie_output_motion"
+msgstr ""
+
+#: src/conf.cpp:1805
+#, c-format
+msgid "Invalid movie_max_time %d"
+msgstr ""
+
+#: src/conf.cpp:1813
+msgid "movie_max_time"
+msgstr ""
+
+#: src/conf.cpp:1824
+#, c-format
+#| msgid "Invalid picture_output %s"
+msgid "Invalid movie_bps %d"
+msgstr ""
+
+#: src/conf.cpp:1832
+msgid "movie_bps"
+msgstr ""
+
+#: src/conf.cpp:1843
+#, c-format
+#| msgid "Invalid picture_output %s"
+msgid "Invalid movie_quality %d"
+msgstr ""
+
+#: src/conf.cpp:1851
+msgid "movie_quality"
+msgstr ""
+
+#: src/conf.cpp:1864
+msgid "movie_codec"
+msgstr ""
+
+#: src/conf.cpp:1877
+msgid "movie_passthrough"
+msgstr ""
+
+#: src/conf.cpp:1890
+#| msgid "picture_filename"
+msgid "movie_filename"
+msgstr ""
+
+#: src/conf.cpp:1903
+msgid "movie_extpipe_use"
+msgstr ""
+
+#: src/conf.cpp:1916
+msgid "movie_extpipe"
+msgstr ""
+
+#: src/conf.cpp:1927
+#, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid timelapse_interval %d"
+msgstr ""
+
+#: src/conf.cpp:1935
+msgid "timelapse_interval"
+msgstr ""
+
+#: src/conf.cpp:1950
+#, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid timelapse_mode %s"
+msgstr ""
+
+#: src/conf.cpp:1961
+msgid "timelapse_mode"
+msgstr ""
+
+#: src/conf.cpp:1972
+#, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid timelapse_fps %d"
+msgstr ""
+
+#: src/conf.cpp:1980
+msgid "timelapse_fps"
+msgstr ""
+
+#: src/conf.cpp:1993
+#, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid timelapse_codec %s"
+msgstr ""
+
+#: src/conf.cpp:2003
+#| msgid "Timelapse using mpeg4 codec."
+msgid "timelapse_codec"
+msgstr ""
+
+#: src/conf.cpp:2016
+#| msgid "picture_filename"
+msgid "timelapse_filename"
+msgstr ""
+
+#: src/conf.cpp:2029
+msgid "video_pipe"
+msgstr ""
+
+#: src/conf.cpp:2042
+msgid "video_pipe_motion"
+msgstr ""
+
+#: src/conf.cpp:2053
+#, c-format
+#| msgid "Started webcontrol on port %d"
+msgid "Invalid webcontrol_port %d"
+msgstr ""
+
+#: src/conf.cpp:2061
+#| msgid "Started webcontrol on port %d"
+msgid "webcontrol_port"
+msgstr ""
+
+#: src/conf.cpp:2074
+msgid "webcontrol_ipv6"
+msgstr ""
+
+#: src/conf.cpp:2087
+msgid "webcontrol_localhost"
+msgstr ""
+
+#: src/conf.cpp:2098
+#, c-format
+#| msgid "Started webcontrol on port %d"
+msgid "Invalid webcontrol_parms %d"
+msgstr ""
+
+#: src/conf.cpp:2110
+msgid "webcontrol_parms"
+msgstr ""
+
+#: src/conf.cpp:2121
+#, c-format
+#| msgid "Started webcontrol on port %d"
+msgid "Invalid webcontrol_interface %d"
+msgstr ""
+
+#: src/conf.cpp:2133
+msgid "webcontrol_interface"
+msgstr ""
+
+#: src/conf.cpp:2144
+#, c-format
+msgid "Invalid webcontrol_auth_method %d"
+msgstr ""
+
+#: src/conf.cpp:2156
+msgid "webcontrol_auth_method"
+msgstr ""
+
+#: src/conf.cpp:2169
+msgid "webcontrol_authentication"
+msgstr ""
+
+#: src/conf.cpp:2182
+msgid "webcontrol_tls"
+msgstr ""
+
+#: src/conf.cpp:2195
+msgid "webcontrol_cert"
+msgstr ""
+
+#: src/conf.cpp:2208
+msgid "webcontrol_key"
+msgstr ""
+
+#: src/conf.cpp:2220
 msgid "Error compiling regex in copy_uri"
 msgstr "Klaida sudarant regex egz. Uri kopiją"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2226
+msgid "Possibly invalid webcontrol_cors_header"
+msgstr ""
+
+#: src/conf.cpp:2234
+msgid "webcontrol_cors_header"
+msgstr ""
+
+#: src/conf.cpp:2247
+msgid "webcontrol_html"
+msgstr ""
+
+#: src/conf.cpp:2258
+#, c-format
+#| msgid "Invalid thread specified: %s"
+msgid "Invalid stream_preview_scale %d"
+msgstr ""
+
+#: src/conf.cpp:2266
+msgid "stream_preview_scale"
+msgstr ""
+
+#: src/conf.cpp:2279
+msgid "stream_preview_newline"
+msgstr ""
+
+#: src/conf.cpp:2290
+#, c-format
+#| msgid "Invalid thread specified: %s"
+msgid "Invalid stream_preview_method %d"
+msgstr ""
+
+#: src/conf.cpp:2302
+msgid "stream_preview_method"
+msgstr ""
+
+#: src/conf.cpp:2315
+msgid "stream_preview_ptz"
+msgstr ""
+
+#: src/conf.cpp:2326
+#, c-format
+#| msgid "Invalid picture_output %s"
+msgid "Invalid stream_quality %d"
+msgstr ""
+
+#: src/conf.cpp:2334
+msgid "stream_quality"
+msgstr ""
+
+#: src/conf.cpp:2347
+msgid "stream_grey"
+msgstr ""
+
+#: src/conf.cpp:2360
+msgid "stream_motion"
+msgstr ""
+
+#: src/conf.cpp:2371
+#, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid stream_maxrate %d"
+msgstr ""
+
+#: src/conf.cpp:2379
+msgid "stream_maxrate"
+msgstr ""
+
+#: src/conf.cpp:2391
 #, c-format
 msgid "Invalid database_type %s"
 msgstr "Netinkamas duomenų bazės tipas %s"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2401
 msgid "database_type"
 msgstr "duomenų bazės tipas"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2414
 msgid "database_dbname"
 msgstr "duomenų bazės dbname"
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2427
+#| msgid "database_type"
+msgid "database_host"
+msgstr ""
+
+#: src/conf.cpp:2438
 #, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid database_port %d"
+msgstr ""
+
+#: src/conf.cpp:2446
+#| msgid "database_type"
+msgid "database_port"
+msgstr ""
+
+#: src/conf.cpp:2459
+#| msgid "database_type"
+msgid "database_user"
+msgstr ""
+
+#: src/conf.cpp:2472
+#| msgid "database_type"
+msgid "database_password"
+msgstr ""
+
+#: src/conf.cpp:2483
+#, c-format
+#| msgid "database_busy_timeout"
+msgid "Invalid database_busy_timeout %d"
+msgstr ""
+
+#: src/conf.cpp:2491
 msgid "database_busy_timeout"
 msgstr "duomenų bazės užimtumo laikas"
 
-#: src/conf_edit.cpp
-#, c-format
-msgid "track_type"
-msgstr "takelio tipas"
+#: src/conf.cpp:2504
+#| msgid "on_picture_save"
+msgid "sql_log_picture"
+msgstr ""
 
-#: src/conf_edit.cpp
-#, c-format
-msgid "track_generic_move"
-msgstr "takelis generic move"
+#: src/conf.cpp:2517
+msgid "sql_log_snapshot"
+msgstr ""
 
-#: src/conf_edit.cpp
-#, c-format
-msgid "track_step_angle_x"
-msgstr "bėgių žingsnio kampas x"
+#: src/conf.cpp:2530
+msgid "sql_log_movie"
+msgstr ""
 
-#: src/conf_edit.cpp
-#, c-format
-msgid "track_step_angle_y"
-msgstr "vikšro žingsnio kampas y"
+#: src/conf.cpp:2543
+msgid "sql_log_timelapse"
+msgstr ""
 
-#: src/conf_edit.cpp src/draw.cpp
+#: src/conf.cpp:2556
+msgid "sql_query_start"
+msgstr ""
+
+#: src/conf.cpp:2569
+msgid "sql_query_stop"
+msgstr ""
+
+#: src/conf.cpp:2582
+msgid "sql_query"
+msgstr ""
+
+#: src/conf.cpp:2595
+msgid "ptz_auto_track"
+msgstr ""
+
+#: src/conf.cpp:2606
+#, c-format
+#| msgid "Invalid picture_output %s"
+msgid "Invalid ptz_wait %d"
+msgstr ""
+
+#: src/conf.cpp:2614
+msgid "ptz_wait"
+msgstr ""
+
+#: src/conf.cpp:2627
+msgid "ptz_move_track"
+msgstr ""
+
+#: src/conf.cpp:2640
+msgid "ptz_pan_left"
+msgstr ""
+
+#: src/conf.cpp:2653
+msgid "ptz_pan_right"
+msgstr ""
+
+#: src/conf.cpp:2666
+msgid "ptz_tilt_up"
+msgstr ""
+
+#: src/conf.cpp:2679
+msgid "ptz_tilt_down"
+msgstr ""
+
+#: src/conf.cpp:2692
+msgid "ptz_zoom_in"
+msgstr ""
+
+#: src/conf.cpp:2705
+msgid "ptz_zoom_out"
+msgstr ""
+
+#: src/conf.cpp:3192 src/conf.cpp:3212 src/conf.cpp:3232 src/conf.cpp:3253
+#, c-format
+msgid "Unknown config option \"%s\""
+msgstr ""
+
+#: src/conf.cpp:3501
+#, c-format
+#| msgid "Camera directory config %s not found"
+msgid "Camera config file %s not found"
+msgstr ""
+
+#: src/conf.cpp:3515
+#, c-format
+#| msgid "Processing thread 0 - config file %s"
+msgid "Processing camera config file %s"
+msgstr ""
+
+#: src/conf.cpp:3547
+#, c-format
+#| msgid "Processing thread 0 - config file %s"
+msgid "Processing config file %s"
+msgstr ""
+
+#: src/conf.cpp:3560
+#, c-format
+msgid "Camera directory config %s not found"
+msgstr "Kameros katalogo konfigūracija %s nerasta"
+
+#: src/conf.cpp:3650
+#| msgid "Writing configuration parameters from all files"
+msgid "Logging configuration parameters from all files"
+msgstr ""
+
+#: src/conf.cpp:3654
+#, c-format
+#| msgid "Processing thread 0 - config file %s"
+msgid "Camera %d - Config file: %s"
+msgstr ""
+
+#: src/conf.cpp:3679
+#, c-format
+msgid "%-25s <redacted>"
+msgstr ""
+
+#: src/conf.cpp:3802
+#, c-format
+#| msgid "No Configuration Options"
+msgid "Configuration written to %s"
+msgstr ""
+
+#: src/conf.cpp:3830
+msgid "Error getcwd"
+msgstr ""
+
+#: src/conf.cpp:3849
+#, c-format
+msgid "could not open configfile %s"
+msgstr ""
+
+#: src/conf.cpp:3864 src/conf.cpp:3898
+msgid "No config file to process, using default values"
+msgstr "Nėra apdorojamas konfigūracijos failas, naudojant numatytąsias vertes"
+
+#: src/conf.cpp:3893
+#, c-format
+msgid "Processing thread 0 - config file %s"
+msgstr "0 gijos apdorojimas - konfigūracijos failas %s"
+
+#: src/dbse.cpp:34
+#| msgid "Invalid database_type %s"
+msgid "Invalid database name"
+msgstr ""
+
+#: src/dbse.cpp:42
+msgid "Must specify database port for mysql/mariadb/pgsql"
+msgstr ""
+
+#: src/dbse.cpp:48
+#| msgid "Basic authentication: disabled"
+msgid "Database functionality disabled."
+msgstr ""
+
+#: src/dbse.cpp:64 src/dbse.cpp:75
+msgid "Closing MYSQL"
+msgstr ""
+
+#: src/dbse.cpp:109
+#| msgid "Invalid database_type %s"
+msgid "Initializing database"
+msgstr ""
+
+#: src/dbse.cpp:115 src/dbse.cpp:127 src/dbse.cpp:158
+#, c-format
+#| msgid "Could not write movie header %s"
+msgid "Could not initialize database %s"
+msgstr ""
+
+#: src/dbse.cpp:142 src/dbse.cpp:269
+#, c-format
+msgid "SQLite3 Database filename %s"
+msgstr ""
+
+#: src/dbse.cpp:147
+msgid "SQLite3 is threadsafe"
+msgstr ""
+
+#: src/dbse.cpp:148
+#, c-format
+msgid "SQLite3 serialized %s"
+msgstr ""
+
+#: src/dbse.cpp:149
+msgid "FAILED"
+msgstr ""
+
+#: src/dbse.cpp:149
+msgid "SUCCESS"
+msgstr ""
+
+#: src/dbse.cpp:153 src/dbse.cpp:272
+#, c-format
+msgid "Can't open database %s : %s"
+msgstr ""
+
+#: src/dbse.cpp:163 src/dbse.cpp:281
+#, c-format
+#| msgid "database_busy_timeout"
+msgid "database_busy_timeout %d msec"
+msgstr ""
+
+#: src/dbse.cpp:167 src/dbse.cpp:284
+#, c-format
+#| msgid "database_busy_timeout"
+msgid "database_busy_timeout failed %s"
+msgstr ""
+
+#: src/dbse.cpp:199 src/dbse.cpp:238
+#, c-format
+msgid "Cannot connect to MySQL database %s on host %s with user %s"
+msgstr ""
+
+#: src/dbse.cpp:203 src/dbse.cpp:242
+#, c-format
+msgid "MySQL error was %s"
+msgstr ""
+
+#: src/dbse.cpp:205 src/dbse.cpp:244 src/dbse.cpp:276 src/dbse.cpp:317
+msgid "Disabling database functionality"
+msgstr ""
+
+#: src/dbse.cpp:265
+msgid "SQLite3 using shared handle"
+msgstr ""
+
+#: src/dbse.cpp:314 src/dbse.cpp:518
+#, c-format
+msgid "Connection to PostgreSQL database '%s' failed: %s"
+msgstr ""
+
+#: src/dbse.cpp:333
+#, c-format
+msgid "Database backend %s"
+msgstr ""
+
+#: src/dbse.cpp:344
+#, c-format
+#| msgid "Invalid database_type %s"
+msgid "Invalid Database backend %s"
+msgstr ""
+
+#: src/dbse.cpp:356
+msgid "Closing database"
+msgstr ""
+
+#: src/dbse.cpp:412 src/dbse.cpp:464
+#, c-format
+msgid "Mysql query failed %s error code %d"
+msgstr ""
+
+#: src/dbse.cpp:426 src/dbse.cpp:478
+#, c-format
+msgid ""
+"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error "
+"was %s"
+msgstr ""
+
+#: src/dbse.cpp:433 src/dbse.cpp:485
+#, c-format
+msgid "Re-Connection to Mysql database '%s' Succeed"
+msgstr ""
+
+#: src/dbse.cpp:438 src/dbse.cpp:490
+#, c-format
+msgid "after re-connection Mysql query failed %s error code %d"
+msgstr ""
+
+#: src/dbse.cpp:527
+#, c-format
+msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
+msgstr ""
+
+#: src/dbse.cpp:531
+#, c-format
+msgid "Re-Connection to PostgreSQL database '%s' Succeed"
+msgstr ""
+
+#: src/dbse.cpp:561
+#, c-format
+msgid "SQLite error was %s"
+msgstr ""
+
+#: src/draw.cpp:1241 src/draw.cpp:1250
 #, c-format
 msgid "Invalid text scale.  Adjusted to %d"
 msgstr "Netinkama teksto skalė. Pritaikyta %d"
 
-#: src/event.cpp src/track.cpp
+#: src/event.cpp:70
 #, c-format
-msgid "Unable to start external command '%s'"
-msgstr "Nepavyko paleisti išorinės komandos '%s'"
+#| msgid "File of type %ld saved to: %s"
+msgid "File saved to: %s"
+msgstr ""
 
-#: src/event.cpp src/track.cpp
-#, c-format
-msgid "Executing external command '%s'"
-msgstr "Išorinės komandos '%s' vykdymas"
-
-#: src/event.cpp
-#, c-format
-msgid "File of type %ld saved to: %s"
-msgstr "%ld tipo failas išsaugotas: %s"
-
-#: src/event.cpp
+#: src/event.cpp:240
 msgid "Failed to put image into video pipe"
 msgstr "Nepavyko įkelti vaizdo į vaizdo vamzdį"
 
-#: src/event.cpp
+#: src/event.cpp:270
 msgid "Error creating image file name"
 msgstr "Klaida kuriant vaizdo failo pavadinimą"
 
-#: src/event.cpp
+#: src/event.cpp:302
 msgid "Error creating image motion file name"
 msgstr "Klaida kuriant vaizdo judesio failo pavadinimą"
 
-#: src/event.cpp
+#: src/event.cpp:313
+#| msgid "Error creating image motion file name"
+msgid "Error creating image motion roi file name"
+msgstr ""
+
+#: src/event.cpp:344 src/event.cpp:349 src/event.cpp:367 src/event.cpp:372
+#: src/event.cpp:523
+#| msgid "Error opening file %s"
+msgid "Error option"
+msgstr ""
+
+#: src/event.cpp:360
 #, c-format
 msgid "Could not create symbolic link [%s]"
 msgstr "Nepavyko sukurti simbolinės nuorodos [%s]"
 
-#: src/event.cpp
+#: src/event.cpp:407
 msgid "Error creating preview file name"
 msgstr "Klaida kuriant peržiūros failo pavadinimą"
 
-#: src/event.cpp
+#: src/event.cpp:448
+msgid "Event secondary detect"
+msgstr ""
+
+#: src/event.cpp:498
 #, c-format
 msgid "CLOSING: extpipe file desc %d, error state %d"
 msgstr "UŽDARYMAS: ištrinkite failo aprašą %d, klaidos būsena %d"
 
-#: src/event.cpp
+#: src/event.cpp:530
 #, c-format
 msgid "no write access to target directory %s"
 msgstr "nėra rašymo prieigos prie tikslinio katalogo %s"
 
-#: src/event.cpp
+#: src/event.cpp:535
 #, c-format
 msgid "path not found, trying to create it %s ..."
 msgstr "kelias nerastas, bandant jį sukurti %s ..."
 
-#: src/event.cpp
+#: src/event.cpp:542
 #, c-format
 msgid "error accesing path %s"
 msgstr "klaida pasiekiant kelią %s"
 
-#: src/event.cpp
+#: src/event.cpp:558
 #, c-format
 msgid "Error specifying command line: %s"
 msgstr "Klaida nurodant komandinę eilutę: %s"
 
-#: src/event.cpp
+#: src/event.cpp:561
 #, c-format
 msgid "pipe: %s"
 msgstr "vamzdis: %s"
 
-#: src/event.cpp
+#: src/event.cpp:569
+msgid "popen failed"
+msgstr ""
+
+#: src/event.cpp:591
+msgid "Using extpipe"
+msgstr ""
+
+#: src/event.cpp:598 src/event.cpp:603
 #, c-format
 msgid "Error writing in pipe , state error %d"
 msgstr "Klaida rašant vamzdį, būsenos klaida %d"
 
-#: src/event.cpp
+#: src/event.cpp:608
 #, c-format
 msgid "pipe %s not created or closed already "
 msgstr "vamzdis %s dar nesukurtas ar uždarytas"
 
-#: src/event.cpp
+#: src/event.cpp:627
 #, c-format
+msgid "Source FPS %d"
+msgstr ""
+
+#: src/event.cpp:654
 msgid "Error opening ctx_cam for movie output."
 msgstr "Klaida atidarant ctx kamerą filmo išvedimui."
 
-#: src/event.cpp
+#: src/event.cpp:668
 #, c-format
 msgid "Error creating motion file [%s]"
 msgstr "Klaida kuriant judesio failą [%s]"
 
-#: src/event.cpp
+#: src/event.cpp:692
 #, c-format
 msgid "Error creating timelapse file [%s]"
 msgstr "Klaida kuriant„ timelapse “failą [%s]"
 
-#: src/event.cpp
+#: src/event.cpp:704 src/event.cpp:719 src/event.cpp:724
 msgid "Error encoding image"
 msgstr "Klaida koduojant vaizdą"
 
-#: src/movie.cpp
-msgid "Failed to allocate memory for codec name"
-msgstr "Nepavyko skirti atminties kodeko pavadinimui"
-
-#: src/movie.cpp
-msgid ""
-"The frame rate specified is too high for the movie movie type specified. Choose a different "
-"movie container or lower framerate."
-msgstr "Nurodytas kadro dažnis yra per didelis nurodytam filmo filmo tipui."
-
-msgid "Error setting base file name"
-msgstr "Klaida nustatant bazinio failo pavadinimą"
-
-#: src/movie.cpp
-#, c-format
-msgid "Error setting file name"
-msgstr "Klaida nustatant failo vardą"
-
-#: src/movie.cpp
-#, c-format
-msgid "codec option value %s is not supported"
-msgstr "kodeko parinkties reikšmė %s nepalaikoma"
-
-#: src/movie.cpp
-msgid "Could not get the codec"
-msgstr "Nepavyko gauti kodeko"
-
-#: src/movie.cpp
-#, c-format
-msgid "Error sending frame for encoding:%s"
-msgstr "Klaida siunčiant kodavimą: %s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Receive packet threw EAGAIN returning -2 code :%s"
-msgstr "Priimamas paketas išmetė EAGAIN grąžinant -2 kodą: %s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Error receiving encoded packet video:%s"
-msgstr "Klaida gaunant užkoduotą paketinį vaizdo įrašą: %s"
-
-#: src/movie.cpp
-#, c-format
-msgid "BAD TIMING!! Frame skipped."
-msgstr "BAD TIMING! Rėmelis praleistas."
-
-#: src/movie.cpp
-#, c-format
-msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change %d"
-msgstr ""
-
-#: src/movie.cpp
-#, c-format
-msgid "Failed to allocate decoder!"
-msgstr "Nepavyko paskirstyti dekoderio!"
-
-#: src/movie.cpp
-#, c-format
-msgid "Reported FPS Supported %d/%d"
-msgstr "Pranešta apie FPS palaikomą %d / %d"
-
-#: src/movie.cpp
-#, c-format
-msgid "Failed to copy decoder parameters!: %s"
-msgstr "Nepavyko nukopijuoti dekoderio parametrų !: %s"
-
-#: src/movie.cpp
-#, c-format
-msgid "could not alloc buffers %s"
-msgstr "nepavyko paskirstyti buferių %s"
-
-#: src/movie.cpp
-#, c-format
-msgid "error opening file %s"
-msgstr "klaida atidarant failą %s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Permission denied. %s"
-msgstr "Leidimas atmestas. %s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Error opening file %s"
-msgstr "Klaida atidarant failą %s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Could not write movie header %s"
-msgstr "Nepavyko parašyti filmo antraštės %s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Error entering draining mode:%s"
-msgstr "Klaida įeinant į kanalizacijos režimą: %s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Error writing draining video frame"
-msgstr "Klaida rašant nusausintą vaizdo kadrą"
-
-#: src/movie.cpp
-msgid "Error while encoding picture"
-msgstr "Klaida koduojant paveikslėlį"
-
-#: src/movie.cpp
-#, c-format
-msgid "Error while writing video frame: %s"
-msgstr "Klaida rašant vaizdo įrašo kadrą: %s"
-
-#: src/movie.cpp
-msgid "rtsp camera not ready for pass-through."
-msgstr "rtsp kamera nėra paruošta perėjimui."
-
-#: src/movie.cpp
-msgid "pass-through mode enabled.  Changing to MP4 container."
-msgstr "įjungtas praėjimo režimas. Perjungimas į MP4 talpyklą."
-
-#: src/movie.cpp
-msgid "Could not get codec!"
-msgstr "Nepavyko gauti kodeko!"
-
-#: src/movie.cpp src/netcam.cpp
-msgid "Unable to copy codec parameters"
-msgstr "Nepavyko nukopijuoti kodeko parametrų"
-
-#: src/movie.cpp
-msgid "Pass-through disabled.  ffmpeg too old"
-msgstr "Pravažiavimas neįgalus. Ffmpeg per senas"
-
-#: src/movie.cpp
-#, c-format
-msgid "movie libavcodec version %d.%d.%d libavformat version %d.%d.%d"
-msgstr "filmo„ libavcodec “versija %d.%d.%d„ libavformat “versija %d.%d.%d"
-
-#: src/movie.cpp
-#, c-format
-msgid "av_lockmgr_register failed (%d)"
-msgstr "nepavyko užregistruoti„ lockmgr “registracijos (%d)"
-
-#: src/movie.cpp
-msgid "av_lockmgr_register reset failed on cleanup"
-msgstr "nepavyko išvalyti„ lock lock “registro iš naujo nustatyti"
-
-#: src/movie.cpp
-msgid "Could not allocate output context"
-msgstr "Nepavyko paskirstyti išvesties konteksto"
-
-#: src/movie.cpp
-msgid "Could not setup passthru!"
-msgstr "Nepavyko nustatyti passthru!"
-
-#: src/movie.cpp
-msgid "Failed to allocate codec!"
-msgstr "Nepavyko paskirstyti kodeko!"
-
-#: src/movie.cpp
-msgid "Excessive attempts to clear buffered packet"
-msgstr "Per daug bandymų išvalyti buferinį paketą"
-
-#: src/movie.cpp
-msgid "The swf container for timelapse no longer supported.  Using mpg container."
-msgstr "„ Swf “konteinerio laikui bėgant nebepalaikoma. Naudojant mpg konteinerį."
-
-#: src/movie.cpp
-msgid "Events will be appended to file"
-msgstr "Įvykiai bus pridedami prie bylos"
-
-#: src/movie.cpp
-msgid "Timelapse using mpeg4 codec."
-msgstr "Laiko praleidimas naudojant mpeg4 kodeką."
-
-#: src/movie.cpp src/jpegutils.cpp
+#: src/jpegutils.cpp:91
 #, c-format
 msgid "%s: Given jpeg buffer was too small"
 msgstr "%s: Duotas JPEG buferis buvo per mažas"
 
-#: src/jpegutils.cpp
+#: src/jpegutils.cpp:465
+msgid "Invalid JPEG image dimensions"
+msgstr ""
+
+#: src/jpegutils.cpp:472
 #, c-format
 msgid "JPEG image size %dx%d, JPEG was %dx%d"
 msgstr "JPEG vaizdo dydis %dx%d, JPEG buvo %dx%d"
 
-#: src/logger.cpp
+#: src/logger.cpp:270
 #, c-format
 msgid "Using default log level (%s) (%d)"
 msgstr "Numatytojo žurnalo lygio naudojimas (%s) (%d)"
 
-#: src/logger.cpp
+#: src/logger.cpp:283
 #, c-format
 msgid "Logging to file (%s)"
 msgstr "Prisijungimas prie failo (%s)"
 
-#: src/logger.cpp
+#: src/logger.cpp:287
 #, c-format
 msgid "Exit motion, cannot create log file %s"
 msgstr "Išeiti iš judesio, negaliu sukurti žurnalo failo %s"
 
-#: src/logger.cpp
+#: src/logger.cpp:292 src/logger.cpp:295
 msgid "Logging to syslog"
 msgstr "Prisijungimas prie sistemos žurnalo"
 
-#: src/logger.cpp
+#: src/logger.cpp:301
 #, c-format
 msgid "Using log type (%s) log level (%s)"
 msgstr "Naudojant žurnalo tipą (%s) žurnalo lygis (%s)"
 
-#: src/logger.cpp
+#: src/logger.cpp:313
 #, c-format
 msgid "Closing logfile (%s)."
 msgstr "Uždarymo žurnalo failas (%s)."
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:83
 #, c-format
 msgid "Received unexpected camera control callback event, 0x%08x"
 msgstr "Gautas netikėtas fotoaparato valdymo atšaukimo įvykis, 0x%08x"
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:114
 msgid "A high frame rate can cause problems with exposure of images"
 msgstr "Didelis kadrų dažnis gali sukelti problemų dėl vaizdų ekspozicijos"
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:115
 msgid "If autoexposure is not working, try a lower frame rate."
 msgstr "Jei automatinė ekspozicija neveikia, išbandykite mažesnę kadrų dažnį."
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:129
 #, c-format
 msgid "Failed to create MMAL camera component %s"
 msgstr "Nepavyko sukurti MMAL fotoaparato komponento %s"
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:135
 #, c-format
 msgid "MMAL camera %s doesn't have output ports"
 msgstr "MMAL kamera %s neturi išvesties prievadų"
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:145
 #, c-format
 msgid "Unable to enable control port : error %d"
 msgstr "Neįmanoma įjungti valdymo prievado: klaida %d"
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:174
 msgid "MMAL no-padding setup failed"
 msgstr "MMAL nepavyko užpildyti sąrankos"
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:180
 msgid "camera video format couldn't be set"
 msgstr "Nepavyko nustatyti vaizdo kameros vaizdo įrašo formato"
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:192
 msgid "camera component couldn't be enabled"
 msgstr "fotoaparato komponento negalima įjungti"
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:200
+#| msgid "camera component couldn't be enabled"
+msgid "MMAL camera component created"
+msgstr ""
+
+#: src/mmalcam.cpp:224
 msgid "MMAL camera buffer pool creation failed"
 msgstr "Nepavyko sukurti MMAL fotoaparato buferio telkinio"
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:230
 msgid "MMAL camera buffer queue creation failed"
 msgstr "Nepavyko sukurti MMAL fotoaparato buferio eilės"
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:246
 #, c-format
 msgid "Unable to get a required buffer %d from pool queue"
 msgstr "Nepavyko gauti reikiamo buferio %d iš baseino eilės"
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:251
 #, c-format
 msgid "Unable to send a buffer to port (%d)"
 msgstr "Neįmanoma nusiųsti buferio į uostą (%d)"
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:300
 #, c-format
 msgid "MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps"
 msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:305
 msgid "camera params couldn't be allocated"
 msgstr "fotoaparatų parametrų nepavyko paskirstyti"
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:331
 msgid "MMAL camera capture port enabling failed"
 msgstr "MMAL fotoaparato fiksavimo prievadas įgalintas nepavyko"
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:339
+#| msgid "MMAL camera capture port enabling failed"
+msgid "MMAL camera capture start failed"
+msgstr ""
+
+#: src/mmalcam.cpp:351
+msgid "MMAL Camera not available"
+msgstr ""
+
+#: src/mmalcam.cpp:375
+msgid "MMAL Camera cleanup"
+msgstr ""
+
+#: src/mmalcam.cpp:433
 #, c-format
 msgid "cmd %d flags %08x size %d/%d at %08x, img_size=%d"
 msgstr "cmd %d vėliavos %08x dydis %d / %d esant %08x, img size = %d"
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:450
 msgid "Unable to return a buffer to the camera video port"
 msgstr "Neįmanoma grąžinti buferio į fotoaparato vaizdo prievadą"
 
-#: src/motion.cpp
+#: src/motion_loop.cpp:60
+#, c-format
+msgid "Resizing pre_capture buffer to %d items"
+msgstr ""
+
+#: src/motion_loop.cpp:213
+#, c-format
+msgid "Motion detected - starting event %d"
+msgstr ""
+
+#: src/motion_loop.cpp:367
+msgid "calling mmalcam_cleanup"
+msgstr ""
+
+#: src/motion_loop.cpp:376
+msgid "calling netcam_cleanup"
+msgstr ""
+
+#: src/motion_loop.cpp:382
+#| msgid "Not a V4L2 device?"
+msgid "Cleaning up V4L2 device"
+msgstr ""
+
+#: src/motion_loop.cpp:387
+msgid "No Camera device cleanup (MMAL, Netcam, V4L2)"
+msgstr "Nėra fotoaparato įrenginio valymo (MMAL, Netcam, V4L2)"
+
+#: src/motion_loop.cpp:404
+msgid "Opening MMAL cam"
+msgstr ""
+
+#: src/motion_loop.cpp:409
+#| msgid "Failed to open '%s'"
+msgid "MMAL cam failed to open"
+msgstr ""
+
+#: src/motion_loop.cpp:415
+msgid "Opening Netcam"
+msgstr ""
+
+#: src/motion_loop.cpp:419
+#| msgid "Failed to open '%s'"
+msgid "Netcam failed to open"
+msgstr ""
+
+#: src/motion_loop.cpp:425
+#| msgid "Not a V4L2 device?"
+msgid "Opening V4L2 device"
+msgstr ""
+
+#: src/motion_loop.cpp:428
+msgid "V4L2 device failed to open"
+msgstr ""
+
+#: src/motion_loop.cpp:434
+msgid "No Camera device specified (MMAL, Netcam, V4L2)"
+msgstr "Nenurodytas fotoaparato įrenginys (MMAL, Netcam, V4L2)"
+
+#: src/motion_loop.cpp:491
+#| msgid "No Camera device cleanup (MMAL, Netcam, V4L2)"
+msgid "Unable to determine camera type (MMAL, Netcam, V4L2)"
+msgstr ""
+
+#: src/motion_loop.cpp:516
+#| msgid "Error encoding image"
+msgid "Error capturing first image"
+msgstr ""
+
+#: src/motion_loop.cpp:528
+#, c-format
+#| msgid "Image width (%d) requested is not modulo 8."
+msgid "Image width (%d) or height(%d) requested is not modulo 8."
+msgstr ""
+
+#: src/motion_loop.cpp:534
+#, c-format
+msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
+msgstr ""
+
+#: src/motion_loop.cpp:541
+msgid "Substream not available.  Image sizes not modulo 16."
+msgstr ""
+
+#: src/motion_loop.cpp:630
+#| msgid "Pass-through disabled.  ffmpeg too old"
+msgid "Pass-through processing disabled."
+msgstr ""
+
+#: src/motion_loop.cpp:643 src/motion_loop.cpp:647
+#| msgid "Could not get image to stream."
+msgid "Could not fetch initial image from camera "
+msgstr ""
+
+#: src/motion_loop.cpp:649
+msgid "Motion only supports width and height modulo 8"
+msgstr ""
+
+#: src/motion_loop.cpp:682
+msgid "initialize loop"
+msgstr ""
+
+#: src/motion_loop.cpp:729
+#, c-format
+msgid "Camera %d started: motion detection %s"
+msgstr ""
+
+#: src/motion_loop.cpp:730
+msgid "Disabled"
+msgstr ""
+
+#: src/motion_loop.cpp:730
+msgid "Enabled"
+msgstr ""
+
+#: src/motion_loop.cpp:733
+msgid "Emulating motion"
+msgstr ""
+
+#: src/motion_loop.cpp:894
+#, c-format
+#| msgid "on_area_detected"
+msgid "Motion in area %d detected."
+msgstr ""
+
+#: src/motion_loop.cpp:993
+msgid "Retrying until successful connection with camera"
+msgstr ""
+
+#: src/motion_loop.cpp:1009
+msgid ""
+"Camera has finally become available\n"
+"Camera image has different width and heightfrom what is in the config file. "
+"You should fix that\n"
+"Restarting Motion thread to reinitialize all image buffers to new picture "
+"dimensions"
+msgstr ""
+
+#: src/motion_loop.cpp:1054
+msgid "Video signal re-acquired"
+msgstr ""
+
+#: src/motion_loop.cpp:1064
+msgid "Video device fatal error - Closing video device"
+msgstr ""
+
+#: src/motion_loop.cpp:1071
+msgid "Restarting Motion thread to reinitialize all image buffers"
+msgstr ""
+
+#: src/motion_loop.cpp:1105
+msgid "Video signal lost - Adding grey image"
+msgstr ""
+
+#: src/motion_loop.cpp:1112
+msgid "Video signal still lost - Trying to close video device"
+msgstr ""
+
+#: src/motion_loop.cpp:1357
+#, c-format
+#| msgid "End Event"
+msgid "End of event %d"
+msgstr ""
+
+#: src/motion_loop.cpp:1415
+#, c-format
+msgid "Raw changes: %5d - changes after '%s': %5d"
+msgstr ""
+
+#: src/motion_loop.cpp:1419
+#, c-format
+msgid " - labels: %3d"
+msgstr ""
+
+#: src/motion_loop.cpp:1423
+#, c-format
+msgid "Changes: %5d"
+msgstr ""
+
+#: src/motion_loop.cpp:1428
+#, c-format
+msgid " - noise level: %2d"
+msgstr ""
+
+#: src/motion_loop.cpp:1433
+#, c-format
+msgid " - threshold: %d"
+msgstr ""
+
+#: src/motion_loop.cpp:1684
+#| msgid "Threads finished"
+msgid "Thread exiting"
+msgstr ""
+
+#: src/motionplus.cpp:173
 msgid "Removed process id file (pid file)."
 msgstr "Pašalintas proceso ID failas (pid failas)."
 
-#: src/motion.cpp
+#: src/motionplus.cpp:175
 msgid "Error removing pid file"
 msgstr "Klaida pašalinant pid failą"
 
-#: src/motion.cpp
+#: src/motionplus.cpp:198
+#| msgid "Motion running as daemon process"
+msgid "Motion going to daemon mode"
+msgstr ""
+
+#: src/motionplus.cpp:216
 #, c-format
 msgid "Exit motion, cannot create process id file (pid file) %s"
 msgstr "Išeiti iš judesio, negaliu sukurti proceso ID failo (pid failo) %s"
 
-#: src/motion.cpp
+#: src/motionplus.cpp:228
 msgid "Could not change directory"
 msgstr "Nepavyko pakeisti katalogo"
 
-#: src/motion.cpp
+#: src/motionplus.cpp:260
 #, c-format
 msgid "Created process id file %s. Process ID is %d"
 msgstr "Sukurtas proceso ID failas %s. Proceso ID yra %d"
 
-#: src/motion.cpp
-msgid "Camara IDs are not unique or have values over 32,000.  Falling back to thread numbers"
+#: src/motionplus.cpp:317
+msgid ""
+"Camara IDs are not unique or have values over 32,000.  Falling back to "
+"thread numbers"
 msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:330
+#| msgid "nls    : available"
+msgid "v4l2   : available"
+msgstr ""
+
+#: src/motionplus.cpp:332
+#| msgid "nls    : available"
+msgid "v4l2   : not available"
+msgstr ""
+
+#: src/motionplus.cpp:336
+#| msgid "nls    : available"
+msgid "webp   : available"
+msgstr ""
+
+#: src/motionplus.cpp:338
+#| msgid "nls    : available"
+msgid "webp   : not available"
+msgstr ""
+
+#: src/motionplus.cpp:342
+#| msgid "nls    : available"
+msgid "mmal   : available"
+msgstr ""
+
+#: src/motionplus.cpp:344
+#| msgid "nls    : available"
+msgid "mmal   : not available"
+msgstr ""
+
+#: src/motionplus.cpp:348
+#| msgid "nls    : available"
+msgid "mysql  : available"
+msgstr ""
+
+#: src/motionplus.cpp:350
+#| msgid "nls    : available"
+msgid "mysql  : not available"
+msgstr ""
+
+#: src/motionplus.cpp:354
+#| msgid "nls    : available"
+msgid "MariaDB: available"
+msgstr ""
+
+#: src/motionplus.cpp:356
+msgid "MariaDB: not available"
+msgstr ""
+
+#: src/motionplus.cpp:360
+#| msgid "nls    : available"
+msgid "sqlite3: available"
+msgstr ""
+
+#: src/motionplus.cpp:362
+#| msgid "Basic authentication: available"
+msgid "sqlite3: not available"
+msgstr ""
+
+#: src/motionplus.cpp:366
+#| msgid "nls    : available"
+msgid "pgsql  : available"
+msgstr ""
+
+#: src/motionplus.cpp:368
+#| msgid "nls    : available"
+msgid "pgsql  : not available"
+msgstr ""
+
+#: src/motionplus.cpp:372
 msgid "nls    : available"
 msgstr "nls: yra"
 
-#: src/motion.cpp
+#: src/motionplus.cpp:374
+#| msgid "nls    : available"
+msgid "nls    : not available"
+msgstr ""
+
+#: src/motionplus.cpp:398
 msgid "Motion running as daemon process"
 msgstr "Judesys veikia kaip demono procesas"
 
-#: src/motion.cpp
+#: src/motionplus.cpp:403
 msgid "Motion running in setup mode."
 msgstr "Judesys veikia nustatymo režimu."
 
-#: src/motion.cpp
+#: src/motionplus.cpp:435
+#| msgid "Unable to start stream for camera %d"
+msgid "Unable to start thread for motion loop."
+msgstr ""
+
+#: src/motionplus.cpp:445
+#| msgid "Restarting thread %d"
+msgid "Restarting motion."
+msgstr ""
+
+#: src/motionplus.cpp:452
+msgid "Motion restarted"
+msgstr ""
+
+#: src/motionplus.cpp:483
 #, c-format
 msgid "Thread %d - Watchdog timeout. Trying to do a graceful restart"
-msgstr "Siūla %d - sargybinio laiko pertrauka. Bandoma atlikti malonų pakartotinį paleidimą"
+msgstr ""
+"Siūla %d - sargybinio laiko pertrauka. Bandoma atlikti malonų pakartotinį "
+"paleidimą"
 
-#: src/motion.cpp
+#: src/motionplus.cpp:491
 #, c-format
 msgid "Thread %d - Watchdog timeout did NOT restart, killing it!"
 msgstr "Siūla %d - sargybinio laikas nebebuvo paleistas iš naujo, žudant!"
 
-#: src/motion.cpp
+#: src/motionplus.cpp:506
 #, c-format
 msgid "Thread %d - Watchdog kill!"
 msgstr "Siūla %d - sargybinis nužudyk!"
 
-#: src/motion.cpp
+#: src/motionplus.cpp:538
 #, c-format
 msgid "Thread %d - Cleaning thread."
 msgstr "Siūlas %d - valymo siūlas."
 
-#: src/motion.cpp
+#: src/motionplus.cpp:581
 #, c-format
 msgid "DEBUG-1 threads_running %d motion_threads_running %d , finish %d"
-msgstr "DEBUG-1 gijos, veikiančios %d judesio gijos, veikiančios %d, apdaila %d"
+msgstr ""
+"DEBUG-1 gijos, veikiančios %d judesio gijos, veikiančios %d, apdaila %d"
 
-#: src/motion.cpp
+#: src/motionplus.cpp:680
+#, c-format
+#| msgid "Invalid thread specified: %s"
+msgid "Invalid camera specified for deletion. %d"
+msgstr ""
+
+#: src/motionplus.cpp:750
 #, c-format
 msgid "Waiting for threads to finish, pid: %d"
 msgstr "Laukiu, kol baigsis siūlai, pid: %d"
 
-#: src/motion.cpp
+#: src/motionplus.cpp:764
 #, c-format
+msgid "Motion thread %d restart"
+msgstr ""
+
+#: src/motionplus.cpp:785
 msgid "Threads finished"
 msgstr "Gijos baigtos"
 
-#: src/motion.cpp src/webu.cpp src/netcam.cpp
+#: src/motionplus.cpp:794
+msgid "Motion terminating"
+msgstr ""
+
+#: src/movie.cpp:143
+msgid "Failed to allocate memory for codec name"
+msgstr "Nepavyko skirti atminties kodeko pavadinimui"
+
+#: src/movie.cpp:153
+msgid "Error setting base file name"
+msgstr "Klaida nustatant bazinio failo pavadinimą"
+
+#: src/movie.cpp:172
+#, c-format
+#| msgid "Error creating timelapse file [%s]"
+msgid "Error setting timelapse append for codec %s"
+msgstr ""
+
+#: src/movie.cpp:238 src/movie.cpp:843 src/movie.cpp:1714 src/movie.cpp:1772
+msgid "Error setting file name"
+msgstr "Klaida nustatant failo vardą"
+
+#: src/movie.cpp:249
+#, c-format
+msgid "codec option value %s is not supported"
+msgstr "kodeko parinkties reikšmė %s nepalaikoma"
+
+#: src/movie.cpp:259
+msgid "Could not get the codec"
+msgstr "Nepavyko gauti kodeko"
+
+#: src/movie.cpp:288
+#, c-format
+msgid "Error sending frame for encoding:%s"
+msgstr "Klaida siunčiant kodavimą: %s"
+
+#: src/movie.cpp:301
+#, c-format
+msgid "Error receiving encoded packet video:%s"
+msgstr "Klaida gaunant užkoduotą paketinį vaizdo įrašą: %s"
+
+#: src/movie.cpp:321
+#, c-format
+#| msgid "Error encoding image"
+msgid "Error encoding video:%s"
+msgstr ""
+
+#: src/movie.cpp:349
+#| msgid "Error encoding image"
+msgid "Error encoding video"
+msgstr ""
+
+#: src/movie.cpp:409
+#, c-format
+msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d"
+msgstr ""
+
+#: src/movie.cpp:417
+msgid "BAD TIMING!! Frame skipped."
+msgstr "BAD TIMING! Rėmelis praleistas."
+
+#: src/movie.cpp:483
+#, c-format
+msgid "%s codec vbr/crf/bit_rate: %d"
+msgstr ""
+
+#: src/movie.cpp:534
+#, c-format
+msgid "Preferred codec %s has been blacklisted: %s"
+msgstr ""
+
+#: src/movie.cpp:542
+#, c-format
+#| msgid "Camera directory config %s not found"
+msgid "Preferred codec %s not found"
+msgstr ""
+
+#: src/movie.cpp:552
+#, c-format
+#| msgid "Camera directory config %s not found"
+msgid "Codec %s not found"
+msgstr ""
+
+#: src/movie.cpp:568
+#, c-format
+msgid "Using codec %s"
+msgstr ""
+
+#: src/movie.cpp:591 src/movie.cpp:604
+#| msgid "Could not get image to stream."
+msgid "Could not alloc stream"
+msgstr ""
+
+#: src/movie.cpp:597
+msgid "Failed to allocate decoder!"
+msgstr "Nepavyko paskirstyti dekoderio!"
+
+#: src/movie.cpp:668
+msgid "Unable to set quality"
+msgstr ""
+
+#: src/movie.cpp:678
+#, c-format
+msgid "Reported FPS Supported %d/%d"
+msgstr "Pranešta apie FPS palaikomą %d / %d"
+
+#: src/movie.cpp:690
+#, c-format
+#| msgid "Could not get codec!"
+msgid "Could not open codec %s"
+msgstr ""
+
+#: src/movie.cpp:713
+#, c-format
+msgid "Failed to copy decoder parameters!: %s"
+msgstr "Nepavyko nukopijuoti dekoderio parametrų !: %s"
+
+#: src/movie.cpp:801
+#| msgid "could not alloc buffers %s"
+msgid "could not alloc frame"
+msgstr ""
+
+#: src/movie.cpp:823
+#, c-format
+msgid "could not alloc buffers %s"
+msgstr "nepavyko paskirstyti buferių %s"
+
+#: src/movie.cpp:859
+#, c-format
+msgid "error opening file %s"
+msgstr "klaida atidarant failą %s"
+
+#: src/movie.cpp:866
+#, c-format
+msgid "Permission denied. %s"
+msgstr "Leidimas atmestas. %s"
+
+#: src/movie.cpp:871
+#, c-format
+msgid "Error opening file %s"
+msgstr "Klaida atidarant failą %s"
+
+#: src/movie.cpp:886
+#, c-format
+msgid "Could not write movie header %s"
+msgstr "Nepavyko parašyti filmo antraštės %s"
+
+#: src/movie.cpp:922
+#, c-format
+msgid "Error entering draining mode:%s"
+msgstr "Klaida įeinant į kanalizacijos režimą: %s"
+
+#: src/movie.cpp:932
+#, c-format
+#| msgid "Error entering draining mode:%s"
+msgid "Error draining codec:%s"
+msgstr ""
+
+#: src/movie.cpp:945
+msgid "Error writing draining video frame"
+msgstr "Klaida rašant nusausintą vaizdo kadrą"
+
+#: src/movie.cpp:976
+msgid "Error while encoding picture"
+msgstr "Klaida koduojant paveikslėlį"
+
+#: src/movie.cpp:990
+#| msgid "Error while writing video frame: %s"
+msgid "Error while writing video frame"
+msgstr ""
+
+#: src/movie.cpp:1087
+#, c-format
+msgid "Error while writing video frame: %s"
+msgstr "Klaida rašant vaizdo įrašo kadrą: %s"
+
+#: src/movie.cpp:1229
+#| msgid "Could not get image to stream."
+msgid "Could not alloc video stream"
+msgstr ""
+
+#: src/movie.cpp:1235
+#| msgid "Unable to copy codec parameters"
+msgid "Unable to copy video codec parameters"
+msgstr ""
+
+#: src/movie.cpp:1244
+#, c-format
+msgid "video timebase %d/%d fps %d/%d"
+msgstr ""
+
+#: src/movie.cpp:1259
+#| msgid "Could not get image to stream."
+msgid "Could not alloc audio stream"
+msgstr ""
+
+#: src/movie.cpp:1265
+#| msgid "Unable to copy codec parameters"
+msgid "Unable to copy audio codec parameters"
+msgstr ""
+
+#: src/movie.cpp:1278
+#, c-format
+msgid "audio timebase %d/%d"
+msgstr ""
+
+#: src/movie.cpp:1309
+msgid "Pass-through disabled.  ffmpeg too old"
+msgstr "Pravažiavimas neįgalus. Ffmpeg per senas"
+
+#: src/movie.cpp:1319
+msgid "rtsp camera not ready for pass-through."
+msgstr "rtsp kamera nėra paruošta perėjimui."
+
+#: src/movie.cpp:1324
+msgid "RTSP context not available."
+msgstr ""
+
+#: src/movie.cpp:1344 src/movie.cpp:1516
+msgid "Could not allocate output context"
+msgstr "Nepavyko paskirstyti išvesties konteksto"
+
+#: src/movie.cpp:1351
+#| msgid "%s: Failed to copy stream for pass-through."
+msgid "Changing to MP4 container for pass-through."
+msgstr ""
+
+#: src/movie.cpp:1359
+#| msgid "Could not allocate output context"
+msgid "Could not get output format!"
+msgstr ""
+
+#: src/movie.cpp:1365
+#| msgid "Could not get image to stream."
+msgid "Could not get streams!"
+msgstr ""
+
+#: src/movie.cpp:1371
+#| msgid "Could not get the codec"
+msgid "Could not set the output file"
+msgstr ""
+
+#: src/movie.cpp:1377
+#, c-format
+msgid "Timebase after open audio: %d/%d video: %d/%d"
+msgstr ""
+
+#: src/movie.cpp:1468
+#, c-format
+#| msgid "movie libavcodec version %d.%d.%d libavformat version %d.%d.%d"
+msgid "libavcodec  version %d.%d.%d"
+msgstr ""
+
+#: src/movie.cpp:1470
+#, c-format
+#| msgid "movie libavcodec version %d.%d.%d libavformat version %d.%d.%d"
+msgid "libavformat version %d.%d.%d"
+msgstr ""
+
+#: src/movie.cpp:1493
+msgid "av_lockmgr_register reset failed on cleanup"
+msgstr "nepavyko išvalyti„ lock lock “registro iš naujo nustatyti"
+
+#: src/movie.cpp:1507
+#| msgid "Could not setup passthru!"
+msgid "Could not setup passthrough!"
+msgstr ""
+
+#: src/movie.cpp:1523
+msgid "Could not get codec!"
+msgstr "Nepavyko gauti kodeko!"
+
+#: src/movie.cpp:1530
+msgid "Failed to allocate codec!"
+msgstr "Nepavyko paskirstyti kodeko!"
+
+#: src/movie.cpp:1536 src/movie.cpp:1542 src/movie.cpp:1548
+#| msgid "Could not get image to stream."
+msgid "Could not set the stream"
+msgstr ""
+
+#: src/movie.cpp:1562
+#| msgid "Error sending packet to codec: %s"
+msgid "Error flushing codec"
+msgstr ""
+
+#: src/movie.cpp:1622
+msgid "Excessive attempts to clear buffered packet"
+msgstr "Per daug bandymų išvalyti buferinį paketą"
+
+#: src/movie.cpp:1629
+msgid "Buffered packet"
+msgstr ""
+
+#: src/movie.cpp:1819
+#, c-format
+#| msgid "Error setting base file name"
+msgid "Error setting timelapse file name %s"
+msgstr ""
+
+#: src/movie.cpp:1846
+#| msgid "Timelapse using mpeg4 codec."
+msgid "Timelapse using mpg codec."
+msgstr ""
+
+#: src/movie.cpp:1847
+msgid "Events will be appended to file"
+msgstr "Įvykiai bus pridedami prie bylos"
+
+#: src/movie.cpp:1853
+msgid "Timelapse using mpeg4 codec."
+msgstr "Laiko praleidimas naudojant mpeg4 kodeką."
+
+#: src/movie.cpp:1854
+#| msgid "Events will be appended to file"
+msgid "Events will be trigger new files"
+msgstr ""
+
+#: src/netcam.cpp:63
 #, c-format
 msgid "expanding buffer from [%d/%d] to [%d/%d] bytes."
 msgstr "išplečiamas buferis nuo [%d / %d] iki [%d / %d] baitų."
 
-#: src/netcam.cpp
+#: src/netcam.cpp:131
 msgid "Invalid URL.  Can not parse values."
 msgstr "Netinkamas URL. Negalima parsisiųsti reikšmių."
 
-#: src/netcam.cpp
+#: src/netcam.cpp:237
 #, c-format
 msgid "Using port number %d"
 msgstr "Naudojant prievado numerį %d"
 
-#: src/netcam.cpp
+#: src/netcam.cpp:407
 #, c-format
 msgid "%s: Resized packet array to %d"
 msgstr "%s: pakeistas paketo paketo masyvas į %d"
 
-#: src/netcam.cpp
+#: src/netcam.cpp:444
 #, c-format
 msgid "%s: av_copy_packet: %s ,Interrupt: %s"
 msgstr "%s: av kopijos paketas: %s, pertraukimas: %s"
 
-#: src/netcam.cpp
+#: src/netcam.cpp:446
+msgid "true"
+msgstr ""
+
+#: src/netcam.cpp:446
+msgid "false"
+msgstr ""
+
+#: src/netcam.cpp:476 src/netcam.cpp:513
+#, c-format
+#| msgid "Ignoring packet with invalid data"
+msgid "%s: Ignoring packet with invalid data"
+msgstr ""
+
+#: src/netcam.cpp:482 src/netcam.cpp:519
+#, c-format
+#| msgid "%s: av_read_frame: %s ,Interrupt: %s"
+msgid "%s: Rec frame error: %s"
+msgstr ""
+
+#: src/netcam.cpp:532
+#, c-format
+msgid "%s: Error transferring HW decoded to system memory"
+msgstr ""
+
+#: src/netcam.cpp:571
+#, c-format
+#| msgid "%s: Handler loop finished."
+msgid "%s: Interrupted or finish on send"
+msgstr ""
+
+#: src/netcam.cpp:577
+#, c-format
+#| msgid "Ignoring packet with invalid data"
+msgid "%s: Send ignoring packet with invalid data"
+msgstr ""
+
+#: src/netcam.cpp:584
+#, c-format
+#| msgid "Error sending packet to codec: %s"
+msgid "%s: Error sending packet to codec: %s"
+msgstr ""
+
+#: src/netcam.cpp:614
 msgid "Ignoring packet with invalid data"
 msgstr "Paketo su netinkamais duomenimis ignoravimas"
 
-#: src/netcam.cpp
-#, c-format
-msgid "Error sending packet to codec: %s"
-msgstr "Klaida siunčiant paketą į kodeką: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "Error receiving frame from codec: %s"
-msgstr "Klaida gaunant kadrą iš kodeko: %s"
-
-#: src/netcam.cpp
+#: src/netcam.cpp:620
 #, c-format
 msgid "Error decoding packet: %s"
 msgstr "Klaida dekoduojant paketą: %s"
 
-#: src/netcam.cpp
-msgid "Error decoding video packet: Copying to buffer"
-msgstr "Klaida dekoduojant vaizdo įrašo paketą: kopijavimas į buferį"
-
-#: src/netcam.cpp
+#: src/netcam.cpp:644
 #, c-format
-msgid "%s: av_find_best_stream: %s,Interrupt %s"
-msgstr "%s: av rasti geriausią srautą: %s, pertraukti %s"
+#| msgid "Error decoding video packet: Copying to buffer"
+msgid "%s: Error decoding video packet...it is audio"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:667
 #, c-format
-msgid "%s: avcodec_find_decoder: Failed,Interrupt %s"
-msgstr "%s: avcodec rasti dekoderis: Nepavyko, pertraukti %s"
+#| msgid "Error decoding video packet: Copying to buffer"
+msgid "%s: Error decoding video packet: Copying to buffer"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:686
 #, c-format
-msgid "%s: avcodec_alloc_context3: Failed,Interrupt %s"
-msgstr "%s: avcodec alloc context3: Nepavyko, pertraukite %s"
+msgid "%s: HW Devices: "
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:691
 #, c-format
-msgid "%s: avcodec_parameters_to_context: %s,Interrupt %s"
-msgstr "%s: avcodec parametrai kontekste: %s, pertraukti %s"
+#| msgid "nls    : available"
+msgid "%s: %s (available)"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:696
 #, c-format
-msgid "%s: avcodec_open2: %s,Interrupt %s"
-msgstr "%s: avcodec open2: %s, pertraukti %s"
+msgid "%s: %s (not implemented)"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:722
+msgid "Failed to get vaapi pix format"
+msgstr ""
+
+#: src/netcam.cpp:738 src/netcam.cpp:1233
+#, c-format
+msgid "%s: Interrupted"
+msgstr ""
+
+#: src/netcam.cpp:743
+#, c-format
+msgid "%s: %s: %s"
+msgstr ""
+
+#: src/netcam.cpp:746
+#, c-format
+msgid "%s: %s: Failed"
+msgstr ""
+
+#: src/netcam.cpp:752
+#, c-format
+msgid "%s: Decoder %s did not work."
+msgstr ""
+
+#: src/netcam.cpp:755
+#, c-format
+msgid "%s: Ignoring and removing the user requested decoder %s"
+msgstr ""
+
+#: src/netcam.cpp:786
+#, c-format
+msgid "%s: Initializing vaapi decoder"
+msgstr ""
+
+#: src/netcam.cpp:790
+#, c-format
+#| msgid "%s: Unable to find stream info: %s"
+msgid "%s: Unable to find vaapi hw device"
+msgstr ""
+
+#: src/netcam.cpp:837
+#, c-format
+msgid "%s: Initializing decoder"
+msgstr ""
+
+#: src/netcam.cpp:844
+#, c-format
+msgid "%s: Using decoder %s"
+msgstr ""
+
+#: src/netcam.cpp:936
+#, c-format
+msgid "%s: Decoder opened"
+msgstr ""
+
+#: src/netcam.cpp:995
 #, c-format
 msgid "%s: Camera reading (%s) timed out"
 msgstr "%s: fotoaparato skaitymo (%s) laikas baigėsi"
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1011
 #, c-format
-msgid "Error allocating picture in: %s"
-msgstr "Klaida paskirstant paveikslėlį: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "Error allocating picture out: %s"
-msgstr "Klaida paskirstant paveikslėlį: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "Error resizing/reformatting: %s"
-msgstr "Klaida keičiant dydį / formatuojant: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "Error putting frame into output buffer: %s"
-msgstr "Klaida įdedant kadrą į išvesties buferį: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: av_read_frame: %s ,Interrupt: %s"
-msgstr "%s: av skaitymo rėmelis: %s, pertraukimas: %s"
-
-#: src/netcam.cpp
-msgid "The network camera is sending pictures in a different"
-msgstr "Tinklo kamera siunčia nuotraukas kitokia"
-
-#: src/netcam.cpp
-msgid "size than specified in the config and also a "
-msgstr "dydžio, nei nurodyta konfigūracijoje, taip pat"
-
-#: src/netcam.cpp
-msgid "different picture format.  The picture is being"
-msgstr "skirtingas paveikslėlio formatas. Nuotrauka kuriama"
-
-#: src/netcam.cpp
-msgid "transcoded to YUV420P and into the size requested"
-msgstr "perkoduojamas į YUV420P ir į norimą dydį"
-
-#: src/netcam.cpp
-msgid "in the config file.  If possible change netcam to"
+#| msgid "%s: Camera reading (%s) timed out"
+msgid "%s: Camera (%s) timed out"
 msgstr ""
 
-#: src/netcam.cpp
-msgid "be in YUV420P format and the size requested in the"
-msgstr "turi būti YUV420P formato, o dydis reikalaujamas"
-
-#: src/netcam.cpp
-msgid "config to possibly lower CPU usage."
-msgstr "konfigūracija, kad galbūt sumažėtų procesoriaus naudojimas."
-
-#: src/netcam.cpp
-msgid "size than specified in the configuration file."
-msgstr "dydžio, nei nurodyta konfigūracijos faile."
-
-#: src/netcam.cpp
-msgid "The picture is being transcoded into the size "
-msgstr "Nuotrauka perkoduojama į dydį"
-
-#: src/netcam.cpp
-msgid "requested in the configuration.  If possible change"
-msgstr "reikalaujama konfigūracijoje. Jei įmanoma, pakeiskite"
-
-#: src/netcam.cpp
-msgid "netcam or configuration to indicate the same size"
-msgstr "„ netcam “arba konfigūracija nurodyti tokį patį dydį"
-
-#: src/netcam.cpp
-msgid "to possibly lower CPU usage."
-msgstr ", kad galbūt sumažėtų procesoriaus naudojimas."
-
-#: src/netcam.cpp
+#: src/netcam.cpp:1035
 #, c-format
-msgid "The image sent is being "
-msgstr "Siunčiamas vaizdas yra"
+#| msgid "Unable to allocate swsframe_in."
+msgid "%s: Unable to allocate swsframe_in."
+msgstr ""
 
-#: src/netcam.cpp
-msgid "trancoded to YUV420P.  If possible change netcam "
-msgstr ", koduota YUV420P. Jei įmanoma, pakeiskite„ netcam "
-
-#: src/netcam.cpp
-msgid "picture format to YUV420P to possibly lower CPU usage."
-msgstr "vaizdo formatas į YUV420P, kad būtų galima sumažinti CPU naudojimą."
-
-#: src/netcam.cpp
-msgid "Unable to allocate swsframe_in."
-msgstr "Neįmanoma paskirstyti rėmelio."
-
-#: src/netcam.cpp
-msgid "Unable to allocate swsframe_out."
-msgstr "Neįmanoma paskirstyti rėmelio."
-
-#: src/netcam.cpp
-msgid "Unable to allocate scaling context."
-msgstr "Neįmanoma paskirstyti mastelio keitimo konteksto."
-
-#: src/netcam.cpp
-msgid "Error determining size of frame out"
-msgstr "Klaida nustatant rėmelio išėjimo dydį"
-
-#: src/netcam.cpp
+#: src/netcam.cpp:1046
 #, c-format
-msgid "%s: Setting http input_format mjpeg"
-msgstr "%s:„ http “įvesties formato„ mjpeg “nustatymas"
+#| msgid "Unable to allocate swsframe_out."
+msgid "%s: Unable to allocate swsframe_out."
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1059
 #, c-format
-msgid "%s: Setting rtsp transport to tcp"
-msgstr "%s: rtsp transportavimo į TCP nustatymas"
+msgid "%s: Pixel format %d will be converted."
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1074
 #, c-format
-msgid "%s: Setting rtsp transport to udp"
-msgstr "%s: rtsp transportavimo nustatymas į udp"
+#| msgid "Unable to allocate scaling context."
+msgid "%s: Unable to allocate scaling context."
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1088
 #, c-format
-msgid "%s: Setting attributes to read file"
-msgstr "%s: failo nuskaitymo atributų nustatymas"
+#| msgid "Error determining size of frame out"
+msgid "%s: Error determining size of frame out"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1130
 #, c-format
-msgid "%s: Requested v4l2_palette option: %d"
-msgstr "%s: prašoma v4l2 paletės parinktis: %d"
+#| msgid "Error allocating picture in: %s"
+msgid "%s: Error allocating picture in: %s"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1149
 #, c-format
-msgid "%s: Requested FOURCC code: %s"
-msgstr "%s: prašomas FOURCC kodas: %s"
+#| msgid "Error allocating picture out: %s"
+msgid "%s: Error allocating picture out: %s"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1168
 #, c-format
-msgid "%s: Setting v4l2 input_format: %s"
-msgstr "%s: v4l2 įvesties formato nustatymas: %s"
+#| msgid "Error resizing/reformatting: %s"
+msgid "%s: Error resizing/reformatting: %s"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1186
 #, c-format
-msgid "%s: Setting v4l2 framerate: %s"
-msgstr "%s:„ v4l2 “kadrų dažnio nustatymas: %s"
+#| msgid "Error putting frame into output buffer: %s"
+msgid "%s: Error putting frame into output buffer: %s"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1238
 #, c-format
-msgid "%s: Setting v4l2 video_size: %s"
-msgstr "%s:„ V4l2 “vaizdo įrašo dydžio nustatymas: %s"
+#| msgid "%s: av_read_frame: %s ,Interrupt: %s"
+msgid "%s: av_read_frame: %s"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1324
 #, c-format
-msgid "Error setting name of resolution %s."
-msgstr "Klaida nustatant skyros %s pavadinimą."
+msgid "%s: capture_rate not specified in netcam_params. Using %d"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1331
 #, c-format
-msgid "Setting up %s stream."
-msgstr "%s srauto nustatymas."
+msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1355
 #, c-format
-msgid "%s: Invalid camera service"
-msgstr "%s: netinkama kameros paslauga"
+#| msgid "The network camera is sending pictures in a different"
+msgid "The network camera is sending pictures at %dx%d"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1357
 #, c-format
-msgid "%s: Unable to open camera(%s)"
-msgstr "%s: Nepavyko atidaryti kameros (%s)"
+#| msgid "requested in the configuration.  If possible change"
+msgid "resolution but config is %dx%d. If possible change"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1359
+#| msgid "netcam or configuration to indicate the same size"
+msgid "the netcam or config so that the image height and"
+msgstr ""
+
+#: src/netcam.cpp:1360
+msgid "width are the same to lower the CPU usage."
+msgstr ""
+
+#: src/netcam.cpp:1384
+#, c-format
+#| msgid "%s: Setting rtsp transport to tcp"
+msgid "%s: Setting rtsp/rtmp"
+msgstr ""
+
+#: src/netcam.cpp:1391
+#, c-format
+#| msgid "%s: Setting http input_format mjpeg"
+msgid "%s: Setting input_format mjpeg"
+msgstr ""
+
+#: src/netcam.cpp:1396
+#, c-format
+#| msgid "%s: Setting http input_format mjpeg"
+msgid "%s: Setting input_format video4linux2"
+msgstr ""
+
+#: src/netcam.cpp:1411
+#, c-format
+#| msgid "%s: Setting attributes to read file"
+msgid "%s: Setting up movie file"
+msgstr ""
+
+#: src/netcam.cpp:1414
+#, c-format
+#| msgid "Setting up %s stream."
+msgid "%s: Setting up %s"
+msgstr ""
+
+#: src/netcam.cpp:1429
+#, c-format
+msgid "%s: option: %s = %s"
+msgstr ""
+
+#: src/netcam.cpp:1464
+#| msgid "Error setting file name"
+msgid "Error getting userpass"
+msgstr ""
+
+#: src/netcam.cpp:1472
+#| msgid "Setting up %s stream."
+msgid "Setting up v4l2"
+msgstr ""
+
+#: src/netcam.cpp:1477
+#| msgid "Setting up %s stream."
+msgid "Setting up file"
+msgstr ""
+
+#: src/netcam.cpp:1482
+#| msgid "Setting up %s stream."
+msgid "Setting up http"
+msgstr ""
+
+#: src/netcam.cpp:1485
+#, c-format
+#| msgid "Setting up %s stream."
+msgid "Setting up %s "
+msgstr ""
+
+#: src/netcam.cpp:1517
+msgid "High"
+msgstr ""
+
+#: src/netcam.cpp:1524
+msgid "Norm"
+msgstr ""
+
+#: src/netcam.cpp:1531
+#, c-format
+#| msgid "%s: Setting v4l2 framerate: %s"
+msgid "%s: Setting up camera."
+msgstr ""
+
+#: src/netcam.cpp:1576
+msgid "Unknown"
+msgstr ""
+
+#: src/netcam.cpp:1609
+#, c-format
+#| msgid "Adjusting width to next higher multiple of 8 (%d)."
+msgid "%s: Adjusting width to next higher multiple of 8 (%d)."
+msgstr ""
+
+#: src/netcam.cpp:1649
+#, c-format
+#| msgid "Unable to copy codec parameters"
+msgid "%s: Unable to copy codec parameters"
+msgstr ""
+
+#: src/netcam.cpp:1660
+#| msgid "rtsp camera not ready for pass-through."
+msgid "Stream copied for pass-through"
+msgstr ""
+
+#: src/netcam.cpp:1665
+msgid "ffmpeg too old"
+msgstr ""
+
+#: src/netcam.cpp:1684
+msgid "Null path passed to connect"
+msgstr ""
+
+#: src/netcam.cpp:1706
 #, c-format
 msgid "%s: Unable to open camera(%s): %s"
 msgstr "%s: Neįmanoma atidaryti kameros (%s): %s"
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1717
 #, c-format
 msgid "%s: Opened camera(%s)"
 msgstr "%s: atidaryta kamera (%s)"
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1726
 #, c-format
 msgid "%s: Unable to find stream info: %s"
 msgstr "%s: Neįmanoma rasti srauto informacijos: %s"
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1745
 #, c-format
 msgid "%s: Unable to open codec context: %s"
 msgstr "%s: Nepavyko atidaryti kodeko konteksto: %s"
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1750
+#, c-format
+#| msgid "%s: Unable to open codec context: %s"
+msgid "%s: Connected and unable to open codec context: %s"
+msgstr ""
+
+#: src/netcam.cpp:1760
 #, c-format
 msgid "%s: Camera image size is invalid"
 msgstr "%s: netinkamas fotoaparato vaizdo dydis"
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1774
 #, c-format
 msgid "%s: Unable to allocate frame."
 msgstr "%s: Neįmanoma paskirti rėmelio."
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1785
 #, c-format
 msgid "%s: Failed to copy stream for pass-through."
 msgstr "%s: Nepavyko nukopijuoti srauto, skirto pratekėjimui."
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1797
 #, c-format
 msgid "%s: Failed to read first image"
 msgstr "%s: nepavyko perskaityti pirmo vaizdo"
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1832
 #, c-format
 msgid "%s: Camera (%s) connected"
 msgstr "%s: kamera prijungta (%s)"
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1836
+#, c-format
+msgid "%s: Netcam capture FPS is %d."
+msgstr ""
+
+#: src/netcam.cpp:1841
+#, c-format
+#| msgid "%s: Camera (%s) connected"
+msgid "%s: Camera source is %d FPS"
+msgstr ""
+
+#: src/netcam.cpp:1845
+#, c-format
+#| msgid "%s: Unable to open camera(%s)"
+msgid "%s: Unable to determine the camera source FPS."
+msgstr ""
+
+#: src/netcam.cpp:1851
+#, c-format
+msgid "%s: Capture FPS less than camera FPS. Decoding errors will occur."
+msgstr ""
+
+#: src/netcam.cpp:1854
+#, c-format
+msgid "%s: Capture FPS should be greater than camera FPS."
+msgstr ""
+
+#: src/netcam.cpp:1865
+#, c-format
+msgid ""
+"%s: An audio stream was detected.  Capture_rate increased to compensate."
+msgstr ""
+
+#: src/netcam.cpp:1942
 #, c-format
 msgid "%s: Reconnecting with camera...."
 msgstr "%s: sujungimas su kamera ..."
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1957 src/netcam.cpp:1964
+#, c-format
+#| msgid "%s: Camera (%s) connected"
+msgid "%s: Camera did not reconnect."
+msgstr ""
+
+#: src/netcam.cpp:1959
 #, c-format
 msgid "%s: Checking for camera every 10 seconds."
 msgstr "%s: tikrinama, ar fotoaparatas kas 10 sekundžių."
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1966
+#, c-format
+#| msgid "%s: Checking for camera every 10 seconds."
+msgid "%s: Checking for camera every 10 minutes."
+msgstr ""
+
+#: src/netcam.cpp:1990
 #, c-format
 msgid "%s: Camera handler thread [%d] started"
 msgstr "%s: prasidėjo fotoaparato tvarkyklės siūlai [%d]"
 
-#: src/netcam.cpp
+#: src/netcam.cpp:2013
 #, c-format
-msgid "%s: Handler loop finished."
-msgstr "%s: tvarkiklio kilpa baigta."
+#| msgid "%s: Handler loop finished."
+msgid "%s: Loop finished."
+msgstr ""
 
-#: src/netcam.cpp
-msgid "netcam camera handler: finish set, exiting"
-msgstr "„ netcam “fotoaparatų prižiūrėtojas: baigtas komplektas, išeinama"
+#: src/netcam.cpp:2022
+#, c-format
+msgid "%s: Exiting"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:2048
 #, c-format
 msgid "%s: Error starting handler thread"
 msgstr "%s: Klaida pradedant tvarkyklės giją"
 
-#: src/netcam.cpp
+#: src/netcam.cpp:2069
 #, c-format
 msgid "%s: Waiting for first image from the handler."
 msgstr "%s: laukiama pirmo atvaizdo iš prižiūrėtojo."
 
-#: src/netcam.cpp
+#: src/netcam.cpp:2105
+#| msgid "Unable to allocate scaling context."
+msgid "unable to create rtsp context"
+msgstr ""
+
+#: src/netcam.cpp:2114
+#| msgid "Unable to allocate scaling context."
+msgid "unable to create rtsp high context"
+msgstr ""
+
+#: src/netcam.cpp:2132
 #, c-format
 msgid "Failed trying to read first image - retval:%d"
 msgstr "Nepavyko nuskaityti pirmo vaizdo - retval: %d"
 
-#: src/netcam.cpp
+#: src/netcam.cpp:2230
 #, c-format
 msgid "%s: Shutting down network camera."
 msgstr "%s: tinklo kameros išjungimas."
 
-#: src/netcam.cpp
+#: src/netcam.cpp:2245
 #, c-format
 msgid "%s: No response from handler thread."
 msgstr "%s: jokio atsakymo iš prižiūrėtojo gijos."
 
-#: src/netcam.cpp
-msgid "Normal resolution: Shut down complete."
-msgstr "Normali skiriamoji geba: Išjungti baigta."
+#: src/netcam.cpp:2267
+#| msgid "Normal resolution: Shut down complete."
+msgid "Norm: Shut down complete."
+msgstr ""
 
-#: src/netcam.cpp
-msgid "High resolution: Shut down complete."
-msgstr "Didelė skiriamoji geba: išsijungia."
+#: src/netcam.cpp:2270
+#| msgid "High resolution: Shut down complete."
+msgid "High: Shut down complete."
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:57
 msgid "Unable to set set EXIF to webp chunk"
 msgstr "Nepavyko nustatyti EXIF ​​nustatymo į„ webp chunk \""
 
-#: src/picture.cpp
+#: src/picture.cpp:74 src/picture.cpp:81
+msgid "libwebp version error"
+msgstr ""
+
+#: src/picture.cpp:89
+msgid "libwebp image buffer allocation error"
+msgstr ""
+
+#: src/picture.cpp:106
+msgid "libwebp image compression error"
+msgstr ""
+
+#: src/picture.cpp:121
 msgid "unable to assemble webp image"
 msgstr "nepavyko surinkti žiniatinklio vaizdo"
 
-#: src/picture.cpp
+#: src/picture.cpp:126
 msgid "unable to save webp image to file"
 msgstr "nepavyko išsaugoti žiniatinklio failo failo"
 
-#: src/picture.cpp
+#: src/picture.cpp:310
 #, c-format
 msgid ""
 "Can't write picture to file %s - check access rights to target directory\n"
 "Thread is going to finish due to this fatal error"
 msgstr ""
-"Nepavyksta įrašyti paveikslėlio į failą %s - patikrinkite prieigos teises į tikslinį katalogą \n"
+"Nepavyksta įrašyti paveikslėlio į failą %s - patikrinkite prieigos teises į "
+"tikslinį katalogą \n"
 "Gija baigsis dėl šios mirtinos klaidos"
 
+#: src/picture.cpp:318 src/picture.cpp:345
 #, c-format
 msgid "Can't write picture to file %s"
 msgstr "Negaliu parašyti paveikslėlio į failą %s"
 
-#: src/picture.cpp
+#: src/picture.cpp:382
 msgid "Could not read from pgm file"
 msgstr "Nepavyko nuskaityti iš pgm failo"
 
-#: src/picture.cpp
+#: src/picture.cpp:388
 #, c-format
 msgid "This is not a pgm file, starts with '%s'"
 msgstr "Tai nėra pgm failas, prasideda raide '%s'"
 
-#: src/picture.cpp
+#: src/picture.cpp:402
 msgid "Failed reading size in pgm file"
 msgstr "Nepavyko nuskaityti failo dydžio pdf faile"
 
-#: src/picture.cpp
+#: src/picture.cpp:415
 msgid "Failed reading maximum value in pgm file"
 msgstr "Nepavyko nuskaityti didžiausios reikšmės pgm faile"
 
-#: src/picture.cpp
+#: src/picture.cpp:440
 msgid "The mask file specified is not the same size as image from camera."
 msgstr "Nurodytas kaukės failas nėra tokio dydžio kaip vaizdas iš fotoaparato."
 
-#: src/picture.cpp
+#: src/picture.cpp:442
 #, c-format
 msgid "Attempting to resize mask image from %dx%d to %dx%d"
 msgstr "Bandoma pakeisti kaukės atvaizdą iš %dx%d į %dx%d"
 
-#: src/picture.cpp
+#: src/picture.cpp:472
 #, c-format
 msgid "can't write mask file %s - check access rights to target directory"
-msgstr "negali rašyti kaukės failo %s - patikrinkite prieigos teises į tikslinį katalogą"
+msgstr ""
+"negali rašyti kaukės failo %s - patikrinkite prieigos teises į tikslinį "
+"katalogą"
 
-#: src/picture.cpp
+#: src/picture.cpp:477
 #, c-format
 msgid "can't write mask file %s"
 msgstr "negaliu parašyti kaukės failo %s"
 
-#: src/picture.cpp
+#: src/picture.cpp:491
 msgid "Failed writing default mask as pgm file"
 msgstr "Nepavyko parašyti numatytosios kaukės kaip pgm failo"
 
-#: src/picture.cpp
+#: src/picture.cpp:498
 #, c-format
 msgid ""
 "Creating empty mask %s\n"
 "Please edit this file and re-run motion to enable mask feature"
 msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:574
+#| msgid "Error opening mask file %s"
+msgid "Opening privacy mask file"
+msgstr ""
+
+#: src/picture.cpp:586
+msgid "Opening high resolution privacy mask file"
+msgstr ""
+
+#: src/picture.cpp:595 src/picture.cpp:680
 #, c-format
 msgid "Error opening mask file %s"
 msgstr "Klaida atidarant kaukės failą %s"
 
-#: src/picture.cpp
+#: src/picture.cpp:602
 msgid "Failed to read mask privacy image. Mask privacy feature disabled."
-msgstr "Nepavyko nuskaityti kaukės privatumo vaizdo. Kaukės privatumo funkcija išjungta."
+msgstr ""
+"Nepavyko nuskaityti kaukės privatumo vaizdo. Kaukės privatumo funkcija "
+"išjungta."
 
-#: src/picture.cpp
+#: src/picture.cpp:605
 #, c-format
 msgid "Mask privacy file \"%s\" loaded."
 msgstr "Įkelta slaptažodžių privatumo byla \"%s\"."
 
-#: src/picture.cpp
+#: src/picture.cpp:691
 msgid "Failed to read mask image. Mask feature disabled."
 msgstr "Nepavyko nuskaityti kaukės vaizdo. Kaukės funkcija išjungta."
 
-#: src/picture.cpp src/rotate.cpp src/track.cpp
+#: src/picture.cpp:694
 #, c-format
-msgid "Failed to reset UVC camera to starting position! Reason"
-msgstr "Nepavyko atkurti UVC fotoaparato į pradinę padėtį! Priežastis"
-
-#: src/track.cpp
-msgid "Reseting UVC camera to starting position"
-msgstr "UVC kameros atkūrimas į pradinę padėtį"
-
-#: src/track.cpp
-#, c-format
-msgid "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d "
-msgstr "INPUT PARAM ABS pan min. %d, visos maksimalios %d, pakreipimo min. %d, pakreipimo maks. %d"
-
-#: src/track.cpp
-#, c-format
-msgid "INPUT_PARAM_ABS X_Angel %d, Y_Angel %d "
-msgstr "INPUT PARAM ABS X Angel %d, Y Angel %d"
-
-#: src/track.cpp
-#, c-format
-msgid "For_SET_ABS move_X %d,move_Y %d"
-msgstr "Jei norite nustatyti SET ABS, perkelkite X %d, perkelkite Y %d"
-
-#: src/track.cpp
-msgid "Failed to move UVC camera!"
-msgstr "Nepavyko perkelti UVC fotoaparato!"
-
-#: src/track.cpp
-#, c-format
-msgid "Found MINMAX = %d"
-msgstr "Rasta MINMAX = %d"
-
-#: src/track.cpp
-#, c-format
-msgid "Before_ABS_Y_Angel : x= %d , Y= %d, "
-msgstr "Prieš ABS Y Angel: x = %d, Y = %d"
-
-#: src/track.cpp
-#, c-format
-msgid "After_ABS_Y_Angel : x= %d , Y= %d"
-msgstr "Po ABS Y angelas: x = %d, Y = %d"
-
-#: src/track.cpp
-#, c-format
-msgid "For_SET_REL pan_min %d,pan_max %d,tilt_min %d,tilt_max %d"
-msgstr "„ SET REL “pan min %d, pan max %d, pan. Min %d, tilt max %d"
-
-#: src/track.cpp
-#, c-format
-msgid "For_SET_REL track_pan_Angel %d, track_tilt_Angel %d"
+#| msgid "Mask privacy file \"%s\" loaded."
+msgid "Maskfile \"%s\" loaded."
 msgstr ""
 
-#: src/track.cpp
+#: src/rotate.cpp:196
 #, c-format
-msgid "For_SET_REL move_X %d,move_Y %d"
-msgstr "Jei norite nustatyti REL, perkelkite X %d, perkelkite Y %d"
+msgid "Config option \"rotate\" not a multiple of 90: %d"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:111
 #, c-format
-msgid " dev %d, addr= %d, control_S= %d, Wert= %d"
-msgstr "dev %d, addr = %d, control S = %d, Wert = %d"
+#| msgid "Could not allocate output context"
+msgid "Could not allocate %llu bytes of memory!"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:127
 #, c-format
-msgid " dev %d,addr= %d, control_S= %d, Wert= %d"
-msgstr "dev %d, addr = %d, control S = %d, Wert = %d"
+msgid "Warning! Function %s tries to resize memoryblock at %p to 0 bytes!"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:133
 #, c-format
-msgid "After_REL_Y_Angel : x= %d , Y= %d"
-msgstr "Po REL Y angelas: x = %d, Y = %d"
+msgid "Could not resize memory-block at offset %p to %llu bytes (function %s)!"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:175
 #, c-format
-msgid "internal error, %hu is not a known track-type"
-msgstr "vidinė klaida, %hu nėra žinomas takelio tipas"
+#| msgid "Could not change directory"
+msgid "Problem creating directory %s"
+msgstr ""
 
-#: src/video_common.cpp
+#: src/util.cpp:183
+#, c-format
+#| msgid "no write access to target directory %s"
+msgid "creating directory %s"
+msgstr ""
+
+#: src/util.cpp:221
+#, c-format
+#| msgid "Error opening file %s"
+msgid "Error opening file %s with mode %s"
+msgstr ""
+
+#: src/util.cpp:234
+#| msgid "Error opening file %s"
+msgid "Error closing file"
+msgstr ""
+
+#: src/util.cpp:294
+#, c-format
+#| msgid "Invalid thread specified: %s"
+msgid "invalid format specifier keyword %*.*s"
+msgstr ""
+
+#: src/util.cpp:523
+#, c-format
+#| msgid "Unable to start stream for camera %d"
+msgid "Unable to set thread name %s"
+msgstr ""
+
+#: src/util.cpp:550
+msgid "FFMPEG version too old. Disabling pass-through processing."
+msgstr ""
+
+#: src/util.cpp:589
+msgid "Language: English"
+msgstr ""
+
+#: src/util.cpp:606
+msgid "Disabling native language support"
+msgstr ""
+
+#: src/util.cpp:613
+msgid "Enabling native language support"
+msgstr ""
+
+#: src/util.cpp:885
+#, c-format
+msgid "Parsed: >%s< >%s<"
+msgstr ""
+
+#: src/util.cpp:1047 src/util.cpp:1078 src/util.cpp:1098
+#, c-format
+msgid "Parsing: >%s< >%ld %ld %ld %ld<"
+msgstr ""
+
+#: src/util.cpp:1127
+#, c-format
+msgid "Starting parsing parameters: %s"
+msgstr ""
+
+#: src/util.cpp:1135
+#, c-format
+#| msgid "Failed to copy decoder parameters!: %s"
+msgid "Finished parsing parameters: %s"
+msgstr ""
+
+#: src/util.cpp:1197
+#, c-format
+msgid "New config: %s"
+msgstr ""
+
+#: src/util.cpp:1233
+#, c-format
+msgid "Unable to start external command '%s'"
+msgstr "Nepavyko paleisti išorinės komandos '%s'"
+
+#: src/util.cpp:1239
+#, c-format
+msgid "Executing external command '%s'"
+msgstr "Išorinės komandos '%s' vykdymas"
+
+#: src/video_common.cpp:425 src/video_common.cpp:447
+msgid "Corrupt image ... continue"
+msgstr ""
+
+#: src/video_common.cpp:438
 #, c-format
 msgid "SOI position adjusted by %d bytes."
 msgstr "SOI padėtis pakoreguota %d baitais."
 
-#: src/video_common.cpp
-#, c-format
-msgid "No Camera device cleanup (MMAL, Netcam, V4L2)"
-msgstr "Nėra fotoaparato įrenginio valymo (MMAL, Netcam, V4L2)"
-
-#: src/video_common.cpp
-msgid "No Camera device specified (MMAL, Netcam, V4L2)"
-msgstr "Nenurodytas fotoaparato įrenginys (MMAL, Netcam, V4L2)"
-
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:76
 #, c-format
 msgid "Failed to open '%s'"
 msgstr "Nepavyko atidaryti„ %s “"
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:86 src/video_loopback.cpp:108
 #, c-format
 msgid "Error specifying buffer: %s"
 msgstr "Klaida nurodant buferį: %s"
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:89
+#, c-format
+#| msgid "Error specifying buffer: %s"
+msgid "Opening buffer: %s"
+msgstr ""
+
+#: src/video_loopback.cpp:98
+#, c-format
+msgid "Read buffer: %s"
+msgstr ""
+
+#: src/video_loopback.cpp:112
 #, c-format
 msgid "found video device '%s' %d"
 msgstr "rastas vaizdo įtaisas„ %s “%d"
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:131 src/video_loopback.cpp:180
 #, c-format
 msgid "Opened %s as pipe output"
 msgstr "Atidarytas %s kaip vamzdžio išėjimas"
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:184
 #, c-format
 msgid "Opening %s as pipe output failed"
 msgstr "Nepavyko atidaryti %s, nes nepavyko išvesti vamzdžio"
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:204
 msgid "Original pipe specifications"
 msgstr "Originalios vamzdžių specifikacijos"
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:215
 msgid "Proposed pipe specifications"
 msgstr "Siūlomos vamzdžių specifikacijos"
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:223
 msgid "Final pipe specifications"
 msgstr "Galutinės vamzdžių specifikacijos"
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:251
 msgid "Opening video loopback device for normal pictures"
 msgstr "Vaizdo grįžtamojo ryšio įrenginio atidarymas normalioms nuotraukoms"
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:258
 msgid "Failed to open video loopback for normal pictures"
 msgstr "Nepavyko atidaryti įprastų paveikslėlių vaizdo atgalinio perdavimo"
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:267
 msgid "Opening video loopback device for motion pictures"
 msgstr "Vaizdo įrašų atgalinio įtaiso atidarymas kino filmams"
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:274
 msgid "Failed to open video loopback for motion pictures"
 msgstr "Nepavyko atidaryti vaizdo filmų atgalinio grįžimo atgal"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:130
 msgid "---------Controls---------"
 msgstr "--------- Valdikliai ---------"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:131
 msgid "  V4L2 ID   Name and Range"
 msgstr "V4L2 ID pavadinimas ir diapazonas"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:159
+msgid "No Controls found for device"
+msgstr ""
+
+#: src/video_v4l2.cpp:240
 #, c-format
 msgid "setting control %s \"%s\" to %d failed with return code %d"
-msgstr "%s \"%s\" valdymo į %d valdymo nustatymas nepavyko su grąžinimo kodu %d"
+msgstr ""
+"%s \"%s\" valdymo į %d valdymo nustatymas nepavyko su grąžinimo kodu %d"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:245
 #, c-format
 msgid "Set control \"%s\" to value %d"
 msgstr "Nustatykite \"%s\" valdymą reikšme %d"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:285
 #, c-format
-msgid "%s control option value %d is below minimum.  Using minimum"
-msgstr "%s valdymo parinkties reikšmė %d yra mažesnė už minimalią. Naudojant minimumą"
+#| msgid "%s control option value %d is below minimum.  Using minimum"
+msgid "%s control option value %s is below minimum.  Skipping..."
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:289
 #, c-format
-msgid "%s control option value %d is above maximum.  Using maximum"
-msgstr "%s valdymo parinkties reikšmė %d yra didesnė už maksimalią. Naudojant maksimalią"
+#| msgid "%s control option value %d is above maximum.  Using maximum"
+msgid "%s control option value %s is above maximum.  Skipping..."
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:300
 msgid "control type not supported yet"
 msgstr "valdymo tipas dar nepalaikomas"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:324
 #, c-format
 msgid ""
-"Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input value in conf by -1"
+"Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input "
+"value in conf by -1"
 msgstr ""
-"Nepavyko užklausti įvesties %d. VIDIOC ENUMINPUT, jei naudojate WEBCAM keitimo įvestįvertė "
-"konfidencialu -1"
+"Nepavyko užklausti įvesties %d. VIDIOC ENUMINPUT, jei naudojate WEBCAM "
+"keitimo įvestįvertė konfidencialu -1"
 
+#: src/video_v4l2.cpp:331
 #, c-format
 msgid "Name = \"%s\", type 0x%08X, status %08x"
 msgstr "Vardas = \"%s\", tipas 0x%08X, būsena %08x"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:336
 #, c-format
 msgid "Name = \"%s\",- TUNER"
 msgstr "Vardas = \"%s\", - TUNER"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:340
 #, c-format
 msgid "Name = \"%s\"- CAMERA"
 msgstr "Name = \"%s\"- CAMERA"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:345
 #, c-format
 msgid "Error selecting input %d VIDIOC_S_INPUT"
 msgstr "Klaida pasirenkant įvestį %d VIDIOC S INPUT"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:363
 msgid "Device does not support specifying PAL/NTSC norm"
 msgstr "Įrenginys nepalaiko PAL / NTSC normų nurodymo"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:374
 #, c-format
 msgid "- video standard %s"
 msgstr "- vaizdo įrašo standartas %s"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:392
 #, c-format
 msgid "Error selecting standard method %d VIDIOC_S_STD"
 msgstr "Klaida pasirenkant standartinį metodą %d VIDIOC S STD"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:397
 msgid "Video standard set to NTSC"
 msgstr "Vaizdo įrašo standartas nustatytas NTSC"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:399
+#| msgid "Video standard set to NTSC"
+msgid "Video standard set to SECAM"
+msgstr ""
+
+#: src/video_v4l2.cpp:401
 msgid "Video standard set to PAL"
 msgstr "Vaizdo įrašo standartas nustatytas į PAL"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:422
 #, c-format
 msgid "tuner %d VIDIOC_G_TUNER"
 msgstr "imtuvas %d VIDIOC G TUNER"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:426
+#, c-format
+msgid "Set tuner %d"
+msgstr ""
+
+#: src/video_v4l2.cpp:436
+#, c-format
+msgid "freq %ul VIDIOC_S_FREQUENCY"
+msgstr ""
+
+#: src/video_v4l2.cpp:440
+#, c-format
+msgid "Set Frequency to %ul"
+msgstr ""
+
+#: src/video_v4l2.cpp:461
+#, c-format
+#| msgid "Using palette %c%c%c%c (%dx%d)"
+msgid "Testing palette %c%c%c%c (%dx%d)"
+msgstr ""
+
+#: src/video_v4l2.cpp:470
 #, c-format
 msgid "Adjusting resolution from %ix%i to %ix%i."
 msgstr "Sureguliuota skiriamoji geba nuo %ix%i iki %ix%i."
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:480
 msgid "Adjusted resolution not modulo 8."
 msgstr "Pakoreguota skiriamoji geba be modulio 8."
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:482
 msgid "Specify different palette or width/height in config file."
 msgstr "Nurodykite skirtingą paletę arba plotį / aukštį konfigūracijos faile."
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:490
 msgid ""
 "Error setting pixel format.\n"
 "VIDIOC_S_FMT: "
 msgstr ""
 
+#: src/video_v4l2.cpp:497
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
 msgstr "Naudojant paletę %c%c%c%c (%dx%d)"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:502
+#, c-format
+msgid "Bytesperlines %d sizeimage %d colorspace %08x"
+msgstr ""
+
+#: src/video_v4l2.cpp:518
 #, c-format
 msgid "config image width (%d) is not modulo 8"
 msgstr "konfigūracijos vaizdo plotis (%d) nėra 8 modulio"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:521
 #, c-format
 msgid "Adjusting to width (%d)"
 msgstr "Sureguliavimas pagal plotį (%d)"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:526
 #, c-format
 msgid "config image height (%d) is not modulo 8"
 msgstr "konfigūracijos vaizdo aukštis (%d) nėra 8 modulio"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:529
 #, c-format
 msgid "Adjusting to height (%d)"
 msgstr "Sureguliavimas pagal aukštį (%d)"
 
-#: src/video_v4l2.cpp
-msgid "H264(21) format not supported via videodevice.  Changing to default palette"
+#: src/video_v4l2.cpp:548
+msgid ""
+"H264(21) format not supported via v4l2_device.  Changing to default palette"
 msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:564
 #, c-format
 msgid "Configuration palette index %d (%s) for %dx%d doesn't work."
 msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:573
+msgid "Supported palettes:"
+msgstr ""
+
+#: src/video_v4l2.cpp:581
 #, c-format
 msgid "%d - %s (compressed : %d) (%#x)"
 msgstr "%d - %s (suspaustas: %d) (% # x)"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:602
+#, c-format
+msgid "Selected palette %s"
+msgstr ""
+
+#: src/video_v4l2.cpp:611
 #, c-format
 msgid "Palette selection failed for format %s"
 msgstr "Nepavyko pasirinkti paletės formatui %s"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:616
 msgid "Unable to find a compatible palette format."
 msgstr "Nepavyko rasti suderinamo paletės formato."
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:644
 #, c-format
 msgid "Error requesting buffers %d for memory map. VIDIOC_REQBUFS"
-msgstr "Klaida pateikiant užklausą apie %d buferius atminties žemėlapiui. VIDIOK REQBUFS"
+msgstr ""
+"Klaida pateikiant užklausą apie %d buferius atminties žemėlapiui. VIDIOK "
+"REQBUFS"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:651
 #, c-format
 msgid "mmap information: frames=%d"
 msgstr "mmap information: frames = %d"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:655
 #, c-format
 msgid "Insufficient buffer memory %d < MIN_MMAP_BUFFERS."
 msgstr "Nepakankama buferinės atminties %d < MIN MMAP BUFFERS."
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:662
+msgid "Out of memory."
+msgstr ""
+
+#: src/video_v4l2.cpp:677
 #, c-format
 msgid ""
 "Error querying buffer %i\n"
 "VIDIOC_QUERYBUF: "
 msgstr ""
 
+#: src/video_v4l2.cpp:692
 #, c-format
 msgid "Error mapping buffer %i mmap"
 msgstr "Klaida atvaizduojant buferį %i mmap"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:701
 #, c-format
 msgid "%i length=%d Address (%x)"
 msgstr "%i length = %d Address (%x)"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:722
 msgid "Error starting stream. VIDIOC_STREAMON"
 msgstr "Klaida pradedant srautą. VIDIOK STREAMON"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:945
+#| msgid "Error setting file name"
+msgid "Error setting device controls"
+msgstr ""
+
+#: src/video_v4l2.cpp:965
 #, c-format
-msgid "the_buffer index %d Address (%x)"
-msgstr "buferio rodyklė %d adresas (%x)"
+#| msgid "Failed to open video device %s"
+msgid "Opening video device %s"
+msgstr ""
 
-#: src/video_v4l2.cpp
-msgid "Errors occurred during device select"
-msgstr "Klaidos įvyko pasirenkant įrenginį"
-
-#: src/video_v4l2.cpp
-#, c-format
-msgid "Using videodevice %s and input %d"
-msgstr "Vaizdo įtaiso %s ir įvesties %d naudojimas"
-
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:973
 #, c-format
 msgid "Failed to open video device %s"
 msgstr "Nepavyko atidaryti vaizdo įrenginio %s"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:979
 msgid "Not a V4L2 device?"
 msgstr "Ar ne V4L2 įrenginys?"
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:984
 msgid "Device does not support capturing."
 msgstr "Įrenginys nepalaiko fiksavimo."
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:1059
 #, c-format
-msgid "Trying to set fps to %d"
-msgstr "Bandoma nustatyti fps į %d"
+#| msgid "Testing palette %s (%c%c%c%c)"
+msgid "Supported palette %s (%c%c%c%c)"
+msgstr ""
 
-#: src/video_v4l2.cpp
-#, c-format
-msgid "Error setting fps. Return code %d"
-msgstr "Klaida nustatant sekundę. Grąžinimo kodas %d"
-
-#: src/video_v4l2.cpp
-#, c-format
-msgid "Still %d users of video device %s, so we don't close it now"
-msgstr "Vis tiek„ %d “vaizdo įrašų įrenginio„ %s “vartotojai, todėl jo dabar neuždarome"
-
-#: src/video_v4l2.cpp
-#, c-format
-msgid "Testing palette %s (%c%c%c%c)"
-msgstr "Testavimo paletė %s (%c%c%c%c)"
-
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:1071
 #, c-format
 msgid "  Width: %d, Height %d"
 msgstr "Plotis: %d, aukštis %d"
 
-#: src/video_v4l2.cpp src/webu.cpp
+#: src/video_v4l2.cpp:1082
 #, c-format
-msgid "Restarting all threads"
-msgstr "Visų gijų paleidimas iš naujo"
+msgid "    Framerate %d/%d"
+msgstr ""
 
-#: src/webu.cpp
+#: src/video_v4l2.cpp:1120
 #, c-format
-msgid "Restarting thread %d"
-msgstr "Iš naujo paleisti siūlą %d"
+msgid "Trying to set fps to %d"
+msgstr "Bandoma nustatyti fps į %d"
 
-#: src/webu.cpp src/webu_html.cpp src/webu_text.cpp
+#: src/video_v4l2.cpp:1126
 #, c-format
-msgid "Invalid action requested: >%s< >%s< >%s<"
-msgstr "Prašomas neteisingas veiksmas: >%s< >%s< >%s<"
+msgid "Error setting fps. Return code %d"
+msgstr "Klaida nustatant sekundę. Grąžinimo kodas %d"
 
-#: src/webu.cpp
-msgid "Set the value to null/zero"
-msgstr "Nustatykite vertę į nulinę / nulinę"
+#: src/video_v4l2.cpp:1130
+#, c-format
+#| msgid "Trying to set fps to %d"
+msgid "Device set fps to %d"
+msgstr ""
 
-#: src/webu.cpp
+#: src/video_v4l2.cpp:1146
+#, c-format
+#| msgid "found video device '%s' %d"
+msgid "Closing video device %s"
+msgstr ""
+
+#: src/webu.cpp:220
+#, c-format
+msgid "Sent url: %s"
+msgstr ""
+
+#: src/webu.cpp:230
+#, c-format
+msgid "Decoded url: %s"
+msgstr ""
+
+#: src/webu.cpp:339
+#, c-format
+msgid "Full Host:  %s"
+msgstr ""
+
+#: src/webu.cpp:352
 #, c-format
 msgid "Failed authentication from %s"
 msgstr "Nepavyko patvirtinti iš %s"
 
-#: src/webu.cpp
+#: src/webu.cpp:414
+#, c-format
+msgid "ignoring attempt from %s"
+msgstr ""
+
+#: src/webu.cpp:629
 msgid "No webcontrol user:pass provided"
 msgstr "Nėra žiniatinklio valdiklio: suteikta leidimo sistema"
 
-#: src/webu.cpp
-msgid "No stream user:pass provided"
-msgstr "Nėra srauto vartotojo: suteikta peržiūra"
+#: src/webu.cpp:659 src/webu_stream.cpp:361 src/webu_stream.cpp:405
+msgid "Invalid response"
+msgstr ""
 
-#: src/webu.cpp src/webu_stream.cpp
-#, c-format
-msgid "Invalid Method requested: %s"
-msgstr "Prašomas netinkamas metodas: %s"
+#: src/webu.cpp:816 src/webu.cpp:830
+msgid "send page failed."
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:864
+#| msgid "%s: Shutting down network camera."
+msgid "Shutting down camera"
+msgstr ""
+
+#: src/webu.cpp:887
 #, c-format
+msgid "Connection from: %s"
+msgstr ""
+
+#: src/webu.cpp:1007
 msgid "Basic authentication: available"
 msgstr "Pagrindinis autentifikavimas: galimas"
 
-#: src/webu.cpp
+#: src/webu.cpp:1010 src/webu.cpp:1013
 msgid "Basic authentication: disabled"
 msgstr "Pagrindinis autentifikavimas: išjungtas"
 
-#: src/webu.cpp
+#: src/webu.cpp:1028
+#| msgid "Basic authentication: available"
+msgid "Digest authentication: available"
+msgstr ""
+
+#: src/webu.cpp:1031 src/webu.cpp:1034
+#| msgid "Basic authentication: disabled"
+msgid "Digest authentication: disabled"
+msgstr ""
+
+#: src/webu.cpp:1045
+#| msgid "libmicrohttpd libary too old SSL/TLS disabled"
+msgid "libmicrohttpd libary too old ipv6 disabled"
+msgstr ""
+
+#: src/webu.cpp:1054
+#| msgid "nls    : available"
+msgid "IPV6: available"
+msgstr ""
+
+#: src/webu.cpp:1056
+msgid "IPV6: disabled"
+msgstr ""
+
+#: src/webu.cpp:1069
 msgid "libmicrohttpd libary too old SSL/TLS disabled"
 msgstr "libmicrohttpd libary per senas SSL / TLS išjungtas"
 
-#: src/webu.cpp
+#: src/webu.cpp:1076
+#| msgid "nls    : available"
+msgid "SSL/TLS: available"
+msgstr ""
+
+#: src/webu.cpp:1079 src/webu.cpp:1082
+msgid "SSL/TLS: disabled"
+msgstr ""
+
+#: src/webu.cpp:1124
 msgid "Error reading file for SSL/TLS support."
 msgstr "Klaida skaitant failą, skirtą SSL / TLS palaikymui."
 
-#: src/webu.cpp
+#: src/webu.cpp:1142
 msgid "SSL/TLS requested but no cert file provided.  SSL/TLS disabled"
-msgstr "Prašyta SSL / TLS, bet sertifikato failas nepateiktas. SSL / TLS išjungta"
+msgstr ""
+"Prašyta SSL / TLS, bet sertifikato failas nepateiktas. SSL / TLS išjungta"
 
-#: src/webu.cpp
+#: src/webu.cpp:1147
 msgid "SSL/TLS requested but no key file provided.  SSL/TLS disabled"
 msgstr "Prašoma SSL / TLS, bet nepateiktas rakto failas. SSL / TLS neleidžiama"
 
-#: src/webu.cpp
+#: src/webu.cpp:1291
 #, c-format
 msgid "Starting webcontrol on port %d"
 msgstr "Internetinio valdymo paleidimas prie %d prievado"
 
-#: src/webu.cpp
+#: src/webu.cpp:1320
+msgid "Unable to start MHD"
+msgstr ""
+
+#: src/webu.cpp:1323
 #, c-format
 msgid "Started webcontrol on port %d"
 msgstr "Pradėtas interneto valdymas uoste %d"
 
-#: src/webu.cpp
+#: src/webu_html.cpp:1118
 #, c-format
-msgid "Starting all camera streams on port %d"
-msgstr "Visų kameros srautų paleidimas prie %d prievado"
+#| msgid "Invalid thread specified: %s"
+msgid "Invalid user html file: %s"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu_post.cpp:68 src/webu_post.cpp:267 src/webu_post.cpp:276
 #, c-format
-msgid "Starting camera %d stream on port %d"
-msgstr "Pradėti vaizdo kameros„ %d “srautą uosto %d“ "
+msgid "Stopping cam %d"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu_post.cpp:241
+#| msgid "Restarting all threads"
+msgid "Restarting all cameras"
+msgstr ""
+
+#: src/webu_post.cpp:250
 #, c-format
-msgid "Unable to start stream for camera %d"
-msgstr "Nepavyko pradėti srauto kamerai %d"
+#| msgid "Restarting thread %d"
+msgid "Restarting camera %d"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu_post.cpp:338
+msgid "Native Language : on"
+msgstr ""
+
+#: src/webu_post.cpp:341
+msgid "Native Language : off"
+msgstr ""
+
+#: src/webu_post.cpp:440
 #, c-format
-msgid "Duplicate port requested %d"
-msgstr "Prašoma kopijuoti prievadą %d"
+#| msgid "Invalid action requested: >%s< >%s< >%s<"
+msgid "Invalid action requested: command: >%s< threadnbr : >%d< "
+msgstr ""
 
-#: src/webu_html.cpp
-msgid "Cameras"
-msgstr "Kameros"
-
-#: src/webu_html.cpp
-msgid "Camera"
-msgstr "Kamera"
-
-#: src/webu_html.cpp
-msgid "All"
-msgstr "Visi"
-
-#: src/webu_html.cpp
-msgid "Action"
-msgstr "Veiksmas"
-
-#: src/webu_html.cpp
-msgid "Start Event"
-msgstr "Pradžia Renginys"
-
-#: src/webu_html.cpp
-msgid "End Event"
-msgstr "Pabaiga įvykis"
-
-#: src/webu_html.cpp
-msgid "Snapshot"
-msgstr "Nuotrauka"
-
-#: src/webu_html.cpp
-msgid "Change Configuration"
-msgstr "Keisti nustatymus"
-
-#: src/webu_html.cpp
-msgid "Write Configuration"
-msgstr "Išsaugoti nustatymus"
-
-#: src/webu_html.cpp
-msgid "Tracking"
-msgstr "Sekimas"
-
-#: src/webu_html.cpp
-msgid "Pause"
-msgstr "Pauzė"
-
-#: src/webu_html.cpp
-msgid "Start"
-msgstr "Pradėti"
-
-#: src/webu_html.cpp
-msgid "Restart"
-msgstr "Perkrauti"
-
-#: src/webu_html.cpp
-msgid "Quit"
-msgstr "Išeiti"
-
-#: src/webu_html.cpp
-msgid "Help"
-msgstr "Pagalba"
-
-#: src/webu_html.cpp
-msgid "No Configuration Options"
-msgstr "Nėra konfigūracijos parametrų"
-
-#: src/webu_html.cpp
-msgid "Limited Configuration Options"
-msgstr "Riboti konfigūracijos parametrai"
-
-#: src/webu_html.cpp
-msgid "Advanced Configuration Options"
-msgstr "Išplėstiniai konfigūracijos parametrai"
-
-#: src/webu_html.cpp
-msgid "Restricted Configuration Options"
-msgstr "Apriboti konfigūracijos parametrai"
-
-# Webu Module
-#: src/webu_html.cpp
-msgid "All Cameras"
-msgstr "Visos kameros"
-
-#: src/webu_html.cpp
-msgid "Not running"
-msgstr "Neaktyvus"
-
-#: src/webu_html.cpp
-msgid "Lost connection"
-msgstr "Prarastas ryšys"
-
-#: src/webu_html.cpp
-msgid "Paused"
-msgstr "Pristabdytas"
-
-#: src/webu_html.cpp
-msgid "Active"
-msgstr "Aktyvus"
-
-#: src/webu_html.cpp
-msgid "Select option"
-msgstr "Pasirinkite parametrą"
-
-#: src/webu_html.cpp
-msgid "Save"
-msgstr "Sutaupyti"
-
-#: src/webu_html.cpp
-msgid "Pan/Tilt"
-msgstr "Pasukti / Pakreipti"
-
-#: src/webu_html.cpp
-msgid "Absolute Change"
-msgstr "Absoliutus skirtumas"
-
-#: src/webu_html.cpp
-msgid "Center"
-msgstr "Centras"
-
-#: src/webu_html.cpp
-msgid "Pan"
-msgstr "Pasukti"
-
-#: src/webu_html.cpp
-msgid "Tilt"
-msgstr "Pakreipti"
-
-#: src/webu_stream.cpp
+#: src/webu_stream.cpp:247 src/webu_stream.cpp:254
 #, c-format
 msgid "Invalid thread specified: %s"
 msgstr "Nurodytas netinkamas siūlas: %s"
 
-#: src/webu_stream.cpp
-#, c-format
-msgid "URL for thread 0 is not valid when using camera specific files.: %s"
-msgstr "0 sriegio URL negalioja, kai naudojami specialūs fotoaparato failai .: %s"
-
-#: src/webu_stream.cpp
-#, c-format
+#: src/webu_stream.cpp:398
 msgid "Could not get image to stream."
 msgstr "Nepavyko gauti vaizdo srautui."
 
-#: src/webu_text.cpp
-#, c-format
-msgid "'%s' option is depreciated.  New option name is `%s'"
-msgstr "„ %s \"parinktis yra nusidėvėjusi. Naujo pasirinkimo pavadinimas yra„ %s \""

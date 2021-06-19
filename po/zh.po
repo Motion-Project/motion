@@ -5,9 +5,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
-"Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-10-30 20:07-0600\n"
-"PO-Revision-Date: 2018-10-13 12:04-0600\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-18 21:32-0600\n"
+"PO-Revision-Date: 2021-06-18 21:45-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: zh\n"
@@ -16,3098 +16,3231 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.0.6\n"
 
-#: src/alg.cpp
+#: src/alg.cpp:1008
 msgid "Lightswitch detected"
-msgstr"检测到光开关"
+msgstr ""
 
-#: src/alg.cpp
-msgid "Switchfilter detected"
-msgstr"检测到Switchfilter"
-
-#: src/conf.cpp
+#: src/alg_sec.cpp:217 src/alg_sec.cpp:266 src/alg_sec.cpp:289
 #, c-format
-msgid "Camera config file %s not found"
-msgstr"找不到摄像机配置文件%s"
+msgid "Error %s"
+msgstr ""
 
-#: src/conf.cpp
+#: src/alg_sec.cpp:218 src/alg_sec.cpp:267
+msgid "Disabling secondary detection"
+msgstr ""
+
+#: src/alg_sec.cpp:278
+msgid "No secondary model specified."
+msgstr ""
+
+#: src/alg_sec.cpp:284 src/alg_sec.cpp:290
 #, c-format
-msgid "Processing camera config file %s"
-msgstr"正在处理摄像机配置文件%s"
+msgid "Failed loading model %s"
+msgstr ""
 
-#: src/conf.cpp
-#, c-format
-msgid "Processing config file %s"
-msgstr"正在处理配置文件%s"
+#: src/alg_sec.cpp:470
+#| msgid "Start"
+msgid "Starting."
+msgstr ""
 
-#: src/conf.cpp
-#, c-format
-msgid "Camera directory config %s not found"
-msgstr"找不到摄像机目录配置%s"
+#: src/alg_sec.cpp:496
+msgid "Exiting."
+msgstr ""
 
-#: src/conf.cpp
-msgid "Writing configuration parameters from all files"
-msgstr"从所有文件写入配置参数"
+#: src/alg_sec.cpp:513
+msgid "Error starting algsec handler thread"
+msgstr ""
 
-#: src/conf.cpp
-#, c-format
-msgid "Camera %d - Config file: %s"
-msgstr"摄像机%d-配置文件：%s"
+#: src/alg_sec.cpp:576
+msgid "Graceful shutdown of secondary detector thread failed"
+msgstr ""
 
-#: src/conf.cpp
-#, c-format
-msgid "%-25s <redacted>"
-msgstr" %-25s <redacted>"
+#: src/alg_sec.cpp:610
+msgid "Your computer is too slow for these settings."
+msgstr ""
 
-#: src/conf.cpp
-#, c-format
-msgid "Writing config file to %s"
-msgstr"将配置文件写入%s"
+#: src/alg_sec.cpp:613
+msgid "Missed many frames for secondary detection."
+msgstr ""
 
-#: src/conf.cpp
-msgid "Error getcwd"
-msgstr"错误getcwd"
+#: src/alg_sec.cpp:615
+msgid "Your computer is too slow."
+msgstr ""
 
-#: src/conf.cpp
-#, c-format
-msgid "could not open configfile %s"
-msgstr"无法打开configfile %s"
-
-#: src/conf.cpp
-msgid "No config file to process, using default values"
-msgstr"无配置文件要处理，使用默认值"
-
-#: src/conf.cpp
-#, c-format
-msgid "Processing thread 0 - config file %s"
-msgstr"正在处理线程0-配置文件%s"
-
-#: src/conf_edit.cpp
+#: src/conf.cpp:428
 msgid "daemon"
-msgstr"守护程序"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:441
 msgid "setup_mode"
-msgstr"设置模式"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:454 src/conf.cpp:480
 msgid "log_file"
-msgstr"日志文件"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:467
 msgid "pid_file"
-msgstr" pid文件"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:491
 #, c-format
 msgid "Invalid log_level %d"
-msgstr"无效的日志级别%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:505
 msgid "log_level"
-msgstr"日志级别"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:520
 #, c-format
 msgid "Invalid log_type %s"
-msgstr"无效的日志类型%s"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:531
 msgid "log_type"
-msgstr"日志类型"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:544
 msgid "native_language"
-msgstr"母语"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "quiet"
-msgstr"安静"
-
-#: src/conf_edit.cpp
+#: src/conf.cpp:561
 msgid "camera_name"
-msgstr"相机名称"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:579
 #, c-format
 msgid "Invalid camera_id %d"
-msgstr"无效的相机ID %d"
+msgstr ""
 
-#: src/conf_edit.cpp
-#, fuzzy
+#: src/conf.cpp:587
 msgid "camera_id"
-msgstr "相机"
+msgstr ""
 
-#: src/conf_edit.cpp
-#, fuzzy
+#: src/conf.cpp:598
+#, c-format
+msgid "Invalid camera_tmo %d"
+msgstr ""
+
+#: src/conf.cpp:606
+msgid "camera_tmo"
+msgstr ""
+
+#: src/conf.cpp:619
 msgid "camera_dir"
-msgstr "相机"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:632
 msgid "target_dir"
-msgstr"目标目录"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "videodevice"
-msgstr" videodevice"
-
-#: src/conf_edit.cpp
-msgid "vid_control_params"
-msgstr" vid控制参数"
-
-#: src/conf_edit.cpp
+#: src/conf.cpp:643
 #, c-format
-msgid "Invalid v4l2_palette %d"
-msgstr"无效的v4l2调色板%d"
+msgid "Invalid watchdog timeout %d"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "v4l2_palette"
-msgstr" v4l2调色板"
+#: src/conf.cpp:651
+msgid "watchdog_tmo"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:662
 #, c-format
-msgid "Invalid input %d"
-msgstr"无效的输入%d"
+msgid "Invalid watchdog kill timeout %d"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "input"
-msgstr"输入"
+#: src/conf.cpp:670
+msgid "watchdog_kill"
+msgstr ""
 
-#: src/conf_edit.cpp
-#, c-format
-msgid "Invalid norm %d"
-msgstr"无效的规范%d"
+#: src/conf.cpp:683
+msgid "v4l2_device"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "norm"
-msgstr"规范"
+#: src/conf.cpp:696
+msgid "v4l2_params"
+msgstr ""
 
-#: src/conf_edit.cpp
-#, c-format
-msgid "Invalid frequency %d"
-msgstr"无效的频率%d"
-
-#: src/conf_edit.cpp
-msgid "frequency"
-msgstr"频率"
-
-#: src/conf_edit.cpp
-msgid "tuner_device"
-msgstr"调谐器设备"
-
-#: src/conf_edit.cpp
-#, c-format
-msgid "Invalid roundrobin_frames %d"
-msgstr"无效的循环帧%d"
-
-#: src/conf_edit.cpp
-msgid "roundrobin_frames"
-msgstr"循环框架"
-
-#: src/conf_edit.cpp
-#, c-format
-msgid "Invalid roundrobin_skip %d"
-msgstr"无效的循环跳过%d"
-
-#: src/conf_edit.cpp
-msgid "roundrobin_skip"
-msgstr"循环跳过"
-
-#: src/conf_edit.cpp
-msgid "roundrobin_switchfilter"
-msgstr" roundrobin switchfilter"
-
-#: src/conf_edit.cpp
+#: src/conf.cpp:709
 msgid "netcam_url"
-msgstr"网络摄像头网址"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "netcam_highres"
-msgstr" netcam highres"
+#: src/conf.cpp:722
+msgid "netcam_params"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:735
+msgid "netcam_high_url"
+msgstr ""
+
+#: src/conf.cpp:748
+msgid "netcam_high_params"
+msgstr ""
+
+#: src/conf.cpp:761
 msgid "netcam_userpass"
-msgstr" netcam userpass"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:774
 msgid "mmalcam_name"
-msgstr" mmalcam名称"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "mmalcam_control_params"
-msgstr" mmalcam控制参数"
+#: src/conf.cpp:787
+msgid "mmalcam_params"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:798
 #, c-format
 msgid "Invalid width %d"
-msgstr"无效宽度%d"
+msgstr ""
 
-#: src/conf_edit.cpp src/netcam.cpp
+#: src/conf.cpp:801 src/netcam.cpp:1605
 #, c-format
 msgid "Image width (%d) requested is not modulo 8."
-msgstr"请求的图像宽度（%d）不是模8。"
+msgstr ""
 
-#: src/conf_edit.cpp src/netcam.cpp
+#: src/conf.cpp:804
 #, c-format
 msgid "Adjusting width to next higher multiple of 8 (%d)."
-msgstr"将宽度调整为8的下一个更高倍数（%d）。"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:813
 msgid "width"
-msgstr"宽度"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:824
 #, c-format
 msgid "Invalid height %d"
-msgstr"无效的高度%d"
+msgstr ""
 
-#: src/conf_edit.cpp src/netcam.cpp
+#: src/conf.cpp:827 src/netcam.cpp:1614
 #, c-format
 msgid "Image height (%d) requested is not modulo 8."
-msgstr"请求的图像高度（%d）不是模8。"
+msgstr ""
 
-#: src/conf_edit.cpp src/netcam.cpp
+#: src/conf.cpp:830 src/netcam.cpp:1617
 #, c-format
 msgid "Adjusting height to next higher multiple of 8 (%d)."
-msgstr"将高度调整为8的下一个更高倍数（%d）。"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:839
 msgid "height"
-msgstr"高度"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:850
 #, c-format
 msgid "Invalid framerate %d"
-msgstr"无效的帧率%d"
+msgstr ""
 
-#: src/conf_edit.cpp
-#, fuzzy
+#: src/conf.cpp:858
 msgid "framerate"
-msgstr "相机"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:869
 #, c-format
 msgid "Invalid minimum_frame_time %d"
-msgstr"无效的最小帧时间%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:877
 msgid "minimum_frame_time"
-msgstr"最小帧时间"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:889
 #, c-format
 msgid "Invalid rotate %d"
-msgstr"无效的旋转%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:899
 msgid "rotate"
-msgstr"旋转"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:912
 #, c-format
 msgid "Invalid flip_axis %s"
-msgstr"无效的翻转轴%s"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:921
 msgid "flip_axis"
-msgstr"翻转轴"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:934
 #, c-format
 msgid "Invalid locate_motion_mode %s"
-msgstr"无效的定位运动模式%s"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:942
 msgid "locate_motion_mode"
-msgstr"定位运动模式"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:956
 #, c-format
 msgid "Invalid locate_motion_style %s"
-msgstr"无效的定位运动样式%s"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:964
 msgid "locate_motion_style"
-msgstr"定位运动样式"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:977
 msgid "text_left"
-msgstr"剩余文字"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:990
 msgid "text_right"
-msgstr"文字正确"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1003
 msgid "text_changes"
-msgstr"文本更改"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1014
 #, c-format
 msgid "Invalid text_scale %d"
-msgstr"无效的文字比例%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1027
 msgid "text_scale"
-msgstr"文字比例"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1040
 msgid "text_event"
-msgstr"文本事件"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1053
 msgid "emulate_motion"
-msgstr"模拟运动"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1064
 #, c-format
 msgid "Invalid primary method %d"
-msgstr"无效的主要方法%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1072
 msgid "primary_method"
-msgstr"主要方法"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1083
 #, c-format
 msgid "Invalid threshold %d"
-msgstr"无效的阈值%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1091
 msgid "threshold"
-msgstr"阈值"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1102
 #, c-format
 msgid "Invalid threshold_maximum %d"
-msgstr"无效的最大阈值%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1110
 msgid "threshold_maximum"
-msgstr"最大阈值"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1121
 #, c-format
 msgid "Invalid threshold_sdevx %d"
-msgstr"无效阈值sdevx %d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1129
 msgid "threshold_sdevx"
-msgstr"阈值sdevx"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1140
 #, c-format
 msgid "Invalid threshold_sdevy %d"
-msgstr"无效的阈值sdevy %d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1148
 msgid "threshold_sdevy"
-msgstr"阈值偏差"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1159
 #, c-format
 msgid "Invalid threshold_sdevxy %d"
-msgstr"无效的阈值sdevxy %d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1167
 msgid "threshold_sdevxy"
-msgstr"阈值sdevxy"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1178
+#, c-format
+msgid "Invalid threshold_ratio %d"
+msgstr ""
+
+#: src/conf.cpp:1186
+msgid "threshold_ratio"
+msgstr ""
+
+#: src/conf.cpp:1199
 msgid "threshold_tune"
-msgstr"阈值调"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1210
 #, c-format
 msgid "Invalid secondary_interval %d"
-msgstr"无效的辅助间隔%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1218
 msgid "secondary_interval"
-msgstr"辅助间隔"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1229
 #, c-format
 msgid "Invalid secondary_method %d"
-msgstr"无效的辅助方法%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1237
 msgid "secondary_method"
-msgstr"辅助方法"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "secondary_model"
-msgstr"次级模型"
+#: src/conf.cpp:1250
+msgid "secondary_params"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "secondary_config"
-msgstr"辅助配置"
-
-#: src/conf_edit.cpp
-#, c-format
-msgid "Invalid secondary_method2 %d"
-msgstr"无效的辅助方法2 %d"
-
-#: src/conf_edit.cpp
-msgid "secondary_method2"
-msgstr"第二方法2"
-
-#: src/conf_edit.cpp
-msgid "secondary_model2"
-msgstr"辅助模型2"
-
-#: src/conf_edit.cpp
-msgid "secondary_config2"
-msgstr"辅助配置2"
-
-#: src/conf_edit.cpp
-#, c-format
-msgid "Invalid secondary_method3 %d"
-msgstr"无效的辅助方法3 %d"
-
-#: src/conf_edit.cpp
-msgid "secondary_method3"
-msgstr"辅助方法3"
-
-#: src/conf_edit.cpp
-msgid "secondary_model3"
-msgstr"第二级模型3"
-
-#: src/conf_edit.cpp
-msgid "secondary_config3"
-msgstr"辅助配置3"
-
-#: src/conf_edit.cpp
+#: src/conf.cpp:1261
 #, c-format
 msgid "Invalid noise_level %d"
-msgstr"无效的噪音水平%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1269
 msgid "noise_level"
-msgstr"噪音级别"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1282
 msgid "noise_tune"
-msgstr"噪音调节"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1295
 msgid "despeckle_filter"
-msgstr"去斑点过滤器"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1308
 msgid "area_detect"
-msgstr"区域检测"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1321
 msgid "mask_file"
-msgstr"掩码文件"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1334
 msgid "mask_privacy"
-msgstr"遮罩隐私"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1345
 #, c-format
 msgid "Invalid smart_mask_speed %d"
-msgstr"无效的智能蒙版速度%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1358
 msgid "smart_mask_speed"
-msgstr"智能蒙版速度"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1369
 #, c-format
 msgid "Invalid lightswitch_percent %d"
-msgstr"无效的电灯百分比%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1377
 msgid "lightswitch_percent"
-msgstr"电灯百分比"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1388
 #, c-format
 msgid "Invalid lightswitch_frames %d"
-msgstr"无效的电灯开关%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1396
 msgid "lightswitch_frames"
-msgstr"电灯开关框架"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1407
 #, c-format
 msgid "Invalid minimum_motion_frames %d"
-msgstr"无效的最小运动帧%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1415
 msgid "minimum_motion_frames"
-msgstr"最小运动帧"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1426
+#, c-format
+msgid "Invalid static_object_time %d"
+msgstr ""
+
+#: src/conf.cpp:1434
+msgid "static_object_time"
+msgstr ""
+
+#: src/conf.cpp:1445
 #, c-format
 msgid "Invalid event_gap %d"
-msgstr"无效的事件间隔%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1453
 msgid "event_gap"
-msgstr"事件间隔"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1464
 #, c-format
 msgid "Invalid pre_capture %d"
-msgstr"无效的预捕获%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1472
 msgid "pre_capture"
-msgstr"预捕获"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1483
 #, c-format
 msgid "Invalid post_capture %d"
-msgstr"无效的帖子捕获%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1491
 msgid "post_capture"
-msgstr"捕获后"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1504
 msgid "on_event_start"
-msgstr"事件开始时"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1517
 msgid "on_event_end"
-msgstr"事件结束"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1530
 msgid "on_picture_save"
-msgstr"保存图片"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1543
 msgid "on_area_detected"
-msgstr"检测到区域"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1556
 msgid "on_motion_detected"
-msgstr"检测到运动"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1569
 msgid "on_movie_start"
-msgstr"电影开始播放"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1582
 msgid "on_movie_end"
-msgstr"电影播放结束"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1595
 msgid "on_camera_lost"
-msgstr"镜头丢失"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1608
 msgid "on_camera_found"
-msgstr"找到摄像头"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1621
+msgid "on_secondary_detect"
+msgstr ""
+
+#: src/conf.cpp:1635
 #, c-format
 msgid "Invalid picture_output %s"
-msgstr"无效的图片输出%s"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1645
 msgid "picture_output"
-msgstr"图片输出"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1658
+#, c-format
+msgid "Invalid picture_output_motion %s"
+msgstr ""
+
+#: src/conf.cpp:1668
 msgid "picture_output_motion"
-msgstr"图像输出运动"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1681
 #, c-format
 msgid "Invalid picture_type %s"
-msgstr"无效的图片类型%s"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1691
 msgid "picture_type"
-msgstr"图片类型"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1702
 #, c-format
 msgid "Invalid picture_quality %d"
-msgstr"无效的图片质量%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1710
 msgid "picture_quality"
-msgstr"图片质量"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1723
 msgid "picture_exif"
-msgstr"图片exif"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1736
 msgid "picture_filename"
-msgstr"图片文件名"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1747
 #, c-format
 msgid "Invalid snapshot_interval %d"
-msgstr"无效的快照间隔%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1755
 msgid "snapshot_interval"
-msgstr"快照间隔"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1768
 msgid "snapshot_filename"
-msgstr"快照文件名"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1781
 msgid "movie_output"
-msgstr"电影输出"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1794
 msgid "movie_output_motion"
-msgstr"电影输出运动"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1805
 #, c-format
 msgid "Invalid movie_max_time %d"
-msgstr"无效的影片最大时间%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1813
 msgid "movie_max_time"
-msgstr"电影最长播放时间"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1824
 #, c-format
 msgid "Invalid movie_bps %d"
-msgstr"无效的电影bps %d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1832
 msgid "movie_bps"
-msgstr"电影bps"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1843
 #, c-format
 msgid "Invalid movie_quality %d"
-msgstr"无效的影片质量%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1851
 msgid "movie_quality"
-msgstr"电影品质"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1864
 msgid "movie_codec"
-msgstr"电影编解码器"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1877
 msgid "movie_passthrough"
-msgstr"电影直通"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1890
 msgid "movie_filename"
-msgstr"电影文件名"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1903
 msgid "movie_extpipe_use"
-msgstr"电影extpipe使用"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1916
 msgid "movie_extpipe"
-msgstr"电影extpipe"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1927
 #, c-format
 msgid "Invalid timelapse_interval %d"
-msgstr"无效的间隔时间间隔%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1935
 msgid "timelapse_interval"
-msgstr"间隔拍摄时间间隔"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1950
 #, c-format
 msgid "Invalid timelapse_mode %s"
-msgstr"无效的间隔拍摄模式%s"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1961
 msgid "timelapse_mode"
-msgstr"间隔拍摄模式"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1972
 #, c-format
 msgid "Invalid timelapse_fps %d"
-msgstr"无效的间隔拍摄fps %d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1980
 msgid "timelapse_fps"
-msgstr"间隔拍摄fps"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:1993
 #, c-format
 msgid "Invalid timelapse_codec %s"
-msgstr"无效的间隔拍摄编解码器%s"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2003
 msgid "timelapse_codec"
-msgstr"间隔拍摄编解码器"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2016
 msgid "timelapse_filename"
-msgstr"间隔拍摄文件名"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2029
 msgid "video_pipe"
-msgstr"视频管道"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2042
 msgid "video_pipe_motion"
-msgstr"视频管道运动"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2053
 #, c-format
 msgid "Invalid webcontrol_port %d"
-msgstr"无效的Web控制端口%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2061
 msgid "webcontrol_port"
-msgstr"网络控制端口"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2074
 msgid "webcontrol_ipv6"
-msgstr"网络控制ipv6"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2087
 msgid "webcontrol_localhost"
-msgstr" webcontrol localhost"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2098
 #, c-format
 msgid "Invalid webcontrol_parms %d"
-msgstr"无效的WebControl参数%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2110
 msgid "webcontrol_parms"
-msgstr"网络控制参数"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2121
 #, c-format
 msgid "Invalid webcontrol_interface %d"
-msgstr"无效的Web控制界面%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2133
 msgid "webcontrol_interface"
-msgstr"网络控制界面"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2144
 #, c-format
 msgid "Invalid webcontrol_auth_method %d"
-msgstr"无效的WebControl身份验证方法%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2156
 msgid "webcontrol_auth_method"
-msgstr"网络控制身份验证方法"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2169
 msgid "webcontrol_authentication"
-msgstr"网络控制身份验证"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2182
 msgid "webcontrol_tls"
-msgstr" webcontrol tls"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2195
 msgid "webcontrol_cert"
-msgstr"网络控制证书"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2208
 msgid "webcontrol_key"
-msgstr"网页控制金钥"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2220
 msgid "Error compiling regex in copy_uri"
-msgstr"在复制uri中编译正则表达式时出错"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "Invalid origin for cors_header"
-msgstr" CORS标头的无效来源"
+#: src/conf.cpp:2226
+msgid "Possibly invalid webcontrol_cors_header"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2234
 msgid "webcontrol_cors_header"
-msgstr" webcontrol cors header"
+msgstr ""
 
-#: src/conf_edit.cpp
-#, c-format
-msgid "Invalid stream_port %d"
-msgstr"无效的流端口%d"
+#: src/conf.cpp:2247
+msgid "webcontrol_html"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "stream_port"
-msgstr"流端口"
-
-#: src/conf_edit.cpp
-msgid "stream_localhost"
-msgstr"流本地主机"
-
-#: src/conf_edit.cpp
-#, c-format
-msgid "Invalid stream_auth_method %d"
-msgstr"无效的流身份验证方法%d"
-
-#: src/conf_edit.cpp
-msgid "stream_auth_method"
-msgstr"流身份验证方法"
-
-#: src/conf_edit.cpp
-msgid "stream_authentication"
-msgstr"流身份验证"
-
-#: src/conf_edit.cpp
-msgid "stream_tls"
-msgstr"流tls"
-
-#: src/conf_edit.cpp
-msgid "stream_cors_header"
-msgstr"流cors标头"
-
-#: src/conf_edit.cpp
+#: src/conf.cpp:2258
 #, c-format
 msgid "Invalid stream_preview_scale %d"
-msgstr"无效的流预览比例%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2266
 msgid "stream_preview_scale"
-msgstr"流预览比例"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2279
 msgid "stream_preview_newline"
-msgstr"流预览换行符"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2290
 #, c-format
 msgid "Invalid stream_preview_method %d"
-msgstr"无效的流预览方法%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2302
 msgid "stream_preview_method"
-msgstr"流预览方法"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2315
+msgid "stream_preview_ptz"
+msgstr ""
+
+#: src/conf.cpp:2326
 #, c-format
 msgid "Invalid stream_quality %d"
-msgstr"无效的流质量%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2334
 msgid "stream_quality"
-msgstr"流质量"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2347
 msgid "stream_grey"
-msgstr"流灰色"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2360
 msgid "stream_motion"
-msgstr"流运动"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2371
 #, c-format
 msgid "Invalid stream_maxrate %d"
-msgstr"无效的流最大速率%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2379
 msgid "stream_maxrate"
-msgstr"流最大速率"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2391
 #, c-format
 msgid "Invalid database_type %s"
-msgstr"无效的数据库类型%s"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2401
 msgid "database_type"
-msgstr"数据库类型"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2414
 msgid "database_dbname"
-msgstr"数据库dbname"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2427
 msgid "database_host"
-msgstr"数据库主机"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2438
 #, c-format
 msgid "Invalid database_port %d"
-msgstr"无效的数据库端口%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2446
 msgid "database_port"
-msgstr"数据库端口"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2459
 msgid "database_user"
-msgstr"数据库用户"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2472
 msgid "database_password"
-msgstr"数据库密码"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2483
 #, c-format
 msgid "Invalid database_busy_timeout %d"
-msgstr"无效的数据库繁忙超时%d"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2491
 msgid "database_busy_timeout"
-msgstr"数据库繁忙超时"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2504
 msgid "sql_log_picture"
-msgstr" sql日志图片"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2517
 msgid "sql_log_snapshot"
-msgstr" SQL日志快照"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2530
 msgid "sql_log_movie"
-msgstr" SQL日志影片"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2543
 msgid "sql_log_timelapse"
-msgstr" sql日志间隔"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2556
 msgid "sql_query_start"
-msgstr" SQL查询启动"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2569
 msgid "sql_query_stop"
-msgstr" SQL查询停止"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2582
 msgid "sql_query"
-msgstr" SQL查询"
+msgstr ""
 
-#: src/conf_edit.cpp
+#: src/conf.cpp:2595
+msgid "ptz_auto_track"
+msgstr ""
+
+#: src/conf.cpp:2606
 #, c-format
-msgid "Invalid track_type %d"
-msgstr"无效的轨道类型%d"
+msgid "Invalid ptz_wait %d"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "track_type"
-msgstr"曲目类型"
+#: src/conf.cpp:2614
+msgid "ptz_wait"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "track_auto"
-msgstr"自动跟踪"
+#: src/conf.cpp:2627
+msgid "ptz_move_track"
+msgstr ""
 
-#: src/conf_edit.cpp
-#, c-format
-msgid "Invalid track_move_wait %d"
-msgstr"无效的曲目移动等待%d"
+#: src/conf.cpp:2640
+msgid "ptz_pan_left"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "track_move_wait"
-msgstr"曲目移动等待"
+#: src/conf.cpp:2653
+msgid "ptz_pan_right"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "track_generic_move"
-msgstr"跟踪通用移动"
+#: src/conf.cpp:2666
+msgid "ptz_tilt_up"
+msgstr ""
 
-#: src/conf_edit.cpp
-#, c-format
-msgid "Invalid track_step_angle_x %d"
-msgstr"无效的轨道步距角x %d"
+#: src/conf.cpp:2679
+msgid "ptz_tilt_down"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "track_step_angle_x"
-msgstr"轨道步距角x"
+#: src/conf.cpp:2692
+msgid "ptz_zoom_in"
+msgstr ""
 
-#: src/conf_edit.cpp
-#, c-format
-msgid "Invalid track_step_angle_y %d"
-msgstr"无效的轨道步距角y %d"
+#: src/conf.cpp:2705
+msgid "ptz_zoom_out"
+msgstr ""
 
-#: src/conf_edit.cpp
-msgid "track_step_angle_y"
-msgstr"轨道步距角y"
-
-#: src/conf_edit.cpp
-msgid "Program coding error"
-msgstr"程序编码错误"
-
-#: src/conf_edit.cpp
+#: src/conf.cpp:3192 src/conf.cpp:3212 src/conf.cpp:3232 src/conf.cpp:3253
 #, c-format
 msgid "Unknown config option \"%s\""
-msgstr"未知的配置选项\"%s\""
+msgstr ""
 
-#: src/draw.cpp
+#: src/conf.cpp:3501
+#, c-format
+msgid "Camera config file %s not found"
+msgstr ""
+
+#: src/conf.cpp:3515
+#, c-format
+msgid "Processing camera config file %s"
+msgstr ""
+
+#: src/conf.cpp:3547
+#, c-format
+msgid "Processing config file %s"
+msgstr ""
+
+#: src/conf.cpp:3560
+#, c-format
+msgid "Camera directory config %s not found"
+msgstr ""
+
+#: src/conf.cpp:3650
+msgid "Logging configuration parameters from all files"
+msgstr ""
+
+#: src/conf.cpp:3654
+#, c-format
+msgid "Camera %d - Config file: %s"
+msgstr ""
+
+#: src/conf.cpp:3679
+#, c-format
+msgid "%-25s <redacted>"
+msgstr ""
+
+#: src/conf.cpp:3802
+#, c-format
+#| msgid "No Configuration Options"
+msgid "Configuration written to %s"
+msgstr ""
+
+#: src/conf.cpp:3830
+msgid "Error getcwd"
+msgstr ""
+
+#: src/conf.cpp:3849
+#, c-format
+msgid "could not open configfile %s"
+msgstr ""
+
+#: src/conf.cpp:3864 src/conf.cpp:3898
+msgid "No config file to process, using default values"
+msgstr ""
+
+#: src/conf.cpp:3893
+#, c-format
+msgid "Processing thread 0 - config file %s"
+msgstr ""
+
+#: src/dbse.cpp:34
+msgid "Invalid database name"
+msgstr ""
+
+#: src/dbse.cpp:42
+msgid "Must specify database port for mysql/mariadb/pgsql"
+msgstr ""
+
+#: src/dbse.cpp:48
+msgid "Database functionality disabled."
+msgstr ""
+
+#: src/dbse.cpp:64 src/dbse.cpp:75
+msgid "Closing MYSQL"
+msgstr ""
+
+#: src/dbse.cpp:109
+msgid "Initializing database"
+msgstr ""
+
+#: src/dbse.cpp:115 src/dbse.cpp:127 src/dbse.cpp:158
+#, c-format
+msgid "Could not initialize database %s"
+msgstr ""
+
+#: src/dbse.cpp:142 src/dbse.cpp:269
+#, c-format
+msgid "SQLite3 Database filename %s"
+msgstr ""
+
+#: src/dbse.cpp:147
+msgid "SQLite3 is threadsafe"
+msgstr ""
+
+#: src/dbse.cpp:148
+#, c-format
+msgid "SQLite3 serialized %s"
+msgstr ""
+
+#: src/dbse.cpp:149
+msgid "FAILED"
+msgstr ""
+
+#: src/dbse.cpp:149
+msgid "SUCCESS"
+msgstr ""
+
+#: src/dbse.cpp:153 src/dbse.cpp:272
+#, c-format
+msgid "Can't open database %s : %s"
+msgstr ""
+
+#: src/dbse.cpp:163 src/dbse.cpp:281
+#, c-format
+msgid "database_busy_timeout %d msec"
+msgstr ""
+
+#: src/dbse.cpp:167 src/dbse.cpp:284
+#, c-format
+msgid "database_busy_timeout failed %s"
+msgstr ""
+
+#: src/dbse.cpp:199 src/dbse.cpp:238
+#, c-format
+msgid "Cannot connect to MySQL database %s on host %s with user %s"
+msgstr ""
+
+#: src/dbse.cpp:203 src/dbse.cpp:242
+#, c-format
+msgid "MySQL error was %s"
+msgstr ""
+
+#: src/dbse.cpp:205 src/dbse.cpp:244 src/dbse.cpp:276 src/dbse.cpp:317
+msgid "Disabling database functionality"
+msgstr ""
+
+#: src/dbse.cpp:265
+msgid "SQLite3 using shared handle"
+msgstr ""
+
+#: src/dbse.cpp:314 src/dbse.cpp:518
+#, c-format
+msgid "Connection to PostgreSQL database '%s' failed: %s"
+msgstr ""
+
+#: src/dbse.cpp:333
+#, c-format
+msgid "Database backend %s"
+msgstr ""
+
+#: src/dbse.cpp:344
+#, c-format
+msgid "Invalid Database backend %s"
+msgstr ""
+
+#: src/dbse.cpp:356
+msgid "Closing database"
+msgstr ""
+
+#: src/dbse.cpp:412 src/dbse.cpp:464
+#, c-format
+msgid "Mysql query failed %s error code %d"
+msgstr ""
+
+#: src/dbse.cpp:426 src/dbse.cpp:478
+#, c-format
+msgid ""
+"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error "
+"was %s"
+msgstr ""
+
+#: src/dbse.cpp:433 src/dbse.cpp:485
+#, c-format
+msgid "Re-Connection to Mysql database '%s' Succeed"
+msgstr ""
+
+#: src/dbse.cpp:438 src/dbse.cpp:490
+#, c-format
+msgid "after re-connection Mysql query failed %s error code %d"
+msgstr ""
+
+#: src/dbse.cpp:527
+#, c-format
+msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
+msgstr ""
+
+#: src/dbse.cpp:531
+#, c-format
+msgid "Re-Connection to PostgreSQL database '%s' Succeed"
+msgstr ""
+
+#: src/dbse.cpp:561
+#, c-format
+msgid "SQLite error was %s"
+msgstr ""
+
+#: src/draw.cpp:1241 src/draw.cpp:1250
 #, c-format
 msgid "Invalid text scale.  Adjusted to %d"
-msgstr"无效的文本比例。已调整为%d"
+msgstr ""
 
-#: src/event.cpp src/track.cpp
+#: src/event.cpp:70
 #, c-format
-msgid "Unable to start external command '%s'"
-msgstr"无法启动外部命令'%s'"
+msgid "File saved to: %s"
+msgstr ""
 
-#: src/event.cpp src/track.cpp
-#, c-format
-msgid "Executing external command '%s'"
-msgstr"执行外部命令'%s'"
-
-#: src/event.cpp
-#, c-format
-msgid "File of type %ld saved to: %s"
-msgstr" %ld类型的文件已保存到：%s"
-
-#: src/event.cpp
+#: src/event.cpp:240
 msgid "Failed to put image into video pipe"
-msgstr"无法将图像放入视频管道"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:270
 msgid "Error creating image file name"
-msgstr"创建图像文件名时出错"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:302
 msgid "Error creating image motion file name"
-msgstr"创建影像运动文件名时出错"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:313
+msgid "Error creating image motion roi file name"
+msgstr ""
+
+#: src/event.cpp:344 src/event.cpp:349 src/event.cpp:367 src/event.cpp:372
+#: src/event.cpp:523
+msgid "Error option"
+msgstr ""
+
+#: src/event.cpp:360
 #, c-format
 msgid "Could not create symbolic link [%s]"
-msgstr"无法创建符号链接[%s]"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:407
 msgid "Error creating preview file name"
-msgstr"创建预览文件名时出错"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:448
+msgid "Event secondary detect"
+msgstr ""
+
+#: src/event.cpp:498
 #, c-format
 msgid "CLOSING: extpipe file desc %d, error state %d"
-msgstr"关闭：extpipe文件desc %d，错误状态%d"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:530
 #, c-format
 msgid "no write access to target directory %s"
-msgstr"对目标目录%s没有写访问权"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:535
 #, c-format
 msgid "path not found, trying to create it %s ..."
-msgstr"找不到路径，正在尝试创建它%s ..."
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:542
 #, c-format
 msgid "error accesing path %s"
-msgstr"错误访问路径%s"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:558
 #, c-format
 msgid "Error specifying command line: %s"
-msgstr"指定命令行时出错：%s"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:561
 #, c-format
 msgid "pipe: %s"
-msgstr"管道：%s"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:569
 msgid "popen failed"
-msgstr" popen失败"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:591
 msgid "Using extpipe"
-msgstr"使用extpipe"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:598 src/event.cpp:603
 #, c-format
 msgid "Error writing in pipe , state error %d"
-msgstr"在管道中写入错误，状态错误%d"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:608
 #, c-format
 msgid "pipe %s not created or closed already "
-msgstr"管道%s尚未创建或关闭"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:627
 #, c-format
 msgid "Source FPS %d"
-msgstr"来源FPS %d"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:654
 msgid "Error opening ctx_cam for movie output."
-msgstr"打开影片输出的ctx凸轮时出错。"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:668
 #, c-format
 msgid "Error creating motion file [%s]"
-msgstr"创建运动文件[%s]时出错"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:692
 #, c-format
 msgid "Error creating timelapse file [%s]"
-msgstr"创建间隔拍摄文件[%s]时出错"
+msgstr ""
 
-#: src/event.cpp
+#: src/event.cpp:704 src/event.cpp:719 src/event.cpp:724
 msgid "Error encoding image"
-msgstr"错误编码图像"
+msgstr ""
 
-#: src/movie.cpp
-msgid "Failed to allocate memory for codec name"
-msgstr"无法为编解码器名称分配内存"
-
-#: src/movie.cpp
-msgid ""
-"The frame rate specified is too high for the movie movie type specified. "
-"Choose a different movie container or lower framerate."
-msgstr""
-"对于指定的电影电影类型，指定的帧速率太高。"
-"选择其他影片容器或较低的帧率。"
-msgid "Error setting base file name"
-msgstr"设置基本文件名时出错"
-
-#: src/movie.cpp
-#, c-format
-msgid "Error setting timelapse append for codec %s"
-msgstr"为编解码器%s设置错误设置timelapse追加"
-
-#: src/movie.cpp
-msgid "Error setting file name"
-msgstr"错误设置文件名"
-
-#: src/movie.cpp
-#, c-format
-msgid "codec option value %s is not supported"
-msgstr"不支持编解码器选项值%s"
-
-#: src/movie.cpp
-msgid "Could not get the codec"
-msgstr"无法获取编解码器"
-
-#: src/movie.cpp
-#, c-format
-msgid "Error sending frame for encoding:%s"
-msgstr"发送编码帧时出错：%s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Receive packet threw EAGAIN returning -2 code :%s"
-msgstr"接收到的数据包抛出了EAGAIN返回-2代码：%s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Error receiving encoded packet video:%s"
-msgstr"接收编码的数据包视频时出错：%s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Error encoding video:%s"
-msgstr"对视频：%s进行编码错误"
-
-#: src/movie.cpp
-msgid "Error encoding video"
-msgstr"对视频进行编码错误"
-
-#: src/movie.cpp
-#, c-format
-msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d"
-msgstr" PTS %<PRId64>基本PTS %<PRId64> ms间隔%<PRId64>时基%d-%d"
-
-#: src/movie.cpp
-msgid "BAD TIMING!! Frame skipped."
-msgstr"时间错误！帧已跳过。"
-
-#: src/movie.cpp
-#, c-format
-msgid ""
-"PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change "
-"%d"
-msgstr""
-" PTS %<PRId64>基本PTS %<PRId64>毫秒间隔%<PRId64>时基%d-%d更改"
-" %d"
-#, c-format
-msgid "%s codec vbr/crf/bit_rate: %d"
-msgstr" %s编解码器vbr / crf /比特率：%d"
-
-#: src/movie.cpp
-#, c-format
-msgid "Preferred codec %s has been blacklisted: %s"
-msgstr"首选编解码器%s已被列入黑名单：%s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Preferred codec %s not found"
-msgstr"找不到首选的编解码器%s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Codec %s not found"
-msgstr"找不到编解码器%s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Using codec %s"
-msgstr"使用编解码器%s"
-
-#: src/movie.cpp
-msgid "Could not alloc stream"
-msgstr"无法分配流"
-
-#: src/movie.cpp
-msgid "Failed to allocate decoder!"
-msgstr"分配解码器失败！"
-
-#: src/movie.cpp
-msgid "Unable to set quality"
-msgstr"无法设置质量"
-
-#: src/movie.cpp
-#, c-format
-msgid "Reported FPS Supported %d/%d"
-msgstr"报告的FPS支持的%d / %d"
-
-#: src/movie.cpp
-#, c-format
-msgid "Could not open codec %s"
-msgstr"无法打开编解码器%s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Failed to copy decoder parameters!: %s"
-msgstr"无法复制解码器参数！：%s"
-
-#: src/movie.cpp
-msgid "could not alloc frame"
-msgstr"无法分配帧"
-
-#: src/movie.cpp
-#, c-format
-msgid "could not alloc buffers %s"
-msgstr"无法分配缓冲区%s"
-
-#: src/movie.cpp
-#, c-format
-msgid "error opening file %s"
-msgstr"打开文件%s时出错"
-
-#: src/movie.cpp
-#, c-format
-msgid "Permission denied. %s"
-msgstr"权限被拒绝。%s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Error opening file %s"
-msgstr"打开文件%s时出错"
-
-#: src/movie.cpp
-#, c-format
-msgid "Could not write movie header %s"
-msgstr"无法写入电影标头%s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Error entering draining mode:%s"
-msgstr"进入排液模式时出错：%s"
-
-#: src/movie.cpp
-#, c-format
-msgid "Error draining codec:%s"
-msgstr"错误引出编解码器：%s"
-
-#: src/movie.cpp
-msgid "Error writing draining video frame"
-msgstr"写入排水视频帧时出错"
-
-#: src/movie.cpp
-msgid "Error while encoding picture"
-msgstr"对图片进行编码时出错"
-
-#: src/movie.cpp
-msgid "Error while writing video frame"
-msgstr"写入视频帧时出错"
-
-#: src/movie.cpp
-#, c-format
-msgid "Error while writing video frame: %s"
-msgstr"写入视频帧时出错：%s"
-
-#: src/movie.cpp
-msgid "RTSP context not available."
-msgstr" RTSP上下文不可用。"
-
-#: src/movie.cpp
-msgid "rtsp camera not ready for pass-through."
-msgstr" rtsp相机未准备好传递。"
-
-#: src/movie.cpp
-msgid "pass-through mode enabled.  Changing to MP4 container."
-msgstr"启用直通模式。更改为MP4容器。"
-
-#: src/movie.cpp
-msgid "Could not get codec!"
-msgstr"无法获得编解码器！"
-
-#: src/movie.cpp src/netcam.cpp
-msgid "Unable to copy codec parameters"
-msgstr"无法复制编解码器参数"
-
-#: src/movie.cpp
-msgid "Pass-through disabled.  ffmpeg too old"
-msgstr"传递功能已禁用。ffmpeg太旧了"
-
-#: src/movie.cpp
-#, c-format
-msgid "movie libavcodec version %d.%d.%d libavformat version %d.%d.%d"
-msgstr"电影libavcodec版本%d.%d.%d libavformat版本%d.%d.%d"
-
-#: src/movie.cpp
-#, c-format
-msgid "av_lockmgr_register failed (%d)"
-msgstr" av lockmgr寄存器失败（%d）"
-
-#: src/movie.cpp
-msgid "av_lockmgr_register reset failed on cleanup"
-msgstr"清理时AV锁定管理器寄存器重置失败"
-
-#: src/movie.cpp
-msgid "Could not allocate output context"
-msgstr"无法分配输出上下文"
-
-#: src/movie.cpp
-msgid "Could not setup passthru!"
-msgstr"无法设置passthru！"
-
-#: src/movie.cpp
-msgid "Failed to allocate codec!"
-msgstr"分配编解码器失败！"
-
-#: src/movie.cpp
-msgid "Could not set the stream"
-msgstr"无法设置流"
-
-#: src/movie.cpp
-msgid "Error flushing codec"
-msgstr"错误刷新编解码器"
-
-#: src/movie.cpp
-msgid "Excessive attempts to clear buffered packet"
-msgstr"过多尝试清除缓冲的数据包"
-
-#: src/movie.cpp
-msgid "Buffered packet"
-msgstr"缓冲的数据包"
-
-#: src/movie.cpp
-msgid ""
-"The swf container for timelapse no longer supported.  Using mpg container."
-msgstr""
-"不再支持用于timelapse的swf容器。使用mpg容器。"
-#: src/movie.cpp
-msgid "Timelapse using mpg codec."
-msgstr"使用mpg编解码器的间隔拍摄。"
-
-#: src/movie.cpp
-msgid "Events will be appended to file"
-msgstr"事件将附加到文件中"
-
-#: src/movie.cpp
-msgid "Timelapse using mpeg4 codec."
-msgstr"使用mpeg4编解码器的间隔拍摄。"
-
-#: src/movie.cpp
-msgid "Events will be trigger new files"
-msgstr"事件将触发新文件"
-
-#: src/jpegutils.cpp
+#: src/jpegutils.cpp:91
 #, c-format
 msgid "%s: Given jpeg buffer was too small"
-msgstr" %s：鉴于jpeg缓冲区太小"
+msgstr ""
 
-#: src/jpegutils.cpp
+#: src/jpegutils.cpp:465
 msgid "Invalid JPEG image dimensions"
-msgstr"无效的JPEG图像尺寸"
+msgstr ""
 
-#: src/jpegutils.cpp
+#: src/jpegutils.cpp:472
 #, c-format
 msgid "JPEG image size %dx%d, JPEG was %dx%d"
-msgstr" JPEG图像尺寸为%dx%d，JPEG为%dx%d"
+msgstr ""
 
-#: src/logger.cpp
+#: src/logger.cpp:270
 #, c-format
 msgid "Using default log level (%s) (%d)"
-msgstr"使用默认日志级别（%s）（%d）"
+msgstr ""
 
-#: src/logger.cpp
+#: src/logger.cpp:283
 #, c-format
 msgid "Logging to file (%s)"
-msgstr"记录到文件（%s）"
+msgstr ""
 
-#: src/logger.cpp
+#: src/logger.cpp:287
 #, c-format
 msgid "Exit motion, cannot create log file %s"
-msgstr"退出运动，无法创建日志文件%s"
+msgstr ""
 
-#: src/logger.cpp
+#: src/logger.cpp:292 src/logger.cpp:295
 msgid "Logging to syslog"
-msgstr"登录到系统日志"
+msgstr ""
 
-#: src/logger.cpp
+#: src/logger.cpp:301
 #, c-format
 msgid "Using log type (%s) log level (%s)"
-msgstr"使用日志类型（%s）日志级别（%s）"
+msgstr ""
 
-#: src/logger.cpp
+#: src/logger.cpp:313
 #, c-format
 msgid "Closing logfile (%s)."
-msgstr"关闭日志文件（%s）。"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:83
 #, c-format
 msgid "Received unexpected camera control callback event, 0x%08x"
-msgstr"收到意外的摄像机控制回调事件，0x%08x"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:114
 msgid "A high frame rate can cause problems with exposure of images"
-msgstr"高帧频可能会导致图像曝光问题"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:115
 msgid "If autoexposure is not working, try a lower frame rate."
-msgstr"如果自动曝光不起作用，请尝试降低帧速率。"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:129
 #, c-format
 msgid "Failed to create MMAL camera component %s"
-msgstr"无法创建MMAL相机组件%s"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:135
 #, c-format
 msgid "MMAL camera %s doesn't have output ports"
-msgstr" MMAL相机%s没有输出端口"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:145
 #, c-format
 msgid "Unable to enable control port : error %d"
-msgstr"无法启用控制端口：错误%d"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:174
 msgid "MMAL no-padding setup failed"
-msgstr" MMAL无填充设置失败"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:180
 msgid "camera video format couldn't be set"
-msgstr"无法设置摄像机视频格式"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:192
 msgid "camera component couldn't be enabled"
-msgstr"无法启用相机组件"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:200
 msgid "MMAL camera component created"
-msgstr"创建了MMAL相机组件"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:224
 msgid "MMAL camera buffer pool creation failed"
-msgstr"创建MMAL摄像机缓冲池失败"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:230
 msgid "MMAL camera buffer queue creation failed"
-msgstr" MMAL摄影机缓冲区队列创建失败"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:246
 #, c-format
 msgid "Unable to get a required buffer %d from pool queue"
-msgstr"无法从池队列中获取所需的缓冲区%d"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:251
 #, c-format
 msgid "Unable to send a buffer to port (%d)"
-msgstr"无法将缓冲区发送到端口（%d）"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:300
 #, c-format
 msgid "MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps"
 msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:305
 msgid "camera params couldn't be allocated"
-msgstr"无法分配相机参数"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:331
 msgid "MMAL camera capture port enabling failed"
-msgstr" MMAL摄像机捕获端口启用失败"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:339
 msgid "MMAL camera capture start failed"
-msgstr" MMAL摄像机捕获启动失败"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:351
 msgid "MMAL Camera not available"
-msgstr"无法使用MMAL相机"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:375
 msgid "MMAL Camera cleanup"
-msgstr" MMAL相机清理"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:433
 #, c-format
 msgid "cmd %d flags %08x size %d/%d at %08x, img_size=%d"
-msgstr" cmd %d将%08x大小标记为%d / %d，标记为%08x，img大小= %d"
+msgstr ""
 
-#: src/mmalcam.cpp
+#: src/mmalcam.cpp:450
 msgid "Unable to return a buffer to the camera video port"
-msgstr"无法将缓冲区返回到摄像机视频端口"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motion_loop.cpp:60
+#, c-format
+msgid "Resizing pre_capture buffer to %d items"
+msgstr ""
+
+#: src/motion_loop.cpp:213
+#, c-format
+msgid "Motion detected - starting event %d"
+msgstr ""
+
+#: src/motion_loop.cpp:367
+msgid "calling mmalcam_cleanup"
+msgstr ""
+
+#: src/motion_loop.cpp:376
+msgid "calling netcam_cleanup"
+msgstr ""
+
+#: src/motion_loop.cpp:382
+msgid "Cleaning up V4L2 device"
+msgstr ""
+
+#: src/motion_loop.cpp:387
+msgid "No Camera device cleanup (MMAL, Netcam, V4L2)"
+msgstr ""
+
+#: src/motion_loop.cpp:404
+msgid "Opening MMAL cam"
+msgstr ""
+
+#: src/motion_loop.cpp:409
+msgid "MMAL cam failed to open"
+msgstr ""
+
+#: src/motion_loop.cpp:415
+msgid "Opening Netcam"
+msgstr ""
+
+#: src/motion_loop.cpp:419
+msgid "Netcam failed to open"
+msgstr ""
+
+#: src/motion_loop.cpp:425
+msgid "Opening V4L2 device"
+msgstr ""
+
+#: src/motion_loop.cpp:428
+msgid "V4L2 device failed to open"
+msgstr ""
+
+#: src/motion_loop.cpp:434
+msgid "No Camera device specified (MMAL, Netcam, V4L2)"
+msgstr ""
+
+#: src/motion_loop.cpp:491
+msgid "Unable to determine camera type (MMAL, Netcam, V4L2)"
+msgstr ""
+
+#: src/motion_loop.cpp:516
+msgid "Error capturing first image"
+msgstr ""
+
+#: src/motion_loop.cpp:528
+#, c-format
+msgid "Image width (%d) or height(%d) requested is not modulo 8."
+msgstr ""
+
+#: src/motion_loop.cpp:534
+#, c-format
+msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
+msgstr ""
+
+#: src/motion_loop.cpp:541
+msgid "Substream not available.  Image sizes not modulo 16."
+msgstr ""
+
+#: src/motion_loop.cpp:630
+msgid "Pass-through processing disabled."
+msgstr ""
+
+#: src/motion_loop.cpp:643 src/motion_loop.cpp:647
+msgid "Could not fetch initial image from camera "
+msgstr ""
+
+#: src/motion_loop.cpp:649
+msgid "Motion only supports width and height modulo 8"
+msgstr ""
+
+#: src/motion_loop.cpp:682
+msgid "initialize loop"
+msgstr ""
+
+#: src/motion_loop.cpp:729
+#, c-format
+msgid "Camera %d started: motion detection %s"
+msgstr ""
+
+#: src/motion_loop.cpp:730
+msgid "Disabled"
+msgstr ""
+
+#: src/motion_loop.cpp:730
+msgid "Enabled"
+msgstr ""
+
+#: src/motion_loop.cpp:733
+msgid "Emulating motion"
+msgstr ""
+
+#: src/motion_loop.cpp:894
+#, c-format
+msgid "Motion in area %d detected."
+msgstr ""
+
+#: src/motion_loop.cpp:993
+msgid "Retrying until successful connection with camera"
+msgstr ""
+
+#: src/motion_loop.cpp:1009
+msgid ""
+"Camera has finally become available\n"
+"Camera image has different width and heightfrom what is in the config file. "
+"You should fix that\n"
+"Restarting Motion thread to reinitialize all image buffers to new picture "
+"dimensions"
+msgstr ""
+
+#: src/motion_loop.cpp:1054
+msgid "Video signal re-acquired"
+msgstr ""
+
+#: src/motion_loop.cpp:1064
+msgid "Video device fatal error - Closing video device"
+msgstr ""
+
+#: src/motion_loop.cpp:1071
+msgid "Restarting Motion thread to reinitialize all image buffers"
+msgstr ""
+
+#: src/motion_loop.cpp:1105
+msgid "Video signal lost - Adding grey image"
+msgstr ""
+
+#: src/motion_loop.cpp:1112
+msgid "Video signal still lost - Trying to close video device"
+msgstr ""
+
+#: src/motion_loop.cpp:1357
+#, c-format
+#| msgid "End Event"
+msgid "End of event %d"
+msgstr ""
+
+#: src/motion_loop.cpp:1415
+#, c-format
+msgid "Raw changes: %5d - changes after '%s': %5d"
+msgstr ""
+
+#: src/motion_loop.cpp:1419
+#, c-format
+msgid " - labels: %3d"
+msgstr ""
+
+#: src/motion_loop.cpp:1423
+#, c-format
+msgid "Changes: %5d"
+msgstr ""
+
+#: src/motion_loop.cpp:1428
+#, c-format
+msgid " - noise level: %2d"
+msgstr ""
+
+#: src/motion_loop.cpp:1433
+#, c-format
+msgid " - threshold: %d"
+msgstr ""
+
+#: src/motion_loop.cpp:1684
+msgid "Thread exiting"
+msgstr ""
+
+#: src/motionplus.cpp:173
 msgid "Removed process id file (pid file)."
-msgstr"已删除进程id文件（pid文件）。"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:175
 msgid "Error removing pid file"
-msgstr"删除pid文件时出错"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:198
 msgid "Motion going to daemon mode"
-msgstr"运动进入守护程序模式"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:216
 #, c-format
 msgid "Exit motion, cannot create process id file (pid file) %s"
-msgstr"退出运动，无法创建进程id文件（pid文件）%s"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:228
 msgid "Could not change directory"
-msgstr"无法更改目录"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:260
 #, c-format
 msgid "Created process id file %s. Process ID is %d"
-msgstr"已创建的进程ID文件%s。进程ID为%d"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:317
 msgid ""
 "Camara IDs are not unique or have values over 32,000.  Falling back to "
 "thread numbers"
-msgstr""
-"相机ID不唯一或值超过32,000。回退为"
-"线程号"
+msgstr ""
+
+#: src/motionplus.cpp:330
 msgid "v4l2   : available"
-msgstr" v4l2：可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:332
 msgid "v4l2   : not available"
-msgstr" v4l2：不可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:336
 msgid "webp   : available"
-msgstr" webp：可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:338
 msgid "webp   : not available"
-msgstr" webp：不可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:342
 msgid "mmal   : available"
-msgstr" mmal：可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:344
 msgid "mmal   : not available"
-msgstr" mmal：不可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:348
 msgid "mysql  : available"
-msgstr" mysql：可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:350
 msgid "mysql  : not available"
-msgstr" mysql：不可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:354
 msgid "MariaDB: available"
-msgstr" MariaDB：可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:356
 msgid "MariaDB: not available"
-msgstr" MariaDB：不可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:360
 msgid "sqlite3: available"
-msgstr" sqlite3：可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:362
 msgid "sqlite3: not available"
-msgstr" sqlite3：不可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:366
 msgid "pgsql  : available"
-msgstr" pgsql：可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:368
 msgid "pgsql  : not available"
-msgstr" pgsql：不可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:372
 msgid "nls    : available"
-msgstr" nls：可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:374
 msgid "nls    : not available"
-msgstr" nls：不可用"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:398
 msgid "Motion running as daemon process"
-msgstr"运动作为守护进程运行"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:403
 msgid "Motion running in setup mode."
-msgstr"运动在设置模式下运行。"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:435
+msgid "Unable to start thread for motion loop."
+msgstr ""
+
+#: src/motionplus.cpp:445
 msgid "Restarting motion."
-msgstr"正在重新启动运动。"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:452
 msgid "Motion restarted"
-msgstr"运动已重新启动"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:483
 #, c-format
 msgid "Thread %d - Watchdog timeout. Trying to do a graceful restart"
-msgstr"线程%d-看门狗超时。尝试进行正常重启"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:491
 #, c-format
 msgid "Thread %d - Watchdog timeout did NOT restart, killing it!"
-msgstr"线程%d-看门狗超时未重新启动，将其杀死！"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:506
 #, c-format
 msgid "Thread %d - Watchdog kill!"
-msgstr"线程%d-看门狗杀死！"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:538
 #, c-format
 msgid "Thread %d - Cleaning thread."
-msgstr"线程%d-清洁线程。"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:581
 #, c-format
 msgid "DEBUG-1 threads_running %d motion_threads_running %d , finish %d"
-msgstr"运行%d的DEBUG-1线程运行%d的运动线程，完成%d"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:680
+#, c-format
+msgid "Invalid camera specified for deletion. %d"
+msgstr ""
+
+#: src/motionplus.cpp:750
 #, c-format
 msgid "Waiting for threads to finish, pid: %d"
-msgstr"等待线程完成，pid：%d"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:764
 #, c-format
 msgid "Motion thread %d restart"
-msgstr"运动线程%d重新启动"
+msgstr ""
 
-#: src/motion.cpp
+#: src/motionplus.cpp:785
 msgid "Threads finished"
-msgstr"线程完成"
+msgstr ""
 
-#: src/motion.cpp src/webu.cpp
+#: src/motionplus.cpp:794
 msgid "Motion terminating"
-msgstr"运动终止"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/movie.cpp:143
+msgid "Failed to allocate memory for codec name"
+msgstr ""
+
+#: src/movie.cpp:153
+msgid "Error setting base file name"
+msgstr ""
+
+#: src/movie.cpp:172
+#, c-format
+msgid "Error setting timelapse append for codec %s"
+msgstr ""
+
+#: src/movie.cpp:238 src/movie.cpp:843 src/movie.cpp:1714 src/movie.cpp:1772
+msgid "Error setting file name"
+msgstr ""
+
+#: src/movie.cpp:249
+#, c-format
+msgid "codec option value %s is not supported"
+msgstr ""
+
+#: src/movie.cpp:259
+msgid "Could not get the codec"
+msgstr ""
+
+#: src/movie.cpp:288
+#, c-format
+msgid "Error sending frame for encoding:%s"
+msgstr ""
+
+#: src/movie.cpp:301
+#, c-format
+msgid "Error receiving encoded packet video:%s"
+msgstr ""
+
+#: src/movie.cpp:321
+#, c-format
+msgid "Error encoding video:%s"
+msgstr ""
+
+#: src/movie.cpp:349
+msgid "Error encoding video"
+msgstr ""
+
+#: src/movie.cpp:409
+#, c-format
+msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d"
+msgstr ""
+
+#: src/movie.cpp:417
+msgid "BAD TIMING!! Frame skipped."
+msgstr ""
+
+#: src/movie.cpp:483
+#, c-format
+msgid "%s codec vbr/crf/bit_rate: %d"
+msgstr ""
+
+#: src/movie.cpp:534
+#, c-format
+msgid "Preferred codec %s has been blacklisted: %s"
+msgstr ""
+
+#: src/movie.cpp:542
+#, c-format
+msgid "Preferred codec %s not found"
+msgstr ""
+
+#: src/movie.cpp:552
+#, c-format
+msgid "Codec %s not found"
+msgstr ""
+
+#: src/movie.cpp:568
+#, c-format
+msgid "Using codec %s"
+msgstr ""
+
+#: src/movie.cpp:591 src/movie.cpp:604
+msgid "Could not alloc stream"
+msgstr ""
+
+#: src/movie.cpp:597
+msgid "Failed to allocate decoder!"
+msgstr ""
+
+#: src/movie.cpp:668
+msgid "Unable to set quality"
+msgstr ""
+
+#: src/movie.cpp:678
+#, c-format
+msgid "Reported FPS Supported %d/%d"
+msgstr ""
+
+#: src/movie.cpp:690
+#, c-format
+msgid "Could not open codec %s"
+msgstr ""
+
+#: src/movie.cpp:713
+#, c-format
+msgid "Failed to copy decoder parameters!: %s"
+msgstr ""
+
+#: src/movie.cpp:801
+msgid "could not alloc frame"
+msgstr ""
+
+#: src/movie.cpp:823
+#, c-format
+msgid "could not alloc buffers %s"
+msgstr ""
+
+#: src/movie.cpp:859
+#, c-format
+msgid "error opening file %s"
+msgstr ""
+
+#: src/movie.cpp:866
+#, c-format
+msgid "Permission denied. %s"
+msgstr ""
+
+#: src/movie.cpp:871
+#, c-format
+msgid "Error opening file %s"
+msgstr ""
+
+#: src/movie.cpp:886
+#, c-format
+msgid "Could not write movie header %s"
+msgstr ""
+
+#: src/movie.cpp:922
+#, c-format
+msgid "Error entering draining mode:%s"
+msgstr ""
+
+#: src/movie.cpp:932
+#, c-format
+msgid "Error draining codec:%s"
+msgstr ""
+
+#: src/movie.cpp:945
+msgid "Error writing draining video frame"
+msgstr ""
+
+#: src/movie.cpp:976
+msgid "Error while encoding picture"
+msgstr ""
+
+#: src/movie.cpp:990
+msgid "Error while writing video frame"
+msgstr ""
+
+#: src/movie.cpp:1087
+#, c-format
+msgid "Error while writing video frame: %s"
+msgstr ""
+
+#: src/movie.cpp:1229
+msgid "Could not alloc video stream"
+msgstr ""
+
+#: src/movie.cpp:1235
+msgid "Unable to copy video codec parameters"
+msgstr ""
+
+#: src/movie.cpp:1244
+#, c-format
+msgid "video timebase %d/%d fps %d/%d"
+msgstr ""
+
+#: src/movie.cpp:1259
+msgid "Could not alloc audio stream"
+msgstr ""
+
+#: src/movie.cpp:1265
+msgid "Unable to copy audio codec parameters"
+msgstr ""
+
+#: src/movie.cpp:1278
+#, c-format
+msgid "audio timebase %d/%d"
+msgstr ""
+
+#: src/movie.cpp:1309
+msgid "Pass-through disabled.  ffmpeg too old"
+msgstr ""
+
+#: src/movie.cpp:1319
+msgid "rtsp camera not ready for pass-through."
+msgstr ""
+
+#: src/movie.cpp:1324
+msgid "RTSP context not available."
+msgstr ""
+
+#: src/movie.cpp:1344 src/movie.cpp:1516
+msgid "Could not allocate output context"
+msgstr ""
+
+#: src/movie.cpp:1351
+msgid "Changing to MP4 container for pass-through."
+msgstr ""
+
+#: src/movie.cpp:1359
+msgid "Could not get output format!"
+msgstr ""
+
+#: src/movie.cpp:1365
+msgid "Could not get streams!"
+msgstr ""
+
+#: src/movie.cpp:1371
+msgid "Could not set the output file"
+msgstr ""
+
+#: src/movie.cpp:1377
+#, c-format
+msgid "Timebase after open audio: %d/%d video: %d/%d"
+msgstr ""
+
+#: src/movie.cpp:1468
+#, c-format
+msgid "libavcodec  version %d.%d.%d"
+msgstr ""
+
+#: src/movie.cpp:1470
+#, c-format
+msgid "libavformat version %d.%d.%d"
+msgstr ""
+
+#: src/movie.cpp:1493
+msgid "av_lockmgr_register reset failed on cleanup"
+msgstr ""
+
+#: src/movie.cpp:1507
+msgid "Could not setup passthrough!"
+msgstr ""
+
+#: src/movie.cpp:1523
+msgid "Could not get codec!"
+msgstr ""
+
+#: src/movie.cpp:1530
+msgid "Failed to allocate codec!"
+msgstr ""
+
+#: src/movie.cpp:1536 src/movie.cpp:1542 src/movie.cpp:1548
+msgid "Could not set the stream"
+msgstr ""
+
+#: src/movie.cpp:1562
+msgid "Error flushing codec"
+msgstr ""
+
+#: src/movie.cpp:1622
+msgid "Excessive attempts to clear buffered packet"
+msgstr ""
+
+#: src/movie.cpp:1629
+msgid "Buffered packet"
+msgstr ""
+
+#: src/movie.cpp:1819
+#, c-format
+msgid "Error setting timelapse file name %s"
+msgstr ""
+
+#: src/movie.cpp:1846
+msgid "Timelapse using mpg codec."
+msgstr ""
+
+#: src/movie.cpp:1847
+msgid "Events will be appended to file"
+msgstr ""
+
+#: src/movie.cpp:1853
+msgid "Timelapse using mpeg4 codec."
+msgstr ""
+
+#: src/movie.cpp:1854
+msgid "Events will be trigger new files"
+msgstr ""
+
+#: src/netcam.cpp:63
 #, c-format
 msgid "expanding buffer from [%d/%d] to [%d/%d] bytes."
-msgstr"将缓冲区从[%d / %d]扩展到[%d / %d]字节。"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:131
 msgid "Invalid URL.  Can not parse values."
-msgstr"无效的URL。无法解析值。"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:237
 #, c-format
 msgid "Using port number %d"
-msgstr"使用端口号%d"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:407
 #, c-format
 msgid "%s: Resized packet array to %d"
-msgstr" %s：将数据包数组调整为%d"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:444
 #, c-format
 msgid "%s: av_copy_packet: %s ,Interrupt: %s"
-msgstr" %s：影音复制封包：%s，中断：%s"
+msgstr ""
 
-#: src/netcam.cpp
-msgid "True"
-msgstr"真实"
+#: src/netcam.cpp:446
+msgid "true"
+msgstr ""
 
-#: src/netcam.cpp
-msgid "False"
-msgstr"错误"
+#: src/netcam.cpp:446
+msgid "false"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:476 src/netcam.cpp:513
+#, c-format
+msgid "%s: Ignoring packet with invalid data"
+msgstr ""
+
+#: src/netcam.cpp:482 src/netcam.cpp:519
+#, c-format
+msgid "%s: Rec frame error: %s"
+msgstr ""
+
+#: src/netcam.cpp:532
+#, c-format
+msgid "%s: Error transferring HW decoded to system memory"
+msgstr ""
+
+#: src/netcam.cpp:571
+#, c-format
+msgid "%s: Interrupted or finish on send"
+msgstr ""
+
+#: src/netcam.cpp:577
+#, c-format
+msgid "%s: Send ignoring packet with invalid data"
+msgstr ""
+
+#: src/netcam.cpp:584
+#, c-format
+msgid "%s: Error sending packet to codec: %s"
+msgstr ""
+
+#: src/netcam.cpp:614
 msgid "Ignoring packet with invalid data"
-msgstr"忽略包含无效数据的数据包"
+msgstr ""
 
-#: src/netcam.cpp
-#, c-format
-msgid "Error sending packet to codec: %s"
-msgstr"向编解码器发送数据包时出错：%s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "Error receiving frame from codec: %s"
-msgstr"从编解码器接收帧出错：%s"
-
-#: src/netcam.cpp
+#: src/netcam.cpp:620
 #, c-format
 msgid "Error decoding packet: %s"
-msgstr"错误解码包：%s"
+msgstr ""
 
-#: src/netcam.cpp
-msgid "Error decoding video packet: Copying to buffer"
-msgstr"解码视频数据包时出错：正在复制到缓冲区"
-
-#: src/netcam.cpp
+#: src/netcam.cpp:644
 #, c-format
-msgid "%s: av_find_best_stream: %s,Interrupt %s"
-msgstr" %s：av找到最佳流：%s，中断%s"
+msgid "%s: Error decoding video packet...it is audio"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:667
 #, c-format
-msgid "%s: avcodec_find_decoder: Failed,Interrupt %s"
-msgstr" %s：avcodec查找解码器：失败，中断%s"
+msgid "%s: Error decoding video packet: Copying to buffer"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:686
 #, c-format
-msgid "%s: avcodec_alloc_context3: Failed,Interrupt %s"
-msgstr" %s：avcodec分配上下文3：失败，中断%s"
+msgid "%s: HW Devices: "
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:691
 #, c-format
-msgid "%s: avcodec_parameters_to_context: %s,Interrupt %s"
-msgstr" %s：上下文的avcodec参数：%s，中断%s"
+msgid "%s: %s (available)"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:696
 #, c-format
-msgid "%s: avcodec_open2: %s,Interrupt %s"
-msgstr" %s：avcodec open2：%s，中断%s"
+msgid "%s: %s (not implemented)"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:722
+msgid "Failed to get vaapi pix format"
+msgstr ""
+
+#: src/netcam.cpp:738 src/netcam.cpp:1233
+#, c-format
+msgid "%s: Interrupted"
+msgstr ""
+
+#: src/netcam.cpp:743
+#, c-format
+msgid "%s: %s: %s"
+msgstr ""
+
+#: src/netcam.cpp:746
+#, c-format
+msgid "%s: %s: Failed"
+msgstr ""
+
+#: src/netcam.cpp:752
+#, c-format
+msgid "%s: Decoder %s did not work."
+msgstr ""
+
+#: src/netcam.cpp:755
+#, c-format
+msgid "%s: Ignoring and removing the user requested decoder %s"
+msgstr ""
+
+#: src/netcam.cpp:786
+#, c-format
+msgid "%s: Initializing vaapi decoder"
+msgstr ""
+
+#: src/netcam.cpp:790
+#, c-format
+msgid "%s: Unable to find vaapi hw device"
+msgstr ""
+
+#: src/netcam.cpp:837
+#, c-format
+msgid "%s: Initializing decoder"
+msgstr ""
+
+#: src/netcam.cpp:844
+#, c-format
+msgid "%s: Using decoder %s"
+msgstr ""
+
+#: src/netcam.cpp:936
+#, c-format
+msgid "%s: Decoder opened"
+msgstr ""
+
+#: src/netcam.cpp:995
 #, c-format
 msgid "%s: Camera reading (%s) timed out"
-msgstr" %s：相机读取（%s）超时"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1011
 #, c-format
 msgid "%s: Camera (%s) timed out"
-msgstr" %s：相机（%s）超时"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1035
 #, c-format
-msgid "Error allocating picture in: %s"
-msgstr"在%s中分配图片时出错"
+msgid "%s: Unable to allocate swsframe_in."
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1046
 #, c-format
-msgid "Error allocating picture out: %s"
-msgstr"将图片分配错误：%s"
+msgid "%s: Unable to allocate swsframe_out."
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1059
 #, c-format
-msgid "Error resizing/reformatting: %s"
-msgstr"错误调整大小/格式：%s"
+msgid "%s: Pixel format %d will be converted."
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1074
 #, c-format
-msgid "Error putting frame into output buffer: %s"
-msgstr"将帧放入输出缓冲区时出错：%s"
+msgid "%s: Unable to allocate scaling context."
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1088
 #, c-format
-msgid "%s: av_read_frame: %s ,Interrupt: %s"
-msgstr" %s：AV读取帧：%s，中断：%s"
+msgid "%s: Error determining size of frame out"
+msgstr ""
 
-#: src/netcam.cpp
-msgid "The network camera is sending pictures in a different"
-msgstr"网络摄像机正在发送不同的图片"
-
-#: src/netcam.cpp
-msgid "size than specified in the config and also a "
-msgstr"大小比配置中指定的大小还要大"
-
-#: src/netcam.cpp
-msgid "different picture format.  The picture is being"
-msgstr"不同的图片格式。图片正在显示"
-
-#: src/netcam.cpp
-msgid "transcoded to YUV420P and into the size requested"
-msgstr"已转换为YUV420P，并转换为所需的大小"
-
-#: src/netcam.cpp
-msgid "in the config file.  If possible change netcam to"
-msgstr"在配置文件中。如果可能，将netcam更改为"
-
-#: src/netcam.cpp
-msgid "be in YUV420P format and the size requested in the"
-msgstr"为YUV420P格式，并在其中请求了大小"
-
-#: src/netcam.cpp
-msgid "config to possibly lower CPU usage."
-msgstr"配置为可能降低CPU使用率。"
-
-#: src/netcam.cpp
-msgid "size than specified in the configuration file."
-msgstr"大小超出配置文件中指定的大小。"
-
-#: src/netcam.cpp
-msgid "The picture is being transcoded into the size "
-msgstr"图片正在被转码为大小"
-
-#: src/netcam.cpp
-msgid "requested in the configuration.  If possible change"
-msgstr"在配置中请求。如果可能，更改"
-
-#: src/netcam.cpp
-msgid "netcam or configuration to indicate the same size"
-msgstr"网络摄像机或配置以指示相同的大小"
-
-#: src/netcam.cpp
-msgid "to possibly lower CPU usage."
-msgstr"可能会降低CPU使用率。"
-
-#: src/netcam.cpp
+#: src/netcam.cpp:1130
 #, c-format
-msgid "Netcam: %d x %d => Config: %d x %d"
-msgstr"网络摄像头：%d x %d = >配置：%d x %d"
+msgid "%s: Error allocating picture in: %s"
+msgstr ""
 
-#: src/netcam.cpp
-msgid "The image sent is being "
-msgstr"发送的图像正在"
-
-#: src/netcam.cpp
-msgid "trancoded to YUV420P.  If possible change netcam "
-msgstr"已转码为YUV420P。如果可能，请更改网络摄像头"
-
-#: src/netcam.cpp
-msgid "picture format to YUV420P to possibly lower CPU usage."
-msgstr"将图片格式转换为YUV420P可能会降低CPU使用率。"
-
-#: src/netcam.cpp
-msgid "Unable to allocate swsframe_in."
-msgstr"无法分配swsframe。"
-
-#: src/netcam.cpp
-msgid "Unable to allocate swsframe_out."
-msgstr"无法将swsframe分配出去。"
-
-#: src/netcam.cpp
-msgid "Unable to allocate scaling context."
-msgstr"无法分配缩放上下文。"
-
-#: src/netcam.cpp
-msgid "Error determining size of frame out"
-msgstr"确定帧输出大小时出错"
-
-#: src/netcam.cpp
+#: src/netcam.cpp:1149
 #, c-format
-msgid "%s: Setting http input_format mjpeg"
-msgstr" %s：设置http输入格式mjpeg"
+msgid "%s: Error allocating picture out: %s"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1168
 #, c-format
-msgid "%s: Setting rtsp transport to tcp"
-msgstr" %s：将rtsp传输设置为tcp"
+msgid "%s: Error resizing/reformatting: %s"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1186
 #, c-format
-msgid "%s: Setting rtsp transport to udp"
-msgstr" %s：将rtsp传输设置为udp"
+msgid "%s: Error putting frame into output buffer: %s"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1238
 #, c-format
-msgid "%s: Setting attributes to read file"
-msgstr" %s：设置属性以读取文件"
+msgid "%s: av_read_frame: %s"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1324
 #, c-format
-msgid "%s: Requested v4l2_palette option: %d"
-msgstr" %s：请求的v4l2调色板选项：%d"
+msgid "%s: capture_rate not specified in netcam_params. Using %d"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1331
 #, c-format
-msgid "%s: Requested FOURCC code: %s"
-msgstr" %s：请求的FOURCC代码：%s"
+msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1355
 #, c-format
-msgid "%s: Setting v4l2 input_format: %s"
-msgstr" %s：设置v4l2输入格式：%s"
+msgid "The network camera is sending pictures at %dx%d"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1357
 #, c-format
-msgid "%s: Setting v4l2 framerate: %s"
-msgstr" %s：设置v4l2帧频：%s"
+msgid "resolution but config is %dx%d. If possible change"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1359
+msgid "the netcam or config so that the image height and"
+msgstr ""
+
+#: src/netcam.cpp:1360
+msgid "width are the same to lower the CPU usage."
+msgstr ""
+
+#: src/netcam.cpp:1384
 #, c-format
-msgid "%s: Setting v4l2 video_size: %s"
-msgstr" %s：设置v4l2视频大小：%s"
+msgid "%s: Setting rtsp/rtmp"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1391
+#, c-format
+msgid "%s: Setting input_format mjpeg"
+msgstr ""
+
+#: src/netcam.cpp:1396
+#, c-format
+msgid "%s: Setting input_format video4linux2"
+msgstr ""
+
+#: src/netcam.cpp:1411
+#, c-format
+msgid "%s: Setting up movie file"
+msgstr ""
+
+#: src/netcam.cpp:1414
+#, c-format
+msgid "%s: Setting up %s"
+msgstr ""
+
+#: src/netcam.cpp:1429
+#, c-format
+msgid "%s: option: %s = %s"
+msgstr ""
+
+#: src/netcam.cpp:1464
 msgid "Error getting userpass"
-msgstr"获取用户密码时出错"
+msgstr ""
 
-#: src/netcam.cpp
-msgid "Setting up v4l2 via ffmpeg netcam"
-msgstr"通过ffmpeg网络摄像头设置v4l2"
+#: src/netcam.cpp:1472
+msgid "Setting up v4l2"
+msgstr ""
 
-#: src/netcam.cpp
-msgid "Setting up file via ffmpeg netcam"
-msgstr"通过ffmpeg网络摄像头设置文件"
+#: src/netcam.cpp:1477
+msgid "Setting up file"
+msgstr ""
 
-#: src/netcam.cpp
-msgid "Setting up http via ffmpeg netcam"
-msgstr"通过ffmpeg网络摄像头设置http"
+#: src/netcam.cpp:1482
+msgid "Setting up http"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1485
 #, c-format
-msgid "Setting up %s via ffmpeg netcam"
-msgstr"通过ffmpeg网络摄像头设置%s"
+msgid "Setting up %s "
+msgstr ""
 
-#: src/netcam.cpp
-msgid "High resolution"
-msgstr"高分辨率"
+#: src/netcam.cpp:1517
+msgid "High"
+msgstr ""
 
-#: src/netcam.cpp
-msgid "Normal resolution"
-msgstr"正常分辨率"
+#: src/netcam.cpp:1524
+msgid "Norm"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1531
 #, c-format
-msgid "Error setting name of resolution %s."
-msgstr"错误设置分辨率%s的名称。"
+msgid "%s: Setting up camera."
+msgstr ""
 
-#: src/netcam.cpp
-#, c-format
-msgid "Setting up %s stream."
-msgstr"设置%s流。"
-
-#: src/netcam.cpp
+#: src/netcam.cpp:1576
 msgid "Unknown"
-msgstr"未知"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1609
+#, c-format
+msgid "%s: Adjusting width to next higher multiple of 8 (%d)."
+msgstr ""
+
+#: src/netcam.cpp:1649
+#, c-format
+msgid "%s: Unable to copy codec parameters"
+msgstr ""
+
+#: src/netcam.cpp:1660
 msgid "Stream copied for pass-through"
-msgstr"复制流以传递"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1665
 msgid "ffmpeg too old"
-msgstr" ffmpeg太旧了"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1684
 msgid "Null path passed to connect"
-msgstr"传递了用于连接的空路径"
+msgstr ""
 
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Invalid camera service"
-msgstr" %s：无效的相机服务"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Unable to open camera(%s)"
-msgstr" %s：无法打开相机（%s）"
-
-#: src/netcam.cpp
+#: src/netcam.cpp:1706
 #, c-format
 msgid "%s: Unable to open camera(%s): %s"
-msgstr" %s：无法打开相机（%s）：%s"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1717
 #, c-format
 msgid "%s: Opened camera(%s)"
-msgstr" %s：打开的摄像头（%s）"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1726
 #, c-format
 msgid "%s: Unable to find stream info: %s"
-msgstr" %s：找不到流信息：%s"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1745
 #, c-format
 msgid "%s: Unable to open codec context: %s"
-msgstr" %s：无法打开编解码器上下文：%s"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1750
+#, c-format
+msgid "%s: Connected and unable to open codec context: %s"
+msgstr ""
+
+#: src/netcam.cpp:1760
 #, c-format
 msgid "%s: Camera image size is invalid"
-msgstr" %s：相机图像大小无效"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1774
 #, c-format
 msgid "%s: Unable to allocate frame."
-msgstr" %s：无法分配帧。"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1785
 #, c-format
 msgid "%s: Failed to copy stream for pass-through."
-msgstr" %s：无法复制流以进行传递。"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1797
 #, c-format
 msgid "%s: Failed to read first image"
-msgstr" %s：无法读取第一张图像"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1832
 #, c-format
 msgid "%s: Camera (%s) connected"
-msgstr" %s：相机（%s）已连接"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1836
+#, c-format
+msgid "%s: Netcam capture FPS is %d."
+msgstr ""
+
+#: src/netcam.cpp:1841
+#, c-format
+msgid "%s: Camera source is %d FPS"
+msgstr ""
+
+#: src/netcam.cpp:1845
+#, c-format
+msgid "%s: Unable to determine the camera source FPS."
+msgstr ""
+
+#: src/netcam.cpp:1851
+#, c-format
+msgid "%s: Capture FPS less than camera FPS. Decoding errors will occur."
+msgstr ""
+
+#: src/netcam.cpp:1854
+#, c-format
+msgid "%s: Capture FPS should be greater than camera FPS."
+msgstr ""
+
+#: src/netcam.cpp:1865
+#, c-format
+msgid ""
+"%s: An audio stream was detected.  Capture_rate increased to compensate."
+msgstr ""
+
+#: src/netcam.cpp:1942
 #, c-format
 msgid "%s: Reconnecting with camera...."
-msgstr" %s：与相机重新连接。..."
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1957 src/netcam.cpp:1964
 #, c-format
 msgid "%s: Camera did not reconnect."
-msgstr" %s：相机未重新连接。"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1959
 #, c-format
 msgid "%s: Checking for camera every 10 seconds."
-msgstr" %s：每10秒钟检查一次相机。"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:1966
+#, c-format
+msgid "%s: Checking for camera every 10 minutes."
+msgstr ""
+
+#: src/netcam.cpp:1990
 #, c-format
 msgid "%s: Camera handler thread [%d] started"
-msgstr" %s：相机处理程序线程[%d]已启动"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:2013
 #, c-format
-msgid "%s: Handler loop finished."
-msgstr" %s：处理程序循环完成。"
+msgid "%s: Loop finished."
+msgstr ""
 
-#: src/netcam.cpp
-msgid "netcam camera handler: finish set, exiting"
-msgstr"网络摄像机处理程序：完成设置，退出"
+#: src/netcam.cpp:2022
+#, c-format
+msgid "%s: Exiting"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:2048
 #, c-format
 msgid "%s: Error starting handler thread"
-msgstr" %s：启动处理程序线程时出错"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:2069
 #, c-format
 msgid "%s: Waiting for first image from the handler."
-msgstr" %s：等待处理程序中的第一张图像。"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:2105
 msgid "unable to create rtsp context"
-msgstr"无法创建rtsp上下文"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:2114
 msgid "unable to create rtsp high context"
-msgstr"无法创建rtsp高上下文"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:2132
 #, c-format
 msgid "Failed trying to read first image - retval:%d"
-msgstr"尝试读取第一张图像失败-retval：%d"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:2230
 #, c-format
 msgid "%s: Shutting down network camera."
-msgstr" %s：关闭网络摄像机。"
+msgstr ""
 
-#: src/netcam.cpp
+#: src/netcam.cpp:2245
 #, c-format
 msgid "%s: No response from handler thread."
-msgstr" %s：处理程序线程无响应。"
+msgstr ""
 
-#: src/netcam.cpp
-msgid "Normal resolution: Shut down complete."
-msgstr"正常分辨率：关闭完成。"
+#: src/netcam.cpp:2267
+msgid "Norm: Shut down complete."
+msgstr ""
 
-#: src/netcam.cpp
-msgid "High resolution: Shut down complete."
-msgstr"高分辨率：关闭完成。"
+#: src/netcam.cpp:2270
+msgid "High: Shut down complete."
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:57
 msgid "Unable to set set EXIF to webp chunk"
-msgstr"无法将EXIF设置为webp块"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:74 src/picture.cpp:81
 msgid "libwebp version error"
-msgstr" libwebp版本错误"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:89
 msgid "libwebp image buffer allocation error"
-msgstr" libwebp图像缓冲区分配错误"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:106
 msgid "libwebp image compression error"
-msgstr" libwebp图像压缩错误"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:121
 msgid "unable to assemble webp image"
-msgstr"无法组合webp图像"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:126
 msgid "unable to save webp image to file"
-msgstr"无法将webp图像保存到文件"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:310
 #, c-format
 msgid ""
 "Can't write picture to file %s - check access rights to target directory\n"
 "Thread is going to finish due to this fatal error"
-msgstr""
-"无法将图片写入文件%s-检查对目标目录\n的访问权限"
-"由于该致命错误，线程即将结束"
+msgstr ""
+
+#: src/picture.cpp:318 src/picture.cpp:345
 #, c-format
 msgid "Can't write picture to file %s"
-msgstr"无法将图片写入文件%s"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:382
 msgid "Could not read from pgm file"
-msgstr"无法从pgm文件读取"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:388
 #, c-format
 msgid "This is not a pgm file, starts with '%s'"
-msgstr"这不是pgm文件，以'%s'开头"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:402
 msgid "Failed reading size in pgm file"
-msgstr" pgm文件中的读取大小失败"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:415
 msgid "Failed reading maximum value in pgm file"
-msgstr"无法读取pgm文件中的最大值"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:440
 msgid "The mask file specified is not the same size as image from camera."
-msgstr"指定的遮罩文件与来自摄像机的图像大小不同。"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:442
 #, c-format
 msgid "Attempting to resize mask image from %dx%d to %dx%d"
-msgstr"试图将遮罩图像从%dx%d调整为%dx%d"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:472
 #, c-format
 msgid "can't write mask file %s - check access rights to target directory"
-msgstr"无法写入掩码文件%s-检查对目标目录的访问权限"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:477
 #, c-format
 msgid "can't write mask file %s"
-msgstr"无法写入掩码文件%s"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:491
 msgid "Failed writing default mask as pgm file"
-msgstr"无法将默认掩码作为pgm文件写入"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:498
 #, c-format
 msgid ""
 "Creating empty mask %s\n"
 "Please edit this file and re-run motion to enable mask feature"
-msgstr""
-"正在创建空蒙版%s\n"
-"请编辑此文件并重新运行运动以启用蒙版功能"
+msgstr ""
+
+#: src/picture.cpp:574
 msgid "Opening privacy mask file"
-msgstr"打开隐私遮罩文件"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:586
 msgid "Opening high resolution privacy mask file"
-msgstr"打开高分辨率隐私遮罩文件"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:595 src/picture.cpp:680
 #, c-format
 msgid "Error opening mask file %s"
-msgstr"打开遮罩文件%s时出错"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:602
 msgid "Failed to read mask privacy image. Mask privacy feature disabled."
-msgstr"无法读取蒙版隐私图像。已禁用蒙版隐私功能。"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:605
 #, c-format
 msgid "Mask privacy file \"%s\" loaded."
 msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:691
 msgid "Failed to read mask image. Mask feature disabled."
-msgstr"无法读取蒙版图像。已禁用蒙版功能。"
+msgstr ""
 
-#: src/picture.cpp
+#: src/picture.cpp:694
 #, c-format
 msgid "Maskfile \"%s\" loaded."
-msgstr"掩码文件\"%s\"已加载。"
+msgstr ""
 
-#: src/rotate.cpp
+#: src/rotate.cpp:196
 #, c-format
 msgid "Config option \"rotate\" not a multiple of 90: %d"
-msgstr"配置选项\"rotate\"不是90的倍数：%d"
+msgstr ""
 
-#: src/track.cpp
-msgid "Failed to reset UVC camera to starting position! Reason"
-msgstr"无法将UVC摄像机重置到起始位置！原因"
-
-#: src/track.cpp
-msgid "Reseting UVC camera to starting position"
-msgstr"将UVC相机重置到起始位置"
-
-#: src/track.cpp
-msgid "ioctl querycontrol"
-msgstr" ioctl querycontrol"
-
-#: src/track.cpp
-msgid "Getting camera range"
-msgstr"获取摄像机范围"
-
-#: src/track.cpp
+#: src/util.cpp:111
 #, c-format
-msgid "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d "
-msgstr"输入参数ABS潘最小%d，潘最大%d，倾斜最小%d，倾斜最大%d"
+msgid "Could not allocate %llu bytes of memory!"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:127
 #, c-format
-msgid "INPUT_PARAM_ABS X_Angel %d, Y_Angel %d "
-msgstr"输入参数ABS X天使%d，Y天使%d"
+msgid "Warning! Function %s tries to resize memoryblock at %p to 0 bytes!"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:133
 #, c-format
-msgid "For_SET_ABS move_X %d,move_Y %d"
-msgstr"对于SET ABS移动X %d，移动Y %d"
+msgid "Could not resize memory-block at offset %p to %llu bytes (function %s)!"
+msgstr ""
 
-#: src/track.cpp
-msgid "Failed to move UVC camera!"
-msgstr"无法移动UVC相机！"
-
-#: src/track.cpp
+#: src/util.cpp:175
 #, c-format
-msgid "Found MINMAX = %d"
-msgstr"找到的MINMAX = %d"
+msgid "Problem creating directory %s"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:183
 #, c-format
-msgid "Before_ABS_Y_Angel : x= %d , Y= %d, "
-msgstr"在ABS Y天使之前：x = %d，Y = %d，"
+msgid "creating directory %s"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:221
 #, c-format
-msgid "After_ABS_Y_Angel : x= %d , Y= %d"
-msgstr"在ABS Y天使之后：x = %d，Y = %d"
+msgid "Error opening file %s with mode %s"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:234
+msgid "Error closing file"
+msgstr ""
+
+#: src/util.cpp:294
 #, c-format
-msgid "For_SET_REL pan_min %d,pan_max %d,tilt_min %d,tilt_max %d"
-msgstr"对于SET REL平移最小%d，平移最大%d，倾斜最小%d，倾斜最大%d"
+msgid "invalid format specifier keyword %*.*s"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:523
 #, c-format
-msgid "For_SET_REL track_pan_Angel %d, track_tilt_Angel %d"
-msgstr"对于SET REL轨道平移天使%d，轨道倾斜天使%d"
+msgid "Unable to set thread name %s"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:550
+msgid "FFMPEG version too old. Disabling pass-through processing."
+msgstr ""
+
+#: src/util.cpp:589
+msgid "Language: English"
+msgstr ""
+
+#: src/util.cpp:606
+msgid "Disabling native language support"
+msgstr ""
+
+#: src/util.cpp:613
+msgid "Enabling native language support"
+msgstr ""
+
+#: src/util.cpp:885
 #, c-format
-msgid "For_SET_REL move_X %d,move_Y %d"
-msgstr"对于SET REL移动X %d，移动Y %d"
+msgid "Parsed: >%s< >%s<"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:1047 src/util.cpp:1078 src/util.cpp:1098
 #, c-format
-msgid " dev %d, addr= %d, control_S= %d, Wert= %d"
-msgstr" dev %d，addr = %d，control S = %d，Wert = %d"
+msgid "Parsing: >%s< >%ld %ld %ld %ld<"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:1127
 #, c-format
-msgid " dev %d,addr= %d, control_S= %d, Wert= %d"
-msgstr" dev %d，addr = %d，control S = %d，Wert = %d"
+msgid "Starting parsing parameters: %s"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:1135
 #, c-format
-msgid "Before_REL_Y_Angel : x= %d , Y= %d"
-msgstr"在REL Y天使之前：x = %d，Y = %d"
+msgid "Finished parsing parameters: %s"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:1197
 #, c-format
-msgid "After_REL_Y_Angel : x= %d , Y= %d"
-msgstr"在REL Y天使之后：x = %d，Y = %d"
+msgid "New config: %s"
+msgstr ""
 
-#: src/track.cpp
+#: src/util.cpp:1233
 #, c-format
-msgid "internal error, %hu is not a known track-type"
-msgstr"内部错误，%hu不是已知的轨道类型"
+msgid "Unable to start external command '%s'"
+msgstr ""
 
-#: src/video_common.cpp
+#: src/util.cpp:1239
+#, c-format
+msgid "Executing external command '%s'"
+msgstr ""
+
+#: src/video_common.cpp:425 src/video_common.cpp:447
 msgid "Corrupt image ... continue"
-msgstr"图像损坏...继续"
+msgstr ""
 
-#: src/video_common.cpp
+#: src/video_common.cpp:438
 #, c-format
 msgid "SOI position adjusted by %d bytes."
-msgstr" SOI位置由%d字节调整。"
+msgstr ""
 
-#: src/video_common.cpp
-#, c-format
-msgid "Parsing controls: %s"
-msgstr"解析控件：%s"
-
-#: src/video_common.cpp
-msgid "calling mmalcam_cleanup"
-msgstr"调用mmalcam清理"
-
-#: src/video_common.cpp
-msgid "calling netcam_cleanup"
-msgstr"正在调用网络摄像头清理"
-
-#: src/video_common.cpp
-msgid "Cleaning up V4L2 device"
-msgstr"正在清理V4L2设备"
-
-#: src/video_common.cpp
-msgid "No Camera device cleanup (MMAL, Netcam, V4L2)"
-msgstr"不清除相机设备（MMAL，Netcam，V4L2）"
-
-#: src/video_common.cpp
-msgid "Opening MMAL cam"
-msgstr"打开MMAL凸轮"
-
-#: src/video_common.cpp
-msgid "MMAL cam failed to open"
-msgstr" MMAL凸轮无法打开"
-
-#: src/video_common.cpp
-msgid "Opening Netcam"
-msgstr"正在打开网络摄像头"
-
-#: src/video_common.cpp
-msgid "Netcam failed to open"
-msgstr" Netcam无法打开"
-
-#: src/video_common.cpp
-msgid "Opening V4L2 device"
-msgstr"正在打开V4L2设备"
-
-#: src/video_common.cpp
-msgid "V4L2 device failed to open"
-msgstr" V4L2设备无法打开"
-
-#: src/video_common.cpp
-msgid "No Camera device specified (MMAL, Netcam, V4L2)"
-msgstr"未指定摄像头设备（MMAL，Netcam，V4L2）"
-
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:76
 #, c-format
 msgid "Failed to open '%s'"
-msgstr"无法打开'%s'"
+msgstr ""
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:86 src/video_loopback.cpp:108
 #, c-format
 msgid "Error specifying buffer: %s"
-msgstr"指定缓冲区时出错：%s"
+msgstr ""
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:89
 #, c-format
 msgid "Opening buffer: %s"
-msgstr"打开缓冲区：%s"
+msgstr ""
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:98
 #, c-format
 msgid "Read buffer: %s"
-msgstr"读取缓冲区：%s"
+msgstr ""
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:112
 #, c-format
 msgid "found video device '%s' %d"
-msgstr"找到了视频设备'%s'%d"
+msgstr ""
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:131 src/video_loopback.cpp:180
 #, c-format
 msgid "Opened %s as pipe output"
-msgstr"打开%s作为管道输出"
+msgstr ""
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:184
 #, c-format
 msgid "Opening %s as pipe output failed"
-msgstr"由于管道输出失败而打开%s"
+msgstr ""
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:204
 msgid "Original pipe specifications"
-msgstr"原始管道规格"
+msgstr ""
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:215
 msgid "Proposed pipe specifications"
-msgstr"建议的管道规格"
+msgstr ""
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:223
 msgid "Final pipe specifications"
-msgstr"最终管道规格"
+msgstr ""
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:251
 msgid "Opening video loopback device for normal pictures"
-msgstr"打开正常图片的视频环回设备"
+msgstr ""
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:258
 msgid "Failed to open video loopback for normal pictures"
-msgstr"无法为正常图片打开视频环回"
+msgstr ""
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:267
 msgid "Opening video loopback device for motion pictures"
-msgstr"打开动态影像的视频环回设备"
+msgstr ""
 
-#: src/video_loopback.cpp
+#: src/video_loopback.cpp:274
 msgid "Failed to open video loopback for motion pictures"
-msgstr"无法打开动态影像的视频环回"
+msgstr ""
 
-#: src/video_v4l2.cpp
-msgid "No Controls found for device"
-msgstr"未找到设备的控件"
-
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:130
 msgid "---------Controls---------"
-msgstr" ---------控件---------"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:131
 msgid "  V4L2 ID   Name and Range"
-msgstr" V4L2 ID名称和范围"
+msgstr ""
 
-#: src/video_v4l2.cpp
-msgid "Device not ready"
-msgstr"设备未准备好"
+#: src/video_v4l2.cpp:159
+msgid "No Controls found for device"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:240
 #, c-format
 msgid "setting control %s \"%s\" to %d failed with return code %d"
-msgstr"将控件%s \"%s\"设置为%d失败，返回码为%d"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:245
 #, c-format
 msgid "Set control \"%s\" to value %d"
-msgstr"将控件\"%s\"设置为值%d"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:285
 #, c-format
-msgid "%s control option value %d is below minimum.  Using minimum"
-msgstr" %s控制选项值%d低于最小值。使用最小值"
+msgid "%s control option value %s is below minimum.  Skipping..."
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:289
 #, c-format
-msgid "%s control option value %d is above maximum.  Using maximum"
-msgstr" %s控制选项值%d大于最大值。正在使用最大值"
+msgid "%s control option value %s is above maximum.  Skipping..."
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:300
 msgid "control type not supported yet"
-msgstr"控件类型尚不支持"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:324
 #, c-format
 msgid ""
 "Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input "
 "value in conf by -1"
-msgstr""
-"如果使用WEBCAM更改输入，则无法查询输入%d。VIDIOC ENUMINPUT"
-" conf中的值为-1"
+msgstr ""
+
+#: src/video_v4l2.cpp:331
 #, c-format
 msgid "Name = \"%s\", type 0x%08X, status %08x"
-msgstr"名称= \"%s\"，类型0x%08X，状态%08x"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:336
 #, c-format
 msgid "Name = \"%s\",- TUNER"
-msgstr"名称= \"%s\"，-调谐器"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:340
 #, c-format
 msgid "Name = \"%s\"- CAMERA"
-msgstr"名称= \"%s\"-相机"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:345
 #, c-format
 msgid "Error selecting input %d VIDIOC_S_INPUT"
-msgstr"选择输入%d VIDIOC S INPUT时出错"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:363
 msgid "Device does not support specifying PAL/NTSC norm"
-msgstr"设备不支持指定PAL / NTSC规范"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:374
 #, c-format
 msgid "- video standard %s"
-msgstr"-视频标准%s"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:392
 #, c-format
 msgid "Error selecting standard method %d VIDIOC_S_STD"
-msgstr"选择标准方法%d VIDIOC S STD时出错"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:397
 msgid "Video standard set to NTSC"
-msgstr"视频标准设置为NTSC"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:399
 msgid "Video standard set to SECAM"
-msgstr"视频标准设置为SECAM"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:401
 msgid "Video standard set to PAL"
-msgstr"视频标准设置为PAL"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:422
 #, c-format
 msgid "tuner %d VIDIOC_G_TUNER"
-msgstr"调谐器%d VIDIOC G调谐器"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:426
 #, c-format
 msgid "Set tuner %d"
-msgstr"设置调谐器%d"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:436
 #, c-format
 msgid "freq %ul VIDIOC_S_FREQUENCY"
-msgstr"频率%ul VIDIOC S频率"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:440
 #, c-format
 msgid "Set Frequency to %ul"
-msgstr"将频率设置为%ul"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:461
 #, c-format
 msgid "Testing palette %c%c%c%c (%dx%d)"
-msgstr"测试调色板%c%c%c%c（%dx%d）"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:470
 #, c-format
 msgid "Adjusting resolution from %ix%i to %ix%i."
-msgstr"将分辨率从%ix%i调整为%ix%i。"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:480
 msgid "Adjusted resolution not modulo 8."
-msgstr"调整后的分辨率不取模8"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:482
 msgid "Specify different palette or width/height in config file."
-msgstr"在配置文件中指定不同的调色板或宽度/高度。"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:490
 msgid ""
 "Error setting pixel format.\n"
 "VIDIOC_S_FMT: "
-msgstr""
-"设置像素格式.\n时出错"
-" VIDIOC S FMT："
+msgstr ""
+
+#: src/video_v4l2.cpp:497
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
-msgstr"使用调色板%c%c%c%c（%dx%d）"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:502
 #, c-format
 msgid "Bytesperlines %d sizeimage %d colorspace %08x"
-msgstr" Bytesperlines %d sizeimage %d colorspace %08x"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:518
 #, c-format
 msgid "config image width (%d) is not modulo 8"
-msgstr"配置图像宽度（%d）不是模"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:521
 #, c-format
 msgid "Adjusting to width (%d)"
-msgstr"调整为宽度（%d）"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:526
 #, c-format
 msgid "config image height (%d) is not modulo 8"
-msgstr"配置图像高度（%d）不是模"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:529
 #, c-format
 msgid "Adjusting to height (%d)"
-msgstr"调整到高度（%d）"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:548
 msgid ""
-"H264(21) format not supported via videodevice.  Changing to default palette"
-msgstr""
-"视频设备不支持H264（21）格式。更改为默认调色板"
-#: src/video_v4l2.cpp
+"H264(21) format not supported via v4l2_device.  Changing to default palette"
+msgstr ""
+
+#: src/video_v4l2.cpp:564
 #, c-format
 msgid "Configuration palette index %d (%s) for %dx%d doesn't work."
 msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:573
 msgid "Supported palettes:"
-msgstr"支持的调色板："
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:581
 #, c-format
 msgid "%d - %s (compressed : %d) (%#x)"
-msgstr""
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:602
 #, c-format
 msgid "Selected palette %s"
-msgstr"选定的调色板%s"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:611
 #, c-format
 msgid "Palette selection failed for format %s"
-msgstr"格式%s的调色板选择失败"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:616
 msgid "Unable to find a compatible palette format."
-msgstr"无法找到兼容的调色板格式。"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:644
 #, c-format
 msgid "Error requesting buffers %d for memory map. VIDIOC_REQBUFS"
-msgstr"为内存映射请求缓冲区%d时出错。VIDIOC REQBUFS"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:651
 #, c-format
 msgid "mmap information: frames=%d"
-msgstr" mmap信息：frames = %d"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:655
 #, c-format
 msgid "Insufficient buffer memory %d < MIN_MMAP_BUFFERS."
-msgstr"缓冲存储器%d <最小MMAP缓冲区不足。"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:662
 msgid "Out of memory."
-msgstr"内存不足。"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:677
 #, c-format
 msgid ""
 "Error querying buffer %i\n"
 "VIDIOC_QUERYBUF: "
-msgstr""
-"查询缓冲区%i\n时出错"
-" VIDIOC QUERYBUF："
+msgstr ""
+
+#: src/video_v4l2.cpp:692
 #, c-format
 msgid "Error mapping buffer %i mmap"
-msgstr"错误映射缓冲区%i mmap"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:701
 #, c-format
 msgid "%i length=%d Address (%x)"
-msgstr" %i length = %d地址（%x）"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:722
 msgid "Error starting stream. VIDIOC_STREAMON"
-msgstr"启动流时出错。VIDIOC STREAMON"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:945
+msgid "Error setting device controls"
+msgstr ""
+
+#: src/video_v4l2.cpp:965
 #, c-format
-msgid "1) vid_source->pframe %i"
-msgstr" 1）vid source->pframe %i"
+msgid "Opening video device %s"
+msgstr ""
 
-#: src/video_v4l2.cpp
-#, c-format
-msgid "the_buffer index %d Address (%x)"
-msgstr"缓冲区索引%d地址（%x）"
-
-#: src/video_v4l2.cpp
-msgid "Errors occurred during device select"
-msgstr"设备选择期间发生错误"
-
-#: src/video_v4l2.cpp
-#, c-format
-msgid "Using videodevice %s and input %d"
-msgstr"使用videodevice %s和输入%d"
-
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:973
 #, c-format
 msgid "Failed to open video device %s"
-msgstr"无法打开视频设备%s"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:979
 msgid "Not a V4L2 device?"
-msgstr"不是V4L2设备吗？"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:984
 msgid "Device does not support capturing."
-msgstr"设备不支持捕获。"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:1059
 #, c-format
-msgid "Trying to set fps to %d"
-msgstr"正在尝试将fps设置为%d"
+msgid "Supported palette %s (%c%c%c%c)"
+msgstr ""
 
-#: src/video_v4l2.cpp
-#, c-format
-msgid "Error setting fps. Return code %d"
-msgstr"设置fps时出错。返回码%d"
-
-#: src/video_v4l2.cpp
-#, c-format
-msgid "Device set fps to %d"
-msgstr"设备将fps设置为%d"
-
-#: src/video_v4l2.cpp
-msgid "V4L2 is not enabled"
-msgstr"未启用V4L2"
-
-#: src/video_v4l2.cpp
-msgid "Unable to find video device"
-msgstr"无法找到视频设备"
-
-#: src/video_v4l2.cpp
-#, c-format
-msgid "Closing video device %s"
-msgstr"关闭视频设备%s"
-
-#: src/video_v4l2.cpp
-#, c-format
-msgid "Still %d users of video device %s, so we don't close it now"
-msgstr""
-
-#: src/video_v4l2.cpp
-#, c-format
-msgid "Testing palette %s (%c%c%c%c)"
-msgstr"测试调色板%s（%c%c%c%c）"
-
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:1071
 #, c-format
 msgid "  Width: %d, Height %d"
-msgstr"宽度：%d，高度%d"
+msgstr ""
 
-#: src/video_v4l2.cpp
+#: src/video_v4l2.cpp:1082
 #, c-format
 msgid "    Framerate %d/%d"
-msgstr"帧率%d / %d"
+msgstr ""
 
-#: src/webu.cpp
+#: src/video_v4l2.cpp:1120
 #, c-format
-msgid "Invalid url: %s"
-msgstr"无效的网址：%s"
+msgid "Trying to set fps to %d"
+msgstr ""
 
-#: src/webu.cpp
-msgid "Error decoding url"
-msgstr"错误解码url"
+#: src/video_v4l2.cpp:1126
+#, c-format
+msgid "Error setting fps. Return code %d"
+msgstr ""
 
-#: src/webu.cpp
+#: src/video_v4l2.cpp:1130
+#, c-format
+msgid "Device set fps to %d"
+msgstr ""
+
+#: src/video_v4l2.cpp:1146
+#, c-format
+msgid "Closing video device %s"
+msgstr ""
+
+#: src/webu.cpp:220
 #, c-format
 msgid "Sent url: %s"
-msgstr"发送的网址：%s"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:230
 #, c-format
 msgid "Decoded url: %s"
-msgstr"解码的网址：%s"
+msgstr ""
 
-#: src/webu.cpp
-msgid "Restarting all threads"
-msgstr"重新启动所有线程"
-
-#: src/webu.cpp
+#: src/webu.cpp:339
 #, c-format
-msgid "Restarting thread %d"
-msgstr"正在重新启动线程%d"
+msgid "Full Host:  %s"
+msgstr ""
 
-#: src/webu.cpp
-#, c-format
-msgid "Quitting thread %d"
-msgstr"退出线程%d"
-
-#: src/webu.cpp src/webu_html.cpp src/webu_text.cpp
-#, c-format
-msgid "Invalid action requested: >%s< >%s< >%s<"
-msgstr""
-
-#: src/webu.cpp
-msgid "Native Language : on"
-msgstr"母语：on"
-
-#: src/webu.cpp
-msgid "Native Language : off"
-msgstr"母语：关闭"
-
-#: src/webu.cpp
-msgid "Set the value to null/zero"
-msgstr"将值设置为null /零"
-
-#: src/webu.cpp
-#, c-format
-msgid "Connection from: %s"
-msgstr"连接来自：%s"
-
-#: src/webu.cpp
+#: src/webu.cpp:352
 #, c-format
 msgid "Failed authentication from %s"
-msgstr"来自%s的身份验证失败"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:414
+#, c-format
+msgid "ignoring attempt from %s"
+msgstr ""
+
+#: src/webu.cpp:629
 msgid "No webcontrol user:pass provided"
-msgstr"未提供网络控制用户：通过"
+msgstr ""
 
-#: src/webu.cpp
-msgid "No stream user:pass provided"
-msgstr"没有流用户：通过提供"
-
-#: src/webu.cpp src/webu_stream.cpp
+#: src/webu.cpp:659 src/webu_stream.cpp:361 src/webu_stream.cpp:405
 msgid "Invalid response"
-msgstr"无效的响应"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:816 src/webu.cpp:830
+msgid "send page failed."
+msgstr ""
+
+#: src/webu.cpp:864
+msgid "Shutting down camera"
+msgstr ""
+
+#: src/webu.cpp:887
 #, c-format
-msgid "Invalid Method requested: %s"
-msgstr"请求的无效方法：%s"
+msgid "Connection from: %s"
+msgstr ""
 
-#: src/webu.cpp
-#, c-format
-msgid "send page failed %d"
-msgstr"发送页面失败%d"
-
-#: src/webu.cpp
+#: src/webu.cpp:1007
 msgid "Basic authentication: available"
-msgstr"基本身份验证：可用"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:1010 src/webu.cpp:1013
 msgid "Basic authentication: disabled"
-msgstr"基本身份验证：已禁用"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:1028
 msgid "Digest authentication: available"
-msgstr"摘要式身份验证：可用"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:1031 src/webu.cpp:1034
 msgid "Digest authentication: disabled"
-msgstr"摘要验证：已禁用"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:1045
 msgid "libmicrohttpd libary too old ipv6 disabled"
-msgstr" libmicrohttpd libary ipv6太老了"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:1054
 msgid "IPV6: available"
-msgstr" IPV6：可用"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:1056
 msgid "IPV6: disabled"
-msgstr" IPV6：已禁用"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:1069
 msgid "libmicrohttpd libary too old SSL/TLS disabled"
-msgstr" libmicrohttpd库太旧，禁用了SSL / TLS"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:1076
 msgid "SSL/TLS: available"
-msgstr" SSL / TLS：可用"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:1079 src/webu.cpp:1082
 msgid "SSL/TLS: disabled"
-msgstr" SSL / TLS：已禁用"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:1124
 msgid "Error reading file for SSL/TLS support."
-msgstr"读取SSL / TLS支持文件时出错。"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:1142
 msgid "SSL/TLS requested but no cert file provided.  SSL/TLS disabled"
-msgstr"已请求SSL / TLS，但未提供证书文件。已禁用SSL / TLS"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:1147
 msgid "SSL/TLS requested but no key file provided.  SSL/TLS disabled"
-msgstr"已请求SSL / TLS，但未提供密钥文件。已禁用SSL / TLS"
+msgstr ""
 
-#: src/webu.cpp
-#, c-format
-msgid "Started camera %d stream on port/camera_id %d/%d"
-msgstr"在端口/摄像机ID %d / %d上启动了摄像机%d流"
-
-#: src/webu.cpp
-#, c-format
-msgid "Started camera %d stream on port %d"
-msgstr"在端口%d上启动了摄像机%d流"
-
-#: src/webu.cpp
+#: src/webu.cpp:1291
 #, c-format
 msgid "Starting webcontrol on port %d"
-msgstr"在端口%d上启动webcontrol"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:1320
 msgid "Unable to start MHD"
-msgstr"无法启动MHD"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu.cpp:1323
 #, c-format
 msgid "Started webcontrol on port %d"
-msgstr"在端口%d上启动了webcontrol"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu_html.cpp:1118
 #, c-format
-msgid "Starting all camera streams on port %d"
-msgstr"在端口%d上启动所有摄像机流"
+msgid "Invalid user html file: %s"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu_post.cpp:68 src/webu_post.cpp:267 src/webu_post.cpp:276
 #, c-format
-msgid "Starting camera %d stream on port %d"
-msgstr"在端口%d上启动摄像机%d流"
+msgid "Stopping cam %d"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu_post.cpp:241
+msgid "Restarting all cameras"
+msgstr ""
+
+#: src/webu_post.cpp:250
 #, c-format
-msgid "Unable to start stream for camera %d"
-msgstr"无法为摄像机%d启动流"
+msgid "Restarting camera %d"
+msgstr ""
 
-#: src/webu.cpp
+#: src/webu_post.cpp:338
+msgid "Native Language : on"
+msgstr ""
+
+#: src/webu_post.cpp:341
+msgid "Native Language : off"
+msgstr ""
+
+#: src/webu_post.cpp:440
 #, c-format
-msgid "Duplicate port requested %d"
-msgstr"要求的端口重复%d"
+msgid "Invalid action requested: command: >%s< threadnbr : >%d< "
+msgstr ""
 
-#: src/webu_html.cpp
-msgid "Cameras"
-msgstr "相机"
-
-#: src/webu_html.cpp
-msgid "Camera"
-msgstr "相机"
-
-#: src/webu_html.cpp
-msgid "All"
-msgstr "凡是"
-
-#: src/webu_html.cpp
-msgid "Action"
-msgstr "行动"
-
-#: src/webu_html.cpp
-msgid "Start Event"
-msgstr "开始活动"
-
-#: src/webu_html.cpp
-msgid "End Event"
-msgstr "结束事件"
-
-#: src/webu_html.cpp
-msgid "Snapshot"
-msgstr "快照"
-
-#: src/webu_html.cpp
-msgid "Change Configuration"
-msgstr "改变配置"
-
-#: src/webu_html.cpp
-msgid "Write Configuration"
-msgstr "写配置"
-
-#: src/webu_html.cpp
-msgid "Tracking"
-msgstr "追踪"
-
-#: src/webu_html.cpp
-msgid "Pause"
-msgstr "暂停"
-
-#: src/webu_html.cpp
-msgid "Start"
-msgstr "开始"
-
-#: src/webu_html.cpp
-msgid "Restart"
-msgstr "重新开始"
-
-#: src/webu_html.cpp
-msgid "Quit"
-msgstr "放弃"
-
-#: src/webu_html.cpp
-msgid "Help"
-msgstr "救命"
-
-#: src/webu_html.cpp
-msgid "No Configuration Options"
-msgstr "没有参数"
-
-#: src/webu_html.cpp
-msgid "Limited Configuration Options"
-msgstr "有限的参数"
-
-#: src/webu_html.cpp
-msgid "Advanced Configuration Options"
-msgstr "高级参数"
-
-#: src/webu_html.cpp
-msgid "Restricted Configuration Options"
-msgstr "保密参数"
-
-#: src/webu_html.cpp
-msgid "All Cameras"
-msgstr "所有相机"
-
-#: src/webu_html.cpp
-msgid "Not running"
-msgstr "没跑"
-
-#: src/webu_html.cpp
-msgid "Lost connection"
-msgstr "失去了连接"
-
-#: src/webu_html.cpp
-msgid "Paused"
-msgstr "暂停"
-
-#: src/webu_html.cpp
-msgid "Active"
-msgstr "活性"
-
-#: src/webu_html.cpp
-msgid "Select option"
-msgstr "选择选项"
-
-#: src/webu_html.cpp
-msgid "Save"
-msgstr "保存"
-
-#: src/webu_html.cpp
-msgid "Pan/Tilt"
-msgstr "旋转/倾"
-
-#: src/webu_html.cpp
-msgid "Absolute Change"
-msgstr "绝对变"
-
-#: src/webu_html.cpp
-msgid "Center"
-msgstr "中央"
-
-#: src/webu_html.cpp
-msgid "Pan"
-msgstr "旋"
-
-#: src/webu_html.cpp
-msgid "Tilt"
-msgstr "倾斜"
-
-#: src/webu_stream.cpp
+#: src/webu_stream.cpp:247 src/webu_stream.cpp:254
 #, c-format
 msgid "Invalid thread specified: %s"
-msgstr"指定了无效的线程：%s"
+msgstr ""
 
-#: src/webu_stream.cpp
-#, c-format
-msgid "Invalid URL for a camera specific port: %s"
-msgstr"摄像机特定端口的无效URL：%s"
-
-#: src/webu_stream.cpp
-#, c-format
-msgid "URL for thread 0 is not valid when using camera specific files.: %s"
-msgstr"使用摄像机专用文件时，线程0的URL无效。：%s"
-
-#: src/webu_stream.cpp
-#, c-format
-msgid "Bad URL for a camera specific port: %s"
-msgstr"摄像机特定端口的错误URL：%s"
-
-#: src/webu_stream.cpp
+#: src/webu_stream.cpp:398
 msgid "Could not get image to stream."
-msgstr"无法使图像流化。"
+msgstr ""
 
-#: src/webu_text.cpp
-#, c-format
-msgid "'%s' option is depreciated.  New option name is `%s'"
-msgstr"'%s'选项已弃用。新选项名称为'%s'"
