@@ -64,10 +64,10 @@ static void event_newfile(struct ctx_cam *cam, motion_event evnt
     (void)evnt;
     (void)img_data;
     (void)ts1;
+    (void)ftype;
 
     MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO
-        ,_("File of type %ld saved to: %s")
-        ,(unsigned long)ftype, fname);
+        ,_("File saved to: %s"), fname);
 }
 
 
