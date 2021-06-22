@@ -772,6 +772,8 @@ static void webu_html_script_initform(struct ctx_webui *webui)
         "          assign_vals(0);\n"
         "          assign_cams();\n"
         "          assign_actions();\n"
+        "          camera_click(0);\n"
+        "          nav_close();\n"
         "        }\n"
         "      };\n"
         "      xmlhttp.open('GET', '" + webui->hostfull + "/config.json');\n"
