@@ -160,6 +160,8 @@
         bool            stream_grey;
         bool            stream_motion;
         int             stream_maxrate;
+        int             stream_scan_time;
+        int             stream_scan_scale;
 
         /* Database and SQL configuration parameters */
         std::string     database_type;

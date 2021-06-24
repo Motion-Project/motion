@@ -171,6 +171,8 @@ struct ctx_parm config_parms[] = {
     {"stream_grey",               PARM_TYP_BOOL,   PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {"stream_motion",             PARM_TYP_BOOL,   PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {"stream_maxrate",            PARM_TYP_INT,    PARM_CAT_14, WEBUI_LEVEL_LIMITED },
+    {"stream_scan_time",          PARM_TYP_INT,    PARM_CAT_14, WEBUI_LEVEL_LIMITED },
+    {"stream_scan_scale",         PARM_TYP_INT,    PARM_CAT_14, WEBUI_LEVEL_LIMITED },
 
     {"database_type",             PARM_TYP_LIST,   PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
     {"database_dbname",           PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
@@ -2379,6 +2381,44 @@ static void conf_edit_stream_maxrate(struct ctx_cam *cam, std::string &parm, enu
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_maxrate",_("stream_maxrate"));
 }
 
+static void conf_edit_stream_scan_time(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    int parm_in;
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->stream_scan_time = 5;
+    } else if (pact == PARM_ACT_SET) {
+        parm_in = atoi(parm.c_str());
+        if ((parm_in < 1) || (parm_in > 600)) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid stream_scan_time %d"),parm_in);
+        } else {
+            cam->conf->stream_scan_time = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET) {
+        parm = std::to_string(cam->conf->stream_scan_time);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_scan_time",_("stream_scan_time"));
+}
+
+static void conf_edit_stream_scan_scale(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    int parm_in;
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->stream_scan_scale = 25;
+    } else if (pact == PARM_ACT_SET) {
+        parm_in = atoi(parm.c_str());
+        if ((parm_in < 1) || (parm_in > 1000)) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid stream_scan_scale %d"),parm_in);
+        } else {
+            cam->conf->stream_scan_scale = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET) {
+        parm = std::to_string(cam->conf->stream_scan_scale);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_scan_scale",_("stream_scan_scale"));
+}
+
 static void conf_edit_database_type(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
@@ -2926,6 +2966,8 @@ static void conf_edit_cat14(struct ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "stream_grey") {                 conf_edit_stream_grey(cam, parm_val, pact);
     } else if (parm_nm == "stream_motion") {               conf_edit_stream_motion(cam, parm_val, pact);
     } else if (parm_nm == "stream_maxrate") {              conf_edit_stream_maxrate(cam, parm_val, pact);
+    } else if (parm_nm == "stream_scan_time") {            conf_edit_stream_scan_time(cam, parm_val, pact);
+    } else if (parm_nm == "stream_scan_scale") {           conf_edit_stream_scan_scale(cam, parm_val, pact);
     }
 
 }

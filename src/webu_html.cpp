@@ -768,7 +768,9 @@ static void webu_html_script_initform(struct ctx_webui *webui)
         "      xmlhttp.onreadystatechange = function() {\n"
         "        if (this.readyState == 4 && this.status == 200) {\n"
         "          pData = JSON.parse(this.responseText);\n"
-        "          gIndexCam = 0;\n\n"
+        "          gIndexCam = 0;\n"
+        "          gIndexScan = -1;\n\n"
+
         "          assign_config();\n"
         "          assign_version();\n"
         "          assign_vals(0);\n"
@@ -814,7 +816,6 @@ static void webu_html_script_display_config(struct ctx_webui *webui)
         "        gIndexCam = 0; \n"
         "        gIndexScan = -1; \n"
         "      }\n"
-        "      cams_scan.stop();\n\n"
         "      cams_timer.stop();\n\n"
         "    }\n\n";
 }
@@ -834,7 +835,6 @@ static void webu_html_script_display_actions(struct ctx_webui *webui)
         "      if (gIndexCam == -1) {\n"
         "        gIndexCam = 0; \n"
         "        gIndexScan = -1; \n"
-        "        cams_scan.stop();\n\n"
         "      }\n"
         "    }\n\n";
 }
@@ -980,7 +980,6 @@ static void webu_html_script_camera_click(struct ctx_webui *webui)
         "        document.getElementById('div_cam').style.display='block';\n"
         "        document.getElementById('div_cam').innerHTML = html_preview;\n"
         "      }\n\n"
-        "      cams_scan.stop();\n\n"
         "      cams_timer.start();\n\n"
         "    }\n\n";
 }
@@ -992,8 +991,8 @@ static void webu_html_script_camera_scan(struct ctx_webui *webui)
         "   function camera_scan() {\n\n"
         "      gIndexCam = -1; \n"
         "      gIndexScan = 0; \n\n"
+        "      cams_scan = setInterval(timer_scan, 5);\n"
         "      cams_timer.stop();\n\n"
-        "      cams_scan.start();\n\n"
         "    }\n\n";
 }
 
@@ -1055,27 +1054,39 @@ static void webu_html_script_timer_pic(struct ctx_webui *webui)
 static void webu_html_script_timer_scan(struct ctx_webui *webui)
 {
     webui->resp_page +=
-        "    var cams_scan = new Timer(function() {\n"
+        "    function timer_scan() {\n"
         "      var html_preview = \"\";\n"
-        "      var camid;\n\n"
-        "      var camcnt = pData['cameras']['count'];\n"
+        "      var camid;\n"
+        "      var camcnt = pData['cameras']['count'];\n\n"
+
+        "      if(gIndexScan == -1) {\n"
+        "        clearInterval(cams_scan);\n"
+        "        return;\n"
+        "      }\n\n"
 
         "      if(gIndexScan == camcnt) {\n"
         "        gIndexScan = 1;\n"
         "      } else { \n"
         "        gIndexScan++;\n"
-        "      }\n"
-        "      camid = pData['cameras'][gIndexScan]['id'];\n\n"
+        "      }\n\n"
+
+        "      camid = pData['cameras'][gIndexScan]['id'];\n"
+        "      clearInterval(cams_scan);\n"
+
+        "      cams_scan = setInterval(timer_scan,\n"
+        "        pData['configuration']['cam'+camid].stream_scan_time.value * 1000 \n"
+        "      );\n"
+
         "      html_preview += \"<a><img id='pic0' src=\"\n"
         "      html_preview += pData['cameras'][gIndexScan]['url'];\n"
         "      html_preview += \"mjpg/stream\" ;\n"
         "      html_preview += \" border=0 width=\"\n"
-        "      html_preview += pData['configuration']['cam'+camid].stream_preview_scale.value;\n"
+        "      html_preview += pData['configuration']['cam'+camid].stream_scan_scale.value;\n"
         "      html_preview += \"%></a>\\n\";\n"
         "      document.getElementById('div_config').style.display='none';\n"
         "      document.getElementById('div_cam').style.display='block';\n"
         "      document.getElementById('div_cam').innerHTML = html_preview;\n"
-        "    }, 5000);\n\n";
+        "    };\n\n";
 
 }
 
@@ -1085,6 +1096,7 @@ static void webu_html_script(struct ctx_webui *webui)
     webui->resp_page += "  <script>\n"
         "    var pData;\n"
         "    var gIndexScan;\n"
+        "    var cams_scan = setInterval(timer_scan, 5000);\n"
         "    var gIndexCam;\n\n";
 
     webu_html_script_nav(webui);
