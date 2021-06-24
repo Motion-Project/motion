@@ -1104,6 +1104,7 @@ void util_parms_parse_comma(struct ctx_params *params, std::string &parmline)
 
 }
 
+/* Parse through the config line and put into the array */
 void util_parms_parse(struct ctx_params *params, std::string confline)
 {
     /* Parse through the configuration option to get values

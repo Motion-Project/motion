@@ -17,7 +17,6 @@
  *    Copyright 2020-2021 MotionMrDave@gmail.com
  */
 
-#include <regex.h>
 #include <dirent.h>
 #include <string>
 #include "motionplus.hpp"
@@ -160,7 +159,7 @@ struct ctx_parm config_parms[] = {
     {"webcontrol_tls",            PARM_TYP_BOOL,   PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
     {"webcontrol_cert",           PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
     {"webcontrol_key",            PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
-    {"webcontrol_cors_header",    PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
+    {"webcontrol_headers",        PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
     {"webcontrol_html",           PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
 
     {"stream_preview_scale",      PARM_TYP_INT,    PARM_CAT_14, WEBUI_LEVEL_LIMITED },
@@ -2210,30 +2209,17 @@ static void conf_edit_webcontrol_key(struct ctx_cam *cam, std::string &parm, enu
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_key",_("webcontrol_key"));
 }
 
-static void conf_edit_webcontrol_cors_header(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_webcontrol_headers(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    int retcd;
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->webcontrol_cors_header = "";
+        cam->conf->webcontrol_headers = "";
     } else if (pact == PARM_ACT_SET) {
-        const char *regex_str = "(http|https)://(((.*):(.*))@)?([^/:]|[-_.a-z0-9]+)(:([0-9]+))?($|(/[^*]*))";
-        regex_t regex;
-        if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Error compiling regex in copy_uri"));
-            return;
-        }
-        /* We only warn on this since regex may not perfectly edit uris */
-        retcd = regexec(&regex, parm.c_str(), 0, NULL, 0);
-        if ((parm != "*") && (parm != "") && (retcd == REG_NOMATCH)) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Possibly invalid webcontrol_cors_header"));
-        }
-        cam->conf->webcontrol_cors_header = parm;
-        regfree(&regex);
+        cam->conf->webcontrol_headers = parm;
     } else if (pact == PARM_ACT_GET) {
-        parm = cam->conf->webcontrol_cors_header;
+        parm = cam->conf->webcontrol_headers;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_cors_header",_("webcontrol_cors_header"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_headers",_("webcontrol_headers"));
 }
 
 static void conf_edit_webcontrol_html(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
@@ -2949,7 +2935,7 @@ static void conf_edit_cat13(struct ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "webcontrol_tls") {              conf_edit_webcontrol_tls(cam, parm_val, pact);
     } else if (parm_nm == "webcontrol_cert") {             conf_edit_webcontrol_cert(cam, parm_val, pact);
     } else if (parm_nm == "webcontrol_key") {              conf_edit_webcontrol_key(cam, parm_val, pact);
-    } else if (parm_nm == "webcontrol_cors_header") {      conf_edit_webcontrol_cors_header(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_headers") {          conf_edit_webcontrol_headers(cam, parm_val, pact);
     } else if (parm_nm == "webcontrol_html") {             conf_edit_webcontrol_html(cam, parm_val, pact);
     }
 
@@ -3711,7 +3697,6 @@ void conf_parms_log(struct ctx_cam **cam_list)
                     (config_parms[i].parm_name == "netcam_userpass") ||
                     (config_parms[i].parm_name == "netcam_high_url") ||
                     (config_parms[i].parm_name == "webcontrol_authentication") ||
-                    (config_parms[i].parm_name == "webcontrol_cors_header") ||
                     (config_parms[i].parm_name == "webcontrol_key") ||
                     (config_parms[i].parm_name == "webcontrol_cert") ||
                     (config_parms[i].parm_name == "database_user") ||

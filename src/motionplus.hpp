@@ -414,7 +414,7 @@ struct ctx_motapp {
     struct MHD_Daemon           *webcontrol_daemon;
     char                        webcontrol_digest_rand[12];
     std::list<ctx_failauth>     webcontrol_failauth;       /* C++ list of ips that failed authentication */
-
+    struct ctx_params          *webcontrol_headers;        /* parameters for header */
 
     bool                parms_changed;      /*bool indicating if the parms have changed */
     pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */

@@ -652,6 +652,7 @@ static mhdrslt webu_mhd_send(struct ctx_webui *webui)
 {
     mhdrslt retcd;
     struct MHD_Response *response;
+    int indx;
 
     response = MHD_create_response_from_buffer(webui->resp_page.length()
         ,(void *)webui->resp_page.c_str(), MHD_RESPMEM_PERSISTENT);
@@ -661,11 +662,14 @@ static mhdrslt webu_mhd_send(struct ctx_webui *webui)
     }
 
     if (webui->cam != NULL) {
-        if (webui->motapp->cam_list[0]->conf->webcontrol_cors_header != "") {
-            MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-                , webui->motapp->cam_list[0]->conf->webcontrol_cors_header.c_str());
+        if (webui->motapp->webcontrol_headers->params_count > 0) {
+            for (indx = 0; indx < webui->motapp->webcontrol_headers->params_count; indx++) {
+                MHD_add_response_header (response
+                    , webui->motapp->webcontrol_headers->params_array[indx].param_name
+                    , webui->motapp->webcontrol_headers->params_array[indx].param_value
+                );
+            }
         }
-
         if (webui->resp_type == WEBUI_RESP_TEXT) {
             MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/plain;");
         } else if (webui->resp_type == WEBUI_RESP_JSON) {
@@ -1290,6 +1294,10 @@ static void webu_init_webcontrol(struct ctx_motapp *motapp)
     MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
         , _("Starting webcontrol on port %d")
         , motapp->cam_list[0]->conf->webcontrol_port);
+
+    motapp->webcontrol_headers = (ctx_params*)mymalloc(sizeof(struct ctx_params));
+    motapp->webcontrol_headers->update_params = true;
+    util_parms_parse(motapp->webcontrol_headers, motapp->cam_list[0]->conf->webcontrol_headers);
 
     mhdst.tls_cert = webu_mhd_loadfile(motapp->cam_list[0]->conf->webcontrol_cert);
     mhdst.tls_key  = webu_mhd_loadfile(motapp->cam_list[0]->conf->webcontrol_key);

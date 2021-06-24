@@ -148,7 +148,7 @@
         bool            webcontrol_tls;
         std::string     webcontrol_cert;
         std::string     webcontrol_key;
-        std::string     webcontrol_cors_header;
+        std::string     webcontrol_headers;
         std::string     webcontrol_html;
 
         /* Live stream configuration parameters */

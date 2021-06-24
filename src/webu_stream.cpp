@@ -344,6 +344,7 @@ static mhdrslt webu_stream_mjpeg(struct ctx_webui *webui)
     /* Create the stream for the motion jpeg */
     mhdrslt retcd;
     struct MHD_Response *response;
+    int indx;
 
     if (webu_stream_checks(webui) == -1) {
         return MHD_NO;
@@ -362,9 +363,13 @@ static mhdrslt webu_stream_mjpeg(struct ctx_webui *webui)
         return MHD_NO;
     }
 
-    if (webui->motapp->cam_list[0]->conf->webcontrol_cors_header != "") {
-        MHD_add_response_header(response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-            , webui->motapp->cam_list[0]->conf->webcontrol_cors_header.c_str());
+    if (webui->motapp->webcontrol_headers->params_count > 0) {
+        for (indx = 0; indx < webui->motapp->webcontrol_headers->params_count; indx++) {
+            MHD_add_response_header (response
+                , webui->motapp->webcontrol_headers->params_array[indx].param_name
+                , webui->motapp->webcontrol_headers->params_array[indx].param_value
+            );
+        }
     }
 
     MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE
@@ -383,6 +388,7 @@ static mhdrslt webu_stream_static(struct ctx_webui *webui)
     mhdrslt retcd;
     struct MHD_Response *response;
     char resp_used[20];
+    int indx;
 
     if (webu_stream_checks(webui) == -1) {
         return MHD_NO;
@@ -406,9 +412,13 @@ static mhdrslt webu_stream_static(struct ctx_webui *webui)
         return MHD_NO;
     }
 
-    if (webui->motapp->cam_list[0]->conf->webcontrol_cors_header != "") {
-        MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-            , webui->motapp->cam_list[0]->conf->webcontrol_cors_header.c_str());
+    if (webui->motapp->webcontrol_headers->params_count > 0) {
+        for (indx = 0; indx < webui->motapp->webcontrol_headers->params_count; indx++) {
+            MHD_add_response_header (response
+                , webui->motapp->webcontrol_headers->params_array[indx].param_name
+                , webui->motapp->webcontrol_headers->params_array[indx].param_value
+            );
+        }
     }
 
     MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "image/jpeg");
