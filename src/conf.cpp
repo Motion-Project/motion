@@ -549,6 +549,23 @@ static void conf_edit_native_language(struct ctx_motapp *motapp, std::string &pa
 /************************************************************************/
 /************************************************************************/
 
+static void conf_edit_camera(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    /* This edit routine is special for the camera.
+     * We are dealing with the file name that is still a char
+     * the file name back on request so that it shows on web interface
+     */
+    if (pact == PARM_ACT_SET) {
+        if (snprintf(cam->conf_filename, PATH_MAX, "%s", parm.c_str()) < 0) {
+            cam->conf_filename[0] = 0;
+        };
+    } else if (pact == PARM_ACT_GET) {
+        parm.assign(cam->conf_filename);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera",_("camera"));
+}
+
 static void conf_edit_camera_name(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
@@ -2751,6 +2768,7 @@ static void conf_edit_cat01(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
     if (parm_nm == "camera_dir") {                   conf_edit_camera_dir(cam, parm_val, pact);
+    } else if (parm_nm == "camera") {                conf_edit_camera(cam, parm_val, pact);
     } else if (parm_nm == "camera_name") {           conf_edit_camera_name(cam, parm_val, pact);
     } else if (parm_nm == "camera_id") {             conf_edit_camera_id(cam, parm_val, pact);
     } else if (parm_nm == "camera_tmo") {            conf_edit_camera_tmo(cam, parm_val, pact);
@@ -3437,7 +3455,7 @@ static void conf_camera_filenm(struct ctx_motapp *motapp)
     std::string src_nm, fullnm;
     FILE *fp;
 
-    src_nm = motapp->cam_list[0]->conf_filename;
+    src_nm = motapp->conf_filename;
     src_nm= src_nm.substr(0, src_nm.find_last_of("/")+1 );
 
     indx = 1;
@@ -3542,7 +3560,9 @@ static void conf_parm_camera(struct ctx_motapp *motapp, std::string filename)
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
         ,_("Processing camera config file %s"), filename.c_str());
 
-    filename.copy(motapp->cam_list[indx_cam]->conf_filename, PATH_MAX);
+    if (snprintf(motapp->cam_list[indx_cam]->conf_filename, PATH_MAX, "%s", filename.c_str()) < 0) {
+        motapp->cam_list[indx_cam]->conf_filename[0] = 0;
+    };
 
     conf_process(motapp, false, fp, indx_cam);
 
@@ -3792,7 +3812,7 @@ void conf_parms_write(struct ctx_motapp *motapp)
                     conf_edit_get(motapp->cam_list[indx_cam], config_parms[indx].parm_name
                         , parm_val, config_parms[indx].parm_cat);
                     if (parm_val == "") {
-                        parm_val = motapp->cam_list[0]->conf_filename;
+                        parm_val = motapp->conf_filename;
                         parm_val = parm_val.substr(0, parm_val.find_last_of("/")+1) + "conf.d";
                     }
                     if (parm_val.compare(0, 1, " ") == 0) {
