@@ -1344,6 +1344,12 @@ void webu_deinit(struct ctx_motapp *motapp)
         MHD_stop_daemon (motapp->webcontrol_daemon);
     }
 
+    util_parms_free(motapp->webcontrol_headers);
+    if (motapp->webcontrol_headers != NULL) {
+        free(motapp->webcontrol_headers);
+    }
+    motapp->webcontrol_headers = NULL;
+
 }
 
 /* Start the webcontrol and streams */
