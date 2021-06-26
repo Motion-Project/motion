@@ -1063,8 +1063,6 @@ void raspicamcontrol_set_defaults(RASPICAM_CAMERA_PARAMETERS *params)
    params->digital_gain = 0;
    params->settings = 0;
 }
-}
-}
 
 /**
  * Get all the current camera parameters from specified camera component
