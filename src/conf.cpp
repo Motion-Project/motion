@@ -3218,7 +3218,7 @@ void conf_edit_get(struct ctx_cam *cam, std::string parm_nm, char *parm_chr, enu
         conf_edit_cat(cam, parm_nm, parm_val, PARM_ACT_GET, parm_cat);
     }
 
-    parm_val.copy(parm_chr, 512);
+    parm_val.copy(parm_chr, strlen(parm_chr));
 
 }
 
@@ -3322,7 +3322,7 @@ void conf_edit_list(struct ctx_cam *cam, std::string parm_nm, char *parm_chr, en
         conf_edit_cat(cam, parm_nm, parm_val, PARM_ACT_LIST, parm_cat);
     }
 
-    parm_val.copy(parm_chr, 512);
+    parm_val.copy(parm_chr, strlen(parm_chr));
 
 }
 
@@ -3487,7 +3487,8 @@ static void conf_camera_filenm(struct ctx_motapp *motapp)
     while (motapp->cam_list[indx_cam] != NULL) {
         indx_cam++;
     }
-    fullnm.copy(motapp->cam_list[indx_cam-1]->conf_filename, PATH_MAX);
+    fullnm.copy(motapp->cam_list[indx_cam-1]->conf_filename
+        , strlen(motapp->cam_list[indx_cam-1]->conf_filename));
 
     /*
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Cam %d Using %s"), indx_cam - 1
@@ -3931,7 +3932,8 @@ void conf_init_cams(struct ctx_motapp *motapp)
     conf_edit_dflt_cam(motapp->cam_list[0]);
 
     if (motapp->conf_filename != "") {
-        motapp->conf_filename.copy(motapp->cam_list[0]->conf_filename,PATH_MAX);
+        motapp->conf_filename.copy(motapp->cam_list[0]->conf_filename
+            , strlen(motapp->cam_list[0]->conf_filename));
         fp = fopen (motapp->conf_filename.c_str(), "r");
     }
 
