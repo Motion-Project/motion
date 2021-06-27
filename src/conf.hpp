@@ -194,24 +194,24 @@
 
     /* Categories for he edits and display on web interface*/
     enum PARM_CAT{
-        PARM_CAT_00
-        ,PARM_CAT_01
-        ,PARM_CAT_02
-        ,PARM_CAT_03
-        ,PARM_CAT_04
-        ,PARM_CAT_05
-        ,PARM_CAT_06
-        ,PARM_CAT_07
-        ,PARM_CAT_08
-        ,PARM_CAT_09
-        ,PARM_CAT_10
-        ,PARM_CAT_11
-        ,PARM_CAT_12
-        ,PARM_CAT_13
-        ,PARM_CAT_14
-        ,PARM_CAT_15
-        ,PARM_CAT_16
-        ,PARM_CAT_17
+        PARM_CAT_00     /* system */
+        ,PARM_CAT_01    /* camera */
+        ,PARM_CAT_02    /* source */
+        ,PARM_CAT_03    /* image */
+        ,PARM_CAT_04    /* overlay */
+        ,PARM_CAT_05    /* method */
+        ,PARM_CAT_06    /* masks */
+        ,PARM_CAT_07    /* detect */
+        ,PARM_CAT_08    /* scripts */
+        ,PARM_CAT_09    /* picture */
+        ,PARM_CAT_10    /* movies */
+        ,PARM_CAT_11    /* timelapse */
+        ,PARM_CAT_12    /* pipes */
+        ,PARM_CAT_13    /* webcontrol */
+        ,PARM_CAT_14    /* streams */
+        ,PARM_CAT_15    /* database */
+        ,PARM_CAT_16    /* sql */
+        ,PARM_CAT_17    /* tracking */
         ,PARM_CAT_MAX
     };
     enum PARM_TYP{

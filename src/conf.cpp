@@ -3804,7 +3804,8 @@ void conf_parms_write(struct ctx_motapp *motapp)
             if ((config_parms[indx].parm_name != "camera") &&
                 (config_parms[indx].parm_name != "camera_dir") &&
                 (config_parms[indx].parm_name != "conf_filename") &&
-                ((indx_cam == 0) || (parm_val != parm_main))) {
+                ((indx_cam == 0) || ((parm_val != parm_main) &&
+                 (config_parms[indx].parm_cat != PARM_CAT_13)))) {
 
                 if (indx_next != (int)config_parms[indx].parm_cat) {
                     fprintf(conffile,"\n%s",";*************************************************\n");
