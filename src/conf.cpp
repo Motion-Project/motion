@@ -555,9 +555,12 @@ static void conf_edit_camera(struct ctx_cam *cam, std::string &parm, enum PARM_A
      * We are dealing with the file name that is still a char
      * the file name back on request so that it shows on web interface
      */
+    int retcd;
     if (pact == PARM_ACT_SET) {
-        if (snprintf(cam->conf_filename, PATH_MAX, "%s", parm.c_str()) < 0) {
-            cam->conf_filename[0] = 0;
+        retcd = snprintf(cam->conf_filename, PATH_MAX, "%s", parm.c_str());
+        if ((retcd < 0) || (retcd >= PATH_MAX)) {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,"Error using %s", parm.c_str());
+            cam->conf_filename[0] = '\0';
         };
     } else if (pact == PARM_ACT_GET) {
         parm.assign(cam->conf_filename);
@@ -3211,6 +3214,7 @@ void conf_edit_get(struct ctx_cam *cam, std::string parm_nm, std::string &parm_v
 void conf_edit_get(struct ctx_cam *cam, std::string parm_nm, char *parm_chr, enum PARM_CAT parm_cat)
 {
     std::string parm_val(parm_chr);
+    int retcd;
 
     if (parm_cat == PARM_CAT_00) {
         conf_edit_cat00(cam->motapp, parm_nm, parm_val, PARM_ACT_GET);
@@ -3218,7 +3222,11 @@ void conf_edit_get(struct ctx_cam *cam, std::string parm_nm, char *parm_chr, enu
         conf_edit_cat(cam, parm_nm, parm_val, PARM_ACT_GET, parm_cat);
     }
 
-    parm_val.copy(parm_chr, strlen(parm_chr));
+    retcd = snprintf(parm_chr, PATH_MAX, "%s", parm_val.c_str());
+    if ((retcd < 0) || (retcd >= PATH_MAX)) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error getting value for \"%s\""), parm_nm.c_str());
+        parm_chr[0] = '\0';
+    }
 
 }
 
@@ -3315,6 +3323,7 @@ void conf_edit_list(struct ctx_cam *cam, std::string parm_nm, std::string &parm_
 void conf_edit_list(struct ctx_cam *cam, std::string parm_nm, char *parm_chr, enum PARM_CAT parm_cat)
 {
     std::string parm_val(parm_chr);
+    int retcd;
 
     if (parm_cat == PARM_CAT_00) {
         conf_edit_cat00(cam->motapp, parm_nm, parm_val, PARM_ACT_LIST);
@@ -3322,7 +3331,11 @@ void conf_edit_list(struct ctx_cam *cam, std::string parm_nm, char *parm_chr, en
         conf_edit_cat(cam, parm_nm, parm_val, PARM_ACT_LIST, parm_cat);
     }
 
-    parm_val.copy(parm_chr, strlen(parm_chr));
+    retcd = snprintf(parm_chr, PATH_MAX, "%s", parm_val.c_str());
+    if ((retcd < 0) || (retcd >= PATH_MAX)) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error getting value for \"%s\""), parm_nm.c_str());
+        parm_chr[0] = '\0';
+    }
 
 }
 
@@ -3451,12 +3464,11 @@ static void conf_cmdline(struct ctx_motapp *motapp)
 /* Add in a default filename for the last camera config if it wasn't provided. */
 static void conf_camera_filenm(struct ctx_motapp *motapp)
 {
-    int indx_cam, indx;
+    int indx_cam, indx, retcd;
     std::string src_nm, fullnm;
     FILE *fp;
 
-    src_nm = motapp->conf_filename;
-    src_nm= src_nm.substr(0, src_nm.find_last_of("/")+1 );
+    src_nm = motapp->conf_filename.substr(0, motapp->conf_filename.find_last_of("/") + 1);
 
     indx = 1;
     while (true) {
@@ -3487,13 +3499,14 @@ static void conf_camera_filenm(struct ctx_motapp *motapp)
     while (motapp->cam_list[indx_cam] != NULL) {
         indx_cam++;
     }
-    fullnm.copy(motapp->cam_list[indx_cam-1]->conf_filename
-        , strlen(motapp->cam_list[indx_cam-1]->conf_filename));
 
-    /*
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Cam %d Using %s"), indx_cam - 1
-        ,motapp->cam_list[indx_cam-1]->conf_filename);
-    */
+    retcd = snprintf(motapp->cam_list[indx_cam-1]->conf_filename, PATH_MAX, "%s", fullnm.c_str());
+    if ((retcd < 0) || (retcd >= PATH_MAX)) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            , _("Error with config file name %s"), fullnm.c_str());
+        motapp->cam_list[indx_cam-1]->conf_filename[0] = '\0';
+    }
+
 }
 
 void conf_camera_add(struct ctx_motapp *motapp)
@@ -3539,7 +3552,7 @@ void conf_camera_add(struct ctx_motapp *motapp)
 
 static void conf_parm_camera(struct ctx_motapp *motapp, std::string filename)
 {
-    int indx_cam;
+    int indx_cam, retcd;
     FILE *fp;
 
     fp = fopen(filename.c_str(), "r");
@@ -3561,8 +3574,11 @@ static void conf_parm_camera(struct ctx_motapp *motapp, std::string filename)
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
         ,_("Processing camera config file %s"), filename.c_str());
 
-    if (snprintf(motapp->cam_list[indx_cam]->conf_filename, PATH_MAX, "%s", filename.c_str()) < 0) {
-        motapp->cam_list[indx_cam]->conf_filename[0] = 0;
+    retcd = snprintf(motapp->cam_list[indx_cam]->conf_filename, PATH_MAX, "%s", filename.c_str());
+    if ((retcd < 0) || (retcd >= PATH_MAX)) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Error using config file  name %s"), filename.c_str());
+        motapp->cam_list[indx_cam]->conf_filename[0] = '\0';
     };
 
     conf_process(motapp, false, fp, indx_cam);
@@ -3578,7 +3594,7 @@ static void conf_parm_camera_dir(struct ctx_motapp *motapp, std::string str)
     DIR *dp;
     struct dirent *ep;
     size_t name_len;
-    int i;
+    int i, retcd;
 
     char conf_file[PATH_MAX];
 
@@ -3587,20 +3603,26 @@ static void conf_parm_camera_dir(struct ctx_motapp *motapp, std::string str)
         while( (ep = readdir(dp)) ) {
             name_len = strlen(ep->d_name);
             if ((name_len > strlen(".conf")) &&
-                (mystreq(".conf",ep->d_name + name_len - strlen(".conf")))) {
+                (mystreq(".conf", ep->d_name + name_len - strlen(".conf")))) {
 
                 memset(conf_file, '\0', sizeof(conf_file));
-                snprintf(conf_file, sizeof(conf_file) - 1, "%s/%s",
+                retcd = snprintf(conf_file, sizeof(conf_file) - 1, "%s/%s",
                             str.c_str(), ep->d_name);
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                    ,_("Processing config file %s"), conf_file );
-                conf_parm_camera(motapp, conf_file);
-                /* The last ctx_cam thread would be ours,
-                 * set it as created from conf directory.
-                 */
-                i = 0;
-                while (motapp->cam_list[++i]);
-                motapp->cam_list[i-1]->from_conf_dir = true;
+                if ((retcd < 0) || (retcd >= PATH_MAX)) {
+                    conf_file[0] = '\0';
+                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                        ,_("Error processing config dir %s"), ep->d_name);
+                } else {
+                    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                        ,_("Processing config file %s"), conf_file );
+                    conf_parm_camera(motapp, conf_file);
+                    /* The last ctx_cam thread would be ours,
+                    * set it as created from conf directory.
+                    */
+                    i = 0;
+                    while (motapp->cam_list[++i]);
+                    motapp->cam_list[i-1]->from_conf_dir = true;
+                }
             }
         }
         closedir(dp);
@@ -3752,14 +3774,14 @@ void conf_parms_write(struct ctx_motapp *motapp)
 
     indx_cam = 0;
     while (motapp->cam_list[indx_cam] != NULL) {
-        /*
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,_("Writing config file to %s")
-            ,cam_list[indx_cam]->conf_filename);
-        */
+
         conffile = myfopen(motapp->cam_list[indx_cam]->conf_filename, "w");
 
         if (!conffile) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Failed to write configuration to %s")
+                , motapp->cam_list[indx_cam]->conf_filename);
+            indx_cam++;
             continue;
         }
 
@@ -3918,7 +3940,7 @@ void conf_init_app(struct ctx_motapp *motapp, int argc, char *argv[])
 void conf_init_cams(struct ctx_motapp *motapp)
 {
     FILE *fp = NULL;
-    int indx;
+    int indx, retcd;
 
     motapp->cam_list = (struct ctx_cam**)calloc(sizeof(struct ctx_cam *), 2);
     motapp->cam_list[0] = new ctx_cam;
@@ -3932,9 +3954,15 @@ void conf_init_cams(struct ctx_motapp *motapp)
     conf_edit_dflt_cam(motapp->cam_list[0]);
 
     if (motapp->conf_filename != "") {
-        motapp->conf_filename.copy(motapp->cam_list[0]->conf_filename
-            , strlen(motapp->cam_list[0]->conf_filename));
-        fp = fopen (motapp->conf_filename.c_str(), "r");
+        retcd = snprintf(motapp->cam_list[0]->conf_filename
+                , PATH_MAX, "%s", motapp->conf_filename.c_str());
+        if ((retcd < 0) || (retcd >= PATH_MAX)) {
+            motapp->cam_list[0]->conf_filename[0] = '\0';
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                ,_("Error using config file %s"), motapp->conf_filename.c_str());
+        } else {
+            fp = fopen (motapp->conf_filename.c_str(), "r");
+        }
     }
 
     if (fp) {
