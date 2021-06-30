@@ -1160,10 +1160,12 @@ static void alg_new_location_dist(ctx_cam *cam)
     for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++) {
             if (*(out++)) {
-                variance_x += pow((x - cent->x),2);
-                variance_y += pow((y - cent->y),2);
+                variance_x += ((x - cent->x) * (x - cent->x));
+                variance_y += ((y - cent->y) * (y - cent->y));
                 /* ToDo: We should store this number for the variance calc...*/
-                distance_mean += sqrt(pow((x - cent->x), 2) + pow((y - cent->y), 2));
+                distance_mean += sqrt(
+                        ((x - cent->x) * (x - cent->x)) +
+                        ((y - cent->y) * (y - cent->y)));
 
                 if (x > cent->x) {
                     xdist += x - cent->x;
@@ -1201,10 +1203,11 @@ static void alg_new_location_dist(ctx_cam *cam)
     for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++) {
             if (*(out++)) {
-                variance_xy += pow(
-                    sqrt(pow((x - cent->x), 2) + pow((y - cent->y), 2)) -
-                        distance_mean,
-                    2);
+                variance_xy += (
+                    (sqrt(((x - cent->x) * (x - cent->x)) +
+                          ((y - cent->y) * (y - cent->y))) - distance_mean) *
+                    (sqrt(((x - cent->x) * (x - cent->x)) +
+                          ((y - cent->y) * (y - cent->y))) - distance_mean));
             }
         }
     }
