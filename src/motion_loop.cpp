@@ -660,12 +660,7 @@ static void mlp_init_ref(struct ctx_cam *cam)
 
     memcpy(cam->imgs.image_vprvcy, cam->current_image->image_norm, cam->imgs.size_norm);
 
-    if (cam->conf->primary_method == 0) {
-        alg_update_reference_frame(cam, RESET_REF_FRAME);
-    } else if (cam->conf->primary_method == 1) {
-        //alg_new_update_frame(cam);
-        alg_update_reference_frame(cam, RESET_REF_FRAME);
-    }
+    alg_update_reference_frame(cam, RESET_REF_FRAME);
 
 }
 
@@ -1121,16 +1116,11 @@ static void mlp_detection(struct ctx_cam *cam)
     }
 
     if ( !cam->pause ) {
-        if (cam->conf->primary_method == 0) {
-            alg_diff(cam);
-            alg_lightswitch(cam);
-            alg_despeckle(cam);
-            alg_tune_smartmask(cam);
-        } else if (cam->conf->primary_method == 1) {
-            alg_new_diff(cam);
-        }
+        alg_diff(cam);
     } else {
         cam->current_image->diffs = 0;
+        cam->current_image->diffs_raw = 0;
+        cam->current_image->diffs_ratio = 100;
     }
 
 }
@@ -1140,20 +1130,26 @@ static void mlp_tuning(struct ctx_cam *cam)
 
     if ((cam->conf->noise_tune && cam->shots == 0) &&
           (!cam->detecting_motion && (cam->current_image->diffs <= cam->threshold))) {
-        alg_noise_tune(cam, cam->imgs.image_vprvcy);
+        alg_noise_tune(cam);
     }
 
     if (cam->conf->threshold_tune) {
-        alg_threshold_tune(cam, cam->current_image->diffs, cam->detecting_motion);
+        alg_threshold_tune(cam);
     }
 
     if ((cam->current_image->diffs > cam->threshold) &&
         (cam->current_image->diffs < cam->threshold_maximum)) {
-        alg_locate_center_size(&cam->imgs
-            , cam->imgs.width
-            , cam->imgs.height
-            , &cam->current_image->location);
+        alg_location(cam);
+        alg_stddev(cam);
+
     }
+
+    if (cam->current_image->diffs_ratio < cam->conf->threshold_ratio) {
+        cam->current_image->diffs = 0;
+    }
+
+    alg_tune_smartmask(cam);
+
 
     alg_update_reference_frame(cam, UPDATE_REF_FRAME);
 
@@ -1203,31 +1199,16 @@ static void mlp_overlay(struct ctx_cam *cam)
     }
 
     if (cam->motapp->setup_mode || (cam->stream.motion.cnct_count > 0)) {
-        if (cam->conf->primary_method == 0) {
-            sprintf(tmp, "D:%5d L:%3d N:%3d", cam->current_image->diffs,
-                cam->current_image->total_labels, cam->noise);
-            draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
-                cam->imgs.width - 10, cam->imgs.height - (30 * cam->text_scale),
-                tmp, cam->text_scale);
-            sprintf(tmp, "THREAD %d SETUP", cam->threadnr);
-            draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
-                cam->imgs.width - 10, cam->imgs.height - (10 * cam->text_scale),
-                tmp, cam->text_scale);
-        } else {
-            sprintf(tmp, "D:%5d xy:%3d x:%3d y:%3d"
-                , cam->current_image->diffs
-                , cam->current_image->location.stddev_xy
-                , cam->current_image->location.stddev_x
-                , cam->current_image->location.stddev_y);
-            draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
-                cam->imgs.width - 10, cam->imgs.height - (30 * cam->text_scale),
-                tmp, cam->text_scale);
-            sprintf(tmp, "center %d x %d", cam->current_image->location.x , cam->current_image->location.y );
-            draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
-                cam->imgs.width - 10, cam->imgs.height - (10 * cam->text_scale),
-                tmp, cam->text_scale);
+        sprintf(tmp, "D:%5d L:%3d N:%3d", cam->current_image->diffs,
+            cam->current_image->total_labels, cam->noise);
+        draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
+            cam->imgs.width - 10, cam->imgs.height - (30 * cam->text_scale),
+            tmp, cam->text_scale);
+        sprintf(tmp, "THREAD %d SETUP", cam->threadnr);
+        draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
+            cam->imgs.width - 10, cam->imgs.height - (10 * cam->text_scale),
+            tmp, cam->text_scale);
 
-        }
     }
 
     /* Add text in lower left corner of the pictures */

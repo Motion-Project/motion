@@ -81,13 +81,13 @@ struct ctx_parm config_parms[] = {
     {"text_event",                PARM_TYP_STRING, PARM_CAT_04, WEBUI_LEVEL_LIMITED },
 
     {"emulate_motion",            PARM_TYP_BOOL,   PARM_CAT_05, WEBUI_LEVEL_LIMITED },
-    {"primary_method",            PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"threshold",                 PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"threshold_maximum",         PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"threshold_sdevx",           PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"threshold_sdevy",           PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"threshold_sdevxy",          PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"threshold_ratio",           PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    {"threshold_ratio_change",    PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"threshold_tune",            PARM_TYP_BOOL,   PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"secondary_interval",        PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"secondary_method",          PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
@@ -1074,25 +1074,6 @@ static void conf_edit_emulate_motion(struct ctx_cam *cam, std::string &parm, enu
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","emulate_motion",_("emulate_motion"));
 }
 
-static void conf_edit_primary_method(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        cam->conf->primary_method = 0;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 2)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid primary method %d"),parm_in);
-        } else {
-            cam->conf->primary_method = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(cam->conf->primary_method);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","primary_method",_("primary_method"));
-}
-
 static void conf_edit_threshold(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
@@ -1192,10 +1173,10 @@ static void conf_edit_threshold_ratio(struct ctx_cam *cam, std::string &parm, en
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->threshold_ratio = 999999; /* Arbitrary large value */
+        cam->conf->threshold_ratio = 0;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) ) {
+        if ((parm_in < 0) || (parm_in > 100) ) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_ratio %d"),parm_in);
         } else {
             cam->conf->threshold_ratio = parm_in;
@@ -1205,6 +1186,25 @@ static void conf_edit_threshold_ratio(struct ctx_cam *cam, std::string &parm, en
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_ratio",_("threshold_ratio"));
+}
+
+static void conf_edit_threshold_ratio_change(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    int parm_in;
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->threshold_ratio_change = 64;
+    } else if (pact == PARM_ACT_SET) {
+        parm_in = atoi(parm.c_str());
+        if ((parm_in < 0) || (parm_in > 255) ) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_ratio_change %d"),parm_in);
+        } else {
+            cam->conf->threshold_ratio_change = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET) {
+        parm = std::to_string(cam->conf->threshold_ratio_change);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_ratio_change",_("threshold_ratio_change"));
 }
 
 static void conf_edit_threshold_tune(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
@@ -2830,13 +2830,13 @@ static void conf_edit_cat05(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
     if (parm_nm == "emulate_motion") {                 conf_edit_emulate_motion(cam, parm_val, pact);
-    } else if (parm_nm == "primary_method") {          conf_edit_primary_method(cam, parm_val, pact);
     } else if (parm_nm == "threshold") {               conf_edit_threshold(cam, parm_val, pact);
     } else if (parm_nm == "threshold_maximum") {       conf_edit_threshold_maximum(cam, parm_val, pact);
     } else if (parm_nm == "threshold_sdevx") {         conf_edit_threshold_sdevx(cam, parm_val, pact);
     } else if (parm_nm == "threshold_sdevy") {         conf_edit_threshold_sdevy(cam, parm_val, pact);
     } else if (parm_nm == "threshold_sdevxy") {        conf_edit_threshold_sdevxy(cam, parm_val, pact);
     } else if (parm_nm == "threshold_ratio") {         conf_edit_threshold_ratio(cam, parm_val, pact);
+    } else if (parm_nm == "threshold_ratio_change") {  conf_edit_threshold_ratio_change(cam, parm_val, pact);
     } else if (parm_nm == "threshold_tune") {          conf_edit_threshold_tune(cam, parm_val, pact);
     } else if (parm_nm == "secondary_interval") {      conf_edit_secondary_interval(cam, parm_val, pact);
     } else if (parm_nm == "secondary_method") {        conf_edit_secondary_method(cam, parm_val, pact);

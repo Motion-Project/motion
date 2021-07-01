@@ -64,13 +64,13 @@
 
         /* Motion detection configuration parameters */
         bool            emulate_motion;
-        int             primary_method;
         int             threshold;
         int             threshold_maximum;
         int             threshold_sdevx;
         int             threshold_sdevy;
         int             threshold_sdevxy;
         int             threshold_ratio;
+        int             threshold_ratio_change;
         bool            threshold_tune;
         int             secondary_interval;
         int             secondary_method;

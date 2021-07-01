@@ -20,18 +20,12 @@
 #ifndef _INCLUDE_ALG_HPP_
 #define _INCLUDE_ALG_HPP_
 
-    struct ctx_coord;
-
-    void alg_locate_center_size(struct ctx_images *imgs, int width, int height, struct ctx_coord *cent);
-    void alg_diff(struct ctx_cam *cam);
-    void alg_lightswitch(struct ctx_cam *cam);
-    void alg_noise_tune(struct ctx_cam *cam, unsigned char *new_var);
-    void alg_threshold_tune(struct ctx_cam *cam, int diffs, int motion);
-    void alg_despeckle(struct ctx_cam *cam);
-    void alg_tune_smartmask(struct ctx_cam *cam);
-    void alg_update_reference_frame(struct ctx_cam *cam, int action);
-    void alg_new_update_frame(ctx_cam *cam);
-    void alg_new_diff(ctx_cam *cam);
-
+    void alg_diff(ctx_cam *cam);
+    void alg_noise_tune(ctx_cam *cam);
+    void alg_threshold_tune(ctx_cam *cam);
+    void alg_tune_smartmask(ctx_cam *cam);
+    void alg_update_reference_frame(ctx_cam *cam, int action);
+    void alg_stddev(ctx_cam *cam);
+    void alg_location(ctx_cam *cam);
 
 #endif /* _INCLUDE_ALG_HPP_ */
