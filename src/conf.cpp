@@ -137,6 +137,7 @@ struct ctx_parm config_parms[] = {
     {"movie_codec",               PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {"movie_passthrough",         PARM_TYP_BOOL,   PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {"movie_filename",            PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
+    {"movie_retain",              PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {"movie_extpipe_use",         PARM_TYP_BOOL,   PARM_CAT_10, WEBUI_LEVEL_RESTRICTED },
     {"movie_extpipe",             PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_RESTRICTED },
 
@@ -1911,6 +1912,29 @@ static void conf_edit_movie_filename(struct ctx_cam *cam, std::string &parm, enu
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_filename",_("movie_filename"));
 }
 
+static void conf_edit_movie_retain(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->movie_retain = "all";
+    } else if (pact == PARM_ACT_SET) {
+        if ((parm == "all") || (parm == "secondary") )  {
+            cam->conf->movie_retain = parm;
+        } else if (parm == "") {
+            cam->conf->movie_retain = "all";
+        } else {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid movie_retain %s"), parm.c_str());
+        }
+    } else if (pact == PARM_ACT_GET) {
+        parm = cam->conf->movie_retain;
+    } else if (pact == PARM_ACT_LIST) {
+        parm = "[";
+        parm = parm +  "\"all\",\"secondary\"";
+        parm = parm + "]";
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_retain",_("movie_retain"));
+}
+
 static void conf_edit_movie_extpipe_use(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
@@ -2916,6 +2940,7 @@ static void conf_edit_cat10(struct ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "movie_codec") {             conf_edit_movie_codec(cam, parm_val, pact);
     } else if (parm_nm == "movie_passthrough") {       conf_edit_movie_passthrough(cam, parm_val, pact);
     } else if (parm_nm == "movie_filename") {          conf_edit_movie_filename(cam, parm_val, pact);
+    } else if (parm_nm == "movie_retain") {            conf_edit_movie_retain(cam, parm_val, pact);
     } else if (parm_nm == "movie_extpipe_use") {       conf_edit_movie_extpipe_use(cam, parm_val, pact);
     } else if (parm_nm == "movie_extpipe") {           conf_edit_movie_extpipe(cam, parm_val, pact);
     }

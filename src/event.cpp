@@ -29,6 +29,7 @@
 #include "video_loopback.hpp"
 #include "video_common.hpp"
 #include "webu_stream.hpp"
+#include "alg_sec.hpp"
 
 const char *eventList[] = {
     "NULL",
@@ -499,7 +500,18 @@ static void event_extpipe_end(struct ctx_cam *cam, motion_event evnt
             ,fileno(cam->extpipe), ferror(cam->extpipe));
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "pclose return: %d",
                    pclose(cam->extpipe));
-        event(cam, EVENT_FILECLOSE, NULL, cam->extpipefilename, (void *)FTYPE_MPEG, ts1);
+
+        if ((cam->conf->movie_retain == "secondary") && (cam->algsec_inuse)) {
+            if (cam->algsec->isdetected == false) {
+                remove(cam->extpipefilename);
+            } else {
+                event(cam, EVENT_FILECLOSE, NULL, cam->extpipefilename, (void *)FTYPE_MPEG, ts1);
+            }
+        } else {
+            event(cam, EVENT_FILECLOSE, NULL, cam->extpipefilename, (void *)FTYPE_MPEG, ts1);
+        }
+
+
     }
 }
 
@@ -741,7 +753,15 @@ static void event_movie_closefile(struct ctx_cam *cam, motion_event evnt
             free(cam->movie_norm);
         }
         cam->movie_norm = NULL;
-        event(cam, EVENT_FILECLOSE, NULL, cam->newfilename, (void *)FTYPE_MPEG, ts1);
+        if ((cam->conf->movie_retain == "secondary") && (cam->algsec_inuse)) {
+            if (cam->algsec->isdetected == false) {
+                remove(cam->newfilename);
+            } else {
+                event(cam, EVENT_FILECLOSE, NULL, cam->newfilename, (void *)FTYPE_MPEG, ts1);
+            }
+        } else {
+            event(cam, EVENT_FILECLOSE, NULL, cam->newfilename, (void *)FTYPE_MPEG, ts1);
+        }
     }
 
     if (cam->movie_motion) {
@@ -750,7 +770,15 @@ static void event_movie_closefile(struct ctx_cam *cam, motion_event evnt
             free(cam->movie_motion);
         }
         cam->movie_motion = NULL;
-        event(cam, EVENT_FILECLOSE, NULL, cam->motionfilename, (void *)FTYPE_MPEG_MOTION, ts1);
+        if ((cam->conf->movie_retain == "secondary") && (cam->algsec_inuse)) {
+            if (cam->algsec->isdetected == false) {
+                remove(cam->motionfilename);
+            } else {
+                event(cam, EVENT_FILECLOSE, NULL, cam->motionfilename, (void *)FTYPE_MPEG_MOTION, ts1);
+            }
+        } else {
+            event(cam, EVENT_FILECLOSE, NULL, cam->motionfilename, (void *)FTYPE_MPEG_MOTION, ts1);
+        }
     }
 
 }

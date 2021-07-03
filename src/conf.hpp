@@ -123,8 +123,10 @@
         std::string     movie_codec;
         bool            movie_passthrough;
         std::string     movie_filename;
+        std::string     movie_retain;
         bool            movie_extpipe_use;
         std::string     movie_extpipe;
+
 
         /* Timelapse movie configuration parameters */
         int             timelapse_interval;
