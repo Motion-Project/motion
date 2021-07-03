@@ -288,6 +288,22 @@ static void mystrftime_long (const struct ctx_cam *cam,
         sprintf(out, "%*s", width, VERSION);
         return;
     }
+    if (SPECIFIERWORD("sdevx")) {
+        sprintf(out, "%*d", width,  cam->current_image->location.stddev_x);
+        return;
+    }
+    if (SPECIFIERWORD("sdevy")) {
+        sprintf(out, "%*d", width,  cam->current_image->location.stddev_y);
+        return;
+    }
+    if (SPECIFIERWORD("sdevxy")) {
+        sprintf(out, "%*d", width,  cam->current_image->location.stddev_xy);
+        return;
+    }
+    if (SPECIFIERWORD("ratio")) {
+        sprintf(out, "%*d", width,  cam->current_image->diffs_ratio);
+        return;
+    }
 
     // Not a valid modifier keyword. Log the error and ignore.
     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
@@ -426,13 +442,7 @@ size_t mystrftime(const struct ctx_cam *cam, char *s, size_t max, const char *us
                 sprintf(tempstr, "%*d", width, cam->imgs.height);
                 break;
 
-            case 'f': // filename -- or %fps
-                if ((*(pos_userformat+1) == 'p') && (*(pos_userformat+2) == 's')) {
-                    sprintf(tempstr, "%*d", width, cam->movie_fps);
-                    pos_userformat += 2;
-                    break;
-                }
-
+            case 'f': // filename
                 if (filename) {
                     snprintf(tempstr, PATH_MAX, "%*s", width, filename);
                 } else {
