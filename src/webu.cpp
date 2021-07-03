@@ -961,30 +961,43 @@ static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
     (void)connection;
     (void)cls;
     (void)toe;
-
+    /* Sometimes we can shutdown after we have initiated a connection but yet
+     * before the connection counter has been incremented.  So we check the
+     * connection counter before we decrement
+     */
     if (webui->cnct_type == WEBUI_CNCT_FULL ) {
         pthread_mutex_lock(&webui->cam->stream.mutex);
-            webui->cam->stream.norm.cnct_count--;
+            if (webui->cam->stream.norm.cnct_count > 0) {
+                webui->cam->stream.norm.cnct_count--;
+            }
         pthread_mutex_unlock(&webui->cam->stream.mutex);
 
     } else if (webui->cnct_type == WEBUI_CNCT_SUB ) {
         pthread_mutex_lock(&webui->cam->stream.mutex);
-            webui->cam->stream.sub.cnct_count--;
+            if (webui->cam->stream.sub.cnct_count > 0) {
+                webui->cam->stream.sub.cnct_count--;
+            }
         pthread_mutex_unlock(&webui->cam->stream.mutex);
 
     } else if (webui->cnct_type == WEBUI_CNCT_MOTION ) {
         pthread_mutex_lock(&webui->cam->stream.mutex);
-            webui->cam->stream.motion.cnct_count--;
+            if (webui->cam->stream.motion.cnct_count > 0) {
+                webui->cam->stream.motion.cnct_count--;
+            }
         pthread_mutex_unlock(&webui->cam->stream.mutex);
 
     } else if (webui->cnct_type == WEBUI_CNCT_SOURCE ) {
         pthread_mutex_lock(&webui->cam->stream.mutex);
-            webui->cam->stream.source.cnct_count--;
+            if (webui->cam->stream.source.cnct_count > 0) {
+                webui->cam->stream.source.cnct_count--;
+            }
         pthread_mutex_unlock(&webui->cam->stream.mutex);
 
     } else if (webui->cnct_type == WEBUI_CNCT_SECONDARY ) {
         pthread_mutex_lock(&webui->cam->stream.mutex);
-            webui->cam->stream.secondary.cnct_count--;
+            if (webui->cam->stream.secondary.cnct_count > 0) {
+                webui->cam->stream.secondary.cnct_count--;
+            }
         pthread_mutex_unlock(&webui->cam->stream.mutex);
 
     }
