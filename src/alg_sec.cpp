@@ -541,7 +541,7 @@ void algsec_init(ctx_cam *cam)
 
         mythreadname_set("ml",cam->threadnr,cam->conf->camera_name.c_str());
     #else
-        (void)cam;
+        cam->algsec_inuse = false;
     #endif
 }
 

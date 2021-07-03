@@ -22,6 +22,7 @@
 #include "conf.hpp"
 #include "util.hpp"
 #include "logger.hpp"
+#include "alg_sec.hpp" /* For sec detect in format output */
 #include "dbse.hpp" /*For dbse ID in format output */
 
 
@@ -304,6 +305,19 @@ static void mystrftime_long (const struct ctx_cam *cam,
         sprintf(out, "%*d", width,  cam->current_image->diffs_ratio);
         return;
     }
+    if (SPECIFIERWORD("secdetect")) {
+        if (cam->algsec_inuse) {
+            if (cam->algsec->isdetected) {
+                sprintf(out, "%*s", width, "Y");
+            } else {
+                sprintf(out, "%*s", width, "N");
+            }
+        } else {
+            sprintf(out, "%*s", width, "N");
+        }
+        return;
+    }
+
 
     // Not a valid modifier keyword. Log the error and ignore.
     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,

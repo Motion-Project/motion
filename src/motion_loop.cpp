@@ -204,6 +204,10 @@ static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img
             cam->prev_event = cam->event_nr;
             cam->eventtime = img->imgts.tv_sec;
 
+            if (cam->algsec_inuse) {
+                cam->algsec->isdetected = false;
+            }
+
             mystrftime(cam, cam->text_event_string, sizeof(cam->text_event_string),
                        cam->conf->text_event.c_str(), &img->imgts, NULL, 0);
 
