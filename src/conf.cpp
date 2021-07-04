@@ -926,7 +926,7 @@ static void conf_edit_flip_axis(struct ctx_cam *cam, std::string &parm, enum PAR
     if (pact == PARM_ACT_DFLT) {
         cam->conf->flip_axis = "none";
     } else if (pact == PARM_ACT_SET) {
-        if ((parm == "none") || (parm == "v") || (parm == "h")) {
+        if ((parm == "none") || (parm == "vertical") || (parm == "horizontal")) {
             cam->conf->flip_axis = parm;
         } else if (parm == "") {
             cam->conf->flip_axis = "none";

@@ -201,9 +201,9 @@ void rotate_init(struct ctx_cam *cam)
         cam->rotate_data->degrees = cam->conf->rotate % 360; /* Range: 0..359 */
     }
 
-    if (cam->conf->flip_axis[0]=='h') {
+    if (cam->conf->flip_axis == "horizontal") {
         cam->rotate_data->axis = FLIP_TYPE_HORIZONTAL;
-    } else if (cam->conf->flip_axis[0]=='v') {
+    } else if (cam->conf->flip_axis == "vertical") {
         cam->rotate_data->axis = FLIP_TYPE_VERTICAL;
     } else {
         cam->rotate_data->axis = FLIP_TYPE_NONE;
