@@ -156,7 +156,7 @@
         /* Live stream configuration parameters */
         int             stream_preview_scale;
         bool            stream_preview_newline;
-        int             stream_preview_method;
+        std::string     stream_preview_method;
         bool            stream_preview_ptz;
         int             stream_quality;
         bool            stream_grey;
