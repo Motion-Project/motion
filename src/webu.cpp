@@ -625,7 +625,7 @@ static mhdrslt webu_mhd_auth(struct ctx_webui *webui)
 
     if (webui->motapp->cam_list[0]->conf->webcontrol_authentication == "") {
         webui->authenticated = true;
-        if (webui->motapp->cam_list[0]->conf->webcontrol_auth_method != 0) {
+        if (webui->motapp->cam_list[0]->conf->webcontrol_auth_method != "none") {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No webcontrol user:pass provided"));
         }
         return MHD_YES;
@@ -635,9 +635,9 @@ static mhdrslt webu_mhd_auth(struct ctx_webui *webui)
         webu_mhd_auth_parse(webui);
     }
 
-    if (webui->motapp->cam_list[0]->conf->webcontrol_auth_method == 1) {
+    if (webui->motapp->cam_list[0]->conf->webcontrol_auth_method == "basic") {
         return webu_mhd_basic(webui);
-    } else if (webui->motapp->cam_list[0]->conf->webcontrol_auth_method == 2) {
+    } else if (webui->motapp->cam_list[0]->conf->webcontrol_auth_method == "digest") {
         return webu_mhd_digest(webui);
     }
 
@@ -1023,9 +1023,9 @@ static void webu_mhd_features_basic(struct mhdstart_ctx *mhdst)
         if (retcd == MHD_YES) {
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: available"));
         } else {
-            if (mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method == 1) {
+            if (mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method == "basic") {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
-                mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method = 0;
+                mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method = "none";
             } else {
                 MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
             }
@@ -1044,9 +1044,9 @@ static void webu_mhd_features_digest(struct mhdstart_ctx *mhdst)
         if (retcd == MHD_YES) {
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: available"));
         } else {
-            if (mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method == 2) {
+            if (mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method == "digest") {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
-                mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method = 0;
+                mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method = "none";
             } else {
                 MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
             }
@@ -1221,7 +1221,7 @@ static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst)
 static void webu_mhd_opts_digest(struct mhdstart_ctx *mhdst)
 {
 
-    if (mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method == 2) {
+    if (mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method == "digest") {
 
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_DIGEST_AUTH_RANDOM;
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = sizeof(mhdst->motapp->webcontrol_digest_rand);

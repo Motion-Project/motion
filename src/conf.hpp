@@ -145,7 +145,7 @@
         bool            webcontrol_localhost;
         int             webcontrol_parms;
         std::string     webcontrol_interface;
-        int             webcontrol_auth_method;
+        std::string     webcontrol_auth_method;
         std::string     webcontrol_authentication;
         bool            webcontrol_tls;
         std::string     webcontrol_cert;

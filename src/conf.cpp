@@ -2183,21 +2183,21 @@ static void conf_edit_webcontrol_interface(struct ctx_cam *cam, std::string &par
 
 static void conf_edit_webcontrol_auth_method(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->webcontrol_auth_method = 0;
+        cam->conf->webcontrol_auth_method = "none";
     } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 2)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_auth_method %d"),parm_in);
+        if ((parm == "none") || (parm == "basic") || (parm == "digest"))  {
+            cam->conf->webcontrol_auth_method = parm;
+        } else if (parm == "") {
+            cam->conf->webcontrol_auth_method = "none";
         } else {
-            cam->conf->webcontrol_auth_method = parm_in;
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_auth_method %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(cam->conf->webcontrol_auth_method);
+        parm = cam->conf->webcontrol_auth_method;
     } else if (pact == PARM_ACT_LIST) {
         parm = "[";
-        parm = parm +  "\"0\",\"1\",\"2\"";
+        parm = parm +  "\"none\",\"basic\",\"digest\"";
         parm = parm + "]";
     }
     return;
