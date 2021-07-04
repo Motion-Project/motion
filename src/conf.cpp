@@ -90,7 +90,7 @@ struct ctx_parm config_parms[] = {
     {"threshold_ratio_change",    PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"threshold_tune",            PARM_TYP_BOOL,   PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"secondary_interval",        PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
-    {"secondary_method",          PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
+    {"secondary_method",          PARM_TYP_LIST,   PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"secondary_params",          PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
 
     {"noise_level",               PARM_TYP_INT,    PARM_CAT_06, WEBUI_LEVEL_LIMITED },
@@ -1242,18 +1242,21 @@ static void conf_edit_secondary_interval(struct ctx_cam *cam, std::string &parm,
 
 static void conf_edit_secondary_method(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->secondary_method = 0;
+        cam->conf->secondary_method = "none";
     } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) ) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid secondary_method %d"),parm_in);
+        if ((parm == "none") || (parm == "haar") ||
+            (parm == "hog"))  {
+            cam->conf->secondary_method = parm;
+        } else if (parm == "") {
+            cam->conf->secondary_method = "none";
         } else {
-            cam->conf->secondary_method = parm_in;
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid secondary_method %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(cam->conf->secondary_method);
+        parm = cam->conf->secondary_method;
+    } else if (pact == PARM_ACT_LIST) {
+        parm = "[\"none\",\"haar\",\"hog\"]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_method",_("secondary_method"));

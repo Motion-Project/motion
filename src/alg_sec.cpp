@@ -216,7 +216,7 @@ static void algsec_detect_hog(ctx_cam *cam, ctx_algsec_model &algmdl)
         const char* err_msg = e.what();
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
-        algmdl.method = 0;
+        algmdl.method = "none";
     }
 }
 
@@ -265,7 +265,7 @@ static void algsec_detect_haar(ctx_cam *cam, ctx_algsec_model &algmdl)
         const char* err_msg = e.what();
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
-        algmdl.method = 0;
+        algmdl.method = "none";
     }
 }
 
@@ -274,13 +274,13 @@ static void algsec_load_haar(ctx_algsec_model &algmdl)
     /* If loading fails, reset the method to invalidate detection */
     try {
         if (algmdl.model_file == "") {
-            algmdl.method = 0;
+            algmdl.method = "none";
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("No secondary model specified."));
             return;
         }
         if (!algmdl.haar_cascade.load(algmdl.model_file)) {
             /* Loading failed, reset method*/
-            algmdl.method = 0;
+            algmdl.method = "none";
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
                 ,algmdl.model_file.c_str());
         };
@@ -288,7 +288,7 @@ static void algsec_load_haar(ctx_algsec_model &algmdl)
         const char* err_msg = e.what();
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s"), algmdl.model_file.c_str());
-        algmdl.method = 0;
+        algmdl.method = "none";
     }
 }
 
@@ -363,7 +363,7 @@ static void algsec_params_defaults(ctx_algsec_model &algmdl)
     util_parms_add_default(algmdl.algsec_params, "imagetype", "full");
 
     util_parms_add_default(algmdl.algsec_params, "threshold_motion", "1.1");
-    if (algmdl.method == 1) {
+    if (algmdl.method == "haar") {
         util_parms_add_default(algmdl.algsec_params, "threshold_model", "1.4");
         util_parms_add_default(algmdl.algsec_params, "scalefactor", "1.1");
     } else {
@@ -437,21 +437,16 @@ static int algsec_load_params(ctx_cam *cam)
 static int algsec_load_models(ctx_cam *cam)
 {
 
-    if (cam->algsec->models.method != 0){
-        switch (cam->algsec->models.method) {
-        case 1:     //Haar Method
-            algsec_load_haar(cam->algsec->models);
-            break;
-        case 2:     //HoG Method
-            //algsec_load_hog(cam->algsec->models);
-            break;
-        default:
-            cam->algsec->models.method = 0;
-        }
+    if (cam->algsec->models.method == "haar") {
+        algsec_load_haar(cam->algsec->models);
+    } else if (cam->algsec->models.method == "hog") {
+        //algsec_load_hog(cam->algsec->models);
+    } else {
+        cam->algsec->models.method = "none";
     }
 
-    /* If model fails to load, it sets method to zero*/
-    if (cam->algsec->models.method != 0){
+    /* If model fails to load, the method is changed to none*/
+    if (cam->algsec->models.method != "none"){
         cam->algsec_inuse = true;
         return 0;
     } else {
@@ -475,13 +470,10 @@ static void *algsec_handler(void *arg)
 
     while (!cam->algsec->closing){
         if (cam->algsec->detecting){
-            switch (cam->algsec->models.method) {
-            case 1:     //Haar Method
+            if (cam->algsec->models.method == "haar") {
                 algsec_detect_haar(cam, cam->algsec->models);
-                break;
-            case 2:     //HoG Method
+            } else if (cam->algsec->models.method == "hog") {
                 algsec_detect_hog(cam, cam->algsec->models);
-                break;
             }
             cam->algsec->detecting = false;
             /*Set the event based isdetected bool */
@@ -511,7 +503,7 @@ static void algsec_start_handler(ctx_cam *cam)
     if (retcd < 0) {
         MOTION_LOG(ALR, TYPE_NETCAM, SHOW_ERRNO
             ,_("Error starting algsec handler thread"));
-        cam->algsec->models.method = 0;
+        cam->algsec->models.method = "none";
     }
     pthread_attr_destroy(&handler_attribute);
     return;

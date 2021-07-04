@@ -39,7 +39,7 @@ struct ctx_algsec_model {
     std::string                 model_file;
     int                         frame_interval;
 
-    int                         method;
+    std::string                 method;
     std::string                 imagetype;
     int                         rotate;
 
