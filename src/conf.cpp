@@ -144,7 +144,7 @@ struct ctx_parm config_parms[] = {
     {"timelapse_interval",        PARM_TYP_INT,    PARM_CAT_11, WEBUI_LEVEL_LIMITED },
     {"timelapse_mode",            PARM_TYP_LIST,   PARM_CAT_11, WEBUI_LEVEL_LIMITED },
     {"timelapse_fps",             PARM_TYP_INT,    PARM_CAT_11, WEBUI_LEVEL_LIMITED },
-    {"timelapse_codec",           PARM_TYP_LIST,   PARM_CAT_11, WEBUI_LEVEL_LIMITED },
+    {"timelapse_container",       PARM_TYP_LIST,   PARM_CAT_11, WEBUI_LEVEL_LIMITED },
     {"timelapse_filename",        PARM_TYP_STRING, PARM_CAT_11, WEBUI_LEVEL_LIMITED },
 
     {"video_pipe",                PARM_TYP_STRING, PARM_CAT_12, WEBUI_LEVEL_LIMITED },
@@ -2028,27 +2028,27 @@ static void conf_edit_timelapse_fps(struct ctx_cam *cam, std::string &parm, enum
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_fps",_("timelapse_fps"));
 }
 
-static void conf_edit_timelapse_codec(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_timelapse_container(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->timelapse_codec = "mpg";
+        cam->conf->timelapse_container = "mpg";
     } else if (pact == PARM_ACT_SET) {
-        if ((parm == "mpg") || (parm == "mpeg4"))  {
-            cam->conf->timelapse_codec = parm;
+        if ((parm == "mpg") || (parm == "mkv"))  {
+            cam->conf->timelapse_container = parm;
         } else if (parm == "") {
-            cam->conf->timelapse_codec = "mpg";
+            cam->conf->timelapse_container = "mpg";
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_codec %s"), parm.c_str());
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_container %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
-        parm = cam->conf->timelapse_codec;
+        parm = cam->conf->timelapse_container;
     } else if (pact == PARM_ACT_LIST) {
         parm = "[";
-        parm = parm +  "\"mpg\",\"mpeg4\"";
+        parm = parm +  "\"mpg\",\"mkv\"";
         parm = parm + "]";
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_codec",_("timelapse_codec"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_container",_("timelapse_container"));
 }
 
 static void conf_edit_timelapse_filename(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
@@ -2956,7 +2956,7 @@ static void conf_edit_cat11(struct ctx_cam *cam, std::string parm_nm
     if (parm_nm == "timelapse_interval") {             conf_edit_timelapse_interval(cam, parm_val, pact);
     } else if (parm_nm == "timelapse_mode") {          conf_edit_timelapse_mode(cam, parm_val, pact);
     } else if (parm_nm == "timelapse_fps") {           conf_edit_timelapse_fps(cam, parm_val, pact);
-    } else if (parm_nm == "timelapse_codec") {         conf_edit_timelapse_codec(cam, parm_val, pact);
+    } else if (parm_nm == "timelapse_container") {     conf_edit_timelapse_container(cam, parm_val, pact);
     } else if (parm_nm == "timelapse_filename") {      conf_edit_timelapse_filename(cam, parm_val, pact);
     }
 

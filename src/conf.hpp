@@ -132,7 +132,7 @@
         int             timelapse_interval;
         std::string     timelapse_mode;
         int             timelapse_fps;
-        std::string     timelapse_codec;
+        std::string     timelapse_container;
         std::string     timelapse_filename;
 
         /* Loopback device configuration parameters */
