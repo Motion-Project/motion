@@ -144,7 +144,7 @@
         bool            webcontrol_ipv6;
         bool            webcontrol_localhost;
         int             webcontrol_parms;
-        int             webcontrol_interface;
+        std::string     webcontrol_interface;
         int             webcontrol_auth_method;
         std::string     webcontrol_authentication;
         bool            webcontrol_tls;

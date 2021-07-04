@@ -697,7 +697,7 @@ static mhdrslt webu_answer_post(struct ctx_webui *webui)
         webu_post_main(webui);
     pthread_mutex_unlock(&webui->motapp->mutex_post);
 
-    if (webui->motapp->cam_list[0]->conf->webcontrol_interface == 3) {
+    if (webui->motapp->cam_list[0]->conf->webcontrol_interface == "user") {
         webu_html_user(webui);
     } else {
         webu_html_page(webui);
@@ -822,7 +822,7 @@ static mhdrslt webu_answer_get(struct ctx_webui *webui)
 
     } else {
         pthread_mutex_lock(&webui->motapp->mutex_post);
-            if (webui->motapp->cam_list[0]->conf->webcontrol_interface == 3) {
+            if (webui->motapp->cam_list[0]->conf->webcontrol_interface == "user") {
                 webu_html_user(webui);
             } else {
                 webu_html_page(webui);

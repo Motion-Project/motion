@@ -2160,21 +2160,21 @@ static void conf_edit_webcontrol_parms(struct ctx_cam *cam, std::string &parm, e
 
 static void conf_edit_webcontrol_interface(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->webcontrol_interface = 0;
+        cam->conf->webcontrol_interface = "default";
     } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 3)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_interface %d"),parm_in);
+        if ((parm == "default") || (parm == "user"))  {
+            cam->conf->webcontrol_interface = parm;
+        } else if (parm == "") {
+            cam->conf->webcontrol_interface = "default";
         } else {
-            cam->conf->webcontrol_interface = parm_in;
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_interface %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(cam->conf->webcontrol_interface);
+        parm = cam->conf->webcontrol_interface;
     } else if (pact == PARM_ACT_LIST) {
         parm = "[";
-        parm = parm +  "\"0\",\"1\",\"2\",\"3\"";
+        parm = parm +  "\"default\",\"user\"";
         parm = parm + "]";
     }
     return;
