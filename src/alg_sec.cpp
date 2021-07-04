@@ -589,6 +589,14 @@ void algsec_detect(ctx_cam *cam)
 {
     /*This function runs on the camera thread */
     #ifdef HAVE_OPENCV
+
+        /* If we have already detected something for this event,
+         * we do not need to do further detections
+         */
+        if (cam->algsec->isdetected) {
+            return;
+        }
+
         if (cam->algsec->frame_cnt > 0) {
             cam->algsec->frame_cnt--;
         }
