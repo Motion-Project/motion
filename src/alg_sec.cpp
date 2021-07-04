@@ -41,7 +41,7 @@ using namespace cv;
 
 static void algsec_img_show(ctx_cam *cam, Mat &mat_src
         , std::vector<Rect> &src_pos, std::vector<double> &src_weights
-        , std::string algmethod, ctx_algsec_model &algmdl)
+        , ctx_algsec_model &algmdl)
 {
 
     std::vector<Rect> fltr_pos;
@@ -51,10 +51,6 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
     std::vector<uchar> buff;    //buffer for coding
     std::vector<int> param(2);
     char wstr[10];
-
-    (void)algmethod;
-    testdir = cam->conf->target_dir;
-    //imwrite(testdir  + "/src_" + algmethod + ".jpg", mat_src);
 
     algmdl.isdetected = false;
     for (indx0=0; indx0<src_pos.size(); indx0++) {
@@ -73,26 +69,34 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
         }
     }
 
-    if (algmdl.isdetected) {
-        for (indx0=0; indx0<fltr_pos.size(); indx0++) {
-            Rect r = fltr_pos[indx0];
-            r.x += cvRound(r.width*0.1);
-            r.width = cvRound(r.width*0.8);
-            r.y += cvRound(r.height*0.06);
-            r.height = cvRound(r.height*0.9);
-            rectangle(mat_src, r.tl(), r.br(), cv::Scalar(0,255,0), 2);
-            snprintf(wstr, 10, "%.4f", fltr_weights[indx0]);
-            putText(mat_src, wstr, Point(r.x,r.y), FONT_HERSHEY_PLAIN, 1, 255, 1);
-        }
-    //    imwrite(testdir  + "/detect_" + algmethod + ".jpg", mat_src);
-    }
-
     /* We check the size so that we at least fill in the first image so the
      * web stream will have something to start with.  After feeding in at least
      * the first image, we rely upon the connection count to tell us whether we
      * need to expend the CPU to compress and load the secondary images */
     if ((cam->stream.secondary.cnct_count >0) ||
-        (cam->imgs.size_secondary == 0)) {
+        (cam->imgs.size_secondary == 0) ||
+        (cam->motapp->log_level >= DBG)) {
+
+        if (cam->motapp->log_level >= DBG) {
+            imwrite(cam->conf->target_dir  + "/src_" + algmdl.method + ".jpg", mat_src);
+        }
+
+        if (algmdl.isdetected) {
+            for (indx0=0; indx0<fltr_pos.size(); indx0++) {
+                Rect r = fltr_pos[indx0];
+                r.x += cvRound(r.width*0.1);
+                r.width = cvRound(r.width*0.8);
+                r.y += cvRound(r.height*0.06);
+                r.height = cvRound(r.height*0.9);
+                rectangle(mat_src, r.tl(), r.br(), cv::Scalar(0,255,0), 2);
+                snprintf(wstr, 10, "%.4f", fltr_weights[indx0]);
+                putText(mat_src, wstr, Point(r.x,r.y), FONT_HERSHEY_PLAIN, 1, 255, 1);
+            }
+            if (cam->motapp->log_level >= DBG) {
+                imwrite(cam->conf->target_dir  + "/detect_" + algmdl.method + ".jpg", mat_src);
+            }
+        }
+
         param[0] = cv::IMWRITE_JPEG_QUALITY;
         param[1] = 75;
         cv::imencode(".jpg", mat_src, buff, param);
@@ -210,7 +214,7 @@ static void algsec_detect_hog(ctx_cam *cam, ctx_algsec_model &algmdl)
             ,algmdl.threshold_model
             ,false);
 
-        algsec_img_show(cam, mat_dst, detect_pos, detect_weights, "hog",algmdl);
+        algsec_img_show(cam, mat_dst, detect_pos, detect_weights, algmdl);
 
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
@@ -259,7 +263,7 @@ static void algsec_detect_haar(ctx_cam *cam, ctx_algsec_model &algmdl)
             , Size(algmdl.haar_minsize,algmdl.haar_minsize)
             , Size(algmdl.haar_maxsize,algmdl.haar_maxsize), true);
 
-        algsec_img_show(cam, mat_dst, detect_pos, detect_weights, "haar", algmdl);
+        algsec_img_show(cam, mat_dst, detect_pos, detect_weights, algmdl);
 
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
