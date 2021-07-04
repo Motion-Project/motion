@@ -137,7 +137,7 @@ struct ctx_parm config_parms[] = {
     {"movie_codec",               PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {"movie_passthrough",         PARM_TYP_BOOL,   PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {"movie_filename",            PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
-    {"movie_retain",              PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
+    {"movie_retain",              PARM_TYP_LIST,   PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {"movie_extpipe_use",         PARM_TYP_BOOL,   PARM_CAT_10, WEBUI_LEVEL_RESTRICTED },
     {"movie_extpipe",             PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_RESTRICTED },
 
