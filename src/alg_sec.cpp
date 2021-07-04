@@ -52,9 +52,9 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
     std::vector<int> param(2);
     char wstr[10];
 
+    (void)algmethod;
     testdir = cam->conf->target_dir;
-
-    imwrite(testdir  + "/src_" + algmethod + ".jpg", mat_src);
+    //imwrite(testdir  + "/src_" + algmethod + ".jpg", mat_src);
 
     algmdl.isdetected = false;
     for (indx0=0; indx0<src_pos.size(); indx0++) {
@@ -84,7 +84,7 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
             snprintf(wstr, 10, "%.4f", fltr_weights[indx0]);
             putText(mat_src, wstr, Point(r.x,r.y), FONT_HERSHEY_PLAIN, 1, 255, 1);
         }
-        imwrite(testdir  + "/detect_" + algmethod + ".jpg", mat_src);
+    //    imwrite(testdir  + "/detect_" + algmethod + ".jpg", mat_src);
     }
 
     /* We check the size so that we at least fill in the first image so the

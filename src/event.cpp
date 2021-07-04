@@ -487,6 +487,7 @@ static void event_extpipe_end(struct ctx_cam *cam, motion_event evnt
         ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
 {
 
+    int retcd;
     (void)evnt;
     (void)img_data;
     (void)fname;
@@ -503,14 +504,17 @@ static void event_extpipe_end(struct ctx_cam *cam, motion_event evnt
 
         if ((cam->conf->movie_retain == "secondary") && (cam->algsec_inuse)) {
             if (cam->algsec->isdetected == false) {
-                remove(cam->extpipefilename);
+                retcd = remove(cam->extpipefilename);
+                if (retcd != 0) {
+                    MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                        , _("Unable to remove file %s"), cam->extpipefilename);
+                }
             } else {
                 event(cam, EVENT_FILECLOSE, NULL, cam->extpipefilename, (void *)FTYPE_MPEG, ts1);
             }
         } else {
             event(cam, EVENT_FILECLOSE, NULL, cam->extpipefilename, (void *)FTYPE_MPEG, ts1);
         }
-
 
     }
 }
@@ -742,6 +746,7 @@ static void event_movie_closefile(struct ctx_cam *cam, motion_event evnt
         ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
 {
 
+    int retcd;
     (void)evnt;
     (void)img_data;
     (void)fname;
@@ -753,9 +758,14 @@ static void event_movie_closefile(struct ctx_cam *cam, motion_event evnt
             free(cam->movie_norm);
         }
         cam->movie_norm = NULL;
+
         if ((cam->conf->movie_retain == "secondary") && (cam->algsec_inuse)) {
             if (cam->algsec->isdetected == false) {
-                remove(cam->newfilename);
+                retcd = remove(cam->newfilename);
+                if (retcd != 0) {
+                    MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                        , _("Unable to remove file %s"), cam->newfilename);
+                }
             } else {
                 event(cam, EVENT_FILECLOSE, NULL, cam->newfilename, (void *)FTYPE_MPEG, ts1);
             }
@@ -769,10 +779,15 @@ static void event_movie_closefile(struct ctx_cam *cam, motion_event evnt
         if (cam->movie_motion != NULL) {
             free(cam->movie_motion);
         }
+
         cam->movie_motion = NULL;
         if ((cam->conf->movie_retain == "secondary") && (cam->algsec_inuse)) {
             if (cam->algsec->isdetected == false) {
-                remove(cam->motionfilename);
+                retcd = remove(cam->motionfilename);
+                if (retcd != 0) {
+                    MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                        , _("Unable to remove file %s"), cam->motionfilename);
+                }
             } else {
                 event(cam, EVENT_FILECLOSE, NULL, cam->motionfilename, (void *)FTYPE_MPEG_MOTION, ts1);
             }

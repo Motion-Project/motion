@@ -1746,6 +1746,16 @@ int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1)
 
     retcd = movie_open(cam->movie_norm);
 
+    if (retcd == 0) {
+        /* We set this after the movie open so we get the extension */
+        retcd = snprintf(cam->newfilename, PATH_MAX, "%s",cam->movie_norm->filename);
+        if ((retcd < 0) || (retcd >= PATH_MAX)) {
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                ,_("Error setting file name"));
+            return -1;
+        }
+    }
+
     return retcd;
 
 }
@@ -1797,6 +1807,15 @@ int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1)
     cam->movie_motion->netcam_data = NULL;
 
     retcd = movie_open(cam->movie_motion);
+
+    if (retcd == 0) {
+        retcd = snprintf(cam->motionfilename, PATH_MAX, "%s",cam->movie_motion->filename);
+        if ((retcd < 0) || (retcd >= PATH_MAX)) {
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                ,_("Error setting file name"));
+            return -1;
+        }
+    }
 
     return retcd;
 
@@ -1856,6 +1875,15 @@ int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1)
         cam->movie_timelapse->tlapse = TIMELAPSE_NEW;
         cam->movie_timelapse->codec_name = codec_mkv;
         retcd = movie_open(cam->movie_timelapse);
+    }
+
+    if (retcd == 0) {
+        retcd = snprintf(cam->timelapsefilename, PATH_MAX, "%s",cam->movie_timelapse->filename);
+        if ((retcd < 0) || (retcd >= PATH_MAX)) {
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                ,_("Error setting file name"));
+            return -1;
+        }
     }
 
     return retcd;
