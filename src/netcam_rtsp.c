@@ -1425,8 +1425,7 @@ static void netcam_rtsp_set_path (struct context *cnt, struct rtsp_context *rtsp
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("Setting up file via ffmpeg netcam"));
     } else {
-        if (mystreq(url.service, "mjpeg")) {
-            sprintf(url.service, "%s","http");
+        if (mystreq(url.service, "http")) {
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("Setting up http via ffmpeg netcam"));
         } else {

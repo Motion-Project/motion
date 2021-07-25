@@ -779,7 +779,7 @@ int netcam_start(struct context *cnt)
     /* Initialise the netcam socket to -1 to trigger a connection by the keep-alive logic. */
     netcam->sock = -1;
 
-    if ((url.service) && (mystreq(url.service, "http"))) {
+    if ((url.service) && (mystreq(url.service, "mjpeg"))) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("now calling netcam_setup_html()"));
         retval = netcam_setup_html(netcam, &url);
     } else if ((url.service) && (mystreq(url.service, "ftp"))) {
@@ -789,10 +789,11 @@ int netcam_start(struct context *cnt)
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("now calling netcam_setup_file()"));
         retval = netcam_setup_file(netcam, &url);
     } else if ((url.service) && (mystreq(url.service, "mjpg"))) {
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("now calling netcam_setup_mjpg()"));
         retval = netcam_setup_mjpg(netcam, &url);
     } else {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or jpeg.")
+            ,_("Invalid netcam service '%s' - must be mjpeg, ftp, mjpg or jpeg.")
             , url.service);
         retval = -1;
     }
