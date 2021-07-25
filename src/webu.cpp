@@ -313,28 +313,14 @@ static void webu_clientip(struct ctx_webui *webui)
 /* Get the hostname */
 static void webu_hostname(struct ctx_webui *webui)
 {
-    const char *hdr;
-    std::string hostname;
-
-    hostname = "localhost";
-
-    hdr = MHD_lookup_connection_value(webui->connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_HOST);
-    if (hdr != NULL) {
-        hostname.assign(hdr);
-        if ((hdr[0] == '[') && (hostname.find("]") != std::string::npos)) {
-            hostname = hostname.substr(0, hostname.find("]") + 1);
-        } else if ((hdr[0] != '[') && (hostname.find(":") != std::string::npos)) {
-            hostname = hostname.substr(0, hostname.find(":"));
-        }
+    /* host header includes port if non-standard already */
+    std::string host(MHD_lookup_connection_value(webui->connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_HOST));
+    if(host.empty()){
+        /* this should not happen, but do our best anyway */
+        host = "localhost:" + std::to_string(webui->motapp->cam_list[0]->conf->webcontrol_port);
     }
-
-    if (webui->motapp->cam_list[0]->conf->webcontrol_tls) {
-        webui->hostfull = "https";
-    } else {
-        webui->hostfull = "http";
-    }
-    webui->hostfull += "://" + hostname + ":" +
-        std::to_string(webui->motapp->cam_list[0]->conf->webcontrol_port);
+    /* use protocol-relative URL */
+    webui->hostfull = "//" + host;
 
     MOTION_LOG(DBG,TYPE_ALL, NO_ERRNO, _("Full Host:  %s"), webui->hostfull.c_str());
 

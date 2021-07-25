@@ -60,7 +60,7 @@ void dbse_global_deinit(struct ctx_motapp *motapp)
 
     #if defined(HAVE_MYSQL)
         if (motapp->cam_list[0]->conf->database_type != "") {
-            if ((cam_list[0]->conf->database_type == "mysql")) {
+            if ((motapp->cam_list[0]->conf->database_type == "mysql")) {
                 MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing MYSQL"));
                 mysql_library_end();
             }
@@ -203,12 +203,12 @@ static void dbse_init_mysql(struct ctx_cam *cam)
                 ,_("MySQL error was %s"), mysql_error(cam->dbse->database_mysql));
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 ,_("Disabling database functionality"));
-            dbse_global_deinit(cam->cam_list);
+            dbse_global_deinit(cam->motapp);
             cam->conf->database_type = "";
             return;
         }
         #if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
-            my_bool my_true = true;
+            bool my_true = true;
             mysql_options(cam->dbse->database_mysql, MYSQL_OPT_RECONNECT, &my_true);
         #endif
     #else
@@ -247,7 +247,7 @@ static void dbse_init_mariadb(struct ctx_cam *cam)
             return;
         }
         #if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
-            my_bool my_true = true;
+            bool my_true = true;
             mysql_options(cam->dbse->database_mariadb, MYSQL_OPT_RECONNECT, &my_true);
         #endif
     #else
