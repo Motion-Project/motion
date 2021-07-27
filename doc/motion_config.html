@@ -2870,21 +2870,16 @@
         </ul>
 
         <p></p>
-        URL to use if you are using a network camera, size will be autodetected.
+        URL for a network camera.
         Available prefixes to the URL:
         <p></p>
         <ul>
         <i>http://</i>
         <ul>
-            This prefix uses the traditional http format and opens the netcam looking for a motion jpg image.
-        </ul>
-        <p></p>
-
-        <i>ftp://</i>
-        <ul>
-            This prefix opens the ftp site and grabs a static image.  The camera will be expected to periodically
-            replace that static image as it processes images.
-        </ul>
+            This prefix uses the traditional http format and opens a netcam that provides a motion jpg image.
+            <p></p>
+            When using the rtsp format, Motion will ignore the netcam_keepalive and netcam_tolerant_check options.
+          </ul>
         <p></p>
 
         <i>rtsp://</i>
@@ -2915,19 +2910,6 @@
         </ul>
         <p></p>
 
-        <i>mjpeg://</i>
-        <ul>
-            This is an alternative prefix for http.  The mjpeg is replaced with http by Motion internally and forces the
-            use of the ffmpeg libraries and the mjpeg format.
-            <p></p>
-            This option is equivalent to using <code>ffplay -f mjpeg http://{yourip}</code>.
-            <p></p>
-            In certain situations, this option may result in better results than using the http protocol.
-            <p></p>
-            Motion will ignore the netcam_keepalive and netcam_tolerant_check options when this format is specified.
-        </ul>
-        <p></p>
-
         <i>file://</i>
         <ul>
             This option allows for the processing of a existing movie file.  Motion will open the file and
@@ -2937,8 +2919,10 @@
             <p></p>
             A sample format for the netcam_url would be <code>netcam_url file:///home/user/cam1/cam1_20180817084027.mkv</code>
             <p></p>
-            This option may be useful for "reprocessing" a movie created by Motion to fine tune the detection options.
-
+            This option is useful for "reprocessing" a movie created by Motion to fine tune the detection options.
+            <p></p>
+            At the end of the movie file, Motion will restart the movie file at the beginning so that you can
+            continue to refine the detection parameters.
         </ul>
         <p></p>
 
@@ -2952,9 +2936,16 @@
         </ul>
         <p></p>
 
+        <i>mjpeg://</i>
+        <ul>
+            This is an alternative prefix for http for use when Motion is compiled without ffmpeg.
+            <p></p>
+        </ul>
+        <p></p>
+
         <i>mjpg://</i>
         <ul>
-            This option processes very old netcams with non standard mjpeg formats.
+            This option may process very old netcams with non standard mjpeg formats.
         </ul>
         <p></p>
 
@@ -2965,7 +2956,14 @@
         </ul>
         <p></p>
 
+        <i>ftp://</i>
+        <ul>
+            This prefix opens the ftp site and grabs a static image.  The camera will be expected to periodically
+            replace that static image as it processes images.
         </ul>
+        <p></p>
+
+      </ul>
 
         <h3><a name="netcam_params"></a> netcam_params </h3>
         <p></p>
@@ -4492,11 +4490,8 @@
           <li> Default: off</li>
         </ul>
         <p></p>
-        When using a RTSP, RTMP, mjpeg and some V4l2 cameras, create movie files of the motion with the packets
+        When using a RTSP, RTMP, http and some V4l2 cameras, create movie files of the motion with the packets
         obtained directly from the camera.
-        <p></p>
-        For mjpeg cameras, the url must be specified using the <code>mjpeg</code> prefix rather than
-        as <code>http</code>
         <p></p>
         For v4l2 cameras to use the movie_passthrough, they must be specified using the
         <a href="#netcam_url">netcam_url</a> parameter and the <code>v4l2</code> prefix.

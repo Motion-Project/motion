@@ -782,13 +782,12 @@ static int init_camera_type(struct context *cnt)
 
     if (cnt->conf.netcam_url) {
         if ((strncmp(cnt->conf.netcam_url,"mjpeg",5) == 0) ||
-            (strncmp(cnt->conf.netcam_url,"v4l2" ,4) == 0) ||
-            (strncmp(cnt->conf.netcam_url,"file" ,4) == 0) ||
-            (strncmp(cnt->conf.netcam_url,"rtmp" ,4) == 0) ||
-            (strncmp(cnt->conf.netcam_url,"rtsp" ,4) == 0)) {
-            cnt->camera_type = CAMERA_TYPE_RTSP;
-        } else {
+            (strncmp(cnt->conf.netcam_url,"ftp" ,3) == 0) ||
+            (strncmp(cnt->conf.netcam_url,"mjpg" ,4) == 0) ||
+            (strncmp(cnt->conf.netcam_url,"jpeg" ,4) == 0)) {
             cnt->camera_type = CAMERA_TYPE_NETCAM;
+        } else {
+            cnt->camera_type = CAMERA_TYPE_RTSP;
         }
         return 0;
     }
