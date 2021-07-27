@@ -341,15 +341,12 @@ Description:
 .fi
 .RS
 Full connection URL string to use to connect to a network camera.
-The URL must provide a stream of images instead of only a static image.
-The following prefixes are recognized
+In addition to standard camera protocols, the following prefixes are
+added by the Motion application.
 
 .RS
-http://
 ftp://
 mjpg://
-rtsp://
-rtmp://
 mjpeg://
 file://
 v4l2://
@@ -357,9 +354,6 @@ v4l2://
 
 The connection string is camera specific.
 It is usually the same as what other video playing applications would use to connect to the camera stream.
-Motion currently only supports basic authentication for the cameras.
-Digest is not currently supported.
-Basic authentication can be specified in the URL or via the netcam_userpass option.
 .RE
 .RE
 
