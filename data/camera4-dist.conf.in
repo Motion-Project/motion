@@ -12,7 +12,7 @@ camera_name Server room
 camera_id 104
 
 # Video device (e.g. /dev/video0) to be used for capturing.
-videodevice /dev/video0
+video_device /dev/video0
 
 # Image width in pixels.
 width 640
