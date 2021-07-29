@@ -1399,6 +1399,7 @@ static void netcam_rtsp_set_path (struct context *cnt, struct rtsp_context *rtsp
     struct url_t url;
 
     rtsp_data->path = NULL;
+    rtsp_data->service = NULL;
 
     memset(&url, 0, sizeof(url));
 
@@ -1418,20 +1419,15 @@ static void netcam_rtsp_set_path (struct context *cnt, struct rtsp_context *rtsp
         rtsp_data->path = mymalloc(strlen(url.path) + 1);
         sprintf(rtsp_data->path, "%s",url.path);
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("Setting up v4l2 via ffmpeg netcam"));
+            ,_("Setting up v4l2 via netcam"));
     } else if (mystreq(url.service, "file")) {
         rtsp_data->path = mymalloc(strlen(url.path) + 1);
         sprintf(rtsp_data->path, "%s",url.path);
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("Setting up file via ffmpeg netcam"));
+            ,_("Setting up file via netcam"));
     } else {
-        if (mystreq(url.service, "http")) {
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("Setting up http via ffmpeg netcam"));
-        } else {
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("Setting up %s via ffmpeg netcam"),url.service);
-        }
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("Setting up %s via netcam"),url.service);
         if (userpass != NULL) {
             rtsp_data->path = mymalloc(strlen(url.service) + 3 + strlen(userpass)
                   + 1 + strlen(url.host) + 6 + strlen(url.path) + 2 );
@@ -1445,6 +1441,7 @@ static void netcam_rtsp_set_path (struct context *cnt, struct rtsp_context *rtsp
         }
     }
 
+    rtsp_data->service = mymalloc(strlen(url.service)+1);
     sprintf(rtsp_data->service, "%s",url.service);
 
     netcam_url_free(&url);
@@ -1834,7 +1831,12 @@ static void netcam_rtsp_shutdown(struct rtsp_context *rtsp_data)
         if (rtsp_data->path != NULL) {
             free(rtsp_data->path);
         }
-        rtsp_data->path       = NULL;
+        rtsp_data->path = NULL;
+
+        if (rtsp_data->service != NULL) {
+            free(rtsp_data->service);
+        }
+        rtsp_data->service = NULL;
 
         if (rtsp_data->img_latest != NULL) {
             free(rtsp_data->img_latest->ptr);
