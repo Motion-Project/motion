@@ -443,6 +443,10 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
         return;
     }
 
+    if (netcam->cnt->netcam == NULL) {
+        return;
+    }
+
     /*
      * This 'lock' is just a bit of "defensive" programming.  It should
      * only be necessary if the routine is being called from different
@@ -450,10 +454,6 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
      * the motion main-loop.
      */
     pthread_mutex_lock(&netcam->mutex);
-
-    if (netcam->cnt->netcam == NULL) {
-        return;
-    }
 
     /*
      * We set the netcam_context pointer in the motion main-loop context
