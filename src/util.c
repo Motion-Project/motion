@@ -246,7 +246,7 @@ void *myrealloc(void *ptr, size_t size, const char *desc)
 int mycreate_path(const char *path)
 {
     char *start;
-    mode_t mode = S_IRWXU | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IXOTH;
+    mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
 
     if (path[0] == '/') {
         start = strchr(path + 1, '/');
