@@ -81,6 +81,7 @@ struct config {
     const char      *text_event;
 
     /* Motion detection configuration parameters */
+    int             pause;
     int             emulate_motion;
     int             threshold;
     int             threshold_maximum;
