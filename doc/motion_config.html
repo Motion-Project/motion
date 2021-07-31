@@ -952,6 +952,12 @@
           <td align="left"><a href="#on_picture_save" >on_picture_save</a></td>
         </tr>
         <tr>
+          <td align="left"><br /></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#pause" >pause</a></td>
+        </tr>
+        <tr>
           <td align="left">exif_text<br /></td>
           <td align="left">exif_text</td>
           <td align="left">picture_exif</td>
@@ -1705,29 +1711,30 @@
           <tbody>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#emulate_motion" >emulate_motion</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#pause" >pause</a> </td>
               <td bgcolor="#edf4f9" ><a href="#threshold" >threshold</a> </td>
               <td bgcolor="#edf4f9" ><a href="#threshold_maximum" >threshold_maximum</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#threshold_tune" >threshold_tune</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#threshold_tune" >threshold_tune</a> </td>
               <td bgcolor="#edf4f9" ><a href="#noise_level" >noise_level</a> </td>
               <td bgcolor="#edf4f9" ><a href="#noise_tune" >noise_tune</a> </td>
               <td bgcolor="#edf4f9" ><a href="#despeckle_filter" >despeckle_filter</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#area_detect" >area_detect</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#area_detect" >area_detect</a> </td>
               <td bgcolor="#edf4f9" ><a href="#mask_file" >mask_file</a> </td>
               <td bgcolor="#edf4f9" ><a href="#mask_privacy" >mask_privacy</a> </td>
               <td bgcolor="#edf4f9" ><a href="#smart_mask_speed" >smart_mask_speed</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#lightswitch_percent" >lightswitch_percent</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#lightswitch_percent" >lightswitch_percent</a> </td>
               <td bgcolor="#edf4f9" ><a href="#lightswitch_frames" >lightswitch_frames</a> </td>
               <td bgcolor="#edf4f9" ><a href="#minimum_motion_frames" >minimum_motion_frames</a> </td>
               <td bgcolor="#edf4f9" ><a href="#event_gap" >event_gap</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#pre_capture" >pre_capture</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#pre_capture" >pre_capture</a> </td>
               <td bgcolor="#edf4f9" ><a href="#post_capture" >post_capture</a> </td>
             </tr>
           </tbody>
@@ -3571,6 +3578,17 @@
         </ul>
         <p></p>
         Always save images even if there was no motion
+        <p></p>
+
+        <h3><a name="pause"></a>pause </h3>
+        <p></p>
+        <ul>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: on off</li>
+          <li> Default: off</li>
+        </ul>
+        <p></p>
+        When Motion is started, pause the motion detection.
         <p></p>
 
         <h3><a name="threshold"></a> threshold </h3>
