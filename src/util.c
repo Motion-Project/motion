@@ -856,6 +856,8 @@ static void util_parms_next(char *parmlne, int indxnm_st, int indxvl_en)
 static void util_parms_parse_qte(struct params_context *parameters, char *parmlne)
 {
     int indxnm_st, indxnm_en, indxvl_st, indxvl_en;
+    int indxcm, indxeq;
+    int indxqte_st, indxqte_en;
 
     while (strstr(parmlne,"\"") != NULL) {
         indxnm_st = 0;
@@ -863,14 +865,62 @@ static void util_parms_parse_qte(struct params_context *parameters, char *parmln
         indxvl_st = 0;
         indxvl_en = strlen(parmlne);
 
-        indxnm_st = strstr(parmlne,"\"") - parmlne + 1;
-        if (strstr(parmlne + indxnm_st,"\"") != NULL) {
-            indxnm_en = strstr(parmlne + indxnm_st,"\"") - parmlne;
-            if (strstr(parmlne + indxnm_en + 1,"=") != NULL) {
-                indxvl_st = strstr(parmlne + indxnm_en + 1,"=") - parmlne + 1;
+        indxqte_st = strstr(parmlne,"\"") - parmlne + 1;
+        indxqte_en = strlen(parmlne);
+        if (strstr(parmlne + indxqte_st,"\"") != NULL) {
+            indxqte_en = strstr(parmlne + indxqte_st,"\"") - parmlne;
+        }
+
+        indxcm = strlen(parmlne);
+        if (strstr(parmlne + indxqte_en + 1,",") != NULL) {
+            indxcm = strstr(parmlne + indxqte_en + 1,",") - parmlne;
+        }
+
+        indxeq = strlen(parmlne);
+        if (strstr(parmlne + indxqte_en + 1,"=") != NULL) {
+            indxeq = strstr(parmlne + indxqte_en + 1,"=") - parmlne;
+        }
+
+        if (indxcm <= indxeq) {
+            /* The quoted item is not followed by an equal so it is the value. */
+            indxvl_st = indxqte_st;
+            indxvl_en = indxqte_en;
+
+            indxcm = 0;
+            if (strstr(parmlne + indxqte_en + 1,",") != NULL) {
+                indxcm = strstr(parmlne + indxqte_en + 1,",") - parmlne;
             }
-            if (strstr(parmlne + indxvl_st + 1,",") != NULL) {
-                indxvl_en = strstr(parmlne + indxvl_st + 1,",") - parmlne;
+
+
+        } else {
+            /*The quoted item is the name, now check the value*/
+            indxnm_st = indxqte_st;
+            indxnm_en = indxqte_en;
+
+            indxvl_st = indxeq++;
+            if (indxvl_st > strlen(parmlne)) {
+                /* There is not any equal */
+                indxvl_st = strlen(parmlne);
+                indxvl_en = strlen(parmlne);
+            } else {
+                if (strstr(parmlne + indxvl_st,"\"") != NULL) {
+                    indxqte_st = strstr(parmlne + indxvl_st,"\"") - parmlne + 1;
+                    if (indxqte_st > indxcm) {
+                        /*The quoted item is for the next parm */
+                        indxvl_en = indxcm;
+                    } else {
+                        /*The value is also quoted*/
+                        indxqte_en = strlen(parmlne);
+                        if (strstr(parmlne + indxqte_st,"\"") != NULL) {
+                            indxqte_en = strstr(parmlne + indxqte_st,"\"") - parmlne;
+                        }
+                        indxvl_st = indxqte_st;
+                        indxvl_en = indxqte_en;
+                    }
+                } else {
+                    /* No more quotes so end is the comma position*/
+                    indxvl_en = indxcm;
+                }
             }
         }
 
