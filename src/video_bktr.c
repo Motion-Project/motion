@@ -878,6 +878,7 @@ int bktr_start(struct context *cnt)
 
                 if (ioctl(dev->fd_device, METEORCAPTUR, &dummy) < 0) {
                     MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("Stopping capture"));
+                    pthread_mutex_unlock(&bktr_mutex);
                     return -1;
                 }
 
