@@ -1431,13 +1431,23 @@ static void netcam_rtsp_set_path (struct context *cnt, struct rtsp_context *rtsp
         if (userpass != NULL) {
             rtsp_data->path = mymalloc(strlen(url.service) + 3 + strlen(userpass)
                   + 1 + strlen(url.host) + 6 + strlen(url.path) + 2 );
-            sprintf((char *)rtsp_data->path, "%s://%s@%s:%d%s",
+            if (url.port > 0) {
+                sprintf((char *)rtsp_data->path, "%s://%s@%s:%d%s",
                     url.service, userpass, url.host, url.port, url.path);
+            } else {
+                sprintf((char *)rtsp_data->path, "%s://%s@%s%s",
+                    url.service, userpass, url.host, url.path);
+            }
         } else {
             rtsp_data->path = mymalloc(strlen(url.service) + 3 + strlen(url.host)
                   + 6 + strlen(url.path) + 2);
-            sprintf((char *)rtsp_data->path, "%s://%s:%d%s", url.service,
-                url.host, url.port, url.path);
+            if (url.port > 0) {
+                sprintf((char *)rtsp_data->path, "%s://%s:%d%s"
+                    , url.service, url.host, url.port, url.path);
+            } else {
+                sprintf((char *)rtsp_data->path, "%s://%s%s"
+                    , url.service, url.host, url.path);
+            }
         }
     }
 
