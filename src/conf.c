@@ -99,6 +99,7 @@ struct config conf_template = {
 
     /* Motion detection configuration parameters */
     .emulate_motion =                  FALSE,
+    .pause =                           FALSE,
     .threshold =                       DEF_CHANGES,
     .threshold_maximum =               0,
     .threshold_tune =                  FALSE,
@@ -601,6 +602,15 @@ config_param config_params[] = {
     "# Always save pictures and movies even if there was no motion.",
     0,
     CONF_OFFSET(emulate_motion),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "pause",
+    "# pause motion detection.",
+    0,
+    CONF_OFFSET(pause),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED
@@ -3418,6 +3428,7 @@ static void config_parms_intl()
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","text_scale",_("text_scale"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","text_event",_("text_event"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","emulate_motion",_("emulate_motion"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","pause",_("pause"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold",_("threshold"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_maximum",_("threshold_maximum"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_tune",_("threshold_tune"));
