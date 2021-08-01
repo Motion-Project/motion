@@ -764,11 +764,18 @@ static void util_parms_add(struct params_context *parameters
 /* util_parms_extract
  * Extract out of the configuration string the name and values at the location specified.
 */
-static void util_parms_extract(struct params_context *parameters
-            , char *parmlne, int indxnm_st, int indxnm_en, int indxvl_st, int indxvl_en)
+static void util_parms_extract(struct params_context *parameters, char *parmlne
+            , size_t indxnm_st, size_t indxnm_en, size_t indxvl_st, size_t indxvl_en)
 {
     char *parm_nm, *parm_vl;
     int retcd, chksz;
+
+    /*
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,"%s", parmlne);
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,"012345678901234567890123456789012345678901234567890");
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,"%d %d, %d, %d"
+        , indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+    */
 
     if ((indxnm_en != 0) &&
         (indxvl_st != 0) &&
@@ -777,7 +784,7 @@ static void util_parms_extract(struct params_context *parameters
         parm_nm = mymalloc(PATH_MAX);
         parm_vl = mymalloc(PATH_MAX);
 
-        chksz = indxnm_en - indxnm_st + 1;
+        chksz = indxnm_en - indxnm_st + 2;
         retcd = snprintf(parm_nm, chksz, "%s", parmlne + indxnm_st);
         if (retcd < 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_nm controls: %s"), parmlne);
@@ -785,7 +792,7 @@ static void util_parms_extract(struct params_context *parameters
             parm_nm = NULL;
         }
 
-        chksz = indxvl_en - indxvl_st + 1;
+        chksz = indxvl_en - indxvl_st + 2;
         retcd = snprintf(parm_vl, chksz, "%s", parmlne + indxvl_st);
         if (retcd < 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_vl controls: %s"), parmlne);
@@ -812,10 +819,16 @@ static void util_parms_extract(struct params_context *parameters
  * Remove the parameter parsed out in previous steps from the parms string
  * and set up the string for parsing out the next parameter.
 */
-static void util_parms_next(char *parmlne, int indxnm_st, int indxvl_en)
+static void util_parms_next(char *parmlne, size_t indxpr_st, size_t indxpr_en)
 {
     char *parm_tmp;
     int retcd;
+
+    /*
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,"%s", parmlne);
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,"012345678901234567890123456789012345678901234567890");
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,"%d %d", indxpr_st, indxpr_en);
+    */
 
     parm_tmp = mymalloc(PATH_MAX);
     retcd = snprintf(parm_tmp, PATH_MAX, "%s", parmlne);
@@ -825,21 +838,21 @@ static void util_parms_next(char *parmlne, int indxnm_st, int indxvl_en)
         return;
     }
 
-    if (indxnm_st == 0) {
-        if ((size_t)(indxvl_en + 1) >strlen(parmlne)) {
+    if (indxpr_st == 0) {
+        if (indxpr_en >= strlen(parmlne)) {
             parmlne[0]='\0';
         } else {
-            retcd = snprintf(parmlne, strlen(parm_tmp) - indxvl_en + 1
-                , "%s", parm_tmp+indxvl_en+1);
+            retcd = snprintf(parmlne, strlen(parm_tmp) - indxpr_en + 2
+                , "%s", parm_tmp + indxpr_en + 1);
         }
     } else {
-        if ((size_t)(indxvl_en + 1) > strlen(parmlne) ) {
-            retcd = snprintf(parmlne, indxnm_st - 1, "%s", parm_tmp);
+        if (indxpr_en >= strlen(parmlne)) {
+            retcd = snprintf(parmlne, indxpr_st, "%s", parm_tmp);
         } else {
             retcd = snprintf(parmlne, PATH_MAX, "%.*s%.*s"
-                , indxnm_st - 1, parm_tmp
-                , (int)(strlen(parm_tmp) - indxvl_en)
-                , parm_tmp + indxvl_en);
+                , (int)indxpr_st, parm_tmp
+                , (int)(strlen(parm_tmp) - indxpr_en)
+                , parm_tmp + indxpr_en + 1);
         }
     }
     if (retcd < 0) {
@@ -855,77 +868,99 @@ static void util_parms_next(char *parmlne, int indxnm_st, int indxvl_en)
 */
 static void util_parms_parse_qte(struct params_context *parameters, char *parmlne)
 {
-    int indxnm_st, indxnm_en, indxvl_st, indxvl_en;
-    int indxcm, indxeq;
-    int indxqte_st, indxqte_en;
+    size_t indxnm_st, indxnm_en, indxvl_st, indxvl_en;
+    size_t indxcm, indxeq, indxqte_st, indxqte_en;
+    size_t indxpr_st, indxpr_en;
 
     while (strstr(parmlne,"\"") != NULL) {
         indxnm_st = 0;
         indxnm_en = 0;
         indxvl_st = 0;
         indxvl_en = strlen(parmlne);
+        indxpr_st = 0;
+        indxpr_en = strlen(parmlne);
 
-        indxqte_st = strstr(parmlne,"\"") - parmlne + 1;
+        indxqte_st = strcspn(parmlne,"\"");
         indxqte_en = strlen(parmlne);
-        if (strstr(parmlne + indxqte_st,"\"") != NULL) {
-            indxqte_en = strstr(parmlne + indxqte_st,"\"") - parmlne;
+        if (strstr(parmlne + indxqte_st + 1,"\"") != NULL) {
+            indxqte_en = strcspn(parmlne + indxqte_st + 1,"\"") + indxqte_st + 1;
         }
 
         indxcm = strlen(parmlne);
         if (strstr(parmlne + indxqte_en + 1,",") != NULL) {
-            indxcm = strstr(parmlne + indxqte_en + 1,",") - parmlne;
+            indxcm = strcspn(parmlne + indxqte_en + 1,",") + indxqte_en + 1;
         }
 
         indxeq = strlen(parmlne);
         if (strstr(parmlne + indxqte_en + 1,"=") != NULL) {
-            indxeq = strstr(parmlne + indxqte_en + 1,"=") - parmlne;
+            indxeq = strcspn(parmlne + indxqte_en + 1,"=") + indxqte_en + 1;
         }
 
         if (indxcm <= indxeq) {
             /* The quoted item is not followed by an equal so it is the value. */
-            indxvl_st = indxqte_st;
-            indxvl_en = indxqte_en;
+            indxvl_st = indxqte_st + 1;
+            indxvl_en = indxqte_en - 1;
 
-            indxcm = 0;
-            if (strstr(parmlne + indxqte_en + 1,",") != NULL) {
-                indxcm = strstr(parmlne + indxqte_en + 1,",") - parmlne;
+            if (strstr(parmlne, ",") != NULL) {
+                indxcm = 0;
+                while ((strstr(parmlne + indxcm, ",") != NULL) &&
+                       ((strcspn(parmlne + indxcm, ",") + indxcm) < indxvl_st)) {
+                    indxcm = strcspn(parmlne + indxcm, ",") + indxcm + 1;
+                }
+                indxnm_st = indxcm;
+            } else {
+                indxnm_st = 0;
             }
 
+            indxnm_en = indxnm_st;
+            if (strstr(parmlne + indxnm_st, "=") != NULL) {
+                indxnm_en = strcspn(parmlne + indxnm_st, "=") + indxnm_st - 1;
+            }
+
+            indxpr_st = indxnm_st;
 
         } else {
             /*The quoted item is the name, now check the value*/
-            indxnm_st = indxqte_st;
-            indxnm_en = indxqte_en;
+            indxnm_st = indxqte_st + 1;
+            indxnm_en = indxqte_en - 1;
+            indxpr_st = indxqte_st;
 
-            indxvl_st = indxeq++;
+            indxvl_st = indxeq + 1;
             if (indxvl_st > strlen(parmlne)) {
                 /* There is not any equal */
                 indxvl_st = strlen(parmlne);
                 indxvl_en = strlen(parmlne);
             } else {
                 if (strstr(parmlne + indxvl_st,"\"") != NULL) {
-                    indxqte_st = strstr(parmlne + indxvl_st,"\"") - parmlne + 1;
+                    indxqte_st = strcspn(parmlne + indxvl_st,"\"") + indxvl_st + 1;
                     if (indxqte_st > indxcm) {
                         /*The quoted item is for the next parm */
-                        indxvl_en = indxcm;
+                        indxvl_en = indxcm - 1;
                     } else {
                         /*The value is also quoted*/
                         indxqte_en = strlen(parmlne);
                         if (strstr(parmlne + indxqte_st,"\"") != NULL) {
-                            indxqte_en = strstr(parmlne + indxqte_st,"\"") - parmlne;
+                            indxqte_en = strcspn(parmlne + indxqte_st,"\"")+ indxqte_st;
                         }
                         indxvl_st = indxqte_st;
-                        indxvl_en = indxqte_en;
+                        indxvl_en = indxqte_en - 1;
                     }
                 } else {
                     /* No more quotes so end is the comma position*/
-                    indxvl_en = indxcm;
+                    indxvl_en = indxcm - 1;
                 }
             }
         }
 
+        /* Find the next comma or end of line */
+        if ((strstr(parmlne + indxvl_en, ",") != NULL)) {
+            indxpr_en = strcspn(parmlne + indxvl_en, ",") + indxvl_en;
+        } else {
+            indxpr_en = strlen(parmlne);
+        }
+
         util_parms_extract(parameters, parmlne, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
-        util_parms_next(parmlne, indxnm_st, indxvl_en);
+        util_parms_next(parmlne, indxpr_st, indxpr_en);
     }
 }
 
@@ -934,22 +969,20 @@ static void util_parms_parse_qte(struct params_context *parameters, char *parmln
 */
 static void util_parms_parse_comma(struct params_context *parameters, char *parmlne)
 {
-    int indxnm_st, indxnm_en, indxvl_st, indxvl_en;
+    size_t indxnm_st, indxnm_en, indxvl_st, indxvl_en;
 
     while (strstr(parmlne,",") != NULL) {
         indxnm_st = 0;
         indxnm_en = 0;
         indxvl_st = 0;
-        indxvl_en = strstr(parmlne, ",") - parmlne;
+        indxvl_en = strcspn(parmlne, ",") - 1;
 
         if (strstr(parmlne, "=") != NULL) {
-            indxnm_en = strstr(parmlne,"=") - parmlne;
-            if ((size_t)indxnm_en < strlen(parmlne)) {
-                indxvl_st = indxnm_en + 1;
-            }
+            indxnm_en = strcspn(parmlne, "=") - 1;
+            indxvl_st = indxnm_en + 2;
         }
         util_parms_extract(parameters, parmlne, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
-        util_parms_next(parmlne, indxnm_st, indxvl_en);
+        util_parms_next(parmlne, indxnm_st, indxvl_en + 1);
     }
 
 }
@@ -995,12 +1028,13 @@ void util_parms_parse(struct params_context *parameters, char *confparm)
      * The values are separated by commas but may also have
      * double quotes around the names which include a comma.
      * Examples:
-     * vid_control_params ID01234= 1, ID23456=2
-     * vid_control_params "Brightness, auto" = 1, ID23456=2
-     * vid_control_params ID23456=2, "Brightness, auto" = 1,ID2222=5
+     * video_params "Brightness, auto" = 1, ID23456=2
+     * netcam_params newparm = "1,2,3,r,a,b,c",other=a
+     * video_params "a,b,d" = "1,2,3"
      */
 
-    int retcd, indxnm_st, indxnm_en, indxvl_st, indxvl_en;
+    int retcd;
+    size_t indxnm_st, indxnm_en, indxvl_st, indxvl_en;
     char *parmlne;
 
     util_parms_free(parameters);
@@ -1029,11 +1063,9 @@ void util_parms_parse(struct params_context *parameters, char *confparm)
             indxnm_en = 0;
             indxvl_st = 0;
             indxvl_en = strlen(parmlne);
-            if (strstr(parmlne + 1,"=") != NULL) {
-                indxnm_en = strstr(parmlne + 1,"=") - parmlne;
-                if ((size_t)indxnm_en < strlen(parmlne)) {
-                    indxvl_st = indxnm_en + 1;
-                }
+            if (strstr(parmlne,"=") != NULL) {
+                indxnm_en = strcspn(parmlne,"=") - 1;
+                indxvl_st = indxnm_en + 2;
             }
 
             util_parms_extract(parameters, parmlne, indxnm_st, indxnm_en, indxvl_st, indxvl_en);

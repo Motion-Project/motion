@@ -2294,10 +2294,13 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
                  * It is important that we can use "" so that we can use
                  * leading spaces in text_left and text_right.
                  */
-                if ((beg[0] == '"' && beg[strlen(beg)-1] == '"') ||
-                    (beg[0] == '\'' && beg[strlen(beg)-1] == '\'')) {
-                    beg[strlen(beg)-1] = '\0';
-                    beg++;
+                /* For the config values of params we leave on the quotes */
+                if (strstr(cmd, "params") == NULL) {
+                    if ((beg[0] == '"' && beg[strlen(beg)-1] == '"') ||
+                        (beg[0] == '\'' && beg[strlen(beg)-1] == '\'')) {
+                        beg[strlen(beg)-1] = '\0';
+                        beg++;
+                    }
                 }
 
                 arg1 = beg; /* Argument starts here */
