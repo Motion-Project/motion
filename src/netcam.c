@@ -669,7 +669,7 @@ int netcam_start(struct context *cnt)
 
     netcam->parameters = mymalloc(sizeof(struct params_context));
     netcam->parameters->update_params = TRUE;
-    util_parms_parse(netcam->parameters, (char*)cnt->conf.netcam_params);
+    util_parms_parse(netcam->parameters, (char*)cnt->conf.netcam_params, TRUE);
     util_parms_add_default(netcam->parameters,"proxy","NULL");
     util_parms_add_default(netcam->parameters,"keepalive","off");
     util_parms_add_default(netcam->parameters,"tolerant_check","off"); /*false*/

@@ -1182,6 +1182,7 @@ static mymhd_retcd webu_mhd_send(struct webui_ctx *webui, int ctrl)
      */
     mymhd_retcd retcd;
     struct MHD_Response *response;
+    int indx;
 
     response = MHD_create_response_from_buffer (strlen(webui->resp_page)
         ,(void *)webui->resp_page, MHD_RESPMEM_PERSISTENT);
@@ -1192,9 +1193,16 @@ static mymhd_retcd webu_mhd_send(struct webui_ctx *webui, int ctrl)
 
     if (webui->cnt != NULL) {
         if (ctrl) {
-            if (webui->cnt->conf.webcontrol_cors_header != NULL) {
-                MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-                    , webui->cnt->conf.webcontrol_cors_header);
+            for (indx = 0; indx < webui->cnt->webcontrol_headers->params_count; indx++) {
+                retcd = MHD_add_response_header (response
+                    , webui->cnt->webcontrol_headers->params_array[indx].param_name
+                    , webui->cnt->webcontrol_headers->params_array[indx].param_value);
+                if (retcd == MHD_NO) {
+                    MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                        , _("Error adding webcontrol header %s %s")
+                        , webui->cnt->webcontrol_headers->params_array[indx].param_name
+                        , webui->cnt->webcontrol_headers->params_array[indx].param_value);
+                }
             }
             if (webui->cnt->conf.webcontrol_interface == 1) {
                 MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/plain;");
@@ -1202,9 +1210,16 @@ static mymhd_retcd webu_mhd_send(struct webui_ctx *webui, int ctrl)
                 MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
             }
         } else {
-            if (webui->cnt->conf.stream_cors_header != NULL) {
-                MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-                    , webui->cnt->conf.stream_cors_header);
+            for (indx = 0; indx < webui->cnt->stream_headers->params_count; indx++) {
+                retcd = MHD_add_response_header (response
+                    , webui->cnt->stream_headers->params_array[indx].param_name
+                    , webui->cnt->stream_headers->params_array[indx].param_value);
+                if (retcd == MHD_NO) {
+                    MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                        , _("Error adding stream header %s %s")
+                        , webui->cnt->stream_headers->params_array[indx].param_name
+                        , webui->cnt->stream_headers->params_array[indx].param_value);
+                }
             }
             if ((webui->cnct_type == WEBUI_CNCT_STATUS_LIST) ||
                 (webui->cnct_type == WEBUI_CNCT_STATUS_ONE)) {
@@ -2170,7 +2185,6 @@ void webu_stop(struct context **cnt)
         MHD_stop_daemon (cnt[0]->webcontrol_daemon);
     }
 
-
     indxthrd = 0;
     while (cnt[indxthrd] != NULL) {
         if (cnt[indxthrd]->webstream_daemon != NULL) {
@@ -2179,6 +2193,16 @@ void webu_stop(struct context **cnt)
         }
         cnt[indxthrd]->webstream_daemon = NULL;
         cnt[indxthrd]->webcontrol_daemon = NULL;
+        util_parms_free(cnt[indxthrd]->webcontrol_headers);
+        if (cnt[indxthrd]->webcontrol_headers != NULL) {
+            free(cnt[indxthrd]->webcontrol_headers);
+            cnt[indxthrd]->webcontrol_headers = NULL;
+        }
+        util_parms_free(cnt[indxthrd]->stream_headers);
+        if (cnt[indxthrd]->stream_headers != NULL) {
+            free(cnt[indxthrd]->stream_headers);
+            cnt[indxthrd]->stream_headers = NULL;
+        }
         indxthrd++;
     }
 }
@@ -2205,6 +2229,17 @@ void webu_start(struct context **cnt)
         cnt[indxthrd]->webstream_daemon = NULL;
         cnt[indxthrd]->webcontrol_daemon = NULL;
         cnt[indxthrd]->webcontrol_finish = FALSE;
+        cnt[indxthrd]->webcontrol_headers = mymalloc(sizeof(struct params_context));
+        cnt[indxthrd]->stream_headers = mymalloc(sizeof(struct params_context));
+        util_parms_parse(cnt[indxthrd]->webcontrol_headers
+            , cnt[indxthrd]->conf.webcontrol_header_params
+            , cnt[indxthrd]->conf.webcontrol_localhost);
+        util_parms_parse(cnt[indxthrd]->stream_headers
+            , cnt[indxthrd]->conf.stream_header_params
+            , cnt[indxthrd]->conf.stream_localhost);
+        cnt[indxthrd]->stream_headers->update_params = FALSE;
+        cnt[indxthrd]->webcontrol_headers->update_params = FALSE;
+
         indxthrd++;
     }
 

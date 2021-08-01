@@ -24,7 +24,7 @@
 #ifndef _INCLUDE_MOTION_H
 #define _INCLUDE_MOTION_H
 
-/* Forward declarations, used in functional definitions of headers */
+/* Forward declarations of structs */
 struct images;
 struct image_data;
 struct rtsp_context;
@@ -558,6 +558,9 @@ struct context {
     struct stream_data  stream_sub;     /* Copy of the image to use for web stream*/
     struct stream_data  stream_motion;  /* Copy of the image to use for web stream*/
     struct stream_data  stream_source;  /* Copy of the image to use for web stream*/
+
+    struct params_context    *webcontrol_headers;  /* Headers for webcontrol */
+    struct params_context    *stream_headers;  /* Headers for stream */
 
 
 };

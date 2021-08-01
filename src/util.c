@@ -716,7 +716,7 @@ void util_trim(char *parm)
  * Add the parsed out parameter and value to the control array.
 */
 static void util_parms_add(struct params_context *parameters
-            , const char *parm_nm, const char *parm_vl)
+            , const char *parm_nm, const char *parm_vl, int logmsg)
 {
     int indx, retcd;
 
@@ -735,7 +735,11 @@ static void util_parms_add(struct params_context *parameters
         parameters->params_array[indx].param_name = (char*)mymalloc(strlen(parm_nm)+1);
         retcd = sprintf(parameters->params_array[indx].param_name,"%s",parm_nm);
         if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >%s<"),parm_nm);
+            if (logmsg) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >%s<"),parm_nm);
+            } else {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >redacted<"));
+            }
             free(parameters->params_array[indx].param_name);
             parameters->params_array[indx].param_name = NULL;
         }
@@ -747,7 +751,11 @@ static void util_parms_add(struct params_context *parameters
         parameters->params_array[indx].param_value = (char*)mymalloc(strlen(parm_vl)+1);
         retcd = sprintf(parameters->params_array[indx].param_value,"%s",parm_vl);
         if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >%s<"),parm_vl);
+            if (logmsg) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >%s<"),parm_vl);
+            } else {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >redacted<"));
+            }
             free(parameters->params_array[indx].param_value);
             parameters->params_array[indx].param_value = NULL;
         }
@@ -755,17 +763,21 @@ static void util_parms_add(struct params_context *parameters
         parameters->params_array[indx].param_value = NULL;
     }
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Parsed: >%s< >%s<")
-        ,parameters->params_array[indx].param_name
-        ,parameters->params_array[indx].param_value);
-
+    if (logmsg) {
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Parsed: >%s< >%s<")
+            ,parameters->params_array[indx].param_name
+            ,parameters->params_array[indx].param_value);
+    } else {
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Parsed: >redacted< >redacted<"));
+    }
 }
 
 /* util_parms_extract
  * Extract out of the configuration string the name and values at the location specified.
 */
 static void util_parms_extract(struct params_context *parameters, char *parmlne
-            , size_t indxnm_st, size_t indxnm_en, size_t indxvl_st, size_t indxvl_en)
+            , size_t indxnm_st, size_t indxnm_en, size_t indxvl_st, size_t indxvl_en
+            , int logmsg)
 {
     char *parm_nm, *parm_vl;
     int retcd, chksz;
@@ -787,7 +799,11 @@ static void util_parms_extract(struct params_context *parameters, char *parmlne
         chksz = indxnm_en - indxnm_st + 2;
         retcd = snprintf(parm_nm, chksz, "%s", parmlne + indxnm_st);
         if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_nm controls: %s"), parmlne);
+            if (logmsg) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_nm controls: %s"), parmlne);
+            } else {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_nm controls: <redacted>"));
+            }
             free(parm_nm);
             parm_nm = NULL;
         }
@@ -795,7 +811,11 @@ static void util_parms_extract(struct params_context *parameters, char *parmlne
         chksz = indxvl_en - indxvl_st + 2;
         retcd = snprintf(parm_vl, chksz, "%s", parmlne + indxvl_st);
         if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_vl controls: %s"), parmlne);
+            if (logmsg) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_vl controls: %s"), parmlne);
+            } else {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_vl controls: <redacted>"));
+            }
             free(parm_vl);
             parm_vl = NULL;
         }
@@ -803,7 +823,7 @@ static void util_parms_extract(struct params_context *parameters, char *parmlne
         util_trim(parm_nm);
         util_trim(parm_vl);
 
-        util_parms_add(parameters, parm_nm, parm_vl);
+        util_parms_add(parameters, parm_nm, parm_vl, logmsg);
 
         if (parm_nm != NULL) {
             free(parm_nm);
@@ -819,7 +839,7 @@ static void util_parms_extract(struct params_context *parameters, char *parmlne
  * Remove the parameter parsed out in previous steps from the parms string
  * and set up the string for parsing out the next parameter.
 */
-static void util_parms_next(char *parmlne, size_t indxpr_st, size_t indxpr_en)
+static void util_parms_next(char *parmlne, size_t indxpr_st, size_t indxpr_en, int logmsg)
 {
     char *parm_tmp;
     int retcd;
@@ -833,7 +853,11 @@ static void util_parms_next(char *parmlne, size_t indxpr_st, size_t indxpr_en)
     parm_tmp = mymalloc(PATH_MAX);
     retcd = snprintf(parm_tmp, PATH_MAX, "%s", parmlne);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting temp: %s"), parmlne);
+        if (logmsg) {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting temp: %s"), parmlne);
+        } else {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting temp: <redacted>"));
+        }
         free(parm_tmp);
         return;
     }
@@ -855,8 +879,13 @@ static void util_parms_next(char *parmlne, size_t indxpr_st, size_t indxpr_en)
                 , parm_tmp + indxpr_en + 1);
         }
     }
+
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error reparsing controls: %s"), parmlne);
+        if (logmsg) {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error reparsing controls: %s"), parmlne);
+        } else {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error reparsing controls: <redacted>"));
+        }
     }
 
     free(parm_tmp);
@@ -866,7 +895,7 @@ static void util_parms_next(char *parmlne, size_t indxpr_st, size_t indxpr_en)
 /* util_parms_parse_qte
  * Split out the parameters that have quotes around the name.
 */
-static void util_parms_parse_qte(struct params_context *parameters, char *parmlne)
+static void util_parms_parse_qte(struct params_context *parameters, char *parmlne, int logmsg)
 {
     size_t indxnm_st, indxnm_en, indxvl_st, indxvl_en;
     size_t indxcm, indxeq, indxqte_st, indxqte_en;
@@ -959,15 +988,15 @@ static void util_parms_parse_qte(struct params_context *parameters, char *parmln
             indxpr_en = strlen(parmlne);
         }
 
-        util_parms_extract(parameters, parmlne, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
-        util_parms_next(parmlne, indxpr_st, indxpr_en);
+        util_parms_extract(parameters, parmlne, indxnm_st, indxnm_en, indxvl_st, indxvl_en, logmsg);
+        util_parms_next(parmlne, indxpr_st, indxpr_en, logmsg);
     }
 }
 
 /* util_parms_parse_comma
  * Split out the parameters between the commas.
 */
-static void util_parms_parse_comma(struct params_context *parameters, char *parmlne)
+static void util_parms_parse_comma(struct params_context *parameters, char *parmlne, int logmsg)
 {
     size_t indxnm_st, indxnm_en, indxvl_st, indxvl_en;
 
@@ -981,8 +1010,8 @@ static void util_parms_parse_comma(struct params_context *parameters, char *parm
             indxnm_en = strcspn(parmlne, "=") - 1;
             indxvl_st = indxnm_en + 2;
         }
-        util_parms_extract(parameters, parmlne, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
-        util_parms_next(parmlne, indxnm_st, indxvl_en + 1);
+        util_parms_extract(parameters, parmlne, indxnm_st, indxnm_en, indxvl_st, indxvl_en, logmsg);
+        util_parms_next(parmlne, indxnm_st, indxvl_en + 1, logmsg);
     }
 
 }
@@ -1022,7 +1051,7 @@ void util_parms_free(struct params_context *parameters)
 /* util_parms_parse
  * Parse the user provided string of parameters into a array.
 */
-void util_parms_parse(struct params_context *parameters, char *confparm)
+void util_parms_parse(struct params_context *parameters, char *confparm, int logmsg)
 {
     /* Parse through the configuration option to get values
      * The values are separated by commas but may also have
@@ -1041,22 +1070,31 @@ void util_parms_parse(struct params_context *parameters, char *confparm)
     parmlne = NULL;
 
     if (confparm != NULL) {
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
-            ,_("Parsing controls: %s"), confparm);
-
+        if (logmsg) {
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+                ,_("Parsing controls: %s"), confparm);
+        } else {
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+                ,_("Parsing controls: <redacted>"));
+        }
         parmlne = mymalloc(PATH_MAX);
 
         retcd = snprintf(parmlne, PATH_MAX, "%s", confparm);
         if ((retcd < 0) || (retcd > PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                ,_("Error parsing controls: %s"), confparm);
+            if (logmsg) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    ,_("Error parsing controls: %s"), confparm);
+            } else {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    ,_("Error parsing controls: <redacted>"));
+            }
             free(parmlne);
             return;
         }
 
-        util_parms_parse_qte(parameters, parmlne);
+        util_parms_parse_qte(parameters, parmlne, logmsg);
 
-        util_parms_parse_comma(parameters, parmlne);
+        util_parms_parse_comma(parameters, parmlne, logmsg);
 
         if (strlen(parmlne) != 0) {
             indxnm_st = 0;
@@ -1068,7 +1106,7 @@ void util_parms_parse(struct params_context *parameters, char *confparm)
                 indxvl_st = indxnm_en + 2;
             }
 
-            util_parms_extract(parameters, parmlne, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+            util_parms_extract(parameters, parmlne, indxnm_st, indxnm_en, indxvl_st, indxvl_en, logmsg);
         }
         free(parmlne);
     }
@@ -1089,7 +1127,7 @@ void util_parms_add_default(struct params_context *parameters, const char *parm_
         }
     }
     if (dflt == TRUE) {
-        util_parms_add(parameters, parm_nm, parm_vl);
+        util_parms_add(parameters, parm_nm, parm_vl, TRUE);
     }
 
 }

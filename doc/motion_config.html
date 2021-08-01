@@ -1117,7 +1117,7 @@
           <td align="left"></td>
           <td align="left"></td>
           <td align="left">stream_cors_header</td>
-          <td align="left"><a href="#stream_cors_header" >stream_cors_header</a></td>
+          <td align="left"><a href="#stream_header_params" >stream_header_params</a></td>
         </tr>
         <tr>
           <td align="left"></td>
@@ -1453,7 +1453,7 @@
           <td align="left"></td>
           <td align="left"></td>
           <td align="left">webcontrol_cors_header</td>
-          <td align="left"><a href="#webcontrol_cors_header" >webcontrol_cors_header</a></td>
+          <td align="left"><a href="#webcontrol_header_params" >webcontrol_header_params</a></td>
         </tr>
         <tr>
           <td align="left">webcontrol_html_output</td>
@@ -1893,7 +1893,7 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_cert" >webcontrol_cert</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_key" >webcontrol_key</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_cors_header" >webcontrol_cors_header</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_header_params" >webcontrol_header_params</a> </td>
             </tr>
             </tbody>
         </table>
@@ -1922,7 +1922,7 @@
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#stream_tls" >stream_tls</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_cors_header" >stream_cors_header</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_header_params" >stream_header_params</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_preview_scale" >stream_preview_scale</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_preview_newline" >stream_preview_newline</a> </td>
             </tr>
@@ -5046,20 +5046,22 @@
         <p></p>
         <p></p>
 
-        <h3><a name="webcontrol_cors_header"></a> webcontrol_cors_header </h3>
+        <h3><a name="webcontrol_header_params"></a> webcontrol_header_params </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
-          <li> Range / Valid values: * or a valid URI</li>
+          <li> Range / Valid values: Max 4095 characters</li>
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The Access-Control-Allow-Origin header value to be sent with the webcontrol.
-        If unspecified, no Access-Control-Allow-Origin header is sent.
-        The header allows browsers to access the webcontrol via cross-origin resource sharing (CORS).
-        For example, * allows access from browser client code served from any origin.
+        Comma separated pairs for the header and value.  e.g.
         <p></p>
-
+        <code>webcontrol_header_params Access-Control-Allow-Origin=*, Cache-Control=no-cache</code>
+        <p></p>
+        When Motion parses this parameter, it will only show the values when <a href="#webcontrol_localhost">webcontrol_localhost</a> is
+        set to on.  When the <a href="#webcontrol_localhost">webcontrol_localhost</a> is set to off, the Motion log will redact the
+        values.
+        <p></p>
 
       </ul>
 
@@ -5199,19 +5201,23 @@
         <p></p>
         <p></p>
 
-        <h3><a name="stream_cors_header"></a> stream_cors_header </h3>
+        <h3><a name="stream_header_params"></a> stream_header_params</h3>
         <p></p>
         <ul>
           <li> Type: String</li>
-          <li> Range / Valid values: * or a valid URI</li>
+          <li> Range / Valid values: Max 4095 characters</li>
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The Access-Control-Allow-Origin header value to be sent with the stream.
-        If unspecified, no Access-Control-Allow-Origin header is sent.
-        The header allows browsers to access the stream via cross-origin resource sharing (CORS).
-        For example, * allows access from browser client code served from any origin.
+        The comma separated pairs for header values sent with the stream. e.g.
+		    <p></p>
+        <code>stream_header_params Access-Control-Allow-Origin=*, Cache-Control=no-cache</code>
         <p></p>
+        When Motion parses this parameter, it will only show the values when <a href="#stream_localhost">stream_localhost</a> is
+        set to on.  When the <a href="#stream_localhost">stream_localhost</a> is set to off, the Motion log will redact the
+        values.
+        <p></p>
+
 
         <h3><a name="stream_preview_scale"></a> stream_preview_scale </h3>
         <p></p>
