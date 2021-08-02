@@ -1,3 +1,57 @@
+Summary of changes for version 4.4.0 are below
+    * Adjust copyright to 2021
+    * Fix for urls provided without port number
+    * Fix the workaround for the exif creation.
+    * Add a user parameter for pause camera
+    * Fix to avoid potential deadlocks
+    * Update permissions assigned for created directories
+    * Update parameter in the sample configuration files
+    * Remove restrictions on network camera protocols
+    * Change default for http processing to ffmpeg.
+    * Update build documents for MacOSX
+    * Update documents on PGM requirements
+    * Fix for latest version of FFMPEG
+    * Fix for movie_max_time
+    * Fix processing for gray scale network cameras
+    * Add dbeventid for PostgreSQL
+    * Add GPL license file.
+    * Add json pages
+    * Update for new MHD return codes
+    * Simplify image ring processing
+    * Update travis tesing file.
+    * Use high resolution for snapshots if available.
+    * Add grey picture output option.
+    * Fix web stream content size
+    * Update documentation
+    * Enhance the processing for the params
+    * Change automake check to maintainer-check
+    * Add new modules for dbse and util
+    * Remove use of ATTRIBUTE_UNUSED
+    * Adjust module headers comments
+    * Implement mystr functions
+    * Adjust default capture_rate
+    * Use new params for the bktr and video
+    * Implement consistent use of braces {}
+    * Add support for cuda HW decoding of network cameras
+    * Remove MD5 module since no longer used.
+    * Implement consistent indentations
+    * Implement MYFFVER for easier condition testing
+    * Add netcam_params to specify items for network camera
+    * Revise parameter names
+    * Use MHD function for url decoding
+    * Fix scaling text calculations
+    * Fix end events criteria
+    * Add param for netcam rate high
+    * Remove old stream module.
+    * Add vaapi decoding for network cameras
+    * Allow lightswitch value of 1 percent
+    * Add parameter for network capture rate
+    * Fix the content-type header
+    * Update copyright to 2020
+    * Guide update
+    * Fix MySQL/MariaDB init/definitions
+    * Fix CFLAGS/LDFLAGS
+    * Fix buile for gcc 10
 Summary of changes for version 4.3.0 are below
    * Implement default for non ascii characters
    * Removed poll requirement for MHD
