@@ -1475,14 +1475,14 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
         snprintf(rtsp_data->cameratype,29, "%s",_("highres"));
         rtsp_data->parameters = mymalloc(sizeof(struct params_context));
         rtsp_data->parameters->update_params = TRUE;
-        util_parms_parse(rtsp_data->parameters,(char*)cnt->conf.netcam_high_params);
+        util_parms_parse(rtsp_data->parameters,(char*)cnt->conf.netcam_high_params, TRUE);
     } else {
         rtsp_data->imgsize.width = cnt->conf.width;
         rtsp_data->imgsize.height = cnt->conf.height;
         snprintf(rtsp_data->cameratype,29, "%s",_("norm"));
         rtsp_data->parameters = mymalloc(sizeof(struct params_context));
         rtsp_data->parameters->update_params = TRUE;
-        util_parms_parse(rtsp_data->parameters, (char*)cnt->conf.netcam_params);
+        util_parms_parse(rtsp_data->parameters, (char*)cnt->conf.netcam_params, TRUE);
     }
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("Setting up %s stream."),rtsp_data->cameratype);

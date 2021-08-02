@@ -514,7 +514,7 @@ void vid_parms_parse(struct context *cnt)
     }
 
     /* Put in the user specified parameters */
-    util_parms_parse(cnt->vdev, cnt->conf.video_params);
+    util_parms_parse(cnt->vdev, cnt->conf.video_params, TRUE);
 
     /* Now add any missing default items */
     util_parms_add_default(cnt->vdev,"palette","17");

@@ -114,7 +114,7 @@ void util_threadname_get(char *threadname);
 int util_check_passthrough(struct context *cnt);
 void util_trim(char *parm);
 void util_parms_free(struct params_context *parameters);
-void util_parms_parse(struct params_context *parameters, char *confparm);
+void util_parms_parse(struct params_context *parameters, char *confparm, int logmsg);
 void util_parms_add_default(struct params_context *parameters, const char *parm_nm, const char *parm_vl);
 void util_parms_update(struct params_context *params, struct context *cnt, const char *cfgitm);
 

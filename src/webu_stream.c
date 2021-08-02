@@ -297,6 +297,7 @@ mymhd_retcd webu_stream_mjpeg(struct webui_ctx *webui)
     /* Create the stream for the motion jpeg */
     mymhd_retcd retcd;
     struct MHD_Response *response;
+    int indx;
 
     if (webu_stream_checks(webui) == -1) {
         return MHD_NO;
@@ -315,9 +316,16 @@ mymhd_retcd webu_stream_mjpeg(struct webui_ctx *webui)
         return MHD_NO;
     }
 
-    if (webui->cnt->conf.stream_cors_header != NULL) {
-        MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-            , webui->cnt->conf.stream_cors_header);
+    for (indx = 0; indx < webui->cnt->stream_headers->params_count; indx++) {
+        retcd = MHD_add_response_header (response
+            , webui->cnt->stream_headers->params_array[indx].param_name
+            , webui->cnt->stream_headers->params_array[indx].param_value);
+        if (retcd == MHD_NO) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                , _("Error adding stream header %s %s")
+                , webui->cnt->stream_headers->params_array[indx].param_name
+                , webui->cnt->stream_headers->params_array[indx].param_value);
+        }
     }
 
     MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE
@@ -335,6 +343,7 @@ mymhd_retcd webu_stream_static(struct webui_ctx *webui)
     mymhd_retcd retcd;
     struct MHD_Response *response;
     char resp_used[20];
+    int indx;
 
     if (webu_stream_checks(webui) == -1) {
         return MHD_NO;
@@ -358,9 +367,16 @@ mymhd_retcd webu_stream_static(struct webui_ctx *webui)
         return MHD_NO;
     }
 
-    if (webui->cnt->conf.stream_cors_header != NULL) {
-        MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-            , webui->cnt->conf.stream_cors_header);
+    for (indx = 0; indx < webui->cnt->stream_headers->params_count; indx++) {
+        retcd = MHD_add_response_header (response
+            , webui->cnt->stream_headers->params_array[indx].param_name
+            , webui->cnt->stream_headers->params_array[indx].param_value);
+        if (retcd == MHD_NO) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                , _("Error adding stream header %s %s")
+                , webui->cnt->stream_headers->params_array[indx].param_name
+                , webui->cnt->stream_headers->params_array[indx].param_value);
+        }
     }
 
     MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "image/jpeg");

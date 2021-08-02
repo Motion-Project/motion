@@ -1498,7 +1498,7 @@ The full path to the SSL key file for webcontrol
 .RE
 
 .TP
-.B webcontrol_cors_header
+.B webcontrol_header_params
 .RS
 .nf
 Values: User specified string
@@ -1506,7 +1506,7 @@ Default: Not defined
 Description:
 .fi
 .RS
-The header to add for cross orgin on the webcontrol
+The comma separated header=value pairs to use for the webcontrol responses.
 .RE
 .RE
 
@@ -1582,7 +1582,7 @@ When specified as on, use SSL/TLS for the stream port.
 .RE
 
 .TP
-.B stream_cors_header
+.B stream_header_params
 .RS
 .nf
 Values: User specified string
@@ -1590,10 +1590,7 @@ Default: Not defined
 Description:
 .fi
 .RS
-The Access-Control-Allow-Origin header value to be sent with the stream.
-If unspecified, no Access-Control-Allow-Origin header is sent.
-The header allows browsers to access the stream via cross-origin resource sharing (CORS).
-For example, * allows access from browser client code served from any domain.
+The comma separated header=value pairs to send for the stream responses.
 .RE
 .RE
 

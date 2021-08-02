@@ -175,7 +175,7 @@ struct config conf_template = {
     .webcontrol_tls =                  FALSE,
     .webcontrol_cert =                 NULL,
     .webcontrol_key =                  NULL,
-    .webcontrol_cors_header =          NULL,
+    .webcontrol_header_params =        NULL,
 
     /* Live stream configuration parameters */
     .stream_port =                     0,
@@ -183,7 +183,7 @@ struct config conf_template = {
     .stream_auth_method =              0,
     .stream_authentication =           NULL,
     .stream_tls =                      FALSE,
-    .stream_cors_header =              NULL,
+    .stream_header_params =            NULL,
     .stream_preview_scale =            25,
     .stream_preview_newline =          FALSE,
     .stream_preview_method =           0,
@@ -219,6 +219,8 @@ static struct context **copy_bool(struct context **cnt, const char *str, int val
 static struct context **copy_int(struct context **cnt, const char *str, int val_ptr);
 static struct context **copy_video_params(struct context **cnt, const char *config_val, int config_indx);
 static struct context **copy_netcam_params(struct context **cnt, const char *config_val, int config_indx);
+static struct context **copy_webcontrol_header(struct context **cnt, const char *config_val, int config_indx);
+static struct context **copy_stream_header(struct context **cnt, const char *config_val, int config_indx);
 static struct context **copy_text_double(struct context **cnt, const char *str, int val_ptr);
 static struct context **copy_html_output(struct context **cnt, const char *str, int val_ptr);
 
@@ -1186,11 +1188,11 @@ config_param config_params[] = {
     WEBUI_LEVEL_RESTRICTED
     },
     {
-    "webcontrol_cors_header",
-    "# The cross-origin resource sharing (CORS) header for webcontrol",
+    "webcontrol_header_params",
+    "# The header parameters for webcontrol",
     0,
-    CONF_OFFSET(webcontrol_cors_header),
-    copy_uri,
+    CONF_OFFSET(webcontrol_header_params),
+    copy_string,
     print_string,
     WEBUI_LEVEL_RESTRICTED
     },
@@ -1244,11 +1246,11 @@ config_param config_params[] = {
     WEBUI_LEVEL_RESTRICTED
     },
     {
-    "stream_cors_header",
-    "# The cross-origin resource sharing (CORS) header for the stream",
+    "stream_header_params",
+    "# The header parameters for the stream",
     0,
-    CONF_OFFSET(stream_cors_header),
-    copy_uri,
+    CONF_OFFSET(stream_header_params),
+    copy_string,
     print_string,
     WEBUI_LEVEL_RESTRICTED
     },
@@ -2049,6 +2051,22 @@ dep_config_param dep_config_params[] = {
     "netcam_high_url",
     copy_string
     },
+    {
+    "webcontrol_cors_header",
+    "4.3.2",
+    "\"webcontrol_cors_header\" replaced with \"webcontrol_header_params\"",
+    CONF_OFFSET(webcontrol_header_params),
+    "webcontrol_header_params",
+    copy_string
+    },
+    {
+    "stream_cors_header",
+    "4.3.2",
+    "\"stream_cors_header\" replaced with \"stream_header_params\"",
+    CONF_OFFSET(stream_header_params),
+    "stream_header_params",
+    copy_string
+    },
 
     { NULL, NULL, NULL, 0, NULL, NULL}
 };
@@ -2212,6 +2230,12 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
                     mystreq(dep_config_params[i].name,"netcam_keepalive")) {
                     cnt = copy_netcam_params(cnt, arg1, i);
 
+                } else if (mystreq(dep_config_params[i].name,"webcontrol_cors_header"))  {
+                    cnt = copy_webcontrol_header(cnt, arg1, i);
+
+                } else if (mystreq(dep_config_params[i].name,"stream_cors_header"))  {
+                    cnt = copy_stream_header(cnt, arg1, i);
+
                 } else {
                     cnt = dep_config_params[i].copy(cnt, arg1, dep_config_params[i].conf_value);
                 }
@@ -2294,10 +2318,16 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
                  * It is important that we can use "" so that we can use
                  * leading spaces in text_left and text_right.
                  */
-                if ((beg[0] == '"' && beg[strlen(beg)-1] == '"') ||
-                    (beg[0] == '\'' && beg[strlen(beg)-1] == '\'')) {
-                    beg[strlen(beg)-1] = '\0';
-                    beg++;
+                /* For the config values of 'params' we leave on the quotes.
+                 * These parameters use the util_parms_parse routine that
+                 * will strip away the quotes if they are there
+                 */
+                if (strstr(cmd, "params") == NULL) {
+                    if ((beg[0] == '"' && beg[strlen(beg)-1] == '"') ||
+                        (beg[0] == '\'' && beg[strlen(beg)-1] == '\'')) {
+                        beg[strlen(beg)-1] = '\0';
+                        beg++;
+                    }
                 }
 
                 arg1 = beg; /* Argument starts here */
@@ -2599,10 +2629,10 @@ void conf_output_parms(struct context **cnt)
                 if (!strncmp(name, "netcam_url", 10) ||
                     !strncmp(name, "netcam_userpass", 15) ||
                     !strncmp(name, "netcam_highres", 14) ||
-                    !strncmp(name, "stream_cors_header", 18) ||
+                    !strncmp(name, "stream_header_params", 20) ||
                     !strncmp(name, "stream_authentication", 21) ||
                     !strncmp(name, "webcontrol_authentication", 25) ||
-                    !strncmp(name, "webcontrol_cors_header", 22) ||
+                    !strncmp(name, "webcontrol_header_params", 24) ||
                     !strncmp(name, "webcontrol_key", 14) ||
                     !strncmp(name, "webcontrol_cert", 15) ||
                     !strncmp(name, "database_user", 13) ||
@@ -2644,8 +2674,7 @@ static void malloc_strings(struct context *cnt)
     unsigned int i = 0;
     char **val;
     while (config_params[i].param_name != NULL) {
-        if (config_params[i].copy == copy_string ||
-            config_params[i].copy == copy_uri) {
+        if (config_params[i].copy == copy_string) {
             /* if member is a string */
             /* val is made to point to a pointer to the current string. */
             val = (char **)((char *)cnt+config_params[i].conf_value);
@@ -3002,6 +3031,142 @@ static struct context **copy_netcam_params(struct context **cnt, const char *con
 }
 
 /**
+ * copy_webcontrol_header
+ *      Assigns a new string value to a config option.
+ * Returns context struct.
+ */
+static struct context **copy_webcontrol_header(struct context **cnt, const char *config_val, int config_indx)
+{
+
+    int i, indx;
+    int parm_len;
+    char *orig_parm, *parm_new;
+
+    indx = 0;
+    while (config_params[indx].param_name != NULL) {
+        if (mystreq(config_params[indx].param_name,"webcontrol_header_params")) {
+            break;
+        }
+        indx++;
+    }
+
+    if (mystrne(config_params[indx].param_name,"webcontrol_header_params")) {
+        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
+            ,_("Unable to locate webcontrol_header_params"));
+        return cnt;
+    }
+
+    if (config_val == NULL) {
+        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
+            ,_("No value provided to put into webcontrol_header_params"));
+        return cnt;
+    }
+
+    if (mystreq(dep_config_params[config_indx].name,"webcontrol_cors_header")) {
+        parm_len = strlen("Access-Control-Allow-Origin") + strlen(config_val) + 2;
+        parm_new = mymalloc(parm_len);
+        snprintf(parm_new, parm_len, "%s=%s"
+            ,"Access-Control-Allow-Origin", config_val);
+    } else {
+        return cnt;
+    }
+
+    /* Recall that the current parms have already been processed by time this is called */
+    i = -1;
+    while (cnt[++i]) {
+        if (cnt[i]->conf.webcontrol_header_params != NULL) {
+            parm_len =  strlen(cnt[i]->conf.webcontrol_header_params) + 1;
+            orig_parm = mymalloc(parm_len);
+            snprintf(orig_parm,parm_len,"%s",cnt[i]->conf.webcontrol_header_params);
+
+            parm_len = strlen(parm_new) + strlen(orig_parm) + 2;
+
+            free(cnt[i]->conf.webcontrol_header_params);
+            cnt[i]->conf.webcontrol_header_params = mymalloc(parm_len);
+            snprintf(cnt[i]->conf.webcontrol_header_params, parm_len, "%s,%s",parm_new, orig_parm);
+
+            free(orig_parm);
+        } else {
+            parm_len = strlen(parm_new) + 1;
+            cnt[i]->conf.webcontrol_header_params = mymalloc(parm_len);
+            snprintf(cnt[i]->conf.webcontrol_header_params, parm_len, "%s", parm_new);
+        }
+    }
+
+    free(parm_new);
+
+    return cnt;
+}
+
+/**
+ * copy_stream_header
+ *      Assigns a new string value to a config option.
+ * Returns context struct.
+ */
+static struct context **copy_stream_header(struct context **cnt, const char *config_val, int config_indx)
+{
+
+    int i, indx;
+    int parm_len;
+    char *orig_parm, *parm_new;
+
+    indx = 0;
+    while (config_params[indx].param_name != NULL) {
+        if (mystreq(config_params[indx].param_name,"stream_header_params")) {
+            break;
+        }
+        indx++;
+    }
+
+    if (mystrne(config_params[indx].param_name,"stream_header_params")) {
+        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
+            ,_("Unable to locate stream_header_params"));
+        return cnt;
+    }
+
+    if (config_val == NULL) {
+        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
+            ,_("No value provided to put into stream_header_params"));
+        return cnt;
+    }
+
+    if (mystreq(dep_config_params[config_indx].name,"stream_cors_header")) {
+        parm_len = strlen("Access-Control-Allow-Origin") + strlen(config_val) + 2;
+        parm_new = mymalloc(parm_len);
+        snprintf(parm_new, parm_len, "%s=%s"
+            ,"Access-Control-Allow-Origin", config_val);
+    } else {
+        return cnt;
+    }
+
+    /* Recall that the current parms have already been processed by time this is called */
+    i = -1;
+    while (cnt[++i]) {
+        if (cnt[i]->conf.stream_header_params != NULL) {
+            parm_len =  strlen(cnt[i]->conf.stream_header_params) + 1;
+            orig_parm = mymalloc(parm_len);
+            snprintf(orig_parm,parm_len,"%s",cnt[i]->conf.stream_header_params);
+
+            parm_len = strlen(parm_new) + strlen(orig_parm) + 2;
+
+            free(cnt[i]->conf.stream_header_params);
+            cnt[i]->conf.stream_header_params = mymalloc(parm_len);
+            snprintf(cnt[i]->conf.stream_header_params, parm_len, "%s,%s",parm_new, orig_parm);
+
+            free(orig_parm);
+        } else {
+            parm_len = strlen(parm_new) + 1;
+            cnt[i]->conf.stream_header_params = mymalloc(parm_len);
+            snprintf(cnt[i]->conf.stream_header_params, parm_len, "%s", parm_new);
+        }
+    }
+
+    free(parm_new);
+
+    return cnt;
+}
+
+/**
  * copy_text_double
  *      Converts the bool of text_double to a 1 or 2 in text_scale
  * Returns context struct.
@@ -3058,33 +3223,6 @@ static struct context **copy_html_output(struct context **cnt, const char *str, 
     return cnt;
 }
 
-struct context **copy_uri(struct context **cnt, const char *str, int val)
-{
-
-    const char *regex_str = "(http|https)://(((.*):(.*))@)?([^/:]|[-_.a-z0-9]+)(:([0-9]+))?($|(/[^*]*))";
-
-    regex_t regex;
-    if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Error compiling regex in copy_uri"));
-        return cnt;
-    }
-
-    // A single asterisk is also valid, so check for that.
-    // Getting a perfect regex for all the uri's that are possible is
-    // almost impossible so if it fails, we warn the user but still accept
-    // that they know what they typed and move on.
-    if (mystrne(str, "*") && regexec(&regex, str, 0, NULL, 0) == REG_NOMATCH) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
-            ,_("The CORS header may not be valid %s"),str);
-    }
-
-    regfree(&regex);
-    cnt = copy_string(cnt, str, val);
-    return cnt;
-
-}
-
 /**
  * config_type
  *      Returns a pointer to string containing value the type of config parameter passed.
@@ -3101,9 +3239,6 @@ const char *config_type(config_param *configparam)
     }
     if (configparam->copy == copy_bool) {
         return "bool";
-    }
-    if (configparam->copy == copy_uri) {
-        return "uri";
     }
 
     return "unknown";
@@ -3490,13 +3625,13 @@ static void config_parms_intl()
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_tls",_("webcontrol_tls"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_cert",_("webcontrol_cert"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_key",_("webcontrol_key"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_cors_header",_("webcontrol_cors_header"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_header_params",_("webcontrol_header_params"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_port",_("stream_port"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_localhost",_("stream_localhost"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_auth_method",_("stream_auth_method"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_authentication",_("stream_authentication"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_tls",_("stream_tls"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_cors_header",_("stream_cors_header"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_header_params",_("stream_header_params"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_scale",_("stream_preview_scale"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_newline",_("stream_preview_newline"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_method",_("stream_preview_method"));
