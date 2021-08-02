@@ -5054,13 +5054,16 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        Comma separated pairs for the header and value.  e.g.
+        User specified header(s) for the webcontrol.  The header/value pair is separated by an equal sign and multiple header/value
+        pairs are separated by commas.  If the header or value includes an equal sign or comma, then the header or value must be
+        enclosed in double quotes.  e.g.
         <p></p>
-        <code>webcontrol_header_params Access-Control-Allow-Origin=*, Cache-Control=no-cache</code>
+        <code>webcontrol_header_params Access-Control-Allow-Origin=*, Cache-Control="no-cache"</code>
         <p></p>
-        When Motion parses this parameter, it will only show the values when <a href="#webcontrol_localhost">webcontrol_localhost</a> is
-        set to on.  When the <a href="#webcontrol_localhost">webcontrol_localhost</a> is set to off, the Motion log will redact the
-        values.
+        When Motion parses this parameter, it only shows the values in the Motion log
+        when <a href="#webcontrol_localhost">webcontrol_localhost</a> is set to on.  When
+        the <a href="#webcontrol_localhost">webcontrol_localhost</a> is set to off, Motion
+        will redact the values in the log.
         <p></p>
 
       </ul>
@@ -5209,15 +5212,17 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The comma separated pairs for header values sent with the stream. e.g.
+        User specified header(s) for the stream.  The header/value pair is separated by an equal sign and multiple header/value
+        pairs are separated by commas.  If the header or value includes an equal sign or comma, then the header or value must be
+        enclosed in double quotes.  e.g.
+        <p></p>
+        <code>stream_header_params Access-Control-Allow-Origin=*, Cache-Control="no-cache"</code>
+        <p></p>
+        When Motion parses this parameter, it only shows the values in the Motion log
+        when <a href="#stream_localhost">stream_localhost</a> is set to on.  When
+        the <a href="#stream_localhost">stream_localhost</a> is set to off, Motion
+        will redact the values in the log.
 		    <p></p>
-        <code>stream_header_params Access-Control-Allow-Origin=*, Cache-Control=no-cache</code>
-        <p></p>
-        When Motion parses this parameter, it will only show the values when <a href="#stream_localhost">stream_localhost</a> is
-        set to on.  When the <a href="#stream_localhost">stream_localhost</a> is set to off, the Motion log will redact the
-        values.
-        <p></p>
-
 
         <h3><a name="stream_preview_scale"></a> stream_preview_scale </h3>
         <p></p>
