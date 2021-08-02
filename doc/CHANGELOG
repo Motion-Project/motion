@@ -1,4 +1,4 @@
-Summary of changes for version 4.4.0 are below
+
     * Adjust copyright to 2021
     * Fix for urls provided without port number
     * Fix the workaround for the exif creation.
