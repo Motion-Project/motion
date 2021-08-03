@@ -179,7 +179,7 @@
       The following are some additional topics which may be of interest during the initial setup.
       <ul>
         <li>Run automatically at start (Run as <a href="#basic_setup_service" >service</a>)</li>
-        <li>Remove depreciated parameters warnings (<a href="#config_depreciated" >Remove Depreciated</a>)</li>
+        <li>Remove deprecated parameters warnings (<a href="#config_deprecated" >Remove deprecated</a>)</li>
         <li>List/include all possible configuration parameters (<a href="#config_listall" >All parameters</a>)</li>
       </ul>
       <p></p>
@@ -318,7 +318,7 @@
       run, it will only have limited permissions.  It is NOT recommended that this user get added to the
       <code>sudo</code> group.  Instead, only add this user to groups that are specifically required.
       <p></p>
-      On newer distributions, the above method of running a service is depreciated (but still functional) in
+      On newer distributions, the above method of running a service is deprecated (but still functional) in
       favor of the systemctl method.  Since this is not available on all the distributions which Motion is
       deployed, the above method is retained.  Once systemctl is available on all the deployed versions, Motion
       will transition to systemctl as the service method.  For users that wish to systemctl rather than the above
@@ -455,9 +455,9 @@
       belong to those features.
 
       <p></p>
-      <a name="config_depreciated"></a>
+      <a name="config_deprecated"></a>
       <p></p>
-      <strong>Depreciated Parameters</strong>
+      <strong>Deprecated Parameters</strong>
       <p></p>
       Over the years, Motion has added many new configuration parameters and changed the name
       of a few of them so that there is some consistency to the parameter names.  Since version
@@ -481,7 +481,7 @@
       configuration files only include a limited subset of the configuration parameters.  Users can add to the
       files as needed the parameters that are applicable to their set up.  Users that wish to have every parameter
       listed and included in the configuration file can follow the process described immediately above in
-      the <a href="#config_depreciated" >Remove Depreciated</a> section.
+      the <a href="#config_deprecated" >Remove deprecated</a> section.
       i.e. Use the webcontrol interface to write out the configuration file.
       <p></p>
       Extended descriptions / documentation are not included in the configuration file.  This guide
@@ -549,8 +549,8 @@
       <p></p>
       <style>
         @media screen and (max-width: 48em) {
-          .tblalpha td:nth-of-type(1):before {content: "v4.0"; padding-right: 10px;}
-          .tblalpha td:nth-of-type(2):before {content: "v4.1"; padding-right: 10px;}
+          .tblalpha td:nth-of-type(1):before {content: "v4.1"; padding-right: 10px;}
+          .tblalpha td:nth-of-type(2):before {content: "v4.2"; padding-right: 10px;}
           .tblalpha td:nth-of-type(3):before {content: "v4.3"; padding-right: 10px;}
           .tblalpha td:nth-of-type(4):before {content: "Cur."; padding-right: 10px;}
         }
@@ -562,9 +562,9 @@
         <colgroup width="25%"></colgroup>
         <colgroup width="25%"></colgroup>
         <tr>
-          <td align="left"><b>Version 4.0</b></td>
           <td align="left"><b>Version 4.1</b></td>
           <td align="left"><b>Version 4.2</b></td>
+          <td align="left"><b>Version 4.3</b></td>
           <td align="left"><b>Current Version</b></td>
         </tr>
         <tr>
@@ -670,7 +670,7 @@
           <td align="left"><a href="#event_gap" >event_gap</a></td>
         </tr>
         <tr>
-          <td align="left"></td>
+          <td align="left">flip_axis</td>
           <td align="left">flip_axis</td>
           <td align="left">flip_axis</td>
           <td align="left"><a href="#flip_axis" >flip_axis</a></td>
@@ -689,13 +689,13 @@
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">lightswitch_frames</td>
           <td align="left">lightswitch_frames</td>
           <td align="left"><a href="#lightswitch_frames" >lightswitch_frames</a></td>
         </tr>
         <tr>
           <td align="left">lightswitch</td>
-          <td align="left">lightswitch</td>
+          <td align="left">lightswitch_percent</td>
           <td align="left">lightswitch_percent</td>
           <td align="left"><a href="#lightswitch_percent" >lightswitch_percent</a></td>
         </tr>
@@ -713,7 +713,7 @@
         </tr>
         <tr>
           <td align="left">logfile</td>
-          <td align="left">logfile</td>
+          <td align="left">log_file</td>
           <td align="left">log_file</td>
           <td align="left"><a href="#log_file" >log_file</a></td>
         </tr>
@@ -736,7 +736,7 @@
           <td align="left"><a href="#mask_file" >mask_file</a></td>
         </tr>
         <tr>
-          <td align="left"></td>
+          <td align="left">mask_privacy</td>
           <td align="left">mask_privacy</td>
           <td align="left">mask_privacy</td>
           <td align="left"><a href="#mask_privacy" >mask_privacy</a></td>
@@ -767,13 +767,13 @@
         </tr>
         <tr>
           <td align="left">ffmpeg_bps</td>
-          <td align="left">ffmpeg_bps</td>
+          <td align="left">movie_bps</td>
           <td align="left">movie_bps</td>
           <td align="left"><a href="#movie_bps" >movie_bps</a></td>
         </tr>
         <tr>
           <td align="left">ffmpeg_video_codec</td>
-          <td align="left">ffmpeg_video_codec</td>
+          <td align="left">movie_codec</td>
           <td align="left">movie_codec</td>
           <td align="left"><a href="#movie_codec" >movie_codec</a></td>
         </tr>
@@ -785,13 +785,13 @@
         </tr>
         <tr>
           <td align="left">extpipe</td>
-          <td align="left">extpipe</td>
+          <td align="left">movie_extpipe</td>
           <td align="left">movie_extpipe</td>
           <td align="left"><a href="#movie_extpipe" >movie_extpipe</a></td>
         </tr>
         <tr>
           <td align="left">use_extpipe</td>
-          <td align="left">use_extpipe</td>
+          <td align="left">movie_extpipe_use</td>
           <td align="left">movie_extpipe_use</td>
           <td align="left"><a href="#movie_extpipe_use" >movie_extpipe_use</a></td>
         </tr>
@@ -802,38 +802,38 @@
           <td align="left"><a href="#movie_filename" >movie_filename</a></td>
         </tr>
         <tr>
-          <td align="left">max_mpeg_time</td>
           <td align="left">max_movie_time</td>
+          <td align="left">movie_max_time</td>
           <td align="left">movie_max_time</td>
           <td align="left"><a href="#movie_max_time" >movie_max_time</a></td>
         </tr>
         <tr>
           <td align="left">ffmpeg_output_movies</td>
-          <td align="left">ffmpeg_output_movies</td>
+          <td align="left">movie_output</td>
           <td align="left">movie_output</td>
           <td align="left"><a href="#movie_output" >movie_output</a></td>
         </tr>
         <tr>
           <td align="left">ffmpeg_output_debug_movies</td>
-          <td align="left">ffmpeg_output_debug_movies</td>
+          <td align="left">movie_output_motion</td>
           <td align="left">movie_output_motion</td>
           <td align="left"><a href="#movie_output_motion" >movie_output_motion</a></td>
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">movie_passthrough</td>
           <td align="left">movie_passthrough</td>
           <td align="left"><a href="#movie_passthrough" >movie_passthrough</a></td>
         </tr>
         <tr>
           <td align="left">ffmpeg_variable_bitrate</td>
-          <td align="left">ffmpeg_variable_bitrate</td>
+          <td align="left">movie_quality</td>
           <td align="left">movie_quality</td>
           <td align="left"><a href="#movie_quality" >movie_quality</a></td>
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">native_language</td>
           <td align="left">native_language</td>
           <td align="left"><a href="#native_language" >native_language</a></td>
         </tr>
@@ -844,10 +844,16 @@
           <td align="left"><a href="#netcam_high_params" >netcam_high_params</a></td>
         </tr>
         <tr>
-          <td align="left"></td>
+          <td align="left">netcam_highres</td>
           <td align="left">netcam_highres</td>
           <td align="left">netcam_highres</td>
           <td align="left"><a href="#netcam_high_url" >netcam_high_url</a></td>
+        </tr>
+        <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left">netcam_decoder</td>
+          <td align="left"><a href="#netcam_params" >netcam_params</a></td>
         </tr>
         <tr>
           <td align="left">netcam_keepalive</td>
@@ -869,7 +875,7 @@
         </tr>
         <tr>
           <td align="left">rtsp_uses_tcp<br /></td>
-          <td align="left">rtsp_uses_tcp</td>
+          <td align="left">netcam_use_tcp</td>
           <td align="left">netcam_use_tcp</td>
           <td align="left"><a href="#netcam_params" >netcam_params</a></td>
         </tr>
@@ -904,7 +910,7 @@
           <td align="left"><a href="#on_area_detected" >on_area_detected</a></td>
         </tr>
         <tr>
-          <td align="left"></td>
+          <td align="left">on_camera_found</td>
           <td align="left">on_camera_found</td>
           <td align="left">on_camera_found</td>
           <td align="left"><a href="#on_camera_found" >on_camera_found</a></td>
@@ -959,19 +965,19 @@
         </tr>
         <tr>
           <td align="left">exif_text<br /></td>
-          <td align="left">exif_text</td>
+          <td align="left">picture_exif</td>
           <td align="left">picture_exif</td>
           <td align="left"><a href="#picture_exif" >picture_exif</a></td>
         </tr>
         <tr>
           <td align="left">output_pictures</td>
-          <td align="left">output_pictures</td>
+          <td align="left">picture_output</td>
           <td align="left">picture_output</td>
           <td align="left"><a href="#picture_output" >picture_output</a></td>
         </tr>
         <tr>
           <td align="left">output_debug_pictures</td>
-          <td align="left">output_debug_pictures</td>
+          <td align="left">picture_output_motion</td>
           <td align="left">picture_output_motion</td>
           <td align="left"><a href="#picture_output_motion" >picture_output_motion</a></td>
         </tr>
@@ -989,13 +995,13 @@
         </tr>
         <tr>
           <td align="left">quality</td>
-          <td align="left">quality</td>
+          <td align="left">picture_quality</td>
           <td align="left">picture_quality</td>
           <td align="left"><a href="#picture_quality" >picture_quality</a></td>
         </tr>
         <tr>
           <td align="left">process_id_file</td>
-          <td align="left">process_id_file</td>
+          <td align="left">pid_file</td>
           <td align="left">pid_file</td>
           <td align="left"><a href="#pid_file" >pid_file</a></td>
         </tr>
@@ -1037,7 +1043,7 @@
         </tr>
         <tr>
           <td align="left">switchfilter</td>
-          <td align="left">switchfilter</td>
+          <td align="left">roundrobin_switchfilter</td>
           <td align="left">roundrobin_switchfilter</td>
           <td align="left"><a href="#roundrobin_switchfilter" >roundrobin_switchfilter</a></td>
         </tr>
@@ -1096,14 +1102,14 @@
           <td align="left"><a href="#sql_query" >sql_query</a></td>
         </tr>
         <tr>
-          <td align="left"></td>
+          <td align="left">sql_query_start</td>
           <td align="left">sql_query_start</td>
           <td align="left">sql_query_start</td>
           <td align="left"><a href="#sql_query_start" >sql_query_start</a></td>
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">sql_query_stop</td>
           <td align="left">sql_query_stop</td>
           <td align="left"><a href="#sql_query_stop" >sql_query_stop</a></td>
         </tr>
@@ -1121,13 +1127,13 @@
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">stream_cors_header</td>
           <td align="left">stream_cors_header</td>
           <td align="left"><a href="#stream_header_params" >stream_header_params</a></td>
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">stream_grey</td>
           <td align="left">stream_grey</td>
           <td align="left"><a href="#stream_grey" >stream_grey</a></td>
         </tr>
@@ -1157,7 +1163,7 @@
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">stream_preview_method</td>
           <td align="left">stream_preview_method</td>
           <td align="left"><a href="#stream_preview_method" >stream_preview_method</a></td>
         </tr>
@@ -1181,7 +1187,7 @@
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">stream_tls</td>
           <td align="left">stream_tls</td>
           <td align="left"><a href="#stream_tls" >stream_tls</a></td>
         </tr>
@@ -1217,7 +1223,7 @@
         </tr>
         <tr>
           <td align="left">text_double</td>
-          <td align="left">text_double</td>
+          <td align="left">text_scale</td>
           <td align="left">text_scale</td>
           <td align="left"><a href="#text_scale" >text_scale</a></td>
         </tr>
@@ -1229,7 +1235,7 @@
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">threshold_maximum</td>
           <td align="left">threshold_maximum</td>
           <td align="left"><a href="#threshold_maximum" >threshold_maximum</a></td>
         </tr>
@@ -1240,7 +1246,7 @@
           <td align="left"><a href="#threshold_tune" >threshold_tune</a></td>
         </tr>
         <tr>
-          <td align="left">ffmpeg_video_codec</td>
+          <td align="left">timelapse_codec</td>
           <td align="left">timelapse_codec</td>
           <td align="left">timelapse_codec</td>
           <td align="left"><a href="#timelapse_codec" >timelapse_codec</a></td>
@@ -1252,19 +1258,19 @@
           <td align="left"><a href="#timelapse_filename" >timelapse_filename</a></td>
         </tr>
           <tr>
-          <td align="left"></td>
+          <td align="left">timelapse_fps</td>
           <td align="left">timelapse_fps</td>
           <td align="left">timelapse_fps</td>
           <td align="left"><a href="#timelapse_fps" >timelapse_fps</a></td>
         </tr>
         <tr>
-          <td align="left">ffmpeg_timelapse</td>
+          <td align="left">timelapse_interval</td>
           <td align="left">timelapse_interval</td>
           <td align="left">timelapse_interval</td>
           <td align="left"><a href="#timelapse_interval" >timelapse_interval</a></td>
         </tr>
           <tr>
-          <td align="left">ffmpeg_timelapse_mode</td>
+          <td align="left">timelapse_mode</td>
           <td align="left">timelapse_mode</td>
           <td align="left">timelapse_mode</td>
           <td align="left"><a href="#timelapse_mode" >timelapse_mode</a></td>
@@ -1277,7 +1283,7 @@
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">track_generic_move</td>
           <td align="left">track_generic_move</td>
           <td align="left"><a href="#track_generic_move" >track_generic_move</a></td>
         </tr>
@@ -1385,37 +1391,37 @@
         </tr>
         <tr>
           <td align="left">brightness</td>
-          <td align="left">brightness</td>
+          <td align="left">vid_control_params</td>
           <td align="left">vid_control_params</td>
           <td align="left"><a href="#video_params" >video_params</a></td>
         </tr>
         <tr>
           <td align="left">contrast</td>
-          <td align="left">contrast</td>
+          <td align="left">vid_control_params</td>
           <td align="left">vid_control_params</td>
           <td align="left"><a href="#video_params" >video_params</a></td>
         </tr>
         <tr>
           <td align="left">hue</td>
-          <td align="left">hue</td>
+          <td align="left">vid_control_params</td>
           <td align="left">vid_control_params</td>
           <td align="left"><a href="#video_params" >video_params</a></td>
         </tr>
         <tr>
           <td align="left">power_line_frequency</td>
-          <td align="left">power_line_frequency</td>
+          <td align="left">vid_control_params</td>
           <td align="left">vid_control_params</td>
           <td align="left"><a href="#video_params" >video_params</a></td>
         </tr>
         <tr>
           <td align="left">saturation</td>
-          <td align="left">saturation</td>
+          <td align="left">vid_control_params</td>
           <td align="left">vid_control_params</td>
           <td align="left"><a href="#video_params" >video_params</a></td>
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">vid_control_params</td>
           <td align="left">vid_control_params</td>
           <td align="left"><a href="#video_params" >video_params</a></td>
         </tr>
@@ -1433,13 +1439,13 @@
         </tr>
         <tr>
           <td align="left">motion_video_pipe</td>
-          <td align="left">motion_video_pipe</td>
+          <td align="left">video_pipe_motion</td>
           <td align="left">video_pipe_motion</td>
           <td align="left"><a href="#video_pipe_motion" >video_pipe_motion</a></td>
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">webcontrol_auth_method</td>
           <td align="left">webcontrol_auth_method</td>
           <td align="left"><a href="#webcontrol_auth_method" >webcontrol_auth_method</a></td>
         </tr>
@@ -1451,31 +1457,31 @@
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">webcontrol_cert</td>
           <td align="left">webcontrol_cert</td>
           <td align="left"><a href="#webcontrol_cert" >webcontrol_cert</a></td>
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">webcontrol_cors_header</td>
           <td align="left">webcontrol_cors_header</td>
           <td align="left"><a href="#webcontrol_header_params" >webcontrol_header_params</a></td>
         </tr>
         <tr>
           <td align="left">webcontrol_html_output</td>
-          <td align="left">webcontrol_html_output</td>
+          <td align="left">webcontrol_interface</td>
           <td align="left">webcontrol_interface</td>
           <td align="left"><a href="#webcontrol_interface" >webcontrol_interface</a></td>
         </tr>
         <tr>
           <td align="left">ipv6_enabled</td>
-          <td align="left">ipv6_enabled</td>
+          <td align="left">webcontrol_ipv6</td>
           <td align="left">webcontrol_ipv6</td>
           <td align="left"><a href="#webcontrol_ipv6" >webcontrol_ipv6</a></td>
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">webcontrol_key</td>
           <td align="left">webcontrol_key</td>
           <td align="left"><a href="#webcontrol_key" >webcontrol_key</a></td>
         </tr>
@@ -1486,7 +1492,7 @@
           <td align="left"><a href="#webcontrol_localhost" >webcontrol_localhost</a></td>
         </tr>
         <tr>
-          <td align="left"></td>
+          <td align="left">webcontrol_parms</td>
           <td align="left">webcontrol_parms</td>
           <td align="left">webcontrol_parms</td>
           <td align="left"><a href="#webcontrol_parms" >webcontrol_parms</a></td>
@@ -1499,7 +1505,7 @@
         </tr>
         <tr>
           <td align="left"></td>
-          <td align="left"></td>
+          <td align="left">webcontrol_tls</td>
           <td align="left">webcontrol_tls</td>
           <td align="left"><a href="#webcontrol_tls" >webcontrol_tls</a></td>
         </tr>
@@ -1510,22 +1516,16 @@
           <td align="left"><a href="#width" >width</td>
         </tr>
         <tr>
-          <td align="left">sdl_threadnr</td>
-          <td align="left">-Depreciated</td>
-          <td align="left">-Depreciated</td>
-          <td align="left">-Depreciated</td>
+          <td align="left">stream_limit</td>
+          <td align="left">-Deprecated</td>
+          <td align="left">-Deprecated</td>
+          <td align="left">-Deprecated</td>
         </tr>
         <tr>
-          <td align="left">stream_limit</td>
-          <td align="left">stream_limit</td>
-          <td align="left">-Depreciated</td>
-          <td align="left">-Depreciated</td>
-        </tr>
-        <tr>
-          <td align="left"></td>
           <td align="left">substream_port</td>
-          <td align="left">-Depreciated</td>
-          <td align="left">-Depreciated</td>
+          <td align="left">-Deprecated</td>
+          <td align="left">-Deprecated</td>
+          <td align="left">-Deprecated</td>
         </tr>
       </table>
       </div>
@@ -2461,7 +2461,7 @@
         </ul>
         <p></p>
         While it always recommended that users remove older configuration options and only use the new options,
-        if users have within the configuration file any of the depreciated options list above, Motion will
+        if users have within the configuration file any of the deprecated options list above, Motion will
         continue to read those values and upgrade them into the new <a href="#video_params" >video_params</a>
         option.  The resulting pictures from the device may however may not be comparable due to different
         interpretations of the values.
@@ -2987,7 +2987,7 @@
         parameters and values is the same as what is given in the examples for video_params.  The parameters are
         delimited by commas and provided in the format of parameter_name = parameter_value.
         <p></p>
-        For cameras that use the url prefix of http, ftp, mjpg, and jpeg the options permitted are limited
+        For cameras that use the url prefix of mjpeg, ftp, mjpg, and jpeg the options permitted are limited
         to keepalive, proxy and tolerant_check.  These parameters correspond to the options provided in previous
         versions of Motion.
         <p></p>
@@ -3059,18 +3059,17 @@
         will fall back to the default decoder.  This option may improve performance in certain situations for
         certain platforms and cameras.
         <p></p>
-        Users can find the names of the decoders on their system by going to a command prompt and
+        Users can find the names of the decoders in ffmpeg on their system by going to a command prompt and
         typing <code>ffmpeg -decoders</code> and looking for the name of the decoder with a 'D' next
-        to it and correlating this with the type of image provided from the camera.  The list of decoders
-        will correspond with how the distro built ffmpeg.  Additional decoders could also be available
-        if ffmpeg is compiled from source.
+        to it and correlating this with the type of image provided from the camera.  Note that although the
+        decoder may be listed, it still may not work within Motion.
         <p></p>
-        Additional different decoder options may also be found by reviewing the Motion log.  These
-        decoders will be shown as "available" in log when <a href="#log_level">log_level</a> is
-        specified at the INF level or higher.
+        In addition to the decoders specified by ffmpeg, additional different decoder options may also
+        be found by reviewing the Motion log.  These decoders will be shown as "available" in the log
+        when <a href="#log_level">log_level</a> is specified at the INF level or higher.
         <p></p>
-        Note that not all decoders will work with all cameras even if they are indicated as
-        available.  If the camera does not open using the requested decoder, specify a different
+        Not all decoders will work even if they are indicated as available or work using ffmpeg externally
+        to Motion.  If the camera does not open using the requested decoder, try a different
         decoder or leave this parameter empty to use the default.
         <p></p>
 
@@ -3108,9 +3107,9 @@
         To avoid the decoding and disconnection errors, it is recommended that the FPS of the camera be
         adjusted where possible.  Generally, it is preferable to have the FPS of the camera be slightly
         lower than the capture_rate of Motion.  This allows for the decoder to perform better and reduce
-        decode errors.  For example if the capture_rate is set at 5 and the camera is sending images at
+        decoding errors.  For example if the capture_rate is set at 5 and the camera is sending images at
         30 FPS, the resulting images, processing latency, etc is going to be extremely "poor".  But if
-        the camera FPS is set at 4 instead, the results will be much better.
+        the camera FPS is set at 4 instead, the results will "better".
         <p></p>
         Reviews of the Motion log at the INF level can assist in determining whether a higher capture_rate is
         required.  In particular, look for the following:
@@ -3158,8 +3157,7 @@
         <p></p>
         The input_format option is specified in the <a href="#netcam_params" >netcam_params</a> option.  This option
         is from the ffmpeg libraries.  This option is used for specifying the palette format of the camera when
-        using the v4l2 via netcam option.  The values of mjpeg and h264 correspond to the values assigned in
-        previous versions of Motion using the v4l2_palette option.
+        using the v4l2 via netcam option.
         <p></p>
 
         <h3><a name="netcam_high_url"></a> netcam_high_url </h3>
@@ -3170,10 +3168,9 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The network camera high resolution URL.  This option can be used in conjunction with the netcam_url for
-        rtsp/rtmp/mjpeg cameras. Users may specify the normal resolution url in the netcam_url which will be used for
-        the motion detection and then specify the high resolution url for this parameter.  For mjpeg cameras,
-        the url must use the <code>mjpeg</code> prefix and not <code>http</code>.
+        The network camera high resolution URL used in conjunction with the netcam_url parameter.
+        Users may specify the normal resolution in the netcam_url and that will be used for
+        the motion detection and then specify the high resolution url for this parameter.
         <br>
         Motion detection on the normal resolution will trigger the saving of images from the high resolution stream.
         Note that the ONLY overlay that will be present on the resulting high resolution pictures and movies is the
@@ -3185,7 +3182,7 @@
         <p></p>
         When this option is used with the <a href="#movie_passthrough">movie_passthrough</a> even less processing occurs.
         Since the <a href="#movie_passthrough">movie_passthrough</a> bypasses decoding the stream, images will be saved
-        only as normal resolution and the privacy mask will not be overlaid on to the high resolution images.
+        as provided from the camera and the privacy mask will not be applied.
         <p></p>
 
         <h3><a name="netcam_high_params"></a> netcam_params </h3>
@@ -3208,9 +3205,8 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The Username and password for the network camera.  For http protocols, this
-        option is for HTTP 1.1 Basic authentication only. The string is specified as username:password.
-        To use no authentication simply remove this option.  Digest authentication is only available for rtsp/rtmp cameras.
+        The username and password for the network camera.  The string is specified as username:password.
+        If the camera does not have any authentication to the stream, leave this option empty.
         <p></p>
 
         <p></p>
@@ -4497,9 +4493,10 @@
         </ul>
         <p></p>
         When specified, if the CPU can not keep up with the requested frame rate for the movies,
-        frames will be duplicated in order to keep up with the frame rate.  Use this option with care
-        since the resulting movies will have the same frame sent multiple times and therefore the
-        movie may appear to "stall" and look terrible.
+        frames will be duplicated in order to keep up with the frame rate.
+        <p></p>
+        Users should never use this option since the resulting movies will have the same frame
+        sent multiple times and therefore the movie will appear to "stall" and look terrible.
         <p></p>
         <p></p>
 
@@ -4511,7 +4508,7 @@
           <li> Default: off</li>
         </ul>
         <p></p>
-        When using a RTSP, RTMP, http and some V4l2 cameras, create movie files of the motion with the packets
+        When using a RTSP, RTMP, HTTP and some V4l2 cameras, create movie files of the motion with the packets
         obtained directly from the camera.
         <p></p>
         For v4l2 cameras to use the movie_passthrough, they must be specified using the
