@@ -850,6 +850,12 @@
           <td align="left"><a href="#netcam_high_url" >netcam_high_url</a></td>
         </tr>
         <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left">netcam_decoder</td>
+          <td align="left"><a href="#netcam_params" >netcam_params</a></td>
+        </tr>
+        <tr>
           <td align="left">netcam_keepalive</td>
           <td align="left">netcam_keepalive</td>
           <td align="left">netcam_keepalive</td>
@@ -2981,7 +2987,7 @@
         parameters and values is the same as what is given in the examples for video_params.  The parameters are
         delimited by commas and provided in the format of parameter_name = parameter_value.
         <p></p>
-        For cameras that use the url prefix of http, ftp, mjpg, and jpeg the options permitted are limited
+        For cameras that use the url prefix of mjpeg, ftp, mjpg, and jpeg the options permitted are limited
         to keepalive, proxy and tolerant_check.  These parameters correspond to the options provided in previous
         versions of Motion.
         <p></p>
@@ -3053,18 +3059,17 @@
         will fall back to the default decoder.  This option may improve performance in certain situations for
         certain platforms and cameras.
         <p></p>
-        Users can find the names of the decoders on their system by going to a command prompt and
+        Users can find the names of the decoders in ffmpeg on their system by going to a command prompt and
         typing <code>ffmpeg -decoders</code> and looking for the name of the decoder with a 'D' next
-        to it and correlating this with the type of image provided from the camera.  The list of decoders
-        will correspond with how the distro built ffmpeg.  Additional decoders could also be available
-        if ffmpeg is compiled from source.
+        to it and correlating this with the type of image provided from the camera.  Note that although the
+        decoder may be listed, it still may not work within Motion.
         <p></p>
-        Additional different decoder options may also be found by reviewing the Motion log.  These
-        decoders will be shown as "available" in log when <a href="#log_level">log_level</a> is
-        specified at the INF level or higher.
+        In addition to the decoders specified by ffmpeg, additional different decoder options may also
+        be found by reviewing the Motion log.  These decoders will be shown as "available" in the log
+        when <a href="#log_level">log_level</a> is specified at the INF level or higher.
         <p></p>
-        Note that not all decoders will work with all cameras even if they are indicated as
-        available.  If the camera does not open using the requested decoder, specify a different
+        Not all decoders will work even if they are indicated as available or work using ffmpeg externally
+        to Motion.  If the camera does not open using the requested decoder, try a different
         decoder or leave this parameter empty to use the default.
         <p></p>
 
@@ -3102,9 +3107,9 @@
         To avoid the decoding and disconnection errors, it is recommended that the FPS of the camera be
         adjusted where possible.  Generally, it is preferable to have the FPS of the camera be slightly
         lower than the capture_rate of Motion.  This allows for the decoder to perform better and reduce
-        decode errors.  For example if the capture_rate is set at 5 and the camera is sending images at
+        decoding errors.  For example if the capture_rate is set at 5 and the camera is sending images at
         30 FPS, the resulting images, processing latency, etc is going to be extremely "poor".  But if
-        the camera FPS is set at 4 instead, the results will be much better.
+        the camera FPS is set at 4 instead, the results will "better".
         <p></p>
         Reviews of the Motion log at the INF level can assist in determining whether a higher capture_rate is
         required.  In particular, look for the following:
@@ -3152,8 +3157,7 @@
         <p></p>
         The input_format option is specified in the <a href="#netcam_params" >netcam_params</a> option.  This option
         is from the ffmpeg libraries.  This option is used for specifying the palette format of the camera when
-        using the v4l2 via netcam option.  The values of mjpeg and h264 correspond to the values assigned in
-        previous versions of Motion using the v4l2_palette option.
+        using the v4l2 via netcam option.
         <p></p>
 
         <h3><a name="netcam_high_url"></a> netcam_high_url </h3>
@@ -3164,10 +3168,9 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The network camera high resolution URL.  This option can be used in conjunction with the netcam_url for
-        rtsp/rtmp/mjpeg cameras. Users may specify the normal resolution url in the netcam_url which will be used for
-        the motion detection and then specify the high resolution url for this parameter.  For mjpeg cameras,
-        the url must use the <code>mjpeg</code> prefix and not <code>http</code>.
+        The network camera high resolution URL used in conjunction with the netcam_url parameter.
+        Users may specify the normal resolution in the netcam_url and that will be used for
+        the motion detection and then specify the high resolution url for this parameter.
         <br>
         Motion detection on the normal resolution will trigger the saving of images from the high resolution stream.
         Note that the ONLY overlay that will be present on the resulting high resolution pictures and movies is the
@@ -3179,7 +3182,7 @@
         <p></p>
         When this option is used with the <a href="#movie_passthrough">movie_passthrough</a> even less processing occurs.
         Since the <a href="#movie_passthrough">movie_passthrough</a> bypasses decoding the stream, images will be saved
-        only as normal resolution and the privacy mask will not be overlaid on to the high resolution images.
+        as provided from the camera and the privacy mask will not be applied.
         <p></p>
 
         <h3><a name="netcam_high_params"></a> netcam_params </h3>
@@ -3202,9 +3205,8 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The Username and password for the network camera.  For http protocols, this
-        option is for HTTP 1.1 Basic authentication only. The string is specified as username:password.
-        To use no authentication simply remove this option.  Digest authentication is only available for rtsp/rtmp cameras.
+        The username and password for the network camera.  The string is specified as username:password.
+        If the camera does not have any authentication to the stream, leave this option empty.
         <p></p>
 
         <p></p>
@@ -4491,9 +4493,10 @@
         </ul>
         <p></p>
         When specified, if the CPU can not keep up with the requested frame rate for the movies,
-        frames will be duplicated in order to keep up with the frame rate.  Use this option with care
-        since the resulting movies will have the same frame sent multiple times and therefore the
-        movie may appear to "stall" and look terrible.
+        frames will be duplicated in order to keep up with the frame rate.
+        <p></p>
+        Users should never use this option since the resulting movies will have the same frame
+        sent multiple times and therefore the movie will appear to "stall" and look terrible.
         <p></p>
         <p></p>
 
@@ -4505,7 +4508,7 @@
           <li> Default: off</li>
         </ul>
         <p></p>
-        When using a RTSP, RTMP, http and some V4l2 cameras, create movie files of the motion with the packets
+        When using a RTSP, RTMP, HTTP and some V4l2 cameras, create movie files of the motion with the packets
         obtained directly from the camera.
         <p></p>
         For v4l2 cameras to use the movie_passthrough, they must be specified using the
