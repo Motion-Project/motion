@@ -1,9 +1,6 @@
 Motion
 =============
 
-## Status
-The build status from travis-ci for the master branch is: [![Build Status](https://travis-ci.org/Motion-Project/motion.svg?branch=master)](https://travis-ci.org/Motion-Project/motion)
-
 ## Description
 
 Motion is a program that monitors the video signal from one or more cameras and
