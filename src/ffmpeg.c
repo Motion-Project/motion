@@ -44,9 +44,11 @@
 
 #ifdef HAVE_FFMPEG
 
-static void movie_free_pkt(struct ffmpeg *ffmpeg)
+static void ffmpeg_free_pkt(struct ffmpeg *ffmpeg)
 {
-    my_packet_free(ffmpeg->pkt);
+    if (ffmpeg->pkt != NULL) {
+        my_packet_free(ffmpeg->pkt);
+    }
     ffmpeg->pkt = NULL;
 }
 
@@ -342,7 +344,7 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg)
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
                 ,_("Receive packet threw EAGAIN returning -2 code :%s"),errstr);
-            movie_free_pkt(ffmpeg);
+            ffmpeg_free_pkt(ffmpeg);
             return -2;
         }
         if (retcd < 0 ) {
@@ -376,7 +378,7 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg)
         }
         if (got_packet_ptr == 0) {
             //Buffered packet.  Throw special return code
-            movie_free_pkt(ffmpeg);
+            ffmpeg_free_pkt(ffmpeg);
             return -2;
         }
 
@@ -402,12 +404,12 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg)
         retcd = avcodec_encode_video(ffmpeg->video_st->codec, video_outbuf, video_outbuf_size, ffmpeg->picture);
         if (retcd < 0 ) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error encoding video"));
-            movie_free_pkt(ffmpeg);
+            ffmpeg_free_pkt(ffmpeg);
             return -1;
         }
         if (retcd == 0 ) {
             // No bytes encoded => buffered=>special handling
-            movie_free_pkt(ffmpeg);
+            ffmpeg_free_pkt(ffmpeg);
             return -2;
         }
 
@@ -1008,13 +1010,13 @@ static int ffmpeg_flush_codec(struct ffmpeg *ffmpeg)
                         av_strerror(recv_cd, errstr, sizeof(errstr));
                         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                             ,_("Error draining codec:%s"),errstr);
-                        movie_free_pkt(ffmpeg);
+                        ffmpeg_free_pkt(ffmpeg);
                         return -1;
                     }
                     // v4l2_m2m encoder uses pts 0 and size 0 to indicate AVERROR_EOF
                     if ((ffmpeg->pkt->pts == 0) || (ffmpeg->pkt->size == 0)) {
                         recv_cd = AVERROR_EOF;
-                        movie_free_pkt(ffmpeg);
+                        ffmpeg_free_pkt(ffmpeg);
                         continue;
                     }
                     retcd = av_write_frame(ffmpeg->oc, ffmpeg->pkt);
@@ -1024,7 +1026,7 @@ static int ffmpeg_flush_codec(struct ffmpeg *ffmpeg)
                         return -1;
                     }
                 }
-                movie_free_pkt(ffmpeg);
+                ffmpeg_free_pkt(ffmpeg);
             }
         }
         return 0;
@@ -1048,7 +1050,7 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1)
     retcd = ffmpeg_set_pts(ffmpeg, tv1);
     if (retcd < 0) {
         //If there is an error, it has already been reported.
-        movie_free_pkt(ffmpeg);
+        ffmpeg_free_pkt(ffmpeg);
         return 0;
     }
 
@@ -1057,7 +1059,7 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1)
         if (retcd != -2) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error while encoding picture"));
         }
-        movie_free_pkt(ffmpeg);
+        ffmpeg_free_pkt(ffmpeg);
         return retcd;
     }
 
@@ -1066,7 +1068,7 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1)
     } else {
         retcd = av_write_frame(ffmpeg->oc, ffmpeg->pkt);
     }
-    movie_free_pkt(ffmpeg);
+    ffmpeg_free_pkt(ffmpeg);
 
     if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error while writing video frame"));
@@ -1102,20 +1104,20 @@ static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx)
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("av_copy_packet: %s"),errstr);
-        movie_free_pkt(ffmpeg);
+        ffmpeg_free_pkt(ffmpeg);
         return;
     }
 
     retcd = ffmpeg_set_pktpts(ffmpeg, &ffmpeg->rtsp_data->pktarray[indx].timestamp_tv);
     if (retcd < 0) {
-        movie_free_pkt(ffmpeg);
+        ffmpeg_free_pkt(ffmpeg);
         return;
     }
 
     ffmpeg->pkt->stream_index = 0;
 
     retcd = av_write_frame(ffmpeg->oc, ffmpeg->pkt);
-    movie_free_pkt(ffmpeg);
+    ffmpeg_free_pkt(ffmpeg);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
