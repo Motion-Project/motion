@@ -70,36 +70,38 @@ void dbse_global_deinit(struct context **cntlist)
  */
 void dbse_global_init(struct context **cntlist)
 {
-struct context *cnt;
-    int i;
+    int indx;
 
     MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("Initializing database"));
 
     /* Initialize all the database items; different camera threads can use different DBMSs */
     #if defined(HAVE_MYSQL)
-        for (cnt=cntlist[i=0]; cnt; cnt=cntlist[++i]) {
-            if (mystreq(cnt->conf.database_type, "mysql") && mysql_library_init(0, NULL, NULL)) {
+        indx = 0;
+        while (cntlist[indx] != NULL) {
+            if (mystreq(cntlist[indx]->conf.database_type, "mysql") && mysql_library_init(0, NULL, NULL)) {
                 fprintf(stderr, "Could not initialize MySQL library\n");
                 exit(1);
             } else {
                 break;
             }
+            indx++;
         }
     #endif /* HAVE_MYSQL */
 
     #if defined(HAVE_MARIADB)
-        for (cnt=cntlist[i=0]; cnt; cnt=cntlist[++i]) {
-            if (mystreq(cnt->conf.database_type, "mariadb") && mysql_library_init(0, NULL, NULL)) {
+        indx = 0;
+        while (cntlist[indx] != NULL) {
+            if (mystreq(cntlist[indx]->conf.database_type, "mariadb") && mysql_library_init(0, NULL, NULL)) {
                 fprintf(stderr, "Could not initialize MariaDB library\n");
                 exit(1);
             } else {
                 break;
             }
+            indx++;
         }
     #endif /* HAVE_MARIADB */
 
-    #ifdef HAVE_SQLITE3
-        int indx;
+    #if defined(HAVE_SQLITE3)
         /* database_sqlite3 == NULL if not changed causes each thread to create their own
         * sqlite3 connection this will only happens when using a non-threaded sqlite version */
         cntlist[0]->database_sqlite3=NULL;
@@ -135,10 +137,12 @@ struct context *cnt;
             cntlist[indx]->database_sqlite3 = cntlist[0]->database_sqlite3;
             indx++;
         }
-
-    #else
-        (void)cntlist;
     #endif /* HAVE_SQLITE3 */
+
+    #if !defined(HAVE_MYSQL) && !defined(HAVE_MARIADB) && !defined(HAVE_SQLITE3)
+        (void)indx;
+        (void)cntlist;
+    #endif
 
 }
 
