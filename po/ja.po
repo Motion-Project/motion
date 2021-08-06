@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
-"Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-12-29 16:29-0700\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-08-04 21:33-0600\n"
 "PO-Revision-Date: 2020-01-12 17:46-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -75,20 +75,36 @@ msgid "%-25s <redacted>"
 msgstr " %-25s <編集済み>"
 
 #: src/conf.c
-msgid "Unable to locate vid_control_params"
-msgstr "VID制御パラメータを見つけることができません"
+msgid "Unable to locate video_params"
+msgstr ""
 
 #: src/conf.c
-msgid "No value provided to put into vid_control_params"
-msgstr "vid制御パラメーターに入れる値が提供されていません"
+msgid "No value provided to put into video_params"
+msgstr ""
 
 #: src/conf.c
-msgid "Error compiling regex in copy_uri"
-msgstr "コピーURIでの正規表現のコンパイルエラー"
+msgid "Unable to locate netcam_params"
+msgstr ""
 
 #: src/conf.c
-msgid "Invalid origin for cors_header in copy_uri"
-msgstr "コピーuriのcorsヘッダーの無効なオリジン"
+msgid "No value provided to put into netcam_params"
+msgstr ""
+
+#: src/conf.c
+msgid "Unable to locate webcontrol_header_params"
+msgstr ""
+
+#: src/conf.c
+msgid "No value provided to put into webcontrol_header_params"
+msgstr ""
+
+#: src/conf.c
+msgid "Unable to locate stream_header_params"
+msgstr ""
+
+#: src/conf.c
+msgid "No value provided to put into stream_header_params"
+msgstr ""
 
 #: src/conf.c
 #, c-format
@@ -155,36 +171,20 @@ msgid "target_dir"
 msgstr "ターゲットディレクトリ"
 
 #: src/conf.c
-msgid "videodevice"
-msgstr "ビデオデバイス"
+msgid "video_device"
+msgstr ""
 
 #: src/conf.c
-msgid "vid_control_params"
-msgstr "vid制御パラメーター"
-
-#: src/conf.c
-msgid "v4l2_palette"
-msgstr "v4l2パレット"
-
-#: src/conf.c
-msgid "input"
-msgstr "入力"
-
-#: src/conf.c
-msgid "norm"
-msgstr "規範"
-
-#: src/conf.c
-msgid "frequency"
-msgstr "周波数"
+msgid "video_params"
+msgstr ""
 
 #: src/conf.c
 msgid "auto_brightness"
 msgstr "自動輝度"
 
 #: src/conf.c
-msgid "tunerdevice"
-msgstr "チューナーデバイス"
+msgid "tuner_device"
+msgstr ""
 
 #: src/conf.c
 msgid "roundrobin_frames"
@@ -203,40 +203,28 @@ msgid "netcam_url"
 msgstr "netcam url"
 
 #: src/conf.c
-msgid "netcam_highres"
-msgstr "netcam highres"
+msgid "netcam_params"
+msgstr ""
+
+#: src/conf.c
+msgid "netcam_high_url"
+msgstr ""
+
+#: src/conf.c
+msgid "netcam_high_params"
+msgstr ""
 
 #: src/conf.c
 msgid "netcam_userpass"
 msgstr "netcamユーザーパス"
 
 #: src/conf.c
-msgid "netcam_keepalive"
-msgstr "ネットカメラキープアライブ"
-
-#: src/conf.c
-msgid "netcam_proxy"
-msgstr "netcamプロキシ"
-
-#: src/conf.c
-msgid "netcam_tolerant_check"
-msgstr "netcamトレラントチェック"
-
-#: src/conf.c
-msgid "netcam_use_tcp"
-msgstr "netcam use tcp"
-
-#: src/conf.c
-msgid "netcam_decoder"
-msgstr "netcamデコーダー"
-
-#: src/conf.c
 msgid "mmalcam_name"
 msgstr "mmalcam名"
 
 #: src/conf.c
-msgid "mmalcam_control_params"
-msgstr "mmalcam制御パラメーター"
+msgid "mmalcam_params"
+msgstr ""
 
 #: src/conf.c
 msgid "width"
@@ -293,6 +281,10 @@ msgstr "テキストイベント"
 #: src/conf.c
 msgid "emulate_motion"
 msgstr "モーションをエミュレートする"
+
+#: src/conf.c
+msgid "pause"
+msgstr ""
 
 #: src/conf.c
 msgid "threshold"
@@ -539,8 +531,8 @@ msgid "webcontrol_key"
 msgstr "WebControlキー"
 
 #: src/conf.c
-msgid "webcontrol_cors_header"
-msgstr "webcontrol corsヘッダー"
+msgid "webcontrol_header_params"
+msgstr ""
 
 #: src/conf.c
 msgid "stream_port"
@@ -563,8 +555,8 @@ msgid "stream_tls"
 msgstr "ストリームTLS"
 
 #: src/conf.c
-msgid "stream_cors_header"
-msgstr "ストリームcorsヘッダー"
+msgid "stream_header_params"
+msgstr ""
 
 #: src/conf.c
 msgid "stream_preview_scale"
@@ -742,6 +734,185 @@ msgstr "カメラ"
 msgid "camera_dir"
 msgstr "カメラの方向"
 
+#: src/dbse.c
+msgid "Closing MySQL library"
+msgstr ""
+
+#: src/dbse.c
+msgid "Closing MariaDB library"
+msgstr ""
+
+#: src/dbse.c
+msgid "Database closed"
+msgstr ""
+
+#: src/dbse.c
+msgid "Initializing database"
+msgstr "データベースの初期化"
+
+#: src/dbse.c
+#, c-format
+msgid "SQLite3 Database filename %s"
+msgstr "SQLite3データベースファイル名 %s"
+
+#: src/dbse.c
+msgid "SQLite3 is threadsafe"
+msgstr "SQLite3はスレッドセーフです"
+
+#: src/dbse.c
+#, c-format
+msgid "SQLite3 serialized %s"
+msgstr "SQLite3シリアル化 %s"
+
+#: src/dbse.c
+msgid "FAILED"
+msgstr "失敗しました"
+
+#: src/dbse.c
+msgid "SUCCESS"
+msgstr "成功"
+
+#: src/dbse.c
+#, c-format
+msgid "Can't open SQLite3 database %s : %s"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "database_busy_timeout %d msec"
+msgstr "データベースビジータイムアウト %dミリ秒"
+
+#: src/dbse.c
+#, c-format
+msgid "database_busy_timeout failed %s"
+msgstr "データベースビジータイムアウトに失敗しました %s"
+
+#: src/dbse.c
+#, c-format
+msgid "Cannot connect to MySQL database %s on host %s with user %s"
+msgstr "ユーザー %sでホスト %sのMySQLデータベース %sに接続できません"
+
+#: src/dbse.c
+#, c-format
+msgid "MySQL error was %s"
+msgstr "MySQLエラーは %sでした"
+
+#: src/dbse.c
+#, c-format
+msgid "Cannot connect to MariaDB database %s on host %s with user %s"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "MariaDB error was %s"
+msgstr ""
+
+#: src/dbse.c
+msgid "SQLite3 using shared handle"
+msgstr "共有ハンドルを使用するSQLite3"
+
+#: src/dbse.c
+#, c-format
+msgid "Connection to PostgreSQL database '%s' failed: %s"
+msgstr "PostgreSQLデータベース ' %s'への接続に失敗しました： %s"
+
+#: src/dbse.c
+#, c-format
+msgid "Database backend %s"
+msgstr "データベースバックエンド %s"
+
+#: src/dbse.c
+msgid "Executing MySQL query"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "MySQL query failed %s error code %d"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid ""
+"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error "
+"was %s"
+msgstr ""
+"ユーザー %s MySQLエラーでホスト %sのMySQLデータベース %sに再接続できません %s"
+"でした"
+
+#: src/dbse.c
+#, c-format
+msgid "Re-Connection to MySQL database '%s' Succeed"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "after re-connection MySQL query failed %s error code %d"
+msgstr ""
+
+#: src/dbse.c
+msgid "Executing MariaDB query"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "MariaDB query failed %s error code %d"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid ""
+"Cannot reconnect to MariaDB database %s on host %s with user %s MariaDB "
+"error was %s"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Re-Connection to MariaDB database '%s' Succeed"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "after re-connection MariaDB query failed %s error code %d"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Re-connected to PostgreSQL database '%s'"
+msgstr ""
+
+#: src/dbse.c
+msgid "Executing PostgreSQL query"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Attempting reconnect to PostgreSQL database '%s': %s"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "PGSQL query failed: [%s]  %s %s"
+msgstr "PGSQLクエリが失敗しました：[%s] %s %s"
+
+#: src/dbse.c
+#, c-format
+msgid "INSERT ... RETURNING VALUE=\"%s\""
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Invalid event ID returned by SQL query \"%s\""
+msgstr ""
+
+#: src/dbse.c
+msgid "Executing SQLite3 query"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "SQLite3 error was %s"
+msgstr ""
+
 #: src/event.c src/track.c
 #, c-format
 msgid "Unable to start external command '%s'"
@@ -756,69 +927,6 @@ msgstr "外部コマンド ' %s'を実行しています"
 #, c-format
 msgid "File of type %ld saved to: %s"
 msgstr "タイプ %ldのファイルの保存先： %s"
-
-#: src/event.c
-msgid "Ignoring empty sql query"
-msgstr "空のSQLクエリを無視する"
-
-#: src/event.c
-msgid "Executing mysql query"
-msgstr "mysqlクエリの実行"
-
-#: src/event.c
-#, c-format
-msgid "Mysql query failed %s error code %d"
-msgstr "Mysqlクエリが %sエラーコード %dに失敗しました"
-
-#: src/event.c
-#, c-format
-msgid ""
-"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error was %s"
-msgstr ""
-"ユーザー %s MySQLエラーでホスト %sのMySQLデータベース %sに再接続できません %sでした"
-
-#: src/event.c
-#, c-format
-msgid "Re-Connection to Mysql database '%s' Succeed"
-msgstr "Mysqlデータベース ' %s'への再接続に成功しました"
-
-#: src/event.c
-#, c-format
-msgid "after re-connection Mysql query failed %s error code %d"
-msgstr "再接続後、Mysqlクエリは %sエラーコード %dに失敗しました"
-
-#: src/event.c
-msgid "Executing postgresql query"
-msgstr "postgresqlクエリの実行"
-
-#: src/event.c src/motion.c
-#, c-format
-msgid "Connection to PostgreSQL database '%s' failed: %s"
-msgstr "PostgreSQLデータベース ' %s'への接続に失敗しました： %s"
-
-#: src/event.c
-#, c-format
-msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
-msgstr "PostgreSQLデータベース ' %s'への再接続に失敗しました： %s"
-
-#: src/event.c
-#, c-format
-msgid "Re-Connection to PostgreSQL database '%s' Succeed"
-msgstr "PostgreSQLデータベース ' %s'への再接続に成功しました"
-
-#: src/event.c
-#, c-format
-msgid "PGSQL query failed: [%s]  %s %s"
-msgstr "PGSQLクエリが失敗しました：[%s] %s %s"
-
-#: src/event.c
-msgid "Executing sqlite query"
-msgstr "sqliteクエリの実行"
-
-#: src/event.c
-#, c-format
-msgid "SQLite error was %s"
-msgstr "SQLiteエラーは %sでした"
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -930,9 +1038,11 @@ msgid "ffopen_open error creating (motion) file [%s]"
 msgstr "ffopenオープンエラー（モーション）ファイルの作成中[ %s]"
 
 #: src/event.c
-msgid "The swf container for timelapse no longer supported.  Using mpg container."
+msgid ""
+"The swf container for timelapse no longer supported.  Using mpg container."
 msgstr ""
-"タイムラプスのswfコンテナはサポートされなくなりました。mpgコンテナを使用します。"
+"タイムラプスのswfコンテナはサポートされなくなりました。mpgコンテナを使用しま"
+"す。"
 
 #: src/event.c
 msgid "Timelapse using mpg codec."
@@ -965,11 +1075,11 @@ msgstr "コーデック名にメモリを割り当てることができません
 
 #: src/ffmpeg.c
 msgid ""
-"The frame rate specified is too high for the ffmpeg movie type specified. Choose a "
-"different ffmpeg container or lower framerate."
+"The frame rate specified is too high for the ffmpeg movie type specified. "
+"Choose a different ffmpeg container or lower framerate."
 msgstr ""
-"指定されたフレームレートが、指定されたffmpegムービータイプに対して高すぎます。別の"
-"ffmpegコンテナを選択するか、フレームレートを下げます。"
+"指定されたフレームレートが、指定されたffmpegムービータイプに対して高すぎま"
+"す。別のffmpegコンテナを選択するか、フレームレートを下げます。"
 
 #: src/ffmpeg.c
 msgid "Error setting base file name"
@@ -1020,7 +1130,8 @@ msgstr "ビデオのエンコードエラー"
 #: src/ffmpeg.c
 #, c-format
 msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d"
-msgstr "PTS %<PRId64>ベースPTS %<PRId64>ミリ秒間隔 %<PRId64>タイムベース %d- %d"
+msgstr ""
+"PTS %<PRId64>ベースPTS %<PRId64>ミリ秒間隔 %<PRId64>タイムベース %d- %d"
 
 #: src/ffmpeg.c
 msgid "BAD TIMING!! Frame skipped."
@@ -1029,9 +1140,11 @@ msgstr "悪いタイミング！！フレームがスキップされました。
 #: src/ffmpeg.c
 #, c-format
 msgid ""
-"PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change %d"
+"PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change "
+"%d"
 msgstr ""
-"PTS %<PRId64>ベースPTS %<PRId64>ミリ秒間隔 %<PRId64>タイムベース %d- %d変更 %d"
+"PTS %<PRId64>ベースPTS %<PRId64>ミリ秒間隔 %<PRId64>タイムベース %d- %d変更 "
+"%d"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1182,7 +1295,8 @@ msgstr "パススルーストリームを開きました"
 #: src/ffmpeg.c
 #, c-format
 msgid "ffmpeg libavcodec version %d.%d.%d libavformat version %d.%d.%d"
-msgstr "ffmpeg libavcodecバージョン %d。 %d。 %d libavformatバージョン %d。 %d。 %d"
+msgstr ""
+"ffmpeg libavcodecバージョン %d。 %d。 %d libavformatバージョン %d。 %d。 %d"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1224,10 +1338,6 @@ msgstr "バッファリングされたパケットをクリアしようとする
 #: src/ffmpeg.c
 msgid "Buffered packet"
 msgstr "バッファリングされたパケット"
-
-#: src/ffmpeg.c
-msgid "No ffmpeg support"
-msgstr "ffmpegサポートなし"
 
 #: src/jpegutils.c
 #, c-format
@@ -1383,7 +1493,8 @@ msgstr "マスクファイル %sを開く際のエラー"
 #: src/motion.c
 msgid "Failed to read mask privacy image. Mask privacy feature disabled."
 msgstr ""
-"マスクプライバシー画像の読み取りに失敗しました。マスクプライバシー機能が無効です。"
+"マスクプライバシー画像の読み取りに失敗しました。マスクプライバシー機能が無効"
+"です。"
 
 #: src/motion.c
 #, c-format
@@ -1394,70 +1505,6 @@ msgstr "マスクプライバシーファイル\" %s \"がロードされまし�
 #, c-format
 msgid "Invalid text scale.  Adjusted to %d"
 msgstr "無効なテキストスケール。 %dに調整"
-
-#: src/motion.c
-msgid "Closing MYSQL"
-msgstr "MYSQLを閉じる"
-
-#: src/motion.c
-msgid "Initializing database"
-msgstr "データベースの初期化"
-
-#: src/motion.c
-#, c-format
-msgid "SQLite3 Database filename %s"
-msgstr "SQLite3データベースファイル名 %s"
-
-#: src/motion.c
-msgid "SQLite3 is threadsafe"
-msgstr "SQLite3はスレッドセーフです"
-
-#: src/motion.c
-#, c-format
-msgid "SQLite3 serialized %s"
-msgstr "SQLite3シリアル化 %s"
-
-#: src/motion.c
-msgid "FAILED"
-msgstr "失敗しました"
-
-#: src/motion.c
-msgid "SUCCESS"
-msgstr "成功"
-
-#: src/motion.c
-#, c-format
-msgid "Can't open database %s : %s"
-msgstr "データベース %sを開けません： %s"
-
-#: src/motion.c
-#, c-format
-msgid "database_busy_timeout %d msec"
-msgstr "データベースビジータイムアウト %dミリ秒"
-
-#: src/motion.c
-#, c-format
-msgid "database_busy_timeout failed %s"
-msgstr "データベースビジータイムアウトに失敗しました %s"
-
-#: src/motion.c
-#, c-format
-msgid "Cannot connect to MySQL database %s on host %s with user %s"
-msgstr "ユーザー %sでホスト %sのMySQLデータベース %sに接続できません"
-
-#: src/motion.c
-#, c-format
-msgid "MySQL error was %s"
-msgstr "MySQLエラーは %sでした"
-
-#: src/motion.c
-msgid "SQLite3 using shared handle"
-msgstr "共有ハンドルを使用するSQLite3"
-
-#: src/motion.c
-#, c-format
-msgid "Database backend %s"
-msgstr "データベースバックエンド %s"
 
 #: src/motion.c
 #, c-format
@@ -1566,16 +1613,6 @@ msgid "Maskfile \"%s\" loaded."
 msgstr "マスクファイル\" %s \"がロードされました。"
 
 #: src/motion.c
-#, c-format
-msgid "Problem enabling motion-stream server in port %d"
-msgstr "ポート %dでのモーションストリームサーバーの有効化の問題"
-
-#: src/motion.c
-#, c-format
-msgid "Started motion-stream server on port %d (auth %s)"
-msgstr "ポート %d（認証 %s）でモーションストリームサーバーを開始しました"
-
-#: src/motion.c
 msgid "Emulating motion"
 msgstr "エミュレートモーション"
 
@@ -1595,15 +1632,16 @@ msgstr "カメラとの接続に成功するまで再試行しています"
 #: src/motion.c
 msgid ""
 "Camera has finally become available\n"
-"Camera image has different width and heightfrom what is in the config file. You "
-"should fix that\n"
+"Camera image has different width and heightfrom what is in the config file. "
+"You should fix that\n"
 "Restarting Motion thread to reinitialize all image buffers to new picture "
 "dimensions"
 msgstr ""
 "カメラがついに利用可能になりました\n"
-"カメラ画像の幅と高さは、構成ファイルにあるものとは異なります。あなたはそれを修正す"
-"る必要があります\n"
-"Motionスレッドを再起動して、すべての画像バッファを新しい画像に再初期化します寸法"
+"カメラ画像の幅と高さは、構成ファイルにあるものとは異なります。あなたはそれを"
+"修正する必要があります\n"
+"Motionスレッドを再起動して、すべての画像バッファを新しい画像に再初期化します"
+"寸法"
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -1687,7 +1725,8 @@ msgstr "デーモンモードに移行するモーション"
 #: src/motion.c
 #, c-format
 msgid "Exit motion, cannot create process id file (pid file) %s"
-msgstr "モーションを終了します。プロセスIDファイル（pidファイル） %sを作成できません"
+msgstr ""
+"モーションを終了します。プロセスIDファイル（pidファイル） %sを作成できません"
 
 #: src/motion.c
 msgid "Could not change directory"
@@ -1700,10 +1739,11 @@ msgstr "プロセスIDファイル %sを作成しました。プロセスIDは %
 
 #: src/motion.c
 msgid ""
-"Camara IDs are not unique or have values over 32,000.  Falling back to thread "
-"numbers"
+"Camara IDs are not unique or have values over 32,000.  Falling back to "
+"thread numbers"
 msgstr ""
-"カマラIDは一意ではなく、32,000を超える値があります。にフォールバックスレッド番号"
+"カマラIDは一意ではなく、32,000を超える値があります。にフォールバックスレッド"
+"番号"
 
 #: src/motion.c
 msgid "v4l2   : available"
@@ -1903,68 +1943,9 @@ msgstr "終了したスレッド"
 msgid "Motion terminating"
 msgstr "モーション終了"
 
-#: src/motion.c
-#, c-format
-msgid "Could not allocate %llu bytes of memory!"
-msgstr " %lluバイトのメモリを割り当てることができませんでした！"
-
-#: src/motion.c
-#, c-format
-msgid "Warning! Function %s tries to resize memoryblock at %p to 0 bytes!"
-msgstr "警告！関数 %sは、 %pのメモリブロックのサイズを0バイトに変更しようとします！"
-
-#: src/motion.c
-#, c-format
-msgid "Could not resize memory-block at offset %p to %llu bytes (function %s)!"
-msgstr ""
-"オフセット %pのメモリブロックのサイズを %lluバイトに変更できませんでした（関数 "
-"%s）！"
-
-#: src/motion.c
-#, c-format
-msgid "Problem creating directory %s"
-msgstr "ディレクトリ %sの作成中に問題が発生しました"
-
-#: src/motion.c
-#, c-format
-msgid "creating directory %s"
-msgstr "ディレクトリ %sを作成しています"
-
-#: src/motion.c
-#, c-format
-msgid "Error opening file %s with mode %s"
-msgstr "モード %sでファイル %sを開く際のエラー"
-
-#: src/motion.c
-msgid "Error closing file"
-msgstr "ファイルを閉じる際のエラー"
-
-#: src/motion.c
-#, c-format
-msgid "invalid format specifier keyword %*.*s"
-msgstr "無効なフォーマット指定子キーワード %*.*s"
-
-#: src/motion.c
-#, c-format
-msgid "Unable to set thread name %s"
-msgstr "スレッド名 %sを設定できません"
-
-#: src/motion.c
-msgid "FFMPEG version too old. Disabling pass-through processing."
-msgstr "FFMPEGバージョンが古すぎます。パススルー処理を無効にします。"
-
-#: src/motion.c
-msgid "pass-through is enabled but is still experimental."
-msgstr "パススルーは有効ですが、まだ実験段階です。"
-
 #: src/netcam.c
 msgid "Invalid URL.  Can not parse values."
 msgstr "無効なURL。値を解析できません。"
-
-#: src/netcam.c
-#, c-format
-msgid "Using port number %d"
-msgstr "ポート番号 %dを使用"
 
 #: src/netcam.c
 #, c-format
@@ -1976,8 +1957,8 @@ msgid ""
 "Closing netcam socket as Keep-Alive time is up (camera sent Close field). A "
 "reconnect should happen."
 msgstr ""
-"キープアライブ時間が経過したため、Netcamソケットを閉じます（カメラはCloseフィールド"
-"を送信しました）。A再接続が発生するはずです。"
+"キープアライブ時間が経過したため、Netcamソケットを閉じます（カメラはClose"
+"フィールドを送信しました）。A再接続が発生するはずです。"
 
 #: src/netcam.c
 msgid "re-opening camera (non-streaming)"
@@ -2048,11 +2029,11 @@ msgstr "カメラのネットカメラURLが無効です（ %s）"
 #: src/netcam.c
 #, c-format
 msgid ""
-"Netcam_http parameter '%s' converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive "
-"%s."
+"Netcam_http parameter '%s' converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-"
+"Alive %s."
 msgstr ""
-"Netcam httpパラメーター ' %s'はフラグに変換します：HTTP / 1.0： %s HTTP / 1.1： %s "
-"Keep-生きている %s。"
+"Netcam httpパラメーター ' %s'はフラグに変換します：HTTP / 1.0： %s HTTP / "
+"1.1： %s Keep-生きている %s。"
 
 #: src/netcam.c
 msgid "now calling netcam_setup_html()"
@@ -2066,12 +2047,14 @@ msgstr "現在、netcam setup ftpを呼び出しています"
 msgid "now calling netcam_setup_file()"
 msgstr "現在、netcam setup file（）を呼び出しています"
 
+#: src/netcam.c src/netcam_http.c
+msgid "now calling netcam_setup_mjpg()"
+msgstr "現在netcam setup mjpg（）を呼び出しています"
+
 #: src/netcam.c
 #, c-format
-msgid "Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or jpeg."
+msgid "Invalid netcam service '%s' - must be mjpeg, ftp, mjpg or jpeg."
 msgstr ""
-"無効なnetcamサービス ' %s'-http、ftp、mjpg、mjpeg、v4l2、またはjpegである必要があり"
-"ます。"
 
 #: src/netcam.c src/netcam_rtsp.c
 #, c-format
@@ -2194,7 +2177,8 @@ msgstr "コンテンツタイプ %s"
 
 #: src/netcam_http.c
 msgid "Error reading image header, streaming mode (1). Null header."
-msgstr "画像ヘッダーの読み取りエラー、ストリーミングモード（1）。ヌルヘッダー。"
+msgstr ""
+"画像ヘッダーの読み取りエラー、ストリーミングモード（1）。ヌルヘッダー。"
 
 #: src/netcam_http.c
 #, c-format
@@ -2239,7 +2223,8 @@ msgstr "HTTP結果コード %d"
 
 #: src/netcam_http.c
 msgid "Removed netcam Keep-Alive flag due to apparent closed HTTP connection."
-msgstr "明らかにHTTP接続が閉じられたため、netcam Keep-Aliveフラグを削除しました。"
+msgstr ""
+"明らかにHTTP接続が閉じられたため、netcam Keep-Aliveフラグを削除しました。"
 
 #: src/netcam_http.c
 msgid "Non-streaming camera (keep-alive set)"
@@ -2264,10 +2249,11 @@ msgstr "ヘッダーに境界文字列が見つかりません"
 
 #: src/netcam_http.c
 msgid ""
-"Streaming camera probably using MJPG-blocks, consider using mjpg:// netcam_url."
+"Streaming camera probably using MJPG-blocks, consider using mjpg:// "
+"netcam_url."
 msgstr ""
-"おそらくMJPGブロックを使用するストリーミングカメラ。mjpg：//の使用を検討してくださ"
-"いnetcamのURL。"
+"おそらくMJPGブロックを使用するストリーミングカメラ。mjpg：//の使用を検討して"
+"くださいnetcamのURL。"
 
 #: src/netcam_http.c
 msgid "Unrecognized content type"
@@ -2288,19 +2274,19 @@ msgstr "見つかった接続：ヘッダーを閉じる（ ' %s'）"
 
 #: src/netcam_http.c
 msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. Motion "
-"removes keepalive."
+"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
+"Motion removes keepalive."
 msgstr ""
-"「Connection：Keep-Alive」および「Connection：close」ヘッダーの両方が受信されまし"
-"た。Motionはキープアライブを削除します。"
+"「Connection：Keep-Alive」および「Connection：close」ヘッダーの両方が受信され"
+"ました。Motionはキープアライブを削除します。"
 
 #: src/netcam_http.c
 msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. Motion "
-"continues unchanged."
+"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
+"Motion continues unchanged."
 msgstr ""
-"「Connection：Keep-Alive」および「Connection：close」ヘッダーの両方が受信されまし"
-"た。動きは変わりません。"
+"「Connection：Keep-Alive」および「Connection：close」ヘッダーの両方が受信され"
+"ました。動きは変わりません。"
 
 #: src/netcam_http.c
 msgid "Received a Keep-Alive field in this set of headers."
@@ -2311,7 +2297,8 @@ msgid ""
 "No 'Connection: Keep-Alive' nor 'Connection: close' header received.\n"
 " Motion removes keepalive."
 msgstr ""
-"「接続：キープアライブ」ヘッダーも「接続：閉じる」ヘッダーも受信しませんでした。\n"
+"「接続：キープアライブ」ヘッダーも「接続：閉じる」ヘッダーも受信しませんでし"
+"た。\n"
 "Motionはキープアライブを削除します。"
 
 #: src/netcam_http.c
@@ -2319,7 +2306,8 @@ msgid ""
 "No 'Connection: Keep-Alive' nor 'Connection: close' header received.\n"
 " Motion continues unchanged."
 msgstr ""
-"「接続：キープアライブ」ヘッダーも「接続：閉じる」ヘッダーも受信しませんでした。\n"
+"「接続：キープアライブ」ヘッダーも「接続：閉じる」ヘッダーも受信しませんでし"
+"た。\n"
 "動きは変わりません。"
 
 #: src/netcam_http.c
@@ -2327,9 +2315,10 @@ msgid ""
 "Removed netcam Keep-Alive flag because 'Connection: close' header received.\n"
 " Netcam does not support Keep-Alive. Motion continues in non-Keep-Alive."
 msgstr ""
-"「Connection：close」ヘッダーを受信したため、netcam Keep-Aliveフラグを削除しまし"
-"た。\n"
-"Netcamはキープアライブをサポートしていません。動きは非キープアライブで継続します。"
+"「Connection：close」ヘッダーを受信したため、netcam Keep-Aliveフラグを削除し"
+"ました。\n"
+"Netcamはキープアライブをサポートしていません。動きは非キープアライブで継続し"
+"ます。"
 
 #: src/netcam_http.c
 msgid ""
@@ -2367,20 +2356,20 @@ msgstr "キープアライブなしで、新しいソケットはfd %dを作成�
 
 #: src/netcam_http.c
 msgid ""
-"with keepalive set, invalid socket.This could be the first time. Creating a new "
-"one failed."
+"with keepalive set, invalid socket.This could be the first time. Creating a "
+"new one failed."
 msgstr ""
-"キープアライブが設定されていて、無効なソケット。これが初めての可能性があります。作"
-"成する新しいものは失敗しました。"
+"キープアライブが設定されていて、無効なソケット。これが初めての可能性がありま"
+"す。作成する新しいものは失敗しました。"
 
 #: src/netcam_http.c
 #, c-format
 msgid ""
-"with keepalive set, invalid socket.This could be first time, created a new one "
-"with fd %d"
+"with keepalive set, invalid socket.This could be first time, created a new "
+"one with fd %d"
 msgstr ""
-"キープアライブが設定され、無効なソケットがあります。これは初めての場合、新しいfd %d"
-"を持つもの"
+"キープアライブが設定され、無効なソケットがあります。これは初めての場合、新し"
+"いfd %dを持つもの"
 
 #: src/netcam_http.c
 #, c-format
@@ -2467,8 +2456,8 @@ msgstr "接続しようとしています、時間＃ %d"
 #: src/netcam_http.c
 msgid "Failed to open camera - check your config and that netcamera is online"
 msgstr ""
-"カメラを開けませんでした-設定を確認し、ネットカメラがオンラインであることを確認して"
-"ください"
+"カメラを開けませんでした-設定を確認し、ネットカメラがオンラインであることを確"
+"認してください"
 
 #: src/netcam_http.c
 msgid "Error reading first header - re-trying"
@@ -2481,17 +2470,20 @@ msgstr "最初のカメラヘッダーの読み取りに失敗しました-今�
 #: src/netcam_http.c
 #, c-format
 msgid "Netcam has flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s."
-msgstr "Netcamにはフラグがあります：HTTP / 1.0： %s HTTP / 1.1： %s Keep-Alive %s。"
+msgstr ""
+"Netcamにはフラグがあります：HTTP / 1.0： %s HTTP / 1.1： %s Keep-Alive %s。"
 
 #: src/netcam_http.c
 msgid ""
-"Removed netcam_keepalive flag due to proxy set.Proxy is incompatible with Keep-"
-"Alive."
-msgstr "プロキシセットが原因でnetcamキープアライブフラグを削除しました。生き続ける。"
+"Removed netcam_keepalive flag due to proxy set.Proxy is incompatible with "
+"Keep-Alive."
+msgstr ""
+"プロキシセットが原因でnetcamキープアライブフラグを削除しました。生き続ける。"
 
 #: src/netcam_http.c
 msgid "Failed to read first stream header - giving up for now"
-msgstr "最初のストリームヘッダーの読み取りに失敗しました-今のところあきらめます"
+msgstr ""
+"最初のストリームヘッダーの読み取りに失敗しました-今のところあきらめます"
 
 #: src/netcam_http.c
 msgid "connected, going on to read image."
@@ -2533,10 +2525,6 @@ msgstr "チャンクが完了し、バッファが使用されました[ %d]バ�
 #, c-format
 msgid "Image complete, buffer used [%d] bytes."
 msgstr "イメージが完了しました、使用されたバッファー[ %d]バイト。"
-
-#: src/netcam_http.c
-msgid "now calling netcam_setup_mjpg()"
-msgstr "現在netcam setup mjpg（）を呼び出しています"
 
 #: src/netcam_http.c
 msgid "connected, going on to read and decode MJPG chunks."
@@ -2623,9 +2611,10 @@ msgstr "戻りコード %d"
 #: src/netcam_jpeg.c
 #, c-format
 msgid ""
-"Camera width/height mismatch with JPEG image -  expected %dx%d, JPEG %dx%d retval "
-"%d"
-msgstr "JPEG画像とカメラの幅/高さの不一致-予想される %dx %d、JPEG %dx %dretval %d"
+"Camera width/height mismatch with JPEG image -  expected %dx%d, JPEG %dx%d "
+"retval %d"
+msgstr ""
+"JPEG画像とカメラの幅/高さの不一致-予想される %dx %d、JPEG %dx %dretval %d"
 
 #: src/netcam_jpeg.c
 #, c-format
@@ -2651,18 +2640,18 @@ msgid "False"
 msgstr "偽"
 
 #: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Ignoring packet with invalid data"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Rec frame error: %s"
+msgstr ""
+
+#: src/netcam_rtsp.c
 msgid "Ignoring packet with invalid data"
 msgstr "無効なデータを持つパケットを無視する"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "Error sending packet to codec: %s"
-msgstr "コーデックへのパケット送信エラー： %s"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "Error receiving frame from codec: %s"
-msgstr "コーデックからのフレーム受信エラー： %s"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2670,28 +2659,106 @@ msgid "Error decoding packet: %s"
 msgstr "パケットのデコードエラー： %s"
 
 #: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Error transferring HW decoded to system memory"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "Error sending packet to codec: %s"
+msgstr "コーデックへのパケット送信エラー： %s"
+
+#: src/netcam_rtsp.c
 msgid "Error decoding video packet: Copying to buffer"
 msgstr "ビデオパケットのデコードエラー：バッファへのコピー"
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: %s: %s,Interrupt %s"
-msgstr " %s： %s： %s、割り込み %s"
+msgid "%s: HW Devices: "
+msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: %s: Failed,Interrupt %s"
-msgstr " %s： %s：失敗、 %sを中断"
+msgid "%s: %s (available)"
+msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: Ignoring user requested decoder %s"
-msgstr " %s：ユーザーが要求したデコーダ %sを無視します"
+msgid "%s: %s (not implemented)"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: netcam_decoder %s disabled."
+msgstr ""
+
+#: src/netcam_rtsp.c
+msgid "Failed to get vaapi pix format"
+msgstr ""
+
+#: src/netcam_rtsp.c
+msgid "Failed to get cuda pix format"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Interrupted."
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: %s: %s"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: %s: Failed"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Decoder %s did not work."
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Ignoring and removing the user requested decoder %s"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Initializing vaapi decoder"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Unable to find vaapi hw device"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Initializing cuda decoder"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Unable to find cuda hw device"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Initializing decoder"
+msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Using decoder %s"
 msgstr " %s：デコーダー %sを使用"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Decoder opened"
+msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2702,6 +2769,22 @@ msgstr " %s：カメラ読み取り（ %s）がタイムアウトしました"
 #, c-format
 msgid "%s: Camera (%s) timed out"
 msgstr " %s：カメラ（ %s）がタイムアウトしました"
+
+#: src/netcam_rtsp.c
+msgid "Unable to allocate swsframe_in."
+msgstr "swsframeを割り当てることができません。"
+
+#: src/netcam_rtsp.c
+msgid "Unable to allocate swsframe_out."
+msgstr "swsframeを割り当てることができません。"
+
+#: src/netcam_rtsp.c
+msgid "Unable to allocate scaling context."
+msgstr "スケーリングコンテキストを割り当てることができません。"
+
+#: src/netcam_rtsp.c
+msgid "Error determining size of frame out"
+msgstr "フレームアウトのサイズの決定エラー"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2725,8 +2808,23 @@ msgstr "出力バッファへのフレームの書き込みエラー： %s"
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: av_read_frame: %s ,Interrupt: %s"
-msgstr " %s：読み取りフレーム： %s、割り込み： %s"
+msgid "%s: Interrupted"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: av_read_frame: %s"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: capture_rate not specified in netcam_params. Using %d"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
+msgstr ""
 
 #: src/netcam_rtsp.c
 msgid "The network camera is sending pictures in a different"
@@ -2794,95 +2892,55 @@ msgid "picture format to YUV420P to possibly lower CPU usage."
 msgstr "CPU使用率を下げるためのYUV420Pへの画像フォーマット。"
 
 #: src/netcam_rtsp.c
-msgid "Unable to allocate swsframe_in."
-msgstr "swsframeを割り当てることができません。"
-
-#: src/netcam_rtsp.c
-msgid "Unable to allocate swsframe_out."
-msgstr "swsframeを割り当てることができません。"
-
-#: src/netcam_rtsp.c
-msgid "Unable to allocate scaling context."
-msgstr "スケーリングコンテキストを割り当てることができません。"
-
-#: src/netcam_rtsp.c
-msgid "Error determining size of frame out"
-msgstr "フレームアウトのサイズの決定エラー"
+#, c-format
+msgid "%s: Setting rtsp/rtmp"
+msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: Setting http input_format mjpeg"
-msgstr " %s：http入力形式mjpegの設定"
+msgid "%s: Setting input_format mjpeg"
+msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: Setting rtsp transport to tcp"
-msgstr " %s：rtspトランスポートをtcpに設定"
+msgid "%s: Setting input_format video4linux2"
+msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: Setting rtsp transport to udp"
-msgstr " %s：rtspトランスポートをudpに設定"
+msgid "%s: Setting up movie file"
+msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: Setting attributes to read file"
-msgstr " %s：ファイルを読み取るための属性の設定"
+msgid "%s: Setting up %s"
+msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: Requested v4l2_palette option: %d"
-msgstr " %s：要求されたv4l2パレットオプション： %d"
+msgid "%s: option: %s = %s"
+msgstr ""
+
+#: src/netcam_rtsp.c
+msgid "Setting up v4l2 via netcam"
+msgstr ""
+
+#: src/netcam_rtsp.c
+msgid "Setting up file via netcam"
+msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: Requested FOURCC code: %s"
-msgstr " %s：要求されたFOURCCコード： %s"
+msgid "Setting up %s via netcam"
+msgstr ""
 
 #: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Setting v4l2 input_format: %s"
-msgstr " %s：v4l2入力形式の設定： %s"
+msgid "highres"
+msgstr ""
 
 #: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Setting v4l2 framerate: %s"
-msgstr " %s：v4l2フレームレートの設定： %s"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Setting v4l2 video_size: %s"
-msgstr " %s：v4l2ビデオサイズの設定： %s"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "Proxies not supported using for %s"
-msgstr " %sの使用でサポートされていないプロキシ"
-
-#: src/netcam_rtsp.c
-msgid "Setting up v4l2 via ffmpeg netcam"
-msgstr "ffmpeg netcam経由でv4l2をセットアップする"
-
-#: src/netcam_rtsp.c
-msgid "Setting up file via ffmpeg netcam"
-msgstr "ffmpeg netcamを介したファイルのセットアップ"
-
-#: src/netcam_rtsp.c
-msgid "Setting up http via ffmpeg netcam"
-msgstr "ffmpeg netcam経由でhttpを設定する"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "Setting up %s via ffmpeg netcam"
-msgstr "ffmpeg netcam経由で %sを設定しています"
-
-#: src/netcam_rtsp.c
-msgid "High resolution"
-msgstr "高解像度"
-
-#: src/netcam_rtsp.c
-msgid "Normal resolution"
-msgstr "通常の解像度"
+msgid "norm"
+msgstr "規範"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2898,22 +2956,8 @@ msgid "Stream copied for pass-through"
 msgstr "パススルー用にコピーされたストリーム"
 
 #: src/netcam_rtsp.c
-msgid "ffmpeg too old"
-msgstr "ffmpegが古すぎる"
-
-#: src/netcam_rtsp.c
 msgid "Null path passed to connect"
 msgstr "接続に渡されたヌルパス"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Invalid camera service"
-msgstr " %s：無効なカメラサービス"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Unable to open camera(%s)"
-msgstr " %s：カメラを開くことができません（ %s）"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2962,6 +3006,36 @@ msgstr " %s：カメラ（ %s）が接続されました"
 
 #: src/netcam_rtsp.c
 #, c-format
+msgid "%s: Netcam capture_rate is %d."
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Camera source is %d FPS"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Unable to determine the camera source FPS."
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: capture_rate is less than camera FPS."
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Decoding errors will occur."
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: capture_rate slightly larger than camera FPS is recommended."
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
 msgid "%s: Reconnecting with camera...."
 msgstr " %s：カメラと再接続しています..."
 
@@ -2996,21 +3070,6 @@ msgid "%s: Waiting for first image from the handler."
 msgstr " %s：ハンドラーからの最初の画像を待機しています。"
 
 #: src/netcam_rtsp.c
-#, c-format
-msgid "Requested frame rate %d FPS is less than camera frame rate %d FPS"
-msgstr "要求されたフレームレート%d FPSはカメラのフレームレート%d FPSよりも小さい"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "Increasing capture rate to %d FPS to match camera."
-msgstr "カメラに合わせてキャプチャ率を%d FPSに上げます。"
-
-#: src/netcam_rtsp.c
-msgid "To lower CPU, change camera FPS to lower rate and decrease I frame interval."
-msgstr ""
-"CPUを下げるには、カメラのFPSを低いレートに変更し、Iフレーム間隔を減らします。"
-
-#: src/netcam_rtsp.c
 msgid "unable to create rtsp context"
 msgstr "rtspコンテキストを作成できません"
 
@@ -3019,8 +3078,8 @@ msgid "unable to create rtsp high context"
 msgstr "rtspハイコンテキストを作成できません"
 
 #: src/netcam_rtsp.c
-msgid "FFmpeg/Libav not found on computer.  No RTSP support"
-msgstr "FFmpeg / Libavがコンピューターに見つかりません。RTSPサポートなし"
+msgid "No FFmpeg support"
+msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3070,8 +3129,8 @@ msgid ""
 "Can't write picture to file %s - check access rights to target directory\n"
 "Thread is going to finish due to this fatal error"
 msgstr ""
-"ファイル %sに画像を書き込めません-ターゲットディレクトリへのアクセス権を確認してく"
-"ださい\n"
+"ファイル %sに画像を書き込めません-ターゲットディレクトリへのアクセス権を確認"
+"してください\n"
 "この致命的なエラーにより、スレッドは終了します"
 
 #: src/picture.c
@@ -3102,7 +3161,8 @@ msgstr "pgmファイルからの画像データの読み取りに失敗しまし
 
 #: src/picture.c
 msgid "The mask file specified is not the same size as image from camera."
-msgstr "指定されたマスクファイルは、カメラからの画像と同じサイズではありません。"
+msgstr ""
+"指定されたマスクファイルは、カメラからの画像と同じサイズではありません。"
 
 #: src/picture.c
 #, c-format
@@ -3113,8 +3173,8 @@ msgstr "マスクイメージのサイズを %dx %dから %dx %dに変更しよ�
 #, c-format
 msgid "can't write mask file %s - check access rights to target directory"
 msgstr ""
-"マスクファイル %sを書き込めません-ターゲットディレクトリへのアクセス権を確認してく"
-"ださい"
+"マスクファイル %sを書き込めません-ターゲットディレクトリへのアクセス権を確認"
+"してください"
 
 #: src/picture.c
 #, c-format
@@ -3180,7 +3240,8 @@ msgstr "シリアルデバイス %sを開いて初期化、fd %i"
 #: src/track.c
 #, c-format
 msgid "No device %s started yet , trying stepper_center()"
-msgstr "デバイス %sはまだ開始されていません。ステッパーcenter（）を試行しています"
+msgstr ""
+"デバイス %sはまだ開始されていません。ステッパーcenter（）を試行しています"
 
 #: src/track.c
 #, c-format
@@ -3229,9 +3290,11 @@ msgstr "Xオフセット %d"
 #: src/track.c
 #, c-format
 msgid ""
-"X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command %d"
+"X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command "
+"%d"
 msgstr ""
-"X cent-> x %d、cent-> y %d、reversex %d、reversey %d motorx %d data %dコマンド %d"
+"X cent-> x %d、cent-> y %d、reversex %d、reversey %d motorx %d data %dコマン"
+"ド %d"
 
 #: src/track.c
 #, c-format
@@ -3241,19 +3304,20 @@ msgstr "Yオフセット %d"
 #: src/track.c
 #, c-format
 msgid ""
-"Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command %d"
-msgstr ""
-"Yセント-> x %d、セント-> y %d、reversex %d、reversey %d motory %dデータ %dコマンド "
+"Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command "
 "%d"
+msgstr ""
+"Yセント-> x %d、セント-> y %d、reversex %d、reversey %d motory %dデータ %dコ"
+"マンド %d"
 
 #: src/track.c
 #, c-format
 msgid ""
-"X-offset %d, Y-offset %d, x-position %d. y-position %d,reversex %d, reversey %d , "
-"stepsize %d"
+"X-offset %d, Y-offset %d, x-position %d. y-position %d,reversex %d, reversey "
+"%d , stepsize %d"
 msgstr ""
-"Xオフセット %d、Yオフセット %d、x位置 %d。y位置 %d、逆方向 %d、逆方向 %d、ステップ"
-"サイズ %d"
+"Xオフセット %d、Yオフセット %d、x位置 %d。y位置 %d、逆方向 %d、逆方向 %d、ス"
+"テップサイズ %d"
 
 #: src/track.c
 msgid "Return byte timeout!"
@@ -3302,7 +3366,8 @@ msgstr "カメラの範囲を取得する"
 #: src/track.c
 #, c-format
 msgid "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d "
-msgstr "入力パラメータABSパン最小 %d、パン最大 %d、チルト最小 %d、チルト最大 %d"
+msgstr ""
+"入力パラメータABSパン最小 %d、パン最大 %d、チルト最小 %d、チルト最大 %d"
 
 #: src/track.c
 #, c-format
@@ -3372,6 +3437,162 @@ msgstr "REL Y Angelの後：x = %d、Y = %d"
 msgid "Language: English"
 msgstr "言語：英語"
 
+#: src/util.c
+#, c-format
+msgid "Could not allocate %llu bytes of memory!"
+msgstr " %lluバイトのメモリを割り当てることができませんでした！"
+
+#: src/util.c
+#, c-format
+msgid "Warning! Function %s tries to resize memoryblock at %p to 0 bytes!"
+msgstr ""
+"警告！関数 %sは、 %pのメモリブロックのサイズを0バイトに変更しようとします！"
+
+#: src/util.c
+#, c-format
+msgid "Could not resize memory-block at offset %p to %llu bytes (function %s)!"
+msgstr ""
+"オフセット %pのメモリブロックのサイズを %lluバイトに変更できませんでした（関"
+"数 %s）！"
+
+#: src/util.c
+#, c-format
+msgid "Problem creating directory %s"
+msgstr "ディレクトリ %sの作成中に問題が発生しました"
+
+#: src/util.c
+#, c-format
+msgid "creating directory %s"
+msgstr "ディレクトリ %sを作成しています"
+
+#: src/util.c
+#, c-format
+msgid "Error opening file %s with mode %s"
+msgstr "モード %sでファイル %sを開く際のエラー"
+
+#: src/util.c
+msgid "Error closing file"
+msgstr "ファイルを閉じる際のエラー"
+
+#: src/util.c
+msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
+msgstr ""
+
+#: src/util.c
+#, c-format
+msgid "invalid format specifier keyword %*.*s"
+msgstr "無効なフォーマット指定子キーワード %*.*s"
+
+#: src/util.c
+#, c-format
+msgid "Unable to set thread name %s"
+msgstr "スレッド名 %sを設定できません"
+
+#: src/util.c
+msgid "FFMPEG version too old. Disabling pass-through processing."
+msgstr "FFMPEGバージョンが古すぎます。パススルー処理を無効にします。"
+
+#: src/util.c
+msgid "pass-through enabled."
+msgstr ""
+
+#: src/util.c
+#, c-format
+msgid "Error setting parm >%s<"
+msgstr ""
+
+#: src/util.c
+msgid "Error setting parm >redacted<"
+msgstr ""
+
+#: src/util.c
+#, c-format
+msgid "Parsed: >%s< >%s<"
+msgstr ""
+
+#: src/util.c
+msgid "Parsed: >redacted< >redacted<"
+msgstr ""
+
+#: src/util.c
+#, c-format
+msgid "Error parsing parm_nm controls: %s"
+msgstr ""
+
+#: src/util.c
+msgid "Error parsing parm_nm controls: <redacted>"
+msgstr ""
+
+#: src/util.c
+#, c-format
+msgid "Error parsing parm_vl controls: %s"
+msgstr ""
+
+#: src/util.c
+msgid "Error parsing parm_vl controls: <redacted>"
+msgstr ""
+
+#: src/util.c
+#, c-format
+msgid "Error setting temp: %s"
+msgstr ""
+
+#: src/util.c
+msgid "Error setting temp: <redacted>"
+msgstr ""
+
+#: src/util.c
+#, c-format
+msgid "Error reparsing controls: %s"
+msgstr ""
+
+#: src/util.c
+msgid "Error reparsing controls: <redacted>"
+msgstr ""
+
+#: src/util.c
+#, c-format
+msgid "Parsing controls: %s"
+msgstr "解析コントロール： %s"
+
+#: src/util.c
+msgid "Parsing controls: <redacted>"
+msgstr ""
+
+#: src/util.c
+#, c-format
+msgid "Error parsing controls: %s"
+msgstr ""
+
+#: src/util.c
+msgid "Error parsing controls: <redacted>"
+msgstr ""
+
+#: src/util.c
+#, c-format
+msgid "Error: %s"
+msgstr ""
+
+#: src/util.c
+#, c-format
+msgid "New netcam_params: %s"
+msgstr ""
+
+#: src/util.c
+#, c-format
+msgid "New netcam_high_params: %s"
+msgstr ""
+
+#: src/util.c
+#, c-format
+msgid "New video_params: %s"
+msgstr ""
+
+#: src/util.c
+#, c-format
+msgid "Programming error.  Unknown configuration item: %s"
+msgstr ""
+
 #: src/video_bktr.c
 #, c-format
 msgid "METEORSHUE Error setting hue [%d]"
@@ -3429,7 +3650,8 @@ msgstr "METEORSINPUT %d無効-複合 %dを試行しています"
 
 #: src/video_bktr.c
 msgid "BT848SFMT, Couldn't set the input format, try again with default"
-msgstr "BT848SFMT、入力形式を設定できませんでした。デフォルトで再試行してください"
+msgstr ""
+"BT848SFMT、入力形式を設定できませんでした。デフォルトで再試行してください"
 
 #: src/video_bktr.c
 msgid "BT848SFMT, Couldn't set the input format either default"
@@ -3446,13 +3668,13 @@ msgstr "[ %d / %d]ノルム %d"
 
 #: src/video_bktr.c
 #, c-format
-msgid "Not valid Frequency [%lu] for Source input [%i]"
-msgstr "無効な頻度[%lu]。 ソース入力[%i]"
+msgid "Not valid Frequency [%ld] for Source input [%i]"
+msgstr ""
 
 #: src/video_bktr.c
 #, c-format
-msgid "Frequency [%lu] Source input [%i]"
-msgstr "頻度[ %lu]ソース入力[ %i]"
+msgid "Frequency [%ld] Source input [%i]"
+msgstr ""
 
 #: src/video_bktr.c
 #, c-format
@@ -3492,10 +3714,6 @@ msgstr "単一メソッドエラーキャプチャを使用するMETEORCAPTUR"
 #: src/video_bktr.c
 msgid "Error capturing using single method"
 msgstr "単一メソッドを使用したエラーキャプチャ"
-
-#: src/video_bktr.c
-msgid "BKTR is not enabled."
-msgstr "BKTRは有効ではありません。"
 
 #: src/video_bktr.c src/video_v4l2.c
 msgid "Unable to find video device"
@@ -3552,11 +3770,6 @@ msgstr "画像が破損しています...続行"
 #, c-format
 msgid "SOI position adjusted by %d bytes."
 msgstr " %dバイト調整されたSOIの位置。"
-
-#: src/video_common.c
-#, c-format
-msgid "Parsing controls: %s"
-msgstr "解析コントロール： %s"
 
 #: src/video_common.c
 msgid "calling mmalcam_cleanup"
@@ -3701,13 +3914,13 @@ msgstr "コントロール\" %s \"を値 %dに設定します"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "%s control option value %d is below minimum.  Using minimum"
-msgstr " %s制御オプション値 %dは最小値を下回っています。最小使用"
+msgid "%s control option value %s is below minimum.  Using minimum %d"
+msgstr ""
 
 #: src/video_v4l2.c
 #, c-format
-msgid "%s control option value %d is above maximum.  Using maximum"
-msgstr " %s制御オプション値 %dは最大値を超えています。最大使用"
+msgid "%s control option value %s is above maximum.  Using maximum %d"
+msgstr ""
 
 #: src/video_v4l2.c
 msgid "control type not supported yet"
@@ -3716,10 +3929,11 @@ msgstr "制御タイプはまだサポートされていません"
 #: src/video_v4l2.c
 #, c-format
 msgid ""
-"Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input value "
-"in conf by -1"
+"Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input "
+"value in conf by -1"
 msgstr ""
-"入力 %dをクエリできません。VIDIOC ENUMINPUT、WEBCAM変更入力を使用する場合confの値-1"
+"入力 %dをクエリできません。VIDIOC ENUMINPUT、WEBCAM変更入力を使用する場合conf"
+"の値-1"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3834,10 +4048,11 @@ msgid "Adjusting to height (%d)"
 msgstr "高さの調整（ %d）"
 
 #: src/video_v4l2.c
-msgid "H264(21) format not supported via videodevice.  Changing to default palette"
+msgid ""
+"H264(21) format not supported via videodevice.  Changing to default palette"
 msgstr ""
-"H264（21）形式は、ビデオデバイスではサポートされていません。デフォルトのパレットに"
-"変更する"
+"H264（21）形式は、ビデオデバイスではサポートされていません。デフォルトのパ"
+"レットに変更する"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3910,16 +4125,6 @@ msgid "Error starting stream. VIDIOC_STREAMON"
 msgstr "ストリームの開始エラー。VIDIOC STREAMON"
 
 #: src/video_v4l2.c
-#, c-format
-msgid "1) vid_source->pframe %i"
-msgstr "1）vid source-> pframe %i"
-
-#: src/video_v4l2.c
-#, c-format
-msgid "the_buffer index %d Address (%x)"
-msgstr "バッファインデックス %dアドレス（ %x）"
-
-#: src/video_v4l2.c
 msgid "Errors occurred during device select"
 msgstr "デバイスの選択中にエラーが発生しました"
 
@@ -3978,15 +4183,6 @@ msgstr "幅： %d、高さ %d"
 #, c-format
 msgid "    Framerate %d/%d"
 msgstr "フレームレート %d / %d"
-
-#: src/webu.c
-#, c-format
-msgid "Invalid url: %s"
-msgstr "無効なURL： %s"
-
-#: src/webu.c
-msgid "Error decoding url"
-msgstr "URLのデコードエラー"
 
 #: src/webu.c
 #, c-format
@@ -4053,6 +4249,16 @@ msgstr "無効な応答"
 
 #: src/webu.c
 #, c-format
+msgid "Error adding webcontrol header %s %s"
+msgstr ""
+
+#: src/webu.c src/webu_stream.c
+#, c-format
+msgid "Error adding stream header %s %s"
+msgstr ""
+
+#: src/webu.c
+#, c-format
 msgid "Invalid Method requested: %s"
 msgstr "無効なメソッドが要求されました： %s"
 
@@ -4060,6 +4266,18 @@ msgstr "無効なメソッドが要求されました： %s"
 #, c-format
 msgid "send page failed %d"
 msgstr "ページの送信に失敗しました %d"
+
+#: src/webu.c
+msgid "Stream picture is not ready yet"
+msgstr ""
+
+#: src/webu.c
+msgid "Stream process requested to finish."
+msgstr ""
+
+#: src/webu.c
+msgid "Send page failed."
+msgstr ""
 
 #: src/webu.c
 msgid "Basic authentication: available"
@@ -4108,13 +4326,14 @@ msgstr "SSL / TLSサポート用のファイルの読み取りエラー。"
 #: src/webu.c
 msgid "SSL/TLS requested but no cert file provided.  SSL/TLS disabled"
 msgstr ""
-"SSL / TLSが要求されましたが、証明書ファイルが提供されていません。SSL / TLSが無効で"
-"す"
+"SSL / TLSが要求されましたが、証明書ファイルが提供されていません。SSL / TLSが"
+"無効です"
 
 #: src/webu.c
 msgid "SSL/TLS requested but no key file provided.  SSL/TLS disabled"
 msgstr ""
-"SSL / TLSが要求されましたが、キーファイルが提供されていません。SSL / TLSが無効です"
+"SSL / TLSが要求されましたが、キーファイルが提供されていません。SSL / TLSが無"
+"効です"
 
 #: src/webu.c
 #, c-format
@@ -4312,3 +4531,234 @@ msgstr "ストリーミングする画像を取得できませんでした。"
 #, c-format
 msgid "'%s' option is depreciated.  New option name is '%s'"
 msgstr "' %s'オプションは減価償却されています。新しいオプション名は '%s'です"
+
+#~ msgid "Unable to locate vid_control_params"
+#~ msgstr "VID制御パラメータを見つけることができません"
+
+#~ msgid "No value provided to put into vid_control_params"
+#~ msgstr "vid制御パラメーターに入れる値が提供されていません"
+
+#~ msgid "Error compiling regex in copy_uri"
+#~ msgstr "コピーURIでの正規表現のコンパイルエラー"
+
+#~ msgid "Invalid origin for cors_header in copy_uri"
+#~ msgstr "コピーuriのcorsヘッダーの無効なオリジン"
+
+#~ msgid "videodevice"
+#~ msgstr "ビデオデバイス"
+
+#~ msgid "vid_control_params"
+#~ msgstr "vid制御パラメーター"
+
+#~ msgid "v4l2_palette"
+#~ msgstr "v4l2パレット"
+
+#~ msgid "input"
+#~ msgstr "入力"
+
+#~ msgid "frequency"
+#~ msgstr "周波数"
+
+#~ msgid "tunerdevice"
+#~ msgstr "チューナーデバイス"
+
+#~ msgid "netcam_highres"
+#~ msgstr "netcam highres"
+
+#~ msgid "netcam_keepalive"
+#~ msgstr "ネットカメラキープアライブ"
+
+#~ msgid "netcam_proxy"
+#~ msgstr "netcamプロキシ"
+
+#~ msgid "netcam_tolerant_check"
+#~ msgstr "netcamトレラントチェック"
+
+#~ msgid "netcam_use_tcp"
+#~ msgstr "netcam use tcp"
+
+#~ msgid "netcam_decoder"
+#~ msgstr "netcamデコーダー"
+
+#~ msgid "mmalcam_control_params"
+#~ msgstr "mmalcam制御パラメーター"
+
+#~ msgid "webcontrol_cors_header"
+#~ msgstr "webcontrol corsヘッダー"
+
+#~ msgid "stream_cors_header"
+#~ msgstr "ストリームcorsヘッダー"
+
+#~ msgid "Ignoring empty sql query"
+#~ msgstr "空のSQLクエリを無視する"
+
+#~ msgid "Executing mysql query"
+#~ msgstr "mysqlクエリの実行"
+
+#~ msgid "Mysql query failed %s error code %d"
+#~ msgstr "Mysqlクエリが %sエラーコード %dに失敗しました"
+
+#~ msgid "Re-Connection to Mysql database '%s' Succeed"
+#~ msgstr "Mysqlデータベース ' %s'への再接続に成功しました"
+
+#~ msgid "after re-connection Mysql query failed %s error code %d"
+#~ msgstr "再接続後、Mysqlクエリは %sエラーコード %dに失敗しました"
+
+#~ msgid "Executing postgresql query"
+#~ msgstr "postgresqlクエリの実行"
+
+#~ msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
+#~ msgstr "PostgreSQLデータベース ' %s'への再接続に失敗しました： %s"
+
+#~ msgid "Re-Connection to PostgreSQL database '%s' Succeed"
+#~ msgstr "PostgreSQLデータベース ' %s'への再接続に成功しました"
+
+#~ msgid "Executing sqlite query"
+#~ msgstr "sqliteクエリの実行"
+
+#~ msgid "SQLite error was %s"
+#~ msgstr "SQLiteエラーは %sでした"
+
+#~ msgid "No ffmpeg support"
+#~ msgstr "ffmpegサポートなし"
+
+#~ msgid "Closing MYSQL"
+#~ msgstr "MYSQLを閉じる"
+
+#~ msgid "Can't open database %s : %s"
+#~ msgstr "データベース %sを開けません： %s"
+
+#~ msgid "Problem enabling motion-stream server in port %d"
+#~ msgstr "ポート %dでのモーションストリームサーバーの有効化の問題"
+
+#~ msgid "Started motion-stream server on port %d (auth %s)"
+#~ msgstr "ポート %d（認証 %s）でモーションストリームサーバーを開始しました"
+
+#~ msgid "pass-through is enabled but is still experimental."
+#~ msgstr "パススルーは有効ですが、まだ実験段階です。"
+
+#~ msgid "Using port number %d"
+#~ msgstr "ポート番号 %dを使用"
+
+#~ msgid ""
+#~ "Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or "
+#~ "jpeg."
+#~ msgstr ""
+#~ "無効なnetcamサービス ' %s'-http、ftp、mjpg、mjpeg、v4l2、またはjpegである"
+#~ "必要があります。"
+
+#~ msgid "Error receiving frame from codec: %s"
+#~ msgstr "コーデックからのフレーム受信エラー： %s"
+
+#~ msgid "%s: %s: %s,Interrupt %s"
+#~ msgstr " %s： %s： %s、割り込み %s"
+
+#~ msgid "%s: %s: Failed,Interrupt %s"
+#~ msgstr " %s： %s：失敗、 %sを中断"
+
+#~ msgid "%s: Ignoring user requested decoder %s"
+#~ msgstr " %s：ユーザーが要求したデコーダ %sを無視します"
+
+#~ msgid "%s: av_read_frame: %s ,Interrupt: %s"
+#~ msgstr " %s：読み取りフレーム： %s、割り込み： %s"
+
+#~ msgid "%s: Setting http input_format mjpeg"
+#~ msgstr " %s：http入力形式mjpegの設定"
+
+#~ msgid "%s: Setting rtsp transport to tcp"
+#~ msgstr " %s：rtspトランスポートをtcpに設定"
+
+#~ msgid "%s: Setting rtsp transport to udp"
+#~ msgstr " %s：rtspトランスポートをudpに設定"
+
+#~ msgid "%s: Setting attributes to read file"
+#~ msgstr " %s：ファイルを読み取るための属性の設定"
+
+#~ msgid "%s: Requested v4l2_palette option: %d"
+#~ msgstr " %s：要求されたv4l2パレットオプション： %d"
+
+#~ msgid "%s: Requested FOURCC code: %s"
+#~ msgstr " %s：要求されたFOURCCコード： %s"
+
+#~ msgid "%s: Setting v4l2 input_format: %s"
+#~ msgstr " %s：v4l2入力形式の設定： %s"
+
+#~ msgid "%s: Setting v4l2 framerate: %s"
+#~ msgstr " %s：v4l2フレームレートの設定： %s"
+
+#~ msgid "%s: Setting v4l2 video_size: %s"
+#~ msgstr " %s：v4l2ビデオサイズの設定： %s"
+
+#~ msgid "Proxies not supported using for %s"
+#~ msgstr " %sの使用でサポートされていないプロキシ"
+
+#~ msgid "Setting up v4l2 via ffmpeg netcam"
+#~ msgstr "ffmpeg netcam経由でv4l2をセットアップする"
+
+#~ msgid "Setting up file via ffmpeg netcam"
+#~ msgstr "ffmpeg netcamを介したファイルのセットアップ"
+
+#~ msgid "Setting up http via ffmpeg netcam"
+#~ msgstr "ffmpeg netcam経由でhttpを設定する"
+
+#~ msgid "Setting up %s via ffmpeg netcam"
+#~ msgstr "ffmpeg netcam経由で %sを設定しています"
+
+#~ msgid "High resolution"
+#~ msgstr "高解像度"
+
+#~ msgid "Normal resolution"
+#~ msgstr "通常の解像度"
+
+#~ msgid "ffmpeg too old"
+#~ msgstr "ffmpegが古すぎる"
+
+#~ msgid "%s: Invalid camera service"
+#~ msgstr " %s：無効なカメラサービス"
+
+#~ msgid "%s: Unable to open camera(%s)"
+#~ msgstr " %s：カメラを開くことができません（ %s）"
+
+#~ msgid "Requested frame rate %d FPS is less than camera frame rate %d FPS"
+#~ msgstr ""
+#~ "要求されたフレームレート%d FPSはカメラのフレームレート%d FPSよりも小さい"
+
+#~ msgid "Increasing capture rate to %d FPS to match camera."
+#~ msgstr "カメラに合わせてキャプチャ率を%d FPSに上げます。"
+
+#~ msgid ""
+#~ "To lower CPU, change camera FPS to lower rate and decrease I frame "
+#~ "interval."
+#~ msgstr ""
+#~ "CPUを下げるには、カメラのFPSを低いレートに変更し、Iフレーム間隔を減らしま"
+#~ "す。"
+
+#~ msgid "FFmpeg/Libav not found on computer.  No RTSP support"
+#~ msgstr "FFmpeg / Libavがコンピューターに見つかりません。RTSPサポートなし"
+
+#~ msgid "Not valid Frequency [%lu] for Source input [%i]"
+#~ msgstr "無効な頻度[%lu]。 ソース入力[%i]"
+
+#~ msgid "Frequency [%lu] Source input [%i]"
+#~ msgstr "頻度[ %lu]ソース入力[ %i]"
+
+#~ msgid "BKTR is not enabled."
+#~ msgstr "BKTRは有効ではありません。"
+
+#~ msgid "%s control option value %d is below minimum.  Using minimum"
+#~ msgstr " %s制御オプション値 %dは最小値を下回っています。最小使用"
+
+#~ msgid "%s control option value %d is above maximum.  Using maximum"
+#~ msgstr " %s制御オプション値 %dは最大値を超えています。最大使用"
+
+#~ msgid "1) vid_source->pframe %i"
+#~ msgstr "1）vid source-> pframe %i"
+
+#~ msgid "the_buffer index %d Address (%x)"
+#~ msgstr "バッファインデックス %dアドレス（ %x）"
+
+#~ msgid "Invalid url: %s"
+#~ msgstr "無効なURL： %s"
+
+#~ msgid "Error decoding url"
+#~ msgstr "URLのデコードエラー"
