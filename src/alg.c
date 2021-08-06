@@ -410,7 +410,7 @@ void alg_noise_tune(struct context *cnt, unsigned char *new)
     }
 
     /* 5: safe, 4: regular, 3: more sensitive */
-    cnt->noise = 4 + (cnt->noise + sum) / 2;
+    cnt->noise = 4 + (cnt->conf.noise_level / 2) + (cnt->noise + sum) / 2;
 }
 
 /**
