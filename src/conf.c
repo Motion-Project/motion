@@ -59,6 +59,8 @@ struct config conf_template = {
     .log_type =                        NULL,
     .quiet =                           TRUE,
     .native_language =                 TRUE,
+    .watchdog_tmo =                    30,
+    .watchdog_kill =                   10,
     .camera_name =                     NULL,
     .camera_id =                       0,
     .camera_dir =                      NULL,
@@ -320,6 +322,24 @@ config_param config_params[] = {
     CONF_OFFSET(native_language),
     copy_bool,
     print_bool,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "watchdog_tmo",
+    "# Watchdog timeout.",
+    1,
+    CONF_OFFSET(watchdog_tmo),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "watchdog_kill",
+    "# Watchdog kill.",
+    1,
+    CONF_OFFSET(watchdog_kill),
+    copy_int,
+    print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -3531,6 +3551,8 @@ static void config_parms_intl()
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","log_level",_("log_level"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","log_type",_("log_type"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","quiet",_("quiet"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","watchdog_tmo",_("watchdog_tmo"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","watchdog_kill",_("watchdog_kill"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","native_language",_("native_language"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera_name",_("camera_name"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera_id",_("camera_id"));

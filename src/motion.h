@@ -153,9 +153,6 @@ struct ffmpeg;
                                     and then we show a grey image instead
                                     */
 
-#define WATCHDOG_TMO            30   /* 30 sec max motion_loop interval */
-#define WATCHDOG_KILL          -10   /* 10 sec grace period before calling thread cancel */
-
 #define CONNECTION_KO           "Lost connection"
 #define CONNECTION_OK           "Connection OK"
 
