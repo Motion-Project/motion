@@ -1272,7 +1272,7 @@ static int v4l2_device_open(struct context *cnt, struct video_dev *curdev)
         ,cnt->conf.video_device, cnt->param_input);
 
     /* Give the watchdog more time for this open function */
-    cnt->watchdog = (WATCHDOG_TMO * 2);
+    cnt->watchdog = (cnt->conf.watchdog_tmo * 2);
 
     curdev->video_device = cnt->conf.video_device;
     curdev->fd_device = -1;

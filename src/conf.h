@@ -42,6 +42,8 @@ struct config {
     char            *log_type;
     int             quiet;
     int             native_language;
+    int             watchdog_tmo;
+    int             watchdog_kill;
     const char      *camera_name;
     int             camera_id;
     const char      *camera_dir;

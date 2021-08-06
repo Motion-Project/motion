@@ -1445,6 +1445,18 @@
         </tr>
         <tr>
           <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#watchdog_tmo" >watchdog_tmo</a></td>
+        </tr>
+        <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#watchdog_kill" >watchdog_kill</a></td>
+        </tr>
+        <tr>
+          <td align="left"></td>
           <td align="left">webcontrol_auth_method</td>
           <td align="left">webcontrol_auth_method</td>
           <td align="left"><a href="#webcontrol_auth_method" >webcontrol_auth_method</a></td>
@@ -1572,6 +1584,8 @@
               <td bgcolor="#edf4f9" ><a href="#camera_dir" >camera_dir</a> </td>
             </tr>
               <td bgcolor="#edf4f9" ><a href="#target_dir" >target_dir</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#watchdog_tmo" >watchdog_tmo</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#watchdog_kill" >watchdog_kill</a> </td>
             <tr>
             </tr>
           </tbody>
@@ -2378,6 +2392,28 @@
         Note that the file name options are all saved relative to this target_dir
         This means in principle that you can specify target_dir as '/' and be 100% flexible. But this is
         NOT recommended.  It is recommended that this directory be specified as deep as possible.
+        <p></p>
+
+        <h3><a name="watchdog_tmo"></a>watchdog_tmo</h3>
+        <p></p>
+        <ul>
+          <li> Type: int</li>
+          <li> Range / Valid values: Integer</li>
+          <li> Default: 30</li>
+        </ul>
+        <p></p>
+        The number of seconds a camera can be non-responsive before Motion attempts to stop the camera gracefully.
+        <p></p>
+
+        <h3><a name="watchdog_kill"></a>watchdog_kill</h3>
+        <p></p>
+        <ul>
+          <li> Type: int</li>
+          <li> Range / Valid values: Integer</li>
+          <li> Default: 30</li>
+        </ul>
+        <p></p>
+        The number of seconds after the timeout has expired until Motion forcefully kills the camera that is unresponsive.
         <p></p>
 
       </ul>
@@ -3668,8 +3704,9 @@
         Activates the automatic tuning of noise level.
         This feature makes Motion continuously adjust the noise
         threshold for distinguishing between noise and motion.
-        The 'noise_level' setting is ignored when activating this feature.
-        It may give different results depending on camera and light conditions.
+        <p></p>
+        When activating this feature, the noise_level setting is used as a value added to the dynamic noise level rather
+        than the absolute value.
         <p></p>
 
         <h3><a name="despeckle_filter"></a> despeckle_filter </h3>

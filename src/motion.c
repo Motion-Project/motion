@@ -1663,7 +1663,7 @@ static void mlp_prepare(struct context *cnt)
     struct timeval tv1;
 
     /***** MOTION LOOP - PREPARE FOR NEW FRAME SECTION *****/
-    cnt->watchdog = WATCHDOG_TMO;
+    cnt->watchdog = cnt->conf.watchdog_tmo;
 
     /* Get current time and preserver last time for frame interval calc. */
 
@@ -3296,8 +3296,8 @@ static void motion_start_thread(struct context *cnt)
     /* Set a flag that we want this thread running */
     cnt->restart = 1;
 
-    /* Give the thread WATCHDOG_TMO to start */
-    cnt->watchdog = WATCHDOG_TMO;
+    /* Give the thread watchdog to start */
+    cnt->watchdog = cnt->conf.watchdog_tmo;
 
     /* Flag it as running outside of the thread, otherwise if the main loop
      * checked if it is was running before the thread set it to 1, it would
@@ -3366,7 +3366,7 @@ static void motion_watchdog(int indx)
         cnt_list[indx]->finish = 1;
     }
 
-    if (cnt_list[indx]->watchdog == WATCHDOG_KILL) {
+    if (cnt_list[indx]->watchdog == -cnt_list[indx]->conf.watchdog_kill) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Thread %d - Watchdog timeout did NOT restart, killing it!")
             , cnt_list[indx]->threadnr);
@@ -3385,7 +3385,7 @@ static void motion_watchdog(int indx)
         pthread_cancel(cnt_list[indx]->thread_id);
     }
 
-    if (cnt_list[indx]->watchdog < WATCHDOG_KILL) {
+    if (cnt_list[indx]->watchdog < -cnt_list[indx]->conf.watchdog_kill) {
         if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
             (cnt_list[indx]->rtsp != NULL)) {
             if (!cnt_list[indx]->rtsp->handler_finished &&
