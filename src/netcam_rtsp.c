@@ -53,9 +53,11 @@
 
 #include "ffmpeg.h"
 
-static void netcam_free_pkt(struct rtsp_context *rtsp_data)
+static void netcam_rtsp_free_pkt(struct rtsp_context *rtsp_data)
 {
-    my_packet_free(rtsp_data->packet_recv);
+    if (rtsp_data->packet_recv != NULL) {
+        my_packet_free(rtsp_data->packet_recv);
+    }
     rtsp_data->packet_recv = NULL;
 }
 
@@ -82,6 +84,7 @@ static void netcam_rtsp_pktarray_free(struct rtsp_context *rtsp_data)
         if (rtsp_data->pktarray_size > 0) {
             for(indx = 0; indx < rtsp_data->pktarray_size; indx++) {
                 my_packet_free(rtsp_data->pktarray[indx].packet);
+                rtsp_data->pktarray[indx].packet = NULL;
             }
         }
         free(rtsp_data->pktarray);
@@ -235,6 +238,8 @@ static void netcam_rtsp_pktarray_add(struct rtsp_context *rtsp_data)
         rtsp_data->pktarray[indx_next].idnbr = rtsp_data->idnbr;
 
         my_packet_free(rtsp_data->pktarray[indx_next].packet);
+        rtsp_data->pktarray[indx_next].packet = NULL;
+
         rtsp_data->pktarray[indx_next].packet = my_packet_alloc(rtsp_data->pktarray[indx_next].packet);
         retcd = my_copy_packet(rtsp_data->pktarray[indx_next].packet, rtsp_data->packet_recv);
         if ((rtsp_data->interrupted) || (retcd < 0)) {
@@ -244,8 +249,7 @@ static void netcam_rtsp_pktarray_add(struct rtsp_context *rtsp_data)
                 ,rtsp_data->cameratype
                 ,errstr, rtsp_data->interrupted ? _("True"):_("False"));
             my_packet_free(rtsp_data->pktarray[indx_next].packet);
-            rtsp_data->pktarray[indx_next].packet->data = NULL;
-            rtsp_data->pktarray[indx_next].packet->size = 0;
+            rtsp_data->pktarray[indx_next].packet = NULL;
         }
 
         if (rtsp_data->pktarray[indx_next].packet->flags & AV_PKT_FLAG_KEY) {
@@ -1181,7 +1185,7 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data)
                     ,_("%s: av_read_frame: %s")
                     ,rtsp_data->cameratype, errstr);
             }
-            netcam_free_pkt(rtsp_data);
+            netcam_rtsp_free_pkt(rtsp_data);
             netcam_rtsp_close_context(rtsp_data);
             return -1;
         } else {
@@ -1201,10 +1205,10 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data)
                 haveimage = TRUE;
             } else if (size_decoded == 0) {
                 /* Did not fail, just didn't get anything.  Try again */
-                netcam_free_pkt(rtsp_data);
+                netcam_rtsp_free_pkt(rtsp_data);
                 rtsp_data->packet_recv = my_packet_alloc(rtsp_data->packet_recv);
             } else {
-                netcam_free_pkt(rtsp_data);
+                netcam_rtsp_free_pkt(rtsp_data);
                 netcam_rtsp_close_context(rtsp_data);
                 return -1;
             }
@@ -1228,7 +1232,7 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data)
             (rtsp_data->imgsize.height != rtsp_data->frame->height) ||
             (netcam_rtsp_check_pixfmt(rtsp_data) != 0)) {
             if (netcam_rtsp_resize(rtsp_data) < 0) {
-                netcam_free_pkt(rtsp_data);
+                netcam_rtsp_free_pkt(rtsp_data);
                 netcam_rtsp_close_context(rtsp_data);
                 return -1;
             }
@@ -1247,7 +1251,7 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data)
         }
     pthread_mutex_unlock(&rtsp_data->mutex);
 
-    netcam_free_pkt(rtsp_data);
+    netcam_rtsp_free_pkt(rtsp_data);
 
     if (rtsp_data->format_context->streams[rtsp_data->video_stream_index]->avg_frame_rate.den > 0) {
         rtsp_data->src_fps = (
