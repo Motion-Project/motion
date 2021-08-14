@@ -936,7 +936,7 @@ static int netcam_rtsp_interrupt(void *ctx)
 {
     struct rtsp_context *rtsp_data = ctx;
 
-    if (rtsp_data->finish) {
+    if (rtsp_data->finish && rtsp_data->handler_finished) {
         rtsp_data->interrupted = TRUE;
         return TRUE;
     }
@@ -1980,6 +1980,8 @@ static void *netcam_rtsp_handler(void *arg)
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("%s: Handler loop finished."),rtsp_data->cameratype);
     netcam_rtsp_shutdown(rtsp_data);
+
+    SLEEP(1,0);
 
     /* Our thread is finished - decrement motion's thread count. */
     pthread_mutex_lock(&global_lock);
