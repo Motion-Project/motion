@@ -735,11 +735,7 @@ static void util_parms_add(struct params_context *parameters
         parameters->params_array[indx].param_name = (char*)mymalloc(strlen(parm_nm)+1);
         retcd = sprintf(parameters->params_array[indx].param_name,"%s",parm_nm);
         if (retcd < 0) {
-            if (logmsg) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >%s<"),parm_nm);
-            } else {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >redacted<"));
-            }
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >%s<"),parm_nm);
             free(parameters->params_array[indx].param_name);
             parameters->params_array[indx].param_name = NULL;
         }
@@ -751,11 +747,7 @@ static void util_parms_add(struct params_context *parameters
         parameters->params_array[indx].param_value = (char*)mymalloc(strlen(parm_vl)+1);
         retcd = sprintf(parameters->params_array[indx].param_value,"%s",parm_vl);
         if (retcd < 0) {
-            if (logmsg) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >%s<"),parm_vl);
-            } else {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >redacted<"));
-            }
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >%s<"),parm_vl);
             free(parameters->params_array[indx].param_value);
             parameters->params_array[indx].param_value = NULL;
         }
@@ -764,11 +756,11 @@ static void util_parms_add(struct params_context *parameters
     }
 
     if (logmsg) {
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Parsed: >%s< >%s<")
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsed: >%s< >%s<")
             ,parameters->params_array[indx].param_name
             ,parameters->params_array[indx].param_value);
     } else {
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Parsed: >redacted< >redacted<"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsed: >redacted< >redacted<"));
     }
 }
 
@@ -791,19 +783,15 @@ static void util_parms_extract(struct params_context *parameters, char *parmlne
 
     if ((indxnm_en != 0) &&
         (indxvl_st != 0) &&
-        ((indxnm_en - indxnm_st) > 0) &&
-        ((indxvl_en - indxvl_st) > 0)) {
+        ((int)(indxnm_en - indxnm_st) >= 0) &&
+        ((int)(indxvl_en - indxvl_st) >= 0)) {
         parm_nm = mymalloc(PATH_MAX);
         parm_vl = mymalloc(PATH_MAX);
 
         chksz = indxnm_en - indxnm_st + 2;
         retcd = snprintf(parm_nm, chksz, "%s", parmlne + indxnm_st);
         if (retcd < 0) {
-            if (logmsg) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_nm controls: %s"), parmlne);
-            } else {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_nm controls: <redacted>"));
-            }
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_nm controls: %s"), parmlne);
             free(parm_nm);
             parm_nm = NULL;
         }
@@ -811,11 +799,7 @@ static void util_parms_extract(struct params_context *parameters, char *parmlne
         chksz = indxvl_en - indxvl_st + 2;
         retcd = snprintf(parm_vl, chksz, "%s", parmlne + indxvl_st);
         if (retcd < 0) {
-            if (logmsg) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_vl controls: %s"), parmlne);
-            } else {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_vl controls: <redacted>"));
-            }
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_vl controls: %s"), parmlne);
             free(parm_vl);
             parm_vl = NULL;
         }
@@ -839,7 +823,7 @@ static void util_parms_extract(struct params_context *parameters, char *parmlne
  * Remove the parameter parsed out in previous steps from the parms string
  * and set up the string for parsing out the next parameter.
 */
-static void util_parms_next(char *parmlne, size_t indxpr_st, size_t indxpr_en, int logmsg)
+static void util_parms_next(char *parmlne, size_t indxpr_st, size_t indxpr_en)
 {
     char *parm_tmp;
     int retcd;
@@ -853,11 +837,7 @@ static void util_parms_next(char *parmlne, size_t indxpr_st, size_t indxpr_en, i
     parm_tmp = mymalloc(PATH_MAX);
     retcd = snprintf(parm_tmp, PATH_MAX, "%s", parmlne);
     if (retcd < 0) {
-        if (logmsg) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting temp: %s"), parmlne);
-        } else {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting temp: <redacted>"));
-        }
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting temp: %s"), parmlne);
         free(parm_tmp);
         return;
     }
@@ -881,11 +861,7 @@ static void util_parms_next(char *parmlne, size_t indxpr_st, size_t indxpr_en, i
     }
 
     if (retcd < 0) {
-        if (logmsg) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error reparsing controls: %s"), parmlne);
-        } else {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error reparsing controls: <redacted>"));
-        }
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error reparsing controls: %s"), parmlne);
     }
 
     free(parm_tmp);
@@ -989,7 +965,7 @@ static void util_parms_parse_qte(struct params_context *parameters, char *parmln
         }
 
         util_parms_extract(parameters, parmlne, indxnm_st, indxnm_en, indxvl_st, indxvl_en, logmsg);
-        util_parms_next(parmlne, indxpr_st, indxpr_en, logmsg);
+        util_parms_next(parmlne, indxpr_st, indxpr_en);
     }
 }
 
@@ -1011,7 +987,7 @@ static void util_parms_parse_comma(struct params_context *parameters, char *parm
             indxvl_st = indxnm_en + 2;
         }
         util_parms_extract(parameters, parmlne, indxnm_st, indxnm_en, indxvl_st, indxvl_en, logmsg);
-        util_parms_next(parmlne, indxnm_st, indxvl_en + 1, logmsg);
+        util_parms_next(parmlne, indxnm_st, indxvl_en + 1);
     }
 
 }
@@ -1071,23 +1047,18 @@ void util_parms_parse(struct params_context *parameters, char *confparm, int log
 
     if (confparm != NULL) {
         if (logmsg) {
-            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
-                ,_("Parsing controls: %s"), confparm);
+            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+                ,_("Parsing: %s"), confparm);
         } else {
-            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
-                ,_("Parsing controls: <redacted>"));
+            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+                ,_("Parsing: <redacted>"));
         }
         parmlne = mymalloc(PATH_MAX);
 
         retcd = snprintf(parmlne, PATH_MAX, "%s", confparm);
         if ((retcd < 0) || (retcd > PATH_MAX)) {
-            if (logmsg) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                    ,_("Error parsing controls: %s"), confparm);
-            } else {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                    ,_("Error parsing controls: <redacted>"));
-            }
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                ,_("Error parsing controls: %s"), confparm);
             free(parmlne);
             return;
         }
@@ -1132,102 +1103,148 @@ void util_parms_add_default(struct params_context *parameters, const char *parm_
 
 }
 
+/* util_parms_add_update
+ * Add a new value or update an existing one.
+*/
+void util_parms_add_update(struct params_context *parameters, const char *parm_nm, const char *parm_vl)
+{
+
+    int indx, newval, retcd;
+
+    newval = TRUE;
+    for (indx = 0; indx < parameters->params_count; indx++) {
+        if ( mystreq(parameters->params_array[indx].param_name, parm_nm) ) {
+            newval = FALSE;
+        }
+    }
+
+    if (newval == TRUE) {
+        util_parms_add(parameters, parm_nm, parm_vl, TRUE);
+    } else {
+        for (indx = 0; indx < parameters->params_count; indx++) {
+            if ( mystreq(parameters->params_array[indx].param_name, parm_nm) ) {
+                free(parameters->params_array[indx].param_value);
+                parameters->params_array[indx].param_value = mymalloc(strlen(parm_vl) + 1);
+                retcd = snprintf(parameters->params_array[indx].param_value
+                    , strlen(parm_vl) + 1 , "%s", parm_vl);
+                if ((retcd < 0) || (retcd > PATH_MAX)) {
+                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s")
+                        , parameters->params_array[indx].param_value);
+                }
+            }
+        }
+    }
+
+}
+
 /* Update config line with the values from the params array */
 void util_parms_update(struct params_context *params, struct context *cnt, const char *cfgitm)
 {
     int indx, retcd;
-    char *tst;
     char newline[PATH_MAX];
-    char hldline[PATH_MAX];
+    char cpyline[PATH_MAX];
+    char fmt[15];
+
+    memset(newline,'\0', PATH_MAX);
+    memset(cpyline,'\0', PATH_MAX);
 
     for (indx = 0; indx < params->params_count; indx++) {
-        if (indx == 0){
-            retcd = snprintf(newline, PATH_MAX , "%s", " ");
-            if ((retcd < 0) || (retcd > PATH_MAX)) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
-            }
 
-            retcd = snprintf(hldline, PATH_MAX, "%s", " ");
-            if ((retcd < 0) || (retcd > PATH_MAX)) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
-            }
-
-        } else {
-            retcd = snprintf(newline, PATH_MAX, "%s,", hldline);
-            if ((retcd < 0) || (retcd > PATH_MAX)) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
-            }
-
-            retcd = snprintf(hldline, PATH_MAX, "%s", newline);
-            if ((retcd < 0) || (retcd > PATH_MAX)) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
-            }
+        /* Determine format spec for newline*/
+        memset(fmt,'\0', 15);
+        if (indx > 0) {
+            memcpy(fmt,"%s,", 3);
         }
 
-        tst = strstr(params->params_array[indx].param_name," ");
-        if (tst == NULL) {
-            retcd = snprintf(newline, PATH_MAX, "%s%s"
-                , hldline, params->params_array[indx].param_name);
-            if ((retcd < 0) || (retcd > PATH_MAX)) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
-            }
-
-            retcd = snprintf(hldline, PATH_MAX, "%s", newline);
-            if ((retcd < 0) || (retcd > PATH_MAX)) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
-            }
-
+        if ((strstr(params->params_array[indx].param_name," ") == NULL) &&
+            (strstr(params->params_array[indx].param_name,",") == NULL) &&
+            (strstr(params->params_array[indx].param_name,"=") == NULL)) {
+            memcpy(fmt + strlen(fmt),"%s", 2);
         } else {
-            retcd = snprintf(newline, PATH_MAX, "%s\"%s\""
-                , hldline, params->params_array[indx].param_name);
-            if ((retcd < 0) || (retcd > PATH_MAX)) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
-            }
-
-            retcd = snprintf(hldline, PATH_MAX, "%s", newline);
-            if ((retcd < 0) || (retcd > PATH_MAX)) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
-            }
+            memcpy(fmt + strlen(fmt),"\"%s\"", 4);
         }
 
-        retcd = snprintf(newline, PATH_MAX, "%s=%s"
-            , hldline, params->params_array[indx].param_value);
+        if ((strstr(params->params_array[indx].param_value," ") == NULL) &&
+            (strstr(params->params_array[indx].param_value,",") == NULL) &&
+            (strstr(params->params_array[indx].param_value,"=") == NULL)) {
+            memcpy(fmt + strlen(fmt),"=%s", 3);
+        } else {
+            memcpy(fmt + strlen(fmt),"=\"%s\"", 5);
+        }
+
+        /*Create the new line */
+        if (indx > 0) {
+            retcd = snprintf(newline, PATH_MAX , fmt, cpyline
+                , params->params_array[indx].param_name
+                , params->params_array[indx].param_value);
+        } else {
+            retcd = snprintf(newline, PATH_MAX , fmt
+                , params->params_array[indx].param_name
+                , params->params_array[indx].param_value);
+        }
         if ((retcd < 0) || (retcd > PATH_MAX)) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
         }
-
-        retcd = snprintf(hldline, PATH_MAX, "%s", newline);
+        /* Create a copy of our new line for use in next iteration of loop*/
+        retcd = snprintf(cpyline, PATH_MAX, "%s", newline);
         if ((retcd < 0) || (retcd > PATH_MAX)) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
         }
     }
 
-    if (mystrceq(cfgitm, "netcam_params")) {
+    /* Assign finished new parameter line to the config item */
+    if (mystreq(cfgitm, "netcam_params")) {
         free(cnt->conf.netcam_params);
         cnt->conf.netcam_params = mymalloc(strlen(newline)+1);
         retcd = snprintf(cnt->conf.netcam_params, strlen(newline)+1, "%s", newline);
         if ((retcd < 0) || (retcd > PATH_MAX)) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
         }
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("New netcam_params: %s"), newline);
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("New netcam_params: %s"), newline);
 
-    } else if (mystrceq(cfgitm, "netcam_high_params")) {
+    } else if (mystreq(cfgitm, "netcam_high_params")) {
         free(cnt->conf.netcam_high_params);
         cnt->conf.netcam_high_params = mymalloc(strlen(newline)+1);
         retcd = snprintf(cnt->conf.netcam_high_params, strlen(newline)+1, "%s", newline);
         if ((retcd < 0) || (retcd > PATH_MAX)) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
         }
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("New netcam_high_params: %s"), newline);
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("New netcam_high_params: %s"), newline);
 
-    } else if (mystrceq(cfgitm, "video_params")) {
+    } else if (mystreq(cfgitm, "video_params")) {
         free(cnt->conf.video_params);
         cnt->conf.video_params = mymalloc(strlen(newline)+1);
         retcd = snprintf(cnt->conf.video_params, strlen(newline)+1, "%s", newline);
         if ((retcd < 0) || (retcd > PATH_MAX)) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
         }
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("New video_params: %s"), newline);
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("New video_params: %s"), newline);
+
+    } else if (mystreq(cfgitm, "webcontrol_header_params")) {
+        free(cnt->conf.webcontrol_header_params);
+        cnt->conf.webcontrol_header_params = mymalloc(strlen(newline)+1);
+        retcd = snprintf(cnt->conf.webcontrol_header_params, strlen(newline)+1, "%s", newline);
+        if ((retcd < 0) || (retcd > PATH_MAX)) {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+        }
+        if (cnt->conf.webcontrol_localhost) {
+            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("New webcontrol_header_params: %s"), newline);
+        } else {
+            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("New webcontrol_header_params: <redacted>"));
+        }
+
+    } else if (mystreq(cfgitm, "stream_header_params")) {
+        free(cnt->conf.stream_header_params);
+        cnt->conf.stream_header_params = mymalloc(strlen(newline)+1);
+        retcd = snprintf(cnt->conf.stream_header_params, strlen(newline)+1, "%s", newline);
+        if ((retcd < 0) || (retcd > PATH_MAX)) {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+        }
+        if (cnt->conf.stream_localhost) {
+            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("New stream_header_params: %s"), newline);
+        } else {
+            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("New stream_header_params: <redacted>"));
+        }
 
     } else {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
