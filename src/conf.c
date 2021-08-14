@@ -2295,7 +2295,7 @@ static void copy_text_double(struct context *cnt, char *config_val)
         mystrceq(config_val, "on")) {
         cnt->conf.text_scale = 2;
     } else {
-        cnt->conf.text_scale = 2;
+        cnt->conf.text_scale = 1;
     }
     return;
 }
