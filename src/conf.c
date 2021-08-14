@@ -18,7 +18,7 @@
   **
   ** conf.c
   **
-  ** I (some random person) originally wrote conf.c as part of the drpoxy package
+  ** Initially wrote conf.c as part of the drpoxy package
   ** thanks to Matthew Pratt and others for their additions.
   **
   ** Copyright 1999 Jeroen Vreeken (pe1rxq@chello.nl)
@@ -26,17 +26,6 @@
   **
   **
 */
-
-/**
- * How to add a config option :
- *
- *   1. think twice, there are settings enough
- *
- *   2. add a field to 'struct config' (conf.h) and 'struct config conf'
- *
- *   4. add a entry to the config_params array below, if your
- *      option should be configurable by the config file.
- */
 
 #include <dirent.h>
 #include <string.h>
@@ -46,8 +35,6 @@
 #include "logger.h"
 
 #define EXTENSION ".conf"
-
-#define stripnewline(x) {if ((x)[strlen(x)-1]=='\n') (x)[strlen(x) - 1] = 0; }
 
 struct config conf_template = {
     /* Overall system configuration parameters */
@@ -217,20 +204,13 @@ struct config conf_template = {
 
 /* Forward Declares */
 static void malloc_strings(struct context *cnt);
-static struct context **copy_bool(struct context **cnt, const char *str, int val_ptr);
-static struct context **copy_int(struct context **cnt, const char *str, int val_ptr);
-static struct context **copy_video_params(struct context **cnt, const char *config_val, int config_indx);
-static struct context **copy_netcam_params(struct context **cnt, const char *config_val, int config_indx);
-static struct context **copy_webcontrol_header(struct context **cnt, const char *config_val, int config_indx);
-static struct context **copy_stream_header(struct context **cnt, const char *config_val, int config_indx);
-static struct context **copy_text_double(struct context **cnt, const char *str, int val_ptr);
-static struct context **copy_html_output(struct context **cnt, const char *str, int val_ptr);
-
+static void copy_bool(struct context *cnt, char *str, int val_ptr);
+static void copy_int(struct context *cnt, char *str, int val_ptr);
 static const char *print_bool(struct context **cnt, char **str,int parm, unsigned int threadnr);
 static const char *print_string(struct context **cnt,char **str, int parm, unsigned int threadnr);
 static const char *print_int(struct context **cnt, char **str, int parm, unsigned int threadnr);
 static const char *print_camera(struct context **cnt, char **str, int parm, unsigned int threadnr);
-
+static struct context **read_camera_dir(struct context **cnt, char *str, int val);
 static struct context **config_camera(struct context **cnt, const char *str, int val);
 
 static void usage(void);
@@ -1665,7 +1645,7 @@ config_param config_params[] = {
     "##############################################################",
     1,
     0,
-    config_camera,
+    copy_string,
     print_camera,
     WEBUI_LEVEL_ADVANCED
     },
@@ -1677,7 +1657,7 @@ config_param config_params[] = {
     "##############################################################",
     1,
     CONF_OFFSET(camera_dir),
-    read_camera_dir,
+    copy_string,
     print_string,
     WEBUI_LEVEL_ADVANCED
     },
@@ -1701,7 +1681,7 @@ dep_config_param dep_config_params[] = {
     "The \"thread\" option has been replaced by the \"camera\"",
     0,
     "camera",
-    config_camera
+    copy_string
     },
     {
     "ffmpeg_timelapse",
@@ -1725,7 +1705,7 @@ dep_config_param dep_config_params[] = {
     "\"brightness\" replaced with \"video_params\"",
     CONF_OFFSET(video_params),
     "video_params",
-    copy_video_params
+    NULL
     },
     {
     "contrast",
@@ -1733,7 +1713,7 @@ dep_config_param dep_config_params[] = {
     "\"contrast\" replaced with \"video_params\"",
     CONF_OFFSET(video_params),
     "video_params",
-    copy_video_params
+    NULL
     },
     {
     "saturation",
@@ -1741,7 +1721,7 @@ dep_config_param dep_config_params[] = {
     "\"saturation\" replaced with \"video_params\"",
     CONF_OFFSET(video_params),
     "video_params",
-    copy_video_params
+    NULL
     },
     {
     "hue",
@@ -1749,7 +1729,7 @@ dep_config_param dep_config_params[] = {
     "\"hue\" replaced with \"video_params\"",
     CONF_OFFSET(video_params),
     "video_params",
-    copy_video_params
+    NULL
     },
     {
     "power_line_frequency",
@@ -1757,7 +1737,7 @@ dep_config_param dep_config_params[] = {
     "\"power_line_frequency\" replaced with \"video_params\"",
     CONF_OFFSET(video_params),
     "video_params",
-    copy_video_params
+    NULL
     },
     {
     "text_double",
@@ -1765,7 +1745,7 @@ dep_config_param dep_config_params[] = {
     "\"text_double\" replaced with \"text_scale\"",
     CONF_OFFSET(text_scale),
     "text_scale",
-    copy_text_double
+    NULL
     },
     {
     "webcontrol_html_output",
@@ -1773,7 +1753,7 @@ dep_config_param dep_config_params[] = {
     "\"webcontrol_html_output\" replaced with \"webcontrol_interface\"",
     CONF_OFFSET(webcontrol_interface),
     "webcontrol_interface",
-    copy_html_output
+    NULL
     },
     {
      "lightswitch",
@@ -1941,7 +1921,7 @@ dep_config_param dep_config_params[] = {
     "\"vid_control_params\" replaced with \"video_params\"",
     CONF_OFFSET(video_params),
     "video_params",
-    copy_video_params
+    NULL
     },
     {
     "v4l2_palette",
@@ -1949,7 +1929,7 @@ dep_config_param dep_config_params[] = {
     "\"v4l2_palette\" replaced with \"video_params\"",
     CONF_OFFSET(video_params),
     "video_params",
-    copy_video_params
+    NULL
     },
     {
     "input",
@@ -1957,7 +1937,7 @@ dep_config_param dep_config_params[] = {
     "\"input\" replaced with \"video_params\"",
     CONF_OFFSET(video_params),
     "video_params",
-    copy_video_params
+    NULL
     },
     {
     "norm",
@@ -1965,7 +1945,7 @@ dep_config_param dep_config_params[] = {
     "\"norm\" replaced with \"video_params\"",
     CONF_OFFSET(video_params),
     "video_params",
-    copy_video_params
+    NULL
     },
     {
     "frequency",
@@ -1973,7 +1953,7 @@ dep_config_param dep_config_params[] = {
     "\"frequency\" replaced with \"video_params\"",
     CONF_OFFSET(video_params),
     "video_params",
-    copy_video_params
+    NULL
     },
     {
     "rtsp_uses_tcp",
@@ -1981,7 +1961,7 @@ dep_config_param dep_config_params[] = {
     "\"rtsp_uses_tcp\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
-    copy_netcam_params
+    NULL
     },
     {
     "netcam_use_tcp",
@@ -1989,7 +1969,7 @@ dep_config_param dep_config_params[] = {
     "\"netcam_use_tcp\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
-    copy_netcam_params
+    NULL
     },
     {
     "netcam_rate",
@@ -1997,7 +1977,7 @@ dep_config_param dep_config_params[] = {
     "\"netcam_rate\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
-    copy_netcam_params
+    NULL
     },
     {
     "netcam_ratehigh",
@@ -2005,7 +1985,7 @@ dep_config_param dep_config_params[] = {
     "\"netcam_ratehigh\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
-    copy_netcam_params
+    NULL
     },
     {
     "netcam_decoder",
@@ -2013,7 +1993,7 @@ dep_config_param dep_config_params[] = {
     "\"netcam_decoder\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
-    copy_netcam_params
+    NULL
     },
     {
     "netcam_proxy",
@@ -2021,7 +2001,7 @@ dep_config_param dep_config_params[] = {
     "\"netcam_proxy\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
-    copy_netcam_params
+    NULL
     },
     {
     "netcam_keepalive",
@@ -2029,7 +2009,7 @@ dep_config_param dep_config_params[] = {
     "\"netcam_keepalive\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
-    copy_netcam_params
+    NULL
     },
     {
     "netcam_tolerant_check",
@@ -2037,7 +2017,7 @@ dep_config_param dep_config_params[] = {
     "\"netcam_tolerant_check\" replaced with \"netcam_params\"",
     CONF_OFFSET(netcam_params),
     "netcam_params",
-    copy_netcam_params
+    NULL
     },
     {
     "videodevice",
@@ -2077,7 +2057,7 @@ dep_config_param dep_config_params[] = {
     "\"webcontrol_cors_header\" replaced with \"webcontrol_header_params\"",
     CONF_OFFSET(webcontrol_header_params),
     "webcontrol_header_params",
-    copy_string
+    NULL
     },
     {
     "stream_cors_header",
@@ -2085,11 +2065,256 @@ dep_config_param dep_config_params[] = {
     "\"stream_cors_header\" replaced with \"stream_header_params\"",
     CONF_OFFSET(stream_header_params),
     "stream_header_params",
-    copy_string
+    NULL
     },
 
     { NULL, NULL, NULL, 0, NULL, NULL}
 };
+
+/**
+ * copy_bool
+ *      Assigns a config option to a new boolean value.
+ */
+static void copy_bool(struct context *cnt, char *str, int val_ptr)
+{
+    void *tmp;
+
+    tmp = (char *)cnt + (int)val_ptr;
+    if (mystreq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
+        *((int *)tmp) = 1;
+    } else {
+        *((int *)tmp) = 0;
+    }
+}
+
+/**
+ * copy_int
+ *      Assigns a config option to a new integer value.
+ */
+static void copy_int(struct context *cnt, char *str, int val_ptr)
+{
+    void *tmp;
+
+    tmp = (char *)cnt + val_ptr;
+    if (mystrceq(str, "yes") || mystrceq(str, "on")) {
+        *((int *)tmp) = 1;
+    } else if (mystrceq(str, "no") || mystrceq(str, "off")) {
+        *((int *)tmp) = 0;
+    } else {
+        *((int *)tmp) = atoi(str);
+    }
+}
+
+/**
+ * copy_string
+ *      Assigns a new string value to a config option.
+ */
+void copy_string(struct context *cnt, char *str, int val_ptr)
+{
+    char **tmp;
+
+    tmp = (char **)((char *)cnt + val_ptr);
+
+    if (*tmp != NULL) {
+        free(*tmp);
+        *tmp = NULL;
+    }
+
+    if (strlen(str) > 0) {
+        *tmp = mymalloc(strlen(str)+1);
+        sprintf(*tmp,"%s",str);
+    }
+
+}
+
+/**
+ * copy_video_params
+ *      Assign old values into new config option.
+ */
+static void copy_video_params(struct context *cnt, char *config_val, int config_indx)
+{
+    int indx, parmval;
+    struct params_context *params;
+    struct params_context *params_depr;
+
+    if (config_val == NULL) {
+        return;
+    }
+
+    /* If the depreciated option is the default, then just return */
+    parmval = atoi(config_val);
+    if (mystreq(dep_config_params[config_indx].name,"power_line_frequency") &&
+        (parmval == -1)) {
+        return;
+    }
+
+    if ((mystreq(dep_config_params[config_indx].name,"brightness") ||
+         mystreq(dep_config_params[config_indx].name,"contrast") ||
+         mystreq(dep_config_params[config_indx].name,"saturation") ||
+         mystreq(dep_config_params[config_indx].name,"hue")) &&
+        (parmval == 0)) {
+        return;
+    }
+
+    params = mymalloc(sizeof(struct params_context));
+    util_parms_parse(params, cnt->conf.video_params, TRUE);
+
+    if (mystreq(dep_config_params[config_indx].name,"power_line_frequency")) {
+        util_parms_add_update(params, "power line frequency", config_val);
+    } else if (mystreq(dep_config_params[config_indx].name,"v4l2_palette")) {
+        util_parms_add_update(params, "palette", config_val);
+    } else if (mystreq(dep_config_params[config_indx].name,"vid_control_params")) {
+        params_depr = mymalloc(sizeof(struct params_context));
+        util_parms_parse(params_depr, config_val, TRUE);
+        for (indx = 0; indx < params_depr->params_count; indx++) {
+            util_parms_add_update(params
+                , params_depr->params_array[indx].param_name
+                , params_depr->params_array[indx].param_value);
+        }
+        util_parms_free(params_depr);
+        free(params_depr);
+    } else {
+        util_parms_add_update(params, dep_config_params[config_indx].name, config_val);
+    }
+
+    util_parms_update(params, cnt, "video_params");
+    util_parms_free(params);
+    free(params);
+
+    return;
+}
+
+/**
+ * copy_netcam_params
+ *      Assigns a new string value to a config option.
+ */
+static void copy_netcam_params(struct context *cnt, char *config_val, int config_indx)
+{
+    struct params_context *params;
+
+    if (config_val == NULL) {
+        return;
+    }
+
+    if (mystreq(dep_config_params[config_indx].name,"netcam_ratehigh")) {
+        params = mymalloc(sizeof(struct params_context));
+        util_parms_parse(params, cnt->conf.netcam_high_params, TRUE);
+        util_parms_add_update(params, "capture_rate", config_val);
+        util_parms_update(params, cnt, "netcam_high_params");
+        util_parms_free(params);
+        free(params);
+
+    } else {
+        params = mymalloc(sizeof(struct params_context));
+        util_parms_parse(params, cnt->conf.netcam_params, TRUE);
+
+        if (mystreq(dep_config_params[config_indx].name,"netcam_use_tcp") ||
+            mystreq(dep_config_params[config_indx].name,"rtsp_uses_tcp")) {
+            if (mystrceq(config_val,"on")) {
+                util_parms_add_update(params, "rtsp_transport", "tcp");
+            } else {
+                util_parms_add_update(params, "rtsp_transport", "udp");
+            }
+
+        } else if (mystreq(dep_config_params[config_indx].name,"netcam_decoder")) {
+            util_parms_add_update(params, "decoder",config_val);
+
+        } else if (mystreq(dep_config_params[config_indx].name,"netcam_rate")) {
+            util_parms_add_update(params, "capture_rate", config_val);
+
+        } else if (mystreq(dep_config_params[config_indx].name,"netcam_proxy")) {
+            util_parms_add_update(params, "proxy", config_val);
+
+        } else if (mystreq(dep_config_params[config_indx].name,"netcam_keepalive")) {
+            util_parms_add_update(params, "keepalive", config_val);
+
+        } else if (mystreq(dep_config_params[config_indx].name,"netcam_tolerant_check")) {
+            util_parms_add_update(params, "tolerant_check", config_val);
+        }
+
+        util_parms_update(params, cnt, "netcam_params");
+        util_parms_free(params);
+        free(params);
+    }
+
+    return;
+}
+
+/**
+ * copy_webcontrol_header
+ *      Assigns a new string value to a config option.
+ */
+static void copy_webcontrol_header(struct context *cnt, char *config_val)
+{
+    struct params_context *params;
+
+    if (config_val == NULL) {
+        return;
+    }
+
+    params = mymalloc(sizeof(struct params_context));
+    util_parms_parse(params, cnt->conf.webcontrol_header_params, TRUE);
+    util_parms_add_update(params, "Access-Control-Allow-Origin", config_val);
+    util_parms_update(params, cnt, "webcontrol_header_params");
+    util_parms_free(params);
+    free(params);
+
+    return;
+}
+
+/**
+ * copy_stream_header
+ *      Assigns a new string value to a config option.
+ */
+static void copy_stream_header(struct context *cnt, char *config_val)
+{
+    struct params_context *params;
+
+    if (config_val == NULL) {
+        return;
+    }
+
+    params = mymalloc(sizeof(struct params_context));
+    util_parms_parse(params, cnt->conf.stream_header_params, TRUE);
+    util_parms_add_update(params, "Access-Control-Allow-Origin", config_val);
+    util_parms_update(params, cnt, "stream_header_params");
+    util_parms_free(params);
+    free(params);
+
+    return;
+}
+
+/**
+ * copy_text_double
+ *      Converts the bool of text_double to a 1 or 2 in text_scale
+ */
+static void copy_text_double(struct context *cnt, char *config_val)
+{
+    if (mystreq(config_val, "1") ||
+        mystrceq(config_val, "yes") ||
+        mystrceq(config_val, "on")) {
+        cnt->conf.text_scale = 2;
+    } else {
+        cnt->conf.text_scale = 2;
+    }
+    return;
+}
+
+/**
+ * copy_html_output
+ *      Converts the webcontrol_html_output to the webcontrol_interface option.
+ */
+static void copy_html_output(struct context *cnt, char *config_val)
+{
+    if (mystreq(config_val, "1") ||
+        mystrceq(config_val, "yes") ||
+        mystrceq(config_val, "on")) {
+        cnt->conf.webcontrol_interface = 0;
+    } else {
+        cnt->conf.webcontrol_interface = 1;
+    }
+    return;
+}
 
 /**
  * conf_cmdline
@@ -2103,11 +2328,6 @@ static void conf_cmdline(struct context *cnt, int thread)
     struct config *conf = &cnt->conf;
     int c;
 
-    /*
-     * For the string options, we free() if necessary and malloc()
-     * if necessary. This is accomplished by calling mystrcpy();
-     * see this function for more information.
-     */
     while ((c = getopt(conf->argc, conf->argv, "bc:d:hmns?p:k:l:")) != EOF) {
         switch (c) {
         case 'c':
@@ -2162,7 +2382,6 @@ static void conf_cmdline(struct context *cnt, int thread)
     optind = 1;
 }
 
-
 /**
  * conf_cmdparse
  *      Sets a config option given by 'cmd' to the value given by 'arg1'.
@@ -2173,100 +2392,85 @@ static void conf_cmdline(struct context *cnt, int thread)
  *
  * Returns context struct.
  */
-struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char *arg1)
+struct context **conf_cmdparse(struct context **cnt, char *param_name, char *param_val)
 {
-    unsigned int i = 0;
+    int indx;
 
-    if (!cmd) {
+    if (param_name == NULL) {
         return cnt;
     }
 
-    /*
-     * We search through config_params until we find a param_name that matches
-     * our option given by cmd (or reach the end = NULL).
-     */
-    while (config_params[i].param_name != NULL) {
-        if (mystrceq(cmd, config_params[i].param_name)) {
-
-            /* If config_param is string we don't want to check arg1. */
-            if (mystrcne(config_type(&config_params[i]), "string")) {
-                if (config_params[i].conf_value && !arg1) {
-                    return cnt;
-                }
+    indx = 0;
+    while (config_params[indx].param_name != NULL) {
+        if (mystrceq(param_name, config_params[indx].param_name)) {
+            if (mystreq(param_name, "camera"))  {
+                cnt = config_camera(cnt, param_val, config_params[indx].conf_value);
+            } else if (mystreq(param_name, "camera_dir"))  {
+                cnt = read_camera_dir(cnt, param_val, config_params[indx].conf_value);
+            } else {
+                config_params[indx].copy(*cnt, param_val, config_params[indx].conf_value);
             }
 
-            /*
-             * We call the function given by the pointer config_params[i].copy
-             * If the option is a bool, copy_bool is called.
-             * If the option is an int, copy_int is called.
-             * If the option is a string, copy_string is called.
-             * If the option is camera, config_camera is called.
-             * The arguments to the function are:
-             *  cnt  - a pointer to the context structure.
-             *  arg1 - a pointer to the new option value (represented as string).
-             *  config_params[i].conf_value - an integer value which is a pointer
-             *  to the context structure member relative to the pointer cnt.
-             */
-            cnt = config_params[i].copy(cnt, arg1, config_params[i].conf_value);
             return cnt;
         }
-        i++;
+        indx++;
     }
 
-    /*
-     * We reached the end of config_params without finding a matching option.
-     * Check if it's a deprecated option, log a warning, and if applicable
-     * set the replacement option to the given value.
-     */
-    i = 0;
-    while (dep_config_params[i].name != NULL) {
-        if (!strncasecmp(cmd, dep_config_params[i].name, 255 + 50)) {
+    /* Now check deprecated options */
+    indx = 0;
+    while (dep_config_params[indx].name != NULL) {
+        if (mystreq(param_name, dep_config_params[indx].name)) {
             MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("%s after version %s")
-                , dep_config_params[i].info, dep_config_params[i].last_version);
+                , dep_config_params[indx].info
+                , dep_config_params[indx].last_version);
 
-            if (dep_config_params[i].copy != NULL) {
-                /* If the depreciated option is a vid item, copy_video_params is called
-                 * with the array index sent instead of the context structure member pointer.
-                 */
-                if (mystreq(dep_config_params[i].name,"brightness") ||
-                    mystreq(dep_config_params[i].name,"contrast") ||
-                    mystreq(dep_config_params[i].name,"saturation") ||
-                    mystreq(dep_config_params[i].name,"hue") ||
-                    mystreq(dep_config_params[i].name,"power_line_frequency") ||
-                    mystreq(dep_config_params[i].name,"v4l2_palette") ||
-                    mystreq(dep_config_params[i].name,"input") ||
-                    mystreq(dep_config_params[i].name,"norm") ||
-                    mystreq(dep_config_params[i].name,"frequency") ||
-                    mystreq(dep_config_params[i].name,"vid_control_params")) {
-                    cnt = copy_video_params(cnt, arg1, i);
+            if (mystreq(dep_config_params[indx].name,"brightness") ||
+                mystreq(dep_config_params[indx].name,"contrast") ||
+                mystreq(dep_config_params[indx].name,"saturation") ||
+                mystreq(dep_config_params[indx].name,"hue") ||
+                mystreq(dep_config_params[indx].name,"power_line_frequency") ||
+                mystreq(dep_config_params[indx].name,"v4l2_palette") ||
+                mystreq(dep_config_params[indx].name,"input") ||
+                mystreq(dep_config_params[indx].name,"norm") ||
+                mystreq(dep_config_params[indx].name,"frequency") ||
+                mystreq(dep_config_params[indx].name,"vid_control_params")) {
+                copy_video_params(*cnt, param_val, indx);
 
-                } else if (mystreq(dep_config_params[i].name,"netcam_decoder") ||
-                    mystreq(dep_config_params[i].name,"netcam_use_tcp") ||
-                    mystreq(dep_config_params[i].name,"rtsp_uses_tcp") ||
-                    mystreq(dep_config_params[i].name,"netcam_rate")  ||
-                    mystreq(dep_config_params[i].name,"netcam_ratehigh") ||
-                    mystreq(dep_config_params[i].name,"netcam_proxy") ||
-                    mystreq(dep_config_params[i].name,"netcam_tolerant_check") ||
-                    mystreq(dep_config_params[i].name,"netcam_keepalive")) {
-                    cnt = copy_netcam_params(cnt, arg1, i);
+            } else if (mystreq(dep_config_params[indx].name,"netcam_decoder") ||
+                mystreq(dep_config_params[indx].name,"netcam_use_tcp") ||
+                mystreq(dep_config_params[indx].name,"rtsp_uses_tcp") ||
+                mystreq(dep_config_params[indx].name,"netcam_rate")  ||
+                mystreq(dep_config_params[indx].name,"netcam_ratehigh") ||
+                mystreq(dep_config_params[indx].name,"netcam_proxy") ||
+                mystreq(dep_config_params[indx].name,"netcam_tolerant_check") ||
+                mystreq(dep_config_params[indx].name,"netcam_keepalive")) {
+                copy_netcam_params(*cnt, param_val, indx);
 
-                } else if (mystreq(dep_config_params[i].name,"webcontrol_cors_header"))  {
-                    cnt = copy_webcontrol_header(cnt, arg1, i);
+            } else if (mystreq(dep_config_params[indx].name,"webcontrol_cors_header"))  {
+                copy_webcontrol_header(*cnt, param_val);
 
-                } else if (mystreq(dep_config_params[i].name,"stream_cors_header"))  {
-                    cnt = copy_stream_header(cnt, arg1, i);
+            } else if (mystreq(dep_config_params[indx].name,"stream_cors_header"))  {
+                copy_stream_header(*cnt, param_val);
 
-                } else {
-                    cnt = dep_config_params[i].copy(cnt, arg1, dep_config_params[i].conf_value);
-                }
+            } else if (mystreq(dep_config_params[indx].name,"text_double"))  {
+                copy_text_double(*cnt, param_val);
+
+            } else if (mystreq(dep_config_params[indx].name,"webcontrol_html_output"))  {
+                copy_html_output(*cnt, param_val);
+
+            } else if (mystreq(dep_config_params[indx].name,"thread"))  {
+                cnt = config_camera(cnt, param_val, dep_config_params[indx].conf_value);
+
+            } else if (dep_config_params[indx].copy != NULL) {
+                dep_config_params[indx].copy(*cnt, param_val, dep_config_params[indx].conf_value);
             }
             return cnt;
         }
-        i++;
+        indx++;
     }
 
     /* If we get here, it's unknown to us. */
-    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), cmd);
+    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), param_name);
     return cnt;
 }
 
@@ -2596,17 +2800,32 @@ struct context **conf_load(struct context **cnt)
 
     /* If pid file was passed from Command-line copy to main thread conf struct. */
     if (cnt[0]->pid_file[0]) {
-        cnt[0]->conf.pid_file = mystrcpy(cnt[0]->conf.pid_file, cnt[0]->pid_file);
+        if (cnt[0]->conf.pid_file != NULL) {
+            free(cnt[0]->conf.pid_file);
+            cnt[0]->conf.pid_file = NULL;
+        }
+        cnt[0]->conf.pid_file = mymalloc(strlen(cnt[0]->pid_file) + 1);
+        sprintf(cnt[0]->conf.pid_file, "%s", cnt[0]->pid_file);
     }
 
     /* If log file was passed from Command-line copy to main thread conf struct. */
     if (cnt[0]->log_file[0]) {
-        cnt[0]->conf.log_file = mystrcpy(cnt[0]->conf.log_file, cnt[0]->log_file);
+        if (cnt[0]->conf.log_file != NULL) {
+            free(cnt[0]->conf.log_file);
+            cnt[0]->conf.log_file = NULL;
+        }
+        cnt[0]->conf.log_file = mymalloc(strlen(cnt[0]->log_file) + 1);
+        sprintf(cnt[0]->conf.log_file, "%s", cnt[0]->log_file);
     }
 
     /* If log type string was passed from Command-line copy to main thread conf struct. */
     if (cnt[0]->log_type_str[0]) {
-        cnt[0]->conf.log_type = mystrcpy(cnt[0]->conf.log_type, cnt[0]->log_type_str);
+        if (cnt[0]->conf.log_type != NULL) {
+            free(cnt[0]->conf.log_type);
+            cnt[0]->conf.log_type = NULL;
+        }
+        cnt[0]->conf.log_type = mymalloc(strlen(cnt[0]->log_type_str) + 1);
+        sprintf(cnt[0]->conf.log_type, "%s", cnt[0]->log_type_str);
     }
 
     /* if log level was passed from Command-line copy to main thread conf struct. */
@@ -2646,17 +2865,25 @@ void conf_output_parms(struct context **cnt)
         while (config_params[i].param_name != NULL) {
             name=config_params[i].param_name;
             if ((value = config_params[i].print(cnt, NULL, i, t)) != NULL) {
-                if (!strncmp(name, "netcam_url", 10) ||
-                    !strncmp(name, "netcam_userpass", 15) ||
-                    !strncmp(name, "netcam_highres", 14) ||
-                    !strncmp(name, "stream_header_params", 20) ||
-                    !strncmp(name, "stream_authentication", 21) ||
-                    !strncmp(name, "webcontrol_authentication", 25) ||
-                    !strncmp(name, "webcontrol_header_params", 24) ||
-                    !strncmp(name, "webcontrol_key", 14) ||
-                    !strncmp(name, "webcontrol_cert", 15) ||
-                    !strncmp(name, "database_user", 13) ||
-                    !strncmp(name, "database_password", 17)) {
+                if (mystreq(name, "netcam_url") ||
+                    mystreq(name, "netcam_userpass") ||
+                    mystreq(name, "netcam_high_url") ||
+                    mystreq(name, "stream_authentication") ||
+                    mystreq(name, "webcontrol_authentication") ||
+                    mystreq(name, "webcontrol_key") ||
+                    mystreq(name, "webcontrol_cert") ||
+                    mystreq(name, "database_user") ||
+                    mystreq(name, "database_password")) {
+                    motion_log(INF, TYPE_ALL, NO_ERRNO,0
+                        ,_("%-25s <redacted>"), name);
+
+                } else if (mystreq(name, "webcontrol_header_params") &&
+                    (cnt[t]->conf.webcontrol_localhost == FALSE)) {
+                    motion_log(INF, TYPE_ALL, NO_ERRNO,0
+                        ,_("%-25s <redacted>"), name);
+
+                } else if (mystreq(name, "stream_header_params") &&
+                    (cnt[t]->conf.stream_localhost == FALSE)) {
                     motion_log(INF, TYPE_ALL, NO_ERRNO,0
                         ,_("%-25s <redacted>"), name);
 
@@ -2710,560 +2937,6 @@ static void malloc_strings(struct context *cnt)
         i++;
     }
 }
-
-/************************************************************************
- * copy functions
- *
- *   copy_bool   - convert a bool representation to int
- *   copy_int    - convert a string to int
- *   copy_string - just a string copy
- *
- * @param str     - A char *, pointing to a string representation of the
- *                  value.
- * @param val_ptr - points to the place where to store the value relative
- *                  to pointer pointing to the given context structure
- * @cnt           - points to a context structure for a thread
- *
- * The function is given a pointer cnt to a context structure and a pointer val_ptr
- * which is an integer giving the position of the structure member relative to the
- * pointer of the context structure.
- * If the context structure is for thread 0 (cnt[0]->threadnr is zero) then the
- * function also sets the value for all the child threads since thread 0 is the
- * global thread.
- * If the thread given belongs to a child thread (cnt[0]->threadnr is not zero)
- * the function will only assign the value for the given thread.
- ***********************************************************************/
-
-/**
- * copy_bool
- *      Assigns a config option to a new boolean value.
- *      The boolean is given as a string in str which is converted to 0 or 1
- *      by the function. Values 1, yes and on are converted to 1 ignoring case.
- *      Any other value is converted to 0.
- *
- * Returns context struct.
- */
-static struct context **copy_bool(struct context **cnt, const char *str, int val_ptr)
-{
-    void *tmp;
-    int i;
-
-    i = -1;
-    while (cnt[++i]) {
-        tmp = (char *)cnt[i]+(int)val_ptr;
-
-        if (mystreq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
-            *((int *)tmp) = 1;
-        } else {
-            *((int *)tmp) = 0;
-        }
-
-        if (cnt[0]->threadnr) {
-            return cnt;
-        }
-    }
-
-    return cnt;
-}
-
-/**
- * copy_int
- *      Assigns a config option to a new integer value.
- *      The integer is given as a string in str which is converted to integer
- *      by the function.
- *
- * Returns context struct.
- */
-static struct context **copy_int(struct context **cnt, const char *str, int val_ptr)
-{
-    void *tmp;
-    int i;
-
-    i = -1;
-    while (cnt[++i]) {
-        tmp = (char *)cnt[i]+val_ptr;
-        if (mystrceq(str, "yes") || mystrceq(str, "on")) {
-            *((int *)tmp) = 1;
-        } else if (mystrceq(str, "no") || mystrceq(str, "off")) {
-            *((int *)tmp) = 0;
-        } else {
-            *((int *)tmp) = atoi(str);
-        }
-        if (cnt[0]->threadnr) {
-            return cnt;
-        }
-    }
-
-    return cnt;
-}
-
-/**
- * copy_string
- *      Assigns a new string value to a config option.
- *      Strings are handled differently from bool and int.
- *      the char *conf->option that we are working on is free()'d
- *      (if memory for it has already been malloc()'d), and set to
- *      a freshly malloc()'d string with the value from str,
- *      or NULL if str is blank.
- *
- * Returns context struct.
- */
-struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
-{
-    char **tmp;
-    int i;
-
-    i = -1;
-
-    while (cnt[++i]) {
-        tmp = (char **)((char *)cnt[i] + val_ptr);
-
-        /*
-         * mystrcpy assigns the new string value
-         * including free'ing and reserving new memory for it.
-         */
-        *tmp = mystrcpy(*tmp, str);
-
-        /*
-         * Set the option on all threads if setting the option
-         * for thread 0; otherwise just set that one thread's option.
-         */
-        if (cnt[0]->threadnr) {
-            return cnt;
-        }
-    }
-
-    return cnt;
-}
-
-/**
- * copy_video_params
- *      Assigns a new string value to a config option.
- * Returns context struct.
- */
-static struct context **copy_video_params(struct context **cnt, const char *config_val, int config_indx)
-{
-
-    int i, indx_vid;
-    int parmnew_len, parmval;
-    char *orig_parm, *parmname_new;
-
-    indx_vid = 0;
-    while (config_params[indx_vid].param_name != NULL) {
-        if (mystreq(config_params[indx_vid].param_name,"video_params")) {
-            break;
-        }
-        indx_vid++;
-    }
-
-    if (mystrne(config_params[indx_vid].param_name,"video_params")) {
-        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
-            ,_("Unable to locate video_params"));
-        return cnt;
-    }
-
-    if (config_val == NULL) {
-        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
-            ,_("No value provided to put into video_params"));
-    }
-
-    /* If the depreciated option is the default, then just return */
-    parmval = atoi(config_val);
-    if (mystreq(dep_config_params[config_indx].name,"power_line_frequency") &&
-        (parmval == -1)) {
-        return cnt;
-    }
-
-    if ((mystreq(dep_config_params[config_indx].name,"brightness") ||
-         mystreq(dep_config_params[config_indx].name,"contrast") ||
-         mystreq(dep_config_params[config_indx].name,"saturation") ||
-         mystreq(dep_config_params[config_indx].name,"hue")) &&
-        (parmval == 0)) {
-        return cnt;
-    }
-
-    /* Remove underscore from parm name and add quotes*/
-    if (mystreq(dep_config_params[config_indx].name,"power_line_frequency")) {
-        parmname_new = mymalloc(strlen(dep_config_params[config_indx].name) + 3);
-        sprintf(parmname_new,"%s","\"power line frequency\"");
-    } else if (mystreq(dep_config_params[config_indx].name,"v4l2_palette")) {
-        parmname_new = mymalloc(strlen("palette") + 1);
-        sprintf(parmname_new,"%s","palette");
-    } else {
-        parmname_new = mymalloc(strlen(dep_config_params[config_indx].name)+1);
-        sprintf(parmname_new,"%s",dep_config_params[config_indx].name);
-    }
-
-    /* Recall that the current parms have already been processed by time this is called */
-    i = -1;
-    while (cnt[++i]) {
-        parmnew_len = strlen(parmname_new) + strlen(config_val) + 2; /*Add for = and /0*/
-        if (cnt[i]->conf.video_params != NULL) {
-            orig_parm = mymalloc(strlen(cnt[i]->conf.video_params)+1);
-            sprintf(orig_parm,"%s",cnt[i]->conf.video_params);
-
-            parmnew_len = strlen(orig_parm) + parmnew_len + 1; /*extra 1 for the comma */
-
-            free(cnt[i]->conf.video_params);
-            cnt[i]->conf.video_params = mymalloc(parmnew_len);
-            if (mystreq(dep_config_params[config_indx].name,"vid_control_params")) {
-                sprintf(cnt[i]->conf.video_params,"%s,%s",config_val, orig_parm);
-            } else {
-                sprintf(cnt[i]->conf.video_params,"%s=%s,%s",parmname_new, config_val, orig_parm);
-            }
-
-            free(orig_parm);
-        } else {
-            cnt[i]->conf.video_params = mymalloc(parmnew_len);
-            if (mystreq(dep_config_params[config_indx].name,"vid_control_params")) {
-                sprintf(cnt[i]->conf.video_params,"%s", config_val);
-            } else {
-                sprintf(cnt[i]->conf.video_params,"%s=%s", parmname_new, config_val);
-            }
-        }
-    }
-
-    free(parmname_new);
-
-    return cnt;
-}
-
-/**
- * copy_netcam_params
- *      Assigns a new string value to a config option.
- * Returns context struct.
- */
-static struct context **copy_netcam_params(struct context **cnt, const char *config_val, int config_indx)
-{
-
-    int i, indx;
-    int parm_len;
-    char *orig_parm, *parm_new;
-
-
-    indx = 0;
-    while (config_params[indx].param_name != NULL) {
-        if (mystreq(config_params[indx].param_name,"netcam_params")) {
-            break;
-        }
-        indx++;
-    }
-
-    if (mystrne(config_params[indx].param_name,"netcam_params")) {
-        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
-            ,_("Unable to locate netcam_params"));
-        return cnt;
-    }
-
-    if (config_val == NULL) {
-        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
-            ,_("No value provided to put into netcam_params"));
-        return cnt;
-    }
-
-    /* Remove underscore from parm name and add quotes*/
-    if (mystreq(dep_config_params[config_indx].name,"netcam_use_tcp") ||
-        mystreq(dep_config_params[config_indx].name,"rtsp_uses_tcp")) {
-        parm_len = strlen("rtsp_transport = tcp") + 1;
-        parm_new = mymalloc(parm_len);
-        if (mystrceq(config_val,"on")) {
-            snprintf(parm_new, parm_len, "%s", "rtsp_transport = tcp");
-        } else {
-            snprintf(parm_new, parm_len, "%s", "rtsp_transport = udp");
-        }
-
-    } else if (mystreq(dep_config_params[config_indx].name,"netcam_decoder")) {
-        parm_len = strlen("decoder = ") + strlen(config_val) + 1;
-        parm_new = mymalloc(parm_len);
-        snprintf(parm_new, parm_len, "%s%s", "decoder = ", config_val);
-
-    } else if (mystreq(dep_config_params[config_indx].name,"netcam_rate") ||
-        mystreq(dep_config_params[config_indx].name,"netcam_ratehigh")) {
-        parm_len = strlen("capture_rate = ") + strlen(config_val) + 1;
-        parm_new = mymalloc(parm_len);
-        snprintf(parm_new, parm_len, "%s%s", "capture_rate = ", config_val);
-
-    } else if (mystreq(dep_config_params[config_indx].name,"netcam_proxy")) {
-        parm_len = strlen("proxy = ") + strlen(config_val) + 1;
-        parm_new = mymalloc(parm_len);
-        snprintf(parm_new, parm_len, "%s%s", "proxy = ", config_val);
-
-    } else if (mystreq(dep_config_params[config_indx].name,"netcam_keepalive")) {
-        parm_len = strlen("keepalive = ") + strlen(config_val) + 1;
-        parm_new = mymalloc(parm_len);
-        snprintf(parm_new, parm_len, "%s%s", "keepalive = ", config_val);
-
-    } else if (mystreq(dep_config_params[config_indx].name,"netcam_tolerant_check")) {
-        parm_len = strlen("tolerant_check = ") + strlen(config_val) + 1;
-        parm_new = mymalloc(parm_len);
-        snprintf(parm_new, parm_len, "%s%s", "tolerant_check = ", config_val);
-
-    } else {
-        return cnt;
-    }
-
-    /* Recall that the current parms have already been processed by time this is called */
-    i = -1;
-    while (cnt[++i]) {
-        if (mystreq(dep_config_params[config_indx].name,"netcam_ratehigh")) {
-            if (cnt[i]->conf.netcam_high_params != NULL) {
-                parm_len = strlen(cnt[i]->conf.netcam_high_params) + 1;
-                orig_parm = mymalloc(parm_len);
-                snprintf(orig_parm,parm_len, "%s",cnt[i]->conf.netcam_high_params);
-
-                parm_len = strlen(parm_new) + strlen(orig_parm) + 2; /* the comma*/
-
-                free(cnt[i]->conf.netcam_high_params);
-                cnt[i]->conf.netcam_high_params = mymalloc(parm_len);
-                snprintf(cnt[i]->conf.netcam_high_params,parm_len,"%s,%s",parm_new, orig_parm);
-
-                free(orig_parm);
-            } else {
-                parm_len = strlen(parm_new) + 1;
-                cnt[i]->conf.netcam_high_params = mymalloc(parm_len);
-                snprintf(cnt[i]->conf.netcam_high_params,parm_len, "%s", parm_new);
-            }
-        } else {
-            if (cnt[i]->conf.netcam_params != NULL) {
-                parm_len =  strlen(cnt[i]->conf.netcam_params) + 1;
-                orig_parm = mymalloc(parm_len);
-                snprintf(orig_parm,parm_len,"%s",cnt[i]->conf.netcam_params);
-
-                parm_len = strlen(parm_new) + strlen(orig_parm) + 2;
-
-                free(cnt[i]->conf.netcam_params);
-                cnt[i]->conf.netcam_params = mymalloc(parm_len);
-                snprintf(cnt[i]->conf.netcam_params,parm_len, "%s,%s",parm_new, orig_parm);
-
-                free(orig_parm);
-            } else {
-                parm_len = strlen(parm_new) + 1;
-                cnt[i]->conf.netcam_params = mymalloc(parm_len);
-                snprintf(cnt[i]->conf.netcam_params,parm_len, "%s", parm_new);
-            }
-        }
-
-    }
-
-    free(parm_new);
-
-    return cnt;
-}
-
-/**
- * copy_webcontrol_header
- *      Assigns a new string value to a config option.
- * Returns context struct.
- */
-static struct context **copy_webcontrol_header(struct context **cnt, const char *config_val, int config_indx)
-{
-
-    int i, indx;
-    int parm_len;
-    char *orig_parm, *parm_new;
-
-    indx = 0;
-    while (config_params[indx].param_name != NULL) {
-        if (mystreq(config_params[indx].param_name,"webcontrol_header_params")) {
-            break;
-        }
-        indx++;
-    }
-
-    if (mystrne(config_params[indx].param_name,"webcontrol_header_params")) {
-        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
-            ,_("Unable to locate webcontrol_header_params"));
-        return cnt;
-    }
-
-    if (config_val == NULL) {
-        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
-            ,_("No value provided to put into webcontrol_header_params"));
-        return cnt;
-    }
-
-    if (mystreq(dep_config_params[config_indx].name,"webcontrol_cors_header")) {
-        parm_len = strlen("Access-Control-Allow-Origin") + strlen(config_val) + 2;
-        parm_new = mymalloc(parm_len);
-        snprintf(parm_new, parm_len, "%s=%s"
-            ,"Access-Control-Allow-Origin", config_val);
-    } else {
-        return cnt;
-    }
-
-    /* Recall that the current parms have already been processed by time this is called */
-    i = -1;
-    while (cnt[++i]) {
-        if (cnt[i]->conf.webcontrol_header_params != NULL) {
-            parm_len =  strlen(cnt[i]->conf.webcontrol_header_params) + 1;
-            orig_parm = mymalloc(parm_len);
-            snprintf(orig_parm,parm_len,"%s",cnt[i]->conf.webcontrol_header_params);
-
-            parm_len = strlen(parm_new) + strlen(orig_parm) + 2;
-
-            free(cnt[i]->conf.webcontrol_header_params);
-            cnt[i]->conf.webcontrol_header_params = mymalloc(parm_len);
-            snprintf(cnt[i]->conf.webcontrol_header_params, parm_len, "%s,%s",parm_new, orig_parm);
-
-            free(orig_parm);
-        } else {
-            parm_len = strlen(parm_new) + 1;
-            cnt[i]->conf.webcontrol_header_params = mymalloc(parm_len);
-            snprintf(cnt[i]->conf.webcontrol_header_params, parm_len, "%s", parm_new);
-        }
-    }
-
-    free(parm_new);
-
-    return cnt;
-}
-
-/**
- * copy_stream_header
- *      Assigns a new string value to a config option.
- * Returns context struct.
- */
-static struct context **copy_stream_header(struct context **cnt, const char *config_val, int config_indx)
-{
-
-    int i, indx;
-    int parm_len;
-    char *orig_parm, *parm_new;
-
-    indx = 0;
-    while (config_params[indx].param_name != NULL) {
-        if (mystreq(config_params[indx].param_name,"stream_header_params")) {
-            break;
-        }
-        indx++;
-    }
-
-    if (mystrne(config_params[indx].param_name,"stream_header_params")) {
-        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
-            ,_("Unable to locate stream_header_params"));
-        return cnt;
-    }
-
-    if (config_val == NULL) {
-        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
-            ,_("No value provided to put into stream_header_params"));
-        return cnt;
-    }
-
-    if (mystreq(dep_config_params[config_indx].name,"stream_cors_header")) {
-        parm_len = strlen("Access-Control-Allow-Origin") + strlen(config_val) + 2;
-        parm_new = mymalloc(parm_len);
-        snprintf(parm_new, parm_len, "%s=%s"
-            ,"Access-Control-Allow-Origin", config_val);
-    } else {
-        return cnt;
-    }
-
-    /* Recall that the current parms have already been processed by time this is called */
-    i = -1;
-    while (cnt[++i]) {
-        if (cnt[i]->conf.stream_header_params != NULL) {
-            parm_len =  strlen(cnt[i]->conf.stream_header_params) + 1;
-            orig_parm = mymalloc(parm_len);
-            snprintf(orig_parm,parm_len,"%s",cnt[i]->conf.stream_header_params);
-
-            parm_len = strlen(parm_new) + strlen(orig_parm) + 2;
-
-            free(cnt[i]->conf.stream_header_params);
-            cnt[i]->conf.stream_header_params = mymalloc(parm_len);
-            snprintf(cnt[i]->conf.stream_header_params, parm_len, "%s,%s",parm_new, orig_parm);
-
-            free(orig_parm);
-        } else {
-            parm_len = strlen(parm_new) + 1;
-            cnt[i]->conf.stream_header_params = mymalloc(parm_len);
-            snprintf(cnt[i]->conf.stream_header_params, parm_len, "%s", parm_new);
-        }
-    }
-
-    free(parm_new);
-
-    return cnt;
-}
-
-/**
- * copy_text_double
- *      Converts the bool of text_double to a 1 or 2 in text_scale
- * Returns context struct.
- */
-static struct context **copy_text_double(struct context **cnt, const char *str, int val_ptr)
-{
-    void *tmp;
-    int i;
-
-    i = -1;
-    while (cnt[++i]) {
-        tmp = (char *)cnt[i]+(int)val_ptr;
-
-        if (mystreq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
-            *((int *)tmp) = 2;
-        } else {
-            *((int *)tmp) = 1;
-        }
-
-        if (cnt[0]->threadnr) {
-            return cnt;
-        }
-    }
-
-    return cnt;
-}
-
-/**
- * copy_html_output
- *      Converts the webcontrol_html_output to the webcontrol_interface option.
- *
- * Returns context struct.
- */
-static struct context **copy_html_output(struct context **cnt, const char *str, int val_ptr)
-{
-    void *tmp;
-    int i;
-
-    i = -1;
-    while (cnt[++i]) {
-        tmp = (char *)cnt[i]+(int)val_ptr;
-
-        if (mystreq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
-            *((int *)tmp) = 0;
-        } else {
-            *((int *)tmp) = 1;
-        }
-
-        if (cnt[0]->threadnr) {
-            return cnt;
-        }
-    }
-
-    return cnt;
-}
-
-/**
- * config_type
- *      Returns a pointer to string containing value the type of config parameter passed.
- *
- * Returns const char *.
- */
-const char *config_type(config_param *configparam)
-{
-    if (configparam->copy == copy_string) {
-        return "string";
-    }
-    if (configparam->copy == copy_int) {
-        return "int";
-    }
-    if (configparam->copy == copy_bool) {
-        return "bool";
-    }
-
-    return "unknown";
-}
-
 
 /**
  * print_bool
@@ -3384,8 +3057,7 @@ static const char *print_camera(struct context **cnt, char **str, int parm, unsi
  *     Read the directory finding all *.conf files in the path
  *     When found calls config_camera
  */
-
-struct context **read_camera_dir(struct context **cnt, const char *str, int val)
+static struct context **read_camera_dir(struct context **cnt, char *str, int val)
 {
     DIR *dp;
     struct dirent *ep;
@@ -3393,6 +3065,9 @@ struct context **read_camera_dir(struct context **cnt, const char *str, int val)
     int i;
 
     char conf_file[PATH_MAX];
+
+    /* Store the given config value to allow writing it out */
+    copy_string(*cnt, str, val);
 
     dp = opendir(str);
     if (dp != NULL) {
@@ -3423,9 +3098,6 @@ struct context **read_camera_dir(struct context **cnt, const char *str, int val)
             ,_("Camera directory config %s not found"), str);
         return cnt;
     }
-
-    /* Store the given config value to allow writing it out */
-    cnt = copy_string(cnt, str, val);
 
     return cnt;
 }

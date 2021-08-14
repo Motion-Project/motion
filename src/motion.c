@@ -317,8 +317,7 @@ static void context_destroy(struct context *cnt)
 
     /* Free memory allocated for config parameters */
     for (j = 0; config_params[j].param_name != NULL; j++) {
-        if (config_params[j].copy == copy_string ||
-            config_params[j].copy == read_camera_dir) {
+        if (config_params[j].copy == copy_string ) {
             void **val;
             val = (void *)((char *)cnt+(int)config_params[j].conf_value);
             if (*val) {
@@ -3173,7 +3172,8 @@ static void motion_startup(int daemonize, int argc, char *argv[])
     if ((cnt_list[0]->conf.log_type == NULL) ||
         !(cnt_list[0]->log_type = get_log_type(cnt_list[0]->conf.log_type))) {
         cnt_list[0]->log_type = TYPE_DEFAULT;
-        cnt_list[0]->conf.log_type = mystrcpy(cnt_list[0]->conf.log_type, "ALL");
+        cnt_list[0]->conf.log_type = mymalloc(4);
+        sprintf(cnt_list[0]->conf.log_type, "%s", "ALL");
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Using default log type (%s)"),
                    get_log_type_str(cnt_list[0]->log_type));
     }

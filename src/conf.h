@@ -200,10 +200,11 @@ struct config {
     char            **argv;
 };
 
+struct context;
 /**
  * typedef for a param copy function.
  */
-typedef struct context ** (* conf_copy_func)(struct context **, const char *, int);
+typedef void (* conf_copy_func)(struct context *, char *, int);
 typedef const char *(* conf_print_func)(struct context **, char **, int, unsigned int);
 
 /**
@@ -235,13 +236,10 @@ typedef struct {
 
 extern dep_config_param dep_config_params[];
 
-struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char *arg1);
+struct context **conf_cmdparse(struct context **cnt, char *cmd, char *arg1);
 void conf_print(struct context **cnt);
 struct context **conf_load(struct context **cnt);
 void conf_output_parms(struct context **cnt);
-struct context **copy_string(struct context **cnt, const char *str, int val_ptr);
-struct context **copy_uri(struct context **cnt, const char *str, int val);
-const char *config_type(config_param *configparam);
-struct context **read_camera_dir(struct context **cnt, const char *str, int val);
+void copy_string(struct context *cnt, char *str, int val_ptr);
 
 #endif /* _INCLUDE_CONF_H */
