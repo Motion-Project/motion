@@ -165,6 +165,8 @@ struct config conf_template = {
     .webcontrol_cert =                 NULL,
     .webcontrol_key =                  NULL,
     .webcontrol_header_params =        NULL,
+    .webcontrol_lockout_min =          5,
+    .webcontrol_lockout_cnt =          5,
 
     /* Live stream configuration parameters */
     .stream_port =                     0,
@@ -1194,6 +1196,24 @@ config_param config_params[] = {
     CONF_OFFSET(webcontrol_header_params),
     copy_string,
     print_string,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
+    "webcontrol_lockout_min",
+    "# The number of minutes to lock out failed authentication clients",
+    0,
+    CONF_OFFSET(webcontrol_lockout_min),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
+    "webcontrol_lockout_cnt",
+    "# The number failed authentication attempts before locking out a client",
+    0,
+    CONF_OFFSET(webcontrol_lockout_cnt),
+    copy_int,
+    print_int,
     WEBUI_LEVEL_RESTRICTED
     },
 
