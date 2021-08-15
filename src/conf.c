@@ -2120,11 +2120,12 @@ void copy_string(struct context *cnt, char *str, int val_ptr)
         *tmp = NULL;
     }
 
-    if (strlen(str) > 0) {
-        *tmp = mymalloc(strlen(str)+1);
-        sprintf(*tmp,"%s",str);
+    if (str != NULL) {
+        if (strlen(str) > 0) {
+            *tmp = mymalloc(strlen(str)+1);
+            sprintf(*tmp,"%s",str);
+        }
     }
-
 }
 
 /**
