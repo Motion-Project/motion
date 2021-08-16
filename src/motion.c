@@ -3127,9 +3127,7 @@ static void motion_ntc(void)
  */
 static void motion_startup(int daemonize, int argc, char *argv[])
 {
-    int indx;
-
-    /* Initialize our global mutex */
+     /* Initialize our global mutex */
     pthread_mutex_init(&global_lock, NULL);
 
     /*
