@@ -1511,6 +1511,45 @@ The comma separated header=value pairs to use for the webcontrol responses.
 .RE
 
 .TP
+.B webcontrol_lock_attempts
+.RS
+.nf
+Values: integer
+Default: 5
+Description:
+.fi
+.RS
+The number of failed authentication attempts before IP is locked out.
+.RE
+.RE
+
+.TP
+.B webcontrol_lock_minutes
+.RS
+.nf
+Values: integer
+Default: 5
+Description:
+.fi
+.RS
+The number of minutes a failed authentication IP is locked out.
+.RE
+.RE
+
+.TP
+.B webcontrol_lock_max_ips
+.RS
+.nf
+Values: integer
+Default: 5
+Description:
+.fi
+.RS
+The maximum number of concurrent IPs that can be locked out.
+.RE
+.RE
+
+.TP
 .B stream_port
 .RS
 .nf

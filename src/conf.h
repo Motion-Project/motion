@@ -161,8 +161,9 @@ struct config {
     const char      *webcontrol_cert;
     const char      *webcontrol_key;
     char            *webcontrol_header_params;
-    int             webcontrol_lockout_min;
-    int             webcontrol_lockout_cnt;
+    int             webcontrol_lock_minutes;
+    int             webcontrol_lock_attempts;
+    int             webcontrol_lock_max_ips;
 
     /* Live stream configuration parameters */
     int             stream_port;
