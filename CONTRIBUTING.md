@@ -5,7 +5,7 @@ configuration or use of Motion, we have the following additional resources which
 
   * User guide:  [Motion User Guide](https://motion-project.github.io/motion_guide.html)
   * User Group List:  Please sign-up and send your issue to the list [Motion User](https://lists.sourceforge.net/lists/listinfo/motion-user)  
-  * IRC:  [#motion](irc://chat.freenode.net/motion) on freenode
+  * IRC:  [#motion](ircs://irc.libera.chat:6697/motion) on Libera Chat
 
 It is very important to use these resources for non-code issues since it engages a much wider audience who may have experience resolving
 the particular issue you are trying to resolve.  
