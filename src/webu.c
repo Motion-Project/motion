@@ -55,6 +55,8 @@
 #include "webu_status.h"
 #include "translate.h"
 
+static mymhd_retcd webu_mhd_send(struct webui_ctx *webui, int ctrl);
+
 /* Context to pass the parms to functions to start mhd */
 struct mhdstart_ctx {
     struct context          **cnt;
@@ -69,6 +71,24 @@ struct mhdstart_ctx {
     struct sockaddr_in      lpbk_ipv4;
     struct sockaddr_in6     lpbk_ipv6;
 };
+
+struct failauth_item_ctx {
+    char                *clientip;      /* Ip of the client failing auth*/
+    int                 attempt_nbr;    /* Number of times client ip failed auth*/
+    struct timeval      attempt_tm;     /* The time of the last attempt*/
+};
+
+struct failauth_ctx {
+    struct failauth_item_ctx    *failauth_array;    /*Array of the failed auths*/
+    int                         lockout_minutes;    /*Number of minutes to lock out*/
+    int                         lockout_attempts;   /*Number attempts before locking out*/
+    int                         lockout_max_ips;    /*Maximum number of IPs to lock out at once*/
+    int                         count;              /*Count of the array size */
+    pthread_mutex_t             mutex_failauth;
+};
+
+/* Since we do not have a application context, must make this global */
+struct failauth_ctx *failauth;
 
 static void webu_context_init(struct context **cntlst, struct context *cnt, struct webui_ctx *webui)
 {
@@ -916,6 +936,111 @@ static void webu_hostname(struct webui_ctx *webui, int ctrl)
     return;
 }
 
+/* Return true if the IP is being blocked for failed auths*/
+static int webu_failauth_check(struct webui_ctx *webui)
+{
+    int indx, chkcnt,  retcd;
+    struct timeval time_curr;
+
+    gettimeofday(&time_curr, NULL);
+
+    retcd = FALSE;
+    chkcnt = 0;
+
+    pthread_mutex_lock(&failauth->mutex_failauth);
+        for (indx=0; indx<failauth->count; indx++) {
+            if (failauth->failauth_array[indx].attempt_tm.tv_sec > 0) {
+                if (time_curr.tv_sec > ((failauth->lockout_minutes * 60) +
+                    failauth->failauth_array[indx].attempt_tm.tv_sec)) {
+                    /*The lockout period has expired */
+                    if (failauth->failauth_array[indx].clientip != NULL) {
+                        free(failauth->failauth_array[indx].clientip);
+                        failauth->failauth_array[indx].clientip = NULL;
+                    }
+                    failauth->failauth_array[indx].attempt_tm.tv_sec = 0;
+                    failauth->failauth_array[indx].attempt_nbr = 0;
+                } else {
+                    chkcnt++;
+                }
+                if ((mystreq(failauth->failauth_array[indx].clientip, webui->clientip)) &&
+                    (failauth->failauth_array[indx].attempt_nbr > failauth->lockout_attempts)) {
+                    /* An additional attempt so reset our lockout start time */
+                    failauth->failauth_array[indx].attempt_tm.tv_sec = time_curr.tv_sec;
+                    retcd = TRUE;
+                }
+            }
+        }
+    pthread_mutex_unlock(&failauth->mutex_failauth);
+
+    /* If the count locked IPs is at our maximum, we do not permit more connections */
+    if (chkcnt == failauth->count) {
+        retcd = TRUE;
+    }
+
+    if (retcd) {
+        MOTION_LOG(ALR,TYPE_ALL, NO_ERRNO
+            , _("Ignoring connection from: %s"), webui->clientip);
+        SLEEP(2, 0);
+    }
+
+    return retcd;
+}
+
+/* Add the IP for failed auths*/
+static void webu_failauth_log(struct webui_ctx *webui)
+{
+    int indx;
+    struct timeval time_curr;
+
+    gettimeofday(&time_curr, NULL);
+    pthread_mutex_lock(&failauth->mutex_failauth);
+        for (indx=0; indx<failauth->count; indx++) {
+            if (mystreq(failauth->failauth_array[indx].clientip, webui->clientip)) {
+                failauth->failauth_array[indx].attempt_nbr++;
+                failauth->failauth_array[indx].attempt_tm.tv_sec = time_curr.tv_sec;
+                break;
+            }
+        }
+        if (indx == failauth->count) {
+            /* Was not previously logged so add it to the array*/
+            for (indx=0; indx<failauth->count; indx++) {
+                if (failauth->failauth_array[indx].clientip == NULL) {
+                    failauth->failauth_array[indx].clientip = mymalloc(strlen(webui->clientip)+1);
+                    sprintf(failauth->failauth_array[indx].clientip,"%s", webui->clientip);
+                    failauth->failauth_array[indx].attempt_nbr++;
+                    failauth->failauth_array[indx].attempt_tm.tv_sec = time_curr.tv_sec;
+                    break;
+                }
+            }
+        }
+    pthread_mutex_unlock(&failauth->mutex_failauth);
+
+    /* Sleep some to annoy the bots trying to hack in */
+    SLEEP(2, 0);
+
+}
+
+/* Reset the IP for failed auths*/
+static void webu_failauth_reset(struct webui_ctx *webui)
+{
+    int indx;
+
+    pthread_mutex_lock(&failauth->mutex_failauth);
+        for (indx=0; indx<failauth->count; indx++) {
+            if (mystreq(failauth->failauth_array[indx].clientip, webui->clientip)) {
+                if (failauth->failauth_array[indx].clientip != NULL) {
+                    free(failauth->failauth_array[indx].clientip);
+                    failauth->failauth_array[indx].clientip = NULL;
+                }
+                failauth->failauth_array[indx].attempt_tm.tv_sec = 0;
+                failauth->failauth_array[indx].attempt_nbr = 0;
+                break;
+            }
+        }
+    pthread_mutex_unlock(&failauth->mutex_failauth);
+
+}
+
 static mymhd_retcd webu_mhd_digest_fail(struct webui_ctx *webui,int signal_stale)
 {
     /* Create a denied response to user*/
@@ -923,6 +1048,8 @@ static mymhd_retcd webu_mhd_digest_fail(struct webui_ctx *webui,int signal_stale
     mymhd_retcd retcd;
 
     webui->authenticated = FALSE;
+
+    webu_failauth_log(webui);
 
     response = MHD_create_response_from_buffer(strlen(webui->auth_denied)
         ,(void *)webui->auth_denied, MHD_RESPMEM_PERSISTENT);
@@ -992,6 +1119,8 @@ static mymhd_retcd webu_mhd_basic_fail(struct webui_ctx *webui)
     int retcd;
 
     webui->authenticated = FALSE;
+
+    webu_failauth_log(webui);
 
     response = MHD_create_response_from_buffer(strlen(webui->auth_denied)
         ,(void *)webui->auth_denied, MHD_RESPMEM_PERSISTENT);
@@ -1316,23 +1445,29 @@ static mymhd_retcd webu_answer_ctrl(void *cls, struct MHD_Connection *connection
 
     webui->cnct_type = WEBUI_CNCT_CONTROL;
 
-    util_threadname_set("wu", 0,NULL);
+    util_threadname_set("wu", 0, NULL);
 
     webui->connection = connection;
+
+    if (strlen(webui->clientip) == 0) {
+        webu_clientip(webui);
+    }
+
+    if (webu_failauth_check(webui) == TRUE) {
+        webu_badreq(webui);
+        retcd = webu_mhd_send(webui, TRUE);
+        return retcd;
+    }
 
     /* Throw bad URLS back to user*/
     if ((webui->cnt ==  NULL) || (strlen(webui->url) == 0)) {
         webu_badreq(webui);
-        retcd = webu_mhd_send(webui, FALSE);
+        retcd = webu_mhd_send(webui, TRUE);
         return retcd;
     }
 
     if (webui->cnt->webcontrol_finish) {
         return MHD_NO;
-    }
-
-    if (strlen(webui->clientip) == 0) {
-        webu_clientip(webui);
     }
 
     webu_hostname(webui, TRUE);
@@ -1343,6 +1478,8 @@ static mymhd_retcd webu_answer_ctrl(void *cls, struct MHD_Connection *connection
             return retcd;
         }
     }
+
+    webu_failauth_reset(webui);
 
     if ((webui->cntlst[0]->conf.webcontrol_interface == 1) ||
         (webui->cntlst[0]->conf.webcontrol_interface == 2)) {
@@ -1386,9 +1523,19 @@ static mymhd_retcd webu_answer_strm(void *cls, struct MHD_Connection *connection
         return MHD_NO;
     }
 
-    util_threadname_set("st", 0,NULL);
+    util_threadname_set("st", 0, NULL);
 
     webui->connection = connection;
+
+    if (strlen(webui->clientip) == 0) {
+        webu_clientip(webui);
+    }
+
+    if (webu_failauth_check(webui) == TRUE) {
+        webu_badreq(webui);
+        retcd = webu_mhd_send(webui, FALSE);
+        return retcd;
+    }
 
     /* Throw bad URLS back to user*/
     if ((webui->cnt ==  NULL) || (strlen(webui->url) == 0)) {
@@ -1410,10 +1557,6 @@ static mymhd_retcd webu_answer_strm(void *cls, struct MHD_Connection *connection
         return MHD_NO;
     }
 
-    if (strlen(webui->clientip) == 0) {
-        webu_clientip(webui);
-    }
-
     webu_hostname(webui, FALSE);
 
     if (!webui->authenticated) {
@@ -1422,6 +1565,8 @@ static mymhd_retcd webu_answer_strm(void *cls, struct MHD_Connection *connection
             return retcd;
         }
     }
+
+    webu_failauth_reset(webui);
 
     webu_answer_strm_type(webui);
 
@@ -2173,6 +2318,56 @@ static void webu_start_ports(struct context **cnt)
     }
 }
 
+static void webu_start_failauth(struct context **cnt)
+{
+    int indx;
+
+    failauth = mymalloc(sizeof(struct failauth_ctx));
+
+    if (cnt[0]->conf.webcontrol_lock_max_ips <= 0) {
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            ,_("Invalid webcontrol_lock_max_ips.  Setting equal to 25."));
+        cnt[0]->conf.webcontrol_lock_max_ips = 25;
+    }
+    failauth->lockout_max_ips = cnt[0]->conf.webcontrol_lock_max_ips;
+
+    failauth->failauth_array =
+        (struct failauth_item_ctx *)mymalloc(
+            sizeof(struct failauth_item_ctx) * failauth->lockout_max_ips);
+    failauth->count = failauth->lockout_max_ips;
+    for (indx = 0; indx < failauth->count; indx++) {
+        failauth->failauth_array[indx].clientip = NULL;
+        failauth->failauth_array[indx].attempt_tm.tv_sec = 0;
+        failauth->failauth_array[indx].attempt_tm.tv_usec = 0;
+        failauth->failauth_array[indx].attempt_nbr = 0;
+    }
+
+    failauth->lockout_attempts = cnt[0]->conf.webcontrol_lock_attempts;
+    failauth->lockout_minutes = cnt[0]->conf.webcontrol_lock_minutes;
+
+    pthread_mutex_init(&failauth->mutex_failauth, NULL);
+
+}
+
+static void webu_stop_failauth(void)
+{
+    int indx;
+
+    for (indx = 0; indx < failauth->count; indx++) {
+        if (failauth->failauth_array[indx].clientip != NULL) {
+            free(failauth->failauth_array[indx].clientip);
+            failauth->failauth_array[indx].clientip = NULL;
+        }
+    }
+    if (failauth->failauth_array != NULL) {
+        free(failauth->failauth_array);
+        failauth->failauth_array = NULL;
+    }
+    pthread_mutex_destroy(&failauth->mutex_failauth);
+    free(failauth);
+
+}
+
 void webu_stop(struct context **cnt)
 {
     /* This function is called from the main Motion loop to shutdown the
@@ -2205,6 +2400,9 @@ void webu_stop(struct context **cnt)
         }
         indxthrd++;
     }
+
+    webu_stop_failauth();
+
 }
 
 void webu_start(struct context **cnt)
@@ -2244,6 +2442,8 @@ void webu_start(struct context **cnt)
     }
 
     webu_start_ports(cnt);
+
+    webu_start_failauth(cnt);
 
     webu_start_strm(cnt);
 

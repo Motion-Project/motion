@@ -2985,14 +2985,15 @@ static void cntlist_create(int argc, char *argv[])
 
 static void motion_shutdown(void)
 {
-    int i = -1;
+    int indx;
 
     motion_remove_pid();
 
     webu_stop(cnt_list);
 
-    while (cnt_list[++i]) {
-        context_destroy(cnt_list[i]);
+    indx = -1;
+    while (cnt_list[++indx]) {
+        context_destroy(cnt_list[indx]);
     }
 
     free(cnt_list);
@@ -3126,7 +3127,7 @@ static void motion_ntc(void)
  */
 static void motion_startup(int daemonize, int argc, char *argv[])
 {
-    /* Initialize our global mutex */
+     /* Initialize our global mutex */
     pthread_mutex_init(&global_lock, NULL);
 
     /*

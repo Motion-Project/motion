@@ -165,6 +165,9 @@ struct config conf_template = {
     .webcontrol_cert =                 NULL,
     .webcontrol_key =                  NULL,
     .webcontrol_header_params =        NULL,
+    .webcontrol_lock_minutes =         5,
+    .webcontrol_lock_attempts =        5,
+    .webcontrol_lock_max_ips =         25,
 
     /* Live stream configuration parameters */
     .stream_port =                     0,
@@ -1194,6 +1197,33 @@ config_param config_params[] = {
     CONF_OFFSET(webcontrol_header_params),
     copy_string,
     print_string,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
+    "webcontrol_lock_minutes",
+    "# The number of minutes to lock out a IP for failed authentication attempts",
+    0,
+    CONF_OFFSET(webcontrol_lock_minutes),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
+    "webcontrol_lock_attempts",
+    "# The number failed authentication attempts before locking out a IP address",
+    0,
+    CONF_OFFSET(webcontrol_lock_attempts),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
+    "webcontrol_lock_max_ips",
+    "# The maximum number of IPs to track at once for locking out.",
+    0,
+    CONF_OFFSET(webcontrol_lock_max_ips),
+    copy_int,
+    print_int,
     WEBUI_LEVEL_RESTRICTED
     },
 
@@ -3321,6 +3351,9 @@ static void config_parms_intl()
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_cert",_("webcontrol_cert"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_key",_("webcontrol_key"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_header_params",_("webcontrol_header_params"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_lock_minutes",_("webcontrol_lock_minutes"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_lock_attempts",_("webcontrol_lock_attempts"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_lock_max_ips",_("webcontrol_lock_max_ips"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_port",_("stream_port"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_localhost",_("stream_localhost"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_auth_method",_("stream_auth_method"));

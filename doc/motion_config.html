@@ -1504,6 +1504,24 @@
           <td align="left"><a href="#webcontrol_localhost" >webcontrol_localhost</a></td>
         </tr>
         <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#webcontrol_lock_attempts" >webcontrol_lock_attempts</a></td>
+        </tr>
+        <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#webcontrol_lock_max_ips" >webcontrol_lock_max_ips</a></td>
+        </tr>
+        <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#webcontrol_lock_minutes" >webcontrol_lock_minutes</a></td>
+        </tr>
+        <tr>
           <td align="left">webcontrol_parms</td>
           <td align="left">webcontrol_parms</td>
           <td align="left">webcontrol_parms</td>
@@ -1915,6 +1933,11 @@
               <td bgcolor="#edf4f9" ><a href="#webcontrol_cert" >webcontrol_cert</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_key" >webcontrol_key</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_header_params" >webcontrol_header_params</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_attempts" >webcontrol_lock_attempts</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_minutes" >webcontrol_lock_minutes</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_max_ips" >webcontrol_lock_max_ips</a> </td>
             </tr>
             </tbody>
         </table>
@@ -5116,6 +5139,60 @@
         when <a href="#webcontrol_localhost">webcontrol_localhost</a> is set to on.  When
         the <a href="#webcontrol_localhost">webcontrol_localhost</a> is set to off, Motion
         will redact the values in the log.
+        <p></p>
+        <p></p>
+
+        <h3><a name="webcontrol_lock_attempts"></a> webcontrol_lock_attempts</h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Integers</li>
+          <li> Default: 5</li>
+        </ul>
+        <p></p>
+        This parameter applies to the webcontrol port and all stream ports.
+        <p></p>
+        The maximum number of failed authentication attempts to the web control or streams before the client IP is locked out
+        for the duration specified by webcontrol_lock_minutes.
+        <p></p>
+        <p></p>
+
+        <h3><a name="webcontrol_lock_minutes"></a> webcontrol_lock_minutes</h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Integers</li>
+          <li> Default: 5</li>
+        </ul>
+        <p></p>
+        This parameter applies to the webcontrol port and all stream ports.
+        <p></p>
+        The number of minutes that a IP is locked out when the number of failed authentication attempts has been reached.  Note that
+        when the user attempts to connect the during the lock out period, the timer is reset to zero.  So if the user set the time
+        at 5 minutes and attempted to log in after 4 minutes, they would have to wait a total of 9 minutes before Motion would
+        start to prompt for a password again.  The attempt to open the web site at minute 4 resets the clock even though Motion
+        does not even respond with a prompt.
+        <p></p>
+        <p></p>
+
+        <h3><a name="webcontrol_lock_max_ips"></a> webcontrol_lock_max_ips</h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Integers</li>
+          <li> Default: 25</li>
+        </ul>
+        <p></p>
+        This parameter applies to the webcontrol port and all stream ports.
+        <p></p>
+        Motion can only keep track of a limited amount of IPs that are attempting to log in but failing.  This parameter specifies
+        the maximum number of IPs that can be blocked at the same time.  Motion will clear the log of IPs that have been locked out
+        but the webcontrol_lock_minutes has expired so this parameter represents the maximum concurrent IPs locked out.  Note that
+        when this maximum is reached, Motion will deny all connections until one of the time of one of the lockouts expires.
+        <p></p>
+        While it is permitted to have a high value for this, it should be noted that it could impact the loading time for the webcontrol
+        and streams.  Motion loops through the entire array looking for the connecting IP to determine whether to block it on each and
+        every connection.
         <p></p>
 
       </ul>
