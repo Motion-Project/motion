@@ -876,7 +876,6 @@ static void webu_clientip(struct webui_ctx *webui)
             snprintf(webui->clientip,WEBUI_LEN_URLI,"%s",client);
         }
     }
-    MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),webui->clientip);
 
 }
 
@@ -1049,8 +1048,6 @@ static mymhd_retcd webu_mhd_digest_fail(struct webui_ctx *webui,int signal_stale
 
     webui->authenticated = FALSE;
 
-    webu_failauth_log(webui);
-
     response = MHD_create_response_from_buffer(strlen(webui->auth_denied)
         ,(void *)webui->auth_denied, MHD_RESPMEM_PERSISTENT);
 
@@ -1083,6 +1080,7 @@ static mymhd_retcd webu_mhd_digest(struct webui_ctx *webui)
 
     /* Check for valid user name */
     if (mystrne(user, webui->auth_user)) {
+        webu_failauth_log(webui);
         MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
             ,_("Failed authentication from %s"), webui->clientip);
         if (user != NULL) {
@@ -1099,6 +1097,7 @@ static mymhd_retcd webu_mhd_digest(struct webui_ctx *webui)
         , webui->auth_user, webui->auth_pass, 300);
 
     if (retcd == MHD_NO) {
+        webu_failauth_log(webui);
         MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
             ,_("Failed authentication from %s"), webui->clientip);
     }
@@ -1119,8 +1118,6 @@ static mymhd_retcd webu_mhd_basic_fail(struct webui_ctx *webui)
     int retcd;
 
     webui->authenticated = FALSE;
-
-    webu_failauth_log(webui);
 
     response = MHD_create_response_from_buffer(strlen(webui->auth_denied)
         ,(void *)webui->auth_denied, MHD_RESPMEM_PERSISTENT);
@@ -1162,6 +1159,7 @@ static mymhd_retcd webu_mhd_basic(struct webui_ctx *webui)
 
     if (mystrne(user, webui->auth_user) ||
         mystrne(pass, webui->auth_pass)) {
+        webu_failauth_log(webui);
         MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
             ,_("Failed authentication from %s"),webui->clientip);
         if (user != NULL) {
@@ -1481,6 +1479,8 @@ static mymhd_retcd webu_answer_ctrl(void *cls, struct MHD_Connection *connection
 
     webu_failauth_reset(webui);
 
+    MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),webui->clientip);
+
     if ((webui->cntlst[0]->conf.webcontrol_interface == 1) ||
         (webui->cntlst[0]->conf.webcontrol_interface == 2)) {
         webu_text_main(webui);
@@ -1567,6 +1567,8 @@ static mymhd_retcd webu_answer_strm(void *cls, struct MHD_Connection *connection
     }
 
     webu_failauth_reset(webui);
+
+    MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),webui->clientip);
 
     webu_answer_strm_type(webui);
 
