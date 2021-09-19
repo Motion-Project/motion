@@ -4,7 +4,7 @@ Source:  https://motion-project.github.io/
 License: GPL-2+
 
 Files: *
-Copyright: 1999-2020 motion authors; see CREDITS for details
+Copyright: 1999-2021 motion authors; see CREDITS for details
 License: GPL-2+
 
 Files: netcam_wget.*
