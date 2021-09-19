@@ -1,5 +1,4 @@
 Formatting rules for Motion code.
-Version 2.0 - 15 Jul 2008
 
 Note: To understand them you must view this document with spaces and tabs
 visible.
@@ -120,7 +119,7 @@ if ((picture=fopen(cnt->conf.mask_file, "r"))) {
 }
 
 
-BAD EXAMPLE (even though Kenneth loves this one personally)
+BAD EXAMPLE
 
 if ((picture=fopen(cnt->conf.mask_file, "r")))
 {
@@ -183,7 +182,8 @@ To ensure that Motion code looks homogeneous and to enhance readability:
      space.
 
 GOOD EXAMPLES
-int function_name(int *par1, int par2, int par3) {
+int function_name(int *par1, int par2, int par3)
+{
 if (var1==2 || var2==3) {
 
 BAD EXAMPLES
@@ -219,8 +219,7 @@ Use names like image, image_buffer, image_height, output_buffer
 Short names like i and j for loop index variable are a known good practice.
 Variable and function names are in lower case. Use '_' to separate words.
 MACROS are in uppercase.
-camelCase (mix of upper and lower case) is not allowed because it creates too
-many typos for many two finger typers.
+camelCase (mix of upper and lower case) is not allowed
 
 RULE 9
 Break code into many smaller functions rather than one extremely long one.
@@ -253,10 +252,4 @@ frame_delay = (1000000L / cnt->conf.low_cpu) - frame_delay - elapsedtime; (good)
 This document can probably be enhanced more as time goes by.
 Hope it helps developers to understand the ideas.
 
-What happens if I do not follow the rules?
-Your code will probably be accepted, but developers will have to spend a lot of
-time rewriting the code to follow the standard. If this happens, he may make
-a less-than-complimentary remark.  Please help the developers by at least trying
-to follow the spirit of this document.  We all have our coding preferences, but
-if Motion is coded in 40 different styles, readability (and at the end
-quality) will become bad.
+Please help the developers by at least trying to follow the spirit of this document.  We all have our coding preferences, but
