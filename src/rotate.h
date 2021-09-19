@@ -15,13 +15,11 @@
  */
 
 /*
- *    rotate.h
- *
- *    Include file for handling image rotation.
- *
+ *  rotate.h
+ *    Headers associated with functions in the rotate.c module.
  *    Copyright 2004-2005, Per Jonsson (per@pjd.nu)
- *
  */
+
 #ifndef _INCLUDE_ROTATE_H
 #define _INCLUDE_ROTATE_H
 

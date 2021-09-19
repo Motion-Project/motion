@@ -14,11 +14,10 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*    alg.h
- *
+/*
+ *  alg.h
  *    Detect changes in a video stream.
  *    Copyright 2001 by Jeroen Vreeken (pe1rxq@amsat.org)
- *
  */
 
 #ifndef _INCLUDE_ALG_H

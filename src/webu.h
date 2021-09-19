@@ -15,11 +15,10 @@
  */
 
 /*
- *      webu.h
- *
- *      Include file for webu.c
- *
-*/
+ *  webu.h
+ *    Headers associated with functions in the webu.c module.
+ */
+
 #ifndef _INCLUDE_WEBU_H_
 #define _INCLUDE_WEBU_H_
 

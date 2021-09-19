@@ -15,13 +15,14 @@
  */
 
 /*
- *      Much of the FTP routines was inspired by the nanoftp.c module from
- *      libxml2 (Copyright Daniel Veillard, 2003).  The routines have been
- *      modified to fit the needs of the Motion project.
- *
- *      Copyright 2005, William M. Brack
- *
+ *  netcam_ftp.h
+ *    Headers associated with functions in the netcam_ftp.c module.
+ *    Much of the FTP routines was inspired by the nanoftp.c module from
+ *    libxml2 (Copyright Daniel Veillard, 2003).  The routines have been
+ *    modified to fit the needs of the Motion project.
+ *    Copyright 2005, William M. Brack
  */
+
 #ifndef _INCLUDE_NETCAM_FTP_H
 #define _INCLUDE_NETCAM_FTP_H
 

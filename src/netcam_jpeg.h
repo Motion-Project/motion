@@ -14,6 +14,11 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/*
+ *  netcam_jpeg.h
+ *    Headers associated with functions in the netcam_jpeg.c module.
+ */
+
 #ifndef _INCLUDE_NETCAM_JPEG_H
 #define _INCLUDE_NETCAM_JPEG_H
 

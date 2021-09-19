@@ -14,10 +14,9 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*    track.h
- *
- *    Experimental motion tracking.
- *
+/*
+ *  track.h
+ *    Headers associated with functions in the track.c module.
  *    Copyright 2000, Jeroen Vreeken
  */
 

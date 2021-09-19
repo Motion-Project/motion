@@ -15,15 +15,9 @@
  */
 
 /*
- *
- * conf.h - function prototypes for the config handling routines
- *
- * Originally written for the dproxy package by Matthew Pratt.
- *
- * Copyright 2000 Jeroen Vreeken (pe1rxq@chello.nl)
- *
- *
- *
+ * conf.h
+ *   Originally written for the dproxy package by Matthew Pratt.
+ *   Copyright 2000 Jeroen Vreeken (pe1rxq@chello.nl)
  */
 
 #ifndef _INCLUDE_CONF_H

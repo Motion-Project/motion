@@ -14,6 +14,11 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/*
+ *  netcam_rtsp.h
+ *    Headers associated with functions in the netcam_rtsp.c module.
+ */
+
 #ifndef _INCLUDE_NETCAM_RTSP_H
 #define _INCLUDE_NETCAM_RTSP_H
 

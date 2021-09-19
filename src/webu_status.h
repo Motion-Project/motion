@@ -14,6 +14,11 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/*
+ *  webu_status.h
+ *    Headers associated with functions in the webu_status.c module.
+ */
+
 #ifndef _INCLUDE_WEBU_STATUS_H_
 #define _INCLUDE_WEBU_STATUS_H_
 

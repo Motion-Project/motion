@@ -14,6 +14,11 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/*
+ *  webu_stream.h
+ *    Headers associated with functions in the webu_stream.c module.
+ */
+
 #ifndef _INCLUDE_WEBU_STREAM_H_
 #define _INCLUDE_WEBU_STREAM_H_
 

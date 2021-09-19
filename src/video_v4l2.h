@@ -14,11 +14,10 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*    video_v4l2.h
- *
- *    Include file for video_v4l2.c
- *      Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
- *
+/*
+ *  video_v4l2.h
+ *    Headers associated with functions in the video_v4l2.c module.
+ *    Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
  */
 
 #ifndef _INCLUDE_VIDEO_V4L2_H

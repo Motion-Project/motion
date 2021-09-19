@@ -15,13 +15,11 @@
  */
 
 /*
- * jpegutils.h: Some Utility programs for dealing with
- *               JPEG encoded images
- *
- *  Copyright (C) 1999 Rainer Johanni <Rainer@Johanni.de>
- *  Copyright (C) 2001 pHilipp Zabel  <pzabel@gmx.de>
- *  Copyright (C) 2008 Angel Carpintero <motiondevelop@gmail.com>
- *
+ *  jpegutils.h
+ *    Headers associated with functions in the jpegutils.c module.
+ *    Copyright (C) 1999 Rainer Johanni <Rainer@Johanni.de>
+ *    Copyright (C) 2001 pHilipp Zabel  <pzabel@gmx.de>
+ *    Copyright (C) 2008 Angel Carpintero <motiondevelop@gmail.com>
  */
 
 #ifndef __JPEGUTILS_H__

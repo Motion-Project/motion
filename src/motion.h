@@ -14,11 +14,10 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*    motion.h
- *
- *    Include file for motion.c
- *      Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
- *
+/*
+ *  motion.h
+ *    Headers associated with functions in the motion.c module.
+ *    Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
  */
 
 #ifndef _INCLUDE_MOTION_H

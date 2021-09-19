@@ -15,10 +15,8 @@
  */
 
 /*
- * mmalcam.h
- *
- *    Include file for mmalcam.c
- *
+ *  mmalcam.h
+ *    Headers associated with functions in the mmalcam.c module.
  *    Copyright 2013 by Nicholas Tuckett
  */
 
