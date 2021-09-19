@@ -563,6 +563,9 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
             mystrftime(cnt, cnt->text_event_string, sizeof(cnt->text_event_string),
                        cnt->conf.text_event, &img->timestamp_tv, NULL, 0);
 
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
+                       cnt->event_nr);
+
             /* EVENT_FIRSTMOTION triggers on_event_start_command and event_ffmpeg_newfile */
 
             indx = cnt->imgs.image_ring_out-1;
@@ -577,8 +580,6 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
                 }
             } while (indx != cnt->imgs.image_ring_in);
 
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
-                       cnt->event_nr);
 
             /* always save first motion frame as preview-shot, may be changed to an other one later */
             if (cnt->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)) {
@@ -2430,13 +2431,6 @@ static void mlp_actions(struct context *cnt)
 
     process_image_ring(cnt);
 
-    /* Check for movie length */
-    if ((cnt->conf.movie_max_time > 0) &&
-        (cnt->event_nr == cnt->prev_event) &&
-        (cnt->current_image->timestamp_tv.tv_sec - cnt->movietime >= cnt->conf.movie_max_time)) {
-        event(cnt, EVENT_MAX_MOVIE, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
-    }
-
     /* Check event gap */
     if ((cnt->conf.event_gap > 0) &&
         ((cnt->currenttime - cnt->lasttime) >= cnt->conf.event_gap )) {
@@ -2474,6 +2468,19 @@ static void mlp_actions(struct context *cnt)
         }
         cnt->event_stop = FALSE;
         cnt->event_user = FALSE;
+    }
+
+    /* Check for movie length.  If we are in post capture processing, then
+     * we just let the current movie finish with that.  Otherwise we close
+     * and set up for the next movie file
+     */
+    if ((cnt->conf.movie_max_time > 0) &&
+        (cnt->event_nr == cnt->prev_event) &&
+        (cnt->current_image->timestamp_tv.tv_sec - cnt->movietime >= cnt->conf.movie_max_time) &&
+        ( !(cnt->current_image->flags & IMAGE_POSTCAP)) &&
+        ( !(cnt->current_image->flags & IMAGE_PRECAP))) {
+        event(cnt, EVENT_MOVIE_END, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
+        event(cnt, EVENT_MOVIE_START, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
     }
 
 }
