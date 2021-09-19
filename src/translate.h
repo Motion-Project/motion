@@ -15,11 +15,10 @@
  */
 
 /*
- *      translate.h
- *
- *      Include file for translate.c
- *
+ *  translate.h
+ *    Headers associated with functions in the translate.c module.
  */
+
 #ifndef _INCLUDE_TRANSLATE_H_
 #define _INCLUDE_TRANSLATE_H_
 

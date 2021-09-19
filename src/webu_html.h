@@ -14,6 +14,11 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/*
+ *  webu_html.h
+ *    Headers associated with functions in the webu_html.c module.
+ */
+
 #ifndef _INCLUDE_WEBU_HTML_H_
 #define _INCLUDE_WEBU_HTML_H_
 

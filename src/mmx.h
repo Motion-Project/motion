@@ -15,9 +15,10 @@
  */
 
 /*
- * mmx.h
- * Copyright (C) 1997-2001 H. Dietz and R. Fisher
+ *  mmx.h
+ *    Copyright (C) 1997-2001 H. Dietz and R. Fisher
  */
+
 #ifndef I386MMX_H
 #define I386MMX_H
 

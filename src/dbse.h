@@ -14,11 +14,9 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- *      dbse.h
- *
- *      Headers associated with functions in the dbse.c module.
- *
+/*
+ *  dbse.h
+ *    Headers associated with functions in the dbse.c module.
  */
 
 #ifndef _INCLUDE_DBSE_H

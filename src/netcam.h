@@ -15,15 +15,12 @@
  */
 
 /*
- *    netcam.h
- *
- *    Include file for handling network cameras.
- *
+ *  netcam.h *
+ *    Headers associated with functions in the netcam.c module.
  *    This code was inspired by the original netcam.c module
  *    written by Jeroen Vreeken and enhanced by several Motion
  *    project contributors, particularly Angel Carpintero and
  *    Christopher Price.
- *
  *    Copyright 2005, William M. Brack
  */
 #ifndef _INCLUDE_NETCAM_H

@@ -15,16 +15,15 @@
  */
 
 /*
- *  Copyright (C) 1995, 1996, 1997, 1998, 2000, 2001, 2002
- *   Free Software Foundation, Inc.
- *
- *  Additional Copyright (C) 2004-2005 Christopher Price,
- *  Angel Carpintero, and other contributing authors.
- *
- *  Major part of this file is reused code from GNU Wget. It has been
- *  merged and modified for use in the program Motion which is also
- *  released under the terms of the GNU General Public License.
- *
+ *  netcam_wget.h
+ *    Headers associated with functions in the netcam_wget.c module.
+ *    Copyright (C) 1995, 1996, 1997, 1998, 2000, 2001, 2002
+ *      Free Software Foundation, Inc.
+ *    Copyright (C) 2004-2005 Christopher Price,
+ *      Angel Carpintero, and other contributing authors.
+ *    Major part of this file is reused code from GNU Wget. It has been
+ *    merged and modified for use in the program Motion which is also
+ *    released under the terms of the GNU General Public License.
  */
 
 #ifndef NETCAM_WGET_H

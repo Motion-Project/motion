@@ -14,6 +14,11 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/*
+ *  video_common.h
+ *    Headers associated with functions in the video_common.c module.
+ */
+
 #ifndef _INCLUDE_VIDEO_COMMON_H
 #define _INCLUDE_VIDEO_COMMON_H
 

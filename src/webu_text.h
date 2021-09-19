@@ -14,6 +14,11 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/*
+ *  webu_text.h
+ *    Headers associated with functions in the webu_text.c module.
+ */
+
 #ifndef _INCLUDE_WEBU_TEXT_H_
 #define _INCLUDE_WEBU_TEXT_H_
 

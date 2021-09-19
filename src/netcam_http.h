@@ -14,6 +14,11 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/*
+ *  netcam_http.h
+ *    Headers associated with functions in the netcam_http.c module.
+ */
+
 #ifndef _INCLUDE_NETCAM_HTTP_H
 #define _INCLUDE_NETCAM_HTTP_H
 

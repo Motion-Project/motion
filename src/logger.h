@@ -15,14 +15,12 @@
  */
 
 /*
- *      logger.h
- *
- *      Include file for logger.c
- *
- *      Copyright 2005, William M. Brack
- *      Copyright 2008 by Angel Carpintero  (motiondevelop@gmail.com)
- *
+ *  logger.h
+ *    Headers associated with functions in the logger.c module.
+ *    Copyright 2005, William M. Brack
+ *    Copyright 2008 by Angel Carpintero  (motiondevelop@gmail.com)
  */
+
 #ifndef _INCLUDE_LOGGER_H_
 #define _INCLUDE_LOGGER_H_
 

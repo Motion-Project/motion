@@ -14,13 +14,13 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*  vloopback_motion.h
- *
- *  Include file for video_loopback.c
- *      Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
- *      Copyright 2008 by Angel Carpintero (motiondevelop@gmail.com)
- *
+/*
+ *  video_loopback.h
+ *    Headers associated with functions in the video_loopback.c module.
+ *    Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
+ *    Copyright 2008 by Angel Carpintero (motiondevelop@gmail.com)
  */
+
 #ifndef _INCLUDE_VIDEO_LOOPBACK_H
 #define _INCLUDE_VIDEO_LOOPBACK_H
 

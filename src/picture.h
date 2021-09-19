@@ -15,12 +15,12 @@
  */
 
 /*
- *    picture.h
- *
- *      Copyright 2002 by Jeroen Vreeken (pe1rxq@amsat.org)
- *      Portions of this file are Copyright by Lionnel Maugis
- *
+ *  picture.h
+ *    Headers associated with functions in the picture.c module.
+ *    Copyright 2002 by Jeroen Vreeken (pe1rxq@amsat.org)
+ *    Portions of this file are Copyright by Lionnel Maugis
  */
+
 #ifndef _INCLUDE_PICTURE_H_
 #define _INCLUDE_PICTURE_H_
 

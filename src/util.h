@@ -14,11 +14,9 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- *      util.h
- *
- *      Headers associated with utility and "my" routines in util.c module.
- *
+/*
+ *  util.h
+ *    Headers associated with functions in the util.c module.
  */
 
 #ifndef _INCLUDE_UTIL_H

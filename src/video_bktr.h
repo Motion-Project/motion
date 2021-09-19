@@ -15,11 +15,9 @@
  */
 
 /*
- * video_bktr.h
- *
- *    Include file for video_bktr.c
+ *  video_bktr.h
+ *    Headers associated with functions in the video_bktr.c module.
  *    Copyright 2004 by Angel Carpintero (motiondevelop@gmail.com)
- *
  */
 
 #ifndef _INCLUDE_VIDEO_BKTR_H

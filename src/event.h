@@ -15,13 +15,11 @@
  */
 
 /*
- *    event.h
- *
- *    Include file for event.c
- *
+ *  event.h
+ *    Headers associated with functions in the event.c module.
  *    Copyright Jeroen Vreeken, 2002
- *
  */
+
 #ifndef _INCLUDE_EVENT_H_
 #define _INCLUDE_EVENT_H_
 

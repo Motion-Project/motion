@@ -14,6 +14,11 @@
  *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/*
+ *  draw.h
+ *    Headers associated with functions in the draw.c module.
+ */
+
 #ifndef _INCLUDE_DRAW_H
 #define _INCLUDE_DRAW_H
 
