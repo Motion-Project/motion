@@ -46,8 +46,9 @@ typedef enum {
     EVENT_CAMERA_LOST,
     EVENT_CAMERA_FOUND,
     EVENT_FFMPEG_PUT,
-    EVENT_LAST,
-    EVENT_MAX_MOVIE,
+    EVENT_MOVIE_START,
+    EVENT_MOVIE_END,
+    EVENT_LAST
 } motion_event;
 
 typedef void(* event_handler)(struct context *cnt, motion_event type, struct image_data *img_data,
