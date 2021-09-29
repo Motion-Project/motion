@@ -20,7 +20,6 @@ doc_DATA = \
 	doc/outputnormal1.jpg \
 	doc/motion_guide.html \
 	doc/motion_stylesheet.css \
-	doc/COPYING \
 	doc/CREDITS \
 	doc/motion_build.html \
 	doc/motion_config.html
