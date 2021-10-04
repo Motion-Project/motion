@@ -2,11 +2,13 @@
 # Copyright (2018)
 # This file is distributed under the same license as the Motion package.
 #
+#, fuzzy
 msgid ""
 msgstr ""
+"#-#-#-#-#  zh.po (4.x)  #-#-#-#-#\n"
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-04 21:33-0600\n"
+"POT-Creation-Date: 2021-10-03 23:12-0600\n"
 "PO-Revision-Date: 2020-01-12 17:52-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -15,6 +17,18 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.0.6\n"
+"#-#-#-#-#  new_zh.po (4.x)  #-#-#-#-#\n"
+"Project-Id-Version: 4.x\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-10-03 23:12-0600\n"
+"PO-Revision-Date: 2021-10-03 23:43-0600\n"
+"Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
+"Language-Team: MrDave <MotionMrDave@gmail.com>\n"
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #: src/conf.c
 #, c-format
@@ -73,38 +87,6 @@ msgstr "线程 %d-配置文件： %s"
 #, c-format
 msgid "%-25s <redacted>"
 msgstr " %-25s <已编辑>"
-
-#: src/conf.c
-msgid "Unable to locate video_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into video_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate netcam_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into netcam_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate webcontrol_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into webcontrol_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate stream_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into stream_header_params"
-msgstr ""
 
 #: src/conf.c
 #, c-format
@@ -171,20 +153,8 @@ msgid "target_dir"
 msgstr "目标目录"
 
 #: src/conf.c
-msgid "video_device"
-msgstr ""
-
-#: src/conf.c
-msgid "video_params"
-msgstr ""
-
-#: src/conf.c
 msgid "auto_brightness"
 msgstr "自动亮度"
-
-#: src/conf.c
-msgid "tuner_device"
-msgstr ""
 
 #: src/conf.c
 msgid "roundrobin_frames"
@@ -203,28 +173,12 @@ msgid "netcam_url"
 msgstr "网络摄像头网址"
 
 #: src/conf.c
-msgid "netcam_params"
-msgstr ""
-
-#: src/conf.c
-msgid "netcam_high_url"
-msgstr ""
-
-#: src/conf.c
-msgid "netcam_high_params"
-msgstr ""
-
-#: src/conf.c
 msgid "netcam_userpass"
 msgstr "网络摄像头用户密码"
 
 #: src/conf.c
 msgid "mmalcam_name"
 msgstr "mmalcam名称"
-
-#: src/conf.c
-msgid "mmalcam_params"
-msgstr ""
 
 #: src/conf.c
 msgid "width"
@@ -281,10 +235,6 @@ msgstr "文字事件"
 #: src/conf.c
 msgid "emulate_motion"
 msgstr "模拟运动"
-
-#: src/conf.c
-msgid "pause"
-msgstr ""
 
 #: src/conf.c
 msgid "threshold"
@@ -531,10 +481,6 @@ msgid "webcontrol_key"
 msgstr "网页控制键"
 
 #: src/conf.c
-msgid "webcontrol_header_params"
-msgstr ""
-
-#: src/conf.c
 msgid "stream_port"
 msgstr "流端口"
 
@@ -553,10 +499,6 @@ msgstr "流认证"
 #: src/conf.c
 msgid "stream_tls"
 msgstr "流tls"
-
-#: src/conf.c
-msgid "stream_header_params"
-msgstr ""
 
 #: src/conf.c
 msgid "stream_preview_scale"
@@ -735,18 +677,6 @@ msgid "camera_dir"
 msgstr "相机目录"
 
 #: src/dbse.c
-msgid "Closing MySQL library"
-msgstr ""
-
-#: src/dbse.c
-msgid "Closing MariaDB library"
-msgstr ""
-
-#: src/dbse.c
-msgid "Database closed"
-msgstr ""
-
-#: src/dbse.c
 msgid "Initializing database"
 msgstr "初始化数据库"
 
@@ -774,11 +704,6 @@ msgstr "成功"
 
 #: src/dbse.c
 #, c-format
-msgid "Can't open SQLite3 database %s : %s"
-msgstr ""
-
-#: src/dbse.c
-#, c-format
 msgid "database_busy_timeout %d msec"
 msgstr "数据库繁忙超时 %d毫秒"
 
@@ -798,16 +723,6 @@ msgid "MySQL error was %s"
 msgstr "MySQL错误为 %s"
 
 #: src/dbse.c
-#, c-format
-msgid "Cannot connect to MariaDB database %s on host %s with user %s"
-msgstr ""
-
-#: src/dbse.c
-#, c-format
-msgid "MariaDB error was %s"
-msgstr ""
-
-#: src/dbse.c
 msgid "SQLite3 using shared handle"
 msgstr "SQLite3使用共享句柄"
 
@@ -822,15 +737,6 @@ msgid "Database backend %s"
 msgstr "数据库后端 %s"
 
 #: src/dbse.c
-msgid "Executing MySQL query"
-msgstr ""
-
-#: src/dbse.c
-#, c-format
-msgid "MySQL query failed %s error code %d"
-msgstr ""
-
-#: src/dbse.c
 #, c-format
 msgid ""
 "Cannot reconnect to MySQL database %s on host %s with user %s MySQL error "
@@ -839,77 +745,8 @@ msgstr "无法通过用户 %s MySQL错误重新连接到主机 %s上的MySQL数�
 
 #: src/dbse.c
 #, c-format
-msgid "Re-Connection to MySQL database '%s' Succeed"
-msgstr ""
-
-#: src/dbse.c
-#, c-format
-msgid "after re-connection MySQL query failed %s error code %d"
-msgstr ""
-
-#: src/dbse.c
-msgid "Executing MariaDB query"
-msgstr ""
-
-#: src/dbse.c
-#, c-format
-msgid "MariaDB query failed %s error code %d"
-msgstr ""
-
-#: src/dbse.c
-#, c-format
-msgid ""
-"Cannot reconnect to MariaDB database %s on host %s with user %s MariaDB "
-"error was %s"
-msgstr ""
-
-#: src/dbse.c
-#, c-format
-msgid "Re-Connection to MariaDB database '%s' Succeed"
-msgstr ""
-
-#: src/dbse.c
-#, c-format
-msgid "after re-connection MariaDB query failed %s error code %d"
-msgstr ""
-
-#: src/dbse.c
-#, c-format
-msgid "Re-connected to PostgreSQL database '%s'"
-msgstr ""
-
-#: src/dbse.c
-msgid "Executing PostgreSQL query"
-msgstr ""
-
-#: src/dbse.c
-#, c-format
-msgid "Attempting reconnect to PostgreSQL database '%s': %s"
-msgstr ""
-
-#: src/dbse.c
-#, c-format
 msgid "PGSQL query failed: [%s]  %s %s"
 msgstr "PGSQL查询失败：[%s] %s %s"
-
-#: src/dbse.c
-#, c-format
-msgid "INSERT ... RETURNING VALUE=\"%s\""
-msgstr ""
-
-#: src/dbse.c
-#, c-format
-msgid "Invalid event ID returned by SQL query \"%s\""
-msgstr ""
-
-#: src/dbse.c
-msgid "Executing SQLite3 query"
-msgstr ""
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 error was %s"
-msgstr ""
 
 #: src/event.c src/track.c
 #, c-format
@@ -920,11 +757,6 @@ msgstr "无法启动外部命令' %s'"
 #, c-format
 msgid "Executing external command '%s'"
 msgstr "执行外部命令' %s'"
-
-#: src/event.c
-#, c-format
-msgid "File of type %ld saved to: %s"
-msgstr " %ld类型的文件已保存到： %s"
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -959,6 +791,11 @@ msgstr "正在关闭：extpipe文件描述 %d，错误状态为 %d"
 #, c-format
 msgid "pclose return: %d"
 msgstr "pclose返回：%d"
+
+#: src/event.c
+#, c-format
+msgid "Source FPS %d"
+msgstr "来源FPS %d"
 
 #: src/event.c
 #, c-format
@@ -1012,11 +849,6 @@ msgstr "在管道中写入错误，状态错误 %d"
 #, c-format
 msgid "pipe %s not created or closed already "
 msgstr "管道 %s尚未创建或关闭"
-
-#: src/event.c
-#, c-format
-msgid "Source FPS %d"
-msgstr "来源FPS %d"
 
 #: src/event.c
 msgid "The ogg container is no longer supported.  Changing to mpeg4"
@@ -2035,11 +1867,6 @@ msgstr "现在调用netcam设置文件（）"
 msgid "now calling netcam_setup_mjpg()"
 msgstr "现在调用netcam setup mjpg（）"
 
-#: src/netcam.c
-#, c-format
-msgid "Invalid netcam service '%s' - must be mjpeg, ftp, mjpg or jpeg."
-msgstr ""
-
 #: src/netcam.c src/netcam_rtsp.c
 #, c-format
 msgid "Failed trying to read first image - retval:%d"
@@ -2601,16 +2428,6 @@ msgid "False"
 msgstr "假"
 
 #: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Ignoring packet with invalid data"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Rec frame error: %s"
-msgstr ""
-
-#: src/netcam_rtsp.c
 msgid "Ignoring packet with invalid data"
 msgstr "忽略无效数据包"
 
@@ -2618,11 +2435,6 @@ msgstr "忽略无效数据包"
 #, c-format
 msgid "Error decoding packet: %s"
 msgstr "解码数据包时出错： %s"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Error transferring HW decoded to system memory"
-msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2635,91 +2447,8 @@ msgstr "解码视频数据包时出错：复制到缓冲区"
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: HW Devices: "
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: %s (available)"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: %s (not implemented)"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: netcam_decoder %s disabled."
-msgstr ""
-
-#: src/netcam_rtsp.c
-msgid "Failed to get vaapi pix format"
-msgstr ""
-
-#: src/netcam_rtsp.c
-msgid "Failed to get cuda pix format"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Interrupted."
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: %s: %s"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: %s: Failed"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Decoder %s did not work."
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Ignoring and removing the user requested decoder %s"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Initializing vaapi decoder"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Unable to find vaapi hw device"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Initializing cuda decoder"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Unable to find cuda hw device"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Initializing decoder"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
 msgid "%s: Using decoder %s"
 msgstr " %s：使用解码器 %s"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Decoder opened"
-msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2766,26 +2495,6 @@ msgstr "调整大小/格式错误： %s"
 #, c-format
 msgid "Error putting frame into output buffer: %s"
 msgstr "将帧放入输出缓冲区时出错： %s"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Interrupted"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: av_read_frame: %s"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: capture_rate not specified in netcam_params. Using %d"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
-msgstr ""
 
 #: src/netcam_rtsp.c
 msgid "The network camera is sending pictures in a different"
@@ -2851,53 +2560,6 @@ msgstr "转码为YUV420P。如果可能，请更改网络摄像头"
 #: src/netcam_rtsp.c
 msgid "picture format to YUV420P to possibly lower CPU usage."
 msgstr "图片格式转换为YUV420P可能会降低CPU使用率。"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Setting rtsp/rtmp"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Setting input_format mjpeg"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Setting input_format video4linux2"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Setting up movie file"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Setting up %s"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: option: %s = %s"
-msgstr ""
-
-#: src/netcam_rtsp.c
-msgid "Setting up v4l2 via netcam"
-msgstr ""
-
-#: src/netcam_rtsp.c
-msgid "Setting up file via netcam"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "Setting up %s via netcam"
-msgstr ""
-
-#: src/netcam_rtsp.c
-msgid "highres"
-msgstr ""
 
 #: src/netcam_rtsp.c
 msgid "norm"
@@ -2967,36 +2629,6 @@ msgstr " %s：已连接相机（ %s）"
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: Netcam capture_rate is %d."
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Camera source is %d FPS"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Unable to determine the camera source FPS."
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: capture_rate is less than camera FPS."
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Decoding errors will occur."
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: capture_rate slightly larger than camera FPS is recommended."
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
 msgid "%s: Reconnecting with camera...."
 msgstr " %s：重新连接相机。"
 
@@ -3037,10 +2669,6 @@ msgstr "无法创建rtsp上下文"
 #: src/netcam_rtsp.c
 msgid "unable to create rtsp high context"
 msgstr "无法创建rtsp高上下文"
-
-#: src/netcam_rtsp.c
-msgid "No FFmpeg support"
-msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3423,10 +3051,6 @@ msgid "Error closing file"
 msgstr "关闭文件时出错"
 
 #: src/util.c
-msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
-msgstr ""
-
-#: src/util.c
 #, c-format
 msgid "invalid format specifier keyword %*.*s"
 msgstr "格式说明符关键字  %*.*s 无效"
@@ -3439,107 +3063,6 @@ msgstr "无法设置线程名称 %s"
 #: src/util.c
 msgid "FFMPEG version too old. Disabling pass-through processing."
 msgstr "FFMPEG版本太旧。禁用传递处理。"
-
-#: src/util.c
-msgid "pass-through enabled."
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "Error setting parm >%s<"
-msgstr ""
-
-#: src/util.c
-msgid "Error setting parm >redacted<"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "Parsed: >%s< >%s<"
-msgstr ""
-
-#: src/util.c
-msgid "Parsed: >redacted< >redacted<"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "Error parsing parm_nm controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing parm_nm controls: <redacted>"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "Error parsing parm_vl controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing parm_vl controls: <redacted>"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "Error setting temp: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error setting temp: <redacted>"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "Error reparsing controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error reparsing controls: <redacted>"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "Parsing controls: %s"
-msgstr "解析控件： %s"
-
-#: src/util.c
-msgid "Parsing controls: <redacted>"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "Error parsing controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing controls: <redacted>"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "Error: %s"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "New netcam_params: %s"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "New netcam_high_params: %s"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "New video_params: %s"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "Programming error.  Unknown configuration item: %s"
-msgstr ""
 
 #: src/video_bktr.c
 #, c-format
@@ -3612,16 +3135,6 @@ msgstr "无法设置几何"
 #, c-format
 msgid "to [%d/%d] Norm %d"
 msgstr "到[ %d / %d]规范 %d"
-
-#: src/video_bktr.c
-#, c-format
-msgid "Not valid Frequency [%ld] for Source input [%i]"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "Frequency [%ld] Source input [%i]"
-msgstr ""
 
 #: src/video_bktr.c
 #, c-format
@@ -3858,16 +3371,6 @@ msgstr "将控件 %s \" %s \"设置为 %d失败，返回码为 %d"
 #, c-format
 msgid "Set control \"%s\" to value %d"
 msgstr "将控件\" %s \"设置为值 %d"
-
-#: src/video_v4l2.c
-#, c-format
-msgid "%s control option value %s is below minimum.  Using minimum %d"
-msgstr ""
-
-#: src/video_v4l2.c
-#, c-format
-msgid "%s control option value %s is above maximum.  Using maximum %d"
-msgstr ""
 
 #: src/video_v4l2.c
 msgid "control type not supported yet"
@@ -4171,11 +3674,6 @@ msgstr "将值设置为null / zero"
 
 #: src/webu.c
 #, c-format
-msgid "Connection from: %s"
-msgstr "连接来源： %s"
-
-#: src/webu.c
-#, c-format
 msgid "Failed authentication from %s"
 msgstr "来自 %s的身份验证失败"
 
@@ -4193,35 +3691,18 @@ msgstr "无效的回应"
 
 #: src/webu.c
 #, c-format
-msgid "Error adding webcontrol header %s %s"
-msgstr ""
-
-#: src/webu.c src/webu_stream.c
-#, c-format
-msgid "Error adding stream header %s %s"
-msgstr ""
-
-#: src/webu.c
-#, c-format
 msgid "Invalid Method requested: %s"
 msgstr "请求的方法无效： %s"
 
 #: src/webu.c
 #, c-format
+msgid "Connection from: %s"
+msgstr "连接来源： %s"
+
+#: src/webu.c
+#, c-format
 msgid "send page failed %d"
 msgstr "发送页面失败 %d"
-
-#: src/webu.c
-msgid "Stream picture is not ready yet"
-msgstr ""
-
-#: src/webu.c
-msgid "Stream process requested to finish."
-msgstr ""
-
-#: src/webu.c
-msgid "Send page failed."
-msgstr ""
 
 #: src/webu.c
 msgid "Basic authentication: available"
@@ -4472,229 +3953,542 @@ msgstr "无法获取图像流。"
 msgid "'%s' option is depreciated.  New option name is '%s'"
 msgstr "' %s'选项已弃用。新选项名称为 '%s'"
 
-#~ msgid "Unable to locate vid_control_params"
-#~ msgstr "无法找到vid控制参数"
-
-#~ msgid "No value provided to put into vid_control_params"
-#~ msgstr "没有提供值放入vid控制参数"
-
-#~ msgid "Error compiling regex in copy_uri"
-#~ msgstr "在复制URI中编译正则表达式时出错"
-
-#~ msgid "Invalid origin for cors_header in copy_uri"
-#~ msgstr "复制uri中的cors标头无效来源"
-
-#~ msgid "videodevice"
-#~ msgstr "视频设备"
-
-#~ msgid "vid_control_params"
-#~ msgstr "vid控制参数"
-
-#~ msgid "v4l2_palette"
-#~ msgstr "v4l2调色板"
-
-#~ msgid "input"
-#~ msgstr "输入"
-
-#~ msgid "frequency"
-#~ msgstr "频率"
-
-#~ msgid "tunerdevice"
-#~ msgstr "调谐器设备"
-
-#~ msgid "netcam_highres"
-#~ msgstr "网络摄像头"
-
-#~ msgid "netcam_keepalive"
-#~ msgstr "网络摄像头保持活跃"
-
-#~ msgid "netcam_proxy"
-#~ msgstr "网络摄像头代理"
-
-#~ msgid "netcam_tolerant_check"
-#~ msgstr "网络摄像机容忍检查"
-
-#~ msgid "netcam_use_tcp"
-#~ msgstr "网络摄像头使用TCP"
-
-#~ msgid "netcam_decoder"
-#~ msgstr "网络摄像头解码器"
-
-#~ msgid "mmalcam_control_params"
-#~ msgstr "mmalcam控制参数"
-
-#~ msgid "webcontrol_cors_header"
-#~ msgstr "webcontrol cors标头"
-
-#~ msgid "stream_cors_header"
-#~ msgstr "流cors标头"
-
-#~ msgid "Ignoring empty sql query"
-#~ msgstr "忽略空的SQL查询"
-
-#~ msgid "Executing mysql query"
-#~ msgstr "执行mysql查询"
-
-#~ msgid "Mysql query failed %s error code %d"
-#~ msgstr "MySQL查询失败 %s错误代码 %d"
-
-#~ msgid "Re-Connection to Mysql database '%s' Succeed"
-#~ msgstr "重新连接到Mysql数据库' %s'成功"
-
-#~ msgid "after re-connection Mysql query failed %s error code %d"
-#~ msgstr "重新连接MySQL查询后失败 %s错误代码 %d"
-
-#~ msgid "Executing postgresql query"
-#~ msgstr "执行PostgreSQL查询"
-
-#~ msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
-#~ msgstr "重新连接到PostgreSQL数据库' %s'失败： %s"
-
-#~ msgid "Re-Connection to PostgreSQL database '%s' Succeed"
-#~ msgstr "重新连接到PostgreSQL数据库' %s'成功"
-
-#~ msgid "Executing sqlite query"
-#~ msgstr "执行sqlite查询"
-
-#~ msgid "SQLite error was %s"
-#~ msgstr "SQLite错误为 %s"
-
-#~ msgid "No ffmpeg support"
-#~ msgstr "不支持ffmpeg"
-
-#~ msgid "Closing MYSQL"
-#~ msgstr "关闭MYSQL"
-
-#~ msgid "Can't open database %s : %s"
-#~ msgstr "无法打开数据库 %s： %s"
-
-#~ msgid "Problem enabling motion-stream server in port %d"
-#~ msgstr "在端口 %d中启用运动流服务器时出现问题"
-
-#~ msgid "Started motion-stream server on port %d (auth %s)"
-#~ msgstr "在端口 %d（auth %s）上启动了运动流服务器"
-
-#~ msgid "pass-through is enabled but is still experimental."
-#~ msgstr "直通已启用，但仍处于试验阶段。"
-
-#~ msgid "Using port number %d"
-#~ msgstr "使用端口号 %d"
-
-#~ msgid ""
-#~ "Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or "
-#~ "jpeg."
-#~ msgstr ""
-#~ "无效的网络摄像头服务' %s'-必须为http，ftp，mjpg，mjpeg，v4l2或jpeg。"
-
-#~ msgid "Error receiving frame from codec: %s"
-#~ msgstr "错误从编解码器接收帧： %s"
-
-#~ msgid "%s: %s: %s,Interrupt %s"
-#~ msgstr " %s： %s： %s，中断 %s"
-
-#~ msgid "%s: %s: Failed,Interrupt %s"
-#~ msgstr " %s： %s：失败，中断 %s"
-
-#~ msgid "%s: Ignoring user requested decoder %s"
-#~ msgstr " %s：忽略用户请求的解码器 %s"
-
-#~ msgid "%s: av_read_frame: %s ,Interrupt: %s"
-#~ msgstr " %s：影音读取帧： %s，中断： %s"
-
-#~ msgid "%s: Setting http input_format mjpeg"
-#~ msgstr " %s：设置http输入格式mjpeg"
-
-#~ msgid "%s: Setting rtsp transport to tcp"
-#~ msgstr " %s：将rtsp传输设置为tcp"
-
-#~ msgid "%s: Setting rtsp transport to udp"
-#~ msgstr " %s：将rtsp传输设置为udp"
-
-#~ msgid "%s: Setting attributes to read file"
-#~ msgstr " %s：设置属性以读取文件"
-
-#~ msgid "%s: Requested v4l2_palette option: %d"
-#~ msgstr " %s：请求的v4l2调色板选项： %d"
-
-#~ msgid "%s: Requested FOURCC code: %s"
-#~ msgstr " %s：请求的FOURCC代码： %s"
-
-#~ msgid "%s: Setting v4l2 input_format: %s"
-#~ msgstr " %s：设置v4l2输入格式： %s"
-
-#~ msgid "%s: Setting v4l2 framerate: %s"
-#~ msgstr " %s：设置v4l2帧率： %s"
-
-#~ msgid "%s: Setting v4l2 video_size: %s"
-#~ msgstr " %s：设置v4l2视频大小： %s"
-
-#~ msgid "Proxies not supported using for %s"
-#~ msgstr "不支持用于 %s的代理"
-
-#~ msgid "Setting up v4l2 via ffmpeg netcam"
-#~ msgstr "通过ffmpeg网络摄像头设置v4l2"
-
-#~ msgid "Setting up file via ffmpeg netcam"
-#~ msgstr "通过ffmpeg netcam设置文件"
-
-#~ msgid "Setting up http via ffmpeg netcam"
-#~ msgstr "通过ffmpeg netcam设置http"
-
-#~ msgid "Setting up %s via ffmpeg netcam"
-#~ msgstr "通过ffmpeg网络摄像头设置 %s"
-
-#~ msgid "High resolution"
-#~ msgstr "高分辨率"
-
-#~ msgid "Normal resolution"
-#~ msgstr "普通分辨率"
-
-#~ msgid "ffmpeg too old"
-#~ msgstr "ffmpeg太旧了"
-
-#~ msgid "%s: Invalid camera service"
-#~ msgstr " %s：相机服务无效"
-
-#~ msgid "%s: Unable to open camera(%s)"
-#~ msgstr " %s：无法打开相机（ %s）"
-
-#~ msgid "Requested frame rate %d FPS is less than camera frame rate %d FPS"
-#~ msgstr "请求的帧速率%d FPS小于相机帧速率%d FPS"
-
-#~ msgid "Increasing capture rate to %d FPS to match camera."
-#~ msgstr "将捕获率提高到%d FPS以匹配相机。"
-
-#~ msgid ""
-#~ "To lower CPU, change camera FPS to lower rate and decrease I frame "
-#~ "interval."
-#~ msgstr "要降低CPU，请将摄像机FPS更改为较低的速率并减小I帧间隔。"
-
-#~ msgid "FFmpeg/Libav not found on computer.  No RTSP support"
-#~ msgstr "在计算机上找不到FFmpeg / Libav。不支持RTSP"
-
-#~ msgid "Not valid Frequency [%lu] for Source input [%i]"
-#~ msgstr "来无效的频率[%lu]。 源输入[%i]"
-
-#~ msgid "Frequency [%lu] Source input [%i]"
-#~ msgstr "频率[ %lu]源输入[ %i]"
-
-#~ msgid "BKTR is not enabled."
-#~ msgstr "未启用BKTR。"
-
-#~ msgid "%s control option value %d is below minimum.  Using minimum"
-#~ msgstr " %s控制选项值 %d低于最小值。使用最低"
-
-#~ msgid "%s control option value %d is above maximum.  Using maximum"
-#~ msgstr " %s控制选项值 %d大于最大值。使用最大值"
-
-#~ msgid "1) vid_source->pframe %i"
-#~ msgstr "1）vid source-> pframe %i"
-
-#~ msgid "the_buffer index %d Address (%x)"
-#~ msgstr "缓冲区索引 %d地址（ %x）"
-
-#~ msgid "Invalid url: %s"
-#~ msgstr "无效的网址： %s"
-
-#~ msgid "Error decoding url"
-#~ msgstr "解码网址时出错"
+#: src/conf.c
+msgid "watchdog_tmo"
+msgstr "看门狗"
+
+#: src/conf.c
+msgid "watchdog_kill"
+msgstr "看门狗杀"
+
+#: src/conf.c
+msgid "video_device"
+msgstr "视频设备"
+
+#: src/conf.c
+msgid "video_params"
+msgstr "视频参数"
+
+#: src/conf.c
+msgid "tuner_device"
+msgstr "调谐器装置"
+
+#: src/conf.c
+msgid "netcam_params"
+msgstr "网络摄像头参数"
+
+#: src/conf.c
+msgid "netcam_high_url"
+msgstr "网络摄像头高网址"
+
+#: src/conf.c
+msgid "netcam_high_params"
+msgstr "网络摄像头高参数"
+
+#: src/conf.c
+msgid "mmalcam_params"
+msgstr "mmalcam 参数"
+
+#: src/conf.c
+msgid "pause"
+msgstr "暂停"
+
+#: src/conf.c
+msgid "webcontrol_header_params"
+msgstr "webcontrol 头参数"
+
+#: src/conf.c
+msgid "webcontrol_lock_minutes"
+msgstr "网络控制锁定分钟"
+
+#: src/conf.c
+msgid "webcontrol_lock_attempts"
+msgstr "网络控制锁定尝试"
+
+#: src/conf.c
+msgid "webcontrol_lock_max_ips"
+msgstr "webcontrol锁最大ips"
+
+#: src/conf.c
+msgid "stream_header_params"
+msgstr "流头参数"
+
+#: src/dbse.c
+msgid "Closing MySQL library"
+msgstr "关闭 MySQL 库"
+
+#: src/dbse.c
+msgid "Closing MariaDB library"
+msgstr "关闭 MariaDB 库"
+
+#: src/dbse.c
+msgid "Database closed"
+msgstr "数据库关闭"
+
+#: src/dbse.c
+#, c-format
+msgid "Can't open SQLite3 database %s : %s"
+msgstr "无法打开 SQLite3 数据库 %s：%s"
+
+#: src/dbse.c
+#, c-format
+msgid "Cannot connect to MariaDB database %s on host %s with user %s"
+msgstr "无法使用用户 %s 连接到主机 %s 上的 MariaDB 数据库 %s"
+
+#: src/dbse.c
+#, c-format
+msgid "MariaDB error was %s"
+msgstr "MariaDB 错误为 %s"
+
+#: src/dbse.c
+msgid "Executing MySQL query"
+msgstr "执行 MySQL 查询"
+
+#: src/dbse.c
+#, c-format
+msgid "MySQL query failed %s error code %d"
+msgstr "MySQL 查询失败 %s 错误代码 %d"
+
+#: src/dbse.c
+#, c-format
+msgid "Re-Connection to MySQL database '%s' Succeed"
+msgstr "重新连接到 MySQL 数据库\"%s\"成功"
+
+#: src/dbse.c
+#, c-format
+msgid "after re-connection MySQL query failed %s error code %d"
+msgstr "重新连接 MySQL 查询失败后 %s 错误代码 %d"
+
+#: src/dbse.c
+msgid "Executing MariaDB query"
+msgstr "执行 MariaDB 查询"
+
+#: src/dbse.c
+#, c-format
+msgid "MariaDB query failed %s error code %d"
+msgstr "MariaDB 查询失败 %s 错误代码 %d"
+
+#: src/dbse.c
+#, c-format
+msgid ""
+"Cannot reconnect to MariaDB database %s on host %s with user %s MariaDB "
+"error was %s"
+msgstr ""
+"无法使用用户 %s MariaDB 重新连接到主机 %s 上的 MariaDB 数据库 %s错误是 %s"
+
+#: src/dbse.c
+#, c-format
+msgid "Re-Connection to MariaDB database '%s' Succeed"
+msgstr "重新连接到 MariaDB 数据库\"%s\"成功"
+
+#: src/dbse.c
+#, c-format
+msgid "after re-connection MariaDB query failed %s error code %d"
+msgstr "重新连接 MariaDB 查询失败后 %s 错误代码 %d"
+
+#: src/dbse.c
+#, c-format
+msgid "Re-connected to PostgreSQL database '%s'"
+msgstr "重新连接到 PostgreSQL 数据库\"%s\""
+
+#: src/dbse.c
+msgid "Executing PostgreSQL query"
+msgstr "执行 PostgreSQL 查询"
+
+#: src/dbse.c
+#, c-format
+msgid "Attempting reconnect to PostgreSQL database '%s': %s"
+msgstr "正在尝试重新连接到 PostgreSQL 数据库\"%s\"：%s"
+
+#: src/dbse.c
+#, c-format
+msgid "INSERT ... RETURNING VALUE=\"%s\""
+msgstr "插入...返回值=\"%s\""
+
+#: src/dbse.c
+#, c-format
+msgid "Invalid event ID returned by SQL query \"%s\""
+msgstr "SQL 查询 \"%s\" 返回的事件 ID 无效"
+
+#: src/dbse.c
+msgid "Executing SQLite3 query"
+msgstr "执行 SQLite3 查询"
+
+#: src/dbse.c
+#, c-format
+msgid "SQLite3 error was %s"
+msgstr "SQLite3 错误是 %s"
+
+#: src/event.c
+#, c-format
+msgid "Writing image to file: %s"
+msgstr "将图像写入文件：%s"
+
+#: src/event.c
+#, c-format
+msgid "Writing movie to file: %s"
+msgstr "将电影写入文件：%s"
+
+#: src/event.c
+#, c-format
+msgid "Saved image to file: %s"
+msgstr "已将图像保存到文件：%s"
+
+#: src/event.c
+#, c-format
+msgid "Saved movie to file: %s"
+msgstr "已将电影保存到文件：%s"
+
+#: src/netcam.c
+#, c-format
+msgid "Invalid netcam service '%s' - must be mjpeg, ftp, mjpg or jpeg."
+msgstr "无效的网络摄像头服务\"%s\" - 必须是 mjpeg、ftp、mjpg 或 jpeg。"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Ignoring packet with invalid data"
+msgstr "%s: 忽略包含无效数据的数据包"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Rec frame error: %s"
+msgstr "%s: 记录帧错误: %s"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Error transferring HW decoded to system memory"
+msgstr "%s: 将解码的硬件传输到系统内存时出错"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: HW Devices: "
+msgstr "%s: 硬件设备:"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: %s (available)"
+msgstr "%s: %s（可用）"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: %s (not implemented)"
+msgstr "%s: %s（未实现）"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: netcam_decoder %s disabled."
+msgstr "%s：网络摄像头解码器 %s 已禁用。"
+
+#: src/netcam_rtsp.c
+msgid "Failed to get vaapi pix format"
+msgstr "获取 vaapi pix 格式失败"
+
+#: src/netcam_rtsp.c
+msgid "Failed to get cuda pix format"
+msgstr "获取 cuda pix 格式失败"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Interrupted."
+msgstr "%s：打断了。"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: %s: %s"
+msgstr "%s: %s: %s"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: %s: Failed"
+msgstr "%s: %s: 失败"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Decoder %s did not work."
+msgstr "%s：解码器 %s 不工作。"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Ignoring and removing the user requested decoder %s"
+msgstr "%s：忽略并删除用户请求的解码器 %s"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Initializing vaapi decoder"
+msgstr "%s：初始化 vaapi 解码器"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Unable to find vaapi hw device"
+msgstr "%s: 无法找到 vaapi 硬件设备"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Initializing cuda decoder"
+msgstr "%s：初始化 cuda 解码器"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Unable to find cuda hw device"
+msgstr "%s: 无法找到 cuda 硬件设备"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Initializing decoder"
+msgstr "%s：初始化解码器"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Decoder opened"
+msgstr "%s: 解码器打开"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Interrupted"
+msgstr "%s：打断了"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: av_read_frame: %s"
+msgstr "%s: av 读帧: %s"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: capture_rate not specified in netcam_params. Using %d"
+msgstr "%s：未在 netcam 参数中指定捕获率。使用 %d"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
+msgstr "%s：未在 netcam 参数中指定捕获率。使用帧率 %d"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Setting rtsp/rtmp"
+msgstr "%s: 设置 rtsp/rtmp"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Setting input_format mjpeg"
+msgstr "%s: 设置输入格式 mjpeg"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Setting input_format video4linux2"
+msgstr "%s: 设置输入格式 video4linux2"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Setting up movie file"
+msgstr "%s: 设置电影文件"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Setting up %s"
+msgstr "%s：设置 %s"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: option: %s = %s"
+msgstr "%s: 选项: %s = %s"
+
+#: src/netcam_rtsp.c
+msgid "Setting up v4l2 via netcam"
+msgstr "通过网络摄像头设置 v4l2"
+
+#: src/netcam_rtsp.c
+msgid "Setting up file via netcam"
+msgstr "通过网络摄像头设置文件"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "Setting up %s via netcam"
+msgstr "通过网络摄像头设置 %s"
+
+#: src/netcam_rtsp.c
+msgid "highres"
+msgstr "高分辨率"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Netcam capture_rate is %d."
+msgstr "%s：Netcam 捕获率为 %d。"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Camera source is %d FPS"
+msgstr "%s：摄像机源为 %d FPS"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Unable to determine the camera source FPS."
+msgstr "%s：无法确定摄像机源 FPS。"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: capture_rate is less than camera FPS."
+msgstr "%s：捕获率低于相机 FPS。"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Decoding errors will occur."
+msgstr "%s：会发生解码错误。"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: capture_rate slightly larger than camera FPS is recommended."
+msgstr "%s：建议使用略大于相机 FPS 的捕获率。"
+
+#: src/netcam_rtsp.c
+msgid "No FFmpeg support"
+msgstr "不支持 FFmpeg"
+
+#: src/util.c
+msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
+msgstr "使用了 %{dbeventid} 但 sql 查询开始返回没有有效的事件 ID"
+
+#: src/util.c
+msgid "pass-through enabled."
+msgstr "已启用直通。"
+
+#: src/util.c
+#, c-format
+msgid "Error setting parm >%s<"
+msgstr "设置参数时出错 >%s<"
+
+#: src/util.c
+#, c-format
+msgid "Parsed: >%s< >%s<"
+msgstr "解析：>%s< >%s<"
+
+#: src/util.c
+msgid "Parsed: >redacted< >redacted<"
+msgstr "解析：>已编辑< >已编辑<"
+
+#: src/util.c
+#, c-format
+msgid "Error parsing parm_nm controls: %s"
+msgstr "解析参数 nm 控件时出错：%s"
+
+#: src/util.c
+#, c-format
+msgid "Error parsing parm_vl controls: %s"
+msgstr "解析 parm vl 控件时出错：%s"
+
+#: src/util.c
+#, c-format
+msgid "Error setting temp: %s"
+msgstr "设置温度时出错：%s"
+
+#: src/util.c
+#, c-format
+msgid "Error reparsing controls: %s"
+msgstr "重新解析控件时出错：%s"
+
+#: src/util.c
+#, c-format
+msgid "Parsing: %s"
+msgstr "解析：%s"
+
+#: src/util.c
+msgid "Parsing: <redacted>"
+msgstr "解析：<已编辑>"
+
+#: src/util.c
+#, c-format
+msgid "Error parsing controls: %s"
+msgstr "解析控件时出错：%s"
+
+#: src/util.c
+#, c-format
+msgid "Error: %s"
+msgstr "错误：%s"
+
+#: src/util.c
+#, c-format
+msgid "New netcam_params: %s"
+msgstr "新的网络摄像头参数：%s"
+
+#: src/util.c
+#, c-format
+msgid "New netcam_high_params: %s"
+msgstr "新的网络摄像头高参数：%s"
+
+#: src/util.c
+#, c-format
+msgid "New video_params: %s"
+msgstr "新的视频参数：%s"
+
+#: src/util.c
+#, c-format
+msgid "New webcontrol_header_params: %s"
+msgstr "新的 webcontrol 标头参数：%s"
+
+#: src/util.c
+msgid "New webcontrol_header_params: <redacted>"
+msgstr "新的 webcontrol 标头参数：<redacted>"
+
+#: src/util.c
+#, c-format
+msgid "New stream_header_params: %s"
+msgstr "新的流标头参数：%s"
+
+#: src/util.c
+msgid "New stream_header_params: <redacted>"
+msgstr "新的流标头参数：<redacted>"
+
+#: src/util.c
+#, c-format
+msgid "Programming error.  Unknown configuration item: %s"
+msgstr "编程错误。未知配置项：%s "
+
+#: src/video_bktr.c
+#, c-format
+msgid "Not valid Frequency [%ld] for Source input [%i]"
+msgstr "无效频率 [%ld] 对于源输入 [%i] "
+
+#: src/video_bktr.c
+#, c-format
+msgid "Frequency [%ld] Source input [%i]"
+msgstr "频率 [%ld] 源输入 [%i]"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "%s control option value %s is below minimum.  Using minimum %d"
+msgstr "%s 控制选项值 %s 低于最小值。使用最小 %d "
+
+#: src/video_v4l2.c
+#, c-format
+msgid "%s control option value %s is above maximum.  Using maximum %d"
+msgstr "%s 控制选项值 %s 高于最大值。使用最大 %d "
+
+#: src/webu.c
+#, c-format
+msgid "Ignoring connection from: %s"
+msgstr "忽略来自: %s 的连接"
+
+#: src/webu.c
+#, c-format
+msgid "Error adding webcontrol header %s %s"
+msgstr "添加 webcontrol 标头 %s %s 时出错"
+
+#: src/webu.c src/webu_stream.c
+#, c-format
+msgid "Error adding stream header %s %s"
+msgstr "添加流标头 %s %s 时出错"
+
+#: src/webu.c
+msgid "Stream picture is not ready yet"
+msgstr "流图片尚未准备好"
+
+#: src/webu.c
+msgid "Stream process requested to finish."
+msgstr "请求完成的流处理。"
+
+#: src/webu.c
+msgid "Send page failed."
+msgstr "发送页面失败。"
+
+#: src/webu.c
+msgid "Invalid webcontrol_lock_max_ips.  Setting equal to 25."
+msgstr "无效的 webcontrol 锁定最大 ips。设置等于 25。 "

@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-04 21:33-0600\n"
-"PO-Revision-Date: 2020-01-12 17:49-0700\n"
+"POT-Creation-Date: 2021-10-03 23:12-0600\n"
+"PO-Revision-Date: 2021-10-03 22:50-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #: src/conf.c
 #, c-format
@@ -75,38 +75,6 @@ msgid "%-25s <redacted>"
 msgstr "%-25s <편집 됨>"
 
 #: src/conf.c
-msgid "Unable to locate video_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into video_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate netcam_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into netcam_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate webcontrol_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into webcontrol_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate stream_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into stream_header_params"
-msgstr ""
-
-#: src/conf.c
 #, c-format
 msgid "Processing config file %s"
 msgstr "구성 파일 %s 처리 중"
@@ -155,6 +123,14 @@ msgid "quiet"
 msgstr "조용한"
 
 #: src/conf.c
+msgid "watchdog_tmo"
+msgstr "워치독 티모"
+
+#: src/conf.c
+msgid "watchdog_kill"
+msgstr "감시견 죽이기"
+
+#: src/conf.c
 msgid "native_language"
 msgstr "모국어"
 
@@ -172,11 +148,11 @@ msgstr "대상 디렉토리"
 
 #: src/conf.c
 msgid "video_device"
-msgstr ""
+msgstr "비디오 장치"
 
 #: src/conf.c
 msgid "video_params"
-msgstr ""
+msgstr "비디오 매개변수"
 
 #: src/conf.c
 msgid "auto_brightness"
@@ -184,7 +160,7 @@ msgstr "자동 밝기"
 
 #: src/conf.c
 msgid "tuner_device"
-msgstr ""
+msgstr "튜너 장치"
 
 #: src/conf.c
 msgid "roundrobin_frames"
@@ -204,15 +180,15 @@ msgstr "넷캠 URL"
 
 #: src/conf.c
 msgid "netcam_params"
-msgstr ""
+msgstr "넷캠 매개변수"
 
 #: src/conf.c
 msgid "netcam_high_url"
-msgstr ""
+msgstr "넷캠 높은 URL"
 
 #: src/conf.c
 msgid "netcam_high_params"
-msgstr ""
+msgstr "넷캠 높은 매개변수"
 
 #: src/conf.c
 msgid "netcam_userpass"
@@ -224,7 +200,7 @@ msgstr "mmalcam 이름"
 
 #: src/conf.c
 msgid "mmalcam_params"
-msgstr ""
+msgstr "mmalcam 매개변수"
 
 #: src/conf.c
 msgid "width"
@@ -284,7 +260,7 @@ msgstr "모션 에뮬레이션"
 
 #: src/conf.c
 msgid "pause"
-msgstr ""
+msgstr "정지시키다"
 
 #: src/conf.c
 msgid "threshold"
@@ -532,7 +508,7 @@ msgstr "webcontrol 키"
 
 #: src/conf.c
 msgid "webcontrol_header_params"
-msgstr ""
+msgstr "webcontrol 헤더 매개변수"
 
 #: src/conf.c
 msgid "stream_port"
@@ -556,7 +532,7 @@ msgstr "스트림 tls"
 
 #: src/conf.c
 msgid "stream_header_params"
-msgstr ""
+msgstr "스트림 헤더 매개변수"
 
 #: src/conf.c
 msgid "stream_preview_scale"
@@ -736,15 +712,15 @@ msgstr "카메라 디렉토리"
 
 #: src/dbse.c
 msgid "Closing MySQL library"
-msgstr ""
+msgstr "MySQL 라이브러리 닫기"
 
 #: src/dbse.c
 msgid "Closing MariaDB library"
-msgstr ""
+msgstr "MariaDB 라이브러리 닫기"
 
 #: src/dbse.c
 msgid "Database closed"
-msgstr ""
+msgstr "데이터베이스 닫힘"
 
 #: src/dbse.c
 msgid "Initializing database"
@@ -775,7 +751,7 @@ msgstr "성공"
 #: src/dbse.c
 #, c-format
 msgid "Can't open SQLite3 database %s : %s"
-msgstr ""
+msgstr "SQLite3 데이터베이스 %s을(를) 열 수 없습니다: %s"
 
 #: src/dbse.c
 #, c-format
@@ -801,11 +777,13 @@ msgstr "MySQL 오류는 %s입니다"
 #, c-format
 msgid "Cannot connect to MariaDB database %s on host %s with user %s"
 msgstr ""
+"사용자 %s이(가) 있는 호스트 %s의 MariaDB 데이터베이스 %s에 연결할 수 없습니"
+"다."
 
 #: src/dbse.c
 #, c-format
 msgid "MariaDB error was %s"
-msgstr ""
+msgstr "MariaDB 오류는 %s입니다."
 
 #: src/dbse.c
 msgid "SQLite3 using shared handle"
@@ -823,12 +801,12 @@ msgstr "데이터베이스 백엔드 %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
-msgstr ""
+msgstr "MySQL 쿼리 실행"
 
 #: src/dbse.c
 #, c-format
 msgid "MySQL query failed %s error code %d"
-msgstr ""
+msgstr "MySQL 쿼리 실패 %s 오류 코드 %d"
 
 #: src/dbse.c
 #, c-format
@@ -842,21 +820,21 @@ msgstr ""
 #: src/dbse.c
 #, c-format
 msgid "Re-Connection to MySQL database '%s' Succeed"
-msgstr ""
+msgstr "MySQL 데이터베이스 '%s'에 대한 재연결 성공"
 
 #: src/dbse.c
 #, c-format
 msgid "after re-connection MySQL query failed %s error code %d"
-msgstr ""
+msgstr "재연결 후 MySQL 쿼리 실패 %s 오류 코드 %d"
 
 #: src/dbse.c
 msgid "Executing MariaDB query"
-msgstr ""
+msgstr "MariaDB 쿼리 실행"
 
 #: src/dbse.c
 #, c-format
 msgid "MariaDB query failed %s error code %d"
-msgstr ""
+msgstr "MariaDB 쿼리 실패 %s 오류 코드 %d"
 
 #: src/dbse.c
 #, c-format
@@ -864,30 +842,32 @@ msgid ""
 "Cannot reconnect to MariaDB database %s on host %s with user %s MariaDB "
 "error was %s"
 msgstr ""
+"사용자 %s MariaDB가 있는 %s 호스트의 MariaDB 데이터베이스 %s에 다시 연결할 "
+"수 없습니다.오류는 %s입니다."
 
 #: src/dbse.c
 #, c-format
 msgid "Re-Connection to MariaDB database '%s' Succeed"
-msgstr ""
+msgstr "MariaDB 데이터베이스 '%s'에 대한 재연결 성공"
 
 #: src/dbse.c
 #, c-format
 msgid "after re-connection MariaDB query failed %s error code %d"
-msgstr ""
+msgstr "재연결 후 MariaDB 쿼리 실패 %s 오류 코드 %d"
 
 #: src/dbse.c
 #, c-format
 msgid "Re-connected to PostgreSQL database '%s'"
-msgstr ""
+msgstr "PostgreSQL 데이터베이스 '%s'에 다시 연결되었습니다."
 
 #: src/dbse.c
 msgid "Executing PostgreSQL query"
-msgstr ""
+msgstr "PostgreSQL 쿼리 실행"
 
 #: src/dbse.c
 #, c-format
 msgid "Attempting reconnect to PostgreSQL database '%s': %s"
-msgstr ""
+msgstr "PostgreSQL 데이터베이스 '%s'에 대한 재연결 시도: %s"
 
 #: src/dbse.c
 #, c-format
@@ -897,21 +877,21 @@ msgstr "PGSQL 쿼리 실패 : [%s] %s %s"
 #: src/dbse.c
 #, c-format
 msgid "INSERT ... RETURNING VALUE=\"%s\""
-msgstr ""
+msgstr "삽입 ... 반환 값=\"%s\""
 
 #: src/dbse.c
 #, c-format
 msgid "Invalid event ID returned by SQL query \"%s\""
-msgstr ""
+msgstr "SQL 쿼리 \"%s\"에서 잘못된 이벤트 ID를 반환했습니다."
 
 #: src/dbse.c
 msgid "Executing SQLite3 query"
-msgstr ""
+msgstr "SQLite3 쿼리 실행"
 
 #: src/dbse.c
 #, c-format
 msgid "SQLite3 error was %s"
-msgstr ""
+msgstr "SQLite3 오류는 %s입니다."
 
 #: src/event.c src/track.c
 #, c-format
@@ -922,11 +902,6 @@ msgstr "외부 명령 ' %s'을 (를) 시작할 수 없습니다"
 #, c-format
 msgid "Executing external command '%s'"
 msgstr "외부 명령 ' %s'실행"
-
-#: src/event.c
-#, c-format
-msgid "File of type %ld saved to: %s"
-msgstr "%ld 유형의 파일이 %s에 저장되었습니다."
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -961,6 +936,11 @@ msgstr "닫기 : extpipe 파일 설명 %d, 오류 상태 %d"
 #, c-format
 msgid "pclose return: %d"
 msgstr "반품 마감 : %d"
+
+#: src/event.c
+#, c-format
+msgid "Source FPS %d"
+msgstr "소스 FPS %d"
 
 #: src/event.c
 #, c-format
@@ -1014,11 +994,6 @@ msgstr "파이프 쓰기 오류, 상태 오류 %d"
 #, c-format
 msgid "pipe %s not created or closed already "
 msgstr "파이프 %s이 (가) 작성되지 않았거나 닫혔습니다"
-
-#: src/event.c
-#, c-format
-msgid "Source FPS %d"
-msgstr "소스 FPS %d"
 
 #: src/event.c
 msgid "The ogg container is no longer supported.  Changing to mpeg4"
@@ -2049,7 +2024,7 @@ msgstr "이제 netcam setup을 호출합니다. mjpg ()"
 #: src/netcam.c
 #, c-format
 msgid "Invalid netcam service '%s' - must be mjpeg, ftp, mjpg or jpeg."
-msgstr ""
+msgstr "잘못된 넷캠 서비스 '%s' - mjpeg, ftp, mjpg 또는 jpeg여야 합니다."
 
 #: src/netcam.c src/netcam_rtsp.c
 #, c-format
@@ -2630,12 +2605,12 @@ msgstr "그릇된"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Ignoring packet with invalid data"
-msgstr ""
+msgstr "%s: 잘못된 데이터가 있는 패킷을 무시합니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Rec frame error: %s"
-msgstr ""
+msgstr "%s: 녹화 프레임 오류: %s"
 
 #: src/netcam_rtsp.c
 msgid "Ignoring packet with invalid data"
@@ -2649,7 +2624,7 @@ msgstr "패킷 디코딩 오류 : %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Error transferring HW decoded to system memory"
-msgstr ""
+msgstr "%s: 디코딩된 HW를 시스템 메모리로 전송하는 동안 오류가 발생했습니다."
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2663,80 +2638,80 @@ msgstr "비디오 패킷 디코딩 오류 : 버퍼로 복사"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: HW Devices: "
-msgstr ""
+msgstr "%s: 하드웨어 장치:"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s (available)"
-msgstr ""
+msgstr "%s: %s(사용 가능)"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s (not implemented)"
-msgstr ""
+msgstr "%s: %s(구현되지 않음)"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: netcam_decoder %s disabled."
-msgstr ""
+msgstr "%s: 넷캠 디코더 %s이(가) 비활성화되었습니다."
 
 #: src/netcam_rtsp.c
 msgid "Failed to get vaapi pix format"
-msgstr ""
+msgstr "vaapi pix 형식을 가져오지 못했습니다."
 
 #: src/netcam_rtsp.c
 msgid "Failed to get cuda pix format"
-msgstr ""
+msgstr "cuda pix 형식을 가져오지 못했습니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Interrupted."
-msgstr ""
+msgstr "%s: 중단되었습니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s: %s"
-msgstr ""
+msgstr "%s: %s: %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s: Failed"
-msgstr ""
+msgstr "%s: %s: 실패"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Decoder %s did not work."
-msgstr ""
+msgstr "%s: 디코더 %s이(가) 작동하지 않았습니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Ignoring and removing the user requested decoder %s"
-msgstr ""
+msgstr "%s: 사용자가 요청한 디코더 %s 무시 및 제거"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Initializing vaapi decoder"
-msgstr ""
+msgstr "%s: vaapi 디코더 초기화 중"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to find vaapi hw device"
-msgstr ""
+msgstr "%s: vaapi hw 장치를 찾을 수 없습니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Initializing cuda decoder"
-msgstr ""
+msgstr "%s: cuda 디코더 초기화 중"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to find cuda hw device"
-msgstr ""
+msgstr "%s: cuda hw 장치를 찾을 수 없습니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Initializing decoder"
-msgstr ""
+msgstr "%s: 디코더 초기화 중"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2746,7 +2721,7 @@ msgstr "%s : 디코더 사용 %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Decoder opened"
-msgstr ""
+msgstr "%s: 디코더가 열렸습니다."
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2797,22 +2772,23 @@ msgstr "출력 버퍼에 프레임을 넣는 중 오류 발생 : %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Interrupted"
-msgstr ""
+msgstr "%s: 중단됨"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: av_read_frame: %s"
-msgstr ""
+msgstr "%s: av 읽기 프레임: %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using %d"
-msgstr ""
+msgstr "%s: netcam 매개변수에 캡처 속도가 지정되지 않았습니다. %d 사용"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
 msgstr ""
+"%s: netcam 매개변수에 캡처 속도가 지정되지 않았습니다. 프레임 속도 %d 사용 중"
 
 #: src/netcam_rtsp.c
 msgid "The network camera is sending pictures in a different"
@@ -2882,49 +2858,49 @@ msgstr "CPU 사용률을 낮추려면 YUV420P로 사진 형식을 지정하십�
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting rtsp/rtmp"
-msgstr ""
+msgstr "%s: rtsp/rtmp 설정 중"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting input_format mjpeg"
-msgstr ""
+msgstr "%s: 입력 형식 mjpeg 설정 중"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting input_format video4linux2"
-msgstr ""
+msgstr "%s: 입력 형식 video4linux2 설정"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting up movie file"
-msgstr ""
+msgstr "%s: 동영상 파일 설정 중"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting up %s"
-msgstr ""
+msgstr "%s: %s 설정 중"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: option: %s = %s"
-msgstr ""
+msgstr "%s: 옵션: %s = %s"
 
 #: src/netcam_rtsp.c
 msgid "Setting up v4l2 via netcam"
-msgstr ""
+msgstr "netcam을 통해 v4l2 설정"
 
 #: src/netcam_rtsp.c
 msgid "Setting up file via netcam"
-msgstr ""
+msgstr "넷캠을 통한 파일 설정"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Setting up %s via netcam"
-msgstr ""
+msgstr "netcam을 통해 %s 설정"
 
 #: src/netcam_rtsp.c
 msgid "highres"
-msgstr ""
+msgstr "고해상도"
 
 #: src/netcam_rtsp.c
 msgid "norm"
@@ -2995,32 +2971,32 @@ msgstr "%s : 카메라 ( %s) 연결"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Netcam capture_rate is %d."
-msgstr ""
+msgstr "%s: Netcam 캡처 속도는 %d입니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Camera source is %d FPS"
-msgstr ""
+msgstr "%s: 카메라 소스는 %d FPS입니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to determine the camera source FPS."
-msgstr ""
+msgstr "%s: 카메라 소스 FPS를 결정할 수 없습니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate is less than camera FPS."
-msgstr ""
+msgstr "%s: 캡처 속도가 카메라 FPS보다 낮습니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Decoding errors will occur."
-msgstr ""
+msgstr "%s: 디코딩 오류가 발생합니다."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate slightly larger than camera FPS is recommended."
-msgstr ""
+msgstr "%s: 카메라 FPS보다 약간 더 큰 캡처 속도를 권장합니다."
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3067,7 +3043,7 @@ msgstr "RTSP 높은 컨텍스트를 만들 수 없습니다"
 
 #: src/netcam_rtsp.c
 msgid "No FFmpeg support"
-msgstr ""
+msgstr "FFmpeg 지원 없음"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3459,6 +3435,8 @@ msgstr "파일 닫기 오류"
 #: src/util.c
 msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
 msgstr ""
+"%{dbventid}를 사용했지만 SQL 쿼리 시작에서 유효한 이벤트 ID가 반환되지 않았습"
+"니다."
 
 #: src/util.c
 #, c-format
@@ -3476,104 +3454,80 @@ msgstr "FFMPEG 버전이 너무 오래되었습니다. 통과 처리 비활성�
 
 #: src/util.c
 msgid "pass-through enabled."
-msgstr ""
+msgstr "통과 가능."
 
 #: src/util.c
 #, c-format
 msgid "Error setting parm >%s<"
-msgstr ""
-
-#: src/util.c
-msgid "Error setting parm >redacted<"
-msgstr ""
+msgstr "매개변수 >%s<을(를) 설정하는 동안 오류가 발생했습니다."
 
 #: src/util.c
 #, c-format
 msgid "Parsed: >%s< >%s<"
-msgstr ""
+msgstr "구문 분석: >%s< >%s<"
 
 #: src/util.c
 msgid "Parsed: >redacted< >redacted<"
-msgstr ""
+msgstr "구문 분석: >수정됨< >수정됨<"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing parm_nm controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing parm_nm controls: <redacted>"
-msgstr ""
+msgstr "parm nm 컨트롤을 구문 분석하는 동안 오류 발생: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing parm_vl controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing parm_vl controls: <redacted>"
-msgstr ""
+msgstr "parm vl 컨트롤을 구문 분석하는 동안 오류 발생: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error setting temp: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error setting temp: <redacted>"
-msgstr ""
+msgstr "온도 설정 오류: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error reparsing controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error reparsing controls: <redacted>"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "Parsing controls: %s"
-msgstr "파싱 ​​컨트롤 : %s"
-
-#: src/util.c
-msgid "Parsing controls: <redacted>"
-msgstr ""
+msgstr "컨트롤을 다시 분석하는 동안 오류 발생: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing controls: <redacted>"
-msgstr ""
+msgstr "컨트롤 구문 분석 오류: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error: %s"
-msgstr ""
+msgstr "오류: %s"
 
 #: src/util.c
 #, c-format
 msgid "New netcam_params: %s"
-msgstr ""
+msgstr "새 넷캠 매개변수: %s"
 
 #: src/util.c
 #, c-format
 msgid "New netcam_high_params: %s"
-msgstr ""
+msgstr "새 netcam 상위 매개변수: %s"
 
 #: src/util.c
 #, c-format
 msgid "New video_params: %s"
-msgstr ""
+msgstr "새 비디오 매개변수: %s"
+
+#: src/util.c
+#, c-format
+msgid "New stream_header_params: %s"
+msgstr "새 스트림 헤더 매개변수: %s"
+
+#: src/util.c
+msgid "New stream_header_params: <redacted>"
+msgstr "새 스트림 헤더 매개변수: <편집됨>"
 
 #: src/util.c
 #, c-format
 msgid "Programming error.  Unknown configuration item: %s"
-msgstr ""
+msgstr "프로그래밍 오류입니다. 알 수 없는 구성 항목: %s "
 
 #: src/video_bktr.c
 #, c-format
@@ -3651,12 +3605,12 @@ msgstr "[ %d / %d]까지 규범 %d"
 #: src/video_bktr.c
 #, c-format
 msgid "Not valid Frequency [%ld] for Source input [%i]"
-msgstr ""
+msgstr "유효하지 않은 빈도[%ld]입니다. 소스 입력 [%i]의 경우"
 
 #: src/video_bktr.c
 #, c-format
 msgid "Frequency [%ld] Source input [%i]"
-msgstr ""
+msgstr "주파수 [%ld] 소스 입력 [%i]"
 
 #: src/video_bktr.c
 #, c-format
@@ -3898,12 +3852,12 @@ msgstr "제어 \" %s \"를 값 %d (으)로 설정"
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %s is below minimum.  Using minimum %d"
-msgstr ""
+msgstr "%s 제어 옵션 값 %s이(가) 최소값 미만입니다. 최소 %d 사용 "
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %s is above maximum.  Using maximum %d"
-msgstr ""
+msgstr "%s 제어 옵션 값 %s이(가) 최대값을 초과합니다. 최대 %d 사용 "
 
 #: src/video_v4l2.c
 msgid "control type not supported yet"
@@ -4210,11 +4164,6 @@ msgstr "값을 null / zero로 설정"
 
 #: src/webu.c
 #, c-format
-msgid "Connection from: %s"
-msgstr "연결 : %s"
-
-#: src/webu.c
-#, c-format
 msgid "Failed authentication from %s"
 msgstr "%s의 인증 실패"
 
@@ -4233,12 +4182,12 @@ msgstr "잘못된 답변"
 #: src/webu.c
 #, c-format
 msgid "Error adding webcontrol header %s %s"
-msgstr ""
+msgstr "웹 컨트롤 헤더 %s %s을(를) 추가하는 동안 오류가 발생했습니다."
 
 #: src/webu.c src/webu_stream.c
 #, c-format
 msgid "Error adding stream header %s %s"
-msgstr ""
+msgstr "스트림 헤더 %s %s을(를) 추가하는 동안 오류가 발생했습니다."
 
 #: src/webu.c
 #, c-format
@@ -4247,20 +4196,25 @@ msgstr "요청 된 잘못된 방법 : %s"
 
 #: src/webu.c
 #, c-format
+msgid "Connection from: %s"
+msgstr "연결 : %s"
+
+#: src/webu.c
+#, c-format
 msgid "send page failed %d"
 msgstr "페이지 전송 실패 %d"
 
 #: src/webu.c
 msgid "Stream picture is not ready yet"
-msgstr ""
+msgstr "스트림 사진이 아직 준비되지 않았습니다."
 
 #: src/webu.c
 msgid "Stream process requested to finish."
-msgstr ""
+msgstr "스트림 프로세스가 완료되도록 요청되었습니다."
 
 #: src/webu.c
 msgid "Send page failed."
-msgstr ""
+msgstr "페이지 보내기에 실패했습니다."
 
 #: src/webu.c
 msgid "Basic authentication: available"
@@ -4359,6 +4313,10 @@ msgstr "카메라 %d의 스트림을 시작할 수 없습니다"
 #, c-format
 msgid "Duplicate port requested %d"
 msgstr "중복 포트 요청 %d"
+
+#: src/webu.c
+msgid "Invalid webcontrol_lock_max_ips.  Setting equal to 25."
+msgstr "잘못된 webcontrol 잠금 최대 IP입니다. 25와 동일하게 설정합니다. "
 
 #: src/webu_html.c
 msgid "Cameras"
@@ -4513,231 +4471,57 @@ msgstr "이미지를 스트리밍 할 수 없습니다."
 msgid "'%s' option is depreciated.  New option name is '%s'"
 msgstr "' %s'옵션이 감가 상각되었습니다. 새로운 옵션 이름은 '%s' 입니다"
 
-#~ msgid "Unable to locate vid_control_params"
-#~ msgstr "Vid 컨트롤 매개 변수를 찾을 수 없습니다"
-
-#~ msgid "No value provided to put into vid_control_params"
-#~ msgstr "vid control params에 입력 할 값이 없습니다."
-
-#~ msgid "Error compiling regex in copy_uri"
-#~ msgstr "복사 URI에서 정규식 컴파일 오류"
-
-#~ msgid "Invalid origin for cors_header in copy_uri"
-#~ msgstr "copy URI의 cors 헤더에 대한 잘못된 출처"
-
-#~ msgid "videodevice"
-#~ msgstr "비디오 장치"
-
-#~ msgid "vid_control_params"
-#~ msgstr "vid 제어 매개 변수"
-
-#~ msgid "v4l2_palette"
-#~ msgstr "v4l2 팔레트"
-
-#~ msgid "input"
-#~ msgstr "입력"
-
-#~ msgid "frequency"
-#~ msgstr "회수"
-
-#~ msgid "tunerdevice"
-#~ msgstr "튜너 장치"
-
-#~ msgid "netcam_highres"
-#~ msgstr "넷캠 고어"
-
-#~ msgid "netcam_keepalive"
-#~ msgstr "넷캠 킵 얼라이브"
-
-#~ msgid "netcam_proxy"
-#~ msgstr "넷캠 프록시"
-
-#~ msgid "netcam_tolerant_check"
-#~ msgstr "넷캠 허용 검사"
-
-#~ msgid "netcam_use_tcp"
-#~ msgstr "넷캠 사용 TCP"
-
-#~ msgid "netcam_decoder"
-#~ msgstr "넷캠 디코더"
-
-#~ msgid "mmalcam_control_params"
-#~ msgstr "mmalcam 제어 매개 변수"
-
-#~ msgid "webcontrol_cors_header"
-#~ msgstr "webcontrol cors 헤더"
-
-#~ msgid "stream_cors_header"
-#~ msgstr "스트림 코르 헤더"
-
-#~ msgid "Ignoring empty sql query"
-#~ msgstr "빈 SQL 쿼리 무시"
-
-#~ msgid "Executing mysql query"
-#~ msgstr "MySQL 쿼리 실행"
-
-#~ msgid "Mysql query failed %s error code %d"
-#~ msgstr "MySQL 쿼리 실패 %s 오류 코드 %d"
-
-#~ msgid "Re-Connection to Mysql database '%s' Succeed"
-#~ msgstr "MySQL 데이터베이스 ' %s'에 다시 연결 성공"
-
-#~ msgid "after re-connection Mysql query failed %s error code %d"
-#~ msgstr "재 연결 후 MySQL 쿼리 실패 %s 오류 코드 %d"
-
-#~ msgid "Executing postgresql query"
-#~ msgstr "postgresql 쿼리 실행"
-
-#~ msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
-#~ msgstr "PostgreSQL 데이터베이스 ' %s'에 다시 연결하지 못했습니다 : %s"
-
-#~ msgid "Re-Connection to PostgreSQL database '%s' Succeed"
-#~ msgstr "PostgreSQL 데이터베이스 ' %s'에 다시 연결 성공"
-
-#~ msgid "Executing sqlite query"
-#~ msgstr "sqlite 쿼리 실행"
-
-#~ msgid "SQLite error was %s"
-#~ msgstr "SQLite 오류는 %s입니다."
-
-#~ msgid "No ffmpeg support"
-#~ msgstr "ffmpeg 지원 안함"
-
-#~ msgid "Closing MYSQL"
-#~ msgstr "MYSQL 닫기"
-
-#~ msgid "Can't open database %s : %s"
-#~ msgstr "데이터베이스 %s을 (를) 열 수 없습니다 : %s"
-
-#~ msgid "Problem enabling motion-stream server in port %d"
-#~ msgstr "포트 %d에서 모션 스트림 서버 활성화 문제"
-
-#~ msgid "Started motion-stream server on port %d (auth %s)"
-#~ msgstr "포트 %d에서 모션 스트림 서버 시작 (인증 %s)"
-
-#~ msgid "pass-through is enabled but is still experimental."
-#~ msgstr "통과가 활성화되었지만 여전히 실험 중입니다."
-
-#~ msgid "Using port number %d"
-#~ msgstr "포트 번호 %d 사용"
-
-#~ msgid ""
-#~ "Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or "
-#~ "jpeg."
-#~ msgstr ""
-#~ "잘못된 넷캠 서비스 ' %s'-http, ftp, mjpg, mjpeg, v4l2 또는 jpeg 여야합니"
-#~ "다."
-
-#~ msgid "Error receiving frame from codec: %s"
-#~ msgstr "코덱에서 프레임을받는 중 오류 : %s"
-
-#~ msgid "%s: %s: %s,Interrupt %s"
-#~ msgstr "%s : %s : %s, 인터럽트 %s"
-
-#~ msgid "%s: %s: Failed,Interrupt %s"
-#~ msgstr "%s : %s : 실패, 인터럽트 %s"
-
-#~ msgid "%s: Ignoring user requested decoder %s"
-#~ msgstr "%s : 사용자 요청 디코더 무시 %s"
-
-#~ msgid "%s: av_read_frame: %s ,Interrupt: %s"
-#~ msgstr "%s : av 읽기 프레임 : %s, 인터럽트 : %s"
-
-#~ msgid "%s: Setting http input_format mjpeg"
-#~ msgstr "%s : http 입력 형식 mjpeg 설정"
-
-#~ msgid "%s: Setting rtsp transport to tcp"
-#~ msgstr "%s : rtsp 전송을 tcp로 설정"
-
-#~ msgid "%s: Setting rtsp transport to udp"
-#~ msgstr "%s : RTSP 전송을 UDP로 설정"
-
-#~ msgid "%s: Setting attributes to read file"
-#~ msgstr "%s : 파일을 읽을 속성 설정"
-
-#~ msgid "%s: Requested v4l2_palette option: %d"
-#~ msgstr "%s : 요청 된 v4l2 팔레트 옵션 : %d"
-
-#~ msgid "%s: Requested FOURCC code: %s"
-#~ msgstr "%s : 요청 된 FOURCC 코드 : %s"
-
-#~ msgid "%s: Setting v4l2 input_format: %s"
-#~ msgstr "%s : v4l2 입력 형식 설정 : %s"
-
-#~ msgid "%s: Setting v4l2 framerate: %s"
-#~ msgstr "%s : v4l2 프레임 속도 설정 : %s"
-
-#~ msgid "%s: Setting v4l2 video_size: %s"
-#~ msgstr "%s : v4l2 비디오 크기 설정 : %s"
-
-#~ msgid "Proxies not supported using for %s"
-#~ msgstr "%s에 대해 프록시가 지원되지 않습니다"
-
-#~ msgid "Setting up v4l2 via ffmpeg netcam"
-#~ msgstr "ffmpeg netcam을 통해 v4l2 설정"
-
-#~ msgid "Setting up file via ffmpeg netcam"
-#~ msgstr "ffmpeg netcam을 통한 파일 설정"
-
-#~ msgid "Setting up http via ffmpeg netcam"
-#~ msgstr "ffmpeg netcam을 통해 http 설정"
-
-#~ msgid "Setting up %s via ffmpeg netcam"
-#~ msgstr "ffmpeg netcam을 통한 %s 설정"
-
-#~ msgid "High resolution"
-#~ msgstr "높은 해상도"
-
-#~ msgid "Normal resolution"
-#~ msgstr "일반 해상도"
-
-#~ msgid "ffmpeg too old"
-#~ msgstr "너무 오래된 ffmpeg"
-
-#~ msgid "%s: Invalid camera service"
-#~ msgstr "%s : 잘못된 카메라 서비스"
-
-#~ msgid "%s: Unable to open camera(%s)"
-#~ msgstr "%s : 카메라를 열 수 없습니다 ( %s)"
-
-#~ msgid "Requested frame rate %d FPS is less than camera frame rate %d FPS"
-#~ msgstr "요청한 프레임 속도 %d FPS가 카메라 프레임 속도 %d FPS보다 작습니다."
-
-#~ msgid "Increasing capture rate to %d FPS to match camera."
-#~ msgstr "카메라와 일치시키기 위해 캡처 속도를 %d FPS로 증가"
-
-#~ msgid ""
-#~ "To lower CPU, change camera FPS to lower rate and decrease I frame "
-#~ "interval."
-#~ msgstr ""
-#~ "CPU를 낮추려면 카메라 FPS를 낮은 속도로 변경하고 I 프레임 간격을 줄입니다."
-
-#~ msgid "FFmpeg/Libav not found on computer.  No RTSP support"
-#~ msgstr "컴퓨터에서 FFmpeg / Libav를 찾을 수 없습니다. RTSP 지원 안함"
-
-#~ msgid "Not valid Frequency [%lu] for Source input [%i]"
-#~ msgstr "유효하지 않은 주파수 [%lu] 소스 입력 [%i]"
-
-#~ msgid "Frequency [%lu] Source input [%i]"
-#~ msgstr "주파수 [ %lu] 소스 입력 [ %i]"
-
-#~ msgid "BKTR is not enabled."
-#~ msgstr "BKTR이 활성화되어 있지 않습니다."
-
-#~ msgid "%s control option value %d is below minimum.  Using minimum"
-#~ msgstr "%s 제어 옵션 값 %d이 (가) 최소값보다 낮습니다. 최소 사용"
-
-#~ msgid "%s control option value %d is above maximum.  Using maximum"
-#~ msgstr "%s 제어 옵션 값 %d이 (가) 최대 값보다 큽니다. 최대 사용"
-
-#~ msgid "1) vid_source->pframe %i"
-#~ msgstr "1) vid source-> pframe %i"
-
-#~ msgid "the_buffer index %d Address (%x)"
-#~ msgstr "버퍼 인덱스 %d 주소 ( %x)"
-
-#~ msgid "Invalid url: %s"
-#~ msgstr "잘못된 URL : %s"
-
-#~ msgid "Error decoding url"
-#~ msgstr "URL 디코딩 오류"
+#: src/conf.c
+msgid "webcontrol_lock_minutes"
+msgstr "webcontrol 잠금 시간"
+
+#: src/conf.c
+msgid "webcontrol_lock_attempts"
+msgstr "webcontrol 잠금 시도"
+
+#: src/conf.c
+msgid "webcontrol_lock_max_ips"
+msgstr "webcontrol 잠금 최대 ips"
+
+#: src/event.c
+#, c-format
+msgid "Writing image to file: %s"
+msgstr "파일에 이미지 쓰기: %s"
+
+#: src/event.c
+#, c-format
+msgid "Writing movie to file: %s"
+msgstr "파일에 동영상 쓰기: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved image to file: %s"
+msgstr "파일에 이미지 저장: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved movie to file: %s"
+msgstr "파일에 저장된 동영상: %s"
+
+#: src/util.c
+#, c-format
+msgid "Parsing: %s"
+msgstr "구문 분석: %s"
+
+#: src/util.c
+msgid "Parsing: <redacted>"
+msgstr "구문 분석: <편집됨>"
+
+#: src/util.c
+#, c-format
+msgid "New webcontrol_header_params: %s"
+msgstr "새 웹 컨트롤 헤더 매개변수: %s"
+
+#: src/util.c
+msgid "New webcontrol_header_params: <redacted>"
+msgstr "새로운 webcontrol 헤더 매개변수: <편집됨>"
+
+#: src/webu.c
+#, c-format
+msgid "Ignoring connection from: %s"
+msgstr "연결 무시: %s"

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-04 21:33-0600\n"
+"POT-Creation-Date: 2021-10-03 23:12-0600\n"
 "PO-Revision-Date: 2020-01-12 17:45-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -75,38 +75,6 @@ msgid "%-25s <redacted>"
 msgstr "%-25s <korjattu>"
 
 #: src/conf.c
-msgid "Unable to locate video_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into video_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate netcam_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into netcam_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate webcontrol_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into webcontrol_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate stream_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into stream_header_params"
-msgstr ""
-
-#: src/conf.c
 #, c-format
 msgid "Processing config file %s"
 msgstr "Prosessoidaan konfigurointitiedostoa %s"
@@ -155,6 +123,14 @@ msgid "quiet"
 msgstr "hiljainen"
 
 #: src/conf.c
+msgid "watchdog_tmo"
+msgstr "vahtikoira tmo"
+
+#: src/conf.c
+msgid "watchdog_kill"
+msgstr "vahtikoira tappaa"
+
+#: src/conf.c
 msgid "native_language"
 msgstr "äidinkieli"
 
@@ -172,11 +148,11 @@ msgstr "kohdeohjaaja"
 
 #: src/conf.c
 msgid "video_device"
-msgstr ""
+msgstr "videolaite"
 
 #: src/conf.c
 msgid "video_params"
-msgstr ""
+msgstr "videopalvelut"
 
 #: src/conf.c
 msgid "auto_brightness"
@@ -184,7 +160,7 @@ msgstr "automaattinen kirkkaus"
 
 #: src/conf.c
 msgid "tuner_device"
-msgstr ""
+msgstr "viritin laite"
 
 #: src/conf.c
 msgid "roundrobin_frames"
@@ -204,15 +180,15 @@ msgstr "netcam url"
 
 #: src/conf.c
 msgid "netcam_params"
-msgstr ""
+msgstr "netcam -avustajat"
 
 #: src/conf.c
 msgid "netcam_high_url"
-msgstr ""
+msgstr "netcam korkea url"
 
 #: src/conf.c
 msgid "netcam_high_params"
-msgstr ""
+msgstr "netcam high params"
 
 #: src/conf.c
 msgid "netcam_userpass"
@@ -224,7 +200,7 @@ msgstr "mmalcam nimi"
 
 #: src/conf.c
 msgid "mmalcam_params"
-msgstr ""
+msgstr "mmalcam -avustajat"
 
 #: src/conf.c
 msgid "width"
@@ -284,7 +260,7 @@ msgstr "jäljitellä liikettä"
 
 #: src/conf.c
 msgid "pause"
-msgstr ""
+msgstr "tauko"
 
 #: src/conf.c
 msgid "threshold"
@@ -532,7 +508,7 @@ msgstr "web-avain"
 
 #: src/conf.c
 msgid "webcontrol_header_params"
-msgstr ""
+msgstr "webcontrol -otsikon parametrit"
 
 #: src/conf.c
 msgid "stream_port"
@@ -556,7 +532,7 @@ msgstr "stream tls"
 
 #: src/conf.c
 msgid "stream_header_params"
-msgstr ""
+msgstr "stream header params"
 
 #: src/conf.c
 msgid "stream_preview_scale"
@@ -736,15 +712,15 @@ msgstr "kameraohjaus"
 
 #: src/dbse.c
 msgid "Closing MySQL library"
-msgstr ""
+msgstr "MySQL -kirjaston sulkeminen"
 
 #: src/dbse.c
 msgid "Closing MariaDB library"
-msgstr ""
+msgstr "MariaDB -kirjasto suljetaan"
 
 #: src/dbse.c
 msgid "Database closed"
-msgstr ""
+msgstr "Tietokanta suljettu"
 
 #: src/dbse.c
 msgid "Initializing database"
@@ -775,7 +751,7 @@ msgstr "MENESTYS"
 #: src/dbse.c
 #, c-format
 msgid "Can't open SQLite3 database %s : %s"
-msgstr ""
+msgstr "SQLite3 -tietokantaa %s ei voi avata: %s"
 
 #: src/dbse.c
 #, c-format
@@ -803,11 +779,13 @@ msgstr "MySQL-virhe oli %s"
 #, c-format
 msgid "Cannot connect to MariaDB database %s on host %s with user %s"
 msgstr ""
+"Ei voi muodostaa yhteyttä MariaDB -tietokantaan %s isännällä %s käyttäjän %s "
+"kanssa"
 
 #: src/dbse.c
 #, c-format
 msgid "MariaDB error was %s"
-msgstr ""
+msgstr "MariaDB -virhe oli %s"
 
 #: src/dbse.c
 msgid "SQLite3 using shared handle"
@@ -825,12 +803,12 @@ msgstr "Tietokannan taustaohjelma %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
-msgstr ""
+msgstr "MySQL -kyselyn suorittaminen"
 
 #: src/dbse.c
 #, c-format
 msgid "MySQL query failed %s error code %d"
-msgstr ""
+msgstr "MySQL -kysely epäonnistui %s -virhekoodi %d"
 
 #: src/dbse.c
 #, c-format
@@ -844,21 +822,23 @@ msgstr ""
 #: src/dbse.c
 #, c-format
 msgid "Re-Connection to MySQL database '%s' Succeed"
-msgstr ""
+msgstr "Yhteyden muodostaminen uudelleen MySQL-tietokantaan%s onnistuu"
 
 #: src/dbse.c
 #, c-format
 msgid "after re-connection MySQL query failed %s error code %d"
 msgstr ""
+"uudelleen yhteyden muodostamisen jälkeen MySQL-kysely epäonnistui %s "
+"virhekoodi %d"
 
 #: src/dbse.c
 msgid "Executing MariaDB query"
-msgstr ""
+msgstr "Suoritetaan MariaDB -kysely"
 
 #: src/dbse.c
 #, c-format
 msgid "MariaDB query failed %s error code %d"
-msgstr ""
+msgstr "MariaDB -kysely epäonnistui %s -virhekoodi %d"
 
 #: src/dbse.c
 #, c-format
@@ -866,30 +846,34 @@ msgid ""
 "Cannot reconnect to MariaDB database %s on host %s with user %s MariaDB "
 "error was %s"
 msgstr ""
+"Yhteyttä MariaDB -tietokantaan %s ei voi muodostaa uudelleen palvelimella %s "
+"käyttäjän %s MariaDB kanssavirhe oli %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Re-Connection to MariaDB database '%s' Succeed"
-msgstr ""
+msgstr "Yhteyden muodostaminen uudelleen MariaDB-tietokantaan '%s' onnistui"
 
 #: src/dbse.c
 #, c-format
 msgid "after re-connection MariaDB query failed %s error code %d"
 msgstr ""
+"yhteyden muodostamisen jälkeen MariaDB-kysely epäonnistui %s -virhekoodi %d"
 
 #: src/dbse.c
 #, c-format
 msgid "Re-connected to PostgreSQL database '%s'"
-msgstr ""
+msgstr "Yhdistetty uudelleen PostgreSQL-tietokantaan '%s'"
 
 #: src/dbse.c
 msgid "Executing PostgreSQL query"
-msgstr ""
+msgstr "Suoritetaan PostgreSQL -kysely"
 
 #: src/dbse.c
 #, c-format
 msgid "Attempting reconnect to PostgreSQL database '%s': %s"
 msgstr ""
+"Yritetään muodostaa uudelleen yhteys PostgreSQL -tietokantaan ' %s': %s"
 
 #: src/dbse.c
 #, c-format
@@ -899,21 +883,21 @@ msgstr "PGSQL-kysely epäonnistui: [%s] %s %s"
 #: src/dbse.c
 #, c-format
 msgid "INSERT ... RETURNING VALUE=\"%s\""
-msgstr ""
+msgstr "LISÄÄ ... PALAUTUSARVO = \"%s \""
 
 #: src/dbse.c
 #, c-format
 msgid "Invalid event ID returned by SQL query \"%s\""
-msgstr ""
+msgstr "SQL -kysely \"%s \" palautti virheellisen tapahtumatunnuksen"
 
 #: src/dbse.c
 msgid "Executing SQLite3 query"
-msgstr ""
+msgstr "Suoritetaan SQLite3 -kysely"
 
 #: src/dbse.c
 #, c-format
 msgid "SQLite3 error was %s"
-msgstr ""
+msgstr "SQLite3 -virhe oli %s"
 
 #: src/event.c src/track.c
 #, c-format
@@ -924,11 +908,6 @@ msgstr "Ulkoista komentoa ' %s' ei voida käynnistää"
 #, c-format
 msgid "Executing external command '%s'"
 msgstr "Suoritetaan ulkoinen komento ' %s'"
-
-#: src/event.c
-#, c-format
-msgid "File of type %ld saved to: %s"
-msgstr "Tiedostotyyppi %ld tallennettu tiedostoon: %s"
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -963,6 +942,11 @@ msgstr "SULJEMINEN: poistetaan tiedosto desc %d, virhetila %d"
 #, c-format
 msgid "pclose return: %d"
 msgstr "pclose tuotto: %d"
+
+#: src/event.c
+#, c-format
+msgid "Source FPS %d"
+msgstr "Lähde FPS %d"
 
 #: src/event.c
 #, c-format
@@ -1016,11 +1000,6 @@ msgstr "Virhe kirjoitettaessa putkessa, tilavirhe %d"
 #, c-format
 msgid "pipe %s not created or closed already "
 msgstr "putkea %s ei ole luotu tai suljettu jo"
-
-#: src/event.c
-#, c-format
-msgid "Source FPS %d"
-msgstr "Lähde FPS %d"
 
 #: src/event.c
 msgid "The ogg container is no longer supported.  Changing to mpeg4"
@@ -2062,6 +2041,8 @@ msgstr "soitetaan nyt netcam setup mjpg ()"
 #, c-format
 msgid "Invalid netcam service '%s' - must be mjpeg, ftp, mjpg or jpeg."
 msgstr ""
+"Virheellinen verkkokamerapalvelu '%s' - sen on oltava mjpeg, ftp, mjpg tai "
+"jpeg."
 
 #: src/netcam.c src/netcam_rtsp.c
 #, c-format
@@ -2650,12 +2631,12 @@ msgstr "Väärä"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Ignoring packet with invalid data"
-msgstr ""
+msgstr "%s: Ohitetaan virheellistä dataa sisältävä paketti"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Rec frame error: %s"
-msgstr ""
+msgstr "%s: Tallennuskehyksen virhe: %s"
 
 #: src/netcam_rtsp.c
 msgid "Ignoring packet with invalid data"
@@ -2669,7 +2650,7 @@ msgstr "Virhe paketin dekoodauksessa: %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Error transferring HW decoded to system memory"
-msgstr ""
+msgstr "%s: Virhe siirrettäessä HW -dekoodattu järjestelmämuistiin"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2683,80 +2664,80 @@ msgstr "Virhe videopaketin dekoodauksessa: Kopioidaan puskuriin"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: HW Devices: "
-msgstr ""
+msgstr "%s: HW -laitteet:"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s (available)"
-msgstr ""
+msgstr "%s: %s (saatavilla)"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s (not implemented)"
-msgstr ""
+msgstr "%s: %s (ei toteutettu)"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: netcam_decoder %s disabled."
-msgstr ""
+msgstr "%s: verkkokameran dekooderi %s poistettu käytöstä."
 
 #: src/netcam_rtsp.c
 msgid "Failed to get vaapi pix format"
-msgstr ""
+msgstr "Vaapi pix -muodon hakeminen epäonnistui"
 
 #: src/netcam_rtsp.c
 msgid "Failed to get cuda pix format"
-msgstr ""
+msgstr "Cuda pix -muodon hakeminen epäonnistui"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Interrupted."
-msgstr ""
+msgstr "%s: Keskeytetty."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s: %s"
-msgstr ""
+msgstr "%s: %s: %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s: Failed"
-msgstr ""
+msgstr "%s: %s: epäonnistui"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Decoder %s did not work."
-msgstr ""
+msgstr "%s: Dekooderi %s ei toiminut."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Ignoring and removing the user requested decoder %s"
-msgstr ""
+msgstr "%s: Käyttäjän pyytämä dekooderi %s ohitetaan ja poistetaan"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Initializing vaapi decoder"
-msgstr ""
+msgstr "%s: Vaapi -dekooderin alustaminen"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to find vaapi hw device"
-msgstr ""
+msgstr "%s: Vaapi hw -laitetta ei löydy"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Initializing cuda decoder"
-msgstr ""
+msgstr "%s: Alustetaan cuda -dekooderia"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to find cuda hw device"
-msgstr ""
+msgstr "%s: cuda hw -laitetta ei löydy"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Initializing decoder"
-msgstr ""
+msgstr "%s: Alustetaan dekooderia"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2766,7 +2747,7 @@ msgstr "%s: Dekooderin %s käyttäminen"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Decoder opened"
-msgstr ""
+msgstr "%s: Dekooderi avattu"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2817,22 +2798,26 @@ msgstr "Virhe asetettaessa kehystä lähtöpuskuriin: %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Interrupted"
-msgstr ""
+msgstr "%s: Keskeytetty"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: av_read_frame: %s"
-msgstr ""
+msgstr "%s: av lukukehys: %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using %d"
 msgstr ""
+"%s: sieppausnopeutta ei ole määritetty verkkokameran parametreissa. "
+"Käyttämällä %d"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
 msgstr ""
+"%s: sieppausnopeutta ei ole määritetty verkkokameran parametreissa. "
+"Käytetään kehysnopeutta %d"
 
 #: src/netcam_rtsp.c
 msgid "The network camera is sending pictures in a different"
@@ -2902,49 +2887,49 @@ msgstr "kuvaformaatti YUV420P: een mahdollisesti vähentää suorittimen käytt�
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting rtsp/rtmp"
-msgstr ""
+msgstr "%s: asetus rtsp/rtmp"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting input_format mjpeg"
-msgstr ""
+msgstr "%s: syöttömuodon asettaminen mjpeg"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting input_format video4linux2"
-msgstr ""
+msgstr "%s: tulomuodon asetus video4linux2"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting up movie file"
-msgstr ""
+msgstr "%s: Elokuvatiedoston määrittäminen"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting up %s"
-msgstr ""
+msgstr "%s: Määritetään %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: option: %s = %s"
-msgstr ""
+msgstr "%s: vaihtoehto: %s = %s"
 
 #: src/netcam_rtsp.c
 msgid "Setting up v4l2 via netcam"
-msgstr ""
+msgstr "V4l2: n määrittäminen netcamilla"
 
 #: src/netcam_rtsp.c
 msgid "Setting up file via netcam"
-msgstr ""
+msgstr "Tiedoston asettaminen netcamin kautta"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Setting up %s via netcam"
-msgstr ""
+msgstr "Määritetään %s verkkokameran kautta"
 
 #: src/netcam_rtsp.c
 msgid "highres"
-msgstr ""
+msgstr "korkearesoluutio"
 
 #: src/netcam_rtsp.c
 msgid "norm"
@@ -3015,32 +3000,32 @@ msgstr "%s: Kamera ( %s) kytketty"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Netcam capture_rate is %d."
-msgstr ""
+msgstr "%s: Netcam -kaappausnopeus on %d."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Camera source is %d FPS"
-msgstr ""
+msgstr "%s: Kameran lähde on %d FPS"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to determine the camera source FPS."
-msgstr ""
+msgstr "%s: Kameran lähteen FPS: ää ei voida määrittää."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate is less than camera FPS."
-msgstr ""
+msgstr "%s: kuvausnopeus on pienempi kuin kameran FPS."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Decoding errors will occur."
-msgstr ""
+msgstr "%s: Dekoodausvirheitä esiintyy."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate slightly larger than camera FPS is recommended."
-msgstr ""
+msgstr "%s: kuvausnopeus on hieman suurempi kuin kameran FPS."
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3087,7 +3072,7 @@ msgstr "ei voi luoda rtsp-korkeaa kontekstia"
 
 #: src/netcam_rtsp.c
 msgid "No FFmpeg support"
-msgstr ""
+msgstr "Ei FFmpeg -tukea"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3485,6 +3470,8 @@ msgstr "Virhe tiedoston sulkemisessa"
 #: src/util.c
 msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
 msgstr ""
+"Käytetty %{dbeventid}, mutta SQL -kyselyn aloitus ei palauttanut kelvollista "
+"tapahtumatunnusta"
 
 #: src/util.c
 #, c-format
@@ -3502,104 +3489,80 @@ msgstr "FFMPEG-versio on liian vanha. Läpäisykäsittelyn poistaminen käytöst
 
 #: src/util.c
 msgid "pass-through enabled."
-msgstr ""
+msgstr "läpivienti käytössä."
 
 #: src/util.c
 #, c-format
 msgid "Error setting parm >%s<"
-msgstr ""
-
-#: src/util.c
-msgid "Error setting parm >redacted<"
-msgstr ""
+msgstr "Virhe asetettaessa parm>%s <"
 
 #: src/util.c
 #, c-format
 msgid "Parsed: >%s< >%s<"
-msgstr ""
+msgstr "Jäsennetyt:>%s <>%s <"
 
 #: src/util.c
 msgid "Parsed: >redacted< >redacted<"
-msgstr ""
+msgstr "Jäsennetty:> muokattu <> muokattu <"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing parm_nm controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing parm_nm controls: <redacted>"
-msgstr ""
+msgstr "Virhe jäsennettäessä parm nm -ohjaimia: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing parm_vl controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing parm_vl controls: <redacted>"
-msgstr ""
+msgstr "Virhe jäsennettäessä parm vl -ohjaimia: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error setting temp: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error setting temp: <redacted>"
-msgstr ""
+msgstr "Virhe lämpötilan asettamisessa: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error reparsing controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error reparsing controls: <redacted>"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "Parsing controls: %s"
-msgstr "Ohjainten jäsentäminen: %s"
-
-#: src/util.c
-msgid "Parsing controls: <redacted>"
-msgstr ""
+msgstr "Virhe ohjainten korjaamisessa: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing controls: <redacted>"
-msgstr ""
+msgstr "Virhe jäsennettäessä ohjaimia: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error: %s"
-msgstr ""
+msgstr "Virhe: %s"
 
 #: src/util.c
 #, c-format
 msgid "New netcam_params: %s"
-msgstr ""
+msgstr "Uudet verkkokameran parametrit: %s"
 
 #: src/util.c
 #, c-format
 msgid "New netcam_high_params: %s"
-msgstr ""
+msgstr "Uusi verkkokameran korkea parametri: %s"
 
 #: src/util.c
 #, c-format
 msgid "New video_params: %s"
-msgstr ""
+msgstr "Uudet videoparametrit: %s"
+
+#: src/util.c
+#, c-format
+msgid "New stream_header_params: %s"
+msgstr "Striimin ylätunnisteen uudet parametrit: %s"
+
+#: src/util.c
+msgid "New stream_header_params: <redacted>"
+msgstr "Uudet streamin otsikon parametrit: <redacted>"
 
 #: src/util.c
 #, c-format
 msgid "Programming error.  Unknown configuration item: %s"
-msgstr ""
+msgstr "Ohjelmointivirhe. Tuntematon määrityskohde: %s "
 
 #: src/video_bktr.c
 #, c-format
@@ -3677,12 +3640,12 @@ msgstr "- [ %d / %d] Normi %d"
 #: src/video_bktr.c
 #, c-format
 msgid "Not valid Frequency [%ld] for Source input [%i]"
-msgstr ""
+msgstr "Virheellinen taajuus [%ld] lähdetulolle [%i]"
 
 #: src/video_bktr.c
 #, c-format
 msgid "Frequency [%ld] Source input [%i]"
-msgstr ""
+msgstr "Taajuus [%ld] Lähdetulo [%i]"
 
 #: src/video_bktr.c
 #, c-format
@@ -3926,11 +3889,15 @@ msgstr "Aseta ohjaus \" %s \" arvoon %d"
 #, c-format
 msgid "%s control option value %s is below minimum.  Using minimum %d"
 msgstr ""
+"%s -valintavaihtoehdon arvo %s on pienempi kuin minimi. Käyttämällä "
+"vähintään %d "
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %s is above maximum.  Using maximum %d"
 msgstr ""
+"%s -ohjausvaihtoehdon arvo %s on maksimiarvon yläpuolella. Käytetään "
+"enintään %d "
 
 #: src/video_v4l2.c
 msgid "control type not supported yet"
@@ -4236,11 +4203,6 @@ msgstr "Aseta arvoksi nolla / nolla"
 
 #: src/webu.c
 #, c-format
-msgid "Connection from: %s"
-msgstr "Yhteys: %s"
-
-#: src/webu.c
-#, c-format
 msgid "Failed authentication from %s"
 msgstr "Epäonnistunut todennus kohteelta %s"
 
@@ -4259,12 +4221,12 @@ msgstr "Virheellinen vastaus"
 #: src/webu.c
 #, c-format
 msgid "Error adding webcontrol header %s %s"
-msgstr ""
+msgstr "Virhe lisättäessä webcontrol -otsikkoa %s %s"
 
 #: src/webu.c src/webu_stream.c
 #, c-format
 msgid "Error adding stream header %s %s"
-msgstr ""
+msgstr "Virhe lisättäessä streamin otsikkoa %s %s"
 
 #: src/webu.c
 #, c-format
@@ -4273,20 +4235,25 @@ msgstr "Pyydetty virheellinen menetelmä: %s"
 
 #: src/webu.c
 #, c-format
+msgid "Connection from: %s"
+msgstr "Yhteys: %s"
+
+#: src/webu.c
+#, c-format
 msgid "send page failed %d"
 msgstr "lähetys sivu epäonnistui %d"
 
 #: src/webu.c
 msgid "Stream picture is not ready yet"
-msgstr ""
+msgstr "Stream -kuva ei ole vielä valmis"
 
 #: src/webu.c
 msgid "Stream process requested to finish."
-msgstr ""
+msgstr "Suoratoistoprosessi pyydettiin loppuun."
 
 #: src/webu.c
 msgid "Send page failed."
-msgstr ""
+msgstr "Sivun lähettäminen epäonnistui."
 
 #: src/webu.c
 msgid "Basic authentication: available"
@@ -4387,6 +4354,10 @@ msgstr "Kameran %d suoratoistoa ei voi aloittaa"
 #, c-format
 msgid "Duplicate port requested %d"
 msgstr "Päällekkäinen portti pyydettiin %d"
+
+#: src/webu.c
+msgid "Invalid webcontrol_lock_max_ips.  Setting equal to 25."
+msgstr "Virheellinen webcontrol -lukituksen enimmäisnopeus. Asetus on 25. "
 
 #: src/webu_html.c
 msgid "Cameras"
@@ -4542,235 +4513,57 @@ msgstr "Kuvan suoratoisto ei onnistunut."
 msgid "'%s' option is depreciated.  New option name is '%s'"
 msgstr "' %s' -vaihtoehto on poistettu. Uuden vaihtoehdon nimi on '%s' "
 
-#~ msgid "Unable to locate vid_control_params"
-#~ msgstr "Vid-ohjausparametreja ei löydy"
-
-#~ msgid "No value provided to put into vid_control_params"
-#~ msgstr "Ei arvoa, joka asetetaan vid-ohjausparamereihin"
-
-#~ msgid "Error compiling regex in copy_uri"
-#~ msgstr "Virhe kommentoidessaan regeksia kopiossa uri"
-
-#~ msgid "Invalid origin for cors_header in copy_uri"
-#~ msgstr "Virheellinen alku cors-otsikolle kopiossa uri"
-
-#~ msgid "videodevice"
-#~ msgstr "videodevice"
-
-#~ msgid "vid_control_params"
-#~ msgstr "vid ohjausparametrit"
-
-#~ msgid "v4l2_palette"
-#~ msgstr "v4l2-paletti"
-
-#~ msgid "input"
-#~ msgstr "panos"
-
-#~ msgid "frequency"
-#~ msgstr "taajuus"
-
-#~ msgid "tunerdevice"
-#~ msgstr "tunerdevice"
-
-#~ msgid "netcam_highres"
-#~ msgstr "netcam highres"
-
-#~ msgid "netcam_keepalive"
-#~ msgstr "netcam pitää yllä"
-
-#~ msgid "netcam_proxy"
-#~ msgstr "netcam-välityspalvelin"
-
-#~ msgid "netcam_tolerant_check"
-#~ msgstr "netcam-toleranssitarkistus"
-
-#~ msgid "netcam_use_tcp"
-#~ msgstr "netcam käyttö TCP"
-
-#~ msgid "netcam_decoder"
-#~ msgstr "netcam-dekooderi"
-
-#~ msgid "mmalcam_control_params"
-#~ msgstr "mmalcam-ohjausparametrit"
-
-#~ msgid "webcontrol_cors_header"
-#~ msgstr "web-ohjaimen korssiotsikko"
-
-#~ msgid "stream_cors_header"
-#~ msgstr "stream korssi otsikko"
-
-#~ msgid "Ignoring empty sql query"
-#~ msgstr "Tyhjän sql-kyselyn sivuuttaminen"
-
-#~ msgid "Executing mysql query"
-#~ msgstr "Suoritetaan mysql-kyselyä"
-
-#~ msgid "Mysql query failed %s error code %d"
-#~ msgstr "Mysql-kysely epäonnistui %s virhekoodi %d"
-
-#~ msgid "Re-Connection to Mysql database '%s' Succeed"
-#~ msgstr "Yhteyden muodostaminen uudelleen Mysql-tietokantaan ' %s' onnistuu"
-
-#~ msgid "after re-connection Mysql query failed %s error code %d"
-#~ msgstr "uudelleenyhteyden jälkeen Mysql-kysely epäonnistui %s virhekoodi %d"
-
-#~ msgid "Executing postgresql query"
-#~ msgstr "Suoritetaan postgresql-kyselyä"
-
-#~ msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
-#~ msgstr "Uudelleenyhteys PostgreSQL-tietokantaan ' %s' epäonnistui: %s"
-
-#~ msgid "Re-Connection to PostgreSQL database '%s' Succeed"
-#~ msgstr "Uudelleenyhteys PostgreSQL-tietokantaan ' %s' onnistuu"
-
-#~ msgid "Executing sqlite query"
-#~ msgstr "Suoritetaan sqlite-kysely"
-
-#~ msgid "SQLite error was %s"
-#~ msgstr "SQLite-virhe oli %s"
-
-#~ msgid "No ffmpeg support"
-#~ msgstr "Ei ffmpeg-tukea"
-
-#~ msgid "Closing MYSQL"
-#~ msgstr "MYSQL: n sulkeminen"
-
-#~ msgid "Can't open database %s : %s"
-#~ msgstr "Tietokantaa %s ei voi avata: %s"
-
-#~ msgid "Problem enabling motion-stream server in port %d"
-#~ msgstr "Ongelma liikevirtapalvelimen sallimisessa portissa %d"
-
-#~ msgid "Started motion-stream server on port %d (auth %s)"
-#~ msgstr "Aloitettu liikevirtapalvelin portissa %d (auth %s)"
-
-#~ msgid "pass-through is enabled but is still experimental."
-#~ msgstr "läpikulku on käytössä, mutta on silti kokeellinen."
-
-#~ msgid "Using port number %d"
-#~ msgstr "Portinumeron %d käyttäminen"
-
-#~ msgid ""
-#~ "Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or "
-#~ "jpeg."
-#~ msgstr ""
-#~ "Virheellinen netcam-palvelun ' %s' - täytyy olla http, ftp, mjpg, mjpeg, "
-#~ "v4l2 tai jpeg."
-
-#~ msgid "Error receiving frame from codec: %s"
-#~ msgstr "Virhe vastaanottaessa kehystä koodekista: %s"
-
-#~ msgid "%s: %s: %s,Interrupt %s"
-#~ msgstr "%s: %s: %s, keskeytä %s"
-
-#~ msgid "%s: %s: Failed,Interrupt %s"
-#~ msgstr "%s: %s: epäonnistui, keskeytti %s"
-
-#~ msgid "%s: Ignoring user requested decoder %s"
-#~ msgstr "%s: Käyttäjän pyytämän dekooderin ohittaminen %s"
-
-#~ msgid "%s: av_read_frame: %s ,Interrupt: %s"
-#~ msgstr "%s: av lukukehys: %s, keskeytä: %s"
-
-#~ msgid "%s: Setting http input_format mjpeg"
-#~ msgstr "%s: http-sisääntulomuodon asettaminen mjpeg"
-
-#~ msgid "%s: Setting rtsp transport to tcp"
-#~ msgstr "%s: rtsp-siirron asettaminen TCP: hen"
-
-#~ msgid "%s: Setting rtsp transport to udp"
-#~ msgstr "%s: Aseta rtsp-siirto udp-arvoon"
-
-#~ msgid "%s: Setting attributes to read file"
-#~ msgstr "%s: määritteiden määrittäminen tiedostojen lukemiseen"
-
-#~ msgid "%s: Requested v4l2_palette option: %d"
-#~ msgstr "%s: Pyydetty v4l2-palettivaihtoehto: %d"
-
-#~ msgid "%s: Requested FOURCC code: %s"
-#~ msgstr "%s: Pyydetty FOURCC-koodi: %s"
-
-#~ msgid "%s: Setting v4l2 input_format: %s"
-#~ msgstr "%s: v4l2-syöttömuodon asettaminen: %s"
-
-#~ msgid "%s: Setting v4l2 framerate: %s"
-#~ msgstr "%s: v4l2-kehyksen asettaminen: %s"
-
-#~ msgid "%s: Setting v4l2 video_size: %s"
-#~ msgstr "%s: v4l2-videokoon asettaminen: %s"
-
-#~ msgid "Proxies not supported using for %s"
-#~ msgstr "Välityspalvelimia ei tueta %s: lle"
-
-#~ msgid "Setting up v4l2 via ffmpeg netcam"
-#~ msgstr "V4l2: n asettaminen ffmpeg netcamin kautta"
-
-#~ msgid "Setting up file via ffmpeg netcam"
-#~ msgstr "Tiedoston asettaminen ffmpeg netcamin kautta"
-
-#~ msgid "Setting up http via ffmpeg netcam"
-#~ msgstr "Http: n asettaminen ffmpeg netcamin kautta"
-
-#~ msgid "Setting up %s via ffmpeg netcam"
-#~ msgstr "%s: n asettaminen ffmpeg netcamin kautta"
-
-#~ msgid "High resolution"
-#~ msgstr "Korkea resoluutio"
-
-#~ msgid "Normal resolution"
-#~ msgstr "Normaali tarkkuus"
-
-#~ msgid "ffmpeg too old"
-#~ msgstr "ffmpeg liian vanha"
-
-#~ msgid "%s: Invalid camera service"
-#~ msgstr "%s: Virheellinen kamerapalvelu"
-
-#~ msgid "%s: Unable to open camera(%s)"
-#~ msgstr "%s: kameraa ei voi avata ( %s)"
-
-#~ msgid "Requested frame rate %d FPS is less than camera frame rate %d FPS"
-#~ msgstr ""
-#~ "Pyydetty kuvanopeus %d FPS on pienempi kuin kameran kuvanopeus %d FPS"
-
-#~ msgid "Increasing capture rate to %d FPS to match camera."
-#~ msgstr "Nostamisnopeuden lisääminen %d FPS: iin vastaamaan kameraa."
-
-#~ msgid ""
-#~ "To lower CPU, change camera FPS to lower rate and decrease I frame "
-#~ "interval."
-#~ msgstr ""
-#~ "Laskeaksesi CPU: ta, vaihda kameran FPS pienempään nopeuteen ja pienennä "
-#~ "I-kehysväliä."
-
-#~ msgid "FFmpeg/Libav not found on computer.  No RTSP support"
-#~ msgstr "FFmpeg / Libavia ei löydy tietokoneesta. Ei RTSP-tukea"
-
-#~ msgid "Not valid Frequency [%lu] for Source input [%i]"
-#~ msgstr "Ei kelpaa taajuus [ %lu] lähdetulolle [ %i]"
-
-#~ msgid "Frequency [%lu] Source input [%i]"
-#~ msgstr "Taajuus [ %lu] Lähteen tulo [ %i]"
-
-#~ msgid "BKTR is not enabled."
-#~ msgstr "BKTR ei ole käytössä."
-
-#~ msgid "%s control option value %d is below minimum.  Using minimum"
-#~ msgstr ""
-#~ "%s ohjausvaihtoehdon arvo %d on minimiarvon alapuolella. Käyttämällä "
-#~ "minimiä"
-
-#~ msgid "%s control option value %d is above maximum.  Using maximum"
-#~ msgstr "%s ohjausvaihtoehdon arvo %d on maksimiarvon yläpuolella. Maksimi"
-
-#~ msgid "1) vid_source->pframe %i"
-#~ msgstr "1) vid lähde-> kehys %i"
-
-#~ msgid "the_buffer index %d Address (%x)"
-#~ msgstr "puskuri-indeksi %d Osoite ( %x)"
-
-#~ msgid "Invalid url: %s"
-#~ msgstr "Virheellinen URL: %s"
-
-#~ msgid "Error decoding url"
-#~ msgstr "Virhe URL-osoitteen purkamisessa"
+#: src/conf.c
+msgid "webcontrol_lock_minutes"
+msgstr "webcontrol -lukituksen minuutit"
+
+#: src/conf.c
+msgid "webcontrol_lock_attempts"
+msgstr "webcontrol -lukitusyritykset"
+
+#: src/conf.c
+msgid "webcontrol_lock_max_ips"
+msgstr "webcontrol -lukon maksimi ips"
+
+#: src/event.c
+#, c-format
+msgid "Writing image to file: %s"
+msgstr "Kirjoitetaan kuvaa tiedostoon: %s"
+
+#: src/event.c
+#, c-format
+msgid "Writing movie to file: %s"
+msgstr "Kirjoitetaan elokuvaa tiedostoon: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved image to file: %s"
+msgstr "Kuva tallennettu tiedostoon: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved movie to file: %s"
+msgstr "Elokuva tallennettu tiedostoon: %s"
+
+#: src/util.c
+#, c-format
+msgid "Parsing: %s"
+msgstr "Jäsennys: %s"
+
+#: src/util.c
+msgid "Parsing: <redacted>"
+msgstr "Jäsennys: <redacted>"
+
+#: src/util.c
+#, c-format
+msgid "New webcontrol_header_params: %s"
+msgstr "Uudet webcontrol -otsikon parametrit: %s"
+
+#: src/util.c
+msgid "New webcontrol_header_params: <redacted>"
+msgstr "Uudet webcontrol -otsikon parametrit: <redacted>"
+
+#: src/webu.c
+#, c-format
+msgid "Ignoring connection from: %s"
+msgstr "Ohitetaan yhteys kohteesta: %s"

@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-04 21:33-0600\n"
-"PO-Revision-Date: 2020-01-12 17:46-0700\n"
+"POT-Creation-Date: 2021-10-03 23:12-0600\n"
+"PO-Revision-Date: 2021-10-03 22:53-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #: src/conf.c
 #, c-format
@@ -76,38 +76,6 @@ msgid "%-25s <redacted>"
 msgstr "%-25s <redacted>"
 
 #: src/conf.c
-msgid "Unable to locate video_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into video_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate netcam_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into netcam_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate webcontrol_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into webcontrol_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate stream_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into stream_header_params"
-msgstr ""
-
-#: src/conf.c
 #, c-format
 msgid "Processing config file %s"
 msgstr "Elaborazione del file di configurazione %s"
@@ -157,6 +125,14 @@ msgid "quiet"
 msgstr "silenzioso"
 
 #: src/conf.c
+msgid "watchdog_tmo"
+msgstr "cane da guardia tmo"
+
+#: src/conf.c
+msgid "watchdog_kill"
+msgstr "cane da guardia uccidere"
+
+#: src/conf.c
 msgid "native_language"
 msgstr "lingua nativa"
 
@@ -174,11 +150,11 @@ msgstr "destinazione target"
 
 #: src/conf.c
 msgid "video_device"
-msgstr ""
+msgstr "dispositivo video"
 
 #: src/conf.c
 msgid "video_params"
-msgstr ""
+msgstr "parametri video"
 
 #: src/conf.c
 msgid "auto_brightness"
@@ -186,7 +162,7 @@ msgstr "luminosità automatica"
 
 #: src/conf.c
 msgid "tuner_device"
-msgstr ""
+msgstr "dispositivo sintonizzatore"
 
 #: src/conf.c
 msgid "roundrobin_frames"
@@ -206,15 +182,15 @@ msgstr "netcam url"
 
 #: src/conf.c
 msgid "netcam_params"
-msgstr ""
+msgstr "parametri della netcam"
 
 #: src/conf.c
 msgid "netcam_high_url"
-msgstr ""
+msgstr "netcam alto url"
 
 #: src/conf.c
 msgid "netcam_high_params"
-msgstr ""
+msgstr "parametri elevati di netcam"
 
 #: src/conf.c
 msgid "netcam_userpass"
@@ -226,7 +202,7 @@ msgstr "nome mmalcam"
 
 #: src/conf.c
 msgid "mmalcam_params"
-msgstr ""
+msgstr "parametri mmalcam"
 
 #: src/conf.c
 msgid "width"
@@ -286,7 +262,7 @@ msgstr "emulare il movimento"
 
 #: src/conf.c
 msgid "pause"
-msgstr ""
+msgstr "pausa"
 
 #: src/conf.c
 msgid "threshold"
@@ -534,7 +510,7 @@ msgstr "chiave webcontrol"
 
 #: src/conf.c
 msgid "webcontrol_header_params"
-msgstr ""
+msgstr "parametri dell'intestazione webcontrol"
 
 #: src/conf.c
 msgid "stream_port"
@@ -558,7 +534,7 @@ msgstr "stream tls"
 
 #: src/conf.c
 msgid "stream_header_params"
-msgstr ""
+msgstr "parametri dell'intestazione del flusso"
 
 #: src/conf.c
 msgid "stream_preview_scale"
@@ -738,15 +714,15 @@ msgstr "dir camera"
 
 #: src/dbse.c
 msgid "Closing MySQL library"
-msgstr ""
+msgstr "Chiusura della libreria MySQL"
 
 #: src/dbse.c
 msgid "Closing MariaDB library"
-msgstr ""
+msgstr "Chiusura della libreria MariaDB"
 
 #: src/dbse.c
 msgid "Database closed"
-msgstr ""
+msgstr "Database chiuso"
 
 #: src/dbse.c
 msgid "Initializing database"
@@ -777,7 +753,7 @@ msgstr "SUCCESSO"
 #: src/dbse.c
 #, c-format
 msgid "Can't open SQLite3 database %s : %s"
-msgstr ""
+msgstr "Impossibile aprire il database SQLite3 %s : %s"
 
 #: src/dbse.c
 #, c-format
@@ -804,11 +780,12 @@ msgstr "L'errore MySQL era %s"
 #, c-format
 msgid "Cannot connect to MariaDB database %s on host %s with user %s"
 msgstr ""
+"Impossibile connettersi al database MariaDB %s sull'host %s con l'utente %s"
 
 #: src/dbse.c
 #, c-format
 msgid "MariaDB error was %s"
-msgstr ""
+msgstr "L'errore MariaDB era %s"
 
 #: src/dbse.c
 msgid "SQLite3 using shared handle"
@@ -826,12 +803,12 @@ msgstr "Backend del database %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
-msgstr ""
+msgstr "Esecuzione di query MySQL"
 
 #: src/dbse.c
 #, c-format
 msgid "MySQL query failed %s error code %d"
-msgstr ""
+msgstr "La query MySQL non è riuscita %s codice di errore %d"
 
 #: src/dbse.c
 #, c-format
@@ -845,21 +822,22 @@ msgstr ""
 #: src/dbse.c
 #, c-format
 msgid "Re-Connection to MySQL database '%s' Succeed"
-msgstr ""
+msgstr "Riconnessione al database MySQL '%s' riuscita"
 
 #: src/dbse.c
 #, c-format
 msgid "after re-connection MySQL query failed %s error code %d"
 msgstr ""
+"dopo la riconnessione la query MySQL non è riuscita %s codice di errore %d"
 
 #: src/dbse.c
 msgid "Executing MariaDB query"
-msgstr ""
+msgstr "Esecuzione della query MariaDB"
 
 #: src/dbse.c
 #, c-format
 msgid "MariaDB query failed %s error code %d"
-msgstr ""
+msgstr "La query MariaDB non è riuscita %s codice di errore %d"
 
 #: src/dbse.c
 #, c-format
@@ -867,30 +845,33 @@ msgid ""
 "Cannot reconnect to MariaDB database %s on host %s with user %s MariaDB "
 "error was %s"
 msgstr ""
+"Impossibile riconnettersi al database MariaDB %s sull'host %s con l'utente "
+"%s MariaDBl'errore era %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Re-Connection to MariaDB database '%s' Succeed"
-msgstr ""
+msgstr "Riconnessione al database MariaDB '%s' riuscita"
 
 #: src/dbse.c
 #, c-format
 msgid "after re-connection MariaDB query failed %s error code %d"
 msgstr ""
+"dopo la riconnessione la query MariaDB non è riuscita %s codice di errore %d"
 
 #: src/dbse.c
 #, c-format
 msgid "Re-connected to PostgreSQL database '%s'"
-msgstr ""
+msgstr "Ricollegato al database PostgreSQL '%s'"
 
 #: src/dbse.c
 msgid "Executing PostgreSQL query"
-msgstr ""
+msgstr "Esecuzione di query PostgreSQL"
 
 #: src/dbse.c
 #, c-format
 msgid "Attempting reconnect to PostgreSQL database '%s': %s"
-msgstr ""
+msgstr "Tentativo di riconnessione al database PostgreSQL '%s': %s"
 
 #: src/dbse.c
 #, c-format
@@ -900,21 +881,21 @@ msgstr "Query PGSQL non riuscita: [%s] %s %s"
 #: src/dbse.c
 #, c-format
 msgid "INSERT ... RETURNING VALUE=\"%s\""
-msgstr ""
+msgstr "INSERISCI... VALORE RESTITUITO=\"%s\""
 
 #: src/dbse.c
 #, c-format
 msgid "Invalid event ID returned by SQL query \"%s\""
-msgstr ""
+msgstr "ID evento non valido restituito dalla query SQL \"%s\""
 
 #: src/dbse.c
 msgid "Executing SQLite3 query"
-msgstr ""
+msgstr "Esecuzione di query SQLite3"
 
 #: src/dbse.c
 #, c-format
 msgid "SQLite3 error was %s"
-msgstr ""
+msgstr "L'errore SQLite3 era %s"
 
 #: src/event.c src/track.c
 #, c-format
@@ -925,11 +906,6 @@ msgstr "Impossibile avviare il comando esterno ' %s'"
 #, c-format
 msgid "Executing external command '%s'"
 msgstr "Esecuzione del comando esterno ' %s'"
-
-#: src/event.c
-#, c-format
-msgid "File of type %ld saved to: %s"
-msgstr "File di tipo %ld salvato in: %s"
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -964,6 +940,11 @@ msgstr "CHIUSURA: file extpipe desc %d, stato errore %d"
 #, c-format
 msgid "pclose return: %d"
 msgstr "pclose return: %d"
+
+#: src/event.c
+#, c-format
+msgid "Source FPS %d"
+msgstr "Fonte FPS %d"
 
 #: src/event.c
 #, c-format
@@ -1017,11 +998,6 @@ msgstr "Errore durante la scrittura nella pipe, errore di stato %d"
 #, c-format
 msgid "pipe %s not created or closed already "
 msgstr "pipe %s non già creato o chiuso"
-
-#: src/event.c
-#, c-format
-msgid "Source FPS %d"
-msgstr "Fonte FPS %d"
 
 #: src/event.c
 msgid "The ogg container is no longer supported.  Changing to mpeg4"
@@ -2084,7 +2060,7 @@ msgstr "ora chiama netcam setup mjpg ()"
 #: src/netcam.c
 #, c-format
 msgid "Invalid netcam service '%s' - must be mjpeg, ftp, mjpg or jpeg."
-msgstr ""
+msgstr "Servizio netcam '%s' non valido: deve essere mjpeg, ftp, mjpg o jpeg."
 
 #: src/netcam.c src/netcam_rtsp.c
 #, c-format
@@ -2679,12 +2655,12 @@ msgstr "falso"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Ignoring packet with invalid data"
-msgstr ""
+msgstr "%s: Ignora pacchetto con dati non validi"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Rec frame error: %s"
-msgstr ""
+msgstr "%s: Errore frame di registrazione: %s"
 
 #: src/netcam_rtsp.c
 msgid "Ignoring packet with invalid data"
@@ -2699,6 +2675,8 @@ msgstr "Pacchetto di decodifica errore: %s"
 #, c-format
 msgid "%s: Error transferring HW decoded to system memory"
 msgstr ""
+"%s: errore durante il trasferimento dell'hardware decodificato alla memoria "
+"di sistema"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2712,80 +2690,80 @@ msgstr "Errore nella decodifica del pacchetto video: copia nel buffer"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: HW Devices: "
-msgstr ""
+msgstr "%s: Dispositivi HW:"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s (available)"
-msgstr ""
+msgstr "%s: %s (disponibile)"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s (not implemented)"
-msgstr ""
+msgstr "%s: %s (non implementato)"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: netcam_decoder %s disabled."
-msgstr ""
+msgstr "%s: decoder netcam %s disabilitato."
 
 #: src/netcam_rtsp.c
 msgid "Failed to get vaapi pix format"
-msgstr ""
+msgstr "Impossibile ottenere il formato pix vaapi"
 
 #: src/netcam_rtsp.c
 msgid "Failed to get cuda pix format"
-msgstr ""
+msgstr "Impossibile ottenere il formato cuda pix"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Interrupted."
-msgstr ""
+msgstr "%s: interrotto."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s: %s"
-msgstr ""
+msgstr "%s: %s: %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s: Failed"
-msgstr ""
+msgstr "%s: %s: fallito"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Decoder %s did not work."
-msgstr ""
+msgstr "%s: il decoder %s non ha funzionato."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Ignoring and removing the user requested decoder %s"
-msgstr ""
+msgstr "%s: Ignorando e rimuovendo il decoder richiesto dall'utente %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Initializing vaapi decoder"
-msgstr ""
+msgstr "%s: inizializzazione del decodificatore vaapi"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to find vaapi hw device"
-msgstr ""
+msgstr "%s: impossibile trovare il dispositivo vaapi hw"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Initializing cuda decoder"
-msgstr ""
+msgstr "%s: inizializzazione del decoder cuda"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to find cuda hw device"
-msgstr ""
+msgstr "%s: impossibile trovare il dispositivo cuda hw"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Initializing decoder"
-msgstr ""
+msgstr "%s: inizializzazione del decodificatore"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2795,7 +2773,7 @@ msgstr "%s: utilizzo del decodificatore %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Decoder opened"
-msgstr ""
+msgstr "%s: decoder aperto"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2846,22 +2824,25 @@ msgstr "Errore durante l'inserimento del frame nel buffer di output: %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Interrupted"
-msgstr ""
+msgstr "%s: Interrotto"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: av_read_frame: %s"
-msgstr ""
+msgstr "%s: frame letto av: %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using %d"
 msgstr ""
+"%s: velocità di acquisizione non specificata nei parametri netcam. Usando %d"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
 msgstr ""
+"%s: velocità di acquisizione non specificata nei parametri netcam. Usando il "
+"frame rate %d"
 
 #: src/netcam_rtsp.c
 msgid "The network camera is sending pictures in a different"
@@ -2932,49 +2913,49 @@ msgstr ""
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting rtsp/rtmp"
-msgstr ""
+msgstr "%s: impostazione rtsp/rtmp"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting input_format mjpeg"
-msgstr ""
+msgstr "%s: impostazione del formato di input mjpeg"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting input_format video4linux2"
-msgstr ""
+msgstr "%s: impostazione del formato di input video4linux2"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting up movie file"
-msgstr ""
+msgstr "%s: Configurazione del file del filmato"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting up %s"
-msgstr ""
+msgstr "%s: Configurazione di %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: option: %s = %s"
-msgstr ""
+msgstr "%s: opzione: %s = %s"
 
 #: src/netcam_rtsp.c
 msgid "Setting up v4l2 via netcam"
-msgstr ""
+msgstr "Configurazione di v4l2 tramite netcam"
 
 #: src/netcam_rtsp.c
 msgid "Setting up file via netcam"
-msgstr ""
+msgstr "Configurazione file tramite netcam"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Setting up %s via netcam"
-msgstr ""
+msgstr "Configurazione di %s tramite netcam"
 
 #: src/netcam_rtsp.c
 msgid "highres"
-msgstr ""
+msgstr "alta risoluzione"
 
 #: src/netcam_rtsp.c
 msgid "norm"
@@ -3045,32 +3026,34 @@ msgstr "%s: videocamera ( %s) collegata"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Netcam capture_rate is %d."
-msgstr ""
+msgstr "%s: la velocità di acquisizione della Netcam è %d."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Camera source is %d FPS"
-msgstr ""
+msgstr "%s: la sorgente della fotocamera è %d FPS"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to determine the camera source FPS."
-msgstr ""
+msgstr "%s: impossibile determinare l'FPS della sorgente della telecamera."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate is less than camera FPS."
-msgstr ""
+msgstr "%s: la velocità di acquisizione è inferiore all'FPS della fotocamera."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Decoding errors will occur."
-msgstr ""
+msgstr "%s: si verificheranno errori di decodifica."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate slightly larger than camera FPS is recommended."
 msgstr ""
+"%s: si consiglia una velocità di acquisizione leggermente maggiore dell'FPS "
+"della fotocamera."
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3117,7 +3100,7 @@ msgstr "impossibile creare il contesto elevato rtsp"
 
 #: src/netcam_rtsp.c
 msgid "No FFmpeg support"
-msgstr ""
+msgstr "Nessun supporto FFmpeg"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3526,6 +3509,8 @@ msgstr "Errore durante la chiusura del file"
 #: src/util.c
 msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
 msgstr ""
+"Usato %{dbeventid} ma l'inizio della query sql non ha restituito alcun ID "
+"evento valido"
 
 #: src/util.c
 #, c-format
@@ -3545,104 +3530,80 @@ msgstr ""
 
 #: src/util.c
 msgid "pass-through enabled."
-msgstr ""
+msgstr "passaggio abilitato."
 
 #: src/util.c
 #, c-format
 msgid "Error setting parm >%s<"
-msgstr ""
-
-#: src/util.c
-msgid "Error setting parm >redacted<"
-msgstr ""
+msgstr "Errore durante l'impostazione del parametro >%s<"
 
 #: src/util.c
 #, c-format
 msgid "Parsed: >%s< >%s<"
-msgstr ""
+msgstr "Analizzato: >%s< >%s<"
 
 #: src/util.c
 msgid "Parsed: >redacted< >redacted<"
-msgstr ""
+msgstr "Parsed: >censurato< >censurato<"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing parm_nm controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing parm_nm controls: <redacted>"
-msgstr ""
+msgstr "Errore durante l'analisi dei controlli parm nm: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing parm_vl controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing parm_vl controls: <redacted>"
-msgstr ""
+msgstr "Errore durante l'analisi dei controlli parm vl: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error setting temp: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error setting temp: <redacted>"
-msgstr ""
+msgstr "Errore durante l'impostazione della temperatura: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error reparsing controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error reparsing controls: <redacted>"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "Parsing controls: %s"
-msgstr "Controlli di analisi: %s"
-
-#: src/util.c
-msgid "Parsing controls: <redacted>"
-msgstr ""
+msgstr "Errore durante l'analisi dei controlli: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing controls: <redacted>"
-msgstr ""
+msgstr "Errore durante l'analisi dei controlli: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error: %s"
-msgstr ""
+msgstr "Errori %s"
 
 #: src/util.c
 #, c-format
 msgid "New netcam_params: %s"
-msgstr ""
+msgstr "Nuovi parametri della netcam: %s"
 
 #: src/util.c
 #, c-format
 msgid "New netcam_high_params: %s"
-msgstr ""
+msgstr "Nuovi parametri alti della netcam: %s"
 
 #: src/util.c
 #, c-format
 msgid "New video_params: %s"
-msgstr ""
+msgstr "Nuovi parametri video: %s"
+
+#: src/util.c
+#, c-format
+msgid "New stream_header_params: %s"
+msgstr "Nuovi parametri dell'intestazione del flusso: %s"
+
+#: src/util.c
+msgid "New stream_header_params: <redacted>"
+msgstr "Nuovi parametri dell'intestazione del flusso: <redatto>"
 
 #: src/util.c
 #, c-format
 msgid "Programming error.  Unknown configuration item: %s"
-msgstr ""
+msgstr "Errore di programmazione. Elemento di configurazione sconosciuto: %s "
 
 #: src/video_bktr.c
 #, c-format
@@ -3721,12 +3682,12 @@ msgstr "a [ %d / %d] Norm %d"
 #: src/video_bktr.c
 #, c-format
 msgid "Not valid Frequency [%ld] for Source input [%i]"
-msgstr ""
+msgstr "Frequenza non valida [%ld] per ingresso sorgente [%i]"
 
 #: src/video_bktr.c
 #, c-format
 msgid "Frequency [%ld] Source input [%i]"
-msgstr ""
+msgstr "Frequenza [%ld] Ingresso sorgente [%i]"
 
 #: src/video_bktr.c
 #, c-format
@@ -3973,11 +3934,15 @@ msgstr "Impostare il controllo \" %s \" sul valore %d"
 #, c-format
 msgid "%s control option value %s is below minimum.  Using minimum %d"
 msgstr ""
+"Il valore dell'opzione di controllo %s %s è inferiore al minimo. Usando il "
+"minimo %d "
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %s is above maximum.  Using maximum %d"
 msgstr ""
+"Il valore dell'opzione di controllo %s %s è superiore al massimo. "
+"Utilizzando il massimo %d "
 
 #: src/video_v4l2.c
 msgid "control type not supported yet"
@@ -4289,11 +4254,6 @@ msgstr "Impostare il valore su null / zero"
 
 #: src/webu.c
 #, c-format
-msgid "Connection from: %s"
-msgstr "Connessione da: %s"
-
-#: src/webu.c
-#, c-format
 msgid "Failed authentication from %s"
 msgstr "Autenticazione non riuscita da %s"
 
@@ -4312,12 +4272,12 @@ msgstr "Risposta non valida"
 #: src/webu.c
 #, c-format
 msgid "Error adding webcontrol header %s %s"
-msgstr ""
+msgstr "Errore durante l'aggiunta dell'intestazione del controllo web %s %s"
 
 #: src/webu.c src/webu_stream.c
 #, c-format
 msgid "Error adding stream header %s %s"
-msgstr ""
+msgstr "Errore durante l'aggiunta dell'intestazione del flusso %s %s"
 
 #: src/webu.c
 #, c-format
@@ -4326,20 +4286,25 @@ msgstr "Metodo non valido richiesto: %s"
 
 #: src/webu.c
 #, c-format
+msgid "Connection from: %s"
+msgstr "Connessione da: %s"
+
+#: src/webu.c
+#, c-format
 msgid "send page failed %d"
 msgstr "pagina di invio non riuscita %d"
 
 #: src/webu.c
 msgid "Stream picture is not ready yet"
-msgstr ""
+msgstr "L'immagine in streaming non è ancora pronta"
 
 #: src/webu.c
 msgid "Stream process requested to finish."
-msgstr ""
+msgstr "Processo di streaming richiesto per il completamento."
 
 #: src/webu.c
 msgid "Send page failed."
-msgstr ""
+msgstr "Invio pagina non riuscito."
 
 #: src/webu.c
 msgid "Basic authentication: available"
@@ -4439,6 +4404,10 @@ msgstr "Impossibile avviare lo streaming per la telecamera %d"
 #, c-format
 msgid "Duplicate port requested %d"
 msgstr "Porta duplicata richiesta %d"
+
+#: src/webu.c
+msgid "Invalid webcontrol_lock_max_ips.  Setting equal to 25."
+msgstr "Ips max blocco controllo web non valido. Impostazione pari a 25. "
 
 #: src/webu_html.c
 msgid "Cameras"
@@ -4595,241 +4564,57 @@ msgstr "Impossibile ottenere lo streaming dell'immagine."
 msgid "'%s' option is depreciated.  New option name is '%s'"
 msgstr "L'opzione ' %s' è ammortizzata. Il nome della nuova opzione è '%s'"
 
-#~ msgid "Unable to locate vid_control_params"
-#~ msgstr "Impossibile trovare i parametri di controllo vid"
-
-#~ msgid "No value provided to put into vid_control_params"
-#~ msgstr "Nessun valore fornito per mettere nei parametri di controllo video"
-
-#~ msgid "Error compiling regex in copy_uri"
-#~ msgstr "Errore durante la compilazione di regex nella copia uri"
-
-#~ msgid "Invalid origin for cors_header in copy_uri"
-#~ msgstr "Origine non valida per l'intestazione cors nella copia uri"
-
-#~ msgid "videodevice"
-#~ msgstr "videodevice"
-
-#~ msgid "vid_control_params"
-#~ msgstr "parametri di controllo vid"
-
-#~ msgid "v4l2_palette"
-#~ msgstr "palette v4l2"
-
-#~ msgid "input"
-#~ msgstr "ingresso"
-
-#~ msgid "frequency"
-#~ msgstr "frequenza"
-
-#~ msgid "tunerdevice"
-#~ msgstr "tunerdevice"
-
-#~ msgid "netcam_highres"
-#~ msgstr "netcam highres"
-
-#~ msgid "netcam_keepalive"
-#~ msgstr "netcam keepalive"
-
-#~ msgid "netcam_proxy"
-#~ msgstr "proxy netcam"
-
-#~ msgid "netcam_tolerant_check"
-#~ msgstr "controllo tollerante netcam"
-
-#~ msgid "netcam_use_tcp"
-#~ msgstr "netcam usa tcp"
-
-#~ msgid "netcam_decoder"
-#~ msgstr "decodificatore netcam"
-
-#~ msgid "mmalcam_control_params"
-#~ msgstr "Parametri di controllo mmalcam"
-
-#~ msgid "webcontrol_cors_header"
-#~ msgstr "intestazione cors webcontrol"
-
-#~ msgid "stream_cors_header"
-#~ msgstr "intestazione stream cors"
-
-#~ msgid "Ignoring empty sql query"
-#~ msgstr "Ignorando la query sql vuota"
-
-#~ msgid "Executing mysql query"
-#~ msgstr "Esecuzione della query mysql"
-
-#~ msgid "Mysql query failed %s error code %d"
-#~ msgstr "Query Mysql non riuscita %s codice errore %d"
-
-#~ msgid "Re-Connection to Mysql database '%s' Succeed"
-#~ msgstr "Ricollegamento al database Mysql ' %s' Riuscito"
-
-#~ msgid "after re-connection Mysql query failed %s error code %d"
-#~ msgstr "dopo ricollegamento query Mysql non riuscita %s codice errore %d"
-
-#~ msgid "Executing postgresql query"
-#~ msgstr "Esecuzione della query postgresql"
-
-#~ msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
-#~ msgstr "Riconnessione al database PostgreSQL ' %s' non riuscita: %s"
-
-#~ msgid "Re-Connection to PostgreSQL database '%s' Succeed"
-#~ msgstr "Ricollegamento al database PostgreSQL ' %s' riuscito"
-
-#~ msgid "Executing sqlite query"
-#~ msgstr "Esecuzione di query sqlite"
-
-#~ msgid "SQLite error was %s"
-#~ msgstr "L'errore SQLite era %s"
-
-#~ msgid "No ffmpeg support"
-#~ msgstr "Nessun supporto ffmpeg"
-
-#~ msgid "Closing MYSQL"
-#~ msgstr "Chiusura di MYSQL"
-
-#~ msgid "Can't open database %s : %s"
-#~ msgstr "Impossibile aprire il database %s: %s"
-
-#~ msgid "Problem enabling motion-stream server in port %d"
-#~ msgstr ""
-#~ "Problema durante l'abilitazione del server motion-stream nella porta %d"
-
-#~ msgid "Started motion-stream server on port %d (auth %s)"
-#~ msgstr "Avvio del server Motion Stream sulla porta %d (auth %s)"
-
-#~ msgid "pass-through is enabled but is still experimental."
-#~ msgstr "il pass-through è abilitato ma è ancora sperimentale."
-
-#~ msgid "Using port number %d"
-#~ msgstr "Utilizzando il numero di porta %d"
-
-#~ msgid ""
-#~ "Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or "
-#~ "jpeg."
-#~ msgstr ""
-#~ "Servizio netcam non valido ' %s' - deve essere http, ftp, mjpg, mjpeg, "
-#~ "v4l2 o jpeg."
-
-#~ msgid "Error receiving frame from codec: %s"
-#~ msgstr "Errore durante la ricezione di frame dal codec: %s"
-
-#~ msgid "%s: %s: %s,Interrupt %s"
-#~ msgstr "%s: %s: %s, interrompi %s"
-
-#~ msgid "%s: %s: Failed,Interrupt %s"
-#~ msgstr "%s: %s: non riuscito, interrompi %s"
-
-#~ msgid "%s: Ignoring user requested decoder %s"
-#~ msgstr "%s: ignorando il decodificatore richiesto dall'utente %s"
-
-#~ msgid "%s: av_read_frame: %s ,Interrupt: %s"
-#~ msgstr "%s: frame di lettura av: %s, interruzione: %s"
-
-#~ msgid "%s: Setting http input_format mjpeg"
-#~ msgstr "%s: impostazione del formato di input http mjpeg"
-
-#~ msgid "%s: Setting rtsp transport to tcp"
-#~ msgstr "%s: impostazione del trasporto rtsp su tcp"
-
-#~ msgid "%s: Setting rtsp transport to udp"
-#~ msgstr "%s: impostazione del trasporto rtsp su udp"
-
-#~ msgid "%s: Setting attributes to read file"
-#~ msgstr "%s: impostazione degli attributi per leggere il file"
-
-#~ msgid "%s: Requested v4l2_palette option: %d"
-#~ msgstr "%s: opzione tavolozza v4l2 richiesta: %d"
-
-#~ msgid "%s: Requested FOURCC code: %s"
-#~ msgstr "%s: codice FOURCC richiesto: %s"
-
-#~ msgid "%s: Setting v4l2 input_format: %s"
-#~ msgstr "%s: impostazione del formato di input v4l2: %s"
-
-#~ msgid "%s: Setting v4l2 framerate: %s"
-#~ msgstr "%s: impostazione del framerate v4l2: %s"
-
-#~ msgid "%s: Setting v4l2 video_size: %s"
-#~ msgstr "%s: impostazione dimensione video v4l2: %s"
-
-#~ msgid "Proxies not supported using for %s"
-#~ msgstr "Proxy non supportati utilizzando per %s"
-
-#~ msgid "Setting up v4l2 via ffmpeg netcam"
-#~ msgstr "Configurazione di v4l2 tramite netcam ffmpeg"
-
-#~ msgid "Setting up file via ffmpeg netcam"
-#~ msgstr "Impostazione del file tramite ffmpeg netcam"
-
-#~ msgid "Setting up http via ffmpeg netcam"
-#~ msgstr "Impostazione di http tramite ffmpeg netcam"
-
-#~ msgid "Setting up %s via ffmpeg netcam"
-#~ msgstr "Impostazione %s tramite netcam ffmpeg"
-
-#~ msgid "High resolution"
-#~ msgstr "Alta risoluzione"
-
-#~ msgid "Normal resolution"
-#~ msgstr "Risoluzione normale"
-
-#~ msgid "ffmpeg too old"
-#~ msgstr "ffmpeg troppo vecchio"
-
-#~ msgid "%s: Invalid camera service"
-#~ msgstr "%s: servizio fotocamera non valido"
-
-#~ msgid "%s: Unable to open camera(%s)"
-#~ msgstr "%s: impossibile aprire la telecamera ( %s)"
-
-#~ msgid "Requested frame rate %d FPS is less than camera frame rate %d FPS"
-#~ msgstr ""
-#~ "La frequenza fotogrammi richiesta %d FPS è inferiore alla frequenza "
-#~ "fotogrammi %d FPS"
-
-#~ msgid "Increasing capture rate to %d FPS to match camera."
-#~ msgstr ""
-#~ "Aumento della velocità di acquisizione a %d FPS per adattarsi alla "
-#~ "telecamera."
-
-#~ msgid ""
-#~ "To lower CPU, change camera FPS to lower rate and decrease I frame "
-#~ "interval."
-#~ msgstr ""
-#~ "Per abbassare la CPU, modificare l'FPS della fotocamera su una velocità "
-#~ "più bassa e ridurre l'intervallo di fotogrammi I."
-
-#~ msgid "FFmpeg/Libav not found on computer.  No RTSP support"
-#~ msgstr "FFmpeg / Libav non trovato sul computer. Nessun supporto RTSP"
-
-#~ msgid "Not valid Frequency [%lu] for Source input [%i]"
-#~ msgstr "Frequenza non valida [ %lu] per input sorgente [ %i]"
-
-#~ msgid "Frequency [%lu] Source input [%i]"
-#~ msgstr "Frequenza [ %lu] Ingresso sorgente [ %i]"
-
-#~ msgid "BKTR is not enabled."
-#~ msgstr "BKTR non è abilitato."
-
-#~ msgid "%s control option value %d is below minimum.  Using minimum"
-#~ msgstr ""
-#~ "Il valore dell'opzione di controllo %s %d è inferiore al minimo. Usando "
-#~ "il minimo"
-
-#~ msgid "%s control option value %d is above maximum.  Using maximum"
-#~ msgstr ""
-#~ "Il valore dell'opzione di controllo %s %d è superiore al massimo. "
-#~ "Utilizzando il massimo"
-
-#~ msgid "1) vid_source->pframe %i"
-#~ msgstr "1) vid source-> pframe %i"
-
-#~ msgid "the_buffer index %d Address (%x)"
-#~ msgstr "l'indice del buffer %d indirizzo ( %x)"
-
-#~ msgid "Invalid url: %s"
-#~ msgstr "URL non valido: %s"
-
-#~ msgid "Error decoding url"
-#~ msgstr "Errore durante la decodifica dell'URL"
+#: src/conf.c
+msgid "webcontrol_lock_minutes"
+msgstr "minuti di blocco del controllo web"
+
+#: src/conf.c
+msgid "webcontrol_lock_attempts"
+msgstr "tentativi di blocco del controllo web"
+
+#: src/conf.c
+msgid "webcontrol_lock_max_ips"
+msgstr "blocco controllo web max ips"
+
+#: src/event.c
+#, c-format
+msgid "Writing image to file: %s"
+msgstr "Scrittura immagine su file: %s"
+
+#: src/event.c
+#, c-format
+msgid "Writing movie to file: %s"
+msgstr "Scrittura del filmato su file: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved image to file: %s"
+msgstr "Immagine salvata su file: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved movie to file: %s"
+msgstr "Filmato salvato su file: %s"
+
+#: src/util.c
+#, c-format
+msgid "Parsing: %s"
+msgstr "Analisi: %s"
+
+#: src/util.c
+msgid "Parsing: <redacted>"
+msgstr "Analisi: <redatto>"
+
+#: src/util.c
+#, c-format
+msgid "New webcontrol_header_params: %s"
+msgstr "Nuovi parametri dell'intestazione del controllo web: %s"
+
+#: src/util.c
+msgid "New webcontrol_header_params: <redacted>"
+msgstr "Nuovi parametri dell'intestazione del controllo web: <redatto>"
+
+#: src/webu.c
+#, c-format
+msgid "Ignoring connection from: %s"
+msgstr "Ignora connessione da: %s"

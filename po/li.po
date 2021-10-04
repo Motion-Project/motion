@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-04 21:33-0600\n"
+"POT-Creation-Date: 2021-10-03 23:12-0600\n"
 "PO-Revision-Date: 2020-01-12 17:49-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -76,38 +76,6 @@ msgid "%-25s <redacted>"
 msgstr "%-25s <pataisytas>"
 
 #: src/conf.c
-msgid "Unable to locate video_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into video_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate netcam_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into netcam_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate webcontrol_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into webcontrol_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate stream_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into stream_header_params"
-msgstr ""
-
-#: src/conf.c
 #, c-format
 msgid "Processing config file %s"
 msgstr "Apdorojamas konfigūracijos failas %s"
@@ -157,6 +125,14 @@ msgid "quiet"
 msgstr "tyliai"
 
 #: src/conf.c
+msgid "watchdog_tmo"
+msgstr "waakhond tmo"
+
+#: src/conf.c
+msgid "watchdog_kill"
+msgstr "waakhond doden"
+
+#: src/conf.c
 msgid "native_language"
 msgstr "Gimtoji kalba"
 
@@ -174,11 +150,11 @@ msgstr "taikinys rež"
 
 #: src/conf.c
 msgid "video_device"
-msgstr ""
+msgstr "videoapparaat"
 
 #: src/conf.c
 msgid "video_params"
-msgstr ""
+msgstr "video parameters"
 
 #: src/conf.c
 msgid "auto_brightness"
@@ -186,7 +162,7 @@ msgstr "automatinis ryškumas"
 
 #: src/conf.c
 msgid "tuner_device"
-msgstr ""
+msgstr "tunerapparaat"
 
 #: src/conf.c
 msgid "roundrobin_frames"
@@ -206,15 +182,15 @@ msgstr "„netcam“ URL"
 
 #: src/conf.c
 msgid "netcam_params"
-msgstr ""
+msgstr "netcam parameters"
 
 #: src/conf.c
 msgid "netcam_high_url"
-msgstr ""
+msgstr "netcam hoge url"
 
 #: src/conf.c
 msgid "netcam_high_params"
-msgstr ""
+msgstr "netcam hoge parameters"
 
 #: src/conf.c
 msgid "netcam_userpass"
@@ -226,7 +202,7 @@ msgstr "mmalcam vardas"
 
 #: src/conf.c
 msgid "mmalcam_params"
-msgstr ""
+msgstr "mmalcam params"
 
 #: src/conf.c
 msgid "width"
@@ -286,7 +262,7 @@ msgstr "mėgdžioja judesį"
 
 #: src/conf.c
 msgid "pause"
-msgstr ""
+msgstr "pauze"
 
 #: src/conf.c
 msgid "threshold"
@@ -534,7 +510,7 @@ msgstr "interneto valdymo raktas"
 
 #: src/conf.c
 msgid "webcontrol_header_params"
-msgstr ""
+msgstr "webcontrol header parameters"
 
 #: src/conf.c
 msgid "stream_port"
@@ -558,7 +534,7 @@ msgstr "srautas tls"
 
 #: src/conf.c
 msgid "stream_header_params"
-msgstr ""
+msgstr "stream header parameters"
 
 #: src/conf.c
 msgid "stream_preview_scale"
@@ -738,15 +714,15 @@ msgstr "kameros rež"
 
 #: src/dbse.c
 msgid "Closing MySQL library"
-msgstr ""
+msgstr "MySQL-bibliotheek sluiten"
 
 #: src/dbse.c
 msgid "Closing MariaDB library"
-msgstr ""
+msgstr "MariaDB-bibliotheek sluiten"
 
 #: src/dbse.c
 msgid "Database closed"
-msgstr ""
+msgstr "Database gesloten"
 
 #: src/dbse.c
 msgid "Initializing database"
@@ -777,7 +753,7 @@ msgstr "SĖKMĖ"
 #: src/dbse.c
 #, c-format
 msgid "Can't open SQLite3 database %s : %s"
-msgstr ""
+msgstr "Kan SQLite3-database %s niet openen: %s"
 
 #: src/dbse.c
 #, c-format
@@ -805,11 +781,12 @@ msgstr "„MySQL“ klaida buvo %s"
 #, c-format
 msgid "Cannot connect to MariaDB database %s on host %s with user %s"
 msgstr ""
+"Kan geen verbinding maken met MariaDB-database %s op host %s met gebruiker %s"
 
 #: src/dbse.c
 #, c-format
 msgid "MariaDB error was %s"
-msgstr ""
+msgstr "MariaDB-fout was %s"
 
 #: src/dbse.c
 msgid "SQLite3 using shared handle"
@@ -827,12 +804,12 @@ msgstr "Duomenų bazės užrašai %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
-msgstr ""
+msgstr "MySQL-query uitvoeren"
 
 #: src/dbse.c
 #, c-format
 msgid "MySQL query failed %s error code %d"
-msgstr ""
+msgstr "MySQL-query mislukt %s foutcode %d"
 
 #: src/dbse.c
 #, c-format
@@ -846,21 +823,21 @@ msgstr ""
 #: src/dbse.c
 #, c-format
 msgid "Re-Connection to MySQL database '%s' Succeed"
-msgstr ""
+msgstr "Opnieuw verbinding maken met MySQL-database '%s' geslaagd"
 
 #: src/dbse.c
 #, c-format
 msgid "after re-connection MySQL query failed %s error code %d"
-msgstr ""
+msgstr "na opnieuw verbinden MySQL-query mislukt %s foutcode %d"
 
 #: src/dbse.c
 msgid "Executing MariaDB query"
-msgstr ""
+msgstr "MariaDB-query uitvoeren"
 
 #: src/dbse.c
 #, c-format
 msgid "MariaDB query failed %s error code %d"
-msgstr ""
+msgstr "MariaDB-query mislukt %s foutcode %d"
 
 #: src/dbse.c
 #, c-format
@@ -868,30 +845,32 @@ msgid ""
 "Cannot reconnect to MariaDB database %s on host %s with user %s MariaDB "
 "error was %s"
 msgstr ""
+"Kan niet opnieuw verbinding maken met MariaDB-database %s op host %s met "
+"gebruiker %s MariaDBfout was %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Re-Connection to MariaDB database '%s' Succeed"
-msgstr ""
+msgstr "Opnieuw verbinding maken met MariaDB-database '%s' geslaagd"
 
 #: src/dbse.c
 #, c-format
 msgid "after re-connection MariaDB query failed %s error code %d"
-msgstr ""
+msgstr "na opnieuw verbinden MariaDB-query mislukt %s foutcode %d"
 
 #: src/dbse.c
 #, c-format
 msgid "Re-connected to PostgreSQL database '%s'"
-msgstr ""
+msgstr "Opnieuw verbonden met PostgreSQL-database '%s'"
 
 #: src/dbse.c
 msgid "Executing PostgreSQL query"
-msgstr ""
+msgstr "PostgreSQL-query uitvoeren"
 
 #: src/dbse.c
 #, c-format
 msgid "Attempting reconnect to PostgreSQL database '%s': %s"
-msgstr ""
+msgstr "Poging om opnieuw verbinding te maken met PostgreSQL-database '%s': %s"
 
 #: src/dbse.c
 #, c-format
@@ -901,21 +880,21 @@ msgstr "PGSQL užklausa nepavyko: [%s] %s %s"
 #: src/dbse.c
 #, c-format
 msgid "INSERT ... RETURNING VALUE=\"%s\""
-msgstr ""
+msgstr "INSERT ... RETURNING VALUE=\"%s\""
 
 #: src/dbse.c
 #, c-format
 msgid "Invalid event ID returned by SQL query \"%s\""
-msgstr ""
+msgstr "Ongeldige gebeurtenis-ID geretourneerd door SQL-query \"%s\""
 
 #: src/dbse.c
 msgid "Executing SQLite3 query"
-msgstr ""
+msgstr "SQLite3-query uitvoeren"
 
 #: src/dbse.c
 #, c-format
 msgid "SQLite3 error was %s"
-msgstr ""
+msgstr "SQLite3-fout was %s"
 
 #: src/event.c src/track.c
 #, c-format
@@ -926,11 +905,6 @@ msgstr "Neįmanoma paleisti išorinės komandos „ %s“"
 #, c-format
 msgid "Executing external command '%s'"
 msgstr "Vykdo išorinę komandą „ %s“"
-
-#: src/event.c
-#, c-format
-msgid "File of type %ld saved to: %s"
-msgstr "%ld tipo failas išsaugotas: %s"
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -965,6 +939,11 @@ msgstr "UŽDARYMAS: ištrinkite failo aprašą %d, klaidos būsena %d"
 #, c-format
 msgid "pclose return: %d"
 msgstr "grąžinimas: %d"
+
+#: src/event.c
+#, c-format
+msgid "Source FPS %d"
+msgstr "Šaltinis FPS %d"
 
 #: src/event.c
 #, c-format
@@ -1018,11 +997,6 @@ msgstr "Klaida rašant vamzdyje, būsenos klaida %d"
 #, c-format
 msgid "pipe %s not created or closed already "
 msgstr "vamzdis %s dar nėra sukurtas arba uždarytas"
-
-#: src/event.c
-#, c-format
-msgid "Source FPS %d"
-msgstr "Šaltinis FPS %d"
 
 #: src/event.c
 msgid "The ogg container is no longer supported.  Changing to mpeg4"
@@ -2064,7 +2038,7 @@ msgstr "dabar skambina netcam setup mjpg ()"
 #: src/netcam.c
 #, c-format
 msgid "Invalid netcam service '%s' - must be mjpeg, ftp, mjpg or jpeg."
-msgstr ""
+msgstr "Ongeldige netcam-service '%s' - moet mjpeg, ftp, mjpg of jpeg zijn."
 
 #: src/netcam.c src/netcam_rtsp.c
 #, c-format
@@ -2655,12 +2629,12 @@ msgstr "Melagingas"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Ignoring packet with invalid data"
-msgstr ""
+msgstr "%s: Pakket met ongeldige gegevens negeren"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Rec frame error: %s"
-msgstr ""
+msgstr "%s: Fout opnameframe: %s"
 
 #: src/netcam_rtsp.c
 msgid "Ignoring packet with invalid data"
@@ -2675,6 +2649,7 @@ msgstr "Klaida dekoduojant paketą: %s"
 #, c-format
 msgid "%s: Error transferring HW decoded to system memory"
 msgstr ""
+"%s: Fout bij het overzetten van gedecodeerde HW naar het systeemgeheugen"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2688,80 +2663,81 @@ msgstr "Klaida dekoduojant vaizdo įrašo paketą: kopijavimas į buferį"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: HW Devices: "
-msgstr ""
+msgstr "%s: HW-apparaten:"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s (available)"
-msgstr ""
+msgstr "%s: %s (beschikbaar)"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s (not implemented)"
-msgstr ""
+msgstr "%s: %s (niet geïmplementeerd)"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: netcam_decoder %s disabled."
-msgstr ""
+msgstr "%s: netcam-decoder %s uitgeschakeld."
 
 #: src/netcam_rtsp.c
 msgid "Failed to get vaapi pix format"
-msgstr ""
+msgstr "Kan vaapi pix-indeling niet ophalen"
 
 #: src/netcam_rtsp.c
 msgid "Failed to get cuda pix format"
-msgstr ""
+msgstr "Cuda pix-indeling kan niet worden opgehaald"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Interrupted."
-msgstr ""
+msgstr "%s: onderbroken."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s: %s"
-msgstr ""
+msgstr "%s: %s: %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s: Failed"
-msgstr ""
+msgstr "%s: %s: Mislukt"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Decoder %s did not work."
-msgstr ""
+msgstr "%s: Decoder %s werkte niet."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Ignoring and removing the user requested decoder %s"
 msgstr ""
+"%s: Negeren en verwijderen van de door de gebruiker gevraagde decoder %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Initializing vaapi decoder"
-msgstr ""
+msgstr "%s: vaapi-decoder initialiseren"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to find vaapi hw device"
-msgstr ""
+msgstr "%s: kan vaapi hw-apparaat niet vinden"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Initializing cuda decoder"
-msgstr ""
+msgstr "%s: Cuda-decoder initialiseren"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to find cuda hw device"
-msgstr ""
+msgstr "%s: kan cuda hw-apparaat niet vinden"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Initializing decoder"
-msgstr ""
+msgstr "%s: Decoder initialiseren"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2771,7 +2747,7 @@ msgstr "%s: Naudojant dekoderį %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Decoder opened"
-msgstr ""
+msgstr "%s: decoder geopend"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2822,22 +2798,25 @@ msgstr "Klaida įdedant kadrą į išvesties buferį: %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Interrupted"
-msgstr ""
+msgstr "%s: onderbroken"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: av_read_frame: %s"
-msgstr ""
+msgstr "%s: gem leesframe: %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using %d"
 msgstr ""
+"%s: opnamesnelheid niet gespecificeerd in netcam-parameters. %d . gebruiken"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
 msgstr ""
+"%s: opnamesnelheid niet gespecificeerd in netcam-parameters. Framerate %d . "
+"gebruiken"
 
 #: src/netcam_rtsp.c
 msgid "The network camera is sending pictures in a different"
@@ -2908,49 +2887,49 @@ msgstr ""
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting rtsp/rtmp"
-msgstr ""
+msgstr "%s: rtsp/rtmp . instellen"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting input_format mjpeg"
-msgstr ""
+msgstr "%s: Invoerformaat mjpeg instellen"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting input_format video4linux2"
-msgstr ""
+msgstr "%s: Invoerformaat video4linux2 instellen"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting up movie file"
-msgstr ""
+msgstr "%s: filmbestand instellen"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting up %s"
-msgstr ""
+msgstr "%s: %s instellen"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: option: %s = %s"
-msgstr ""
+msgstr "%s: optie: %s = %s"
 
 #: src/netcam_rtsp.c
 msgid "Setting up v4l2 via netcam"
-msgstr ""
+msgstr "v4l2 instellen via netcam"
 
 #: src/netcam_rtsp.c
 msgid "Setting up file via netcam"
-msgstr ""
+msgstr "Bestand instellen via netcam"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Setting up %s via netcam"
-msgstr ""
+msgstr "%s instellen via netcam"
 
 #: src/netcam_rtsp.c
 msgid "highres"
-msgstr ""
+msgstr "hoge resolutie"
 
 #: src/netcam_rtsp.c
 msgid "norm"
@@ -3021,32 +3000,34 @@ msgstr "%s: prijungta kamera ( %s)"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Netcam capture_rate is %d."
-msgstr ""
+msgstr "%s: Netcam-opnamesnelheid is %d."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Camera source is %d FPS"
-msgstr ""
+msgstr "%s: Camerabron is %d FPS"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to determine the camera source FPS."
-msgstr ""
+msgstr "%s: kan de camerabron-FPS niet bepalen."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate is less than camera FPS."
-msgstr ""
+msgstr "%s: opnamesnelheid is lager dan camera-FPS."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Decoding errors will occur."
-msgstr ""
+msgstr "%s: er zullen decoderingsfouten optreden."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate slightly larger than camera FPS is recommended."
 msgstr ""
+"%s: opnamesnelheid die iets groter is dan de FPS van de camera wordt "
+"aanbevolen."
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3093,7 +3074,7 @@ msgstr "nepavyksta sukurti aukšto rtsp konteksto"
 
 #: src/netcam_rtsp.c
 msgid "No FFmpeg support"
-msgstr ""
+msgstr "Geen FFmpeg-ondersteuning"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3492,6 +3473,8 @@ msgstr "Klaida uždarant failą"
 #: src/util.c
 msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
 msgstr ""
+"%{dbeventid} gebruikt maar sql-query start heeft geen geldige gebeurtenis-ID "
+"geretourneerd"
 
 #: src/util.c
 #, c-format
@@ -3509,104 +3492,80 @@ msgstr "FFMPEG versija per sena. Išjungti leidimų apdorojimą."
 
 #: src/util.c
 msgid "pass-through enabled."
-msgstr ""
+msgstr "doorgang ingeschakeld."
 
 #: src/util.c
 #, c-format
 msgid "Error setting parm >%s<"
-msgstr ""
-
-#: src/util.c
-msgid "Error setting parm >redacted<"
-msgstr ""
+msgstr "Fout bij instellen parm >%s<"
 
 #: src/util.c
 #, c-format
 msgid "Parsed: >%s< >%s<"
-msgstr ""
+msgstr "Geparseerd: >%s< >%s<"
 
 #: src/util.c
 msgid "Parsed: >redacted< >redacted<"
-msgstr ""
+msgstr "Geparseerd: >geredigeerd< >geredigeerd<"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing parm_nm controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing parm_nm controls: <redacted>"
-msgstr ""
+msgstr "Fout bij parseren van parm nm-besturingselementen: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing parm_vl controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing parm_vl controls: <redacted>"
-msgstr ""
+msgstr "Fout bij het parseren van pars vl-besturingselementen: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error setting temp: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error setting temp: <redacted>"
-msgstr ""
+msgstr "Fout bij het instellen van de temperatuur: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error reparsing controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error reparsing controls: <redacted>"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "Parsing controls: %s"
-msgstr "Analizės valdikliai: %s"
-
-#: src/util.c
-msgid "Parsing controls: <redacted>"
-msgstr ""
+msgstr "Fout bij het repareren van besturingselementen: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing controls: <redacted>"
-msgstr ""
+msgstr "Fout bij het parseren van besturingselementen: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error: %s"
-msgstr ""
+msgstr "Fout: %s"
 
 #: src/util.c
 #, c-format
 msgid "New netcam_params: %s"
-msgstr ""
+msgstr "Nieuwe netcam-parameters: %s"
 
 #: src/util.c
 #, c-format
 msgid "New netcam_high_params: %s"
-msgstr ""
+msgstr "Nieuwe netcam hoge parameters: %s"
 
 #: src/util.c
 #, c-format
 msgid "New video_params: %s"
-msgstr ""
+msgstr "Nieuwe videoparameters: %s"
+
+#: src/util.c
+#, c-format
+msgid "New stream_header_params: %s"
+msgstr "Nieuwe stream header-parameters: %s"
+
+#: src/util.c
+msgid "New stream_header_params: <redacted>"
+msgstr "Nieuwe stream header-parameters: <redacted>"
 
 #: src/util.c
 #, c-format
 msgid "Programming error.  Unknown configuration item: %s"
-msgstr ""
+msgstr "Programmeerfout. Onbekend configuratie-item: %s "
 
 #: src/video_bktr.c
 #, c-format
@@ -3685,12 +3644,12 @@ msgstr "iki [ %d / %d] Norma %d"
 #: src/video_bktr.c
 #, c-format
 msgid "Not valid Frequency [%ld] for Source input [%i]"
-msgstr ""
+msgstr "Niet geldig Frequentie [%ld] voor Broninvoer [%i]"
 
 #: src/video_bktr.c
 #, c-format
 msgid "Frequency [%ld] Source input [%i]"
-msgstr ""
+msgstr "Frequentie [%ld] Broninvoer [%i]"
 
 #: src/video_bktr.c
 #, c-format
@@ -3935,11 +3894,12 @@ msgstr "Nustatykite valdymo elementą „ %s“ reikšmei %d"
 #, c-format
 msgid "%s control option value %s is below minimum.  Using minimum %d"
 msgstr ""
+"%s controle optie waarde %s is onder het minimum. Minimaal %d . gebruiken "
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %s is above maximum.  Using maximum %d"
-msgstr ""
+msgstr "%s controle optie waarde %s is boven maximum. Maximaal %d . gebruiken "
 
 #: src/video_v4l2.c
 msgid "control type not supported yet"
@@ -4246,11 +4206,6 @@ msgstr "Nustatykite reikšmę null / zero"
 
 #: src/webu.c
 #, c-format
-msgid "Connection from: %s"
-msgstr "Ryšys iš: %s"
-
-#: src/webu.c
-#, c-format
 msgid "Failed authentication from %s"
 msgstr "Nepavyko patvirtinti iš %s"
 
@@ -4269,12 +4224,12 @@ msgstr "Netinkamas atsakymas"
 #: src/webu.c
 #, c-format
 msgid "Error adding webcontrol header %s %s"
-msgstr ""
+msgstr "Fout bij het toevoegen van webcontrol-header %s %s"
 
 #: src/webu.c src/webu_stream.c
 #, c-format
 msgid "Error adding stream header %s %s"
-msgstr ""
+msgstr "Fout bij het toevoegen van streamheader %s %s"
 
 #: src/webu.c
 #, c-format
@@ -4283,20 +4238,25 @@ msgstr "Prašytas netinkamas metodas: %s"
 
 #: src/webu.c
 #, c-format
+msgid "Connection from: %s"
+msgstr "Ryšys iš: %s"
+
+#: src/webu.c
+#, c-format
 msgid "send page failed %d"
 msgstr "siųsti puslapį nepavyko %d"
 
 #: src/webu.c
 msgid "Stream picture is not ready yet"
-msgstr ""
+msgstr "Stream foto is nog niet klaar"
 
 #: src/webu.c
 msgid "Stream process requested to finish."
-msgstr ""
+msgstr "Streamproces verzocht om te voltooien."
 
 #: src/webu.c
 msgid "Send page failed."
-msgstr ""
+msgstr "Pagina verzenden mislukt."
 
 #: src/webu.c
 msgid "Basic authentication: available"
@@ -4394,6 +4354,10 @@ msgstr "Nepavyko pradėti srauto %d kamerai"
 #, c-format
 msgid "Duplicate port requested %d"
 msgstr "Prašoma kopijuoti prievadą %d"
+
+#: src/webu.c
+msgid "Invalid webcontrol_lock_max_ips.  Setting equal to 25."
+msgstr "Ongeldige webcontrol lock max ips. Instelling gelijk aan 25. "
 
 #: src/webu_html.c
 msgid "Cameras"
@@ -4549,241 +4513,3 @@ msgstr "Nepavyko gauti vaizdo srautui."
 #, c-format
 msgid "'%s' option is depreciated.  New option name is '%s'"
 msgstr "„ %s“ galimybė yra nusidėvėjusi. Naujo varianto pavadinimas yra '%s' "
-
-#~ msgid "Unable to locate vid_control_params"
-#~ msgstr "Neįmanoma rasti „vid“ valdymo parametrų"
-
-#~ msgid "No value provided to put into vid_control_params"
-#~ msgstr ""
-#~ "Nėra jokios vertės, kad būtų galima įdėti į „vid“ valdymo parametrus"
-
-#~ msgid "Error compiling regex in copy_uri"
-#~ msgstr "Įrašant regex kopiją „uri“, įvyko klaida"
-
-#~ msgid "Invalid origin for cors_header in copy_uri"
-#~ msgstr "Netinkama rs egzemplioriaus kors antraštė"
-
-#~ msgid "videodevice"
-#~ msgstr "vaizdo įtaisas"
-
-#~ msgid "vid_control_params"
-#~ msgstr "vid valdymo params"
-
-#~ msgid "v4l2_palette"
-#~ msgstr "„v4l2“ paletė"
-
-#~ msgid "input"
-#~ msgstr "įvestis"
-
-#~ msgid "frequency"
-#~ msgstr "dažnis"
-
-#~ msgid "tunerdevice"
-#~ msgstr "Tunerdevice"
-
-#~ msgid "netcam_highres"
-#~ msgstr "netcam aukštumos"
-
-#~ msgid "netcam_keepalive"
-#~ msgstr "„netcam keepalive“"
-
-#~ msgid "netcam_proxy"
-#~ msgstr "„netcam“ tarpinis serveris"
-
-#~ msgid "netcam_tolerant_check"
-#~ msgstr "„netcam“ tolerancijos patikrinimas"
-
-#~ msgid "netcam_use_tcp"
-#~ msgstr "„netcam“ naudojimas TCP"
-
-#~ msgid "netcam_decoder"
-#~ msgstr "„netcam“ dekoderis"
-
-#~ msgid "mmalcam_control_params"
-#~ msgstr "„mmalcam“ valdymo params"
-
-#~ msgid "webcontrol_cors_header"
-#~ msgstr "interneto valdymo korsų antraštė"
-
-#~ msgid "stream_cors_header"
-#~ msgstr "srauto korsų antraštė"
-
-#~ msgid "Ignoring empty sql query"
-#~ msgstr "Nepaisoma tuščios sql užklausos"
-
-#~ msgid "Executing mysql query"
-#~ msgstr "Vykdome „mysql“ užklausą"
-
-#~ msgid "Mysql query failed %s error code %d"
-#~ msgstr "„MySQL“ užklausa nepavyko %s klaidos kodas %d"
-
-#~ msgid "Re-Connection to Mysql database '%s' Succeed"
-#~ msgstr "Pakartotinis prisijungimas prie „MySQL“ duomenų bazės „ %s“ pavyko"
-
-#~ msgid "after re-connection Mysql query failed %s error code %d"
-#~ msgstr ""
-#~ "po pakartotinio prisijungimo „MySQL“ užklausa nepavyko %s klaidos kodas %d"
-
-#~ msgid "Executing postgresql query"
-#~ msgstr "Vykdome postgresql užklausą"
-
-#~ msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
-#~ msgstr ""
-#~ "Nepavyko iš naujo prisijungti prie „PostgreSQL“ duomenų bazės „ %s“: %s"
-
-#~ msgid "Re-Connection to PostgreSQL database '%s' Succeed"
-#~ msgstr "Vėl pavyks prisijungti prie „PostgreSQL“ duomenų bazės „ %s“"
-
-#~ msgid "Executing sqlite query"
-#~ msgstr "Vykdome „sqlite“ užklausą"
-
-#~ msgid "SQLite error was %s"
-#~ msgstr "„SQLite“ klaida buvo %s"
-
-#~ msgid "No ffmpeg support"
-#~ msgstr "Nėra „ffmpeg“ palaikymo"
-
-#~ msgid "Closing MYSQL"
-#~ msgstr "MYSQL uždarymas"
-
-#~ msgid "Can't open database %s : %s"
-#~ msgstr "Neįmanoma atidaryti duomenų bazės %s: %s"
-
-#~ msgid "Problem enabling motion-stream server in port %d"
-#~ msgstr "Problema įgalinant judesio srauto serverį uoste %d"
-
-#~ msgid "Started motion-stream server on port %d (auth %s)"
-#~ msgstr "Paleistas judesio srauto serveris prie %d prievado (aut. %s)"
-
-#~ msgid "pass-through is enabled but is still experimental."
-#~ msgstr "pravažiavimas įgalintas, tačiau vis dar yra eksperimentinis."
-
-#~ msgid "Using port number %d"
-#~ msgstr "Naudojant prievado numerį %d"
-
-#~ msgid ""
-#~ "Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or "
-#~ "jpeg."
-#~ msgstr ""
-#~ "Netinkama „netcam“ paslauga „ %s“ - turi būti http, ftp, mjpg, mjpeg, "
-#~ "v4l2 arba JPEG."
-
-#~ msgid "Error receiving frame from codec: %s"
-#~ msgstr "Klaida gaunant kadrą iš kodeko: %s"
-
-#~ msgid "%s: %s: %s,Interrupt %s"
-#~ msgstr "%s: %s: %s, pertraukti %s"
-
-#~ msgid "%s: %s: Failed,Interrupt %s"
-#~ msgstr "%s: %s: nepavyko, pertraukti %s"
-
-#~ msgid "%s: Ignoring user requested decoder %s"
-#~ msgstr "%s: nepaisoma vartotojo reikalaujamo dekoderio %s"
-
-#~ msgid "%s: av_read_frame: %s ,Interrupt: %s"
-#~ msgstr "%s: av skaitymo rėmelis: %s, pertraukimas: %s"
-
-#~ msgid "%s: Setting http input_format mjpeg"
-#~ msgstr "%s: „http“ įvesties formato „mjpeg“ nustatymas"
-
-#~ msgid "%s: Setting rtsp transport to tcp"
-#~ msgstr "%s: rtsp transportavimo nustatymas į TCP"
-
-#~ msgid "%s: Setting rtsp transport to udp"
-#~ msgstr "%s: rtsp transportavimo nustatymas į udp"
-
-#~ msgid "%s: Setting attributes to read file"
-#~ msgstr "%s: atributų nustatymas failui skaityti"
-
-#~ msgid "%s: Requested v4l2_palette option: %d"
-#~ msgstr "%s: Prašoma „v4l2“ paletės parinktis: %d"
-
-#~ msgid "%s: Requested FOURCC code: %s"
-#~ msgstr "%s: prašomas FOURCC kodas: %s"
-
-#~ msgid "%s: Setting v4l2 input_format: %s"
-#~ msgstr "%s: „v4l2“ įvesties formato nustatymas: %s"
-
-#~ msgid "%s: Setting v4l2 framerate: %s"
-#~ msgstr "%s: „V4l2“ kadrų dažnio nustatymas: %s"
-
-#~ msgid "%s: Setting v4l2 video_size: %s"
-#~ msgstr "%s: „V4l2“ vaizdo įrašo dydžio nustatymas: %s"
-
-#~ msgid "Proxies not supported using for %s"
-#~ msgstr "Tarpiniai serveriai nepalaikomi naudojant %s"
-
-#~ msgid "Setting up v4l2 via ffmpeg netcam"
-#~ msgstr "„V4l2“ nustatymas per „ffmpeg netcam“"
-
-#~ msgid "Setting up file via ffmpeg netcam"
-#~ msgstr "Failo nustatymas per „ffmpeg netcam“"
-
-#~ msgid "Setting up http via ffmpeg netcam"
-#~ msgstr "„Http“ nustatymas per „ffmpeg netcam“"
-
-#~ msgid "Setting up %s via ffmpeg netcam"
-#~ msgstr "%s nustatymas per „ffmpeg netcam“"
-
-#~ msgid "High resolution"
-#~ msgstr "Didelės raiškos"
-
-#~ msgid "Normal resolution"
-#~ msgstr "Normali skiriamoji geba"
-
-#~ msgid "ffmpeg too old"
-#~ msgstr "ffmpeg per senas"
-
-#~ msgid "%s: Invalid camera service"
-#~ msgstr "%s: netinkama fotoaparato paslauga"
-
-#~ msgid "%s: Unable to open camera(%s)"
-#~ msgstr "%s: Neįmanoma atidaryti kameros ( %s)"
-
-#~ msgid "Requested frame rate %d FPS is less than camera frame rate %d FPS"
-#~ msgstr ""
-#~ "Prašoma kadrų dažnio %d FPS yra mažesnė nei fotoaparato kadrų dažnio %d "
-#~ "FPS"
-
-#~ msgid "Increasing capture rate to %d FPS to match camera."
-#~ msgstr "Padidinamas fotografavimo greitis iki %d FPS, kad atitiktų kamerą."
-
-#~ msgid ""
-#~ "To lower CPU, change camera FPS to lower rate and decrease I frame "
-#~ "interval."
-#~ msgstr ""
-#~ "Norėdami sumažinti CPU, pakeiskite fotoaparato FPS į mažesnį dažnį ir "
-#~ "sumažinkite I kadrų intervalą."
-
-#~ msgid "FFmpeg/Libav not found on computer.  No RTSP support"
-#~ msgstr "„FFmpeg“ / „Libav“ nerastas kompiuteryje. Nėra RTSP palaikymo"
-
-#~ msgid "Not valid Frequency [%lu] for Source input [%i]"
-#~ msgstr "Netinkamas šaltinio įvesties dažnis [ %lu] [ %i]"
-
-#~ msgid "Frequency [%lu] Source input [%i]"
-#~ msgstr "Dažnis [ %lu] Šaltinio įvestis [ %i]"
-
-#~ msgid "BKTR is not enabled."
-#~ msgstr "BKTR neįgalintas."
-
-#~ msgid "%s control option value %d is below minimum.  Using minimum"
-#~ msgstr ""
-#~ "%s valdymo parinkties vertė %d yra mažesnė už minimalią. Naudojant "
-#~ "minimumą"
-
-#~ msgid "%s control option value %d is above maximum.  Using maximum"
-#~ msgstr ""
-#~ "%s valdymo parinkties vertė %d viršija maksimalią. Naudojant maksimaliai"
-
-#~ msgid "1) vid_source->pframe %i"
-#~ msgstr "1) vid šaltinis-> rėmas %i"
-
-#~ msgid "the_buffer index %d Address (%x)"
-#~ msgstr "buferio indeksas %d adresas ( %x)"
-
-#~ msgid "Invalid url: %s"
-#~ msgstr "Netinkamas URL: %s"
-
-#~ msgid "Error decoding url"
-#~ msgstr "Klaida dekoduojant URL"
