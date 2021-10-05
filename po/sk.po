@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-04 21:33-0600\n"
+"POT-Creation-Date: 2021-10-03 23:12-0600\n"
 "PO-Revision-Date: 2020-01-10 21:18-0700\n"
 "Last-Translator: Dusan Mikulas <dmkil22@gmail.com>\n"
 "Language-Team: Dusan Mikulas <dmkil22@gmail.com>\n"
@@ -75,38 +75,6 @@ msgid "%-25s <redacted>"
 msgstr "%-25s <redacted>"
 
 #: src/conf.c
-msgid "Unable to locate video_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into video_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate netcam_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into netcam_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate webcontrol_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into webcontrol_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "Unable to locate stream_header_params"
-msgstr ""
-
-#: src/conf.c
-msgid "No value provided to put into stream_header_params"
-msgstr ""
-
-#: src/conf.c
 #, c-format
 msgid "Processing config file %s"
 msgstr "Spracovávaný konfig. súbor %s"
@@ -155,6 +123,14 @@ msgid "quiet"
 msgstr "tichý"
 
 #: src/conf.c
+msgid "watchdog_tmo"
+msgstr "strážny pes tmo"
+
+#: src/conf.c
+msgid "watchdog_kill"
+msgstr "strážny pes zabíja"
+
+#: src/conf.c
 msgid "native_language"
 msgstr "materinský jazyk"
 
@@ -172,11 +148,11 @@ msgstr "cieľová r"
 
 #: src/conf.c
 msgid "video_device"
-msgstr ""
+msgstr "video zariadenie"
 
 #: src/conf.c
 msgid "video_params"
-msgstr ""
+msgstr "video parametre"
 
 #: src/conf.c
 msgid "auto_brightness"
@@ -184,7 +160,7 @@ msgstr "automatický jas"
 
 #: src/conf.c
 msgid "tuner_device"
-msgstr ""
+msgstr "tunerové zariadenie"
 
 #: src/conf.c
 msgid "roundrobin_frames"
@@ -204,15 +180,15 @@ msgstr "webová adresa netcam"
 
 #: src/conf.c
 msgid "netcam_params"
-msgstr ""
+msgstr "parametre netcam"
 
 #: src/conf.c
 msgid "netcam_high_url"
-msgstr ""
+msgstr "netcam vysoká adresa URL"
 
 #: src/conf.c
 msgid "netcam_high_params"
-msgstr ""
+msgstr "netcam vysoké parametre"
 
 #: src/conf.c
 msgid "netcam_userpass"
@@ -224,7 +200,7 @@ msgstr "mmalcam name"
 
 #: src/conf.c
 msgid "mmalcam_params"
-msgstr ""
+msgstr "mmalcam params"
 
 #: src/conf.c
 msgid "width"
@@ -284,7 +260,7 @@ msgstr "napodobniť pohyb"
 
 #: src/conf.c
 msgid "pause"
-msgstr ""
+msgstr "pauza"
 
 #: src/conf.c
 msgid "threshold"
@@ -532,7 +508,7 @@ msgstr "webcontrol key"
 
 #: src/conf.c
 msgid "webcontrol_header_params"
-msgstr ""
+msgstr "Parametre hlavičky webcontrol"
 
 #: src/conf.c
 msgid "stream_port"
@@ -556,7 +532,7 @@ msgstr "stream tls"
 
 #: src/conf.c
 msgid "stream_header_params"
-msgstr ""
+msgstr "parametre hlavičky streamu"
 
 #: src/conf.c
 msgid "stream_preview_scale"
@@ -736,15 +712,15 @@ msgstr "kamera dir"
 
 #: src/dbse.c
 msgid "Closing MySQL library"
-msgstr ""
+msgstr "Zatváranie knižnice MySQL"
 
 #: src/dbse.c
 msgid "Closing MariaDB library"
-msgstr ""
+msgstr "Zatvára sa knižnica MariaDB"
 
 #: src/dbse.c
 msgid "Database closed"
-msgstr ""
+msgstr "Databáza je zatvorená"
 
 #: src/dbse.c
 msgid "Initializing database"
@@ -775,7 +751,7 @@ msgstr "ÚSPECH"
 #: src/dbse.c
 #, c-format
 msgid "Can't open SQLite3 database %s : %s"
-msgstr ""
+msgstr "Nie je možné otvoriť databázu SQLite3 %s: %s"
 
 #: src/dbse.c
 #, c-format
@@ -803,11 +779,12 @@ msgstr "Chyba MySQL bola %s"
 #, c-format
 msgid "Cannot connect to MariaDB database %s on host %s with user %s"
 msgstr ""
+"Nedá sa pripojiť k databáze MariaDB %s na hostiteľovi %s s používateľom %s"
 
 #: src/dbse.c
 #, c-format
 msgid "MariaDB error was %s"
-msgstr ""
+msgstr "Chyba MariaDB bola %s"
 
 #: src/dbse.c
 msgid "SQLite3 using shared handle"
@@ -825,12 +802,12 @@ msgstr "Backend databázy %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
-msgstr ""
+msgstr "Vykonáva sa dotaz MySQL"
 
 #: src/dbse.c
 #, c-format
 msgid "MySQL query failed %s error code %d"
-msgstr ""
+msgstr "Dotaz MySQL zlyhal %s kód chyby %d"
 
 #: src/dbse.c
 #, c-format
@@ -844,21 +821,21 @@ msgstr ""
 #: src/dbse.c
 #, c-format
 msgid "Re-Connection to MySQL database '%s' Succeed"
-msgstr ""
+msgstr "Opätovné pripojenie k databáze MySQL '%s' bolo úspešné"
 
 #: src/dbse.c
 #, c-format
 msgid "after re-connection MySQL query failed %s error code %d"
-msgstr ""
+msgstr "po opätovnom pripojení zlyhal dotaz MySQL %s kód chyby %d"
 
 #: src/dbse.c
 msgid "Executing MariaDB query"
-msgstr ""
+msgstr "Vykonáva sa dotaz MariaDB"
 
 #: src/dbse.c
 #, c-format
 msgid "MariaDB query failed %s error code %d"
-msgstr ""
+msgstr "Dotaz MariaDB zlyhal %s kód chyby %d"
 
 #: src/dbse.c
 #, c-format
@@ -866,30 +843,32 @@ msgid ""
 "Cannot reconnect to MariaDB database %s on host %s with user %s MariaDB "
 "error was %s"
 msgstr ""
+"Nedá sa znova pripojiť k databáze MariaDB %s na hostiteľovi %s s "
+"používateľom %s MariaDBchyba bola %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Re-Connection to MariaDB database '%s' Succeed"
-msgstr ""
+msgstr "Opätovné pripojenie k databáze MariaDB '%s' bolo úspešné"
 
 #: src/dbse.c
 #, c-format
 msgid "after re-connection MariaDB query failed %s error code %d"
-msgstr ""
+msgstr "po opätovnom pripojení zlyhal dotaz MariaDB %s kód chyby %d"
 
 #: src/dbse.c
 #, c-format
 msgid "Re-connected to PostgreSQL database '%s'"
-msgstr ""
+msgstr "Znovu pripojené k databáze PostgreSQL '%s'"
 
 #: src/dbse.c
 msgid "Executing PostgreSQL query"
-msgstr ""
+msgstr "Vykonáva sa dotaz PostgreSQL"
 
 #: src/dbse.c
 #, c-format
 msgid "Attempting reconnect to PostgreSQL database '%s': %s"
-msgstr ""
+msgstr "Pokus o opätovné pripojenie k databáze PostgreSQL ' %s': %s"
 
 #: src/dbse.c
 #, c-format
@@ -899,21 +878,21 @@ msgstr "Dopyt PGSQL zlyhal: [%s] %s %s"
 #: src/dbse.c
 #, c-format
 msgid "INSERT ... RETURNING VALUE=\"%s\""
-msgstr ""
+msgstr "VLOŽIŤ ... NÁVRATNÁ HODNOTA = \"%s \""
 
 #: src/dbse.c
 #, c-format
 msgid "Invalid event ID returned by SQL query \"%s\""
-msgstr ""
+msgstr "Neplatné ID udalosti vrátené SQL dotazom \"%s \""
 
 #: src/dbse.c
 msgid "Executing SQLite3 query"
-msgstr ""
+msgstr "Vykonáva sa dotaz SQLite3"
 
 #: src/dbse.c
 #, c-format
 msgid "SQLite3 error was %s"
-msgstr ""
+msgstr "Chyba SQLite3 bola %s"
 
 #: src/event.c src/track.c
 #, c-format
@@ -924,11 +903,6 @@ msgstr "Nedá sa spustiť externý príkaz '%s'"
 #, c-format
 msgid "Executing external command '%s'"
 msgstr "Spustenie externého príkazu '%s'"
-
-#: src/event.c
-#, c-format
-msgid "File of type %ld saved to: %s"
-msgstr "Súbor typu %ld je zapísaný do: %s"
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -963,6 +937,11 @@ msgstr "ZATVORENÉ: súbor extpipe desc %d, chybový stav %d"
 #, c-format
 msgid "pclose return: %d"
 msgstr "návrat výplaty: %d"
+
+#: src/event.c
+#, c-format
+msgid "Source FPS %d"
+msgstr "Zdroj FPS %d"
 
 #: src/event.c
 #, c-format
@@ -1016,11 +995,6 @@ msgstr "Chyba zápisu do rúry, chybný stav %d"
 #, c-format
 msgid "pipe %s not created or closed already "
 msgstr "rúra %s nevytvorená, alebo už zatvorená "
-
-#: src/event.c
-#, c-format
-msgid "Source FPS %d"
-msgstr "Zdroj FPS %d"
 
 #: src/event.c
 msgid "The ogg container is no longer supported.  Changing to mpeg4"
@@ -2063,7 +2037,7 @@ msgstr "teraz volá netcam setup mjpg ()"
 #: src/netcam.c
 #, c-format
 msgid "Invalid netcam service '%s' - must be mjpeg, ftp, mjpg or jpeg."
-msgstr ""
+msgstr "Neplatná služba netcam '%s' - musí byť mjpeg, ftp, mjpg alebo jpeg."
 
 #: src/netcam.c src/netcam_rtsp.c
 #, c-format
@@ -2654,12 +2628,12 @@ msgstr "nepravdivý"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Ignoring packet with invalid data"
-msgstr ""
+msgstr "%s: Paket s neplatnými údajmi sa ignoruje"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Rec frame error: %s"
-msgstr ""
+msgstr "%s: Chyba rámca záznamu: %s"
 
 #: src/netcam_rtsp.c
 msgid "Ignoring packet with invalid data"
@@ -2673,7 +2647,7 @@ msgstr "Chyba pri dekódovaní paketu: %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Error transferring HW decoded to system memory"
-msgstr ""
+msgstr "%s: Chyba pri prenose HW dekódovaného do systémovej pamäte"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2687,80 +2661,80 @@ msgstr "Chyba pri dekódovaní video paketu: Kopírovanie do vyrovnávacej pamä
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: HW Devices: "
-msgstr ""
+msgstr "%s: HW zariadenia:"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s (available)"
-msgstr ""
+msgstr "%s: %s (k dispozícii)"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s (not implemented)"
-msgstr ""
+msgstr "%s: %s (neimplementované)"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: netcam_decoder %s disabled."
-msgstr ""
+msgstr "%s: dekodér netcam %s je deaktivovaný."
 
 #: src/netcam_rtsp.c
 msgid "Failed to get vaapi pix format"
-msgstr ""
+msgstr "Nepodarilo sa získať formát vaapi pix"
 
 #: src/netcam_rtsp.c
 msgid "Failed to get cuda pix format"
-msgstr ""
+msgstr "Nepodarilo sa získať formát cuda pix"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Interrupted."
-msgstr ""
+msgstr "%s: prerušené."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s: %s"
-msgstr ""
+msgstr "%s: %s: %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: %s: Failed"
-msgstr ""
+msgstr "%s: %s: Zlyhalo"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Decoder %s did not work."
-msgstr ""
+msgstr "%s: Dekodér %s nefungoval."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Ignoring and removing the user requested decoder %s"
-msgstr ""
+msgstr "%s: Ignorovanie a odstránenie dekodéra požadovaného používateľom %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Initializing vaapi decoder"
-msgstr ""
+msgstr "%s: Inicializácia dekodéra vaapi"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to find vaapi hw device"
-msgstr ""
+msgstr "%s: Nedá sa nájsť vaapi hw zariadenie"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Initializing cuda decoder"
-msgstr ""
+msgstr "%s: Inicializácia dekodéra cuda"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to find cuda hw device"
-msgstr ""
+msgstr "%s: Nedá sa nájsť cuda hw zariadenie"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Initializing decoder"
-msgstr ""
+msgstr "%s: Inicializácia dekodéra"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2770,7 +2744,7 @@ msgstr "%s: Použitie dekodéra %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Decoder opened"
-msgstr ""
+msgstr "%s: Dekodér je otvorený"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2821,22 +2795,24 @@ msgstr "Chyba pri vkladaní rámca do výstupnej vyrovnávacej pamäte: %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Interrupted"
-msgstr ""
+msgstr "%s: prerušené"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: av_read_frame: %s"
-msgstr ""
+msgstr "%s: av rám na čítanie: %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using %d"
-msgstr ""
+msgstr "%s: rýchlosť snímania nie je uvedená v parametroch netcam. Použitie %d"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
 msgstr ""
+"%s: rýchlosť snímania nie je uvedená v parametroch netcam. Použitie "
+"framerate %d"
 
 #: src/netcam_rtsp.c
 msgid "The network camera is sending pictures in a different"
@@ -2906,49 +2882,49 @@ msgstr "obrazový formát podľa YUV420P pre prípadné nižšie využitie proce
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting rtsp/rtmp"
-msgstr ""
+msgstr "%s: Nastavenie rtsp/rtmp"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting input_format mjpeg"
-msgstr ""
+msgstr "%s: Nastavenie vstupného formátu mjpeg"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting input_format video4linux2"
-msgstr ""
+msgstr "%s: Nastavenie vstupného formátu video4linux2"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting up movie file"
-msgstr ""
+msgstr "%s: Nastavenie súboru filmu"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Setting up %s"
-msgstr ""
+msgstr "%s: Nastavenie %s"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: option: %s = %s"
-msgstr ""
+msgstr "%s: možnosť: %s = %s"
 
 #: src/netcam_rtsp.c
 msgid "Setting up v4l2 via netcam"
-msgstr ""
+msgstr "Nastavenie v4l2 cez netcam"
 
 #: src/netcam_rtsp.c
 msgid "Setting up file via netcam"
-msgstr ""
+msgstr "Nastavenie súboru cez netcam"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Setting up %s via netcam"
-msgstr ""
+msgstr "Nastavenie %s cez netcam"
 
 #: src/netcam_rtsp.c
 msgid "highres"
-msgstr ""
+msgstr "vysoké rozlíšenie"
 
 #: src/netcam_rtsp.c
 msgid "norm"
@@ -3019,32 +2995,33 @@ msgstr "%s: Kamera ( %s) je pripojená"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Netcam capture_rate is %d."
-msgstr ""
+msgstr "%s: Rýchlosť snímania kamery Netcam je %d."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Camera source is %d FPS"
-msgstr ""
+msgstr "%s: Zdroj fotoaparátu je %d FPS"
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Unable to determine the camera source FPS."
-msgstr ""
+msgstr "%s: Nedá sa určiť FPS zdroja fotoaparátu."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate is less than camera FPS."
-msgstr ""
+msgstr "%s: Rýchlosť snímania je nižšia ako FPS fotoaparátu."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Decoding errors will occur."
-msgstr ""
+msgstr "%s: Vyskytnú sa chyby dekódovania."
 
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: capture_rate slightly larger than camera FPS is recommended."
 msgstr ""
+"%s: odporúča sa snímacia frekvencia o niečo väčšia ako FPS fotoaparátu."
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3091,7 +3068,7 @@ msgstr "nie je možné vytvoriť vysoký kontext rtsp"
 
 #: src/netcam_rtsp.c
 msgid "No FFmpeg support"
-msgstr ""
+msgstr "Žiadna podpora FFmpeg"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3490,6 +3467,8 @@ msgstr "Chyba pri zatváraní súboru"
 #: src/util.c
 msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
 msgstr ""
+"Použité %{dbeventid}, ale spustenie dotazu sql nevrátilo žiadne platné ID "
+"udalosti"
 
 #: src/util.c
 #, c-format
@@ -3507,104 +3486,80 @@ msgstr "Verzia FFMPEG je príliš stará. Zakázanie spracovania pass-through."
 
 #: src/util.c
 msgid "pass-through enabled."
-msgstr ""
+msgstr "prechod povolený."
 
 #: src/util.c
 #, c-format
 msgid "Error setting parm >%s<"
-msgstr ""
-
-#: src/util.c
-msgid "Error setting parm >redacted<"
-msgstr ""
+msgstr "Chyba pri nastavovaní parametra>%s <"
 
 #: src/util.c
 #, c-format
 msgid "Parsed: >%s< >%s<"
-msgstr ""
+msgstr "Analyzované:>%s <>%s <"
 
 #: src/util.c
 msgid "Parsed: >redacted< >redacted<"
-msgstr ""
+msgstr "Analyzované:> redigované <> redigované <"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing parm_nm controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing parm_nm controls: <redacted>"
-msgstr ""
+msgstr "Chyba pri analýze ovládacích prvkov parm nm: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing parm_vl controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing parm_vl controls: <redacted>"
-msgstr ""
+msgstr "Chyba pri analýze ovládacích prvkov parametra vl: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error setting temp: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error setting temp: <redacted>"
-msgstr ""
+msgstr "Chyba pri nastavovaní teploty: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error reparsing controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error reparsing controls: <redacted>"
-msgstr ""
-
-#: src/util.c
-#, c-format
-msgid "Parsing controls: %s"
-msgstr "Ovládacie prvky analýzy: %s"
-
-#: src/util.c
-msgid "Parsing controls: <redacted>"
-msgstr ""
+msgstr "Chyba pri reparácii ovládacích prvkov: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing controls: %s"
-msgstr ""
-
-#: src/util.c
-msgid "Error parsing controls: <redacted>"
-msgstr ""
+msgstr "Chyba pri analýze ovládacích prvkov: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error: %s"
-msgstr ""
+msgstr "Chyba: %s"
 
 #: src/util.c
 #, c-format
 msgid "New netcam_params: %s"
-msgstr ""
+msgstr "Nové parametre netcam: %s"
 
 #: src/util.c
 #, c-format
 msgid "New netcam_high_params: %s"
-msgstr ""
+msgstr "Nové parametre netcamu - vysoké parametre: %s"
 
 #: src/util.c
 #, c-format
 msgid "New video_params: %s"
-msgstr ""
+msgstr "Nové parametre videa: %s"
+
+#: src/util.c
+#, c-format
+msgid "New stream_header_params: %s"
+msgstr "Nové parametre hlavičky streamu: %s"
+
+#: src/util.c
+msgid "New stream_header_params: <redacted>"
+msgstr "Nové parametre hlavičky streamu: <redacted>"
 
 #: src/util.c
 #, c-format
 msgid "Programming error.  Unknown configuration item: %s"
-msgstr ""
+msgstr "Chyba programovania. Neznáma položka konfigurácie: %s "
 
 #: src/video_bktr.c
 #, c-format
@@ -3683,12 +3638,12 @@ msgstr "do [ %d / %d] Norm. %d"
 #: src/video_bktr.c
 #, c-format
 msgid "Not valid Frequency [%ld] for Source input [%i]"
-msgstr ""
+msgstr "Neplatná frekvencia [%ld] pre vstup zdroja [%i]"
 
 #: src/video_bktr.c
 #, c-format
 msgid "Frequency [%ld] Source input [%i]"
-msgstr ""
+msgstr "Frekvencia [%ld] Vstup zdroja [%i]"
 
 #: src/video_bktr.c
 #, c-format
@@ -3934,11 +3889,14 @@ msgstr "Nastavte ovládací prvok \" %s \" na hodnotu %d"
 #, c-format
 msgid "%s control option value %s is below minimum.  Using minimum %d"
 msgstr ""
+"Hodnota možnosti ovládania %s %s je nižšia ako minimum. Použitie minimálneho "
+"%d "
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %s is above maximum.  Using maximum %d"
 msgstr ""
+"Hodnota možnosti ovládania %s %s je nad maximom. Použitie maximálne %d "
 
 #: src/video_v4l2.c
 msgid "control type not supported yet"
@@ -4246,11 +4204,6 @@ msgstr "Nastavte hodnotu na null / nula"
 
 #: src/webu.c
 #, c-format
-msgid "Connection from: %s"
-msgstr "Pripojenie od: %s"
-
-#: src/webu.c
-#, c-format
 msgid "Failed authentication from %s"
 msgstr "Overenie zlyhalo z %s"
 
@@ -4269,12 +4222,12 @@ msgstr "Neplatná odpoveď"
 #: src/webu.c
 #, c-format
 msgid "Error adding webcontrol header %s %s"
-msgstr ""
+msgstr "Chyba pri pridávaní hlavičky webového ovládania %s %s"
 
 #: src/webu.c src/webu_stream.c
 #, c-format
 msgid "Error adding stream header %s %s"
-msgstr ""
+msgstr "Chyba pri pridávaní hlavičky streamu %s %s"
 
 #: src/webu.c
 #, c-format
@@ -4283,20 +4236,25 @@ msgstr "Požadovaná neplatná metóda: %s"
 
 #: src/webu.c
 #, c-format
+msgid "Connection from: %s"
+msgstr "Pripojenie od: %s"
+
+#: src/webu.c
+#, c-format
 msgid "send page failed %d"
 msgstr "odoslanie stránky zlyhalo %d"
 
 #: src/webu.c
 msgid "Stream picture is not ready yet"
-msgstr ""
+msgstr "Streamovaný obrázok ešte nie je pripravený"
 
 #: src/webu.c
 msgid "Stream process requested to finish."
-msgstr ""
+msgstr "Dokončil sa proces streamu."
 
 #: src/webu.c
 msgid "Send page failed."
-msgstr ""
+msgstr "Odoslanie stránky zlyhalo."
 
 #: src/webu.c
 msgid "Basic authentication: available"
@@ -4397,6 +4355,11 @@ msgstr "Nemožno spustiť stream pre kameru %d"
 #, c-format
 msgid "Duplicate port requested %d"
 msgstr "Vyžaduje sa duplikát portu %d"
+
+#: src/webu.c
+msgid "Invalid webcontrol_lock_max_ips.  Setting equal to 25."
+msgstr ""
+"Neplatný max. Počet ips zámku webového ovládania. Nastavenie rovné 25. "
 
 #: src/webu_html.c
 msgid "Cameras"
@@ -4553,234 +4516,57 @@ msgstr "Nemožné dostať obrázok do stream-u."
 msgid "'%s' option is depreciated.  New option name is '%s'"
 msgstr "Možnosť ' %s' je odpisovaná. Nový názov voľby je '%s' "
 
-#~ msgid "Unable to locate vid_control_params"
-#~ msgstr "Nemožné určiť vid_control_params"
-
-#~ msgid "No value provided to put into vid_control_params"
-#~ msgstr "Nie je hodnota na vloženie do vid_control_params"
-
-#~ msgid "Error compiling regex in copy_uri"
-#~ msgstr "Chzba prekladu regex v copy_uri"
-
-#~ msgid "Invalid origin for cors_header in copy_uri"
-#~ msgstr "Neplatný pôvod pre hlavičku korzetu v kópii uri"
-
-#~ msgid "videodevice"
-#~ msgstr "videodevice"
-
-#~ msgid "vid_control_params"
-#~ msgstr "vid control params"
-
-#~ msgid "v4l2_palette"
-#~ msgstr "paleta v4l2"
-
-#~ msgid "input"
-#~ msgstr "vstup"
-
-#~ msgid "frequency"
-#~ msgstr "kmitočet"
-
-#~ msgid "tunerdevice"
-#~ msgstr "tunerdevice"
-
-#~ msgid "netcam_highres"
-#~ msgstr "netcam highres"
-
-#~ msgid "netcam_keepalive"
-#~ msgstr "netcam keepalive"
-
-#~ msgid "netcam_proxy"
-#~ msgstr "proxy servera netcam"
-
-#~ msgid "netcam_tolerant_check"
-#~ msgstr "kontrola tolerovaná voči"
-
-#~ msgid "netcam_use_tcp"
-#~ msgstr "netcam použitie tcp"
-
-#~ msgid "netcam_decoder"
-#~ msgstr "dekodér netcam"
-
-#~ msgid "mmalcam_control_params"
-#~ msgstr "Parametre ovládania mmalcam"
-
-#~ msgid "webcontrol_cors_header"
-#~ msgstr "hlavička webcontrol"
-
-#~ msgid "stream_cors_header"
-#~ msgstr "stream cors header"
-
-#~ msgid "Ignoring empty sql query"
-#~ msgstr "Ignorovanie prázdneho dotazu SQL"
-
-#~ msgid "Executing mysql query"
-#~ msgstr "Vykonáva sa dotaz mysql"
-
-#~ msgid "Mysql query failed %s error code %d"
-#~ msgstr "Príkaz bol neúspešný Mysql %s, kód chyby %d"
-
-#~ msgid "Re-Connection to Mysql database '%s' Succeed"
-#~ msgstr "Úspešné znovupripojenie na MySql db '%s' "
-
-#~ msgid "after re-connection Mysql query failed %s error code %d"
-#~ msgstr "po opätovnom pripojení zlyhal dotaz Mysql %s kód chyby %d"
-
-#~ msgid "Executing postgresql query"
-#~ msgstr "Vykonáva sa postgresql dotaz"
-
-#~ msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
-#~ msgstr "Znovupripojenie na PostgreSQL db '%s' chybné: %s"
-
-#~ msgid "Re-Connection to PostgreSQL database '%s' Succeed"
-#~ msgstr "Znovupripojenie naPostgreSQL '%s' úspešné"
-
-#~ msgid "Executing sqlite query"
-#~ msgstr "Vykonáva sa dotaz typu sqlite"
-
-#~ msgid "SQLite error was %s"
-#~ msgstr "Chyba SQLite bola %s "
-
-#~ msgid "No ffmpeg support"
-#~ msgstr "Žiadna podpora ffmpeg"
-
-#~ msgid "Closing MYSQL"
-#~ msgstr "Zatváranie MYSQL"
-
-#~ msgid "Can't open database %s : %s"
-#~ msgstr "Nie je možné otvoriť databázu %s: %s"
-
-#~ msgid "Problem enabling motion-stream server in port %d"
-#~ msgstr "Problém s povolením servera Motion-stream v portu %d"
-
-#~ msgid "Started motion-stream server on port %d (auth %s)"
-#~ msgstr "Spustený server Motion-stream na porte %d (auth %s)"
-
-#~ msgid "pass-through is enabled but is still experimental."
-#~ msgstr "prechod je povolený, ale stále je experimentálny."
-
-#~ msgid "Using port number %d"
-#~ msgstr "Použitie čísla portu %d"
-
-#~ msgid ""
-#~ "Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or "
-#~ "jpeg."
-#~ msgstr ""
-#~ "Neplatná služba netcam ' %s' - musí byť http, ftp, mjpg, mjpeg, v4l2 "
-#~ "alebo jpeg."
-
-#~ msgid "Error receiving frame from codec: %s"
-#~ msgstr "Chyba pri prijímaní rámca z kodeku: %s"
-
-#~ msgid "%s: %s: %s,Interrupt %s"
-#~ msgstr "%s: %s: %s, prerušenie %s"
-
-#~ msgid "%s: %s: Failed,Interrupt %s"
-#~ msgstr "%s: %s: Neúspešné, prerušenie %s"
-
-#~ msgid "%s: Ignoring user requested decoder %s"
-#~ msgstr "%s: Ignoruje sa užívateľ, ktorý požaduje dekodér %s"
-
-#~ msgid "%s: av_read_frame: %s ,Interrupt: %s"
-#~ msgstr "%s: av čítací rámec: %s, prerušenie: %s"
-
-#~ msgid "%s: Setting http input_format mjpeg"
-#~ msgstr "%s: Nastavenie vstupného formátu http mjpeg"
-
-#~ msgid "%s: Setting rtsp transport to tcp"
-#~ msgstr "%s: Nastavenie prenosu rtsp na tcp"
-
-#~ msgid "%s: Setting rtsp transport to udp"
-#~ msgstr "%s: Nastavenie prenosu rtsp na udp"
-
-#~ msgid "%s: Setting attributes to read file"
-#~ msgstr "%s: Nastavenie atribútov na čítanie súboru"
-
-#~ msgid "%s: Requested v4l2_palette option: %d"
-#~ msgstr "%s: Požadovaná možnosť palety v4l2: %d"
-
-#~ msgid "%s: Requested FOURCC code: %s"
-#~ msgstr "%s: Požadovaný kód FOURCC: %s"
-
-#~ msgid "%s: Setting v4l2 input_format: %s"
-#~ msgstr "%s: Nastavenie vstupného formátu v4l2: %s"
-
-#~ msgid "%s: Setting v4l2 framerate: %s"
-#~ msgstr "%s: Nastavenie snímkovej rýchlosti v4l2: %s"
-
-#~ msgid "%s: Setting v4l2 video_size: %s"
-#~ msgstr "%s: Nastavenie veľkosti videa v4l2: %s"
-
-#~ msgid "Proxies not supported using for %s"
-#~ msgstr "Proxy nie sú podporované pre %s"
-
-#~ msgid "Setting up v4l2 via ffmpeg netcam"
-#~ msgstr "Nastavenie v4l2 cez ffmpeg netcam"
-
-#~ msgid "Setting up file via ffmpeg netcam"
-#~ msgstr "Nastavenie súboru pomocou ffmpeg netcam"
-
-#~ msgid "Setting up http via ffmpeg netcam"
-#~ msgstr "Nastavenie http pomocou ffmpeg netcam"
-
-#~ msgid "Setting up %s via ffmpeg netcam"
-#~ msgstr "Nastavenie %s pomocou ffmpeg netcam"
-
-#~ msgid "High resolution"
-#~ msgstr "S vysokým rozlíšením"
-
-#~ msgid "Normal resolution"
-#~ msgstr "Normálne rozlíšenie"
-
-#~ msgid "ffmpeg too old"
-#~ msgstr "ffmpeg je príliš starý"
-
-#~ msgid "%s: Invalid camera service"
-#~ msgstr "%s: Neplatná služba fotoaparátu"
-
-#~ msgid "%s: Unable to open camera(%s)"
-#~ msgstr "%s: Nie je možné otvoriť fotoaparát ( %s)"
-
-#~ msgid "Requested frame rate %d FPS is less than camera frame rate %d FPS"
-#~ msgstr ""
-#~ "Požadovaná snímková frekvencia %d FPS je nižšia ako snímková frekvencia "
-#~ "kamery %d FPS"
-
-#~ msgid "Increasing capture rate to %d FPS to match camera."
-#~ msgstr "Zvyšuje sa miera snímania na %d FPS, aby zodpovedala fotoaparátu."
-
-#~ msgid ""
-#~ "To lower CPU, change camera FPS to lower rate and decrease I frame "
-#~ "interval."
-#~ msgstr ""
-#~ "Ak chcete znížiť CPU, zmeňte FPS kamery na nižšiu rýchlosť a znížte "
-#~ "interval snímok I."
-
-#~ msgid "FFmpeg/Libav not found on computer.  No RTSP support"
-#~ msgstr "FFmpeg / Libav sa nenašiel v počítači. Žiadna podpora RTSP"
-
-#~ msgid "Not valid Frequency [%lu] for Source input [%i]"
-#~ msgstr "Neplatná frekvencia [ %lu] pre vstup zdroja [ %i]"
-
-#~ msgid "Frequency [%lu] Source input [%i]"
-#~ msgstr "Frekvencia [ %lu] Vstup zdroja [ %i]"
-
-#~ msgid "BKTR is not enabled."
-#~ msgstr "BKTR nie je povolený."
-
-#~ msgid "%s control option value %d is below minimum.  Using minimum"
-#~ msgstr "Hodnota možnosti kontroly %s %d je pod minimom. Použitie minima"
-
-#~ msgid "%s control option value %d is above maximum.  Using maximum"
-#~ msgstr "Hodnota ovládacej možnosti %s '%d' je nad maximom. Použitie maxima"
-
-#~ msgid "1) vid_source->pframe %i"
-#~ msgstr "1) vid zdroj-> pframe %i"
-
-#~ msgid "the_buffer index %d Address (%x)"
-#~ msgstr "index vyrovnávacej pamäte %d adresa ( %x)"
-
-#~ msgid "Invalid url: %s"
-#~ msgstr "Neplatná webová adresa: %s"
-
-#~ msgid "Error decoding url"
-#~ msgstr "Chyba pri dekódovaní adresy URL"
+#: src/conf.c
+msgid "webcontrol_lock_minutes"
+msgstr "minúty zámku webového ovládania"
+
+#: src/conf.c
+msgid "webcontrol_lock_attempts"
+msgstr "pokusy o zablokovanie webového ovládania"
+
+#: src/conf.c
+msgid "webcontrol_lock_max_ips"
+msgstr "zámok webcontrol, max. ips"
+
+#: src/event.c
+#, c-format
+msgid "Writing image to file: %s"
+msgstr "Zápis obrázku do súboru: %s"
+
+#: src/event.c
+#, c-format
+msgid "Writing movie to file: %s"
+msgstr "Zápis filmu do súboru: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved image to file: %s"
+msgstr "Uložený obrázok do súboru: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved movie to file: %s"
+msgstr "Film bol uložený do súboru: %s"
+
+#: src/util.c
+#, c-format
+msgid "Parsing: %s"
+msgstr "Analýza: %s"
+
+#: src/util.c
+msgid "Parsing: <redacted>"
+msgstr "Analýza: <redacted>"
+
+#: src/util.c
+#, c-format
+msgid "New webcontrol_header_params: %s"
+msgstr "Nové parametre hlavičky webcontrol: %s"
+
+#: src/util.c
+msgid "New webcontrol_header_params: <redacted>"
+msgstr "Nové parametre hlavičky webcontrol: <redacted>"
+
+#: src/webu.c
+#, c-format
+msgid "Ignoring connection from: %s"
+msgstr "Ignorovanie pripojenia od: %s"
