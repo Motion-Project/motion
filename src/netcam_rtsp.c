@@ -1144,7 +1144,7 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data)
 {
 
     int  size_decoded;
-    int  retcd, errcnt, haveimage;
+    int  retcd, nodata, haveimage;
     char errstr[128];
     netcam_buff *xchg;
 
@@ -1164,32 +1164,30 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data)
     rtsp_data->status = RTSP_READINGIMAGE;
     rtsp_data->img_recv->used = 0;
     size_decoded = 0;
-    errcnt = 0;
+    nodata = 0;
     haveimage = FALSE;
 
-    /* We allow for one failure on the av_read_frame.  Upon the second failure, we exit the function
-     * with a fail code to either end the program or possibly try to reconnnect to camera
-    */
-    while ((!haveimage) && (!rtsp_data->interrupted)) {
+    while ((haveimage == FALSE) && (rtsp_data->interrupted == FALSE)) {
         retcd = av_read_frame(rtsp_data->format_context, rtsp_data->packet_recv);
-        if (retcd < 0 ) {
-            errcnt++;
-        }
-        if ((rtsp_data->interrupted) || (errcnt > 1)) {
+        /* The 2000 for nodata tries is arbritrary*/
+        if ((rtsp_data->interrupted) || (retcd < 0 ) || (nodata > 2000)) {
             if (rtsp_data->interrupted) {
                 MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                     ,_("%s: Interrupted"),rtsp_data->cameratype);
-            } else {
+            } else if (retcd < 0) {
                 av_strerror(retcd, errstr, sizeof(errstr));
                 MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                     ,_("%s: av_read_frame: %s")
                     ,rtsp_data->cameratype, errstr);
+            } else {
+                MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s: Excessive tries to get data from camera %d")
+                    ,rtsp_data->cameratype, nodata);
             }
             netcam_rtsp_free_pkt(rtsp_data);
             netcam_rtsp_close_context(rtsp_data);
             return -1;
         } else {
-            errcnt = 0;
             if (rtsp_data->packet_recv->stream_index == rtsp_data->video_stream_index) {
                 /* For a high resolution pass-through we don't decode the image */
                 if (rtsp_data->high_resolution && rtsp_data->passthrough) {
@@ -1205,6 +1203,7 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data)
                 haveimage = TRUE;
             } else if (size_decoded == 0) {
                 /* Did not fail, just didn't get anything.  Try again */
+                nodata++;
                 netcam_rtsp_free_pkt(rtsp_data);
                 rtsp_data->packet_recv = my_packet_alloc(rtsp_data->packet_recv);
             } else {
