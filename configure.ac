@@ -282,9 +282,18 @@ AS_IF([test "${OPENCV}" = "no"], [
         OPENCV_VER=`pkg-config --modversion opencv`
         AC_DEFINE([HAVE_OPENCV], [1], [Define to 1 if OpenCV is around])
       ],[
-        OPENCV="no"
+        AS_IF([pkg-config opencv4], [
+            TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags opencv4`
+            TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs opencv4`
+            OPENCV_VER=`pkg-config --modversion opencv4`
+            AC_DEFINE([HAVE_OPENCV], [1], [Define to 1 if OpenCV is around])
+          ],[
+            OPENCV="no"
+          ]
+        )
       ]
     )
+
     AC_MSG_RESULT([$OPENCV])
     PKG_CONFIG_PATH=$TEMP_PATH
     export PKG_CONFIG_PATH
