@@ -133,7 +133,7 @@ void motion_log(int level, int type, int errno_flag,int fncname, const char *fmt
 
     static int flood_cnt = 0;
     static char flood_msg[1024];
-    static char prefix_msg[1024];
+    static char prefix_msg[512];
     char flood_repeats[1024];
     char threadname[32];
     int  applvl, apptyp;

@@ -780,7 +780,7 @@ static mhdrslt webu_iterate_post (void *ptr, enum MHD_ValueKind kind
 /* Answer the get request from the user */
 static mhdrslt webu_answer_get(struct ctx_webui *webui)
 {
-    int retcd;
+    mhdrslt retcd;
 
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,"processing get");
 
