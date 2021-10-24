@@ -1,8 +1,10 @@
-
+Summary of changes for version 4.4.0 are below
+    * Add limit on attempts to get image from camera
+    * Add limit on failed authentication attempts
     * Adjust copyright to 2021
     * Fix for urls provided without port number
     * Fix the workaround for the exif creation.
-    * Add a user parameter for pause camera
+    * Add parameter to start camera paused
     * Fix to avoid potential deadlocks
     * Update permissions assigned for created directories
     * Update parameter in the sample configuration files
@@ -18,7 +20,7 @@
     * Add json pages
     * Update for new MHD return codes
     * Simplify image ring processing
-    * Update travis tesing file.
+    * Update travis testing file.
     * Use high resolution for snapshots if available.
     * Add grey picture output option.
     * Fix web stream content size
@@ -51,7 +53,19 @@
     * Guide update
     * Fix MySQL/MariaDB init/definitions
     * Fix CFLAGS/LDFLAGS
-    * Fix buile for gcc 10
+    * Fix build for gcc 10
+Summary of changes for version 4.3.2 are below
+   * Revise to use MHD function for url decode
+   * Update travis distribution testing
+   * Eliminate compiler warnings on unsigned comparisons
+   * Eliminate compiler warnings on MHD return codes
+Summary of changes for version 4.3.1 are below
+  * Compiler errors with GCC 10
+  * Overrides to CFLAGS
+  * Add maintainer mode
+  * Segfault when invalid camera directory specified
+  * MariaDB initializations
+  * Updated guide
 Summary of changes for version 4.3.0 are below
    * Implement default for non ascii characters
    * Removed poll requirement for MHD

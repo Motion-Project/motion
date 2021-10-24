@@ -293,45 +293,21 @@
       section can be updated with their distribution.
       <p></p>
       Motion can be set up to run as a service which means that it will start automatically whenever the computer
-      is started.  When Motion is installed from apt or from a deb file, default files are installed which can be
-      easily modified so that Motion starts as a service.  If Motion is built directly from source and installed,
-      then these additional files will need to be copied, modified and installed manually from the source and packaging
-      repositories.
-      <p></p>
-      When setting up Motion to run as a service, it should be done only after all the other configuration
+      is started.  When setting up Motion to run as a service, it should be done only after all the other configuration
       has been completed.  It is much easier to edit and revise the parameters when Motion is just running
-      in a terminal rather than as a service.
+      in a terminal rather than as a service.  Motion now uses the systemctl and when running as a service,
+      the option <a href="#daemon" >daemon</a> must be set as <code>off</code>
       <p></p>
-      To set up to run as a service, first edit the file <code>/etc/default/motion</code> and revise the line
-      to indicate <code>start_motion_daemon=yes</code>.
-      Next, edit the main motion.conf file and specify <a href="#daemon" >daemon</a> as <code>on</code>
-      When the computer is restarted, Motion should now be running.  The following commands control
-      the Motion service.
+      The following commands control the Motion service.
       <ul>
-        <li>Start the Motion service<code>sudo service motion start</code></li>
-        <li>Stop the Motion service<code>sudo service motion stop</code></li>
-        <li>Restart the Motion service<code>sudo service motion restart</code></li>
+        <li>Start the Motion service<code>sudo systemctl start motion</code></li>
+        <li>Stop the Motion service<code>sudo systemctl stop motion</code></li>
       </ul>
       <p></p>
       When running as a service, Motion runs as the user <code>motion</code> and this user is automatically
       added to the user group of <code>video</code>.  By only be included in this user group, when Motion is
       run, it will only have limited permissions.  It is NOT recommended that this user get added to the
       <code>sudo</code> group.  Instead, only add this user to groups that are specifically required.
-      <p></p>
-      On newer distributions, the above method of running a service is deprecated (but still functional) in
-      favor of the systemctl method.  Since this is not available on all the distributions which Motion is
-      deployed, the above method is retained.  Once systemctl is available on all the deployed versions, Motion
-      will transition to systemctl as the service method.  For users that wish to systemctl rather than the above
-      method, a <code>motion.system</code> file is included in the source code.
-      <p></p>
-      For users that are building and installing from source without a deb file, the file <code>motion.init-Debian</code>
-      will need to be copied from the examples directory or from the source directory.  It will need to be renamed and put
-      into <code>/etc/init.d/motion</code>.  Ensure that it is also marked as executable and has root ownership.  Next,
-      create the file <code>/etc/default/motion</code> with the entry as specified above.  Finally, create the
-      <code>motion</code> user as needed.  The scripts that create the groups and users when using
-      the deb packages can be used as a model.  These scripts can be reviewed in the motion-packaging repo, within the
-      debian directory, motion.postinst (e.g. <code>motion-packaging/debian/motion.postinst</code>
-
       <p></p>
       <p></p>
     </ul>
@@ -2197,7 +2173,8 @@
           <li> Default: off</li>
         </ul>
         <p></p>
-        When Motion is started, immediately go to daemon mode and release the terminal.
+        When Motion is started, immediately go to daemon mode and release the terminal.  Set
+        the option to off when running Motion as a service.
         <p></p>
 
         <h3><a name="setup_mode"></a> setup_mode </h3>
@@ -3244,7 +3221,7 @@
         as provided from the camera and the privacy mask will not be applied.
         <p></p>
 
-        <h3><a name="netcam_high_params"></a> netcam_params </h3>
+        <h3><a name="netcam_high_params"></a> netcam_high_params </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
