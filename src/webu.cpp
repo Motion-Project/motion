@@ -330,51 +330,80 @@ static void webu_hostname(struct ctx_webui *webui)
 /* Log the failed authentication check */
 static void webu_failauth_log(struct ctx_webui *webui)
 {
-    timespec                            tm_cnct;
-    struct ctx_failauth                 failauth;
-    std::list<ctx_failauth>::iterator   it;
+    timespec                                tm_cnct;
+    struct ctx_webu_clients                 clients;
+    std::list<ctx_webu_clients>::iterator   it;
 
     MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
             ,_("Failed authentication from %s"), webui->clientip.c_str());
 
     clock_gettime(CLOCK_REALTIME, &tm_cnct);
 
-    it = webui->motapp->webcontrol_failauth.begin();
-    while (it != webui->motapp->webcontrol_failauth.end()) {
+    it = webui->motapp->webcontrol_clients.begin();
+    while (it != webui->motapp->webcontrol_clients.end()) {
         if (it->clientip == webui->clientip) {
-            it->attempt_nbr++;
-            it->attempt_time.tv_sec =tm_cnct.tv_sec;
+            it->conn_nbr++;
+            it->conn_time.tv_sec =tm_cnct.tv_sec;
+            it->authenticated = false;
             return;
         }
         it++;
     }
 
-    failauth.clientip = webui->clientip;
-    failauth.attempt_nbr = 1;
-    failauth.attempt_time = tm_cnct;
+    clients.clientip = webui->clientip;
+    clients.conn_nbr = 1;
+    clients.conn_time = tm_cnct;
+    clients.authenticated = false;
 
-    webui->motapp->webcontrol_failauth.push_back(failauth);
+    webui->motapp->webcontrol_clients.push_back(clients);
 
     return;
 
 }
 
-/* Log the failed authentication check */
-static void webu_failauth_reset(struct ctx_webui *webui)
+static void webu_client_connect(struct ctx_webui *webui)
 {
-    timespec                            tm_cnct;
-    std::list<ctx_failauth>::iterator   it;
+    timespec                                tm_cnct;
+    struct ctx_webu_clients                 clients;
+    std::list<ctx_webu_clients>::iterator   it;
 
     clock_gettime(CLOCK_REALTIME, &tm_cnct);
-    it = webui->motapp->webcontrol_failauth.begin();
-    while (it != webui->motapp->webcontrol_failauth.end()) {
-        if ((it->clientip == webui->clientip) ||
-            ((tm_cnct.tv_sec - it->attempt_time.tv_sec) >= 600)) {
-            it = webui->motapp->webcontrol_failauth.erase(it);
-        } else {
-            it++;
+
+    /* First we need to clean out any old IPs from the list*/
+    it = webui->motapp->webcontrol_clients.begin();
+    while (it != webui->motapp->webcontrol_clients.end()) {
+        if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >= 600) {
+            it = webui->motapp->webcontrol_clients.erase(it);
         }
+        it++;
     }
+
+    /* When this function is called, we know that we are authenticated
+     * so we reset the info and as needed print a message that the
+     * ip is connected.
+     */
+    it = webui->motapp->webcontrol_clients.begin();
+    while (it != webui->motapp->webcontrol_clients.end()) {
+        if (it->clientip == webui->clientip) {
+            if (it->authenticated == false) {
+                MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),webui->clientip.c_str());
+            }
+            it->authenticated = true;
+            it->conn_nbr = 1;
+            it->conn_time.tv_sec = tm_cnct.tv_sec;
+            return;
+        }
+        it++;
+    }
+
+    /* The ip was not already in our list. */
+    clients.clientip = webui->clientip;
+    clients.conn_nbr = 1;
+    clients.conn_time = tm_cnct;
+    clients.authenticated = true;
+    webui->motapp->webcontrol_clients.push_back(clients);
+
+    MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),webui->clientip.c_str());
 
     return;
 
@@ -383,26 +412,26 @@ static void webu_failauth_reset(struct ctx_webui *webui)
 /* Check for ips with excessive failed authentication attempts */
 static mhdrslt webu_failauth_check(struct ctx_webui *webui)
 {
-    timespec    tm_cnct;
-    std::list<ctx_failauth>::iterator it;
+    timespec                                tm_cnct;
+    std::list<ctx_webu_clients>::iterator   it;
 
-    if (webui->motapp->webcontrol_failauth.size() == 0) {
+    if (webui->motapp->webcontrol_clients.size() == 0) {
         return MHD_YES;
     }
 
     clock_gettime(CLOCK_REALTIME, &tm_cnct);
-    it = webui->motapp->webcontrol_failauth.begin();
-    while (it != webui->motapp->webcontrol_failauth.end()) {
+    it = webui->motapp->webcontrol_clients.begin();
+    while (it != webui->motapp->webcontrol_clients.end()) {
         if ((it->clientip == webui->clientip) &&
-            ((tm_cnct.tv_sec - it->attempt_time.tv_sec) < 600) &&
-            (it->attempt_nbr > 5)) {
-MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
-            ,_("ignoring attempt from %s"), webui->clientip.c_str());
-
-            it->attempt_time = tm_cnct;
+            ((tm_cnct.tv_sec - it->conn_time.tv_sec) < 600) &&
+            (it->authenticated == false) &&
+            (it->conn_nbr > 5)) {
+            MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
+                ,_("ignoring attempt from %s"), webui->clientip.c_str());
+            it->conn_time = tm_cnct;
             return MHD_NO;
-        } else if ((tm_cnct.tv_sec - it->attempt_time.tv_sec) >= 600) {
-            it = webui->motapp->webcontrol_failauth.erase(it);
+        } else if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >= 600) {
+            it = webui->motapp->webcontrol_clients.erase(it);
         } else {
             it++;
         }
@@ -872,9 +901,7 @@ static mhdrslt webu_answer(void *cls, struct MHD_Connection *connection, const c
         }
     }
 
-    webu_failauth_reset(webui);
-
-    MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),webui->clientip.c_str());
+    webu_client_connect(webui);
 
     if (webui->mhd_first) {
         webui->mhd_first = false;

@@ -166,10 +166,11 @@ enum MOTION_SIGNAL {
     MOTION_SIGNAL_SIGTERM
 };
 
-struct ctx_failauth {
+struct ctx_webu_clients {
     std::string                 clientip;
-    int                         attempt_nbr;
-    struct timespec             attempt_time;
+    bool                        authenticated;
+    int                         conn_nbr;
+    struct timespec             conn_time;
 };
 
 struct ctx_params_item {
@@ -413,8 +414,8 @@ struct ctx_motapp {
     volatile int                webcontrol_finish;
     struct MHD_Daemon           *webcontrol_daemon;
     char                        webcontrol_digest_rand[12];
-    std::list<ctx_failauth>     webcontrol_failauth;       /* C++ list of ips that failed authentication */
-    struct ctx_params          *webcontrol_headers;        /* parameters for header */
+    std::list<ctx_webu_clients> webcontrol_clients;         /* C++ list of client ips */
+    struct ctx_params           *webcontrol_headers;        /* parameters for header */
 
     bool                parms_changed;      /*bool indicating if the parms have changed */
     pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */
