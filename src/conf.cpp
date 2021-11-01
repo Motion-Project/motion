@@ -585,22 +585,24 @@ static void conf_edit_camera_name(struct ctx_cam *cam, std::string &parm, enum P
 
 static void conf_edit_camera_id(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
-    int parm_in, minval;
-
-    if (cam->motapp->cam_list[0] == cam) {
-        minval = 0;
-    } else {
-        minval = 1;
-    }
+    int parm_in;
 
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->camera_id = minval;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if (parm_in < minval) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid camera_id %d"),parm_in);
+        if (cam->motapp->cam_list[0] == cam) {
+            cam->conf->camera_id = 0;
         } else {
-            cam->conf->camera_id = parm_in;
+            cam->conf->camera_id = 1;
+        }
+    } else if (pact == PARM_ACT_SET) {
+        if (cam->motapp->cam_list[0] == cam) {
+            cam->conf->camera_id = 0;
+        } else {
+            parm_in = atoi(parm.c_str());
+            if (parm_in < 1) {
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid camera_id %d"),parm_in);
+            } else {
+                cam->conf->camera_id = parm_in;
+            }
         }
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(cam->conf->camera_id);
