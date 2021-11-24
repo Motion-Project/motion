@@ -604,8 +604,8 @@ static void mlp_init_values(struct ctx_cam *cam)
     cam->event_nr = 1;
     cam->prev_event = 0;
 
-    clock_gettime(CLOCK_REALTIME, &cam->frame_curr_ts);
-    clock_gettime(CLOCK_REALTIME, &cam->frame_last_ts);
+    clock_gettime(CLOCK_MONOTONIC, &cam->frame_curr_ts);
+    clock_gettime(CLOCK_MONOTONIC, &cam->frame_last_ts);
 
     cam->noise = cam->conf->noise_level;
 
@@ -901,7 +901,7 @@ static void mlp_prepare(struct ctx_cam *cam)
 
     cam->frame_last_ts.tv_sec = cam->frame_curr_ts.tv_sec;
     cam->frame_last_ts.tv_nsec = cam->frame_curr_ts.tv_nsec;
-    clock_gettime(CLOCK_REALTIME, &cam->frame_curr_ts);
+    clock_gettime(CLOCK_MONOTONIC, &cam->frame_curr_ts);
 
     if (cam->conf->pre_capture < 0) {
         cam->conf->pre_capture = 0;
@@ -1595,7 +1595,7 @@ static void mlp_frametiming(struct ctx_cam *cam)
         cam->frame_wait[AVGCNT-1] = 0;
     }
 
-    clock_gettime(CLOCK_REALTIME, &ts2);
+    clock_gettime(CLOCK_MONOTONIC, &ts2);
 
     cam->frame_wait[AVGCNT-1] = cam->frame_wait[AVGCNT-1] -
             (1000000L * (ts2.tv_sec - cam->frame_curr_ts.tv_sec)) -

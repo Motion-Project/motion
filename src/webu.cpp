@@ -337,7 +337,7 @@ static void webu_failauth_log(struct ctx_webui *webui)
     MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
             ,_("Failed authentication from %s"), webui->clientip.c_str());
 
-    clock_gettime(CLOCK_REALTIME, &tm_cnct);
+    clock_gettime(CLOCK_MONOTONIC, &tm_cnct);
 
     it = webui->motapp->webcontrol_clients.begin();
     while (it != webui->motapp->webcontrol_clients.end()) {
@@ -367,7 +367,7 @@ static void webu_client_connect(struct ctx_webui *webui)
     struct ctx_webu_clients                 clients;
     std::list<ctx_webu_clients>::iterator   it;
 
-    clock_gettime(CLOCK_REALTIME, &tm_cnct);
+    clock_gettime(CLOCK_MONOTONIC, &tm_cnct);
 
     /* First we need to clean out any old IPs from the list*/
     it = webui->motapp->webcontrol_clients.begin();
@@ -419,7 +419,7 @@ static mhdrslt webu_failauth_check(struct ctx_webui *webui)
         return MHD_YES;
     }
 
-    clock_gettime(CLOCK_REALTIME, &tm_cnct);
+    clock_gettime(CLOCK_MONOTONIC, &tm_cnct);
     it = webui->motapp->webcontrol_clients.begin();
     while (it != webui->motapp->webcontrol_clients.end()) {
         if ((it->clientip == webui->clientip) &&

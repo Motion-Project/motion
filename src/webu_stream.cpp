@@ -56,7 +56,7 @@ static void webu_stream_mjpeg_delay(struct ctx_webui *webui)
         return;
     }
 
-    clock_gettime(CLOCK_REALTIME, &time_curr);
+    clock_gettime(CLOCK_MONOTONIC, &time_curr);
 
     /* The stream rate MUST be less than 1000000000 otherwise undefined behaviour
      * will occur with the SLEEP function.
@@ -78,7 +78,7 @@ static void webu_stream_mjpeg_delay(struct ctx_webui *webui)
             SLEEP(1,0);
         }
     }
-    clock_gettime(CLOCK_REALTIME, &webui->time_last);
+    clock_gettime(CLOCK_MONOTONIC, &webui->time_last);
 
 }
 
@@ -354,7 +354,7 @@ static mhdrslt webu_stream_mjpeg(struct ctx_webui *webui)
 
     webu_stream_mjpeg_checkbuffers(webui);
 
-    clock_gettime(CLOCK_REALTIME, &webui->time_last);
+    clock_gettime(CLOCK_MONOTONIC, &webui->time_last);
 
     response = MHD_create_response_from_callback (MHD_SIZE_UNKNOWN, 1024
         ,&webu_stream_mjpeg_response, webui, NULL);

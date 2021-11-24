@@ -451,7 +451,6 @@ static void netcam_pktarray_add(struct ctx_netcam *netcam)
             netcam->pktarray[indx_next].iskey = false;
         }
         netcam->pktarray[indx_next].iswritten = false;
-        clock_gettime(CLOCK_REALTIME, &netcam->pktarray[indx_next].timestamp_ts);
 
         netcam->pktarray_index = indx_next;
     pthread_mutex_unlock(&netcam->mutex_pktarray);
@@ -986,7 +985,7 @@ static int netcam_interrupt(void *ctx)
     if (netcam->status == NETCAM_CONNECTED) {
         return false;
     } else if (netcam->status == NETCAM_READINGIMAGE) {
-        clock_gettime(CLOCK_REALTIME, &netcam->interruptcurrenttime);
+        clock_gettime(CLOCK_MONOTONIC, &netcam->interruptcurrenttime);
         if ((netcam->interruptcurrenttime.tv_sec - netcam->interruptstarttime.tv_sec ) > netcam->interruptduration){
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Camera reading (%s) timed out")
@@ -1002,7 +1001,7 @@ static int netcam_interrupt(void *ctx)
          * netcam_connect function will use the same start time.  Otherwise we
          * would need to reset the time before each call to a ffmpeg function.
         */
-        clock_gettime(CLOCK_REALTIME, &netcam->interruptcurrenttime);
+        clock_gettime(CLOCK_MONOTONIC, &netcam->interruptcurrenttime);
         if ((netcam->interruptcurrenttime.tv_sec - netcam->interruptstarttime.tv_sec ) > netcam->interruptduration){
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Camera (%s) timed out")
@@ -1209,7 +1208,7 @@ static int netcam_read_image(struct ctx_netcam *netcam)
     netcam->packet_recv = mypacket_alloc(netcam->packet_recv);
 
     netcam->interrupted=false;
-    clock_gettime(CLOCK_REALTIME, &netcam->interruptstarttime);
+    clock_gettime(CLOCK_MONOTONIC, &netcam->interruptstarttime);
     netcam->interruptduration = 10;
 
     netcam->status = NETCAM_READINGIMAGE;
@@ -1273,7 +1272,7 @@ static int netcam_read_image(struct ctx_netcam *netcam)
             }
         }
     }
-    clock_gettime(CLOCK_REALTIME, &netcam->img_recv->image_time);
+    clock_gettime(CLOCK_MONOTONIC, &netcam->img_recv->image_time);
     netcam->last_stream_index = netcam->packet_recv->stream_index;
 
     if (!netcam->first_image) {
@@ -1568,14 +1567,14 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
 
     snprintf(netcam->threadname, 15, "%s",_("Unknown"));
 
-    clock_gettime(CLOCK_REALTIME, &netcam->interruptstarttime);
-    clock_gettime(CLOCK_REALTIME, &netcam->interruptcurrenttime);
+    clock_gettime(CLOCK_MONOTONIC, &netcam->interruptstarttime);
+    clock_gettime(CLOCK_MONOTONIC, &netcam->interruptcurrenttime);
 
     netcam->interruptduration = 5;
     netcam->interrupted = false;
 
-    clock_gettime(CLOCK_REALTIME, &netcam->frame_curr_tm);
-    clock_gettime(CLOCK_REALTIME, &netcam->frame_prev_tm);
+    clock_gettime(CLOCK_MONOTONIC, &netcam->frame_curr_tm);
+    clock_gettime(CLOCK_MONOTONIC, &netcam->frame_prev_tm);
 
     netcam_set_path(cam, netcam);
 
@@ -1685,7 +1684,7 @@ static int netcam_open_context(struct ctx_netcam *netcam)
     netcam->format_context->interrupt_callback.opaque = netcam;
     netcam->interrupted = false;
 
-    clock_gettime(CLOCK_REALTIME, &netcam->interruptstarttime);
+    clock_gettime(CLOCK_MONOTONIC, &netcam->interruptstarttime);
 
     netcam->interruptduration = 20;
 
@@ -1912,7 +1911,7 @@ static void netcam_handler_wait(struct ctx_netcam *netcam)
 
     usec_maxrate = (1000000L / netcam->capture_rate);
 
-    clock_gettime(CLOCK_REALTIME, &netcam->frame_curr_tm);
+    clock_gettime(CLOCK_MONOTONIC, &netcam->frame_curr_tm);
 
     usec_delay = usec_maxrate -
         ((netcam->frame_curr_tm.tv_sec - netcam->frame_prev_tm.tv_sec) * 1000000L) -
@@ -1985,11 +1984,11 @@ static void *netcam_handler(void *arg)
 
     while (!netcam->finish) {
         if (!netcam->format_context) {      /* We must have disconnected.  Try to reconnect */
-            clock_gettime(CLOCK_REALTIME, &netcam->frame_prev_tm);
+            clock_gettime(CLOCK_MONOTONIC, &netcam->frame_prev_tm);
             netcam_handler_reconnect(netcam);
             continue;
         } else {            /* We think we are connected...*/
-            clock_gettime(CLOCK_REALTIME, &netcam->frame_prev_tm);
+            clock_gettime(CLOCK_MONOTONIC, &netcam->frame_prev_tm);
             if (netcam_read_image(netcam) < 0) {
                 if (!netcam->finish) {   /* Nope.  We are not or got bad image.  Reconnect*/
                     netcam_handler_reconnect(netcam);

@@ -84,7 +84,6 @@ struct packet_item{
     int64_t                   idnbr;
     bool                      iskey;
     bool                      iswritten;
-    struct timespec           timestamp_ts;
 };
 
 struct ctx_netcam {
