@@ -562,51 +562,84 @@ static void webu_html_script_assign_cams(struct ctx_webui *webui)
 /* Create the javascript function assign_actions */
 static void webu_html_script_assign_actions(struct ctx_webui *webui)
 {
+    int indx;
+    struct ctx_params *wact;
+
     webui->resp_page +=
         "    function assign_actions() {\n"
         "      var html_actions = \"\\n\";\n"
-        "      html_actions += \"  \";\n"
+        "      html_actions += \"  \";\n";
 
-        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
-        "      html_actions += \"'snapshot');\\\">\";\n"
-        "      html_actions += \"Snapshot</a>\\n\";\n\n"
+    wact = webui->motapp->webcontrol_actions;
+    for (indx = 0; indx < wact->params_count; indx++) {
+        if (mystreq(wact->params_array[indx].param_name,"snapshot") &&
+            mystreq(wact->params_array[indx].param_value,"on")) {
+            webui->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'snapshot');\\\">\";\n"
+                "      html_actions += \"Snapshot</a>\\n\";\n\n"
+                ;
+        } else if (mystreq(wact->params_array[indx].param_name,"event") &&
+            mystreq(wact->params_array[indx].param_value,"on")) {
+            webui->resp_page +=
+            "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+            "      html_actions += \"'eventstart');\\\">\";\n"
+            "      html_actions += \"Start Event</a>\\n\";\n\n"
 
-        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
-        "      html_actions += \"'eventstart');\\\">\";\n"
-        "      html_actions += \"Start Event</a>\\n\";\n\n"
+            "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+            "      html_actions += \"'eventend');\\\">\";\n"
+            "      html_actions += \"End Event</a>\\n\";\n\n"
+            ;
+        } else if (mystreq(wact->params_array[indx].param_name,"pause") &&
+            mystreq(wact->params_array[indx].param_value,"on")) {
+            webui->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'pause');\\\">\";\n"
+                "      html_actions += \"Pause</a>\\n\";\n\n"
 
-        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
-        "      html_actions += \"'eventend');\\\">\";\n"
-        "      html_actions += \"End Event</a>\\n\";\n\n"
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'unpause');\\\">\";\n"
+                "      html_actions += \"Unpause</a>\\n\";\n\n"
+                ;
+        } else if (mystreq(wact->params_array[indx].param_name,"camera_add") &&
+            mystreq(wact->params_array[indx].param_value,"on")) {
+            webui->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_reload(\";\n"
+                "      html_actions += \"'camera_add');\\\">\";\n"
+                "      html_actions += \"Add Camera</a>\\n\";\n\n"
+                ;
+        } else if (mystreq(wact->params_array[indx].param_name,"camera_delete") &&
+            mystreq(wact->params_array[indx].param_value,"on")) {
+            webui->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_reload(\";\n"
+                "      html_actions += \"'camera_delete');\\\">\";\n"
+                "      html_actions += \"Delete Camera</a>\\n\";\n\n"
+                ;
+        } else if (mystreq(wact->params_array[indx].param_name,"config_write") &&
+            mystreq(wact->params_array[indx].param_value,"on")) {
+            webui->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'config_write');\\\">\";\n"
+                "      html_actions += \"Save Config</a>\\n\";\n\n"
+                ;
+        } else if (mystreq(wact->params_array[indx].param_name,"stop") &&
+            mystreq(wact->params_array[indx].param_value,"on")) {
+            webui->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'stop');\\\">\";\n"
+                "      html_actions += \"Stop</a>\\n\";\n\n"
+                ;
+        } else if (mystreq(wact->params_array[indx].param_name,"restart") &&
+            mystreq(wact->params_array[indx].param_value,"on")) {
+            webui->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'restart');\\\">\";\n"
+                "      html_actions += \"Start/Restart</a>\\n\";\n\n"
+                ;
+        }
+    }
 
-        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
-        "      html_actions += \"'pause');\\\">\";\n"
-        "      html_actions += \"Pause</a>\\n\";\n\n"
-
-        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
-        "      html_actions += \"'unpause');\\\">\";\n"
-        "      html_actions += \"Unpause</a>\\n\";\n\n"
-
-        "      html_actions += \"<a onclick=\\\"send_reload(\";\n"
-        "      html_actions += \"'camera_add');\\\">\";\n"
-        "      html_actions += \"Add Camera</a>\\n\";\n\n"
-
-        "      html_actions += \"<a onclick=\\\"send_reload(\";\n"
-        "      html_actions += \"'camera_delete');\\\">\";\n"
-        "      html_actions += \"Delete Camera</a>\\n\";\n\n"
-
-        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
-        "      html_actions += \"'config_write');\\\">\";\n"
-        "      html_actions += \"Save Config</a>\\n\";\n\n"
-
-        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
-        "      html_actions += \"'stop');\\\">\";\n"
-        "      html_actions += \"Stop</a>\\n\";\n\n"
-
-        "      html_actions += \"<a onclick=\\\"send_action(\";\n"
-        "      html_actions += \"'restart');\\\">\";\n"
-        "      html_actions += \"Start/Restart</a>\\n\";\n\n"
-
+    webui->resp_page +=
         "      document.getElementById(\"divnav_actions\").innerHTML = html_actions;\n\n"
         "      return;\n"
 

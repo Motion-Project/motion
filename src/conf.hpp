@@ -152,6 +152,7 @@
         std::string     webcontrol_key;
         std::string     webcontrol_headers;
         std::string     webcontrol_html;
+        std::string     webcontrol_actions;
 
         /* Live stream configuration parameters */
         int             stream_preview_scale;

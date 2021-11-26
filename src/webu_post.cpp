@@ -28,6 +28,19 @@
 static void webu_post_cam_add(struct ctx_webui *webui)
 {
     int indx, maxcnt;
+    struct ctx_params *wact;
+
+    wact = webui->motapp->webcontrol_actions;
+    for (indx = 0; indx < wact->params_count; indx++) {
+        if (mystreq(wact->params_array[indx].param_name,"camera_add")) {
+            if (mystreq(wact->params_array[indx].param_value,"off")) {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Camera add action disabled");
+                return;
+            } else {
+                break;
+            }
+        }
+    }
 
     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Adding camera.");
 
@@ -53,6 +66,19 @@ static void webu_post_cam_add(struct ctx_webui *webui)
 static void webu_post_cam_delete(struct ctx_webui *webui)
 {
     int indx, maxcnt;
+    struct ctx_params *wact;
+
+    wact = webui->motapp->webcontrol_actions;
+    for (indx = 0; indx < wact->params_count; indx++) {
+        if (mystreq(wact->params_array[indx].param_name,"camera_delete")) {
+            if (mystreq(wact->params_array[indx].param_value,"off")) {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Camera delete action disabled");
+                return;
+            } else {
+                break;
+            }
+        }
+    }
 
     if (webui->threadnbr == 0) {
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "No camera specified for deletion." );
@@ -151,6 +177,19 @@ void webu_post_cmdthrd(struct ctx_webui *webui)
 void webu_post_action_eventend(struct ctx_webui *webui)
 {
     int indx;
+    struct ctx_params *wact;
+
+    wact = webui->motapp->webcontrol_actions;
+    for (indx = 0; indx < wact->params_count; indx++) {
+        if (mystreq(wact->params_array[indx].param_name,"event")) {
+            if (mystreq(wact->params_array[indx].param_value,"off")) {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Event end action disabled");
+                return;
+            } else {
+                break;
+            }
+        }
+    }
 
     if (webui->threadnbr == 0) {
         indx = 1;
@@ -168,6 +207,19 @@ void webu_post_action_eventend(struct ctx_webui *webui)
 void webu_post_action_eventstart(struct ctx_webui *webui)
 {
     int indx;
+    struct ctx_params *wact;
+
+    wact = webui->motapp->webcontrol_actions;
+    for (indx = 0; indx < wact->params_count; indx++) {
+        if (mystreq(wact->params_array[indx].param_name,"event")) {
+            if (mystreq(wact->params_array[indx].param_value,"off")) {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Event start action disabled");
+                return;
+            } else {
+                break;
+            }
+        }
+    }
 
     if (webui->threadnbr == 0) {
         indx = 1;
@@ -185,6 +237,19 @@ void webu_post_action_eventstart(struct ctx_webui *webui)
 void webu_post_action_snapshot(struct ctx_webui *webui)
 {
     int indx;
+    struct ctx_params *wact;
+
+    wact = webui->motapp->webcontrol_actions;
+    for (indx = 0; indx < wact->params_count; indx++) {
+        if (mystreq(wact->params_array[indx].param_name,"snapshot")) {
+            if (mystreq(wact->params_array[indx].param_value,"off")) {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Snapshot action disabled");
+                return;
+            } else {
+                break;
+            }
+        }
+    }
 
     if (webui->threadnbr == 0) {
         indx = 1;
@@ -202,6 +267,19 @@ void webu_post_action_snapshot(struct ctx_webui *webui)
 void webu_post_action_pause(struct ctx_webui *webui)
 {
     int indx;
+    struct ctx_params *wact;
+
+    wact = webui->motapp->webcontrol_actions;
+    for (indx = 0; indx < wact->params_count; indx++) {
+        if (mystreq(wact->params_array[indx].param_name,"pause")) {
+            if (mystreq(wact->params_array[indx].param_value,"off")) {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
+                return;
+            } else {
+                break;
+            }
+        }
+    }
 
     if (webui->threadnbr == 0) {
         indx = 1;
@@ -219,6 +297,19 @@ void webu_post_action_pause(struct ctx_webui *webui)
 void webu_post_action_unpause(struct ctx_webui *webui)
 {
     int indx;
+    struct ctx_params *wact;
+
+    wact = webui->motapp->webcontrol_actions;
+    for (indx = 0; indx < wact->params_count; indx++) {
+        if (mystreq(wact->params_array[indx].param_name,"pause")) {
+            if (mystreq(wact->params_array[indx].param_value,"off")) {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
+                return;
+            } else {
+                break;
+            }
+        }
+    }
 
     if (webui->threadnbr == 0) {
         indx = 1;
@@ -236,7 +327,19 @@ void webu_post_action_unpause(struct ctx_webui *webui)
 void webu_post_action_restart(struct ctx_webui *webui)
 {
     int indx;
+    struct ctx_params *wact;
 
+    wact = webui->motapp->webcontrol_actions;
+    for (indx = 0; indx < wact->params_count; indx++) {
+        if (mystreq(wact->params_array[indx].param_name,"restart")) {
+            if (mystreq(wact->params_array[indx].param_value,"off")) {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Restart action disabled");
+                return;
+            } else {
+                break;
+            }
+        }
+    }
     if (webui->threadnbr == 0) {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all cameras"));
         indx = 1;
@@ -259,12 +362,25 @@ void webu_post_action_restart(struct ctx_webui *webui)
 void webu_post_action_stop(struct ctx_webui *webui)
 {
     int indx;
+    struct ctx_params *wact;
 
+    wact = webui->motapp->webcontrol_actions;
+    for (indx = 0; indx < wact->params_count; indx++) {
+        if (mystreq(wact->params_array[indx].param_name,"stop")) {
+            if (mystreq(wact->params_array[indx].param_value,"off")) {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Stop action disabled");
+                return;
+            } else {
+                break;
+            }
+        }
+    }
     if (webui->threadnbr == 0)  {
         indx = 1;
         while (webui->motapp->cam_list[indx]) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
-                _("Stopping cam %d"),webui->motapp->cam_list[indx]->camera_id);
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                , _("Stopping cam %d")
+                , webui->motapp->cam_list[indx]->camera_id);
             webui->motapp->cam_list[indx]->restart_cam = false;
             webui->motapp->cam_list[indx]->event_stop = true;
             webui->motapp->cam_list[indx]->event_user = true;
@@ -283,12 +399,47 @@ void webu_post_action_stop(struct ctx_webui *webui)
 
 }
 
+/* Process the write config action */
+void webu_post_write_config(struct ctx_webui *webui)
+{
+    int indx;
+    struct ctx_params *wact;
+
+    wact = webui->motapp->webcontrol_actions;
+    for (indx = 0; indx < wact->params_count; indx++) {
+        if (mystreq(wact->params_array[indx].param_name,"config_write")) {
+            if (mystreq(wact->params_array[indx].param_value,"off")) {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config write action disabled");
+                return;
+            } else {
+                break;
+            }
+        }
+    }
+
+    conf_parms_write(webui->motapp);
+
+}
+
 /* Process the configuration parameters */
 static void webu_post_config(struct ctx_webui *webui)
 {
     int indx, indx2;
     bool ismotapp;
     std::string tmpname;
+    struct ctx_params *wact;
+
+    wact = webui->motapp->webcontrol_actions;
+    for (indx = 0; indx < wact->params_count; indx++) {
+        if (mystreq(wact->params_array[indx].param_name,"config")) {
+            if (mystreq(wact->params_array[indx].param_value,"off")) {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config save actions disabled");
+                return;
+            } else {
+                break;
+            }
+        }
+    }
 
     for (indx = 0; indx < webui->post_sz; indx++) {
         if (mystrne(webui->post_info[indx].key_nm, "command") &&
@@ -345,33 +496,50 @@ static void webu_post_config(struct ctx_webui *webui)
         }
     }
 
-
-
 }
 
 /* Process the ptz action */
 void webu_post_ptz(struct ctx_webui *webui)
 {
+    int indx;
     struct ctx_cam *cam;
+    struct ctx_params *wact;
 
+    wact = webui->motapp->webcontrol_actions;
+    for (indx = 0; indx < wact->params_count; indx++) {
+        if (mystreq(wact->params_array[indx].param_name,"ptz")) {
+            if (mystreq(wact->params_array[indx].param_value,"off")) {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "PTZ actions disabled");
+                return;
+            } else {
+                break;
+            }
+        }
+    }
     cam = webui->motapp->cam_list[webui->threadnbr];
 
-    if ((webui->post_cmd == "pan_left") && (cam->conf->ptz_pan_left != "")) {
+    if ((webui->post_cmd == "pan_left") &&
+        (cam->conf->ptz_pan_left != "")) {
         util_exec_command(cam, cam->conf->ptz_pan_left.c_str(), NULL, 0);
 
-    } else if ((webui->post_cmd == "pan_right") && (cam->conf->ptz_pan_right != "")) {
+    } else if ((webui->post_cmd == "pan_right") &&
+        (cam->conf->ptz_pan_right != "")) {
         util_exec_command(cam, cam->conf->ptz_pan_right.c_str(), NULL, 0);
 
-    } else if ((webui->post_cmd == "tilt_up") && (cam->conf->ptz_tilt_up != "")) {
+    } else if ((webui->post_cmd == "tilt_up") &&
+        (cam->conf->ptz_tilt_up != "")) {
         util_exec_command(cam, cam->conf->ptz_tilt_up.c_str(), NULL, 0);
 
-    } else if ((webui->post_cmd == "tilt_down") && (cam->conf->ptz_tilt_down != "")) {
+    } else if ((webui->post_cmd == "tilt_down") &&
+        (cam->conf->ptz_tilt_down != "")) {
         util_exec_command(cam, cam->conf->ptz_tilt_down.c_str(), NULL, 0);
 
-    } else if ((webui->post_cmd == "zoom_in") && (cam->conf->ptz_zoom_in != "")) {
+    } else if ((webui->post_cmd == "zoom_in") &&
+        (cam->conf->ptz_zoom_in != "")) {
         util_exec_command(cam, cam->conf->ptz_zoom_in.c_str(), NULL, 0);
 
-    } else if ((webui->post_cmd == "zoom_out") && (cam->conf->ptz_zoom_out != "")) {
+    } else if ((webui->post_cmd == "zoom_out") &&
+        (cam->conf->ptz_zoom_out != "")) {
         util_exec_command(cam, cam->conf->ptz_zoom_out.c_str(), NULL, 0);
 
     } else {
@@ -391,7 +559,6 @@ void webu_post_main(struct ctx_webui *webui)
     if ((webui->post_cmd == "") || (webui->threadnbr == -1)) {
         return;
     }
-
 
     if (webui->post_cmd == "eventend") {
         webu_post_action_eventend(webui);
@@ -415,7 +582,7 @@ void webu_post_main(struct ctx_webui *webui)
         webu_post_action_stop(webui);
 
     } else if (webui->post_cmd == "config_write") {
-        conf_parms_write(webui->motapp);
+        webu_post_write_config(webui);
 
     } else if (webui->post_cmd == "camera_add") {
         webu_post_cam_add(webui);

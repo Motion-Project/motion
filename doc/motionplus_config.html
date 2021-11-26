@@ -1510,6 +1510,13 @@
           <td align="left"><a href="#webcontrol_tls" >webcontrol_tls</a></td>
         </tr>
         <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#webcontrol_actions" >webcontrol_actions</a></td>
+        </tr>
+
+        <tr>
           <td align="left">width</td>
           <td align="left">width</td>
           <td align="left">width</td>
@@ -1920,6 +1927,7 @@
               <td bgcolor="#edf4f9" ><a href="#webcontrol_cert" >webcontrol_cert</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_key" >webcontrol_key</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_cors_header" >webcontrol_cors_header</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_actions" >webcontrol_actions</a> </td>
             </tr>
             </tbody>
         </table>
@@ -4854,7 +4862,7 @@
         Sets the type of parameters that will be listed on the webcontrol page and available for
         modification.
         <ul>
-          <li> 0: None - No configuration parameters will be available.</li>
+          <li> 0: None - No configuration parameters or actions will be available.</li>
           <li> 1: Limited- A limited list of parameters will be available. </li>
           <li> 2: Advanced - The advanced list of parameters will be available.  These typically require Motion to be restarted to become effective.</li>
           <li> 3: Restricted - User IDs, passwords and "on_" commands.</li>
@@ -4867,7 +4875,8 @@
         Users are strongly advised to only set this option to something other than zero when initially setting up the
         cameras.  Once Motion has been configured, it is advised to complete the set up by setting this value back to zero!
         <p></p>
-
+		  Use the webcontrol_actions parameter to enable/disable specific actions
+		  <p></p>
         <h3><a name="webcontrol_interface"></a> webcontrol_interface </h3>
         <p></p>
         <ul>
@@ -4972,6 +4981,33 @@
         If unspecified, no Access-Control-Allow-Origin header is sent.
         The header allows browsers to access the webcontrol via cross-origin resource sharing (CORS).
         For example, * allows access from browser client code served from any origin.
+        <p></p>
+
+        <h3><a name="webcontrol_actions"></a> webcontrol_actions </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values:</li>
+          <li> Default: Not defined</li>
+        </ul>
+        <p></p>
+        Comma separated list of the actions to allow and show on the web control page.  The
+        following parameters are recognized.
+        <ul>
+          <li> pause:  Applies for both Pause and Unpause actions</li>
+          <li> event:  Applies for both Start Event and End Event actions</li>
+          <li> snapshot</li>
+          <li> camera_add</li>
+          <li> camera_delete</li>
+          <li> ptz:  Applies for all PTZ commands</li>
+          <li> stop</li>
+          <li> restart</li>
+          <li> config_write</li>
+          <li> config:  Applies for any and all configuration parameters</li>
+        </ul>
+			Specify each of these using "on"/"off" to permit or deny respectively.  Note that the specification in
+			this parameter will override the default that is associated with
+			<a href="#webcontrol_parms">webcontrol_parms</a>.
         <p></p>
 
 

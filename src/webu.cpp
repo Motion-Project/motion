@@ -1311,6 +1311,34 @@ static void webu_mhd_flags(struct mhdstart_ctx *mhdst)
 
 }
 
+/* Set the values for the action commands */
+static void webu_init_actions(struct ctx_motapp *motapp)
+{
+    std::string parm_vl;
+
+    motapp->webcontrol_actions = (ctx_params*)mymalloc(sizeof(struct ctx_params));
+    motapp->webcontrol_actions->update_params = true;
+    util_parms_parse(motapp->webcontrol_actions, motapp->cam_list[0]->conf->webcontrol_actions);
+
+    if (motapp->cam_list[0]->conf->webcontrol_parms == 0) {
+        parm_vl = "off";
+    } else {
+        parm_vl = "on";
+    }
+
+    util_parms_add_default(motapp->webcontrol_actions,"event",parm_vl);
+    util_parms_add_default(motapp->webcontrol_actions,"snapshot",parm_vl);
+    util_parms_add_default(motapp->webcontrol_actions,"pause",parm_vl);
+    util_parms_add_default(motapp->webcontrol_actions,"restart",parm_vl);
+    util_parms_add_default(motapp->webcontrol_actions,"stop",parm_vl);
+    util_parms_add_default(motapp->webcontrol_actions,"config_write",parm_vl);
+    util_parms_add_default(motapp->webcontrol_actions,"camera_add",parm_vl);
+    util_parms_add_default(motapp->webcontrol_actions,"camera_delete",parm_vl);
+    util_parms_add_default(motapp->webcontrol_actions,"config",parm_vl);
+    util_parms_add_default(motapp->webcontrol_actions,"ptz",parm_vl);
+
+}
+
 /* Start the webcontrol */
 static void webu_init_webcontrol(struct ctx_motapp *motapp)
 {
@@ -1324,6 +1352,8 @@ static void webu_init_webcontrol(struct ctx_motapp *motapp)
     motapp->webcontrol_headers = (ctx_params*)mymalloc(sizeof(struct ctx_params));
     motapp->webcontrol_headers->update_params = true;
     util_parms_parse(motapp->webcontrol_headers, motapp->cam_list[0]->conf->webcontrol_headers);
+
+    webu_init_actions(motapp);
 
     mhdst.tls_cert = webu_mhd_loadfile(motapp->cam_list[0]->conf->webcontrol_cert);
     mhdst.tls_key  = webu_mhd_loadfile(motapp->cam_list[0]->conf->webcontrol_key);
@@ -1375,6 +1405,12 @@ void webu_deinit(struct ctx_motapp *motapp)
         free(motapp->webcontrol_headers);
     }
     motapp->webcontrol_headers = NULL;
+
+    util_parms_free(motapp->webcontrol_actions);
+    if (motapp->webcontrol_actions != NULL) {
+        free(motapp->webcontrol_actions);
+    }
+    motapp->webcontrol_actions = NULL;
 
 }
 

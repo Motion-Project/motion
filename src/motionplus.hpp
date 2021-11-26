@@ -416,6 +416,7 @@ struct ctx_motapp {
     char                        webcontrol_digest_rand[12];
     std::list<ctx_webu_clients> webcontrol_clients;         /* C++ list of client ips */
     struct ctx_params           *webcontrol_headers;        /* parameters for header */
+    struct ctx_params           *webcontrol_actions;        /* parameters for actions */
 
     bool                parms_changed;      /*bool indicating if the parms have changed */
     pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */

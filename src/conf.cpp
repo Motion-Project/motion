@@ -162,6 +162,7 @@ struct ctx_parm config_parms[] = {
     {"webcontrol_key",            PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
     {"webcontrol_headers",        PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
     {"webcontrol_html",           PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
+    {"webcontrol_actions",        PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
 
     {"stream_preview_scale",      PARM_TYP_INT,    PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {"stream_preview_newline",    PARM_TYP_BOOL,   PARM_CAT_14, WEBUI_LEVEL_LIMITED },
@@ -2284,6 +2285,19 @@ static void conf_edit_webcontrol_html(struct ctx_cam *cam, std::string &parm, en
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_html",_("webcontrol_html"));
 }
 
+static void conf_edit_webcontrol_actions(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->webcontrol_actions = "";
+    } else if (pact == PARM_ACT_SET) {
+        cam->conf->webcontrol_actions = parm;
+    } else if (pact == PARM_ACT_GET) {
+        parm = cam->conf->webcontrol_actions;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_actions",_("webcontrol_actions"));
+}
+
 static void conf_edit_stream_preview_scale(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
@@ -2988,6 +3002,7 @@ static void conf_edit_cat13(struct ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "webcontrol_key") {              conf_edit_webcontrol_key(cam, parm_val, pact);
     } else if (parm_nm == "webcontrol_headers") {          conf_edit_webcontrol_headers(cam, parm_val, pact);
     } else if (parm_nm == "webcontrol_html") {             conf_edit_webcontrol_html(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_actions") {          conf_edit_webcontrol_actions(cam, parm_val, pact);
     }
 
 }
