@@ -313,14 +313,14 @@ static void webu_clientip(struct ctx_webui *webui)
 /* Get the hostname */
 static void webu_hostname(struct ctx_webui *webui)
 {
-    /* host header includes port if non-standard already */
-    std::string host(MHD_lookup_connection_value(webui->connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_HOST));
-    if(host.empty()){
-        /* this should not happen, but do our best anyway */
-        host = "localhost:" + std::to_string(webui->motapp->cam_list[0]->conf->webcontrol_port);
+    const char *hdr;
+
+    hdr = MHD_lookup_connection_value(webui->connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_HOST);
+    if (hdr == NULL) {
+        webui->hostfull = "//localhost:" + std::to_string(webui->motapp->cam_list[0]->conf->webcontrol_port);
+    } else {
+        webui->hostfull = "//" + std::string(hdr);
     }
-    /* use protocol-relative URL */
-    webui->hostfull = "//" + host;
 
     MOTION_LOG(DBG,TYPE_ALL, NO_ERRNO, _("Full Host:  %s"), webui->hostfull.c_str());
 
