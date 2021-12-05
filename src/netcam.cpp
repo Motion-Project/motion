@@ -1274,6 +1274,7 @@ static int netcam_read_image(struct ctx_netcam *netcam)
     }
     clock_gettime(CLOCK_MONOTONIC, &netcam->img_recv->image_time);
     netcam->last_stream_index = netcam->packet_recv->stream_index;
+    netcam->last_pts = netcam->packet_recv->pts;
 
     if (!netcam->first_image) {
         netcam->status = NETCAM_CONNECTED;
@@ -1435,7 +1436,6 @@ static void netcam_set_options(struct ctx_netcam *netcam)
 
 }
 
-
 static void netcam_set_path (struct ctx_cam *cam, struct ctx_netcam *netcam )
 {
 
@@ -1538,6 +1538,7 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
     netcam->first_image = true;
     netcam->reconnect_count = 0;
     netcam->src_fps =  -1; /* Default to neg so we know it has not been set */
+    netcam->pts_adj = false;
     netcam->capture_rate = -1;
     netcam->video_stream_index = -1;
     netcam->audio_stream_index = -1;
@@ -1550,11 +1551,13 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
             snprintf(netcam->decoder_nm, val_len
                 , "%s",netcam->params->params_array[indx].param_value);
         }
-
         if (mystreq(netcam->params->params_array[indx].param_name,"capture_rate")) {
             netcam->capture_rate = atoi(netcam->params->params_array[indx].param_value);
         }
-
+        if (mystreq(netcam->params->params_array[indx].param_name,"pts_adj") &&
+            mystreq(netcam->params->params_array[indx].param_value,"on")) {
+            netcam->pts_adj = true;
+        }
     }
 
     /* If this is the norm and we have a highres, then disable passthru on the norm */
@@ -1792,6 +1795,8 @@ static int netcam_open_context(struct ctx_netcam *netcam)
         return -1;
     }
 
+    netcam->connection_pts = AV_NOPTS_VALUE;
+
     return 0;
 
 }
@@ -1903,22 +1908,44 @@ static void netcam_shutdown(struct ctx_netcam *netcam)
 
 static void netcam_handler_wait(struct ctx_netcam *netcam)
 {
-    long usec_maxrate, usec_delay;
+    int64_t usec_ltncy;
+    AVRational tbase;
+    struct timespec tmp_tm;
+
+    clock_gettime(CLOCK_MONOTONIC, &tmp_tm);
 
     if (netcam->capture_rate < 1) {
         netcam->capture_rate = 1;
     }
+    tbase = netcam->format_context->streams[netcam->video_stream_index]->time_base;
+    if (tbase.num == 0) {
+        tbase.num = 1;
+    }
 
-    usec_maxrate = (1000000L / netcam->capture_rate);
-
-    clock_gettime(CLOCK_MONOTONIC, &netcam->frame_curr_tm);
-
-    usec_delay = usec_maxrate -
-        ((netcam->frame_curr_tm.tv_sec - netcam->frame_prev_tm.tv_sec) * 1000000L) -
+    /* FPS calculation from last frame capture */
+    netcam->frame_curr_tm = tmp_tm;
+    usec_ltncy = (1000000 / netcam->capture_rate) -
+        ((netcam->frame_curr_tm.tv_sec - netcam->frame_prev_tm.tv_sec) * 1000000) -
         ((netcam->frame_curr_tm.tv_nsec - netcam->frame_prev_tm.tv_nsec)/1000);
 
-    if ((usec_delay > 0) && (usec_delay < 1000000L)) {
-        SLEEP(0, usec_delay * 1000);
+    /* Adjust to clock and pts timer */
+    if (netcam->pts_adj == true) {
+        if (netcam->connection_pts == AV_NOPTS_VALUE) {
+            netcam->connection_pts = netcam->last_pts;
+            clock_gettime(CLOCK_MONOTONIC, &netcam->connection_tm);
+            return;
+        }
+        if (netcam->last_pts != AV_NOPTS_VALUE) {
+            usec_ltncy +=
+                + (av_rescale(netcam->last_pts, 1000000, tbase.den/tbase.num)
+                  - av_rescale(netcam->connection_pts, 1000000, tbase.den/tbase.num))
+                -(((tmp_tm.tv_sec - netcam->connection_tm.tv_sec) * 1000000) +
+                  ((tmp_tm.tv_nsec - netcam->connection_tm.tv_nsec) / 1000));
+        }
+    }
+
+    if ((usec_ltncy > 0) && (usec_ltncy < 1000000L)) {
+        SLEEP(0, usec_ltncy * 1000);
     }
 
 }

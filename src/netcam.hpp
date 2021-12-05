@@ -140,6 +140,11 @@ struct ctx_netcam {
     int                       src_fps;          /* The fps provided from source*/
     char                      *decoder_nm;      /* User requested decoder */
 
+    struct timespec           connection_tm;    /* Time when camera was connected*/
+    int64_t                   connection_pts;   /* PTS from the connection */
+    int64_t                   last_pts;         /* PTS from the last packet read */
+    bool                      pts_adj;          /* Bool for whether to use pts for timing */
+
     struct timespec           frame_prev_tm;    /* The time set before calling the av functions */
     struct timespec           frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
     struct ctx_motapp         *motapp;          /* Pointer to parent application context  */
@@ -152,7 +157,6 @@ struct ctx_netcam {
     pthread_mutex_t           mutex;            /* mutex used with conditional waits */
     pthread_mutex_t           mutex_transfer;   /* mutex used with transferring stream info for pass-through */
     pthread_mutex_t           mutex_pktarray;   /* mutex used with the packet array */
-
 
 };
 
