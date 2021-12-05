@@ -1024,21 +1024,25 @@ static int movie_passthru_pktpts(struct ctx_movie *movie)
         base_pdts = movie->pass_video_base;
     }
 
-    if (movie->pkt->pts < base_pdts) {
-        ts_interval = 0;
-    } else {
-        ts_interval = movie->pkt->pts - base_pdts;
+    if (movie->pkt->pts != AV_NOPTS_VALUE) {
+        if (movie->pkt->pts < base_pdts) {
+            ts_interval = 0;
+        } else {
+            ts_interval = movie->pkt->pts - base_pdts;
+        }
+        movie->pkt->pts = av_rescale_q(ts_interval
+            , movie->netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
     }
-    movie->pkt->pts = av_rescale_q(ts_interval
-        , movie->netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
 
-    if (movie->pkt->dts < base_pdts) {
-        ts_interval = 0;
-    } else {
-        ts_interval = movie->pkt->dts - base_pdts;
+    if (movie->pkt->dts != AV_NOPTS_VALUE) {
+        if (movie->pkt->dts < base_pdts) {
+            ts_interval = 0;
+        } else {
+            ts_interval = movie->pkt->dts - base_pdts;
+        }
+        movie->pkt->dts = av_rescale_q(ts_interval
+            , movie->netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
     }
-    movie->pkt->dts = av_rescale_q(ts_interval
-        , movie->netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
 
     ts_interval = movie->pkt->duration;
     movie->pkt->duration = av_rescale_q(ts_interval
@@ -1103,27 +1107,33 @@ static void movie_passthru_minpts(struct ctx_movie *movie)
         indx_video =  movie->netcam_data->video_stream_index;
 
         for (indx = 0; indx < movie->netcam_data->pktarray_size; indx++) {
-            if (movie->netcam_data->pktarray[indx].packet->stream_index == indx_audio) {
+            if ((movie->netcam_data->pktarray[indx].packet->stream_index == indx_audio) &&
+                (movie->netcam_data->pktarray[indx].packet->pts != AV_NOPTS_VALUE)) {
                 movie->pass_audio_base = movie->netcam_data->pktarray[indx].packet->pts;
             };
-            if (movie->netcam_data->pktarray[indx].packet->stream_index == indx_video) {
+            if ((movie->netcam_data->pktarray[indx].packet->stream_index == indx_video) &&
+                (movie->netcam_data->pktarray[indx].packet->pts != AV_NOPTS_VALUE)) {
                 movie->pass_video_base = movie->netcam_data->pktarray[indx].packet->pts;
             };
         }
         for (indx = 0; indx < movie->netcam_data->pktarray_size; indx++) {
             if ((movie->netcam_data->pktarray[indx].packet->stream_index == indx_audio) &&
+                (movie->netcam_data->pktarray[indx].packet->pts != AV_NOPTS_VALUE) &&
                 (movie->netcam_data->pktarray[indx].packet->pts < movie->pass_audio_base)) {
                 movie->pass_audio_base = movie->netcam_data->pktarray[indx].packet->pts;
             };
             if ((movie->netcam_data->pktarray[indx].packet->stream_index == indx_audio) &&
+                (movie->netcam_data->pktarray[indx].packet->pts != AV_NOPTS_VALUE) &&
                 (movie->netcam_data->pktarray[indx].packet->dts < movie->pass_audio_base)) {
                 movie->pass_audio_base = movie->netcam_data->pktarray[indx].packet->dts;
             };
             if ((movie->netcam_data->pktarray[indx].packet->stream_index == indx_video) &&
+                (movie->netcam_data->pktarray[indx].packet->pts != AV_NOPTS_VALUE) &&
                 (movie->netcam_data->pktarray[indx].packet->pts < movie->pass_video_base)) {
                 movie->pass_video_base = movie->netcam_data->pktarray[indx].packet->pts;
             };
             if ((movie->netcam_data->pktarray[indx].packet->stream_index == indx_video) &&
+                (movie->netcam_data->pktarray[indx].packet->pts != AV_NOPTS_VALUE) &&
                 (movie->netcam_data->pktarray[indx].packet->dts < movie->pass_video_base)) {
                 movie->pass_video_base = movie->netcam_data->pktarray[indx].packet->dts;
             };
