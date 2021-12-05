@@ -2202,7 +2202,7 @@ int netcam_next(struct ctx_cam *cam, struct ctx_image_data *img_data)
 
         pthread_mutex_lock(&cam->netcam_high->mutex);
             netcam_pktarray_resize(cam, true);
-            if (!(cam->netcam_high->high_resolution && cam->netcam_high->passthrough)) {
+            if (!cam->netcam_high->passthrough) {
                 memcpy(img_data->image_high
                        ,cam->netcam_high->img_latest->ptr
                        ,cam->netcam_high->img_latest->used);

@@ -158,8 +158,9 @@ static void pic_save_yuv420p(FILE *fp, unsigned char *image, int width, int heig
         int quality, struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box)
 {
 
-    int sz = 0;
-    int image_size = cam->imgs.size_norm;
+    int sz, image_size;
+    
+    image_size = (width * height * 3)/2;
     unsigned char *buf =(unsigned char*) mymalloc(image_size);
 
     sz = jpgutl_put_yuv420p(buf, image_size, image, width, height, quality, cam ,ts1, box);
@@ -174,8 +175,10 @@ static void pic_save_grey(FILE *picture, unsigned char *image, int width, int he
         int quality, struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box)
 {
 
-    int sz = 0;
-    int image_size = cam->imgs.size_norm;
+    int sz, image_size;
+    
+    image_size = (width * height * 3)/2;
+ 
     unsigned char *buf =(unsigned char*) mymalloc(image_size);
 
     sz = jpgutl_put_grey(buf, image_size, image, width, height, quality, cam ,ts1, box);
@@ -275,7 +278,8 @@ static void pic_write(struct ctx_cam *cam, FILE *picture, unsigned char *image, 
     int passthrough;
 
     passthrough = mycheck_passthrough(cam);
-    if ((ftype == FTYPE_IMAGE) && (cam->imgs.size_high > 0) && (!passthrough)) {
+    if (((ftype == FTYPE_IMAGE) || (ftype == FTYPE_IMAGE_SNAPSHOT)) &&
+         (cam->imgs.size_high > 0) && (!passthrough)) {
         width = cam->imgs.width_high;
         height = cam->imgs.height_high;
     } else {
