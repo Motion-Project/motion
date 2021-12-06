@@ -29,7 +29,7 @@
 
 #define MMAP_BUFFERS            4
 #define MIN_MMAP_BUFFERS        2
-#define V4L2_PALETTE_COUNT_MAX 21
+#define V4L2_PALETTE_COUNT_MAX 22
 
 #ifdef HAVE_V4L2
 
@@ -60,6 +60,7 @@ static void v4l2_palette_init(palette_item *palette_array)
     palette_array[19].v4l2id = V4L2_PIX_FMT_Y12;
     palette_array[20].v4l2id = V4L2_PIX_FMT_GREY;
     palette_array[21].v4l2id = V4L2_PIX_FMT_H264;
+    palette_array[22].v4l2id = V4L2_PIX_FMT_SRGGB8;
 
     for (indx = 0; indx <= V4L2_PALETTE_COUNT_MAX; indx++) {
         sprintf(palette_array[indx].fourcc ,"%c%c%c%c"
@@ -852,6 +853,11 @@ static int v4l2_capture_convert(ctx_cam *cam, ctx_v4l2cam *v4l2cam, unsigned cha
     case V4L2_PIX_FMT_SGRBG8:
         /*FALLTHROUGH*/
     case V4L2_PIX_FMT_SBGGR8:    /* bayer */
+        vid_bayer2rgb24(cam->imgs.common_buffer, the_buffer->ptr, v4l2cam->width, v4l2cam->height);
+        vid_rgb24toyuv420p(img_norm, cam->imgs.common_buffer, v4l2cam->width, v4l2cam->height);
+        return 0;
+
+    case V4L2_PIX_FMT_SRGGB8: /*New Pi Camera format*/
         vid_bayer2rgb24(cam->imgs.common_buffer, the_buffer->ptr, v4l2cam->width, v4l2cam->height);
         vid_rgb24toyuv420p(img_norm, cam->imgs.common_buffer, v4l2cam->width, v4l2cam->height);
         return 0;
