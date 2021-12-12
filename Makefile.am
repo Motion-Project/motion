@@ -14,10 +14,6 @@ man_MANS = man/motionplus.1
 
 docdir = $(datadir)/doc/@PACKAGE@
 doc_DATA = \
-	doc/mask1.png \
-	doc/normal.jpg \
-	doc/outputmotion1.jpg  \
-	doc/outputnormal1.jpg \
 	doc/motionplus_guide.html \
 	doc/motionplus_stylesheet.css \
 	doc/CREDITS \
