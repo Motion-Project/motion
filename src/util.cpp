@@ -847,8 +847,10 @@ AVPacket *mypacket_alloc(AVPacket *pkt)
         av_init_packet(pkt);
         pkt->data = NULL;
         pkt->size = 0;
-        return pkt;
     #endif
+    
+    return pkt;
+    
 }
 
 /*********************************************/
