@@ -202,20 +202,19 @@ static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img
         if (cam->event_nr != cam->prev_event) {
 
             cam->prev_event = cam->event_nr;
-            cam->eventtime = img->imgts.tv_sec;
 
             if (cam->algsec_inuse) {
                 cam->algsec->isdetected = false;
             }
 
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
+                       cam->event_nr);
+
             mystrftime(cam, cam->text_event_string, sizeof(cam->text_event_string),
                        cam->conf->text_event.c_str(), &img->imgts, NULL, 0);
 
-            event(cam, EVENT_FIRSTMOTION, img, NULL, NULL,
+            event(cam, EVENT_START, img, NULL, NULL,
                 &cam->imgs.image_ring[cam->imgs.ring_out].imgts);
-
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
-                       cam->event_nr);
 
             if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)) {
                 pic_save_preview(cam, img);
@@ -732,7 +731,7 @@ static int mlp_init(struct ctx_cam *cam)
 void mlp_cleanup(struct ctx_cam *cam)
 {
 
-    event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, NULL);
+    event(cam, EVENT_TLAPSE_END, NULL, NULL, NULL, NULL);
 
     /*if (cam->event_nr == cam->prev_event) {
         mlp_ring_process(cam);
@@ -741,7 +740,7 @@ void mlp_cleanup(struct ctx_cam *cam)
             cam->imgs.image_preview.diffs = 0;
         }
     */
-        event(cam, EVENT_ENDMOTION, NULL, NULL, NULL, &cam->current_image->imgts);
+        event(cam, EVENT_END, NULL, NULL, NULL, &cam->current_image->imgts);
     /* } */
 
     webu_stream_deinit(cam);
@@ -964,6 +963,7 @@ static void mlp_resetimages(struct ctx_cam *cam)
     cam->current_image->total_labels = 0;
 
     clock_gettime(CLOCK_REALTIME, &cam->current_image->imgts);
+    clock_gettime(CLOCK_MONOTONIC, &cam->current_image->monots);
 
     /* Store shot number with pre_captured image */
     cam->current_image->shot = cam->shots;
@@ -1302,13 +1302,9 @@ static void mlp_actions_motion(struct ctx_cam *cam)
 static void mlp_actions_event(struct ctx_cam *cam)
 {
 
-    if ((cam->conf->movie_max_time > 0) &&
-        (cam->event_nr == cam->prev_event) &&
-        ((cam->frame_curr_ts.tv_sec - cam->eventtime) >= cam->conf->movie_max_time)) {
-        cam->event_stop = true;
-    }
+    /* Other functions may also set the event_stop */
     if ((cam->conf->event_gap > 0) &&
-        ((cam->frame_curr_ts.tv_sec - cam->lasttime) >= cam->conf->event_gap)) {
+        ((cam->frame_curr_ts.tv_sec - cam->lasttime ) >= cam->conf->event_gap)) {
         cam->event_stop = true;
     }
 
@@ -1321,7 +1317,7 @@ static void mlp_actions_event(struct ctx_cam *cam)
                 event(cam, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cam->current_image->imgts);
                 cam->imgs.image_preview.diffs = 0;
             }
-            event(cam, EVENT_ENDMOTION, NULL, NULL, NULL, &cam->current_image->imgts);
+            event(cam, EVENT_END, NULL, NULL, NULL, &cam->current_image->imgts);
 
             mlp_track_center(cam);
 
@@ -1341,11 +1337,21 @@ static void mlp_actions_event(struct ctx_cam *cam)
         cam->event_stop = false;
         cam->event_user = false;
     }
+
+    if ((cam->conf->movie_max_time > 0) &&
+        (cam->event_nr == cam->prev_event) &&
+        ((cam->frame_curr_ts.tv_sec - cam->movie_start_time) >=
+            cam->conf->movie_max_time) &&
+        ( !(cam->current_image->flags & IMAGE_POSTCAP)) &&
+        ( !(cam->current_image->flags & IMAGE_PRECAP))) {
+        event(cam, EVENT_MOVIE_END, NULL, NULL, NULL, &cam->current_image->imgts);
+        event(cam, EVENT_MOVIE_START, NULL, NULL, NULL, &cam->current_image->imgts);
+    }
+
 }
 
 static void mlp_actions(struct ctx_cam *cam)
 {
-
      if ((cam->current_image->diffs > cam->threshold) &&
         (cam->current_image->diffs < cam->threshold_maximum)) {
         cam->current_image->flags |= IMAGE_MOTION;
@@ -1367,7 +1373,7 @@ static void mlp_actions(struct ctx_cam *cam)
     }
 
     if (cam->current_image->flags & IMAGE_SAVE) {
-        cam->lasttime = cam->current_image->imgts.tv_sec;
+        cam->lasttime = cam->current_image->monots.tv_sec;
     }
 
     if (cam->detecting_motion) {
@@ -1444,21 +1450,21 @@ static void mlp_timelapse(struct ctx_cam *cam)
 
             if (cam->conf->timelapse_mode == "daily") {
                 if (timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
+                    event(cam, EVENT_TLAPSE_END, NULL, NULL, NULL, &cam->current_image->imgts);
                 }
             } else if (cam->conf->timelapse_mode == "hourly") {
-                event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
+                event(cam, EVENT_TLAPSE_END, NULL, NULL, NULL, &cam->current_image->imgts);
             } else if (cam->conf->timelapse_mode == "weekly-sunday") {
                 if (timestamp_tm.tm_wday == 0 && timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
+                    event(cam, EVENT_TLAPSE_END, NULL, NULL, NULL, &cam->current_image->imgts);
                 }
             } else if (cam->conf->timelapse_mode == "weekly-monday") {
                 if (timestamp_tm.tm_wday == 1 && timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
+                    event(cam, EVENT_TLAPSE_END, NULL, NULL, NULL, &cam->current_image->imgts);
                 }
             } else if (cam->conf->timelapse_mode == "monthly") {
                 if (timestamp_tm.tm_mday == 1 && timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
+                    event(cam, EVENT_TLAPSE_END, NULL, NULL, NULL, &cam->current_image->imgts);
                 }
             }
         }
@@ -1466,7 +1472,7 @@ static void mlp_timelapse(struct ctx_cam *cam)
         if (cam->shots == 0 &&
             cam->frame_curr_ts.tv_sec % cam->conf->timelapse_interval <=
             cam->frame_last_ts.tv_sec % cam->conf->timelapse_interval) {
-                event(cam, EVENT_TIMELAPSE, cam->current_image, NULL
+                event(cam, EVENT_TLAPSE_START, cam->current_image, NULL
                     , NULL, &cam->current_image->imgts);
         }
 
@@ -1476,7 +1482,7 @@ static void mlp_timelapse(struct ctx_cam *cam)
      * This is an important feature that allows manual roll-over of timelapse file using the http
      * remote control via a cron job.
      */
-        event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
+        event(cam, EVENT_TLAPSE_END, NULL, NULL, NULL, &cam->current_image->imgts);
     }
 
 }

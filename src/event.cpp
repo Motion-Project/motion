@@ -35,11 +35,11 @@ const char *eventList[] = {
     "NULL",
     "EVENT_FILECREATE",
     "EVENT_MOTION",
-    "EVENT_FIRSTMOTION",
-    "EVENT_ENDMOTION",
+    "EVENT_START",
+    "EVENT_END",
     "EVENT_STOP",
-    "EVENT_TIMELAPSE",
-    "EVENT_TIMELAPSEEND",
+    "EVENT_TLAPSE_START",
+    "EVENT_TLAPSE_END",
     "EVENT_STREAM",
     "EVENT_IMAGE_DETECTED",
     "EVENT_IMAGEM_DETECTED",
@@ -48,8 +48,6 @@ const char *eventList[] = {
     "EVENT_IMAGEM",
     "EVENT_IMAGE_PREVIEW",
     "EVENT_FILECLOSE",
-    "EVENT_DEBUG",
-    "EVENT_CRITICAL",
     "EVENT_AREA_DETECTED",
     "EVENT_CAMERA_LOST",
     "EVENT_CAMERA_FOUND",
@@ -519,7 +517,7 @@ static void event_extpipe_end(struct ctx_cam *cam, motion_event evnt
     }
 }
 
-static void event_create_extpipe(struct ctx_cam *cam, motion_event evnt
+static void event_extpipe_start(struct ctx_cam *cam, motion_event evnt
         ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
 {
 
@@ -626,32 +624,9 @@ static void event_extpipe_put(struct ctx_cam *cam, motion_event evnt
     }
 }
 
-static void event_new_video(struct ctx_cam *cam, motion_event evnt
+static void event_movie_start(struct ctx_cam *cam, motion_event evnt
         ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
 {
-
-    (void)evnt;
-    (void)img_data;
-    (void)fname;
-    (void)ftype;
-    (void)ts1;
-
-    cam->movie_last_shot = -1;
-
-    cam->movie_fps = cam->lastrate;
-
-    MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO, _("Source FPS %d"), cam->movie_fps);
-
-    if (cam->movie_fps < 2) {
-        cam->movie_fps = 2;
-    }
-
-}
-
-static void event_movie_newfile(struct ctx_cam *cam, motion_event evnt
-        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
-{
-
     int retcd;
 
     (void)evnt;
@@ -659,8 +634,14 @@ static void event_movie_newfile(struct ctx_cam *cam, motion_event evnt
     (void)fname;
     (void)ftype;
 
-    if (!cam->conf->movie_output && !cam->conf->movie_output_motion) {
-        return;
+    /* This will cascade to extpipe_start*/
+    cam->movie_start_time = cam->frame_curr_ts.tv_sec;
+    
+    cam->movie_last_shot = -1;
+    if (cam->lastrate < 2) {
+        cam->movie_fps = 2;
+    } else {
+        cam->movie_fps = cam->lastrate;
     }
 
     if (cam->conf->movie_output) {
@@ -691,37 +672,6 @@ static void event_movie_newfile(struct ctx_cam *cam, motion_event evnt
     }
 }
 
-static void event_movie_timelapse(struct ctx_cam *cam, motion_event evnt
-        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
-{
-
-    int retcd;
-
-    (void)evnt;
-    (void)fname;
-    (void)ftype;
-
-    if (!cam->movie_timelapse) {
-        retcd = movie_init_timelapse(cam, ts1);
-        if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("Error creating timelapse file [%s]"), cam->movie_timelapse->filename);
-            if (cam->movie_timelapse != NULL) {
-                free(cam->movie_timelapse);
-            }
-            cam->movie_timelapse = NULL;
-            return;
-        }
-        event(cam, EVENT_FILECREATE, NULL, cam->movie_timelapse->filename
-            , (void *)FTYPE_MPEG_TIMELAPSE, ts1);
-    }
-
-    if (movie_put_image(cam->movie_timelapse, img_data, ts1) == -1) {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
-    }
-
-}
-
 static void event_movie_put(struct ctx_cam *cam, motion_event evnt
         ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
 {
@@ -742,7 +692,7 @@ static void event_movie_put(struct ctx_cam *cam, motion_event evnt
     }
 }
 
-static void event_movie_closefile(struct ctx_cam *cam, motion_event evnt
+static void event_movie_end(struct ctx_cam *cam, motion_event evnt
         ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
 {
 
@@ -798,7 +748,38 @@ static void event_movie_closefile(struct ctx_cam *cam, motion_event evnt
 
 }
 
-static void event_movie_timelapseend(struct ctx_cam *cam, motion_event evnt
+static void event_tlapse_start(struct ctx_cam *cam, motion_event evnt
+        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
+{
+
+    int retcd;
+
+    (void)evnt;
+    (void)fname;
+    (void)ftype;
+
+    if (!cam->movie_timelapse) {
+        retcd = movie_init_timelapse(cam, ts1);
+        if (retcd < 0) {
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+                ,_("Error creating timelapse file [%s]"), cam->movie_timelapse->filename);
+            if (cam->movie_timelapse != NULL) {
+                free(cam->movie_timelapse);
+            }
+            cam->movie_timelapse = NULL;
+            return;
+        }
+        event(cam, EVENT_FILECREATE, NULL, cam->movie_timelapse->filename
+            , (void *)FTYPE_MPEG_TIMELAPSE, ts1);
+    }
+
+    if (movie_put_image(cam->movie_timelapse, img_data, ts1) == -1) {
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+    }
+
+}
+
+static void event_tlapse_end(struct ctx_cam *cam, motion_event evnt
         ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
 {
 
@@ -844,20 +825,44 @@ struct event_handlers event_handlers[] = {
     on_area_command
     },
     {
-    EVENT_FIRSTMOTION,
+    EVENT_START,
     event_sqlfirstmotion
     },
     {
-    EVENT_FIRSTMOTION,
+    EVENT_START,
     on_event_start_command
     },
     {
-    EVENT_ENDMOTION,
+    EVENT_START,
+    event_movie_start
+    },
+    {
+    EVENT_START,
+    event_extpipe_start
+    },
+    {
+    EVENT_END,
     on_event_end_command
+    },
+    {
+    EVENT_END,
+    event_movie_end
+    },
+    {
+    EVENT_END,
+    event_extpipe_end
     },
     {
     EVENT_IMAGE_DETECTED,
     event_image_detect
+    },
+    {
+    EVENT_IMAGE_DETECTED,
+    event_movie_put
+    },
+    {
+    EVENT_IMAGE_DETECTED,
+    event_extpipe_put
     },
     {
     EVENT_IMAGEM_DETECTED,
@@ -884,32 +889,20 @@ struct event_handlers event_handlers[] = {
     event_stream_put
     },
     {
-    EVENT_FIRSTMOTION,
-    event_new_video
-    },
-    {
-    EVENT_FIRSTMOTION,
-    event_movie_newfile
-    },
-    {
-    EVENT_IMAGE_DETECTED,
-    event_movie_put
-    },
-    {
     EVENT_MOVIE_PUT,
     event_movie_put
     },
     {
-    EVENT_ENDMOTION,
-    event_movie_closefile
+    EVENT_MOVIE_PUT,
+    event_extpipe_put
     },
     {
-    EVENT_TIMELAPSE,
-    event_movie_timelapse
+    EVENT_TLAPSE_START,
+    event_tlapse_start
     },
     {
-    EVENT_TIMELAPSEEND,
-    event_movie_timelapseend
+    EVENT_TLAPSE_END,
+    event_tlapse_end
     },
     {
     EVENT_FILECLOSE,
@@ -920,19 +913,19 @@ struct event_handlers event_handlers[] = {
     on_movie_end_command
     },
     {
-    EVENT_FIRSTMOTION,
-    event_create_extpipe
+    EVENT_MOVIE_START,
+    event_movie_start
     },
     {
-    EVENT_IMAGE_DETECTED,
-    event_extpipe_put
+    EVENT_MOVIE_START,
+    event_extpipe_start
     },
     {
-    EVENT_MOVIE_PUT,
-    event_extpipe_put
+    EVENT_MOVIE_END,
+    event_movie_end
     },
     {
-    EVENT_ENDMOTION,
+    EVENT_END,
     event_extpipe_end
     },
     {

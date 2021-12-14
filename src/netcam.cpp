@@ -1953,7 +1953,7 @@ static void netcam_handler_wait(struct ctx_netcam *netcam)
 static void netcam_handler_reconnect(struct ctx_netcam *netcam)
 {
 
-    int retcd;
+    int retcd, indx;
 
     if ((netcam->status == NETCAM_CONNECTED) ||
         (netcam->status == NETCAM_READINGIMAGE)) {
@@ -1961,6 +1961,22 @@ static void netcam_handler_reconnect(struct ctx_netcam *netcam)
             ,_("%s: Reconnecting with camera...."),netcam->cameratype);
     }
     netcam->status = NETCAM_RECONNECTING;
+
+    /* When doing passthrough movies, any movies in progress
+    * must end and start again because the cache'd packets and timing
+    * on them gets all messed up.  So we loop through the list of cameras
+    * and find the pointer that matches our passed in netcam.
+    */
+    if (netcam->passthrough == true) {
+        indx = 1;
+        while (netcam->motapp->cam_list[indx] != NULL) {
+            if ((netcam->motapp->cam_list[indx]->netcam == netcam) ||
+                (netcam->motapp->cam_list[indx]->netcam_high == netcam)) {
+                netcam->motapp->cam_list[indx]->event_stop = true;
+            }
+            indx++;
+        }
+    }
 
     /*
     * The retry count of 100 is arbritrary.

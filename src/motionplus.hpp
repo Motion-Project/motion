@@ -206,7 +206,8 @@ struct ctx_image_data {
     int                 diffs_ratio;
     int64_t             idnbr_norm;
     int64_t             idnbr_high;
-    struct timespec     imgts;
+    struct timespec     imgts;          /* Realtime for display */
+    struct timespec     monots;         /* Montonic clock for timing */
     int                 shot;           /* Sub second timestamp count */
     unsigned long       cent_dist;      /* Movement center to img center distance * Note: Dist is calculated distX*distX + distY*distY */
     unsigned int        flags;          /* See IMAGE_* defines */
@@ -343,7 +344,7 @@ struct ctx_cam {
     struct timespec         frame_last_ts;
 
     time_t                  lasttime;
-    time_t                  eventtime;
+    time_t                  movie_start_time;
     time_t                  connectionlosttime;               /* timestamp from connection lost */
     unsigned int            lastrate;
     unsigned int            startup_frames;
