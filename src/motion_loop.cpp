@@ -165,10 +165,6 @@ static void mlp_ring_process(struct ctx_cam *cam)
             event(cam, EVENT_IMAGE_DETECTED,
               &cam->imgs.image_ring[cam->imgs.ring_out], NULL, NULL,
               &cam->imgs.image_ring[cam->imgs.ring_out].imgts);
-
-            if (cam->movie_last_shot >= 0) {
-                cam->movie_last_shot = cam->imgs.image_ring[cam->imgs.ring_out].shot;
-            }
         }
 
         cam->imgs.image_ring[cam->imgs.ring_out].flags |= IMAGE_SAVED;

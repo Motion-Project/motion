@@ -363,7 +363,6 @@ struct ctx_cam {
     char                    newfilename[PATH_MAX];
     char                    extpipefilename[PATH_MAX];
     char                    extpipecmdline[PATH_MAX];
-    int                     movie_last_shot;
     bool                    movie_passthrough;
     char                    timelapsefilename[PATH_MAX];
     char                    motionfilename[PATH_MAX];

@@ -636,8 +636,7 @@ static void event_movie_start(struct ctx_cam *cam, motion_event evnt
 
     /* This will cascade to extpipe_start*/
     cam->movie_start_time = cam->frame_curr_ts.tv_sec;
-    
-    cam->movie_last_shot = -1;
+
     if (cam->lastrate < 2) {
         cam->movie_fps = 2;
     } else {
