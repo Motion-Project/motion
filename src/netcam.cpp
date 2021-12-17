@@ -1317,16 +1317,20 @@ static int netcam_read_image(struct ctx_netcam *netcam)
             0.5);
         if (netcam->capture_rate < 1) {
             netcam->capture_rate = netcam->src_fps + 1;
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            if (netcam->pts_adj == false) {
+                MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                     ,_("%s: capture_rate not specified in netcam_params. Using %d")
                     ,netcam->cameratype,netcam->capture_rate);
+            }
         }
     } else {
         if (netcam->capture_rate < 1) {
             netcam->capture_rate = netcam->conf->framerate;
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            if (netcam->pts_adj == false) {
+               MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                     ,_("%s: capture_rate not specified in netcam_params. Using framerate %d")
                     ,netcam->cameratype, netcam->capture_rate);
+            }
         }
     }
 
@@ -1552,11 +1556,11 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
                 , "%s",netcam->params->params_array[indx].param_value);
         }
         if (mystreq(netcam->params->params_array[indx].param_name,"capture_rate")) {
-            netcam->capture_rate = atoi(netcam->params->params_array[indx].param_value);
-        }
-        if (mystreq(netcam->params->params_array[indx].param_name,"pts_adj") &&
-            mystreq(netcam->params->params_array[indx].param_value,"on")) {
-            netcam->pts_adj = true;
+            if (mystreq(netcam->params->params_array[indx].param_value,"pts")) {
+                netcam->pts_adj = true;
+            } else {
+                netcam->capture_rate = atoi(netcam->params->params_array[indx].param_value);
+            }
         }
     }
 

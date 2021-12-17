@@ -2406,7 +2406,9 @@
           <div>
           <p></p>
           The number of frames per second to capture from the camera. This option should be slightly higher than
-          the FPS that the camera is sending image.  
+          the FPS that the camera is sending image.  Users can also specify the capture_rate as
+          <code>pts</code>.  When using <code>pts</code> as the capture_rate MotionPlus will sync the timing
+          of the capture to match between the clock and the presentation time stamps sent from the camera.
           <p></p>
           </div>
         </ul>
