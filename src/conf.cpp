@@ -14,7 +14,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
  *
- *    Copyright 2020-2021 MotionMrDave@gmail.com
+ *    Copyright 2020-2022 MotionMrDave@gmail.com
  */
 
 #include <dirent.h>
@@ -3445,7 +3445,7 @@ std::string conf_cat_desc(enum PARM_CAT pcat, bool shrt) {
 /** Prints usage and options allowed from Command-line. */
 static void usage(void)
 {
-    printf("MotionPlus version %s, Copyright 2020\n",PACKAGE_VERSION);
+    printf("MotionPlus version %s, Copyright 2020-2022\n",PACKAGE_VERSION);
     printf("\nusage:\tmotionplus [options]\n");
     printf("\n\n");
     printf("Possible options:\n\n");

@@ -1,6 +1,6 @@
-# Motion Application
-# Copyright (2018)
-# This file is distributed under the same license as the Motion package.
+# MotionPlus Application
+# Copyright (2020 - 2022)
+# This file is distributed under the same license as the MotionPlus package.
 #
 msgid ""
 msgstr ""
