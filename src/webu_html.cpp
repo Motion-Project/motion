@@ -802,6 +802,8 @@ static void webu_html_script_initform(struct ctx_webui *webui)
         "        if (this.readyState == 4 && this.status == 200) {\n"
         "          pData = JSON.parse(this.responseText);\n"
         "          gIndexCam = 0;\n"
+        "          gIndxCurr = 1;\n"
+        "          gIndxPrev = -1;\n"
         "          gIndexScan = -1;\n\n"
 
         "          assign_config();\n"
@@ -1071,17 +1073,26 @@ static void webu_html_script_timer_pic(struct ctx_webui *webui)
         "          document.getElementById('pic'+gIndexCam).src = picurl;\n"
         "         }\n "
         "      } else if (gIndexCam == 0) {\n"
-        "        var camcnt = pData['cameras']['count'];\n"
-        "        for (var indx = 1; indx <= camcnt; indx++) {\n"
-        "          camid = pData['cameras'][indx]['id'];\n\n"
-        "          if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {\n"
-        "            picurl = pData['cameras'][indx]['url'] + \"static/stream/t\" + new Date().getTime();\n"
-        "            img.src = picurl;\n"
-        "            document.getElementById('pic'+indx).src = picurl;\n"
-        "          }\n"
-        "        }\n"
-        "      }\n"
-        "    }, 1000);\n\n";
+        "         var camcnt = pData['cameras']['count'];\n"
+        "         //Set the src for the periodic updates one camera at a time.\n"
+        "         if (gIndxCurr != gIndxPrev) {\n"
+        "           gIndxPrev = gIndxCurr;\n"
+        "           camid = pData['cameras'][gIndxCurr]['id'];\n"
+        "           if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {\n"
+        "             picurl = pData['cameras'][gIndxCurr]['url'] + \"static/stream/t\" + new Date().getTime();\n"
+        "             img.onload = function () {\n"
+        "               document.getElementById('pic'+gIndxCurr).src = picurl;\n"
+        "               gIndxCurr++;\n"
+        "               if (gIndxCurr > camcnt) {\n"
+        "                 gIndxCurr = 1;\n"
+        "               }\n"
+        "             }\n"
+        "             img.src = picurl;\n"
+        "           }\n"
+        "         }\n"
+        "       }\n"
+        "    }, 50);\n\n";
+
 
 }
 
@@ -1131,9 +1142,8 @@ static void webu_html_script(struct ctx_webui *webui)
 {
     webui->resp_page += "  <script>\n"
         "    var pData;\n"
-        "    var gIndexScan;\n"
-        "    var cams_scan = setInterval(timer_scan, 5000);\n"
-        "    var gIndexCam;\n\n";
+        "    var gIndexScan, gIndexCam, gIndxCurr, gIndxPrev;;\n"
+        "    var cams_scan = setInterval(timer_scan, 5000);\n\n";
 
     webu_html_script_nav(webui);
 
