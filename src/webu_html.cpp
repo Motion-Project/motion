@@ -66,7 +66,7 @@ static void webu_html_style_navbar(struct ctx_webui *webui)
         "      font-size: 1rem;\n"
         "      background-color: lightgray;\n"
         "    }\n"
-        "   .sidenav .closebtn:hover {\n"
+        "    .sidenav .closebtn:hover {\n"
         "      background-color: lightgray;\n"
         "      color: white;\n"
         "    }\n"
@@ -121,18 +121,18 @@ static void webu_html_style_config(struct ctx_webui *webui)
         "      font-weight: normal;\n"
         "      font-size: 0.90rem;\n"
         "    }\n"
-        "   .cls_config table {\n"
+        "    .cls_config table {\n"
         "      display: table;\n"
         "      border-spacing: 1rem;\n"
         "      margin: auto;\n"
         "    }\n"
-        "   .cls_config label {\n"
+        "    .cls_config label {\n"
         "      padding: 0rem;\n"
         "      text-align: right;\n"
         "      width: 10rem;\n"
         "      height: 2.5rem;\n"
         "    }\n"
-        "   .cls_config textarea {\n"
+        "    .cls_config textarea {\n"
         "      margin: auto;\n"
         "      text-align: center;\n"
         "      width: 15.5rem;\n"
@@ -769,7 +769,7 @@ static void webu_html_script_assign_config_cat(struct ctx_webui *webui)
 
         "      return html_cfg;\n\n"
 
-        "    }\n";
+        "    }\n\n";
 }
 
 /* Create the javascript function assign_config */
@@ -879,7 +879,7 @@ static void webu_html_script_camera_buttons_ptz(struct ctx_webui *webui)
 {
 
     webui->resp_page +=
-        "   function camera_buttons_ptz() {\n\n"
+        "    function camera_buttons_ptz() {\n\n"
         "      var html_preview = \"\";\n"
 
         "      html_preview += \"<table style='float: left' >\";\n"
@@ -927,25 +927,25 @@ static void webu_html_script_camera_buttons_ptz(struct ctx_webui *webui)
 static void webu_html_script_image_pantilt(struct ctx_webui *webui)
 {
     webui->resp_page +=
-        "   function image_pantilt() {\n\n"
-        "        document.getElementById('pic'+ gIndexCam).addEventListener('click',function(event){\n"
-        "          bounds=this.getBoundingClientRect();\n"
-        "          var x = Math.floor(event.pageX - bounds.left - window.scrollX);\n"
-        "          var y = Math.floor(event.pageY - bounds.top - window.scrollY);\n"
-        "          var w = Math.floor(bounds.width);\n"
-        "          var h = Math.floor(bounds.height);\n"
-        "          var qtr_x = Math.floor(bounds.width/4);\n"
-        "          var qtr_y = Math.floor(bounds.height/4);\n"
-        "          if ((x > qtr_x) && (x < (w - qtr_x)) && (y < qtr_y)) {\n"
-        "            send_action('tilt_up');\n"
-        "          } else if ((x > qtr_x) && (x < (w - qtr_x)) && (y >(h - qtr_y))) {\n"
-        "            send_action('tilt_down');\n"
-        "          } else if ((x < qtr_x) && (y > qtr_y) && (y < (h - qtr_y))) {\n"
-        "            send_action('pan_left');\n"
-        "          } else if ((x >(w - qtr_x)) && (y > qtr_y) && (y < (h - qtr_y))) {\n"
-        "            send_action('pan_right');\n"
-        "          }\n"
-        "        });\n"
+        "    function image_pantilt() {\n\n"
+        "      document.getElementById('pic'+ gIndexCam).addEventListener('click',function(event){\n"
+        "        bounds=this.getBoundingClientRect();\n"
+        "        var x = Math.floor(event.pageX - bounds.left - window.scrollX);\n"
+        "        var y = Math.floor(event.pageY - bounds.top - window.scrollY);\n"
+        "        var w = Math.floor(bounds.width);\n"
+        "        var h = Math.floor(bounds.height);\n"
+        "        var qtr_x = Math.floor(bounds.width/4);\n"
+        "        var qtr_y = Math.floor(bounds.height/4);\n"
+        "        if ((x > qtr_x) && (x < (w - qtr_x)) && (y < qtr_y)) {\n"
+        "          send_action('tilt_up');\n"
+        "        } else if ((x > qtr_x) && (x < (w - qtr_x)) && (y >(h - qtr_y))) {\n"
+        "          send_action('tilt_down');\n"
+        "        } else if ((x < qtr_x) && (y > qtr_y) && (y < (h - qtr_y))) {\n"
+        "           send_action('pan_left');\n"
+        "        } else if ((x >(w - qtr_x)) && (y > qtr_y) && (y < (h - qtr_y))) {\n"
+        "           send_action('pan_right');\n"
+        "        }\n"
+        "      });\n"
         "    }\n\n";
 
 }
@@ -954,7 +954,7 @@ static void webu_html_script_image_pantilt(struct ctx_webui *webui)
 static void webu_html_script_camera_click(struct ctx_webui *webui)
 {
     webui->resp_page +=
-        "   function camera_click(index_cam) {\n\n"
+        "    function camera_click(index_cam) {\n\n"
         "      var html_preview = \"\";\n"
         "      var camid;\n\n"
         "      config_hideall();\n\n"
@@ -1025,7 +1025,7 @@ static void webu_html_script_camera_click(struct ctx_webui *webui)
 static void webu_html_script_camera_scan(struct ctx_webui *webui)
 {
     webui->resp_page +=
-        "   function camera_scan() {\n\n"
+        "    function camera_scan() {\n\n"
         "      gIndexCam = -1; \n"
         "      gIndexScan = 0; \n\n"
         "      cams_scan = setInterval(timer_scan, 5);\n"
