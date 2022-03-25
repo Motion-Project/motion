@@ -163,7 +163,7 @@ static int movie_get_oformat(struct ctx_movie *movie)
 
         movie->oc->oformat = av_guess_format ("mpeg2video", NULL, NULL);
         if (movie->oc->oformat) {
-            movie->oc->video_codec_id = MY_CODEC_ID_MPEG2VIDEO;
+            movie->oc->oformat->video_codec = MY_CODEC_ID_MPEG2VIDEO;
         }
         retcd = snprintf(movie->filename,PATH_MAX,"%s.mpg",basename);
         if ((!movie->oc->oformat) ||
@@ -188,7 +188,7 @@ static int movie_get_oformat(struct ctx_movie *movie)
         movie->oc->oformat = av_guess_format("flv", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.flv",basename);
         if (movie->oc->oformat) {
-            movie->oc->video_codec_id = MY_CODEC_ID_FLV1;
+            movie->oc->oformat->video_codec = MY_CODEC_ID_FLV1;
         }
     }
 
@@ -196,7 +196,7 @@ static int movie_get_oformat(struct ctx_movie *movie)
         movie->oc->oformat = av_guess_format("ogg", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.ogg",basename);
         if (movie->oc->oformat) {
-            movie->oc->video_codec_id = MY_CODEC_ID_THEORA;
+            movie->oc->oformat->video_codec = MY_CODEC_ID_THEORA;
         }
     }
 
@@ -204,7 +204,7 @@ static int movie_get_oformat(struct ctx_movie *movie)
         movie->oc->oformat = av_guess_format("webm", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.webm",basename);
         if (movie->oc->oformat) {
-            movie->oc->video_codec_id = MY_CODEC_ID_VP8;
+            movie->oc->oformat->video_codec = MY_CODEC_ID_VP8;
         }
     }
 
@@ -212,7 +212,7 @@ static int movie_get_oformat(struct ctx_movie *movie)
         movie->oc->oformat = av_guess_format("mp4", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.mp4",basename);
         if (movie->oc->oformat) {
-            movie->oc->video_codec_id = MY_CODEC_ID_H264;
+            movie->oc->oformat->video_codec = MY_CODEC_ID_H264;
         }
     }
 
@@ -220,7 +220,7 @@ static int movie_get_oformat(struct ctx_movie *movie)
         movie->oc->oformat = av_guess_format("matroska", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.mkv",basename);
         if (movie->oc->oformat) {
-            movie->oc->video_codec_id = MY_CODEC_ID_H264;
+            movie->oc->oformat->video_codec = MY_CODEC_ID_H264;
         }
     }
 
@@ -228,7 +228,7 @@ static int movie_get_oformat(struct ctx_movie *movie)
         movie->oc->oformat = av_guess_format("mp4", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.mp4",basename);
         if (movie->oc->oformat) {
-            movie->oc->video_codec_id = MY_CODEC_ID_HEVC;
+            movie->oc->oformat->video_codec = MY_CODEC_ID_HEVC;
         }
     }
 
@@ -536,7 +536,7 @@ static int movie_set_codec_preferred(struct ctx_movie *movie)
         } else {
             movie->codec = avcodec_find_encoder_by_name(&movie->codec_name[codec_name_len+1]);
             if ((movie->oc->oformat) && (movie->codec != NULL)) {
-                    movie->oc->video_codec_id = movie->codec->id;
+                    movie->oc->oformat->video_codec = movie->codec->id;
             } else if (movie->codec == NULL) {
                 MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO
                     ,_("Preferred codec %s not found")
@@ -1300,7 +1300,7 @@ static int movie_passthru_streams(struct ctx_movie *movie)
         pthread_mutex_lock(&movie->netcam_data->mutex_transfer);
             for (indx= 0; indx < (int)movie->netcam_data->transfer_format->nb_streams; indx++) {
                 stream_in = movie->netcam_data->transfer_format->streams[indx];
-                movie->oc->video_codec_id = stream_in->codecpar->codec_id;
+                movie->oc->oformat->video_codec = stream_in->codecpar->codec_id;
                 if (stream_in->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
                     retcd = movie_passthru_streams_video(movie, stream_in);
                 } else if (stream_in->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
