@@ -409,7 +409,7 @@ static void webu_html_script_send_action(struct ctx_webui *webui)
         "      }\n\n"
 
         "      var formData = new FormData();\n"
-        "      var camid = pData['cameras'][gIndexCam]['id'];\n\n"
+        "      var camid = pData['cameras'][gIndxCam]['id'];\n\n"
         "      formData.append('command', actval);\n"
         "      formData.append('camid', camid);\n\n"
         "      var request = new XMLHttpRequest();\n"
@@ -427,7 +427,7 @@ static void webu_html_script_send_reload(struct ctx_webui *webui)
         "      var formData = new FormData();\n"
         "      var request = new XMLHttpRequest();\n"
         "      var xmlhttp = new XMLHttpRequest();\n"
-        "      var camid = pData['cameras'][gIndexCam]['id'];\n"
+        "      var camid = pData['cameras'][gIndxCam]['id'];\n"
         "      var ans;\n\n"
 
         "      if (actval == 'camera_delete') {\n"
@@ -440,7 +440,7 @@ static void webu_html_script_send_reload(struct ctx_webui *webui)
         "      xmlhttp.onreadystatechange = function() {\n"
         "        if (this.readyState == 4 && this.status == 200) {\n"
         "          pData = JSON.parse(this.responseText);\n"
-        "          gIndexCam = 0;\n"
+        "          gIndxCam = 0;\n"
         "          assign_config_nav();\n"
         "          assign_vals(0);\n"
         "          assign_cams();\n"
@@ -480,7 +480,7 @@ static void webu_html_script_dropchange_cam(struct ctx_webui *webui)
 
         "      for (indx = 0; indx <= pData['cameras']['count']; indx++) {\n"
         "        if (pData['cameras'][indx]['id'] == camobj.value) {\n"
-        "          gIndexCam = indx;\n"
+        "          gIndxCam = indx;\n"
         "        }\n"
         "      }\n\n"
 
@@ -801,10 +801,11 @@ static void webu_html_script_initform(struct ctx_webui *webui)
         "      xmlhttp.onreadystatechange = function() {\n"
         "        if (this.readyState == 4 && this.status == 200) {\n"
         "          pData = JSON.parse(this.responseText);\n"
-        "          gIndexCam = 0;\n"
-        "          gIndxCurr = 1;\n"
+        "          gIndxCam  = 0;\n"
+        "          gIndxCurr = 0;\n"
         "          gIndxPrev = -1;\n"
-        "          gIndexScan = -1;\n\n"
+        "          gIndxQtr  = 0;\n"
+        "          gIndxScan = -1;\n\n"
 
         "          assign_config();\n"
         "          assign_version();\n"
@@ -847,9 +848,9 @@ static void webu_html_script_display_config(struct ctx_webui *webui)
         "      } else {\n"
         "        document.getElementById('divnav_config').style.display = 'block';\n"
         "      }\n"
-        "      if (gIndexCam == -1) {\n"
-        "        gIndexCam = 0; \n"
-        "        gIndexScan = -1; \n"
+        "      if (gIndxCam == -1) {\n"
+        "        gIndxCam = 0; \n"
+        "        gIndxScan = -1; \n"
         "      }\n"
         "      cams_timer.stop();\n\n"
         "    }\n\n";
@@ -867,9 +868,9 @@ static void webu_html_script_display_actions(struct ctx_webui *webui)
         "      } else {\n"
         "        document.getElementById('divnav_actions').style.display = 'block';\n"
         "      }\n"
-        "      if (gIndexCam == -1) {\n"
-        "        gIndexCam = 0; \n"
-        "        gIndexScan = -1; \n"
+        "      if (gIndxCam == -1) {\n"
+        "        gIndxCam = 0; \n"
+        "        gIndxScan = -1; \n"
         "      }\n"
         "    }\n\n";
 }
@@ -928,7 +929,7 @@ static void webu_html_script_image_pantilt(struct ctx_webui *webui)
 {
     webui->resp_page +=
         "    function image_pantilt() {\n\n"
-        "      document.getElementById('pic'+ gIndexCam).addEventListener('click',function(event){\n"
+        "      document.getElementById('pic'+ gIndxCam).addEventListener('click',function(event){\n"
         "        bounds=this.getBoundingClientRect();\n"
         "        var x = Math.floor(event.pageX - bounds.left - window.scrollX);\n"
         "        var y = Math.floor(event.pageY - bounds.top - window.scrollY);\n"
@@ -958,10 +959,10 @@ static void webu_html_script_camera_click(struct ctx_webui *webui)
         "      var html_preview = \"\";\n"
         "      var camid;\n\n"
         "      config_hideall();\n\n"
-        "      gIndexCam = index_cam;\n\n"
-        "      gIndexScan = -1; \n\n"
+        "      gIndxCam = index_cam;\n\n"
+        "      gIndxScan = -1; \n\n"
 
-        "      if (gIndexCam > 0) {\n"
+        "      if (gIndxCam > 0) {\n"
         "        camid = pData['cameras'][index_cam].id;\n\n"
 
         "        if ((pData['configuration']['cam'+camid].stream_preview_ptz.value == true)) {\n"
@@ -969,13 +970,13 @@ static void webu_html_script_camera_click(struct ctx_webui *webui)
         "        }\n\n"
 
         "        if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {\n"
-        "          html_preview += \"<a><img id='pic\" + gIndexCam + \"' src=\";\n"
-        "          html_preview += pData['cameras'][gIndexCam]['url'];\n"
+        "          html_preview += \"<a><img id='pic\" + gIndxCam + \"' src=\";\n"
+        "          html_preview += pData['cameras'][gIndxCam]['url'];\n"
         "          html_preview += \"static/stream/t\" + new Date().getTime();\n"
         "          html_preview += \" border=0 width=95%></a>\\n\";\n"
         "        } else { \n"
-        "          html_preview += \"<a><img id='pic\" + gIndexCam + \"' src=\";\n"
-        "          html_preview += pData['cameras'][gIndexCam]['url'];\n"
+        "          html_preview += \"<a><img id='pic\" + gIndxCam + \"' src=\";\n"
+        "          html_preview += pData['cameras'][gIndxCam]['url'];\n"
         "          html_preview += \"mjpg/stream\" ;\n"
         "          html_preview += \" border=0 width=95%></a>\\n\";\n"
         "        }\n"
@@ -984,7 +985,7 @@ static void webu_html_script_camera_click(struct ctx_webui *webui)
         "        document.getElementById('div_cam').innerHTML = html_preview;\n\n"
         "        image_pantilt();\n\n"
 
-        "      } else if (gIndexCam == 0) {\n"
+        "      } else if (gIndxCam == 0) {\n"
         "        var camcnt = pData['cameras']['count'];\n"
         "        html_preview += \"</table>\";\n"
         "        for (var indx = 1; indx <= camcnt; indx++) {\n"
@@ -1026,8 +1027,8 @@ static void webu_html_script_camera_scan(struct ctx_webui *webui)
 {
     webui->resp_page +=
         "    function camera_scan() {\n\n"
-        "      gIndexCam = -1; \n"
-        "      gIndexScan = 0; \n\n"
+        "      gIndxCam = -1; \n"
+        "      gIndxScan = 0; \n\n"
         "      cams_scan = setInterval(timer_scan, 5);\n"
         "      cams_timer.stop();\n\n"
         "    }\n\n";
@@ -1060,39 +1061,61 @@ static void webu_html_script_timer_function(struct ctx_webui *webui)
 /* Create the pictimer_function javascript function */
 static void webu_html_script_timer_pic(struct ctx_webui *webui)
 {
+
+    webui->resp_page +=
+        "    function img_onload(indxcam, camcnt, pic_url) {\n"
+        "      document.getElementById('pic'+indxcam).src = pic_url;\n"
+        "      gIndxQtr++;\n"
+        "      if ((gIndxQtr == 4) || (indxcam >= camcnt)) {\n"
+        "        gIndxCurr++;\n"
+        "        if (gIndxCurr > (camcnt/4)) {\n"
+        "          gIndxCurr = 0;\n"
+        "        }\n"
+        "        gIndxQtr = 0;\n"
+        "      }\n"
+        "    }\n\n";
+
     webui->resp_page +=
         "    var cams_timer = new Timer(function() {\n"
-        "      var picurl = \"\";\n"
-        "      var img = new Image();\n\n"
-        "      var camid;\n\n"
-        "      if (gIndexCam > 0) {\n"
-        "        camid = pData['cameras'][gIndexCam]['id'];\n\n"
+        "      if (gIndxCam > 0) {\n"
+        "        var pic_url = \"\";\n"
+        "        var img = new Image();\n\n"
+        "        var camid;\n\n"
+        "        camid = pData['cameras'][gIndxCam]['id'];\n\n"
         "        if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {\n"
-        "          picurl = pData['cameras'][gIndexCam]['url'] + \"static/stream/t\" + new Date().getTime();\n"
-        "          img.src = picurl;\n"
-        "          document.getElementById('pic'+gIndexCam).src = picurl;\n"
+        "          pic_url = pData['cameras'][gIndxCam]['url'] + \"static/stream/t\" + new Date().getTime();\n"
+        "          img.src = pic_url;\n"
+        "          document.getElementById('pic'+gIndxCam).src = pic_url;\n"
         "         }\n "
-        "      } else if (gIndexCam == 0) {\n"
-        "         var camcnt = pData['cameras']['count'];\n"
-        "         //Set the src for the periodic updates one camera at a time.\n"
-        "         if (gIndxCurr != gIndxPrev) {\n"
+        "      } else if (gIndxCam == 0) {\n"
+        "        if (gIndxCurr != gIndxPrev) {\n"
+        "          var camcnt = pData['cameras']['count'];\n"
+        "           var indx\n"
+        "           var cam    = new Array(4);\n"
+        "           var pic_url = new Array(4);\n"
+        "           var img   = new Array(4);\n"
+        "           for (indx = 0; indx <= 3; indx++) {\n"
+        "             cam[indx] = 1;\n"
+        "             pic_url[indx] = '';\n"
+        "             img[indx] = new Image();\n"
+        "           }\n"
         "           gIndxPrev = gIndxCurr;\n"
-        "           camid = pData['cameras'][gIndxCurr]['id'];\n"
-        "           if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {\n"
-        "             picurl = pData['cameras'][gIndxCurr]['url'] + \"static/stream/t\" + new Date().getTime();\n"
-        "             img.onload = function () {\n"
-        "               document.getElementById('pic'+gIndxCurr).src = picurl;\n"
-        "               gIndxCurr++;\n"
-        "               if (gIndxCurr > camcnt) {\n"
-        "                 gIndxCurr = 1;\n"
+        "           for (indx = 0; indx <= 3; indx++) {\n"
+        "             cam[indx] = (gIndxCurr * 4) + indx + 1;\n"
+        "             if (cam[indx] <= camcnt) {\n"
+        "               camid = pData['cameras'][cam[indx]]['id'];\n"
+        "               if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {\n"
+        "                 pic_url[indx] = pData['cameras'][cam[indx]]['url'] + \"static/stream/t\" + new Date().getTime();\n"
+        "                 img[indx].onload = img_onload(cam[indx], camcnt, pic_url[indx]);\n"
+        "                 img[indx].src = pic_url[indx];\n"
+        "               } else {\n"
+        "                 gIndxQtr++;\n"
         "               }\n"
         "             }\n"
-        "             img.src = picurl;\n"
         "           }\n"
         "         }\n"
         "       }\n"
-        "    }, 50);\n\n";
-
+        "    }, 1000);\n\n";
 
 }
 
@@ -1105,18 +1128,18 @@ static void webu_html_script_timer_scan(struct ctx_webui *webui)
         "      var camid;\n"
         "      var camcnt = pData['cameras']['count'];\n\n"
 
-        "      if(gIndexScan == -1) {\n"
+        "      if(gIndxScan == -1) {\n"
         "        clearInterval(cams_scan);\n"
         "        return;\n"
         "      }\n\n"
 
-        "      if(gIndexScan == camcnt) {\n"
-        "        gIndexScan = 1;\n"
+        "      if(gIndxScan == camcnt) {\n"
+        "        gIndxScan = 1;\n"
         "      } else { \n"
-        "        gIndexScan++;\n"
+        "        gIndxScan++;\n"
         "      }\n\n"
 
-        "      camid = pData['cameras'][gIndexScan]['id'];\n"
+        "      camid = pData['cameras'][gIndxScan]['id'];\n"
         "      clearInterval(cams_scan);\n"
 
         "      cams_scan = setInterval(timer_scan,\n"
@@ -1124,9 +1147,9 @@ static void webu_html_script_timer_scan(struct ctx_webui *webui)
         "      );\n"
 
         "      html_preview += \"<a><img id='pic0' src=\"\n"
-        "      html_preview += pData['cameras'][gIndexScan]['url'];\n"
+        "      html_preview += pData['cameras'][gIndxScan]['url'];\n"
         "      html_preview += \"mjpg/stream\" ;\n"
-        "      html_preview += \" onclick='camera_click(\" + gIndexScan + \")' \";\n"
+        "      html_preview += \" onclick='camera_click(\" + gIndxScan + \")' \";\n"
         "      html_preview += \" border=0 width=\";\n"
         "      html_preview += pData['configuration']['cam'+camid].stream_scan_scale.value;\n"
         "      html_preview += \"%></a>\\n\";\n"
@@ -1142,7 +1165,7 @@ static void webu_html_script(struct ctx_webui *webui)
 {
     webui->resp_page += "  <script>\n"
         "    var pData;\n"
-        "    var gIndexScan, gIndexCam, gIndxCurr, gIndxPrev;;\n"
+        "    var gIndxScan, gIndxCam, gIndxCurr, gIndxPrev, gIndxQtr;\n"
         "    var cams_scan = setInterval(timer_scan, 5000);\n\n";
 
     webu_html_script_nav(webui);
