@@ -1393,6 +1393,11 @@ static void netcam_set_options(struct ctx_netcam *netcam)
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("%s: Setting input_format mjpeg"),netcam->cameratype);
         netcam->format_context->iformat = av_find_input_format("mjpeg");
+        util_parms_add_default(netcam->params,"reconnect_on_network_error","1");
+        util_parms_add_default(netcam->params,"reconnect_at_eof","1");
+        util_parms_add_default(netcam->params,"reconnect","1");
+        util_parms_add_default(netcam->params,"multiple_requests","1");
+        util_parms_add_default(netcam->params,"reconnect_streamed","1");
 
     } else if (mystreq(netcam->service, "v4l2")) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO

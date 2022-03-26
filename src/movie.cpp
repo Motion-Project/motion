@@ -1422,8 +1422,9 @@ void movie_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list 
         if (end > buf && end[-1] == '\n') {
             *--end = 0;
         }
-
-        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s", buf);
+        if (strstr(buf, "Will reconnect at") == NULL) {
+            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s", buf);
+        }
     }
 
 }
