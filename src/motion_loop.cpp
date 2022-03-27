@@ -1026,7 +1026,6 @@ static int mlp_capture(struct ctx_cam *cam)
     const char *tmpin;
     char tmpout[80];
     int vid_return_code = 0;        /* Return code used when calling mlp_cam_next */
-    struct timespec ts1;
 
     if (cam->video_dev >= 0) {
         vid_return_code = mlp_cam_next(cam, cam->current_image);
@@ -1036,7 +1035,7 @@ static int mlp_capture(struct ctx_cam *cam)
 
     if (vid_return_code == 0) {
         cam->lost_connection = 0;
-        cam->connectionlosttime = 0;
+        cam->connectionlosttime.tv_sec = 0;
 
         if (cam->missing_frame_counter >= (cam->conf->camera_tmo * cam->conf->framerate)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
@@ -1062,8 +1061,8 @@ static int mlp_capture(struct ctx_cam *cam)
             return 1;
         }
 
-        if (cam->connectionlosttime == 0) {
-            cam->connectionlosttime = cam->frame_curr_ts.tv_sec;
+        if (cam->connectionlosttime.tv_sec == 0) {
+            clock_gettime(CLOCK_REALTIME, &cam->connectionlosttime);
         }
 
         ++cam->missing_frame_counter;
@@ -1080,10 +1079,9 @@ static int mlp_capture(struct ctx_cam *cam)
                 tmpin = "UNABLE TO OPEN VIDEO DEVICE\\nSINCE %Y-%m-%d %T";
             }
 
-            ts1.tv_sec=cam->connectionlosttime;
-            ts1.tv_nsec = 0;
             memset(cam->current_image->image_norm, 0x80, cam->imgs.size_norm);
-            mystrftime(cam, tmpout, sizeof(tmpout), tmpin, &ts1, NULL, 0);
+            mystrftime(cam, tmpout, sizeof(tmpout)
+                , tmpin, &cam->connectionlosttime, NULL, 0);
             draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
                       10, 20 * cam->text_scale, tmpout, cam->text_scale);
 
@@ -1091,7 +1089,7 @@ static int mlp_capture(struct ctx_cam *cam)
             if (cam->missing_frame_counter == (cam->conf->camera_tmo * cam->conf->framerate)) {
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                     ,_("Video signal lost - Adding grey image"));
-                event(cam, EVENT_CAMERA_LOST, NULL, NULL, NULL, &ts1);
+                event(cam, EVENT_CAMERA_LOST, NULL, NULL, NULL, &cam->connectionlosttime);
             }
 
             if ((cam->video_dev > 0) &&

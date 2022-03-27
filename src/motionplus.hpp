@@ -345,7 +345,7 @@ struct ctx_cam {
 
     time_t                  lasttime;
     time_t                  movie_start_time;
-    time_t                  connectionlosttime;               /* timestamp from connection lost */
+    struct timespec         connectionlosttime;               /* timestamp from connection lost */
     unsigned int            lastrate;
     unsigned int            startup_frames;
     unsigned int            frame_skip;
