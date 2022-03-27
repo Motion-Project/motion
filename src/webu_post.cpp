@@ -383,7 +383,7 @@ void webu_post_action_stop(struct ctx_webui *webui)
                 , webui->motapp->cam_list[indx]->camera_id);
             webui->motapp->cam_list[indx]->restart_cam = false;
             webui->motapp->cam_list[indx]->event_stop = true;
-            webui->motapp->cam_list[indx]->event_user = true;
+            webui->motapp->cam_list[indx]->event_user = false;
             webui->motapp->cam_list[indx]->finish_cam = true;
             indx++;
         }
@@ -393,7 +393,7 @@ void webu_post_action_stop(struct ctx_webui *webui)
             , webui->motapp->cam_list[webui->threadnbr]->camera_id);
         webui->motapp->cam_list[webui->threadnbr]->restart_cam = false;
         webui->motapp->cam_list[webui->threadnbr]->event_stop = true;
-        webui->motapp->cam_list[webui->threadnbr]->event_user = true;
+        webui->motapp->cam_list[webui->threadnbr]->event_user = false;
         webui->motapp->cam_list[webui->threadnbr]->finish_cam = true;
     }
 
