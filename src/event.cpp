@@ -717,9 +717,11 @@ static void event_movie_end(struct ctx_cam *cam, motion_event evnt
                 }
             } else {
                 event(cam, EVENT_FILECLOSE, NULL, cam->newfilename, (void *)FTYPE_MPEG, ts1);
+                dbse_motpls_addrec(cam, cam->newfilename, ts1);
             }
         } else {
             event(cam, EVENT_FILECLOSE, NULL, cam->newfilename, (void *)FTYPE_MPEG, ts1);
+            dbse_motpls_addrec(cam, cam->newfilename, ts1);
         }
     }
 
@@ -739,9 +741,11 @@ static void event_movie_end(struct ctx_cam *cam, motion_event evnt
                 }
             } else {
                 event(cam, EVENT_FILECLOSE, NULL, cam->motionfilename, (void *)FTYPE_MPEG_MOTION, ts1);
+                dbse_motpls_addrec(cam, cam->motionfilename, ts1);
             }
         } else {
             event(cam, EVENT_FILECLOSE, NULL, cam->motionfilename, (void *)FTYPE_MPEG_MOTION, ts1);
+            dbse_motpls_addrec(cam, cam->motionfilename, ts1);
         }
     }
 

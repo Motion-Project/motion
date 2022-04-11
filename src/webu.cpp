@@ -30,6 +30,7 @@
 #include "webu_stream.hpp"
 #include "webu_json.hpp"
 #include "webu_post.hpp"
+#include "webu_file.hpp"
 #include "video_v4l2.hpp"
 
 /* Context to pass the parms to functions to start mhd */
@@ -55,6 +56,7 @@ static void webu_context_init(struct ctx_motapp *motapp, struct ctx_webui *webui
     webui->uri_camid     = "";
     webui->uri_cmd1      = "";
     webui->uri_cmd2      = "";
+    webui->uri_cmd3      = "";
     webui->clientip      = "";
     webui->lang          = "";                          /* Two digit lang code */
 
@@ -70,6 +72,7 @@ static void webu_context_init(struct ctx_motapp *motapp, struct ctx_webui *webui
     webui->stream_fps    = 1;                           /* Stream rate */
     webui->resp_page     = "";                          /* The response being constructed */
     webui->post_info     = NULL;
+    webui->req_file      = NULL;
     webui->post_sz       = 0;
     webui->motapp        = motapp;                      /* The motion application context */
     webui->cam           = NULL;                        /* The context pointer for a single camera */
@@ -189,9 +192,10 @@ static void webu_parms_edit(struct ctx_webui *webui)
     }
 
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
-        , "camid: >%s< thread: >%d< cmd1: >%s< cmd2: >%s<"
+        , "camid: >%s< thread: >%d< cmd1: >%s< cmd2: >%s< cmd3: >%s<"
         , webui->uri_camid.c_str(), webui->threadnbr
-        , webui->uri_cmd1.c_str(), webui->uri_cmd2.c_str());
+        , webui->uri_cmd1.c_str(), webui->uri_cmd2.c_str()
+        , webui->uri_cmd3.c_str());
 
 
 }
@@ -199,15 +203,14 @@ static void webu_parms_edit(struct ctx_webui *webui)
 /* Extract the camid and cmds from the url */
 static int webu_parseurl(struct ctx_webui *webui)
 {
-    int retcd;
     char *tmpurl;
     size_t  pos_slash1, pos_slash2;
 
-    /* Example:  /camid/cmd1/cmd2   */
-    retcd = 0;
+    /* Example:  /camid/cmd1/cmd2/cmd3   */
     webui->uri_camid = "";
     webui->uri_cmd1 = "";
     webui->uri_cmd2 = "";
+    webui->uri_cmd3 = "";
 
     if (webui->url.length() == 0) {
         return -1;
@@ -231,6 +234,11 @@ static int webu_parseurl(struct ctx_webui *webui)
 
     if (webui->url.length() == 1) {
         return 0;
+    }
+
+    /* Remove any trailing slash */
+    if (webui->url.substr(webui->url.length()-1,1) == "/") {
+        webui->url = webui->url.substr(0, webui->url.length()-1);
     }
 
     pos_slash1 = webui->url.find("/", 1);
@@ -259,15 +267,26 @@ static int webu_parseurl(struct ctx_webui *webui)
         return 0;
     }
 
-    pos_slash2 = webui->url.find("/", pos_slash1);
-    if (pos_slash2 != std::string::npos) {
-        webui->uri_cmd2 = webui->url.substr(pos_slash1, pos_slash2 - pos_slash1);
-    } else {
+    if (webui->uri_cmd1 == "movies") {
+        /* Whole remaining url is the movie name and possibly subdir */
         webui->uri_cmd2 = webui->url.substr(pos_slash1);
         return 0;
-    }
+    } else {
+        pos_slash2 = webui->url.find("/", pos_slash1);
+        if (pos_slash2 != std::string::npos) {
+            webui->uri_cmd2 = webui->url.substr(pos_slash1, pos_slash2 - pos_slash1);
+        } else {
+            webui->uri_cmd1 = webui->url.substr(pos_slash1);
+            return 0;
+        }
 
-    return retcd;
+        pos_slash1 = ++pos_slash2;
+        if (pos_slash1 >= webui->url.length()) {
+            return 0;
+        }
+        webui->uri_cmd3 = webui->url.substr(pos_slash1);
+    }
+    return 0;
 
 }
 
@@ -823,11 +842,29 @@ static mhdrslt webu_answer_get(struct ctx_webui *webui)
             retcd = webu_mhd_send(webui);
         }
 
-    } else if ((webui->uri_camid == "config.json") ||
-               (webui->uri_cmd1 == "config.json")) {
+    } else if (webui->uri_cmd1 == "movies") {
+
+        retcd = webu_file_main(webui);
+        if (retcd == MHD_NO) {
+            webu_html_badreq(webui);
+            retcd = webu_mhd_send(webui);
+        }
+
+    } else if (webui->uri_cmd1 == "config.json") {
 
         pthread_mutex_lock(&webui->motapp->mutex_post);
             webu_json_config(webui);
+        pthread_mutex_unlock(&webui->motapp->mutex_post);
+
+        retcd = webu_mhd_send(webui);
+        if (retcd == MHD_NO) {
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
+        }
+
+    } else if (webui->uri_cmd1 == "movies.json") {
+
+        pthread_mutex_lock(&webui->motapp->mutex_post);
+            webu_json_movies(webui);
         pthread_mutex_unlock(&webui->motapp->mutex_post);
 
         retcd = webu_mhd_send(webui);
@@ -1336,6 +1373,7 @@ static void webu_init_actions(struct ctx_motapp *motapp)
     util_parms_add_default(motapp->webcontrol_actions,"camera_delete",parm_vl);
     util_parms_add_default(motapp->webcontrol_actions,"config",parm_vl);
     util_parms_add_default(motapp->webcontrol_actions,"ptz",parm_vl);
+    util_parms_add_default(motapp->webcontrol_actions,"movies","on");
 
 }
 

@@ -415,25 +415,41 @@ AS_IF([test "${PGSQL}" = "no"], [
 )
 
 ##############################################################################
-###  Check for SQLITE3 - Optional
+###  Check for SQLITE3
 ##############################################################################
-AC_ARG_WITH(sqlite3,
-  AS_HELP_STRING([--without-sqlite3],[Disable sqlite3 support.]),
-  [SQLITE3="$withval"],
+AC_ARG_WITH([sqlite3],
+  AS_HELP_STRING([--with-sqlite3[=DIR]],[Build with sqlite3 support]),
+  [SQLITE3=$withval],
   [SQLITE3="yes"]
 )
+
 AS_IF([test "${SQLITE3}" = "no"], [
-    AC_MSG_CHECKING(for sqlite3)
-    AC_MSG_RESULT(skipping)
+    AC_MSG_CHECKING(for SQLite3)
+    AC_MSG_ERROR([Package sqlite3 is required.])
   ],[
-    AC_CHECK_HEADERS(sqlite3.h, [
+    AC_MSG_CHECKING(SQLite3 pkg-config path)
+    TEMP_PATH=$PKG_CONFIG_PATH
+    AS_IF([test "${SQLITE3}" != "yes"], [
+        PKG_CONFIG_PATH=${SQLITE3}/lib/pkgconfig:$PKG_CONFIG_PATH
+        SQLITE3="yes"
+      ]
+    )
+    export PKG_CONFIG_PATH
+    AC_MSG_RESULT($PKG_CONFIG_PATH done)
+
+    AC_MSG_CHECKING(for SQLite3)
+    AS_IF([pkg-config sqlite3], [
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags sqlite3`
         TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs sqlite3`
         AC_DEFINE([HAVE_SQLITE3], [1], [Define to 1 if you have SQLITE3 support])
+        AC_MSG_RESULT(yes)
       ],[
-        SQLITE3="no"
+        AC_MSG_RESULT(no)
+        AC_MSG_ERROR([Required SQLite3 packages were not found.  Please check motionplus_guide.html and install necessary dependencies])
       ]
     )
+    PKG_CONFIG_PATH=$TEMP_PATH
+    export PKG_CONFIG_PATH
   ]
 )
 

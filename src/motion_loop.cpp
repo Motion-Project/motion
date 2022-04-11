@@ -666,9 +666,9 @@ static void mlp_init_ref(struct ctx_cam *cam)
 /** mlp_init */
 static int mlp_init(struct ctx_cam *cam)
 {
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("initialize loop"));
-
     mythreadname_set("ml",cam->threadnr,cam->conf->camera_name.c_str());
+
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize loop"));
 
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cam->threadnr));
 
@@ -704,6 +704,8 @@ static int mlp_init(struct ctx_cam *cam)
 
     dbse_init(cam);
 
+    dbse_motpls_init(cam);
+
     pic_init_mask(cam);
 
     pic_init_privacy(cam);
@@ -729,15 +731,15 @@ void mlp_cleanup(struct ctx_cam *cam)
 
     event(cam, EVENT_TLAPSE_END, NULL, NULL, NULL, NULL);
 
-    /*if (cam->event_nr == cam->prev_event) {
+    if (cam->event_nr == cam->prev_event) {
         mlp_ring_process(cam);
         if (cam->imgs.image_preview.diffs) {
             event(cam, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cam->current_image->imgts);
             cam->imgs.image_preview.diffs = 0;
         }
-    */
+
         event(cam, EVENT_END, NULL, NULL, NULL, &cam->current_image->imgts);
-    /* } */
+    }
 
     webu_stream_deinit(cam);
 
@@ -857,6 +859,8 @@ void mlp_cleanup(struct ctx_cam *cam)
     }
 
     dbse_deinit(cam);
+
+    dbse_motpls_deinit(cam);
 
 }
 

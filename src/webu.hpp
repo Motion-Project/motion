@@ -40,6 +40,7 @@
         WEBUI_CNCT_MOTION      = 3,
         WEBUI_CNCT_SOURCE      = 4,
         WEBUI_CNCT_SECONDARY   = 5,
+        WEBUI_CNCT_FILE        = 6,
         WEBUI_CNCT_UNKNOWN     = 99
     };
 
@@ -57,9 +58,10 @@
 
     struct ctx_webui {
         std::string                 url;            /* The URL sent from the client */
-        std::string                 uri_camid;      /* Parsed camera number from the url eg /camid/cmd1/cmd2 */
-        std::string                 uri_cmd1;       /* Parsed command1 from the url eg /camid/cmd1/cmd2 */
-        std::string                 uri_cmd2;       /* Parsed command2 from the url eg /camid/cmd1/cmd2 */
+        std::string                 uri_camid;      /* Parsed camera number from the url eg /camid/cmd1/cmd2/cmd3 */
+        std::string                 uri_cmd1;       /* Parsed command1 from the url eg /camid/cmd1/cmd2/cmd3 */
+        std::string                 uri_cmd2;       /* Parsed command2 from the url eg /camid/cmd1/cmd2/cmd3 */
+        std::string                 uri_cmd3;       /* Parsed command3 from the url eg /camid/cmd1/cmd2/cmd3 */
 
         std::string                 clientip;       /* IP of the connecting client */
         std::string                 hostfull;       /* Full http name for host with port number */
@@ -86,6 +88,8 @@
         std::string                 post_cmd;       /* The command sent with the post */
         struct ctx_key              *post_info;     /* Structure of the entries provided from the post data */
         struct MHD_PostProcessor    *post_processor; /* Processor for handling Post method connections */
+
+        FILE                        *req_file;      /* requested file*/
 
         enum WEBUI_METHOD           cnct_method;    /* Connection method.  Get or Post */
 

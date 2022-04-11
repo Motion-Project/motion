@@ -298,7 +298,8 @@ struct ctx_cam {
     struct ctx_image_data   *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
     struct ctx_algsec       *algsec;
     struct ctx_rotate       *rotate_data;       /* rotation data is thread-specific */
-    struct ctx_dbse         *dbse;
+    struct ctx_dbse         *dbse;      /*Multi use/type user specified database */
+    struct ctx_dbsemp       *dbsemp;    /*Dedicated sqlite3 Motionplus database */
     struct ctx_movie        *movie_norm;
     struct ctx_movie        *movie_motion;
     struct ctx_movie        *movie_timelapse;

@@ -655,6 +655,7 @@ static void motion_cam_add(struct ctx_motapp *motapp)
     motapp->cam_list[indx_cam]->conf->camera_id = indx;
     motapp->cam_list[indx_cam]->dbse = (struct ctx_dbse *)mymalloc(sizeof(struct ctx_dbse));
     motapp->cam_list[indx_cam]->conf->webcontrol_port = 0;
+    dbse_motpls_init(motapp->cam_list[indx_cam]);
 
     motapp->cam_add = false;
 
@@ -685,6 +686,8 @@ static void motion_cam_delete(struct ctx_motapp *motapp)
         free(motapp->cam_list[motapp->cam_delete]->dbse);
     }
     motapp->cam_list[motapp->cam_delete]->dbse = NULL;
+
+    dbse_motpls_deinit(motapp->cam_list[motapp->cam_delete]);
 
     /* Delete the config context */
     delete motapp->cam_list[motapp->cam_delete]->conf;

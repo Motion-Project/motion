@@ -17,10 +17,11 @@
  *    Copyright 2020-2022 MotionMrDave@gmail.com
 */
 
-#ifndef _INCLUDE_WEBU_JSON_HPP_
-#define _INCLUDE_WEBU_JSON_HPP_
+#ifndef _INCLUDE_WEBU_FILE_HPP_
+#define _INCLUDE_WEBU_FILE_HPP_
 
-    void webu_json_config(struct ctx_webui *webui);
-    void webu_json_movies(struct ctx_webui *webui);
+    struct ctx_webui;
 
-#endif /* _INCLUDE_WEBU_JSON_HPP_ */
+    mhdrslt webu_file_main(struct ctx_webui *webui);
+
+#endif /* _INCLUDE_WEBU_FILE_HPP_ */
