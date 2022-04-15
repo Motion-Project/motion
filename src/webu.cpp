@@ -204,21 +204,13 @@ static void webu_parms_edit(struct ctx_webui *webui)
 static int webu_parseurl(struct ctx_webui *webui)
 {
     char *tmpurl;
-    size_t  pos_slash1, pos_slash2;
+    size_t  pos_slash1, pos_slash2, baselen;
 
     /* Example:  /camid/cmd1/cmd2/cmd3   */
     webui->uri_camid = "";
     webui->uri_cmd1 = "";
     webui->uri_cmd2 = "";
     webui->uri_cmd3 = "";
-
-    if (webui->url.length() == 0) {
-        return -1;
-    }
-
-    if (webui->url ==  "/favicon.ico") {
-        return -1;
-    }
 
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Sent url: %s"),webui->url.c_str());
 
@@ -232,20 +224,39 @@ static int webu_parseurl(struct ctx_webui *webui)
 
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),webui->url.c_str());
 
-    if (webui->url.length() == 1) {
+    baselen = webui->motapp->cam_list[0]->conf->webcontrol_base_path.length();
+
+    if (webui->url.length() < baselen) {
+        return -1;
+    }
+
+    if (webui->url.substr(baselen) ==  "/favicon.ico") {
+        return -1;
+    }
+
+    if (webui->url.substr(0, baselen) !=
+        webui->motapp->cam_list[0]->conf->webcontrol_base_path) {
+        return -1;
+    }
+
+    if (webui->url == "/") {
         return 0;
     }
 
-    /* Remove any trailing slash */
+    /* Remove any trailing slash to keep parms clean */
     if (webui->url.substr(webui->url.length()-1,1) == "/") {
         webui->url = webui->url.substr(0, webui->url.length()-1);
     }
 
-    pos_slash1 = webui->url.find("/", 1);
+    if (webui->url.length() == baselen) {
+        return 0;
+    }
+
+    pos_slash1 = webui->url.find("/", baselen+1);
     if (pos_slash1 != std::string::npos) {
-        webui->uri_camid = webui->url.substr(1, pos_slash1 - 1);
+        webui->uri_camid = webui->url.substr(baselen+1, pos_slash1-baselen- 1);
     } else {
-        webui->uri_camid = webui->url.substr(1);
+        webui->uri_camid = webui->url.substr(baselen+1);
         return 0;
     }
 
@@ -276,7 +287,7 @@ static int webu_parseurl(struct ctx_webui *webui)
         if (pos_slash2 != std::string::npos) {
             webui->uri_cmd2 = webui->url.substr(pos_slash1, pos_slash2 - pos_slash1);
         } else {
-            webui->uri_cmd1 = webui->url.substr(pos_slash1);
+            webui->uri_cmd2 = webui->url.substr(pos_slash1);
             return 0;
         }
 
@@ -336,9 +347,12 @@ static void webu_hostname(struct ctx_webui *webui)
 
     hdr = MHD_lookup_connection_value(webui->connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_HOST);
     if (hdr == NULL) {
-        webui->hostfull = "//localhost:" + std::to_string(webui->motapp->cam_list[0]->conf->webcontrol_port);
+        webui->hostfull = "//localhost:" +
+            std::to_string(webui->motapp->cam_list[0]->conf->webcontrol_port) +
+            webui->motapp->cam_list[0]->conf->webcontrol_base_path;
     } else {
-        webui->hostfull = "//" + std::string(hdr);
+        webui->hostfull = "//" +  std::string(hdr) +
+            webui->motapp->cam_list[0]->conf->webcontrol_base_path;
     }
 
     MOTION_LOG(DBG,TYPE_ALL, NO_ERRNO, _("Full Host:  %s"), webui->hostfull.c_str());
@@ -994,6 +1008,8 @@ static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *co
     if (retcd != 0) {
         webui->uri_camid = "";
         webui->uri_cmd1 = "";
+        webui->uri_cmd2 = "";
+        webui->uri_cmd3 = "";
         webui->url = "";
     }
 

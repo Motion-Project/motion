@@ -151,6 +151,7 @@ struct ctx_parm config_parms[] = {
     {"video_pipe_motion",         PARM_TYP_STRING, PARM_CAT_12, WEBUI_LEVEL_LIMITED },
 
     {"webcontrol_port",           PARM_TYP_INT,    PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
+    {"webcontrol_base_path",      PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
     {"webcontrol_ipv6",           PARM_TYP_BOOL,   PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
     {"webcontrol_localhost",      PARM_TYP_BOOL,   PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
     {"webcontrol_parms",          PARM_TYP_LIST,   PARM_CAT_13, WEBUI_LEVEL_NEVER},
@@ -2112,6 +2113,33 @@ static void conf_edit_webcontrol_port(struct ctx_cam *cam, std::string &parm, en
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_port",_("webcontrol_port"));
 }
 
+static void conf_edit_webcontrol_base_path(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->webcontrol_base_path = "";
+    } else if (pact == PARM_ACT_SET) {
+        if (parm == "/") {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Invalid webcontrol_base_path: Use blank instead of single / "));
+            cam->conf->webcontrol_base_path = "";
+        } else if (parm.length() >= 1) {
+            if (parm.substr(0, 1) != "/") {
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                    , _("Invalid webcontrol_base_path:  Must start with a / "));
+                cam->conf->webcontrol_base_path = "/" + parm;
+            } else {
+                cam->conf->webcontrol_base_path = parm;
+            }
+        } else {
+            cam->conf->webcontrol_base_path = parm;
+        }
+    } else if (pact == PARM_ACT_GET) {
+        parm = cam->conf->webcontrol_base_path;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_base_path",_("webcontrol_base_path"));
+}
+
 static void conf_edit_webcontrol_ipv6(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
@@ -2991,6 +3019,7 @@ static void conf_edit_cat13(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
     if (parm_nm == "webcontrol_port") {                    conf_edit_webcontrol_port(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_base_path") {        conf_edit_webcontrol_base_path(cam, parm_val, pact);
     } else if (parm_nm == "webcontrol_ipv6") {             conf_edit_webcontrol_ipv6(cam, parm_val, pact);
     } else if (parm_nm == "webcontrol_localhost") {        conf_edit_webcontrol_localhost(cam, parm_val, pact);
     } else if (parm_nm == "webcontrol_parms") {            conf_edit_webcontrol_parms(cam, parm_val, pact);
