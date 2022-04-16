@@ -109,8 +109,8 @@ mhdrslt webu_file_main(struct ctx_webui *webui)
             , webui
             , &webu_file_free);
         if (response == NULL) {
-	        myfclose(webui->req_file);
-	        return MHD_NO;
+            myfclose(webui->req_file);
+            return MHD_NO;
         }
         retcd = MHD_queue_response (webui->connection, MHD_HTTP_OK, response);
         MHD_destroy_response (response);

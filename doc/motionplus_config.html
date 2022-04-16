@@ -159,31 +159,31 @@
       on the motion images and in the log to assist the setup.
       <p></p>
       <a name="basic_setup_v4l2"></a>
-      <strong>Video4linux devices</strong> must be installed per the requirements of the camera. Test the 
+      <strong>Video4linux devices</strong> must be installed per the requirements of the camera. Test the
       device using a different application such as ffplay to ensure the device is working properly.
       <p></p>
       USB cameras take a lot of bandwidth. A USB camera connected to a USB2 port or hub consumes virtually
-      all the bandwidth that the port can handle. Do not expect that multiple USB cameras can be used at the 
-      same time on the same USB2 hub due to this hardware limitation.  
+      all the bandwidth that the port can handle. Do not expect that multiple USB cameras can be used at the
+      same time on the same USB2 hub due to this hardware limitation.
       <p></p>
-      
+
       <a name="basic_setup_network"></a>
       <strong>Network cameras</strong> are set up via the
       <a href="#netcam_url" >netcam_url</a> parameter.
       MotionPlus uses the ffmpeg libraries to process network cameras.  Generally, if the network camera
-      functions using ffmpeg, it will work in MotionPlus.  Cameras sold as a package using proprietary 
-      software will not generally work with MotionPlus.  
+      functions using ffmpeg, it will work in MotionPlus.  Cameras sold as a package using proprietary
+      software will not generally work with MotionPlus.
       <p></p>
       The URL connection string to enter is specific to the camera and is
-      usually provided by the manufacturer or can be found by doing a internet search.  
+      usually provided by the manufacturer or can be found by doing a internet search.
       The connection string used by MotionPlus is the same that would be used by ffplay.
       <p></p>
 
       <a name="basic_setup_picam"></a>
-      <strong>Raspberry Pi cameras</strong> can be set up different ways.  In older distros, the 
+      <strong>Raspberry Pi cameras</strong> can be set up different ways.  In older distros, the
       MMAL camera options may be available while new releases only support use of the camera via the v4l2 modules.
       <p></p>
-      
+
       <a name="basic_setup_static"></a>
       <strong>Static files</strong> can also be processed by MotionPlus in one of two ways.  The first method
       is by using the <a href="#netcam_url" >netcam_url</a> option and using a prefix of file:\\.  With
@@ -231,51 +231,51 @@
     <h2><a name="configfiles"></a>  The Configuration Files </h2>
     <ul>
       <p></p>
-      MotionPlus can be invoked with command line option <code>-c pathname</code> to specify a specific 
+      MotionPlus can be invoked with command line option <code>-c pathname</code> to specify a specific
       configuration file.  If the -c option is not specified, MotionPlus will search for the
       configuration file called 'motionplus.conf' in the following order:
       <p></p>
       <ol>
         <li> Current directory where MotionPlus was invoked</li>
         <li> The directory called '.motionplus' in the current users home directory</li>
-        <li> The directory defined by --sysconfdir=DIR during the configure step of installation. If this was 
+        <li> The directory defined by --sysconfdir=DIR during the configure step of installation. If this was
           not defined, it will default to /etc/motion</li>
-      </ol>      
+      </ol>
       <p></p>
-		  The motionplus.conf file specifies parameters for the entire MotionPlus application.  Each camera is set up
-		  in separate files with the parameters that are unique to that camera.
-		  <p></p>
+      The motionplus.conf file specifies parameters for the entire MotionPlus application.  Each camera is set up
+      in separate files with the parameters that are unique to that camera.
+      <p></p>
       MotionPlus reads the configuration parameters in sequence and if the same
       parameter exists more than one place the last one read is used.
-		  <p></p>
-		  The specification of the camera files should be on the last rows of the 
-		  motionplus.conf file.  Specifications in the motionplus.conf file that occur 
-		  after the camera configuration line are ignored.
-	    <p></p>
-      Nearly all config options can be unique for a specific camera and placed in a camera config file.  Some 
+      <p></p>
+      The specification of the camera files should be on the last rows of the
+      motionplus.conf file.  Specifications in the motionplus.conf file that occur
+      after the camera configuration line are ignored.
+      <p></p>
+      Nearly all config options can be unique for a specific camera and placed in a camera config file.  Some
       options however must be specified in the motionplus.conf file such as: webcontrol_* , daemon, and camera.
       <p></p>
       If MotionPlus is built without specific features such as mysql, opencv, etc it will ignore the options that
       belong to those features.
       <p></p>
-      
+
       <a name="config_deprecated"></a>
       <p></p>
       <strong>Deprecated Parameters</strong>
       <p></p>
-      As MotionPlus matures, new configuration parameters and different names for the parameters 
-      will occur.  When a configuration parameter has a new name or additional functionality, MotionPlus 
-      will try to interpret the value specified for the old parameter and translate it to the new 
-      parameter.  These translations will be reported in the log as MotionPlus is started.  To 
-      eliminate these warnings, use the <code>write configuration</code> option from the webcontrol. 
+      As MotionPlus matures, new configuration parameters and different names for the parameters
+      will occur.  When a configuration parameter has a new name or additional functionality, MotionPlus
+      will try to interpret the value specified for the old parameter and translate it to the new
+      parameter.  These translations will be reported in the log as MotionPlus is started.  To
+      eliminate these warnings, use the <code>write configuration</code> option from the webcontrol.
       <p></p>
-      
+
       <a name="config_listall"></a>
       <p></p>
       <strong>Parameters in distributed configuration files</strong>
       <p></p>
       Since MotionPlus includes over 150 parameters, only a limited subset of the configuration parameters
-      are included in the sample files.  To list all options, use the webcontrol interface to write out 
+      are included in the sample files.  To list all options, use the webcontrol interface to write out
       the configuration file.
       <p></p>
 
@@ -322,9 +322,9 @@
 
     <h2><a name="Useful_Tips"></a>Useful Tips</h2>
     <ul>
-    	<p></p>
+      <p></p>
       <h3><a name="persist_v4l2"></a>Persistent v4l2 devices</h3>
-      <ul>  
+      <ul>
         <p></p>
         Since the exact device number is set by the kernel upon boot, when there is more than one video device
         it is possible that the particular cameras that were assigned to /dev/video0 and /dev/video1 may switch. In
@@ -346,8 +346,8 @@
         Once the change has been made and saved, reboot the computer and there should now be a "sticky" device called
         /dev/video-webcam0
         <p></p>
-		</ul>
-		
+    </ul>
+
       <p></p>
       <p></p>
     </ul>
@@ -865,7 +865,7 @@
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#ptz_zoom_out" >ptz_zoom_out</a></td>
-        </tr>        
+        </tr>
         <tr>
           <td align="left"><br /></td>
           <td align="left"></td>
@@ -1350,7 +1350,7 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#netcam_userpass" >netcam_proxy</a> </td>
             </tr>
-            
+
           </tbody>
         </table>
         <p></p>
@@ -1820,7 +1820,7 @@
              <tr>
                <td bgcolor="#edf4f9" >%o</a> </td>
                <td bgcolor="#edf4f9" >threshold</a> </td>
-	             <td bgcolor="#edf4f9" >%Q</a> </td>
+               <td bgcolor="#edf4f9" >%Q</a> </td>
                <td bgcolor="#edf4f9" >Number of labels from despeckle</a> </td>
                <td bgcolor="#edf4f9" >%{dbeventid}</a> </td>
                <td bgcolor="#edf4f9" >See <a href="#sql_query_start">sql_query_start</a> </a> </td>
@@ -1857,7 +1857,7 @@
           <li> Default: off</li>
         </ul>
         <p></p>
-        When MotionPlus is started, immediately go to daemon mode and release the terminal. Specify this 
+        When MotionPlus is started, immediately go to daemon mode and release the terminal. Specify this
         parameter as off when running MotionPlus as a service under systemctl.
         <p></p>
 
@@ -1871,8 +1871,8 @@
         <p></p>
         When this option is turned on, MotionPlus starts in setup mode so that the
         parameters can be set more easily.  In setup mode MotionPlus will write to the log
-        many messages about the images being processed and will also show the motion images 
-        via the web interface.  
+        many messages about the images being processed and will also show the motion images
+        via the web interface.
         <p></p>
 
         <h3><a name="pid_file"></a> pid_file </h3>
@@ -1883,7 +1883,7 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The full path and file name where the pid (process id) will be saved. 
+        The full path and file name where the pid (process id) will be saved.
         <p></p>
 
         <h3><a name="log_file"></a> log_file </h3>
@@ -1895,8 +1895,8 @@
         </ul>
         <p></p>
         The full path and filename for the log file that will be used to save
-        the messages from MotionPlus.  If this option is not defined, the stderr 
-        and syslog is used. Note that MotionPlus can generate a LOT of messages 
+        the messages from MotionPlus.  If this option is not defined, the stderr
+        and syslog is used. Note that MotionPlus can generate a LOT of messages
         and as a result, this option should be considered.
         <p></p>
 
@@ -1910,7 +1910,7 @@
         <p></p>
         This option specifies the level of verbosity of the messages sent from MotionPlus.
         At a level of 8(DBG), there are a LOT of messages.  At a level of 1(EMR) virtually no
-        messages will be output.  The following are the abbreviations used in the log that 
+        messages will be output.  The following are the abbreviations used in the log that
         correspond to the various levels:
         <p></p>
         EMR, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL.
@@ -1961,10 +1961,10 @@
         </ul>
         <p></p>
         The full path for the target directory for pictures, snapshots, movies, etc. to be saved.
-        The default is the current directory. 
+        The default is the current directory.
         <p></p>
-        The filename options for pictures, snapshots, movies, etc. are all relative 
-        to this target_dir parameter.  
+        The filename options for pictures, snapshots, movies, etc. are all relative
+        to this target_dir parameter.
         <p></p>
 
         <h3><a name="camera_name"></a> camera_name </h3>
@@ -1990,7 +1990,7 @@
         This is the user defined numeric id for the camera.  If one is not specified
         or if the user specified values include duplicates, MotionPlus will create unique
         ids.  Note that the identifier of zero is reserved for the MotionPlus application and
-        may be used when interacting via the web interface.  
+        may be used when interacting via the web interface.
         <p></p>
         <p></p>
 
@@ -2002,9 +2002,9 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The full path and file name for the camera file that specifies the parameters that 
-        are specific to the individual camera.  The camera line should be specified in the 
-        motionplus.conf file LAST.  MotionPlus will use all the lines above in the 
+        The full path and file name for the camera file that specifies the parameters that
+        are specific to the individual camera.  The camera line should be specified in the
+        motionplus.conf file LAST.  MotionPlus will use all the lines above in the
         motionplus.conf file as the defaults.  Options specified after the camera line will be ignored.
         <p></p>
 
@@ -2039,8 +2039,8 @@
           <li> Default: </li>
         </ul>
         <p></p>
-			The approximate number of seconds that must elapse before a camera is deemed to be unresponsive
-			and MotionPlus triggers a watchdog timeout and begins to try to force the camera to shut down.
+      The approximate number of seconds that must elapse before a camera is deemed to be unresponsive
+      and MotionPlus triggers a watchdog timeout and begins to try to force the camera to shut down.
         <p></p>
 
         <h3><a name="watchdog_kill"></a>watchdog_kill</h3>
@@ -2051,8 +2051,8 @@
           <li> Default: </li>
         </ul>
         <p></p>
-			The approximate number of seconds that must elapse before a camera is deemed to be unresponsive
-			and MotionPlus triggers a watchdog kill and begins to try to kill the camera processes.
+      The approximate number of seconds that must elapse before a camera is deemed to be unresponsive
+      and MotionPlus triggers a watchdog kill and begins to try to kill the camera processes.
         <p></p>
 
       </ul>
@@ -2063,12 +2063,12 @@
         <h3><a name="v4l2_device"></a>v4l2_device</h3>
         <p></p>
         <ul>
-          <li> Type: String</li>	
+          <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
           <li> Default: /dev/video0 </li>
         </ul>
         <p></p>
-        The v4l2 device to be used for capturing. 
+        The v4l2 device to be used for capturing.
         <p></p>
         <p></p>
 
@@ -2085,24 +2085,24 @@
         <p></p>
         The controls that are available for a particular device are unique to that device.  In
         order to assist the user in the setup and specification of these parameters, MotionPlus
-        will report in the log all the available controls for the device when the 
+        will report in the log all the available controls for the device when the
         <a href="#log_level" >log_level</a> is specified as 7 or higher.  In the log it will list
-        an ID number as well as a configuration name.  Either of these can be used for the 
-        v4l2_params specifications.  If the name includes embedded spaces or commas, then the name must 
-        be enclosed in quotes.  
+        an ID number as well as a configuration name.  Either of these can be used for the
+        v4l2_params specifications.  If the name includes embedded spaces or commas, then the name must
+        be enclosed in quotes.
         <p></p>
         In addition to the parameters/controls specified by the device, MotionPlus also includes the following
         parameters that can also be specified.
-   
+
         <ul>
-       
+
         <i><h4> palette </h4></i>
         <div>
-	     	<ul>
-   	   	<li> Type: Integer</li>
-      	    <li> Range / Valid values: 0 - 20</li>
-         	 <li> Default: 17</li>
-        	</ul>
+         <ul>
+          <li> Type: Integer</li>
+            <li> Range / Valid values: 0 - 20</li>
+            <li> Default: 17</li>
+          </ul>
         <p></p>
         The palette option is specified in the <a href="#v4l2_params" >v4l2_params</a> option and
         allows the user to specify the preferred palette for MotionPlus to use.  If the video device does not
@@ -2239,9 +2239,9 @@
           </tbody>
         </table>
         </div>
-        <p></p>   
+        <p></p>
         </div>
-        
+
         <i><h4> input </h4></i>
         <div>
         <ul>
@@ -2250,14 +2250,14 @@
           <li> Default: -1 </li>
         </ul>
         <p></p>
-        The input option is specified to indicate the input channel to use for the device.  For 
-        USB cameras, the input option is the default of -1.  For other devices such as capture cards, 
-        the input option is device dependent but usually starts with zero.  Using an external 
-        application such as VLC may allow for easier determination of the various inputs associated 
+        The input option is specified to indicate the input channel to use for the device.  For
+        USB cameras, the input option is the default of -1.  For other devices such as capture cards,
+        the input option is device dependent but usually starts with zero.  Using an external
+        application such as VLC may allow for easier determination of the various inputs associated
         with the device.
         <p></p>
         </div>
-			
+
         <i><h4> norm </h4></i>
         <div>
         <ul>
@@ -2283,8 +2283,8 @@
         </div>
 
         </ul>
-        
-        <p></p>        
+
+        <p></p>
         The following is a sample output from the log and examples of how to specify the parameters
         <p></p>
         <div>
@@ -2346,7 +2346,7 @@
         delimits the end of the name for the MotionPlus log.
         <p></p>
         </div>
-        
+
         <p></p>
         <p></p>
         <h3><a name="mmalcam_name"></a> mmalcam_name </h3>
@@ -2372,7 +2372,7 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The control parameters to the Pi camera.  The options that are available via the 
+        The control parameters to the Pi camera.  The options that are available via the
         raspistill / raspivid applications are the options to be specified for this option.
         <p></p>
         Some frequently used options are:
@@ -2406,8 +2406,8 @@
         </ul>
         <p></p>
         MotionPlus uses the ffmpeg libraries to process network cameras.  This option is
-        the comma separated list of the ffmpeg options for the camera.  In addition to the 
-        ffmpeg options, MotionPlus includes the following additional options.   
+        the comma separated list of the ffmpeg options for the camera.  In addition to the
+        ffmpeg options, MotionPlus includes the following additional options.
         <ul>
           <i><h4>capture_rate</h4></i>
           <div>
@@ -2431,14 +2431,14 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The network camera high resolution URL.  
+        The network camera high resolution URL.
         <p></p>
         Typically, this option is used with the <a href="#movie_passthrough">movie_passthrough</a> so minimal
         processing can occur.  The netcam_url will specify the low resolution images which will be decoded and
-        processed and the movies are saved directly from the data provided from the netcam_high_url.  
-        <p></p> 
-        Since this bypasses decoding the stream, the images will be saved without any privacy masks 
-        or MotionPlus overlays.  
+        processed and the movies are saved directly from the data provided from the netcam_high_url.
+        <p></p>
+        Since this bypasses decoding the stream, the images will be saved without any privacy masks
+        or MotionPlus overlays.
         <p></p>
         <p></p>
 
@@ -2467,7 +2467,7 @@
         <p></p>
 
       </ul>
-      
+
       <h3><a name="OptDetail_Image_Processing"></a> Image Processing</h3>
       <ul>
         <p></p>
@@ -2480,7 +2480,7 @@
         </ul>
         <p></p>
         The width in pixels of the image. The valid range is camera dependent and it must be a multiple of 8. For
-        network cameras, the image will be scaled to the width specified by this parameter.  
+        network cameras, the image will be scaled to the width specified by this parameter.
         <p></p>
         <p></p>
 
@@ -2493,7 +2493,7 @@
         </ul>
         <p></p>
         The height in pixels of the image. The valid range is camera dependent and it must be a multiple of 8. For
-        network cameras, the image will be scaled to the height specified by this parameter.  
+        network cameras, the image will be scaled to the height specified by this parameter.
         <p></p>
         <p></p>
 
@@ -2505,7 +2505,7 @@
           <li> Default: 15 </li>
         </ul>
         <p></p>
-        The number of frames to be processed per second for motion detection. 
+        The number of frames to be processed per second for motion detection.
         <p></p>
         <p></p>
 
@@ -2528,7 +2528,7 @@
         </ul>
         <p></p>
         Rotate image the given number of degrees.  Specify for the width and heigth the dimensions prior to
-        rotation. 
+        rotation.
         <p></p>
 
         <h3><a name="flip_axis"></a> flip_axis </h3>
@@ -2540,7 +2540,7 @@
         </ul>
         <p></p>
         Flip the image according to specified axis. This option may be needed when the
-        camera is pointed towards a mirror or provides a mirrored image. 
+        camera is pointed towards a mirror or provides a mirrored image.
         <p></p>
 
         <h3><a name="locate_motion_mode"></a> locate_motion_mode </h3>
@@ -2575,10 +2575,10 @@
           <li> Default: Not defined</li>
         </ul>
         User defined text overlaid on each in the lower left corner.
-        Use A-Z, a-z, 0-9, " / ( ) @ ~ # &lt; &gt; \ , . : - + _ \n and 
+        Use A-Z, a-z, 0-9, " / ( ) @ ~ # &lt; &gt; \ , . : - + _ \n and
         the <a href="#conversion_specifiers">Conversion Specifiers</a>.
         <p></p>
-        
+
 
         <h3><a name="text_right"></a> text_right </h3>
         <p></p>
@@ -2589,7 +2589,7 @@
         </ul>
         <p></p>
         User defined text overlaid on each in the lower right corner.
-        Use A-Z, a-z, 0-9, " / ( ) @ ~ # &lt; &gt; \ , . : - + _ \n and 
+        Use A-Z, a-z, 0-9, " / ( ) @ ~ # &lt; &gt; \ , . : - + _ \n and
         the <a href="#conversion_specifiers">Conversion Specifiers</a>.
         <p></p>
 
@@ -2601,7 +2601,7 @@
           <li> Default: off</li>
         </ul>
         <p></p>
-        Show the number of pixels that changed in the upper right corner of the pictures. 
+        Show the number of pixels that changed in the upper right corner of the pictures.
         <p></p>
 
         <h3><a name="text_scale"></a> text_scale </h3>
@@ -2653,9 +2653,9 @@
           <li> Default: 1500</li>
         </ul>
         <p></p>
-        Minimum number of changed pixels that triggers an event.   
+        Minimum number of changed pixels that triggers an event.
         <p></p>
-         
+
         <h3><a name="threshold_maximum"></a> threshold_maximum</h3>
         <p></p>
         <ul>
@@ -2668,7 +2668,7 @@
         the threshold maximum, no event is triggered.  A value of zero disables threshold_maximum.
         <p></p>
 
- 
+
         <h3><a name="threshold_tune"></a> threshold_tune </h3>
         <p></p>
         <ul>
@@ -2677,7 +2677,7 @@
           <li> Default: off</li>
         </ul>
         <p></p>
-        Continuously adjust the threshold for triggering an event. 
+        Continuously adjust the threshold for triggering an event.
         <p></p>
 
 
@@ -2691,7 +2691,7 @@
         <p></p>
         The maximum standard deviation of the changed pixels in the x (width) axis.
         <p></p>
-        
+
        <h3><a name="threshold_sdevy"></a>threshold_sdevy</h3>
         <p></p>
         <ul>
@@ -2702,7 +2702,7 @@
         <p></p>
         The maximum standard deviation of the changed pixels in the y (height) axis.
         <p></p>
-        
+
        <h3><a name="threshold_sdevxy"></a>threshold_sdevxy</h3>
         <p></p>
         <ul>
@@ -2744,9 +2744,9 @@
           <li> Default: </li>
         </ul>
         <p></p>
-        The interval of framerate images to process using the secondary method.  This is 
-        measured as fractions of the framerate.  e.g. A interval of 2 with a frame rate of 30 
-        means secondary processing will be at 15 fps.  But if instead the framerate is 10, the 
+        The interval of framerate images to process using the secondary method.  This is
+        measured as fractions of the framerate.  e.g. A interval of 2 with a frame rate of 30
+        means secondary processing will be at 15 fps.  But if instead the framerate is 10, the
         secondary processing will be at 5 fps.
         <p></p>
        <h3><a name="secondary_method"></a>secondary_method</h3>
@@ -2827,7 +2827,7 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        Detect motion in predefined areas (1 - 9) and when Motion is detected in the area, execute the script. This 
+        Detect motion in predefined areas (1 - 9) and when Motion is detected in the area, execute the script. This
         option is only to execute the on_area_detect script.
         <p></p>
         Areas are numbered like
@@ -2847,15 +2847,15 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The full path and filename for the masking pgm file.  If needed, the mask will be resized to 
-        match the width and height of the image.  The mask file permits certain areas of the image to 
+        The full path and filename for the masking pgm file.  If needed, the mask will be resized to
+        match the width and height of the image.  The mask file permits certain areas of the image to
         be completely or partially excluded from the motion detection process.  A image from the camera
-        is obtained and areas in the image are manually colored to black, partially black or white.  The 
-        areas in black will be ignored, the areas in white will have detection continue and the shades of 
+        is obtained and areas in the image are manually colored to black, partially black or white.  The
+        areas in black will be ignored, the areas in white will have detection continue and the shades of
         gray between define varying levels of detection.  The resulting image is then saved as a
-        pgm binary format file and specified in this parameter.  Note that the mask is applied after the 
-        <a href="#rotate">rotate</a> or <a href="#flip_axis">flip_axis</a> has been applied so 
-        the mask should be based upon an image saved using those options.  
+        pgm binary format file and specified in this parameter.  Note that the mask is applied after the
+        <a href="#rotate">rotate</a> or <a href="#flip_axis">flip_axis</a> has been applied so
+        the mask should be based upon an image saved using those options.
         <p></p>
 
 
@@ -2871,7 +2871,7 @@
         the <a href="#mask_file">mask_file</a>  described above except that instead of
         masking for motion detection, this option will remove the indicated sections from the image.
         <p></p>
-        
+
         <h3><a name="smart_mask_speed"></a> smart_mask_speed </h3>
         <p></p>
         <ul>
@@ -2881,8 +2881,8 @@
         </ul>
         <p></p>
         The smartmask is intended to be a dynamic, self-learning mask to decrease sensitivity
-        in areas with frequent motion.  The speed specified by this parameter is 
-        how quickly the mask gets adjusted. 
+        in areas with frequent motion.  The speed specified by this parameter is
+        how quickly the mask gets adjusted.
         <p></p>
         Fast means here that the mask is built quick, but it is also not staying very long with no more motion.
         Slow means that it takes a while until the mask is built but it also stays longer.
@@ -2897,9 +2897,9 @@
         </ul>
         <p></p>
         The minimum change in the portion of the image that will trigger a lightswitch condition
-        whereby the next number of frames specified by lightswitch_frames will be ignored.  This option is 
-        similar to threshold maximum but this option permits exclusion of a specified number of 
-        frames after the large change. 
+        whereby the next number of frames specified by lightswitch_frames will be ignored.  This option is
+        similar to threshold maximum but this option permits exclusion of a specified number of
+        frames after the large change.
         <p></p>
 
         <h3><a name="lightswitch_frames"></a> lightswitch_frames </h3>
@@ -2955,7 +2955,7 @@
           <li> Default: 0 (disabled)</li>
         </ul>
         <p></p>
-        Specifies the number of frames to be captured after an event has ended. 
+        Specifies the number of frames to be captured after an event has ended.
         <p></p>
 
         <h3><a name="static_object_time"></a>static_object_time</h3>
@@ -2982,7 +2982,7 @@
         <p></p>
         Do not enable updates to these parameters via the webcontrol_params when the webcontrol is
         exposed. Also make sure that MotionPlus is not running as a super user and is instead
-        running under a "harmless" user.  
+        running under a "harmless" user.
         <p></p>
 
         <p></p>
@@ -2996,9 +2996,9 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The full path and file name of the program/script to be executed at the start of an 
+        The full path and file name of the program/script to be executed at the start of an
         event.  <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script. 
+        this option to pass into the program/script.
         <p></p>
         <p></p>
 
@@ -3010,9 +3010,9 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The full path and file name of the program/script to be executed at the end of an 
+        The full path and file name of the program/script to be executed at the end of an
         event.  <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script. 
+        this option to pass into the program/script.
         <p></p>
         <p></p>
 
@@ -3024,9 +3024,9 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The full path and file name of the program/script to be executed when a picture is 
+        The full path and file name of the program/script to be executed when a picture is
         saved.  <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script. 
+        this option to pass into the program/script.
         <p></p>
         <p></p>
 
@@ -3040,7 +3040,7 @@
         <p></p>
         The full path and file name of the program/script to be executed when motion is
         detected.  <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script. 
+        this option to pass into the program/script.
         <p></p>
         <p></p>
 
@@ -3053,8 +3053,8 @@
         </ul>
         <p></p>
         The full path and file name of the program/script to be executed when motion is
-        detected in the area specifed.  <a href="#conversion_specifiers">Conversion Specifiers</a> can 
-        be specified in this option to pass into the program/script. 
+        detected in the area specifed.  <a href="#conversion_specifiers">Conversion Specifiers</a> can
+        be specified in this option to pass into the program/script.
         <p></p>
         <p></p>
 
@@ -3068,7 +3068,7 @@
         <p></p>
         The full path and file name of the program/script to be executed at the creation
         of a movie. <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script. 
+        this option to pass into the program/script.
         <p></p>
         <p></p>
 
@@ -3083,7 +3083,7 @@
         <p></p>
         The full path and file name of the program/script to be executed when a movie
         ends. <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script. 
+        this option to pass into the program/script.
         <p></p>
         <p></p>
 
@@ -3097,7 +3097,7 @@
         <p></p>
         The full path and file name of the program/script to be executed when the camera
         it no longer detected.  <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script. 
+        this option to pass into the program/script.
         <p></p>
         <p></p>
 
@@ -3110,9 +3110,9 @@
         </ul>
         <p></p>
         The full path and file name of the program/script to be executed when the cameras
-        that was previously lost is now active 
+        that was previously lost is now active
         again.  <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script. 
+        this option to pass into the program/script.
         <p></p>
         <p></p>
 
@@ -3124,9 +3124,9 @@
           <li> Default:</li>
         </ul>
         <p></p>
-		    The full path and file name of the program/script to be executed when secondary
-		    detection suceeds. <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script. 
+        The full path and file name of the program/script to be executed when secondary
+        detection suceeds. <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
+        this option to pass into the program/script.
         <p></p>
 
       </ul>
@@ -3136,7 +3136,7 @@
         <p></p>
         MotionPlus can output different types of pictures.  A normal picture
         as well as a "motion" or debug type of picture.  The debug picture indicates
-        the changed pixels as well as the various masks that may be applied to the image. 
+        the changed pixels as well as the various masks that may be applied to the image.
         <p></p>
         <p></p>
 
@@ -3149,13 +3149,13 @@
           <li> Default: off</li>
         </ul>
         <p></p>
-        Specify whether to save normal images.  
+        Specify whether to save normal images.
         <p></p>
         The option of 'first' saves only the first motion detected picture per event.  The
         option of "best" saves the picture with most changed pixels during the event.
         <p></p>
         When the <a href="#netcam_highres">netcam_highres</a> option is selected along with the
-        <a href="#movie_passthrough">movie_passthrough</a> the output pictures will be provided in 
+        <a href="#movie_passthrough">movie_passthrough</a> the output pictures will be provided in
         normal resolution not high resolution.
         <p></p>
 
@@ -3167,9 +3167,9 @@
           <li> Default: off</li>
         </ul>
         <p></p>
-        Output the motion pictures with the pixels that change as a graytone image. 
-        <p></p>        
-        If labelling is enabled via the despeckele option, you see the largest area in blue and 
+        Output the motion pictures with the pixels that change as a graytone image.
+        <p></p>
+        If labelling is enabled via the despeckele option, you see the largest area in blue and
         areas in red are those determined by the smartmask option.
         <p></p>
         <p></p>
@@ -3194,8 +3194,8 @@
           <li> Default: 75</li>
         </ul>
         <p></p>
-        The image quality for the jpeg or webp images in percent.  
-        The value of 1 is worst and 100 is best.  
+        The image quality for the jpeg or webp images in percent.
+        The value of 1 is worst and 100 is best.
         <p></p>
         <p></p>
 
@@ -3222,7 +3222,7 @@
           <li> Default: %v-%Y%m%d%H%M%S-%q</li>
         </ul>
         <p></p>
-        This option indicates the file name and optionally the path for the pictures relative 
+        This option indicates the file name and optionally the path for the pictures relative
         to target_dir. The appropiate file extension will be added based upon the picture_type.
         <p></p>
         <a href="#conversion_specifiers">Conversion Specifiers</a> can be included in this option.
@@ -3249,7 +3249,7 @@
           <li> Default: %v-%Y%m%d%H%M%S-snapshot</li>
         </ul>
         <p></p>
-        This option indicates the file name and optionally the path for the snapshots relative 
+        This option indicates the file name and optionally the path for the snapshots relative
         to target_dir. The file extension is automatically added.
         <p></p>
         A symbolic link called lastsnap.jpg is created in the target_dir and will always
@@ -3286,9 +3286,9 @@
         </ul>
         <p></p>
         Encode movies that show the motion type of pictures that show
-        the pixels that changed.  If labeling is enabled via the despeckle option, the 
+        the pixels that changed.  If labeling is enabled via the despeckle option, the
         largest area will be in blue.  The smartmask if enabled will be
-        shown in red. The filename will be the same as normal movies except with 
+        shown in red. The filename will be the same as normal movies except with
         an 'm' appended to the filename.
         <p></p>
         <p></p>
@@ -3311,7 +3311,7 @@
           <li> Default: 400000</li>
         </ul>
         <p></p>
-        Bitrate to use in encoding of movies.  A higher value means better quality 
+        Bitrate to use in encoding of movies.  A higher value means better quality
         and larger files.  This option is ignored if movie_quality is not 0 (disabled).
         <p></p>
         <p></p>
@@ -3326,7 +3326,7 @@
         <p></p>
         A value of 0 disables this option while values 1 - 100 change the quality
         of the movie.  The value of 1 means worst quality and 100 is the best quality.  High
-        values of this option (e.g. 100) may cause difficulty with some players.  
+        values of this option (e.g. 100) may cause difficulty with some players.
         <p></p>
         <p></p>
 
@@ -3341,8 +3341,8 @@
         Container/Codec to be used for the video.
         <p></p>
         Certain containers can handle different codecs than the defaults indicated above.  For example, the
-        mkv container can handle virtually any codec.  MotionPlus can optionally take an additional 
-        specification with this parameter.  By specifying the container (mkv) and then appending 
+        mkv container can handle virtually any codec.  MotionPlus can optionally take an additional
+        specification with this parameter.  By specifying the container (mkv) and then appending
         a colon and the ffmpeg codec name.  This permits options such as encoding the h265 codec
         into a mkv container instead of mp4 by specifying the option as <code>mkv:libx265</code>
         <p></p>
@@ -3355,7 +3355,7 @@
           <li> Default: off</li>
         </ul>
         <p></p>
-        Retain movie only if the secondary detection occurred. 
+        Retain movie only if the secondary detection occurred.
         <p></p>
         <p></p>
 
@@ -3405,8 +3405,8 @@
           <li> Default: %v-%Y%m%d%H%M%S</li>
         </ul>
         <p></p>
-        This option indicates the file name and optionally the path for the movies relative 
-        to target_dir. The file extension based upon the codec is automatically added.        
+        This option indicates the file name and optionally the path for the movies relative
+        to target_dir. The file extension based upon the codec is automatically added.
         <p></p>
         <a href="#conversion_specifiers">Conversion Specifiers</a> can be used in this option.
         <p></p>
@@ -3479,7 +3479,7 @@
         Note that it is important to use <a href="#conversion_specifiers">Conversion Specifiers</a>
         in timelapse_filename that ensure that the filename is unique upon rollover.  If the filename
         does not change MotionPlus will append the timelapse pictures to the existing file.
-        <br />The value 'Manual' means that MotionPlus does not automatically rollover to a new filename. 
+        <br />The value 'Manual' means that MotionPlus does not automatically rollover to a new filename.
         <p></p>
         The value 'hourly' rolls over on the full hour. Value 'daily' which is the default
         rolls over at midnight. There are two weekly options because depending on where you come from a week
@@ -3509,15 +3509,15 @@
         Container/Codec to be used by timelapse video.
         <p></p>
         <ul>
-        <li>mpg - Creates mpg file with mpeg-2 encoding. If MotionPlus is shutdown and restarted, new 
+        <li>mpg - Creates mpg file with mpeg-2 encoding. If MotionPlus is shutdown and restarted, new
            pictures will be appended to any previously created file with name indicated for timelapse.</li>
-        <li>mpeg4 - Creates avi file with the default encoding.  If MotionPlus is shutdown and restarted, 
+        <li>mpeg4 - Creates avi file with the default encoding.  If MotionPlus is shutdown and restarted,
         new pictures will create a new file with the name indicated for timelapse.</li>
         </ul>
         <p></p>
         <p></p>
 
-	      <h3><a name="timelapse_filename"></a> timelapse_filename </h3>
+        <h3><a name="timelapse_filename"></a> timelapse_filename </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
@@ -3559,7 +3559,7 @@
         can use for the loopback.  As needed, review the documentation of the v4l2loopback
         project for additional details on set up..
         <p></p>
-        To activate the vloopback device in MotionPlus set the 'video_pipe' option in the motionplus.conf 
+        To activate the vloopback device in MotionPlus set the 'video_pipe' option in the motionplus.conf
         file to the device name associated with the one created by v4l2loopback.
         <br />You can also view the special motion pictures where you see the changed pixels by setting the option
         'video_pipe_motion' in motionplus.conf. When setting the video_pipe and/or video_pipe_motion options
@@ -3612,7 +3612,7 @@
           <li> Default: 0 (disabled)</li>
         </ul>
         <p></p>
-        The port number for the web based control of MotionPlus.  This option must 
+        The port number for the web based control of MotionPlus.  This option must
         be placed in the motionplus.conf file and not in a camera config file.
         <p></p>
 
@@ -3635,7 +3635,7 @@
           <li> Default: on</li>
         </ul>
         <p></p>
-        Restrict the webcontrol of MotionPlus to the localhost.  This option must be 
+        Restrict the webcontrol of MotionPlus to the localhost.  This option must be
         placed in motionplus.conf and not in a camera config file.
         <p></p>
 
@@ -3666,15 +3666,15 @@
           <li> 2: Advanced - The advanced list of parameters will be available.  These typically require MotionPlus to be restarted to become effective.</li>
           <li> 3: Restricted - User IDs, passwords and "on_" commands.</li>
         </ul>
-        The default for this parameter is 0 (none) to enhance the security of the web interface.  The 
-        setting of the webcontrol_parms is not included on the web interface and this parameter 
+        The default for this parameter is 0 (none) to enhance the security of the web interface.  The
+        setting of the webcontrol_parms is not included on the web interface and this parameter
         must be specified via the configuration file.
         <p></p>
-        Once MotionPlus has been configured, it is advised to complete the setup by setting 
+        Once MotionPlus has been configured, it is advised to complete the setup by setting
         this value to zero.
         <p></p>
         <p></p>
-        
+
         <h3><a name="webcontrol_interface"></a> webcontrol_interface </h3>
         <p></p>
         <ul>
@@ -3689,7 +3689,7 @@
         <li>The value of `user` means the html will be provided by file specified in webcontrol_html</li>
         </ul>
         <p></p>
-        This option must be placed in motionplus.conf and not in a camera config file. 
+        This option must be placed in motionplus.conf and not in a camera config file.
         <p></p>
 
         <h3><a name="webcontrol_auth_method"></a> webcontrol_auth_method </h3>
@@ -3762,8 +3762,8 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        Comma separated list of headers for the webcontrol.  Use 
-        Access-Control-Allow-Origin header value to specify the CORS header.  
+        Comma separated list of headers for the webcontrol.  Use
+        Access-Control-Allow-Origin header value to specify the CORS header.
         <p></p>
 
         <h3><a name="webcontrol_actions"></a> webcontrol_actions </h3>
@@ -3788,9 +3788,9 @@
           <li> config_write</li>
           <li> config:  Applies for any and all configuration parameters</li>
         </ul>
-			  Specify each of these using "on"/"off" to permit or deny respectively.  The specification in
-			  this parameter will override the default that is associated with
-			  <a href="#webcontrol_parms">webcontrol_parms</a>.
+        Specify each of these using "on"/"off" to permit or deny respectively.  The specification in
+        this parameter will override the default that is associated with
+        <a href="#webcontrol_parms">webcontrol_parms</a>.
         <p></p>
 
         <h3><a name="webcontrol_html"></a> webcontrol_html</h3>
@@ -3816,7 +3816,7 @@
           <li> Default: 25</li>
         </ul>
         <p></p>
-        The percentage to scale the stream image when it is placed on the webcontrol 
+        The percentage to scale the stream image when it is placed on the webcontrol
         page.  Numbers greater than 100 are permitted.
         <p></p>
         <p></p>
@@ -3909,7 +3909,7 @@
           <li> Default: </li>
         </ul>
         <p></p>
-        Time in seconds to display image when in scan mode.  
+        Time in seconds to display image when in scan mode.
         <p></p>
 
         <h3><a name="stream_scan_scale"></a>stream_scan_scale</h3>
@@ -3920,7 +3920,7 @@
           <li> Default: </li>
         </ul>
         <p></p>
-        Percentage scaling factor to apply on the image when in scan mode.  
+        Percentage scaling factor to apply on the image when in scan mode.
         <p></p>
 
 
@@ -4131,7 +4131,7 @@
       <h3><a name="OptDetail_Tracking"></a>Tracking</h3>
       <ul>
         <p></p>
- 
+
         <p></p>
 
         <h3><a name="ptz_auto_track"></a>ptz_auto_track</h3>
@@ -4142,7 +4142,7 @@
           <li> Default:</li>
         </ul>
         <p></p>
-        Enable automatic tracking. 
+        Enable automatic tracking.
         <p></p>
 
         <h3><a name="ptz_wait"></a>ptz_wait</h3>
@@ -4155,7 +4155,7 @@
         <p></p>
         Time in seconds to wait after a PTZ scripts is called before resuming motion detection.
         <p></p>
-        
+
         <h3><a name="ptz_move_track"></a>ptz_move_track</h3>
         <p></p>
         <ul>
@@ -4165,7 +4165,7 @@
         </ul>
         <p></p>
         Full path and file name for script to execute for auto tracking.
-        
+
         <p></p>
         <h3><a name="ptz_pan_left"></a>ptz_pan_left</h3>
         <p></p>
@@ -4177,7 +4177,7 @@
         <p></p>
         Full path and file name for script to pan the camera left.
         <p></p>
-        
+
         <h3><a name="ptz_pan_right"></a>ptz_pan_right</h3>
         <p></p>
         <ul>
@@ -4188,7 +4188,7 @@
         <p></p>
         Full path and file name for script to pan the camera right.
         <p></p>
-        
+
         <h3><a name="ptz_tilt_up"></a>ptz_tilt_up</h3>
         <p></p>
         <ul>
@@ -4209,7 +4209,7 @@
         <p></p>
         Full path and file name for script to tilt the camera down.
         <p></p>
-        
+
         <h3><a name="ptz_zoom_in"></a>ptz_zoom_in</h3>
         <p></p>
         <ul>

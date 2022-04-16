@@ -608,7 +608,7 @@
           <col width="700px">
         </colgroup>
         <tbody>
-        	  <tr>
+            <tr>
              <td bgcolor="#edf4f9" word-wrap:break-word > Options</td>
              <td bgcolor="#edf4f9" word-wrap:break-word > Description <br /> Defaults for the options are specified in brackets [ ]</td>
              <td bgcolor="#edf4f9" word-wrap:break-word > Editors comment </td>
@@ -751,88 +751,88 @@
              <td bgcolor="#edf4f9" word-wrap:break-word > man documentation [PREFIX/man]</td>
              <td bgcolor="#edf4f9" word-wrap:break-word > Editor recommends the default.</td>
            </tr>
-      	  <tr>
-      			<th bgcolor="#edf4f9" word-wrap:break-word > Optional Packages: </th>
-      			<th bgcolor="#edf4f9" word-wrap:break-word >  </th>
-      			<th bgcolor="#edf4f9" word-wrap:break-word >  </th>
-      		</tr>
-      		<tr>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > --without-bktr </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude bktr video subsystem devices </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > ONLY used in *BSD </td>
-      		</tr>
-      		<tr>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > --without-v4l2 </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude using v4l2 (video4linux2) subsystem. Makes Motion so it only supports network cameras. </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Can be used if you do not need support or lack some of the libraries for it. </td>
-      		</tr>
-      		<tr>
+          <tr>
+            <th bgcolor="#edf4f9" word-wrap:break-word > Optional Packages: </th>
+            <th bgcolor="#edf4f9" word-wrap:break-word >  </th>
+            <th bgcolor="#edf4f9" word-wrap:break-word >  </th>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --without-bktr </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Exclude bktr video subsystem devices </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > ONLY used in *BSD </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --without-v4l2 </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Exclude using v4l2 (video4linux2) subsystem. Makes Motion so it only supports network cameras. </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Can be used if you do not need support or lack some of the libraries for it. </td>
+          </tr>
+          <tr>
             <td bgcolor="#edf4f9" word-wrap:break-word > --without-webp </td>
             <td bgcolor="#edf4f9" word-wrap:break-word > Compile without webp image support</td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word >  </td>
-      		</tr>
-      		<tr>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > --with-ffmpeg=DIR </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Specify the path for the directory prefix in which the
-      			library and headers are installed.
-      			<br /> If not specified configure will search in /usr/ and /usr/local/ </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >  </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-ffmpeg=DIR </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Specify the path for the directory prefix in which the
+            library and headers are installed.
+            <br /> If not specified configure will search in /usr/ and /usr/local/ </td>
 
-      			<td bgcolor="#edf4f9" word-wrap:break-word > DIR is the directory PREFIX in which
-      			the ffmpeg shared libraries and their headers are installed.
-      			<br /> If you install ffmpeg from sources and use the default directories or
-      			if ffmpeg is installed as a binary package (RPM or deb) you may not need to specify the directory prefix.
-      			Configure should find the libraries automatically.
-      			<br />If you installed ffmpeg from sources and specified a different --prefix when building f
-      			fmpeg you must use the same value for the DIR ( --with-ffmpeg=DIR)
-      			or export that location to be included in the PKG_CONFIG_PATH
-      			<br />The option of --with-ffmpeg is the default for Motion.  If the required libraries are not located, the
-      			configure script will stop at the ffmpeg section and report which libraries need to be installed.
-      			Once the required libraries are installed, run the script again.  As noted previously, make sure
-      			to install the -dev versions.
-      			<br />For more information on FFmpeg see the documentation for the FFmpeg project.
-      			</td>
-      		</tr>
-      		<tr>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > --without-ffmpeg </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Do not compile with ffmpeg </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to compile with ffmpeg. If ffmpeg is not installed you must specify this option for Motion to build without ffmpeg. </td>
-      		</tr>
-      		<tr>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > --without-mysql </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Do not compile with MySQL support </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include MySQL support in the package. <br /> This can also be useful if you get compilation errors related to MySQL and you actually do not need the feature anyway. </td>
-      		</tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > DIR is the directory PREFIX in which
+            the ffmpeg shared libraries and their headers are installed.
+            <br /> If you install ffmpeg from sources and use the default directories or
+            if ffmpeg is installed as a binary package (RPM or deb) you may not need to specify the directory prefix.
+            Configure should find the libraries automatically.
+            <br />If you installed ffmpeg from sources and specified a different --prefix when building f
+            fmpeg you must use the same value for the DIR ( --with-ffmpeg=DIR)
+            or export that location to be included in the PKG_CONFIG_PATH
+            <br />The option of --with-ffmpeg is the default for Motion.  If the required libraries are not located, the
+            configure script will stop at the ffmpeg section and report which libraries need to be installed.
+            Once the required libraries are installed, run the script again.  As noted previously, make sure
+            to install the -dev versions.
+            <br />For more information on FFmpeg see the documentation for the FFmpeg project.
+            </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --without-ffmpeg </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Do not compile with ffmpeg </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to compile with ffmpeg. If ffmpeg is not installed you must specify this option for Motion to build without ffmpeg. </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --without-mysql </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Do not compile with MySQL support </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include MySQL support in the package. <br /> This can also be useful if you get compilation errors related to MySQL and you actually do not need the feature anyway. </td>
+          </tr>
           <tr>
             <td bgcolor="#edf4f9" word-wrap:break-word > --without-mariadb </td>
             <td bgcolor="#edf4f9" word-wrap:break-word > Do not compile with MariaDB support </td>
             <td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include MariaDB support in the package. <br /> This can also be useful if you get compilation errors related to MariaDB and you actually do not need the feature anyway. </td>
           </tr>
-      		<tr>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > --without-pgsql </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Do not compile with PostgreSQL support </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include PostgreSQL support in the package. <br /> This can also be useful if you get compilation errors related to PostgreSQL and you actually do not need the feature anyway. </td>
-      		</tr>
-      		<tr>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > --without-sqlite3 </td>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --without-pgsql </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Do not compile with PostgreSQL support </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include PostgreSQL support in the package. <br /> This can also be useful if you get compilation errors related to PostgreSQL and you actually do not need the feature anyway. </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --without-sqlite3 </td>
             <td bgcolor="#edf4f9" word-wrap:break-word > Disable sqlite3 support in motion. </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include SQLite3 support in the package. <br /> This can also be useful if you get compilation errors related to SQLite3 and you actually do not need the feature anyway. </td>
-      		</tr>
-      		<tr>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > --without-optimizecpu </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude autodetecting platform and cpu type. This will disable the compilation of gcc optimizing code by platform and cpu. </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if the optimization causes problems. Not typically needed. </td>
-      		</tr>
-      		<tr>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > --with-developer-flags </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Add additional warning flags for the compiler. </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include SQLite3 support in the package. <br /> This can also be useful if you get compilation errors related to SQLite3 and you actually do not need the feature anyway. </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --without-optimizecpu </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Exclude autodetecting platform and cpu type. This will disable the compilation of gcc optimizing code by platform and cpu. </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use this if the optimization causes problems. Not typically needed. </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-developer-flags </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Add additional warning flags for the compiler. </td>
             <td bgcolor="#edf4f9" word-wrap:break-word > This option is for developers only. It applies many compiler flags and errors on all warnings.</td>
-      		</tr>
+          </tr>
           <tr>
             <td bgcolor="#edf4f9" word-wrap:break-word > --with-prototype-flags </td>
             <td bgcolor="#edf4f9" word-wrap:break-word > Add additional warning flags for the compiler. </td>
             <td bgcolor="#edf4f9" word-wrap:break-word > This option is similar to --with-developer-flags but does not include flags for prototypes. </td>
           </tr>
-      	</tbody>
+        </tbody>
       </table>
       </div>
       <p></p>
