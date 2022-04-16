@@ -40,7 +40,7 @@ static ssize_t webu_file_reader (void *cls, uint64_t pos, char *buf, size_t max)
 static void webu_file_free (void *cls)
 {
     struct ctx_webui *webui =(struct ctx_webui *)cls;
-    fclose (webui->req_file);
+    myfclose(webui->req_file);
 }
 
 /* Entry point for answering file request*/
@@ -85,7 +85,7 @@ mhdrslt webu_file_main(struct ctx_webui *webui)
     }
 
     if (stat(full_nm.c_str(), &statbuf) == 0) {
-        webui->req_file = fopen (full_nm.c_str(), "rbe");
+        webui->req_file = myfopen(full_nm.c_str(), "rbe");
     } else {
         webui->req_file = NULL;
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
@@ -109,7 +109,7 @@ mhdrslt webu_file_main(struct ctx_webui *webui)
             , webui
             , &webu_file_free);
         if (response == NULL) {
-	        fclose (webui->req_file);
+	        myfclose(webui->req_file);
 	        return MHD_NO;
         }
         retcd = MHD_queue_response (webui->connection, MHD_HTTP_OK, response);

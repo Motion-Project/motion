@@ -1413,7 +1413,7 @@ void webu_html_user(struct ctx_webui *webui)
     char response[PATH_MAX];
     FILE *fp = NULL;
 
-    fp = fopen(webui->motapp->cam_list[0]->conf->webcontrol_html.c_str(), "r");
+    fp = myfopen(webui->motapp->cam_list[0]->conf->webcontrol_html.c_str(), "re");
 
     if (fp == NULL) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO

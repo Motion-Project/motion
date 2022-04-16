@@ -190,40 +190,30 @@ int mycreate_path(const char *path)
     return 0;
 }
 
-/** myfopen */
-FILE * myfopen(const char *path, const char *mode)
+/* myfopen */
+FILE *myfopen(const char *path, const char *mode)
 {
-    /* first, just try to open the file */
-    FILE *dummy = fopen(path, mode);
-    if (dummy) {
-        return dummy;
+    FILE *fp;
+
+    fp = fopen(path, mode);
+    if (fp) {
+        return fp;
     }
 
-    /* could not open file... */
-    /* path did not exist? */
+    /* If path did not exist, create and try again*/
     if (errno == ENOENT) {
-
-        /* create path for file... */
         if (mycreate_path(path) == -1) {
             return NULL;
         }
-
-        /* and retry opening the file */
-        dummy = fopen(path, mode);
+        fp = fopen(path, mode);
     }
-    if (!dummy) {
-        /*
-         * Two possibilities
-         * 1: there was an other error while trying to open the file for the
-         * first time
-         * 2: could still not open the file after the path was created
-         */
+    if (!fp) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
             ,_("Error opening file %s with mode %s"), path, mode);
         return NULL;
     }
 
-    return dummy;
+    return fp;
 }
 
 /** myfclose */
@@ -848,9 +838,9 @@ AVPacket *mypacket_alloc(AVPacket *pkt)
         pkt->data = NULL;
         pkt->size = 0;
     #endif
-    
+
     return pkt;
-    
+
 }
 
 /*********************************************/
@@ -1241,17 +1231,8 @@ void util_exec_command(struct ctx_cam *cam, const char *command, char *filename,
     mystrftime(cam, stamp, sizeof(stamp), command, &cam->current_image->imgts, filename, filetype);
 
     if (!fork()) {
-        int i;
-
         /* Detach from parent */
         setsid();
-
-        /*
-         * Close any file descriptor except console because we will
-         * like to see error messages
-         */
-        for (i = getdtablesize() - 1; i > 2; i--)
-            close(i);
 
         execl("/bin/sh", "sh", "-c", stamp, " &",(char*)NULL);
 

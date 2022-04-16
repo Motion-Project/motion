@@ -96,7 +96,7 @@ static void log_set_logfile(const char *logfile_name)
     /* Setup temporary to let log if myfopen fails */
     log_set_mode(LOGMODE_SYSLOG);
 
-    logfile = myfopen(logfile_name, "a");
+    logfile = myfopen(logfile_name, "ae");
 
     /* If logfile was opened correctly */
     if (logfile) {

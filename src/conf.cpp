@@ -3565,7 +3565,7 @@ static void conf_camera_filenm(struct ctx_motapp *motapp)
             indx_cam++;
         }
         if (motapp->cam_list[indx_cam] == NULL) {
-            fp = fopen(fullnm.c_str(), "r");
+            fp = myfopen(fullnm.c_str(), "re");
             if (fp) {
                 myfclose(fp);
             } else {
@@ -3635,7 +3635,7 @@ static void conf_parm_camera(struct ctx_motapp *motapp, std::string filename)
     int indx_cam, retcd;
     FILE *fp;
 
-    fp = fopen(filename.c_str(), "r");
+    fp = myfopen(filename.c_str(), "re");
     if (!fp) {
         MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
             ,_("Camera config file %s not found"), filename.c_str());
@@ -3855,7 +3855,7 @@ void conf_parms_write(struct ctx_motapp *motapp)
     indx_cam = 0;
     while (motapp->cam_list[indx_cam] != NULL) {
 
-        conffile = myfopen(motapp->cam_list[indx_cam]->conf_filename, "w");
+        conffile = myfopen(motapp->cam_list[indx_cam]->conf_filename, "we");
 
         if (!conffile) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
@@ -3973,7 +3973,7 @@ void conf_init_app(struct ctx_motapp *motapp, int argc, char *argv[])
 
     if (motapp->conf_filename != "") {
         filename = motapp->conf_filename;
-        fp = fopen (filename.c_str(), "r");
+        fp = myfopen(filename.c_str(), "re");
     }
 
     if (!fp) {
@@ -3982,17 +3982,17 @@ void conf_init_app(struct ctx_motapp *motapp, int argc, char *argv[])
             exit(-1);
         }
         filename = path + std::string("/motionplus.conf");
-        fp = fopen (filename.c_str(), "r");
+        fp = myfopen(filename.c_str(), "re");
     }
 
     if (!fp) {
         filename = std::string(getenv("HOME")) + std::string("/.motionplus/motionplus.conf");
-        fp = fopen(filename.c_str(), "r");
+        fp = myfopen(filename.c_str(), "re");
     }
 
     if (!fp) {
         filename = std::string( sysconfdir ) + std::string("/motionplus.conf");
-        fp = fopen(filename.c_str(), "r");
+        fp = myfopen(filename.c_str(), "re");
     }
 
     if (!fp) {
@@ -4042,7 +4042,7 @@ void conf_init_cams(struct ctx_motapp *motapp)
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 ,_("Error using config file %s"), motapp->conf_filename.c_str());
         } else {
-            fp = fopen (motapp->conf_filename.c_str(), "r");
+            fp = myfopen(motapp->conf_filename.c_str(), "re");
         }
     }
 

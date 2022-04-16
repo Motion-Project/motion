@@ -1191,7 +1191,7 @@ static std::string webu_mhd_loadfile(std::string fname)
 
     filestr = "";
     if (fname != "") {
-        infile = fopen(fname.c_str() , "rb");
+        infile = myfopen(fname.c_str() , "rbe");
         if (infile != NULL) {
             fseek(infile, 0, SEEK_END);
             file_size = ftell(infile);
@@ -1208,7 +1208,7 @@ static std::string webu_mhd_loadfile(std::string fname)
                 }
                 free(file_char);
             }
-            fclose(infile);
+            myfclose(infile);
         }
     }
     return filestr;

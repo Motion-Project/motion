@@ -206,7 +206,7 @@ static void motion_daemon(struct ctx_motapp *motapp)
      * for an enter.
      */
     if (motapp->pid_file != "") {
-        pidf = myfopen(motapp->pid_file.c_str(), "w+");
+        pidf = myfopen(motapp->pid_file.c_str(), "w+e");
 
         if (pidf) {
             (void)fprintf(pidf, "%d\n", getpid());
@@ -234,20 +234,20 @@ static void motion_daemon(struct ctx_motapp *motapp)
         setpgrp();
     #endif
 
-    if ((fd = open("/dev/tty", O_RDWR)) >= 0) {
+    if ((fd = open("/dev/tty", O_RDWR|O_CLOEXEC)) >= 0) {
         ioctl(fd, TIOCNOTTY, NULL);
         close(fd);
     }
 
     setsid();
 
-    fd = open("/dev/null", O_RDONLY);
+    fd = open("/dev/null", O_RDONLY|O_CLOEXEC);
     if (fd != -1) {
         dup2(fd, STDIN_FILENO);
         close(fd);
     }
 
-    fd = open("/dev/null", O_WRONLY);
+    fd = open("/dev/null", O_WRONLY|O_CLOEXEC);
     if (fd != -1) {
         dup2(fd, STDOUT_FILENO);
         dup2(fd, STDERR_FILENO);

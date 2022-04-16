@@ -159,7 +159,7 @@ static void pic_save_yuv420p(FILE *fp, unsigned char *image, int width, int heig
 {
 
     int sz, image_size;
-    
+
     image_size = (width * height * 3)/2;
     unsigned char *buf =(unsigned char*) mymalloc(image_size);
 
@@ -176,9 +176,9 @@ static void pic_save_grey(FILE *picture, unsigned char *image, int width, int he
 {
 
     int sz, image_size;
-    
+
     image_size = (width * height * 3)/2;
- 
+
     unsigned char *buf =(unsigned char*) mymalloc(image_size);
 
     sz = jpgutl_put_grey(buf, image_size, image, width, height, quality, cam ,ts1, box);
@@ -306,7 +306,7 @@ void pic_save_norm(struct ctx_cam *cam, char *file, unsigned char *image, int ft
 {
     FILE *picture;
 
-    picture = myfopen(file, "w");
+    picture = myfopen(file, "wbe");
     if (!picture) {
         /* Report to syslog - suggest solution if the problem is access rights to target dir. */
         if (errno ==  EACCES) {
@@ -343,7 +343,7 @@ void pic_save_roi(struct ctx_cam *cam, char *file, unsigned char *image)
         return;
     }
 
-    picture = myfopen(file, "w");
+    picture = myfopen(file, "wbe");
     if (!picture) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
             ,_("Can't write picture to file %s"), file);
@@ -468,7 +468,7 @@ static void pic_write_mask(struct ctx_cam *cam, const char *file)
 {
     FILE *picture;
 
-    picture = myfopen(file, "w");
+    picture = myfopen(file, "wbe");
     if (!picture) {
         /* Report to syslog - suggest solution if the problem is access rights to target dir. */
         if (errno ==  EACCES) {
@@ -574,7 +574,7 @@ void pic_init_privacy(struct ctx_cam *cam)
     cam->imgs.mask_privacy_high_uv = NULL;
 
     if (cam->conf->mask_privacy != "") {
-        if ((picture = myfopen(cam->conf->mask_privacy.c_str(), "r"))) {
+        if ((picture = myfopen(cam->conf->mask_privacy.c_str(), "rbe"))) {
             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Opening privacy mask file"));
             /*
              * NOTE: The mask is expected to have the output dimensions. I.e., the mask
@@ -671,7 +671,7 @@ void pic_init_mask(struct ctx_cam *cam)
 
     /* Load the mask file if any */
     if (cam->conf->mask_file != "") {
-        if ((picture = myfopen(cam->conf->mask_file.c_str(), "r"))) {
+        if ((picture = myfopen(cam->conf->mask_file.c_str(), "rbe"))) {
             /*
              * NOTE: The mask is expected to have the output dimensions. I.e., the mask
              * applies to the already rotated image, not the capture image. Thus, use
