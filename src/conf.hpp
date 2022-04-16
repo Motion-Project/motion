@@ -120,7 +120,7 @@
         int             movie_max_time;
         int             movie_bps;
         int             movie_quality;
-        std::string     movie_codec;
+        std::string     movie_container;
         bool            movie_passthrough;
         std::string     movie_filename;
         std::string     movie_retain;

@@ -62,7 +62,7 @@ struct ctx_movie {
     int                 bps;
     char                filename[PATH_MAX];
     int                 quality;
-    const char          *codec_name;
+    const char          *container_name;
     int64_t             last_pts;
     int64_t             base_pts;
     int64_t             pass_audio_base;

@@ -134,7 +134,7 @@ struct ctx_parm config_parms[] = {
     {"movie_max_time",            PARM_TYP_INT,    PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {"movie_bps",                 PARM_TYP_INT,    PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {"movie_quality",             PARM_TYP_INT,    PARM_CAT_10, WEBUI_LEVEL_LIMITED },
-    {"movie_codec",               PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
+    {"movie_container",           PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {"movie_passthrough",         PARM_TYP_BOOL,   PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {"movie_filename",            PARM_TYP_STRING, PARM_CAT_10, WEBUI_LEVEL_LIMITED },
     {"movie_retain",              PARM_TYP_LIST,   PARM_CAT_10, WEBUI_LEVEL_LIMITED },
@@ -317,8 +317,8 @@ struct ctx_parm_depr config_parms_depr[] = {
     {
     "ffmpeg_video_codec",
     "4.1.1",
-    "\"ffmpeg_video_codec\" replaced with \"movie_codec\"",
-    "movie_codec"
+    "\"ffmpeg_video_codec\" replaced with \"movie_container\"",
+    "movie_container"
     },
     {
     "ffmpeg_passthrough",
@@ -397,6 +397,12 @@ struct ctx_parm_depr config_parms_depr[] = {
     "4.1.1",
     "\"process_id_file\" replaced with \"pid_file\"",
     "pid_file"
+    },
+    {
+    "movie_codec",
+    "0.0.1",
+    "\"movie_codec\" replaced with \"movie_container\"",
+    "movie_container"
     },
     { "","","",""}
 };
@@ -1886,17 +1892,17 @@ static void conf_edit_movie_quality(struct ctx_cam *cam, std::string &parm, enum
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_quality",_("movie_quality"));
 }
 
-static void conf_edit_movie_codec(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_movie_container(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->movie_codec = "mkv";
+        cam->conf->movie_container = "mkv";
     } else if (pact == PARM_ACT_SET) {
-        cam->conf->movie_codec = parm;
+        cam->conf->movie_container = parm;
     } else if (pact == PARM_ACT_GET) {
-        parm = cam->conf->movie_codec;
+        parm = cam->conf->movie_container;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_codec",_("movie_codec"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_container",_("movie_container"));
 }
 
 static void conf_edit_movie_passthrough(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
@@ -2990,7 +2996,7 @@ static void conf_edit_cat10(struct ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "movie_max_time") {          conf_edit_movie_max_time(cam, parm_val, pact);
     } else if (parm_nm == "movie_bps") {               conf_edit_movie_bps(cam, parm_val, pact);
     } else if (parm_nm == "movie_quality") {           conf_edit_movie_quality(cam, parm_val, pact);
-    } else if (parm_nm == "movie_codec") {             conf_edit_movie_codec(cam, parm_val, pact);
+    } else if (parm_nm == "movie_container") {         conf_edit_movie_container(cam, parm_val, pact);
     } else if (parm_nm == "movie_passthrough") {       conf_edit_movie_passthrough(cam, parm_val, pact);
     } else if (parm_nm == "movie_filename") {          conf_edit_movie_filename(cam, parm_val, pact);
     } else if (parm_nm == "movie_retain") {            conf_edit_movie_retain(cam, parm_val, pact);
