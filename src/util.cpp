@@ -143,48 +143,39 @@ void *myrealloc(void *ptr, size_t size, const char *desc)
 
 /**
  * mycreate_path
- *
- *   This function creates a whole path, like mkdir -p. Example paths:
- *      this/is/an/example/
- *      /this/is/an/example/
- *   Warning: a path *must* end with a slash!
- *
- * Parameters:
- *
- *   cam  - current thread's context structure (for logging)
- *   path - the path to create
- *
- * Returns: 0 on success, -1 on failure
+ *   Create whole path.
+ *   Path provided *must* end with a slash!
  */
 int mycreate_path(const char *path)
 {
-    char *start;
+    std::string tmp;
     mode_t mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
+    size_t indx_pos;
+    int retcd;
 
-    if (path[0] == '/') {
-        start = (char*)strchr(path + 1, '/');
+    tmp = std::string(path);
+
+    if (tmp.substr(0, 1) == "/") {
+        indx_pos = tmp.find("/", 1);
     } else {
-        start = (char*)strchr(path, '/');
+        indx_pos = tmp.find("/", 0);
     }
 
-    while (start) {
-        char *buffer = mystrdup(path);
-        buffer[start-path] = 0x00;
-
-        if (mkdir(buffer, mode) == -1 && errno != EEXIST) {
+    while (indx_pos != std::string::npos) {
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            ,_("Creating %s"), tmp.substr(0, indx_pos + 1).c_str());
+        retcd = mkdir(tmp.substr(0, indx_pos + 1).c_str(), mode);
+        if (retcd == -1 && errno != EEXIST) {
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
-                ,_("Problem creating directory %s"), buffer);
-            free(buffer);
+                ,_("Problem creating directory %s")
+                , tmp.substr(0, indx_pos + 1).c_str());
             return -1;
         }
-
-        start = strchr(start + 1, '/');
-
-        if (!start) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("creating directory %s"), buffer);
+        indx_pos++;
+        if (indx_pos >= tmp.length()) {
+            break;
         }
-
-        free(buffer);
+        indx_pos = tmp.find("/", indx_pos);
     }
 
     return 0;
@@ -640,75 +631,6 @@ char* mytranslate_text(const char *msgid, int setnls)
             return (char*)msgid;
         #endif
     }
-}
-
-/**
- * mystrcpy
- *      Is used to assign string type fields (e.g. config options)
- *      In a way so that we the memory is malloc'ed to fit the string.
- *      If a field is already pointing to a string (not NULL) the memory of the
- *      old string is free'd and new memory is malloc'ed and filled with the
- *      new string is copied into the the memory and with the char pointer
- *      pointing to the new string.
- *
- *      from - pointer to the new string we want to copy
- *      to   - the pointer to the current string (or pointing to NULL)
- *              If not NULL the memory it points to is free'd.
- *
- * Returns pointer to the new string which is in malloc'ed memory
- * FIXME The strings that are malloc'ed with this function should be freed
- * when the motion program is terminated normally instead of relying on the
- * OS to clean up.
- */
-char *mystrcpy(char *to, const char *from)
-{
-    /*
-     * Free the memory used by the to string, if such memory exists,
-     * and return a pointer to a freshly malloc()'d string with the
-     * same value as from.
-     */
-
-    if (to != NULL) {
-        free(to);
-    }
-
-    return mystrdup(from);
-}
-
-/**
- * mystrdup
- *      Truncates the string to the length given by the environment
- *      variable PATH_MAX to ensure that config options can always contain
- *      a really long path but no more than that.
- *
- * Returns a pointer to a freshly malloc()'d string with the same
- *      value as the string that the input parameter 'from' points to,
- *      or NULL if the from string is 0 characters.
- */
-char *mystrdup(const char *from)
-{
-    char *tmp;
-    size_t stringlength;
-
-    if (from == NULL || !strlen(from)) {
-        tmp = NULL;
-    } else {
-        stringlength = strlen(from);
-        stringlength = (stringlength < PATH_MAX ? stringlength : PATH_MAX);
-        tmp = (char*)mymalloc(stringlength + 1);
-        strncpy(tmp, from, stringlength);
-
-        /*
-         * We must ensure the string always has a NULL terminator.
-         * This necessary because strncpy will not append a NULL terminator
-         * if the original string is greater than string length.
-         */
-        tmp += stringlength;
-        *tmp = '\0';
-        tmp -= stringlength;
-    }
-
-    return tmp;
 }
 
 /****************************************************************************

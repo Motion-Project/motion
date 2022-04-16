@@ -120,8 +120,6 @@
     int mystrcne(const char* var1, const char* var2);
     int mystreq(const char* var1, const char* var2);
     int mystrne(const char* var1, const char* var2);
-    char *mystrdup(const char *from);
-    char *mystrcpy(char *to, const char *from);
     void myltrim(std::string &parm);
     void myrtrim(std::string &parm);
     void mytrim(std::string &parm);
