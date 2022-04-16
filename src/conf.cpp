@@ -650,7 +650,13 @@ static void conf_edit_target_dir(struct ctx_cam *cam, std::string &parm, enum PA
     if (pact == PARM_ACT_DFLT) {
         cam->conf->target_dir = ".";
     } else if (pact == PARM_ACT_SET) {
-        cam->conf->target_dir = parm;
+        if (parm.find("%", 0) != std::string::npos) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Invalid target_dir.  Conversion specifiers not permitted. %s")
+                , parm.c_str());
+        } else {
+            cam->conf->target_dir = parm;
+        }
     } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->target_dir;
     }
