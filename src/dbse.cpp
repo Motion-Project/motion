@@ -947,7 +947,13 @@ void dbse_motpls_addrec(struct ctx_cam *cam,char *fname, struct timespec *ts1)
 
     retcd = sqlite3_exec(cam->dbsemp->database_sqlite3, sqlquery.c_str(), NULL, 0, &errmsg);
     if (retcd != SQLITE_OK ) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("SQLite error was %s"), errmsg);
-        sqlite3_free(errmsg);
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("SQLite error %d was %s"),retcd, errmsg);
+        dbse_motpls_deinit(cam);
+        dbse_motpls_init(cam);
+        retcd = sqlite3_exec(cam->dbsemp->database_sqlite3, sqlquery.c_str(), NULL, 0, &errmsg);
+        if (retcd != SQLITE_OK ) {
+            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("Serious error %d was %s"),retcd, errmsg);
+            dbse_motpls_deinit(cam);
+        }
     }
 }
