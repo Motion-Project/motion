@@ -81,13 +81,12 @@ static void movie_encode_nal(struct ctx_movie *movie)
 
 static int movie_timelapse_exists(const char *fname)
 {
-    FILE *file;
-    file = myfopen(fname, "rbe");
-    if (file) {
-        myfclose(file);
+    struct stat statbuf;
+    if (stat(fname, &statbuf) == 0) {
         return 1;
+    } else {
+        return 0;
     }
-    return 0;
 }
 
 static int movie_timelapse_append(struct ctx_movie *movie, AVPacket *pkt)

@@ -152,6 +152,7 @@ int mycreate_path(const char *path)
     mode_t mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
     size_t indx_pos;
     int retcd;
+    struct stat statbuf;
 
     tmp = std::string(path);
 
@@ -162,14 +163,16 @@ int mycreate_path(const char *path)
     }
 
     while (indx_pos != std::string::npos) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,_("Creating %s"), tmp.substr(0, indx_pos + 1).c_str());
-        retcd = mkdir(tmp.substr(0, indx_pos + 1).c_str(), mode);
-        if (retcd == -1 && errno != EEXIST) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
-                ,_("Problem creating directory %s")
-                , tmp.substr(0, indx_pos + 1).c_str());
-            return -1;
+        if (stat(tmp.substr(0, indx_pos + 1).c_str(), &statbuf) != 0) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Creating %s"), tmp.substr(0, indx_pos + 1).c_str());
+            retcd = mkdir(tmp.substr(0, indx_pos + 1).c_str(), mode);
+            if (retcd == -1 && errno != EEXIST) {
+                MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+                    ,_("Problem creating directory %s")
+                    , tmp.substr(0, indx_pos + 1).c_str());
+                return -1;
+            }
         }
         indx_pos++;
         if (indx_pos >= tmp.length()) {
