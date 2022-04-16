@@ -3546,17 +3546,13 @@ static void conf_camera_filenm(struct ctx_motapp *motapp)
 {
     int indx_cam, indx, retcd;
     std::string src_nm, fullnm;
-    FILE *fp;
+    struct stat statbuf;
 
     src_nm = motapp->conf_filename.substr(0, motapp->conf_filename.find_last_of("/") + 1);
 
     indx = 1;
     while (true) {
         fullnm = src_nm + "camera" + std::to_string(indx) + ".conf";
-        /*
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Trying %s"), fullnm.c_str());
-        */
-
         indx_cam = 0;
         while (motapp->cam_list[indx_cam] != NULL) {
             if (fullnm == motapp->cam_list[indx_cam]->conf_filename) {
@@ -3565,10 +3561,9 @@ static void conf_camera_filenm(struct ctx_motapp *motapp)
             indx_cam++;
         }
         if (motapp->cam_list[indx_cam] == NULL) {
-            fp = myfopen(fullnm.c_str(), "re");
-            if (fp) {
-                myfclose(fp);
-            } else {
+            /* Not specified for any other camera */
+            if (stat(fullnm.c_str(), &statbuf) != 0) {
+                /*File does not exist */
                 break;
             }
         }
@@ -3634,9 +3629,16 @@ static void conf_parm_camera(struct ctx_motapp *motapp, std::string filename)
 {
     int indx_cam, retcd;
     FILE *fp;
+    struct stat statbuf;
 
-    fp = myfopen(filename.c_str(), "re");
-    if (!fp) {
+    if (stat(filename.c_str(), &statbuf) == 0) {
+        fp = myfopen(filename.c_str(), "re");
+        if (!fp) {
+            MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
+                ,_("Camera config file %s not found"), filename.c_str());
+            return;
+        }
+    } else {
         MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
             ,_("Camera config file %s not found"), filename.c_str());
         return;
@@ -3706,9 +3708,6 @@ static void conf_parm_camera_dir(struct ctx_motapp *motapp, std::string str)
             }
         }
         closedir(dp);
-    } else {
-        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
-            ,_("Camera directory config %s not found"), str.c_str());
     }
 
     /* Store the given config value to allow writing it out */
@@ -3963,6 +3962,7 @@ void conf_init_app(struct ctx_motapp *motapp, int argc, char *argv[])
     FILE *fp = NULL;
     std::string filename;
     char path[PATH_MAX];
+    struct stat statbuf;
 
     motapp->argc = argc;
     motapp->argv = argv;
@@ -3973,7 +3973,9 @@ void conf_init_app(struct ctx_motapp *motapp, int argc, char *argv[])
 
     if (motapp->conf_filename != "") {
         filename = motapp->conf_filename;
-        fp = myfopen(filename.c_str(), "re");
+        if (stat(filename.c_str(), &statbuf) == 0) {
+            fp = myfopen(filename.c_str(), "re");
+        }
     }
 
     if (!fp) {
@@ -3982,17 +3984,23 @@ void conf_init_app(struct ctx_motapp *motapp, int argc, char *argv[])
             exit(-1);
         }
         filename = path + std::string("/motionplus.conf");
-        fp = myfopen(filename.c_str(), "re");
+        if (stat(filename.c_str(), &statbuf) == 0) {
+            fp = myfopen(filename.c_str(), "re");
+        }
     }
 
     if (!fp) {
         filename = std::string(getenv("HOME")) + std::string("/.motionplus/motionplus.conf");
-        fp = myfopen(filename.c_str(), "re");
+        if (stat(filename.c_str(), &statbuf) == 0) {
+            fp = myfopen(filename.c_str(), "re");
+        }
     }
 
     if (!fp) {
         filename = std::string( sysconfdir ) + std::string("/motionplus.conf");
-        fp = myfopen(filename.c_str(), "re");
+        if (stat(filename.c_str(), &statbuf) == 0) {
+            fp = myfopen(filename.c_str(), "re");
+        }
     }
 
     if (!fp) {
