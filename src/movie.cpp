@@ -1562,6 +1562,14 @@ int movie_open(struct ctx_movie *movie)
 
 }
 
+void movie_free(struct ctx_movie *movie)
+{
+    if (movie != NULL) {
+        movie_free_context(movie);
+        movie_free_nal(movie);
+    }
+}
+
 void movie_close(struct ctx_movie *movie)
 {
 
@@ -1582,8 +1590,7 @@ void movie_close(struct ctx_movie *movie)
                 }
             }
         }
-        movie_free_context(movie);
-        movie_free_nal(movie);
+        movie_free(movie);
     }
 
 }

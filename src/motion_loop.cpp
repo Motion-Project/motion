@@ -728,17 +728,30 @@ static int mlp_init(struct ctx_cam *cam)
 /** clean up all memory etc. from motion init */
 void mlp_cleanup(struct ctx_cam *cam)
 {
+    /* When the watchdog counter is less than zero we
+     * only do the minimal necessary to free the memory variables
+     * rather than finish off any event processing
+     */
+    if (cam->watchdog > 0) {
+        event(cam, EVENT_TLAPSE_END, NULL, NULL, NULL, NULL);
+        if (cam->event_nr == cam->prev_event) {
+            mlp_ring_process(cam);
+            if (cam->imgs.image_preview.diffs) {
+                event(cam, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cam->current_image->imgts);
+                cam->imgs.image_preview.diffs = 0;
+            }
 
-    event(cam, EVENT_TLAPSE_END, NULL, NULL, NULL, NULL);
-
-    if (cam->event_nr == cam->prev_event) {
-        mlp_ring_process(cam);
-        if (cam->imgs.image_preview.diffs) {
-            event(cam, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cam->current_image->imgts);
-            cam->imgs.image_preview.diffs = 0;
+            event(cam, EVENT_END, NULL, NULL, NULL, &cam->current_image->imgts);
         }
+    } else {
+        movie_free(cam->movie_norm);
+        cam->movie_norm = NULL;
 
-        event(cam, EVENT_END, NULL, NULL, NULL, &cam->current_image->imgts);
+        movie_free(cam->movie_motion);
+        cam->movie_motion = NULL;
+
+        movie_free(cam->movie_timelapse);
+        cam->movie_timelapse = NULL;
     }
 
     webu_stream_deinit(cam);

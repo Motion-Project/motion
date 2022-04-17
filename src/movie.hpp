@@ -90,5 +90,6 @@ void movie_reset_start_time(struct ctx_movie *ffmpeg, const struct timespec *tv1
 int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1);
 int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1);
 int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1);
+void movie_free(struct ctx_movie *movie);
 
 #endif /* #define _INCLUDE_MOVIE_HPP_ */
