@@ -164,6 +164,8 @@ struct ctx_parm config_parms[] = {
     {"webcontrol_headers",        PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
     {"webcontrol_html",           PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
     {"webcontrol_actions",        PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
+    {"webcontrol_lock_minutes",   PARM_TYP_INT,    PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
+    {"webcontrol_lock_attempts",  PARM_TYP_INT,    PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
 
     {"stream_preview_scale",      PARM_TYP_INT,    PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {"stream_preview_newline",    PARM_TYP_BOOL,   PARM_CAT_14, WEBUI_LEVEL_LIMITED },
@@ -2338,6 +2340,44 @@ static void conf_edit_webcontrol_actions(struct ctx_cam *cam, std::string &parm,
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_actions",_("webcontrol_actions"));
 }
 
+static void conf_edit_webcontrol_lock_minutes(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    int parm_in;
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->webcontrol_lock_minutes = 10;
+    } else if (pact == PARM_ACT_SET) {
+        parm_in = atoi(parm.c_str());
+        if (parm_in < 0) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_lock_minutes %d"),parm_in);
+        } else {
+            cam->conf->webcontrol_lock_minutes = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET) {
+        parm = std::to_string(cam->conf->webcontrol_lock_minutes);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_lock_minutes",_("webcontrol_lock_minutes"));
+}
+
+static void conf_edit_webcontrol_lock_attempts(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    int parm_in;
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->webcontrol_lock_attempts = 3;
+    } else if (pact == PARM_ACT_SET) {
+        parm_in = atoi(parm.c_str());
+        if (parm_in < 0) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_lock_attempts %d"),parm_in);
+        } else {
+            cam->conf->webcontrol_lock_attempts = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET) {
+        parm = std::to_string(cam->conf->webcontrol_lock_attempts);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_lock_attempts",_("webcontrol_lock_attempts"));
+}
+
 static void conf_edit_stream_preview_scale(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
@@ -3044,6 +3084,8 @@ static void conf_edit_cat13(struct ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "webcontrol_headers") {          conf_edit_webcontrol_headers(cam, parm_val, pact);
     } else if (parm_nm == "webcontrol_html") {             conf_edit_webcontrol_html(cam, parm_val, pact);
     } else if (parm_nm == "webcontrol_actions") {          conf_edit_webcontrol_actions(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_lock_minutes") {     conf_edit_webcontrol_lock_minutes(cam, parm_val, pact);
+    } else if (parm_nm == "webcontrol_lock_attempts") {    conf_edit_webcontrol_lock_attempts(cam, parm_val, pact);
     }
 
 }

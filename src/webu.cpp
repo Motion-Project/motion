@@ -405,7 +405,8 @@ static void webu_client_connect(struct ctx_webui *webui)
     /* First we need to clean out any old IPs from the list*/
     it = webui->motapp->webcontrol_clients.begin();
     while (it != webui->motapp->webcontrol_clients.end()) {
-        if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >= 600) {
+        if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >=
+            (webui->cam->conf->webcontrol_lock_minutes*60)) {
             it = webui->motapp->webcontrol_clients.erase(it);
         }
         it++;
@@ -456,14 +457,16 @@ static mhdrslt webu_failauth_check(struct ctx_webui *webui)
     it = webui->motapp->webcontrol_clients.begin();
     while (it != webui->motapp->webcontrol_clients.end()) {
         if ((it->clientip == webui->clientip) &&
-            ((tm_cnct.tv_sec - it->conn_time.tv_sec) < 600) &&
+            ((tm_cnct.tv_sec - it->conn_time.tv_sec) <
+             (webui->cam->conf->webcontrol_lock_minutes*60)) &&
             (it->authenticated == false) &&
-            (it->conn_nbr > 5)) {
-            MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
+            (it->conn_nbr > webui->cam->conf->webcontrol_lock_attempts)) {
+            MOTION_LOG(EMG, TYPE_STREAM, NO_ERRNO
                 ,_("ignoring attempt from %s"), webui->clientip.c_str());
             it->conn_time = tm_cnct;
             return MHD_NO;
-        } else if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >= 600) {
+        } else if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >=
+            (webui->cam->conf->webcontrol_lock_minutes*60)) {
             it = webui->motapp->webcontrol_clients.erase(it);
         } else {
             it++;
