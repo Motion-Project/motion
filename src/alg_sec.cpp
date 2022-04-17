@@ -529,6 +529,7 @@ void algsec_init(ctx_cam *cam)
 
         cam->algsec = new ctx_algsec;
 
+        cam->algsec->isdetected = false;
         pthread_mutex_init(&cam->algsec->mutex, NULL);
 
         retcd = algsec_load_params(cam);
