@@ -462,7 +462,7 @@ static mhdrslt webu_failauth_check(struct ctx_webui *webui)
             (it->authenticated == false) &&
             (it->conn_nbr > webui->cam->conf->webcontrol_lock_attempts)) {
             MOTION_LOG(EMG, TYPE_STREAM, NO_ERRNO
-                ,_("ignoring attempt from %s"), webui->clientip.c_str());
+                ,_("Ignoring connection from: %s"), webui->clientip.c_str());
             it->conn_time = tm_cnct;
             return MHD_NO;
         } else if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >=
