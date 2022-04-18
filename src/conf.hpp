@@ -178,13 +178,11 @@
         std::string     database_password;
         int             database_busy_timeout;
 
-        bool            sql_log_picture;
-        bool            sql_log_snapshot;
-        bool            sql_log_movie;
-        bool            sql_log_timelapse;
-        std::string     sql_query_start;
-        std::string     sql_query_stop;
-        std::string     sql_query;
+        std::string     sql_event_start;
+        std::string     sql_event_end;
+        std::string     sql_movie_start;
+        std::string     sql_movie_end;
+        std::string     sql_pic_save;
 
         bool            ptz_auto_track;         /* Bool to enable auto tracking */
         int             ptz_wait;               /* Frames to wait after a PTZ move */

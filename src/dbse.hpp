@@ -62,7 +62,6 @@
             PGconn *database_pg;
         #endif
 
-        int             sql_mask;
         uint64_t        database_event_id;
     };
 
@@ -94,14 +93,12 @@
     void dbse_global_init(struct ctx_motapp *motapp);
     void dbse_init(struct ctx_cam *cam);
     void dbse_deinit(struct ctx_cam *cam);
-    void dbse_sqlmask_update(struct ctx_cam *cam);
-    void dbse_firstmotion(struct ctx_cam *cam);
-    void dbse_newfile(struct ctx_cam *cam, char *filename, int sqltype, struct timespec *ts1);
-    void dbse_fileclose(struct ctx_cam *cam, char *filename, int sqltype, struct timespec *ts1);
     void dbse_motpls_init(struct ctx_cam *cam);
     void dbse_motpls_deinit(struct ctx_cam *cam);
     void dbse_motpls_exec(char *sqlquery, struct ctx_cam *cam);
     int dbse_motpls_getlist(struct ctx_cam *cam);
     void dbse_motpls_addrec(struct ctx_cam *cam,char *fname, struct timespec *ts1);
+    void dbse_exec(struct ctx_cam *cam, char *filename
+        , int sqltype, struct timespec *ts1, const char *cmd);
 
 #endif /* _INCLUDE_DBSE_HPP_ */

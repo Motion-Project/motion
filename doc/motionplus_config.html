@@ -919,43 +919,31 @@
           <td align="left"><br /></td>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"><a href="#sql_log_movie" >sql_log_movie</a></td>
+          <td align="left"><a href="#sql_event_end" >sql_event_end</a></td>
         </tr>
         <tr>
           <td align="left"><br /></td>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"><a href="#sql_log_picture" >sql_log_picture</a></td>
+          <td align="left"><a href="#sql_event_start" >sql_event_start</a></td>
         </tr>
         <tr>
           <td align="left"><br /></td>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"><a href="#sql_log_snapshot" >sql_log_snapshot</a></td>
+          <td align="left"><a href="#sql_movie_end" >sql_movie_end</a></td>
         </tr>
         <tr>
           <td align="left"><br /></td>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"><a href="#sql_log_timelapse" >sql_log_timelapse</a></td>
+          <td align="left"><a href="#sql_movie_start" >sql_movie_start</a></td>
         </tr>
         <tr>
           <td align="left"><br /></td>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"><a href="#sql_query" >sql_query</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#sql_query_start" >sql_query_start</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#sql_query_stop" >sql_query_stop</a></td>
+          <td align="left"><a href="#sql_pic_save" >sql_pic_save</a></td>
         </tr>
         <tr>
           <td align="left"><br /></td>
@@ -1683,17 +1671,13 @@
               <td bgcolor="#edf4f9" ><a href="#database_user" >database_user</a> </td>
               <td bgcolor="#edf4f9" ><a href="#database_password" >database_password</a> </td>
               <td bgcolor="#edf4f9" ><a href="#database_busy_timeout" >database_busy_timeout</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#sql_log_picture" >sql_log_picture</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#sql_event_end" >sql_event_end</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#sql_log_snapshot" >sql_log_snapshot</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#sql_log_movie" >sql_log_movie</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#sql_log_timelapse" >sql_log_timelapse</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#sql_query" >sql_query</a> </td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" ><a href="#sql_query_start" >sql_query_start</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#sql_query_stop" >sql_query_stop</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#sql_event_start" >sql_event_start</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#sql_movie_end" >sql_movie_end</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#sql_movie_start" >sql_movie_start</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#sql_pic_save" >sql_pic_save</a> </td>
             </tr>
            </tbody>
         </table>
@@ -4008,121 +3992,65 @@
         <p></p>
 
         <p></p>
-        <h3><a name="sql_log_picture"></a> sql_log_picture </h3>
+        <h3><a name="sql_event_end"></a> sql_event_end </h3>
         <p></p>
         <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+          <li> Type: string</li>
+          <li> Range / Valid values: string</li>
+          <li> Default: </li>
         </ul>
         <p></p>
-        Log to the database when MotionPlus triggers a image file to be saved.
+        SQL query to execute at the end of the event.
         <p></p>
 
-        <h3><a name="sql_log_snapshot"></a> sql_log_snapshot </h3>
+        <p></p>
+        <h3><a name="sql_event_start"></a> sql_event_start </h3>
         <p></p>
         <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+          <li> Type: string</li>
+          <li> Range / Valid values: string</li>
+          <li> Default: </li>
         </ul>
         <p></p>
-        Log to the database when creating a snapshot image file.
+        SQL query to execute at the start of the event.
         <p></p>
 
-        <h3><a name="sql_log_movie"></a> sql_log_movie </h3>
+        <p></p>
+        <h3><a name="sql_movie_end"></a> sql_movie_end </h3>
         <p></p>
         <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+          <li> Type: string</li>
+          <li> Range / Valid values: string</li>
+          <li> Default: </li>
         </ul>
         <p></p>
-        Log to the database when creating motion triggered movie file.
+        SQL query to execute at the end of the movie.
         <p></p>
 
-        <h3><a name="sql_log_timelapse"></a> sql_log_timelapse </h3>
+        <p></p>
+        <h3><a name="sql_movie_start"></a> sql_movie_start </h3>
         <p></p>
         <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+          <li> Type: string</li>
+          <li> Range / Valid values: string</li>
+          <li> Default: </li>
         </ul>
         <p></p>
-        Log to the database when creating timelapse movie file
+        SQL query to execute at the start of the movie.
         <p></p>
 
-        <h3><a name="sql_query_start"></a> sql_query_start </h3>
+        <p></p>
+        <h3><a name="sql_pic_save"></a> sql_pic_save</h3>
         <p></p>
         <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+          <li> Type: string</li>
+          <li> Range / Valid values: string</li>
+          <li> Default: </li>
         </ul>
         <p></p>
-        SQL query that executes against the event table which tracks the unique events of motion.
-        <p></p>
-        Once the new record is added to this table, the mysql function <code><b>mysql_insert_id</b></code> is then
-        executed to provide the key back into the <code>dbeventid</code> specifier.
-        <p></p>
-        The <code>dbeventid</code> specifier can then be used in the <code>sql_query</code> as a parameter
-        to that query for inserting into the table.
-        <p></p>
-        Although this query is run for all the different database options, the <code>dbeventid</code> is
-        only set for mysql databases.  For the other databases, the <code>dbeventid</code> is always set
-        to zero.
-        <p></p>
+        SQL query to execute when a picture has been saved.
         <p></p>
         You can use <a href="#conversion_specifiers">Conversion Specifiers</a> within the query.
-        <p></p>
-        <p></p>
-        Sample Query
-        <p></p>
-        insert into security_events(camera, event_time_stamp) values('%t', '%Y-%m-%d %T')"
-        <p></p>
-        <p></p>
-
-        <h3><a name="sql_query_stop"></a> sql_query_stop </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
-        </ul>
-        <p></p>
-        SQL query that executes after a movie has finished.
-        This can be used to for example update the events table with an end timestamp for the recording.
-        <p></p>
-        <p></p>
-        You can use <a href="#conversion_specifiers">Conversion Specifiers</a> within the query.
-        <p></p>
-        <p></p>
-        Sample Query
-        <p></p>
-        update security_events set event_end_time_stamp='%Y-%m-%d %T' where filename='%f'
-        <p></p>
-        <p></p>
-
-        <h3><a name="sql_query"></a> sql_query </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
-        </ul>
-        <p></p>
-        SQL query string that is sent to the database when the sql_log_* item is triggered.
-        <p></p>
-        <p></p>
-        You can use <a href="#conversion_specifiers">Conversion Specifiers</a>
-        within the query.
-        <p></p>
-        <p></p>
-        Sample Queries (depend upon the table created)
-        <p></p>
-        <br />insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
-        <br />insert or ignore into images (camera_nbr, file_name, year, month, day, hour, minute) values (8, '%f', '%Y','%m','%d','%H','%M')
-        <br />insert into security_file(camera, event_id, filename, frame, file_type, time_stamp) values('%t', '%{dbeventid}', '%f', '%q', '%n', '%Y-%m-%d %T')"
         <p></p>
         <p></p>
 

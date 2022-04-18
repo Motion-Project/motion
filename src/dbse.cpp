@@ -344,7 +344,6 @@ void dbse_init(struct ctx_cam *cam)
             ,_("Invalid Database backend %s")
             , cam->conf->database_type.c_str());
         }
-        dbse_sqlmask_update(cam);
     }
 
     return;
@@ -383,20 +382,6 @@ void dbse_deinit(struct ctx_cam *cam)
             }
         #endif /* HAVE_SQLITE3 */
     }
-
-}
-
-void dbse_sqlmask_update(struct ctx_cam *cam)
-{
-    /*
-    * Set the sql mask file according to the SQL config options
-    * We update it for every frame in case the config was updated
-    * via remote control.
-    */
-    cam->dbse->sql_mask = cam->conf->sql_log_picture * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
-                    cam->conf->sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
-                    cam->conf->sql_log_movie * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
-                    cam->conf->sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
 
 }
 
@@ -571,37 +556,36 @@ static void dbse_sqlite3_exec(char *sqlquery,struct ctx_cam *cam, int save_id)
     #endif /* HAVE_SQLITE3 */
 }
 
-void dbse_firstmotion(struct ctx_cam *cam)
+void dbse_exec(struct ctx_cam *cam, char *filename
+    , int sqltype, struct timespec *ts1, const char *cmd)
 {
-
     char sqlquery[PATH_MAX];
 
-    mystrftime(cam, sqlquery, sizeof(sqlquery), cam->conf->sql_query_start.c_str(),
-                &cam->current_image->imgts, NULL, 0);
-
-    if (strlen(sqlquery) <= 0) {
-        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, "Ignoring empty sql query");
+    if (cam->conf->database_type == "") {
         return;
     }
 
-    if (cam->conf->database_type == "mysql") {
-        dbse_mysql_exec(sqlquery, cam, 1);
-    } else if (cam->conf->database_type == "mariadb") {
-        dbse_mariadb_exec(sqlquery, cam, 1);
-    } else if (cam->conf->database_type == "postgresql") {
-        dbse_pgsql_exec(sqlquery, cam, 1);
-    } else if (cam->conf->database_type == "sqlite3") {
-        dbse_sqlite3_exec(sqlquery, cam, 1);
+    if (mystreq(cmd,"pic_save")) {
+        mystrftime(cam, sqlquery, sizeof(sqlquery)
+            , cam->conf->sql_pic_save.c_str()
+            , ts1, filename, sqltype);
+    } else if (mystreq(cmd,"movie_start")) {
+        mystrftime(cam, sqlquery, sizeof(sqlquery)
+            , cam->conf->sql_movie_start.c_str()
+            , ts1, filename, sqltype);
+    } else if (mystreq(cmd,"movie_end")) {
+        mystrftime(cam, sqlquery, sizeof(sqlquery)
+            , cam->conf->sql_movie_end.c_str()
+            , ts1, filename, sqltype);
+    } else if (mystreq(cmd,"event_start")) {
+        mystrftime(cam, sqlquery, sizeof(sqlquery)
+            , cam->conf->sql_event_start.c_str()
+            , ts1, filename, sqltype);
+    } else if (mystreq(cmd,"event_end")) {
+        mystrftime(cam, sqlquery, sizeof(sqlquery)
+            , cam->conf->sql_event_end.c_str()
+            , ts1, filename, sqltype);
     }
-
-}
-
-void dbse_newfile(struct ctx_cam *cam, char *filename, int sqltype, struct timespec *ts1)
-{
-    char sqlquery[PATH_MAX];
-
-    mystrftime(cam, sqlquery, sizeof(sqlquery), cam->conf->sql_query.c_str(),
-                ts1, filename, sqltype);
 
     if (strlen(sqlquery) <= 0) {
         MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, "Ignoring empty sql query");
@@ -620,24 +604,6 @@ void dbse_newfile(struct ctx_cam *cam, char *filename, int sqltype, struct times
 
 }
 
-void dbse_fileclose(struct ctx_cam *cam, char *filename, int sqltype, struct timespec *ts1)
-{
-    char sqlquery[PATH_MAX];
-
-    mystrftime(cam, sqlquery, sizeof(sqlquery), cam->conf->sql_query_stop.c_str(),
-                ts1, filename, sqltype);
-
-    if (cam->conf->database_type == "mysql") {
-        dbse_mysql_exec(sqlquery, cam, 0);
-    } else if (cam->conf->database_type == "mariadb") {
-        dbse_mariadb_exec(sqlquery, cam, 0);
-    } else if (cam->conf->database_type == "postgresql") {
-        dbse_pgsql_exec(sqlquery, cam, 0);
-    } else if (cam->conf->database_type == "sqlite3") {
-        dbse_sqlite3_exec(sqlquery, cam, 0);
-    }
-
-}
 
 static int dbse_motpls_callback(
     void *ptr, int arg_nb, char **arg_val, char **col_nm)

@@ -88,15 +88,16 @@ struct ctx_v4l2cam;
 #define THRESHOLD_TUNE_LENGTH  256
 
 /* Filetype defines */
-#define FTYPE_IMAGE            1
-#define FTYPE_IMAGE_SNAPSHOT   2
-#define FTYPE_IMAGE_MOTION     4
-#define FTYPE_MPEG             8
-#define FTYPE_MPEG_MOTION     16
-#define FTYPE_MPEG_TIMELAPSE  32
+#define FTYPE_IMAGE             1
+#define FTYPE_IMAGE_SNAPSHOT    2
+#define FTYPE_IMAGE_MOTION      4
+#define FTYPE_MOVIE             8
+#define FTYPE_MOVIE_MOTION     16
+#define FTYPE_MOVIE_TIMELAPSE  32
+#define FTYPE_IMAGE_ROI        64
 
-#define FTYPE_MPEG_ANY    (FTYPE_MPEG | FTYPE_MPEG_MOTION | FTYPE_MPEG_TIMELAPSE)
-#define FTYPE_IMAGE_ANY   (FTYPE_IMAGE | FTYPE_IMAGE_SNAPSHOT | FTYPE_IMAGE_MOTION)
+#define FTYPE_MOVIE_ANY   (FTYPE_MOVIE | FTYPE_MOVIE_MOTION | FTYPE_MOVIE_TIMELAPSE)
+#define FTYPE_IMAGE_ANY   (FTYPE_IMAGE | FTYPE_IMAGE_SNAPSHOT | FTYPE_IMAGE_MOTION | FTYPE_IMAGE_ROI)
 
 /* What types of images files do we want to have */
 #define NEWIMG_OFF        0

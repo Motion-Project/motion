@@ -74,7 +74,7 @@ static void event_newfile(struct ctx_cam *cam, motion_event evnt
  * on_picture_save_command
  *      handles both on_picture_save and on_movie_start
  *      If arg = FTYPE_IMAGE_ANY on_picture_save script is executed
- *      If arg = FTYPE_MPEG_ANY on_movie_start script is executed
+ *      If arg = FTYPE_MOVIE_ANY on_movie_start script is executed
  *      The scripts are executed with the filename of picture or movie appended
  *      to the config parameter.
  */
@@ -92,7 +92,7 @@ static void on_picture_save_command(struct ctx_cam *cam, motion_event evnt
         util_exec_command(cam, cam->conf->on_picture_save.c_str(), fname, filetype);
     }
 
-    if ((filetype & FTYPE_MPEG_ANY) != 0 && (cam->conf->on_movie_start != "")) {
+    if ((filetype & FTYPE_MOVIE_ANY) != 0 && (cam->conf->on_movie_start != "")) {
         util_exec_command(cam, cam->conf->on_movie_start.c_str(), fname, filetype);
     }
 }
@@ -110,60 +110,6 @@ static void on_motion_detected_command(struct ctx_cam *cam, motion_event evnt
     if (cam->conf->on_motion_detected != "") {
         util_exec_command(cam, cam->conf->on_motion_detected.c_str(), NULL, 0);
     }
-}
-
-static void event_sqlfirstmotion(struct ctx_cam *cam, motion_event evnt
-        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
-{
-
-    (void)evnt;
-    (void)img_data;
-    (void)fname;
-    (void)ftype;
-    (void)ts1;
-
-    if (cam->conf->database_type == "") {
-        return;
-    } else {
-        dbse_firstmotion(cam);
-    }
-}
-
-static void event_sqlnewfile(struct ctx_cam *cam, motion_event evnt
-        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
-{
-
-    int sqltype = (unsigned long)ftype;
-
-    (void)evnt;
-    (void)img_data;
-
-    /* Only log the file types we want */
-    if ((cam->conf->database_type == "") || (sqltype & cam->dbse->sql_mask) == 0) {
-        return;
-    } else {
-        dbse_newfile(cam, fname, sqltype, ts1);
-    }
-
-}
-
-static void event_sqlfileclose(struct ctx_cam *cam, motion_event evnt
-        ,struct ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
-{
-
-    int sqltype = (unsigned long)ftype;
-
-    (void)evnt;
-    (void)img_data;
-
-    /* Only log the file types we want */
-    if ((cam->conf->database_type == "") || (sqltype & cam->dbse->sql_mask) == 0) {
-        return;
-    } else {
-        dbse_fileclose(cam, fname, sqltype, ts1);
-    }
-
-
 }
 
 static void on_area_command(struct ctx_cam *cam, motion_event evnt
@@ -276,6 +222,7 @@ static void event_image_detect(struct ctx_cam *cam, motion_event evnt
             pic_save_norm(cam, fullfilename,img_data->image_norm, FTYPE_IMAGE);
         }
         event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE, ts1);
+        dbse_exec(cam, fullfilename, FTYPE_IMAGE, ts1, "pic_save");
     }
 }
 
@@ -302,7 +249,8 @@ static void event_imagem_detect(struct ctx_cam *cam, motion_event evnt
             return;
         }
         pic_save_norm(cam, fullfilename, cam->imgs.image_motion.image_norm, FTYPE_IMAGE_MOTION);
-        event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE, ts1);
+        event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE_MOTION, ts1);
+        dbse_exec(cam, fullfilename, FTYPE_IMAGE_MOTION, ts1, "pic_save");
     } else if (cam->conf->picture_output_motion == "roi") {
         mystrftime(cam, filename, sizeof(filename), cam->conf->picture_filename.c_str(), ts1, NULL, 0);
         retcd = snprintf(fullfilename, PATH_MAX, "%s/%sr.%s"
@@ -313,7 +261,8 @@ static void event_imagem_detect(struct ctx_cam *cam, motion_event evnt
             return;
         }
         pic_save_roi(cam, fullfilename, cam->current_image->image_norm);
-        event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE, ts1);
+        event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE_ROI, ts1);
+        dbse_exec(cam, fullfilename, FTYPE_IMAGE_ROI, ts1, "pic_save");
     }
 }
 
@@ -350,6 +299,7 @@ static void event_image_snapshot(struct ctx_cam *cam, motion_event evnt
 
         pic_save_norm(cam, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
         event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE_SNAPSHOT, ts1);
+        dbse_exec(cam, fullfilename, FTYPE_IMAGE_SNAPSHOT, ts1, "pic_save");
 
         /* Update symbolic link */
         snprintf(linkpath, PATH_MAX, "%s/lastsnap.%s", cam->conf->target_dir.c_str(), imageext(cam));
@@ -374,6 +324,7 @@ static void event_image_snapshot(struct ctx_cam *cam, motion_event evnt
         remove(fullfilename);
         pic_save_norm(cam, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
         event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE_SNAPSHOT, ts1);
+        dbse_exec(cam, fullfilename, FTYPE_IMAGE_SNAPSHOT, ts1, "pic_save");
     }
 
     cam->snapshot = 0;
@@ -413,6 +364,7 @@ static void event_image_preview(struct ctx_cam *cam, motion_event evnt
             pic_save_norm(cam, previewname, cam->imgs.image_preview.image_norm, FTYPE_IMAGE);
         }
         event(cam, EVENT_FILECREATE, NULL, previewname, (void *)FTYPE_IMAGE, ts1);
+        dbse_exec(cam, previewname, FTYPE_IMAGE, ts1, "pic_save");
 
         /* Restore global context values. */
         cam->current_image = saved_current_image;
@@ -476,7 +428,7 @@ static void on_movie_end_command(struct ctx_cam *cam, motion_event evnt
     (void)img_data;
     (void)ts1;
 
-    if ((filetype & FTYPE_MPEG_ANY) && (cam->conf->on_movie_end != "")) {
+    if ((filetype & FTYPE_MOVIE_ANY) && (cam->conf->on_movie_end != "")) {
         util_exec_command(cam, cam->conf->on_movie_end.c_str(), fname, filetype);
     }
 }
@@ -508,10 +460,12 @@ static void event_extpipe_end(struct ctx_cam *cam, motion_event evnt
                         , _("Unable to remove file %s"), cam->extpipefilename);
                 }
             } else {
-                event(cam, EVENT_FILECLOSE, NULL, cam->extpipefilename, (void *)FTYPE_MPEG, ts1);
+                event(cam, EVENT_FILECLOSE, NULL, cam->extpipefilename, (void *)FTYPE_MOVIE, ts1);
+                dbse_exec(cam,  cam->extpipefilename, FTYPE_MOVIE, ts1, "movie_end");
             }
         } else {
-            event(cam, EVENT_FILECLOSE, NULL, cam->extpipefilename, (void *)FTYPE_MPEG, ts1);
+            event(cam, EVENT_FILECLOSE, NULL, cam->extpipefilename, (void *)FTYPE_MOVIE, ts1);
+            dbse_exec(cam, cam->extpipefilename, FTYPE_MOVIE, ts1, "movie_end");
         }
 
     }
@@ -576,7 +530,8 @@ static void event_extpipe_start(struct ctx_cam *cam, motion_event evnt
 
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "cam->moviefps: %d", cam->movie_fps);
 
-        event(cam, EVENT_FILECREATE, NULL, cam->extpipefilename, (void *)FTYPE_MPEG, ts1);
+        event(cam, EVENT_FILECREATE, NULL, cam->extpipefilename, (void *)FTYPE_MOVIE, ts1);
+        dbse_exec(cam, cam->extpipefilename, FTYPE_MOVIE, ts1, "movie_start");
         cam->extpipe = popen(cam->extpipecmdline, "we");
 
         if (cam->extpipe == NULL) {
@@ -654,7 +609,8 @@ static void event_movie_start(struct ctx_cam *cam, motion_event evnt
             cam->movie_norm  = NULL;
             return;
         }
-        event(cam, EVENT_FILECREATE, NULL, cam->movie_norm->filename, (void *)FTYPE_MPEG, ts1);
+        event(cam, EVENT_FILECREATE, NULL, cam->movie_norm->filename, (void *)FTYPE_MOVIE, ts1);
+        dbse_exec(cam, cam->movie_norm->filename, FTYPE_MOVIE, ts1, "movie_start");
     }
 
     if (cam->conf->movie_output_motion) {
@@ -716,11 +672,13 @@ static void event_movie_end(struct ctx_cam *cam, motion_event evnt
                         , _("Unable to remove file %s"), cam->newfilename);
                 }
             } else {
-                event(cam, EVENT_FILECLOSE, NULL, cam->newfilename, (void *)FTYPE_MPEG, ts1);
+                event(cam, EVENT_FILECLOSE, NULL, cam->newfilename, (void *)FTYPE_MOVIE, ts1);
+                dbse_exec(cam, cam->newfilename, FTYPE_MOVIE, ts1, "movie_end");
                 dbse_motpls_addrec(cam, cam->newfilename, ts1);
             }
         } else {
-            event(cam, EVENT_FILECLOSE, NULL, cam->newfilename, (void *)FTYPE_MPEG, ts1);
+            event(cam, EVENT_FILECLOSE, NULL, cam->newfilename, (void *)FTYPE_MOVIE, ts1);
+            dbse_exec(cam, cam->newfilename, FTYPE_MOVIE, ts1, "movie_end");
             dbse_motpls_addrec(cam, cam->newfilename, ts1);
         }
     }
@@ -740,11 +698,13 @@ static void event_movie_end(struct ctx_cam *cam, motion_event evnt
                         , _("Unable to remove file %s"), cam->motionfilename);
                 }
             } else {
-                event(cam, EVENT_FILECLOSE, NULL, cam->motionfilename, (void *)FTYPE_MPEG_MOTION, ts1);
+                event(cam, EVENT_FILECLOSE, NULL, cam->motionfilename, (void *)FTYPE_MOVIE_MOTION, ts1);
+                dbse_exec(cam, cam->motionfilename, FTYPE_MOVIE_MOTION, ts1, "movie_end");
                 dbse_motpls_addrec(cam, cam->motionfilename, ts1);
             }
         } else {
-            event(cam, EVENT_FILECLOSE, NULL, cam->motionfilename, (void *)FTYPE_MPEG_MOTION, ts1);
+            event(cam, EVENT_FILECLOSE, NULL, cam->motionfilename, (void *)FTYPE_MOVIE_MOTION, ts1);
+            dbse_exec(cam, cam->motionfilename, FTYPE_MOVIE_MOTION, ts1, "movie_end");
             dbse_motpls_addrec(cam, cam->motionfilename, ts1);
         }
     }
@@ -773,7 +733,9 @@ static void event_tlapse_start(struct ctx_cam *cam, motion_event evnt
             return;
         }
         event(cam, EVENT_FILECREATE, NULL, cam->movie_timelapse->filename
-            , (void *)FTYPE_MPEG_TIMELAPSE, ts1);
+            , (void *)FTYPE_MOVIE_TIMELAPSE, ts1);
+        dbse_exec(cam, cam->movie_timelapse->filename, FTYPE_MOVIE_TIMELAPSE
+            , ts1, "movie_start");
     }
 
     if (movie_put_image(cam->movie_timelapse, img_data, ts1) == -1) {
@@ -797,7 +759,8 @@ static void event_tlapse_end(struct ctx_cam *cam, motion_event evnt
             free(cam->movie_timelapse);
         }
         cam->movie_timelapse = NULL;
-        event(cam, EVENT_FILECLOSE, NULL, cam->timelapsefilename, (void *)FTYPE_MPEG_TIMELAPSE, ts1);
+        event(cam, EVENT_FILECLOSE, NULL, cam->timelapsefilename, (void *)FTYPE_MOVIE_TIMELAPSE, ts1);
+        dbse_exec(cam, cam->timelapsefilename, FTYPE_MOVIE_TIMELAPSE, ts1, "movie_end");
     }
 }
 
@@ -807,10 +770,6 @@ struct event_handlers {
 };
 
 struct event_handlers event_handlers[] = {
-    {
-    EVENT_FILECREATE,
-    event_sqlnewfile
-    },
     {
     EVENT_FILECREATE,
     on_picture_save_command
@@ -826,10 +785,6 @@ struct event_handlers event_handlers[] = {
     {
     EVENT_AREA_DETECTED,
     on_area_command
-    },
-    {
-    EVENT_START,
-    event_sqlfirstmotion
     },
     {
     EVENT_START,
@@ -906,10 +861,6 @@ struct event_handlers event_handlers[] = {
     {
     EVENT_TLAPSE_END,
     event_tlapse_end
-    },
-    {
-    EVENT_FILECLOSE,
-    event_sqlfileclose
     },
     {
     EVENT_FILECLOSE,

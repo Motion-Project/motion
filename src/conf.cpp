@@ -186,13 +186,11 @@ struct ctx_parm config_parms[] = {
     {"database_password",         PARM_TYP_STRING, PARM_CAT_15, WEBUI_LEVEL_RESTRICTED },
     {"database_busy_timeout",     PARM_TYP_INT,    PARM_CAT_15, WEBUI_LEVEL_ADVANCED },
 
-    {"sql_log_picture",           PARM_TYP_BOOL,   PARM_CAT_16, WEBUI_LEVEL_LIMITED },
-    {"sql_log_snapshot",          PARM_TYP_BOOL,   PARM_CAT_16, WEBUI_LEVEL_LIMITED},
-    {"sql_log_movie",             PARM_TYP_BOOL,   PARM_CAT_16, WEBUI_LEVEL_LIMITED },
-    {"sql_log_timelapse",         PARM_TYP_BOOL,   PARM_CAT_16, WEBUI_LEVEL_LIMITED},
-    {"sql_query_start",           PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED },
-    {"sql_query_stop",            PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED },
-    {"sql_query",                 PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED},
+    {"sql_event_start",           PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED },
+    {"sql_event_end",             PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED },
+    {"sql_movie_start",           PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED },
+    {"sql_movie_end",             PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED },
+    {"sql_pic_save",              PARM_TYP_STRING, PARM_CAT_16, WEBUI_LEVEL_ADVANCED},
 
     {"ptz_auto_track",            PARM_TYP_BOOL,   PARM_CAT_17, WEBUI_LEVEL_LIMITED },
     {"ptz_wait",                  PARM_TYP_INT,    PARM_CAT_17, WEBUI_LEVEL_LIMITED },
@@ -2660,95 +2658,69 @@ static void conf_edit_database_busy_timeout(struct ctx_cam *cam, std::string &pa
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","database_busy_timeout",_("database_busy_timeout"));
 }
 
-static void conf_edit_sql_log_picture(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_sql_event_start(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->sql_log_picture = false;
+        cam->conf->sql_event_start = "";
     } else if (pact == PARM_ACT_SET) {
-        conf_edit_set_bool(cam->conf->sql_log_picture, parm);
+        cam->conf->sql_event_start = parm;
     } else if (pact == PARM_ACT_GET) {
-        conf_edit_get_bool(parm, cam->conf->sql_log_picture);
+        parm = cam->conf->sql_event_start;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_log_picture",_("sql_log_picture"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_event_start",_("sql_event_start"));
 }
 
-static void conf_edit_sql_log_snapshot(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_sql_event_end(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->sql_log_snapshot = false;
+        cam->conf->sql_event_end = "";
     } else if (pact == PARM_ACT_SET) {
-        conf_edit_set_bool(cam->conf->sql_log_snapshot, parm);
+        cam->conf->sql_event_end = parm;
     } else if (pact == PARM_ACT_GET) {
-        conf_edit_get_bool(parm, cam->conf->sql_log_snapshot);
+        parm = cam->conf->sql_event_end;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_log_snapshot",_("sql_log_snapshot"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_event_end",_("sql_event_end"));
 }
 
-static void conf_edit_sql_log_movie(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_sql_movie_start(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->sql_log_movie = false;
+        cam->conf->sql_movie_start = "";
     } else if (pact == PARM_ACT_SET) {
-        conf_edit_set_bool(cam->conf->sql_log_movie, parm);
+        cam->conf->sql_movie_start = parm;
     } else if (pact == PARM_ACT_GET) {
-        conf_edit_get_bool(parm, cam->conf->sql_log_movie);
+        parm = cam->conf->sql_movie_start;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_log_movie",_("sql_log_movie"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_movie_start",_("sql_movie_start"));
 }
 
-static void conf_edit_sql_log_timelapse(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_sql_movie_end(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->sql_log_timelapse = false;
+        cam->conf->sql_movie_end = "";
     } else if (pact == PARM_ACT_SET) {
-        conf_edit_set_bool(cam->conf->sql_log_timelapse, parm);
+        cam->conf->sql_movie_end = parm;
     } else if (pact == PARM_ACT_GET) {
-        conf_edit_get_bool(parm, cam->conf->sql_log_timelapse);
+        parm = cam->conf->sql_movie_end;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_log_timelapse",_("sql_log_timelapse"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_movie_end",_("sql_movie_end"));
 }
 
-static void conf_edit_sql_query_start(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_sql_pic_save(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->sql_query_start = "";
+        cam->conf->sql_pic_save = "";
     } else if (pact == PARM_ACT_SET) {
-        cam->conf->sql_query_start = parm;
+        cam->conf->sql_pic_save = parm;
     } else if (pact == PARM_ACT_GET) {
-        parm = cam->conf->sql_query_start;
+        parm = cam->conf->sql_pic_save;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_query_start",_("sql_query_start"));
-}
-
-static void conf_edit_sql_query_stop(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    if (pact == PARM_ACT_DFLT) {
-        cam->conf->sql_query_stop = "";
-    } else if (pact == PARM_ACT_SET) {
-        cam->conf->sql_query_stop = parm;
-    } else if (pact == PARM_ACT_GET) {
-        parm = cam->conf->sql_query_stop;
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_query_stop",_("sql_query_stop"));
-}
-
-static void conf_edit_sql_query(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    if (pact == PARM_ACT_DFLT) {
-        cam->conf->sql_query = "";
-    } else if (pact == PARM_ACT_SET) {
-        cam->conf->sql_query = parm;
-    } else if (pact == PARM_ACT_GET) {
-        parm = cam->conf->sql_query;
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_query",_("sql_query"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_pic_save",_("sql_pic_save"));
 }
 
 static void conf_edit_ptz_auto_track(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
@@ -3123,13 +3095,11 @@ static void conf_edit_cat15(struct ctx_cam *cam, std::string parm_nm, std::strin
 static void conf_edit_cat16(struct ctx_cam *cam, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "sql_log_picture") {                conf_edit_sql_log_picture(cam, parm_val, pact);
-    } else if (parm_nm == "sql_log_snapshot") {        conf_edit_sql_log_snapshot(cam, parm_val, pact);
-    } else if (parm_nm == "sql_log_movie") {           conf_edit_sql_log_movie(cam, parm_val, pact);
-    } else if (parm_nm == "sql_log_timelapse") {       conf_edit_sql_log_timelapse(cam, parm_val, pact);
-    } else if (parm_nm == "sql_query_start") {         conf_edit_sql_query_start(cam, parm_val, pact);
-    } else if (parm_nm == "sql_query_stop") {          conf_edit_sql_query_stop(cam, parm_val, pact);
-    } else if (parm_nm == "sql_query") {               conf_edit_sql_query(cam, parm_val, pact);
+    if (parm_nm == "sql_event_start") {                conf_edit_sql_event_start(cam, parm_val, pact);
+    } else if (parm_nm == "sql_event_end") {           conf_edit_sql_event_end(cam, parm_val, pact);
+    } else if (parm_nm == "sql_movie_start") {         conf_edit_sql_movie_start(cam, parm_val, pact);
+    } else if (parm_nm == "sql_movie_end") {           conf_edit_sql_movie_end(cam, parm_val, pact);
+    } else if (parm_nm == "sql_pic_save") {            conf_edit_sql_pic_save(cam, parm_val, pact);
     }
 
 }

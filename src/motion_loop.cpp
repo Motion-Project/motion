@@ -211,6 +211,9 @@ static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img
 
             event(cam, EVENT_START, img, NULL, NULL,
                 &cam->imgs.image_ring[cam->imgs.ring_out].imgts);
+            dbse_exec(cam, NULL, 0
+                , &cam->imgs.image_ring[cam->imgs.ring_out].imgts
+                , "event_start");
 
             if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)) {
                 pic_save_preview(cam, img);
@@ -742,6 +745,8 @@ void mlp_cleanup(struct ctx_cam *cam)
             }
 
             event(cam, EVENT_END, NULL, NULL, NULL, &cam->current_image->imgts);
+            dbse_exec(cam, NULL, 0, &cam->current_image->imgts, "event_end");
+
         }
     } else {
         movie_free(cam->movie_norm);
@@ -1329,6 +1334,8 @@ static void mlp_actions_event(struct ctx_cam *cam)
                 cam->imgs.image_preview.diffs = 0;
             }
             event(cam, EVENT_END, NULL, NULL, NULL, &cam->current_image->imgts);
+            dbse_exec(cam, NULL, 0, &cam->current_image->imgts, "event_end");
+
 
             mlp_track_center(cam);
 
@@ -1569,8 +1576,6 @@ static void mlp_parmsupdate(struct ctx_cam *cam)
             cam->smartmask_speed = cam->conf->smart_mask_speed;
             cam->smartmask_ratio = 5 * cam->lastrate * (11 - cam->smartmask_speed);
         }
-
-        dbse_sqlmask_update(cam);
 
         cam->threshold = cam->conf->threshold;
         if (cam->conf->threshold_maximum > cam->conf->threshold ) {
