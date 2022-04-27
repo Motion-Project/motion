@@ -154,11 +154,13 @@ FILE * set_logfile(const char *logfile_name)
  */
 static char *str_time(void)
 {
-    static char buffer[16];
+    //static char buffer[16]; // the month differs depending on the language. ex)LANG=ja_JP.UTF-8
+    static char buffer[18];
     time_t now = 0;
 
     now = time(0);
-    strftime(buffer, 16, "%b %d %H:%M:%S", localtime(&now));
+    //strftime(buffer, 16, "%b %d %H:%M:%S", localtime(&now));
+    strftime(buffer, 18, "%b %d %H:%M:%S", localtime(&now));
     return buffer;
 }
 
