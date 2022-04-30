@@ -384,6 +384,12 @@ struct ctx_cam {
     pthread_mutex_t         parms_lock;
     bool                    parms_changed;      /*bool indicating if the parms have changed */
 
+    uint64_t                info_diff_tot;
+    uint64_t                info_diff_cnt;
+    int                     info_sdev_min;
+    int                     info_sdev_max;
+    uint64_t                info_sdev_tot;
+
 };
 
 /*  ctx_cam for whole motion application including all the cameras */

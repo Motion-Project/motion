@@ -1161,13 +1161,14 @@ void alg_location(ctx_cam *cam)
 void alg_stddev(ctx_cam *cam)
 {
 
+    /*
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "dev_x %d dev_y %d dev_xy %d, diff %d ratio %d"
         , cam->current_image->location.stddev_x
         , cam->current_image->location.stddev_y
         , cam->current_image->location.stddev_xy
         , cam->current_image->diffs
         , cam->current_image->diffs_ratio);
-
+    */
 
     if (cam->conf->threshold_sdevx > 0) {
         if (cam->current_image->location.stddev_x > cam->conf->threshold_sdevx) {

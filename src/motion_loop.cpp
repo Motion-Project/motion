@@ -191,12 +191,21 @@ static void mlp_ring_process(struct ctx_cam *cam)
     cam->current_image = saved_current_image;
 }
 
+static void mlp_info_reset(struct ctx_cam *cam)
+{
+    cam->info_diff_cnt = 0;
+    cam->info_diff_tot = 0;
+    cam->info_sdev_min = 99999999;
+    cam->info_sdev_max = 0;
+    cam->info_sdev_tot = 0;
+}
+
 static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img)
 {
 
     if (img->flags & IMAGE_TRIGGER) {
         if (cam->event_nr != cam->prev_event) {
-
+            mlp_info_reset(cam);
             cam->prev_event = cam->event_nr;
 
             if (cam->algsec_inuse) {
@@ -1363,6 +1372,7 @@ static void mlp_actions_event(struct ctx_cam *cam)
         ( !(cam->current_image->flags & IMAGE_POSTCAP)) &&
         ( !(cam->current_image->flags & IMAGE_PRECAP))) {
         event(cam, EVENT_MOVIE_END, NULL, NULL, NULL, &cam->current_image->imgts);
+        mlp_info_reset(cam);
         event(cam, EVENT_MOVIE_START, NULL, NULL, NULL, &cam->current_image->imgts);
     }
 
@@ -1373,6 +1383,25 @@ static void mlp_actions(struct ctx_cam *cam)
      if ((cam->current_image->diffs > cam->threshold) &&
         (cam->current_image->diffs < cam->threshold_maximum)) {
         cam->current_image->flags |= IMAGE_MOTION;
+        cam->info_diff_cnt++;
+        cam->info_diff_tot += cam->current_image->diffs;
+        cam->info_sdev_tot += cam->current_image->location.stddev_xy;
+        if (cam->info_sdev_min > cam->current_image->location.stddev_xy ) {
+            cam->info_sdev_min = cam->current_image->location.stddev_xy;
+        }
+        if (cam->info_sdev_max < cam->current_image->location.stddev_xy ) {
+            cam->info_sdev_max = cam->current_image->location.stddev_xy;
+        }
+
+
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+        , "dev_x %d dev_y %d dev_xy %d, diff %d ratio %d"
+        , cam->current_image->location.stddev_x
+        , cam->current_image->location.stddev_y
+        , cam->current_image->location.stddev_xy
+        , cam->current_image->diffs
+        , cam->current_image->diffs_ratio);
+
     }
 
     if ((cam->conf->emulate_motion || cam->event_user) && (cam->startup_frames == 0)) {

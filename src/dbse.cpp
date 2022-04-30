@@ -604,13 +604,32 @@ void dbse_exec(struct ctx_cam *cam, char *filename
 
 }
 
+/* Execute query against the motionplus database */
+void dbse_motpls_exec(const char *sqlquery, struct ctx_cam *cam)
+{
+    int retcd;
+    char *errmsg = 0;
 
-static int dbse_motpls_callback(
+    if (cam->dbsemp == NULL) {
+        return;
+    }
+    if (cam->dbsemp->database_sqlite3 == NULL) {
+        return;
+    }
+
+    retcd = sqlite3_exec(cam->dbsemp->database_sqlite3, sqlquery, NULL, 0, &errmsg);
+    if (retcd != SQLITE_OK ) {
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("SQLite error was %s"), errmsg);
+        sqlite3_free(errmsg);
+    }
+}
+
+/* sqlite query result call back */
+static int dbse_motpls_cb(
     void *ptr, int arg_nb, char **arg_val, char **col_nm)
 {
     ctx_cam *cam = (ctx_cam *)ptr;
-    struct stat statbuf;
-    int indx, rnbr, flen;
+    int indx;
 
     (void)col_nm;
 
@@ -626,46 +645,119 @@ static int dbse_motpls_callback(
                 cam->dbsemp->movie_cnt =atoi(arg_val[indx]);
             }
         }
-
-    } else if (cam->dbsemp->dbse_action == DBSE_ACT_GETTBL) {
-        rnbr = cam->dbsemp->movie_indx;
-        if (rnbr < cam->dbsemp->movie_cnt) {
-            cam->dbsemp->movie_list[rnbr].rowid     = -1;
-            cam->dbsemp->movie_list[rnbr].camid     = -1;
-            cam->dbsemp->movie_list[rnbr].movie_nm  = NULL;
-            cam->dbsemp->movie_list[rnbr].movie_sz  = 0;
-            cam->dbsemp->movie_list[rnbr].movie_dtl = 0;
-            cam->dbsemp->movie_list[rnbr].found     = false;
-            // select rowid,camid,movie_nm,movie_sz,movie_dtl
-            cam->dbsemp->movie_list[rnbr].rowid =atoi(arg_val[0]);
-            cam->dbsemp->movie_list[rnbr].camid =atoi(arg_val[1]);
-            if (arg_val[2] != NULL) {
-                flen = strlen(arg_val[2]);
-                cam->dbsemp->movie_list[rnbr].movie_nm =
-                    (char*)mymalloc(flen + 1);
-                snprintf(cam->dbsemp->movie_list[rnbr].movie_nm
-                    ,flen+1,"%s",arg_val[2]);
-                flen += cam->conf->target_dir.length() + 2;
-                cam->dbsemp->movie_list[rnbr].full_nm =
-                    (char*)mymalloc(flen + 1);
-                snprintf(cam->dbsemp->movie_list[rnbr].full_nm
-                    ,flen,"%s/%s",cam->conf->target_dir.c_str(), arg_val[2]);
-
-                if (stat(cam->dbsemp->movie_list[rnbr].full_nm, &statbuf) == 0) {
-                    cam->dbsemp->movie_list[rnbr].found = true;
-                }
-            }
-            cam->dbsemp->movie_list[rnbr].movie_sz =atoi(arg_val[3]);
-            cam->dbsemp->movie_list[rnbr].movie_dtl =atoi(arg_val[4]);
-        }
-        cam->dbsemp->movie_indx++;
     }
 
     return 0;
 }
 
-/* Free the list of movies*/
-static void dbse_motpls_freelist(struct ctx_cam *cam)
+/* Process query records for movie list */
+static int dbse_motpls_cb_movies(
+    void *ptr, int arg_nb, char **arg_val, char **col_nm)
+{
+    ctx_cam *cam = (ctx_cam *)ptr;
+    struct stat statbuf;
+    int indx, rnbr, flen;
+
+    if (cam->dbsemp->dbse_action == DBSE_ACT_GETTBL) {
+        rnbr = cam->dbsemp->rec_indx;
+        if (rnbr < cam->dbsemp->movie_cnt) {
+            cam->dbsemp->movie_list[rnbr].found     = false;
+
+            cam->dbsemp->movie_list[rnbr].rowid     = -1;
+            cam->dbsemp->movie_list[rnbr].camid     = -1;
+            cam->dbsemp->movie_list[rnbr].movie_nm  = NULL;
+            cam->dbsemp->movie_list[rnbr].full_nm   = NULL;
+            cam->dbsemp->movie_list[rnbr].movie_sz  = 0;
+            cam->dbsemp->movie_list[rnbr].movie_dtl = 0;
+            cam->dbsemp->movie_list[rnbr].movie_tmc = NULL;
+            cam->dbsemp->movie_list[rnbr].movie_tmc = NULL;
+            cam->dbsemp->movie_list[rnbr].diff_avg  = 0;
+            cam->dbsemp->movie_list[rnbr].sdev_min  = 0;
+            cam->dbsemp->movie_list[rnbr].sdev_max  = 0;
+            cam->dbsemp->movie_list[rnbr].sdev_avg  = 0;
+
+            for (indx=0; indx < arg_nb; indx++) {
+                if (arg_val[indx] != NULL) {
+                    if (mystreq(col_nm[indx],"rowid")) {
+                        cam->dbsemp->movie_list[rnbr].rowid = atoi(arg_val[indx]);
+
+                    } else if (mystreq(col_nm[indx],"camid")) {
+                        cam->dbsemp->movie_list[rnbr].camid = atoi(arg_val[indx]);
+
+                    } else if (mystreq(col_nm[indx],"movie_nm")) {
+                        flen = strlen(arg_val[indx]);
+                        cam->dbsemp->movie_list[rnbr].movie_nm =
+                            (char*)mymalloc(flen + 1);
+                        snprintf(cam->dbsemp->movie_list[rnbr].movie_nm
+                            ,flen+1,"%s",arg_val[indx]);
+                        flen += cam->conf->target_dir.length() + 2;
+                        cam->dbsemp->movie_list[rnbr].full_nm =
+                            (char*)mymalloc(flen + 1);
+                        snprintf(cam->dbsemp->movie_list[rnbr].full_nm
+                            , flen, "%s/%s", cam->conf->target_dir.c_str()
+                            , arg_val[indx]);
+                        if (stat(cam->dbsemp->movie_list[rnbr].full_nm,
+                                &statbuf) == 0) {
+                            cam->dbsemp->movie_list[rnbr].found = true;
+                        }
+
+                    } else if (mystreq(col_nm[indx],"movie_sz")) {
+                        cam->dbsemp->movie_list[rnbr].movie_sz =atoi(arg_val[indx]);
+
+                    } else if (mystreq(col_nm[indx],"movie_dtl")) {
+                        cam->dbsemp->movie_list[rnbr].movie_dtl =atoi(arg_val[indx]);
+
+                    } else if (mystreq(col_nm[indx],"movie_tmc")) {
+                        flen = strlen(arg_val[indx]);
+                        cam->dbsemp->movie_list[rnbr].movie_tmc =
+                            (char*)mymalloc(flen + 1);
+                        snprintf(cam->dbsemp->movie_list[rnbr].movie_tmc
+                            ,flen+1,"%s",arg_val[indx]);
+
+                    } else if (mystreq(col_nm[indx],"diff_avg")) {
+                        cam->dbsemp->movie_list[rnbr].diff_avg =atoi(arg_val[indx]);
+                    } else if (mystreq(col_nm[indx],"sdev_min")) {
+                        cam->dbsemp->movie_list[rnbr].sdev_min =atoi(arg_val[indx]);
+                    } else if (mystreq(col_nm[indx],"sdev_max")) {
+                        cam->dbsemp->movie_list[rnbr].sdev_max =atoi(arg_val[indx]);
+                    } else if (mystreq(col_nm[indx],"sdev_avg")) {
+                        cam->dbsemp->movie_list[rnbr].sdev_avg =atoi(arg_val[indx]);
+
+                    }
+                }
+            }
+        }
+        cam->dbsemp->rec_indx++;
+    }
+
+    return 0;
+}
+
+/* Process query list of columns in motionplus table*/
+static int dbse_motpls_cb_cols(
+    void *ptr, int arg_nb, char **arg_val, char **col_nm)
+{
+    ctx_cam *cam = (ctx_cam *)ptr;
+    int indx, indx2;
+
+    if (cam->dbsemp->dbse_action == DBSE_ACT_GETCOLS) {
+        for (indx=0; indx < arg_nb; indx++) {
+            if (mystreq(col_nm[indx],"col_nm")) {
+                for (indx2=0; indx2 < cam->dbsemp->cols_cnt; indx2++) {
+                    if (mystreq(arg_val[indx]
+                        , cam->dbsemp->cols_list[indx2].col_nm)) {
+                        cam->dbsemp->cols_list[indx2].found = true;
+                    }
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
+/* Free the movies lists*/
+static void dbse_motpls_free_movies(struct ctx_cam *cam)
 {
     int indx;
 
@@ -673,23 +765,133 @@ static void dbse_motpls_freelist(struct ctx_cam *cam)
         return;
     }
 
-    for (indx=0; indx<cam->dbsemp->movie_cnt; indx++) {
-        if (cam->dbsemp->movie_list[indx].movie_nm != NULL) {
-            free(cam->dbsemp->movie_list[indx].movie_nm);
-            cam->dbsemp->movie_list[indx].movie_nm = NULL;
-        }
-        if (cam->dbsemp->movie_list[indx].full_nm != NULL) {
-            free(cam->dbsemp->movie_list[indx].full_nm);
-            cam->dbsemp->movie_list[indx].full_nm = NULL;
-        }
-    }
-
     if (cam->dbsemp->movie_list != NULL) {
+        for (indx=0; indx<cam->dbsemp->movie_cnt; indx++) {
+            if (cam->dbsemp->movie_list[indx].movie_nm != NULL) {
+                free(cam->dbsemp->movie_list[indx].movie_nm);
+                cam->dbsemp->movie_list[indx].movie_nm = NULL;
+            }
+            if (cam->dbsemp->movie_list[indx].full_nm != NULL) {
+                free(cam->dbsemp->movie_list[indx].full_nm);
+                cam->dbsemp->movie_list[indx].full_nm = NULL;
+            }
+            if (cam->dbsemp->movie_list[indx].movie_tmc != NULL) {
+                free(cam->dbsemp->movie_list[indx].movie_tmc);
+                cam->dbsemp->movie_list[indx].movie_tmc = NULL;
+            }
+        }
         free(cam->dbsemp->movie_list);
         cam->dbsemp->movie_list = NULL;
     }
     cam->dbsemp->movie_cnt = 0;
 
+}
+
+/* Free the cols lists*/
+static void dbse_motpls_free_cols(struct ctx_cam *cam)
+{
+    int indx;
+
+    if (cam->dbsemp == NULL) {
+        return;
+    }
+
+    if (cam->dbsemp->cols_list != NULL) {
+        for (indx=0; indx<cam->dbsemp->cols_cnt; indx++) {
+            if (cam->dbsemp->cols_list[indx].col_nm != NULL) {
+                free(cam->dbsemp->cols_list[indx].col_nm);
+                cam->dbsemp->cols_list[indx].col_nm = NULL;
+            }
+        }
+        free(cam->dbsemp->cols_list);
+        cam->dbsemp->cols_list = NULL;
+    }
+    cam->dbsemp->cols_cnt = 0;
+
+}
+
+/* Create array of all the columns in current version */
+static void dbse_motpls_col_list(struct ctx_cam *cam)
+{
+    int indx;
+
+    dbse_motpls_free_cols(cam);
+
+    cam->dbsemp->cols_cnt = 9;
+
+    cam->dbsemp->cols_list =(ctx_dbsemp_col *)
+        mymalloc(sizeof(ctx_dbsemp_col) * cam->dbsemp->cols_cnt);
+
+    /* The size of 30 is arbitrary */
+    for (indx=0; indx<cam->dbsemp->cols_cnt; indx++) {
+        cam->dbsemp->cols_list[indx].col_nm = (char*)mymalloc(30);
+        cam->dbsemp->cols_list[indx].col_typ = (char*)mymalloc(30);
+        cam->dbsemp->cols_list[indx].found = false;
+    }
+
+    snprintf(cam->dbsemp->cols_list[0].col_nm,  30, "%s", "camid");
+    snprintf(cam->dbsemp->cols_list[0].col_typ, 30, "%s", "int");
+
+    snprintf(cam->dbsemp->cols_list[1].col_nm,  30, "%s", "movie_nm");
+    snprintf(cam->dbsemp->cols_list[1].col_typ, 30, "%s", "text");
+
+    snprintf(cam->dbsemp->cols_list[2].col_nm,  30, "%s", "movie_sz");
+    snprintf(cam->dbsemp->cols_list[2].col_typ, 30, "%s", "int");
+
+    snprintf(cam->dbsemp->cols_list[3].col_nm,  30, "%s", "movie_dtl");
+    snprintf(cam->dbsemp->cols_list[3].col_typ, 30, "%s", "int");
+
+    snprintf(cam->dbsemp->cols_list[4].col_nm,  30, "%s", "movie_tmc");
+    snprintf(cam->dbsemp->cols_list[4].col_typ, 30, "%s", "text");
+
+    snprintf(cam->dbsemp->cols_list[5].col_nm,  30, "%s", "diff_avg");
+    snprintf(cam->dbsemp->cols_list[5].col_typ, 30, "%s", "int");
+
+    snprintf(cam->dbsemp->cols_list[6].col_nm,  30, "%s", "sdev_min");
+    snprintf(cam->dbsemp->cols_list[6].col_typ, 30, "%s", "int");
+
+    snprintf(cam->dbsemp->cols_list[7].col_nm,  30, "%s", "sdev_max");
+    snprintf(cam->dbsemp->cols_list[7].col_typ, 30, "%s", "int");
+
+    snprintf(cam->dbsemp->cols_list[8].col_nm,  30, "%s", "sdev_avg");
+    snprintf(cam->dbsemp->cols_list[8].col_typ, 30, "%s", "int");
+
+}
+
+/* Validate table has our cols.  If not add the cols */
+static int dbse_motpls_validate_cols(struct ctx_cam *cam)
+{
+    int retcd, indx;
+    char *errmsg = 0;
+    std::string sqlquery;
+
+    dbse_motpls_col_list(cam);
+
+    sqlquery =
+        " select name as col_nm "
+        " from pragma_table_info('motionplus');";
+    cam->dbsemp->dbse_action = DBSE_ACT_GETCOLS;
+    retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
+        , sqlquery.c_str(), dbse_motpls_cb_cols, cam, &errmsg);
+    if (retcd != SQLITE_OK ) {
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+            , _("Error retrieving table columns: %s"), errmsg);
+        sqlite3_free(errmsg);
+        return -1;
+    }
+
+    for (indx=0; indx<cam->dbsemp->cols_cnt; indx++) {
+        if (cam->dbsemp->cols_list[indx].found == false) {
+            sqlquery = "Alter table motionplus add column ";
+            sqlquery += std::string(cam->dbsemp->cols_list[indx].col_nm) + " ";
+            sqlquery += std::string(cam->dbsemp->cols_list[indx].col_typ) + " ;";
+            dbse_motpls_exec(sqlquery.c_str(), cam);
+        }
+    }
+
+    dbse_motpls_free_cols(cam);
+
+    return 0;
 }
 
 /* Validate database has our required table, if not create it */
@@ -706,7 +908,7 @@ static int dbse_motpls_validate(struct ctx_cam *cam)
     cam->dbsemp->table_ok = false;
     cam->dbsemp->dbse_action = DBSE_ACT_CHKTBL;
     retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
-        , sqlquery.c_str(), dbse_motpls_callback, cam, &errmsg);
+        , sqlquery.c_str(), dbse_motpls_cb, cam, &errmsg);
     if (retcd != SQLITE_OK ) {
         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error checking table: %s"), errmsg);
@@ -717,10 +919,7 @@ static int dbse_motpls_validate(struct ctx_cam *cam)
     if (cam->dbsemp->table_ok == false) {
         sqlquery =
             "create table motionplus ("
-            "camid int"
-            ",movie_nm text"
-            ",movie_sz int"
-            ",movie_dtl int"
+            " camid     int"
             ");";
         retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
             , sqlquery.c_str(), 0, 0, &errmsg);
@@ -732,7 +931,9 @@ static int dbse_motpls_validate(struct ctx_cam *cam)
         }
     }
 
-    return 0;
+    retcd = dbse_motpls_validate_cols(cam);
+
+    return retcd;
 
 }
 
@@ -744,6 +945,8 @@ void dbse_motpls_init(struct ctx_cam *cam)
     cam->dbsemp = new ctx_dbsemp;
     cam->dbsemp->movie_cnt = 0;
     cam->dbsemp->movie_list = NULL;
+    cam->dbsemp->cols_cnt = 0;
+    cam->dbsemp->cols_list = NULL;
 
     dbname = cam->conf->target_dir + "/dbcam" +
         std::to_string(cam->camera_id)+".db";
@@ -777,29 +980,9 @@ void dbse_motpls_deinit(struct ctx_cam *cam)
             sqlite3_close(cam->dbsemp->database_sqlite3);
         }
         cam->dbsemp->database_sqlite3 = NULL;
-        dbse_motpls_freelist(cam);
-
+        dbse_motpls_free_movies(cam);
+        dbse_motpls_free_cols(cam);
         delete cam->dbsemp;
-    }
-}
-
-/* Execute query against the motionplus database */
-void dbse_motpls_exec(const char *sqlquery, struct ctx_cam *cam)
-{
-    int retcd;
-    char *errmsg = 0;
-
-    if (cam->dbsemp == NULL) {
-        return;
-    }
-    if (cam->dbsemp->database_sqlite3 == NULL) {
-        return;
-    }
-
-    retcd = sqlite3_exec(cam->dbsemp->database_sqlite3, sqlquery, NULL, 0, &errmsg);
-    if (retcd != SQLITE_OK ) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("SQLite error was %s"), errmsg);
-        sqlite3_free(errmsg);
     }
 }
 
@@ -814,7 +997,7 @@ int dbse_motpls_getlist(struct ctx_cam *cam)
         return -1;
     }
 
-    dbse_motpls_freelist(cam);
+    dbse_motpls_free_movies(cam);
 
     if (cam->dbsemp->database_sqlite3 == NULL) {
         return -1;
@@ -826,7 +1009,7 @@ int dbse_motpls_getlist(struct ctx_cam *cam)
         " where camid = " + std::to_string(cam->camera_id) + ";";
     cam->dbsemp->dbse_action = DBSE_ACT_GETCNT;
     retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
-        , sqlquery.c_str(), dbse_motpls_callback, cam, &errmsg);
+        , sqlquery.c_str(), dbse_motpls_cb, cam, &errmsg);
     if (retcd != SQLITE_OK ) {
         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error counting table: %s"), errmsg);
@@ -837,14 +1020,13 @@ int dbse_motpls_getlist(struct ctx_cam *cam)
     if (cam->dbsemp->movie_cnt > 0) {
         cam->dbsemp->movie_list =(ctx_dbsemp_rec *)
             mymalloc(sizeof(ctx_dbsemp_rec)*cam->dbsemp->movie_cnt);
-        cam->dbsemp->movie_indx = 0;
+        cam->dbsemp->rec_indx = 0;
         sqlquery =
-            "select rowid,camid,movie_nm,movie_sz,movie_dtl"
-            " from motionplus "
+            " select rowid, * from motionplus "
             " where camid = " + std::to_string(cam->camera_id) + ";";
         cam->dbsemp->dbse_action = DBSE_ACT_GETTBL;
         retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
-            , sqlquery.c_str(), dbse_motpls_callback, cam, &errmsg);
+            , sqlquery.c_str(), dbse_motpls_cb_movies, cam, &errmsg);
         if (retcd != SQLITE_OK ) {
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 , _("Error retrieving table: %s"), errmsg);
@@ -855,7 +1037,7 @@ int dbse_motpls_getlist(struct ctx_cam *cam)
         for (indx=0; indx<cam->dbsemp->movie_cnt; indx++) {
             if (cam->dbsemp->movie_list[indx].found == false) {
                 sqlquery =
-                    "delete from motionplus "
+                    " delete from motionplus "
                     " where camid = " + std::to_string(cam->camera_id) +
                     " and rowid = " + std::to_string(
                     cam->dbsemp->movie_list[indx].rowid)+";";
@@ -880,6 +1062,9 @@ void dbse_motpls_addrec(struct ctx_cam *cam,char *fname, struct timespec *ts1)
     int retcd, dirlen;
     int64_t bsz;
     char dtl[12];
+    char tmc[12];
+    uint64_t diff_avg, sdev_avg;
+
     struct tm timestamp_tm;
 
     if (cam->dbsemp == NULL) {
@@ -889,6 +1074,7 @@ void dbse_motpls_addrec(struct ctx_cam *cam,char *fname, struct timespec *ts1)
         return;
     }
 
+    /* Movie file times */
     if (stat(fname, &statbuf) == 0) {
         bsz = statbuf.st_size;
     } else {
@@ -896,6 +1082,7 @@ void dbse_motpls_addrec(struct ctx_cam *cam,char *fname, struct timespec *ts1)
     }
     localtime_r(&ts1->tv_sec, &timestamp_tm);
     strftime(dtl, 11, "%G%m%d", &timestamp_tm);
+    strftime(tmc, 11, "%I:%M%p", &timestamp_tm);
 
     /* Add 1 for last slash */
     dirlen = cam->conf->target_dir.length() + 1;
@@ -903,12 +1090,29 @@ void dbse_motpls_addrec(struct ctx_cam *cam,char *fname, struct timespec *ts1)
         return;
     }
 
+    if (cam->info_diff_cnt != 0) {
+        diff_avg = (cam->info_diff_tot / cam->info_diff_cnt);
+    } else {
+        diff_avg =0;
+    }
+    if (cam->info_diff_cnt != 0) {
+        sdev_avg = (cam->info_sdev_tot / cam->info_diff_cnt);
+    } else {
+        sdev_avg =0;
+    }
+
     sqlquery =  "insert into motionplus ";
-    sqlquery += " (camid,movie_nm,movie_sz,movie_dtl)";
+    sqlquery += " (camid, movie_nm, movie_sz, movie_dtl, movie_tmc ";
+    sqlquery += " , diff_avg, sdev_min, sdev_max, sdev_avg)";
     sqlquery += " values ("+std::to_string(cam->camera_id);
     sqlquery += " ,'" + std::string(fname + dirlen) + "'";
-    sqlquery += " ," + std::to_string(bsz);
-    sqlquery += " ," + std::string(dtl);
+    sqlquery += " ,"  + std::to_string(bsz);
+    sqlquery += " ,"  + std::string(dtl);
+    sqlquery += " ,'" + std::string(tmc)+ "'";
+    sqlquery += " ,"  + std::to_string(diff_avg);
+    sqlquery += " ,"  + std::to_string(cam->info_sdev_min);
+    sqlquery += " ,"  + std::to_string(cam->info_sdev_max);
+    sqlquery += " ,"  + std::to_string(sdev_avg);
     sqlquery += ")";
 
     retcd = sqlite3_exec(cam->dbsemp->database_sqlite3, sqlquery.c_str(), NULL, 0, &errmsg);

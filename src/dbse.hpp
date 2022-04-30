@@ -43,7 +43,9 @@
     enum DBSE_ACT {
         DBSE_ACT_CHKTBL     = 0,
         DBSE_ACT_GETCNT     = 1,
-        DBSE_ACT_GETTBL     = 2
+        DBSE_ACT_GETTBL     = 2,
+        DBSE_ACT_GETCOLS    = 3
+
     };
 
 
@@ -67,13 +69,26 @@
 
     /* Record structure of motionplus database */
     struct ctx_dbsemp_rec {
+        bool        found;      /*Bool for whether the file exists in dir*/
+
         int64_t     rowid;      /*rowid from database*/
         int         camid;      /*camera id */
         char        *movie_nm;  /*Name of the movie file*/
-        char        *full_nm;   /*Name of the movie file*/
+        char        *full_nm;   /*Full name of the movie file with dir*/
         int64_t     movie_sz;   /*Size of the movie file in bytes*/
         int         movie_dtl;  /*Date in yyyymmdd format for the movie file*/
-        bool        found;      /*Bool for whether the file exists in dir*/
+        char        *movie_tmc; /*Movie time*/
+        int         diff_avg;   /*Average diffs for motion frames */
+        int         sdev_min;   /*std dev min */
+        int         sdev_max;   /*std dev max */
+        int         sdev_avg;   /*std dev average */
+    };
+
+    /* Columns in the motionplus database */
+    struct ctx_dbsemp_col {
+        bool        found;      /*Bool for whether the col in existing db*/
+        char        *col_nm;    /*Name of the column*/
+        char        *col_typ;   /*Data type of the column*/
     };
 
     /* Database structure for motionplus dedicated database*/
@@ -83,9 +98,11 @@
         #endif
         enum DBSE_ACT           dbse_action;    /* action to perform with query*/
         bool                    table_ok;       /* bool of whether table exists*/
-        int                     movie_indx;     /* index of movie_list */
+        int                     rec_indx;       /* index of recordset */
         int                     movie_cnt;      /* count of movie_list */
         struct ctx_dbsemp_rec   *movie_list;    /* list of movies from the database*/
+        int                     cols_cnt;       /* count of columns */
+        struct ctx_dbsemp_col   *cols_list;     /* columns of table from the database*/
     };
 
 
@@ -95,7 +112,7 @@
     void dbse_deinit(struct ctx_cam *cam);
     void dbse_motpls_init(struct ctx_cam *cam);
     void dbse_motpls_deinit(struct ctx_cam *cam);
-    void dbse_motpls_exec(char *sqlquery, struct ctx_cam *cam);
+    void dbse_motpls_exec(const char *sqlquery, struct ctx_cam *cam);
     int dbse_motpls_getlist(struct ctx_cam *cam);
     void dbse_motpls_addrec(struct ctx_cam *cam,char *fname, struct timespec *ts1);
     void dbse_exec(struct ctx_cam *cam, char *filename

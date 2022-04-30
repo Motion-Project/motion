@@ -337,11 +337,33 @@ static void webu_json_movies_list(struct ctx_webui *webui)
                         ,((double)db.movie_sz/1000000000));
                 }
                 webui->resp_page += ",\""+ std::to_string(indx_mov) + "\":";
-                webui->resp_page += "{\"name\": \"" +std::string(db.movie_nm) + "\"";
+
+                webui->resp_page += "{\"name\": \"";
+                webui->resp_page += std::string(db.movie_nm) + "\"";
+
                 webui->resp_page += ",\"size\": \"";
                 webui->resp_page += std::string(fmt) + "\"";
+
                 webui->resp_page += ",\"date\": \"";
                 webui->resp_page += std::to_string(db.movie_dtl) + "\"";
+
+                if (db.movie_tmc != NULL) {
+                    webui->resp_page += ",\"time\": \"";
+                    webui->resp_page += std::string(db.movie_tmc) + "\"";
+                }
+
+                webui->resp_page += ",\"diff_avg\": \"";
+                webui->resp_page += std::to_string(db.diff_avg) + "\"";
+
+                webui->resp_page += ",\"sdev_min\": \"";
+                webui->resp_page += std::to_string(db.sdev_min) + "\"";
+
+                webui->resp_page += ",\"sdev_max\": \"";
+                webui->resp_page += std::to_string(db.sdev_max) + "\"";
+
+                webui->resp_page += ",\"sdev_avg\": \"";
+                webui->resp_page += std::to_string(db.sdev_avg) + "\"";
+
                 webui->resp_page += "}";
             }
             webui->resp_page += "}";
