@@ -523,7 +523,6 @@ static void alg_despeckle(ctx_cam *cam)
     common_buffer = cam->imgs.common_buffer;
     cam->current_image->total_labels = 0;
     cam->imgs.largest_label = 0;
-    cam->olddiffs = cam->current_image->diffs;
 
     for (i = 0; i < len; i++) {
         switch (cam->conf->despeckle_filter[i]) {
@@ -568,7 +567,7 @@ static void alg_despeckle(ctx_cam *cam)
     } else {
         cam->imgs.labelsize_max = 0; // Disable Labeling
     }
-    cam->current_image->diffs = cam->olddiffs;
+
     return;
 }
 

@@ -1443,8 +1443,8 @@ static void mlp_setupmode(struct ctx_cam *cam)
         char part[100];
 
         if (cam->conf->despeckle_filter != "") {
-            snprintf(part, 99, _("Raw changes: %5d - changes after '%s': %5d"),
-                     cam->olddiffs, cam->conf->despeckle_filter.c_str(), cam->current_image->diffs);
+            snprintf(part, 99, _("changes after '%s': %5d")
+                , cam->conf->despeckle_filter.c_str(), cam->current_image->diffs);
             strcat(msg, part);
             if (cam->conf->despeckle_filter.find('l') != std::string::npos) {
                 snprintf(part, 99,_(" - labels: %3d"), cam->current_image->total_labels);

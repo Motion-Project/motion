@@ -374,7 +374,6 @@ struct ctx_cam {
     int                     minimum_frame_time_downcounter;
     unsigned int            get_image;    /* Flag used to signal that we capture new image when we run the loop */
 
-    int                     olddiffs;   //only need this in here for a printf later...do we need that printf?
     int                     smartmask_ratio;
     int                     smartmask_count;
     unsigned int            smartmask_lastrate;
