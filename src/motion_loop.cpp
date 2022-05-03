@@ -115,10 +115,11 @@ static void mlp_ring_destroy(struct ctx_cam *cam)
         cam->imgs.image_ring = NULL;
     }
 
-    if (cam->current_image != NULL) {
-        free(cam->current_image);
-        cam->current_image = NULL;
-    }
+    /*
+     * current_image is an alias from the pointers above which have
+     * already been freed so we just set it equal to NULL here
+    */
+    cam->current_image = NULL;
 
     cam->imgs.ring_size = 0;
 }
