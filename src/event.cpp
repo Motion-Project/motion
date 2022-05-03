@@ -605,8 +605,8 @@ static void event_movie_start(struct ctx_cam *cam, motion_event evnt
                 ,_("Error opening ctx_cam for movie output."));
             if (cam->movie_norm != NULL) {
                 free(cam->movie_norm);
+                cam->movie_norm  = NULL;
             }
-            cam->movie_norm  = NULL;
             return;
         }
         event(cam, EVENT_FILECREATE, NULL, cam->movie_norm->filename, (void *)FTYPE_MOVIE, ts1);
@@ -620,8 +620,8 @@ static void event_movie_start(struct ctx_cam *cam, motion_event evnt
                 ,_("Error creating motion file [%s]"), cam->movie_motion->filename);
             if (cam->movie_motion != NULL) {
                 free(cam->movie_motion);
+                cam->movie_motion = NULL;
             }
-            cam->movie_motion = NULL;
             return;
         }
     }
@@ -661,8 +661,8 @@ static void event_movie_end(struct ctx_cam *cam, motion_event evnt
         movie_close(cam->movie_norm);
         if (cam->movie_norm != NULL) {
             free(cam->movie_norm);
+            cam->movie_norm = NULL;
         }
-        cam->movie_norm = NULL;
 
         if ((cam->conf->movie_retain == "secondary") && (cam->algsec_inuse)) {
             if (cam->algsec->isdetected == false) {
@@ -687,9 +687,9 @@ static void event_movie_end(struct ctx_cam *cam, motion_event evnt
         movie_close(cam->movie_motion);
         if (cam->movie_motion != NULL) {
             free(cam->movie_motion);
+            cam->movie_motion = NULL;
         }
 
-        cam->movie_motion = NULL;
         if ((cam->conf->movie_retain == "secondary") && (cam->algsec_inuse)) {
             if (cam->algsec->isdetected == false) {
                 retcd = remove(cam->motionfilename);
@@ -728,8 +728,8 @@ static void event_tlapse_start(struct ctx_cam *cam, motion_event evnt
                 ,_("Error creating timelapse file [%s]"), cam->movie_timelapse->filename);
             if (cam->movie_timelapse != NULL) {
                 free(cam->movie_timelapse);
+                cam->movie_timelapse = NULL;
             }
-            cam->movie_timelapse = NULL;
             return;
         }
         event(cam, EVENT_FILECREATE, NULL, cam->movie_timelapse->filename
@@ -757,8 +757,8 @@ static void event_tlapse_end(struct ctx_cam *cam, motion_event evnt
         movie_close(cam->movie_timelapse);
         if (cam->movie_timelapse != NULL) {
             free(cam->movie_timelapse);
+            cam->movie_timelapse = NULL;
         }
-        cam->movie_timelapse = NULL;
         event(cam, EVENT_FILECLOSE, NULL, cam->timelapsefilename, (void *)FTYPE_MOVIE_TIMELAPSE, ts1);
         dbse_exec(cam, cam->timelapsefilename, FTYPE_MOVIE_TIMELAPSE, ts1, "movie_end");
     }

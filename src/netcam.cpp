@@ -1886,31 +1886,31 @@ static void netcam_shutdown(struct ctx_netcam *netcam)
 
         if (netcam->path != NULL) {
             free(netcam->path);
+            netcam->path    = NULL;
         }
-        netcam->path    = NULL;
 
         if (netcam->img_latest != NULL) {
             free(netcam->img_latest->ptr);
             free(netcam->img_latest);
+            netcam->img_latest = NULL;
         }
-        netcam->img_latest = NULL;
 
         if (netcam->img_recv != NULL) {
             free(netcam->img_recv->ptr);
             free(netcam->img_recv);
+            netcam->img_recv   = NULL;
         }
-        netcam->img_recv   = NULL;
 
         if (netcam->decoder_nm != NULL) {
             free(netcam->decoder_nm);
+            netcam->decoder_nm = NULL;
         }
-        netcam->decoder_nm = NULL;
 
         util_parms_free(netcam->params);
         if (netcam->params != NULL) {
             free(netcam->params);
+            netcam->params = NULL;
         }
-        netcam->params = NULL;
     }
 
 }
@@ -2304,8 +2304,11 @@ void netcam_cleanup(struct ctx_cam *cam, bool init_retry_flag)
             pthread_mutex_destroy(&netcam->mutex_pktarray);
             pthread_mutex_destroy(&netcam->mutex_transfer);
 
-            free(netcam);
-            netcam = NULL;
+            if (netcam != NULL) {
+                free(netcam);
+                netcam = NULL;
+            }
+
             if (indx_cam == 1) {
                 MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
                     ,_("Norm: Shut down complete."));

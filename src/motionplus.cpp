@@ -696,8 +696,8 @@ static void motion_cam_delete(struct ctx_motapp *motapp)
 
     if (motapp->cam_list[motapp->cam_delete]->dbse != NULL) {
         free(motapp->cam_list[motapp->cam_delete]->dbse);
+        motapp->cam_list[motapp->cam_delete]->dbse = NULL;
     }
-    motapp->cam_list[motapp->cam_delete]->dbse = NULL;
 
     dbse_motpls_deinit(motapp->cam_list[motapp->cam_delete]);
 
@@ -724,6 +724,7 @@ static void motion_cam_delete(struct ctx_motapp *motapp)
     pthread_mutex_lock(&motapp->mutex_camlst);
         if (motapp->cam_list != NULL) {
             free(motapp->cam_list);
+            motapp->cam_list = NULL;
         }
         motapp->cam_list = tmp;
     pthread_mutex_unlock(&motapp->mutex_camlst);

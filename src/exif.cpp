@@ -347,8 +347,8 @@ unsigned exif_prepare(unsigned char **exif, const struct ctx_cam *cam,
 
     if (description != NULL) {
         free(description);
+        description = NULL;
     }
-    description = NULL;
 
     *exif = marker;
     return marker_len;

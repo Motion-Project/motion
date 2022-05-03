@@ -111,43 +111,43 @@ static void webu_context_free(struct ctx_webui *webui)
 
     if (webui->auth_user != NULL) {
         free(webui->auth_user);
+        webui->auth_user = NULL;
     }
-    webui->auth_user = NULL;
 
     if (webui->auth_pass != NULL) {
         free(webui->auth_pass);
+        webui->auth_pass = NULL;
     }
-    webui->auth_pass = NULL;
 
     if (webui->auth_opaque != NULL) {
         free(webui->auth_opaque);
+        webui->auth_opaque = NULL;
     }
-    webui->auth_opaque = NULL;
 
     if (webui->auth_realm != NULL) {
         free(webui->auth_realm);
+        webui->auth_realm = NULL;
     }
-    webui->auth_realm = NULL;
 
     if (webui->resp_image != NULL) {
         free(webui->resp_image);
+        webui->resp_image = NULL;
     }
-    webui->resp_image = NULL;
 
     for (indx = 0; indx<webui->post_sz; indx++) {
         if (webui->post_info[indx].key_nm != NULL) {
             free(webui->post_info[indx].key_nm);
+            webui->post_info[indx].key_nm = NULL;
         }
-        webui->post_info[indx].key_nm = NULL;
         if (webui->post_info[indx].key_val != NULL) {
             free(webui->post_info[indx].key_val);
+            webui->post_info[indx].key_val = NULL;
         }
-        webui->post_info[indx].key_val = NULL;
     }
     if (webui->post_info != NULL) {
         free(webui->post_info);
+        webui->post_info = NULL;
     }
-    webui->post_info = NULL;
 
     delete webui;
 
@@ -524,14 +524,14 @@ static mhdrslt webu_mhd_digest(struct ctx_webui *webui)
         webu_failauth_log(webui);
         if (user != NULL) {
             free(user);
+            user = NULL;
         }
-        user = NULL;
         return webu_mhd_digest_fail(webui, MHD_NO);
     }
     if (user != NULL) {
         free(user);
+        user = NULL;
     }
-    user = NULL;
 
     /* Check the password as well*/
     retcd = MHD_digest_auth_check(webui->connection, webui->auth_realm
@@ -592,12 +592,12 @@ static mhdrslt webu_mhd_basic(struct ctx_webui *webui)
     if ((user == NULL) || (pass == NULL)) {
         if (user != NULL) {
             free(user);
+            user = NULL;
         }
-        user = NULL;
         if (pass != NULL) {
             free(pass);
+            pass = NULL;
         }
-        pass = NULL;
         return webu_mhd_basic_fail(webui);
     }
 
@@ -605,23 +605,23 @@ static mhdrslt webu_mhd_basic(struct ctx_webui *webui)
         webu_failauth_log(webui);
         if (user != NULL) {
             free(user);
+            user = NULL;
         }
-        user = NULL;
         if (pass != NULL) {
             free(pass);
+            pass = NULL;
         }
-        pass = NULL;
         return webu_mhd_basic_fail(webui);
     }
 
     if (user != NULL) {
         free(user);
+        user = NULL;
     }
-    user = NULL;
     if (pass != NULL) {
         free(pass);
+        pass = NULL;
     }
-    pass = NULL;
 
     webui->authenticated = true;
 
@@ -637,12 +637,12 @@ static void webu_mhd_auth_parse(struct ctx_webui *webui)
 
     if (webui->auth_user != NULL) {
         free(webui->auth_user);
+        webui->auth_user = NULL;
     }
-    webui->auth_user = NULL;
     if (webui->auth_pass != NULL) {
         free(webui->auth_pass);
+        webui->auth_pass = NULL;
     }
-    webui->auth_pass = NULL;
 
     auth_len = webui->motapp->cam_list[0]->conf->webcontrol_authentication.length();
     col_pos =(char*) strstr(webui->motapp->cam_list[0]->conf->webcontrol_authentication.c_str() ,":");
@@ -1460,14 +1460,14 @@ void webu_deinit(struct ctx_motapp *motapp)
     util_parms_free(motapp->webcontrol_headers);
     if (motapp->webcontrol_headers != NULL) {
         free(motapp->webcontrol_headers);
+        motapp->webcontrol_headers = NULL;
     }
-    motapp->webcontrol_headers = NULL;
 
     util_parms_free(motapp->webcontrol_actions);
     if (motapp->webcontrol_actions != NULL) {
         free(motapp->webcontrol_actions);
+        motapp->webcontrol_actions = NULL;
     }
-    motapp->webcontrol_actions = NULL;
 
 }
 

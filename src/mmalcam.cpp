@@ -384,13 +384,13 @@ void mmalcam_cleanup(struct ctx_mmalcam *mmalcam)
 
             if (mmalcam->camera_parameters != NULL) {
                 free(mmalcam->camera_parameters);
+                mmalcam->camera_parameters = NULL;
             }
-            mmalcam->camera_parameters = NULL;
 
             if (mmalcam != NULL) {
                 free(mmalcam);
+                mmalcam = NULL;
             }
-            mmalcam = NULL;
         }
     #else
         (void)mmalcam;

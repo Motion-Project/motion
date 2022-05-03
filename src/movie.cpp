@@ -153,8 +153,8 @@ static int movie_get_oformat(struct ctx_movie *movie)
         movie_free_context(movie);
         if (container_name != NULL) {
             free(container_name);
+            container_name = NULL;
         }
-        container_name = NULL;
         return -1;
     }
 
@@ -172,14 +172,14 @@ static int movie_get_oformat(struct ctx_movie *movie)
             movie_free_context(movie);
             if (container_name != NULL) {
                 free(container_name);
+                container_name = NULL;
             }
-            container_name = NULL;
             return -1;
         }
         if (container_name != NULL) {
             free(container_name);
+            container_name = NULL;
         }
-        container_name = NULL;
         return 0;
     }
 
@@ -238,8 +238,8 @@ static int movie_get_oformat(struct ctx_movie *movie)
         movie_free_context(movie);
         if (container_name != NULL) {
             free(container_name);
+            container_name = NULL;
         }
-        container_name = NULL;
         return -1;
     }
 
@@ -249,8 +249,8 @@ static int movie_get_oformat(struct ctx_movie *movie)
         movie_free_context(movie);
         if (container_name != NULL) {
             free(container_name);
+            container_name = NULL;
         }
-        container_name = NULL;
         return -1;
     }
 
@@ -259,15 +259,15 @@ static int movie_get_oformat(struct ctx_movie *movie)
         movie_free_context(movie);
         if (container_name != NULL) {
             free(container_name);
+            container_name = NULL;
         }
-        container_name = NULL;
         return -1;
     }
 
     if (container_name != NULL) {
         free(container_name);
+        container_name = NULL;
     }
-    container_name = NULL;
 
     return 0;
 }
@@ -367,8 +367,8 @@ static int movie_encode_video(struct ctx_movie *movie)
 
         if (video_outbuf != NULL) {
             free(video_outbuf);
+            video_outbuf = NULL;
         }
-        video_outbuf = NULL;
 
         /* This kills compiler warnings.  Nal setting is only for recent movie versions*/
         if (movie->preferred_codec == USER_CODEC_V4L2M2M) {

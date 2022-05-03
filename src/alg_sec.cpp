@@ -391,8 +391,8 @@ static void algsec_params_deinit(ctx_algsec_model &algmdl)
         util_parms_free(algmdl.algsec_params);
         if (algmdl.algsec_params != NULL) {
             free(algmdl.algsec_params);
+            algmdl.algsec_params = NULL;
         }
-        algmdl.algsec_params = NULL;
     }
 }
 
@@ -564,8 +564,8 @@ void algsec_deinit(ctx_cam *cam)
         if (cam->algsec->image_norm != NULL){
             if (cam->algsec->image_norm != NULL) {
                 free(cam->algsec->image_norm);
+                cam->algsec->image_norm = NULL;
             }
-            cam->algsec->image_norm = NULL;
         }
 
         if (waitcnt == 1000){

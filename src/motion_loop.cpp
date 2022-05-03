@@ -76,8 +76,8 @@ static void mlp_ring_resize(struct ctx_cam *cam, int new_size)
 
             if (cam->imgs.image_ring != NULL) {
                 free(cam->imgs.image_ring);
+                cam->imgs.image_ring = NULL;
             }
-            cam->imgs.image_ring = NULL;
 
             cam->imgs.image_ring = tmp;
             cam->current_image = NULL;
@@ -101,21 +101,25 @@ static void mlp_ring_destroy(struct ctx_cam *cam)
     for (i = 0; i < cam->imgs.ring_size; i++) {
         if (cam->imgs.image_ring[i].image_norm != NULL) {
             free(cam->imgs.image_ring[i].image_norm);
+            cam->imgs.image_ring[i].image_norm = NULL;
         }
-        cam->imgs.image_ring[i].image_norm = NULL;
 
         if (cam->imgs.image_ring[i].image_high != NULL) {
             free(cam->imgs.image_ring[i].image_high);
+            cam->imgs.image_ring[i].image_high = NULL;
         }
-        cam->imgs.image_ring[i].image_high = NULL;
+
     }
     if (cam->imgs.image_ring != NULL) {
         free(cam->imgs.image_ring);
+        cam->imgs.image_ring = NULL;
     }
-    cam->imgs.image_ring = NULL;
 
-    cam->imgs.image_ring = NULL;
-    cam->current_image = NULL;
+    if (cam->current_image != NULL) {
+        free(cam->current_image);
+        cam->current_image = NULL;
+    }
+
     cam->imgs.ring_size = 0;
 }
 
@@ -778,98 +782,98 @@ void mlp_cleanup(struct ctx_cam *cam)
 
     if (cam->imgs.image_motion.image_norm != NULL) {
         free(cam->imgs.image_motion.image_norm);
+        cam->imgs.image_motion.image_norm = NULL;
     }
-    cam->imgs.image_motion.image_norm = NULL;
 
     if (cam->imgs.ref != NULL) {
         free(cam->imgs.ref);
+        cam->imgs.ref = NULL;
     }
-    cam->imgs.ref = NULL;
 
     if (cam->imgs.ref_dyn != NULL) {
         free(cam->imgs.ref_dyn);
+        cam->imgs.ref_dyn = NULL;
     }
-    cam->imgs.ref_dyn = NULL;
 
     if (cam->imgs.image_virgin != NULL) {
         free(cam->imgs.image_virgin);
+        cam->imgs.image_virgin = NULL;
     }
-    cam->imgs.image_virgin = NULL;
 
     if (cam->imgs.image_vprvcy != NULL) {
         free(cam->imgs.image_vprvcy);
+        cam->imgs.image_vprvcy = NULL;
     }
-    cam->imgs.image_vprvcy = NULL;
 
     if (cam->imgs.labels != NULL) {
         free(cam->imgs.labels);
+        cam->imgs.labels = NULL;
     }
-    cam->imgs.labels = NULL;
 
     if (cam->imgs.labelsize != NULL) {
         free(cam->imgs.labelsize);
+        cam->imgs.labelsize = NULL;
     }
-    cam->imgs.labelsize = NULL;
 
     if (cam->imgs.smartmask != NULL) {
         free(cam->imgs.smartmask);
+        cam->imgs.smartmask = NULL;
     }
-    cam->imgs.smartmask = NULL;
 
     if (cam->imgs.smartmask_final != NULL) {
         free(cam->imgs.smartmask_final);
+        cam->imgs.smartmask_final = NULL;
     }
-    cam->imgs.smartmask_final = NULL;
 
     if (cam->imgs.smartmask_buffer != NULL) {
         free(cam->imgs.smartmask_buffer);
+        cam->imgs.smartmask_buffer = NULL;
     }
-    cam->imgs.smartmask_buffer = NULL;
 
     if (cam->imgs.mask != NULL) {
         free(cam->imgs.mask);
+        cam->imgs.mask = NULL;
     }
-    cam->imgs.mask = NULL;
 
     if (cam->imgs.mask_privacy != NULL) {
         free(cam->imgs.mask_privacy);
+        cam->imgs.mask_privacy = NULL;
     }
-    cam->imgs.mask_privacy = NULL;
 
     if (cam->imgs.mask_privacy_uv != NULL) {
         free(cam->imgs.mask_privacy_uv);
+        cam->imgs.mask_privacy_uv = NULL;
     }
-    cam->imgs.mask_privacy_uv = NULL;
 
     if (cam->imgs.mask_privacy_high != NULL) {
         free(cam->imgs.mask_privacy_high);
+        cam->imgs.mask_privacy_high = NULL;
     }
-    cam->imgs.mask_privacy_high = NULL;
 
     if (cam->imgs.mask_privacy_high_uv != NULL) {
         free(cam->imgs.mask_privacy_high_uv);
+        cam->imgs.mask_privacy_high_uv = NULL;
     }
-    cam->imgs.mask_privacy_high_uv = NULL;
 
     if (cam->imgs.common_buffer != NULL) {
         free(cam->imgs.common_buffer);
+        cam->imgs.common_buffer = NULL;
     }
-    cam->imgs.common_buffer = NULL;
 
     if (cam->imgs.image_secondary != NULL) {
         free(cam->imgs.image_secondary);
+        cam->imgs.image_secondary = NULL;
     }
-    cam->imgs.image_secondary = NULL;
 
     if (cam->imgs.image_preview.image_norm != NULL)  {
         free(cam->imgs.image_preview.image_norm);
+        cam->imgs.image_preview.image_norm = NULL;
     }
-    cam->imgs.image_preview.image_norm = NULL;
 
     if (cam->imgs.image_preview.image_high != NULL) {
         free(cam->imgs.image_preview.image_high);
+        cam->imgs.image_preview.image_high = NULL;
     }
-    cam->imgs.image_preview.image_high = NULL;
 
     mlp_ring_destroy(cam); /* Cleanup the precapture ring buffer */
 
