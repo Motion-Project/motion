@@ -802,6 +802,10 @@ static void dbse_motpls_free_cols(struct ctx_cam *cam)
                 free(cam->dbsemp->cols_list[indx].col_nm);
                 cam->dbsemp->cols_list[indx].col_nm = NULL;
             }
+            if (cam->dbsemp->cols_list[indx].col_typ != NULL) {
+                free(cam->dbsemp->cols_list[indx].col_typ);
+                cam->dbsemp->cols_list[indx].col_typ = NULL;
+            }
         }
         free(cam->dbsemp->cols_list);
         cam->dbsemp->cols_list = NULL;
