@@ -151,10 +151,7 @@ static int movie_get_oformat(struct ctx_movie *movie)
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Error setting base file name"));
         movie_free_context(movie);
-        if (container_name != NULL) {
-            free(container_name);
-            container_name = NULL;
-        }
+        myfree(&container_name);
         return -1;
     }
 
@@ -170,16 +167,10 @@ static int movie_get_oformat(struct ctx_movie *movie)
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                 ,_("Error setting timelapse append for container %s"), container_name);
             movie_free_context(movie);
-            if (container_name != NULL) {
-                free(container_name);
-                container_name = NULL;
-            }
+            myfree(&container_name);
             return -1;
         }
-        if (container_name != NULL) {
-            free(container_name);
-            container_name = NULL;
-        }
+        myfree(&container_name);
         return 0;
     }
 
@@ -236,10 +227,7 @@ static int movie_get_oformat(struct ctx_movie *movie)
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Error setting file name"));
         movie_free_context(movie);
-        if (container_name != NULL) {
-            free(container_name);
-            container_name = NULL;
-        }
+        myfree(&container_name);
         return -1;
     }
 
@@ -247,27 +235,18 @@ static int movie_get_oformat(struct ctx_movie *movie)
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("container option value %s is not supported"), container_name);
         movie_free_context(movie);
-        if (container_name != NULL) {
-            free(container_name);
-            container_name = NULL;
-        }
+        myfree(&container_name);
         return -1;
     }
 
     if (movie->oc->oformat->video_codec == MY_CODEC_ID_NONE) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get the container"));
         movie_free_context(movie);
-        if (container_name != NULL) {
-            free(container_name);
-            container_name = NULL;
-        }
+        myfree(&container_name);
         return -1;
     }
 
-    if (container_name != NULL) {
-        free(container_name);
-        container_name = NULL;
-    }
+    myfree(&container_name);
 
     return 0;
 }
@@ -365,10 +344,7 @@ static int movie_encode_video(struct ctx_movie *movie)
         movie->pkt->pts = movie->picture->pts;
         movie->pkt->dts = movie->pkt->pts;
 
-        if (video_outbuf != NULL) {
-            free(video_outbuf);
-            video_outbuf = NULL;
-        }
+        myfree(&video_outbuf);
 
         /* This kills compiler warnings.  Nal setting is only for recent movie versions*/
         if (movie->preferred_codec == USER_CODEC_V4L2M2M) {

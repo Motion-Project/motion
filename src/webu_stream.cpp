@@ -32,10 +32,7 @@ static void webu_stream_mjpeg_checkbuffers(struct ctx_webui *webui)
 {
     if (webui->resp_size < (size_t)webui->cam->imgs.size_norm) {
         if (webui->resp_image   != NULL) {
-            if (webui->resp_image != NULL) {
-                free(webui->resp_image);
-                webui->resp_image = NULL;
-            }
+            myfree(&webui->resp_image);
         }
         webui->resp_image   =(char*) mymalloc(webui->cam->imgs.size_norm);
         memset(webui->resp_image,'\0',webui->cam->imgs.size_norm);
@@ -494,35 +491,12 @@ void webu_stream_deinit(struct ctx_cam *cam)
 
     pthread_mutex_destroy(&cam->stream.mutex);
 
-    if (cam->imgs.image_substream != NULL) {
-        free(cam->imgs.image_substream);
-        cam->imgs.image_substream = NULL;
-    }
-
-    if (cam->stream.norm.jpeg_data != NULL) {
-        free(cam->stream.norm.jpeg_data);
-        cam->stream.norm.jpeg_data = NULL;
-    }
-
-    if (cam->stream.sub.jpeg_data != NULL) {
-        free(cam->stream.sub.jpeg_data);
-        cam->stream.sub.jpeg_data = NULL;
-    }
-
-    if (cam->stream.motion.jpeg_data != NULL) {
-        free(cam->stream.motion.jpeg_data);
-        cam->stream.motion.jpeg_data = NULL;
-    }
-
-    if (cam->stream.source.jpeg_data != NULL) {
-        free(cam->stream.source.jpeg_data);
-        cam->stream.source.jpeg_data = NULL;
-    }
-
-    if (cam->stream.secondary.jpeg_data != NULL) {
-        free(cam->stream.secondary.jpeg_data);
-        cam->stream.secondary.jpeg_data = NULL;
-    }
+    myfree(&cam->imgs.image_substream);
+    myfree(&cam->stream.norm.jpeg_data);
+    myfree(&cam->stream.sub.jpeg_data);
+    myfree(&cam->stream.motion.jpeg_data);
+    myfree(&cam->stream.source.jpeg_data);
+    myfree(&cam->stream.secondary.jpeg_data);
 
 }
 
@@ -647,10 +621,7 @@ static void webu_stream_getimg_secondary(struct ctx_cam *cam)
             cam->stream.secondary.jpeg_size = cam->imgs.size_secondary;
         pthread_mutex_unlock(&cam->algsec->mutex);
     } else {
-        if (cam->stream.secondary.jpeg_data != NULL) {
-            free(cam->stream.secondary.jpeg_data);
-            cam->stream.secondary.jpeg_data = NULL;
-        }
+        myfree(&cam->stream.secondary.jpeg_data);
     }
 
 }

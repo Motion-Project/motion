@@ -82,10 +82,7 @@ void dbse_global_deinit(struct ctx_motapp *motapp)
 
     indx = 0;
     while (motapp->cam_list[indx] != NULL) {
-        if (motapp->cam_list[indx]->dbse != NULL) {
-            free(motapp->cam_list[indx]->dbse);
-            motapp->cam_list[indx]->dbse = NULL;
-        }
+        myfree(&motapp->cam_list[indx]->dbse);
         indx++;
     }
 
@@ -767,21 +764,11 @@ static void dbse_motpls_free_movies(struct ctx_cam *cam)
 
     if (cam->dbsemp->movie_list != NULL) {
         for (indx=0; indx<cam->dbsemp->movie_cnt; indx++) {
-            if (cam->dbsemp->movie_list[indx].movie_nm != NULL) {
-                free(cam->dbsemp->movie_list[indx].movie_nm);
-                cam->dbsemp->movie_list[indx].movie_nm = NULL;
-            }
-            if (cam->dbsemp->movie_list[indx].full_nm != NULL) {
-                free(cam->dbsemp->movie_list[indx].full_nm);
-                cam->dbsemp->movie_list[indx].full_nm = NULL;
-            }
-            if (cam->dbsemp->movie_list[indx].movie_tmc != NULL) {
-                free(cam->dbsemp->movie_list[indx].movie_tmc);
-                cam->dbsemp->movie_list[indx].movie_tmc = NULL;
-            }
+            myfree(&cam->dbsemp->movie_list[indx].movie_nm);
+            myfree(&cam->dbsemp->movie_list[indx].full_nm);
+            myfree(&cam->dbsemp->movie_list[indx].movie_tmc);
         }
-        free(cam->dbsemp->movie_list);
-        cam->dbsemp->movie_list = NULL;
+        myfree(&cam->dbsemp->movie_list);
     }
     cam->dbsemp->movie_cnt = 0;
 
@@ -798,17 +785,10 @@ static void dbse_motpls_free_cols(struct ctx_cam *cam)
 
     if (cam->dbsemp->cols_list != NULL) {
         for (indx=0; indx<cam->dbsemp->cols_cnt; indx++) {
-            if (cam->dbsemp->cols_list[indx].col_nm != NULL) {
-                free(cam->dbsemp->cols_list[indx].col_nm);
-                cam->dbsemp->cols_list[indx].col_nm = NULL;
-            }
-            if (cam->dbsemp->cols_list[indx].col_typ != NULL) {
-                free(cam->dbsemp->cols_list[indx].col_typ);
-                cam->dbsemp->cols_list[indx].col_typ = NULL;
-            }
+            myfree(&cam->dbsemp->cols_list[indx].col_nm);
+            myfree(&cam->dbsemp->cols_list[indx].col_typ);
         }
-        free(cam->dbsemp->cols_list);
-        cam->dbsemp->cols_list = NULL;
+        myfree(&cam->dbsemp->cols_list);
     }
     cam->dbsemp->cols_cnt = 0;
 

@@ -389,10 +389,7 @@ static void algsec_params_deinit(ctx_algsec_model &algmdl)
 {
     if (algmdl.algsec_params != NULL){
         util_parms_free(algmdl.algsec_params);
-        if (algmdl.algsec_params != NULL) {
-            free(algmdl.algsec_params);
-            algmdl.algsec_params = NULL;
-        }
+        myfree(&algmdl.algsec_params);
     }
 }
 
@@ -561,12 +558,7 @@ void algsec_deinit(ctx_cam *cam)
                 waitcnt++;
             }
         }
-        if (cam->algsec->image_norm != NULL){
-            if (cam->algsec->image_norm != NULL) {
-                free(cam->algsec->image_norm);
-                cam->algsec->image_norm = NULL;
-            }
-        }
+        myfree(&cam->algsec->image_norm);
 
         if (waitcnt == 1000){
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO

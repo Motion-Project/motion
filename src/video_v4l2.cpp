@@ -555,10 +555,7 @@ static int v4l2_set_palette(ctx_v4l2cam *v4l2cam)
     if ((indx_palette >= 0) && (indx_palette <= V4L2_PALETTE_COUNT_MAX)) {
         retcd = v4l2_set_pixfmt(v4l2cam, palette_array[indx_palette].v4l2id);
         if (retcd >= 0) {
-            if (palette_array != NULL) {
-                free(palette_array);
-                palette_array = NULL;
-            }
+            myfree(&palette_array);
             return 0;
         }
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
@@ -602,10 +599,7 @@ static int v4l2_set_palette(ctx_v4l2cam *v4l2cam)
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 ,_("Selected palette %s")
                 ,palette_array[indx_palette].fourcc);
-            if (palette_array != NULL) {
-                free(palette_array);
-                palette_array = NULL;
-            }
+            myfree(&palette_array);
             return 0;
         }
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
@@ -615,10 +609,7 @@ static int v4l2_set_palette(ctx_v4l2cam *v4l2cam)
 
     MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
         ,_("Unable to find a compatible palette format."));
-    if (palette_array != NULL) {
-        free(palette_array);
-        palette_array = NULL;
-    }
+    myfree(&palette_array);
 
     return -1;
 
@@ -677,10 +668,7 @@ static int v4l2_set_mmap(ctx_v4l2cam *v4l2cam)
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
                 ,_("Error querying buffer %i\nVIDIOC_QUERYBUF: ")
                 ,buffer_index);
-            if (v4l2cam->buffers != NULL) {
-                free(v4l2cam->buffers);
-                v4l2cam->buffers = NULL;
-            }
+            myfree(&v4l2cam->buffers);
             return -1;
         }
 
@@ -691,10 +679,7 @@ static int v4l2_set_mmap(ctx_v4l2cam *v4l2cam)
         if (v4l2cam->buffers[buffer_index].ptr == MAP_FAILED) {
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
                 ,_("Error mapping buffer %i mmap"), buffer_index);
-            if (v4l2cam->buffers != NULL) {
-                free(v4l2cam->buffers);
-                v4l2cam->buffers = NULL;
-            }
+            myfree(&v4l2cam->buffers);
             return -1;
         }
 
@@ -1103,10 +1088,7 @@ static void v4l2_log_formats(ctx_v4l2cam *v4l2cam)
             dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         }
 
-        if (palette_array != NULL) {
-            free(palette_array);
-            palette_array = NULL;
-        }
+        myfree(&palette_array);
 
         return;
 }
@@ -1168,42 +1150,22 @@ void v4l2_cleanup(ctx_cam *cam)
             for (indx = 0; indx < (int)cam->v4l2cam->req.count; indx++){
                 munmap(cam->v4l2cam->buffers[indx].ptr, cam->v4l2cam->buffers[indx].size);
             }
-            if (cam->v4l2cam->buffers != NULL) {
-                free(cam->v4l2cam->buffers);
-                cam->v4l2cam->buffers = NULL;
-            }
+            myfree(&cam->v4l2cam->buffers);
         }
 
         if (cam->v4l2cam->devctrl_count != 0) {
             for (indx = 0; indx < cam->v4l2cam->devctrl_count; indx++){
-                if (cam->v4l2cam->devctrl_array[indx].ctrl_iddesc != NULL) {
-                    free(cam->v4l2cam->devctrl_array[indx].ctrl_iddesc);
-                    cam->v4l2cam->devctrl_array[indx].ctrl_iddesc = NULL;
-                }
-
-                if (cam->v4l2cam->devctrl_array[indx].ctrl_name != NULL) {
-                    free(cam->v4l2cam->devctrl_array[indx].ctrl_name);
-                    cam->v4l2cam->devctrl_array[indx].ctrl_name = NULL;
-                }
+                myfree(&cam->v4l2cam->devctrl_array[indx].ctrl_iddesc);
+                myfree(&cam->v4l2cam->devctrl_array[indx].ctrl_name);
             }
-            if (cam->v4l2cam->devctrl_array != NULL) {
-                free(cam->v4l2cam->devctrl_array);
-                cam->v4l2cam->devctrl_array = NULL;
-            }
+            myfree(&cam->v4l2cam->devctrl_array);
         }
         cam->v4l2cam->devctrl_count=0;
 
         util_parms_free(cam->v4l2cam->params);
+        myfree(&cam->v4l2cam->params);
 
-        if (cam->v4l2cam->params != NULL) {
-            free(cam->v4l2cam->params);
-            cam->v4l2cam->params = NULL;
-        }
-
-        if (cam->v4l2cam != NULL) {
-            free(cam->v4l2cam);
-            cam->v4l2cam = NULL;
-        }
+        myfree(&cam->v4l2cam);
 
         cam->running_cam = false;
     #else

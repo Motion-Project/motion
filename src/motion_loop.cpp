@@ -74,10 +74,7 @@ static void mlp_ring_resize(struct ctx_cam *cam, int new_size)
                 }
             }
 
-            if (cam->imgs.image_ring != NULL) {
-                free(cam->imgs.image_ring);
-                cam->imgs.image_ring = NULL;
-            }
+            myfree(&cam->imgs.image_ring);
 
             cam->imgs.image_ring = tmp;
             cam->current_image = NULL;
@@ -99,21 +96,10 @@ static void mlp_ring_destroy(struct ctx_cam *cam)
     }
 
     for (i = 0; i < cam->imgs.ring_size; i++) {
-        if (cam->imgs.image_ring[i].image_norm != NULL) {
-            free(cam->imgs.image_ring[i].image_norm);
-            cam->imgs.image_ring[i].image_norm = NULL;
-        }
-
-        if (cam->imgs.image_ring[i].image_high != NULL) {
-            free(cam->imgs.image_ring[i].image_high);
-            cam->imgs.image_ring[i].image_high = NULL;
-        }
-
+        myfree(&cam->imgs.image_ring[i].image_norm);
+        myfree(&cam->imgs.image_ring[i].image_high);
     }
-    if (cam->imgs.image_ring != NULL) {
-        free(cam->imgs.image_ring);
-        cam->imgs.image_ring = NULL;
-    }
+    myfree(&cam->imgs.image_ring);
 
     /*
      * current_image is an alias from the pointers above which have
@@ -781,100 +767,25 @@ void mlp_cleanup(struct ctx_cam *cam)
         mlp_cam_close(cam);
     }
 
-    if (cam->imgs.image_motion.image_norm != NULL) {
-        free(cam->imgs.image_motion.image_norm);
-        cam->imgs.image_motion.image_norm = NULL;
-    }
-
-    if (cam->imgs.ref != NULL) {
-        free(cam->imgs.ref);
-        cam->imgs.ref = NULL;
-    }
-
-    if (cam->imgs.ref_dyn != NULL) {
-        free(cam->imgs.ref_dyn);
-        cam->imgs.ref_dyn = NULL;
-    }
-
-    if (cam->imgs.image_virgin != NULL) {
-        free(cam->imgs.image_virgin);
-        cam->imgs.image_virgin = NULL;
-    }
-
-    if (cam->imgs.image_vprvcy != NULL) {
-        free(cam->imgs.image_vprvcy);
-        cam->imgs.image_vprvcy = NULL;
-    }
-
-    if (cam->imgs.labels != NULL) {
-        free(cam->imgs.labels);
-        cam->imgs.labels = NULL;
-    }
-
-    if (cam->imgs.labelsize != NULL) {
-        free(cam->imgs.labelsize);
-        cam->imgs.labelsize = NULL;
-    }
-
-    if (cam->imgs.smartmask != NULL) {
-        free(cam->imgs.smartmask);
-        cam->imgs.smartmask = NULL;
-    }
-
-    if (cam->imgs.smartmask_final != NULL) {
-        free(cam->imgs.smartmask_final);
-        cam->imgs.smartmask_final = NULL;
-    }
-
-    if (cam->imgs.smartmask_buffer != NULL) {
-        free(cam->imgs.smartmask_buffer);
-        cam->imgs.smartmask_buffer = NULL;
-    }
-
-    if (cam->imgs.mask != NULL) {
-        free(cam->imgs.mask);
-        cam->imgs.mask = NULL;
-    }
-
-    if (cam->imgs.mask_privacy != NULL) {
-        free(cam->imgs.mask_privacy);
-        cam->imgs.mask_privacy = NULL;
-    }
-
-    if (cam->imgs.mask_privacy_uv != NULL) {
-        free(cam->imgs.mask_privacy_uv);
-        cam->imgs.mask_privacy_uv = NULL;
-    }
-
-    if (cam->imgs.mask_privacy_high != NULL) {
-        free(cam->imgs.mask_privacy_high);
-        cam->imgs.mask_privacy_high = NULL;
-    }
-
-    if (cam->imgs.mask_privacy_high_uv != NULL) {
-        free(cam->imgs.mask_privacy_high_uv);
-        cam->imgs.mask_privacy_high_uv = NULL;
-    }
-
-    if (cam->imgs.common_buffer != NULL) {
-        free(cam->imgs.common_buffer);
-        cam->imgs.common_buffer = NULL;
-    }
-
-    if (cam->imgs.image_secondary != NULL) {
-        free(cam->imgs.image_secondary);
-        cam->imgs.image_secondary = NULL;
-    }
-
-    if (cam->imgs.image_preview.image_norm != NULL)  {
-        free(cam->imgs.image_preview.image_norm);
-        cam->imgs.image_preview.image_norm = NULL;
-    }
-
-    if (cam->imgs.image_preview.image_high != NULL) {
-        free(cam->imgs.image_preview.image_high);
-        cam->imgs.image_preview.image_high = NULL;
-    }
+    myfree(&cam->imgs.image_motion.image_norm);
+    myfree(&cam->imgs.ref);
+    myfree(&cam->imgs.ref_dyn);
+    myfree(&cam->imgs.image_virgin);
+    myfree(&cam->imgs.image_vprvcy);
+    myfree(&cam->imgs.labels);
+    myfree(&cam->imgs.labelsize);
+    myfree(&cam->imgs.smartmask);
+    myfree(&cam->imgs.smartmask_final);
+    myfree(&cam->imgs.smartmask_buffer);
+    myfree(&cam->imgs.mask);
+    myfree(&cam->imgs.mask_privacy);
+    myfree(&cam->imgs.mask_privacy_uv);
+    myfree(&cam->imgs.mask_privacy_high);
+    myfree(&cam->imgs.mask_privacy_high_uv);
+    myfree(&cam->imgs.common_buffer);
+    myfree(&cam->imgs.image_secondary);
+    myfree(&cam->imgs.image_preview.image_norm);
+    myfree(&cam->imgs.image_preview.image_high);
 
     mlp_ring_destroy(cam); /* Cleanup the precapture ring buffer */
 

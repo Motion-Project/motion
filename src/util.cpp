@@ -103,6 +103,16 @@ void mytrim(std::string &parm)
     myltrim(parm);
 }
 
+/* Free memory and set the pointer to NULL*/
+void myfree(void *ptr_addr) {
+    void **ptr = (void **)ptr_addr;
+
+    if (*ptr != NULL) {
+        free(*ptr);
+        *ptr = NULL;
+    }
+}
+
 /** mymalloc */
 void *mymalloc(size_t nbytes)
 {
@@ -779,20 +789,10 @@ void util_parms_free(struct ctx_params *params)
     }
 
     for (indx_parm=0; indx_parm<params->params_count; indx_parm++) {
-        if (params->params_array[indx_parm].param_name != NULL) {
-            free(params->params_array[indx_parm].param_name);
-            params->params_array[indx_parm].param_name = NULL;
-        }
-        if (params->params_array[indx_parm].param_value != NULL) {
-            free(params->params_array[indx_parm].param_value);
-            params->params_array[indx_parm].param_value = NULL;
-        }
+        myfree(&params->params_array[indx_parm].param_name);
+        myfree(&params->params_array[indx_parm].param_value);
     }
-
-    if (params->params_array != NULL) {
-      free(params->params_array);
-      params->params_array = NULL;
-    }
+    myfree(&params->params_array);
 
     params->params_count = 0;
 

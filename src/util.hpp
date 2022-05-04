@@ -99,6 +99,7 @@
         typedef int             mhdrslt; /* Version independent return result from MHD */
     #endif
 
+    void myfree(void *ptr_addr);
 
     void *mymalloc(size_t nbytes);
     void *myrealloc(void *ptr, size_t size, const char *desc);

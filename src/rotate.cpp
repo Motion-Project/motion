@@ -278,21 +278,9 @@ void rotate_deinit(struct ctx_cam *cam)
     if (cam->rotate_data == NULL) {
         return;
     }
-
-    if (cam->rotate_data->buffer_norm != NULL) {
-        free(cam->rotate_data->buffer_norm);
-        cam->rotate_data->buffer_norm = NULL;
-    }
-
-    if (cam->rotate_data->buffer_high != NULL) {
-        free(cam->rotate_data->buffer_high);
-        cam->rotate_data->buffer_high = NULL;
-    }
-
-    if (cam->rotate_data != NULL) {
-        free(cam->rotate_data);
-        cam->rotate_data = NULL;
-    }
+    myfree(&cam->rotate_data->buffer_norm);
+    myfree(&cam->rotate_data->buffer_high);
+    myfree(&cam->rotate_data);
 }
 
 /**

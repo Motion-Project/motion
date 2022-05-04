@@ -251,17 +251,10 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
  */
 static void netcam_url_free(struct url_t *parse_url)
 {
-    free(parse_url->service);
-    parse_url->service = NULL;
-
-    free(parse_url->userpass);
-    parse_url->userpass = NULL;
-
-    free(parse_url->host);
-    parse_url->host = NULL;
-
-    free(parse_url->path);
-    parse_url->path = NULL;
+    myfree(&parse_url->service);
+    myfree(&parse_url->userpass);
+    myfree(&parse_url->host);
+    myfree(&parse_url->path);
 }
 
 static void netcam_free_pkt(struct ctx_netcam *netcam)
@@ -296,8 +289,7 @@ static void netcam_pktarray_free(struct ctx_netcam *netcam)
                 netcam->pktarray[indx].packet = NULL;
             }
         }
-        free(netcam->pktarray);
-        netcam->pktarray = NULL;
+        myfree(&netcam->pktarray);
         netcam->pktarray_size = 0;
         netcam->pktarray_index = -1;
     pthread_mutex_unlock(&netcam->mutex_pktarray);
@@ -394,9 +386,7 @@ static void netcam_pktarray_resize(struct ctx_cam *cam, bool is_highres)
                 tmp[indx].iswritten = false;
             }
 
-            if (netcam->pktarray != NULL) {
-                free(netcam->pktarray);
-            }
+            myfree(&netcam->pktarray);
             netcam->pktarray = tmp;
             netcam->pktarray_size = newsize;
 
@@ -753,7 +743,7 @@ static void netcam_decoder_error(struct ctx_netcam *netcam, int retcd, const cha
 
         for (indx = 0; indx < netcam->params->params_count; indx++) {
             if (mystreq(netcam->params->params_array[indx].param_name,"decoder") ) {
-                free(netcam->params->params_array[indx].param_value);
+                myfree(&netcam->params->params_array[indx].param_value);
                 netcam->params->params_array[indx].param_value = (char*)mymalloc(5);
                 snprintf(netcam->params->params_array[indx].param_value, 5, "%s","NULL");
                 break;
@@ -766,7 +756,7 @@ static void netcam_decoder_error(struct ctx_netcam *netcam, int retcd, const cha
             util_parms_update(netcam->params, netcam->conf->netcam_params);
         }
 
-        free(netcam->decoder_nm);
+        myfree(&netcam->decoder_nm);
         netcam->decoder_nm = (char*)mymalloc(5);
         snprintf(netcam->decoder_nm, 5, "%s","NULL");
     }
@@ -1884,10 +1874,7 @@ static void netcam_shutdown(struct ctx_netcam *netcam)
     if (netcam) {
         netcam_close_context(netcam);
 
-        if (netcam->path != NULL) {
-            free(netcam->path);
-            netcam->path    = NULL;
-        }
+        myfree(&netcam->path);
 
         if (netcam->img_latest != NULL) {
             free(netcam->img_latest->ptr);
@@ -1901,16 +1888,9 @@ static void netcam_shutdown(struct ctx_netcam *netcam)
             netcam->img_recv   = NULL;
         }
 
-        if (netcam->decoder_nm != NULL) {
-            free(netcam->decoder_nm);
-            netcam->decoder_nm = NULL;
-        }
-
+        myfree(&netcam->decoder_nm);
         util_parms_free(netcam->params);
-        if (netcam->params != NULL) {
-            free(netcam->params);
-            netcam->params = NULL;
-        }
+        myfree(&netcam->params);
     }
 
 }
@@ -2304,10 +2284,7 @@ void netcam_cleanup(struct ctx_cam *cam, bool init_retry_flag)
             pthread_mutex_destroy(&netcam->mutex_pktarray);
             pthread_mutex_destroy(&netcam->mutex_transfer);
 
-            if (netcam != NULL) {
-                free(netcam);
-                netcam = NULL;
-            }
+            myfree(&netcam);
 
             if (indx_cam == 1) {
                 MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
