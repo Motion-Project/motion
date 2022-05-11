@@ -2139,7 +2139,7 @@ static void copy_lightswitch_frames(struct context *cnt, char *str, int val_ptr)
 {
     void *tmp;
 
-    copy_int(*cnt, *str, val_ptr);
+    copy_int(cnt, str, val_ptr);
 
     tmp = (char *)cnt + val_ptr;
     if (*((int *)tmp) < 1) {
