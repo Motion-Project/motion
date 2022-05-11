@@ -724,7 +724,7 @@ config_param config_params[] = {
     "# When lightswitch is detected, ignore this many frames",
     0,
     CONF_OFFSET(lightswitch_frames),
-    copy_int,
+    copy_lightswitch_frames,
     print_int,
     WEBUI_LEVEL_LIMITED
     },
@@ -2132,6 +2132,20 @@ static void copy_int(struct context *cnt, char *str, int val_ptr)
         *((int *)tmp) = 0;
     } else {
         *((int *)tmp) = atoi(str);
+    }
+}
+
+static void copy_lightswitch_frames(struct context *cnt, char *str, int val_ptr)
+{
+    void *tmp;
+
+    copy_int(*cnt, *str, val_ptr);
+
+    tmp = (char *)cnt + val_ptr;
+    if (*((int *)tmp) < 1) {
+        *((int *)tmp) = 1;
+    } else if (*((int *)tmp) > 1000) {
+        *((int *)tmp) = 1000;
     }
 }
 
