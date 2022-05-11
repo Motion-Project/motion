@@ -3,6 +3,13 @@
 # This file is distributed under the same license as the Motion package.
 #
 # update 2022/04/13 siriuth
+# 単独で変換する場合の手順
+# mv ~/motion/po/ja.po ja.po.org
+# mv ~/ja.po ~/motion/po/
+# cd ~/motion/po/
+# sudo rm -f ja.gmo && /usr/bin/msgfmt -c --statistics --verbose -o ja.gmo ja.po
+# sudo mv ./ja.gmo /usr/local/share/locale/ja/LC_MESSAGES/motion.mo
+# sudo service motion restart
 msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
@@ -305,7 +312,7 @@ msgstr "スマートマスク更新頻度"
 
 #: src/conf.c
 msgid "lightswitch_percent"
-msgstr "ライトスイッチ率"
+msgstr "ライトスイッチ比率"
 
 #: src/conf.c
 msgid "lightswitch_frames"
@@ -321,11 +328,11 @@ msgstr "イベントギャップ"
 
 #: src/conf.c
 msgid "pre_capture"
-msgstr "プレキャプチャ"
+msgstr "キャプチャ前"
 
 #: src/conf.c
 msgid "post_capture"
-msgstr "ポストキャプチャ"
+msgstr "キャプチャ後"
 
 #: src/conf.c
 msgid "on_event_start"
@@ -357,7 +364,7 @@ msgstr "動画終了時"
 
 #: src/conf.c
 msgid "on_camera_lost"
-msgstr "カメラを失ったとき"
+msgstr "カメラを見失ったとき"
 
 #: src/conf.c
 msgid "on_camera_found"
@@ -365,23 +372,23 @@ msgstr "カメラを見つけたとき"
 
 #: src/conf.c
 msgid "picture_output"
-msgstr "画像出力"
+msgstr "画像 出力"
 
 #: src/conf.c
 msgid "picture_output_motion"
-msgstr "動体画像の出力"
+msgstr "画像 動体の出力"
 
 #: src/conf.c
 msgid "picture_type"
-msgstr "ピクチャタイプ"
+msgstr "画像 種類"
 
 #: src/conf.c
 msgid "picture_quality"
-msgstr "画質"
+msgstr "画像 画質"
 
 #: src/conf.c
 msgid "picture_exif"
-msgstr "画像のexif"
+msgstr "画像 exif"
 
 #: src/conf.c
 msgid "picture_filename"
@@ -413,51 +420,51 @@ msgstr "動画のビットレート"
 
 #: src/conf.c
 msgid "movie_quality"
-msgstr "動画の品質"
+msgstr "動画品質"
 
 #: src/conf.c
 msgid "movie_codec"
-msgstr "動画のコーデック"
+msgstr "動画コーデック"
 
 #: src/conf.c
 msgid "movie_duplicate_frames"
-msgstr "動画に複製したフレームを利用する"
+msgstr "動画 フレームを複製"
 
 #: src/conf.c
 msgid "movie_passthrough"
-msgstr "動画のパススルー"
+msgstr "動画 パススルー"
 
 #: src/conf.c
 msgid "movie_filename"
-msgstr "動画のファイル名"
+msgstr "動画 ファイル名"
 
 #: src/conf.c
 msgid "movie_extpipe_use"
-msgstr "動画を拡張パイプに出力"
+msgstr "動画 拡張パイプを使用"
 
 #: src/conf.c
 msgid "movie_extpipe"
-msgstr "動画の拡張パイプ"
+msgstr "動画 拡張パイプ"
 
 #: src/conf.c
 msgid "timelapse_interval"
-msgstr "タイムラプスの間隔"
+msgstr "タイムラプス 間隔"
 
 #: src/conf.c
 msgid "timelapse_mode"
-msgstr "タイムラプスモード"
+msgstr "タイムラプス モード"
 
 #: src/conf.c
 msgid "timelapse_fps"
-msgstr "タイムラプスのfps"
+msgstr "タイムラプス fps"
 
 #: src/conf.c
 msgid "timelapse_codec"
-msgstr "タイムラプスのコーデック"
+msgstr "タイムラプス コーデック"
 
 #: src/conf.c
 msgid "timelapse_filename"
-msgstr "タイムラプスファイル名"
+msgstr "タイムラプス ファイル名"
 
 #: src/conf.c
 msgid "video_pipe"
@@ -617,7 +624,7 @@ msgstr "SQLクエリの開始"
 
 #: src/conf.c
 msgid "sql_query_stop"
-msgstr "SQLクエリ停止"
+msgstr "SQLクエリの停止"
 
 #: src/conf.c
 msgid "sql_query"
@@ -625,7 +632,7 @@ msgstr "SQLクエリ"
 
 #: src/conf.c
 msgid "track_type"
-msgstr "トラックタイプ"
+msgstr "トラッキング タイプ"
 
 #: src/conf.c
 msgid "track_auto"
@@ -689,19 +696,19 @@ msgstr "トラッキング Yステップ角度"
 
 #: src/conf.c
 msgid "track_move_wait"
-msgstr "トラッキング移動待ち時間"
+msgstr "トラッキング 移動待ち時間"
 
 #: src/conf.c
 msgid "track_speed"
-msgstr "トラッキング速度"
+msgstr "トラッキング 速度"
 
 #: src/conf.c
 msgid "track_stepsize"
-msgstr "トラックステップサイズ"
+msgstr "トラッキング ステップサイズ"
 
 #: src/conf.c
 msgid "track_generic_move"
-msgstr "トラッキング 一般的な移動"
+msgstr "トラッキング 一般的な動作"
 
 #: src/conf.c
 msgid "camera"
@@ -713,15 +720,15 @@ msgstr "カメラ方向"
 
 #: src/dbse.c
 msgid "Closing MySQL library"
-msgstr "MySQLライブラリを閉じる"
+msgstr "MySQLライブラリをクローズ中"
 
 #: src/dbse.c
 msgid "Closing MariaDB library"
-msgstr "MariaDBライブラリを閉じる"
+msgstr "MariaDBライブラリをクローズ中"
 
 #: src/dbse.c
 msgid "Database closed"
-msgstr "データベースを閉じた"
+msgstr "データベースを閉じました"
 
 #: src/dbse.c
 msgid "Initializing database"
@@ -782,11 +789,11 @@ msgstr "ユーザー %sでホスト %sのMariaDBデータベース %sに接続�
 #: src/dbse.c
 #, c-format
 msgid "MariaDB error was %s"
-msgstr "MariaDBエラー %s"
+msgstr "MariaDB エラー %s"
 
 #: src/dbse.c
 msgid "SQLite3 using shared handle"
-msgstr "SQLite3 共有ハンドルを使用"
+msgstr "SQLite3 共有ハンドルを使用中"
 
 #: src/dbse.c
 #, c-format
@@ -800,12 +807,12 @@ msgstr "データベースバックエンド %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
-msgstr "MySQLクエリの実行"
+msgstr "MySQLクエリの実行中"
 
 #: src/dbse.c
 #, c-format
 msgid "MySQL query failed %s error code %d"
-msgstr "MySQLクエリが失敗しました %sエラーコード %d"
+msgstr "MySQLクエリが失敗しました %s エラーコード %d"
 
 #: src/dbse.c
 #, c-format
@@ -828,12 +835,12 @@ msgstr "再接続後、MySQLクエリが失敗しました %sエラーコード 
 
 #: src/dbse.c
 msgid "Executing MariaDB query"
-msgstr "MariaDBクエリの実行"
+msgstr "MariaDBクエリの実行中"
 
 #: src/dbse.c
 #, c-format
 msgid "MariaDB query failed %s error code %d"
-msgstr "MariaDBクエリが失敗しました %sエラーコード %d"
+msgstr "MariaDBクエリが失敗しました %s エラーコード %d"
 
 #: src/dbse.c
 #, c-format
@@ -842,7 +849,7 @@ msgid ""
 "error was %s"
 msgstr ""
 "ユーザー %s MariaDBを使用してホスト %sのMariaDBデータベース %sに再接続できま"
-"せんエラーは %sでした"
+"せん エラーは %sでした"
 
 #: src/dbse.c
 #, c-format
@@ -861,12 +868,12 @@ msgstr "PostgreSQLデータベース '%s'に再接続しました"
 
 #: src/dbse.c
 msgid "Executing PostgreSQL query"
-msgstr "PostgreSQLクエリの実行"
+msgstr "PostgreSQLクエリを実行中"
 
 #: src/dbse.c
 #, c-format
 msgid "Attempting reconnect to PostgreSQL database '%s': %s"
-msgstr "PostgreSQLデータベース '%s'への再接続を試みています: %s"
+msgstr "PostgreSQLデータベース '%s'への再接続を試行中: %s"
 
 #: src/dbse.c
 #, c-format
@@ -876,7 +883,7 @@ msgstr "PGSQLクエリが失敗しました:[%s] %s %s"
 #: src/dbse.c
 #, c-format
 msgid "INSERT ... RETURNING VALUE=\"%s\""
-msgstr "挿入...戻り値= \"%s\""
+msgstr "挿入... 戻り値=\"%s\""
 
 #: src/dbse.c
 #, c-format
@@ -900,11 +907,11 @@ msgstr "外部コマンド '%s'を開始できません"
 #: src/event.c src/track.c
 #, c-format
 msgid "Executing external command '%s'"
-msgstr "外部コマンド '%s'を実行しています"
+msgstr "外部コマンド '%s'を実行中"
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
-msgstr "画像をビデオパイプに配置できませんでした"
+msgstr "ビデオパイプへ画像を送れませんでした"
 
 #: src/event.c
 #, c-format
@@ -929,12 +936,12 @@ msgstr "プレビュー名 %d %sの作成エラー"
 #: src/event.c
 #, c-format
 msgid "CLOSING: extpipe file desc %d, error state %d"
-msgstr "クローズ中: extpipeファイルの説明 %d、エラー状態 %d"
+msgstr "クローズ中: 拡張パイプ ファイルの説明 %d エラー状態 %d"
 
 #: src/event.c
 #, c-format
 msgid "pclose return: %d"
-msgstr "pcloseリターン値: %d"
+msgstr "pclose 結果: %d"
 
 #: src/event.c
 #, c-format
@@ -1170,7 +1177,7 @@ msgstr "報告されたFPSは %d/%dをサポートしました"
 #: src/ffmpeg.c
 #, c-format
 msgid "Could not open codec %s"
-msgstr "コーデック %sを開けませんでした"
+msgstr "コーデックを開けませんでした(%s)"
 
 #: src/ffmpeg.c
 #, c-format
