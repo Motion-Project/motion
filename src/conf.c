@@ -209,6 +209,7 @@ struct config conf_template = {
 static void malloc_strings(struct context *cnt);
 static void copy_bool(struct context *cnt, char *str, int val_ptr);
 static void copy_int(struct context *cnt, char *str, int val_ptr);
+static void copy_lightswitch_frames(struct context *cnt, char *str, int val_ptr);
 static const char *print_bool(struct context **cnt, char **str,int parm, unsigned int threadnr);
 static const char *print_string(struct context **cnt,char **str, int parm, unsigned int threadnr);
 static const char *print_int(struct context **cnt, char **str, int parm, unsigned int threadnr);
