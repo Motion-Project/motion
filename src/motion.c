@@ -2070,11 +2070,11 @@ static void mlp_detection(struct context *cnt)
                 if (alg_lightswitch(cnt, cnt->current_image->diffs)) {
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
 
-                    if (cnt->conf.lightswitch_frames < 1) {
-                        cnt->conf.lightswitch_frames = 1;
-                    } else if (cnt->conf.lightswitch_frames > 1000) {
-                        cnt->conf.lightswitch_frames = 1000;
-                    }
+                    //if (cnt->conf.lightswitch_frames < 1) {
+                    //    cnt->conf.lightswitch_frames = 1;
+                    //} else if (cnt->conf.lightswitch_frames > 1000) {
+                    //    cnt->conf.lightswitch_frames = 1000;
+                    //}
 
                     if (cnt->moved < (unsigned int)cnt->conf.lightswitch_frames) {
                         cnt->moved = (unsigned int)cnt->conf.lightswitch_frames;
