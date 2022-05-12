@@ -209,6 +209,8 @@ struct config conf_template = {
 static void malloc_strings(struct context *cnt);
 static void copy_bool(struct context *cnt, char *str, int val_ptr);
 static void copy_int(struct context *cnt, char *str, int val_ptr);
+static void copy_int_positive(struct context *cnt, char *str, int val_ptr);	// 1,2,3...
+static void copy_int_zero_or_above(struct context *cnt, char *str, int val_ptr);	// 0,1,2...
 static void copy_lightswitch_frames(struct context *cnt, char *str, int val_ptr);
 static const char *print_bool(struct context **cnt, char **str,int parm, unsigned int threadnr);
 static const char *print_string(struct context **cnt,char **str, int parm, unsigned int threadnr);
@@ -732,9 +734,9 @@ config_param config_params[] = {
     {
     "minimum_motion_frames",
     "# Number of images that must contain motion to trigger an event.",
-    0,
+    1,
     CONF_OFFSET(minimum_motion_frames),
-    copy_int,
+    copy_int_positive,
     print_int,
     WEBUI_LEVEL_LIMITED
     },
@@ -752,7 +754,7 @@ config_param config_params[] = {
     "# The number of pre-captured (buffered) pictures from before motion.",
     0,
     CONF_OFFSET(pre_capture),
-    copy_int,
+    copy_int_zero_or_above,
     print_int,
     WEBUI_LEVEL_LIMITED
     },
@@ -2136,7 +2138,20 @@ static void copy_int(struct context *cnt, char *str, int val_ptr)
     }
 }
 
-static void copy_lightswitch_frames(struct context *cnt, char *str, int val_ptr)
+static copy_int_zero_or_above(struct context *cnt, char *str, int val_ptr)
+{
+    void *tmp;
+
+    copy_int(cnt, str, val_ptr);
+
+    tmp = (char *)cnt + val_ptr;
+    if (*((int *)tmp) < 0) {
+        *((int *)tmp) = 0;
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("%s is negative integer. Set to zero."), str);
+    }
+}
+
+static void copy_int_positive(struct context *cnt, char *str, int val_ptr)
 {
     void *tmp;
 
@@ -2145,8 +2160,20 @@ static void copy_lightswitch_frames(struct context *cnt, char *str, int val_ptr)
     tmp = (char *)cnt + val_ptr;
     if (*((int *)tmp) < 1) {
         *((int *)tmp) = 1;
-    } else if (*((int *)tmp) > 1000) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("%s is below zero. Set to 1."), str);
+    }
+}
+
+static void copy_lightswitch_frames(struct context *cnt, char *str, int val_ptr)
+{
+    void *tmp;
+
+    copy_int_positive(cnt, str, val_ptr);
+
+    tmp = (char *)cnt + val_ptr;
+    if (*((int *)tmp) > 1000) {
         *((int *)tmp) = 1000;
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("%s is over 1000. Set to 1000."), str);
     }
 }
 
