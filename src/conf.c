@@ -732,6 +732,7 @@ config_param config_params[] = {
     print_int,
     WEBUI_LEVEL_LIMITED
     },
+    {
     "microlightswitch",
     "# triggers a microlightswitch detected.",
     0,
