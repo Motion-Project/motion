@@ -101,6 +101,7 @@ struct config conf_template = {
     .smart_mask_speed =                0,
     .lightswitch_percent =             0,
     .lightswitch_frames =              5,
+    .microlightswitch =                0,
     .minimum_motion_frames =           1,
     .event_gap =                       DEF_EVENT_GAP,
     .pre_capture =                     0,
@@ -728,6 +729,14 @@ config_param config_params[] = {
     0,
     CONF_OFFSET(lightswitch_frames),
     copy_lightswitch_frames,
+    print_int,
+    WEBUI_LEVEL_LIMITED
+    },
+    "microlightswitch",
+    "# triggers a microlightswitch detected.",
+    0,
+    CONF_OFFSET(microlightswitch),
+    copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
     },
