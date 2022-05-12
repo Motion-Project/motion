@@ -2148,7 +2148,7 @@ static void copy_int(struct context *cnt, char *str, int val_ptr)
     }
 }
 
-static copy_int_zero_or_above(struct context *cnt, char *str, int val_ptr)
+static void copy_int_zero_or_above(struct context *cnt, char *str, int val_ptr)
 {
     void *tmp;
 
