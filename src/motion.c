@@ -2152,6 +2152,8 @@ static void mlp_detection(struct context *cnt)
     if (cnt->moved) {
         cnt->moved--;
         cnt->current_image->diffs = 0;
+        // diffs is zero but i hope save image
+        cnt->current_image->flags |= IMAGE_MOTION;
     }
 
 }
