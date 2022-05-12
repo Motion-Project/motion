@@ -91,6 +91,7 @@ struct config {
     int             smart_mask_speed;
     int             lightswitch_percent;
     int             lightswitch_frames;
+    int             microlightswitch;
     int             minimum_motion_frames;
     int             event_gap;
     int             pre_capture;
