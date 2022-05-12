@@ -2209,30 +2209,31 @@ static void mlp_tuning(struct context *cnt)
          * at a constant level.
          */
 
-        // If you process at this timing, it will fail.
-        
-//        if ((cnt->current_image->diffs > cnt->threshold) &&
-//            (cnt->current_image->diffs < cnt->threshold_maximum) &&
-//            (cnt->conf.lightswitch_percent >= 1) &&
-//            (cnt->lightswitch_framecounter < (cnt->lastrate * 2)) && /* two seconds window only */
-//            /* number of changed pixels almost the same in two consecutive frames and */
-//            ((abs(cnt->previous_diffs - cnt->current_image->diffs)) < (cnt->previous_diffs / 15)) &&
-//            /* center of motion in about the same place ? */
-//            ((abs(cnt->current_image->location.x - cnt->previous_location_x)) <= (cnt->imgs.width / 150)) &&
-//            ((abs(cnt->current_image->location.y - cnt->previous_location_y)) <= (cnt->imgs.height / 150))) {
-//            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _(
-//                "lastrate:%d previous_diffs:%d diffs:%d lightswitch_framecounter:%d"),
-//                cnt->lastrate, cnt->previous_diffs, cnt->current_image->diffs, cnt->lightswitch_framecounter);
-//            alg_update_reference_frame(cnt, RESET_REF_FRAME);
-//            cnt->current_image->diffs = 0;
-//            //////// Checking operation
-//            //cnt->lightswitch_framecounter = 0;
-//
-//            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("micro-lightswitch!"));
-//        } else {
-//            alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
-//        }
-        alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
+        /*
+         * I couldn't understand the function of the micro light switch.
+         * I think it should be treated as separate from the light switch.
+         */
+        if ((cnt->current_image->diffs > cnt->threshold) &&
+            (cnt->current_image->diffs < cnt->threshold_maximum) &&
+            //(cnt->conf.lightswitch_percent >= 1) &&
+            (cnt->conf.microlightswitch) &&
+            (cnt->lightswitch_framecounter < (cnt->lastrate * 2)) && /* two seconds window only */
+            /* number of changed pixels almost the same in two consecutive frames and */
+            ((abs(cnt->previous_diffs - cnt->current_image->diffs)) < (cnt->previous_diffs / 15)) &&
+            /* center of motion in about the same place ? */
+            ((abs(cnt->current_image->location.x - cnt->previous_location_x)) <= (cnt->imgs.width / 150)) &&
+            ((abs(cnt->current_image->location.y - cnt->previous_location_y)) <= (cnt->imgs.height / 150))) {
+            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _(
+                "lastrate:%d previous_diffs:%d diffs:%d lightswitch_framecounter:%d"),
+                cnt->lastrate, cnt->previous_diffs, cnt->current_image->diffs, cnt->lightswitch_framecounter);
+            alg_update_reference_frame(cnt, RESET_REF_FRAME);
+            cnt->current_image->diffs = 0;
+            cnt->lightswitch_framecounter = 0;
+
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("micro-lightswitch!"));
+        } else {
+            alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
+        }
 
         cnt->previous_diffs = cnt->current_image->diffs;
         cnt->previous_location_x = cnt->current_image->location.x;
@@ -2332,7 +2333,8 @@ static void mlp_actions(struct context *cnt)
         (cnt->current_image->diffs < cnt->threshold_maximum)) {
         /* flag this image, it have motion */
         cnt->current_image->flags |= IMAGE_MOTION;
-        cnt->lightswitch_framecounter++; /* micro lightswitch */
+        if (cnt->conf.microlightswitch)
+            cnt->lightswitch_framecounter++; /* micro lightswitch */
     } else {
         cnt->lightswitch_framecounter = 0;
     }
