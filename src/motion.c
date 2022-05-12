@@ -1685,18 +1685,19 @@ static void mlp_prepare(struct context *cnt)
         cnt->process_thisframe = 1;
     }
 
+    // Changed to check in conf.c
     /*
      * Since we don't have sanity checks done when options are set,
      * this sanity check must go in the main loop :(, before pre_captures
      * are attempted.
      */
-    if (cnt->conf.minimum_motion_frames < 1) {
-        cnt->conf.minimum_motion_frames = 1;
-    }
+    //if (cnt->conf.minimum_motion_frames < 1) {
+    //    cnt->conf.minimum_motion_frames = 1;
+    //}
 
-    if (cnt->conf.pre_capture < 0) {
-        cnt->conf.pre_capture = 0;
-    }
+    //if (cnt->conf.pre_capture < 0) {
+    //    cnt->conf.pre_capture = 0;
+    //}
 
     /*
      * Check if our buffer is still the right size
@@ -2212,9 +2213,13 @@ static void mlp_tuning(struct context *cnt)
             /* center of motion in about the same place ? */
             ((abs(cnt->current_image->location.x - cnt->previous_location_x)) <= (cnt->imgs.width / 150)) &&
             ((abs(cnt->current_image->location.y - cnt->previous_location_y)) <= (cnt->imgs.height / 150))) {
+            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _(
+                "lastrate:%d previous_diffs:%d diffs:%d lightswitch_framecounter:%d"),
+                cnt->lastrate, cnt->previous_diffs, cnt->current_image->diffs, cnt->lightswitch_framecounter);
             alg_update_reference_frame(cnt, RESET_REF_FRAME);
             cnt->current_image->diffs = 0;
-            cnt->lightswitch_framecounter = 0;
+            //////// Checking operation
+            //cnt->lightswitch_framecounter = 0;
 
             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("micro-lightswitch!"));
         } else {
