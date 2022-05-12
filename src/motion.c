@@ -2071,6 +2071,7 @@ static void mlp_detection(struct context *cnt)
                 if (alg_lightswitch(cnt, cnt->current_image->diffs)) {
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
 
+                    // to conf.c 
                     //if (cnt->conf.lightswitch_frames < 1) {
                     //    cnt->conf.lightswitch_frames = 1;
                     //} else if (cnt->conf.lightswitch_frames > 1000) {
@@ -2081,8 +2082,9 @@ static void mlp_detection(struct context *cnt)
                         cnt->moved = (unsigned int)cnt->conf.lightswitch_frames;
                     }
 
-                    cnt->current_image->diffs = 0;
-                    alg_update_reference_frame(cnt, RESET_REF_FRAME);
+                    // if move > 0 then begin exit this function. elase this code. 2022/05/12 siriuth 
+                    //cnt->current_image->diffs = 0;
+                    //alg_update_reference_frame(cnt, RESET_REF_FRAME);
                 }
             }
 
@@ -2204,27 +2206,31 @@ static void mlp_tuning(struct context *cnt)
          * at a constant level.
          */
 
-        if ((cnt->current_image->diffs > cnt->threshold) &&
-            (cnt->current_image->diffs < cnt->threshold_maximum) &&
-            (cnt->conf.lightswitch_percent >= 1) &&
-            (cnt->lightswitch_framecounter < (cnt->lastrate * 2)) && /* two seconds window only */
-            /* number of changed pixels almost the same in two consecutive frames and */
-            ((abs(cnt->previous_diffs - cnt->current_image->diffs)) < (cnt->previous_diffs / 15)) &&
-            /* center of motion in about the same place ? */
-            ((abs(cnt->current_image->location.x - cnt->previous_location_x)) <= (cnt->imgs.width / 150)) &&
-            ((abs(cnt->current_image->location.y - cnt->previous_location_y)) <= (cnt->imgs.height / 150))) {
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _(
-                "lastrate:%d previous_diffs:%d diffs:%d lightswitch_framecounter:%d"),
-                cnt->lastrate, cnt->previous_diffs, cnt->current_image->diffs, cnt->lightswitch_framecounter);
-            alg_update_reference_frame(cnt, RESET_REF_FRAME);
-            cnt->current_image->diffs = 0;
-            //////// Checking operation
-            //cnt->lightswitch_framecounter = 0;
+        // If you process at this timing, it will fail.
+        
+//        if ((cnt->current_image->diffs > cnt->threshold) &&
+//            (cnt->current_image->diffs < cnt->threshold_maximum) &&
+//            (cnt->conf.lightswitch_percent >= 1) &&
+//            (cnt->lightswitch_framecounter < (cnt->lastrate * 2)) && /* two seconds window only */
+//            /* number of changed pixels almost the same in two consecutive frames and */
+//            ((abs(cnt->previous_diffs - cnt->current_image->diffs)) < (cnt->previous_diffs / 15)) &&
+//            /* center of motion in about the same place ? */
+//            ((abs(cnt->current_image->location.x - cnt->previous_location_x)) <= (cnt->imgs.width / 150)) &&
+//            ((abs(cnt->current_image->location.y - cnt->previous_location_y)) <= (cnt->imgs.height / 150))) {
+//            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _(
+//                "lastrate:%d previous_diffs:%d diffs:%d lightswitch_framecounter:%d"),
+//                cnt->lastrate, cnt->previous_diffs, cnt->current_image->diffs, cnt->lightswitch_framecounter);
+//            alg_update_reference_frame(cnt, RESET_REF_FRAME);
+//            cnt->current_image->diffs = 0;
+//            //////// Checking operation
+//            //cnt->lightswitch_framecounter = 0;
+//
+//            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("micro-lightswitch!"));
+//        } else {
+//            alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
+//        }
+        alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
 
-            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("micro-lightswitch!"));
-        } else {
-            alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
-        }
         cnt->previous_diffs = cnt->current_image->diffs;
         cnt->previous_location_x = cnt->current_image->location.x;
         cnt->previous_location_y = cnt->current_image->location.y;
