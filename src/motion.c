@@ -930,9 +930,9 @@ static void init_text_scale(struct context *cnt)
      */
 
     cnt->text_scale = cnt->conf.text_scale;
-    if (cnt->text_scale <= 0) {
-        cnt->text_scale = 1;
-    }
+    //if (cnt->text_scale <= 0) {
+    //    cnt->text_scale = 1;
+    //}
 
     if ((cnt->text_scale * 10 * 2) > (cnt->imgs.width / 4)) {
         cnt->text_scale = (cnt->imgs.width / (4 * 10 * 2));
