@@ -61,6 +61,7 @@ extern "C" {
     #include <libavutil/imgutils.h>
     #include <libavutil/mathematics.h>
     #include <libavdevice/avdevice.h>
+    #include <libavcodec/avcodec.h>
 }
 
 #ifdef HAVE_V4L2

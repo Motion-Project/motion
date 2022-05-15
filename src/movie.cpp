@@ -157,10 +157,8 @@ static int movie_get_oformat(struct ctx_movie *movie)
 
     if (movie->tlapse == TIMELAPSE_APPEND) {
 
-        movie->oc->oformat = av_guess_format ("mpeg2video", NULL, NULL);
-        if (movie->oc->oformat) {
-            movie->oc->oformat->video_codec = MY_CODEC_ID_MPEG2VIDEO;
-        }
+        movie->oc->oformat = av_guess_format("mpeg2video", NULL, NULL);
+        movie->oc->video_codec_id = MY_CODEC_ID_MPEG2VIDEO;
         retcd = snprintf(movie->filename,PATH_MAX,"%s.mpg",basename);
         if ((!movie->oc->oformat) ||
             (retcd < 0) || (retcd >= PATH_MAX)) {
@@ -177,49 +175,38 @@ static int movie_get_oformat(struct ctx_movie *movie)
     if (mystreq(container_name, "flv")) {
         movie->oc->oformat = av_guess_format("flv", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.flv",basename);
-        if (movie->oc->oformat) {
-            movie->oc->oformat->video_codec = MY_CODEC_ID_FLV1;
-        }
+        movie->oc->video_codec_id = MY_CODEC_ID_FLV1;
     }
 
     if (mystreq(container_name, "ogg")) {
         movie->oc->oformat = av_guess_format("ogg", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.ogg",basename);
-        if (movie->oc->oformat) {
-            movie->oc->oformat->video_codec = MY_CODEC_ID_THEORA;
-        }
+        movie->oc->video_codec_id = MY_CODEC_ID_THEORA;
     }
 
     if (mystreq(container_name, "vp8")) {
         movie->oc->oformat = av_guess_format("webm", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.webm",basename);
-        if (movie->oc->oformat) {
-            movie->oc->oformat->video_codec = MY_CODEC_ID_VP8;
-        }
+        movie->oc->video_codec_id = MY_CODEC_ID_VP8;
     }
 
     if (mystreq(container_name, "mp4")) {
         movie->oc->oformat = av_guess_format("mp4", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.mp4",basename);
-        if (movie->oc->oformat) {
-            movie->oc->oformat->video_codec = MY_CODEC_ID_H264;
-        }
+        movie->oc->video_codec_id = MY_CODEC_ID_H264;
     }
 
     if (mystreq(container_name, "mkv")) {
         movie->oc->oformat = av_guess_format("matroska", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.mkv",basename);
-        if (movie->oc->oformat) {
-            movie->oc->oformat->video_codec = MY_CODEC_ID_H264;
-        }
+        movie->oc->video_codec_id = MY_CODEC_ID_H264;
     }
 
     if (mystreq(container_name, "hevc")) {
+            movie->oc->video_codec_id = MY_CODEC_ID_HEVC;
         movie->oc->oformat = av_guess_format("mp4", NULL, NULL);
         retcd = snprintf(movie->filename,PATH_MAX,"%s.mp4",basename);
-        if (movie->oc->oformat) {
-            movie->oc->oformat->video_codec = MY_CODEC_ID_HEVC;
-        }
+        movie->oc->video_codec_id = MY_CODEC_ID_HEVC;
     }
 
     //Check for valid results
@@ -440,7 +427,9 @@ static int movie_set_quality(struct ctx_movie *movie)
             char crf[10];
             movie->quality = (int)(( (100-movie->quality) * 51)/100);
             snprintf(crf, 10, "%d", movie->quality);
-            av_opt_set(movie->ctx_codec->priv_data, "profile", "high", 0);
+            if (movie->ctx_codec->codec_id == MY_CODEC_ID_H264) {
+                av_opt_set(movie->ctx_codec->priv_data, "profile", "high", 0);
+            }
             av_opt_set(movie->ctx_codec->priv_data, "crf", crf, 0);
             av_opt_set(movie->ctx_codec->priv_data, "tune", "zerolatency", 0);
             av_opt_set(movie->ctx_codec->priv_data, "preset", "superfast",0);
@@ -509,19 +498,12 @@ static int movie_set_codec_preferred(struct ctx_movie *movie)
                 ,&movie->container_name[container_name_len+1], blacklist_reason);
         } else {
             movie->codec = avcodec_find_encoder_by_name(&movie->container_name[container_name_len+1]);
-            if ((movie->oc->oformat) && (movie->codec != NULL)) {
-                    movie->oc->oformat->video_codec = movie->codec->id;
-            } else if (movie->codec == NULL) {
-                MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO
-                    ,_("Preferred codec %s not found")
-                    ,&movie->container_name[container_name_len+1]);
-            }
         }
     }
-    if (!movie->codec) {
-        movie->codec = avcodec_find_encoder(movie->oc->oformat->video_codec);
+    if (movie->codec == NULL) {
+        movie->codec = avcodec_find_encoder(movie->oc->video_codec_id);
     }
-    if (!movie->codec) {
+    if (movie->codec == NULL) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("container %s not found"), movie->container_name);
         movie_free_context(movie);
@@ -559,8 +541,7 @@ static int movie_set_codec(struct ctx_movie *movie)
     }
 
     #if (MYFFVER >= 57041)
-        //If we provide the codec to this, it results in a memory leak.  ffmpeg ticket: 5714
-        movie->strm_video = avformat_new_stream(movie->oc, NULL);
+        movie->strm_video = avformat_new_stream(movie->oc, movie->codec);
         if (!movie->strm_video) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
             movie_free_context(movie);
@@ -568,7 +549,7 @@ static int movie_set_codec(struct ctx_movie *movie)
         }
         movie->ctx_codec = avcodec_alloc_context3(movie->codec);
         if (movie->ctx_codec == NULL) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Failed to allocate decoder!"));
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Failed to allocate codec context!"));
             movie_free_context(movie);
             return -1;
         }
@@ -609,7 +590,7 @@ static int movie_set_codec(struct ctx_movie *movie)
         }
     }
 
-    movie->ctx_codec->codec_id      = movie->oc->oformat->video_codec;
+    movie->ctx_codec->codec_id      = movie->codec->id;
     movie->ctx_codec->codec_type    = AVMEDIA_TYPE_VIDEO;
     movie->ctx_codec->bit_rate      = movie->bps;
     movie->ctx_codec->width         = movie->width;
@@ -1274,7 +1255,6 @@ static int movie_passthru_streams(struct ctx_movie *movie)
         pthread_mutex_lock(&movie->netcam_data->mutex_transfer);
             for (indx= 0; indx < (int)movie->netcam_data->transfer_format->nb_streams; indx++) {
                 stream_in = movie->netcam_data->transfer_format->streams[indx];
-                movie->oc->oformat->video_codec = stream_in->codecpar->codec_id;
                 if (stream_in->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
                     retcd = movie_passthru_streams_video(movie, stream_in);
                 } else if (stream_in->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
