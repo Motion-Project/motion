@@ -1252,6 +1252,10 @@ static int movie_passthru_streams(struct ctx_movie *movie)
         int         retcd, indx;
         AVStream    *stream_in;
 
+        if (movie->netcam_data->finish == true) {
+            return -1;
+        }
+
         pthread_mutex_lock(&movie->netcam_data->mutex_transfer);
             for (indx= 0; indx < (int)movie->netcam_data->transfer_format->nb_streams; indx++) {
                 stream_in = movie->netcam_data->transfer_format->streams[indx];
