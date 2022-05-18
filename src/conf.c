@@ -148,6 +148,7 @@ struct config conf_template = {
     .timelapse_interval =              0,
     .timelapse_mode =                  DEF_TIMELAPSE_MODE,
     .timelapse_fps =                   30,
+    .timelapse_quality =                   60,
     .timelapse_codec =                 "mpg",
     .timelapse_filename =              DEF_TIMEPATH,
 
@@ -1078,6 +1079,15 @@ config_param config_params[] = {
     "# Frame rate for timelapse playback",
     0,
     CONF_OFFSET(timelapse_fps),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "timelapse_quality",
+    "# The encoding quality of the timelapse movie. (0=use bitrate. 1=worst quality, 100=best)",
+    0,
+    CONF_OFFSET(timelapse_quality),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
