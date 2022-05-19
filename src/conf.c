@@ -148,7 +148,7 @@ struct config conf_template = {
     .timelapse_interval =              0,
     .timelapse_mode =                  DEF_TIMELAPSE_MODE,
     .timelapse_fps =                   30,
-    .timelapse_quality =                   60,
+    .timelapse_quality =               60,
     .timelapse_codec =                 "mpg",
     .timelapse_filename =              DEF_TIMEPATH,
 
