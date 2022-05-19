@@ -138,6 +138,7 @@ struct config {
     int             timelapse_interval;
     const char      *timelapse_mode;
     int             timelapse_fps;
+    int             timelapse_quality;
     const char      *timelapse_codec;
     const char      *timelapse_filename;
 
