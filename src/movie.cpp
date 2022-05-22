@@ -785,9 +785,23 @@ static int movie_set_picture(struct ctx_movie *movie)
 
 }
 
+static int movie_interrupt(void *ctx)
+{
+    struct ctx_movie *movie = (struct ctx_movie *)ctx;
+
+    clock_gettime(CLOCK_MONOTONIC, &movie->cb_cr_ts);
+    if ((movie->cb_cr_ts.tv_sec - movie->cb_st_ts.tv_sec ) > movie->cb_dur) {
+        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO,_("Movie timed out"));
+        return 1;
+    } else{
+        return 0;
+    }
+    return 0;
+}
+
+
 static int movie_set_outputfile(struct ctx_movie *movie)
 {
-
     int retcd;
     char errstr[128];
 
@@ -802,38 +816,38 @@ static int movie_set_outputfile(struct ctx_movie *movie)
 
     /* Open the output file, if needed. */
     if ((movie_timelapse_exists(movie->filename) == 0) || (movie->tlapse != TIMELAPSE_APPEND)) {
-        if (!(movie->oc->oformat->flags & AVFMT_NOFILE)) {
-            if (avio_open(&movie->oc->pb, movie->filename, MY_FLAG_WRITE) < 0) {
-                if (errno == ENOENT) {
-                    if (mycreate_path(movie->filename) == -1) {
-                        movie_free_context(movie);
-                        return -1;
-                    }
-                    if (avio_open(&movie->oc->pb, movie->filename, MY_FLAG_WRITE) < 0) {
-                        MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
-                            ,_("error opening file %s"), movie->filename);
-                        movie_free_context(movie);
-                        return -1;
-                    }
-                    /* Permission denied */
-                } else if (errno ==  EACCES) {
-                    MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
-                        ,_("Permission denied. %s"),movie->filename);
-                    movie_free_context(movie);
-                    return -1;
-                } else {
-                    MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
-                        ,_("Error opening file %s"), movie->filename);
+        clock_gettime(CLOCK_MONOTONIC, &movie->cb_st_ts);
+        retcd = avio_open(&movie->oc->pb, movie->filename, MY_FLAG_WRITE);
+        if (retcd < 0) {
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
+                ,_("avio_open: %s File %s")
+                , errstr, movie->filename);
+            if (errno == ENOENT) {
+                if (mycreate_path(movie->filename) == -1) {
                     movie_free_context(movie);
                     return -1;
                 }
+                clock_gettime(CLOCK_MONOTONIC, &movie->cb_st_ts);
+                retcd = avio_open(&movie->oc->pb, movie->filename, MY_FLAG_WRITE);
+                if (retcd < 0) {
+                    av_strerror(retcd, errstr, sizeof(errstr));
+                    MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
+                        ,_("error %s opening file %s")
+                        , errstr, movie->filename);
+                    movie_free_context(movie);
+                    return -1;
+                }
+            } else {
+                MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
+                    ,_("Error opening file %s")
+                    , movie->filename);
+                movie_free_context(movie);
+                return -1;
             }
         }
 
-        /* Write the stream header,  For the TIMELAPSE_APPEND
-         * we write the data via standard file I/O so we close the
-         * items here
-         */
+        clock_gettime(CLOCK_MONOTONIC, &movie->cb_st_ts);
         retcd = avformat_write_header(movie->oc, NULL);
         if (retcd < 0) {
             av_strerror(retcd, errstr, sizeof(errstr));
@@ -842,6 +856,7 @@ static int movie_set_outputfile(struct ctx_movie *movie)
             movie_free_context(movie);
             return -1;
         }
+        /* TIMELAPSE_APPEND uses standard file IO so we close it */
         if (movie->tlapse == TIMELAPSE_APPEND) {
             av_write_trailer(movie->oc);
             avio_close(movie->oc->pb);
@@ -855,7 +870,6 @@ static int movie_set_outputfile(struct ctx_movie *movie)
 
 static int movie_flush_codec(struct ctx_movie *movie)
 {
-
     #if (MYFFVER >= 57041)
         //ffmpeg version 3.1 and after
 
@@ -1051,7 +1065,6 @@ static void movie_passthru_write(struct ctx_movie *movie, int indx)
 
 static void movie_passthru_minpts(struct ctx_movie *movie)
 {
-
     int indx, indx_audio, indx_video;
 
     movie->pass_audio_base = 0;
@@ -1313,6 +1326,9 @@ static int movie_passthru_open(struct ctx_movie *movie)
         movie_free_context(movie);
         return -1;
     }
+    movie->oc->interrupt_callback.callback = movie_interrupt;
+    movie->oc->interrupt_callback.opaque = movie;
+    movie->cb_dur = 3;
 
     if (mystrne(movie->container_name, "mp4") && mystrne(movie->container_name, "mkv")) {
         MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
@@ -1486,6 +1502,10 @@ int movie_open(struct ctx_movie *movie)
         movie_free_context(movie);
         return -1;
     }
+    clock_gettime(CLOCK_MONOTONIC, &movie->cb_st_ts);
+    movie->cb_dur = 3;
+    movie->oc->interrupt_callback.callback = movie_interrupt;
+    movie->oc->interrupt_callback.opaque = movie;
 
     retcd = movie_get_oformat(movie);
     if (retcd < 0 ) {
@@ -1534,6 +1554,7 @@ void movie_close(struct ctx_movie *movie)
 {
 
     if (movie != NULL) {
+        clock_gettime(CLOCK_MONOTONIC, &movie->cb_st_ts);
 
         if (movie_flush_codec(movie) < 0) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error flushing codec"));
@@ -1557,9 +1578,10 @@ void movie_close(struct ctx_movie *movie)
 
 int movie_put_image(struct ctx_movie *movie, struct ctx_image_data *img_data, const struct timespec *ts1)
 {
-
     int retcd = 0;
     int cnt = 0;
+
+    clock_gettime(CLOCK_MONOTONIC, &movie->cb_st_ts);
 
     if (movie->passthrough) {
         retcd = movie_passthru_put(movie, img_data);

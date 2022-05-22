@@ -76,6 +76,10 @@ struct ctx_movie {
     enum USER_CODEC     preferred_codec;
     char                *nal_info;
     int                 nal_info_len;
+    struct timespec     cb_st_ts;    /* The time set before calling the av functions */
+    struct timespec     cb_cr_ts;    /* Time during the interrupt to determine duration since start*/
+    int                 cb_dur;      /* Seconds permitted before triggering a interrupt */
+
 };
 
 

@@ -505,11 +505,15 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
             , motapp->cam_list[indx]->threadnr);
         if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
             (motapp->cam_list[indx]->netcam != NULL)) {
-            pthread_cancel(motapp->cam_list[indx]->netcam->thread_id);
+            if (motapp->cam_list[indx]->netcam->handler_finished == false) {
+                pthread_cancel(motapp->cam_list[indx]->netcam->thread_id);
+            }
         }
         if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
             (motapp->cam_list[indx]->netcam_high != NULL)) {
-            pthread_cancel(motapp->cam_list[indx]->netcam_high->thread_id);
+            if (motapp->cam_list[indx]->netcam_high->handler_finished == false) {
+                pthread_cancel(motapp->cam_list[indx]->netcam_high->thread_id);
+            }
         }
         pthread_cancel(motapp->cam_list[indx]->thread_id);
     }
