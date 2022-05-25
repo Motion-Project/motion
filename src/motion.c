@@ -2678,6 +2678,15 @@ static void mlp_parmsupdate(struct context *cnt)
         return;
     }
 
+    //////////////////////////////////////////////////////////////////
+    if (cnt->pause != cnt->conf.pause) {
+        cnt->pause = cnt->conf.pause;
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            ,_("Camera %d parmsupdate: motion detection %s"),
+            cnt->camera_id, cnt->pause ? _("Disabled"):_("Enabled"));
+    }
+    //////////////////////////////////////////////////////////////////
+
     init_text_scale(cnt);  /* Initialize and validate text_scale */
 
     if (mystrceq(cnt->conf.picture_output, "on")) {
