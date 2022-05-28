@@ -485,8 +485,8 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
     motapp->cam_list[indx]->watchdog--;
     if (motapp->cam_list[indx]->watchdog == 0) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Thread %d - Watchdog timeout. Trying to do a graceful restart")
-            , motapp->cam_list[indx]->threadnr);
+            ,_("Camera %d - Watchdog timeout. Trying to do a graceful restart")
+            , motapp->cam_list[indx]->camera_id);
         motapp->cam_list[indx]->event_stop = true; /* Trigger end of event */
         motapp->cam_list[indx]->finish_cam = true;
         if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
@@ -501,8 +501,8 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
 
     if (motapp->cam_list[indx]->watchdog == sec_cancel) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Thread %d - Watchdog timeout.  Requesting cancel.")
-            , motapp->cam_list[indx]->threadnr);
+            ,_("Camera %d - Watchdog timeout.  Requesting cancel.")
+            , motapp->cam_list[indx]->camera_id);
         if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
             (motapp->cam_list[indx]->netcam != NULL)) {
             if (motapp->cam_list[indx]->netcam->handler_finished == false) {
@@ -520,8 +520,8 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
 
     if (motapp->cam_list[indx]->watchdog < sec_kill) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Thread %d - Watchdog timeout.  Requesting kill.")
-            , motapp->cam_list[indx]->threadnr);
+            ,_("Camera %d - Watchdog timeout.  Requesting kill.")
+            , motapp->cam_list[indx]->camera_id);
         if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
             (motapp->cam_list[indx]->netcam != NULL)) {
             if (!motapp->cam_list[indx]->netcam->handler_finished &&
@@ -551,8 +551,8 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
         if (motapp->cam_list[indx]->running_cam &&
             pthread_kill(motapp->cam_list[indx]->thread_id, 0) == ESRCH) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                ,_("Thread %d - Cleaning thread.")
-                , motapp->cam_list[indx]->threadnr);
+                ,_("Camera %d - Cleaning thread.")
+                , motapp->cam_list[indx]->camera_id);
             pthread_mutex_lock(&motapp->global_lock);
                 motapp->threads_running--;
             pthread_mutex_unlock(&motapp->global_lock);
@@ -775,7 +775,8 @@ int main (int argc, char **argv)
                 if ((!motapp->cam_list[indx]->running_cam) &&
                     (motapp->cam_list[indx]->restart_cam)) {
                     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                        ,_("Motion thread %d restart"), motapp->cam_list[indx]->threadnr);
+                        ,_("Motion camera %d restart")
+                        , motapp->cam_list[indx]->camera_id);
                     motion_start_thread(motapp, indx);
                 }
                 motion_watchdog(motapp, indx);
