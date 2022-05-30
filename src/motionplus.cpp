@@ -524,44 +524,31 @@ static void motion_watchdog(struct ctx_motapp *motapp, int indx)
             , motapp->cam_list[indx]->camera_id);
         if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
             (motapp->cam_list[indx]->netcam != NULL)) {
-            if (!motapp->cam_list[indx]->netcam->handler_finished &&
-                pthread_kill(motapp->cam_list[indx]->netcam->thread_id, 0) == ESRCH) {
-                motapp->cam_list[indx]->netcam->handler_finished = true;
-                pthread_mutex_lock(&motapp->global_lock);
-                    motapp->threads_running--;
-                pthread_mutex_unlock(&motapp->global_lock);
-                netcam_cleanup(motapp->cam_list[indx],false);
-            } else {
+            if (motapp->cam_list[indx]->netcam->handler_finished == false) {
                 pthread_kill(motapp->cam_list[indx]->netcam->thread_id, SIGVTALRM);
             }
+            motapp->threads_running--;
+            netcam_cleanup(motapp->cam_list[indx],false);
         }
         if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
             (motapp->cam_list[indx]->netcam_high != NULL)) {
-            if (!motapp->cam_list[indx]->netcam_high->handler_finished &&
-                pthread_kill(motapp->cam_list[indx]->netcam_high->thread_id, 0) == ESRCH) {
-                motapp->cam_list[indx]->netcam_high->handler_finished = true;
-                pthread_mutex_lock(&motapp->global_lock);
-                    motapp->threads_running--;
-                pthread_mutex_unlock(&motapp->global_lock);
-                netcam_cleanup(motapp->cam_list[indx], false);
-            } else {
+            if (motapp->cam_list[indx]->netcam_high->handler_finished == false) {
                 pthread_kill(motapp->cam_list[indx]->netcam_high->thread_id, SIGVTALRM);
             }
+            motapp->cam_list[indx]->netcam_high->handler_finished = true;
+            motapp->threads_running--;
+            netcam_cleanup(motapp->cam_list[indx], false);
         }
-        if (motapp->cam_list[indx]->running_cam &&
-            pthread_kill(motapp->cam_list[indx]->thread_id, 0) == ESRCH) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                ,_("Camera %d - Cleaning thread.")
-                , motapp->cam_list[indx]->camera_id);
-            pthread_mutex_lock(&motapp->global_lock);
-                motapp->threads_running--;
-            pthread_mutex_unlock(&motapp->global_lock);
-            mlp_cleanup(motapp->cam_list[indx]);
-            motapp->cam_list[indx]->running_cam = false;
-            motapp->cam_list[indx]->finish_cam = false;
-        } else {
+        if (motapp->cam_list[indx]->running_cam) {
             pthread_kill(motapp->cam_list[indx]->thread_id,SIGVTALRM);
         }
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Camera %d - Cleaning thread.")
+            , motapp->cam_list[indx]->camera_id);
+        motapp->threads_running--;
+        mlp_cleanup(motapp->cam_list[indx]);
+        motapp->cam_list[indx]->running_cam = false;
+        motapp->cam_list[indx]->finish_cam = false;
     }
 
 }
