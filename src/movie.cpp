@@ -829,7 +829,7 @@ static int movie_set_outputfile(struct ctx_movie *movie)
                     return -1;
                 }
                 clock_gettime(CLOCK_MONOTONIC, &movie->cb_st_ts);
-                retcd = avio_open(&movie->oc->pb, movie->filename, MY_FLAG_WRITE|nonb AVIO_FLAG_NONBLOCK);
+                retcd = avio_open(&movie->oc->pb, movie->filename, MY_FLAG_WRITE| AVIO_FLAG_NONBLOCK);
                 if (retcd < 0) {
                     av_strerror(retcd, errstr, sizeof(errstr));
                     MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
