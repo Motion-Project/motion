@@ -945,7 +945,10 @@ void dbse_motpls_init(struct ctx_cam *cam)
         cam->dbsemp->database_sqlite3 = NULL;
         return;
     }
-
+    if (sqlite3_busy_timeout(cam->dbsemp->database_sqlite3, 1000) != SQLITE_OK) {
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO,_("database_busy_timeout failed %s")
+            ,sqlite3_errmsg(cam->dbsemp->database_sqlite3));
+    }
     if (dbse_motpls_validate(cam) != 0) {
         sqlite3_close(cam->dbsemp->database_sqlite3);
         cam->dbsemp->database_sqlite3 = NULL;
