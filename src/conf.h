@@ -131,6 +131,8 @@ struct config {
     int             movie_duplicate_frames;
     int             movie_passthrough;
     const char      *movie_filename;
+    const char      *movie_motion_filename_suffix;
+    const char      *movie_extpipe_filename_suffix;
     int             movie_extpipe_use;
     const char      *movie_extpipe;
 
