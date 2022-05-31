@@ -141,8 +141,8 @@ struct config conf_template = {
     .movie_duplicate_frames =          FALSE,
     .movie_passthrough =               FALSE,
     .movie_filename =                  DEF_MOVIEPATH,
-    .movie_motion_filename_suffix =    "m",
-    .movie_extpipe_filename_suffix =   NULL,
+    .movie_motion_filename_suffix =    DEF_MOTION_SUFFIX,
+    .movie_extpipe_filename_suffix =   DEF_EXTPIPE_SUFFIX,
     .movie_extpipe_use =               FALSE,
     .movie_extpipe =                   NULL,
 
