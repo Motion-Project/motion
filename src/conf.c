@@ -141,6 +141,8 @@ struct config conf_template = {
     .movie_duplicate_frames =          FALSE,
     .movie_passthrough =               FALSE,
     .movie_filename =                  DEF_MOVIEPATH,
+    .movie_motion_filename_suffix =    "m",
+    .movie_extpipe_filename_suffix =   "p",
     .movie_extpipe_use =               FALSE,
     .movie_extpipe =                   NULL,
 
@@ -1031,6 +1033,25 @@ config_param config_params[] = {
     "# File name(without extension) for movies relative to target directory",
     0,
     CONF_OFFSET(movie_filename),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "movie_motion_filename_suffix",
+    "# File name suffix for motion movies",
+    0,
+    CONF_OFFSET(movie_motion_filename_suffix),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_LIMITED
+    },
+
+    {
+    "movie_extpipe_filename_suffix",
+    "# File name suffix for extpipe movies",
+    0,
+    CONF_OFFSET(movie_extpipe_filename_suffix),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
