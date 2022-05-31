@@ -142,7 +142,7 @@ struct config conf_template = {
     .movie_passthrough =               FALSE,
     .movie_filename =                  DEF_MOVIEPATH,
     .movie_motion_filename_suffix =    "m",
-    .movie_extpipe_filename_suffix =   "p",
+    .movie_extpipe_filename_suffix =   NULL,
     .movie_extpipe_use =               FALSE,
     .movie_extpipe =                   NULL,
 
