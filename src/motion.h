@@ -166,6 +166,9 @@ struct ffmpeg;
 #define DEF_MOVIEPATH           "%v-%Y%m%d%H%M%S"
 #define DEF_TIMEPATH            "%Y%m%d-timelapse"
 
+#define DEF_MOTION_SUFFIX       "m"
+#define DEF_EXTPIPE_SUFFIX      ""
+
 #define DEF_TIMELAPSE_MODE      "daily"
 
 /* OUTPUT Image types */
