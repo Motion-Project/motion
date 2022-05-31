@@ -814,7 +814,7 @@ static void event_create_extpipe(struct context *cnt, motion_event eventtype
             , cnt->conf.target_dir
             , (int)(PATH_MAX-5-strlen(cnt->conf.target_dir))
             , stamp
-            , cnt->conf.movie_extpipe_filename_suffix?cnt->conf.movie_extpipe_filename_suffix:"");
+            , cnt->conf.movie_extpipe_filename_suffix?cnt->conf.movie_extpipe_filename_suffix:DEF_EXTPIPE_SUFFIX);
 
         if (access(cnt->conf.target_dir, W_OK)!= 0) {
             /* Permission denied */
@@ -999,7 +999,7 @@ static void event_ffmpeg_newfile(struct context *cnt, motion_event eventtype
             , cnt->conf.target_dir, codec
             , (int)(PATH_MAX-7-strlen(cnt->conf.target_dir)-strlen(codec))
             , stamp
-            , cnt->conf.movie_motion_filename_suffix);
+            , cnt->conf.movie_motion_filename_suffix?cnt->conf.movie_motion_filename_suffix:DEF_MOTION_SUFFIX);
         snprintf(cnt->newfilename, PATH_MAX - 4, "%.*s/%s_%.*s"
             , (int)(PATH_MAX-6-strlen(stamp)-strlen(codec))
             , cnt->conf.target_dir, codec
@@ -1011,7 +1011,7 @@ static void event_ffmpeg_newfile(struct context *cnt, motion_event eventtype
             , cnt->conf.target_dir
             , (int)(PATH_MAX-6-strlen(cnt->conf.target_dir))
             , stamp
-            , cnt->conf.movie_motion_filename_suffix);
+            , cnt->conf.movie_motion_filename_suffix?cnt->conf.movie_motion_filename_suffix:DEF_MOTION_SUFFIX);
         snprintf(cnt->newfilename, PATH_MAX - 4, "%.*s/%.*s"
             , (int)(PATH_MAX-5-strlen(stamp))
             , cnt->conf.target_dir
