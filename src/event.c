@@ -814,7 +814,7 @@ static void event_create_extpipe(struct context *cnt, motion_event eventtype
             , cnt->conf.target_dir
             , (int)(PATH_MAX-5-strlen(cnt->conf.target_dir))
             , stamp
-            , cnt->conf.movie_extpipe_filename_suffix);
+            , cnt->conf.movie_extpipe_filename_suffix?cnt->conf.movie_extpipe_filename_suffix,"");
 
         if (access(cnt->conf.target_dir, W_OK)!= 0) {
             /* Permission denied */
