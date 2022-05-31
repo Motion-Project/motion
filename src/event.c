@@ -809,7 +809,7 @@ static void event_create_extpipe(struct context *cnt, motion_event eventtype
         }
 
         mystrftime(cnt, stamp, sizeof(stamp), moviepath, tv1, NULL, 0);
-        snprintf(cnt->extpipefilename, PATH_MAX - 4, "%.*s/%.*s"
+        snprintf(cnt->extpipefilename, PATH_MAX - 4, "%.*s/%.*sp"
             , (int)(PATH_MAX-5-strlen(stamp))
             , cnt->conf.target_dir
             , (int)(PATH_MAX-5-strlen(cnt->conf.target_dir))
