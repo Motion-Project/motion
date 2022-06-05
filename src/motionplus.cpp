@@ -598,6 +598,7 @@ static void motion_init(struct ctx_motapp *motapp)
     pthread_mutex_init(&motapp->mutex_parms, NULL);
     pthread_mutex_init(&motapp->mutex_camlst, NULL);
     pthread_mutex_init(&motapp->mutex_post, NULL);
+    pthread_mutex_init(&motapp->mutex_sqlite, NULL);
 
     motapp->threads_running = 0;
     motapp->finish_all = false;
@@ -804,6 +805,7 @@ int main (int argc, char **argv)
     pthread_mutex_destroy(&motapp->mutex_parms);
     pthread_mutex_destroy(&motapp->mutex_camlst);
     pthread_mutex_destroy(&motapp->mutex_post);
+    pthread_mutex_destroy(&motapp->mutex_sqlite);
 
     delete motapp;
 

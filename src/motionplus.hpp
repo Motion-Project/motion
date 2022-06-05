@@ -430,6 +430,7 @@ struct ctx_motapp {
     pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */
     pthread_mutex_t     mutex_camlst;       /* Lock the list of cams while adding/removing */
     pthread_mutex_t     mutex_post;         /* mutex to allow for processing of post actions*/
+    pthread_mutex_t     mutex_sqlite;       /* mutex for database*/
 
 
 };

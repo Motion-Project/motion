@@ -605,7 +605,7 @@ void dbse_exec(struct ctx_cam *cam, char *filename
 void dbse_motpls_exec(const char *sqlquery, struct ctx_cam *cam)
 {
     int retcd;
-    char *errmsg = 0;
+    char *errmsg = NULL;
 
     if (cam->dbsemp == NULL) {
         return;
@@ -613,11 +613,14 @@ void dbse_motpls_exec(const char *sqlquery, struct ctx_cam *cam)
     if (cam->dbsemp->database_sqlite3 == NULL) {
         return;
     }
-
-    retcd = sqlite3_exec(cam->dbsemp->database_sqlite3, sqlquery, NULL, 0, &errmsg);
+    pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+        retcd = sqlite3_exec(cam->dbsemp->database_sqlite3, sqlquery, NULL, 0, &errmsg);
+    pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
     if (retcd != SQLITE_OK ) {
         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("SQLite error was %s"), errmsg);
-        sqlite3_free(errmsg);
+        pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+            sqlite3_free(errmsg);
+        pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
     }
 }
 
@@ -855,12 +858,16 @@ static int dbse_motpls_validate_cols(struct ctx_cam *cam)
         " select name as col_nm "
         " from pragma_table_info('motionplus');";
     cam->dbsemp->dbse_action = DBSE_ACT_GETCOLS;
-    retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
-        , sqlquery.c_str(), dbse_motpls_cb_cols, cam, &errmsg);
+    pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+        retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
+            , sqlquery.c_str(), dbse_motpls_cb_cols, cam, &errmsg);
+    pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
     if (retcd != SQLITE_OK ) {
         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error retrieving table columns: %s"), errmsg);
-        sqlite3_free(errmsg);
+        pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+            sqlite3_free(errmsg);
+        pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
         return -1;
     }
 
@@ -882,7 +889,7 @@ static int dbse_motpls_validate_cols(struct ctx_cam *cam)
 static int dbse_motpls_validate(struct ctx_cam *cam)
 {
     int retcd;
-    char *errmsg = 0;
+    char *errmsg = NULL;
     std::string sqlquery;
 
     sqlquery =
@@ -891,12 +898,16 @@ static int dbse_motpls_validate(struct ctx_cam *cam)
         " and name='motionplus';";
     cam->dbsemp->table_ok = false;
     cam->dbsemp->dbse_action = DBSE_ACT_CHKTBL;
-    retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
-        , sqlquery.c_str(), dbse_motpls_cb, cam, &errmsg);
+    pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+        retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
+            , sqlquery.c_str(), dbse_motpls_cb, cam, &errmsg);
+    pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
     if (retcd != SQLITE_OK ) {
         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error checking table: %s"), errmsg);
-        sqlite3_free(errmsg);
+        pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+            sqlite3_free(errmsg);
+        pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
         return -1;
     }
 
@@ -905,12 +916,16 @@ static int dbse_motpls_validate(struct ctx_cam *cam)
             "create table motionplus ("
             " camid     int"
             ");";
-        retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
-            , sqlquery.c_str(), 0, 0, &errmsg);
+        pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+            retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
+                , sqlquery.c_str(), 0, 0, &errmsg);
+        pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
         if (retcd != SQLITE_OK ) {
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 , _("Error creating table: %s"), errmsg);
-            sqlite3_free(errmsg);
+            pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+                sqlite3_free(errmsg);
+            pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
             return -1;
         }
     }
@@ -925,6 +940,8 @@ static int dbse_motpls_validate(struct ctx_cam *cam)
 void dbse_motpls_init(struct ctx_cam *cam)
 {
     std::string dbname;
+    const char *errmsg;
+    int retcd;
 
     cam->dbsemp = new ctx_dbsemp;
     cam->dbsemp->movie_cnt = 0;
@@ -936,21 +953,39 @@ void dbse_motpls_init(struct ctx_cam *cam)
         std::to_string(cam->camera_id)+".db";
 
     MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s", dbname.c_str());
-
-    if (sqlite3_open(dbname.c_str(), &cam->dbsemp->database_sqlite3) != SQLITE_OK) {
+    pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+        retcd = sqlite3_open(dbname.c_str(), &cam->dbsemp->database_sqlite3);
+    pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
+    if (retcd != SQLITE_OK) {
+        pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+            errmsg = sqlite3_errmsg(cam->dbsemp->database_sqlite3);
+        pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             ,_("Can't open database %s : %s")
-            ,dbname.c_str(), sqlite3_errmsg(cam->dbsemp->database_sqlite3));
-        sqlite3_close(cam->dbsemp->database_sqlite3);
+            ,dbname.c_str(), errmsg);
+        pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+            sqlite3_close(cam->dbsemp->database_sqlite3);
+        pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
         cam->dbsemp->database_sqlite3 = NULL;
         return;
     }
-    if (sqlite3_busy_timeout(cam->dbsemp->database_sqlite3, 1000) != SQLITE_OK) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO,_("database_busy_timeout failed %s")
-            ,sqlite3_errmsg(cam->dbsemp->database_sqlite3));
+
+    pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+        retcd =sqlite3_busy_timeout(cam->dbsemp->database_sqlite3, 1000);
+    pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
+    if (retcd != SQLITE_OK) {
+        pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+            errmsg = sqlite3_errmsg(cam->dbsemp->database_sqlite3);
+        pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+            ,_("database_busy_timeout failed %s"),errmsg);
     }
-    if (dbse_motpls_validate(cam) != 0) {
-        sqlite3_close(cam->dbsemp->database_sqlite3);
+
+    retcd = dbse_motpls_validate(cam);
+    if (retcd != 0) {
+        pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+            sqlite3_close(cam->dbsemp->database_sqlite3);
+        pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
         cam->dbsemp->database_sqlite3 = NULL;
         return;
     };
@@ -964,7 +999,9 @@ void dbse_motpls_deinit(struct ctx_cam *cam)
 {
     if (cam->dbsemp != NULL) {
         if (cam->dbsemp->database_sqlite3 != NULL) {
-            sqlite3_close(cam->dbsemp->database_sqlite3);
+            pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+                sqlite3_close(cam->dbsemp->database_sqlite3);
+            pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
         }
         cam->dbsemp->database_sqlite3 = NULL;
         dbse_motpls_free_movies(cam);
@@ -995,12 +1032,16 @@ int dbse_motpls_getlist(struct ctx_cam *cam)
         " from motionplus "
         " where camid = " + std::to_string(cam->camera_id) + ";";
     cam->dbsemp->dbse_action = DBSE_ACT_GETCNT;
-    retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
-        , sqlquery.c_str(), dbse_motpls_cb, cam, &errmsg);
+    pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+        retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
+            , sqlquery.c_str(), dbse_motpls_cb, cam, &errmsg);
+    pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
     if (retcd != SQLITE_OK ) {
         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error counting table: %s"), errmsg);
-        sqlite3_free(errmsg);
+        pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+            sqlite3_free(errmsg);
+        pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
         return -1;
     }
 
@@ -1012,12 +1053,16 @@ int dbse_motpls_getlist(struct ctx_cam *cam)
             " select rowid, * from motionplus "
             " where camid = " + std::to_string(cam->camera_id) + ";";
         cam->dbsemp->dbse_action = DBSE_ACT_GETTBL;
-        retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
-            , sqlquery.c_str(), dbse_motpls_cb_movies, cam, &errmsg);
+        pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+            retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
+                , sqlquery.c_str(), dbse_motpls_cb_movies, cam, &errmsg);
+        pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
         if (retcd != SQLITE_OK ) {
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 , _("Error retrieving table: %s"), errmsg);
-            sqlite3_free(errmsg);
+            pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+               sqlite3_free(errmsg);
+            pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
             return -1;
         }
         /* Clean the database of files that were removed*/
@@ -1101,15 +1146,28 @@ void dbse_motpls_addrec(struct ctx_cam *cam,char *fname, struct timespec *ts1)
     sqlquery += " ,"  + std::to_string(cam->info_sdev_max);
     sqlquery += " ,"  + std::to_string(sdev_avg);
     sqlquery += ")";
-
-    retcd = sqlite3_exec(cam->dbsemp->database_sqlite3, sqlquery.c_str(), NULL, 0, &errmsg);
+    pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+        retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
+            , sqlquery.c_str(), NULL, 0, &errmsg);
+    pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
     if (retcd != SQLITE_OK ) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("SQLite error %d was %s"),retcd, errmsg);
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+            , _("SQLite error %d was %s"),retcd, errmsg);
+        pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+            sqlite3_free(errmsg);
+        pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
         dbse_motpls_deinit(cam);
         dbse_motpls_init(cam);
-        retcd = sqlite3_exec(cam->dbsemp->database_sqlite3, sqlquery.c_str(), NULL, 0, &errmsg);
+        pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+            retcd = sqlite3_exec(cam->dbsemp->database_sqlite3
+                , sqlquery.c_str(), NULL, 0, &errmsg);
+        pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
         if (retcd != SQLITE_OK ) {
-            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("Serious error %d was %s"),retcd, errmsg);
+            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+                , _("Serious error %d was %s"),retcd, errmsg);
+            pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+               sqlite3_free(errmsg);
+            pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
             dbse_motpls_deinit(cam);
         }
     }
