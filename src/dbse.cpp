@@ -88,6 +88,74 @@ void dbse_global_deinit(struct ctx_motapp *motapp)
 
 }
 
+static void dbse_global_init_sqlite3(struct ctx_motapp *motapp)
+{
+    int indx;
+
+    motapp->cam_list[0]->dbse->database_sqlite3 = NULL;
+
+    #ifdef HAVE_SQLITE3
+        int retcd;
+        const char *errmsg;
+
+        if ((motapp->cam_list[0]->conf->database_type == "sqlite3") &&
+            (motapp->cam_list[0]->conf->database_dbname != "")) {
+
+            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO,_("SQLite3 Database filename %s")
+                ,motapp->cam_list[0]->conf->database_dbname.c_str());
+            pthread_mutex_lock(&motapp->mutex_sqlite);
+                retcd = sqlite3_open(motapp->cam_list[0]->conf->database_dbname.c_str()
+                    , &motapp->cam_list[0]->dbse->database_sqlite3);
+            pthread_mutex_unlock(&motapp->mutex_sqlite);
+            if (retcd != SQLITE_OK) {
+                pthread_mutex_lock(&motapp->mutex_sqlite);
+                    errmsg =sqlite3_errmsg(motapp->cam_list[0]->dbse->database_sqlite3);
+                pthread_mutex_unlock(&motapp->mutex_sqlite);
+                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("Can't open database %s : %s")
+                    , motapp->cam_list[0]->conf->database_dbname.c_str(),errmsg);
+                pthread_mutex_lock(&motapp->mutex_sqlite);
+                    sqlite3_close(motapp->cam_list[0]->dbse->database_sqlite3);
+                pthread_mutex_unlock(&motapp->mutex_sqlite);
+                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO,_("Could not initialize database %s")
+                    ,motapp->cam_list[0]->conf->database_dbname.c_str());
+                motapp->cam_list[0]->conf->database_type = "";
+                motapp->cam_list[0]->dbse->database_sqlite3 = NULL;
+            } else {
+                MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, _("database_busy_timeout %d msec")
+                    , motapp->cam_list[0]->conf->database_busy_timeout);
+                pthread_mutex_lock(&motapp->mutex_sqlite);
+                    retcd = sqlite3_busy_timeout(
+                        motapp->cam_list[0]->dbse->database_sqlite3
+                        , motapp->cam_list[0]->conf->database_busy_timeout);
+                pthread_mutex_unlock(&motapp->mutex_sqlite);
+                if (retcd != SQLITE_OK) {
+                    pthread_mutex_lock(&motapp->mutex_sqlite);
+                        errmsg = sqlite3_errmsg(
+                            motapp->cam_list[0]->dbse->database_sqlite3);
+                    pthread_mutex_unlock(&motapp->mutex_sqlite);
+                    MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+                        , _("database_busy_timeout failed %s"), errmsg);
+                }
+            }
+        }
+    #endif /* HAVE_SQLITE3 */
+
+    /* Cascade to all cameras */
+    indx = 1;
+    while (motapp->cam_list[indx] != NULL) {
+        if ((motapp->cam_list[indx]->conf->database_type == "sqlite3") &&
+            (motapp->cam_list[indx]->conf->database_dbname ==
+                motapp->cam_list[0]->conf->database_dbname)) {
+            motapp->cam_list[indx]->dbse->database_sqlite3 =
+                motapp->cam_list[0]->dbse->database_sqlite3;
+        } else {
+            motapp->cam_list[indx]->dbse->database_sqlite3 = NULL;
+        }
+        indx++;
+    }
+
+}
+
 void dbse_global_init(struct ctx_motapp *motapp)
 {
     int indx;
@@ -129,50 +197,8 @@ void dbse_global_init(struct ctx_motapp *motapp)
             }
         #endif /* HAVE_MARIADB */
 
-        #ifdef HAVE_SQLITE3
-            /* database_sqlite3 == NULL if not changed causes each thread to create their own
-            * sqlite3 connection this will only happens when using a non-threaded sqlite version */
-            motapp->cam_list[0]->dbse->database_sqlite3=NULL;
-            if ((motapp->cam_list[0]->conf->database_type == "sqlite3") &&
-                (motapp->cam_list[0]->conf->database_dbname != "")) {
-                MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-                    ,_("SQLite3 Database filename %s")
-                    ,motapp->cam_list[0]->conf->database_dbname.c_str());
+        dbse_global_init_sqlite3(motapp);
 
-                int thread_safe = sqlite3_threadsafe();
-                if (thread_safe > 0) {
-                    MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, _("SQLite3 is threadsafe"));
-                    MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, _("SQLite3 serialized %s")
-                        ,(sqlite3_config(SQLITE_CONFIG_SERIALIZED)?_("FAILED"):_("SUCCESS")));
-                    if (sqlite3_open(motapp->cam_list[0]->conf->database_dbname.c_str()
-                        , &motapp->cam_list[0]->dbse->database_sqlite3) != SQLITE_OK) {
-                        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                            ,_("Can't open database %s : %s")
-                            ,motapp->cam_list[0]->conf->database_dbname.c_str()
-                            ,sqlite3_errmsg(motapp->cam_list[0]->dbse->database_sqlite3));
-                        sqlite3_close(motapp->cam_list[0]->dbse->database_sqlite3);
-                        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                            ,_("Could not initialize database %s")
-                            ,motapp->cam_list[0]->conf->database_dbname.c_str());
-                        motapp->cam_list[0]->conf->database_type = "";
-                        return;
-                    }
-                    MOTION_LOG(NTC, TYPE_DB, NO_ERRNO,_("database_busy_timeout %d msec"),
-                            motapp->cam_list[0]->conf->database_busy_timeout);
-                    if (sqlite3_busy_timeout(motapp->cam_list[0]->dbse->database_sqlite3
-                        , motapp->cam_list[0]->conf->database_busy_timeout) != SQLITE_OK)
-                        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO,_("database_busy_timeout failed %s")
-                            ,sqlite3_errmsg(motapp->cam_list[0]->dbse->database_sqlite3));
-                }
-            }
-            /* Cascade to all threads */
-            indx = 1;
-            while (motapp->cam_list[indx] != NULL) {
-                motapp->cam_list[indx]->dbse->database_sqlite3 = motapp->cam_list[0]->dbse->database_sqlite3;
-                indx++;
-            }
-
-        #endif /* HAVE_SQLITE3 */
     }
 }
 
@@ -258,31 +284,50 @@ static void dbse_init_mariadb(struct ctx_cam *cam)
 static void dbse_init_sqlite3(struct ctx_cam *cam)
 {
     #ifdef HAVE_SQLITE3
-        if (cam->motapp->cam_list[0]->dbse->database_sqlite3 != 0) {
-            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO,_("SQLite3 using shared handle"));
-            cam->dbse->database_sqlite3 = cam->motapp->cam_list[0]->dbse->database_sqlite3;
-        } else {
-            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-                ,_("SQLite3 Database filename %s"), cam->conf->database_dbname.c_str());
-            if (sqlite3_open(cam->conf->database_dbname.c_str(), &cam->dbse->database_sqlite3) != SQLITE_OK) {
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                    ,_("Can't open database %s : %s")
-                    ,cam->conf->database_dbname.c_str(), sqlite3_errmsg(cam->dbse->database_sqlite3));
-                sqlite3_close(cam->dbse->database_sqlite3);
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                    ,_("Disabling database functionality"));
+        int retcd;
+        const char *errmsg;
+
+        /*User specified a different database for the camera*/
+        if ((cam->conf->database_type == "sqlite3") &&
+            (cam->conf->database_dbname != "") &&
+            (cam->dbse->database_sqlite3 == NULL)) {
+            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, _("SQLite3 Database filename %s")
+                ,cam->conf->database_dbname.c_str());
+            pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+                retcd = sqlite3_open(cam->conf->database_dbname.c_str()
+                    , &cam->dbse->database_sqlite3);
+            pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
+            if (retcd != SQLITE_OK) {
+                pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+                    errmsg =sqlite3_errmsg(cam->dbse->database_sqlite3);
+                pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
+                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("Can't open database %s : %s")
+                    , cam->conf->database_dbname.c_str(), errmsg);
+                pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+                    sqlite3_close(cam->dbse->database_sqlite3);
+                pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
+                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO,_("Could not initialize database %s")
+                    ,cam->conf->database_dbname.c_str());
                 cam->conf->database_type = "";
-                return;
+                cam->dbse->database_sqlite3 = NULL;
+            } else {
+                MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, _("database_busy_timeout %d msec")
+                    , cam->conf->database_busy_timeout);
+                pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+                    retcd = sqlite3_busy_timeout(cam->dbse->database_sqlite3
+                        , cam->conf->database_busy_timeout);
+                pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
+                if (retcd != SQLITE_OK) {
+                    pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+                        errmsg = sqlite3_errmsg(cam->dbse->database_sqlite3);
+                    pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
+                    MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+                        , _("database_busy_timeout failed %s"), errmsg);
+                }
             }
-            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-                ,_("database_busy_timeout %d msec"), cam->conf->database_busy_timeout);
-            if (sqlite3_busy_timeout(cam->dbse->database_sqlite3, cam->conf->database_busy_timeout) != SQLITE_OK)
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                    ,_("database_busy_timeout failed %s")
-                    ,sqlite3_errmsg(cam->dbse->database_sqlite3));
         }
     #else
-        (void)cam;  /* Avoid compiler warnings */
+        (void)cam;
     #endif /* HAVE_SQLITE3 */
 
     return;
@@ -535,17 +580,23 @@ static void dbse_pgsql_exec(char *sqlquery,struct ctx_cam *cam, int save_id)
 static void dbse_sqlite3_exec(char *sqlquery,struct ctx_cam *cam, int save_id)
 {
     #ifdef HAVE_SQLITE3
-        int res;
-        char *errmsg = 0;
-        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing sqlite query");
-        res = sqlite3_exec(cam->dbse->database_sqlite3, sqlquery, NULL, 0, &errmsg);
-        if (res != SQLITE_OK ) {
+        int retcd;
+        char *errmsg = NULL;
+
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing query");
+        pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+            retcd = sqlite3_exec(cam->dbse->database_sqlite3, sqlquery, NULL, 0, &errmsg);
+        pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
+        if (retcd != SQLITE_OK ) {
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("SQLite error was %s"), errmsg);
-            sqlite3_free(errmsg);
+            pthread_mutex_lock(&cam->motapp->mutex_sqlite);
+                sqlite3_free(errmsg);
+            pthread_mutex_unlock(&cam->motapp->mutex_sqlite);
         }
         if (save_id) {
             cam->dbse->database_event_id = 0;
         }
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Finished query");
     #else
         (void)sqlquery;
         (void)cam;
@@ -585,9 +636,10 @@ void dbse_exec(struct ctx_cam *cam, char *filename
     }
 
     if (strlen(sqlquery) <= 0) {
-        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, "Ignoring empty sql query");
         return;
     }
+    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "%s query: %s",cmd, sqlquery);
+
 
     if (cam->conf->database_type == "mysql") {
         dbse_mysql_exec(sqlquery, cam, 0);
