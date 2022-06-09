@@ -1043,6 +1043,7 @@ static int motion_init(struct context *cnt)
     /* Store thread number in TLS. */
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cnt->threadnr));
 
+    cnt->currenttime_ts = mymalloc(sizeof(struct timespec));
     cnt->currenttime_tm = mymalloc(sizeof(struct tm));
     cnt->eventtime_tm = mymalloc(sizeof(struct tm));
     /* Init frame time */
@@ -1532,6 +1533,8 @@ static void motion_cleanup(struct context *cnt)
 
 
     /* Cleanup the current time structure */
+    free(cnt->currenttime_ts);
+    cnt->currenttime_ts = NULL;
     free(cnt->currenttime_tm);
     cnt->currenttime_tm = NULL;
 
@@ -1712,7 +1715,8 @@ static void mlp_prepare(struct context *cnt)
 
     /* Get time for current frame */
     cnt->currenttime = time(NULL);
-
+    clock_gettime(CLOCK_REALTIME, cnt->currenttime_ts);
+    
     /*
      * localtime returns static data and is not threadsafe
      * so we use localtime_r which is reentrant and threadsafe
@@ -1800,7 +1804,11 @@ static void mlp_resetimages(struct context *cnt)
     }
 
     /* Store time with pre_captured image */
-    gettimeofday(&cnt->current_image->timestamp_tv, NULL);
+    //gettimeofday(&cnt->current_image->timestamp_tv, NULL);
+    // timestamp bug fix
+    //TIMESPEC_TO_TIMEVAL(&cnt->current_image->timestamp_tv, cnt->currenttime);
+    cnt->current_image->timestamp_tv.tv_sec = cnt->currenttime;
+    cnt->current_image->timestamp_tv.tv_sec = cnt->currenttime;
 
     /* Store shot number with pre_captured image */
     cnt->current_image->shot = cnt->shots;
