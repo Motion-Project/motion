@@ -1047,7 +1047,7 @@ static int motion_init(struct context *cnt)
     cnt->currenttime_tm = mymalloc(sizeof(struct tm));
     cnt->eventtime_tm = mymalloc(sizeof(struct tm));
     /* Init frame time */
-    clock_gettime(CLOCK_REALTIME, &cnt->currenttime_ts);
+    clock_gettime(CLOCK_REALTIME, cnt->currenttime_ts);
     //cnt->currenttime = time(NULL);
     cnt->currenttime = cnt->currenttime_ts->tv_sec;
     localtime_r(&cnt->currenttime, cnt->currenttime_tm);
@@ -1716,7 +1716,7 @@ static void mlp_prepare(struct context *cnt)
     }
 
     /* Get time for current frame */
-    clock_gettime(CLOCK_REALTIME, &cnt->currenttime_ts);
+    clock_gettime(CLOCK_REALTIME, cnt->currenttime_ts);
     //cnt->currenttime = time(NULL);
     cnt->currenttime = cnt->currenttime_ts->tv_sec;
     clock_gettime(CLOCK_REALTIME, cnt->currenttime_ts);
