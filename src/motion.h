@@ -452,6 +452,7 @@ struct context {
     int postcap;                             /* downcounter, frames left to to send post event */
     int shots;
     unsigned int detecting_motion;
+    struct timespec *currenttime_ts;
     struct tm *currenttime_tm;
     struct tm *eventtime_tm;
 
