@@ -89,7 +89,6 @@ struct config conf_template = {
     /* Motion detection configuration parameters */
     .emulate_motion =                  FALSE,
     .pause =                           FALSE,
-    .motion_fps =                      2,
     .threshold =                       DEF_CHANGES,
     .threshold_maximum =               0,
     .threshold_tune =                  FALSE,
@@ -627,15 +626,6 @@ config_param config_params[] = {
     CONF_OFFSET(pause),
     copy_bool,
     print_bool,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "motion_fps",
-    "# process motion fps. Processing interval when not detected. (0:disable(original operation)/minus:slow more 1 fps(Unimplemented))",
-    0,
-    CONF_OFFSET(motion_fps),
-    copy_int,
-    print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
