@@ -79,7 +79,6 @@ struct config {
     /* Motion detection configuration parameters */
     int             pause;
     int             emulate_motion;
-    int             motion_fps;
     int             threshold;
     int             threshold_maximum;
     int             threshold_tune;
