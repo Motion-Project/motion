@@ -1874,6 +1874,8 @@ static void netcam_shutdown(struct ctx_netcam *netcam)
     if (netcam) {
         netcam_close_context(netcam);
 
+        netcam->status = NETCAM_NOTCONNECTED;
+
         myfree(&netcam->path);
 
         if (netcam->img_latest != NULL) {

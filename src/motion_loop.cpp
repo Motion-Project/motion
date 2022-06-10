@@ -757,6 +757,10 @@ void mlp_cleanup(struct ctx_cam *cam)
 
         movie_free(cam->movie_timelapse);
         cam->movie_timelapse = NULL;
+
+        if (cam->dbsemp != NULL) {
+            cam->dbsemp->database_sqlite3 = NULL;
+        }
     }
 
     webu_stream_deinit(cam);
