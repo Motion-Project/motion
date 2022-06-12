@@ -1145,7 +1145,7 @@ static void event_ffmpeg_timelapse(struct context *cnt, motion_event eventtype
             cnt->ffmpeg_timelapse->high_resolution = FALSE;
         }
         cnt->ffmpeg_timelapse->fps = cnt->conf.timelapse_fps;
-        cnt->ffmpeg_timelapse->bps = cnt->conf.movie_bps;
+        cnt->ffmpeg_timelapse->bps = cnt->conf.timelapse_bps;
         cnt->ffmpeg_timelapse->filename = cnt->timelapsefilename;
         cnt->ffmpeg_timelapse->quality = cnt->conf.timelapse_quality;
         cnt->ffmpeg_timelapse->start_time.tv_sec = tv1->tv_sec;
