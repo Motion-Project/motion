@@ -2615,7 +2615,7 @@ void conf_print(struct context **cnt)
             ,_("Writing config file to %s")
             ,cnt[thread]->conf_filename);
 
-        conffile = myfopen(cnt[thread]->conf_filename, "w");
+        conffile = myfopen(cnt[thread]->conf_filename, "we");
 
         if (!conffile) {
             continue;
@@ -2755,7 +2755,7 @@ struct context **conf_load(struct context **cnt)
         /* User has supplied filename on Command-line. */
         strncpy(filename, cnt[0]->conf_filename, PATH_MAX-1);
         filename[PATH_MAX-1] = '\0';
-        fp = fopen (filename, "r");
+        fp = myfopen (filename, "re");
     }
 
     if (!fp) {  /* Command-line didn't work, try current dir. */
@@ -2775,16 +2775,16 @@ struct context **conf_load(struct context **cnt)
         snprintf(filename, PATH_MAX, "%.*s/motion.conf"
             , (int)(PATH_MAX-1-strlen("/motion.conf"))
             , path);
-        fp = fopen (filename, "r");
+        fp = myfopen (filename, "re");
     }
 
     if (!fp) {  /* Specified file does not exist... try default file. */
         snprintf(filename, PATH_MAX, "%s/.motion/motion.conf", getenv("HOME"));
-        fp = fopen(filename, "r");
+        fp = myfopen(filename, "re");
 
         if (!fp) {
             snprintf(filename, PATH_MAX, "%s/motion.conf", sysconfdir);
-            fp = fopen(filename, "r");
+            fp = myfopen(filename, "re");
 
             if (!fp) { /* There is no config file.... use defaults. */
                 MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
@@ -3156,7 +3156,7 @@ static struct context **config_camera(struct context **cnt, const char *str, int
         return cnt;
     }
 
-    fp = fopen(str, "r");
+    fp = myfopen(str, "re");
 
     if (!fp) {
         MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO

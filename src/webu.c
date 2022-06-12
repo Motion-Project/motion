@@ -1856,7 +1856,7 @@ static char *webu_mhd_loadfile(const char *fname)
     if (fname == NULL) {
         file_char = NULL;
     } else {
-        infile = fopen(fname, "rb");
+        infile = myfopen(fname, "rbe");
         if (infile != NULL) {
             fseek(infile, 0, SEEK_END);
             file_size = ftell(infile);

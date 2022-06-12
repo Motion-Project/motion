@@ -828,7 +828,7 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
 {
     FILE *picture;
 
-    picture = myfopen(file, "w");
+    picture = myfopen(file, "wbe");
     if (!picture) {
         /* Report to syslog - suggest solution if the problem is access rights to target dir. */
         if (errno ==  EACCES) {
@@ -959,7 +959,7 @@ void put_fixed_mask(struct context *cnt, const char *file)
 {
     FILE *picture;
 
-    picture = myfopen(file, "w");
+    picture = myfopen(file, "wbe");
     if (!picture) {
         /* Report to syslog - suggest solution if the problem is access rights to target dir. */
         if (errno ==  EACCES) {

@@ -832,7 +832,7 @@ static void init_mask_privacy(struct context *cnt)
     cnt->imgs.mask_privacy_high_uv = NULL;
 
     if (cnt->conf.mask_privacy) {
-        if ((picture = myfopen(cnt->conf.mask_privacy, "r"))) {
+        if ((picture = myfopen(cnt->conf.mask_privacy, "re"))) {
             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Opening privacy mask file"));
             /*
              * NOTE: The mask is expected to have the output dimensions. I.e., the mask
@@ -1279,7 +1279,7 @@ static int motion_init(struct context *cnt)
 
     /* Load the mask file if any */
     if (cnt->conf.mask_file) {
-        if ((picture = myfopen(cnt->conf.mask_file, "r"))) {
+        if ((picture = myfopen(cnt->conf.mask_file, "re"))) {
             /*
              * NOTE: The mask is expected to have the output dimensions. I.e., the mask
              * applies to the already rotated image, not the capture image. Thus, use
@@ -2892,7 +2892,7 @@ static void become_daemon(void)
      * for an enter.
      */
     if (cnt_list[0]->conf.pid_file) {
-        pidf = myfopen(cnt_list[0]->conf.pid_file, "w+");
+        pidf = myfopen(cnt_list[0]->conf.pid_file, "w+e");
 
         if (pidf) {
             (void)fprintf(pidf, "%d\n", getpid());
@@ -2924,20 +2924,20 @@ static void become_daemon(void)
     #endif
 
 
-    if ((i = open("/dev/tty", O_RDWR)) >= 0) {
+    if ((i = open("/dev/tty", O_RDWR|O_CLOEXEC)) >= 0) {
         ioctl(i, TIOCNOTTY, NULL);
         close(i);
     }
 
     setsid();
-    i = open("/dev/null", O_RDONLY);
+    i = open("/dev/null", O_RDONLY|O_CLOEXEC);
 
     if (i != -1) {
         dup2(i, STDIN_FILENO);
         close(i);
     }
 
-    i = open("/dev/null", O_WRONLY);
+    i = open("/dev/null", O_WRONLY|O_CLOEXEC);
 
     if (i != -1) {
         dup2(i, STDOUT_FILENO);

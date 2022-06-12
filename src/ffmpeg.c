@@ -87,9 +87,9 @@ static int ffmpeg_encode_nal(struct ffmpeg *ffmpeg)
 static int ffmpeg_timelapse_exists(const char *fname)
 {
     FILE *file;
-    file = fopen(fname, "r");
+    file = myfopen(fname, "rbe");
     if (file) {
-        fclose(file);
+        myfclose(file);
         return 1;
     }
     return 0;
@@ -99,7 +99,7 @@ static int ffmpeg_timelapse_append(struct ffmpeg *ffmpeg, AVPacket *pkt)
 {
     FILE *file;
 
-    file = fopen(ffmpeg->filename, "a");
+    file = myfopen(ffmpeg->filename, "abe");
     if (!file) {
         return -1;
     }
