@@ -364,15 +364,22 @@ void vid_uyvyto420p(unsigned char *img_dst, unsigned char *img_src, int width, i
     }
 }
 
-void vid_rgb24toyuv420p(unsigned char *img_dst, unsigned char *img_src, int width, int height)
+static void vid_rgb_bgr(unsigned char *img_dst, unsigned char *img_src
+    , int width, int height, int rgb)
 {
     unsigned char *y, *u, *v;
     unsigned char *r, *g, *b;
     int i, loop;
 
-    r = img_src;
-    g = r + 1;
-    b = g + 1;
+    if (rgb == 1) {
+        r = img_src;
+        g = r + 1;
+        b = g + 1;
+    } else {
+        b = img_src;
+        g = b + 1;
+        r = g + 1;
+    }
 
     y = img_dst;
     u = y + width * height;
@@ -403,6 +410,18 @@ void vid_rgb24toyuv420p(unsigned char *img_dst, unsigned char *img_src, int widt
             v -= width / 2;
         }
     }
+}
+
+void vid_rgb24toyuv420p(unsigned char *img_dst, unsigned char *img_src
+    , int width, int height)
+{
+    vid_rgb_bgr(img_dst, img_src, width, height, 1);
+}
+
+void vid_bgr24toyuv420p(unsigned char *img_dst, unsigned char *img_src
+    , int width, int height)
+{
+    vid_rgb_bgr(img_dst, img_src, width, height, 0);
 }
 
 /**

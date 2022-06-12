@@ -24,6 +24,7 @@ void vid_yuv422to420p(unsigned char *img_dest, unsigned char *img_src, int width
 void vid_yuv422pto420p(unsigned char *img_dest, unsigned char *img_src, int width, int height);
 void vid_uyvyto420p(unsigned char *img_dest, unsigned char *img_src, int width, int height);
 void vid_rgb24toyuv420p(unsigned char *img_dest, unsigned char *img_src, int width, int height);
+void vid_bgr24toyuv420p(unsigned char *img_dest, unsigned char *img_src, int width, int height);
 void vid_bayer2rgb24(unsigned char *img_dst, unsigned char *img_src, long int width, long int height);
 void vid_y10torgb24(unsigned char *img_dest, unsigned char *img_src, int width, int height, int shift);
 void vid_greytoyuv420p(unsigned char *img_dest, unsigned char *img_src, int width, int height);
