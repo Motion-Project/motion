@@ -150,12 +150,12 @@ static int create_camera_component(ctx_mmalcam_ptr mmalcam, const char *mmalcam_
     {
         MMAL_PARAMETER_CAMERA_CONFIG_T cam_config = {
                 { MMAL_PARAMETER_CAMERA_CONFIG, sizeof(cam_config) },
-                .max_stills_w = mmalcam->width,
-                .max_stills_h = mmalcam->height,
+                .max_stills_w = (unsigned int)mmalcam->width,
+                .max_stills_h = (unsigned int)mmalcam->height,
                 .stills_yuv422 = 0,
                 .one_shot_stills = 0,
-                .max_preview_video_w = mmalcam->width,
-                .max_preview_video_h = mmalcam->height,
+                .max_preview_video_w = (unsigned int)mmalcam->width,
+                .max_preview_video_h = (unsigned int)mmalcam->height,
                 .num_preview_video_frames = 3,
                 .stills_capture_circular_buffer_height = 0,
                 .fast_preview_resume = 0,
