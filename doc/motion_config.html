@@ -136,9 +136,15 @@
           <li> Specify a <a href="#stream_port" >stream_port</a></li>
           <li> Optionally turn off <a href="#stream_localhost" >stream_localhost</a> if you want to view
                the stream from a different computer</li>
-          <li> Optionally adjust the number of persistent connections of your browser. This value will limit
-               the number of simultaneous streams.
-               See: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Connection_management_in_HTTP_1.x#persistent_connections" rel="nofollow" target="_top">persistent connections</a></li>
+          <li> Optionally adjust the number of persistent connections of your browser. By default many browsers
+               limit the number of simultaneous connections (usually to something like 5).  Since Motion uses
+               connections for each camera, it is possible that only the first 5 cameras are displayed on the all
+               cameras home pages.  To get around this, some browsers allow the user to specify a different(higher)
+               number of simultaneous streams.  For some browsers, this is specified via the
+               network.http.max-persistent-connections-per-server option.  For other browsers, users are not permitted
+               to customize the settings.  For these browsers, users will need to specify a different port for
+               each camera stream.  The connection limit is based upon the server:port combination therefore specifying
+               a different port for each camera avoids the limitation.
         </ul>
         <li>Enable the <a href="#OptDetail_Webcontrol" >web control</a> in the configuration file </li>
         <ul>
@@ -5186,7 +5192,14 @@
         the browser does not directly open the stream, it may be possible to manually create a simple HTML
         page that references the stream.
         <p></p>
-        Browsers may limit the number of simultaneous streams. See: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Connection_management_in_HTTP_1.x#persistent_connections" rel="nofollow" target="_top">persistent connections</a>
+        By default many browsers limit the number of simultaneous connections (usually to something like 5).
+        Since Motion uses connections for each camera, it is possible that only the first 5 cameras are displayed
+        on the all cameras home page.  To get around this, some browsers allow the user to specify a
+        different(higher) number of simultaneous streams.  For some browsers, this is specified via the
+        network.http.max-persistent-connections-per-server option.  For other browsers, users are not permitted
+        to customize the settings.  For these browswers, users will need to specify a different port for
+        each camera stream.  The connection limit is based upon the server:port combination therefore specifying
+        a different port for each camera avoids the limitation.
         <p></p>
         Some regular stream players such as mplayer, ffplay and avplay may open the streams as well by specifying
         the network stream as
