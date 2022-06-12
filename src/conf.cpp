@@ -64,6 +64,8 @@ struct ctx_parm config_parms[] = {
     {"netcam_userpass",           PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
     {"mmalcam_name",              PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
     {"mmalcam_params",            PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
+    {"libcam_name",               PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
+    {"libcam_params",             PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
 
     {"width",                     PARM_TYP_INT,    PARM_CAT_03, WEBUI_LEVEL_LIMITED },
     {"height",                    PARM_TYP_INT,    PARM_CAT_03, WEBUI_LEVEL_LIMITED },
@@ -823,6 +825,32 @@ static void conf_edit_mmalcam_params(struct ctx_cam *cam, std::string &parm, enu
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mmalcam_params",_("mmalcam_params"));
+}
+
+static void conf_edit_libcam_name(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->libcam_name = "";
+    } else if (pact == PARM_ACT_SET) {
+        cam->conf->libcam_name = parm;
+    } else if (pact == PARM_ACT_GET) {
+        parm = cam->conf->libcam_name;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","libcam_name",_("libcam_name"));
+}
+
+static void conf_edit_libcam_params(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->libcam_params = "";
+    } else if (pact == PARM_ACT_SET) {
+        cam->conf->libcam_params = parm;
+    } else if (pact == PARM_ACT_GET) {
+        parm = cam->conf->libcam_params;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","libcam_params",_("libcam_params"));
 }
 
 static void conf_edit_width(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
@@ -2890,6 +2918,8 @@ static void conf_edit_cat02(struct ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "netcam_userpass") {       conf_edit_netcam_userpass(cam, parm_val, pact);
     } else if (parm_nm == "mmalcam_name") {          conf_edit_mmalcam_name(cam, parm_val, pact);
     } else if (parm_nm == "mmalcam_params") {        conf_edit_mmalcam_params(cam, parm_val, pact);
+    } else if (parm_nm == "libcam_name") {           conf_edit_libcam_name(cam, parm_val, pact);
+    } else if (parm_nm == "libcam_params") {         conf_edit_libcam_params(cam, parm_val, pact);
     }
 
 }

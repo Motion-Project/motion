@@ -47,6 +47,9 @@
         std::string     mmalcam_name;
         std::string     mmalcam_params;
 
+        std::string     libcam_name;
+        std::string     libcam_params;
+
         /* Image processing configuration parameters */
         int             width;
         int             height;

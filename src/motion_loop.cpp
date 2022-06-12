@@ -26,6 +26,7 @@
 #include "rotate.hpp"
 #include "movie.hpp"
 #include "mmalcam.hpp"
+#include "libcam.hpp"
 #include "video_v4l2.hpp"
 #include "video_loopback.hpp"
 #include "netcam.hpp"
@@ -364,11 +365,16 @@ static void mlp_mask_privacy(struct ctx_cam *cam)
 
 void mlp_cam_close(struct ctx_cam *cam)
 {
-
     if (cam->mmalcam) {
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling mmalcam_cleanup"));
         mmalcam_cleanup(cam->mmalcam);
         cam->mmalcam = NULL;
+        cam->running_cam = false;
+        return;
+    }
+
+    if (cam->libcam) {
+        libcam_cleanup(cam);
         cam->running_cam = false;
         return;
     }
@@ -386,7 +392,7 @@ void mlp_cam_close(struct ctx_cam *cam)
         return;
     }
 
-    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("No Camera device cleanup (MMAL, Netcam, V4L2)"));
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("No Camera device cleanup"));
     return;
 
 }
@@ -413,6 +419,16 @@ int mlp_cam_start(struct ctx_cam *cam)
         return dev;
     }
 
+    if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening Libcam"));
+        dev = libcam_start(cam);
+        if (dev < 0) {
+            libcam_cleanup(cam);
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Libcam failed to open"));
+        }
+        return dev;
+    }
+
     if (cam->camera_type == CAMERA_TYPE_NETCAM) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening Netcam"));
         dev = netcam_setup(cam);
@@ -433,7 +449,7 @@ int mlp_cam_start(struct ctx_cam *cam)
     }
 
     MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-        ,_("No Camera device specified (MMAL, Netcam, V4L2)"));
+        ,_("No Camera device specified"));
     return dev;
 
 }
@@ -447,6 +463,14 @@ int mlp_cam_next(struct ctx_cam *cam, struct ctx_image_data *img_data)
         }
         return mmalcam_next(cam, img_data);
     }
+
+    if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
+        if (cam->libcam == NULL) {
+            return NETCAM_GENERAL_ERROR;
+        }
+        return libcam_next(cam, img_data);
+    }
+
 
     if (cam->camera_type == CAMERA_TYPE_NETCAM) {
         if (cam->video_dev == -1) {
@@ -472,6 +496,11 @@ static int init_camera_type(struct ctx_cam *cam)
         return 0;
     }
 
+    if (cam->conf->libcam_name != "") {
+        cam->camera_type = CAMERA_TYPE_LIBCAM;
+        return 0;
+    }
+
     if (cam->conf->netcam_url != "") {
         cam->camera_type = CAMERA_TYPE_NETCAM;
         return 0;
@@ -483,7 +512,7 @@ static int init_camera_type(struct ctx_cam *cam)
     }
 
     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-        , _("Unable to determine camera type (MMAL, Netcam, V4L2)"));
+        , _("Unable to determine camera type"));
     return -1;
 
 }

@@ -84,6 +84,8 @@ struct ctx_algsec;
 struct ctx_config;
 struct ctx_v4l2cam;
 
+class cls_libcam;
+
 #define MYFFVER (LIBAVFORMAT_VERSION_MAJOR * 1000)+LIBAVFORMAT_VERSION_MINOR
 
 #define THRESHOLD_TUNE_LENGTH  256
@@ -143,6 +145,7 @@ enum CAMERA_TYPE {
     CAMERA_TYPE_UNKNOWN,
     CAMERA_TYPE_V4L2,
     CAMERA_TYPE_MMAL,
+    CAMERA_TYPE_LIBCAM,
     CAMERA_TYPE_NETCAM
 };
 
@@ -306,6 +309,8 @@ struct ctx_cam {
     struct ctx_movie        *movie_motion;
     struct ctx_movie        *movie_timelapse;
     struct ctx_stream       stream;
+
+    class cls_libcam        *libcam;
 
     FILE                    *extpipe;
     int                     extpipe_open;

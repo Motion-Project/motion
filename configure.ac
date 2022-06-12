@@ -1,6 +1,6 @@
 AC_INIT(motionplus, esyscmd(['./scripts/version.sh']))
 AM_INIT_AUTOMAKE([subdir-objects foreign])
-CXXFLAGS="$CXXFLAGS -std=c++0x"
+CXXFLAGS="$CXXFLAGS -std=c++17"
 AC_PROG_CC
 AC_PROG_CXX
 AC_GNU_SOURCE
@@ -203,6 +203,48 @@ AS_IF([test "${MMAL}" = "no"], [
       ],[
         AC_MSG_RESULT([no])
         MMAL="no"
+      ]
+    )
+    PKG_CONFIG_PATH=$TEMP_PATH
+    export PKG_CONFIG_PATH
+  ]
+)
+AM_CONDITIONAL([INC_MMAL_SRC],[test x${MMAL} = xyes])
+
+##############################################################################
+###  raspberry pi libcamera - Optional.
+##############################################################################
+AC_ARG_WITH([libcam],
+  AS_HELP_STRING([--with-libcam[=DIR]],[Compile with RasperryPi libcamera support]),
+  [LIBCAM="$withval"],
+  [LIBCAM="yes"]
+)
+
+AS_IF([test "${LIBCAM}" = "no"], [
+    AC_MSG_CHECKING(for LIBCAM)
+    AC_MSG_RESULT(skipped)
+  ],[
+    AC_MSG_CHECKING(LIBCAM pkg-config path)
+    TEMP_PATH=$PKG_CONFIG_PATH
+    AS_IF([test "${LIBCAM}" != "yes"], [
+        PKG_CONFIG_PATH=${LIBCAM}/lib/pkgconfig:$PKG_CONFIG_PATH
+        LIBCAM="yes"
+      ],[
+        PKG_CONFIG_PATH=.:/usr/lib/pkgconfig
+      ]
+    )
+    export PKG_CONFIG_PATH
+    AC_MSG_RESULT($PKG_CONFIG_PATH)
+
+    AC_MSG_CHECKING(for LIBCAM)
+    AS_IF([pkg-config libcamera], [
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags libcamera`
+        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libcamera`
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([HAVE_LIBCAM], [1], [Define to 1 if LIBCAM is around])
+      ],[
+        AC_MSG_RESULT([no])
+        LIBCAM="no"
       ]
     )
     PKG_CONFIG_PATH=$TEMP_PATH
@@ -534,6 +576,7 @@ echo "XSI error             : $XSI_STRERROR"
 echo "webp support          : $WEBP"
 echo "V4L2 support          : $V4L2"
 echo "MMAL support          : $MMAL"
+echo "libcamera support     : $LIBCAM"
 echo "FFmpeg support        : $FFMPEG"
 echo "  libavformat version : $FFMPEG_VER"
 echo "OpenCV                : $OPENCV"

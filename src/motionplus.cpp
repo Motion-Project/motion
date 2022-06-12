@@ -344,6 +344,12 @@ static void motion_ntc(void)
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("mmal   : not available"));
     #endif
 
+    #ifdef HAVE_LIBCAM
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("libcam : available"));
+    #else
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("libcam : not available"));
+    #endif
+
     #ifdef HAVE_MYSQL
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("mysql  : available"));
     #else
