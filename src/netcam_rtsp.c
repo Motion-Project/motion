@@ -2168,7 +2168,7 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data)
             }
             pthread_mutex_lock(&cnt->rtsp_high->mutex);
                 netcam_rtsp_pktarray_resize(cnt, TRUE);
-                if (!(cnt->rtsp_high->high_resolution && cnt->rtsp_high->passthrough)) {
+                if (!cnt->rtsp_high->passthrough) {
                     memcpy(img_data->image_high
                         ,cnt->rtsp_high->img_latest->ptr
                         ,cnt->rtsp_high->img_latest->used);

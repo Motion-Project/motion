@@ -507,8 +507,9 @@ static void put_webp_yuv420p_file(FILE *fp, unsigned char *image, int width, int
 static void put_jpeg_yuv420p_file(FILE *fp, unsigned char *image, int width, int height
             , int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
 {
-    int sz = 0;
-    int image_size = cnt->imgs.size_norm;
+    int sz, image_size;
+
+    image_size = (width * height * 3)/2;
     unsigned char *buf = mymalloc(image_size);
 
     sz = jpgutl_put_yuv420p(buf, image_size, image, width, height, quality, cnt ,tv1, box);
@@ -535,8 +536,9 @@ static void put_jpeg_yuv420p_file(FILE *fp, unsigned char *image, int width, int
 static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, int height,
             int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
 {
-    int sz = 0;
-    int image_size = cnt->imgs.size_norm;
+    int sz, image_size;
+
+    image_size = (width * height * 3)/2;
     unsigned char *buf = mymalloc(image_size);
 
     sz = jpgutl_put_grey(buf, image_size, image, width, height, quality, cnt ,tv1, box);
@@ -795,7 +797,8 @@ static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *im
     int width, height, passthrough;
 
     passthrough = util_check_passthrough(cnt);
-    if ((ftype == FTYPE_IMAGE) && (cnt->imgs.size_high > 0) && (!passthrough)) {
+    if (((ftype == FTYPE_IMAGE) || (ftype == FTYPE_IMAGE_SNAPSHOT)) &&
+        (cnt->imgs.size_high > 0) && (!passthrough)) {
         width = cnt->imgs.width_high;
         height = cnt->imgs.height_high;
     } else {
