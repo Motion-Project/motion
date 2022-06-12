@@ -234,7 +234,17 @@
       <p></p>
 
       <a name="basic_setup_picam"></a>
-      <strong>Raspberry Pi cameras</strong> can be set up two different ways.  If Motion is installed by using the
+      <strong>The raspberry Pi camera</strong> is set up multiple ways depending upon the distro being used.
+      <p></p>
+      In the Raspbian version based upon Debian release of 'bullseye' (and presumably later releases), Raspbian
+      allows access to the PI camera via an application called
+      <i><small><code>libcamera</code></small></i>.  <i><small><code>libcamera</code></small></i> provides
+      access to the camera as a v4l2 device but this interface is only available when using a special
+      application.  Users must run Motion using the
+      command <i><small><code>libcamerify motion</code></small></i> and
+      then specify /dev/video0 in the Motion configuration file.
+      <p></p>
+      For Raspbian releases prior to 'bullseye', the PI camera can be set up two different ways.  If Motion is installed by using the
       apt packages (e.g. apt-get install motion), then the camera must be set up using the bcm2835-v4l2 module which creates
       a v4l2 device for the camera.  Users will need to install this module using the
       command <code>sudo modprobe bcm2835-v4l2</code>.  This
@@ -242,6 +252,8 @@
       built from source or installed via the deb packages on the project release page, then an additional option is to set
       up the camera using the <a href="#mmalcam_name" >mmalcam_name</a> parameter or using
       the bcm2835-v4l2 module.  <strong>When Motion is installed via apt, the mmalcam option is not available.</strong>
+      It has been noted that this historical method of accessing the PI camera may be available in newer
+      releases via the enabling the legacy camera stack but it is unclear how long this method will be permitted.
       <p></p>
 
       <a name="basic_setup_composite"></a>
