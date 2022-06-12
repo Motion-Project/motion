@@ -1347,6 +1347,11 @@ static void netcam_rtsp_set_options(struct rtsp_context *rtsp_data)
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("%s: Setting input_format mjpeg"),rtsp_data->cameratype);
         rtsp_data->format_context->iformat = av_find_input_format("mjpeg");
+        util_parms_add_default(rtsp_data->parameters,"reconnect_on_network_error","1");
+        util_parms_add_default(rtsp_data->parameters,"reconnect_at_eof","1");
+        util_parms_add_default(rtsp_data->parameters,"reconnect","1");
+        util_parms_add_default(rtsp_data->parameters,"multiple_requests","1");
+        util_parms_add_default(rtsp_data->parameters,"reconnect_streamed","1");
 
     } else if (strncmp(rtsp_data->service, "v4l2", 4) == 0 ) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
