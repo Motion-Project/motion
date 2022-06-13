@@ -755,9 +755,6 @@ int netcam_connect(netcam_context_ptr netcam, int err_flag)
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("SO_KEEPALIVE set on socket."));
     }
 
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-        ,_("re-using socket %d since keepalive is set."), netcam->sock);
-
     /*
      * We set the socket non-blocking and then use a 'select'
      * system call to control the timeout.

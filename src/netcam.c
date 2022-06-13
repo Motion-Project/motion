@@ -544,6 +544,12 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
         netcam_disconnect(netcam);
     }
 
+    util_parms_free (netcam->parameters);
+    if (netcam->parameters != NULL) {
+        free(netcam->parameters);
+    }
+    netcam->parameters = NULL;
+
     free(netcam->response);
 
     pthread_mutex_destroy(&netcam->mutex);

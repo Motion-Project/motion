@@ -317,10 +317,6 @@ static int netcam_init_jpeg(netcam_context_ptr netcam, j_decompress_ptr cinfo)
 
         if (retcode) {    /* We assume a non-zero reply is ETIMEOUT */
             pthread_mutex_unlock(&netcam->mutex);
-
-            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
-                ,_("no new pic, no signal rcvd"));
-
             return NETCAM_GENERAL_ERROR | NETCAM_NOTHING_NEW_ERROR;
         }
 
@@ -494,9 +490,7 @@ int netcam_proc_jpeg(netcam_context_ptr netcam,  struct image_data *img_data)
         ,_("processing jpeg image - content length %d"), netcam->latest->content_length);
 
     ret = netcam_init_jpeg(netcam, &cinfo);
-
     if (ret != 0) {
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("return code %d"), ret);
         return ret;
     }
 

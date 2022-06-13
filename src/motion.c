@@ -1439,8 +1439,8 @@ static void motion_cleanup(struct context *cnt)
     mot_stream_deinit(cnt);
 
     if (cnt->video_dev >= 0) {
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Calling vid_close() from motion_cleanup"));
         vid_close(cnt);
+        cnt->video_dev = -1;
     }
 
     free(cnt->imgs.img_motion.image_norm);
@@ -1475,28 +1475,28 @@ static void motion_cleanup(struct context *cnt)
 
     if (cnt->imgs.mask) {
         free(cnt->imgs.mask);
+        cnt->imgs.mask = NULL;
     }
-    cnt->imgs.mask = NULL;
 
     if (cnt->imgs.mask_privacy) {
         free(cnt->imgs.mask_privacy);
+        cnt->imgs.mask_privacy = NULL;
     }
-    cnt->imgs.mask_privacy = NULL;
 
     if (cnt->imgs.mask_privacy_uv) {
         free(cnt->imgs.mask_privacy_uv);
+        cnt->imgs.mask_privacy_uv = NULL;
     }
-    cnt->imgs.mask_privacy_uv = NULL;
 
     if (cnt->imgs.mask_privacy_high) {
         free(cnt->imgs.mask_privacy_high);
+        cnt->imgs.mask_privacy_high = NULL;
     }
-    cnt->imgs.mask_privacy_high = NULL;
 
     if (cnt->imgs.mask_privacy_high_uv) {
         free(cnt->imgs.mask_privacy_high_uv);
+        cnt->imgs.mask_privacy_high_uv = NULL;
     }
-    cnt->imgs.mask_privacy_high_uv = NULL;
 
     free(cnt->imgs.common_buffer);
     cnt->imgs.common_buffer = NULL;
@@ -1504,10 +1504,12 @@ static void motion_cleanup(struct context *cnt)
     free(cnt->imgs.preview_image.image_norm);
     cnt->imgs.preview_image.image_norm = NULL;
 
-    if (cnt->imgs.size_high > 0) {
+    if (cnt->imgs.image_virgin.image_high != NULL) {
         free(cnt->imgs.image_virgin.image_high);
         cnt->imgs.image_virgin.image_high = NULL;
+    }
 
+    if (cnt->imgs.preview_image.image_high != NULL) {
         free(cnt->imgs.preview_image.image_high);
         cnt->imgs.preview_image.image_high = NULL;
     }
@@ -1528,8 +1530,8 @@ static void motion_cleanup(struct context *cnt)
 
     if (cnt->rolling_average_data != NULL) {
         free(cnt->rolling_average_data);
+        cnt->rolling_average_data = NULL;
     }
-
 
     /* Cleanup the current time structure */
     free(cnt->currenttime_tm);
