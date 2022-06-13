@@ -136,9 +136,15 @@
           <li> Specify a <a href="#stream_port" >stream_port</a></li>
           <li> Optionally turn off <a href="#stream_localhost" >stream_localhost</a> if you want to view
                the stream from a different computer</li>
-          <li> Optionally adjust the number of persistent connections of your browser. This value will limit
-               the number of simultaneous streams.
-               See: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Connection_management_in_HTTP_1.x#persistent_connections" rel="nofollow" target="_top">persistent connections</a></li>
+          <li> Optionally adjust the number of persistent connections of your browser. By default many browsers
+               limit the number of simultaneous connections (usually to something like 5).  Since Motion uses
+               connections for each camera, it is possible that only the first 5 cameras are displayed on the all
+               cameras home pages.  To get around this, some browsers allow the user to specify a different(higher)
+               number of simultaneous streams.  For some browsers, this is specified via the
+               network.http.max-persistent-connections-per-server option.  For other browsers, users are not permitted
+               to customize the settings.  For these browsers, users will need to specify a different port for
+               each camera stream.  The connection limit is based upon the server:port combination therefore specifying
+               a different port for each camera avoids the limitation.
         </ul>
         <li>Enable the <a href="#OptDetail_Webcontrol" >web control</a> in the configuration file </li>
         <ul>
@@ -228,7 +234,17 @@
       <p></p>
 
       <a name="basic_setup_picam"></a>
-      <strong>Raspberry Pi cameras</strong> can be set up two different ways.  If Motion is installed by using the
+      <strong>The raspberry Pi camera</strong> is set up multiple ways depending upon the distro being used.
+      <p></p>
+      In the Raspbian version based upon Debian release of 'bullseye' (and presumably later releases), Raspbian
+      allows access to the PI camera via an application called
+      <i><small><code>libcamera</code></small></i>.  <i><small><code>libcamera</code></small></i> provides
+      access to the camera as a v4l2 device but this interface is only available when using a special
+      application.  Users must run Motion using the
+      command <i><small><code>libcamerify motion</code></small></i> and
+      then specify /dev/video0 in the Motion configuration file.
+      <p></p>
+      For Raspbian releases prior to 'bullseye', the PI camera can be set up two different ways.  If Motion is installed by using the
       apt packages (e.g. apt-get install motion), then the camera must be set up using the bcm2835-v4l2 module which creates
       a v4l2 device for the camera.  Users will need to install this module using the
       command <code>sudo modprobe bcm2835-v4l2</code>.  This
@@ -236,6 +252,8 @@
       built from source or installed via the deb packages on the project release page, then an additional option is to set
       up the camera using the <a href="#mmalcam_name" >mmalcam_name</a> parameter or using
       the bcm2835-v4l2 module.  <strong>When Motion is installed via apt, the mmalcam option is not available.</strong>
+      It has been noted that this historical method of accessing the PI camera may be available in newer
+      releases via the enabling the legacy camera stack but it is unclear how long this method will be permitted.
       <p></p>
 
       <a name="basic_setup_composite"></a>
@@ -5186,7 +5204,14 @@
         the browser does not directly open the stream, it may be possible to manually create a simple HTML
         page that references the stream.
         <p></p>
-        Browsers may limit the number of simultaneous streams. See: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Connection_management_in_HTTP_1.x#persistent_connections" rel="nofollow" target="_top">persistent connections</a>
+        By default many browsers limit the number of simultaneous connections (usually to something like 5).
+        Since Motion uses connections for each camera, it is possible that only the first 5 cameras are displayed
+        on the all cameras home page.  To get around this, some browsers allow the user to specify a
+        different(higher) number of simultaneous streams.  For some browsers, this is specified via the
+        network.http.max-persistent-connections-per-server option.  For other browsers, users are not permitted
+        to customize the settings.  For these browswers, users will need to specify a different port for
+        each camera stream.  The connection limit is based upon the server:port combination therefore specifying
+        a different port for each camera avoids the limitation.
         <p></p>
         Some regular stream players such as mplayer, ffplay and avplay may open the streams as well by specifying
         the network stream as

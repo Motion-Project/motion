@@ -86,18 +86,9 @@ static void exec_command(struct context *cnt, char *command, char *filename, int
     mystrftime(cnt, stamp, sizeof(stamp), command, &cnt->current_image->timestamp_tv, filename, filetype);
 
     if (!fork()) {
-        int i;
 
         /* Detach from parent */
         setsid();
-
-        /*
-         * Close any file descriptor except console because we will
-         * like to see error messages
-         */
-        for (i = getdtablesize() - 1; i > 2; i--) {
-            close(i);
-        }
 
         execl("/bin/sh", "sh", "-c", stamp, " &", NULL);
 

@@ -832,7 +832,7 @@ static void init_mask_privacy(struct context *cnt)
     cnt->imgs.mask_privacy_high_uv = NULL;
 
     if (cnt->conf.mask_privacy) {
-        if ((picture = myfopen(cnt->conf.mask_privacy, "r"))) {
+        if ((picture = myfopen(cnt->conf.mask_privacy, "re"))) {
             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Opening privacy mask file"));
             /*
              * NOTE: The mask is expected to have the output dimensions. I.e., the mask
@@ -1282,7 +1282,7 @@ static int motion_init(struct context *cnt)
 
     /* Load the mask file if any */
     if (cnt->conf.mask_file) {
-        if ((picture = myfopen(cnt->conf.mask_file, "r"))) {
+        if ((picture = myfopen(cnt->conf.mask_file, "re"))) {
             /*
              * NOTE: The mask is expected to have the output dimensions. I.e., the mask
              * applies to the already rotated image, not the capture image. Thus, use
@@ -1442,8 +1442,8 @@ static void motion_cleanup(struct context *cnt)
     mot_stream_deinit(cnt);
 
     if (cnt->video_dev >= 0) {
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Calling vid_close() from motion_cleanup"));
         vid_close(cnt);
+        cnt->video_dev = -1;
     }
 
     free(cnt->imgs.img_motion.image_norm);
@@ -1478,28 +1478,28 @@ static void motion_cleanup(struct context *cnt)
 
     if (cnt->imgs.mask) {
         free(cnt->imgs.mask);
+        cnt->imgs.mask = NULL;
     }
-    cnt->imgs.mask = NULL;
 
     if (cnt->imgs.mask_privacy) {
         free(cnt->imgs.mask_privacy);
+        cnt->imgs.mask_privacy = NULL;
     }
-    cnt->imgs.mask_privacy = NULL;
 
     if (cnt->imgs.mask_privacy_uv) {
         free(cnt->imgs.mask_privacy_uv);
+        cnt->imgs.mask_privacy_uv = NULL;
     }
-    cnt->imgs.mask_privacy_uv = NULL;
 
     if (cnt->imgs.mask_privacy_high) {
         free(cnt->imgs.mask_privacy_high);
+        cnt->imgs.mask_privacy_high = NULL;
     }
-    cnt->imgs.mask_privacy_high = NULL;
 
     if (cnt->imgs.mask_privacy_high_uv) {
         free(cnt->imgs.mask_privacy_high_uv);
+        cnt->imgs.mask_privacy_high_uv = NULL;
     }
-    cnt->imgs.mask_privacy_high_uv = NULL;
 
     free(cnt->imgs.common_buffer);
     cnt->imgs.common_buffer = NULL;
@@ -1507,10 +1507,12 @@ static void motion_cleanup(struct context *cnt)
     free(cnt->imgs.preview_image.image_norm);
     cnt->imgs.preview_image.image_norm = NULL;
 
-    if (cnt->imgs.size_high > 0) {
+    if (cnt->imgs.image_virgin.image_high != NULL) {
         free(cnt->imgs.image_virgin.image_high);
         cnt->imgs.image_virgin.image_high = NULL;
+    }
 
+    if (cnt->imgs.preview_image.image_high != NULL) {
         free(cnt->imgs.preview_image.image_high);
         cnt->imgs.preview_image.image_high = NULL;
     }
@@ -1531,8 +1533,8 @@ static void motion_cleanup(struct context *cnt)
 
     if (cnt->rolling_average_data != NULL) {
         free(cnt->rolling_average_data);
+        cnt->rolling_average_data = NULL;
     }
-
 
     /* Cleanup the current time structure */
     free(cnt->currenttime_ts);
@@ -2911,7 +2913,7 @@ static void become_daemon(void)
      * for an enter.
      */
     if (cnt_list[0]->conf.pid_file) {
-        pidf = myfopen(cnt_list[0]->conf.pid_file, "w+");
+        pidf = myfopen(cnt_list[0]->conf.pid_file, "w+e");
 
         if (pidf) {
             (void)fprintf(pidf, "%d\n", getpid());
@@ -2943,20 +2945,20 @@ static void become_daemon(void)
     #endif
 
 
-    if ((i = open("/dev/tty", O_RDWR)) >= 0) {
+    if ((i = open("/dev/tty", O_RDWR|O_CLOEXEC)) >= 0) {
         ioctl(i, TIOCNOTTY, NULL);
         close(i);
     }
 
     setsid();
-    i = open("/dev/null", O_RDONLY);
+    i = open("/dev/null", O_RDONLY|O_CLOEXEC);
 
     if (i != -1) {
         dup2(i, STDIN_FILENO);
         close(i);
     }
 
-    i = open("/dev/null", O_WRONLY);
+    i = open("/dev/null", O_WRONLY|O_CLOEXEC);
 
     if (i != -1) {
         dup2(i, STDOUT_FILENO);

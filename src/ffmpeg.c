@@ -87,9 +87,12 @@ static int ffmpeg_encode_nal(struct ffmpeg *ffmpeg)
 static int ffmpeg_timelapse_exists(const char *fname)
 {
     FILE *file;
-    file = fopen(fname, "r");
+
+    /* We do not use myfopen since we are doing
+     * a file check.(using a very poor method) */
+    file = fopen(fname, "rbe");
     if (file) {
-        fclose(file);
+        myfclose(file);
         return 1;
     }
     return 0;
@@ -99,7 +102,7 @@ static int ffmpeg_timelapse_append(struct ffmpeg *ffmpeg, AVPacket *pkt)
 {
     FILE *file;
 
-    file = fopen(ffmpeg->filename, "a");
+    file = fopen(ffmpeg->filename, "abe");
     if (!file) {
         return -1;
     }
@@ -621,19 +624,12 @@ static int ffmpeg_set_codec_preferred(struct ffmpeg *ffmpeg)
                 ,&ffmpeg->codec_name[codec_name_len+1], blacklist_reason);
         } else {
             ffmpeg->codec = avcodec_find_encoder_by_name(&ffmpeg->codec_name[codec_name_len+1]);
-            if ((ffmpeg->oc->oformat) && (ffmpeg->codec != NULL)) {
-                    ffmpeg->oc->video_codec_id = ffmpeg->codec->id;
-            } else if (ffmpeg->codec == NULL) {
-                MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO
-                    ,_("Preferred codec %s not found")
-                    ,&ffmpeg->codec_name[codec_name_len+1]);
-            }
         }
     }
-    if (!ffmpeg->codec) {
-        ffmpeg->codec = avcodec_find_encoder(ffmpeg->oc->oformat->video_codec);
+    if (ffmpeg->codec == NULL) {
+        ffmpeg->codec = avcodec_find_encoder(ffmpeg->oc->video_codec_id);
     }
-    if (!ffmpeg->codec) {
+    if (ffmpeg->codec == NULL) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Codec %s not found"), ffmpeg->codec_name);
         ffmpeg_free_context(ffmpeg);
@@ -671,8 +667,7 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg)
     }
 
     #if ( MYFFVER >= 57041)
-        //If we provide the codec to this, it results in a memory leak.  ffmpeg ticket: 5714
-        ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, NULL);
+        ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, ffmpeg->codec);
         if (!ffmpeg->video_st) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
             ffmpeg_free_context(ffmpeg);
@@ -680,7 +675,7 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg)
         }
         ffmpeg->ctx_codec = avcodec_alloc_context3(ffmpeg->codec);
         if (ffmpeg->ctx_codec == NULL) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Failed to allocate decoder!"));
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Failed to allocate codec!"));
             ffmpeg_free_context(ffmpeg);
             return -1;
         }
@@ -724,7 +719,7 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg)
         }
     }
 
-    ffmpeg->ctx_codec->codec_id      = ffmpeg->oc->oformat->video_codec;
+    ffmpeg->ctx_codec->codec_id      = ffmpeg->codec->id;
     ffmpeg->ctx_codec->codec_type    = AVMEDIA_TYPE_VIDEO;
     ffmpeg->ctx_codec->bit_rate      = ffmpeg->bps;
     ffmpeg->ctx_codec->width         = ffmpeg->width;
@@ -1311,8 +1306,9 @@ void ffmpeg_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list
         if (end > buf && end[-1] == '\n') {
             *--end = 0;
         }
-
-        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s", buf);
+        if (strstr(buf, "Will reconnect at") == NULL) {
+            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s", buf);
+        }
     }
 }
 
