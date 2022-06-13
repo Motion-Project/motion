@@ -244,4 +244,15 @@ struct context **conf_load(struct context **cnt);
 void conf_output_parms(struct context **cnt);
 void copy_string(struct context *cnt, char *str, int val_ptr);
 
+typedef 
+enum tagTIMELAPSE_MODE
+    {
+        TIMELAPSE_MODE_MANUAL	        = 0,
+        TIMELAPSE_MODE_DAILY	        = 1,
+        TIMELAPSE_MODE_HOURLY	        = 2,
+        TIMELAPSE_MODE_WEEKLY_SUNDAY    = 3,
+        TIMELAPSE_MODE_WEEKLY_MONDAY    = 4,
+        TIMELAPSE_MODE_MONTHLY          = 5
+    } 	TIMELAPSE_MODE;
+
 #endif /* _INCLUDE_CONF_H */
