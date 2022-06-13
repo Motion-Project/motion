@@ -1690,7 +1690,6 @@ static void mlp_prepare(struct context *cnt)
         cnt->process_thisframe = 1;
     }
 
-    // Changed to check in conf.c
     /*
      * Since we don't have sanity checks done when options are set,
      * this sanity check must go in the main loop :(, before pre_captures
@@ -1716,8 +1715,8 @@ static void mlp_prepare(struct context *cnt)
     }
 
     /* Get time for current frame */
-    clock_gettime(CLOCK_REALTIME, cnt->currenttime_ts);
     //cnt->currenttime = time(NULL);
+    clock_gettime(CLOCK_REALTIME, cnt->currenttime_ts);
     cnt->currenttime = cnt->currenttime_ts->tv_sec;
     clock_gettime(CLOCK_REALTIME, cnt->currenttime_ts);
     
@@ -1809,7 +1808,6 @@ static void mlp_resetimages(struct context *cnt)
 
     /* Store time with pre_captured image */
     //gettimeofday(&cnt->current_image->timestamp_tv, NULL);
-    // timestamp bug fix
     TIMESPEC_TO_TIMEVAL(&cnt->current_image->timestamp_tv, cnt->currenttime_ts);
 
     /* Store shot number with pre_captured image */
@@ -2077,13 +2075,13 @@ static void mlp_detection(struct context *cnt)
              * 'lightswitch_frames' frames to allow the camera to settle.
              * Don't check if we have lost connection, we detect "Lost signal" frame as lightswitch
              */
-            //if (cnt->conf.lightswitch_percent >= 1 && !cnt->lost_connection) {
-            if (cnt->conf.lightswitch_percent >= 1 && !cnt->lost_connection && !cnt->detecting_motion) {
+            if (cnt->conf.lightswitch_percent >= 1 && !cnt->lost_connection) {
+            /////////////////////////////////////////////
+            //if (cnt->conf.lightswitch_percent >= 1 && !cnt->lost_connection && !cnt->detecting_motion) {
                 if (alg_lightswitch(cnt, cnt->current_image->diffs)) {
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
-                    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("diffs:%d moved:%d"), cnt->current_image->diffs, cnt->moved);
+                    //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("diffs:%d moved:%d"), cnt->current_image->diffs, cnt->moved);
 
-                    // to conf.c 
                     //if (cnt->conf.lightswitch_frames < 1) {
                     //    cnt->conf.lightswitch_frames = 1;
                     //} else if (cnt->conf.lightswitch_frames > 1000) {
@@ -2094,9 +2092,12 @@ static void mlp_detection(struct context *cnt)
                         cnt->moved = (unsigned int)cnt->conf.lightswitch_frames;
                     }
 
-                    // if move > 0 then begin exit this function. elase this code. 2022/05/12 siriuth 
-                    //cnt->current_image->diffs = 0;
-                    //alg_update_reference_frame(cnt, RESET_REF_FRAME);
+                    ///////////////////////////////////////////////////////////////////////////////////
+                    // if cnt->move > 0 then Not required as it is executed at the end of the function.
+                    // 2022/06/13 もう少し様子を見るために以下の２行を元に戻した。
+                    ///////////////////////////////////////////////////////////////////////////////////
+                    cnt->current_image->diffs = 0;
+                    alg_update_reference_frame(cnt, RESET_REF_FRAME);
                 }
             }
 
@@ -2163,8 +2164,6 @@ static void mlp_detection(struct context *cnt)
     if (cnt->moved) {
         cnt->moved--;
         cnt->current_image->diffs = 0;
-        // diffs is zero but i hope save image
-        //cnt->current_image->flags |= IMAGE_MOTION;
     }
 
 }
@@ -2220,10 +2219,6 @@ static void mlp_tuning(struct context *cnt)
          * at a constant level.
          */
 
-        /*
-         * I couldn't understand the function of the micro light switch.
-         * I think it should be treated as separate from the light switch.
-         */
         if ((cnt->current_image->diffs > cnt->threshold) &&
             (cnt->current_image->diffs < cnt->threshold_maximum) &&
             //(cnt->conf.lightswitch_percent >= 1) &&
@@ -2234,9 +2229,6 @@ static void mlp_tuning(struct context *cnt)
             /* center of motion in about the same place ? */
             ((abs(cnt->current_image->location.x - cnt->previous_location_x)) <= (cnt->imgs.width / 150)) &&
             ((abs(cnt->current_image->location.y - cnt->previous_location_y)) <= (cnt->imgs.height / 150))) {
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _(
-                "lastrate:%d previous_diffs:%d diffs:%d lightswitch_framecounter:%d"),
-                cnt->lastrate, cnt->previous_diffs, cnt->current_image->diffs, cnt->lightswitch_framecounter);
             alg_update_reference_frame(cnt, RESET_REF_FRAME);
             cnt->current_image->diffs = 0;
             cnt->lightswitch_framecounter = 0;
@@ -2687,16 +2679,6 @@ static void mlp_parmsupdate(struct context *cnt)
     if (cnt->shots != 0) {
         return;
     }
-
-    //////////////////////////////////////////////////////////////////
-    // 揮発性の属性として扱っているのでこれを行う必要はない
-    //if (cnt->pause != cnt->conf.pause) {
-    //    cnt->pause = cnt->conf.pause;
-    //    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-    //        ,_("Camera %d parmsupdate: motion detection %s"),
-    //        cnt->camera_id, cnt->pause ? _("Disabled"):_("Enabled"));
-    //}
-    //////////////////////////////////////////////////////////////////
 
     init_text_scale(cnt);  /* Initialize and validate text_scale */
 
