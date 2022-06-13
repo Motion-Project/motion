@@ -420,11 +420,11 @@ int mlp_cam_start(struct ctx_cam *cam)
     }
 
     if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening Libcam"));
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
         dev = libcam_start(cam);
         if (dev < 0) {
             libcam_cleanup(cam);
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Libcam failed to open"));
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
         }
         return dev;
     }

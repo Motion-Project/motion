@@ -70,7 +70,7 @@
             public:
                 cls_libcam(){};
                 ~cls_libcam(){};
-        }
+        };
     #endif
 
     int libcam_start (ctx_cam *cam);
