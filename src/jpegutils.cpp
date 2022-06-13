@@ -200,7 +200,7 @@ static boolean jpgutl_fill_input_buffer(j_decompress_ptr cinfo)
 {
     cinfo->src->next_input_byte = EOI_data;
     cinfo->src->bytes_in_buffer = 2;
-    return true;
+    return TRUE;
 }
 
 /*
@@ -352,7 +352,7 @@ METHODDEF(boolean) empty_output_buffer(j_compress_ptr cinfo)
     dest->pub.next_output_byte = dest->buf;
     dest->pub.free_in_buffer = dest->bufsize;
 
-    return false;
+    return FALSE;
     ERREXIT(cinfo, JERR_BUFFER_SIZE);
 }
 
@@ -453,7 +453,7 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
 
     jpgutl_buffer_src (&dinfo, jpeg_data_in, jpeg_data_len);
 
-    jpeg_read_header (&dinfo, true);
+    jpeg_read_header (&dinfo, TRUE);
 
     //420 sampling is the default for YCbCr so no need to override.
     dinfo.out_color_space = JCS_YCbCr;
@@ -561,9 +561,9 @@ int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
 
     jpeg_set_colorspace(&cinfo, JCS_YCbCr);
 
-    cinfo.raw_data_in = true; // Supply downsampled data
+    cinfo.raw_data_in = TRUE; // Supply downsampled data
     #if JPEG_LIB_VERSION >= 70
-        cinfo.do_fancy_downsampling = false;  // Fix segfault with v7
+        cinfo.do_fancy_downsampling = FALSE;  // Fix segfault with v7
     #endif
     cinfo.comp_info[0].h_samp_factor = 2;
     cinfo.comp_info[0].v_samp_factor = 2;
@@ -572,13 +572,13 @@ int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
     cinfo.comp_info[2].h_samp_factor = 1;
     cinfo.comp_info[2].v_samp_factor = 1;
 
-    jpeg_set_quality(&cinfo, quality, true);
+    jpeg_set_quality(&cinfo, quality, TRUE);
     cinfo.dct_method = JDCT_FASTEST;
 
     _jpeg_mem_dest(&cinfo, dest_image, image_size);  // Data written to mem
 
 
-    jpeg_start_compress(&cinfo, true);
+    jpeg_start_compress(&cinfo, TRUE);
 
     put_jpeg_exif(&cinfo, cam, ts1, box);
 
@@ -642,11 +642,11 @@ int jpgutl_put_grey(unsigned char *dest_image, int image_size,
 
     jpeg_set_defaults(&cjpeg);
 
-    jpeg_set_quality(&cjpeg, quality, true);
+    jpeg_set_quality(&cjpeg, quality, TRUE);
     cjpeg.dct_method = JDCT_FASTEST;
     _jpeg_mem_dest(&cjpeg, dest_image, image_size);  // Data written to mem
 
-    jpeg_start_compress (&cjpeg, true);
+    jpeg_start_compress (&cjpeg, TRUE);
 
     put_jpeg_exif(&cjpeg, cam, ts1, box);
 

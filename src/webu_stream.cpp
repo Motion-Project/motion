@@ -241,14 +241,14 @@ static int webu_stream_checks(struct ctx_webui *webui)
     pthread_mutex_lock(&webui->motapp->mutex_camlst);
         if (webui->threadnbr >= webui->cam_threads) {
             MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-                , _("Invalid thread specified: %s"),webui->url);
+                , _("Invalid thread specified: %s"),webui->url.c_str());
             pthread_mutex_unlock(&webui->motapp->mutex_camlst);
             return -1;
         }
 
         if (webui->threadnbr <= 0) {
             MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-                , _("Invalid thread specified: %s"),webui->url);
+                , _("Invalid thread specified: %s"),webui->url.c_str());
             pthread_mutex_unlock(&webui->motapp->mutex_camlst);
             return -1;
         }
