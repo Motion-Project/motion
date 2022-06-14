@@ -2584,7 +2584,7 @@ static void mlp_timelapse(struct context *cnt)
             (cnt->time_current_frame % 60 < cnt->time_last_frame % 60) &&
             cnt->shots == 0) {
             //if (mystrceq(cnt->conf.timelapse_mode, "manual")) {
-            if (cnt->conf.timelapse_mode == TIMELAPSE_MODE_MANUAL)) {
+            if (cnt->conf.timelapse_mode == TIMELAPSE_MODE_MANUAL) {
                 ;/* No action */
 
             /* If we are daily, raise timelapseend event at midnight */
