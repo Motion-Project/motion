@@ -247,9 +247,9 @@ void copy_string(struct context *cnt, char *str, int val_ptr);
 typedef
 enum tagTIMELAPSE_MODE
     {
-        TIMELAPSE_MODE_MANUAL	        = 0,
-        TIMELAPSE_MODE_DAILY	        = 1,
-        TIMELAPSE_MODE_HOURLY	        = 2,
+        TIMELAPSE_MODE_MANUAL           = 0,
+        TIMELAPSE_MODE_DAILY            = 1,
+        TIMELAPSE_MODE_HOURLY           = 2,
         TIMELAPSE_MODE_WEEKLY_SUNDAY    = 3,
         TIMELAPSE_MODE_WEEKLY_MONDAY    = 4,
         TIMELAPSE_MODE_MONTHLY          = 5
@@ -258,9 +258,9 @@ enum tagTIMELAPSE_MODE
 typedef
 enum tagPICTURE_OUTPUT
     {
-        PICTURE_OUTPUT_OFF	     = 0,
-        PICTURE_OUTPUT_ON	     = 1,
-        PICTURE_OUTPUT_FIRST	 = 2,
+        PICTURE_OUTPUT_OFF       = 0,
+        PICTURE_OUTPUT_ON        = 1,
+        PICTURE_OUTPUT_FIRST     = 2,
         PICTURE_OUTPUT_BEST      = 3,
         PICTURE_OUTPUT_CENTER    = 4
     } 	PICTURE_OUTPUT;
@@ -268,17 +268,17 @@ enum tagPICTURE_OUTPUT
 typedef
 enum tagLOCATE_MOTION_MODE
     {
-        LOCATE_MOTION_MODE_OFF	     = 0,
-        LOCATE_MOTION_MODE_ON	     = 1,
-        LOCATE_MOTION_MODE_PREVIEW	 = 2
+        LOCATE_MOTION_MODE_OFF       = 0,
+        LOCATE_MOTION_MODE_ON        = 1,
+        LOCATE_MOTION_MODE_PREVIEW   = 2
     } 	LOCATE_MOTION_MODE;
 
 typedef
 enum tagLOCATE_MOTION_STYLE
     {
-        //LOCATE_MOTION_STYLE_OFF	        = 0,
+        //LOCATE_MOTION_STYLE_OFF         = 0,
         LOCATE_MOTION_STYLE_BOX	        = 1,
-        LOCATE_MOTION_STYLE_REDBOX	    = 0xF000+1,
+        LOCATE_MOTION_STYLE_REDBOX      = 0xF000+1,
         LOCATE_MOTION_STYLE_CROSS       = 2,
         LOCATE_MOTION_STYLE_REDCROSS    = 0xF000+2
     } 	LOCATE_MOTION_STYLE;
