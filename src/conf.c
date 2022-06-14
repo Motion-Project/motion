@@ -2291,7 +2291,7 @@ static void copy_picture_output(struct context *cnt, char *str, int val_ptr)
 	}
 }
 
-static void copy_locate_motion_mod(struct context *cnt, char *str, int val_ptr)
+static void copy_locate_motion_mode(struct context *cnt, char *str, int val_ptr)
 {
     void *tmp;
 
