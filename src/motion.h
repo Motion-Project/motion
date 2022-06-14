@@ -169,7 +169,8 @@ struct ffmpeg;
 #define DEF_MOTION_SUFFIX       "m"
 #define DEF_EXTPIPE_SUFFIX      ""
 
-#define DEF_TIMELAPSE_MODE      "daily"
+//#define DEF_TIMELAPSE_MODE      "daily"
+#define DEF_TIMELAPSE_MODE      TIMELAPSE_MODE_DAILY
 
 /* OUTPUT Image types */
 #define IMAGE_TYPE_JPEG        0
