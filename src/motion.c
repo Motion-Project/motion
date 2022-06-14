@@ -2583,40 +2583,46 @@ static void mlp_timelapse(struct context *cnt)
         if (timestamp_tm.tm_min == 0 &&
             (cnt->time_current_frame % 60 < cnt->time_last_frame % 60) &&
             cnt->shots == 0) {
-            if (mystrceq(cnt->conf.timelapse_mode, "manual")) {
+            //if (mystrceq(cnt->conf.timelapse_mode, "manual")) {
+            if (cnt->conf.timelapse_mode == TIMELAPSE_MODE_MANUAL)) {
                 ;/* No action */
 
             /* If we are daily, raise timelapseend event at midnight */
-            } else if (mystrceq(cnt->conf.timelapse_mode, "daily")) {
+            //} else if (mystrceq(cnt->conf.timelapse_mode, "daily")) {
+            } else if (cnt->conf.timelapse_mode == TIMELAPSE_MODE_DAILY) {
                 if (timestamp_tm.tm_hour == 0) {
                     event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
                 }
             /* handle the hourly case */
-            } else if (mystrceq(cnt->conf.timelapse_mode, "hourly")) {
+            //} else if (mystrceq(cnt->conf.timelapse_mode, "hourly")) {
+            } else if (cnt->conf.timelapse_mode == TIMELAPSE_MODE_HOURLY) {
                 event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
 
             /* If we are weekly-sunday, raise timelapseend event at midnight on sunday */
-            } else if (mystrceq(cnt->conf.timelapse_mode, "weekly-sunday")) {
+            //} else if (mystrceq(cnt->conf.timelapse_mode, "weekly-sunday")) {
+            } else if (cnt->conf.timelapse_mode == TIMELAPSE_MODE_WEEKLY_SUNDAY) {
                 if (timestamp_tm.tm_wday == 0 && timestamp_tm.tm_hour == 0) {
                     event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
                 }
             /* If we are weekly-monday, raise timelapseend event at midnight on monday */
-            } else if (mystrceq(cnt->conf.timelapse_mode, "weekly-monday")) {
+            //} else if (mystrceq(cnt->conf.timelapse_mode, "weekly-monday")) {
+            } else if (cnt->conf.timelapse_mode == TIMELAPSE_MODE_WEEKLY_MONDAY) {
                 if (timestamp_tm.tm_wday == 1 && timestamp_tm.tm_hour == 0) {
                     event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
                 }
             /* If we are monthly, raise timelapseend event at midnight on first day of month */
-            } else if (mystrceq(cnt->conf.timelapse_mode, "monthly")) {
+            //} else if (mystrceq(cnt->conf.timelapse_mode, "monthly")) {
+            } else if (cnt->conf.timelapse_mode == TIMELAPSE_MODE_MONTHLY) {
                 if (timestamp_tm.tm_mday == 1 && timestamp_tm.tm_hour == 0) {
                     event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
                 }
-            /* If invalid we report in syslog once and continue in manual mode */
-            } else {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                    ,_("Invalid timelapse_mode argument '%s'"), cnt->conf.timelapse_mode);
-                MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
-                    ,_("%:s Defaulting to manual timelapse mode"));
-                conf_cmdparse(&cnt, (char *)"ffmpeg_timelapse_mode",(char *)"manual");
+            ///* If invalid we report in syslog once and continue in manual mode */
+            //} else {
+            //    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            //        ,_("Invalid timelapse_mode argument '%s'"), cnt->conf.timelapse_mode);
+            //    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+            //        ,_("%:s Defaulting to manual timelapse mode"));
+            //    conf_cmdparse(&cnt, (char *)"ffmpeg_timelapse_mode",(char *)"manual");
             }
         }
 
@@ -2684,33 +2690,43 @@ static void mlp_parmsupdate(struct context *cnt)
 
     init_text_scale(cnt);  /* Initialize and validate text_scale */
 
-    if (mystrceq(cnt->conf.picture_output, "on")) {
+    //if (mystrceq(cnt->conf.picture_output, "on")) {
+    if (cnt->conf.picture_output == PICTURE_OUTPUT_ON) {
         cnt->new_img = NEWIMG_ON;
-    } else if (mystrceq(cnt->conf.picture_output, "first")) {
+    //} else if (mystrceq(cnt->conf.picture_output, "first")) {
+    } else if (cnt->conf.picture_output == PICTURE_OUTPUT_FIRST) {
         cnt->new_img = NEWIMG_FIRST;
-    } else if (mystrceq(cnt->conf.picture_output, "best")) {
+    //} else if (mystrceq(cnt->conf.picture_output, "best")) {
+    } else if (cnt->conf.picture_output == PICTURE_OUTPUT_BEST) {
         cnt->new_img = NEWIMG_BEST;
-    } else if (mystrceq(cnt->conf.picture_output, "center")) {
+    //} else if (mystrceq(cnt->conf.picture_output, "center")) {
+    } else if (cnt->conf.picture_output == PICTURE_OUTPUT_CENTER) {
         cnt->new_img = NEWIMG_CENTER;
     } else {
         cnt->new_img = NEWIMG_OFF;
     }
 
-    if (mystrceq(cnt->conf.locate_motion_mode, "on")) {
+    //if (mystrceq(cnt->conf.locate_motion_mode, "on")) {
+    if (cnt->conf.locate_motion_mode == LOCATE_MOTION_MODE_ON) {
         cnt->locate_motion_mode = LOCATE_ON;
-    } else if (mystrceq(cnt->conf.locate_motion_mode, "preview")) {
+    //} else if (mystrceq(cnt->conf.locate_motion_mode, "preview")) {
+    } else if (cnt->conf.locate_motion_mode == LOCATE_MOTION_MODE_PREVIEW) {
         cnt->locate_motion_mode = LOCATE_PREVIEW;
     } else {
         cnt->locate_motion_mode = LOCATE_OFF;
     }
 
-    if (mystrceq(cnt->conf.locate_motion_style, "box")) {
+    //if (mystrceq(cnt->conf.locate_motion_style, "box")) {
+    if (cnt->conf.locate_motion_style == LOCATE_MOTION_STYLE_BOX) {
         cnt->locate_motion_style = LOCATE_BOX;
-    } else if (mystrceq(cnt->conf.locate_motion_style, "redbox")) {
+    //} else if (mystrceq(cnt->conf.locate_motion_style, "redbox")) {
+    } else if (cnt->conf.locate_motion_style == LOCATE_MOTION_STYLE_REDBOX) {
         cnt->locate_motion_style = LOCATE_REDBOX;
-    } else if (mystrceq(cnt->conf.locate_motion_style, "cross")) {
+    //} else if (mystrceq(cnt->conf.locate_motion_style, "cross")) {
+    } else if (cnt->conf.locate_motion_style == LOCATE_MOTION_STYLE_CROSS) {
         cnt->locate_motion_style = LOCATE_CROSS;
-    } else if (mystrceq(cnt->conf.locate_motion_style, "redcross")) {
+    //} else if (mystrceq(cnt->conf.locate_motion_style, "redcross")) {
+    } else if (cnt->conf.locate_motion_style == LOCATE_MOTION_STYLE_REDCROSS) {
         cnt->locate_motion_style = LOCATE_REDCROSS;
     } else {
         cnt->locate_motion_style = LOCATE_BOX;
