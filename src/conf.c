@@ -78,8 +78,10 @@ struct config conf_template = {
     .minimum_frame_time =              0,
     .rotate =                          0,
     .flip_axis =                       "none",
-    .locate_motion_mode =              "off",
-    .locate_motion_style =             "box",
+    //.locate_motion_mode =              "off",
+    .locate_motion_mode =              LOCATE_MOTION_MODE_OFF,
+    //.locate_motion_style =             "box",
+    .locate_motion_style =             LOCATE_MOTION_STYLE_BOX,
     .text_left =                       NULL,
     .text_right =                      DEF_TIMESTAMP,
     .text_changes =                    FALSE,
@@ -119,7 +121,8 @@ struct config conf_template = {
     .on_camera_found =                 NULL,
 
     /* Picture output configuration parameters */
-    .picture_output =                  "off",
+    //.picture_output =                  "off",
+    .picture_output =                  PICTURE_OUTPUT_OFF,
     .picture_output_motion =           FALSE,
     .picture_type =                    "jpeg",
     .picture_quality =                 75,
@@ -218,10 +221,18 @@ static void copy_int_positive(struct context *cnt, char *str, int val_ptr);	// 1
 static void copy_int_zero_or_above(struct context *cnt, char *str, int val_ptr);	// 0,1,2...
 static void copy_int_percent(struct context *cnt, char *str, int val_ptr);	// 0,1,2...100
 static void copy_lightswitch_frames(struct context *cnt, char *str, int val_ptr);
+static void copy_timelapse_mode(struct context *cnt, char *str, int val_ptr);
+static void copy_picture_output(struct context *cnt, char *str, int val_ptr);
+static void copy_locate_motion_mode(struct context *cnt, char *str, int val_ptr);
+static void copy_locate_motion_style(struct context *cnt, char *str, int val_ptr);
 static const char *print_bool(struct context **cnt, char **str,int parm, unsigned int threadnr);
 static const char *print_string(struct context **cnt,char **str, int parm, unsigned int threadnr);
 static const char *print_int(struct context **cnt, char **str, int parm, unsigned int threadnr);
 static const char *print_camera(struct context **cnt, char **str, int parm, unsigned int threadnr);
+static const char *print_timelapse_mode(struct context **cnt, char **str, int parm, unsigned int threadnr);
+static const char *print_picture_output(struct context **cnt, char **str, int parm, unsigned int threadnr);
+static const char *print_locate_motion_mode(struct context **cnt, char **str, int parm, unsigned int threadnr);
+static const char *print_locate_motion_style(struct context **cnt, char **str, int parm, unsigned int threadnr);
 static struct context **read_camera_dir(struct context **cnt, char *str, int val);
 static struct context **config_camera(struct context **cnt, const char *str, int val);
 
@@ -550,8 +561,8 @@ config_param config_params[] = {
     "# Draw a locate box around the moving object.",
     0,
     CONF_OFFSET(locate_motion_mode),
-    copy_string,
-    print_string,
+    copy_locate_motion_mode,
+    print_locate_motion_mode,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -559,8 +570,8 @@ config_param config_params[] = {
     "# Set the look and style of the locate box.",
     0,
     CONF_OFFSET(locate_motion_style),
-    copy_string,
-    print_string,
+    copy_locate_motion_style,
+    print_locate_motion_style,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -874,8 +885,8 @@ config_param config_params[] = {
     "# Output pictures when motion is detected",
     0,
     CONF_OFFSET(picture_output),
-    copy_string,
-    print_string,
+    copy_picture_output,
+    print_picture_output,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1082,8 +1093,8 @@ config_param config_params[] = {
     "# Timelapse file rollover mode. See motion_guide.html for options and uses.",
     0,
     CONF_OFFSET(timelapse_mode),
-    copy_string,
-    print_string,
+    copy_timelapse_mode,
+    print_timelapse_mode,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -2242,6 +2253,74 @@ static void copy_lightswitch_frames(struct context *cnt, char *str, int val_ptr)
     }
 }
 
+static void copy_timelapse_mode(struct context *cnt, char *str, int val_ptr)
+{
+    void *tmp;
+
+    tmp = (char *)cnt + val_ptr;
+	if (mystrceq(str, "daily")) {
+		*((TIMELAPSE_MODE *)tmp) = TIMELAPSE_MODE_DAILY;
+	} else if (mystrceq(str, "hourly")) {
+		*((TIMELAPSE_MODE *)tmp) = TIMELAPSE_MODE_HOURLY;
+	} else if (mystrceq(str, "weekly-sunday")) {
+		*((TIMELAPSE_MODE *)tmp) = TIMELAPSE_MODE_WEEKLY_SUNDAY;
+	} else if (mystrceq(str, "weekly-monday")) {
+		*((TIMELAPSE_MODE *)tmp) = TIMELAPSE_MODE_WEEKLY_MONDAY;
+	} else if (mystrceq(str, "monthly")) {
+		*((TIMELAPSE_MODE *)tmp) = TIMELAPSE_MODE_MONTHLY;
+	} else {
+		*((TIMELAPSE_MODE *)tmp) = TIMELAPSE_MODE_MANUAL;
+	}
+}
+
+static void copy_picture_output(struct context *cnt, char *str, int val_ptr)
+{
+    void *tmp;
+
+    tmp = (char *)cnt + val_ptr;
+	if (mystrceq(str, "on")) {
+		*((PICTURE_OUTPUT *)tmp) = PICTURE_OUTPUT_ON;
+	} else if (mystrceq(str, "first")) {
+		*((PICTURE_OUTPUT *)tmp) = PICTURE_OUTPUT_FIRST;
+	} else if (mystrceq(str, "best")) {
+		*((PICTURE_OUTPUT *)tmp) = PICTURE_OUTPUT_BEST;
+	} else if (mystrceq(str, "center")) {
+		*((PICTURE_OUTPUT *)tmp) = PICTURE_OUTPUT_CENTER;
+	} else {
+		*((PICTURE_OUTPUT *)tmp) = PICTURE_OUTPUT_OFF;
+	}
+}
+
+static void copy_locate_motion_mod(struct context *cnt, char *str, int val_ptr)
+{
+    void *tmp;
+
+    tmp = (char *)cnt + val_ptr;
+	if (mystrceq(str, "on")) {
+		*((LOCATE_MOTION_MODE *)tmp) = LOCATE_MOTION_MODE_ON;
+	} else if (mystrceq(str, "preview")) {
+		*((LOCATE_MOTION_MODE *)tmp) = LOCATE_MOTION_MODE_PREVIEW;
+	} else {
+		*((LOCATE_MOTION_MODE *)tmp) = LOCATE_MOTION_MODE_OFF;
+	}
+}
+
+static void copy_locate_motion_style(struct context *cnt, char *str, int val_ptr)
+{
+    void *tmp;
+
+    tmp = (char *)cnt + val_ptr;
+	if (mystrceq(str, "redbox")) {
+		*((LOCATE_MOTION_STYLE *)tmp) = LOCATE_MOTION_STYLE_REDBOX;
+	} else if (mystrceq(str, "cross")) {
+		*((LOCATE_MOTION_STYLE *)tmp) = LOCATE_MOTION_STYLE_CROSS;
+	} else if (mystrceq(str, "redcross")) {
+		*((LOCATE_MOTION_STYLE *)tmp) = LOCATE_MOTION_STYLE_REDCROSS;
+	} else {
+		*((LOCATE_MOTION_STYLE *)tmp) = LOCATE_MOTION_STYLE_BOX;
+	}
+}
+
 /**
  * copy_string
  *      Assigns a new string value to a config option.
@@ -3188,6 +3267,120 @@ static const char *print_camera(struct context **cnt, char **str, int parm, unsi
     *str = retval;
 
     return NULL;
+}
+
+static const char *print_timelapse_mode(struct context **cnt, char **str, int parm, unsigned int threadnr)
+{
+    static char *result;
+    int val = config_params[parm].conf_value;
+
+    (void)str;
+
+    if (threadnr && *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val)) {
+        return NULL;
+    }
+
+	switch(*(TIMELAPSE_MODE*)((char *)cnt[threadnr] + val)){
+    case TIMELAPSE_MODE_DAILY:
+		result = "daily";
+		break;
+    case TIMELAPSE_MODE_HOURLY:
+		result = "hourly";
+		break;
+    case TIMELAPSE_MODE_WEEKLY_SUNDAY:
+		result = "weekly-sunday";
+		break;
+    case TIMELAPSE_MODE_WEEKLY_MONDAY:
+		result = "weekly-monday";
+		break;
+    case TIMELAPSE_MODE_MONTHLY:
+		result = "weekly_monthly";
+		break;
+	default:
+		result = "manual";
+	}
+    return result;
+}
+
+static const char *print_picture_output(struct context **cnt, char **str, int parm, unsigned int threadnr)
+{
+    static char *result;
+    int val = config_params[parm].conf_value;
+
+    (void)str;
+
+    if (threadnr && *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val)) {
+        return NULL;
+    }
+
+	switch(*(PICTURE_OUTPUT*)((char *)cnt[threadnr] + val)){
+    case PICTURE_OUTPUT_ON:
+		result = "on";
+		break;
+    case PICTURE_OUTPUT_FIRST:
+		result = "first";
+		break;
+    case PICTURE_OUTPUT_BEST:
+		result = "best";
+		break;
+    case PICTURE_OUTPUT_CENTER:
+		result = "center";
+		break;
+	default:
+		result = "off";
+	}
+    return result;
+}
+
+static const char *print_locate_motion_mode(struct context **cnt, char **str, int parm, unsigned int threadnr)
+{
+    static char *result;
+    int val = config_params[parm].conf_value;
+
+    (void)str;
+
+    if (threadnr && *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val)) {
+        return NULL;
+    }
+
+	switch(*(LOCATE_MOTION_MODE*)((char *)cnt[threadnr] + val)){
+	case LOCATE_MOTION_MODE_ON:
+		result = "on";
+		break;
+    case LOCATE_MOTION_MODE_PREVIEW:
+		result = "preview";
+		break;
+	default:
+		result = "off";
+	}
+    return result;
+}
+
+static const char *print_locate_motion_style(struct context **cnt, char **str, int parm, unsigned int threadnr)
+{
+    static char *result;
+    int val = config_params[parm].conf_value;
+
+    (void)str;
+
+    if (threadnr && *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val)) {
+        return NULL;
+    }
+
+	switch(*(LOCATE_MOTION_STYLE*)((char *)cnt[threadnr] + val)){
+	case LOCATE_MOTION_STYLE_REDBOX:
+		result = "redbox";
+		break;
+    case LOCATE_MOTION_STYLE_CROSS:
+		result = "cross";
+		break;
+    case LOCATE_MOTION_STYLE_REDCROSS:
+		result = "redcross";
+		break;
+	default:
+		result = "box";
+	}
+    return result;
 }
 
 /**
