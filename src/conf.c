@@ -1793,7 +1793,8 @@ dep_config_param dep_config_params[] = {
     "\"ffmpeg_timelapse_mode\" replaced with \"timelapse_mode\"",
     CONF_OFFSET(timelapse_mode),
     "timelapse_mode",
-    copy_string
+    //copy_string
+    copy_timelapse_mode
     },
     {
     "brightness",
