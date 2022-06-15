@@ -1947,7 +1947,7 @@ dep_config_param dep_config_params[] = {
     CONF_OFFSET(picture_output),
     "picture_output",
     //copy_string
-	copy_picture_output
+    copy_picture_output
     },
     {
     "output_debug_pictures",
