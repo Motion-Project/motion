@@ -1946,7 +1946,8 @@ dep_config_param dep_config_params[] = {
     "\"output_pictures\" replaced with \"picture_output\"",
     CONF_OFFSET(picture_output),
     "picture_output",
-    copy_string
+    //copy_string
+	copy_picture_output
     },
     {
     "output_debug_pictures",
