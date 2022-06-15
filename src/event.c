@@ -1257,6 +1257,44 @@ struct event_handlers {
     event_handler handler;
 };
 
+// この構造を破棄して単純な構造にしたいと考える。
+// しかし、どうしてもテーブルを使いたいのなら、こんな構造でどうだろうか？
+
+struct event_handlers2 {
+    motion_event eventtype;
+    event_handler handlers[];
+};
+
+struct event_handlers2 event_handlers2[] = {
+    {
+        EVENT_FILECREATE,
+        {
+            event_sqlnewfile,
+            on_picture_save_command,
+            event_newfile
+        }
+    },
+    {
+        EVENT_MOTION,
+        {
+            event_beep,
+            on_motion_detected_command,
+        }
+    },
+    {
+        EVENT_AREA_DETECTED,
+        {
+            on_area_command
+        }
+    }
+}
+
+
+
+    
+
+
+
 struct event_handlers event_handlers[] = {
     {
     EVENT_FILECREATE,
