@@ -1252,14 +1252,11 @@ static void event_ffmpeg_timelapseend(struct context *cnt, motion_event eventtyp
  * Starting point for all events
  */
 
-/*
 struct event_handlers {
     motion_event eventtype;
     event_handler handler;
 };
-*/
     
-/*
 struct event_handlers event_handlers[] = {
     {
     EVENT_FILECREATE,
@@ -1405,7 +1402,6 @@ struct event_handlers event_handlers[] = {
     },
     {0, NULL}
 };
-*/
 
 
 // この構造を破棄して単純な構造にしたいと考える。
