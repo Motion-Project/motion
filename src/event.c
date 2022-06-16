@@ -1258,107 +1258,6 @@ struct event_handlers {
     event_handler handler;
 };
 */
-// この構造を破棄して単純な構造にしたいと考える。
-// しかし、どうしてもテーブルを使いたいのなら、こんな構造でどうだろうか？
-
-struct struct_event_handlers {
-    motion_event eventtype;
-    event_handler handlers[];
-};
-
-// [EVENT_FILECREATE] = 
-// [EVENT_MOTION] = 
-struct struct_event_handlers event_handlers[] = {
-    {EVENT_FILECREATE, {
-        event_sqlnewfile,
-        on_picture_save_command,
-        event_newfile}
-    },
-    {EVENT_MOTION, {
-        event_beep,
-        on_motion_detected_command
-    }}
-};
-/*
-    [EVENT_FIRSTMOTION] = {
-        event_sqlfirstmotion,
-        on_event_start_command,
-        event_ffmpeg_newfile,
-        event_create_extpipe
-    },
-    [EVENT_ENDMOTION] = {
-        on_event_end_command,
-        event_ffmpeg_closefile,
-        event_extpipe_end
-    },
-    [EVENT_TIMELAPSE] = {
-        event_ffmpeg_timelapse
-    },
-    [EVENT_TIMELAPSEEND] = {
-        event_ffmpeg_timelapseend
-    },
-    [EVENT_STREAM] = {
-        event_stream_put
-    },
-    [EVENT_IMAGE_DETECTED] = {
-        event_image_detect,
-        event_extpipe_put
-    },
-    [EVENT_IMAGEM_DETECTED] = {
-        event_imagem_detect,
-        event_ffmpeg_put
-    },
-    [EVENT_IMAGE_SNAPSHOT] = {
-        event_image_snapshot
-    },
-    [EVENT_IMAGE] = {
-        #if defined(HAVE_V4L2) && !defined(BSD)
-            event_vlp_putpipe
-        #endif // defined(HAVE_V4L2) && !defined(BSD)
-        
-    },
-    [EVENT_IMAGEM] = {
-        #if defined(HAVE_V4L2) && !defined(BSD)
-            event_vlp_putpipe
-        #endif // defined(HAVE_V4L2) && !defined(BSD)
-    },
-    [EVENT_IMAGE_PREVIEW] = {
-        event_image_preview
-    },
-    [EVENT_FILECLOSE] = {
-        event_sqlfileclose,
-        on_movie_end_command,
-        event_closefile
-    },
-    [EVENT_DEBUG] = {
-    },
-    [EVENT_CRITICAL] = {
-    },
-    [EVENT_AREA_DETECTED] = {
-        on_area_command
-    },
-    [EVENT_CAMERA_LOST] = {
-        event_camera_lost
-    },
-    [EVENT_CAMERA_FOUND] = {
-        event_camera_found
-    },
-    [EVENT_FFMPEG_PUT] = {
-        event_ffmpeg_put,
-        event_extpipe_put
-    },
-    [EVENT_MOVIE_START] = {
-        event_ffmpeg_newfile,
-        event_create_extpipe
-    },
-    [EVENT_MOVIE_END] = {
-        event_ffmpeg_closefile,
-        event_extpipe_end
-    },
-    [EVENT_LAST] = {
-    }
-}
-*/
     
 /*
 struct event_handlers event_handlers[] = {
@@ -1508,6 +1407,133 @@ struct event_handlers event_handlers[] = {
 };
 */
 
+
+// この構造を破棄して単純な構造にしたいと考える。
+// しかし、どうしてもテーブルを使いたいのなら、こんな構造でどうだろうか？
+
+struct event_handlers2 {
+    int len;
+    event_handler *handlers;
+};
+
+struct event_handlers2 event_handlers2[EVENT_LAST+1];
+
+// 下記の形で初期化できないので初期化コードを作成
+/*
+struct struct_event_handlers event_handlers[] = {
+    [EVENT_FILECREATE] = {
+        event_sqlnewfile,
+        on_picture_save_command,
+        event_newfile}
+    },
+    [EVENT_MOTION] = {
+        event_beep,
+        on_motion_detected_command
+    },
+    [EVENT_FIRSTMOTION] = {
+        event_sqlfirstmotion,
+        on_event_start_command,
+        event_ffmpeg_newfile,
+        event_create_extpipe
+    },
+    [EVENT_ENDMOTION] = {
+        on_event_end_command,
+        event_ffmpeg_closefile,
+        event_extpipe_end
+    },
+    [EVENT_TIMELAPSE] = {
+        event_ffmpeg_timelapse
+    },
+    [EVENT_TIMELAPSEEND] = {
+        event_ffmpeg_timelapseend
+    },
+    [EVENT_STREAM] = {
+        event_stream_put
+    },
+    [EVENT_IMAGE_DETECTED] = {
+        event_image_detect,
+        event_extpipe_put
+    },
+    [EVENT_IMAGEM_DETECTED] = {
+        event_imagem_detect,
+        event_ffmpeg_put
+    },
+    [EVENT_IMAGE_SNAPSHOT] = {
+        event_image_snapshot
+    },
+    [EVENT_IMAGE] = {
+        #if defined(HAVE_V4L2) && !defined(BSD)
+            event_vlp_putpipe
+        #endif // defined(HAVE_V4L2) && !defined(BSD)
+        
+    },
+    [EVENT_IMAGEM] = {
+        #if defined(HAVE_V4L2) && !defined(BSD)
+            event_vlp_putpipe
+        #endif // defined(HAVE_V4L2) && !defined(BSD)
+    },
+    [EVENT_IMAGE_PREVIEW] = {
+        event_image_preview
+    },
+    [EVENT_FILECLOSE] = {
+        event_sqlfileclose,
+        on_movie_end_command,
+        event_closefile
+    },
+    [EVENT_DEBUG] = {
+    },
+    [EVENT_CRITICAL] = {
+    },
+    [EVENT_AREA_DETECTED] = {
+        on_area_command
+    },
+    [EVENT_CAMERA_LOST] = {
+        event_camera_lost
+    },
+    [EVENT_CAMERA_FOUND] = {
+        event_camera_found
+    },
+    [EVENT_FFMPEG_PUT] = {
+        event_ffmpeg_put,
+        event_extpipe_put
+    },
+    [EVENT_MOVIE_START] = {
+        event_ffmpeg_newfile,
+        event_create_extpipe
+    },
+    [EVENT_MOVIE_END] = {
+        event_ffmpeg_closefile,
+        event_extpipe_end
+    },
+    [EVENT_LAST] = {
+    }
+}
+*/
+
+void init_event_handlers2(void){
+    for (motion_event me = EVENT_FILECREATE; me <= EVENT_LAST; me++){
+        // count handles
+        int count_handle = 0;
+        for(int i=0; i < sizeof(event_handlers)/sizeof(struct event_handlers); i++){
+            if(event_handlers[i].eventtype == me){
+                count_handle++;
+            }
+        }
+        event_handlers2[me].len = count_handle;
+        event_handlers2[me].handlers = malloc(sizeof(event_handler)*count_handle);
+        int index_handle = 0;
+        for(int i=0; i < sizeof(event_handlers)/sizeof(struct event_handlers); i++){
+            if(event_handlers[i].eventtype == me){
+                event_handlers2[me].handlers[index_handle++] = event_handlers[i].handler;
+            }
+        }
+    }
+    
+    for (motion_event me = EVENT_FILECREATE; me <= EVENT_LAST; me++){
+        MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO, _("event_handlers2[%d].len : %d"), me, event_handlers2[me].handlers);
+    }
+}
+
 /**
  * event
  *   defined with the following parameters:
@@ -1530,7 +1556,7 @@ void event(struct context *cnt, motion_event eventtype, struct image_data *img_d
     //        event_handlers[i].handler(cnt, eventtype, img_data, filename, eventdata, tv1);
     //    }
     //}
-    for(int i=0; i < sizeof(event_handlers[eventtype].handlers)/sizeof(event_handler); i++){
-        event_handlers[eventtype].handlers[i](cnt, eventtype, img_data, filename, eventdata, tv1);
+    for(int i=0; i < event_handlers2[eventtype].len; i++){
+        event_handlers2[eventtype].handlers[i](cnt, eventtype, img_data, filename, eventdata, tv1);
     }
 }
