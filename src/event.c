@@ -1510,7 +1510,7 @@ struct struct_event_handlers event_handlers[] = {
 }
 */
 
-void init_event_handlers2(void){
+void event_handlers2_init(void){
     for (motion_event me = EVENT_FILECREATE; me <= EVENT_LAST; me++){
         // count handles
         int count_handle = 0;
