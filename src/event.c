@@ -1266,7 +1266,7 @@ struct struct_event_handlers {
     event_handler handlers[];
 };
 
-struct event_handlers event_handlers[] = {
+struct struct_event_handlers event_handlers[] = {
     [EVENT_FILECREATE] = {EVENT_FILECREATE, {
         event_sqlnewfile,
         on_picture_save_command,
