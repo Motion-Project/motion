@@ -1510,13 +1510,18 @@ void event_handlers2_init(void){
                 count_handle++;
             }
         }
-        event_handlers2[me].len = count_handle;
-        event_handlers2[me].handlers = malloc(sizeof(event_handler)*count_handle);
-        int index_handle = 0;
-        for(int i=0; i < sizeof(event_handlers)/sizeof(struct event_handlers); i++){
-            if(event_handlers[i].eventtype == me){
-                event_handlers2[me].handlers[index_handle++] = event_handlers[i].handler;
+        if(count_handle > 0){
+            event_handlers2[me].len = count_handle;
+            event_handlers2[me].handlers = malloc(sizeof(event_handler)*count_handle);
+            int index_handle = 0;
+            for(int i=0; i < sizeof(event_handlers)/sizeof(struct event_handlers); i++){
+                if(event_handlers[i].eventtype == me){
+                    event_handlers2[me].handlers[index_handle++] = event_handlers[i].handler;
+                }
             }
+        }else{
+            event_handlers2[me].len = 0;
+            event_handlers2[me].handlers = null;
         }
     }
     
