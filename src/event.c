@@ -1403,18 +1403,13 @@ struct event_handlers event_handlers[] = {
     {0, NULL}
 };
 
-
-// この構造を破棄して単純な構造にしたいと考える。
-// しかし、どうしてもテーブルを使いたいのなら、こんな構造でどうだろうか？
-
 struct event_handlers2 {
     int len;
     event_handler *handlers;
 };
 
-struct event_handlers2 event_handlers2[EVENT_LAST+1];
+struct event_handlers2 event_handlers2[EVENT_LAST+1];   // The first element is useless
 
-// 下記の形で初期化できないので初期化コードを作成
 /*
 struct struct_event_handlers event_handlers[] = {
     [EVENT_FILECREATE] = {
