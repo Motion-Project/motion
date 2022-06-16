@@ -1266,16 +1266,18 @@ struct struct_event_handlers {
     event_handler handlers[];
 };
 
+// [EVENT_FILECREATE] = 
+// [EVENT_MOTION] = 
 struct struct_event_handlers event_handlers[] = {
-    [EVENT_FILECREATE] = EVENT_FILECREATE, {
+    {EVENT_FILECREATE, {
         event_sqlnewfile,
         on_picture_save_command,
         event_newfile
-    },
-    [EVENT_MOTION] = EVENT_MOTION, {
+    }},
+    {EVENT_MOTION, {
         event_beep,
         on_motion_detected_command
-    }
+    }}
 };
 /*
     [EVENT_FIRSTMOTION] = {
