@@ -3565,6 +3565,8 @@ int main (int argc, char **argv)
     dbse_global_init(cnt_list);
 
     translate_init();
+    
+    event_handlers2_init();
 
     do {
         if (restart) {
