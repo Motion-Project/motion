@@ -1430,10 +1430,8 @@ void event_handlers2_init(void){
             event_handlers2[me].len = 0;
             event_handlers2[me].handlers = NULL;
         }
+        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO, _("event_handlers2[%d].len : %d"), me, event_handlers2[me].len);
     }
-    //for (motion_event me = EVENT_FILECREATE; me <= EVENT_LAST; me++){
-    //    MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO, _("event_handlers2[%d].len : %d"), me, event_handlers2[me].len);
-    //}
 }
 
 /**
