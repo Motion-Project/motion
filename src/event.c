@@ -1521,7 +1521,7 @@ void event_handlers2_init(void){
             }
         }else{
             event_handlers2[me].len = 0;
-            event_handlers2[me].handlers = null;
+            event_handlers2[me].handlers = NULL;
         }
     }
     
