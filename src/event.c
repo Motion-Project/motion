@@ -1252,49 +1252,109 @@ static void event_ffmpeg_timelapseend(struct context *cnt, motion_event eventtyp
  * Starting point for all events
  */
 
+/*
 struct event_handlers {
     motion_event eventtype;
     event_handler handler;
 };
-
+*/
 // この構造を破棄して単純な構造にしたいと考える。
 // しかし、どうしてもテーブルを使いたいのなら、こんな構造でどうだろうか？
 
-struct event_handlers2 {
-    motion_event eventtype;
+struct struct_event_handlers {
     event_handler handlers[];
 };
 
-struct event_handlers2 event_handlers2[] = {
-    {
-        EVENT_FILECREATE,
-        {
-            event_sqlnewfile,
-            on_picture_save_command,
-            event_newfile
-        }
+struct event_handlers event_handlers[] = {
+    [EVENT_FILECREATE] = {
+        event_sqlnewfile,
+        on_picture_save_command,
+        event_newfile
     },
-    {
-        EVENT_MOTION,
-        {
-            event_beep,
-            on_motion_detected_command,
-        }
+    [EVENT_MOTION] = {
+        event_beep,
+        on_motion_detected_command
     },
-    {
-        EVENT_AREA_DETECTED,
-        {
-            on_area_command
-        }
+    [EVENT_FIRSTMOTION] = {
+        event_sqlfirstmotion,
+        on_event_start_command,
+        event_ffmpeg_newfile,
+        event_create_extpipe
+    },
+    [EVENT_ENDMOTION] = {
+        on_event_end_command,
+        event_ffmpeg_closefile,
+        event_extpipe_end
+    },
+    [EVENT_TIMELAPSE] = {
+        event_ffmpeg_timelapse
+    },
+    [EVENT_TIMELAPSEEND] = {
+        event_ffmpeg_timelapseend
+    },
+    [EVENT_STREAM] = {
+        event_stream_put
+    },
+    [EVENT_IMAGE_DETECTED] = {
+        event_image_detect,
+        event_extpipe_put
+    },
+    [EVENT_IMAGEM_DETECTED] = {
+        event_imagem_detect,
+        event_ffmpeg_put
+    },
+    [EVENT_IMAGE_SNAPSHOT] = {
+        event_image_snapshot
+    },
+    [EVENT_IMAGE] = {
+        #if defined(HAVE_V4L2) && !defined(BSD)
+            event_vlp_putpipe
+        #endif // defined(HAVE_V4L2) && !defined(BSD)
+        
+    },
+    [EVENT_IMAGEM] = {
+        #if defined(HAVE_V4L2) && !defined(BSD)
+            event_vlp_putpipe
+        #endif // defined(HAVE_V4L2) && !defined(BSD)
+    },
+    [EVENT_IMAGE_PREVIEW] = {
+        event_image_preview
+    },
+    [EVENT_FILECLOSE] = {
+        event_sqlfileclose,
+        on_movie_end_command,
+        event_closefile
+    },
+    [EVENT_DEBUG] = {
+    },
+    [EVENT_CRITICAL] = {
+    },
+    [EVENT_AREA_DETECTED] = {
+        on_area_command
+    },
+    [EVENT_CAMERA_LOST] = {
+        event_camera_lost
+    },
+    [EVENT_CAMERA_FOUND] = {
+        event_camera_found
+    },
+    [EVENT_FFMPEG_PUT] = {
+        event_ffmpeg_put,
+        event_extpipe_put
+    },
+    [EVENT_MOVIE_START] = {
+        event_ffmpeg_newfile,
+        event_create_extpipe
+    },
+    [EVENT_MOVIE_END] = {
+        event_ffmpeg_closefile,
+        event_extpipe_end
+    },
+    [EVENT_LAST] = {
     }
 }
 
-
-
-    
-
-
-
+/*
 struct event_handlers event_handlers[] = {
     {
     EVENT_FILECREATE,
@@ -1353,7 +1413,7 @@ struct event_handlers event_handlers[] = {
         EVENT_IMAGEM,
         event_vlp_putpipe
         },
-    #endif /* defined(HAVE_V4L2) && !defined(BSD) */
+    #endif // defined(HAVE_V4L2) && !defined(BSD)
     {
     EVENT_IMAGE_PREVIEW,
     event_image_preview
@@ -1440,7 +1500,7 @@ struct event_handlers event_handlers[] = {
     },
     {0, NULL}
 };
-
+*/
 
 /**
  * event
@@ -1457,11 +1517,14 @@ struct event_handlers event_handlers[] = {
 void event(struct context *cnt, motion_event eventtype, struct image_data *img_data,
            char *filename, void *eventdata, struct timeval *tv1)
 {
-    int i=-1;
+    //int i=-1;
 
-    while (event_handlers[++i].handler) {
-        if (eventtype == event_handlers[i].eventtype) {
-            event_handlers[i].handler(cnt, eventtype, img_data, filename, eventdata, tv1);
-        }
+    //while (event_handlers[++i].handler) {
+    //    if (eventtype == event_handlers[i].eventtype) {
+    //        event_handlers[i].handler(cnt, eventtype, img_data, filename, eventdata, tv1);
+    //    }
+    //}
+    for(int i=0; i < sizeof(event_handlers[eventtype].handlers)/sizeof(event_handler); i++){
+        event_handlers[eventtype].handlers[i](cnt, eventtype, img_data, filename, eventdata, tv1);
     }
 }
