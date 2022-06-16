@@ -1262,19 +1262,22 @@ struct event_handlers {
 // しかし、どうしてもテーブルを使いたいのなら、こんな構造でどうだろうか？
 
 struct struct_event_handlers {
+    motion_event eventtype;
     event_handler handlers[];
 };
 
 struct event_handlers event_handlers[] = {
-    [EVENT_FILECREATE] = {
+    [EVENT_FILECREATE] = {EVENT_FILECREATE, {
         event_sqlnewfile,
         on_picture_save_command,
         event_newfile
-    },
-    [EVENT_MOTION] = {
+    }},
+    [EVENT_MOTION] = {EVENT_MOTION, {
         event_beep,
         on_motion_detected_command
-    },
+    }}
+}
+/*
     [EVENT_FIRSTMOTION] = {
         event_sqlfirstmotion,
         on_event_start_command,
@@ -1353,7 +1356,8 @@ struct event_handlers event_handlers[] = {
     [EVENT_LAST] = {
     }
 }
-
+*/
+    
 /*
 struct event_handlers event_handlers[] = {
     {
