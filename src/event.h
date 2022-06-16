@@ -52,6 +52,7 @@ typedef enum {
 typedef void(* event_handler)(struct context *cnt, motion_event type, struct image_data *img_data,
            char *filename, void *eventdata, struct timeval *tv1);
 
+void init_event_handlers2(void);
 void event(struct context *cnt, motion_event type, struct image_data *img_data,
            char *filename, void *eventdata, struct timeval *tv1);
 
