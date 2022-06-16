@@ -1272,8 +1272,8 @@ struct struct_event_handlers event_handlers[] = {
     {EVENT_FILECREATE, {
         event_sqlnewfile,
         on_picture_save_command,
-        event_newfile
-    }},
+        event_newfile}
+    },
     {EVENT_MOTION, {
         event_beep,
         on_motion_detected_command
