@@ -697,6 +697,12 @@
           <td align="left"><a href="#lightswitch_percent" >lightswitch_percent</a></td>
         </tr>
         <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#microlightswitch" >microlightswitch</a></td>
+        </tr>
+        <tr>
           <td align="left">locate_motion_mode</td>
           <td align="left">locate_motion_mode</td>
           <td align="left">locate_motion_mode</td>
@@ -797,6 +803,18 @@
           <td align="left">movie_filename</td>
           <td align="left">movie_filename</td>
           <td align="left"><a href="#movie_filename" >movie_filename</a></td>
+        </tr>
+        <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#movie_motion_filename_suffix" >movie_motion_filename_suffix</a></td>
+        </tr>
+        <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#movie_extpipe_filename_suffix" >movie_extpipe_filename_suffix</a></td>
         </tr>
         <tr>
           <td align="left">max_movie_time</td>
@@ -1243,6 +1261,12 @@
           <td align="left"><a href="#threshold_tune" >threshold_tune</a></td>
         </tr>
         <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#timelapse_bps" >timelapse_bps</a></td>
+        </tr>
+        <tr>
           <td align="left">timelapse_codec</td>
           <td align="left">timelapse_codec</td>
           <td align="left">timelapse_codec</td>
@@ -1271,6 +1295,12 @@
           <td align="left">timelapse_mode</td>
           <td align="left">timelapse_mode</td>
           <td align="left"><a href="#timelapse_mode" >timelapse_mode</a></td>
+        </tr>
+        <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#timelapse_quality" >timelapse_quality</a></td>
         </tr>
         <tr>
           <td align="left">track_auto</td>
@@ -1759,10 +1789,11 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#lightswitch_percent" >lightswitch_percent</a> </td>
               <td bgcolor="#edf4f9" ><a href="#lightswitch_frames" >lightswitch_frames</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#microlightswitch" >microlightswitch</a> </td>
               <td bgcolor="#edf4f9" ><a href="#minimum_motion_frames" >minimum_motion_frames</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#event_gap" >event_gap</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#event_gap" >event_gap</a> </td>
               <td bgcolor="#edf4f9" ><a href="#pre_capture" >pre_capture</a> </td>
               <td bgcolor="#edf4f9" ><a href="#post_capture" >post_capture</a> </td>
             </tr>
@@ -1863,15 +1894,21 @@
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#movie_filename" >movie_filename</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_motion_filename_suffix" >movie_motion_filename_suffix</a> </td>
               <td bgcolor="#edf4f9" ><a href="#movie_extpipe_use" >movie_extpipe_use</a> </td>
               <td bgcolor="#edf4f9" ><a href="#movie_extpipe" >movie_extpipe</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#timelapse_filename" >timelapse_filename</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#movie_extpipe_filename_suffix" >movie_extpipe_filename_suffix</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_filename" >timelapse_filename</a> </td>
               <td bgcolor="#edf4f9" ><a href="#timelapse_interval" >timelapse_interval</a> </td>
               <td bgcolor="#edf4f9" ><a href="#timelapse_mode" >timelapse_mode</a> </td>
+            </tr>
+            <tr>
               <td bgcolor="#edf4f9" ><a href="#timelapse_codec" >timelapse_codec</a> </td>
               <td bgcolor="#edf4f9" ><a href="#timelapse_fps" >timelapse_fps</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_bps" >timelapse_bps</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_quality" >timelapse_quality</a> </td>
             </tr>
           </tbody>
         </table>
@@ -3944,6 +3981,17 @@
         The number of frames to ignore when the lightswitch condition is triggered (see above).
         <p></p>
 
+        <h3><a name="microlightswitch"></a> microlightswitch </h3>
+        <p></p>
+        <ul>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: on, off</li>
+          <li> Default: off</li>
+        </ul>
+        <p></p>
+        Separated from lightswitch. When turned on, the microlight switch will be detected.
+        <p></p>
+
         <h3><a name="minimum_motion_frames"></a> minimum_motion_frames </h3>
         <p></p>
         <ul>
@@ -4610,6 +4658,30 @@
         <p></p>
         <p></p>
 
+        <h3><a name="movie_motion_filename_suffix"></a> movie_motion_filename_suffix </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: m</li>
+        </ul>
+        <p></p>
+        File name suffix for motion movies.
+        <p></p>
+        <p></p>
+
+        <h3><a name="movie_extpipe_filename_suffix"></a> movie_extpipe_filename_suffix </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: </li>
+        </ul>
+        <p></p>
+        File name suffix for extpipe movies.
+        <p></p>
+        <p></p>
+
         <h3><a name="movie_extpipe_use"></a> movie_extpipe_use </h3>
         <p></p>
         <ul>
@@ -4707,6 +4779,32 @@
         </ul>
         <p></p>
         The frame per second rate to use in the playback of the timelapse video.
+        <p></p>
+        <p></p>
+
+        <h3><a name="timelapse_bps"></a> timelapse_bps </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0 - 9999999</li>
+          <li> Default: 400000</li>
+        </ul>
+        <p></p>
+        The fixed bitrate to be used by the timelapse movie encoder.
+	This option is ignored if timelapse_quality is not 0 (disabled). 
+        <p></p>
+        <p></p>
+
+        <h3><a name="timelapse_quality"></a> timelapse_quality </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0 - 100</li>
+          <li> Default: 60</li>
+        </ul>
+        <p></p>
+        A value of 0 disables this option while values 1 - 100 varies the quality of the movie.
+        The value of 1 means worst quality and 100 is the best quality.
         <p></p>
         <p></p>
 
