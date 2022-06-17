@@ -468,7 +468,7 @@ msgid "timelapse_bps"
 msgstr "タイムラプス bps"
 
 #: src/conf.c
-msgid "timelapse_qualitiy"
+msgid "timelapse_quality"
 msgstr "タイムラプス 品質(%)"
 
 #: src/conf.c
