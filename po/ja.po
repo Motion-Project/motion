@@ -121,7 +121,7 @@ msgstr "ログタイプ"
 
 #: src/conf.c
 msgid "quiet"
-msgstr "静寂"
+msgstr "ビープ音を鳴らさない"
 
 #: src/conf.c
 msgid "watchdog_tmo"
