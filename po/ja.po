@@ -3,13 +3,6 @@
 # This file is distributed under the same license as the Motion package.
 #
 # update 2022/04/13 siriuth
-# 単独で変換する場合の手順
-# mv ~/motion/po/ja.po ja.po.org
-# mv ~/ja.po ~/motion/po/
-# cd ~/motion/po/
-# sudo rm -f ja.gmo && /usr/bin/msgfmt -c --statistics --verbose -o ja.gmo ja.po
-# sudo mv ./ja.gmo /usr/local/share/locale/ja/LC_MESSAGES/motion.mo
-# sudo service motion restart
 msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
