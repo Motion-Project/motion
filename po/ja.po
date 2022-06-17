@@ -3387,8 +3387,8 @@ msgstr "MINMAX = %d が見つかりました"
 
 #: src/track.c
 #, c-format
-$msgid "Before_ABS_Y_Angel : x= %d , Y= %d, "
-$msgstr "ABS Y Angelの前:x = %d、Y = %d、"
+#$msgid "Before_ABS_Y_Angel : x= %d , Y= %d, "
+#$msgstr "ABS Y Angelの前:x = %d、Y = %d、"
 
 #: src/track.c
 #, c-format
