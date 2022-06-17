@@ -1810,52 +1810,42 @@ static void mlp_resetimages(struct context *cnt)
 
 static int mlp_retry(struct context *cnt)
 {
-
-    /*
-     * If a camera is not available we keep on retrying every 10 seconds
-     * until it shows up.
-     */
-    int size_high;
+    int size_high, height, width;
 
     if (cnt->video_dev < 0 && cnt->currenttime % 10 == 0 && cnt->shots == 0) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Retrying until successful connection with camera"));
-        cnt->video_dev = vid_start(cnt);
 
+        width = cnt->imgs.width;
+        height  = cnt->imgs.height;
+
+        cnt->video_dev = vid_start(cnt);
         if (cnt->video_dev < 0) {
-            return 1;
+            return 0;
         }
 
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Camera has become available."));
+
         if ((cnt->imgs.width % 8) || (cnt->imgs.height % 8)) {
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-                ,_("Image width (%d) or height(%d) requested is not modulo 8.")
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Restarting Motion.\n"
+                "Image width (%d) or height(%d) requested is not modulo 8.")
                 ,cnt->imgs.width, cnt->imgs.height);
             return 1;
         }
 
         if ((cnt->imgs.width  < 64) || (cnt->imgs.height < 64)) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Restarting Motion.\n"
+                "Motion only supports width and height greater than or equal to 64 %dx%d")
                 ,cnt->imgs.width, cnt->imgs.height);
                 return 1;
         }
 
-        /*
-         * If the netcam has different dimensions than in the config file
-         * we need to restart Motion to re-allocate all the buffers
-         */
-        if (cnt->imgs.width != cnt->conf.width || cnt->imgs.height != cnt->conf.height) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Camera has finally become available\n"
-                       "Camera image has different width and height"
-                       "from what is in the config file. You should fix that\n"
-                       "Restarting Motion thread to reinitialize all "
-                       "image buffers to new picture dimensions"));
-            cnt->conf.width = cnt->imgs.width;
-            cnt->conf.height = cnt->imgs.height;
-            /*
-             * Break out of main loop terminating thread
-             * watchdog will start us again
-             */
+        if (cnt->imgs.width != width || cnt->imgs.height != height) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Restarting Motion.\n"
+                "Height or width has changed on camera."));
             return 1;
         }
         /*
@@ -1865,6 +1855,9 @@ static int mlp_retry(struct context *cnt)
          */
         size_high = (cnt->imgs.width_high * cnt->imgs.height_high * 3) / 2;
         if (cnt->imgs.size_high != size_high) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Restarting Motion.\n"
+                "High resolution has changed on camera."));
             return 1;
         }
     }
