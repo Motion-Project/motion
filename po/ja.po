@@ -131,12 +131,12 @@ msgid "quiet"
 msgstr "静寂"
 
 #: src/conf.c
-#msgid "watchdog_tmo"
-#msgstr "ウォッチドッグtmo"
+msgid "watchdog_tmo"
+msgstr "カメラのレスポンスタイム 秒"
 
 #: src/conf.c
-#msgid "watchdog_kill"
-#msgstr "ウォッチドッグキル"
+msgid "watchdog_kill"
+msgstr "カメラを強制終了させるまでの秒数"
 
 #: src/conf.c
 msgid "native_language"
@@ -192,11 +192,11 @@ msgstr "ネットカムパラメータ"
 
 #: src/conf.c
 msgid "netcam_high_url"
-msgstr "ハイネットカムURL"
+msgstr "高解像度ネットカムURL"
 
 #: src/conf.c
 msgid "netcam_high_params"
-msgstr "ハイネットカム params"
+msgstr "高解像度ネットカム params"
 
 #: src/conf.c
 msgid "netcam_userpass"
@@ -319,6 +319,10 @@ msgid "lightswitch_frames"
 msgstr "ライトスイッチフレーム"
 
 #: src/conf.c
+msgid "microlightswitch"
+msgstr "マイクロライトスイッチ"
+
+#: src/conf.c
 msgid "minimum_motion_frames"
 msgstr "最小モーションフレーム"
 
@@ -439,6 +443,14 @@ msgid "movie_filename"
 msgstr "動画 ファイル名"
 
 #: src/conf.c
+msgid "movie_motion_filename_suffix"
+msgstr "検知動画ファイル名の接尾辞"
+
+#: src/conf.c
+msgid "movie_extpipe_filename_suffix"
+msgstr "拡張パイプファイル名の接尾辞"
+
+#: src/conf.c
 msgid "movie_extpipe_use"
 msgstr "動画 拡張パイプを使用"
 
@@ -457,6 +469,14 @@ msgstr "タイムラプス モード"
 #: src/conf.c
 msgid "timelapse_fps"
 msgstr "タイムラプス fps"
+
+#: src/conf.c
+msgid "timelapse_bps"
+msgstr "タイムラプス bps"
+
+#: src/conf.c
+msgid "timelapse_qualitiy"
+msgstr "タイムラプス 品質(%)"
 
 #: src/conf.c
 msgid "timelapse_codec"
@@ -3195,7 +3215,7 @@ msgstr "内部エラー、 %huは既知のトラックタイプではありま�
 #: src/track.c
 #, c-format
 msgid "port %s dev fd %i, motor %hu command %hu data %hu"
-msgstr "ポート %s dev fd %i、モーター %huコマンド %huデータ %hu"
+msgstr "ポート %s dev fd %i、モーター %huコマンド %hu データ %hu"
 
 #: src/track.c
 msgid "Status byte timeout!"
@@ -3225,7 +3245,7 @@ msgstr "シリアルデバイス %sを開いて初期化、fd %i"
 #, c-format
 msgid "No device %s started yet , trying stepper_center()"
 msgstr ""
-"デバイス %sはまだ開始されていません.ステッパーcenter()を試行しています"
+"デバイス %sはまだ開始されていません。stepper_center()を試行中"
 
 #: src/track.c
 #, c-format
@@ -3240,7 +3260,7 @@ msgstr "成功、デバイスは %s、fd [%i]を開始しました"
 #: src/track.c
 #, c-format
 msgid "SENDS port %s dev fd %i, motor %hu command %hu data %hu"
-msgstr "ポート %s dev fd %i、モーター %huコマンド %huデータ %huを送信します"
+msgstr "ポート %s dev fd %i、モーター %hu コマンド %hu データ %hu を送信します"
 
 #: src/track.c
 #, c-format
@@ -3249,7 +3269,7 @@ msgstr "コマンドリターン %d"
 
 #: src/track.c
 msgid "Problem opening servo!"
-msgstr "サーボを開けない!"
+msgstr "サーボを開くときに問題があります!"
 
 #: src/track.c
 #, c-format
@@ -3264,7 +3284,7 @@ msgstr "x %d値が範囲外です!(%d - %d)"
 #: src/track.c
 #, c-format
 msgid "y %d value out of range! (%d - %d)"
-msgstr "y %d値が範囲外です!(%d - %d)"
+msgstr "y %d 値が範囲外です!(%d - %d)"
 
 #: src/track.c
 #, c-format
@@ -3317,7 +3337,7 @@ msgstr "成功"
 
 #: src/track.c
 msgid "Failed to reset pwc camera to starting position! Reason"
-msgstr "pwcカメラを開始位置にリセットできませんでした!理由"
+msgstr "pwcカメラを開始位置にリセットできませんでした! 理由"
 
 #: src/track.c
 msgid "failed VIDIOCPWCMPTGRANGE"
@@ -3329,11 +3349,11 @@ msgstr "ioctl VIDIOCPWCMPTGANGLE"
 
 #: src/track.c
 msgid "Failed to pan/tilt pwc camera! Reason"
-msgstr "PWCカメラのパン/ティルトに失敗しました!理由"
+msgstr "PWCカメラのパン/ティルトに失敗しました! 理由"
 
 #: src/track.c
 msgid "Failed to reset UVC camera to starting position! Reason"
-msgstr "UVCカメラを開始位置にリセットできませんでした!理由"
+msgstr "UVCカメラを開始位置にリセットできませんでした! 理由"
 
 #: src/track.c
 msgid "Reseting UVC camera to starting position"
@@ -3374,8 +3394,8 @@ msgstr "MINMAX = %d が見つかりました"
 
 #: src/track.c
 #, c-format
-msgid "Before_ABS_Y_Angel : x= %d , Y= %d, "
-msgstr "ABS Y Angelの前:x = %d、Y = %d、"
+$msgid "Before_ABS_Y_Angel : x= %d , Y= %d, "
+$msgstr "ABS Y Angelの前:x = %d、Y = %d、"
 
 #: src/track.c
 #, c-format
@@ -3419,7 +3439,7 @@ msgstr "ABS Y Angelの前:x = %d、Y = %d、"
 
 #: src/translate.c
 msgid "Language: English"
-msgstr "言語:英語"
+msgstr "言語: 英語"
 
 #: src/util.c
 #, c-format
@@ -3430,7 +3450,7 @@ msgstr "%lluバイトのメモリを割り当てることができませんで�
 #, c-format
 msgid "Warning! Function %s tries to resize memoryblock at %p to 0 bytes!"
 msgstr ""
-"警告!関数 %sは、 %pのメモリブロックのサイズを0バイトに変更しようとします!"
+"警告! 関数 %sは、 %pのメモリブロックのサイズを0バイトに変更しようとします!"
 
 #: src/util.c
 #, c-format
@@ -3447,16 +3467,16 @@ msgstr "ディレクトリ %sの作成中に問題が発生しました"
 #: src/util.c
 #, c-format
 msgid "creating directory %s"
-msgstr "ディレクトリ %sを作成しています"
+msgstr "ディレクトリ %sを作成中"
 
 #: src/util.c
 #, c-format
 msgid "Error opening file %s with mode %s"
-msgstr "モード %sでファイル %sを開く際のエラー"
+msgstr "ファイル %s(モード %s)を開く際にエラー"
 
 #: src/util.c
 msgid "Error closing file"
-msgstr "ファイルを閉じる際のエラー"
+msgstr "ファイルクローズ エラー"
 
 #: src/util.c
 msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
@@ -3480,7 +3500,7 @@ msgstr "FFMPEGバージョンが古すぎます.パススルー処理を無効�
 
 #: src/util.c
 msgid "pass-through enabled."
-msgstr "パススルーが有効になっています"
+msgstr "パススルーは有効です"
 
 #: src/util.c
 #, c-format
@@ -3499,17 +3519,17 @@ msgstr "解析済み:>編集済み<>編集済み<"
 #: src/util.c
 #, c-format
 msgid "Error parsing parm_nm controls: %s"
-msgstr "parm nmコントロールの解析エラー: %s"
+msgstr "parm_nmコントロールの解析エラー: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error parsing parm_vl controls: %s"
-msgstr "parm vlコントロールの解析エラー: %s"
+msgstr "parm_vlコントロールの解析エラー: %s"
 
 #: src/util.c
 #, c-format
 msgid "Error setting temp: %s"
-msgstr "温度設定エラー: %s"
+msgstr "一時設定エラー: %s"
 
 #: src/util.c
 #, c-format
@@ -3534,7 +3554,7 @@ msgstr "新しいnetcamパラメータ: %s"
 #: src/util.c
 #, c-format
 msgid "New netcam_high_params: %s"
-msgstr "新しいnetcamの高パラメータ: %s"
+msgstr "新しい高解像度netcamパラメータ: %s"
 
 #: src/util.c
 #, c-format
@@ -3553,12 +3573,12 @@ msgstr "新しいストリームヘッダパラメータ:<編集済み>"
 #: src/util.c
 #, c-format
 msgid "Programming error.  Unknown configuration item: %s"
-msgstr "プログラミングエラー.不明な設定アイテム:%s"
+msgstr "プログラミングエラー.不明な設定アイテム: %s"
 
 #: src/video_bktr.c
 #, c-format
 msgid "METEORSHUE Error setting hue [%d]"
-msgstr "METEORSHUE色相[%d]の設定エラー"
+msgstr "METEORSHUE 色相[%d]の設定エラー"
 
 #: src/video_bktr.c
 #, c-format
@@ -3567,38 +3587,38 @@ msgstr "[%d]"
 
 #: src/video_bktr.c
 msgid "METEORGHUE Error getting hue"
-msgstr "METEORGHUE色相の取得エラー"
+msgstr "METEORGHUE 色相の取得エラー"
 
 #: src/video_bktr.c
 #, c-format
 msgid "METEORSCSAT Error setting saturation [%d]"
-msgstr "METEORSCSAT飽和の設定エラー[%d]"
+msgstr "METEORSCSAT 彩度の設定エラー[%d]"
 
 #: src/video_bktr.c
 msgid "METEORGCSAT Error getting saturation"
-msgstr "METEORGCSAT飽和の取得エラー"
+msgstr "METEORGCSAT 彩度の取得エラー"
 
 #: src/video_bktr.c
 #, c-format
 msgid "METEORSCONT Error setting contrast [%d]"
-msgstr "METEORSCONTコントラスト設定エラー[%d]"
+msgstr "METEORSCONT コントラスト設定エラー[%d]"
 
 #: src/video_bktr.c
 msgid "METEORGCONT Error getting contrast"
-msgstr "METEORGCONTコントラスト取得エラー"
+msgstr "METEORGCONT コントラスト取得エラー"
 
 #: src/video_bktr.c
 #, c-format
 msgid "METEORSBRIG  brightness [%d]"
-msgstr "METEORSBRIG輝度[%d]"
+msgstr "METEORSBRIG 輝度[%d]"
 
 #: src/video_bktr.c
 msgid "METEORGBRIG  getting brightness"
-msgstr "METEORGBRIGが明るさを取得"
+msgstr "METEORGBRIG 輝度を取得中"
 
 #: src/video_bktr.c
 msgid "Not implemented"
-msgstr "実装されていません"
+msgstr "未実装"
 
 #: src/video_bktr.c
 #, c-format
@@ -3608,12 +3628,12 @@ msgstr "デバイス入力 %dが範囲外(0〜4)"
 #: src/video_bktr.c
 #, c-format
 msgid "METEORSINPUT %d invalid -Trying composite %d"
-msgstr "METEORSINPUT %d無効-複合 %dを試行しています"
+msgstr "METEORSINPUT %d 無効 -composite %dを試行中"
 
 #: src/video_bktr.c
 msgid "BT848SFMT, Couldn't set the input format, try again with default"
 msgstr ""
-"BT848SFMT、入力形式を設定できませんでした.デフォルトで再試行してください"
+"BT848SFMT、入力形式を設定できませんでした. デフォルトで再試行してください"
 
 #: src/video_bktr.c
 msgid "BT848SFMT, Couldn't set the input format either default"
@@ -3626,17 +3646,17 @@ msgstr "ジオメトリを設定できませんでした"
 #: src/video_bktr.c
 #, c-format
 #msgid "to [%d/%d] Norm %d"
-#msgstr "[%d/%d]ノルム %d"
+#msgstr "to [%d/%d] Norm %d"
 
 #: src/video_bktr.c
 #, c-format
 msgid "Not valid Frequency [%ld] for Source input [%i]"
-msgstr "無効な頻度[%ld] ソース入力の場合[%i]"
+msgstr "無効な周波数[%ld] 入力ソース[%i]"
 
 #: src/video_bktr.c
 #, c-format
 msgid "Frequency [%ld] Source input [%i]"
-msgstr "周波数[%ld]ソース入力[%i]"
+msgstr "周波数[%ld] 入力ソース[%i]"
 
 #: src/video_bktr.c
 #, c-format
@@ -3651,31 +3671,31 @@ msgstr "入力フォーマットを設定[%d]"
 #: src/video_bktr.c
 #, c-format
 msgid "set geometry [%d]x[%d]"
-msgstr "ジオメトリ[%d]x[%d]を設定します"
+msgstr "ジオメトリ[%d]x[%d]を設定"
 
 #: src/video_bktr.c
 msgid "Frequency set (no implemented yet"
-msgstr "周波数セット(まだ実装されていません"
+msgstr "周波数設定(まだ未実装"
 
 #: src/video_bktr.c
 msgid "Sizing buffer to 3x"
-msgstr "バッファーのサイズを3倍にする"
+msgstr "バッファサイズを3倍へ"
 
 #: src/video_bktr.c
 msgid "Sizing buffer to 3/2x"
-msgstr "バッファーを3/2xにサイズ変更する"
+msgstr "バッファサイズを3/2倍へ"
 
 #: src/video_bktr.c
 msgid "mmap failed"
 msgstr "mmapが失敗しました"
 
 #: src/video_bktr.c
-msgid "METEORCAPTUR using single method Error capturing"
-msgstr "単一メソッドエラーキャプチャを使用するMETEORCAPTUR"
+#msgid "METEORCAPTUR using single method Error capturing"
+#msgstr "単一メソッドエラーキャプチャを使用するMETEORCAPTUR"
 
 #: src/video_bktr.c
-msgid "Error capturing using single method"
-msgstr "単一メソッドを使用したエラーキャプチャ"
+#msgid "Error capturing using single method"
+#msgstr "単一メソッドを使用したエラーキャプチャ"
 
 #: src/video_bktr.c src/video_v4l2.c
 msgid "Unable to find video device"
@@ -3689,7 +3709,7 @@ msgstr "ビデオデバイス %sを閉じています"
 #: src/video_bktr.c src/video_v4l2.c
 #, c-format
 msgid "Still %d users of video device %s, so we don't close it now"
-msgstr "まだビデオを%d人 使用中です(device %s).今は閉じません"
+msgstr "まだ%d人 ビデオデバイス %s を使用中です. 今は閉じません"
 
 #: src/video_bktr.c src/video_v4l2.c
 #, c-format
@@ -3708,11 +3728,11 @@ msgstr "キャプチャの停止"
 #: src/video_bktr.c
 #, c-format
 msgid "Reusing [%s] inputs [%d,%d] Change capture method METEOR_CAP_SINGLE"
-msgstr "入力(%s)の再利用[%d,%d] キャプチャの変更処理 METEOR_CAP_SINGLE"
+msgstr "[%s]の再利用 入力[%d,%d] キャプチャの変更処理 METEOR_CAP_SINGLE"
 
 #: src/video_bktr.c
 msgid "VIDEO_PALETTE_YUV420P setting imgs.size_norm and imgs.motionsize"
-msgstr "ビデオパレットYUV420P設定imgs.size normおよびimgs.motionsize"
+msgstr "ビデオパレットYUV420P 設定 imgs.size_normおよびimgs.motionsize"
 
 #: src/video_bktr.c
 #, c-format
@@ -3726,24 +3746,24 @@ msgstr "チューナーデバイス %sを開きます"
 
 #: src/video_common.c
 msgid "Corrupt image ... continue"
-msgstr "画像が破損しています...続行"
+msgstr "画像が破損しています... 続行"
 
 #: src/video_common.c
 #, c-format
 msgid "SOI position adjusted by %d bytes."
-msgstr "SOIの位置が%dバイトに調整しました"
+msgstr "SOIの位置を%dバイトに調整しました"
 
 #: src/video_common.c
 msgid "calling mmalcam_cleanup"
-msgstr "mmalcamクリーンアップの呼び出し"
+msgstr "mmalcam_cleanupの呼び出し"
 
 #: src/video_common.c
 msgid "calling netcam_cleanup"
-msgstr "ネットカメラクリーンアップの呼び出し"
+msgstr "netcam_cleanupの呼び出し"
 
 #: src/video_common.c
 msgid "calling netcam_rtsp_cleanup"
-msgstr "netcam rtspクリーンアップの呼び出し"
+msgstr "netcam_rtsp_cleanupの呼び出し"
 
 #: src/video_common.c
 msgid "Cleaning up V4L2 device"
@@ -3755,15 +3775,15 @@ msgstr "BKTRデバイスのクリーンアップ"
 
 #: src/video_common.c
 msgid "No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)"
-msgstr "カメラデバイスのクリーンアップなし(MMAL、Netcam、V4L2、BKTR)"
+msgstr "カメラデバイスがありません クリーンアップ(MMAL、Netcam、V4L2、BKTR)"
 
 #: src/video_common.c
 msgid "Opening MMAL cam"
-msgstr "MMALカムを開く"
+msgstr "MMALカメラを開く"
 
 #: src/video_common.c
 msgid "MMAL cam failed to open"
-msgstr "MMALカムを開けませんでした"
+msgstr "MMALカメラを開けませんでした"
 
 #: src/video_common.c
 msgid "Opening Netcam"
@@ -3804,7 +3824,7 @@ msgstr "カメラデバイスが指定されていません(MMAL、Netcam、V4L2
 #: src/video_loopback.c
 #, c-format
 msgid "Failed to open '%s'"
-msgstr "「 %s」を開けませんでした"
+msgstr "'%s'を開けませんでした"
 
 #: src/video_loopback.c
 #, c-format
@@ -3819,7 +3839,7 @@ msgstr "開始バッファ: %s"
 #: src/video_loopback.c
 #, c-format
 msgid "Read buffer: %s"
-msgstr "読み取りバッファ: %s"
+msgstr "読取バッファ: %s"
 
 #: src/video_loopback.c
 #, c-format
@@ -3858,7 +3878,7 @@ msgstr "---------コントロール---------"
 
 #: src/video_v4l2.c
 msgid "  V4L2 ID   Name and Range"
-msgstr "V4L2 IDの名前と範囲"
+msgstr "  V4L2 ID    名前と範囲"
 
 #: src/video_v4l2.c
 msgid "Device not ready"
@@ -3867,22 +3887,22 @@ msgstr "デバイスの準備ができていません"
 #: src/video_v4l2.c
 #, c-format
 msgid "setting control %s \"%s\" to %d failed with return code %d"
-msgstr "コントロール %s \"%s\"を %dに設定できませんでした.戻りコード %d"
+msgstr "コントロール %s \"%s\"を %dに設定できませんでした. 戻り値 %d"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Set control \"%s\" to value %d"
-msgstr "コントロール\"%s\"を値 %dに設定します"
+msgstr "コントロール\"%s\"の値を %d に設定します"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %s is below minimum.  Using minimum %d"
-msgstr "%s 制御オプション値 %s が最小値を下回っています.最小 %d を使用 "
+msgstr "%s 制御オプション値 %s が最小値を下回っています. 最小値 %d を使用します"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %s is above maximum.  Using maximum %d"
-msgstr "%s 制御オプション値 %s が最大値を超えています.最大 %d を使用 "
+msgstr "%s 制御オプション値 %s が最大値を超えています. 最大値 %d を使用します"
 
 #: src/video_v4l2.c
 msgid "control type not supported yet"
@@ -3894,22 +3914,22 @@ msgid ""
 "Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input "
 "value in conf by -1"
 msgstr ""
-"VIDIOC_ENUMINPUT 入力をWEBCAM(-1)にする場合、%dを指定できません"
+"入力をWEBCAM(-1)に変更する場合、VIDIOC_ENUMINPUTに%dを指定できません"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Name = \"%s\", type 0x%08X, status %08x"
-msgstr "名前= \"%s\"、タイプ0x %08X、ステータス %08x"
+msgstr "名前 = \"%s\", タイプ 0x%08X, ステータス %08x"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Name = \"%s\",- TUNER"
-msgstr "名前= \"%s\",- TUNER"
+msgstr "名前 = \"%s\",- TUNER"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Name = \"%s\"- CAMERA"
-msgstr "名前= \"%s\"- CAMERA"
+msgstr "名前 = \"%s\"- CAMERA"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3923,7 +3943,7 @@ msgstr "デバイスはPAL/NTSC normの指定をサポートしていません"
 #: src/video_v4l2.c
 #, c-format
 msgid "- video standard %s"
-msgstr "-ビデオ標準 %s"
+msgstr "- ビデオ標準 %s"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4051,12 +4071,12 @@ msgstr "メモリマップ用のバッファ %dの要求エラー.VIDIOC REQBUFS
 #: src/video_v4l2.c
 #, c-format
 msgid "mmap information: frames=%d"
-msgstr "mmap情報:frames = %d"
+msgstr "mmap情報: frames=%d"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Insufficient buffer memory %d < MIN_MMAP_BUFFERS."
-msgstr "バッファメモリが不足しています %d <MIN MMAP BUFFERS"
+msgstr "バッファメモリが不足しています %d < MIN MMAP BUFFERS"
 
 #: src/video_v4l2.c
 msgid "Out of memory."
@@ -4068,13 +4088,13 @@ msgid ""
 "Error querying buffer %i\n"
 "VIDIOC_QUERYBUF: "
 msgstr ""
-"クエリバッファ %i エラー\n"
+"クエリバッファエラー %i\n"
 "VIDIOC QUERYBUF:"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Error mapping buffer %i mmap"
-msgstr "エラーマッピングバッファ %i mmap"
+msgstr "マッピングバッファエラー %i mmap"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4083,7 +4103,7 @@ msgstr "エラーマッピングバッファ %i mmap"
 
 #: src/video_v4l2.c
 msgid "Error starting stream. VIDIOC_STREAMON"
-msgstr "ストリームの開始エラー.VIDIOC STREAMON"
+msgstr "ストリーム開始時のエラー. VIDIOC_STREAMON"
 
 #: src/video_v4l2.c
 msgid "Errors occurred during device select"
@@ -4092,7 +4112,7 @@ msgstr "デバイスの選択中にエラーが発生しました"
 #: src/video_v4l2.c
 #, c-format
 msgid "Using videodevice %s and input %d"
-msgstr "ビデオデバイス %sと入力 %dを使用しています"
+msgstr "ビデオデバイス %s、入力 %d を使用しています"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4176,11 +4196,11 @@ msgstr "無効なアクションが要求されました: >%s< >%s< >%s<"
 
 #: src/webu.c
 msgid "Native Language : on"
-msgstr "母国語:オン"
+msgstr "母国語: オン"
 
 #: src/webu.c
 msgid "Native Language : off"
-msgstr "母国語:オフ"
+msgstr "母国語: オフ"
 
 #: src/webu.c
 msgid "Set the value to null/zero"
@@ -4250,11 +4270,11 @@ msgstr "基本認証:無効"
 
 #: src/webu.c
 msgid "Digest authentication: available"
-msgstr "ダイジェスト認証:利用可能"
+msgstr "ダイジェスト認証: 利用可能"
 
 #: src/webu.c
 msgid "Digest authentication: disabled"
-msgstr "ダイジェスト認証:無効"
+msgstr "ダイジェスト認証: 無効"
 
 #: src/webu.c
 msgid "libmicrohttpd libary too old ipv6 disabled"
@@ -4262,11 +4282,11 @@ msgstr "libmicrohttpdライブラリが古すぎるためipv6は無効です"
 
 #: src/webu.c
 msgid "IPV6: available"
-msgstr "IPV6:利用可能"
+msgstr "IPV6: 利用可能"
 
 #: src/webu.c
 msgid "IPV6: disabled"
-msgstr "IPV6:無効"
+msgstr "IPV6: 無効"
 
 #: src/webu.c
 msgid "libmicrohttpd libary too old SSL/TLS disabled"
@@ -4274,11 +4294,11 @@ msgstr "libmicrohttpdライブラリが古すぎるためSSL/TLSは無効です"
 
 #: src/webu.c
 msgid "SSL/TLS: available"
-msgstr "SSL/TLS:利用可能"
+msgstr "SSL/TLS: 利用可能"
 
 #: src/webu.c
 msgid "SSL/TLS: disabled"
-msgstr "SSL/TLS:無効"
+msgstr "SSL/TLS: 無効"
 
 #: src/webu.c
 msgid "Error reading file for SSL/TLS support."
@@ -4299,7 +4319,7 @@ msgstr ""
 #: src/webu.c
 #, c-format
 msgid "Starting webcontrol on port %d"
-msgstr "ポート %dでweb制御を開始中です"
+msgstr "ポート %dでweb制御を開始中"
 
 #: src/webu.c
 msgid "Unable to start MHD"
@@ -4313,7 +4333,7 @@ msgstr "ポート %dでweb制御を開始しました"
 #: src/webu.c
 #, c-format
 msgid "Started camera %d stream on port/camera_id %d/%d"
-msgstr "ポート/カメラID %d/%dでカメラ %dストリームを開始しました"
+msgstr "カメラ %dストリーム(ポート/カメラID %d/%d)を開始しました"
 
 #: src/webu.c
 #, c-format
@@ -4342,7 +4362,7 @@ msgstr "重複したポートが要求しました %d"
 
 #: src/webu.c
 msgid "Invalid webcontrol_lock_max_ips.  Setting equal to 25."
-msgstr "無効なweb制御ロックの最大ips.25に等しい設定. "
+msgstr "無効なwebcontrol_lock_max_ips. 25に設定"
 
 #: src/webu_html.c
 msgid "Cameras"
@@ -4398,7 +4418,7 @@ msgstr "再起動"
 
 #: src/webu_html.c
 msgid "Quit"
-msgstr "終了する"
+msgstr "終了"
 
 #: src/webu_html.c
 msgid "Help"
@@ -4414,11 +4434,11 @@ msgstr "制限された設定オプション"
 
 #: src/webu_html.c
 msgid "Advanced Configuration Options"
-msgstr "高度な設定オプション"
+msgstr "詳細設定オプション"
 
 #: src/webu_html.c
 msgid "Restricted Configuration Options"
-msgstr "限定的な設定オプション"
+msgstr "制限付き設定オプション"
 
 #: src/webu_html.c
 msgid "All Cameras"
@@ -4426,7 +4446,7 @@ msgstr "すべてのカメラ"
 
 #: src/webu_html.c
 msgid "Not running"
-msgstr "非活動中"
+msgstr "停止中"
 
 #: src/webu_html.c
 msgid "Lost connection"
@@ -4495,19 +4515,19 @@ msgstr "ストリーミングする画像を取得できませんでした"
 #: src/webu_text.c
 #, c-format
 msgid "'%s' option is depreciated.  New option name is '%s'"
-msgstr "'%s'オプションは非推奨になりました.新しいオプション名は'%s'です"
+msgstr "'%s'オプションは非推奨になりました. 新しいオプション名は'%s'です"
 
 #: src/conf.c
-msgid "webcontrol_lock_minutes"
-msgstr "web制御ロック分"
+#msgid "webcontrol_lock_minutes"
+#msgstr "web制御ロック分"
 
 #: src/conf.c
-msgid "webcontrol_lock_attempts"
-msgstr "web制御ロックの試行"
+#msgid "webcontrol_lock_attempts"
+#msgstr "web制御ロックの試行"
 
 #: src/conf.c
-msgid "webcontrol_lock_max_ips"
-msgstr "web制御ロック最大ips"
+#msgid "webcontrol_lock_max_ips"
+#msgstr "web制御ロック最大ips"
 
 #: src/event.c
 #, c-format
@@ -4541,11 +4561,11 @@ msgstr "解析: <編集済み>"
 #: src/util.c
 #, c-format
 msgid "New webcontrol_header_params: %s"
-msgstr "新規web制御 ヘッダ パラメータ: %s"
+msgstr "新規web制御ヘッダパラメータ: %s"
 
 #: src/util.c
 msgid "New webcontrol_header_params: <redacted>"
-msgstr "新規web制御 ヘッダ パラメータ: <編集済み>"
+msgstr "新規web制御ヘッダパラメータ: <編集済み>"
 
 #: src/webu.c
 #, c-format
