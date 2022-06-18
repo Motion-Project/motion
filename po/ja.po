@@ -1561,8 +1561,9 @@ msgstr "Motionは8を法とする幅と高さのみをサポートします"
 
 #: src/motion.c
 #, c-format
-msgid "Image width (%d) or height(%d) requested is not modulo 8."
-msgstr "要求された画像の幅(%d)または高さ(%d)はモジュロ8ではありません"
+msgid "Restarting Motion.\n"
+"Image width (%d) or height(%d) requested is not modulo 8."
+msgstr "Motionを再開します.要求された画像の幅(%d)または高さ(%d)は8で割切れません"
 
 #: src/motion.c
 #, c-format
