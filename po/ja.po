@@ -2,7 +2,7 @@
 # Copyright (2018)
 # This file is distributed under the same license as the Motion package.
 #
-# update 2022/04/13 siriuth
+# update 2022/06/05 siriuth
 msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
@@ -1486,9 +1486,8 @@ msgstr "マスクファイル %sを開く際のエラー"
 
 #: src/motion.c
 msgid "Failed to read mask privacy image. Mask privacy feature disabled."
-msgstr ""
-"プライバシーマスク画像の読み取りに失敗しました.プライバシーマスク機能が無効"
-"です"
+msgstr "プライバシーマスク画像の読み取りに失敗しました."
+"プライバシーマスク機能が無効です"
 
 #: src/motion.c
 #, c-format
@@ -1530,7 +1529,7 @@ msgstr "デフォルトの寸法 %dx %dを使用"
 #: src/motion.c src/netcam_rtsp.c
 #, c-format
 msgid "Image width (%d) requested is not modulo 8."
-msgstr "要求された画像幅(%d)はモジュロ8ではありません"
+msgstr "要求された画像幅(%d)は8の倍数ではありません"
 
 #: src/motion.c src/netcam_rtsp.c
 #, c-format
@@ -1540,7 +1539,7 @@ msgstr "幅を次に高い8の倍数(%d)に調整します"
 #: src/motion.c src/netcam_rtsp.c
 #, c-format
 msgid "Image height (%d) requested is not modulo 8."
-msgstr "要求された画像の高さ(%d)はモジュロ8ではありません"
+msgstr "要求された画像の高さ(%d)は8の倍数ではありません"
 
 #: src/motion.c src/netcam_rtsp.c
 #, c-format
@@ -1557,34 +1556,35 @@ msgstr "設定ファイルの幅と高さを使用してモーションが続行
 
 #: src/motion.c
 msgid "Motion only supports width and height modulo 8"
-msgstr "Motionは8を法とする幅と高さのみをサポートします"
+msgstr "Motionは8で割切れる幅と高さのみをサポートします"
 
 #: src/motion.c
 #, c-format
 msgid "Restarting Motion.\n"
 "Image width (%d) or height(%d) requested is not modulo 8."
-msgstr "Motionを再開します.要求された画像の幅(%d)または高さ(%d)は8で割切れません"
+msgstr "Motionを再開します.\n要求された画像の幅(%d)または高さ(%d)は8の倍数ではありません"
 
 #: src/motion.c
 #, c-format
-msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
-msgstr "モーションは、64 %dx %d以上の幅と高さのみをサポートします"
+msgid "Restarting Motion.\n"
+"Motion only supports width and height greater than or equal to 64 %dx%d"
+msgstr "Motionを再開します.\nモーションは、64 %dx%d 以上の幅と高さのみをサポートします"
 
 #: src/motion.c
 msgid "Substream not available.  Image sizes not modulo 16."
-msgstr "サブストリームは利用できません.16を法としない画像サイズ"
+msgstr "サブストリームは利用できません.画像サイズが16の倍数ではありません"
 
 #: src/motion.c
 msgid "webp image format is not available, failing back to jpeg"
-msgstr "webp画像形式は利用できません.jpegにフェールバックします"
+msgstr "webp画像形式は利用できません.jpegとして処理されます"
 
 #: src/motion.c
 msgid "Error capturing first image"
-msgstr "最初の画像のキャプチャエラー"
+msgstr "最初の画像が取得できませんでした"
 
 #: src/motion.c
 msgid "Opening video loopback device for normal pictures"
-msgstr "通常の写真用のビデオループバックデバイスを開く"
+msgstr "通常の写真用のビデオループバックデバイスを開いています"
 
 #: src/motion.c
 msgid "Failed to open video loopback for normal pictures"
@@ -1592,11 +1592,11 @@ msgstr "通常の写真のビデオループバックを開けませんでした
 
 #: src/motion.c
 msgid "Opening video loopback device for motion pictures"
-msgstr "映画用のビデオループバックデバイスを開く"
+msgstr "動体検知用のビデオループバックデバイスを開いています"
 
 #: src/motion.c
 msgid "Failed to open video loopback for motion pictures"
-msgstr "動画のビデオループバックを開けませんでした"
+msgstr "動体検知用のビデオループバックを開けませんでした"
 
 #: src/motion.c
 msgid "Failed to read mask image. Mask feature disabled."
@@ -1609,11 +1609,11 @@ msgstr "マスクファイル\"%s\"がロードされました"
 
 #: src/motion.c
 msgid "Emulating motion"
-msgstr "エミュレートモーション"
+msgstr "動体検知をエミュレート"
 
 #: src/motion.c
 msgid "Calling vid_close() from motion_cleanup"
-msgstr "モーションクリーンアップからvid close()を呼び出す"
+msgstr "モーションクリーンアップからvid_close()を実行中"
 
 #: src/motion.c
 #, c-format
@@ -1623,6 +1623,10 @@ msgstr "エリア %dの動きが検出されました"
 #: src/motion.c
 msgid "Retrying until successful connection with camera"
 msgstr "カメラとの接続に成功するまで再試行しています"
+
+#: src/motion.c
+msgid "Camera has become available."
+msgstr "カメラが利用可能になりました"
 
 #: src/motion.c
 msgid ""
@@ -1639,12 +1643,22 @@ msgstr ""
 "寸法"
 
 #: src/motion.c
+msgid "Restarting Motion.\n"
+"Height or width has changed on camera."
+msgstr "Motionを再開します.\nカメラの高さか幅が変更されました."
+
+#: src/motion.c
+msgid "Restarting Motion.\n"
+"High resolution has changed on camera."
+msgstr "Motionを再開します.\nカメラが高解像度へ変更されました."
+
+#: src/motion.c
 msgid "Video signal re-acquired"
 msgstr "再取得したビデオ信号"
 
 #: src/motion.c
 msgid "Video device fatal error - Closing video device"
-msgstr "ビデオデバイスの致命的なエラー-ビデオデバイスを閉じる"
+msgstr "ビデオデバイスの致命的なエラー - ビデオデバイスを閉じています"
 
 #: src/motion.c
 msgid "Restarting Motion thread to reinitialize all image buffers"
@@ -1737,88 +1751,87 @@ msgid ""
 "Camara IDs are not unique or have values over 32,000.  Falling back to "
 "thread numbers"
 msgstr ""
-"カマラIDは一意ではなく、32,000を超える値があります.にフォールバックスレッド"
-"番号"
+"カメラIDは一意ではなく、32,000を超える値となっています. スレッド番号で処理されます"
 
 #: src/motion.c
 msgid "v4l2   : available"
-msgstr "v4l2:利用可能"
+msgstr "v4l2   : 利用可能"
 
 #: src/motion.c
 msgid "v4l2   : not available"
-msgstr "v4l2:利用できません"
+msgstr "v4l2   : 利用できません"
 
 #: src/motion.c
 msgid "bktr   : available"
-msgstr "bktr:利用可能"
+msgstr "bktr   : 利用可能"
 
 #: src/motion.c
 msgid "bktr   : not available"
-msgstr "bktr:利用できません"
+msgstr "bktr   : 利用できません"
 
 #: src/motion.c
 msgid "webp   : available"
-msgstr "webp:利用可能"
+msgstr "webp   : 利用可能"
 
 #: src/motion.c
 msgid "webp   : not available"
-msgstr "webp:利用できません"
+msgstr "webp   : 利用できません"
 
 #: src/motion.c
 msgid "mmal   : available"
-msgstr "mmal:利用可能"
+msgstr "mmal   : 利用可能"
 
 #: src/motion.c
 msgid "mmal   : not available"
-msgstr "mmal:利用できません"
+msgstr "mmal   : 利用できません"
 
 #: src/motion.c
 msgid "ffmpeg : available"
-msgstr "ffmpeg:利用可能"
+msgstr "ffmpeg : 利用可能"
 
 #: src/motion.c
 msgid "ffmpeg : not available"
-msgstr "ffmpeg:利用できません"
+msgstr "ffmpeg : 利用できません"
 
 #: src/motion.c
 msgid "mysql  : available"
-msgstr "mysql:利用可能"
+msgstr "mysql  : 利用可能"
 
 #: src/motion.c
 msgid "mysql  : not available"
-msgstr "mysql:利用できません"
+msgstr "mysql  : 利用できません"
 
 #: src/motion.c
 msgid "MariaDB: available"
-msgstr "MariaDB:利用可能"
+msgstr "MariaDB: 利用可能"
 
 #: src/motion.c
 msgid "MariaDB: not available"
-msgstr "MariaDB:利用できません"
+msgstr "MariaDB: 利用できません"
 
 #: src/motion.c
 msgid "sqlite3: available"
-msgstr "sqlite3:利用可能"
+msgstr "sqlite3: 利用可能"
 
 #: src/motion.c
 msgid "sqlite3: not available"
-msgstr "sqlite3:利用できません"
+msgstr "sqlite3: 利用できません"
 
 #: src/motion.c
 msgid "pgsql  : available"
-msgstr "pgsql:利用可能"
+msgstr "pgsql  : 利用可能"
 
 #: src/motion.c
 msgid "pgsql  : not available"
-msgstr "pgsql:利用できません"
+msgstr "pgsql  : 利用できません"
 
 #: src/motion.c
 msgid "nls    : available"
-msgstr "nls:利用可能"
+msgstr "nls    : 利用可能"
 
 #: src/motion.c
 msgid "nls    : not available"
-msgstr "nls:利用できません"
+msgstr "nls    : 利用できません"
 
 #: src/motion.c
 #, c-format
@@ -2188,11 +2201,11 @@ msgstr "画像ヘッダの読み取りエラー(2)"
 
 #: src/netcam_http.c
 msgid "Header not JPEG"
-msgstr "JPEGではないヘッダ"
+msgstr "ヘッダがJPEGではありません"
 
 #: src/netcam_http.c
 msgid "Content-Length 0"
-msgstr "コンテンツ長0"
+msgstr "コンテンツの長さ 0"
 
 #: src/netcam_http.c
 msgid "Found image header record"
@@ -2224,7 +2237,7 @@ msgstr ""
 
 #: src/netcam_http.c
 msgid "Non-streaming camera (keep-alive set)"
-msgstr "非ストリーミングカメラ(キープアライブセット)"
+msgstr "非ストリーミングカメラ(キープアライブが設定されている)"
 
 #: src/netcam_http.c
 msgid "Non-streaming camera (keep-alive not set)"
@@ -2248,8 +2261,8 @@ msgid ""
 "Streaming camera probably using MJPG-blocks, consider using mjpg:// "
 "netcam_url."
 msgstr ""
-"おそらくMJPGブロックを使用するストリーミングカメラ.mjpg://の使用を検討して"
-"くださいnetcamのURL"
+"おそらくMJPGブロックを使用するストリーミングカメラ. "
+"mjpg://netcam_URLの使用を検討してください"
 
 #: src/netcam_http.c
 msgid "Unrecognized content type"
