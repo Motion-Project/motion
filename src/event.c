@@ -1246,6 +1246,8 @@ static void event_ffmpeg_timelapseend(struct context *cnt, motion_event eventtyp
     }
 }
 
+
+
 /*
  * Starting point for all events
  */
