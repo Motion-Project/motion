@@ -2089,10 +2089,6 @@ static void mlp_detection(struct context *cnt)
                         cnt->moved = (unsigned int)cnt->conf.lightswitch_frames;
                     }
 
-                    ///////////////////////////////////////////////////////////////////////////////////
-                    // if cnt->move > 0 then Not required as it is executed at the end of the function.
-                    // 2022/06/13 もう少し様子を見るために以下の２行を元に戻した。
-                    ///////////////////////////////////////////////////////////////////////////////////
                     cnt->current_image->diffs = 0;
                     alg_update_reference_frame(cnt, RESET_REF_FRAME);
                 }
