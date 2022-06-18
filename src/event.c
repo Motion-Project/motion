@@ -1254,7 +1254,7 @@ struct event_handlers {
     motion_event eventtype;
     event_handler handler;
 };
-    
+
 struct event_handlers event_handlers[] = {
     {
     EVENT_FILECREATE,
