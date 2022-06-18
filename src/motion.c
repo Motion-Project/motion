@@ -654,7 +654,7 @@ static void process_image_ring(struct context *cnt)
         cnt->current_image = &cnt->imgs.image_ring[cnt->imgs.image_ring_out];
 
         if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot < cnt->conf.framerate) {
-            if (cnt->log_level >= DBG) {
+            if (cnt_list[0]->log_level >= DBG) {
                 char tmp[32];
                 const char *t;
 
@@ -670,12 +670,15 @@ static void process_image_ring(struct context *cnt)
                     t = "Other";
                 }
 
-                mystrftime(cnt, tmp, sizeof(tmp), "%H%M%S-%q",
-                           &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv, NULL, 0);
-                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm,
-                          cnt->imgs.width, cnt->imgs.height, 10, 20, tmp, cnt->text_scale);
-                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm,
-                          cnt->imgs.width, cnt->imgs.height, 10, 30, t, cnt->text_scale);
+                mystrftime(cnt, tmp, sizeof(tmp), "%H:%M:%S-%q"
+                    , &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv
+                    , NULL, 0);
+                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm
+                    , cnt->imgs.width, cnt->imgs.height, 10
+                    , 20, tmp, cnt->text_scale);
+                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm
+                    , cnt->imgs.width, cnt->imgs.height, 10
+                    , 20 + (10*cnt->text_scale), t, cnt->text_scale);
             }
 
             /* Output the picture to jpegs and ffmpeg */
