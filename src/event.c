@@ -869,7 +869,7 @@ static void event_extpipe_put(struct context *cnt, motion_event eventtype
 
     /* Check use_extpipe enabled and ext_pipe not NULL */
     if ((cnt->conf.movie_extpipe_use) && (cnt->extpipe != NULL)) {
-        //MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO, _("Using extpipe"));
+        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO, _("Using extpipe"));
         passthrough = util_check_passthrough(cnt);
         /* Check that is open */
         if ((cnt->extpipe_open) && (fileno(cnt->extpipe) > 0)) {
