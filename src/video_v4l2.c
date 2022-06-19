@@ -700,83 +700,145 @@ static int v4l2_frequency_select(struct context *cnt, struct video_dev *curdev)
     return 0;
 }
 
-static int v4l2_pixfmt_set(struct context *cnt, struct video_dev *curdev, u32 pixformat)
+static int v4l2_pixfmt_try(struct context *cnt, struct video_dev *curdev
+    , u32 pixformat)
 {
-
-    /* Set the pixel format for the camera*/
+    int retcd;
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
+    struct v4l2_format *fmt = &vid_source->dst_fmt;
 
-    memset(&vid_source->dst_fmt, 0, sizeof(struct v4l2_format));
+    memset(fmt, 0, sizeof(struct v4l2_format));
+    fmt->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    fmt->fmt.pix.width = cnt->conf.width;
+    fmt->fmt.pix.height = cnt->conf.height;
+    fmt->fmt.pix.pixelformat = pixformat;
+    fmt->fmt.pix.field = V4L2_FIELD_ANY;
 
-    vid_source->dst_fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    vid_source->dst_fmt.fmt.pix.width = cnt->conf.width;
-    vid_source->dst_fmt.fmt.pix.height = cnt->conf.height;
-    vid_source->dst_fmt.fmt.pix.pixelformat = pixformat;
-    vid_source->dst_fmt.fmt.pix.field = V4L2_FIELD_ANY;
-
-    if (xioctl(vid_source, VIDIOC_TRY_FMT, &vid_source->dst_fmt) != -1 &&
-        vid_source->dst_fmt.fmt.pix.pixelformat == pixformat) {
+    retcd = xioctl(vid_source, VIDIOC_TRY_FMT, fmt);
+    if ((retcd == -1) || (fmt->fmt.pix.pixelformat != pixformat)) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-            ,_("Testing palette %c%c%c%c (%dx%d)")
-            ,pixformat >> 0, pixformat >> 8
-            ,pixformat >> 16, pixformat >> 24
-            ,cnt->conf.width, cnt->conf.height);
+            , _("Unable to use %c%c%c%c (%dx%d)")
+            , pixformat >> 0, pixformat >> 8
+            , pixformat >> 16, pixformat >> 24
+            , cnt->conf.width, cnt->conf.height);
+        return -1;
+    }
 
-        curdev->width = vid_source->dst_fmt.fmt.pix.width;
-        curdev->height = vid_source->dst_fmt.fmt.pix.height;
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        , _("Testing palette %c%c%c%c (%dx%d)")
+        , pixformat >> 0, pixformat >> 8
+        , pixformat >> 16, pixformat >> 24
+        , cnt->conf.width, cnt->conf.height);
 
-        if (vid_source->dst_fmt.fmt.pix.width != (unsigned int) cnt->conf.width ||
-            vid_source->dst_fmt.fmt.pix.height != (unsigned int) cnt->conf.height) {
 
+    return 0;
+
+}
+
+static int v4l2_pixfmt_stride(struct video_dev *curdev, u32 pixformat)
+{
+    int retcd;
+    src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
+    struct v4l2_format *fmt = &vid_source->dst_fmt;
+
+    if (vid_source->dst_fmt.fmt.pix.width !=
+        vid_source->dst_fmt.fmt.pix.bytesperline) {
+
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+            , _("The image width(%d) is not equal to the stride(%d)")
+            , fmt->fmt.pix.width
+            , fmt->fmt.pix.bytesperline);
+
+        fmt->fmt.pix.width = fmt->fmt.pix.bytesperline;
+
+        retcd = xioctl(vid_source, VIDIOC_TRY_FMT, fmt);
+        if ((retcd == -1) || (fmt->fmt.pix.pixelformat != pixformat)) {
             MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-                ,_("Adjusting resolution from %ix%i to %ix%i.")
-                ,cnt->conf.width, cnt->conf.height
-                ,vid_source->dst_fmt.fmt.pix.width
-                ,vid_source->dst_fmt.fmt.pix.height);
-
-            if ((curdev->width % 8) || (curdev->height % 8)) {
-                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                    ,_("Adjusted resolution not modulo 8."));
-                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                    ,_("Specify different palette or width/height in config file."));
-                return -1;
-            }
-            cnt->conf.width = curdev->width;
-            cnt->conf.height = curdev->height;
+                , _("Unable to adjust width to stride."));
+            return -1;
         }
+    }
+    return 0;
 
-        if (xioctl(vid_source, VIDIOC_S_FMT, &vid_source->dst_fmt) == -1) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
-                ,_("Error setting pixel format.\nVIDIOC_S_FMT: "));
+}
+
+/* Adjust requested resolution if needed*/
+static int v4l2_pixfmt_adj(struct context *cnt, struct video_dev *curdev)
+{
+    src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
+    struct v4l2_format *fmt = &vid_source->dst_fmt;
+
+    curdev->width = (int)fmt->fmt.pix.width;
+    curdev->height = (int)fmt->fmt.pix.height;
+
+    if ((curdev->width != cnt->conf.width) ||
+        (curdev->height != cnt->conf.height)) {
+
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+            ,_("Adjusting resolution from %ix%i to %ix%i.")
+            ,cnt->conf.width, cnt->conf.height
+            ,curdev->width, curdev->height);
+
+        if ((curdev->width % 8) || (curdev->height % 8)) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                ,_("Adjusted resolution not modulo 8."));
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                ,_("Specify different palette or width/height in config file."));
             return -1;
         }
 
-        curdev->pixfmt_src = pixformat;
+        cnt->conf.width = curdev->width;
+        cnt->conf.height = curdev->height;
 
-        if (curdev->starting) {
-            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-                ,_("Using palette %c%c%c%c (%dx%d)")
-                ,pixformat >> 0 , pixformat >> 8
-                ,pixformat >> 16, pixformat >> 24
-                ,cnt->conf.width, cnt->conf.height);
-            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-                ,_("Bytesperlines %d sizeimage %d colorspace %08x")
-                ,vid_source->dst_fmt.fmt.pix.bytesperline
-                ,vid_source->dst_fmt.fmt.pix.sizeimage
-                ,vid_source->dst_fmt.fmt.pix.colorspace);
-        }
+    }
+    return 0;
 
-        return 0;
+}
+
+static int v4l2_pixfmt_set(struct context *cnt, struct video_dev *curdev, u32 pixformat)
+{
+    int retcd;
+    src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
+    struct v4l2_format *fmt = &vid_source->dst_fmt;
+
+    retcd = v4l2_pixfmt_try(cnt, curdev, pixformat);
+    if (retcd == -1) {
+        return -1;
     }
 
-    return -1;
+    retcd = v4l2_pixfmt_stride(curdev, pixformat);
+    if (retcd == -1) {
+        return -1;
+    }
+
+    retcd = v4l2_pixfmt_adj(cnt, curdev);
+    if (retcd == -1) {
+        return -1;
+    }
+
+    retcd = xioctl(vid_source, VIDIOC_S_FMT, fmt);
+    if (retcd == -1) {
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
+            ,_("Error setting pixel format."));
+        return -1;
+    }
+
+    curdev->pixfmt_src = pixformat;
+
+    if (curdev->starting) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+            ,_("Using palette %c%c%c%c (%dx%d)")
+            ,pixformat >> 0 , pixformat >> 8
+            ,pixformat >> 16, pixformat >> 24
+            ,cnt->conf.width, cnt->conf.height);
+    }
+
+    return 0;
+
 }
 
 static int v4l2_pixfmt_select(struct context *cnt, struct video_dev *curdev)
 {
-
-    /* Find and select the pixel format for camera*/
-
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     struct v4l2_fmtdesc fmtd;
     int v4l2_pal, indx_palette, indx, retcd;
@@ -884,24 +946,16 @@ static int v4l2_pixfmt_select(struct context *cnt, struct video_dev *curdev)
 
 }
 
-static int v4l2_mmap_set(struct video_dev *curdev)
+static int v4l2_mmap_request(struct video_dev *curdev)
 {
-
-    /* Set the memory mapping from device to Motion*/
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
-    enum v4l2_buf_type type;
-    int buffer_index;
-
-    /* Does the device support streaming? */
-    if (!(vid_source->cap.capabilities & V4L2_CAP_STREAMING)) {
-        return -1;
-    }
 
     memset(&vid_source->req, 0, sizeof(struct v4l2_requestbuffers));
 
     vid_source->req.count = MMAP_BUFFERS;
     vid_source->req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     vid_source->req.memory = V4L2_MEMORY_MMAP;
+
     if (xioctl(vid_source, VIDIOC_REQBUFS, &vid_source->req) == -1) {
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
                    ,_("Error requesting buffers %d for memory map. VIDIOC_REQBUFS")
@@ -927,55 +981,103 @@ static int v4l2_mmap_set(struct video_dev *curdev)
         return -1;
     }
 
-    for (buffer_index = 0; buffer_index < curdev->buffer_count; buffer_index++) {
-        struct v4l2_buffer buf;
+    return 0;
+}
 
-        memset(&buf, 0, sizeof(struct v4l2_buffer));
+static int v4l2_mmap_query(struct video_dev *curdev, int indx)
+{
+    src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
+    struct v4l2_buffer buf;
+	struct v4l2_plane planes[VIDEO_MAX_PLANES];
 
-        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buf.memory = V4L2_MEMORY_MMAP;
-        buf.index = buffer_index;
-        if (xioctl(vid_source, VIDIOC_QUERYBUF, &buf) == -1) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
-                ,_("Error querying buffer %i\nVIDIOC_QUERYBUF: ")
-                ,buffer_index);
-            free(vid_source->buffers);
-            vid_source->buffers = NULL;
-            return -1;
-        }
+    memset(&buf, 0, sizeof(struct v4l2_buffer));
+    memset(planes, 0, sizeof planes);
 
-        vid_source->buffers[buffer_index].size = buf.length;
-        vid_source->buffers[buffer_index].ptr = mmap(NULL, buf.length, PROT_READ | PROT_WRITE,
-                                                     MAP_SHARED, vid_source->fd_device, buf.m.offset);
+    buf.index = indx;
+    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    buf.memory = V4L2_MEMORY_MMAP;
+    buf.length = VIDEO_MAX_PLANES;
+    buf.m.planes = planes;
 
-        if (vid_source->buffers[buffer_index].ptr == MAP_FAILED) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
-                ,_("Error mapping buffer %i mmap"), buffer_index);
-            free(vid_source->buffers);
-            vid_source->buffers = NULL;
-            return -1;
-        }
-
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-            ,_("%i length=%d Address (%x)")
-            ,buffer_index, buf.length, vid_source->buffers[buffer_index].ptr);
+    if (xioctl(vid_source, VIDIOC_QUERYBUF, &buf) == -1) {
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
+            ,_("Error querying buffer %i"), indx);
+        free(vid_source->buffers);
+        vid_source->buffers = NULL;
+        return -1;
     }
 
-    for (buffer_index = 0; buffer_index < curdev->buffer_count; buffer_index++) {
-        memset(&vid_source->buf, 0, sizeof(struct v4l2_buffer));
+    vid_source->buffers[indx].size = buf.length;
 
-        vid_source->buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        vid_source->buf.memory = V4L2_MEMORY_MMAP;
-        vid_source->buf.index = buffer_index;
+    vid_source->buffers[indx].ptr = mmap(NULL, buf.length
+        , PROT_READ | PROT_WRITE, MAP_SHARED
+        , vid_source->fd_device, buf.m.offset);
 
-        if (xioctl(vid_source, VIDIOC_QBUF, &vid_source->buf) == -1) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_QBUF");
-            return -1;
+    if (vid_source->buffers[indx].ptr == MAP_FAILED) {
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
+            ,_("Error mapping buffer %i mmap"), indx);
+        free(vid_source->buffers);
+        vid_source->buffers = NULL;
+        return -1;
+    }
+
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+        , _("%i length=%d Address (%x) offset %d")
+        , indx, buf.length, vid_source->buffers[indx].ptr
+        , buf.m.offset);
+
+    return 0;
+}
+
+static int v4l2_mmap_queue(struct video_dev *curdev, int indx)
+{
+    src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
+    struct v4l2_plane planes[VIDEO_MAX_PLANES];
+
+    memset(&vid_source->buf, 0, sizeof(struct v4l2_buffer));
+    memset(planes, 0, sizeof planes);
+
+    vid_source->buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    vid_source->buf.memory = V4L2_MEMORY_MMAP;
+    vid_source->buf.index = indx;
+    vid_source->buf.length = VIDEO_MAX_PLANES;
+    vid_source->buf.m.planes = planes;
+
+    if (xioctl(vid_source, VIDIOC_QBUF, &vid_source->buf) == -1) {
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_QBUF");
+        return -1;
+    }
+    return 0;
+
+}
+
+static int v4l2_mmap_set(struct video_dev *curdev)
+{
+    int retcd, indx;
+    src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
+    enum v4l2_buf_type type;
+
+    if (!(vid_source->cap.capabilities & V4L2_CAP_STREAMING)) {
+        return -1;
+    }
+
+    retcd = v4l2_mmap_request(curdev);
+    if (retcd != 0) {
+        return retcd;
+    }
+
+    for (indx = 0; indx < curdev->buffer_count; indx++) {
+        retcd = v4l2_mmap_query(curdev, indx);
+        if (retcd != 0) {
+            return retcd;
+        }
+        retcd = v4l2_mmap_queue(curdev,indx);
+        if (retcd != 0) {
+            return retcd;
         }
     }
 
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-
     if (xioctl(vid_source, VIDIOC_STREAMON, &type) == -1) {
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
             ,_("Error starting stream. VIDIOC_STREAMON"));
@@ -987,8 +1089,6 @@ static int v4l2_mmap_set(struct video_dev *curdev)
 
 static int v4l2_imgs_set(struct context *cnt, struct video_dev *curdev)
 {
-    /* Set the items on the imgs */
-
     cnt->imgs.width = curdev->width;
     cnt->imgs.height = curdev->height;
     cnt->imgs.motionsize = cnt->imgs.width * cnt->imgs.height;
@@ -1000,18 +1100,88 @@ static int v4l2_imgs_set(struct context *cnt, struct video_dev *curdev)
 
 }
 
-static int v4l2_capture(struct context *cnt, struct video_dev *curdev, unsigned char *map)
+static int v4l2_pix_change(struct context *cnt, struct video_dev *curdev
+    , uint8_t *dest)
 {
+    int retcd, width, height;
+    src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
+    video_buff *src;
 
-    /* Capture a image */
-    /* FIXME:  This function needs to be refactored*/
+    width = cnt->imgs.width;
+    height = cnt->imgs.height;
+    src = &vid_source->buffers[vid_source->buf.index];
 
+    /*The FALLTHROUGH is a special comment required by compiler.*/
+    switch (curdev->pixfmt_src) {
+    case V4L2_PIX_FMT_RGB24:
+        vid_rgb24toyuv420p(dest, src->ptr, width, height);
+        return 0;
+    case V4L2_PIX_FMT_UYVY:
+        vid_uyvyto420p(dest, src->ptr, width, height);
+        return 0;
+    case V4L2_PIX_FMT_YUYV:
+        vid_yuv422to420p(dest, src->ptr, width, height);
+        return 0;
+    case V4L2_PIX_FMT_YUV422P:
+        vid_yuv422pto420p(dest, src->ptr, width, height);
+        return 0;
+    case V4L2_PIX_FMT_YUV420:
+        memcpy(dest, src->ptr, cnt->imgs.size_norm);
+        return 0;
+
+    case V4L2_PIX_FMT_PJPG:
+        /*FALLTHROUGH*/
+    case V4L2_PIX_FMT_JPEG:
+        /*FALLTHROUGH*/
+    case V4L2_PIX_FMT_MJPEG:
+        retcd = vid_mjpegtoyuv420p(dest
+            , src->ptr, width, height, src->content_length);
+        return retcd;
+
+    case V4L2_PIX_FMT_SBGGR16:
+        /*FALLTHROUGH*/
+    case V4L2_PIX_FMT_SGBRG8:
+        /*FALLTHROUGH*/
+    case V4L2_PIX_FMT_SGRBG8:
+        /*FALLTHROUGH*/
+    case V4L2_PIX_FMT_SBGGR8:    /* bayer */
+        vid_bayer2rgb24(cnt->imgs.common_buffer, src->ptr, width, height);
+        vid_rgb24toyuv420p(dest, cnt->imgs.common_buffer, width, height);
+        return 0;
+
+    case V4L2_PIX_FMT_SPCA561:
+        /*FALLTHROUGH*/
+    case V4L2_PIX_FMT_SN9C10X:
+        vid_sonix_decompress(dest, src->ptr, width, height);
+        vid_bayer2rgb24(cnt->imgs.common_buffer, dest, width, height);
+        vid_rgb24toyuv420p(dest, cnt->imgs.common_buffer, width, height);
+        return 0;
+
+    case V4L2_PIX_FMT_Y10:
+        vid_y10torgb24(cnt->imgs.common_buffer, src->ptr, width, height, 2);
+        vid_rgb24toyuv420p(dest, cnt->imgs.common_buffer, width, height);
+        return 0;
+    case V4L2_PIX_FMT_Y12:
+        vid_y10torgb24(cnt->imgs.common_buffer, src->ptr, width, height, 4);
+        vid_rgb24toyuv420p(dest, cnt->imgs.common_buffer, width, height);
+        return 0;
+    case V4L2_PIX_FMT_GREY:
+        vid_greytoyuv420p(dest, src->ptr, width, height);
+        return 0;
+    default:
+        retcd = -1;
+
+    }
+
+    return -1;
+}
+
+static int v4l2_capture(struct video_dev *curdev)
+{
+    int retcd;
     sigset_t set, old;
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
-    int shift, width, height, retcd;
-
-    width = cnt->conf.width;
-    height = cnt->conf.height;
+	struct v4l2_plane planes[VIDEO_MAX_PLANES];
 
     /* Block signals during IOCTL */
     sigemptyset(&set);
@@ -1022,137 +1192,36 @@ static int v4l2_capture(struct context *cnt, struct video_dev *curdev, unsigned 
     sigaddset(&set, SIGHUP);
     pthread_sigmask(SIG_BLOCK, &set, &old);
 
-    /* Most MOTION_LOG statements are commented out to avoid spamming to regular users*/
-    //MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-    //    ,_("1) vid_source->pframe %i"), vid_source->pframe);
-
     if (vid_source->pframe >= 0) {
-        if (xioctl(vid_source, VIDIOC_QBUF, &vid_source->buf) == -1) {
+        retcd = xioctl(vid_source, VIDIOC_QBUF, &vid_source->buf);
+        if (retcd == -1) {
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_QBUF");
             pthread_sigmask(SIG_UNBLOCK, &old, NULL);
-            return -1;
+            return retcd;
         }
     }
 
     memset(&vid_source->buf, 0, sizeof(struct v4l2_buffer));
-
+    memset(planes, 0, sizeof planes);
     vid_source->buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     vid_source->buf.memory = V4L2_MEMORY_MMAP;
     vid_source->buf.bytesused = 0;
+    vid_source->buf.length = VIDEO_MAX_PLANES;
+    vid_source->buf.m.planes = planes;
 
-    if (xioctl(vid_source, VIDIOC_DQBUF, &vid_source->buf) == -1) {
-        /*
-         * Some drivers return EIO when there is no signal,
-         * driver might dequeue an (empty) buffer despite
-         * returning an error, or even stop capturing.
-         */
-        if (errno == EIO) {
-            vid_source->pframe++;
-
-            if ((u32)vid_source->pframe >= vid_source->req.count) {
-                vid_source->pframe = 0;
-            }
-
-             vid_source->buf.index = vid_source->pframe;
-             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
-                ,"VIDIOC_DQBUF: EIO "
-                "(vid_source->pframe %d)", vid_source->pframe);
-             retcd = 1;
-        } else if (errno == EAGAIN) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_DQBUF: EAGAIN"
-                       " (vid_source->pframe %d)", vid_source->pframe);
-            retcd = 1;
-        } else {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_DQBUF");
-            retcd = -1;
-        }
-
+    retcd = xioctl(vid_source, VIDIOC_DQBUF, &vid_source->buf);
+    if (retcd == -1) {
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_DQBUF");
         pthread_sigmask(SIG_UNBLOCK, &old, NULL);
         return retcd;
     }
 
-    //MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "2) vid_source->pframe %i", vid_source->pframe);
-
     vid_source->pframe = vid_source->buf.index;
     vid_source->buffers[vid_source->buf.index].used = vid_source->buf.bytesused;
     vid_source->buffers[vid_source->buf.index].content_length = vid_source->buf.bytesused;
+    pthread_sigmask(SIG_UNBLOCK, &old, NULL);
 
-    //MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "3) vid_source->pframe %i "
-    //           "vid_source->buf.index %i", vid_source->pframe, vid_source->buf.index);
-
-    pthread_sigmask(SIG_UNBLOCK, &old, NULL);    /*undo the signal blocking */
-
-    {
-        video_buff *the_buffer = &vid_source->buffers[vid_source->buf.index];
-
-        //MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-        //    ,_("the_buffer index %d Address (%x)")
-        //    ,vid_source->buf.index, the_buffer->ptr);
-
-        shift = 0;
-        /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
-        switch (curdev->pixfmt_src) {
-        case V4L2_PIX_FMT_RGB24:
-            vid_rgb24toyuv420p(map, the_buffer->ptr, width, height);
-            return 0;
-
-        case V4L2_PIX_FMT_UYVY:
-            vid_uyvyto420p(map, the_buffer->ptr, (unsigned)width, (unsigned)height);
-            return 0;
-
-        case V4L2_PIX_FMT_YUYV:
-            vid_yuv422to420p(map, the_buffer->ptr, width, height);
-            return 0;
-        case V4L2_PIX_FMT_YUV422P:
-            vid_yuv422pto420p(map, the_buffer->ptr, width, height);
-            return 0;
-
-        case V4L2_PIX_FMT_YUV420:
-            memcpy(map, the_buffer->ptr, the_buffer->content_length);
-            return 0;
-
-        case V4L2_PIX_FMT_PJPG:
-            /*FALLTHROUGH*/
-        case V4L2_PIX_FMT_JPEG:
-            /*FALLTHROUGH*/
-        case V4L2_PIX_FMT_MJPEG:
-            return vid_mjpegtoyuv420p(map, the_buffer->ptr, width, height
-                                      ,the_buffer->content_length);
-
-        /* FIXME: quick hack to allow work all bayer formats */
-        case V4L2_PIX_FMT_SBGGR16:
-            /*FALLTHROUGH*/
-        case V4L2_PIX_FMT_SGBRG8:
-            /*FALLTHROUGH*/
-        case V4L2_PIX_FMT_SGRBG8:
-            /*FALLTHROUGH*/
-        case V4L2_PIX_FMT_SBGGR8:    /* bayer */
-            vid_bayer2rgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height);
-            vid_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
-            return 0;
-
-        case V4L2_PIX_FMT_SPCA561:
-            /*FALLTHROUGH*/
-        case V4L2_PIX_FMT_SN9C10X:
-            vid_sonix_decompress(map, the_buffer->ptr, width, height);
-            vid_bayer2rgb24(cnt->imgs.common_buffer, map, width, height);
-            vid_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
-            return 0;
-        case V4L2_PIX_FMT_Y12:
-            shift += 2;
-            /*FALLTHROUGH*/
-        case V4L2_PIX_FMT_Y10:
-            shift += 2;
-            vid_y10torgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height, shift);
-            vid_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
-            return 0;
-        case V4L2_PIX_FMT_GREY:
-            vid_greytoyuv420p(map, the_buffer->ptr, width, height);
-            return 0;
-        }
-    }
-
-    return 1;
+    return 0;
 }
 
 static int v4l2_device_init(struct context *cnt, struct video_dev *curdev)
@@ -1193,9 +1262,8 @@ static int v4l2_device_init(struct context *cnt, struct video_dev *curdev)
     return 0;
 }
 
-static void v4l2_device_select(struct context *cnt, struct video_dev *curdev, unsigned char *map)
+static void v4l2_device_select(struct context *cnt, struct video_dev *curdev)
 {
-
     int indx, retcd, newvals;
 
     if (curdev->v4l2_private == NULL) {
@@ -1237,12 +1305,12 @@ static void v4l2_device_select(struct context *cnt, struct video_dev *curdev, un
 
         /* Clear the buffers from previous "robin" pictures*/
         for (indx =0; indx < curdev->buffer_count; indx++) {
-            v4l2_capture(cnt, curdev, map);
+            v4l2_capture(curdev);
         }
 
         /* Skip the requested round robin frame count */
         for (indx = 1; indx < cnt->conf.roundrobin_skip; indx++) {
-            v4l2_capture(cnt, curdev, map);
+            v4l2_capture(curdev);
         }
 
     } else {
@@ -1638,7 +1706,7 @@ void v4l2_cleanup(struct context *cnt)
 int v4l2_next(struct context *cnt, struct image_data *img_data)
 {
     #ifdef HAVE_V4L2
-        int ret = -2;
+        int retcd = -2;
         struct config *conf = &cnt->conf;
         struct video_dev *dev;
 
@@ -1662,19 +1730,24 @@ int v4l2_next(struct context *cnt, struct image_data *img_data)
             dev->frames = conf->roundrobin_frames;
         }
 
-        v4l2_device_select(cnt, dev, img_data->image_norm);
-        ret = v4l2_capture(cnt, dev, img_data->image_norm);
+        v4l2_device_select(cnt, dev);
+
+        retcd = v4l2_capture(dev);
+
+        if (retcd == 0) {
+            retcd = v4l2_pix_change(cnt, dev, img_data->image_norm);
+        }
 
         if (--dev->frames <= 0) {
             dev->owner = -1;
             dev->frames = 0;
             pthread_mutex_unlock(&dev->mutex);
         }
+        if (retcd == 0) {
+            rotate_map(cnt, img_data);
+        }
 
-        /* Rotate the image as specified. */
-        rotate_map(cnt, img_data);
-
-        return ret;
+        return retcd;
     #else
         (void)cnt;
         (void)img_data;
