@@ -34,7 +34,7 @@ log_level 6
 video_device /dev/video0
 
 # Parameters to control video device.  See motion_guide.html
-; vid_control_params value
+; video_params value
 
 # The full URL of the network camera stream.
 ; netcam_url value
@@ -43,7 +43,7 @@ video_device /dev/video0
 ; mmalcam_name value
 
 # Camera control parameters (see raspivid/raspistill tool documentation)
-; mmalcam_control_params value
+; mmalcam_params value
 
 ############################################################
 # Image Processing configuration parameters
