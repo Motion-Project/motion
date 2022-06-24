@@ -735,29 +735,52 @@ static int v4l2_pixfmt_try(struct context *cnt, struct video_dev *curdev
 
 }
 
-static int v4l2_pixfmt_stride(struct video_dev *curdev, u32 pixformat)
+static int v4l2_pixfmt_stride(struct video_dev *curdev)
 {
-    int retcd;
+    int wd, bpl, wps;
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
-    struct v4l2_format *fmt = &vid_source->dst_fmt;
 
-    if (vid_source->dst_fmt.fmt.pix.width !=
-        vid_source->dst_fmt.fmt.pix.bytesperline) {
+    curdev->width = (int)vid_source->dst_fmt.fmt.pix.width;
+    curdev->height = (int)vid_source->dst_fmt.fmt.pix.height;
 
-        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-            , _("The image width(%d) is not equal to the stride(%d)")
-            , fmt->fmt.pix.width
-            , fmt->fmt.pix.bytesperline);
+    bpl = (int)vid_source->dst_fmt.fmt.pix.bytesperline;
+    wd = curdev->width;
 
-        fmt->fmt.pix.width = fmt->fmt.pix.bytesperline;
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+        , _("Checking image size %dx%d with stride %d")
+        , curdev->width, curdev->height, bpl);
 
-        retcd = xioctl(vid_source, VIDIOC_TRY_FMT, fmt);
-        if ((retcd == -1) || (fmt->fmt.pix.pixelformat != pixformat)) {
-            MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-                , _("Unable to adjust width to stride."));
-            return -1;
-        }
+    /* Documents indicate that stride is equal to width + padding
+     * As such, the stride(bpl) will never be less than width
+    */
+    if (wd > bpl) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            , _("Width(%d) must be less than stride(%d)"), wd, bpl);
+        return -1;
     }
+
+    /* For perfect multiples of width and stride, no adjustment needed */
+    if ((wd == bpl) || ((bpl % wd) == 0)) {
+        return 0;
+    }
+
+    MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+        , _("The image width(%d) is not multiple of the stride(%d)")
+        , wd, bpl);
+
+    /* Width per stride */
+    wps = bpl / wd;
+    if (wps < 1) {
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+            , _("Impossible condition: Width(%d), Stride(%d), Per stride(%d)")
+            , wd, bpl, wps);
+    }
+
+    MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+        , _("Image width will be padded %d bytes"), ((bpl % wd)/wps));
+
+    curdev->width = (int)wd + ((bpl % wd)/wps);
+
     return 0;
 
 }
@@ -765,11 +788,6 @@ static int v4l2_pixfmt_stride(struct video_dev *curdev, u32 pixformat)
 /* Adjust requested resolution if needed*/
 static int v4l2_pixfmt_adj(struct context *cnt, struct video_dev *curdev)
 {
-    src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
-    struct v4l2_format *fmt = &vid_source->dst_fmt;
-
-    curdev->width = (int)fmt->fmt.pix.width;
-    curdev->height = (int)fmt->fmt.pix.height;
 
     if ((curdev->width != cnt->conf.width) ||
         (curdev->height != cnt->conf.height)) {
@@ -806,7 +824,7 @@ static int v4l2_pixfmt_set(struct context *cnt, struct video_dev *curdev, u32 pi
         return -1;
     }
 
-    retcd = v4l2_pixfmt_stride(curdev, pixformat);
+    retcd = v4l2_pixfmt_stride(curdev);
     if (retcd == -1) {
         return -1;
     }
