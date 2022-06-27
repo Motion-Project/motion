@@ -562,15 +562,15 @@ static void dbse_exec_sqlite3(char *sqlquery, struct context *cnt)
 {
     #ifdef HAVE_SQLITE3
         if ((mystreq(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
-            int res;
+            int retcd;
             char *errmsg = 0;
             MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing SQLite3 query"));
-            res = sqlite3_exec(cnt->database_sqlite3, sqlquery, NULL, 0, &errmsg);
-            if (res != SQLITE_OK ) {
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("SQLite3 error was %s"), errmsg);
+            retcd = sqlite3_exec(cnt->database_sqlite3, sqlquery, NULL, 0, &errmsg);
+            if (retcd != SQLITE_OK ) {
+                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+                    , _("SQLite3 error %d : %s"), retcd, errmsg);
                 sqlite3_free(errmsg);
             }
-
         }
     #else
         (void)sqlquery;
