@@ -27,14 +27,15 @@
 #include "logger.h"
 #include "dbse.h"
 
-/**
- * dbse_global_deinit
- *
- */
+pthread_mutex_t dbse_lock;
+
+/** dbse_global_deinit */
 void dbse_global_deinit(struct context **cntlist)
 {
     struct context *cnt;
     int i;
+
+    pthread_mutex_destroy(&dbse_lock);
 
     #if defined(HAVE_MYSQL)
         for (cnt=cntlist[i=0]; cnt; cnt=cntlist[++i]) {
@@ -64,15 +65,14 @@ void dbse_global_deinit(struct context **cntlist)
     }
 }
 
-/**
- * dbse_global_init
- *
- */
+/** dbse_global_init */
 void dbse_global_init(struct context **cntlist)
 {
     int indx;
 
     MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("Initializing database"));
+
+    pthread_mutex_init(&dbse_lock, NULL);
 
     /* Initialize all the database items; different camera threads can use different DBMSs */
     #if defined(HAVE_MYSQL)
@@ -102,32 +102,37 @@ void dbse_global_init(struct context **cntlist)
     #endif /* HAVE_MARIADB */
 
     #if defined(HAVE_SQLITE3)
-        /* database_sqlite3 == NULL if not changed causes each thread to create their own
-        * sqlite3 connection this will only happens when using a non-threaded sqlite version */
-        cntlist[0]->database_sqlite3=NULL;
-        if (cntlist[0]->conf.database_type && ((mystreq(cntlist[0]->conf.database_type, "sqlite3")) && cntlist[0]->conf.database_dbname)) {
+        int retcd;
+        cntlist[0]->database_sqlite3 = NULL;
+        if ((cntlist[0]->conf.database_type != NULL) &&
+            (mystreq(cntlist[0]->conf.database_type, "sqlite3")) &&
+            (cntlist[0]->conf.database_dbname != NULL)) {
             MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-                ,_("SQLite3 Database filename %s")
-                ,cntlist[0]->conf.database_dbname);
+                , _("SQLite3 Database filename %s")
+                , cntlist[0]->conf.database_dbname);
 
-            int thread_safe = sqlite3_threadsafe();
-            if (thread_safe > 0) {
-                MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, _("SQLite3 is threadsafe"));
-                MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, _("SQLite3 serialized %s")
-                    ,(sqlite3_config(SQLITE_CONFIG_SERIALIZED)?_("FAILED"):_("SUCCESS")));
-                if (sqlite3_open( cntlist[0]->conf.database_dbname, &cntlist[0]->database_sqlite3) != SQLITE_OK) {
+            retcd = sqlite3_threadsafe();
+            if (retcd != 0) {
+                MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("SQLite3 is threadsafe"));
+                retcd = sqlite3_open( cntlist[0]->conf.database_dbname
+                    , &cntlist[0]->database_sqlite3);
+                if (retcd != SQLITE_OK) {
                     MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                        ,_("Can't open SQLite3 database %s : %s")
-                        ,cntlist[0]->conf.database_dbname
-                        ,sqlite3_errmsg( cntlist[0]->database_sqlite3));
+                        , _("Can't open SQLite3 database %s. Error %d:%s")
+                        , cntlist[0]->conf.database_dbname, retcd
+                        , sqlite3_errmsg( cntlist[0]->database_sqlite3));
                     sqlite3_close( cntlist[0]->database_sqlite3);
                     exit(1);
                 }
-                MOTION_LOG(NTC, TYPE_DB, NO_ERRNO,_("database_busy_timeout %d msec"),
-                        cntlist[0]->conf.database_busy_timeout);
-                if (sqlite3_busy_timeout( cntlist[0]->database_sqlite3,  cntlist[0]->conf.database_busy_timeout) != SQLITE_OK) {
-                    MOTION_LOG(ERR, TYPE_DB, NO_ERRNO,_("database_busy_timeout failed %s")
-                        ,sqlite3_errmsg( cntlist[0]->database_sqlite3));
+                MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
+                    , _("Setting busy timeout to %d msec")
+                    , cntlist[0]->conf.database_busy_timeout);
+                retcd = sqlite3_busy_timeout(cntlist[0]->database_sqlite3
+                    , cntlist[0]->conf.database_busy_timeout);
+                if (retcd != SQLITE_OK) {
+                    MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+                        , _("Setting busy timeout failed. Error %d:%s")
+                        , retcd, sqlite3_errmsg( cntlist[0]->database_sqlite3));
                 }
             }
         }
@@ -224,33 +229,38 @@ static int dbse_init_mariadb(struct context *cnt)
 
 }
 
-/**
- * dbse_init_sqlite3
- *
- */
+/** dbse_init_sqlite3 */
 static int dbse_init_sqlite3(struct context *cnt,struct context **cntlist)
 {
     #ifdef HAVE_SQLITE3
-        if (cntlist[0]->database_sqlite3 != 0) {
-            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO,_("SQLite3 using shared handle"));
-            cnt->database_sqlite3 = cntlist[0]->database_sqlite3;
-
-        } else if ((mystreq(cnt->conf.database_type, "sqlite3")) && cnt->conf.database_dbname) {
+        int retcd;
+        if (cntlist[0]->database_sqlite3 != NULL) {
             MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-                ,_("SQLite3 Database filename %s"), cnt->conf.database_dbname);
-            if (sqlite3_open(cnt->conf.database_dbname, &cnt->database_sqlite3) != SQLITE_OK) {
+                , _("Using common database %s")
+                , cntlist[0]->conf.database_dbname);
+            cnt->database_sqlite3 = cntlist[0]->database_sqlite3;
+        } else if ((mystreq(cnt->conf.database_type, "sqlite3")) &&
+            (cnt->conf.database_dbname != NULL)) {
+            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
+                ,_("Opening database %s"), cnt->conf.database_dbname);
+            retcd = sqlite3_open(cnt->conf.database_dbname, &cnt->database_sqlite3);
+            if (retcd != SQLITE_OK) {
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                    ,_("Can't open SQLite3 database %s : %s")
-                    ,cnt->conf.database_dbname, sqlite3_errmsg(cnt->database_sqlite3));
+                    ,_("Can't open SQLite3 database %s.  Error %d : %s")
+                    , cnt->conf.database_dbname, retcd
+                    , sqlite3_errmsg(cnt->database_sqlite3));
                 sqlite3_close(cnt->database_sqlite3);
                 return -2;
             }
             MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-                ,_("database_busy_timeout %d msec"), cnt->conf.database_busy_timeout);
-            if (sqlite3_busy_timeout(cnt->database_sqlite3, cnt->conf.database_busy_timeout) != SQLITE_OK) {
+                , _("Setting busy timeout to %d msec")
+                , cnt->conf.database_busy_timeout);
+            retcd = sqlite3_busy_timeout(cnt->database_sqlite3
+                , cnt->conf.database_busy_timeout);
+            if (retcd != SQLITE_OK) {
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                    ,_("database_busy_timeout failed %s")
-                    ,sqlite3_errmsg(cnt->database_sqlite3));
+                    , _("Setting busy timeout failed.  Error %d:%s")
+                    , retcd, sqlite3_errmsg(cnt->database_sqlite3));
             }
         }
     #else
@@ -296,17 +306,14 @@ static int dbse_init_pgsql(struct context *cnt)
     return 0;
 }
 
-/**
- * dbse_init
- *
- */
+/** dbse_init */
 int dbse_init(struct context *cnt, struct context **cntlist)
 {
     int retcd = 0;
 
     if (cnt->conf.database_type) {
         MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-            ,_("Database backend %s"), cnt->conf.database_type);
+            ,_("Database type %s"), cnt->conf.database_type);
 
         if (mystreq(cnt->conf.database_type,"mysql")) {
             retcd = dbse_init_mysql(cnt);
@@ -357,11 +364,10 @@ void dbse_deinit(struct context *cnt)
         #endif /* HAVE_PGSQL */
 
         #ifdef HAVE_SQLITE3
-                /* Close the SQLite database */
-                if ((mystreq(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
-                    sqlite3_close(cnt->database_sqlite3);
-                    cnt->database_sqlite3 = NULL;
-                }
+            if (cnt->database_sqlite3 != NULL) {
+                sqlite3_close(cnt->database_sqlite3);
+                cnt->database_sqlite3 = NULL;
+            }
         #endif /* HAVE_SQLITE3 */
         (void)cnt;
     }
@@ -554,17 +560,14 @@ static void dbse_exec_pgsql(char *sqlquery, struct context *cnt)
 
 }
 
-/**
- * dbse_exec_sqlite3
- *
- */
+/** dbse_exec_sqlite3 */
 static void dbse_exec_sqlite3(char *sqlquery, struct context *cnt)
 {
     #ifdef HAVE_SQLITE3
-        if ((mystreq(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
+        if (cnt->database_sqlite3 != NULL) {
             int retcd;
-            char *errmsg = 0;
-            MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing SQLite3 query"));
+            char *errmsg = NULL;
+            MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("Executing %s"), sqlquery);
             retcd = sqlite3_exec(cnt->database_sqlite3, sqlquery, NULL, 0, &errmsg);
             if (retcd != SQLITE_OK ) {
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
@@ -579,10 +582,7 @@ static void dbse_exec_sqlite3(char *sqlquery, struct context *cnt)
 
 }
 
-/**
- * dbse_firstmotion
- *
- */
+/** dbse_firstmotion */
 void dbse_firstmotion(struct context *cnt)
 {
     char sqlquery[PATH_MAX];
@@ -595,22 +595,21 @@ void dbse_firstmotion(struct context *cnt)
         return;
     }
 
-    if (mystreq(cnt->conf.database_type,"mysql")) {
-        dbse_exec_mysql(sqlquery, cnt);
-    } else if (mystreq(cnt->conf.database_type,"mariadb")) {
-        dbse_exec_mariadb(sqlquery, cnt);
-    } else if (mystreq(cnt->conf.database_type,"postgresql")) {
-        dbse_exec_pgsql(sqlquery, cnt);
-    } else if (mystreq(cnt->conf.database_type,"sqlite3")) {
-        dbse_exec_sqlite3(sqlquery, cnt);
-    }
+    pthread_mutex_lock(&dbse_lock);
+        if (mystreq(cnt->conf.database_type,"mysql")) {
+            dbse_exec_mysql(sqlquery, cnt);
+        } else if (mystreq(cnt->conf.database_type,"mariadb")) {
+            dbse_exec_mariadb(sqlquery, cnt);
+        } else if (mystreq(cnt->conf.database_type,"postgresql")) {
+            dbse_exec_pgsql(sqlquery, cnt);
+        } else if (mystreq(cnt->conf.database_type,"sqlite3")) {
+            dbse_exec_sqlite3(sqlquery, cnt);
+        }
+    pthread_mutex_unlock(&dbse_lock);
 
 }
 
-/**
- * dbse_newfile
- *
- */
+/** dbse_newfile */
 void dbse_newfile(struct context *cnt, char *filename, int sqltype, struct timeval *tv1)
 {
     char sqlquery[PATH_MAX];
@@ -623,22 +622,21 @@ void dbse_newfile(struct context *cnt, char *filename, int sqltype, struct timev
         return;
     }
 
-    if (mystreq(cnt->conf.database_type,"mysql")) {
-        dbse_exec_mysql(sqlquery, cnt);
-    } else if (mystreq(cnt->conf.database_type,"mariadb")) {
-        dbse_exec_mariadb(sqlquery, cnt);
-    } else if (mystreq(cnt->conf.database_type,"postgresql")) {
-        dbse_exec_pgsql(sqlquery, cnt);
-    } else if (mystreq(cnt->conf.database_type,"sqlite3")) {
-        dbse_exec_sqlite3(sqlquery, cnt);
-    }
+    pthread_mutex_lock(&dbse_lock);
+        if (mystreq(cnt->conf.database_type,"mysql")) {
+            dbse_exec_mysql(sqlquery, cnt);
+        } else if (mystreq(cnt->conf.database_type,"mariadb")) {
+            dbse_exec_mariadb(sqlquery, cnt);
+        } else if (mystreq(cnt->conf.database_type,"postgresql")) {
+            dbse_exec_pgsql(sqlquery, cnt);
+        } else if (mystreq(cnt->conf.database_type,"sqlite3")) {
+            dbse_exec_sqlite3(sqlquery, cnt);
+        }
+    pthread_mutex_unlock(&dbse_lock);
 
 }
 
-/**
- * dbse_fileclose
- *
- */
+/** dbse_fileclose */
 void dbse_fileclose(struct context *cnt, char *filename, int sqltype, struct timeval *tv1)
 {
     char sqlquery[PATH_MAX];
@@ -650,14 +648,17 @@ void dbse_fileclose(struct context *cnt, char *filename, int sqltype, struct tim
         return;
     }
 
-    if (mystreq(cnt->conf.database_type,"mysql")) {
-        dbse_exec_mysql(sqlquery, cnt);
-    } else if (mystreq(cnt->conf.database_type,"mariadb")) {
-        dbse_exec_mariadb(sqlquery, cnt);
-    } else if (mystreq(cnt->conf.database_type,"postgresql")) {
-        dbse_exec_pgsql(sqlquery, cnt);
-    } else if (mystreq(cnt->conf.database_type,"sqlite3")) {
-        dbse_exec_sqlite3(sqlquery, cnt);
-    }
+    pthread_mutex_lock(&dbse_lock);
+        if (mystreq(cnt->conf.database_type,"mysql")) {
+            dbse_exec_mysql(sqlquery, cnt);
+        } else if (mystreq(cnt->conf.database_type,"mariadb")) {
+            dbse_exec_mariadb(sqlquery, cnt);
+        } else if (mystreq(cnt->conf.database_type,"postgresql")) {
+            dbse_exec_pgsql(sqlquery, cnt);
+        } else if (mystreq(cnt->conf.database_type,"sqlite3")) {
+            dbse_exec_sqlite3(sqlquery, cnt);
+        }
+    pthread_mutex_unlock(&dbse_lock);
+
 }
 
