@@ -2159,8 +2159,8 @@
                <td bgcolor="#edf4f9" >threshold</a> </td>
 	             <td bgcolor="#edf4f9" >%Q</a> </td>
                <td bgcolor="#edf4f9" >Number of labels from despeckle</a> </td>
-               <td bgcolor="#edf4f9" >%{dbeventid}</a> </td>
-               <td bgcolor="#edf4f9" >See <a href="#sql_query_start">sql_query_start</a> </a> </td>
+               <td bgcolor="#edf4f9" >%{eventid}</a> </td>
+               <td bgcolor="#edf4f9" >Unique identifier for event (cam id + date/time)</a> </td>
              </tr>
              <tr>
                <td bgcolor="#edf4f9" >%$</a> </td>
@@ -5499,20 +5499,6 @@
         The sql_log_* options do <em>not</em> impact <a href="#sql_query_start">sql_query_start</a>,
         which, if specified, is always executed at event start.
         <p></p>
-        Configuration option <a href="#sql_query_start">sql_query_start</a> allows motion-detected
-        events to be assigned unique event IDs and recorded in the database independently from
-        Motion's recording of images and movies.
-        When this SQL statement and the related database table schema are so configured, the
-        database assigns an event ID that is globally unique within its table and returns the ID
-        to the motion thread that recorded the event.
-        The conversion specifier %{dbeventid} may then be included in subsequently executed
-        <a href="#sql_query">sql_query</a> and <a href="#sql_query_stop">sql_query_stop</a>
-        statements to insert that event ID into database records created for associated files or
-        to control updates of event-related records.
-        For example, <a href="#sql_query_stop">sql_query_stop</a> may specify a SQL UPDATE statement
-        that inserts event end time into a recently-started event's record. (Note that Motion's "event"
-        data item, conversion specifier %v, is unique only within a given camera and Motion run).
-        <p></p>
         Motion does not provide for deletion of the database records it creates nor for the
         images and movies they catalog.
         Other user-provided scripts or software may analyze, search, display,
@@ -5529,28 +5515,6 @@
           filename VARCHAR NOT NULL, file_type INTEGER NOT NULL,
           time_stamp TIMESTAMP NOT NULL, frame INTEGER, motion_event INTEGER,
           movie_end TIMESTAMP);</code>
-        <p></p>
-        Sample SQL defining a table for Motion-recognized events, each with a unique <code>%{dbeventid}</code> ID:
-        <p></p>
-        MySQL; MariaDB : <code>CREATE TABLE event (event_id INTEGER PRIMARY KEY AUTO_INCREMENT,
-          camera INTEGER NOT NULL, event_start DATETIME NOT NULL, event_stop DATETIME,
-          motion_event INTEGER NOT NULL, event_text VARCHAR(255));</code>
-        <p></p>
-        SQLite3 : <code>CREATE TABLE event (event_id INTEGER PRIMARY KEY AUTOINCREMENT,
-          camera INTEGER NOT NULL, event_start REAL NOT NULL, event_stop REAL,
-          motion_event INTEGER NOT NULL, event_text TEXT);</code>
-          (SQLite3 has no native timestamp data type; REAL supports timestamps down to microsecond precision.)
-        <p></p>
-        PostgreSQL : <code>
-        CREATE TABLE event (event_id SERIAL PRIMARY KEY, camera INTEGER NOT NULL,
-          event_start TIMESTAMP NOT NULL, event_stop TIMESTAMP, motion_event INTEGER NOT NULL,
-          motion_pixels INTEGER, motion_x INTEGER, motion_y INTEGER, event_text VARCHAR);</code><br/>
-        sql_query_start <code>INSERT INTO event values (DEFAULT, %t, '%Y-%m-%d %T', NULL, %v,
-          %D, %K, %L, %C) RETURNING event_id</code><br/>
-        sql_query_stop <code>UPDATE event SET event_stop='%Y-%m-%d %T' WHERE %n=8 AND
-          event_id=%{dbeventid} AND event_stop IS NULL</code>
-          (assumes <a href="#movie_output">movie_output</a> and
-          <a href="#sql_log_movie">sql_log_movie</a> are enabled)
         <p></p>
 
         <h3><a name="database_type"></a> database_type </h3>
@@ -5704,8 +5668,6 @@
           VALUES(%t, '%f', %q, %n, '%Y-%m-%d %T', '%C')</code><br/>
         <code>INSERT IGNORE INTO security(camera, file_name, year, month, day, hour, minute)
           VALUES (8, '%f', %Y, %m,%d, %H, %M)</code><br/>
-        <code>INSERT INTO security(camera, event_id, filename, frame, file_type, time_stamp)
-          VALUES(%t, %{dbeventid}, '%f', %q, %n, '%Y-%m-%d %T')</code>
         <p></p>
         <p></p>
 
@@ -5721,26 +5683,6 @@
         This can be used, for example, to record event start times and generate unique event IDs.
         <p></p>
         You can use <a href="#conversion_specifiers">Conversion Specifiers</a> in this statement.
-        <p></p>
-        <p></p>
-        Upon successful INSERTion of a record into a database table whose schema generates
-        a positive integer ID for each new record, the returned <code>mysql_insert_id()</code>,
-        <code>sqlite3_last_insert_rowid()</code>, or PostgreSQL <code>INSERT ... RETURNING</code>
-        value is saved until the next <code>sql_query_start</code> is executed
-        for the same camera.
-        <code>%{dbeventid}</code> can then be used as a value in <code>sql_query</code>
-        or <code>sql_query_stop</code> statements.
-        To obtain <code>%{dbeventid}</code> for PostgreSQL, an INSERT statement must include a
-        <code>RETURNING</code> clause that yields a single positive integer value.
-        Absent a valid ID value returned by the database, <code>%{dbeventid}</code> yields zero.
-        <p></p>
-        Sample Queries (presuming the schema of table <code>event</code> defines a column that generates unique IDs):
-        <p></p>
-        MySQL; MariaDB; SQLite3:
-        <code>INSERT INTO event(camera, event_start) VALUES(%t, '%Y-%m-%d %T')</code>
-        <p></p>
-        PostgreSQL:
-        <code>INSERT INTO event(camera, event_start) VALUES(%t, '%Y-%m-%d %T') RETURNING event_id</code><br/>
         <p></p>
         <p></p>
 
@@ -5766,9 +5708,6 @@
         Sample Queries:
         <p></p>
         <code>UPDATE security SET movie_end='%Y-%m-%d %T' WHERE filename='%f'</code><br/>
-        <code>UPDATE event SET event_stop='%Y-%m-%d %T' WHERE %n=8 AND event_id=%{dbeventid}
-          AND event_stop IS NULL</code>
-        <p></p>
         <p></p>
 
       </ul>

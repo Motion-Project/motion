@@ -155,7 +155,6 @@ static int dbse_init_mysql(struct context *cnt)
     #if defined(HAVE_MYSQL)
         int dbport;
         if ((mystreq(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {
-            cnt->database_event_id = 0;
             cnt->database_mysql = mymalloc(sizeof(MYSQL));
             mysql_init(cnt->database_mysql);
             if ((cnt->conf.database_port < 0) || (cnt->conf.database_port > 65535)) {
@@ -195,7 +194,6 @@ static int dbse_init_mariadb(struct context *cnt)
     #if defined(HAVE_MARIADB)
         int dbport;
         if ((mystreq(cnt->conf.database_type, "mariadb")) && (cnt->conf.database_dbname)) {
-            cnt->database_event_id = 0;
             cnt->database_mariadb = mymalloc(sizeof(MYSQL));
             mysql_init(cnt->database_mariadb);
             if ((cnt->conf.database_port < 0) || (cnt->conf.database_port > 65535)) {
@@ -273,11 +271,6 @@ static int dbse_init_pgsql(struct context *cnt)
     #ifdef HAVE_PGSQL
         if ((mystreq(cnt->conf.database_type, "postgresql")) && (cnt->conf.database_dbname)) {
             char connstring[255];
-
-            /*
-             * Create the connection string.
-             * Quote the values so we can have null values (blank)
-             */
             snprintf(connstring, 255,
                      "dbname='%s' host='%s' user='%s' password='%s' port='%d'",
                       cnt->conf.database_dbname, /* dbname */
@@ -290,12 +283,11 @@ static int dbse_init_pgsql(struct context *cnt)
             cnt->database_pgsql = PQconnectdb(connstring);
             if (PQstatus(cnt->database_pgsql) == CONNECTION_BAD) {
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                ,_("Connection to PostgreSQL database '%s' failed: %s")
-                ,cnt->conf.database_dbname, PQerrorMessage(cnt->database_pgsql));
+                    ,_("Connection to PostgreSQL database '%s' failed: %s")
+                    ,cnt->conf.database_dbname, PQerrorMessage(cnt->database_pgsql));
                 return -2;
             }
             cnt->eid_db_format = dbeid_undetermined;
-            cnt->database_event_id = 0;
         }
     #else
         (void)cnt;  /* Avoid compiler warnings */
@@ -347,7 +339,6 @@ void dbse_deinit(struct context *cnt)
             if ( (mystreq(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {
                 mysql_thread_end();
                 mysql_close(cnt->database_mysql);
-                cnt->database_event_id = 0;
             }
         #endif /* HAVE_MYSQL */
 
@@ -355,7 +346,6 @@ void dbse_deinit(struct context *cnt)
             if ( (mystreq(cnt->conf.database_type, "mariadb")) && (cnt->conf.database_dbname)) {
                 mysql_thread_end();
                 mysql_close(cnt->database_mariadb);
-                cnt->database_event_id = 0;
             }
         #endif /* HAVE_MARIADB */
 
@@ -363,7 +353,6 @@ void dbse_deinit(struct context *cnt)
                 if ((mystreq(cnt->conf.database_type, "postgresql")) && (cnt->conf.database_dbname)) {
                     PQfinish(cnt->database_pgsql);
                     cnt->database_pgsql = NULL;
-                    cnt->database_event_id = 0;
                 }
         #endif /* HAVE_PGSQL */
 
@@ -399,7 +388,7 @@ void dbse_sqlmask_update(struct context *cnt)
  * dbse_exec_mysql
  *
  */
-static void dbse_exec_mysql(char *sqlquery, struct context *cnt, int save_id)
+static void dbse_exec_mysql(char *sqlquery, struct context *cnt)
 {
     #if defined(HAVE_MYSQL)
         if (mystreq(cnt->conf.database_type, "mysql")) {
@@ -440,14 +429,10 @@ static void dbse_exec_mysql(char *sqlquery, struct context *cnt, int save_id)
                     }
                 }
             }
-            if (save_id) {
-                cnt->database_event_id = (unsigned long long) mysql_insert_id(cnt->database_mysql);
-            }
         }
     #else
         (void)sqlquery;
         (void)cnt;
-        (void)save_id;
     #endif /* HAVE_MYSQL*/
 }
 
@@ -455,7 +440,7 @@ static void dbse_exec_mysql(char *sqlquery, struct context *cnt, int save_id)
  * dbse_exec_mariadb
  *
  */
-static void dbse_exec_mariadb(char *sqlquery, struct context *cnt, int save_id)
+static void dbse_exec_mariadb(char *sqlquery, struct context *cnt)
 {
     #if defined(HAVE_MARIADB)
         if (mystreq(cnt->conf.database_type, "mariadb")) {
@@ -496,14 +481,10 @@ static void dbse_exec_mariadb(char *sqlquery, struct context *cnt, int save_id)
                     }
                 }
             }
-            if (save_id) {
-                cnt->database_event_id = (unsigned long long) mysql_insert_id(cnt->database_mariadb);
-            }
         }
     #else
         (void)sqlquery;
         (void)cnt;
-        (void)save_id;
     #endif /* HAVE_MYSQL HAVE_MARIADB*/
 
 }
@@ -512,7 +493,7 @@ static void dbse_exec_mariadb(char *sqlquery, struct context *cnt, int save_id)
  * dbse_exec_pgsql
  *
  */
-static void dbse_exec_pgsql(char *sqlquery, struct context *cnt, int save_id)
+static void dbse_exec_pgsql(char *sqlquery, struct context *cnt)
 {
     #ifdef HAVE_PGSQL
         if (mystreq(cnt->conf.database_type, "postgresql") && cnt->database_pgsql) {
@@ -561,47 +542,6 @@ static void dbse_exec_pgsql(char *sqlquery, struct context *cnt, int save_id)
             } else if (!(estat == PGRES_COMMAND_OK || estat == PGRES_TUPLES_OK)) {
                 MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, _("PGSQL query failed: [%s]  %s %s"),
                     sqlquery, PQresStatus(PQresultStatus(res)), PQresultErrorMessage(res));
-            } else if (save_id) {
-                /* sqlquery processing is complete unless it potentially returns an event ID value;
-                 * save_id optionally allows SQL INSERT RETURNING a single positive integer value,
-                 * e.g., an auto-incremented unique row ID. */
-                if (cnt->eid_db_format < dbeid_undetermined) {
-                    /* A previous successful sqlquery returned nothing or an invalid value. This
-                     * is either intended or a non-transient flaw in a table schema or sqlquery. */
-                } else {
-                    if (estat == PGRES_TUPLES_OK) {  /* returned DB record set (possibly empty) */
-                        if (PQntuples(res) == 1 && PQnfields(res) == 1 && !PQgetisnull(res, 0, 0) && \
-                            ((cnt->eid_db_format=PQfformat(res, 0)) == 0)) {  /* got one char string */
-                            /* PQfformat()==0: null-term string, guaranteed unless DECLARE CURSOR BINARY
-                             * or extended query protocol (PGSQL Doc.sec.51.2.2; PGSQL>v9, 52.2.2) */
-                            char *eid_db_val;
-                            char *endptr;
-                            eid_db_val = PQgetvalue(res, 0, 0);
-                            MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("INSERT ... RETURNING VALUE=\"%s\""),
-                                eid_db_val);
-                            cnt->database_event_id = strtoll(eid_db_val, &endptr, 10);
-                            /* "unsigned" dcl overriden by cast, else "<1" test fails if negative */
-                            if (*endptr != '\0' || (long long)cnt->database_event_id < 1) {
-                                /* not numeric or not positive or not integer */
-                                cnt->eid_db_format = dbeid_not_valid;  /* abandon event ID retrieval */
-                            }
-                        } else if (PQntuples(res) < 1) {  /* returned empty record set */
-                            cnt->eid_db_format = dbeid_no_return;
-                        } else {  /* returned NULL, BINARY value, multiple values, or muliple records */
-                            cnt->eid_db_format = dbeid_not_valid;  /* abandon event ID retrieval */
-                        }
-                    } else {  /* nothing returned; OK if %{dbeventid} never used */
-                        cnt->eid_db_format = dbeid_no_return;
-                    }
-                    if (cnt->eid_db_format == dbeid_not_valid) {
-                        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("Invalid event ID returned by SQL query \"%s\""),
-                        sqlquery);
-                    }
-                    if (cnt->eid_db_format && cnt-> database_event_id) {
-                        /* retrieval failed; nullify any earlier retrieved value */
-                        cnt->database_event_id = 0;
-                    }
-                }
             }
             if (res) {
                 PQclear(res);
@@ -610,7 +550,6 @@ static void dbse_exec_pgsql(char *sqlquery, struct context *cnt, int save_id)
     #else
         (void)sqlquery;
         (void)cnt;
-        (void)save_id;
     #endif /* HAVE_PGSQL */
 
 }
@@ -619,7 +558,7 @@ static void dbse_exec_pgsql(char *sqlquery, struct context *cnt, int save_id)
  * dbse_exec_sqlite3
  *
  */
-static void dbse_exec_sqlite3(char *sqlquery, struct context *cnt, int save_id)
+static void dbse_exec_sqlite3(char *sqlquery, struct context *cnt)
 {
     #ifdef HAVE_SQLITE3
         if ((mystreq(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
@@ -630,18 +569,12 @@ static void dbse_exec_sqlite3(char *sqlquery, struct context *cnt, int save_id)
             if (res != SQLITE_OK ) {
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("SQLite3 error was %s"), errmsg);
                 sqlite3_free(errmsg);
-                if (save_id) {
-                    cnt->database_event_id = 0;
-                }
-            } else if (save_id) {
-                cnt->database_event_id = sqlite3_last_insert_rowid(cnt->database_sqlite3);
             }
 
         }
     #else
         (void)sqlquery;
         (void)cnt;
-        (void)save_id;
     #endif /* HAVE_SQLITE3 */
 
 }
@@ -663,13 +596,13 @@ void dbse_firstmotion(struct context *cnt)
     }
 
     if (mystreq(cnt->conf.database_type,"mysql")) {
-        dbse_exec_mysql(sqlquery, cnt, 1);
+        dbse_exec_mysql(sqlquery, cnt);
     } else if (mystreq(cnt->conf.database_type,"mariadb")) {
-        dbse_exec_mariadb(sqlquery, cnt, 1);
+        dbse_exec_mariadb(sqlquery, cnt);
     } else if (mystreq(cnt->conf.database_type,"postgresql")) {
-        dbse_exec_pgsql(sqlquery, cnt, 1);
+        dbse_exec_pgsql(sqlquery, cnt);
     } else if (mystreq(cnt->conf.database_type,"sqlite3")) {
-        dbse_exec_sqlite3(sqlquery, cnt, 1);
+        dbse_exec_sqlite3(sqlquery, cnt);
     }
 
 }
@@ -691,13 +624,13 @@ void dbse_newfile(struct context *cnt, char *filename, int sqltype, struct timev
     }
 
     if (mystreq(cnt->conf.database_type,"mysql")) {
-        dbse_exec_mysql(sqlquery, cnt, 0);
+        dbse_exec_mysql(sqlquery, cnt);
     } else if (mystreq(cnt->conf.database_type,"mariadb")) {
-        dbse_exec_mariadb(sqlquery, cnt, 0);
+        dbse_exec_mariadb(sqlquery, cnt);
     } else if (mystreq(cnt->conf.database_type,"postgresql")) {
-        dbse_exec_pgsql(sqlquery, cnt, 0);
+        dbse_exec_pgsql(sqlquery, cnt);
     } else if (mystreq(cnt->conf.database_type,"sqlite3")) {
-        dbse_exec_sqlite3(sqlquery, cnt, 0);
+        dbse_exec_sqlite3(sqlquery, cnt);
     }
 
 }
@@ -718,13 +651,13 @@ void dbse_fileclose(struct context *cnt, char *filename, int sqltype, struct tim
     }
 
     if (mystreq(cnt->conf.database_type,"mysql")) {
-        dbse_exec_mysql(sqlquery, cnt, 0);
+        dbse_exec_mysql(sqlquery, cnt);
     } else if (mystreq(cnt->conf.database_type,"mariadb")) {
-        dbse_exec_mariadb(sqlquery, cnt, 0);
+        dbse_exec_mariadb(sqlquery, cnt);
     } else if (mystreq(cnt->conf.database_type,"postgresql")) {
-        dbse_exec_pgsql(sqlquery, cnt, 0);
+        dbse_exec_pgsql(sqlquery, cnt);
     } else if (mystreq(cnt->conf.database_type,"sqlite3")) {
-        dbse_exec_sqlite3(sqlquery, cnt, 0);
+        dbse_exec_sqlite3(sqlquery, cnt);
     }
 }
 

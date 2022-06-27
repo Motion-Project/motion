@@ -388,18 +388,16 @@ static void mystrftime_long (const struct context *cnt, int width, const char *w
         return;
     }
     if (SPECIFIERWORD("dbeventid")) {
-        #ifdef HAVE_PGSQL
-            if (cnt->eid_db_format == dbeid_no_return) {
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO,
-                    _("Used %{dbeventid} but sql_query_start returned no valid event ID"));
-                ((struct context *)cnt)->eid_db_format = dbeid_use_error;
-            }
-        #endif
-        sprintf(out, "%*llu", width, cnt->database_event_id);
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO,
+            _("{dbeventid} is not supported. Use eventid."));
         return;
     }
     if (SPECIFIERWORD("ver")) {
         sprintf(out, "%*s", width, VERSION);
+        return;
+    }
+    if (SPECIFIERWORD("eventid")) {
+        sprintf(out, "%*s", width,  cnt->eventid);
         return;
     }
 

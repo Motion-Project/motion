@@ -372,10 +372,6 @@ struct rotdata {
 
 };
 
-/*
-*  These used to be global variables but now each thread will have its
-*  own context
-*/
 struct context {
     FILE *extpipe;
     int extpipe_open;
@@ -441,7 +437,7 @@ struct context {
 
     int event_nr;
     int prev_event;
-    unsigned long long database_event_id;
+    char            eventid[20];        /* Cam ID + Date/Time 99999yyyymmddhhmmss */
     unsigned int lightswitch_framecounter;
     char text_event_string[PATH_MAX];        /* The text for conv. spec. %C - */
     int text_scale;

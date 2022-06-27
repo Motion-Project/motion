@@ -554,7 +554,8 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
             cnt->prev_event = cnt->event_nr;
             cnt->eventtime = img->timestamp_tv.tv_sec;
             localtime_r(&cnt->eventtime, cnt->eventtime_tm);
-
+            sprintf(cnt->eventid,"%05d",cnt->camera_id);
+            strftime(cnt->eventid+5, 15,"%Y%m%d%H%M%S", cnt->eventtime_tm);
             /*
              * Since this is a new event we create the event_text_string used for
              * the %C conversion specifier. We may already need it for
@@ -563,9 +564,9 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
             mystrftime(cnt, cnt->text_event_string, sizeof(cnt->text_event_string),
                        cnt->conf.text_event, &img->timestamp_tv, NULL, 0);
 
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
-                       cnt->event_nr);
-
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Motion detected - starting event %d.")
+                , cnt->event_nr);
             /* EVENT_FIRSTMOTION triggers on_event_start_command and event_ffmpeg_newfile */
 
             indx = cnt->imgs.image_ring_out-1;
