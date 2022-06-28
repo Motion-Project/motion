@@ -750,6 +750,12 @@ static int v4l2_pixfmt_stride(struct video_dev *curdev)
         , _("Checking image size %dx%d with stride %d")
         , curdev->width, curdev->height, bpl);
 
+    if (bpl == 0) {
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , _("No stride value provided from device."));
+        return 0;
+    }
+
     /* Documents indicate that stride is equal to width + padding
      * As such, the stride(bpl) will never be less than width
     */
