@@ -211,6 +211,7 @@ static int v4l2_ctrls_list(struct video_dev *curdev)
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     struct v4l2_queryctrl       vid_ctrl;
     struct v4l2_querymenu       vid_menu;
+    struct v4l2_control         vid_curr;
     int indx, indx_ctrl;
 
     curdev->devctrl_array = NULL;
@@ -245,6 +246,13 @@ static int v4l2_ctrls_list(struct video_dev *curdev)
 
         curdev->devctrl_array[indx_ctrl].ctrl_minimum = vid_ctrl.minimum;
         curdev->devctrl_array[indx_ctrl].ctrl_maximum = vid_ctrl.maximum;
+
+        memset(&vid_curr, 0, sizeof (struct v4l2_control));
+        vid_curr.id = vid_ctrl.id;
+        if (xioctl(vid_source, VIDIOC_G_CTRL, &vid_curr) == 0) {
+            curdev->devctrl_array[indx_ctrl].ctrl_currval = vid_curr.value;
+            curdev->devctrl_array[indx_ctrl].ctrl_newval = vid_curr.value;
+        }
 
         if (vid_ctrl.type == V4L2_CTRL_TYPE_MENU) {
             for (indx = vid_ctrl.minimum; indx<=vid_ctrl.maximum; indx++) {
@@ -296,32 +304,61 @@ static int v4l2_ctrls_list(struct video_dev *curdev)
 
 }
 
-static int v4l2_ctrls_set(struct video_dev *curdev)
+static void v4l2_parm_reset(struct context *cnt
+    , struct video_dev *curdev, int indx_dev)
 {
+    struct vid_devctrl_ctx *devitem;
+    struct params_item_ctx *usritem;
+    int indx_user, retcd;
 
+    devitem=&curdev->devctrl_array[indx_dev];
+    for (indx_user=0; indx_user<cnt->vdev->params_count; indx_user++) {
+        usritem=&cnt->vdev->params_array[indx_user];
+        if ((mystrceq(devitem->ctrl_iddesc,usritem->param_name)) ||
+            (mystrceq(devitem->ctrl_name  ,usritem->param_name))) {
+            free(usritem->param_value);
+            /* 32 is a randomly selected long enough length*/
+            usritem->param_value = mymalloc(32);
+            retcd = snprintf(usritem->param_value, 32, "%d", devitem->ctrl_currval);
+            if ((retcd < 0) || (retcd > 31)){
+                MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+                    ,_("Error resetting user value"));
+                return;
+            }
+        }
+    }
+    devitem->ctrl_newval = devitem->ctrl_currval;
+
+    MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+        ,_("Leaving control %s \"%s\" set to %d")
+        ,devitem->ctrl_iddesc, devitem->ctrl_name
+        ,devitem->ctrl_currval);
+    return;
+}
+
+static int v4l2_ctrls_set(struct context *cnt, struct video_dev *curdev)
+{
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     struct vid_devctrl_ctx *devitem;
     struct v4l2_control     vid_ctrl;
-    int indx_dev, retcd;
+    int indx_dev, retcd, failed;
 
     if (vid_source == NULL) {
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO,_("Device not ready"));
         return -1;
     }
 
+    failed = FALSE;
     for (indx_dev= 0;indx_dev<curdev->devctrl_count;indx_dev++) {
         devitem=&curdev->devctrl_array[indx_dev];
-        if (!devitem->ctrl_menuitem) {
+        if (devitem->ctrl_menuitem == FALSE) {
             if (devitem->ctrl_currval != devitem->ctrl_newval) {
                 memset(&vid_ctrl, 0, sizeof (struct v4l2_control));
                 vid_ctrl.id = devitem->ctrl_id;
                 vid_ctrl.value = devitem->ctrl_newval;
                 retcd = xioctl(vid_source, VIDIOC_S_CTRL, &vid_ctrl);
                 if (retcd < 0) {
-                    MOTION_LOG(WRN, TYPE_VIDEO, SHOW_ERRNO
-                        ,_("setting control %s \"%s\" to %d failed with return code %d")
-                        ,devitem->ctrl_iddesc, devitem->ctrl_name
-                        ,devitem->ctrl_newval,retcd);
+                    failed = TRUE;
                 } else {
                     if (curdev->starting) {
                         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
@@ -330,10 +367,43 @@ static int v4l2_ctrls_set(struct video_dev *curdev)
                     }
                    devitem->ctrl_currval = devitem->ctrl_newval;
                 }
-
             }
         }
-     }
+    }
+
+    /* We loop again to retry to set the values.  It is possible that
+     * something needed to be "enabled" before the device would accept
+     * values for a specific control. So the first loop would in theory
+     * enable the control to accept different values, then this loop would
+     * be able to "set" the value.  (Users may specify them in random order)
+     */
+    if (failed == TRUE) {
+        for (indx_dev= 0;indx_dev<curdev->devctrl_count;indx_dev++) {
+            devitem=&curdev->devctrl_array[indx_dev];
+            if (devitem->ctrl_menuitem == FALSE) {
+                if (devitem->ctrl_currval != devitem->ctrl_newval) {
+                    memset(&vid_ctrl, 0, sizeof (struct v4l2_control));
+                    vid_ctrl.id = devitem->ctrl_id;
+                    vid_ctrl.value = devitem->ctrl_newval;
+                    retcd = xioctl(vid_source, VIDIOC_S_CTRL, &vid_ctrl);
+                    if (retcd < 0) {
+                        MOTION_LOG(WRN, TYPE_VIDEO, SHOW_ERRNO
+                            ,_("setting control %s \"%s\" to %d failed. ")
+                            ,devitem->ctrl_iddesc, devitem->ctrl_name
+                            ,devitem->ctrl_newval);
+                        v4l2_parm_reset(cnt, curdev, indx_dev);
+                    } else {
+                        if (curdev->starting) {
+                            MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
+                                , _("Set control \"%s\" to value %d")
+                                , devitem->ctrl_name, devitem->ctrl_newval);
+                        }
+                        devitem->ctrl_currval = devitem->ctrl_newval;
+                    }
+                }
+            }
+        }
+    }
 
     return 0;
 }
@@ -356,7 +426,6 @@ static int v4l2_parms_set(struct context *cnt, struct video_dev *curdev)
 
     for (indx_dev=0; indx_dev<curdev->devctrl_count; indx_dev++ ) {
         devitem=&curdev->devctrl_array[indx_dev];
-        devitem->ctrl_newval = devitem->ctrl_default;
         for (indx_user=0; indx_user<cnt->vdev->params_count; indx_user++) {
             usritem=&cnt->vdev->params_array[indx_user];
             if ((mystrceq(devitem->ctrl_iddesc,usritem->param_name)) ||
@@ -1320,7 +1389,7 @@ static void v4l2_device_select(struct context *cnt, struct video_dev *curdev)
             retcd = v4l2_autobright(cnt, curdev, cnt->conf.auto_brightness);
         }
         if (retcd == 0) {
-            retcd = v4l2_ctrls_set(curdev);
+            retcd = v4l2_ctrls_set(cnt, curdev);
         }
         if (retcd <  0) {
             MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
@@ -1344,7 +1413,7 @@ static void v4l2_device_select(struct context *cnt, struct video_dev *curdev)
             retcd = v4l2_autobright(cnt, curdev, cnt->conf.auto_brightness);
         }
         if (retcd == 0) {
-            retcd = v4l2_ctrls_set(curdev);
+            retcd = v4l2_ctrls_set(cnt, curdev);
         }
         if (retcd < 0 ) {
             MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
@@ -1617,7 +1686,7 @@ int v4l2_start(struct context *cnt)
             retcd = v4l2_parms_set(cnt, curdev);
         }
         if (retcd == 0) {
-            retcd = v4l2_ctrls_set(curdev);
+            retcd = v4l2_ctrls_set(cnt, curdev);
         }
         if (retcd == 0) {
             retcd = v4l2_mmap_set(curdev);
