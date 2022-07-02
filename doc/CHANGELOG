@@ -1,3 +1,21 @@
+Summary of changes for version 4.x.x are below
+    * Revise issue template
+    * Eliminate shared handle for sqlite3
+    * Fix setting of controls for v4l2 devices
+    * Fix processing for v4l2 devices when stride is not width
+    * Replace dbeventid with eventid
+    * Fix parsing of PGM files
+    * Fix scale of text when in debug mode
+    * Fix processing when camera is not initially available
+    * Fix double free when camera is lost frequently.
+    * Fix close on exec methods
+    * Fix processing for preferred codec with new ffmpeg versions
+    * Fix snapshots when using netcam high
+    * Update instructions on using libcamerify for pi camera
+    * Update instructions on maximum number of cameras shown on web control page.
+    * Expand buffer for log messages
+    * Update japanese translations.
+    * Fix extra event triggered upon quit
 Summary of changes for version 4.4.0 are below
     * Add limit on attempts to get image from camera
     * Add limit on failed authentication attempts
