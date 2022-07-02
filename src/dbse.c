@@ -101,50 +101,7 @@ void dbse_global_init(struct context **cntlist)
         }
     #endif /* HAVE_MARIADB */
 
-    #if defined(HAVE_SQLITE3)
-        int retcd;
-        cntlist[0]->database_sqlite3 = NULL;
-        if ((cntlist[0]->conf.database_type != NULL) &&
-            (mystreq(cntlist[0]->conf.database_type, "sqlite3")) &&
-            (cntlist[0]->conf.database_dbname != NULL)) {
-            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-                , _("SQLite3 Database filename %s")
-                , cntlist[0]->conf.database_dbname);
-
-            retcd = sqlite3_threadsafe();
-            if (retcd != 0) {
-                MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, _("SQLite3 is threadsafe"));
-                retcd = sqlite3_open( cntlist[0]->conf.database_dbname
-                    , &cntlist[0]->database_sqlite3);
-                if (retcd != SQLITE_OK) {
-                    MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                        , _("Can't open SQLite3 database %s. Error %d:%s")
-                        , cntlist[0]->conf.database_dbname, retcd
-                        , sqlite3_errmsg( cntlist[0]->database_sqlite3));
-                    sqlite3_close( cntlist[0]->database_sqlite3);
-                    exit(1);
-                }
-                MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-                    , _("Setting busy timeout to %d msec")
-                    , cntlist[0]->conf.database_busy_timeout);
-                retcd = sqlite3_busy_timeout(cntlist[0]->database_sqlite3
-                    , cntlist[0]->conf.database_busy_timeout);
-                if (retcd != SQLITE_OK) {
-                    MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                        , _("Setting busy timeout failed. Error %d:%s")
-                        , retcd, sqlite3_errmsg( cntlist[0]->database_sqlite3));
-                }
-            }
-        }
-        /* Cascade to all threads */
-        indx = 1;
-        while (cntlist[indx] != NULL) {
-            cntlist[indx]->database_sqlite3 = cntlist[0]->database_sqlite3;
-            indx++;
-        }
-    #endif /* HAVE_SQLITE3 */
-
-    #if !defined(HAVE_MYSQL) && !defined(HAVE_MARIADB) && !defined(HAVE_SQLITE3)
+    #if !defined(HAVE_MYSQL) && !defined(HAVE_MARIADB)
         (void)indx;
         (void)cntlist;
     #endif
@@ -234,12 +191,7 @@ static int dbse_init_sqlite3(struct context *cnt,struct context **cntlist)
 {
     #ifdef HAVE_SQLITE3
         int retcd;
-        if (cntlist[0]->database_sqlite3 != NULL) {
-            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-                , _("Using common database %s")
-                , cntlist[0]->conf.database_dbname);
-            cnt->database_sqlite3 = cntlist[0]->database_sqlite3;
-        } else if ((mystreq(cnt->conf.database_type, "sqlite3")) &&
+        if ((mystreq(cnt->conf.database_type, "sqlite3")) &&
             (cnt->conf.database_dbname != NULL)) {
             MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
                 ,_("Opening database %s"), cnt->conf.database_dbname);
