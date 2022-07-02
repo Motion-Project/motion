@@ -1576,6 +1576,7 @@ static int v4l2_fps_set(struct context *cnt, struct video_dev *curdev)
     struct v4l2_streamparm setfps;
     int retcd;
 
+    memset(&setfps, 0, sizeof(struct v4l2_streamparm));
     setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     setfps.parm.capture.timeperframe.numerator = 1;
     setfps.parm.capture.timeperframe.denominator = cnt->conf.framerate;
