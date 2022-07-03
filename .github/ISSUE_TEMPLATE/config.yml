@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Motion User Questions
+    url: https://github.com/Motion-Project/motion/discussions
+    about: Please ask and answer questions here.
+  - name: Motion Enhancements
+    url: https://github.com/Motion-Project/motion/discussions
+    about: Please use the discussions page and tag as an enhancement request.

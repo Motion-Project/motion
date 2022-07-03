@@ -1,0 +1,107 @@
+name: Issue Report
+description: File a report on a problem with the code
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for reporting problems with the code. 
+  - type: dropdown
+    id: readdocs
+    attributes:
+      label: Did you read the guide? 
+      multiple: false
+      options:
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true
+  - type: dropdown
+    id: baseversion
+    attributes:
+      label: What is the base version number of Motion being used? 
+      multiple: false
+      options:
+        - 4.0.x
+        - 4.1.x
+        - 4.2.x
+        - 4.3.x
+        - 4.4.x
+        - 4.5.x
+        - 4.6.x
+    validations:
+      required: true
+  - type: dropdown
+    id: buildtype
+    attributes:
+      label: What was the install method? 
+      multiple: false
+      options:
+        - Built from source code
+        - Installed via package tool
+    validations:
+      required: true
+  - type: dropdown
+    id: buildarch
+    attributes:
+      label: What is base architecture?  
+      multiple: false
+      options:
+        - ARM-32bit
+        - ARM-64bit
+        - x86
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: distrotype
+    attributes:
+      label: What is the distro being used?  
+      multiple: false
+      options:
+        - Raspbian
+        - Ubuntu
+        - Debian
+        - BSD
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: distrover
+    attributes:
+      label: Disto version number
+      description: The version number of the distro being used e.g. 20.04, bullseye
+    validations:
+      required: false
+  - type: dropdown
+    id: camtype
+    attributes:
+      label: Camera type(s) being used? 
+      multiple: true
+      options:
+        - v4l2 USB camera
+        - v4l2 capture card
+        - PI cam via libcamerify
+        - PI cam via MMAL
+        - Network camera with RTSP
+        - Network camera with HTTP
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Describe the issue/problem and steps to reproduce 
+      description: Issue/Problem Description
+      placeholder: Tell us what went wrong
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Motion log output (at log_level 8)
+      description: Please copy and paste the log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+    validations:
+      required: true
+
