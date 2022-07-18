@@ -67,8 +67,7 @@ struct ctx_v4l2cam {
     volatile bool           finish;                /* End the thread */
     #ifdef HAVE_V4L2
         struct v4l2_capability cap;
-        struct v4l2_format src_fmt;
-        struct v4l2_format dst_fmt;
+        struct v4l2_format fmt;
         struct v4l2_requestbuffers req;
         struct v4l2_buffer buf;
     #endif

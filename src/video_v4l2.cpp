@@ -444,75 +444,156 @@ static void v4l2_set_frequency(ctx_v4l2cam *v4l2cam)
     return;
 }
 
-/* Set the pixel format on the device */
-static int v4l2_set_pixfmt(ctx_v4l2cam *v4l2cam, unsigned int pixformat)
+static int v4l2_pixfmt_try(ctx_v4l2cam *v4l2cam, uint pixformat)
 {
+    int retcd;
+    struct v4l2_format *fmt = &v4l2cam->fmt;
 
-    memset(&v4l2cam->dst_fmt, 0, sizeof(struct v4l2_format));
+    memset(fmt, 0, sizeof(struct v4l2_format));
 
-    v4l2cam->dst_fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    v4l2cam->dst_fmt.fmt.pix.width = v4l2cam->width;
-    v4l2cam->dst_fmt.fmt.pix.height = v4l2cam->height;
-    v4l2cam->dst_fmt.fmt.pix.pixelformat = pixformat;
-    v4l2cam->dst_fmt.fmt.pix.field = V4L2_FIELD_ANY;
+    fmt->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    fmt->fmt.pix.width = v4l2cam->width;
+    fmt->fmt.pix.height = v4l2cam->height;
+    fmt->fmt.pix.pixelformat = pixformat;
+    fmt->fmt.pix.field = V4L2_FIELD_ANY;
 
-    if (xioctl(v4l2cam, VIDIOC_TRY_FMT, &v4l2cam->dst_fmt) != -1 &&
-        v4l2cam->dst_fmt.fmt.pix.pixelformat == pixformat) {
+    retcd = xioctl(v4l2cam, VIDIOC_TRY_FMT, fmt);
+    if ((retcd == -1) || (fmt->fmt.pix.pixelformat != pixformat)) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-            ,_("Testing palette %c%c%c%c (%dx%d)")
+            ,_("Unable to use palette %c%c%c%c (%dx%d)")
             ,pixformat >> 0, pixformat >> 8
             ,pixformat >> 16, pixformat >> 24
             ,v4l2cam->width, v4l2cam->height);
+        return -1;
+    }
 
-        if (v4l2cam->dst_fmt.fmt.pix.width != (unsigned int) v4l2cam->width ||
-            v4l2cam->dst_fmt.fmt.pix.height != (unsigned int) v4l2cam->height) {
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        ,_("Testing palette %c%c%c%c (%dx%d)")
+        ,pixformat >> 0, pixformat >> 8
+        ,pixformat >> 16, pixformat >> 24
+        ,v4l2cam->width, v4l2cam->height);
 
-            MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-                ,_("Adjusting resolution from %ix%i to %ix%i.")
-                ,v4l2cam->width, v4l2cam->height
-                ,v4l2cam->dst_fmt.fmt.pix.width
-                ,v4l2cam->dst_fmt.fmt.pix.height);
+    return 0;
+}
 
-            v4l2cam->width = v4l2cam->dst_fmt.fmt.pix.width;
-            v4l2cam->height = v4l2cam->dst_fmt.fmt.pix.height;
+static int v4l2_pixfmt_stride(ctx_v4l2cam *v4l2cam)
+{
+    int wd, bpl, wps;
+    struct v4l2_format *fmt = &v4l2cam->fmt;
 
-            if ((v4l2cam->width % 8) || (v4l2cam->height % 8)) {
-                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                    ,_("Adjusted resolution not modulo 8."));
-                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                    ,_("Specify different palette or width/height in config file."));
-                return -1;
-            }
+    v4l2cam->width = (int)fmt->fmt.pix.width;
+    v4l2cam->height = (int)fmt->fmt.pix.height;
 
-        }
+    bpl = (int)fmt->fmt.pix.bytesperline;
+    wd = v4l2cam->width;
 
-        if (xioctl(v4l2cam, VIDIOC_S_FMT, &v4l2cam->dst_fmt) == -1) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
-                ,_("Error setting pixel format.\nVIDIOC_S_FMT: "));
-            return -1;
-        }
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+        , _("Checking image size %dx%d with stride %d")
+        , v4l2cam->width, v4l2cam->height, bpl);
 
-        v4l2cam->pixfmt_src = pixformat;
-
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-            ,_("Using palette %c%c%c%c (%dx%d)")
-            ,pixformat >> 0 , pixformat >> 8
-            ,pixformat >> 16, pixformat >> 24
-            ,v4l2cam->width, v4l2cam->height);
+    if (bpl == 0) {
         MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-            ,_("Bytesperlines %d sizeimage %d colorspace %08x")
-            ,v4l2cam->dst_fmt.fmt.pix.bytesperline
-            ,v4l2cam->dst_fmt.fmt.pix.sizeimage
-            ,v4l2cam->dst_fmt.fmt.pix.colorspace);
-
+            , _("No stride value provided from device."));
         return 0;
     }
 
-    return -1;
+    if (wd > bpl) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            , _("Width(%d) must be less than stride(%d)"), wd, bpl);
+        return -1;
+    }
+
+    /* For perfect multiples of width and stride, no adjustment needed */
+    if ((wd == bpl) || ((bpl % wd) == 0)) {
+        return 0;
+    }
+
+    MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+        , _("The image width(%d) is not multiple of the stride(%d)")
+        , wd, bpl);
+
+    /* Width per stride */
+    wps = bpl / wd;
+    if (wps < 1) {
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+            , _("Impossible condition: Width(%d), Stride(%d), Per stride(%d)")
+            , wd, bpl, wps);
+    }
+
+    MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+        , _("Image width will be padded %d bytes"), ((bpl % wd)/wps));
+
+    v4l2cam->width = wd + ((bpl % wd)/wps);
+
+    return 0;
+
 }
 
-/* If needed adjust sizes to be modulo 8 */
-static void v4l2_validate_sizes(ctx_v4l2cam *v4l2cam)
+static int v4l2_pixfmt_adjust(ctx_v4l2cam *v4l2cam)
+{
+    struct v4l2_format *fmt = &v4l2cam->fmt;
+
+    if (fmt->fmt.pix.width != (uint)v4l2cam->width ||
+        fmt->fmt.pix.height != (uint)v4l2cam->height) {
+
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+            ,_("Adjusting resolution from %ix%i to %ix%i.")
+            ,v4l2cam->width, v4l2cam->height
+            ,fmt->fmt.pix.width
+            ,fmt->fmt.pix.height);
+
+        v4l2cam->width = fmt->fmt.pix.width;
+        v4l2cam->height = fmt->fmt.pix.height;
+
+        if ((v4l2cam->width % 8) || (v4l2cam->height % 8)) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                ,_("Adjusted resolution not modulo 8."));
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                ,_("Specify different palette or width/height in config file."));
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+/* Set the pixel format on the device */
+static int v4l2_pixfmt_set(ctx_v4l2cam *v4l2cam, unsigned int pixformat)
+{
+    int retcd;
+    struct v4l2_format *fmt = &v4l2cam->fmt;
+
+    retcd = v4l2_pixfmt_try(v4l2cam, pixformat);
+    if (retcd != 0) {
+        return -1;
+    }
+    retcd = v4l2_pixfmt_stride(v4l2cam);
+    if (retcd != 0) {
+        return -1;
+    }
+    retcd = v4l2_pixfmt_adjust(v4l2cam);
+    if (retcd != 0) {
+        return -1;
+    }
+    retcd = xioctl(v4l2cam, VIDIOC_S_FMT, fmt);
+    if (retcd == -1) {
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
+            ,_("Error setting pixel format."));
+        return -1;
+    }
+
+    v4l2cam->pixfmt_src = pixformat;
+
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        ,_("Using palette %c%c%c%c (%dx%d)")
+        ,pixformat >> 0 , pixformat >> 8
+        ,pixformat >> 16, pixformat >> 24
+        ,v4l2cam->width, v4l2cam->height);
+
+    return 0;
+}
+
+static void v4l2_params_check(ctx_v4l2cam *v4l2cam)
 {
     if (v4l2cam->width % 8) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
@@ -530,57 +611,41 @@ static void v4l2_validate_sizes(ctx_v4l2cam *v4l2cam)
             ,_("Adjusting to height (%d)"), v4l2cam->height);
     }
 
-}
-
-/* Find and select the pixel format for camera*/
-static int v4l2_set_palette(ctx_v4l2cam *v4l2cam)
-{
-    struct v4l2_fmtdesc fmtd;
-    int v4l2_pal, indx_palette, indx, retcd;
-    palette_item *palette_array;
-
-    palette_array =(palette_item*) malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
-    v4l2_palette_init(palette_array);
-
-    v4l2_validate_sizes(v4l2cam);
-
     if (v4l2cam->palette == 21) {
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             ,_("H264(21) format not supported via v4l2_device.  Changing to default palette"));
         v4l2cam->palette = 17;
     }
 
-    /* First we try setting the config file value */
-    indx_palette = v4l2cam->palette;
-    if ((indx_palette >= 0) && (indx_palette <= V4L2_PALETTE_COUNT_MAX)) {
-        retcd = v4l2_set_pixfmt(v4l2cam, palette_array[indx_palette].v4l2id);
-        if (retcd >= 0) {
-            myfree(&palette_array);
-            return 0;
-        }
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-            ,_("Configuration palette index %d (%s) for %dx%d doesn't work.")
-            , indx_palette, palette_array[indx_palette].fourcc
-            ,v4l2cam->width, v4l2cam->height);
+    if ((v4l2cam->palette < 0) || (v4l2cam->palette > V4L2_PALETTE_COUNT_MAX)) {
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+            ,_("Invalid palette.  Changing to default"));
+        v4l2cam->palette = 17;
     }
 
-    memset(&fmtd, 0, sizeof(struct v4l2_fmtdesc));
-    fmtd.index = v4l2_pal = 0;
-    fmtd.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    indx_palette = -1; /* -1 says not yet selected */
+}
+
+/*List camera palettes and return index of one that Motionplus supports*/
+static int v4l2_pixfmt_list(ctx_v4l2cam *v4l2cam, palette_item *palette_array)
+{
+    struct v4l2_fmtdesc fmtd;
+    int v4l2_pal, indx_palette, indx;
+
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Supported palettes:"));
 
-    while (xioctl(v4l2cam, VIDIOC_ENUM_FMT, &fmtd) != -1) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "(%i) %c%c%c%c (%s)",
-            v4l2_pal, fmtd.pixelformat >> 0,
-            fmtd.pixelformat >> 8, fmtd.pixelformat >> 16,
-            fmtd.pixelformat >> 24, fmtd.description);
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-            ,_("%d - %s (compressed : %d) (%#x)")
-            ,fmtd.index, fmtd.description, fmtd.flags, fmtd.pixelformat);
+    v4l2_pal = 0;
+    memset(&fmtd, 0, sizeof(struct v4l2_fmtdesc));
+    fmtd.index = v4l2_pal;
+    fmtd.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    indx_palette = -1; /* -1 says not yet selected */
 
-        /* Adjust indx_palette if larger value found */
-        /* Prevent the selection of H264 since this module does not support it */
+    while (xioctl(v4l2cam, VIDIOC_ENUM_FMT, &fmtd) != -1) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+            , "(%i) %c%c%c%c (%s)", v4l2_pal
+            , fmtd.pixelformat >> 0, fmtd.pixelformat >> 8
+            , fmtd.pixelformat >> 16, fmtd.pixelformat >> 24
+            , fmtd.description);
+        /* Prevent the selection of H264*/
         for (indx = 0; indx <= V4L2_PALETTE_COUNT_MAX; indx++) {
             if ((palette_array[indx].v4l2id == fmtd.pixelformat) &&
                 (palette_array[indx].v4l2id != V4L2_PIX_FMT_H264)) {
@@ -588,31 +653,61 @@ static int v4l2_set_palette(ctx_v4l2cam *v4l2cam)
             }
         }
 
+        v4l2_pal++;
         memset(&fmtd, 0, sizeof(struct v4l2_fmtdesc));
-        fmtd.index = ++v4l2_pal;
+        fmtd.index = v4l2_pal;
         fmtd.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     }
 
-    if (indx_palette >= 0) {
-        retcd = v4l2_set_pixfmt(v4l2cam, palette_array[indx_palette].v4l2id);
-        if (retcd >= 0) {
-            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-                ,_("Selected palette %s")
-                ,palette_array[indx_palette].fourcc);
-            myfree(&palette_array);
-            return 0;
-        }
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            ,_("Palette selection failed for format %s")
-            , palette_array[indx_palette].fourcc);
+    return indx_palette;
+}
+
+/* Find and select the pixel format for camera*/
+static int v4l2_palette_set(ctx_v4l2cam *v4l2cam)
+{
+    int indxp, retcd;
+    palette_item *palette_array;
+
+    palette_array =(palette_item*) malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
+    v4l2_palette_init(palette_array);
+
+    v4l2_params_check(v4l2cam);
+
+    indxp =v4l2cam->palette;
+    retcd = v4l2_pixfmt_set(v4l2cam, palette_array[indxp].v4l2id);
+    if (retcd == 0) {
+        myfree(&palette_array);
+        return 0;
     }
 
-    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-        ,_("Unable to find a compatible palette format."));
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        ,_("Configuration palette index %d (%s) for %dx%d doesn't work.")
+        , indxp, palette_array[indxp].fourcc
+        ,v4l2cam->width, v4l2cam->height);
+
+    indxp = v4l2_pixfmt_list(v4l2cam, palette_array);
+    if (indxp < 0) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            ,_("Unable to find a compatible palette format."));
+        myfree(&palette_array);
+        return -1;
+    }
+
+    retcd = v4l2_pixfmt_set(v4l2cam, palette_array[indxp].v4l2id);
+    if (retcd < 0) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            , _("Palette selection failed for format %s")
+            , palette_array[indxp].fourcc);
+        return -1;
+    }
+
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        ,_("Selected palette %s")
+        ,palette_array[indxp].fourcc);
+
     myfree(&palette_array);
 
-    return -1;
-
+    return 0;
 }
 
 /* Set the memory mapping from device to Motion*/
@@ -621,7 +716,6 @@ static int v4l2_set_mmap(ctx_v4l2cam *v4l2cam)
     enum v4l2_buf_type type;
     int buffer_index;
 
-    /* Does the device support streaming? */
     if (!(v4l2cam->cap.capabilities & V4L2_CAP_STREAMING)) {
         return -1;
     }
@@ -650,9 +744,8 @@ static int v4l2_set_mmap(ctx_v4l2cam *v4l2cam)
     }
 
     v4l2cam->buffers =(video_buff*) calloc(v4l2cam->buffer_count, sizeof(video_buff));
-    if (!v4l2cam->buffers) {
+    if (v4l2cam->buffers == NULL) {
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, _("Out of memory."));
-        v4l2cam->buffers = NULL;
         return -1;
     }
 
@@ -721,11 +814,10 @@ static void v4l2_set_imgs(ctx_cam *cam)
     cam->imgs.size_norm = (cam->imgs.motionsize * 3) / 2;
     cam->conf->width = cam->v4l2cam->width;
     cam->conf->height = cam->v4l2cam->height;
-
 }
 
 /* Capture the image into the buffer */
-static int v4l2_capture_buffer(ctx_v4l2cam *v4l2cam)
+static int v4l2_capture(ctx_v4l2cam *v4l2cam)
 {
     int retcd;
     sigset_t set, old;
@@ -740,10 +832,11 @@ static int v4l2_capture_buffer(ctx_v4l2cam *v4l2cam)
     pthread_sigmask(SIG_BLOCK, &set, &old);
 
     if (v4l2cam->pframe >= 0) {
-        if (xioctl(v4l2cam, VIDIOC_QBUF, &v4l2cam->buf) == -1) {
+        retcd = xioctl(v4l2cam, VIDIOC_QBUF, &v4l2cam->buf);
+        if (retcd == -1) {
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_QBUF");
             pthread_sigmask(SIG_UNBLOCK, &old, NULL);
-            return -1;
+            return retcd;
         }
     }
 
@@ -753,33 +846,9 @@ static int v4l2_capture_buffer(ctx_v4l2cam *v4l2cam)
     v4l2cam->buf.memory = V4L2_MEMORY_MMAP;
     v4l2cam->buf.bytesused = 0;
 
-    if (xioctl(v4l2cam, VIDIOC_DQBUF, &v4l2cam->buf) == -1) {
-        /*
-         * Some drivers return EIO when there is no signal,
-         * driver might dequeue an (empty) buffer despite
-         * returning an error, or even stop capturing.
-         */
-        if (errno == EIO) {
-            v4l2cam->pframe++;
-
-            if (v4l2cam->pframe >= (int)v4l2cam->req.count) {
-                v4l2cam->pframe = 0;
-            }
-
-            v4l2cam->buf.index = v4l2cam->pframe;
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
-                ,"VIDIOC_DQBUF: EIO "
-                "(vid_source->pframe %ud)", v4l2cam->pframe);
-            retcd = 1;
-        } else if (errno == EAGAIN) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_DQBUF: EAGAIN"
-                       " (vid_source->pframe %ud)", v4l2cam->pframe);
-            retcd = 1;
-        } else {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_DQBUF");
-            retcd = -1;
-        }
-
+    retcd = xioctl(v4l2cam, VIDIOC_DQBUF, &v4l2cam->buf);
+    if (retcd == -1) {
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_DQBUF");
         pthread_sigmask(SIG_UNBLOCK, &old, NULL);
         return retcd;
     }
@@ -794,13 +863,11 @@ static int v4l2_capture_buffer(ctx_v4l2cam *v4l2cam)
 
 }
 
-/* Convert captured image to the standard motion pixel format*/
-static int v4l2_capture_convert(ctx_cam *cam, ctx_v4l2cam *v4l2cam, unsigned char *img_norm)
+/* Convert captured image to the standard pixel format*/
+static int v4l2_convert(ctx_cam *cam, ctx_v4l2cam *v4l2cam, unsigned char *img_norm)
 {
-    int shift;
     video_buff *the_buffer = &v4l2cam->buffers[v4l2cam->buf.index];
 
-    shift = 0;
     /*The FALLTHROUGH is a special comment required by compiler. */
     switch (v4l2cam->pixfmt_src) {
     case V4L2_PIX_FMT_RGB24:
@@ -856,14 +923,13 @@ static int v4l2_capture_convert(ctx_cam *cam, ctx_v4l2cam *v4l2cam, unsigned cha
         return 0;
 
     case V4L2_PIX_FMT_Y12:
-        shift += 2;
-        /*FALLTHROUGH*/
-    case V4L2_PIX_FMT_Y10:
-        shift += 2;
-        vid_y10torgb24(cam->imgs.common_buffer, the_buffer->ptr, v4l2cam->width, v4l2cam->height, shift);
+        vid_y10torgb24(cam->imgs.common_buffer, the_buffer->ptr, v4l2cam->width, v4l2cam->height, 2);
         vid_rgb24toyuv420p(img_norm, cam->imgs.common_buffer, v4l2cam->width, v4l2cam->height);
         return 0;
-
+    case V4L2_PIX_FMT_Y10:
+        vid_y10torgb24(cam->imgs.common_buffer, the_buffer->ptr, v4l2cam->width, v4l2cam->height, 4);
+        vid_rgb24toyuv420p(img_norm, cam->imgs.common_buffer, v4l2cam->width, v4l2cam->height);
+        return 0;
     case V4L2_PIX_FMT_GREY:
         vid_greytoyuv420p(img_norm, the_buffer->ptr, v4l2cam->width, v4l2cam->height);
         return 0;
@@ -1032,65 +1098,65 @@ static void v4l2_log_types(ctx_v4l2cam *v4l2cam)
 
 static void v4l2_log_formats(ctx_v4l2cam *v4l2cam)
 {
-        palette_item *palette_array;
-        struct v4l2_fmtdesc         dev_format;
-        struct v4l2_frmsizeenum     dev_sizes;
-        struct v4l2_frmivalenum     dev_frameint;
-        int indx_format, indx_sizes, indx_frameint;
+    palette_item *palette_array;
+    struct v4l2_fmtdesc         dev_format;
+    struct v4l2_frmsizeenum     dev_sizes;
+    struct v4l2_frmivalenum     dev_frameint;
+    int indx_format, indx_sizes, indx_frameint;
 
-        palette_array = (palette_item *)malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
+    palette_array = (palette_item *)malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
 
-        v4l2_palette_init(palette_array);
+    v4l2_palette_init(palette_array);
 
-        memset(&dev_format, 0, sizeof(struct v4l2_fmtdesc));
-        dev_format.index = indx_format = 0;
-        dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        while (xioctl(v4l2cam, VIDIOC_ENUM_FMT, &dev_format) != -1) {
+    memset(&dev_format, 0, sizeof(struct v4l2_fmtdesc));
+    dev_format.index = indx_format = 0;
+    dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    while (xioctl(v4l2cam, VIDIOC_ENUM_FMT, &dev_format) != -1) {
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            ,_("Supported palette %s (%c%c%c%c)")
+            ,dev_format.description
+            ,dev_format.pixelformat >> 0
+            ,dev_format.pixelformat >> 8
+            ,dev_format.pixelformat >> 16
+            ,dev_format.pixelformat >> 24);
+
+        memset(&dev_sizes, 0, sizeof(struct v4l2_frmsizeenum));
+        dev_sizes.index = indx_sizes = 0;
+        dev_sizes.pixel_format = dev_format.pixelformat;
+        while (xioctl(v4l2cam, VIDIOC_ENUM_FRAMESIZES, &dev_sizes) != -1) {
             MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-                ,_("Supported palette %s (%c%c%c%c)")
-                ,dev_format.description
-                ,dev_format.pixelformat >> 0
-                ,dev_format.pixelformat >> 8
-                ,dev_format.pixelformat >> 16
-                ,dev_format.pixelformat >> 24);
+                ,_("  Width: %d, Height %d")
+                ,dev_sizes.discrete.width
+                ,dev_sizes.discrete.height);
 
-            memset(&dev_sizes, 0, sizeof(struct v4l2_frmsizeenum));
-            dev_sizes.index = indx_sizes = 0;
-            dev_sizes.pixel_format = dev_format.pixelformat;
-            while (xioctl(v4l2cam, VIDIOC_ENUM_FRAMESIZES, &dev_sizes) != -1) {
+            memset(&dev_frameint, 0, sizeof(struct v4l2_frmivalenum));
+            dev_frameint.index = indx_frameint = 0;
+            dev_frameint.pixel_format = dev_format.pixelformat;
+            dev_frameint.width = dev_sizes.discrete.width;
+            dev_frameint.height = dev_sizes.discrete.height;
+            while (xioctl(v4l2cam, VIDIOC_ENUM_FRAMEINTERVALS, &dev_frameint) != -1) {
                 MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-                    ,_("  Width: %d, Height %d")
-                    ,dev_sizes.discrete.width
-                    ,dev_sizes.discrete.height);
-
+                    ,_("    Framerate %d/%d")
+                    ,dev_frameint.discrete.numerator
+                    ,dev_frameint.discrete.denominator);
                 memset(&dev_frameint, 0, sizeof(struct v4l2_frmivalenum));
-                dev_frameint.index = indx_frameint = 0;
+                dev_frameint.index = ++indx_frameint;
                 dev_frameint.pixel_format = dev_format.pixelformat;
                 dev_frameint.width = dev_sizes.discrete.width;
                 dev_frameint.height = dev_sizes.discrete.height;
-                while (xioctl(v4l2cam, VIDIOC_ENUM_FRAMEINTERVALS, &dev_frameint) != -1) {
-                    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-                        ,_("    Framerate %d/%d")
-                        ,dev_frameint.discrete.numerator
-                        ,dev_frameint.discrete.denominator);
-                    memset(&dev_frameint, 0, sizeof(struct v4l2_frmivalenum));
-                    dev_frameint.index = ++indx_frameint;
-                    dev_frameint.pixel_format = dev_format.pixelformat;
-                    dev_frameint.width = dev_sizes.discrete.width;
-                    dev_frameint.height = dev_sizes.discrete.height;
-                }
-                memset(&dev_sizes, 0, sizeof(struct v4l2_frmsizeenum));
-                dev_sizes.index = ++indx_sizes;
-                dev_sizes.pixel_format = dev_format.pixelformat;
             }
-            memset(&dev_format, 0, sizeof(struct v4l2_fmtdesc));
-            dev_format.index = ++indx_format;
-            dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+            memset(&dev_sizes, 0, sizeof(struct v4l2_frmsizeenum));
+            dev_sizes.index = ++indx_sizes;
+            dev_sizes.pixel_format = dev_format.pixelformat;
         }
+        memset(&dev_format, 0, sizeof(struct v4l2_fmtdesc));
+        dev_format.index = ++indx_format;
+        dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    }
 
-        myfree(&palette_array);
+    myfree(&palette_array);
 
-        return;
+    return;
 }
 
 static void v4l2_set_fps(ctx_v4l2cam *v4l2cam)
@@ -1186,7 +1252,7 @@ int v4l2_start(ctx_cam *cam)
         if (retcd == 0) retcd = v4l2_set_input(cam->v4l2cam);
         if (retcd == 0) v4l2_set_norm(cam->v4l2cam);
         if (retcd == 0) v4l2_set_frequency(cam->v4l2cam);
-        if (retcd == 0) retcd = v4l2_set_palette(cam->v4l2cam);
+        if (retcd == 0) retcd = v4l2_palette_set(cam->v4l2cam);
         if (retcd == 0) v4l2_set_fps(cam->v4l2cam);
         if (retcd == 0) retcd = v4l2_ctrls_count(cam->v4l2cam);
         if (retcd == 0) v4l2_ctrls_list(cam->v4l2cam);
@@ -1212,17 +1278,16 @@ int v4l2_next(ctx_cam *cam, ctx_image_data *img_data)
 
         v4l2_device_select(cam);
 
-        retcd = v4l2_capture_buffer(cam->v4l2cam);
+        retcd = v4l2_capture(cam->v4l2cam);
         if (retcd != 0) {
             return retcd;
         }
 
-        retcd = v4l2_capture_convert(cam, cam->v4l2cam, img_data->image_norm);
+        retcd = v4l2_convert(cam, cam->v4l2cam, img_data->image_norm);
         if (retcd != 0) {
             return retcd;
         }
 
-        /* Rotate the image as specified. */
         rotate_map(cam, img_data);
 
         return retcd;
