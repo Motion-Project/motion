@@ -107,6 +107,7 @@ static void sig_handler(int signo)
         exit(0);
     case SIGVTALRM:
         printf("SIGVTALRM went off\n");
+        pthread_exit(NULL);
         break;
     }
 }
@@ -462,113 +463,97 @@ static void motion_restart(struct ctx_motapp *motapp, int argc, char **argv)
 }
 
 /* Check for whether any cams are locked */
-static void motion_watchdog(struct ctx_motapp *motapp, int indx)
+static void motion_watchdog(struct ctx_motapp *motapp, int camindx)
 {
+    int indx;
 
-    /* Notes:
-     * To test scenarios, just double lock a mutex in a spawned thread.
-     * We use detached threads because pthread_join would lock the main thread
-     * If we only call the first pthread_cancel when we reach the watchdog_kill
-     *   it does not break us out of the mutex lock.
-     * We keep sending VTAlarms so the pthread_cancel queued can be caught.
-     * The calls to pthread_kill 'may' not work or cause crashes
-     *   The cancel could finish and then the pthread_kill could be called
-     *   on the invalid thread_id which could cause undefined results
-     * Even if the cancel finishes it is not clean since memory is not cleaned.
-     * The other option instead of cancel would be to exit(1) and terminate everything
-     * Best to just not get into a watchdog situation...
-     */
-
-    int sec_cancel, sec_kill;
-
-    sec_cancel = 0 -motapp->cam_list[indx]->conf->watchdog_kill;
-    sec_kill = 2 * sec_cancel;
-
-    if (!motapp->cam_list[indx]->running_cam) {
+    if (motapp->cam_list[camindx]->running_cam == false) {
         return;
     }
 
-    motapp->cam_list[indx]->watchdog--;
-    if (motapp->cam_list[indx]->watchdog == 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Camera %d - Watchdog timeout. Trying to do a graceful restart")
-            , motapp->cam_list[indx]->camera_id);
-        motapp->cam_list[indx]->event_stop = true; /* Trigger end of event */
-        motapp->cam_list[indx]->finish_cam = true;
+    motapp->cam_list[camindx]->watchdog--;
+    if (motapp->cam_list[camindx]->watchdog > 0) {
+        return;
+    }
+
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        , _("Camera %d - Watchdog timeout.")
+        , motapp->cam_list[camindx]->camera_id);
+
+    /* Shut down all the cameras */
+    indx = 1;
+    while (motapp->cam_list[indx] != NULL) {
+        pthread_mutex_unlock(&motapp->mutex_camlst);
+        pthread_mutex_unlock(&motapp->mutex_parms);
+        pthread_mutex_unlock(&motapp->mutex_camlst);
+        pthread_mutex_unlock(&motapp->mutex_post);
+        pthread_mutex_unlock(&motapp->mutex_sqlite);
+        pthread_mutex_unlock(&motapp->global_lock);
+        pthread_mutex_unlock(&motapp->cam_list[indx]->stream.mutex);
+        pthread_mutex_unlock(&motapp->cam_list[indx]->parms_lock);
+
         if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
             (motapp->cam_list[indx]->netcam != NULL)) {
+            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam->mutex);
+            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam->mutex_pktarray);
+            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam->mutex_transfer);
             motapp->cam_list[indx]->netcam->finish = true;
         }
         if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
             (motapp->cam_list[indx]->netcam_high != NULL)) {
+            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam_high->mutex);
+            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam_high->mutex_pktarray);
+            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam_high->mutex_transfer);
             motapp->cam_list[indx]->netcam_high->finish = true;
         }
+        motapp->cam_list[indx]->event_stop = true;
+        motapp->cam_list[indx]->finish_cam = true;
+        indx++;
     }
 
-    if (motapp->cam_list[indx]->watchdog == sec_cancel) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Camera %d - Watchdog timeout.  Requesting cancel.")
-            , motapp->cam_list[indx]->camera_id);
-        if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (motapp->cam_list[indx]->netcam != NULL)) {
-            if (motapp->cam_list[indx]->netcam->handler_finished == false) {
-                pthread_cancel(motapp->cam_list[indx]->netcam->thread_id);
-            }
-        }
-        if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (motapp->cam_list[indx]->netcam_high != NULL)) {
-            if (motapp->cam_list[indx]->netcam_high->handler_finished == false) {
-                pthread_cancel(motapp->cam_list[indx]->netcam_high->thread_id);
-            }
-        }
-        pthread_cancel(motapp->cam_list[indx]->thread_id);
-    }
+    SLEEP(motapp->cam_list[camindx]->conf->watchdog_kill, 0);
 
-    if (motapp->cam_list[indx]->watchdog < sec_kill) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Camera %d - Watchdog timeout.  Requesting kill.")
-            , motapp->cam_list[indx]->camera_id);
-        if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (motapp->cam_list[indx]->netcam != NULL)) {
+    /* When in a watchdog timeout and we get to a kill situation,
+     * we WILL have to leak memory because the freeing/deinit
+     * processes could lock this thread which would stop everything.
+    */
+    indx = 1;
+    while (motapp->cam_list[indx] != NULL) {
+        if (motapp->cam_list[indx]->netcam != NULL) {
             if (motapp->cam_list[indx]->netcam->handler_finished == false) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    , _("Camera %d - Watchdog netcam kill.")
+                    , motapp->cam_list[indx]->camera_id);
                 pthread_kill(motapp->cam_list[indx]->netcam->thread_id, SIGVTALRM);
             }
-            motapp->threads_running--;
-            netcam_cleanup(motapp->cam_list[indx],false);
         }
-        if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (motapp->cam_list[indx]->netcam_high != NULL)) {
+        if (motapp->cam_list[indx]->netcam_high != NULL) {
             if (motapp->cam_list[indx]->netcam_high->handler_finished == false) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    , _("Camera %d - Watchdog netcam_high kill.")
+                    , motapp->cam_list[indx]->camera_id);
                 pthread_kill(motapp->cam_list[indx]->netcam_high->thread_id, SIGVTALRM);
             }
-            motapp->cam_list[indx]->netcam_high->handler_finished = true;
-            motapp->threads_running--;
-            netcam_cleanup(motapp->cam_list[indx], false);
         }
-        if (motapp->cam_list[indx]->running_cam) {
-            pthread_kill(motapp->cam_list[indx]->thread_id,SIGVTALRM);
-        }
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Camera %d - Cleaning thread.")
-            , motapp->cam_list[indx]->camera_id);
-        motapp->threads_running--;
-        mlp_cleanup(motapp->cam_list[indx]);
+        if (motapp->cam_list[indx]->running_cam == true) {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                , _("Camera %d - Watchdog kill.")
+                , motapp->cam_list[indx]->camera_id);
+            pthread_kill(motapp->cam_list[indx]->thread_id, SIGVTALRM);
+        };
         motapp->cam_list[indx]->running_cam = false;
-        motapp->cam_list[indx]->finish_cam = false;
+        motapp->cam_list[indx]->restart_cam = false;
+        indx++;
     }
+    motapp->restart_all = true;
+    motapp->finish_all = true;
+    motapp->webcontrol_finish = true;
+    motapp->threads_running = 0;
 
 }
 
 static int motion_check_threadcount(struct ctx_motapp *motapp)
 {
-    /* Return 1 if we should break out of loop */
-
-    /* It has been observed that this is not counting every
-     * thread running.  The netcams spawn handler threads which are not
-     * counted here.  This is only counting ctx_cam threads and when they
-     * all get to zero, then we are done.
-     */
-
     int thrdcnt, indx;
 
     thrdcnt = 0;
@@ -699,6 +684,7 @@ static void motion_cam_delete(struct ctx_motapp *motapp)
     /* Delete the config context */
     delete motapp->cam_list[motapp->cam_delete]->conf;
     delete motapp->cam_list[motapp->cam_delete];
+    motapp->cam_list[motapp->cam_delete] = NULL;
 
     /* Set up a new cam_list */
     tmp = (struct ctx_cam **)mymalloc(sizeof(struct ctx_cam *) * indx_cam);
@@ -766,8 +752,8 @@ int main (int argc, char **argv)
 
             for (indx = (motapp->cam_list[1] != NULL ? 1 : 0); motapp->cam_list[indx]; indx++) {
                 /* Check if threads wants to be restarted */
-                if ((!motapp->cam_list[indx]->running_cam) &&
-                    (motapp->cam_list[indx]->restart_cam)) {
+                if ((motapp->cam_list[indx]->running_cam == false) &&
+                    (motapp->cam_list[indx]->restart_cam == true)) {
                     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                         ,_("Motion camera %d restart")
                         , motapp->cam_list[indx]->camera_id);

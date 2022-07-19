@@ -316,6 +316,10 @@ int rotate_map(struct ctx_cam *cam, struct ctx_image_data *img_data)
     unsigned char *img;
     unsigned char *temp_buff;
 
+    if (cam->rotate_data == NULL) {
+        return 0;
+    }
+
     if (cam->rotate_data->degrees == 0 && cam->rotate_data->axis == FLIP_TYPE_NONE) {
         return 0;
     }

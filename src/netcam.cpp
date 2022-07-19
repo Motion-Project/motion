@@ -2184,24 +2184,28 @@ int netcam_setup(struct ctx_cam *cam)
 
 }
 
+/* netcam_next (Called from the motion loop thread) */
 int netcam_next(struct ctx_cam *cam, struct ctx_image_data *img_data)
 {
+    if (cam == NULL) {
+        return 1;
+    }
 
-    /* This is called from the motion loop thread */
-
-    if ((cam->netcam->status == NETCAM_RECONNECTING) ||
-        (cam->netcam->status == NETCAM_NOTCONNECTED)) {
+    if (cam->netcam != NULL) {
+        if ((cam->netcam->status == NETCAM_RECONNECTING) ||
+            (cam->netcam->status == NETCAM_NOTCONNECTED)) {
             return 1;
         }
-    pthread_mutex_lock(&cam->netcam->mutex);
-        netcam_pktarray_resize(cam, false);
-        memcpy(img_data->image_norm
-               , cam->netcam->img_latest->ptr
-               , cam->netcam->img_latest->used);
-        img_data->idnbr_norm = cam->netcam->idnbr;
-    pthread_mutex_unlock(&cam->netcam->mutex);
+        pthread_mutex_lock(&cam->netcam->mutex);
+            netcam_pktarray_resize(cam, false);
+            memcpy(img_data->image_norm
+                , cam->netcam->img_latest->ptr
+                , cam->netcam->img_latest->used);
+            img_data->idnbr_norm = cam->netcam->idnbr;
+        pthread_mutex_unlock(&cam->netcam->mutex);
+    }
 
-    if (cam->netcam_high) {
+    if (cam->netcam_high != NULL) {
         if ((cam->netcam_high->status == NETCAM_RECONNECTING) ||
             (cam->netcam_high->status == NETCAM_NOTCONNECTED)) {
             return 1;

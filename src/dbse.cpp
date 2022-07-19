@@ -162,7 +162,9 @@ void dbse_global_init(struct ctx_motapp *motapp)
 
     indx = 0;
     while (motapp->cam_list[indx] != NULL) {
-        motapp->cam_list[indx]->dbse = (struct ctx_dbse *)mymalloc(sizeof(struct ctx_dbse));
+        if (motapp->cam_list[indx]->conf->database_type != "") {
+            motapp->cam_list[indx]->dbse = new ctx_dbse;
+        }
         indx++;
     }
 
@@ -418,7 +420,8 @@ void dbse_deinit(struct ctx_cam *cam)
 
         #ifdef HAVE_SQLITE3
             /* Close the SQLite database */
-            if (cam->conf->database_type == "sqlite3") {
+            if ((cam->conf->database_type == "sqlite3") &&
+                (cam->dbse->database_sqlite3 != NULL)) {
                 sqlite3_close(cam->dbse->database_sqlite3);
                 cam->dbse->database_sqlite3 = NULL;
             }
@@ -1059,6 +1062,7 @@ void dbse_motpls_deinit(struct ctx_cam *cam)
         dbse_motpls_free_movies(cam);
         dbse_motpls_free_cols(cam);
         delete cam->dbsemp;
+        cam->dbsemp = NULL;
     }
 }
 

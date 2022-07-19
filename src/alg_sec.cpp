@@ -568,6 +568,7 @@ void algsec_deinit(ctx_cam *cam)
         pthread_mutex_destroy(&cam->algsec->mutex);
 
         delete cam->algsec;
+        cam->algsec = NULL;
 
     #else
         (void)cam;
