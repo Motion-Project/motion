@@ -84,6 +84,7 @@ void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int h
 void vid_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 void vid_bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long int height);
 void vid_y10torgb24(unsigned char *map, unsigned char *cap_map, int width, int height, int shift);
+void vid_y10btoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 void vid_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 int vid_sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int height);
 int vid_mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height, unsigned int size);

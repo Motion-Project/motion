@@ -48,7 +48,7 @@
 
 #define MMAP_BUFFERS            4
 #define MIN_MMAP_BUFFERS        2
-#define V4L2_PALETTE_COUNT_MAX 21
+#define V4L2_PALETTE_COUNT_MAX 22
 
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MIN2(x, y) ((x) < (y) ? (x) : (y))
@@ -116,6 +116,7 @@ static void v4l2_palette_init(palette_item *palette_array)
     palette_array[19].v4l2id = V4L2_PIX_FMT_Y12;
     palette_array[20].v4l2id = V4L2_PIX_FMT_GREY;
     palette_array[21].v4l2id = V4L2_PIX_FMT_H264;
+    palette_array[22].v4l2id = V4L2_PIX_FMT_Y10BPACK;
 
     for (indx=0; indx <=V4L2_PALETTE_COUNT_MAX; indx++ ) {
         sprintf(palette_array[indx].fourcc ,"%c%c%c%c"
@@ -839,6 +840,22 @@ static int v4l2_pixfmt_stride(struct video_dev *curdev)
         return 0;
     }
 
+    /* For packed formats, the stride is not necessarily a multiple of the width.
+     * In that case, ensure that the buffer we'll receive has a valid size
+     */
+    switch (vid_source->dst_fmt.fmt.pix.pixelformat) {
+    case V4L2_PIX_FMT_Y10BPACK:
+        if (vid_source->dst_fmt.fmt.pix.sizeimage / curdev->height < bpl) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                , _("Image size(%d) must be at least height(%d) times stride(%d)")
+                , vid_source->dst_fmt.fmt.pix.sizeimage, curdev->height, bpl);
+            return -1;
+        }
+        return 0;
+    default:
+        break;
+    }
+
     MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
         , _("The image width(%d) is not multiple of the stride(%d)")
         , wd, bpl);
@@ -1260,6 +1277,9 @@ static int v4l2_pix_change(struct context *cnt, struct video_dev *curdev
         return 0;
     case V4L2_PIX_FMT_GREY:
         vid_greytoyuv420p(dest, src->ptr, width, height);
+        return 0;
+    case V4L2_PIX_FMT_Y10BPACK:
+        vid_y10btoyuv420p(dest, src->ptr, width, height);
         return 0;
     default:
         retcd = -1;

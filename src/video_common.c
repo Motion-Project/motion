@@ -493,6 +493,43 @@ void vid_y10torgb24(unsigned char *map, unsigned char *cap_map, int width, int h
     }
 }
 
+/* convert_packed_to_16bit comes from the libfreenect project */
+/* https://github.com/OpenKinect/libfreenect/blob/master/src/cameras.c#L304 */
+
+/* Unpack buffer of (vw bit) data into padded 16bit buffer. */
+static inline void convert_packed_to_16bit(const unsigned char *raw, unsigned short int *unpacked, int vw, int unpacked_len)
+{
+    int mask = (1 << vw) - 1;
+    unsigned short int buffer = 0;
+    int bitsIn = 0;
+    while (unpacked_len--) {
+        while (bitsIn < vw) {
+            buffer = (buffer << 8) | *(raw++);
+            bitsIn += 8;
+        }
+        bitsIn -= vw;
+        *(unpacked++) = (buffer >> bitsIn) & mask;
+    }
+}
+
+void vid_y10btoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height)
+{
+    unsigned char *unpacked_buffer;
+    unpacked_buffer = malloc(width * height * sizeof(unsigned short int));
+    convert_packed_to_16bit((unsigned char *)cap_map, (unsigned short int *)unpacked_buffer, 10, width * height);
+
+    int x, y;
+    unsigned short *tmp = (unsigned short *)unpacked_buffer;
+
+    for (y = 0; y < height; y++)
+        for (x = 0; x < width; x++) {
+            /* AND with 0x3FF because we only have 10 bits of actual data */
+            *map++ = *tmp++ & 0x3FF;
+        }
+
+    memset(map+(width*height), 128, (width * height) / 2);
+}
+
 void vid_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
 
