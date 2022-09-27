@@ -481,10 +481,17 @@ static void conf_edit_pid_file(struct ctx_motapp *motapp, std::string &parm, int
 
 static void conf_edit_log_file(struct ctx_motapp *motapp, std::string &parm, enum PARM_ACT pact)
 {
+    char        lognm[4096];
+    struct tm   *logtm;
+    time_t      logt;
+
     if (pact == PARM_ACT_DFLT) {
         motapp->log_file = "";
     } else if (pact == PARM_ACT_SET) {
-        motapp->log_file = parm;
+        time(&logt);
+        logtm = localtime(&logt);
+        strftime(lognm, 4096, parm.c_str(), logtm);
+        motapp->log_file = lognm;
     } else if (pact == PARM_ACT_GET) {
         parm = motapp->log_file;
     }
