@@ -606,15 +606,15 @@ static void event_movie_start(struct ctx_cam *cam, motion_event evnt
             myfree(&cam->movie_norm);
             return;
         }
-        event(cam, EVENT_FILECREATE, NULL, cam->movie_norm->filename, (void *)FTYPE_MOVIE, ts1);
-        dbse_exec(cam, cam->movie_norm->filename, FTYPE_MOVIE, ts1, "movie_start");
+        event(cam, EVENT_FILECREATE, NULL, cam->movie_norm->full_nm, (void *)FTYPE_MOVIE, ts1);
+        dbse_exec(cam, cam->movie_norm->full_nm, FTYPE_MOVIE, ts1, "movie_start");
     }
 
     if (cam->conf->movie_output_motion) {
         retcd = movie_init_motion(cam, ts1);
         if (retcd < 0) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("Error creating motion file [%s]"), cam->movie_motion->filename);
+                ,_("Error creating motion file [%s]"), cam->movie_motion->full_nm);
             myfree(&cam->movie_motion);
             return;
         }
@@ -652,49 +652,59 @@ static void event_movie_end(struct ctx_cam *cam, motion_event evnt
     (void)ftype;
 
     if (cam->movie_norm) {
+        if ((cam->conf->movie_retain == "secondary") && (cam->algsec_inuse)) {
+            if (cam->algsec->isdetected == false) {
+                retcd = remove(cam->movie_norm->full_nm);
+                if (retcd != 0) {
+                    MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                        , _("Unable to remove file %s")
+                        , cam->movie_norm->full_nm);
+                }
+            } else {
+                event(cam, EVENT_FILECLOSE, NULL, cam->movie_norm->full_nm
+                    , (void *)FTYPE_MOVIE, ts1);
+                dbse_exec(cam, cam->movie_norm->full_nm, FTYPE_MOVIE
+                    , ts1, "movie_end");
+                dbse_movies_addrec(cam, cam->movie_norm, ts1);
+            }
+        } else {
+            event(cam, EVENT_FILECLOSE, NULL, cam->movie_norm->full_nm
+                , (void *)FTYPE_MOVIE, ts1);
+            dbse_exec(cam, cam->movie_norm->full_nm
+                , FTYPE_MOVIE, ts1, "movie_end");
+            dbse_movies_addrec(cam, cam->movie_norm, ts1);
+        }
         movie_close(cam->movie_norm);
         myfree(&cam->movie_norm);
 
-        if ((cam->conf->movie_retain == "secondary") && (cam->algsec_inuse)) {
-            if (cam->algsec->isdetected == false) {
-                retcd = remove(cam->newfilename);
-                if (retcd != 0) {
-                    MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
-                        , _("Unable to remove file %s"), cam->newfilename);
-                }
-            } else {
-                event(cam, EVENT_FILECLOSE, NULL, cam->newfilename, (void *)FTYPE_MOVIE, ts1);
-                dbse_exec(cam, cam->newfilename, FTYPE_MOVIE, ts1, "movie_end");
-                dbse_motpls_addrec(cam, cam->newfilename, ts1);
-            }
-        } else {
-            event(cam, EVENT_FILECLOSE, NULL, cam->newfilename, (void *)FTYPE_MOVIE, ts1);
-            dbse_exec(cam, cam->newfilename, FTYPE_MOVIE, ts1, "movie_end");
-            dbse_motpls_addrec(cam, cam->newfilename, ts1);
-        }
     }
 
     if (cam->movie_motion) {
+        if ((cam->conf->movie_retain == "secondary") && (cam->algsec_inuse)) {
+            if (cam->algsec->isdetected == false) {
+                retcd = remove(cam->movie_motion->full_nm);
+                if (retcd != 0) {
+                    MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                        , _("Unable to remove file %s")
+                        , cam->movie_motion->full_nm);
+                }
+            } else {
+                event(cam, EVENT_FILECLOSE, NULL, cam->movie_motion->full_nm
+                    , (void *)FTYPE_MOVIE_MOTION, ts1);
+                dbse_exec(cam, cam->movie_motion->full_nm
+                    , FTYPE_MOVIE_MOTION, ts1, "movie_end");
+                dbse_movies_addrec(cam, cam->movie_motion, ts1);
+            }
+        } else {
+            event(cam, EVENT_FILECLOSE, NULL, cam->movie_motion->full_nm
+                , (void *)FTYPE_MOVIE_MOTION, ts1);
+            dbse_exec(cam, cam->movie_motion->full_nm
+                , FTYPE_MOVIE_MOTION, ts1, "movie_end");
+            dbse_movies_addrec(cam, cam->movie_motion, ts1);
+        }
         movie_close(cam->movie_motion);
         myfree(&cam->movie_motion);
 
-        if ((cam->conf->movie_retain == "secondary") && (cam->algsec_inuse)) {
-            if (cam->algsec->isdetected == false) {
-                retcd = remove(cam->motionfilename);
-                if (retcd != 0) {
-                    MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
-                        , _("Unable to remove file %s"), cam->motionfilename);
-                }
-            } else {
-                event(cam, EVENT_FILECLOSE, NULL, cam->motionfilename, (void *)FTYPE_MOVIE_MOTION, ts1);
-                dbse_exec(cam, cam->motionfilename, FTYPE_MOVIE_MOTION, ts1, "movie_end");
-                dbse_motpls_addrec(cam, cam->motionfilename, ts1);
-            }
-        } else {
-            event(cam, EVENT_FILECLOSE, NULL, cam->motionfilename, (void *)FTYPE_MOVIE_MOTION, ts1);
-            dbse_exec(cam, cam->motionfilename, FTYPE_MOVIE_MOTION, ts1, "movie_end");
-            dbse_motpls_addrec(cam, cam->motionfilename, ts1);
-        }
     }
 
 }
@@ -713,13 +723,13 @@ static void event_tlapse_start(struct ctx_cam *cam, motion_event evnt
         retcd = movie_init_timelapse(cam, ts1);
         if (retcd < 0) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("Error creating timelapse file [%s]"), cam->movie_timelapse->filename);
+                ,_("Error creating timelapse file [%s]"), cam->movie_timelapse->full_nm);
             myfree(&cam->movie_timelapse);
             return;
         }
-        event(cam, EVENT_FILECREATE, NULL, cam->movie_timelapse->filename
+        event(cam, EVENT_FILECREATE, NULL, cam->movie_timelapse->full_nm
             , (void *)FTYPE_MOVIE_TIMELAPSE, ts1);
-        dbse_exec(cam, cam->movie_timelapse->filename, FTYPE_MOVIE_TIMELAPSE
+        dbse_exec(cam, cam->movie_timelapse->full_nm, FTYPE_MOVIE_TIMELAPSE
             , ts1, "movie_start");
     }
 
@@ -739,10 +749,13 @@ static void event_tlapse_end(struct ctx_cam *cam, motion_event evnt
     (void)ftype;
 
     if (cam->movie_timelapse) {
+        event(cam, EVENT_FILECLOSE, NULL, cam->movie_timelapse->full_nm
+            , (void *)FTYPE_MOVIE_TIMELAPSE, ts1);
+        dbse_exec(cam, cam->movie_timelapse->full_nm
+            , FTYPE_MOVIE_TIMELAPSE, ts1, "movie_end");
         movie_close(cam->movie_timelapse);
         myfree(&cam->movie_timelapse);
-        event(cam, EVENT_FILECLOSE, NULL, cam->timelapsefilename, (void *)FTYPE_MOVIE_TIMELAPSE, ts1);
-        dbse_exec(cam, cam->timelapsefilename, FTYPE_MOVIE_TIMELAPSE, ts1, "movie_end");
+
     }
 }
 

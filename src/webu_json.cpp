@@ -283,13 +283,12 @@ void webu_json_config(struct ctx_webui *webui)
 static void webu_json_movies_list(struct ctx_webui *webui)
 {
     int indx_mov, indx_cam, indx;
-    int movie_cnt, retcd, skip;
+    int movie_cnt, skip;
     std::string response;
     char fmt[PATH_MAX];
     ctx_cam *cam;
-    ctx_dbsemp_rec db;
+    ctx_dbse_rec db;
     struct ctx_params *wact;
-
 
     /* Get the count */
     indx_cam = 0;
@@ -316,16 +315,16 @@ static void webu_json_movies_list(struct ctx_webui *webui)
     indx_cam = 1;
     while (webui->motapp->cam_list[indx_cam] != NULL) {
         cam =webui->motapp->cam_list[indx_cam];
-        retcd = dbse_motpls_getlist(cam);
+        dbse_movies_getlist(cam->motapp);
         webui->resp_page += ",\""+ std::to_string(indx_cam) + "\":";
-        if ((retcd !=0) || (skip ==1)) {
+        if (skip == 1) {
             webui->resp_page += "{\"count\" : 0} ";
         } else {
-            movie_cnt = cam->dbsemp->movie_cnt;
+            movie_cnt = cam->motapp->dbse->movie_cnt;
             webui->resp_page += "{\"count\" : " + std::to_string(movie_cnt);
 
             for (indx_mov=0; indx_mov < movie_cnt; indx_mov++) {
-                db = cam->dbsemp->movie_list[indx_mov];
+                db = cam->motapp->dbse->movie_list[indx_mov];
                 if ((db.movie_sz/1000) < 1000) {
                     snprintf(fmt,PATH_MAX,"%'.1fKB"
                         ,((double)db.movie_sz/1000));

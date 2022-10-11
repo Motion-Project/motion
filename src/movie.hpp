@@ -60,7 +60,9 @@ struct ctx_movie {
     enum TIMELAPSE_TYPE tlapse;
     int                 fps;
     int                 bps;
-    char                filename[PATH_MAX];
+    char                *movie_nm;
+    char                *movie_dir;
+    char                *full_nm;
     int                 quality;
     const char          *container_name;
     int64_t             last_pts;

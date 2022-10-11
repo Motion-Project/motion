@@ -93,7 +93,7 @@ static int movie_timelapse_append(struct ctx_movie *movie, AVPacket *pkt)
 {
     FILE *file;
 
-    file = myfopen(movie->filename, "abe");
+    file = myfopen(movie->full_nm, "abe");
     if (!file) {
         return -1;
     }
@@ -128,97 +128,83 @@ static void movie_free_context(struct ctx_movie *movie)
 static int movie_get_oformat(struct ctx_movie *movie)
 {
 
-    size_t container_name_len = strcspn(movie->container_name, ":");
-    char *container_name =(char*) malloc(container_name_len + 1);
-    char basename[PATH_MAX];
-    int retcd;
+    size_t container_name_len;
+    char *container_name;
+    int len_full, len_nm;
 
-    /* TODO:  Rework the extenstion asssignment along with the code in event.c
-     * If extension is ever something other than three bytes,
-     * preceded by . then lots of things will fail
-     */
-    if (container_name == NULL) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-            ,_("Failed to allocate memory for container name"));
-        movie_free_context(movie);
-        return -1;
-    }
+    container_name_len = strcspn(movie->container_name, ":");
+    container_name =(char*) mymalloc(container_name_len + 1);
     memcpy(container_name, movie->container_name, container_name_len);
     container_name[container_name_len] = 0;
 
-    retcd = snprintf(basename,PATH_MAX,"%s",movie->filename);
-    if ((retcd < 0) || (retcd >= PATH_MAX)) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-            ,_("Error setting base file name"));
-        movie_free_context(movie);
-        myfree(&container_name);
-        return -1;
-    }
+    /* the full_nm, movie_dir, movie_nm all have an extra 10 bytes allocated
+     * at the end and initialized to null, so that we can just memcpy in the
+     * extensions
+    */
+    len_full = strlen(movie->full_nm);
+    len_nm = strlen(movie->movie_nm);
 
     if (movie->tlapse == TIMELAPSE_APPEND) {
-
         movie->oc->oformat = av_guess_format("mpeg2video", NULL, NULL);
         movie->oc->video_codec_id = MY_CODEC_ID_MPEG2VIDEO;
-        retcd = snprintf(movie->filename,PATH_MAX,"%s.mpg",basename);
-        if ((!movie->oc->oformat) ||
-            (retcd < 0) || (retcd >= PATH_MAX)) {
+        memcpy(movie->full_nm + len_full, ".mpg", 4);
+        memcpy(movie->movie_nm + len_nm, ".mpg", 4);
+        if (movie->oc->oformat == NULL) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                 ,_("Error setting timelapse append for container %s"), container_name);
             movie_free_context(movie);
             myfree(&container_name);
             return -1;
         }
+
         myfree(&container_name);
         return 0;
     }
 
     if (mystreq(container_name, "flv")) {
         movie->oc->oformat = av_guess_format("flv", NULL, NULL);
-        retcd = snprintf(movie->filename,PATH_MAX,"%s.flv",basename);
+        memcpy(movie->full_nm + len_full, ".flv", 4);
+        memcpy(movie->movie_nm + len_nm, ".flv", 4);
         movie->oc->video_codec_id = MY_CODEC_ID_FLV1;
     }
 
     if (mystreq(container_name, "ogg")) {
         movie->oc->oformat = av_guess_format("ogg", NULL, NULL);
-        retcd = snprintf(movie->filename,PATH_MAX,"%s.ogg",basename);
+        memcpy(movie->full_nm + len_full, ".ogg", 4);
+        memcpy(movie->movie_nm + len_nm, ".ogg", 4);
         movie->oc->video_codec_id = MY_CODEC_ID_THEORA;
     }
 
     if (mystreq(container_name, "vp8")) {
         movie->oc->oformat = av_guess_format("webm", NULL, NULL);
-        retcd = snprintf(movie->filename,PATH_MAX,"%s.webm",basename);
+        memcpy(movie->full_nm + len_full, ".webm", 5);
+        memcpy(movie->movie_nm + len_nm, ".webm", 5);
         movie->oc->video_codec_id = MY_CODEC_ID_VP8;
     }
 
     if (mystreq(container_name, "mp4")) {
         movie->oc->oformat = av_guess_format("mp4", NULL, NULL);
-        retcd = snprintf(movie->filename,PATH_MAX,"%s.mp4",basename);
+        memcpy(movie->full_nm + len_full, ".mp4", 4);
+        memcpy(movie->movie_nm + len_nm, ".mp4", 4);
         movie->oc->video_codec_id = MY_CODEC_ID_H264;
     }
 
     if (mystreq(container_name, "mkv")) {
         movie->oc->oformat = av_guess_format("matroska", NULL, NULL);
-        retcd = snprintf(movie->filename,PATH_MAX,"%s.mkv",basename);
+        memcpy(movie->full_nm + len_full, ".mkv", 4);
+        memcpy(movie->movie_nm + len_nm, ".mkv", 4);
         movie->oc->video_codec_id = MY_CODEC_ID_H264;
     }
 
     if (mystreq(container_name, "hevc")) {
-            movie->oc->video_codec_id = MY_CODEC_ID_HEVC;
+        movie->oc->video_codec_id = MY_CODEC_ID_HEVC;
         movie->oc->oformat = av_guess_format("mp4", NULL, NULL);
-        retcd = snprintf(movie->filename,PATH_MAX,"%s.mp4",basename);
+        memcpy(movie->full_nm + len_full, ".mp4", 4);
+        memcpy(movie->movie_nm + len_nm, ".mp4", 4);
         movie->oc->video_codec_id = MY_CODEC_ID_HEVC;
     }
 
-    //Check for valid results
-    if ((retcd < 0) || (retcd >= PATH_MAX)) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-            ,_("Error setting file name"));
-        movie_free_context(movie);
-        myfree(&container_name);
-        return -1;
-    }
-
-    if (!movie->oc->oformat) {
+    if (movie->oc->oformat == NULL) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("container option value %s is not supported"), container_name);
         movie_free_context(movie);
@@ -806,7 +792,7 @@ static int movie_set_outputfile(struct ctx_movie *movie)
     char errstr[128];
 
     #if (MYFFVER < 58000)
-        retcd = snprintf(movie->oc->filename, sizeof(movie->oc->filename), "%s", movie->filename);
+        retcd = snprintf(movie->oc->full_nm, sizeof(movie->oc->full_nm), "%s", movie->full_nm);
         if ((retcd < 0) || (retcd >= PATH_MAX)) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                 ,_("Error setting file name"));
@@ -815,33 +801,33 @@ static int movie_set_outputfile(struct ctx_movie *movie)
     #endif
 
     /* Open the output file, if needed. */
-    if ((movie_timelapse_exists(movie->filename) == 0) || (movie->tlapse != TIMELAPSE_APPEND)) {
+    if ((movie_timelapse_exists(movie->full_nm) == 0) || (movie->tlapse != TIMELAPSE_APPEND)) {
         clock_gettime(CLOCK_MONOTONIC, &movie->cb_st_ts);
-        retcd = avio_open(&movie->oc->pb, movie->filename, MY_FLAG_WRITE|AVIO_FLAG_NONBLOCK);
+        retcd = avio_open(&movie->oc->pb, movie->full_nm, MY_FLAG_WRITE|AVIO_FLAG_NONBLOCK);
         if (retcd < 0) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
                 ,_("avio_open: %s File %s")
-                , errstr, movie->filename);
+                , errstr, movie->full_nm);
             if (errno == ENOENT) {
-                if (mycreate_path(movie->filename) == -1) {
+                if (mycreate_path(movie->full_nm) == -1) {
                     movie_free_context(movie);
                     return -1;
                 }
                 clock_gettime(CLOCK_MONOTONIC, &movie->cb_st_ts);
-                retcd = avio_open(&movie->oc->pb, movie->filename, MY_FLAG_WRITE| AVIO_FLAG_NONBLOCK);
+                retcd = avio_open(&movie->oc->pb, movie->full_nm, MY_FLAG_WRITE| AVIO_FLAG_NONBLOCK);
                 if (retcd < 0) {
                     av_strerror(retcd, errstr, sizeof(errstr));
                     MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
                         ,_("error %s opening file %s")
-                        , errstr, movie->filename);
+                        , errstr, movie->full_nm);
                     movie_free_context(movie);
                     return -1;
                 }
             } else {
                 MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
                     ,_("Error opening file %s")
-                    , movie->filename);
+                    , movie->full_nm);
                 movie_free_context(movie);
                 return -1;
             }
@@ -1547,6 +1533,15 @@ void movie_free(struct ctx_movie *movie)
     if (movie != NULL) {
         movie_free_context(movie);
         movie_free_nal(movie);
+        if (movie->movie_nm != NULL) {
+            free(movie->movie_nm);
+        }
+        if (movie->movie_dir != NULL) {
+            free(movie->movie_dir);
+        }
+        if (movie->full_nm != NULL) {
+            free(movie->full_nm);
+        }
     }
 }
 
@@ -1691,23 +1686,38 @@ static const char* movie_init_container(struct ctx_cam *cam)
 
 int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1)
 {
-    char stamp[PATH_MAX];
+    char tmp[PATH_MAX];
     const char *container;
-    int retcd;
+    int retcd, len;
 
-    mystrftime(cam, stamp, sizeof(stamp), cam->conf->movie_filename.c_str(), ts1, NULL, 0);
+    cam->movie_norm =(struct ctx_movie*) mymalloc(sizeof(struct ctx_movie));
+
+    mystrftime(cam, tmp, sizeof(tmp)
+        , cam->conf->movie_filename.c_str(), ts1, NULL, 0);
 
     container = movie_init_container(cam);
 
-    cam->movie_norm =(struct ctx_movie*) mymalloc(sizeof(struct ctx_movie));
+    /* The increment of 10 is to allow for the extension and other chars*/
+    len = strlen(tmp) + cam->conf->target_dir.length() + 10;
+    cam->movie_norm->full_nm = (char*)mymalloc(len);
     if (mystreq(container, "test")) {
-        retcd = snprintf(cam->movie_norm->filename, PATH_MAX, "%s/%s_%s"
-            , cam->conf->target_dir.c_str(), container, stamp);
+        retcd = snprintf(cam->movie_norm->full_nm, len, "%s/%s_%s"
+            , cam->conf->target_dir.c_str(), container, tmp);
     } else {
-        retcd = snprintf(cam->movie_norm->filename, PATH_MAX, "%s/%s"
-            , cam->conf->target_dir.c_str(), stamp);
+        retcd = snprintf(cam->movie_norm->full_nm, len, "%s/%s"
+            , cam->conf->target_dir.c_str(), tmp);
     }
-    if ((retcd < 0) || (retcd >= PATH_MAX)) {
+
+    len = cam->conf->target_dir.length() + 10;
+    cam->movie_norm->movie_dir = (char*)mymalloc(len);
+    retcd = snprintf(cam->movie_norm->movie_dir,len,"%s"
+        ,cam->conf->target_dir.c_str());
+
+    len = strlen(tmp) + 10;
+    cam->movie_norm->movie_nm = (char*)mymalloc(len);
+    retcd = snprintf(cam->movie_norm->movie_nm, len, "%s", tmp);
+
+    if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Error setting file name"));
         return -1;
@@ -1744,38 +1754,43 @@ int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1)
 
     retcd = movie_open(cam->movie_norm);
 
-    if (retcd == 0) {
-        /* We set this after the movie open so we get the extension */
-        retcd = snprintf(cam->newfilename, PATH_MAX, "%s",cam->movie_norm->filename);
-        if ((retcd < 0) || (retcd >= PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                ,_("Error setting file name"));
-            return -1;
-        }
-    }
-
     return retcd;
 
 }
 
 int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1)
 {
-    char stamp[PATH_MAX];
+    char tmp[PATH_MAX];
     const char *container;
-    int retcd;
-
-    mystrftime(cam, stamp, sizeof(stamp), cam->conf->movie_filename.c_str(), ts1, NULL, 0);
-    container = movie_init_container(cam);
+    int retcd, len;
 
     cam->movie_motion =(struct ctx_movie*)mymalloc(sizeof(struct ctx_movie));
+
+    mystrftime(cam, tmp, sizeof(tmp)
+        , cam->conf->movie_filename.c_str(), ts1, NULL, 0);
+    container = movie_init_container(cam);
+
+    /* The increment of 10 is to allow for the extension and other chars*/
+    len = strlen(tmp) + cam->conf->target_dir.length() + 10;
+    cam->movie_norm->full_nm = (char*)mymalloc(len);
     if (mystreq(container, "test")) {
-        retcd = snprintf(cam->movie_motion->filename, PATH_MAX, "%s/%s_%sm"
-            , cam->conf->target_dir.c_str(), container, stamp);
+        retcd = snprintf(cam->movie_motion->full_nm, len, "%s/%s_%sm"
+            , cam->conf->target_dir.c_str(), container, tmp);
     } else {
-        retcd = snprintf(cam->movie_motion->filename, PATH_MAX, "%s/%sm"
-            , cam->conf->target_dir.c_str(), stamp);
+        retcd = snprintf(cam->movie_motion->full_nm, len, "%s/%sm"
+            , cam->conf->target_dir.c_str(), tmp);
     }
-    if ((retcd < 0) || (retcd >= PATH_MAX)) {
+
+    len = cam->conf->target_dir.length() + 10;
+    cam->movie_norm->movie_dir = (char*)mymalloc(len);
+    retcd = snprintf(cam->movie_norm->movie_dir,len,"%s"
+        ,cam->conf->target_dir.c_str());
+
+    len = strlen(tmp) + 10;
+    cam->movie_norm->movie_nm = (char*)mymalloc(len);
+    retcd = snprintf(cam->movie_norm->movie_nm, len, "%s", tmp);
+
+    if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Error setting file name"));
         return -1;
@@ -1806,15 +1821,6 @@ int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1)
 
     retcd = movie_open(cam->movie_motion);
 
-    if (retcd == 0) {
-        retcd = snprintf(cam->motionfilename, PATH_MAX, "%s",cam->movie_motion->filename);
-        if ((retcd < 0) || (retcd >= PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                ,_("Error setting file name"));
-            return -1;
-        }
-    }
-
     return retcd;
 
 }
@@ -1824,14 +1830,28 @@ int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1)
     char tmp[PATH_MAX];
     const char *container_mpg = "mpg";
     const char *container_mkv = "mkv";
-    int retcd;
+    int retcd, len;
 
     cam->movie_timelapse =(struct ctx_movie*)mymalloc(sizeof(struct ctx_movie));
-    mystrftime(cam, tmp, sizeof(tmp), cam->conf->timelapse_filename.c_str(), ts1, NULL, 0);
+    mystrftime(cam, tmp, sizeof(tmp)
+        , cam->conf->timelapse_filename.c_str(), ts1, NULL, 0);
 
-    retcd = snprintf(cam->movie_timelapse->filename, PATH_MAX, "%s/%s"
+    /* The increment of 10 is to allow for the extension and other chars*/
+    len = strlen(tmp) + cam->conf->target_dir.length() + 10;
+    cam->movie_norm->full_nm = (char*)mymalloc(len);
+    retcd = snprintf(cam->movie_timelapse->full_nm, len, "%s/%s"
         , cam->conf->target_dir.c_str(), tmp);
-    if (retcd > PATH_MAX) {
+
+    len = cam->conf->target_dir.length() + 10;
+    cam->movie_norm->movie_dir = (char*)mymalloc(len);
+    retcd = snprintf(cam->movie_norm->movie_dir,len,"%s"
+        ,cam->conf->target_dir.c_str());
+
+    len = strlen(tmp) + 10;
+    cam->movie_norm->movie_nm = (char*)mymalloc(len);
+    retcd = snprintf(cam->movie_norm->movie_nm, len, "%s", tmp);
+
+    if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("Error setting timelapse file name %s"), tmp);
     }
@@ -1873,15 +1893,6 @@ int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1)
         cam->movie_timelapse->tlapse = TIMELAPSE_NEW;
         cam->movie_timelapse->container_name = container_mkv;
         retcd = movie_open(cam->movie_timelapse);
-    }
-
-    if (retcd == 0) {
-        retcd = snprintf(cam->timelapsefilename, PATH_MAX, "%s",cam->movie_timelapse->filename);
-        if ((retcd < 0) || (retcd >= PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                ,_("Error setting file name"));
-            return -1;
-        }
     }
 
     return retcd;

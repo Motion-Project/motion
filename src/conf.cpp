@@ -2619,7 +2619,7 @@ static void conf_edit_database_dbname(struct ctx_cam *cam, std::string &parm, en
 static void conf_edit_database_host(struct ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->database_host = "localhost";
+        cam->conf->database_host = "";
     } else if (pact == PARM_ACT_SET) {
         cam->conf->database_host = parm;
     } else if (pact == PARM_ACT_GET) {

@@ -54,14 +54,12 @@ mhdrslt webu_file_main(struct ctx_webui *webui)
     struct ctx_params *wact;
 
     /*If we have not fully started yet, simply return*/
-    if (webui->cam->dbsemp == NULL) {
+    if (webui->cam->motapp->dbse == NULL) {
         return MHD_NO;
     }
 
-    if (webui->cam->dbsemp->movie_cnt == 0) {
-        if (dbse_motpls_getlist(webui->cam) != 0) {
-            return MHD_NO;
-        }
+    if (webui->cam->motapp->dbse->movie_cnt == 0) {
+        dbse_movies_getlist(webui->cam->motapp);
     }
 
     wact = webui->motapp->webcontrol_actions;
@@ -77,10 +75,10 @@ mhdrslt webu_file_main(struct ctx_webui *webui)
     }
 
     full_nm = "";
-    for (indx=0; indx < webui->cam->dbsemp->movie_cnt; indx++) {
-        if (mystreq(webui->cam->dbsemp->movie_list[indx].movie_nm
+    for (indx=0; indx < webui->cam->motapp->dbse->movie_cnt; indx++) {
+        if (mystreq(webui->cam->motapp->dbse->movie_list[indx].movie_nm
             , webui->uri_cmd2.c_str())) {
-            full_nm = webui->cam->dbsemp->movie_list[indx].full_nm;
+            full_nm = webui->cam->motapp->dbse->movie_list[indx].full_nm;
         }
     }
 

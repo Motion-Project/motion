@@ -710,10 +710,6 @@ static int mlp_init(struct ctx_cam *cam)
 
     vlp_init(cam);
 
-    dbse_init(cam);
-
-    dbse_motpls_init(cam);
-
     pic_init_mask(cam);
 
     pic_init_privacy(cam);
@@ -789,9 +785,6 @@ void mlp_cleanup(struct ctx_cam *cam)
         cam->mpipe = -1;
     }
 
-    dbse_deinit(cam);
-
-    dbse_motpls_deinit(cam);
 }
 
 /* check the area detect */

@@ -303,8 +303,6 @@ struct ctx_cam {
     struct ctx_image_data   *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
     struct ctx_algsec       *algsec;
     struct ctx_rotate       *rotate_data;       /* rotation data is thread-specific */
-    struct ctx_dbse         *dbse;      /*Multi use/type user specified database */
-    struct ctx_dbsemp       *dbsemp;    /*Dedicated sqlite3 Motionplus database */
     struct ctx_movie        *movie_norm;
     struct ctx_movie        *movie_motion;
     struct ctx_movie        *movie_timelapse;
@@ -368,12 +366,9 @@ struct ctx_cam {
     char                    hostname[PATH_MAX];
 
     int                     movie_fps;
-    char                    newfilename[PATH_MAX];
     char                    extpipefilename[PATH_MAX];
     char                    extpipecmdline[PATH_MAX];
     bool                    movie_passthrough;
-    char                    timelapsefilename[PATH_MAX];
-    char                    motionfilename[PATH_MAX];
 
     int area_minx[9], area_miny[9], area_maxx[9], area_maxy[9];
     int                     areadetect_eventnbr;
@@ -430,12 +425,12 @@ struct ctx_motapp {
     std::list<ctx_webu_clients> webcontrol_clients;         /* C++ list of client ips */
     struct ctx_params           *webcontrol_headers;        /* parameters for header */
     struct ctx_params           *webcontrol_actions;        /* parameters for actions */
+    struct ctx_dbse             *dbse;                      /* user specified database */
 
     bool                parms_changed;      /*bool indicating if the parms have changed */
     pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */
     pthread_mutex_t     mutex_camlst;       /* Lock the list of cams while adding/removing */
     pthread_mutex_t     mutex_post;         /* mutex to allow for processing of post actions*/
-    pthread_mutex_t     mutex_sqlite;       /* mutex for database*/
 
 
 };

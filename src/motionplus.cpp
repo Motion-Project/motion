@@ -275,7 +275,7 @@ static void motion_shutdown(struct ctx_motapp *motapp)
 
     webu_deinit(motapp);
 
-    dbse_global_deinit(motapp);
+    dbse_deinit(motapp);
 
     conf_deinit(motapp);
 
@@ -416,7 +416,7 @@ static void motion_startup(struct ctx_motapp *motapp, int daemonize, int argc, c
 
     motion_camera_ids(motapp->cam_list);
 
-    dbse_global_init(motapp);
+    dbse_init(motapp);
 
     draw_init_chars();
 
@@ -487,7 +487,9 @@ static void motion_watchdog(struct ctx_motapp *motapp, int camindx)
         pthread_mutex_unlock(&motapp->mutex_parms);
         pthread_mutex_unlock(&motapp->mutex_camlst);
         pthread_mutex_unlock(&motapp->mutex_post);
-        pthread_mutex_unlock(&motapp->mutex_sqlite);
+        if (motapp->dbse != NULL) {
+            pthread_mutex_unlock(&motapp->dbse->mutex_dbse);
+        }
         pthread_mutex_unlock(&motapp->global_lock);
         pthread_mutex_unlock(&motapp->cam_list[indx]->stream.mutex);
         pthread_mutex_unlock(&motapp->cam_list[indx]->parms_lock);
@@ -589,7 +591,6 @@ static void motion_init(struct ctx_motapp *motapp)
     pthread_mutex_init(&motapp->mutex_parms, NULL);
     pthread_mutex_init(&motapp->mutex_camlst, NULL);
     pthread_mutex_init(&motapp->mutex_post, NULL);
-    pthread_mutex_init(&motapp->mutex_sqlite, NULL);
 
     motapp->threads_running = 0;
     motapp->finish_all = false;
@@ -648,9 +649,7 @@ static void motion_cam_add(struct ctx_motapp *motapp)
 
     motapp->cam_list[indx_cam]->camera_id = indx;
     motapp->cam_list[indx_cam]->conf->camera_id = indx;
-    motapp->cam_list[indx_cam]->dbse = (struct ctx_dbse *)mymalloc(sizeof(struct ctx_dbse));
     motapp->cam_list[indx_cam]->conf->webcontrol_port = 0;
-    dbse_motpls_init(motapp->cam_list[indx_cam]);
 
     motapp->cam_add = false;
 
@@ -676,10 +675,6 @@ static void motion_cam_delete(struct ctx_motapp *motapp)
             ,_("Invalid camera specified for deletion. %d"), motapp->cam_delete);
         return;
     }
-
-    myfree(&motapp->cam_list[motapp->cam_delete]->dbse);
-
-    dbse_motpls_deinit(motapp->cam_list[motapp->cam_delete]);
 
     /* Delete the config context */
     delete motapp->cam_list[motapp->cam_delete]->conf;
@@ -797,7 +792,6 @@ int main (int argc, char **argv)
     pthread_mutex_destroy(&motapp->mutex_parms);
     pthread_mutex_destroy(&motapp->mutex_camlst);
     pthread_mutex_destroy(&motapp->mutex_post);
-    pthread_mutex_destroy(&motapp->mutex_sqlite);
 
     delete motapp;
 

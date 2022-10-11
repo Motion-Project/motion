@@ -28,7 +28,7 @@ static FILE *logfile  = NULL;
 static int log_level = LEVEL_DEFAULT;
 static int log_type = TYPE_DEFAULT;
 
-static const char *log_type_str[]  = {NULL, "COR", "STR", "ENC", "NET", "DBL", "EVT", "TRK", "VID", "ALL"};
+static const char *log_type_str[]  = {NULL, "COR", "STR", "ENC", "NET", "DBS", "EVT", "TRK", "VID", "ALL"};
 static const char *log_level_str[] = {NULL, "EMG", "ALR", "CRT", "ERR", "WRN", "NTC", "INF", "DBG", "ALL"};
 static struct ctx_motapp *log_motapp;  /*Used to access the parms mutex for updates*/
 
