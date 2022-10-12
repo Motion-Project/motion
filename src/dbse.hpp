@@ -76,9 +76,6 @@
         #ifdef HAVE_SQLITE3
             sqlite3 *database_sqlite3;
         #endif
-        #ifdef HAVE_MYSQL
-            MYSQL *database_mysql;
-        #endif
         #ifdef HAVE_MARIADB
             MYSQL *database_mariadb;
         #endif

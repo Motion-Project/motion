@@ -36,12 +36,11 @@ static int dbse_edits(struct ctx_motapp *motapp)
             , _("Invalid database name"));
         retcd = -1;
     }
-    if (((motapp->dbse->database_type == "mysql") ||
-         (motapp->dbse->database_type == "mariadb") ||
+    if (((motapp->dbse->database_type == "mariadb") ||
          (motapp->dbse->database_type == "pgsql")) &&
          (motapp->dbse->database_port == 0)) {
         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-            ,_("Must specify database port for mysql/mariadb/pgsql"));
+            ,_("Must specify database port for mariadb/pgsql"));
         retcd = -1;
     }
 
@@ -869,122 +868,6 @@ static void dbse_mariadb_movlst(struct ctx_motapp *motapp)
 
 #endif  /*HAVE_MARIADB*/
 
-#ifdef HAVE_MYSQL
-
-static void dbse_mysql_init(struct ctx_motapp *motapp)
-{
-    motapp->dbse->database_mysql = NULL;
-
-    if (motapp->dbse->database_type != "mysql") {
-        return;
-    }
-
-    if (mysql_library_init(0, NULL, NULL) != 0) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-            , _("Could not initialize database %s")
-            , motapp->dbse->database_type.c_str());
-        motapp->dbse->database_type = "";
-        return;
-    }
-
-    motapp->dbse->database_mysql = (MYSQL *) mymalloc(sizeof(MYSQL));
-    mysql_init(motapp->dbse->database_mysql);
-
-    if (mysql_real_connect(
-        motapp->dbse->database_mysql
-        , motapp->dbse->database_host.c_str()
-        , motapp->dbse->database_user.c_str()
-        , motapp->dbse->database_password.c_str()
-        , motapp->dbse->database_dbname.c_str()
-        , motapp->dbse->database_port, NULL, 0) == NULL) {
-
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-            , _("Cannot connect to MySQL database %s on host %s with user %s")
-            , motapp->dbse->database_dbname.c_str()
-            , motapp->dbse->database_host.c_str()
-            , motapp->dbse->database_user.c_str());
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-            , _("MySQL error was %s")
-            , mysql_error(motapp->dbse->database_mysql));
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-            , _("Disabling database functionality"));
-        dbse_close(motapp);
-        motapp->dbse->database_type = "";
-        return;
-    }
-    #if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
-        bool my_true = true;
-        mysql_options(motapp->dbse->database_mysql
-            , MYSQL_OPT_RECONNECT, &my_true);
-    #endif
-}
-
-static void dbse_mysql_exec(struct ctx_motapp *motapp, const char *sqlquery)
-{
-    int retcd;
-    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing mysql query");
-    retcd = mysql_query(motapp->dbse->database_mysql, sqlquery);
-    if (retcd != 0) {
-        retcd = mysql_errno(motapp->dbse->database_mysql);
-        MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
-            , _("Mysql query failed %s error code %d")
-            , mysql_error(motapp->dbse->database_mysql), retcd);
-        if (retcd >= 2000) {
-            mysql_close(motapp->dbse->database_mysql);
-            motapp->dbse->database_mysql = (MYSQL *) mymalloc(sizeof(MYSQL));
-            mysql_init(motapp->dbse->database_mysql);
-            if (mysql_real_connect(
-                motapp->dbse->database_mysql
-                , motapp->dbse->database_host.c_str()
-                , motapp->dbse->database_user.c_str()
-                , motapp->dbse->database_password.c_str()
-                , motapp->dbse->database_dbname.c_str()
-                , motapp->dbse->database_port, NULL, 0) == NULL) {
-                MOTION_LOG(ALR, TYPE_DB, NO_ERRNO
-                    ,_("Cannot reconnect to MySQL"
-                    " database %s on host %s with user %s MySQL error was %s")
-                    , motapp->dbse->database_dbname.c_str()
-                    , motapp->dbse->database_host.c_str()
-                    , motapp->dbse->database_user.c_str()
-                    , mysql_error(motapp->dbse->database_mysql));
-                dbse_deinit(motapp);
-            } else {
-                MOTION_LOG(INF, TYPE_DB, NO_ERRNO
-                    , _("Re-Connection to Mysql database '%s' Succeed")
-                    , motapp->dbse->database_dbname.c_str());
-                retcd = mysql_query(motapp->dbse->database_mysql, sqlquery);
-                if (retcd != 0) {
-                    retcd = mysql_errno(motapp->dbse->database_mysql);
-                    MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
-                        , _("after re-connection Mysql query failed "
-                            " %s error code %d")
-                        , mysql_error(motapp->dbse->database_mysql), retcd);
-                }
-            }
-        }
-    }
-}
-
-static void dbse_mysql_close(struct ctx_motapp *motapp)
-{
-    if (motapp->dbse->database_type == "mysql") {
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing MYSQL"));
-        mysql_library_end();
-        if (motapp->dbse->database_mysql != NULL) {
-            mysql_close(motapp->dbse->database_mysql);
-            motapp->dbse->database_mysql = NULL;
-        }
-    }
-}
-
-int dbse_mysql_movlst(struct ctx_cam *cam)
-{
-    (void)cam;
-    return 0;
-}
-
-#endif  /*HAVE_MYSQL*/
-
 #ifdef HAVE_PGSQL
 
 static void dbse_pgsql_exec(struct ctx_motapp *motapp, const char *sqlquery)
@@ -1330,11 +1213,6 @@ void dbse_init(struct ctx_motapp *motapp)
         }
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("Initializing database"));
         pthread_mutex_lock(&motapp->dbse->mutex_dbse);
-            #ifdef HAVE_MYSQL
-                if (motapp->dbse->database_type == "mysql") {
-                    dbse_mysql_init(motapp);
-                }
-            #endif
             #ifdef HAVE_MARIADB
                 if (motapp->dbse->database_type == "mariadb") {
                     dbse_mariadb_init(motapp);
@@ -1366,11 +1244,6 @@ void dbse_movies_getlist(struct ctx_motapp *motapp)
     dbse_movies_free(motapp);
 
     pthread_mutex_lock(&motapp->dbse->mutex_dbse);
-        #ifdef HAVE_MYSQL
-            if (cam->motapp->dbse->database_type == "mysql") {
-
-            }
-        #endif
         #ifdef HAVE_MARIADB
             if (motapp->dbse->database_type == "mariadb") {
                 dbse_mariadb_movlst(motapp);
@@ -1392,9 +1265,6 @@ void dbse_movies_getlist(struct ctx_motapp *motapp)
 
 void dbse_close(struct ctx_motapp *motapp)
 {
-    #ifdef HAVE_MYSQL
-        dbse_mysql_close(motapp);
-    #endif
     #ifdef HAVE_MARIADB
         dbse_mariadb_close(motapp);
     #endif
@@ -1431,11 +1301,6 @@ void dbse_exec_sql(struct ctx_motapp *motapp, const char *sqlquery)
     }
 
     pthread_mutex_lock(&motapp->dbse->mutex_dbse);
-        #ifdef HAVE_MYSQL
-            if (motapp->dbse->database_type == "mysql") {
-                dbse_mysql_exec(motapp, sqlquery);
-            }
-        #endif
         #ifdef HAVE_MARIADB
             if (motapp->dbse->database_type == "mariadb") {
                 dbse_mariadb_exec(motapp, sqlquery);

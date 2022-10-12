@@ -255,7 +255,7 @@
       Nearly all config options can be unique for a specific camera and placed in a camera config file.  Some
       options however must be specified in the motionplus.conf file such as: webcontrol_* , daemon, and camera.
       <p></p>
-      If MotionPlus is built without specific features such as mysql, opencv, etc it will ignore the options that
+      If MotionPlus is built without specific features such as MariaDB, opencv, etc it will ignore the options that
       belong to those features.
       <p></p>
 
@@ -359,7 +359,7 @@
       These are the options that can be used in the config file.
       <p></p>
       <p></p>
-      Some configuration options are only used if MotionPlus is built on a system that has the matching software installed (MySQL, PostgreSQL, SQLite, etc).
+      Some configuration options are only used if MotionPlus is built on a system that has the matching software installed (MariaDB, PostgreSQL, SQLite, etc).
       <p></p>
       <p></p>
       <style>
@@ -1267,7 +1267,7 @@
       <p></p>
       These are the options that can be used in the config file.
       <p></p>
-      Some configuration options are only used if MotionPlus is built on a system that has the matching software libraries installed (MySQL, PostgreSQL, SQLite, FFMPEG, etc).
+      Some configuration options are only used if MotionPlus is built on a system that has the matching software libraries installed (MariaDB, PostgreSQL, SQLite, FFMPEG, etc).
       <p></p>
       <p></p>
 
@@ -3916,7 +3916,7 @@
         <p></p>
         <ul>
           <li> Type: String</li>
-          <li> Range / Valid values: mysql, postgresql, sqlite3</li>
+          <li> Range / Valid values: mariadb, postgresql, sqlite3</li>
           <li> Default: Not defined</li>
         </ul>
         <p></p>
@@ -3953,7 +3953,7 @@
           <li> Default: 0</li>
         </ul>
         <p></p>
-        The port number that is used for the database.  Typical values are: mysql=3306 and postgresql=5432
+        The port number that is used for the database.  Typical values are: MariaDB=3306 and postgresql=5432
         <p></p>
 
         <h3><a name="database_user"></a> database_user </h3>

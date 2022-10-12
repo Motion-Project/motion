@@ -369,7 +369,7 @@ AS_IF([test "${MARIADB}" = "no"], [
     AS_IF([pkg-config mariadb], [
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags mariadb`
         TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs mariadb`
-        AC_DEFINE([HAVE_MARIADB], [1], [Define to 1 if you have MariaDB support])
+        AC_DEFINE([HAVE_MARIADB], [1], [Define to 1 if you have MariaDB/MySQL support])
       ],[
         MARIADB="no"
       ]
@@ -407,7 +407,7 @@ AS_IF([test "${MYSQL}" = "no"], [
     AS_IF([pkg-config mysqlclient], [
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags mysqlclient`
         TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs mysqlclient`
-        AC_DEFINE([HAVE_MYSQL], [1], [Define to 1 if you have MySQL support])
+        AC_DEFINE([HAVE_MARIADB], [1], [Define to 1 if you have MySQL/MariaDB support])
       ],[
         MYSQL="no"
       ]
@@ -467,7 +467,7 @@ AC_ARG_WITH([sqlite3],
 
 AS_IF([test "${SQLITE3}" = "no"], [
     AC_MSG_CHECKING(for SQLite3)
-    AC_MSG_ERROR([Package sqlite3 is required.])
+    AC_MSG_RESULT(skipped)
   ],[
     AC_MSG_CHECKING(SQLite3 pkg-config path)
     TEMP_PATH=$PKG_CONFIG_PATH
@@ -486,10 +486,11 @@ AS_IF([test "${SQLITE3}" = "no"], [
         AC_DEFINE([HAVE_SQLITE3], [1], [Define to 1 if you have SQLITE3 support])
         AC_MSG_RESULT(yes)
       ],[
-        AC_MSG_RESULT(no)
-        AC_MSG_ERROR([Required SQLite3 packages were not found.  Please check motionplus_guide.html and install necessary dependencies])
+        SQLITE3="no"
       ]
     )
+
+    AC_MSG_RESULT([$SQLITE3])
     PKG_CONFIG_PATH=$TEMP_PATH
     export PKG_CONFIG_PATH
   ]
