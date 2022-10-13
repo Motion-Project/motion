@@ -1410,7 +1410,7 @@ void dbse_movies_addrec(ctx_cam *cam, ctx_movie *movie, timespec *ts1)
     }
     localtime_r(&ts1->tv_sec, &timestamp_tm);
     strftime(dtl, 11, "%G%m%d", &timestamp_tm);
-    strftime(tmc, 11, "%I:%M%p", &timestamp_tm);
+    strftime(tmc, 11, "%H:%M", &timestamp_tm);
 
     if (cam->info_diff_cnt != 0) {
         diff_avg = (cam->info_diff_tot / cam->info_diff_cnt);
