@@ -202,6 +202,72 @@ static void dbse_rec_default(ctx_dbse_rec *rec)
 
 }
 
+static void dbse_rec_assign(ctx_dbse_rec *rec, char *col_nm, char *col_val)
+{
+    int flen;
+    struct stat statbuf;
+
+    if (mystrceq(col_nm,"recordid")) {
+        rec->recordid = atoi(col_val);
+
+    } else if (mystrceq(col_nm,"camid")) {
+        rec->camid = atoi(col_val);
+
+    } else if (mystrceq(col_nm,"movie_nm")) {
+        free(rec->movie_nm);
+        flen = strlen(col_val);
+        rec->movie_nm = (char*)mymalloc(flen + 1);
+        snprintf(rec->movie_nm, flen+1,"%s",col_val);
+
+    } else if (mystrceq(col_nm,"movie_dir")) {
+        free(rec->movie_dir);
+        flen = strlen(col_val);
+        rec->movie_dir = (char*)mymalloc(flen + 1);
+        snprintf(rec->movie_dir, flen+1,"%s",col_val);
+
+    } else if (mystrceq(col_nm,"full_nm")) {
+        free(rec->full_nm);
+        flen = strlen(col_val);
+        rec->full_nm = (char*)mymalloc(flen + 1);
+        snprintf(rec->full_nm, flen+1,"%s",col_val);
+        if (stat(rec->full_nm, &statbuf) == 0) {
+            rec->found = true;
+        }
+
+    } else if (mystrceq(col_nm,"movie_sz")) {
+        rec->movie_sz =atoi(col_val);
+
+    } else if (mystrceq(col_nm,"movie_dtl")) {
+        rec->movie_dtl =atoi(col_val);
+
+    } else if (mystrceq(col_nm,"movie_tmc")) {
+        free(rec->movie_tmc);
+        flen = strlen(col_val);
+        rec->movie_tmc =
+            (char*)mymalloc(flen + 1);
+        snprintf(rec->movie_tmc
+            ,flen+1,"%s",col_val);
+
+    } else if (mystrceq(col_nm,"movie_tml")) {
+        free(rec->movie_tml);
+        flen = strlen(col_val);
+        rec->movie_tml =
+            (char*)mymalloc(flen + 1);
+        snprintf(rec->movie_tml
+            ,flen+1,"%s",col_val);
+
+    } else if (mystrceq(col_nm,"diff_avg")) {
+        rec->diff_avg =atoi(col_val);
+    } else if (mystrceq(col_nm,"sdev_min")) {
+        rec->sdev_min =atoi(col_val);
+    } else if (mystrceq(col_nm,"sdev_max")) {
+        rec->sdev_max =atoi(col_val);
+    } else if (mystrceq(col_nm,"sdev_avg")) {
+        rec->sdev_avg =atoi(col_val);
+    }
+
+}
+
 #ifdef HAVE_SQLITE3
 
 static void dbse_sqlite3_exec(struct ctx_motapp *motapp, const char *sqlquery)
@@ -230,10 +296,7 @@ static int dbse_sqlite3_cb (
     void *ptr, int arg_nb, char **arg_val, char **col_nm)
 {
     ctx_motapp *motapp = (ctx_motapp *)ptr;
-    int indx, indx2;
-    int rnbr, flen;
-    struct stat statbuf;
-    ctx_dbse_rec *rec;
+    int indx, indx2, rnbr;
 
     if (motapp->dbse->dbse_action == DBSE_ACT_CHKTBL) {
         for (indx=0; indx < arg_nb; indx++) {
@@ -261,71 +324,12 @@ static int dbse_sqlite3_cb (
     } else if (motapp->dbse->dbse_action == DBSE_ACT_GETTBL) {
         rnbr = motapp->dbse->rec_indx;
         if (rnbr < motapp->dbse->movie_cnt) {
-            rec = &motapp->dbse->movie_list[rnbr];
-            dbse_rec_default(rec);
-
+            dbse_rec_default(&motapp->dbse->movie_list[rnbr]);
             for (indx=0; indx < arg_nb; indx++) {
                 if (arg_val[indx] != NULL) {
-                    if (arg_val[indx] != NULL) {
-                        if (mystrceq(col_nm[indx],"recordid")) {
-                            rec->recordid = atoi(arg_val[indx]);
-
-                        } else if (mystrceq(col_nm[indx],"camid")) {
-                            rec->camid = atoi(arg_val[indx]);
-
-                        } else if (mystrceq(col_nm[indx],"movie_nm")) {
-                            free(rec->movie_nm);
-                            flen = strlen(arg_val[indx]);
-                            rec->movie_nm = (char*)mymalloc(flen + 1);
-                            snprintf(rec->movie_nm, flen+1,"%s",arg_val[indx]);
-
-                        } else if (mystrceq(col_nm[indx],"movie_dir")) {
-                            free(rec->movie_dir);
-                            flen = strlen(arg_val[indx]);
-                            rec->movie_dir = (char*)mymalloc(flen + 1);
-                            snprintf(rec->movie_dir, flen+1,"%s",arg_val[indx]);
-
-                        } else if (mystrceq(col_nm[indx],"full_nm")) {
-                            free(rec->full_nm);
-                            flen = strlen(arg_val[indx]);
-                            rec->full_nm = (char*)mymalloc(flen + 1);
-                            snprintf(rec->full_nm, flen+1,"%s",arg_val[indx]);
-                            if (stat(rec->full_nm, &statbuf) == 0) {
-                                rec->found = true;
-                            }
-
-                        } else if (mystrceq(col_nm[indx],"movie_sz")) {
-                            rec->movie_sz =atoi(arg_val[indx]);
-
-                        } else if (mystrceq(col_nm[indx],"movie_dtl")) {
-                            rec->movie_dtl =atoi(arg_val[indx]);
-
-                        } else if (mystrceq(col_nm[indx],"movie_tmc")) {
-                            free(rec->movie_tmc);
-                            flen = strlen(arg_val[indx]);
-                            rec->movie_tmc =
-                                (char*)mymalloc(flen + 1);
-                            snprintf(rec->movie_tmc
-                                ,flen+1,"%s",arg_val[indx]);
-
-                        } else if (mystrceq(col_nm[indx],"movie_tml")) {
-                            free(rec->movie_tml);
-                            flen = strlen(arg_val[indx]);
-                            rec->movie_tml =
-                                (char*)mymalloc(flen + 1);
-                            snprintf(rec->movie_tml
-                                ,flen+1,"%s",arg_val[indx]);
-
-                        } else if (mystrceq(col_nm[indx],"diff_avg")) {
-                            rec->diff_avg =atoi(arg_val[indx]);
-                        } else if (mystrceq(col_nm[indx],"sdev_min")) {
-                            rec->sdev_min =atoi(arg_val[indx]);
-                        } else if (mystrceq(col_nm[indx],"sdev_max")) {
-                            rec->sdev_max =atoi(arg_val[indx]);
-                        } else if (mystrceq(col_nm[indx],"sdev_avg")) {
-                            rec->sdev_avg =atoi(arg_val[indx]);
-                        }
-                    }
+                    dbse_rec_assign(&motapp->dbse->movie_list[rnbr]
+                        , (char*)col_nm[indx]
+                        , (char*)arg_val[indx]);
                 }
             }
         }
@@ -597,12 +601,10 @@ static void dbse_mariadb_exec (struct ctx_motapp *motapp, const char *sqlquery)
 static void dbse_mariadb_recs (struct ctx_motapp *motapp, const char *sqlquery)
 {
     int retcd, indx, indx2;
-    int qry_fields, rnbr, flen;
-    struct stat statbuf;
+    int qry_fields, rnbr;
     MYSQL_RES *qry_result;
     MYSQL_ROW qry_row;
     MYSQL_FIELD *qry_col;
-    ctx_dbse_rec *rec;
     ctx_dbse_col *cols;
 
     retcd = mysql_query(motapp->dbse->database_mariadb, sqlquery);
@@ -673,60 +675,12 @@ static void dbse_mariadb_recs (struct ctx_motapp *motapp, const char *sqlquery)
         motapp->dbse->rec_indx = 0;
         while (qry_row != NULL) {
             rnbr = motapp->dbse->rec_indx;
-            rec = &motapp->dbse->movie_list[rnbr];
-            dbse_rec_default(rec);
-
+            dbse_rec_default(&motapp->dbse->movie_list[rnbr]);
             for(indx = 0; indx < qry_fields; indx++) {
                 if (qry_row[indx] != NULL) {
-                    if (mystrceq(cols[indx].col_nm,"recordid")) {
-                        rec->recordid = atoi(qry_row[indx]);
-                    } else if (mystrceq(cols[indx].col_nm,"camid")) {
-                        rec->camid = atoi(qry_row[indx]);
-                    } else if (mystrceq(cols[indx].col_nm,"movie_nm")) {
-                        free(rec->movie_nm);
-                        flen = strlen(qry_row[indx]);
-                        rec->movie_nm = (char*)mymalloc(flen + 1);
-                        snprintf(rec->movie_nm, flen+1,"%s",qry_row[indx]);
-                    } else if (mystrceq(cols[indx].col_nm,"movie_dir")) {
-                        free(rec->movie_dir);
-                        flen = strlen(qry_row[indx]);
-                        rec->movie_dir = (char*)mymalloc(flen + 1);
-                        snprintf(rec->movie_dir, flen+1,"%s",qry_row[indx]);
-                    } else if (mystrceq(cols[indx].col_nm,"full_nm")) {
-                        free(rec->full_nm);
-                        flen = strlen(qry_row[indx]);
-                        rec->full_nm = (char*)mymalloc(flen + 1);
-                        snprintf(rec->full_nm, flen+1,"%s",qry_row[indx]);
-                        if (stat(rec->full_nm, &statbuf) == 0) {
-                            rec->found = true;
-                        }
-                    } else if (mystrceq(cols[indx].col_nm,"movie_sz")) {
-                        rec->movie_sz =atoi(qry_row[indx]);
-
-                    } else if (mystrceq(cols[indx].col_nm,"movie_dtl")) {
-                        rec->movie_dtl =atoi(qry_row[indx]);
-
-                    } else if (mystrceq(cols[indx].col_nm,"movie_tmc")) {
-                        free(rec->movie_tmc);
-                        flen = strlen(qry_row[indx]);
-                        rec->movie_tmc =(char*)mymalloc(flen + 1);
-                        snprintf(rec->movie_tmc, flen+1,"%s",qry_row[indx]);
-
-                    } else if (mystrceq(cols[indx].col_nm,"movie_tml")) {
-                        free(rec->movie_tml);
-                        flen = strlen(qry_row[indx]);
-                        rec->movie_tml =(char*)mymalloc(flen + 1);
-                        snprintf(rec->movie_tml, flen+1,"%s",qry_row[indx]);
-
-                    } else if (mystrceq(cols[indx].col_nm,"diff_avg")) {
-                        rec->diff_avg =atoi(qry_row[indx]);
-                    } else if (mystrceq(cols[indx].col_nm,"sdev_min")) {
-                        rec->sdev_min =atoi(qry_row[indx]);
-                    } else if (mystrceq(cols[indx].col_nm,"sdev_max")) {
-                        rec->sdev_max =atoi(qry_row[indx]);
-                    } else if (mystrceq(cols[indx].col_nm,"sdev_avg")) {
-                        rec->sdev_avg =atoi(qry_row[indx]);
-                    }
+                    dbse_rec_assign(&motapp->dbse->movie_list[rnbr]
+                        , (char*)cols[indx].col_nm
+                        , (char*)qry_row[indx]);
                 }
             }
             motapp->dbse->rec_indx++;
@@ -963,9 +917,7 @@ static void dbse_pgsql_close(struct ctx_motapp *motapp)
 static void dbse_pgsql_recs (struct ctx_motapp *motapp, const char *sqlquery)
 {
     PGresult    *res;
-    int indx, indx2, rows, cols, rnbr, flen;
-    struct stat statbuf;
-    ctx_dbse_rec *rec;
+    int indx, indx2, rows, cols, rnbr;
 
     if (motapp->dbse->database_pgsql == NULL) {
         return;
@@ -1033,70 +985,12 @@ static void dbse_pgsql_recs (struct ctx_motapp *motapp, const char *sqlquery)
         rows = PQntuples(res);
         for(indx = 0; indx < rows; indx++) {
             rnbr = motapp->dbse->rec_indx;
-            rec = &motapp->dbse->movie_list[rnbr];
-            dbse_rec_default(rec);
-
+            dbse_rec_default(&motapp->dbse->movie_list[rnbr]);
             for (indx2 = 0; indx2 < cols; indx2++) {
                 if (PQgetvalue(res, indx, indx2) != NULL) {
-                    if (mystrceq(PQfname(res, indx2), "recordid")) {
-                        rec->recordid = atoi(PQgetvalue(res, indx, indx2));
-
-                    } else if (mystrceq(PQfname(res, indx2),"camid")) {
-                        rec->camid = atoi(PQgetvalue(res, indx, indx2));
-
-                    } else if (mystrceq(PQfname(res, indx2),"movie_nm")) {
-                        free(rec->movie_nm);
-                        flen = strlen(PQgetvalue(res, indx, indx2));
-                        rec->movie_nm = (char*)mymalloc(flen + 1);
-                        snprintf(rec->movie_nm, flen+1, "%s"
-                            ,PQgetvalue(res, indx, indx2));
-                    } else if (mystrceq(PQfname(res, indx2),"movie_dir")) {
-                        free(rec->movie_dir);
-                        flen = strlen(PQgetvalue(res, indx, indx2));
-                        rec->movie_dir =(char*)mymalloc(flen + 1);
-                        snprintf(rec->movie_dir, flen+1, "%s"
-                            ,PQgetvalue(res, indx, indx2));
-                    } else if (mystrceq(PQfname(res, indx2),"full_nm")) {
-                        free(rec->full_nm);
-                        flen = strlen(PQgetvalue(res, indx, indx2));
-                        rec->full_nm =(char*)mymalloc(flen + 1);
-                        snprintf(rec->full_nm, flen+1, "%s"
-                            ,PQgetvalue(res, indx, indx2));
-                        if (stat(rec->full_nm, &statbuf) == 0) {
-                            rec->found = true;
-                        }
-                    } else if (mystrceq(PQfname(res, indx2),"movie_sz")) {
-                        rec->movie_sz =atoi(PQgetvalue(res, indx, indx2));
-
-                    } else if (mystrceq(PQfname(res, indx2),"movie_dtl")) {
-                        rec->movie_dtl =atoi(PQgetvalue(res, indx, indx2));
-
-                    } else if (mystrceq(PQfname(res, indx2),"movie_tmc")) {
-                        free(rec->movie_tmc);
-                        flen = strlen(PQgetvalue(res, indx, indx2));
-                        rec->movie_tmc =(char*)mymalloc(flen + 1);
-                        snprintf(rec->movie_tmc, flen+1, "%s"
-                            ,PQgetvalue(res, indx, indx2));
-
-                    } else if (mystrceq(PQfname(res, indx2),"movie_tml")) {
-                        free(rec->movie_tml);
-                        flen = strlen(PQgetvalue(res, indx, indx2));
-                        rec->movie_tml =(char*)mymalloc(flen + 1);
-                        snprintf(rec->movie_tml, flen+1, "%s"
-                            ,PQgetvalue(res, indx, indx2));
-
-                    } else if (mystrceq(PQfname(res, indx2),"diff_avg")) {
-                        rec->diff_avg =atoi(PQgetvalue(res, indx, indx2));
-
-                    } else if (mystrceq(PQfname(res, indx2),"sdev_min")) {
-                        rec->sdev_min =atoi(PQgetvalue(res, indx, indx2));
-
-                    } else if (mystrceq(PQfname(res, indx2),"sdev_max")) {
-                        rec->sdev_max =atoi(PQgetvalue(res, indx, indx2));
-
-                    } else if (mystrceq(PQfname(res, indx2),"sdev_avg")) {
-                        rec->sdev_avg =atoi(PQgetvalue(res, indx, indx2));
-                    }
+                    dbse_rec_assign(&motapp->dbse->movie_list[rnbr]
+                        , (char*)PQfname(res, indx2)
+                        , (char*)PQgetvalue(res, indx, indx2));
                 }
             }
             motapp->dbse->rec_indx++;
