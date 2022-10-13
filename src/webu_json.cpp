@@ -283,92 +283,89 @@ void webu_json_config(struct ctx_webui *webui)
 static void webu_json_movies_list(struct ctx_webui *webui)
 {
     int indx_mov, indx_cam, indx;
-    int movie_cnt, skip;
+    int movie_cnt, indx_req;
     std::string response;
     char fmt[PATH_MAX];
-    ctx_cam *cam;
     ctx_dbse_rec db;
     struct ctx_params *wact;
 
-    /* Get the count */
+    /* Get the indx we want */
     indx_cam = 0;
+    indx_req = -1;
     while (webui->motapp->cam_list[indx_cam] != NULL) {
+        if (webui->cam->camera_id == webui->motapp->cam_list[indx_cam]->camera_id){
+            indx_req = indx_cam;
+        }
         indx_cam++;
     }
-    webui->resp_page += "{\"count\" : " + std::to_string(indx_cam - 1);
 
-    skip = 0;
+    webui->resp_page += "{\"count\" : 1";
+    webui->resp_page += ",\""+ std::to_string(indx_req) + "\":";
+
+    /* Validate movies permitted via params */
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"movies")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
                 MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Movies via webcontrol disabled");
-                skip = 1;
-                break;
+                webui->resp_page += "{\"count\" : 0} ";
+                webui->resp_page += "}";
+                return;
             } else {
                 break;
             }
         }
     }
 
-    /* We skip the default 0 "all" index */
-    indx_cam = 1;
-    while (webui->motapp->cam_list[indx_cam] != NULL) {
-        cam =webui->motapp->cam_list[indx_cam];
-        dbse_movies_getlist(cam->motapp);
-        webui->resp_page += ",\""+ std::to_string(indx_cam) + "\":";
-        if (skip == 1) {
-            webui->resp_page += "{\"count\" : 0} ";
+
+    dbse_movies_getlist(webui->cam->motapp, webui->cam->camera_id);
+
+    movie_cnt = webui->cam->motapp->dbse->movie_cnt;
+    webui->resp_page += "{\"count\" : " + std::to_string(movie_cnt);
+
+    for (indx_mov=0; indx_mov < movie_cnt; indx_mov++) {
+        db = webui->cam->motapp->dbse->movie_list[indx_mov];
+        if ((db.movie_sz/1000) < 1000) {
+            snprintf(fmt,PATH_MAX,"%'.1fKB"
+                ,((double)db.movie_sz/1000));
+        } else if ((db.movie_sz/1000000) < 1000) {
+            snprintf(fmt,PATH_MAX,"%'.1fMB"
+                ,((double)db.movie_sz/1000000));
         } else {
-            movie_cnt = cam->motapp->dbse->movie_cnt;
-            webui->resp_page += "{\"count\" : " + std::to_string(movie_cnt);
-
-            for (indx_mov=0; indx_mov < movie_cnt; indx_mov++) {
-                db = cam->motapp->dbse->movie_list[indx_mov];
-                if ((db.movie_sz/1000) < 1000) {
-                    snprintf(fmt,PATH_MAX,"%'.1fKB"
-                        ,((double)db.movie_sz/1000));
-                } else if ((db.movie_sz/1000000) < 1000) {
-                    snprintf(fmt,PATH_MAX,"%'.1fMB"
-                        ,((double)db.movie_sz/1000000));
-                } else {
-                    snprintf(fmt,PATH_MAX,"%'.1fGB"
-                        ,((double)db.movie_sz/1000000000));
-                }
-                webui->resp_page += ",\""+ std::to_string(indx_mov) + "\":";
-
-                webui->resp_page += "{\"name\": \"";
-                webui->resp_page += std::string(db.movie_nm) + "\"";
-
-                webui->resp_page += ",\"size\": \"";
-                webui->resp_page += std::string(fmt) + "\"";
-
-                webui->resp_page += ",\"date\": \"";
-                webui->resp_page += std::to_string(db.movie_dtl) + "\"";
-
-                if (db.movie_tmc != NULL) {
-                    webui->resp_page += ",\"time\": \"";
-                    webui->resp_page += std::string(db.movie_tmc) + "\"";
-                }
-
-                webui->resp_page += ",\"diff_avg\": \"";
-                webui->resp_page += std::to_string(db.diff_avg) + "\"";
-
-                webui->resp_page += ",\"sdev_min\": \"";
-                webui->resp_page += std::to_string(db.sdev_min) + "\"";
-
-                webui->resp_page += ",\"sdev_max\": \"";
-                webui->resp_page += std::to_string(db.sdev_max) + "\"";
-
-                webui->resp_page += ",\"sdev_avg\": \"";
-                webui->resp_page += std::to_string(db.sdev_avg) + "\"";
-
-                webui->resp_page += "}";
-            }
-            webui->resp_page += "}";
+            snprintf(fmt,PATH_MAX,"%'.1fGB"
+                ,((double)db.movie_sz/1000000000));
         }
-        indx_cam++;
+        webui->resp_page += ",\""+ std::to_string(indx_mov) + "\":";
+
+        webui->resp_page += "{\"name\": \"";
+        webui->resp_page += std::string(db.movie_nm) + "\"";
+
+        webui->resp_page += ",\"size\": \"";
+        webui->resp_page += std::string(fmt) + "\"";
+
+        webui->resp_page += ",\"date\": \"";
+        webui->resp_page += std::to_string(db.movie_dtl) + "\"";
+
+        if (db.movie_tmc != NULL) {
+            webui->resp_page += ",\"time\": \"";
+            webui->resp_page += std::string(db.movie_tmc) + "\"";
+        }
+
+        webui->resp_page += ",\"diff_avg\": \"";
+        webui->resp_page += std::to_string(db.diff_avg) + "\"";
+
+        webui->resp_page += ",\"sdev_min\": \"";
+        webui->resp_page += std::to_string(db.sdev_min) + "\"";
+
+        webui->resp_page += ",\"sdev_max\": \"";
+        webui->resp_page += std::to_string(db.sdev_max) + "\"";
+
+        webui->resp_page += ",\"sdev_avg\": \"";
+        webui->resp_page += std::to_string(db.sdev_avg) + "\"";
+
+        webui->resp_page += "}";
     }
+    webui->resp_page += "}";
     webui->resp_page += "}";
 
     return;

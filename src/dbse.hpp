@@ -110,7 +110,7 @@
     void dbse_deinit_motpls(ctx_motapp *motapp);
     void dbse_exec(ctx_cam *cam, char *filename
         , int sqltype, timespec *ts1, const char *cmd);
-    void dbse_movies_getlist(ctx_motapp *motapp);
+    void dbse_movies_getlist(ctx_motapp *motapp, int camera_id);
     void dbse_movies_addrec(ctx_cam *cam, ctx_movie *movie, timespec *ts1);
 
 #endif /* _INCLUDE_DBSE_HPP_ */

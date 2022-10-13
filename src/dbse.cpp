@@ -435,15 +435,18 @@ static void dbse_sqlite3_init(struct ctx_motapp *motapp)
 
 }
 
-static void dbse_sqlite3_movlst(struct ctx_motapp *motapp)
+static void dbse_sqlite3_movlst(struct ctx_motapp *motapp, int camera_id)
 {
     int retcd, indx;
     char *errmsg  = NULL;
     std::string sqlquery, delimit;
 
-    sqlquery =
-        "select count(*) as movie_cnt "
-        " from motionplus ;";
+    sqlquery  = " select ";
+    sqlquery += "   count(*) as movie_cnt ";
+    sqlquery += " from motionplus ";
+    sqlquery += " where ";
+    sqlquery += "   camid = " + std::to_string(camera_id);
+    sqlquery += ";";
     motapp->dbse->dbse_action = DBSE_ACT_GETCNT;
 
     retcd = sqlite3_exec(
@@ -461,7 +464,12 @@ static void dbse_sqlite3_movlst(struct ctx_motapp *motapp)
             mymalloc(sizeof(ctx_dbse_rec)*motapp->dbse->movie_cnt);
         motapp->dbse->rec_indx = 0;
 
-        sqlquery =" select * from motionplus ;";
+        sqlquery  = " select * ";
+        sqlquery += " from motionplus ";
+        sqlquery += " where ";
+        sqlquery += "   camid = " + std::to_string(camera_id);
+        sqlquery += " order by ";
+        sqlquery += "   movie_dtl,movie_dtl;";
         motapp->dbse->dbse_action = DBSE_ACT_GETTBL;
 
         retcd = sqlite3_exec(
@@ -825,14 +833,17 @@ static void dbse_mariadb_close(struct ctx_motapp *motapp)
     }
 }
 
-static void dbse_mariadb_movlst(struct ctx_motapp *motapp)
+static void dbse_mariadb_movlst(struct ctx_motapp *motapp, int camera_id )
 {
     int indx;
     std::string sqlquery, delimit;
 
-    sqlquery =
-        "select count(*) as movie_cnt "
-        " from motionplus ;";
+    sqlquery  = " select ";
+    sqlquery += "   count(*) as movie_cnt ";
+    sqlquery += " from motionplus ";
+    sqlquery += " where ";
+    sqlquery += "   camid = " + std::to_string(camera_id);
+    sqlquery += ";";
     motapp->dbse->dbse_action = DBSE_ACT_GETCNT;
     dbse_mariadb_recs(motapp, sqlquery.c_str());
 
@@ -840,7 +851,12 @@ static void dbse_mariadb_movlst(struct ctx_motapp *motapp)
         motapp->dbse->movie_list =(ctx_dbse_rec *)
             mymalloc(sizeof(ctx_dbse_rec)*motapp->dbse->movie_cnt);
 
-        sqlquery =" select * from motionplus ;";
+        sqlquery  = " select * ";
+        sqlquery += " from motionplus ";
+        sqlquery += " where ";
+        sqlquery += "   camid = " + std::to_string(camera_id);
+        sqlquery += " order by ";
+        sqlquery += "   movie_dtl,movie_dtl;";
         motapp->dbse->dbse_action = DBSE_ACT_GETTBL;
         dbse_mariadb_recs(motapp, sqlquery.c_str());
 
@@ -1146,14 +1162,17 @@ static void dbse_pgsql_init(struct ctx_motapp *motapp)
         , motapp->dbse->database_dbname.c_str() );
 }
 
-static void dbse_pgsql_movlst(struct ctx_motapp *motapp)
+static void dbse_pgsql_movlst(struct ctx_motapp *motapp, int camera_id)
 {
     int indx;
     std::string sqlquery, delimit;
 
-    sqlquery =
-        "select count(*) as movie_cnt "
-        " from motionplus ;";
+    sqlquery  = " select ";
+    sqlquery += "   count(*) as movie_cnt ";
+    sqlquery += " from motionplus ";
+    sqlquery += " where ";
+    sqlquery += "   camid = " + std::to_string(camera_id);
+    sqlquery += ";";
     motapp->dbse->dbse_action = DBSE_ACT_GETCNT;
     dbse_pgsql_recs(motapp, sqlquery.c_str());
 
@@ -1161,7 +1180,14 @@ static void dbse_pgsql_movlst(struct ctx_motapp *motapp)
         motapp->dbse->movie_list =(ctx_dbse_rec *)
             mymalloc(sizeof(ctx_dbse_rec)*motapp->dbse->movie_cnt);
 
-        sqlquery =" select * from motionplus ;";
+        sqlquery  = " select ";
+        sqlquery += "   * ";
+        sqlquery += " from motionplus ";
+        sqlquery += " where ";
+        sqlquery += "   camid = " + std::to_string(camera_id);
+        sqlquery += " order by ";
+        sqlquery += "   movie_dtl,movie_dtl";
+        sqlquery += ";";
         motapp->dbse->dbse_action = DBSE_ACT_GETTBL;
         dbse_pgsql_recs(motapp, sqlquery.c_str());
 
@@ -1234,7 +1260,7 @@ void dbse_init(struct ctx_motapp *motapp)
 }
 
 /* Populate the list of the movies from the database*/
-void dbse_movies_getlist(struct ctx_motapp *motapp)
+void dbse_movies_getlist(struct ctx_motapp *motapp, int camera_id)
 {
 
     if (motapp->dbse->database_type == "") {
@@ -1246,17 +1272,17 @@ void dbse_movies_getlist(struct ctx_motapp *motapp)
     pthread_mutex_lock(&motapp->dbse->mutex_dbse);
         #ifdef HAVE_MARIADB
             if (motapp->dbse->database_type == "mariadb") {
-                dbse_mariadb_movlst(motapp);
+                dbse_mariadb_movlst(motapp, camera_id);
             }
         #endif
         #ifdef HAVE_PGSQL
             if (motapp->dbse->database_type == "postgresql") {
-                dbse_pgsql_movlst(motapp);
+                dbse_pgsql_movlst(motapp, camera_id);
             }
         #endif
         #ifdef HAVE_SQLITE3
             if (motapp->dbse->database_type == "sqlite3") {
-                dbse_sqlite3_movlst(motapp);
+                dbse_sqlite3_movlst(motapp, camera_id);
             }
         #endif
     pthread_mutex_unlock(&motapp->dbse->mutex_dbse);
