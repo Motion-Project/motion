@@ -50,7 +50,7 @@
     /* Record structure of motionplus table */
     struct ctx_dbse_rec {
         bool        found;      /*Bool for whether the file exists*/
-        int64_t     recordid;   /*recordid*/
+        int64_t     record_id;  /*record_id*/
         int         camera_id;  /*camera id */
         char        *movie_nm;  /*Name of the movie file*/
         char        *movie_dir; /*Directory of the movie file */
