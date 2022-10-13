@@ -469,7 +469,7 @@ static void dbse_sqlite3_movlst(struct ctx_motapp *motapp, int camera_id)
         sqlquery += " where ";
         sqlquery += "   camid = " + std::to_string(camera_id);
         sqlquery += " order by ";
-        sqlquery += "   movie_dtl,movie_dtl;";
+        sqlquery += "   movie_dtl,movie_tmc;";
         motapp->dbse->dbse_action = DBSE_ACT_GETTBL;
 
         retcd = sqlite3_exec(
@@ -856,7 +856,7 @@ static void dbse_mariadb_movlst(struct ctx_motapp *motapp, int camera_id )
         sqlquery += " where ";
         sqlquery += "   camid = " + std::to_string(camera_id);
         sqlquery += " order by ";
-        sqlquery += "   movie_dtl,movie_dtl;";
+        sqlquery += "   movie_dtl,movie_tmc;";
         motapp->dbse->dbse_action = DBSE_ACT_GETTBL;
         dbse_mariadb_recs(motapp, sqlquery.c_str());
 
@@ -1186,7 +1186,7 @@ static void dbse_pgsql_movlst(struct ctx_motapp *motapp, int camera_id)
         sqlquery += " where ";
         sqlquery += "   camid = " + std::to_string(camera_id);
         sqlquery += " order by ";
-        sqlquery += "   movie_dtl,movie_dtl";
+        sqlquery += "   movie_dtl,movie_tmc;";
         sqlquery += ";";
         motapp->dbse->dbse_action = DBSE_ACT_GETTBL;
         dbse_pgsql_recs(motapp, sqlquery.c_str());
