@@ -124,7 +124,7 @@ static void sigchild_handler(int signo)
     return;
 }
 
-/** Attach handlers to a number of signals that Motion need to catch. */
+/** Attach handlers to a number of signals that MotionPlus need to catch. */
 static void setup_signals(void)
 {
     struct sigaction sig_handler_action;
@@ -163,7 +163,7 @@ static void setup_signals(void)
     sigaction(SIGVTALRM, &sig_handler_action, NULL);
 }
 
-/** Remove the process id file ( pid file ) before motion exit. */
+/** Remove the process id file ( pid file ) before MotionPlus exit. */
 static void motion_remove_pid(struct ctx_motapp *motapp)
 {
 
@@ -179,7 +179,7 @@ static void motion_remove_pid(struct ctx_motapp *motapp)
 
 }
 
-/**  Turn Motion into a daemon through forking. */
+/**  Turn MotionPlus into a daemon through forking. */
 static void motion_daemon(struct ctx_motapp *motapp)
 {
     int fd;
@@ -196,14 +196,14 @@ static void motion_daemon(struct ctx_motapp *motapp)
     sigemptyset(&sig_ign_action.sa_mask);
 
     if (fork()) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion going to daemon mode"));
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus going to daemon mode"));
         exit(0);
     }
 
     /*
      * Create the pid file if defined, if failed exit
      * If we fail we report it. If we succeed we postpone the log entry till
-     * later when we have closed stdout. Otherwise Motion hangs in the terminal waiting
+     * later when we have closed stdout. Otherwise MotionPlus hangs in the terminal waiting
      * for an enter.
      */
     if (motapp->pid_file != "") {
@@ -214,7 +214,7 @@ static void motion_daemon(struct ctx_motapp *motapp)
             myfclose(pidf);
         } else {
             MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
-                ,_("Exit motion, cannot create process"
+                ,_("Exit MotionPlus, cannot create process"
                 " id file (pid file) %s"),motapp->pid_file.c_str());
             log_deinit(motapp);
             exit(0);
@@ -223,7 +223,7 @@ static void motion_daemon(struct ctx_motapp *motapp)
 
     /*
      * Changing dir to root enables people to unmount a disk
-     * without having to stop Motion
+     * without having to stop MotionPlus
      */
     if (chdir("/")) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Could not change directory"));
@@ -402,12 +402,12 @@ static void motion_startup(struct ctx_motapp *motapp, int daemonize, int argc, c
     if (daemonize) {
         if (motapp->daemon && motapp->setup_mode == 0) {
             motion_daemon(motapp);
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion running as daemon process"));
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus running as daemon process"));
         }
     }
 
     if (motapp->setup_mode) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Motion running in setup mode."));
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("MotionPlus running in setup mode."));
     }
 
     conf_parms_log(motapp->cam_list);
@@ -439,7 +439,7 @@ static void motion_start_thread(struct ctx_motapp *motapp, int indx)
     retcd = pthread_create(&motapp->cam_list[indx]->thread_id
                 , &thread_attr, &motion_loop, motapp->cam_list[indx]);
     if (retcd != 0) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start thread for motion loop."));
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start thread for MotionPlus loop."));
     }
 
     pthread_attr_destroy(&thread_attr);
@@ -449,14 +449,14 @@ static void motion_start_thread(struct ctx_motapp *motapp, int indx)
 static void motion_restart(struct ctx_motapp *motapp, int argc, char **argv)
 {
 
-    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Restarting motion."));
+    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Restarting MotionPlus."));
 
     motion_shutdown(motapp);
 
     SLEEP(2, 0);
 
     motion_startup(motapp, false, argc, argv);
-    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Motion restarted"));
+    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("MotionPlus restarted"));
 
     motapp->restart_all = false;
 
@@ -574,7 +574,7 @@ static int motion_check_threadcount(struct ctx_motapp *motapp)
     if (((thrdcnt == 0) && motapp->finish_all) ||
         ((thrdcnt == 0) && (motapp->threads_running == 0))) {
         MOTION_LOG(ALL, TYPE_ALL, NO_ERRNO
-            ,_("DEBUG-1 threads_running %d motion_threads_running %d , finish %d")
+            ,_("DEBUG-1 threads_running %d thrdcnt %d , finish %d")
             ,motapp->threads_running, thrdcnt, motapp->finish_all);
         return 1;
     } else {
@@ -708,7 +708,7 @@ static void motion_cam_delete(struct ctx_motapp *motapp)
 }
 
 
-/** Main entry point of Motion. */
+/** Main entry point of MotionPlus. */
 int main (int argc, char **argv)
 {
     int indx;
@@ -750,7 +750,7 @@ int main (int argc, char **argv)
                 if ((motapp->cam_list[indx]->running_cam == false) &&
                     (motapp->cam_list[indx]->restart_cam == true)) {
                     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                        ,_("Motion camera %d restart")
+                        ,_("MotionPlus camera %d restart")
                         , motapp->cam_list[indx]->camera_id);
                     motion_start_thread(motapp, indx);
                 }
@@ -781,7 +781,7 @@ int main (int argc, char **argv)
         }
     }
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion terminating"));
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus terminating"));
 
     movie_global_deinit();
 
