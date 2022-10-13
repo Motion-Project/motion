@@ -102,7 +102,7 @@ static void dbse_cols_list(struct ctx_motapp *motapp)
     }
 
     indx=0;
-    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "camid");
+    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "camera_id");
     snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "int");
 
     indx++;
@@ -175,7 +175,7 @@ static void dbse_rec_default(ctx_dbse_rec *rec)
 {
     rec->found     = false;
     rec->recordid  = -1;
-    rec->camid     = -1;
+    rec->camera_id     = -1;
 
     rec->movie_nm = (char*)mymalloc(5);
     snprintf(rec->movie_nm, 5,"%s", "null");
@@ -210,8 +210,8 @@ static void dbse_rec_assign(ctx_dbse_rec *rec, char *col_nm, char *col_val)
     if (mystrceq(col_nm,"recordid")) {
         rec->recordid = atoi(col_val);
 
-    } else if (mystrceq(col_nm,"camid")) {
-        rec->camid = atoi(col_val);
+    } else if (mystrceq(col_nm,"camera_id")) {
+        rec->camera_id = atoi(col_val);
 
     } else if (mystrceq(col_nm,"movie_nm")) {
         free(rec->movie_nm);
@@ -467,7 +467,7 @@ static void dbse_sqlite3_movlst(struct ctx_motapp *motapp, int camera_id)
     sqlquery += "   count(*) as movie_cnt ";
     sqlquery += " from motionplus ";
     sqlquery += " where ";
-    sqlquery += "   camid = " + std::to_string(camera_id);
+    sqlquery += "   camera_id = " + std::to_string(camera_id);
     sqlquery += ";";
     motapp->dbse->dbse_action = DBSE_ACT_GETCNT;
 
@@ -489,7 +489,7 @@ static void dbse_sqlite3_movlst(struct ctx_motapp *motapp, int camera_id)
         sqlquery  = " select * ";
         sqlquery += " from motionplus ";
         sqlquery += " where ";
-        sqlquery += "   camid = " + std::to_string(camera_id);
+        sqlquery += "   camera_id = " + std::to_string(camera_id);
         sqlquery += " order by ";
         sqlquery += "   movie_dtl, movie_tml;";
         motapp->dbse->dbse_action = DBSE_ACT_GETTBL;
@@ -820,7 +820,7 @@ static void dbse_mariadb_movlst(struct ctx_motapp *motapp, int camera_id )
     sqlquery += "   count(*) as movie_cnt ";
     sqlquery += " from motionplus ";
     sqlquery += " where ";
-    sqlquery += "   camid = " + std::to_string(camera_id);
+    sqlquery += "   camera_id = " + std::to_string(camera_id);
     sqlquery += ";";
     motapp->dbse->dbse_action = DBSE_ACT_GETCNT;
     dbse_mariadb_recs(motapp, sqlquery.c_str());
@@ -832,7 +832,7 @@ static void dbse_mariadb_movlst(struct ctx_motapp *motapp, int camera_id )
         sqlquery  = " select * ";
         sqlquery += " from motionplus ";
         sqlquery += " where ";
-        sqlquery += "   camid = " + std::to_string(camera_id);
+        sqlquery += "   camera_id = " + std::to_string(camera_id);
         sqlquery += " order by ";
         sqlquery += "   movie_dtl,movie_tml;";
         motapp->dbse->dbse_action = DBSE_ACT_GETTBL;
@@ -1096,7 +1096,7 @@ static void dbse_pgsql_movlst(struct ctx_motapp *motapp, int camera_id)
     sqlquery += "   count(*) as movie_cnt ";
     sqlquery += " from motionplus ";
     sqlquery += " where ";
-    sqlquery += "   camid = " + std::to_string(camera_id);
+    sqlquery += "   camera_id = " + std::to_string(camera_id);
     sqlquery += ";";
     motapp->dbse->dbse_action = DBSE_ACT_GETCNT;
     dbse_pgsql_recs(motapp, sqlquery.c_str());
@@ -1109,7 +1109,7 @@ static void dbse_pgsql_movlst(struct ctx_motapp *motapp, int camera_id)
         sqlquery += "   * ";
         sqlquery += " from motionplus ";
         sqlquery += " where ";
-        sqlquery += "   camid = " + std::to_string(camera_id);
+        sqlquery += "   camera_id = " + std::to_string(camera_id);
         sqlquery += " order by ";
         sqlquery += "   movie_dtl,movie_tml;";
         sqlquery += ";";
@@ -1352,7 +1352,7 @@ void dbse_movies_addrec(ctx_cam *cam, ctx_movie *movie, timespec *ts1)
     }
 
     sqlquery =  "insert into motionplus ";
-    sqlquery += " (camid, movie_nm, movie_dir, full_nm, movie_sz, movie_dtl";
+    sqlquery += " (camera_id, movie_nm, movie_dir, full_nm, movie_sz, movie_dtl";
     sqlquery += " , movie_tmc, movie_tml, diff_avg, sdev_min, sdev_max, sdev_avg)";
     sqlquery += " values ("+std::to_string(cam->camera_id);
     sqlquery += " ,'" + std::string(movie->movie_nm) + "'";

@@ -51,7 +51,7 @@
     struct ctx_dbse_rec {
         bool        found;      /*Bool for whether the file exists*/
         int64_t     recordid;   /*recordid*/
-        int         camid;      /*camera id */
+        int         camera_id;  /*camera id */
         char        *movie_nm;  /*Name of the movie file*/
         char        *movie_dir; /*Directory of the movie file */
         char        *full_nm;   /*Full name of the movie file with dir*/
