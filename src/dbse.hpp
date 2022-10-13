@@ -57,7 +57,8 @@
         char        *full_nm;   /*Full name of the movie file with dir*/
         int64_t     movie_sz;   /*Size of the movie file in bytes*/
         int         movie_dtl;  /*Date in yyyymmdd format for the movie file*/
-        char        *movie_tmc; /*Movie time*/
+        char        *movie_tmc; /*Movie time 12h format*/
+        char        *movie_tml; /*Movie time 24h format*/
         int         diff_avg;   /*Average diffs for motion frames */
         int         sdev_min;   /*std dev min */
         int         sdev_max;   /*std dev max */

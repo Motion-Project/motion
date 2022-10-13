@@ -88,7 +88,8 @@ static void dbse_cols_list(struct ctx_motapp *motapp)
 
     dbse_cols_free(motapp);
 
-    motapp->dbse->cols_cnt = 11;
+    /* 50 is a arbitrary "high" number */
+    motapp->dbse->cols_cnt = 50;
 
     motapp->dbse->cols_list =(ctx_dbse_col *)
         mymalloc(sizeof(ctx_dbse_col) * motapp->dbse->cols_cnt);
@@ -129,6 +130,10 @@ static void dbse_cols_list(struct ctx_motapp *motapp)
     snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "text");
 
     indx++;
+    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "movie_tml");
+    snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "text");
+
+    indx++;
     snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "diff_avg");
     snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "int");
 
@@ -157,6 +162,8 @@ static void dbse_movies_free(struct ctx_motapp *motapp)
             myfree(&motapp->dbse->movie_list[indx].movie_dir);
             myfree(&motapp->dbse->movie_list[indx].full_nm);
             myfree(&motapp->dbse->movie_list[indx].movie_tmc);
+            myfree(&motapp->dbse->movie_list[indx].movie_tml);
+
         }
         myfree(&motapp->dbse->movie_list);
     }
@@ -184,6 +191,9 @@ static void dbse_rec_default(ctx_dbse_rec *rec)
 
     rec->movie_tmc = (char*)mymalloc(5);
     snprintf(rec->movie_tmc, 5,"%s", "null");
+
+    rec->movie_tml = (char*)mymalloc(5);
+    snprintf(rec->movie_tml, 5,"%s", "null");
 
     rec->diff_avg  = 0;
     rec->sdev_min  = 0;
@@ -296,6 +306,14 @@ static int dbse_sqlite3_cb (
                             rec->movie_tmc =
                                 (char*)mymalloc(flen + 1);
                             snprintf(rec->movie_tmc
+                                ,flen+1,"%s",arg_val[indx]);
+
+                        } else if (mystrceq(col_nm[indx],"movie_tml")) {
+                            free(rec->movie_tml);
+                            flen = strlen(arg_val[indx]);
+                            rec->movie_tml =
+                                (char*)mymalloc(flen + 1);
+                            snprintf(rec->movie_tml
                                 ,flen+1,"%s",arg_val[indx]);
 
                         } else if (mystrceq(col_nm[indx],"diff_avg")) {
@@ -469,7 +487,7 @@ static void dbse_sqlite3_movlst(struct ctx_motapp *motapp, int camera_id)
         sqlquery += " where ";
         sqlquery += "   camid = " + std::to_string(camera_id);
         sqlquery += " order by ";
-        sqlquery += "   movie_dtl,movie_tmc;";
+        sqlquery += "   movie_dtl, movie_tml;";
         motapp->dbse->dbse_action = DBSE_ACT_GETTBL;
 
         retcd = sqlite3_exec(
@@ -694,6 +712,12 @@ static void dbse_mariadb_recs (struct ctx_motapp *motapp, const char *sqlquery)
                         rec->movie_tmc =(char*)mymalloc(flen + 1);
                         snprintf(rec->movie_tmc, flen+1,"%s",qry_row[indx]);
 
+                    } else if (mystrceq(cols[indx].col_nm,"movie_tml")) {
+                        free(rec->movie_tml);
+                        flen = strlen(qry_row[indx]);
+                        rec->movie_tml =(char*)mymalloc(flen + 1);
+                        snprintf(rec->movie_tml, flen+1,"%s",qry_row[indx]);
+
                     } else if (mystrceq(cols[indx].col_nm,"diff_avg")) {
                         rec->diff_avg =atoi(qry_row[indx]);
                     } else if (mystrceq(cols[indx].col_nm,"sdev_min")) {
@@ -856,7 +880,7 @@ static void dbse_mariadb_movlst(struct ctx_motapp *motapp, int camera_id )
         sqlquery += " where ";
         sqlquery += "   camid = " + std::to_string(camera_id);
         sqlquery += " order by ";
-        sqlquery += "   movie_dtl,movie_tmc;";
+        sqlquery += "   movie_dtl,movie_tml;";
         motapp->dbse->dbse_action = DBSE_ACT_GETTBL;
         dbse_mariadb_recs(motapp, sqlquery.c_str());
 
@@ -1054,6 +1078,13 @@ static void dbse_pgsql_recs (struct ctx_motapp *motapp, const char *sqlquery)
                         snprintf(rec->movie_tmc, flen+1, "%s"
                             ,PQgetvalue(res, indx, indx2));
 
+                    } else if (mystrceq(PQfname(res, indx2),"movie_tml")) {
+                        free(rec->movie_tml);
+                        flen = strlen(PQgetvalue(res, indx, indx2));
+                        rec->movie_tml =(char*)mymalloc(flen + 1);
+                        snprintf(rec->movie_tml, flen+1, "%s"
+                            ,PQgetvalue(res, indx, indx2));
+
                     } else if (mystrceq(PQfname(res, indx2),"diff_avg")) {
                         rec->diff_avg =atoi(PQgetvalue(res, indx, indx2));
 
@@ -1186,7 +1217,7 @@ static void dbse_pgsql_movlst(struct ctx_motapp *motapp, int camera_id)
         sqlquery += " where ";
         sqlquery += "   camid = " + std::to_string(camera_id);
         sqlquery += " order by ";
-        sqlquery += "   movie_dtl,movie_tmc;";
+        sqlquery += "   movie_dtl,movie_tml;";
         sqlquery += ";";
         motapp->dbse->dbse_action = DBSE_ACT_GETTBL;
         dbse_pgsql_recs(motapp, sqlquery.c_str());
@@ -1395,6 +1426,8 @@ void dbse_movies_addrec(ctx_cam *cam, ctx_movie *movie, timespec *ts1)
     int64_t bsz;
     char dtl[12];
     char tmc[12];
+    char tml[12];
+
     uint64_t diff_avg, sdev_avg;
     struct tm timestamp_tm;
 
@@ -1409,8 +1442,9 @@ void dbse_movies_addrec(ctx_cam *cam, ctx_movie *movie, timespec *ts1)
         bsz = 0;
     }
     localtime_r(&ts1->tv_sec, &timestamp_tm);
-    strftime(dtl, 11, "%G%m%d", &timestamp_tm);
-    strftime(tmc, 11, "%H:%M", &timestamp_tm);
+    strftime(dtl, 11, "%G%m%d"   , &timestamp_tm);
+    strftime(tmc, 11, "%I:%M%p"  , &timestamp_tm);
+    strftime(tml, 11, "%H:%M:%S" , &timestamp_tm);
 
     if (cam->info_diff_cnt != 0) {
         diff_avg = (cam->info_diff_tot / cam->info_diff_cnt);
@@ -1425,7 +1459,7 @@ void dbse_movies_addrec(ctx_cam *cam, ctx_movie *movie, timespec *ts1)
 
     sqlquery =  "insert into motionplus ";
     sqlquery += " (camid, movie_nm, movie_dir, full_nm, movie_sz, movie_dtl";
-    sqlquery += " , movie_tmc, diff_avg, sdev_min, sdev_max, sdev_avg)";
+    sqlquery += " , movie_tmc, movie_tml, diff_avg, sdev_min, sdev_max, sdev_avg)";
     sqlquery += " values ("+std::to_string(cam->camera_id);
     sqlquery += " ,'" + std::string(movie->movie_nm) + "'";
     sqlquery += " ,'" + std::string(movie->movie_dir) + "'";
@@ -1433,6 +1467,7 @@ void dbse_movies_addrec(ctx_cam *cam, ctx_movie *movie, timespec *ts1)
     sqlquery += " ,"  + std::to_string(bsz);
     sqlquery += " ,"  + std::string(dtl);
     sqlquery += " ,'" + std::string(tmc)+ "'";
+    sqlquery += " ,'" + std::string(tml)+ "'";
     sqlquery += " ,"  + std::to_string(diff_avg);
     sqlquery += " ,"  + std::to_string(cam->info_sdev_min);
     sqlquery += " ,"  + std::to_string(cam->info_sdev_max);
