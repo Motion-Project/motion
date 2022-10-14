@@ -24,7 +24,7 @@
 #include "movie.hpp"
 #include "dbse.hpp"
 
-/* Forward Declares */
+/* Forward Declare */
 void dbse_close(struct ctx_motapp *motapp);
 
 static int dbse_edits(struct ctx_motapp *motapp)
@@ -88,9 +88,8 @@ static void dbse_cols_list(struct ctx_motapp *motapp)
 
     dbse_cols_free(motapp);
 
-    /* 50 is a arbitrary "high" number */
+    /* 50 is an arbitrary "high" number */
     motapp->dbse->cols_cnt = 50;
-
     motapp->dbse->cols_list =(ctx_dbse_col *)
         mymalloc(sizeof(ctx_dbse_col) * motapp->dbse->cols_cnt);
 
@@ -171,6 +170,7 @@ static void dbse_movies_free(struct ctx_motapp *motapp)
 
 }
 
+/* Assign default values for records from database*/
 static void dbse_rec_default(ctx_dbse_rec *rec)
 {
     rec->found     = false;
@@ -202,6 +202,7 @@ static void dbse_rec_default(ctx_dbse_rec *rec)
 
 }
 
+/* Assign values to rec from the database */
 static void dbse_rec_assign(ctx_dbse_rec *rec, char *col_nm, char *col_val)
 {
     int flen;
@@ -268,6 +269,106 @@ static void dbse_rec_assign(ctx_dbse_rec *rec, char *col_nm, char *col_val)
 
 }
 
+static void dbse_sql_motpls(ctx_dbse *dbse, std::string &sql)
+{
+    std::string delimit;
+    int indx;
+
+    sql = "";
+
+    if (dbse->dbse_action == DBSE_TBL_CHECK) {
+        if (dbse->database_type == "mariadb") {
+            sql = "Select table_name "
+                " from information_schema.tables "
+                " where table_name = 'motionplus';";
+        } else if (dbse->database_type == "postgresql") {
+            sql = " select tablename as table_nm "
+                " from pg_catalog.pg_tables "
+                " where schemaname != 'pg_catalog' "
+                " and schemaname != 'information_schema' "
+                " and tablename = 'motionplus';";
+        } else if (dbse->database_type == "sqlite3") {
+            sql = "select name from sqlite_master"
+                " where type='table' "
+                " and name='motionplus';";
+        }
+    } else if (dbse->dbse_action == DBSE_TBL_CREATE) {
+        sql = "create table motionplus (";
+        if ((dbse->database_type == "mariadb") ||
+            (dbse->database_type == "postgresql")) {
+            sql += " record_id serial ";
+        } else if (dbse->database_type == "sqlite3") {
+            /* Autoincrement is discouraged but I want compatibility*/
+            sql += " record_id integer primary key autoincrement ";
+        }
+        sql += ");";
+
+    } else if (dbse->dbse_action == DBSE_COLS_LIST) {
+        sql = " select * from motionplus;";
+
+    } else if (dbse->dbse_action == DBSE_MOV_CLEAN) {
+        sql = " delete from motionplus "
+            " where record_id in (";
+        delimit = " ";
+        for (indx=0; indx<dbse->movie_cnt; indx++) {
+            if (dbse->movie_list[indx].found == false) {
+                sql += delimit + std::to_string(
+                    dbse->movie_list[indx].record_id);
+                delimit = ",";
+            }
+            /* 5000 is arbitrary */
+            if (sql.length() > 5000) {
+                indx = dbse->movie_cnt;
+            }
+        }
+        if (delimit == ",") {
+            sql += ");";
+        } else {
+            sql = "";
+        }
+    }
+
+}
+
+static void dbse_sql_motpls(ctx_dbse *dbse
+    , std::string &sql, int camera_id)
+{
+    sql = "";
+
+    if (dbse->dbse_action == DBSE_MOV_COUNT) {
+        sql  = " select ";
+        sql += "   count(*) as movie_cnt ";
+        sql += " from motionplus ";
+        sql += " where ";
+        sql += "   camera_id = " + std::to_string(camera_id);
+        sql += ";";
+
+    } else if (dbse->dbse_action == DBSE_MOV_SELECT) {
+        sql  = " select * ";
+        sql += " from motionplus ";
+        sql += " where ";
+        sql += "   camera_id = " + std::to_string(camera_id);
+        sql += " order by ";
+        sql += "   movie_dtl, movie_tml;";
+
+    }
+
+}
+
+static void dbse_sql_motpls(ctx_dbse *dbse
+    , std::string &sql, char *col_nm, char *col_typ)
+{
+    sql = "";
+
+    if ((dbse->dbse_action == DBSE_COLS_ADD) &&
+        (strlen(col_nm)  > 0) && (strlen(col_typ) > 0)) {
+        sql = "Alter table motionplus add column ";
+        sql += std::string(col_nm) + " ";
+        sql += std::string(col_typ) + " ;";
+    }
+
+}
+
 #ifdef HAVE_SQLITE3
 
 static void dbse_sqlite3_exec(struct ctx_motapp *motapp, const char *sqlquery)
@@ -275,7 +376,8 @@ static void dbse_sqlite3_exec(struct ctx_motapp *motapp, const char *sqlquery)
     int retcd;
     char *errmsg = NULL;
 
-    if(motapp->dbse->database_sqlite3 == NULL) {
+    if ((motapp->dbse->database_sqlite3 == NULL) ||
+        (strlen(sqlquery) == 0)) {
         return;
     };
 
@@ -291,37 +393,34 @@ static void dbse_sqlite3_exec(struct ctx_motapp *motapp, const char *sqlquery)
     MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Finished query");
 }
 
-/* Process query list of columns in motionplus table*/
 static int dbse_sqlite3_cb (
     void *ptr, int arg_nb, char **arg_val, char **col_nm)
 {
     ctx_motapp *motapp = (ctx_motapp *)ptr;
     int indx, indx2, rnbr;
 
-    if (motapp->dbse->dbse_action == DBSE_ACT_CHKTBL) {
+    if (motapp->dbse->dbse_action == DBSE_TBL_CHECK) {
         for (indx=0; indx < arg_nb; indx++) {
             if (mystrceq(arg_val[indx],"motionplus")) {
                 motapp->dbse->table_ok = true;
             }
         }
-    } else if (motapp->dbse->dbse_action == DBSE_ACT_GETCNT) {
+    } else if (motapp->dbse->dbse_action == DBSE_MOV_COUNT) {
         for (indx=0; indx < arg_nb; indx++) {
             if (mystrceq(col_nm[indx],"movie_cnt")) {
                 motapp->dbse->movie_cnt =atoi(arg_val[indx]);
             }
         }
-    } else if (motapp->dbse->dbse_action == DBSE_ACT_GETCOLS) {
+    } else if (motapp->dbse->dbse_action == DBSE_COLS_LIST) {
         for (indx=0; indx < arg_nb; indx++) {
-            if (mystrceq(col_nm[indx],"col_nm")) {
-                for (indx2=0; indx2 < motapp->dbse->cols_cnt; indx2++) {
-                    if (mystrceq(arg_val[indx]
-                        , motapp->dbse->cols_list[indx2].col_nm)) {
-                        motapp->dbse->cols_list[indx2].found = true;
-                    }
+            for (indx2=0; indx2 < motapp->dbse->cols_cnt; indx2++) {
+                if (mystrceq(col_nm[indx]
+                    , motapp->dbse->cols_list[indx2].col_nm)) {
+                    motapp->dbse->cols_list[indx2].found = true;
                 }
             }
         }
-    } else if (motapp->dbse->dbse_action == DBSE_ACT_GETTBL) {
+    } else if (motapp->dbse->dbse_action == DBSE_MOV_SELECT) {
         rnbr = motapp->dbse->rec_indx;
         if (rnbr < motapp->dbse->movie_cnt) {
             dbse_rec_default(&motapp->dbse->movie_list[rnbr]);
@@ -343,16 +442,14 @@ static void dbse_sqlite3_cols(struct ctx_motapp *motapp)
 {
     int retcd, indx;
     char *errmsg = 0;
-    std::string sqlquery;
+    std::string sql;
 
     dbse_cols_list(motapp);
 
-    sqlquery =
-        " select name as col_nm "
-        " from pragma_table_info('motionplus');";
-    motapp->dbse->dbse_action = DBSE_ACT_GETCOLS;
+    motapp->dbse->dbse_action = DBSE_COLS_LIST;
+    dbse_sql_motpls(motapp->dbse, sql);
     retcd = sqlite3_exec(motapp->dbse->database_sqlite3
-        , sqlquery.c_str(), dbse_sqlite3_cb, motapp, &errmsg);
+        , sql.c_str(), dbse_sqlite3_cb, motapp, &errmsg);
     if (retcd != SQLITE_OK ) {
         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error retrieving table columns: %s"), errmsg);
@@ -362,10 +459,11 @@ static void dbse_sqlite3_cols(struct ctx_motapp *motapp)
 
     for (indx=0; indx<motapp->dbse->cols_cnt; indx++) {
         if (motapp->dbse->cols_list[indx].found == false) {
-            sqlquery = "Alter table motionplus add column ";
-            sqlquery += std::string(motapp->dbse->cols_list[indx].col_nm) + " ";
-            sqlquery += std::string(motapp->dbse->cols_list[indx].col_typ) + " ;";
-            dbse_sqlite3_exec(motapp, sqlquery.c_str());
+            motapp->dbse->dbse_action = DBSE_COLS_ADD;
+            dbse_sql_motpls(motapp->dbse, sql
+                , motapp->dbse->cols_list[indx].col_nm
+                , motapp->dbse->cols_list[indx].col_typ);
+            dbse_sqlite3_exec(motapp, sql.c_str());
         }
     }
 
@@ -378,7 +476,7 @@ static void dbse_sqlite3_init(struct ctx_motapp *motapp)
     int retcd;
     const char *err_open  = NULL;
     char *err_qry  = NULL;
-    std::string sqlquery;
+    std::string sql;
 
     motapp->dbse->database_sqlite3 = NULL;
 
@@ -419,15 +517,12 @@ static void dbse_sqlite3_init(struct ctx_motapp *motapp)
         }
     }
 
-    sqlquery =
-        "select name from sqlite_master"
-        " where type='table' "
-        " and name='motionplus';";
     motapp->dbse->table_ok = false;
-    motapp->dbse->dbse_action = DBSE_ACT_CHKTBL;
+    motapp->dbse->dbse_action = DBSE_TBL_CHECK;
+    dbse_sql_motpls(motapp->dbse, sql);
     retcd = sqlite3_exec(
         motapp->dbse->database_sqlite3
-        , sqlquery.c_str(), dbse_sqlite3_cb, motapp, &err_qry);
+        , sql.c_str(), dbse_sqlite3_cb, motapp, &err_qry);
     if (retcd != SQLITE_OK ) {
         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error checking table: %s"), err_qry);
@@ -436,15 +531,10 @@ static void dbse_sqlite3_init(struct ctx_motapp *motapp)
     }
 
     if (motapp->dbse->table_ok == false) {
-        /* Autoincrement is discouraged but I want compatibility across
-         * all the various DBS used in motionplus
-        */
-        sqlquery =
-            "create table motionplus ("
-            " record_id integer primary key autoincrement "
-            ");";
+        motapp->dbse->dbse_action = DBSE_TBL_CREATE;
+        dbse_sql_motpls(motapp->dbse, sql);
         retcd = sqlite3_exec(motapp->dbse->database_sqlite3
-            , sqlquery.c_str(), 0, 0, &err_qry);
+            , sql.c_str(), 0, 0, &err_qry);
         if (retcd != SQLITE_OK ) {
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 , _("Error creating table: %s"), err_qry);
@@ -459,21 +549,15 @@ static void dbse_sqlite3_init(struct ctx_motapp *motapp)
 
 static void dbse_sqlite3_movlst(struct ctx_motapp *motapp, int camera_id)
 {
-    int retcd, indx;
+    int retcd;
     char *errmsg  = NULL;
-    std::string sqlquery, delimit;
+    std::string sql;
 
-    sqlquery  = " select ";
-    sqlquery += "   count(*) as movie_cnt ";
-    sqlquery += " from motionplus ";
-    sqlquery += " where ";
-    sqlquery += "   camera_id = " + std::to_string(camera_id);
-    sqlquery += ";";
-    motapp->dbse->dbse_action = DBSE_ACT_GETCNT;
-
+    motapp->dbse->dbse_action = DBSE_MOV_COUNT;
+    dbse_sql_motpls(motapp->dbse, sql, camera_id);
     retcd = sqlite3_exec(
         motapp->dbse->database_sqlite3
-        , sqlquery.c_str(), dbse_sqlite3_cb, motapp, &errmsg);
+        , sql.c_str(), dbse_sqlite3_cb, motapp, &errmsg);
     if (retcd != SQLITE_OK ) {
         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error counting table: %s"), errmsg);
@@ -486,17 +570,11 @@ static void dbse_sqlite3_movlst(struct ctx_motapp *motapp, int camera_id)
             mymalloc(sizeof(ctx_dbse_rec)*motapp->dbse->movie_cnt);
         motapp->dbse->rec_indx = 0;
 
-        sqlquery  = " select * ";
-        sqlquery += " from motionplus ";
-        sqlquery += " where ";
-        sqlquery += "   camera_id = " + std::to_string(camera_id);
-        sqlquery += " order by ";
-        sqlquery += "   movie_dtl, movie_tml;";
-        motapp->dbse->dbse_action = DBSE_ACT_GETTBL;
-
+        motapp->dbse->dbse_action = DBSE_MOV_SELECT;
+        dbse_sql_motpls(motapp->dbse, sql, camera_id);
         retcd = sqlite3_exec(
             motapp->dbse->database_sqlite3
-            , sqlquery.c_str(), dbse_sqlite3_cb, motapp, &errmsg);
+            , sql.c_str(), dbse_sqlite3_cb, motapp, &errmsg);
         if (retcd != SQLITE_OK ) {
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 , _("Error retrieving table: %s"), errmsg);
@@ -504,31 +582,15 @@ static void dbse_sqlite3_movlst(struct ctx_motapp *motapp, int camera_id)
             return;
         }
 
-        sqlquery =
-            " delete from motionplus "
-            " where record_id in (";
-        delimit = " ";
-        for (indx=0; indx<motapp->dbse->movie_cnt; indx++) {
-            if (motapp->dbse->movie_list[indx].found == false) {
-                sqlquery += delimit + std::to_string(
-                    motapp->dbse->movie_list[indx].record_id);
-                delimit = ",";
-            }
-            /* 5000 is arbitrary */
-            if (sqlquery.length() > 5000) {
-                indx = motapp->dbse->movie_cnt;
-            }
-        }
-        sqlquery += ");";
-        if (delimit == ",") {
-            dbse_sqlite3_exec(motapp, sqlquery.c_str());
-        }
+        motapp->dbse->dbse_action = DBSE_MOV_CLEAN;
+        dbse_sql_motpls(motapp->dbse, sql, camera_id);
+        dbse_sqlite3_exec(motapp, sql.c_str());
 
-        sqlquery ="vacuum";
-        dbse_sqlite3_exec(motapp, sqlquery.c_str());
+        sql = " vacuum;";
+        dbse_sqlite3_exec(motapp, sql.c_str());
+
     }
     return;
-
 }
 
 static void dbse_sqlite3_close(struct ctx_motapp *motapp)
@@ -548,7 +610,8 @@ static void dbse_mariadb_exec (struct ctx_motapp *motapp, const char *sqlquery)
 {
     int retcd;
 
-    if (motapp->dbse->database_mariadb == NULL) {
+    if ((motapp->dbse->database_mariadb == NULL) ||
+        (strlen(sqlquery) == 0)) {
         return;
     }
 
@@ -637,7 +700,7 @@ static void dbse_mariadb_recs (struct ctx_motapp *motapp, const char *sqlquery)
 
     qry_row = mysql_fetch_row(qry_result);
 
-    if (motapp->dbse->dbse_action == DBSE_ACT_CHKTBL) {
+    if (motapp->dbse->dbse_action == DBSE_TBL_CHECK) {
         motapp->dbse->table_ok = false;
         while (qry_row != NULL) {
             for(indx = 0; indx < qry_fields; indx++) {
@@ -650,7 +713,7 @@ static void dbse_mariadb_recs (struct ctx_motapp *motapp, const char *sqlquery)
             qry_row = mysql_fetch_row(qry_result);
         }
 
-    } else if (motapp->dbse->dbse_action == DBSE_ACT_GETCNT) {
+    } else if (motapp->dbse->dbse_action == DBSE_MOV_COUNT) {
         motapp->dbse->movie_cnt = 0;
         while (qry_row != NULL) {
             for(indx = 0; indx < qry_fields; indx++) {
@@ -661,7 +724,7 @@ static void dbse_mariadb_recs (struct ctx_motapp *motapp, const char *sqlquery)
             qry_row = mysql_fetch_row(qry_result);
         }
 
-    } else if (motapp->dbse->dbse_action == DBSE_ACT_GETCOLS) {
+    } else if (motapp->dbse->dbse_action == DBSE_COLS_LIST) {
         for(indx = 0; indx < qry_fields; indx++) {
             for (indx2=0; indx2 < motapp->dbse->cols_cnt; indx2++) {
                 if (mystrceq(cols[indx].col_nm
@@ -671,7 +734,7 @@ static void dbse_mariadb_recs (struct ctx_motapp *motapp, const char *sqlquery)
             }
         }
 
-    } else if (motapp->dbse->dbse_action == DBSE_ACT_GETTBL) {
+    } else if (motapp->dbse->dbse_action == DBSE_MOV_SELECT) {
         motapp->dbse->rec_indx = 0;
         while (qry_row != NULL) {
             rnbr = motapp->dbse->rec_indx;
@@ -700,20 +763,21 @@ static void dbse_mariadb_recs (struct ctx_motapp *motapp, const char *sqlquery)
 static void dbse_mariadb_cols(struct ctx_motapp *motapp)
 {
     int indx;
-    std::string sqlquery;
+    std::string sql;
 
     dbse_cols_list(motapp);
 
-    sqlquery = " select * from motionplus;";
-    motapp->dbse->dbse_action = DBSE_ACT_GETCOLS;
-    dbse_mariadb_recs(motapp, sqlquery.c_str());
+    motapp->dbse->dbse_action = DBSE_COLS_LIST;
+    dbse_sql_motpls(motapp->dbse, sql);
+    dbse_mariadb_recs(motapp, sql.c_str());
 
     for (indx=0; indx<motapp->dbse->cols_cnt; indx++) {
         if (motapp->dbse->cols_list[indx].found == false) {
-            sqlquery = "Alter table motionplus add column ";
-            sqlquery += std::string(motapp->dbse->cols_list[indx].col_nm) + " ";
-            sqlquery += std::string(motapp->dbse->cols_list[indx].col_typ) + " ;";
-            dbse_mariadb_exec(motapp,sqlquery.c_str());
+            motapp->dbse->dbse_action = DBSE_COLS_ADD;
+            dbse_sql_motpls(motapp->dbse, sql
+                , motapp->dbse->cols_list[indx].col_nm
+                , motapp->dbse->cols_list[indx].col_typ);
+            dbse_mariadb_exec(motapp, sql.c_str());
         }
     }
 
@@ -723,23 +787,18 @@ static void dbse_mariadb_cols(struct ctx_motapp *motapp)
 
 static void dbse_mariadb_setup(struct ctx_motapp *motapp)
 {
-    std::string sqlquery;
+    std::string sql;
 
-    sqlquery =
-        "Select table_name "
-        " from information_schema.tables "
-        " where table_name = 'motionplus';";
-    motapp->dbse->dbse_action = DBSE_ACT_CHKTBL;
-    dbse_mariadb_recs(motapp,sqlquery.c_str());
+    motapp->dbse->dbse_action = DBSE_TBL_CHECK;
+    dbse_sql_motpls(motapp->dbse, sql);
+    dbse_mariadb_recs(motapp, sql.c_str());
 
     if (motapp->dbse->table_ok == false) {
         MOTION_LOG(INF, TYPE_DB, NO_ERRNO
             , _("Creating motionplus table"));
-        sqlquery =
-            "create table motionplus ("
-            " record_id serial "
-            ");";
-        dbse_mariadb_exec(motapp,sqlquery.c_str());
+        motapp->dbse->dbse_action = DBSE_TBL_CREATE;
+        dbse_sql_motpls(motapp->dbse, sql);
+        dbse_mariadb_exec(motapp,sql.c_str());
     }
 
     dbse_mariadb_cols(motapp);
@@ -813,50 +872,23 @@ static void dbse_mariadb_close(struct ctx_motapp *motapp)
 
 static void dbse_mariadb_movlst(struct ctx_motapp *motapp, int camera_id )
 {
-    int indx;
-    std::string sqlquery, delimit;
+    std::string sql;
 
-    sqlquery  = " select ";
-    sqlquery += "   count(*) as movie_cnt ";
-    sqlquery += " from motionplus ";
-    sqlquery += " where ";
-    sqlquery += "   camera_id = " + std::to_string(camera_id);
-    sqlquery += ";";
-    motapp->dbse->dbse_action = DBSE_ACT_GETCNT;
-    dbse_mariadb_recs(motapp, sqlquery.c_str());
+    motapp->dbse->dbse_action = DBSE_MOV_COUNT;
+    dbse_sql_motpls(motapp->dbse, sql, camera_id);
+    dbse_mariadb_recs(motapp, sql.c_str());
 
     if (motapp->dbse->movie_cnt > 0) {
         motapp->dbse->movie_list =(ctx_dbse_rec *)
             mymalloc(sizeof(ctx_dbse_rec)*motapp->dbse->movie_cnt);
 
-        sqlquery  = " select * ";
-        sqlquery += " from motionplus ";
-        sqlquery += " where ";
-        sqlquery += "   camera_id = " + std::to_string(camera_id);
-        sqlquery += " order by ";
-        sqlquery += "   movie_dtl,movie_tml;";
-        motapp->dbse->dbse_action = DBSE_ACT_GETTBL;
-        dbse_mariadb_recs(motapp, sqlquery.c_str());
+        motapp->dbse->dbse_action = DBSE_MOV_SELECT;
+        dbse_sql_motpls(motapp->dbse, sql, camera_id);
+        dbse_mariadb_recs(motapp, sql.c_str());
 
-        sqlquery =
-            " delete from motionplus "
-            " where record_id in (";
-        delimit = " ";
-        for (indx=0; indx<motapp->dbse->movie_cnt; indx++) {
-            if (motapp->dbse->movie_list[indx].found == false) {
-                sqlquery += delimit + std::to_string(
-                    motapp->dbse->movie_list[indx].record_id);
-                delimit = ",";
-            }
-            /* 5000 is arbitrary */
-            if (sqlquery.length() > 5000) {
-                indx = motapp->dbse->movie_cnt;
-            }
-        }
-        sqlquery += ");";
-        if (delimit == ",") {
-            dbse_mariadb_exec(motapp, sqlquery.c_str());
-        }
+        motapp->dbse->dbse_action = DBSE_MOV_CLEAN;
+        dbse_sql_motpls(motapp->dbse, sql);
+        dbse_mariadb_exec(motapp, sql.c_str());
     }
 }
 
@@ -868,7 +900,8 @@ static void dbse_pgsql_exec(struct ctx_motapp *motapp, const char *sqlquery)
 {
     PGresult    *res;
 
-    if (motapp->dbse->database_pgsql == NULL) {
+    if ((motapp->dbse->database_pgsql == NULL) ||
+        (strlen(sqlquery) == 0)) {
         return;
     }
 
@@ -925,7 +958,7 @@ static void dbse_pgsql_recs (struct ctx_motapp *motapp, const char *sqlquery)
 
     res = PQexec(motapp->dbse->database_pgsql, sqlquery);
 
-    if (motapp->dbse->dbse_action == DBSE_ACT_CHKTBL) {
+    if (motapp->dbse->dbse_action == DBSE_TBL_CHECK) {
         motapp->dbse->table_ok = false;
         if (PQresultStatus(res) != PGRES_TUPLES_OK) {
             PQclear(res);
@@ -944,7 +977,7 @@ static void dbse_pgsql_recs (struct ctx_motapp *motapp, const char *sqlquery)
         }
         PQclear(res);
 
-    } else if (motapp->dbse->dbse_action == DBSE_ACT_GETCNT) {
+    } else if (motapp->dbse->dbse_action == DBSE_MOV_COUNT) {
         motapp->dbse->movie_cnt = 0;
         if (PQresultStatus(res) != PGRES_TUPLES_OK) {
             PQclear(res);
@@ -962,7 +995,7 @@ static void dbse_pgsql_recs (struct ctx_motapp *motapp, const char *sqlquery)
         }
         PQclear(res);
 
-    } else if (motapp->dbse->dbse_action == DBSE_ACT_GETCOLS) {
+    } else if (motapp->dbse->dbse_action == DBSE_COLS_LIST) {
         cols = PQnfields(res);
         for(indx = 0; indx < cols; indx++) {
             for (indx2=0; indx2 < motapp->dbse->cols_cnt; indx2++) {
@@ -974,7 +1007,7 @@ static void dbse_pgsql_recs (struct ctx_motapp *motapp, const char *sqlquery)
         }
         PQclear(res);
 
-    } else if (motapp->dbse->dbse_action == DBSE_ACT_GETTBL) {
+    } else if (motapp->dbse->dbse_action == DBSE_MOV_SELECT) {
         motapp->dbse->rec_indx = 0;
         if (PQresultStatus(res) != PGRES_TUPLES_OK) {
             PQclear(res);
@@ -1004,20 +1037,21 @@ static void dbse_pgsql_recs (struct ctx_motapp *motapp, const char *sqlquery)
 static void dbse_pgsql_cols(struct ctx_motapp *motapp)
 {
     int indx;
-    std::string sqlquery;
+    std::string sql;
 
     dbse_cols_list(motapp);
 
-    sqlquery = " select * from motionplus;";
-    motapp->dbse->dbse_action = DBSE_ACT_GETCOLS;
-    dbse_pgsql_recs(motapp, sqlquery.c_str());
+    motapp->dbse->dbse_action = DBSE_COLS_LIST;
+    dbse_sql_motpls(motapp->dbse, sql);
+    dbse_pgsql_recs(motapp, sql.c_str());
 
     for (indx=0; indx<motapp->dbse->cols_cnt; indx++) {
         if (motapp->dbse->cols_list[indx].found == false) {
-            sqlquery = "Alter table motionplus add column ";
-            sqlquery += std::string(motapp->dbse->cols_list[indx].col_nm) + " ";
-            sqlquery += std::string(motapp->dbse->cols_list[indx].col_typ) + " ;";
-            dbse_pgsql_exec(motapp,sqlquery.c_str());
+            motapp->dbse->dbse_action = DBSE_COLS_ADD;
+            dbse_sql_motpls(motapp->dbse, sql
+                , motapp->dbse->cols_list[indx].col_nm
+                , motapp->dbse->cols_list[indx].col_typ);
+            dbse_pgsql_exec(motapp,sql.c_str());
         }
     }
 
@@ -1027,25 +1061,18 @@ static void dbse_pgsql_cols(struct ctx_motapp *motapp)
 
 static void dbse_pgsql_setup(struct ctx_motapp *motapp)
 {
-    std::string sqlquery;
+    std::string sql;
 
-    sqlquery =
-        " select tablename as table_nm "
-        " from pg_catalog.pg_tables "
-        " where schemaname != 'pg_catalog' "
-        " and schemaname != 'information_schema' "
-        " and tablename = 'motionplus';";
-    motapp->dbse->dbse_action = DBSE_ACT_CHKTBL;
-    dbse_pgsql_recs(motapp,sqlquery.c_str());
+    motapp->dbse->dbse_action = DBSE_TBL_CHECK;
+    dbse_sql_motpls(motapp->dbse, sql);
+    dbse_pgsql_recs(motapp,sql.c_str());
 
     if (motapp->dbse->table_ok == false) {
         MOTION_LOG(INF, TYPE_DB, NO_ERRNO
             , _("Creating motionplus table"));
-        sqlquery =
-            "create table motionplus ("
-            " record_id serial "
-            ");";
-        dbse_pgsql_exec(motapp,sqlquery.c_str());
+        motapp->dbse->dbse_action = DBSE_TBL_CREATE;
+        dbse_sql_motpls(motapp->dbse, sql);
+        dbse_pgsql_exec(motapp,sql.c_str());
     }
 
     dbse_pgsql_cols(motapp);
@@ -1089,52 +1116,23 @@ static void dbse_pgsql_init(struct ctx_motapp *motapp)
 
 static void dbse_pgsql_movlst(struct ctx_motapp *motapp, int camera_id)
 {
-    int indx;
-    std::string sqlquery, delimit;
+    std::string sql;
 
-    sqlquery  = " select ";
-    sqlquery += "   count(*) as movie_cnt ";
-    sqlquery += " from motionplus ";
-    sqlquery += " where ";
-    sqlquery += "   camera_id = " + std::to_string(camera_id);
-    sqlquery += ";";
-    motapp->dbse->dbse_action = DBSE_ACT_GETCNT;
-    dbse_pgsql_recs(motapp, sqlquery.c_str());
+    motapp->dbse->dbse_action = DBSE_MOV_COUNT;
+    dbse_sql_motpls(motapp->dbse, sql, camera_id);
+    dbse_pgsql_recs(motapp, sql.c_str());
 
     if (motapp->dbse->movie_cnt > 0) {
         motapp->dbse->movie_list =(ctx_dbse_rec *)
             mymalloc(sizeof(ctx_dbse_rec)*motapp->dbse->movie_cnt);
 
-        sqlquery  = " select ";
-        sqlquery += "   * ";
-        sqlquery += " from motionplus ";
-        sqlquery += " where ";
-        sqlquery += "   camera_id = " + std::to_string(camera_id);
-        sqlquery += " order by ";
-        sqlquery += "   movie_dtl,movie_tml;";
-        sqlquery += ";";
-        motapp->dbse->dbse_action = DBSE_ACT_GETTBL;
-        dbse_pgsql_recs(motapp, sqlquery.c_str());
+        motapp->dbse->dbse_action = DBSE_MOV_SELECT;
+        dbse_sql_motpls(motapp->dbse, sql, camera_id);
+        dbse_pgsql_recs(motapp, sql.c_str());
 
-        sqlquery =
-            " delete from motionplus "
-            " where record_id in (";
-        delimit = " ";
-        for (indx=0; indx<motapp->dbse->movie_cnt; indx++) {
-            if (motapp->dbse->movie_list[indx].found == false) {
-                sqlquery += delimit + std::to_string(
-                    motapp->dbse->movie_list[indx].record_id);
-                delimit = ",";
-            }
-            /* 5000 is arbitrary */
-            if (sqlquery.length() > 5000) {
-                indx = motapp->dbse->movie_cnt;
-            }
-        }
-        sqlquery += ");";
-        if (delimit == ",") {
-            dbse_pgsql_exec(motapp, sqlquery.c_str());
-        }
+        motapp->dbse->dbse_action = DBSE_MOV_CLEAN;
+        dbse_sql_motpls(motapp->dbse, sql);
+        dbse_pgsql_exec(motapp, sql.c_str());
     }
     return;
 }

@@ -41,10 +41,14 @@
     #endif
 
     enum DBSE_ACT {
-        DBSE_ACT_CHKTBL     = 0,
-        DBSE_ACT_GETCNT     = 1,
-        DBSE_ACT_GETTBL     = 2,
-        DBSE_ACT_GETCOLS    = 3
+        DBSE_TBL_CHECK,
+        DBSE_TBL_CREATE,
+        DBSE_MOV_COUNT,
+        DBSE_MOV_SELECT,
+        DBSE_MOV_CLEAN,
+        DBSE_COLS_LIST,
+        DBSE_COLS_ADD,
+        DBSE_END
     };
 
     /* Record structure of motionplus table */
