@@ -126,8 +126,6 @@ struct ctx_netcam {
     char                      cameratype[30];   /* String specifying Normal or High for use in logging */
     ctx_imgsize               imgsize;          /* The image size parameters */
 
-    int                       rtsp_uses_tcp;    /* Flag from config for whether to use tcp transport */
-    int                       v4l2_palette;     /* Palette from config for v4l2 devices */
     int                       capture_rate;     /* Frames per second from configuration file */
     int                       reconnect_count;  /* Count of the times reconnection is tried*/
     int                       src_fps;          /* The fps provided from source*/
