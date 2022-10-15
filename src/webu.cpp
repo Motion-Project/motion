@@ -34,7 +34,7 @@
 #include "video_v4l2.hpp"
 
 /* Context to pass the parms to functions to start mhd */
-struct mhdstart_ctx {
+struct ctx_mhdstart {
     ctx_motapp       *motapp;
     std::string             tls_cert;
     std::string             tls_key;
@@ -1024,7 +1024,7 @@ static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
 }
 
 /* Validate that the MHD version installed can process basic authentication */
-static void webu_mhd_features_basic(struct mhdstart_ctx *mhdst)
+static void webu_mhd_features_basic(ctx_mhdstart *mhdst)
 {
     #if MHD_VERSION < 0x00094400
         (void)mhdst;
@@ -1045,7 +1045,7 @@ static void webu_mhd_features_basic(struct mhdstart_ctx *mhdst)
 }
 
 /* Validate that the MHD version installed can process digest authentication */
-static void webu_mhd_features_digest(struct mhdstart_ctx *mhdst)
+static void webu_mhd_features_digest(ctx_mhdstart *mhdst)
 {
     #if MHD_VERSION < 0x00094400
         (void)mhdst;
@@ -1066,7 +1066,7 @@ static void webu_mhd_features_digest(struct mhdstart_ctx *mhdst)
 }
 
 /* Validate that the MHD version installed can process IPV6 */
-static void webu_mhd_features_ipv6(struct mhdstart_ctx *mhdst)
+static void webu_mhd_features_ipv6(ctx_mhdstart *mhdst)
 {
     #if MHD_VERSION < 0x00094400
         if (mhdst->ipv6) {
@@ -1090,7 +1090,7 @@ static void webu_mhd_features_ipv6(struct mhdstart_ctx *mhdst)
 }
 
 /* Validate that the MHD version installed can process tls */
-static void webu_mhd_features_tls(struct mhdstart_ctx *mhdst)
+static void webu_mhd_features_tls(ctx_mhdstart *mhdst)
 {
     #if MHD_VERSION < 0x00094400
         if (mhdst->motapp->cam_list[0]->conf->webcontrol_tls) {
@@ -1114,7 +1114,7 @@ static void webu_mhd_features_tls(struct mhdstart_ctx *mhdst)
 }
 
 /* Validate the features that MHD can support */
-static void webu_mhd_features(struct mhdstart_ctx *mhdst)
+static void webu_mhd_features(ctx_mhdstart *mhdst)
 {
     webu_mhd_features_basic(mhdst);
 
@@ -1161,7 +1161,7 @@ static std::string webu_mhd_loadfile(std::string fname)
 }
 
 /* Validate that we have the files needed for tls*/
-static void webu_mhd_checktls(struct mhdstart_ctx *mhdst)
+static void webu_mhd_checktls(ctx_mhdstart *mhdst)
 {
 
     if (mhdst->motapp->cam_list[0]->conf->webcontrol_tls) {
@@ -1180,7 +1180,7 @@ static void webu_mhd_checktls(struct mhdstart_ctx *mhdst)
 }
 
 /* Set the initialization function for MHD to call upon getting a connection */
-static void webu_mhd_opts_init(struct mhdstart_ctx *mhdst)
+static void webu_mhd_opts_init(ctx_mhdstart *mhdst)
 {
     mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_URI_LOG_CALLBACK;
     mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = (intptr_t)webu_mhd_init;
@@ -1189,7 +1189,7 @@ static void webu_mhd_opts_init(struct mhdstart_ctx *mhdst)
 }
 
 /* Set the MHD option on the function to call when the connection closes */
-static void webu_mhd_opts_deinit(struct mhdstart_ctx *mhdst)
+static void webu_mhd_opts_deinit(ctx_mhdstart *mhdst)
 {
     mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_NOTIFY_COMPLETED;
     mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = (intptr_t)webu_mhd_deinit;
@@ -1199,7 +1199,7 @@ static void webu_mhd_opts_deinit(struct mhdstart_ctx *mhdst)
 }
 
 /* Set the MHD option on acceptable connections */
-static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst)
+static void webu_mhd_opts_localhost(ctx_mhdstart *mhdst)
 {
     if (mhdst->motapp->cam_list[0]->conf->webcontrol_localhost) {
         if (mhdst->ipv6) {
@@ -1229,7 +1229,7 @@ static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst)
 }
 
 /* Set the mhd digest options */
-static void webu_mhd_opts_digest(struct mhdstart_ctx *mhdst)
+static void webu_mhd_opts_digest(ctx_mhdstart *mhdst)
 {
 
     if (mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method == "digest") {
@@ -1253,7 +1253,7 @@ static void webu_mhd_opts_digest(struct mhdstart_ctx *mhdst)
 }
 
 /* Set the MHD options needed when we want TLS connections */
-static void webu_mhd_opts_tls(struct mhdstart_ctx *mhdst)
+static void webu_mhd_opts_tls(ctx_mhdstart *mhdst)
 {
     if (mhdst->motapp->cam_list[0]->conf->webcontrol_tls) {
 
@@ -1271,7 +1271,7 @@ static void webu_mhd_opts_tls(struct mhdstart_ctx *mhdst)
 }
 
 /* Set all the MHD options based upon the configuration parameters*/
-static void webu_mhd_opts(struct mhdstart_ctx *mhdst)
+static void webu_mhd_opts(ctx_mhdstart *mhdst)
 {
     mhdst->mhd_opt_nbr = 0;
 
@@ -1295,7 +1295,7 @@ static void webu_mhd_opts(struct mhdstart_ctx *mhdst)
 }
 
 /* Set the mhd start up flags */
-static void webu_mhd_flags(struct mhdstart_ctx *mhdst)
+static void webu_mhd_flags(ctx_mhdstart *mhdst)
 {
     mhdst->mhd_flags = MHD_USE_THREAD_PER_CONNECTION;
 
@@ -1341,7 +1341,7 @@ static void webu_init_actions(ctx_motapp *motapp)
 /* Start the webcontrol */
 static void webu_init_webcontrol(ctx_motapp *motapp)
 {
-    struct mhdstart_ctx mhdst;
+    ctx_mhdstart mhdst;
     unsigned int randnbr;
 
     MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
