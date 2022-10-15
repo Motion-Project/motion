@@ -22,9 +22,6 @@
 #ifndef _INCLUDE_NETCAM_HPP_
 #define _INCLUDE_NETCAM_HPP_
 
-struct context;
-struct image_data;
-
 #define NETCAM_GENERAL_ERROR       0x02          /* binary 000010 */
 #define NETCAM_RESTART_ERROR       0x12          /* binary 010010 */
 #define NETCAM_BUFFSIZE 4096
@@ -36,16 +33,12 @@ enum NETCAM_STATUS {
     NETCAM_RECONNECTING   /* Motion is trying to reconnect to camera */
 };
 
-struct imgsize_context {
+struct ctx_imgsize {
     int                   width;
     int                   height;
 };
 
-/*
- * struct url_t is used when parsing the user-supplied URL, as well as
- * when attempting to connect to the netcam.
- */
-struct url_t {
+struct ctx_url {
     char *service;
     char *userpass;
     char *host;
@@ -79,7 +72,7 @@ extern "C" {
     #include "libavutil/hwcontext.h"
     #include "libavutil/mem.h"
 }
-struct packet_item{
+struct ctx_packet_item{
     AVPacket                 *packet;
     int64_t                   idnbr;
     bool                      iskey;
@@ -97,7 +90,7 @@ struct ctx_netcam {
     struct SwsContext        *swsctx;                /* Context for the resizing of the image */
     AVPacket                 *packet_recv;           /* The packet that is currently being processed */
     AVFormatContext          *transfer_format;       /* Format context just for transferring to pass-through */
-    struct packet_item       *pktarray;              /* Pointer to array of packets for passthru processing */
+    ctx_packet_item          *pktarray;              /* Pointer to array of packets for passthru processing */
     int                       pktarray_size;         /* The number of packets in array.  1 based */
     int                       pktarray_index;        /* The index to the most current packet in array */
     int64_t                   idnbr;                 /* A ID number to track the packet vs image */
@@ -131,7 +124,7 @@ struct ctx_netcam {
     char                      service[5];       /* String specifying the type of camera http, rtsp, v4l2 */
     char                      camera_name[PATH_MAX];      /* The name of the camera as provided in the config file */
     char                      cameratype[30];   /* String specifying Normal or High for use in logging */
-    struct imgsize_context    imgsize;          /* The image size parameters */
+    ctx_imgsize               imgsize;          /* The image size parameters */
 
     int                       rtsp_uses_tcp;    /* Flag from config for whether to use tcp transport */
     int                       v4l2_palette;     /* Palette from config for v4l2 devices */

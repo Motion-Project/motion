@@ -125,7 +125,7 @@ static char *netcam_url_match(regmatch_t m, const char *input)
     return match;
 }
 
-static void netcam_url_invalid(struct url_t *parse_url)
+static void netcam_url_invalid(ctx_url *parse_url)
 {
 
     MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Invalid URL.  Can not parse values."));
@@ -154,7 +154,7 @@ static void netcam_url_invalid(struct url_t *parse_url)
  * Returns:                Nothing
  *
  */
-static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
+static void netcam_url_parse(ctx_url *parse_url, const char *text_url)
 {
     char *s;
     int i;
@@ -177,7 +177,7 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
 
     //MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Entry netcam_url_parse data %s",text_url);
 
-    memset(parse_url, 0, sizeof(struct url_t));
+    memset(parse_url, 0, sizeof(ctx_url));
     /*
      * regcomp compiles regular expressions into a form that is
      * suitable for regexec searches
@@ -249,7 +249,7 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
  * Returns:             Nothing
  *
  */
-static void netcam_url_free(struct url_t *parse_url)
+static void netcam_url_free(ctx_url *parse_url)
 {
     myfree(&parse_url->service);
     myfree(&parse_url->userpass);
@@ -345,11 +345,11 @@ static void netcam_pktarray_resize(ctx_cam *cam, bool is_highres)
      * ...So....make this array big enough so we never catch our tail.  :)
      */
 
-    int64_t               idnbr_last, idnbr_first;
-    int                   indx;
-    ctx_netcam  *netcam;
-    struct packet_item   *tmp;
-    int                   newsize;
+    int64_t         idnbr_last, idnbr_first;
+    int             indx;
+    ctx_netcam      *netcam;
+    ctx_packet_item *tmp;
+    int             newsize;
 
     if (is_highres) {
         idnbr_last = cam->imgs.image_ring[cam->imgs.ring_out].idnbr_high;
@@ -374,9 +374,9 @@ static void netcam_pktarray_resize(ctx_cam *cam, bool is_highres)
 
     pthread_mutex_lock(&netcam->mutex_pktarray);
         if ((netcam->pktarray_size < newsize) ||  (netcam->pktarray_size < 30)) {
-            tmp =(packet_item*) mymalloc(newsize * sizeof(struct packet_item));
+            tmp =(ctx_packet_item*) mymalloc(newsize * sizeof(ctx_packet_item));
             if (netcam->pktarray_size > 0 ) {
-                memcpy(tmp, netcam->pktarray, sizeof(struct packet_item) * netcam->pktarray_size);
+                memcpy(tmp, netcam->pktarray, sizeof(ctx_packet_item) * netcam->pktarray_size);
             }
             for(indx = netcam->pktarray_size; indx < newsize; indx++) {
                 tmp[indx].packet = NULL;
@@ -1439,7 +1439,7 @@ static void netcam_set_path (ctx_cam *cam, ctx_netcam *netcam )
 {
 
     char   userpass[PATH_MAX];
-    struct url_t url;
+    ctx_url url;
     int retcd;
 
     netcam->path = NULL;
