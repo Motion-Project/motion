@@ -20,8 +20,6 @@
 #ifndef _INCLUDE_WEBU_FILE_HPP_
 #define _INCLUDE_WEBU_FILE_HPP_
 
-    struct ctx_webui;
-
-    mhdrslt webu_file_main(struct ctx_webui *webui);
+    mhdrslt webu_file_main(ctx_webui *webui);
 
 #endif /* _INCLUDE_WEBU_FILE_HPP_ */

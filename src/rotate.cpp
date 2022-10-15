@@ -177,11 +177,11 @@ static inline void rot90ccw(unsigned char *src, unsigned char *dst, int size, in
  *
  * Returns: nothing
  */
-void rotate_init(struct ctx_cam *cam)
+void rotate_init(ctx_cam *cam)
 {
     int size_norm, size_high;
 
-    cam->rotate_data =(struct ctx_rotate*) mymalloc(sizeof(struct ctx_rotate));
+    cam->rotate_data =(ctx_rotate*) mymalloc(sizeof(ctx_rotate));
 
     /* Make sure buffer_norm isn't freed if it hasn't been allocated. */
     cam->rotate_data->buffer_norm = NULL;
@@ -272,7 +272,7 @@ void rotate_init(struct ctx_cam *cam)
  *
  * Returns: nothing
  */
-void rotate_deinit(struct ctx_cam *cam)
+void rotate_deinit(ctx_cam *cam)
 {
 
     if (cam->rotate_data == NULL) {
@@ -298,7 +298,7 @@ void rotate_deinit(struct ctx_cam *cam)
  *   0  - success
  *   -1 - failure (shouldn't happen)
  */
-int rotate_map(struct ctx_cam *cam, struct ctx_image_data *img_data)
+int rotate_map(ctx_cam *cam, ctx_image_data *img_data)
 {
     /*
      * The image format is YUV 4:2:0 planar, which has the pixel

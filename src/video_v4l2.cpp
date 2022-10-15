@@ -224,7 +224,7 @@ static void v4l2_ctrls_list(ctx_v4l2cam *v4l2cam)
 /* Set the control array items to the device */
 static void v4l2_ctrls_set(ctx_v4l2cam *v4l2cam)
 {
-    struct ctx_v4l2cam_ctrl *devitem;
+    ctx_v4l2cam_ctrl *devitem;
     struct v4l2_control     vid_ctrl;
     int indx_dev, retcd;
 
@@ -257,8 +257,8 @@ static void v4l2_ctrls_set(ctx_v4l2cam *v4l2cam)
 
 static int v4l2_parms_set(ctx_v4l2cam *v4l2cam)
 {
-    struct ctx_v4l2cam_ctrl  *devitem;
-    struct ctx_params_item *usritem;
+    ctx_v4l2cam_ctrl  *devitem;
+    ctx_params_item *usritem;
     int indx_dev, indx_user;
 
     if (v4l2cam->devctrl_count == 0) {
@@ -943,7 +943,7 @@ static int v4l2_device_init(ctx_cam *cam)
 {
     int indx;
 
-    cam->v4l2cam = (struct ctx_v4l2cam*)mymalloc(sizeof(struct ctx_v4l2cam));
+    cam->v4l2cam = (ctx_v4l2cam*)mymalloc(sizeof(ctx_v4l2cam));
     cam->v4l2cam->devctrl_array = NULL;
     cam->v4l2cam->devctrl_count = 0;
     cam->v4l2cam->buffer_count= 0;
@@ -951,8 +951,8 @@ static int v4l2_device_init(ctx_cam *cam)
     cam->v4l2cam->finish = cam->finish_cam;
     cam->v4l2cam->buffers = NULL;
 
-    cam->v4l2cam->params =(struct ctx_params*) mymalloc(sizeof(struct ctx_params));
-    memset(cam->v4l2cam->params, 0, sizeof(struct ctx_params));
+    cam->v4l2cam->params =(ctx_params*) mymalloc(sizeof(ctx_params));
+    memset(cam->v4l2cam->params, 0, sizeof(ctx_params));
     cam->v4l2cam->params->params_array = NULL;
     cam->v4l2cam->params->params_count = 0;
     cam->v4l2cam->params->update_params = true;     /*Set trigger to update the params */

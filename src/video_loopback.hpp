@@ -21,5 +21,5 @@
 
     int vlp_startpipe(const char *dev_name, int width, int height);
     int vlp_putpipe(int dev, unsigned char *image, int imgsize);
-    void vlp_init(struct ctx_cam *cam);
+    void vlp_init(ctx_cam *cam);
 #endif /* _INCLUDE_VIDEO_LOOPBACK_HPP_ */

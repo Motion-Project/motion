@@ -25,10 +25,10 @@
 #include "webu_post.hpp"
 
 /* Process the add camera action */
-static void webu_post_cam_add(struct ctx_webui *webui)
+static void webu_post_cam_add(ctx_webui *webui)
 {
     int indx, maxcnt;
-    struct ctx_params *wact;
+    ctx_params *wact;
 
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
@@ -63,10 +63,10 @@ static void webu_post_cam_add(struct ctx_webui *webui)
 
 }
 /* Process the delete camera action */
-static void webu_post_cam_delete(struct ctx_webui *webui)
+static void webu_post_cam_delete(ctx_webui *webui)
 {
     int indx, maxcnt;
-    struct ctx_params *wact;
+    ctx_params *wact;
 
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
@@ -123,7 +123,7 @@ static void webu_post_cam_delete(struct ctx_webui *webui)
 }
 
 /* Get the command and thread number from the post data */
-void webu_post_cmdthrd(struct ctx_webui *webui)
+void webu_post_cmdthrd(ctx_webui *webui)
 {
     int indx, camid;
 
@@ -174,10 +174,10 @@ void webu_post_cmdthrd(struct ctx_webui *webui)
 }
 
 /* Process the event end action */
-void webu_post_action_eventend(struct ctx_webui *webui)
+void webu_post_action_eventend(ctx_webui *webui)
 {
     int indx;
-    struct ctx_params *wact;
+    ctx_params *wact;
 
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
@@ -204,10 +204,10 @@ void webu_post_action_eventend(struct ctx_webui *webui)
 }
 
 /* Process the event start action */
-void webu_post_action_eventstart(struct ctx_webui *webui)
+void webu_post_action_eventstart(ctx_webui *webui)
 {
     int indx;
-    struct ctx_params *wact;
+    ctx_params *wact;
 
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
@@ -234,10 +234,10 @@ void webu_post_action_eventstart(struct ctx_webui *webui)
 }
 
 /* Process the snapshot action */
-void webu_post_action_snapshot(struct ctx_webui *webui)
+void webu_post_action_snapshot(ctx_webui *webui)
 {
     int indx;
-    struct ctx_params *wact;
+    ctx_params *wact;
 
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
@@ -264,10 +264,10 @@ void webu_post_action_snapshot(struct ctx_webui *webui)
 }
 
 /* Process the pause action */
-void webu_post_action_pause(struct ctx_webui *webui)
+void webu_post_action_pause(ctx_webui *webui)
 {
     int indx;
-    struct ctx_params *wact;
+    ctx_params *wact;
 
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
@@ -294,10 +294,10 @@ void webu_post_action_pause(struct ctx_webui *webui)
 }
 
 /* Process the unpause action */
-void webu_post_action_unpause(struct ctx_webui *webui)
+void webu_post_action_unpause(ctx_webui *webui)
 {
     int indx;
-    struct ctx_params *wact;
+    ctx_params *wact;
 
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
@@ -324,10 +324,10 @@ void webu_post_action_unpause(struct ctx_webui *webui)
 }
 
 /* Process the restart action */
-void webu_post_action_restart(struct ctx_webui *webui)
+void webu_post_action_restart(ctx_webui *webui)
 {
     int indx;
-    struct ctx_params *wact;
+    ctx_params *wact;
 
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
@@ -359,10 +359,10 @@ void webu_post_action_restart(struct ctx_webui *webui)
 }
 
 /* Process the stop action */
-void webu_post_action_stop(struct ctx_webui *webui)
+void webu_post_action_stop(ctx_webui *webui)
 {
     int indx;
-    struct ctx_params *wact;
+    ctx_params *wact;
 
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
@@ -400,10 +400,10 @@ void webu_post_action_stop(struct ctx_webui *webui)
 }
 
 /* Process the write config action */
-void webu_post_write_config(struct ctx_webui *webui)
+void webu_post_write_config(ctx_webui *webui)
 {
     int indx;
-    struct ctx_params *wact;
+    ctx_params *wact;
 
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
@@ -422,12 +422,12 @@ void webu_post_write_config(struct ctx_webui *webui)
 }
 
 /* Process the configuration parameters */
-static void webu_post_config(struct ctx_webui *webui)
+static void webu_post_config(ctx_webui *webui)
 {
     int indx, indx2;
     bool ismotapp;
     std::string tmpname;
-    struct ctx_params *wact;
+    ctx_params *wact;
 
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
@@ -499,11 +499,11 @@ static void webu_post_config(struct ctx_webui *webui)
 }
 
 /* Process the ptz action */
-void webu_post_ptz(struct ctx_webui *webui)
+void webu_post_ptz(ctx_webui *webui)
 {
     int indx;
-    struct ctx_cam *cam;
-    struct ctx_params *wact;
+    ctx_cam *cam;
+    ctx_params *wact;
 
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
@@ -551,7 +551,7 @@ void webu_post_ptz(struct ctx_webui *webui)
 }
 
 /* Process the actions from the webcontrol that the user requested */
-void webu_post_main(struct ctx_webui *webui)
+void webu_post_main(ctx_webui *webui)
 {
 
     webu_post_cmdthrd(webui);

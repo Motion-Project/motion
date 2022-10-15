@@ -106,13 +106,13 @@
     int mycreate_path(const char *path);
     FILE *myfopen(const char *path, const char *mode);
     int myfclose(FILE *fh);
-    size_t mystrftime(const struct ctx_cam *cam, char *s, size_t max, const char *userformat,
+    size_t mystrftime(ctx_cam *cam, char *s, size_t max, const char *userformat,
         const struct timespec *ts1, const char *filename, int sqltype);
-    void util_exec_command(struct ctx_cam *cam, const char *command, char *filename, int filetype);
+    void util_exec_command(ctx_cam *cam, const char *command, char *filename, int filetype);
 
     void mythreadname_set(const char *abbr, int threadnbr, const char *threadname);
     void mythreadname_get(char *threadname);
-    bool mycheck_passthrough(struct ctx_cam *cam);
+    bool mycheck_passthrough(ctx_cam *cam);
 
     char* mytranslate_text(const char *msgid, int setnls);
     void mytranslate_init(void);
@@ -136,11 +136,11 @@
     int mycopy_packet(AVPacket *dest_pkt, AVPacket *src_pkt);
     AVPacket *mypacket_alloc(AVPacket *pkt);
 
-    void util_parms_parse(struct ctx_params *params, std::string confline);
+    void util_parms_parse(ctx_params *params, std::string confline);
     void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl);
 
-    void util_parms_free(struct ctx_params *params);
-    void util_parms_update(struct ctx_params *params, std::string &confline);
+    void util_parms_free(ctx_params *params);
+    void util_parms_update(ctx_params *params, std::string &confline);
 
 
 #endif /* _INCLUDE_UTIL_HPP_ */

@@ -33,7 +33,7 @@ pthread_key_t tls_key_threadnr;
 volatile enum MOTION_SIGNAL motsignal;
 
 /** Process signals sent */
-static void motion_signal_process(struct ctx_motapp *motapp)
+static void motion_signal_process(ctx_motapp *motapp)
 {
     int indx;
 
@@ -164,7 +164,7 @@ static void setup_signals(void)
 }
 
 /** Remove the process id file ( pid file ) before MotionPlus exit. */
-static void motion_remove_pid(struct ctx_motapp *motapp)
+static void motion_remove_pid(ctx_motapp *motapp)
 {
 
     if ((motapp->daemon) &&
@@ -180,7 +180,7 @@ static void motion_remove_pid(struct ctx_motapp *motapp)
 }
 
 /**  Turn MotionPlus into a daemon through forking. */
-static void motion_daemon(struct ctx_motapp *motapp)
+static void motion_daemon(ctx_motapp *motapp)
 {
     int fd;
     FILE *pidf = NULL;
@@ -267,7 +267,7 @@ static void motion_daemon(struct ctx_motapp *motapp)
     sigaction(SIGTSTP, &sig_ign_action, NULL);
 }
 
-static void motion_shutdown(struct ctx_motapp *motapp)
+static void motion_shutdown(ctx_motapp *motapp)
 {
     motion_remove_pid(motapp);
 
@@ -281,7 +281,7 @@ static void motion_shutdown(struct ctx_motapp *motapp)
 
 }
 
-static void motion_camera_ids(struct ctx_cam **cam_list)
+static void motion_camera_ids(ctx_cam **cam_list)
 {
     /* Set the camera id's on the ctx_cam.  They must be unique */
     int indx, indx2;
@@ -384,7 +384,7 @@ static void motion_ntc(void)
 }
 
 /** Initialize upon start up or restart */
-static void motion_startup(struct ctx_motapp *motapp, int daemonize, int argc, char *argv[])
+static void motion_startup(ctx_motapp *motapp, int daemonize, int argc, char *argv[])
 {
 
     log_set_motapp(motapp);  /* This is needed prior to any function possibly calling motion_log*/
@@ -425,7 +425,7 @@ static void motion_startup(struct ctx_motapp *motapp, int daemonize, int argc, c
 }
 
 /** Start a camera thread */
-static void motion_start_thread(struct ctx_motapp *motapp, int indx)
+static void motion_start_thread(ctx_motapp *motapp, int indx)
 {
     int retcd;
 
@@ -446,7 +446,7 @@ static void motion_start_thread(struct ctx_motapp *motapp, int indx)
 
 }
 
-static void motion_restart(struct ctx_motapp *motapp, int argc, char **argv)
+static void motion_restart(ctx_motapp *motapp, int argc, char **argv)
 {
 
     MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Restarting MotionPlus."));
@@ -463,7 +463,7 @@ static void motion_restart(struct ctx_motapp *motapp, int argc, char **argv)
 }
 
 /* Check for whether any cams are locked */
-static void motion_watchdog(struct ctx_motapp *motapp, int camindx)
+static void motion_watchdog(ctx_motapp *motapp, int camindx)
 {
     int indx;
 
@@ -554,7 +554,7 @@ static void motion_watchdog(struct ctx_motapp *motapp, int camindx)
 
 }
 
-static int motion_check_threadcount(struct ctx_motapp *motapp)
+static int motion_check_threadcount(ctx_motapp *motapp)
 {
     int thrdcnt, indx;
 
@@ -583,7 +583,7 @@ static int motion_check_threadcount(struct ctx_motapp *motapp)
 
 }
 
-static void motion_init(struct ctx_motapp *motapp)
+static void motion_init(ctx_motapp *motapp)
 {
 
     motapp->cam_list = NULL;
@@ -624,7 +624,7 @@ static void motion_init(struct ctx_motapp *motapp)
 }
 
 /* Check for whether to add a new cam */
-static void motion_cam_add(struct ctx_motapp *motapp)
+static void motion_cam_add(ctx_motapp *motapp)
 {
     int indx_cam, indx;
 
@@ -656,10 +656,10 @@ static void motion_cam_add(struct ctx_motapp *motapp)
 }
 
 /* Check for whether to delete a new cam */
-static void motion_cam_delete(struct ctx_motapp *motapp)
+static void motion_cam_delete(ctx_motapp *motapp)
 {
     int indx_cam, indx;
-    struct ctx_cam **tmp;
+    ctx_cam **tmp;
 
     if (motapp->cam_delete == 0) {
         return;
@@ -682,7 +682,7 @@ static void motion_cam_delete(struct ctx_motapp *motapp)
     motapp->cam_list[motapp->cam_delete] = NULL;
 
     /* Set up a new cam_list */
-    tmp = (struct ctx_cam **)mymalloc(sizeof(struct ctx_cam *) * indx_cam);
+    tmp = (ctx_cam **)mymalloc(sizeof(ctx_cam *) * indx_cam);
     tmp[indx_cam-1] = NULL;
 
     /* Copy all the other cam pointers */
@@ -712,7 +712,7 @@ static void motion_cam_delete(struct ctx_motapp *motapp)
 int main (int argc, char **argv)
 {
     int indx;
-    struct ctx_motapp *motapp;
+    ctx_motapp *motapp;
 
     motapp = new ctx_motapp;
 

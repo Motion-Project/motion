@@ -73,6 +73,7 @@ extern "C" {
 #endif
 
 /* Forward declarations, used in functional definitions of headers */
+struct ctx_motapp;
 struct ctx_rotate;
 struct ctx_images;
 struct ctx_image_data;
@@ -83,6 +84,8 @@ struct ctx_netcam;
 struct ctx_algsec;
 struct ctx_config;
 struct ctx_v4l2cam;
+struct ctx_webui;
+struct ctx_netcam;
 
 class cls_libcam;
 
@@ -184,7 +187,7 @@ struct ctx_params_item {
 };
 
 struct ctx_params {
-    struct ctx_params_item *params_array;     /*Array of the controls the user specified*/
+    ctx_params_item *params_array;     /*Array of the controls the user specified*/
     int params_count;                         /*Count of the controls the user specified*/
     bool update_params;                       /*Bool for whether to update the parameters on the device*/
 };
@@ -216,14 +219,14 @@ struct ctx_image_data {
     int                 shot;           /* Sub second timestamp count */
     unsigned long       cent_dist;      /* Movement center to img center distance * Note: Dist is calculated distX*distX + distY*distY */
     unsigned int        flags;          /* See IMAGE_* defines */
-    struct ctx_coord    location;       /* coordinates for center and size of last motion detection*/
+    ctx_coord           location;       /* coordinates for center and size of last motion detection*/
     int                 total_labels;
 };
 
 struct ctx_images {
-    struct ctx_image_data *image_ring;    /* The base address of the image ring buffer */
-    struct ctx_image_data image_motion;   /* Picture buffer for motion images */
-    struct ctx_image_data image_preview;  /* Picture buffer for best image when enables */
+    ctx_image_data *image_ring;    /* The base address of the image ring buffer */
+    ctx_image_data image_motion;   /* Picture buffer for motion images */
+    ctx_image_data image_preview;  /* Picture buffer for best image when enables */
 
     unsigned char *ref;               /* The reference frame */
     unsigned char *ref_next;          /* The reference frame */
@@ -274,12 +277,12 @@ struct ctx_stream_data {
 };
 
 struct ctx_stream {
-    pthread_mutex_t         mutex;
-    struct ctx_stream_data  norm;       /* Copy of the image to use for web stream*/
-    struct ctx_stream_data  sub;        /* Copy of the image to use for web stream*/
-    struct ctx_stream_data  motion;     /* Copy of the image to use for web stream*/
-    struct ctx_stream_data  source;     /* Copy of the image to use for web stream*/
-    struct ctx_stream_data  secondary;  /* Copy of the image to use for web stream*/
+    pthread_mutex_t  mutex;
+    ctx_stream_data  norm;       /* Copy of the image to use for web stream*/
+    ctx_stream_data  sub;        /* Copy of the image to use for web stream*/
+    ctx_stream_data  motion;     /* Copy of the image to use for web stream*/
+    ctx_stream_data  source;     /* Copy of the image to use for web stream*/
+    ctx_stream_data  secondary;  /* Copy of the image to use for web stream*/
 };
 
 /*
@@ -288,27 +291,27 @@ struct ctx_stream {
  */
 struct ctx_cam {
 
-    struct ctx_motapp       *motapp;
-    char                    conf_filename[PATH_MAX];
-    bool                    from_conf_dir;
-    int                     threadnr;
-    pthread_t               thread_id;
+    ctx_motapp      *motapp;
+    char            conf_filename[PATH_MAX];
+    bool            from_conf_dir;
+    int             threadnr;
+    pthread_t       thread_id;
 
-    struct ctx_config       *conf;
-    struct ctx_images       imgs;
-    struct ctx_mmalcam      *mmalcam;
-    struct ctx_netcam       *netcam;            /* this structure contains the context for normal RTSP connection */
-    struct ctx_netcam       *netcam_high;       /* this structure contains the context for high resolution RTSP connection */
-    struct ctx_v4l2cam      *v4l2cam;
-    struct ctx_image_data   *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
-    struct ctx_algsec       *algsec;
-    struct ctx_rotate       *rotate_data;       /* rotation data is thread-specific */
-    struct ctx_movie        *movie_norm;
-    struct ctx_movie        *movie_motion;
-    struct ctx_movie        *movie_timelapse;
-    struct ctx_stream       stream;
+    ctx_config      *conf;
+    ctx_images      imgs;
+    ctx_mmalcam     *mmalcam;
+    ctx_netcam      *netcam;            /* this structure contains the context for normal RTSP connection */
+    ctx_netcam      *netcam_high;       /* this structure contains the context for high resolution RTSP connection */
+    ctx_v4l2cam     *v4l2cam;
+    ctx_image_data  *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
+    ctx_algsec      *algsec;
+    ctx_rotate      *rotate_data;       /* rotation data is thread-specific */
+    ctx_movie       *movie_norm;
+    ctx_movie       *movie_motion;
+    ctx_movie       *movie_timelapse;
+    ctx_stream      stream;
 
-    class cls_libcam        *libcam;
+    cls_libcam      *libcam;
 
     FILE                    *extpipe;
     int                     extpipe_open;
@@ -395,7 +398,7 @@ struct ctx_cam {
 /*  ctx_cam for whole motion application including all the cameras */
 struct ctx_motapp {
 
-    struct ctx_cam      **cam_list;
+    ctx_cam             **cam_list;
     pthread_mutex_t     global_lock;
 
     volatile int        threads_running;
@@ -423,9 +426,9 @@ struct ctx_motapp {
     struct MHD_Daemon           *webcontrol_daemon;
     char                        webcontrol_digest_rand[12];
     std::list<ctx_webu_clients> webcontrol_clients;         /* C++ list of client ips */
-    struct ctx_params           *webcontrol_headers;        /* parameters for header */
-    struct ctx_params           *webcontrol_actions;        /* parameters for actions */
-    struct ctx_dbse             *dbse;                      /* user specified database */
+    ctx_params                  *webcontrol_headers;        /* parameters for header */
+    ctx_params                  *webcontrol_actions;        /* parameters for actions */
+    ctx_dbse                    *dbse;                      /* user specified database */
 
     bool                parms_changed;      /*bool indicating if the parms have changed */
     pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */

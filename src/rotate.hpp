@@ -19,8 +19,6 @@
 #ifndef _INCLUDE_ROTATE_HPP_
 #define _INCLUDE_ROTATE_HPP_
 
-    struct ctx_cam;
-
     struct ctx_rotate {
         unsigned char *buffer_norm; /* Temp low res buffer for 90 and 270 degrees rotation */
         unsigned char *buffer_high; /* Temp high res buffer for 90 and 270 degrees rotation */
@@ -34,8 +32,8 @@
         int capture_height_high;    /* Capture height of high resolution image */
     };
 
-    void rotate_init(struct ctx_cam *cam);
-    void rotate_deinit(struct ctx_cam *cam);
-    int rotate_map(struct ctx_cam *cam, struct ctx_image_data *img_data);
+    void rotate_init(ctx_cam *cam);
+    void rotate_deinit(ctx_cam *cam);
+    int rotate_map(ctx_cam *cam, ctx_image_data *img_data);
 
 #endif /* _INCLUDE_ROTATE_HPP_ */

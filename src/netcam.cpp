@@ -257,13 +257,13 @@ static void netcam_url_free(struct url_t *parse_url)
     myfree(&parse_url->path);
 }
 
-static void netcam_free_pkt(struct ctx_netcam *netcam)
+static void netcam_free_pkt(ctx_netcam *netcam)
 {
     mypacket_free(netcam->packet_recv);
     netcam->packet_recv = NULL;
 }
 
-static int netcam_check_pixfmt(struct ctx_netcam *netcam)
+static int netcam_check_pixfmt(ctx_netcam *netcam)
 {
     /* Determine if the format is YUV420P */
     int retcd;
@@ -278,7 +278,7 @@ static int netcam_check_pixfmt(struct ctx_netcam *netcam)
 
 }
 
-static void netcam_pktarray_free(struct ctx_netcam *netcam)
+static void netcam_pktarray_free(ctx_netcam *netcam)
 {
 
     int indx;
@@ -296,7 +296,7 @@ static void netcam_pktarray_free(struct ctx_netcam *netcam)
 
 }
 
-static void netcam_null_context(struct ctx_netcam *netcam)
+static void netcam_null_context(ctx_netcam *netcam)
 {
 
     netcam->swsctx          = NULL;
@@ -310,7 +310,7 @@ static void netcam_null_context(struct ctx_netcam *netcam)
 
 }
 
-static void netcam_close_context(struct ctx_netcam *netcam)
+static void netcam_close_context(ctx_netcam *netcam)
 {
 
     if (netcam->swsctx          != NULL) sws_freeContext(netcam->swsctx);
@@ -326,7 +326,7 @@ static void netcam_close_context(struct ctx_netcam *netcam)
 
 }
 
-static void netcam_pktarray_resize(struct ctx_cam *cam, bool is_highres)
+static void netcam_pktarray_resize(ctx_cam *cam, bool is_highres)
 {
     /* This is called from netcam_next and is on the motion loop thread
      * The netcam->mutex is locked around the call to this function.
@@ -347,7 +347,7 @@ static void netcam_pktarray_resize(struct ctx_cam *cam, bool is_highres)
 
     int64_t               idnbr_last, idnbr_first;
     int                   indx;
-    struct ctx_netcam  *netcam;
+    ctx_netcam  *netcam;
     struct packet_item   *tmp;
     int                   newsize;
 
@@ -397,7 +397,7 @@ static void netcam_pktarray_resize(struct ctx_cam *cam, bool is_highres)
 
 }
 
-static void netcam_pktarray_add(struct ctx_netcam *netcam)
+static void netcam_pktarray_add(ctx_netcam *netcam)
 {
 
     int indx_next;
@@ -447,7 +447,7 @@ static void netcam_pktarray_add(struct ctx_netcam *netcam)
 
 }
 
-static int netcam_decode_sw(struct ctx_netcam *netcam)
+static int netcam_decode_sw(ctx_netcam *netcam)
 {
     #if (MYFFVER >= 57041)
         int retcd;
@@ -481,7 +481,7 @@ static int netcam_decode_sw(struct ctx_netcam *netcam)
     #endif
 }
 
-static int netcam_decode_vaapi(struct ctx_netcam *netcam)
+static int netcam_decode_vaapi(ctx_netcam *netcam)
 {
     #if ( MYFFVER >= 57083)
         int retcd;
@@ -536,7 +536,7 @@ static int netcam_decode_vaapi(struct ctx_netcam *netcam)
  *   1 valid data
  */
 
-static int netcam_decode_video(struct ctx_netcam *netcam)
+static int netcam_decode_video(ctx_netcam *netcam)
 {
     #if (MYFFVER >= 57041)
         int retcd;
@@ -615,7 +615,7 @@ static int netcam_decode_video(struct ctx_netcam *netcam)
 
 }
 
-static int netcam_decode_packet(struct ctx_netcam *netcam)
+static int netcam_decode_packet(ctx_netcam *netcam)
 {
 
     int frame_size;
@@ -660,7 +660,7 @@ static int netcam_decode_packet(struct ctx_netcam *netcam)
     return frame_size;
 }
 
-static void netcam_hwdecoders(struct ctx_netcam *netcam)
+static void netcam_hwdecoders(ctx_netcam *netcam)
 {
     #if ( MYFFVER >= 57083)
         /* High Res pass through does not decode images into frames*/
@@ -714,7 +714,7 @@ static enum AVPixelFormat netcam_getfmt_vaapi(AVCodecContext *avctx, const enum 
     #endif
 }
 
-static void netcam_decoder_error(struct ctx_netcam *netcam, int retcd, const char* fnc_nm)
+static void netcam_decoder_error(ctx_netcam *netcam, int retcd, const char* fnc_nm)
 {
     char errstr[128];
     int indx;
@@ -763,7 +763,7 @@ static void netcam_decoder_error(struct ctx_netcam *netcam, int retcd, const cha
 
 }
 
-static int netcam_init_vaapi(struct ctx_netcam *netcam)
+static int netcam_init_vaapi(ctx_netcam *netcam)
 {
     #if ( MYFFVER >= 57083)
         int retcd;
@@ -814,7 +814,7 @@ static int netcam_init_vaapi(struct ctx_netcam *netcam)
     #endif
 }
 
-static int netcam_init_swdecoder(struct ctx_netcam *netcam)
+static int netcam_init_swdecoder(ctx_netcam *netcam)
 {
     #if ( MYFFVER >= 57041)
         int retcd;
@@ -873,7 +873,7 @@ static int netcam_init_swdecoder(struct ctx_netcam *netcam)
 
 }
 
-static int netcam_open_codec(struct ctx_netcam *netcam)
+static int netcam_open_codec(ctx_netcam *netcam)
 {
     #if ( MYFFVER >= 57041)
 
@@ -950,14 +950,14 @@ static int netcam_open_codec(struct ctx_netcam *netcam)
 
 }
 
-static struct ctx_netcam *netcam_new_context(void)
+static ctx_netcam *netcam_new_context(void)
 {
-    struct ctx_netcam *ret;
+    ctx_netcam *ret;
 
     /* Note that mymalloc will exit on any problem. */
-    ret =(struct ctx_netcam*) mymalloc(sizeof(struct ctx_netcam));
+    ret =(ctx_netcam*) mymalloc(sizeof(ctx_netcam));
 
-    memset(ret, 0, sizeof(struct ctx_netcam));
+    memset(ret, 0, sizeof(ctx_netcam));
 
     return ret;
 }
@@ -965,7 +965,7 @@ static struct ctx_netcam *netcam_new_context(void)
 static int netcam_interrupt(void *ctx)
 {
     /* Must return as an int since this is a callback to a C function */
-    struct ctx_netcam *netcam = (struct ctx_netcam *)ctx;
+    ctx_netcam *netcam = (ctx_netcam *)ctx;
 
     if (netcam->finish) {
         netcam->interrupted = true;
@@ -1007,7 +1007,7 @@ static int netcam_interrupt(void *ctx)
     return false;
 }
 
-static int netcam_open_sws(struct ctx_netcam *netcam)
+static int netcam_open_sws(ctx_netcam *netcam)
 {
 
     if (netcam->finish) {
@@ -1086,7 +1086,7 @@ static int netcam_open_sws(struct ctx_netcam *netcam)
 
 }
 
-static int netcam_resize(struct ctx_netcam *netcam)
+static int netcam_resize(ctx_netcam *netcam)
 {
 
     int      retcd;
@@ -1183,7 +1183,7 @@ static int netcam_resize(struct ctx_netcam *netcam)
 
 }
 
-static int netcam_read_image(struct ctx_netcam *netcam)
+static int netcam_read_image(ctx_netcam *netcam)
 {
 
     int  size_decoded, retcd, errcnt, nodata;
@@ -1327,7 +1327,7 @@ static int netcam_read_image(struct ctx_netcam *netcam)
     return 0;
 }
 
-static int netcam_ntc(struct ctx_netcam *netcam)
+static int netcam_ntc(ctx_netcam *netcam)
 {
 
     if ((netcam->finish) || (!netcam->first_image)) {
@@ -1357,7 +1357,7 @@ static int netcam_ntc(struct ctx_netcam *netcam)
 
 }
 
-static void netcam_set_options(struct ctx_netcam *netcam)
+static void netcam_set_options(ctx_netcam *netcam)
 {
 
     int indx;
@@ -1435,7 +1435,7 @@ static void netcam_set_options(struct ctx_netcam *netcam)
 
 }
 
-static void netcam_set_path (struct ctx_cam *cam, struct ctx_netcam *netcam )
+static void netcam_set_path (ctx_cam *cam, ctx_netcam *netcam )
 {
 
     char   userpass[PATH_MAX];
@@ -1494,7 +1494,7 @@ static void netcam_set_path (struct ctx_cam *cam, struct ctx_netcam *netcam )
 
 }
 
-static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
+static void netcam_set_parms (ctx_cam *cam, ctx_netcam *netcam )
 {
     /* Set the parameters to be used with our camera */
     int indx, val_len;
@@ -1506,14 +1506,14 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
         netcam->imgsize.width = 0;
         netcam->imgsize.height = 0;
         snprintf(netcam->cameratype, 29, "%s",_("High"));
-        netcam->params = (ctx_params*)mymalloc(sizeof(struct ctx_params));
+        netcam->params = (ctx_params*)mymalloc(sizeof(ctx_params));
         netcam->params->update_params = true;
         util_parms_parse(netcam->params, cam->conf->netcam_high_params);
     } else {
         netcam->imgsize.width = cam->conf->width;
         netcam->imgsize.height = cam->conf->height;
         snprintf(netcam->cameratype, 29, "%s",_("Norm"));
-        netcam->params = (ctx_params*)mymalloc(sizeof(struct ctx_params));
+        netcam->params = (ctx_params*)mymalloc(sizeof(ctx_params));
         netcam->params->update_params = true;
         util_parms_parse(netcam->params, cam->conf->netcam_params);
     }
@@ -1582,7 +1582,7 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam )
 
 }
 
-static int netcam_set_dimensions (struct ctx_cam *cam)
+static int netcam_set_dimensions (ctx_cam *cam)
 {
 
     cam->imgs.width = 0;
@@ -1620,7 +1620,7 @@ static int netcam_set_dimensions (struct ctx_cam *cam)
     return 0;
 }
 
-static int netcam_copy_stream(struct ctx_netcam *netcam)
+static int netcam_copy_stream(ctx_netcam *netcam)
 {
     /* Make a static copy of the stream information for use in passthrough processing */
     #if (MYFFVER >= 57041)
@@ -1663,7 +1663,7 @@ static int netcam_copy_stream(struct ctx_netcam *netcam)
 
 }
 
-static int netcam_open_context(struct ctx_netcam *netcam)
+static int netcam_open_context(ctx_netcam *netcam)
 {
 
     int  retcd;
@@ -1800,7 +1800,7 @@ static int netcam_open_context(struct ctx_netcam *netcam)
 
 }
 
-static int netcam_connect(struct ctx_netcam *netcam)
+static int netcam_connect(ctx_netcam *netcam)
 {
 
     if (netcam_open_context(netcam) < 0) {
@@ -1868,7 +1868,7 @@ static int netcam_connect(struct ctx_netcam *netcam)
     return 0;
 }
 
-static void netcam_shutdown(struct ctx_netcam *netcam)
+static void netcam_shutdown(ctx_netcam *netcam)
 {
 
     if (netcam) {
@@ -1897,7 +1897,7 @@ static void netcam_shutdown(struct ctx_netcam *netcam)
 
 }
 
-static void netcam_handler_wait(struct ctx_netcam *netcam)
+static void netcam_handler_wait(ctx_netcam *netcam)
 {
     int64_t usec_ltncy;
     AVRational tbase;
@@ -1941,7 +1941,7 @@ static void netcam_handler_wait(struct ctx_netcam *netcam)
 
 }
 
-static void netcam_handler_reconnect(struct ctx_netcam *netcam)
+static void netcam_handler_reconnect(ctx_netcam *netcam)
 {
 
     int retcd, indx;
@@ -2004,7 +2004,7 @@ static void netcam_handler_reconnect(struct ctx_netcam *netcam)
 static void *netcam_handler(void *arg)
 {
 
-    struct ctx_netcam *netcam =(struct ctx_netcam *) arg;
+    ctx_netcam *netcam =(ctx_netcam *) arg;
 
     netcam->handler_finished = false;
 
@@ -2051,7 +2051,7 @@ static void *netcam_handler(void *arg)
     pthread_exit(NULL);
 }
 
-static int netcam_start_handler(struct ctx_netcam *netcam)
+static int netcam_start_handler(ctx_netcam *netcam)
 {
 
     int retcd, wait_counter;
@@ -2102,12 +2102,12 @@ static int netcam_start_handler(struct ctx_netcam *netcam)
 
 }
 
-int netcam_setup(struct ctx_cam *cam)
+int netcam_setup(ctx_cam *cam)
 {
 
     int retcd;
     int indx_cam, indx_max;
-    struct ctx_netcam *netcam;
+    ctx_netcam *netcam;
 
     cam->netcam = NULL;
     cam->netcam_high = NULL;
@@ -2185,7 +2185,7 @@ int netcam_setup(struct ctx_cam *cam)
 }
 
 /* netcam_next (Called from the motion loop thread) */
-int netcam_next(struct ctx_cam *cam, struct ctx_image_data *img_data)
+int netcam_next(ctx_cam *cam, ctx_image_data *img_data)
 {
     if (cam == NULL) {
         return 1;
@@ -2228,7 +2228,7 @@ int netcam_next(struct ctx_cam *cam, struct ctx_image_data *img_data)
     return 0;
 }
 
-void netcam_cleanup(struct ctx_cam *cam, bool init_retry_flag)
+void netcam_cleanup(ctx_cam *cam, bool init_retry_flag)
 {
 
      /*
@@ -2239,7 +2239,7 @@ void netcam_cleanup(struct ctx_cam *cam, bool init_retry_flag)
      */
     int wait_counter;
     int indx_cam, indx_max;
-    struct ctx_netcam *netcam;
+    ctx_netcam *netcam;
 
     indx_cam = 1;
     if (cam->netcam_high) {

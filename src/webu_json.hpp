@@ -20,7 +20,7 @@
 #ifndef _INCLUDE_WEBU_JSON_HPP_
 #define _INCLUDE_WEBU_JSON_HPP_
 
-    void webu_json_config(struct ctx_webui *webui);
-    void webu_json_movies(struct ctx_webui *webui);
+    void webu_json_config(ctx_webui *webui);
+    void webu_json_movies(ctx_webui *webui);
 
 #endif /* _INCLUDE_WEBU_JSON_HPP_ */

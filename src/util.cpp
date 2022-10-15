@@ -261,7 +261,7 @@ int myfclose(FILE* fh)
  * host    Replaced with the name of the local machine (see gethostname(2)).
  * fps     Equivalent to %fps.
  */
-static void mystrftime_long (const struct ctx_cam *cam,
+static void mystrftime_long (const ctx_cam *cam,
         int width, const char *word, int l, char *out)
 {
 
@@ -343,7 +343,7 @@ static void mystrftime_long (const struct ctx_cam *cam,
  *
  * Returns: number of bytes written to the string s
  */
-size_t mystrftime(const struct ctx_cam *cam, char *s, size_t max, const char *userformat,
+size_t mystrftime(ctx_cam *cam, char *s, size_t max, const char *userformat,
         const struct timespec *ts1, const char *filename, int sqltype)
 {
     char formatstring[PATH_MAX] = "";
@@ -554,7 +554,7 @@ void mythreadname_get(char *threadname)
     #endif
 }
 
-bool mycheck_passthrough(struct ctx_cam *cam)
+bool mycheck_passthrough(ctx_cam *cam)
 {
     #if (MYFFVER >= 57041)
         if (cam->movie_passthrough) {
@@ -780,7 +780,7 @@ AVPacket *mypacket_alloc(AVPacket *pkt)
 
 /*********************************************/
 
-void util_parms_free(struct ctx_params *params)
+void util_parms_free(ctx_params *params)
 {
     int indx_parm;
 
@@ -798,15 +798,15 @@ void util_parms_free(struct ctx_params *params)
 
 }
 
-static void util_parms_add(struct ctx_params *params, const char *parm_nm, const char *parm_val)
+static void util_parms_add(ctx_params *params, const char *parm_nm, const char *parm_val)
 {
     params->params_count++;
 
     if (params->params_count == 1) {
-        params->params_array =(struct ctx_params_item *) mymalloc(sizeof(struct ctx_params_item));
+        params->params_array =(ctx_params_item *) mymalloc(sizeof(ctx_params_item));
     } else {
-        params->params_array =(struct ctx_params_item *)realloc(params->params_array
-            , sizeof(struct ctx_params_item)*params->params_count);
+        params->params_array =(ctx_params_item *)realloc(params->params_array
+            , sizeof(ctx_params_item)*params->params_count);
     }
 
     if (parm_nm != NULL) {
@@ -856,7 +856,7 @@ static void util_parms_strip_qte(std::string &parm)
 
 }
 
-static void util_parms_extract(struct ctx_params *params, std::string &parmline
+static void util_parms_extract(ctx_params *params, std::string &parmline
         ,size_t indxnm_st,size_t indxnm_en,size_t indxvl_st,size_t indxvl_en)
 {
     std::string parm_nm, parm_vl;
@@ -905,7 +905,7 @@ static void util_parms_next(std::string &parmline, size_t indxnm_st, size_t indx
 
 }
 
-void util_parms_parse_qte(struct ctx_params *params, std::string &parmline)
+void util_parms_parse_qte(ctx_params *params, std::string &parmline)
 {
     size_t indxnm_st, indxnm_en;
     size_t indxvl_st, indxvl_en;
@@ -994,7 +994,7 @@ void util_parms_parse_qte(struct ctx_params *params, std::string &parmline)
     }
 }
 
-void util_parms_parse_comma(struct ctx_params *params, std::string &parmline)
+void util_parms_parse_comma(ctx_params *params, std::string &parmline)
 {
     size_t indxnm_st, indxnm_en;
     size_t indxvl_st, indxvl_en;
@@ -1046,7 +1046,7 @@ void util_parms_parse_comma(struct ctx_params *params, std::string &parmline)
 }
 
 /* Parse through the config line and put into the array */
-void util_parms_parse(struct ctx_params *params, std::string confline)
+void util_parms_parse(ctx_params *params, std::string confline)
 {
     /* Parse through the configuration option to get values
      * The values are separated by commas but may also have
@@ -1100,7 +1100,7 @@ void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string
 }
 
 /* Update config line with the values from the params array */
-void util_parms_update(struct ctx_params *params, std::string &confline)
+void util_parms_update(ctx_params *params, std::string &confline)
 {
     int indx;
     char *tst;
@@ -1150,7 +1150,7 @@ void util_parms_update(struct ctx_params *params, std::string &confline)
  *      that the fork inherited from the parent in order not to pass
  *      the open handles on to the shell
  */
-void util_exec_command(struct ctx_cam *cam, const char *command, char *filename, int filetype)
+void util_exec_command(ctx_cam *cam, const char *command, char *filename, int filetype)
 {
     char stamp[PATH_MAX];
     mystrftime(cam, stamp, sizeof(stamp), command, &cam->current_image->imgts, filename, filetype);

@@ -26,7 +26,7 @@
 
 
 /* Create the CSS styles used in the navigation bar/side of the page */
-static void webu_html_style_navbar(struct ctx_webui *webui)
+static void webu_html_style_navbar(ctx_webui *webui)
 {
     webui->resp_page +=
         "    .sidenav {\n"
@@ -109,7 +109,7 @@ static void webu_html_style_navbar(struct ctx_webui *webui)
 }
 
 /* Create the css styles used in the config sections */
-static void webu_html_style_config(struct ctx_webui *webui)
+static void webu_html_style_config(ctx_webui *webui)
 {
     webui->resp_page +=
         "    .cls_config {\n"
@@ -222,7 +222,7 @@ static void webu_html_style_config(struct ctx_webui *webui)
 }
 
 /* Write out the starting style section of the web page */
-static void webu_html_style_base(struct ctx_webui *webui)
+static void webu_html_style_base(ctx_webui *webui)
 {
 
     webui->resp_page +=
@@ -278,7 +278,7 @@ static void webu_html_style_base(struct ctx_webui *webui)
 }
 
 /* Write out the style section of the web page */
-static void webu_html_style(struct ctx_webui *webui)
+static void webu_html_style(ctx_webui *webui)
 {
     webui->resp_page += "  <style>\n";
 
@@ -293,7 +293,7 @@ static void webu_html_style(struct ctx_webui *webui)
 }
 
 /* Create the header section of the page */
-static void webu_html_head(struct ctx_webui *webui)
+static void webu_html_head(ctx_webui *webui)
 {
 
     webui->resp_page += "<head> \n"
@@ -308,7 +308,7 @@ static void webu_html_head(struct ctx_webui *webui)
 }
 
 /* Create the navigation bar section of the page */
-static void webu_html_navbar(struct ctx_webui *webui)
+static void webu_html_navbar(ctx_webui *webui)
 {
     webui->resp_page +=
         "  <div id=\"divnav_main\" class=\"sidenav\">\n"
@@ -345,7 +345,7 @@ static void webu_html_navbar(struct ctx_webui *webui)
 }
 
 /* Create the body main section of the page */
-static void webu_html_divmain(struct ctx_webui *webui)
+static void webu_html_divmain(ctx_webui *webui)
 {
     webui->resp_page +=
         "  <div id='divmain' style='margin-left:10rem' >\n"
@@ -368,7 +368,7 @@ static void webu_html_divmain(struct ctx_webui *webui)
 }
 
 /* Create the javascript function send_config */
-static void webu_html_script_nav(struct ctx_webui *webui)
+static void webu_html_script_nav(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function nav_open() {\n"
@@ -385,7 +385,7 @@ static void webu_html_script_nav(struct ctx_webui *webui)
 }
 
 /* Create the javascript function send_config */
-static void webu_html_script_send_config(struct ctx_webui *webui)
+static void webu_html_script_send_config(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function send_config(category) {\n"
@@ -427,7 +427,7 @@ static void webu_html_script_send_config(struct ctx_webui *webui)
 }
 
 /* Create the send_action javascript function */
-static void webu_html_script_send_action(struct ctx_webui *webui)
+static void webu_html_script_send_action(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function send_action(actval) {\n\n"
@@ -449,7 +449,7 @@ static void webu_html_script_send_action(struct ctx_webui *webui)
 }
 
 /* Create the send_reload javascript function */
-static void webu_html_script_send_reload(struct ctx_webui *webui)
+static void webu_html_script_send_reload(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function send_reload(actval) {\n\n"
@@ -493,7 +493,7 @@ static void webu_html_script_send_reload(struct ctx_webui *webui)
 }
 
 /* Create the javascript function dropchange_cam */
-static void webu_html_script_dropchange_cam(struct ctx_webui *webui)
+static void webu_html_script_dropchange_cam(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function dropchange_cam(camobj) {\n"
@@ -516,7 +516,7 @@ static void webu_html_script_dropchange_cam(struct ctx_webui *webui)
 }
 
 /* Create the javascript function config_hideall */
-static void webu_html_script_config_hideall(struct ctx_webui *webui)
+static void webu_html_script_config_hideall(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function config_hideall() {\n"
@@ -529,7 +529,7 @@ static void webu_html_script_config_hideall(struct ctx_webui *webui)
 }
 
 /* Create the javascript function config_click */
-static void webu_html_script_config_click(struct ctx_webui *webui)
+static void webu_html_script_config_click(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function config_click(actval) {\n"
@@ -543,7 +543,7 @@ static void webu_html_script_config_click(struct ctx_webui *webui)
 }
 
 /* Create the javascript function assign_version */
-static void webu_html_script_assign_version(struct ctx_webui *webui)
+static void webu_html_script_assign_version(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function assign_version() {\n"
@@ -554,7 +554,7 @@ static void webu_html_script_assign_version(struct ctx_webui *webui)
 }
 
 /* Create the javascript function assign_cams */
-static void webu_html_script_assign_cams(struct ctx_webui *webui)
+static void webu_html_script_assign_cams(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function assign_cams() {\n"
@@ -594,10 +594,10 @@ static void webu_html_script_assign_cams(struct ctx_webui *webui)
 }
 
 /* Create the javascript function assign_actions */
-static void webu_html_script_assign_actions(struct ctx_webui *webui)
+static void webu_html_script_assign_actions(ctx_webui *webui)
 {
     int indx;
-    struct ctx_params *wact;
+    ctx_params *wact;
 
     webui->resp_page +=
         "    function assign_actions() {\n"
@@ -684,7 +684,7 @@ static void webu_html_script_assign_actions(struct ctx_webui *webui)
 
 
 /* Create the javascript function assign_vals */
-static void webu_html_script_assign_vals(struct ctx_webui *webui)
+static void webu_html_script_assign_vals(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function assign_vals(camid) {\n"
@@ -711,7 +711,7 @@ static void webu_html_script_assign_vals(struct ctx_webui *webui)
 }
 
 /* Create the javascript function assign_config_nav */
-static void webu_html_script_assign_config_nav(struct ctx_webui *webui)
+static void webu_html_script_assign_config_nav(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function assign_config_nav() {\n"
@@ -731,7 +731,7 @@ static void webu_html_script_assign_config_nav(struct ctx_webui *webui)
 }
 
 /* Create the javascript function assign_config_item */
-static void webu_html_script_assign_config_item(struct ctx_webui *webui)
+static void webu_html_script_assign_config_item(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function assign_config_item(jkey) {\n"
@@ -770,7 +770,7 @@ static void webu_html_script_assign_config_item(struct ctx_webui *webui)
 }
 
 /* Create the javascript function assign_config_cat */
-static void webu_html_script_assign_config_cat(struct ctx_webui *webui)
+static void webu_html_script_assign_config_cat(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function assign_config_cat(jcat) {\n"
@@ -807,7 +807,7 @@ static void webu_html_script_assign_config_cat(struct ctx_webui *webui)
 }
 
 /* Create the javascript function assign_config */
-static void webu_html_script_assign_config(struct ctx_webui *webui)
+static void webu_html_script_assign_config(ctx_webui *webui)
 {
 
     webui->resp_page +=
@@ -827,7 +827,7 @@ static void webu_html_script_assign_config(struct ctx_webui *webui)
 }
 
 /* Create the javascript function init_form */
-static void webu_html_script_initform(struct ctx_webui *webui)
+static void webu_html_script_initform(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function initform() {\n"
@@ -855,7 +855,7 @@ static void webu_html_script_initform(struct ctx_webui *webui)
 }
 
 /* Create the javascript function display_cameras */
-static void webu_html_script_display_cameras(struct ctx_webui *webui)
+static void webu_html_script_display_cameras(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function display_cameras() {\n"
@@ -871,7 +871,7 @@ static void webu_html_script_display_cameras(struct ctx_webui *webui)
 }
 
 /* Create the javascript function display_config */
-static void webu_html_script_display_config(struct ctx_webui *webui)
+static void webu_html_script_display_config(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function display_config() {\n"
@@ -892,7 +892,7 @@ static void webu_html_script_display_config(struct ctx_webui *webui)
 }
 
 /* Create the javascript function display_movies */
-static void webu_html_script_display_movies(struct ctx_webui *webui)
+static void webu_html_script_display_movies(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function display_movies() {\n"
@@ -913,7 +913,7 @@ static void webu_html_script_display_movies(struct ctx_webui *webui)
 }
 
 /* Create the javascript function display_actions */
-static void webu_html_script_display_actions(struct ctx_webui *webui)
+static void webu_html_script_display_actions(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function display_actions() {\n"
@@ -932,7 +932,7 @@ static void webu_html_script_display_actions(struct ctx_webui *webui)
 }
 
 /* Create the camera_buttons_ptz javascript function */
-static void webu_html_script_camera_buttons_ptz(struct ctx_webui *webui)
+static void webu_html_script_camera_buttons_ptz(ctx_webui *webui)
 {
 
     webui->resp_page +=
@@ -981,7 +981,7 @@ static void webu_html_script_camera_buttons_ptz(struct ctx_webui *webui)
 }
 
 /* Create the image_pantilt javascript function */
-static void webu_html_script_image_pantilt(struct ctx_webui *webui)
+static void webu_html_script_image_pantilt(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function image_pantilt() {\n\n"
@@ -1008,7 +1008,7 @@ static void webu_html_script_image_pantilt(struct ctx_webui *webui)
 }
 
 /* Create the cams_reset javascript function */
-static void webu_html_script_cams_reset(struct ctx_webui *webui)
+static void webu_html_script_cams_reset(ctx_webui *webui)
 {
 
     webui->resp_page +=
@@ -1032,7 +1032,7 @@ static void webu_html_script_cams_reset(struct ctx_webui *webui)
 }
 
 /* Create the cams_one_click javascript function */
-static void webu_html_script_cams_one_click(struct ctx_webui *webui)
+static void webu_html_script_cams_one_click(ctx_webui *webui)
 {
 
     webui->resp_page +=
@@ -1071,7 +1071,7 @@ static void webu_html_script_cams_one_click(struct ctx_webui *webui)
 }
 
 /* Create the cams_all_click javascript function */
-static void webu_html_script_cams_all_click(struct ctx_webui *webui)
+static void webu_html_script_cams_all_click(ctx_webui *webui)
 {
 
     webui->resp_page +=
@@ -1119,7 +1119,7 @@ static void webu_html_script_cams_all_click(struct ctx_webui *webui)
         "  }\n\n";
 }
 /* Create the movies_page javascript function */
-static void webu_html_script_movies_page(struct ctx_webui *webui)
+static void webu_html_script_movies_page(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function movies_page() {\n\n"
@@ -1192,7 +1192,7 @@ static void webu_html_script_movies_page(struct ctx_webui *webui)
 }
 
 /* Create the movies_page javascript function */
-static void webu_html_script_movies_click(struct ctx_webui *webui)
+static void webu_html_script_movies_click(ctx_webui *webui)
 {
 
     webui->resp_page +=
@@ -1217,7 +1217,7 @@ static void webu_html_script_movies_click(struct ctx_webui *webui)
 
 }
 /* Create the cams_scan_click javascript function */
-static void webu_html_script_cams_scan_click(struct ctx_webui *webui)
+static void webu_html_script_cams_scan_click(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function cams_scan_click() {\n\n"
@@ -1229,7 +1229,7 @@ static void webu_html_script_cams_scan_click(struct ctx_webui *webui)
 }
 
 /* Create the cams_one_fnc javascript function */
-static void webu_html_script_cams_one_fnc(struct ctx_webui *webui)
+static void webu_html_script_cams_one_fnc(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function cams_one_fnc () {\n"
@@ -1246,7 +1246,7 @@ static void webu_html_script_cams_one_fnc(struct ctx_webui *webui)
 }
 
 /* Create the cams_all_fnc javascript function */
-static void webu_html_script_cams_all_fnc(struct ctx_webui *webui)
+static void webu_html_script_cams_all_fnc(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function cams_img_onload(camindx, indx) {\n"
@@ -1290,7 +1290,7 @@ static void webu_html_script_cams_all_fnc(struct ctx_webui *webui)
 }
 
 /* Create the scancam_function javascript function */
-static void webu_html_script_cams_scan_fnc(struct ctx_webui *webui)
+static void webu_html_script_cams_scan_fnc(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function cams_scan_fnc() {\n"
@@ -1334,7 +1334,7 @@ static void webu_html_script_cams_scan_fnc(struct ctx_webui *webui)
 }
 
 /* Call all the functions to create the java scripts of page*/
-static void webu_html_script(struct ctx_webui *webui)
+static void webu_html_script(ctx_webui *webui)
 {
     webui->resp_page += "  <script>\n"
         "    var pData, pMovies;\n"
@@ -1388,7 +1388,7 @@ static void webu_html_script(struct ctx_webui *webui)
 }
 
 /* Create the body section of the web page */
-static void webu_html_body(struct ctx_webui *webui)
+static void webu_html_body(ctx_webui *webui)
 {
     webui->resp_page += "<body class='body' onload='initform()'>\n";
 
@@ -1403,7 +1403,7 @@ static void webu_html_body(struct ctx_webui *webui)
 }
 
 /* Create the default motionplus page */
-void webu_html_page(struct ctx_webui *webui)
+void webu_html_page(ctx_webui *webui)
 {
     webui->resp_page += "<!DOCTYPE html>\n"
         "<html lang='" + webui->lang + "'>\n";
@@ -1416,7 +1416,7 @@ void webu_html_page(struct ctx_webui *webui)
 }
 
 /*Create the bad request page*/
-void webu_html_badreq(struct ctx_webui *webui)
+void webu_html_badreq(ctx_webui *webui)
 {
     webui->resp_page =
         "<!DOCTYPE html>\n"
@@ -1430,7 +1430,7 @@ void webu_html_badreq(struct ctx_webui *webui)
 }
 
 /* Load a user provided html page */
-void webu_html_user(struct ctx_webui *webui)
+void webu_html_user(ctx_webui *webui)
 {
     char response[PATH_MAX];
     FILE *fp = NULL;

@@ -19,8 +19,6 @@
 #ifndef _INCLUDE_LOGGER_HPP_
 #define _INCLUDE_LOGGER_HPP_
 
-    struct ctx_cam;
-
     /* Logging mode */
     #define LOGMODE_NONE            0   /* No logging             */
     #define LOGMODE_FILE            1   /* Log messages to file   */
@@ -58,10 +56,10 @@
     #define MOTION_LOG(x, y, z, format, args...)  motion_log(x, y, z, 1, format, __FUNCTION__, ##args)
 
     void motion_log(int loglevel, int logtype, int errno_flag,int fncname, const char *fmt, ...);
-    void log_init(struct ctx_motapp *motapp);
-    void log_deinit(struct ctx_motapp *motapp);
+    void log_init(ctx_motapp *motapp);
+    void log_deinit(ctx_motapp *motapp);
     void log_set_level(int new_level);
     void log_set_type(const char *new_logtype);
-    void log_set_motapp(struct ctx_motapp *motapp);
+    void log_set_motapp(ctx_motapp *motapp);
 
 #endif /* _INCLUDE_LOGGER_HPP_ */

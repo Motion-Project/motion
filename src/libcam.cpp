@@ -54,7 +54,7 @@ void cls_libcam::cam_start_params(ctx_cam *ptr)
 
     camctx = ptr;
 
-    camctx->libcam->params = (ctx_params*)mymalloc(sizeof(struct ctx_params));
+    camctx->libcam->params = (ctx_params*)mymalloc(sizeof(ctx_params));
     camctx->libcam->params->update_params = true;
     util_parms_parse(camctx->libcam->params, camctx->conf->libcam_params);
 
@@ -387,7 +387,7 @@ int libcam_start(ctx_cam *cam)
 }
 
 /** close and stop libcam */
-void libcam_cleanup(struct ctx_cam *cam)
+void libcam_cleanup(ctx_cam *cam)
 {
     #ifdef HAVE_LIBCAM
         cam->libcam->cam_stop();
@@ -399,7 +399,7 @@ void libcam_cleanup(struct ctx_cam *cam)
 }
 
 /** get next image from libcam */
-int libcam_next(struct ctx_cam *cam,  struct ctx_image_data *img_data)
+int libcam_next(ctx_cam *cam,  ctx_image_data *img_data)
 {
     #ifdef HAVE_LIBCAM
         int retcd;

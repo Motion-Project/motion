@@ -24,7 +24,7 @@
     typedef struct ctx_mmalcam *ctx_mmalcam_ptr;
 
     typedef struct ctx_mmalcam {
-        struct ctx_cam *cam;        /* pointer to parent motion
+        ctx_cam *cam;        /* pointer to parent motion
                                     context structure */
         int width;
         int height;
@@ -38,8 +38,8 @@
         #endif
     } ctx_mmalcam;
 
-    int mmalcam_start (struct ctx_cam *cam);
-    int mmalcam_next (struct ctx_cam *cam, struct ctx_image_data *img_data);
-    void mmalcam_cleanup (struct ctx_mmalcam *mmalcam);
+    int mmalcam_start (ctx_cam *cam);
+    int mmalcam_next (ctx_cam *cam, ctx_image_data *img_data);
+    void mmalcam_cleanup (ctx_mmalcam *mmalcam);
 
 #endif /* _INCLUDE_MMALCAM_HPP_ */

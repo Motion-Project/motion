@@ -144,7 +144,7 @@ static void put_stringentry(struct tiff_writing *into, unsigned tag, const char 
     into->buf += 4;
 }
 
-static void put_subjectarea(struct tiff_writing *into, const struct ctx_coord *box)
+static void put_subjectarea(struct tiff_writing *into, ctx_coord *box)
 {
     put_uint16(into->buf    , EXIF_TAG_SUBJECT_AREA);
     put_uint16(into->buf + 2, TIFF_TYPE_USHORT);
@@ -164,8 +164,8 @@ static void put_subjectarea(struct tiff_writing *into, const struct ctx_coord *b
  * exif data to be inserted into jpeg or webp files
  *
  */
-unsigned exif_prepare(unsigned char **exif, const struct ctx_cam *cam,
-        const struct timespec *ts_in1, const struct ctx_coord *box)
+unsigned exif_prepare(unsigned char **exif, ctx_cam *cam,
+        const struct timespec *ts_in1, ctx_coord *box)
 {
     /* description, datetime, and subtime are the values that are actually
      * put into the EXIF data

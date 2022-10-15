@@ -147,9 +147,9 @@ struct ctx_netcam {
 
     struct timespec           frame_prev_tm;    /* The time set before calling the av functions */
     struct timespec           frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
-    struct ctx_motapp         *motapp;          /* Pointer to parent application context  */
-    struct ctx_config         *conf;            /* Pointer to conf parms of parent cam*/
-    struct ctx_params         *params;          /* parameters for the camera */
+    ctx_motapp                *motapp;          /* Pointer to parent application context  */
+    ctx_config                *conf;            /* Pointer to conf parms of parent cam*/
+    ctx_params                *params;          /* parameters for the camera */
 
     char                      threadname[16];   /* The thread name*/
     int                       threadnbr;        /* The thread number */
@@ -160,8 +160,8 @@ struct ctx_netcam {
 
 };
 
-int netcam_setup(struct ctx_cam *cam);
-int netcam_next(struct ctx_cam *cam, struct ctx_image_data *img_data);
-void netcam_cleanup(struct ctx_cam *cam, bool init_retry_flag);
+int netcam_setup(ctx_cam *cam);
+int netcam_next(ctx_cam *cam, ctx_image_data *img_data);
+void netcam_cleanup(ctx_cam *cam, bool init_retry_flag);
 
 #endif /* _INCLUDE_NETCAM_HPP_ */

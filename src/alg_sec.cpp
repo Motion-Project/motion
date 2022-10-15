@@ -395,8 +395,8 @@ static void algsec_params_deinit(ctx_algsec_model &algmdl)
 
 static void algsec_params_init(ctx_algsec_model &algmdl)
 {
-    algmdl.algsec_params = (struct ctx_params*) mymalloc(sizeof(struct ctx_params));
-    memset(algmdl.algsec_params, 0, sizeof(struct ctx_params));
+    algmdl.algsec_params = (ctx_params*) mymalloc(sizeof(ctx_params));
+    memset(algmdl.algsec_params, 0, sizeof(ctx_params));
     algmdl.algsec_params->params_array = NULL;
     algmdl.algsec_params->params_count = 0;
     algmdl.algsec_params->update_params = true;     /*Set trigger to update parameters */

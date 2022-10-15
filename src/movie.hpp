@@ -27,9 +27,6 @@
 #include <sys/time.h>
 #include <stdint.h>
 
-struct ctx_image_data; /* forward declare for functions */
-struct ctx_netcam;
-
 enum TIMELAPSE_TYPE {
     TIMELAPSE_NONE,         /* No timelapse, regular processing */
     TIMELAPSE_APPEND,       /* Use append version of timelapse */
@@ -54,7 +51,7 @@ struct ctx_movie {
     AVPacket            *pkt;
     AVFrame             *picture;       /* contains default image pointers */
     AVDictionary        *opts;
-    struct ctx_netcam   *netcam_data;
+    ctx_netcam          *netcam_data;
     int                 width;
     int                 height;
     enum TIMELAPSE_TYPE tlapse;
@@ -89,13 +86,13 @@ void movie_global_init(void);
 void movie_global_deinit(void);
 void movie_avcodec_log(void *, int, const char *, va_list);
 
-int movie_open(struct ctx_movie *movie);
-int movie_put_image(struct ctx_movie *movie, struct ctx_image_data *img_data, const struct timespec *tv1);
-void movie_close(struct ctx_movie *movie);
-void movie_reset_start_time(struct ctx_movie *movie, const struct timespec *tv1);
-int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1);
-int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1);
-int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1);
-void movie_free(struct ctx_movie *movie);
+int movie_open(ctx_movie *movie);
+int movie_put_image(ctx_movie *movie, ctx_image_data *img_data, const struct timespec *tv1);
+void movie_close(ctx_movie *movie);
+void movie_reset_start_time(ctx_movie *movie, const struct timespec *tv1);
+int movie_init_timelapse(ctx_cam *cam, struct timespec *ts1);
+int movie_init_norm(ctx_cam *cam, struct timespec *ts1);
+int movie_init_motion(ctx_cam *cam, struct timespec *ts1);
+void movie_free(ctx_movie *movie);
 
 #endif /* #define _INCLUDE_MOVIE_HPP_ */

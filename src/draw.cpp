@@ -1219,7 +1219,7 @@ int draw_init_chars(void)
     return 0;
 }
 
-void draw_init_scale(struct ctx_cam *cam)
+void draw_init_scale(ctx_cam *cam)
 {
 
     /* Consider that web interface may change conf values at any moment.
@@ -1255,7 +1255,7 @@ void draw_init_scale(struct ctx_cam *cam)
 
 }
 
-static void draw_location(struct ctx_coord *cent, struct ctx_images *imgs, int width
+static void draw_location(ctx_coord *cent, ctx_images *imgs, int width
         , unsigned char *new_var, int style, int mode)
 {
     unsigned char *out = imgs->image_motion.image_norm;
@@ -1318,7 +1318,7 @@ static void draw_location(struct ctx_coord *cent, struct ctx_images *imgs, int w
     }
 }
 
-static void draw_red_location(struct ctx_coord *cent, struct ctx_images *imgs, int width
+static void draw_red_location(ctx_coord *cent, ctx_images *imgs, int width
         , unsigned char *new_var, int style, int mode)
 {
     unsigned char *out = imgs->image_motion.image_norm;
@@ -1427,7 +1427,7 @@ static void draw_red_location(struct ctx_coord *cent, struct ctx_images *imgs, i
     }
 }
 
-void draw_locate_preview(struct ctx_cam *cam, struct ctx_image_data *img)
+void draw_locate_preview(ctx_cam *cam, ctx_image_data *img)
 {
     /* draw locate box here when mode = LOCATE_PREVIEW */
     if (cam->locate_motion_mode == LOCATE_PREVIEW) {
@@ -1448,10 +1448,10 @@ void draw_locate_preview(struct ctx_cam *cam, struct ctx_image_data *img)
     }
 }
 
-void draw_locate(struct ctx_cam *cam, struct ctx_image_data *img)
+void draw_locate(ctx_cam *cam, ctx_image_data *img)
 {
-    struct ctx_images *imgs = &cam->imgs;
-    struct ctx_coord *location = &img->location;
+    ctx_images *imgs = &cam->imgs;
+    ctx_coord *location = &img->location;
 
     if (cam->locate_motion_mode == LOCATE_ON) {
 
@@ -1471,10 +1471,10 @@ void draw_locate(struct ctx_cam *cam, struct ctx_image_data *img)
     }
 }
 
-void draw_smartmask(struct ctx_cam *cam, unsigned char *out)
+void draw_smartmask(ctx_cam *cam, unsigned char *out)
 {
     int i, x, v, width, height, line;
-    struct ctx_images *imgs = &cam->imgs;
+    ctx_images *imgs = &cam->imgs;
     unsigned char *smartmask = imgs->smartmask_final;
     unsigned char *out_y, *out_u, *out_v;
 
@@ -1510,10 +1510,10 @@ void draw_smartmask(struct ctx_cam *cam, unsigned char *out)
     }
 }
 
-void draw_fixed_mask(struct ctx_cam *cam, unsigned char *out)
+void draw_fixed_mask(ctx_cam *cam, unsigned char *out)
 {
     int i, x, v, width, height, line;
-    struct ctx_images *imgs = &cam->imgs;
+    ctx_images *imgs = &cam->imgs;
     unsigned char *mask = imgs->mask;
     unsigned char *out_y, *out_u, *out_v;
 
@@ -1549,10 +1549,10 @@ void draw_fixed_mask(struct ctx_cam *cam, unsigned char *out)
     }
 }
 
-void draw_largest_label(struct ctx_cam *cam, unsigned char *out)
+void draw_largest_label(ctx_cam *cam, unsigned char *out)
 {
     int i, x, v, width, height, line;
-    struct ctx_images *imgs = &cam->imgs;
+    ctx_images *imgs = &cam->imgs;
     int *labels = imgs->labels;
     unsigned char *out_y, *out_u, *out_v;
 

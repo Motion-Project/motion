@@ -61,7 +61,7 @@ struct ctx_v4l2cam {
     int                     devctrl_count;         /*Count of the controls in the device*/
     int                     device_type;           /*Camera, tuner, etc as provided by driver enum*/
     int                     device_tuner;          /*Tuner number if applicable from driver*/
-    struct ctx_params       *params;               /*User parameters for the camera */
+    ctx_params       *params;               /*User parameters for the camera */
     video_buff              *buffers;
     int                     pframe;
     volatile bool           finish;                /* End the thread */
@@ -73,8 +73,8 @@ struct ctx_v4l2cam {
     #endif
 };
 
-    int v4l2_start(struct ctx_cam *cam);
-    int v4l2_next(struct ctx_cam *cam,  struct ctx_image_data *img_data);
-    void v4l2_cleanup(struct ctx_cam *cam);
+    int v4l2_start(ctx_cam *cam);
+    int v4l2_next(ctx_cam *cam,  ctx_image_data *img_data);
+    void v4l2_cleanup(ctx_cam *cam);
 
 #endif /* _INCLUDE_VIDEO_V4L2_HPP_ */

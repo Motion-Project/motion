@@ -35,7 +35,7 @@
 
 /* Context to pass the parms to functions to start mhd */
 struct mhdstart_ctx {
-    struct ctx_motapp       *motapp;
+    ctx_motapp       *motapp;
     std::string             tls_cert;
     std::string             tls_key;
     struct MHD_OptionItem   *mhd_ops;
@@ -47,7 +47,7 @@ struct mhdstart_ctx {
 };
 
 /* Set defaults for the webui context */
-static void webu_context_init(struct ctx_motapp *motapp, struct ctx_webui *webui)
+static void webu_context_init(ctx_motapp *motapp, ctx_webui *webui)
 {
     int indx;
     char *tmplang;
@@ -105,7 +105,7 @@ static void webu_context_init(struct ctx_motapp *motapp, struct ctx_webui *webui
 }
 
 /* Free the variables in the webui context */
-static void webu_context_free(struct ctx_webui *webui)
+static void webu_context_free(ctx_webui *webui)
 {
     int indx;
 
@@ -127,7 +127,7 @@ static void webu_context_free(struct ctx_webui *webui)
 }
 
 /* Edit the parameters specified in the url sent */
-static void webu_parms_edit(struct ctx_webui *webui)
+static void webu_parms_edit(ctx_webui *webui)
 {
     int indx, is_nbr;
 
@@ -173,7 +173,7 @@ static void webu_parms_edit(struct ctx_webui *webui)
 }
 
 /* Extract the camid and cmds from the url */
-static int webu_parseurl(struct ctx_webui *webui)
+static int webu_parseurl(ctx_webui *webui)
 {
     char *tmpurl;
     size_t  pos_slash1, pos_slash2, baselen;
@@ -274,7 +274,7 @@ static int webu_parseurl(struct ctx_webui *webui)
 }
 
 /* Log the ip of the client connecting*/
-static void webu_clientip(struct ctx_webui *webui)
+static void webu_clientip(ctx_webui *webui)
 {
     const union MHD_ConnectionInfo *con_info;
     char client[WEBUI_LEN_URLI];
@@ -313,7 +313,7 @@ static void webu_clientip(struct ctx_webui *webui)
 }
 
 /* Get the hostname */
-static void webu_hostname(struct ctx_webui *webui)
+static void webu_hostname(ctx_webui *webui)
 {
     const char *hdr;
 
@@ -333,10 +333,10 @@ static void webu_hostname(struct ctx_webui *webui)
 }
 
 /* Log the failed authentication check */
-static void webu_failauth_log(struct ctx_webui *webui)
+static void webu_failauth_log(ctx_webui *webui)
 {
     timespec                                tm_cnct;
-    struct ctx_webu_clients                 clients;
+    ctx_webu_clients                 clients;
     std::list<ctx_webu_clients>::iterator   it;
 
     MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
@@ -366,10 +366,10 @@ static void webu_failauth_log(struct ctx_webui *webui)
 
 }
 
-static void webu_client_connect(struct ctx_webui *webui)
+static void webu_client_connect(ctx_webui *webui)
 {
     timespec                                tm_cnct;
-    struct ctx_webu_clients                 clients;
+    ctx_webu_clients                 clients;
     std::list<ctx_webu_clients>::iterator   it;
 
     clock_gettime(CLOCK_MONOTONIC, &tm_cnct);
@@ -416,7 +416,7 @@ static void webu_client_connect(struct ctx_webui *webui)
 }
 
 /* Check for ips with excessive failed authentication attempts */
-static mhdrslt webu_failauth_check(struct ctx_webui *webui)
+static mhdrslt webu_failauth_check(ctx_webui *webui)
 {
     timespec                                tm_cnct;
     std::list<ctx_webu_clients>::iterator   it;
@@ -450,7 +450,7 @@ static mhdrslt webu_failauth_check(struct ctx_webui *webui)
 }
 
 /* Create a authorization denied response to user*/
-static mhdrslt webu_mhd_digest_fail(struct ctx_webui *webui,int signal_stale)
+static mhdrslt webu_mhd_digest_fail(ctx_webui *webui,int signal_stale)
 {
     struct MHD_Response *response;
     mhdrslt retcd;
@@ -477,7 +477,7 @@ static mhdrslt webu_mhd_digest_fail(struct ctx_webui *webui,int signal_stale)
 }
 
 /* Perform digest authentication */
-static mhdrslt webu_mhd_digest(struct ctx_webui *webui)
+static mhdrslt webu_mhd_digest(ctx_webui *webui)
 {
     /* This function gets called a couple of
      * times by MHD during the authentication process.
@@ -517,7 +517,7 @@ static mhdrslt webu_mhd_digest(struct ctx_webui *webui)
 }
 
 /* Create a authorization denied response to user*/
-static mhdrslt webu_mhd_basic_fail(struct ctx_webui *webui)
+static mhdrslt webu_mhd_basic_fail(ctx_webui *webui)
 {
     struct MHD_Response *response;
     int retcd;
@@ -547,7 +547,7 @@ static mhdrslt webu_mhd_basic_fail(struct ctx_webui *webui)
 }
 
 /* Perform Basic Authentication.  */
-static mhdrslt webu_mhd_basic(struct ctx_webui *webui)
+static mhdrslt webu_mhd_basic(ctx_webui *webui)
 {
     char *user, *pass;
 
@@ -578,7 +578,7 @@ static mhdrslt webu_mhd_basic(struct ctx_webui *webui)
 }
 
 /* Parse apart the user:pass provided*/
-static void webu_mhd_auth_parse(struct ctx_webui *webui)
+static void webu_mhd_auth_parse(ctx_webui *webui)
 {
     int auth_len;
     char *col_pos;
@@ -605,7 +605,7 @@ static void webu_mhd_auth_parse(struct ctx_webui *webui)
 }
 
 /* Initialize for authorization */
-static mhdrslt webu_mhd_auth(struct ctx_webui *webui)
+static mhdrslt webu_mhd_auth(ctx_webui *webui)
 {
     unsigned int rand1,rand2;
 
@@ -641,7 +641,7 @@ static mhdrslt webu_mhd_auth(struct ctx_webui *webui)
 }
 
 /* Send the response that we created back to the user.  */
-static mhdrslt webu_mhd_send(struct ctx_webui *webui)
+static mhdrslt webu_mhd_send(ctx_webui *webui)
 {
     mhdrslt retcd;
     struct MHD_Response *response;
@@ -680,7 +680,7 @@ static mhdrslt webu_mhd_send(struct ctx_webui *webui)
 
 
 /* Process the post data command */
-static mhdrslt webu_answer_post(struct ctx_webui *webui)
+static mhdrslt webu_answer_post(ctx_webui *webui)
 {
     mhdrslt retcd;
 
@@ -706,7 +706,7 @@ static mhdrslt webu_answer_post(struct ctx_webui *webui)
 }
 
 /*Append more data on to an existing entry in the post info structure */
-static void webu_iterate_post_append(struct ctx_webui *webui, int indx
+static void webu_iterate_post_append(ctx_webui *webui, int indx
         , const char *data, size_t datasz)
 {
 
@@ -727,17 +727,17 @@ static void webu_iterate_post_append(struct ctx_webui *webui, int indx
 }
 
 /*Create new entry in the post info structure */
-static void webu_iterate_post_new(struct ctx_webui *webui, const char *key
+static void webu_iterate_post_new(ctx_webui *webui, const char *key
         , const char *data, size_t datasz)
 {
     int retcd;
 
     webui->post_sz++;
     if (webui->post_sz == 1) {
-        webui->post_info = (ctx_key *)malloc(sizeof(struct ctx_key));
+        webui->post_info = (ctx_key *)malloc(sizeof(ctx_key));
     } else {
         webui->post_info = (ctx_key *)realloc(webui->post_info
-            , webui->post_sz * sizeof(struct ctx_key));
+            , webui->post_sz * sizeof(ctx_key));
     }
 
     webui->post_info[webui->post_sz-1].key_nm = (char*)malloc(strlen(key)+1);
@@ -767,7 +767,7 @@ static mhdrslt webu_iterate_post (void *ptr, enum MHD_ValueKind kind
     (void) transfer_encoding;
     (void) off;
 
-    struct ctx_webui *webui = (ctx_webui *)ptr;
+    ctx_webui *webui = (ctx_webui *)ptr;
     int indx;
 
     for (indx=0; indx < webui->post_sz; indx++) {
@@ -785,7 +785,7 @@ static mhdrslt webu_iterate_post (void *ptr, enum MHD_ValueKind kind
 }
 
 /* Answer the get request from the user */
-static mhdrslt webu_answer_get(struct ctx_webui *webui)
+static mhdrslt webu_answer_get(ctx_webui *webui)
 {
     mhdrslt retcd;
 
@@ -863,7 +863,7 @@ static mhdrslt webu_answer(void *cls, struct MHD_Connection *connection, const c
     (void)upload_data_size;
 
     mhdrslt retcd;
-    ctx_webui *webui =(struct ctx_webui *) *ptr;
+    ctx_webui *webui =(ctx_webui *) *ptr;
 
     webui->cnct_type = WEBUI_CNCT_CONTROL;
     webui->connection = connection;
@@ -933,8 +933,8 @@ static mhdrslt webu_answer(void *cls, struct MHD_Connection *connection, const c
 /* Initialize the MHD answer */
 static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *connection)
 {
-    struct ctx_motapp *motapp = (struct ctx_motapp *)cls;
-    struct ctx_webui *webui;
+    ctx_motapp *motapp = (ctx_motapp *)cls;
+    ctx_webui *webui;
     int retcd;
 
     (void)connection;
@@ -967,7 +967,7 @@ static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *co
 static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
         , void **con_cls, enum MHD_RequestTerminationCode toe)
 {
-    struct ctx_webui *webui =(struct ctx_webui *) *con_cls;
+    ctx_webui *webui =(ctx_webui *) *con_cls;
 
     (void)connection;
     (void)cls;
@@ -1310,11 +1310,11 @@ static void webu_mhd_flags(struct mhdstart_ctx *mhdst)
 }
 
 /* Set the values for the action commands */
-static void webu_init_actions(struct ctx_motapp *motapp)
+static void webu_init_actions(ctx_motapp *motapp)
 {
     std::string parm_vl;
 
-    motapp->webcontrol_actions = (ctx_params*)mymalloc(sizeof(struct ctx_params));
+    motapp->webcontrol_actions = (ctx_params*)mymalloc(sizeof(ctx_params));
     motapp->webcontrol_actions->update_params = true;
     util_parms_parse(motapp->webcontrol_actions, motapp->cam_list[0]->conf->webcontrol_actions);
 
@@ -1339,7 +1339,7 @@ static void webu_init_actions(struct ctx_motapp *motapp)
 }
 
 /* Start the webcontrol */
-static void webu_init_webcontrol(struct ctx_motapp *motapp)
+static void webu_init_webcontrol(ctx_motapp *motapp)
 {
     struct mhdstart_ctx mhdst;
     unsigned int randnbr;
@@ -1348,7 +1348,7 @@ static void webu_init_webcontrol(struct ctx_motapp *motapp)
         , _("Starting webcontrol on port %d")
         , motapp->cam_list[0]->conf->webcontrol_port);
 
-    motapp->webcontrol_headers = (ctx_params*)mymalloc(sizeof(struct ctx_params));
+    motapp->webcontrol_headers = (ctx_params*)mymalloc(sizeof(ctx_params));
     motapp->webcontrol_headers->update_params = true;
     util_parms_parse(motapp->webcontrol_headers, motapp->cam_list[0]->conf->webcontrol_headers);
 
@@ -1391,7 +1391,7 @@ static void webu_init_webcontrol(struct ctx_motapp *motapp)
 }
 
 /* Shut down the webcontrol */
-void webu_deinit(struct ctx_motapp *motapp)
+void webu_deinit(ctx_motapp *motapp)
 {
 
     if (motapp->webcontrol_daemon != NULL) {
@@ -1408,7 +1408,7 @@ void webu_deinit(struct ctx_motapp *motapp)
 }
 
 /* Start the webcontrol and streams */
-void webu_init(struct ctx_motapp *motapp)
+void webu_init(ctx_motapp *motapp)
 {
     struct sigaction act;
 

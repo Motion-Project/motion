@@ -30,7 +30,7 @@
 /* Callback for the file reader response*/
 static ssize_t webu_file_reader (void *cls, uint64_t pos, char *buf, size_t max)
 {
-    struct ctx_webui *webui =(struct ctx_webui *)cls;
+    ctx_webui *webui =(ctx_webui *)cls;
 
     (void)fseek (webui->req_file, pos, SEEK_SET);
     return fread (buf, 1, max, webui->req_file);
@@ -39,19 +39,19 @@ static ssize_t webu_file_reader (void *cls, uint64_t pos, char *buf, size_t max)
 /* Close the requested file */
 static void webu_file_free (void *cls)
 {
-    struct ctx_webui *webui =(struct ctx_webui *)cls;
+    ctx_webui *webui =(ctx_webui *)cls;
     myfclose(webui->req_file);
 }
 
 /* Entry point for answering file request*/
-mhdrslt webu_file_main(struct ctx_webui *webui)
+mhdrslt webu_file_main(ctx_webui *webui)
 {
     mhdrslt retcd;
     struct stat statbuf;
     struct MHD_Response *response;
     std::string full_nm;
     int indx;
-    struct ctx_params *wact;
+    ctx_params *wact;
 
     /*If we have not fully started yet, simply return*/
     if (webui->cam->motapp->dbse == NULL) {

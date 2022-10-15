@@ -25,9 +25,9 @@
 #include "dbse.hpp"
 
 /* Forward Declare */
-void dbse_close(struct ctx_motapp *motapp);
+void dbse_close(ctx_motapp *motapp);
 
-static int dbse_edits(struct ctx_motapp *motapp)
+static int dbse_edits(ctx_motapp *motapp)
 {
     int retcd = 0;
 
@@ -62,7 +62,7 @@ static int dbse_edits(struct ctx_motapp *motapp)
 }
 
 /* Free the cols lists*/
-static void dbse_cols_free(struct ctx_motapp *motapp)
+static void dbse_cols_free(ctx_motapp *motapp)
 {
     int indx;
 
@@ -82,7 +82,7 @@ static void dbse_cols_free(struct ctx_motapp *motapp)
 }
 
 /* Create array of all the columns in current version */
-static void dbse_cols_list(struct ctx_motapp *motapp)
+static void dbse_cols_list(ctx_motapp *motapp)
 {
     int indx;
 
@@ -151,7 +151,7 @@ static void dbse_cols_list(struct ctx_motapp *motapp)
 }
 
 /* Free the movies lists*/
-static void dbse_movies_free(struct ctx_motapp *motapp)
+static void dbse_movies_free(ctx_motapp *motapp)
 {
     int indx;
 
@@ -371,7 +371,7 @@ static void dbse_sql_motpls(ctx_dbse *dbse
 
 #ifdef HAVE_SQLITE3
 
-static void dbse_sqlite3_exec(struct ctx_motapp *motapp, const char *sqlquery)
+static void dbse_sqlite3_exec(ctx_motapp *motapp, const char *sqlquery)
 {
     int retcd;
     char *errmsg = NULL;
@@ -438,7 +438,7 @@ static int dbse_sqlite3_cb (
     return 0;
 }
 
-static void dbse_sqlite3_cols(struct ctx_motapp *motapp)
+static void dbse_sqlite3_cols(ctx_motapp *motapp)
 {
     int retcd, indx;
     char *errmsg = 0;
@@ -471,7 +471,7 @@ static void dbse_sqlite3_cols(struct ctx_motapp *motapp)
 
 }
 
-static void dbse_sqlite3_init(struct ctx_motapp *motapp)
+static void dbse_sqlite3_init(ctx_motapp *motapp)
 {
     int retcd;
     const char *err_open  = NULL;
@@ -547,7 +547,7 @@ static void dbse_sqlite3_init(struct ctx_motapp *motapp)
 
 }
 
-static void dbse_sqlite3_movlst(struct ctx_motapp *motapp, int camera_id)
+static void dbse_sqlite3_movlst(ctx_motapp *motapp, int camera_id)
 {
     int retcd;
     char *errmsg  = NULL;
@@ -593,7 +593,7 @@ static void dbse_sqlite3_movlst(struct ctx_motapp *motapp, int camera_id)
     return;
 }
 
-static void dbse_sqlite3_close(struct ctx_motapp *motapp)
+static void dbse_sqlite3_close(ctx_motapp *motapp)
 {
     if ((motapp->dbse->database_type == "sqlite3") &&
         (motapp->dbse->database_sqlite3 != NULL)) {
@@ -606,7 +606,7 @@ static void dbse_sqlite3_close(struct ctx_motapp *motapp)
 
 #ifdef HAVE_MARIADB
 
-static void dbse_mariadb_exec (struct ctx_motapp *motapp, const char *sqlquery)
+static void dbse_mariadb_exec (ctx_motapp *motapp, const char *sqlquery)
 {
     int retcd;
 
@@ -661,7 +661,7 @@ static void dbse_mariadb_exec (struct ctx_motapp *motapp, const char *sqlquery)
 
 }
 
-static void dbse_mariadb_recs (struct ctx_motapp *motapp, const char *sqlquery)
+static void dbse_mariadb_recs (ctx_motapp *motapp, const char *sqlquery)
 {
     int retcd, indx, indx2;
     int qry_fields, rnbr;
@@ -760,7 +760,7 @@ static void dbse_mariadb_recs (struct ctx_motapp *motapp, const char *sqlquery)
     return;
 }
 
-static void dbse_mariadb_cols(struct ctx_motapp *motapp)
+static void dbse_mariadb_cols(ctx_motapp *motapp)
 {
     int indx;
     std::string sql;
@@ -785,7 +785,7 @@ static void dbse_mariadb_cols(struct ctx_motapp *motapp)
 
 }
 
-static void dbse_mariadb_setup(struct ctx_motapp *motapp)
+static void dbse_mariadb_setup(ctx_motapp *motapp)
 {
     std::string sql;
 
@@ -805,7 +805,7 @@ static void dbse_mariadb_setup(struct ctx_motapp *motapp)
 
 }
 
-static void dbse_mariadb_init(struct ctx_motapp *motapp)
+static void dbse_mariadb_init(ctx_motapp *motapp)
 {
     bool my_true = true;
 
@@ -858,7 +858,7 @@ static void dbse_mariadb_init(struct ctx_motapp *motapp)
         , motapp->dbse->database_dbname.c_str() );
 }
 
-static void dbse_mariadb_close(struct ctx_motapp *motapp)
+static void dbse_mariadb_close(ctx_motapp *motapp)
 {
     if (motapp->dbse->database_type == "mariadb") {
         mysql_library_end();
@@ -870,7 +870,7 @@ static void dbse_mariadb_close(struct ctx_motapp *motapp)
     }
 }
 
-static void dbse_mariadb_movlst(struct ctx_motapp *motapp, int camera_id )
+static void dbse_mariadb_movlst(ctx_motapp *motapp, int camera_id )
 {
     std::string sql;
 
@@ -896,7 +896,7 @@ static void dbse_mariadb_movlst(struct ctx_motapp *motapp, int camera_id )
 
 #ifdef HAVE_PGSQL
 
-static void dbse_pgsql_exec(struct ctx_motapp *motapp, const char *sqlquery)
+static void dbse_pgsql_exec(ctx_motapp *motapp, const char *sqlquery)
 {
     PGresult    *res;
 
@@ -937,7 +937,7 @@ static void dbse_pgsql_exec(struct ctx_motapp *motapp, const char *sqlquery)
     PQclear(res);
 }
 
-static void dbse_pgsql_close(struct ctx_motapp *motapp)
+static void dbse_pgsql_close(ctx_motapp *motapp)
 {
     if ((motapp->dbse->database_type == "postgresql") &&
         (motapp->dbse->database_pgsql != NULL)) {
@@ -947,7 +947,7 @@ static void dbse_pgsql_close(struct ctx_motapp *motapp)
 
 }
 
-static void dbse_pgsql_recs (struct ctx_motapp *motapp, const char *sqlquery)
+static void dbse_pgsql_recs (ctx_motapp *motapp, const char *sqlquery)
 {
     PGresult    *res;
     int indx, indx2, rows, cols, rnbr;
@@ -1034,7 +1034,7 @@ static void dbse_pgsql_recs (struct ctx_motapp *motapp, const char *sqlquery)
     return;
 }
 
-static void dbse_pgsql_cols(struct ctx_motapp *motapp)
+static void dbse_pgsql_cols(ctx_motapp *motapp)
 {
     int indx;
     std::string sql;
@@ -1059,7 +1059,7 @@ static void dbse_pgsql_cols(struct ctx_motapp *motapp)
 
 }
 
-static void dbse_pgsql_setup(struct ctx_motapp *motapp)
+static void dbse_pgsql_setup(ctx_motapp *motapp)
 {
     std::string sql;
 
@@ -1079,7 +1079,7 @@ static void dbse_pgsql_setup(struct ctx_motapp *motapp)
 
 }
 
-static void dbse_pgsql_init(struct ctx_motapp *motapp)
+static void dbse_pgsql_init(ctx_motapp *motapp)
 {
     std::string constr;
 
@@ -1114,7 +1114,7 @@ static void dbse_pgsql_init(struct ctx_motapp *motapp)
         , motapp->dbse->database_dbname.c_str() );
 }
 
-static void dbse_pgsql_movlst(struct ctx_motapp *motapp, int camera_id)
+static void dbse_pgsql_movlst(ctx_motapp *motapp, int camera_id)
 {
     std::string sql;
 
@@ -1139,7 +1139,7 @@ static void dbse_pgsql_movlst(struct ctx_motapp *motapp, int camera_id)
 
 #endif  /*HAVE_PGSQL*/
 
-void dbse_init(struct ctx_motapp *motapp)
+void dbse_init(ctx_motapp *motapp)
 {
     motapp->dbse = new ctx_dbse;
     motapp->dbse->database_busy_timeout = motapp->cam_list[0]->conf->database_busy_timeout;
@@ -1183,7 +1183,7 @@ void dbse_init(struct ctx_motapp *motapp)
 }
 
 /* Populate the list of the movies from the database*/
-void dbse_movies_getlist(struct ctx_motapp *motapp, int camera_id)
+void dbse_movies_getlist(ctx_motapp *motapp, int camera_id)
 {
 
     if (motapp->dbse->database_type == "") {
@@ -1212,7 +1212,7 @@ void dbse_movies_getlist(struct ctx_motapp *motapp, int camera_id)
 
 }
 
-void dbse_close(struct ctx_motapp *motapp)
+void dbse_close(ctx_motapp *motapp)
 {
     #ifdef HAVE_MARIADB
         dbse_mariadb_close(motapp);
@@ -1225,7 +1225,7 @@ void dbse_close(struct ctx_motapp *motapp)
     #endif
 }
 
-void dbse_deinit(struct ctx_motapp *motapp)
+void dbse_deinit(ctx_motapp *motapp)
 {
     dbse_movies_free(motapp);
 
@@ -1242,7 +1242,7 @@ void dbse_deinit(struct ctx_motapp *motapp)
 }
 
 /* Execute sql against database with mutex lock */
-void dbse_exec_sql(struct ctx_motapp *motapp, const char *sqlquery)
+void dbse_exec_sql(ctx_motapp *motapp, const char *sqlquery)
 {
 
     if (motapp->dbse->database_type == "") {
@@ -1270,7 +1270,7 @@ void dbse_exec_sql(struct ctx_motapp *motapp, const char *sqlquery)
 }
 
 /* Create and execute user provided sql with mutex lock*/
-void dbse_exec(struct ctx_cam *cam, char *filename
+void dbse_exec(ctx_cam *cam, char *filename
     , int sqltype, struct timespec *ts1, const char *cmd)
 {
     char sqlquery[PATH_MAX];

@@ -86,7 +86,7 @@
 
         int                         post_sz;        /* The number of entries in the post info */
         std::string                 post_cmd;       /* The command sent with the post */
-        struct ctx_key              *post_info;     /* Structure of the entries provided from the post data */
+        ctx_key                     *post_info;     /* Structure of the entries provided from the post data */
         struct MHD_PostProcessor    *post_processor; /* Processor for handling Post method connections */
 
         FILE                        *req_file;      /* requested file*/
@@ -98,12 +98,12 @@
         struct timespec             time_last;      /* Keep track of processing time for stream thread*/
         int                         mhd_first;      /* Boolean for whether it is the first connection*/
         struct MHD_Connection       *connection;    /* The MHD connection value from the client */
-        struct ctx_motapp           *motapp;        /* The motionplus context pointer */
-        struct ctx_cam              *cam;           /* The ctx_cam information for the camera requested */
+        ctx_motapp                  *motapp;        /* The motionplus context pointer */
+        ctx_cam                     *cam;           /* The ctx_cam information for the camera requested */
 
     };
 
-    void webu_init(struct ctx_motapp *motapp);
-    void webu_deinit(struct ctx_motapp *motapp);
+    void webu_init(ctx_motapp *motapp);
+    void webu_deinit(ctx_motapp *motapp);
 
 #endif /* _INCLUDE_WEBU_HPP_ */

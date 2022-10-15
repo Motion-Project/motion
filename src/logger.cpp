@@ -30,7 +30,7 @@ static int log_type = TYPE_DEFAULT;
 
 static const char *log_type_str[]  = {NULL, "COR", "STR", "ENC", "NET", "DBS", "EVT", "TRK", "VID", "ALL"};
 static const char *log_level_str[] = {NULL, "EMG", "ALR", "CRT", "ERR", "WRN", "NTC", "INF", "DBG", "ALL"};
-static struct ctx_motapp *log_motapp;  /*Used to access the parms mutex for updates*/
+static ctx_motapp *log_motapp;  /*Used to access the parms mutex for updates*/
 
 /** Returns index of log type or 0 if not valid type. */
 static int log_get_type(const char *type)
@@ -259,7 +259,7 @@ void motion_log(int level, int type, int errno_flag,int fncname, const char *fmt
 
 }
 
-void log_init(struct ctx_motapp *motapp)
+void log_init(ctx_motapp *motapp)
 {
 
     if ((motapp->log_level > ALL) ||
@@ -305,7 +305,7 @@ void log_init(struct ctx_motapp *motapp)
 
 }
 
-void log_deinit(struct ctx_motapp *motapp)
+void log_deinit(ctx_motapp *motapp)
 {
 
     if (logfile != NULL) {
@@ -318,7 +318,7 @@ void log_deinit(struct ctx_motapp *motapp)
 
 }
 
-void log_set_motapp(struct ctx_motapp *motapp)
+void log_set_motapp(ctx_motapp *motapp)
 {
     /* Need better design to avoid the need to do this.  Extern motapp to whole app? */
     log_motapp = motapp;  /* Set our static pointer used for locking parms mutex*/

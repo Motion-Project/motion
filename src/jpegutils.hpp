@@ -26,9 +26,9 @@
         unsigned int width, unsigned int height, unsigned char *volatile img_out);
     int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
         unsigned char *input_image, int width, int height, int quality,
-        struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box);
+        ctx_cam *cam, struct timespec *ts1, ctx_coord *box);
     int jpgutl_put_grey(unsigned char *dest_image, int image_size,
         unsigned char *input_image, int width, int height, int quality,
-        struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box);
+        ctx_cam *cam, struct timespec *ts1, ctx_coord *box);
 
 #endif /*  _INCLUDE_JPEGUTILS_HPP_ */

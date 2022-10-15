@@ -25,7 +25,7 @@
 #include "webu_json.hpp"
 #include "dbse.hpp"
 
-static void webu_json_config_item(struct ctx_webui *webui, int indx_cam, int indx_parm)
+static void webu_json_config_item(ctx_webui *webui, int indx_cam, int indx_parm)
 {
     int indx;
     std::string parm_orig, parm_val, parm_list, parm_enable;
@@ -115,7 +115,7 @@ static void webu_json_config_item(struct ctx_webui *webui, int indx_cam, int ind
 
 }
 
-static void webu_json_config_parms(struct ctx_webui *webui, int indx_cam)
+static void webu_json_config_parms(ctx_webui *webui, int indx_cam)
 {
     int indx_parm;
     bool first;
@@ -160,7 +160,7 @@ static void webu_json_config_parms(struct ctx_webui *webui, int indx_cam)
 
 }
 
-static void webu_json_config_cam_parms(struct ctx_webui *webui)
+static void webu_json_config_cam_parms(ctx_webui *webui)
 {
     int indx_cam;
     bool first;
@@ -187,7 +187,7 @@ static void webu_json_config_cam_parms(struct ctx_webui *webui)
 
 }
 
-static void webu_json_config_cam_list(struct ctx_webui *webui)
+static void webu_json_config_cam_list(ctx_webui *webui)
 {
     int indx_cam;
     std::string response;
@@ -233,7 +233,7 @@ static void webu_json_config_cam_list(struct ctx_webui *webui)
 
 }
 
-static void webu_json_config_categories(struct ctx_webui *webui)
+static void webu_json_config_categories(ctx_webui *webui)
 {
     int indx_cat;
     std::string catnm_short, catnm_long;
@@ -261,7 +261,7 @@ static void webu_json_config_categories(struct ctx_webui *webui)
 
 }
 
-void webu_json_config(struct ctx_webui *webui)
+void webu_json_config(ctx_webui *webui)
 {
     webui->resp_type = WEBUI_RESP_JSON;
 
@@ -280,14 +280,14 @@ void webu_json_config(struct ctx_webui *webui)
 
 }
 
-static void webu_json_movies_list(struct ctx_webui *webui)
+static void webu_json_movies_list(ctx_webui *webui)
 {
     int indx_mov, indx_cam, indx;
     int movie_cnt, indx_req;
     std::string response;
     char fmt[PATH_MAX];
     ctx_dbse_rec db;
-    struct ctx_params *wact;
+    ctx_params *wact;
 
     /* Get the indx we want */
     indx_cam = 0;
@@ -377,7 +377,7 @@ static void webu_json_movies_list(struct ctx_webui *webui)
 
 }
 
-void webu_json_movies(struct ctx_webui *webui)
+void webu_json_movies(ctx_webui *webui)
 {
     webui->resp_type = WEBUI_RESP_JSON;
 

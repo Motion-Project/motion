@@ -33,7 +33,7 @@
 
 struct ctx_algsec_model {
     std::string                 config;             //Source params line
-    struct ctx_params           *algsec_params;
+    ctx_params                  *algsec_params;
 
 
     std::string                 model_file;
@@ -74,7 +74,7 @@ struct ctx_algsec {
     int                     height;
     bool                    isdetected;         /* Bool reset for each Motion event as to whether a detection occurred */
     pthread_mutex_t         mutex;
-    struct ctx_algsec_model models;
+    ctx_algsec_model        models;
 };
 
 

@@ -42,13 +42,13 @@
 #include "movie.hpp"
 
 
-static void movie_free_pkt(struct ctx_movie *movie)
+static void movie_free_pkt(ctx_movie *movie)
 {
     mypacket_free(movie->pkt);
     movie->pkt = NULL;
 }
 
-static void movie_free_nal(struct ctx_movie *movie)
+static void movie_free_nal(ctx_movie *movie)
 {
     if (movie->nal_info) {
         free(movie->nal_info);
@@ -57,7 +57,7 @@ static void movie_free_nal(struct ctx_movie *movie)
     }
 }
 
-static void movie_encode_nal(struct ctx_movie *movie)
+static void movie_encode_nal(ctx_movie *movie)
 {
     // h264_v4l2m2m has NAL units separated from the first frame, which makes
     // some players very unhappy.
@@ -89,7 +89,7 @@ static int movie_timelapse_exists(const char *fname)
     }
 }
 
-static int movie_timelapse_append(struct ctx_movie *movie, AVPacket *pkt)
+static int movie_timelapse_append(ctx_movie *movie, AVPacket *pkt)
 {
     FILE *file;
 
@@ -105,7 +105,7 @@ static int movie_timelapse_append(struct ctx_movie *movie, AVPacket *pkt)
     return 0;
 }
 
-static void movie_free_context(struct ctx_movie *movie)
+static void movie_free_context(ctx_movie *movie)
 {
 
         if (movie->picture != NULL) {
@@ -125,7 +125,7 @@ static void movie_free_context(struct ctx_movie *movie)
 
 }
 
-static int movie_get_oformat(struct ctx_movie *movie)
+static int movie_get_oformat(ctx_movie *movie)
 {
 
     size_t container_name_len;
@@ -224,7 +224,7 @@ static int movie_get_oformat(struct ctx_movie *movie)
     return 0;
 }
 
-static int movie_encode_video(struct ctx_movie *movie)
+static int movie_encode_video(ctx_movie *movie)
 {
 
     #if (MYFFVER >= 57041)
@@ -330,7 +330,7 @@ static int movie_encode_video(struct ctx_movie *movie)
 
 }
 
-static int movie_set_pts(struct ctx_movie *movie, const struct timespec *ts1)
+static int movie_set_pts(ctx_movie *movie, const struct timespec *ts1)
 {
 
     int64_t pts_interval;
@@ -370,7 +370,7 @@ static int movie_set_pts(struct ctx_movie *movie, const struct timespec *ts1)
     return 0;
 }
 
-static int movie_set_quality(struct ctx_movie *movie)
+static int movie_set_quality(ctx_movie *movie)
 {
 
     movie->opts = 0;
@@ -471,7 +471,7 @@ static const char *movie_codec_is_blacklisted(const char *codec_name)
     return NULL;
 }
 
-static int movie_set_codec_preferred(struct ctx_movie *movie)
+static int movie_set_codec_preferred(ctx_movie *movie)
 {
     size_t container_name_len = strcspn(movie->container_name, ":");
 
@@ -514,7 +514,7 @@ static int movie_set_codec_preferred(struct ctx_movie *movie)
 
 }
 
-static int movie_set_codec(struct ctx_movie *movie)
+static int movie_set_codec(ctx_movie *movie)
 {
 
     int retcd;
@@ -640,7 +640,7 @@ static int movie_set_codec(struct ctx_movie *movie)
     return 0;
 }
 
-static int movie_set_stream(struct ctx_movie *movie)
+static int movie_set_stream(ctx_movie *movie)
 {
 
     #if (MYFFVER >= 57041)
@@ -731,7 +731,7 @@ static int movie_alloc_video_buffer(AVFrame *frame, int align)
 }
 
 
-static int movie_set_picture(struct ctx_movie *movie)
+static int movie_set_picture(ctx_movie *movie)
 {
 
     int retcd;
@@ -773,7 +773,7 @@ static int movie_set_picture(struct ctx_movie *movie)
 
 static int movie_interrupt(void *ctx)
 {
-    struct ctx_movie *movie = (struct ctx_movie *)ctx;
+    ctx_movie *movie = (ctx_movie *)ctx;
 
     clock_gettime(CLOCK_MONOTONIC, &movie->cb_cr_ts);
     if ((movie->cb_cr_ts.tv_sec - movie->cb_st_ts.tv_sec ) > movie->cb_dur) {
@@ -786,7 +786,7 @@ static int movie_interrupt(void *ctx)
 }
 
 
-static int movie_set_outputfile(struct ctx_movie *movie)
+static int movie_set_outputfile(ctx_movie *movie)
 {
     int retcd;
     char errstr[128];
@@ -854,7 +854,7 @@ static int movie_set_outputfile(struct ctx_movie *movie)
 
 }
 
-static int movie_flush_codec(struct ctx_movie *movie)
+static int movie_flush_codec(ctx_movie *movie)
 {
     #if (MYFFVER >= 57041)
         //ffmpeg version 3.1 and after
@@ -912,7 +912,7 @@ static int movie_flush_codec(struct ctx_movie *movie)
 
 }
 
-static int movie_put_frame(struct ctx_movie *movie, const struct timespec *ts1)
+static int movie_put_frame(ctx_movie *movie, const struct timespec *ts1)
 {
     int retcd;
 
@@ -950,7 +950,7 @@ static int movie_put_frame(struct ctx_movie *movie, const struct timespec *ts1)
 }
 
 /* Reset the written flag and movie start time at opening of each event */
-static void movie_passthru_reset(struct ctx_movie *movie)
+static void movie_passthru_reset(ctx_movie *movie)
 {
     int indx;
 
@@ -963,7 +963,7 @@ static void movie_passthru_reset(struct ctx_movie *movie)
 }
 
 
-static int movie_passthru_pktpts(struct ctx_movie *movie)
+static int movie_passthru_pktpts(ctx_movie *movie)
 {
     int64_t ts_interval, base_pdts;
     AVRational tmpbase;
@@ -1015,7 +1015,7 @@ static int movie_passthru_pktpts(struct ctx_movie *movie)
     return 0;
 }
 
-static void movie_passthru_write(struct ctx_movie *movie, int indx)
+static void movie_passthru_write(ctx_movie *movie, int indx)
 {
     /* Write the packet in the buffer at indx to file */
     char errstr[128];
@@ -1049,7 +1049,7 @@ static void movie_passthru_write(struct ctx_movie *movie, int indx)
 
 }
 
-static void movie_passthru_minpts(struct ctx_movie *movie)
+static void movie_passthru_minpts(ctx_movie *movie)
 {
     int indx, indx_audio, indx_video;
 
@@ -1104,7 +1104,7 @@ static void movie_passthru_minpts(struct ctx_movie *movie)
 
 }
 
-static int movie_passthru_put(struct ctx_movie *movie, struct ctx_image_data *img_data)
+static int movie_passthru_put(ctx_movie *movie, ctx_image_data *img_data)
 {
     int idnbr_image, idnbr_lastwritten, idnbr_stop, idnbr_firstkey;
     int indx, indx_lastwritten, indx_firstkey, indx_video;
@@ -1184,7 +1184,7 @@ static int movie_passthru_put(struct ctx_movie *movie, struct ctx_image_data *im
     return 0;
 }
 
-static int movie_passthru_streams_video(struct ctx_movie *movie, AVStream *stream_in)
+static int movie_passthru_streams_video(ctx_movie *movie, AVStream *stream_in)
 {
     int retcd;
 
@@ -1214,7 +1214,7 @@ static int movie_passthru_streams_video(struct ctx_movie *movie, AVStream *strea
     return 0;
 }
 
-static int movie_passthru_streams_audio(struct ctx_movie *movie, AVStream *stream_in)
+static int movie_passthru_streams_audio(ctx_movie *movie, AVStream *stream_in)
 {
     int         retcd;
 
@@ -1245,7 +1245,7 @@ static int movie_passthru_streams_audio(struct ctx_movie *movie, AVStream *strea
     return 0;
 }
 
-static int movie_passthru_streams(struct ctx_movie *movie)
+static int movie_passthru_streams(ctx_movie *movie)
 {
     #if (MYFFVER >= 57041)
         int         retcd, indx;
@@ -1278,7 +1278,7 @@ static int movie_passthru_streams(struct ctx_movie *movie)
     #endif
 }
 
-static int movie_passthru_check(struct ctx_movie *movie)
+static int movie_passthru_check(ctx_movie *movie)
 {
     if ((movie->netcam_data->status == NETCAM_NOTCONNECTED  ) ||
         (movie->netcam_data->status == NETCAM_RECONNECTING  )) {
@@ -1297,7 +1297,7 @@ static int movie_passthru_check(struct ctx_movie *movie)
     return 0;
 }
 
-static int movie_passthru_open(struct ctx_movie *movie)
+static int movie_passthru_open(ctx_movie *movie)
 {
     int retcd;
 
@@ -1389,7 +1389,7 @@ void movie_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list 
 
 }
 
-static void movie_put_pix_nv21(struct ctx_movie *movie, struct ctx_image_data *img_data)
+static void movie_put_pix_nv21(ctx_movie *movie, ctx_image_data *img_data)
 {
     unsigned char *image,*imagecr, *imagecb;
     int cr_len, x, y;
@@ -1416,7 +1416,7 @@ static void movie_put_pix_nv21(struct ctx_movie *movie, struct ctx_image_data *i
 
 }
 
-static void movie_put_pix_yuv420(struct ctx_movie *movie, struct ctx_image_data *img_data)
+static void movie_put_pix_yuv420(ctx_movie *movie, ctx_image_data *img_data)
 {
     unsigned char *image;
 
@@ -1468,7 +1468,7 @@ void movie_global_deinit(void)
 
 }
 
-int movie_open(struct ctx_movie *movie)
+int movie_open(ctx_movie *movie)
 {
     int retcd;
 
@@ -1528,7 +1528,7 @@ int movie_open(struct ctx_movie *movie)
 
 }
 
-void movie_free(struct ctx_movie *movie)
+void movie_free(ctx_movie *movie)
 {
     if (movie != NULL) {
         movie_free_context(movie);
@@ -1545,7 +1545,7 @@ void movie_free(struct ctx_movie *movie)
     }
 }
 
-void movie_close(struct ctx_movie *movie)
+void movie_close(ctx_movie *movie)
 {
 
     if (movie != NULL) {
@@ -1571,7 +1571,7 @@ void movie_close(struct ctx_movie *movie)
 
 }
 
-int movie_put_image(struct ctx_movie *movie, struct ctx_image_data *img_data, const struct timespec *ts1)
+int movie_put_image(ctx_movie *movie, ctx_image_data *img_data, const struct timespec *ts1)
 {
     int retcd = 0;
     int cnt = 0;
@@ -1627,7 +1627,7 @@ int movie_put_image(struct ctx_movie *movie, struct ctx_image_data *img_data, co
 
 }
 
-void movie_reset_start_time(struct ctx_movie *movie, const struct timespec *ts1)
+void movie_reset_start_time(ctx_movie *movie, const struct timespec *ts1)
 {
     int64_t one_frame_interval = av_rescale_q(1,(AVRational){1, movie->fps}, movie->strm_video->time_base);
     if (one_frame_interval <= 0) {
@@ -1640,7 +1640,7 @@ void movie_reset_start_time(struct ctx_movie *movie, const struct timespec *ts1)
 
 }
 
-static const char* movie_init_container(struct ctx_cam *cam)
+static const char* movie_init_container(ctx_cam *cam)
 {
 
     /* The following section allows for testing of all the various containers
@@ -1684,13 +1684,13 @@ static const char* movie_init_container(struct ctx_cam *cam)
 
 }
 
-int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1)
+int movie_init_norm(ctx_cam *cam, struct timespec *ts1)
 {
     char tmp[PATH_MAX];
     const char *container;
     int retcd, len;
 
-    cam->movie_norm =(struct ctx_movie*) mymalloc(sizeof(struct ctx_movie));
+    cam->movie_norm =(ctx_movie*) mymalloc(sizeof(ctx_movie));
 
     mystrftime(cam, tmp, sizeof(tmp)
         , cam->conf->movie_filename.c_str(), ts1, NULL, 0);
@@ -1758,13 +1758,13 @@ int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1)
 
 }
 
-int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1)
+int movie_init_motion(ctx_cam *cam, struct timespec *ts1)
 {
     char tmp[PATH_MAX];
     const char *container;
     int retcd, len;
 
-    cam->movie_motion =(struct ctx_movie*)mymalloc(sizeof(struct ctx_movie));
+    cam->movie_motion =(ctx_movie*)mymalloc(sizeof(ctx_movie));
 
     mystrftime(cam, tmp, sizeof(tmp)
         , cam->conf->movie_filename.c_str(), ts1, NULL, 0);
@@ -1825,14 +1825,14 @@ int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1)
 
 }
 
-int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1)
+int movie_init_timelapse(ctx_cam *cam, struct timespec *ts1)
 {
     char tmp[PATH_MAX];
     const char *container_mpg = "mpg";
     const char *container_mkv = "mkv";
     int retcd, len;
 
-    cam->movie_timelapse =(struct ctx_movie*)mymalloc(sizeof(struct ctx_movie));
+    cam->movie_timelapse =(ctx_movie*)mymalloc(sizeof(ctx_movie));
     mystrftime(cam, tmp, sizeof(tmp)
         , cam->conf->timelapse_filename.c_str(), ts1, NULL, 0);
 

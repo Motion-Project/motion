@@ -41,7 +41,7 @@ typedef struct {
 
 void alg_noise_tune(ctx_cam *cam)
 {
-    struct ctx_images *imgs = &cam->imgs;
+    ctx_images *imgs = &cam->imgs;
     int i;
     unsigned char *ref = imgs->ref;
     int diff, sum = 0, count = 0;
@@ -199,7 +199,7 @@ static int alg_iflood(int x, int y, int width, int height,
 
 static int alg_labeling(ctx_cam *cam)
 {
-    struct ctx_images *imgs = &cam->imgs;
+    ctx_images *imgs = &cam->imgs;
     unsigned char *out = imgs->image_motion.image_norm;
     int *labels = imgs->labels;
     int ix, iy, pixelpos;
@@ -836,7 +836,7 @@ static void alg_diff_masksmart(ctx_cam *cam)
 
 static bool alg_diff_fast(ctx_cam *cam)
 {
-    struct ctx_images *imgs = &cam->imgs;
+    ctx_images *imgs = &cam->imgs;
     int i, curdiff, diffs = 0;
     int step = cam->imgs.motionsize / 10000;
     int noise = cam->noise;
@@ -910,7 +910,7 @@ static void alg_lightswitch(ctx_cam *cam)
  *
  * Parameters:
  *
- *   cam    - current thread's context struct
+ *   cam    - current thread's context
  *   action - UPDATE_REF_FRAME or RESET_REF_FRAME
  *
  */

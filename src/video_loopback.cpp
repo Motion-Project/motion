@@ -241,7 +241,7 @@ int vlp_putpipe(int dev, unsigned char *image, int imgsize)
     #endif
 }
 
-void vlp_init(struct ctx_cam *cam)
+void vlp_init(ctx_cam *cam)
 {
 
     #if defined(HAVE_V4L2) && !defined(BSD)
