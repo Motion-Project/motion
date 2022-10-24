@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-03 23:12-0600\n"
-"PO-Revision-Date: 2021-10-03 22:50-0600\n"
+"POT-Creation-Date: 2022-10-24 08:29-0600\n"
+"PO-Revision-Date: 2022-10-24 08:35-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: ko\n"
@@ -511,6 +511,18 @@ msgid "webcontrol_header_params"
 msgstr "webcontrol 헤더 매개변수"
 
 #: src/conf.c
+msgid "webcontrol_lock_minutes"
+msgstr "webcontrol 잠금 시간"
+
+#: src/conf.c
+msgid "webcontrol_lock_attempts"
+msgstr "webcontrol 잠금 시도"
+
+#: src/conf.c
+msgid "webcontrol_lock_max_ips"
+msgstr "webcontrol 잠금 최대 ips"
+
+#: src/conf.c
 msgid "stream_port"
 msgstr "스트림 포트"
 
@@ -728,43 +740,6 @@ msgstr "데이터베이스 초기화"
 
 #: src/dbse.c
 #, c-format
-msgid "SQLite3 Database filename %s"
-msgstr "SQLite3 데이터베이스 파일 이름 %s"
-
-#: src/dbse.c
-msgid "SQLite3 is threadsafe"
-msgstr "SQLite3은 스레드 안전"
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 serialized %s"
-msgstr "SQLite3 직렬화 %s"
-
-#: src/dbse.c
-msgid "FAILED"
-msgstr "실패한"
-
-#: src/dbse.c
-msgid "SUCCESS"
-msgstr "성공"
-
-#: src/dbse.c
-#, c-format
-msgid "Can't open SQLite3 database %s : %s"
-msgstr "SQLite3 데이터베이스 %s을(를) 열 수 없습니다: %s"
-
-#: src/dbse.c
-#, c-format
-msgid "database_busy_timeout %d msec"
-msgstr "데이터베이스 사용 시간 초과 %d msec"
-
-#: src/dbse.c
-#, c-format
-msgid "database_busy_timeout failed %s"
-msgstr "데이터베이스 사용 시간 초과 실패 %s"
-
-#: src/dbse.c
-#, c-format
 msgid "Cannot connect to MySQL database %s on host %s with user %s"
 msgstr "사용자 %s로 호스트 %s의 MySQL 데이터베이스 %s에 연결할 수 없습니다."
 
@@ -786,8 +761,24 @@ msgid "MariaDB error was %s"
 msgstr "MariaDB 오류는 %s입니다."
 
 #: src/dbse.c
-msgid "SQLite3 using shared handle"
-msgstr "공유 핸들을 사용하는 SQLite3"
+#, c-format
+msgid "Opening database %s"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Can't open SQLite3 database %s.  Error %d : %s"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Setting busy timeout to %d msec"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Setting busy timeout failed.  Error %d:%s"
+msgstr ""
 
 #: src/dbse.c
 #, c-format
@@ -796,8 +787,8 @@ msgstr "PostgreSQL 데이터베이스 ' %s'에 연결하지 못했습니다 : %s
 
 #: src/dbse.c
 #, c-format
-msgid "Database backend %s"
-msgstr "데이터베이스 백엔드 %s"
+msgid "Database type %s"
+msgstr ""
 
 #: src/dbse.c
 msgid "Executing MySQL query"
@@ -876,22 +867,17 @@ msgstr "PGSQL 쿼리 실패 : [%s] %s %s"
 
 #: src/dbse.c
 #, c-format
-msgid "INSERT ... RETURNING VALUE=\"%s\""
-msgstr "삽입 ... 반환 값=\"%s\""
+msgid "Executing %s"
+msgstr ""
 
 #: src/dbse.c
 #, c-format
-msgid "Invalid event ID returned by SQL query \"%s\""
-msgstr "SQL 쿼리 \"%s\"에서 잘못된 이벤트 ID를 반환했습니다."
+msgid "SQLite3 error %d : %s"
+msgstr ""
 
 #: src/dbse.c
-msgid "Executing SQLite3 query"
-msgstr "SQLite3 쿼리 실행"
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 error was %s"
-msgstr "SQLite3 오류는 %s입니다."
+msgid "Ignoring empty sql query"
+msgstr ""
 
 #: src/event.c src/track.c
 #, c-format
@@ -902,6 +888,26 @@ msgstr "외부 명령 ' %s'을 (를) 시작할 수 없습니다"
 #, c-format
 msgid "Executing external command '%s'"
 msgstr "외부 명령 ' %s'실행"
+
+#: src/event.c
+#, c-format
+msgid "Writing image to file: %s"
+msgstr "파일에 이미지 쓰기: %s"
+
+#: src/event.c
+#, c-format
+msgid "Writing movie to file: %s"
+msgstr "파일에 동영상 쓰기: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved image to file: %s"
+msgstr "파일에 이미지 저장: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved movie to file: %s"
+msgstr "파일에 저장된 동영상: %s"
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -1131,11 +1137,6 @@ msgstr "기본 코덱 %s이 (가) 블랙리스트에 추가되었습니다 : %s"
 
 #: src/ffmpeg.c
 #, c-format
-msgid "Preferred codec %s not found"
-msgstr "기본 코덱 %s를 찾을 수 없습니다"
-
-#: src/ffmpeg.c
-#, c-format
 msgid "Codec %s not found"
 msgstr "코덱 %s를 찾을 수 없습니다"
 
@@ -1149,8 +1150,8 @@ msgid "Could not alloc stream"
 msgstr "스트림을 할당 할 수 없습니다"
 
 #: src/ffmpeg.c
-msgid "Failed to allocate decoder!"
-msgstr "디코더를 할당하지 못했습니다!"
+msgid "Failed to allocate codec!"
+msgstr "코덱을 할당하지 못했습니다!"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1290,10 +1291,6 @@ msgstr "출력 컨텍스트를 할당 할 수 없습니다"
 #: src/ffmpeg.c
 msgid "Could not setup passthru!"
 msgstr "경유를 설정할 수 없습니다!"
-
-#: src/ffmpeg.c
-msgid "Failed to allocate codec!"
-msgstr "코덱을 할당하지 못했습니다!"
 
 #: src/ffmpeg.c
 msgid "Could not set the stream"
@@ -1437,8 +1434,8 @@ msgstr "로그 파일을 닫는 중 ( %s)."
 
 #: src/motion.c
 #, c-format
-msgid "Motion detected - starting event %d"
-msgstr "동작 감지-시작 이벤트 %d"
+msgid "Motion detected - starting event %d."
+msgstr ""
 
 #: src/motion.c
 #, c-format
@@ -1589,10 +1586,6 @@ msgid "Emulating motion"
 msgstr "모션 모방"
 
 #: src/motion.c
-msgid "Calling vid_close() from motion_cleanup"
-msgstr "모션 정리에서 vid close () 호출"
-
-#: src/motion.c
 #, c-format
 msgid "Motion in area %d detected."
 msgstr "%d 영역의 모션이 감지되었습니다."
@@ -1602,17 +1595,34 @@ msgid "Retrying until successful connection with camera"
 msgstr "카메라와 성공적으로 연결될 때까지 재시도"
 
 #: src/motion.c
-msgid ""
-"Camera has finally become available\n"
-"Camera image has different width and heightfrom what is in the config file. "
-"You should fix that\n"
-"Restarting Motion thread to reinitialize all image buffers to new picture "
-"dimensions"
+msgid "Camera has become available."
 msgstr ""
-"카메라를 사용할 수있게되었습니다 \n"
-"카메라 이미지는 구성 파일의 너비와 높이가 다릅니다.문제를 해결해야합니다 \n"
-"모든 이미지 버퍼를 새 그림으로 다시 초기화하기 위해 모션 스레드를 다시 시작치"
-"수"
+
+#: src/motion.c
+#, c-format
+msgid ""
+"Restarting Motion.\n"
+"Image width (%d) or height(%d) requested is not modulo 8."
+msgstr ""
+
+#: src/motion.c
+#, c-format
+msgid ""
+"Restarting Motion.\n"
+"Motion only supports width and height greater than or equal to 64 %dx%d"
+msgstr ""
+
+#: src/motion.c
+msgid ""
+"Restarting Motion.\n"
+"Height or width has changed on camera."
+msgstr ""
+
+#: src/motion.c
+msgid ""
+"Restarting Motion.\n"
+"High resolution has changed on camera."
+msgstr ""
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -2354,11 +2364,6 @@ msgid "SO_KEEPALIVE set on socket."
 msgstr "소켓에 KEEPALIVE가 설정되었습니다."
 
 #: src/netcam_http.c
-#, c-format
-msgid "re-using socket %d since keepalive is set."
-msgstr "keepalive가 설정되었으므로 소켓 %d을 (를) 다시 사용하십시오."
-
-#: src/netcam_http.c
 msgid "fcntl(1) on socket"
 msgstr "소켓의 fcntl (1)"
 
@@ -2549,10 +2554,6 @@ msgid "netcam->jpeg_error %d"
 msgstr "netcam-> jpeg 오류 %d"
 
 #: src/netcam_jpeg.c
-msgid "no new pic, no signal rcvd"
-msgstr "새로운 그림 없음, 신호 없음 rcvd"
-
-#: src/netcam_jpeg.c
 msgid "***new pic delay successful***"
 msgstr "*** 새로운 사진 지연 성공 ***"
 
@@ -2565,11 +2566,6 @@ msgstr "JPEG 오류 %d"
 #, c-format
 msgid "processing jpeg image - content length %d"
 msgstr "JPEG 이미지 처리-콘텐츠 길이 %d"
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid "return code %d"
-msgstr "리턴 코드 %d"
 
 #: src/netcam_jpeg.c
 #, c-format
@@ -2778,6 +2774,11 @@ msgstr "%s: 중단됨"
 #, c-format
 msgid "%s: av_read_frame: %s"
 msgstr "%s: av 읽기 프레임: %s"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Excessive tries to get data from camera %d"
+msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3103,8 +3104,8 @@ msgid "Can't write picture to file %s"
 msgstr "%s 파일에 그림을 쓸 수 없습니다"
 
 #: src/picture.c
-msgid "Could not read from pgm file"
-msgstr "pgm 파일에서 읽을 수 없습니다"
+msgid "Error getting PGM vars."
+msgstr ""
 
 #: src/picture.c
 #, c-format
@@ -3112,12 +3113,9 @@ msgid "This is not a pgm file, starts with '%s'"
 msgstr "이것은 pgm 파일이 아니며 ' %s'로 시작합니다"
 
 #: src/picture.c
-msgid "Failed reading size in pgm file"
-msgstr "pgm 파일에서 읽지 않은 크기"
-
-#: src/picture.c
-msgid "Failed reading maximum value in pgm file"
-msgstr "pgm 파일에서 최대 값을 읽지 못했습니다."
+#, c-format
+msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
+msgstr ""
 
 #: src/picture.c
 msgid "Failed reading image data from pgm file"
@@ -3433,10 +3431,8 @@ msgid "Error closing file"
 msgstr "파일 닫기 오류"
 
 #: src/util.c
-msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
+msgid "{dbeventid} is not supported. Use eventid."
 msgstr ""
-"%{dbventid}를 사용했지만 SQL 쿼리 시작에서 유효한 이벤트 ID가 반환되지 않았습"
-"니다."
 
 #: src/util.c
 #, c-format
@@ -3492,6 +3488,15 @@ msgstr "컨트롤을 다시 분석하는 동안 오류 발생: %s"
 
 #: src/util.c
 #, c-format
+msgid "Parsing: %s"
+msgstr "구문 분석: %s"
+
+#: src/util.c
+msgid "Parsing: <redacted>"
+msgstr "구문 분석: <편집됨>"
+
+#: src/util.c
+#, c-format
 msgid "Error parsing controls: %s"
 msgstr "컨트롤 구문 분석 오류: %s"
 
@@ -3514,6 +3519,15 @@ msgstr "새 netcam 상위 매개변수: %s"
 #, c-format
 msgid "New video_params: %s"
 msgstr "새 비디오 매개변수: %s"
+
+#: src/util.c
+#, c-format
+msgid "New webcontrol_header_params: %s"
+msgstr "새 웹 컨트롤 헤더 매개변수: %s"
+
+#: src/util.c
+msgid "New webcontrol_header_params: <redacted>"
+msgstr "새로운 webcontrol 헤더 매개변수: <편집됨>"
 
 #: src/util.c
 #, c-format
@@ -3836,18 +3850,27 @@ msgid "  V4L2 ID   Name and Range"
 msgstr "V4L2 ID 이름 및 범위"
 
 #: src/video_v4l2.c
+msgid "Error resetting user value"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Leaving control %s \"%s\" set to %d"
+msgstr ""
+
+#: src/video_v4l2.c
 msgid "Device not ready"
 msgstr "장치가 준비되지 않았습니다"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "setting control %s \"%s\" to %d failed with return code %d"
-msgstr "설정 제어 %s \"%s\"에서 %d 로의 리턴 코드 %d 실패"
+msgid "Set control \"%s\" to value %d"
+msgstr "제어 \" %s \"를 값 %d (으)로 설정"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "Set control \"%s\" to value %d"
-msgstr "제어 \" %s \"를 값 %d (으)로 설정"
+msgid "setting control %s \"%s\" to %d failed. "
+msgstr ""
 
 #: src/video_v4l2.c
 #, c-format
@@ -3940,8 +3963,42 @@ msgstr "빈도를 %ul로 설정"
 
 #: src/video_v4l2.c
 #, c-format
+msgid "Unable to use %c%c%c%c (%dx%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
 msgid "Testing palette %c%c%c%c (%dx%d)"
 msgstr "테스트 팔레트 %c %c %c %c ( %dx %d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Checking image size %dx%d with stride %d"
+msgstr ""
+
+#: src/video_v4l2.c
+msgid "No stride value provided from device."
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Width(%d) must be less than stride(%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "The image width(%d) is not multiple of the stride(%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Image width will be padded %d bytes"
+msgstr ""
 
 #: src/video_v4l2.c
 #, c-format
@@ -3957,22 +4014,13 @@ msgid "Specify different palette or width/height in config file."
 msgstr "구성 파일에서 다른 팔레트 또는 너비 / 높이를 지정하십시오."
 
 #: src/video_v4l2.c
-msgid ""
-"Error setting pixel format.\n"
-"VIDIOC_S_FMT: "
+msgid "Error setting pixel format."
 msgstr ""
-"픽셀 형식을 설정하는 중 오류가 발생했습니다. \n"
-"VIDIOC S FMT :"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
 msgstr "팔레트 사용 %c %c %c %c ( %dx %d)"
-
-#: src/video_v4l2.c
-#, c-format
-msgid "Bytesperlines %d sizeimage %d colorspace %08x"
-msgstr "바이트 라인 %d 크기 이미지 %d 색 공간 %08x"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3983,12 +4031,6 @@ msgstr "너비 ( %d)로 조정"
 #, c-format
 msgid "Adjusting to height (%d)"
 msgstr "높이 ( %d)로 조정"
-
-#: src/video_v4l2.c
-msgid ""
-"H264(21) format not supported via videodevice.  Changing to default palette"
-msgstr ""
-"비디오 장치를 통해 H264 (21) 형식이 지원되지 않습니다. 기본 팔레트로 변경"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4040,12 +4082,8 @@ msgstr "메모리가 부족합니다."
 
 #: src/video_v4l2.c
 #, c-format
-msgid ""
-"Error querying buffer %i\n"
-"VIDIOC_QUERYBUF: "
+msgid "Error querying buffer %i"
 msgstr ""
-"버퍼 %i \n"
-" 쿼리 오류VIDIOC QUERYBUF :"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4054,8 +4092,8 @@ msgstr "오류 매핑 버퍼 %i mmap"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "%i length=%d Address (%x)"
-msgstr "%i 길이 = %d 주소 ( %x)"
+msgid "%i length=%d Address (%x) offset %d"
+msgstr ""
 
 #: src/video_v4l2.c
 msgid "Error starting stream. VIDIOC_STREAMON"
@@ -4161,6 +4199,11 @@ msgstr "모국어 : 해제"
 #: src/webu.c
 msgid "Set the value to null/zero"
 msgstr "값을 null / zero로 설정"
+
+#: src/webu.c
+#, c-format
+msgid "Ignoring connection from: %s"
+msgstr "연결 무시: %s"
 
 #: src/webu.c
 #, c-format
@@ -4470,58 +4513,3 @@ msgstr "이미지를 스트리밍 할 수 없습니다."
 #, c-format
 msgid "'%s' option is depreciated.  New option name is '%s'"
 msgstr "' %s'옵션이 감가 상각되었습니다. 새로운 옵션 이름은 '%s' 입니다"
-
-#: src/conf.c
-msgid "webcontrol_lock_minutes"
-msgstr "webcontrol 잠금 시간"
-
-#: src/conf.c
-msgid "webcontrol_lock_attempts"
-msgstr "webcontrol 잠금 시도"
-
-#: src/conf.c
-msgid "webcontrol_lock_max_ips"
-msgstr "webcontrol 잠금 최대 ips"
-
-#: src/event.c
-#, c-format
-msgid "Writing image to file: %s"
-msgstr "파일에 이미지 쓰기: %s"
-
-#: src/event.c
-#, c-format
-msgid "Writing movie to file: %s"
-msgstr "파일에 동영상 쓰기: %s"
-
-#: src/event.c
-#, c-format
-msgid "Saved image to file: %s"
-msgstr "파일에 이미지 저장: %s"
-
-#: src/event.c
-#, c-format
-msgid "Saved movie to file: %s"
-msgstr "파일에 저장된 동영상: %s"
-
-#: src/util.c
-#, c-format
-msgid "Parsing: %s"
-msgstr "구문 분석: %s"
-
-#: src/util.c
-msgid "Parsing: <redacted>"
-msgstr "구문 분석: <편집됨>"
-
-#: src/util.c
-#, c-format
-msgid "New webcontrol_header_params: %s"
-msgstr "새 웹 컨트롤 헤더 매개변수: %s"
-
-#: src/util.c
-msgid "New webcontrol_header_params: <redacted>"
-msgstr "새로운 webcontrol 헤더 매개변수: <편집됨>"
-
-#: src/webu.c
-#, c-format
-msgid "Ignoring connection from: %s"
-msgstr "연결 무시: %s"

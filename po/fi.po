@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-03 23:12-0600\n"
-"PO-Revision-Date: 2020-01-12 17:45-0700\n"
+"POT-Creation-Date: 2022-10-24 08:29-0600\n"
+"PO-Revision-Date: 2022-10-24 08:39-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #: src/conf.c
 #, c-format
@@ -511,6 +511,18 @@ msgid "webcontrol_header_params"
 msgstr "webcontrol -otsikon parametrit"
 
 #: src/conf.c
+msgid "webcontrol_lock_minutes"
+msgstr "webcontrol -lukituksen minuutit"
+
+#: src/conf.c
+msgid "webcontrol_lock_attempts"
+msgstr "webcontrol -lukitusyritykset"
+
+#: src/conf.c
+msgid "webcontrol_lock_max_ips"
+msgstr "webcontrol -lukon maksimi ips"
+
+#: src/conf.c
 msgid "stream_port"
 msgstr "stream-portti"
 
@@ -728,43 +740,6 @@ msgstr "Tietokannan alustaminen"
 
 #: src/dbse.c
 #, c-format
-msgid "SQLite3 Database filename %s"
-msgstr "SQLite3-tietokantatiedostonimi %s"
-
-#: src/dbse.c
-msgid "SQLite3 is threadsafe"
-msgstr "SQLite3 on langaton"
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 serialized %s"
-msgstr "SQLite3 sarjanumeroitu %s"
-
-#: src/dbse.c
-msgid "FAILED"
-msgstr "FAILED"
-
-#: src/dbse.c
-msgid "SUCCESS"
-msgstr "MENESTYS"
-
-#: src/dbse.c
-#, c-format
-msgid "Can't open SQLite3 database %s : %s"
-msgstr "SQLite3 -tietokantaa %s ei voi avata: %s"
-
-#: src/dbse.c
-#, c-format
-msgid "database_busy_timeout %d msec"
-msgstr "tietokannan varattu aikakatkaisu %d ms"
-
-#: src/dbse.c
-#, c-format
-msgid "database_busy_timeout failed %s"
-msgstr "tietokannan varattu aikakatkaisu epäonnistui %s"
-
-#: src/dbse.c
-#, c-format
 msgid "Cannot connect to MySQL database %s on host %s with user %s"
 msgstr ""
 "Isäntä %s -sovelluksessa ei voi muodostaa yhteyttä MySQL-tietokantaan %s "
@@ -788,8 +763,24 @@ msgid "MariaDB error was %s"
 msgstr "MariaDB -virhe oli %s"
 
 #: src/dbse.c
-msgid "SQLite3 using shared handle"
-msgstr "SQLite3 jaettua kahvaa käyttämällä"
+#, c-format
+msgid "Opening database %s"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Can't open SQLite3 database %s.  Error %d : %s"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Setting busy timeout to %d msec"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Setting busy timeout failed.  Error %d:%s"
+msgstr ""
 
 #: src/dbse.c
 #, c-format
@@ -798,8 +789,8 @@ msgstr "Yhteys PostgreSQL-tietokantaan ' %s' epäonnistui: %s"
 
 #: src/dbse.c
 #, c-format
-msgid "Database backend %s"
-msgstr "Tietokannan taustaohjelma %s"
+msgid "Database type %s"
+msgstr ""
 
 #: src/dbse.c
 msgid "Executing MySQL query"
@@ -813,8 +804,8 @@ msgstr "MySQL -kysely epäonnistui %s -virhekoodi %d"
 #: src/dbse.c
 #, c-format
 msgid ""
-"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error "
-"was %s"
+"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error was "
+"%s"
 msgstr ""
 "Isäntä %s: n MySQL-tietokantaan %s ei voida muodostaa yhteyttä käyttäjän %s "
 "MySQL -virheen kanssaoli %s"
@@ -843,8 +834,8 @@ msgstr "MariaDB -kysely epäonnistui %s -virhekoodi %d"
 #: src/dbse.c
 #, c-format
 msgid ""
-"Cannot reconnect to MariaDB database %s on host %s with user %s MariaDB "
-"error was %s"
+"Cannot reconnect to MariaDB database %s on host %s with user %s MariaDB error "
+"was %s"
 msgstr ""
 "Yhteyttä MariaDB -tietokantaan %s ei voi muodostaa uudelleen palvelimella %s "
 "käyttäjän %s MariaDB kanssavirhe oli %s"
@@ -872,8 +863,7 @@ msgstr "Suoritetaan PostgreSQL -kysely"
 #: src/dbse.c
 #, c-format
 msgid "Attempting reconnect to PostgreSQL database '%s': %s"
-msgstr ""
-"Yritetään muodostaa uudelleen yhteys PostgreSQL -tietokantaan ' %s': %s"
+msgstr "Yritetään muodostaa uudelleen yhteys PostgreSQL -tietokantaan ' %s': %s"
 
 #: src/dbse.c
 #, c-format
@@ -882,22 +872,17 @@ msgstr "PGSQL-kysely epäonnistui: [%s] %s %s"
 
 #: src/dbse.c
 #, c-format
-msgid "INSERT ... RETURNING VALUE=\"%s\""
-msgstr "LISÄÄ ... PALAUTUSARVO = \"%s \""
+msgid "Executing %s"
+msgstr ""
 
 #: src/dbse.c
 #, c-format
-msgid "Invalid event ID returned by SQL query \"%s\""
-msgstr "SQL -kysely \"%s \" palautti virheellisen tapahtumatunnuksen"
+msgid "SQLite3 error %d : %s"
+msgstr ""
 
 #: src/dbse.c
-msgid "Executing SQLite3 query"
-msgstr "Suoritetaan SQLite3 -kysely"
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 error was %s"
-msgstr "SQLite3 -virhe oli %s"
+msgid "Ignoring empty sql query"
+msgstr ""
 
 #: src/event.c src/track.c
 #, c-format
@@ -908,6 +893,26 @@ msgstr "Ulkoista komentoa ' %s' ei voida käynnistää"
 #, c-format
 msgid "Executing external command '%s'"
 msgstr "Suoritetaan ulkoinen komento ' %s'"
+
+#: src/event.c
+#, c-format
+msgid "Writing image to file: %s"
+msgstr "Kirjoitetaan kuvaa tiedostoon: %s"
+
+#: src/event.c
+#, c-format
+msgid "Writing movie to file: %s"
+msgstr "Kirjoitetaan elokuvaa tiedostoon: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved image to file: %s"
+msgstr "Kuva tallennettu tiedostoon: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved movie to file: %s"
+msgstr "Elokuva tallennettu tiedostoon: %s"
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -1118,8 +1123,7 @@ msgstr "HUONO AJOITUS!! Kehys ohitettu."
 #: src/ffmpeg.c
 #, c-format
 msgid ""
-"PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change "
-"%d"
+"PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change %d"
 msgstr ""
 "PTS %<PRId64> perus PTS %<PRId64> ms-aika %<PRId64> aikabaasi %d- %d Muuta%d"
 
@@ -1132,11 +1136,6 @@ msgstr "%s koodekki vbr / crf / bittinopeus: %d"
 #, c-format
 msgid "Preferred codec %s has been blacklisted: %s"
 msgstr "Haluttu koodekki %s on mustassa listassa: %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Preferred codec %s not found"
-msgstr "Haluttua koodekkia %s ei löydy"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1153,8 +1152,8 @@ msgid "Could not alloc stream"
 msgstr "Streamia ei voitu allokoida"
 
 #: src/ffmpeg.c
-msgid "Failed to allocate decoder!"
-msgstr "Dekooderin allokointi epäonnistui!"
+msgid "Failed to allocate codec!"
+msgstr "Koodekin allokointi epäonnistui!"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1294,10 +1293,6 @@ msgstr "Tulostekontekstia ei voitu allokoida"
 #: src/ffmpeg.c
 msgid "Could not setup passthru!"
 msgstr "Passthrun asennus epäonnistui!"
-
-#: src/ffmpeg.c
-msgid "Failed to allocate codec!"
-msgstr "Koodekin allokointi epäonnistui!"
 
 #: src/ffmpeg.c
 msgid "Could not set the stream"
@@ -1442,8 +1437,8 @@ msgstr "Lokitiedoston sulkeminen ( %s)."
 
 #: src/motion.c
 #, c-format
-msgid "Motion detected - starting event %d"
-msgstr "Liike havaittu - aloitustapahtuma %d"
+msgid "Motion detected - starting event %d."
+msgstr ""
 
 #: src/motion.c
 #, c-format
@@ -1596,10 +1591,6 @@ msgid "Emulating motion"
 msgstr "Jäljittelevä liike"
 
 #: src/motion.c
-msgid "Calling vid_close() from motion_cleanup"
-msgstr "Soittaminen vid close () liikkeen puhdistuksesta"
-
-#: src/motion.c
 #, c-format
 msgid "Motion in area %d detected."
 msgstr "Alueella %d havaittu liike."
@@ -1609,18 +1600,34 @@ msgid "Retrying until successful connection with camera"
 msgstr "Yritä uudelleen, kunnes onnistunut yhteys kameraan"
 
 #: src/motion.c
-msgid ""
-"Camera has finally become available\n"
-"Camera image has different width and heightfrom what is in the config file. "
-"You should fix that\n"
-"Restarting Motion thread to reinitialize all image buffers to new picture "
-"dimensions"
+msgid "Camera has become available."
 msgstr ""
-"Kamera on vihdoin tullut saataville \n"
-"Kameran kuvan leveys ja korkeus ovat erilaiset kuin konfiguraatiotiedostossa."
-"Sinun tulisi korjata se \n"
-"Liikelangan käynnistäminen uudelleen kaikkien kuvapuskurien alustamiseksi "
-"uuteen kuvaanmitat"
+
+#: src/motion.c
+#, c-format
+msgid ""
+"Restarting Motion.\n"
+"Image width (%d) or height(%d) requested is not modulo 8."
+msgstr ""
+
+#: src/motion.c
+#, c-format
+msgid ""
+"Restarting Motion.\n"
+"Motion only supports width and height greater than or equal to 64 %dx%d"
+msgstr ""
+
+#: src/motion.c
+msgid ""
+"Restarting Motion.\n"
+"Height or width has changed on camera."
+msgstr ""
+
+#: src/motion.c
+msgid ""
+"Restarting Motion.\n"
+"High resolution has changed on camera."
+msgstr ""
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -1633,8 +1640,7 @@ msgstr "Videolaitteen kohtalokas virhe - videolaitteen sulkeminen"
 #: src/motion.c
 msgid "Restarting Motion thread to reinitialize all image buffers"
 msgstr ""
-"Käynnistä Motion-ketju uudelleen kaikkien kuvapuskurien "
-"uudelleenalustamiseksi"
+"Käynnistä Motion-ketju uudelleen kaikkien kuvapuskurien uudelleenalustamiseksi"
 
 #: src/motion.c
 msgid "Video signal lost - Adding grey image"
@@ -1719,11 +1725,11 @@ msgstr "Luotu prosessin tunnistiedosto %s. Prosessin tunnus on %d"
 
 #: src/motion.c
 msgid ""
-"Camara IDs are not unique or have values over 32,000.  Falling back to "
-"thread numbers"
+"Camara IDs are not unique or have values over 32,000.  Falling back to thread "
+"numbers"
 msgstr ""
-"Camara-tunnukset eivät ole ainutlaatuisia tai niiden arvo on yli 32 000. "
-"Palaa takaisinsäie numeroita"
+"Camara-tunnukset eivät ole ainutlaatuisia tai niiden arvo on yli 32 000. Palaa "
+"takaisinsäie numeroita"
 
 #: src/motion.c
 msgid "v4l2   : available"
@@ -1866,8 +1872,7 @@ msgstr "Kameran tunnus: %d Kameran nimi: %s Laite: %s"
 #, c-format
 msgid "Stream port number %d for thread %d conflicts with the control port"
 msgstr ""
-"Suoratoiston portin numero %d lankalle %d on ristiriidassa ohjausportin "
-"kanssa"
+"Suoratoiston portin numero %d lankalle %d on ristiriidassa ohjausportin kanssa"
 
 #: src/motion.c
 #, c-format
@@ -2018,8 +2023,8 @@ msgid ""
 "Netcam_http parameter '%s' converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-"
 "Alive %s."
 msgstr ""
-"Netcam http -parametri ' %s' muunnetaan lippuiksi: HTTP / 1.0: %s HTTP / "
-"1.1: %s Keep-Elossa %s."
+"Netcam http -parametri ' %s' muunnetaan lippuiksi: HTTP / 1.0: %s HTTP / 1.1: "
+"%s Keep-Elossa %s."
 
 #: src/netcam.c
 msgid "now calling netcam_setup_html()"
@@ -2237,11 +2242,10 @@ msgstr "Rajamerkkijonoa ei löydy otsikosta"
 
 #: src/netcam_http.c
 msgid ""
-"Streaming camera probably using MJPG-blocks, consider using mjpg:// "
-"netcam_url."
+"Streaming camera probably using MJPG-blocks, consider using mjpg:// netcam_url."
 msgstr ""
-"Suoratoistokamera, joka todennäköisesti käyttää MJPG-lohkoja, harkitse "
-"mjpg: //netcam url."
+"Suoratoistokamera, joka todennäköisesti käyttää MJPG-lohkoja, harkitse mjpg: //"
+"netcam url."
 
 #: src/netcam_http.c
 msgid "Unrecognized content type"
@@ -2262,16 +2266,16 @@ msgstr "Löydetty Conn: sulje otsikko (' %s')"
 
 #: src/netcam_http.c
 msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
-"Motion removes keepalive."
+"Both 'Connection: Keep-Alive' and 'Connection: close' header received. Motion "
+"removes keepalive."
 msgstr ""
 "Sekä 'Yhteys: Pidä elossa' ja 'Yhteys: sulje' -otsikko vastaanotettu.Liike "
 "poistaa pitävyyden."
 
 #: src/netcam_http.c
 msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
-"Motion continues unchanged."
+"Both 'Connection: Keep-Alive' and 'Connection: close' header received. Motion "
+"continues unchanged."
 msgstr ""
 "Sekä 'Yhteys: Pidä elossa' ja 'Yhteys: sulje' -otsikko vastaanotettu.Liike "
 "jatkuu ennallaan."
@@ -2353,8 +2357,8 @@ msgstr ""
 #: src/netcam_http.c
 #, c-format
 msgid ""
-"with keepalive set, invalid socket.This could be first time, created a new "
-"one with fd %d"
+"with keepalive set, invalid socket.This could be first time, created a new one "
+"with fd %d"
 msgstr ""
 "Pidä kiinni, virheellinen pistorasia. Tämä saattaa olla ensimmäinen kerta, "
 "luonut uudenyksi fd %d kanssa"
@@ -2375,11 +2379,6 @@ msgstr "POIS PÄÄLTÄ"
 #: src/netcam_http.c
 msgid "SO_KEEPALIVE set on socket."
 msgstr "SO KEEPALIVE asetettu pistorasiaan."
-
-#: src/netcam_http.c
-#, c-format
-msgid "re-using socket %d since keepalive is set."
-msgstr "käytetään uudelleen pistorasiaa %d, koska pidätysmäärä on asetettu."
 
 #: src/netcam_http.c
 msgid "fcntl(1) on socket"
@@ -2462,8 +2461,8 @@ msgstr "Netcamilla on liput: HTTP / 1.0: %s HTTP / 1.1: %s Keep-Alive %s."
 
 #: src/netcam_http.c
 msgid ""
-"Removed netcam_keepalive flag due to proxy set.Proxy is incompatible with "
-"Keep-Alive."
+"Removed netcam_keepalive flag due to proxy set.Proxy is incompatible with Keep-"
+"Alive."
 msgstr ""
 "Poistettu netcam-säilytyslippu välityspalvelimen asettaman vuoksi. Proxy ei "
 "ole yhteensopiva verkkotunnuksen kanssaPitää hengissä."
@@ -2574,10 +2573,6 @@ msgid "netcam->jpeg_error %d"
 msgstr "netcam-> jpeg-virhe %d"
 
 #: src/netcam_jpeg.c
-msgid "no new pic, no signal rcvd"
-msgstr "ei uutta kuvaa, ei signaalia rcvd"
-
-#: src/netcam_jpeg.c
 msgid "***new pic delay successful***"
 msgstr "*** uusi kuvaviive onnistunut ***"
 
@@ -2590,11 +2585,6 @@ msgstr "jpeg-virhe %d"
 #, c-format
 msgid "processing jpeg image - content length %d"
 msgstr "käsittely jpeg-kuvaa - sisällön pituus %d"
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid "return code %d"
-msgstr "paluukoodi %d"
 
 #: src/netcam_jpeg.c
 #, c-format
@@ -2807,6 +2797,11 @@ msgstr "%s: av lukukehys: %s"
 
 #: src/netcam_rtsp.c
 #, c-format
+msgid "%s: Excessive tries to get data from camera %d"
+msgstr ""
+
+#: src/netcam_rtsp.c
+#, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using %d"
 msgstr ""
 "%s: sieppausnopeutta ei ole määritetty verkkokameran parametreissa. "
@@ -2816,8 +2811,8 @@ msgstr ""
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
 msgstr ""
-"%s: sieppausnopeutta ei ole määritetty verkkokameran parametreissa. "
-"Käytetään kehysnopeutta %d"
+"%s: sieppausnopeutta ei ole määritetty verkkokameran parametreissa. Käytetään "
+"kehysnopeutta %d"
 
 #: src/netcam_rtsp.c
 msgid "The network camera is sending pictures in a different"
@@ -3132,8 +3127,8 @@ msgid "Can't write picture to file %s"
 msgstr "Kuvaa ei voi kirjoittaa tiedostoon %s"
 
 #: src/picture.c
-msgid "Could not read from pgm file"
-msgstr "Ei voitu lukea pgm-tiedostosta"
+msgid "Error getting PGM vars."
+msgstr ""
 
 #: src/picture.c
 #, c-format
@@ -3141,12 +3136,9 @@ msgid "This is not a pgm file, starts with '%s'"
 msgstr "Tämä ei ole pgm-tiedosto, alkaa ' %s'"
 
 #: src/picture.c
-msgid "Failed reading size in pgm file"
-msgstr "Lukukoko pgm-tiedostossa epäonnistui"
-
-#: src/picture.c
-msgid "Failed reading maximum value in pgm file"
-msgstr "Pgm-tiedoston enimmäisarvon lukeminen epäonnistui"
+#, c-format
+msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
+msgstr ""
 
 #: src/picture.c
 msgid "Failed reading image data from pgm file"
@@ -3282,8 +3274,7 @@ msgstr "X-siirto %d"
 #: src/track.c
 #, c-format
 msgid ""
-"X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command "
-"%d"
+"X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command %d"
 msgstr ""
 "X cent-> x %d, cent-> y %d, käänteinen %d, käänteinen %d motorx %d data %d "
 "komento%d"
@@ -3296,8 +3287,7 @@ msgstr "Y siirtymä %d"
 #: src/track.c
 #, c-format
 msgid ""
-"Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command "
-"%d"
+"Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command %d"
 msgstr ""
 "Y cent-> x %d, cent-> y %d, käänteinen %d, käänteinen %d motiivi %d data %d "
 "komento%d"
@@ -3439,8 +3429,7 @@ msgstr "%Llu-tavua muistia ei voitu varata!"
 #: src/util.c
 #, c-format
 msgid "Warning! Function %s tries to resize memoryblock at %p to 0 bytes!"
-msgstr ""
-"Varoitus! Toiminto %s yrittää muuttaa muistimuistion %p arvoksi 0 tavua!"
+msgstr "Varoitus! Toiminto %s yrittää muuttaa muistimuistion %p arvoksi 0 tavua!"
 
 #: src/util.c
 #, c-format
@@ -3468,10 +3457,8 @@ msgid "Error closing file"
 msgstr "Virhe tiedoston sulkemisessa"
 
 #: src/util.c
-msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
+msgid "{dbeventid} is not supported. Use eventid."
 msgstr ""
-"Käytetty %{dbeventid}, mutta SQL -kyselyn aloitus ei palauttanut kelvollista "
-"tapahtumatunnusta"
 
 #: src/util.c
 #, c-format
@@ -3527,6 +3514,15 @@ msgstr "Virhe ohjainten korjaamisessa: %s"
 
 #: src/util.c
 #, c-format
+msgid "Parsing: %s"
+msgstr "Jäsennys: %s"
+
+#: src/util.c
+msgid "Parsing: <redacted>"
+msgstr "Jäsennys: <redacted>"
+
+#: src/util.c
+#, c-format
 msgid "Error parsing controls: %s"
 msgstr "Virhe jäsennettäessä ohjaimia: %s"
 
@@ -3549,6 +3545,15 @@ msgstr "Uusi verkkokameran korkea parametri: %s"
 #, c-format
 msgid "New video_params: %s"
 msgstr "Uudet videoparametrit: %s"
+
+#: src/util.c
+#, c-format
+msgid "New webcontrol_header_params: %s"
+msgstr "Uudet webcontrol -otsikon parametrit: %s"
+
+#: src/util.c
+msgid "New webcontrol_header_params: <redacted>"
+msgstr "Uudet webcontrol -otsikon parametrit: <redacted>"
 
 #: src/util.c
 #, c-format
@@ -3718,8 +3723,7 @@ msgstr "Kaappauksen lopettaminen"
 #, c-format
 msgid "Reusing [%s] inputs [%d,%d] Change capture method METEOR_CAP_SINGLE"
 msgstr ""
-"[ %s] -tulojen uudelleenkäyttö [ %d, %d] Vaihda sieppaustapa METEOR CAP "
-"SINGLE"
+"[ %s] -tulojen uudelleenkäyttö [ %d, %d] Vaihda sieppaustapa METEOR CAP SINGLE"
 
 #: src/video_bktr.c
 msgid "VIDEO_PALETTE_YUV420P setting imgs.size_norm and imgs.motionsize"
@@ -3872,13 +3876,17 @@ msgid "  V4L2 ID   Name and Range"
 msgstr "V4L2-tunnuksen nimi ja alue"
 
 #: src/video_v4l2.c
-msgid "Device not ready"
-msgstr "Laite ei ole valmis"
+msgid "Error resetting user value"
+msgstr ""
 
 #: src/video_v4l2.c
 #, c-format
-msgid "setting control %s \"%s\" to %d failed with return code %d"
-msgstr "säätö %s \" %s \" asetetaan %d epäonnistui paluukoodilla %d"
+msgid "Leaving control %s \"%s\" set to %d"
+msgstr ""
+
+#: src/video_v4l2.c
+msgid "Device not ready"
+msgstr "Laite ei ole valmis"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3887,17 +3895,22 @@ msgstr "Aseta ohjaus \" %s \" arvoon %d"
 
 #: src/video_v4l2.c
 #, c-format
+msgid "setting control %s \"%s\" to %d failed. "
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
 msgid "%s control option value %s is below minimum.  Using minimum %d"
 msgstr ""
-"%s -valintavaihtoehdon arvo %s on pienempi kuin minimi. Käyttämällä "
-"vähintään %d "
+"%s -valintavaihtoehdon arvo %s on pienempi kuin minimi. Käyttämällä vähintään "
+"%d "
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %s is above maximum.  Using maximum %d"
 msgstr ""
-"%s -ohjausvaihtoehdon arvo %s on maksimiarvon yläpuolella. Käytetään "
-"enintään %d "
+"%s -ohjausvaihtoehdon arvo %s on maksimiarvon yläpuolella. Käytetään enintään "
+"%d "
 
 #: src/video_v4l2.c
 msgid "control type not supported yet"
@@ -3909,8 +3922,8 @@ msgid ""
 "Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input "
 "value in conf by -1"
 msgstr ""
-"Syöttöä %d ei voida kysyä. VIDIOC ENUMINPUT, jos käytät WEBCAM-"
-"muutostuloaarvo suhdeluvulla -1"
+"Syöttöä %d ei voida kysyä. VIDIOC ENUMINPUT, jos käytät WEBCAM-muutostuloaarvo "
+"suhdeluvulla -1"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3980,8 +3993,42 @@ msgstr "Aseta taajuudeksi %ul"
 
 #: src/video_v4l2.c
 #, c-format
+msgid "Unable to use %c%c%c%c (%dx%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
 msgid "Testing palette %c%c%c%c (%dx%d)"
 msgstr "Testauspaletti %c %c %c %c ( %dx %d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Checking image size %dx%d with stride %d"
+msgstr ""
+
+#: src/video_v4l2.c
+msgid "No stride value provided from device."
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Width(%d) must be less than stride(%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "The image width(%d) is not multiple of the stride(%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Image width will be padded %d bytes"
+msgstr ""
 
 #: src/video_v4l2.c
 #, c-format
@@ -3997,22 +4044,13 @@ msgid "Specify different palette or width/height in config file."
 msgstr "Määritä konfigurointitiedostossa eri paletti tai leveys / korkeus."
 
 #: src/video_v4l2.c
-msgid ""
-"Error setting pixel format.\n"
-"VIDIOC_S_FMT: "
+msgid "Error setting pixel format."
 msgstr ""
-"Virhe pikselimuodon asettamisessa. \n"
-" VIDIOC S FMT:"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
 msgstr "Käyttämällä palettia %c %c %c %c ( %dx %d)"
-
-#: src/video_v4l2.c
-#, c-format
-msgid "Bytesperlines %d sizeimage %d colorspace %08x"
-msgstr "Bytesperlines %d kokokuva %d väriavaruus %08x"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4023,12 +4061,6 @@ msgstr "Säätö leveyteen ( %d)"
 #, c-format
 msgid "Adjusting to height (%d)"
 msgstr "Säätö korkeuteen ( %d)"
-
-#: src/video_v4l2.c
-msgid ""
-"H264(21) format not supported via videodevice.  Changing to default palette"
-msgstr ""
-"H264 (21) -muotoa ei tueta videolaitteen kautta. Vaihtaminen oletuspalettiin"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4079,12 +4111,8 @@ msgstr "Muisti loppu."
 
 #: src/video_v4l2.c
 #, c-format
-msgid ""
-"Error querying buffer %i\n"
-"VIDIOC_QUERYBUF: "
+msgid "Error querying buffer %i"
 msgstr ""
-"Virhe kyselyssä puskurista %i \n"
-"VIDIOKOKERU:"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4093,8 +4121,8 @@ msgstr "Virhe kartoitettaessa puskuria %i mmap"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "%i length=%d Address (%x)"
-msgstr "%i pituus = %d osoite ( %x)"
+msgid "%i length=%d Address (%x) offset %d"
+msgstr ""
 
 #: src/video_v4l2.c
 msgid "Error starting stream. VIDIOC_STREAMON"
@@ -4200,6 +4228,11 @@ msgstr "Äidinkieli: pois päältä"
 #: src/webu.c
 msgid "Set the value to null/zero"
 msgstr "Aseta arvoksi nolla / nolla"
+
+#: src/webu.c
+#, c-format
+msgid "Ignoring connection from: %s"
+msgstr "Ohitetaan yhteys kohteesta: %s"
 
 #: src/webu.c
 #, c-format
@@ -4512,58 +4545,3 @@ msgstr "Kuvan suoratoisto ei onnistunut."
 #, c-format
 msgid "'%s' option is depreciated.  New option name is '%s'"
 msgstr "' %s' -vaihtoehto on poistettu. Uuden vaihtoehdon nimi on '%s' "
-
-#: src/conf.c
-msgid "webcontrol_lock_minutes"
-msgstr "webcontrol -lukituksen minuutit"
-
-#: src/conf.c
-msgid "webcontrol_lock_attempts"
-msgstr "webcontrol -lukitusyritykset"
-
-#: src/conf.c
-msgid "webcontrol_lock_max_ips"
-msgstr "webcontrol -lukon maksimi ips"
-
-#: src/event.c
-#, c-format
-msgid "Writing image to file: %s"
-msgstr "Kirjoitetaan kuvaa tiedostoon: %s"
-
-#: src/event.c
-#, c-format
-msgid "Writing movie to file: %s"
-msgstr "Kirjoitetaan elokuvaa tiedostoon: %s"
-
-#: src/event.c
-#, c-format
-msgid "Saved image to file: %s"
-msgstr "Kuva tallennettu tiedostoon: %s"
-
-#: src/event.c
-#, c-format
-msgid "Saved movie to file: %s"
-msgstr "Elokuva tallennettu tiedostoon: %s"
-
-#: src/util.c
-#, c-format
-msgid "Parsing: %s"
-msgstr "Jäsennys: %s"
-
-#: src/util.c
-msgid "Parsing: <redacted>"
-msgstr "Jäsennys: <redacted>"
-
-#: src/util.c
-#, c-format
-msgid "New webcontrol_header_params: %s"
-msgstr "Uudet webcontrol -otsikon parametrit: %s"
-
-#: src/util.c
-msgid "New webcontrol_header_params: <redacted>"
-msgstr "Uudet webcontrol -otsikon parametrit: <redacted>"
-
-#: src/webu.c
-#, c-format
-msgid "Ignoring connection from: %s"
-msgstr "Ohitetaan yhteys kohteesta: %s"

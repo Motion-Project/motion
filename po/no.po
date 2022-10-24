@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-03 23:12-0600\n"
-"PO-Revision-Date: 2020-01-12 17:51-0700\n"
+"POT-Creation-Date: 2022-10-24 08:29-0600\n"
+"PO-Revision-Date: 2022-10-24 08:36-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: no\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #: src/conf.c
 #, c-format
@@ -511,6 +511,18 @@ msgid "webcontrol_header_params"
 msgstr "webkontroll overskrift params"
 
 #: src/conf.c
+msgid "webcontrol_lock_minutes"
+msgstr "webkontrolllås minutter"
+
+#: src/conf.c
+msgid "webcontrol_lock_attempts"
+msgstr "webkontrolllåsforsøk"
+
+#: src/conf.c
+msgid "webcontrol_lock_max_ips"
+msgstr "webkontrolllås maks. ips"
+
+#: src/conf.c
 msgid "stream_port"
 msgstr "strømhavn"
 
@@ -728,43 +740,6 @@ msgstr "Initierer databasen"
 
 #: src/dbse.c
 #, c-format
-msgid "SQLite3 Database filename %s"
-msgstr "SQLite3-databasens filnavn %s"
-
-#: src/dbse.c
-msgid "SQLite3 is threadsafe"
-msgstr "SQLite3 er trådløs"
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 serialized %s"
-msgstr "SQLite3 serialisert %s"
-
-#: src/dbse.c
-msgid "FAILED"
-msgstr "FEILET"
-
-#: src/dbse.c
-msgid "SUCCESS"
-msgstr "SUKSESS"
-
-#: src/dbse.c
-#, c-format
-msgid "Can't open SQLite3 database %s : %s"
-msgstr "Kan ikke åpne SQLite3 -databasen %s: %s"
-
-#: src/dbse.c
-#, c-format
-msgid "database_busy_timeout %d msec"
-msgstr "timeout for database opptatt %d msek"
-
-#: src/dbse.c
-#, c-format
-msgid "database_busy_timeout failed %s"
-msgstr "timeout for database opptatt mislyktes %s"
-
-#: src/dbse.c
-#, c-format
 msgid "Cannot connect to MySQL database %s on host %s with user %s"
 msgstr "Kan ikke koble til MySQL-databasen %s på verten %s med brukeren %s"
 
@@ -784,8 +759,24 @@ msgid "MariaDB error was %s"
 msgstr "MariaDB -feilen var %s"
 
 #: src/dbse.c
-msgid "SQLite3 using shared handle"
-msgstr "SQLite3 ved hjelp av delt håndtak"
+#, c-format
+msgid "Opening database %s"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Can't open SQLite3 database %s.  Error %d : %s"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Setting busy timeout to %d msec"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Setting busy timeout failed.  Error %d:%s"
+msgstr ""
 
 #: src/dbse.c
 #, c-format
@@ -794,8 +785,8 @@ msgstr "Tilkobling til PostgreSQL-databasen ' %s' mislyktes: %s"
 
 #: src/dbse.c
 #, c-format
-msgid "Database backend %s"
-msgstr "Database backend %s"
+msgid "Database type %s"
+msgstr ""
 
 #: src/dbse.c
 msgid "Executing MySQL query"
@@ -874,22 +865,17 @@ msgstr "PGSQL-spørring mislyktes: [%s] %s %s"
 
 #: src/dbse.c
 #, c-format
-msgid "INSERT ... RETURNING VALUE=\"%s\""
-msgstr "INSERT ... RETURNING VALUE = \"%s \""
+msgid "Executing %s"
+msgstr ""
 
 #: src/dbse.c
 #, c-format
-msgid "Invalid event ID returned by SQL query \"%s\""
-msgstr "Ugyldig hendelses -ID returnert av SQL -spørring \"%s \""
+msgid "SQLite3 error %d : %s"
+msgstr ""
 
 #: src/dbse.c
-msgid "Executing SQLite3 query"
-msgstr "Kjører SQLite3 -spørring"
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 error was %s"
-msgstr "SQLite3 -feilen var %s"
+msgid "Ignoring empty sql query"
+msgstr ""
 
 #: src/event.c src/track.c
 #, c-format
@@ -900,6 +886,26 @@ msgstr "Kan ikke starte ekstern kommando ' %s'"
 #, c-format
 msgid "Executing external command '%s'"
 msgstr "Utfører ekstern kommando ' %s'"
+
+#: src/event.c
+#, c-format
+msgid "Writing image to file: %s"
+msgstr "Skriver bilde til fil: %s"
+
+#: src/event.c
+#, c-format
+msgid "Writing movie to file: %s"
+msgstr "Skriver film til fil: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved image to file: %s"
+msgstr "Lagret bilde i filen: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved movie to file: %s"
+msgstr "Filmen er lagret i filen: %s"
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -1130,11 +1136,6 @@ msgstr "Foretrukket codec %s er svartelistet: %s"
 
 #: src/ffmpeg.c
 #, c-format
-msgid "Preferred codec %s not found"
-msgstr "Foretrukket codec %s ikke funnet"
-
-#: src/ffmpeg.c
-#, c-format
 msgid "Codec %s not found"
 msgstr "Kodeks %s ikke funnet"
 
@@ -1148,8 +1149,8 @@ msgid "Could not alloc stream"
 msgstr "Kunne ikke tildele strøm"
 
 #: src/ffmpeg.c
-msgid "Failed to allocate decoder!"
-msgstr "Kunne ikke tildele dekoder!"
+msgid "Failed to allocate codec!"
+msgstr "Kunne ikke tildele codec!"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1289,10 +1290,6 @@ msgstr "Kunne ikke tildele utgangskontekst"
 #: src/ffmpeg.c
 msgid "Could not setup passthru!"
 msgstr "Kunne ikke konfigurere passthru!"
-
-#: src/ffmpeg.c
-msgid "Failed to allocate codec!"
-msgstr "Kunne ikke tildele codec!"
 
 #: src/ffmpeg.c
 msgid "Could not set the stream"
@@ -1437,8 +1434,8 @@ msgstr "Lukker loggfil ( %s)."
 
 #: src/motion.c
 #, c-format
-msgid "Motion detected - starting event %d"
-msgstr "Bevegelse oppdaget - starthendelse %d"
+msgid "Motion detected - starting event %d."
+msgstr ""
 
 #: src/motion.c
 #, c-format
@@ -1590,10 +1587,6 @@ msgid "Emulating motion"
 msgstr "Emulerende bevegelse"
 
 #: src/motion.c
-msgid "Calling vid_close() from motion_cleanup"
-msgstr "Ringer vid nær () fra opprydding"
-
-#: src/motion.c
 #, c-format
 msgid "Motion in area %d detected."
 msgstr "Bevegelse i område %d oppdaget."
@@ -1603,18 +1596,34 @@ msgid "Retrying until successful connection with camera"
 msgstr "Forsøk på nytt til vellykket tilkobling med kamera"
 
 #: src/motion.c
-msgid ""
-"Camera has finally become available\n"
-"Camera image has different width and heightfrom what is in the config file. "
-"You should fix that\n"
-"Restarting Motion thread to reinitialize all image buffers to new picture "
-"dimensions"
+msgid "Camera has become available."
 msgstr ""
-"Kamera har endelig blitt tilgjengelig \n"
-"Kamerabildet har forskjellig bredde og høyde fra det som er i "
-"konfigurasjonsfilen.Du bør fikse det \n"
-"Start Motion thread på nytt for å initialisere alle bildebuffere til nytt "
-"bildedimensjoner"
+
+#: src/motion.c
+#, c-format
+msgid ""
+"Restarting Motion.\n"
+"Image width (%d) or height(%d) requested is not modulo 8."
+msgstr ""
+
+#: src/motion.c
+#, c-format
+msgid ""
+"Restarting Motion.\n"
+"Motion only supports width and height greater than or equal to 64 %dx%d"
+msgstr ""
+
+#: src/motion.c
+msgid ""
+"Restarting Motion.\n"
+"Height or width has changed on camera."
+msgstr ""
+
+#: src/motion.c
+msgid ""
+"Restarting Motion.\n"
+"High resolution has changed on camera."
+msgstr ""
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -2362,11 +2371,6 @@ msgid "SO_KEEPALIVE set on socket."
 msgstr "SÅ KEEPALIVE sett på stikkontakt."
 
 #: src/netcam_http.c
-#, c-format
-msgid "re-using socket %d since keepalive is set."
-msgstr "bruker socket %d på nytt siden keepalive er angitt."
-
-#: src/netcam_http.c
 msgid "fcntl(1) on socket"
 msgstr "fcntl (1) på stikkontakt"
 
@@ -2558,10 +2562,6 @@ msgid "netcam->jpeg_error %d"
 msgstr "netcam-> jpeg-feil %d"
 
 #: src/netcam_jpeg.c
-msgid "no new pic, no signal rcvd"
-msgstr "ingen nye bilder, ingen signal rcvd"
-
-#: src/netcam_jpeg.c
 msgid "***new pic delay successful***"
 msgstr "*** ny bilde forsinkelse vellykket ***"
 
@@ -2574,11 +2574,6 @@ msgstr "jpeg-feil %d"
 #, c-format
 msgid "processing jpeg image - content length %d"
 msgstr "behandler jpeg image - innholdslengde %d"
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid "return code %d"
-msgstr "returkode %d"
 
 #: src/netcam_jpeg.c
 #, c-format
@@ -2788,6 +2783,11 @@ msgstr "%s: Avbrutt"
 #, c-format
 msgid "%s: av_read_frame: %s"
 msgstr "%s: av leseramme: %s"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Excessive tries to get data from camera %d"
+msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3113,8 +3113,8 @@ msgid "Can't write picture to file %s"
 msgstr "Kan ikke skrive bilde til fil %s"
 
 #: src/picture.c
-msgid "Could not read from pgm file"
-msgstr "Kunne ikke lese fra pgm-filen"
+msgid "Error getting PGM vars."
+msgstr ""
 
 #: src/picture.c
 #, c-format
@@ -3122,12 +3122,9 @@ msgid "This is not a pgm file, starts with '%s'"
 msgstr "Dette er ikke en pgm-fil, starter med ' %s'"
 
 #: src/picture.c
-msgid "Failed reading size in pgm file"
-msgstr "Mislykket lesestørrelse i pgm-fil"
-
-#: src/picture.c
-msgid "Failed reading maximum value in pgm file"
-msgstr "Kunne ikke lese maksimal verdi i pgm-fil"
+#, c-format
+msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
+msgstr ""
 
 #: src/picture.c
 msgid "Failed reading image data from pgm file"
@@ -3447,10 +3444,8 @@ msgid "Error closing file"
 msgstr "Feil ved lukking av fil"
 
 #: src/util.c
-msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
+msgid "{dbeventid} is not supported. Use eventid."
 msgstr ""
-"Brukte %{dbeventid}, men start av sql -spørringen returnerte ingen gyldig "
-"hendelses -ID"
 
 #: src/util.c
 #, c-format
@@ -3506,6 +3501,15 @@ msgstr "Feil ved ny kontroll av kontroller: %s"
 
 #: src/util.c
 #, c-format
+msgid "Parsing: %s"
+msgstr "Analyse: %s"
+
+#: src/util.c
+msgid "Parsing: <redacted>"
+msgstr "Parsing: <redaktert>"
+
+#: src/util.c
+#, c-format
 msgid "Error parsing controls: %s"
 msgstr "Feil ved analysering av kontroller: %s"
 
@@ -3528,6 +3532,15 @@ msgstr "Nye netcam high params: %s"
 #, c-format
 msgid "New video_params: %s"
 msgstr "Nye videoparameter: %s"
+
+#: src/util.c
+#, c-format
+msgid "New webcontrol_header_params: %s"
+msgstr "Nye webkontrolloverskrifter: %s"
+
+#: src/util.c
+msgid "New webcontrol_header_params: <redacted>"
+msgstr "Nye webkontrolloverskriftsparametre: <redaktert>"
 
 #: src/util.c
 #, c-format
@@ -3849,18 +3862,27 @@ msgid "  V4L2 ID   Name and Range"
 msgstr "V4L2 ID Navn og rekkevidde"
 
 #: src/video_v4l2.c
+msgid "Error resetting user value"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Leaving control %s \"%s\" set to %d"
+msgstr ""
+
+#: src/video_v4l2.c
 msgid "Device not ready"
 msgstr "Enheten er ikke klar"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "setting control %s \"%s\" to %d failed with return code %d"
-msgstr "å sette kontroll %s \" %s \" til %d mislyktes med returkode %d"
+msgid "Set control \"%s\" to value %d"
+msgstr "Sett kontroll \" %s \" til verdi %d"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "Set control \"%s\" to value %d"
-msgstr "Sett kontroll \" %s \" til verdi %d"
+msgid "setting control %s \"%s\" to %d failed. "
+msgstr ""
 
 #: src/video_v4l2.c
 #, c-format
@@ -3953,8 +3975,42 @@ msgstr "Sett frekvens til %ul"
 
 #: src/video_v4l2.c
 #, c-format
+msgid "Unable to use %c%c%c%c (%dx%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
 msgid "Testing palette %c%c%c%c (%dx%d)"
 msgstr "Testpalett %c %c %c %c ( %dx %d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Checking image size %dx%d with stride %d"
+msgstr ""
+
+#: src/video_v4l2.c
+msgid "No stride value provided from device."
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Width(%d) must be less than stride(%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "The image width(%d) is not multiple of the stride(%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Image width will be padded %d bytes"
+msgstr ""
 
 #: src/video_v4l2.c
 #, c-format
@@ -3970,22 +4026,13 @@ msgid "Specify different palette or width/height in config file."
 msgstr "Spesifiser annen palett eller bredde / høyde i konfigurasjonsfilen."
 
 #: src/video_v4l2.c
-msgid ""
-"Error setting pixel format.\n"
-"VIDIOC_S_FMT: "
+msgid "Error setting pixel format."
 msgstr ""
-"Feil ved innstilling av pikselformat. \n"
-" VIDIOC S FMT:"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
 msgstr "Bruker palett %c %c %c %c ( %dx %d)"
-
-#: src/video_v4l2.c
-#, c-format
-msgid "Bytesperlines %d sizeimage %d colorspace %08x"
-msgstr "Bytesperlines %d størrelse Bildet %d fargerom %08x"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3996,12 +4043,6 @@ msgstr "Justering til bredde ( %d)"
 #, c-format
 msgid "Adjusting to height (%d)"
 msgstr "Justering til høyde ( %d)"
-
-#: src/video_v4l2.c
-msgid ""
-"H264(21) format not supported via videodevice.  Changing to default palette"
-msgstr ""
-"H264 (21) -format støttes ikke via videodevice. Bytter til standardpalett"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4052,12 +4093,8 @@ msgstr "Tomt for minne."
 
 #: src/video_v4l2.c
 #, c-format
-msgid ""
-"Error querying buffer %i\n"
-"VIDIOC_QUERYBUF: "
+msgid "Error querying buffer %i"
 msgstr ""
-"Feil ved spørring av buffer %i \n"
-"VIDIOC QUERYBUF:"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4066,8 +4103,8 @@ msgstr "Feil ved kartlegging av buffer %i mmap"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "%i length=%d Address (%x)"
-msgstr "%i lengde = %d Adresse ( %x)"
+msgid "%i length=%d Address (%x) offset %d"
+msgstr ""
 
 #: src/video_v4l2.c
 msgid "Error starting stream. VIDIOC_STREAMON"
@@ -4173,6 +4210,11 @@ msgstr "Morsmål: av"
 #: src/webu.c
 msgid "Set the value to null/zero"
 msgstr "Sett verdien til null / null"
+
+#: src/webu.c
+#, c-format
+msgid "Ignoring connection from: %s"
+msgstr "Ignorerer tilkobling fra: %s"
 
 #: src/webu.c
 #, c-format
@@ -4481,58 +4523,3 @@ msgstr "Kunne ikke få bilde til å strømme."
 #, c-format
 msgid "'%s' option is depreciated.  New option name is '%s'"
 msgstr "Alternativet '%s' avskrives. Navnet på det nye alternativet er '%s' "
-
-#: src/conf.c
-msgid "webcontrol_lock_minutes"
-msgstr "webkontrolllås minutter"
-
-#: src/conf.c
-msgid "webcontrol_lock_attempts"
-msgstr "webkontrolllåsforsøk"
-
-#: src/conf.c
-msgid "webcontrol_lock_max_ips"
-msgstr "webkontrolllås maks. ips"
-
-#: src/event.c
-#, c-format
-msgid "Writing image to file: %s"
-msgstr "Skriver bilde til fil: %s"
-
-#: src/event.c
-#, c-format
-msgid "Writing movie to file: %s"
-msgstr "Skriver film til fil: %s"
-
-#: src/event.c
-#, c-format
-msgid "Saved image to file: %s"
-msgstr "Lagret bilde i filen: %s"
-
-#: src/event.c
-#, c-format
-msgid "Saved movie to file: %s"
-msgstr "Filmen er lagret i filen: %s"
-
-#: src/util.c
-#, c-format
-msgid "Parsing: %s"
-msgstr "Analyse: %s"
-
-#: src/util.c
-msgid "Parsing: <redacted>"
-msgstr "Parsing: <redaktert>"
-
-#: src/util.c
-#, c-format
-msgid "New webcontrol_header_params: %s"
-msgstr "Nye webkontrolloverskrifter: %s"
-
-#: src/util.c
-msgid "New webcontrol_header_params: <redacted>"
-msgstr "Nye webkontrolloverskriftsparametre: <redaktert>"
-
-#: src/webu.c
-#, c-format
-msgid "Ignoring connection from: %s"
-msgstr "Ignorerer tilkobling fra: %s"

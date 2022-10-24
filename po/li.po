@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-03 23:12-0600\n"
-"PO-Revision-Date: 2020-01-12 17:49-0700\n"
+"POT-Creation-Date: 2022-10-24 08:29-0600\n"
+"PO-Revision-Date: 2022-10-24 08:35-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: li\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #: src/conf.c
 #, c-format
@@ -513,6 +513,18 @@ msgid "webcontrol_header_params"
 msgstr "webcontrol header parameters"
 
 #: src/conf.c
+msgid "webcontrol_lock_minutes"
+msgstr ""
+
+#: src/conf.c
+msgid "webcontrol_lock_attempts"
+msgstr ""
+
+#: src/conf.c
+msgid "webcontrol_lock_max_ips"
+msgstr ""
+
+#: src/conf.c
 msgid "stream_port"
 msgstr "srauto uostas"
 
@@ -730,43 +742,6 @@ msgstr "Inicijuojama duomenų bazė"
 
 #: src/dbse.c
 #, c-format
-msgid "SQLite3 Database filename %s"
-msgstr "„SQLite3“ duomenų bazės failo vardas %s"
-
-#: src/dbse.c
-msgid "SQLite3 is threadsafe"
-msgstr "„SQLite3“ yra saugus siūlams"
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 serialized %s"
-msgstr "„SQLite3“ serija „ %s“"
-
-#: src/dbse.c
-msgid "FAILED"
-msgstr "NETEISĖTAS"
-
-#: src/dbse.c
-msgid "SUCCESS"
-msgstr "SĖKMĖ"
-
-#: src/dbse.c
-#, c-format
-msgid "Can't open SQLite3 database %s : %s"
-msgstr "Kan SQLite3-database %s niet openen: %s"
-
-#: src/dbse.c
-#, c-format
-msgid "database_busy_timeout %d msec"
-msgstr "duomenų bazės užimtumo laikas %d msec"
-
-#: src/dbse.c
-#, c-format
-msgid "database_busy_timeout failed %s"
-msgstr "duomenų bazės užimtumo laikas nepavyko %s"
-
-#: src/dbse.c
-#, c-format
 msgid "Cannot connect to MySQL database %s on host %s with user %s"
 msgstr ""
 "Neįmanoma prisijungti prie „MySQL“ duomenų bazės %s pagrindiniame %s su "
@@ -789,8 +764,24 @@ msgid "MariaDB error was %s"
 msgstr "MariaDB-fout was %s"
 
 #: src/dbse.c
-msgid "SQLite3 using shared handle"
-msgstr "„SQLite3“ naudojant bendrą tvarkyklę"
+#, c-format
+msgid "Opening database %s"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Can't open SQLite3 database %s.  Error %d : %s"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Setting busy timeout to %d msec"
+msgstr ""
+
+#: src/dbse.c
+#, c-format
+msgid "Setting busy timeout failed.  Error %d:%s"
+msgstr ""
 
 #: src/dbse.c
 #, c-format
@@ -799,8 +790,8 @@ msgstr "Nepavyko prisijungti prie „PostgreSQL“ duomenų bazės „ %s“: %s
 
 #: src/dbse.c
 #, c-format
-msgid "Database backend %s"
-msgstr "Duomenų bazės užrašai %s"
+msgid "Database type %s"
+msgstr ""
 
 #: src/dbse.c
 msgid "Executing MySQL query"
@@ -879,22 +870,17 @@ msgstr "PGSQL užklausa nepavyko: [%s] %s %s"
 
 #: src/dbse.c
 #, c-format
-msgid "INSERT ... RETURNING VALUE=\"%s\""
-msgstr "INSERT ... RETURNING VALUE=\"%s\""
+msgid "Executing %s"
+msgstr ""
 
 #: src/dbse.c
 #, c-format
-msgid "Invalid event ID returned by SQL query \"%s\""
-msgstr "Ongeldige gebeurtenis-ID geretourneerd door SQL-query \"%s\""
+msgid "SQLite3 error %d : %s"
+msgstr ""
 
 #: src/dbse.c
-msgid "Executing SQLite3 query"
-msgstr "SQLite3-query uitvoeren"
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 error was %s"
-msgstr "SQLite3-fout was %s"
+msgid "Ignoring empty sql query"
+msgstr ""
 
 #: src/event.c src/track.c
 #, c-format
@@ -905,6 +891,26 @@ msgstr "Neįmanoma paleisti išorinės komandos „ %s“"
 #, c-format
 msgid "Executing external command '%s'"
 msgstr "Vykdo išorinę komandą „ %s“"
+
+#: src/event.c
+#, c-format
+msgid "Writing image to file: %s"
+msgstr ""
+
+#: src/event.c
+#, c-format
+msgid "Writing movie to file: %s"
+msgstr ""
+
+#: src/event.c
+#, c-format
+msgid "Saved image to file: %s"
+msgstr ""
+
+#: src/event.c
+#, c-format
+msgid "Saved movie to file: %s"
+msgstr ""
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -1134,11 +1140,6 @@ msgstr "Pageidaujamas kodekas %s įtrauktas į juodąjį sąrašą: %s"
 
 #: src/ffmpeg.c
 #, c-format
-msgid "Preferred codec %s not found"
-msgstr "Pageidaujamas kodekas %s nerastas"
-
-#: src/ffmpeg.c
-#, c-format
 msgid "Codec %s not found"
 msgstr "Kodekas %s nerastas"
 
@@ -1152,8 +1153,8 @@ msgid "Could not alloc stream"
 msgstr "Nepavyko paskirstyti srauto"
 
 #: src/ffmpeg.c
-msgid "Failed to allocate decoder!"
-msgstr "Nepavyko paskirstyti dekoderio!"
+msgid "Failed to allocate codec!"
+msgstr "Nepavyko paskirstyti kodeko!"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1294,10 +1295,6 @@ msgstr "Nepavyko paskirstyti išvesties konteksto"
 #: src/ffmpeg.c
 msgid "Could not setup passthru!"
 msgstr "Nepavyko nustatyti „passthru“!"
-
-#: src/ffmpeg.c
-msgid "Failed to allocate codec!"
-msgstr "Nepavyko paskirstyti kodeko!"
 
 #: src/ffmpeg.c
 msgid "Could not set the stream"
@@ -1441,8 +1438,8 @@ msgstr "Uždaryti logfile ( %s)."
 
 #: src/motion.c
 #, c-format
-msgid "Motion detected - starting event %d"
-msgstr "Judesys aptiktas - pradžios įvykis %d"
+msgid "Motion detected - starting event %d."
+msgstr ""
 
 #: src/motion.c
 #, c-format
@@ -1597,10 +1594,6 @@ msgid "Emulating motion"
 msgstr "Emuliuojantis judesys"
 
 #: src/motion.c
-msgid "Calling vid_close() from motion_cleanup"
-msgstr "Skambinimas vid arti () nuo judesio valymo"
-
-#: src/motion.c
 #, c-format
 msgid "Motion in area %d detected."
 msgstr "Aptikta judesio %d srityje."
@@ -1610,18 +1603,34 @@ msgid "Retrying until successful connection with camera"
 msgstr "Bandoma dar kartą, kol nebus sėkmingai užmegztas ryšys su kamera"
 
 #: src/motion.c
-msgid ""
-"Camera has finally become available\n"
-"Camera image has different width and heightfrom what is in the config file. "
-"You should fix that\n"
-"Restarting Motion thread to reinitialize all image buffers to new picture "
-"dimensions"
+msgid "Camera has become available."
 msgstr ""
-"Fotoaparatas pagaliau tapo prieinamas \n"
-"Kameros vaizdo plotis ir aukštis skiriasi nuo konfigūracijos failo."
-"Turėtumėte tai išspręsti \n"
-"Iš naujo paleidę judesio sriegį, iš naujo inicijuoti visų vaizdų buferius į "
-"naują paveikslėlįmatmenys"
+
+#: src/motion.c
+#, c-format
+msgid ""
+"Restarting Motion.\n"
+"Image width (%d) or height(%d) requested is not modulo 8."
+msgstr ""
+
+#: src/motion.c
+#, c-format
+msgid ""
+"Restarting Motion.\n"
+"Motion only supports width and height greater than or equal to 64 %dx%d"
+msgstr ""
+
+#: src/motion.c
+msgid ""
+"Restarting Motion.\n"
+"Height or width has changed on camera."
+msgstr ""
+
+#: src/motion.c
+msgid ""
+"Restarting Motion.\n"
+"High resolution has changed on camera."
+msgstr ""
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -2372,11 +2381,6 @@ msgid "SO_KEEPALIVE set on socket."
 msgstr "SO KEEPALIVE nustatytas ant lizdo."
 
 #: src/netcam_http.c
-#, c-format
-msgid "re-using socket %d since keepalive is set."
-msgstr "pakartotinai naudoti lizdą %d, nes nustatytas palaikymo režimas."
-
-#: src/netcam_http.c
 msgid "fcntl(1) on socket"
 msgstr "fcntl (1) ant lizdo"
 
@@ -2572,10 +2576,6 @@ msgid "netcam->jpeg_error %d"
 msgstr "netcam-> JPEG klaida %d"
 
 #: src/netcam_jpeg.c
-msgid "no new pic, no signal rcvd"
-msgstr "nėra naujų vaizdų, nėra signalo rcvd"
-
-#: src/netcam_jpeg.c
 msgid "***new pic delay successful***"
 msgstr "*** sėkmingas naujų nuotraukų atidėjimas ***"
 
@@ -2588,11 +2588,6 @@ msgstr "JPEG klaida %d"
 #, c-format
 msgid "processing jpeg image - content length %d"
 msgstr "apdorojamas JPEG vaizdas - turinio ilgis %d"
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid "return code %d"
-msgstr "grąžinimo kodas %d"
 
 #: src/netcam_jpeg.c
 #, c-format
@@ -2804,6 +2799,11 @@ msgstr "%s: onderbroken"
 #, c-format
 msgid "%s: av_read_frame: %s"
 msgstr "%s: gem leesframe: %s"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Excessive tries to get data from camera %d"
+msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3134,8 +3134,8 @@ msgid "Can't write picture to file %s"
 msgstr "Neįmanoma parašyti paveikslėlio į failą %s"
 
 #: src/picture.c
-msgid "Could not read from pgm file"
-msgstr "Nepavyko nuskaityti iš pgm failo"
+msgid "Error getting PGM vars."
+msgstr ""
 
 #: src/picture.c
 #, c-format
@@ -3143,12 +3143,9 @@ msgid "This is not a pgm file, starts with '%s'"
 msgstr "Tai nėra pgm failas, prasideda raide ' %s'"
 
 #: src/picture.c
-msgid "Failed reading size in pgm file"
-msgstr "Nepavyko nuskaityti failo dydžio"
-
-#: src/picture.c
-msgid "Failed reading maximum value in pgm file"
-msgstr "Nepavyko nuskaityti didžiausios reikšmės pgm faile"
+#, c-format
+msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
+msgstr ""
 
 #: src/picture.c
 msgid "Failed reading image data from pgm file"
@@ -3471,10 +3468,8 @@ msgid "Error closing file"
 msgstr "Klaida uždarant failą"
 
 #: src/util.c
-msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
+msgid "{dbeventid} is not supported. Use eventid."
 msgstr ""
-"%{dbeventid} gebruikt maar sql-query start heeft geen geldige gebeurtenis-ID "
-"geretourneerd"
 
 #: src/util.c
 #, c-format
@@ -3530,6 +3525,15 @@ msgstr "Fout bij het repareren van besturingselementen: %s"
 
 #: src/util.c
 #, c-format
+msgid "Parsing: %s"
+msgstr ""
+
+#: src/util.c
+msgid "Parsing: <redacted>"
+msgstr ""
+
+#: src/util.c
+#, c-format
 msgid "Error parsing controls: %s"
 msgstr "Fout bij het parseren van besturingselementen: %s"
 
@@ -3552,6 +3556,15 @@ msgstr "Nieuwe netcam hoge parameters: %s"
 #, c-format
 msgid "New video_params: %s"
 msgstr "Nieuwe videoparameters: %s"
+
+#: src/util.c
+#, c-format
+msgid "New webcontrol_header_params: %s"
+msgstr ""
+
+#: src/util.c
+msgid "New webcontrol_header_params: <redacted>"
+msgstr ""
 
 #: src/util.c
 #, c-format
@@ -3877,18 +3890,27 @@ msgid "  V4L2 ID   Name and Range"
 msgstr "V4L2 ID pavadinimas ir diapazonas"
 
 #: src/video_v4l2.c
+msgid "Error resetting user value"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Leaving control %s \"%s\" set to %d"
+msgstr ""
+
+#: src/video_v4l2.c
 msgid "Device not ready"
 msgstr "Įrenginys nėra paruoštas"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "setting control %s \"%s\" to %d failed with return code %d"
-msgstr "nepavyko nustatyti valdymo %s \" %s \" į %d su grąžinimo kodu %d"
+msgid "Set control \"%s\" to value %d"
+msgstr "Nustatykite valdymo elementą „ %s“ reikšmei %d"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "Set control \"%s\" to value %d"
-msgstr "Nustatykite valdymo elementą „ %s“ reikšmei %d"
+msgid "setting control %s \"%s\" to %d failed. "
+msgstr ""
 
 #: src/video_v4l2.c
 #, c-format
@@ -3982,8 +4004,42 @@ msgstr "Nustatykite dažnį %ul"
 
 #: src/video_v4l2.c
 #, c-format
+msgid "Unable to use %c%c%c%c (%dx%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
 msgid "Testing palette %c%c%c%c (%dx%d)"
 msgstr "Testavimo paletė %c %c %c %c ( %dx %d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Checking image size %dx%d with stride %d"
+msgstr ""
+
+#: src/video_v4l2.c
+msgid "No stride value provided from device."
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Width(%d) must be less than stride(%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "The image width(%d) is not multiple of the stride(%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Image width will be padded %d bytes"
+msgstr ""
 
 #: src/video_v4l2.c
 #, c-format
@@ -3999,22 +4055,13 @@ msgid "Specify different palette or width/height in config file."
 msgstr "Konfigūracijos faile nurodykite skirtingą paletę arba plotį / aukštį."
 
 #: src/video_v4l2.c
-msgid ""
-"Error setting pixel format.\n"
-"VIDIOC_S_FMT: "
+msgid "Error setting pixel format."
 msgstr ""
-"Klaida nustatant vaizdo elementų formatą. \n"
-" VIDIOC S FMT:"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
 msgstr "Naudojant paletę %c %c %c %c ( %dx %d)"
-
-#: src/video_v4l2.c
-#, c-format
-msgid "Bytesperlines %d sizeimage %d colorspace %08x"
-msgstr "„Bytesperlines“ %d dydžio vaizdas %d spalvų sritis %08x"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4025,13 +4072,6 @@ msgstr "Reguliuojama pagal plotį ( %d)"
 #, c-format
 msgid "Adjusting to height (%d)"
 msgstr "Sureguliavimas pagal aukštį ( %d)"
-
-#: src/video_v4l2.c
-msgid ""
-"H264(21) format not supported via videodevice.  Changing to default palette"
-msgstr ""
-"H264 (21) formatas nepalaikomas per vaizdo įrenginį. Pakeitus numatytąją "
-"paletę"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4082,12 +4122,8 @@ msgstr "Nepakanka atminties."
 
 #: src/video_v4l2.c
 #, c-format
-msgid ""
-"Error querying buffer %i\n"
-"VIDIOC_QUERYBUF: "
+msgid "Error querying buffer %i"
 msgstr ""
-"Klaida užklausant buferio %i \n"
-"VAIZDO KOKYBĖ:"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4096,8 +4132,8 @@ msgstr "Klaida atvaizduojant buferį %i mmap"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "%i length=%d Address (%x)"
-msgstr "%i ilgis = %d adresas ( %x)"
+msgid "%i length=%d Address (%x) offset %d"
+msgstr ""
 
 #: src/video_v4l2.c
 msgid "Error starting stream. VIDIOC_STREAMON"
@@ -4203,6 +4239,11 @@ msgstr "Gimtoji kalba: ne"
 #: src/webu.c
 msgid "Set the value to null/zero"
 msgstr "Nustatykite reikšmę null / zero"
+
+#: src/webu.c
+#, c-format
+msgid "Ignoring connection from: %s"
+msgstr ""
 
 #: src/webu.c
 #, c-format
