@@ -1,4 +1,10 @@
 Summary of changes for version 4.x.x are below
+    * Fix cleanup when v4l2 open fails
+    * Remove unused include module.
+    * Remove unused H264 palette code
+    * Fix sending of stale images to stream
+    * Revise path when checking headers
+    * Fix double free when using extpipe.
     * Revise issue template
     * Eliminate shared handle for sqlite3
     * Fix setting of controls for v4l2 devices
