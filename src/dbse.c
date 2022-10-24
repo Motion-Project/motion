@@ -542,7 +542,7 @@ void dbse_firstmotion(struct context *cnt)
                    &cnt->current_image->timestamp_tv, NULL, 0);
 
     if (strlen(sqlquery) <= 0) {
-        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, "Ignoring empty sql query");
+        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, _("Ignoring empty sql query"));
         return;
     }
 
@@ -569,7 +569,7 @@ void dbse_newfile(struct context *cnt, char *filename, int sqltype, struct timev
                    tv1, filename, sqltype);
 
     if (strlen(sqlquery) <= 0) {
-        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, "Ignoring empty sql query");
+        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, _("Ignoring empty sql query"));
         return;
     }
 
@@ -595,7 +595,7 @@ void dbse_fileclose(struct context *cnt, char *filename, int sqltype, struct tim
     mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_query_stop,
                tv1, filename, sqltype);
     if (strlen(sqlquery) <= 0) {
-        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, "Ignoring empty sql query");
+        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, _("Ignoring empty sql query"));
         return;
     }
 
