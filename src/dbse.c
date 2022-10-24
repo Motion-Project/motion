@@ -187,7 +187,7 @@ static int dbse_init_mariadb(struct context *cnt)
 }
 
 /** dbse_init_sqlite3 */
-static int dbse_init_sqlite3(struct context *cnt,struct context **cntlist)
+static int dbse_init_sqlite3(struct context *cnt)
 {
     #ifdef HAVE_SQLITE3
         int retcd;
@@ -217,7 +217,6 @@ static int dbse_init_sqlite3(struct context *cnt,struct context **cntlist)
         }
     #else
         (void)cnt;
-        (void)cntlist;
     #endif /* HAVE_SQLITE3 */
 
     return 0;
@@ -259,7 +258,7 @@ static int dbse_init_pgsql(struct context *cnt)
 }
 
 /** dbse_init */
-int dbse_init(struct context *cnt, struct context **cntlist)
+int dbse_init(struct context *cnt)
 {
     int retcd = 0;
 
@@ -274,7 +273,7 @@ int dbse_init(struct context *cnt, struct context **cntlist)
         } else if (mystreq(cnt->conf.database_type,"postgresql")) {
             retcd = dbse_init_pgsql(cnt);
         } else if (mystreq(cnt->conf.database_type,"sqlite3")) {
-            retcd = dbse_init_sqlite3(cnt, cntlist);
+            retcd = dbse_init_sqlite3(cnt);
         }
 
         /* Set the sql mask file according to the SQL config options*/
