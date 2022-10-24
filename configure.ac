@@ -43,34 +43,44 @@ LIBS="$LIBS -pthread "
 ##############################################################################
 ###  Check JPG - Required.  Needed for image processing
 ##############################################################################
+AS_IF([pkg-config libjpeg ], [
+    TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags libjpeg`
+    TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libjpeg`
+  ],[
+    TEMP_LIBS="$TEMP_LIBS -ljpeg"
+  ]
+)
+HOLD_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS $TEMP_CFLAGS"
 AC_CHECK_HEADERS(setjmp.h jerror.h jpeglib.h,[JPGS="yes"],[JPGS="no"])
 AC_MSG_CHECKING(jpg libraries)
 AC_MSG_RESULT($JPGS)
-AS_IF([test "${JPGS}" = "yes" ], [
-    AS_IF([pkg-config libjpeg ], [
-        TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags libjpeg`
-        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libjpeg`
-      ],[
-        TEMP_LIBS="$TEMP_LIBS -ljpeg"
-      ]
-    )
-  ],[
-    AC_MSG_ERROR([Required package libjpeg-dev not found, please check motion_guide.html and install necessary dependencies])
+AS_IF([test "${JPGS}" != "yes" ], [
+    AC_MSG_ERROR([Required jpeg headers not found, please check motion_guide.html and install necessary dependencies])
   ]
 )
+CFLAGS="$HOLD_CFLAGS"
+
 ##############################################################################
 ###  Check libmicrohttpd - Required.  Needed for stream/webcontrol
 ##############################################################################
-AC_CHECK_HEADERS(microhttpd.h,[MHTTP="yes"],[MHTTP="no"])
-AC_MSG_CHECKING(libmicrohttpd libraries)
-AC_MSG_RESULT($MHTTP)
-AS_IF([test "${MHTTP}" = "yes" ], [
+AS_IF([pkg-config libmicrohttpd ], [
     TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags libmicrohttpd`
     TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libmicrohttpd`
   ],[
     AC_MSG_ERROR([Required package libmicrohttpd-dev not found, please check motion_guide.html and install necessary dependencies])
   ]
 )
+HOLD_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS $TEMP_CFLAGS"
+AC_CHECK_HEADERS(microhttpd.h,[MHTTP="yes"],[MHTTP="no"])
+AC_MSG_CHECKING(libmicrohttpd libraries)
+AC_MSG_RESULT($MHTTP)
+AS_IF([test "${MHTTP}" != "yes" ], [
+    AC_MSG_ERROR([Required package libmicrohttpd-dev not found, please check motion_guide.html and install necessary dependencies])
+  ]
+)
+CFLAGS="$HOLD_CFLAGS"
 
 ##############################################################################
 ###  Check setting/getting thread names
