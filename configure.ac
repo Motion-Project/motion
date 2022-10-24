@@ -310,14 +310,24 @@ AS_IF([test "${MARIADB}" = "no"], [
     AC_MSG_RESULT($PKG_CONFIG_PATH)
 
     AC_MSG_CHECKING(for MariaDB)
-    AS_IF([pkg-config mariadb], [
-        TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags mariadb`
-        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs mariadb`
+    AS_IF([pkg-config libmariadb], [
+        TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags libmariadb`
+        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libmariadb`
         AC_DEFINE([HAVE_MARIADB], [1], [Define to 1 if you have MariaDB support])
       ],[
         MARIADB="no"
       ]
     )
+    # Check for the old pkg name for MariaDB
+    AS_IF([test "${MARIADB}" = "no"], [
+      AS_IF([pkg-config mariadb], [
+        TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags mariadb`
+        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs mariadb`
+        MARIADB="yes"
+        AC_DEFINE([HAVE_MARIADB], [1], [Define to 1 if you have MariaDB support])
+      ])
+    ])
+
     AC_MSG_RESULT([$MARIADB])
     PKG_CONFIG_PATH=$TEMP_PATH
     export PKG_CONFIG_PATH
