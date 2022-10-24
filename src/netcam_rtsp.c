@@ -47,7 +47,6 @@
 #include "rotate.h"
 #include "netcam.h"
 #include "netcam_rtsp.h"
-#include "video_v4l2.h"  /* Needed to validate palette for v4l2 via netcam */
 
 #ifdef HAVE_FFMPEG
 
