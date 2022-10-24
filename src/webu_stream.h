@@ -25,5 +25,6 @@
 
 mymhd_retcd webu_stream_mjpeg(struct webui_ctx *webui);
 mymhd_retcd webu_stream_static(struct webui_ctx *webui);
+void webu_stream_deinit(struct webui_ctx *webui, struct stream_data *stream);
 
 #endif

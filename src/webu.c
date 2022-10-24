@@ -1687,30 +1687,15 @@ static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
     (void)toe;
 
     if (webui->cnct_type == WEBUI_CNCT_FULL ) {
-        pthread_mutex_lock(&webui->cnt->mutex_stream);
-            webui->cnt->stream_norm.cnct_count--;
-        pthread_mutex_unlock(&webui->cnt->mutex_stream);
-
+        webu_stream_deinit(webui, &webui->cnt->stream_norm);
     } else if (webui->cnct_type == WEBUI_CNCT_SUB ) {
-        pthread_mutex_lock(&webui->cnt->mutex_stream);
-            webui->cnt->stream_sub.cnct_count--;
-        pthread_mutex_unlock(&webui->cnt->mutex_stream);
-
+        webu_stream_deinit(webui, &webui->cnt->stream_sub);
     } else if (webui->cnct_type == WEBUI_CNCT_MOTION ) {
-        pthread_mutex_lock(&webui->cnt->mutex_stream);
-            webui->cnt->stream_motion.cnct_count--;
-        pthread_mutex_unlock(&webui->cnt->mutex_stream);
-
+        webu_stream_deinit(webui, &webui->cnt->stream_motion);
     } else if (webui->cnct_type == WEBUI_CNCT_SOURCE ) {
-        pthread_mutex_lock(&webui->cnt->mutex_stream);
-            webui->cnt->stream_source.cnct_count--;
-        pthread_mutex_unlock(&webui->cnt->mutex_stream);
-
+        webu_stream_deinit(webui, &webui->cnt->stream_source);
     } else if (webui->cnct_type == WEBUI_CNCT_STATIC ) {
-        pthread_mutex_lock(&webui->cnt->mutex_stream);
-            webui->cnt->stream_norm.cnct_count--;
-        pthread_mutex_unlock(&webui->cnt->mutex_stream);
-
+        webu_stream_deinit(webui, &webui->cnt->stream_norm);
     }
 
     webu_context_free(webui);
