@@ -1688,16 +1688,12 @@ int v4l2_start(struct context *cnt)
         }
         if (retcd < 0) {
             /* These may need more work to consider all the fail scenarios*/
-            if (curdev->v4l2_private != NULL) {
-                free(curdev->v4l2_private);
-                curdev->v4l2_private = NULL;
-            }
+            v4l2_device_close(curdev);
+            v4l2_device_cleanup(curdev);
+            curdev->fd_device = -1;
             pthread_mutexattr_destroy(&curdev->attr);
             pthread_mutex_destroy(&curdev->mutex);
             v4l2_vdev_free(cnt);
-            if (curdev->fd_device != -1) {
-                close(curdev->fd_device);
-            }
             free(curdev);
             pthread_mutex_unlock(&v4l2_mutex);
             return retcd;
