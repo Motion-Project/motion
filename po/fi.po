@@ -765,22 +765,22 @@ msgstr "MariaDB -virhe oli %s"
 #: src/dbse.c
 #, c-format
 msgid "Opening database %s"
-msgstr ""
+msgstr "Avataan tietokanta %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Can't open SQLite3 database %s.  Error %d : %s"
-msgstr ""
+msgstr "SQLite3-tietokantaa %s ei voi avata. Virhe %d : %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Setting busy timeout to %d msec"
-msgstr ""
+msgstr "Varattu aikakatkaisuksi asetetaan %d ms"
 
 #: src/dbse.c
 #, c-format
 msgid "Setting busy timeout failed.  Error %d:%s"
-msgstr ""
+msgstr "Varattu aikakatkaisun asettaminen epäonnistui. Virhe %d:%s"
 
 #: src/dbse.c
 #, c-format
@@ -790,7 +790,7 @@ msgstr "Yhteys PostgreSQL-tietokantaan ' %s' epäonnistui: %s"
 #: src/dbse.c
 #, c-format
 msgid "Database type %s"
-msgstr ""
+msgstr "Tietokantatyyppi %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
@@ -873,16 +873,16 @@ msgstr "PGSQL-kysely epäonnistui: [%s] %s %s"
 #: src/dbse.c
 #, c-format
 msgid "Executing %s"
-msgstr ""
+msgstr "Suoritetaan %s"
 
 #: src/dbse.c
 #, c-format
 msgid "SQLite3 error %d : %s"
-msgstr ""
+msgstr "SQLite3-virhe %d : %s"
 
 #: src/dbse.c
 msgid "Ignoring empty sql query"
-msgstr ""
+msgstr "Tyhjän sql-kyselyn huomioiminen"
 
 #: src/event.c src/track.c
 #, c-format
@@ -1438,7 +1438,7 @@ msgstr "Lokitiedoston sulkeminen ( %s)."
 #: src/motion.c
 #, c-format
 msgid "Motion detected - starting event %d."
-msgstr ""
+msgstr "Liike havaittu - alkava tapahtuma %d."
 
 #: src/motion.c
 #, c-format
@@ -1601,7 +1601,7 @@ msgstr "Yritä uudelleen, kunnes onnistunut yhteys kameraan"
 
 #: src/motion.c
 msgid "Camera has become available."
-msgstr ""
+msgstr "Kamera on tullut saataville."
 
 #: src/motion.c
 #, c-format
@@ -1609,6 +1609,8 @@ msgid ""
 "Restarting Motion.\n"
 "Image width (%d) or height(%d) requested is not modulo 8."
 msgstr ""
+"Aloitetaan liikettä uudelleen.\n"
+"Pyydetty kuvan leveys (%d) tai korkeus (%d) ei ole modulo 8."
 
 #: src/motion.c
 #, c-format
@@ -1616,18 +1618,24 @@ msgid ""
 "Restarting Motion.\n"
 "Motion only supports width and height greater than or equal to 64 %dx%d"
 msgstr ""
+"Aloitetaan liikettä uudelleen.\n"
+"Liike tukee vain leveyttä ja korkeutta, joka on suurempi tai yhtä suuri kuin 64 %dx%d"
 
 #: src/motion.c
 msgid ""
 "Restarting Motion.\n"
 "Height or width has changed on camera."
 msgstr ""
+"Aloitetaan liikettä uudelleen.\n"
+"Kameran korkeus tai leveys on muuttunut."
 
 #: src/motion.c
 msgid ""
 "Restarting Motion.\n"
 "High resolution has changed on camera."
 msgstr ""
+"Aloitetaan liikettä uudelleen.\n"
+"Kameran korkea resoluutio on muuttunut."
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -2798,7 +2806,7 @@ msgstr "%s: av lukukehys: %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Excessive tries to get data from camera %d"
-msgstr ""
+msgstr "%s: Liiallinen yritys yrittää saada tietoja kamerasta %d"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3128,7 +3136,7 @@ msgstr "Kuvaa ei voi kirjoittaa tiedostoon %s"
 
 #: src/picture.c
 msgid "Error getting PGM vars."
-msgstr ""
+msgstr "Virhe haettaessa PGM vars."
 
 #: src/picture.c
 #, c-format
@@ -3138,7 +3146,7 @@ msgstr "Tämä ei ole pgm-tiedosto, alkaa ' %s'"
 #: src/picture.c
 #, c-format
 msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
-msgstr ""
+msgstr "Magic %s: Leveys %s(%d): Korkeus %s(%d): MaxVal: %s(%d)"
 
 #: src/picture.c
 msgid "Failed reading image data from pgm file"
@@ -3458,7 +3466,7 @@ msgstr "Virhe tiedoston sulkemisessa"
 
 #: src/util.c
 msgid "{dbeventid} is not supported. Use eventid."
-msgstr ""
+msgstr "{dbeventid} ei ole tuettu. Käytä eventid."
 
 #: src/util.c
 #, c-format
@@ -3877,12 +3885,12 @@ msgstr "V4L2-tunnuksen nimi ja alue"
 
 #: src/video_v4l2.c
 msgid "Error resetting user value"
-msgstr ""
+msgstr "Virhe nollattaessa käyttäjäarvoa"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Leaving control %s \"%s\" set to %d"
-msgstr ""
+msgstr "Jätetään ohjausobjektin %s \"%s\" arvoksi %d"
 
 #: src/video_v4l2.c
 msgid "Device not ready"
@@ -3896,7 +3904,7 @@ msgstr "Aseta ohjaus \" %s \" arvoon %d"
 #: src/video_v4l2.c
 #, c-format
 msgid "setting control %s \"%s\" to %d failed. "
-msgstr ""
+msgstr "Säätimen %s \"%s\" asettaminen arvoon %d epäonnistui."
 
 #: src/video_v4l2.c
 #, c-format
@@ -3994,7 +4002,7 @@ msgstr "Aseta taajuudeksi %ul"
 #: src/video_v4l2.c
 #, c-format
 msgid "Unable to use %c%c%c%c (%dx%d)"
-msgstr ""
+msgstr "Ei voida käyttää %c%c%c%c (%dx%d)"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4004,31 +4012,31 @@ msgstr "Testauspaletti %c %c %c %c ( %dx %d)"
 #: src/video_v4l2.c
 #, c-format
 msgid "Checking image size %dx%d with stride %d"
-msgstr ""
+msgstr "Tarkistetaan kuvan kokoa %dx%d askeleella %d"
 
 #: src/video_v4l2.c
 msgid "No stride value provided from device."
-msgstr ""
+msgstr "Laitteesta ei ole annettu askelarvoa."
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Width(%d) must be less than stride(%d)"
-msgstr ""
+msgstr "Leveyden (%d) on oltava pienempi kuin askel (%d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "The image width(%d) is not multiple of the stride(%d)"
-msgstr ""
+msgstr "Kuvan leveys (%d) ei ole askeleen (%d) monikerta"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
-msgstr ""
+msgstr "Mahdoton ehto: Leveys (%d), askel (%d), askelta kohti (%d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Image width will be padded %d bytes"
-msgstr ""
+msgstr "Kuvan leveys täytetään %d tavua"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4045,7 +4053,7 @@ msgstr "Määritä konfigurointitiedostossa eri paletti tai leveys / korkeus."
 
 #: src/video_v4l2.c
 msgid "Error setting pixel format."
-msgstr ""
+msgstr "Virhe pikselimuodon asettamisessa."
 
 #: src/video_v4l2.c
 #, c-format
@@ -4112,7 +4120,7 @@ msgstr "Muisti loppu."
 #: src/video_v4l2.c
 #, c-format
 msgid "Error querying buffer %i"
-msgstr ""
+msgstr "Virhe kyselyssä puskurista %i"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4122,7 +4130,7 @@ msgstr "Virhe kartoitettaessa puskuria %i mmap"
 #: src/video_v4l2.c
 #, c-format
 msgid "%i length=%d Address (%x) offset %d"
-msgstr ""
+msgstr "%i pituus=%d Osoite (%x) offset %d"
 
 #: src/video_v4l2.c
 msgid "Error starting stream. VIDIOC_STREAMON"

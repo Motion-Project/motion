@@ -514,15 +514,15 @@ msgstr "webcontrol header parameters"
 
 #: src/conf.c
 msgid "webcontrol_lock_minutes"
-msgstr ""
+msgstr "žiniatinklio valdymo blokavimo minutės"
 
 #: src/conf.c
 msgid "webcontrol_lock_attempts"
-msgstr ""
+msgstr "žiniatinklio valdymo blokavimo bandymai"
 
 #: src/conf.c
 msgid "webcontrol_lock_max_ips"
-msgstr ""
+msgstr "interneto valdymo užraktas max ips"
 
 #: src/conf.c
 msgid "stream_port"
@@ -766,22 +766,22 @@ msgstr "MariaDB-fout was %s"
 #: src/dbse.c
 #, c-format
 msgid "Opening database %s"
-msgstr ""
+msgstr "Atidaroma duomenų bazė %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Can't open SQLite3 database %s.  Error %d : %s"
-msgstr ""
+msgstr "Nepavyko atidaryti SQLite3 duomenų bazės %s. Klaida %d: %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Setting busy timeout to %d msec"
-msgstr ""
+msgstr "Nustatomas užimtumo laikas į %d ms"
 
 #: src/dbse.c
 #, c-format
 msgid "Setting busy timeout failed.  Error %d:%s"
-msgstr ""
+msgstr "Nepavyko nustatyti užimtumo skirtojo laiko. Klaida %d:%s"
 
 #: src/dbse.c
 #, c-format
@@ -791,7 +791,7 @@ msgstr "Nepavyko prisijungti prie „PostgreSQL“ duomenų bazės „ %s“: %s
 #: src/dbse.c
 #, c-format
 msgid "Database type %s"
-msgstr ""
+msgstr "Duomenų bazės tipas %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
@@ -871,16 +871,16 @@ msgstr "PGSQL užklausa nepavyko: [%s] %s %s"
 #: src/dbse.c
 #, c-format
 msgid "Executing %s"
-msgstr ""
+msgstr "Vykdomas %s"
 
 #: src/dbse.c
 #, c-format
 msgid "SQLite3 error %d : %s"
-msgstr ""
+msgstr "SQLite3 klaida %d : %s"
 
 #: src/dbse.c
 msgid "Ignoring empty sql query"
-msgstr ""
+msgstr "Nepaisoma tuščios sql užklausos"
 
 #: src/event.c src/track.c
 #, c-format
@@ -895,22 +895,22 @@ msgstr "Vykdo išorinę komandą „ %s“"
 #: src/event.c
 #, c-format
 msgid "Writing image to file: %s"
-msgstr ""
+msgstr "Vaizdas įrašomas į failą: %s"
 
 #: src/event.c
 #, c-format
 msgid "Writing movie to file: %s"
-msgstr ""
+msgstr "Filmas įrašomas į failą: %s"
 
 #: src/event.c
 #, c-format
 msgid "Saved image to file: %s"
-msgstr ""
+msgstr "Vaizdas išsaugotas faile: %s"
 
 #: src/event.c
 #, c-format
 msgid "Saved movie to file: %s"
-msgstr ""
+msgstr "Filmas išsaugotas faile: %s"
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -1439,7 +1439,7 @@ msgstr "Uždaryti logfile ( %s)."
 #: src/motion.c
 #, c-format
 msgid "Motion detected - starting event %d."
-msgstr ""
+msgstr "Aptiktas judesys – prasideda įvykis %d."
 
 #: src/motion.c
 #, c-format
@@ -1604,7 +1604,7 @@ msgstr "Bandoma dar kartą, kol nebus sėkmingai užmegztas ryšys su kamera"
 
 #: src/motion.c
 msgid "Camera has become available."
-msgstr ""
+msgstr "Fotoaparatas tapo prieinamas."
 
 #: src/motion.c
 #, c-format
@@ -1612,6 +1612,8 @@ msgid ""
 "Restarting Motion.\n"
 "Image width (%d) or height(%d) requested is not modulo 8."
 msgstr ""
+"Iš naujo paleidžiamas judėjimas.\n"
+"Vaizdo plotis (%d) arba aukštis (%d) nėra 8 modulio."
 
 #: src/motion.c
 #, c-format
@@ -1619,18 +1621,24 @@ msgid ""
 "Restarting Motion.\n"
 "Motion only supports width and height greater than or equal to 64 %dx%d"
 msgstr ""
+"Iš naujo paleidžiamas judėjimas.\n"
+"Judėjimas palaiko tik plotį ir aukštį, didesnį arba lygų 64 %dx%d"
 
 #: src/motion.c
 msgid ""
 "Restarting Motion.\n"
 "Height or width has changed on camera."
 msgstr ""
+"Iš naujo paleidžiamas judėjimas.\n"
+"Pasikeitė fotoaparato aukštis arba plotis."
 
 #: src/motion.c
 msgid ""
 "Restarting Motion.\n"
 "High resolution has changed on camera."
 msgstr ""
+"Iš naujo paleidžiamas judėjimas.\n"
+"Kameroje pasikeitė didelė raiška."
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -2803,7 +2811,7 @@ msgstr "%s: gem leesframe: %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Excessive tries to get data from camera %d"
-msgstr ""
+msgstr "%s: Per daug bandoma gauti duomenis iš fotoaparato %d"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3135,7 +3143,7 @@ msgstr "Neįmanoma parašyti paveikslėlio į failą %s"
 
 #: src/picture.c
 msgid "Error getting PGM vars."
-msgstr ""
+msgstr "Klaida gaunant PGM vars."
 
 #: src/picture.c
 #, c-format
@@ -3145,7 +3153,7 @@ msgstr "Tai nėra pgm failas, prasideda raide ' %s'"
 #: src/picture.c
 #, c-format
 msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
-msgstr ""
+msgstr "Stebuklingas %s: plotis %s(%d): aukštis %s(%d): maksimalus val.: %s(%d)"
 
 #: src/picture.c
 msgid "Failed reading image data from pgm file"
@@ -3469,7 +3477,7 @@ msgstr "Klaida uždarant failą"
 
 #: src/util.c
 msgid "{dbeventid} is not supported. Use eventid."
-msgstr ""
+msgstr "{dbeventid} nepalaikomas. Naudokite eventid."
 
 #: src/util.c
 #, c-format
@@ -3526,11 +3534,11 @@ msgstr "Fout bij het repareren van besturingselementen: %s"
 #: src/util.c
 #, c-format
 msgid "Parsing: %s"
-msgstr ""
+msgstr "Analizuojama: %s"
 
 #: src/util.c
 msgid "Parsing: <redacted>"
-msgstr ""
+msgstr "Analizuojama: <redaguota>"
 
 #: src/util.c
 #, c-format
@@ -3560,11 +3568,11 @@ msgstr "Nieuwe videoparameters: %s"
 #: src/util.c
 #, c-format
 msgid "New webcontrol_header_params: %s"
-msgstr ""
+msgstr "Nauji žiniatinklio valdymo antraštės parametrai: %s"
 
 #: src/util.c
 msgid "New webcontrol_header_params: <redacted>"
-msgstr ""
+msgstr "Nauji žiniatinklio valdymo antraštės parametrai: <redacted>"
 
 #: src/util.c
 #, c-format
@@ -3891,12 +3899,12 @@ msgstr "V4L2 ID pavadinimas ir diapazonas"
 
 #: src/video_v4l2.c
 msgid "Error resetting user value"
-msgstr ""
+msgstr "Klaida iš naujo nustatant vartotojo vertę"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Leaving control %s \"%s\" set to %d"
-msgstr ""
+msgstr "Valdymas %s \"%s\" paliekamas kaip %d"
 
 #: src/video_v4l2.c
 msgid "Device not ready"
@@ -3910,7 +3918,7 @@ msgstr "Nustatykite valdymo elementą „ %s“ reikšmei %d"
 #: src/video_v4l2.c
 #, c-format
 msgid "setting control %s \"%s\" to %d failed. "
-msgstr ""
+msgstr "nepavyko nustatyti valdiklio %s \"%s\" į %d."
 
 #: src/video_v4l2.c
 #, c-format
@@ -4005,7 +4013,7 @@ msgstr "Nustatykite dažnį %ul"
 #: src/video_v4l2.c
 #, c-format
 msgid "Unable to use %c%c%c%c (%dx%d)"
-msgstr ""
+msgstr "Nepavyko naudoti %c%c%c%c (%dx%d)"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4015,31 +4023,31 @@ msgstr "Testavimo paletė %c %c %c %c ( %dx %d)"
 #: src/video_v4l2.c
 #, c-format
 msgid "Checking image size %dx%d with stride %d"
-msgstr ""
+msgstr "Tikrinamas vaizdo dydis %dx%d su žingsniu %d"
 
 #: src/video_v4l2.c
 msgid "No stride value provided from device."
-msgstr ""
+msgstr "Iš įrenginio nepateikta žingsnio vertė."
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Width(%d) must be less than stride(%d)"
-msgstr ""
+msgstr "Plotis (%d) turi būti mažesnis už žingsnį (%d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "The image width(%d) is not multiple of the stride(%d)"
-msgstr ""
+msgstr "Vaizdo plotis (%d) nėra žingsnio (%d) kartotinis"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
-msgstr ""
+msgstr "Neįmanoma sąlyga: plotis (%d), žingsnis (%d), žingsnis (%d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Image width will be padded %d bytes"
-msgstr ""
+msgstr "Vaizdo plotis bus padidintas %d baitų"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4056,7 +4064,7 @@ msgstr "Konfigūracijos faile nurodykite skirtingą paletę arba plotį / aukšt
 
 #: src/video_v4l2.c
 msgid "Error setting pixel format."
-msgstr ""
+msgstr "Klaida nustatant pikselių formatą."
 
 #: src/video_v4l2.c
 #, c-format
@@ -4123,7 +4131,7 @@ msgstr "Nepakanka atminties."
 #: src/video_v4l2.c
 #, c-format
 msgid "Error querying buffer %i"
-msgstr ""
+msgstr "Klaida užklausant buferį %i"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4133,7 +4141,7 @@ msgstr "Klaida atvaizduojant buferį %i mmap"
 #: src/video_v4l2.c
 #, c-format
 msgid "%i length=%d Address (%x) offset %d"
-msgstr ""
+msgstr "%i ilgis=%d Adreso (%x) poslinkis %d"
 
 #: src/video_v4l2.c
 msgid "Error starting stream. VIDIOC_STREAMON"
@@ -4243,7 +4251,7 @@ msgstr "Nustatykite reikšmę null / zero"
 #: src/webu.c
 #, c-format
 msgid "Ignoring connection from: %s"
-msgstr ""
+msgstr "Ignoruojamas ryšys iš: %s"
 
 #: src/webu.c
 #, c-format

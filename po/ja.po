@@ -125,11 +125,11 @@ msgstr "静寂"
 
 #: src/conf.c
 msgid "watchdog_tmo"
-msgstr ""
+msgstr "ウォッチドッグ tmo"
 
 #: src/conf.c
 msgid "watchdog_kill"
-msgstr ""
+msgstr "ウォッチドッグキル"
 
 # msgid "watchdog_tmo"
 # msgstr "ウォッチドッグtmo"
@@ -766,22 +766,22 @@ msgstr "MariaDBエラー %s"
 #: src/dbse.c
 #, c-format
 msgid "Opening database %s"
-msgstr ""
+msgstr "データベース %s を開いています"
 
 #: src/dbse.c
 #, c-format
 msgid "Can't open SQLite3 database %s.  Error %d : %s"
-msgstr ""
+msgstr "SQLite3 データベース %s を開けません。エラー %d : %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Setting busy timeout to %d msec"
-msgstr ""
+msgstr "ビジー タイムアウトを %d ミリ秒に設定"
 
 #: src/dbse.c
 #, c-format
 msgid "Setting busy timeout failed.  Error %d:%s"
-msgstr ""
+msgstr "ビジー タイムアウトの設定に失敗しました。エラー %d:%s"
 
 #: src/dbse.c
 #, c-format
@@ -791,7 +791,7 @@ msgstr "PostgreSQLデータベース '%s'への接続に失敗しました: %s"
 #: src/dbse.c
 #, c-format
 msgid "Database type %s"
-msgstr ""
+msgstr "データベース タイプ %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
@@ -871,16 +871,16 @@ msgstr "PGSQLクエリが失敗しました:[%s] %s %s"
 #: src/dbse.c
 #, c-format
 msgid "Executing %s"
-msgstr ""
+msgstr "%s を実行しています"
 
 #: src/dbse.c
 #, c-format
 msgid "SQLite3 error %d : %s"
-msgstr ""
+msgstr "SQLite3 エラー %d : %s"
 
 #: src/dbse.c
 msgid "Ignoring empty sql query"
-msgstr ""
+msgstr "空の SQL クエリを無視する"
 
 #: src/event.c src/track.c
 #, c-format
@@ -1010,7 +1010,7 @@ msgstr "oggコンテナは使用しなくなりました. mpeg4への変更し�
 
 #: src/event.c
 msgid "Running test of the various output formats."
-msgstr ""
+msgstr "さまざまな出力形式の実行テスト。"
 
 #: src/event.c
 msgid "Error opening context for movie output."
@@ -1439,7 +1439,7 @@ msgstr "ログファイルを閉じています(%s)"
 #: src/motion.c
 #, c-format
 msgid "Motion detected - starting event %d."
-msgstr ""
+msgstr "モーションが検出されました - イベント %d を開始します。"
 
 #: src/motion.c
 #, c-format
@@ -1600,7 +1600,7 @@ msgstr "カメラとの接続に成功するまで再試行しています"
 
 #: src/motion.c
 msgid "Camera has become available."
-msgstr ""
+msgstr "カメラが使用可能になりました。"
 
 #: src/motion.c
 #, c-format
@@ -1608,6 +1608,8 @@ msgid ""
 "Restarting Motion.\n"
 "Image width (%d) or height(%d) requested is not modulo 8."
 msgstr ""
+"モーションを再開しています。\n"
+"要求された画像の幅 (%d) または高さ (%d) はモジュロ 8 ではありません。"
 
 #: src/motion.c
 #, c-format
@@ -1615,18 +1617,24 @@ msgid ""
 "Restarting Motion.\n"
 "Motion only supports width and height greater than or equal to 64 %dx%d"
 msgstr ""
+"モーションを再開しています。\n"
+"モーションは 64 %dx%d 以上の幅と高さのみをサポートします"
 
 #: src/motion.c
 msgid ""
 "Restarting Motion.\n"
 "Height or width has changed on camera."
 msgstr ""
+"モーションを再開しています。\n"
+"カメラの高さまたは幅が変更されました。"
 
 #: src/motion.c
 msgid ""
 "Restarting Motion.\n"
 "High resolution has changed on camera."
 msgstr ""
+"モーションを再開しています。\n"
+"カメラの高解像度が変更されました。"
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -2600,11 +2608,11 @@ msgstr "%s: AVコピーパケット: %s、割り込み: %s"
 
 #: src/netcam_rtsp.c
 msgid "True"
-msgstr ""
+msgstr "真実"
 
 #: src/netcam_rtsp.c
 msgid "False"
-msgstr ""
+msgstr "間違い"
 
 # msgid "True"
 # msgstr "真"
@@ -2790,7 +2798,7 @@ msgstr "%s: av読み取りフレーム: %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Excessive tries to get data from camera %d"
-msgstr ""
+msgstr "%s: カメラ %d からデータを取得しようとしています"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2918,7 +2926,7 @@ msgstr "高解像度"
 
 #: src/netcam_rtsp.c
 msgid "norm"
-msgstr ""
+msgstr "ノルム"
 
 # msgid "norm"
 # msgstr "規範"
@@ -3120,7 +3128,7 @@ msgstr "ファイル %sに画像を書き込めません"
 
 #: src/picture.c
 msgid "Error getting PGM vars."
-msgstr ""
+msgstr "PGM 変数の取得中にエラーが発生しました。"
 
 #: src/picture.c
 #, c-format
@@ -3130,7 +3138,7 @@ msgstr "これはpgmファイルではなく、「 %s」で始まります"
 #: src/picture.c
 #, c-format
 msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
-msgstr ""
+msgstr "マジック %s: 幅 %s(%d): 高さ %s(%d): MaxVal: %s(%d)"
 
 #: src/picture.c
 msgid "Failed reading image data from pgm file"
@@ -3245,7 +3253,7 @@ msgstr "サーボを開けない!"
 #: src/track.c
 #, c-format
 msgid "cent->x %d, cent->y %d, reversex %d, reversey %d manual %d"
-msgstr ""
+msgstr "cent->x %d、cent->y %d、reversex %d、reversey %d 手動 %d"
 
 # msgid "cent->x %d, cent->y %d, reversex %d, reversey %d manual %d"
 # msgstr "cent->x %d、cent-> y %d、reversex %d、reversey %d手動 %d"
@@ -3270,6 +3278,8 @@ msgid ""
 "X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command "
 "%d"
 msgstr ""
+"X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d コマンド"
+"%d"
 
 # msgid ""
 # "X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command "
@@ -3288,6 +3298,8 @@ msgid ""
 "Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command "
 "%d"
 msgstr ""
+"Y cent->x %d, cent->y %d, reversex %d,reversey %d モーター %d データ %d コマンド"
+"%d"
 
 #: src/track.c
 #, c-format
@@ -3295,6 +3307,8 @@ msgid ""
 "X-offset %d, Y-offset %d, x-position %d. y-position %d,reversex %d, reversey "
 "%d , stepsize %d"
 msgstr ""
+"X オフセット %d、Y オフセット %d、X 位置 %d。 y 位置 %d、逆 %d、逆"
+"%d 、ステップサイズ %d"
 
 # msgid ""
 # "Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command "
@@ -3355,17 +3369,17 @@ msgstr "カメラの範囲を取得"
 #: src/track.c
 #, c-format
 msgid "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d "
-msgstr ""
+msgstr "入力パラメータ ABS パン最小 %d、パン最大 %d、チルト最小 %d、チルト最大 %d"
 
 #: src/track.c
 #, c-format
 msgid "INPUT_PARAM_ABS X_Angel %d, Y_Angel %d "
-msgstr ""
+msgstr "入力パラメータ ABS X エンジェル %d、Y エンジェル %d"
 
 #: src/track.c
 #, c-format
 msgid "For_SET_ABS move_X %d,move_Y %d"
-msgstr ""
+msgstr "SET ABS の場合 X %d を移動、Y %d を移動"
 
 # msgid "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d "
 # msgstr ""
@@ -3391,42 +3405,42 @@ msgstr "ABS Y Angelの前:x = %d、Y = %d、"
 #: src/track.c
 #, c-format
 msgid "After_ABS_Y_Angel : x= %d , Y= %d"
-msgstr ""
+msgstr "ABS Y エンジェルの後 : x= %d 、Y= %d"
 
 #: src/track.c
 #, c-format
 msgid "For_SET_REL pan_min %d,pan_max %d,tilt_min %d,tilt_max %d"
-msgstr ""
+msgstr "SET REL パン最小 %d、パン最大 %d、チルト最小 %d、チルト最大 %d"
 
 #: src/track.c
 #, c-format
 msgid "For_SET_REL track_pan_Angel %d, track_tilt_Angel %d"
-msgstr ""
+msgstr "SET REL トラック パン エンジェル %d、トラック チルト エンジェル %d の場合"
 
 #: src/track.c
 #, c-format
 msgid "For_SET_REL move_X %d,move_Y %d"
-msgstr ""
+msgstr "SET REL の場合 X %d を移動、Y %d を移動"
 
 #: src/track.c
 #, c-format
 msgid " dev %d, addr= %d, control_S= %d, Wert= %d"
-msgstr ""
+msgstr "dev %d, addr= %d, control S= %d, Wert= %d"
 
 #: src/track.c
 #, c-format
 msgid " dev %d,addr= %d, control_S= %d, Wert= %d"
-msgstr ""
+msgstr "dev %d,addr= %d, コントロール S= %d, Wert= %d"
 
 #: src/track.c
 #, c-format
 msgid "Before_REL_Y_Angel : x= %d , Y= %d"
-msgstr ""
+msgstr "REL Y エンジェルの前: x= %d , Y= %d"
 
 #: src/track.c
 #, c-format
 msgid "After_REL_Y_Angel : x= %d , Y= %d"
-msgstr ""
+msgstr "REL Y エンジェルの後 : x= %d , Y= %d"
 
 # msgid "After_ABS_Y_Angel : x= %d , Y= %d"
 # msgstr "後 絶対値 Y角度 : x= %d , Y= %d"
@@ -3487,7 +3501,7 @@ msgstr "ファイルを閉じる際のエラー"
 
 #: src/util.c
 msgid "{dbeventid} is not supported. Use eventid."
-msgstr ""
+msgstr "{dbeventid} はサポートされていません。イベント ID を使用します。"
 
 #: src/util.c
 #, c-format
@@ -3669,7 +3683,7 @@ msgstr "ジオメトリを設定できませんでした"
 #: src/video_bktr.c
 #, c-format
 msgid "to [%d/%d] Norm %d"
-msgstr ""
+msgstr "[%d/%d] ノルム %d へ"
 
 # msgid "to [%d/%d] Norm %d"
 # msgstr "[%d/%d]ノルム %d"
@@ -3907,12 +3921,12 @@ msgstr "V4L2 IDの名前と範囲"
 
 #: src/video_v4l2.c
 msgid "Error resetting user value"
-msgstr ""
+msgstr "ユーザー値のリセット中にエラーが発生しました"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Leaving control %s \"%s\" set to %d"
-msgstr ""
+msgstr "コントロール %s \"%s\" を %d に設定したままにします"
 
 #: src/video_v4l2.c
 msgid "Device not ready"
@@ -3926,7 +3940,7 @@ msgstr "コントロール\"%s\"を値 %dに設定します"
 #: src/video_v4l2.c
 #, c-format
 msgid "setting control %s \"%s\" to %d failed. "
-msgstr ""
+msgstr "コントロール %s \"%s\" を %d に設定できませんでした。"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4018,7 +4032,7 @@ msgstr "周波数を%ulへ設定"
 #: src/video_v4l2.c
 #, c-format
 msgid "Unable to use %c%c%c%c (%dx%d)"
-msgstr ""
+msgstr "%c%c%c%c (%dx%d) を使用できません"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4028,31 +4042,31 @@ msgstr "パレット %c%c%c%c (%dx%d)のテスト中"
 #: src/video_v4l2.c
 #, c-format
 msgid "Checking image size %dx%d with stride %d"
-msgstr ""
+msgstr "ストライド %d で画像サイズ %dx%d をチェックしています"
 
 #: src/video_v4l2.c
 msgid "No stride value provided from device."
-msgstr ""
+msgstr "デバイスからストライド値が提供されていません。"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Width(%d) must be less than stride(%d)"
-msgstr ""
+msgstr "幅 (%d) はストライド (%d) より小さくなければなりません"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "The image width(%d) is not multiple of the stride(%d)"
-msgstr ""
+msgstr "画像の幅 (%d) がストライド (%d) の倍数ではありません"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
-msgstr ""
+msgstr "不可能な条件: 幅(%d)、歩幅(%d)、歩幅(%d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Image width will be padded %d bytes"
-msgstr ""
+msgstr "画像の幅に %d バイトが埋め込まれます"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4069,7 +4083,7 @@ msgstr "設定ファイルと異なるパレットまたは幅/高さを指定�
 
 #: src/video_v4l2.c
 msgid "Error setting pixel format."
-msgstr ""
+msgstr "ピクセル形式の設定エラー。"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4136,7 +4150,7 @@ msgstr "メモリ不足"
 #: src/video_v4l2.c
 #, c-format
 msgid "Error querying buffer %i"
-msgstr ""
+msgstr "バッファ %i のクエリ中にエラーが発生しました"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4146,7 +4160,7 @@ msgstr "エラーマッピングバッファ %i mmap"
 #: src/video_v4l2.c
 #, c-format
 msgid "%i length=%d Address (%x) offset %d"
-msgstr ""
+msgstr "%i 長さ=%d アドレス (%x) オフセット %d"
 
 # msgid "%i length=%d Address (%x)"
 # msgstr "%i length=%d アドレス(%x)"

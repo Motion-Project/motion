@@ -764,22 +764,22 @@ msgstr "MariaDB -felet var %s"
 #: src/dbse.c
 #, c-format
 msgid "Opening database %s"
-msgstr ""
+msgstr "Öppnar databasen %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Can't open SQLite3 database %s.  Error %d : %s"
-msgstr ""
+msgstr "Kan inte öppna SQLite3-databasen %s. Fel %d: %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Setting busy timeout to %d msec"
-msgstr ""
+msgstr "Ställer in upptaget timeout till %d msec"
 
 #: src/dbse.c
 #, c-format
 msgid "Setting busy timeout failed.  Error %d:%s"
-msgstr ""
+msgstr "Det gick inte att ställa in timeout för upptaget. Fel %d:%s"
 
 #: src/dbse.c
 #, c-format
@@ -789,7 +789,7 @@ msgstr "Anslutning till PostgreSQL-databasen ' %s' misslyckades: %s"
 #: src/dbse.c
 #, c-format
 msgid "Database type %s"
-msgstr ""
+msgstr "Databastyp %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
@@ -869,16 +869,16 @@ msgstr "PGSQL-frågan misslyckades: [%s] %s %s"
 #: src/dbse.c
 #, c-format
 msgid "Executing %s"
-msgstr ""
+msgstr "Kör %s"
 
 #: src/dbse.c
 #, c-format
 msgid "SQLite3 error %d : %s"
-msgstr ""
+msgstr "SQLite3-fel %d: %s"
 
 #: src/dbse.c
 msgid "Ignoring empty sql query"
-msgstr ""
+msgstr "Ignorerar tom sql-fråga"
 
 #: src/event.c src/track.c
 #, c-format
@@ -1434,7 +1434,7 @@ msgstr "Stäng loggfil ( %s)."
 #: src/motion.c
 #, c-format
 msgid "Motion detected - starting event %d."
-msgstr ""
+msgstr "Rörelse upptäckt - starthändelse %d."
 
 #: src/motion.c
 #, c-format
@@ -1597,7 +1597,7 @@ msgstr "Försöker igen tills framgångsrik anslutning med kameran"
 
 #: src/motion.c
 msgid "Camera has become available."
-msgstr ""
+msgstr "Kameran har blivit tillgänglig."
 
 #: src/motion.c
 #, c-format
@@ -1605,6 +1605,8 @@ msgid ""
 "Restarting Motion.\n"
 "Image width (%d) or height(%d) requested is not modulo 8."
 msgstr ""
+"Startar om rörelse.\n"
+"Den begärda bildens bredd (%d) eller höjd (%d) är inte modulo 8."
 
 #: src/motion.c
 #, c-format
@@ -1612,18 +1614,24 @@ msgid ""
 "Restarting Motion.\n"
 "Motion only supports width and height greater than or equal to 64 %dx%d"
 msgstr ""
+"Startar om rörelse.\n"
+"Rörelse stöder endast bredd och höjd större än eller lika med 64 %dx%d"
 
 #: src/motion.c
 msgid ""
 "Restarting Motion.\n"
 "Height or width has changed on camera."
 msgstr ""
+"Startar om rörelse.\n"
+"Höjd eller bredd har ändrats på kameran."
 
 #: src/motion.c
 msgid ""
 "Restarting Motion.\n"
 "High resolution has changed on camera."
 msgstr ""
+"Startar om rörelse.\n"
+"Hög upplösning har ändrats på kameran."
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -2783,7 +2791,7 @@ msgstr "%s: av läsram: %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Excessive tries to get data from camera %d"
-msgstr ""
+msgstr "%s: För många försök att hämta data från kameran %d"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3112,7 +3120,7 @@ msgstr "Kan inte skriva bild till fil %s"
 
 #: src/picture.c
 msgid "Error getting PGM vars."
-msgstr ""
+msgstr "Det gick inte att hämta PGM vars."
 
 #: src/picture.c
 #, c-format
@@ -3122,7 +3130,7 @@ msgstr "Detta är inte en pgm-fil, börjar med ' %s'"
 #: src/picture.c
 #, c-format
 msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
-msgstr ""
+msgstr "Magisk %s: Bredd %s(%d): Höjd %s(%d): MaxVal: %s(%d)"
 
 #: src/picture.c
 msgid "Failed reading image data from pgm file"
@@ -3443,7 +3451,7 @@ msgstr "Fel vid stängning av fil"
 
 #: src/util.c
 msgid "{dbeventid} is not supported. Use eventid."
-msgstr ""
+msgstr "{dbeventid} stöds inte. Använd eventtid."
 
 #: src/util.c
 #, c-format
@@ -3864,12 +3872,12 @@ msgstr "V4L2 ID-namn och intervall"
 
 #: src/video_v4l2.c
 msgid "Error resetting user value"
-msgstr ""
+msgstr "Fel vid återställning av användarvärde"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Leaving control %s \"%s\" set to %d"
-msgstr ""
+msgstr "Lämnar kontrollen %s \"%s\" inställd på %d"
 
 #: src/video_v4l2.c
 msgid "Device not ready"
@@ -3883,7 +3891,7 @@ msgstr "Ställ kontroll \" %s \" till värde %d"
 #: src/video_v4l2.c
 #, c-format
 msgid "setting control %s \"%s\" to %d failed. "
-msgstr ""
+msgstr "inställning av kontroll %s \"%s\" till %d misslyckades."
 
 #: src/video_v4l2.c
 #, c-format
@@ -3977,7 +3985,7 @@ msgstr "Ställ in frekvens på %ul"
 #: src/video_v4l2.c
 #, c-format
 msgid "Unable to use %c%c%c%c (%dx%d)"
-msgstr ""
+msgstr "Det går inte att använda %c%c%c%c (%dx%d)"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3987,31 +3995,31 @@ msgstr "Testpalett %c %c %c %c ( %dx %d)"
 #: src/video_v4l2.c
 #, c-format
 msgid "Checking image size %dx%d with stride %d"
-msgstr ""
+msgstr "Kontrollerar bildstorlek %dx%d med steg %d"
 
 #: src/video_v4l2.c
 msgid "No stride value provided from device."
-msgstr ""
+msgstr "Inget stegvärde tillhandahålls från enheten."
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Width(%d) must be less than stride(%d)"
-msgstr ""
+msgstr "Bredd(%d) måste vara mindre än steg(%d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "The image width(%d) is not multiple of the stride(%d)"
-msgstr ""
+msgstr "Bildbredden (%d) är inte multipel av steget (%d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
-msgstr ""
+msgstr "Omöjligt tillstånd: Bredd(%d), Steg(%d), Per steg(%d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Image width will be padded %d bytes"
-msgstr ""
+msgstr "Bildbredden kommer att fyllas med %d byte"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4028,7 +4036,7 @@ msgstr "Ange annan palett eller bredd / höjd i konfigurationsfilen."
 
 #: src/video_v4l2.c
 msgid "Error setting pixel format."
-msgstr ""
+msgstr "Fel vid inställning av pixelformat."
 
 #: src/video_v4l2.c
 #, c-format
@@ -4095,7 +4103,7 @@ msgstr "Slut på minne."
 #: src/video_v4l2.c
 #, c-format
 msgid "Error querying buffer %i"
-msgstr ""
+msgstr "Fel vid fråga efter buffert %i"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4105,7 +4113,7 @@ msgstr "Fel vid kartläggning av buffert %i mmap"
 #: src/video_v4l2.c
 #, c-format
 msgid "%i length=%d Address (%x) offset %d"
-msgstr ""
+msgstr "%i length=%d Adressförskjutning (%x) %d"
 
 #: src/video_v4l2.c
 msgid "Error starting stream. VIDIOC_STREAMON"

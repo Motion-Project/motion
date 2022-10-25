@@ -765,22 +765,22 @@ msgstr "L'errore MariaDB era %s"
 #: src/dbse.c
 #, c-format
 msgid "Opening database %s"
-msgstr ""
+msgstr "Apertura database %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Can't open SQLite3 database %s.  Error %d : %s"
-msgstr ""
+msgstr "Impossibile aprire il database SQLite3 %s. Errore %d: %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Setting busy timeout to %d msec"
-msgstr ""
+msgstr "Impostazione del timeout di occupato su %d msec"
 
 #: src/dbse.c
 #, c-format
 msgid "Setting busy timeout failed.  Error %d:%s"
-msgstr ""
+msgstr "Impostazione del timeout di occupato non riuscita. Errore %d:%s"
 
 #: src/dbse.c
 #, c-format
@@ -790,7 +790,7 @@ msgstr "Connessione al database PostgreSQL ' %s' non riuscita: %s"
 #: src/dbse.c
 #, c-format
 msgid "Database type %s"
-msgstr ""
+msgstr "Tipo di database %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
@@ -872,16 +872,16 @@ msgstr "Query PGSQL non riuscita: [%s] %s %s"
 #: src/dbse.c
 #, c-format
 msgid "Executing %s"
-msgstr ""
+msgstr "Esecuzione di %s"
 
 #: src/dbse.c
 #, c-format
 msgid "SQLite3 error %d : %s"
-msgstr ""
+msgstr "Errore SQLite3 %d : %s"
 
 #: src/dbse.c
 msgid "Ignoring empty sql query"
-msgstr ""
+msgstr "Ignorando la query sql vuota"
 
 #: src/event.c src/track.c
 #, c-format
@@ -1451,7 +1451,7 @@ msgstr "File di registro di chiusura ( %s)."
 #: src/motion.c
 #, c-format
 msgid "Motion detected - starting event %d."
-msgstr ""
+msgstr "Rilevato movimento - inizio dell'evento %d."
 
 #: src/motion.c
 #, c-format
@@ -1620,7 +1620,7 @@ msgstr "Nuovo tentativo fino a connessione riuscita con la fotocamera"
 
 #: src/motion.c
 msgid "Camera has become available."
-msgstr ""
+msgstr "La fotocamera è diventata disponibile."
 
 #: src/motion.c
 #, c-format
@@ -1628,6 +1628,8 @@ msgid ""
 "Restarting Motion.\n"
 "Image width (%d) or height(%d) requested is not modulo 8."
 msgstr ""
+"Riavvio del movimento.\n"
+"La larghezza dell'immagine (%d) o l'altezza (%d) richieste non sono modulo 8."
 
 #: src/motion.c
 #, c-format
@@ -1635,18 +1637,24 @@ msgid ""
 "Restarting Motion.\n"
 "Motion only supports width and height greater than or equal to 64 %dx%d"
 msgstr ""
+"Riavvio del movimento.\n"
+"Motion supporta solo larghezza e altezza maggiori o uguali a 64 %dx%d"
 
 #: src/motion.c
 msgid ""
 "Restarting Motion.\n"
 "Height or width has changed on camera."
 msgstr ""
+"Riavvio del movimento.\n"
+"L'altezza o la larghezza è cambiata sulla fotocamera."
 
 #: src/motion.c
 msgid ""
 "Restarting Motion.\n"
 "High resolution has changed on camera."
 msgstr ""
+"Riavvio del movimento.\n"
+"L'alta risoluzione è cambiata sulla fotocamera."
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -2829,7 +2837,7 @@ msgstr "%s: frame letto av: %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Excessive tries to get data from camera %d"
-msgstr ""
+msgstr "%s: tentativi eccessivi di ottenere dati dalla fotocamera %d"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3161,7 +3169,7 @@ msgstr "Impossibile scrivere l'immagine nel file %s"
 
 #: src/picture.c
 msgid "Error getting PGM vars."
-msgstr ""
+msgstr "Errore durante l'ottenimento delle var PGM."
 
 #: src/picture.c
 #, c-format
@@ -3171,7 +3179,7 @@ msgstr "Questo non è un file pgm, inizia con ' %s'"
 #: src/picture.c
 #, c-format
 msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
-msgstr ""
+msgstr "Magic %s: Larghezza %s(%d): Altezza %s(%d): MaxVal: %s(%d)"
 
 #: src/picture.c
 msgid "Failed reading image data from pgm file"
@@ -3505,7 +3513,7 @@ msgstr "Errore durante la chiusura del file"
 
 #: src/util.c
 msgid "{dbeventid} is not supported. Use eventid."
-msgstr ""
+msgstr "{dbeventid} non è supportato. Usa evento."
 
 #: src/util.c
 #, c-format
@@ -3929,12 +3937,12 @@ msgstr "Nome e intervallo ID V4L2"
 
 #: src/video_v4l2.c
 msgid "Error resetting user value"
-msgstr ""
+msgstr "Errore durante il ripristino del valore utente"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Leaving control %s \"%s\" set to %d"
-msgstr ""
+msgstr "Lasciando il controllo %s \"%s\" impostato su %d"
 
 #: src/video_v4l2.c
 msgid "Device not ready"
@@ -3948,7 +3956,7 @@ msgstr "Impostare il controllo \" %s \" sul valore %d"
 #: src/video_v4l2.c
 #, c-format
 msgid "setting control %s \"%s\" to %d failed. "
-msgstr ""
+msgstr "impostazione del controllo %s \"%s\" su %d non riuscita."
 
 #: src/video_v4l2.c
 #, c-format
@@ -4046,7 +4054,7 @@ msgstr "Imposta la frequenza su %ul"
 #: src/video_v4l2.c
 #, c-format
 msgid "Unable to use %c%c%c%c (%dx%d)"
-msgstr ""
+msgstr "Impossibile utilizzare %c%c%c%c (%dx%d)"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4056,31 +4064,31 @@ msgstr "Tavolozza dei test %c %c %c %c ( %dx %d)"
 #: src/video_v4l2.c
 #, c-format
 msgid "Checking image size %dx%d with stride %d"
-msgstr ""
+msgstr "Controllo della dimensione dell'immagine %dx%d con stride %d"
 
 #: src/video_v4l2.c
 msgid "No stride value provided from device."
-msgstr ""
+msgstr "Nessun valore del passo fornito dal dispositivo."
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Width(%d) must be less than stride(%d)"
-msgstr ""
+msgstr "Larghezza(%d) deve essere inferiore a falcata(%d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "The image width(%d) is not multiple of the stride(%d)"
-msgstr ""
+msgstr "La larghezza dell'immagine (%d) non è multiplo del passo (%d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
-msgstr ""
+msgstr "Condizione impossibile: Larghezza(%d), Passo(%d), Per passo(%d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Image width will be padded %d bytes"
-msgstr ""
+msgstr "La larghezza dell'immagine verrà riempita di %d byte"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4099,7 +4107,7 @@ msgstr ""
 
 #: src/video_v4l2.c
 msgid "Error setting pixel format."
-msgstr ""
+msgstr "Errore durante l'impostazione del formato pixel."
 
 #: src/video_v4l2.c
 #, c-format
@@ -4169,7 +4177,7 @@ msgstr "Fuori dalla memoria."
 #: src/video_v4l2.c
 #, c-format
 msgid "Error querying buffer %i"
-msgstr ""
+msgstr "Errore durante la query del buffer %i"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4179,7 +4187,7 @@ msgstr "Buffer di mappatura degli errori %i mmap"
 #: src/video_v4l2.c
 #, c-format
 msgid "%i length=%d Address (%x) offset %d"
-msgstr ""
+msgstr "%i lunghezza=%d Offset indirizzo (%x) %d"
 
 #: src/video_v4l2.c
 msgid "Error starting stream. VIDIOC_STREAMON"

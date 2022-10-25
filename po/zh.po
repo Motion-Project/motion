@@ -762,22 +762,22 @@ msgstr "MariaDB 错误为 %s"
 #: src/dbse.c
 #, c-format
 msgid "Opening database %s"
-msgstr ""
+msgstr "正在打开数据库 %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Can't open SQLite3 database %s.  Error %d : %s"
-msgstr ""
+msgstr "无法打开 SQLite3 数据库 %s。错误 %d: %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Setting busy timeout to %d msec"
-msgstr ""
+msgstr "将繁忙超时设置为 %d 毫秒"
 
 #: src/dbse.c
 #, c-format
 msgid "Setting busy timeout failed.  Error %d:%s"
-msgstr ""
+msgstr "设置繁忙超时失败。错误 %d:%s"
 
 #: src/dbse.c
 #, c-format
@@ -787,7 +787,7 @@ msgstr "与PostgreSQL数据库' %s'的连接失败： %s"
 #: src/dbse.c
 #, c-format
 msgid "Database type %s"
-msgstr ""
+msgstr "数据库类型 %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
@@ -864,16 +864,16 @@ msgstr "PGSQL查询失败：[%s] %s %s"
 #: src/dbse.c
 #, c-format
 msgid "Executing %s"
-msgstr ""
+msgstr "正在执行 %s"
 
 #: src/dbse.c
 #, c-format
 msgid "SQLite3 error %d : %s"
-msgstr ""
+msgstr "SQLite3 错误 %d: %s"
 
 #: src/dbse.c
 msgid "Ignoring empty sql query"
-msgstr ""
+msgstr "忽略空 sql 查询"
 
 #: src/event.c src/track.c
 #, c-format
@@ -1427,7 +1427,7 @@ msgstr "正在关闭日志文件（ %s）。"
 #: src/motion.c
 #, c-format
 msgid "Motion detected - starting event %d."
-msgstr ""
+msgstr "检测到运动 - 开始事件 %d。"
 
 #: src/motion.c
 #, c-format
@@ -1586,7 +1586,7 @@ msgstr "重试直到成功连接相机"
 
 #: src/motion.c
 msgid "Camera has become available."
-msgstr ""
+msgstr "相机已可用。"
 
 #: src/motion.c
 #, c-format
@@ -1594,6 +1594,8 @@ msgid ""
 "Restarting Motion.\n"
 "Image width (%d) or height(%d) requested is not modulo 8."
 msgstr ""
+"重新启动运动。\n"
+"请求的图像宽度 (%d) 或高度 (%d) 不是模 8。"
 
 #: src/motion.c
 #, c-format
@@ -1601,18 +1603,24 @@ msgid ""
 "Restarting Motion.\n"
 "Motion only supports width and height greater than or equal to 64 %dx%d"
 msgstr ""
+"重新启动运动。\n"
+"Motion 仅支持宽度和高度大于等于 64 %dx%d"
 
 #: src/motion.c
 msgid ""
 "Restarting Motion.\n"
 "Height or width has changed on camera."
 msgstr ""
+"重新启动运动。\n"
+"相机的高度或宽度发生了变化。"
 
 #: src/motion.c
 msgid ""
 "Restarting Motion.\n"
 "High resolution has changed on camera."
 msgstr ""
+"重新启动运动。\n"
+"相机上的高分辨率已更改。"
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -2750,7 +2758,7 @@ msgstr "%s: av 读帧: %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Excessive tries to get data from camera %d"
-msgstr ""
+msgstr "%s: 过度尝试从相机 %d 获取数据"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3075,7 +3083,7 @@ msgstr "无法将图片写入文件 %s"
 
 #: src/picture.c
 msgid "Error getting PGM vars."
-msgstr ""
+msgstr "获取 PGM 变量时出错。"
 
 #: src/picture.c
 #, c-format
@@ -3085,7 +3093,7 @@ msgstr "这不是一个pgm文件，以' %s'开头"
 #: src/picture.c
 #, c-format
 msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
-msgstr ""
+msgstr "魔法 %s: 宽度 %s(%d): 高度 %s(%d): MaxVal: %s(%d)"
 
 #: src/picture.c
 msgid "Failed reading image data from pgm file"
@@ -3396,7 +3404,7 @@ msgstr "关闭文件时出错"
 
 #: src/util.c
 msgid "{dbeventid} is not supported. Use eventid."
-msgstr ""
+msgstr "不支持 {dbeventid}。使用事件标识。"
 
 #: src/util.c
 #, c-format
@@ -3813,12 +3821,12 @@ msgstr "V4L2 ID名称和范围"
 
 #: src/video_v4l2.c
 msgid "Error resetting user value"
-msgstr ""
+msgstr "重置用户值时出错"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Leaving control %s \"%s\" set to %d"
-msgstr ""
+msgstr "将控制 %s\"%s\" 设置为 %d"
 
 #: src/video_v4l2.c
 msgid "Device not ready"
@@ -3832,7 +3840,7 @@ msgstr "将控件\" %s \"设置为值 %d"
 #: src/video_v4l2.c
 #, c-format
 msgid "setting control %s \"%s\" to %d failed. "
-msgstr ""
+msgstr "将控件 %s \"%s\" 设置为 %d 失败。"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3925,7 +3933,7 @@ msgstr "将频率设置为 %ul"
 #: src/video_v4l2.c
 #, c-format
 msgid "Unable to use %c%c%c%c (%dx%d)"
-msgstr ""
+msgstr "无法使用 %c%c%c%c (%dx%d)"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3935,31 +3943,31 @@ msgstr "测试调色板 %c %c %c %c（ %dx %d）"
 #: src/video_v4l2.c
 #, c-format
 msgid "Checking image size %dx%d with stride %d"
-msgstr ""
+msgstr "正在检查图像大小 %dx%d，步幅为 %d"
 
 #: src/video_v4l2.c
 msgid "No stride value provided from device."
-msgstr ""
+msgstr "设备不提供步幅值。"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Width(%d) must be less than stride(%d)"
-msgstr ""
+msgstr "宽度(%d) 必须小于步幅(%d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "The image width(%d) is not multiple of the stride(%d)"
-msgstr ""
+msgstr "图像宽度（%d）不是步幅（%d）的倍数"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
-msgstr ""
+msgstr "不可能的条件：宽度（%d），步幅（%d），每步幅（%d）"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Image width will be padded %d bytes"
-msgstr ""
+msgstr "图像宽度将被填充 %d 个字节"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3976,7 +3984,7 @@ msgstr "在配置文件中指定其他调色板或宽度/高度。"
 
 #: src/video_v4l2.c
 msgid "Error setting pixel format."
-msgstr ""
+msgstr "设置像素格式时出错。"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4043,7 +4051,7 @@ msgstr "记不清。"
 #: src/video_v4l2.c
 #, c-format
 msgid "Error querying buffer %i"
-msgstr ""
+msgstr "查询缓冲区 %i 时出错"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4053,7 +4061,7 @@ msgstr "错误映射缓冲区 %i mmap"
 #: src/video_v4l2.c
 #, c-format
 msgid "%i length=%d Address (%x) offset %d"
-msgstr ""
+msgstr "%i 长度=%d 地址 (%x) 偏移量 %d"
 
 #: src/video_v4l2.c
 msgid "Error starting stream. VIDIOC_STREAMON"

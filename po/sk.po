@@ -764,22 +764,22 @@ msgstr "Chyba MariaDB bola %s"
 #: src/dbse.c
 #, c-format
 msgid "Opening database %s"
-msgstr ""
+msgstr "Otvára sa databáza %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Can't open SQLite3 database %s.  Error %d : %s"
-msgstr ""
+msgstr "Nedá sa otvoriť SQLite3 databáza %s. Chyba %d: %s"
 
 #: src/dbse.c
 #, c-format
 msgid "Setting busy timeout to %d msec"
-msgstr ""
+msgstr "Časový limit obsadenosti sa nastavuje na %d ms"
 
 #: src/dbse.c
 #, c-format
 msgid "Setting busy timeout failed.  Error %d:%s"
-msgstr ""
+msgstr "Nastavenie časového limitu zaneprázdnenia zlyhalo. Chyba %d:%s"
 
 #: src/dbse.c
 #, c-format
@@ -789,7 +789,7 @@ msgstr "Pripojenie na PostgreSQL '%s' chybné : %s"
 #: src/dbse.c
 #, c-format
 msgid "Database type %s"
-msgstr ""
+msgstr "Typ databázy %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
@@ -869,16 +869,16 @@ msgstr "Dopyt PGSQL zlyhal: [%s] %s %s"
 #: src/dbse.c
 #, c-format
 msgid "Executing %s"
-msgstr ""
+msgstr "Prebieha %s"
 
 #: src/dbse.c
 #, c-format
 msgid "SQLite3 error %d : %s"
-msgstr ""
+msgstr "Chyba SQLite3 %d: %s"
 
 #: src/dbse.c
 msgid "Ignoring empty sql query"
-msgstr ""
+msgstr "Ignorovanie prázdneho dotazu SQL"
 
 #: src/event.c src/track.c
 #, c-format
@@ -1441,7 +1441,7 @@ msgstr "Zatvára sa logfile ( %s)."
 #: src/motion.c
 #, c-format
 msgid "Motion detected - starting event %d."
-msgstr ""
+msgstr "Detegovaný pohyb – začínajúca udalosť %d."
 
 #: src/motion.c
 #, c-format
@@ -1604,7 +1604,7 @@ msgstr "Opakuje sa pokus, až kým sa nepripojí k fotoaparátu"
 
 #: src/motion.c
 msgid "Camera has become available."
-msgstr ""
+msgstr "Fotoaparát sa stal dostupným."
 
 #: src/motion.c
 #, c-format
@@ -1612,6 +1612,8 @@ msgid ""
 "Restarting Motion.\n"
 "Image width (%d) or height(%d) requested is not modulo 8."
 msgstr ""
+"Reštartuje sa Motion.\n"
+"Požadovaná šírka obrázka (%d) alebo výška (%d) nie je modulo 8."
 
 #: src/motion.c
 #, c-format
@@ -1619,18 +1621,24 @@ msgid ""
 "Restarting Motion.\n"
 "Motion only supports width and height greater than or equal to 64 %dx%d"
 msgstr ""
+"Reštartuje sa Motion.\n"
+"Pohyb podporuje iba šírku a výšku väčšiu alebo rovnú 64 %dx%d"
 
 #: src/motion.c
 msgid ""
 "Restarting Motion.\n"
 "Height or width has changed on camera."
 msgstr ""
+"Reštartuje sa Motion.\n"
+"Na fotoaparáte sa zmenila výška alebo šírka."
 
 #: src/motion.c
 msgid ""
 "Restarting Motion.\n"
 "High resolution has changed on camera."
 msgstr ""
+"Reštartuje sa Motion.\n"
+"Vysoké rozlíšenie fotoaparátu sa zmenilo."
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -2800,7 +2808,7 @@ msgstr "%s: av rám na čítanie: %s"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: Excessive tries to get data from camera %d"
-msgstr ""
+msgstr "%s: Nadmerný pokus o získanie údajov z kamery %d"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3129,7 +3137,7 @@ msgstr "Obrázok sa nedá zapísať do súboru %s"
 
 #: src/picture.c
 msgid "Error getting PGM vars."
-msgstr ""
+msgstr "Chyba pri získavaní PGM vars."
 
 #: src/picture.c
 #, c-format
@@ -3139,7 +3147,7 @@ msgstr "Toto nie je pgm súbor začínajúci ' %s'"
 #: src/picture.c
 #, c-format
 msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
-msgstr ""
+msgstr "Magic %s: Šírka %s(%d): Výška %s(%d): MaxVal: %s(%d)"
 
 #: src/picture.c
 msgid "Failed reading image data from pgm file"
@@ -3463,7 +3471,7 @@ msgstr "Chyba pri zatváraní súboru"
 
 #: src/util.c
 msgid "{dbeventid} is not supported. Use eventid."
-msgstr ""
+msgstr "{dbeventid} nie je podporovaný. Použite eventid."
 
 #: src/util.c
 #, c-format
@@ -3885,12 +3893,12 @@ msgstr "Názov a rozsah ID V4L2"
 
 #: src/video_v4l2.c
 msgid "Error resetting user value"
-msgstr ""
+msgstr "Chyba pri resetovaní používateľskej hodnoty"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Leaving control %s \"%s\" set to %d"
-msgstr ""
+msgstr "Opúšťate ovládací prvok %s \"%s\" nastavený na %d"
 
 #: src/video_v4l2.c
 msgid "Device not ready"
@@ -3904,7 +3912,7 @@ msgstr "Nastavte ovládací prvok \" %s \" na hodnotu %d"
 #: src/video_v4l2.c
 #, c-format
 msgid "setting control %s \"%s\" to %d failed. "
-msgstr ""
+msgstr "nastavenie ovládacieho prvku %s \"%s\" na %d zlyhalo."
 
 #: src/video_v4l2.c
 #, c-format
@@ -4001,7 +4009,7 @@ msgstr "Nastavte frekvenciu na %ul"
 #: src/video_v4l2.c
 #, c-format
 msgid "Unable to use %c%c%c%c (%dx%d)"
-msgstr ""
+msgstr "Nedá sa použiť %c%c%c%c (%dx%d)"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4011,31 +4019,31 @@ msgstr "Testovacia paleta %c %c %c %c ( %dx %d)"
 #: src/video_v4l2.c
 #, c-format
 msgid "Checking image size %dx%d with stride %d"
-msgstr ""
+msgstr "Kontrola veľkosti obrázka %dx%d s krokom %d"
 
 #: src/video_v4l2.c
 msgid "No stride value provided from device."
-msgstr ""
+msgstr "Zo zariadenia nebola poskytnutá žiadna hodnota kroku."
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Width(%d) must be less than stride(%d)"
-msgstr ""
+msgstr "Šírka (%d) musí byť menšia ako krok (%d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "The image width(%d) is not multiple of the stride(%d)"
-msgstr ""
+msgstr "Šírka obrázka (%d) nie je násobkom kroku (%d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
-msgstr ""
+msgstr "Nemožná podmienka: Šírka (%d), Krok (%d), Na krok (%d)"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Image width will be padded %d bytes"
-msgstr ""
+msgstr "Šírka obrázka bude doplnená o %d bajtov"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4052,7 +4060,7 @@ msgstr "V konfiguračnom súbore zadajte inú paletu alebo šírku / výšku."
 
 #: src/video_v4l2.c
 msgid "Error setting pixel format."
-msgstr ""
+msgstr "Chyba pri nastavovaní formátu pixelov."
 
 #: src/video_v4l2.c
 #, c-format
@@ -4120,7 +4128,7 @@ msgstr "Nedostatok pamäte."
 #: src/video_v4l2.c
 #, c-format
 msgid "Error querying buffer %i"
-msgstr ""
+msgstr "Chyba pri dotazovaní vyrovnávacej pamäte %i"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4130,7 +4138,7 @@ msgstr "Chyba mapovania vyrovnávacej pamäte %i mmap"
 #: src/video_v4l2.c
 #, c-format
 msgid "%i length=%d Address (%x) offset %d"
-msgstr ""
+msgstr "%i dĺžka=%d Posun adresy (%x) %d"
 
 #: src/video_v4l2.c
 msgid "Error starting stream. VIDIOC_STREAMON"
