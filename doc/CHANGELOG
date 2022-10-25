@@ -1,4 +1,6 @@
 Summary of changes for version 4.x.x are below
+    * Update translations
+    * Update for new MariaDB pkg-config name
     * Fix cleanup when v4l2 open fails
     * Remove unused include module.
     * Remove unused H264 palette code
