@@ -1276,7 +1276,7 @@ static int motion_init(struct context *cnt)
         }
     #endif /* HAVE_V4L2 && !BSD */
 
-    retcd = dbse_init(cnt, cnt_list);
+    retcd = dbse_init(cnt);
     if (retcd != 0) {
         return retcd;
     }

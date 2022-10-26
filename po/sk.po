@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-03 23:12-0600\n"
-"PO-Revision-Date: 2020-01-10 21:18-0700\n"
+"POT-Creation-Date: 2022-10-24 08:29-0600\n"
+"PO-Revision-Date: 2022-10-24 08:37-0600\n"
 "Last-Translator: Dusan Mikulas <dmkil22@gmail.com>\n"
 "Language-Team: Dusan Mikulas <dmkil22@gmail.com>\n"
 "Language: sk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #: src/conf.c
 #, c-format
@@ -511,6 +511,18 @@ msgid "webcontrol_header_params"
 msgstr "Parametre hlavičky webcontrol"
 
 #: src/conf.c
+msgid "webcontrol_lock_minutes"
+msgstr "minúty zámku webového ovládania"
+
+#: src/conf.c
+msgid "webcontrol_lock_attempts"
+msgstr "pokusy o zablokovanie webového ovládania"
+
+#: src/conf.c
+msgid "webcontrol_lock_max_ips"
+msgstr "zámok webcontrol, max. ips"
+
+#: src/conf.c
 msgid "stream_port"
 msgstr "port prúdu"
 
@@ -728,43 +740,6 @@ msgstr "Inicializácia databázy"
 
 #: src/dbse.c
 #, c-format
-msgid "SQLite3 Database filename %s"
-msgstr "SQLite3 Názov súboru databázy %s"
-
-#: src/dbse.c
-msgid "SQLite3 is threadsafe"
-msgstr "SQLite3 je vlákno bezpečný"
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 serialized %s"
-msgstr "SQLite3 serializovaný %s"
-
-#: src/dbse.c
-msgid "FAILED"
-msgstr "ZLYHALO"
-
-#: src/dbse.c
-msgid "SUCCESS"
-msgstr "ÚSPECH"
-
-#: src/dbse.c
-#, c-format
-msgid "Can't open SQLite3 database %s : %s"
-msgstr "Nie je možné otvoriť databázu SQLite3 %s: %s"
-
-#: src/dbse.c
-#, c-format
-msgid "database_busy_timeout %d msec"
-msgstr "časový limit databázy zaneprázdnený %d msec"
-
-#: src/dbse.c
-#, c-format
-msgid "database_busy_timeout failed %s"
-msgstr "zlyhalo vypršanie časového limitu databázy %s"
-
-#: src/dbse.c
-#, c-format
 msgid "Cannot connect to MySQL database %s on host %s with user %s"
 msgstr ""
 "Nemožno sa pripojiť k databáze MySQL %s na hostiteľovi %s pomocou "
@@ -787,8 +762,24 @@ msgid "MariaDB error was %s"
 msgstr "Chyba MariaDB bola %s"
 
 #: src/dbse.c
-msgid "SQLite3 using shared handle"
-msgstr "SQLite3 pomocou zdieľaného handle"
+#, c-format
+msgid "Opening database %s"
+msgstr "Otvára sa databáza %s"
+
+#: src/dbse.c
+#, c-format
+msgid "Can't open SQLite3 database %s.  Error %d : %s"
+msgstr "Nedá sa otvoriť SQLite3 databáza %s. Chyba %d: %s"
+
+#: src/dbse.c
+#, c-format
+msgid "Setting busy timeout to %d msec"
+msgstr "Časový limit obsadenosti sa nastavuje na %d ms"
+
+#: src/dbse.c
+#, c-format
+msgid "Setting busy timeout failed.  Error %d:%s"
+msgstr "Nastavenie časového limitu zaneprázdnenia zlyhalo. Chyba %d:%s"
 
 #: src/dbse.c
 #, c-format
@@ -797,8 +788,8 @@ msgstr "Pripojenie na PostgreSQL '%s' chybné : %s"
 
 #: src/dbse.c
 #, c-format
-msgid "Database backend %s"
-msgstr "Backend databázy %s"
+msgid "Database type %s"
+msgstr "Typ databázy %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
@@ -877,22 +868,17 @@ msgstr "Dopyt PGSQL zlyhal: [%s] %s %s"
 
 #: src/dbse.c
 #, c-format
-msgid "INSERT ... RETURNING VALUE=\"%s\""
-msgstr "VLOŽIŤ ... NÁVRATNÁ HODNOTA = \"%s \""
+msgid "Executing %s"
+msgstr "Prebieha %s"
 
 #: src/dbse.c
 #, c-format
-msgid "Invalid event ID returned by SQL query \"%s\""
-msgstr "Neplatné ID udalosti vrátené SQL dotazom \"%s \""
+msgid "SQLite3 error %d : %s"
+msgstr "Chyba SQLite3 %d: %s"
 
 #: src/dbse.c
-msgid "Executing SQLite3 query"
-msgstr "Vykonáva sa dotaz SQLite3"
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 error was %s"
-msgstr "Chyba SQLite3 bola %s"
+msgid "Ignoring empty sql query"
+msgstr "Ignorovanie prázdneho dotazu SQL"
 
 #: src/event.c src/track.c
 #, c-format
@@ -903,6 +889,26 @@ msgstr "Nedá sa spustiť externý príkaz '%s'"
 #, c-format
 msgid "Executing external command '%s'"
 msgstr "Spustenie externého príkazu '%s'"
+
+#: src/event.c
+#, c-format
+msgid "Writing image to file: %s"
+msgstr "Zápis obrázku do súboru: %s"
+
+#: src/event.c
+#, c-format
+msgid "Writing movie to file: %s"
+msgstr "Zápis filmu do súboru: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved image to file: %s"
+msgstr "Uložený obrázok do súboru: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved movie to file: %s"
+msgstr "Film bol uložený do súboru: %s"
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -1134,11 +1140,6 @@ msgstr "Preferovaný kodek %s bol zaradený na čiernu listinu: %s"
 
 #: src/ffmpeg.c
 #, c-format
-msgid "Preferred codec %s not found"
-msgstr "Preferovaný kodek %s nebol nájdený"
-
-#: src/ffmpeg.c
-#, c-format
 msgid "Codec %s not found"
 msgstr "Kodek %s nebol nájdený"
 
@@ -1152,8 +1153,8 @@ msgid "Could not alloc stream"
 msgstr "Nepodarilo sa prideliť stream"
 
 #: src/ffmpeg.c
-msgid "Failed to allocate decoder!"
-msgstr "Nepodarilo sa prideliť dekodér!"
+msgid "Failed to allocate codec!"
+msgstr "Nepodarilo sa prideliť kodek!"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1293,10 +1294,6 @@ msgstr "Nepodarilo sa priradiť výstupný kontext"
 #: src/ffmpeg.c
 msgid "Could not setup passthru!"
 msgstr "Passthru sa nepodarilo nastaviť!"
-
-#: src/ffmpeg.c
-msgid "Failed to allocate codec!"
-msgstr "Nepodarilo sa prideliť kodek!"
 
 #: src/ffmpeg.c
 msgid "Could not set the stream"
@@ -1443,8 +1440,8 @@ msgstr "Zatvára sa logfile ( %s)."
 
 #: src/motion.c
 #, c-format
-msgid "Motion detected - starting event %d"
-msgstr "Zistený pohyb - počiatočná udalosť %d"
+msgid "Motion detected - starting event %d."
+msgstr "Detegovaný pohyb – začínajúca udalosť %d."
 
 #: src/motion.c
 #, c-format
@@ -1597,10 +1594,6 @@ msgid "Emulating motion"
 msgstr "Emulujúci pohyb"
 
 #: src/motion.c
-msgid "Calling vid_close() from motion_cleanup"
-msgstr "Volanie vid blízko () z čistenia pohybu"
-
-#: src/motion.c
 #, c-format
 msgid "Motion in area %d detected."
 msgstr "Bol detekovaný pohyb v oblasti %d."
@@ -1610,18 +1603,42 @@ msgid "Retrying until successful connection with camera"
 msgstr "Opakuje sa pokus, až kým sa nepripojí k fotoaparátu"
 
 #: src/motion.c
+msgid "Camera has become available."
+msgstr "Fotoaparát sa stal dostupným."
+
+#: src/motion.c
+#, c-format
 msgid ""
-"Camera has finally become available\n"
-"Camera image has different width and heightfrom what is in the config file. "
-"You should fix that\n"
-"Restarting Motion thread to reinitialize all image buffers to new picture "
-"dimensions"
+"Restarting Motion.\n"
+"Image width (%d) or height(%d) requested is not modulo 8."
 msgstr ""
-"Fotoaparát je konečne k dispozícii \n"
-"Obrázok kamery má rôznu šírku a výšku od toho, čo je v konfiguračnom súbore. "
-"Mali by ste to opraviť \n"
-"Reštartovanie vlákna vlákna na opätovné inicializáciu všetkých vyrovnávacích "
-"pamätí obrázkov do nového obrázkarozmery"
+"Reštartuje sa Motion.\n"
+"Požadovaná šírka obrázka (%d) alebo výška (%d) nie je modulo 8."
+
+#: src/motion.c
+#, c-format
+msgid ""
+"Restarting Motion.\n"
+"Motion only supports width and height greater than or equal to 64 %dx%d"
+msgstr ""
+"Reštartuje sa Motion.\n"
+"Pohyb podporuje iba šírku a výšku väčšiu alebo rovnú 64 %dx%d"
+
+#: src/motion.c
+msgid ""
+"Restarting Motion.\n"
+"Height or width has changed on camera."
+msgstr ""
+"Reštartuje sa Motion.\n"
+"Na fotoaparáte sa zmenila výška alebo šírka."
+
+#: src/motion.c
+msgid ""
+"Restarting Motion.\n"
+"High resolution has changed on camera."
+msgstr ""
+"Reštartuje sa Motion.\n"
+"Vysoké rozlíšenie fotoaparátu sa zmenilo."
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -2375,11 +2392,6 @@ msgid "SO_KEEPALIVE set on socket."
 msgstr "SO KEEPALIVE nastavený na pätici."
 
 #: src/netcam_http.c
-#, c-format
-msgid "re-using socket %d since keepalive is set."
-msgstr "opätovné použitie soketu %d, pretože je nastavený parameter keepalive."
-
-#: src/netcam_http.c
 msgid "fcntl(1) on socket"
 msgstr "fcntl (1) na sokete"
 
@@ -2571,10 +2583,6 @@ msgid "netcam->jpeg_error %d"
 msgstr "netcam-> jpeg chyba %d"
 
 #: src/netcam_jpeg.c
-msgid "no new pic, no signal rcvd"
-msgstr "žiadny nový obrázok, žiadny signál rcvd"
-
-#: src/netcam_jpeg.c
 msgid "***new pic delay successful***"
 msgstr "*** nové pic oneskorenie úspešné ***"
 
@@ -2587,11 +2595,6 @@ msgstr "Chyba jpeg %d"
 #, c-format
 msgid "processing jpeg image - content length %d"
 msgstr "spracovanie obrázka JPEG - dĺžka obsahu %d"
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid "return code %d"
-msgstr "návratový kód %d"
 
 #: src/netcam_jpeg.c
 #, c-format
@@ -2801,6 +2804,11 @@ msgstr "%s: prerušené"
 #, c-format
 msgid "%s: av_read_frame: %s"
 msgstr "%s: av rám na čítanie: %s"
+
+#: src/netcam_rtsp.c
+#, c-format
+msgid "%s: Excessive tries to get data from camera %d"
+msgstr "%s: Nadmerný pokus o získanie údajov z kamery %d"
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -3128,8 +3136,8 @@ msgid "Can't write picture to file %s"
 msgstr "Obrázok sa nedá zapísať do súboru %s"
 
 #: src/picture.c
-msgid "Could not read from pgm file"
-msgstr "Nepodarilo sa prečítať zo súboru pgm"
+msgid "Error getting PGM vars."
+msgstr "Chyba pri získavaní PGM vars."
 
 #: src/picture.c
 #, c-format
@@ -3137,12 +3145,9 @@ msgid "This is not a pgm file, starts with '%s'"
 msgstr "Toto nie je pgm súbor začínajúci ' %s'"
 
 #: src/picture.c
-msgid "Failed reading size in pgm file"
-msgstr "Nepodarilo sa prečítať veľkosť súboru pgm"
-
-#: src/picture.c
-msgid "Failed reading maximum value in pgm file"
-msgstr "Nepodarilo sa načítať maximálnu hodnotu v pgm súbore"
+#, c-format
+msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
+msgstr "Magic %s: Šírka %s(%d): Výška %s(%d): MaxVal: %s(%d)"
 
 #: src/picture.c
 msgid "Failed reading image data from pgm file"
@@ -3465,10 +3470,8 @@ msgid "Error closing file"
 msgstr "Chyba pri zatváraní súboru"
 
 #: src/util.c
-msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
-msgstr ""
-"Použité %{dbeventid}, ale spustenie dotazu sql nevrátilo žiadne platné ID "
-"udalosti"
+msgid "{dbeventid} is not supported. Use eventid."
+msgstr "{dbeventid} nie je podporovaný. Použite eventid."
 
 #: src/util.c
 #, c-format
@@ -3524,6 +3527,15 @@ msgstr "Chyba pri reparácii ovládacích prvkov: %s"
 
 #: src/util.c
 #, c-format
+msgid "Parsing: %s"
+msgstr "Analýza: %s"
+
+#: src/util.c
+msgid "Parsing: <redacted>"
+msgstr "Analýza: <redacted>"
+
+#: src/util.c
+#, c-format
 msgid "Error parsing controls: %s"
 msgstr "Chyba pri analýze ovládacích prvkov: %s"
 
@@ -3546,6 +3558,15 @@ msgstr "Nové parametre netcamu - vysoké parametre: %s"
 #, c-format
 msgid "New video_params: %s"
 msgstr "Nové parametre videa: %s"
+
+#: src/util.c
+#, c-format
+msgid "New webcontrol_header_params: %s"
+msgstr "Nové parametre hlavičky webcontrol: %s"
+
+#: src/util.c
+msgid "New webcontrol_header_params: <redacted>"
+msgstr "Nové parametre hlavičky webcontrol: <redacted>"
 
 #: src/util.c
 #, c-format
@@ -3871,19 +3892,27 @@ msgid "  V4L2 ID   Name and Range"
 msgstr "Názov a rozsah ID V4L2"
 
 #: src/video_v4l2.c
+msgid "Error resetting user value"
+msgstr "Chyba pri resetovaní používateľskej hodnoty"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Leaving control %s \"%s\" set to %d"
+msgstr "Opúšťate ovládací prvok %s \"%s\" nastavený na %d"
+
+#: src/video_v4l2.c
 msgid "Device not ready"
 msgstr "Zariadenie nie je pripravené"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "setting control %s \"%s\" to %d failed with return code %d"
-msgstr ""
-"nastavenie ovládacieho prvku %s \" %s \" na %d zlyhalo pri návratovom kóde %d"
+msgid "Set control \"%s\" to value %d"
+msgstr "Nastavte ovládací prvok \" %s \" na hodnotu %d"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "Set control \"%s\" to value %d"
-msgstr "Nastavte ovládací prvok \" %s \" na hodnotu %d"
+msgid "setting control %s \"%s\" to %d failed. "
+msgstr "nastavenie ovládacieho prvku %s \"%s\" na %d zlyhalo."
 
 #: src/video_v4l2.c
 #, c-format
@@ -3979,8 +4008,42 @@ msgstr "Nastavte frekvenciu na %ul"
 
 #: src/video_v4l2.c
 #, c-format
+msgid "Unable to use %c%c%c%c (%dx%d)"
+msgstr "Nedá sa použiť %c%c%c%c (%dx%d)"
+
+#: src/video_v4l2.c
+#, c-format
 msgid "Testing palette %c%c%c%c (%dx%d)"
 msgstr "Testovacia paleta %c %c %c %c ( %dx %d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Checking image size %dx%d with stride %d"
+msgstr "Kontrola veľkosti obrázka %dx%d s krokom %d"
+
+#: src/video_v4l2.c
+msgid "No stride value provided from device."
+msgstr "Zo zariadenia nebola poskytnutá žiadna hodnota kroku."
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Width(%d) must be less than stride(%d)"
+msgstr "Šírka (%d) musí byť menšia ako krok (%d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "The image width(%d) is not multiple of the stride(%d)"
+msgstr "Šírka obrázka (%d) nie je násobkom kroku (%d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
+msgstr "Nemožná podmienka: Šírka (%d), Krok (%d), Na krok (%d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Image width will be padded %d bytes"
+msgstr "Šírka obrázka bude doplnená o %d bajtov"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3996,22 +4059,13 @@ msgid "Specify different palette or width/height in config file."
 msgstr "V konfiguračnom súbore zadajte inú paletu alebo šírku / výšku."
 
 #: src/video_v4l2.c
-msgid ""
-"Error setting pixel format.\n"
-"VIDIOC_S_FMT: "
-msgstr ""
-"Chyba pri nastavovaní formátu pixlov. \n"
-" VIDIOC S FMT:"
+msgid "Error setting pixel format."
+msgstr "Chyba pri nastavovaní formátu pixelov."
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
 msgstr "Použitie palety %c %c %c %c ( %dx %d)"
-
-#: src/video_v4l2.c
-#, c-format
-msgid "Bytesperlines %d sizeimage %d colorspace %08x"
-msgstr "Bytesperlines %d sizeimage %d colorspace %08x"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4022,13 +4076,6 @@ msgstr "Prispôsobenie šírky ( %d)"
 #, c-format
 msgid "Adjusting to height (%d)"
 msgstr "Nastavenie výšky ( %d)"
-
-#: src/video_v4l2.c
-msgid ""
-"H264(21) format not supported via videodevice.  Changing to default palette"
-msgstr ""
-"Formát H264 (21) nie je podporovaný prostredníctvom videozariadenia. Zmena "
-"na predvolenú paletu"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4080,12 +4127,8 @@ msgstr "Nedostatok pamäte."
 
 #: src/video_v4l2.c
 #, c-format
-msgid ""
-"Error querying buffer %i\n"
-"VIDIOC_QUERYBUF: "
-msgstr ""
-"Chyba pri vyhľadávaní vyrovnávacej pamäte %i \n"
-" VIDIOC QUERYBUF:"
+msgid "Error querying buffer %i"
+msgstr "Chyba pri dotazovaní vyrovnávacej pamäte %i"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4094,8 +4137,8 @@ msgstr "Chyba mapovania vyrovnávacej pamäte %i mmap"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "%i length=%d Address (%x)"
-msgstr "%i length = %d adresa ( %x)"
+msgid "%i length=%d Address (%x) offset %d"
+msgstr "%i dĺžka=%d Posun adresy (%x) %d"
 
 #: src/video_v4l2.c
 msgid "Error starting stream. VIDIOC_STREAMON"
@@ -4201,6 +4244,11 @@ msgstr "Národný jazyk : Vypnutý"
 #: src/webu.c
 msgid "Set the value to null/zero"
 msgstr "Nastavte hodnotu na null / nula"
+
+#: src/webu.c
+#, c-format
+msgid "Ignoring connection from: %s"
+msgstr "Ignorovanie pripojenia od: %s"
 
 #: src/webu.c
 #, c-format
@@ -4515,58 +4563,3 @@ msgstr "Nemožné dostať obrázok do stream-u."
 #, c-format
 msgid "'%s' option is depreciated.  New option name is '%s'"
 msgstr "Možnosť ' %s' je odpisovaná. Nový názov voľby je '%s' "
-
-#: src/conf.c
-msgid "webcontrol_lock_minutes"
-msgstr "minúty zámku webového ovládania"
-
-#: src/conf.c
-msgid "webcontrol_lock_attempts"
-msgstr "pokusy o zablokovanie webového ovládania"
-
-#: src/conf.c
-msgid "webcontrol_lock_max_ips"
-msgstr "zámok webcontrol, max. ips"
-
-#: src/event.c
-#, c-format
-msgid "Writing image to file: %s"
-msgstr "Zápis obrázku do súboru: %s"
-
-#: src/event.c
-#, c-format
-msgid "Writing movie to file: %s"
-msgstr "Zápis filmu do súboru: %s"
-
-#: src/event.c
-#, c-format
-msgid "Saved image to file: %s"
-msgstr "Uložený obrázok do súboru: %s"
-
-#: src/event.c
-#, c-format
-msgid "Saved movie to file: %s"
-msgstr "Film bol uložený do súboru: %s"
-
-#: src/util.c
-#, c-format
-msgid "Parsing: %s"
-msgstr "Analýza: %s"
-
-#: src/util.c
-msgid "Parsing: <redacted>"
-msgstr "Analýza: <redacted>"
-
-#: src/util.c
-#, c-format
-msgid "New webcontrol_header_params: %s"
-msgstr "Nové parametre hlavičky webcontrol: %s"
-
-#: src/util.c
-msgid "New webcontrol_header_params: <redacted>"
-msgstr "Nové parametre hlavičky webcontrol: <redacted>"
-
-#: src/webu.c
-#, c-format
-msgid "Ignoring connection from: %s"
-msgstr "Ignorovanie pripojenia od: %s"

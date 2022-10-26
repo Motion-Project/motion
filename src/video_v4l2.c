@@ -48,7 +48,7 @@
 
 #define MMAP_BUFFERS            4
 #define MIN_MMAP_BUFFERS        2
-#define V4L2_PALETTE_COUNT_MAX 22
+#define V4L2_PALETTE_COUNT_MAX 21
 
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MIN2(x, y) ((x) < (y) ? (x) : (y))
@@ -115,8 +115,7 @@ static void v4l2_palette_init(palette_item *palette_array)
     palette_array[18].v4l2id = V4L2_PIX_FMT_Y10;
     palette_array[19].v4l2id = V4L2_PIX_FMT_Y12;
     palette_array[20].v4l2id = V4L2_PIX_FMT_GREY;
-    palette_array[21].v4l2id = V4L2_PIX_FMT_H264;
-    palette_array[22].v4l2id = V4L2_PIX_FMT_Y10BPACK;
+    palette_array[21].v4l2id = V4L2_PIX_FMT_Y10BPACK;
 
     for (indx=0; indx <=V4L2_PALETTE_COUNT_MAX; indx++ ) {
         sprintf(palette_array[indx].fourcc ,"%c%c%c%c"
@@ -981,12 +980,6 @@ static int v4l2_pixfmt_select(struct context *cnt, struct video_dev *curdev)
         };
     }
 
-    if (indx_palette == 21) {
-        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-            ,_("H264(21) format not supported via videodevice.  Changing to default palette"));
-        indx_palette = 17;
-    }
-
     /* First we try setting the config file value */
     if ((indx_palette >= 0) && (indx_palette <= V4L2_PALETTE_COUNT_MAX)) {
         retcd = v4l2_pixfmt_set(cnt, curdev,palette_array[indx_palette].v4l2id);
@@ -1017,10 +1010,8 @@ static int v4l2_pixfmt_select(struct context *cnt, struct video_dev *curdev)
                 ,fmtd.index, fmtd.description, fmtd.flags, fmtd.pixelformat);
         }
          /* Adjust indx_palette if larger value found */
-         /* Prevent the selection of H264 since this module does not support it */
         for (indx = 0; indx <= V4L2_PALETTE_COUNT_MAX; indx++) {
-            if ((palette_array[indx].v4l2id == fmtd.pixelformat) &&
-                (palette_array[indx].v4l2id != V4L2_PIX_FMT_H264)) {
+            if (palette_array[indx].v4l2id == fmtd.pixelformat) {
                 indx_palette = indx;
             }
         }
@@ -1717,16 +1708,12 @@ int v4l2_start(struct context *cnt)
         }
         if (retcd < 0) {
             /* These may need more work to consider all the fail scenarios*/
-            if (curdev->v4l2_private != NULL) {
-                free(curdev->v4l2_private);
-                curdev->v4l2_private = NULL;
-            }
+            v4l2_device_close(curdev);
+            v4l2_device_cleanup(curdev);
+            curdev->fd_device = -1;
             pthread_mutexattr_destroy(&curdev->attr);
             pthread_mutex_destroy(&curdev->mutex);
             v4l2_vdev_free(cnt);
-            if (curdev->fd_device != -1) {
-                close(curdev->fd_device);
-            }
             free(curdev);
             pthread_mutex_unlock(&v4l2_mutex);
             return retcd;

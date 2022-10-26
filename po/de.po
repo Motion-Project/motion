@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-03 23:12-0600\n"
-"PO-Revision-Date: 2020-01-12 17:45-0700\n"
+"POT-Creation-Date: 2022-10-24 08:29-0600\n"
+"PO-Revision-Date: 2022-10-24 08:39-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #: src/conf.c
 #, c-format
@@ -514,6 +514,18 @@ msgid "webcontrol_header_params"
 msgstr "Webcontrol-Header-Parameter"
 
 #: src/conf.c
+msgid "webcontrol_lock_minutes"
+msgstr "Webcontrol-Sperrminuten"
+
+#: src/conf.c
+msgid "webcontrol_lock_attempts"
+msgstr "Webcontrol-Sperrversuche"
+
+#: src/conf.c
+msgid "webcontrol_lock_max_ips"
+msgstr "Webcontrol-Sperre max. ips"
+
+#: src/conf.c
 msgid "stream_port"
 msgstr "Stream-Port"
 
@@ -731,43 +743,6 @@ msgstr "Datenbank wird initialisiert"
 
 #: src/dbse.c
 #, c-format
-msgid "SQLite3 Database filename %s"
-msgstr "SQLite3-Datenbankdateiname %s"
-
-#: src/dbse.c
-msgid "SQLite3 is threadsafe"
-msgstr "SQLite3 ist threadsicher"
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 serialized %s"
-msgstr "SQLite3 serialisiert %s"
-
-#: src/dbse.c
-msgid "FAILED"
-msgstr "GESCHEITERT"
-
-#: src/dbse.c
-msgid "SUCCESS"
-msgstr "ERFOLG"
-
-#: src/dbse.c
-#, c-format
-msgid "Can't open SQLite3 database %s : %s"
-msgstr "Kann SQLite3-Datenbank %s nicht öffnen: %s"
-
-#: src/dbse.c
-#, c-format
-msgid "database_busy_timeout %d msec"
-msgstr "Zeitüberschreitung bei Datenbankbelegung %d ms"
-
-#: src/dbse.c
-#, c-format
-msgid "database_busy_timeout failed %s"
-msgstr "Zeitüberschreitung bei Datenbankbelegung %s fehlgeschlagen"
-
-#: src/dbse.c
-#, c-format
 msgid "Cannot connect to MySQL database %s on host %s with user %s"
 msgstr ""
 "Es kann keine Verbindung zur MySQL-Datenbank %s auf Host %s mit Benutzer %s "
@@ -791,8 +766,24 @@ msgid "MariaDB error was %s"
 msgstr "MariaDB-Fehler war %s"
 
 #: src/dbse.c
-msgid "SQLite3 using shared handle"
-msgstr "SQLite3 mit freigegebenem Handle"
+#, c-format
+msgid "Opening database %s"
+msgstr "Datenbank %s wird geöffnet"
+
+#: src/dbse.c
+#, c-format
+msgid "Can't open SQLite3 database %s.  Error %d : %s"
+msgstr "Die SQLite3-Datenbank %s kann nicht geöffnet werden. Fehler %d : %s"
+
+#: src/dbse.c
+#, c-format
+msgid "Setting busy timeout to %d msec"
+msgstr "Beschäftigt-Zeitüberschreitung auf %d ms einstellen"
+
+#: src/dbse.c
+#, c-format
+msgid "Setting busy timeout failed.  Error %d:%s"
+msgstr "Festlegen des Zeitlimits für besetzt fehlgeschlagen. Fehler %d:%s"
 
 #: src/dbse.c
 #, c-format
@@ -801,8 +792,8 @@ msgstr "Verbindung zur PostgreSQL-Datenbank ' %s' fehlgeschlagen: %s"
 
 #: src/dbse.c
 #, c-format
-msgid "Database backend %s"
-msgstr "Datenbank-Backend %s"
+msgid "Database type %s"
+msgstr "Datenbanktyp %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
@@ -884,22 +875,17 @@ msgstr "PGSQL-Abfrage fehlgeschlagen: [%s] %s %s"
 
 #: src/dbse.c
 #, c-format
-msgid "INSERT ... RETURNING VALUE=\"%s\""
-msgstr "EINFÜGEN ... RÜCKGABEWERT=\"%s\""
+msgid "Executing %s"
+msgstr "Ausführen von %s"
 
 #: src/dbse.c
 #, c-format
-msgid "Invalid event ID returned by SQL query \"%s\""
-msgstr "Ungültige Ereignis-ID von SQL-Abfrage \"%s\" zurückgegeben"
+msgid "SQLite3 error %d : %s"
+msgstr "SQLite3-Fehler %d : %s"
 
 #: src/dbse.c
-msgid "Executing SQLite3 query"
-msgstr "Ausführen einer SQLite3-Abfrage"
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 error was %s"
-msgstr "SQLite3-Fehler war %s"
+msgid "Ignoring empty sql query"
+msgstr "Ignorieren einer leeren SQL-Abfrage"
 
 #: src/event.c src/track.c
 #, c-format
@@ -910,6 +896,26 @@ msgstr "Externer Befehl ' %s' kann nicht gestartet werden"
 #, c-format
 msgid "Executing external command '%s'"
 msgstr "Externes Kommando ' %s' ausführen"
+
+#: src/event.c
+#, c-format
+msgid "Writing image to file: %s"
+msgstr "Bild in Datei schreiben: %s"
+
+#: src/event.c
+#, c-format
+msgid "Writing movie to file: %s"
+msgstr "Film in Datei schreiben: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved image to file: %s"
+msgstr "Bild in Datei gespeichert: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved movie to file: %s"
+msgstr "Gespeicherter Film in Datei: %s"
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -1001,7 +1007,7 @@ msgstr "Fehler beim Schreiben in die Pipe, Statusfehler %d"
 #: src/event.c
 #, c-format
 msgid "pipe %s not created or closed already "
-msgstr "Pipe %s wurde noch nicht erstellt oder geschlossen"
+msgstr "Pipe %s wurde noch nicht erstellt oder geschlossen "
 
 #: src/event.c
 msgid "The ogg container is no longer supported.  Changing to mpeg4"
@@ -1141,11 +1147,6 @@ msgstr "Der bevorzugte Codec %s wurde auf die schwarze Liste gesetzt: %s"
 
 #: src/ffmpeg.c
 #, c-format
-msgid "Preferred codec %s not found"
-msgstr "Bevorzugter Codec %s nicht gefunden"
-
-#: src/ffmpeg.c
-#, c-format
 msgid "Codec %s not found"
 msgstr "Codec %s nicht gefunden"
 
@@ -1159,8 +1160,8 @@ msgid "Could not alloc stream"
 msgstr "Stream konnte nicht zugeordnet werden"
 
 #: src/ffmpeg.c
-msgid "Failed to allocate decoder!"
-msgstr "Decoder konnte nicht zugeordnet werden!"
+msgid "Failed to allocate codec!"
+msgstr "Codec konnte nicht zugeordnet werden!"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1300,10 +1301,6 @@ msgstr "Ausgabekontext konnte nicht zugeordnet werden"
 #: src/ffmpeg.c
 msgid "Could not setup passthru!"
 msgstr "Konnte Durchgang nicht einrichten!"
-
-#: src/ffmpeg.c
-msgid "Failed to allocate codec!"
-msgstr "Codec konnte nicht zugeordnet werden!"
 
 #: src/ffmpeg.c
 msgid "Could not set the stream"
@@ -1453,8 +1450,8 @@ msgstr "Logdatei schließen ( %s)."
 
 #: src/motion.c
 #, c-format
-msgid "Motion detected - starting event %d"
-msgstr "Bewegung erkannt - Startereignis %d"
+msgid "Motion detected - starting event %d."
+msgstr "Bewegung erkannt - Startereignis %d."
 
 #: src/motion.c
 #, c-format
@@ -1504,7 +1501,7 @@ msgstr "Behindert"
 
 #: src/motion.c
 msgid "Enabled"
-msgstr "aktiviert"
+msgstr "Aktiviert"
 
 #: src/motion.c
 msgid "Pass-through processing disabled."
@@ -1542,7 +1539,7 @@ msgstr "Anpassen der Höhe auf das nächsthöhere Vielfache von 8 ( %d)."
 
 #: src/motion.c
 msgid "Could not fetch initial image from camera "
-msgstr "Das ursprüngliche Bild konnte nicht von der Kamera abgerufen werden"
+msgstr "Das ursprüngliche Bild konnte nicht von der Kamera abgerufen werden "
 
 #: src/motion.c
 msgid "Motion continues using width and height from config file(s)"
@@ -1607,10 +1604,6 @@ msgid "Emulating motion"
 msgstr "Bewegung nachahmen"
 
 #: src/motion.c
-msgid "Calling vid_close() from motion_cleanup"
-msgstr "Aufruf von vid close () aus der Bewegungsbereinigung"
-
-#: src/motion.c
 #, c-format
 msgid "Motion in area %d detected."
 msgstr "Bewegung im Bereich %d erkannt."
@@ -1620,18 +1613,42 @@ msgid "Retrying until successful connection with camera"
 msgstr "Wiederholen, bis die Verbindung zur Kamera hergestellt ist"
 
 #: src/motion.c
+msgid "Camera has become available."
+msgstr "Kamera ist verfügbar geworden."
+
+#: src/motion.c
+#, c-format
 msgid ""
-"Camera has finally become available\n"
-"Camera image has different width and heightfrom what is in the config file. "
-"You should fix that\n"
-"Restarting Motion thread to reinitialize all image buffers to new picture "
-"dimensions"
+"Restarting Motion.\n"
+"Image width (%d) or height(%d) requested is not modulo 8."
 msgstr ""
-"Die Kamera ist endlich verfügbar \n"
-"Das Kamerabild hat eine andere Breite und Höhe als in der "
-"Konfigurationsdatei angegeben.Sie sollten das \n"
-" korrigierenStarten Sie den Motion-Thread neu, um alle Bildpuffer für das "
-"neue Bild neu zu initialisierenMaße"
+"Motion wird neu gestartet.\n"
+"Die angeforderte Bildbreite (%d) oder -höhe (%d) ist nicht Modulo 8."
+
+#: src/motion.c
+#, c-format
+msgid ""
+"Restarting Motion.\n"
+"Motion only supports width and height greater than or equal to 64 %dx%d"
+msgstr ""
+"Motion wird neu gestartet.\n"
+"Motion unterstützt nur Breite und Höhe größer oder gleich 64 %dx%d"
+
+#: src/motion.c
+msgid ""
+"Restarting Motion.\n"
+"Height or width has changed on camera."
+msgstr ""
+"Motion wird neu gestartet.\n"
+"Höhe oder Breite hat sich auf der Kamera geändert."
+
+#: src/motion.c
+msgid ""
+"Restarting Motion.\n"
+"High resolution has changed on camera."
+msgstr ""
+"Motion wird neu gestartet.\n"
+"Die hohe Auflösung hat sich auf der Kamera geändert."
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -1681,7 +1698,7 @@ msgstr "Raw changes: %5d - Änderungen nach ' %s': %5d"
 #: src/motion.c
 #, c-format
 msgid " - labels: %3d"
-msgstr "- Beschriftungen: %3d"
+msgstr " - Beschriftungen: %3d"
 
 #: src/motion.c
 #, c-format
@@ -1691,12 +1708,12 @@ msgstr "Änderungen: %5d"
 #: src/motion.c
 #, c-format
 msgid " - noise level: %2d"
-msgstr "- Geräuschpegel: %2d"
+msgstr " - Geräuschpegel: %2d"
 
 #: src/motion.c
 #, c-format
 msgid " - threshold: %d"
-msgstr "- Schwelle: %d"
+msgstr " - Schwelle: %d"
 
 #: src/motion.c
 #, c-format
@@ -2017,7 +2034,7 @@ msgstr "Benutzername / Passwort für eine Proxy-URL nicht zulässig"
 #: src/netcam.c
 #, c-format
 msgid "Invalid netcam service '%s' "
-msgstr "Ungültiger Netcam-Dienst ' %s'"
+msgstr "Ungültiger Netcam-Dienst ' %s' "
 
 #: src/netcam.c
 #, c-format
@@ -2389,11 +2406,6 @@ msgid "SO_KEEPALIVE set on socket."
 msgstr "SO KEEPALIVE auf Steckdose setzen."
 
 #: src/netcam_http.c
-#, c-format
-msgid "re-using socket %d since keepalive is set."
-msgstr "Socket %d wiederverwenden, da Keepalive gesetzt ist."
-
-#: src/netcam_http.c
 msgid "fcntl(1) on socket"
 msgstr "fcntl (1) am Socket"
 
@@ -2550,7 +2562,7 @@ msgstr "Wartezeit für neues Dateibild"
 
 #: src/netcam_http.c
 msgid "delay waiting new file image "
-msgstr "Wartezeit für neues Dateibild"
+msgstr "Wartezeit für neues Dateibild "
 
 #: src/netcam_http.c
 #, c-format
@@ -2586,10 +2598,6 @@ msgid "netcam->jpeg_error %d"
 msgstr "netcam-> JPEG-Fehler %d"
 
 #: src/netcam_jpeg.c
-msgid "no new pic, no signal rcvd"
-msgstr "kein neues bild, kein signal rcvd"
-
-#: src/netcam_jpeg.c
 msgid "***new pic delay successful***"
 msgstr "*** Neue Bildverzögerung erfolgreich ***"
 
@@ -2602,11 +2610,6 @@ msgstr "JPEG-Fehler %d"
 #, c-format
 msgid "processing jpeg image - content length %d"
 msgstr "Verarbeitung von JPEG-Bildern - Länge des Inhalts %d"
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid "return code %d"
-msgstr "Rückkehrcode %d"
 
 #: src/netcam_jpeg.c
 #, c-format
@@ -2676,7 +2679,7 @@ msgstr "Fehler beim Dekodieren des Videopakets: Kopieren in den Puffer"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: HW Devices: "
-msgstr "%s: HW-Geräte:"
+msgstr "%s: HW-Geräte: "
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2820,6 +2823,11 @@ msgstr "%s: av Leserahmen: %s"
 
 #: src/netcam_rtsp.c
 #, c-format
+msgid "%s: Excessive tries to get data from camera %d"
+msgstr "%s: Übermäßige Versuche, Daten von Kamera %d abzurufen"
+
+#: src/netcam_rtsp.c
+#, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using %d"
 msgstr ""
 "%s: Erfassungsrate nicht in den netcam-Parametern angegeben. Verwenden von %d"
@@ -2837,7 +2845,7 @@ msgstr "Die Netzwerkkamera sendet Bilder in einem anderen Format"
 
 #: src/netcam_rtsp.c
 msgid "size than specified in the config and also a "
-msgstr "größe als in der config angegeben und auch a"
+msgstr "größe als in der config angegeben und auch a "
 
 #: src/netcam_rtsp.c
 msgid "different picture format.  The picture is being"
@@ -2865,7 +2873,7 @@ msgstr "Größe als in der Konfigurationsdatei angegeben."
 
 #: src/netcam_rtsp.c
 msgid "The picture is being transcoded into the size "
-msgstr "Das Bild wird in die Größe transkodiert"
+msgstr "Das Bild wird in die Größe transkodiert "
 
 #: src/netcam_rtsp.c
 msgid "requested in the configuration.  If possible change"
@@ -2886,11 +2894,11 @@ msgstr "Netcam: %dx %d => Konfiguration: %dx %d"
 
 #: src/netcam_rtsp.c
 msgid "The image sent is being "
-msgstr "Das gesendete Bild wird gesendet"
+msgstr "Das gesendete Bild wird gesendet "
 
 #: src/netcam_rtsp.c
 msgid "trancoded to YUV420P.  If possible change netcam "
-msgstr "trancodiert zu YUV420P. Wenn möglich netcam wechseln"
+msgstr "trancodiert zu YUV420P. Wenn möglich netcam wechseln "
 
 #: src/netcam_rtsp.c
 msgid "picture format to YUV420P to possibly lower CPU usage."
@@ -2929,7 +2937,7 @@ msgstr "%s: Option: %s = %s"
 
 #: src/netcam_rtsp.c
 msgid "Setting up v4l2 via netcam"
-msgstr "v4l2 über netcam einrichten"
+msgstr "V4l2 über netcam einrichten"
 
 #: src/netcam_rtsp.c
 msgid "Setting up file via netcam"
@@ -2955,7 +2963,7 @@ msgstr "%s Stream wird eingerichtet."
 
 #: src/netcam_rtsp.c
 msgid "Unknown"
-msgstr "unbekannte"
+msgstr "Unbekannte"
 
 #: src/netcam_rtsp.c
 msgid "Stream copied for pass-through"
@@ -3146,8 +3154,8 @@ msgid "Can't write picture to file %s"
 msgstr "Bild kann nicht in Datei %s geschrieben werden"
 
 #: src/picture.c
-msgid "Could not read from pgm file"
-msgstr "Konnte nicht aus PGM-Datei lesen"
+msgid "Error getting PGM vars."
+msgstr "Fehler beim Abrufen der PGM-Variablen."
 
 #: src/picture.c
 #, c-format
@@ -3155,12 +3163,9 @@ msgid "This is not a pgm file, starts with '%s'"
 msgstr "Dies ist keine pgm-Datei, beginnt mit ' %s'"
 
 #: src/picture.c
-msgid "Failed reading size in pgm file"
-msgstr "Fehler beim Lesen der Größe in der PGM-Datei"
-
-#: src/picture.c
-msgid "Failed reading maximum value in pgm file"
-msgstr "Fehler beim Lesen des Maximalwerts in der PGM-Datei"
+#, c-format
+msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
+msgstr "Magic %s: Breite %s(%d): Höhe %s(%d): MaxVal: %s(%d)"
 
 #: src/picture.c
 msgid "Failed reading image data from pgm file"
@@ -3379,12 +3384,12 @@ msgstr "Kamerabereich abrufen"
 msgid "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d "
 msgstr ""
 "EINGANGSPARAM ABS Schwenk min %d, Schwenk max %d, Neigung min %d, Neigung "
-"max %d"
+"max %d "
 
 #: src/track.c
 #, c-format
 msgid "INPUT_PARAM_ABS X_Angel %d, Y_Angel %d "
-msgstr "EINGABEPARAMETER ABS X Engel %d, Y Engel %d"
+msgstr "EINGABEPARAMETER ABS X Engel %d, Y Engel %d "
 
 #: src/track.c
 #, c-format
@@ -3403,7 +3408,7 @@ msgstr "Gefunden MINMAX = %d"
 #: src/track.c
 #, c-format
 msgid "Before_ABS_Y_Angel : x= %d , Y= %d, "
-msgstr "Vor ABS Y Angel: x = %d, Y = %d,"
+msgstr "Vor ABS Y Angel: x = %d, Y = %d, "
 
 #: src/track.c
 #, c-format
@@ -3429,12 +3434,12 @@ msgstr "Für SET REL X %d verschieben, Y %d verschieben"
 #: src/track.c
 #, c-format
 msgid " dev %d, addr= %d, control_S= %d, Wert= %d"
-msgstr "dev %d, addr = %d, control S = %d, Wert = %d"
+msgstr " dev %d, addr = %d, control S = %d, Wert = %d"
 
 #: src/track.c
 #, c-format
 msgid " dev %d,addr= %d, control_S= %d, Wert= %d"
-msgstr "dev %d, addr = %d, control S = %d, Wert = %d"
+msgstr " dev %d, addr = %d, control S = %d, Wert = %d"
 
 #: src/track.c
 #, c-format
@@ -3489,10 +3494,8 @@ msgid "Error closing file"
 msgstr "Fehler beim Schließen der Datei"
 
 #: src/util.c
-msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
-msgstr ""
-"%{dbeventid} verwendet, aber SQL-Abfragestart hat keine gültige Ereignis-ID "
-"zurückgegeben"
+msgid "{dbeventid} is not supported. Use eventid."
+msgstr "{dbeventid} wird nicht unterstützt. Verwenden Sie eventid."
 
 #: src/util.c
 #, c-format
@@ -3548,6 +3551,15 @@ msgstr "Fehler beim Analysieren von Steuerelementen: %s"
 
 #: src/util.c
 #, c-format
+msgid "Parsing: %s"
+msgstr "Parsen: %s"
+
+#: src/util.c
+msgid "Parsing: <redacted>"
+msgstr "Parsing: <redacted>"
+
+#: src/util.c
+#, c-format
 msgid "Error parsing controls: %s"
 msgstr "Fehler beim Parsen der Steuerelemente: %s"
 
@@ -3573,6 +3585,15 @@ msgstr "Neue Videoparameter: %s"
 
 #: src/util.c
 #, c-format
+msgid "New webcontrol_header_params: %s"
+msgstr "Neue Webcontrol-Header-Parameter: %s"
+
+#: src/util.c
+msgid "New webcontrol_header_params: <redacted>"
+msgstr "Neue Webcontrol-Header-Parameter: <redacted>"
+
+#: src/util.c
+#, c-format
 msgid "New stream_header_params: %s"
 msgstr "Neue Stream-Header-Parameter: %s"
 
@@ -3583,7 +3604,7 @@ msgstr "Neue Stream-Header-Parameter: <redacted>"
 #: src/util.c
 #, c-format
 msgid "Programming error.  Unknown configuration item: %s"
-msgstr "Programmierfehler. Unbekanntes Konfigurationselement: %s "
+msgstr "Programmierfehler. Unbekanntes Konfigurationselement: %s"
 
 #: src/video_bktr.c
 #, c-format
@@ -3894,7 +3915,16 @@ msgstr "--------- Steuerelemente ---------"
 
 #: src/video_v4l2.c
 msgid "  V4L2 ID   Name and Range"
-msgstr "Name und Bereich der V4L2-ID"
+msgstr " Name und Bereich der V4L2-ID"
+
+#: src/video_v4l2.c
+msgid "Error resetting user value"
+msgstr "Fehler beim Zurücksetzen des Benutzerwerts"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Leaving control %s \"%s\" set to %d"
+msgstr "Steuerelement %s \"%s\" auf %d gesetzt lassen"
 
 #: src/video_v4l2.c
 msgid "Device not ready"
@@ -3902,28 +3932,27 @@ msgstr "Gerät nicht bereit"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "setting control %s \"%s\" to %d failed with return code %d"
-msgstr ""
-"Das Setzen von %s \" %s \" auf %d ist mit dem Rückkehrcode %d fehlgeschlagen"
+msgid "Set control \"%s\" to value %d"
+msgstr "Setzen Sie das Steuerelement \" %s\" auf den Wert %d"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "Set control \"%s\" to value %d"
-msgstr "Setzen Sie das Steuerelement \" %s\" auf den Wert %d "
+msgid "setting control %s \"%s\" to %d failed. "
+msgstr "Setzen des Steuerelements %s \"%s\" auf %d fehlgeschlagen."
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %s is below minimum.  Using minimum %d"
 msgstr ""
 "Der Wert der Steueroption %s %s liegt unter dem Minimum. Mindestens %d . "
-"verwenden "
+"verwenden"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %s is above maximum.  Using maximum %d"
 msgstr ""
 "Der Wert der %s-Steuerungsoption %s liegt über dem Maximum. Maximale %d . "
-"verwenden "
+"verwenden"
 
 #: src/video_v4l2.c
 msgid "control type not supported yet"
@@ -4006,8 +4035,42 @@ msgstr "Setzen Sie die Frequenz auf %ul"
 
 #: src/video_v4l2.c
 #, c-format
+msgid "Unable to use %c%c%c%c (%dx%d)"
+msgstr "%c%c%c%c (%dx%d) kann nicht verwendet werden"
+
+#: src/video_v4l2.c
+#, c-format
 msgid "Testing palette %c%c%c%c (%dx%d)"
 msgstr "Testpalette %c %c %c %c ( %dx %d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Checking image size %dx%d with stride %d"
+msgstr "Bildgröße %dx%d wird mit Schritt %d überprüft"
+
+#: src/video_v4l2.c
+msgid "No stride value provided from device."
+msgstr "Kein Schrittwert vom Gerät bereitgestellt."
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Width(%d) must be less than stride(%d)"
+msgstr "Die Breite (%d) muss kleiner sein als die Schrittweite (%d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "The image width(%d) is not multiple of the stride(%d)"
+msgstr "Die Bildbreite (%d) ist kein Vielfaches der Schrittweite (%d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
+msgstr "Unmögliche Bedingung: Breite(%d), Schritt(%d), Pro Schritt(%d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Image width will be padded %d bytes"
+msgstr "Die Bildbreite wird mit %d Bytes aufgefüllt"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4025,22 +4088,13 @@ msgstr ""
 "an."
 
 #: src/video_v4l2.c
-msgid ""
-"Error setting pixel format.\n"
-"VIDIOC_S_FMT: "
-msgstr ""
-"Fehler beim Einstellen des Pixelformats. \n"
-" VIDIOC S FMT:"
+msgid "Error setting pixel format."
+msgstr "Fehler beim Festlegen des Pixelformats."
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
 msgstr "Verwenden der Palette %c %c %c %c ( %dx %d)"
-
-#: src/video_v4l2.c
-#, c-format
-msgid "Bytesperlines %d sizeimage %d colorspace %08x"
-msgstr "Bytesperlines %d sizeimage %d colorspace %08x"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4051,13 +4105,6 @@ msgstr "Anpassung an die Breite ( %d)"
 #, c-format
 msgid "Adjusting to height (%d)"
 msgstr "Anpassung an die Höhe ( %d)"
-
-#: src/video_v4l2.c
-msgid ""
-"H264(21) format not supported via videodevice.  Changing to default palette"
-msgstr ""
-"Das Format H264 (21) wird über ein Videogerät nicht unterstützt. Zur "
-"Standardpalette wechseln"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4110,12 +4157,8 @@ msgstr "Zu wenig Speicher."
 
 #: src/video_v4l2.c
 #, c-format
-msgid ""
-"Error querying buffer %i\n"
-"VIDIOC_QUERYBUF: "
-msgstr ""
-"Fehler beim Abfragen des Puffers %i \n"
-"VIDIOC QUERYBUF:"
+msgid "Error querying buffer %i"
+msgstr "Fehler beim Abfragen des Puffers %i"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4124,8 +4167,8 @@ msgstr "Fehler beim Zuordnen des Puffers %i mmap"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "%i length=%d Address (%x)"
-msgstr "%i Länge = %d Adresse ( %x)"
+msgid "%i length=%d Address (%x) offset %d"
+msgstr "%i Länge=%d Adresse (%x) Offset %d"
 
 #: src/video_v4l2.c
 msgid "Error starting stream. VIDIOC_STREAMON"
@@ -4184,12 +4227,12 @@ msgstr "Testpalette %s ( %c %c %c %c)"
 #: src/video_v4l2.c
 #, c-format
 msgid "  Width: %d, Height %d"
-msgstr "Breite: %d, Höhe %d"
+msgstr " Breite: %d, Höhe %d"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "    Framerate %d/%d"
-msgstr "Bildrate %d / %d"
+msgstr " Bildrate %d / %d"
 
 #: src/webu.c
 #, c-format
@@ -4231,6 +4274,11 @@ msgstr "Muttersprache: Aus"
 #: src/webu.c
 msgid "Set the value to null/zero"
 msgstr "Setzen Sie den Wert auf null / null"
+
+#: src/webu.c
+#, c-format
+msgid "Ignoring connection from: %s"
+msgstr "Ignorieren der Verbindung von: %s"
 
 #: src/webu.c
 #, c-format
@@ -4388,7 +4436,7 @@ msgstr "Doppelter Port angefordert %d"
 
 #: src/webu.c
 msgid "Invalid webcontrol_lock_max_ips.  Setting equal to 25."
-msgstr "Ungültige maximale IPs für Webcontrol-Sperre. Einstellung gleich 25. "
+msgstr "Ungültige maximale IPs für Webcontrol-Sperre. Einstellung gleich 25."
 
 #: src/webu_html.c
 msgid "Cameras"
@@ -4543,59 +4591,4 @@ msgstr "Das Bild konnte nicht zum Streaming gebracht werden."
 #: src/webu_text.c
 #, c-format
 msgid "'%s' option is depreciated.  New option name is '%s'"
-msgstr "Die Option ' %s' wird abgeschrieben. Neuer Optionsname ist '%s' "
-
-#: src/conf.c
-msgid "webcontrol_lock_minutes"
-msgstr "Webcontrol-Sperrminuten"
-
-#: src/conf.c
-msgid "webcontrol_lock_attempts"
-msgstr "Webcontrol-Sperrversuche"
-
-#: src/conf.c
-msgid "webcontrol_lock_max_ips"
-msgstr "Webcontrol-Sperre max. ips"
-
-#: src/event.c
-#, c-format
-msgid "Writing image to file: %s"
-msgstr "Bild in Datei schreiben: %s"
-
-#: src/event.c
-#, c-format
-msgid "Writing movie to file: %s"
-msgstr "Film in Datei schreiben: %s"
-
-#: src/event.c
-#, c-format
-msgid "Saved image to file: %s"
-msgstr "Bild in Datei gespeichert: %s"
-
-#: src/event.c
-#, c-format
-msgid "Saved movie to file: %s"
-msgstr "Gespeicherter Film in Datei: %s"
-
-#: src/util.c
-#, c-format
-msgid "Parsing: %s"
-msgstr "Parsen: %s"
-
-#: src/util.c
-msgid "Parsing: <redacted>"
-msgstr "Parsing: <redacted>"
-
-#: src/util.c
-#, c-format
-msgid "New webcontrol_header_params: %s"
-msgstr "Neue Webcontrol-Header-Parameter: %s"
-
-#: src/util.c
-msgid "New webcontrol_header_params: <redacted>"
-msgstr "Neue Webcontrol-Header-Parameter: <redacted>"
-
-#: src/webu.c
-#, c-format
-msgid "Ignoring connection from: %s"
-msgstr "Ignorieren der Verbindung von: %s"
+msgstr "Die Option ' %s' wird abgeschrieben. Neuer Optionsname ist '%s'"

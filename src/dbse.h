@@ -25,7 +25,7 @@
 void dbse_global_init(struct context **cntlist);
 void dbse_global_deinit(struct context **cntlist);
 
-int dbse_init(struct context *cnt, struct context **cntlist);
+int dbse_init(struct context *cnt);
 void dbse_deinit(struct context *cnt);
 
 void dbse_sqlmask_update(struct context *cnt);

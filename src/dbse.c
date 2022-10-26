@@ -187,7 +187,7 @@ static int dbse_init_mariadb(struct context *cnt)
 }
 
 /** dbse_init_sqlite3 */
-static int dbse_init_sqlite3(struct context *cnt,struct context **cntlist)
+static int dbse_init_sqlite3(struct context *cnt)
 {
     #ifdef HAVE_SQLITE3
         int retcd;
@@ -217,7 +217,6 @@ static int dbse_init_sqlite3(struct context *cnt,struct context **cntlist)
         }
     #else
         (void)cnt;
-        (void)cntlist;
     #endif /* HAVE_SQLITE3 */
 
     return 0;
@@ -259,7 +258,7 @@ static int dbse_init_pgsql(struct context *cnt)
 }
 
 /** dbse_init */
-int dbse_init(struct context *cnt, struct context **cntlist)
+int dbse_init(struct context *cnt)
 {
     int retcd = 0;
 
@@ -274,7 +273,7 @@ int dbse_init(struct context *cnt, struct context **cntlist)
         } else if (mystreq(cnt->conf.database_type,"postgresql")) {
             retcd = dbse_init_pgsql(cnt);
         } else if (mystreq(cnt->conf.database_type,"sqlite3")) {
-            retcd = dbse_init_sqlite3(cnt, cntlist);
+            retcd = dbse_init_sqlite3(cnt);
         }
 
         /* Set the sql mask file according to the SQL config options*/
@@ -543,7 +542,7 @@ void dbse_firstmotion(struct context *cnt)
                    &cnt->current_image->timestamp_tv, NULL, 0);
 
     if (strlen(sqlquery) <= 0) {
-        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, "Ignoring empty sql query");
+        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, _("Ignoring empty sql query"));
         return;
     }
 
@@ -570,7 +569,7 @@ void dbse_newfile(struct context *cnt, char *filename, int sqltype, struct timev
                    tv1, filename, sqltype);
 
     if (strlen(sqlquery) <= 0) {
-        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, "Ignoring empty sql query");
+        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, _("Ignoring empty sql query"));
         return;
     }
 
@@ -596,7 +595,7 @@ void dbse_fileclose(struct context *cnt, char *filename, int sqltype, struct tim
     mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_query_stop,
                tv1, filename, sqltype);
     if (strlen(sqlquery) <= 0) {
-        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, "Ignoring empty sql query");
+        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, _("Ignoring empty sql query"));
         return;
     }
 

@@ -33,6 +33,19 @@
 #include "webu_stream.h"
 #include "translate.h"
 
+void webu_stream_deinit(struct webui_ctx *webui, struct stream_data *stream)
+{
+    pthread_mutex_lock(&webui->cnt->mutex_stream);
+        stream->cnct_count--;
+        if (stream->cnct_count == 0) {
+            if (stream->jpeg_data != NULL) {
+                free(stream->jpeg_data);
+                stream->jpeg_data = NULL;
+            }
+        }
+    pthread_mutex_unlock(&webui->cnt->mutex_stream);
+}
+
 static void webu_stream_mjpeg_checkbuffers(struct webui_ctx *webui)
 {
     /* Allocate buffers if needed */
@@ -117,6 +130,13 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui)
         } else {
             webui->stream_fps = webui->cnt->conf.stream_maxrate;
         }
+        /* If no image, wait a second*/
+        if (local_stream->jpeg_data == NULL) {
+            pthread_mutex_unlock(&webui->cnt->mutex_stream);
+                SLEEP(1,0);
+            pthread_mutex_lock(&webui->cnt->mutex_stream);
+        }
+        /* If still no image, give up */
         if (local_stream->jpeg_data == NULL) {
             pthread_mutex_unlock(&webui->cnt->mutex_stream);
             return;

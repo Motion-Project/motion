@@ -1675,7 +1675,7 @@ config_param config_params[] = {
     "##############################################################",
     1,
     0,
-    copy_string,
+    NULL,
     print_camera,
     WEBUI_LEVEL_ADVANCED
     },

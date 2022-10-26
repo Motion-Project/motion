@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-03 23:12-0600\n"
-"PO-Revision-Date: 2021-10-03 22:57-0600\n"
+"POT-Creation-Date: 2022-10-24 08:29-0600\n"
+"PO-Revision-Date: 2022-10-24 08:31-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: da\n"
@@ -228,11 +228,11 @@ msgstr "vend akse"
 
 #: src/conf.c
 msgid "locate_motion_mode"
-msgstr "Find bevægelsestilstand"
+msgstr "find bevægelsestilstand"
 
 #: src/conf.c
 msgid "locate_motion_style"
-msgstr "Find bevægelsestil"
+msgstr "find bevægelsestil"
 
 #: src/conf.c
 msgid "text_left"
@@ -264,7 +264,7 @@ msgstr "pause"
 
 #: src/conf.c
 msgid "threshold"
-msgstr "Grænseværdi"
+msgstr "grænseværdi"
 
 #: src/conf.c
 msgid "threshold_maximum"
@@ -336,7 +336,7 @@ msgstr "ved arrangementets afslutning"
 
 #: src/conf.c
 msgid "on_picture_save"
-msgstr "Gem på billedet"
+msgstr "gem på billedet"
 
 #: src/conf.c
 msgid "on_area_detected"
@@ -511,6 +511,18 @@ msgid "webcontrol_header_params"
 msgstr "webkontrol header params"
 
 #: src/conf.c
+msgid "webcontrol_lock_minutes"
+msgstr "webkontrol lås minutter"
+
+#: src/conf.c
+msgid "webcontrol_lock_attempts"
+msgstr "forsøg på webkontrollås"
+
+#: src/conf.c
+msgid "webcontrol_lock_max_ips"
+msgstr "webkontrol lås max ips"
+
+#: src/conf.c
 msgid "stream_port"
 msgstr "strømhavn"
 
@@ -600,11 +612,11 @@ msgstr "sql log billede"
 
 #: src/conf.c
 msgid "sql_log_snapshot"
-msgstr "SQL-log-snapshot"
+msgstr "sql-log-snapshot"
 
 #: src/conf.c
 msgid "sql_log_movie"
-msgstr "SQL logfilm"
+msgstr "sql logfilm"
 
 #: src/conf.c
 msgid "sql_log_timelapse"
@@ -728,43 +740,6 @@ msgstr "Initialisering af database"
 
 #: src/dbse.c
 #, c-format
-msgid "SQLite3 Database filename %s"
-msgstr "SQLite3 databasefilnavn %s"
-
-#: src/dbse.c
-msgid "SQLite3 is threadsafe"
-msgstr "SQLite3 er trådløs"
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 serialized %s"
-msgstr "SQLite3 serialiseret %s"
-
-#: src/dbse.c
-msgid "FAILED"
-msgstr "MISLYKKEDES"
-
-#: src/dbse.c
-msgid "SUCCESS"
-msgstr "SUCCES"
-
-#: src/dbse.c
-#, c-format
-msgid "Can't open SQLite3 database %s : %s"
-msgstr "Kan ikke åbne SQLite3 -databasen %s: %s"
-
-#: src/dbse.c
-#, c-format
-msgid "database_busy_timeout %d msec"
-msgstr "timeout for database optaget %d msek"
-
-#: src/dbse.c
-#, c-format
-msgid "database_busy_timeout failed %s"
-msgstr "timeout for database optaget mislykkedes %s"
-
-#: src/dbse.c
-#, c-format
 msgid "Cannot connect to MySQL database %s on host %s with user %s"
 msgstr ""
 "Kan ikke oprette forbindelse til MySQL-database %s på vært %s med bruger %s"
@@ -787,8 +762,24 @@ msgid "MariaDB error was %s"
 msgstr "MariaDB -fejl var %s"
 
 #: src/dbse.c
-msgid "SQLite3 using shared handle"
-msgstr "SQLite3 ved hjælp af delt håndtag"
+#, c-format
+msgid "Opening database %s"
+msgstr "Åbner database %s"
+
+#: src/dbse.c
+#, c-format
+msgid "Can't open SQLite3 database %s.  Error %d : %s"
+msgstr "Kan ikke åbne SQLite3-databasen %s. Fejl %d: %s"
+
+#: src/dbse.c
+#, c-format
+msgid "Setting busy timeout to %d msec"
+msgstr "Indstiller optaget timeout til %d msec"
+
+#: src/dbse.c
+#, c-format
+msgid "Setting busy timeout failed.  Error %d:%s"
+msgstr "Indstilling af optaget timeout mislykkedes. Fejl %d:%s"
 
 #: src/dbse.c
 #, c-format
@@ -797,8 +788,8 @@ msgstr "Forbindelse til PostgreSQL-database ' %s' mislykkedes: %s"
 
 #: src/dbse.c
 #, c-format
-msgid "Database backend %s"
-msgstr "Database backend %s"
+msgid "Database type %s"
+msgstr "Databasetype %s"
 
 #: src/dbse.c
 msgid "Executing MySQL query"
@@ -878,22 +869,17 @@ msgstr "PGSQL-forespørgsel mislykkedes: [%s] %s %s"
 
 #: src/dbse.c
 #, c-format
-msgid "INSERT ... RETURNING VALUE=\"%s\""
-msgstr "INSERT ... RETURNING VALUE = \"%s \""
+msgid "Executing %s"
+msgstr "Kører %s"
 
 #: src/dbse.c
 #, c-format
-msgid "Invalid event ID returned by SQL query \"%s\""
-msgstr "Ugyldigt hændelses -id returneret af SQL -forespørgsel \"%s \""
+msgid "SQLite3 error %d : %s"
+msgstr "SQLite3 fejl %d: %s"
 
 #: src/dbse.c
-msgid "Executing SQLite3 query"
-msgstr "Kører SQLite3 -forespørgsel"
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 error was %s"
-msgstr "SQLite3 fejl var %s"
+msgid "Ignoring empty sql query"
+msgstr "Ignorerer tom sql-forespørgsel"
 
 #: src/event.c src/track.c
 #, c-format
@@ -904,6 +890,26 @@ msgstr "Kan ikke starte ekstern kommando ' %s'"
 #, c-format
 msgid "Executing external command '%s'"
 msgstr "Udfører ekstern kommando ' %s'"
+
+#: src/event.c
+#, c-format
+msgid "Writing image to file: %s"
+msgstr "Skriver billede til fil: %s"
+
+#: src/event.c
+#, c-format
+msgid "Writing movie to file: %s"
+msgstr "Skriver film til fil: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved image to file: %s"
+msgstr "Gemt billede i fil: %s"
+
+#: src/event.c
+#, c-format
+msgid "Saved movie to file: %s"
+msgstr "Filmen blev gemt i filen: %s"
 
 #: src/event.c
 msgid "Failed to put image into video pipe"
@@ -995,7 +1001,7 @@ msgstr "Fejl ved skrivning i røret, angiv fejl %d"
 #: src/event.c
 #, c-format
 msgid "pipe %s not created or closed already "
-msgstr "pipe %s er ikke allerede oprettet eller lukket"
+msgstr "pipe %s er ikke allerede oprettet eller lukket "
 
 #: src/event.c
 msgid "The ogg container is no longer supported.  Changing to mpeg4"
@@ -1135,11 +1141,6 @@ msgstr "Foretrukket codec %s er sortlistet: %s"
 
 #: src/ffmpeg.c
 #, c-format
-msgid "Preferred codec %s not found"
-msgstr "Foretrukket codec %s ikke fundet"
-
-#: src/ffmpeg.c
-#, c-format
 msgid "Codec %s not found"
 msgstr "Codec %s ikke fundet"
 
@@ -1153,8 +1154,8 @@ msgid "Could not alloc stream"
 msgstr "Kunne ikke tildele strøm"
 
 #: src/ffmpeg.c
-msgid "Failed to allocate decoder!"
-msgstr "Kunne ikke tildele dekoder!"
+msgid "Failed to allocate codec!"
+msgstr "Der blev ikke tildelt codec!"
 
 #: src/ffmpeg.c
 #, c-format
@@ -1294,10 +1295,6 @@ msgstr "Kunne ikke allokere outputkontekst"
 #: src/ffmpeg.c
 msgid "Could not setup passthru!"
 msgstr "Kunne ikke konfigurere passthru!"
-
-#: src/ffmpeg.c
-msgid "Failed to allocate codec!"
-msgstr "Der blev ikke tildelt codec!"
 
 #: src/ffmpeg.c
 msgid "Could not set the stream"
@@ -1443,8 +1440,8 @@ msgstr "Lukker logfil ( %s)."
 
 #: src/motion.c
 #, c-format
-msgid "Motion detected - starting event %d"
-msgstr "Bevægelse detekteret - starthændelse %d"
+msgid "Motion detected - starting event %d."
+msgstr "Bevægelse registreret - starthændelse %d."
 
 #: src/motion.c
 #, c-format
@@ -1491,7 +1488,7 @@ msgstr "Kamera %d startet: bevægelsesdetektion %s"
 
 #: src/motion.c
 msgid "Disabled"
-msgstr "handicappet"
+msgstr "Handicappet"
 
 #: src/motion.c
 msgid "Enabled"
@@ -1533,7 +1530,7 @@ msgstr "Justering af højde til næste højere multipel på 8 ( %d)."
 
 #: src/motion.c
 msgid "Could not fetch initial image from camera "
-msgstr "Kunne ikke hente det oprindelige billede fra kameraet"
+msgstr "Kunne ikke hente det oprindelige billede fra kameraet "
 
 #: src/motion.c
 msgid "Motion continues using width and height from config file(s)"
@@ -1597,10 +1594,6 @@ msgid "Emulating motion"
 msgstr "Efterligende bevægelse"
 
 #: src/motion.c
-msgid "Calling vid_close() from motion_cleanup"
-msgstr "Ringer op tæt () fra oprydning af bevægelse"
-
-#: src/motion.c
 #, c-format
 msgid "Motion in area %d detected."
 msgstr "Bevægelse i område %d detekteret."
@@ -1610,18 +1603,42 @@ msgid "Retrying until successful connection with camera"
 msgstr "Forsøg igen, indtil en vellykket forbindelse med kameraet"
 
 #: src/motion.c
+msgid "Camera has become available."
+msgstr "Kamera er blevet tilgængeligt."
+
+#: src/motion.c
+#, c-format
 msgid ""
-"Camera has finally become available\n"
-"Camera image has different width and heightfrom what is in the config file. "
-"You should fix that\n"
-"Restarting Motion thread to reinitialize all image buffers to new picture "
-"dimensions"
+"Restarting Motion.\n"
+"Image width (%d) or height(%d) requested is not modulo 8."
 msgstr ""
-"Kameraet er endelig blevet tilgængeligt \n"
-"Kamerabillede har forskellig bredde og højde fra det, der findes i "
-"konfigurationsfilen.Du skal ordne det \n"
-"Genstart bevægelsestråd for at initialisere alle billedbuffere til et nyt "
-"billededimensioner"
+"Genstarter bevægelse.\n"
+"Den ønskede billedbredde (%d) eller højde (%d) er ikke modulo 8."
+
+#: src/motion.c
+#, c-format
+msgid ""
+"Restarting Motion.\n"
+"Motion only supports width and height greater than or equal to 64 %dx%d"
+msgstr ""
+"Genstarter bevægelse.\n"
+"Bevægelse understøtter kun bredde og højde større end eller lig med 64 %dx%d"
+
+#: src/motion.c
+msgid ""
+"Restarting Motion.\n"
+"Height or width has changed on camera."
+msgstr ""
+"Genstarter bevægelse.\n"
+"Højde eller bredde er ændret på kameraet."
+
+#: src/motion.c
+msgid ""
+"Restarting Motion.\n"
+"High resolution has changed on camera."
+msgstr ""
+"Genstarter bevægelse.\n"
+"Høj opløsning er ændret på kameraet."
 
 #: src/motion.c
 msgid "Video signal re-acquired"
@@ -1668,7 +1685,7 @@ msgstr "Rå ændringer: %5d - ændringer efter ' %s': %5d"
 #: src/motion.c
 #, c-format
 msgid " - labels: %3d"
-msgstr "- etiketter: %3d"
+msgstr " - etiketter: %3d"
 
 #: src/motion.c
 #, c-format
@@ -1678,17 +1695,17 @@ msgstr "Ændringer: %5d"
 #: src/motion.c
 #, c-format
 msgid " - noise level: %2d"
-msgstr "- støjniveau: %2d"
+msgstr " - støjniveau: %2d"
 
 #: src/motion.c
 #, c-format
 msgid " - threshold: %d"
-msgstr "- tærskelværdi: %d"
+msgstr " - tærskelværdi: %d"
 
 #: src/motion.c
 #, c-format
 msgid "Invalid timelapse_mode argument '%s'"
-msgstr "Ugyldigt argument for timelapse-tilstand '%s' "
+msgstr "Ugyldigt argument for timelapse-tilstand '%s'"
 
 #: src/motion.c
 msgid "%:s Defaulting to manual timelapse mode"
@@ -1998,7 +2015,7 @@ msgstr "Brugernavn / adgangskode er ikke tilladt på en proxy-URL"
 #: src/netcam.c
 #, c-format
 msgid "Invalid netcam service '%s' "
-msgstr "Ugyldig netkamptjeneste ' %s'"
+msgstr "Ugyldig netkamptjeneste ' %s' "
 
 #: src/netcam.c
 #, c-format
@@ -2370,11 +2387,6 @@ msgid "SO_KEEPALIVE set on socket."
 msgstr "SÅ KEEPALIVE indstillet på stikkontakt."
 
 #: src/netcam_http.c
-#, c-format
-msgid "re-using socket %d since keepalive is set."
-msgstr "genanvendelse af socket %d, da keepalive er indstillet."
-
-#: src/netcam_http.c
 msgid "fcntl(1) on socket"
 msgstr "fcntl (1) på stikkontakt"
 
@@ -2529,7 +2541,7 @@ msgstr "venter på timeout for ny filbillede"
 
 #: src/netcam_http.c
 msgid "delay waiting new file image "
-msgstr "forsinkelse af at vente på nyt filbillede"
+msgstr "forsinkelse af at vente på nyt filbillede "
 
 #: src/netcam_http.c
 #, c-format
@@ -2565,10 +2577,6 @@ msgid "netcam->jpeg_error %d"
 msgstr "netcam-> jpeg-fejl %d"
 
 #: src/netcam_jpeg.c
-msgid "no new pic, no signal rcvd"
-msgstr "ingen nye billeder, ingen signal-rcvd"
-
-#: src/netcam_jpeg.c
 msgid "***new pic delay successful***"
 msgstr "*** ny pic forsinkelse vellykket ***"
 
@@ -2581,11 +2589,6 @@ msgstr "jpeg-fejl %d"
 #, c-format
 msgid "processing jpeg image - content length %d"
 msgstr "behandling af jpeg-billede - indholdslængde %d"
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid "return code %d"
-msgstr "returkode %d"
 
 #: src/netcam_jpeg.c
 #, c-format
@@ -2655,7 +2658,7 @@ msgstr "Fejl ved afkodning af videopakke: Kopiering til buffer"
 #: src/netcam_rtsp.c
 #, c-format
 msgid "%s: HW Devices: "
-msgstr "%s: HW -enheder:"
+msgstr "%s: HW -enheder: "
 
 #: src/netcam_rtsp.c
 #, c-format
@@ -2798,6 +2801,11 @@ msgstr "%s: av læseramme: %s"
 
 #: src/netcam_rtsp.c
 #, c-format
+msgid "%s: Excessive tries to get data from camera %d"
+msgstr "%s: For mange forsøg på at hente data fra kameraet %d"
+
+#: src/netcam_rtsp.c
+#, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using %d"
 msgstr "%s: fangsthastighed ikke angivet i netcam -params. Brug af %d"
 
@@ -2813,7 +2821,7 @@ msgstr "Netværkskameraet sender billeder på et andet"
 
 #: src/netcam_rtsp.c
 msgid "size than specified in the config and also a "
-msgstr "størrelse end specificeret i konfigurationen og også en"
+msgstr "størrelse end specificeret i konfigurationen og også en "
 
 #: src/netcam_rtsp.c
 msgid "different picture format.  The picture is being"
@@ -2841,7 +2849,7 @@ msgstr "størrelse end specificeret i konfigurationsfilen."
 
 #: src/netcam_rtsp.c
 msgid "The picture is being transcoded into the size "
-msgstr "Billedet bliver kodet til størrelsen"
+msgstr "Billedet bliver kodet til størrelsen "
 
 #: src/netcam_rtsp.c
 msgid "requested in the configuration.  If possible change"
@@ -2862,11 +2870,11 @@ msgstr "Netcam: %dx %d => Config: %dx %d"
 
 #: src/netcam_rtsp.c
 msgid "The image sent is being "
-msgstr "Det sendte billede bliver ved"
+msgstr "Det sendte billede bliver ved "
 
 #: src/netcam_rtsp.c
 msgid "trancoded to YUV420P.  If possible change netcam "
-msgstr "trancoderet til YUV420P. Skift om muligt netcam"
+msgstr "trancoderet til YUV420P. Skift om muligt netcam "
 
 #: src/netcam_rtsp.c
 msgid "picture format to YUV420P to possibly lower CPU usage."
@@ -3119,8 +3127,8 @@ msgid "Can't write picture to file %s"
 msgstr "Kan ikke skrive billede til filen %s"
 
 #: src/picture.c
-msgid "Could not read from pgm file"
-msgstr "Kunne ikke læse fra pgm-fil"
+msgid "Error getting PGM vars."
+msgstr "Fejl ved hentning af PGM vars."
 
 #: src/picture.c
 #, c-format
@@ -3128,12 +3136,9 @@ msgid "This is not a pgm file, starts with '%s'"
 msgstr "Dette er ikke en pgm-fil, starter med ' %s'"
 
 #: src/picture.c
-msgid "Failed reading size in pgm file"
-msgstr "Mislykket læsestørrelse i pgm-fil"
-
-#: src/picture.c
-msgid "Failed reading maximum value in pgm file"
-msgstr "Der kunne ikke læses maksimumværdi i pgm-fil"
+#, c-format
+msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
+msgstr "Magic %s: Bredde %s(%d): Højde %s(%d): MaxVal: %s(%d)"
 
 #: src/picture.c
 msgid "Failed reading image data from pgm file"
@@ -3343,12 +3348,12 @@ msgstr "Henter kameraområdet"
 #: src/track.c
 #, c-format
 msgid "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d "
-msgstr "INPUT PARAM ABS pan min %d, pan max %d, tilt min %d, tilt max %d"
+msgstr "INPUT PARAM ABS pan min %d, pan max %d, tilt min %d, tilt max %d "
 
 #: src/track.c
 #, c-format
 msgid "INPUT_PARAM_ABS X_Angel %d, Y_Angel %d "
-msgstr "INPUT PARAM ABS X Angel %d, Y Angel %d"
+msgstr "INPUT PARAM ABS X Angel %d, Y Angel %d "
 
 #: src/track.c
 #, c-format
@@ -3367,7 +3372,7 @@ msgstr "Fundet MINMAX = %d"
 #: src/track.c
 #, c-format
 msgid "Before_ABS_Y_Angel : x= %d , Y= %d, "
-msgstr "Før ABS Y Angel: x = %d, Y = %d,"
+msgstr "Før ABS Y Angel: x = %d, Y = %d, "
 
 #: src/track.c
 #, c-format
@@ -3392,12 +3397,12 @@ msgstr "For SET REL skal du flytte X %d, flytte Y %d"
 #: src/track.c
 #, c-format
 msgid " dev %d, addr= %d, control_S= %d, Wert= %d"
-msgstr "dev %d, addr = %d, kontrol S = %d, Wert = %d"
+msgstr " dev %d, addr = %d, kontrol S = %d, Wert = %d"
 
 #: src/track.c
 #, c-format
 msgid " dev %d,addr= %d, control_S= %d, Wert= %d"
-msgstr "dev %d, addr = %d, kontrol S = %d, Wert = %d"
+msgstr " dev %d, addr = %d, kontrol S = %d, Wert = %d"
 
 #: src/track.c
 #, c-format
@@ -3452,10 +3457,8 @@ msgid "Error closing file"
 msgstr "Fejl ved lukning af fil"
 
 #: src/util.c
-msgid "Used %{dbeventid} but sql_query_start returned no valid event ID"
-msgstr ""
-"Brugte %{dbeventid}, men start af sql -forespørgsel returnerede intet "
-"gyldigt hændelses -id"
+msgid "{dbeventid} is not supported. Use eventid."
+msgstr "{dbeventid} understøttes ikke. Brug eventtid."
 
 #: src/util.c
 #, c-format
@@ -3511,6 +3514,15 @@ msgstr "Fejl ved genindlæsning af kontroller: %s"
 
 #: src/util.c
 #, c-format
+msgid "Parsing: %s"
+msgstr "Parsing: %s"
+
+#: src/util.c
+msgid "Parsing: <redacted>"
+msgstr "Parsing: <redigeret>"
+
+#: src/util.c
+#, c-format
 msgid "Error parsing controls: %s"
 msgstr "Fejl ved analysering af kontroller: %s"
 
@@ -3536,6 +3548,15 @@ msgstr "Nye videoparameter: %s"
 
 #: src/util.c
 #, c-format
+msgid "New webcontrol_header_params: %s"
+msgstr "Nyt webkontrolhovedparameter: %s"
+
+#: src/util.c
+msgid "New webcontrol_header_params: <redacted>"
+msgstr "Nye webkontrolhovedparametre: <redigeret>"
+
+#: src/util.c
+#, c-format
 msgid "New stream_header_params: %s"
 msgstr "Nyt stream header params: %s"
 
@@ -3546,7 +3567,7 @@ msgstr "Nyt stream -header params: <redacted>"
 #: src/util.c
 #, c-format
 msgid "Programming error.  Unknown configuration item: %s"
-msgstr "Programmeringsfejl. Ukendt konfigurationselement: %s "
+msgstr "Programmeringsfejl. Ukendt konfigurationselement: %s"
 
 #: src/video_bktr.c
 #, c-format
@@ -3852,16 +3873,20 @@ msgstr "--------- Controls ---------"
 
 #: src/video_v4l2.c
 msgid "  V4L2 ID   Name and Range"
-msgstr "V4L2 ID Navn og rækkevidde"
+msgstr " V4L2 ID Navn og rækkevidde"
+
+#: src/video_v4l2.c
+msgid "Error resetting user value"
+msgstr "Fejl ved nulstilling af brugerværdi"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Leaving control %s \"%s\" set to %d"
+msgstr "Forlader kontrol %s \"%s\" indstillet til %d"
 
 #: src/video_v4l2.c
 msgid "Device not ready"
 msgstr "Enheden er ikke klar"
-
-#: src/video_v4l2.c
-#, c-format
-msgid "setting control %s \"%s\" to %d failed with return code %d"
-msgstr "indstilling af kontrol %s \" %s \" til %d mislykkedes med returkode %d"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3870,13 +3895,18 @@ msgstr "Sæt kontrol \" %s \" til værdi %d"
 
 #: src/video_v4l2.c
 #, c-format
+msgid "setting control %s \"%s\" to %d failed. "
+msgstr "indstilling af kontrol %s \"%s\" til %d mislykkedes."
+
+#: src/video_v4l2.c
+#, c-format
 msgid "%s control option value %s is below minimum.  Using minimum %d"
-msgstr "%s kontrolmulighedsværdi %s er under minimum. Brug minimum %d "
+msgstr "%s kontrolmulighedsværdi %s er under minimum. Brug minimum %d"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "%s control option value %s is above maximum.  Using maximum %d"
-msgstr "%s kontrolmulighedsværdi %s er over maksimum. Brug af maks. %d "
+msgstr "%s kontrolmulighedsværdi %s er over maksimum. Brug af maks. %d"
 
 #: src/video_v4l2.c
 msgid "control type not supported yet"
@@ -3959,8 +3989,42 @@ msgstr "Indstil frekvens til %ul"
 
 #: src/video_v4l2.c
 #, c-format
+msgid "Unable to use %c%c%c%c (%dx%d)"
+msgstr "Kan ikke bruge %c%c%c%c (%dx%d)"
+
+#: src/video_v4l2.c
+#, c-format
 msgid "Testing palette %c%c%c%c (%dx%d)"
 msgstr "Testpalette %c %c %c %c ( %dx %d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Checking image size %dx%d with stride %d"
+msgstr "Kontrollerer billedstørrelse %dx%d med skridt %d"
+
+#: src/video_v4l2.c
+msgid "No stride value provided from device."
+msgstr "Ingen skridtværdi angivet fra enheden."
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Width(%d) must be less than stride(%d)"
+msgstr "Bredde(%d) skal være mindre end skridtlængde(%d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "The image width(%d) is not multiple of the stride(%d)"
+msgstr "Billedbredden (%d) er ikke multiplum af skridtet (%d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
+msgstr "Umulig tilstand: Bredde(%d), Skridt(%d), Pr. skridt(%d)"
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Image width will be padded %d bytes"
+msgstr "Billedbredden vil blive polstret %d bytes"
 
 #: src/video_v4l2.c
 #, c-format
@@ -3976,22 +4040,13 @@ msgid "Specify different palette or width/height in config file."
 msgstr "Angiv anden palet eller bredde / højde i konfigurationsfilen."
 
 #: src/video_v4l2.c
-msgid ""
-"Error setting pixel format.\n"
-"VIDIOC_S_FMT: "
-msgstr ""
-"Fejl ved indstilling af pixelformat. \n"
-" VIDIOC S FMT:"
+msgid "Error setting pixel format."
+msgstr "Fejl ved indstilling af pixelformat."
 
 #: src/video_v4l2.c
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
 msgstr "Brug af palet %c %c %c %c ( %dx %d)"
-
-#: src/video_v4l2.c
-#, c-format
-msgid "Bytesperlines %d sizeimage %d colorspace %08x"
-msgstr "Bytesperlines %d størrelse Billedbehandling %d farverum %08x"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4002,12 +4057,6 @@ msgstr "Justering til bredde ( %d)"
 #, c-format
 msgid "Adjusting to height (%d)"
 msgstr "Justering til højde ( %d)"
-
-#: src/video_v4l2.c
-msgid ""
-"H264(21) format not supported via videodevice.  Changing to default palette"
-msgstr ""
-"H264 (21) -format understøttes ikke via videodevice. Skift til standardpalet"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4058,12 +4107,8 @@ msgstr "Ikke mere hukommelse."
 
 #: src/video_v4l2.c
 #, c-format
-msgid ""
-"Error querying buffer %i\n"
-"VIDIOC_QUERYBUF: "
-msgstr ""
-"Fejl ved forespørgsel om buffer %i \n"
-"VIDIOC QUERYBUF:"
+msgid "Error querying buffer %i"
+msgstr "Fejl ved forespørgsel efter buffer %i"
 
 #: src/video_v4l2.c
 #, c-format
@@ -4072,8 +4117,8 @@ msgstr "Fejl ved kortlægning af buffer %i mmap"
 
 #: src/video_v4l2.c
 #, c-format
-msgid "%i length=%d Address (%x)"
-msgstr "%i længde = %d Adresse ( %x)"
+msgid "%i length=%d Address (%x) offset %d"
+msgstr "%i længde=%d Adresse (%x) offset %d"
 
 #: src/video_v4l2.c
 msgid "Error starting stream. VIDIOC_STREAMON"
@@ -4132,12 +4177,12 @@ msgstr "Testpalette %s ( %c %c %c %c)"
 #: src/video_v4l2.c
 #, c-format
 msgid "  Width: %d, Height %d"
-msgstr "Bredde: %d, Højde %d"
+msgstr " Bredde: %d, Højde %d"
 
 #: src/video_v4l2.c
 #, c-format
 msgid "    Framerate %d/%d"
-msgstr "Framerat %d / %d"
+msgstr " Framerat %d / %d"
 
 #: src/webu.c
 #, c-format
@@ -4179,6 +4224,11 @@ msgstr "Modersmål: slukket"
 #: src/webu.c
 msgid "Set the value to null/zero"
 msgstr "Indstil værdien til null / nul"
+
+#: src/webu.c
+#, c-format
+msgid "Ignoring connection from: %s"
+msgstr "Ignorerer forbindelse fra: %s"
 
 #: src/webu.c
 #, c-format
@@ -4336,7 +4386,7 @@ msgstr "Dupliceret port anmodet %d"
 
 #: src/webu.c
 msgid "Invalid webcontrol_lock_max_ips.  Setting equal to 25."
-msgstr "Ugyldig webkontrollås maks. Ips. Indstilling lig med 25. "
+msgstr "Ugyldig webkontrollås maks. Ips. Indstilling lig med 25."
 
 #: src/webu_html.c
 msgid "Cameras"
@@ -4490,59 +4540,4 @@ msgstr "Billedet kunne ikke streames."
 #: src/webu_text.c
 #, c-format
 msgid "'%s' option is depreciated.  New option name is '%s'"
-msgstr "Indstillingen ' %s' afskrives. Navn på den nye indstilling er '%s' "
-
-#: src/conf.c
-msgid "webcontrol_lock_minutes"
-msgstr "webkontrol lås minutter"
-
-#: src/conf.c
-msgid "webcontrol_lock_attempts"
-msgstr "forsøg på webkontrollås"
-
-#: src/conf.c
-msgid "webcontrol_lock_max_ips"
-msgstr "webkontrol lås max ips"
-
-#: src/event.c
-#, c-format
-msgid "Writing image to file: %s"
-msgstr "Skriver billede til fil: %s"
-
-#: src/event.c
-#, c-format
-msgid "Writing movie to file: %s"
-msgstr "Skriver film til fil: %s"
-
-#: src/event.c
-#, c-format
-msgid "Saved image to file: %s"
-msgstr "Gemt billede i fil: %s"
-
-#: src/event.c
-#, c-format
-msgid "Saved movie to file: %s"
-msgstr "Filmen blev gemt i filen: %s"
-
-#: src/util.c
-#, c-format
-msgid "Parsing: %s"
-msgstr "Parsing: %s"
-
-#: src/util.c
-msgid "Parsing: <redacted>"
-msgstr "Parsing: <redigeret>"
-
-#: src/util.c
-#, c-format
-msgid "New webcontrol_header_params: %s"
-msgstr "Nyt webkontrolhovedparameter: %s"
-
-#: src/util.c
-msgid "New webcontrol_header_params: <redacted>"
-msgstr "Nye webkontrolhovedparametre: <redigeret>"
-
-#: src/webu.c
-#, c-format
-msgid "Ignoring connection from: %s"
-msgstr "Ignorerer forbindelse fra: %s"
+msgstr "Indstillingen ' %s' afskrives. Navn på den nye indstilling er '%s'  "
