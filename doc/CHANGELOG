@@ -1,4 +1,8 @@
 Summary of changes for version 4.x.x are below
+    * Do not translate the ignoring IP alert message
+    * Fix processing for native_language config option
+    * Add additional sleep time for images to web stream
+    * Revise log level for some messages
     * Update translations
     * Update for new MariaDB pkg-config name
     * Fix cleanup when v4l2 open fails
