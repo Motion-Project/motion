@@ -22,8 +22,8 @@
  *    Copyright 2008 by Angel Carpintero (motiondevelop@gmail.com)
  *
  */
-#include "translate.h"
 #include "motion.h"
+#include "translate.h"
 #include "util.h"
 #include "logger.h"
 

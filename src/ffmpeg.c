@@ -34,8 +34,8 @@
  * indicate libav
 */
 
-#include "translate.h"
 #include "motion.h"
+#include "translate.h"
 #include "util.h"
 #include "logger.h"
 #include "netcam.h"

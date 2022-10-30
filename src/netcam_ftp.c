@@ -22,8 +22,8 @@
  *      Copyright 2005, William M. Brack
  *
  */
-#include "translate.h"
 #include "motion.h"
+#include "translate.h"
 #include "util.h"
 #include "logger.h"
 #include <ctype.h>

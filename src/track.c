@@ -21,8 +21,8 @@
  *    Copyright 2000, Jeroen Vreeken
  */
 #include <math.h>
-#include "translate.h"
 #include "motion.h"
+#include "translate.h"
 #include "util.h"
 #include "logger.h"
 

@@ -23,8 +23,8 @@
  *    Refactor/rewrite code:  2018 MrDave
  *
 */
-#include "translate.h"
 #include "motion.h"
+#include "translate.h"
 #include "util.h"
 #include "logger.h"
 #include "rotate.h"

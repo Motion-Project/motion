@@ -20,8 +20,8 @@
  *    Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
  *
  */
-#include "translate.h"
 #include "motion.h"
+#include "translate.h"
 #include "util.h"
 #include "logger.h"
 #include "ffmpeg.h"
@@ -3527,7 +3527,7 @@ int main (int argc, char **argv)
 
     dbse_global_init(cnt_list);
 
-    translate_init();
+    translate_init(cnt_list[0]);
 
     do {
         if (restart) {

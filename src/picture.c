@@ -22,8 +22,8 @@
  *    Portions of this file are Copyright 2010 by Wim Lewis (wiml@hhhh.org)
  *
  */
-#include "translate.h"
 #include "motion.h"
+#include "translate.h"
 #include "util.h"
 #include "logger.h"
 #include "picture.h"

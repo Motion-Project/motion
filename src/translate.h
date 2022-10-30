@@ -32,7 +32,7 @@ extern int nls_enabled;
 #define _(STRING) translate_text(STRING)
 
 char* translate_text(const char *msgid);
-void translate_init(void);
+void translate_init(struct context *cnt);
 void translate_locale_chg(const char *langcd);
 
 #endif // _INCLUDE_TRANSLATE_H_

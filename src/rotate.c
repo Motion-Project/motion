@@ -42,8 +42,8 @@
  *                       - speed optimization, including bswap
  *      v1 (28-Aug-2004) - initial version
  */
-#include "translate.h"
 #include "motion.h"
+#include "translate.h"
 #include "util.h"
 #include "logger.h"
 #include "rotate.h"

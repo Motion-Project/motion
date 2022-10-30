@@ -22,9 +22,9 @@
  */
 
 /* For rotation */
-#include "translate.h"
 #include "motion.h"
 #include "util.h"
+#include "translate.h"
 #include "logger.h"
 #include "rotate.h"
 #include "video_common.h"

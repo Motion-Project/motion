@@ -21,8 +21,8 @@
  *
  */
 
-#include "translate.h"
 #include "motion.h"
+#include "translate.h"
 #include "logger.h"
 #include "util.h"
 

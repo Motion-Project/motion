@@ -29,8 +29,8 @@
 
 #include <dirent.h>
 #include <string.h>
-#include "translate.h"
 #include "motion.h"
+#include "translate.h"
 #include "util.h"
 #include "logger.h"
 

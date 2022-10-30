@@ -22,8 +22,8 @@
  *                2007 by Angel Carpintero (motiondevelop@gmail.com)
  *
  */
-#include "translate.h"
 #include "motion.h"
+#include "translate.h"
 #include "util.h"
 #include "logger.h"
 #include "video_common.h"
