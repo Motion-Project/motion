@@ -48,7 +48,6 @@ void translate_init(struct context *cnt)
 {
     #ifdef HAVE_GETTEXT
         if (cnt->conf.native_language == 1) {
-            translate_locale_chg("es"); /* This is a testing only function call*/
             nls_enabled = 1;
             setlocale (LC_ALL, "");
             bindtextdomain ("motion", LOCALEDIR);
@@ -62,6 +61,10 @@ void translate_init(struct context *cnt)
         nls_enabled = 0;
         (void)cnt;
     #endif
+
+    if (nls_enabled == 1) {
+        translate_locale_chg("es"); /* This is a testing only function call*/
+    }
 }
 
 char* translate_text(const char *msgid)
