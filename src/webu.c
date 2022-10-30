@@ -974,8 +974,18 @@ static int webu_failauth_check(struct webui_ctx *webui)
     }
 
     if (retcd) {
-        MOTION_LOG(ALR,TYPE_ALL, NO_ERRNO
+        if (mystrne(
+            _("Ignoring connection from: %s")
+            ,"Ignoring connection from: %s")) {
+            MOTION_LOG(ALR,TYPE_ALL, NO_ERRNO
             , _("Ignoring connection from: %s"), webui->clientip);
+        }
+        /* Do not translate the message below or change it
+         * in any way.  Other applications read the logs looking
+         * for this message so that the IP can be banned
+         */
+        MOTION_LOG(ALR,TYPE_ALL, NO_ERRNO
+            , "Ignoring connection from: %s", webui->clientip);
         SLEEP(2, 0);
     }
 
