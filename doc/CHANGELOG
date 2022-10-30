@@ -1,4 +1,4 @@
-Summary of changes for version 4.x.x are below
+Summary of changes for version 4.5.0 are below
     * Do not translate the ignoring IP alert message
     * Fix processing for native_language config option
     * Add additional sleep time for images to web stream
@@ -23,6 +23,7 @@ Summary of changes for version 4.x.x are below
     * Fix close on exec methods
     * Fix processing for preferred codec with new ffmpeg versions
     * Fix snapshots when using netcam high
+    * Enhance netcam processing for single jpg pages
     * Update instructions on using libcamerify for pi camera
     * Update instructions on maximum number of cameras shown on web control page.
     * Expand buffer for log messages
