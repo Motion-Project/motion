@@ -174,6 +174,17 @@ enum MOTION_SIGNAL {
     MOTION_SIGNAL_SIGTERM
 };
 
+enum CAPTURE_RESULT {
+    CAPTURE_SUCCESS,
+    CAPTURE_FAILURE,
+    CAPTURE_ATTEMPTED
+};
+
+enum CAM_STATUS {
+    STATUS_CLOSED,   /* Camera is closed and not Initialized */
+    STATUS_OPENED    /* Successfully started the camera */
+};
+
 struct ctx_webu_clients {
     std::string                 clientip;
     bool                        authenticated;
@@ -285,10 +296,6 @@ struct ctx_stream {
     ctx_stream_data  secondary;  /* Copy of the image to use for web stream*/
 };
 
-/*
- *  These used to be global variables but now each thread will have its
- *  own context
- */
 struct ctx_cam {
 
     ctx_motapp      *motapp;
@@ -320,6 +327,7 @@ struct ctx_cam {
     int                     track_posy;
     int                     camera_id;
     enum CAMERA_TYPE        camera_type;
+    enum CAM_STATUS         camera_status;
     unsigned int            new_img;
     int                     locate_motion_mode;
     int                     locate_motion_style;
@@ -362,7 +370,6 @@ struct ctx_cam {
     int                     missing_frame_counter;               /* counts failed attempts to fetch picture frame from camera */
     unsigned int            lost_connection;
 
-    int                     video_dev;
     int                     pipe;
     int                     mpipe;
 
@@ -395,7 +402,7 @@ struct ctx_cam {
 
 };
 
-/*  ctx_cam for whole motion application including all the cameras */
+/*  ctx_motapp for whole motion application including all the cameras */
 struct ctx_motapp {
 
     ctx_cam             **cam_list;

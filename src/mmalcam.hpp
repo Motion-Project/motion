@@ -38,8 +38,8 @@
         #endif
     } ctx_mmalcam;
 
-    int mmalcam_start (ctx_cam *cam);
+    void mmalcam_start (ctx_cam *cam);
     int mmalcam_next (ctx_cam *cam, ctx_image_data *img_data);
-    void mmalcam_cleanup (ctx_mmalcam *mmalcam);
+    void mmalcam_cleanup (ctx_cam *cam);
 
 #endif /* _INCLUDE_MMALCAM_HPP_ */

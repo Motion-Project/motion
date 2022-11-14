@@ -342,7 +342,7 @@ int cls_libcam::cam_next(ctx_image_data *img_data)
     int indx;
 
     if (started_cam == false) {
-        return -1;
+        return CAPTURE_FAILURE;
     }
 
     /* Allow time for request to finish.*/
@@ -361,30 +361,14 @@ int cls_libcam::cam_next(ctx_image_data *img_data)
 
         request->reuse(Request::ReuseBuffers);
         req_add(request);
-        return 0;
+        return CAPTURE_SUCCESS;
 
     } else {
-        return -1;
+        return CAPTURE_FAILURE;
     }
 }
 
 #endif
-
-/** initialize and start libcam */
-int libcam_start(ctx_cam *cam)
-{
-    #ifdef HAVE_LIBCAM
-        int retcd;
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting experimental libcamera .");
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "EXPECT crashes and hung processes!!!");
-        cam->libcam = new cls_libcam;
-        retcd = cam->libcam->cam_start(cam);
-        return retcd;
-    #else
-        (void)cam;
-        return -1;
-    #endif
-}
 
 /** close and stop libcam */
 void libcam_cleanup(ctx_cam *cam)
@@ -393,10 +377,32 @@ void libcam_cleanup(ctx_cam *cam)
         cam->libcam->cam_stop();
         delete cam->libcam;
         cam->libcam = nullptr;
-   #else
-        (void)cam;
+    #endif
+    cam->camera_status = STATUS_CLOSED;
+    cam->running_cam = false;
+}
+
+/** initialize and start libcam */
+void libcam_start(ctx_cam *cam)
+{
+    #ifdef HAVE_LIBCAM
+        int retcd;
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting experimental libcamera .");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "EXPECT crashes and hung processes!!!");
+        cam->libcam = new cls_libcam;
+        retcd = cam->libcam->cam_start(cam);
+        if (retcd < 0) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
+            libcam_cleanup(cam);
+        } else {
+            cam->camera_status = STATUS_OPENED;
+        }
+    #else
+        cam->camera_status = STATUS_CLOSED;
     #endif
 }
+
 
 /** get next image from libcam */
 int libcam_next(ctx_cam *cam,  ctx_image_data *img_data)
@@ -405,17 +411,19 @@ int libcam_next(ctx_cam *cam,  ctx_image_data *img_data)
         int retcd;
 
         if (cam->libcam == nullptr){
-            return -1;
+            return CAPTURE_FAILURE;
         }
+
         retcd = cam->libcam->cam_next(img_data);
-        if (retcd == 0) {
+        if (retcd == CAPTURE_SUCCESS) {
             rotate_map(cam, img_data);
         }
+
         return retcd;
     #else
         (void)cam;
         (void)img_data;
-        return -1;
+        return CAPTURE_FAILURE;
     #endif
 }
 

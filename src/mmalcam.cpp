@@ -271,25 +271,35 @@ static void destroy_camera_buffer_structures(ctx_mmalcam_ptr mmalcam)
 
 #endif
 
-/**
- * mmalcam_start
- *
- *      This routine is called from the main motion thread.  It's job is
- *      to open up the requested camera device via MMAL and do any required
- *      initialization.
- *
- * Parameters:
- *
- *      cam     Pointer to the motion context structure for this device.
- *
- * Returns:     0 on success
- *              -1 on any failure
- */
-
-int mmalcam_start(ctx_cam *cam)
+void mmalcam_cleanup(ctx_cam *cam)
 {
     #ifdef HAVE_MMAL
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("MMAL Camera cleanup"));
+
+        if (cam->mmalcam != NULL ) {
+            if (cam->mmalcam->camera_component) {
+                check_disable_port(cam->mmalcam->camera_capture_port);
+                mmal_component_disable(cam->mmalcam->camera_component);
+                destroy_camera_buffer_structures(cam->mmalcam);
+                destroy_camera_component(cam->mmalcam);
+            }
+            myfree(&cam->mmalcam->camera_parameters);
+            myfree(&cam->mmalcam);
+        }
+    #endif
+
+    cam->camera_status = STATUS_CLOSED;
+    cam->running_cam = false;
+
+}
+
+void mmalcam_start(ctx_cam *cam)
+{
+    #ifdef HAVE_MMAL
+
         ctx_mmalcam_ptr mmalcam;
+
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening MMAL cam"));
 
         cam->mmalcam = (ctx_mmalcam*) mymalloc(sizeof(ctx_mmalcam));
         memset(cam->mmalcam, 0, sizeof(ctx_mmalcam));
@@ -303,7 +313,9 @@ int mmalcam_start(ctx_cam *cam)
         mmalcam->camera_parameters = (RASPICAM_CAMERA_PARAMETERS*)malloc(sizeof(RASPICAM_CAMERA_PARAMETERS));
         if (mmalcam->camera_parameters == NULL) {
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("camera params couldn't be allocated"));
-            return MMALCAM_ERROR;
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("MMAL cam failed to open"));
+            mmalcam_cleanup(cam);
+            return;
         }
 
         raspicamcontrol_set_defaults(mmalcam->camera_parameters);
@@ -345,62 +357,21 @@ int mmalcam_start(ctx_cam *cam)
             retval = send_pooled_buffers_to_port(mmalcam->camera_buffer_pool, mmalcam->camera_capture_port);
         }
 
-        return retval;
-    #else
-        (void)cam;
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("MMAL Camera not available"));
-        return -1;
-    #endif
-}
-
-/**
- * mmalcam_cleanup
- *
- *      This routine shuts down any MMAL resources, then releases any allocated data
- *      within the mmalcam context and frees the context itself.
- *      This function is also called from motion_init if first time connection
- *      fails and we start retrying until we get a valid first frame from the
- *      camera.
- *
- * Parameters:
- *
- *      mmalcam          Pointer to a mmalcam context
- *
- * Returns:              Nothing.
- *
- */
-void mmalcam_cleanup(ctx_mmalcam *mmalcam)
-{
-    #ifdef HAVE_MMAL
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("MMAL Camera cleanup"));
-
-        if (mmalcam != NULL ) {
-            if (mmalcam->camera_component) {
-                check_disable_port(mmalcam->camera_capture_port);
-                mmal_component_disable(mmalcam->camera_component);
-                destroy_camera_buffer_structures(mmalcam);
-                destroy_camera_component(mmalcam);
-            }
-            myfree(&mmalcam->camera_parameters);
-            myfree(&mmalcam);
+        if (retval == 0) {
+            cam->camera_status = STATUS_OPENED;
+        } else {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("MMAL cam failed to open"));
+            mmalcam_cleanup(cam);
         }
     #else
-        (void)mmalcam;
+        cam->camera_status = STATUS_CLOSED;
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("MMAL Camera not available"));
     #endif
 }
 
+
 /**
- * mmalcam_next
- *
- *      This routine is called when the main 'motion' thread wants a new
- *      frame of video.  It fetches the most recent frame available from
- *      the Pi camera already in YUV420P, and returns it to motion.
- *
- * Parameters:
- *      cam             Pointer to the context for this thread
- *      image           Pointer to a buffer for the returned image
- *
- * Returns:             Error code
+ * Return image from mmalcam.  Runs on motion_loop thread.
  */
 int mmalcam_next(ctx_cam *cam,  ctx_image_data *img_data)
 {
@@ -408,7 +379,7 @@ int mmalcam_next(ctx_cam *cam,  ctx_image_data *img_data)
         ctx_mmalcam_ptr mmalcam;
 
         if ((!cam) || (!cam->mmalcam)) {
-            return -1;
+            return CAPTURE_FAILURE;
         }
 
         mmalcam = cam->mmalcam;
@@ -445,11 +416,11 @@ int mmalcam_next(ctx_cam *cam,  ctx_image_data *img_data)
 
         rotate_map(cam,img_data);
 
-        return 0;
+        return CAPTURE_SUCCESS;
     #else
         (void)cam;
         (void)img_data;
-        return -1;
+        return CAPTURE_FAILURE;
     #endif
 }
 

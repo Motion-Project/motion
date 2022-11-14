@@ -73,7 +73,7 @@ struct ctx_v4l2cam {
     #endif
 };
 
-    int v4l2_start(ctx_cam *cam);
+    void v4l2_start(ctx_cam *cam);
     int v4l2_next(ctx_cam *cam,  ctx_image_data *img_data);
     void v4l2_cleanup(ctx_cam *cam);
 

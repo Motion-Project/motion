@@ -22,8 +22,6 @@
 #ifndef _INCLUDE_NETCAM_HPP_
 #define _INCLUDE_NETCAM_HPP_
 
-#define NETCAM_GENERAL_ERROR       0x02          /* binary 000010 */
-#define NETCAM_RESTART_ERROR       0x12          /* binary 010010 */
 #define NETCAM_BUFFSIZE 4096
 
 enum NETCAM_STATUS {
@@ -151,8 +149,8 @@ struct ctx_netcam {
 
 };
 
-int netcam_setup(ctx_cam *cam);
+void netcam_start(ctx_cam *cam);
 int netcam_next(ctx_cam *cam, ctx_image_data *img_data);
-void netcam_cleanup(ctx_cam *cam, bool init_retry_flag);
+void netcam_cleanup(ctx_cam *cam);
 
 #endif /* _INCLUDE_NETCAM_HPP_ */

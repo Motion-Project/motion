@@ -73,7 +73,7 @@
         };
     #endif
 
-    int libcam_start (ctx_cam *cam);
+    void libcam_start (ctx_cam *cam);
     int libcam_next (ctx_cam *cam, ctx_image_data *img_data);
     void libcam_cleanup (ctx_cam *cam);
 

@@ -836,7 +836,7 @@ static int v4l2_capture(ctx_v4l2cam *v4l2cam)
         if (retcd == -1) {
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_QBUF");
             pthread_sigmask(SIG_UNBLOCK, &old, NULL);
-            return retcd;
+            return -1;
         }
     }
 
@@ -850,7 +850,7 @@ static int v4l2_capture(ctx_v4l2cam *v4l2cam)
     if (retcd == -1) {
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_DQBUF");
         pthread_sigmask(SIG_UNBLOCK, &old, NULL);
-        return retcd;
+        return -1;
     }
 
     v4l2cam->pframe = v4l2cam->buf.index;
@@ -935,7 +935,7 @@ static int v4l2_convert(ctx_cam *cam, ctx_v4l2cam *v4l2cam, unsigned char *img_n
         return 0;
     }
 
-    return 1;
+    return -1;
 
 }
 
@@ -1199,10 +1199,6 @@ void v4l2_cleanup(ctx_cam *cam)
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             ,_("Closing video device %s"), cam->conf->v4l2_device.c_str());
 
-        if (cam->v4l2cam == NULL) {
-            return;
-        }
-
         type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
         if (cam->v4l2cam->fd_device != -1) {
@@ -1232,18 +1228,19 @@ void v4l2_cleanup(ctx_cam *cam)
         myfree(&cam->v4l2cam->params);
 
         myfree(&cam->v4l2cam);
-
-        cam->running_cam = false;
-    #else
-        (void)cam;
     #endif // HAVE_V4L2
+
+    cam->running_cam = false;
+    cam->camera_status = STATUS_CLOSED;
+
 }
 
-int v4l2_start(ctx_cam *cam)
+void v4l2_start(ctx_cam *cam)
 {
     #ifdef HAVE_V4L2
-
         int retcd;
+
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening V4L2 device"));
 
         retcd = v4l2_device_init(cam);
         if (retcd == 0) retcd = v4l2_device_open(cam);
@@ -1259,15 +1256,14 @@ int v4l2_start(ctx_cam *cam)
         if (retcd == 0) v4l2_ctrls_set(cam->v4l2cam);
         if (retcd == 0) retcd = v4l2_set_mmap(cam->v4l2cam);
         if (retcd == 0) v4l2_set_imgs(cam);
-        if (retcd < 0) {
+        if (retcd == 0) {
+            cam->camera_status = STATUS_OPENED;
+        } else {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("V4L2 device failed to open"));
             v4l2_cleanup(cam);
-            return retcd;
         }
-
-        return cam->v4l2cam->fd_device;
     #else
-        (void)cam;
-        return -1;
+        cam->camera_status = STATUS_CLOSED;
     #endif // HAVE_V4l2
 }
 
@@ -1276,25 +1272,29 @@ int v4l2_next(ctx_cam *cam, ctx_image_data *img_data)
     #ifdef HAVE_V4L2
         int retcd;
 
+        if (cam->v4l2cam == NULL) {
+            return CAPTURE_FAILURE;
+        }
+
         v4l2_device_select(cam);
 
         retcd = v4l2_capture(cam->v4l2cam);
         if (retcd != 0) {
-            return retcd;
+            return CAPTURE_FAILURE;
         }
 
         retcd = v4l2_convert(cam, cam->v4l2cam, img_data->image_norm);
         if (retcd != 0) {
-            return retcd;
+            return CAPTURE_FAILURE;
         }
 
         rotate_map(cam, img_data);
 
-        return retcd;
+        return CAPTURE_SUCCESS;
     #else
         (void)cam;
         (void)img_data;
-        return -1;
+        return CAPTURE_FAILURE;
     #endif // HAVE_V4L2
 }
 

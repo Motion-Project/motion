@@ -1502,6 +1502,10 @@ static void netcam_set_parms (ctx_cam *cam, ctx_netcam *netcam )
     netcam->motapp = cam->motapp;
     netcam->conf = cam->conf;
 
+    pthread_mutex_lock(&netcam->motapp->global_lock);
+        netcam->threadnbr = ++netcam->motapp->threads_running;
+    pthread_mutex_unlock(&netcam->motapp->global_lock);
+
     if (netcam->high_resolution) {
         netcam->imgsize.width = 0;
         netcam->imgsize.height = 0;
@@ -1582,7 +1586,7 @@ static void netcam_set_parms (ctx_cam *cam, ctx_netcam *netcam )
 
 }
 
-static int netcam_set_dimensions (ctx_cam *cam)
+static void netcam_set_dimensions (ctx_cam *cam)
 {
 
     cam->imgs.width = 0;
@@ -1617,7 +1621,6 @@ static int netcam_set_dimensions (ctx_cam *cam)
     cam->imgs.size_norm = (cam->conf->width * cam->conf->height * 3) / 2;
     cam->imgs.motionsize = cam->conf->width * cam->conf->height;
 
-    return 0;
 }
 
 static int netcam_copy_stream(ctx_netcam *netcam)
@@ -2064,10 +2067,6 @@ static int netcam_start_handler(ctx_netcam *netcam)
     pthread_attr_init(&handler_attribute);
     pthread_attr_setdetachstate(&handler_attribute, PTHREAD_CREATE_DETACHED);
 
-    pthread_mutex_lock(&netcam->motapp->global_lock);
-        netcam->threadnbr = ++netcam->motapp->threads_running;
-    pthread_mutex_unlock(&netcam->motapp->global_lock);
-
     retcd = pthread_create(&netcam->thread_id, &handler_attribute, &netcam_handler, netcam);
     if (retcd < 0) {
         MOTION_LOG(ALR, TYPE_NETCAM, SHOW_ERRNO
@@ -2102,141 +2101,8 @@ static int netcam_start_handler(ctx_netcam *netcam)
 
 }
 
-int netcam_setup(ctx_cam *cam)
+void netcam_cleanup(ctx_cam *cam)
 {
-
-    int retcd;
-    int indx_cam, indx_max;
-    ctx_netcam *netcam;
-
-    cam->netcam = NULL;
-    cam->netcam_high = NULL;
-
-    if (netcam_set_dimensions(cam) < 0 ) {
-        return -1;
-    }
-
-    indx_cam = 1;
-    if (cam->conf->netcam_high_url != "") {
-        indx_max = 2;
-    } else {
-        indx_max = 1;
-    }
-
-    while (indx_cam <= indx_max){
-        if (indx_cam == 1) {
-            cam->netcam = netcam_new_context();
-            if (cam->netcam == NULL) {
-                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                    ,_("unable to create rtsp context"));
-                return -1;
-            }
-            netcam = cam->netcam;
-            netcam->high_resolution = false;           /* Set flag for this being the normal resolution camera */
-        } else {
-            cam->netcam_high = netcam_new_context();
-            if (cam->netcam_high == NULL) {
-                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                    ,_("unable to create rtsp high context"));
-                return -1;
-            }
-            netcam = cam->netcam_high;
-            netcam->high_resolution = true;            /* Set flag for this being the high resolution camera */
-        }
-
-        netcam_null_context(netcam);
-
-        netcam_set_parms(cam, netcam);
-
-        if (netcam_connect(netcam) < 0) {
-            return -1;
-        }
-
-        retcd = netcam_read_image(netcam);
-        if (retcd < 0) {
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-                ,_("Failed trying to read first image - retval:%d"), retcd);
-            netcam->status = NETCAM_NOTCONNECTED;
-            return -1;
-        }
-        /* When running dual, there seems to be contamination across norm/high with codec functions. */
-        netcam_close_context(netcam);       /* Close in this thread to open it again within handler thread */
-        netcam->status = NETCAM_RECONNECTING;      /* Set as reconnecting to avoid excess messages when starting */
-        netcam->first_image = false;             /* Set flag that we are not processing our first image */
-
-        /* For normal resolution, we resize the image to the config parms so we do not need
-         * to set the dimension parameters here (it is done in the set_parms).  For high res
-         * we must get the dimensions from the first image captured
-         */
-        if (netcam->high_resolution) {
-            cam->imgs.width_high = netcam->imgsize.width;
-            cam->imgs.height_high = netcam->imgsize.height;
-        }
-
-        if (netcam_start_handler(netcam) < 0 ) {
-            return -1;
-        }
-
-        indx_cam++;
-    }
-
-    return 0;
-
-}
-
-/* netcam_next (Called from the motion loop thread) */
-int netcam_next(ctx_cam *cam, ctx_image_data *img_data)
-{
-    if (cam == NULL) {
-        return 1;
-    }
-
-    if (cam->netcam != NULL) {
-        if ((cam->netcam->status == NETCAM_RECONNECTING) ||
-            (cam->netcam->status == NETCAM_NOTCONNECTED)) {
-            return 1;
-        }
-        pthread_mutex_lock(&cam->netcam->mutex);
-            netcam_pktarray_resize(cam, false);
-            memcpy(img_data->image_norm
-                , cam->netcam->img_latest->ptr
-                , cam->netcam->img_latest->used);
-            img_data->idnbr_norm = cam->netcam->idnbr;
-        pthread_mutex_unlock(&cam->netcam->mutex);
-    }
-
-    if (cam->netcam_high != NULL) {
-        if ((cam->netcam_high->status == NETCAM_RECONNECTING) ||
-            (cam->netcam_high->status == NETCAM_NOTCONNECTED)) {
-            return 1;
-        }
-
-        pthread_mutex_lock(&cam->netcam_high->mutex);
-            netcam_pktarray_resize(cam, true);
-            if (!cam->netcam_high->passthrough) {
-                memcpy(img_data->image_high
-                       ,cam->netcam_high->img_latest->ptr
-                       ,cam->netcam_high->img_latest->used);
-            }
-            img_data->idnbr_high = cam->netcam_high->idnbr;
-        pthread_mutex_unlock(&cam->netcam_high->mutex);
-    }
-
-    /* Rotate images if requested */
-    rotate_map(cam, img_data);
-
-    return 0;
-}
-
-void netcam_cleanup(ctx_cam *cam, bool init_retry_flag)
-{
-
-     /*
-     * If the init_retry_flag is not set this function was
-     * called while retrying the initial connection and there is
-     * no camera-handler started yet and thread_running must
-     * not be decremented.  This is called from motion_loop thread
-     */
     int wait_counter;
     int indx_cam, indx_max;
     ctx_netcam *netcam;
@@ -2258,11 +2124,6 @@ void netcam_cleanup(ctx_cam *cam, bool init_retry_flag)
         if (netcam) {
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Shutting down network camera."),netcam->cameratype);
-
-            /* Throw the finish flag in context and wait a bit for it to finish its work and close everything
-             * This is shutting down the thread so for the moment, we are not worrying about the
-             * cross threading and protecting these variables with mutex's
-            */
             netcam->finish = true;
             netcam->interruptduration = 0;
             wait_counter = 0;
@@ -2273,17 +2134,13 @@ void netcam_cleanup(ctx_cam *cam, bool init_retry_flag)
             if (!netcam->handler_finished) {
                 MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
                     ,_("%s: No response from handler thread."),netcam->cameratype);
-                /* Last resort.  Kill the thread. Not safe for posix but if no response, what to do...*/
-                /* pthread_kill(netcam->thread_id); */
+                /* Last resort.  Kill the thread.*/
                 pthread_cancel(netcam->thread_id);
-                pthread_kill(netcam->thread_id, SIGVTALRM); /* This allows the cancel to be processed */
-                if (!init_retry_flag) {
-                    pthread_mutex_lock(&netcam->motapp->global_lock);
-                        netcam->motapp->threads_running--;
-                    pthread_mutex_unlock(&netcam->motapp->global_lock);
-                }
+                pthread_kill(netcam->thread_id, SIGVTALRM);
+                pthread_mutex_lock(&netcam->motapp->global_lock);
+                    netcam->motapp->threads_running--;
+                pthread_mutex_unlock(&netcam->motapp->global_lock);
             }
-            /* If we never connect we don't have a handler but we still need to clean up some */
             netcam_shutdown(netcam);
 
             pthread_mutex_destroy(&netcam->mutex);
@@ -2304,8 +2161,133 @@ void netcam_cleanup(ctx_cam *cam, bool init_retry_flag)
     }
     cam->netcam = NULL;
     cam->netcam_high = NULL;
-    if (init_retry_flag == false) {
-        cam->running_cam = false;
+    cam->running_cam = false;
+    cam->camera_status = STATUS_CLOSED;
+
+}
+
+void netcam_start(ctx_cam *cam)
+{
+    int indx_cam, indx_max;
+    ctx_netcam *netcam;
+
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening Netcam"));
+
+    cam->netcam = NULL;
+    cam->netcam_high = NULL;
+
+    netcam_set_dimensions(cam);
+
+    indx_cam = 1;
+    if (cam->conf->netcam_high_url != "") {
+        indx_max = 2;
+    } else {
+        indx_max = 1;
     }
+
+    while (indx_cam <= indx_max) {
+
+        if (indx_cam == 1) {
+            cam->netcam = netcam_new_context();
+            if (cam->netcam == NULL) {
+                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                    ,_("unable to create rtsp context"));
+                netcam_cleanup(cam);
+                return;
+            }
+            netcam = cam->netcam;
+            netcam->high_resolution = false;           /* Set flag for this being the normal resolution camera */
+        } else {
+            cam->netcam_high = netcam_new_context();
+            if (cam->netcam_high == NULL) {
+                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                    ,_("unable to create rtsp high context"));
+                netcam_cleanup(cam);
+                return;
+            }
+            netcam = cam->netcam_high;
+            netcam->high_resolution = true;            /* Set flag for this being the high resolution camera */
+        }
+
+        netcam_null_context(netcam);
+        netcam_set_parms(cam, netcam);
+        if (netcam_connect(netcam) != 0) {
+            netcam_cleanup(cam);
+            return;
+        }
+        if (netcam_read_image(netcam) != 0) {
+            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+                ,_("Failed trying to read first image"));
+            netcam->status = NETCAM_NOTCONNECTED;
+            netcam_cleanup(cam);
+            return;
+        }
+        /* When running dual, there seems to be contamination across norm/high with codec functions. */
+        netcam_close_context(netcam);       /* Close in this thread to open it again within handler thread */
+        netcam->status = NETCAM_RECONNECTING;      /* Set as reconnecting to avoid excess messages when starting */
+        netcam->first_image = false;             /* Set flag that we are not processing our first image */
+
+        /* For normal resolution, we resize the image to the config parms so we do not need
+         * to set the dimension parameters here (it is done in the set_parms).  For high res
+         * we must get the dimensions from the first image captured
+         */
+        if (netcam->high_resolution) {
+            cam->imgs.width_high = netcam->imgsize.width;
+            cam->imgs.height_high = netcam->imgsize.height;
+        }
+
+        if (netcam_start_handler(netcam) != 0 ) {
+            netcam_cleanup(cam);
+            return;
+        }
+
+        indx_cam++;
+    }
+
+    cam->camera_status = STATUS_OPENED;
+
+    return;
+
+}
+
+/* netcam_next (Called from the motion loop thread) */
+int netcam_next(ctx_cam *cam, ctx_image_data *img_data)
+{
+    if ((cam == NULL) || (cam->netcam == NULL)) {
+        return CAPTURE_FAILURE;
+    }
+
+    if ((cam->netcam->status == NETCAM_RECONNECTING) ||
+        (cam->netcam->status == NETCAM_NOTCONNECTED)) {
+        return CAPTURE_ATTEMPTED;
+    }
+    pthread_mutex_lock(&cam->netcam->mutex);
+        netcam_pktarray_resize(cam, false);
+        memcpy(img_data->image_norm
+            , cam->netcam->img_latest->ptr
+            , cam->netcam->img_latest->used);
+        img_data->idnbr_norm = cam->netcam->idnbr;
+    pthread_mutex_unlock(&cam->netcam->mutex);
+
+    if (cam->netcam_high != NULL) {
+        if ((cam->netcam_high->status == NETCAM_RECONNECTING) ||
+            (cam->netcam_high->status == NETCAM_NOTCONNECTED)) {
+            return CAPTURE_ATTEMPTED;
+        }
+
+        pthread_mutex_lock(&cam->netcam_high->mutex);
+            netcam_pktarray_resize(cam, true);
+            if (!cam->netcam_high->passthrough) {
+                memcpy(img_data->image_high
+                       ,cam->netcam_high->img_latest->ptr
+                       ,cam->netcam_high->img_latest->used);
+            }
+            img_data->idnbr_high = cam->netcam_high->idnbr;
+        pthread_mutex_unlock(&cam->netcam_high->mutex);
+    }
+
+    rotate_map(cam, img_data);
+
+    return CAPTURE_SUCCESS;
 }
 

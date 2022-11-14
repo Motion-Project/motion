@@ -365,25 +365,22 @@ static void mlp_mask_privacy(ctx_cam *cam)
 /* Close and clean up camera*/
 void mlp_cam_close(ctx_cam *cam)
 {
-    if (cam->mmalcam) {
-        mmalcam_cleanup(cam->mmalcam);
-        cam->mmalcam = NULL;
-        cam->running_cam = false;
+    if (cam->mmalcam != NULL) {
+        mmalcam_cleanup(cam);
         return;
     }
 
-    if (cam->libcam) {
+    if (cam->libcam != NULL) {
         libcam_cleanup(cam);
-        cam->running_cam = false;
         return;
     }
 
-    if (cam->netcam) {
-        netcam_cleanup(cam, false);
+    if (cam->netcam != NULL) {
+        netcam_cleanup(cam);
         return;
     }
 
-    if (cam->camera_type == CAMERA_TYPE_V4L2) {
+    if (cam->v4l2cam != NULL) {
         v4l2_cleanup(cam);
         return;
     }
@@ -394,85 +391,37 @@ void mlp_cam_close(ctx_cam *cam)
 }
 
 /* Start camera */
-int mlp_cam_start(ctx_cam *cam)
+void mlp_cam_start(ctx_cam *cam)
 {
-    int retcd;
-
     if (cam->camera_type == CAMERA_TYPE_MMAL) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening MMAL cam"));
-        retcd = mmalcam_start(cam);
-        if (retcd < 0) {
-            mmalcam_cleanup(cam->mmalcam);
-            cam->mmalcam = NULL;
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("MMAL cam failed to open"));
-        }
-        return retcd;
+        mmalcam_start(cam);
+    } else if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
+        libcam_start(cam);
+    } else if (cam->camera_type == CAMERA_TYPE_NETCAM) {
+        netcam_start(cam);
+    } else if (cam->camera_type == CAMERA_TYPE_V4L2) {
+        v4l2_start(cam);
+    } else {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            ,_("No Camera device specified"));
+        cam->camera_status = STATUS_CLOSED;
     }
-
-    if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
-        retcd = libcam_start(cam);
-        if (retcd < 0) {
-            libcam_cleanup(cam);
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
-        }
-        return retcd;
-    }
-
-    if (cam->camera_type == CAMERA_TYPE_NETCAM) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening Netcam"));
-        retcd = netcam_setup(cam);
-        if (retcd < 0) {
-            netcam_cleanup(cam, true);
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Netcam failed to open"));
-        }
-        return retcd;
-    }
-
-    if (cam->camera_type == CAMERA_TYPE_V4L2) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening V4L2 device"));
-        retcd = v4l2_start(cam);
-        if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("V4L2 device failed to open"));
-        }
-        return retcd;
-    }
-
-    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-        ,_("No Camera device specified"));
-    return -1;
-
 }
 
 /* Get next image from camera */
 int mlp_cam_next(ctx_cam *cam, ctx_image_data *img_data)
 {
     if (cam->camera_type == CAMERA_TYPE_MMAL) {
-        if (cam->mmalcam == NULL) {
-            return NETCAM_GENERAL_ERROR;
-        }
         return mmalcam_next(cam, img_data);
-    }
-
-    if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
-        if (cam->libcam == NULL) {
-            return NETCAM_GENERAL_ERROR;
-        }
+    } else if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
         return libcam_next(cam, img_data);
-    }
-
-    if (cam->camera_type == CAMERA_TYPE_NETCAM) {
-        if (cam->video_dev == -1) {
-            return NETCAM_GENERAL_ERROR;
-        }
+    } else if (cam->camera_type == CAMERA_TYPE_NETCAM) {
         return netcam_next(cam, img_data);
+    } else if (cam->camera_type == CAMERA_TYPE_V4L2) {
+        return v4l2_next(cam, img_data);
     }
 
-    if (cam->camera_type == CAMERA_TYPE_V4L2) {
-        return v4l2_next(cam, img_data);
-   }
-
-    return -2;
+    return CAPTURE_FAILURE;
 }
 
 /* Assign the camera type */
@@ -511,9 +460,9 @@ static void mlp_init_firstimage(ctx_cam *cam)
     int indx;
 
     cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
-    if (cam->video_dev >= 0) {
+    if (cam->camera_status == STATUS_OPENED) {
         for (indx = 0; indx < 5; indx++) {
-            if (mlp_cam_next(cam, cam->current_image) == 0) {
+            if (mlp_cam_next(cam, cam->current_image) == CAPTURE_SUCCESS) {
                 break;
             }
             SLEEP(2, 0);
@@ -621,7 +570,7 @@ static void mlp_init_values(ctx_cam *cam)
     } else {
         cam->threshold_maximum = (cam->imgs.height * cam->imgs.width * 3) / 2;
     }
-
+    cam->camera_status = STATUS_CLOSED;
     cam->startup_frames = (cam->conf->framerate * 2) + cam->conf->pre_capture + cam->conf->minimum_motion_frames;
 
     cam->minimum_frame_time_downcounter = cam->conf->minimum_frame_time;
@@ -638,25 +587,22 @@ static void mlp_init_values(ctx_cam *cam)
 /* start the camera */
 static int mlp_init_cam_start(ctx_cam *cam)
 {
-    cam->video_dev = mlp_cam_start(cam);
+    mlp_cam_start(cam);
 
-    if (cam->video_dev == -1) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
-            ,_("Could not fetch initial image from camera "));
-        return -1;
-    } else if (cam->video_dev == -2) {
+    if (cam->camera_status == STATUS_CLOSED) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Could not fetch initial image from camera "));
+            ,_("Failed to start camera."));
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Motion only supports width and height modulo 8"));
+            ,_("Use webcontrol to start camera when it is ready."));
+        cam->restart_cam = false;
         return -1;
-    } else {
-        cam->imgs.motionsize = (cam->imgs.width * cam->imgs.height);
-        cam->imgs.size_norm  = (cam->imgs.width * cam->imgs.height * 3) / 2;
-        cam->imgs.size_high  = (cam->imgs.width_high * cam->imgs.height_high * 3) / 2;
     }
 
+    cam->imgs.motionsize = (cam->imgs.width * cam->imgs.height);
+    cam->imgs.size_norm  = (cam->imgs.width * cam->imgs.height * 3) / 2;
+    cam->imgs.size_high  = (cam->imgs.width_high * cam->imgs.height_high * 3) / 2;
     return 0;
+
 }
 
 /* initialize reference images*/
@@ -747,7 +693,7 @@ void mlp_cleanup(ctx_cam *cam)
 
     algsec_deinit(cam);
 
-    if (cam->video_dev >= 0) {
+    if (cam->camera_status == STATUS_OPENED) {
         mlp_cam_close(cam);
     }
 
@@ -895,13 +841,14 @@ static int mlp_retry(ctx_cam *cam)
 {
     int size_high;
 
-    if (cam->video_dev < 0 &&
-        cam->frame_curr_ts.tv_sec % 10 == 0 && cam->shots == 0) {
+    if ((cam->camera_status == STATUS_CLOSED) &&
+        (cam->frame_curr_ts.tv_sec % 10 == 0) &&
+        (cam->shots == 0)) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Retrying until successful connection with camera"));
-        cam->video_dev = mlp_cam_start(cam);
 
-        if (cam->video_dev < 0) {
+        mlp_cam_start(cam);
+        if (cam->camera_status != STATUS_OPENED) {
             return 1;
         }
 
@@ -945,15 +892,11 @@ static int mlp_capture(ctx_cam *cam)
 {
     const char *tmpin;
     char tmpout[80];
-    int vid_return_code = 0;        /* Return code used when calling mlp_cam_next */
+    int retcd;
 
-    if (cam->video_dev >= 0) {
-        vid_return_code = mlp_cam_next(cam, cam->current_image);
-    } else {
-        vid_return_code = 1; /* Non fatal error */
-    }
+    retcd = mlp_cam_next(cam, cam->current_image);
 
-    if (vid_return_code == 0) {
+    if (retcd == CAPTURE_SUCCESS) {
         cam->lost_connection = 0;
         cam->connectionlosttime.tv_sec = 0;
 
@@ -966,34 +909,26 @@ static int mlp_capture(ctx_cam *cam)
         mlp_mask_privacy(cam);
         memcpy(cam->imgs.image_vprvcy, cam->current_image->image_norm, cam->imgs.size_norm);
 
-    } else if (vid_return_code < 0) {
+    } else if (retcd == CAPTURE_FAILURE) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Video device fatal error - Closing video device"));
         mlp_cam_close(cam);
         memcpy(cam->current_image->image_norm, cam->imgs.image_virgin, cam->imgs.size_norm);
         cam->lost_connection = 1;
     } else {
-        if (vid_return_code == NETCAM_RESTART_ERROR) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                ,_("Restarting Motion thread to reinitialize all "
-                "image buffers"));
-            cam->lost_connection = 1;
-            return 1;
-        }
-
         if (cam->connectionlosttime.tv_sec == 0) {
             clock_gettime(CLOCK_REALTIME, &cam->connectionlosttime);
         }
 
-        ++cam->missing_frame_counter;
+        cam->missing_frame_counter++;
 
-        if (cam->video_dev >= 0 &&
-            cam->missing_frame_counter < (cam->conf->camera_tmo * cam->conf->framerate)) {
+        if ((cam->camera_status == STATUS_OPENED) &&
+            (cam->missing_frame_counter <
+                (cam->conf->camera_tmo * cam->conf->framerate))) {
             memcpy(cam->current_image->image_norm, cam->imgs.image_vprvcy, cam->imgs.size_norm);
         } else {
             cam->lost_connection = 1;
-
-            if (cam->video_dev >= 0) {
+            if (cam->camera_status == STATUS_OPENED) {
                 tmpin = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
             } else {
                 tmpin = "UNABLE TO OPEN VIDEO DEVICE\\nSINCE %Y-%m-%d %T";
@@ -1012,7 +947,7 @@ static int mlp_capture(ctx_cam *cam)
                 event(cam, EVENT_CAMERA_LOST, NULL, NULL, NULL, &cam->connectionlosttime);
             }
 
-            if ((cam->video_dev > 0) &&
+            if ((cam->camera_status == STATUS_OPENED) &&
                 (cam->missing_frame_counter == ((cam->conf->camera_tmo * 4) * cam->conf->framerate))) {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Video signal still lost - Trying to close video device"));
