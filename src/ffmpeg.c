@@ -241,6 +241,9 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg)
     if (mystreq(codec_name, "mpeg4")) {
         ffmpeg->oc->oformat = av_guess_format("avi", NULL, NULL);
         retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.avi",basename);
+        if (ffmpeg->oc->oformat) {
+            ffmpeg->oc->video_codec_id = MY_CODEC_ID_MSMPEG4V2;
+        }
     }
 
     if (mystreq(codec_name, "msmpeg4")) {
