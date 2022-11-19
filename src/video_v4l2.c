@@ -1191,8 +1191,8 @@ static int v4l2_pix_change(struct context *cnt, struct video_dev *curdev
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     video_buff *src;
 
-    width = cnt->imgs.width;
-    height = cnt->imgs.height;
+    width = curdev->width;
+    height = curdev->height;
     src = &vid_source->buffers[vid_source->buf.index];
 
     /*The FALLTHROUGH is a special comment required by compiler.*/
