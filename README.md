@@ -3,36 +3,25 @@ MotionPlus
 
 ## Description
 
-MotionPlus is a break at version 4.2.2 from the Motion application.  MotionPlus removes
-some of the outdated processes and features of the Motion application and introduces new
-functionalities.
+MotionPlus is a break from Motion version 4.2.2 to provide an application for enhancements.  MotionPlus removes some of the outdated processes, cleans up the code base and introduces new functionality.
 
-The following is a initial list of revisions from the Motion application.
-- Compiled in C++ (Not all code has been converted from C)
-- FFmpeg is required.
-- Removed
-    - Brooktree devices
-    - Round-Robin
-    - Netcam options not using FFmpeg
-    - Assembler code
-    - Web items not using libmicrohttpd
-    - Embedded tracking (Is now all external scripts)
-    - autobrightness
-    - mpeg4, msmpeg4, swf, ffv1 and mov movie formats.
-    - separate ports for camera streams
-    - text web interfaces
-    - Web control GET interface to parameters
-- New functionality
-    - Secondary detection method via OpenCV
-    - New primary detection parameters
-    - Sound from pass through sources
-    - JSON configuration parameters
-    - User provided web page
-    - Add/delete camera via web interface
-    - Additional control parameters
-    - Edits on user configuration parameters
-    - POST web control processing
-    - ROI picture output
+The following are some of the things that are plus.
+- Compiled in C++
+- Secondary detection method via OpenCV
+  - HOG (Histogram of Oriented Gradients)
+  - Haar cascade classifiers
+  - Deep neural networks(Caffe, TensorFlow, etc.)
+- Additional primary detection parameters
+- Sound recording from certain camera sources
+- Direct processing of libcamera sources
+- JSON configuration parameters
+- User provided web pages
+- Add/delete camera via web interface
+- List/download movies via the web interface
+- Additional control parameters
+- Edits on user configuration parameters
+- POST web control processing
+- ROI picture output
 
 ## Documentation
 
