@@ -23,7 +23,6 @@
 #include "util.hpp"
 #include "logger.hpp"
 #include "alg_sec.hpp" /* For sec detect in format output */
-#include "dbse.hpp" /*For dbse ID in format output */
 
 
 /** Non case sensitive equality check for strings*/
@@ -797,36 +796,104 @@ void util_parms_free(ctx_params *params)
     params->params_count = 0;
 
 }
-
-static void util_parms_add(ctx_params *params, const char *parm_nm, const char *parm_val)
+static void util_parms_file(ctx_params *params, const char *params_file)
 {
-    params->params_count++;
+    int indx, chk;
+    size_t stpos;
+    std::string line, parm_nm, parm_vl;
+    std::ifstream ifs;
 
-    if (params->params_count == 1) {
-        params->params_array =(ctx_params_item *) mymalloc(sizeof(ctx_params_item));
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                , _("parse file: %s"), params_file);
+    chk = 0;
+    for (indx = 0; indx < params->params_count; indx++) {
+        if (mystreq(params->params_array[indx].param_name, "params_file") ) {
+            chk++;
+        }
+    }
+    if (chk > 1){
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Only one params_file specification is permitted."));
+        return;
+    }
+
+    ifs.open(params_file);
+        if (ifs.is_open() == false) {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                , _("params_file not found: %s"), params_file);
+            return;
+        }
+        while (std::getline(ifs, line)) {
+            mytrim(line);
+            stpos = line.find(" ");
+            if (stpos > line.find("=")) {
+                stpos = line.find("=");
+            }
+            if ((stpos != std::string::npos) &&
+                (stpos != line.length()-1) &&
+                (stpos != 0) &&
+                (line.substr(0, 1) != ";") &&
+                (line.substr(0, 1) != "#")) {
+                parm_nm = line.substr(0, stpos);
+                parm_vl = line.substr(stpos+1, line.length()-stpos);
+                mytrim(parm_nm);
+                mytrim(parm_vl);
+                util_parms_add(params, parm_nm.c_str(), parm_vl.c_str());
+            } else if ((line != "") &&
+                (line.substr(0, 1) != ";") &&
+                (line.substr(0, 1) != "#")) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                , _("Unable to parse line: %s"), line.c_str());
+            }
+        }
+    ifs.close();
+
+}
+
+void util_parms_add(ctx_params *params, const char *parm_nm, const char *parm_val)
+{
+    int indx;
+
+    for (indx = 0; indx < params->params_count; indx++) {
+        if (mystreq(params->params_array[indx].param_name, parm_nm) ) {
+            break;
+        }
+    }
+
+    if (indx == params->params_count) {
+        params->params_count++;
+        if (params->params_count == 1) {
+            params->params_array =(ctx_params_item *) mymalloc(sizeof(ctx_params_item));
+        } else {
+            params->params_array =(ctx_params_item *)realloc(params->params_array
+                , sizeof(ctx_params_item)*params->params_count);
+        }
     } else {
-        params->params_array =(ctx_params_item *)realloc(params->params_array
-            , sizeof(ctx_params_item)*params->params_count);
+        free(params->params_array[indx].param_name);
+        free(params->params_array[indx].param_value);
     }
 
     if (parm_nm != NULL) {
-        params->params_array[params->params_count-1].param_name =(char*)mymalloc(strlen(parm_nm)+1);
-        sprintf(params->params_array[params->params_count-1].param_name,"%s",parm_nm);
+        params->params_array[indx].param_name =(char*)mymalloc(strlen(parm_nm)+1);
+        sprintf(params->params_array[indx].param_name,"%s",parm_nm);
     } else {
-        params->params_array[params->params_count-1].param_name = NULL;
+        params->params_array[indx].param_name = NULL;
     }
 
     if (parm_val != NULL) {
-        params->params_array[params->params_count-1].param_value =(char*)mymalloc(strlen(parm_val)+1);
-        sprintf(params->params_array[params->params_count-1].param_value,"%s",parm_val);
+        params->params_array[indx].param_value =(char*)mymalloc(strlen(parm_val)+1);
+        sprintf(params->params_array[indx].param_value,"%s",parm_val);
     } else {
-        params->params_array[params->params_count-1].param_value = NULL;
+        params->params_array[indx].param_value = NULL;
     }
 
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Parsed: >%s< >%s<")
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Parsed: >%s< >%s<")
         ,params->params_array[params->params_count-1].param_name
         ,params->params_array[params->params_count-1].param_value);
 
+    if (mystrceq(parm_nm, "params_file") && (parm_val != NULL)) {
+        util_parms_file(params, parm_val);
+    }
 }
 
 static void util_parms_strip_qte(std::string &parm)
@@ -985,7 +1052,7 @@ void util_parms_parse_qte(ctx_params *params, std::string &parmline)
             }
         }
 
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
             ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
@@ -1016,7 +1083,7 @@ void util_parms_parse_comma(ctx_params *params, std::string &parmline)
             indxvl_en = parmline.find(",",indxvl_st) - 1;
         }
 
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
             ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
@@ -1036,7 +1103,7 @@ void util_parms_parse_comma(ctx_params *params, std::string &parmline)
         }
         indxvl_en = parmline.length() - 1;
 
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
             ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
@@ -1066,7 +1133,7 @@ void util_parms_parse(ctx_params *params, std::string confline)
     /* We make a copy because the parsing destroys the value passed */
     parmline = confline;
 
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Starting parsing parameters: %s"), parmline.c_str());
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Starting parsing parameters: %s"), parmline.c_str());
 
     util_parms_free(params);
 
@@ -1074,7 +1141,7 @@ void util_parms_parse(ctx_params *params, std::string confline)
 
     util_parms_parse_comma(params, parmline);
 
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Finished parsing parameters: %s"), confline.c_str());
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Finished parsing parameters: %s"), confline.c_str());
 
     params->update_params = false;
 
@@ -1153,7 +1220,7 @@ void util_parms_update(ctx_params *params, std::string &confline)
 
     confline = parmline;
 
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("New config: %s"), confline.c_str());
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("New config: %s"), confline.c_str());
 
     return;
 

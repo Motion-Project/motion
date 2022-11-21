@@ -17,12 +17,6 @@
  *    Copyright 2020-2022 MotionMrDave@gmail.com
  */
 
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <stdexcept>
-#include <fstream>
-
 #include "motionplus.hpp"
 #include "conf.hpp"
 #include "util.hpp"

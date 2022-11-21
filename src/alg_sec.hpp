@@ -22,9 +22,6 @@
 #define _INCLUDE_ALG_SEC_HPP_
 
 
-#include <string>
-#include <iostream>
-#include <vector>
 #ifdef HAVE_OPENCV
     #include "opencv2/objdetect.hpp"
     #include "opencv2/dnn.hpp"

@@ -49,6 +49,9 @@
 #include <microhttpd.h>
 #include <string>
 #include <list>
+#include <vector>
+#include <iostream>
+#include <fstream>
 
 #if defined(HAVE_PTHREAD_NP_H)
     #include <pthread_np.h>
