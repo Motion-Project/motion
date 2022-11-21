@@ -138,6 +138,7 @@
 
     void util_parms_parse(ctx_params *params, std::string confline);
     void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl);
+    void util_parms_add_default(ctx_params *params, std::string parm_nm, int parm_vl);
 
     void util_parms_free(ctx_params *params);
     void util_parms_update(ctx_params *params, std::string &confline);

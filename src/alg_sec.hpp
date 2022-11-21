@@ -24,8 +24,10 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
 #ifdef HAVE_OPENCV
     #include "opencv2/objdetect.hpp"
+    #include "opencv2/dnn.hpp"
     #include "opencv2/highgui.hpp"
     #include "opencv2/imgproc.hpp"
 #endif
@@ -45,20 +47,33 @@ struct ctx_algsec_model {
 
     float                       scalefactor;
     float                       threshold_model;    /* Threshold fed into the opencv model*/
-    float                       threshold_motion;   /* Threshold for motion to use on detection*/
+    float                       threshold;          /* Threshold for motion to use on detection*/
 
     int                         hog_winstride;
     int                         hog_padding;
-
 
     int                         haar_minneighbors;
     int                         haar_flags;
     int                         haar_minsize;
     int                         haar_maxsize;
+
+    std::string                 dnn_config;
+    std::string                 dnn_framework;
+    std::string                 dnn_classes_file;
+
+    int                         dnn_backend;
+    int                         dnn_target;
+    std::vector<std::string>    dnn_classes;
+    int                         dnn_width;
+    int                         dnn_height;
+    float                       dnn_scale;
+
     bool                        isdetected;         /* Bool reset for each image as to whether a detection occurred */
+
     #ifdef HAVE_OPENCV
         cv::CascadeClassifier   haar_cascade;       /*Haar Cascade (if applicable) */
         cv::HOGDescriptor       hog;
+        cv::dnn::Net            net;
     #endif
 };
 

@@ -1297,7 +1297,7 @@ static void conf_edit_secondary_method(ctx_cam *cam, std::string &parm, enum PAR
         cam->conf->secondary_method = "none";
     } else if (pact == PARM_ACT_SET) {
         if ((parm == "none") || (parm == "haar") ||
-            (parm == "hog"))  {
+            (parm == "hog")  || (parm == "dnn"))  {
             cam->conf->secondary_method = parm;
         } else if (parm == "") {
             cam->conf->secondary_method = "none";
@@ -1307,7 +1307,7 @@ static void conf_edit_secondary_method(ctx_cam *cam, std::string &parm, enum PAR
     } else if (pact == PARM_ACT_GET) {
         parm = cam->conf->secondary_method;
     } else if (pact == PARM_ACT_LIST) {
-        parm = "[\"none\",\"haar\",\"hog\"]";
+        parm = "[\"none\",\"haar\",\"hog\",\"dnn\"]";
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_method",_("secondary_method"));

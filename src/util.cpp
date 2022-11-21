@@ -1082,6 +1082,23 @@ void util_parms_parse(ctx_params *params, std::string confline)
 
 }
 
+void util_parms_add_default(ctx_params *params, std::string parm_nm, int parm_vl)
+{
+    int indx;
+    bool dflt;
+
+    dflt = true;
+    for (indx = 0; indx < params->params_count; indx++) {
+        if (mystreq(params->params_array[indx].param_name, parm_nm.c_str()) ) {
+            dflt = false;
+        }
+    }
+    if (dflt == true) {
+        util_parms_add(params, parm_nm.c_str(), std::to_string(parm_vl).c_str());
+    }
+
+}
+
 void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl)
 {
     int indx;
