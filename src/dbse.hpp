@@ -26,18 +26,30 @@
 
     #ifdef HAVE_MYSQL
         #include <mysql.h>
+        #ifndef HAVE_DBSE
+            #define HAVE_DBSE
+        #endif
     #endif
 
     #ifdef HAVE_MARIADB
         #include <mysql.h>
+        #ifndef HAVE_DBSE
+            #define HAVE_DBSE
+        #endif
     #endif
 
     #ifdef HAVE_SQLITE3
         #include <sqlite3.h>
+        #ifndef HAVE_DBSE
+            #define HAVE_DBSE
+        #endif
     #endif
 
     #ifdef HAVE_PGSQL
         #include <libpq-fe.h>
+        #ifndef HAVE_DBSE
+            #define HAVE_DBSE
+        #endif
     #endif
 
     enum DBSE_ACT {

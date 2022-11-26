@@ -81,6 +81,28 @@ static void dbse_cols_free(ctx_motapp *motapp)
 
 }
 
+/* Free the movies lists*/
+static void dbse_movies_free(ctx_motapp *motapp)
+{
+    int indx;
+
+    if (motapp->dbse->movie_list != NULL) {
+        for (indx=0; indx<motapp->dbse->movie_cnt; indx++) {
+            myfree(&motapp->dbse->movie_list[indx].movie_nm);
+            myfree(&motapp->dbse->movie_list[indx].movie_dir);
+            myfree(&motapp->dbse->movie_list[indx].full_nm);
+            myfree(&motapp->dbse->movie_list[indx].movie_tmc);
+            myfree(&motapp->dbse->movie_list[indx].movie_tml);
+
+        }
+        myfree(&motapp->dbse->movie_list);
+    }
+    motapp->dbse->movie_cnt = 0;
+
+}
+
+#ifdef HAVE_DBSE
+
 /* Create array of all the columns in current version */
 static void dbse_cols_list(ctx_motapp *motapp)
 {
@@ -147,26 +169,6 @@ static void dbse_cols_list(ctx_motapp *motapp)
     indx++;
     snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "sdev_avg");
     snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "int");
-
-}
-
-/* Free the movies lists*/
-static void dbse_movies_free(ctx_motapp *motapp)
-{
-    int indx;
-
-    if (motapp->dbse->movie_list != NULL) {
-        for (indx=0; indx<motapp->dbse->movie_cnt; indx++) {
-            myfree(&motapp->dbse->movie_list[indx].movie_nm);
-            myfree(&motapp->dbse->movie_list[indx].movie_dir);
-            myfree(&motapp->dbse->movie_list[indx].full_nm);
-            myfree(&motapp->dbse->movie_list[indx].movie_tmc);
-            myfree(&motapp->dbse->movie_list[indx].movie_tml);
-
-        }
-        myfree(&motapp->dbse->movie_list);
-    }
-    motapp->dbse->movie_cnt = 0;
 
 }
 
@@ -330,8 +332,7 @@ static void dbse_sql_motpls(ctx_dbse *dbse, std::string &sql)
 
 }
 
-static void dbse_sql_motpls(ctx_dbse *dbse
-    , std::string &sql, int camera_id)
+static void dbse_sql_motpls(ctx_dbse *dbse, std::string &sql, int camera_id)
 {
     sql = "";
 
@@ -355,8 +356,7 @@ static void dbse_sql_motpls(ctx_dbse *dbse
 
 }
 
-static void dbse_sql_motpls(ctx_dbse *dbse
-    , std::string &sql, char *col_nm, char *col_typ)
+static void dbse_sql_motpls(ctx_dbse *dbse, std::string &sql, char *col_nm, char *col_typ)
 {
     sql = "";
 
@@ -368,6 +368,8 @@ static void dbse_sql_motpls(ctx_dbse *dbse
     }
 
 }
+
+#endif /* HAVE_DBSE */
 
 #ifdef HAVE_SQLITE3
 
@@ -1208,6 +1210,9 @@ void dbse_movies_getlist(ctx_motapp *motapp, int camera_id)
                 dbse_sqlite3_movlst(motapp, camera_id);
             }
         #endif
+        #ifndef HAVE_DBSE
+            (void)camera_id;
+        #endif
     pthread_mutex_unlock(&motapp->dbse->mutex_dbse);
 
 }
@@ -1223,6 +1228,10 @@ void dbse_close(ctx_motapp *motapp)
     #ifdef HAVE_SQLITE3
         dbse_sqlite3_close(motapp);
     #endif
+    #ifndef HAVE_DBSE
+        (void)motapp;
+    #endif
+
 }
 
 void dbse_deinit(ctx_motapp *motapp)
@@ -1264,6 +1273,9 @@ void dbse_exec_sql(ctx_motapp *motapp, const char *sqlquery)
             if (motapp->dbse->database_type == "sqlite3") {
                 dbse_sqlite3_exec(motapp, sqlquery);
             }
+        #endif
+        #ifndef HAVE_DBSE
+            (void)sqlquery;
         #endif
     pthread_mutex_unlock(&motapp->dbse->mutex_dbse);
 
