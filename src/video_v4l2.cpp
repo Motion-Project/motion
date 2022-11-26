@@ -89,11 +89,12 @@ static int xioctl(ctx_v4l2cam *v4l2cam, unsigned long request, void *arg)
 }
 
 /* Get the count of how many controls and menu items the device supports */
-static int v4l2_ctrls_count(ctx_v4l2cam *v4l2cam)
+static int v4l2_ctrls_count(ctx_cam *cam)
 {
+    int indx;
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_queryctrl       vid_ctrl;
     struct v4l2_querymenu       vid_menu;
-    int indx;
 
     v4l2cam->devctrl_count = 0;
 
@@ -123,9 +124,10 @@ static int v4l2_ctrls_count(ctx_v4l2cam *v4l2cam)
 }
 
 /* Print the device controls to the log */
-static void v4l2_ctrls_log(ctx_v4l2cam *v4l2cam)
+static void v4l2_ctrls_log(ctx_cam *cam)
 {
     int indx;
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
 
     if (v4l2cam->devctrl_count != 0 ) {
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("---------Controls---------"));
@@ -149,11 +151,12 @@ static void v4l2_ctrls_log(ctx_v4l2cam *v4l2cam)
 }
 
 /* Get names of the controls and menu items the device supports */
-static void v4l2_ctrls_list(ctx_v4l2cam *v4l2cam)
+static void v4l2_ctrls_list(ctx_cam *cam)
 {
+    int indx, indx_ctrl;
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_queryctrl       vid_ctrl;
     struct v4l2_querymenu       vid_menu;
-    int indx, indx_ctrl;
 
     v4l2cam->devctrl_array = NULL;
     if (v4l2cam->devctrl_count == 0) {
@@ -215,18 +218,19 @@ static void v4l2_ctrls_list(ctx_v4l2cam *v4l2cam)
         vid_ctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
     }
 
-    v4l2_ctrls_log(v4l2cam);
+    v4l2_ctrls_log(cam);
 
     return;
 
 }
 
 /* Set the control array items to the device */
-static void v4l2_ctrls_set(ctx_v4l2cam *v4l2cam)
+static void v4l2_ctrls_set(ctx_cam *cam)
 {
+    int indx_dev, retcd;
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     ctx_v4l2cam_ctrl *devitem;
     struct v4l2_control     vid_ctrl;
-    int indx_dev, retcd;
 
     for (indx_dev = 0; indx_dev < v4l2cam->devctrl_count; indx_dev++) {
         devitem=&v4l2cam->devctrl_array[indx_dev];
@@ -254,12 +258,12 @@ static void v4l2_ctrls_set(ctx_v4l2cam *v4l2cam)
     return;
 }
 
-
-static int v4l2_parms_set(ctx_v4l2cam *v4l2cam)
+static int v4l2_parms_set(ctx_cam *cam)
 {
-    ctx_v4l2cam_ctrl  *devitem;
-    ctx_params_item *usritem;
     int indx_dev, indx_user;
+    ctx_params_item *usritem;
+    ctx_v4l2cam_ctrl  *devitem;
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
 
     if (v4l2cam->devctrl_count == 0) {
         v4l2cam->params->update_params = false;
@@ -309,8 +313,9 @@ static int v4l2_parms_set(ctx_v4l2cam *v4l2cam)
 }
 
 /* Set the device to the input number requested by user */
-static int v4l2_set_input(ctx_v4l2cam *v4l2cam)
+static int v4l2_set_input(ctx_cam *cam)
 {
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_input    input;
 
     memset(&input, 0, sizeof (struct v4l2_input));
@@ -354,8 +359,9 @@ static int v4l2_set_input(ctx_v4l2cam *v4l2cam)
 }
 
 /* Set the video standard(norm) for the device to the user requested value*/
-static void v4l2_set_norm(ctx_v4l2cam *v4l2cam)
+static void v4l2_set_norm(ctx_cam *cam)
 {
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_standard standard;
     v4l2_std_id std_id;
 
@@ -407,8 +413,9 @@ static void v4l2_set_norm(ctx_v4l2cam *v4l2cam)
 }
 
 /* Set the frequency on the device to the user requested value */
-static void v4l2_set_frequency(ctx_v4l2cam *v4l2cam)
+static void v4l2_set_frequency(ctx_cam *cam)
 {
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_tuner     tuner;
     struct v4l2_frequency freq;
 
@@ -444,9 +451,10 @@ static void v4l2_set_frequency(ctx_v4l2cam *v4l2cam)
     return;
 }
 
-static int v4l2_pixfmt_try(ctx_v4l2cam *v4l2cam, uint pixformat)
+static int v4l2_pixfmt_try(ctx_cam *cam, uint pixformat)
 {
     int retcd;
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_format *fmt = &v4l2cam->fmt;
 
     memset(fmt, 0, sizeof(struct v4l2_format));
@@ -476,9 +484,10 @@ static int v4l2_pixfmt_try(ctx_v4l2cam *v4l2cam, uint pixformat)
     return 0;
 }
 
-static int v4l2_pixfmt_stride(ctx_v4l2cam *v4l2cam)
+static int v4l2_pixfmt_stride(ctx_cam *cam)
 {
     int wd, bpl, wps;
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_format *fmt = &v4l2cam->fmt;
 
     v4l2cam->width = (int)fmt->fmt.pix.width;
@@ -529,8 +538,9 @@ static int v4l2_pixfmt_stride(ctx_v4l2cam *v4l2cam)
 
 }
 
-static int v4l2_pixfmt_adjust(ctx_v4l2cam *v4l2cam)
+static int v4l2_pixfmt_adjust(ctx_cam *cam)
 {
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_format *fmt = &v4l2cam->fmt;
 
     if (fmt->fmt.pix.width != (uint)v4l2cam->width ||
@@ -558,20 +568,21 @@ static int v4l2_pixfmt_adjust(ctx_v4l2cam *v4l2cam)
 }
 
 /* Set the pixel format on the device */
-static int v4l2_pixfmt_set(ctx_v4l2cam *v4l2cam, unsigned int pixformat)
+static int v4l2_pixfmt_set(ctx_cam *cam, unsigned int pixformat)
 {
     int retcd;
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_format *fmt = &v4l2cam->fmt;
 
-    retcd = v4l2_pixfmt_try(v4l2cam, pixformat);
+    retcd = v4l2_pixfmt_try(cam, pixformat);
     if (retcd != 0) {
         return -1;
     }
-    retcd = v4l2_pixfmt_stride(v4l2cam);
+    retcd = v4l2_pixfmt_stride(cam);
     if (retcd != 0) {
         return -1;
     }
-    retcd = v4l2_pixfmt_adjust(v4l2cam);
+    retcd = v4l2_pixfmt_adjust(cam);
     if (retcd != 0) {
         return -1;
     }
@@ -593,8 +604,10 @@ static int v4l2_pixfmt_set(ctx_v4l2cam *v4l2cam, unsigned int pixformat)
     return 0;
 }
 
-static void v4l2_params_check(ctx_v4l2cam *v4l2cam)
+static void v4l2_params_check(ctx_cam *cam)
 {
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
+
     if (v4l2cam->width % 8) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("config image width (%d) is not modulo 8"), v4l2cam->width);
@@ -626,10 +639,11 @@ static void v4l2_params_check(ctx_v4l2cam *v4l2cam)
 }
 
 /*List camera palettes and return index of one that Motionplus supports*/
-static int v4l2_pixfmt_list(ctx_v4l2cam *v4l2cam, palette_item *palette_array)
+static int v4l2_pixfmt_list(ctx_cam *cam, palette_item *palette_array)
 {
-    struct v4l2_fmtdesc fmtd;
     int v4l2_pal, indx_palette, indx;
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
+    struct v4l2_fmtdesc fmtd;
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Supported palettes:"));
 
@@ -663,18 +677,19 @@ static int v4l2_pixfmt_list(ctx_v4l2cam *v4l2cam, palette_item *palette_array)
 }
 
 /* Find and select the pixel format for camera*/
-static int v4l2_palette_set(ctx_v4l2cam *v4l2cam)
+static int v4l2_palette_set(ctx_cam *cam)
 {
     int indxp, retcd;
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     palette_item *palette_array;
 
     palette_array =(palette_item*) malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
     v4l2_palette_init(palette_array);
 
-    v4l2_params_check(v4l2cam);
+    v4l2_params_check(cam);
 
     indxp =v4l2cam->palette;
-    retcd = v4l2_pixfmt_set(v4l2cam, palette_array[indxp].v4l2id);
+    retcd = v4l2_pixfmt_set(cam, palette_array[indxp].v4l2id);
     if (retcd == 0) {
         myfree(&palette_array);
         return 0;
@@ -685,7 +700,7 @@ static int v4l2_palette_set(ctx_v4l2cam *v4l2cam)
         , indxp, palette_array[indxp].fourcc
         ,v4l2cam->width, v4l2cam->height);
 
-    indxp = v4l2_pixfmt_list(v4l2cam, palette_array);
+    indxp = v4l2_pixfmt_list(cam, palette_array);
     if (indxp < 0) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("Unable to find a compatible palette format."));
@@ -693,7 +708,7 @@ static int v4l2_palette_set(ctx_v4l2cam *v4l2cam)
         return -1;
     }
 
-    retcd = v4l2_pixfmt_set(v4l2cam, palette_array[indxp].v4l2id);
+    retcd = v4l2_pixfmt_set(cam, palette_array[indxp].v4l2id);
     if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , _("Palette selection failed for format %s")
@@ -711,10 +726,11 @@ static int v4l2_palette_set(ctx_v4l2cam *v4l2cam)
 }
 
 /* Set the memory mapping from device to Motion*/
-static int v4l2_set_mmap(ctx_v4l2cam *v4l2cam)
+static int v4l2_set_mmap(ctx_cam *cam)
 {
     enum v4l2_buf_type type;
     int buffer_index;
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
 
     if (!(v4l2cam->cap.capabilities & V4L2_CAP_STREAMING)) {
         return -1;
@@ -817,10 +833,11 @@ static void v4l2_set_imgs(ctx_cam *cam)
 }
 
 /* Capture the image into the buffer */
-static int v4l2_capture(ctx_v4l2cam *v4l2cam)
+static int v4l2_capture(ctx_cam *cam)
 {
     int retcd;
     sigset_t set, old;
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
 
     /* Block signals during IOCTL */
     sigemptyset(&set);
@@ -864,8 +881,9 @@ static int v4l2_capture(ctx_v4l2cam *v4l2cam)
 }
 
 /* Convert captured image to the standard pixel format*/
-static int v4l2_convert(ctx_cam *cam, ctx_v4l2cam *v4l2cam, unsigned char *img_norm)
+static int v4l2_convert(ctx_cam *cam, unsigned char *img_norm)
 {
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     video_buff *the_buffer = &v4l2cam->buffers[v4l2cam->buf.index];
 
     /*The FALLTHROUGH is a special comment required by compiler. */
@@ -996,14 +1014,14 @@ static void v4l2_device_select(ctx_cam *cam)
 
         util_parms_parse(cam->v4l2cam->params, cam->conf->v4l2_params);
 
-        retcd = v4l2_parms_set(cam->v4l2cam);
+        retcd = v4l2_parms_set(cam);
         if (retcd < 0 ) {
             MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             ,_("Error setting device controls"));
             return;
         }
 
-        v4l2_ctrls_set(cam->v4l2cam);
+        v4l2_ctrls_set(cam);
     }
 }
 
@@ -1046,8 +1064,9 @@ static int v4l2_device_open(ctx_cam *cam)
 
 }
 
-static void v4l2_log_types(ctx_v4l2cam *v4l2cam)
+static void v4l2_log_types(ctx_cam *cam)
 {
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
 
     MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "------------------------");
     MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.driver: \"%s\"",v4l2cam->cap.driver);
@@ -1096,8 +1115,10 @@ static void v4l2_log_types(ctx_v4l2cam *v4l2cam)
     return;
 }
 
-static void v4l2_log_formats(ctx_v4l2cam *v4l2cam)
+static void v4l2_log_formats(ctx_cam *cam)
 {
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
+
     palette_item *palette_array;
     struct v4l2_fmtdesc         dev_format;
     struct v4l2_frmsizeenum     dev_sizes;
@@ -1159,10 +1180,11 @@ static void v4l2_log_formats(ctx_v4l2cam *v4l2cam)
     return;
 }
 
-static void v4l2_set_fps(ctx_v4l2cam *v4l2cam)
+static void v4l2_set_fps(ctx_cam *cam)
 {
-    struct v4l2_streamparm setfps;
     int retcd;
+    ctx_v4l2cam *v4l2cam = cam->v4l2cam;
+    struct v4l2_streamparm setfps;
 
     memset(&setfps, 0, sizeof(struct v4l2_streamparm));
 
@@ -1244,17 +1266,17 @@ void v4l2_start(ctx_cam *cam)
 
         retcd = v4l2_device_init(cam);
         if (retcd == 0) retcd = v4l2_device_open(cam);
-        if (retcd == 0) v4l2_log_types(cam->v4l2cam);
-        if (retcd == 0) v4l2_log_formats(cam->v4l2cam);
-        if (retcd == 0) retcd = v4l2_set_input(cam->v4l2cam);
-        if (retcd == 0) v4l2_set_norm(cam->v4l2cam);
-        if (retcd == 0) v4l2_set_frequency(cam->v4l2cam);
-        if (retcd == 0) retcd = v4l2_palette_set(cam->v4l2cam);
-        if (retcd == 0) v4l2_set_fps(cam->v4l2cam);
-        if (retcd == 0) retcd = v4l2_ctrls_count(cam->v4l2cam);
-        if (retcd == 0) v4l2_ctrls_list(cam->v4l2cam);
-        if (retcd == 0) v4l2_ctrls_set(cam->v4l2cam);
-        if (retcd == 0) retcd = v4l2_set_mmap(cam->v4l2cam);
+        if (retcd == 0) v4l2_log_types(cam);
+        if (retcd == 0) v4l2_log_formats(cam);
+        if (retcd == 0) retcd = v4l2_set_input(cam);
+        if (retcd == 0) v4l2_set_norm(cam);
+        if (retcd == 0) v4l2_set_frequency(cam);
+        if (retcd == 0) retcd = v4l2_palette_set(cam);
+        if (retcd == 0) v4l2_set_fps(cam);
+        if (retcd == 0) retcd = v4l2_ctrls_count(cam);
+        if (retcd == 0) v4l2_ctrls_list(cam);
+        if (retcd == 0) v4l2_ctrls_set(cam);
+        if (retcd == 0) retcd = v4l2_set_mmap(cam);
         if (retcd == 0) v4l2_set_imgs(cam);
         if (retcd == 0) {
             cam->camera_status = STATUS_OPENED;
@@ -1278,12 +1300,12 @@ int v4l2_next(ctx_cam *cam, ctx_image_data *img_data)
 
         v4l2_device_select(cam);
 
-        retcd = v4l2_capture(cam->v4l2cam);
+        retcd = v4l2_capture(cam);
         if (retcd != 0) {
             return CAPTURE_FAILURE;
         }
 
-        retcd = v4l2_convert(cam, cam->v4l2cam, img_data->image_norm);
+        retcd = v4l2_convert(cam, img_data->image_norm);
         if (retcd != 0) {
             return CAPTURE_FAILURE;
         }
