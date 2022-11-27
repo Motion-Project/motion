@@ -563,6 +563,7 @@ static void algsec_load_params(ctx_cam *cam)
     cam->algsec->too_slow = 0;
     cam->algsec->detecting = false;
     cam->algsec->closing = false;
+    cam->algsec->thread_running = false;
 
     algsec_params_init(cam);
 
@@ -592,7 +593,9 @@ static void algsec_load_models(ctx_cam *cam)
     }
 
     /* If model fails to load, the method is changed to none*/
-    if (cam->algsec->models.method != "none"){
+    if ((cam->algsec->models.method == "haar") ||
+        (cam->algsec->models.method == "hog") ||
+        (cam->algsec->models.method == "dnn")) {
         cam->algsec_inuse = true;
     } else {
         cam->algsec_inuse = false;
@@ -609,6 +612,7 @@ static void *algsec_handler(void *arg)
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("Starting."));
 
     cam->algsec->closing = false;
+    cam->algsec->thread_running = true;
 
     interval = 1000000L / cam->conf->framerate;
 
@@ -632,6 +636,7 @@ static void *algsec_handler(void *arg)
     }
     cam->algsec->closing = false;
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("Exiting."));
+    cam->algsec->thread_running = false;
     pthread_exit(NULL);
 
 }
@@ -663,6 +668,8 @@ static void algsec_start_handler(ctx_cam *cam)
 /** Initialize the secondary processes and parameters */
 void algsec_init(ctx_cam *cam)
 {
+    cam->algsec_inuse = false;
+
     #ifdef HAVE_OPENCV
         mythreadname_set("cv",cam->threadnr,cam->conf->camera_name.c_str());
             cam->algsec = new ctx_algsec;
@@ -670,8 +677,6 @@ void algsec_init(ctx_cam *cam)
             algsec_load_models(cam);
             algsec_start_handler(cam);
         mythreadname_set("ml",cam->threadnr,cam->conf->camera_name.c_str());
-    #else
-        cam->algsec_inuse = false;
     #endif
 }
 
@@ -685,25 +690,29 @@ void algsec_deinit(ctx_cam *cam)
             return;
         }
 
-        algsec_params_deinit(cam);
-        if (cam->algsec->closing == false) {
-            cam->algsec->closing = true;
-            while ((cam->algsec->closing) && (waitcnt <1000)){
-                SLEEP(0,1000000)
-                waitcnt++;
+        if (cam->algsec->thread_running == true) {
+            if (cam->algsec->closing == false) {
+                cam->algsec->closing = true;
+                while ((cam->algsec->closing) && (waitcnt <1000)){
+                    SLEEP(0,1000000)
+                    waitcnt++;
+                }
+            }
+            if (waitcnt == 1000){
+                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                    ,_("Graceful shutdown of secondary detector thread failed"));
             }
         }
-        myfree(&cam->algsec->image_norm);
 
-        if (waitcnt == 1000){
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("Graceful shutdown of secondary detector thread failed"));
-        }
+        algsec_params_deinit(cam);
+
+        myfree(&cam->algsec->image_norm);
 
         pthread_mutex_destroy(&cam->algsec->mutex);
 
         delete cam->algsec;
         cam->algsec = NULL;
+        cam->algsec_inuse = false;
 
     #else
         (void)cam;
@@ -714,6 +723,10 @@ void algsec_deinit(ctx_cam *cam)
 void algsec_detect(ctx_cam *cam)
 {
     #ifdef HAVE_OPENCV
+        if (cam->algsec_inuse == false){
+            return;
+        }
+
         if (cam->algsec->isdetected) {
             return;
         }
@@ -726,10 +739,6 @@ void algsec_detect(ctx_cam *cam)
             if (cam->algsec->detecting){
                 cam->algsec->frame_missed++;
             } else {
-                //memcpy(cam->algsec->image_norm
-                //    , cam->current_image->image_norm
-                //    , cam->imgs.size_norm);
-
                 memcpy(cam->algsec->image_norm
                     , cam->imgs.image_virgin
                     , cam->imgs.size_norm);
@@ -752,6 +761,12 @@ void algsec_detect(ctx_cam *cam)
                 cam->algsec->frame_missed = 0;
             }
         }
+
+        /* If the method was changed to none, then an error occurred*/
+        if (cam->algsec->models.method == "none") {
+            algsec_deinit(cam);
+        }
+
     #else
         (void)cam;
     #endif

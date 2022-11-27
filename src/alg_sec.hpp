@@ -76,6 +76,7 @@ struct ctx_algsec_model {
 
 struct ctx_algsec {
     pthread_t               threadid;        /* thread i.d. for a secondary detection thread (if required). */
+    volatile bool           thread_running;
     volatile bool           closing;
     volatile bool           detecting;
     int                     frame_cnt;
