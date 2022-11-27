@@ -315,14 +315,23 @@ static int v4l2_parms_set(ctx_cam *cam)
 /* Set the device to the input number requested by user */
 static int v4l2_set_input(ctx_cam *cam)
 {
+    int indx, spec;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_input    input;
 
+    spec = -1;
+    for (indx = 0; indx < cam->v4l2cam->params->params_count; indx++) {
+        if (mystreq(cam->v4l2cam->params->params_array[indx].param_name,"input")) {
+            spec =  atoi(cam->v4l2cam->params->params_array[indx].param_value);
+            break;
+        }
+    }
+
     memset(&input, 0, sizeof (struct v4l2_input));
-    if (v4l2cam->input == -1) {
+    if (spec == -1) {
         input.index = 0;
     } else {
-        input.index = v4l2cam->input;
+        input.index = spec;
     }
 
     if (xioctl(v4l2cam, VIDIOC_ENUMINPUT, &input) == -1) {
@@ -361,14 +370,22 @@ static int v4l2_set_input(ctx_cam *cam)
 /* Set the video standard(norm) for the device to the user requested value*/
 static void v4l2_set_norm(ctx_cam *cam)
 {
+    int indx, spec;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_standard standard;
     v4l2_std_id std_id;
 
+    spec = 1;
+    for (indx = 0; indx < cam->v4l2cam->params->params_count; indx++) {
+        if (mystreq(cam->v4l2cam->params->params_array[indx].param_name,"norm")) {
+            spec =  atoi(cam->v4l2cam->params->params_array[indx].param_value);
+            break;
+        }
+    }
+
     if (xioctl(v4l2cam, VIDIOC_G_STD, &std_id) == -1) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
             ,_("Device does not support specifying PAL/NTSC norm"));
-        v4l2cam->norm = std_id = 0;    // V4L2_STD_UNKNOWN = 0
     }
 
     if (std_id) {
@@ -383,7 +400,7 @@ static void v4l2_set_norm(ctx_cam *cam)
             standard.index++;
         }
 
-        switch (v4l2cam->norm) {
+        switch (spec) {
         case 1:
             std_id = V4L2_STD_NTSC;
             break;
@@ -415,9 +432,19 @@ static void v4l2_set_norm(ctx_cam *cam)
 /* Set the frequency on the device to the user requested value */
 static void v4l2_set_frequency(ctx_cam *cam)
 {
+    int indx;
+    long spec;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_tuner     tuner;
     struct v4l2_frequency freq;
+
+    spec = 0;
+    for (indx = 0; indx < cam->v4l2cam->params->params_count; indx++) {
+        if (mystreq(cam->v4l2cam->params->params_array[indx].param_name,"frequency")) {
+            spec =  atol(cam->v4l2cam->params->params_array[indx].param_value);
+            break;
+        }
+    }
 
     /* If this input is attached to a tuner, set the frequency. */
     if (v4l2cam->device_type & V4L2_INPUT_TYPE_TUNER) {
@@ -437,7 +464,7 @@ static void v4l2_set_frequency(ctx_cam *cam)
         memset(&freq, 0, sizeof(struct v4l2_frequency));
         freq.tuner = v4l2cam->device_tuner;
         freq.type = V4L2_TUNER_ANALOG_TV;
-        freq.frequency = (v4l2cam->frequency / 1000) * 16;
+        freq.frequency = (spec / 1000) * 16;
 
         if (xioctl(v4l2cam, VIDIOC_S_FREQUENCY, &freq) == -1) {
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
@@ -606,6 +633,7 @@ static int v4l2_pixfmt_set(ctx_cam *cam, unsigned int pixformat)
 
 static void v4l2_params_check(ctx_cam *cam)
 {
+    int indx, spec;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
 
     if (v4l2cam->width % 8) {
@@ -624,16 +652,18 @@ static void v4l2_params_check(ctx_cam *cam)
             ,_("Adjusting to height (%d)"), v4l2cam->height);
     }
 
-    if (v4l2cam->palette == 21) {
-        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-            ,_("H264(21) format not supported via v4l2_device.  Changing to default palette"));
-        v4l2cam->palette = 17;
+    spec = 17;
+    for (indx = 0; indx < cam->v4l2cam->params->params_count; indx++) {
+        if (mystreq(cam->v4l2cam->params->params_array[indx].param_name,"palette")) {
+            spec =  atoi(cam->v4l2cam->params->params_array[indx].param_value);
+            break;
+        }
     }
 
-    if ((v4l2cam->palette < 0) || (v4l2cam->palette > V4L2_PALETTE_COUNT_MAX)) {
+    if ((spec < 0) || (spec > V4L2_PALETTE_COUNT_MAX)) {
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             ,_("Invalid palette.  Changing to default"));
-        v4l2cam->palette = 17;
+        util_parms_add(cam->v4l2cam->params,"palette","17");
     }
 
 }
@@ -679,7 +709,7 @@ static int v4l2_pixfmt_list(ctx_cam *cam, palette_item *palette_array)
 /* Find and select the pixel format for camera*/
 static int v4l2_palette_set(ctx_cam *cam)
 {
-    int indxp, retcd;
+    int indxp, indx, retcd;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     palette_item *palette_array;
 
@@ -688,7 +718,13 @@ static int v4l2_palette_set(ctx_cam *cam)
 
     v4l2_params_check(cam);
 
-    indxp =v4l2cam->palette;
+    for (indx = 0; indx < cam->v4l2cam->params->params_count; indx++) {
+        if (mystreq(cam->v4l2cam->params->params_array[indx].param_name,"palette")) {
+            indxp =  atoi(cam->v4l2cam->params->params_array[indx].param_value);
+            break;
+        }
+    }
+
     retcd = v4l2_pixfmt_set(cam, palette_array[indxp].v4l2id);
     if (retcd == 0) {
         myfree(&palette_array);
@@ -959,7 +995,6 @@ static int v4l2_convert(ctx_cam *cam, unsigned char *img_norm)
 
 static int v4l2_device_init(ctx_cam *cam)
 {
-    int indx;
 
     cam->v4l2cam = (ctx_v4l2cam*)mymalloc(sizeof(ctx_v4l2cam));
     cam->v4l2cam->devctrl_array = NULL;
@@ -981,22 +1016,6 @@ static int v4l2_device_init(ctx_cam *cam)
     util_parms_add_default(cam->v4l2cam->params, "palette", "17");
     util_parms_add_default(cam->v4l2cam->params, "norm", "0");
     util_parms_add_default(cam->v4l2cam->params, "frequency", "0");
-
-
-    for (indx = 0; indx < cam->v4l2cam->params->params_count; indx++) {
-        if (mystreq(cam->v4l2cam->params->params_array[indx].param_name,"input")) {
-            cam->v4l2cam->input =  atoi(cam->v4l2cam->params->params_array[indx].param_value);
-        }
-        if (mystreq(cam->v4l2cam->params->params_array[indx].param_name,"palette")) {
-            cam->v4l2cam->palette =  atoi(cam->v4l2cam->params->params_array[indx].param_value);
-        }
-        if (mystreq(cam->v4l2cam->params->params_array[indx].param_name,"norm")) {
-            cam->v4l2cam->norm =  atoi(cam->v4l2cam->params->params_array[indx].param_value);
-        }
-        if (mystreq(cam->v4l2cam->params->params_array[indx].param_name,"frequency")) {
-            cam->v4l2cam->frequency =  atol(cam->v4l2cam->params->params_array[indx].param_value);
-        }
-    }
 
     cam->v4l2cam->height = cam->conf->height;
     cam->v4l2cam->width = cam->conf->width;

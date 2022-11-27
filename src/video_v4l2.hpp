@@ -48,12 +48,8 @@ struct ctx_v4l2cam_ctrl {
 
 struct ctx_v4l2cam {
     int                     fd_device;
-    int                     input;
-    int                     norm;
     int                     width;
     int                     height;
-    unsigned long           frequency;
-    int                     palette;
     int                     fps;
     int                     pixfmt_src;
     int                     buffer_count;
@@ -61,7 +57,7 @@ struct ctx_v4l2cam {
     int                     devctrl_count;         /*Count of the controls in the device*/
     int                     device_type;           /*Camera, tuner, etc as provided by driver enum*/
     int                     device_tuner;          /*Tuner number if applicable from driver*/
-    ctx_params       *params;               /*User parameters for the camera */
+    ctx_params              *params;               /*User parameters for the camera */
     video_buff              *buffers;
     int                     pframe;
     volatile bool           finish;                /* End the thread */
