@@ -409,6 +409,7 @@ static void v4l2_set_norm(ctx_cam *cam)
     if (xioctl(v4l2cam, VIDIOC_G_STD, &std_id) == -1) {
         MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
             ,_("Device does not support specifying PAL/NTSC norm"));
+        return;
     }
 
     if (std_id) {
