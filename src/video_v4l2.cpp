@@ -29,7 +29,7 @@
 
 #define MMAP_BUFFERS            4
 #define MIN_MMAP_BUFFERS        2
-#define V4L2_PALETTE_COUNT_MAX 22
+#define V4L2_PALETTE_COUNT_MAX 21
 
 #ifdef HAVE_V4L2
 
@@ -59,8 +59,7 @@ static void v4l2_palette_init(palette_item *palette_array)
     palette_array[18].v4l2id = V4L2_PIX_FMT_Y10;
     palette_array[19].v4l2id = V4L2_PIX_FMT_Y12;
     palette_array[20].v4l2id = V4L2_PIX_FMT_GREY;
-    palette_array[21].v4l2id = V4L2_PIX_FMT_H264;
-    palette_array[22].v4l2id = V4L2_PIX_FMT_SRGGB8;
+    palette_array[21].v4l2id = V4L2_PIX_FMT_SRGGB8;
 
     for (indx = 0; indx <= V4L2_PALETTE_COUNT_MAX; indx++) {
         sprintf(palette_array[indx].fourcc ,"%c%c%c%c"
@@ -689,10 +688,8 @@ static int v4l2_pixfmt_list(ctx_cam *cam, palette_item *palette_array)
             , fmtd.pixelformat >> 0, fmtd.pixelformat >> 8
             , fmtd.pixelformat >> 16, fmtd.pixelformat >> 24
             , fmtd.description);
-        /* Prevent the selection of H264*/
         for (indx = 0; indx <= V4L2_PALETTE_COUNT_MAX; indx++) {
-            if ((palette_array[indx].v4l2id == fmtd.pixelformat) &&
-                (palette_array[indx].v4l2id != V4L2_PIX_FMT_H264)) {
+            if (palette_array[indx].v4l2id == fmtd.pixelformat) {
                 indx_palette = indx;
             }
         }
