@@ -1211,7 +1211,7 @@ static void mlp_actions(ctx_cam *cam)
         if (cam->info_sdev_max < cam->current_image->location.stddev_xy ) {
             cam->info_sdev_max = cam->current_image->location.stddev_xy;
         }
-
+        /*
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
         , "dev_x %d dev_y %d dev_xy %d, diff %d ratio %d"
         , cam->current_image->location.stddev_x
@@ -1219,7 +1219,7 @@ static void mlp_actions(ctx_cam *cam)
         , cam->current_image->location.stddev_xy
         , cam->current_image->diffs
         , cam->current_image->diffs_ratio);
-
+        */
     }
 
     if ((cam->conf->emulate_motion || cam->event_user) && (cam->startup_frames == 0)) {
