@@ -117,6 +117,14 @@ struct config conf_template = {
     .on_camera_lost =                  NULL,
     .on_camera_found =                 NULL,
 
+    .motion_schedule =                {{0, 24},
+                                       {0, 24},
+                                       {0, 24},
+                                       {0, 24},
+                                       {0, 24},
+                                       {0, 24},
+                                       {0, 24}},
+
     /* Picture output configuration parameters */
     .picture_output =                  "off",
     .picture_output_motion =           FALSE,
@@ -2413,6 +2421,41 @@ static void conf_cmdline(struct context *cnt, int thread)
     optind = 1;
 }
 
+# define MOTION_SCHEDULE_LEN 20
+static void set_schedule_opt(struct context *cnt, int day, char *val)
+{
+    char *dash = NULL, *tmp = NULL;
+    int start = 0, end = 24, len = 0;
+
+    if (day >= 0 && day < 7) {
+        len = strlen(val);
+        if (len == 0) {
+            start = end = 24;
+        } else if (mystreq(val, "*")) {
+            // defaults 0 - 24
+        } else if ((dash = strchr(val, '-'))) {
+            start = atoi(val);
+            if (dash + 1) {
+                end = atoi(dash + 1);
+            }
+        } else {
+            start = atoi(val);
+        }
+        if (start > 24 || start < 0) {
+            start = 0;
+            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Invalid start hour value for motion_schedule: %d"), val);
+        }
+        if (end > 24 || end < 0) {
+            end = 24;
+            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Invalid end value for motion_schedule: %d"), val);
+        }
+        cnt->conf.motion_schedule[day].start = start;
+        cnt->conf.motion_schedule[day].end = end;
+    } else {
+        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Invalid day value for motion_schedule: %d"), day);
+    }
+}
+
 /**
  * conf_cmdparse
  *      Sets a config option given by 'cmd' to the value given by 'arg1'.
@@ -2425,7 +2468,7 @@ static void conf_cmdline(struct context *cnt, int thread)
  */
 struct context **conf_cmdparse(struct context **cnt, char *param_name, char *param_val)
 {
-    int indx;
+    int indx, schidx = 0;
 
     if (param_name == NULL) {
         return cnt;
@@ -2445,6 +2488,17 @@ struct context **conf_cmdparse(struct context **cnt, char *param_name, char *par
             return cnt;
         }
         indx++;
+    }
+
+    /* Scheduling related options (don't fit nicely into single struct values */
+    if (mystrceq(param_name, "motion_schedule")) {
+        for (indx = 0; indx < 7; indx++) {
+            set_schedule_opt(*cnt, indx, param_val);
+        }
+        return cnt;
+    } else if (!strncasecmp(param_name, "motion_schedule_day_", MOTION_SCHEDULE_LEN)) {
+        set_schedule_opt(*cnt, atoi(&param_name[MOTION_SCHEDULE_LEN]), param_val);
+        return cnt;
     }
 
     /* Now check deprecated options */

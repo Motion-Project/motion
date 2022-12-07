@@ -1667,6 +1667,9 @@ static void mlp_prepare(struct context *cnt)
 
     int frame_buffer_size;
     struct timeval tv1;
+    struct tm tmval;
+    time_t tmnow;
+    SCHEDULE_OPTS sched_opt;
 
     /***** MOTION LOOP - PREPARE FOR NEW FRAME SECTION *****/
     cnt->watchdog = cnt->conf.watchdog_tmo;
@@ -1679,6 +1682,15 @@ static void mlp_prepare(struct context *cnt)
     cnt->timebefore = cnt->timenow;
     gettimeofday(&tv1, NULL);
     cnt->timenow = tv1.tv_usec + 1000000L * tv1.tv_sec;
+
+    tmnow = time(NULL);
+    localtime_r(&tmnow, &tmval);
+
+    sched_opt = cnt->conf.motion_schedule[tmval.tm_wday];
+    if (tmval.tm_hour < sched_opt.start || tmval.tm_hour > sched_opt.end) {
+        cnt->process_thisframe = 0;
+        return;
+    }
 
     /*
      * Calculate detection rate limit. Above 5fps we limit the detection

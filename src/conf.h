@@ -23,6 +23,11 @@
 #ifndef _INCLUDE_CONF_H
 #define _INCLUDE_CONF_H
 
+typedef struct shopts {
+    int start;
+    int end;
+} SCHEDULE_OPTS;
+
 /*
 * More parameters may be added later.
 */
@@ -106,6 +111,9 @@ struct config {
     char            *on_movie_end;
     char            *on_camera_lost;
     char            *on_camera_found;
+
+    /* Scheduling options */
+    SCHEDULE_OPTS   motion_schedule[7];
 
     /* Picture output configuration parameters */
     const char      *picture_output;
