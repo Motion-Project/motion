@@ -1687,9 +1687,16 @@ static void mlp_prepare(struct context *cnt)
     localtime_r(&tmnow, &tmval);
 
     sched_opt = cnt->conf.motion_schedule[tmval.tm_wday];
-    if (tmval.tm_hour < sched_opt.start || tmval.tm_hour > sched_opt.end) {
-        cnt->process_thisframe = 0;
-        return;
+    if (sched_opt.end >= sched_opt.start) {
+        if (tmval.tm_hour < sched_opt.start || tmval.tm_hour >= sched_opt.end) {
+            cnt->process_thisframe = 0;
+            return;
+        }
+    } else {
+        if (tmval.tm_hour < sched_opt.end && tmval.tm_hour > sched_opt.start) {
+            cnt->process_thisframe = 0;
+            return;
+        }
     }
 
     /*
