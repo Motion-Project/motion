@@ -763,6 +763,18 @@
           <td align="left"><a href="#mmalcam_params" >mmalcam_params</a></td>
         </tr>
         <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#motion_schedule" >motion_schedule</a></td>
+        </tr>
+        <tr>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#motion_schedule_day" >motion_schedule_day_$</a></td>
+        </tr>
+        <tr>
           <td align="left">movie_bps</td>
           <td align="left">movie_bps</td>
           <td align="left">movie_bps</td>
@@ -4439,6 +4451,54 @@
         <p></p>
         <p></p>
 
+        <h3><a name="motion_schedule"></a> motion_schedule </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: 0-24|0|24|*</li>
+          <li> Default: 0-24</li>
+        </ul>
+        <p></p>
+        A range of hours to dictate which hours of the day are eligible for motion detection
+        A range includes both a start and end hour separated by a dash and optional whitespace
+        The range is inclusive-exclusive of the start and end values, meaning that the default value of 0-24
+        will consider any hour >= 0 || < 24 a valid hour to detect motion
+        Single values without a dash will be considered the start time with the implied default end of 24
+        The wildcard "*" is a short alias for the default 0-24 indicating all hours
+        Wraparound values are also supported, where the start is greater than the end
+        Examples:
+        <ul>
+            <li>motion_schedule 0-24    # All hours</li>
+            <li>motion_schedule *       # All hours</li>
+            <li>motion_schedule 12- 17  # Noon to 5pm</li>
+            <li>motion_schedule 22 - 2  # 10pm to 2am</li>
+            <li>motion_schedule 10      # Anytime after 10am</li>
+            <li>motion_schedule 24      # No detection (no hour will ever be >=24)
+        </ul>
+        <p></p>
+        <p></p>
+
+        <h3><a name="motion_schedule_day"></a> motion_schedule_day_$ </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Valid days: The last portion of the config name must be an integer 0-6 indicating which day is being specified (Sunday=0)</li>
+          <li> Range / Valid values: Same as <a href="#motion_schedule"> motion_schedule </a></li>
+          <li> Default: 0-24</li>
+        </ul>
+        <p></p>
+        Similar to <a href="#motion_schedule"> motion_schedule </a> but overrides any given schedules just for a single day
+        Specify multiple config options with unique "day" indexes to specify individual day overrides
+        Example:
+        <ul>
+            <li>motion_schedule 8-22         # Set all days to detect from 8am-10pm</li>
+            <li>motion_schedule_day_0 0-24   # Sunday detect all day</li>
+            <li>motion_schedule_day_6 22-24  # Saturday detect 10pm-midnight</li>
+            <li>motion_schedule_day_3 24     # Wednesday no detection at all</li>
+        </ul>
+        <p></p>
+        <p></p>
+        
         <h3><a name="movie_bps"></a> movie_bps </h3>
         <p></p>
         <ul>
