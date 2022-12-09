@@ -1409,6 +1409,13 @@ static int motion_init(struct context *cnt)
     cnt->smartmask_lastrate = 0;
 
     cnt->passflag = 0;  //only purpose to flag first frame
+    /*If multiple cameras then we must set the pass flag for
+     * context zero since it is just the master and will
+     * not be set as a camera loop occurs */
+    if (cnt_list[1] != NULL) {
+        cnt_list[0]->passflag = 1;
+    }
+
     cnt->rolling_frame = 0;
 
     if (cnt->conf.emulate_motion) {
