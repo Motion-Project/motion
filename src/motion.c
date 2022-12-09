@@ -1071,7 +1071,10 @@ static int motion_init(struct context *cnt)
     cnt->imgs.height_high = 0;
     cnt->imgs.size_high = 0;
     cnt->movie_passthrough = cnt->conf.movie_passthrough;
-    cnt->pause = cnt->conf.pause;
+    /* Pause may have been set via command line.  If so, keep that value*/
+    if (cnt->pause == 0) {
+        cnt->pause = cnt->conf.pause;
+    }
 
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
         ,_("Camera %d started: motion detection %s"),
