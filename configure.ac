@@ -225,19 +225,22 @@ AS_IF([test "${MMAL}" = "no"], [
     export PKG_CONFIG_PATH
     AC_MSG_RESULT($PKG_CONFIG_PATH)
 
-    AC_MSG_CHECKING(for MMAL)
     AS_IF([pkg-config mmal], [
+      AC_CHECK_HEADERS(interface/vcos/vcos.h interface/mmal/mmal.h,,[MMAL="no"])
+      AC_MSG_CHECKING(for MMAL)
+      AS_IF([test "${MMAL}" = "no"], [
+        AC_MSG_RESULT([no])
+      ],[
         TEMP_CFLAGS="$TEMP_CFLAGS -Irasppicam "`pkg-config --cflags mmal`
-        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs mmal`
-        #pkg config parm does not provide -lvchostif that buildroot requires
-        TEMP_LIBS="$TEMP_LIBS -lvchostif "
+        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs mmal`" -lvchostif "
         AC_MSG_RESULT([yes])
         AC_DEFINE([HAVE_MMAL], [1], [Define to 1 if MMAL is around])
-      ],[
-        AC_MSG_RESULT([no])
-        MMAL="no"
-      ]
-    )
+      ])
+    ],[
+      AC_MSG_CHECKING(for MMAL)
+      AC_MSG_RESULT([no])
+      MMAL="no"
+    ])
     PKG_CONFIG_PATH=$TEMP_PATH
     export PKG_CONFIG_PATH
   ]
