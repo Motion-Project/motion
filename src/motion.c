@@ -479,7 +479,7 @@ static void setup_signals(void)
  */
 void motion_remove_pid(void)
 {
-    if ((cnt_list[0]->daemon) && (cnt_list[0]->conf.pid_file) && (restart == 0)) {
+    if ((cnt_list[0]->conf.pid_file) && (restart == 0)) {
         if (!unlink(cnt_list[0]->conf.pid_file)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Removed process id file (pid file)."));
         } else {
@@ -2876,7 +2876,6 @@ static void *motion_loop(void *arg)
 static void become_daemon(void)
 {
     int i;
-    FILE *pidf = NULL;
     struct sigaction sig_ign_action;
 
     /* Setup sig_ign_action */
@@ -2895,36 +2894,12 @@ static void become_daemon(void)
     }
 
     /*
-     * Create the pid file if defined, if failed exit
-     * If we fail we report it. If we succeed we postpone the log entry till
-     * later when we have closed stdout. Otherwise Motion hangs in the terminal waiting
-     * for an enter.
-     */
-    if (cnt_list[0]->conf.pid_file) {
-        pidf = myfopen(cnt_list[0]->conf.pid_file, "w+e");
-
-        if (pidf) {
-            (void)fprintf(pidf, "%d\n", getpid());
-            myfclose(pidf);
-        } else {
-            MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
-                ,_("Exit motion, cannot create process"
-                " id file (pid file) %s"), cnt_list[0]->conf.pid_file);
-            if (ptr_logfile) {
-                myfclose(ptr_logfile);
-            }
-            exit(0);
-        }
-    }
-
-    /*
      * Changing dir to root enables people to unmount a disk
      * without having to stop Motion
      */
     if (chdir("/")) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Could not change directory"));
     }
-
 
     #if (defined(BSD) && !defined(__APPLE__))
         setpgrp(0, getpid());
@@ -2954,16 +2929,30 @@ static void become_daemon(void)
         close(i);
     }
 
-    /* Now it is safe to add the PID creation to the logs */
-    if (pidf) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,_("Created process id file %s. Process ID is %d")
-            ,cnt_list[0]->conf.pid_file, getpid());
-    }
-
     sigaction(SIGTTOU, &sig_ign_action, NULL);
     sigaction(SIGTTIN, &sig_ign_action, NULL);
     sigaction(SIGTSTP, &sig_ign_action, NULL);
+}
+
+static void pid_write(void)
+{
+    FILE *pidf = NULL;
+
+    if (cnt_list[0]->conf.pid_file) {
+        pidf = myfopen(cnt_list[0]->conf.pid_file, "w+e");
+
+        if (pidf) {
+            (void)fprintf(pidf, "%d\n", getpid());
+            myfclose(pidf);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Created process id file %s. Process ID is %d")
+                ,cnt_list[0]->conf.pid_file, getpid());
+        } else {
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+                ,_("Cannot create process id file (pid file) %s")
+                , cnt_list[0]->conf.pid_file);
+        }
+    }
 }
 
 static void cntlist_create(int argc, char *argv[])
@@ -3212,6 +3201,8 @@ static void motion_startup(int daemonize, int argc, char *argv[])
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion running as daemon process"));
         }
     }
+
+    pid_write();
 
     if (cnt_list[0]->conf.setup_mode) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Motion running in setup mode."));
