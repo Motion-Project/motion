@@ -1,3 +1,10 @@
+Summary of changes for version 4.5.1 are below
+    * Fix creation of pid_file
+    * Add header check for mmal
+    * Fix pause when used as command line option
+    * Fix json pages when multiple cameras used
+    * Fix codec for movie_codec for mpeg4
+    * Fix rotation for v4l2 devices
 Summary of changes for version 4.5.0 are below
     * Do not translate the ignoring IP alert message
     * Fix processing for native_language config option
