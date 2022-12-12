@@ -163,12 +163,32 @@ static void setup_signals(void)
     sigaction(SIGVTALRM, &sig_handler_action, NULL);
 }
 
+/* Write out the pid file*/
+static void motion_pid_write(ctx_motapp *motapp)
+{
+    FILE *pidf = NULL;
+
+    if (motapp->pid_file != "") {
+        pidf = myfopen(motapp->pid_file.c_str(), "w+e");
+        if (pidf) {
+            (void)fprintf(pidf, "%d\n", getpid());
+            myfclose(pidf);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Created process id file %s. Process ID is %d")
+                ,motapp->pid_file.c_str(), getpid());
+        } else {
+            MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
+                , _("Cannot create process id file (pid file) %s")
+                , motapp->pid_file.c_str());
+        }
+    }
+}
+
 /** Remove the process id file ( pid file ) before MotionPlus exit. */
-static void motion_remove_pid(ctx_motapp *motapp)
+static void motion_pid_remove(ctx_motapp *motapp)
 {
 
-    if ((motapp->daemon) &&
-        (motapp->pid_file != "") &&
+    if ((motapp->pid_file != "") &&
         (motapp->restart_all == false)) {
         if (!unlink(motapp->pid_file.c_str())) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Removed process id file (pid file)."));
@@ -183,7 +203,6 @@ static void motion_remove_pid(ctx_motapp *motapp)
 static void motion_daemon(ctx_motapp *motapp)
 {
     int fd;
-    FILE *pidf = NULL;
     struct sigaction sig_ign_action;
 
     #ifdef SA_RESTART
@@ -198,27 +217,6 @@ static void motion_daemon(ctx_motapp *motapp)
     if (fork()) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus going to daemon mode"));
         exit(0);
-    }
-
-    /*
-     * Create the pid file if defined, if failed exit
-     * If we fail we report it. If we succeed we postpone the log entry till
-     * later when we have closed stdout. Otherwise MotionPlus hangs in the terminal waiting
-     * for an enter.
-     */
-    if (motapp->pid_file != "") {
-        pidf = myfopen(motapp->pid_file.c_str(), "w+e");
-
-        if (pidf) {
-            (void)fprintf(pidf, "%d\n", getpid());
-            myfclose(pidf);
-        } else {
-            MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
-                ,_("Exit MotionPlus, cannot create process"
-                " id file (pid file) %s"),motapp->pid_file.c_str());
-            log_deinit(motapp);
-            exit(0);
-        }
     }
 
     /*
@@ -255,13 +253,6 @@ static void motion_daemon(ctx_motapp *motapp)
         close(fd);
     }
 
-    /* Now it is safe to add the PID creation to the logs */
-    if (pidf) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,_("Created process id file %s. Process ID is %d")
-            ,motapp->pid_file.c_str(), getpid());
-    }
-
     sigaction(SIGTTOU, &sig_ign_action, NULL);
     sigaction(SIGTTIN, &sig_ign_action, NULL);
     sigaction(SIGTSTP, &sig_ign_action, NULL);
@@ -269,7 +260,7 @@ static void motion_daemon(ctx_motapp *motapp)
 
 static void motion_shutdown(ctx_motapp *motapp)
 {
-    motion_remove_pid(motapp);
+    motion_pid_remove(motapp);
 
     log_deinit(motapp);
 
