@@ -79,7 +79,7 @@ install-data-local:
 	@sed -e 's|$${prefix}|$(prefix)|' data/camera3-dist.conf > data/camera3-dist.conf.tmp && mv -f data/camera3-dist.conf.tmp data/camera3-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' data/camera4-dist.conf > data/camera4-dist.conf.tmp && mv -f data/camera4-dist.conf.tmp data/camera4-dist.conf
 
-check:
+maintainer-check:
 	./configure --with-developer-flags                   && $(MAKE) clean && $(MAKE)
 	./configure --with-developer-flags --without-opencv  && $(MAKE) clean && $(MAKE)
 	./configure --with-developer-flags --without-mariadb && $(MAKE) clean && $(MAKE)
