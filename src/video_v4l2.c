@@ -1415,9 +1415,7 @@ static void v4l2_device_select(struct context *cnt, struct video_dev *curdev)
 
 static int v4l2_device_open(struct context *cnt, struct video_dev *curdev)
 {
-
     int fd_device;
-    /* Open the video device */
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         ,_("Using videodevice %s and input %d")
@@ -1427,13 +1425,14 @@ static int v4l2_device_open(struct context *cnt, struct video_dev *curdev)
     cnt->watchdog = (cnt->conf.watchdog_tmo * 2);
 
     curdev->video_device = cnt->conf.video_device;
+    src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     curdev->fd_device = -1;
+    vid_source->fd_device = -1;
     fd_device = -1;
 
     fd_device = open(curdev->video_device, O_RDWR|O_CLOEXEC);
     if (fd_device > 0) {
         curdev->fd_device = fd_device;
-        src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
         vid_source->fd_device = fd_device;
         return 0;
     }
@@ -1447,39 +1446,35 @@ static int v4l2_device_open(struct context *cnt, struct video_dev *curdev)
 
 static void v4l2_device_close(struct video_dev *curdev)
 {
-
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     enum v4l2_buf_type type;
 
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-
     if (vid_source != NULL) {
-        xioctl(vid_source, VIDIOC_STREAMOFF, &type);
-    }
-
-    if (vid_source->fd_device != -1) {
-        close(vid_source->fd_device);
-        vid_source->fd_device = -1;
+        if (vid_source->fd_device != -1) {
+            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "close");
+            xioctl(vid_source, VIDIOC_STREAMOFF, &type);
+            close(vid_source->fd_device);
+            vid_source->fd_device = -1;
+        }
     }
 }
 
 static void v4l2_device_cleanup(struct video_dev *curdev)
 {
-
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
-
     unsigned int indx;
     int indx2;
 
-    if (vid_source->buffers != NULL) {
-        for (indx = 0; indx < vid_source->req.count; indx++) {
-            munmap(vid_source->buffers[indx].ptr, vid_source->buffers[indx].size);
-        }
-        free(vid_source->buffers);
-        vid_source->buffers = NULL;
-    }
-
     if (vid_source != NULL) {
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "vid_source");
+        if (vid_source->buffers != NULL) {
+            for (indx = 0; indx < vid_source->req.count; indx++) {
+                munmap(vid_source->buffers[indx].ptr, vid_source->buffers[indx].size);
+            }
+            free(vid_source->buffers);
+            vid_source->buffers = NULL;
+        }
         free(vid_source);
         curdev->v4l2_private = NULL;
     }
