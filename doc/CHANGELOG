@@ -1,4 +1,5 @@
 Summary of changes for version 4.5.1 are below
+    * Improve closing of v4l2 devices
     * Fix creation of pid_file
     * Add header check for mmal
     * Fix pause when used as command line option
