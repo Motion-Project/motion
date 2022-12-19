@@ -1,0 +1,54 @@
+Formatting for MotionPlus.
+
+--------------------
+RULE 1
+Code is generally indented using 4 spaces
+
+--------------------
+RULE 2
+If a line or statement is broken into two lines you will normally want the text
+in the 2nd line to align with text in the first line.  The alignment is done
+using spaces making the code on the following lines appear in a natural way below
+the corresponding code above. Use common sense to enhance readability.
+
+--------------------
+RULE 3
+Never use TABS to align anything. A tab may be 4 positions in one editor
+and 8 in another. A space is always a space. 
+
+--------------------
+RULE 4
+If blocks always use braces and follow K&R.  Braces are free and do not cost money,
+use them to clarify what you are doing.  
+
+--------------------
+RULE 5
+Use whitespace, commas, braces and indentation to enhance readability:
+  1. No spaces before a comma
+  2. Always leave at least one space after a comma
+  3. Use one space between a block start statement and a '{'
+  4. Do not use a space between a function name and the '('
+  5. The '*' for pointers should be just before the variable name with no space.
+  6. Use spaces to enhance readability (a non objective rule but at least think about it)
+
+--------------------
+RULE 6
+Comment the code where it isn't intuitive to new programmers.
+Use /* This style of comment for permament comments */ or
+/*
+ * This style of comment for comments which
+ * require more that one line
+ */
+Use // style comments for something you add temporarily while testing.
+
+--------------------
+RULE 7
+Use variable names that say what the variable is used for.
+Variable and function names are in lower case. 
+Use '_' to separate words.
+MACROS are in uppercase.
+Follow the naming scheme for functions
+
+   
+  
+

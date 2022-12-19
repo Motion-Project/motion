@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <link href="motionplus.png" rel="icon" type="image/png">
-  <title>Motion</title>
+  <title>MotionPlus</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" href="motionplus_stylesheet.css" media="screen">
   <script>
@@ -29,7 +29,6 @@
 <body>
   <div class="topnav" id="id_topnav">
     <img class="logoimg" src="motionplus.gif">
-
     <a href="javascript:void(0);" class="icon" onclick="fnc_topnav()">&#9776;</a>
   </div>
 
@@ -41,39 +40,11 @@
 
   <div class="subnav" id="id_subnav">
     <div class="dropdown">
-      <button class="dropbtn">Basic Setup</button>
-      <div class="dropdown-content">
-        <a href="#top">General</a>
-        <a href="#basic_setup_v4l2">V4L2 Devices</a>
-        <a href="#basic_setup_network">Network Cameras</a>
-        <a href="#basic_setup_picam">Pi Camera</a>
-        <a href="#basic_setup_composite">Composite Cards</a>
-        <a href="#basic_setup_static">Static Files</a>
-      </div>
-    </div>
-    <div class="dropdown">
-      <button class="dropbtn">Commands/Files</button>
-      <div class="dropdown-content">
-        <a href="#commandlineoptions">Command Line</a>
-        <a href="#configfiles">Configuration Files </a>
-        <a href="#Signals_Sent">Signals</a>
-      </div>
-    </div>
-    <div class="dropdown">
-      <button class="dropbtn">Options-List</button>
-      <div class="dropdown-content">
-        <a href="#Configuration_OptionsAlpha" >Sorted alphabetically</a>
-        <a href="#Configuration_OptionsTopic" >Sorted by topic</a>
-      </div>
-    </div>
-    <div class="dropdown">
       <button class="dropbtn">General/Cameras</button>
       <div class="dropdown-content">
         <a href="#OptTopic_System_Processing">System Processing</a>
         <a href="#conversion_specifiers">Conversion Specifiers</a>
-        <a href="#OptTopic_Video4Linux_Devices">Video4Linux Devices</a>
-        <a href="#OptTopic_Network_Cameras">Network Cameras</a>
-        <a href="#OptTopic_Raspi_Cameras">Pi Cameras</a>
+        <a href="#OptTopic_Devices">Devices</a>
       </div>
     </div>
     <div class="dropdown">
@@ -96,1178 +67,24 @@
         <a href="#OptTopic_Tracking">Tracking Options</a>
       </div>
     </div>
+    <div class="dropdown">
+      <button class="dropbtn">Commands/Files</button>
+      <div class="dropdown-content">
+        <a href="#command_line_options">Command Line</a>
+        <a href="#config_files">Configuration Files </a>
+        <a href="#signals">Signals</a>
+      </div>
+    </div>
 
     <a href="javascript:void(0);" class="icon" onclick="fnc_subnav()">menu&#8659;&nbsp&nbsp  </a>
   </div>
 
   <section class="main-content">
-    <h2><a name="Basic_Setup"></a>  Basic Setup </h2>
-    <ul>
-      <p></p>
-      MotionPlus is able to process images from many different types of cameras.  The following is brief overview
-      of the process to set up the MotionPlus software.
-      <ul>
-        <li>Determine the type of camera
-        <ul>
-          <li> <a href="#basic_setup_v4l2" >v4l2 devices</a></li>
-          <li> <a href="#basic_setup_composite" >Composite capture cards</a> </li>
-          <li> <a href="#basic_setup_network" >Network/IP cameras</a> </li>
-          <li> <a href="#basic_setup_picam" >The PI camera</a> </li>
-          <li> <a href="#basic_setup_static" >Static movie files</a>.
-        </ul>
-        <li>Specify the camera in the <a href="#configfiles" >configuration files</a>.</li>
-        <li>Start MotionPlus from a terminal via the <a href="#commandlineoptions" >command line</a></li>
-        <li>Review the messages to ensure camera was found and press cntrl-c to exit</li>
-        <li>Specify a <a href="#target_dir" >target_dir</a> in the configuration file.</li>
-        <li>Enable the <a href="#OptDetail_Webcontrol" >web control</a> in the configuration file </li>
-        <ul>
-          <li> Specify a <a href="#webcontrol_port" >webcontrol_port</a></li>
-          <li> Optionally turn off <a href="#webcontrol_localhost" >webcontrol_localhost</a> if you want to view
-               the webcontrol from a different computer</li>
-          <li> Specify which parameters to show on the webcontrol via <a href="#webcontrol_parms" >webcontrol_parms</a></li>
-          <li> Optionally specify a <a href="#stream_preview_method" >stream_preview_method</a></li>
-        </ul>
-      </ul>
-      The above should allow users to get MotionPlus running and being able to view images via the web page.  The
-      next steps refine and finish a basic setup.
-      <ul>
-          <li> Refine how the image is captured with the <a href="#OptTopic_Image_Processing" >image processing</a> parameters</li>
-          <li> Specify the <a href="#OptTopic_Motion_Detection" >motion detection</a> parameters</li>
-          <li>
-            <a href="#OptTopic_Scripts" >Execute scripts</a>, Save
-            <a href="#OptTopic_Pictures" >pictures</a> or
-            <a href="#OptTopic_Movies" >movies</a>.
-          </li>
-      </ul>
-      The most difficult step in the above process will be the motion detection settings and specifying them
-      to minimize the false positives.  To assist this process, MotionPlus provides the
-      <a href="#stream_preview_method" >stream_preview_method</a> which allows users to see side
-      by side images of where the motion is occurring next to the regular image.
-      <ul>
-        <li> Specify <a href="#stream_preview_method" >stream_preview_method</a></li>
-        <li> Specify <a href="#webcontrol_parms" >webcontrol_parms</a> </li>
-        <li> Start MotionPlus and in a web browser navigate to the webcontrol port</li>
-        <li> Try adjusting the
-          <a href="#threshold" >threshold</a>,
-          <a href="#noise_level" >noise_level</a>,
-          <a href="#despeckle_filter" >despeckle_filter</a> and
-          <a href="#smart_mask_speed" >smart_mask_speed</a>
-        </li>
-        <li> Make sure to write configuration to file in order to save any changes.</li>
-      </ul>
-      MotionPlus also includes a <a href="#setup_mode" >setup_mode</a> which provides more values reported
-      on the motion images and in the log to assist the setup.
-      <p></p>
-      <a name="basic_setup_v4l2"></a>
-      <strong>Video4linux devices</strong> must be installed per the requirements of the camera. Test the
-      device using a different application such as ffplay to ensure the device is working properly.
-      <p></p>
-      USB cameras take a lot of bandwidth. A USB camera connected to a USB2 port or hub consumes virtually
-      all the bandwidth that the port can handle. Do not expect that multiple USB cameras can be used at the
-      same time on the same USB2 hub due to this hardware limitation.
-      <p></p>
-
-      <a name="basic_setup_network"></a>
-      <strong>Network cameras</strong> are set up via the
-      <a href="#netcam_url" >netcam_url</a> parameter.
-      MotionPlus uses the ffmpeg libraries to process network cameras.  Generally, if the network camera
-      functions using ffmpeg, it will work in MotionPlus.  Cameras sold as a package using proprietary
-      software will not generally work with MotionPlus.
-      <p></p>
-      The URL connection string to enter is specific to the camera and is
-      usually provided by the manufacturer or can be found by doing a internet search.
-      The connection string used by MotionPlus is the same that would be used by ffplay.
-      <p></p>
-
-      <a name="basic_setup_picam"></a>
-      <strong>Raspberry Pi cameras</strong> can be set up different ways.  In older distros, the
-      MMAL camera options may be available while new releases only support use of the camera via the v4l2 modules.
-      <p></p>
-
-      <a name="basic_setup_static"></a>
-      <strong>Static files</strong> can also be processed by MotionPlus in one of two ways.  The first method
-      is by using the <a href="#netcam_url" >netcam_url</a> option and using a prefix of file:\\.  With
-      this method, MotionPlus will process the file at the speed specified by
-      <a href="#framerate" >framerate</a>.  This allows the user to either speed up or slow down the video
-      processing to suit the particular need.
-      <p></p>
-      The second option for processing a static file requires a bit of additional setup and uses a
-      v4l2loopback device.  To set this up, first install the loopback software as described in the
-      <a href="#OptDetail_Pipe" >Output - Pipe Options</a>
-      section of this guide to create a /dev/videoX device and then use software such as ffmpeg to stream
-      the static file into the v4l2 device.  e.g.
-      <code> ffmpeg -re -i mymovie.mp4 -f v4l2 /dev/video0 </code>  Then in a separate terminal, start Motion
-      with it set to use the <code>/dev/video0</code> device as input.  This method can can also be used to
-      reformat the content to a different format.  The following outputs the original movie into a gray pixel format.
-      <code> ffmpeg -re -i mymovie.mp4 -f v4l2 -pix_fmt gray /dev/video0 </code>
-      This can be helpful as a interim process where ffmpeg supports a particular input but that format is not yet supported
-      by MotionPlus.
-
-      <p></p>
-      <p></p>
-    </ul>
-
-    <h2><a name="commandlineoptions"></a>  Command Line Options </h2>
-    <ul>
-      <p></p>
-      <code>motionplus [ -hbnsm ] [ -c config file path ] [ -d level ] [ -k level ] [ -p pid_file ] [ -l log_file ]</code>
-      <p></p>
-      <ul>
-        <li>-c : Full path and filename of config file.</li>
-        <li>-h : Show help screen</li>
-        <li>-b : Run in daemon mode</li>
-        <li>-n : Run in non-daemon mode</li>
-        <li>-s : Run in setup mode. Also forces non-daemon mode.</li>
-        <li>-d : Run with message log level 1 - 9</li>
-        <li>-k : Run with message log type 1 - 9</li>
-        <li>-l : Full path and file name for log file</li>
-        <li>-p : Full path and file name for the process id file</li>
-        <li>-m : Start in pause mode</li>
-      </ul>
-      <p></p>
-      <p></p>
-    </ul>
-
-    <h2><a name="configfiles"></a>  The Configuration Files </h2>
-    <ul>
-      <p></p>
-      MotionPlus can be invoked with command line option <code>-c pathname</code> to specify a specific
-      configuration file.  If the -c option is not specified, MotionPlus will search for the
-      configuration file called 'motionplus.conf' in the following order:
-      <p></p>
-      <ol>
-        <li> Current directory where MotionPlus was invoked</li>
-        <li> The directory called '.motionplus' in the current users home directory</li>
-        <li> The directory defined by --sysconfdir=DIR during the configure step of installation. If this was
-          not defined, it will default to /etc/motion</li>
-      </ol>
-      <p></p>
-      The motionplus.conf file specifies parameters for the entire MotionPlus application.  Each camera is set up
-      in separate files with the parameters that are unique to that camera.
-      <p></p>
-      MotionPlus reads the configuration parameters in sequence and if the same
-      parameter exists more than one place the last one read is used.
-      <p></p>
-      The specification of the camera files should be on the last rows of the
-      motionplus.conf file.  Specifications in the motionplus.conf file that occur
-      after the camera configuration line are ignored.
-      <p></p>
-      Nearly all config options can be unique for a specific camera and placed in a camera config file.  Some
-      options however must be specified in the motionplus.conf file such as: webcontrol_* , daemon, and camera.
-      <p></p>
-      If MotionPlus is built without specific features such as MariaDB, opencv, etc it will ignore the options that
-      belong to those features.
-      <p></p>
-
-      <a name="config_deprecated"></a>
-      <p></p>
-      <strong>Deprecated Parameters</strong>
-      <p></p>
-      As MotionPlus matures, new configuration parameters and different names for the parameters
-      will occur.  When a configuration parameter has a new name or additional functionality, MotionPlus
-      will try to interpret the value specified for the old parameter and translate it to the new
-      parameter.  These translations will be reported in the log as MotionPlus is started.  To
-      eliminate these warnings, use the <code>write configuration</code> option from the webcontrol.
-      <p></p>
-
-      <a name="config_listall"></a>
-      <p></p>
-      <strong>Parameters in distributed configuration files</strong>
-      <p></p>
-      Since MotionPlus includes over 150 parameters, only a limited subset of the configuration parameters
-      are included in the sample files.  To list all options, use the webcontrol interface to write out
-      the configuration file.
-      <p></p>
-
-    </ul>
-
-    <h2><a name="Signals_Sent"></a>  Signals </h2>
-    <ul>
-      <p></p>
-        A signal can be sent from the command line by typing
-        e.g. <code>kill -s SIGHUP pid</code>, where the last parameter is the process ID for MotionPlus.
-      <p></p>
-      <div class="tblsignal">
-      <table border="1" class="fixed" >
-        <colgroup>
-          <col width="30%">
-          <col width="30%">
-          <col width="30%">
-        </colgroup>
-        <thead >
-          <tr >
-            <th bgcolor="#edf4f9" word-wrap:break-word > Signal </th>
-            <th bgcolor="#edf4f9" word-wrap:break-word > Description </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td bgcolor="#edf4f9" word-wrap:break-word > SIGHUP </td>
-            <td bgcolor="#edf4f9" word-wrap:break-word > The config file will be reread. </td>
-          </tr>
-          <tr>
-            <td bgcolor="#edf4f9" word-wrap:break-word > SIGTERM </td>
-            <td bgcolor="#edf4f9" word-wrap:break-word > If needed MotionPlus will create an movie file of the last event and exit </td>
-          </tr>
-          <tr>
-            <td bgcolor="#edf4f9" word-wrap:break-word > SIGUSR1 </td>
-            <td bgcolor="#edf4f9" word-wrap:break-word > MotionPlus will create an movie file of the current event. </td>
-          </tr>
-        </tbody>
-      </table>
-      </div>
-      <p></p>
-      <p></p>
-    </ul>
-
-    <h2><a name="Useful_Tips"></a>Useful Tips</h2>
-    <ul>
-      <p></p>
-      <h3><a name="persist_v4l2"></a>Persistent v4l2 devices</h3>
-      <ul>
-        <p></p>
-        Since the exact device number is set by the kernel upon boot, when there is more than one video device
-        it is possible that the particular cameras that were assigned to /dev/video0 and /dev/video1 may switch. In
-        order to set up MotionPlus so that a particular camera is always assigned the same way, users can set up
-        a symbolic link using udev rules.  To do this a unique attribute must be identified for each camera. The
-        camera attributes can be viewed by using the command
-        <code>udevadm info -a -p $(udevadm info -q path -n /dev/video0) </code> while the camera is attached.  Usually
-        a serial number can be used.  ("Usually" because some cameras have been observed to have the same serial
-        number for different cameras)
-        <p></p>
-        Once a unique attribute has been identified for each camera, edit or create the file
-        <code>/etc/udev/rules.d/99-local.rules</code>.
-        <p></p>
-        Assuming that the unique attribute for the camera was name and was
-        <code>ATTR{name}=="Philips SPC 900NC webcam"</code> you would add the following line to the
-        99-local.rules file:
-        <code> KERNEL=="video[0-9]*", ATTR{name}=="Philips\ SPC\ 900NC*", SYMLINK+="video-webcam0"</code>
-        <p></p>
-        Once the change has been made and saved, reboot the computer and there should now be a "sticky" device called
-        /dev/video-webcam0
-        <p></p>
-    </ul>
-
-      <p></p>
-      <p></p>
-    </ul>
-
-
-    <h2><a name="Configuration_OptionsAlpha"></a>  Configuration Options-Listed Alphabetically </h2>
-    <ul>
-      <p></p>
-      These are the options that can be used in the config file.
-      <p></p>
-      <p></p>
-      Some configuration options are only used if MotionPlus is built on a system that has the matching software installed (MariaDB, PostgreSQL, SQLite, etc).
-      <p></p>
-      <p></p>
-      <style>
-        @media screen and (max-width: 48em) {
-          .tblalpha td:nth-of-type(1):before {content: "vx.x"; padding-right: 10px;}
-          .tblalpha td:nth-of-type(2):before {content: "vx.x"; padding-right: 10px;}
-          .tblalpha td:nth-of-type(3):before {content: "vx.x"; padding-right: 10px;}
-          .tblalpha td:nth-of-type(4):before {content: "Cur."; padding-right: 10px;}
-        }
-      </style>
-      <div class="tblalpha">
-      <table cellspacing="0" border="0">
-        <colgroup width="15%"></colgroup>
-        <colgroup width="25%"></colgroup>
-        <colgroup width="25%"></colgroup>
-        <colgroup width="25%"></colgroup>
-        <tr>
-          <td align="left"><b>Version x.x</b></td>
-          <td align="left"><b>Version x.x</b></td>
-          <td align="left"><b>Version x.x</b></td>
-          <td align="left"><b>Current Version</b></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#area_detect" >area_detect</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#camera" >camera</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#camera_dir" >camera_dir</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#camera_id" >camera_id</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#camera_name" >camera_name</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#camera_tmo" >camera_tmo</a></td>
-        </tr>
-
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#daemon" >daemon</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#database_busy_timeout" >database_busy_timeout</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#database_dbname" >database_dbname</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#database_host" >database_host</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#database_password" >database_password</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#database_port" >database_port</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#database_type" >database_type</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#database_user" >database_user</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#despeckle_filter" >despeckle_filter</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#emulate_motion" >emulate_motion</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#event_gap" >event_gap</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#flip_axis" >flip_axis</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#framerate" >framerate</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#height" >height</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#lightswitch_frames" >lightswitch_frames</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#lightswitch_percent" >lightswitch_percent</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#locate_motion_mode" >locate_motion_mode</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#locate_motion_style" >locate_motion_style</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#log_file" >log_file</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#log_level" >log_level</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#log_type" >log_type</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#mask_file" >mask_file</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#mask_privacy" >mask_privacy</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#minimum_frame_time" >minimum_frame_time</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#minimum_motion_frames" >minimum_motion_frames</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#mmalcam_name" >mmalcam_name</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#mmalcam_params" >mmalcam_params</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#movie_bps" >movie_bps</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#movie_container" >movie_container</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#movie_extpipe" >movie_extpipe</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#movie_extpipe_use" >movie_extpipe_use</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#movie_filename" >movie_filename</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#movie_max_time" >movie_max_time</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#movie_output" >movie_output</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#movie_output_motion" >movie_output_motion</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#movie_passthrough" >movie_passthrough</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#movie_quality" >movie_quality</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#movie_retain" >movie_retain</a></td>
-        </tr>
-
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#native_language" >native_language</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#netcam_high_params" >netcam_high_params</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#netcam_high_url" >netcam_high_url</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#netcam_params" >netcam_params</a></td>
-        </tr>
-
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#netcam_url" >netcam_url</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#netcam_userpass" >netcam_userpass</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#noise_level" >noise_level</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#noise_tune" >noise_tune</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#on_area_detected" >on_area_detected</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#on_camera_found" >on_camera_found</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#on_camera_lost" >on_camera_lost</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#on_event_end" >on_event_end</a></td>
-        </tr>
-        <tr>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#on_event_start" >on_event_start</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#on_motion_detected" >on_motion_detected</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#on_movie_end" >on_movie_end</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#on_movie_start" >on_movie_start</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#on_picture_save" >on_picture_save</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#on_secondary_detect" >on_secondary_detect</a></td>
-        </tr>
-
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#picture_exif" >picture_exif</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#picture_output" >picture_output</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#picture_output_motion" >picture_output_motion</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#picture_filename" >picture_filename</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#picture_type" >picture_type</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#picture_quality" >picture_quality</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#pid_file" >pid_file</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#post_capture" >post_capture</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#pre_capture" >pre_capture</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#ptz_auto_track" >ptz_auto_track</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#ptz_move_track" >ptz_move_track</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#ptz_pan_left" >ptz_pan_left</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#ptz_pan_right" >ptz_pan_right</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#ptz_tilt_down" >ptz_tilt_down</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#ptz_tilt_up" >ptz_tilt_up</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#ptz_wait" >ptz_wait</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#ptz_zoom_in" >ptz_zoom_in</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#ptz_zoom_out" >ptz_zoom_out</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#rotate" >rotate</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#secondary_interval" >secondary_interval</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#secondary_method" >secondary_method</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#secondary_params" >secondary_params</a></td>
-        </tr>
-
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#setup_mode" >setup_mode</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#smart_mask_speed" >smart_mask_speed</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#snapshot_filename" >snapshot_filename</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#snapshot_interval" >snapshot_interval</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#sql_event_end" >sql_event_end</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#sql_event_start" >sql_event_start</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#sql_movie_end" >sql_movie_end</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#sql_movie_start" >sql_movie_start</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#sql_pic_save" >sql_pic_save</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#static_object_time" >static_object_time</a></td>
-        </tr>
-
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#stream_grey" >stream_grey</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#stream_maxrate" >stream_maxrate</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#stream_motion" >stream_motion</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#stream_preview_method" >stream_preview_method</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#stream_preview_newline" >stream_preview_newline</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#stream_preview_ptz" >stream_preview_ptz</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#stream_preview_scale" >stream_preview_scale</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#stream_quality" >stream_quality</a></td>
-        </tr>
-
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#stream_scan_scale" >stream_scan_scale</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#stream_scan_time" >stream_scan_time</a></td>
-        </tr>
-
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#target_dir" >target_dir</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#text_changes" >text_changes</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#text_event" >text_event</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#text_left" >text_left</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#text_right" >text_right</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#text_scale" >text_scale</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#threshold" >threshold</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#threshold_maximum" >threshold_maximum</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#threshold_ratio" >threshold_ratio</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#threshold_ratio_change" >threshold_ratio_change</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#threshold_sdevx" >threshold_sdevx</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#threshold_sdevxy" >threshold_sdevxy</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#threshold_sdevy" >threshold_sdevy</a></td>
-        </tr>
-
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#threshold_tune" >threshold_tune</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#timelapse_container" >timelapse_container</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#timelapse_filename" >timelapse_filename</a></td>
-        </tr>
-          <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#timelapse_fps" >timelapse_fps</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#timelapse_interval" >timelapse_interval</a></td>
-        </tr>
-          <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#timelapse_mode" >timelapse_mode</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#v4l2_device" >v4l2_device</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#v4l2_params" >v4l2_params</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#video_pipe" >video_pipe</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#video_pipe_motion" >video_pipe_motion</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#watchdog_kill" >watchdog_kill</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#watchdog_tmo" >watchdog_tmo</a></td>
-        </tr>
-
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#webcontrol_auth_method" >webcontrol_auth_method</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#webcontrol_authentication" >webcontrol_authentication</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#webcontrol_cert" >webcontrol_cert</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#webcontrol_headers" >webcontrol_headers</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#webcontrol_html" >webcontrol_html</a></td>
-        </tr>
-
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#webcontrol_interface" >webcontrol_interface</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#webcontrol_ipv6" >webcontrol_ipv6</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#webcontrol_key" >webcontrol_key</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#webcontrol_localhost" >webcontrol_localhost</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#webcontrol_parms" >webcontrol_parms</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#webcontrol_port" >webcontrol_port</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#webcontrol_base_path" >webcontrol_base_path</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#webcontrol_tls" >webcontrol_tls</a></td>
-        </tr>
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#webcontrol_actions" >webcontrol_actions</a></td>
-        </tr>
-
-        <tr>
-          <td align="left"><br /></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#width" >width</td>
-        </tr>
-      </table>
-      </div>
-    </ul>
-
+   
     <h2><a name="Configuration_OptionsTopic"></a>  Configuration Options-Listed by Topic </h2>
     <ul>
       <p></p>
-      These are the options that can be used in the config file.
-      <p></p>
-      Some configuration options are only used if MotionPlus is built on a system that has the matching software libraries installed (MariaDB, PostgreSQL, SQLite, FFMPEG, etc).
+      Configuration options sorted by topic.
       <p></p>
       <p></p>
 
@@ -1303,6 +120,7 @@
               <td bgcolor="#edf4f9" ><a href="#camera_tmo" >camera_tmo</a> </td>
               <td bgcolor="#edf4f9" ><a href="#watchdog_tmo" >watchdog_tmo</a> </td>
               <td bgcolor="#edf4f9" ><a href="#watchdog_kill" >watchdog_kill</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#pause" >pause</a> </td>
             <tr>
             </tr>
           </tbody>
@@ -1326,8 +144,8 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#v4l2_device" >v4l2_device</a> </td>
               <td bgcolor="#edf4f9" ><a href="#v4l2_params" >v4l2_params</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#mmalcam_name" >mmalcam_name</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#mmalcam_params" >mmalcam_params</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#libcam_name" >libcam_name</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#libcam_params" >libcam_params</a> </td>              
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#netcam_url" >netcam_url</a> </td>
@@ -1337,8 +155,9 @@
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#netcam_userpass" >netcam_proxy</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#mmalcam_name" >mmalcam_name</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#mmalcam_params" >mmalcam_params</a> </td>
             </tr>
-
           </tbody>
         </table>
         <p></p>
@@ -1439,7 +258,6 @@
             </tr>
           </tbody>
         </table>
-
         <p></p>
         <p></p>
         <p></p>
@@ -1504,7 +322,6 @@
             </tr>
           </tbody>
         </table>
-
         <p></p>
         <p></p>
         <p></p>
@@ -1606,10 +423,11 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_html" >webcontrol_html</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_base_path" >webcontrol_base_path</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_attempts" >webcontrol_lock_attempts</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_minutes" >webcontrol_lock_minutes</a> </td>
             </tr>
             </tbody>
         </table>
-
         <p></p>
         <p></p>
         <p></p>
@@ -1644,7 +462,6 @@
            </tr>
            </tbody>
         </table>
-
         <p></p>
         <p></p>
         <p></p>
@@ -1681,7 +498,6 @@
             </tr>
            </tbody>
         </table>
-
         <p></p>
         <p></p>
         <p></p>
@@ -1715,13 +531,11 @@
             </tr>
           </tbody>
         </table>
-
         <p></p>
         <p></p>
         <p></p>
       </ul>
-
-
+      
       <p></p>
      </ul>
 
@@ -1815,11 +629,11 @@
                <td bgcolor="#edf4f9" >%{fps}</a> </td>
                <td bgcolor="#edf4f9" >current frames per second</a> </td>
                <td bgcolor="#edf4f9" >%{host}</a> </td>
-               <td bgcolor="#edf4f9" >name of computer running Motion</a> </td>
+               <td bgcolor="#edf4f9" >name of computer running MotionPlus</a> </td>
              </tr>
              <tr>
                <td bgcolor="#edf4f9" >%{ver}</a> </td>
-               <td bgcolor="#edf4f9" >The version of Motion</a> </td>
+               <td bgcolor="#edf4f9" >The version of MotionPlus</a> </td>
              </tr>
             </tbody>
         </table>
@@ -1834,2332 +648,1511 @@
       <ul>
         <p></p>
         <h3><a name="daemon"></a> daemon </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
-        </ul>
-        <p></p>
-        When MotionPlus is started, immediately go to daemon mode and release the terminal. Specify this
-        parameter as off when running MotionPlus as a service under systemctl.
+        <ul>          
+          <li> Values: on, off | Default: off</li>
+          Run in daemon mode.  When running MotionPlus under systemd specify as off.
+        </ul>  
         <p></p>
 
         <h3><a name="setup_mode"></a> setup_mode </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+        <ul>          
+          <li> Values: on, off | Default: off</li>
+          Run in setup mode and provide lots of messages related to images processed.         
         </ul>
         <p></p>
-        When this option is turned on, MotionPlus starts in setup mode so that the
-        parameters can be set more easily.  In setup mode MotionPlus will write to the log
-        many messages about the images being processed and will also show the motion images
-        via the web interface.
-        <p></p>
-
+          
         <h3><a name="pid_file"></a> pid_file </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and name of the process id file.  
         </ul>
-        <p></p>
-        The full path and file name where the pid (process id) will be saved.
         <p></p>
 
         <h3><a name="log_file"></a> log_file </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and name for the log file. When not specified, use syslog.
         </ul>
-        <p></p>
-        The full path and filename for the log file that will be used to save
-        the messages from MotionPlus.  If this option is not defined, the stderr
-        and syslog is used. Note that MotionPlus can generate a LOT of messages
-        and as a result, this option should be considered.
         <p></p>
 
         <h3><a name="log_level"></a> log_level </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 1 - 9 </li>
-          <li> Default: 6</li>
+        <ul>          
+          <li> Values: 1 - 9 | Default: 6</li>
+          Verbosity level(EMR, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL) of messages. 
         </ul>
-        <p></p>
-        This option specifies the level of verbosity of the messages sent from MotionPlus.
-        At a level of 8(DBG), there are a LOT of messages.  At a level of 1(EMR) virtually no
-        messages will be output.  The following are the abbreviations used in the log that
-        correspond to the various levels:
-        <p></p>
-        EMR, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL.
-        <p></p>
-        When reporting any issues or errors associated with the MotionPlus application,
-        use the INF level.
-        <p></p>
         <p></p>
 
         <h3><a name="log_type"></a> log_type </h3>
-        <p></p>
         <ul>
-          <li> Type: Discreet Strings </li>
-          <li> Range / Valid values: See Below</li>
-          <li> Default: ALL</li>
+          <li> Values: COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL | Default: ALL</li>
+          The component for which to log messages.
         </ul>
-        <p></p>
-        Different components of MotionPlus use different log types.  This option allows the
-        user to only show the messages from particular components.  The choices for this option
-        are: COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL
         <p></p>
 
         <h3><a name="native_language"></a> native_language</h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: on</li>
+        <ul>          
+          <li> Values: on, off | Default: on</li>
+          Enable native language messages.
         </ul>
-        <p></p>
-        Enable native language for MotionPlus webcontrol and log messages.
-        <p></p>
-        MotionPlus will use the locale variable LANGUAGE for determining the webcontrol and log messages.  If
-        messages or the webcontrol still display in English, then the messages / words have not yet been translated.
-        <p></p>
-        Please consider helping the developers by submitting pull requests to add new translations and correcting
-        any inaccurate translations.
-        <p></p>
-        When this option is specified as 'off', the webcontrol and log messages will be provided in English.
         <p></p>
 
         <h3><a name="target_dir"></a> target_dir </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined = current directory</li>
+        <ul>           
+          <li> Values: String | Default: current directory</li>
+          The full path for the target directory for pictures, snapshots, movies, etc. to be saved.
         </ul>
-        <p></p>
-        The full path for the target directory for pictures, snapshots, movies, etc. to be saved.
-        The default is the current directory.
-        <p></p>
-        The filename options for pictures, snapshots, movies, etc. are all relative
-        to this target_dir parameter.
         <p></p>
 
         <h3><a name="camera_name"></a> camera_name </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+         The camera name to be used in the format specifiers and web interface.
         </ul>
-        <p></p>
-        This option specifies a camera name to be used in the format
-        specifiers and web interface.
         <p></p>
 
         <h3><a name="camera_id"></a> camera_id </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 1 - 32000</li>
-          <li> Default: The sequence that the camera file is read</li>
+        <ul>          
+          <li> Values: 1 - 32000 | Default: The sequence that the camera file is read</li>
+          Unique numeric id for the camera.  
         </ul>
-        <p></p>
-        This is the user defined numeric id for the camera.  If one is not specified
-        or if the user specified values include duplicates, MotionPlus will create unique
-        ids.  Note that the identifier of zero is reserved for the MotionPlus application and
-        may be used when interacting via the web interface.
-        <p></p>
         <p></p>
 
         <h3><a name="camera"></a> camera </h3>
         <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name with the configuration parameters for the individual camera.
         </ul>
-        <p></p>
-        The full path and file name for the camera file that specifies the parameters that
-        are specific to the individual camera.  The camera line should be specified in the
-        motionplus.conf file LAST.  MotionPlus will use all the lines above in the
-        motionplus.conf file as the defaults.  Options specified after the camera line will be ignored.
         <p></p>
 
         <h3><a name="camera_dir"></a> camera_dir </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          Directory containing individual camera configuration files.  Any files ending in '.conf' in 
+          the directory will be read as a camera configuration file.
         </ul>
-        <p></p>
-        This option specifies a directory to contain the individual camera configuration files.
-        Any files ending in '.conf' in this directory will be read as a camera config file.
         <p></p>
 
         <h3><a name="camera_tmo"></a>camera_tmo</h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values:</li>
-          <li> Default: </li>
+        <ul>           
+          <li> Values: Integer | Default: 30 </li>
+          Number of seconds that elapse before the camera is deemed to be lost.
         </ul>
-        <p></p>
-        The approximate number of seconds that must elapse before the camera is deemed to be lost.
         <p></p>
 
         <h3><a name="watchdog_tmo"></a>watchdog_tmo</h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values:</li>
-          <li> Default: </li>
+        <ul>           
+          <li> Values: Integer | Default: 30 </li>
+          Number of seconds that elapse before a camera is deemed to be unresponsive and MotionPlus triggers 
+          a watchdog timeout and begins to force the camera to shut down.  
         </ul>
-        <p></p>
-      The approximate number of seconds that must elapse before a camera is deemed to be unresponsive
-      and MotionPlus triggers a watchdog timeout and begins to try to force the camera to shut down.
         <p></p>
 
         <h3><a name="watchdog_kill"></a>watchdog_kill</h3>
-        <p></p>
         <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values:</li>
-          <li> Default: </li>
+          <li> Values: Integer | Default: 10 </li>
+          Number of seconds that elapse after the watchdog_tmo that MotionPlus waits until the
+          kill processes begin to force the camera to shut down.
         </ul>
-        <p></p>
-      The approximate number of seconds that must elapse before a camera is deemed to be unresponsive
-      and MotionPlus triggers a watchdog kill and begins to try to kill the camera processes.
         <p></p>
 
       </ul>
 
       <h3><a name="OptDetail_Devices"></a>Devices</h3>
       <ul>
-        <p></p>
         <h3><a name="v4l2_device"></a>v4l2_device</h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: /dev/video0 </li>
+        <ul>           
+          <li> Values: String | Default: /dev/video0 </li>
+          The v4l2 device to be used for capturing.
         </ul>
         <p></p>
-        The v4l2 device to be used for capturing.
-        <p></p>
-        <p></p>
-
 
         <h3><a name="v4l2_params"></a>v4l2_params</h3>
         <p></p>
+        <ul>          
+          <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters (aka controls) for the v4l2 device.         
+        </ul>
+        <p></p>
+        
+       <ul>
+          <p></p>
+          The configuration parameters for v4l2_params are specified by name or ID.  They may also be
+          enclosed in double quotes. Review the MotionPlus log with log_level 8 to see the options that 
+          are applicable to the device.  The following is a sample output from the log and 
+          examples of how to specify the parameters
+          <p></p>
+          <div>
+          <ul style="list-style: none;">
+            <li>Log: [1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963776 : Brightness : 0 to 127</li>
+            <p></p>
+            <li>Example 1:<code>v4l2_params Brightness=30,palette=15</code></li>
+            <li>Example 2:<code>v4l2_params "Brightness"=30,palette=15</code></li>
+            <li>Example 3:<code>v4l2_params ID09963776=30,palette=15</code></li>
+          </ul>
+          </div>
+          <p></p>
+          Additional MotionPlus specific options for v4l2_params are listed below.           
+        </ul>
+  
         <ul>
-         <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default:  Not defined</li>
-         </ul>
-        <p></p>
-        Comma separated list of configuration parameters (aka controls) for the v4l2 device.
-        <p></p>
-        The controls that are available for a particular device are unique to that device.  In
-        order to assist the user in the setup and specification of these parameters, MotionPlus
-        will report in the log all the available controls for the device when the
-        <a href="#log_level" >log_level</a> is specified as 7 or higher.  In the log it will list
-        an ID number as well as a configuration name.  Either of these can be used for the
-        v4l2_params specifications.  If the name includes embedded spaces or commas, then the name must
-        be enclosed in quotes.
-        <p></p>
-        In addition to the parameters/controls specified by the device, MotionPlus also includes the following
-        parameters that can also be specified.
-
-        <ul>
-
         <i><h4> palette </h4></i>
         <div>
-         <ul>
-          <li> Type: Integer</li>
-            <li> Range / Valid values: 0 - 20</li>
-            <li> Default: 17</li>
+          <ul>          
+            <li> Values: 0 - 21 | Default: 17</li>
+            Preferred color palette for MotionPlus to use for the device.  See table below for the meaning of 
+            each parameter number value.      
+            <div class="tblpaltte">
+            <table border="1" class="fixed" >
+              <colgroup>
+                  <col width="250px">
+                  <col width="200px">
+                  <col width="200px">
+              </colgroup>
+              <tbody>
+                <tr>
+                  <td bgcolor="#edf4f9" align="center" > V4l2 Option</td>
+                  <td bgcolor="#edf4f9" align="center" > FOURCC</td>
+                  <td bgcolor="#edf4f9" align="center" > palette option </td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SN9C10X</td>
+                  <td bgcolor="#edf4f9" align="center" >S910</td>
+                  <td bgcolor="#edf4f9" align="center" >0</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SBGGR16</td>
+                  <td bgcolor="#edf4f9" align="center" >BYR2</td>
+                  <td bgcolor="#edf4f9" align="center" >1</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SBGGR8</td>
+                  <td bgcolor="#edf4f9" align="center" >BA81</td>
+                  <td bgcolor="#edf4f9" align="center" >2</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SPCA561</td>
+                  <td bgcolor="#edf4f9" align="center" >S561</td>
+                  <td bgcolor="#edf4f9" align="center" >3</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SGBRG8</td>
+                  <td bgcolor="#edf4f9" align="center" >GBRG</td>
+                  <td bgcolor="#edf4f9" align="center" >4</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SGRBG8</td>
+                  <td bgcolor="#edf4f9" align="center" >GRBG</td>
+                  <td bgcolor="#edf4f9" align="center" >5</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_PAC207</td>
+                  <td bgcolor="#edf4f9" align="center" >P207</td>
+                  <td bgcolor="#edf4f9" align="center" >6</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_PJPG</td>
+                  <td bgcolor="#edf4f9" align="center" >PJPG</li>
+                  <td bgcolor="#edf4f9" align="center" >7</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_MJPEG</td>
+                  <td bgcolor="#edf4f9" align="center" >MJPG</li>
+                  <td bgcolor="#edf4f9" align="center" >8</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_JPEG</td>
+                  <td bgcolor="#edf4f9" align="center" >JPEG</li>
+                  <td bgcolor="#edf4f9" align="center" >9</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_RGB24</td>
+                  <td bgcolor="#edf4f9" align="center" >RGB3</li>
+                  <td bgcolor="#edf4f9" align="center" >10</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA501</td>
+                  <td bgcolor="#edf4f9" align="center" >S501</li>
+                  <td bgcolor="#edf4f9" align="center" >11</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA505</td>
+                  <td bgcolor="#edf4f9" align="center" >S505</li>
+                  <td bgcolor="#edf4f9" align="center" >12</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA508</td>
+                  <td bgcolor="#edf4f9" align="center" >S508</li>
+                  <td bgcolor="#edf4f9" align="center" >13</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_UYVY</td>
+                  <td bgcolor="#edf4f9" align="center" >UYVY</li>
+                  <td bgcolor="#edf4f9" align="center" >14</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUYV</td>
+                  <td bgcolor="#edf4f9" align="center" >YUYV</li>
+                  <td bgcolor="#edf4f9" align="center" >15</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUV422P</td>
+                  <td bgcolor="#edf4f9" align="center" >422P</li>
+                  <td bgcolor="#edf4f9" align="center" >16</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUV420</td>
+                  <td bgcolor="#edf4f9" align="center" >YU12</li>
+                  <td bgcolor="#edf4f9" align="center" >17</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y10</td>
+                  <td bgcolor="#edf4f9" align="center" >Y10</li>
+                  <td bgcolor="#edf4f9" align="center" >18</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y12</td>
+                  <td bgcolor="#edf4f9" align="center" >Y12</li>
+                  <td bgcolor="#edf4f9" align="center" >19</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_GREY</td>
+                  <td bgcolor="#edf4f9" align="center" >GREY</li>
+                  <td bgcolor="#edf4f9" align="center" >20</td>
+                </tr>
+              </tbody>
+            </table>
+            </div>
           </ul>
-        <p></p>
-        The palette option is specified in the <a href="#v4l2_params" >v4l2_params</a> option and
-        allows the user to specify the preferred palette for MotionPlus to use.  If the video device does not
-        support this preferred format, MotionPlus will loop through the available palettes to try to find one
-        that is supported by both MotionPlus and the device.
-        <p></p>
-        MotionPlus will report the supported palettes of the device when MotionPlus starts and the
-        <a href="#log_level" >log_level</a> is specified as NTC or higher.
-        <p></p>
-        The default of 17 is highly preferred over <u>all</u> other formats since this the native
-        format that Motion uses internally.
-        <p></p>
-        The following are each of the palette options.  For the MotionPlus configuration,
-        specify the numeric value.
-        <p></p>
-        <div class="tblpaltte">
-        <table border="1" class="fixed" >
-          <colgroup>
-              <col width="250px">
-              <col width="200px">
-              <col width="200px">
-          </colgroup>
-          <tbody>
-            <tr>
-              <td bgcolor="#edf4f9" align="center" > V4l2 Option</td>
-              <td bgcolor="#edf4f9" align="center" > FOURCC</td>
-              <td bgcolor="#edf4f9" align="center" > v4l2_palette option </td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SN9C10X</td>
-              <td bgcolor="#edf4f9" align="center" >S910</td>
-              <td bgcolor="#edf4f9" align="center" >0</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SBGGR16</td>
-              <td bgcolor="#edf4f9" align="center" >BYR2</td>
-              <td bgcolor="#edf4f9" align="center" >1</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SBGGR8</td>
-              <td bgcolor="#edf4f9" align="center" >BA81</td>
-              <td bgcolor="#edf4f9" align="center" >2</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SPCA561</td>
-              <td bgcolor="#edf4f9" align="center" >S561</td>
-              <td bgcolor="#edf4f9" align="center" >3</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SGBRG8</td>
-              <td bgcolor="#edf4f9" align="center" >GBRG</td>
-              <td bgcolor="#edf4f9" align="center" >4</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SGRBG8</td>
-              <td bgcolor="#edf4f9" align="center" >GRBG</td>
-              <td bgcolor="#edf4f9" align="center" >5</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_PAC207</td>
-              <td bgcolor="#edf4f9" align="center" >P207</td>
-              <td bgcolor="#edf4f9" align="center" >6</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_PJPG</td>
-              <td bgcolor="#edf4f9" align="center" >PJPG</li>
-              <td bgcolor="#edf4f9" align="center" >7</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_MJPEG</td>
-              <td bgcolor="#edf4f9" align="center" >MJPG</li>
-              <td bgcolor="#edf4f9" align="center" >8</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_JPEG</td>
-              <td bgcolor="#edf4f9" align="center" >JPEG</li>
-              <td bgcolor="#edf4f9" align="center" >9</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_RGB24</td>
-              <td bgcolor="#edf4f9" align="center" >RGB3</li>
-              <td bgcolor="#edf4f9" align="center" >10</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA501</td>
-              <td bgcolor="#edf4f9" align="center" >S501</li>
-              <td bgcolor="#edf4f9" align="center" >11</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA505</td>
-              <td bgcolor="#edf4f9" align="center" >S505</li>
-              <td bgcolor="#edf4f9" align="center" >12</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA508</td>
-              <td bgcolor="#edf4f9" align="center" >S508</li>
-              <td bgcolor="#edf4f9" align="center" >13</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_UYVY</td>
-              <td bgcolor="#edf4f9" align="center" >UYVY</li>
-              <td bgcolor="#edf4f9" align="center" >14</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUYV</td>
-              <td bgcolor="#edf4f9" align="center" >YUYV</li>
-              <td bgcolor="#edf4f9" align="center" >15</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUV422P</td>
-              <td bgcolor="#edf4f9" align="center" >422P</li>
-              <td bgcolor="#edf4f9" align="center" >16</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUV420</td>
-              <td bgcolor="#edf4f9" align="center" >YU12</li>
-              <td bgcolor="#edf4f9" align="center" >17</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y10</td>
-              <td bgcolor="#edf4f9" align="center" >Y10</li>
-              <td bgcolor="#edf4f9" align="center" >18</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y12</td>
-              <td bgcolor="#edf4f9" align="center" >Y12</li>
-              <td bgcolor="#edf4f9" align="center" >19</td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_GREY</td>
-              <td bgcolor="#edf4f9" align="center" >GREY</li>
-              <td bgcolor="#edf4f9" align="center" >20</td>
-            </tr>
-          </tbody>
-        </table>
-        </div>
-        <p></p>
+          <p></p>
+          <p></p>
         </div>
 
         <i><h4> input </h4></i>
         <div>
         <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: -1, 0 - ? </li>
-          <li> Default: -1 </li>
+          <li> Values: Integer | Default: -1 </li>
+          Input channel for the v4l2 device.  Use -1 for web cams.
         </ul>
-        <p></p>
-        The input option is specified to indicate the input channel to use for the device.  For
-        USB cameras, the input option is the default of -1.  For other devices such as capture cards,
-        the input option is device dependent but usually starts with zero.  Using an external
-        application such as VLC may allow for easier determination of the various inputs associated
-        with the device.
         <p></p>
         </div>
 
         <i><h4> norm </h4></i>
         <div>
         <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no color)</li>
-          <li> Default: 0 (PAL) </li>
+          <li> Values: 0-3: | Default: 0 </li>
+          The TV norm to use for the device (PAL, NTSC, SECCAM, PAL-BW)
         </ul>
-        <p></p>
-        The norm option is to specify the television norm for the device.
         <p></p>
         </div>
 
         <i><h4>frequency </h4></i>
         <div>
         <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 999999</li>
-          <li> Default: 0 (Not set)</li>
+          <li> Values: Long | Default: 0</li>
+          The tuner frequency to use for the device.
         </ul>
-        <p></p>
-        The frequency option specifies the frequency to use for the device.
         <p></p>
         </div>
 
-        </ul>
-
-        <p></p>
-        The following is a sample output from the log and examples of how to specify the parameters
-        <p></p>
+        <i><h4> params_file </h4></i>
         <div>
-        <ul style="list-style: none;">
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ---------Controls---------</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   V4L2 ID   Name and Range</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963776 Brightness, 0 to 127</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963777 Contrast, 0 to 63</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963778 Saturation, -100 to 100</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963788 White Balance, Automatic, 0 to 4</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   menu item: Value 0 Indoor (Incandescant Lighting)</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   menu item: Value 1 Outdoor (Sunlight) Mode</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   menu item: Value 2 Indoor (Fluorescent Lighting) M</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   menu item: Value 3 Manual Mode</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   menu item: Value 4 Auto Mode</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963790 Red Balance, 0 to 255</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963791 Blue Balance, 0 to 255</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963792 Gamma, 0 to 31</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963793 Exposure, 0 to 255</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963794 Gain, Automatic, 0 to 1</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963795 Gain, 0 to 63</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963804 Backlight Compensation, 0 to 1</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963807 Color Effects, 0 to 1</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   menu item: Value 0 None</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   menu item: Value 1 Black & White</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963809 Band-Stop Filter, 0 to 1</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025216 Auto contour, 0 to 1</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025217 Contour, 0 to 63</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025218 Dynamic Noise Reduction, 0 to 3</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025219 Auto White Balance Speed, 1 to 32</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025220 Auto White Balance Delay, 0 to 63</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025221 Save User Settings, 0 to 0</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025222 Restore User Settings, 0 to 0</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025223 Restore Factory Settings, 0 to 0</li>
-        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: --------------------------</li>
+        <ul>
+          <li> Values: String | Default: Not Defined </li>
+          Full path and file name for a file containing the params listed one per line.
         </ul>
-
-        <p></p>
-        Example 1:  Set the gain to manual, then the gain to 50 and the brightness to 30
-        <p></p>
-        <code>v4l2_params "Gain, Automatic"=1,ID09963795=50, brightness=30</code>
-        <p></p>
-        a equally valid alternative method for specifying this example would be
-        <p></p>
-        <code>v4l2_params ID09963794=1,ID09963795=50, ID09963776=30</code>
-        <p></p>
-        or another way of specifying it could be
-        <p></p>
-        <code>v4l2_params ID09963794=1,"Gain"=50, "brightness"=30</code>
-        <p></p>
-        Example 2:  Set the saturation to 50 and the contrast to 100
-        <p></p>
-        <code>v4l2_params saturation=50,contrast=100</code>
-        <p></p>
-        As can be seen in these examples, the specification can use either the control ID or the name of the
-        control.  If the control name has embedded blanks or commas, then it must be enclosed in quotes.  Special
-        care should be taken when using the name.  As shown above, there is a comma that separates the name
-        of the control versus the valid range of values.  That comma is NOT part of the control name and only
-        delimits the end of the name for the MotionPlus log.
         <p></p>
         </div>
-
-        <p></p>
-        <p></p>
-        <h3><a name="mmalcam_name"></a> mmalcam_name </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
         </ul>
         <p></p>
-        Name of camera to use if you are using a camera accessed through OpenMax/MMAL.  The standard
-        Raspberry Pi camera device name is "vc.ril.camera" without the quotes.
-        <p></p>
-        MotionPlus will ignore this option when the MMAL support is not included.  In these situations,
-        users will need to set up the camera as a v4l2 device.
+
+        <h3><a name="mmalcam_name"></a> mmalcam_name </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          Name of camera for MMAL.  Use vc.ril.camera for the standard Raspberry PI camera.  
+        </ul>
         <p></p>
 
         <h3><a name="mmalcam_params"></a>mmalcam_params</h3>
-        <p></p>
         <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+          <li> Values: String | Default: Not defined</li>
+         MMAL control parameters such as -hf, -vf, -rot   
         </ul>
-        <p></p>
-        The control parameters to the Pi camera.  The options that are available via the
-        raspistill / raspivid applications are the options to be specified for this option.
-        <p></p>
-        Some frequently used options are:
-        <ul>
-          <li>Horizontal Flip:  -hf</li>
-          <li>Vertical Flip:    -vf</li>
-          <li>Rotation:         -rot</li>
-        </ul>
-        <p></p>
         <p></p>
 
 
         <h3><a name="netcam_url"></a> netcam_url </h3>
-        <p></p>
         <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+          <li> Values: String | Default: Not defined</li>
+          URL associated with the network camera.
         </ul>
-
-        <p></p>
-        URL associated with the network camera.
         <p></p>
 
         <h3><a name="netcam_params"></a>netcam_params</h3>
-        <p></p>
         <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values:</li>
-          <li> Default: </li>
+          <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters.  Format is: option=value,option2=value2
         </ul>
-        <p></p>
-        MotionPlus uses the ffmpeg libraries to process network cameras.  This option is
-        the comma separated list of the ffmpeg options for the camera.  In addition to the
-        ffmpeg options, MotionPlus includes the following additional options.
         <ul>
-          <i><h4>capture_rate</h4></i>
-          <div>
           <p></p>
-          The number of frames per second to capture from the camera. This option should be slightly higher than
-          the FPS that the camera is sending image.  Users can also specify the capture_rate as
-          <code>pts</code>.  When using <code>pts</code> as the capture_rate MotionPlus will sync the timing
-          of the capture to match between the clock and the presentation time stamps sent from the camera.
+          MotionPlus uses the ffmpeg libraries to process network cameras.  This option is
+          a comma separated list of the ffmpeg options for the camera.  In addition 
+          to the ffmpeg options, MotionPlus includes the following additional options.
           <p></p>
-          </div>
-        </ul>
 
-        <p></p>
+          <div>          
+            <i><h4>capture_rate</h4></i>
+            The number of frames per second to capture from the camera. This option should be slightly higher than
+            the FPS that the camera is sending image.  Users can also specify the capture_rate as
+            <code>pts</code>.  When using <code>pts</code> as the capture_rate MotionPlus will sync the timing
+            of the capture to match between the clock and the presentation time stamps sent from the camera.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4> params_file </h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+              Full path and file name for a file containing the params listed one per line.
+            </ul>
+          </div>
+         </ul>
         <p></p>
 
         <h3><a name="netcam_high_url"></a>netcam_high_url</h3>
         <p></p>
         <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+          <li> Values: String | Default: Not defined</li>
+          URL associated with the high resolution stream of the network camera.  This option is typically used with 
+          the <a href="#movie_passthrough">movie_passthrough</a> to minimize CPU usage.  The netcam_url specifies a low 
+          resolution stream which is decoded and processed and the movies are saved directly from the data provided 
+          from the netcam_high_url without decoding or processing it.
         </ul>
-        <p></p>
-        The network camera high resolution URL.
-        <p></p>
-        Typically, this option is used with the <a href="#movie_passthrough">movie_passthrough</a> so minimal
-        processing can occur.  The netcam_url will specify the low resolution images which will be decoded and
-        processed and the movies are saved directly from the data provided from the netcam_high_url.
-        <p></p>
-        Since this bypasses decoding the stream, the images will be saved without any privacy masks
-        or MotionPlus overlays.
-        <p></p>
         <p></p>
 
         <h3><a name="netcam_high_params"></a>netcam_high_params</h3>
-        <p></p>
         <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values:</li>
-          <li> Default: </li>
+          <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters.  Format is: option=value,option2=value2
         </ul>
-        <p></p>
-        This option is the same as the netcam_params except that it applies to the high resolution url
-        processing specified by the netcam_high_url.
-        <p></p>
+        <ul>
+          <p></p>
+          MotionPlus uses the ffmpeg libraries to process network cameras.  This option is
+          a comma separated list of the ffmpeg options for the stream specified by netcam_high_url.  In addition 
+          to the ffmpeg options, MotionPlus includes the following additional options.
+          <p></p>
 
+          <div>          
+            <i><h4>capture_rate</h4></i>
+            The number of frames per second to capture from the camera. This option should be slightly higher than
+            the FPS that the camera is sending images.  Users can also specify the capture_rate as
+            <code>pts</code>.  When using <code>pts</code> as the capture_rate MotionPlus will sync the timing
+            of the capture to match between the clock and the presentation time stamps sent from the camera.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4> params_file </h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+              Full path and file name for a file containing the params listed one per line.
+            </ul>
+          </div>
+         </ul>
+        <p></p>
 
         <h3><a name="netcam_userpass"></a> netcam_userpass </h3>
-        <p></p>
         <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+          <li> Values: String | Default: Not defined</li>
+          Username and password for the network camera specified as username:password.
         </ul>
-        <p></p>
-        The Username and password for the network camera specified as username:password.
         <p></p>
 
       </ul>
 
       <h3><a name="OptDetail_Image_Processing"></a> Image Processing</h3>
       <ul>
-        <p></p>
         <h3><a name="width"></a> width </h3>
-        <p></p>
         <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: Device Dependent</li>
-          <li> Default: 640</li>
+          <li> Values: Integer | Default: 640</li>
+          The width of the image in pixels.  Must be a multiple of 8.
         </ul>
-        <p></p>
-        The width in pixels of the image. The valid range is camera dependent and it must be a multiple of 8. For
-        network cameras, the image will be scaled to the width specified by this parameter.
-        <p></p>
         <p></p>
 
         <h3><a name="height"></a> height </h3>
-        <p></p>
         <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: Device Dependent</li>
-          <li> Default: 480</li>
+          <li> Values: Integer | Default: 480</li>
+          The height of the image in pixels. Must be a multiple of 8.                
         </ul>
-        <p></p>
-        The height in pixels of the image. The valid range is camera dependent and it must be a multiple of 8. For
-        network cameras, the image will be scaled to the height specified by this parameter.
-        <p></p>
         <p></p>
 
         <h3><a name="framerate"></a> framerate </h3>
-        <p></p>
         <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 2 - 100</li>
-          <li> Default: 15 </li>
+          <li> Values: 2 - 100 | Default: 15 </li>
+          The number of frames to be processed per second for motion detection.
         </ul>
-        <p></p>
-        The number of frames to be processed per second for motion detection.
-        <p></p>
         <p></p>
 
         <h3><a name="minimum_frame_time"></a> minimum_frame_time </h3>
-        <p></p>
         <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 2147483647</li>
-          <li> Default: 0</li>
+          <li> Values: Integer | Default: 0</li>
         </ul>
-        <p></p>
         <p></p>
 
         <h3><a name="rotate"></a> rotate </h3>
-        <p></p>
         <ul>
-          <li> Type: Discrete Integers</li>
-          <li> Range / Valid values: 0, 90, 180, 270</li>
-          <li> Default: 0 (not rotated)</li>
+          <li> Values: 0, 90, 180, 270 | Default: 0</li>
+          Rotate image the given number of degrees.        
         </ul>
-        <p></p>
-        Rotate image the given number of degrees.  Specify for the width and heigth the dimensions prior to
-        rotation.
         <p></p>
 
         <h3><a name="flip_axis"></a> flip_axis </h3>
-        <p></p>
         <ul>
-          <li> Type: Discrete Strings</li>
-          <li> Range / Valid values: none, v, h</li>
-          <li> Default: none (no change)</li>
+          <li> Values: none, v, h | Default: none</li>
+          Flip the image according to specified axis.        
         </ul>
-        <p></p>
-        Flip the image according to specified axis. This option may be needed when the
-        camera is pointed towards a mirror or provides a mirrored image.
         <p></p>
 
         <h3><a name="locate_motion_mode"></a> locate_motion_mode </h3>
-        <p></p>
         <ul>
-          <li> Type: Discrete Strings</li>
-          <li> Range / Valid values: on, off, preview</li>
-          <li> Default: off</li>
+          <li> Values: on, off, preview | Default: off</li>
+          Locate and draw around/on the moving object. Preview only applies to pictures.        
         </ul>
-        <p></p>
-        Locate and draw a box around the moving object. When the option is specified
-        as 'preview', MotionPlus only draw a box on the saved preview jpeg image and not on movies.
-        <p></p>
 
         <h3><a name="locate_motion_style"></a> locate_motion_style </h3>
-        <p></p>
         <ul>
-          <li> Type: Discrete Strings</li>
-          <li> Range / Valid values: box, redbox, cross, redcross</li>
-          <li> Default: box</li>
+          <li> Values: box, redbox, cross, redcross | Default: box</li>
+          Set the look and style of the locate mode.
         </ul>
         <p></p>
-         Set the look and style of the locate box if enabled.
-        <p></p>
-
 
         <h3><a name="text_left"></a> text_left </h3>
-        <p></p>
         <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+          <li> Values: String | Default: Not defined</li>
+          User defined text overlaid in the lower left corner.
         </ul>
-        User defined text overlaid on each in the lower left corner.
-        Use A-Z, a-z, 0-9, " / ( ) @ ~ # &lt; &gt; \ , . : - + _ \n and
-        the <a href="#conversion_specifiers">Conversion Specifiers</a>.
         <p></p>
-
 
         <h3><a name="text_right"></a> text_right </h3>
-        <p></p>
         <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: %Y-%m-%d\\n%T</li>
+          <li> Values: String | Default: %Y-%m-%d\\n%T</li>
+          User defined text overlaid in the lower right corner.
         </ul>
-        <p></p>
-        User defined text overlaid on each in the lower right corner.
-        Use A-Z, a-z, 0-9, " / ( ) @ ~ # &lt; &gt; \ , . : - + _ \n and
-        the <a href="#conversion_specifiers">Conversion Specifiers</a>.
         <p></p>
 
         <h3><a name="text_changes"></a> text_changes </h3>
-        <p></p>
         <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+          <li> Values: on, off | Default: off</li>
+          Show the number of pixels that changed in the upper right corner.
         </ul>
-        <p></p>
-        Show the number of pixels that changed in the upper right corner of the pictures.
         <p></p>
 
         <h3><a name="text_scale"></a> text_scale </h3>
-        <p></p>
         <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 1 - 10</li>
-          <li> Default: 1</li>
+          <li> Values: 1 - 10 | Default: 1</li>
+          Scale factor for text drawn on images.         
         </ul>
-        <p></p>
-        The scale apply to the text drawn over the images.  If the text can not be scaled to requested
-        value due to the size of the image, the scale value will be reduced.
         <p></p>
 
         <h3><a name="text_event"></a> text_event </h3>
-        <p></p>
         <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: %Y%m%d%H%M%S</li>
+          <li> Values: String | Default: %Y%m%d%H%M%S</li>
+          Creates conversion specifier %C
         </ul>
-        <p></p>
-        This option defines the conversion specifier %C
-        <p></p>
-
-        <p></p>
         <p></p>
       </ul>
 
       <h3><a name="OptDetail_Motion_Detection"></a>Motion Detection</h3>
       <ul>
-        <p></p>
         <h3><a name="emulate_motion"></a> emulate_motion </h3>
-        <p></p>
         <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on off</li>
-          <li> Default: off</li>
+          <li> Values: on, off | Default: off</li>
+          Always save images even if there was no motion
         </ul>
-        <p></p>
-        Always save images even if there was no motion
         <p></p>
 
         <h3><a name="threshold"></a> threshold </h3>
-        <p></p>
         <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 1 - 2147483647</li>
-          <li> Default: 1500</li>
+          <li> Values: Integer | Default: 1500</li>
+          Minimum number of changed pixels that triggers an event.
         </ul>
-        <p></p>
-        Minimum number of changed pixels that triggers an event.
         <p></p>
 
         <h3><a name="threshold_maximum"></a> threshold_maximum</h3>
-        <p></p>
         <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0, 1 to unlimited</li>
-          <li> Default: 0 (off)</li>
+          <li> Values: Integer | Default: 0</li>
+          Maximum number of changed pixels that triggers an event.  If the number of changed pixels is over
+          the threshold maximum, no event is triggered.  A value of zero disables threshold_maximum.
         </ul>
-        <p></p>
-        Maximum number of changed pixels that triggers an event.  If the number of changed pixels is over
-        the threshold maximum, no event is triggered.  A value of zero disables threshold_maximum.
         <p></p>
 
 
         <h3><a name="threshold_tune"></a> threshold_tune </h3>
-        <p></p>
         <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+          <li> Values: on, off | Default: off</li>
+          Continuously adjust the threshold for triggering an event.
         </ul>
-        <p></p>
-        Continuously adjust the threshold for triggering an event.
         <p></p>
 
 
        <h3><a name="threshold_sdevx"></a>threshold_sdevx</h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values:</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        The maximum standard deviation of the changed pixels in the x (width) axis.
-        <p></p>
+       <ul>
+         <li> Values: Integer | Default: 0</li>
+         The maximum standard deviation of the changed pixels in the x (width) axis.
+       </ul>
+       <p></p>
 
        <h3><a name="threshold_sdevy"></a>threshold_sdevy</h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values:</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        The maximum standard deviation of the changed pixels in the y (height) axis.
-        <p></p>
+       <ul>
+         <li> Values: Integer | Default: 0</li>
+         The maximum standard deviation of the changed pixels in the y (height) axis.
+       </ul>
+       <p></p>
 
        <h3><a name="threshold_sdevxy"></a>threshold_sdevxy</h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values:</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        The maximum standard deviation of the changed pixels in the x (width) and y(height) axis.
-        <p></p>
+       <ul>
+         <li> Values: Integer | Default: 0</li> 
+         The maximum standard deviation of the changed pixels in the x (width) and y(height) axis.        
+       </ul>
+       <p></p>
 
        <h3><a name="threshold_ratio"></a>threshold_ratio</h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values:</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        The maximum ratio comparing the pixels that went white to black and vice versa.
-        <p></p>
+       <ul>
+         <li> Values: Integer | Default: </li>
+         The maximum ratio comparing the pixels that went white to black and vice versa.
+       </ul>
+       <p></p>
 
        <h3><a name="threshold_ratio_change"></a>threshold_ratio_change</h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values:</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        The minimum change in the ratio to trigger a event.
-        <p></p>
+       <ul>
+         <li> Values: Integer | Default: </li>
+         The minimum change in the ratio to trigger a event.
+       </ul>
+       <p></p>
 
        <h3><a name="secondary_interval"></a>secondary_interval</h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values:</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        The interval of framerate images to process using the secondary method.  This is
-        measured as fractions of the framerate.  e.g. A interval of 2 with a frame rate of 30
-        means secondary processing will be at 15 fps.  But if instead the framerate is 10, the
-        secondary processing will be at 5 fps.
-        <p></p>
+       <ul>
+         <li> Values: Integer | Default: </li>
+         The interval of framerate images to process using the secondary method.  This is
+         measured as fractions of the framerate.  e.g. A secondary_interval of 2 with a framerate of 30
+         means secondary processing will be at 15 fps.  
+       </ul>
+       <p></p>
+
        <h3><a name="secondary_method"></a>secondary_method</h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values:</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        The secondary method to use.
-        <p></p>
+       <ul>           
+         <li> Values: haar, hog, dnn | Default: Not Defined</li>
+         The secondary detection method.        
+       </ul>
+       <p></p>
+        
+       <p></p>
        <h3><a name="secondary_params"></a>secondary_params</h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values:</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        The parameters that are specific to the secondary method requested.
+       <ul>
+         <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters for the camera. Format is option=value,option2=value2
+       </ul>
+       <ul>
+          <p></p>
+          This option is a comma separated list of the secondary detection model options.  In addition to the
+          options for each of the models, MotionPlus includes the following additional options.
+          <p></p>
+
+          <div>
+            <i><h4>model_file</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+              Full path and file name for the model file associated with the secondary model.
+            </ul>
+            <p></p>
+          </div>
+
+          <div>
+            <i><h4> imagetype </h4></i>
+            <ul>
+              <li> Values: full, roi | Default: full </li>
+              Process full image or just the region of interest(roi).
+            </ul>
+            <p></p>
+          </div>
+
+          <div>
+            <i><h4>rotate</h4></i>
+            <ul>
+              <li> Values: Integer | Default: 0 </li>
+              Rotation of image when being processed through secondary detection model.
+            </ul>
+            <p></p>
+          </div>
+
+          <div>
+            <i><h4> params_file </h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+              Full path and file name for a file containing the params listed one per line.
+            </ul>
+            <p></p>
+          </div>
+
+         </ul>
         <p></p>
 
 
         <h3><a name="noise_level"></a> noise_level </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 1 - 255</li>
-          <li> Default: 32</li>
+        <ul>                  
+          <li> Values: 1 - 255 | Default: 32</li>
+          The minimum amount of change in a single pixel before it is counted towards the threshold value.
         </ul>
-        <p></p>
-        The minimum amount of change in a single pixel before it is counted towards
-        the threshold value.
-        <p></p>
 
         <h3><a name="noise_tune"></a> noise_tune </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: on</li>
+        <ul>          
+          <li> Values: on, off | Default: on</li>
+          Continuously adjust the noise_level parameter.
         </ul>
-        <p></p>
-        Continuously adjust the noise_level parameter.
         <p></p>
 
         <h3><a name="despeckle_filter"></a> despeckle_filter </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Combinations of E,e,D,d and l</li>
-          <li> Default: Not defined </li>
+        <ul>           
+          <li> Values: Combinations of E,e,D,d and l | Default: Not defined </li>
+          Despeckle the image using combinations of (E/e)rode or (D/d)ilate. And ending with optional (l)abeling.
+          This reduces noise in the motion image. Adding a trailing l enables labeling in which only the largest
+          section section is used to calculate the threshold.  Typical value is EedDl
         </ul>
-        <p></p>
-        Despeckle the image using combinations of (E/e)rode or (D/d)ilate. And ending with optional (l)abeling.
-        A way of tuning (by removing or enhancing) noise in the motion image. Options for the despeckle feature are
-        any of 'e', 'E', 'd' or 'D'. This can be combined by a trailing 'l' (letter l) which enables the labeling
-        feature.
-        <p></p>
-        The 'e' option removes diamonds, 'E' removes squares and alternating eE will remove circles. Each e/E you add will
-        shrink the noise by a pixel all the way around. So 'despeckle Ee' will remove circles of radius 2. However, this
-        will also shrink the detection by 2 and will affect the threshold. So to remove noise and then restore the detected
-        motion to its original size try 'despeckle EedD'.
-        After the despeckle feature is done you can let the labeling feature search for areas of connected pixels and "label"
-        each area. The program will now trigger motion based on the number of changed pixels in the largest area. In other words,
-        the largest labeled area has to be above the threshold to trigger a motion detected.
-        The value EedDl is a good starting point. The possible combinations are endless and it requires many experiments to
-        find the best combination. Just remember that the labeling feature only works as intended if it runs after the
-        despeckle feature. Ie. the letter 'l' must be the last letter and only one 'l'.
         <p></p>
 
         <h3><a name="area_detect"></a> area_detect </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
-        </ul>
-        <p></p>
-        Detect motion in predefined areas (1 - 9) and when Motion is detected in the area, execute the script. This
-        option is only to execute the on_area_detect script.
-        <p></p>
-        Areas are numbered like
-        <ul>
-        <li>1 2 3</li>
-        <li>4 5 6</li>
-        <li>7 8 9</li>
-        </li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          Detect motion in predefined areas (1 - 9) and when Motion is detected in the area, execute the script. This
+          option is only to execute the on_area_detect script.
+          <p></p>
+          Areas are numbered like
+          <ul>
+            <li>1 2 3</li>
+            <li>4 5 6</li>
+            <li>7 8 9</li>
+            </li>
+          </ul>
         </ul>
         <p></p>
 
         <h3><a name="mask_file"></a> mask_file </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and filename for the masking pgm file.  If needed, the mask will be resized to
+          match the width and height of the image.  The areas in the mask file colored black will be
+          excluded from motion detection.  Shades of grey on the mask will diminish the detection while
+          areas of white will not have any impact on motion detection. 
         </ul>
-        <p></p>
-        The full path and filename for the masking pgm file.  If needed, the mask will be resized to
-        match the width and height of the image.  The mask file permits certain areas of the image to
-        be completely or partially excluded from the motion detection process.  A image from the camera
-        is obtained and areas in the image are manually colored to black, partially black or white.  The
-        areas in black will be ignored, the areas in white will have detection continue and the shades of
-        gray between define varying levels of detection.  The resulting image is then saved as a
-        pgm binary format file and specified in this parameter.  Note that the mask is applied after the
-        <a href="#rotate">rotate</a> or <a href="#flip_axis">flip_axis</a> has been applied so
-        the mask should be based upon an image saved using those options.
         <p></p>
 
 
         <h3><a name="mask_privacy"></a> mask_privacy </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and filename for the privacy masking pgm file.  This mask completely removes the 
+          indicated sections of the image.  
         </ul>
-        <p></p>
-        The full path and filename for the privacy masking pgm file.  This file works like
-        the <a href="#mask_file">mask_file</a>  described above except that instead of
-        masking for motion detection, this option will remove the indicated sections from the image.
         <p></p>
 
         <h3><a name="smart_mask_speed"></a> smart_mask_speed </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 10</li>
-          <li> Default: 0 (disabled)</li>
+        <ul>          
+          <li> Values: 0 - 10 | Default: 0</li>
+          The smartmask is intended to be a dynamic, self-learning mask to decrease sensitivity
+          in areas with frequent motion.  The speed specified by this parameter is
+          how quickly the mask gets adjusted.  Zero disables the smart mask        
         </ul>
-        <p></p>
-        The smartmask is intended to be a dynamic, self-learning mask to decrease sensitivity
-        in areas with frequent motion.  The speed specified by this parameter is
-        how quickly the mask gets adjusted.
-        <p></p>
-        Fast means here that the mask is built quick, but it is also not staying very long with no more motion.
-        Slow means that it takes a while until the mask is built but it also stays longer.
         <p></p>
 
         <h3><a name="lightswitch_percent"></a> lightswitch_percent </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 100</li>
-          <li> Default: 0 (disabled)</li>
+        <ul>          
+          <li> Values: 0 - 100 | Default: 0</li>
+          The minimum change in the portion of the image that will trigger a lightswitch condition 
         </ul>
         <p></p>
-        The minimum change in the portion of the image that will trigger a lightswitch condition
-        whereby the next number of frames specified by lightswitch_frames will be ignored.  This option is
-        similar to threshold maximum but this option permits exclusion of a specified number of
-        frames after the large change.
-        <p></p>
-
+ 
         <h3><a name="lightswitch_frames"></a> lightswitch_frames </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 1 - 1000</li>
-          <li> Default: 5</li>
+        <ul>          
+          <li> Values: Integer | Default: 5</li>
+          The number of frames to ignore when the lightswitch condition is triggered (see above).
         </ul>
-        <p></p>
-        The number of frames to ignore when the lightswitch condition is triggered (see above).
         <p></p>
 
         <h3><a name="minimum_motion_frames"></a> minimum_motion_frames </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 1 - 1000s</li>
-          <li> Default: 1</li>
+        <ul>          
+          <li> Values: Integer | Default: 1</li>
+          The number of frames that must contain motion in order to trigger an event.
         </ul>
-        <p></p>
-        The number of frames that must contain motion in order to trigger an event.
         <p></p>
 
         <h3><a name="event_gap"></a> event_gap </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 2147483647</li>
-          <li> Default: 60</li>
+        <ul>          
+          <li> Values: Integer | Default: 60</li>
+          The seconds of no motion detection that triggers the end of an event.
         </ul>
-        <p></p>
-        The seconds of no motion detection that triggers the end of an event.
         <p></p>
 
         <h3><a name="pre_capture"></a> pre_capture </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 100s</li>
-          <li> Default: 0 (disabled)</li>
+        <ul>          
+          <li> Values: Integer | Default: 0</li>
+          The number of pre-captured (buffered) frames to be captured before an event.   
         </ul>
-        <p></p>
-        Specifies the number of pre-captured (buffered) pictures from before motion
-        was detected that will be output at motion detection.
         <p></p>
 
         <h3><a name="post_capture"></a> post_capture </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 2147483647</li>
-          <li> Default: 0 (disabled)</li>
+        <ul>          
+          <li> Values: Integer | Default: 0</li>
+          The number of frames to be captured after an event has ended.
         </ul>
-        <p></p>
-        Specifies the number of frames to be captured after an event has ended.
         <p></p>
 
         <h3><a name="static_object_time"></a>static_object_time</h3>
-        <p></p>
         <ul>
-          <li> Type: </li>
-          <li> Range / Valid values:</li>
-          <li> Default:</li>
+          <li> Values: Integer | Default:</li>
+          Number of seconds before a new object is included in the reference image.
         </ul>
         <p></p>
-        Number of seconds before a new object is accepted into the reference image.
-        <p></p>
-
 
       </ul>
 
       <h3><a name="OptDetail_Scripts"></a> Script Execution </h3>
       <ul>
-        <p></p>
-        MotionPlus can execute external commands based on the motion detection and related events.
-        They are described in the sections below.
-        <p></p>
-        <strong>Security Warning!</strong>
-        <p></p>
-        Do not enable updates to these parameters via the webcontrol_params when the webcontrol is
-        exposed. Also make sure that MotionPlus is not running as a super user and is instead
-        running under a "harmless" user.
-        <p></p>
-
-        <p></p>
-        <p></p>
-
         <h3><a name="on_event_start"></a> on_event_start </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed at the start of an event.
         </ul>
-        <p></p>
-        The full path and file name of the program/script to be executed at the start of an
-        event.  <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script.
-        <p></p>
         <p></p>
 
         <h3><a name="on_event_end"></a> on_event_end </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed at the end of an event.
         </ul>
-        <p></p>
-        The full path and file name of the program/script to be executed at the end of an
-        event.  <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script.
-        <p></p>
         <p></p>
 
         <h3><a name="on_picture_save"></a> on_picture_save </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed when a picture is saved.
         </ul>
-        <p></p>
-        The full path and file name of the program/script to be executed when a picture is
-        saved.  <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script.
-        <p></p>
         <p></p>
 
         <h3><a name="on_motion_detected"></a> on_motion_detected </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed when motion is detected. 
         </ul>
-        <p></p>
-        The full path and file name of the program/script to be executed when motion is
-        detected.  <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script.
-        <p></p>
         <p></p>
 
         <h3><a name="on_area_detected"></a> on_area_detected </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed when motion is detected in the area specified.
         </ul>
-        <p></p>
-        The full path and file name of the program/script to be executed when motion is
-        detected in the area specifed.  <a href="#conversion_specifiers">Conversion Specifiers</a> can
-        be specified in this option to pass into the program/script.
-        <p></p>
         <p></p>
 
         <h3><a name="on_movie_start"></a> on_movie_start </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed at the creation of a movie.
         </ul>
-        <p></p>
-        The full path and file name of the program/script to be executed at the creation
-        of a movie. <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script.
-        <p></p>
         <p></p>
 
         <h3><a name="on_movie_end"></a> on_movie_end </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed when a movie ends. 
         </ul>
-        <p></p>
-        <p></p>
-        The full path and file name of the program/script to be executed when a movie
-        ends. <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script.
-        <p></p>
         <p></p>
 
         <h3><a name="on_camera_lost"></a> on_camera_lost </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed when the camera is no longer detected.
         </ul>
-        <p></p>
-        The full path and file name of the program/script to be executed when the camera
-        it no longer detected.  <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script.
-        <p></p>
         <p></p>
 
         <h3><a name="on_camera_found"></a> on_camera_found </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed when a previously lost camera is active again.
         </ul>
-        <p></p>
-        The full path and file name of the program/script to be executed when the cameras
-        that was previously lost is now active
-        again.  <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script.
-        <p></p>
         <p></p>
 
         <h3><a name="on_secondary_detect"></a>on_secondary_detect</h3>
-        <p></p>
         <ul>
-          <li> Type: </li>
-          <li> Range / Valid values:</li>
-          <li> Default:</li>
+          <li> Values: String | Default: Not Defined</li>
+          The full path and file name of the program/script to be executed when secondary detection occurs.
         </ul>
-        <p></p>
-        The full path and file name of the program/script to be executed when secondary
-        detection suceeds. <a href="#conversion_specifiers">Conversion Specifiers</a> can be specified in
-        this option to pass into the program/script.
         <p></p>
 
       </ul>
 
       <h3><a name="OptDetail_Pictures"></a>Output - Picture Options </h3>
       <ul>
-        <p></p>
-        MotionPlus can output different types of pictures.  A normal picture
-        as well as a "motion" or debug type of picture.  The debug picture indicates
-        the changed pixels as well as the various masks that may be applied to the image.
-        <p></p>
-        <p></p>
-
-
         <h3><a name="picture_output"></a> picture_output </h3>
-        <p></p>
         <ul>
-          <li> Type: Discrete Strings</li>
-          <li> Range / Valid values: on, off, first, best</li>
-          <li> Default: off</li>
+          <li> Values: on, off, first, best | Default: off</li>
+          'on' saves all motion images during an event.  'first' saves only the first image that detected 
+          motion.  'best' saves image with most changed pixels.
         </ul>
-        <p></p>
-        Specify whether to save normal images.
-        <p></p>
-        The option of 'first' saves only the first motion detected picture per event.  The
-        option of "best" saves the picture with most changed pixels during the event.
-        <p></p>
-        When the <a href="#netcam_highres">netcam_highres</a> option is selected along with the
-        <a href="#movie_passthrough">movie_passthrough</a> the output pictures will be provided in
-        normal resolution not high resolution.
         <p></p>
 
         <h3><a name="picture_output_motion"></a> picture_output_motion </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+        <ul>          
+          <li> Values: on, off | Default: off</li>
+          Save the motion(debug) pictures with the pixels that change as a graytone image.  If 
+          labeling is enabled via the despeckele option, the largest area will be blue and
+          areas in red are those determined by the smartmask option.                
         </ul>
-        <p></p>
-        Output the motion pictures with the pixels that change as a graytone image.
-        <p></p>
-        If labelling is enabled via the despeckele option, you see the largest area in blue and
-        areas in red are those determined by the smartmask option.
-        <p></p>
         <p></p>
 
         <h3><a name="picture_type"></a> picture_type </h3>
-        <p></p>
         <ul>
-          <li> Type: Discrete Strings</li>
-          <li> Range / Valid values: jpeg, webp, ppm</li>
-          <li> Default: jpeg</li>
+          <li> Values: jpeg, webp, ppm | Default: jpeg</li>
+          The type of picture file to output.
         </ul>
-        <p></p>
-        This option specifies the type of picture file to output.
-        <p></p>
         <p></p>
 
         <h3><a name="picture_quality"></a> picture_quality </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 1 - 100</li>
-          <li> Default: 75</li>
+        <ul>          
+          <li> Values: 1 - 100 | Default: 75</li>
+          The image quality for the jpeg or webp images in percent.  The value of 1 is worst and 100 is best.
         </ul>
-        <p></p>
-        The image quality for the jpeg or webp images in percent.
-        The value of 1 is worst and 100 is best.
-        <p></p>
         <p></p>
 
         <h3><a name="picture_exif"></a> picture_exif </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The text for the JPEG EXIF comment with the EXIF timestamp.                
         </ul>
-        <p></p>
-        Use this option to specify the text to include in a JPEG EXIF comment
-        The EXIF timestamp is included independent of this text.
-        <p></p>
-        You can use <a href="#conversion_specifiers">Conversion Specifiers</a> in this option.
-        <p></p>
         <p></p>
 
         <h3><a name="picture_filename"></a> picture_filename </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: %v-%Y%m%d%H%M%S-%q</li>
+        <ul>           
+          <li> Values: String | Default: %v-%Y%m%d%H%M%S-%q</li>
+          The file name and optionally the path for the pictures relative to target_dir. The file 
+          extension will be added based upon the picture_type.
         </ul>
-        <p></p>
-        This option indicates the file name and optionally the path for the pictures relative
-        to target_dir. The appropiate file extension will be added based upon the picture_type.
-        <p></p>
-        <a href="#conversion_specifiers">Conversion Specifiers</a> can be included in this option.
-        <p></p>
         <p></p>
 
         <h3><a name="snapshot_interval"></a> snapshot_interval </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 2147483647</li>
-          <li> Default: 0 (disabled)</li>
+        <ul>          
+          <li> Values: Integer | Default: 0</li>
+          The number of seconds between snapshots
         </ul>
-        <p></p>
-        Specifies the number of seconds between each snapshot
-        <p></p>
         <p></p>
 
         <h3><a name="snapshot_filename"></a> snapshot_filename </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: %v-%Y%m%d%H%M%S-snapshot</li>
+        <ul>           
+          <li> Values: String | Default: %v-%Y%m%d%H%M%S-snapshot</li>
+          The file name and optionally the path for the snapshots relative to target_dir. The file 
+          extension is automatically added.  A symbolic link called lastsnap.jpg is created in the 
+          target_dir and will always point to the latest snapshot, unless snapshot_filename is exactly 'lastsnap'
         </ul>
-        <p></p>
-        This option indicates the file name and optionally the path for the snapshots relative
-        to target_dir. The file extension is automatically added.
-        <p></p>
-        A symbolic link called lastsnap.jpg is created in the target_dir and will always
-        point to the latest snapshot, unless snapshot_filename is exactly 'lastsnap'
-        <p></p>
-        <a href="#conversion_specifiers">Conversion Specifiers</a> can be used in this option.
-        <p></p>
         <p></p>
 
       </ul>
 
       <h3><a name="OptDetail_Movies"></a>Output - Movie Options</h3>
       <ul>
-        <p></p>
-
         <h3><a name="movie_output"></a>movie_output </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: on</li>
+        <ul>          
+          <li> Values: on, off | Default: on</li>
+          Encode movies of the motion events.
         </ul>
-        <p></p>
-        Encode movies of the motion events.
-        <p></p>
         <p></p>
 
         <h3><a name="movie_output_motion"></a>movie_output_motion</h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+        <ul>          
+          <li> Values: on, off | Default: off</li>
+          Encode movies that show the pixels that changed.  If labeling is enabled via the 
+          despeckle option, the largest area will be in blue.  If smartmask is enabled it will 
+          be shown in red. The filename will be the same as normal movies except with
+          an 'm' appended.
         </ul>
-        <p></p>
-        Encode movies that show the motion type of pictures that show
-        the pixels that changed.  If labeling is enabled via the despeckle option, the
-        largest area will be in blue.  The smartmask if enabled will be
-        shown in red. The filename will be the same as normal movies except with
-        an 'm' appended to the filename.
-        <p></p>
         <p></p>
 
         <h3><a name="movie_max_time"></a> movie_max_time </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Default: 120</li>
+        <ul>          
+          <li> Values: Integer | Default: 120</li>
+          The maximum length of a movie in seconds. Set this to zero for unlimited length.
         </ul>
-        <p></p>
-        The maximum length of a movie in seconds. Set this to zero for unlimited length.
-        <p></p>
         <p></p>
 
         <h3><a name="movie_bps"></a> movie_bps </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Default: 400000</li>
+        <ul>          
+          <li> Values: Integer | Default: 400000</li>
+          Bitrate to use in encoding of movies.  This option is ignored if movie_quality is specified.
         </ul>
-        <p></p>
-        Bitrate to use in encoding of movies.  A higher value means better quality
-        and larger files.  This option is ignored if movie_quality is not 0 (disabled).
-        <p></p>
         <p></p>
 
         <h3><a name="movie_quality"></a> movie_quality </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 100</li>
-          <li> Default: 60</li>
+        <ul>          
+          <li> Values: 0 - 100 | Default: 60</li>
+          A value of 0 disables this option while values 1 - 100 change the quality
+          of the movie.  The value of 1 means worst quality and 100 is the best quality.  High
+          values of this option (e.g. 100) may cause difficulty with some players.        
         </ul>
-        <p></p>
-        A value of 0 disables this option while values 1 - 100 change the quality
-        of the movie.  The value of 1 means worst quality and 100 is the best quality.  High
-        values of this option (e.g. 100) may cause difficulty with some players.
-        <p></p>
         <p></p>
 
         <h3><a name="movie_container"></a> movie_container </h3>
-        <p></p>
         <ul>
-          <li> Type: Discrete Strings</li>
-          <li> Range / Valid values: flv, ogg, vp8, mp4, mkv, hevc</li>
-          <li> Default: mkv</li>
+          <li> Values: flv, ogg, vp8, mp4, mkv, hevc | Default: mkv</li>
+          Container/Codec to be used for the video.  Preferred codec can be appended e.g. <code>mkv:libx265</code>
         </ul>
-        <p></p>
-        Container/Codec to be used for the video.
-        <p></p>
-        Certain containers can handle different codecs than the defaults indicated above.  For example, the
-        mkv container can handle virtually any codec.  MotionPlus can optionally take an additional
-        specification with this parameter.  By specifying the container (mkv) and then appending
-        a colon and the ffmpeg codec name.  This permits options such as encoding the h265 codec
-        into a mkv container instead of mp4 by specifying the option as <code>mkv:libx265</code>
         <p></p>
 
         <h3><a name="movie_retain"></a>movie_retain</h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+        <ul>          
+          <li> Values: on, off | Default: off</li>
+          Retain movie only if the secondary detection occurred.
         </ul>
-        <p></p>
-        Retain movie only if the secondary detection occurred.
-        <p></p>
         <p></p>
 
         <h3><a name="movie_passthrough"></a> movie_passthrough </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+        <ul>          
+          <li> Values: on, off | Default: off</li>
+          When using a RTSP, RTMP, mjpeg and some V4l2 cameras, create movie files with the packets
+          obtained directly from the camera.
         </ul>
-        <p></p>
-        When using a RTSP, RTMP, mjpeg and some V4l2 cameras, create movie files with the packets
-        obtained directly from the camera.
-        <p></p>
-        For v4l2 cameras to use the movie_passthrough, they must be specified using the
-        <a href="#netcam_url">netcam_url</a> parameter and the <code>v4l2</code> prefix.
-        <u>Only</u> webcams that provide mjpeg (<a href="#v4l2_palette">v4l2_palette</a> option 8)
-        or H264 (<a href="#v4l2_palette">v4l2_palette</a> option 21) will work with the
-        <a href="#movie_passthrough">movie_passthrough</a>.
-        <p></p>
-
-        <p></p>
-        When using only the single <a href="#netcam_url">netcam_url</a> this option will reduce the processing
-        required when encoding the movie file.  Decoding of the image will still occur on the
-        image in order to process the motion detection.
-        <p></p>
-        When using both the <a href="#netcam_url">netcam_url</a> and the <a href="#netcam_highres">netcam_highres</a>
-        what will occur is that normal resolution stream will be captured and decoded, when motion is detected, the
-        high resolution images will be captured and processed into the movie file without going through the decode/encode
-        processing.
-        <p></p>
-        This option should reduce CPU usage but does increase memory requirements.
-        <p></p>
-        No image processing is performed so text overlays, privacy masks etc will not be on the resulting video.  The
-        resulting movie may also include a few extra frames at the start that would not exist if the movie was created
-        without the passthrough option.
-        <p></p>
-        Since this option bypasses the decoding of the high resolution images to reduce CPU, when images are saved via
-        the <a href="#picture_output">picture_output</a> option, the pictures provided will be from the normal resolution stream.
         <p></p>
 
         <h3><a name="movie_filename"></a> movie_filename </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: %v-%Y%m%d%H%M%S</li>
+        <ul>           
+          <li> Values: String | Default: %v-%Y%m%d%H%M%S</li>
+          The file name and optionally the path for the movie relative to target_dir. The file extension
+          is automatically added based upon the container.                  
         </ul>
-        <p></p>
-        This option indicates the file name and optionally the path for the movies relative
-        to target_dir. The file extension based upon the codec is automatically added.
-        <p></p>
-        <a href="#conversion_specifiers">Conversion Specifiers</a> can be used in this option.
-        <p></p>
         <p></p>
 
         <h3><a name="movie_extpipe_use"></a> movie_extpipe_use </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+        <ul>          
+          <li> Values: on, off | Default: off</li>
+          Specifies whether to send the pictures to pipe for external encoding into a movie.
         </ul>
-        <p></p>
-        This option specifies whether to send the output to a
-        pipe for external encoding into a movie.
-        <p></p>
         <p></p>
 
         <h3><a name="movie_extpipe"></a> movie_extpipe </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The program name and options for processing the images. 
         </ul>
-        <p></p>
-        This option specifies the program name and options for the
-        program that will receive and process the images.
-        <p></p>
-        Samples:
-        <p></p>
-        <code>
-        movie_extpipe mencoder -demuxer rawvideo -rawvideo w=%w:h=%h:i420 -ovc x264 -x264encopts bframes=4:frameref=1:subq=1:scenecut=-1:nob_adapt:threads=1:keyint=1000:8x8dct:vbv_bufsize=4000:crf=24:partitions=i8x8,i4x4:vbv_maxrate=800:no-chroma-me -vf denoise3d=16:12:48:4,pp=lb -of   avi -o %f.avi - -fps %fps
-        </code>
-        <p></p>
-        <code>
-        movie_extpipe x264 - --input-res %wx%h --fps %fps --bitrate 2000 --preset ultrafast --quiet -o %f.mp4
-        </code>
-        <p></p>
-        <code>
-        movie_extpipe mencoder -demuxer rawvideo -rawvideo w=%w:h=%h:fps=%fps -ovc x264 -x264encopts preset=ultrafast -of lavf -o %f.mp4 - -fps %fps
-        </code>
-        <p></p>
-        <code>
-        movie_extpipe ffmpeg -y -f rawvideo -pix_fmt yuv420p -video_size %wx%h -framerate %fps -i pipe:0 -vcodec libx264 -preset ultrafast -f mp4 %f.mp4
-        </code>
-        <p></p>
         <p></p>
 
         <h3><a name="timelapse_interval"></a> timelapse_interval </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Default: 0 (disabled)</li>
+        <ul>          
+          <li> Values: Integer | Default: 0</li>
+          Interval in seconds for saving a picture into timelapse movie.  Zero disables timelapse.
         </ul>
-        <p></p>
-        Create a timelapse video saving a picture frame at the interval in seconds set by this parameter.
-        <p></p>
         <p></p>
 
         <h3><a name="timelapse_mode"></a> timelapse_mode </h3>
-        <p></p>
         <ul>
-          <li> Type: Discrete Strings</li>
-          <li> Range / Valid values: hourly, daily, weekly-sunday, weekly-monday, monthly, manual</li>
-          <li> Default: daily</li>
+          <li> Values: hourly, daily, weekly-sunday, weekly-monday, monthly, manual | Default: daily</li>
+          File rollover mode of the timelapse video.
         </ul>
-        <p></p>
-        The file rollover mode of the timelapse video.
-        Note that it is important to use <a href="#conversion_specifiers">Conversion Specifiers</a>
-        in timelapse_filename that ensure that the filename is unique upon rollover.  If the filename
-        does not change MotionPlus will append the timelapse pictures to the existing file.
-        <br />The value 'Manual' means that MotionPlus does not automatically rollover to a new filename.
-        <p></p>
-        The value 'hourly' rolls over on the full hour. Value 'daily' which is the default
-        rolls over at midnight. There are two weekly options because depending on where you come from a week
-        may either start on Sunday or Monday. And 'monthly' naturally rolls over on the 1st of the month.
-        <p></p>
         <p></p>
 
         <h3><a name="timelapse_fps"></a> timelapse_fps </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Default: 30</li>
+        <ul>          
+          <li>Values: Integer | Default: 30</li>
+          The frame per second rate to use in the playback of the timelapse video.
         </ul>
-        <p></p>
-        The frame per second rate to use in the playback of the timelapse video.
-        <p></p>
         <p></p>
 
         <h3><a name="timelapse_container"></a>timelapse_container</h3>
-        <p></p>
         <ul>
-          <li> Type: Discrete Strings</li>
-          <li> Range / Valid values: mpg, mpeg4</li>
-          <li> Default: mpg</li>
+          <li> Values: mpg, mpeg4 | Default: mpg</li>
+          Container to be used by timelapse video.
+          <ul>
+            <li>mpg - Creates mpg file with mpeg-2 encoding. If MotionPlus is shutdown and restarted, new
+            pictures will be appended to any previously created file with name indicated for timelapse.</li>
+            <li>mpeg4 - Creates avi file with the default encoding.  If MotionPlus is shutdown and restarted,
+            new pictures will create a new file with the name indicated for timelapse.</li>
+          </ul>
         </ul>
-        <p></p>
-        Container/Codec to be used by timelapse video.
-        <p></p>
-        <ul>
-        <li>mpg - Creates mpg file with mpeg-2 encoding. If MotionPlus is shutdown and restarted, new
-           pictures will be appended to any previously created file with name indicated for timelapse.</li>
-        <li>mpeg4 - Creates avi file with the default encoding.  If MotionPlus is shutdown and restarted,
-        new pictures will create a new file with the name indicated for timelapse.</li>
-        </ul>
-        <p></p>
         <p></p>
 
         <h3><a name="timelapse_filename"></a> timelapse_filename </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: %Y%m%d-timelapse</li>
+        <ul>           
+          <li> Values: String | Default: %Y%m%d-timelapse</li>
+          The file name and optionally the path for the timelapse movies relative to target_dir. The 
+          file extension is automatically added based upon the container.  
         </ul>
         <p></p>
-        This option indicates the file name and optionally the path for the timelapse movies
-        relative to target_dir. The file extension is automatically added based upon the codec.
-        <p></p>
-        <a href="#conversion_specifiers">Conversion Specifiers</a> can be used in this option.
-        <p></p>
-        <p></p>
-
 
       </ul>
 
       <h3><a name="OptDetail_Pipe"></a>Output - Pipe Options</h3>
       <ul>
-        <p></p>
-        MotionPlus provides two pipe variations.  The first option is a v4l2loopback device with normal images.
-        Using this pipe option, the video that is captured from the v4l2 device is piped into a new
-        v4l2 device using the v4l2loopback software.  This piping is desired when the user wishes to
-        use the video device at the same time as MotionPlus is using the same device.  By default, only
-        one application can have a device open at one time.  Unlike a physical device, the videoloopback
-        devices take both input and output.  The module simply takes anything that comes on its input
-        and send it out at the output.
-        <p></p>
-        When you install the video loopback device it will create a new device for example /dev/video1 while
-        the actual webcam device would be /dev/video0.  You can then tell MotionPlus to open the physical
-        device (/dev/video0) and "pipe" the video signal to the /dev/video1.  You will then be able to open
-        the /dev/video1 device with external videoplayers.
-        <p></p>
-        <strong>Installing</strong>
-        <p></p>
-        The video loopback device can be added installed via apt in many distributions.  The package tested
-        with MotionPlus is v4l2loopback-dkms.  Once the package is installed, you just need to run
-        <code>sudo modprobe v4l2loopback</code>.  This will add a new video device that you
-        can use for the loopback.  As needed, review the documentation of the v4l2loopback
-        project for additional details on set up..
-        <p></p>
-        To activate the vloopback device in MotionPlus set the 'video_pipe' option in the motionplus.conf
-        file to the device name associated with the one created by v4l2loopback.
-        <br />You can also view the special motion pictures where you see the changed pixels by setting the option
-        'video_pipe_motion' in motionplus.conf. When setting the video_pipe and/or video_pipe_motion options
-        specify the input device as e.g. /dev/video1.
-        <p></p>
-        De-activating should be done with this command
-        <p></p>
-        <code>sudo modprobe -r v4l2loopback</code>
-        <p></p>
-        The second option for pipe is the same as the above except motion images are sent to the loopback device.
-        <p></p>
-
         <h3><a name="video_pipe"></a> video_pipe </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The video4linux video loopback device for normal images. The device would be specified
+          in the format like /dev/video1
         </ul>
-        <p></p>
-        The video4linux video loopback device for normal images. The device would be specified
-        in the format like /dev/video1
-        <p></p>
         <p></p>
 
         <h3><a name="video_pipe_motion"></a> video_pipe_motion </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The video4linux video loopback device for motion images. The device would be specified
+          in the format like /dev/video1
         </ul>
         <p></p>
-        The video4linux video loopback device for motion images. The device would be specified
-        in the format like /dev/video1
-        <p></p>
-        <p></p>
-
       </ul>
 
       <h3><a name="OptDetail_Webcontrol"></a>Web Control</a> </h3>
+      <p></p>
+      These options must be placed in the motionplus.conf file and not in a camera config files.
       <ul>
-        <p></p>
-        <p></p>
-
         <h3><a name="webcontrol_port"></a> webcontrol_port </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Default: 0 (disabled)</li>
+        <ul>          
+          <li>Values: 0 to 65535 | Default: 0 (disabled)</li>
+          The port number for the web based control of MotionPlus.  
         </ul>
-        <p></p>
-        The port number for the web based control of MotionPlus.  This option must
-        be placed in the motionplus.conf file and not in a camera config file.
         <p></p>
 
         <h3><a name="webcontrol_ipv6"></a> webcontrol_ipv6 </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+        <ul>          
+          <li> Values: on, off | Default: off</li>
+          Listen for connections from IPv6 and IPV4.
         </ul>
-        <p></p>
-        Listen for connections from IPv6 and IPV4.
         <p></p>
 
         <h3><a name="webcontrol_localhost"></a> webcontrol_localhost </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: on</li>
+        <ul>          
+          <li> Values: on, off | Default: on</li>
+          Restrict the webcontrol of MotionPlus to the localhost.
         </ul>
-        <p></p>
-        Restrict the webcontrol of MotionPlus to the localhost.  This option must be
-        placed in motionplus.conf and not in a camera config file.
         <p></p>
 
         <h3><a name="webcontrol_base_path"></a> webcontrol_base_path </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Valid values: Valid url path</li>
-          <li> Default: </li>
+        <ul>           
+          <li> Values: Valid url path | Default: Not Defined </li>
+          Specify new base url path for the webcontrol.
         </ul>
-        <p></p>
-        Change the base path for the web UI. This option must be placed in motionplus.conf
-        and not in a camera config file.
         <p></p>
 
         <h3><a name="webcontrol_parms"></a> webcontrol_parms </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 3</li>
-          <li> Default: 0 </li>
+        <ul>          
+          <li> Values: 0 - 3 | Default: 0 </li>
+          Set the type of parameters that can be accessed via the webcontrol page.
+          <ul>
+            <li> 0: None - No configuration parameters or actions will be available.</li>
+            <li> 1: Limited- A limited list of parameters will be available. </li>
+            <li> 2: Advanced - The advanced list of parameters will be available.  These 
+              typically require MotionPlus to be restarted to become effective.</li>
+            <li> 3: Restricted - User IDs, passwords and "on_" commands.</li>
+          </ul>
+          The default for this parameter is 0 (none) to enhance the security of the web interface.  The
+          setting of the webcontrol_parms is not included on the web interface and this parameter
+          can only be specified via the configuration file.
+          <p></p>
+          Once MotionPlus has been configured, it is advised to complete the setup by setting
+          this value to zero.
         </ul>
-        <p></p>
-        Set the type of parameters that can be accessed via the webcontrol page.
-        <ul>
-          <li> 0: None - No configuration parameters or actions will be available.</li>
-          <li> 1: Limited- A limited list of parameters will be available. </li>
-          <li> 2: Advanced - The advanced list of parameters will be available.  These typically require MotionPlus to be restarted to become effective.</li>
-          <li> 3: Restricted - User IDs, passwords and "on_" commands.</li>
-        </ul>
-        The default for this parameter is 0 (none) to enhance the security of the web interface.  The
-        setting of the webcontrol_parms is not included on the web interface and this parameter
-        must be specified via the configuration file.
-        <p></p>
-        Once MotionPlus has been configured, it is advised to complete the setup by setting
-        this value to zero.
-        <p></p>
         <p></p>
 
         <h3><a name="webcontrol_interface"></a> webcontrol_interface </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: `default`, `user`</li>
-          <li> Default: 0</li>
+        <ul>          
+          <li> Values: `default` or `user` | Default: `default`</li>
+          The type of webcontrol interface to provide.
+          <ul>
+            <li>The value of `default` provides a traditional web page interface using html/css.</li>
+            <li>The value of `user` means the html will be provided by file specified in webcontrol_html</li>
+          </ul>
         </ul>
-        <p></p>
-        The type of webcontrol interface to provide.
-        <ul>
-        <li>The value of `default` provides a traditional web page interface using html/css.</li>
-        <li>The value of `user` means the html will be provided by file specified in webcontrol_html</li>
-        </ul>
-        <p></p>
-        This option must be placed in motionplus.conf and not in a camera config file.
         <p></p>
 
         <h3><a name="webcontrol_auth_method"></a> webcontrol_auth_method </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: `none`, `basic`, `digest'</li>
-          <li> Default: 0</li>
+        <ul>          
+          <li> Values: none, basic, digest | Default: none</li>
+          Authentication method to use for the webcontrol port
         </ul>
-        <p></p>
-        Authentication method to use for the webcontrol port
-        <p></p>
         <p></p>
 
         <h3><a name="webcontrol_authentication"></a> webcontrol_authentication </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The username and password specified as username:password
         </ul>
-        <p></p>
-        The username and password specified as username:password
-        <p></p>
         <p></p>
 
         <h3><a name="webcontrol_tls"></a> webcontrol_tls </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+        <ul>          
+          <li> Values: on, off | Default: off</li>
+          Enable SSL/TLS (https) for the webcontrol.
         </ul>
-        <p></p>
-        Enable SSL/TLS for the webcontrol port.
-        <p></p>
         <p></p>
 
         <h3><a name="webcontrol_cert"></a> webcontrol_cert </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          Full path and file name  to the certification file for SSL/TLS support.  Only used when
+          <a href="#webcontrol_tls">webcontrol_tls</a> is enabled.
         </ul>
-        <p></p>
-        Full path to the certification file for SSL/TLS support.  Only used when
-        <a href="#webcontrol_tls">webcontrol_tls</a> is enabled.
-        <p></p>
         <p></p>
 
         <h3><a name="webcontrol_key"></a> webcontrol_key </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          Full path and file name to the key file for SSL/TLS support.  Only used when
+          <a href="#webcontrol_tls">webcontrol_tls</a> is enabled.
         </ul>
-        <p></p>
-        Full path to the key file for SSL/TLS support.  Only used when
-        <a href="#webcontrol_tls">webcontrol_tls</a> is enabled.
-        <p></p>
         <p></p>
 
         <h3><a name="webcontrol_headers"></a> webcontrol_headers </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: * or a valid URI</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          Comma separated list of headers=values for the webcontrol.  Use
+          Access-Control-Allow-Origin header to specify the CORS header.
         </ul>
-        <p></p>
-        Comma separated list of headers for the webcontrol.  Use
-        Access-Control-Allow-Origin header value to specify the CORS header.
         <p></p>
 
         <h3><a name="webcontrol_actions"></a> webcontrol_actions </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values:</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          Comma separated list of the actions=values to allow and show on the web control page.  The
+          following parameters are recognized.
+          <ul>
+            <li> pause:  Applies for both Pause and Unpause actions</li>
+            <li> event:  Applies for both Start Event and End Event actions</li>
+            <li> snapshot</li>
+            <li> camera_add</li>
+            <li> camera_delete</li>
+            <li> ptz:  Applies for all PTZ commands</li>
+            <li> stop</li>
+            <li> restart</li>
+            <li> config_write</li>
+            <li> config:  Applies for any and all configuration parameters</li>
+          </ul>
+          Specify each of these using values of `on` or `off` to permit or deny respectively.  The specification in
+          this parameter will override the default that is associated with
+          <a href="#webcontrol_parms">webcontrol_parms</a>.
         </ul>
-        <p></p>
-        Comma separated list of the actions to allow and show on the web control page.  The
-        following parameters are recognized.
-        <ul>
-          <li> pause:  Applies for both Pause and Unpause actions</li>
-          <li> event:  Applies for both Start Event and End Event actions</li>
-          <li> snapshot</li>
-          <li> camera_add</li>
-          <li> camera_delete</li>
-          <li> ptz:  Applies for all PTZ commands</li>
-          <li> stop</li>
-          <li> restart</li>
-          <li> config_write</li>
-          <li> config:  Applies for any and all configuration parameters</li>
-        </ul>
-        Specify each of these using "on"/"off" to permit or deny respectively.  The specification in
-        this parameter will override the default that is associated with
-        <a href="#webcontrol_parms">webcontrol_parms</a>.
         <p></p>
 
         <h3><a name="webcontrol_html"></a> webcontrol_html</h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values:</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name for a user specified html page to use as the webcontrol.
         </ul>
         <p></p>
-        The full path and file name for a user specified html page to use as the webcontrol.
-        <p></p>
-
       </ul>
 
       <h3><a name="OptDetail_Stream"></a> Live Stream</a> </h3>
       <ul>
-          <h3><a name="stream_preview_scale"></a> stream_preview_scale </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 1 to 100s</li>
-          <li> Default: 25</li>
+        <h3><a name="stream_preview_scale"></a> stream_preview_scale </h3>
+        <ul>          
+          <li> Values: Integer | Default: 25</li>
+          The percentage to scale the stream image when it is placed on the webcontrol
+          page.  Numbers greater than 100 are permitted.
         </ul>
-        <p></p>
-        The percentage to scale the stream image when it is placed on the webcontrol
-        page.  Numbers greater than 100 are permitted.
-        <p></p>
         <p></p>
 
         <h3><a name="stream_preview_newline"></a> stream_preview_newline </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+        <ul>          
+          <li> Values: on, off | Default: off</li>
+          Insert a new line indicator prior to the image on the webcontrol web page.
         </ul>
-        <p></p>
-        Insert a new line indicator prior to the image on the webcontrol web page.
         <p></p>
 
         <h3><a name="stream_preview_method"></a> stream_preview_method </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: `mjpg`, `static`</li>
-          <li> Default: 0</li>
+        <ul>          
+          <li> Values: `mjpg`, `static` | Default: `mjpg`</li>
+          This option determines the method used for displaying images on the webcontrol page.  Use
+          `static` to get around browser limits on the concurrent number connections to server.
         </ul>
-        <p></p>
-        This option determines the method used for displaying images on the webcontrol page.
-        <p></p>
         <p></p>
 
         <h3><a name="stream_preview_ptz"></a> stream_preview_ptz</h3>
-        <p></p>
         <ul>
-          <li> Type: </li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: </li>
+          <li> Values: on, off | Default: on</li>
+          Include the PTZ buttons on the webcontrol page.
         </ul>
-        <p></p>
-        Include the PTZ buttons on the webcontrol page.
         <p></p>
 
         <h3><a name="stream_quality"></a> stream_quality </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 1 - 100</li>
-          <li> Default: 50</li>
+        <ul>          
+          <li> Values: 1 - 100 | Default: 50</li>
+          JPG compression quality setting in percent for the images transferred to live stream.
         </ul>
-        <p></p>
-        Quality setting in percent for the images transferred to live stream.
         <p></p>
 
         <h3><a name="stream_grey"></a> stream_grey </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+        <ul>          
+          <li> Values: on, off | Default: off</li>
+          Send the live stream in grey rather than color.
         </ul>
-        <p></p>
-        Send the live stream in grey rather than color.
         <p></p>
 
         <h3><a name="stream_maxrate"></a> stream_maxrate </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 1 - 100</li>
-          <li> Default: 1</li>
+        <ul>          
+          <li> Values: Integer | Default: 1</li>
+          The frames per second for the webcontrol camera stream.
         </ul>
-        <p></p>
-        The fps of the webcontrol camera stream.
         <p></p>
 
         <h3><a name="stream_motion"></a> stream_motion </h3>
-        <p></p>
         <ul>
-          <li> Type: boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+          <li> Values: on, off | Default: off</li>
+          Limit the frames per second for the webcontrol stream to 1 when there 
+          is no motion being detected and increase to the stream_maxrate when there is motion.
         </ul>
         <p></p>
-        Limit the FPS to 1 when there is no motion being detected and increase
-        it to the stream_maxrate when there is motion.
-        <p></p>
-
 
         <h3><a name="stream_scan_time"></a>stream_scan_time</h3>
-        <p></p>
         <ul>
-          <li> Type: </li>
-          <li> Range / Valid values:</li>
-          <li> Default: </li>
+          <li> Values: Integer | Default: 5</li>
+          Time in seconds to display image when in scan mode.
         </ul>
-        <p></p>
-        Time in seconds to display image when in scan mode.
         <p></p>
 
         <h3><a name="stream_scan_scale"></a>stream_scan_scale</h3>
-        <p></p>
         <ul>
-          <li> Type: </li>
-          <li> Range / Valid values:</li>
-          <li> Default: </li>
+          <li> Values: Integer | Default: 25</li>
+          Percentage scaling factor to apply on the image when in scan mode.
         </ul>
         <p></p>
-        Percentage scaling factor to apply on the image when in scan mode.
-        <p></p>
-
-
       </ul>
 
       <h3><a name="OptDetail_Database"></a>Database</h3>
+      Only one database can be used by MotionPlus at a time.  These options must be placed in the motionplus.conf 
+      file and not in a camera config files.
       <ul>
         <h3><a name="database_type"></a> database_type </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: mariadb, postgresql, sqlite3</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: mariadb, postgresql, sqlite3 | Default: Not defined</li>
+          The database type.
         </ul>
-        <p></p>
-        The database type.
         <p></p>
 
         <h3><a name="database_dbname"></a> database_dbname </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name to the Sqlite3 database.
         </ul>
-        <p></p>
-        The name of the database.  For Sqlite3, the full path and name to the database.
         <p></p>
 
         <h3><a name="database_host"></a> database_host </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: localhost</li>
+        <ul>           
+          <li> Values: String | Default: localhost</li>
+          The host on which the database is located
         </ul>
-        <p></p>
-        The host on which the database is located
         <p></p>
 
         <h3><a name="database_port"></a> database_port </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 65535</li>
-          <li> Default: 0</li>
+        <ul>          
+          <li> Values: 0 - 65535 | Default: 0</li>
+          The port number that is used for the database.  Typical values are: MariaDB=3306 and postgresql=5432
         </ul>
-        <p></p>
-        The port number that is used for the database.  Typical values are: MariaDB=3306 and postgresql=5432
         <p></p>
 
         <h3><a name="database_user"></a> database_user </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The user account name for database
         </ul>
-        <p></p>
-        The user account name for database
         <p></p>
 
         <h3><a name="database_password"></a> database_password </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
+        <ul>           
+          <li> Values: String | Default: Not defined</li>
+          The user password for database
         </ul>
-        <p></p>
-        The user password for database
         <p></p>
 
         <h3><a name="database_busy_timeout"></a> database_busy_timeout </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 1000's</li>
-          <li> Default: 0</li>
+        <ul>          
+          <li> Values: Integer | Default: 0</li>
+          The time to wait before issuing a timeout message for sqlite3.
         </ul>
         <p></p>
-        If the database is busy when the request is issued, this parameter indicates the time to
-        wait before issuing a timeout message.
-        <p></p>
-        <p></p>
 
-        <p></p>
         <h3><a name="sql_event_end"></a> sql_event_end </h3>
-        <p></p>
         <ul>
-          <li> Type: string</li>
-          <li> Range / Valid values: string</li>
-          <li> Default: </li>
+          <li> Values: String | Default: </li>
+          SQL query to execute at the end of the event.
         </ul>
         <p></p>
-        SQL query to execute at the end of the event.
-        <p></p>
 
-        <p></p>
         <h3><a name="sql_event_start"></a> sql_event_start </h3>
-        <p></p>
         <ul>
-          <li> Type: string</li>
-          <li> Range / Valid values: string</li>
-          <li> Default: </li>
+          <li> Values: String | Default: </li>
+          SQL query to execute at the start of the event.        
         </ul>
         <p></p>
-        SQL query to execute at the start of the event.
-        <p></p>
-
-        <p></p>
+        
         <h3><a name="sql_movie_end"></a> sql_movie_end </h3>
-        <p></p>
         <ul>
-          <li> Type: string</li>
-          <li> Range / Valid values: string</li>
-          <li> Default: </li>
+          <li> Values: String | Default: </li>
+          SQL query to execute at the end of the movie.
         </ul>
         <p></p>
-        SQL query to execute at the end of the movie.
-        <p></p>
 
-        <p></p>
         <h3><a name="sql_movie_start"></a> sql_movie_start </h3>
-        <p></p>
         <ul>
-          <li> Type: string</li>
-          <li> Range / Valid values: string</li>
-          <li> Default: </li>
+          <li> Values: String | Default: </li>
+          SQL query to execute at the start of the movie.
         </ul>
         <p></p>
-        SQL query to execute at the start of the movie.
-        <p></p>
 
-        <p></p>
         <h3><a name="sql_pic_save"></a> sql_pic_save</h3>
-        <p></p>
         <ul>
-          <li> Type: string</li>
-          <li> Range / Valid values: string</li>
-          <li> Default: </li>
+          <li> Values: String | Default: </li>
+          SQL query to execute when a picture has been saved.
         </ul>
         <p></p>
-        SQL query to execute when a picture has been saved.
-        <p></p>
-        You can use <a href="#conversion_specifiers">Conversion Specifiers</a> within the query.
-        <p></p>
-        <p></p>
-
       </ul>
 
       <h3><a name="OptDetail_Tracking"></a>Tracking</h3>
       <ul>
-        <p></p>
-
-        <p></p>
-
         <h3><a name="ptz_auto_track"></a>ptz_auto_track</h3>
-        <p></p>
         <ul>
-          <li> Type:</li>
-          <li> Range / Valid values:</li>
-          <li> Default:</li>
+          <li> Values: on,off Default: off</li>
+          Enable automatic tracking.
         </ul>
-        <p></p>
-        Enable automatic tracking.
         <p></p>
 
         <h3><a name="ptz_wait"></a>ptz_wait</h3>
-        <p></p>
         <ul>
-          <li> Type:</li>
-          <li> Range / Valid values:</li>
-          <li> Default:</li>
+          <li> Values: Integer | Default: 0</li>
+          Time in seconds to wait after a PTZ script is called before resuming motion detection.
         </ul>
-        <p></p>
-        Time in seconds to wait after a PTZ scripts is called before resuming motion detection.
         <p></p>
 
         <h3><a name="ptz_move_track"></a>ptz_move_track</h3>
-        <p></p>
         <ul>
-          <li> Type:</li>
-          <li> Range / Valid values:</li>
-          <li> Default:</li>
+          <li> Values: String | Default: Not Defined</li>
+          Full path and file name for script to execute for auto tracking.
         </ul>
         <p></p>
-        Full path and file name for script to execute for auto tracking.
 
-        <p></p>
-        <h3><a name="ptz_pan_left"></a>ptz_pan_left</h3>
+      <h3><a name="ptz_pan_left"></a>ptz_pan_left</h3>
         <p></p>
         <ul>
-          <li> Type:</li>
-          <li> Range / Valid values:</li>
-          <li> Default:</li>
+          <li> Values: String | Default: Not Defined</li>
+          Full path and file name for script to pan the camera left. 
         </ul>
-        <p></p>
-        Full path and file name for script to pan the camera left.
         <p></p>
 
         <h3><a name="ptz_pan_right"></a>ptz_pan_right</h3>
-        <p></p>
         <ul>
-          <li> Type:</li>
-          <li> Range / Valid values:</li>
-          <li> Default:</li>
+          <li> Values: String | Default: Not Defined</li>
+          Full path and file name for script to pan the camera right.
         </ul>
-        <p></p>
-        Full path and file name for script to pan the camera right.
         <p></p>
 
         <h3><a name="ptz_tilt_up"></a>ptz_tilt_up</h3>
-        <p></p>
         <ul>
-          <li> Type:</li>
-          <li> Range / Valid values:</li>
-          <li> Default:</li>
+          <li> Values: String | Default:</li>
+          Full path and file name for script to tilt the camera up.
         </ul>
         <p></p>
-        Full path and file name for script to tilt the camera up.
-        <p></p>
+
         <h3><a name="ptz_tilt_down"></a>ptz_tilt_down</h3>
-        <p></p>
         <ul>
-          <li> Type:</li>
-          <li> Range / Valid values:</li>
-          <li> Default:</li>
+          <li> Values: String | Default: Not Defined</li>
+          Full path and file name for script to tilt the camera down.
         </ul>
-        <p></p>
-        Full path and file name for script to tilt the camera down.
         <p></p>
 
         <h3><a name="ptz_zoom_in"></a>ptz_zoom_in</h3>
-        <p></p>
         <ul>
-          <li> Type:</li>
-          <li> Range / Valid values:</li>
-          <li> Default:</li>
+          <li> Values: String | Default: Not Defined</li>
+          Full path and file name for script to zoom the camera in .
         </ul>
         <p></p>
-        Full path and file name for script to zoom the camera in .
-        <p></p>
+
         <h3><a name="ptz_zoom_out"></a>ptz_zoom_out</h3>
-        <p></p>
         <ul>
-          <li> Type:</li>
-          <li> Range / Valid values:</li>
-          <li> Default:</li>
+          <li> Values: String | Default: Not Defined</li>
+          Full path and file name for script to zoom the camera out.
         </ul>
-        <p></p>
-        Full path and file name for script to zoom the camera out.
         <p></p>
       </ul>
 
+    </ul>
+
+    <h2><a name="command_line_options"></a>  Command Line Options </h2>
+    <ul>
+      <p></p>
+      <code>motionplus [ -hbnsm ] [ -c config file path ] [ -d level ] [ -k level ] [ -p pid_file ] [ -l log_file ]</code>
+      <p></p>
+      <ul>
+        <li>-c : Full path and filename of config file.</li>
+        <li>-h : Show help screen</li>
+        <li>-b : Run in daemon mode</li>
+        <li>-n : Run in non-daemon mode</li>
+        <li>-s : Run in setup mode. Also forces non-daemon mode.</li>
+        <li>-d : Run with message log level 1 - 9</li>
+        <li>-k : Run with message log type 1 - 9</li>
+        <li>-l : Full path and file name for log file</li>
+        <li>-p : Full path and file name for the process id file</li>
+        <li>-m : Start in pause mode</li>
+      </ul>
+      <p></p>
+      <p></p>
+    </ul>
+
+    <h2><a name="config_files"></a>  The Configuration Files </h2>
+    <ul>
+      <p></p>
+      MotionPlus will search for the configuration file called 'motionplus.conf' in the following order:
+      <p></p>
+      <ol>
+        <li> Current directory where MotionPlus was invoked</li>
+        <li> The directory called '.motionplus' in the current users home directory</li>
+        <li> The directory defined by --sysconfdir=DIR during the configure step of installation. If this was
+          not defined, it will default to /etc/motionplus</li>
+      </ol>
+      <p></p>
+      The motionplus.conf file specifies parameters for the entire MotionPlus application and defaults for 
+      each camera.  Specifications that are unique to each camera are included in separate files. 
+      <p></p>
+
+    </ul>
+
+    <h2><a name="signals"></a>  Signals </h2>
+    <ul>
+      <p></p>
+        A signal can be sent from the command line by typing
+        e.g. <code>kill -s SIGHUP pid</code>, where the last parameter is the process ID for MotionPlus.
+      <p></p>
+      <div class="tblsignal">
+      <table border="1" class="fixed" >
+        <colgroup>
+          <col width="30%">
+          <col width="30%">
+          <col width="30%">
+        </colgroup>
+        <thead >
+          <tr >
+            <th bgcolor="#edf4f9" word-wrap:break-word > Signal </th>
+            <th bgcolor="#edf4f9" word-wrap:break-word > Description </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > SIGHUP </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > The config file will be reread. </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > SIGTERM </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > If needed MotionPlus will create an movie file of the last event and exit </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > SIGUSR1 </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > MotionPlus will create an movie file of the current event. </td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <p></p>
+      <p></p>
     </ul>
 
   </section>
