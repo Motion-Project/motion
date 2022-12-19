@@ -6,7 +6,6 @@ src/event.cpp
 src/movie.cpp
 src/jpegutils.cpp
 src/logger.cpp
-src/mmalcam.cpp
 src/motionplus.cpp
 src/netcam.cpp
 src/picture.cpp

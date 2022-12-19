@@ -41,9 +41,6 @@
         std::string     netcam_high_params;
         std::string     netcam_userpass;
 
-        std::string     mmalcam_name;
-        std::string     mmalcam_params;
-
         std::string     libcam_name;
         std::string     libcam_params;
 

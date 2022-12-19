@@ -193,14 +193,6 @@ msgstr ""
 msgid "netcam_userpass"
 msgstr "netcam userpass"
 
-#: src/conf.cpp:774
-msgid "mmalcam_name"
-msgstr "nom mmalcam"
-
-#: src/conf.cpp:787
-msgid "mmalcam_params"
-msgstr ""
-
 #: src/conf.cpp:798
 #, c-format
 msgid "Invalid width %d"
@@ -1333,107 +1325,6 @@ msgstr "Utilisation du niveau de journalisation de type journal (%s) (%s)"
 msgid "Closing logfile (%s)."
 msgstr "Fermeture du fichier journal (%s)."
 
-#: src/mmalcam.cpp:83
-#, c-format
-msgid "Received unexpected camera control callback event, 0x%08x"
-msgstr ""
-"Réception d'un événement de rappel de contrôle de caméra inattendu, 0x%08x"
-
-#: src/mmalcam.cpp:114
-msgid "A high frame rate can cause problems with exposure of images"
-msgstr "Une cadence élevée peut causer des problèmes d'exposition des images"
-
-#: src/mmalcam.cpp:115
-msgid "If autoexposure is not working, try a lower frame rate."
-msgstr ""
-"Si l'exposition automatique ne fonctionne pas, essayez une cadence d'images "
-"plus faible."
-
-#: src/mmalcam.cpp:129
-#, c-format
-msgid "Failed to create MMAL camera component %s"
-msgstr "Impossible de créer le composant de caméra MMAL %s"
-
-#: src/mmalcam.cpp:135
-#, c-format
-msgid "MMAL camera %s doesn't have output ports"
-msgstr "La caméra MMAL %s n'a pas de ports de sortie"
-
-#: src/mmalcam.cpp:145
-#, c-format
-msgid "Unable to enable control port : error %d"
-msgstr "Impossible d'activer le port de contrôle: erreur %d"
-
-#: src/mmalcam.cpp:174
-msgid "MMAL no-padding setup failed"
-msgstr "Echec de l'installation de MMAL sans remplissage"
-
-#: src/mmalcam.cpp:180
-msgid "camera video format couldn't be set"
-msgstr "Le format vidéo de la caméra n'a pas pu être défini"
-
-#: src/mmalcam.cpp:192
-msgid "camera component couldn't be enabled"
-msgstr "Impossible d'activer le composant de la caméra"
-
-#: src/mmalcam.cpp:200
-msgid "MMAL camera component created"
-msgstr "Composant de caméra MMAL créé"
-
-#: src/mmalcam.cpp:224
-msgid "MMAL camera buffer pool creation failed"
-msgstr "La création du pool de mémoire tampon de caméra MMAL a échoué"
-
-#: src/mmalcam.cpp:230
-msgid "MMAL camera buffer queue creation failed"
-msgstr ""
-"La création de la file d'attente de mémoire tampon de caméra MMAL a échoué"
-
-#: src/mmalcam.cpp:246
-#, c-format
-msgid "Unable to get a required buffer %d from pool queue"
-msgstr "Impossible d'obtenir un tampon requis %d de la file d'attente du pool"
-
-#: src/mmalcam.cpp:251
-#, c-format
-msgid "Unable to send a buffer to port (%d)"
-msgstr "Impossible d'envoyer un tampon au port (%d)"
-
-#: src/mmalcam.cpp:300
-#, c-format
-msgid "MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps"
-msgstr ""
-"Fil de caméra MMAL commençant ... pour la caméra (%s) de %d x %d à %d fps"
-
-#: src/mmalcam.cpp:305
-msgid "camera params couldn't be allocated"
-msgstr "Les paramètres de la caméra n'ont pas pu être attribués"
-
-#: src/mmalcam.cpp:331
-msgid "MMAL camera capture port enabling failed"
-msgstr "Echec de l'activation du port de capture de caméra MMAL"
-
-#: src/mmalcam.cpp:339
-msgid "MMAL camera capture start failed"
-msgstr "Le démarrage de la capture de la caméra MMAL a échoué"
-
-#: src/mmalcam.cpp:351
-msgid "MMAL Camera not available"
-msgstr "Caméra MMAL non disponible"
-
-#: src/mmalcam.cpp:375
-msgid "MMAL Camera cleanup"
-msgstr "Nettoyage de la caméra MMAL"
-
-#: src/mmalcam.cpp:433
-#, c-format
-msgid "cmd %d flags %08x size %d/%d at %08x, img_size=%d"
-msgstr "cmd drapeaux %d de taille %08x %d / %d à %08x, taille img = %d"
-
-#: src/mmalcam.cpp:450
-msgid "Unable to return a buffer to the camera video port"
-msgstr "Impossible de renvoyer un tampon sur le port vidéo de la caméra"
-
 #: src/motion_loop.cpp:60
 #, c-format
 msgid "Resizing pre_capture buffer to %d items"
@@ -1444,10 +1335,6 @@ msgstr ""
 msgid "Motion detected - starting event %d"
 msgstr ""
 
-#: src/motion_loop.cpp:367
-msgid "calling mmalcam_cleanup"
-msgstr "appel du nettoyage de la caméra"
-
 #: src/motion_loop.cpp:376
 msgid "calling netcam_cleanup"
 msgstr "appel du nettoyage de netcam"
@@ -1457,16 +1344,8 @@ msgid "Cleaning up V4L2 device"
 msgstr "Nettoyage du périphérique V4L2"
 
 #: src/motion_loop.cpp:387
-msgid "No Camera device cleanup (MMAL, Netcam, V4L2)"
-msgstr "Pas de nettoyage de l'appareil photo (MMAL, Netcam, V4L2)"
-
-#: src/motion_loop.cpp:404
-msgid "Opening MMAL cam"
-msgstr "Ouverture de la came MMAL"
-
-#: src/motion_loop.cpp:409
-msgid "MMAL cam failed to open"
-msgstr "Echec de l'ouverture de la caméra MMAL"
+msgid "No Camera device cleanup (Netcam, V4L2)"
+msgstr "Pas de nettoyage de l'appareil photo (Netcam, V4L2)"
 
 #: src/motion_loop.cpp:415
 msgid "Opening Netcam"
@@ -1485,12 +1364,12 @@ msgid "V4L2 device failed to open"
 msgstr "échec de l'ouverture du périphérique V4L2"
 
 #: src/motion_loop.cpp:434
-msgid "No Camera device specified (MMAL, Netcam, V4L2)"
-msgstr "Aucun appareil photo spécifié (MMAL, Netcam, V4L2)"
+msgid "No Camera device specified (Netcam, V4L2)"
+msgstr "Aucun appareil photo spécifié (Netcam, V4L2)"
 
 #: src/motion_loop.cpp:491
-#| msgid "No Camera device cleanup (MMAL, Netcam, V4L2)"
-msgid "Unable to determine camera type (MMAL, Netcam, V4L2)"
+#| msgid "No Camera device cleanup (Netcam, V4L2)"
+msgid "Unable to determine camera type (Netcam, V4L2)"
 msgstr ""
 
 #: src/motion_loop.cpp:516
@@ -1678,14 +1557,6 @@ msgstr "webp: disponible"
 #: src/motionplus.cpp:338
 msgid "webp   : not available"
 msgstr "webp: non disponible"
-
-#: src/motionplus.cpp:342
-msgid "mmal   : available"
-msgstr "mmal: disponible"
-
-#: src/motionplus.cpp:344
-msgid "mmal   : not available"
-msgstr "mmal: non disponible"
 
 #: src/motionplus.cpp:348
 msgid "mysql  : available"

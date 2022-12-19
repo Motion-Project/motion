@@ -81,7 +81,6 @@ struct ctx_rotate;
 struct ctx_images;
 struct ctx_image_data;
 struct ctx_dbse;
-struct ctx_mmalcam;
 struct ctx_movie;
 struct ctx_netcam;
 struct ctx_algsec;
@@ -150,7 +149,6 @@ class cls_libcam;
 enum CAMERA_TYPE {
     CAMERA_TYPE_UNKNOWN,
     CAMERA_TYPE_V4L2,
-    CAMERA_TYPE_MMAL,
     CAMERA_TYPE_LIBCAM,
     CAMERA_TYPE_NETCAM
 };
@@ -309,7 +307,6 @@ struct ctx_cam {
 
     ctx_config      *conf;
     ctx_images      imgs;
-    ctx_mmalcam     *mmalcam;
     ctx_netcam      *netcam;            /* this structure contains the context for normal RTSP connection */
     ctx_netcam      *netcam_high;       /* this structure contains the context for high resolution RTSP connection */
     ctx_v4l2cam     *v4l2cam;

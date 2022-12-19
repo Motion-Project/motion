@@ -25,7 +25,6 @@
 #include "motion_loop.hpp"
 #include "rotate.hpp"
 #include "movie.hpp"
-#include "mmalcam.hpp"
 #include "libcam.hpp"
 #include "video_v4l2.hpp"
 #include "video_loopback.hpp"
@@ -365,11 +364,6 @@ static void mlp_mask_privacy(ctx_cam *cam)
 /* Close and clean up camera*/
 void mlp_cam_close(ctx_cam *cam)
 {
-    if (cam->mmalcam != NULL) {
-        mmalcam_cleanup(cam);
-        return;
-    }
-
     if (cam->libcam != NULL) {
         libcam_cleanup(cam);
         return;
@@ -393,9 +387,7 @@ void mlp_cam_close(ctx_cam *cam)
 /* Start camera */
 void mlp_cam_start(ctx_cam *cam)
 {
-    if (cam->camera_type == CAMERA_TYPE_MMAL) {
-        mmalcam_start(cam);
-    } else if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
+    if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
         libcam_start(cam);
     } else if (cam->camera_type == CAMERA_TYPE_NETCAM) {
         netcam_start(cam);
@@ -411,9 +403,7 @@ void mlp_cam_start(ctx_cam *cam)
 /* Get next image from camera */
 int mlp_cam_next(ctx_cam *cam, ctx_image_data *img_data)
 {
-    if (cam->camera_type == CAMERA_TYPE_MMAL) {
-        return mmalcam_next(cam, img_data);
-    } else if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
+    if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
         return libcam_next(cam, img_data);
     } else if (cam->camera_type == CAMERA_TYPE_NETCAM) {
         return netcam_next(cam, img_data);
@@ -427,11 +417,6 @@ int mlp_cam_next(ctx_cam *cam, ctx_image_data *img_data)
 /* Assign the camera type */
 static int init_camera_type(ctx_cam *cam)
 {
-    if (cam->conf->mmalcam_name != "") {
-        cam->camera_type = CAMERA_TYPE_MMAL;
-        return 0;
-    }
-
     if (cam->conf->libcam_name != "") {
         cam->camera_type = CAMERA_TYPE_LIBCAM;
         return 0;

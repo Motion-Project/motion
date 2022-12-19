@@ -195,15 +195,6 @@ msgstr ""
 msgid "netcam_userpass"
 msgstr "넷캠 사용자 패스"
 
-#: src/conf.cpp:774
-msgid "mmalcam_name"
-msgstr "mmalcam 이름"
-
-#: src/conf.cpp:787
-#| msgid "mmalcam_control_params"
-msgid "mmalcam_params"
-msgstr ""
-
 #: src/conf.cpp:798
 #, c-format
 #| msgid "Invalid url: %s"
@@ -1391,103 +1382,6 @@ msgstr "로그 유형 (%s) 로그 레벨 (%s) 사용"
 msgid "Closing logfile (%s)."
 msgstr "로그 파일 닫기 (%s)."
 
-#: src/mmalcam.cpp:83
-#, c-format
-msgid "Received unexpected camera control callback event, 0x%08x"
-msgstr "예기치 않은 카메라 제어 콜백 이벤트, 0x%08x를 수신했습니다."
-
-#: src/mmalcam.cpp:114
-msgid "A high frame rate can cause problems with exposure of images"
-msgstr "프레임 속도가 높으면 이미지 노출에 문제가 발생할 수 있습니다"
-
-#: src/mmalcam.cpp:115
-msgid "If autoexposure is not working, try a lower frame rate."
-msgstr "자동 노출이 작동하지 않으면 더 낮은 프레임 속도를 시도하십시오."
-
-#: src/mmalcam.cpp:129
-#, c-format
-msgid "Failed to create MMAL camera component %s"
-msgstr "MMAL 카메라 컴포넌트 %s 작성 실패"
-
-#: src/mmalcam.cpp:135
-#, c-format
-msgid "MMAL camera %s doesn't have output ports"
-msgstr "MMAL 카메라 %s에 출력 포트가 없습니다"
-
-#: src/mmalcam.cpp:145
-#, c-format
-msgid "Unable to enable control port : error %d"
-msgstr "제어 포트를 활성화 할 수 없습니다 : 오류 %d"
-
-#: src/mmalcam.cpp:174
-msgid "MMAL no-padding setup failed"
-msgstr "MMAL 패딩 없음 설정 실패"
-
-#: src/mmalcam.cpp:180
-msgid "camera video format couldn't be set"
-msgstr "카메라 비디오 형식을 설정할 수 없습니다"
-
-#: src/mmalcam.cpp:192
-msgid "camera component couldn't be enabled"
-msgstr "카메라 구성 요소를 사용할 수 없습니다"
-
-#: src/mmalcam.cpp:200
-msgid "MMAL camera component created"
-msgstr "MMAL 카메라 컴포넌트 생성"
-
-#: src/mmalcam.cpp:224
-msgid "MMAL camera buffer pool creation failed"
-msgstr "MMAL 카메라 버퍼 풀 작성 실패"
-
-#: src/mmalcam.cpp:230
-msgid "MMAL camera buffer queue creation failed"
-msgstr "MMAL 카메라 버퍼 큐 작성 실패"
-
-#: src/mmalcam.cpp:246
-#, c-format
-msgid "Unable to get a required buffer %d from pool queue"
-msgstr "풀 큐에서 필요한 버퍼 %d를 얻을 수 없습니다"
-
-#: src/mmalcam.cpp:251
-#, c-format
-msgid "Unable to send a buffer to port (%d)"
-msgstr "포트 (%d)에 버퍼를 보낼 수 없습니다"
-
-#: src/mmalcam.cpp:300
-#, c-format
-msgid "MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps"
-msgstr ""
-
-#: src/mmalcam.cpp:305
-msgid "camera params couldn't be allocated"
-msgstr "카메라 매개 변수를 할당 할 수 없습니다"
-
-#: src/mmalcam.cpp:331
-msgid "MMAL camera capture port enabling failed"
-msgstr "MMAL 카메라 캡처 포트 활성화 실패"
-
-#: src/mmalcam.cpp:339
-msgid "MMAL camera capture start failed"
-msgstr "MMAL 카메라 캡처 시작 실패"
-
-#: src/mmalcam.cpp:351
-#| msgid "MariaDB: not available"
-msgid "MMAL Camera not available"
-msgstr ""
-
-#: src/mmalcam.cpp:375
-msgid "MMAL Camera cleanup"
-msgstr "MMAL 카메라 정리"
-
-#: src/mmalcam.cpp:433
-#, c-format
-msgid "cmd %d flags %08x size %d/%d at %08x, img_size=%d"
-msgstr "cmd %d 플래그 %08x 크기 %d / %d (%08x, img 크기 = %d)"
-
-#: src/mmalcam.cpp:450
-msgid "Unable to return a buffer to the camera video port"
-msgstr "카메라 비디오 포트로 버퍼를 되돌릴 수 없습니다"
-
 #: src/motion_loop.cpp:60
 #, c-format
 msgid "Resizing pre_capture buffer to %d items"
@@ -1498,10 +1392,6 @@ msgstr "%d 항목으로 사전 캡처 버퍼 크기 조정"
 msgid "Motion detected - starting event %d"
 msgstr "동작 감지-시작 이벤트 %d"
 
-#: src/motion_loop.cpp:367
-msgid "calling mmalcam_cleanup"
-msgstr "mmalcam 정리 호출"
-
 #: src/motion_loop.cpp:376
 msgid "calling netcam_cleanup"
 msgstr "넷캠 정리 호출"
@@ -1511,16 +1401,8 @@ msgid "Cleaning up V4L2 device"
 msgstr "V4L2 장치 정리"
 
 #: src/motion_loop.cpp:387
-msgid "No Camera device cleanup (MMAL, Netcam, V4L2)"
-msgstr "카메라 장치 정리 없음 (MMAL, Netcam, V4L2)"
-
-#: src/motion_loop.cpp:404
-msgid "Opening MMAL cam"
-msgstr "MMAL 캠 열기"
-
-#: src/motion_loop.cpp:409
-msgid "MMAL cam failed to open"
-msgstr "MMAL 캠을 열지 못했습니다"
+msgid "No Camera device cleanup (Netcam, V4L2)"
+msgstr "카메라 장치 정리 없음 (Netcam, V4L2)"
 
 #: src/motion_loop.cpp:415
 msgid "Opening Netcam"
@@ -1539,12 +1421,12 @@ msgid "V4L2 device failed to open"
 msgstr "V4L2 장치를 열지 못했습니다"
 
 #: src/motion_loop.cpp:434
-msgid "No Camera device specified (MMAL, Netcam, V4L2)"
-msgstr "카메라 장치를 지정하지 않았습니다 (MMAL, Netcam, V4L2)"
+msgid "No Camera device specified (Netcam, V4L2)"
+msgstr "카메라 장치를 지정하지 않았습니다 (Netcam, V4L2)"
 
 #: src/motion_loop.cpp:491
-msgid "Unable to determine camera type (MMAL, Netcam, V4L2)"
-msgstr "카메라 유형을 결정할 수 없습니다 (MMAL, Netcam, V4L2)"
+msgid "Unable to determine camera type (Netcam, V4L2)"
+msgstr "카메라 유형을 결정할 수 없습니다 (Netcam, V4L2)"
 
 #: src/motion_loop.cpp:516
 msgid "Error capturing first image"
@@ -1720,14 +1602,6 @@ msgstr "webp : 사용 가능"
 #: src/motionplus.cpp:338
 msgid "webp   : not available"
 msgstr "webp : 사용할 수 없음"
-
-#: src/motionplus.cpp:342
-msgid "mmal   : available"
-msgstr "mmal : 사용 가능"
-
-#: src/motionplus.cpp:344
-msgid "mmal   : not available"
-msgstr "mmal : 사용할 수 없음"
 
 #: src/motionplus.cpp:348
 msgid "mysql  : available"

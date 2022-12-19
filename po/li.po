@@ -188,14 +188,6 @@ msgstr ""
 msgid "netcam_userpass"
 msgstr ""
 
-#: src/conf.cpp:774
-msgid "mmalcam_name"
-msgstr ""
-
-#: src/conf.cpp:787
-msgid "mmalcam_params"
-msgstr ""
-
 #: src/conf.cpp:798
 #, c-format
 #| msgid "Invalid database_type %s"
@@ -1374,104 +1366,6 @@ msgstr "Naudojant žurnalo tipą (%s) žurnalo lygis (%s)"
 msgid "Closing logfile (%s)."
 msgstr "Uždarymo žurnalo failas (%s)."
 
-#: src/mmalcam.cpp:83
-#, c-format
-msgid "Received unexpected camera control callback event, 0x%08x"
-msgstr "Gautas netikėtas fotoaparato valdymo atšaukimo įvykis, 0x%08x"
-
-#: src/mmalcam.cpp:114
-msgid "A high frame rate can cause problems with exposure of images"
-msgstr "Didelis kadrų dažnis gali sukelti problemų dėl vaizdų ekspozicijos"
-
-#: src/mmalcam.cpp:115
-msgid "If autoexposure is not working, try a lower frame rate."
-msgstr "Jei automatinė ekspozicija neveikia, išbandykite mažesnę kadrų dažnį."
-
-#: src/mmalcam.cpp:129
-#, c-format
-msgid "Failed to create MMAL camera component %s"
-msgstr "Nepavyko sukurti MMAL fotoaparato komponento %s"
-
-#: src/mmalcam.cpp:135
-#, c-format
-msgid "MMAL camera %s doesn't have output ports"
-msgstr "MMAL kamera %s neturi išvesties prievadų"
-
-#: src/mmalcam.cpp:145
-#, c-format
-msgid "Unable to enable control port : error %d"
-msgstr "Neįmanoma įjungti valdymo prievado: klaida %d"
-
-#: src/mmalcam.cpp:174
-msgid "MMAL no-padding setup failed"
-msgstr "MMAL nepavyko užpildyti sąrankos"
-
-#: src/mmalcam.cpp:180
-msgid "camera video format couldn't be set"
-msgstr "Nepavyko nustatyti vaizdo kameros vaizdo įrašo formato"
-
-#: src/mmalcam.cpp:192
-msgid "camera component couldn't be enabled"
-msgstr "fotoaparato komponento negalima įjungti"
-
-#: src/mmalcam.cpp:200
-#| msgid "camera component couldn't be enabled"
-msgid "MMAL camera component created"
-msgstr ""
-
-#: src/mmalcam.cpp:224
-msgid "MMAL camera buffer pool creation failed"
-msgstr "Nepavyko sukurti MMAL fotoaparato buferio telkinio"
-
-#: src/mmalcam.cpp:230
-msgid "MMAL camera buffer queue creation failed"
-msgstr "Nepavyko sukurti MMAL fotoaparato buferio eilės"
-
-#: src/mmalcam.cpp:246
-#, c-format
-msgid "Unable to get a required buffer %d from pool queue"
-msgstr "Nepavyko gauti reikiamo buferio %d iš baseino eilės"
-
-#: src/mmalcam.cpp:251
-#, c-format
-msgid "Unable to send a buffer to port (%d)"
-msgstr "Neįmanoma nusiųsti buferio į uostą (%d)"
-
-#: src/mmalcam.cpp:300
-#, c-format
-msgid "MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps"
-msgstr ""
-
-#: src/mmalcam.cpp:305
-msgid "camera params couldn't be allocated"
-msgstr "fotoaparatų parametrų nepavyko paskirstyti"
-
-#: src/mmalcam.cpp:331
-msgid "MMAL camera capture port enabling failed"
-msgstr "MMAL fotoaparato fiksavimo prievadas įgalintas nepavyko"
-
-#: src/mmalcam.cpp:339
-#| msgid "MMAL camera capture port enabling failed"
-msgid "MMAL camera capture start failed"
-msgstr ""
-
-#: src/mmalcam.cpp:351
-msgid "MMAL Camera not available"
-msgstr ""
-
-#: src/mmalcam.cpp:375
-msgid "MMAL Camera cleanup"
-msgstr ""
-
-#: src/mmalcam.cpp:433
-#, c-format
-msgid "cmd %d flags %08x size %d/%d at %08x, img_size=%d"
-msgstr "cmd %d vėliavos %08x dydis %d / %d esant %08x, img size = %d"
-
-#: src/mmalcam.cpp:450
-msgid "Unable to return a buffer to the camera video port"
-msgstr "Neįmanoma grąžinti buferio į fotoaparato vaizdo prievadą"
-
 #: src/motion_loop.cpp:60
 #, c-format
 msgid "Resizing pre_capture buffer to %d items"
@@ -1480,10 +1374,6 @@ msgstr ""
 #: src/motion_loop.cpp:213
 #, c-format
 msgid "Motion detected - starting event %d"
-msgstr ""
-
-#: src/motion_loop.cpp:367
-msgid "calling mmalcam_cleanup"
 msgstr ""
 
 #: src/motion_loop.cpp:376
@@ -1496,17 +1386,9 @@ msgid "Cleaning up V4L2 device"
 msgstr ""
 
 #: src/motion_loop.cpp:387
-msgid "No Camera device cleanup (MMAL, Netcam, V4L2)"
-msgstr "Nėra fotoaparato įrenginio valymo (MMAL, Netcam, V4L2)"
+msgid "No Camera device cleanup (Netcam, V4L2)"
+msgstr "Nėra fotoaparato įrenginio valymo (Netcam, V4L2)"
 
-#: src/motion_loop.cpp:404
-msgid "Opening MMAL cam"
-msgstr ""
-
-#: src/motion_loop.cpp:409
-#| msgid "Failed to open '%s'"
-msgid "MMAL cam failed to open"
-msgstr ""
 
 #: src/motion_loop.cpp:415
 msgid "Opening Netcam"
@@ -1527,12 +1409,12 @@ msgid "V4L2 device failed to open"
 msgstr ""
 
 #: src/motion_loop.cpp:434
-msgid "No Camera device specified (MMAL, Netcam, V4L2)"
-msgstr "Nenurodytas fotoaparato įrenginys (MMAL, Netcam, V4L2)"
+msgid "No Camera device specified (Netcam, V4L2)"
+msgstr "Nenurodytas fotoaparato įrenginys (Netcam, V4L2)"
 
 #: src/motion_loop.cpp:491
-#| msgid "No Camera device cleanup (MMAL, Netcam, V4L2)"
-msgid "Unable to determine camera type (MMAL, Netcam, V4L2)"
+#| msgid "No Camera device cleanup (Netcam, V4L2)"
+msgid "Unable to determine camera type (Netcam, V4L2)"
 msgstr ""
 
 #: src/motion_loop.cpp:516
@@ -1716,16 +1598,6 @@ msgstr ""
 #: src/motionplus.cpp:338
 #| msgid "nls    : available"
 msgid "webp   : not available"
-msgstr ""
-
-#: src/motionplus.cpp:342
-#| msgid "nls    : available"
-msgid "mmal   : available"
-msgstr ""
-
-#: src/motionplus.cpp:344
-#| msgid "nls    : available"
-msgid "mmal   : not available"
 msgstr ""
 
 #: src/motionplus.cpp:348
