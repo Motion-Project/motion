@@ -227,7 +227,6 @@
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#threshold_ratio_change" >threshold_ratio_change</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#secondary_interval" >secondary_interval</a> </td>
               <td bgcolor="#edf4f9" ><a href="#secondary_method" >secondary_method</a> </td>
               <td bgcolor="#edf4f9" ><a href="#secondary_params" >secondary_params</a> </td>
             </tr>
@@ -1213,15 +1212,6 @@
        </ul>
        <p></p>
 
-       <h3><a name="secondary_interval"></a>secondary_interval</h3>
-       <ul>
-         <li> Values: Integer | Default: </li>
-         The interval of framerate images to process using the secondary method.  This is
-         measured as fractions of the framerate.  e.g. A secondary_interval of 2 with a framerate of 30
-         means secondary processing will be at 15 fps.  
-       </ul>
-       <p></p>
-
        <h3><a name="secondary_method"></a>secondary_method</h3>
        <ul>           
          <li> Values: haar, hog, dnn | Default: Not Defined</li>
@@ -1240,6 +1230,17 @@
           This option is a comma separated list of the secondary detection model options.  In addition to the
           options for each of the models, MotionPlus includes the following additional options.
           <p></p>
+
+          <div>
+            <i><h4>frame_interval</h4></i>
+            <ul>
+              <li> Values: Integer | Default: 5 </li>
+                The interval of images between processing using the secondary method.  This works in conjunction with 
+                the framerate.  For example, a frame_interval of 5 with a framerate of 30 means secondary processing 
+                will be at 6 fps while a frame_interval of 60 would have secondary processing every other second.
+            </ul>
+            <p></p>
+          </div>
 
           <div>
             <i><h4>model_file</h4></i>
