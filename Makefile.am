@@ -36,7 +36,6 @@ docdir = $(datadir)/doc/@PACKAGE@
 doc_DATA = \
 	doc/motionplus_guide.html \
 	doc/motionplus_stylesheet.css \
-	doc/CREDITS \
 	doc/motionplus_build.html \
 	doc/motionplus_config.html
 
