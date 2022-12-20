@@ -22,5 +22,6 @@
 
     void webu_json_config(ctx_webui *webui);
     void webu_json_movies(ctx_webui *webui);
+    void webu_json_status(ctx_webui *webui);
 
 #endif /* _INCLUDE_WEBU_JSON_HPP_ */

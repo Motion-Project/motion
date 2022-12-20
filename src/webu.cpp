@@ -831,6 +831,17 @@ static mhdrslt webu_answer_get(ctx_webui *webui)
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
         }
 
+    } else if (webui->uri_cmd1 == "status.json") {
+
+        pthread_mutex_lock(&webui->motapp->mutex_post);
+            webu_json_status(webui);
+        pthread_mutex_unlock(&webui->motapp->mutex_post);
+
+        retcd = webu_mhd_send(webui);
+        if (retcd == MHD_NO) {
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
+        }
+
     } else {
         pthread_mutex_lock(&webui->motapp->mutex_post);
             if (webui->motapp->cam_list[0]->conf->webcontrol_interface == "user") {

@@ -387,3 +387,84 @@ void webu_json_movies(ctx_webui *webui)
     webui->resp_page += "}";
 
 }
+
+static void webu_json_status_vars(ctx_webui *webui, int indx_cam)
+{
+    char buf[32];
+    struct tm timestamp_tm;
+    struct timespec curr_ts;
+    ctx_cam *cam;
+
+    cam = webui->motapp->cam_list[indx_cam];
+
+    webui->resp_page += "{";
+
+    webui->resp_page += "\"name\":\"" + webui->cam->conf->camera_name+"\"";
+    webui->resp_page += ",\"id\":" + std::to_string(cam->camera_id);
+    webui->resp_page += ",\"width\":" + std::to_string(cam->imgs.width);
+    webui->resp_page += ",\"height\":" + std::to_string(cam->imgs.height);
+    webui->resp_page += ",\"fps\":" + std::to_string(cam->lastrate);
+
+    clock_gettime(CLOCK_REALTIME, &curr_ts);
+    localtime_r(&curr_ts.tv_sec, &timestamp_tm);
+    strftime(buf, sizeof(buf), "%FT%T", &timestamp_tm);
+    webui->resp_page += ",\"current_time\":\"" + std::string(buf)+"\"";
+
+    webui->resp_page += ",\"missing_frame_counter\":" +
+        std::to_string(cam->missing_frame_counter);
+
+    if (cam->lost_connection) {
+        webui->resp_page += ",\"lost_connection\":true";
+    } else {
+        webui->resp_page += ",\"lost_connection\":false";
+    }
+
+    if (cam->connectionlosttime.tv_sec != 0) {
+        localtime_r(&cam->connectionlosttime.tv_sec, &timestamp_tm);
+        strftime(buf, sizeof(buf), "%FT%T", &timestamp_tm);
+        webui->resp_page += ",\"connection_lost_time\":\"" + std::string(buf)+"\"";
+    } else {
+        webui->resp_page += ",\"connection_lost_time\":\"\"" ;
+    }
+    if (cam->detecting_motion) {
+        webui->resp_page += ",\"detecting\":true";
+    } else {
+        webui->resp_page += ",\"detecting\":false";
+    }
+
+    if (cam->pause) {
+        webui->resp_page += ",\"pause\":true";
+    } else {
+        webui->resp_page += ",\"pause\":false";
+    }
+
+    webui->resp_page += "}";
+
+}
+
+void webu_json_status(ctx_webui *webui)
+{
+    int indx_cam;
+
+    webui->resp_type = WEBUI_RESP_JSON;
+
+    webui->resp_page += "{\"version\" : \"" VERSION "\"";
+    webui->resp_page += ",\"status\" : ";
+
+    indx_cam = 0;
+    while (webui->motapp->cam_list[indx_cam] != NULL) {
+        indx_cam++;
+    }
+    webui->resp_page += "{\"count\" : " + std::to_string(indx_cam - 1);
+        indx_cam = 0;
+        while (webui->motapp->cam_list[indx_cam] != NULL) {
+            webui->resp_page += ",\"cam" +
+                std::to_string(webui->motapp->cam_list[indx_cam]->camera_id) + "\": ";
+            webu_json_status_vars(webui, indx_cam);
+            indx_cam++;
+        }
+    webui->resp_page += "}";
+
+    webui->resp_page += "}";
+
+}
