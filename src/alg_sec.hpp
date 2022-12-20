@@ -39,7 +39,7 @@ struct ctx_algsec_model {
     int                         frame_interval;
 
     std::string                 method;
-    std::string                 imagetype;
+    std::string                 image_type;
     int                         rotate;
 
     float                       scalefactor;

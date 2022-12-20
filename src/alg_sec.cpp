@@ -226,10 +226,10 @@ static void algsec_image_type(ctx_cam *cam, Mat &mat_dst)
 {
     ctx_algsec_model *algmdl = &cam->algsec->models;
 
-    if ((algmdl->imagetype == "gray") || (algmdl->imagetype == "grey")) {
+    if ((algmdl->image_type == "gray") || (algmdl->image_type == "grey")) {
         mat_dst = Mat(cam->imgs.height, cam->imgs.width
             , CV_8UC1, (void*)cam->algsec->image_norm);
-    } else if (algmdl->imagetype == "roi") {
+    } else if (algmdl->image_type == "roi") {
         /*Discard really small and large images */
         if ((cam->current_image->location.width < 64) ||
             (cam->current_image->location.height < 64) ||
@@ -443,8 +443,8 @@ static void algsec_params_model(ctx_cam *cam)
             algmdl->model_file = param_vl;
         } else if (mystreq(param_nm,"frame_interval")) {
             algmdl->frame_interval = atoi(param_vl);
-        } else if (mystreq(param_nm,"imagetype")) {
-            algmdl->imagetype = param_vl;
+        } else if (mystreq(param_nm,"image_type")) {
+            algmdl->image_type = param_vl;
         } else if (mystreq(param_nm,"threshold")) {
             algmdl->threshold = atof(param_vl);
         } else if (mystreq(param_nm,"threshold_model")) {
@@ -500,7 +500,7 @@ static void algsec_params_defaults(ctx_cam *cam)
 
     util_parms_add_default(algmdl->algsec_params, "model_file", "");
     util_parms_add_default(algmdl->algsec_params, "frame_interval", "5");
-    util_parms_add_default(algmdl->algsec_params, "imagetype", "full");
+    util_parms_add_default(algmdl->algsec_params, "image_type", "full");
     util_parms_add_default(algmdl->algsec_params, "rotate", "0");
 
     if (algmdl->method == "haar") {
