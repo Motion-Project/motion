@@ -69,7 +69,6 @@
         int             threshold_ratio;
         int             threshold_ratio_change;
         bool            threshold_tune;
-        int             secondary_interval;
         std::string     secondary_method;
         std::string     secondary_params;
         int             noise_level;

@@ -89,7 +89,6 @@ ctx_parm config_parms[] = {
     {"threshold_ratio",           PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"threshold_ratio_change",    PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"threshold_tune",            PARM_TYP_BOOL,   PARM_CAT_05, WEBUI_LEVEL_LIMITED },
-    {"secondary_interval",        PARM_TYP_INT,    PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"secondary_method",          PARM_TYP_LIST,   PARM_CAT_05, WEBUI_LEVEL_LIMITED },
     {"secondary_params",          PARM_TYP_STRING, PARM_CAT_05, WEBUI_LEVEL_LIMITED },
 
@@ -1242,25 +1241,6 @@ static void conf_edit_threshold_tune(ctx_cam *cam, std::string &parm, enum PARM_
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_tune",_("threshold_tune"));
-}
-
-static void conf_edit_secondary_interval(ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        cam->conf->secondary_interval = 0;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) ) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid secondary_interval %d"),parm_in);
-        } else {
-            cam->conf->secondary_interval = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(cam->conf->secondary_interval);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_interval",_("secondary_interval"));
 }
 
 static void conf_edit_secondary_method(ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
@@ -2940,7 +2920,6 @@ static void conf_edit_cat05(ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "threshold_ratio") {         conf_edit_threshold_ratio(cam, parm_val, pact);
     } else if (parm_nm == "threshold_ratio_change") {  conf_edit_threshold_ratio_change(cam, parm_val, pact);
     } else if (parm_nm == "threshold_tune") {          conf_edit_threshold_tune(cam, parm_val, pact);
-    } else if (parm_nm == "secondary_interval") {      conf_edit_secondary_interval(cam, parm_val, pact);
     } else if (parm_nm == "secondary_method") {        conf_edit_secondary_method(cam, parm_val, pact);
     } else if (parm_nm == "secondary_params") {        conf_edit_secondary_params(cam, parm_val, pact);
     }
