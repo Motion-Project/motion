@@ -139,14 +139,14 @@ static void v4l2_ctrls_log(ctx_cam *cam)
 
     if (v4l2cam->devctrl_count != 0 ) {
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("---------Controls---------"));
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("  V4L2 ID   Name and Range"));
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("  V4L2 ID :  Name : Range"));
         for (indx = 0; indx < v4l2cam->devctrl_count; indx++) {
             if (v4l2cam->devctrl_array[indx].ctrl_menuitem) {
-                MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "  %s %s"
+                MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "  %s : %s"
                     ,v4l2cam->devctrl_array[indx].ctrl_iddesc
                     ,v4l2cam->devctrl_array[indx].ctrl_name);
             } else {
-                MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s %s, %d to %d"
+                MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s : %s : %d to %d"
                     ,v4l2cam->devctrl_array[indx].ctrl_iddesc
                     ,v4l2cam->devctrl_array[indx].ctrl_name
                     ,v4l2cam->devctrl_array[indx].ctrl_minimum
