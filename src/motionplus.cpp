@@ -560,9 +560,6 @@ static int motion_check_threadcount(ctx_motapp *motapp)
 
     if (((thrdcnt == 0) && motapp->finish_all) ||
         ((thrdcnt == 0) && (motapp->threads_running == 0))) {
-        MOTION_LOG(ALL, TYPE_ALL, NO_ERRNO
-            ,_("DEBUG-1 threads_running %d thrdcnt %d , finish %d")
-            ,motapp->threads_running, thrdcnt, motapp->finish_all);
         return 1;
     } else {
         return 0;
