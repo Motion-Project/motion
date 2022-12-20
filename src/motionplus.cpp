@@ -200,7 +200,7 @@ static void motion_pid_remove(ctx_motapp *motapp)
 }
 
 /**  Turn MotionPlus into a daemon through forking. */
-static void motion_daemon(ctx_motapp *motapp)
+static void motion_daemon()
 {
     int fd;
     struct sigaction sig_ign_action;
@@ -386,7 +386,7 @@ static void motion_startup(ctx_motapp *motapp, int daemonize, int argc, char *ar
 
     if (daemonize) {
         if (motapp->daemon && motapp->setup_mode == 0) {
-            motion_daemon(motapp);
+            motion_daemon();
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus running as daemon process"));
         }
     }
@@ -396,6 +396,8 @@ static void motion_startup(ctx_motapp *motapp, int daemonize, int argc, char *ar
     }
 
     conf_parms_log(motapp->cam_list);
+
+    motion_pid_write(motapp);
 
     motion_ntc();
 
