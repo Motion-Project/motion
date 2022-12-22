@@ -43,9 +43,9 @@ struct ctx_algsec_model {
     int                         rotate;
 
     float                       scalefactor;
-    float                       threshold_model;    /* Threshold fed into the opencv model*/
     float                       threshold;          /* Threshold for motion to use on detection*/
 
+    float                       hog_threshold_model;  /* Threshold fed into the opencv model*/
     int                         hog_winstride;
     int                         hog_padding;
 

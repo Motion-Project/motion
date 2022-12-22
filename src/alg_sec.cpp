@@ -269,7 +269,7 @@ static void algsec_detect_hog(ctx_cam *cam)
             ,Size(algmdl->hog_winstride, algmdl->hog_winstride)
             ,Size(algmdl->hog_padding, algmdl->hog_padding)
             ,algmdl->scalefactor
-            ,algmdl->threshold_model
+            ,algmdl->hog_threshold_model
             ,false);
 
         algsec_image_label(cam, mat_dst, detect_pos, detect_weights);
@@ -447,8 +447,6 @@ static void algsec_params_model(ctx_cam *cam)
             algmdl->image_type = param_vl;
         } else if (mystreq(param_nm,"threshold")) {
             algmdl->threshold = atof(param_vl);
-        } else if (mystreq(param_nm,"threshold_model")) {
-            algmdl->threshold_model = atof(param_vl);
         } else if (mystreq(param_nm,"scalefactor")) {
             algmdl->scalefactor = atof(param_vl);
         } else if (mystreq(param_nm,"rotate")) {
@@ -458,8 +456,9 @@ static void algsec_params_model(ctx_cam *cam)
         if (algmdl->method == "hog") {
             if (mystreq(param_nm,"padding")) {
                 algmdl->hog_padding = atoi(param_vl);
-            }
-           if (mystreq(param_nm,"winstride")) {
+            } else if (mystreq(param_nm,"threshold_model")) {
+                algmdl->hog_threshold_model = atof(param_vl);
+            } else if (mystreq(param_nm,"winstride")) {
                 algmdl->hog_winstride = atoi(param_vl);
             }
         } else if (algmdl->method == "haar") {
@@ -505,7 +504,6 @@ static void algsec_params_defaults(ctx_cam *cam)
 
     if (algmdl->method == "haar") {
         util_parms_add_default(algmdl->algsec_params, "threshold", "1.1");
-        util_parms_add_default(algmdl->algsec_params, "threshold_model", "1.4");
         util_parms_add_default(algmdl->algsec_params, "scalefactor", "1.1");
         util_parms_add_default(algmdl->algsec_params, "flags", "0");
         util_parms_add_default(algmdl->algsec_params, "maxsize", "1024");
