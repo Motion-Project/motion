@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <link href="motionplus.png" rel="icon" type="image/png">
+    <title>MotionPlus</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="motionplus_stylesheet.css" media="screen">
+    <script>
+      function fnc_topnav() {
+        var x = document.getElementById("id_topnav");
+        if (x.className === "topnav") {
+          x.className += " responsive";
+        } else {
+          x.className = "topnav";
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="topnav" id="id_topnav">
+      <img class="logoimg" src="motionplus.gif">
+
+      <a class="topnav-d" href="https://motion-project.github.io/motion_support.html">Support</a>
+      <a class="topnav-d" href="https://motion-project.github.io/motion_news.html" >News</a>
+      <a class="topnav-d" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+      <a class="topnav-d" href="https://motion-project.github.io/motion_download.html">Download</a>
+      <a class="topnav-d" href="https://motion-project.github.io/index.html">Home</a>
+
+      <a class="topnav-m" href="https://motion-project.github.io/index.html">Home</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_download.html">Download</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_news.html" >News</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_support.html">Support</a>
+
+      <a href="javascript:void(0);" class="icon" onclick="fnc_topnav()">&#9776;</a>
+    </div>
+    <section class="page-header">
+      <h1>
+        Examples
+      </h1>
+    </section>
+    <section class="main-content">
+
+      <h3><a name="Examples"></a> Examples</h3>
+      <ul>
+        The following provides some sample configuration options and examples for MotionPlus.  
+        <li> <a href="#persistent_device"> Persistent v4l2 device name </a></li>
+        <li> <a href="#extpipe_commands"> Sample extpipe commands </a></li>
+        <li> <a href="#loopback_setup">Loopback device setup</a></li>
+        <li> <a href="#ffmpeg_input_device">FFmpeg as input device</a></li>
+        <li> <a href="#webcontrol_pages">Webcontrol pages</a></li>
+        <li> <a href="#database_setup">Database setup</a></li>
+        <li> <a href="#haar_setup">Haar setup</a></li>
+        <li> <a href="#hog_setup">HOG setup</a></li>
+        <li> <a href="#dnn_setup">DNN setup</a></li>
+        
+        <p></p>
+        <p></p>
+      </ul>
+      <p></p>
+      <p></p>
+
+      <h3><a name="persistent_device"></a> Persistent v4l2 device name </h3>
+      <ul>
+        Since the exact device number is set by the kernel upon boot, when there is more than one video device
+        it is possible that the particular cameras that were assigned to /dev/video0 and /dev/video1 may switch. In
+        order to set up Motion so that a particular camera is always assigned the same way, users can set up
+        a symbolic link using udev rules.  To do this a unique attribute must be identified for each camera. The
+        camera attributes can be viewed by using the command
+        <code>udevadm info -a -p $(udevadm info -q path -n /dev/video0) </code> while the camera is attached.  Usually
+        a serial number can be used.  ("Usually" because some cameras have been observed to have the same serial
+        number for different cameras)
+        <p></p>
+        Once a unique attribute has been identified for each camera, edit or create the file
+        <code>/etc/udev/rules.d/99-local.rules</code>.
+        <p></p>
+        Assuming that the unique attribute for the camera was name and was
+        <code>ATTR{name}=="Philips SPC 900NC webcam"</code> you would add the following line to the
+        99-local.rules file:
+        <code> KERNEL=="video[0-9]*", ATTR{name}=="Philips\ SPC\ 900NC*", SYMLINK+="video-webcam0"</code>
+        <p></p>
+        Once the change has been made and saved, reboot the computer and there should now be a "sticky" device called
+        /dev/video-webcam0
+        <p></p>
+      </ul>
+
+      <h3><a name="extpipe_commands"></a>Sample extpipe commands</h3>
+      <ul>
+        The following are some sample extpipe commands
+        <p></p>
+        <code>
+        movie_extpipe mencoder -demuxer rawvideo -rawvideo w=%w:h=%h:i420 -ovc x264 -x264encopts bframes=4:frameref=1:subq=1:scenecut=-1:nob_adapt:threads=1:keyint=1000:8x8dct:vbv_bufsize=4000:crf=24:partitions=i8x8,i4x4:vbv_maxrate=800:no-chroma-me -vf denoise3d=16:12:48:4,pp=lb -of   avi -o %f.avi - -fps %fps
+        </code>
+        <p></p>
+        <code>
+        movie_extpipe x264 - --input-res %wx%h --fps %fps --bitrate 2000 --preset ultrafast --quiet -o %f.mp4
+        </code>
+        <p></p>
+        <code>
+        movie_extpipe mencoder -demuxer rawvideo -rawvideo w=%w:h=%h:fps=%fps -ovc x264 -x264encopts preset=ultrafast -of lavf -o %f.mp4 - -fps %fps
+        </code>
+        <p></p>
+        <code>
+        movie_extpipe ffmpeg -y -f rawvideo -pix_fmt yuv420p -video_size %wx%h -framerate %fps -i pipe:0 -vcodec libx264 -preset ultrafast -f mp4 %f.mp4
+        </code>
+        <p></p>
+      </ul>
+
+      <h3><a name="loopback_setup"></a>Loopback device setup</h3>
+      <ul>
+        The video loopback device can be added installed via apt in many distributions.  The package tested
+        with Motion is v4l2loopback-dkms.  Once the package is installed, you just need to run
+        <code>sudo modprobe v4l2loopback</code>.  This will add a new video device that you
+        can use for the loopback.  It is believed that there are additional options associated with the
+        v4l2loopback that allows for adding more than one device.  See the documentation of the v4l2loopback
+        project for additional details.
+        <p></p>
+        To activate the vloopback device in Motion set the 'video_pipe' option in the motion.conf file to the
+        device name associated with the one created by v4l2loopback.
+        <br />You can also view the special motion pictures where you see the changed pixels by setting the option
+        'video_pipe_motion' in motion.conf. When setting the video_pipe and/or video_pipe_motion options
+        specify the input device as e.g. /dev/video1.
+        <p></p>
+        De-activating should be done with this command
+        <p></p>
+        <code>sudo modprobe -r v4l2loopback</code>
+        <p></p>
+      </ul>
+
+      <h3><a name="ffmpeg_input_device"></a>Use ffmpeg as input device</h3>
+      <ul>
+      Sometimes the particular device is not function for MotionPlus but does work with FFmpeg.  In
+      this situation the device can be setup to be used in MotionPlus using FFMpeg as an intermediate
+      application.  The process would be to set up a loopback device and then have FFmpeg feed the 
+      video into that device and then Motion can read from it.  The following are some examples.  First set up
+      the loopback device and set it to /dev/video0.  Then start ffmpeg using options such as the following.    
+      <code> ffmpeg -re -i mymovie.mp4 -f v4l2 /dev/video0 </code>  Then in a separate terminal, start MotionPlus
+      with it set to use the <code>/dev/video0</code> device as input.  This method can can also be used to
+      reformat the content to a different format.  The following outputs the original movie into a gray pixel format.
+      <code> ffmpeg -re -i mymovie.mp4 -f v4l2 -pix_fmt gray /dev/video0 </code>
+      </ul>
+
+      <h3><a name="webcontrol_pages"></a>Webcontrol pages</h3>
+      <ul>
+        <li><code>{IP}:{port0}/</code> Home html page with streams for all cameras</li>
+
+        The following JSON pages are available via the webcontrol.
+        <ul>
+          <li><code>{IP}:{port0}/0/config.json</code> JSON object with the configuration information for all cameras</li>
+          <li><code>{IP}:{port0}/0/status.json</code> JSON object with information about status of all cameras</li>
+          <li><code>{IP}:{port0}/0/movies.json</code> JSON object with information about all movies</li>
+        </ul>
+        The following mjpg pages are available via the webcontrol. (Update automatically)
+        <ul>
+          <li><code>{IP}:{port0}/{camid}/mjpg</code> Primary stream for the camera updated as a mjpg</li>
+          <li><code>{IP}:{port0}/{camid}/mjpg/substream</code> Substream for the camera updated as a mjpg</li>
+          <li><code>{IP}:{port0}/{camid}/mjpg/motion</code> Stream of motion images for the camera as a mjpg</li>
+          <li><code>{IP}:{port0}/{camid}/mjpg/source</code> Source image stream of the camera as a mjpg</li>
+        </ul>
+        The following static pages are available via the webcontrol. (Update manually)
+        <ul>
+          <li><code>{IP}:{port0}/{camid}/static</code> Primary image for the camera</li>
+          <li><code>{IP}:{port0}/{camid}/static/substream</code> Substream image for the camera</li>
+          <li><code>{IP}:{port0}/{camid}/static/motion</code> Motion image for the camera</li>
+          <li><code>{IP}:{port0}/{camid}/static/source</code> Source image of the camera</li>
+        </ul>
+      </ul>
+ 
+      <h3><a name="haar_setup"></a>HAAR setup</h3>
+      <ul>
+        <li>Set the following Motionplus items within the secondardy_params</li>
+        <ul>
+          <li><code>frame_interval</code>Default: 5 | The number of images between each secondary detection</li>
+          <li><code>image_type</code>Default: full | Type of image to process through secondary detection</li>
+          <li><code>model_file</code>Default: None | Full path and file name for the haar model</li>
+          <li><code>rotate</code>Default: 0 | Degrees of rotation of the image when processing through secondary detection </li>
+          <li><code>threshold</code>Default: 1.10 | weights of detected values </li>
+        </ul>
+        <li>Set the following parameters to the OpenCV function <code>CascadeClassifier::detectMultScale</code> within the secondardy_params</li>
+        </u>        
+          <li><code>scalefactor</code>Default: 1.10 | Scale factor to apply to the image</li>
+          <li><code>flags</code>Default: 0 | </li>
+          <li><code>maxsize</code>Default: 1024 | </li>
+          <li><code>minsize</code>Default: 8 |  </li>
+          <li><code>minneighbors</code>Default: 8 | </li>
+        </ul>
+
+      </ul>
+
+      <h3><a name="hog_device"></a>HOG setup</h3>
+      <ul>
+        <li>Set the following items within the secondardy_params</li>
+        <ul>
+          <li><code>frame_interval</code>Default: 5 | The number of images between each secondary detection</li>
+          <li><code>image_type</code>Default: full | Type of image to process through secondary detection</li>
+          <li><code>model_file</code>Default: None | Full path and file name for the haar model</li>
+          <li><code>rotate</code>Default: 0 | Degrees of rotation of the image when processing through secondary detection </li>
+          <li><code>threshold</code>Default: 1.10 | Weights of detected values</li>
+        </ul>
+        <li>Set the following parameters to the OpenCV function <code>HOGDescriptor::detectMultScale</code> within the secondardy_params</li>
+        <ul>
+          <li><code>threshold_model</code>Default: 2.00 | </li>
+          <li><code>scalefactor</code>Default: 1.05 | </li>
+          <li><code>padding</code>Default: 8 | </li>
+          <li><code>winstride</code>Default: 8 | </li>
+        </ul>
+
+      </ul>
+ 
+      <h3><a name="dnn_setup"></a>DNN setup</h3>
+      <ul>
+        <li>Set the following items within the secondardy_params</li>
+        <ul>
+          <li><code>model_file</code>Default: None | Full path and file name for the haar model</li>
+          <li><code>frame_interval</code>Default: 5 | The number of images between each secondary detection</li>
+          <li><code>image_type</code>Default: full | Type of image to process through secondary detection</li>
+          <li><code>rotate</code>Default: 0 | Degrees of rotation of the image when processing through secondary detection </li>
+          <li><code>threshold</code>Default: 0.75 | Confidence threshold</li>
+          <li><code>scalefactor</code>Default: 1.05 | </li>
+
+          <li><code>backend</code>Default: 0(DNN_BACKEND_DEFAULT) | </li>
+          <li><code>target</code>Default: 0(DNN_TARGET_CPU) | </li>
+          <li><code>width</code>Default: none | Width for the model (not the source image)</li>
+          <li><code>height</code>Default: none | Height for the model (not the source image)</li>
+          <li><code>scale</code>Default: none | Scale used in the model</li>
+          <li><code>config</code>Default: none | </li>
+          <li><code>classes_file</code>Default: none | Full path and name for a file with the names of the classes </li>
+          <li><code>framework</code>Default: none | </li>        
+        </ul>
+
+      </ul>
+
+ 
+    </section>
+  </body>
+</html>
+
