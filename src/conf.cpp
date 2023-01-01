@@ -717,7 +717,7 @@ static void conf_edit_watchdog_kill(ctx_cam *cam, std::string &parm, enum PARM_A
 static void conf_edit_v4l2_device(ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        cam->conf->v4l2_device = "/dev/video0";
+        cam->conf->v4l2_device = "";
     } else if (pact == PARM_ACT_SET) {
         cam->conf->v4l2_device = parm;
     } else if (pact == PARM_ACT_GET) {
