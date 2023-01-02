@@ -1704,9 +1704,7 @@ static int netcam_open_context(ctx_netcam *netcam)
                 , netcam->cameratype, netcam->camera_name, errstr);
         }
         av_dict_free(&netcam->opts);
-        if (netcam->interrupted) {
-            netcam_close_context(netcam);
-        }
+        netcam_close_context(netcam);
         return -1;
     }
     av_dict_free(&netcam->opts);
@@ -2161,7 +2159,6 @@ void netcam_cleanup(ctx_cam *cam)
     }
     cam->netcam = NULL;
     cam->netcam_high = NULL;
-    cam->running_cam = false;
     cam->camera_status = STATUS_CLOSED;
 
 }

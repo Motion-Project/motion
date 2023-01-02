@@ -182,7 +182,9 @@ enum CAPTURE_RESULT {
 };
 
 enum CAM_STATUS {
-    STATUS_CLOSED,   /* Camera is closed and not Initialized */
+    STATUS_CLOSED,   /* Camera is closed */
+    STATUS_INIT,     /* First time initialize */
+    STATUS_RESET,    /* Clean up and re-initialize */
     STATUS_OPENED    /* Successfully started the camera */
 };
 
@@ -342,7 +344,7 @@ struct ctx_cam {
     volatile bool           event_user;  /* Boolean for whether to user triggered an event */
     volatile bool           finish_cam;      /* End the thread */
     volatile bool           restart_cam;     /* Restart the thread when it ends */
-    bool                    running_cam;
+    bool                    running_cam;     /* thread is running*/
     volatile int            watchdog;
 
     int                     event_nr;

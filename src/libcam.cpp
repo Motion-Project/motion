@@ -379,7 +379,6 @@ void libcam_cleanup(ctx_cam *cam)
         cam->libcam = nullptr;
     #endif
     cam->camera_status = STATUS_CLOSED;
-    cam->running_cam = false;
 }
 
 /** initialize and start libcam */

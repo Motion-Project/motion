@@ -1315,7 +1315,6 @@ void v4l2_cleanup(ctx_cam *cam)
         myfree(&cam->v4l2cam);
     #endif // HAVE_V4L2
 
-    cam->running_cam = false;
     cam->camera_status = STATUS_CLOSED;
 
 }
