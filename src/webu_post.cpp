@@ -405,6 +405,7 @@ void webu_post_action_user(ctx_webui *webui)
     int indx, indx2;
     ctx_params *wact;
     ctx_cam *cam;
+    std::string tmp;
 
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
@@ -425,10 +426,18 @@ void webu_post_action_user(ctx_webui *webui)
             cam->action_user[0] = '\0';
             for (indx2 = 0; indx2 < webui->post_sz; indx2++) {
                 if (mystreq(webui->post_info[indx2].key_nm, "user")) {
-                    snprintf(cam->action_user, PATH_MAX
-                        , "%s", webui->post_info[indx2].key_val);
+                    tmp = std::string(webui->post_info[indx2].key_val);
                 }
             }
+            for (indx2 = 0; indx2<(int)tmp.length(); indx2++) {
+                if (isalnum(tmp.at(indx2)) == false) {
+                    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                        , _("Invalid character included in action user \"%c\"")
+                        , tmp.at(indx2));
+                    return;
+                }
+            }
+            snprintf(cam->action_user, 20, "%s", tmp.c_str());
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Executing user action on cam %d")
                 , cam->camera_id);
@@ -440,10 +449,19 @@ void webu_post_action_user(ctx_webui *webui)
         cam->action_user[0] = '\0';
         for (indx2 = 0; indx2 < webui->post_sz; indx2++) {
             if (mystreq(webui->post_info[indx2].key_nm, "user")) {
-                snprintf(cam->action_user, PATH_MAX
-                    , "%s", webui->post_info[indx2].key_val);
+                tmp = std::string(webui->post_info[indx2].key_val);
             }
         }
+        for (indx2 = 0; indx2<(int)tmp.length(); indx2++) {
+            if (isalnum(tmp.at(indx2)) == false) {
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                    , _("Invalid character included in action user \"%c\"")
+                    , tmp.at(indx2));
+                return;
+            }
+        }
+        snprintf(cam->action_user, 20, "%s", tmp.c_str());
+
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Executing user action on cam %d")
             , cam->camera_id);
