@@ -566,9 +566,6 @@ static void mlp_init_values(ctx_cam *cam)
     cam->camera_status = STATUS_CLOSED;
     cam->startup_frames = (cam->conf->framerate * 2) + cam->conf->pre_capture + cam->conf->minimum_motion_frames;
 
-    cam->minimum_frame_time_downcounter = cam->conf->minimum_frame_time;
-    cam->get_image = 1;
-
     cam->movie_passthrough = cam->conf->movie_passthrough;
     if ((cam->camera_type != CAMERA_TYPE_NETCAM) &&
         (cam->movie_passthrough)) {
@@ -766,15 +763,6 @@ static void mlp_prepare(ctx_cam *cam)
     if (cam->frame_last_ts.tv_sec != cam->frame_curr_ts.tv_sec) {
         cam->lastrate = cam->shots + 1;
         cam->shots = -1;
-
-        if (cam->conf->minimum_frame_time) {
-            cam->minimum_frame_time_downcounter--;
-            if (cam->minimum_frame_time_downcounter == 0) {
-                cam->get_image = 1;
-            }
-        } else {
-            cam->get_image = 1;
-        }
     }
 
     cam->shots++;
@@ -787,11 +775,6 @@ static void mlp_prepare(ctx_cam *cam)
 /* reset the images */
 static void mlp_resetimages(ctx_cam *cam)
 {
-    if (cam->conf->minimum_frame_time) {
-        cam->minimum_frame_time_downcounter = cam->conf->minimum_frame_time;
-        cam->get_image = 0;
-    }
-
     /* ring_buffer_in is pointing to current pos, update before put in a new image */
     if (++cam->imgs.ring_in >= cam->imgs.ring_size) {
         cam->imgs.ring_in = 0;

@@ -68,7 +68,6 @@ ctx_parm config_parms[] = {
     {"width",                     PARM_TYP_INT,    PARM_CAT_03, WEBUI_LEVEL_LIMITED },
     {"height",                    PARM_TYP_INT,    PARM_CAT_03, WEBUI_LEVEL_LIMITED },
     {"framerate",                 PARM_TYP_INT,    PARM_CAT_03, WEBUI_LEVEL_LIMITED },
-    {"minimum_frame_time",        PARM_TYP_INT,    PARM_CAT_03, WEBUI_LEVEL_LIMITED },
     {"rotate",                    PARM_TYP_LIST,   PARM_CAT_03, WEBUI_LEVEL_LIMITED },
     {"flip_axis",                 PARM_TYP_LIST,   PARM_CAT_03, WEBUI_LEVEL_LIMITED },
 
@@ -900,25 +899,6 @@ static void conf_edit_framerate(ctx_cam *cam, std::string &parm, enum PARM_ACT p
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","framerate",_("framerate"));
-}
-
-static void conf_edit_minimum_frame_time(ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        cam->conf->minimum_frame_time = 0;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 2147483647)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid minimum_frame_time %d"),parm_in);
-        } else {
-            cam->conf->minimum_frame_time = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(cam->conf->minimum_frame_time);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","minimum_frame_time",_("minimum_frame_time"));
 }
 
 static void conf_edit_rotate(ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
@@ -2887,7 +2867,6 @@ static void conf_edit_cat03(ctx_cam *cam, std::string parm_nm
     if (parm_nm == "width") {                          conf_edit_width(cam, parm_val, pact);
     } else if (parm_nm == "height") {                  conf_edit_height(cam, parm_val, pact);
     } else if (parm_nm == "framerate") {               conf_edit_framerate(cam, parm_val, pact);
-    } else if (parm_nm == "minimum_frame_time") {      conf_edit_minimum_frame_time(cam, parm_val, pact);
     } else if (parm_nm == "rotate") {                  conf_edit_rotate(cam, parm_val, pact);
     } else if (parm_nm == "flip_axis") {               conf_edit_flip_axis(cam, parm_val, pact);
     }

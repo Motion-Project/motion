@@ -384,8 +384,6 @@ struct ctx_cam {
 
     int area_minx[9], area_miny[9], area_maxx[9], area_maxy[9];
     int                     areadetect_eventnbr;
-    int                     minimum_frame_time_downcounter;
-    unsigned int            get_image;    /* Flag used to signal that we capture new image when we run the loop */
 
     int                     smartmask_ratio;
     int                     smartmask_count;

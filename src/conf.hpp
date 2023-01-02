@@ -48,7 +48,6 @@
         int             width;
         int             height;
         int             framerate;
-        int             minimum_frame_time;
         int             rotate;
         std::string     flip_axis;
         std::string     locate_motion_mode;
