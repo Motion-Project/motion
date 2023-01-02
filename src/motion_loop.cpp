@@ -182,6 +182,9 @@ static void mlp_info_reset(ctx_cam *cam)
 /* Process the motion detected items*/
 static void mlp_detected_trigger(ctx_cam *cam, ctx_image_data *img)
 {
+    time_t raw_time;
+    struct tm evt_tm;
+
     if (img->flags & IMAGE_TRIGGER) {
         if (cam->event_nr != cam->prev_event) {
             mlp_info_reset(cam);
@@ -190,6 +193,11 @@ static void mlp_detected_trigger(ctx_cam *cam, ctx_image_data *img)
             if (cam->algsec_inuse) {
                 cam->algsec->isdetected = false;
             }
+
+            time(&raw_time);
+            localtime_r(&raw_time, &evt_tm);
+            sprintf(cam->eventid, "%05d", cam->camera_id);
+            strftime(cam->eventid+5, 15, "%Y%m%d%H%M%S", &evt_tm);
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
                        cam->event_nr);

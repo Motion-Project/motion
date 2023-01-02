@@ -349,7 +349,7 @@ struct ctx_cam {
 
     int                     event_nr;
     int                     prev_event;
-    unsigned long long      database_event_id;
+    char                    eventid[20];        /* Cam ID + Date/Time 99999yyyymmddhhmmss */
     char                    text_event_string[PATH_MAX];        /* The text for conv. spec. %C - */
     int                     text_scale;
 

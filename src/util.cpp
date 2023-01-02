@@ -274,8 +274,8 @@ static void mystrftime_long (const ctx_cam *cam,
         sprintf(out, "%*d", width, cam->movie_fps);
         return;
     }
-    if (SPECIFIERWORD("dbeventid")) {
-        sprintf(out, "%*llu", width, cam->database_event_id);
+    if (SPECIFIERWORD("eventid")) {
+        sprintf(out, "%*s", width, cam->eventid);
         return;
     }
     if (SPECIFIERWORD("ver")) {
