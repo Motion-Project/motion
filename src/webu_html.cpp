@@ -403,7 +403,7 @@ static void webu_html_script_send_config(ctx_webui *webui)
 
         "      request.onreadystatechange = function() {\n"
         "        if (this.readyState == 4 && this.status == 200) {\n"
-        "          xmlhttp.open('GET', '" + webui->hostfull + "/0/config.json');\n"
+        "          xmlhttp.open('GET', pHostFull+'/0/config.json');\n"
         "          xmlhttp.send();\n\n"
         "        }\n"
         "      };\n"
@@ -421,7 +421,7 @@ static void webu_html_script_send_config(ctx_webui *webui)
         "          }\n"
         "        }\n"
         "      }\n"
-        "      request.open('POST', '" + webui->hostfull + "');\n"
+        "      request.open('POST', pHostFull);\n"
         "      request.send(formData);\n\n"
         "    }\n\n";
 }
@@ -445,10 +445,10 @@ static void webu_html_script_send_action(ctx_webui *webui)
         "       ans = prompt('Enter user parameter');\n"
         "      }\n"
         "      formData.append('command', actval);\n"
-        "      formData.append('camid', camid);\n\n"
+        "      formData.append('camid', camid);\n"
         "      formData.append('user', ans);\n\n"
         "      var request = new XMLHttpRequest();\n"
-        "      request.open('POST', '" + webui->hostfull + "');\n"
+        "      request.open('POST', pHostFull);\n"
         "      request.send(formData);\n\n"
         "      return;\n"
         "    }\n\n";
@@ -484,7 +484,7 @@ static void webu_html_script_send_reload(ctx_webui *webui)
 
         "      request.onreadystatechange = function() {\n"
         "        if (this.readyState == 4 && this.status == 200) {\n"
-        "          xmlhttp.open('GET', '" + webui->hostfull + "/0/config.json');\n"
+        "          xmlhttp.open('GET', pHostFull+'/0/config.json');\n"
         "          xmlhttp.send();\n\n"
         "        }\n"
         "      };\n"
@@ -492,7 +492,7 @@ static void webu_html_script_send_reload(ctx_webui *webui)
         "      formData.append('command', actval);\n"
         "      formData.append('camid', camid);\n\n"
 
-        "      request.open('POST', '" + webui->hostfull + "');\n"
+        "      request.open('POST', pHostFull);\n"
         "      request.send(formData);\n\n"
 
         "    }\n\n";
@@ -844,7 +844,11 @@ static void webu_html_script_initform(ctx_webui *webui)
 {
     webui->resp_page +=
         "    function initform() {\n"
-        "      var xmlhttp = new XMLHttpRequest();\n"
+        "      var xmlhttp = new XMLHttpRequest();\n\n"
+
+        "      pHostFull = '//' + window.location.hostname;\n"
+        "      pHostFull = pHostFull + ':' + window.location.port;\n\n"
+
         "      xmlhttp.onreadystatechange = function() {\n"
         "        if (this.readyState == 4 && this.status == 200) {\n"
         "          pData = JSON.parse(this.responseText);\n"
@@ -862,7 +866,7 @@ static void webu_html_script_initform(ctx_webui *webui)
 
         "        }\n"
         "      };\n"
-        "      xmlhttp.open('GET', '" + webui->hostfull + "/0/config.json');\n"
+        "      xmlhttp.open('GET', pHostFull+'/0/config.json');\n"
         "      xmlhttp.send();\n"
         "    }\n\n";
 }
@@ -1141,7 +1145,7 @@ static void webu_html_script_movies_page(ctx_webui *webui)
         "      var fname,fsize,fdate;\n\n"
 
         "      camid = pData['cameras'][gIndxCam].id;\n"
-        "      uri = '"+ webui->hostfull + "/'+camid+'/movies/';\n\n"
+        "      uri = pHostFull+'/'+camid+'/movies/';\n\n"
 
         "      movcnt = pMovies['movies'][gIndxCam].count;\n"
         "      html_tab +=\"<table style='color:white;' >\";\n"
@@ -1212,7 +1216,7 @@ static void webu_html_script_movies_click(ctx_webui *webui)
         "    function movies_click(index_cam) {\n"
         "      var camid, indx, camcnt, uri;\n"
         "      camid = pData['cameras'][index_cam].id;\n"
-        "      uri = '" + webui->hostfull + "/'+camid+'/movies.json';\n"
+        "      uri = pHostFull+'/'+camid+'/movies.json';\n"
         "      gIndxCam = index_cam;\n"
         "      gIndxScan = -1; \n"
         "      config_hideall();\n"
@@ -1350,7 +1354,7 @@ static void webu_html_script_cams_scan_fnc(ctx_webui *webui)
 static void webu_html_script(ctx_webui *webui)
 {
     webui->resp_page += "  <script>\n"
-        "    var pData, pMovies;\n"
+        "    var pData, pMovies, pHostFull;\n"
         "    var gIndxScan, gIndxCam, gGetImgs;\n"
         "    var pic_url = Array(4);\n"
         "    var cams_scan_timer, cams_all_timer, cams_one_timer;\n\n";
