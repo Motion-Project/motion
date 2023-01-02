@@ -43,7 +43,7 @@
 /* Resize the image ring */
 static void mlp_ring_resize(ctx_cam *cam)
 {
-    int smallest, i, new_size;
+    int i, new_size;
     ctx_image_data *tmp;
 
     new_size = cam->conf->pre_capture + cam->conf->minimum_motion_frames;
@@ -51,43 +51,26 @@ static void mlp_ring_resize(ctx_cam *cam)
         new_size = 1;
     }
 
-    if (cam->event_nr != cam->prev_event) {
-        if (new_size < cam->imgs.ring_size) {
-            smallest = new_size;
-        } else {
-            smallest = cam->imgs.ring_size;
-        }
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        ,_("Resizing buffer to %d items"), new_size);
 
-        if (cam->imgs.ring_in == smallest - 1 || smallest == 0) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                ,_("Resizing pre_capture buffer to %d items"), new_size);
+    tmp =(ctx_image_data*) mymalloc(new_size * sizeof(ctx_image_data));
 
-            tmp =(ctx_image_data*) mymalloc(new_size * sizeof(ctx_image_data));
-
-            if (smallest > 0) {
-                memcpy(tmp, cam->imgs.image_ring, sizeof(ctx_image_data) * smallest);
-            }
-
-            for(i = smallest; i < new_size; i++) {
-                tmp[i].image_norm =(unsigned char*) mymalloc(cam->imgs.size_norm);
-                memset(tmp[i].image_norm, 0x80, cam->imgs.size_norm);
-                if (cam->imgs.size_high > 0) {
-                    tmp[i].image_high =(unsigned char*) mymalloc(cam->imgs.size_high);
-                    memset(tmp[i].image_high, 0x80, cam->imgs.size_high);
-                }
-            }
-
-            myfree(&cam->imgs.image_ring);
-
-            cam->imgs.image_ring = tmp;
-            cam->current_image = NULL;
-
-            cam->imgs.ring_size = new_size;
-
-            cam->imgs.ring_in = 0;
-            cam->imgs.ring_out = 0;
+    for(i = 0; i < new_size; i++) {
+        tmp[i].image_norm =(unsigned char*) mymalloc(cam->imgs.size_norm);
+        memset(tmp[i].image_norm, 0x80, cam->imgs.size_norm);
+        if (cam->imgs.size_high > 0) {
+            tmp[i].image_high =(unsigned char*) mymalloc(cam->imgs.size_high);
+            memset(tmp[i].image_high, 0x80, cam->imgs.size_high);
         }
     }
+
+    cam->imgs.image_ring = tmp;
+    cam->current_image = NULL;
+    cam->imgs.ring_size = new_size;
+    cam->imgs.ring_in = 0;
+    cam->imgs.ring_out = 0;
+
 }
 
 /* Clean image ring */
