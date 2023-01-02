@@ -14,7 +14,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
  *
- *    Copyright 2020-2022 MotionMrDave@gmail.com
+ *    Copyright 2020-2023 MotionMrDave@gmail.com
 */
 
 #include "motionplus.hpp"

@@ -13,7 +13,7 @@ msgstr ""
 "X-Generator: Poedit 2.0.6\n"
 
 # MotionPlus Application
-# Copyright (2020 - 2022)
+# Copyright (2020 - 2023)
 # This file is distributed under the same license as the MotionPlus package.
 #
 #: src/alg.cpp:1008
