@@ -399,6 +399,59 @@ void webu_post_action_stop(ctx_webui *webui)
 
 }
 
+/* Process the action_user */
+void webu_post_action_user(ctx_webui *webui)
+{
+    int indx, indx2;
+    ctx_params *wact;
+    ctx_cam *cam;
+
+    wact = webui->motapp->webcontrol_actions;
+    for (indx = 0; indx < wact->params_count; indx++) {
+        if (mystreq(wact->params_array[indx].param_name,"action_user")) {
+            if (mystreq(wact->params_array[indx].param_value,"off")) {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "User action disabled");
+                return;
+            } else {
+                break;
+            }
+        }
+    }
+
+    if (webui->threadnbr == 0)  {
+        indx = 1;
+        while (webui->motapp->cam_list[indx]) {
+            cam = webui->motapp->cam_list[indx];
+            cam->action_user[0] = '\0';
+            for (indx2 = 0; indx2 < webui->post_sz; indx2++) {
+                if (mystreq(webui->post_info[indx2].key_nm, "user")) {
+                    snprintf(cam->action_user, PATH_MAX
+                        , "%s", webui->post_info[indx2].key_val);
+                }
+            }
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                , _("Executing user action on cam %d")
+                , cam->camera_id);
+            util_exec_command(cam, cam->conf->on_action_user.c_str(), NULL, 0);
+            indx++;
+        }
+    } else {
+        cam = webui->motapp->cam_list[webui->threadnbr];
+        cam->action_user[0] = '\0';
+        for (indx2 = 0; indx2 < webui->post_sz; indx2++) {
+            if (mystreq(webui->post_info[indx2].key_nm, "user")) {
+                snprintf(cam->action_user, PATH_MAX
+                    , "%s", webui->post_info[indx2].key_val);
+            }
+        }
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            , _("Executing user action on cam %d")
+            , cam->camera_id);
+        util_exec_command(cam, cam->conf->on_action_user.c_str(), NULL, 0);
+    }
+
+}
+
 /* Process the write config action */
 void webu_post_write_config(ctx_webui *webui)
 {
@@ -592,6 +645,9 @@ void webu_post_main(ctx_webui *webui)
 
     } else if (webui->post_cmd == "config") {
         webu_post_config(webui);
+
+    } else if (webui->post_cmd == "action_user") {
+        webu_post_action_user(webui);
 
     } else if (
         (webui->post_cmd == "pan_left") ||

@@ -298,6 +298,11 @@ static void mystrftime_long (const ctx_cam *cam,
         sprintf(out, "%*d", width,  cam->current_image->diffs_ratio);
         return;
     }
+    if (SPECIFIERWORD("action_user")) {
+        sprintf(out, "%*s", width,  cam->action_user);
+        return;
+    }
+
     if (SPECIFIERWORD("secdetect")) {
         if (cam->algsec_inuse) {
             if (cam->algsec->isdetected) {

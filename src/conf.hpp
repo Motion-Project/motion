@@ -96,6 +96,7 @@
         std::string     on_camera_lost;
         std::string     on_camera_found;
         std::string     on_secondary_detect;
+        std::string     on_action_user;
 
         /* Picture output configuration parameters */
         std::string     picture_output;

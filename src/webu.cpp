@@ -1346,6 +1346,7 @@ static void webu_init_actions(ctx_motapp *motapp)
     util_parms_add_default(motapp->webcontrol_actions,"config",parm_vl);
     util_parms_add_default(motapp->webcontrol_actions,"ptz",parm_vl);
     util_parms_add_default(motapp->webcontrol_actions,"movies","on");
+    util_parms_add_default(motapp->webcontrol_actions,"action_user",parm_vl);
 
 }
 

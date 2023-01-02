@@ -117,6 +117,7 @@ ctx_parm config_parms[] = {
     {"on_camera_lost",            PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
     {"on_camera_found",           PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
     {"on_secondary_detect",       PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
+    {"on_action_user",            PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
 
     {"picture_output",            PARM_TYP_LIST,   PARM_CAT_09, WEBUI_LEVEL_LIMITED },
     {"picture_output_motion",     PARM_TYP_LIST,   PARM_CAT_09, WEBUI_LEVEL_LIMITED },
@@ -1629,6 +1630,19 @@ static void conf_edit_on_secondary_detect(ctx_cam *cam, std::string &parm, enum 
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_secondary_detect",_("on_secondary_detect"));
 }
 
+static void conf_edit_on_action_user(ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        cam->conf->on_action_user = "";
+    } else if (pact == PARM_ACT_SET) {
+        cam->conf->on_action_user = parm;
+    } else if (pact == PARM_ACT_GET) {
+        parm = cam->conf->on_action_user;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_action_user",_("on_action_user"));
+}
+
 static void conf_edit_picture_output(ctx_cam *cam, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
@@ -2946,6 +2960,7 @@ static void conf_edit_cat08(ctx_cam *cam, std::string parm_nm
     } else if (parm_nm == "on_camera_lost") {          conf_edit_on_camera_lost(cam, parm_val, pact);
     } else if (parm_nm == "on_camera_found") {         conf_edit_on_camera_found(cam, parm_val, pact);
     } else if (parm_nm == "on_secondary_detect") {     conf_edit_on_secondary_detect(cam, parm_val, pact);
+    } else if (parm_nm == "on_action_user") {          conf_edit_on_action_user(cam, parm_val, pact);
     }
 
 }

@@ -438,9 +438,15 @@ static void webu_html_script_send_action(ctx_webui *webui)
         "      }\n\n"
 
         "      var formData = new FormData();\n"
-        "      var camid = pData['cameras'][gIndxCam]['id'];\n\n"
+        "      var camid = pData['cameras'][gIndxCam]['id'];\n"
+        "      var ans;\n\n"
+
+        "      if (actval == 'action_user') {\n"
+        "       ans = prompt('Enter user parameter');\n"
+        "      }\n"
         "      formData.append('command', actval);\n"
         "      formData.append('camid', camid);\n\n"
+        "      formData.append('user', ans);\n\n"
         "      var request = new XMLHttpRequest();\n"
         "      request.open('POST', '" + webui->hostfull + "');\n"
         "      request.send(formData);\n\n"
@@ -669,6 +675,13 @@ static void webu_html_script_assign_actions(ctx_webui *webui)
                 "      html_actions += \"<a onclick=\\\"send_action(\";\n"
                 "      html_actions += \"'restart');\\\">\";\n"
                 "      html_actions += \"Start/Restart</a>\\n\";\n\n"
+                ;
+        } else if (mystreq(wact->params_array[indx].param_name,"action_user") &&
+            mystreq(wact->params_array[indx].param_value,"on")) {
+            webui->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'action_user');\\\">\";\n"
+                "      html_actions += \"User Action</a>\\n\";\n\n"
                 ;
         }
     }

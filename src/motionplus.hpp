@@ -376,6 +376,7 @@ struct ctx_cam {
     int                     mpipe;
 
     char                    hostname[PATH_MAX];
+    char                    action_user[PATH_MAX];
 
     int                     movie_fps;
     char                    extpipefilename[PATH_MAX];
