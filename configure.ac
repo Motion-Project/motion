@@ -43,34 +43,44 @@ LIBS="$LIBS -pthread "
 ##############################################################################
 ###  Check JPG - Required.  Needed for image processing
 ##############################################################################
+AS_IF([pkg-config libjpeg ], [
+    TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags libjpeg`
+    TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libjpeg`
+  ],[
+    TEMP_LIBS="$TEMP_LIBS -ljpeg"
+  ]
+)
+HOLD_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $TEMP_CPPFLAGS"
 AC_CHECK_HEADERS(setjmp.h jerror.h jpeglib.h,[JPGS="yes"],[JPGS="no"])
 AC_MSG_CHECKING(jpg libraries)
 AC_MSG_RESULT($JPGS)
-AS_IF([test "${JPGS}" = "yes" ], [
-    AS_IF([pkg-config libjpeg ], [
-        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags libjpeg`
-        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libjpeg`
-      ],[
-        TEMP_LIBS="$TEMP_LIBS -ljpeg"
-      ]
-    )
-  ],[
-    AC_MSG_ERROR([Required package libjpeg-dev not found, please check motionplus_guide.html and install necessary dependencies])
+AS_IF([test "${JPGS}" != "yes" ], [
+    AC_MSG_ERROR([Required jpeg headers not found, please check motionplus_guide.html and install necessary dependencies])
   ]
 )
+CPPFLAGS="$HOLD_CPPFLAGS"
+
 ##############################################################################
 ###  Check libmicrohttpd - Required.  Needed for stream/webcontrol
 ##############################################################################
-AC_CHECK_HEADERS(microhttpd.h,[MHTTP="yes"],[MHTTP="no"])
-AC_MSG_CHECKING(libmicrohttpd libraries)
-AC_MSG_RESULT($MHTTP)
-AS_IF([test "${MHTTP}" = "yes" ], [
+AS_IF([pkg-config libmicrohttpd ], [
     TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags libmicrohttpd`
     TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libmicrohttpd`
   ],[
     AC_MSG_ERROR([Required package libmicrohttpd-dev not found, please check motionplus_guide.html and install necessary dependencies])
   ]
 )
+HOLD_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $TEMP_CPPFLAGS"
+AC_CHECK_HEADERS(microhttpd.h,[MHTTP="yes"],[MHTTP="no"])
+AC_MSG_CHECKING(libmicrohttpd libraries)
+AC_MSG_RESULT($MHTTP)
+AS_IF([test "${MHTTP}" != "yes" ], [
+    AC_MSG_ERROR([Required package libmicrohttpd-dev not found, please check motionplus_guide.html and install necessary dependencies])
+  ]
+)
+CPPFLAGS="$HOLD_CPPFLAGS"
 
 ##############################################################################
 ###  Check setting/getting thread names
@@ -323,14 +333,24 @@ AS_IF([test "${MARIADB}" = "no"], [
     AC_MSG_RESULT($PKG_CONFIG_PATH)
 
     AC_MSG_CHECKING(for MariaDB)
-    AS_IF([pkg-config mariadb], [
-        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags mariadb`
-        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs mariadb`
-        AC_DEFINE([HAVE_MARIADB], [1], [Define to 1 if you have MariaDB/MySQL support])
+    AS_IF([pkg-config libmariadb], [
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags libmariadb`
+        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libmariadb`
+        AC_DEFINE([HAVE_MARIADB], [1], [Define to 1 if you have MariaDB support])
       ],[
         MARIADB="no"
       ]
     )
+    # Check for the old pkg name for MariaDB
+    AS_IF([test "${MARIADB}" = "no"], [
+      AS_IF([pkg-config mariadb], [
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags mariadb`
+        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs mariadb`
+        MARIADB="yes"
+        AC_DEFINE([HAVE_MARIADB], [1], [Define to 1 if you have MariaDB support])
+      ])
+    ])
+
     AC_MSG_RESULT([$MARIADB])
     PKG_CONFIG_PATH=$TEMP_PATH
     export PKG_CONFIG_PATH
