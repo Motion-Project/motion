@@ -102,6 +102,25 @@ void mytrim(std::string &parm)
     myltrim(parm);
 }
 
+/* Remove surrounding quotes */
+void myunquote(std::string &parm)
+{
+    size_t plen;
+
+    mytrim(parm);
+
+    plen = parm.length();
+    while ((plen >= 2) &&
+        (((parm.substr(0,1)== "\"") && (parm.substr(plen,1)== "\"")) ||
+         ((parm.substr(0,1)== "'") && (parm.substr(plen,1)== "'")))) {
+
+        parm = parm.substr(1, plen-2);
+        plen = parm.length();
+    }
+
+}
+
+
 /* Free memory and set the pointer to NULL*/
 void myfree(void *ptr_addr) {
     void **ptr = (void **)ptr_addr;

@@ -80,7 +80,7 @@ static void webu_post_cam_delete(ctx_webui *webui)
         }
     }
 
-    if (webui->threadnbr == 0) {
+    if (webui->threadnbr == -1) {
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "No camera specified for deletion." );
         return;
     } else {
@@ -164,12 +164,6 @@ void webu_post_cmdthrd(ctx_webui *webui)
         }
         indx++;
     }
-    if (webui->threadnbr == -1) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            , "Invalid post request.  Camid: %d not found"
-            , camid);
-        return;
-    }
 
 }
 
@@ -191,8 +185,8 @@ void webu_post_action_eventend(ctx_webui *webui)
         }
     }
 
-    if (webui->threadnbr == 0) {
-        indx = 1;
+    if (webui->threadnbr == -1) {
+        indx = 0;
         while (webui->motapp->cam_list[indx]) {
             webui->motapp->cam_list[indx]->event_stop = true;
             indx++;
@@ -221,8 +215,8 @@ void webu_post_action_eventstart(ctx_webui *webui)
         }
     }
 
-    if (webui->threadnbr == 0) {
-        indx = 1;
+    if (webui->threadnbr == -1) {
+        indx = 0;
         while (webui->motapp->cam_list[indx]) {
             webui->motapp->cam_list[indx]->event_user = true;
             indx++;
@@ -251,8 +245,8 @@ void webu_post_action_snapshot(ctx_webui *webui)
         }
     }
 
-    if (webui->threadnbr == 0) {
-        indx = 1;
+    if (webui->threadnbr == -1) {
+        indx = 0;
         while (webui->motapp->cam_list[indx]) {
             webui->motapp->cam_list[indx]->snapshot = true;
             indx++;
@@ -281,8 +275,8 @@ void webu_post_action_pause(ctx_webui *webui)
         }
     }
 
-    if (webui->threadnbr == 0) {
-        indx = 1;
+    if (webui->threadnbr == -1) {
+        indx = 0;
         while (webui->motapp->cam_list[indx]) {
             webui->motapp->cam_list[indx]->pause = true;
             indx++;
@@ -311,8 +305,8 @@ void webu_post_action_unpause(ctx_webui *webui)
         }
     }
 
-    if (webui->threadnbr == 0) {
-        indx = 1;
+    if (webui->threadnbr == -1) {
+        indx = 0;
         while (webui->motapp->cam_list[indx]) {
             webui->motapp->cam_list[indx]->pause = false;
             indx++;
@@ -340,9 +334,9 @@ void webu_post_action_restart(ctx_webui *webui)
             }
         }
     }
-    if (webui->threadnbr == 0) {
+    if (webui->threadnbr == -1) {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all cameras"));
-        indx = 1;
+        indx = 0;
         while (webui->motapp->cam_list[indx]) {
             webui->motapp->cam_list[indx]->restart_cam = true;
             webui->motapp->cam_list[indx]->finish_cam = true;
@@ -355,7 +349,6 @@ void webu_post_action_restart(ctx_webui *webui)
         webui->motapp->cam_list[webui->threadnbr]->restart_cam = true;
         webui->motapp->cam_list[webui->threadnbr]->finish_cam = true;
     }
-
 }
 
 /* Process the stop action */
@@ -375,8 +368,8 @@ void webu_post_action_stop(ctx_webui *webui)
             }
         }
     }
-    if (webui->threadnbr == 0)  {
-        indx = 1;
+    if (webui->threadnbr == -1) {
+        indx = 0;
         while (webui->motapp->cam_list[indx]) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Stopping cam %d")
@@ -419,8 +412,8 @@ void webu_post_action_user(ctx_webui *webui)
         }
     }
 
-    if (webui->threadnbr == 0)  {
-        indx = 1;
+    if (webui->threadnbr == -1) {
+        indx = 0;
         while (webui->motapp->cam_list[indx]) {
             cam = webui->motapp->cam_list[indx];
             cam->action_user[0] = '\0';
@@ -496,7 +489,6 @@ void webu_post_write_config(ctx_webui *webui)
 static void webu_post_config(ctx_webui *webui)
 {
     int indx, indx2;
-    bool ismotapp;
     std::string tmpname;
     ctx_params *wact;
 
@@ -529,7 +521,7 @@ static void webu_post_config(ctx_webui *webui)
             /* Ignore any requests for parms above webcontrol_parms level. */
             indx2=0;
             while (config_parms[indx2].parm_name != "") {
-                if ((config_parms[indx2].webui_level > webui->motapp->cam_list[0]->conf->webcontrol_parms) ||
+                if ((config_parms[indx2].webui_level > webui->motapp->conf->webcontrol_parms) ||
                     (config_parms[indx2].webui_level == WEBUI_LEVEL_NEVER) ) {
                     indx2++;
                     continue;
@@ -541,27 +533,14 @@ static void webu_post_config(ctx_webui *webui)
             }
 
             if (config_parms[indx2].parm_name != "") {
-
                 if (config_parms[indx2].parm_cat == PARM_CAT_00) {
-                    ismotapp = true;
+                    conf_edit_set(webui->motapp->conf
+                        , config_parms[indx2].parm_name
+                        , webui->post_info[indx].key_val);
                 } else {
-                    ismotapp = false;
-                }
-
-                conf_edit_set(webui->motapp, ismotapp
-                    , webui->threadnbr
-                    , config_parms[indx2].parm_name
-                    , webui->post_info[indx].key_val);
-
-                /* If changing language, do it now */
-                if (config_parms[indx2].parm_name == "native_language") {
-                    if (webui->motapp->native_language) {
-                        mytranslate_text("", 1);
-                        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Native Language : on"));
-                    } else {
-                        mytranslate_text("", 0);
-                        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Native Language : off"));
-                    }
+                    conf_edit_set(webui->motapp->cam_list[webui->threadnbr]->conf
+                        , config_parms[indx2].parm_name
+                        , webui->post_info[indx].key_val);
                 }
             }
         }
@@ -575,6 +554,10 @@ void webu_post_ptz(ctx_webui *webui)
     int indx;
     ctx_dev *cam;
     ctx_params *wact;
+
+    if (webui->threadnbr == -1) {
+        return;
+    }
 
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
@@ -627,7 +610,7 @@ void webu_post_main(ctx_webui *webui)
 
     webu_post_cmdthrd(webui);
 
-    if ((webui->post_cmd == "") || (webui->threadnbr == -1)) {
+    if (webui->post_cmd == "")  {
         return;
     }
 

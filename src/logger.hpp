@@ -60,6 +60,6 @@
     void log_deinit(ctx_motapp *motapp);
     void log_set_level(int new_level);
     void log_set_type(const char *new_logtype);
-    void log_set_motapp(ctx_motapp *motapp);
+    void log_init_app(ctx_motapp *motapp);
 
 #endif /* _INCLUDE_LOGGER_HPP_ */

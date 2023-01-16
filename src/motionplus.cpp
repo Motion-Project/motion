@@ -168,18 +168,18 @@ static void motion_pid_write(ctx_motapp *motapp)
 {
     FILE *pidf = NULL;
 
-    if (motapp->pid_file != "") {
-        pidf = myfopen(motapp->pid_file.c_str(), "w+e");
+    if (motapp->conf->pid_file != "") {
+        pidf = myfopen(motapp->conf->pid_file.c_str(), "w+e");
         if (pidf) {
             (void)fprintf(pidf, "%d\n", getpid());
             myfclose(pidf);
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Created process id file %s. Process ID is %d")
-                ,motapp->pid_file.c_str(), getpid());
+                ,motapp->conf->pid_file.c_str(), getpid());
         } else {
             MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
                 , _("Cannot create process id file (pid file) %s")
-                , motapp->pid_file.c_str());
+                , motapp->conf->pid_file.c_str());
         }
     }
 }
@@ -188,9 +188,9 @@ static void motion_pid_write(ctx_motapp *motapp)
 static void motion_pid_remove(ctx_motapp *motapp)
 {
 
-    if ((motapp->pid_file != "") &&
+    if ((motapp->conf->pid_file != "") &&
         (motapp->restart_all == false)) {
-        if (!unlink(motapp->pid_file.c_str())) {
+        if (!unlink(motapp->conf->pid_file.c_str())) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Removed process id file (pid file)."));
         } else{
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error removing pid file"));
@@ -309,7 +309,7 @@ static void motion_camera_ids(ctx_dev **cam_list)
             ,_("Camara IDs are not unique or have values over 32,000.  Falling back to thread numbers"));
         indx = 0;
         while (cam_list[indx] != NULL){
-            cam_list[indx]->camera_id = indx;
+            cam_list[indx]->camera_id = indx+1;
             indx++;
         }
     }
@@ -369,33 +369,31 @@ static void motion_ntc(void)
 }
 
 /** Initialize upon start up or restart */
-static void motion_startup(ctx_motapp *motapp, int daemonize, int argc, char *argv[])
+static void motion_startup(ctx_motapp *motapp, int daemonize)
 {
 
-    log_set_motapp(motapp);  /* This is needed prior to any function possibly calling motion_log*/
+    log_init_app(motapp);  /* This is needed prior to any function possibly calling motion_log*/
 
-    conf_init_app(motapp, argc, argv);
+    conf_init(motapp);
 
     log_init(motapp);
 
-    conf_init_cams(motapp);
-
     mytranslate_init();
 
-    mytranslate_text("",motapp->native_language);
+    mytranslate_text("",motapp->conf->native_language);
 
     if (daemonize) {
-        if (motapp->daemon && motapp->setup_mode == 0) {
+        if (motapp->conf->daemon && motapp->conf->setup_mode == 0) {
             motion_daemon();
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus running as daemon process"));
         }
     }
 
-    if (motapp->setup_mode) {
+    if (motapp->conf->setup_mode) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("MotionPlus running in setup mode."));
     }
 
-    conf_parms_log(motapp->cam_list);
+    conf_parms_log(motapp);
 
     motion_pid_write(motapp);
 
@@ -433,7 +431,7 @@ static void motion_start_thread(ctx_motapp *motapp, int indx)
 
 }
 
-static void motion_restart(ctx_motapp *motapp, int argc, char **argv)
+static void motion_restart(ctx_motapp *motapp)
 {
 
     MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Restarting MotionPlus."));
@@ -442,7 +440,7 @@ static void motion_restart(ctx_motapp *motapp, int argc, char **argv)
 
     SLEEP(2, 0);
 
-    motion_startup(motapp, false, argc, argv);
+    motion_startup(motapp, false);
     MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("MotionPlus restarted"));
 
     motapp->restart_all = false;
@@ -468,7 +466,7 @@ static void motion_watchdog(ctx_motapp *motapp, int camindx)
         , motapp->cam_list[camindx]->camera_id);
 
     /* Shut down all the cameras */
-    indx = 1;
+    indx = 0;
     while (motapp->cam_list[indx] != NULL) {
         pthread_mutex_unlock(&motapp->mutex_camlst);
         pthread_mutex_unlock(&motapp->mutex_parms);
@@ -506,7 +504,7 @@ static void motion_watchdog(ctx_motapp *motapp, int camindx)
      * we WILL have to leak memory because the freeing/deinit
      * processes could lock this thread which would stop everything.
     */
-    indx = 1;
+    indx = 0;
     while (motapp->cam_list[indx] != NULL) {
         if (motapp->cam_list[indx]->netcam != NULL) {
             if (motapp->cam_list[indx]->netcam->handler_finished == false) {
@@ -547,7 +545,7 @@ static int motion_check_threadcount(ctx_motapp *motapp)
 
     thrdcnt = 0;
 
-    for (indx = (motapp->cam_list[1] != NULL ? 1 : 0); motapp->cam_list[indx]; indx++) {
+    for (indx=0; indx<motapp->cam_cnt; indx++) {
         if (motapp->cam_list[indx]->running_cam || motapp->cam_list[indx]->restart_cam) {
             thrdcnt++;
         }
@@ -567,43 +565,41 @@ static int motion_check_threadcount(ctx_motapp *motapp)
 
 }
 
-static void motion_init(ctx_motapp *motapp)
+static void motion_init(ctx_motapp *motapp, int argc, char *argv[])
 {
+    motapp->argc = argc;
+    motapp->argv = argv;
 
-    motapp->cam_list = NULL;
-    pthread_mutex_init(&motapp->global_lock, NULL);
-    pthread_mutex_init(&motapp->mutex_parms, NULL);
-    pthread_mutex_init(&motapp->mutex_camlst, NULL);
-    pthread_mutex_init(&motapp->mutex_post, NULL);
+    motapp->cam_list = (ctx_dev **)mymalloc(sizeof(ctx_dev *));
+    motapp->cam_list[0] = NULL;
 
     motapp->threads_running = 0;
     motapp->finish_all = false;
     motapp->restart_all = false;
-
-    motapp->argc = 0;
-    motapp->argv = NULL;
-
-    motapp->daemon = false;
-    motapp->conf_filename="";
-    motapp->pid_file="";
-    motapp->log_file="";
-    motapp->log_type_str="";
-    motapp->log_level=0;
-    motapp->log_type=0;
-    motapp->setup_mode = false;
+    motapp->parms_changed = false;
     motapp->pause = false;
-    motapp->native_language = false;
-
     motapp->cam_add = false;
     motapp->cam_delete = 0;
+    motapp->cam_cnt = 0;
+
+    motapp->conf = new ctx_config;
+    motapp->dbse = NULL;
 
     motapp->webcontrol_running = false;
     motapp->webcontrol_finish = false;
     motapp->webcontrol_daemon = NULL;
+    motapp->webcontrol_headers = NULL;
+    motapp->webcontrol_actions = NULL;
+    motapp->webcontrol_clients.clear();
     memset(motapp->webcontrol_digest_rand, 0, sizeof(motapp->webcontrol_digest_rand));
 
     pthread_key_create(&tls_key_threadnr, NULL);
     pthread_setspecific(tls_key_threadnr, (void *)(0));
+
+    pthread_mutex_init(&motapp->global_lock, NULL);
+    pthread_mutex_init(&motapp->mutex_parms, NULL);
+    pthread_mutex_init(&motapp->mutex_camlst, NULL);
+    pthread_mutex_init(&motapp->mutex_post, NULL);
 
 }
 
@@ -621,7 +617,7 @@ static void motion_cam_add(ctx_motapp *motapp)
     pthread_mutex_unlock(&motapp->mutex_camlst);
 
     indx_cam = 0;
-    indx = 0;
+    indx = 1;
     while (motapp->cam_list[indx_cam] != NULL) {
         if (indx < motapp->cam_list[indx_cam]->camera_id) {
             indx = motapp->cam_list[indx_cam]->camera_id;
@@ -700,22 +696,22 @@ int main (int argc, char **argv)
 
     motapp = new ctx_motapp;
 
-    motion_init(motapp);
+    motion_init(motapp, argc, argv);
 
     setup_signals();
 
-    motion_startup(motapp, true, argc, argv);
+    motion_startup(motapp, true);
 
     movie_global_init();
 
     while (true) {
 
         if (motapp->restart_all) {
-            motion_restart(motapp, argc, argv);
+            motion_restart(motapp);
         }
 
-        for (indx = motapp->cam_list[1] != NULL ? 1 : 0; motapp->cam_list[indx]; indx++) {
-            motapp->cam_list[indx]->threadnr = indx ? indx : 1;
+        for (indx=0; indx<motapp->cam_cnt; indx++) {
+            motapp->cam_list[indx]->threadnr = indx;
             motion_start_thread(motapp, indx);
         }
 
@@ -729,7 +725,7 @@ int main (int argc, char **argv)
                 break;
             }
 
-            for (indx = (motapp->cam_list[1] != NULL ? 1 : 0); motapp->cam_list[indx]; indx++) {
+            for (indx=0; indx<motapp->cam_cnt; indx++) {
                 /* Check if threads wants to be restarted */
                 if ((motapp->cam_list[indx]->running_cam == false) &&
                     (motapp->cam_list[indx]->restart_cam == true)) {

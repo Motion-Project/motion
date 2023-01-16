@@ -136,7 +136,7 @@ static void mlp_ring_process(ctx_dev *cam)
         cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_out];
 
         if (cam->imgs.image_ring[cam->imgs.ring_out].shot < cam->conf->framerate) {
-            if (cam->motapp->log_level >= DBG) {
+            if (cam->motapp->conf->log_level >= DBG) {
                 mlp_ring_process_debug(cam);
             }
 
@@ -261,7 +261,7 @@ static void mlp_detected(ctx_dev *cam, ctx_image_data *img)
     mlp_detected_trigger(cam, img);
 
     if (img->shot < conf->framerate) {
-        if (conf->stream_motion && !cam->motapp->setup_mode && img->shot != 1) {
+        if (conf->stream_motion && !cam->motapp->conf->setup_mode && img->shot != 1) {
             event(cam, EVENT_STREAM, img, NULL, NULL, &img->imgts);
         }
         if (conf->picture_output_motion != "off") {
@@ -953,7 +953,7 @@ static void mlp_overlay(ctx_dev *cam)
     if (cam->smartmask_speed &&
         ((cam->conf->picture_output_motion != "off") ||
         cam->conf->movie_output_motion ||
-        cam->motapp->setup_mode ||
+        cam->motapp->conf->setup_mode ||
         (cam->stream.motion.cnct_count > 0))) {
         draw_smartmask(cam, cam->imgs.image_motion.image_norm);
     }
@@ -961,7 +961,7 @@ static void mlp_overlay(ctx_dev *cam)
     if (cam->imgs.largest_label &&
         ((cam->conf->picture_output_motion != "off") ||
         cam->conf->movie_output_motion ||
-        cam->motapp->setup_mode ||
+        cam->motapp->conf->setup_mode ||
         (cam->stream.motion.cnct_count > 0))) {
         draw_largest_label(cam, cam->imgs.image_motion.image_norm);
     }
@@ -969,7 +969,7 @@ static void mlp_overlay(ctx_dev *cam)
     if (cam->imgs.mask &&
         ((cam->conf->picture_output_motion != "off") ||
         cam->conf->movie_output_motion ||
-        cam->motapp->setup_mode ||
+        cam->motapp->conf->setup_mode ||
         (cam->stream.motion.cnct_count > 0))) {
         draw_fixed_mask(cam, cam->imgs.image_motion.image_norm);
     }
@@ -984,7 +984,7 @@ static void mlp_overlay(ctx_dev *cam)
                   cam->imgs.width - 10, 10, tmp, cam->text_scale);
     }
 
-    if (cam->motapp->setup_mode || (cam->stream.motion.cnct_count > 0)) {
+    if (cam->motapp->conf->setup_mode || (cam->stream.motion.cnct_count > 0)) {
         sprintf(tmp, "D:%5d L:%3d N:%3d", cam->current_image->diffs,
             cam->current_image->total_labels, cam->noise);
         draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
@@ -1191,7 +1191,7 @@ static void mlp_actions(ctx_dev *cam)
 /* Process for setup mode */
 static void mlp_setupmode(ctx_dev *cam)
 {
-    if (cam->motapp->setup_mode) {
+    if (cam->motapp->conf->setup_mode) {
         char msg[1024] = "\0";
         char part[100];
 
@@ -1287,7 +1287,7 @@ static void mlp_timelapse(ctx_dev *cam)
 /* send images to loopback device*/
 static void mlp_loopback(ctx_dev *cam)
 {
-    if (cam->motapp->setup_mode) {
+    if (cam->motapp->conf->setup_mode) {
         event(cam, EVENT_IMAGE, &cam->imgs.image_motion, NULL, &cam->pipe, &cam->current_image->imgts);
         event(cam, EVENT_STREAM, &cam->imgs.image_motion, NULL, NULL, &cam->current_image->imgts);
     } else {
@@ -1370,8 +1370,8 @@ static void mlp_parmsupdate(ctx_dev *cam)
     }
 
     if (cam->motapp->parms_changed) {
-        log_set_level(cam->motapp->log_level);
-        log_set_type(cam->motapp->log_type_str.c_str());
+        log_set_level(cam->motapp->conf->log_level);
+        log_set_type(cam->motapp->conf->log_type_str.c_str());
         cam->motapp->parms_changed = false;
     }
 }

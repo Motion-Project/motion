@@ -50,9 +50,9 @@ static void algsec_image_show(ctx_dev *cam, Mat &mat_dst)
      * need to expend the CPU to compress and load the secondary images */
     if ((cam->stream.secondary.cnct_count >0) ||
         (cam->imgs.size_secondary == 0) ||
-        (cam->motapp->log_level >= DBG)) {
+        (cam->motapp->conf->log_level >= DBG)) {
 
-        if ((cam->motapp->log_level >= DBG) &&
+        if ((cam->motapp->conf->log_level >= DBG) &&
             (algmdl->isdetected == true)) {
             MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Saved detected image: %s%s%s%s"
                 , cam->conf->target_dir.c_str()
@@ -89,7 +89,7 @@ static void algsec_image_label(ctx_dev *cam, Mat &mat_dst
     try {
         algmdl->isdetected = false;
 
-        if (cam->motapp->log_level >= DBG) {
+        if (cam->motapp->conf->log_level >= DBG) {
             imwrite(cam->conf->target_dir  + "/src_" + algmdl->method + ".jpg"
                 , mat_dst);
             MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Saved source image: %s%s%s%s"
@@ -148,7 +148,7 @@ static void algsec_image_label(ctx_dev *cam, Mat &mat_dst
     try {
         algmdl->isdetected = false;
 
-        if (cam->motapp->log_level >= DBG) {
+        if (cam->motapp->conf->log_level >= DBG) {
             imwrite(cam->conf->target_dir  + "/src_" + algmdl->method + ".jpg"
                 , mat_dst);
             MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Saved source image: %s%s%s%s"

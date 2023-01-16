@@ -78,8 +78,6 @@
         size_t                      resp_size;      /* The allocated size of the response */
         size_t                      resp_used;      /* The amount of the response page used */
 
-        int                         cam_count;      /* Count of the number of cameras*/
-        int                         cam_threads;    /* Count of the number of camera threads running*/
         std::string                 lang;           /* Two character abbreviation for locale language*/
         int                         threadnbr;      /* Thread number provided from the uri */
         enum WEBUI_CNCT             cnct_type;      /* Type of connection we are processing */

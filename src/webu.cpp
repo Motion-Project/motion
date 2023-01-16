@@ -35,7 +35,7 @@
 
 /* Context to pass the parms to functions to start mhd */
 struct ctx_mhdstart {
-    ctx_motapp       *motapp;
+    ctx_motapp              *motapp;
     std::string             tls_cert;
     std::string             tls_key;
     struct MHD_OptionItem   *mhd_ops;
@@ -49,7 +49,6 @@ struct ctx_mhdstart {
 /* Set defaults for the webui context */
 static void webu_context_init(ctx_motapp *motapp, ctx_webui *webui)
 {
-    int indx;
     char *tmplang;
 
     webui->url           = "";
@@ -79,20 +78,7 @@ static void webu_context_init(ctx_motapp *motapp, ctx_webui *webui)
     webui->cnct_type     = WEBUI_CNCT_UNKNOWN;
     webui->resp_type     = WEBUI_RESP_HTML;             /* Default to html response */
     webui->cnct_method   = WEBUI_METHOD_GET;
-
-    /* get the number of cameras and threads */
-    indx = 0;
-    if (webui->motapp->cam_list != NULL) {
-        while (webui->motapp->cam_list[++indx]) {
-            continue;
-        };
-    }
-    webui->cam_threads = indx;
-
-    webui->cam_count = indx;
-    if (indx > 1) {
-        webui->cam_count--;
-    }
+    webui->threadnbr      = -1;
 
     tmplang = setlocale(LC_ALL, NULL);
     if (tmplang == NULL) {
@@ -129,8 +115,9 @@ static void webu_context_free(ctx_webui *webui)
 /* Edit the parameters specified in the url sent */
 static void webu_parms_edit(ctx_webui *webui)
 {
-    int indx, is_nbr;
+    int indx, is_nbr, camera_id;
 
+    camera_id = -1;
     if (webui->uri_camid.length() > 0) {
         is_nbr = true;
         for (indx=0; indx < (int)webui->uri_camid.length(); indx++) {
@@ -139,28 +126,15 @@ static void webu_parms_edit(ctx_webui *webui)
             }
         }
         if (is_nbr) {
-            webui->threadnbr = atoi(webui->uri_camid.c_str());
-        } else {
-            webui->threadnbr = -1;
+            camera_id = atoi(webui->uri_camid.c_str());
         }
-    } else {
-        webui->threadnbr = -1;
     }
 
-    if (webui->threadnbr < 0) {
-        webui->cam = webui->motapp->cam_list[0];
-        webui->threadnbr = 0;
-    } else {
-        indx = 0;
-        while (webui->motapp->cam_list[indx] != NULL) {
-            if (webui->motapp->cam_list[indx]->camera_id == webui->threadnbr) {
-                webui->threadnbr = indx;
-                break;
-            }
-            indx++;
+    for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
+        if (webui->motapp->cam_list[indx]->camera_id == camera_id) {
+            webui->threadnbr = indx;
+            webui->cam = webui->motapp->cam_list[indx];
         }
-        /* This may be null, in which case we will not answer the request */
-        webui->cam = webui->motapp->cam_list[indx];
     }
 
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
@@ -168,7 +142,6 @@ static void webu_parms_edit(ctx_webui *webui)
         , webui->uri_camid.c_str(), webui->threadnbr
         , webui->uri_cmd1.c_str(), webui->uri_cmd2.c_str()
         , webui->uri_cmd3.c_str());
-
 
 }
 
@@ -196,7 +169,7 @@ static int webu_parseurl(ctx_webui *webui)
 
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),webui->url.c_str());
 
-    baselen = webui->motapp->cam_list[0]->conf->webcontrol_base_path.length();
+    baselen = webui->motapp->conf->webcontrol_base_path.length();
 
     if (webui->url.length() < baselen) {
         return -1;
@@ -207,7 +180,7 @@ static int webu_parseurl(ctx_webui *webui)
     }
 
     if (webui->url.substr(0, baselen) !=
-        webui->motapp->cam_list[0]->conf->webcontrol_base_path) {
+        webui->motapp->conf->webcontrol_base_path) {
         return -1;
     }
 
@@ -284,7 +257,7 @@ static void webu_clientip(ctx_webui *webui)
     int is_ipv6;
 
     is_ipv6 = false;
-    if (webui->motapp->cam_list[0]->conf->webcontrol_ipv6) {
+    if (webui->motapp->conf->webcontrol_ipv6) {
         is_ipv6 = true;
     }
 
@@ -320,11 +293,11 @@ static void webu_hostname(ctx_webui *webui)
     hdr = MHD_lookup_connection_value(webui->connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_HOST);
     if (hdr == NULL) {
         webui->hostfull = "//localhost:" +
-            std::to_string(webui->motapp->cam_list[0]->conf->webcontrol_port) +
-            webui->motapp->cam_list[0]->conf->webcontrol_base_path;
+            std::to_string(webui->motapp->conf->webcontrol_port) +
+            webui->motapp->conf->webcontrol_base_path;
     } else {
         webui->hostfull = "//" +  std::string(hdr) +
-            webui->motapp->cam_list[0]->conf->webcontrol_base_path;
+            webui->motapp->conf->webcontrol_base_path;
     }
 
     MOTION_LOG(DBG,TYPE_ALL, NO_ERRNO, _("Full Host:  %s"), webui->hostfull.c_str());
@@ -378,7 +351,7 @@ static void webu_client_connect(ctx_webui *webui)
     it = webui->motapp->webcontrol_clients.begin();
     while (it != webui->motapp->webcontrol_clients.end()) {
         if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >=
-            (webui->cam->conf->webcontrol_lock_minutes*60)) {
+            (webui->motapp->conf->webcontrol_lock_minutes*60)) {
             it = webui->motapp->webcontrol_clients.erase(it);
         }
         it++;
@@ -430,15 +403,15 @@ static mhdrslt webu_failauth_check(ctx_webui *webui)
     while (it != webui->motapp->webcontrol_clients.end()) {
         if ((it->clientip == webui->clientip) &&
             ((tm_cnct.tv_sec - it->conn_time.tv_sec) <
-             (webui->cam->conf->webcontrol_lock_minutes*60)) &&
+             (webui->motapp->conf->webcontrol_lock_minutes*60)) &&
             (it->authenticated == false) &&
-            (it->conn_nbr > webui->cam->conf->webcontrol_lock_attempts)) {
+            (it->conn_nbr > webui->motapp->conf->webcontrol_lock_attempts)) {
             MOTION_LOG(EMG, TYPE_STREAM, NO_ERRNO
                 ,_("Ignoring connection from: %s"), webui->clientip.c_str());
             it->conn_time = tm_cnct;
             return MHD_NO;
         } else if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >=
-            (webui->cam->conf->webcontrol_lock_minutes*60)) {
+            (webui->motapp->conf->webcontrol_lock_minutes*60)) {
             it = webui->motapp->webcontrol_clients.erase(it);
         } else {
             it++;
@@ -586,19 +559,19 @@ static void webu_mhd_auth_parse(ctx_webui *webui)
     myfree(&webui->auth_user);
     myfree(&webui->auth_pass);
 
-    auth_len = webui->motapp->cam_list[0]->conf->webcontrol_authentication.length();
-    col_pos =(char*) strstr(webui->motapp->cam_list[0]->conf->webcontrol_authentication.c_str() ,":");
+    auth_len = webui->motapp->conf->webcontrol_authentication.length();
+    col_pos =(char*) strstr(webui->motapp->conf->webcontrol_authentication.c_str() ,":");
     if (col_pos == NULL) {
         webui->auth_user = (char*)mymalloc(auth_len+1);
         webui->auth_pass = (char*)mymalloc(2);
         snprintf(webui->auth_user, auth_len + 1, "%s"
-            ,webui->motapp->cam_list[0]->conf->webcontrol_authentication.c_str());
+            ,webui->motapp->conf->webcontrol_authentication.c_str());
         snprintf(webui->auth_pass, 2, "%s","");
     } else {
         webui->auth_user = (char*)mymalloc(auth_len - strlen(col_pos) + 1);
         webui->auth_pass =(char*)mymalloc(strlen(col_pos));
         snprintf(webui->auth_user, auth_len - strlen(col_pos) + 1, "%s"
-            ,webui->motapp->cam_list[0]->conf->webcontrol_authentication.c_str());
+            ,webui->motapp->conf->webcontrol_authentication.c_str());
         snprintf(webui->auth_pass, strlen(col_pos), "%s", col_pos + 1);
     }
 
@@ -616,9 +589,9 @@ static mhdrslt webu_mhd_auth(ctx_webui *webui)
 
     snprintf(webui->auth_realm, WEBUI_LEN_PARM, "%s","Motion");
 
-    if (webui->motapp->cam_list[0]->conf->webcontrol_authentication == "") {
+    if (webui->motapp->conf->webcontrol_authentication == "") {
         webui->authenticated = true;
-        if (webui->motapp->cam_list[0]->conf->webcontrol_auth_method != "none") {
+        if (webui->motapp->conf->webcontrol_auth_method != "none") {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No webcontrol user:pass provided"));
         }
         return MHD_YES;
@@ -628,9 +601,9 @@ static mhdrslt webu_mhd_auth(ctx_webui *webui)
         webu_mhd_auth_parse(webui);
     }
 
-    if (webui->motapp->cam_list[0]->conf->webcontrol_auth_method == "basic") {
+    if (webui->motapp->conf->webcontrol_auth_method == "basic") {
         return webu_mhd_basic(webui);
-    } else if (webui->motapp->cam_list[0]->conf->webcontrol_auth_method == "digest") {
+    } else if (webui->motapp->conf->webcontrol_auth_method == "digest") {
         return webu_mhd_digest(webui);
     }
 
@@ -654,22 +627,21 @@ static mhdrslt webu_mhd_send(ctx_webui *webui)
         return MHD_NO;
     }
 
-    if (webui->cam != NULL) {
-        if (webui->motapp->webcontrol_headers->params_count > 0) {
-            for (indx = 0; indx < webui->motapp->webcontrol_headers->params_count; indx++) {
-                MHD_add_response_header (response
-                    , webui->motapp->webcontrol_headers->params_array[indx].param_name
-                    , webui->motapp->webcontrol_headers->params_array[indx].param_value
-                );
-            }
+    if (webui->motapp->webcontrol_headers->params_count > 0) {
+        for (indx = 0; indx < webui->motapp->webcontrol_headers->params_count; indx++) {
+            MHD_add_response_header (response
+                , webui->motapp->webcontrol_headers->params_array[indx].param_name
+                , webui->motapp->webcontrol_headers->params_array[indx].param_value
+            );
         }
-        if (webui->resp_type == WEBUI_RESP_TEXT) {
-            MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/plain;");
-        } else if (webui->resp_type == WEBUI_RESP_JSON) {
-            MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "application/json;");
-        } else {
-            MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
-        }
+    }
+
+    if (webui->resp_type == WEBUI_RESP_TEXT) {
+        MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/plain;");
+    } else if (webui->resp_type == WEBUI_RESP_JSON) {
+        MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "application/json;");
+    } else {
+        MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
     }
 
     retcd = MHD_queue_response (webui->connection, MHD_HTTP_OK, response);
@@ -690,7 +662,7 @@ static mhdrslt webu_answer_post(ctx_webui *webui)
         webu_post_main(webui);
     pthread_mutex_unlock(&webui->motapp->mutex_post);
 
-    if (webui->motapp->cam_list[0]->conf->webcontrol_interface == "user") {
+    if (webui->motapp->conf->webcontrol_interface == "user") {
         webu_html_user(webui);
     } else {
         webu_html_page(webui);
@@ -701,7 +673,7 @@ static mhdrslt webu_answer_post(ctx_webui *webui)
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"send post page failed");
     }
 
-    return MHD_YES;
+    return retcd;
 
 }
 
@@ -844,7 +816,7 @@ static mhdrslt webu_answer_get(ctx_webui *webui)
 
     } else {
         pthread_mutex_lock(&webui->motapp->mutex_post);
-            if (webui->motapp->cam_list[0]->conf->webcontrol_interface == "user") {
+            if (webui->motapp->conf->webcontrol_interface == "user") {
                 webu_html_user(webui);
             } else {
                 webu_html_page(webui);
@@ -880,15 +852,22 @@ static mhdrslt webu_answer(void *cls, struct MHD_Connection *connection, const c
     webui->connection = connection;
 
     /* Throw bad URLS back to user*/
-    if ((webui->cam ==  NULL) || (webui->url.length() == 0)) {
+    if (webui->url.length() == 0) {
         webu_html_badreq(webui);
         retcd = webu_mhd_send(webui);
         return retcd;
     }
 
-    if (webui->cam->finish_cam) {
+    if (webui->motapp->finish_all) {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
         return MHD_NO;
+    }
+
+    if (webui->cam != NULL) {
+        if (webui->cam->finish_cam) {
+           MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
+           return MHD_NO;
+        }
     }
 
     if (webui->clientip.length() == 0) {
@@ -1045,9 +1024,9 @@ static void webu_mhd_features_basic(ctx_mhdstart *mhdst)
         if (retcd == MHD_YES) {
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: available"));
         } else {
-            if (mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method == "basic") {
+            if (mhdst->motapp->conf->webcontrol_auth_method == "basic") {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
-                mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method = "none";
+                mhdst->motapp->conf->webcontrol_auth_method = "none";
             } else {
                 MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
             }
@@ -1066,9 +1045,9 @@ static void webu_mhd_features_digest(ctx_mhdstart *mhdst)
         if (retcd == MHD_YES) {
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: available"));
         } else {
-            if (mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method == "digest") {
+            if (mhdst->motapp->conf->webcontrol_auth_method == "digest") {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
-                mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method = "none";
+                mhdst->motapp->conf->webcontrol_auth_method = "none";
             } else {
                 MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
             }
@@ -1104,9 +1083,9 @@ static void webu_mhd_features_ipv6(ctx_mhdstart *mhdst)
 static void webu_mhd_features_tls(ctx_mhdstart *mhdst)
 {
     #if MHD_VERSION < 0x00094400
-        if (mhdst->motapp->cam_list[0]->conf->webcontrol_tls) {
+        if (mhdst->motapp->conf->webcontrol_tls) {
             MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL/TLS disabled"));
-            mhdst->motapp->cam_list[0]->conf->webcontrol_tls = 0;
+            mhdst->motapp->conf->webcontrol_tls = 0;
         }
     #else
         mhdrslt retcd;
@@ -1114,9 +1093,9 @@ static void webu_mhd_features_tls(ctx_mhdstart *mhdst)
         if (retcd == MHD_YES) {
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: available"));
         } else {
-            if (mhdst->motapp->cam_list[0]->conf->webcontrol_tls) {
+            if (mhdst->motapp->conf->webcontrol_tls) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
-                mhdst->motapp->cam_list[0]->conf->webcontrol_tls = 0;
+                mhdst->motapp->conf->webcontrol_tls = 0;
             } else {
                 MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
             }
@@ -1175,16 +1154,16 @@ static std::string webu_mhd_loadfile(std::string fname)
 static void webu_mhd_checktls(ctx_mhdstart *mhdst)
 {
 
-    if (mhdst->motapp->cam_list[0]->conf->webcontrol_tls) {
-        if ((mhdst->motapp->cam_list[0]->conf->webcontrol_cert == "") || (mhdst->tls_cert == "")) {
+    if (mhdst->motapp->conf->webcontrol_tls) {
+        if ((mhdst->motapp->conf->webcontrol_cert == "") || (mhdst->tls_cert == "")) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
-            mhdst->motapp->cam_list[0]->conf->webcontrol_tls = 0;
+            mhdst->motapp->conf->webcontrol_tls = 0;
         }
-        if ((mhdst->motapp->cam_list[0]->conf->webcontrol_key == "") || (mhdst->tls_key == "")) {
+        if ((mhdst->motapp->conf->webcontrol_key == "") || (mhdst->tls_key == "")) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 ,_("SSL/TLS requested but no key file provided.  SSL/TLS disabled"));
-            mhdst->motapp->cam_list[0]->conf->webcontrol_tls = 0;
+            mhdst->motapp->conf->webcontrol_tls = 0;
         }
     }
 
@@ -1212,11 +1191,11 @@ static void webu_mhd_opts_deinit(ctx_mhdstart *mhdst)
 /* Set the MHD option on acceptable connections */
 static void webu_mhd_opts_localhost(ctx_mhdstart *mhdst)
 {
-    if (mhdst->motapp->cam_list[0]->conf->webcontrol_localhost) {
+    if (mhdst->motapp->conf->webcontrol_localhost) {
         if (mhdst->ipv6) {
             memset(&mhdst->lpbk_ipv6, 0, sizeof(struct sockaddr_in6));
             mhdst->lpbk_ipv6.sin6_family = AF_INET6;
-            mhdst->lpbk_ipv6.sin6_port = htons(mhdst->motapp->cam_list[0]->conf->webcontrol_port);
+            mhdst->lpbk_ipv6.sin6_port = htons(mhdst->motapp->conf->webcontrol_port);
             mhdst->lpbk_ipv6.sin6_addr = in6addr_loopback;
 
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
@@ -1227,7 +1206,7 @@ static void webu_mhd_opts_localhost(ctx_mhdstart *mhdst)
         } else {
             memset(&mhdst->lpbk_ipv4, 0, sizeof(struct sockaddr_in));
             mhdst->lpbk_ipv4.sin_family = AF_INET;
-            mhdst->lpbk_ipv4.sin_port = htons(mhdst->motapp->cam_list[0]->conf->webcontrol_port);
+            mhdst->lpbk_ipv4.sin_port = htons(mhdst->motapp->conf->webcontrol_port);
             mhdst->lpbk_ipv4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
@@ -1243,7 +1222,7 @@ static void webu_mhd_opts_localhost(ctx_mhdstart *mhdst)
 static void webu_mhd_opts_digest(ctx_mhdstart *mhdst)
 {
 
-    if (mhdst->motapp->cam_list[0]->conf->webcontrol_auth_method == "digest") {
+    if (mhdst->motapp->conf->webcontrol_auth_method == "digest") {
 
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_DIGEST_AUTH_RANDOM;
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = sizeof(mhdst->motapp->webcontrol_digest_rand);
@@ -1266,7 +1245,7 @@ static void webu_mhd_opts_digest(ctx_mhdstart *mhdst)
 /* Set the MHD options needed when we want TLS connections */
 static void webu_mhd_opts_tls(ctx_mhdstart *mhdst)
 {
-    if (mhdst->motapp->cam_list[0]->conf->webcontrol_tls) {
+    if (mhdst->motapp->conf->webcontrol_tls) {
 
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_HTTPS_MEM_CERT;
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
@@ -1314,7 +1293,7 @@ static void webu_mhd_flags(ctx_mhdstart *mhdst)
         mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_DUAL_STACK;
     }
 
-    if (mhdst->motapp->cam_list[0]->conf->webcontrol_tls) {
+    if (mhdst->motapp->conf->webcontrol_tls) {
         mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_SSL;
     }
 
@@ -1327,9 +1306,9 @@ static void webu_init_actions(ctx_motapp *motapp)
 
     motapp->webcontrol_actions = (ctx_params*)mymalloc(sizeof(ctx_params));
     motapp->webcontrol_actions->update_params = true;
-    util_parms_parse(motapp->webcontrol_actions, motapp->cam_list[0]->conf->webcontrol_actions);
+    util_parms_parse(motapp->webcontrol_actions, motapp->conf->webcontrol_actions);
 
-    if (motapp->cam_list[0]->conf->webcontrol_parms == 0) {
+    if (motapp->conf->webcontrol_parms == 0) {
         parm_vl = "off";
     } else {
         parm_vl = "on";
@@ -1358,18 +1337,18 @@ static void webu_init_webcontrol(ctx_motapp *motapp)
 
     MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
         , _("Starting webcontrol on port %d")
-        , motapp->cam_list[0]->conf->webcontrol_port);
+        , motapp->conf->webcontrol_port);
 
     motapp->webcontrol_headers = (ctx_params*)mymalloc(sizeof(ctx_params));
     motapp->webcontrol_headers->update_params = true;
-    util_parms_parse(motapp->webcontrol_headers, motapp->cam_list[0]->conf->webcontrol_headers);
+    util_parms_parse(motapp->webcontrol_headers, motapp->conf->webcontrol_headers);
 
     webu_init_actions(motapp);
 
-    mhdst.tls_cert = webu_mhd_loadfile(motapp->cam_list[0]->conf->webcontrol_cert);
-    mhdst.tls_key  = webu_mhd_loadfile(motapp->cam_list[0]->conf->webcontrol_key);
+    mhdst.tls_cert = webu_mhd_loadfile(motapp->conf->webcontrol_cert);
+    mhdst.tls_key  = webu_mhd_loadfile(motapp->conf->webcontrol_key);
     mhdst.motapp = motapp;
-    mhdst.ipv6 = motapp->cam_list[0]->conf->webcontrol_ipv6;
+    mhdst.ipv6 = motapp->conf->webcontrol_ipv6;
 
     /* Set the rand number for webcontrol digest if needed */
     srand(time(NULL));
@@ -1384,7 +1363,7 @@ static void webu_init_webcontrol(ctx_motapp *motapp)
 
     motapp->webcontrol_daemon = MHD_start_daemon (
         mhdst.mhd_flags
-        , motapp->cam_list[0]->conf->webcontrol_port
+        , motapp->conf->webcontrol_port
         , NULL, NULL
         , &webu_answer, motapp->cam_list
         , MHD_OPTION_ARRAY, mhdst.mhd_ops
@@ -1396,7 +1375,7 @@ static void webu_init_webcontrol(ctx_motapp *motapp)
     } else {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             ,_("Started webcontrol on port %d")
-            ,motapp->cam_list[0]->conf->webcontrol_port);
+            ,motapp->conf->webcontrol_port);
     }
 
     return;
@@ -1436,7 +1415,7 @@ void webu_init(ctx_motapp *motapp)
     motapp->webcontrol_finish = false;
 
      /* Start the webcontrol */
-    if (motapp->cam_list[0]->conf->webcontrol_port != 0 ) {
+    if (motapp->conf->webcontrol_port != 0 ) {
         webu_init_webcontrol(motapp);
     }
 

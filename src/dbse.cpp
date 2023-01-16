@@ -1144,13 +1144,13 @@ static void dbse_pgsql_movlst(ctx_motapp *motapp, int camera_id)
 void dbse_init(ctx_motapp *motapp)
 {
     motapp->dbse = new ctx_dbse;
-    motapp->dbse->database_busy_timeout = motapp->cam_list[0]->conf->database_busy_timeout;
-    motapp->dbse->database_dbname = motapp->cam_list[0]->conf->database_dbname;
-    motapp->dbse->database_host = motapp->cam_list[0]->conf->database_host;
-    motapp->dbse->database_password = motapp->cam_list[0]->conf->database_password;
-    motapp->dbse->database_port = motapp->cam_list[0]->conf->database_port;
-    motapp->dbse->database_type = motapp->cam_list[0]->conf->database_type;
-    motapp->dbse->database_user = motapp->cam_list[0]->conf->database_user;
+    motapp->dbse->database_busy_timeout = motapp->conf->database_busy_timeout;
+    motapp->dbse->database_dbname = motapp->conf->database_dbname;
+    motapp->dbse->database_host = motapp->conf->database_host;
+    motapp->dbse->database_password = motapp->conf->database_password;
+    motapp->dbse->database_port = motapp->conf->database_port;
+    motapp->dbse->database_type = motapp->conf->database_type;
+    motapp->dbse->database_user = motapp->conf->database_user;
     motapp->dbse->movie_cnt = 0;
     motapp->dbse->movie_list = NULL;
     motapp->dbse->cols_cnt = 0;

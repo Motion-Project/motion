@@ -25,7 +25,7 @@
 #include "webu_json.hpp"
 #include "dbse.hpp"
 
-static void webu_json_config_item(ctx_webui *webui, int indx_cam, int indx_parm)
+static void webu_json_config_item(ctx_webui *webui, ctx_config *conf, int indx_parm)
 {
     int indx;
     std::string parm_orig, parm_val, parm_list, parm_enable;
@@ -34,16 +34,14 @@ static void webu_json_config_item(ctx_webui *webui, int indx_cam, int indx_parm)
     parm_val = "";
     parm_list = "";
 
-    if (webui->motapp->cam_list[0]->conf->webcontrol_parms < WEBUI_LEVEL_LIMITED) {
+    if (webui->motapp->conf->webcontrol_parms < WEBUI_LEVEL_LIMITED) {
         parm_enable = "false";
     } else {
         parm_enable = "true";
     }
 
-    conf_edit_get(webui->motapp->cam_list[indx_cam]
-        , config_parms[indx_parm].parm_name
-        , parm_orig
-        , config_parms[indx_parm].parm_cat);
+    conf_edit_get(conf, config_parms[indx_parm].parm_name
+        , parm_orig, config_parms[indx_parm].parm_cat);
 
     if (parm_orig.find("\"") != std::string::npos) {
         for (indx = 0; indx < (int)parm_orig.length(); indx++){
@@ -87,10 +85,8 @@ static void webu_json_config_item(ctx_webui *webui, int indx_cam, int indx_parm)
                 "}";
         }
     } else if (config_parms[indx_parm].parm_type == PARM_TYP_LIST) {
-        conf_edit_list(webui->motapp->cam_list[indx_cam]
-            , config_parms[indx_parm].parm_name
-            , parm_list
-            , config_parms[indx_parm].parm_cat);
+        conf_edit_list(conf, config_parms[indx_parm].parm_name
+            , parm_list, config_parms[indx_parm].parm_cat);
 
         webui->resp_page +=
             "\"" + config_parms[indx_parm].parm_name + "\"" +
@@ -115,7 +111,7 @@ static void webu_json_config_item(ctx_webui *webui, int indx_cam, int indx_parm)
 
 }
 
-static void webu_json_config_parms(ctx_webui *webui, int indx_cam)
+static void webu_json_config_parms(ctx_webui *webui, ctx_config *conf)
 {
     int indx_parm;
     bool first;
@@ -136,7 +132,7 @@ static void webu_json_config_parms(ctx_webui *webui, int indx_cam)
         }
         /* Allow limited parameters to be read only to the web page */
         if ((config_parms[indx_parm].webui_level >
-                webui->motapp->cam_list[0]->conf->webcontrol_parms) &&
+                webui->motapp->conf->webcontrol_parms) &&
             (config_parms[indx_parm].webui_level > WEBUI_LEVEL_LIMITED)) {
 
             webui->resp_page +=
@@ -152,7 +148,7 @@ static void webu_json_config_parms(ctx_webui *webui, int indx_cam)
             }
             webui->resp_page +="}";
         } else {
-           webu_json_config_item(webui, indx_cam, indx_parm);
+           webu_json_config_item(webui, conf, indx_parm);
         }
         indx_parm++;
     }
@@ -163,22 +159,16 @@ static void webu_json_config_parms(ctx_webui *webui, int indx_cam)
 static void webu_json_config_cam_parms(ctx_webui *webui)
 {
     int indx_cam;
-    bool first;
+
+    webui->resp_page += "{";
+    webui->resp_page += "\"default\": ";
+    webu_json_config_parms(webui, webui->motapp->conf);
 
     indx_cam = 0;
-    first = true;
     while (webui->motapp->cam_list[indx_cam] != NULL) {
-        if (first) {
-            first = false;
-            webui->resp_page += "{";
-        } else {
-            webui->resp_page += ",";
-        }
-        webui->resp_page += "\"cam" +
+        webui->resp_page += ",\"cam" +
             std::to_string(webui->motapp->cam_list[indx_cam]->camera_id) + "\": ";
-
-        webu_json_config_parms(webui, indx_cam);
-
+        webu_json_config_parms(webui, webui->motapp->cam_list[indx_cam]->conf);
         indx_cam++;
     }
     webui->resp_page += "}";
@@ -191,40 +181,23 @@ static void webu_json_config_cam_list(ctx_webui *webui)
 {
     int indx_cam;
     std::string response;
+    std::string strid;
+    ctx_dev     *cam;
 
-    /* Get the count */
-    indx_cam = 0;
-    while (webui->motapp->cam_list[indx_cam] != NULL) {
-        indx_cam++;
-    }
-    webui->resp_page += "{\"count\" : " + std::to_string(indx_cam - 1);
+    webui->resp_page += "{\"count\" : " + std::to_string(webui->motapp->cam_cnt);
 
     indx_cam = 0;
     while (webui->motapp->cam_list[indx_cam] != NULL) {
-        webui->resp_page += ",\""+ std::to_string(indx_cam) + "\":";
-
-        if (indx_cam == 0) {
-            webui->resp_page += "{\"name\": \"default\" ";
-        } else if (webui->motapp->cam_list[indx_cam]->conf->camera_name == "") {
-            webui->resp_page += "{\"name\": \"camera " +
-                std::to_string(webui->motapp->cam_list[indx_cam]->camera_id) + "\"";
+        cam = webui->motapp->cam_list[indx_cam];
+        strid =std::to_string(cam->camera_id);
+        webui->resp_page += ",\"" + std::to_string(indx_cam) + "\":";
+        if (cam->conf->camera_name == "") {
+            webui->resp_page += "{\"name\": \"camera " + strid + "\"";
         } else {
-            webui->resp_page += "{\"name\": \"" +
-                webui->motapp->cam_list[indx_cam]->conf->camera_name + "\"";
+            webui->resp_page += "{\"name\": \"" + cam->conf->camera_name + "\"";
         }
-
-        webui->resp_page += ",\"id\": " +
-            std::to_string(webui->motapp->cam_list[indx_cam]->camera_id);
-
-        if (indx_cam == 0) {
-            webui->resp_page += "}";
-        } else {
-            webui->resp_page +=
-                ",\"url\": \"" + webui->hostfull +
-                "/" + std::to_string(webui->motapp->cam_list[indx_cam]->camera_id) +
-                "/\"} ";
-        }
-
+        webui->resp_page += ",\"id\": " + strid;
+        webui->resp_page += ",\"url\": \"" + webui->hostfull + "/" + strid + "/\"} ";
         indx_cam++;
     }
     webui->resp_page += "}";
@@ -302,6 +275,12 @@ static void webu_json_movies_list(ctx_webui *webui)
     webui->resp_page += "{\"count\" : 1";
     webui->resp_page += ",\""+ std::to_string(indx_req) + "\":";
 
+    if (webui->cam == NULL) {
+        webui->resp_page += "{\"count\" : 0} ";
+        webui->resp_page += "}";
+        return;
+    }
+
     /* Validate movies permitted via params */
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
@@ -317,14 +296,13 @@ static void webu_json_movies_list(ctx_webui *webui)
         }
     }
 
+    dbse_movies_getlist(webui->motapp, webui->cam->camera_id);
 
-    dbse_movies_getlist(webui->cam->motapp, webui->cam->camera_id);
-
-    movie_cnt = webui->cam->motapp->dbse->movie_cnt;
+    movie_cnt = webui->motapp->dbse->movie_cnt;
     webui->resp_page += "{";
     indx = 0;
     for (indx_mov=0; indx_mov < movie_cnt; indx_mov++) {
-        db = webui->cam->motapp->dbse->movie_list[indx_mov];
+        db = webui->motapp->dbse->movie_list[indx_mov];
         if (db.found == true) {
             if ((db.movie_sz/1000) < 1000) {
                 snprintf(fmt,PATH_MAX,"%'.1fKB"
@@ -399,7 +377,7 @@ static void webu_json_status_vars(ctx_webui *webui, int indx_cam)
 
     webui->resp_page += "{";
 
-    webui->resp_page += "\"name\":\"" + webui->cam->conf->camera_name+"\"";
+    webui->resp_page += "\"name\":\"" + cam->conf->camera_name+"\"";
     webui->resp_page += ",\"id\":" + std::to_string(cam->camera_id);
     webui->resp_page += ",\"width\":" + std::to_string(cam->imgs.width);
     webui->resp_page += ",\"height\":" + std::to_string(cam->imgs.height);

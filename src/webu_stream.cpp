@@ -239,14 +239,14 @@ static void webu_stream_static_getimg(ctx_webui *webui)
 static int webu_stream_checks(ctx_webui *webui)
 {
     pthread_mutex_lock(&webui->motapp->mutex_camlst);
-        if (webui->threadnbr >= webui->cam_threads) {
+        if (webui->threadnbr == -1) {
             MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
                 , _("Invalid thread specified: %s"),webui->url.c_str());
             pthread_mutex_unlock(&webui->motapp->mutex_camlst);
             return -1;
         }
 
-        if (webui->threadnbr <= 0) {
+        if (webui->threadnbr < 0) {
             MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
                 , _("Invalid thread specified: %s"),webui->url.c_str());
             pthread_mutex_unlock(&webui->motapp->mutex_camlst);
@@ -432,6 +432,10 @@ static mhdrslt webu_stream_static(ctx_webui *webui)
 mhdrslt webu_stream_main(ctx_webui *webui)
 {
     mhdrslt retcd;
+
+    if (webui->cam == NULL) {
+        return MHD_NO;
+    }
 
     if (webui->cam->passflag == 0) {
         return MHD_NO;

@@ -302,8 +302,6 @@ struct ctx_stream {
 struct ctx_dev {
 
     ctx_motapp      *motapp;
-    char            conf_filename[PATH_MAX];
-    bool            from_conf_dir;
     int             threadnr;
     pthread_t       thread_id;
 
@@ -417,17 +415,9 @@ struct ctx_motapp {
 
     int                 argc;
     char                **argv;
-
-    bool                daemon;
-    std::string         conf_filename;
-    std::string         pid_file;
-    std::string         log_file;
-    std::string         log_type_str;
-    int                 log_level;
-    int                 log_type;
-    bool                setup_mode;
     bool                pause;
-    bool                native_language;
+    ctx_config          *conf;
+    int                 cam_cnt;
 
     volatile int                webcontrol_running;
     volatile int                webcontrol_finish;

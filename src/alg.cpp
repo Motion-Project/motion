@@ -1193,7 +1193,7 @@ void alg_stddev(ctx_dev *cam)
 void alg_diff(ctx_dev *cam)
 {
 
-    if (cam->detecting_motion || cam->motapp->setup_mode) {
+    if (cam->detecting_motion || cam->motapp->conf->setup_mode) {
         alg_diff_standard(cam);
     } else {
         if (alg_diff_fast(cam)) {

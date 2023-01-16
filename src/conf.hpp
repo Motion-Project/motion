@@ -22,7 +22,21 @@
 #define _INCLUDE_CONF_HPP_
 
     struct ctx_config {
+
         /* Overall system configuration parameters */
+        std::string     conf_filename;
+        bool            from_conf_dir;
+
+        /* Overall application parameters */
+        bool            daemon;
+        std::string     pid_file;
+        std::string     log_file;
+        std::string     log_type_str;
+        int             log_level;
+        int             log_type;
+        bool            setup_mode;
+        bool            native_language;
+
         std::string     camera_name;
         int             camera_id;
         std::string     camera_dir;
@@ -240,31 +254,18 @@
     extern struct ctx_parm config_parms[];
     extern struct ctx_parm_depr config_parms_depr[];
 
-    void conf_init_app(ctx_motapp *motapp, int argc, char* argv[]);
-    void conf_init_cams(ctx_motapp *motapp);
+    void conf_init(ctx_motapp *motapp);
     void conf_deinit(ctx_motapp *motapp);
-    void conf_parms_log(ctx_dev **cam_list);
+    void conf_parms_log(ctx_motapp *motapp);
     void conf_parms_write(ctx_motapp *motapp);
     void conf_camera_add(ctx_motapp *motapp);
 
-    void conf_edit_set(ctx_motapp *motapp, bool ismotapp, int threadnbr
-            ,std::string parm_nm, std::string parm_val);
-    void conf_edit_set(ctx_motapp *motapp, bool ismotapp, int threadnbr
-            ,const char *parm_nm_chr, std::string parm_val);
-    void conf_edit_set(ctx_motapp *motapp, bool ismotapp, int threadnbr
-            ,std::string parm_nm, const char *parm_val_chr);
-    void conf_edit_set(ctx_motapp *motapp, bool ismotapp, int threadnbr
-            ,const char *parm_nm_chr, const char *parm_val_chr);
-
-    void conf_edit_get(ctx_dev *cam, std::string parm_nm
-            , std::string &parm_val, enum PARM_CAT parm_cat);
-    void conf_edit_get(ctx_dev *cam, std::string parm_nm
-            , char *parm_chr, enum PARM_CAT parm_cat);
-
-    void conf_edit_list(ctx_dev *cam, std::string parm_nm
-            , std::string &parm_val, enum PARM_CAT parm_cat);
-    void conf_edit_list(ctx_dev *cam, std::string parm_nm
-            , char *parm_chr, enum PARM_CAT parm_cat);
+    void conf_edit_set(ctx_config *conf, std::string parm_nm
+        , std::string parm_val);
+    void conf_edit_get(ctx_config *conf, std::string parm_nm
+        , std::string &parm_val, enum PARM_CAT parm_cat);
+    void conf_edit_list(ctx_config *conf, std::string parm_nm
+        , std::string &parm_val, enum PARM_CAT parm_cat);
 
     std::string conf_type_desc(enum PARM_TYP ptype);
     std::string conf_cat_desc(enum PARM_CAT pcat, bool shrt);

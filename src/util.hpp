@@ -124,7 +124,7 @@
     void myltrim(std::string &parm);
     void myrtrim(std::string &parm);
     void mytrim(std::string &parm);
-
+    void myunquote(std::string &parm);
 
     AVFrame *myframe_alloc(void);
     void myframe_free(AVFrame *frame);
