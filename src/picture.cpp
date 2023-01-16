@@ -39,7 +39,7 @@
  * It must be called after WebPEncode() and the result
  * can then be written out to webp a file
  */
-static void pic_webp_exif(WebPMux* webp_mux, ctx_cam *cam,
+static void pic_webp_exif(WebPMux* webp_mux, ctx_dev *cam,
         const struct timespec *ts1, ctx_coord *box)
 {
     unsigned char *exif = NULL;
@@ -65,7 +65,7 @@ static void pic_webp_exif(WebPMux* webp_mux, ctx_cam *cam,
 
 /** Save image as webp to file */
 static void pic_save_webp(FILE *fp, unsigned char *image, int width, int height,
-        int quality, ctx_cam *cam, struct timespec *ts1, ctx_coord *box)
+        int quality, ctx_dev *cam, struct timespec *ts1, ctx_coord *box)
 {
     #ifdef HAVE_WEBP
         /* Create a config present and check for compatible library version */
@@ -155,7 +155,7 @@ static void pic_save_webp(FILE *fp, unsigned char *image, int width, int height,
 
 /** Save image as yuv420p jpeg to file */
 static void pic_save_yuv420p(FILE *fp, unsigned char *image, int width, int height,
-        int quality, ctx_cam *cam, struct timespec *ts1, ctx_coord *box)
+        int quality, ctx_dev *cam, struct timespec *ts1, ctx_coord *box)
 {
 
     int sz, image_size;
@@ -172,7 +172,7 @@ static void pic_save_yuv420p(FILE *fp, unsigned char *image, int width, int heig
 
 /** Save image as grey jpeg to file */
 static void pic_save_grey(FILE *picture, unsigned char *image, int width, int height,
-        int quality, ctx_cam *cam, struct timespec *ts1, ctx_coord *box)
+        int quality, ctx_dev *cam, struct timespec *ts1, ctx_coord *box)
 {
 
     int sz, image_size;
@@ -254,7 +254,7 @@ static void pic_save_ppm(FILE *picture, unsigned char *image, int width, int hei
 
 
 /** Put picture into memory as jpg */
-int pic_put_memory(ctx_cam *cam, unsigned char* dest_image, int image_size
+int pic_put_memory(ctx_dev *cam, unsigned char* dest_image, int image_size
         , unsigned char *image, int quality, int width, int height)
 {
     struct timespec ts1;
@@ -272,7 +272,7 @@ int pic_put_memory(ctx_cam *cam, unsigned char* dest_image, int image_size
 }
 
 /* Write the picture to a file */
-static void pic_write(ctx_cam *cam, FILE *picture, unsigned char *image, int quality, int ftype)
+static void pic_write(ctx_dev *cam, FILE *picture, unsigned char *image, int quality, int ftype)
 {
     int width, height;
     int passthrough;
@@ -302,7 +302,7 @@ static void pic_write(ctx_cam *cam, FILE *picture, unsigned char *image, int qua
 }
 
 /* Saves image to a file in format requested */
-void pic_save_norm(ctx_cam *cam, char *file, unsigned char *image, int ftype)
+void pic_save_norm(ctx_dev *cam, char *file, unsigned char *image, int ftype)
 {
     FILE *picture;
 
@@ -330,7 +330,7 @@ void pic_save_norm(ctx_cam *cam, char *file, unsigned char *image, int ftype)
 }
 
 /* Saves image to a file in format requested */
-void pic_save_roi(ctx_cam *cam, char *file, unsigned char *image)
+void pic_save_roi(ctx_dev *cam, char *file, unsigned char *image)
 {
     FILE *picture;
     int image_size, sz, indxh;
@@ -464,7 +464,7 @@ unsigned char *pic_load_pgm(FILE *picture, int width, int height)
 }
 
 /** Write out a base mask file if needed */
-static void pic_write_mask(ctx_cam *cam, const char *file)
+static void pic_write_mask(ctx_dev *cam, const char *file)
 {
     FILE *picture;
 
@@ -521,7 +521,7 @@ void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsign
     return;
 }
 
-void pic_save_preview(ctx_cam *cam, ctx_image_data *img)
+void pic_save_preview(ctx_dev *cam, ctx_image_data *img)
 {
     unsigned char *image_norm, *image_high;
 
@@ -554,7 +554,7 @@ void pic_save_preview(ctx_cam *cam, ctx_image_data *img)
 
 }
 
-void pic_init_privacy(ctx_cam *cam)
+void pic_init_privacy(ctx_dev *cam)
 {
 
     int indxrow, indxcol;
@@ -664,7 +664,7 @@ void pic_init_privacy(ctx_cam *cam)
 
 }
 
-void pic_init_mask(ctx_cam *cam)
+void pic_init_mask(ctx_dev *cam)
 {
 
     FILE *picture;

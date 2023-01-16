@@ -1282,7 +1282,7 @@ void dbse_exec_sql(ctx_motapp *motapp, const char *sqlquery)
 }
 
 /* Create and execute user provided sql with mutex lock*/
-void dbse_exec(ctx_cam *cam, char *filename
+void dbse_exec(ctx_dev *cam, char *filename
     , int sqltype, struct timespec *ts1, const char *cmd)
 {
     char sqlquery[PATH_MAX];
@@ -1323,7 +1323,7 @@ void dbse_exec(ctx_cam *cam, char *filename
 }
 
 /* Add a record to motionplus table for new movies */
-void dbse_movies_addrec(ctx_cam *cam, ctx_movie *movie, timespec *ts1)
+void dbse_movies_addrec(ctx_dev *cam, ctx_movie *movie, timespec *ts1)
 {
     std::string sqlquery;
     struct stat statbuf;

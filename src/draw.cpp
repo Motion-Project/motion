@@ -1219,7 +1219,7 @@ int draw_init_chars(void)
     return 0;
 }
 
-void draw_init_scale(ctx_cam *cam)
+void draw_init_scale(ctx_dev *cam)
 {
 
     /* Consider that web interface may change conf values at any moment.
@@ -1427,7 +1427,7 @@ static void draw_red_location(ctx_coord *cent, ctx_images *imgs, int width
     }
 }
 
-void draw_locate_preview(ctx_cam *cam, ctx_image_data *img)
+void draw_locate_preview(ctx_dev *cam, ctx_image_data *img)
 {
     /* draw locate box here when mode = LOCATE_PREVIEW */
     if (cam->locate_motion_mode == LOCATE_PREVIEW) {
@@ -1448,7 +1448,7 @@ void draw_locate_preview(ctx_cam *cam, ctx_image_data *img)
     }
 }
 
-void draw_locate(ctx_cam *cam, ctx_image_data *img)
+void draw_locate(ctx_dev *cam, ctx_image_data *img)
 {
     ctx_images *imgs = &cam->imgs;
     ctx_coord *location = &img->location;
@@ -1471,7 +1471,7 @@ void draw_locate(ctx_cam *cam, ctx_image_data *img)
     }
 }
 
-void draw_smartmask(ctx_cam *cam, unsigned char *out)
+void draw_smartmask(ctx_dev *cam, unsigned char *out)
 {
     int i, x, v, width, height, line;
     ctx_images *imgs = &cam->imgs;
@@ -1510,7 +1510,7 @@ void draw_smartmask(ctx_cam *cam, unsigned char *out)
     }
 }
 
-void draw_fixed_mask(ctx_cam *cam, unsigned char *out)
+void draw_fixed_mask(ctx_dev *cam, unsigned char *out)
 {
     int i, x, v, width, height, line;
     ctx_images *imgs = &cam->imgs;
@@ -1549,7 +1549,7 @@ void draw_fixed_mask(ctx_cam *cam, unsigned char *out)
     }
 }
 
-void draw_largest_label(ctx_cam *cam, unsigned char *out)
+void draw_largest_label(ctx_dev *cam, unsigned char *out)
 {
     int i, x, v, width, height, line;
     ctx_images *imgs = &cam->imgs;

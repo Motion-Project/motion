@@ -177,7 +177,7 @@ static inline void rot90ccw(unsigned char *src, unsigned char *dst, int size, in
  *
  * Returns: nothing
  */
-void rotate_init(ctx_cam *cam)
+void rotate_init(ctx_dev *cam)
 {
     int size_norm, size_high;
 
@@ -272,7 +272,7 @@ void rotate_init(ctx_cam *cam)
  *
  * Returns: nothing
  */
-void rotate_deinit(ctx_cam *cam)
+void rotate_deinit(ctx_dev *cam)
 {
 
     if (cam->rotate_data == NULL) {
@@ -298,7 +298,7 @@ void rotate_deinit(ctx_cam *cam)
  *   0  - success
  *   -1 - failure (shouldn't happen)
  */
-int rotate_map(ctx_cam *cam, ctx_image_data *img_data)
+int rotate_map(ctx_dev *cam, ctx_image_data *img_data)
 {
     /*
      * The image format is YUV 4:2:0 planar, which has the pixel

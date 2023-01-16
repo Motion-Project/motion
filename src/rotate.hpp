@@ -32,8 +32,8 @@
         int capture_height_high;    /* Capture height of high resolution image */
     };
 
-    void rotate_init(ctx_cam *cam);
-    void rotate_deinit(ctx_cam *cam);
-    int rotate_map(ctx_cam *cam, ctx_image_data *img_data);
+    void rotate_init(ctx_dev *cam);
+    void rotate_deinit(ctx_dev *cam);
+    int rotate_map(ctx_dev *cam, ctx_image_data *img_data);
 
 #endif /* _INCLUDE_ROTATE_HPP_ */

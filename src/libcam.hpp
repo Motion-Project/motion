@@ -36,11 +36,11 @@
             public:
                 cls_libcam(){};
                 ~cls_libcam(){};
-                int cam_start(ctx_cam *cam);
+                int cam_start(ctx_dev *cam);
                 void cam_stop();
                 int cam_next(ctx_image_data *img_data);
             private:
-                ctx_cam     *camctx;
+                ctx_dev     *camctx;
                 ctx_params  *params;
 
                 std::unique_ptr<CameraManager>          cam_mgr;
@@ -57,7 +57,7 @@
                 bool                    started_aqr;
                 bool                    started_req;
 
-                void cam_start_params(ctx_cam *ptr);
+                void cam_start_params(ctx_dev *ptr);
                 int cam_start_mgr();
                 int cam_start_config();
                 int cam_start_req();
@@ -73,8 +73,8 @@
         };
     #endif
 
-    void libcam_start (ctx_cam *cam);
-    int libcam_next (ctx_cam *cam, ctx_image_data *img_data);
-    void libcam_cleanup (ctx_cam *cam);
+    void libcam_start (ctx_dev *cam);
+    int libcam_next (ctx_dev *cam, ctx_image_data *img_data);
+    void libcam_cleanup (ctx_dev *cam);
 
 #endif /* _INCLUDE_LIBCAM_HPP_ */

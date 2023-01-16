@@ -326,7 +326,7 @@ static void netcam_close_context(ctx_netcam *netcam)
 
 }
 
-static void netcam_pktarray_resize(ctx_cam *cam, bool is_highres)
+static void netcam_pktarray_resize(ctx_dev *cam, bool is_highres)
 {
     /* This is called from netcam_next and is on the motion loop thread
      * The netcam->mutex is locked around the call to this function.
@@ -1435,7 +1435,7 @@ static void netcam_set_options(ctx_netcam *netcam)
 
 }
 
-static void netcam_set_path (ctx_cam *cam, ctx_netcam *netcam )
+static void netcam_set_path (ctx_dev *cam, ctx_netcam *netcam )
 {
 
     char   userpass[PATH_MAX];
@@ -1494,7 +1494,7 @@ static void netcam_set_path (ctx_cam *cam, ctx_netcam *netcam )
 
 }
 
-static void netcam_set_parms (ctx_cam *cam, ctx_netcam *netcam )
+static void netcam_set_parms (ctx_dev *cam, ctx_netcam *netcam )
 {
     /* Set the parameters to be used with our camera */
     int indx, val_len;
@@ -1586,7 +1586,7 @@ static void netcam_set_parms (ctx_cam *cam, ctx_netcam *netcam )
 
 }
 
-static void netcam_set_dimensions (ctx_cam *cam)
+static void netcam_set_dimensions (ctx_dev *cam)
 {
 
     cam->imgs.width = 0;
@@ -2099,7 +2099,7 @@ static int netcam_start_handler(ctx_netcam *netcam)
 
 }
 
-void netcam_cleanup(ctx_cam *cam)
+void netcam_cleanup(ctx_dev *cam)
 {
     int wait_counter;
     int indx_cam, indx_max;
@@ -2163,7 +2163,7 @@ void netcam_cleanup(ctx_cam *cam)
 
 }
 
-void netcam_start(ctx_cam *cam)
+void netcam_start(ctx_dev *cam)
 {
     int indx_cam, indx_max;
     ctx_netcam *netcam;
@@ -2248,7 +2248,7 @@ void netcam_start(ctx_cam *cam)
 }
 
 /* netcam_next (Called from the motion loop thread) */
-int netcam_next(ctx_cam *cam, ctx_image_data *img_data)
+int netcam_next(ctx_dev *cam, ctx_image_data *img_data)
 {
     if ((cam == NULL) || (cam->netcam == NULL)) {
         return CAPTURE_FAILURE;

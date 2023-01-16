@@ -149,8 +149,8 @@ struct ctx_netcam {
 
 };
 
-void netcam_start(ctx_cam *cam);
-int netcam_next(ctx_cam *cam, ctx_image_data *img_data);
-void netcam_cleanup(ctx_cam *cam);
+void netcam_start(ctx_dev *cam);
+int netcam_next(ctx_dev *cam, ctx_image_data *img_data);
+void netcam_cleanup(ctx_dev *cam);
 
 #endif /* _INCLUDE_NETCAM_HPP_ */

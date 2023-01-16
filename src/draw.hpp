@@ -26,12 +26,12 @@
               int startx, int starty,
               const char *text, int factor);
     int draw_init_chars(void);
-    void draw_init_scale(ctx_cam *cam);
+    void draw_init_scale(ctx_dev *cam);
 
-    void draw_locate_preview(ctx_cam *cam, ctx_image_data *img);
-    void draw_locate(ctx_cam *cam, ctx_image_data *img);
-    void draw_smartmask(ctx_cam *cam, unsigned char *out);
-    void draw_fixed_mask(ctx_cam *cam, unsigned char *out);
-    void draw_largest_label(ctx_cam *cam, unsigned char *out);
+    void draw_locate_preview(ctx_dev *cam, ctx_image_data *img);
+    void draw_locate(ctx_dev *cam, ctx_image_data *img);
+    void draw_smartmask(ctx_dev *cam, unsigned char *out);
+    void draw_fixed_mask(ctx_dev *cam, unsigned char *out);
+    void draw_largest_label(ctx_dev *cam, unsigned char *out);
 
 #endif /* _INCLUDE_DRAW_HPP_ */

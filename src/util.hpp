@@ -106,13 +106,13 @@
     int mycreate_path(const char *path);
     FILE *myfopen(const char *path, const char *mode);
     int myfclose(FILE *fh);
-    size_t mystrftime(ctx_cam *cam, char *s, size_t max, const char *userformat,
+    size_t mystrftime(ctx_dev *cam, char *s, size_t max, const char *userformat,
         const struct timespec *ts1, const char *filename, int sqltype);
-    void util_exec_command(ctx_cam *cam, const char *command, char *filename, int filetype);
+    void util_exec_command(ctx_dev *cam, const char *command, char *filename, int filetype);
 
     void mythreadname_set(const char *abbr, int threadnbr, const char *threadname);
     void mythreadname_get(char *threadname);
-    bool mycheck_passthrough(ctx_cam *cam);
+    bool mycheck_passthrough(ctx_dev *cam);
 
     char* mytranslate_text(const char *msgid, int setnls);
     void mytranslate_init(void);

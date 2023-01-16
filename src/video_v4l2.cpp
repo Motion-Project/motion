@@ -87,14 +87,14 @@ static int xioctl(ctx_v4l2cam *v4l2cam, unsigned long request, void *arg)
     return retcd;
 }
 
-static void v4l2_device_close(ctx_cam *cam)
+static void v4l2_device_close(ctx_dev *cam)
 {
     close(cam->v4l2cam->fd_device);
     cam->v4l2cam->fd_device = -1;
 }
 
 /* Get the count of how many controls and menu items the device supports */
-static void v4l2_ctrls_count(ctx_cam *cam)
+static void v4l2_ctrls_count(ctx_dev *cam)
 {
     int indx;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
@@ -132,7 +132,7 @@ static void v4l2_ctrls_count(ctx_cam *cam)
 }
 
 /* Print the device controls to the log */
-static void v4l2_ctrls_log(ctx_cam *cam)
+static void v4l2_ctrls_log(ctx_dev *cam)
 {
     int indx;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
@@ -159,7 +159,7 @@ static void v4l2_ctrls_log(ctx_cam *cam)
 }
 
 /* Get names of the controls and menu items the device supports */
-static void v4l2_ctrls_list(ctx_cam *cam)
+static void v4l2_ctrls_list(ctx_dev *cam)
 {
     int indx, indx_ctrl;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
@@ -235,7 +235,7 @@ static void v4l2_ctrls_list(ctx_cam *cam)
 }
 
 /* Set the control array items to the device */
-static void v4l2_ctrls_set(ctx_cam *cam)
+static void v4l2_ctrls_set(ctx_dev *cam)
 {
     int indx_dev, retcd;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
@@ -271,7 +271,7 @@ static void v4l2_ctrls_set(ctx_cam *cam)
 
 }
 
-static int v4l2_parms_set(ctx_cam *cam)
+static int v4l2_parms_set(ctx_dev *cam)
 {
     int indx_dev, indx_user;
     ctx_params_item *usritem;
@@ -326,7 +326,7 @@ static int v4l2_parms_set(ctx_cam *cam)
 }
 
 /* Set the device to the input number requested by user */
-static void v4l2_set_input(ctx_cam *cam)
+static void v4l2_set_input(ctx_dev *cam)
 {
     int indx, spec;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
@@ -387,7 +387,7 @@ static void v4l2_set_input(ctx_cam *cam)
 }
 
 /* Set the video standard(norm) for the device to the user requested value*/
-static void v4l2_set_norm(ctx_cam *cam)
+static void v4l2_set_norm(ctx_dev *cam)
 {
     int indx, spec;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
@@ -454,7 +454,7 @@ static void v4l2_set_norm(ctx_cam *cam)
 }
 
 /* Set the frequency on the device to the user requested value */
-static void v4l2_set_frequency(ctx_cam *cam)
+static void v4l2_set_frequency(ctx_dev *cam)
 {
     int indx;
     long spec;
@@ -506,7 +506,7 @@ static void v4l2_set_frequency(ctx_cam *cam)
     return;
 }
 
-static int v4l2_pixfmt_try(ctx_cam *cam, uint pixformat)
+static int v4l2_pixfmt_try(ctx_dev *cam, uint pixformat)
 {
     int retcd;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
@@ -539,7 +539,7 @@ static int v4l2_pixfmt_try(ctx_cam *cam, uint pixformat)
     return 0;
 }
 
-static int v4l2_pixfmt_stride(ctx_cam *cam)
+static int v4l2_pixfmt_stride(ctx_dev *cam)
 {
     int wd, bpl, wps;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
@@ -593,7 +593,7 @@ static int v4l2_pixfmt_stride(ctx_cam *cam)
 
 }
 
-static int v4l2_pixfmt_adjust(ctx_cam *cam)
+static int v4l2_pixfmt_adjust(ctx_dev *cam)
 {
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_format *fmt = &v4l2cam->fmt;
@@ -623,7 +623,7 @@ static int v4l2_pixfmt_adjust(ctx_cam *cam)
 }
 
 /* Set the pixel format on the device */
-static int v4l2_pixfmt_set(ctx_cam *cam, unsigned int pixformat)
+static int v4l2_pixfmt_set(ctx_dev *cam, unsigned int pixformat)
 {
     int retcd;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
@@ -659,7 +659,7 @@ static int v4l2_pixfmt_set(ctx_cam *cam, unsigned int pixformat)
     return 0;
 }
 
-static void v4l2_params_check(ctx_cam *cam)
+static void v4l2_params_check(ctx_dev *cam)
 {
     int indx, spec;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
@@ -697,7 +697,7 @@ static void v4l2_params_check(ctx_cam *cam)
 }
 
 /*List camera palettes and return index of one that Motionplus supports*/
-static int v4l2_pixfmt_list(ctx_cam *cam, palette_item *palette_array)
+static int v4l2_pixfmt_list(ctx_dev *cam, palette_item *palette_array)
 {
     int v4l2_pal, indx_palette, indx;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
@@ -733,7 +733,7 @@ static int v4l2_pixfmt_list(ctx_cam *cam, palette_item *palette_array)
 }
 
 /* Find and select the pixel format for camera*/
-static void v4l2_palette_set(ctx_cam *cam)
+static void v4l2_palette_set(ctx_dev *cam)
 {
     int indxp, indx, retcd;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
@@ -793,7 +793,7 @@ static void v4l2_palette_set(ctx_cam *cam)
 }
 
 /* Set the memory mapping from device to Motion*/
-static void v4l2_set_mmap(ctx_cam *cam)
+static void v4l2_set_mmap(ctx_dev *cam)
 {
     enum v4l2_buf_type type;
     int buffer_index;
@@ -900,7 +900,7 @@ static void v4l2_set_mmap(ctx_cam *cam)
 }
 
 /* Assign the resulting sizes to the camera context items */
-static void v4l2_set_imgs(ctx_cam *cam)
+static void v4l2_set_imgs(ctx_dev *cam)
 {
     if (cam->v4l2cam->fd_device == -1) {
         return;
@@ -914,7 +914,7 @@ static void v4l2_set_imgs(ctx_cam *cam)
 }
 
 /* Capture the image into the buffer */
-static int v4l2_capture(ctx_cam *cam)
+static int v4l2_capture(ctx_dev *cam)
 {
     int retcd;
     sigset_t set, old;
@@ -962,7 +962,7 @@ static int v4l2_capture(ctx_cam *cam)
 }
 
 /* Convert captured image to the standard pixel format*/
-static int v4l2_convert(ctx_cam *cam, unsigned char *img_norm)
+static int v4l2_convert(ctx_dev *cam, unsigned char *img_norm)
 {
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     video_buff *the_buffer = &v4l2cam->buffers[v4l2cam->buf.index];
@@ -1038,7 +1038,7 @@ static int v4l2_convert(ctx_cam *cam, unsigned char *img_norm)
 
 }
 
-static void v4l2_device_init(ctx_cam *cam)
+static void v4l2_device_init(ctx_dev *cam)
 {
     cam->v4l2cam = (ctx_v4l2cam*)mymalloc(sizeof(ctx_v4l2cam));
     cam->v4l2cam->devctrl_array = NULL;
@@ -1067,7 +1067,7 @@ static void v4l2_device_init(ctx_cam *cam)
 }
 
 /* Update and set user params if needed */
-static void v4l2_device_select(ctx_cam *cam)
+static void v4l2_device_select(ctx_dev *cam)
 {
     int retcd;
 
@@ -1087,7 +1087,7 @@ static void v4l2_device_select(ctx_cam *cam)
 }
 
 /* Open the device */
-static void v4l2_device_open(ctx_cam *cam)
+static void v4l2_device_open(ctx_dev *cam)
 {
     int fd_device;
 
@@ -1121,7 +1121,7 @@ static void v4l2_device_open(ctx_cam *cam)
 
 }
 
-static void v4l2_log_types(ctx_cam *cam)
+static void v4l2_log_types(ctx_dev *cam)
 {
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
 
@@ -1175,7 +1175,7 @@ static void v4l2_log_types(ctx_cam *cam)
 
 }
 
-static void v4l2_log_formats(ctx_cam *cam)
+static void v4l2_log_formats(ctx_dev *cam)
 {
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     palette_item *palette_array;
@@ -1242,7 +1242,7 @@ static void v4l2_log_formats(ctx_cam *cam)
 
 }
 
-static void v4l2_set_fps(ctx_cam *cam)
+static void v4l2_set_fps(ctx_dev *cam)
 {
     int retcd;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
@@ -1276,7 +1276,7 @@ static void v4l2_set_fps(ctx_cam *cam)
 
 #endif /* HAVE_V4L2 */
 
-void v4l2_cleanup(ctx_cam *cam)
+void v4l2_cleanup(ctx_dev *cam)
 {
     #ifdef HAVE_V4L2
 
@@ -1319,7 +1319,7 @@ void v4l2_cleanup(ctx_cam *cam)
 
 }
 
-void v4l2_start(ctx_cam *cam)
+void v4l2_start(ctx_dev *cam)
 {
     #ifdef HAVE_V4L2
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening V4L2 device"));
@@ -1350,7 +1350,7 @@ void v4l2_start(ctx_cam *cam)
     #endif // HAVE_V4l2
 }
 
-int v4l2_next(ctx_cam *cam, ctx_image_data *img_data)
+int v4l2_next(ctx_dev *cam, ctx_image_data *img_data)
 {
     #ifdef HAVE_V4L2
         int retcd;

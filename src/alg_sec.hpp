@@ -91,8 +91,8 @@ struct ctx_algsec {
 };
 
 
-void algsec_detect(ctx_cam *cam);
-void algsec_init(ctx_cam *cam);
-void algsec_deinit(ctx_cam *cam);
+void algsec_detect(ctx_dev *cam);
+void algsec_init(ctx_dev *cam);
+void algsec_deinit(ctx_dev *cam);
 
 #endif /*_INCLUDE_ALG_SEC_HPP_*/

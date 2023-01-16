@@ -39,7 +39,7 @@ typedef struct {
 } Segment;
 
 
-void alg_noise_tune(ctx_cam *cam)
+void alg_noise_tune(ctx_dev *cam)
 {
     ctx_images *imgs = &cam->imgs;
     int i;
@@ -78,7 +78,7 @@ void alg_noise_tune(ctx_cam *cam)
     cam->noise = 4 + (cam->noise + sum) / 2;
 }
 
-void alg_threshold_tune(ctx_cam *cam)
+void alg_threshold_tune(ctx_dev *cam)
 {
     int i, top;
     int sum = 0;
@@ -197,7 +197,7 @@ static int alg_iflood(int x, int y, int width, int height,
     return count;
 }
 
-static int alg_labeling(ctx_cam *cam)
+static int alg_labeling(ctx_dev *cam)
 {
     ctx_images *imgs = &cam->imgs;
     unsigned char *out = imgs->image_motion.image_norm;
@@ -502,7 +502,7 @@ static int alg_erode5(unsigned char *img, int width, int height, void *buffer, u
     return sum;
 }
 
-static void alg_despeckle(ctx_cam *cam)
+static void alg_despeckle(ctx_dev *cam)
 {
     int diffs, width, height, done, i, len;
     unsigned char *out, *common_buffer;
@@ -571,7 +571,7 @@ static void alg_despeckle(ctx_cam *cam)
     return;
 }
 
-void alg_tune_smartmask(ctx_cam *cam)
+void alg_tune_smartmask(ctx_dev *cam)
 {
     int i, diff;
     int motionsize = cam->imgs.motionsize;
@@ -620,7 +620,7 @@ void alg_tune_smartmask(ctx_cam *cam)
 /* Increment for *smartmask_buffer in alg_diff_standard. */
 #define SMARTMASK_SENSITIVITY_INCR 5
 
-static void alg_diff_nomask(ctx_cam *cam)
+static void alg_diff_nomask(ctx_dev *cam)
 {
     unsigned char *ref = cam->imgs.ref;
     unsigned char *out = cam->imgs.image_motion.image_norm;
@@ -661,7 +661,7 @@ static void alg_diff_nomask(ctx_cam *cam)
 
 }
 
-static void alg_diff_mask(ctx_cam *cam)
+static void alg_diff_mask(ctx_dev *cam)
 {
     unsigned char *ref  = cam->imgs.ref;
     unsigned char *out  = cam->imgs.image_motion.image_norm;
@@ -709,7 +709,7 @@ static void alg_diff_mask(ctx_cam *cam)
 
 }
 
-static void alg_diff_smart(ctx_cam *cam)
+static void alg_diff_smart(ctx_dev *cam)
 {
 
     unsigned char *ref  = cam->imgs.ref;
@@ -767,7 +767,7 @@ static void alg_diff_smart(ctx_cam *cam)
     }
 }
 
-static void alg_diff_masksmart(ctx_cam *cam)
+static void alg_diff_masksmart(ctx_dev *cam)
 {
     unsigned char *ref = cam->imgs.ref;
     unsigned char *out = cam->imgs.image_motion.image_norm;
@@ -834,7 +834,7 @@ static void alg_diff_masksmart(ctx_cam *cam)
 
 }
 
-static bool alg_diff_fast(ctx_cam *cam)
+static bool alg_diff_fast(ctx_dev *cam)
 {
     ctx_images *imgs = &cam->imgs;
     int i, curdiff, diffs = 0;
@@ -867,7 +867,7 @@ static bool alg_diff_fast(ctx_cam *cam)
     return false;
 }
 
-static void alg_diff_standard(ctx_cam *cam)
+static void alg_diff_standard(ctx_dev *cam)
 {
 
     if (cam->smartmask_speed == 0) {
@@ -886,7 +886,7 @@ static void alg_diff_standard(ctx_cam *cam)
 
 }
 
-static void alg_lightswitch(ctx_cam *cam)
+static void alg_lightswitch(ctx_dev *cam)
 {
 
     if (cam->conf->lightswitch_percent >= 1 && !cam->lost_connection) {
@@ -914,7 +914,7 @@ static void alg_lightswitch(ctx_cam *cam)
  *   action - UPDATE_REF_FRAME or RESET_REF_FRAME
  *
  */
-void alg_update_reference_frame(ctx_cam *cam, int action)
+void alg_update_reference_frame(ctx_dev *cam, int action)
 {
     int accept_timer = cam->lastrate * cam->conf->static_object_time;
     int i, threshold_ref;
@@ -968,7 +968,7 @@ void alg_update_reference_frame(ctx_cam *cam, int action)
 }
 
 /*Copy in new reference frame*/
-void alg_new_update_frame(ctx_cam *cam)
+void alg_new_update_frame(ctx_dev *cam)
 {
 
     /* There used to be a lot more to this function before.....*/
@@ -977,7 +977,7 @@ void alg_new_update_frame(ctx_cam *cam)
 }
 
 /*Calculate the center location of changes*/
-static void alg_location_center(ctx_cam *cam)
+static void alg_location_center(ctx_dev *cam)
 {
     int width = cam->imgs.width;
     int height = cam->imgs.height;
@@ -1020,7 +1020,7 @@ static void alg_location_center(ctx_cam *cam)
 }
 
 /*Calculate distribution and variances of changes*/
-static void alg_location_dist(ctx_cam *cam)
+static void alg_location_dist(ctx_dev *cam)
 {
     ctx_images *imgs = &cam->imgs;
     int width = cam->imgs.width;
@@ -1103,7 +1103,7 @@ static void alg_location_dist(ctx_cam *cam)
 }
 
 /* Ensure min/max are within limits*/
-static void alg_location_minmax(ctx_cam *cam)
+static void alg_location_minmax(ctx_dev *cam)
 {
 
     int width = cam->imgs.width;
@@ -1146,7 +1146,7 @@ static void alg_location_minmax(ctx_cam *cam)
 }
 
 /* Determine the location and standard deviations of changes*/
-void alg_location(ctx_cam *cam)
+void alg_location(ctx_dev *cam)
 {
 
     alg_location_center(cam);
@@ -1157,7 +1157,7 @@ void alg_location(ctx_cam *cam)
 }
 
 /* Apply user or default thresholds on standard deviations*/
-void alg_stddev(ctx_cam *cam)
+void alg_stddev(ctx_dev *cam)
 {
 
     /*
@@ -1190,7 +1190,7 @@ void alg_stddev(ctx_cam *cam)
 
 }
 
-void alg_diff(ctx_cam *cam)
+void alg_diff(ctx_dev *cam)
 {
 
     if (cam->detecting_motion || cam->motapp->setup_mode) {

@@ -393,7 +393,7 @@ static void webu_json_status_vars(ctx_webui *webui, int indx_cam)
     char buf[32];
     struct tm timestamp_tm;
     struct timespec curr_ts;
-    ctx_cam *cam;
+    ctx_dev *cam;
 
     cam = webui->motapp->cam_list[indx_cam];
 

@@ -164,7 +164,7 @@ static void put_subjectarea(struct tiff_writing *into, ctx_coord *box)
  * exif data to be inserted into jpeg or webp files
  *
  */
-unsigned exif_prepare(unsigned char **exif, ctx_cam *cam,
+unsigned exif_prepare(unsigned char **exif, ctx_dev *cam,
         const struct timespec *ts_in1, ctx_coord *box)
 {
     /* description, datetime, and subtime are the values that are actually

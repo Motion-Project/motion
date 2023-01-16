@@ -260,7 +260,7 @@ int myfclose(FILE* fh)
  * host    Replaced with the name of the local machine (see gethostname(2)).
  * fps     Equivalent to %fps.
  */
-static void mystrftime_long (const ctx_cam *cam,
+static void mystrftime_long (const ctx_dev *cam,
         int width, const char *word, int l, char *out)
 {
 
@@ -347,7 +347,7 @@ static void mystrftime_long (const ctx_cam *cam,
  *
  * Returns: number of bytes written to the string s
  */
-size_t mystrftime(ctx_cam *cam, char *s, size_t max, const char *userformat,
+size_t mystrftime(ctx_dev *cam, char *s, size_t max, const char *userformat,
         const struct timespec *ts1, const char *filename, int sqltype)
 {
     char formatstring[PATH_MAX] = "";
@@ -558,7 +558,7 @@ void mythreadname_get(char *threadname)
     #endif
 }
 
-bool mycheck_passthrough(ctx_cam *cam)
+bool mycheck_passthrough(ctx_dev *cam)
 {
     #if (MYFFVER >= 57041)
         if (cam->movie_passthrough) {
@@ -1239,7 +1239,7 @@ void util_parms_update(ctx_params *params, std::string &confline)
  *      that the fork inherited from the parent in order not to pass
  *      the open handles on to the shell
  */
-void util_exec_command(ctx_cam *cam, const char *command, char *filename, int filetype)
+void util_exec_command(ctx_dev *cam, const char *command, char *filename, int filetype)
 {
     char stamp[PATH_MAX];
     mystrftime(cam, stamp, sizeof(stamp), command, &cam->current_image->imgts, filename, filetype);

@@ -299,7 +299,7 @@ struct ctx_stream {
     ctx_stream_data  secondary;  /* Copy of the image to use for web stream*/
 };
 
-struct ctx_cam {
+struct ctx_dev {
 
     ctx_motapp      *motapp;
     char            conf_filename[PATH_MAX];
@@ -406,7 +406,7 @@ struct ctx_cam {
 /*  ctx_motapp for whole motion application including all the cameras */
 struct ctx_motapp {
 
-    ctx_cam             **cam_list;
+    ctx_dev             **cam_list;
     pthread_mutex_t     global_lock;
 
     volatile int        threads_running;

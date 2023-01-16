@@ -272,9 +272,9 @@ static void motion_shutdown(ctx_motapp *motapp)
 
 }
 
-static void motion_camera_ids(ctx_cam **cam_list)
+static void motion_camera_ids(ctx_dev **cam_list)
 {
-    /* Set the camera id's on the ctx_cam.  They must be unique */
+    /* Set the camera id's on the ctx_dev.  They must be unique */
     int indx, indx2;
     int invalid_ids;
 
@@ -643,7 +643,7 @@ static void motion_cam_add(ctx_motapp *motapp)
 static void motion_cam_delete(ctx_motapp *motapp)
 {
     int indx_cam, indx;
-    ctx_cam **tmp;
+    ctx_dev **tmp;
 
     if (motapp->cam_delete == 0) {
         return;
@@ -666,7 +666,7 @@ static void motion_cam_delete(ctx_motapp *motapp)
     motapp->cam_list[motapp->cam_delete] = NULL;
 
     /* Set up a new cam_list */
-    tmp = (ctx_cam **)mymalloc(sizeof(ctx_cam *) * indx_cam);
+    tmp = (ctx_dev **)mymalloc(sizeof(ctx_dev *) * indx_cam);
     tmp[indx_cam-1] = NULL;
 
     /* Copy all the other cam pointers */

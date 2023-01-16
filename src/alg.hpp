@@ -20,12 +20,12 @@
 #ifndef _INCLUDE_ALG_HPP_
 #define _INCLUDE_ALG_HPP_
 
-    void alg_diff(ctx_cam *cam);
-    void alg_noise_tune(ctx_cam *cam);
-    void alg_threshold_tune(ctx_cam *cam);
-    void alg_tune_smartmask(ctx_cam *cam);
-    void alg_update_reference_frame(ctx_cam *cam, int action);
-    void alg_stddev(ctx_cam *cam);
-    void alg_location(ctx_cam *cam);
+    void alg_diff(ctx_dev *cam);
+    void alg_noise_tune(ctx_dev *cam);
+    void alg_threshold_tune(ctx_dev *cam);
+    void alg_tune_smartmask(ctx_dev *cam);
+    void alg_update_reference_frame(ctx_dev *cam, int action);
+    void alg_stddev(ctx_dev *cam);
+    void alg_location(ctx_dev *cam);
 
 #endif /* _INCLUDE_ALG_HPP_ */

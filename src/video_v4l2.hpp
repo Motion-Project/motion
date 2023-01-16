@@ -69,8 +69,8 @@ struct ctx_v4l2cam {
     #endif
 };
 
-    void v4l2_start(ctx_cam *cam);
-    int v4l2_next(ctx_cam *cam,  ctx_image_data *img_data);
-    void v4l2_cleanup(ctx_cam *cam);
+    void v4l2_start(ctx_dev *cam);
+    int v4l2_next(ctx_dev *cam,  ctx_image_data *img_data);
+    void v4l2_cleanup(ctx_dev *cam);
 
 #endif /* _INCLUDE_VIDEO_V4L2_HPP_ */

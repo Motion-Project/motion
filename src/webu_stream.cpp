@@ -449,7 +449,7 @@ mhdrslt webu_stream_main(ctx_webui *webui)
 }
 
 /* Initial the stream context items for the camera */
-void webu_stream_init(ctx_cam *cam)
+void webu_stream_init(ctx_dev *cam)
 {
     /* NOTE:  This runs on the motion_loop thread. */
 
@@ -485,7 +485,7 @@ void webu_stream_init(ctx_cam *cam)
 }
 
 /* Free the stream buffers and mutex for shutdown */
-void webu_stream_deinit(ctx_cam *cam)
+void webu_stream_deinit(ctx_dev *cam)
 {
     /* NOTE:  This runs on the motion_loop thread. */
 
@@ -501,7 +501,7 @@ void webu_stream_deinit(ctx_cam *cam)
 }
 
 /* Get a normal image from the motion loop and compress it*/
-static void webu_stream_getimg_norm(ctx_cam *cam, ctx_image_data *img_data)
+static void webu_stream_getimg_norm(ctx_dev *cam, ctx_image_data *img_data)
 {
     /*This is on the motion_loop thread */
     if (cam->stream.norm.jpeg_data == NULL) {
@@ -521,7 +521,7 @@ static void webu_stream_getimg_norm(ctx_cam *cam, ctx_image_data *img_data)
 }
 
 /* Get a substream image from the motion loop and compress it*/
-static void webu_stream_getimg_sub(ctx_cam *cam, ctx_image_data *img_data)
+static void webu_stream_getimg_sub(ctx_dev *cam, ctx_image_data *img_data)
 {
     /*This is on the motion_loop thread */
 
@@ -566,7 +566,7 @@ static void webu_stream_getimg_sub(ctx_cam *cam, ctx_image_data *img_data)
 }
 
 /* Get a motion image from the motion loop and compress it*/
-static void webu_stream_getimg_motion(ctx_cam *cam)
+static void webu_stream_getimg_motion(ctx_dev *cam)
 {
     /*This is on the motion_loop thread */
 
@@ -587,7 +587,7 @@ static void webu_stream_getimg_motion(ctx_cam *cam)
 }
 
 /* Get a source image from the motion loop and compress it*/
-static void webu_stream_getimg_source(ctx_cam *cam)
+static void webu_stream_getimg_source(ctx_dev *cam)
 {
     /*This is on the motion_loop thread */
 
@@ -608,7 +608,7 @@ static void webu_stream_getimg_source(ctx_cam *cam)
 }
 
 /* Get a secondary image from the motion loop and compress it*/
-static void webu_stream_getimg_secondary(ctx_cam *cam)
+static void webu_stream_getimg_secondary(ctx_dev *cam)
 {
     /*This is on the motion_loop thread */
 
@@ -627,7 +627,7 @@ static void webu_stream_getimg_secondary(ctx_cam *cam)
 }
 
 /* Get image from the motion loop and compress it*/
-void webu_stream_getimg(ctx_cam *cam, ctx_image_data *img_data)
+void webu_stream_getimg(ctx_dev *cam, ctx_image_data *img_data)
 {
 
     /*This is on the motion_loop thread */

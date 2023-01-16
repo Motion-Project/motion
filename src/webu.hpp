@@ -99,7 +99,7 @@
         int                         mhd_first;      /* Boolean for whether it is the first connection*/
         struct MHD_Connection       *connection;    /* The MHD connection value from the client */
         ctx_motapp                  *motapp;        /* The motionplus context pointer */
-        ctx_cam                     *cam;           /* The ctx_cam information for the camera requested */
+        ctx_dev                     *cam;           /* The ctx_dev information for the camera requested */
 
     };
 

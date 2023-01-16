@@ -404,7 +404,7 @@ void webu_post_action_user(ctx_webui *webui)
 {
     int indx, indx2;
     ctx_params *wact;
-    ctx_cam *cam;
+    ctx_dev *cam;
     std::string tmp;
 
     wact = webui->motapp->webcontrol_actions;
@@ -573,7 +573,7 @@ static void webu_post_config(ctx_webui *webui)
 void webu_post_ptz(ctx_webui *webui)
 {
     int indx;
-    ctx_cam *cam;
+    ctx_dev *cam;
     ctx_params *wact;
 
     wact = webui->motapp->webcontrol_actions;

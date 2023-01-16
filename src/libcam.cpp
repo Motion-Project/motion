@@ -46,7 +46,7 @@
 
 using namespace libcamera;
 
-void cls_libcam::cam_start_params(ctx_cam *ptr)
+void cls_libcam::cam_start_params(ctx_dev *ptr)
 {
     int indx;
 
@@ -263,7 +263,7 @@ void cls_libcam::req_complete(Request *request)
     req_queue.push(request);
 }
 
-int cls_libcam::cam_start(ctx_cam *cam)
+int cls_libcam::cam_start(ctx_dev *cam)
 {
     int retcd;
 
@@ -371,7 +371,7 @@ int cls_libcam::cam_next(ctx_image_data *img_data)
 #endif
 
 /** close and stop libcam */
-void libcam_cleanup(ctx_cam *cam)
+void libcam_cleanup(ctx_dev *cam)
 {
     #ifdef HAVE_LIBCAM
         cam->libcam->cam_stop();
@@ -382,7 +382,7 @@ void libcam_cleanup(ctx_cam *cam)
 }
 
 /** initialize and start libcam */
-void libcam_start(ctx_cam *cam)
+void libcam_start(ctx_dev *cam)
 {
     #ifdef HAVE_LIBCAM
         int retcd;
@@ -404,7 +404,7 @@ void libcam_start(ctx_cam *cam)
 
 
 /** get next image from libcam */
-int libcam_next(ctx_cam *cam,  ctx_image_data *img_data)
+int libcam_next(ctx_dev *cam,  ctx_image_data *img_data)
 {
     #ifdef HAVE_LIBCAM
         int retcd;

@@ -394,7 +394,7 @@ static GLOBAL(int) _jpeg_mem_size(j_compress_ptr cinfo)
  * It must be called after jpeg_start_compress() but before
  * any image data is written by jpeg_write_scanlines().
  */
-static void put_jpeg_exif(j_compress_ptr cinfo, ctx_cam *cam,
+static void put_jpeg_exif(j_compress_ptr cinfo, ctx_dev *cam,
         const struct timespec *ts1, ctx_coord *box)
 {
     unsigned char *exif = NULL;
@@ -523,7 +523,7 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
 
 int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
         unsigned char *input_image, int width, int height, int quality,
-        ctx_cam *cam, struct timespec *ts1, ctx_coord *box)
+        ctx_dev *cam, struct timespec *ts1, ctx_coord *box)
 
 {
     int i, j, jpeg_image_size;
@@ -612,7 +612,7 @@ int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
 
 int jpgutl_put_grey(unsigned char *dest_image, int image_size,
         unsigned char *input_image, int width, int height, int quality,
-        ctx_cam *cam, struct timespec *ts1, ctx_coord *box)
+        ctx_dev *cam, struct timespec *ts1, ctx_coord *box)
 {
     int y, dest_image_size;
     JSAMPROW row_ptr[1];

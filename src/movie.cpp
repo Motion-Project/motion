@@ -1640,7 +1640,7 @@ void movie_reset_start_time(ctx_movie *movie, const struct timespec *ts1)
 
 }
 
-static const char* movie_init_container(ctx_cam *cam)
+static const char* movie_init_container(ctx_dev *cam)
 {
 
     /* The following section allows for testing of all the various containers
@@ -1684,7 +1684,7 @@ static const char* movie_init_container(ctx_cam *cam)
 
 }
 
-int movie_init_norm(ctx_cam *cam, struct timespec *ts1)
+int movie_init_norm(ctx_dev *cam, struct timespec *ts1)
 {
     char tmp[PATH_MAX];
     const char *container;
@@ -1758,7 +1758,7 @@ int movie_init_norm(ctx_cam *cam, struct timespec *ts1)
 
 }
 
-int movie_init_motion(ctx_cam *cam, struct timespec *ts1)
+int movie_init_motion(ctx_dev *cam, struct timespec *ts1)
 {
     char tmp[PATH_MAX];
     const char *container;
@@ -1825,7 +1825,7 @@ int movie_init_motion(ctx_cam *cam, struct timespec *ts1)
 
 }
 
-int movie_init_timelapse(ctx_cam *cam, struct timespec *ts1)
+int movie_init_timelapse(ctx_dev *cam, struct timespec *ts1)
 {
     char tmp[PATH_MAX];
     const char *container_mpg = "mpg";

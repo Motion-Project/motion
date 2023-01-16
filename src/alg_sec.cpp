@@ -36,7 +36,7 @@
 using namespace cv;
 using namespace dnn;
 
-static void algsec_image_show(ctx_cam *cam, Mat &mat_dst)
+static void algsec_image_show(ctx_dev *cam, Mat &mat_dst)
 {
     //std::string testdir;
     std::vector<uchar> buff;    //buffer for coding
@@ -74,7 +74,7 @@ static void algsec_image_show(ctx_cam *cam, Mat &mat_dst)
 
 }
 
-static void algsec_image_label(ctx_cam *cam, Mat &mat_dst
+static void algsec_image_label(ctx_dev *cam, Mat &mat_dst
     , std::vector<Rect> &src_pos, std::vector<double> &src_weights)
 {
     std::vector<Rect> fltr_pos;
@@ -139,7 +139,7 @@ static void algsec_image_label(ctx_cam *cam, Mat &mat_dst
 
 }
 
-static void algsec_image_label(ctx_cam *cam, Mat &mat_dst
+static void algsec_image_label(ctx_dev *cam, Mat &mat_dst
     , double confidence, Point classIdPoint)
 {
     ctx_algsec_model *algmdl = &cam->algsec->models;
@@ -183,7 +183,7 @@ static void algsec_image_label(ctx_cam *cam, Mat &mat_dst
 
 }
 
-static void algsec_image_roi(ctx_cam *cam, Mat &mat_src, Mat &mat_dst)
+static void algsec_image_roi(ctx_dev *cam, Mat &mat_src, Mat &mat_dst)
 {
     cv::Rect roi;
     int width, height, x, y;
@@ -222,7 +222,7 @@ static void algsec_image_roi(ctx_cam *cam, Mat &mat_src, Mat &mat_dst)
 
 }
 
-static void algsec_image_type(ctx_cam *cam, Mat &mat_dst)
+static void algsec_image_type(ctx_dev *cam, Mat &mat_dst)
 {
     ctx_algsec_model *algmdl = &cam->algsec->models;
 
@@ -249,7 +249,7 @@ static void algsec_image_type(ctx_cam *cam, Mat &mat_dst)
 
 }
 
-static void algsec_detect_hog(ctx_cam *cam)
+static void algsec_detect_hog(ctx_dev *cam)
 {
     std::vector<double> detect_weights;
     std::vector<Rect> detect_pos;
@@ -282,7 +282,7 @@ static void algsec_detect_hog(ctx_cam *cam)
     }
 }
 
-static void algsec_detect_haar(ctx_cam *cam)
+static void algsec_detect_haar(ctx_dev *cam)
 {
     ctx_algsec_model *algmdl = &cam->algsec->models;
     std::vector<double> detect_weights;
@@ -313,7 +313,7 @@ static void algsec_detect_haar(ctx_cam *cam)
     }
 }
 
-static void algsec_detect_dnn(ctx_cam *cam)
+static void algsec_detect_dnn(ctx_dev *cam)
 {
     ctx_algsec_model *algmdl = &cam->algsec->models;
     Mat mat_dst, softmaxProb;
@@ -350,7 +350,7 @@ static void algsec_detect_dnn(ctx_cam *cam)
     }
 }
 
-static void algsec_load_haar(ctx_cam *cam)
+static void algsec_load_haar(ctx_dev *cam)
 {
     ctx_algsec_model *algmdl = &cam->algsec->models;
     try {
@@ -374,7 +374,7 @@ static void algsec_load_haar(ctx_cam *cam)
     }
 }
 
-static void algsec_load_dnn(ctx_cam *cam)
+static void algsec_load_dnn(ctx_dev *cam)
 {
     ctx_algsec_model *algmdl = &cam->algsec->models;
     std::string line;
@@ -415,7 +415,7 @@ static void algsec_load_dnn(ctx_cam *cam)
     }
 }
 
-static void algsec_params_log(ctx_cam *cam)
+static void algsec_params_log(ctx_dev *cam)
 {
     ctx_algsec_model *algmdl = &cam->algsec->models;
     int indx;
@@ -429,7 +429,7 @@ static void algsec_params_log(ctx_cam *cam)
     }
 }
 
-static void algsec_params_model(ctx_cam *cam)
+static void algsec_params_model(ctx_dev *cam)
 {
     ctx_algsec_model *algmdl = &cam->algsec->models;
     int indx;
@@ -493,7 +493,7 @@ static void algsec_params_model(ctx_cam *cam)
     }
 }
 
-static void algsec_params_defaults(ctx_cam *cam)
+static void algsec_params_defaults(ctx_dev *cam)
 {
     ctx_algsec_model *algmdl = &cam->algsec->models;
 
@@ -526,7 +526,7 @@ static void algsec_params_defaults(ctx_cam *cam)
 
 }
 
-static void algsec_params_deinit(ctx_cam *cam)
+static void algsec_params_deinit(ctx_dev *cam)
 {
     ctx_algsec_model *algmdl = &cam->algsec->models;
 
@@ -536,7 +536,7 @@ static void algsec_params_deinit(ctx_cam *cam)
     }
 }
 
-static void algsec_params_init(ctx_cam *cam)
+static void algsec_params_init(ctx_dev *cam)
 {
     ctx_algsec_model *algmdl = &cam->algsec->models;
 
@@ -548,7 +548,7 @@ static void algsec_params_init(ctx_cam *cam)
 }
 
 /**Load the parms from the config to algsec struct */
-static void algsec_load_params(ctx_cam *cam)
+static void algsec_load_params(ctx_dev *cam)
 {
     pthread_mutex_init(&cam->algsec->mutex, NULL);
 
@@ -578,7 +578,7 @@ static void algsec_load_params(ctx_cam *cam)
 }
 
 /**Preload the models and initialize them */
-static void algsec_load_models(ctx_cam *cam)
+static void algsec_load_models(ctx_dev *cam)
 {
     if (cam->algsec->models.method == "haar") {
         algsec_load_haar(cam);
@@ -604,7 +604,7 @@ static void algsec_load_models(ctx_cam *cam)
 /**Detection thread processing loop */
 static void *algsec_handler(void *arg)
 {
-    ctx_cam *cam = (ctx_cam*)arg;
+    ctx_dev *cam = (ctx_dev*)arg;
     long interval;
 
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("Starting."));
@@ -640,7 +640,7 @@ static void *algsec_handler(void *arg)
 }
 
 /**Start the detection thread*/
-static void algsec_start_handler(ctx_cam *cam)
+static void algsec_start_handler(ctx_dev *cam)
 {
     int retcd;
     pthread_attr_t handler_attribute;
@@ -664,7 +664,7 @@ static void algsec_start_handler(ctx_cam *cam)
 #endif
 
 /** Initialize the secondary processes and parameters */
-void algsec_init(ctx_cam *cam)
+void algsec_init(ctx_dev *cam)
 {
     cam->algsec_inuse = false;
 
@@ -679,7 +679,7 @@ void algsec_init(ctx_cam *cam)
 }
 
 /** Shut down the secondary detection components */
-void algsec_deinit(ctx_cam *cam)
+void algsec_deinit(ctx_dev *cam)
 {
     #ifdef HAVE_OPENCV
         int waitcnt = 0;
@@ -718,7 +718,7 @@ void algsec_deinit(ctx_cam *cam)
 }
 
 /*Invoke the secondary detetction method*/
-void algsec_detect(ctx_cam *cam)
+void algsec_detect(ctx_dev *cam)
 {
     #ifdef HAVE_OPENCV
         if (cam->algsec_inuse == false){

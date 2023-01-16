@@ -20,16 +20,16 @@
 #ifndef _INCLUDE_PICTURE_HPP_
 #define _INCLUDE_PICTURE_HPP_
 
-    struct ctx_cam;
+    struct ctx_dev;
 
-    int pic_put_memory(struct ctx_cam *cam, unsigned char* dest_image
+    int pic_put_memory(struct ctx_dev *cam, unsigned char* dest_image
         , int image_size, unsigned char *image, int quality, int width, int height);
-    void pic_save_norm(struct ctx_cam *cam, char *file, unsigned char *image, int ftype);
-    void pic_save_roi(struct ctx_cam *cam, char *file, unsigned char *image);
+    void pic_save_norm(struct ctx_dev *cam, char *file, unsigned char *image, int ftype);
+    void pic_save_roi(struct ctx_dev *cam, char *file, unsigned char *image);
     unsigned char *pic_load_pgm(FILE *picture, int width, int height);
     void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst);
-    void pic_save_preview(struct ctx_cam *cam, struct ctx_image_data *img);
-    void pic_init_privacy(struct ctx_cam *cam);
-    void pic_init_mask(struct ctx_cam *cam);
+    void pic_save_preview(struct ctx_dev *cam, struct ctx_image_data *img);
+    void pic_init_privacy(struct ctx_dev *cam);
+    void pic_init_mask(struct ctx_dev *cam);
 
 #endif /* _INCLUDE_PICTURE_HPP_ */
