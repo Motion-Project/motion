@@ -579,7 +579,7 @@ static void motion_init(ctx_motapp *motapp, int argc, char *argv[])
     motapp->parms_changed = false;
     motapp->pause = false;
     motapp->cam_add = false;
-    motapp->cam_delete = 0;
+    motapp->cam_delete = -1;
     motapp->cam_cnt = 0;
 
     motapp->conf = new ctx_config;
@@ -638,52 +638,61 @@ static void motion_cam_add(ctx_motapp *motapp)
 /* Check for whether to delete a new cam */
 static void motion_cam_delete(ctx_motapp *motapp)
 {
-    int indx_cam, indx;
-    ctx_dev **tmp;
+    int indx1, indx2, maxcnt;
+    ctx_dev **tmp, *cam;
 
-    if (motapp->cam_delete == 0) {
+    if ((motapp->cam_delete == -1) || (motapp->cam_cnt == 0)) {
+        motapp->cam_delete = -1;
         return;
     }
-    /* motapp->cam_delete contains the index of the cam to delete */
-    indx_cam = 0;
-    while (motapp->cam_list[indx_cam] != NULL) {
-        indx_cam++;
-    }
 
-    if (motapp->cam_delete > indx_cam) {
+    if (motapp->cam_delete >= motapp->cam_cnt) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,_("Invalid camera specified for deletion. %d"), motapp->cam_delete);
+            , _("Invalid camera specified for deletion. %d"), motapp->cam_delete);
+        motapp->cam_delete = -1;
         return;
     }
 
-    /* Delete the config context */
-    delete motapp->cam_list[motapp->cam_delete]->conf;
-    delete motapp->cam_list[motapp->cam_delete];
-    motapp->cam_list[motapp->cam_delete] = NULL;
+    cam = motapp->cam_list[motapp->cam_delete];
 
-    /* Set up a new cam_list */
-    tmp = (ctx_dev **)mymalloc(sizeof(ctx_dev *) * indx_cam);
-    tmp[indx_cam-1] = NULL;
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Stopping %s camera_id %d")
+        , cam->conf->camera_name.c_str(), cam->camera_id);
+    cam->restart_cam = false;
+    cam->finish_cam = true;
 
-    /* Copy all the other cam pointers */
-    indx_cam = 0;
-    indx = 0;
-    while (motapp->cam_list[indx_cam] != NULL) {
-        if (indx_cam != motapp->cam_delete) {
-            tmp[indx] = motapp->cam_list[indx_cam];
-            indx++;
+    maxcnt = 100;
+    indx1 = 0;
+    while ((cam->running_cam) && (indx1 < maxcnt)) {
+        SLEEP(0, 50000000)
+        indx1++;
+    }
+    if (indx1 == maxcnt) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error stopping camera.  Timed out shutting down");
+        motapp->cam_delete = -1;
+        return;
+    }
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Camera stopped");
+
+    tmp = (ctx_dev **)mymalloc(sizeof(ctx_dev *) * (motapp->cam_cnt));
+    tmp[motapp->cam_cnt-1] = NULL;
+
+    indx2 = 0;
+    for (indx1=0; indx1<motapp->cam_cnt; indx1++) {
+        if (indx1 != motapp->cam_delete) {
+            tmp[indx2] = motapp->cam_list[indx1];
+            indx2++;
         }
-        indx_cam++;
     }
 
-    /* Swap out the old list with the new */
     pthread_mutex_lock(&motapp->mutex_camlst);
+        delete motapp->cam_list[motapp->cam_delete]->conf;
+        delete motapp->cam_list[motapp->cam_delete];
         myfree(&motapp->cam_list);
+        motapp->cam_cnt--;
         motapp->cam_list = tmp;
     pthread_mutex_unlock(&motapp->mutex_camlst);
 
-    /* Reset the delete flag */
-    motapp->cam_delete = 0;
+    motapp->cam_delete = -1;
 
 }
 
@@ -773,6 +782,7 @@ int main (int argc, char **argv)
     pthread_mutex_destroy(&motapp->mutex_camlst);
     pthread_mutex_destroy(&motapp->mutex_post);
 
+    delete motapp->conf;
     delete motapp;
 
     return 0;

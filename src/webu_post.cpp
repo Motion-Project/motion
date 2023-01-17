@@ -87,36 +87,17 @@ static void webu_post_cam_delete(ctx_webui *webui)
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Deleting camera.");
     }
 
+    webui->motapp->cam_delete = webui->threadnbr;
 
     maxcnt = 100;
-
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
-        _("Stopping cam %d"),webui->cam->camera_id);
-    webui->motapp->cam_list[webui->threadnbr]->restart_cam = false;
-    webui->motapp->cam_list[webui->threadnbr]->finish_cam = true;
-
     indx = 0;
-    while ((webui->motapp->cam_list[webui->threadnbr]->running_cam) && (indx < maxcnt)) {
+    while ((webui->motapp->cam_delete != -1) && (indx < maxcnt)) {
         SLEEP(0, 50000000)
         indx++;
     }
     if (indx == maxcnt) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error stopping camera.  Timed out shutting down");
-        return;
-    }
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Camera stopped");
-
-    webui->motapp->cam_delete = webui->threadnbr;
-
-    indx = 0;
-    while ((webui->motapp->cam_delete > 0) && (indx < maxcnt)) {
-        SLEEP(0, 50000000)
-        indx++;
-    }
-
-    if (indx == maxcnt) {
-        webui->motapp->cam_delete = 0;
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error deleting camera.  Timed out");
+        webui->motapp->cam_delete = -1;
         return;
     }
 

@@ -49,7 +49,9 @@ static void webu_stream_mjpeg_delay(ctx_webui *webui)
     struct timespec time_curr;
     long   stream_delay;
 
-    if (webui->cam->motapp->webcontrol_finish) {
+    if ((webui->motapp->webcontrol_finish) ||
+        (webui->cam->finish_cam)) {
+        webui->resp_used = 0;
         return;
     }
 
@@ -86,7 +88,9 @@ static void webu_stream_mjpeg_getimg(ctx_webui *webui)
     int  header_len;
     ctx_stream_data *local_stream;
 
-    if (webui->cam->motapp->webcontrol_finish) {
+    if ((webui->motapp->webcontrol_finish) ||
+        (webui->cam->finish_cam)) {
+        webui->resp_used = 0;
         return;
     }
 
@@ -157,7 +161,8 @@ static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, s
 
     (void)pos;  /*Remove compiler warning */
 
-    if (webui->cam->motapp->webcontrol_finish) {
+    if ((webui->motapp->webcontrol_finish) ||
+        (webui->cam->finish_cam)) {
         return -1;
     }
 
@@ -250,6 +255,11 @@ static int webu_stream_checks(ctx_webui *webui)
             MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
                 , _("Invalid thread specified: %s"),webui->url.c_str());
             pthread_mutex_unlock(&webui->motapp->mutex_camlst);
+            return -1;
+        }
+
+        if ((webui->motapp->webcontrol_finish) ||
+            (webui->cam->finish_cam)) {
             return -1;
         }
 
@@ -437,7 +447,7 @@ mhdrslt webu_stream_main(ctx_webui *webui)
         return MHD_NO;
     }
 
-    if (webui->cam->passflag == 0) {
+    if ((webui->cam->passflag == 0) || (webui->cam->finish_cam)) {
         return MHD_NO;
     }
 
