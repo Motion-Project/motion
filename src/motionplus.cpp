@@ -452,7 +452,7 @@ static void motion_watchdog(ctx_motapp *motapp, int camindx)
 {
     int indx;
 
-    if (motapp->cam_list[camindx]->running_cam == false) {
+    if (motapp->cam_list[camindx]->running_dev == false) {
         return;
     }
 
@@ -522,13 +522,13 @@ static void motion_watchdog(ctx_motapp *motapp, int camindx)
                 pthread_kill(motapp->cam_list[indx]->netcam_high->thread_id, SIGVTALRM);
             }
         }
-        if (motapp->cam_list[indx]->running_cam == true) {
+        if (motapp->cam_list[indx]->running_dev == true) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("Camera %d - Watchdog kill.")
                 , motapp->cam_list[indx]->camera_id);
             pthread_kill(motapp->cam_list[indx]->thread_id, SIGVTALRM);
         };
-        motapp->cam_list[indx]->running_cam = false;
+        motapp->cam_list[indx]->running_dev = false;
         motapp->cam_list[indx]->restart_dev = false;
         indx++;
     }
@@ -546,7 +546,7 @@ static int motion_check_threadcount(ctx_motapp *motapp)
     thrdcnt = 0;
 
     for (indx=0; indx<motapp->cam_cnt; indx++) {
-        if (motapp->cam_list[indx]->running_cam || motapp->cam_list[indx]->restart_dev) {
+        if (motapp->cam_list[indx]->running_dev || motapp->cam_list[indx]->restart_dev) {
             thrdcnt++;
         }
     }
@@ -662,7 +662,7 @@ static void motion_cam_delete(ctx_motapp *motapp)
 
     maxcnt = 100;
     indx1 = 0;
-    while ((cam->running_cam) && (indx1 < maxcnt)) {
+    while ((cam->running_dev) && (indx1 < maxcnt)) {
         SLEEP(0, 50000000)
         indx1++;
     }
@@ -736,7 +736,7 @@ int main (int argc, char **argv)
 
             for (indx=0; indx<motapp->cam_cnt; indx++) {
                 /* Check if threads wants to be restarted */
-                if ((motapp->cam_list[indx]->running_cam == false) &&
+                if ((motapp->cam_list[indx]->running_dev == false) &&
                     (motapp->cam_list[indx]->restart_dev == true)) {
                     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                         ,_("MotionPlus camera %d restart")

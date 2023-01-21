@@ -1423,7 +1423,7 @@ void *motion_loop(void *arg)
 {
     ctx_dev *cam =(ctx_dev *) arg;
 
-    cam->running_cam = true;
+    cam->running_dev = true;
 
     pthread_mutex_lock(&cam->motapp->global_lock);
         cam->motapp->threads_running++;
@@ -1463,7 +1463,7 @@ void *motion_loop(void *arg)
     pthread_mutex_unlock(&cam->motapp->global_lock);
 
     cam->finish_dev = true;
-    cam->running_cam = false;
+    cam->running_dev = false;
 
     pthread_exit(NULL);
 }

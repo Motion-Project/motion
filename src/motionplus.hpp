@@ -342,7 +342,7 @@ struct ctx_dev {
     volatile bool           event_user;  /* Boolean for whether to user triggered an event */
     volatile bool           finish_dev;      /* End the device thread */
     volatile bool           restart_dev;     /* Restart the device thread when it ends */
-    bool                    running_cam;     /* thread is running*/
+    bool                    running_dev;     /* Device thread is running*/
     volatile int            watchdog;
 
     int                     event_nr;
