@@ -313,7 +313,7 @@ void pic_save_norm(ctx_dev *cam, char *file, unsigned char *image, int ftype)
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
                 ,_("Can't write picture to file %s - check access rights to target directory\n"
                 "Thread is going to finish due to this fatal error"), file);
-            cam->finish_cam = 1;
+            cam->finish_dev = true;
             cam->restart_cam = 0;
             return;
         } else {

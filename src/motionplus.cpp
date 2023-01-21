@@ -69,7 +69,7 @@ static void motion_signal_process(ctx_motapp *motapp)
             indx = 0;
             while (motapp->cam_list[indx]) {
                 motapp->cam_list[indx]->event_stop = true;
-                motapp->cam_list[indx]->finish_cam = true;
+                motapp->cam_list[indx]->finish_dev = true;
                 motapp->cam_list[indx]->restart_cam = false;
                 indx++;
             }
@@ -494,7 +494,7 @@ static void motion_watchdog(ctx_motapp *motapp, int camindx)
             motapp->cam_list[indx]->netcam_high->finish = true;
         }
         motapp->cam_list[indx]->event_stop = true;
-        motapp->cam_list[indx]->finish_cam = true;
+        motapp->cam_list[indx]->finish_dev = true;
         indx++;
     }
 
@@ -658,7 +658,7 @@ static void motion_cam_delete(ctx_motapp *motapp)
     MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Stopping %s camera_id %d")
         , cam->conf->camera_name.c_str(), cam->camera_id);
     cam->restart_cam = false;
-    cam->finish_cam = true;
+    cam->finish_dev = true;
 
     maxcnt = 100;
     indx1 = 0;

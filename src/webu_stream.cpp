@@ -50,7 +50,7 @@ static void webu_stream_mjpeg_delay(ctx_webui *webui)
     long   stream_delay;
 
     if ((webui->motapp->webcontrol_finish) ||
-        (webui->cam->finish_cam)) {
+        (webui->cam->finish_dev)) {
         webui->resp_used = 0;
         return;
     }
@@ -89,7 +89,7 @@ static void webu_stream_mjpeg_getimg(ctx_webui *webui)
     ctx_stream_data *local_stream;
 
     if ((webui->motapp->webcontrol_finish) ||
-        (webui->cam->finish_cam)) {
+        (webui->cam->finish_dev)) {
         webui->resp_used = 0;
         return;
     }
@@ -162,7 +162,7 @@ static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, s
     (void)pos;  /*Remove compiler warning */
 
     if ((webui->motapp->webcontrol_finish) ||
-        (webui->cam->finish_cam)) {
+        (webui->cam->finish_dev)) {
         return -1;
     }
 
@@ -259,7 +259,7 @@ static int webu_stream_checks(ctx_webui *webui)
         }
 
         if ((webui->motapp->webcontrol_finish) ||
-            (webui->cam->finish_cam)) {
+            (webui->cam->finish_dev)) {
             return -1;
         }
 
@@ -447,7 +447,7 @@ mhdrslt webu_stream_main(ctx_webui *webui)
         return MHD_NO;
     }
 
-    if ((webui->cam->passflag == 0) || (webui->cam->finish_cam)) {
+    if ((webui->cam->passflag == 0) || (webui->cam->finish_dev)) {
         return MHD_NO;
     }
 

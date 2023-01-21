@@ -1045,7 +1045,7 @@ static void v4l2_device_init(ctx_dev *cam)
     cam->v4l2cam->devctrl_count = 0;
     cam->v4l2cam->buffer_count= 0;
     cam->v4l2cam->pframe = -1;
-    cam->v4l2cam->finish = cam->finish_cam;
+    cam->v4l2cam->finish = cam->finish_dev;
     cam->v4l2cam->buffers = NULL;
 
     cam->v4l2cam->params =(ctx_params*) mymalloc(sizeof(ctx_params));

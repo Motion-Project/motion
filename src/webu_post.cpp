@@ -320,7 +320,7 @@ void webu_post_action_restart(ctx_webui *webui)
         indx = 0;
         while (webui->motapp->cam_list[indx]) {
             webui->motapp->cam_list[indx]->restart_cam = true;
-            webui->motapp->cam_list[indx]->finish_cam = true;
+            webui->motapp->cam_list[indx]->finish_dev = true;
             indx++;
         }
     } else {
@@ -328,7 +328,7 @@ void webu_post_action_restart(ctx_webui *webui)
             , _("Restarting camera %d")
             , webui->motapp->cam_list[webui->threadnbr]->camera_id);
         webui->motapp->cam_list[webui->threadnbr]->restart_cam = true;
-        webui->motapp->cam_list[webui->threadnbr]->finish_cam = true;
+        webui->motapp->cam_list[webui->threadnbr]->finish_dev = true;
     }
 }
 
@@ -358,7 +358,7 @@ void webu_post_action_stop(ctx_webui *webui)
             webui->motapp->cam_list[indx]->restart_cam = false;
             webui->motapp->cam_list[indx]->event_stop = true;
             webui->motapp->cam_list[indx]->event_user = false;
-            webui->motapp->cam_list[indx]->finish_cam = true;
+            webui->motapp->cam_list[indx]->finish_dev = true;
             indx++;
         }
     } else {
@@ -368,7 +368,7 @@ void webu_post_action_stop(ctx_webui *webui)
         webui->motapp->cam_list[webui->threadnbr]->restart_cam = false;
         webui->motapp->cam_list[webui->threadnbr]->event_stop = true;
         webui->motapp->cam_list[webui->threadnbr]->event_user = false;
-        webui->motapp->cam_list[webui->threadnbr]->finish_cam = true;
+        webui->motapp->cam_list[webui->threadnbr]->finish_dev = true;
     }
 
 }

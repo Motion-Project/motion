@@ -864,7 +864,7 @@ static mhdrslt webu_answer(void *cls, struct MHD_Connection *connection, const c
     }
 
     if (webui->cam != NULL) {
-        if (webui->cam->finish_cam) {
+        if (webui->cam->finish_dev) {
            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
            return MHD_NO;
         }

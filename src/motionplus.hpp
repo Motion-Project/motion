@@ -340,7 +340,7 @@ struct ctx_dev {
     volatile bool           snapshot;    /* Make a snapshot */
     volatile bool           event_stop;  /* Boolean for whether to stop a event */
     volatile bool           event_user;  /* Boolean for whether to user triggered an event */
-    volatile bool           finish_cam;      /* End the thread */
+    volatile bool           finish_dev;      /* End the device thread */
     volatile bool           restart_cam;     /* Restart the thread when it ends */
     bool                    running_cam;     /* thread is running*/
     volatile int            watchdog;
