@@ -502,8 +502,8 @@ size_t mystrftime(ctx_dev *cam, char *s, size_t max, const char *userformat,
                 break;
 
             case '$': // thread name
-                if (cam->conf->camera_name != "") {
-                    cam->conf->camera_name.copy(tempstr, PATH_MAX);
+                if (cam->conf->device_name != "") {
+                    cam->conf->device_name.copy(tempstr, PATH_MAX);
                 } else {
                     ++pos_userformat;
                 }

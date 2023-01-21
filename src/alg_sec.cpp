@@ -669,12 +669,12 @@ void algsec_init(ctx_dev *cam)
     cam->algsec_inuse = false;
 
     #ifdef HAVE_OPENCV
-        mythreadname_set("cv",cam->threadnr,cam->conf->camera_name.c_str());
+        mythreadname_set("cv",cam->threadnr,cam->conf->device_name.c_str());
             cam->algsec = new ctx_algsec;
             algsec_load_params(cam);
             algsec_load_models(cam);
             algsec_start_handler(cam);
-        mythreadname_set("ml",cam->threadnr,cam->conf->camera_name.c_str());
+        mythreadname_set("ml",cam->threadnr,cam->conf->device_name.c_str());
     #endif
 }
 

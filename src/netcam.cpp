@@ -1526,7 +1526,7 @@ static void netcam_set_parms (ctx_dev *cam, ctx_netcam *netcam )
         ,_("%s: Setting up camera."),netcam->cameratype);
 
     netcam->status = NETCAM_NOTCONNECTED;
-    cam->conf->camera_name.copy(netcam->camera_name,PATH_MAX);
+    cam->conf->device_name.copy(netcam->camera_name,PATH_MAX);
     mycheck_passthrough(cam);
     util_parms_add_default(netcam->params,"decoder","NULL");
     netcam->img_recv =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));

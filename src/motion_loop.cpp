@@ -1429,7 +1429,7 @@ void *motion_loop(void *arg)
         cam->motapp->threads_running++;
     pthread_mutex_unlock(&cam->motapp->global_lock);
 
-    mythreadname_set("ml",cam->threadnr,cam->conf->camera_name.c_str());
+    mythreadname_set("ml",cam->threadnr,cam->conf->device_name.c_str());
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cam->threadnr));
 
     cam->finish_dev = false;

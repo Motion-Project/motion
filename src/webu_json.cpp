@@ -191,10 +191,10 @@ static void webu_json_config_cam_list(ctx_webui *webui)
         cam = webui->motapp->cam_list[indx_cam];
         strid =std::to_string(cam->device_id);
         webui->resp_page += ",\"" + std::to_string(indx_cam) + "\":";
-        if (cam->conf->camera_name == "") {
+        if (cam->conf->device_name == "") {
             webui->resp_page += "{\"name\": \"camera " + strid + "\"";
         } else {
-            webui->resp_page += "{\"name\": \"" + cam->conf->camera_name + "\"";
+            webui->resp_page += "{\"name\": \"" + cam->conf->device_name + "\"";
         }
         webui->resp_page += ",\"id\": " + strid;
         webui->resp_page += ",\"url\": \"" + webui->hostfull + "/" + strid + "/\"} ";
@@ -377,7 +377,7 @@ static void webu_json_status_vars(ctx_webui *webui, int indx_cam)
 
     webui->resp_page += "{";
 
-    webui->resp_page += "\"name\":\"" + cam->conf->camera_name+"\"";
+    webui->resp_page += "\"name\":\"" + cam->conf->device_name+"\"";
     webui->resp_page += ",\"id\":" + std::to_string(cam->device_id);
     webui->resp_page += ",\"width\":" + std::to_string(cam->imgs.width);
     webui->resp_page += ",\"height\":" + std::to_string(cam->imgs.height);

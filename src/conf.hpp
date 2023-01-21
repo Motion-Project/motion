@@ -37,7 +37,7 @@
         bool            setup_mode;
         bool            native_language;
 
-        std::string     camera_name;
+        std::string     device_name;
         int             device_id;
         std::string     camera_dir;
         std::string     target_dir;

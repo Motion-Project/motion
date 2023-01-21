@@ -656,7 +656,7 @@ static void motion_cam_delete(ctx_motapp *motapp)
     cam = motapp->cam_list[motapp->cam_delete];
 
     MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Stopping %s device_id %d")
-        , cam->conf->camera_name.c_str(), cam->device_id);
+        , cam->conf->device_name.c_str(), cam->device_id);
     cam->restart_dev = false;
     cam->finish_dev = true;
 

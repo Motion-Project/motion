@@ -46,7 +46,7 @@ ctx_parm config_parms[] = {
     {"log_type",                  PARM_TYP_LIST,   PARM_CAT_00, WEBUI_LEVEL_LIMITED },
     {"native_language",           PARM_TYP_BOOL,   PARM_CAT_00, WEBUI_LEVEL_LIMITED },
 
-    {"camera_name",               PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_LIMITED },
+    {"device_name",               PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {"device_id",                 PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {"camera_tmo",                PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {"target_dir",                PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
@@ -409,6 +409,13 @@ ctx_parm_depr config_parms_depr[] = {
     "\"camera_id\" replaced with \"device_id\"",
     "device_id"
     },
+    {
+    "camera_name",
+    "0.0.1",
+    "\"camera_name\" replaced with \"device_name\"",
+    "device_name"
+    },
+
     { "","","",""}
 };
 
@@ -577,17 +584,17 @@ static void conf_edit_camera(ctx_config *conf, std::string &parm, enum PARM_ACT 
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera",_("camera"));
 }
 
-static void conf_edit_camera_name(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_device_name(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        conf->camera_name= "";
+        conf->device_name= "";
     } else if (pact == PARM_ACT_SET) {
-        conf->camera_name = parm;
+        conf->device_name = parm;
     } else if (pact == PARM_ACT_GET) {
-        parm = conf->camera_name;
+        parm = conf->device_name;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera_name",_("camera_name"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","device_name",_("device_name"));
 }
 
 static void conf_edit_device_id(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
@@ -2834,7 +2841,7 @@ static void conf_edit_cat01(ctx_config *conf, std::string parm_nm
 {
     if (parm_nm == "camera_dir") {                   conf_edit_camera_dir(conf, parm_val, pact);
     } else if (parm_nm == "camera") {                conf_edit_camera(conf, parm_val, pact);
-    } else if (parm_nm == "camera_name") {           conf_edit_camera_name(conf, parm_val, pact);
+    } else if (parm_nm == "device_name") {           conf_edit_device_name(conf, parm_val, pact);
     } else if (parm_nm == "device_id") {             conf_edit_device_id(conf, parm_val, pact);
     } else if (parm_nm == "camera_tmo") {            conf_edit_camera_tmo(conf, parm_val, pact);
     } else if (parm_nm == "target_dir") {            conf_edit_target_dir(conf, parm_val, pact);
