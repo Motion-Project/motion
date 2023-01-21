@@ -167,7 +167,7 @@ static void webu_json_config_cam_parms(ctx_webui *webui)
     indx_cam = 0;
     while (webui->motapp->cam_list[indx_cam] != NULL) {
         webui->resp_page += ",\"cam" +
-            std::to_string(webui->motapp->cam_list[indx_cam]->camera_id) + "\": ";
+            std::to_string(webui->motapp->cam_list[indx_cam]->device_id) + "\": ";
         webu_json_config_parms(webui, webui->motapp->cam_list[indx_cam]->conf);
         indx_cam++;
     }
@@ -189,7 +189,7 @@ static void webu_json_config_cam_list(ctx_webui *webui)
     indx_cam = 0;
     while (webui->motapp->cam_list[indx_cam] != NULL) {
         cam = webui->motapp->cam_list[indx_cam];
-        strid =std::to_string(cam->camera_id);
+        strid =std::to_string(cam->device_id);
         webui->resp_page += ",\"" + std::to_string(indx_cam) + "\":";
         if (cam->conf->camera_name == "") {
             webui->resp_page += "{\"name\": \"camera " + strid + "\"";
@@ -266,7 +266,7 @@ static void webu_json_movies_list(ctx_webui *webui)
     indx_cam = 0;
     indx_req = -1;
     while (webui->motapp->cam_list[indx_cam] != NULL) {
-        if (webui->cam->camera_id == webui->motapp->cam_list[indx_cam]->camera_id){
+        if (webui->cam->device_id == webui->motapp->cam_list[indx_cam]->device_id){
             indx_req = indx_cam;
         }
         indx_cam++;
@@ -296,7 +296,7 @@ static void webu_json_movies_list(ctx_webui *webui)
         }
     }
 
-    dbse_movies_getlist(webui->motapp, webui->cam->camera_id);
+    dbse_movies_getlist(webui->motapp, webui->cam->device_id);
 
     movie_cnt = webui->motapp->dbse->movie_cnt;
     webui->resp_page += "{";
@@ -378,7 +378,7 @@ static void webu_json_status_vars(ctx_webui *webui, int indx_cam)
     webui->resp_page += "{";
 
     webui->resp_page += "\"name\":\"" + cam->conf->camera_name+"\"";
-    webui->resp_page += ",\"id\":" + std::to_string(cam->camera_id);
+    webui->resp_page += ",\"id\":" + std::to_string(cam->device_id);
     webui->resp_page += ",\"width\":" + std::to_string(cam->imgs.width);
     webui->resp_page += ",\"height\":" + std::to_string(cam->imgs.height);
     webui->resp_page += ",\"fps\":" + std::to_string(cam->lastrate);
@@ -437,7 +437,7 @@ void webu_json_status(ctx_webui *webui)
         indx_cam = 0;
         while (webui->motapp->cam_list[indx_cam] != NULL) {
             webui->resp_page += ",\"cam" +
-                std::to_string(webui->motapp->cam_list[indx_cam]->camera_id) + "\": ";
+                std::to_string(webui->motapp->cam_list[indx_cam]->device_id) + "\": ";
             webu_json_status_vars(webui, indx_cam);
             indx_cam++;
         }

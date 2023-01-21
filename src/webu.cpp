@@ -115,9 +115,9 @@ static void webu_context_free(ctx_webui *webui)
 /* Edit the parameters specified in the url sent */
 static void webu_parms_edit(ctx_webui *webui)
 {
-    int indx, is_nbr, camera_id;
+    int indx, is_nbr, device_id;
 
-    camera_id = -1;
+    device_id = -1;
     if (webui->uri_camid.length() > 0) {
         is_nbr = true;
         for (indx=0; indx < (int)webui->uri_camid.length(); indx++) {
@@ -126,12 +126,12 @@ static void webu_parms_edit(ctx_webui *webui)
             }
         }
         if (is_nbr) {
-            camera_id = atoi(webui->uri_camid.c_str());
+            device_id = atoi(webui->uri_camid.c_str());
         }
     }
 
     for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
-        if (webui->motapp->cam_list[indx]->camera_id == camera_id) {
+        if (webui->motapp->cam_list[indx]->device_id == device_id) {
             webui->threadnbr = indx;
             webui->cam = webui->motapp->cam_list[indx];
         }

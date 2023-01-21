@@ -38,7 +38,7 @@
         bool            native_language;
 
         std::string     camera_name;
-        int             camera_id;
+        int             device_id;
         std::string     camera_dir;
         std::string     target_dir;
         int             watchdog_tmo;

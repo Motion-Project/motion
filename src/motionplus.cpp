@@ -272,7 +272,7 @@ static void motion_shutdown(ctx_motapp *motapp)
 
 }
 
-static void motion_camera_ids(ctx_dev **cam_list)
+static void motion_device_ids(ctx_dev **cam_list)
 {
     /* Set the camera id's on the ctx_dev.  They must be unique */
     int indx, indx2;
@@ -281,10 +281,10 @@ static void motion_camera_ids(ctx_dev **cam_list)
     /* Set defaults */
     indx = 0;
     while (cam_list[indx] != NULL){
-        if (cam_list[indx]->conf->camera_id > 0) {
-            cam_list[indx]->camera_id = cam_list[indx]->conf->camera_id;
+        if (cam_list[indx]->conf->device_id > 0) {
+            cam_list[indx]->device_id = cam_list[indx]->conf->device_id;
         } else {
-            cam_list[indx]->camera_id = indx;
+            cam_list[indx]->device_id = indx;
         }
         indx++;
     }
@@ -292,12 +292,12 @@ static void motion_camera_ids(ctx_dev **cam_list)
     invalid_ids = false;
     indx = 0;
     while (cam_list[indx] != NULL){
-        if (cam_list[indx]->camera_id > 32000) {
+        if (cam_list[indx]->device_id > 32000) {
             invalid_ids = true;
         }
         indx2 = indx + 1;
         while (cam_list[indx2] != NULL){
-            if (cam_list[indx]->camera_id == cam_list[indx2]->camera_id) {
+            if (cam_list[indx]->device_id == cam_list[indx2]->device_id) {
                 invalid_ids = true;
             }
             indx2++;
@@ -309,7 +309,7 @@ static void motion_camera_ids(ctx_dev **cam_list)
             ,_("Camara IDs are not unique or have values over 32,000.  Falling back to thread numbers"));
         indx = 0;
         while (cam_list[indx] != NULL){
-            cam_list[indx]->camera_id = indx+1;
+            cam_list[indx]->device_id = indx+1;
             indx++;
         }
     }
@@ -399,7 +399,7 @@ static void motion_startup(ctx_motapp *motapp, int daemonize)
 
     motion_ntc();
 
-    motion_camera_ids(motapp->cam_list);
+    motion_device_ids(motapp->cam_list);
 
     dbse_init(motapp);
 
@@ -463,7 +463,7 @@ static void motion_watchdog(ctx_motapp *motapp, int camindx)
 
     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
         , _("Camera %d - Watchdog timeout.")
-        , motapp->cam_list[camindx]->camera_id);
+        , motapp->cam_list[camindx]->device_id);
 
     /* Shut down all the cameras */
     indx = 0;
@@ -510,7 +510,7 @@ static void motion_watchdog(ctx_motapp *motapp, int camindx)
             if (motapp->cam_list[indx]->netcam->handler_finished == false) {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     , _("Camera %d - Watchdog netcam kill.")
-                    , motapp->cam_list[indx]->camera_id);
+                    , motapp->cam_list[indx]->device_id);
                 pthread_kill(motapp->cam_list[indx]->netcam->thread_id, SIGVTALRM);
             }
         }
@@ -518,14 +518,14 @@ static void motion_watchdog(ctx_motapp *motapp, int camindx)
             if (motapp->cam_list[indx]->netcam_high->handler_finished == false) {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     , _("Camera %d - Watchdog netcam_high kill.")
-                    , motapp->cam_list[indx]->camera_id);
+                    , motapp->cam_list[indx]->device_id);
                 pthread_kill(motapp->cam_list[indx]->netcam_high->thread_id, SIGVTALRM);
             }
         }
         if (motapp->cam_list[indx]->running_dev == true) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("Camera %d - Watchdog kill.")
-                , motapp->cam_list[indx]->camera_id);
+                , motapp->cam_list[indx]->device_id);
             pthread_kill(motapp->cam_list[indx]->thread_id, SIGVTALRM);
         };
         motapp->cam_list[indx]->running_dev = false;
@@ -619,16 +619,16 @@ static void motion_cam_add(ctx_motapp *motapp)
     indx_cam = 0;
     indx = 1;
     while (motapp->cam_list[indx_cam] != NULL) {
-        if (indx < motapp->cam_list[indx_cam]->camera_id) {
-            indx = motapp->cam_list[indx_cam]->camera_id;
+        if (indx < motapp->cam_list[indx_cam]->device_id) {
+            indx = motapp->cam_list[indx_cam]->device_id;
         }
         indx_cam++;
     }
     indx++;
     indx_cam--;
 
-    motapp->cam_list[indx_cam]->camera_id = indx;
-    motapp->cam_list[indx_cam]->conf->camera_id = indx;
+    motapp->cam_list[indx_cam]->device_id = indx;
+    motapp->cam_list[indx_cam]->conf->device_id = indx;
     motapp->cam_list[indx_cam]->conf->webcontrol_port = 0;
 
     motapp->cam_add = false;
@@ -655,8 +655,8 @@ static void motion_cam_delete(ctx_motapp *motapp)
 
     cam = motapp->cam_list[motapp->cam_delete];
 
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Stopping %s camera_id %d")
-        , cam->conf->camera_name.c_str(), cam->camera_id);
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Stopping %s device_id %d")
+        , cam->conf->camera_name.c_str(), cam->device_id);
     cam->restart_dev = false;
     cam->finish_dev = true;
 
@@ -740,7 +740,7 @@ int main (int argc, char **argv)
                     (motapp->cam_list[indx]->restart_dev == true)) {
                     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                         ,_("MotionPlus camera %d restart")
-                        , motapp->cam_list[indx]->camera_id);
+                        , motapp->cam_list[indx]->device_id);
                     motion_start_thread(motapp, indx);
                 }
                 motion_watchdog(motapp, indx);

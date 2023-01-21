@@ -139,7 +139,7 @@ void webu_post_cmdthrd(ctx_webui *webui)
 
     indx = 0;
     while (webui->motapp->cam_list[indx] != NULL) {
-        if (webui->motapp->cam_list[indx]->camera_id == camid) {
+        if (webui->motapp->cam_list[indx]->device_id == camid) {
             webui->threadnbr = indx;
             break;
         }
@@ -326,7 +326,7 @@ void webu_post_action_restart(ctx_webui *webui)
     } else {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Restarting camera %d")
-            , webui->motapp->cam_list[webui->threadnbr]->camera_id);
+            , webui->motapp->cam_list[webui->threadnbr]->device_id);
         webui->motapp->cam_list[webui->threadnbr]->restart_dev = true;
         webui->motapp->cam_list[webui->threadnbr]->finish_dev = true;
     }
@@ -354,7 +354,7 @@ void webu_post_action_stop(ctx_webui *webui)
         while (webui->motapp->cam_list[indx]) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Stopping cam %d")
-                , webui->motapp->cam_list[indx]->camera_id);
+                , webui->motapp->cam_list[indx]->device_id);
             webui->motapp->cam_list[indx]->restart_dev = false;
             webui->motapp->cam_list[indx]->event_stop = true;
             webui->motapp->cam_list[indx]->event_user = false;
@@ -364,7 +364,7 @@ void webu_post_action_stop(ctx_webui *webui)
     } else {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Stopping cam %d")
-            , webui->motapp->cam_list[webui->threadnbr]->camera_id);
+            , webui->motapp->cam_list[webui->threadnbr]->device_id);
         webui->motapp->cam_list[webui->threadnbr]->restart_dev = false;
         webui->motapp->cam_list[webui->threadnbr]->event_stop = true;
         webui->motapp->cam_list[webui->threadnbr]->event_user = false;
@@ -414,7 +414,7 @@ void webu_post_action_user(ctx_webui *webui)
             snprintf(cam->action_user, 20, "%s", tmp.c_str());
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Executing user action on cam %d")
-                , cam->camera_id);
+                , cam->device_id);
             util_exec_command(cam, cam->conf->on_action_user.c_str(), NULL, 0);
             indx++;
         }
@@ -438,7 +438,7 @@ void webu_post_action_user(ctx_webui *webui)
 
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Executing user action on cam %d")
-            , cam->camera_id);
+            , cam->device_id);
         util_exec_command(cam, cam->conf->on_action_user.c_str(), NULL, 0);
     }
 

@@ -123,7 +123,7 @@ static void dbse_cols_list(ctx_motapp *motapp)
     }
 
     indx=0;
-    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "camera_id");
+    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "device_id");
     snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "int");
 
     indx++;
@@ -177,7 +177,7 @@ static void dbse_rec_default(ctx_dbse_rec *rec)
 {
     rec->found     = false;
     rec->record_id  = -1;
-    rec->camera_id     = -1;
+    rec->device_id     = -1;
 
     rec->movie_nm = (char*)mymalloc(5);
     snprintf(rec->movie_nm, 5,"%s", "null");
@@ -213,8 +213,8 @@ static void dbse_rec_assign(ctx_dbse_rec *rec, char *col_nm, char *col_val)
     if (mystrceq(col_nm,"record_id")) {
         rec->record_id = atoi(col_val);
 
-    } else if (mystrceq(col_nm,"camera_id")) {
-        rec->camera_id = atoi(col_val);
+    } else if (mystrceq(col_nm,"device_id")) {
+        rec->device_id = atoi(col_val);
 
     } else if (mystrceq(col_nm,"movie_nm")) {
         free(rec->movie_nm);
@@ -332,7 +332,7 @@ static void dbse_sql_motpls(ctx_dbse *dbse, std::string &sql)
 
 }
 
-static void dbse_sql_motpls(ctx_dbse *dbse, std::string &sql, int camera_id)
+static void dbse_sql_motpls(ctx_dbse *dbse, std::string &sql, int device_id)
 {
     sql = "";
 
@@ -341,14 +341,14 @@ static void dbse_sql_motpls(ctx_dbse *dbse, std::string &sql, int camera_id)
         sql += "   count(*) as movie_cnt ";
         sql += " from motionplus ";
         sql += " where ";
-        sql += "   camera_id = " + std::to_string(camera_id);
+        sql += "   device_id = " + std::to_string(device_id);
         sql += ";";
 
     } else if (dbse->dbse_action == DBSE_MOV_SELECT) {
         sql  = " select * ";
         sql += " from motionplus ";
         sql += " where ";
-        sql += "   camera_id = " + std::to_string(camera_id);
+        sql += "   device_id = " + std::to_string(device_id);
         sql += " order by ";
         sql += "   movie_dtl, movie_tml;";
 
@@ -549,14 +549,14 @@ static void dbse_sqlite3_init(ctx_motapp *motapp)
 
 }
 
-static void dbse_sqlite3_movlst(ctx_motapp *motapp, int camera_id)
+static void dbse_sqlite3_movlst(ctx_motapp *motapp, int device_id)
 {
     int retcd;
     char *errmsg  = NULL;
     std::string sql;
 
     motapp->dbse->dbse_action = DBSE_MOV_COUNT;
-    dbse_sql_motpls(motapp->dbse, sql, camera_id);
+    dbse_sql_motpls(motapp->dbse, sql, device_id);
     retcd = sqlite3_exec(
         motapp->dbse->database_sqlite3
         , sql.c_str(), dbse_sqlite3_cb, motapp, &errmsg);
@@ -573,7 +573,7 @@ static void dbse_sqlite3_movlst(ctx_motapp *motapp, int camera_id)
         motapp->dbse->rec_indx = 0;
 
         motapp->dbse->dbse_action = DBSE_MOV_SELECT;
-        dbse_sql_motpls(motapp->dbse, sql, camera_id);
+        dbse_sql_motpls(motapp->dbse, sql, device_id);
         retcd = sqlite3_exec(
             motapp->dbse->database_sqlite3
             , sql.c_str(), dbse_sqlite3_cb, motapp, &errmsg);
@@ -585,7 +585,7 @@ static void dbse_sqlite3_movlst(ctx_motapp *motapp, int camera_id)
         }
 
         motapp->dbse->dbse_action = DBSE_MOV_CLEAN;
-        dbse_sql_motpls(motapp->dbse, sql, camera_id);
+        dbse_sql_motpls(motapp->dbse, sql, device_id);
         dbse_sqlite3_exec(motapp, sql.c_str());
 
         sql = " vacuum;";
@@ -872,12 +872,12 @@ static void dbse_mariadb_close(ctx_motapp *motapp)
     }
 }
 
-static void dbse_mariadb_movlst(ctx_motapp *motapp, int camera_id )
+static void dbse_mariadb_movlst(ctx_motapp *motapp, int device_id )
 {
     std::string sql;
 
     motapp->dbse->dbse_action = DBSE_MOV_COUNT;
-    dbse_sql_motpls(motapp->dbse, sql, camera_id);
+    dbse_sql_motpls(motapp->dbse, sql, device_id);
     dbse_mariadb_recs(motapp, sql.c_str());
 
     if (motapp->dbse->movie_cnt > 0) {
@@ -885,7 +885,7 @@ static void dbse_mariadb_movlst(ctx_motapp *motapp, int camera_id )
             mymalloc(sizeof(ctx_dbse_rec)*motapp->dbse->movie_cnt);
 
         motapp->dbse->dbse_action = DBSE_MOV_SELECT;
-        dbse_sql_motpls(motapp->dbse, sql, camera_id);
+        dbse_sql_motpls(motapp->dbse, sql, device_id);
         dbse_mariadb_recs(motapp, sql.c_str());
 
         motapp->dbse->dbse_action = DBSE_MOV_CLEAN;
@@ -1116,12 +1116,12 @@ static void dbse_pgsql_init(ctx_motapp *motapp)
         , motapp->dbse->database_dbname.c_str() );
 }
 
-static void dbse_pgsql_movlst(ctx_motapp *motapp, int camera_id)
+static void dbse_pgsql_movlst(ctx_motapp *motapp, int device_id)
 {
     std::string sql;
 
     motapp->dbse->dbse_action = DBSE_MOV_COUNT;
-    dbse_sql_motpls(motapp->dbse, sql, camera_id);
+    dbse_sql_motpls(motapp->dbse, sql, device_id);
     dbse_pgsql_recs(motapp, sql.c_str());
 
     if (motapp->dbse->movie_cnt > 0) {
@@ -1129,7 +1129,7 @@ static void dbse_pgsql_movlst(ctx_motapp *motapp, int camera_id)
             mymalloc(sizeof(ctx_dbse_rec)*motapp->dbse->movie_cnt);
 
         motapp->dbse->dbse_action = DBSE_MOV_SELECT;
-        dbse_sql_motpls(motapp->dbse, sql, camera_id);
+        dbse_sql_motpls(motapp->dbse, sql, device_id);
         dbse_pgsql_recs(motapp, sql.c_str());
 
         motapp->dbse->dbse_action = DBSE_MOV_CLEAN;
@@ -1185,7 +1185,7 @@ void dbse_init(ctx_motapp *motapp)
 }
 
 /* Populate the list of the movies from the database*/
-void dbse_movies_getlist(ctx_motapp *motapp, int camera_id)
+void dbse_movies_getlist(ctx_motapp *motapp, int device_id)
 {
 
     if (motapp->dbse->database_type == "") {
@@ -1197,21 +1197,21 @@ void dbse_movies_getlist(ctx_motapp *motapp, int camera_id)
     pthread_mutex_lock(&motapp->dbse->mutex_dbse);
         #ifdef HAVE_MARIADB
             if (motapp->dbse->database_type == "mariadb") {
-                dbse_mariadb_movlst(motapp, camera_id);
+                dbse_mariadb_movlst(motapp, device_id);
             }
         #endif
         #ifdef HAVE_PGSQL
             if (motapp->dbse->database_type == "postgresql") {
-                dbse_pgsql_movlst(motapp, camera_id);
+                dbse_pgsql_movlst(motapp, device_id);
             }
         #endif
         #ifdef HAVE_SQLITE3
             if (motapp->dbse->database_type == "sqlite3") {
-                dbse_sqlite3_movlst(motapp, camera_id);
+                dbse_sqlite3_movlst(motapp, device_id);
             }
         #endif
         #ifndef HAVE_DBSE
-            (void)camera_id;
+            (void)device_id;
         #endif
     pthread_mutex_unlock(&motapp->dbse->mutex_dbse);
 
@@ -1362,9 +1362,9 @@ void dbse_movies_addrec(ctx_dev *cam, ctx_movie *movie, timespec *ts1)
     }
 
     sqlquery =  "insert into motionplus ";
-    sqlquery += " (camera_id, movie_nm, movie_dir, full_nm, movie_sz, movie_dtl";
+    sqlquery += " (device_id, movie_nm, movie_dir, full_nm, movie_sz, movie_dtl";
     sqlquery += " , movie_tmc, movie_tml, diff_avg, sdev_min, sdev_max, sdev_avg)";
-    sqlquery += " values ("+std::to_string(cam->camera_id);
+    sqlquery += " values ("+std::to_string(cam->device_id);
     sqlquery += " ,'" + std::string(movie->movie_nm) + "'";
     sqlquery += " ,'" + std::string(movie->movie_dir) + "'";
     sqlquery += " ,'" + std::string(movie->full_nm) + "'";

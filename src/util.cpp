@@ -452,8 +452,8 @@ size_t mystrftime(ctx_dev *cam, char *s, size_t max, const char *userformat,
                     cam->current_image->total_labels);
                 break;
 
-            case 't': // camera id
-                sprintf(tempstr, "%*d", width, cam->camera_id);
+            case 't': // device id
+                sprintf(tempstr, "%*d", width, cam->device_id);
                 break;
 
             case 'C': // text_event

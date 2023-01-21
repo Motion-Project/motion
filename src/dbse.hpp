@@ -67,7 +67,7 @@
     struct ctx_dbse_rec {
         bool        found;      /*Bool for whether the file exists*/
         int64_t     record_id;  /*record_id*/
-        int         camera_id;  /*camera id */
+        int         device_id;  /*camera id */
         char        *movie_nm;  /*Name of the movie file*/
         char        *movie_dir; /*Directory of the movie file */
         char        *full_nm;   /*Full name of the movie file with dir*/
@@ -127,7 +127,7 @@
     void dbse_deinit_motpls(ctx_motapp *motapp);
     void dbse_exec(ctx_dev *cam, char *filename
         , int sqltype, timespec *ts1, const char *cmd);
-    void dbse_movies_getlist(ctx_motapp *motapp, int camera_id);
+    void dbse_movies_getlist(ctx_motapp *motapp, int device_id);
     void dbse_movies_addrec(ctx_dev *cam, ctx_movie *movie, timespec *ts1);
 
 #endif /* _INCLUDE_DBSE_HPP_ */

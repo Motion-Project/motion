@@ -196,7 +196,7 @@ static void mlp_detected_trigger(ctx_dev *cam, ctx_image_data *img)
 
             time(&raw_time);
             localtime_r(&raw_time, &evt_tm);
-            sprintf(cam->eventid, "%05d", cam->camera_id);
+            sprintf(cam->eventid, "%05d", cam->device_id);
             strftime(cam->eventid+5, 15, "%Y%m%d%H%M%S", &evt_tm);
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
@@ -701,7 +701,7 @@ static void mlp_init(ctx_dev *cam)
     if (cam->camera_status == STATUS_OPENED) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Camera %d started: motion detection %s"),
-            cam->camera_id, cam->pause ? _("Disabled"):_("Enabled"));
+            cam->device_id, cam->pause ? _("Disabled"):_("Enabled"));
 
         if (cam->conf->emulate_motion) {
             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Emulating motion"));

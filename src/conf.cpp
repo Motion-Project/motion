@@ -47,7 +47,7 @@ ctx_parm config_parms[] = {
     {"native_language",           PARM_TYP_BOOL,   PARM_CAT_00, WEBUI_LEVEL_LIMITED },
 
     {"camera_name",               PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_LIMITED },
-    {"camera_id",                 PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
+    {"device_id",                 PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {"camera_tmo",                PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {"target_dir",                PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
     {"watchdog_tmo",              PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
@@ -403,6 +403,12 @@ ctx_parm_depr config_parms_depr[] = {
     "\"movie_codec\" replaced with \"movie_container\"",
     "movie_container"
     },
+    {
+    "camera_id",
+    "0.0.1",
+    "\"camera_id\" replaced with \"device_id\"",
+    "device_id"
+    },
     { "","","",""}
 };
 
@@ -584,24 +590,24 @@ static void conf_edit_camera_name(ctx_config *conf, std::string &parm, enum PARM
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera_name",_("camera_name"));
 }
 
-static void conf_edit_camera_id(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_device_id(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
 
     if (pact == PARM_ACT_DFLT) {
-        conf->camera_id = 1;
+        conf->device_id = 1;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if (parm_in < 1) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid camera_id %d"),parm_in);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid device_id %d"),parm_in);
         } else {
-            conf->camera_id = parm_in;
+            conf->device_id = parm_in;
         }
     } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(conf->camera_id);
+        parm = std::to_string(conf->device_id);
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera_id",_("camera_id"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","device_id",_("device_id"));
 }
 
 static void conf_edit_camera_tmo(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
@@ -2829,7 +2835,7 @@ static void conf_edit_cat01(ctx_config *conf, std::string parm_nm
     if (parm_nm == "camera_dir") {                   conf_edit_camera_dir(conf, parm_val, pact);
     } else if (parm_nm == "camera") {                conf_edit_camera(conf, parm_val, pact);
     } else if (parm_nm == "camera_name") {           conf_edit_camera_name(conf, parm_val, pact);
-    } else if (parm_nm == "camera_id") {             conf_edit_camera_id(conf, parm_val, pact);
+    } else if (parm_nm == "device_id") {             conf_edit_device_id(conf, parm_val, pact);
     } else if (parm_nm == "camera_tmo") {            conf_edit_camera_tmo(conf, parm_val, pact);
     } else if (parm_nm == "target_dir") {            conf_edit_target_dir(conf, parm_val, pact);
     } else if (parm_nm == "watchdog_tmo") {          conf_edit_watchdog_tmo(conf, parm_val, pact);
@@ -3431,7 +3437,7 @@ void conf_camera_add(ctx_motapp *motapp)
 
     indx = 0;
     while (config_parms[indx].parm_name != "") {
-        if (mystrne(config_parms[indx].parm_name.c_str(),"camera_id")) {
+        if (mystrne(config_parms[indx].parm_name.c_str(),"device_id")) {
             conf_edit_get(motapp->conf, config_parms[indx].parm_name
                 , parm_val, config_parms[indx].parm_cat);
             conf_edit_set(motapp->cam_list[motapp->cam_cnt-1]->conf
@@ -3594,7 +3600,7 @@ void conf_parms_log(ctx_motapp *motapp)
     for (indx=0; indx<motapp->cam_cnt; indx++) {
         motion_log(INF, TYPE_ALL, NO_ERRNO, 0
             , _("Camera %d - Config file: %s")
-            , motapp->cam_list[indx]->conf->camera_id
+            , motapp->cam_list[indx]->conf->device_id
             , motapp->cam_list[indx]->conf->conf_filename.c_str());
         i = 0;
         while (config_parms[i].parm_name != "") {

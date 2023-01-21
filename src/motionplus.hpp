@@ -325,7 +325,7 @@ struct ctx_dev {
     bool                    algsec_inuse;        /*Bool for whether we have secondary detection*/
     int                     track_posx;
     int                     track_posy;
-    int                     camera_id;
+    int                     device_id;
     enum CAMERA_TYPE        camera_type;
     enum CAM_STATUS         camera_status;
     unsigned int            new_img;
