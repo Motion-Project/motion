@@ -423,7 +423,7 @@ static void mlp_init_camera_type(ctx_dev *cam)
             , _("Unable to determine camera type"));
         cam->camera_type = CAMERA_TYPE_UNKNOWN;
         cam->finish_dev = true;
-        cam->restart_cam = false;
+        cam->restart_dev = false;
     }
 }
 
@@ -1433,7 +1433,7 @@ void *motion_loop(void *arg)
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cam->threadnr));
 
     cam->finish_dev = false;
-    cam->restart_cam = false;
+    cam->restart_dev = false;
     cam->camera_status = STATUS_INIT;
 
     while (cam->finish_dev == false) {

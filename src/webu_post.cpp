@@ -319,7 +319,7 @@ void webu_post_action_restart(ctx_webui *webui)
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all cameras"));
         indx = 0;
         while (webui->motapp->cam_list[indx]) {
-            webui->motapp->cam_list[indx]->restart_cam = true;
+            webui->motapp->cam_list[indx]->restart_dev = true;
             webui->motapp->cam_list[indx]->finish_dev = true;
             indx++;
         }
@@ -327,7 +327,7 @@ void webu_post_action_restart(ctx_webui *webui)
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Restarting camera %d")
             , webui->motapp->cam_list[webui->threadnbr]->camera_id);
-        webui->motapp->cam_list[webui->threadnbr]->restart_cam = true;
+        webui->motapp->cam_list[webui->threadnbr]->restart_dev = true;
         webui->motapp->cam_list[webui->threadnbr]->finish_dev = true;
     }
 }
@@ -355,7 +355,7 @@ void webu_post_action_stop(ctx_webui *webui)
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Stopping cam %d")
                 , webui->motapp->cam_list[indx]->camera_id);
-            webui->motapp->cam_list[indx]->restart_cam = false;
+            webui->motapp->cam_list[indx]->restart_dev = false;
             webui->motapp->cam_list[indx]->event_stop = true;
             webui->motapp->cam_list[indx]->event_user = false;
             webui->motapp->cam_list[indx]->finish_dev = true;
@@ -365,7 +365,7 @@ void webu_post_action_stop(ctx_webui *webui)
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Stopping cam %d")
             , webui->motapp->cam_list[webui->threadnbr]->camera_id);
-        webui->motapp->cam_list[webui->threadnbr]->restart_cam = false;
+        webui->motapp->cam_list[webui->threadnbr]->restart_dev = false;
         webui->motapp->cam_list[webui->threadnbr]->event_stop = true;
         webui->motapp->cam_list[webui->threadnbr]->event_user = false;
         webui->motapp->cam_list[webui->threadnbr]->finish_dev = true;

@@ -314,7 +314,7 @@ void pic_save_norm(ctx_dev *cam, char *file, unsigned char *image, int ftype)
                 ,_("Can't write picture to file %s - check access rights to target directory\n"
                 "Thread is going to finish due to this fatal error"), file);
             cam->finish_dev = true;
-            cam->restart_cam = 0;
+            cam->restart_dev = false;
             return;
         } else {
             /* If target dir is temporarily unavailable we may survive. */

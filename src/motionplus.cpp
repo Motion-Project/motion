@@ -70,7 +70,7 @@ static void motion_signal_process(ctx_motapp *motapp)
             while (motapp->cam_list[indx]) {
                 motapp->cam_list[indx]->event_stop = true;
                 motapp->cam_list[indx]->finish_dev = true;
-                motapp->cam_list[indx]->restart_cam = false;
+                motapp->cam_list[indx]->restart_dev = false;
                 indx++;
             }
         }
@@ -419,7 +419,7 @@ static void motion_start_thread(ctx_motapp *motapp, int indx)
     pthread_attr_init(&thread_attr);
     pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
 
-    motapp->cam_list[indx]->restart_cam = true;
+    motapp->cam_list[indx]->restart_dev = true;
 
     retcd = pthread_create(&motapp->cam_list[indx]->thread_id
                 , &thread_attr, &motion_loop, motapp->cam_list[indx]);
@@ -529,7 +529,7 @@ static void motion_watchdog(ctx_motapp *motapp, int camindx)
             pthread_kill(motapp->cam_list[indx]->thread_id, SIGVTALRM);
         };
         motapp->cam_list[indx]->running_cam = false;
-        motapp->cam_list[indx]->restart_cam = false;
+        motapp->cam_list[indx]->restart_dev = false;
         indx++;
     }
     motapp->restart_all = true;
@@ -546,7 +546,7 @@ static int motion_check_threadcount(ctx_motapp *motapp)
     thrdcnt = 0;
 
     for (indx=0; indx<motapp->cam_cnt; indx++) {
-        if (motapp->cam_list[indx]->running_cam || motapp->cam_list[indx]->restart_cam) {
+        if (motapp->cam_list[indx]->running_cam || motapp->cam_list[indx]->restart_dev) {
             thrdcnt++;
         }
     }
@@ -657,7 +657,7 @@ static void motion_cam_delete(ctx_motapp *motapp)
 
     MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Stopping %s camera_id %d")
         , cam->conf->camera_name.c_str(), cam->camera_id);
-    cam->restart_cam = false;
+    cam->restart_dev = false;
     cam->finish_dev = true;
 
     maxcnt = 100;
@@ -737,7 +737,7 @@ int main (int argc, char **argv)
             for (indx=0; indx<motapp->cam_cnt; indx++) {
                 /* Check if threads wants to be restarted */
                 if ((motapp->cam_list[indx]->running_cam == false) &&
-                    (motapp->cam_list[indx]->restart_cam == true)) {
+                    (motapp->cam_list[indx]->restart_dev == true)) {
                     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                         ,_("MotionPlus camera %d restart")
                         , motapp->cam_list[indx]->camera_id);
