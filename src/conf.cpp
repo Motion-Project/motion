@@ -1694,7 +1694,7 @@ static void conf_edit_picture_output_motion(ctx_config *conf, std::string &parm,
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_output_motion %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
-        parm = conf->picture_output;
+        parm = conf->picture_output_motion;
     } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm +  "\"on\",\"off\",\"roi\"";
