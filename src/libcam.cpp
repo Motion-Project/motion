@@ -378,7 +378,7 @@ void libcam_cleanup(ctx_dev *cam)
         delete cam->libcam;
         cam->libcam = nullptr;
     #endif
-    cam->camera_status = STATUS_CLOSED;
+    cam->device_status = STATUS_CLOSED;
 }
 
 /** initialize and start libcam */
@@ -395,10 +395,10 @@ void libcam_start(ctx_dev *cam)
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
             libcam_cleanup(cam);
         } else {
-            cam->camera_status = STATUS_OPENED;
+            cam->device_status = STATUS_OPENED;
         }
     #else
-        cam->camera_status = STATUS_CLOSED;
+        cam->device_status = STATUS_CLOSED;
     #endif
 }
 

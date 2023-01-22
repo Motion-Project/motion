@@ -111,6 +111,7 @@
         std::string     on_camera_found;
         std::string     on_secondary_detect;
         std::string     on_action_user;
+        std::string     on_sound_alert;
 
         /* Picture output configuration parameters */
         std::string     picture_output;
@@ -204,6 +205,13 @@
         std::string     ptz_zoom_in;            /* Zoom in command */
         std::string     ptz_zoom_out;           /* Zoom out command */
 
+        /* Sound processing parameters */
+        std::string             snd_device;
+        std::string             snd_params;
+        std::list<std::string>  snd_alerts;
+        std::string             snd_window;
+        bool                    show_freq;
+
     };
 
     /* Categories for he edits and display on web interface*/
@@ -226,6 +234,7 @@
         ,PARM_CAT_15    /* database */
         ,PARM_CAT_16    /* sql */
         ,PARM_CAT_17    /* tracking */
+        ,PARM_CAT_18    /* sound */
         ,PARM_CAT_MAX
     };
     enum PARM_TYP{
@@ -233,6 +242,7 @@
         , PARM_TYP_INT
         , PARM_TYP_LIST
         , PARM_TYP_BOOL
+        , PARM_TYP_ARRAY
     };
 
     /** Current parameters in the config file */
@@ -264,6 +274,8 @@
         , std::string parm_val);
     void conf_edit_get(ctx_config *conf, std::string parm_nm
         , std::string &parm_val, enum PARM_CAT parm_cat);
+    void conf_edit_get(ctx_config *conf, std::string parm_nm
+        , std::list<std::string> &parm_val, enum PARM_CAT parm_cat);
     void conf_edit_list(ctx_config *conf, std::string parm_nm
         , std::string &parm_val, enum PARM_CAT parm_cat);
 

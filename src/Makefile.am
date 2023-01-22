@@ -28,5 +28,5 @@ motionplus_SOURCES = motionplus.cpp motion_loop.cpp logger.cpp conf.cpp util.cpp
 	video_v4l2.cpp video_common.cpp video_loopback.cpp netcam.cpp jpegutils.cpp exif.cpp \
 	rotate.cpp draw.cpp event.cpp movie.cpp  picture.cpp dbse.cpp \
 	webu.cpp webu_html.cpp webu_stream.cpp webu_json.cpp webu_post.cpp webu_file.cpp \
-	libcam.cpp
+	libcam.cpp sound.cpp
 

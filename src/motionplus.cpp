@@ -22,6 +22,7 @@
 #include "logger.hpp"
 #include "util.hpp"
 #include "motion_loop.hpp"
+#include "sound.hpp"
 #include "dbse.hpp"
 #include "webu.hpp"
 #include "video_v4l2.hpp"
@@ -64,15 +65,15 @@ static void motion_signal_process(ctx_motapp *motapp)
     case MOTION_SIGNAL_SIGTERM:     /* Quit application */
 
         motapp->webcontrol_finish = true;
-
-        if (motapp->cam_list != NULL) {
-            indx = 0;
-            while (motapp->cam_list[indx]) {
-                motapp->cam_list[indx]->event_stop = true;
-                motapp->cam_list[indx]->finish_dev = true;
-                motapp->cam_list[indx]->restart_dev = false;
-                indx++;
-            }
+        for (indx=0; indx<motapp->cam_cnt; indx++) {
+            motapp->cam_list[indx]->event_stop = true;
+            motapp->cam_list[indx]->finish_dev = true;
+            motapp->cam_list[indx]->restart_dev = false;
+        }
+        for (indx=0; indx<motapp->snd_cnt; indx++) {
+            motapp->snd_list[indx]->event_stop = true;
+            motapp->snd_list[indx]->finish_dev = true;
+            motapp->snd_list[indx]->restart_dev = false;
         }
         motapp->finish_all = true;
     default:
@@ -272,47 +273,61 @@ static void motion_shutdown(ctx_motapp *motapp)
 
 }
 
-static void motion_device_ids(ctx_dev **cam_list)
+static void motion_device_ids(ctx_motapp *motapp)
 {
-    /* Set the camera id's on the ctx_dev.  They must be unique */
+    /* Set the device id's on the ctx_dev.  They must be unique */
     int indx, indx2;
     int invalid_ids;
 
-    /* Set defaults */
-    indx = 0;
-    while (cam_list[indx] != NULL){
-        if (cam_list[indx]->conf->device_id > 0) {
-            cam_list[indx]->device_id = cam_list[indx]->conf->device_id;
+    /* Defaults */
+    for (indx=0; indx<motapp->cam_cnt; indx++) {
+        if (motapp->cam_list[indx]->conf->device_id != 0) {
+            motapp->cam_list[indx]->device_id = motapp->cam_list[indx]->conf->device_id;
         } else {
-            cam_list[indx]->device_id = indx;
+            motapp->cam_list[indx]->device_id = indx + 1;
         }
-        indx++;
+    }
+    for (indx=0; indx<motapp->snd_cnt; indx++) {
+        if (motapp->snd_list[indx]->conf->device_id != 0) {
+            motapp->snd_list[indx]->device_id = motapp->snd_list[indx]->conf->device_id;
+        } else {
+            motapp->snd_list[indx]->device_id = motapp->cam_cnt + indx + 1;
+        }
     }
 
+    /*Check for unique values*/
     invalid_ids = false;
-    indx = 0;
-    while (cam_list[indx] != NULL){
-        if (cam_list[indx]->device_id > 32000) {
-            invalid_ids = true;
-        }
-        indx2 = indx + 1;
-        while (cam_list[indx2] != NULL){
-            if (cam_list[indx]->device_id == cam_list[indx2]->device_id) {
+    for (indx=0; indx<motapp->cam_cnt; indx++) {
+        for (indx2=indx+1; indx2<motapp->cam_cnt; indx2++) {
+           if (motapp->cam_list[indx]->device_id == motapp->cam_list[indx2]->device_id) {
                 invalid_ids = true;
             }
-            indx2++;
         }
-        indx++;
+        for (indx2=0; indx2<motapp->snd_cnt; indx2++) {
+           if (motapp->cam_list[indx]->device_id == motapp->snd_list[indx2]->device_id) {
+                invalid_ids = true;
+            }
+        }
     }
+    for (indx=0; indx<motapp->snd_cnt; indx++) {
+        for (indx2=indx+1; indx2<motapp->snd_cnt; indx2++) {
+           if (motapp->snd_list[indx]->device_id == motapp->snd_list[indx2]->device_id) {
+                invalid_ids = true;
+            }
+        }
+    }
+
     if (invalid_ids) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Camara IDs are not unique or have values over 32,000.  Falling back to thread numbers"));
-        indx = 0;
-        while (cam_list[indx] != NULL){
-            cam_list[indx]->device_id = indx+1;
-            indx++;
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Device IDs are not unique."));
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Falling back to sequence numbers"));
+        for (indx=0; indx<motapp->cam_cnt; indx++) {
+            motapp->cam_list[indx]->device_id = indx + 1;
+        }
+        for (indx=0; indx<motapp->snd_cnt; indx++) {
+            motapp->snd_list[indx]->device_id = motapp->cam_cnt + indx + 1;
         }
     }
+
 }
 
 static void motion_ntc(void)
@@ -366,6 +381,18 @@ static void motion_ntc(void)
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("nls    : not available"));
     #endif
 
+    #ifdef HAVE_ALSA
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("alsa   : available"));
+    #else
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("alsa   : not available"));
+    #endif
+
+    #ifdef HAVE_FFTW3
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("fftw3  : available"));
+    #else
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("fftw3  : not available"));
+    #endif
+
 }
 
 /** Initialize upon start up or restart */
@@ -399,7 +426,7 @@ static void motion_startup(ctx_motapp *motapp, int daemonize)
 
     motion_ntc();
 
-    motion_device_ids(motapp->cam_list);
+    motion_device_ids(motapp);
 
     dbse_init(motapp);
 
@@ -410,23 +437,36 @@ static void motion_startup(ctx_motapp *motapp, int daemonize)
 }
 
 /** Start a camera thread */
-static void motion_start_thread(ctx_motapp *motapp, int indx)
+static void motion_start_thread_cam(ctx_dev *cam)
 {
     int retcd;
-
     pthread_attr_t thread_attr;
 
     pthread_attr_init(&thread_attr);
     pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
 
-    motapp->cam_list[indx]->restart_dev = true;
-
-    retcd = pthread_create(&motapp->cam_list[indx]->thread_id
-                , &thread_attr, &motion_loop, motapp->cam_list[indx]);
+    cam->restart_dev = true;
+    retcd = pthread_create(&cam->thread_id, &thread_attr, &motion_loop, cam);
     if (retcd != 0) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start thread for MotionPlus loop."));
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start camera thread."));
     }
+    pthread_attr_destroy(&thread_attr);
 
+}
+
+static void motion_start_thread_snd(ctx_dev *snd)
+{
+    int retcd;
+    pthread_attr_t thread_attr;
+
+    pthread_attr_init(&thread_attr);
+    pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
+
+    snd->restart_dev = true;
+    retcd = pthread_create(&snd->thread_id, &thread_attr, &snd_loop, snd);
+    if (retcd != 0) {
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start sound thread."));
+    }
     pthread_attr_destroy(&thread_attr);
 
 }
@@ -441,6 +481,7 @@ static void motion_restart(ctx_motapp *motapp)
     SLEEP(2, 0);
 
     motion_startup(motapp, false);
+
     MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("MotionPlus restarted"));
 
     motapp->restart_all = false;
@@ -550,6 +591,11 @@ static int motion_check_threadcount(ctx_motapp *motapp)
             thrdcnt++;
         }
     }
+    for (indx=0; indx<motapp->snd_cnt; indx++) {
+        if (motapp->snd_list[indx]->running_dev || motapp->snd_list[indx]->restart_dev) {
+            thrdcnt++;
+        }
+    }
 
     if ((motapp->webcontrol_finish == false) &&
         (motapp->webcontrol_daemon != NULL)) {
@@ -573,6 +619,9 @@ static void motion_init(ctx_motapp *motapp, int argc, char *argv[])
     motapp->cam_list = (ctx_dev **)mymalloc(sizeof(ctx_dev *));
     motapp->cam_list[0] = NULL;
 
+    motapp->snd_list = (ctx_dev **)mymalloc(sizeof(ctx_dev *));
+    motapp->snd_list[0] = NULL;
+
     motapp->threads_running = 0;
     motapp->finish_all = false;
     motapp->restart_all = false;
@@ -581,6 +630,7 @@ static void motion_init(ctx_motapp *motapp, int argc, char *argv[])
     motapp->cam_add = false;
     motapp->cam_delete = -1;
     motapp->cam_cnt = 0;
+    motapp->snd_cnt = 0;
 
     motapp->conf = new ctx_config;
     motapp->dbse = NULL;
@@ -696,7 +746,6 @@ static void motion_cam_delete(ctx_motapp *motapp)
 
 }
 
-
 /** Main entry point of MotionPlus. */
 int main (int argc, char **argv)
 {
@@ -720,12 +769,15 @@ int main (int argc, char **argv)
         }
 
         for (indx=0; indx<motapp->cam_cnt; indx++) {
-            motapp->cam_list[indx]->threadnr = indx;
-            motion_start_thread(motapp, indx);
+            motion_start_thread_cam(motapp->cam_list[indx]);
+        }
+
+        for (indx=0; indx<motapp->snd_cnt; indx++) {
+            motion_start_thread_snd(motapp->snd_list[indx]);
         }
 
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,_("Waiting for threads to finish, pid: %d"), getpid());
+            ,_("Motionplus pid: %d"), getpid());
 
         while (true) {
             SLEEP(1, 0);
@@ -741,10 +793,18 @@ int main (int argc, char **argv)
                     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                         ,_("MotionPlus camera %d restart")
                         , motapp->cam_list[indx]->device_id);
-                    motion_start_thread(motapp, indx);
+                    motion_start_thread_cam(motapp->cam_list[indx]);
                 }
                 motion_watchdog(motapp, indx);
-
+            }
+            for (indx=0; indx<motapp->snd_cnt; indx++) {
+                if ((motapp->snd_list[indx]->running_dev == false) &&
+                    (motapp->snd_list[indx]->restart_dev == true)) {
+                    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                        ,_("MotionPlus sound %d restart")
+                        , motapp->snd_list[indx]->device_id);
+                    motion_start_thread_snd(motapp->snd_list[indx]);
+                }
             }
 
             if (motsignal != MOTION_SIGNAL_NONE) {
@@ -761,7 +821,7 @@ int main (int argc, char **argv)
 
         motapp->finish_all = false;
 
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Threads finished"));
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motionplus devices finished"));
 
         if (motapp->restart_all) {
             SLEEP(1, 0);    /* Rest before restarting */

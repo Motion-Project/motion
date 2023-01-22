@@ -2159,7 +2159,7 @@ void netcam_cleanup(ctx_dev *cam)
     }
     cam->netcam = NULL;
     cam->netcam_high = NULL;
-    cam->camera_status = STATUS_CLOSED;
+    cam->device_status = STATUS_CLOSED;
 
 }
 
@@ -2241,7 +2241,7 @@ void netcam_start(ctx_dev *cam)
         indx_cam++;
     }
 
-    cam->camera_status = STATUS_OPENED;
+    cam->device_status = STATUS_OPENED;
 
     return;
 

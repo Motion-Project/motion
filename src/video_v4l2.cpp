@@ -1315,7 +1315,7 @@ void v4l2_cleanup(ctx_dev *cam)
         myfree(&cam->v4l2cam);
     #endif // HAVE_V4L2
 
-    cam->camera_status = STATUS_CLOSED;
+    cam->device_status = STATUS_CLOSED;
 
 }
 
@@ -1343,10 +1343,10 @@ void v4l2_start(ctx_dev *cam)
             v4l2_cleanup(cam);
             return;
         }
-        cam->camera_status = STATUS_OPENED;
+        cam->device_status = STATUS_OPENED;
 
     #else
-        cam->camera_status = STATUS_CLOSED;
+        cam->device_status = STATUS_CLOSED;
     #endif // HAVE_V4l2
 }
 

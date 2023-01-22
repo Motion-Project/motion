@@ -118,6 +118,7 @@ ctx_parm config_parms[] = {
     {"on_camera_found",           PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
     {"on_secondary_detect",       PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
     {"on_action_user",            PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
+    {"on_sound_alert",            PARM_TYP_STRING, PARM_CAT_08, WEBUI_LEVEL_RESTRICTED },
 
     {"picture_output",            PARM_TYP_LIST,   PARM_CAT_09, WEBUI_LEVEL_LIMITED },
     {"picture_output_motion",     PARM_TYP_LIST,   PARM_CAT_09, WEBUI_LEVEL_LIMITED },
@@ -200,6 +201,12 @@ ctx_parm config_parms[] = {
     {"ptz_tilt_down",             PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
     {"ptz_zoom_in",               PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
     {"ptz_zoom_out",              PARM_TYP_STRING, PARM_CAT_17, WEBUI_LEVEL_RESTRICTED },
+
+    {"snd_device",                PARM_TYP_STRING, PARM_CAT_18, WEBUI_LEVEL_ADVANCED },
+    {"snd_params",                PARM_TYP_STRING, PARM_CAT_18, WEBUI_LEVEL_ADVANCED },
+    {"snd_alerts",                PARM_TYP_ARRAY, PARM_CAT_18, WEBUI_LEVEL_ADVANCED },
+    {"snd_window",                PARM_TYP_LIST, PARM_CAT_18, WEBUI_LEVEL_ADVANCED },
+    {"show_freq",                 PARM_TYP_BOOL, PARM_CAT_18, WEBUI_LEVEL_ADVANCED },
 
     { "", (enum PARM_TYP)0, (enum PARM_CAT)0, (enum WEBUI_LEVEL)0 }
 };
@@ -602,10 +609,12 @@ static void conf_edit_device_id(ctx_config *conf, std::string &parm, enum PARM_A
     int parm_in;
 
     if (pact == PARM_ACT_DFLT) {
-        conf->device_id = 1;
+        conf->device_id = 0;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if (parm_in < 1) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid device_id %d"),parm_in);
+        } else if (parm_in > 32000) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid device_id %d"),parm_in);
         } else {
             conf->device_id = parm_in;
@@ -1633,6 +1642,19 @@ static void conf_edit_on_action_user(ctx_config *conf, std::string &parm, enum P
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_action_user",_("on_action_user"));
+}
+
+static void conf_edit_on_sound_alert(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        conf->on_sound_alert = "";
+    } else if (pact == PARM_ACT_SET) {
+        conf->on_sound_alert = parm;
+    } else if (pact == PARM_ACT_GET) {
+        parm = conf->on_sound_alert;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_sound_alert",_("on_sound_alert"));
 }
 
 static void conf_edit_picture_output(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
@@ -2819,6 +2841,110 @@ static void conf_edit_ptz_zoom_out(ctx_config *conf, std::string &parm, enum PAR
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_zoom_out",_("ptz_zoom_out"));
 }
 
+static void conf_edit_snd_device(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        conf->snd_device = "";
+    } else if (pact == PARM_ACT_SET) {
+        conf->snd_device = parm;
+    } else if (pact == PARM_ACT_GET) {
+        parm = conf->snd_device;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_device",_("snd_device"));
+}
+
+static void conf_edit_snd_params(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        conf->snd_params = "";
+    } else if (pact == PARM_ACT_SET) {
+        conf->snd_params = parm;
+    } else if (pact == PARM_ACT_GET) {
+        parm = conf->snd_params;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_params",_("snd_params"));
+}
+
+static void conf_edit_snd_alerts(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
+{
+    std::list<std::string>::iterator   it;
+
+    if (pact == PARM_ACT_DFLT) {
+        conf->snd_alerts.clear();
+        if (parm == "") {
+            return;
+        }
+        conf->snd_alerts.push_back(parm);
+    } else if (pact == PARM_ACT_SET) {
+        if (parm == "") {
+            return;
+        }
+        conf->snd_alerts.push_back(parm);   /* Add to the end of list*/
+        for (it= conf->snd_alerts.begin(); it != conf->snd_alerts.end(); it++) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,"%s:%s"
+                ,"snd_alerts", it->c_str());
+        }
+    } else if (pact == PARM_ACT_GET) {
+        if (conf->snd_alerts.empty()) {
+            parm = "";
+        } else {
+            parm = conf->snd_alerts.back();     /* Give last item*/
+        }
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_alerts",_("snd_alerts"));
+}
+
+static void conf_edit_snd_alerts(ctx_config *conf, std::list<std::string> &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        conf->snd_alerts.clear();
+        conf->snd_alerts = parm;
+    } else if (pact == PARM_ACT_SET) {
+        conf->snd_alerts = parm;
+    } else if (pact == PARM_ACT_GET) {
+        parm = conf->snd_alerts;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_alerts",_("snd_alerts"));
+}
+
+static void conf_edit_snd_window(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        conf->snd_window = "hamming";
+    } else if (pact == PARM_ACT_SET) {
+        if ((parm == "none") || (parm == "hamming") || (parm == "hann")) {
+            conf->snd_window = parm;
+        } else if (parm == "") {
+            conf->snd_window = "hamming";
+        } else {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid snd_window %s"), parm.c_str());
+        }
+    } else if (pact == PARM_ACT_GET) {
+        parm = conf->snd_window;
+    } else if (pact == PARM_ACT_LIST) {
+        parm = "[\"none\",\"hamming\",\"hann\"]";
+
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_window",_("snd_window"));
+}
+
+static void conf_edit_show_freq(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+       conf->show_freq = false;
+    } else if (pact == PARM_ACT_SET) {
+        conf_edit_set_bool(conf->show_freq, parm);
+    } else if (pact == PARM_ACT_GET) {
+        conf_edit_get_bool(parm, conf->show_freq);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","show_freq",_("show_freq"));
+}
 
 /* Application level parameters */
 static void conf_edit_cat00(ctx_config *conf, std::string cmd
@@ -2954,6 +3080,7 @@ static void conf_edit_cat08(ctx_config *conf, std::string parm_nm
     } else if (parm_nm == "on_camera_found") {         conf_edit_on_camera_found(conf, parm_val, pact);
     } else if (parm_nm == "on_secondary_detect") {     conf_edit_on_secondary_detect(conf, parm_val, pact);
     } else if (parm_nm == "on_action_user") {          conf_edit_on_action_user(conf, parm_val, pact);
+    } else if (parm_nm == "on_sound_alert") {          conf_edit_on_sound_alert(conf, parm_val, pact);
     }
 
 }
@@ -3092,6 +3219,33 @@ static void conf_edit_cat17(ctx_config *conf, std::string parm_nm
     }
 }
 
+static void conf_edit_cat18(ctx_config *conf, std::string parm_nm
+        , std::string &parm_val, enum PARM_ACT pact)
+{
+    if (parm_nm == "snd_device") {         conf_edit_snd_device(conf, parm_val, pact);
+    } else if (parm_nm == "snd_params") {  conf_edit_snd_params(conf, parm_val, pact);
+    } else if (parm_nm == "snd_window") {  conf_edit_snd_window(conf, parm_val, pact);
+    } else if (parm_nm == "snd_alerts") {  conf_edit_snd_alerts(conf, parm_val, pact);
+    } else if (parm_nm == "show_freq") {   conf_edit_show_freq(conf, parm_val, pact);
+
+    }
+}
+
+static void conf_edit_cat18(ctx_config *conf, std::string parm_nm
+        ,std::list<std::string> &parm_val, enum PARM_ACT pact)
+{
+    if (parm_nm == "snd_alerts") {  conf_edit_snd_alerts(conf, parm_val, pact);
+    }
+}
+
+static void conf_edit_cat(ctx_config *conf, std::string parm_nm
+        ,std::list<std::string> &parm_val, enum PARM_ACT pact, enum PARM_CAT pcat)
+{
+    if (pcat == PARM_CAT_18) {
+        conf_edit_cat18(conf, parm_nm, parm_val, pact);
+    }
+}
+
 static void conf_edit_cat(ctx_config *conf, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact, enum PARM_CAT pcat)
 {
@@ -3113,6 +3267,7 @@ static void conf_edit_cat(ctx_config *conf, std::string parm_nm
     } else if (pcat == PARM_CAT_15) {   conf_edit_cat15(conf, parm_nm, parm_val, pact);
     } else if (pcat == PARM_CAT_16) {   conf_edit_cat16(conf, parm_nm, parm_val, pact);
     } else if (pcat == PARM_CAT_17) {   conf_edit_cat17(conf, parm_nm, parm_val, pact);
+    } else if (pcat == PARM_CAT_18) {   conf_edit_cat18(conf, parm_nm, parm_val, pact);
     }
 
 }
@@ -3239,6 +3394,12 @@ void conf_edit_get(ctx_config *conf, std::string parm_nm, std::string &parm_val,
     conf_edit_cat(conf, parm_nm, parm_val, PARM_ACT_GET, parm_cat);
 }
 
+void conf_edit_get(ctx_config *conf, std::string parm_nm
+    , std::list<std::string> &parm_val, enum PARM_CAT parm_cat)
+{
+    conf_edit_cat(conf, parm_nm, parm_val, PARM_ACT_GET, parm_cat);
+}
+
 /* Assign the parameter value */
 void conf_edit_set(ctx_config *conf, std::string parm_nm
         , std::string parm_val)
@@ -3267,6 +3428,7 @@ std::string conf_type_desc(enum PARM_TYP ptype)
     } else if (ptype == PARM_TYP_INT) {     return "int";
     } else if (ptype == PARM_TYP_LIST) {    return "list";
     } else if (ptype == PARM_TYP_STRING) {  return "string";
+    } else if (ptype == PARM_TYP_ARRAY) {   return "array";
     } else {                                return "error";
     }
 }
@@ -3293,6 +3455,7 @@ std::string conf_cat_desc(enum PARM_CAT pcat, bool shrt) {
         } else if (pcat == PARM_CAT_15) { return "database";
         } else if (pcat == PARM_CAT_16) { return "sql";
         } else if (pcat == PARM_CAT_17) { return "track";
+        } else if (pcat == PARM_CAT_18) { return "sound";
         } else { return "unk";
         }
     } else {
@@ -3314,6 +3477,7 @@ std::string conf_cat_desc(enum PARM_CAT pcat, bool shrt) {
         } else if (pcat == PARM_CAT_15) { return "Database";
         } else if (pcat == PARM_CAT_16) { return "SQL";
         } else if (pcat == PARM_CAT_17) { return "Tracking";
+        } else if (pcat == PARM_CAT_18) { return "Sound";
         } else { return "Other";
         }
     }
@@ -3384,7 +3548,7 @@ static void conf_cmdline(ctx_motapp *motapp)
 }
 
 /* Add in a default filename for the last camera config if it wasn't provided. */
-static void conf_filenm_cam(ctx_motapp *motapp)
+static void conf_camera_filenm(ctx_motapp *motapp)
 {
     int indx_cam, indx;
     std::string dirnm, fullnm;
@@ -3453,11 +3617,11 @@ void conf_camera_add(ctx_motapp *motapp)
         indx++;
     }
 
-    conf_filenm_cam(motapp);
+    conf_camera_filenm(motapp);
 
 }
 
-static void conf_parm_camera(ctx_motapp *motapp, std::string filename)
+static void conf_camera_parm(ctx_motapp *motapp, std::string filename)
 {
     struct stat statbuf;
 
@@ -3470,6 +3634,96 @@ static void conf_parm_camera(ctx_motapp *motapp, std::string filename)
     conf_camera_add(motapp);
     motapp->cam_list[motapp->cam_cnt-1]->conf->conf_filename = filename;
     conf_process(motapp, motapp->cam_list[motapp->cam_cnt-1]->conf);
+
+}
+
+/* Add in a default filename for the last sound config if it wasn't provided. */
+static void conf_sound_filenm(ctx_motapp *motapp)
+{
+    int indx_snd, indx;
+    std::string dirnm, fullnm;
+    struct stat statbuf;
+    size_t lstpos;
+
+    if (motapp->snd_list[motapp->snd_cnt-1]->conf->conf_filename != "") {
+        return;
+    }
+
+    lstpos = motapp->conf->conf_filename.find_last_of("/");
+    if (lstpos != std::string::npos) {
+        lstpos++;
+    }
+    dirnm = motapp->conf->conf_filename.substr(0, lstpos);
+
+    indx_snd = 1;
+    fullnm = "";
+    while (fullnm == "") {
+        fullnm = dirnm + "sound" + std::to_string(indx_snd) + ".conf";
+        for (indx=0;indx<motapp->snd_cnt;indx++) {
+            if (fullnm == motapp->snd_list[indx_snd]->conf->conf_filename) {
+                fullnm = "";
+            }
+        }
+        if (fullnm == "") {
+            indx_snd++;
+        } else {
+            if (stat(fullnm.c_str(), &statbuf) == 0) {
+                fullnm = "";
+                indx_snd++;
+            }
+        }
+    }
+
+    motapp->snd_list[motapp->snd_cnt-1]->conf->conf_filename = fullnm;
+
+}
+
+void conf_sound_add(ctx_motapp *motapp)
+{
+    int indx;
+    std::string parm_val;
+
+    motapp->snd_cnt++;
+    motapp->snd_list = (ctx_dev **)myrealloc(
+        motapp->snd_list, sizeof(ctx_dev *) * (motapp->snd_cnt + 1), "config_sound");
+
+    motapp->snd_list[motapp->snd_cnt-1] = new ctx_dev;
+    memset(motapp->snd_list[motapp->snd_cnt-1],0,sizeof(ctx_dev));
+    motapp->snd_list[motapp->snd_cnt-1]->conf = new ctx_config;
+
+    motapp->snd_list[motapp->snd_cnt] = NULL;
+    motapp->snd_list[motapp->snd_cnt-1]->motapp = motapp;
+
+    conf_edit_dflt(motapp->snd_list[motapp->snd_cnt-1]->conf);
+
+    indx = 0;
+    while (config_parms[indx].parm_name != "") {
+        if (mystrne(config_parms[indx].parm_name.c_str(),"device_id")) {
+            conf_edit_get(motapp->conf, config_parms[indx].parm_name
+                , parm_val, config_parms[indx].parm_cat);
+            conf_edit_set(motapp->snd_list[motapp->snd_cnt-1]->conf
+                , config_parms[indx].parm_name, parm_val);
+        }
+        indx++;
+    }
+
+    conf_sound_filenm(motapp);
+
+}
+
+static void conf_sound_parm(ctx_motapp *motapp, std::string filename)
+{
+    struct stat statbuf;
+
+    if (stat(filename.c_str(), &statbuf) != 0) {
+        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
+            ,_("Sound config file %s not found"), filename.c_str());
+        return;
+    }
+
+    conf_sound_add(motapp);
+    motapp->snd_list[motapp->snd_cnt-1]->conf->conf_filename = filename;
+    conf_process(motapp, motapp->snd_list[motapp->snd_cnt-1]->conf);
 
 }
 
@@ -3488,7 +3742,7 @@ static void conf_parm_config_dir(ctx_motapp *motapp, std::string confdir)
                 conf_file = confdir + "/" + conf_file;
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                     ,_("Processing config file %s"), conf_file.c_str() );
-                conf_parm_camera(motapp, conf_file);
+                conf_camera_parm(motapp, conf_file);
                 motapp->cam_list[motapp->cam_cnt-1]->conf->from_conf_dir = true;
             }
         }
@@ -3498,7 +3752,6 @@ static void conf_parm_config_dir(ctx_motapp *motapp, std::string confdir)
     conf_edit_set(motapp->conf, "config_dir", confdir);
 
 }
-
 
 /** Process each line from the config file. */
 void conf_process(ctx_motapp *motapp, ctx_config *conf)
@@ -3535,10 +3788,13 @@ void conf_process(ctx_motapp *motapp, ctx_config *conf)
                 myunquote(parm_nm);
                 myunquote(parm_vl);
                 if ((parm_nm == "camera") && (motapp->conf == conf)) {
-                    conf_parm_camera(motapp, parm_vl);
+                    conf_camera_parm(motapp, parm_vl);
+                } else if ((parm_nm == "sound") && (motapp->conf == conf)) {
+                    conf_sound_parm(motapp, parm_vl);
                 } else if ((parm_nm == "config_dir") && (motapp->conf == conf)){
                     conf_parm_config_dir(motapp, parm_vl);
-                } else if ((parm_nm != "camera") && (parm_nm != "config_dir")) {
+                } else if ((parm_nm != "camera") && (parm_nm != "sound") &&
+                    (parm_nm != "config_dir")) {
                    conf_edit_set(conf, parm_nm, parm_vl);
                 }
             } else if ((line != "") &&
@@ -3584,7 +3840,10 @@ void conf_parms_log(ctx_motapp *motapp)
 {
     int i, indx;
     std::string parm_vl, parm_main, parm_nm;
+    std::list<std::string> parm_array;
+    std::list<std::string>::iterator it;
     enum PARM_CAT parm_ct;
+    enum PARM_TYP parm_typ;
 
     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
         ,_("Logging configuration parameters from all files"));
@@ -3596,10 +3855,19 @@ void conf_parms_log(ctx_motapp *motapp)
     while (config_parms[i].parm_name != "") {
         parm_nm=config_parms[i].parm_name;
         parm_ct=config_parms[i].parm_cat;
-        if ((parm_nm != "camera") && (parm_nm != "config_dir") &&
-            (parm_nm != "conf_filename") ) {
+        parm_typ=config_parms[i].parm_type;
+
+        if ((parm_nm != "camera") && (parm_nm != "sound") &&
+            (parm_nm != "config_dir") && (parm_nm != "conf_filename") &&
+            (parm_typ != PARM_TYP_ARRAY)) {
             conf_edit_get(motapp->conf, parm_nm,parm_vl, parm_ct);
             conf_parms_log_parm(parm_nm, parm_vl);
+        }
+        if (parm_typ == PARM_TYP_ARRAY) {
+            conf_edit_get(motapp->conf, parm_nm, parm_array, parm_ct);
+            for (it = parm_array.begin(); it != parm_array.end(); it++) {
+                conf_parms_log_parm(parm_nm, it->c_str());
+            }
         }
         i++;
     }
@@ -3613,17 +3881,50 @@ void conf_parms_log(ctx_motapp *motapp)
         while (config_parms[i].parm_name != "") {
             parm_nm=config_parms[i].parm_name;
             parm_ct=config_parms[i].parm_cat;
+            parm_typ=config_parms[i].parm_type;
             conf_edit_get(motapp->conf, parm_nm, parm_main, parm_ct);
             conf_edit_get(motapp->cam_list[indx]->conf, parm_nm, parm_vl, parm_ct);
-            if ((parm_nm != "camera") && (parm_nm != "config_dir") &&
-                (parm_nm != "conf_filename") &&
-                (parm_main != parm_vl) ) {
+            if ((parm_nm != "camera") && (parm_nm != "sound") &&
+                (parm_nm != "config_dir") && (parm_nm != "conf_filename") &&
+                (parm_main != parm_vl) && (parm_typ != PARM_TYP_ARRAY) ) {
                 conf_parms_log_parm(parm_nm, parm_vl);
+            }
+            if (parm_typ == PARM_TYP_ARRAY) {
+                conf_edit_get(motapp->cam_list[indx]->conf, parm_nm, parm_array, parm_ct);
+                for (it = parm_array.begin(); it != parm_array.end(); it++) {
+                    conf_parms_log_parm(parm_nm, it->c_str());
+                }
             }
             i++;
         }
     }
 
+    for (indx=0; indx<motapp->snd_cnt; indx++) {
+        motion_log(INF, TYPE_ALL, NO_ERRNO, 0
+            , _("Sound %d - Config file: %s")
+            , motapp->snd_list[indx]->conf->device_id
+            , motapp->snd_list[indx]->conf->conf_filename.c_str());
+        i = 0;
+        while (config_parms[i].parm_name != "") {
+            parm_nm=config_parms[i].parm_name;
+            parm_ct=config_parms[i].parm_cat;
+            parm_typ=config_parms[i].parm_type;
+            conf_edit_get(motapp->conf, parm_nm, parm_main, parm_ct);
+            conf_edit_get(motapp->snd_list[indx]->conf, parm_nm, parm_vl, parm_ct);
+            if ((parm_nm != "camera") && (parm_nm != "sound") &&
+                (parm_nm != "config_dir") && (parm_nm != "conf_filename") &&
+                (parm_main != parm_vl) && (parm_typ != PARM_TYP_ARRAY) ) {
+                conf_parms_log_parm(parm_nm, parm_vl);
+            }
+            if (parm_typ == PARM_TYP_ARRAY) {
+                conf_edit_get(motapp->snd_list[indx]->conf, parm_nm, parm_array, parm_ct);
+                for (it = parm_array.begin(); it != parm_array.end(); it++) {
+                    conf_parms_log_parm(parm_nm, it->c_str());
+                }
+            }
+            i++;
+        }
+    }
 
 }
 
@@ -3655,7 +3956,10 @@ void conf_parms_write_app(ctx_motapp *motapp)
 {
     int i, indx;
     std::string parm_vl, parm_main, parm_nm;
+    std::list<std::string> parm_array;
+    std::list<std::string>::iterator it;
     enum PARM_CAT parm_ct;
+    enum PARM_TYP parm_typ;
     char timestamp[32];
     FILE *conffile;
 
@@ -3681,10 +3985,18 @@ void conf_parms_write_app(ctx_motapp *motapp)
     while (config_parms[i].parm_name != "") {
         parm_nm=config_parms[i].parm_name;
         parm_ct=config_parms[i].parm_cat;
-        if ((parm_nm != "camera") && (parm_nm != "config_dir") &&
-            (parm_nm != "conf_filename")) {
+        parm_typ=config_parms[i].parm_type;
+        if ((parm_nm != "camera") && (parm_nm != "sound") &&
+            (parm_nm != "config_dir") && (parm_nm != "conf_filename") &&
+            (parm_typ != PARM_TYP_ARRAY)) {
             conf_edit_get(motapp->conf, parm_nm, parm_vl, parm_ct);
             conf_parms_write_parms(conffile, parm_nm, parm_vl, parm_ct, false);
+        }
+        if (parm_typ == PARM_TYP_ARRAY) {
+            conf_edit_get(motapp->conf, parm_nm, parm_array, parm_ct);
+            for (it = parm_array.begin(); it != parm_array.end(); it++) {
+                conf_parms_write_parms(conffile, parm_nm, it->c_str(), parm_ct, false);
+            }
         }
         i++;
     }
@@ -3693,6 +4005,14 @@ void conf_parms_write_app(ctx_motapp *motapp)
         if (motapp->cam_list[indx]->conf->from_conf_dir == false) {
             conf_parms_write_parms(conffile, "camera"
                 , motapp->cam_list[indx]->conf->conf_filename
+                , PARM_CAT_01, false);
+        }
+    }
+
+    for (indx=0; indx<motapp->snd_cnt; indx++) {
+        if (motapp->snd_list[indx]->conf->from_conf_dir == false) {
+            conf_parms_write_parms(conffile, "sound"
+                , motapp->snd_list[indx]->conf->conf_filename
                 , PARM_CAT_01, false);
         }
     }
@@ -3715,7 +4035,10 @@ void conf_parms_write_cam(ctx_motapp *motapp)
 {
     int i, indx;
     std::string parm_vl, parm_main, parm_nm;
+    std::list<std::string> parm_array;
+    std::list<std::string>::iterator it;
     enum PARM_CAT parm_ct;
+    enum PARM_TYP parm_typ;
     char timestamp[32];
     FILE *conffile;
 
@@ -3740,12 +4063,20 @@ void conf_parms_write_cam(ctx_motapp *motapp)
         while (config_parms[i].parm_name != "") {
             parm_nm=config_parms[i].parm_name;
             parm_ct=config_parms[i].parm_cat;
-            if ((parm_nm != "camera") && (parm_nm != "config_dir") &&
-                (parm_nm != "conf_filename") ) {
+            parm_typ=config_parms[i].parm_type;
+            if ((parm_nm != "camera") && (parm_nm != "sound") &&
+                (parm_nm != "config_dir") && (parm_nm != "conf_filename") &&
+                (parm_typ != PARM_TYP_ARRAY) ) {
                 conf_edit_get(motapp->conf, parm_nm, parm_main, parm_ct);
                 conf_edit_get(motapp->cam_list[indx]->conf, parm_nm, parm_vl, parm_ct);
                 if (parm_main != parm_vl) {
                     conf_parms_write_parms(conffile, parm_nm, parm_vl, parm_ct, false);
+                }
+            }
+            if (parm_typ == PARM_TYP_ARRAY) {
+                conf_edit_get(motapp->conf, parm_nm, parm_array, parm_ct);
+                for (it = parm_array.begin(); it != parm_array.end(); it++) {
+                    conf_parms_write_parms(conffile, parm_nm, it->c_str(), parm_ct, false);
                 }
             }
             i++;
@@ -3760,12 +4091,72 @@ void conf_parms_write_cam(ctx_motapp *motapp)
 
 }
 
+void conf_parms_write_snd(ctx_motapp *motapp)
+{
+    int i, indx;
+    std::string parm_vl, parm_main, parm_nm;
+    std::list<std::string> parm_array;
+    std::list<std::string>::iterator it;
+    enum PARM_CAT parm_ct;
+    enum PARM_TYP parm_typ;
+    char timestamp[32];
+    FILE *conffile;
+
+    time_t now = time(0);
+    strftime(timestamp, 32, "%Y-%m-%dT%H:%M:%S", localtime(&now));
+
+    for (indx=0; indx<motapp->snd_cnt; indx++) {
+        conffile = myfopen(motapp->snd_list[indx]->conf->conf_filename.c_str(), "we");
+        if (conffile == NULL) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Failed to write configuration to %s")
+                , motapp->snd_list[indx]->conf->conf_filename.c_str());
+            return;
+        }
+        fprintf(conffile, "; %s\n", motapp->snd_list[indx]->conf->conf_filename.c_str());
+        fprintf(conffile, ";\n; This config file was generated by MotionPlus " VERSION "\n");
+        fprintf(conffile, "; at %s\n", timestamp);
+        fprintf(conffile, "\n\n");
+        conf_parms_write_parms(conffile, "", "", PARM_CAT_00, true);
+
+        i=0;
+        while (config_parms[i].parm_name != "") {
+            parm_nm=config_parms[i].parm_name;
+            parm_ct=config_parms[i].parm_cat;
+            parm_typ=config_parms[i].parm_type;
+            if ((parm_nm != "camera") && (parm_nm != "sound") &&
+                (parm_nm != "config_dir") && (parm_nm != "conf_filename") &&
+                (parm_typ != PARM_TYP_ARRAY)) {
+                conf_edit_get(motapp->conf, parm_nm, parm_main, parm_ct);
+                conf_edit_get(motapp->snd_list[indx]->conf, parm_nm, parm_vl, parm_ct);
+                if (parm_main != parm_vl) {
+                    conf_parms_write_parms(conffile, parm_nm, parm_vl, parm_ct, false);
+                }
+            }
+            if (parm_typ == PARM_TYP_ARRAY) {
+                conf_edit_get(motapp->conf, parm_nm, parm_array, parm_ct);
+                for (it = parm_array.begin(); it != parm_array.end(); ++it) {
+                    conf_parms_write_parms(conffile, parm_nm, it->c_str(), parm_ct, false);
+                }
+            }
+            i++;
+        }
+        fprintf(conffile, "\n");
+        myfclose(conffile);
+
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            , _("Configuration written to %s")
+            , motapp->snd_list[indx]->conf->conf_filename.c_str());
+    }
+}
 
 /**  Write the configuration(s) to file */
 void conf_parms_write(ctx_motapp *motapp)
 {
     conf_parms_write_app(motapp);
     conf_parms_write_cam(motapp);
+    conf_parms_write_snd(motapp);
+
 }
 
 void conf_init(ctx_motapp *motapp)
@@ -3828,6 +4219,10 @@ void conf_init(ctx_motapp *motapp)
         motapp->cam_list[indx]->threadnr = indx;
     }
 
+    for (indx=0; indx<motapp->snd_cnt; indx++) {
+        motapp->snd_list[indx]->threadnr = indx + motapp->cam_cnt;
+    }
+
 }
 
 void conf_deinit(ctx_motapp *motapp)
@@ -3839,6 +4234,12 @@ void conf_deinit(ctx_motapp *motapp)
         delete motapp->cam_list[indx];
     }
     myfree(&motapp->cam_list);
+
+    for (indx=0; indx<motapp->snd_cnt; indx++) {
+        delete motapp->snd_list[indx]->conf;
+        delete motapp->snd_list[indx];
+    }
+    myfree(&motapp->snd_list);
 
 }
 

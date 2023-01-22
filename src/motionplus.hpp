@@ -75,6 +75,18 @@ extern "C" {
     #endif
 #endif
 
+#ifdef HAVE_ALSA
+    extern "C" {
+        #include <alsa/asoundlib.h>
+    }
+#endif
+
+#ifdef HAVE_FFTW3
+    extern "C" {
+        #include <fftw3.h>
+    }
+#endif
+
 /* Forward declarations, used in functional definitions of headers */
 struct ctx_motapp;
 struct ctx_rotate;
@@ -181,7 +193,7 @@ enum CAPTURE_RESULT {
     CAPTURE_ATTEMPTED
 };
 
-enum CAM_STATUS {
+enum DEVICE_STATUS {
     STATUS_CLOSED,   /* Camera is closed */
     STATUS_INIT,     /* First time initialize */
     STATUS_RESET,    /* Clean up and re-initialize */
@@ -299,6 +311,60 @@ struct ctx_stream {
     ctx_stream_data  secondary;  /* Copy of the image to use for web stream*/
 };
 
+struct ctx_snd_alert {
+    int             alert_id;           /* Id number for the alert*/
+    std::string     alert_nm;           /* Name of the alert*/
+    int             volume_level;       /* Volume level required to consider the sample*/
+    int             volume_count;       /* For each sample, number of times required to exceed volumne level*/
+    float           freq_low;           /* Lowest frequency for detecting this alert*/
+    float           freq_high;          /* Highest frequency for detecting this alert*/
+    int             trigger_count;      /* Count of how many times it has been triggered so far*/
+    int             trigger_threshold;  /* How many times does it need to be triggered before an event*/
+    timespec        trigger_time;       /* The last time the trigger was invoked */
+    int             trigger_duration;   /* Min. duration to trigger a new /event */
+};
+
+struct ctx_snd_alsa {
+   #ifdef HAVE_ALSA
+        std::string     source;         /* Source string in ALSA format e.g. hw:1,0*/
+        unsigned int    sample_rate;    /* Sample rate of sound source*/
+        int             channels;       /* Number of audio channels */
+        std::string     device_nm;
+        int             device_id;
+        snd_pcm_t       *pcm_dev;
+        snd_pcm_info_t  *pcm_info;
+        int                     card_id;
+        snd_ctl_card_info_t     *card_info;
+        snd_ctl_t               *ctl_hdl;
+        int16_t         *input_buffer;
+        int             buf_frames;
+        long            buf_size;
+        int             buf_items;
+    #else
+        int             dummy;
+    #endif
+};
+
+struct ctx_snd_fftw {
+    #ifdef HAVE_FFTW3
+        fftw_plan       ff_plan;
+        double          *ff_in;
+        fftw_complex    *ff_out;
+        int             bin_max;
+        int             bin_min;
+        float           bin_size;
+    #else
+        int             dummy;
+    #endif
+};
+
+struct ctx_snd_vars {
+    std::list<ctx_snd_alert>    snd_alerts;     /* list of sound alert criteria */
+    int                         snd_vol_min;    /* The minimum volume from alerts*/
+    int                         snd_vol_max;    /* Maximum volume of sample*/
+    int                         snd_vol_count;  /* Number of times volumne exceeded user specified volume level */
+};
+
 struct ctx_dev {
 
     ctx_motapp      *motapp;
@@ -327,7 +393,7 @@ struct ctx_dev {
     int                     track_posy;
     int                     device_id;
     enum CAMERA_TYPE        camera_type;
-    enum CAM_STATUS         camera_status;
+    enum DEVICE_STATUS      device_status;
     unsigned int            new_img;
     int                     locate_motion_mode;
     int                     locate_motion_style;
@@ -391,6 +457,7 @@ struct ctx_dev {
     unsigned int            passflag;  //only purpose is to flag first frame vs all others.....
 
     pthread_mutex_t         parms_lock;
+    ctx_params              *params;            /* Device parameters*/
     bool                    parms_changed;      /*bool indicating if the parms have changed */
 
     uint64_t                info_diff_tot;
@@ -399,12 +466,17 @@ struct ctx_dev {
     int                     info_sdev_max;
     uint64_t                info_sdev_tot;
 
+    ctx_snd_fftw            *snd_fftw;  /* fftw for sound*/
+    ctx_snd_alsa            *snd_alsa;  /* Alsa device for sound*/
+    ctx_snd_vars            *snd_vars;  /* Values for sound processing*/
+
 };
 
 /*  ctx_motapp for whole motion application including all the cameras */
 struct ctx_motapp {
 
     ctx_dev             **cam_list;
+    ctx_dev             **snd_list;
     pthread_mutex_t     global_lock;
 
     volatile int        threads_running;
@@ -418,6 +490,7 @@ struct ctx_motapp {
     bool                pause;
     ctx_config          *conf;
     int                 cam_cnt;
+    int                 snd_cnt;
 
     volatile int                webcontrol_running;
     volatile int                webcontrol_finish;

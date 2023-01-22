@@ -391,7 +391,7 @@ void mlp_cam_start(ctx_dev *cam)
     } else {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("No Camera device specified"));
-        cam->camera_status = STATUS_CLOSED;
+        cam->device_status = STATUS_CLOSED;
     }
 }
 
@@ -434,7 +434,7 @@ static void mlp_init_firstimage(ctx_dev *cam)
     const char *msg;
 
     cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
-    if (cam->camera_status == STATUS_OPENED) {
+    if (cam->device_status == STATUS_OPENED) {
         for (indx = 0; indx < 5; indx++) {
             if (mlp_cam_next(cam, cam->current_image) == CAPTURE_SUCCESS) {
                 break;
@@ -443,8 +443,8 @@ static void mlp_init_firstimage(ctx_dev *cam)
         }
     }
 
-    if ((indx >= 5) || (cam->camera_status != STATUS_OPENED)) {
-        if (cam->camera_status != STATUS_OPENED) {
+    if ((indx >= 5) || (cam->device_status != STATUS_OPENED)) {
+        if (cam->device_status != STATUS_OPENED) {
             msg = "Unable to open camera";
         } else {
             msg = "Error capturing first image";
@@ -468,13 +468,13 @@ static void mlp_check_szimg(ctx_dev *cam)
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
             ,_("Image width (%d) or height(%d) requested is not modulo 8.")
             ,cam->imgs.width, cam->imgs.height);
-        cam->camera_status = STATUS_RESET;
+        cam->device_status = STATUS_RESET;
     }
     if ((cam->imgs.width  < 64) || (cam->imgs.height < 64)) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
             ,cam->imgs.width, cam->imgs.height);
-        cam->camera_status = STATUS_RESET;
+        cam->device_status = STATUS_RESET;
     }
     /* Substream size notification*/
     if ((cam->imgs.width % 16) || (cam->imgs.height % 16)) {
@@ -554,7 +554,7 @@ static void mlp_init_values(ctx_dev *cam)
     } else {
         cam->threshold_maximum = (cam->imgs.height * cam->imgs.width * 3) / 2;
     }
-    cam->camera_status = STATUS_CLOSED;
+    cam->device_status = STATUS_CLOSED;
     cam->startup_frames = (cam->conf->framerate * 2) + cam->conf->pre_capture + cam->conf->minimum_motion_frames;
 
     cam->movie_passthrough = cam->conf->movie_passthrough;
@@ -570,7 +570,7 @@ static void mlp_init_cam_start(ctx_dev *cam)
 {
     mlp_cam_start(cam);
 
-    if (cam->camera_status == STATUS_CLOSED) {
+    if (cam->device_status == STATUS_CLOSED) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Failed to start camera."));
         cam->imgs.width = cam->conf->width;
         cam->imgs.height = cam->conf->height;
@@ -612,7 +612,7 @@ void mlp_cleanup(ctx_dev *cam)
 
     algsec_deinit(cam);
 
-    if (cam->camera_status == STATUS_OPENED) {
+    if (cam->device_status == STATUS_OPENED) {
         mlp_cam_close(cam);
     }
 
@@ -655,12 +655,12 @@ void mlp_cleanup(ctx_dev *cam)
 /* initialize everything for the loop */
 static void mlp_init(ctx_dev *cam)
 {
-    if ((cam->camera_status != STATUS_INIT) &&
-        (cam->camera_status != STATUS_RESET)) {
+    if ((cam->device_status != STATUS_INIT) &&
+        (cam->device_status != STATUS_RESET)) {
         return;
     }
 
-    if (cam->camera_status == STATUS_RESET) {
+    if (cam->device_status == STATUS_RESET) {
         mlp_cleanup(cam);
     }
 
@@ -698,7 +698,7 @@ static void mlp_init(ctx_dev *cam)
 
     mlp_init_ref(cam);
 
-    if (cam->camera_status == STATUS_OPENED) {
+    if (cam->device_status == STATUS_OPENED) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Camera %d started: motion detection %s"),
             cam->device_id, cam->pause ? _("Disabled"):_("Enabled"));
@@ -797,7 +797,7 @@ static void mlp_retry(ctx_dev *cam)
 {
     int size_high;
 
-    if ((cam->camera_status == STATUS_CLOSED) &&
+    if ((cam->device_status == STATUS_CLOSED) &&
         (cam->frame_curr_ts.tv_sec % 10 == 0) &&
         (cam->shots == 0)) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
@@ -809,7 +809,7 @@ static void mlp_retry(ctx_dev *cam)
 
         if (cam->imgs.width != cam->conf->width || cam->imgs.height != cam->conf->height) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Resetting image buffers"));
-            cam->camera_status = STATUS_RESET;
+            cam->device_status = STATUS_RESET;
         }
         /*
          * For high res, we check the size of buffer to determine whether to break out
@@ -818,7 +818,7 @@ static void mlp_retry(ctx_dev *cam)
          */
         size_high = (cam->imgs.width_high * cam->imgs.height_high * 3) / 2;
         if (cam->imgs.size_high != size_high) {
-            cam->camera_status = STATUS_RESET;
+            cam->device_status = STATUS_RESET;
         }
     }
 
@@ -831,7 +831,7 @@ static int mlp_capture(ctx_dev *cam)
     char tmpout[80];
     int retcd;
 
-    if (cam->camera_status != STATUS_OPENED) {
+    if (cam->device_status != STATUS_OPENED) {
         return 0;
     }
 
@@ -857,13 +857,13 @@ static int mlp_capture(ctx_dev *cam)
 
         cam->missing_frame_counter++;
 
-        if ((cam->camera_status == STATUS_OPENED) &&
+        if ((cam->device_status == STATUS_OPENED) &&
             (cam->missing_frame_counter <
                 (cam->conf->device_tmo * cam->conf->framerate))) {
             memcpy(cam->current_image->image_norm, cam->imgs.image_vprvcy, cam->imgs.size_norm);
         } else {
             cam->lost_connection = 1;
-            if (cam->camera_status == STATUS_OPENED) {
+            if (cam->device_status == STATUS_OPENED) {
                 tmpin = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
             } else {
                 tmpin = "UNABLE TO OPEN VIDEO DEVICE\\nSINCE %Y-%m-%d %T";
@@ -882,7 +882,7 @@ static int mlp_capture(ctx_dev *cam)
                 event(cam, EVENT_CAMERA_LOST, NULL, NULL, NULL, &cam->connectionlosttime);
             }
 
-            if ((cam->camera_status == STATUS_OPENED) &&
+            if ((cam->device_status == STATUS_OPENED) &&
                 (cam->missing_frame_counter == ((cam->conf->device_tmo * 4) * cam->conf->framerate))) {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Video signal still lost - Trying to close video device"));
@@ -1434,7 +1434,7 @@ void *motion_loop(void *arg)
 
     cam->finish_dev = false;
     cam->restart_dev = false;
-    cam->camera_status = STATUS_INIT;
+    cam->device_status = STATUS_INIT;
 
     while (cam->finish_dev == false) {
         mlp_init(cam);

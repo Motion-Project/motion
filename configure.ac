@@ -474,6 +474,86 @@ AS_IF([test "${SQLITE3}" = "no"], [
 )
 
 ##############################################################################
+###  Check for ALSA
+##############################################################################
+AC_ARG_WITH([alsa],
+  AS_HELP_STRING([--with-alsa[=DIR]],[Build with ALSA support]),
+  [ALSA=$withval],
+  [ALSA="yes"]
+)
+
+AS_IF([test "${ALSA}" = "no"], [
+    AC_MSG_CHECKING(for ALSA)
+    AC_MSG_RESULT(skipped)
+  ],[
+    AC_MSG_CHECKING(ALSA pkg-config path)
+    TEMP_PATH=$PKG_CONFIG_PATH
+    AS_IF([test "${ALSA}" != "yes"], [
+        PKG_CONFIG_PATH=${ALSA}/lib/pkgconfig:$PKG_CONFIG_PATH
+        ALSA="yes"
+      ]
+    )
+    export PKG_CONFIG_PATH
+    AC_MSG_RESULT($PKG_CONFIG_PATH done)
+
+    AC_MSG_CHECKING(for ALSA)
+    AS_IF([pkg-config alsa], [
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags alsa`
+        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs alsa`
+        AC_DEFINE([HAVE_ALSA], [1], [Define to 1 if you have ALSA support])
+        AC_MSG_RESULT(yes)
+      ],[
+        ALSA="no"
+      ]
+    )
+
+    AC_MSG_RESULT([$ALSA])
+    PKG_CONFIG_PATH=$TEMP_PATH
+    export PKG_CONFIG_PATH
+  ]
+)
+
+##############################################################################
+###  Check for FFTW3
+##############################################################################
+AC_ARG_WITH([fftw3],
+  AS_HELP_STRING([--with-fftw3[=DIR]],[Build with FFTW3 support]),
+  [FFTW3=$withval],
+  [FFTW3="yes"]
+)
+
+AS_IF([test "${FFTW3}" = "no"], [
+    AC_MSG_CHECKING(for FFTW3)
+    AC_MSG_RESULT(skipped)
+  ],[
+    AC_MSG_CHECKING(FFTW3 pkg-config path)
+    TEMP_PATH=$PKG_CONFIG_PATH
+    AS_IF([test "${FFTW3}" != "yes"], [
+        PKG_CONFIG_PATH=${FFTW3}/lib/pkgconfig:$PKG_CONFIG_PATH
+        FFTW3="yes"
+      ]
+    )
+    export PKG_CONFIG_PATH
+    AC_MSG_RESULT($PKG_CONFIG_PATH done)
+
+    AC_MSG_CHECKING(for FFTW3)
+    AS_IF([pkg-config fftw3], [
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags fftw3`
+        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs fftw3`
+        AC_DEFINE([HAVE_FFTW3], [1], [Define to 1 if you have FFTW3 support])
+        AC_MSG_RESULT(yes)
+      ],[
+        FFTW3="no"
+      ]
+    )
+
+    AC_MSG_RESULT([$FFTW3])
+    PKG_CONFIG_PATH=$TEMP_PATH
+    export PKG_CONFIG_PATH
+  ]
+)
+
+##############################################################################
 ###  Optimize compiler
 ##############################################################################
 AC_ARG_WITH([optimizecpu],
@@ -562,6 +642,8 @@ echo "SQLite3 support       : $SQLITE3"
 echo "MYSQL support         : $MYSQL"
 echo "PostgreSQL support    : $PGSQL"
 echo "MariaDB support       : $MARIADB"
+echo "ALSA support          : $ALSA"
+echo "FFTW support          : $FFTW3"
 echo
 echo  "Install prefix:       $prefix"
 echo
