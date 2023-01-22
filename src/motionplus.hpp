@@ -440,7 +440,7 @@ struct ctx_dev {
     int                     mpipe;
 
     char                    hostname[PATH_MAX];
-    char                    action_user[20];
+    char                    action_user[40];
 
     int                     movie_fps;
     char                    extpipefilename[PATH_MAX];

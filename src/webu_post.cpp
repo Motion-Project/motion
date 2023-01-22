@@ -394,7 +394,7 @@ void webu_post_action_user(ctx_webui *webui)
                     return;
                 }
             }
-            snprintf(cam->action_user, 20, "%s", tmp.c_str());
+            snprintf(cam->action_user, 40, "%s", tmp.c_str());
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Executing user action on cam %d")
                 , cam->device_id);
@@ -416,7 +416,7 @@ void webu_post_action_user(ctx_webui *webui)
                 return;
             }
         }
-        snprintf(cam->action_user, 20, "%s", tmp.c_str());
+        snprintf(cam->action_user, 40, "%s", tmp.c_str());
 
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Executing user action on cam %d")
