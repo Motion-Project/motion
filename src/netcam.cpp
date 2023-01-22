@@ -1960,13 +1960,11 @@ static void netcam_handler_reconnect(ctx_netcam *netcam)
     * and find the pointer that matches our passed in netcam.
     */
     if (netcam->passthrough == true) {
-        indx = 1;
-        while (netcam->motapp->cam_list[indx] != NULL) {
+        for (indx=0; indx<netcam->motapp->cam_cnt; indx++) {
             if ((netcam->motapp->cam_list[indx]->netcam == netcam) ||
                 (netcam->motapp->cam_list[indx]->netcam_high == netcam)) {
                 netcam->motapp->cam_list[indx]->event_stop = true;
             }
-            indx++;
         }
     }
 

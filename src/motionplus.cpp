@@ -41,21 +41,17 @@ static void motion_signal_process(ctx_motapp *motapp)
     switch(motsignal){
     case MOTION_SIGNAL_ALARM:       /* Trigger snapshot */
         if (motapp->cam_list != NULL) {
-            indx = 0;
-            while (motapp->cam_list[indx] != NULL) {
+            for (indx=0; indx<motapp->cam_cnt; indx++) {
                 if (motapp->cam_list[indx]->conf->snapshot_interval) {
                     motapp->cam_list[indx]->snapshot = true;
                 }
-                indx++;
             }
         }
         break;
     case MOTION_SIGNAL_USR1:        /* Trigger the end of a event */
         if (motapp->cam_list != NULL) {
-            indx = 0;
-            while (motapp->cam_list[indx] != NULL){
+            for (indx=0; indx<motapp->cam_cnt; indx++) {
                 motapp->cam_list[indx]->event_stop = true;
-                indx++;
             }
         }
         break;
@@ -507,8 +503,7 @@ static void motion_watchdog(ctx_motapp *motapp, int camindx)
         , motapp->cam_list[camindx]->device_id);
 
     /* Shut down all the cameras */
-    indx = 0;
-    while (motapp->cam_list[indx] != NULL) {
+    for (indx=0; indx<motapp->cam_cnt; indx++) {
         pthread_mutex_unlock(&motapp->mutex_camlst);
         pthread_mutex_unlock(&motapp->mutex_parms);
         pthread_mutex_unlock(&motapp->mutex_camlst);
@@ -536,7 +531,6 @@ static void motion_watchdog(ctx_motapp *motapp, int camindx)
         }
         motapp->cam_list[indx]->event_stop = true;
         motapp->cam_list[indx]->finish_dev = true;
-        indx++;
     }
 
     SLEEP(motapp->cam_list[camindx]->conf->watchdog_kill, 0);
@@ -545,8 +539,7 @@ static void motion_watchdog(ctx_motapp *motapp, int camindx)
      * we WILL have to leak memory because the freeing/deinit
      * processes could lock this thread which would stop everything.
     */
-    indx = 0;
-    while (motapp->cam_list[indx] != NULL) {
+    for (indx=0; indx<motapp->cam_cnt; indx++) {
         if (motapp->cam_list[indx]->netcam != NULL) {
             if (motapp->cam_list[indx]->netcam->handler_finished == false) {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
@@ -571,7 +564,6 @@ static void motion_watchdog(ctx_motapp *motapp, int camindx)
         };
         motapp->cam_list[indx]->running_dev = false;
         motapp->cam_list[indx]->restart_dev = false;
-        indx++;
     }
     motapp->restart_all = true;
     motapp->finish_all = true;
@@ -666,20 +658,17 @@ static void motion_cam_add(ctx_motapp *motapp)
         conf_camera_add(motapp);
     pthread_mutex_unlock(&motapp->mutex_camlst);
 
-    indx_cam = 0;
     indx = 1;
-    while (motapp->cam_list[indx_cam] != NULL) {
+    for (indx_cam=0; indx_cam<motapp->cam_cnt; indx_cam++) {
         if (indx < motapp->cam_list[indx_cam]->device_id) {
             indx = motapp->cam_list[indx_cam]->device_id;
         }
-        indx_cam++;
     }
     indx++;
-    indx_cam--;
 
-    motapp->cam_list[indx_cam]->device_id = indx;
-    motapp->cam_list[indx_cam]->conf->device_id = indx;
-    motapp->cam_list[indx_cam]->conf->webcontrol_port = 0;
+    motapp->cam_list[motapp->cam_cnt-1]->device_id = indx;
+    motapp->cam_list[motapp->cam_cnt-1]->conf->device_id = indx;
+    motapp->cam_list[motapp->cam_cnt-1]->conf->webcontrol_port = 0;
 
     motapp->cam_add = false;
 
