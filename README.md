@@ -11,6 +11,7 @@ The following are some of the things that are plus.
   - HOG (Histogram of Oriented Gradients)
   - Haar cascade classifiers
   - Deep neural networks(Caffe, TensorFlow, etc.)
+- Sound frequency detection
 - Additional primary detection parameters
 - Sound recording from certain camera sources
 - Direct processing of libcamera sources
