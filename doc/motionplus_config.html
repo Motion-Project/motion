@@ -81,7 +81,7 @@
   </div>
 
   <section class="main-content">
-   
+
     <h2><a name="Configuration_OptionsTopic"></a>  Configuration Options-Listed by Topic </h2>
     <ul>
       <p></p>
@@ -146,7 +146,7 @@
               <td bgcolor="#edf4f9" ><a href="#v4l2_device" >v4l2_device</a> </td>
               <td bgcolor="#edf4f9" ><a href="#v4l2_params" >v4l2_params</a> </td>
               <td bgcolor="#edf4f9" ><a href="#libcam_name" >libcam_name</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#libcam_params" >libcam_params</a> </td>              
+              <td bgcolor="#edf4f9" ><a href="#libcam_params" >libcam_params</a> </td>
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#netcam_url" >netcam_url</a> </td>
@@ -557,7 +557,7 @@
         <p></p>
         <p></p>
       </ul>
-      
+
       <p></p>
      </ul>
 
@@ -670,37 +670,37 @@
       <ul>
         <p></p>
         <h3><a name="daemon"></a> daemon </h3>
-        <ul>          
+        <ul>
           <li> Values: on, off | Default: off</li>
           Run in daemon mode.  When running MotionPlus under systemd specify as off.
-        </ul>  
+        </ul>
         <p></p>
 
         <h3><a name="setup_mode"></a> setup_mode </h3>
-        <ul>          
+        <ul>
           <li> Values: on, off | Default: off</li>
-          Run in setup mode and provide lots of messages related to images processed.         
+          Run in setup mode and provide lots of messages related to images processed.
         </ul>
         <p></p>
-          
+
         <h3><a name="pid_file"></a> pid_file </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
-          The full path and name of the process id file.  
+          The full path and name of the process id file.
         </ul>
         <p></p>
 
         <h3><a name="log_file"></a> log_file </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The full path and name for the log file. When not specified, use syslog.
         </ul>
         <p></p>
 
         <h3><a name="log_level"></a> log_level </h3>
-        <ul>          
+        <ul>
           <li> Values: 1 - 9 | Default: 6</li>
-          Verbosity level(EMR, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL) of messages. 
+          Verbosity level(EMR, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL) of messages.
         </ul>
         <p></p>
 
@@ -712,28 +712,28 @@
         <p></p>
 
         <h3><a name="native_language"></a> native_language</h3>
-        <ul>          
+        <ul>
           <li> Values: on, off | Default: on</li>
           Enable native language messages.
         </ul>
         <p></p>
 
         <h3><a name="target_dir"></a> target_dir </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: current directory</li>
           The full path for the target directory for pictures, snapshots, movies, etc. to be saved.
         </ul>
         <p></p>
 
         <h3><a name="device_name"></a> device_name </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
          The device name to be used in the format specifiers and web interface.
         </ul>
         <p></p>
 
         <h3><a name="device_id"></a> device_id </h3>
-        <ul>          
+        <ul>
           <li> Values: 1 - 32000 | Default: The sequence that the device file is read</li>
           Unique numeric id for the device.
         </ul>
@@ -741,32 +741,32 @@
 
         <h3><a name="camera"></a> camera </h3>
         <p></p>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The full path and file name with the configuration parameters for the individual camera.
         </ul>
         <p></p>
 
         <h3><a name="config_dir"></a> config_dir </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
-          Directory containing individual device configuration files.  Any files ending in '.conf' in 
+          Directory containing individual device configuration files.  Any files ending in '.conf' in
           the directory will be read as a device configuration file.
         </ul>
         <p></p>
 
         <h3><a name="device_tmo"></a>device_tmo</h3>
-        <ul>           
+        <ul>
           <li> Values: Integer | Default: 30 </li>
           Number of seconds that elapse before the device is deemed to be lost.
         </ul>
         <p></p>
 
         <h3><a name="watchdog_tmo"></a>watchdog_tmo</h3>
-        <ul>           
+        <ul>
           <li> Values: Integer | Default: 30 </li>
-          Number of seconds that elapse before a camera is deemed to be unresponsive and MotionPlus triggers 
-          a watchdog timeout and begins to force the camera to shut down.  
+          Number of seconds that elapse before a camera is deemed to be unresponsive and MotionPlus triggers
+          a watchdog timeout and begins to force the camera to shut down.
         </ul>
         <p></p>
 
@@ -783,7 +783,7 @@
       <h3><a name="OptDetail_Devices"></a>Devices</h3>
       <ul>
         <h3><a name="v4l2_device"></a>v4l2_device</h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not Defined </li>
           The v4l2 device to be used for capturing.
         </ul>
@@ -791,17 +791,17 @@
 
         <h3><a name="v4l2_params"></a>v4l2_params</h3>
         <p></p>
-        <ul>          
+        <ul>
           <li> Values: String | Default: Not Defined</li>
-          Comma separated list of configuration parameters (aka controls) for the v4l2 device.         
+          Comma separated list of configuration parameters (aka controls) for the v4l2 device.
         </ul>
         <p></p>
-        
+
        <ul>
           <p></p>
           The configuration parameters for v4l2_params are specified by name or ID.  They may also be
-          enclosed in double quotes. Review the MotionPlus log with log_level 8 to see the options that 
-          are applicable to the device.  The following is a sample output from the log and 
+          enclosed in double quotes. Review the MotionPlus log with log_level 8 to see the options that
+          are applicable to the device.  The following is a sample output from the log and
           examples of how to specify the parameters
           <p></p>
           <div>
@@ -814,16 +814,16 @@
           </ul>
           </div>
           <p></p>
-          Additional MotionPlus specific options for v4l2_params are listed below.           
+          Additional MotionPlus specific options for v4l2_params are listed below.
         </ul>
-  
+
         <ul>
         <i><h4> palette </h4></i>
         <div>
-          <ul>          
+          <ul>
             <li> Values: 0 - 21 | Default: 17</li>
-            Preferred color palette for MotionPlus to use for the device.  See table below for the meaning of 
-            each parameter number value.      
+            Preferred color palette for MotionPlus to use for the device.  See table below for the meaning of
+            each parameter number value.
             <div class="tblpaltte">
             <table border="1" class="fixed" >
               <colgroup>
@@ -1003,11 +1003,11 @@
         <ul>
           <p></p>
           MotionPlus uses the ffmpeg libraries to process network cameras.  This option is
-          a comma separated list of the ffmpeg options for the camera.  In addition 
+          a comma separated list of the ffmpeg options for the camera.  In addition
           to the ffmpeg options, MotionPlus includes the following additional options.
           <p></p>
 
-          <div>          
+          <div>
             <i><h4>capture_rate</h4></i>
             The number of frames per second to capture from the camera. This option should be slightly higher than
             the FPS that the camera is sending image.  Users can also specify the capture_rate as
@@ -1030,9 +1030,9 @@
         <p></p>
         <ul>
           <li> Values: String | Default: Not defined</li>
-          URL associated with the high resolution stream of the network camera.  This option is typically used with 
-          the <a href="#movie_passthrough">movie_passthrough</a> to minimize CPU usage.  The netcam_url specifies a low 
-          resolution stream which is decoded and processed and the movies are saved directly from the data provided 
+          URL associated with the high resolution stream of the network camera.  This option is typically used with
+          the <a href="#movie_passthrough">movie_passthrough</a> to minimize CPU usage.  The netcam_url specifies a low
+          resolution stream which is decoded and processed and the movies are saved directly from the data provided
           from the netcam_high_url without decoding or processing it.
         </ul>
         <p></p>
@@ -1045,11 +1045,11 @@
         <ul>
           <p></p>
           MotionPlus uses the ffmpeg libraries to process network cameras.  This option is
-          a comma separated list of the ffmpeg options for the stream specified by netcam_high_url.  In addition 
+          a comma separated list of the ffmpeg options for the stream specified by netcam_high_url.  In addition
           to the ffmpeg options, MotionPlus includes the following additional options.
           <p></p>
 
-          <div>          
+          <div>
             <i><h4>capture_rate</h4></i>
             The number of frames per second to capture from the camera. This option should be slightly higher than
             the FPS that the camera is sending images.  Users can also specify the capture_rate as
@@ -1089,7 +1089,7 @@
         <h3><a name="height"></a> height </h3>
         <ul>
           <li> Values: Integer | Default: 480</li>
-          The height of the image in pixels. Must be a multiple of 8.                
+          The height of the image in pixels. Must be a multiple of 8.
         </ul>
         <p></p>
 
@@ -1103,21 +1103,21 @@
         <h3><a name="rotate"></a> rotate </h3>
         <ul>
           <li> Values: 0, 90, 180, 270 | Default: 0</li>
-          Rotate image the given number of degrees.        
+          Rotate image the given number of degrees.
         </ul>
         <p></p>
 
         <h3><a name="flip_axis"></a> flip_axis </h3>
         <ul>
           <li> Values: none, v, h | Default: none</li>
-          Flip the image according to specified axis.        
+          Flip the image according to specified axis.
         </ul>
         <p></p>
 
         <h3><a name="locate_motion_mode"></a> locate_motion_mode </h3>
         <ul>
           <li> Values: on, off, preview | Default: off</li>
-          Locate and draw around/on the moving object. Preview only applies to pictures.        
+          Locate and draw around/on the moving object. Preview only applies to pictures.
         </ul>
 
         <h3><a name="locate_motion_style"></a> locate_motion_style </h3>
@@ -1151,7 +1151,7 @@
         <h3><a name="text_scale"></a> text_scale </h3>
         <ul>
           <li> Values: 1 - 10 | Default: 1</li>
-          Scale factor for text drawn on images.         
+          Scale factor for text drawn on images.
         </ul>
         <p></p>
 
@@ -1212,8 +1212,8 @@
 
        <h3><a name="threshold_sdevxy"></a>threshold_sdevxy</h3>
        <ul>
-         <li> Values: Integer | Default: 0</li> 
-         The maximum standard deviation of the changed pixels in the x (width) and y(height) axis.        
+         <li> Values: Integer | Default: 0</li>
+         The maximum standard deviation of the changed pixels in the x (width) and y(height) axis.
        </ul>
        <p></p>
 
@@ -1232,12 +1232,12 @@
        <p></p>
 
        <h3><a name="secondary_method"></a>secondary_method</h3>
-       <ul>           
+       <ul>
          <li> Values: haar, hog, dnn | Default: Not Defined</li>
-         The secondary detection method.        
+         The secondary detection method.
        </ul>
        <p></p>
-        
+
        <p></p>
        <h3><a name="secondary_params"></a>secondary_params</h3>
        <ul>
@@ -1254,8 +1254,8 @@
             <i><h4>frame_interval</h4></i>
             <ul>
               <li> Values: Integer | Default: 5 </li>
-                The interval of images between processing using the secondary method.  This works in conjunction with 
-                the framerate.  For example, a frame_interval of 5 with a framerate of 30 means secondary processing 
+                The interval of images between processing using the secondary method.  This works in conjunction with
+                the framerate.  For example, a frame_interval of 5 with a framerate of 30 means secondary processing
                 will be at 6 fps while a frame_interval of 60 would have secondary processing every other second.
             </ul>
             <p></p>
@@ -1302,20 +1302,20 @@
 
 
         <h3><a name="noise_level"></a> noise_level </h3>
-        <ul>                  
+        <ul>
           <li> Values: 1 - 255 | Default: 32</li>
           The minimum amount of change in a single pixel before it is counted towards the threshold value.
         </ul>
 
         <h3><a name="noise_tune"></a> noise_tune </h3>
-        <ul>          
+        <ul>
           <li> Values: on, off | Default: on</li>
           Continuously adjust the noise_level parameter.
         </ul>
         <p></p>
 
         <h3><a name="despeckle_filter"></a> despeckle_filter </h3>
-        <ul>           
+        <ul>
           <li> Values: Combinations of E,e,D,d and l | Default: Not defined </li>
           Despeckle the image using combinations of (E/e)rode or (D/d)ilate. And ending with optional (l)abeling.
           This reduces noise in the motion image. Adding a trailing l enables labeling in which only the largest
@@ -1324,7 +1324,7 @@
         <p></p>
 
         <h3><a name="area_detect"></a> area_detect </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           Detect motion in predefined areas (1 - 9) and when Motion is detected in the area, execute the script. This
           option is only to execute the on_area_detect script.
@@ -1340,70 +1340,70 @@
         <p></p>
 
         <h3><a name="mask_file"></a> mask_file </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The full path and filename for the masking pgm file.  If needed, the mask will be resized to
           match the width and height of the image.  The areas in the mask file colored black will be
           excluded from motion detection.  Shades of grey on the mask will diminish the detection while
-          areas of white will not have any impact on motion detection. 
+          areas of white will not have any impact on motion detection.
         </ul>
         <p></p>
 
 
         <h3><a name="mask_privacy"></a> mask_privacy </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
-          The full path and filename for the privacy masking pgm file.  This mask completely removes the 
-          indicated sections of the image.  
+          The full path and filename for the privacy masking pgm file.  This mask completely removes the
+          indicated sections of the image.
         </ul>
         <p></p>
 
         <h3><a name="smart_mask_speed"></a> smart_mask_speed </h3>
-        <ul>          
+        <ul>
           <li> Values: 0 - 10 | Default: 0</li>
           The smartmask is intended to be a dynamic, self-learning mask to decrease sensitivity
           in areas with frequent motion.  The speed specified by this parameter is
-          how quickly the mask gets adjusted.  Zero disables the smart mask        
+          how quickly the mask gets adjusted.  Zero disables the smart mask
         </ul>
         <p></p>
 
         <h3><a name="lightswitch_percent"></a> lightswitch_percent </h3>
-        <ul>          
+        <ul>
           <li> Values: 0 - 100 | Default: 0</li>
-          The minimum change in the portion of the image that will trigger a lightswitch condition 
+          The minimum change in the portion of the image that will trigger a lightswitch condition
         </ul>
         <p></p>
- 
+
         <h3><a name="lightswitch_frames"></a> lightswitch_frames </h3>
-        <ul>          
+        <ul>
           <li> Values: Integer | Default: 5</li>
           The number of frames to ignore when the lightswitch condition is triggered (see above).
         </ul>
         <p></p>
 
         <h3><a name="minimum_motion_frames"></a> minimum_motion_frames </h3>
-        <ul>          
+        <ul>
           <li> Values: Integer | Default: 1</li>
           The number of frames that must contain motion in order to trigger an event.
         </ul>
         <p></p>
 
         <h3><a name="event_gap"></a> event_gap </h3>
-        <ul>          
+        <ul>
           <li> Values: Integer | Default: 60</li>
           The seconds of no motion detection that triggers the end of an event.
         </ul>
         <p></p>
 
         <h3><a name="pre_capture"></a> pre_capture </h3>
-        <ul>          
+        <ul>
           <li> Values: Integer | Default: 0</li>
-          The number of pre-captured (buffered) frames to be captured before an event.   
+          The number of pre-captured (buffered) frames to be captured before an event.
         </ul>
         <p></p>
 
         <h3><a name="post_capture"></a> post_capture </h3>
-        <ul>          
+        <ul>
           <li> Values: Integer | Default: 0</li>
           The number of frames to be captured after an event has ended.
         </ul>
@@ -1421,63 +1421,63 @@
       <h3><a name="OptDetail_Scripts"></a> Script Execution </h3>
       <ul>
         <h3><a name="on_event_start"></a> on_event_start </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The full path and file name of the program/script to be executed at the start of an event.
         </ul>
         <p></p>
 
         <h3><a name="on_event_end"></a> on_event_end </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The full path and file name of the program/script to be executed at the end of an event.
         </ul>
         <p></p>
 
         <h3><a name="on_picture_save"></a> on_picture_save </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The full path and file name of the program/script to be executed when a picture is saved.
         </ul>
         <p></p>
 
         <h3><a name="on_motion_detected"></a> on_motion_detected </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
-          The full path and file name of the program/script to be executed when motion is detected. 
+          The full path and file name of the program/script to be executed when motion is detected.
         </ul>
         <p></p>
 
         <h3><a name="on_area_detected"></a> on_area_detected </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The full path and file name of the program/script to be executed when motion is detected in the area specified.
         </ul>
         <p></p>
 
         <h3><a name="on_movie_start"></a> on_movie_start </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The full path and file name of the program/script to be executed at the creation of a movie.
         </ul>
         <p></p>
 
         <h3><a name="on_movie_end"></a> on_movie_end </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
-          The full path and file name of the program/script to be executed when a movie ends. 
+          The full path and file name of the program/script to be executed when a movie ends.
         </ul>
         <p></p>
 
         <h3><a name="on_camera_lost"></a> on_camera_lost </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The full path and file name of the program/script to be executed when the camera is no longer detected.
         </ul>
         <p></p>
 
         <h3><a name="on_camera_found"></a> on_camera_found </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The full path and file name of the program/script to be executed when a previously lost camera is active again.
         </ul>
@@ -1497,17 +1497,17 @@
         <h3><a name="picture_output"></a> picture_output </h3>
         <ul>
           <li> Values: on, off, first, best | Default: off</li>
-          'on' saves all motion images during an event.  'first' saves only the first image that detected 
+          'on' saves all motion images during an event.  'first' saves only the first image that detected
           motion.  'best' saves image with most changed pixels.
         </ul>
         <p></p>
 
         <h3><a name="picture_output_motion"></a> picture_output_motion </h3>
-        <ul>          
+        <ul>
           <li> Values: on, off | Default: off</li>
-          Save the motion(debug) pictures with the pixels that change as a graytone image.  If 
+          Save the motion(debug) pictures with the pixels that change as a graytone image.  If
           labeling is enabled via the despeckele option, the largest area will be blue and
-          areas in red are those determined by the smartmask option.                
+          areas in red are those determined by the smartmask option.
         </ul>
         <p></p>
 
@@ -1519,39 +1519,39 @@
         <p></p>
 
         <h3><a name="picture_quality"></a> picture_quality </h3>
-        <ul>          
+        <ul>
           <li> Values: 1 - 100 | Default: 75</li>
           The image quality for the jpeg or webp images in percent.  The value of 1 is worst and 100 is best.
         </ul>
         <p></p>
 
         <h3><a name="picture_exif"></a> picture_exif </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
-          The text for the JPEG EXIF comment with the EXIF timestamp.                
+          The text for the JPEG EXIF comment with the EXIF timestamp.
         </ul>
         <p></p>
 
         <h3><a name="picture_filename"></a> picture_filename </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: %v-%Y%m%d%H%M%S-%q</li>
-          The file name and optionally the path for the pictures relative to target_dir. The file 
+          The file name and optionally the path for the pictures relative to target_dir. The file
           extension will be added based upon the picture_type.
         </ul>
         <p></p>
 
         <h3><a name="snapshot_interval"></a> snapshot_interval </h3>
-        <ul>          
+        <ul>
           <li> Values: Integer | Default: 0</li>
           The number of seconds between snapshots
         </ul>
         <p></p>
 
         <h3><a name="snapshot_filename"></a> snapshot_filename </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: %v-%Y%m%d%H%M%S-snapshot</li>
-          The file name and optionally the path for the snapshots relative to target_dir. The file 
-          extension is automatically added.  A symbolic link called lastsnap.jpg is created in the 
+          The file name and optionally the path for the snapshots relative to target_dir. The file
+          extension is automatically added.  A symbolic link called lastsnap.jpg is created in the
           target_dir and will always point to the latest snapshot, unless snapshot_filename is exactly 'lastsnap'
         </ul>
         <p></p>
@@ -1561,42 +1561,42 @@
       <h3><a name="OptDetail_Movies"></a>Output - Movie Options</h3>
       <ul>
         <h3><a name="movie_output"></a>movie_output </h3>
-        <ul>          
+        <ul>
           <li> Values: on, off | Default: on</li>
           Encode movies of the motion events.
         </ul>
         <p></p>
 
         <h3><a name="movie_output_motion"></a>movie_output_motion</h3>
-        <ul>          
+        <ul>
           <li> Values: on, off | Default: off</li>
-          Encode movies that show the pixels that changed.  If labeling is enabled via the 
-          despeckle option, the largest area will be in blue.  If smartmask is enabled it will 
+          Encode movies that show the pixels that changed.  If labeling is enabled via the
+          despeckle option, the largest area will be in blue.  If smartmask is enabled it will
           be shown in red. The filename will be the same as normal movies except with
           an 'm' appended.
         </ul>
         <p></p>
 
         <h3><a name="movie_max_time"></a> movie_max_time </h3>
-        <ul>          
+        <ul>
           <li> Values: Integer | Default: 120</li>
           The maximum length of a movie in seconds. Set this to zero for unlimited length.
         </ul>
         <p></p>
 
         <h3><a name="movie_bps"></a> movie_bps </h3>
-        <ul>          
+        <ul>
           <li> Values: Integer | Default: 400000</li>
           Bitrate to use in encoding of movies.  This option is ignored if movie_quality is specified.
         </ul>
         <p></p>
 
         <h3><a name="movie_quality"></a> movie_quality </h3>
-        <ul>          
+        <ul>
           <li> Values: 0 - 100 | Default: 60</li>
           A value of 0 disables this option while values 1 - 100 change the quality
           of the movie.  The value of 1 means worst quality and 100 is the best quality.  High
-          values of this option (e.g. 100) may cause difficulty with some players.        
+          values of this option (e.g. 100) may cause difficulty with some players.
         </ul>
         <p></p>
 
@@ -1608,14 +1608,14 @@
         <p></p>
 
         <h3><a name="movie_retain"></a>movie_retain</h3>
-        <ul>          
+        <ul>
           <li> Values: on, off | Default: off</li>
           Retain movie only if the secondary detection occurred.
         </ul>
         <p></p>
 
         <h3><a name="movie_passthrough"></a> movie_passthrough </h3>
-        <ul>          
+        <ul>
           <li> Values: on, off | Default: off</li>
           When using a RTSP, RTMP, mjpeg and some V4l2 cameras, create movie files with the packets
           obtained directly from the camera.
@@ -1623,29 +1623,29 @@
         <p></p>
 
         <h3><a name="movie_filename"></a> movie_filename </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: %v-%Y%m%d%H%M%S</li>
           The file name and optionally the path for the movie relative to target_dir. The file extension
-          is automatically added based upon the container.                  
+          is automatically added based upon the container.
         </ul>
         <p></p>
 
         <h3><a name="movie_extpipe_use"></a> movie_extpipe_use </h3>
-        <ul>          
+        <ul>
           <li> Values: on, off | Default: off</li>
           Specifies whether to send the pictures to pipe for external encoding into a movie.
         </ul>
         <p></p>
 
         <h3><a name="movie_extpipe"></a> movie_extpipe </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
-          The program name and options for processing the images. 
+          The program name and options for processing the images.
         </ul>
         <p></p>
 
         <h3><a name="timelapse_interval"></a> timelapse_interval </h3>
-        <ul>          
+        <ul>
           <li> Values: Integer | Default: 0</li>
           Interval in seconds for saving a picture into timelapse movie.  Zero disables timelapse.
         </ul>
@@ -1659,7 +1659,7 @@
         <p></p>
 
         <h3><a name="timelapse_fps"></a> timelapse_fps </h3>
-        <ul>          
+        <ul>
           <li>Values: Integer | Default: 30</li>
           The frame per second rate to use in the playback of the timelapse video.
         </ul>
@@ -1679,10 +1679,10 @@
         <p></p>
 
         <h3><a name="timelapse_filename"></a> timelapse_filename </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: %Y%m%d-timelapse</li>
-          The file name and optionally the path for the timelapse movies relative to target_dir. The 
-          file extension is automatically added based upon the container.  
+          The file name and optionally the path for the timelapse movies relative to target_dir. The
+          file extension is automatically added based upon the container.
         </ul>
         <p></p>
 
@@ -1691,7 +1691,7 @@
       <h3><a name="OptDetail_Pipe"></a>Output - Pipe Options</h3>
       <ul>
         <h3><a name="video_pipe"></a> video_pipe </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The video4linux video loopback device for normal images. The device would be specified
           in the format like /dev/video1
@@ -1699,7 +1699,7 @@
         <p></p>
 
         <h3><a name="video_pipe_motion"></a> video_pipe_motion </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The video4linux video loopback device for motion images. The device would be specified
           in the format like /dev/video1
@@ -1712,41 +1712,41 @@
       These options must be placed in the motionplus.conf file and not in a camera config files.
       <ul>
         <h3><a name="webcontrol_port"></a> webcontrol_port </h3>
-        <ul>          
+        <ul>
           <li>Values: 0 to 65535 | Default: 0 (disabled)</li>
-          The port number for the web based control of MotionPlus.  
+          The port number for the web based control of MotionPlus.
         </ul>
         <p></p>
 
         <h3><a name="webcontrol_ipv6"></a> webcontrol_ipv6 </h3>
-        <ul>          
+        <ul>
           <li> Values: on, off | Default: off</li>
           Listen for connections from IPv6 and IPV4.
         </ul>
         <p></p>
 
         <h3><a name="webcontrol_localhost"></a> webcontrol_localhost </h3>
-        <ul>          
+        <ul>
           <li> Values: on, off | Default: on</li>
           Restrict the webcontrol of MotionPlus to the localhost.
         </ul>
         <p></p>
 
         <h3><a name="webcontrol_base_path"></a> webcontrol_base_path </h3>
-        <ul>           
+        <ul>
           <li> Values: Valid url path | Default: Not Defined </li>
           Specify new base url path for the webcontrol.
         </ul>
         <p></p>
 
         <h3><a name="webcontrol_parms"></a> webcontrol_parms </h3>
-        <ul>          
+        <ul>
           <li> Values: 0 - 3 | Default: 0 </li>
           Set the type of parameters that can be accessed via the webcontrol page.
           <ul>
             <li> 0: None - No configuration parameters or actions will be available.</li>
             <li> 1: Limited- A limited list of parameters will be available. </li>
-            <li> 2: Advanced - The advanced list of parameters will be available.  These 
+            <li> 2: Advanced - The advanced list of parameters will be available.  These
               typically require MotionPlus to be restarted to become effective.</li>
             <li> 3: Restricted - User IDs, passwords and "on_" commands.</li>
           </ul>
@@ -1760,7 +1760,7 @@
         <p></p>
 
         <h3><a name="webcontrol_interface"></a> webcontrol_interface </h3>
-        <ul>          
+        <ul>
           <li> Values: `default` or `user` | Default: `default`</li>
           The type of webcontrol interface to provide.
           <ul>
@@ -1771,28 +1771,28 @@
         <p></p>
 
         <h3><a name="webcontrol_auth_method"></a> webcontrol_auth_method </h3>
-        <ul>          
+        <ul>
           <li> Values: none, basic, digest | Default: none</li>
           Authentication method to use for the webcontrol port
         </ul>
         <p></p>
 
         <h3><a name="webcontrol_authentication"></a> webcontrol_authentication </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The username and password specified as username:password
         </ul>
         <p></p>
 
         <h3><a name="webcontrol_tls"></a> webcontrol_tls </h3>
-        <ul>          
+        <ul>
           <li> Values: on, off | Default: off</li>
           Enable SSL/TLS (https) for the webcontrol.
         </ul>
         <p></p>
 
         <h3><a name="webcontrol_cert"></a> webcontrol_cert </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           Full path and file name  to the certification file for SSL/TLS support.  Only used when
           <a href="#webcontrol_tls">webcontrol_tls</a> is enabled.
@@ -1800,7 +1800,7 @@
         <p></p>
 
         <h3><a name="webcontrol_key"></a> webcontrol_key </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           Full path and file name to the key file for SSL/TLS support.  Only used when
           <a href="#webcontrol_tls">webcontrol_tls</a> is enabled.
@@ -1808,7 +1808,7 @@
         <p></p>
 
         <h3><a name="webcontrol_headers"></a> webcontrol_headers </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           Comma separated list of headers=values for the webcontrol.  Use
           Access-Control-Allow-Origin header to specify the CORS header.
@@ -1816,7 +1816,7 @@
         <p></p>
 
         <h3><a name="webcontrol_actions"></a> webcontrol_actions </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           Comma separated list of the actions=values to allow and show on the web control page.  The
           following parameters are recognized.
@@ -1839,7 +1839,7 @@
         <p></p>
 
         <h3><a name="webcontrol_html"></a> webcontrol_html</h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The full path and file name for a user specified html page to use as the webcontrol.
         </ul>
@@ -1849,7 +1849,7 @@
       <h3><a name="OptDetail_Stream"></a> Live Stream</a> </h3>
       <ul>
         <h3><a name="stream_preview_scale"></a> stream_preview_scale </h3>
-        <ul>          
+        <ul>
           <li> Values: Integer | Default: 25</li>
           The percentage to scale the stream image when it is placed on the webcontrol
           page.  Numbers greater than 100 are permitted.
@@ -1857,14 +1857,14 @@
         <p></p>
 
         <h3><a name="stream_preview_newline"></a> stream_preview_newline </h3>
-        <ul>          
+        <ul>
           <li> Values: on, off | Default: off</li>
           Insert a new line indicator prior to the image on the webcontrol web page.
         </ul>
         <p></p>
 
         <h3><a name="stream_preview_method"></a> stream_preview_method </h3>
-        <ul>          
+        <ul>
           <li> Values: `mjpg`, `static` | Default: `mjpg`</li>
           This option determines the method used for displaying images on the webcontrol page.  Use
           `static` to get around browser limits on the concurrent number connections to server.
@@ -1879,21 +1879,21 @@
         <p></p>
 
         <h3><a name="stream_quality"></a> stream_quality </h3>
-        <ul>          
+        <ul>
           <li> Values: 1 - 100 | Default: 50</li>
           JPG compression quality setting in percent for the images transferred to live stream.
         </ul>
         <p></p>
 
         <h3><a name="stream_grey"></a> stream_grey </h3>
-        <ul>          
+        <ul>
           <li> Values: on, off | Default: off</li>
           Send the live stream in grey rather than color.
         </ul>
         <p></p>
 
         <h3><a name="stream_maxrate"></a> stream_maxrate </h3>
-        <ul>          
+        <ul>
           <li> Values: Integer | Default: 1</li>
           The frames per second for the webcontrol camera stream.
         </ul>
@@ -1902,7 +1902,7 @@
         <h3><a name="stream_motion"></a> stream_motion </h3>
         <ul>
           <li> Values: on, off | Default: off</li>
-          Limit the frames per second for the webcontrol stream to 1 when there 
+          Limit the frames per second for the webcontrol stream to 1 when there
           is no motion being detected and increase to the stream_maxrate when there is motion.
         </ul>
         <p></p>
@@ -1923,53 +1923,53 @@
       </ul>
 
       <h3><a name="OptDetail_Database"></a>Database</h3>
-      Only one database can be used by MotionPlus at a time.  These options must be placed in the motionplus.conf 
+      Only one database can be used by MotionPlus at a time.  These options must be placed in the motionplus.conf
       file and not in a camera config files.
       <ul>
         <h3><a name="database_type"></a> database_type </h3>
-        <ul>           
+        <ul>
           <li> Values: mariadb, postgresql, sqlite3 | Default: Not defined</li>
           The database type.
         </ul>
         <p></p>
 
         <h3><a name="database_dbname"></a> database_dbname </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The full path and file name to the Sqlite3 database.
         </ul>
         <p></p>
 
         <h3><a name="database_host"></a> database_host </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: localhost</li>
           The host on which the database is located
         </ul>
         <p></p>
 
         <h3><a name="database_port"></a> database_port </h3>
-        <ul>          
+        <ul>
           <li> Values: 0 - 65535 | Default: 0</li>
           The port number that is used for the database.  Typical values are: MariaDB=3306 and postgresql=5432
         </ul>
         <p></p>
 
         <h3><a name="database_user"></a> database_user </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The user account name for database
         </ul>
         <p></p>
 
         <h3><a name="database_password"></a> database_password </h3>
-        <ul>           
+        <ul>
           <li> Values: String | Default: Not defined</li>
           The user password for database
         </ul>
         <p></p>
 
         <h3><a name="database_busy_timeout"></a> database_busy_timeout </h3>
-        <ul>          
+        <ul>
           <li> Values: Integer | Default: 0</li>
           The time to wait before issuing a timeout message for sqlite3.
         </ul>
@@ -1985,10 +1985,10 @@
         <h3><a name="sql_event_start"></a> sql_event_start </h3>
         <ul>
           <li> Values: String | Default: </li>
-          SQL query to execute at the start of the event.        
+          SQL query to execute at the start of the event.
         </ul>
         <p></p>
-        
+
         <h3><a name="sql_movie_end"></a> sql_movie_end </h3>
         <ul>
           <li> Values: String | Default: </li>
@@ -2038,7 +2038,7 @@
         <p></p>
         <ul>
           <li> Values: String | Default: Not Defined</li>
-          Full path and file name for script to pan the camera left. 
+          Full path and file name for script to pan the camera left.
         </ul>
         <p></p>
 
@@ -2249,8 +2249,8 @@
           not defined, it will default to /etc/motionplus</li>
       </ol>
       <p></p>
-      The motionplus.conf file specifies parameters for the entire MotionPlus application and defaults for 
-      each camera.  Specifications that are unique to each camera are included in separate files. 
+      The motionplus.conf file specifies parameters for the entire MotionPlus application and defaults for
+      each camera.  Specifications that are unique to each camera are included in separate files.
       <p></p>
 
     </ul>

@@ -52,7 +52,7 @@
     <div class="dropdown">
       <button class="dropbtn">Abbreviated Building</button>
       <div class="dropdown-content">
-        <a href="#Install_Deb"> Install from a deb package</a>        
+        <a href="#Install_Deb"> Install from a deb package</a>
         <a href="#Build_Deb"> Building a deb package</a>
         <a href="#Building"> Abbreviated Building Guide</a>
       </div>
@@ -64,7 +64,7 @@
         <a href="#Make_Options"> Make Options </a>
       </div>
     </div>
-    
+
     <a href="javascript:void(0);" class="icon" onclick="fnc_subnav()">menu&#8659;&nbsp&nbsp  </a>
   </div>
 
@@ -72,21 +72,21 @@
 
     <h3><a name="Install_Deb"></a> Installing with a release deb package </h3>
     <ul>
-      Motion can also be installed from the release deb files.  Download the appropriate 
+      Motion can also be installed from the release deb files.  Download the appropriate
       deb from the <a href="https://github.com/Motion-Project/motionplus/releases">Releases</a> page
-      and install using <code><strong>dpkg</strong></code> 
-      or <code><strong>gdebi-core</strong></code>.  
+      and install using <code><strong>dpkg</strong></code>
+      or <code><strong>gdebi-core</strong></code>.
     </ul>
-    
+
     <h3><a name="Build_Deb"></a> Building a deb package </h3>
     <ul>
       A script has also been written to allow users to create their own deb package
       from either a tagged release or the most current master branch of the code.  Download the
-      script by using the following 
+      script by using the following
       command.  <code><strong>wget https://raw.githubusercontent.com/Motion-Project/motion-packaging/master/builddeb.sh </strong></code>
       <p></p>
       Review the script and specify the following few optional parameters.
-      <code><strong> Username, EmailAddress, branch, install, arch</strong></code>.  If 
+      <code><strong> Username, EmailAddress, branch, install, arch</strong></code>.  If
       the parameters are not provided, the script will create defaults.
       <p></p>
       <p></p>
@@ -99,14 +99,14 @@
     <p></p>
       <p></p>
       <p></p>
-      Debian based distros 
+      Debian based distros
       <ul>
           <code><strong>sudo apt install autoconf automake autopoint build-essential pkgconf libtool libzip-dev
           libjpeg-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev
           libwebp-dev gettext libmicrohttpd-dev libmariadb-dev libasound2-dev libfftw3-dev </strong></code>
           <p></p>
-          Note:  PostgreSQL or Sqlite3 database may also be added 
-          via <code><strong>sudo apt install libpq-dev libsqlite3-dev</strong></code>.  If 
+          Note:  PostgreSQL or Sqlite3 database may also be added
+          via <code><strong>sudo apt install libpq-dev libsqlite3-dev</strong></code>.  If
           no database is running on the system, some functionality of Motionplus will not be available.
           <p></p>
           Once packages are installed, run the following to build Motionplus
@@ -223,8 +223,8 @@
       <p></p>
        <dl>
         <dt> <strong>make cleanall</strong> </dt>
-        <dd> 
-          This command creates a pristine directory without any of the files generated from 
+        <dd>
+          This command creates a pristine directory without any of the files generated from
           the <code><strong>autoreconf</strong></code> command.
         </dd>
       </dl>
