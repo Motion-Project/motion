@@ -352,33 +352,33 @@ static void motion_ntc(void)
     #endif
 
     #ifdef HAVE_MYSQL
-        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("mysql  : available"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("mysql  : available"));
     #else
-        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("mysql  : not available"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("mysql  : not available"));
     #endif
 
     #ifdef HAVE_MARIADB
-        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("MariaDB: available"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("MariaDB: available"));
     #else
-        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("MariaDB: not available"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("MariaDB: not available"));
     #endif
 
     #ifdef HAVE_SQLITE3
-        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("sqlite3: available"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("sqlite3: available"));
     #else
-        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("sqlite3: not available"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("sqlite3: not available"));
     #endif
 
     #ifdef HAVE_PGSQL
-        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("pgsql  : available"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("pgsql  : available"));
     #else
-        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("pgsql  : not available"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("pgsql  : not available"));
     #endif
 
     #ifdef ENABLE_NLS
-        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("nls    : available"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("nls    : available"));
     #else
-        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("nls    : not available"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("nls    : not available"));
     #endif
 
     #ifdef HAVE_ALSA
