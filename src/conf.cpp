@@ -206,7 +206,7 @@ ctx_parm config_parms[] = {
     {"snd_params",                PARM_TYP_STRING, PARM_CAT_18, WEBUI_LEVEL_ADVANCED },
     {"snd_alerts",                PARM_TYP_ARRAY, PARM_CAT_18, WEBUI_LEVEL_ADVANCED },
     {"snd_window",                PARM_TYP_LIST, PARM_CAT_18, WEBUI_LEVEL_ADVANCED },
-    {"show_freq",                 PARM_TYP_BOOL, PARM_CAT_18, WEBUI_LEVEL_ADVANCED },
+    {"snd_show",                  PARM_TYP_BOOL, PARM_CAT_18, WEBUI_LEVEL_ADVANCED },
 
     { "", (enum PARM_TYP)0, (enum PARM_CAT)0, (enum WEBUI_LEVEL)0 }
 };
@@ -2933,17 +2933,17 @@ static void conf_edit_snd_window(ctx_config *conf, std::string &parm, enum PARM_
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_window",_("snd_window"));
 }
 
-static void conf_edit_show_freq(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_snd_show(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-       conf->show_freq = false;
+       conf->snd_show = false;
     } else if (pact == PARM_ACT_SET) {
-        conf_edit_set_bool(conf->show_freq, parm);
+        conf_edit_set_bool(conf->snd_show, parm);
     } else if (pact == PARM_ACT_GET) {
-        conf_edit_get_bool(parm, conf->show_freq);
+        conf_edit_get_bool(parm, conf->snd_show);
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","show_freq",_("show_freq"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_show",_("snd_show"));
 }
 
 /* Application level parameters */
@@ -3222,11 +3222,11 @@ static void conf_edit_cat17(ctx_config *conf, std::string parm_nm
 static void conf_edit_cat18(ctx_config *conf, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "snd_device") {         conf_edit_snd_device(conf, parm_val, pact);
-    } else if (parm_nm == "snd_params") {  conf_edit_snd_params(conf, parm_val, pact);
-    } else if (parm_nm == "snd_window") {  conf_edit_snd_window(conf, parm_val, pact);
-    } else if (parm_nm == "snd_alerts") {  conf_edit_snd_alerts(conf, parm_val, pact);
-    } else if (parm_nm == "show_freq") {   conf_edit_show_freq(conf, parm_val, pact);
+    if (parm_nm == "snd_device") {          conf_edit_snd_device(conf, parm_val, pact);
+    } else if (parm_nm == "snd_params") {   conf_edit_snd_params(conf, parm_val, pact);
+    } else if (parm_nm == "snd_window") {   conf_edit_snd_window(conf, parm_val, pact);
+    } else if (parm_nm == "snd_alerts") {   conf_edit_snd_alerts(conf, parm_val, pact);
+    } else if (parm_nm == "snd_show") {     conf_edit_snd_show(conf, parm_val, pact);
 
     }
 }

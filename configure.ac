@@ -603,7 +603,7 @@ AC_CONFIG_FILES([
   data/camera1-dist.conf
   data/camera2-dist.conf
   data/camera3-dist.conf
-  data/camera4-dist.conf
+  data/sound1-dist.conf
   data/motionplus-dist.conf
   data/motionplus.service
 ])

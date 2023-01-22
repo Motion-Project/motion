@@ -210,7 +210,7 @@
         std::string             snd_params;
         std::list<std::string>  snd_alerts;
         std::string             snd_window;
-        bool                    show_freq;
+        bool                    snd_show;
 
     };
 

@@ -28,7 +28,7 @@ sysconf_DATA = \
 	data/camera1-dist.conf \
 	data/camera2-dist.conf \
 	data/camera3-dist.conf \
-	data/camera4-dist.conf
+	data/sound1-dist.conf
 
 man_MANS = man/motionplus.1
 
@@ -52,7 +52,7 @@ cleanall: distclean
 	@rm -f Makefile.in src/Makefile.in po/Makefile.in.in man/Makefile.in
 	@rm -f data/motionplus.service data/motionplus-dist.conf
 	@rm -f data/camera1-dist.conf data/camera2-dist.conf
-	@rm -f data/camera3-dist.conf data/camera4-dist.conf
+	@rm -f data/camera3-dist.conf data/sound1-dist.conf
 
 ###################################################################
 ## Clean out the tilde crumb files left by gettext autotool processing
@@ -68,7 +68,7 @@ install-data-local:
 	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera1-dist.conf > ${DESTDIR}${sysconfdir}/camera1-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera1-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera1-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera2-dist.conf > ${DESTDIR}${sysconfdir}/camera2-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera2-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera2-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera3-dist.conf > ${DESTDIR}${sysconfdir}/camera3-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera3-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera3-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera4-dist.conf > ${DESTDIR}${sysconfdir}/camera4-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera4-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera4-dist.conf
+	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/sound1-dist.conf > ${DESTDIR}${sysconfdir}/sound1-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/sound1-dist.conf.tmp ${DESTDIR}${sysconfdir}/sound1-dist.conf
 
 	@sed -e 's|$${exec_prefix}|$(exec_prefix)|' data/motionplus.service > data/motionplus.service.tmp && mv -f data/motionplus.service.tmp data/motionplus.service
 
@@ -76,7 +76,7 @@ install-data-local:
 	@sed -e 's|$${prefix}|$(prefix)|' data/camera1-dist.conf > data/camera1-dist.conf.tmp && mv -f data/camera1-dist.conf.tmp data/camera1-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' data/camera2-dist.conf > data/camera2-dist.conf.tmp && mv -f data/camera2-dist.conf.tmp data/camera2-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' data/camera3-dist.conf > data/camera3-dist.conf.tmp && mv -f data/camera3-dist.conf.tmp data/camera3-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' data/camera4-dist.conf > data/camera4-dist.conf.tmp && mv -f data/camera4-dist.conf.tmp data/camera4-dist.conf
+	@sed -e 's|$${prefix}|$(prefix)|' data/sound1-dist.conf > data/sound1-dist.conf.tmp && mv -f data/sound1-dist.conf.tmp data/sound1-dist.conf
 
 maintainer-check:
 	./configure --with-developer-flags                   && $(MAKE) clean && $(MAKE)
@@ -88,6 +88,8 @@ maintainer-check:
 	./configure --with-developer-flags --without-pgsql   && $(MAKE) clean && $(MAKE)
 	./configure --with-developer-flags --without-v4l2    && $(MAKE) clean && $(MAKE)
 	./configure --with-developer-flags --without-webp    && $(MAKE) clean && $(MAKE)
+	./configure --with-developer-flags --without-alsa    && $(MAKE) clean && $(MAKE)
+	./configure --with-developer-flags --without-fftw3   && $(MAKE) clean && $(MAKE)
 	./configure --with-developer-flags \
 		--without-mysql \
 		--without-mariadb \

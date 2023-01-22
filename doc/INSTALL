@@ -1,17 +1,15 @@
 The following is a brief overview of the building and installing instructions for debian / ubuntu.
 
 For full instructions on how to build and install Motion, see the motion_guide.html that is
-distributed with this source code. The guide also includes instructions for building Motion
-on distributions other than debian/ubuntu such as BSD, Mac and Centos.
+distributed with this source code. 
 
 The packages and library names change frequently and vary across base operating systems.
 Adjust the following lines as required by the base operating system.
 
 Install basic build packages:
-    sudo apt-get install autoconf automake autopoint pkgconf libtool libjpeg8-dev build-essential libzip-dev gettext libmicrohttpd-dev
-
-Install FFMPEG packages
-    sudo apt-get install libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev
+    sudo apt install autoconf automake autopoint build-essential pkgconf libtool libzip-dev
+          libjpeg-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev
+          libwebp-dev gettext libmicrohttpd-dev libmariadb-dev libasound2-dev libfftw3-dev
 
 Once required packages are installed, execute:
     autoreconf -fiv

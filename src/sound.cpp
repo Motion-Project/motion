@@ -73,7 +73,7 @@ static void snd_init_alerts(ctx_snd_alert  *tmp_alert)
 {
     tmp_alert->alert_id = 0;
     tmp_alert->alert_nm = "";
-    tmp_alert->freq_high = 0;
+    tmp_alert->freq_high = 10000;
     tmp_alert->freq_low = 0;
     tmp_alert->volume_count = 0;
     tmp_alert->volume_level = 0;
@@ -657,7 +657,7 @@ static void snd_check_alerts(ctx_dev *snd)
 
     freq_value = (snd->snd_fftw->bin_size * pMaxBinIndex * alsa->channels);
 
-    if (snd->conf->show_freq) {
+    if (snd->conf->snd_show) {
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
             , _("Freq: %.4f threshold: %d count: %d maximum: %d")
             , freq_value, vars->snd_vol_min

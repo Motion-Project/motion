@@ -103,7 +103,7 @@
       <ul>
           <code><strong>sudo apt install autoconf automake autopoint build-essential pkgconf libtool libzip-dev
           libjpeg-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev
-          libwebp-dev gettext libmicrohttpd-dev libmariadb-dev</strong></code>
+          libwebp-dev gettext libmicrohttpd-dev libmariadb-dev libasound2-dev libfftw3-dev </strong></code>
           <p></p>
           Note:  PostgreSQL or Sqlite3 database may also be added 
           via <code><strong>sudo apt install libpq-dev libsqlite3-dev</strong></code>.  If 
@@ -190,6 +190,16 @@
             <td bgcolor="#edf4f9" word-wrap:break-word > --with-sqlite3=DIR </td>
             <td bgcolor="#edf4f9" word-wrap:break-word > Specify the pkg-config DIR for sqlite3. </td>
             <td bgcolor="#edf4f9" word-wrap:break-word > Use --without-sqlite3 to disable </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-alsa=DIR </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Specify the pkg-config DIR for alsa. </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use --without-alsa to disable </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-fftw3=DIR </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Specify the pkg-config DIR for fftw3. </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use --without-fftw3 to disable </td>
           </tr>
           <tr>
             <td bgcolor="#edf4f9" word-wrap:break-word > --without-optimizecpu </td>

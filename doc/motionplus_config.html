@@ -59,12 +59,13 @@
       </div>
     </div>
     <div class="dropdown">
-      <button class="dropbtn">Webcontrol/Streams</button>
+      <button class="dropbtn">Webcontrol/Other</button>
       <div class="dropdown-content">
         <a href="#OptTopic_Webcontrol">Webcontrol</a>
         <a href="#OptTopic_Stream">Live Stream</a>
         <a href="#OptTopic_Database">Database Options</a>
         <a href="#OptTopic_Tracking">Tracking Options</a>
+        <a href="#OptTopic_Sound">Sound Options</a>
       </div>
     </div>
     <div class="dropdown">
@@ -522,6 +523,33 @@
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#ptz_zoom_out" >ptz_zoom_out</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Sound" ></a>
+      <a href="#OptDetail_Sound" >Sound Detection</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#snd_device" >snd_device</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#snd_params" >snd_params</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#snd_alerts" >snd_alerts</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#snd_window" >snd_window</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#snd_show" >snd_show</a> </td>
             </tr>
           </tbody>
         </table>
@@ -2048,6 +2076,142 @@
           Full path and file name for script to zoom the camera out.
         </ul>
         <p></p>
+      </ul>
+
+      <h3><a name="OptDetail_Sound"></a>Sound</h3>
+      <ul>
+        <h3><a name="snd_device"></a>snd_device</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          String specifying the sound device in alsa format e.g. hw:1,0
+        </ul>
+        <p></p>
+
+        <h3><a name="snd_params"></a>snd_params</h3>
+        <p></p>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters for the sound device.
+        </ul>
+        <p></p>
+
+        <h3><a name="snd_alerts"></a>snd_alerts</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters for the criteria of each alert.
+          <p></p>
+          Multiple specifications of this parameter are permitted.
+        </ul>
+        <p></p>
+        <ul>
+          <p></p>
+          The configuration parameters for each alert associated with the sound detection.  Multiple alerts can be specified
+          and each one can be set up to check for a different frequency. The following are the parameters that are specified
+          on each alert.
+        </ul>
+
+        <ul>
+          <i><h4>alert_id</h4></i>
+          <div>
+          <ul>
+            <li> Values: Integer | Default:  </li>
+            The unique number associated with the alert.
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4>volume_level</h4></i>
+          <div>
+          <ul>
+            <li> Values: Integer | Default: 0 </li>
+            The minimum volume level required to be start the detection process
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4>volume_count</h4></i>
+          <div>
+          <ul>
+            <li> Values: Integer | Default: 100</li>
+            The minimum number of times that the frequency must be detected above the volume_level before triggering event.
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4>freq_low</h4></i>
+          <div>
+          <ul>
+            <li> Values: Float | Default: 0</li>
+            The minimum frequency associated with the detection.
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4>freq_high</h4></i>
+          <div>
+          <ul>
+            <li> Values: Float | Default: 10000</li>
+            The maximum frequency associated with the detection.
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4>trigger_duration</h4></i>
+          <div>
+          <ul>
+            <li> Values: Integer | Default: 10</li>
+            The duration that must occur in seconds between triggered events before resetting.  This prevents a perpetual
+            stream of on_sound_event being triggered upon a constant sound.  The sound frequency must not occur for at least
+            trigger_duration seconds before a new on_sound_event is triggered for that particular alert.
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4>trigger_threshold</h4></i>
+          <div>
+          <ul>
+            <li> Values: Integer | Default: 10</li>
+            The number of times that the alert must be triggered before invoking the on_sound_event
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4>alert_nm</h4></i>
+          <div>
+          <ul>
+            <li> Values: String | Default: Not defined</li>
+            The description associated with the alert.
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4> params_file </h4></i>
+          <div>
+          <ul>
+            <li> Values: String | Default: Not Defined </li>
+            Full path and file name for a file containing the params listed one per line.
+          </ul>
+          <p></p>
+          </div>
+          </ul>
+          <p></p>
+        </ul>
+
+        <h3><a name="snd_window"></a>snd_window</h3>
+        <p></p>
+        <ul>
+          <li> Values: hamming, hann, none | Default: hamming</li>
+          The sound frequency detection window function method to use.
+        </ul>
+        <p></p>
+
+        <h3><a name="snd_show"></a>snd_show</h3>
+        <ul>
+          <li> Values: boolean | Default: off</li>
+          Write to the log the frequencies being detected.
+        </ul>
+        <p></p>
+
       </ul>
 
     </ul>
