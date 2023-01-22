@@ -48,7 +48,7 @@ ctx_parm config_parms[] = {
 
     {"device_name",               PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {"device_id",                 PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
-    {"camera_tmo",                PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
+    {"device_tmo",                PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {"target_dir",                PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
     {"watchdog_tmo",              PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {"watchdog_kill",             PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
@@ -617,23 +617,23 @@ static void conf_edit_device_id(ctx_config *conf, std::string &parm, enum PARM_A
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","device_id",_("device_id"));
 }
 
-static void conf_edit_camera_tmo(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_device_tmo(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        conf->camera_tmo = 30;
+        conf->device_tmo = 30;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if (parm_in < 1) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid camera_tmo %d"),parm_in);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid device_tmo %d"),parm_in);
         } else {
-            conf->camera_tmo = parm_in;
+            conf->device_tmo = parm_in;
         }
     } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(conf->camera_tmo);
+        parm = std::to_string(conf->device_tmo);
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera_tmo",_("camera_tmo"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","device_tmo",_("device_tmo"));
 }
 
 static void conf_edit_camera_dir(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
@@ -2843,7 +2843,7 @@ static void conf_edit_cat01(ctx_config *conf, std::string parm_nm
     } else if (parm_nm == "camera") {                conf_edit_camera(conf, parm_val, pact);
     } else if (parm_nm == "device_name") {           conf_edit_device_name(conf, parm_val, pact);
     } else if (parm_nm == "device_id") {             conf_edit_device_id(conf, parm_val, pact);
-    } else if (parm_nm == "camera_tmo") {            conf_edit_camera_tmo(conf, parm_val, pact);
+    } else if (parm_nm == "device_tmo") {            conf_edit_device_tmo(conf, parm_val, pact);
     } else if (parm_nm == "target_dir") {            conf_edit_target_dir(conf, parm_val, pact);
     } else if (parm_nm == "watchdog_tmo") {          conf_edit_watchdog_tmo(conf, parm_val, pact);
     } else if (parm_nm == "watchdog_kill") {         conf_edit_watchdog_kill(conf, parm_val, pact);

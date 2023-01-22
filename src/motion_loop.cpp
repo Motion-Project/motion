@@ -841,7 +841,7 @@ static int mlp_capture(ctx_dev *cam)
         cam->lost_connection = 0;
         cam->connectionlosttime.tv_sec = 0;
 
-        if (cam->missing_frame_counter >= (cam->conf->camera_tmo * cam->conf->framerate)) {
+        if (cam->missing_frame_counter >= (cam->conf->device_tmo * cam->conf->framerate)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
             event(cam, EVENT_CAMERA_FOUND, NULL, NULL, NULL, NULL);
         }
@@ -859,7 +859,7 @@ static int mlp_capture(ctx_dev *cam)
 
         if ((cam->camera_status == STATUS_OPENED) &&
             (cam->missing_frame_counter <
-                (cam->conf->camera_tmo * cam->conf->framerate))) {
+                (cam->conf->device_tmo * cam->conf->framerate))) {
             memcpy(cam->current_image->image_norm, cam->imgs.image_vprvcy, cam->imgs.size_norm);
         } else {
             cam->lost_connection = 1;
@@ -876,14 +876,14 @@ static int mlp_capture(ctx_dev *cam)
                       10, 20 * cam->text_scale, tmpout, cam->text_scale);
 
             /* Write error message only once */
-            if (cam->missing_frame_counter == (cam->conf->camera_tmo * cam->conf->framerate)) {
+            if (cam->missing_frame_counter == (cam->conf->device_tmo * cam->conf->framerate)) {
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                     ,_("Video signal lost - Adding grey image"));
                 event(cam, EVENT_CAMERA_LOST, NULL, NULL, NULL, &cam->connectionlosttime);
             }
 
             if ((cam->camera_status == STATUS_OPENED) &&
-                (cam->missing_frame_counter == ((cam->conf->camera_tmo * 4) * cam->conf->framerate))) {
+                (cam->missing_frame_counter == ((cam->conf->device_tmo * 4) * cam->conf->framerate))) {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Video signal still lost - Trying to close video device"));
                 mlp_cam_close(cam);
