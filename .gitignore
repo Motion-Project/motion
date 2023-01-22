@@ -35,9 +35,6 @@ src/Makefile.in
 src/.deps/
 src/Makefile
 src/Makefile.in
-src/raspicam/*.o
-src/raspicam/.dirstamp
-src/raspicam/.deps/
 *.log
 .depend
 
