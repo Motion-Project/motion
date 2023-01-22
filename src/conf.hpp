@@ -39,7 +39,7 @@
 
         std::string     device_name;
         int             device_id;
-        std::string     camera_dir;
+        std::string     config_dir;
         std::string     target_dir;
         int             watchdog_tmo;
         int             watchdog_kill;

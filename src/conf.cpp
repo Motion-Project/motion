@@ -52,7 +52,7 @@ ctx_parm config_parms[] = {
     {"target_dir",                PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
     {"watchdog_tmo",              PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {"watchdog_kill",             PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
-    {"camera_dir",                PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
+    {"config_dir",                PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
     {"camera",                    PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
 
     {"v4l2_device",               PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_ADVANCED },
@@ -636,17 +636,17 @@ static void conf_edit_device_tmo(ctx_config *conf, std::string &parm, enum PARM_
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","device_tmo",_("device_tmo"));
 }
 
-static void conf_edit_camera_dir(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
+static void conf_edit_config_dir(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        conf->camera_dir = "";
+        conf->config_dir = "";
     } else if (pact == PARM_ACT_SET) {
-        conf->camera_dir = parm;
+        conf->config_dir = parm;
     } else if (pact == PARM_ACT_GET) {
-        parm = conf->camera_dir;
+        parm = conf->config_dir;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera_dir",_("camera_dir"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","config_dir",_("config_dir"));
 }
 
 static void conf_edit_target_dir(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
@@ -2839,7 +2839,7 @@ static void conf_edit_cat00(ctx_config *conf, std::string cmd
 static void conf_edit_cat01(ctx_config *conf, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "camera_dir") {                   conf_edit_camera_dir(conf, parm_val, pact);
+    if (parm_nm == "config_dir") {                   conf_edit_config_dir(conf, parm_val, pact);
     } else if (parm_nm == "camera") {                conf_edit_camera(conf, parm_val, pact);
     } else if (parm_nm == "device_name") {           conf_edit_device_name(conf, parm_val, pact);
     } else if (parm_nm == "device_id") {             conf_edit_device_id(conf, parm_val, pact);
@@ -3473,8 +3473,8 @@ static void conf_parm_camera(ctx_motapp *motapp, std::string filename)
 
 }
 
-/** Process camera_dir */
-static void conf_parm_camera_dir(ctx_motapp *motapp, std::string confdir)
+/** Process config_dir */
+static void conf_parm_config_dir(ctx_motapp *motapp, std::string confdir)
 {
     DIR *dp;
     dirent *ep;
@@ -3495,7 +3495,7 @@ static void conf_parm_camera_dir(ctx_motapp *motapp, std::string confdir)
     }
     closedir(dp);
 
-    conf_edit_set(motapp->conf, "camera_dir", confdir);
+    conf_edit_set(motapp->conf, "config_dir", confdir);
 
 }
 
@@ -3536,9 +3536,9 @@ void conf_process(ctx_motapp *motapp, ctx_config *conf)
                 myunquote(parm_vl);
                 if ((parm_nm == "camera") && (motapp->conf == conf)) {
                     conf_parm_camera(motapp, parm_vl);
-                } else if ((parm_nm == "camera_dir") && (motapp->conf == conf)){
-                    conf_parm_camera_dir(motapp, parm_vl);
-                } else if ((parm_nm != "camera") && (parm_nm != "camera_dir")) {
+                } else if ((parm_nm == "config_dir") && (motapp->conf == conf)){
+                    conf_parm_config_dir(motapp, parm_vl);
+                } else if ((parm_nm != "camera") && (parm_nm != "config_dir")) {
                    conf_edit_set(conf, parm_nm, parm_vl);
                 }
             } else if ((line != "") &&
@@ -3596,7 +3596,7 @@ void conf_parms_log(ctx_motapp *motapp)
     while (config_parms[i].parm_name != "") {
         parm_nm=config_parms[i].parm_name;
         parm_ct=config_parms[i].parm_cat;
-        if ((parm_nm != "camera") && (parm_nm != "camera_dir") &&
+        if ((parm_nm != "camera") && (parm_nm != "config_dir") &&
             (parm_nm != "conf_filename") ) {
             conf_edit_get(motapp->conf, parm_nm,parm_vl, parm_ct);
             conf_parms_log_parm(parm_nm, parm_vl);
@@ -3615,7 +3615,7 @@ void conf_parms_log(ctx_motapp *motapp)
             parm_ct=config_parms[i].parm_cat;
             conf_edit_get(motapp->conf, parm_nm, parm_main, parm_ct);
             conf_edit_get(motapp->cam_list[indx]->conf, parm_nm, parm_vl, parm_ct);
-            if ((parm_nm != "camera") && (parm_nm != "camera_dir") &&
+            if ((parm_nm != "camera") && (parm_nm != "config_dir") &&
                 (parm_nm != "conf_filename") &&
                 (parm_main != parm_vl) ) {
                 conf_parms_log_parm(parm_nm, parm_vl);
@@ -3681,7 +3681,7 @@ void conf_parms_write_app(ctx_motapp *motapp)
     while (config_parms[i].parm_name != "") {
         parm_nm=config_parms[i].parm_name;
         parm_ct=config_parms[i].parm_cat;
-        if ((parm_nm != "camera") && (parm_nm != "camera_dir") &&
+        if ((parm_nm != "camera") && (parm_nm != "config_dir") &&
             (parm_nm != "conf_filename")) {
             conf_edit_get(motapp->conf, parm_nm, parm_vl, parm_ct);
             conf_parms_write_parms(conffile, parm_nm, parm_vl, parm_ct, false);
@@ -3699,8 +3699,8 @@ void conf_parms_write_app(ctx_motapp *motapp)
 
     fprintf(conffile, "\n");
 
-    conf_edit_get(motapp->conf, "camera_dir", parm_vl, PARM_CAT_01);
-    conf_parms_write_parms(conffile, "camera_dir", parm_vl, PARM_CAT_01, false);
+    conf_edit_get(motapp->conf, "config_dir", parm_vl, PARM_CAT_01);
+    conf_parms_write_parms(conffile, "config_dir", parm_vl, PARM_CAT_01, false);
 
     fprintf(conffile, "\n");
     myfclose(conffile);
@@ -3740,7 +3740,7 @@ void conf_parms_write_cam(ctx_motapp *motapp)
         while (config_parms[i].parm_name != "") {
             parm_nm=config_parms[i].parm_name;
             parm_ct=config_parms[i].parm_cat;
-            if ((parm_nm != "camera") && (parm_nm != "camera_dir") &&
+            if ((parm_nm != "camera") && (parm_nm != "config_dir") &&
                 (parm_nm != "conf_filename") ) {
                 conf_edit_get(motapp->conf, parm_nm, parm_main, parm_ct);
                 conf_edit_get(motapp->cam_list[indx]->conf, parm_nm, parm_vl, parm_ct);
