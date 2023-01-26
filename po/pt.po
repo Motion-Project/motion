@@ -1950,6 +1950,11 @@ msgstr "%d De reinicialização do segmento de movimento"
 msgid "Threads finished"
 msgstr "Tópicos concluídos"
 
+#: src/motion.c
+#, c-format
+msgid "Received signal %d."
+msgstr "Sinal %d recebido."
+
 #: src/motion.c src/webu.c
 msgid "Motion terminating"
 msgstr "Movimento terminando"

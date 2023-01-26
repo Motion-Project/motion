@@ -383,6 +383,8 @@ static void sig_handler(int signo)
          * movie and end up!
          */
 
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Received signal %d."), signo);
+
         if (cnt_list) {
             i = -1;
             while (cnt_list[++i]) {
@@ -402,8 +404,6 @@ static void sig_handler(int signo)
          */
         finish = 1;
         break;
-    case SIGSEGV:
-        exit(0);
     case SIGVTALRM:
         printf("SIGVTALRM went off\n");
         break;
