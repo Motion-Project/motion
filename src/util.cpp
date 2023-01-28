@@ -1261,7 +1261,14 @@ void util_parms_update(ctx_params *params, std::string &confline)
 void util_exec_command(ctx_dev *cam, const char *command, char *filename, int filetype)
 {
     char stamp[PATH_MAX];
-    mystrftime(cam, stamp, sizeof(stamp), command, &cam->current_image->imgts, filename, filetype);
+    timespec tmpts;
+
+    if (cam->current_image == NULL) {
+        clock_gettime(CLOCK_REALTIME, &tmpts);
+        mystrftime(cam, stamp, sizeof(stamp), command, &tmpts, filename, filetype);
+    } else {
+        mystrftime(cam, stamp, sizeof(stamp), command, &cam->current_image->imgts, filename, filetype);
+    }
 
     if (!fork()) {
         /* Detach from parent */
