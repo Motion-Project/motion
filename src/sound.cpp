@@ -171,6 +171,12 @@ static void snd_load_alerts(ctx_dev *snd)
             if (mystreq(tmp_params->params_array[indx].param_name,"volume_level")) {
                 tmp_alert.volume_level = atoi(tmp_params->params_array[indx].param_value);
             }
+            if (mystreq(tmp_params->params_array[indx].param_name,"trigger_threshold")) {
+                tmp_alert.trigger_threshold = atoi(tmp_params->params_array[indx].param_value);
+            }
+            if (mystreq(tmp_params->params_array[indx].param_name,"trigger_duration")) {
+                tmp_alert.trigger_duration = atoi(tmp_params->params_array[indx].param_value);
+            }
         }
         vars->snd_alerts.push_back(tmp_alert);
         util_parms_free(tmp_params);
