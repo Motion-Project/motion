@@ -130,7 +130,6 @@ static void snd_edit_alerts(ctx_dev *snd)
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  freq_high:           %.4f",it_a0->freq_high);
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  volume_count:        %d",it_a0->volume_count);
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  volume_level:        %d",it_a0->volume_level);
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  trigger_count:       %d",it_a0->trigger_count);
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  trigger_threshold:   %d",it_a0->trigger_threshold);
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  trigger_duration:    %d",it_a0->trigger_duration);
     }
