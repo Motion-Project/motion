@@ -422,6 +422,12 @@ ctx_parm_depr config_parms_depr[] = {
     "\"camera_name\" replaced with \"device_name\"",
     "device_name"
     },
+    {
+    "camera_tmo",
+    "0.0.1",
+    "\"camera_tmo\" replaced with \"device_tmo\"",
+    "device_tmo"
+    },
 
     { "","","",""}
 };
