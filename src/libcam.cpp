@@ -87,12 +87,12 @@ int cls_libcam::cam_start_mgr()
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "cam_mgr started.");
 
-    if (camctx->conf->libcam_name == "camera0"){
+    if (camctx->conf->libcam_device == "camera0"){
         camid = cam_mgr->cameras()[0]->id();
     } else {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Invalid libcam_name '%s'.  The only name supported is 'camera0' "
-            ,camctx->conf->libcam_name.c_str());
+            , "Invalid libcam_device '%s'.  The only name supported is 'camera0' "
+            ,camctx->conf->libcam_device.c_str());
         return -1;
     }
     camera = cam_mgr->get(camid);

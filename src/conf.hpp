@@ -55,7 +55,7 @@
         std::string     netcam_high_params;
         std::string     netcam_userpass;
 
-        std::string     libcam_name;
+        std::string     libcam_device;
         std::string     libcam_params;
 
         /* Image processing configuration parameters */

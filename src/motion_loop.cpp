@@ -412,7 +412,7 @@ int mlp_cam_next(ctx_dev *cam, ctx_image_data *img_data)
 /* Assign the camera type */
 static void mlp_init_camera_type(ctx_dev *cam)
 {
-    if (cam->conf->libcam_name != "") {
+    if (cam->conf->libcam_device != "") {
         cam->camera_type = CAMERA_TYPE_LIBCAM;
     } else if (cam->conf->netcam_url != "") {
         cam->camera_type = CAMERA_TYPE_NETCAM;
