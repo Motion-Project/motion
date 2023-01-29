@@ -358,7 +358,7 @@ struct ctx_snd_fftw {
     #endif
 };
 
-struct ctx_snd_vars {
+struct ctx_snd_info {
     std::list<ctx_snd_alert>    snd_alerts;     /* list of sound alert criteria */
     int                         snd_vol_min;    /* The minimum volume from alerts*/
     int                         snd_vol_max;    /* Maximum volume of sample*/
@@ -468,7 +468,7 @@ struct ctx_dev {
 
     ctx_snd_fftw            *snd_fftw;  /* fftw for sound*/
     ctx_snd_alsa            *snd_alsa;  /* Alsa device for sound*/
-    ctx_snd_vars            *snd_vars;  /* Values for sound processing*/
+    ctx_snd_info            *snd_info;  /* Values for sound processing*/
 
 };
 

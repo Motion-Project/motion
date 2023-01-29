@@ -36,7 +36,7 @@ static float HannWindow(int n1, int N2){
 static void snd_init_values(ctx_dev *snd)
 {
     ctx_snd_alsa *alsa = snd->snd_alsa;
-    ctx_snd_vars *vars = snd->snd_vars;
+    ctx_snd_info *vars = snd->snd_info;
 
     alsa->pcm_dev = NULL;
     alsa->pcm_info = NULL;
@@ -86,7 +86,7 @@ static void snd_init_alerts(ctx_snd_alert  *tmp_alert)
 
 static void snd_edit_alerts(ctx_dev *snd)
 {
-    ctx_snd_vars *vars = snd->snd_vars;
+    ctx_snd_info *vars = snd->snd_info;
     std::list<ctx_snd_alert>::iterator it_a0;
     std::list<ctx_snd_alert>::iterator it_a1;
     int     indx, id_chk, id_cnt;
@@ -138,7 +138,7 @@ static void snd_edit_alerts(ctx_dev *snd)
 
 static void snd_load_alerts(ctx_dev *snd)
 {
-    ctx_snd_vars *vars = snd->snd_vars;
+    ctx_snd_info *vars = snd->snd_info;
     ctx_snd_alert  tmp_alert;
     std::list<std::string> parm_val;
     std::list<std::string>::iterator  it_p;
@@ -622,7 +622,7 @@ static void slp_init(ctx_dev *snd)
 static void snd_check_alerts(ctx_dev *snd)
 {
     ctx_snd_alsa *alsa = snd->snd_alsa;
-    ctx_snd_vars *vars = snd->snd_vars;
+    ctx_snd_info *vars = snd->snd_info;
     float freq_value;
     int   indx, chkval, chkcnt;
     float pMaxIntensity;
@@ -713,7 +713,7 @@ static void snd_check_alerts(ctx_dev *snd)
 static void snd_check_levels(ctx_dev *snd)
 {
     ctx_snd_alsa *alsa = snd->snd_alsa;
-    ctx_snd_vars *vars = snd->snd_vars;
+    ctx_snd_info *vars = snd->snd_info;
     int indx, chkval;
 
     if (snd->device_status == STATUS_CLOSED) {
@@ -750,7 +750,7 @@ void *snd_loop(void *arg)
 
     snd->snd_fftw = new ctx_snd_fftw;
     snd->snd_alsa = new ctx_snd_alsa;
-    snd->snd_vars = new ctx_snd_vars;
+    snd->snd_info = new ctx_snd_info;
     snd->running_dev = true;
     snd->finish_dev = false;
     snd->restart_dev = false;
@@ -774,7 +774,7 @@ void *snd_loop(void *arg)
     snd->running_dev = false;
     delete snd->snd_alsa;
     delete snd->snd_fftw;
-    delete snd->snd_vars;
+    delete snd->snd_info;
 
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Exiting"));
 
