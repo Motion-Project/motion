@@ -59,11 +59,6 @@ static void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
 
     new_size = buff->size + real_alloc;
 
-    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
-        ,_("expanding buffer from [%d/%d] to [%d/%d] bytes.")
-        ,(int) buff->used, (int) buff->size
-        ,(int) buff->used, new_size);
-
     buff->ptr =(char*) myrealloc(buff->ptr, new_size,
                           "netcam_check_buf_size");
     buff->size = new_size;
