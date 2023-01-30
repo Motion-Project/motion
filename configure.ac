@@ -594,29 +594,6 @@ AS_IF([test "${FFTW3}" = "no"], [
 )
 
 ##############################################################################
-###  Optimize compiler
-##############################################################################
-AC_ARG_WITH([optimizecpu],
-  AS_HELP_STRING([--without-optimizecpu],
-    [Exclude autodetecting platform and cpu type. This will disable the compilation of gcc optimizing code by platform and cpu.]),
-  [OPTIMIZECPU=$withval],
-  [OPTIMIZECPU=no]
-)
-
-AS_IF([test "${OPTIMIZECPU}" = "yes"], [
-    AS_IF([test -e "/proc/device-tree/model"], [
-        # explicit test for RPI3 as /proc/cpuinfo reports armv7 even though it is armv8
-        RPI3=`grep "Raspberry Pi 3 Model" /proc/device-tree/model`
-        AS_IF([test "x${RPI3}" != "x"], [
-            TEMP_CPPFLAGS="$TEMP_CPPFLAGS -mcpu=cortex-a53 -mfpu=neon-fp-armv8"
-          ]
-        )
-      ]
-    )
-  ]
-)
-
-##############################################################################
 ###  Developer Flags
 ##############################################################################
 AC_ARG_WITH([developer-flags],
