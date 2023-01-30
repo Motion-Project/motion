@@ -537,33 +537,37 @@ void webu_post_ptz(ctx_webui *webui)
 
     if ((webui->post_cmd == "pan_left") &&
         (cam->conf->ptz_pan_left != "")) {
+        cam->frame_skip = cam->conf->ptz_wait;
         util_exec_command(cam, cam->conf->ptz_pan_left.c_str(), NULL, 0);
 
     } else if ((webui->post_cmd == "pan_right") &&
         (cam->conf->ptz_pan_right != "")) {
+        cam->frame_skip = cam->conf->ptz_wait;
         util_exec_command(cam, cam->conf->ptz_pan_right.c_str(), NULL, 0);
 
     } else if ((webui->post_cmd == "tilt_up") &&
         (cam->conf->ptz_tilt_up != "")) {
+        cam->frame_skip = cam->conf->ptz_wait;
         util_exec_command(cam, cam->conf->ptz_tilt_up.c_str(), NULL, 0);
 
     } else if ((webui->post_cmd == "tilt_down") &&
         (cam->conf->ptz_tilt_down != "")) {
+        cam->frame_skip = cam->conf->ptz_wait;
         util_exec_command(cam, cam->conf->ptz_tilt_down.c_str(), NULL, 0);
 
     } else if ((webui->post_cmd == "zoom_in") &&
         (cam->conf->ptz_zoom_in != "")) {
+        cam->frame_skip = cam->conf->ptz_wait;
         util_exec_command(cam, cam->conf->ptz_zoom_in.c_str(), NULL, 0);
 
     } else if ((webui->post_cmd == "zoom_out") &&
         (cam->conf->ptz_zoom_out != "")) {
+        cam->frame_skip = cam->conf->ptz_wait;
         util_exec_command(cam, cam->conf->ptz_zoom_out.c_str(), NULL, 0);
 
     } else {
         return;
     }
-
-    cam->frame_skip = cam->conf->ptz_wait;
 
 }
 
