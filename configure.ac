@@ -474,6 +474,46 @@ AS_IF([test "${SQLITE3}" = "no"], [
 )
 
 ##############################################################################
+###  Check for Pulse
+##############################################################################
+AC_ARG_WITH([pulse],
+  AS_HELP_STRING([--with-pulse[=DIR]],[Build with PulseAudio support]),
+  [PULSE=$withval],
+  [PULSE="yes"]
+)
+
+AS_IF([test "${PULSE}" = "no"], [
+    AC_MSG_CHECKING(for PulseAudio)
+    AC_MSG_RESULT(skipped)
+  ],[
+    AC_MSG_CHECKING(PULSE pkg-config path)
+    TEMP_PATH=$PKG_CONFIG_PATH
+    AS_IF([test "${PULSE}" != "yes"], [
+        PKG_CONFIG_PATH=${PULSE}/lib/pkgconfig:$PKG_CONFIG_PATH
+        PULSE="yes"
+      ]
+    )
+    export PKG_CONFIG_PATH
+    AC_MSG_RESULT($PKG_CONFIG_PATH done)
+
+    AC_MSG_CHECKING(for PulseAudio)
+    AS_IF([pkg-config libpulse], [
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags libpulse`
+        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libpulse`" -lpulse-simple "
+        AC_DEFINE([HAVE_PULSE], [1], [Define to 1 if you have PulseAudio support])
+        AC_MSG_RESULT(yes)
+      ],[
+        PULSE="no"
+      ]
+    )
+
+    AC_MSG_RESULT([$PULSE])
+    PKG_CONFIG_PATH=$TEMP_PATH
+    export PKG_CONFIG_PATH
+  ]
+)
+
+##############################################################################
 ###  Check for ALSA
 ##############################################################################
 AC_ARG_WITH([alsa],
@@ -643,6 +683,7 @@ echo "MYSQL support         : $MYSQL"
 echo "PostgreSQL support    : $PGSQL"
 echo "MariaDB support       : $MARIADB"
 echo "ALSA support          : $ALSA"
+echo "PulseAudio support    : $PULSE"
 echo "FFTW support          : $FFTW3"
 echo
 echo  "Install prefix:       $prefix"

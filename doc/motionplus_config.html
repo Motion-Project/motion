@@ -2099,7 +2099,12 @@
         <h3><a name="snd_device"></a>snd_device</h3>
         <ul>
           <li> Values: String | Default: Not Defined</li>
-          String specifying the sound device in alsa format e.g. hw:1,0
+          String specifying the sound device.
+          <p></p>
+          For alsa use the format such as hw:1,0
+          <p></p>
+          For PulseAudio, usually leave this empty and let PulseAudio use the defaults.  If a
+          specific PulseAudio device string is known, specify using this parameter.
         </ul>
         <p></p>
 
@@ -2108,6 +2113,65 @@
         <ul>
           <li> Values: String | Default: Not Defined</li>
           Comma separated list of configuration parameters for the sound device.
+        </ul>
+        <p></p>
+        <ul>
+          <p></p>
+          The configuration parameters for snd_device
+        <ul>
+        <i><h4>source</h4></i>
+        <div>
+        <ul>
+          <li> Values: String | Default: alsa </li>
+          The type of source for the sound device.  Currently supported sources are 'alsa' or 'pulse'.
+        </ul>
+        <p></p>
+        </div>
+
+        <i><h4>channels</h4></i>
+        <div>
+        <ul>
+          <li> Values: Integer: | Default: 1 </li>
+          The number of audio channels for the sound device
+        </ul>
+        <p></p>
+        </div>
+
+        <i><h4>frames</h4></i>
+        <div>
+        <ul>
+          <li> Values: Integer | Default: 2048</li>
+          The number of bytes to read in for each frame from the sound device.
+        </ul>
+        <p></p>
+        </div>
+
+        <i><h4>sample_rate</h4></i>
+        <div>
+        <ul>
+          <li> Values: Integer | Default: 44100</li>
+          The sample rate for the sound device.
+        </ul>
+        <p></p>
+        </div>
+
+        <i><h4>pulse_server</h4></i>
+        <div>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The override name of the pulse server to use.
+        </ul>
+        <p></p>
+        </div>
+
+        <i><h4> params_file </h4></i>
+        <div>
+        <ul>
+          <li> Values: String | Default: Not Defined </li>
+          Full path and file name for a file containing the params listed one per line.
+        </ul>
+        <p></p>
+        </div>
         </ul>
         <p></p>
 

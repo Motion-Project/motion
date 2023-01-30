@@ -81,6 +81,14 @@ extern "C" {
     }
 #endif
 
+#ifdef HAVE_PULSE
+    extern "C" {
+        #include <pulse/simple.h>
+        #include <pulse/error.h>
+    }
+#endif
+
+
 #ifdef HAVE_FFTW3
     extern "C" {
         #include <fftw3.h>
@@ -326,20 +334,21 @@ struct ctx_snd_alert {
 
 struct ctx_snd_alsa {
    #ifdef HAVE_ALSA
-        std::string     source;         /* Source string in ALSA format e.g. hw:1,0*/
-        unsigned int    sample_rate;    /* Sample rate of sound source*/
-        int             channels;       /* Number of audio channels */
-        std::string     device_nm;
-        int             device_id;
-        snd_pcm_t       *pcm_dev;
-        snd_pcm_info_t  *pcm_info;
+        int                     device_id;
+        std::string             device_nm;
+        snd_pcm_t               *pcm_dev;
+        snd_pcm_info_t          *pcm_info;
         int                     card_id;
         snd_ctl_card_info_t     *card_info;
         snd_ctl_t               *ctl_hdl;
-        int16_t         *input_buffer;
-        int             buf_frames;
-        long            buf_size;
-        int             buf_items;
+    #else
+        int             dummy;
+    #endif
+};
+
+struct ctx_snd_pulse {
+   #ifdef HAVE_PULSE
+        pa_simple       *dev;
     #else
         int             dummy;
     #endif
@@ -359,10 +368,17 @@ struct ctx_snd_fftw {
 };
 
 struct ctx_snd_info {
-    std::list<ctx_snd_alert>    snd_alerts;     /* list of sound alert criteria */
-    int                         snd_vol_min;    /* The minimum volume from alerts*/
-    int                         snd_vol_max;    /* Maximum volume of sample*/
-    int                         snd_vol_count;  /* Number of times volumne exceeded user specified volume level */
+    std::string                 source;         /* Source string in ALSA format e.g. hw:1,0*/
+    unsigned int                sample_rate;    /* Sample rate of sound source*/
+    uint8_t                     channels;       /* Number of audio channels */
+    std::list<ctx_snd_alert>    alerts;         /* list of sound alert criteria */
+    int                         vol_min;        /* The minimum volume from alerts*/
+    int                         vol_max;        /* Maximum volume of sample*/
+    int                         vol_count;      /* Number of times volumne exceeded user specified volume level */
+    int16_t                     *buffer;
+    int                         buffer_size;
+    int                         frames;
+    std::string                 pulse_server;
 };
 
 struct ctx_dev {
@@ -468,6 +484,7 @@ struct ctx_dev {
 
     ctx_snd_fftw            *snd_fftw;  /* fftw for sound*/
     ctx_snd_alsa            *snd_alsa;  /* Alsa device for sound*/
+    ctx_snd_pulse           *snd_pulse; /* PulseAudio for sound*/
     ctx_snd_info            *snd_info;  /* Values for sound processing*/
 
 };
