@@ -251,7 +251,7 @@ void webu_post_action_pause(ctx_webui *webui)
     if (webui->threadnbr == -1) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             webui->motapp->cam_list[indx]->pause = true;
-        };
+        }
     } else {
         webui->motapp->cam_list[webui->threadnbr]->pause = true;
     }
@@ -279,7 +279,7 @@ void webu_post_action_unpause(ctx_webui *webui)
     if (webui->threadnbr == -1) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             webui->motapp->cam_list[indx]->pause = false;
-        };
+        }
     } else {
         webui->motapp->cam_list[webui->threadnbr]->pause = false;
     }
