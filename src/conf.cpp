@@ -49,6 +49,7 @@ ctx_parm config_parms[] = {
     {"device_name",               PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {"device_id",                 PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {"device_tmo",                PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
+    {"pause",                     PARM_TYP_BOOL,   PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {"target_dir",                PARM_TYP_STRING, PARM_CAT_01, WEBUI_LEVEL_ADVANCED },
     {"watchdog_tmo",              PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
     {"watchdog_kill",             PARM_TYP_INT,    PARM_CAT_01, WEBUI_LEVEL_LIMITED },
@@ -654,6 +655,19 @@ static void conf_edit_device_tmo(ctx_config *conf, std::string &parm, enum PARM_
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","device_tmo",_("device_tmo"));
+}
+
+static void conf_edit_pause(ctx_config *conf, std::string &parm, int pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        conf->pause = false;
+    } else if (pact == PARM_ACT_SET) {
+        conf_edit_set_bool(conf->pause, parm);
+    } else if (pact == PARM_ACT_GET) {
+        conf_edit_get_bool(parm, conf->pause);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","pause",_("pause"));
 }
 
 static void conf_edit_config_dir(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
@@ -2981,6 +2995,7 @@ static void conf_edit_cat01(ctx_config *conf, std::string parm_nm
     } else if (parm_nm == "device_name") {           conf_edit_device_name(conf, parm_val, pact);
     } else if (parm_nm == "device_id") {             conf_edit_device_id(conf, parm_val, pact);
     } else if (parm_nm == "device_tmo") {            conf_edit_device_tmo(conf, parm_val, pact);
+    } else if (parm_nm == "pause") {                 conf_edit_pause(conf, parm_val, pact);
     } else if (parm_nm == "target_dir") {            conf_edit_target_dir(conf, parm_val, pact);
     } else if (parm_nm == "watchdog_tmo") {          conf_edit_watchdog_tmo(conf, parm_val, pact);
     } else if (parm_nm == "watchdog_kill") {         conf_edit_watchdog_kill(conf, parm_val, pact);

@@ -563,6 +563,11 @@ static void mlp_init_values(ctx_dev *cam)
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
         cam->movie_passthrough = false;
     }
+    if (cam->motapp->pause) {
+        cam->pause = true;
+    } else {
+        cam->pause = cam->conf->pause;
+    }
 }
 
 /* start the camera */
@@ -903,7 +908,7 @@ static void mlp_detection(ctx_dev *cam)
         return;
     }
 
-    if ( !cam->pause ) {
+    if (cam->pause == false) {
         alg_diff(cam);
     } else {
         cam->current_image->diffs = 0;
@@ -975,7 +980,7 @@ static void mlp_overlay(ctx_dev *cam)
     }
 
     if (cam->conf->text_changes) {
-        if (!cam->pause) {
+        if (cam->pause == false) {
             sprintf(tmp, "%d", cam->current_image->diffs);
         } else {
             sprintf(tmp, "-");

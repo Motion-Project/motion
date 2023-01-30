@@ -44,6 +44,7 @@
         int             watchdog_tmo;
         int             watchdog_kill;
         int             device_tmo;
+        bool            pause;
 
         /* Capture device configuration parameters */
         std::string     v4l2_device;
