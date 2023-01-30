@@ -1157,15 +1157,13 @@ void util_parms_parse(ctx_params *params, std::string confline)
     /* We make a copy because the parsing destroys the value passed */
     parmline = confline;
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Starting parsing parameters: %s"), parmline.c_str());
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Starting parsing parameters"));
 
     util_parms_free(params);
 
     util_parms_parse_qte(params, parmline);
 
     util_parms_parse_comma(params, parmline);
-
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Finished parsing parameters: %s"), confline.c_str());
 
     params->update_params = false;
 
