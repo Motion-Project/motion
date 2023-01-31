@@ -60,24 +60,6 @@ cleanall: distclean
 all-local:
 	@rm -f po/*.po\~
 
-###################################################################
-## Update contents of sample files with the correct directory
-###################################################################
-install-data-local:
-	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/motionplus-dist.conf > ${DESTDIR}${sysconfdir}/motionplus-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/motionplus-dist.conf.tmp ${DESTDIR}${sysconfdir}/motionplus-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera1-dist.conf > ${DESTDIR}${sysconfdir}/camera1-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera1-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera1-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera2-dist.conf > ${DESTDIR}${sysconfdir}/camera2-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera2-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera2-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera3-dist.conf > ${DESTDIR}${sysconfdir}/camera3-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera3-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera3-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/sound1-dist.conf > ${DESTDIR}${sysconfdir}/sound1-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/sound1-dist.conf.tmp ${DESTDIR}${sysconfdir}/sound1-dist.conf
-
-	@sed -e 's|$${exec_prefix}|$(exec_prefix)|' data/motionplus.service > data/motionplus.service.tmp && mv -f data/motionplus.service.tmp data/motionplus.service
-
-	@sed -e 's|$${prefix}|$(prefix)|' data/motionplus-dist.conf > data/motionplus-dist.conf.tmp && mv -f data/motionplus-dist.conf.tmp data/motionplus-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' data/camera1-dist.conf > data/camera1-dist.conf.tmp && mv -f data/camera1-dist.conf.tmp data/camera1-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' data/camera2-dist.conf > data/camera2-dist.conf.tmp && mv -f data/camera2-dist.conf.tmp data/camera2-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' data/camera3-dist.conf > data/camera3-dist.conf.tmp && mv -f data/camera3-dist.conf.tmp data/camera3-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' data/sound1-dist.conf > data/sound1-dist.conf.tmp && mv -f data/sound1-dist.conf.tmp data/sound1-dist.conf
-
 maintainer-check:
 	./configure --with-developer-flags                   && $(MAKE) clean && $(MAKE)
 	./configure --with-developer-flags --without-opencv  && $(MAKE) clean && $(MAKE)
