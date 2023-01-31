@@ -461,7 +461,7 @@ AS_IF([test "${SQLITE3}" = "no"], [
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags sqlite3`
         TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs sqlite3`
         AC_DEFINE([HAVE_SQLITE3], [1], [Define to 1 if you have SQLITE3 support])
-        AC_MSG_RESULT(yes)
+        SQLITE3="yes"
       ],[
         SQLITE3="no"
       ]
@@ -501,7 +501,7 @@ AS_IF([test "${PULSE}" = "no"], [
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags libpulse`
         TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs libpulse`" -lpulse-simple "
         AC_DEFINE([HAVE_PULSE], [1], [Define to 1 if you have PulseAudio support])
-        AC_MSG_RESULT(yes)
+        PULSE="yes"
       ],[
         PULSE="no"
       ]
@@ -541,7 +541,7 @@ AS_IF([test "${ALSA}" = "no"], [
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags alsa`
         TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs alsa`
         AC_DEFINE([HAVE_ALSA], [1], [Define to 1 if you have ALSA support])
-        AC_MSG_RESULT(yes)
+        ALSA="yes"
       ],[
         ALSA="no"
       ]
@@ -581,7 +581,7 @@ AS_IF([test "${FFTW3}" = "no"], [
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags fftw3`
         TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs fftw3`
         AC_DEFINE([HAVE_FFTW3], [1], [Define to 1 if you have FFTW3 support])
-        AC_MSG_RESULT(yes)
+        FFTW3="yes"
       ],[
         FFTW3="no"
       ]
