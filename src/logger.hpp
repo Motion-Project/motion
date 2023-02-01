@@ -53,9 +53,10 @@
     #define TYPE_DEFAULT            TYPE_ALL      /* Default type      */
     #define TYPE_DEFAULT_STR        "ALL"         /* Default name logs */
 
-    #define MOTION_LOG(x, y, z, format, args...)  motion_log(x, y, z, 1, format, __FUNCTION__, ##args)
+    #define MOTION_LOG(x, y, z, format, args...)  motpls_log(x, y, z, 1, format, __FUNCTION__, ##args)
+    #define MOTPLS_LOG(x, y, z, format, args...)  motpls_log(x, y, z, 1, format, __FUNCTION__, ##args)
 
-    void motion_log(int loglevel, int logtype, int errno_flag,int fncname, const char *fmt, ...);
+    void motpls_log(int loglevel, int logtype, int errno_flag,int fncname, const char *fmt, ...);
     void log_init(ctx_motapp *motapp);
     void log_deinit(ctx_motapp *motapp);
     void log_set_level(int new_level);

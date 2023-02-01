@@ -121,7 +121,7 @@ static char *str_time(void)
  *    This routine is used for printing all informational, debug or error
  *    messages produced by any of the other motion functions.
  */
-void motion_log(int level, int type, int errno_flag,int fncname, const char *fmt, ...)
+void motpls_log(int level, int type, int errno_flag,int fncname, const char *fmt, ...)
 {
     int errno_save, n, prefixlen, timelen;
     char buf[1024]= {0};
