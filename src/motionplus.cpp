@@ -31,7 +31,7 @@
 #include "draw.hpp"
 
 pthread_key_t tls_key_threadnr;
-volatile enum MOTION_SIGNAL motsignal;
+volatile enum MOTPLS_SIGNAL motsignal;
 
 /** Process signals sent */
 static void motion_signal_process(ctx_motapp *motapp)
@@ -39,7 +39,7 @@ static void motion_signal_process(ctx_motapp *motapp)
     int indx;
 
     switch(motsignal){
-    case MOTION_SIGNAL_ALARM:       /* Trigger snapshot */
+    case MOTPLS_SIGNAL_ALARM:       /* Trigger snapshot */
         if (motapp->cam_list != NULL) {
             for (indx=0; indx<motapp->cam_cnt; indx++) {
                 if (motapp->cam_list[indx]->conf->snapshot_interval) {
@@ -48,17 +48,17 @@ static void motion_signal_process(ctx_motapp *motapp)
             }
         }
         break;
-    case MOTION_SIGNAL_USR1:        /* Trigger the end of a event */
+    case MOTPLS_SIGNAL_USR1:        /* Trigger the end of a event */
         if (motapp->cam_list != NULL) {
             for (indx=0; indx<motapp->cam_cnt; indx++) {
                 motapp->cam_list[indx]->event_stop = true;
             }
         }
         break;
-    case MOTION_SIGNAL_SIGHUP:      /* Restart the threads */
+    case MOTPLS_SIGNAL_SIGHUP:      /* Restart the threads */
         motapp->restart_all = true;
         /*FALLTHROUGH*/
-    case MOTION_SIGNAL_SIGTERM:     /* Quit application */
+    case MOTPLS_SIGNAL_SIGTERM:     /* Quit application */
 
         motapp->webcontrol_finish = true;
         for (indx=0; indx<motapp->cam_cnt; indx++) {
@@ -75,7 +75,7 @@ static void motion_signal_process(ctx_motapp *motapp)
     default:
         break;
     }
-    motsignal = MOTION_SIGNAL_NONE;
+    motsignal = MOTPLS_SIGNAL_NONE;
 }
 
 /** Handle signals sent */
@@ -85,20 +85,20 @@ static void sig_handler(int signo)
     /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
     switch(signo) {
     case SIGALRM:
-        motsignal = MOTION_SIGNAL_ALARM;
+        motsignal = MOTPLS_SIGNAL_ALARM;
         break;
     case SIGUSR1:
-        motsignal = MOTION_SIGNAL_USR1;
+        motsignal = MOTPLS_SIGNAL_USR1;
         break;
     case SIGHUP:
-        motsignal = MOTION_SIGNAL_SIGHUP;
+        motsignal = MOTPLS_SIGNAL_SIGHUP;
         break;
     case SIGINT:
         /*FALLTHROUGH*/
     case SIGQUIT:
         /*FALLTHROUGH*/
     case SIGTERM:
-        motsignal = MOTION_SIGNAL_SIGTERM;
+        motsignal = MOTPLS_SIGNAL_SIGTERM;
         break;
     case SIGSEGV:
         exit(0);
@@ -796,7 +796,7 @@ int main (int argc, char **argv)
                 }
             }
 
-            if (motsignal != MOTION_SIGNAL_NONE) {
+            if (motsignal != MOTPLS_SIGNAL_NONE) {
                 motion_signal_process(motapp);
             }
 
