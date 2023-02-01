@@ -1,0 +1,103 @@
+name: Issue Report
+description: File a report on a problem with the code
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for reporting problems with the code.
+  - type: dropdown
+    id: readdocs
+    attributes:
+      label: Did you read the guide?
+      multiple: false
+      options:
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true
+  - type: dropdown
+    id: baseversion
+    attributes:
+      label: What is the base version number of MotionPlus being used?
+      multiple: false
+      options:
+        - 0.0.x
+        - 0.1.x
+    validations:
+      required: true
+  - type: dropdown
+    id: buildtype
+    attributes:
+      label: What was the install method?
+      multiple: false
+      options:
+        - Built from source code
+        - Installed via package tool
+    validations:
+      required: true
+  - type: dropdown
+    id: buildarch
+    attributes:
+      label: What is base architecture?
+      multiple: false
+      options:
+        - ARM-32bit
+        - ARM-64bit
+        - x86/x64
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: distrotype
+    attributes:
+      label: What is the distro being used?
+      multiple: false
+      options:
+        - Raspbian
+        - Ubuntu
+        - Debian
+        - BSD
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: distrover
+    attributes:
+      label: Disto version number
+      description: The version number of the distro being used e.g. 20.04, bullseye
+    validations:
+      required: false
+  - type: dropdown
+    id: camtype
+    attributes:
+      label: Camera/Sound type(s) being used?
+      multiple: true
+      options:
+        - v4l2 camera
+        - PI cam via libcamerify
+        - PI camera via libcam
+        - Network camera with RTSP
+        - Network camera with HTTP
+        - Sound via ALSA
+        - Sound via PulseAudio
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Describe the issue/problem and steps to reproduce
+      description: Issue/Problem Description
+      placeholder: Tell us what went wrong
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant MotionPlus log output (at log_level 8)
+      description: Please copy and paste the log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+    validations:
+      required: true
+
