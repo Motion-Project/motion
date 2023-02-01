@@ -34,7 +34,7 @@ pthread_key_t tls_key_threadnr;
 volatile enum MOTPLS_SIGNAL motsignal;
 
 /** Process signals sent */
-static void motion_signal_process(ctx_motapp *motapp)
+static void motpls_signal_process(ctx_motapp *motapp)
 {
     int indx;
 
@@ -161,7 +161,7 @@ static void setup_signals(void)
 }
 
 /* Write out the pid file*/
-static void motion_pid_write(ctx_motapp *motapp)
+static void motpls_pid_write(ctx_motapp *motapp)
 {
     FILE *pidf = NULL;
 
@@ -182,7 +182,7 @@ static void motion_pid_write(ctx_motapp *motapp)
 }
 
 /** Remove the process id file ( pid file ) before MotionPlus exit. */
-static void motion_pid_remove(ctx_motapp *motapp)
+static void motpls_pid_remove(ctx_motapp *motapp)
 {
 
     if ((motapp->conf->pid_file != "") &&
@@ -197,7 +197,7 @@ static void motion_pid_remove(ctx_motapp *motapp)
 }
 
 /**  Turn MotionPlus into a daemon through forking. */
-static void motion_daemon()
+static void motpls_daemon()
 {
     int fd;
     struct sigaction sig_ign_action;
@@ -255,9 +255,9 @@ static void motion_daemon()
     sigaction(SIGTSTP, &sig_ign_action, NULL);
 }
 
-static void motion_shutdown(ctx_motapp *motapp)
+static void motpls_shutdown(ctx_motapp *motapp)
 {
-    motion_pid_remove(motapp);
+    motpls_pid_remove(motapp);
 
     log_deinit(motapp);
 
@@ -269,7 +269,7 @@ static void motion_shutdown(ctx_motapp *motapp)
 
 }
 
-static void motion_device_ids(ctx_motapp *motapp)
+static void motpls_device_ids(ctx_motapp *motapp)
 {
     /* Set the device id's on the ctx_dev.  They must be unique */
     int indx, indx2;
@@ -326,7 +326,7 @@ static void motion_device_ids(ctx_motapp *motapp)
 
 }
 
-static void motion_ntc(void)
+static void motpls_ntc(void)
 {
 
     #ifdef HAVE_V4L2
@@ -392,7 +392,7 @@ static void motion_ntc(void)
 }
 
 /** Initialize upon start up or restart */
-static void motion_startup(ctx_motapp *motapp, int daemonize)
+static void motpls_startup(ctx_motapp *motapp, int daemonize)
 {
 
     log_init_app(motapp);  /* This is needed prior to any function possibly calling motion_log*/
@@ -407,7 +407,7 @@ static void motion_startup(ctx_motapp *motapp, int daemonize)
 
     if (daemonize) {
         if (motapp->conf->daemon && motapp->conf->setup_mode == 0) {
-            motion_daemon();
+            motpls_daemon();
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus running as daemon process"));
         }
     }
@@ -418,11 +418,11 @@ static void motion_startup(ctx_motapp *motapp, int daemonize)
 
     conf_parms_log(motapp);
 
-    motion_pid_write(motapp);
+    motpls_pid_write(motapp);
 
-    motion_ntc();
+    motpls_ntc();
 
-    motion_device_ids(motapp);
+    motpls_device_ids(motapp);
 
     dbse_init(motapp);
 
@@ -433,7 +433,7 @@ static void motion_startup(ctx_motapp *motapp, int daemonize)
 }
 
 /** Start a camera thread */
-static void motion_start_thread_cam(ctx_dev *cam)
+static void motpls_start_thread_cam(ctx_dev *cam)
 {
     int retcd;
     pthread_attr_t thread_attr;
@@ -450,7 +450,7 @@ static void motion_start_thread_cam(ctx_dev *cam)
 
 }
 
-static void motion_start_thread_snd(ctx_dev *snd)
+static void motpls_start_thread_snd(ctx_dev *snd)
 {
     int retcd;
     pthread_attr_t thread_attr;
@@ -467,16 +467,16 @@ static void motion_start_thread_snd(ctx_dev *snd)
 
 }
 
-static void motion_restart(ctx_motapp *motapp)
+static void motpls_restart(ctx_motapp *motapp)
 {
 
     MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Restarting MotionPlus."));
 
-    motion_shutdown(motapp);
+    motpls_shutdown(motapp);
 
     SLEEP(2, 0);
 
-    motion_startup(motapp, false);
+    motpls_startup(motapp, false);
 
     MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("MotionPlus restarted"));
 
@@ -485,7 +485,7 @@ static void motion_restart(ctx_motapp *motapp)
 }
 
 /* Check for whether any cams are locked */
-static void motion_watchdog(ctx_motapp *motapp, int camindx)
+static void motpls_watchdog(ctx_motapp *motapp, int camindx)
 {
     int indx;
 
@@ -572,7 +572,7 @@ static void motion_watchdog(ctx_motapp *motapp, int camindx)
 
 }
 
-static int motion_check_threadcount(ctx_motapp *motapp)
+static int motpls_check_threadcount(ctx_motapp *motapp)
 {
     int thrdcnt, indx;
 
@@ -603,7 +603,7 @@ static int motion_check_threadcount(ctx_motapp *motapp)
 
 }
 
-static void motion_init(ctx_motapp *motapp, int argc, char *argv[])
+static void motpls_init(ctx_motapp *motapp, int argc, char *argv[])
 {
     motapp->argc = argc;
     motapp->argv = argv;
@@ -646,7 +646,7 @@ static void motion_init(ctx_motapp *motapp, int argc, char *argv[])
 }
 
 /* Check for whether to add a new cam */
-static void motion_cam_add(ctx_motapp *motapp)
+static void motpls_cam_add(ctx_motapp *motapp)
 {
     int indx_cam, indx;
 
@@ -675,7 +675,7 @@ static void motion_cam_add(ctx_motapp *motapp)
 }
 
 /* Check for whether to delete a new cam */
-static void motion_cam_delete(ctx_motapp *motapp)
+static void motpls_cam_delete(ctx_motapp *motapp)
 {
     int indx1, indx2, maxcnt;
     ctx_dev **tmp, *cam;
@@ -743,26 +743,26 @@ int main (int argc, char **argv)
 
     motapp = new ctx_motapp;
 
-    motion_init(motapp, argc, argv);
+    motpls_init(motapp, argc, argv);
 
     setup_signals();
 
-    motion_startup(motapp, true);
+    motpls_startup(motapp, true);
 
     movie_global_init();
 
     while (true) {
 
         if (motapp->restart_all) {
-            motion_restart(motapp);
+            motpls_restart(motapp);
         }
 
         for (indx=0; indx<motapp->cam_cnt; indx++) {
-            motion_start_thread_cam(motapp->cam_list[indx]);
+            motpls_start_thread_cam(motapp->cam_list[indx]);
         }
 
         for (indx=0; indx<motapp->snd_cnt; indx++) {
-            motion_start_thread_snd(motapp->snd_list[indx]);
+            motpls_start_thread_snd(motapp->snd_list[indx]);
         }
 
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
@@ -771,7 +771,7 @@ int main (int argc, char **argv)
         while (true) {
             SLEEP(1, 0);
 
-            if (motion_check_threadcount(motapp)) {
+            if (motpls_check_threadcount(motapp)) {
                 break;
             }
 
@@ -782,9 +782,9 @@ int main (int argc, char **argv)
                     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                         ,_("MotionPlus camera %d restart")
                         , motapp->cam_list[indx]->device_id);
-                    motion_start_thread_cam(motapp->cam_list[indx]);
+                    motpls_start_thread_cam(motapp->cam_list[indx]);
                 }
-                motion_watchdog(motapp, indx);
+                motpls_watchdog(motapp, indx);
             }
             for (indx=0; indx<motapp->snd_cnt; indx++) {
                 if ((motapp->snd_list[indx]->running_dev == false) &&
@@ -792,21 +792,21 @@ int main (int argc, char **argv)
                     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                         ,_("MotionPlus sound %d restart")
                         , motapp->snd_list[indx]->device_id);
-                    motion_start_thread_snd(motapp->snd_list[indx]);
+                    motpls_start_thread_snd(motapp->snd_list[indx]);
                 }
             }
 
             if (motsignal != MOTPLS_SIGNAL_NONE) {
-                motion_signal_process(motapp);
+                motpls_signal_process(motapp);
             }
 
-            motion_cam_add(motapp);
-            motion_cam_delete(motapp);
+            motpls_cam_add(motapp);
+            motpls_cam_delete(motapp);
 
         }
 
         /* If there are no cameras running, this allows for adding */
-        motion_cam_add(motapp);
+        motpls_cam_add(motapp);
 
         motapp->finish_all = false;
 
@@ -823,7 +823,7 @@ int main (int argc, char **argv)
 
     movie_global_deinit();
 
-    motion_shutdown(motapp);
+    motpls_shutdown(motapp);
 
     pthread_key_delete(tls_key_threadnr);
     pthread_mutex_destroy(&motapp->global_lock);
