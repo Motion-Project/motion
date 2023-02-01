@@ -66,7 +66,7 @@ mhdrslt webu_file_main(ctx_webui *webui)
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"movies")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Movies via webcontrol disabled");
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Movies via webcontrol disabled");
                 return MHD_NO;
             } else {
                 break;
@@ -86,7 +86,7 @@ mhdrslt webu_file_main(ctx_webui *webui)
         webui->req_file = myfopen(full_nm.c_str(), "rbe");
     } else {
         webui->req_file = NULL;
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             ,"Security warning: Client IP %s requested file: %s"
             ,webui->clientip.c_str(), webui->uri_cmd2.c_str());
     }

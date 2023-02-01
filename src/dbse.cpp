@@ -32,27 +32,27 @@ static int dbse_edits(ctx_motapp *motapp)
     int retcd = 0;
 
     if (motapp->dbse->database_dbname == "") {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Invalid database name"));
         retcd = -1;
     }
     if (((motapp->dbse->database_type == "mariadb") ||
          (motapp->dbse->database_type == "pgsql")) &&
          (motapp->dbse->database_port == 0)) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             ,_("Must specify database port for mariadb/pgsql"));
         retcd = -1;
     }
 
     if ((motapp->dbse->database_type == "sqlite3") &&
         (motapp->dbse->database_dbname == "")) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             ,_("Must specify database name for sqlite3"));
         retcd = -1;
     }
 
     if (retcd == -1) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             ,_("Database functionality disabled."));
         motapp->dbse->database_type = "";
     }
@@ -383,16 +383,16 @@ static void dbse_sqlite3_exec(ctx_motapp *motapp, const char *sqlquery)
         return;
     };
 
-    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing query");
+    MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing query");
     retcd = sqlite3_exec(
         motapp->dbse->database_sqlite3
         , sqlquery, NULL, 0, &errmsg);
     if (retcd != SQLITE_OK ) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("SQLite error was %s"), errmsg);
         sqlite3_free(errmsg);
     }
-    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Finished query");
+    MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "Finished query");
 }
 
 static int dbse_sqlite3_cb (
@@ -453,7 +453,7 @@ static void dbse_sqlite3_cols(ctx_motapp *motapp)
     retcd = sqlite3_exec(motapp->dbse->database_sqlite3
         , sql.c_str(), dbse_sqlite3_cb, motapp, &errmsg);
     if (retcd != SQLITE_OK ) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error retrieving table columns: %s"), errmsg);
         sqlite3_free(errmsg);
         return;
@@ -486,7 +486,7 @@ static void dbse_sqlite3_init(ctx_motapp *motapp)
         return;
     }
 
-    MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
+    MOTPLS_LOG(NTC, TYPE_DB, NO_ERRNO
         , _("SQLite3 Database filename %s")
         , motapp->dbse->database_dbname.c_str());
     retcd = sqlite3_open(
@@ -494,18 +494,18 @@ static void dbse_sqlite3_init(ctx_motapp *motapp)
         , &motapp->dbse->database_sqlite3);
     if (retcd != SQLITE_OK) {
         err_open =sqlite3_errmsg(motapp->dbse->database_sqlite3);
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Can't open database %s : %s")
             , motapp->dbse->database_dbname.c_str()
             , err_open);
         sqlite3_close(motapp->dbse->database_sqlite3);
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Could not initialize database %s")
             , motapp->dbse->database_dbname.c_str());
         motapp->dbse->database_type = "";
         motapp->dbse->database_sqlite3 = NULL;
     } else {
-        MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_DB, NO_ERRNO
             ,  _("database_busy_timeout %d msec")
             , motapp->dbse->database_busy_timeout);
         retcd = sqlite3_busy_timeout(
@@ -514,7 +514,7 @@ static void dbse_sqlite3_init(ctx_motapp *motapp)
         if (retcd != SQLITE_OK) {
             err_open = sqlite3_errmsg(
                 motapp->dbse->database_sqlite3);
-            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
                 , _("database_busy_timeout failed %s"), err_open);
         }
     }
@@ -526,7 +526,7 @@ static void dbse_sqlite3_init(ctx_motapp *motapp)
         motapp->dbse->database_sqlite3
         , sql.c_str(), dbse_sqlite3_cb, motapp, &err_qry);
     if (retcd != SQLITE_OK ) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error checking table: %s"), err_qry);
         sqlite3_free(err_qry);
         return;
@@ -538,7 +538,7 @@ static void dbse_sqlite3_init(ctx_motapp *motapp)
         retcd = sqlite3_exec(motapp->dbse->database_sqlite3
             , sql.c_str(), 0, 0, &err_qry);
         if (retcd != SQLITE_OK ) {
-            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
                 , _("Error creating table: %s"), err_qry);
                 sqlite3_free(err_qry);
             return;
@@ -561,7 +561,7 @@ static void dbse_sqlite3_movlst(ctx_motapp *motapp, int device_id)
         motapp->dbse->database_sqlite3
         , sql.c_str(), dbse_sqlite3_cb, motapp, &errmsg);
     if (retcd != SQLITE_OK ) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error counting table: %s"), errmsg);
         sqlite3_free(errmsg);
         return;
@@ -578,7 +578,7 @@ static void dbse_sqlite3_movlst(ctx_motapp *motapp, int device_id)
             motapp->dbse->database_sqlite3
             , sql.c_str(), dbse_sqlite3_cb, motapp, &errmsg);
         if (retcd != SQLITE_OK ) {
-            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
                 , _("Error retrieving table: %s"), errmsg);
             sqlite3_free(errmsg);
             return;
@@ -617,11 +617,11 @@ static void dbse_mariadb_exec (ctx_motapp *motapp, const char *sqlquery)
         return;
     }
 
-    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing MariaDB query");
+    MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing MariaDB query");
     retcd = mysql_query(motapp->dbse->database_mariadb, sqlquery);
     if (retcd != 0) {
         retcd = mysql_errno(motapp->dbse->database_mariadb);
-        MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, SHOW_ERRNO
             , _("MariaDB query '%s' failed. %s error code %d")
             , sqlquery, mysql_error(motapp->dbse->database_mariadb)
             , retcd);
@@ -638,7 +638,7 @@ static void dbse_mariadb_exec (ctx_motapp *motapp, const char *sqlquery)
                 , motapp->dbse->database_password.c_str()
                 , motapp->dbse->database_dbname.c_str()
                 , motapp->dbse->database_port, NULL, 0) == NULL) {
-                MOTION_LOG(ALR, TYPE_DB, NO_ERRNO
+                MOTPLS_LOG(ALR, TYPE_DB, NO_ERRNO
                     , _("Cannot reconnect to MariaDB database %s"
                     " on host %s with user %s MariaDB error was %s")
                     , motapp->dbse->database_dbname.c_str()
@@ -646,13 +646,13 @@ static void dbse_mariadb_exec (ctx_motapp *motapp, const char *sqlquery)
                     , motapp->dbse->database_user.c_str()
                     , mysql_error(motapp->dbse->database_mariadb));
             } else {
-                MOTION_LOG(INF, TYPE_DB, NO_ERRNO
+                MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
                     , _("Re-Connection to MariaDB database '%s' Succeed")
                     , motapp->dbse->database_dbname.c_str());
                 retcd = mysql_query(motapp->dbse->database_mariadb, sqlquery);
                 if (retcd != 0) {
                     retcd = mysql_errno(motapp->dbse->database_mariadb);
-                    MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
+                    MOTPLS_LOG(ERR, TYPE_DB, SHOW_ERRNO
                         , _("after re-connection MariaDB query failed %s"
                             " error code %d")
                         , mysql_error(motapp->dbse->database_mariadb), retcd);
@@ -674,7 +674,7 @@ static void dbse_mariadb_recs (ctx_motapp *motapp, const char *sqlquery)
 
     retcd = mysql_query(motapp->dbse->database_mariadb, sqlquery);
     if (retcd != 0){
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Query error: %s"),sqlquery);
         dbse_close(motapp);
         motapp->dbse->database_type = "";
@@ -683,7 +683,7 @@ static void dbse_mariadb_recs (ctx_motapp *motapp, const char *sqlquery)
 
     qry_result = mysql_store_result(motapp->dbse->database_mariadb);
     if (qry_result == NULL) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Query store error: %s"),sqlquery);
         dbse_close(motapp);
         motapp->dbse->database_type = "";
@@ -796,7 +796,7 @@ static void dbse_mariadb_setup(ctx_motapp *motapp)
     dbse_mariadb_recs(motapp, sql.c_str());
 
     if (motapp->dbse->table_ok == false) {
-        MOTION_LOG(INF, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
             , _("Creating motionplus table"));
         motapp->dbse->dbse_action = DBSE_TBL_CREATE;
         dbse_sql_motpls(motapp->dbse, sql);
@@ -818,7 +818,7 @@ static void dbse_mariadb_init(ctx_motapp *motapp)
     }
 
     if (mysql_library_init(0, NULL, NULL)) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Could not initialize database %s")
             , motapp->dbse->database_type.c_str());
         motapp->dbse->database_type = "";
@@ -836,15 +836,15 @@ static void dbse_mariadb_init(ctx_motapp *motapp)
         , motapp->dbse->database_dbname.c_str()
         , motapp->dbse->database_port, NULL, 0) == NULL) {
 
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Cannot connect to MariaDB database %s on host %s with user %s")
             , motapp->dbse->database_dbname.c_str()
             , motapp->dbse->database_host.c_str()
             , motapp->dbse->database_user.c_str());
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("MariaDB error was %s")
             , mysql_error(motapp->dbse->database_mariadb));
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Disabling database functionality"));
         dbse_close(motapp);
         motapp->dbse->database_type = "";
@@ -855,7 +855,7 @@ static void dbse_mariadb_init(ctx_motapp *motapp)
 
     dbse_mariadb_setup(motapp);
 
-    MOTION_LOG(INF, TYPE_DB, NO_ERRNO
+    MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
         , _("%s database opened")
         , motapp->dbse->database_dbname.c_str() );
 }
@@ -907,16 +907,16 @@ static void dbse_pgsql_exec(ctx_motapp *motapp, const char *sqlquery)
         return;
     }
 
-    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing postgresql query");
+    MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing postgresql query");
     res = PQexec(motapp->dbse->database_pgsql, sqlquery);
     if (PQstatus(motapp->dbse->database_pgsql) == CONNECTION_BAD) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Connection to PostgreSQL database '%s' failed: %s")
             , motapp->dbse->database_dbname.c_str()
             , PQerrorMessage(motapp->dbse->database_pgsql));
         PQreset(motapp->dbse->database_pgsql);
         if (PQstatus(motapp->dbse->database_pgsql) == CONNECTION_BAD) {
-            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
                 , _("Re-Connection to PostgreSQL database '%s' failed: %s")
                 , motapp->dbse->database_dbname.c_str()
                 , PQerrorMessage(motapp->dbse->database_pgsql));
@@ -925,12 +925,12 @@ static void dbse_pgsql_exec(ctx_motapp *motapp, const char *sqlquery)
             motapp->dbse->database_type = "";
             return;
         } else {
-            MOTION_LOG(INF, TYPE_DB, NO_ERRNO
+            MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
                 , _("Re-Connection to PostgreSQL database '%s' Succeed")
                 , motapp->dbse->database_dbname.c_str());
         }
     } else if (!(PQresultStatus(res) == PGRES_COMMAND_OK || PQresultStatus(res) == PGRES_TUPLES_OK)) {
-        MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, SHOW_ERRNO
             , "PGSQL query failed: [%s]  %s %s"
             , sqlquery
             , PQresStatus(PQresultStatus(res))
@@ -1070,7 +1070,7 @@ static void dbse_pgsql_setup(ctx_motapp *motapp)
     dbse_pgsql_recs(motapp,sql.c_str());
 
     if (motapp->dbse->table_ok == false) {
-        MOTION_LOG(INF, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
             , _("Creating motionplus table"));
         motapp->dbse->dbse_action = DBSE_TBL_CREATE;
         dbse_sql_motpls(motapp->dbse, sql);
@@ -1098,11 +1098,11 @@ static void dbse_pgsql_init(ctx_motapp *motapp)
     constr += " port="+std::to_string(motapp->dbse->database_port) + " ";
     motapp->dbse->database_pgsql = PQconnectdb(constr.c_str());
     if (PQstatus(motapp->dbse->database_pgsql) == CONNECTION_BAD) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Connection to PostgreSQL database '%s' failed: %s")
             , motapp->dbse->database_dbname.c_str()
             , PQerrorMessage(motapp->dbse->database_pgsql));
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             ,_("Disabling database functionality"));
         dbse_close(motapp);
         motapp->dbse->database_type = "";
@@ -1111,7 +1111,7 @@ static void dbse_pgsql_init(ctx_motapp *motapp)
 
     dbse_pgsql_setup(motapp);
 
-    MOTION_LOG(INF, TYPE_DB, NO_ERRNO
+    MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
         , _("%s database opened")
         , motapp->dbse->database_dbname.c_str() );
 }
@@ -1162,7 +1162,7 @@ void dbse_init(ctx_motapp *motapp)
         if (dbse_edits(motapp) == -1) {
             return;
         }
-        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("Initializing database"));
+        MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO,_("Initializing database"));
         pthread_mutex_lock(&motapp->dbse->mutex_dbse);
             #ifdef HAVE_MARIADB
                 if (motapp->dbse->database_type == "mariadb") {
@@ -1316,7 +1316,7 @@ void dbse_exec(ctx_dev *cam, char *filename
     if (strlen(sqlquery) <= 0) {
         return;
     }
-    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "%s query: %s", cmd, sqlquery);
+    MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "%s query: %s", cmd, sqlquery);
 
     dbse_exec_sql(cam->motapp, sqlquery);
 

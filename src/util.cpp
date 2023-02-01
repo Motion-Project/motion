@@ -137,7 +137,7 @@ void *mymalloc(size_t nbytes)
     void *dummy = calloc(nbytes, 1);
 
     if (!dummy) {
-        MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, _("Could not allocate %llu bytes of memory!")
+        MOTPLS_LOG(EMG, TYPE_ALL, SHOW_ERRNO, _("Could not allocate %llu bytes of memory!")
             ,(unsigned long long)nbytes);
         exit(1);
     }
@@ -152,13 +152,13 @@ void *myrealloc(void *ptr, size_t size, const char *desc)
 
     if (size == 0) {
         free(ptr);
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Warning! Function %s tries to resize memoryblock at %p to 0 bytes!")
             ,desc, ptr);
     } else {
         dummy = realloc(ptr, size);
         if (!dummy) {
-            MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO
+            MOTPLS_LOG(EMG, TYPE_ALL, NO_ERRNO
                 ,_("Could not resize memory-block at offset %p to %llu bytes (function %s)!")
                 ,ptr, (unsigned long long)size, desc);
             exit(1);
@@ -192,11 +192,11 @@ int mycreate_path(const char *path)
 
     while (indx_pos != std::string::npos) {
         if (stat(tmp.substr(0, indx_pos + 1).c_str(), &statbuf) != 0) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Creating %s"), tmp.substr(0, indx_pos + 1).c_str());
             retcd = mkdir(tmp.substr(0, indx_pos + 1).c_str(), mode);
             if (retcd == -1 && errno != EEXIST) {
-                MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+                MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
                     ,_("Problem creating directory %s")
                     , tmp.substr(0, indx_pos + 1).c_str());
                 return -1;
@@ -230,7 +230,7 @@ FILE *myfopen(const char *path, const char *mode)
         fp = fopen(path, mode);
     }
     if (!fp) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
             ,_("Error opening file %s with mode %s"), path, mode);
         return NULL;
     }
@@ -244,7 +244,7 @@ int myfclose(FILE* fh)
     int rval = fclose(fh);
 
     if (rval != 0) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error closing file"));
+        MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error closing file"));
     }
 
     return rval;
@@ -337,7 +337,7 @@ static void mystrftime_long (const ctx_dev *cam,
 
 
     // Not a valid modifier keyword. Log the error and ignore.
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
+    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO,
         _("invalid format specifier keyword %*.*s"), l, l, word);
 
     // Do not let the output buffer empty, or else where to restart the
@@ -561,7 +561,7 @@ void mythreadname_set(const char *abbr, int threadnbr, const char *threadname)
     #elif HAVE_PTHREAD_SETNAME_NP
         pthread_setname_np(pthread_self(), tname);
     #else
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Unable to set thread name %s"), tname);
+        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Unable to set thread name %s"), tname);
     #endif
 
 }
@@ -587,7 +587,7 @@ bool mycheck_passthrough(ctx_dev *cam)
         }
     #else
         if (cam->movie_passthrough) {
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("FFMPEG version too old. Disabling pass-through processing."));
         }
         return false;
@@ -609,7 +609,7 @@ static void mytranslate_locale_chg(const char *langcd)
         ++_nl_msg_cat_cntr;
     #else
         if (langcd != NULL) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,"No native language support");
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,"No native language support");
         }
     #endif
 }
@@ -627,7 +627,7 @@ void mytranslate_init(void)
         bind_textdomain_codeset ("motion", "UTF-8");
         textdomain ("motion");
 
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Language: English"));
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Language: English"));
 
     #else
         /* Disable native language support */
@@ -644,14 +644,14 @@ char* mytranslate_text(const char *msgid, int setnls)
 
     if (setnls == 0) {
         if (nls_enabled) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Disabling native language support"));
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Disabling native language support"));
         }
         nls_enabled = false;
         return NULL;
 
     } else if (setnls == 1) {
         if (!nls_enabled) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Enabling native language support"));
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Enabling native language support"));
         }
         nls_enabled = true;
         return NULL;
@@ -827,7 +827,7 @@ static void util_parms_file(ctx_params *params, const char *params_file)
     std::string line, parm_nm, parm_vl;
     std::ifstream ifs;
 
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("parse file: %s"), params_file);
     chk = 0;
     for (indx = 0; indx < params->params_count; indx++) {
@@ -836,14 +836,14 @@ static void util_parms_file(ctx_params *params, const char *params_file)
         }
     }
     if (chk > 1){
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Only one params_file specification is permitted."));
         return;
     }
 
     ifs.open(params_file);
         if (ifs.is_open() == false) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("params_file not found: %s"), params_file);
             return;
         }
@@ -866,7 +866,7 @@ static void util_parms_file(ctx_params *params, const char *params_file)
             } else if ((line != "") &&
                 (line.substr(0, 1) != ";") &&
                 (line.substr(0, 1) != "#")) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("Unable to parse line: %s"), line.c_str());
             }
         }
@@ -911,7 +911,7 @@ void util_parms_add(ctx_params *params, const char *parm_nm, const char *parm_va
         params->params_array[indx].param_value = NULL;
     }
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Parsed: >%s< >%s<")
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Parsed: >%s< >%s<")
         ,params->params_array[params->params_count-1].param_name
         ,params->params_array[params->params_count-1].param_value);
 
@@ -1076,7 +1076,7 @@ void util_parms_parse_qte(ctx_params *params, std::string &parmline)
             }
         }
 
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
             ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
@@ -1107,7 +1107,7 @@ void util_parms_parse_comma(ctx_params *params, std::string &parmline)
             indxvl_en = parmline.find(",",indxvl_st) - 1;
         }
 
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
             ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
@@ -1127,7 +1127,7 @@ void util_parms_parse_comma(ctx_params *params, std::string &parmline)
         }
         indxvl_en = parmline.length() - 1;
 
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
             ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
@@ -1157,7 +1157,7 @@ void util_parms_parse(ctx_params *params, std::string confline)
     /* We make a copy because the parsing destroys the value passed */
     parmline = confline;
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Starting parsing parameters"));
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Starting parsing parameters"));
 
     util_parms_free(params);
 
@@ -1242,7 +1242,7 @@ void util_parms_update(ctx_params *params, std::string &confline)
 
     confline = parmline;
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("New config: %s"), confline.c_str());
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("New config: %s"), confline.c_str());
 
     return;
 
@@ -1275,13 +1275,13 @@ void util_exec_command(ctx_dev *cam, const char *command, char *filename, int fi
         execl("/bin/sh", "sh", "-c", stamp, " &",(char*)NULL);
 
         /* if above function succeeds the program never reach here */
-        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
             ,_("Unable to start external command '%s'"), stamp);
 
         exit(1);
     }
 
-    MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO
+    MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO
         ,_("Executing external command '%s'"), stamp);
 }
 

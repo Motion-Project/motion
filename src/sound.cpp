@@ -93,8 +93,8 @@ static void snd_edit_alerts(ctx_dev *snd)
     }
 
     if (validids == false) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Sound alert ids must be unique.");
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Creating new sound alert ids.");
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Sound alert ids must be unique.");
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Creating new sound alert ids.");
         indx = 0;
         for (it_a0=info->alerts.begin(); it_a0!=info->alerts.end(); it_a0++) {
             it_a0->alert_id = indx;
@@ -109,15 +109,15 @@ static void snd_edit_alerts(ctx_dev *snd)
         if (it_a0->volume_level < info->vol_min) {
             info->vol_min = it_a0->volume_level;
         }
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Sound Alert Parameters:");
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  alert_id:            %d",it_a0->alert_id);
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  alert_nm             %s",it_a0->alert_nm.c_str());
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  freq_low:            %.4f",it_a0->freq_low);
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  freq_high:           %.4f",it_a0->freq_high);
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  volume_count:        %d",it_a0->volume_count);
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  volume_level:        %d",it_a0->volume_level);
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  trigger_threshold:   %d",it_a0->trigger_threshold);
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  trigger_duration:    %d",it_a0->trigger_duration);
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Sound Alert Parameters:");
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "  alert_id:            %d",it_a0->alert_id);
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "  alert_nm             %s",it_a0->alert_nm.c_str());
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "  freq_low:            %.4f",it_a0->freq_low);
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "  freq_high:           %.4f",it_a0->freq_high);
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "  volume_count:        %d",it_a0->volume_count);
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "  volume_level:        %d",it_a0->volume_level);
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "  trigger_threshold:   %d",it_a0->trigger_threshold);
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "  trigger_duration:    %d",it_a0->trigger_duration);
     }
 
 }
@@ -188,7 +188,7 @@ static void snd_load_params(ctx_dev *snd)
     util_parms_add_default(snd->params,"sample_rate","44100");
 
     for (indx = 0; indx < snd->params->params_count; indx++) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s : %s"
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s : %s"
             , snd->params->params_array[indx].param_name
             , snd->params->params_array[indx].param_value
             );
@@ -222,29 +222,29 @@ static void snd_alsa_list_subdev(ctx_dev *snd)
     ctx_snd_alsa *alsa = snd->snd_alsa;
     int indx, retcd, cnt;
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Card %i(%s): %s [%s]")
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Card %i(%s): %s [%s]")
         , alsa->card_id, alsa->device_nm.c_str()
         , snd_ctl_card_info_get_id(alsa->card_info)
         , snd_ctl_card_info_get_name(alsa->card_info));
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("  Device %i (%s,%d): %s [%s]")
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("  Device %i (%s,%d): %s [%s]")
         , alsa->device_id, alsa->device_nm.c_str()
         , alsa->device_id
         , snd_pcm_info_get_id(alsa->pcm_info)
         , snd_pcm_info_get_name(alsa->pcm_info));
 
     cnt = (int)snd_pcm_info_get_subdevices_count(alsa->pcm_info);
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("  Subdevices: %i/%i")
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("  Subdevices: %i/%i")
         , snd_pcm_info_get_subdevices_avail(alsa->pcm_info),cnt);
 
     for (indx=0; indx<cnt; indx++) {
         snd_pcm_info_set_subdevice(alsa->pcm_info,indx);
         retcd = snd_ctl_pcm_info(alsa->ctl_hdl, alsa->pcm_info);
         if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("control digital audio playback info (%i): %s")
                 , alsa->card_id, snd_strerror(retcd));
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                 , _("  Subdevice #%i: %s"), indx
                 , snd_pcm_info_get_subdevice_name(alsa->pcm_info));
         }
@@ -260,7 +260,7 @@ static void snd_alsa_list_card(ctx_dev *snd)
     retcd = snd_ctl_card_info(alsa->ctl_hdl, alsa->card_info);
     if (retcd < 0) {
         snd_ctl_close(alsa->ctl_hdl);
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("control hardware info (%i): %s")
             , alsa->card_id, snd_strerror(retcd));
         return;
@@ -269,7 +269,7 @@ static void snd_alsa_list_card(ctx_dev *snd)
     alsa->device_id = -1;
     retcd = snd_ctl_pcm_next_device(alsa->ctl_hdl, &alsa->device_id);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("snd_ctl_pcm_next_device"));
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("snd_ctl_pcm_next_device"));
         return;
     }
 
@@ -281,13 +281,13 @@ static void snd_alsa_list_card(ctx_dev *snd)
         if (retcd == 0) {
             snd_alsa_list_subdev(snd);
         } else if (retcd != -ENOENT){
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("control digital audio info (%i): %s")
                 , alsa->card_id, snd_strerror(retcd));
         }
         retcd = snd_ctl_pcm_next_device(alsa->ctl_hdl, &alsa->device_id);
         if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("snd_ctl_pcm_next_device"));
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("snd_ctl_pcm_next_device"));
         }
     }
 
@@ -308,7 +308,7 @@ static void snd_alsa_list(ctx_dev *snd)
     alsa->card_id = -1;
     retcd = snd_card_next(&alsa->card_id);
     if ((retcd < 0) || (alsa->card_id == -1)) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("no soundcards found..."));
         snd->device_status = STATUS_CLOSED;
         snd->restart_dev = false;
@@ -316,7 +316,7 @@ static void snd_alsa_list(ctx_dev *snd)
         return;
     }
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Devices"));
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Devices"));
 
     while (alsa->card_id >= 0) {
         alsa->device_nm="hw:"+std::to_string(alsa->card_id);
@@ -325,7 +325,7 @@ static void snd_alsa_list(ctx_dev *snd)
             snd_alsa_list_card(snd);
             snd_ctl_close(alsa->ctl_hdl);
         } else {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("control open (%i): %s")
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("control open (%i): %s")
                 , alsa->card_id, snd_strerror(retcd));
         }
         snd_card_next(&alsa->card_id);
@@ -348,7 +348,7 @@ static void snd_alsa_start(ctx_dev *snd)
     retcd = snd_pcm_open(&alsa->pcm_dev
         , snd->conf->snd_device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_open device %s (%s)")
             , snd->conf->snd_device.c_str(), snd_strerror (retcd));
         snd->device_status = STATUS_CLOSED;
@@ -357,7 +357,7 @@ static void snd_alsa_start(ctx_dev *snd)
 
     retcd = snd_pcm_hw_params_malloc(&hw_params);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_hw_params_malloc(%s)")
             , snd_strerror (retcd));
         snd->device_status = STATUS_CLOSED;
@@ -366,7 +366,7 @@ static void snd_alsa_start(ctx_dev *snd)
 
     retcd = snd_pcm_hw_params_any(alsa->pcm_dev, hw_params);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_hw_params_any(%s)")
             , snd_strerror (retcd));
         snd->device_status = STATUS_CLOSED;
@@ -376,7 +376,7 @@ static void snd_alsa_start(ctx_dev *snd)
     retcd = snd_pcm_hw_params_set_access(alsa->pcm_dev
         , hw_params, SND_PCM_ACCESS_RW_INTERLEAVED);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_hw_params_set_access(%s)")
             , snd_strerror (retcd));
         snd->device_status = STATUS_CLOSED;
@@ -386,7 +386,7 @@ static void snd_alsa_start(ctx_dev *snd)
     retcd = snd_pcm_hw_params_set_format(alsa->pcm_dev
         , hw_params, SND_PCM_FORMAT_S16_LE);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_hw_params_set_format(%s)")
             , snd_strerror (retcd));
         snd->device_status = STATUS_CLOSED;
@@ -396,7 +396,7 @@ static void snd_alsa_start(ctx_dev *snd)
     retcd = snd_pcm_hw_params_set_rate_near(alsa->pcm_dev
         , hw_params, &info->sample_rate, 0);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_hw_params_set_rate_near(%s)")
             , snd_strerror (retcd));
         snd->device_status = STATUS_CLOSED;
@@ -406,7 +406,7 @@ static void snd_alsa_start(ctx_dev *snd)
     retcd = snd_pcm_hw_params_set_channels(alsa->pcm_dev
         , hw_params, info->channels);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_hw_params_set_channels(%s)")
             , snd_strerror (retcd));
         snd->device_status = STATUS_CLOSED;
@@ -416,7 +416,7 @@ static void snd_alsa_start(ctx_dev *snd)
     retcd = snd_pcm_hw_params_set_period_size_near(alsa->pcm_dev
         , hw_params, &frames_per, NULL);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_hw_params_set_period_size_near(%s)")
             , snd_strerror (retcd));
         snd->device_status = STATUS_CLOSED;
@@ -425,7 +425,7 @@ static void snd_alsa_start(ctx_dev *snd)
 
     retcd = snd_pcm_hw_params(alsa->pcm_dev, hw_params);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_hw_params(%s)")
             , snd_strerror (retcd));
         snd->device_status = STATUS_CLOSED;
@@ -436,7 +436,7 @@ static void snd_alsa_start(ctx_dev *snd)
 
     retcd = snd_pcm_prepare(alsa->pcm_dev);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_prepare(%s)")
             , snd_strerror (retcd));
         snd->device_status = STATUS_CLOSED;
@@ -446,7 +446,7 @@ static void snd_alsa_start(ctx_dev *snd)
     /* get actual parms selected */
 	retcd = snd_pcm_hw_params_get_format(hw_params, &actl_sndfmt);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_hw_params_get_format(%s)")
             , snd_strerror (retcd));
         snd->device_status = STATUS_CLOSED;
@@ -455,7 +455,7 @@ static void snd_alsa_start(ctx_dev *snd)
 
     retcd = snd_pcm_hw_params_get_rate(hw_params, &actl_rate, NULL);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_hw_params_get_rate(%s)")
             , snd_strerror (retcd));
         snd->device_status = STATUS_CLOSED;
@@ -464,21 +464,21 @@ static void snd_alsa_start(ctx_dev *snd)
 
     retcd = snd_pcm_hw_params_get_period_size(hw_params, &frames_per, NULL);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_hw_params_get_period_size(%s)")
             , snd_strerror (retcd));
         snd->device_status = STATUS_CLOSED;
         return;
     }
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Actual rate %hu"), actl_rate);
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Actual frames per %lu"), frames_per);
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Actual rate %hu"), actl_rate);
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Actual frames per %lu"), frames_per);
     if (actl_sndfmt <= 5) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Sound format 16"));
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Sound format 16"));
     } else if (actl_sndfmt <= 9 ) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Sound format 24"));
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Sound format 24"));
     } else {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Sound format 32"));
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Sound format 32"));
     }
 
     /*************************************************************/
@@ -489,7 +489,7 @@ static void snd_alsa_start(ctx_dev *snd)
     info->buffer = (int16_t*)mymalloc(info->buffer_size * sizeof(int16_t));
     memset(info->buffer, 0x00, info->buffer_size * sizeof(int16_t));
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Started.");
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Started.");
     snd->device_status =STATUS_OPENED;
 
 }
@@ -531,7 +531,7 @@ static void snd_alsa_capture(ctx_dev *snd)
 
         retcd = snd_pcm_readi(alsa->pcm_dev, info->buffer, info->frames);
         if (retcd != info->frames) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("error: read from audio interface failed (%s)")
                 , snd_strerror (retcd));
             snd->device_status = STATUS_CLOSED;
@@ -579,7 +579,7 @@ static void snd_pulse_init(ctx_dev *snd)
             , (snd->conf->snd_device=="" ? NULL : snd->conf->snd_device.c_str())
             , "motionplus", &specs, NULL, NULL, &errcd);
         if (snd->snd_pulse->dev == NULL) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("Error opening pulse (%s)")
                 , pa_strerror(errcd));
             snd->device_status = STATUS_CLOSED;
@@ -591,7 +591,7 @@ static void snd_pulse_init(ctx_dev *snd)
         info->buffer = (int16_t*)mymalloc(info->buffer_size * sizeof(int16_t));
         memset(info->buffer, 0x00, info->buffer_size * sizeof(int16_t));
 
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Started.");
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Started.");
         snd->device_status =STATUS_OPENED;
 
     #else
@@ -611,7 +611,7 @@ static void snd_pulse_capture(ctx_dev *snd)
         retcd = pa_simple_read(pulse->dev, info->buffer
             , info->buffer_size, &errcd);
         if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("Error capturing PulseAudio (%s)")
                 , pa_strerror(errcd));
             snd->device_status = STATUS_CLOSED;
@@ -653,7 +653,7 @@ static void snd_fftw_open(ctx_dev *snd)
         return;
     }
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
         , _("Opening FFTW plan"));
 
     fftw->ff_in   = (double*) fftw_malloc(
@@ -708,7 +708,7 @@ void snd_cleanup(ctx_dev *snd)
     fftw_free(snd->snd_fftw->ff_in);
     fftw_free(snd->snd_fftw->ff_out);
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Stopped.");
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Stopped.");
 
 }
 
@@ -724,7 +724,7 @@ static void slp_init(ctx_dev *snd)
         snd_cleanup(snd);
     }
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize"));
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize"));
 
     snd_init_values(snd);
     snd_load_params(snd);
@@ -735,7 +735,7 @@ static void slp_init(ctx_dev *snd)
     } else if (snd->snd_info->source == "pulse") {
         snd_pulse_init(snd);
     } else {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Invalid sound source."));
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Invalid sound source."));
         snd->finish_dev = true;
         snd->device_status = STATUS_CLOSED;
         return;
@@ -743,7 +743,7 @@ static void slp_init(ctx_dev *snd)
 
     snd_fftw_open(snd);
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Detecting"));
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Detecting"));
 
 }
 
@@ -790,7 +790,7 @@ static void snd_check_alerts(ctx_dev *snd)
     freq_value = (snd->snd_fftw->bin_size * pMaxBinIndex * info->channels);
 
     if (snd->conf->snd_show) {
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
             , _("Freq: %.4f threshold: %d count: %d maximum: %d")
             , freq_value, info->vol_min
             , info->vol_count, info->vol_max);
@@ -820,7 +820,7 @@ static void snd_check_alerts(ctx_dev *snd)
             clock_gettime(CLOCK_MONOTONIC, &it->trigger_time);
 
             if (it->trigger_count == it->trigger_threshold) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
                     , _("Sound Alert %d-%s : level %d count %d max vol %d")
                     , it->alert_id ,it->alert_nm.c_str()
                     , it->volume_level, chkcnt
@@ -889,7 +889,7 @@ void *snd_loop(void *arg)
         snd_check_levels(snd);
     }
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Capture loop finished"));
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Capture loop finished"));
 
     snd_cleanup(snd);
 
@@ -904,7 +904,7 @@ void *snd_loop(void *arg)
     delete snd->snd_info;
     delete snd->snd_pulse;
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Exiting"));
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Exiting"));
 
     pthread_exit(NULL);
 
@@ -920,7 +920,7 @@ void *snd_loop(void *arg)
     snd->finish_dev = true;
     snd->running_dev = false;
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Sound detection functionality not supported"));
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Sound detection functionality not supported"));
 
     pthread_exit(NULL);
 }

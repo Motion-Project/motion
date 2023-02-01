@@ -265,7 +265,7 @@ void log_init(ctx_motapp *motapp)
     if ((motapp->conf->log_level > ALL) ||
         (motapp->conf->log_level == 0)) {
         motapp->conf->log_level = LEVEL_DEFAULT;
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Using default log level (%s) (%d)")
             ,log_level_str[motapp->conf->log_level]
             ,motapp->conf->log_level);
@@ -278,27 +278,27 @@ void log_init(ctx_motapp *motapp)
             log_set_logfile(motapp->conf->log_file.c_str());
             if (logfile) {
                 log_set_mode(LOGMODE_SYSLOG);
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                     , _("Logging to file (%s)")
                     , motapp->conf->log_file.c_str());
                 log_set_mode(LOGMODE_FILE);
             } else {
-                MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
+                MOTPLS_LOG(EMG, TYPE_ALL, SHOW_ERRNO
                     , _("Exit motion, cannot create log file %s")
                     , motapp->conf->log_file.c_str());
                 exit(0);
             }
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Logging to syslog"));
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Logging to syslog"));
         }
     } else {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Logging to syslog"));
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Logging to syslog"));
     }
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "MotionPlus %s started",VERSION);
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "MotionPlus %s started",VERSION);
 
     motapp->conf->log_type = log_get_type(motapp->conf->log_type_str.c_str());
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
         , _("Using log type (%s) log level (%s)")
         , log_type_str[motapp->conf->log_type]
         , log_level_str[motapp->conf->log_level]);
@@ -312,7 +312,7 @@ void log_deinit(ctx_motapp *motapp)
 {
 
     if (logfile != NULL) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             , _("Closing logfile (%s).")
             , motapp->conf->log_file.c_str());
         myfclose(logfile);

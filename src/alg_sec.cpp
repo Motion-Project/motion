@@ -54,7 +54,7 @@ static void algsec_image_show(ctx_dev *cam, Mat &mat_dst)
 
         if ((cam->motapp->conf->log_level >= DBG) &&
             (algmdl->isdetected == true)) {
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Saved detected image: %s%s%s%s"
+            MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO, "Saved detected image: %s%s%s%s"
                 , cam->conf->target_dir.c_str()
                 ,  "/detect_"
                 , algmdl->method.c_str()
@@ -92,7 +92,7 @@ static void algsec_image_label(ctx_dev *cam, Mat &mat_dst
         if (cam->motapp->conf->log_level >= DBG) {
             imwrite(cam->conf->target_dir  + "/src_" + algmdl->method + ".jpg"
                 , mat_dst);
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Saved source image: %s%s%s%s"
+            MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO, "Saved source image: %s%s%s%s"
                 , cam->conf->target_dir.c_str()
                 ,  "/src_"
                 , algmdl->method.c_str()
@@ -132,8 +132,8 @@ static void algsec_image_label(ctx_dev *cam, Mat &mat_dst
 
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
         algmdl->method = "none";
     }
 
@@ -151,7 +151,7 @@ static void algsec_image_label(ctx_dev *cam, Mat &mat_dst
         if (cam->motapp->conf->log_level >= DBG) {
             imwrite(cam->conf->target_dir  + "/src_" + algmdl->method + ".jpg"
                 , mat_dst);
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Saved source image: %s%s%s%s"
+            MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO, "Saved source image: %s%s%s%s"
                 , cam->conf->target_dir.c_str()
                 ,  "/src_"
                 , algmdl->method.c_str()
@@ -176,8 +176,8 @@ static void algsec_image_label(ctx_dev *cam, Mat &mat_dst
 
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
         algmdl->method = "none";
     }
 
@@ -205,17 +205,17 @@ static void algsec_image_roi(ctx_dev *cam, Mat &mat_src, Mat &mat_dst)
     roi.width = width;
     roi.height = height;
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Base %d %d (%dx%d) img(%dx%d)"
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Base %d %d (%dx%d) img(%dx%d)"
         ,cam->current_image->location.minx
         ,cam->current_image->location.miny
         ,cam->current_image->location.width
         ,cam->current_image->location.height
         ,cam->imgs.width
         ,cam->imgs.height);
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Set %d %d %d %d"
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Set %d %d %d %d"
         ,x,y,width,height);
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Opencv %d %d %d %d"
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Opencv %d %d %d %d"
         ,roi.x,roi.y,roi.width,roi.height);
 
     mat_dst = mat_src(roi);
@@ -276,8 +276,8 @@ static void algsec_detect_hog(ctx_dev *cam)
 
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
         algmdl->method = "none";
     }
 }
@@ -307,8 +307,8 @@ static void algsec_detect_haar(ctx_dev *cam)
 
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
         algmdl->method = "none";
     }
 }
@@ -344,8 +344,8 @@ static void algsec_detect_dnn(ctx_dev *cam)
 
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
         algmdl->method = "none";
     }
 }
@@ -356,19 +356,19 @@ static void algsec_load_haar(ctx_dev *cam)
     try {
         if (algmdl->model_file == "") {
             algmdl->method = "none";
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("No secondary model specified."));
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("No secondary model specified."));
             return;
         }
         if (algmdl->haar_cascade.load(algmdl->model_file) == false) {
             /* Loading failed, reset method*/
             algmdl->method = "none";
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
                 ,algmdl->model_file.c_str());
         };
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
             , algmdl->model_file.c_str());
         algmdl->method = "none";
     }
@@ -383,7 +383,7 @@ static void algsec_load_dnn(ctx_dev *cam)
     try {
         if (algmdl->model_file == "") {
             algmdl->method = "none";
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("No secondary model specified."));
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("No secondary model specified."));
             return;
         }
         algmdl->net = readNet(
@@ -396,7 +396,7 @@ static void algsec_load_dnn(ctx_dev *cam)
         ifs.open(algmdl->dnn_classes_file.c_str());
             if (ifs.is_open() == false) {
                 algmdl->method = "none";
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                     , _("Classes file not found: %s")
                     ,algmdl->dnn_classes_file.c_str());
                 return;
@@ -408,8 +408,8 @@ static void algsec_load_dnn(ctx_dev *cam)
 
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
             , algmdl->model_file.c_str());
         algmdl->method = "none";
     }
@@ -607,7 +607,7 @@ static void *algsec_handler(void *arg)
     ctx_dev *cam = (ctx_dev*)arg;
     long interval;
 
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("Starting."));
+    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("Starting."));
 
     cam->algsec->closing = false;
     cam->algsec->thread_running = true;
@@ -633,7 +633,7 @@ static void *algsec_handler(void *arg)
         }
     }
     cam->algsec->closing = false;
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("Exiting."));
+    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("Exiting."));
     cam->algsec->thread_running = false;
     pthread_exit(NULL);
 
@@ -653,7 +653,7 @@ static void algsec_start_handler(ctx_dev *cam)
     pthread_attr_setdetachstate(&handler_attribute, PTHREAD_CREATE_DETACHED);
     retcd = pthread_create(&cam->algsec->threadid, &handler_attribute, &algsec_handler, cam);
     if (retcd < 0) {
-        MOTION_LOG(ALR, TYPE_NETCAM, SHOW_ERRNO
+        MOTPLS_LOG(ALR, TYPE_NETCAM, SHOW_ERRNO
             ,_("Error starting algsec handler thread"));
         cam->algsec->models.method = "none";
     }
@@ -697,7 +697,7 @@ void algsec_deinit(ctx_dev *cam)
                 }
             }
             if (waitcnt == 1000){
-                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
                     ,_("Graceful shutdown of secondary detector thread failed"));
             }
         }
@@ -746,12 +746,12 @@ void algsec_detect(ctx_dev *cam)
                 cam->algsec->frame_cnt = cam->algsec->models.frame_interval;
                 if (cam->algsec->frame_missed >10){
                     if (cam->algsec->too_slow == 0) {
-                        MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                        MOTPLS_LOG(WRN, TYPE_NETCAM, NO_ERRNO
                             ,_("Your computer is too slow for these settings."));
                    } else if (cam->algsec->too_slow == 10){
-                        MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                        MOTPLS_LOG(WRN, TYPE_NETCAM, NO_ERRNO
                             ,_("Missed many frames for secondary detection."));
-                        MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                        MOTPLS_LOG(WRN, TYPE_NETCAM, NO_ERRNO
                             ,_("Your computer is too slow."));
                     }
                     cam->algsec->too_slow++;

@@ -280,7 +280,7 @@ static void webu_json_movies_list(ctx_webui *webui)
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"movies")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Movies via webcontrol disabled");
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Movies via webcontrol disabled");
                 webui->resp_page += "{\"count\" : 0} ";
                 webui->resp_page += "}";
                 return;

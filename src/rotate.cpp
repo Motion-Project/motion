@@ -192,7 +192,7 @@ void rotate_init(ctx_dev *cam)
      * we have a value that is safe from changes caused by motion-control.
      */
     if ((cam->conf->rotate % 90) > 0) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Config option \"rotate\" not a multiple of 90: %d")
             ,cam->conf->rotate);
         cam->conf->rotate = 0;     /* Disable rotation. */

@@ -51,7 +51,7 @@ static void mlp_ring_resize(ctx_dev *cam)
         new_size = 1;
     }
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
         ,_("Resizing buffer to %d items"), new_size);
 
     tmp =(ctx_image_data*) mymalloc(new_size * sizeof(ctx_image_data));
@@ -199,7 +199,7 @@ static void mlp_detected_trigger(ctx_dev *cam, ctx_image_data *img)
             sprintf(cam->eventid, "%05d", cam->device_id);
             strftime(cam->eventid+5, 15, "%Y%m%d%H%M%S", &evt_tm);
 
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
                        cam->event_nr);
 
             mystrftime(cam, cam->text_event_string, sizeof(cam->text_event_string),
@@ -374,7 +374,7 @@ void mlp_cam_close(ctx_dev *cam)
         return;
     }
 
-    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("No Camera device cleanup"));
+    MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("No Camera device cleanup"));
     return;
 
 }
@@ -389,7 +389,7 @@ void mlp_cam_start(ctx_dev *cam)
     } else if (cam->camera_type == CAMERA_TYPE_V4L2) {
         v4l2_start(cam);
     } else {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("No Camera device specified"));
         cam->device_status = STATUS_CLOSED;
     }
@@ -419,7 +419,7 @@ static void mlp_init_camera_type(ctx_dev *cam)
     } else if (cam->conf->v4l2_device != "") {
         cam->camera_type = CAMERA_TYPE_V4L2;
     } else {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("Unable to determine camera type"));
         cam->camera_type = CAMERA_TYPE_UNKNOWN;
         cam->finish_dev = true;
@@ -449,7 +449,7 @@ static void mlp_init_firstimage(ctx_dev *cam)
         } else {
             msg = "Error capturing first image";
         }
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", msg);
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", msg);
         for (indx = 0; indx<cam->imgs.ring_size; indx++) {
             memset(cam->imgs.image_ring[indx].image_norm
                 , 0x80, cam->imgs.size_norm);
@@ -465,20 +465,20 @@ static void mlp_init_firstimage(ctx_dev *cam)
 static void mlp_check_szimg(ctx_dev *cam)
 {
     if ((cam->imgs.width % 8) || (cam->imgs.height % 8)) {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+        MOTPLS_LOG(CRT, TYPE_NETCAM, NO_ERRNO
             ,_("Image width (%d) or height(%d) requested is not modulo 8.")
             ,cam->imgs.width, cam->imgs.height);
         cam->device_status = STATUS_RESET;
     }
     if ((cam->imgs.width  < 64) || (cam->imgs.height < 64)) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
             ,cam->imgs.width, cam->imgs.height);
         cam->device_status = STATUS_RESET;
     }
     /* Substream size notification*/
     if ((cam->imgs.width % 16) || (cam->imgs.height % 16)) {
-        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("Substream not available.  Image sizes not modulo 16."));
     }
 
@@ -560,7 +560,7 @@ static void mlp_init_values(ctx_dev *cam)
     cam->movie_passthrough = cam->conf->movie_passthrough;
     if ((cam->camera_type != CAMERA_TYPE_NETCAM) &&
         (cam->movie_passthrough)) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
+        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
         cam->movie_passthrough = false;
     }
     if (cam->motapp->pause) {
@@ -576,7 +576,7 @@ static void mlp_init_cam_start(ctx_dev *cam)
     mlp_cam_start(cam);
 
     if (cam->device_status == STATUS_CLOSED) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Failed to start camera."));
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Failed to start camera."));
         cam->imgs.width = cam->conf->width;
         cam->imgs.height = cam->conf->height;
     }
@@ -669,7 +669,7 @@ static void mlp_init(ctx_dev *cam)
         mlp_cleanup(cam);
     }
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize"));
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize"));
 
     mlp_init_values(cam);
 
@@ -704,12 +704,12 @@ static void mlp_init(ctx_dev *cam)
     mlp_init_ref(cam);
 
     if (cam->device_status == STATUS_OPENED) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Camera %d started: motion detection %s"),
             cam->device_id, cam->pause ? _("Disabled"):_("Enabled"));
 
         if (cam->conf->emulate_motion) {
-            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Emulating motion"));
+            MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, _("Emulating motion"));
         }
     }
 }
@@ -734,7 +734,7 @@ static void mlp_areadetect(ctx_dev *cam)
                     cam->current_image->location.y < cam->area_maxy[z]) {
                     event(cam, EVENT_AREA_DETECTED, NULL, NULL, NULL, &cam->current_image->imgts);
                     cam->areadetect_eventnbr = cam->event_nr; /* Fire script only once per event */
-                    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+                    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
                         ,_("Motion in area %d detected."), z + 1);
                     break;
                 }
@@ -805,7 +805,7 @@ static void mlp_retry(ctx_dev *cam)
     if ((cam->device_status == STATUS_CLOSED) &&
         (cam->frame_curr_ts.tv_sec % 10 == 0) &&
         (cam->shots == 0)) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Retrying until successful connection with camera"));
 
         mlp_cam_start(cam);
@@ -813,7 +813,7 @@ static void mlp_retry(ctx_dev *cam)
         mlp_check_szimg(cam);
 
         if (cam->imgs.width != cam->conf->width || cam->imgs.height != cam->conf->height) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Resetting image buffers"));
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Resetting image buffers"));
             cam->device_status = STATUS_RESET;
         }
         /*
@@ -847,7 +847,7 @@ static int mlp_capture(ctx_dev *cam)
         cam->connectionlosttime.tv_sec = 0;
 
         if (cam->missing_frame_counter >= (cam->conf->device_tmo * cam->conf->framerate)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
             event(cam, EVENT_CAMERA_FOUND, NULL, NULL, NULL, NULL);
         }
         cam->missing_frame_counter = 0;
@@ -882,14 +882,14 @@ static int mlp_capture(ctx_dev *cam)
 
             /* Write error message only once */
             if (cam->missing_frame_counter == (cam->conf->device_tmo * cam->conf->framerate)) {
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                     ,_("Video signal lost - Adding grey image"));
                 event(cam, EVENT_CAMERA_LOST, NULL, NULL, NULL, &cam->connectionlosttime);
             }
 
             if ((cam->device_status == STATUS_OPENED) &&
                 (cam->missing_frame_counter == ((cam->conf->device_tmo * 4) * cam->conf->framerate))) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Video signal still lost - Trying to close video device"));
                 mlp_cam_close(cam);
             }
@@ -1114,7 +1114,7 @@ static void mlp_actions_event(ctx_dev *cam)
                 cam->algsec->isdetected = false;
             }
 
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), cam->event_nr);
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), cam->event_nr);
 
             cam->postcap = 0;
             cam->event_nr++;
@@ -1152,7 +1152,7 @@ static void mlp_actions(ctx_dev *cam)
             cam->info_sdev_max = cam->current_image->location.stddev_xy;
         }
         /*
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
         , "dev_x %d dev_y %d dev_xy %d, diff %d ratio %d"
         , cam->current_image->location.stddev_x
         , cam->current_image->location.stddev_y
@@ -1223,7 +1223,7 @@ static void mlp_setupmode(ctx_dev *cam)
             strcat(msg, part);
         }
 
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s", msg);
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "%s", msg);
     }
 }
 
@@ -1459,7 +1459,7 @@ void *mlp_main(void *arg)
         mlp_frametiming(cam);
     }
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Exiting"));
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Exiting"));
 
     mlp_cleanup(cam);
 

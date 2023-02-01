@@ -65,7 +65,7 @@ static void event_newfile(ctx_dev *cam, motion_event evnt
     (void)ts1;
     (void)ftype;
 
-    MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO
+    MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
         ,_("File saved to: %s"), fname);
 }
 
@@ -181,7 +181,7 @@ static void event_vlp_putpipe(ctx_dev *cam, motion_event evnt
 
     if (*(int *)ftype >= 0) {
         if (vlp_putpipe(*(int *)ftype, img_data->image_norm, cam->imgs.size_norm) == -1) {
-            MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+            MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                 ,_("Failed to put image into video pipe"));
         }
     }
@@ -211,7 +211,7 @@ static void event_image_detect(ctx_dev *cam, motion_event evnt
         retcd = snprintf(fullfilename, PATH_MAX, "%s/%s.%s"
             , cam->conf->target_dir.c_str(), filename, imageext(cam));
         if ((retcd < 0) || (retcd >= PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating image file name"));
             return;
         }
@@ -244,7 +244,7 @@ static void event_imagem_detect(ctx_dev *cam, motion_event evnt
         retcd = snprintf(fullfilename, PATH_MAX, "%s/%sm.%s"
             , cam->conf->target_dir.c_str(), filename, imageext(cam));
         if ((retcd < 0) || (retcd >= PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating image motion file name"));
             return;
         }
@@ -256,7 +256,7 @@ static void event_imagem_detect(ctx_dev *cam, motion_event evnt
         retcd = snprintf(fullfilename, PATH_MAX, "%s/%sr.%s"
             , cam->conf->target_dir.c_str(), filename, imageext(cam));
         if ((retcd < 0) || (retcd >= PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating image motion roi file name"));
             return;
         }
@@ -289,12 +289,12 @@ static void event_image_snapshot(ctx_dev *cam, motion_event evnt
         mystrftime(cam, filepath, sizeof(filepath), cam->conf->snapshot_filename.c_str(), ts1, NULL, 0);
         retcd = snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cam));
         if (retcd <0) {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+            MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
         }
 
         retcd =snprintf(fullfilename, PATH_MAX, "%s/%s", cam->conf->target_dir.c_str(), filename);
         if (retcd <0) {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+            MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
         }
 
         pic_save_norm(cam, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
@@ -305,7 +305,7 @@ static void event_image_snapshot(ctx_dev *cam, motion_event evnt
         snprintf(linkpath, PATH_MAX, "%s/lastsnap.%s", cam->conf->target_dir.c_str(), imageext(cam));
         remove(linkpath);
         if (symlink(filename, linkpath)) {
-            MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+            MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                 ,_("Could not create symbolic link [%s]"), filename);
             return;
         }
@@ -313,12 +313,12 @@ static void event_image_snapshot(ctx_dev *cam, motion_event evnt
         mystrftime(cam, filepath, sizeof(filepath), cam->conf->snapshot_filename.c_str(), ts1, NULL, 0);
         retcd = snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cam));
         if (retcd <0) {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+            MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
         }
 
         retcd = snprintf(fullfilename, PATH_MAX, "%s/%s", cam->conf->target_dir.c_str(), filename);
         if (retcd <0) {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+            MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
         }
 
         remove(fullfilename);
@@ -353,7 +353,7 @@ static void event_image_preview(ctx_dev *cam, motion_event evnt
         retcd = snprintf(previewname, PATH_MAX, "%s/%s.%s"
             , cam->conf->target_dir.c_str(), filename, imageext(cam));
         if ((retcd < 0) || (retcd >= PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating preview file name"));
             return;
         }
@@ -396,7 +396,7 @@ static void event_secondary_detect(ctx_dev *cam, motion_event evnt
     (void)ftype;
     (void)ts1;
 
-    MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO,_("Event secondary detect"));
+    MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO,_("Event secondary detect"));
 
     if (cam->conf->on_secondary_detect != "") {
         util_exec_command(cam, cam->conf->on_secondary_detect.c_str(), NULL, 0);
@@ -446,17 +446,17 @@ static void event_extpipe_end(ctx_dev *cam, motion_event evnt
     if (cam->extpipe_open) {
         cam->extpipe_open = 0;
         fflush(cam->extpipe);
-        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
             ,_("CLOSING: extpipe file desc %d, error state %d")
             ,fileno(cam->extpipe), ferror(cam->extpipe));
-        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "pclose return: %d",
+        MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "pclose return: %d",
                    pclose(cam->extpipe));
 
         if ((cam->conf->movie_retain == "secondary") && (cam->algsec_inuse)) {
             if (cam->algsec->isdetected == false) {
                 retcd = remove(cam->extpipefilename);
                 if (retcd != 0) {
-                    MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                    MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                         , _("Unable to remove file %s"), cam->extpipefilename);
                 }
             } else {
@@ -488,25 +488,25 @@ static void event_extpipe_start(ctx_dev *cam, motion_event evnt
         retcd = snprintf(cam->extpipefilename, PATH_MAX - 4, "%s/%s"
             , cam->conf->target_dir.c_str(), stamp);
         if (retcd <0) {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+            MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
         }
 
         if (access(cam->conf->target_dir.c_str(), W_OK)!= 0) {
             /* Permission denied */
             if (errno ==  EACCES) {
-                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     ,_("no write access to target directory %s"), cam->conf->target_dir.c_str());
                 return ;
             /* Path not found - create it */
             } else if (errno ==  ENOENT) {
-                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     ,_("path not found, trying to create it %s ..."), cam->conf->target_dir.c_str());
                 if (mycreate_path(cam->extpipefilename) == -1) {
                     return ;
                 }
             }
             else {
-                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     ,_("error accesing path %s"), cam->conf->target_dir.c_str());
                 return ;
             }
@@ -522,20 +522,20 @@ static void event_extpipe_start(ctx_dev *cam, motion_event evnt
 
         retcd = snprintf(cam->extpipecmdline, PATH_MAX, "%s", stamp);
         if ((retcd < 0 ) || (retcd >= PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 , _("Error specifying command line: %s"), cam->extpipecmdline);
             return;
         }
-        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("pipe: %s"), cam->extpipecmdline);
+        MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("pipe: %s"), cam->extpipecmdline);
 
-        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "cam->moviefps: %d", cam->movie_fps);
+        MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "cam->moviefps: %d", cam->movie_fps);
 
         event(cam, EVENT_FILECREATE, NULL, cam->extpipefilename, (void *)FTYPE_MOVIE, ts1);
         dbse_exec(cam, cam->extpipefilename, FTYPE_MOVIE, ts1, "movie_start");
         cam->extpipe = popen(cam->extpipecmdline, "we");
 
         if (cam->extpipe == NULL) {
-            MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, _("popen failed"));
+            MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, _("popen failed"));
             return;
         }
 
@@ -557,23 +557,23 @@ static void event_extpipe_put(ctx_dev *cam, motion_event evnt
 
     /* Check use_extpipe enabled and ext_pipe not NULL */
     if ((cam->conf->movie_extpipe_use) && (cam->extpipe != NULL)) {
-        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO, _("Using extpipe"));
+        MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO, _("Using extpipe"));
         passthrough = mycheck_passthrough(cam);
         /* Check that is open */
         if ((cam->extpipe_open) && (fileno(cam->extpipe) > 0)) {
             if ((cam->imgs.size_high > 0) && (!passthrough)) {
                 if (!fwrite(img_data->image_high, cam->imgs.size_high, 1, cam->extpipe)) {
-                    MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                    MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                         ,_("Error writing in pipe , state error %d"), ferror(cam->extpipe));
                 }
             } else {
                 if (!fwrite(img_data->image_norm, cam->imgs.size_norm, 1, cam->extpipe)) {
-                    MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                    MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                         ,_("Error writing in pipe , state error %d"), ferror(cam->extpipe));
                 }
            }
         } else {
-            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("pipe %s not created or closed already "), cam->extpipecmdline);
         }
     }
@@ -601,7 +601,7 @@ static void event_movie_start(ctx_dev *cam, motion_event evnt
     if (cam->conf->movie_output) {
         retcd = movie_init_norm(cam, ts1);
         if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error opening ctx_dev for movie output."));
             myfree(&cam->movie_norm);
             return;
@@ -613,7 +613,7 @@ static void event_movie_start(ctx_dev *cam, motion_event evnt
     if (cam->conf->movie_output_motion) {
         retcd = movie_init_motion(cam, ts1);
         if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating motion file [%s]"), cam->movie_motion->full_nm);
             myfree(&cam->movie_motion);
             return;
@@ -631,12 +631,12 @@ static void event_movie_put(ctx_dev *cam, motion_event evnt
 
     if (cam->movie_norm) {
         if (movie_put_image(cam->movie_norm, img_data, ts1) == -1) {
-            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
         }
     }
     if (cam->movie_motion) {
         if (movie_put_image(cam->movie_motion, &cam->imgs.image_motion, ts1) == -1) {
-            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
         }
     }
 }
@@ -656,7 +656,7 @@ static void event_movie_end(ctx_dev *cam, motion_event evnt
             if (cam->algsec->isdetected == false) {
                 retcd = remove(cam->movie_norm->full_nm);
                 if (retcd != 0) {
-                    MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                    MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                         , _("Unable to remove file %s")
                         , cam->movie_norm->full_nm);
                 }
@@ -684,7 +684,7 @@ static void event_movie_end(ctx_dev *cam, motion_event evnt
             if (cam->algsec->isdetected == false) {
                 retcd = remove(cam->movie_motion->full_nm);
                 if (retcd != 0) {
-                    MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                    MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                         , _("Unable to remove file %s")
                         , cam->movie_motion->full_nm);
                 }
@@ -722,7 +722,7 @@ static void event_tlapse_start(ctx_dev *cam, motion_event evnt
     if (!cam->movie_timelapse) {
         retcd = movie_init_timelapse(cam, ts1);
         if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating timelapse file [%s]"), cam->movie_timelapse->full_nm);
             myfree(&cam->movie_timelapse);
             return;
@@ -734,7 +734,7 @@ static void event_tlapse_start(ctx_dev *cam, motion_event evnt
     }
 
     if (movie_put_image(cam->movie_timelapse, img_data, ts1) == -1) {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
     }
 
 }

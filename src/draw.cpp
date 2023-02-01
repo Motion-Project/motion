@@ -1237,7 +1237,7 @@ void draw_init_scale(ctx_dev *cam)
         if (cam->text_scale <= 0) {
             cam->text_scale = 1;
         }
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Invalid text scale.  Adjusted to %d"), cam->text_scale);
     }
 
@@ -1246,7 +1246,7 @@ void draw_init_scale(ctx_dev *cam)
         if (cam->text_scale <= 0) {
             cam->text_scale = 1;
         }
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Invalid text scale.  Adjusted to %d"), cam->text_scale);
     }
 

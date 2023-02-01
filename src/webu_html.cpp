@@ -1502,7 +1502,7 @@ void webu_html_user(ctx_webui *webui)
     fp = myfopen(webui->motapp->conf->webcontrol_html.c_str(), "re");
 
     if (fp == NULL) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
             , _("Invalid user html file: %s")
             , webui->motapp->conf->webcontrol_html.c_str());
 

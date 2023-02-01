@@ -891,7 +891,7 @@ static void alg_lightswitch(ctx_dev *cam)
 
     if (cam->conf->lightswitch_percent >= 1 && !cam->lost_connection) {
         if (cam->current_image->diffs > (cam->imgs.motionsize * cam->conf->lightswitch_percent / 100)) {
-            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
+            MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
             if (cam->frame_skip < (unsigned int)cam->conf->lightswitch_frames) {
                 cam->frame_skip = (unsigned int)cam->conf->lightswitch_frames;
             }
@@ -1161,7 +1161,7 @@ void alg_stddev(ctx_dev *cam)
 {
 
     /*
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "dev_x %d dev_y %d dev_xy %d, diff %d ratio %d"
+    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO, "dev_x %d dev_y %d dev_xy %d, diff %d ratio %d"
         , cam->current_image->location.stddev_x
         , cam->current_image->location.stddev_y
         , cam->current_image->location.stddev_xy

@@ -138,22 +138,22 @@ static void v4l2_ctrls_log(ctx_dev *cam)
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
 
     if (v4l2cam->devctrl_count != 0 ) {
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("---------Controls---------"));
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("  V4L2 ID :  Name : Range"));
+        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("---------Controls---------"));
+        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("  V4L2 ID :  Name : Range"));
         for (indx = 0; indx < v4l2cam->devctrl_count; indx++) {
             if (v4l2cam->devctrl_array[indx].ctrl_menuitem) {
-                MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "  %s : %s"
+                MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "  %s : %s"
                     ,v4l2cam->devctrl_array[indx].ctrl_iddesc
                     ,v4l2cam->devctrl_array[indx].ctrl_name);
             } else {
-                MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s : %s : %d to %d"
+                MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s : %s : %d to %d"
                     ,v4l2cam->devctrl_array[indx].ctrl_iddesc
                     ,v4l2cam->devctrl_array[indx].ctrl_name
                     ,v4l2cam->devctrl_array[indx].ctrl_minimum
                     ,v4l2cam->devctrl_array[indx].ctrl_maximum);
             }
         }
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "--------------------------");
+        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "--------------------------");
     }
 
 }
@@ -172,7 +172,7 @@ static void v4l2_ctrls_list(ctx_dev *cam)
 
     v4l2cam->devctrl_array = NULL;
     if (v4l2cam->devctrl_count == 0) {
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("No Controls found for device"));
+        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("No Controls found for device"));
         return;
     }
 
@@ -255,12 +255,12 @@ static void v4l2_ctrls_set(ctx_dev *cam)
                 vid_ctrl.value = devitem->ctrl_newval;
                 retcd = xioctl(v4l2cam, VIDIOC_S_CTRL, &vid_ctrl);
                 if (retcd < 0) {
-                    MOTION_LOG(WRN, TYPE_VIDEO, SHOW_ERRNO
+                    MOTPLS_LOG(WRN, TYPE_VIDEO, SHOW_ERRNO
                         ,_("setting control %s \"%s\" to %d failed with return code %d")
                         ,devitem->ctrl_iddesc, devitem->ctrl_name
                         ,devitem->ctrl_newval,retcd);
                 } else {
-                    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
+                    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
                         ,_("Set control \"%s\" to value %d")
                         ,devitem->ctrl_name, devitem->ctrl_newval);
                    devitem->ctrl_currval = devitem->ctrl_newval;
@@ -299,11 +299,11 @@ static int v4l2_parms_set(ctx_dev *cam)
                     /*FALLTHROUGH*/
                 case V4L2_CTRL_TYPE_INTEGER:
                     if (atoi(usritem->param_value) < devitem->ctrl_minimum) {
-                        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+                        MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
                             ,_("%s control option value %s is below minimum.  Skipping...")
                             ,devitem->ctrl_name, usritem->param_value, devitem->ctrl_minimum);
                     } else if (atoi(usritem->param_value) > devitem->ctrl_maximum) {
-                        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+                        MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
                             ,_("%s control option value %s is above maximum.  Skipping...")
                             ,devitem->ctrl_name, usritem->param_value, devitem->ctrl_maximum);
                     } else {
@@ -314,7 +314,7 @@ static int v4l2_parms_set(ctx_dev *cam)
                     devitem->ctrl_newval = usritem->param_value ? 1 : 0;
                     break;
                 default:
-                    MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+                    MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
                         ,_("control type not supported yet"));
                 }
             }
@@ -352,7 +352,7 @@ static void v4l2_set_input(ctx_dev *cam)
     }
 
     if (xioctl(v4l2cam, VIDIOC_ENUMINPUT, &input) == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
+        MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
             ,_("Unable to query input %d."
             " VIDIOC_ENUMINPUT, if you use a WEBCAM change input value in conf by -1")
             ,input.index);
@@ -360,21 +360,21 @@ static void v4l2_set_input(ctx_dev *cam)
         return;
     }
 
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
         ,_("Name = \"%s\", type 0x%08X, status %08x")
         ,input.name, input.type, input.status);
 
     if (input.type & V4L2_INPUT_TYPE_TUNER) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             ,_("Name = \"%s\",- TUNER"), input.name);
     }
 
     if (input.type & V4L2_INPUT_TYPE_CAMERA) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Name = \"%s\"- CAMERA"), input.name);
+        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Name = \"%s\"- CAMERA"), input.name);
     }
 
     if (xioctl(v4l2cam, VIDIOC_S_INPUT, &input.index) == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
+        MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
             , _("Error selecting input %d VIDIOC_S_INPUT"), input.index);
         v4l2_device_close(cam);
         return;
@@ -407,7 +407,7 @@ static void v4l2_set_norm(ctx_dev *cam)
     }
 
     if (xioctl(v4l2cam, VIDIOC_G_STD, &std_id) == -1) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
             ,_("Device does not support specifying PAL/NTSC norm"));
         return;
     }
@@ -418,7 +418,7 @@ static void v4l2_set_norm(ctx_dev *cam)
 
         while (xioctl(v4l2cam, VIDIOC_ENUMSTD, &standard) == 0) {
             if (standard.id & std_id) {
-                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                     ,_("- video standard %s"), standard.name);
             }
             standard.index++;
@@ -436,17 +436,17 @@ static void v4l2_set_norm(ctx_dev *cam)
         }
 
         if (xioctl(v4l2cam, VIDIOC_S_STD, &std_id) == -1) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
+            MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
                 ,_("Error selecting standard method %d VIDIOC_S_STD")
                 ,(int)std_id);
         }
 
         if (std_id == V4L2_STD_NTSC) {
-            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Video standard set to NTSC"));
+            MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Video standard set to NTSC"));
         } else if (std_id == V4L2_STD_SECAM) {
-            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Video standard set to SECAM"));
+            MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Video standard set to SECAM"));
         } else {
-            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Video standard set to PAL"));
+            MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Video standard set to PAL"));
         }
     }
 
@@ -481,12 +481,12 @@ static void v4l2_set_frequency(ctx_dev *cam)
         tuner.index = v4l2cam->device_tuner;
 
         if (xioctl(v4l2cam, VIDIOC_G_TUNER, &tuner) == -1) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
+            MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
             ,_("tuner %d VIDIOC_G_TUNER"), tuner.index);
             return;
         }
 
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Set tuner %d"), tuner.index);
+        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Set tuner %d"), tuner.index);
 
         /* Set the frequency. */
         memset(&freq, 0, sizeof(struct v4l2_frequency));
@@ -495,12 +495,12 @@ static void v4l2_set_frequency(ctx_dev *cam)
         freq.frequency = (spec / 1000) * 16;
 
         if (xioctl(v4l2cam, VIDIOC_S_FREQUENCY, &freq) == -1) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
+            MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
             ,_("freq %ul VIDIOC_S_FREQUENCY"), freq.frequency);
             return;
         }
 
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Set Frequency to %ul"), freq.frequency);
+        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Set Frequency to %ul"), freq.frequency);
     }
 
     return;
@@ -522,7 +522,7 @@ static int v4l2_pixfmt_try(ctx_dev *cam, uint pixformat)
 
     retcd = xioctl(v4l2cam, VIDIOC_TRY_FMT, fmt);
     if ((retcd == -1) || (fmt->fmt.pix.pixelformat != pixformat)) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             ,_("Unable to use palette %c%c%c%c (%dx%d)")
             ,pixformat >> 0, pixformat >> 8
             ,pixformat >> 16, pixformat >> 24
@@ -530,7 +530,7 @@ static int v4l2_pixfmt_try(ctx_dev *cam, uint pixformat)
         return -1;
     }
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         ,_("Testing palette %c%c%c%c (%dx%d)")
         ,pixformat >> 0, pixformat >> 8
         ,pixformat >> 16, pixformat >> 24
@@ -551,18 +551,18 @@ static int v4l2_pixfmt_stride(ctx_dev *cam)
     bpl = (int)fmt->fmt.pix.bytesperline;
     wd = v4l2cam->width;
 
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
         , _("Checking image size %dx%d with stride %d")
         , v4l2cam->width, v4l2cam->height, bpl);
 
     if (bpl == 0) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
             , _("No stride value provided from device."));
         return 0;
     }
 
     if (wd > bpl) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , _("Width(%d) must be less than stride(%d)"), wd, bpl);
         return -1;
     }
@@ -572,19 +572,19 @@ static int v4l2_pixfmt_stride(ctx_dev *cam)
         return 0;
     }
 
-    MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+    MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
         , _("The image width(%d) is not multiple of the stride(%d)")
         , wd, bpl);
 
     /* Width per stride */
     wps = bpl / wd;
     if (wps < 1) {
-        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             , _("Impossible condition: Width(%d), Stride(%d), Per stride(%d)")
             , wd, bpl, wps);
     }
 
-    MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+    MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
         , _("Image width will be padded %d bytes"), ((bpl % wd)/wps));
 
     v4l2cam->width = wd + ((bpl % wd)/wps);
@@ -601,7 +601,7 @@ static int v4l2_pixfmt_adjust(ctx_dev *cam)
     if (fmt->fmt.pix.width != (uint)v4l2cam->width ||
         fmt->fmt.pix.height != (uint)v4l2cam->height) {
 
-        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             ,_("Adjusting resolution from %ix%i to %ix%i.")
             ,v4l2cam->width, v4l2cam->height
             ,fmt->fmt.pix.width
@@ -611,9 +611,9 @@ static int v4l2_pixfmt_adjust(ctx_dev *cam)
         v4l2cam->height = fmt->fmt.pix.height;
 
         if ((v4l2cam->width % 8) || (v4l2cam->height % 8)) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 ,_("Adjusted resolution not modulo 8."));
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 ,_("Specify different palette or width/height in config file."));
             return -1;
         }
@@ -643,14 +643,14 @@ static int v4l2_pixfmt_set(ctx_dev *cam, unsigned int pixformat)
     }
     retcd = xioctl(v4l2cam, VIDIOC_S_FMT, fmt);
     if (retcd == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
+        MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
             ,_("Error setting pixel format."));
         return -1;
     }
 
     v4l2cam->pixfmt_src = pixformat;
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         ,_("Using palette %c%c%c%c (%dx%d)")
         ,pixformat >> 0 , pixformat >> 8
         ,pixformat >> 16, pixformat >> 24
@@ -665,18 +665,18 @@ static void v4l2_params_check(ctx_dev *cam)
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
 
     if (v4l2cam->width % 8) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("config image width (%d) is not modulo 8"), v4l2cam->width);
         v4l2cam->width = v4l2cam->width - (v4l2cam->width % 8) + 8;
-        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             , _("Adjusting to width (%d)"), v4l2cam->width);
     }
 
     if (v4l2cam->height % 8) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("config image height (%d) is not modulo 8"), v4l2cam->height);
         v4l2cam->height = v4l2cam->height - (v4l2cam->height % 8) + 8;
-        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             ,_("Adjusting to height (%d)"), v4l2cam->height);
     }
 
@@ -689,7 +689,7 @@ static void v4l2_params_check(ctx_dev *cam)
     }
 
     if ((spec < 0) || (spec > V4L2_PALETTE_COUNT_MAX)) {
-        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             ,_("Invalid palette.  Changing to default"));
         util_parms_add(cam->v4l2cam->params,"palette","17");
     }
@@ -703,7 +703,7 @@ static int v4l2_pixfmt_list(ctx_dev *cam, palette_item *palette_array)
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_fmtdesc fmtd;
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Supported palettes:"));
+    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Supported palettes:"));
 
     v4l2_pal = 0;
     memset(&fmtd, 0, sizeof(struct v4l2_fmtdesc));
@@ -712,7 +712,7 @@ static int v4l2_pixfmt_list(ctx_dev *cam, palette_item *palette_array)
     indx_palette = -1; /* -1 says not yet selected */
 
     while (xioctl(v4l2cam, VIDIOC_ENUM_FMT, &fmtd) != -1) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             , "(%i) %c%c%c%c (%s)", v4l2_pal
             , fmtd.pixelformat >> 0, fmtd.pixelformat >> 8
             , fmtd.pixelformat >> 16, fmtd.pixelformat >> 24
@@ -761,14 +761,14 @@ static void v4l2_palette_set(ctx_dev *cam)
         return;
     }
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         ,_("Configuration palette index %d (%s) for %dx%d doesn't work.")
         , indxp, palette_array[indxp].fourcc
         ,v4l2cam->width, v4l2cam->height);
 
     indxp = v4l2_pixfmt_list(cam, palette_array);
     if (indxp < 0) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("Unable to find a compatible palette format."));
         myfree(&palette_array);
         v4l2_device_close(cam);
@@ -777,14 +777,14 @@ static void v4l2_palette_set(ctx_dev *cam)
 
     retcd = v4l2_pixfmt_set(cam, palette_array[indxp].v4l2id);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , _("Palette selection failed for format %s")
             , palette_array[indxp].fourcc);
         v4l2_device_close(cam);
         return;
     }
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         ,_("Selected palette %s")
         ,palette_array[indxp].fourcc);
 
@@ -814,7 +814,7 @@ static void v4l2_set_mmap(ctx_dev *cam)
     v4l2cam->req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     v4l2cam->req.memory = V4L2_MEMORY_MMAP;
     if (xioctl(v4l2cam, VIDIOC_REQBUFS, &v4l2cam->req) == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
+        MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
             ,_("Error requesting buffers %d for memory map. VIDIOC_REQBUFS")
             ,v4l2cam->req.count);
         v4l2_device_close(cam);
@@ -822,11 +822,11 @@ static void v4l2_set_mmap(ctx_dev *cam)
     }
     v4l2cam->buffer_count = v4l2cam->req.count;
 
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
         ,_("mmap information: frames=%d"), v4l2cam->buffer_count);
 
     if (v4l2cam->buffer_count < MIN_MMAP_BUFFERS) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
+        MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
             ,_("Insufficient buffer memory %d < MIN_MMAP_BUFFERS.")
             ,v4l2cam->buffer_count);
         v4l2_device_close(cam);
@@ -835,7 +835,7 @@ static void v4l2_set_mmap(ctx_dev *cam)
 
     v4l2cam->buffers =(video_buff*) calloc(v4l2cam->buffer_count, sizeof(video_buff));
     if (v4l2cam->buffers == NULL) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, _("Out of memory."));
+        MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, _("Out of memory."));
         v4l2_device_close(cam);
         return;
     }
@@ -849,7 +849,7 @@ static void v4l2_set_mmap(ctx_dev *cam)
         buf.memory = V4L2_MEMORY_MMAP;
         buf.index = buffer_index;
         if (xioctl(v4l2cam, VIDIOC_QUERYBUF, &buf) == -1) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
+            MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
                 ,_("Error querying buffer %i\nVIDIOC_QUERYBUF: ")
                 ,buffer_index);
             myfree(&v4l2cam->buffers);
@@ -862,14 +862,14 @@ static void v4l2_set_mmap(ctx_dev *cam)
                                                      MAP_SHARED, v4l2cam->fd_device, buf.m.offset);
 
         if (v4l2cam->buffers[buffer_index].ptr == MAP_FAILED) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
+            MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
                 ,_("Error mapping buffer %i mmap"), buffer_index);
             myfree(&v4l2cam->buffers);
             v4l2_device_close(cam);
             return;
         }
 
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
             ,_("%i length=%d Address (%x)")
             ,buffer_index, buf.length, v4l2cam->buffers[buffer_index].ptr);
     }
@@ -882,7 +882,7 @@ static void v4l2_set_mmap(ctx_dev *cam)
         v4l2cam->buf.index = buffer_index;
 
         if (xioctl(v4l2cam, VIDIOC_QBUF, &v4l2cam->buf) == -1) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_QBUF");
+            MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_QBUF");
             v4l2_device_close(cam);
             return;
         }
@@ -891,7 +891,7 @@ static void v4l2_set_mmap(ctx_dev *cam)
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
     if (xioctl(v4l2cam, VIDIOC_STREAMON, &type) == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
+        MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
             ,_("Error starting stream. VIDIOC_STREAMON"));
         v4l2_device_close(cam);
         return;
@@ -932,7 +932,7 @@ static int v4l2_capture(ctx_dev *cam)
     if (v4l2cam->pframe >= 0) {
         retcd = xioctl(v4l2cam, VIDIOC_QBUF, &v4l2cam->buf);
         if (retcd == -1) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_QBUF");
+            MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_QBUF");
             pthread_sigmask(SIG_UNBLOCK, &old, NULL);
             return -1;
         }
@@ -946,7 +946,7 @@ static int v4l2_capture(ctx_dev *cam)
 
     retcd = xioctl(v4l2cam, VIDIOC_DQBUF, &v4l2cam->buf);
     if (retcd == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_DQBUF");
+        MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_DQBUF");
         pthread_sigmask(SIG_UNBLOCK, &old, NULL);
         return -1;
     }
@@ -1077,7 +1077,7 @@ static void v4l2_device_select(ctx_dev *cam)
 
         retcd = v4l2_parms_set(cam);
         if (retcd < 0 ) {
-            MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+            MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             ,_("Error setting device controls"));
             return;
         }
@@ -1091,7 +1091,7 @@ static void v4l2_device_open(ctx_dev *cam)
 {
     int fd_device;
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         , _("Opening video device %s")
         , cam->conf->v4l2_device.c_str());
 
@@ -1100,7 +1100,7 @@ static void v4l2_device_open(ctx_dev *cam)
     if (fd_device > 0) {
         cam->v4l2cam->fd_device = fd_device;
     } else {
-        MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
+        MOTPLS_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
             , _("Failed to open video device %s")
             , cam->conf->v4l2_device.c_str());
         cam->v4l2cam->fd_device = -1;
@@ -1108,13 +1108,13 @@ static void v4l2_device_open(ctx_dev *cam)
     }
 
     if (xioctl(cam->v4l2cam, VIDIOC_QUERYCAP, &cam->v4l2cam->cap) < 0) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("Not a V4L2 device?"));
+        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("Not a V4L2 device?"));
         v4l2_device_close(cam);
         return;
     }
 
     if (!(cam->v4l2cam->cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("Device does not support capturing."));
+        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("Device does not support capturing."));
         v4l2_device_close(cam);
         return;
     }
@@ -1129,48 +1129,48 @@ static void v4l2_log_types(ctx_dev *cam)
         return;
     }
 
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "------------------------");
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.driver: \"%s\"",v4l2cam->cap.driver);
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.card: \"%s\"",v4l2cam->cap.card);
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.bus_info: \"%s\"",v4l2cam->cap.bus_info);
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.capabilities=0x%08X",v4l2cam->cap.capabilities);
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "------------------------");
+    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "------------------------");
+    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.driver: \"%s\"",v4l2cam->cap.driver);
+    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.card: \"%s\"",v4l2cam->cap.card);
+    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.bus_info: \"%s\"",v4l2cam->cap.bus_info);
+    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.capabilities=0x%08X",v4l2cam->cap.capabilities);
+    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "------------------------");
 
     if (v4l2cam->cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VIDEO_CAPTURE");
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VIDEO_CAPTURE");
     }
     if (v4l2cam->cap.capabilities & V4L2_CAP_VIDEO_OUTPUT) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VIDEO_OUTPUT");
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VIDEO_OUTPUT");
     }
     if (v4l2cam->cap.capabilities & V4L2_CAP_VIDEO_OVERLAY) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VIDEO_OVERLAY");
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VIDEO_OVERLAY");
     }
     if (v4l2cam->cap.capabilities & V4L2_CAP_VBI_CAPTURE) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VBI_CAPTURE");
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VBI_CAPTURE");
     }
     if (v4l2cam->cap.capabilities & V4L2_CAP_VBI_OUTPUT) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VBI_OUTPUT");
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VBI_OUTPUT");
     }
     if (v4l2cam->cap.capabilities & V4L2_CAP_RDS_CAPTURE) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- RDS_CAPTURE");
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- RDS_CAPTURE");
     }
     if (v4l2cam->cap.capabilities & V4L2_CAP_TUNER) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- TUNER");
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- TUNER");
     }
     if (v4l2cam->cap.capabilities & V4L2_CAP_AUDIO) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- AUDIO");
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- AUDIO");
     }
     if (v4l2cam->cap.capabilities & V4L2_CAP_READWRITE) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- READWRITE");
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- READWRITE");
     }
     if (v4l2cam->cap.capabilities & V4L2_CAP_ASYNCIO) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- ASYNCIO");
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- ASYNCIO");
     }
     if (v4l2cam->cap.capabilities & V4L2_CAP_STREAMING) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- STREAMING");
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- STREAMING");
     }
     if (v4l2cam->cap.capabilities & V4L2_CAP_TIMEPERFRAME) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- TIMEPERFRAME");
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- TIMEPERFRAME");
     }
 
 }
@@ -1196,7 +1196,7 @@ static void v4l2_log_formats(ctx_dev *cam)
     dev_format.index = indx_format = 0;
     dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     while (xioctl(v4l2cam, VIDIOC_ENUM_FMT, &dev_format) != -1) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
             ,_("Supported palette %s (%c%c%c%c)")
             ,dev_format.description
             ,dev_format.pixelformat >> 0
@@ -1208,7 +1208,7 @@ static void v4l2_log_formats(ctx_dev *cam)
         dev_sizes.index = indx_sizes = 0;
         dev_sizes.pixel_format = dev_format.pixelformat;
         while (xioctl(v4l2cam, VIDIOC_ENUM_FRAMESIZES, &dev_sizes) != -1) {
-            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
                 ,_("  Width: %d, Height %d")
                 ,dev_sizes.discrete.width
                 ,dev_sizes.discrete.height);
@@ -1219,7 +1219,7 @@ static void v4l2_log_formats(ctx_dev *cam)
             dev_frameint.width = dev_sizes.discrete.width;
             dev_frameint.height = dev_sizes.discrete.height;
             while (xioctl(v4l2cam, VIDIOC_ENUM_FRAMEINTERVALS, &dev_frameint) != -1) {
-                MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+                MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
                     ,_("    Framerate %d/%d")
                     ,dev_frameint.discrete.numerator
                     ,dev_frameint.discrete.denominator);
@@ -1258,17 +1258,17 @@ static void v4l2_set_fps(ctx_dev *cam)
     setfps.parm.capture.timeperframe.numerator = 1;
     setfps.parm.capture.timeperframe.denominator = v4l2cam->fps;
 
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
+    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
         , _("Trying to set fps to %d")
         , setfps.parm.capture.timeperframe.denominator);
 
     retcd = xioctl(v4l2cam, VIDIOC_S_PARM, &setfps);
     if (retcd != 0) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("Error setting fps. Return code %d"), retcd);
     }
 
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
+    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
         , _("Device set fps to %d")
         , setfps.parm.capture.timeperframe.denominator);
 
@@ -1283,7 +1283,7 @@ void v4l2_cleanup(ctx_dev *cam)
         enum v4l2_buf_type type;
         int indx;
 
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             ,_("Closing video device %s"), cam->conf->v4l2_device.c_str());
 
         type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -1322,7 +1322,7 @@ void v4l2_cleanup(ctx_dev *cam)
 void v4l2_start(ctx_dev *cam)
 {
     #ifdef HAVE_V4L2
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening V4L2 device"));
+        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening V4L2 device"));
 
         v4l2_device_init(cam);
         v4l2_device_open(cam);
@@ -1339,7 +1339,7 @@ void v4l2_start(ctx_dev *cam)
         v4l2_set_mmap(cam);
         v4l2_set_imgs(cam);
         if (cam->v4l2cam->fd_device == -1) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("V4L2 device failed to open"));
+            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("V4L2 device failed to open"));
             v4l2_cleanup(cam);
             return;
         }

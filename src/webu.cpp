@@ -137,7 +137,7 @@ static void webu_parms_edit(ctx_webui *webui)
         }
     }
 
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
+    MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
         , "camid: >%s< thread: >%d< cmd1: >%s< cmd2: >%s< cmd3: >%s<"
         , webui->uri_camid.c_str(), webui->threadnbr
         , webui->uri_cmd1.c_str(), webui->uri_cmd2.c_str()
@@ -157,7 +157,7 @@ static int webu_parseurl(ctx_webui *webui)
     webui->uri_cmd2 = "";
     webui->uri_cmd3 = "";
 
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Sent url: %s"),webui->url.c_str());
+    MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Sent url: %s"),webui->url.c_str());
 
     tmpurl = (char*)mymalloc(webui->url.length()+1);
     memcpy(tmpurl, webui->url.c_str(), webui->url.length());
@@ -167,7 +167,7 @@ static int webu_parseurl(ctx_webui *webui)
     webui->url.assign(tmpurl);
     free(tmpurl);
 
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),webui->url.c_str());
+    MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),webui->url.c_str());
 
     baselen = webui->motapp->conf->webcontrol_base_path.length();
 
@@ -300,7 +300,7 @@ static void webu_hostname(ctx_webui *webui)
             webui->motapp->conf->webcontrol_base_path;
     }
 
-    MOTION_LOG(DBG,TYPE_ALL, NO_ERRNO, _("Full Host:  %s"), webui->hostfull.c_str());
+    MOTPLS_LOG(DBG,TYPE_ALL, NO_ERRNO, _("Full Host:  %s"), webui->hostfull.c_str());
 
     return;
 }
@@ -312,7 +312,7 @@ static void webu_failauth_log(ctx_webui *webui)
     ctx_webu_clients                 clients;
     std::list<ctx_webu_clients>::iterator   it;
 
-    MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
+    MOTPLS_LOG(ALR, TYPE_STREAM, NO_ERRNO
             ,_("Failed authentication from %s"), webui->clientip.c_str());
 
     clock_gettime(CLOCK_MONOTONIC, &tm_cnct);
@@ -365,7 +365,7 @@ static void webu_client_connect(ctx_webui *webui)
     while (it != webui->motapp->webcontrol_clients.end()) {
         if (it->clientip == webui->clientip) {
             if (it->authenticated == false) {
-                MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),webui->clientip.c_str());
+                MOTPLS_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),webui->clientip.c_str());
             }
             it->authenticated = true;
             it->conn_nbr = 1;
@@ -382,7 +382,7 @@ static void webu_client_connect(ctx_webui *webui)
     clients.authenticated = true;
     webui->motapp->webcontrol_clients.push_back(clients);
 
-    MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),webui->clientip.c_str());
+    MOTPLS_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),webui->clientip.c_str());
 
     return;
 
@@ -406,7 +406,7 @@ static mhdrslt webu_failauth_check(ctx_webui *webui)
              (webui->motapp->conf->webcontrol_lock_minutes*60)) &&
             (it->authenticated == false) &&
             (it->conn_nbr > webui->motapp->conf->webcontrol_lock_attempts)) {
-            MOTION_LOG(EMG, TYPE_STREAM, NO_ERRNO
+            MOTPLS_LOG(EMG, TYPE_STREAM, NO_ERRNO
                 ,_("Ignoring connection from: %s"), webui->clientip.c_str());
             it->conn_time = tm_cnct;
             return MHD_NO;
@@ -592,7 +592,7 @@ static mhdrslt webu_mhd_auth(ctx_webui *webui)
     if (webui->motapp->conf->webcontrol_authentication == "") {
         webui->authenticated = true;
         if (webui->motapp->conf->webcontrol_auth_method != "none") {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No webcontrol user:pass provided"));
+            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No webcontrol user:pass provided"));
         }
         return MHD_YES;
     }
@@ -623,7 +623,7 @@ static mhdrslt webu_mhd_send(ctx_webui *webui)
     response = MHD_create_response_from_buffer(webui->resp_page.length()
         ,(void *)webui->resp_page.c_str(), MHD_RESPMEM_PERSISTENT);
     if (!response) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
 
@@ -656,7 +656,7 @@ static mhdrslt webu_answer_post(ctx_webui *webui)
 {
     mhdrslt retcd;
 
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,"processing post");
+    MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,"processing post");
 
     pthread_mutex_lock(&webui->motapp->mutex_post);
         webu_post_main(webui);
@@ -670,7 +670,7 @@ static mhdrslt webu_answer_post(ctx_webui *webui)
 
     retcd = webu_mhd_send(webui);
     if (retcd == MHD_NO) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"send post page failed");
+        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"send post page failed");
     }
 
     return retcd;
@@ -761,7 +761,7 @@ static mhdrslt webu_answer_get(ctx_webui *webui)
 {
     mhdrslt retcd;
 
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,"processing get");
+    MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,"processing get");
 
     retcd = MHD_NO;
     if ((webui->uri_cmd1 == "mjpg") ||
@@ -789,7 +789,7 @@ static mhdrslt webu_answer_get(ctx_webui *webui)
 
         retcd = webu_mhd_send(webui);
         if (retcd == MHD_NO) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
+            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
         }
 
     } else if (webui->uri_cmd1 == "movies.json") {
@@ -800,7 +800,7 @@ static mhdrslt webu_answer_get(ctx_webui *webui)
 
         retcd = webu_mhd_send(webui);
         if (retcd == MHD_NO) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
+            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
         }
 
     } else if (webui->uri_cmd1 == "status.json") {
@@ -811,7 +811,7 @@ static mhdrslt webu_answer_get(ctx_webui *webui)
 
         retcd = webu_mhd_send(webui);
         if (retcd == MHD_NO) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
+            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
         }
 
     } else {
@@ -825,7 +825,7 @@ static mhdrslt webu_answer_get(ctx_webui *webui)
 
         retcd = webu_mhd_send(webui);
         if (retcd == MHD_NO) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
+            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
         }
     }
 
@@ -859,13 +859,13 @@ static mhdrslt webu_answer(void *cls, struct MHD_Connection *connection, const c
     }
 
     if (webui->motapp->finish_all) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
+        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
         return MHD_NO;
     }
 
     if (webui->cam != NULL) {
         if (webui->cam->finish_dev) {
-           MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
+           MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
            return MHD_NO;
         }
     }
@@ -1022,13 +1022,13 @@ static void webu_mhd_features_basic(ctx_mhdstart *mhdst)
         mhdrslt retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_BASIC_AUTH);
         if (retcd == MHD_YES) {
-            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: available"));
+            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: available"));
         } else {
             if (mhdst->motapp->conf->webcontrol_auth_method == "basic") {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
+                MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
                 mhdst->motapp->conf->webcontrol_auth_method = "none";
             } else {
-                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
+                MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
             }
         }
     #endif
@@ -1043,13 +1043,13 @@ static void webu_mhd_features_digest(ctx_mhdstart *mhdst)
         mhdrslt retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_DIGEST_AUTH);
         if (retcd == MHD_YES) {
-            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: available"));
+            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: available"));
         } else {
             if (mhdst->motapp->conf->webcontrol_auth_method == "digest") {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
+                MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
                 mhdst->motapp->conf->webcontrol_auth_method = "none";
             } else {
-                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
+                MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
             }
         }
     #endif
@@ -1060,7 +1060,7 @@ static void webu_mhd_features_ipv6(ctx_mhdstart *mhdst)
 {
     #if MHD_VERSION < 0x00094400
         if (mhdst->ipv6) {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old ipv6 disabled"));
+            MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old ipv6 disabled"));
             if (mhdst->ipv6) {
                 mhdst->ipv6 = 0;
             }
@@ -1069,9 +1069,9 @@ static void webu_mhd_features_ipv6(ctx_mhdstart *mhdst)
         mhdrslt retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_IPv6);
         if (retcd == MHD_YES) {
-            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("IPV6: available"));
+            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("IPV6: available"));
         } else {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("IPV6: disabled"));
+            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("IPV6: disabled"));
             if (mhdst->ipv6) {
                 mhdst->ipv6 = 0;
             }
@@ -1084,20 +1084,20 @@ static void webu_mhd_features_tls(ctx_mhdstart *mhdst)
 {
     #if MHD_VERSION < 0x00094400
         if (mhdst->motapp->conf->webcontrol_tls) {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL/TLS disabled"));
+            MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL/TLS disabled"));
             mhdst->motapp->conf->webcontrol_tls = 0;
         }
     #else
         mhdrslt retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_SSL);
         if (retcd == MHD_YES) {
-            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: available"));
+            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: available"));
         } else {
             if (mhdst->motapp->conf->webcontrol_tls) {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
+                MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
                 mhdst->motapp->conf->webcontrol_tls = 0;
             } else {
-                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
+                MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
             }
         }
     #endif
@@ -1138,7 +1138,7 @@ static std::string webu_mhd_loadfile(std::string fname)
                     file_char[file_size] = 0;
                     filestr.assign(file_char, file_size);
                 } else {
-                    MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                    MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
                         ,_("Error reading file for SSL/TLS support."));
                 }
                 free(file_char);
@@ -1156,12 +1156,12 @@ static void webu_mhd_checktls(ctx_mhdstart *mhdst)
 
     if (mhdst->motapp->conf->webcontrol_tls) {
         if ((mhdst->motapp->conf->webcontrol_cert == "") || (mhdst->tls_cert == "")) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
             mhdst->motapp->conf->webcontrol_tls = 0;
         }
         if ((mhdst->motapp->conf->webcontrol_key == "") || (mhdst->tls_key == "")) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 ,_("SSL/TLS requested but no key file provided.  SSL/TLS disabled"));
             mhdst->motapp->conf->webcontrol_tls = 0;
         }
@@ -1335,7 +1335,7 @@ static void webu_init_webcontrol(ctx_motapp *motapp)
     ctx_mhdstart mhdst;
     unsigned int randnbr;
 
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+    MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
         , _("Starting webcontrol on port %d")
         , motapp->conf->webcontrol_port);
 
@@ -1371,9 +1371,9 @@ static void webu_init_webcontrol(ctx_motapp *motapp)
 
     free(mhdst.mhd_ops);
     if (motapp->webcontrol_daemon == NULL) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Unable to start MHD"));
+        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Unable to start MHD"));
     } else {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             ,_("Started webcontrol on port %d")
             ,motapp->conf->webcontrol_port);
     }

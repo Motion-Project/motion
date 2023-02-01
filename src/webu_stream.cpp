@@ -245,14 +245,14 @@ static int webu_stream_checks(ctx_webui *webui)
 {
     pthread_mutex_lock(&webui->motapp->mutex_camlst);
         if (webui->threadnbr == -1) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
                 , _("Invalid thread specified: %s"),webui->url.c_str());
             pthread_mutex_unlock(&webui->motapp->mutex_camlst);
             return -1;
         }
 
         if (webui->threadnbr < 0) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
                 , _("Invalid thread specified: %s"),webui->url.c_str());
             pthread_mutex_unlock(&webui->motapp->mutex_camlst);
             return -1;
@@ -366,7 +366,7 @@ static mhdrslt webu_stream_mjpeg(ctx_webui *webui)
     response = MHD_create_response_from_callback (MHD_SIZE_UNKNOWN, 1024
         ,&webu_stream_mjpeg_response, webui, NULL);
     if (!response) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
 
@@ -408,14 +408,14 @@ static mhdrslt webu_stream_static(ctx_webui *webui)
     webu_stream_static_getimg(webui);
 
     if (webui->resp_used == 0) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Could not get image to stream."));
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Could not get image to stream."));
         return MHD_NO;
     }
 
     response = MHD_create_response_from_buffer (webui->resp_size
         ,(void *)webui->resp_image, MHD_RESPMEM_MUST_COPY);
     if (!response) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
 

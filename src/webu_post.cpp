@@ -34,7 +34,7 @@ static void webu_post_cam_add(ctx_webui *webui)
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"camera_add")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Camera add action disabled");
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Camera add action disabled");
                 return;
             } else {
                 break;
@@ -42,7 +42,7 @@ static void webu_post_cam_add(ctx_webui *webui)
         }
     }
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Adding camera.");
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Adding camera.");
 
     maxcnt = 100;
 
@@ -55,11 +55,11 @@ static void webu_post_cam_add(ctx_webui *webui)
 
     if (indx == maxcnt) {
         webui->motapp->cam_add = false;
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error adding camera.  Timed out");
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error adding camera.  Timed out");
         return;
     }
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "New camera added.");
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "New camera added.");
 
 }
 /* Process the delete camera action */
@@ -72,7 +72,7 @@ static void webu_post_cam_delete(ctx_webui *webui)
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"camera_delete")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Camera delete action disabled");
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Camera delete action disabled");
                 return;
             } else {
                 break;
@@ -81,10 +81,10 @@ static void webu_post_cam_delete(ctx_webui *webui)
     }
 
     if (webui->threadnbr == -1) {
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "No camera specified for deletion." );
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "No camera specified for deletion." );
         return;
     } else {
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Deleting camera.");
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Deleting camera.");
     }
 
     webui->motapp->cam_delete = webui->threadnbr;
@@ -96,7 +96,7 @@ static void webu_post_cam_delete(ctx_webui *webui)
         indx++;
     }
     if (indx == maxcnt) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error stopping camera.  Timed out shutting down");
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error stopping camera.  Timed out shutting down");
         webui->motapp->cam_delete = -1;
         return;
     }
@@ -120,19 +120,19 @@ void webu_post_cmdthrd(ctx_webui *webui)
             camid = atoi(webui->post_info[indx].key_val);
         }
 
-        MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,"key: %s  value: %s "
+        MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,"key: %s  value: %s "
             , webui->post_info[indx].key_nm
             , webui->post_info[indx].key_val
         );
     }
 
     if (webui->post_cmd == "") {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , "Invalid post request.  No command");
         return;
     }
     if (camid == -1) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , "Invalid post request.  No camera id provided");
         return;
     }
@@ -156,7 +156,7 @@ void webu_post_action_eventend(ctx_webui *webui)
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"event")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Event end action disabled");
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Event end action disabled");
                 return;
             } else {
                 break;
@@ -184,7 +184,7 @@ void webu_post_action_eventstart(ctx_webui *webui)
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"event")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Event start action disabled");
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Event start action disabled");
                 return;
             } else {
                 break;
@@ -212,7 +212,7 @@ void webu_post_action_snapshot(ctx_webui *webui)
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"snapshot")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Snapshot action disabled");
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Snapshot action disabled");
                 return;
             } else {
                 break;
@@ -240,7 +240,7 @@ void webu_post_action_pause(ctx_webui *webui)
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"pause")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
                 return;
             } else {
                 break;
@@ -268,7 +268,7 @@ void webu_post_action_unpause(ctx_webui *webui)
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"pause")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
                 return;
             } else {
                 break;
@@ -296,7 +296,7 @@ void webu_post_action_restart(ctx_webui *webui)
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"restart")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Restart action disabled");
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Restart action disabled");
                 return;
             } else {
                 break;
@@ -304,13 +304,13 @@ void webu_post_action_restart(ctx_webui *webui)
         }
     }
     if (webui->threadnbr == -1) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all cameras"));
+        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all cameras"));
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             webui->motapp->cam_list[indx]->restart_dev = true;
             webui->motapp->cam_list[indx]->finish_dev = true;
         }
     } else {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Restarting camera %d")
             , webui->motapp->cam_list[webui->threadnbr]->device_id);
         webui->motapp->cam_list[webui->threadnbr]->restart_dev = true;
@@ -328,7 +328,7 @@ void webu_post_action_stop(ctx_webui *webui)
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"stop")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Stop action disabled");
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Stop action disabled");
                 return;
             } else {
                 break;
@@ -337,7 +337,7 @@ void webu_post_action_stop(ctx_webui *webui)
     }
     if (webui->threadnbr == -1) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Stopping cam %d")
                 , webui->motapp->cam_list[indx]->device_id);
             webui->motapp->cam_list[indx]->restart_dev = false;
@@ -346,7 +346,7 @@ void webu_post_action_stop(ctx_webui *webui)
             webui->motapp->cam_list[indx]->finish_dev = true;
         }
     } else {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Stopping cam %d")
             , webui->motapp->cam_list[webui->threadnbr]->device_id);
         webui->motapp->cam_list[webui->threadnbr]->restart_dev = false;
@@ -369,7 +369,7 @@ void webu_post_action_user(ctx_webui *webui)
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"action_user")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "User action disabled");
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "User action disabled");
                 return;
             } else {
                 break;
@@ -388,14 +388,14 @@ void webu_post_action_user(ctx_webui *webui)
             }
             for (indx2 = 0; indx2<(int)tmp.length(); indx2++) {
                 if (isalnum(tmp.at(indx2)) == false) {
-                    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                    MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                         , _("Invalid character included in action user \"%c\"")
                         , tmp.at(indx2));
                     return;
                 }
             }
             snprintf(cam->action_user, 40, "%s", tmp.c_str());
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Executing user action on cam %d")
                 , cam->device_id);
             util_exec_command(cam, cam->conf->on_action_user.c_str(), NULL, 0);
@@ -410,7 +410,7 @@ void webu_post_action_user(ctx_webui *webui)
         }
         for (indx2 = 0; indx2<(int)tmp.length(); indx2++) {
             if (isalnum(tmp.at(indx2)) == false) {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     , _("Invalid character included in action user \"%c\"")
                     , tmp.at(indx2));
                 return;
@@ -418,7 +418,7 @@ void webu_post_action_user(ctx_webui *webui)
         }
         snprintf(cam->action_user, 40, "%s", tmp.c_str());
 
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Executing user action on cam %d")
             , cam->device_id);
         util_exec_command(cam, cam->conf->on_action_user.c_str(), NULL, 0);
@@ -436,7 +436,7 @@ void webu_post_write_config(ctx_webui *webui)
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"config_write")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config write action disabled");
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Config write action disabled");
                 return;
             } else {
                 break;
@@ -459,7 +459,7 @@ static void webu_post_config(ctx_webui *webui)
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"config")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config save actions disabled");
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Config save actions disabled");
                 return;
             } else {
                 break;
@@ -526,7 +526,7 @@ void webu_post_ptz(ctx_webui *webui)
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"ptz")) {
             if (mystreq(wact->params_array[indx].param_value,"off")) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "PTZ actions disabled");
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "PTZ actions disabled");
                 return;
             } else {
                 break;
@@ -627,7 +627,7 @@ void webu_post_main(ctx_webui *webui)
         webu_post_ptz(webui);
 
     } else {
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO
+        MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO
             , _("Invalid action requested: command: >%s< threadnbr : >%d< ")
             , webui->post_cmd.c_str(), webui->threadnbr);
     }

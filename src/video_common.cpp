@@ -441,7 +441,7 @@ int vid_mjpegtoyuv420p(unsigned char *img_dst, unsigned char *img_src, int width
 
     ptr_buffer =(unsigned char*) memmem(img_src, size, "\xff\xd8", 2);
     if (ptr_buffer == NULL) {
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO,_("Corrupt image ... continue"));
+        MOTPLS_LOG(CRT, TYPE_VIDEO, NO_ERRNO,_("Corrupt image ... continue"));
         return 1;
     }
     /**
@@ -454,7 +454,7 @@ int vid_mjpegtoyuv420p(unsigned char *img_dst, unsigned char *img_src, int width
     }
 
     if (soi_pos != 0) {
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("SOI position adjusted by %d bytes."), soi_pos);
+        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("SOI position adjusted by %d bytes."), soi_pos);
     }
 
     memmove(img_src, img_src + soi_pos, size - soi_pos);
@@ -463,7 +463,7 @@ int vid_mjpegtoyuv420p(unsigned char *img_dst, unsigned char *img_src, int width
     ret = jpgutl_decode_jpeg(img_src,size, width, height, img_dst);
 
     if (ret == -1) {
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO,_("Corrupt image ... continue"));
+        MOTPLS_LOG(CRT, TYPE_VIDEO, NO_ERRNO,_("Corrupt image ... continue"));
         ret = 1;
     }
     return ret;

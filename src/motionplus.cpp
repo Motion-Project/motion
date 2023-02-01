@@ -170,11 +170,11 @@ static void motpls_pid_write(ctx_motapp *motapp)
         if (pidf) {
             (void)fprintf(pidf, "%d\n", getpid());
             myfclose(pidf);
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Created process id file %s. Process ID is %d")
                 ,motapp->conf->pid_file.c_str(), getpid());
         } else {
-            MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
+            MOTPLS_LOG(EMG, TYPE_ALL, SHOW_ERRNO
                 , _("Cannot create process id file (pid file) %s")
                 , motapp->conf->pid_file.c_str());
         }
@@ -188,9 +188,9 @@ static void motpls_pid_remove(ctx_motapp *motapp)
     if ((motapp->conf->pid_file != "") &&
         (motapp->restart_all == false)) {
         if (!unlink(motapp->conf->pid_file.c_str())) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Removed process id file (pid file)."));
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Removed process id file (pid file)."));
         } else{
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error removing pid file"));
+            MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error removing pid file"));
         }
     }
 
@@ -212,7 +212,7 @@ static void motpls_daemon()
     sigemptyset(&sig_ign_action.sa_mask);
 
     if (fork()) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus going to daemon mode"));
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus going to daemon mode"));
         exit(0);
     }
 
@@ -221,7 +221,7 @@ static void motpls_daemon()
      * without having to stop MotionPlus
      */
     if (chdir("/")) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Could not change directory"));
+        MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Could not change directory"));
     }
 
     #if (defined(BSD) && !defined(__APPLE__))
@@ -314,8 +314,8 @@ static void motpls_device_ids(ctx_motapp *motapp)
     }
 
     if (invalid_ids) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Device IDs are not unique."));
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Falling back to sequence numbers"));
+        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Device IDs are not unique."));
+        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Falling back to sequence numbers"));
         for (indx=0; indx<motapp->cam_cnt; indx++) {
             motapp->cam_list[indx]->device_id = indx + 1;
         }
@@ -330,63 +330,63 @@ static void motpls_ntc(void)
 {
 
     #ifdef HAVE_V4L2
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("v4l2   : available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("v4l2   : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("v4l2   : not available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("v4l2   : not available"));
     #endif
 
     #ifdef HAVE_WEBP
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("webp   : available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("webp   : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("webp   : not available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("webp   : not available"));
     #endif
 
     #ifdef HAVE_LIBCAM
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("libcam : available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("libcam : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("libcam : not available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("libcam : not available"));
     #endif
 
     #ifdef HAVE_MYSQL
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("mysql  : available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("mysql  : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("mysql  : not available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("mysql  : not available"));
     #endif
 
     #ifdef HAVE_MARIADB
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("MariaDB: available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("MariaDB: available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("MariaDB: not available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("MariaDB: not available"));
     #endif
 
     #ifdef HAVE_SQLITE3
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("sqlite3: available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("sqlite3: available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("sqlite3: not available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("sqlite3: not available"));
     #endif
 
     #ifdef HAVE_PGSQL
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("pgsql  : available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("pgsql  : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("pgsql  : not available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("pgsql  : not available"));
     #endif
 
     #ifdef ENABLE_NLS
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("nls    : available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("nls    : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("nls    : not available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("nls    : not available"));
     #endif
 
     #ifdef HAVE_ALSA
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("alsa   : available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("alsa   : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("alsa   : not available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("alsa   : not available"));
     #endif
 
     #ifdef HAVE_FFTW3
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("fftw3  : available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("fftw3  : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("fftw3  : not available"));
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("fftw3  : not available"));
     #endif
 
 }
@@ -408,12 +408,12 @@ static void motpls_startup(ctx_motapp *motapp, int daemonize)
     if (daemonize) {
         if (motapp->conf->daemon && motapp->conf->setup_mode == 0) {
             motpls_daemon();
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus running as daemon process"));
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus running as daemon process"));
         }
     }
 
     if (motapp->conf->setup_mode) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("MotionPlus running in setup mode."));
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("MotionPlus running in setup mode."));
     }
 
     conf_parms_log(motapp);
@@ -444,7 +444,7 @@ static void motpls_start_thread_cam(ctx_dev *cam)
     cam->restart_dev = true;
     retcd = pthread_create(&cam->thread_id, &thread_attr, &mlp_main, cam);
     if (retcd != 0) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start camera thread."));
+        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start camera thread."));
     }
     pthread_attr_destroy(&thread_attr);
 
@@ -461,7 +461,7 @@ static void motpls_start_thread_snd(ctx_dev *snd)
     snd->restart_dev = true;
     retcd = pthread_create(&snd->thread_id, &thread_attr, &snd_loop, snd);
     if (retcd != 0) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start sound thread."));
+        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start sound thread."));
     }
     pthread_attr_destroy(&thread_attr);
 
@@ -470,7 +470,7 @@ static void motpls_start_thread_snd(ctx_dev *snd)
 static void motpls_restart(ctx_motapp *motapp)
 {
 
-    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Restarting MotionPlus."));
+    MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Restarting MotionPlus."));
 
     motpls_shutdown(motapp);
 
@@ -478,7 +478,7 @@ static void motpls_restart(ctx_motapp *motapp)
 
     motpls_startup(motapp, false);
 
-    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("MotionPlus restarted"));
+    MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("MotionPlus restarted"));
 
     motapp->restart_all = false;
 
@@ -498,7 +498,7 @@ static void motpls_watchdog(ctx_motapp *motapp, int camindx)
         return;
     }
 
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
         , _("Camera %d - Watchdog timeout.")
         , motapp->cam_list[camindx]->device_id);
 
@@ -542,7 +542,7 @@ static void motpls_watchdog(ctx_motapp *motapp, int camindx)
     for (indx=0; indx<motapp->cam_cnt; indx++) {
         if (motapp->cam_list[indx]->netcam != NULL) {
             if (motapp->cam_list[indx]->netcam->handler_finished == false) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                     , _("Camera %d - Watchdog netcam kill.")
                     , motapp->cam_list[indx]->device_id);
                 pthread_kill(motapp->cam_list[indx]->netcam->thread_id, SIGVTALRM);
@@ -550,14 +550,14 @@ static void motpls_watchdog(ctx_motapp *motapp, int camindx)
         }
         if (motapp->cam_list[indx]->netcam_high != NULL) {
             if (motapp->cam_list[indx]->netcam_high->handler_finished == false) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                     , _("Camera %d - Watchdog netcam_high kill.")
                     , motapp->cam_list[indx]->device_id);
                 pthread_kill(motapp->cam_list[indx]->netcam_high->thread_id, SIGVTALRM);
             }
         }
         if (motapp->cam_list[indx]->running_dev == true) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("Camera %d - Watchdog kill.")
                 , motapp->cam_list[indx]->device_id);
             pthread_kill(motapp->cam_list[indx]->thread_id, SIGVTALRM);
@@ -686,7 +686,7 @@ static void motpls_cam_delete(ctx_motapp *motapp)
     }
 
     if (motapp->cam_delete >= motapp->cam_cnt) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             , _("Invalid camera specified for deletion. %d"), motapp->cam_delete);
         motapp->cam_delete = -1;
         return;
@@ -694,7 +694,7 @@ static void motpls_cam_delete(ctx_motapp *motapp)
 
     cam = motapp->cam_list[motapp->cam_delete];
 
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Stopping %s device_id %d")
+    MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Stopping %s device_id %d")
         , cam->conf->device_name.c_str(), cam->device_id);
     cam->restart_dev = false;
     cam->finish_dev = true;
@@ -706,11 +706,11 @@ static void motpls_cam_delete(ctx_motapp *motapp)
         indx1++;
     }
     if (indx1 == maxcnt) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error stopping camera.  Timed out shutting down");
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error stopping camera.  Timed out shutting down");
         motapp->cam_delete = -1;
         return;
     }
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Camera stopped");
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Camera stopped");
 
     tmp = (ctx_dev **)mymalloc(sizeof(ctx_dev *) * (motapp->cam_cnt));
     tmp[motapp->cam_cnt-1] = NULL;
@@ -765,7 +765,7 @@ int main (int argc, char **argv)
             motpls_start_thread_snd(motapp->snd_list[indx]);
         }
 
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Motionplus pid: %d"), getpid());
 
         while (true) {
@@ -779,7 +779,7 @@ int main (int argc, char **argv)
                 /* Check if threads wants to be restarted */
                 if ((motapp->cam_list[indx]->running_dev == false) &&
                     (motapp->cam_list[indx]->restart_dev == true)) {
-                    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                         ,_("MotionPlus camera %d restart")
                         , motapp->cam_list[indx]->device_id);
                     motpls_start_thread_cam(motapp->cam_list[indx]);
@@ -789,7 +789,7 @@ int main (int argc, char **argv)
             for (indx=0; indx<motapp->snd_cnt; indx++) {
                 if ((motapp->snd_list[indx]->running_dev == false) &&
                     (motapp->snd_list[indx]->restart_dev == true)) {
-                    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                         ,_("MotionPlus sound %d restart")
                         , motapp->snd_list[indx]->device_id);
                     motpls_start_thread_snd(motapp->snd_list[indx]);
@@ -810,7 +810,7 @@ int main (int argc, char **argv)
 
         motapp->finish_all = false;
 
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motionplus devices finished"));
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motionplus devices finished"));
 
         if (motapp->restart_all) {
             SLEEP(1, 0);    /* Rest before restarting */
@@ -819,7 +819,7 @@ int main (int argc, char **argv)
         }
     }
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus terminating"));
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus terminating"));
 
     movie_global_deinit();
 
