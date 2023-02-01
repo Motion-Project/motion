@@ -1424,7 +1424,7 @@ static void mlp_frametiming(ctx_dev *cam)
 }
 
 /** main processing loop for each camera */
-void *motion_loop(void *arg)
+void *mlp_main(void *arg)
 {
     ctx_dev *cam =(ctx_dev *) arg;
 

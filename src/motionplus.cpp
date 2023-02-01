@@ -442,7 +442,7 @@ static void motpls_start_thread_cam(ctx_dev *cam)
     pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
 
     cam->restart_dev = true;
-    retcd = pthread_create(&cam->thread_id, &thread_attr, &motion_loop, cam);
+    retcd = pthread_create(&cam->thread_id, &thread_attr, &mlp_main, cam);
     if (retcd != 0) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start camera thread."));
     }
