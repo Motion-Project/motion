@@ -44,7 +44,7 @@
 
       <h3><a name="Examples"></a> Examples</h3>
       <ul>
-        The following provides some sample configuration options and examples for MotionPlus.  
+        The following provides some sample configuration options and examples for MotionPlus.
         <li> <a href="#persistent_device"> Persistent v4l2 device name </a></li>
         <li> <a href="#extpipe_commands"> Sample extpipe commands </a></li>
         <li> <a href="#loopback_setup">Loopback device setup</a></li>
@@ -54,7 +54,7 @@
         <li> <a href="#haar_setup">Haar setup</a></li>
         <li> <a href="#hog_setup">HOG setup</a></li>
         <li> <a href="#dnn_setup">DNN setup</a></li>
-        
+
         <p></p>
         <p></p>
       </ul>
@@ -132,9 +132,9 @@
       <ul>
       Sometimes the particular device is not function for MotionPlus but does work with FFmpeg.  In
       this situation the device can be setup to be used in MotionPlus using FFMpeg as an intermediate
-      application.  The process would be to set up a loopback device and then have FFmpeg feed the 
+      application.  The process would be to set up a loopback device and then have FFmpeg feed the
       video into that device and then Motion can read from it.  The following are some examples.  First set up
-      the loopback device and set it to /dev/video0.  Then start ffmpeg using options such as the following.    
+      the loopback device and set it to /dev/video0.  Then start ffmpeg using options such as the following.
       <code> ffmpeg -re -i mymovie.mp4 -f v4l2 /dev/video0 </code>  Then in a separate terminal, start MotionPlus
       with it set to use the <code>/dev/video0</code> device as input.  This method can can also be used to
       reformat the content to a different format.  The following outputs the original movie into a gray pixel format.
@@ -166,7 +166,7 @@
           <li><code>{IP}:{port0}/{camid}/static/source</code> Source image of the camera</li>
         </ul>
       </ul>
- 
+
       <h3><a name="haar_setup"></a>HAAR setup</h3>
       <ul>
         <li>Set the following Motionplus items within the secondardy_params</li>
@@ -178,7 +178,7 @@
           <li><code>threshold</code>Default: 1.10 | weights of detected values </li>
         </ul>
         <li>Set the following parameters to the OpenCV function <code>CascadeClassifier::detectMultScale</code> within the secondardy_params</li>
-        </u>        
+        </u>
           <li><code>scalefactor</code>Default: 1.10 | Scale factor to apply to the image</li>
           <li><code>flags</code>Default: 0 | </li>
           <li><code>maxsize</code>Default: 1024 | </li>
@@ -207,7 +207,7 @@
         </ul>
 
       </ul>
- 
+
       <h3><a name="dnn_setup"></a>DNN setup</h3>
       <ul>
         <li>Set the following items within the secondardy_params</li>
@@ -226,12 +226,12 @@
           <li><code>scale</code>Default: none | Scale used in the model</li>
           <li><code>config</code>Default: none | </li>
           <li><code>classes_file</code>Default: none | Full path and name for a file with the names of the classes </li>
-          <li><code>framework</code>Default: none | </li>        
+          <li><code>framework</code>Default: none | </li>
         </ul>
 
       </ul>
 
- 
+
     </section>
   </body>
 </html>
