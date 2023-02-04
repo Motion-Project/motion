@@ -240,28 +240,28 @@
               <td bgcolor="#edf4f9" ><a href="#threshold_ratio_change" >threshold_ratio_change</a> </td>
               <td bgcolor="#edf4f9" ><a href="#secondary_method" >secondary_method</a> </td>
               <td bgcolor="#edf4f9" ><a href="#secondary_params" >secondary_params</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#noise_level" >noise_level</a> </td>
             </tr>
 
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#noise_level" >noise_level</a> </td>
               <td bgcolor="#edf4f9" ><a href="#noise_tune" >noise_tune</a> </td>
               <td bgcolor="#edf4f9" ><a href="#despeckle_filter" >despeckle_filter</a> </td>
               <td bgcolor="#edf4f9" ><a href="#area_detect" >area_detect</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#mask_file" >mask_file</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#mask_file" >mask_file</a> </td>
               <td bgcolor="#edf4f9" ><a href="#mask_privacy" >mask_privacy</a> </td>
               <td bgcolor="#edf4f9" ><a href="#smart_mask_speed" >smart_mask_speed</a> </td>
               <td bgcolor="#edf4f9" ><a href="#lightswitch_percent" >lightswitch_percent</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#lightswitch_frames" >lightswitch_frames</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#lightswitch_frames" >lightswitch_frames</a> </td>
               <td bgcolor="#edf4f9" ><a href="#minimum_motion_frames" >minimum_motion_frames</a> </td>
               <td bgcolor="#edf4f9" ><a href="#event_gap" >event_gap</a> </td>
               <td bgcolor="#edf4f9" ><a href="#pre_capture" >pre_capture</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#post_capture" >post_capture</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#post_capture" >post_capture</a> </td>
               <td bgcolor="#edf4f9" ><a href="#static_object_time" >static_object_time</a> </td>
             </tr>
           </tbody>
@@ -297,6 +297,9 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#on_camera_found" >on_camera_found</a> </td>
               <td bgcolor="#edf4f9" ><a href="#on_secondary_detect" >on_secondary_detect</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_action_user" >on_action_user</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_sound_alert" >on_sound_alert</a> </td>
+
             </tr>
           </tbody>
         </table>
@@ -1523,6 +1526,20 @@
         <ul>
           <li> Values: String | Default: Not Defined</li>
           The full path and file name of the program/script to be executed when secondary detection occurs.
+        </ul>
+        <p></p>
+
+        <h3><a name="on_action_user"></a>on_action_user</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          The full path and file name of the program/script to be executed when user selects the user action from the web interface.
+        </ul>
+        <p></p>
+
+        <h3><a name="on_sound_alert"></a>on_sound_alert</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          The full path and file name of the program/script to be executed when a sound alert is triggered.
         </ul>
         <p></p>
 
