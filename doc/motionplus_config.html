@@ -844,7 +844,7 @@
         <i><h4> palette </h4></i>
         <div>
           <ul>
-            <li> Values: 0 - 21 | Default: 17</li>
+            <li> Values: 0 - 20 | Default: 17</li>
             Preferred color palette for MotionPlus to use for the device.  See table below for the meaning of
             each parameter number value.
             <div class="tblpaltte">
@@ -1052,6 +1052,14 @@
             the FPS that the camera is sending image.  Users can also specify the capture_rate as
             <code>pts</code>.  When using <code>pts</code> as the capture_rate MotionPlus will sync the timing
             of the capture to match between the clock and the presentation time stamps sent from the camera.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>decoder</h4></i>
+            The ffmpeg hardware decoder to use.  Note that not all of the hardware decoders provided by ffmpeg are
+            available.  The only hardware decoders are those that do not require customization of libary usage.  The
+            ffmpeg libaries on the computer must usually be built from source in order to enable hardware decoding.
           </div>
           <p></p>
 
@@ -1882,8 +1890,10 @@
             <li> ptz:  Applies for all PTZ commands</li>
             <li> stop</li>
             <li> restart</li>
+            <li> action_user</li>
             <li> config_write</li>
             <li> config:  Applies for any and all configuration parameters</li>
+            <li> movies:  Show page of recorded movies on webcontrol for downloading (requires database functionality)</li>
           </ul>
           Specify each of these using values of `on` or `off` to permit or deny respectively.  The specification in
           this parameter will override the default that is associated with

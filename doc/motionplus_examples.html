@@ -141,6 +141,84 @@
       <code> ffmpeg -re -i mymovie.mp4 -f v4l2 -pix_fmt gray /dev/video0 </code>
       </ul>
 
+      <h3><a name="database_setup"></a>Database Setup</h3>
+      <ul>
+        If a database is specified in the MotionPlus configuration, upon start up, MotionPlus will check for a table in
+        the database called "motionplus" and if it is not found, it will create it.  This MotionPlus specific table is
+        required so that movies can be displayed on the webcontrol page.  It tracks the movies created by MotionPlus along
+        with the various metadata about the movies.  The following is a brief overview of how to create a simple database
+        and specify it within the MotionPlus parameters so recordings can be downloaded from the webcontrol.
+       <ul>
+          <div>
+            <i><h4>sqlite3</h4></i>
+            This database type is by far the easiest to set up since it is file based.  Simply provide the
+            parameters in the MotionPlus configuration parameters
+            <ul>
+            <small><small><code>
+            database_type sqlite3
+            <br>database_dbname /full/path/and/file/name.db
+            </code></small></small>
+            </ul>
+            While this is the easiest to set up, it has also been observed that it can at times be unstable.  This
+            is especially true if the database file is included as part of a archive process while in use by MotionPlus.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>mariadb</h4></i>
+            The following describes the process to set up a Mariadb database.  If your machine already has a Mariadb database,
+            adjust as appropriate to the situation that exists on your computer.  Those with more experience with MariaDb are
+            invited to provide suggestions and corrections to these steps.
+            <small><small><code>
+            <ul>
+            sudo apt install libmariadb-dev libmariadb3 mariadb-client-10.5 mariadb-client-core-10.5 mariadb-common mariadb-server
+            <br>sudo mariadb
+              <ul>
+              GRANT ALL ON *.* TO 'YourUserNameHere'@'localhost' IDENTIFIED BY 'YourPasswordHere' WITH GRANT OPTION;
+              <br>FLUSH PRIVILEGES;
+              <br>exit
+              </ul>
+            mariadb -u YourUserNameHere -p
+              <ul>
+              {enter YourPasswordHere}
+              <br>create database motionplus;
+              <br>use motionplus;
+              <br>quit;
+              </ul>
+            </code></small></small>
+            </ul>
+
+            Once the database is set up, check the status of Mariadb via systemctl.
+            <ul>
+            <small><small><code>
+            sudo systemctl status mariadb
+            </code></small></small>
+            </ul>
+
+            Specify the following in the MotionPlus configuration parameters.
+            <ul>
+            <small><small><code>
+            database_type mariadb
+            <br>database_dbname motionplus
+            <br>database_host localhost
+            <br>database_port 3306
+            <br>database_user YourUserNameHere
+            <br>database_password YourPasswordHere
+            </code></small></small>
+            </ul>
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>pgsql</h4></i>
+            ToDo
+          <p></p>
+
+
+       </ul>
+
+      </ul>
+
       <h3><a name="webcontrol_pages"></a>Webcontrol pages</h3>
       <ul>
         <li><code>{IP}:{port0}/</code> Home html page with streams for all cameras</li>
