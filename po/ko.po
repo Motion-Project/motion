@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.x\n"
+"Project-Id-Version: 0.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-18 21:32-0600\n"
-"PO-Revision-Date: 2021-06-18 21:46-0600\n"
+"POT-Creation-Date: 2023-02-04 18:23-0700\n"
+"PO-Revision-Date: 2023-02-048 21:45-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: ko\n"
@@ -16,3298 +16,3440 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.0.6\n"
 
-#: src/alg.cpp:1008
+#: /home/dave/source/motionplus/src/alg.cpp
 msgid "Lightswitch detected"
-msgstr "전등 스위치가 감지되었습니다"
+msgstr "전등 스위치 감지됨"
 
-#: src/alg_sec.cpp:217 src/alg_sec.cpp:266 src/alg_sec.cpp:289
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 #, c-format
-#| msgid "Error getcwd"
 msgid "Error %s"
-msgstr ""
+msgstr "오류 %s"
 
-#: src/alg_sec.cpp:218 src/alg_sec.cpp:267
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Disabling secondary detection"
-msgstr ""
+msgstr "보조 감지 비활성화"
 
-#: src/alg_sec.cpp:278
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "No secondary model specified."
-msgstr ""
+msgstr "보조 모델이 지정되지 않았습니다."
 
-#: src/alg_sec.cpp:284 src/alg_sec.cpp:290
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 #, c-format
-#| msgid "Failed to open '%s'"
 msgid "Failed loading model %s"
-msgstr ""
+msgstr "모델 %s 로드 실패"
 
-#: src/alg_sec.cpp:470
-#| msgid "Start"
+#: /home/dave/source/motionplus/src/alg_sec.cpp
+#, c-format
+msgid "Classes file not found: %s"
+msgstr "클래스 파일을 찾을 수 없음: %s"
+
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Starting."
-msgstr ""
+msgstr "시작합니다."
 
-#: src/alg_sec.cpp:496
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Exiting."
-msgstr ""
+msgstr "종료합니다."
 
-#: src/alg_sec.cpp:513
-#| msgid "%s: Error starting handler thread"
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Error starting algsec handler thread"
-msgstr ""
+msgstr "algsec 핸들러 스레드 시작 오류"
 
-#: src/alg_sec.cpp:576
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Graceful shutdown of secondary detector thread failed"
-msgstr ""
+msgstr "보조 탐지기 스레드를 정상적으로 종료하지 못했습니다."
 
-#: src/alg_sec.cpp:610
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Your computer is too slow for these settings."
-msgstr ""
+msgstr "컴퓨터가 이 설정에 비해 너무 느립니다."
 
-#: src/alg_sec.cpp:613
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Missed many frames for secondary detection."
-msgstr ""
+msgstr "2차 감지를 위해 많은 프레임을 놓쳤습니다."
 
-#: src/alg_sec.cpp:615
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Your computer is too slow."
-msgstr ""
+msgstr "컴퓨터가 너무 느립니다."
 
-#: src/conf.cpp:428
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "daemon"
-msgstr "데몬"
+msgstr "악마"
 
-#: src/conf.cpp:441
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "setup_mode"
 msgstr "설정 모드"
 
-#: src/conf.cpp:454 src/conf.cpp:480
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "log_file"
 msgstr "로그 파일"
 
-#: src/conf.cpp:467
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "pid_file"
 msgstr "pid 파일"
 
-#: src/conf.cpp:491
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid file name %s"
 msgid "Invalid log_level %d"
-msgstr ""
+msgstr "잘못된 로그 수준 %d"
 
-#: src/conf.cpp:505
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "log_level"
-msgstr "로그 레벨"
+msgstr "로그 수준"
 
-#: src/conf.cpp:520
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid url: %s"
 msgid "Invalid log_type %s"
-msgstr ""
+msgstr "잘못된 로그 유형 %s"
 
-#: src/conf.cpp:531
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "log_type"
 msgstr "로그 유형"
 
-#: src/conf.cpp:544
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "native_language"
 msgstr "모국어"
 
-#: src/conf.cpp:561
-msgid "camera_name"
-msgstr "카메라 이름"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "camera"
+msgstr "카메라"
 
-#: src/conf.cpp:579
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "device_name"
+msgstr "장치 이름"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "%s: Invalid camera service"
-msgid "Invalid camera_id %d"
-msgstr ""
+msgid "Invalid device_id %d"
+msgstr "잘못된 장치 ID %d"
 
-#: src/conf.cpp:587
-msgid "camera_id"
-msgstr "카메라 ID"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "device_id"
+msgstr "장치 아이디"
 
-#: src/conf.cpp:598
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "%s: Invalid camera service"
-msgid "Invalid camera_tmo %d"
-msgstr ""
+msgid "Invalid device_tmo %d"
+msgstr "잘못된 장치 tmo %d"
 
-#: src/conf.cpp:606
-#| msgid "camera_name"
-msgid "camera_tmo"
-msgstr ""
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "device_tmo"
+msgstr "장치 티모"
 
-#: src/conf.cpp:619
-msgid "camera_dir"
-msgstr "카메라 디렉토리"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "pause"
+msgstr "정지시키다"
 
-#: src/conf.cpp:632
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "config_dir"
+msgstr "구성 디렉토리"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid target_dir.  Conversion specifiers not permitted. %s"
+msgstr "잘못된 target_dir입니다. 변환 지정자는 허용되지 않습니다.  %s"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "target_dir"
 msgstr "대상 디렉토리"
 
-#: src/conf.cpp:643
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid Method requested: %s"
 msgid "Invalid watchdog timeout %d"
-msgstr ""
+msgstr "잘못된 감시 시간 초과 %d"
 
-#: src/conf.cpp:651
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "watchdog_tmo"
-msgstr ""
+msgstr "워치독 티모"
 
-#: src/conf.cpp:662
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid watchdog kill timeout %d"
-msgstr ""
+msgstr "잘못된 워치독 종료 시간 초과 %d"
 
-#: src/conf.cpp:670
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "watchdog_kill"
-msgstr ""
+msgstr "감시견 죽이기"
 
-#: src/conf.cpp:683
-#| msgid "videodevice"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "v4l2_device"
-msgstr ""
+msgstr "v4l2 장치"
 
-#: src/conf.cpp:696
-#| msgid "vid_control_params"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "v4l2_params"
-msgstr ""
+msgstr "v4l2 매개변수"
 
-#: src/conf.cpp:709
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "netcam_url"
-msgstr ""
+msgstr "넷캠 URL"
 
-#: src/conf.cpp:722
-#| msgid "netcam_proxy"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "netcam_params"
-msgstr ""
+msgstr "넷캠 매개변수"
 
-#: src/conf.cpp:735
-#| msgid "netcam_highres"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "netcam_high_url"
-msgstr ""
+msgstr "넷캠 높은 URL"
 
-#: src/conf.cpp:748
-#| msgid "netcam_highres"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "netcam_high_params"
-msgstr ""
+msgstr "netcam 높은 매개변수"
 
-#: src/conf.cpp:761
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "netcam_userpass"
 msgstr "넷캠 사용자 패스"
 
-#: src/conf.cpp:798
-#, c-format
-#| msgid "Invalid url: %s"
-msgid "Invalid width %d"
-msgstr ""
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "libcam_device"
+msgstr "libcam 장치"
 
-#: src/conf.cpp:801 src/netcam.cpp:1605
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "libcam_params"
+msgstr "libcam 매개변수"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid width %d"
+msgstr "잘못된 너비 %d"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "Image width (%d) requested is not modulo 8."
-msgstr "요청한 이미지 너비 (%d)가 모듈로 8이 아닙니다."
+msgstr "요청한 이미지 너비(%d)가 모듈로 8이 아닙니다."
 
-#: src/conf.cpp:804
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Adjusting width to next higher multiple of 8 (%d)."
-msgstr "폭을 다음 8의 배수 (%d)로 조정합니다."
+msgstr "너비를 다음으로 높은 8의 배수(%d)로 조정합니다."
 
-#: src/conf.cpp:813
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "width"
-msgstr "폭"
+msgstr "너비"
 
-#: src/conf.cpp:824
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid url: %s"
 msgid "Invalid height %d"
-msgstr ""
+msgstr "잘못된 높이 %d"
 
-#: src/conf.cpp:827 src/netcam.cpp:1614
+#: /home/dave/source/motionplus/src/conf.cpp
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "Image height (%d) requested is not modulo 8."
-msgstr "요청한 이미지 높이 (%d)는 모듈로 8이 아닙니다."
+msgstr "요청한 이미지 높이(%d)가 모듈로 8이 아닙니다."
 
-#: src/conf.cpp:830 src/netcam.cpp:1617
+#: /home/dave/source/motionplus/src/conf.cpp
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "Adjusting height to next higher multiple of 8 (%d)."
-msgstr "높이를 다음 8의 배수 (%d)로 조정합니다."
+msgstr "다음으로 높은 8의 배수(%d)로 높이를 조정합니다."
 
-#: src/conf.cpp:839
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "height"
-msgstr "높이"
+msgstr "키"
 
-#: src/conf.cpp:850
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid file name %s"
 msgid "Invalid framerate %d"
-msgstr ""
+msgstr "잘못된 프레임 속도 %d"
 
-#: src/conf.cpp:858
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "framerate"
 msgstr "프레임 속도"
 
-#: src/conf.cpp:869
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "minimum_frame_time"
-msgid "Invalid minimum_frame_time %d"
-msgstr ""
-
-#: src/conf.cpp:877
-msgid "minimum_frame_time"
-msgstr "최소 프레임 시간"
-
-#: src/conf.cpp:889
-#, c-format
-#| msgid "Invalid url: %s"
 msgid "Invalid rotate %d"
-msgstr ""
+msgstr "잘못된 회전 %d"
 
-#: src/conf.cpp:899
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "rotate"
 msgstr "회전"
 
-#: src/conf.cpp:912
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid file name %s"
 msgid "Invalid flip_axis %s"
-msgstr ""
+msgstr "잘못된 반전 축 %s"
 
-#: src/conf.cpp:921
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "flip_axis"
-msgstr "플립 축"
+msgstr "뒤집기 축"
 
-#: src/conf.cpp:934
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "locate_motion_mode"
 msgid "Invalid locate_motion_mode %s"
-msgstr ""
+msgstr "잘못된 찾기 동작 모드 %s"
 
-#: src/conf.cpp:942
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "locate_motion_mode"
-msgstr "동작 모드 찾기"
+msgstr "모션 모드 찾기"
 
-#: src/conf.cpp:956
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "locate_motion_style"
 msgid "Invalid locate_motion_style %s"
-msgstr ""
+msgstr "잘못된 찾기 동작 스타일 %s"
 
-#: src/conf.cpp:964
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "locate_motion_style"
 msgstr "모션 스타일 찾기"
 
-#: src/conf.cpp:977
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "text_left"
-msgstr "텍스트 남음"
+msgstr "텍스트 왼쪽"
 
-#: src/conf.cpp:990
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "text_right"
-msgstr "텍스트 권한"
+msgstr "텍스트 오른쪽"
 
-#: src/conf.cpp:1003
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "text_changes"
 msgstr "텍스트 변경"
 
-#: src/conf.cpp:1014
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid text scale.  Adjusted to %d"
 msgid "Invalid text_scale %d"
-msgstr ""
+msgstr "잘못된 텍스트 배율 %d"
 
-#: src/conf.cpp:1027
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "text_scale"
-msgstr "텍스트 스케일"
+msgstr "텍스트 축척"
 
-#: src/conf.cpp:1040
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "text_event"
 msgstr "텍스트 이벤트"
 
-#: src/conf.cpp:1053
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "emulate_motion"
-msgstr "모방 모션"
+msgstr "모션 에뮬레이션"
 
-#: src/conf.cpp:1064
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid file name %s"
-msgid "Invalid primary method %d"
-msgstr ""
-
-#: src/conf.cpp:1072
-#| msgid "stream_auth_method"
-msgid "primary_method"
-msgstr ""
-
-#: src/conf.cpp:1083
-#, c-format
-#| msgid " - threshold: %d"
 msgid "Invalid threshold %d"
-msgstr ""
+msgstr "잘못된 임계값 %d"
 
-#: src/conf.cpp:1091
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "threshold"
-msgstr "임계 값"
+msgstr "한계점"
 
-#: src/conf.cpp:1102
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "threshold_maximum"
 msgid "Invalid threshold_maximum %d"
-msgstr ""
+msgstr "잘못된 임계값 최대값 %d"
 
-#: src/conf.cpp:1110
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "threshold_maximum"
-msgstr "임계 값 최대 값"
+msgstr "임계값 최대값"
 
-#: src/conf.cpp:1121
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid response"
 msgid "Invalid threshold_sdevx %d"
-msgstr ""
+msgstr "잘못된 임계값 sdevx %d"
 
-#: src/conf.cpp:1129
-#| msgid "threshold"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "threshold_sdevx"
-msgstr ""
+msgstr "임계값 sdevx"
 
-#: src/conf.cpp:1140
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid response"
 msgid "Invalid threshold_sdevy %d"
-msgstr ""
+msgstr "잘못된 임계값 sdevy %d"
 
-#: src/conf.cpp:1148
-#| msgid "threshold"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "threshold_sdevy"
-msgstr ""
+msgstr "임계값"
 
-#: src/conf.cpp:1159
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid response"
 msgid "Invalid threshold_sdevxy %d"
-msgstr ""
+msgstr "잘못된 임계값 sdevxy %d"
 
-#: src/conf.cpp:1167
-#| msgid "threshold"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "threshold_sdevxy"
-msgstr ""
+msgstr "임계값 sdevxy"
 
-#: src/conf.cpp:1178
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid " - threshold: %d"
 msgid "Invalid threshold_ratio %d"
-msgstr ""
+msgstr "잘못된 임계값 비율 %d"
 
-#: src/conf.cpp:1186
-#| msgid "threshold_maximum"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "threshold_ratio"
-msgstr ""
+msgstr "임계값 비율"
 
-#: src/conf.cpp:1199
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid threshold_ratio_change %d"
+msgstr "잘못된 임계값 비율 변경 %d"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "threshold_ratio_change"
+msgstr "임계 비율 변경"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "threshold_tune"
-msgstr ""
+msgstr "임계값 조정"
 
-#: src/conf.cpp:1210
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-msgid "Invalid secondary_interval %d"
-msgstr ""
+msgid "Invalid secondary_method %s"
+msgstr "잘못된 보조 방법 %s"
 
-#: src/conf.cpp:1218
-#| msgid "snapshot_interval"
-msgid "secondary_interval"
-msgstr ""
-
-#: src/conf.cpp:1229
-#, c-format
-#| msgid "Invalid file name %s"
-msgid "Invalid secondary_method %d"
-msgstr ""
-
-#: src/conf.cpp:1237
-#| msgid "webcontrol_auth_method"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "secondary_method"
-msgstr ""
+msgstr "보조 방법"
 
-#: src/conf.cpp:1250
-#| msgid "webcontrol_parms"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "secondary_params"
-msgstr ""
+msgstr "보조 매개변수"
 
-#: src/conf.cpp:1261
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid " - noise level: %2d"
 msgid "Invalid noise_level %d"
-msgstr ""
+msgstr "잘못된 소음 수준 %d"
 
-#: src/conf.cpp:1269
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "noise_level"
-msgstr "소음 레벨"
+msgstr "소음 수준"
 
-#: src/conf.cpp:1282
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "noise_tune"
-msgstr "잡음 조정"
+msgstr "소음 조정"
 
-#: src/conf.cpp:1295
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "despeckle_filter"
-msgstr "침착 필터"
+msgstr "반점 제거 필터"
 
-#: src/conf.cpp:1308
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "area_detect"
 msgstr "영역 감지"
 
-#: src/conf.cpp:1321
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "mask_file"
 msgstr "마스크 파일"
 
-#: src/conf.cpp:1334
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "mask_privacy"
 msgstr "마스크 프라이버시"
 
-#: src/conf.cpp:1345
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid thread specified: %s"
 msgid "Invalid smart_mask_speed %d"
-msgstr ""
+msgstr "잘못된 스마트 마스크 속도 %d"
 
-#: src/conf.cpp:1358
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "smart_mask_speed"
-msgstr ""
+msgstr "스마트 마스크 속도"
 
-#: src/conf.cpp:1369
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "lightswitch_percent"
 msgid "Invalid lightswitch_percent %d"
-msgstr ""
+msgstr "잘못된 조명 스위치 비율 %d"
 
-#: src/conf.cpp:1377
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "lightswitch_percent"
-msgstr "전등 스위치 비율"
+msgstr "전등 스위치 퍼센트"
 
-#: src/conf.cpp:1388
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "lightswitch_frames"
 msgid "Invalid lightswitch_frames %d"
-msgstr ""
+msgstr "잘못된 조명 스위치 프레임 %d"
 
-#: src/conf.cpp:1396
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "lightswitch_frames"
-msgstr "라이트 스위치 프레임"
+msgstr "전등 스위치 프레임"
 
-#: src/conf.cpp:1407
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "minimum_motion_frames"
 msgid "Invalid minimum_motion_frames %d"
-msgstr ""
+msgstr "잘못된 최소 모션 프레임 %d"
 
-#: src/conf.cpp:1415
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "minimum_motion_frames"
 msgstr "최소 모션 프레임"
 
-#: src/conf.cpp:1426
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid static_object_time %d"
-msgstr ""
+msgstr "잘못된 정적 개체 시간 %d"
 
-#: src/conf.cpp:1434
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "static_object_time"
-msgstr ""
+msgstr "정적 개체 시간"
 
-#: src/conf.cpp:1445
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid file name %s"
 msgid "Invalid event_gap %d"
-msgstr ""
+msgstr "잘못된 이벤트 간격 %d"
 
-#: src/conf.cpp:1453
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "event_gap"
-msgstr "이벤트 간격"
+msgstr "이벤트 갭"
 
-#: src/conf.cpp:1464
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "pre_capture"
 msgid "Invalid pre_capture %d"
-msgstr ""
+msgstr "잘못된 사전 캡처 %d"
 
-#: src/conf.cpp:1472
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "pre_capture"
 msgstr "사전 캡처"
 
-#: src/conf.cpp:1483
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "post_capture"
 msgid "Invalid post_capture %d"
-msgstr ""
+msgstr "잘못된 사후 캡처 %d"
 
-#: src/conf.cpp:1491
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "post_capture"
-msgstr "포스트 캡처"
+msgstr "캡처 후"
 
-#: src/conf.cpp:1504
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_event_start"
-msgstr "이벤트 시작시"
+msgstr "이벤트 시작 시"
 
-#: src/conf.cpp:1517
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_event_end"
-msgstr "이벤트 종료시"
+msgstr "이벤트 종료 시"
 
-#: src/conf.cpp:1530
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_picture_save"
-msgstr "사진 저장 중"
+msgstr "사진 저장"
 
-#: src/conf.cpp:1543
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_area_detected"
-msgstr "영역에서 감지되었습니다"
+msgstr "감지된 영역에서"
 
-#: src/conf.cpp:1556
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_motion_detected"
-msgstr "동작 감지"
+msgstr "모션 감지 시"
 
-#: src/conf.cpp:1569
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_movie_start"
-msgstr ""
+msgstr "영화 시작에"
 
-#: src/conf.cpp:1582
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_movie_end"
-msgstr ""
+msgstr "영화 끝에"
 
-#: src/conf.cpp:1595
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_camera_lost"
-msgstr "카메라 분실"
+msgstr "잃어버린 카메라에"
 
-#: src/conf.cpp:1608
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_camera_found"
-msgstr "카메라를 찾았습니다"
+msgstr "카메라에서 발견"
 
-#: src/conf.cpp:1621
-#| msgid "on_area_detected"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_secondary_detect"
-msgstr ""
+msgstr "보조 감지"
 
-#: src/conf.cpp:1635
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "on_action_user"
+msgstr "작업 사용자"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "on_sound_alert"
+msgstr "경고음에"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "picture_output"
 msgid "Invalid picture_output %s"
-msgstr ""
+msgstr "잘못된 그림 출력 %s"
 
-#: src/conf.cpp:1645
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "picture_output"
-msgstr "사진 출력"
+msgstr "그림 출력"
 
-#: src/conf.cpp:1658
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "picture_output_motion"
 msgid "Invalid picture_output_motion %s"
-msgstr ""
+msgstr "잘못된 사진 출력 동작 %s"
 
-#: src/conf.cpp:1668
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "picture_output_motion"
 msgstr "사진 출력 모션"
 
-#: src/conf.cpp:1681
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "picture_type"
 msgid "Invalid picture_type %s"
-msgstr ""
+msgstr "잘못된 그림 유형 %s"
 
-#: src/conf.cpp:1691
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "picture_type"
-msgstr "사진 유형"
+msgstr "그림 유형"
 
-#: src/conf.cpp:1702
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "picture_quality"
 msgid "Invalid picture_quality %d"
-msgstr ""
+msgstr "잘못된 사진 품질 %d"
 
-#: src/conf.cpp:1710
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "picture_quality"
 msgstr "화질"
 
-#: src/conf.cpp:1723
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "picture_exif"
-msgstr "그림 exif"
+msgstr "그림 엑시프"
 
-#: src/conf.cpp:1736
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "picture_filename"
-msgstr "그림 파일 이름"
+msgstr "사진 파일 이름"
 
-#: src/conf.cpp:1747
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "snapshot_interval"
 msgid "Invalid snapshot_interval %d"
-msgstr ""
+msgstr "잘못된 스냅샷 간격 %d"
 
-#: src/conf.cpp:1755
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "snapshot_interval"
-msgstr "스냅 샷 간격"
+msgstr "스냅샷 간격"
 
-#: src/conf.cpp:1768
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "snapshot_filename"
-msgstr "스냅 샷 파일 이름"
+msgstr "스냅샷 파일 이름"
 
-#: src/conf.cpp:1781
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_output"
 msgstr "영화 출력"
 
-#: src/conf.cpp:1794
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_output_motion"
-msgstr "영화 출력 모션"
+msgstr "동영상 출력 모션"
 
-#: src/conf.cpp:1805
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "movie_max_time"
 msgid "Invalid movie_max_time %d"
-msgstr ""
+msgstr "잘못된 동영상 최대 시간 %d"
 
-#: src/conf.cpp:1813
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_max_time"
 msgstr "영화 최대 시간"
 
-#: src/conf.cpp:1824
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "movie_bps"
 msgid "Invalid movie_bps %d"
-msgstr ""
+msgstr "잘못된 영화 bps %d"
 
-#: src/conf.cpp:1832
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_bps"
 msgstr "영화 bps"
 
-#: src/conf.cpp:1843
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "movie_quality"
 msgid "Invalid movie_quality %d"
-msgstr ""
+msgstr "잘못된 영화 품질 %d"
 
-#: src/conf.cpp:1851
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_quality"
 msgstr "영화 품질"
 
-#: src/conf.cpp:1864
-msgid "movie_codec"
-msgstr "영화 코덱"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "movie_container"
+msgstr "영화 컨테이너"
 
-#: src/conf.cpp:1877
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_passthrough"
 msgstr "영화 통과"
 
-#: src/conf.cpp:1890
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_filename"
 msgstr "영화 파일 이름"
 
-#: src/conf.cpp:1903
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid movie_retain %s"
+msgstr "잘못된 영화 보존 %s"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "movie_retain"
+msgstr "영화 유지"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_extpipe_use"
 msgstr "영화 extpipe 사용"
 
-#: src/conf.cpp:1916
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_extpipe"
-msgstr "영화 extpipe"
+msgstr "영화 엑스트라파이프"
 
-#: src/conf.cpp:1927
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "timelapse_interval"
 msgid "Invalid timelapse_interval %d"
-msgstr ""
+msgstr "잘못된 타임랩스 간격 %d"
 
-#: src/conf.cpp:1935
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "timelapse_interval"
-msgstr "저속 간격"
+msgstr "타임랩스 간격"
 
-#: src/conf.cpp:1950
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid timelapse_mode argument '%s'"
 msgid "Invalid timelapse_mode %s"
-msgstr ""
+msgstr "잘못된 타임랩스 모드 %s"
 
-#: src/conf.cpp:1961
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "timelapse_mode"
-msgstr "저속 모드"
+msgstr "타임랩스 모드"
 
-#: src/conf.cpp:1972
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "timelapse_fps"
 msgid "Invalid timelapse_fps %d"
-msgstr ""
+msgstr "잘못된 타임랩스 fps %d"
 
-#: src/conf.cpp:1980
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "timelapse_fps"
-msgstr "timelapse fps"
+msgstr "타임랩스 fps"
 
-#: src/conf.cpp:1993
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid timelapse_mode argument '%s'"
-msgid "Invalid timelapse_codec %s"
-msgstr ""
+msgid "Invalid timelapse_container %s"
+msgstr "잘못된 타임랩스 컨테이너 %s"
 
-#: src/conf.cpp:2003
-msgid "timelapse_codec"
-msgstr "타임 랩스 코덱"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "timelapse_container"
+msgstr "타임랩스 컨테이너"
 
-#: src/conf.cpp:2016
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "timelapse_filename"
-msgstr "timelapse 파일 이름"
+msgstr "타임랩스 파일 이름"
 
-#: src/conf.cpp:2029
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "video_pipe"
 msgstr "비디오 파이프"
 
-#: src/conf.cpp:2042
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "video_pipe_motion"
 msgstr "비디오 파이프 모션"
 
-#: src/conf.cpp:2053
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "webcontrol_port"
 msgid "Invalid webcontrol_port %d"
-msgstr ""
+msgstr "잘못된 웹 컨트롤 포트 %d"
 
-#: src/conf.cpp:2061
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_port"
-msgstr "웹 제어 포트"
+msgstr "웹 컨트롤 포트"
 
-#: src/conf.cpp:2074
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "Invalid webcontrol_base_path: Use blank instead of single / "
+msgstr "잘못된 웹 컨트롤 기본 경로: 단일 / 대신 공백을 사용하십시오."
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "Invalid webcontrol_base_path:  Must start with a / "
+msgstr "잘못된 웹 컨트롤 기본 경로: /로 시작해야 합니다."
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "webcontrol_base_path"
+msgstr "웹 컨트롤 기본 경로"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_ipv6"
-msgstr "webcontrol ipv6"
+msgstr "웹 컨트롤 ipv6"
 
-#: src/conf.cpp:2087
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_localhost"
-msgstr "웹 컨트롤 localhost"
+msgstr "웹 컨트롤 로컬 호스트"
 
-#: src/conf.cpp:2098
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "webcontrol_parms"
 msgid "Invalid webcontrol_parms %d"
-msgstr ""
+msgstr "잘못된 웹 컨트롤 매개변수 %d"
 
-#: src/conf.cpp:2110
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_parms"
-msgstr "웹 컨트롤 parms"
+msgstr "웹 컨트롤 매개변수"
 
-#: src/conf.cpp:2121
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "webcontrol_interface"
-msgid "Invalid webcontrol_interface %d"
-msgstr ""
+msgid "Invalid webcontrol_interface %s"
+msgstr "잘못된 웹 제어 인터페이스 %s"
 
-#: src/conf.cpp:2133
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_interface"
 msgstr "웹 컨트롤 인터페이스"
 
-#: src/conf.cpp:2144
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "webcontrol_auth_method"
-msgid "Invalid webcontrol_auth_method %d"
-msgstr ""
+msgid "Invalid webcontrol_auth_method %s"
+msgstr "잘못된 웹 컨트롤 인증 방법 %s"
 
-#: src/conf.cpp:2156
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_auth_method"
 msgstr "웹 컨트롤 인증 방법"
 
-#: src/conf.cpp:2169
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_authentication"
 msgstr "웹 컨트롤 인증"
 
-#: src/conf.cpp:2182
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_tls"
-msgstr "웹 컨트롤 tls"
+msgstr "웹 컨트롤 TLS"
 
-#: src/conf.cpp:2195
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_cert"
 msgstr "웹 컨트롤 인증서"
 
-#: src/conf.cpp:2208
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_key"
 msgstr "웹 컨트롤 키"
 
-#: src/conf.cpp:2220
-msgid "Error compiling regex in copy_uri"
-msgstr "복사 URI에서 정규식 컴파일 오류"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "webcontrol_headers"
+msgstr "웹 컨트롤 헤더"
 
-#: src/conf.cpp:2226
-#| msgid "webcontrol_cors_header"
-msgid "Possibly invalid webcontrol_cors_header"
-msgstr ""
-
-#: src/conf.cpp:2234
-msgid "webcontrol_cors_header"
-msgstr "웹 컨트롤 cors 헤더"
-
-#: src/conf.cpp:2247
-#| msgid "webcontrol_tls"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_html"
-msgstr ""
+msgstr "웹 컨트롤 HTML"
 
-#: src/conf.cpp:2258
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "webcontrol_actions"
+msgstr "웹 컨트롤 작업"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "stream_preview_scale"
+msgid "Invalid webcontrol_lock_minutes %d"
+msgstr "잘못된 웹 컨트롤 잠금 분 %d"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "webcontrol_lock_minutes"
+msgstr "웹 컨트롤 잠금 시간"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid webcontrol_lock_attempts %d"
+msgstr "잘못된 웹 컨트롤 잠금 시도 %d"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "webcontrol_lock_attempts"
+msgstr "웹 컨트롤 잠금 시도"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
 msgid "Invalid stream_preview_scale %d"
-msgstr ""
+msgstr "잘못된 스트림 미리보기 배율 %d"
 
-#: src/conf.cpp:2266
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_preview_scale"
-msgstr "스트림 미리보기 스케일"
+msgstr "스트림 미리보기 배율"
 
-#: src/conf.cpp:2279
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_preview_newline"
-msgstr "스트림 미리보기 개행"
+msgstr "스트림 미리보기 줄 바꿈"
 
-#: src/conf.cpp:2290
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "stream_preview_method"
-msgid "Invalid stream_preview_method %d"
-msgstr ""
+msgid "Invalid stream_preview_method %s"
+msgstr "잘못된 스트림 미리보기 방법 %s"
 
-#: src/conf.cpp:2302
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_preview_method"
 msgstr "스트림 미리보기 방법"
 
-#: src/conf.cpp:2315
-#| msgid "stream_preview_method"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_preview_ptz"
-msgstr ""
+msgstr "스트림 미리보기 ptz"
 
-#: src/conf.cpp:2326
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "stream_quality"
 msgid "Invalid stream_quality %d"
-msgstr ""
+msgstr "잘못된 스트림 품질 %d"
 
-#: src/conf.cpp:2334
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_quality"
 msgstr "스트림 품질"
 
-#: src/conf.cpp:2347
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_grey"
 msgstr "스트림 그레이"
 
-#: src/conf.cpp:2360
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_motion"
 msgstr "스트림 모션"
 
-#: src/conf.cpp:2371
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "stream_maxrate"
 msgid "Invalid stream_maxrate %d"
-msgstr ""
+msgstr "잘못된 스트림 최대 속도 %d"
 
-#: src/conf.cpp:2379
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_maxrate"
 msgstr "스트림 최대 속도"
 
-#: src/conf.cpp:2391
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "database_type"
-msgid "Invalid database_type %s"
-msgstr ""
+msgid "Invalid stream_scan_time %d"
+msgstr "잘못된 스트림 검사 시간 %d"
 
-#: src/conf.cpp:2401
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "stream_scan_time"
+msgstr "스트림 스캔 시간"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid stream_scan_scale %d"
+msgstr "잘못된 스트림 스캔 배율 %d"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "stream_scan_scale"
+msgstr "스트림 스캔 스케일"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid database_type %s"
+msgstr "잘못된 데이터베이스 유형 %s"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "database_type"
 msgstr "데이터베이스 유형"
 
-#: src/conf.cpp:2414
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "database_dbname"
-msgstr "데이터베이스 dbname"
+msgstr "데이터베이스 DB이름"
 
-#: src/conf.cpp:2427
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "database_host"
 msgstr "데이터베이스 호스트"
 
-#: src/conf.cpp:2438
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "database_port"
 msgid "Invalid database_port %d"
-msgstr ""
+msgstr "잘못된 데이터베이스 포트 %d"
 
-#: src/conf.cpp:2446
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "database_port"
 msgstr "데이터베이스 포트"
 
-#: src/conf.cpp:2459
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "database_user"
 msgstr "데이터베이스 사용자"
 
-#: src/conf.cpp:2472
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "database_password"
 msgstr "데이터베이스 비밀번호"
 
-#: src/conf.cpp:2483
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "database_busy_timeout"
 msgid "Invalid database_busy_timeout %d"
-msgstr ""
+msgstr "잘못된 데이터베이스 사용 시간 초과 %d"
 
-#: src/conf.cpp:2491
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "database_busy_timeout"
-msgstr "데이터베이스 사용 제한 시간 초과"
+msgstr "데이터베이스 사용 시간 초과"
 
-#: src/conf.cpp:2504
-msgid "sql_log_picture"
-msgstr "sql 로그 그림"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "sql_event_start"
+msgstr "SQL 이벤트 시작"
 
-#: src/conf.cpp:2517
-msgid "sql_log_snapshot"
-msgstr "sql 로그 스냅 샷"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "sql_event_end"
+msgstr "SQL 이벤트 종료"
 
-#: src/conf.cpp:2530
-msgid "sql_log_movie"
-msgstr "sql 로그 영화"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "sql_movie_start"
+msgstr "SQL 동영상 시작"
 
-#: src/conf.cpp:2543
-msgid "sql_log_timelapse"
-msgstr "sql 로그 시간 경과"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "sql_movie_end"
+msgstr "SQL 영화 끝"
 
-#: src/conf.cpp:2556
-msgid "sql_query_start"
-msgstr "sql 쿼리 시작"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "sql_pic_save"
+msgstr "SQL 사진 저장"
 
-#: src/conf.cpp:2569
-msgid "sql_query_stop"
-msgstr "sql 쿼리 중지"
-
-#: src/conf.cpp:2582
-msgid "sql_query"
-msgstr "SQL 쿼리"
-
-#: src/conf.cpp:2595
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_auto_track"
-msgstr ""
+msgstr "PTZ 자동 추적"
 
-#: src/conf.cpp:2606
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid ptz_wait %d"
-msgstr ""
+msgstr "잘못된 PTZ 대기 %d"
 
-#: src/conf.cpp:2614
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_wait"
-msgstr ""
+msgstr "PTZ 대기"
 
-#: src/conf.cpp:2627
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_move_track"
-msgstr ""
+msgstr "PTZ 무브 트랙"
 
-#: src/conf.cpp:2640
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_pan_left"
-msgstr ""
+msgstr "ptz 팬 왼쪽"
 
-#: src/conf.cpp:2653
-#| msgid "text_right"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_pan_right"
-msgstr ""
+msgstr "ptz 팬 오른쪽"
 
-#: src/conf.cpp:2666
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_tilt_up"
-msgstr ""
+msgstr "PTZ 위로 기울이기"
 
-#: src/conf.cpp:2679
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_tilt_down"
-msgstr ""
+msgstr "틸트 다운"
 
-#: src/conf.cpp:2692
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_zoom_in"
-msgstr ""
+msgstr "PTZ 확대"
 
-#: src/conf.cpp:2705
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_zoom_out"
-msgstr ""
+msgstr "PTZ 축소"
 
-#: src/conf.cpp:3192 src/conf.cpp:3212 src/conf.cpp:3232 src/conf.cpp:3253
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "snd_device"
+msgstr "SND 장치"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "snd_params"
+msgstr "SND 매개변수"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "snd_alerts"
+msgstr "알림"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid snd_window %s"
+msgstr "잘못된 snd 창 %s"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "snd_window"
+msgstr "snd 창"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "snd_show"
+msgstr "쇼"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Unknown config option \"%s\""
-msgstr "알 수없는 구성 옵션 \"%s\""
+msgstr "알 수 없는 구성 옵션 \"%s\""
 
-#: src/conf.cpp:3501
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Camera config file %s not found"
-msgstr "카메라 구성 파일 %s를 찾을 수 없음"
+msgstr "카메라 구성 파일 %s을(를) 찾을 수 없습니다."
 
-#: src/conf.cpp:3515
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-msgid "Processing camera config file %s"
-msgstr "카메라 구성 파일 %s 처리 중"
+msgid "Sound config file %s not found"
+msgstr "사운드 구성 파일 %s을(를) 찾을 수 없습니다."
 
-#: src/conf.cpp:3547
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Processing config file %s"
 msgstr "구성 파일 %s 처리 중"
 
-#: src/conf.cpp:3560
+#: /home/dave/source/motionplus/src/conf.cpp
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
-msgid "Camera directory config %s not found"
-msgstr ""
+msgid "params_file not found: %s"
+msgstr "params 파일을 찾을 수 없음: %s"
 
-#: src/conf.cpp:3650
-#| msgid "Writing configuration parameters from all files (%d):"
-msgid "Logging configuration parameters from all files"
-msgstr ""
-
-#: src/conf.cpp:3654
+#: /home/dave/source/motionplus/src/conf.cpp
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
-#| msgid "Thread %d - Config file: %s"
-msgid "Camera %d - Config file: %s"
-msgstr ""
+msgid "Unable to parse line: %s"
+msgstr "라인을 구문 분석할 수 없음: %s"
 
-#: src/conf.cpp:3679
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "%-25s <redacted>"
-msgstr "%-25s <redacted>"
+msgstr "%-25s <편집됨>"
 
-#: src/conf.cpp:3802
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "Logging configuration parameters from all files"
+msgstr "모든 파일에서 구성 매개변수 로깅"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "No Configuration Options"
+msgid "Config file: %s"
+msgstr "구성 파일: %s"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Camera %d - Config file: %s"
+msgstr "카메라 %d - 구성 파일: %s"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Sound %d - Config file: %s"
+msgstr "사운드 %d - 구성 파일: %s"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Failed to write configuration to %s"
+msgstr "구성을 %s에 쓰지 못했습니다."
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
 msgid "Configuration written to %s"
-msgstr ""
+msgstr "%s에 기록된 구성"
 
-#: src/conf.cpp:3830
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "Error getcwd"
-msgstr "getcwd 오류"
+msgstr "오류 getcwd"
 
-#: src/conf.cpp:3849
-#, c-format
-msgid "could not open configfile %s"
-msgstr "설정 파일 %s를 열 수 없습니다"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "Could not open configuration file"
+msgstr "구성 파일을 열 수 없습니다."
 
-#: src/conf.cpp:3864 src/conf.cpp:3898
-msgid "No config file to process, using default values"
-msgstr "기본값을 사용하여 처리 할 구성 파일이 없습니다"
-
-#: src/conf.cpp:3893
-#, c-format
-msgid "Processing thread 0 - config file %s"
-msgstr "처리 스레드 0-구성 파일 %s"
-
-#: src/dbse.cpp:34
-#| msgid "Invalid file name %s"
+#: /home/dave/source/motionplus/src/dbse.cpp
 msgid "Invalid database name"
-msgstr ""
+msgstr "잘못된 데이터베이스 이름"
 
-#: src/dbse.cpp:42
-msgid "Must specify database port for mysql/mariadb/pgsql"
-msgstr ""
+#: /home/dave/source/motionplus/src/dbse.cpp
+msgid "Must specify database port for mariadb/pgsql"
+msgstr "mariadb/pgsql에 대한 데이터베이스 포트를 지정해야 합니다."
 
-#: src/dbse.cpp:48
-#| msgid "Basic authentication: disabled"
+#: /home/dave/source/motionplus/src/dbse.cpp
+msgid "Must specify database name for sqlite3"
+msgstr "sqlite3에 대한 데이터베이스 이름을 지정해야 합니다."
+
+#: /home/dave/source/motionplus/src/dbse.cpp
 msgid "Database functionality disabled."
-msgstr ""
+msgstr "데이터베이스 기능이 비활성화되었습니다."
 
-#: src/dbse.cpp:64 src/dbse.cpp:75
-msgid "Closing MYSQL"
-msgstr "MYSQL 닫기"
-
-#: src/dbse.cpp:109
-msgid "Initializing database"
-msgstr "데이터베이스 초기화"
-
-#: src/dbse.cpp:115 src/dbse.cpp:127 src/dbse.cpp:158
-#, c-format
-#| msgid "Initializing database"
-msgid "Could not initialize database %s"
-msgstr ""
-
-#: src/dbse.cpp:142 src/dbse.cpp:269
-#, c-format
-msgid "SQLite3 Database filename %s"
-msgstr "SQLite3 데이터베이스 파일 이름 %s"
-
-#: src/dbse.cpp:147
-msgid "SQLite3 is threadsafe"
-msgstr "SQLite3은 스레드 세이프입니다"
-
-#: src/dbse.cpp:148
-#, c-format
-msgid "SQLite3 serialized %s"
-msgstr "SQLite3 직렬화 된 %s"
-
-#: src/dbse.cpp:149
-msgid "FAILED"
-msgstr "실패"
-
-#: src/dbse.cpp:149
-msgid "SUCCESS"
-msgstr "성공"
-
-#: src/dbse.cpp:153 src/dbse.cpp:272
-#, c-format
-msgid "Can't open database %s : %s"
-msgstr "%s 데이터베이스를 열 수 없습니다 : %s"
-
-#: src/dbse.cpp:163 src/dbse.cpp:281
-#, c-format
-msgid "database_busy_timeout %d msec"
-msgstr "데이터베이스 사용 제한 시간 %d msec"
-
-#: src/dbse.cpp:167 src/dbse.cpp:284
-#, c-format
-msgid "database_busy_timeout failed %s"
-msgstr "데이터베이스 사용 중 시간 초과 실패 %s"
-
-#: src/dbse.cpp:199 src/dbse.cpp:238
-#, c-format
-msgid "Cannot connect to MySQL database %s on host %s with user %s"
-msgstr "사용자 %s로 호스트 %s에서 MySQL 데이터베이스 %s에 연결할 수 없음"
-
-#: src/dbse.cpp:203 src/dbse.cpp:242
-#, c-format
-msgid "MySQL error was %s"
-msgstr "MySQL 오류는 %s입니다."
-
-#: src/dbse.cpp:205 src/dbse.cpp:244 src/dbse.cpp:276 src/dbse.cpp:317
-msgid "Disabling database functionality"
-msgstr ""
-
-#: src/dbse.cpp:265
-msgid "SQLite3 using shared handle"
-msgstr "공유 핸들을 사용하는 SQLite3"
-
-#: src/dbse.cpp:314 src/dbse.cpp:518
-#, c-format
-msgid "Connection to PostgreSQL database '%s' failed: %s"
-msgstr "PostgreSQL 데이터베이스 '%s'에 연결하지 못했습니다 : %s"
-
-#: src/dbse.cpp:333
-#, c-format
-msgid "Database backend %s"
-msgstr "데이터베이스 백엔드 %s"
-
-#: src/dbse.cpp:344
-#, c-format
-#| msgid "Database backend %s"
-msgid "Invalid Database backend %s"
-msgstr ""
-
-#: src/dbse.cpp:356
-#| msgid "Initializing database"
-msgid "Closing database"
-msgstr ""
-
-#: src/dbse.cpp:412 src/dbse.cpp:464
-#, c-format
-msgid "Mysql query failed %s error code %d"
-msgstr "Mysql 쿼리 실패 %s 오류 코드 %d"
-
-#: src/dbse.cpp:426 src/dbse.cpp:478
-#, c-format
-msgid ""
-"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error "
-"was %s"
-msgstr ""
-"사용자 %s MySQL 오류로 호스트 %s에서 MySQL 데이터베이스 %s에 다시 연결할 수 "
-"없습니다%s"
-
-#: src/dbse.cpp:433 src/dbse.cpp:485
-#, c-format
-msgid "Re-Connection to Mysql database '%s' Succeed"
-msgstr "Mysql 데이터베이스 '%s'에 다시 연결 성공"
-
-#: src/dbse.cpp:438 src/dbse.cpp:490
-#, c-format
-msgid "after re-connection Mysql query failed %s error code %d"
-msgstr "재 연결 후 MySQL 쿼리 %s 오류 코드 %d 실패"
-
-#: src/dbse.cpp:527
-#, c-format
-msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
-msgstr "PostgreSQL 데이터베이스 '%s'에 다시 연결하지 못했습니다 : %s"
-
-#: src/dbse.cpp:531
-#, c-format
-msgid "Re-Connection to PostgreSQL database '%s' Succeed"
-msgstr "PostgreSQL 데이터베이스 '%s'에 다시 연결 성공"
-
-#: src/dbse.cpp:561
+#: /home/dave/source/motionplus/src/dbse.cpp
 #, c-format
 msgid "SQLite error was %s"
 msgstr "SQLite 오류는 %s입니다."
 
-#: src/draw.cpp:1241 src/draw.cpp:1250
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Error retrieving table columns: %s"
+msgstr "테이블 열 검색 오류: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "SQLite3 Database filename %s"
+msgstr "SQLite3 데이터베이스 파일 이름 %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Can't open database %s : %s"
+msgstr "%s 데이터베이스를 열 수 없습니다: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Could not initialize database %s"
+msgstr "%s 데이터베이스를 초기화할 수 없습니다."
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "database_busy_timeout %d msec"
+msgstr "데이터베이스 사용 중 시간 초과 %d밀리초"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "database_busy_timeout failed %s"
+msgstr "데이터베이스 사용 중 시간 초과 실패 %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Error checking table: %s"
+msgstr "오류 검사 테이블: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Error creating table: %s"
+msgstr "테이블 생성 오류: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Error counting table: %s"
+msgstr "테이블 계산 오류: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Error retrieving table: %s"
+msgstr "테이블 검색 오류: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "MariaDB query '%s' failed. %s error code %d"
+msgstr "MariaDB 쿼리 '%s'가 실패했습니다. %s 오류 코드 %d"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid ""
+"Cannot reconnect to MariaDB database %s on host %s with user %s MariaDB "
+"error was %s"
+msgstr ""
+"사용자 %s MariaDB로 호스트 %s의 MariaDB 데이터베이스 %s에 다시 연결할 수 없습"
+"니다.오류는 %s입니다."
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Re-Connection to MariaDB database '%s' Succeed"
+msgstr "MariaDB 데이터베이스 '%s'에 대한 재연결 성공"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "after re-connection MariaDB query failed %s error code %d"
+msgstr "재연결 후 MariaDB 쿼리 실패 %s 오류 코드 %d"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Query error: %s"
+msgstr "쿼리 오류: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Query store error: %s"
+msgstr "쿼리 저장소 오류: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+msgid "Creating motionplus table"
+msgstr "모션플러스 테이블 생성"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Cannot connect to MariaDB database %s on host %s with user %s"
+msgstr ""
+"%s 호스트에서 %s 사용자로 MariaDB 데이터베이스 %s에 연결할 수 없습니다."
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "MariaDB error was %s"
+msgstr "MariaDB 오류는 %s입니다."
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+msgid "Disabling database functionality"
+msgstr "데이터베이스 기능 비활성화"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "%s database opened"
+msgstr "%s 데이터베이스가 열렸습니다."
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Connection to PostgreSQL database '%s' failed: %s"
+msgstr "PostgreSQL 데이터베이스 '%s'에 대한 연결 실패: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
+msgstr "PostgreSQL 데이터베이스 '%s'에 대한 재연결 실패: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Re-Connection to PostgreSQL database '%s' Succeed"
+msgstr "PostgreSQL 데이터베이스 '%s'에 대한 재연결 성공"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+msgid "Initializing database"
+msgstr "데이터베이스 초기화"
+
+#: /home/dave/source/motionplus/src/draw.cpp
 #, c-format
 msgid "Invalid text scale.  Adjusted to %d"
-msgstr "잘못된 텍스트 크기. %d로 조정되었습니다."
+msgstr "잘못된 텍스트 배율입니다. %d로 조정됨"
 
-#: src/event.cpp:70
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
-#| msgid "File of type %ld saved to: %s"
 msgid "File saved to: %s"
-msgstr ""
+msgstr "파일 저장 위치: %s"
 
-#: src/event.cpp:240
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Failed to put image into video pipe"
-msgstr "비디오 파이프에 이미지를 넣지 못했습니다"
+msgstr "비디오 파이프에 이미지를 넣지 못했습니다."
 
-#: src/event.cpp:270
-#| msgid "Error setting base file name"
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Error creating image file name"
-msgstr ""
+msgstr "이미지 파일 이름을 만드는 중 오류가 발생했습니다."
 
-#: src/event.cpp:302
-#| msgid "Error setting base file name"
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Error creating image motion file name"
-msgstr ""
+msgstr "이미지 모션 파일명 생성 오류"
 
-#: src/event.cpp:313
-#| msgid "Error setting base file name"
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Error creating image motion roi file name"
-msgstr ""
+msgstr "이미지 모션 로이 파일명 생성 오류"
 
-#: src/event.cpp:344 src/event.cpp:349 src/event.cpp:367 src/event.cpp:372
-#: src/event.cpp:523
-#| msgid "Error opening file %s"
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Error option"
-msgstr ""
+msgstr "오류 옵션"
 
-#: src/event.cpp:360
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "Could not create symbolic link [%s]"
-msgstr "기호 링크 [%s]를 작성할 수 없습니다."
+msgstr "심볼릭 링크[%s]를 생성할 수 없습니다."
 
-#: src/event.cpp:407
-#| msgid "Error creating preview pipe name %d %s"
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Error creating preview file name"
-msgstr ""
+msgstr "미리보기 파일 이름을 만드는 중에 오류가 발생했습니다."
 
-#: src/event.cpp:448
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Event secondary detect"
-msgstr ""
+msgstr "이벤트 보조 감지"
 
-#: src/event.cpp:498
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "CLOSING: extpipe file desc %d, error state %d"
-msgstr "닫기 : extpipe 파일 디스크 %d, 오류 상태 %d"
+msgstr "닫는 중: extpipe 파일 설명 %d, 오류 상태 %d"
 
-#: src/event.cpp:530
+#: /home/dave/source/motionplus/src/event.cpp
+#, c-format
+msgid "Unable to remove file %s"
+msgstr "%s 파일을 제거할 수 없습니다."
+
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "no write access to target directory %s"
-msgstr "대상 디렉토리 %s에 대한 쓰기 액세스 권한이 없습니다"
+msgstr "대상 디렉토리 %s에 대한 쓰기 권한이 없습니다."
 
-#: src/event.cpp:535
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "path not found, trying to create it %s ..."
-msgstr "경로를 찾을 수 없습니다. %s를 만들려고합니다 ..."
+msgstr "경로를 찾을 수 없습니다. %s 생성 시도 중 ..."
 
-#: src/event.cpp:542
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "error accesing path %s"
-msgstr "오류 액세스 경로 %s"
+msgstr "경로 %s에 액세스하는 동안 오류가 발생했습니다."
 
-#: src/event.cpp:558
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "Error specifying command line: %s"
-msgstr "명령 행 지정 오류 : %s"
+msgstr "명령줄 지정 오류: %s"
 
-#: src/event.cpp:561
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "pipe: %s"
-msgstr "파이프 : %s"
+msgstr "파이프: %s"
 
-#: src/event.cpp:569
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "popen failed"
-msgstr "팝업 실패"
+msgstr "실패"
 
-#: src/event.cpp:591
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Using extpipe"
-msgstr "extpipe 사용"
+msgstr "외부 파이프 사용"
 
-#: src/event.cpp:598 src/event.cpp:603
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "Error writing in pipe , state error %d"
 msgstr "파이프 쓰기 오류, 상태 오류 %d"
 
-#: src/event.cpp:608
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "pipe %s not created or closed already "
-msgstr "파이프 %s가 생성되지 않았거나 이미 닫혔습니다"
+msgstr "%s 파이프가 생성되지 않았거나 이미 닫혀 있습니다."
 
-#: src/event.cpp:627
+#: /home/dave/source/motionplus/src/event.cpp
+msgid "Error opening ctx_dev for movie output."
+msgstr "동영상 출력을 위해 ctx dev를 여는 중 오류가 발생했습니다."
+
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
-msgid "Source FPS %d"
-msgstr "소스 FPS %d"
-
-#: src/event.cpp:654
-#| msgid "Error opening context for movie output."
-msgid "Error opening ctx_cam for movie output."
-msgstr ""
-
-#: src/event.cpp:668
-#, c-format
-#| msgid "ffopen_open error creating (motion) file [%s]"
 msgid "Error creating motion file [%s]"
-msgstr ""
+msgstr "모션 파일 [%s] 생성 오류"
 
-#: src/event.cpp:692
-#, c-format
-#| msgid "ffopen_open error creating (timelapse) file [%s]"
-msgid "Error creating timelapse file [%s]"
-msgstr ""
-
-#: src/event.cpp:704 src/event.cpp:719 src/event.cpp:724
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Error encoding image"
 msgstr "이미지 인코딩 오류"
 
-#: src/jpegutils.cpp:91
+#: /home/dave/source/motionplus/src/event.cpp
+#, c-format
+msgid "Error creating timelapse file [%s]"
+msgstr "타임랩스 파일 [%s] 생성 오류"
+
+#: /home/dave/source/motionplus/src/jpegutils.cpp
 #, c-format
 msgid "%s: Given jpeg buffer was too small"
-msgstr "%s : 주어진 JPEG 버퍼가 너무 작습니다"
+msgstr "%s: 지정된 jpeg 버퍼가 너무 작습니다."
 
-#: src/jpegutils.cpp:465
+#: /home/dave/source/motionplus/src/jpegutils.cpp
 msgid "Invalid JPEG image dimensions"
 msgstr "잘못된 JPEG 이미지 크기"
 
-#: src/jpegutils.cpp:472
+#: /home/dave/source/motionplus/src/jpegutils.cpp
 #, c-format
 msgid "JPEG image size %dx%d, JPEG was %dx%d"
-msgstr "JPEG 이미지 크기 %dx%d, JPEG는 %dx%d"
+msgstr "JPEG 이미지 크기 %dx%d, JPEG는 %dx%d입니다."
 
-#: src/logger.cpp:270
+#: /home/dave/source/motionplus/src/libcam.cpp
+msgid "Opening libcam"
+msgstr "libcam 열기"
+
+#: /home/dave/source/motionplus/src/libcam.cpp
+msgid "libcam failed to open"
+msgstr "libcam을 열지 못했습니다."
+
+#: /home/dave/source/motionplus/src/logger.cpp
 #, c-format
 msgid "Using default log level (%s) (%d)"
-msgstr "기본 로그 레벨 (%s) 사용 (%d)"
+msgstr "기본 로그 수준(%s)(%d) 사용"
 
-#: src/logger.cpp:283
+#: /home/dave/source/motionplus/src/logger.cpp
 #, c-format
 msgid "Logging to file (%s)"
-msgstr "파일에 로깅 (%s)"
+msgstr "파일(%s)에 로깅 중"
 
-#: src/logger.cpp:287
+#: /home/dave/source/motionplus/src/logger.cpp
 #, c-format
 msgid "Exit motion, cannot create log file %s"
-msgstr "동작 종료, 로그 파일 %s를 작성할 수 없음"
+msgstr "모션 종료, 로그 파일 %s을(를) 생성할 수 없습니다."
 
-#: src/logger.cpp:292 src/logger.cpp:295
+#: /home/dave/source/motionplus/src/logger.cpp
 msgid "Logging to syslog"
-msgstr "syslog에 로그인"
+msgstr "syslog에 로깅"
 
-#: src/logger.cpp:301
+#: /home/dave/source/motionplus/src/logger.cpp
 #, c-format
 msgid "Using log type (%s) log level (%s)"
-msgstr "로그 유형 (%s) 로그 레벨 (%s) 사용"
+msgstr "로그 유형(%s) 로그 수준(%s) 사용"
 
-#: src/logger.cpp:313
+#: /home/dave/source/motionplus/src/logger.cpp
 #, c-format
 msgid "Closing logfile (%s)."
-msgstr "로그 파일 닫기 (%s)."
+msgstr "로그 파일(%s)을 닫습니다."
 
-#: src/motion_loop.cpp:60
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
-msgid "Resizing pre_capture buffer to %d items"
-msgstr "%d 항목으로 사전 캡처 버퍼 크기 조정"
+msgid "Resizing buffer to %d items"
+msgstr "버퍼 크기를 %d개 항목으로 조정 중"
 
-#: src/motion_loop.cpp:213
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
 msgid "Motion detected - starting event %d"
-msgstr "동작 감지-시작 이벤트 %d"
+msgstr "움직임 감지됨 - 시작 이벤트 %d"
 
-#: src/motion_loop.cpp:376
-msgid "calling netcam_cleanup"
-msgstr "넷캠 정리 호출"
+#: /home/dave/source/motionplus/src/motion_loop.cpp
+msgid "No Camera device cleanup"
+msgstr "카메라 장치 정리 없음"
 
-#: src/motion_loop.cpp:382
-msgid "Cleaning up V4L2 device"
-msgstr "V4L2 장치 정리"
+#: /home/dave/source/motionplus/src/motion_loop.cpp
+msgid "No Camera device specified"
+msgstr "지정된 카메라 장치가 없습니다."
 
-#: src/motion_loop.cpp:387
-msgid "No Camera device cleanup (Netcam, V4L2)"
-msgstr "카메라 장치 정리 없음 (Netcam, V4L2)"
+#: /home/dave/source/motionplus/src/motion_loop.cpp
+msgid "Unable to determine camera type"
+msgstr "카메라 유형을 확인할 수 없습니다."
 
-#: src/motion_loop.cpp:415
-msgid "Opening Netcam"
-msgstr "Netcam 열기"
-
-#: src/motion_loop.cpp:419
-msgid "Netcam failed to open"
-msgstr "Netcam을 열지 못했습니다"
-
-#: src/motion_loop.cpp:425
-msgid "Opening V4L2 device"
-msgstr "V4L2 장치 열기"
-
-#: src/motion_loop.cpp:428
-msgid "V4L2 device failed to open"
-msgstr "V4L2 장치를 열지 못했습니다"
-
-#: src/motion_loop.cpp:434
-msgid "No Camera device specified (Netcam, V4L2)"
-msgstr "카메라 장치를 지정하지 않았습니다 (Netcam, V4L2)"
-
-#: src/motion_loop.cpp:491
-msgid "Unable to determine camera type (Netcam, V4L2)"
-msgstr "카메라 유형을 결정할 수 없습니다 (Netcam, V4L2)"
-
-#: src/motion_loop.cpp:516
-msgid "Error capturing first image"
-msgstr "첫 번째 이미지 캡처 오류"
-
-#: src/motion_loop.cpp:528
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
 msgid "Image width (%d) or height(%d) requested is not modulo 8."
-msgstr "요청한 이미지 너비 (%d) 또는 높이 (%d)는 모듈로 8이 아닙니다."
+msgstr "요청한 이미지 너비(%d) 또는 높이(%d)가 모듈로 8이 아닙니다."
 
-#: src/motion_loop.cpp:534
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
 msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
-msgstr "모션은 64 %dx%d 이상의 너비와 높이 만 지원합니다."
+msgstr "모션은 64 %dx%d 이상의 너비와 높이만 지원합니다."
 
-#: src/motion_loop.cpp:541
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Substream not available.  Image sizes not modulo 16."
-msgstr "하위 스트림을 사용할 수 없습니다. 이미지 크기가 모듈로 16이 아닙니다."
+msgstr "서브스트림을 사용할 수 없습니다. 모듈로 16이 아닌 이미지 크기."
 
-#: src/motion_loop.cpp:630
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Pass-through processing disabled."
 msgstr "통과 처리가 비활성화되었습니다."
 
-#: src/motion_loop.cpp:643 src/motion_loop.cpp:647
-msgid "Could not fetch initial image from camera "
-msgstr "카메라에서 초기 이미지를 가져올 수 없습니다"
+#: /home/dave/source/motionplus/src/motion_loop.cpp
+msgid "Failed to start camera."
+msgstr "카메라를 시작하지 못했습니다."
 
-#: src/motion_loop.cpp:649
-msgid "Motion only supports width and height modulo 8"
-msgstr "모션은 너비와 높이 모듈로 8 만 지원합니다"
+#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Initialize"
+msgstr "초기화"
 
-#: src/motion_loop.cpp:682
-msgid "initialize loop"
-msgstr ""
-
-#: src/motion_loop.cpp:729
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
 msgid "Camera %d started: motion detection %s"
-msgstr "카메라 %d 시작 : 모션 감지 %s"
+msgstr "카메라 %d 시작됨: 움직임 감지 %s"
 
-#: src/motion_loop.cpp:730
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Disabled"
-msgstr "사용 안함"
+msgstr "장애가 있는"
 
-#: src/motion_loop.cpp:730
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Enabled"
-msgstr "사용 가능"
+msgstr "사용"
 
-#: src/motion_loop.cpp:733
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Emulating motion"
-msgstr "모방 모션"
+msgstr "모션 에뮬레이션"
 
-#: src/motion_loop.cpp:894
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
 msgid "Motion in area %d detected."
-msgstr "%d 영역의 모션이 감지되었습니다."
+msgstr "영역 %d에서 움직임이 감지되었습니다."
 
-#: src/motion_loop.cpp:993
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Retrying until successful connection with camera"
 msgstr "카메라와 성공적으로 연결될 때까지 재시도"
 
-#: src/motion_loop.cpp:1009
-msgid ""
-"Camera has finally become available\n"
-"Camera image has different width and heightfrom what is in the config file. "
-"You should fix that\n"
-"Restarting Motion thread to reinitialize all image buffers to new picture "
-"dimensions"
-msgstr ""
-"카메라를 마침내 사용할 수있게되었습니다 xx5z카메라 이미지가 구성 파일의 너비"
-"와 높이와 다릅니다.xx5z를 수정해야합니다모든 이미지 버퍼를 새 그림으로 다시 "
-"초기화하기 위해 모션 스레드를 다시 시작하는 중치수"
+#: /home/dave/source/motionplus/src/motion_loop.cpp
+msgid "Resetting image buffers"
+msgstr "이미지 버퍼 재설정"
 
-#: src/motion_loop.cpp:1054
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Video signal re-acquired"
-msgstr ""
+msgstr "비디오 신호 재획득"
 
-#: src/motion_loop.cpp:1064
-msgid "Video device fatal error - Closing video device"
-msgstr "비디오 장치 치명적 오류-비디오 장치 닫기"
-
-#: src/motion_loop.cpp:1071
-msgid "Restarting Motion thread to reinitialize all image buffers"
-msgstr "모든 이미지 버퍼를 다시 초기화하기 위해 모션 스레드 다시 시작"
-
-#: src/motion_loop.cpp:1105
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Video signal lost - Adding grey image"
-msgstr "비디오 신호 손실-회색 이미지 추가"
+msgstr "비디오 신호 손실 - 회색 이미지 추가"
 
-#: src/motion_loop.cpp:1112
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Video signal still lost - Trying to close video device"
-msgstr "비디오 신호가 여전히 손실 됨-비디오 장치를 닫으려고합니다"
+msgstr "여전히 비디오 신호 끊김 - 비디오 장치를 닫으려고 합니다."
 
-#: src/motion_loop.cpp:1357
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
 msgid "End of event %d"
-msgstr "이벤트 종료 %d"
+msgstr "이벤트 %d 종료"
 
-#: src/motion_loop.cpp:1415
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
-msgid "Raw changes: %5d - changes after '%s': %5d"
-msgstr "원시 변경 : %5d- '%s'이후 변경 : %5d"
+msgid "changes after '%s': %5d"
+msgstr "'%s' 이후 변경 사항: %5d"
 
-#: src/motion_loop.cpp:1419
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
 msgid " - labels: %3d"
-msgstr "-레이블 : %3d"
+msgstr "- 레이블: %3d"
 
-#: src/motion_loop.cpp:1423
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
 msgid "Changes: %5d"
-msgstr "변경 : %5d"
+msgstr "변경 사항: %5d"
 
-#: src/motion_loop.cpp:1428
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
 msgid " - noise level: %2d"
-msgstr "-소음 수준 : %2d"
+msgstr "- 소음 수준: %2d"
 
-#: src/motion_loop.cpp:1433
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
 msgid " - threshold: %d"
-msgstr "-임계 값 : %d"
+msgstr "- 임계값: %d"
 
-#: src/motion_loop.cpp:1684
-msgid "Thread exiting"
-msgstr "나사 출구"
+#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Exiting"
+msgstr "종료"
 
-#: src/motionplus.cpp:173
-msgid "Removed process id file (pid file)."
-msgstr "프로세스 ID 파일 (pid 파일)을 제거했습니다."
-
-#: src/motionplus.cpp:175
-msgid "Error removing pid file"
-msgstr "pid 파일 제거 오류"
-
-#: src/motionplus.cpp:198
-msgid "Motion going to daemon mode"
-msgstr "데몬 모드로 이동하는 모션"
-
-#: src/motionplus.cpp:216
-#, c-format
-msgid "Exit motion, cannot create process id file (pid file) %s"
-msgstr "동작 종료, 프로세스 ID 파일 (pid 파일) %s를 작성할 수 없음"
-
-#: src/motionplus.cpp:228
-msgid "Could not change directory"
-msgstr "디렉토리를 변경할 수 없습니다"
-
-#: src/motionplus.cpp:260
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
 msgid "Created process id file %s. Process ID is %d"
-msgstr "프로세스 ID 파일 %s를 작성했습니다. 프로세스 ID는 %d"
+msgstr "프로세스 ID 파일 %s을(를) 생성했습니다. 프로세스 ID는 %d입니다."
 
-#: src/motionplus.cpp:317
-msgid ""
-"Camara IDs are not unique or have values over 32,000.  Falling back to "
-"thread numbers"
-msgstr ""
-"Camara ID는 고유하지 않거나 32,000을 초과하는 값을 갖습니다.스레드 번호"
+#: /home/dave/source/motionplus/src/motionplus.cpp
+#, c-format
+msgid "Cannot create process id file (pid file) %s"
+msgstr "프로세스 ID 파일(pid 파일) %s을(를) 생성할 수 없습니다."
 
-#: src/motionplus.cpp:330
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "Removed process id file (pid file)."
+msgstr "제거된 프로세스 ID 파일(pid 파일)."
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "Error removing pid file"
+msgstr "pid 파일을 제거하는 중 오류가 발생했습니다."
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "MotionPlus going to daemon mode"
+msgstr "모션플러스는 데몬 모드로 전환"
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "Could not change directory"
+msgstr "디렉토리를 변경할 수 없습니다."
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "Device IDs are not unique."
+msgstr "장치 ID는 고유하지 않습니다."
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "Falling back to sequence numbers"
+msgstr "시퀀스 번호로 폴백"
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "v4l2   : available"
 msgstr "v4l2 : 사용 가능"
 
-#: src/motionplus.cpp:332
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "v4l2   : not available"
 msgstr "v4l2 : 사용할 수 없음"
 
-#: src/motionplus.cpp:336
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "webp   : available"
 msgstr "webp : 사용 가능"
 
-#: src/motionplus.cpp:338
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "webp   : not available"
 msgstr "webp : 사용할 수 없음"
 
-#: src/motionplus.cpp:348
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "libcam : available"
+msgstr "libcam : 사용 가능"
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "libcam : not available"
+msgstr "libcam : 사용할 수 없음"
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "mysql  : available"
 msgstr "mysql : 사용 가능"
 
-#: src/motionplus.cpp:350
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "mysql  : not available"
 msgstr "mysql : 사용할 수 없음"
 
-#: src/motionplus.cpp:354
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "MariaDB: available"
-msgstr "MariaDB : 사용 가능"
+msgstr "MariaDB: 사용 가능"
 
-#: src/motionplus.cpp:356
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "MariaDB: not available"
-msgstr "MariaDB : 사용할 수 없음"
+msgstr "MariaDB: 사용할 수 없음"
 
-#: src/motionplus.cpp:360
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "sqlite3: available"
-msgstr "sqlite3 : 사용 가능"
+msgstr "sqlite3: 사용 가능"
 
-#: src/motionplus.cpp:362
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "sqlite3: not available"
-msgstr "sqlite3 : 사용할 수 없음"
+msgstr "sqlite3: 사용할 수 없음"
 
-#: src/motionplus.cpp:366
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "pgsql  : available"
 msgstr "pgsql : 사용 가능"
 
-#: src/motionplus.cpp:368
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "pgsql  : not available"
 msgstr "pgsql : 사용할 수 없음"
 
-#: src/motionplus.cpp:372
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "nls    : available"
 msgstr "nls : 사용 가능"
 
-#: src/motionplus.cpp:374
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "nls    : not available"
 msgstr "nls : 사용할 수 없음"
 
-#: src/motionplus.cpp:398
-msgid "Motion running as daemon process"
-msgstr "데몬 프로세스로 실행중인 모션"
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "alsa   : available"
+msgstr "알사 : 가능"
 
-#: src/motionplus.cpp:403
-msgid "Motion running in setup mode."
-msgstr "설정 모드에서 실행중인 모션."
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "alsa   : not available"
+msgstr "alsa : 사용할 수 없음"
 
-#: src/motionplus.cpp:435
-#| msgid "Unable to start stream for camera %d"
-msgid "Unable to start thread for motion loop."
-msgstr ""
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "fftw3  : available"
+msgstr "ftw3 : 사용 가능"
 
-#: src/motionplus.cpp:445
-msgid "Restarting motion."
-msgstr "동작 재시작"
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "fftw3  : not available"
+msgstr "ftw3 : 사용할 수 없음"
 
-#: src/motionplus.cpp:452
-msgid "Motion restarted"
-msgstr "동작이 다시 시작되었습니다"
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "MotionPlus running as daemon process"
+msgstr "데몬 프로세스로 실행되는 MotionPlus"
 
-#: src/motionplus.cpp:483
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "MotionPlus running in setup mode."
+msgstr "설정 모드에서 실행 중인 MotionPlus."
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "Unable to start camera thread."
+msgstr "카메라 스레드를 시작할 수 없습니다."
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "Unable to start sound thread."
+msgstr "사운드 스레드를 시작할 수 없습니다."
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "Restarting MotionPlus."
+msgstr "MotionPlus를 다시 시작합니다."
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "MotionPlus restarted"
+msgstr "모션플러스 재시작"
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "Thread %d - Watchdog timeout. Trying to do a graceful restart"
-msgstr "Thread %d-워치 독 시간 초과. 정상적으로 다시 시작하려고합니다"
+msgid "Camera %d - Watchdog timeout."
+msgstr "카메라 %d - 워치독 시간이 초과되었습니다."
 
-#: src/motionplus.cpp:491
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "Thread %d - Watchdog timeout did NOT restart, killing it!"
-msgstr "Thread %d-워치 독 시간 초과가 재시작되지 않아 종료되었습니다!"
+msgid "Camera %d - Watchdog netcam kill."
+msgstr "카메라 %d - Watchdog netcam kill."
 
-#: src/motionplus.cpp:506
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-#| msgid "Thread %d - Config file: %s"
-msgid "Thread %d - Watchdog kill!"
-msgstr ""
+msgid "Camera %d - Watchdog netcam_high kill."
+msgstr "카메라 %d - Watchdog netcam high kill."
 
-#: src/motionplus.cpp:538
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "Thread %d - Cleaning thread."
-msgstr "스레드 %d-클리닝 스레드."
+msgid "Camera %d - Watchdog kill."
+msgstr "카메라 %d - 워치독 킬."
 
-#: src/motionplus.cpp:581
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "DEBUG-1 threads_running %d motion_threads_running %d , finish %d"
-msgstr ""
-"%d를 실행하는 %d 모션 스레드를 실행하는 DEBUG-1 스레드, %d를 완료하십시오"
-
-#: src/motionplus.cpp:680
-#, c-format
-#| msgid "Invalid URL for a camera specific port: %s"
 msgid "Invalid camera specified for deletion. %d"
-msgstr ""
+msgstr "삭제를 위해 잘못된 카메라가 지정되었습니다. %d"
 
-#: src/motionplus.cpp:750
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "Waiting for threads to finish, pid: %d"
-msgstr "스레드 종료 대기 중, pid : %d"
+msgid "Stopping %s device_id %d"
+msgstr "%s 장치 ID %d 중지"
 
-#: src/motionplus.cpp:764
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "Motion thread %d restart"
-msgstr "모션 스레드 %d 다시 시작"
+msgid "Motionplus pid: %d"
+msgstr "모션플러스 PID: %d"
 
-#: src/motionplus.cpp:785
-msgid "Threads finished"
-msgstr "스레딩 완료"
-
-#: src/motionplus.cpp:794
-msgid "Motion terminating"
-msgstr "동작 종료"
-
-#: src/movie.cpp:143
-msgid "Failed to allocate memory for codec name"
-msgstr "코덱 이름에 메모리를 할당하지 못했습니다"
-
-#: src/movie.cpp:153
-msgid "Error setting base file name"
-msgstr "기본 파일 이름 설정 오류"
-
-#: src/movie.cpp:172
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "Error setting timelapse append for codec %s"
-msgstr "코덱 %s에 대한 timelapse 추가 설정 오류"
+msgid "MotionPlus camera %d restart"
+msgstr "MotionPlus 카메라 %d 다시 시작"
 
-#: src/movie.cpp:238 src/movie.cpp:843 src/movie.cpp:1714 src/movie.cpp:1772
-msgid "Error setting file name"
-msgstr "파일 이름 설정 오류"
-
-#: src/movie.cpp:249
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "codec option value %s is not supported"
-msgstr "코덱 옵션 값 %s는 지원되지 않습니다"
+msgid "MotionPlus sound %d restart"
+msgstr "MotionPlus 사운드 %d 재시작"
 
-#: src/movie.cpp:259
-msgid "Could not get the codec"
-msgstr "코덱을 얻을 수 없습니다"
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "Motionplus devices finished"
+msgstr "Motionplus 장치 완료"
 
-#: src/movie.cpp:288
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "MotionPlus terminating"
+msgstr "MotionPlus 종료"
+
+#: /home/dave/source/motionplus/src/movie.cpp
+#, c-format
+msgid "Error setting timelapse append for container %s"
+msgstr "컨테이너 %s에 대한 타임랩스 추가를 설정하는 동안 오류가 발생했습니다."
+
+#: /home/dave/source/motionplus/src/movie.cpp
+#, c-format
+msgid "container option value %s is not supported"
+msgstr "컨테이너 옵션 값 %s은(는) 지원되지 않습니다."
+
+#: /home/dave/source/motionplus/src/movie.cpp
+msgid "Could not get the container"
+msgstr "컨테이너를 가져올 수 없습니다."
+
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Error sending frame for encoding:%s"
-msgstr "인코딩을위한 프레임 전송 오류 : %s"
+msgstr "인코딩을 위한 프레임 전송 오류:%s"
 
-#: src/movie.cpp:301
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Error receiving encoded packet video:%s"
-msgstr "인코딩 된 패킷 비디오 수신 오류 : %s"
+msgstr "인코딩된 패킷 비디오 수신 오류: %s"
 
-#: src/movie.cpp:321
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Error encoding video:%s"
-msgstr "비디오 인코딩 오류 : %s"
+msgstr "비디오 인코딩 오류: %s"
 
-#: src/movie.cpp:349
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Error encoding video"
-msgstr "비디오 인코딩 오류"
+msgstr "동영상 인코딩 오류"
 
-#: src/movie.cpp:409
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d"
-msgstr "PTS %<PRId64> 기본 PTS %<PRId64> ms 간격 %<PRId64> 타임베이스 %d-%d"
+msgstr "PTS %<PRId64> 기본 PTS %<PRId64> ms 간격 %<PRId64> 시간 기준 %d-%d"
 
-#: src/movie.cpp:417
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "BAD TIMING!! Frame skipped."
-msgstr "BAD TIMING !! 프레임을 건너 ped."
+msgstr "잘못된 타이밍!! 프레임을 건너뛰었습니다."
 
-#: src/movie.cpp:483
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "%s codec vbr/crf/bit_rate: %d"
-msgstr "%s 코덱 vbr / crf / 비트 속도 : %d"
+msgstr "%s 코덱 vbr/crf/비트 전송률: %d"
 
-#: src/movie.cpp:534
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Preferred codec %s has been blacklisted: %s"
-msgstr "선호되는 코덱 %s가 블랙리스트에 추가되었습니다 : %s"
+msgstr "기본 코덱 %s이(가) 블랙리스트에 올랐습니다: %s"
 
-#: src/movie.cpp:542
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
-msgid "Preferred codec %s not found"
-msgstr ""
+msgid "container %s not found"
+msgstr "컨테이너 %s을(를) 찾을 수 없음"
 
-#: src/movie.cpp:552
-#, c-format
-msgid "Codec %s not found"
-msgstr ""
-
-#: src/movie.cpp:568
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Using codec %s"
 msgstr "코덱 %s 사용"
 
-#: src/movie.cpp:591 src/movie.cpp:604
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not alloc stream"
-msgstr "스트림을 할당 할 수 없습니다"
+msgstr "스트림을 할당할 수 없습니다."
 
-#: src/movie.cpp:597
-msgid "Failed to allocate decoder!"
-msgstr "디코더를 할당하지 못했습니다!"
+#: /home/dave/source/motionplus/src/movie.cpp
+msgid "Failed to allocate codec context!"
+msgstr "코덱 컨텍스트를 할당하지 못했습니다!"
 
-#: src/movie.cpp:668
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Unable to set quality"
-msgstr "품질을 설정할 수 없습니다"
+msgstr "품질을 설정할 수 없습니다."
 
-#: src/movie.cpp:678
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Reported FPS Supported %d/%d"
-msgstr "보고 된 FPS 지원 %d / %d"
+msgstr "보고된 FPS 지원 %d/%d"
 
-#: src/movie.cpp:690
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Could not open codec %s"
-msgstr "코덱 %s를 열 수 없습니다"
+msgstr "코덱 %s을(를) 열 수 없습니다."
 
-#: src/movie.cpp:713
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Failed to copy decoder parameters!: %s"
-msgstr "디코더 매개 변수를 복사하지 못했습니다! : %s"
+msgstr "디코더 매개변수를 복사하지 못했습니다!: %s"
 
-#: src/movie.cpp:801
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "could not alloc frame"
-msgstr "프레임을 할당 할 수 없습니다"
+msgstr "프레임을 할당할 수 없습니다"
 
-#: src/movie.cpp:823
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "could not alloc buffers %s"
-msgstr "버퍼 %s를 할당 할 수 없습니다"
+msgstr "버퍼 %s를 할당할 수 없습니다."
 
-#: src/movie.cpp:859
+#: /home/dave/source/motionplus/src/movie.cpp
+msgid "Movie timed out"
+msgstr "영화 시간 초과"
+
+#: /home/dave/source/motionplus/src/movie.cpp
+msgid "Error setting file name"
+msgstr "파일 이름 설정 오류"
+
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
-msgid "error opening file %s"
-msgstr "%s 파일 열기 오류"
+msgid "avio_open: %s File %s"
+msgstr "avio 열기: %s 파일 %s"
 
-#: src/movie.cpp:866
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
-msgid "Permission denied. %s"
-msgstr "권한이 거부되었습니다. %s"
+msgid "error %s opening file %s"
+msgstr "오류 %s 파일 %s 열기"
 
-#: src/movie.cpp:871
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Error opening file %s"
-msgstr "%s 파일을 여는 중 오류 발생"
+msgstr "파일 %s을(를) 여는 중 오류가 발생했습니다."
 
-#: src/movie.cpp:886
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Could not write movie header %s"
-msgstr "영화 헤더 %s를 쓸 수 없습니다."
+msgstr "동영상 헤더 %s을(를) 쓸 수 없습니다."
 
-#: src/movie.cpp:922
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Error entering draining mode:%s"
-msgstr "드레인 모드 진입 오류 : %s"
+msgstr "드레이닝 모드로 들어가는 오류: %s"
 
-#: src/movie.cpp:932
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Error draining codec:%s"
-msgstr "코덱 배수 오류 : %s"
+msgstr "코덱 드레이닝 오류: %s"
 
-#: src/movie.cpp:945
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Error writing draining video frame"
-msgstr "드레인 비디오 프레임 쓰기 오류"
+msgstr "드레이닝 비디오 프레임 쓰기 오류"
 
-#: src/movie.cpp:976
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Error while encoding picture"
-msgstr "그림을 인코딩하는 동안 오류가 발생했습니다"
+msgstr "사진 인코딩 중 오류"
 
-#: src/movie.cpp:990
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Error while writing video frame"
-msgstr "비디오 프레임을 쓰는 중 오류가 발생했습니다."
+msgstr "비디오 프레임을 쓰는 동안 오류가 발생했습니다."
 
-#: src/movie.cpp:1087
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Error while writing video frame: %s"
-msgstr "비디오 프레임을 쓰는 중 오류가 발생했습니다 : %s"
+msgstr "비디오 프레임을 쓰는 중 오류 발생: %s"
 
-#: src/movie.cpp:1229
-#| msgid "Could not alloc stream"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not alloc video stream"
-msgstr ""
+msgstr "비디오 스트림을 할당할 수 없습니다."
 
-#: src/movie.cpp:1235
-#| msgid "Unable to copy codec parameters"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Unable to copy video codec parameters"
-msgstr ""
+msgstr "비디오 코덱 매개변수를 복사할 수 없습니다."
 
-#: src/movie.cpp:1244
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "video timebase %d/%d fps %d/%d"
-msgstr ""
+msgstr "비디오 타임베이스 %d/%d fps %d/%d"
 
-#: src/movie.cpp:1259
-#| msgid "Could not alloc stream"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not alloc audio stream"
-msgstr ""
+msgstr "오디오 스트림을 할당할 수 없습니다."
 
-#: src/movie.cpp:1265
-#| msgid "Unable to copy codec parameters"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Unable to copy audio codec parameters"
-msgstr ""
+msgstr "오디오 코덱 매개변수를 복사할 수 없습니다."
 
-#: src/movie.cpp:1278
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "audio timebase %d/%d"
-msgstr ""
+msgstr "오디오 타임베이스 %d/%d"
 
-#: src/movie.cpp:1309
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Pass-through disabled.  ffmpeg too old"
-msgstr "패스 스루를 사용할 수 없습니다. ffmpeg가 너무 오래되었습니다"
+msgstr "통과가 비활성화되었습니다. ffmpeg가 너무 오래됨"
 
-#: src/movie.cpp:1319
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "rtsp camera not ready for pass-through."
-msgstr "rtsp 카메라가 통과 할 수 없습니다."
+msgstr "rtsp 카메라가 통과할 준비가 되지 않았습니다."
 
-#: src/movie.cpp:1324
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "RTSP context not available."
 msgstr "RTSP 컨텍스트를 사용할 수 없습니다."
 
-#: src/movie.cpp:1344 src/movie.cpp:1516
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not allocate output context"
-msgstr "출력 컨텍스트를 할당 할 수 없습니다"
+msgstr "출력 컨텍스트를 할당할 수 없습니다."
 
-#: src/movie.cpp:1351
-#| msgid "%s: Failed to copy stream for pass-through."
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Changing to MP4 container for pass-through."
-msgstr ""
+msgstr "통과를 위해 MP4 컨테이너로 변경합니다."
 
-#: src/movie.cpp:1359
-#| msgid "Could not allocate output context"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not get output format!"
-msgstr ""
+msgstr "출력 형식을 가져올 수 없습니다!"
 
-#: src/movie.cpp:1365
-#| msgid "Could not set the stream"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not get streams!"
-msgstr ""
+msgstr "스트림을 가져올 수 없습니다!"
 
-#: src/movie.cpp:1371
-#| msgid "Could not set the stream"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not set the output file"
-msgstr ""
+msgstr "출력 파일을 설정할 수 없습니다."
 
-#: src/movie.cpp:1377
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Timebase after open audio: %d/%d video: %d/%d"
-msgstr ""
+msgstr "열린 오디오 이후의 타임베이스: %d/%d 비디오: %d/%d"
 
-#: src/movie.cpp:1468
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
-#| msgid "movie libavcodec version %d.%d.%d libavformat version %d.%d.%d"
 msgid "libavcodec  version %d.%d.%d"
-msgstr ""
+msgstr "libavcodec 버전 %d.%d.%d"
 
-#: src/movie.cpp:1470
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
-#| msgid "movie libavcodec version %d.%d.%d libavformat version %d.%d.%d"
 msgid "libavformat version %d.%d.%d"
-msgstr ""
+msgstr "libavformat 버전 %d.%d.%d"
 
-#: src/movie.cpp:1493
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "av_lockmgr_register reset failed on cleanup"
-msgstr "정리시 av lockmgr 레지스터 재설정 실패"
+msgstr "정리 시 av lockmgr 레지스터 재설정 실패"
 
-#: src/movie.cpp:1507
-#| msgid "Could not setup passthru!"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not setup passthrough!"
-msgstr ""
+msgstr "패스스루를 설정할 수 없습니다!"
 
-#: src/movie.cpp:1523
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not get codec!"
-msgstr "코덱을 얻을 수 없습니다!"
+msgstr "코덱을 가져올 수 없습니다!"
 
-#: src/movie.cpp:1530
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Failed to allocate codec!"
 msgstr "코덱을 할당하지 못했습니다!"
 
-#: src/movie.cpp:1536 src/movie.cpp:1542 src/movie.cpp:1548
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not set the stream"
-msgstr "스트림을 설정할 수 없습니다"
+msgstr "스트림을 설정할 수 없습니다."
 
-#: src/movie.cpp:1562
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Error flushing codec"
 msgstr "코덱 플러시 오류"
 
-#: src/movie.cpp:1622
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Excessive attempts to clear buffered packet"
-msgstr "버퍼링 된 패킷을 지우려는 과도한 시도"
+msgstr "버퍼링된 패킷을 지우려는 과도한 시도"
 
-#: src/movie.cpp:1629
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Buffered packet"
-msgstr "버퍼링 된 패킷"
+msgstr "버퍼링된 패킷"
 
-#: src/movie.cpp:1819
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
-#| msgid "Error setting base file name"
 msgid "Error setting timelapse file name %s"
-msgstr ""
+msgstr "타임랩스 파일 이름 %s을(를) 설정하는 동안 오류가 발생했습니다."
 
-#: src/movie.cpp:1846
-msgid "Timelapse using mpg codec."
-msgstr "mpg 코덱을 사용하는 Timelapse."
+#: /home/dave/source/motionplus/src/movie.cpp
+msgid "Timelapse using mpg container."
+msgstr "mpg 컨테이너를 사용한 타임랩스."
 
-#: src/movie.cpp:1847
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Events will be appended to file"
-msgstr "이벤트가 파일에 추가됩니다"
+msgstr "이벤트가 파일에 추가됩니다."
 
-#: src/movie.cpp:1853
-msgid "Timelapse using mpeg4 codec."
-msgstr "mpeg4 코덱을 사용하는 Timelapse."
+#: /home/dave/source/motionplus/src/movie.cpp
+msgid "Timelapse using mkv container."
+msgstr "mkv 컨테이너를 사용한 타임랩스."
 
-#: src/movie.cpp:1854
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Events will be trigger new files"
-msgstr "이벤트가 새 파일을 트리거합니다"
+msgstr "이벤트가 새 파일을 트리거합니다."
 
-#: src/netcam.cpp:63
-#, c-format
-msgid "expanding buffer from [%d/%d] to [%d/%d] bytes."
-msgstr "[%d / %d]에서 [%d / %d] 바이트로 버퍼 확장."
-
-#: src/netcam.cpp:131
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Invalid URL.  Can not parse values."
-msgstr "잘못된 URL. 값을 구문 분석 할 수 없습니다."
+msgstr "잘못된 URL. 값을 구문 분석할 수 없습니다."
 
-#: src/netcam.cpp:237
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "Using port number %d"
-msgstr "포트 번호 %d 사용"
+msgstr "포트 번호 %d 사용 중"
 
-#: src/netcam.cpp:407
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Resized packet array to %d"
-msgstr "%s : %d로 패킷 배열 크기 조정"
+msgstr "%s: 패킷 배열 크기를 %d(으)로 조정했습니다."
 
-#: src/netcam.cpp:444
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: av_copy_packet: %s ,Interrupt: %s"
-msgstr "%s : av 복사 패킷 : %s, 인터럽트 : %s"
+msgstr "%s: av 복사 패킷: %s ,인터럽트: %s"
 
-#: src/netcam.cpp:446
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "true"
-msgstr ""
+msgstr "진실"
 
-#: src/netcam.cpp:446
-#| msgid "False"
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "false"
-msgstr ""
+msgstr "거짓"
 
-#: src/netcam.cpp:476 src/netcam.cpp:513
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Ignoring packet with invalid data"
 msgid "%s: Ignoring packet with invalid data"
-msgstr ""
+msgstr "%s: 잘못된 데이터가 있는 패킷을 무시합니다."
 
-#: src/netcam.cpp:482 src/netcam.cpp:519
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: av_read_frame: %s ,Interrupt: %s"
 msgid "%s: Rec frame error: %s"
-msgstr ""
+msgstr "%s: 녹화 프레임 오류: %s"
 
-#: src/netcam.cpp:532
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Error transferring HW decoded to system memory"
-msgstr ""
+msgstr "%s: 디코딩된 HW를 시스템 메모리로 전송하는 동안 오류가 발생했습니다."
 
-#: src/netcam.cpp:571
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Handler loop finished."
 msgid "%s: Interrupted or finish on send"
-msgstr ""
+msgstr "%s: 중단되었거나 전송 시 완료됨"
 
-#: src/netcam.cpp:577
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Ignoring packet with invalid data"
 msgid "%s: Send ignoring packet with invalid data"
-msgstr ""
+msgstr "%s: 잘못된 데이터가 포함된 무시 패킷을 보냅니다."
 
-#: src/netcam.cpp:584
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error sending packet to codec: %s"
 msgid "%s: Error sending packet to codec: %s"
-msgstr ""
+msgstr "%s: 패킷을 코덱으로 보내는 중 오류 발생: %s"
 
-#: src/netcam.cpp:614
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Ignoring packet with invalid data"
-msgstr "잘못된 데이터가있는 패킷 무시"
+msgstr "유효하지 않은 데이터가 있는 패킷 무시"
 
-#: src/netcam.cpp:620
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "Error decoding packet: %s"
-msgstr "패킷 디코딩 오류 : %s"
+msgstr "패킷 디코딩 오류: %s"
 
-#: src/netcam.cpp:644
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error decoding video packet: Copying to buffer"
 msgid "%s: Error decoding video packet...it is audio"
-msgstr ""
+msgstr "%s: 비디오 패킷을 디코딩하는 중 오류가 발생했습니다...오디오입니다."
 
-#: src/netcam.cpp:667
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error decoding video packet: Copying to buffer"
 msgid "%s: Error decoding video packet: Copying to buffer"
-msgstr ""
+msgstr "%s: 비디오 패킷 디코딩 오류: 버퍼에 복사 중"
 
-#: src/netcam.cpp:686
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: HW Devices: "
-msgstr ""
+msgstr "%s: HW 디바이스:"
 
-#: src/netcam.cpp:691
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "mysql  : available"
 msgid "%s: %s (available)"
-msgstr ""
+msgstr "%s: %s(사용 가능)"
 
-#: src/netcam.cpp:696
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: %s (not implemented)"
-msgstr ""
+msgstr "%s: %s(구현되지 않음)"
 
-#: src/netcam.cpp:722
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Failed to get vaapi pix format"
-msgstr ""
+msgstr "vaapi pix 형식을 가져오지 못했습니다."
 
-#: src/netcam.cpp:738 src/netcam.cpp:1233
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Interrupted"
-msgstr ""
+msgstr "%s: 중단됨"
 
-#: src/netcam.cpp:743
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: %s: %s"
-msgstr ""
+msgstr "%s: %s: %s"
 
-#: src/netcam.cpp:746
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: %s: Failed"
-msgstr ""
+msgstr "%s: %s: 실패"
 
-#: src/netcam.cpp:752
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Decoder %s did not work."
-msgstr ""
+msgstr "%s: %s 디코더가 작동하지 않습니다."
 
-#: src/netcam.cpp:755
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Ignoring and removing the user requested decoder %s"
-msgstr ""
+msgstr "%s: 사용자가 요청한 디코더 %s을(를) 무시하고 제거합니다."
 
-#: src/netcam.cpp:786
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Initializing database"
 msgid "%s: Initializing vaapi decoder"
-msgstr ""
+msgstr "%s: vaapi 디코더 초기화 중"
 
-#: src/netcam.cpp:790
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Unable to find video device"
 msgid "%s: Unable to find vaapi hw device"
-msgstr ""
+msgstr "%s: vaapi hw 장치를 찾을 수 없습니다."
 
-#: src/netcam.cpp:837
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Initializing database"
 msgid "%s: Initializing decoder"
-msgstr ""
+msgstr "%s: 디코더 초기화 중"
 
-#: src/netcam.cpp:844
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Using codec %s"
 msgid "%s: Using decoder %s"
-msgstr ""
+msgstr "%s: 디코더 %s 사용"
 
-#: src/netcam.cpp:936
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Decoder opened"
-msgstr ""
+msgstr "%s: 디코더 열림"
 
-#: src/netcam.cpp:995
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Camera reading (%s) timed out"
-msgstr "%s : 카메라 판독 (%s) 시간이 초과되었습니다"
+msgstr "%s: 카메라 읽기(%s) 시간 초과"
 
-#: src/netcam.cpp:1011
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Camera (%s) timed out"
-msgstr "%s : 카메라 (%s) 시간이 초과되었습니다"
+msgstr "%s: 카메라(%s) 시간 초과"
 
-#: src/netcam.cpp:1035
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Unable to allocate swsframe_in."
 msgid "%s: Unable to allocate swsframe_in."
-msgstr ""
+msgstr "%s: swsframe을 할당할 수 없습니다."
 
-#: src/netcam.cpp:1046
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Unable to allocate swsframe_out."
 msgid "%s: Unable to allocate swsframe_out."
-msgstr ""
+msgstr "%s: swsframe을 할당할 수 없습니다."
 
-#: src/netcam.cpp:1059
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Pixel format %d will be converted."
-msgstr ""
+msgstr "%s: 픽셀 형식 %d가 변환됩니다."
 
-#: src/netcam.cpp:1074
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Unable to allocate scaling context."
 msgid "%s: Unable to allocate scaling context."
-msgstr ""
+msgstr "%s: 크기 조정 컨텍스트를 할당할 수 없습니다."
 
-#: src/netcam.cpp:1088
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error determining size of frame out"
 msgid "%s: Error determining size of frame out"
-msgstr ""
+msgstr "%s: 프레임 출력 크기를 결정하는 동안 오류가 발생했습니다."
 
-#: src/netcam.cpp:1130
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error allocating picture in: %s"
 msgid "%s: Error allocating picture in: %s"
-msgstr ""
+msgstr "%s: 사진 할당 오류: %s"
 
-#: src/netcam.cpp:1149
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error allocating picture out: %s"
 msgid "%s: Error allocating picture out: %s"
-msgstr ""
+msgstr "%s: 사진 할당 오류: %s"
 
-#: src/netcam.cpp:1168
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error resizing/reformatting: %s"
 msgid "%s: Error resizing/reformatting: %s"
-msgstr ""
+msgstr "%s: 크기 조정/재포맷 오류: %s"
 
-#: src/netcam.cpp:1186
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error putting frame into output buffer: %s"
 msgid "%s: Error putting frame into output buffer: %s"
-msgstr ""
+msgstr "%s: 프레임을 출력 버퍼에 넣는 중 오류 발생: %s"
 
-#: src/netcam.cpp:1238
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: av_read_frame: %s ,Interrupt: %s"
 msgid "%s: av_read_frame: %s"
-msgstr ""
+msgstr "%s: av 읽기 프레임: %s"
 
-#: src/netcam.cpp:1324
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using %d"
-msgstr ""
+msgstr "%s: netcam 매개변수에 캡처 속도가 지정되지 않았습니다. %d 사용"
 
-#: src/netcam.cpp:1331
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
 msgstr ""
+"%s: netcam 매개변수에 캡처 속도가 지정되지 않았습니다. 프레임 속도 %d 사용"
 
-#: src/netcam.cpp:1355
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "The network camera is sending pictures in a different"
 msgid "The network camera is sending pictures at %dx%d"
-msgstr ""
+msgstr "네트워크 카메라가 %dx%d에서 사진을 전송 중입니다."
 
-#: src/netcam.cpp:1357
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "requested in the configuration.  If possible change"
 msgid "resolution but config is %dx%d. If possible change"
-msgstr ""
+msgstr "해상도이지만 구성은 %dx%d입니다. 가능하면 변경"
 
-#: src/netcam.cpp:1359
-#| msgid "netcam or configuration to indicate the same size"
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "the netcam or config so that the image height and"
-msgstr ""
+msgstr "이미지 높이와"
 
-#: src/netcam.cpp:1360
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "width are the same to lower the CPU usage."
-msgstr ""
+msgstr "너비는 CPU 사용량을 낮추기 위해 동일합니다."
 
-#: src/netcam.cpp:1384
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Setting rtsp transport to tcp"
 msgid "%s: Setting rtsp/rtmp"
-msgstr ""
+msgstr "%s: rtsp/rtmp 설정 중"
 
-#: src/netcam.cpp:1391
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Setting http input_format mjpeg"
 msgid "%s: Setting input_format mjpeg"
-msgstr ""
+msgstr "%s: 입력 형식 mjpeg 설정"
 
-#: src/netcam.cpp:1396
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Setting http input_format mjpeg"
 msgid "%s: Setting input_format video4linux2"
-msgstr ""
+msgstr "%s: 입력 형식 video4linux2 설정"
 
-#: src/netcam.cpp:1411
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Setting attributes to read file"
 msgid "%s: Setting up movie file"
-msgstr ""
+msgstr "%s: 동영상 파일 설정 중"
 
-#: src/netcam.cpp:1414
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Setting up %s stream."
 msgid "%s: Setting up %s"
-msgstr ""
+msgstr "%s: %s 설정 중"
 
-#: src/netcam.cpp:1429
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: option: %s = %s"
-msgstr ""
+msgstr "%s: 옵션: %s = %s"
 
-#: src/netcam.cpp:1464
-#| msgid "Error setting file name"
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Error getting userpass"
-msgstr ""
+msgstr "사용자 패스를 가져오는 중에 오류가 발생했습니다."
 
-#: src/netcam.cpp:1472
-#| msgid "Setting up v4l2 via ffmpeg netcam"
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Setting up v4l2"
-msgstr ""
+msgstr "v4l2 설정"
 
-#: src/netcam.cpp:1477
-#| msgid "Setting up %s stream."
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Setting up file"
-msgstr ""
+msgstr "파일 설정"
 
-#: src/netcam.cpp:1482
-#| msgid "Setting up %s stream."
-msgid "Setting up http"
-msgstr ""
-
-#: src/netcam.cpp:1485
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Setting up %s stream."
 msgid "Setting up %s "
-msgstr ""
+msgstr "%s 설정 중"
 
-#: src/netcam.cpp:1517
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "High"
-msgstr ""
+msgstr "높은"
 
-#: src/netcam.cpp:1524
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Norm"
-msgstr ""
+msgstr "표준"
 
-#: src/netcam.cpp:1531
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Setting v4l2 framerate: %s"
 msgid "%s: Setting up camera."
-msgstr ""
+msgstr "%s: 카메라 설정 중입니다."
 
-#: src/netcam.cpp:1576
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Unknown"
-msgstr "알 수 없음"
+msgstr "알려지지 않은"
 
-#: src/netcam.cpp:1609
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Adjusting width to next higher multiple of 8 (%d)."
 msgid "%s: Adjusting width to next higher multiple of 8 (%d)."
-msgstr ""
+msgstr "%s: 너비를 다음으로 높은 8의 배수(%d)로 조정합니다."
 
-#: src/netcam.cpp:1649
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Unable to copy codec parameters"
 msgid "%s: Unable to copy codec parameters"
-msgstr ""
+msgstr "%s: 코덱 매개변수를 복사할 수 없습니다."
 
-#: src/netcam.cpp:1660
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Stream copied for pass-through"
-msgstr "통과를 위해 복사 된 스트림"
+msgstr "통과를 위해 복사된 스트림"
 
-#: src/netcam.cpp:1665
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "ffmpeg too old"
-msgstr "ffmpeg가 너무 오래된"
+msgstr "ffmpeg가 너무 오래됨"
 
-#: src/netcam.cpp:1684
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Null path passed to connect"
-msgstr "널로 전달 된 경로가 연결되었습니다"
+msgstr "연결에 전달된 Null 경로"
 
-#: src/netcam.cpp:1706
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Unable to open camera(%s): %s"
-msgstr "%s : 카메라를 열 수 없습니다 (%s) : %s"
+msgstr "%s: 카메라(%s)를 열 수 없습니다. %s"
 
-#: src/netcam.cpp:1717
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Opened camera(%s)"
-msgstr "%s : 열린 카메라 (%s)"
+msgstr "%s: 열린 카메라(%s)"
 
-#: src/netcam.cpp:1726
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Unable to find stream info: %s"
-msgstr "%s : 스트림 정보를 찾을 수 없습니다 : %s"
+msgstr "%s: 스트림 정보를 찾을 수 없습니다. %s"
 
-#: src/netcam.cpp:1745
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Unable to open codec context: %s"
-msgstr "%s : 코덱 컨텍스트를 열 수 없습니다 : %s"
+msgstr "%s: 코덱 컨텍스트를 열 수 없습니다. %s"
 
-#: src/netcam.cpp:1750
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Unable to open codec context: %s"
 msgid "%s: Connected and unable to open codec context: %s"
-msgstr ""
+msgstr "%s: 연결되었지만 코덱 컨텍스트를 열 수 없음: %s"
 
-#: src/netcam.cpp:1760
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Camera image size is invalid"
-msgstr "%s : 카메라 이미지 크기가 잘못되었습니다"
+msgstr "%s: 카메라 이미지 크기가 잘못되었습니다."
 
-#: src/netcam.cpp:1774
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Unable to allocate frame."
-msgstr "%s : 프레임을 할당 할 수 없습니다."
+msgstr "%s: 프레임을 할당할 수 없습니다."
 
-#: src/netcam.cpp:1785
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Failed to copy stream for pass-through."
-msgstr "%s : 통과를 위해 스트림을 복사하지 못했습니다."
+msgstr "%s: 통과를 위한 스트림을 복사하지 못했습니다."
 
-#: src/netcam.cpp:1797
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Failed to read first image"
-msgstr "%s : 첫 번째 이미지를 읽지 못했습니다"
+msgstr "%s: 첫 번째 이미지를 읽지 못했습니다."
 
-#: src/netcam.cpp:1832
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Camera (%s) connected"
-msgstr "%s : 카메라 (%s) 연결됨"
+msgstr "%s: 카메라(%s)가 연결됨"
 
-#: src/netcam.cpp:1836
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Netcam capture FPS is %d."
-msgstr ""
+msgstr "%s: Netcam 캡처 FPS는 %d입니다."
 
-#: src/netcam.cpp:1841
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Camera (%s) timed out"
 msgid "%s: Camera source is %d FPS"
-msgstr ""
+msgstr "%s: 카메라 소스는 %d FPS입니다."
 
-#: src/netcam.cpp:1845
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Unable to open camera(%s)"
 msgid "%s: Unable to determine the camera source FPS."
-msgstr ""
+msgstr "%s: 카메라 소스 FPS를 결정할 수 없습니다."
 
-#: src/netcam.cpp:1851
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Capture FPS less than camera FPS. Decoding errors will occur."
-msgstr ""
+msgstr "%s: 카메라 FPS보다 적은 FPS를 캡처합니다. 디코딩 오류가 발생합니다."
 
-#: src/netcam.cpp:1854
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Capture FPS should be greater than camera FPS."
-msgstr ""
+msgstr "%s: 캡처 FPS는 카메라 FPS보다 커야 합니다."
 
-#: src/netcam.cpp:1865
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid ""
 "%s: An audio stream was detected.  Capture_rate increased to compensate."
 msgstr ""
+"%s: 오디오 스트림이 감지되었습니다. 보상하기 위해 캡처 속도가 증가했습니다."
 
-#: src/netcam.cpp:1942
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Reconnecting with camera...."
-msgstr "%s : 카메라와 다시 연결 중 ..."
+msgstr "%s: 카메라와 다시 연결하는 중...."
 
-#: src/netcam.cpp:1957 src/netcam.cpp:1964
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Camera did not reconnect."
-msgstr "%s : 카메라가 다시 연결되지 않았습니다."
+msgstr "%s: 카메라가 다시 연결되지 않았습니다."
 
-#: src/netcam.cpp:1959
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Checking for camera every 10 seconds."
-msgstr "%s : 10 초마다 카메라 확인 중."
+msgstr "%s: 10초마다 카메라를 확인합니다."
 
-#: src/netcam.cpp:1966
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Checking for camera every 10 seconds."
 msgid "%s: Checking for camera every 10 minutes."
-msgstr ""
+msgstr "%s: 10분마다 카메라를 확인합니다."
 
-#: src/netcam.cpp:1990
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Camera handler thread [%d] started"
-msgstr "%s : 카메라 핸들러 스레드 [%d]가 시작되었습니다."
+msgstr "%s: 카메라 핸들러 스레드 [%d] 시작됨"
 
-#: src/netcam.cpp:2013
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Handler loop finished."
 msgid "%s: Loop finished."
-msgstr ""
+msgstr "%s: 루프가 끝났습니다."
 
-#: src/netcam.cpp:2022
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Exiting"
-msgstr ""
+msgstr "%s: 종료"
 
-#: src/netcam.cpp:2048
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Error starting handler thread"
-msgstr "%s : 처리기 스레드 시작 오류"
+msgstr "%s: 처리기 스레드를 시작하는 동안 오류가 발생했습니다."
 
-#: src/netcam.cpp:2069
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Waiting for first image from the handler."
-msgstr "%s : 핸들러에서 첫 번째 이미지를 기다리는 중입니다."
+msgstr "%s: 처리기에서 첫 번째 이미지를 기다리는 중입니다."
 
-#: src/netcam.cpp:2105
-msgid "unable to create rtsp context"
-msgstr "rtsp 컨텍스트를 작성할 수 없습니다"
-
-#: src/netcam.cpp:2114
-msgid "unable to create rtsp high context"
-msgstr "rtsp 높은 컨텍스트를 작성할 수 없습니다"
-
-#: src/netcam.cpp:2132
-#, c-format
-msgid "Failed trying to read first image - retval:%d"
-msgstr "첫 번째 이미지를 읽지 못했습니다-retval : %d"
-
-#: src/netcam.cpp:2230
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Shutting down network camera."
-msgstr "%s : 네트워크 카메라 종료 중입니다."
+msgstr "%s: 네트워크 카메라를 종료합니다."
 
-#: src/netcam.cpp:2245
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: No response from handler thread."
-msgstr "%s : 처리기 스레드에서 응답이 없습니다."
+msgstr "%s: 처리기 스레드에서 응답이 없습니다."
 
-#: src/netcam.cpp:2267
-#| msgid "Normal resolution: Shut down complete."
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Norm: Shut down complete."
-msgstr ""
+msgstr "정상: 종료 완료."
 
-#: src/netcam.cpp:2270
-#| msgid "High resolution: Shut down complete."
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "High: Shut down complete."
-msgstr ""
+msgstr "높음: 종료가 완료되었습니다."
 
-#: src/picture.cpp:57
+#: /home/dave/source/motionplus/src/netcam.cpp
+msgid "Opening Netcam"
+msgstr "넷캠 열기"
+
+#: /home/dave/source/motionplus/src/netcam.cpp
+msgid "unable to create rtsp context"
+msgstr "rtsp 컨텍스트를 생성할 수 없습니다."
+
+#: /home/dave/source/motionplus/src/netcam.cpp
+msgid "unable to create rtsp high context"
+msgstr "rtsp 상위 컨텍스트를 생성할 수 없습니다."
+
+#: /home/dave/source/motionplus/src/netcam.cpp
+msgid "Failed trying to read first image"
+msgstr "첫 번째 이미지를 읽지 못했습니다."
+
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Unable to set set EXIF to webp chunk"
-msgstr "EXIF를 webp 청크로 설정할 수 없습니다"
+msgstr "EXIF를 webp 청크로 설정할 수 없습니다."
 
-#: src/picture.cpp:74 src/picture.cpp:81
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "libwebp version error"
 msgstr "libwebp 버전 오류"
 
-#: src/picture.cpp:89
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "libwebp image buffer allocation error"
 msgstr "libwebp 이미지 버퍼 할당 오류"
 
-#: src/picture.cpp:106
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "libwebp image compression error"
 msgstr "libwebp 이미지 압축 오류"
 
-#: src/picture.cpp:121
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "unable to assemble webp image"
-msgstr "웹 이미지를 조립할 수 없습니다"
+msgstr "webp 이미지를 어셈블할 수 없습니다."
 
-#: src/picture.cpp:126
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "unable to save webp image to file"
-msgstr "webp 이미지를 파일로 저장할 수 없습니다"
+msgstr "webp 이미지를 파일에 저장할 수 없습니다."
 
-#: src/picture.cpp:310
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid ""
 "Can't write picture to file %s - check access rights to target directory\n"
 "Thread is going to finish due to this fatal error"
 msgstr ""
-"%s 파일에 사진을 쓸 수 없음-대상 디렉토리 \n"
-"에 대한 액세스 권한 확인이 치명적인 오류로 인해 나사산이 끝납니다"
+"파일 %s에 그림을 쓸 수 없습니다. 대상 디렉토리에 대한 액세스 권한을 확인하십"
+"시오.\n"
+"이 치명적인 오류로 인해 스레드가 종료됩니다."
 
-#: src/picture.cpp:318 src/picture.cpp:345
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "Can't write picture to file %s"
-msgstr "%s 파일에 사진을 쓸 수 없습니다"
+msgstr "파일 %s에 그림을 쓸 수 없습니다."
 
-#: src/picture.cpp:382
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Could not read from pgm file"
-msgstr "pgm 파일에서 읽을 수 없습니다"
+msgstr "pgm 파일에서 읽을 수 없습니다."
 
-#: src/picture.cpp:388
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "This is not a pgm file, starts with '%s'"
-msgstr "이 파일은 pgm 파일이 아니며 '%s'로 시작합니다"
+msgstr "이것은 pgm 파일이 아닙니다. '%s'로 시작합니다."
 
-#: src/picture.cpp:402
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Failed reading size in pgm file"
-msgstr "pgm 파일에서 크기를 읽지 못했습니다"
+msgstr "pgm 파일의 크기 읽기 실패"
 
-#: src/picture.cpp:415
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Failed reading maximum value in pgm file"
-msgstr "pgm 파일에서 최대 값을 읽지 못했습니다"
+msgstr "pgm 파일에서 최대값 읽기 실패"
 
-#: src/picture.cpp:440
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "The mask file specified is not the same size as image from camera."
-msgstr "지정된 마스크 파일이 카메라의 이미지와 크기가 다릅니다."
+msgstr "지정된 마스크 파일이 카메라의 이미지와 같은 크기가 아닙니다."
 
-#: src/picture.cpp:442
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "Attempting to resize mask image from %dx%d to %dx%d"
-msgstr "%dx%d에서 %dx%d로 마스크 이미지 크기를 조정하려고합니다"
+msgstr "마스크 이미지 크기를 %dx%d에서 %dx%d(으)로 조정하려고 합니다."
 
-#: src/picture.cpp:472
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "can't write mask file %s - check access rights to target directory"
 msgstr ""
-"마스크 파일 %s를 쓸 수 없습니다-대상 디렉토리에 대한 액세스 권한을 점검하십시"
-"오"
+"마스크 파일 %s를 쓸 수 없습니다. 대상 디렉토리에 대한 액세스 권한을 확인하십"
+"시오."
 
-#: src/picture.cpp:477
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "can't write mask file %s"
-msgstr "마스크 파일 %s를 쓸 수 없습니다"
+msgstr "마스크 파일 %s에 쓸 수 없습니다."
 
-#: src/picture.cpp:491
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Failed writing default mask as pgm file"
-msgstr "기본 마스크를 pgm 파일로 쓰는 데 실패했습니다"
+msgstr "기본 마스크를 pgm 파일로 쓰지 못했습니다."
 
-#: src/picture.cpp:498
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid ""
 "Creating empty mask %s\n"
 "Please edit this file and re-run motion to enable mask feature"
 msgstr ""
-"빈 마스크 %s\n"
-" 작성마스크 기능을 사용하려면이 파일을 편집하고 모션을 다시 실행하십시오"
+"빈 마스크 %s 작성 중\n"
+"마스크 기능을 활성화하려면 이 파일을 편집하고 동작을 다시 실행하십시오."
 
-#: src/picture.cpp:574
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Opening privacy mask file"
 msgstr "프라이버시 마스크 파일 열기"
 
-#: src/picture.cpp:586
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Opening high resolution privacy mask file"
 msgstr "고해상도 프라이버시 마스크 파일 열기"
 
-#: src/picture.cpp:595 src/picture.cpp:680
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "Error opening mask file %s"
-msgstr "마스크 파일 %s 열기 오류"
+msgstr "마스크 파일 %s을(를) 여는 중 오류가 발생했습니다."
 
-#: src/picture.cpp:602
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Failed to read mask privacy image. Mask privacy feature disabled."
 msgstr ""
 "마스크 프라이버시 이미지를 읽지 못했습니다. 마스크 프라이버시 기능이 비활성화"
 "되었습니다."
 
-#: src/picture.cpp:605
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "Mask privacy file \"%s\" loaded."
-msgstr "마스크 개인 정보 파일 \"%s\"가로드되었습니다."
+msgstr "마스크 프라이버시 파일 \"%s\"이(가) 로드되었습니다."
 
-#: src/picture.cpp:691
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Failed to read mask image. Mask feature disabled."
 msgstr "마스크 이미지를 읽지 못했습니다. 마스크 기능이 비활성화되었습니다."
 
-#: src/picture.cpp:694
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "Maskfile \"%s\" loaded."
-msgstr "Maskfile \"%s\"가로드되었습니다."
+msgstr "마스크 파일 \"%s\"이(가) 로드되었습니다."
 
-#: src/rotate.cpp:196
+#: /home/dave/source/motionplus/src/rotate.cpp
 #, c-format
 msgid "Config option \"rotate\" not a multiple of 90: %d"
-msgstr "설정 옵션 \"rotate\"는 90의 배수가 아님 : %d"
+msgstr "구성 옵션 \"회전\"이 90의 배수가 아님: %d"
 
-#: src/util.cpp:111
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "Card %i(%s): %s [%s]"
+msgstr "카드 %i(%s): %s [%s]"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "  Device %i (%s,%d): %s [%s]"
+msgstr "디바이스 %i(%s,%d): %s [%s]"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "  Subdevices: %i/%i"
+msgstr "하위 장치: %i/%i"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "control digital audio playback info (%i): %s"
+msgstr "디지털 오디오 재생 정보 제어(%i): %s"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "  Subdevice #%i: %s"
+msgstr "하위 장치 #%i: %s"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "control hardware info (%i): %s"
+msgstr "제어 하드웨어 정보(%i): %s"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "snd_ctl_pcm_next_device"
+msgstr "snd ctl pcm 다음 장치"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "control digital audio info (%i): %s"
+msgstr "디지털 오디오 정보 제어(%i): %s"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "no soundcards found..."
+msgstr "사운드카드를 찾을 수 없습니다..."
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Devices"
+msgstr "장치"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "control open (%i): %s"
+msgstr "제어 열기(%i): %s"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_open device %s (%s)"
+msgstr "오류: snd pcm 열린 장치 %s(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_malloc(%s)"
+msgstr "오류: snd pcm hw params malloc(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_any(%s)"
+msgstr "오류: snd pcm hw params any(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_set_access(%s)"
+msgstr "오류: snd pcm hw 매개변수 설정 액세스(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_set_format(%s)"
+msgstr "오류: snd pcm hw 매개변수 세트 형식(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_set_rate_near(%s)"
+msgstr "오류: snd pcm hw 매개변수 설정 속도 근처(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_set_channels(%s)"
+msgstr "오류: snd pcm hw 매개변수 설정 채널(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_set_period_size_near(%s)"
+msgstr "오류: snd pcm hw 매개변수가 기간 크기를 근접하게 설정했습니다(%s)."
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params(%s)"
+msgstr "오류: snd pcm hw 매개변수(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_prepare(%s)"
+msgstr "오류: snd pcm 준비(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_get_format(%s)"
+msgstr "오류: snd pcm hw 매개변수 가져오기 형식(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_get_rate(%s)"
+msgstr "오류: snd pcm hw 매개변수 가져오기 속도(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_get_period_size(%s)"
+msgstr "오류: snd pcm hw 매개변수가 기간 크기(%s)를 가져옵니다."
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "Actual rate %hu"
+msgstr "실제 비율 %hu"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "Actual frames per %lu"
+msgstr "%lu당 실제 프레임"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Sound format 16"
+msgstr "사운드 형식 16"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Sound format 24"
+msgstr "사운드 형식 24"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Sound format 32"
+msgstr "사운드 형식 32"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: read from audio interface failed (%s)"
+msgstr "오류: 오디오 인터페이스에서 읽지 못했습니다(%s)."
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "Error opening pulse (%s)"
+msgstr "펄스 열기 오류(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "Error capturing PulseAudio (%s)"
+msgstr "PulseAudio 캡처 오류(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Opening FFTW plan"
+msgstr "FFTW 계획 열기"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Invalid sound source."
+msgstr "잘못된 음원입니다."
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Detecting"
+msgstr "감지"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "Freq: %.4f threshold: %d count: %d maximum: %d"
+msgstr "빈도: %.4f 임계값: %d 개수: %d 최대값: %d"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "Sound Alert %d-%s : level %d count %d max vol %d"
+msgstr "경고음 %d-%s: 레벨 %d 카운트 %d 최대 볼륨 %d"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Capture loop finished"
+msgstr "캡처 루프 완료"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Sound detection functionality not supported"
+msgstr "소리 감지 기능이 지원되지 않음"
+
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Could not allocate %llu bytes of memory!"
-msgstr "%llu 바이트의 메모리를 할당 할 수 없습니다!"
+msgstr "%llu 바이트의 메모리를 할당할 수 없습니다!"
 
-#: src/util.cpp:127
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Warning! Function %s tries to resize memoryblock at %p to 0 bytes!"
-msgstr "경고! 기능 %s는 %p의 메모리 블록 크기를 0 바이트로 조정하려고합니다!"
+msgstr ""
+"경고! %s 함수가 %p에서 메모리 블록의 크기를 0바이트로 조정하려고 합니다!"
 
-#: src/util.cpp:133
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Could not resize memory-block at offset %p to %llu bytes (function %s)!"
 msgstr ""
-"%p 오프셋에서 %llu 바이트 (기능 %s)로 메모리 블록 크기를 조정할 수 없습니다!"
+"오프셋 %p에서 메모리 블록의 크기를 %llu바이트로 조정할 수 없습니다(함수 %s)!"
 
-#: src/util.cpp:175
+#: /home/dave/source/motionplus/src/util.cpp
+#, c-format
+msgid "Creating %s"
+msgstr "%s 생성 중"
+
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Problem creating directory %s"
-msgstr "%s 디렉토리 작성 문제점"
+msgstr "디렉터리 %s 생성 문제"
 
-#: src/util.cpp:183
-#, c-format
-msgid "creating directory %s"
-msgstr "디렉토리 %s 작성"
-
-#: src/util.cpp:221
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Error opening file %s with mode %s"
-msgstr "%s 모드로 %s 파일을 여는 중 오류 발생"
+msgstr "파일 %s을(를) %s 모드로 여는 동안 오류가 발생했습니다."
 
-#: src/util.cpp:234
+#: /home/dave/source/motionplus/src/util.cpp
 msgid "Error closing file"
-msgstr "파일 닫기 오류"
+msgstr "파일을 닫는 중 오류 발생"
 
-#: src/util.cpp:294
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "invalid format specifier keyword %*.*s"
 msgstr "잘못된 형식 지정자 키워드 %*.*s"
 
-#: src/util.cpp:523
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Unable to set thread name %s"
-msgstr "스레드 이름 %s를 설정할 수 없습니다"
+msgstr "스레드 이름 %s을(를) 설정할 수 없습니다."
 
-#: src/util.cpp:550
+#: /home/dave/source/motionplus/src/util.cpp
 msgid "FFMPEG version too old. Disabling pass-through processing."
-msgstr "FFMPEG 버전이 너무 오래되었습니다. 통과 처리를 사용하지 않습니다."
+msgstr "FFMPEG 버전이 너무 오래되었습니다. 통과 처리 비활성화."
 
-#: src/util.cpp:589
+#: /home/dave/source/motionplus/src/util.cpp
 msgid "Language: English"
-msgstr "언어 : 영어"
+msgstr "언어: 영어"
 
-#: src/util.cpp:606
+#: /home/dave/source/motionplus/src/util.cpp
 msgid "Disabling native language support"
-msgstr ""
+msgstr "모국어 지원 비활성화"
 
-#: src/util.cpp:613
+#: /home/dave/source/motionplus/src/util.cpp
 msgid "Enabling native language support"
-msgstr ""
+msgstr "모국어 지원 활성화"
 
-#: src/util.cpp:885
+#: /home/dave/source/motionplus/src/util.cpp
+#, c-format
+msgid "parse file: %s"
+msgstr "구문 분석 파일: %s"
+
+#: /home/dave/source/motionplus/src/util.cpp
+msgid "Only one params_file specification is permitted."
+msgstr "하나의 params 파일 사양만 허용됩니다."
+
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Parsed: >%s< >%s<"
-msgstr ""
+msgstr "분석됨: >%s< >%s<"
 
-#: src/util.cpp:1047 src/util.cpp:1078 src/util.cpp:1098
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Parsing: >%s< >%ld %ld %ld %ld<"
-msgstr ""
+msgstr "구문 분석 중: >%s< >%ld %ld %ld %ld<"
 
-#: src/util.cpp:1127
-#, c-format
-msgid "Starting parsing parameters: %s"
-msgstr ""
+#: /home/dave/source/motionplus/src/util.cpp
+msgid "Starting parsing parameters"
+msgstr "파싱 매개변수 시작"
 
-#: src/util.cpp:1135
-#, c-format
-#| msgid "Failed to copy decoder parameters!: %s"
-msgid "Finished parsing parameters: %s"
-msgstr ""
-
-#: src/util.cpp:1197
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "New config: %s"
-msgstr ""
+msgstr "새 구성: %s"
 
-#: src/util.cpp:1233
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Unable to start external command '%s'"
-msgstr "외부 명령 '%s'를 시작할 수 없습니다"
+msgstr "외부 명령 '%s'을(를) 시작할 수 없습니다."
 
-#: src/util.cpp:1239
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Executing external command '%s'"
-msgstr "외부 명령 '%s'실행"
+msgstr "외부 명령 '%s' 실행 중"
 
-#: src/video_common.cpp:425 src/video_common.cpp:447
+#: /home/dave/source/motionplus/src/video_common.cpp
 msgid "Corrupt image ... continue"
 msgstr "손상된 이미지 ... 계속"
 
-#: src/video_common.cpp:438
+#: /home/dave/source/motionplus/src/video_common.cpp
 #, c-format
 msgid "SOI position adjusted by %d bytes."
-msgstr "SOI 위치가 %d 바이트로 조정되었습니다."
+msgstr "SOI 위치는 %d바이트로 조정되었습니다."
 
-#: src/video_loopback.cpp:76
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 #, c-format
 msgid "Failed to open '%s'"
-msgstr " '%s'을 (를) 열지 못했습니다"
+msgstr "'%s'을(를) 열지 못했습니다."
 
-#: src/video_loopback.cpp:86 src/video_loopback.cpp:108
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 #, c-format
 msgid "Error specifying buffer: %s"
-msgstr "버퍼 지정 오류 : %s"
+msgstr "버퍼 지정 오류: %s"
 
-#: src/video_loopback.cpp:89
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 #, c-format
 msgid "Opening buffer: %s"
-msgstr "열기 버퍼 : %s"
+msgstr "여는 버퍼: %s"
 
-#: src/video_loopback.cpp:98
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 #, c-format
 msgid "Read buffer: %s"
-msgstr "읽기 버퍼 : %s"
+msgstr "읽기 버퍼: %s"
 
-#: src/video_loopback.cpp:112
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 #, c-format
 msgid "found video device '%s' %d"
-msgstr "발견 된 비디오 장치 '%s'%d"
+msgstr "비디오 장치 '%s' %d을(를) 찾았습니다."
 
-#: src/video_loopback.cpp:131 src/video_loopback.cpp:180
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 #, c-format
 msgid "Opened %s as pipe output"
-msgstr "파이프 출력으로 %s를 열었습니다"
+msgstr "%s를 파이프 출력으로 열었습니다."
 
-#: src/video_loopback.cpp:184
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 #, c-format
 msgid "Opening %s as pipe output failed"
-msgstr "파이프 출력으로 %s를 여는 데 실패했습니다"
+msgstr "%s을(를) 파이프 출력으로 열지 못했습니다."
 
-#: src/video_loopback.cpp:204
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 msgid "Original pipe specifications"
 msgstr "원래 파이프 사양"
 
-#: src/video_loopback.cpp:215
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 msgid "Proposed pipe specifications"
-msgstr "제안 된 파이프 사양"
+msgstr "제안된 파이프 사양"
 
-#: src/video_loopback.cpp:223
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 msgid "Final pipe specifications"
 msgstr "최종 파이프 사양"
 
-#: src/video_loopback.cpp:251
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 msgid "Opening video loopback device for normal pictures"
-msgstr "일반 사진을위한 비디오 루프백 장치 열기"
+msgstr "일반 사진용 비디오 루프백 장치 열기"
 
-#: src/video_loopback.cpp:258
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 msgid "Failed to open video loopback for normal pictures"
-msgstr "일반 사진의 비디오 루프백을 열지 못했습니다"
+msgstr "일반 사진에 대한 비디오 루프백을 열지 못했습니다."
 
-#: src/video_loopback.cpp:267
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 msgid "Opening video loopback device for motion pictures"
-msgstr "동영상 용 비디오 루프백 장치 열기"
+msgstr "동영상용 비디오 루프백 장치 열기"
 
-#: src/video_loopback.cpp:274
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 msgid "Failed to open video loopback for motion pictures"
-msgstr "동영상의 비디오 루프백을 열지 못했습니다"
+msgstr "동영상에 대한 비디오 루프백을 열지 못했습니다."
 
-#: src/video_v4l2.cpp:130
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "---------Controls---------"
-msgstr "--------- 컨트롤 ---------"
+msgstr "---------통제 수단---------"
 
-#: src/video_v4l2.cpp:131
-msgid "  V4L2 ID   Name and Range"
-msgstr "V4L2 ID 이름 및 범위"
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "  V4L2 ID :  Name : Range"
+msgstr "V4L2 ID : 이름 : 범위"
 
-#: src/video_v4l2.cpp:159
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "No Controls found for device"
-msgstr "장치에 대한 컨트롤이 없습니다"
+msgstr "기기에 대한 컨트롤이 없습니다."
 
-#: src/video_v4l2.cpp:240
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "setting control %s \"%s\" to %d failed with return code %d"
-msgstr "제어 코드 %s \"%s\"를 %d로 설정하지 못했습니다. 리턴 코드 %d"
+msgstr "컨트롤 %s \"%s\"을(를) %d(으)로 설정하지 못했습니다(반환 코드 %d)."
 
-#: src/video_v4l2.cpp:245
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Set control \"%s\" to value %d"
-msgstr "제어 \"%s\"를 %d 값으로 설정"
+msgstr "컨트롤 \"%s\"을(를) 값 %d(으)로 설정합니다."
 
-#: src/video_v4l2.cpp:285
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
-#| msgid "%s control option value %d is below minimum.  Using minimum"
 msgid "%s control option value %s is below minimum.  Skipping..."
-msgstr ""
+msgstr "%s 제어 옵션 값 %s이(가) 최소값 미만입니다. 건너뛰는 중..."
 
-#: src/video_v4l2.cpp:289
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
-#| msgid "%s control option value %d is above maximum.  Using maximum"
 msgid "%s control option value %s is above maximum.  Skipping..."
-msgstr ""
+msgstr "%s 제어 옵션 값 %s이(가) 최대값을 초과합니다. 건너뛰는 중..."
 
-#: src/video_v4l2.cpp:300
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "control type not supported yet"
-msgstr "아직 제어 유형이 지원되지 않습니다"
+msgstr "아직 지원되지 않는 제어 유형"
 
-#: src/video_v4l2.cpp:324
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid ""
 "Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input "
 "value in conf by -1"
 msgstr ""
-"입력 %d를 조회 할 수 없습니다. WEBCAM 변경 입력을 사용하는 경우 VIDIOC "
-"ENUMINPUTconf 값 -1"
+"입력 %d을(를) 쿼리할 수 없습니다. VIDIOC ENUMINPUT, WEBCAM 변경 입력을 사용하"
+"는 경우conf의 값 -1"
 
-#: src/video_v4l2.cpp:331
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Name = \"%s\", type 0x%08X, status %08x"
 msgstr "이름 = \"%s\", 유형 0x%08X, 상태 %08x"
 
-#: src/video_v4l2.cpp:336
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Name = \"%s\",- TUNER"
-msgstr "이름 = \"%s\",-TUNER"
+msgstr "이름 = \"%s\",- 튜너"
 
-#: src/video_v4l2.cpp:340
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Name = \"%s\"- CAMERA"
 msgstr "이름 = \"%s\"- 카메라"
 
-#: src/video_v4l2.cpp:345
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Error selecting input %d VIDIOC_S_INPUT"
-msgstr "입력 %d VIDIOC S 입력 선택 오류"
+msgstr "입력 %d 선택 오류 VIDIOC S INPUT"
 
-#: src/video_v4l2.cpp:363
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Device does not support specifying PAL/NTSC norm"
-msgstr "장치가 PAL / NTSC 규범 지정을 지원하지 않습니다"
+msgstr "장치가 PAL/NTSC 표준 지정을 지원하지 않습니다."
 
-#: src/video_v4l2.cpp:374
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "- video standard %s"
-msgstr "-비디오 표준 %s"
+msgstr "- 비디오 표준 %s"
 
-#: src/video_v4l2.cpp:392
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Error selecting standard method %d VIDIOC_S_STD"
-msgstr "표준 방법 %d VIDIOC S STD 선택 오류"
+msgstr "표준 방법 %d VIDIOC S STD를 선택하는 동안 오류가 발생했습니다."
 
-#: src/video_v4l2.cpp:397
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Video standard set to NTSC"
 msgstr "NTSC로 설정된 비디오 표준"
 
-#: src/video_v4l2.cpp:399
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Video standard set to SECAM"
-msgstr "비디오 표준을 SECAM으로 설정"
+msgstr "SECAM으로 설정된 비디오 표준"
 
-#: src/video_v4l2.cpp:401
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Video standard set to PAL"
 msgstr "PAL로 설정된 비디오 표준"
 
-#: src/video_v4l2.cpp:422
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "tuner %d VIDIOC_G_TUNER"
 msgstr "튜너 %d VIDIOC G 튜너"
 
-#: src/video_v4l2.cpp:426
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Set tuner %d"
-msgstr "세트 튜너 %d"
+msgstr "튜너 %d 설정"
 
-#: src/video_v4l2.cpp:436
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "freq %ul VIDIOC_S_FREQUENCY"
-msgstr "freq %ul VIDIOC S FREQUENCY"
+msgstr "freq %ul VIDIOC S 주파수"
 
-#: src/video_v4l2.cpp:440
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Set Frequency to %ul"
-msgstr "주파수를 %ul로 설정"
+msgstr "빈도를 %ul(으)로 설정"
 
-#: src/video_v4l2.cpp:461
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+#, c-format
+msgid "Unable to use palette %c%c%c%c (%dx%d)"
+msgstr "%c%c%c%c(%dx%d) 팔레트를 사용할 수 없습니다."
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Testing palette %c%c%c%c (%dx%d)"
 msgstr "테스트 팔레트 %c%c%c%c (%dx%d)"
 
-#: src/video_v4l2.cpp:470
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+#, c-format
+msgid "Checking image size %dx%d with stride %d"
+msgstr "스트라이드 %d로 이미지 크기 %dx%d 확인 중"
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "No stride value provided from device."
+msgstr "장치에서 제공한 보폭 값이 없습니다."
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+#, c-format
+msgid "Width(%d) must be less than stride(%d)"
+msgstr "너비(%d)는 보폭(%d)보다 작아야 합니다."
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+#, c-format
+msgid "The image width(%d) is not multiple of the stride(%d)"
+msgstr "이미지 너비(%d)가 보폭(%d)의 배수가 아닙니다."
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+#, c-format
+msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
+msgstr "불가능 조건: 폭(%d), 스트라이드(%d), 스트라이드당(%d)"
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+#, c-format
+msgid "Image width will be padded %d bytes"
+msgstr "이미지 너비가 %d바이트로 채워집니다."
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Adjusting resolution from %ix%i to %ix%i."
-msgstr "%ix%i에서 %ix%i로 해상도 조정."
+msgstr "해상도를 %ix%i에서 %ix%i로 조정합니다."
 
-#: src/video_v4l2.cpp:480
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Adjusted resolution not modulo 8."
-msgstr "모듈로 8이 아닌 조정 된 해상도"
+msgstr "모듈로 8이 아닌 조정된 해상도."
 
-#: src/video_v4l2.cpp:482
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Specify different palette or width/height in config file."
-msgstr "설정 파일에서 다른 팔레트 또는 너비 / 높이를 지정하십시오."
+msgstr "구성 파일에서 다른 팔레트 또는 너비/높이를 지정하십시오."
 
-#: src/video_v4l2.cpp:490
-msgid ""
-"Error setting pixel format.\n"
-"VIDIOC_S_FMT: "
-msgstr ""
-"픽셀 형식 설정 오류 .\n"
-"VIDIOC S FMT :"
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "Error setting pixel format."
+msgstr "픽셀 형식을 설정하는 동안 오류가 발생했습니다."
 
-#: src/video_v4l2.cpp:497
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
-msgstr "팔레트 %c%c%c%c (%dx%d) 사용"
+msgstr "%c%c%c%c(%dx%d) 팔레트 사용"
 
-#: src/video_v4l2.cpp:502
-#, c-format
-msgid "Bytesperlines %d sizeimage %d colorspace %08x"
-msgstr "바이트 줄 %d 크기 이미지 %d 색 공간 %08x"
-
-#: src/video_v4l2.cpp:518
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "config image width (%d) is not modulo 8"
-msgstr "설정 이미지 너비 (%d)가 모듈로 8이 아님"
+msgstr "구성 이미지 너비(%d)가 모듈로 8이 아닙니다."
 
-#: src/video_v4l2.cpp:521
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Adjusting to width (%d)"
-msgstr "폭 (%d)으로 조정"
+msgstr "너비(%d)로 조정 중"
 
-#: src/video_v4l2.cpp:526
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "config image height (%d) is not modulo 8"
-msgstr "설정 이미지 높이 (%d)는 모듈로 8이 아닙니다"
+msgstr "구성 이미지 높이(%d)가 모듈로 8이 아닙니다."
 
-#: src/video_v4l2.cpp:529
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Adjusting to height (%d)"
-msgstr "높이 조정 (%d)"
+msgstr "높이 조정 중(%d)"
 
-#: src/video_v4l2.cpp:548
-#| msgid ""
-#| "H264(21) format not supported via videodevice.  Changing to default "
-#| "palette"
-msgid ""
-"H264(21) format not supported via v4l2_device.  Changing to default palette"
-msgstr ""
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "Invalid palette.  Changing to default"
+msgstr "잘못된 팔레트입니다. 기본값으로 변경"
 
-#: src/video_v4l2.cpp:564
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "Supported palettes:"
+msgstr "지원되는 팔레트:"
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Configuration palette index %d (%s) for %dx%d doesn't work."
-msgstr ""
+msgstr "구성 팔레트 인덱스 %d(%s) %dx%d가 작동하지 않습니다"
 
-#: src/video_v4l2.cpp:573
-msgid "Supported palettes:"
-msgstr "지원되는 팔레트 :"
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "Unable to find a compatible palette format."
+msgstr "호환되는 팔레트 형식을 찾을 수 없습니다."
 
-#: src/video_v4l2.cpp:581
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
-msgid "%d - %s (compressed : %d) (%#x)"
-msgstr "%d-%s (압축 : %d) (% # x)"
+msgid "Palette selection failed for format %s"
+msgstr "형식 %s에 대한 팔레트 선택 실패"
 
-#: src/video_v4l2.cpp:602
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Selected palette %s"
 msgstr "선택된 팔레트 %s"
 
-#: src/video_v4l2.cpp:611
-#, c-format
-msgid "Palette selection failed for format %s"
-msgstr ""
-
-#: src/video_v4l2.cpp:616
-msgid "Unable to find a compatible palette format."
-msgstr "호환 가능한 팔레트 형식을 찾을 수 없습니다."
-
-#: src/video_v4l2.cpp:644
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Error requesting buffers %d for memory map. VIDIOC_REQBUFS"
-msgstr "메모리 맵에 버퍼 %d 요청 오류. VIDIOC REQBUFS"
+msgstr ""
+"메모리 맵에 대한 버퍼 %d을(를) 요청하는 동안 오류가 발생했습니다. VIDIOC "
+"REQBUFS"
 
-#: src/video_v4l2.cpp:651
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "mmap information: frames=%d"
-msgstr "mmap 정보 : 프레임 = %d"
+msgstr "mmap 정보: 프레임=%d"
 
-#: src/video_v4l2.cpp:655
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Insufficient buffer memory %d < MIN_MMAP_BUFFERS."
-msgstr "버퍼 메모리 %d < MIN MMAP BUFFERS가 부족합니다."
+msgstr "버퍼 메모리 %d가 부족합니다. < MIN MMAP BUFFERS."
 
-#: src/video_v4l2.cpp:662
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Out of memory."
 msgstr "메모리가 부족합니다."
 
-#: src/video_v4l2.cpp:677
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid ""
 "Error querying buffer %i\n"
 "VIDIOC_QUERYBUF: "
 msgstr ""
-"버퍼 %i\n"
-" 쿼리 오류VIDIOC QUERYBUF :"
+"버퍼 %i 쿼리 오류\n"
+"VIDIOC QUERYBUF:"
 
-#: src/video_v4l2.cpp:692
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Error mapping buffer %i mmap"
-msgstr "버퍼 %i mmap 맵핑 오류"
+msgstr "매핑 버퍼 %i mmap 오류"
 
-#: src/video_v4l2.cpp:701
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "%i length=%d Address (%x)"
-msgstr "%i 길이 = %d 주소 (%x)"
+msgstr "%i 길이=%d 주소(%x)"
 
-#: src/video_v4l2.cpp:722
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Error starting stream. VIDIOC_STREAMON"
-msgstr "스트림 시작 오류. VIDIOC STREAMON"
+msgstr "스트림을 시작하는 동안 오류가 발생했습니다. 비디오크 스트리몬"
 
-#: src/video_v4l2.cpp:945
-#| msgid "Error setting file name"
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Error setting device controls"
-msgstr ""
+msgstr "기기 제어 설정 오류"
 
-#: src/video_v4l2.cpp:965
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
-#| msgid "Closing video device %s"
 msgid "Opening video device %s"
-msgstr ""
+msgstr "비디오 장치 %s 열기"
 
-#: src/video_v4l2.cpp:973
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Failed to open video device %s"
-msgstr "비디오 장치 %s을 (를) 열지 못했습니다"
+msgstr "비디오 장치 %s을(를) 열지 못했습니다."
 
-#: src/video_v4l2.cpp:979
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Not a V4L2 device?"
 msgstr "V4L2 장치가 아닙니까?"
 
-#: src/video_v4l2.cpp:984
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Device does not support capturing."
 msgstr "장치가 캡처를 지원하지 않습니다."
 
-#: src/video_v4l2.cpp:1059
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
-#| msgid "Testing palette %s (%c%c%c%c)"
 msgid "Supported palette %s (%c%c%c%c)"
-msgstr ""
+msgstr "지원되는 팔레트 %s(%c%c%c%c)"
 
-#: src/video_v4l2.cpp:1071
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "  Width: %d, Height %d"
-msgstr "폭 : %d, 높이 %d"
+msgstr "너비: %d, 높이 %d"
 
-#: src/video_v4l2.cpp:1082
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "    Framerate %d/%d"
-msgstr "프레임 속도 %d / %d"
+msgstr "프레임 속도 %d/%d"
 
-#: src/video_v4l2.cpp:1120
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Trying to set fps to %d"
-msgstr "fps를 %d로 설정하려고합니다"
+msgstr "fps를 %d(으)로 설정하려고 합니다."
 
-#: src/video_v4l2.cpp:1126
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Error setting fps. Return code %d"
-msgstr "fps 설정 오류. 리턴 코드 %d"
+msgstr "fps를 설정하는 중에 오류가 발생했습니다. 반환 코드 %d"
 
-#: src/video_v4l2.cpp:1130
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Device set fps to %d"
-msgstr "장치가 fps를 %d로 설정"
+msgstr "장치가 fps를 %d(으)로 설정했습니다."
 
-#: src/video_v4l2.cpp:1146
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Closing video device %s"
 msgstr "비디오 장치 %s 닫기"
 
-#: src/webu.cpp:220
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "Opening V4L2 device"
+msgstr "V4L2 장치 열기"
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "V4L2 device failed to open"
+msgstr "V4L2 장치를 열지 못했습니다."
+
+#: /home/dave/source/motionplus/src/webu.cpp
 #, c-format
 msgid "Sent url: %s"
-msgstr "보낸 URL : %s"
+msgstr "보낸 URL: %s"
 
-#: src/webu.cpp:230
+#: /home/dave/source/motionplus/src/webu.cpp
 #, c-format
 msgid "Decoded url: %s"
-msgstr "디코딩 된 URL : %s"
+msgstr "디코딩된 URL: %s"
 
-#: src/webu.cpp:339
+#: /home/dave/source/motionplus/src/webu.cpp
 #, c-format
 msgid "Full Host:  %s"
-msgstr ""
+msgstr "전체 호스트: %s"
 
-#: src/webu.cpp:352
+#: /home/dave/source/motionplus/src/webu.cpp
 #, c-format
 msgid "Failed authentication from %s"
-msgstr "%s 인증 실패"
+msgstr "%s에서 실패한 인증"
 
-#: src/webu.cpp:414
+#: /home/dave/source/motionplus/src/webu.cpp
 #, c-format
-msgid "ignoring attempt from %s"
-msgstr ""
+msgid "Connection from: %s"
+msgstr "연결 위치: %s"
 
-#: src/webu.cpp:629
+#: /home/dave/source/motionplus/src/webu.cpp
+#, c-format
+msgid "Ignoring connection from: %s"
+msgstr "연결 무시: %s"
+
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "No webcontrol user:pass provided"
-msgstr "웹 컨트롤 사용자 없음 : 패스 제공됨"
+msgstr "웹 컨트롤 사용자:패스가 제공되지 않음"
 
-#: src/webu.cpp:659 src/webu_stream.cpp:361 src/webu_stream.cpp:405
+#: /home/dave/source/motionplus/src/webu.cpp
+#: /home/dave/source/motionplus/src/webu_stream.cpp
 msgid "Invalid response"
 msgstr "잘못된 응답"
 
-#: src/webu.cpp:816 src/webu.cpp:830
-#| msgid "send page failed %d"
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "send page failed."
-msgstr ""
+msgstr "페이지 보내기에 실패했습니다."
 
-#: src/webu.cpp:864
-#| msgid "%s: Shutting down network camera."
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "Shutting down camera"
-msgstr ""
+msgstr "카메라 종료"
 
-#: src/webu.cpp:887
-#, c-format
-msgid "Connection from: %s"
-msgstr "연결 : %s"
-
-#: src/webu.cpp:1007
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "Basic authentication: available"
-msgstr "기본 인증 : 사용 가능"
+msgstr "기본인증 : 가능"
 
-#: src/webu.cpp:1010 src/webu.cpp:1013
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "Basic authentication: disabled"
-msgstr "기본 인증 : 비활성화 됨"
+msgstr "기본 인증: 비활성화"
 
-#: src/webu.cpp:1028
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "Digest authentication: available"
-msgstr "다이제스트 인증 : 사용 가능"
+msgstr "다이제스트 인증: 사용 가능"
 
-#: src/webu.cpp:1031 src/webu.cpp:1034
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "Digest authentication: disabled"
-msgstr "다이제스트 인증 : 비활성화"
+msgstr "다이제스트 인증: 비활성화됨"
 
-#: src/webu.cpp:1045
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "libmicrohttpd libary too old ipv6 disabled"
-msgstr "libmicrohttpd 라이브러리가 너무 오래된 ipv6 비활성화 됨"
+msgstr "libmicrohttpd 라이브러리가 너무 오래됨 ipv6 비활성화됨"
 
-#: src/webu.cpp:1054
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "IPV6: available"
-msgstr "IPV6 : 사용 가능"
+msgstr "IPV6: 사용 가능"
 
-#: src/webu.cpp:1056
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "IPV6: disabled"
-msgstr "IPV6 : 비활성화"
+msgstr "IPV6: 비활성화"
 
-#: src/webu.cpp:1069
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "libmicrohttpd libary too old SSL/TLS disabled"
-msgstr "libmicrohttpd 라이브러리가 너무 오래된 SSL / TLS 비활성화 됨"
+msgstr "libmicrohttpd 라이브러리가 너무 오래됨 SSL/TLS 비활성화됨"
 
-#: src/webu.cpp:1076
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "SSL/TLS: available"
-msgstr "SSL / TLS : 사용 가능"
+msgstr "SSL/TLS: 사용 가능"
 
-#: src/webu.cpp:1079 src/webu.cpp:1082
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "SSL/TLS: disabled"
-msgstr "SSL / TLS : 비활성화 됨"
+msgstr "SSL/TLS: 비활성화됨"
 
-#: src/webu.cpp:1124
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "Error reading file for SSL/TLS support."
-msgstr "SSL / TLS 지원을위한 파일 읽기 오류."
+msgstr "SSL/TLS 지원 파일을 읽는 중 오류가 발생했습니다."
 
-#: src/webu.cpp:1142
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "SSL/TLS requested but no cert file provided.  SSL/TLS disabled"
 msgstr ""
-"SSL / TLS가 요청되었지만 인증 파일이 제공되지 않았습니다. SSL / TLS가 비활성"
-"화되었습니다"
+"SSL/TLS가 요청되었지만 인증서 파일이 제공되지 않았습니다. SSL/TLS 비활성화됨"
 
-#: src/webu.cpp:1147
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "SSL/TLS requested but no key file provided.  SSL/TLS disabled"
 msgstr ""
-"SSL / TLS가 요청되었지만 키 파일이 제공되지 않았습니다. SSL / TLS가 비활성화"
-"되었습니다"
+"SSL/TLS가 요청되었지만 키 파일이 제공되지 않았습니다. SSL/TLS 비활성화됨"
 
-#: src/webu.cpp:1291
+#: /home/dave/source/motionplus/src/webu.cpp
 #, c-format
 msgid "Starting webcontrol on port %d"
-msgstr "%d 포트에서 webcontrol 시작"
+msgstr "포트 %d에서 웹 컨트롤 시작"
 
-#: src/webu.cpp:1320
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "Unable to start MHD"
-msgstr "MHD를 시작할 수 없습니다"
+msgstr "MHD를 시작할 수 없습니다."
 
-#: src/webu.cpp:1323
+#: /home/dave/source/motionplus/src/webu.cpp
 #, c-format
 msgid "Started webcontrol on port %d"
-msgstr "%d 포트에서 webcontrol을 시작했습니다"
+msgstr "포트 %d에서 웹 제어를 시작했습니다."
 
-#: src/webu_html.cpp:1118
+#: /home/dave/source/motionplus/src/webu_html.cpp
 #, c-format
-#| msgid "Invalid url: %s"
 msgid "Invalid user html file: %s"
-msgstr ""
+msgstr "잘못된 사용자 html 파일: %s"
 
-#: src/webu_post.cpp:68 src/webu_post.cpp:267 src/webu_post.cpp:276
+#: /home/dave/source/motionplus/src/webu_post.cpp
+msgid "Restarting all cameras"
+msgstr "모든 카메라 다시 시작"
+
+#: /home/dave/source/motionplus/src/webu_post.cpp
+#, c-format
+msgid "Restarting camera %d"
+msgstr "카메라 %d 다시 시작"
+
+#: /home/dave/source/motionplus/src/webu_post.cpp
 #, c-format
 msgid "Stopping cam %d"
-msgstr ""
+msgstr "캠 %d 중지"
 
-#: src/webu_post.cpp:241
-#| msgid "Restarting all threads"
-msgid "Restarting all cameras"
-msgstr ""
-
-#: src/webu_post.cpp:250
+#: /home/dave/source/motionplus/src/webu_post.cpp
 #, c-format
-#| msgid "Restarting thread %d"
-msgid "Restarting camera %d"
-msgstr ""
+msgid "Invalid character included in action user \"%c\""
+msgstr "작업 사용자 \"%c\"에 잘못된 문자가 포함되어 있습니다."
 
-#: src/webu_post.cpp:338
-msgid "Native Language : on"
-msgstr "모국어 : 켜기"
-
-#: src/webu_post.cpp:341
-msgid "Native Language : off"
-msgstr "모국어 : 꺼짐"
-
-#: src/webu_post.cpp:440
+#: /home/dave/source/motionplus/src/webu_post.cpp
 #, c-format
-#| msgid "Invalid action requested: >%s< >%s< >%s<"
+msgid "Executing user action on cam %d"
+msgstr "캠 %d에서 사용자 작업 실행 중"
+
+#: /home/dave/source/motionplus/src/webu_post.cpp
+#, c-format
 msgid "Invalid action requested: command: >%s< threadnbr : >%d< "
-msgstr ""
+msgstr "잘못된 작업 요청: 명령: >%s< threadnbr: >%d<"
 
-#: src/webu_stream.cpp:247 src/webu_stream.cpp:254
+#: /home/dave/source/motionplus/src/webu_stream.cpp
 #, c-format
 msgid "Invalid thread specified: %s"
-msgstr "잘못된 스레드 지정 : %s"
+msgstr "잘못된 스레드 지정: %s"
 
-#: src/webu_stream.cpp:398
+#: /home/dave/source/motionplus/src/webu_stream.cpp
 msgid "Could not get image to stream."
-msgstr "이미지를 스트리밍 할 수 없습니다."
-
+msgstr "스트리밍할 이미지를 가져올 수 없습니다."

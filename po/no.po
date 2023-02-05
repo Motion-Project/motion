@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.x\n"
+"Project-Id-Version: 0.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-18 21:32-0600\n"
-"PO-Revision-Date: 2021-06-18 21:46-0600\n"
+"POT-Creation-Date: 2023-02-04 18:23-0700\n"
+"PO-Revision-Date: 2023-02-048 21:45-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: no\n"
@@ -16,3250 +16,3438 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.0.6\n"
 
-#: src/alg.cpp:1008
+#: /home/dave/source/motionplus/src/alg.cpp
 msgid "Lightswitch detected"
-msgstr "Lightswitch oppdaget"
+msgstr "Lysbryter oppdaget"
 
-#: src/alg_sec.cpp:217 src/alg_sec.cpp:266 src/alg_sec.cpp:289
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 #, c-format
-#| msgid "Error getcwd"
 msgid "Error %s"
-msgstr ""
+msgstr "Feil %s"
 
-#: src/alg_sec.cpp:218 src/alg_sec.cpp:267
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Disabling secondary detection"
-msgstr ""
+msgstr "Deaktiverer sekundær deteksjon"
 
-#: src/alg_sec.cpp:278
-#| msgid "secondary_model"
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "No secondary model specified."
-msgstr ""
+msgstr "Ingen sekundærmodell spesifisert."
 
-#: src/alg_sec.cpp:284 src/alg_sec.cpp:290
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 #, c-format
-#| msgid "Failed to open '%s'"
 msgid "Failed loading model %s"
-msgstr ""
+msgstr "Kunne ikke laste modellen %s"
 
-#: src/alg_sec.cpp:470
-#| msgid "Start"
+#: /home/dave/source/motionplus/src/alg_sec.cpp
+#, c-format
+msgid "Classes file not found: %s"
+msgstr "Klassefilen ble ikke funnet: %s"
+
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Starting."
-msgstr ""
+msgstr "Starter."
 
-#: src/alg_sec.cpp:496
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Exiting."
-msgstr ""
+msgstr "Avslutter."
 
-#: src/alg_sec.cpp:513
-#| msgid "%s: Error starting handler thread"
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Error starting algsec handler thread"
-msgstr ""
+msgstr "Feil ved start av tråd for algsec-behandler"
 
-#: src/alg_sec.cpp:576
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Graceful shutdown of secondary detector thread failed"
-msgstr ""
+msgstr "Grasiøs avstenging av sekundær detektortråd mislyktes"
 
-#: src/alg_sec.cpp:610
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Your computer is too slow for these settings."
-msgstr ""
+msgstr "Datamaskinen din er for treg for disse innstillingene."
 
-#: src/alg_sec.cpp:613
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Missed many frames for secondary detection."
-msgstr ""
+msgstr "Savnet mange bilder for sekundær deteksjon."
 
-#: src/alg_sec.cpp:615
+#: /home/dave/source/motionplus/src/alg_sec.cpp
 msgid "Your computer is too slow."
-msgstr ""
+msgstr "Datamaskinen din er for treg."
 
-#: src/conf.cpp:428
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "daemon"
-msgstr "daemon"
+msgstr "demon"
 
-#: src/conf.cpp:441
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "setup_mode"
 msgstr "oppsettmodus"
 
-#: src/conf.cpp:454 src/conf.cpp:480
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "log_file"
 msgstr "loggfil"
 
-#: src/conf.cpp:467
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "pid_file"
 msgstr "pid-fil"
 
-#: src/conf.cpp:491
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid log_level %d"
-msgstr "Ugyldig loggenivå %d"
+msgstr "Ugyldig loggnivå %d"
 
-#: src/conf.cpp:505
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "log_level"
 msgstr "loggnivå"
 
-#: src/conf.cpp:520
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid log_type %s"
 msgstr "Ugyldig loggtype %s"
 
-#: src/conf.cpp:531
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "log_type"
-msgstr "log type"
+msgstr "loggtype"
 
-#: src/conf.cpp:544
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "native_language"
 msgstr "morsmål"
 
-#: src/conf.cpp:561
-msgid "camera_name"
-msgstr "kameranavn"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "camera"
+msgstr "kamera"
 
-#: src/conf.cpp:579
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "device_name"
+msgstr "enhetsnavn"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-msgid "Invalid camera_id %d"
-msgstr "Ugyldig kamera-ID %d"
+msgid "Invalid device_id %d"
+msgstr "Ugyldig enhets-ID %d"
 
-#: src/conf.cpp:587
-msgid "camera_id"
-msgstr ""
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "device_id"
+msgstr "enhets-ID"
 
-#: src/conf.cpp:598
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid camera_id %d"
-msgid "Invalid camera_tmo %d"
-msgstr ""
+msgid "Invalid device_tmo %d"
+msgstr "Ugyldig enhet tmo %d"
 
-#: src/conf.cpp:606
-#| msgid "camera_name"
-msgid "camera_tmo"
-msgstr ""
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "device_tmo"
+msgstr "enhet tmo"
 
-#: src/conf.cpp:619
-msgid "camera_dir"
-msgstr ""
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "pause"
+msgstr "pause"
 
-#: src/conf.cpp:632
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "config_dir"
+msgstr "konfig dir"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid target_dir.  Conversion specifiers not permitted. %s"
+msgstr "Ugyldig måldir. Konverteringsspesifikasjoner er ikke tillatt. %s"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "target_dir"
 msgstr "mål dir"
 
-#: src/conf.cpp:643
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid database_busy_timeout %d"
 msgid "Invalid watchdog timeout %d"
-msgstr ""
+msgstr "Ugyldig tidsavbrudd for vakthund %d"
 
-#: src/conf.cpp:651
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "watchdog_tmo"
-msgstr ""
+msgstr "vakthund tmo"
 
-#: src/conf.cpp:662
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid database_busy_timeout %d"
 msgid "Invalid watchdog kill timeout %d"
-msgstr ""
+msgstr "Ugyldig timeout for vakthunddrep %d"
 
-#: src/conf.cpp:670
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "watchdog_kill"
-msgstr ""
+msgstr "vakthund drepe"
 
-#: src/conf.cpp:683
-#| msgid "videodevice"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "v4l2_device"
-msgstr ""
+msgstr "v4l2 enhet"
 
-#: src/conf.cpp:696
-#| msgid "vid_control_params"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "v4l2_params"
-msgstr ""
+msgstr "v4l2 parametere"
 
-#: src/conf.cpp:709
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "netcam_url"
 msgstr "netcam url"
 
-#: src/conf.cpp:722
-#| msgid "netcam_userpass"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "netcam_params"
-msgstr ""
+msgstr "netcam params"
 
-#: src/conf.cpp:735
-#| msgid "netcam_highres"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "netcam_high_url"
-msgstr ""
+msgstr "netcam høy url"
 
-#: src/conf.cpp:748
-#| msgid "netcam_highres"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "netcam_high_params"
-msgstr ""
+msgstr "netcam høye parametere"
 
-#: src/conf.cpp:761
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "netcam_userpass"
 msgstr "netcam brukerpass"
 
-#: src/conf.cpp:798
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "libcam_device"
+msgstr "libcam-enhet"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "libcam_params"
+msgstr "libcam params"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid width %d"
 msgstr "Ugyldig bredde %d"
 
-#: src/conf.cpp:801 src/netcam.cpp:1605
+#: /home/dave/source/motionplus/src/conf.cpp
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "Image width (%d) requested is not modulo 8."
 msgstr "Bildebredde (%d) forespurt er ikke modulo 8."
 
-#: src/conf.cpp:804
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Adjusting width to next higher multiple of 8 (%d)."
-msgstr "Justere bredden til neste høyere multiplum av 8 (%d)."
+msgstr "Justerer bredden til neste høyere multiplum på 8 (%d)."
 
-#: src/conf.cpp:813
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "width"
 msgstr "bredde"
 
-#: src/conf.cpp:824
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid height %d"
 msgstr "Ugyldig høyde %d"
 
-#: src/conf.cpp:827 src/netcam.cpp:1614
+#: /home/dave/source/motionplus/src/conf.cpp
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "Image height (%d) requested is not modulo 8."
 msgstr "Bildehøyde (%d) forespurt er ikke modulo 8."
 
-#: src/conf.cpp:830 src/netcam.cpp:1617
+#: /home/dave/source/motionplus/src/conf.cpp
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "Adjusting height to next higher multiple of 8 (%d)."
-msgstr "Justere høyden til neste høyere multiplum av 8 (%d)."
+msgstr "Justerer høyden til neste høyere multiplum på 8 (%d)."
 
-#: src/conf.cpp:839
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "height"
 msgstr "høyde"
 
-#: src/conf.cpp:850
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid framerate %d"
-msgstr "Ugyldig framerate %d"
+msgstr "Ugyldig rammehastighet %d"
 
-#: src/conf.cpp:858
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "framerate"
-msgstr ""
+msgstr "framerate"
 
-#: src/conf.cpp:869
-#, c-format
-msgid "Invalid minimum_frame_time %d"
-msgstr "Ugyldig minimum bildetid %d"
-
-#: src/conf.cpp:877
-msgid "minimum_frame_time"
-msgstr "minimum bildetid"
-
-#: src/conf.cpp:889
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid rotate %d"
-msgstr "Invalid rotate %d"
+msgstr "Ugyldig rotasjon %d"
 
-#: src/conf.cpp:899
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "rotate"
 msgstr "rotere"
 
-#: src/conf.cpp:912
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid flip_axis %s"
-msgstr "Ugyldig flipakse %s"
+msgstr "Ugyldig vippeakse %s"
 
-#: src/conf.cpp:921
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "flip_axis"
-msgstr "flip axis"
+msgstr "snu aksen"
 
-#: src/conf.cpp:934
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid locate_motion_mode %s"
-msgstr "Ugyldig lokalisere bevegelsesmodus %s"
+msgstr "Ugyldig lokalisering av bevegelsesmodus %s"
 
-#: src/conf.cpp:942
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "locate_motion_mode"
-msgstr "Finn bevegelsesmodus"
+msgstr "finn bevegelsesmodus"
 
-#: src/conf.cpp:956
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid locate_motion_style %s"
-msgstr "Ugyldig lokalisere bevegelsesstil %s"
+msgstr "Ugyldig lokalisering av bevegelsesstil %s"
 
-#: src/conf.cpp:964
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "locate_motion_style"
-msgstr "Finn bevegelsesstil"
+msgstr "finn bevegelsesstil"
 
-#: src/conf.cpp:977
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "text_left"
-msgstr "tekst igjen"
+msgstr "tekst til venstre"
 
-#: src/conf.cpp:990
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "text_right"
-msgstr "tekst til høyre"
+msgstr "tekst høyre"
 
-#: src/conf.cpp:1003
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "text_changes"
 msgstr "tekstendringer"
 
-#: src/conf.cpp:1014
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid text_scale %d"
 msgstr "Ugyldig tekstskala %d"
 
-#: src/conf.cpp:1027
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "text_scale"
-msgstr "tekstskala"
+msgstr "tekst skala"
 
-#: src/conf.cpp:1040
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "text_event"
-msgstr "tekstbegivenhet"
+msgstr "teksthendelse"
 
-#: src/conf.cpp:1053
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "emulate_motion"
-msgstr "emulere bevegelse"
+msgstr "etterligne bevegelse"
 
-#: src/conf.cpp:1064
-#, c-format
-msgid "Invalid primary method %d"
-msgstr "Ugyldig primær metode %d"
-
-#: src/conf.cpp:1072
-msgid "primary_method"
-msgstr "primær metode"
-
-#: src/conf.cpp:1083
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid threshold %d"
 msgstr "Ugyldig terskel %d"
 
-#: src/conf.cpp:1091
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "threshold"
 msgstr "terskel"
 
-#: src/conf.cpp:1102
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid threshold_maximum %d"
-msgstr "Ugyldig terskel maksimum %d"
+msgstr "Ugyldig maksimumsgrense %d"
 
-#: src/conf.cpp:1110
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "threshold_maximum"
 msgstr "terskel maksimum"
 
-#: src/conf.cpp:1121
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid threshold_sdevx %d"
 msgstr "Ugyldig terskel sdevx %d"
 
-#: src/conf.cpp:1129
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "threshold_sdevx"
 msgstr "terskel sdevx"
 
-#: src/conf.cpp:1140
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid threshold_sdevy %d"
 msgstr "Ugyldig terskel sdevy %d"
 
-#: src/conf.cpp:1148
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "threshold_sdevy"
 msgstr "terskel sdevy"
 
-#: src/conf.cpp:1159
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid threshold_sdevxy %d"
 msgstr "Ugyldig terskel sdevxy %d"
 
-#: src/conf.cpp:1167
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "threshold_sdevxy"
 msgstr "terskel sdevxy"
 
-#: src/conf.cpp:1178
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid threshold %d"
 msgid "Invalid threshold_ratio %d"
-msgstr ""
+msgstr "Ugyldig terskelforhold %d"
 
-#: src/conf.cpp:1186
-#| msgid "threshold_tune"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "threshold_ratio"
-msgstr ""
+msgstr "terskelforhold"
 
-#: src/conf.cpp:1199
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid threshold_ratio_change %d"
+msgstr "Ugyldig endring av terskelforhold %d"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "threshold_ratio_change"
+msgstr "terskelforholdsendring"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "threshold_tune"
-msgstr "terskelinnstilling"
+msgstr "terskelmelodi"
 
-#: src/conf.cpp:1210
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-msgid "Invalid secondary_interval %d"
-msgstr "Ugyldig sekundært intervall %d"
+msgid "Invalid secondary_method %s"
+msgstr "Ugyldig sekundær metode %s"
 
-#: src/conf.cpp:1218
-msgid "secondary_interval"
-msgstr "sekundært intervall"
-
-#: src/conf.cpp:1229
-#, c-format
-msgid "Invalid secondary_method %d"
-msgstr "Ugyldig sekundærmetode %d"
-
-#: src/conf.cpp:1237
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "secondary_method"
 msgstr "sekundær metode"
 
-#: src/conf.cpp:1250
-#| msgid "secondary_model"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "secondary_params"
-msgstr ""
+msgstr "sekundære paramer"
 
-#: src/conf.cpp:1261
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid noise_level %d"
 msgstr "Ugyldig støynivå %d"
 
-#: src/conf.cpp:1269
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "noise_level"
 msgstr "støynivå"
 
-#: src/conf.cpp:1282
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "noise_tune"
-msgstr "noise tune"
+msgstr "støy melodi"
 
-#: src/conf.cpp:1295
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "despeckle_filter"
-msgstr "vrakfilter"
+msgstr "flekkete filter"
 
-#: src/conf.cpp:1308
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "area_detect"
 msgstr "område oppdage"
 
-#: src/conf.cpp:1321
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "mask_file"
-msgstr "maskefil"
+msgstr "maske fil"
 
-#: src/conf.cpp:1334
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "mask_privacy"
-msgstr "maske privatliv"
+msgstr "maske personvern"
 
-#: src/conf.cpp:1345
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid smart_mask_speed %d"
 msgstr "Ugyldig smartmaskehastighet %d"
 
-#: src/conf.cpp:1358
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "smart_mask_speed"
 msgstr "smart maskehastighet"
 
-#: src/conf.cpp:1369
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid lightswitch_percent %d"
-msgstr "Ugyldig lysbryter prosent %d"
+msgstr "Ugyldig lysbryterprosent %d"
 
-#: src/conf.cpp:1377
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "lightswitch_percent"
-msgstr "lysbryterprosent"
+msgstr "lysbryter prosent"
 
-#: src/conf.cpp:1388
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid lightswitch_frames %d"
 msgstr "Ugyldige lysbryterrammer %d"
 
-#: src/conf.cpp:1396
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "lightswitch_frames"
 msgstr "lysbryterrammer"
 
-#: src/conf.cpp:1407
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid minimum_motion_frames %d"
-msgstr "Ugyldige minste bevegelsesrammer %d"
+msgstr "Ugyldige minimumsbevegelsesrammer %d"
 
-#: src/conf.cpp:1415
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "minimum_motion_frames"
 msgstr "minimum bevegelsesrammer"
 
-#: src/conf.cpp:1426
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid track_move_wait %d"
 msgid "Invalid static_object_time %d"
-msgstr ""
+msgstr "Ugyldig statisk objekttid %d"
 
-#: src/conf.cpp:1434
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "static_object_time"
-msgstr ""
+msgstr "statisk objekttid"
 
-#: src/conf.cpp:1445
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid event_gap %d"
 msgstr "Ugyldig hendelsesgap %d"
 
-#: src/conf.cpp:1453
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "event_gap"
-msgstr "event gap"
+msgstr "hendelsesgap"
 
-#: src/conf.cpp:1464
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid pre_capture %d"
-msgstr "Ugyldig pre capture %d"
+msgstr "Ugyldig forhåndsfangst %d"
 
-#: src/conf.cpp:1472
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "pre_capture"
-msgstr "pre capture"
+msgstr "forhåndsfangst"
 
-#: src/conf.cpp:1483
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid post_capture %d"
 msgstr "Ugyldig postfangst %d"
 
-#: src/conf.cpp:1491
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "post_capture"
-msgstr "post capture"
+msgstr "postfangst"
 
-#: src/conf.cpp:1504
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_event_start"
-msgstr "på eventstart"
+msgstr "ved arrangementets start"
 
-#: src/conf.cpp:1517
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_event_end"
-msgstr "på arrangementets slutt"
+msgstr "på slutten av arrangementet"
 
-#: src/conf.cpp:1530
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_picture_save"
-msgstr "på bilde lagre"
+msgstr "på bildelagring"
 
-#: src/conf.cpp:1543
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_area_detected"
-msgstr "på område oppdaget"
+msgstr "på oppdaget område"
 
-#: src/conf.cpp:1556
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_motion_detected"
 msgstr "på bevegelse oppdaget"
 
-#: src/conf.cpp:1569
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_movie_start"
 msgstr "på filmstart"
 
-#: src/conf.cpp:1582
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_movie_end"
-msgstr "på filmslutt"
+msgstr "på slutten av filmen"
 
-#: src/conf.cpp:1595
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_camera_lost"
 msgstr "på kamera tapt"
 
-#: src/conf.cpp:1608
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_camera_found"
 msgstr "på kamera funnet"
 
-#: src/conf.cpp:1621
-#| msgid "secondary_model"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "on_secondary_detect"
-msgstr ""
+msgstr "på sekundær deteksjon"
 
-#: src/conf.cpp:1635
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "on_action_user"
+msgstr "på handling bruker"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "on_sound_alert"
+msgstr "på lydvarsling"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid picture_output %s"
 msgstr "Ugyldig bildeutgang %s"
 
-#: src/conf.cpp:1645
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "picture_output"
 msgstr "bildeutgang"
 
-#: src/conf.cpp:1658
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid picture_output %s"
 msgid "Invalid picture_output_motion %s"
-msgstr ""
+msgstr "Ugyldig bildeutgangsbevegelse %s"
 
-#: src/conf.cpp:1668
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "picture_output_motion"
-msgstr "image output motion"
+msgstr "bildeutgang bevegelse"
 
-#: src/conf.cpp:1681
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid picture_type %s"
 msgstr "Ugyldig bildetype %s"
 
-#: src/conf.cpp:1691
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "picture_type"
 msgstr "bildetype"
 
-#: src/conf.cpp:1702
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid picture_quality %d"
 msgstr "Ugyldig bildekvalitet %d"
 
-#: src/conf.cpp:1710
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "picture_quality"
 msgstr "bildekvalitet"
 
-#: src/conf.cpp:1723
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "picture_exif"
-msgstr "picture exif"
+msgstr "bilde exif"
 
-#: src/conf.cpp:1736
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "picture_filename"
-msgstr "bilde filnavn"
+msgstr "bildefilnavn"
 
-#: src/conf.cpp:1747
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid snapshot_interval %d"
-msgstr "Ugyldig stillbildeintervall %d"
+msgstr "Ugyldig øyeblikksbildeintervall %d"
 
-#: src/conf.cpp:1755
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "snapshot_interval"
-msgstr "øyeblikksbilde-intervall"
+msgstr "øyeblikksbildeintervall"
 
-#: src/conf.cpp:1768
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "snapshot_filename"
-msgstr "stillbilde filnavn"
+msgstr "snapshot filnavn"
 
-#: src/conf.cpp:1781
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_output"
 msgstr "filmutgang"
 
-#: src/conf.cpp:1794
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_output_motion"
-msgstr "movie output motion"
+msgstr "filmutgangsbevegelse"
 
-#: src/conf.cpp:1805
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid movie_max_time %d"
-msgstr "Ugyldig film maks tid %d"
+msgstr "Ugyldig filmmaks tid %d"
 
-#: src/conf.cpp:1813
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_max_time"
 msgstr "film maks tid"
 
-#: src/conf.cpp:1824
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid movie_bps %d"
-msgstr "Ugyldig film bps %d"
+msgstr "Ugyldig filmbps %d"
 
-#: src/conf.cpp:1832
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_bps"
 msgstr "film bps"
 
-#: src/conf.cpp:1843
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid movie_quality %d"
 msgstr "Ugyldig filmkvalitet %d"
 
-#: src/conf.cpp:1851
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_quality"
 msgstr "filmkvalitet"
 
-#: src/conf.cpp:1864
-msgid "movie_codec"
-msgstr "filmkodek"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "movie_container"
+msgstr "filmbeholder"
 
-#: src/conf.cpp:1877
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_passthrough"
-msgstr "film gjennomstrømning"
+msgstr "filmgjennomgang"
 
-#: src/conf.cpp:1890
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_filename"
 msgstr "filmfilnavn"
 
-#: src/conf.cpp:1903
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid movie_retain %s"
+msgstr "Ugyldig filmbehold %s"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "movie_retain"
+msgstr "filmen beholde"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_extpipe_use"
-msgstr "Film extpipe use"
+msgstr "bruk av filmextpipe"
 
-#: src/conf.cpp:1916
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "movie_extpipe"
-msgstr "movie extpipe"
+msgstr "filmextpipe"
 
-#: src/conf.cpp:1927
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid timelapse_interval %d"
-msgstr "Ugyldig tidsintervall %d"
+msgstr "Ugyldig timelapse-intervall %d"
 
-#: src/conf.cpp:1935
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "timelapse_interval"
-msgstr "timelapse intervall"
+msgstr "timelapse-intervall"
 
-#: src/conf.cpp:1950
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid timelapse_mode %s"
 msgstr "Ugyldig timelapse-modus %s"
 
-#: src/conf.cpp:1961
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "timelapse_mode"
-msgstr "timelapse mode"
+msgstr "timelapse-modus"
 
-#: src/conf.cpp:1972
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid timelapse_fps %d"
 msgstr "Ugyldig timelapse fps %d"
 
-#: src/conf.cpp:1980
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "timelapse_fps"
 msgstr "timelapse fps"
 
-#: src/conf.cpp:1993
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-msgid "Invalid timelapse_codec %s"
-msgstr "Ugyldig timelapse codec %s"
+msgid "Invalid timelapse_container %s"
+msgstr "Ugyldig timelapse-beholder %s"
 
-#: src/conf.cpp:2003
-msgid "timelapse_codec"
-msgstr "timelapse codec"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "timelapse_container"
+msgstr "timelapse-beholder"
 
-#: src/conf.cpp:2016
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "timelapse_filename"
 msgstr "timelapse filnavn"
 
-#: src/conf.cpp:2029
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "video_pipe"
-msgstr "video pipe"
+msgstr "videopipe"
 
-#: src/conf.cpp:2042
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "video_pipe_motion"
-msgstr "video pipe motion"
+msgstr "videorørbevegelse"
 
-#: src/conf.cpp:2053
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid webcontrol_port %d"
-msgstr "Ugyldig nettkontrollport %d"
+msgstr "Ugyldig webkontrollport %d"
 
-#: src/conf.cpp:2061
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_port"
-msgstr "nettkontrollport"
+msgstr "webkontroll port"
 
-#: src/conf.cpp:2074
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "Invalid webcontrol_base_path: Use blank instead of single / "
+msgstr "Ugyldig webkontroll-basebane: Bruk tom i stedet for enkelt /"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "Invalid webcontrol_base_path:  Must start with a / "
+msgstr "Ugyldig webkontroll-basebane: Må starte med en /"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "webcontrol_base_path"
+msgstr "webcontrols basebane"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_ipv6"
-msgstr "webcontrol ipv6"
+msgstr "webkontroll ipv6"
 
-#: src/conf.cpp:2087
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_localhost"
-msgstr "webkontroll localhost"
+msgstr "webcontrol localhost"
 
-#: src/conf.cpp:2098
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid webcontrol_parms %d"
-msgstr "Ugyldige nettkontrollparmer %d"
+msgstr "Ugyldig webkontroll-parms %d"
 
-#: src/conf.cpp:2110
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_parms"
-msgstr "nettkontrollparmer"
+msgstr "webcontrol parms"
 
-#: src/conf.cpp:2121
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-msgid "Invalid webcontrol_interface %d"
-msgstr "Ugyldig nettkontrollgrensesnitt %d"
+msgid "Invalid webcontrol_interface %s"
+msgstr "Ugyldig webkontroll-grensesnitt %s"
 
-#: src/conf.cpp:2133
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_interface"
-msgstr "webkontrollgrensesnitt"
+msgstr "webkontroll grensesnitt"
 
-#: src/conf.cpp:2144
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-msgid "Invalid webcontrol_auth_method %d"
-msgstr "Ugyldig autorisasjonsmetode for webkontroll %d"
+msgid "Invalid webcontrol_auth_method %s"
+msgstr "Ugyldig webkontroll-autentiseringsmetode %s"
 
-#: src/conf.cpp:2156
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_auth_method"
-msgstr "webcontrol authentic method"
+msgstr "webcontrol auth metode"
 
-#: src/conf.cpp:2169
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_authentication"
-msgstr "nettkontrollgodkjenning"
+msgstr "webcontrol-autentisering"
 
-#: src/conf.cpp:2182
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_tls"
-msgstr "webkontroll tls"
+msgstr "webcontrol tls"
 
-#: src/conf.cpp:2195
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_cert"
-msgstr "webcontrol cert"
+msgstr "webkontroll sertifikat"
 
-#: src/conf.cpp:2208
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_key"
-msgstr "nettkontrollnøkkel"
+msgstr "webkontroll nøkkel"
 
-#: src/conf.cpp:2220
-msgid "Error compiling regex in copy_uri"
-msgstr "Feil ved kompilering av regex i copy uri"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "webcontrol_headers"
+msgstr "webkontroll-hoder"
 
-#: src/conf.cpp:2226
-#| msgid "webcontrol_cors_header"
-msgid "Possibly invalid webcontrol_cors_header"
-msgstr ""
-
-#: src/conf.cpp:2234
-msgid "webcontrol_cors_header"
-msgstr "webcontrol cors header"
-
-#: src/conf.cpp:2247
-#| msgid "webcontrol_tls"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "webcontrol_html"
-msgstr ""
+msgstr "webkontroll html"
 
-#: src/conf.cpp:2258
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "webcontrol_actions"
+msgstr "webkontrollhandlinger"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid webcontrol_lock_minutes %d"
+msgstr "Ugyldig webkontroll-lås minutter %d"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "webcontrol_lock_minutes"
+msgstr "webcontrol lås minutter"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid webcontrol_lock_attempts %d"
+msgstr "Ugyldige webcontrol-låseforsøk %d"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "webcontrol_lock_attempts"
+msgstr "webcontrol låseforsøk"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid stream_preview_scale %d"
-msgstr "Ugyldig strømforhåndsvisningskala %d"
+msgstr "Ugyldig skala for forhåndsvisning av strøm %d"
 
-#: src/conf.cpp:2266
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_preview_scale"
-msgstr "stream preview scale"
+msgstr "skala for forhåndsvisning av strøm"
 
-#: src/conf.cpp:2279
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_preview_newline"
-msgstr "stream preview newline"
+msgstr "stream forhåndsvisning ny linje"
 
-#: src/conf.cpp:2290
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-msgid "Invalid stream_preview_method %d"
-msgstr "Ugyldig forhåndsvisningsmetode for strøm %d"
+msgid "Invalid stream_preview_method %s"
+msgstr "Ugyldig forhåndsvisningsmetode for strøm %s"
 
-#: src/conf.cpp:2302
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_preview_method"
-msgstr "stream preview method"
+msgstr "stream forhåndsvisningsmetode"
 
-#: src/conf.cpp:2315
-#| msgid "stream_preview_method"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_preview_ptz"
-msgstr ""
+msgstr "stream forhåndsvisning ptz"
 
-#: src/conf.cpp:2326
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid stream_quality %d"
 msgstr "Ugyldig strømkvalitet %d"
 
-#: src/conf.cpp:2334
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_quality"
 msgstr "strømkvalitet"
 
-#: src/conf.cpp:2347
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_grey"
-msgstr "strømgrå"
+msgstr "strøm grå"
 
-#: src/conf.cpp:2360
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_motion"
-msgstr "stream motion"
+msgstr "strømmebevegelse"
 
-#: src/conf.cpp:2371
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid stream_maxrate %d"
-msgstr "Ugyldig strøm maxrate %d"
+msgstr "Ugyldig strømmaksrate %d"
 
-#: src/conf.cpp:2379
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "stream_maxrate"
-msgstr "stream maxrate"
+msgstr "stream maksrate"
 
-#: src/conf.cpp:2391
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid stream_scan_time %d"
+msgstr "Ugyldig strømskanningstid %d"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "stream_scan_time"
+msgstr "strømskanningstid"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid stream_scan_scale %d"
+msgstr "Ugyldig strømskanningsskala %d"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "stream_scan_scale"
+msgstr "strømskanningsskala"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid database_type %s"
 msgstr "Ugyldig databasetype %s"
 
-#: src/conf.cpp:2401
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "database_type"
 msgstr "databasetype"
 
-#: src/conf.cpp:2414
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "database_dbname"
 msgstr "database dbname"
 
-#: src/conf.cpp:2427
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "database_host"
-msgstr "database host"
+msgstr "databasevert"
 
-#: src/conf.cpp:2438
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid database_port %d"
 msgstr "Ugyldig databaseport %d"
 
-#: src/conf.cpp:2446
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "database_port"
 msgstr "databaseport"
 
-#: src/conf.cpp:2459
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "database_user"
-msgstr "databasebruker"
+msgstr "database bruker"
 
-#: src/conf.cpp:2472
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "database_password"
 msgstr "databasepassord"
 
-#: src/conf.cpp:2483
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Invalid database_busy_timeout %d"
-msgstr "Ugyldig timeout for database %d"
+msgstr "Ugyldig tidsavbrudd for opptatt database %d"
 
-#: src/conf.cpp:2491
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "database_busy_timeout"
-msgstr "opptatt timeout for database"
+msgstr "database opptatt tidsavbrudd"
 
-#: src/conf.cpp:2504
-msgid "sql_log_picture"
-msgstr "sql log picture"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "sql_event_start"
+msgstr "sql-arrangementstart"
 
-#: src/conf.cpp:2517
-msgid "sql_log_snapshot"
-msgstr "stillbilde av sql log"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "sql_event_end"
+msgstr "sql-hendelse slutt"
 
-#: src/conf.cpp:2530
-msgid "sql_log_movie"
-msgstr "sql log movie"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "sql_movie_start"
+msgstr "sql film start"
 
-#: src/conf.cpp:2543
-msgid "sql_log_timelapse"
-msgstr "sql log timelapse"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "sql_movie_end"
+msgstr "sql film slutt"
 
-#: src/conf.cpp:2556
-msgid "sql_query_start"
-msgstr "sql spørringsstart"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "sql_pic_save"
+msgstr "sql bilde lagre"
 
-#: src/conf.cpp:2569
-msgid "sql_query_stop"
-msgstr "sql spørringsstopp"
-
-#: src/conf.cpp:2582
-msgid "sql_query"
-msgstr "sql spørring"
-
-#: src/conf.cpp:2595
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_auto_track"
-msgstr ""
+msgstr "ptz autospor"
 
-#: src/conf.cpp:2606
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "Invalid width %d"
 msgid "Invalid ptz_wait %d"
-msgstr ""
+msgstr "Ugyldig ptz-vent %d"
 
-#: src/conf.cpp:2614
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_wait"
-msgstr ""
+msgstr "ptz vent"
 
-#: src/conf.cpp:2627
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_move_track"
-msgstr ""
+msgstr "ptz flytte spor"
 
-#: src/conf.cpp:2640
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_pan_left"
-msgstr ""
+msgstr "ptz panne igjen"
 
-#: src/conf.cpp:2653
-#| msgid "text_right"
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_pan_right"
-msgstr ""
+msgstr "ptz panorer høyre"
 
-#: src/conf.cpp:2666
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_tilt_up"
-msgstr ""
+msgstr "ptz tilt opp"
 
-#: src/conf.cpp:2679
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_tilt_down"
-msgstr ""
+msgstr "ptz vippes ned"
 
-#: src/conf.cpp:2692
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_zoom_in"
-msgstr ""
+msgstr "ptz zoom inn"
 
-#: src/conf.cpp:2705
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "ptz_zoom_out"
-msgstr ""
+msgstr "ptz zoome ut"
 
-#: src/conf.cpp:3192 src/conf.cpp:3212 src/conf.cpp:3232 src/conf.cpp:3253
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "snd_device"
+msgstr "snd enhet"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "snd_params"
+msgstr "snd params"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "snd_alerts"
+msgstr "snd varsler"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Invalid snd_window %s"
+msgstr "Ugyldig snd-vindu %s"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "snd_window"
+msgstr "snd vindu"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "snd_show"
+msgstr "snd show"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Unknown config option \"%s\""
 msgstr "Ukjent konfigurasjonsalternativ \"%s\""
 
-#: src/conf.cpp:3501
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Camera config file %s not found"
-msgstr "Kamerakonfigurasjonsfil %s ikke funnet"
+msgstr "Finner ikke kamerakonfigurasjonsfilen %s"
 
-#: src/conf.cpp:3515
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-msgid "Processing camera config file %s"
-msgstr "Behandler kamera-konfigurasjonsfil %s"
+msgid "Sound config file %s not found"
+msgstr "Finner ikke lydkonfigurasjonsfilen %s"
 
-#: src/conf.cpp:3547
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "Processing config file %s"
-msgstr "Behandler konfigurasjonsfil %s"
+msgstr "Behandler konfigurasjonsfilen %s"
 
-#: src/conf.cpp:3560
+#: /home/dave/source/motionplus/src/conf.cpp
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
-msgid "Camera directory config %s not found"
-msgstr "Kamerakatalogkonfigurasjon %s ikke funnet"
+msgid "params_file not found: %s"
+msgstr "params-fil ikke funnet: %s"
 
-#: src/conf.cpp:3650
-#| msgid "Writing configuration parameters from all files"
-msgid "Logging configuration parameters from all files"
-msgstr ""
-
-#: src/conf.cpp:3654
+#: /home/dave/source/motionplus/src/conf.cpp
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
-msgid "Camera %d - Config file: %s"
-msgstr "Camera %d - Konfigurasjonsfil: %s"
+msgid "Unable to parse line: %s"
+msgstr "Kan ikke analysere linje: %s"
 
-#: src/conf.cpp:3679
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
 msgid "%-25s <redacted>"
-msgstr "%-25s <redacted>"
+msgstr "%-25s <redigert>"
 
-#: src/conf.cpp:3802
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "Logging configuration parameters from all files"
+msgstr "Logging av konfigurasjonsparametere fra alle filer"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 #, c-format
-#| msgid "No Configuration Options"
-msgid "Configuration written to %s"
-msgstr ""
+msgid "Config file: %s"
+msgstr "Konfigurasjonsfil: %s"
 
-#: src/conf.cpp:3830
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Camera %d - Config file: %s"
+msgstr "Kamera %d - Konfigurasjonsfil: %s"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Sound %d - Config file: %s"
+msgstr "Lyd %d - Konfigurasjonsfil: %s"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Failed to write configuration to %s"
+msgstr "Kunne ikke skrive konfigurasjon til %s"
+
+#: /home/dave/source/motionplus/src/conf.cpp
+#, c-format
+msgid "Configuration written to %s"
+msgstr "Konfigurasjon skrevet til %s"
+
+#: /home/dave/source/motionplus/src/conf.cpp
 msgid "Error getcwd"
 msgstr "Feil getcwd"
 
-#: src/conf.cpp:3849
-#, c-format
-msgid "could not open configfile %s"
-msgstr "kunne ikke åpne configfile %s"
+#: /home/dave/source/motionplus/src/conf.cpp
+msgid "Could not open configuration file"
+msgstr "Kunne ikke åpne konfigurasjonsfilen"
 
-#: src/conf.cpp:3864 src/conf.cpp:3898
-msgid "No config file to process, using default values"
-msgstr "Ingen konfigurasjonsfil å behandle ved bruk av standardverdier"
-
-#: src/conf.cpp:3893
-#, c-format
-msgid "Processing thread 0 - config file %s"
-msgstr "Behandler tråd 0 - konfigurasjonsfil %s"
-
-#: src/dbse.cpp:34
-#| msgid "Invalid database_type %s"
+#: /home/dave/source/motionplus/src/dbse.cpp
 msgid "Invalid database name"
-msgstr ""
+msgstr "Ugyldig databasenavn"
 
-#: src/dbse.cpp:42
-msgid "Must specify database port for mysql/mariadb/pgsql"
-msgstr ""
+#: /home/dave/source/motionplus/src/dbse.cpp
+msgid "Must specify database port for mariadb/pgsql"
+msgstr "Må spesifisere databaseport for mariadb/pgsql"
 
-#: src/dbse.cpp:48
-#| msgid "Basic authentication: disabled"
+#: /home/dave/source/motionplus/src/dbse.cpp
+msgid "Must specify database name for sqlite3"
+msgstr "Må spesifisere databasenavn for sqlite3"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
 msgid "Database functionality disabled."
-msgstr ""
+msgstr "Databasefunksjonalitet deaktivert."
 
-#: src/dbse.cpp:64 src/dbse.cpp:75
-msgid "Closing MYSQL"
-msgstr ""
-
-#: src/dbse.cpp:109
-#| msgid "Invalid database_type %s"
-msgid "Initializing database"
-msgstr ""
-
-#: src/dbse.cpp:115 src/dbse.cpp:127 src/dbse.cpp:158
-#, c-format
-#| msgid "Could not write movie header %s"
-msgid "Could not initialize database %s"
-msgstr ""
-
-#: src/dbse.cpp:142 src/dbse.cpp:269
-#, c-format
-msgid "SQLite3 Database filename %s"
-msgstr ""
-
-#: src/dbse.cpp:147
-msgid "SQLite3 is threadsafe"
-msgstr ""
-
-#: src/dbse.cpp:148
-#, c-format
-msgid "SQLite3 serialized %s"
-msgstr ""
-
-#: src/dbse.cpp:149
-msgid "FAILED"
-msgstr ""
-
-#: src/dbse.cpp:149
-msgid "SUCCESS"
-msgstr ""
-
-#: src/dbse.cpp:153 src/dbse.cpp:272
-#, c-format
-msgid "Can't open database %s : %s"
-msgstr ""
-
-#: src/dbse.cpp:163 src/dbse.cpp:281
-#, c-format
-#| msgid "database_busy_timeout"
-msgid "database_busy_timeout %d msec"
-msgstr ""
-
-#: src/dbse.cpp:167 src/dbse.cpp:284
-#, c-format
-#| msgid "database_busy_timeout"
-msgid "database_busy_timeout failed %s"
-msgstr ""
-
-#: src/dbse.cpp:199 src/dbse.cpp:238
-#, c-format
-msgid "Cannot connect to MySQL database %s on host %s with user %s"
-msgstr ""
-
-#: src/dbse.cpp:203 src/dbse.cpp:242
-#, c-format
-msgid "MySQL error was %s"
-msgstr ""
-
-#: src/dbse.cpp:205 src/dbse.cpp:244 src/dbse.cpp:276 src/dbse.cpp:317
-msgid "Disabling database functionality"
-msgstr ""
-
-#: src/dbse.cpp:265
-msgid "SQLite3 using shared handle"
-msgstr ""
-
-#: src/dbse.cpp:314 src/dbse.cpp:518
-#, c-format
-msgid "Connection to PostgreSQL database '%s' failed: %s"
-msgstr ""
-
-#: src/dbse.cpp:333
-#, c-format
-msgid "Database backend %s"
-msgstr ""
-
-#: src/dbse.cpp:344
-#, c-format
-#| msgid "Invalid database_type %s"
-msgid "Invalid Database backend %s"
-msgstr ""
-
-#: src/dbse.cpp:356
-msgid "Closing database"
-msgstr ""
-
-#: src/dbse.cpp:412 src/dbse.cpp:464
-#, c-format
-msgid "Mysql query failed %s error code %d"
-msgstr ""
-
-#: src/dbse.cpp:426 src/dbse.cpp:478
-#, c-format
-msgid ""
-"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error "
-"was %s"
-msgstr ""
-
-#: src/dbse.cpp:433 src/dbse.cpp:485
-#, c-format
-msgid "Re-Connection to Mysql database '%s' Succeed"
-msgstr ""
-
-#: src/dbse.cpp:438 src/dbse.cpp:490
-#, c-format
-msgid "after re-connection Mysql query failed %s error code %d"
-msgstr ""
-
-#: src/dbse.cpp:527
-#, c-format
-msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
-msgstr ""
-
-#: src/dbse.cpp:531
-#, c-format
-msgid "Re-Connection to PostgreSQL database '%s' Succeed"
-msgstr ""
-
-#: src/dbse.cpp:561
+#: /home/dave/source/motionplus/src/dbse.cpp
 #, c-format
 msgid "SQLite error was %s"
-msgstr ""
+msgstr "SQLite-feilen var %s"
 
-#: src/draw.cpp:1241 src/draw.cpp:1250
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Error retrieving table columns: %s"
+msgstr "Feil ved henting av tabellkolonner: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "SQLite3 Database filename %s"
+msgstr "SQLite3 Database filnavn %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Can't open database %s : %s"
+msgstr "Kan ikke åpne databasen %s: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Could not initialize database %s"
+msgstr "Kunne ikke initialisere databasen %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "database_busy_timeout %d msec"
+msgstr "database opptatt tidsavbrudd %d msek"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "database_busy_timeout failed %s"
+msgstr "databaseopptatt tidsavbrudd mislyktes %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Error checking table: %s"
+msgstr "Feil ved kontroll av tabellen: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Error creating table: %s"
+msgstr "Feil ved opprettelse av tabell: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Error counting table: %s"
+msgstr "Feil ved telletabell: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Error retrieving table: %s"
+msgstr "Feil ved henting av tabell: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "MariaDB query '%s' failed. %s error code %d"
+msgstr "MariaDB-spørringen '%s' mislyktes. %s feilkode %d"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid ""
+"Cannot reconnect to MariaDB database %s on host %s with user %s MariaDB "
+"error was %s"
+msgstr ""
+"Kan ikke koble til MariaDB-databasen %s på verten %s med brukeren %s "
+"MariaDBfeilen var %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Re-Connection to MariaDB database '%s' Succeed"
+msgstr "Re-tilkobling til MariaDB-databasen '%s' lykkes"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "after re-connection MariaDB query failed %s error code %d"
+msgstr "etter re-tilkobling mislyktes MariaDB-spørringen %s feilkode %d"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Query error: %s"
+msgstr "Spørringsfeil: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Query store error: %s"
+msgstr "Spørringslagerfeil: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+msgid "Creating motionplus table"
+msgstr "Opprette motionplus-tabell"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Cannot connect to MariaDB database %s on host %s with user %s"
+msgstr "Kan ikke koble til MariaDB-databasen %s på vert %s med bruker %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "MariaDB error was %s"
+msgstr "MariaDB-feilen var %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+msgid "Disabling database functionality"
+msgstr "Deaktiverer databasefunksjonalitet"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "%s database opened"
+msgstr "%s database åpnet"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Connection to PostgreSQL database '%s' failed: %s"
+msgstr "Tilkobling til PostgreSQL-databasen '%s' mislyktes: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
+msgstr "Gjentilkobling til PostgreSQL-databasen '%s' mislyktes: %s"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+#, c-format
+msgid "Re-Connection to PostgreSQL database '%s' Succeed"
+msgstr "Re-tilkobling til PostgreSQL-databasen '%s' lykkes"
+
+#: /home/dave/source/motionplus/src/dbse.cpp
+msgid "Initializing database"
+msgstr "Initialiserer database"
+
+#: /home/dave/source/motionplus/src/draw.cpp
 #, c-format
 msgid "Invalid text scale.  Adjusted to %d"
 msgstr "Ugyldig tekstskala. Justert til %d"
 
-#: src/event.cpp:70
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
-#| msgid "File of type %ld saved to: %s"
 msgid "File saved to: %s"
-msgstr ""
+msgstr "Filen er lagret til: %s"
 
-#: src/event.cpp:240
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Failed to put image into video pipe"
-msgstr "Kunne ikke sette bilde i videorør"
+msgstr "Kunne ikke legge bildet inn i videopipe"
 
-#: src/event.cpp:270
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Error creating image file name"
-msgstr "Feil ved oppretting av bildefilnavn"
+msgstr "Feil ved opprettelse av bildefilnavn"
 
-#: src/event.cpp:302
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Error creating image motion file name"
-msgstr "Feil ved oppretting av filnavn for bevegelsesfil"
+msgstr "Feil ved oppretting av navn på bildebevegelsesfil"
 
-#: src/event.cpp:313
-#| msgid "Error creating image motion file name"
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Error creating image motion roi file name"
-msgstr ""
+msgstr "Feil ved opprettelse av image motion roi-filnavn"
 
-#: src/event.cpp:344 src/event.cpp:349 src/event.cpp:367 src/event.cpp:372
-#: src/event.cpp:523
-#| msgid "Error opening file %s"
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Error option"
-msgstr ""
+msgstr "Feilalternativ"
 
-#: src/event.cpp:360
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "Could not create symbolic link [%s]"
 msgstr "Kunne ikke opprette symbolsk lenke [%s]"
 
-#: src/event.cpp:407
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Error creating preview file name"
-msgstr "Feil ved oppretting av forhåndsvisningsfilnavn"
+msgstr "Feil ved opprettelse av forhåndsvisningsfilnavn"
 
-#: src/event.cpp:448
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Event secondary detect"
-msgstr ""
+msgstr "Hendelse sekundær oppdage"
 
-#: src/event.cpp:498
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "CLOSING: extpipe file desc %d, error state %d"
-msgstr "LUKKING: extpipe file desc %d, feiltilstand %d"
+msgstr "SLUTTER: extpipe fil desc %d, feiltilstand %d"
 
-#: src/event.cpp:530
+#: /home/dave/source/motionplus/src/event.cpp
+#, c-format
+msgid "Unable to remove file %s"
+msgstr "Kan ikke fjerne filen %s"
+
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "no write access to target directory %s"
 msgstr "ingen skrivetilgang til målkatalogen %s"
 
-#: src/event.cpp:535
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "path not found, trying to create it %s ..."
-msgstr "banen ikke funnet, prøver å lage den %s ..."
+msgstr "bane ikke funnet, prøver å lage den %s ..."
 
-#: src/event.cpp:542
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "error accesing path %s"
-msgstr "feil tilgang til bane %s"
+msgstr "feil ved tilgang til banen %s"
 
-#: src/event.cpp:558
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "Error specifying command line: %s"
-msgstr "Feil ved spesifisering av kommandolinjen: %s"
+msgstr "Feil ved spesifisering av kommandolinje: %s"
 
-#: src/event.cpp:561
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "pipe: %s"
-msgstr "pipe: %s"
+msgstr "rør: %s"
 
-#: src/event.cpp:569
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "popen failed"
 msgstr "popen mislyktes"
 
-#: src/event.cpp:591
+#: /home/dave/source/motionplus/src/event.cpp
 msgid "Using extpipe"
-msgstr "Bruke extpipe"
+msgstr "Bruker extpipe"
 
-#: src/event.cpp:598 src/event.cpp:603
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "Error writing in pipe , state error %d"
-msgstr "Feil ved skriving i pipe, tilstandsfeil %d"
+msgstr "Feil ved skriving i rør, tilstandsfeil %d"
 
-#: src/event.cpp:608
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "pipe %s not created or closed already "
-msgstr "pipe %s ikke opprettet eller lukket allerede"
+msgstr "pipe %s er ikke opprettet eller lukket allerede"
 
-#: src/event.cpp:627
-#, c-format
-msgid "Source FPS %d"
-msgstr "Kilde FPS %d"
+#: /home/dave/source/motionplus/src/event.cpp
+msgid "Error opening ctx_dev for movie output."
+msgstr "Feil ved åpning av ctx dev for filmutgang."
 
-#: src/event.cpp:654
-msgid "Error opening ctx_cam for movie output."
-msgstr "Feil ved åpning av ctx-kamera for filmutgang."
-
-#: src/event.cpp:668
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "Error creating motion file [%s]"
-msgstr "Feil ved oppretting av bevegelsesfil [%s]"
+msgstr "Feil ved opprettelse av bevegelsesfil [%s]"
 
-#: src/event.cpp:692
+#: /home/dave/source/motionplus/src/event.cpp
+msgid "Error encoding image"
+msgstr "Feil ved koding av bildet"
+
+#: /home/dave/source/motionplus/src/event.cpp
 #, c-format
 msgid "Error creating timelapse file [%s]"
-msgstr "Feil ved oppretting av timelapse-fil [%s]"
+msgstr "Feil ved opprettelse av timelapse-fil [%s]"
 
-#: src/event.cpp:704 src/event.cpp:719 src/event.cpp:724
-msgid "Error encoding image"
-msgstr "Feil ved koding av bilde"
-
-#: src/jpegutils.cpp:91
+#: /home/dave/source/motionplus/src/jpegutils.cpp
 #, c-format
 msgid "%s: Given jpeg buffer was too small"
-msgstr "%s: Gitt jpeg-buffer var for liten"
+msgstr "%s: Gitt at jpeg-bufferen var for liten"
 
-#: src/jpegutils.cpp:465
+#: /home/dave/source/motionplus/src/jpegutils.cpp
 msgid "Invalid JPEG image dimensions"
 msgstr "Ugyldige JPEG-bildedimensjoner"
 
-#: src/jpegutils.cpp:472
+#: /home/dave/source/motionplus/src/jpegutils.cpp
 #, c-format
 msgid "JPEG image size %dx%d, JPEG was %dx%d"
-msgstr "JPEG bildestørrelse %dx%d, JPEG var %dx%d"
+msgstr "JPEG-bildestørrelse %dx%d, JPEG var %dx%d"
 
-#: src/logger.cpp:270
+#: /home/dave/source/motionplus/src/libcam.cpp
+msgid "Opening libcam"
+msgstr "Åpner libcam"
+
+#: /home/dave/source/motionplus/src/libcam.cpp
+msgid "libcam failed to open"
+msgstr "libcam kunne ikke åpnes"
+
+#: /home/dave/source/motionplus/src/logger.cpp
 #, c-format
 msgid "Using default log level (%s) (%d)"
-msgstr "Bruker standard loggenivå (%s) (%d)"
+msgstr "Bruker standard loggnivå (%s) (%d)"
 
-#: src/logger.cpp:283
+#: /home/dave/source/motionplus/src/logger.cpp
 #, c-format
 msgid "Logging to file (%s)"
-msgstr "Logging til fil (%s)"
+msgstr "Logger til fil (%s)"
 
-#: src/logger.cpp:287
+#: /home/dave/source/motionplus/src/logger.cpp
 #, c-format
 msgid "Exit motion, cannot create log file %s"
 msgstr "Avslutt bevegelse, kan ikke opprette loggfil %s"
 
-#: src/logger.cpp:292 src/logger.cpp:295
+#: /home/dave/source/motionplus/src/logger.cpp
 msgid "Logging to syslog"
-msgstr "Logging to syslog"
+msgstr "Logger til syslog"
 
-#: src/logger.cpp:301
+#: /home/dave/source/motionplus/src/logger.cpp
 #, c-format
 msgid "Using log type (%s) log level (%s)"
-msgstr "Bruke loggtype (%s) loggenivå (%s)"
+msgstr "Bruker loggtype (%s) loggnivå (%s)"
 
-#: src/logger.cpp:313
+#: /home/dave/source/motionplus/src/logger.cpp
 #, c-format
 msgid "Closing logfile (%s)."
-msgstr "Closing logfile (%s)."
+msgstr "Lukker loggfil (%s)."
 
-#: src/motion_loop.cpp:60
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
-msgid "Resizing pre_capture buffer to %d items"
-msgstr ""
+msgid "Resizing buffer to %d items"
+msgstr "Endre størrelse på buffer til %d elementer"
 
-#: src/motion_loop.cpp:213
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
 msgid "Motion detected - starting event %d"
-msgstr ""
+msgstr "Bevegelse oppdaget - starthendelse %d"
 
-#: src/motion_loop.cpp:376
-msgid "calling netcam_cleanup"
-msgstr "ringer netcam opprydding"
+#: /home/dave/source/motionplus/src/motion_loop.cpp
+msgid "No Camera device cleanup"
+msgstr "Ingen opprydding av kameraenhet"
 
-#: src/motion_loop.cpp:382
-msgid "Cleaning up V4L2 device"
-msgstr "Rensing av V4L2-enhet"
+#: /home/dave/source/motionplus/src/motion_loop.cpp
+msgid "No Camera device specified"
+msgstr "Ingen kameraenhet spesifisert"
 
-#: src/motion_loop.cpp:387
-msgid "No Camera device cleanup (Netcam, V4L2)"
-msgstr "Ingen opprydding av kameraenhet (Netcam, V4L2)"
+#: /home/dave/source/motionplus/src/motion_loop.cpp
+msgid "Unable to determine camera type"
+msgstr "Kan ikke bestemme kameratype"
 
-#: src/motion_loop.cpp:415
-msgid "Opening Netcam"
-msgstr "Åpne Netcam"
-
-#: src/motion_loop.cpp:419
-msgid "Netcam failed to open"
-msgstr "Netcam kunne ikke åpnes"
-
-#: src/motion_loop.cpp:425
-msgid "Opening V4L2 device"
-msgstr "Åpne V4L2-enhet"
-
-#: src/motion_loop.cpp:428
-msgid "V4L2 device failed to open"
-msgstr "V4L2-enheten kunne ikke åpnes"
-
-#: src/motion_loop.cpp:434
-msgid "No Camera device specified (Netcam, V4L2)"
-msgstr "Ingen kameraenhet spesifisert (Netcam, V4L2)"
-
-#: src/motion_loop.cpp:491
-#| msgid "No Camera device cleanup (Netcam, V4L2)"
-msgid "Unable to determine camera type (Netcam, V4L2)"
-msgstr ""
-
-#: src/motion_loop.cpp:516
-#| msgid "Error encoding image"
-msgid "Error capturing first image"
-msgstr ""
-
-#: src/motion_loop.cpp:528
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
-#| msgid "Image width (%d) requested is not modulo 8."
 msgid "Image width (%d) or height(%d) requested is not modulo 8."
-msgstr ""
+msgstr "Forespurt bildebredde (%d) eller høyde (%d) er ikke modulo 8."
 
-#: src/motion_loop.cpp:534
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
 msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
-msgstr ""
+msgstr "Bevegelse støtter bare bredde og høyde større enn eller lik 64 %dx%d"
 
-#: src/motion_loop.cpp:541
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Substream not available.  Image sizes not modulo 16."
-msgstr ""
+msgstr "Substream ikke tilgjengelig. Bildestørrelser ikke modulo 16."
 
-#: src/motion_loop.cpp:630
-#| msgid "Pass-through disabled.  ffmpeg too old"
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Pass-through processing disabled."
-msgstr ""
+msgstr "Pass-through-behandling er deaktivert."
 
-#: src/motion_loop.cpp:643 src/motion_loop.cpp:647
-#| msgid "Could not get image to stream."
-msgid "Could not fetch initial image from camera "
-msgstr ""
+#: /home/dave/source/motionplus/src/motion_loop.cpp
+msgid "Failed to start camera."
+msgstr "Kunne ikke starte kameraet."
 
-#: src/motion_loop.cpp:649
-msgid "Motion only supports width and height modulo 8"
-msgstr ""
+#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Initialize"
+msgstr "Initialiser"
 
-#: src/motion_loop.cpp:682
-msgid "initialize loop"
-msgstr ""
-
-#: src/motion_loop.cpp:729
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
 msgid "Camera %d started: motion detection %s"
-msgstr ""
+msgstr "Kamera %d startet: bevegelsesdeteksjon %s"
 
-#: src/motion_loop.cpp:730
-#| msgid "IPV6: disabled"
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Disabled"
-msgstr ""
+msgstr "Funksjonshemmet"
 
-#: src/motion_loop.cpp:730
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Enabled"
-msgstr ""
+msgstr "Aktivert"
 
-#: src/motion_loop.cpp:733
-#| msgid "emulate_motion"
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Emulating motion"
-msgstr ""
+msgstr "Emulerende bevegelse"
 
-#: src/motion_loop.cpp:894
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
-#| msgid "Motion thread %d restart"
 msgid "Motion in area %d detected."
-msgstr ""
+msgstr "Bevegelse i området %d oppdaget."
 
-#: src/motion_loop.cpp:993
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Retrying until successful connection with camera"
-msgstr ""
+msgstr "Prøver på nytt til vellykket tilkobling med kamera"
 
-#: src/motion_loop.cpp:1009
-msgid ""
-"Camera has finally become available\n"
-"Camera image has different width and heightfrom what is in the config file. "
-"You should fix that\n"
-"Restarting Motion thread to reinitialize all image buffers to new picture "
-"dimensions"
-msgstr ""
+#: /home/dave/source/motionplus/src/motion_loop.cpp
+msgid "Resetting image buffers"
+msgstr "Tilbakestilling av bildebuffere"
 
-#: src/motion_loop.cpp:1054
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Video signal re-acquired"
-msgstr ""
+msgstr "Videosignal gjenopprettet"
 
-#: src/motion_loop.cpp:1064
-msgid "Video device fatal error - Closing video device"
-msgstr ""
-
-#: src/motion_loop.cpp:1071
-msgid "Restarting Motion thread to reinitialize all image buffers"
-msgstr ""
-
-#: src/motion_loop.cpp:1105
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Video signal lost - Adding grey image"
-msgstr ""
+msgstr "Videosignal tapt - Legger til grått bilde"
 
-#: src/motion_loop.cpp:1112
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 msgid "Video signal still lost - Trying to close video device"
-msgstr ""
+msgstr "Videosignal fortsatt tapt - Prøver å lukke videoenheten"
 
-#: src/motion_loop.cpp:1357
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
-#| msgid "End Event"
 msgid "End of event %d"
-msgstr ""
+msgstr "Slutt på hendelsen %d"
 
-#: src/motion_loop.cpp:1415
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
-msgid "Raw changes: %5d - changes after '%s': %5d"
-msgstr ""
+msgid "changes after '%s': %5d"
+msgstr "endringer etter '%s': %5d"
 
-#: src/motion_loop.cpp:1419
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
 msgid " - labels: %3d"
-msgstr ""
+msgstr "- etiketter: %3d"
 
-#: src/motion_loop.cpp:1423
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
 msgid "Changes: %5d"
-msgstr ""
+msgstr "Endringer: %5d"
 
-#: src/motion_loop.cpp:1428
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
-#| msgid "Invalid noise_level %d"
 msgid " - noise level: %2d"
-msgstr ""
+msgstr "- støynivå: %2d"
 
-#: src/motion_loop.cpp:1433
+#: /home/dave/source/motionplus/src/motion_loop.cpp
 #, c-format
-#| msgid "Invalid threshold %d"
 msgid " - threshold: %d"
-msgstr ""
+msgstr "- terskel: %d"
 
-#: src/motion_loop.cpp:1684
-#| msgid "Threads finished"
-msgid "Thread exiting"
-msgstr ""
+#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Exiting"
+msgstr "Avslutter"
 
-#: src/motionplus.cpp:173
+#: /home/dave/source/motionplus/src/motionplus.cpp
+#, c-format
+msgid "Created process id file %s. Process ID is %d"
+msgstr "Opprettet prosess-ID-fil %s. Prosess-ID er %d"
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+#, c-format
+msgid "Cannot create process id file (pid file) %s"
+msgstr "Kan ikke opprette prosess-ID-fil (pid-fil) %s"
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "Removed process id file (pid file)."
-msgstr "Fjernet prosess-id-fil (pid-fil)."
+msgstr "Fjernet prosess-ID-fil (pid-fil)."
 
-#: src/motionplus.cpp:175
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "Error removing pid file"
 msgstr "Feil ved fjerning av pid-fil"
 
-#: src/motionplus.cpp:198
-msgid "Motion going to daemon mode"
-msgstr "Motion going to daemon mode"
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "MotionPlus going to daemon mode"
+msgstr "MotionPlus går til daemon-modus"
 
-#: src/motionplus.cpp:216
-#, c-format
-msgid "Exit motion, cannot create process id file (pid file) %s"
-msgstr "Avslutt bevegelse, kan ikke opprette prosess-id-fil (pid-fil) %s"
-
-#: src/motionplus.cpp:228
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "Could not change directory"
-msgstr "Kunne ikke endre katalogen"
+msgstr "Kunne ikke endre katalog"
 
-#: src/motionplus.cpp:260
-#, c-format
-msgid "Created process id file %s. Process ID is %d"
-msgstr "Opprettet prosess-id-fil %s. Prosess-ID er %d"
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "Device IDs are not unique."
+msgstr "Enhets-ID-er er ikke unike."
 
-#: src/motionplus.cpp:317
-msgid ""
-"Camara IDs are not unique or have values over 32,000.  Falling back to "
-"thread numbers"
-msgstr ""
-"Camara-ID-er er ikke unike eller har verdier over 32 000. Faller tilbake "
-"tiltrådnumre"
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "Falling back to sequence numbers"
+msgstr "Faller tilbake til sekvensnummer"
 
-#: src/motionplus.cpp:330
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "v4l2   : available"
-msgstr "v4l2: tilgjengelig"
+msgstr "v4l2 : tilgjengelig"
 
-#: src/motionplus.cpp:332
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "v4l2   : not available"
 msgstr "v4l2: ikke tilgjengelig"
 
-#: src/motionplus.cpp:336
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "webp   : available"
-msgstr "webp: tilgjengelig"
+msgstr "webp : tilgjengelig"
 
-#: src/motionplus.cpp:338
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "webp   : not available"
-msgstr "webp: ikke tilgjengelig"
+msgstr "webp : ikke tilgjengelig"
 
-#: src/motionplus.cpp:348
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "libcam : available"
+msgstr "libcam : tilgjengelig"
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "libcam : not available"
+msgstr "libcam: ikke tilgjengelig"
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "mysql  : available"
 msgstr "mysql: tilgjengelig"
 
-#: src/motionplus.cpp:350
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "mysql  : not available"
-msgstr "mysql: not available"
+msgstr "mysql: ikke tilgjengelig"
 
-#: src/motionplus.cpp:354
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "MariaDB: available"
 msgstr "MariaDB: tilgjengelig"
 
-#: src/motionplus.cpp:356
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "MariaDB: not available"
 msgstr "MariaDB: ikke tilgjengelig"
 
-#: src/motionplus.cpp:360
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "sqlite3: available"
 msgstr "sqlite3: tilgjengelig"
 
-#: src/motionplus.cpp:362
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "sqlite3: not available"
-msgstr "sqlite3: not available"
+msgstr "sqlite3: ikke tilgjengelig"
 
-#: src/motionplus.cpp:366
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "pgsql  : available"
 msgstr "pgsql: tilgjengelig"
 
-#: src/motionplus.cpp:368
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "pgsql  : not available"
 msgstr "pgsql: ikke tilgjengelig"
 
-#: src/motionplus.cpp:372
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "nls    : available"
-msgstr "nls: tilgjengelig"
+msgstr "nls : tilgjengelig"
 
-#: src/motionplus.cpp:374
+#: /home/dave/source/motionplus/src/motionplus.cpp
 msgid "nls    : not available"
-msgstr "nls: not available"
+msgstr "nls: ikke tilgjengelig"
 
-#: src/motionplus.cpp:398
-msgid "Motion running as daemon process"
-msgstr "Bevegelse kjører som en demonprosess"
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "alsa   : available"
+msgstr "alsa : tilgjengelig"
 
-#: src/motionplus.cpp:403
-msgid "Motion running in setup mode."
-msgstr "Bevegelse som kjører i installasjonsmodus."
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "alsa   : not available"
+msgstr "alsa : ikke tilgjengelig"
 
-#: src/motionplus.cpp:435
-#| msgid "Unable to start stream for camera %d"
-msgid "Unable to start thread for motion loop."
-msgstr ""
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "fftw3  : available"
+msgstr "fftw3 : tilgjengelig"
 
-#: src/motionplus.cpp:445
-msgid "Restarting motion."
-msgstr "Start bevegelse på nytt."
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "fftw3  : not available"
+msgstr "fftw3 : ikke tilgjengelig"
 
-#: src/motionplus.cpp:452
-msgid "Motion restarted"
-msgstr "Motion restarted"
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "MotionPlus running as daemon process"
+msgstr "MotionPlus kjører som demonprosess"
 
-#: src/motionplus.cpp:483
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "MotionPlus running in setup mode."
+msgstr "MotionPlus kjører i oppsettmodus."
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "Unable to start camera thread."
+msgstr "Kan ikke starte kameratråden."
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "Unable to start sound thread."
+msgstr "Kan ikke starte lydtråden."
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "Restarting MotionPlus."
+msgstr "Starter MotionPlus på nytt."
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "MotionPlus restarted"
+msgstr "MotionPlus startet på nytt"
+
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "Thread %d - Watchdog timeout. Trying to do a graceful restart"
-msgstr "Tråd %d - Watchdog-timeout. Prøver å gjøre en grasiøs omstart"
+msgid "Camera %d - Watchdog timeout."
+msgstr "Kamera %d - Watchdog-tidsavbrudd."
 
-#: src/motionplus.cpp:491
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "Thread %d - Watchdog timeout did NOT restart, killing it!"
-msgstr "Tråd %d - Watchdog-timeout startet IKKE på nytt, og drepte den!"
+msgid "Camera %d - Watchdog netcam kill."
+msgstr "Kamera %d - Watchdog netcam kill."
 
-#: src/motionplus.cpp:506
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "Thread %d - Watchdog kill!"
-msgstr "Tråd %d - Watchdog kill!"
+msgid "Camera %d - Watchdog netcam_high kill."
+msgstr "Kamera %d - Watchdog netcam high kill."
 
-#: src/motionplus.cpp:538
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "Thread %d - Cleaning thread."
-msgstr "Gjeng %d - Rengjøringstråd."
+msgid "Camera %d - Watchdog kill."
+msgstr "Kamera %d - Watchdog-drap."
 
-#: src/motionplus.cpp:581
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "DEBUG-1 threads_running %d motion_threads_running %d , finish %d"
-msgstr "DEBUG-1 tråder som kjører %d bevegelsestråder som kjører %d, finish %d"
-
-#: src/motionplus.cpp:680
-#, c-format
-#| msgid "Invalid URL for a camera specific port: %s"
 msgid "Invalid camera specified for deletion. %d"
-msgstr ""
+msgstr "Ugyldig kamera spesifisert for sletting. %d"
 
-#: src/motionplus.cpp:750
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "Waiting for threads to finish, pid: %d"
-msgstr "Venter på at tråder skal bli ferdige, pid: %d"
+msgid "Stopping %s device_id %d"
+msgstr "Stopper %s enhets-ID %d"
 
-#: src/motionplus.cpp:764
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "Motion thread %d restart"
-msgstr "Bevegelsestråd %d omstart"
+msgid "Motionplus pid: %d"
+msgstr "Motionplus pid: %d"
 
-#: src/motionplus.cpp:785
-msgid "Threads finished"
-msgstr "Tråder ferdig"
-
-#: src/motionplus.cpp:794
-msgid "Motion terminating"
-msgstr "Bevegelsesavslutning"
-
-#: src/movie.cpp:143
-msgid "Failed to allocate memory for codec name"
-msgstr "Kunne ikke tildele minne for kodeknavn"
-
-#: src/movie.cpp:153
-msgid "Error setting base file name"
-msgstr "Feil ved innstilling av basisfilnavn"
-
-#: src/movie.cpp:172
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "Error setting timelapse append for codec %s"
-msgstr "Feil ved innstilling av timelapse append for codec %s"
+msgid "MotionPlus camera %d restart"
+msgstr "MotionPlus-kamera %d starter på nytt"
 
-#: src/movie.cpp:238 src/movie.cpp:843 src/movie.cpp:1714 src/movie.cpp:1772
-msgid "Error setting file name"
-msgstr "Feil ved innstilling av filnavn"
-
-#: src/movie.cpp:249
+#: /home/dave/source/motionplus/src/motionplus.cpp
 #, c-format
-msgid "codec option value %s is not supported"
-msgstr "alternativ for kodeverdi %s støttes ikke"
+msgid "MotionPlus sound %d restart"
+msgstr "MotionPlus-lyd %d starter på nytt"
 
-#: src/movie.cpp:259
-msgid "Could not get the codec"
-msgstr "Kunne ikke hente kodeken"
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "Motionplus devices finished"
+msgstr "Motionplus-enheter er ferdige"
 
-#: src/movie.cpp:288
+#: /home/dave/source/motionplus/src/motionplus.cpp
+msgid "MotionPlus terminating"
+msgstr "MotionPlus avsluttes"
+
+#: /home/dave/source/motionplus/src/movie.cpp
+#, c-format
+msgid "Error setting timelapse append for container %s"
+msgstr "Feil ved innstilling av timelapse append for container %s"
+
+#: /home/dave/source/motionplus/src/movie.cpp
+#, c-format
+msgid "container option value %s is not supported"
+msgstr "Beholderalternativverdi %s støttes ikke"
+
+#: /home/dave/source/motionplus/src/movie.cpp
+msgid "Could not get the container"
+msgstr "Kunne ikke hente beholderen"
+
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Error sending frame for encoding:%s"
-msgstr "Feil ved sending av ramme for koding: %s"
+msgstr "Feil ved sending av ramme for koding:%s"
 
-#: src/movie.cpp:301
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Error receiving encoded packet video:%s"
-msgstr "Feil ved mottak av kodet pakkevideo: %s"
+msgstr "Feil ved mottak av kodet pakkevideo:%s"
 
-#: src/movie.cpp:321
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Error encoding video:%s"
-msgstr "Feil ved koding av video: %s"
+msgstr "Feil ved koding av video:%s"
 
-#: src/movie.cpp:349
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Error encoding video"
 msgstr "Feil ved koding av video"
 
-#: src/movie.cpp:409
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d"
 msgstr "PTS %<PRId64> Base PTS %<PRId64> ms intervall %<PRId64> tidsbase %d-%d"
 
-#: src/movie.cpp:417
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "BAD TIMING!! Frame skipped."
-msgstr "DÅRLIG TIMING !! Ramme hoppet over."
+msgstr "DÅRLIG TIMING!! Rammen hoppet over."
 
-#: src/movie.cpp:483
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "%s codec vbr/crf/bit_rate: %d"
-msgstr "%s codec vbr / crf / bit rate: %d"
+msgstr "%s kodek vbr/crf/bithastighet: %d"
 
-#: src/movie.cpp:534
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Preferred codec %s has been blacklisted: %s"
-msgstr "Foretrukket codec %s er svartelistet: %s"
+msgstr "Foretrukket kodek %s har blitt svartelistet: %s"
 
-#: src/movie.cpp:542
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
-msgid "Preferred codec %s not found"
-msgstr "Foretrukket codec %s ikke funnet"
+msgid "container %s not found"
+msgstr "container %s ikke funnet"
 
-#: src/movie.cpp:552
-#, c-format
-msgid "Codec %s not found"
-msgstr "Codec %s not found"
-
-#: src/movie.cpp:568
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Using codec %s"
-msgstr "Bruke codec %s"
+msgstr "Bruker kodeken %s"
 
-#: src/movie.cpp:591 src/movie.cpp:604
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not alloc stream"
 msgstr "Kunne ikke tildele strøm"
 
-#: src/movie.cpp:597
-msgid "Failed to allocate decoder!"
-msgstr "Kunne ikke tildele dekoder!"
+#: /home/dave/source/motionplus/src/movie.cpp
+msgid "Failed to allocate codec context!"
+msgstr "Kunne ikke tildele kodek-kontekst!"
 
-#: src/movie.cpp:668
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Unable to set quality"
-msgstr "Kan ikke angi kvalitet"
+msgstr "Kan ikke stille inn kvalitet"
 
-#: src/movie.cpp:678
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Reported FPS Supported %d/%d"
-msgstr "Rapportert FPS støttet %d / %d"
+msgstr "Rapportert FPS Støttet %d/%d"
 
-#: src/movie.cpp:690
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Could not open codec %s"
-msgstr "Kunne ikke åpne codec %s"
+msgstr "Kunne ikke åpne kodeken %s"
 
-#: src/movie.cpp:713
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Failed to copy decoder parameters!: %s"
-msgstr "Kunne ikke kopiere dekoderparametere !: %s"
+msgstr "Kunne ikke kopiere dekoderparametere!: %s"
 
-#: src/movie.cpp:801
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "could not alloc frame"
 msgstr "kunne ikke tildele ramme"
 
-#: src/movie.cpp:823
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "could not alloc buffers %s"
 msgstr "kunne ikke tildele buffere %s"
 
-#: src/movie.cpp:859
-#, c-format
-msgid "error opening file %s"
-msgstr "feil ved åpning av fil %s"
+#: /home/dave/source/motionplus/src/movie.cpp
+msgid "Movie timed out"
+msgstr "Filmen ble tidsavbrutt"
 
-#: src/movie.cpp:866
-#, c-format
-msgid "Permission denied. %s"
-msgstr "Tillatelse avslått. %s"
+#: /home/dave/source/motionplus/src/movie.cpp
+msgid "Error setting file name"
+msgstr "Feil ved innstilling av filnavn"
 
-#: src/movie.cpp:871
+#: /home/dave/source/motionplus/src/movie.cpp
+#, c-format
+msgid "avio_open: %s File %s"
+msgstr "avio åpen: %s Fil %s"
+
+#: /home/dave/source/motionplus/src/movie.cpp
+#, c-format
+msgid "error %s opening file %s"
+msgstr "feil %s ved åpning av filen %s"
+
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Error opening file %s"
-msgstr "Feil ved åpning av fil %s"
+msgstr "Feil ved åpning av filen %s"
 
-#: src/movie.cpp:886
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Could not write movie header %s"
-msgstr "Kunne ikke skrive filmoverskrift %s"
+msgstr "Kunne ikke skrive filmoverskriften %s"
 
-#: src/movie.cpp:922
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Error entering draining mode:%s"
-msgstr "Feil ved innløp av tappemodus: %s"
+msgstr "Feil ved å gå inn i dreneringsmodus:%s"
 
-#: src/movie.cpp:932
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Error draining codec:%s"
-msgstr "Feil ved tapping av codec: %s"
+msgstr "Feil ved tømming av kodeken:%s"
 
-#: src/movie.cpp:945
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Error writing draining video frame"
-msgstr "Feil ved skriving av drenering av videoramme"
+msgstr "Feil ved skriving av tømming av videoramme"
 
-#: src/movie.cpp:976
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Error while encoding picture"
-msgstr "Feil ved koding av bilde"
+msgstr "Feil under koding av bilde"
 
-#: src/movie.cpp:990
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Error while writing video frame"
 msgstr "Feil under skriving av videoramme"
 
-#: src/movie.cpp:1087
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Error while writing video frame: %s"
 msgstr "Feil under skriving av videoramme: %s"
 
-#: src/movie.cpp:1229
-#| msgid "Could not alloc stream"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not alloc video stream"
-msgstr ""
+msgstr "Kunne ikke tildele videostrøm"
 
-#: src/movie.cpp:1235
-#| msgid "Unable to copy codec parameters"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Unable to copy video codec parameters"
-msgstr ""
+msgstr "Kan ikke kopiere videokodekparametere"
 
-#: src/movie.cpp:1244
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
-#| msgid "Invalid timelapse_fps %d"
 msgid "video timebase %d/%d fps %d/%d"
-msgstr ""
+msgstr "video tidsbase %d/%d fps %d/%d"
 
-#: src/movie.cpp:1259
-#| msgid "Could not alloc stream"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not alloc audio stream"
-msgstr ""
+msgstr "Kunne ikke tildele lydstrøm"
 
-#: src/movie.cpp:1265
-#| msgid "Unable to copy codec parameters"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Unable to copy audio codec parameters"
-msgstr ""
+msgstr "Kan ikke kopiere lydkodekparametere"
 
-#: src/movie.cpp:1278
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "audio timebase %d/%d"
-msgstr ""
+msgstr "lydtidsbase %d/%d"
 
-#: src/movie.cpp:1309
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Pass-through disabled.  ffmpeg too old"
-msgstr "Gjennomgang deaktivert. Ffmpeg for gammel"
+msgstr "Pass-through deaktivert. ffmpeg for gammel"
 
-#: src/movie.cpp:1319
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "rtsp camera not ready for pass-through."
-msgstr "rtsp kamera er ikke klart for gjennomføring."
+msgstr "rtsp-kamera er ikke klart for gjennomføring."
 
-#: src/movie.cpp:1324
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "RTSP context not available."
-msgstr "RTSP-kontekst ikke tilgjengelig."
+msgstr "RTSP-kontekst er ikke tilgjengelig."
 
-#: src/movie.cpp:1344 src/movie.cpp:1516
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not allocate output context"
-msgstr "Kunne ikke tildele utgangssammenheng"
+msgstr "Kunne ikke tildele utdatakontekst"
 
-#: src/movie.cpp:1351
-#| msgid "%s: Failed to copy stream for pass-through."
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Changing to MP4 container for pass-through."
-msgstr ""
+msgstr "Bytter til MP4-beholder for gjennomføring."
 
-#: src/movie.cpp:1359
-#| msgid "Could not allocate output context"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not get output format!"
-msgstr ""
+msgstr "Kunne ikke hente utdataformat!"
 
-#: src/movie.cpp:1365
-#| msgid "Could not set the stream"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not get streams!"
-msgstr ""
+msgstr "Kunne ikke hente strømmer!"
 
-#: src/movie.cpp:1371
-#| msgid "Could not set the stream"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not set the output file"
-msgstr ""
+msgstr "Kunne ikke angi utdatafilen"
 
-#: src/movie.cpp:1377
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
 msgid "Timebase after open audio: %d/%d video: %d/%d"
-msgstr ""
+msgstr "Tidsbase etter åpen lyd: %d/%d video: %d/%d"
 
-#: src/movie.cpp:1468
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
-#| msgid "movie libavcodec version %d.%d.%d libavformat version %d.%d.%d"
 msgid "libavcodec  version %d.%d.%d"
-msgstr ""
+msgstr "libavcodec versjon %d.%d.%d"
 
-#: src/movie.cpp:1470
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
-#| msgid "movie libavcodec version %d.%d.%d libavformat version %d.%d.%d"
 msgid "libavformat version %d.%d.%d"
-msgstr ""
+msgstr "libavformat versjon %d.%d.%d"
 
-#: src/movie.cpp:1493
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "av_lockmgr_register reset failed on cleanup"
-msgstr "tilbakestilling av lockmgr register mislyktes ved opprydding"
+msgstr "av lockmgr register tilbakestilling mislyktes ved opprydding"
 
-#: src/movie.cpp:1507
-#| msgid "Could not setup passthru!"
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not setup passthrough!"
-msgstr ""
+msgstr "Kunne ikke konfigurere passthrough!"
 
-#: src/movie.cpp:1523
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not get codec!"
-msgstr "Kunne ikke få kodek!"
+msgstr "Kunne ikke hente kodeken!"
 
-#: src/movie.cpp:1530
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Failed to allocate codec!"
-msgstr "Kunne ikke tildele codec!"
+msgstr "Kunne ikke tildele kodeken!"
 
-#: src/movie.cpp:1536 src/movie.cpp:1542 src/movie.cpp:1548
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Could not set the stream"
-msgstr "Kunne ikke stille strømmen"
+msgstr "Kunne ikke angi strømmen"
 
-#: src/movie.cpp:1562
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Error flushing codec"
-msgstr "Feil ved skylling av codec"
+msgstr "Feil ved spyling av kodeken"
 
-#: src/movie.cpp:1622
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Excessive attempts to clear buffered packet"
-msgstr "Overdreven forsøk på å tømme buffret pakke"
+msgstr "Overdrevne forsøk på å fjerne bufret pakke"
 
-#: src/movie.cpp:1629
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Buffered packet"
 msgstr "Bufret pakke"
 
-#: src/movie.cpp:1819
+#: /home/dave/source/motionplus/src/movie.cpp
 #, c-format
-#| msgid "Error setting base file name"
 msgid "Error setting timelapse file name %s"
-msgstr ""
+msgstr "Feil ved innstilling av timelapse-filnavn %s"
 
-#: src/movie.cpp:1846
-msgid "Timelapse using mpg codec."
-msgstr "Timelapse using mpg codec."
+#: /home/dave/source/motionplus/src/movie.cpp
+msgid "Timelapse using mpg container."
+msgstr "Timelapse ved hjelp av mpg-beholder."
 
-#: src/movie.cpp:1847
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Events will be appended to file"
-msgstr "Hendelser vil bli lagt til fil"
+msgstr "Hendelser vil bli lagt til filen"
 
-#: src/movie.cpp:1853
-msgid "Timelapse using mpeg4 codec."
-msgstr "Timelapse ved hjelp av mpeg4 codec."
+#: /home/dave/source/motionplus/src/movie.cpp
+msgid "Timelapse using mkv container."
+msgstr "Timelapse ved hjelp av mkv-beholder."
 
-#: src/movie.cpp:1854
+#: /home/dave/source/motionplus/src/movie.cpp
 msgid "Events will be trigger new files"
 msgstr "Hendelser vil utløse nye filer"
 
-#: src/netcam.cpp:63
-#, c-format
-msgid "expanding buffer from [%d/%d] to [%d/%d] bytes."
-msgstr "utvide buffer fra [%d / %d] til [%d / %d] byte."
-
-#: src/netcam.cpp:131
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Invalid URL.  Can not parse values."
 msgstr "Ugyldig URL. Kan ikke analysere verdier."
 
-#: src/netcam.cpp:237
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "Using port number %d"
 msgstr "Bruker portnummer %d"
 
-#: src/netcam.cpp:407
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Resized packet array to %d"
-msgstr "%s: Endret størrelse på pakkeanordningen til %d"
+msgstr "%s: Endret størrelse på pakkearray til %d"
 
-#: src/netcam.cpp:444
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: av_copy_packet: %s ,Interrupt: %s"
-msgstr "%s: av copy packet: %s, Interrupt: %s"
+msgstr "%s: av kopipakke: %s ,Avbrudd: %s"
 
-#: src/netcam.cpp:446
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "true"
-msgstr ""
+msgstr "ekte"
 
-#: src/netcam.cpp:446
-#| msgid "False"
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "false"
-msgstr ""
+msgstr "falsk"
 
-#: src/netcam.cpp:476 src/netcam.cpp:513
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Ignoring packet with invalid data"
 msgid "%s: Ignoring packet with invalid data"
-msgstr ""
+msgstr "%s: Ignorerer pakke med ugyldige data"
 
-#: src/netcam.cpp:482 src/netcam.cpp:519
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: av_read_frame: %s ,Interrupt: %s"
 msgid "%s: Rec frame error: %s"
-msgstr ""
+msgstr "%s: Opptaksrammefeil: %s"
 
-#: src/netcam.cpp:532
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Error transferring HW decoded to system memory"
-msgstr ""
+msgstr "%s: Feil ved overføring av HW dekodet til systemminnet"
 
-#: src/netcam.cpp:571
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Handler loop finished."
 msgid "%s: Interrupted or finish on send"
-msgstr ""
+msgstr "%s: Avbrutt eller fullfør ved sending"
 
-#: src/netcam.cpp:577
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Ignoring packet with invalid data"
 msgid "%s: Send ignoring packet with invalid data"
-msgstr ""
+msgstr "%s: Send ignorerende pakke med ugyldige data"
 
-#: src/netcam.cpp:584
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error sending packet to codec: %s"
 msgid "%s: Error sending packet to codec: %s"
-msgstr ""
+msgstr "%s: Feil ved sending av pakke til kodek: %s"
 
-#: src/netcam.cpp:614
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Ignoring packet with invalid data"
-msgstr "Ignorerer pakken med ugyldige data"
+msgstr "Ignorerer pakke med ugyldige data"
 
-#: src/netcam.cpp:620
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "Error decoding packet: %s"
-msgstr "Feil dekoding av pakke: %s"
+msgstr "Feil ved dekoding av pakke: %s"
 
-#: src/netcam.cpp:644
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error decoding video packet: Copying to buffer"
 msgid "%s: Error decoding video packet...it is audio"
-msgstr ""
+msgstr "%s: Feil ved dekoding av videopakke...det er lyd"
 
-#: src/netcam.cpp:667
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error decoding video packet: Copying to buffer"
 msgid "%s: Error decoding video packet: Copying to buffer"
-msgstr ""
+msgstr "%s: Feil ved dekoding av videopakke: Kopierer til buffer"
 
-#: src/netcam.cpp:686
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: HW Devices: "
-msgstr ""
+msgstr "%s: HW-enheter:"
 
-#: src/netcam.cpp:691
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "mysql  : available"
 msgid "%s: %s (available)"
-msgstr ""
+msgstr "%s: %s (tilgjengelig)"
 
-#: src/netcam.cpp:696
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: %s (not implemented)"
-msgstr ""
+msgstr "%s: %s (ikke implementert)"
 
-#: src/netcam.cpp:722
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Failed to get vaapi pix format"
-msgstr ""
+msgstr "Kunne ikke hente vaapi pix-format"
 
-#: src/netcam.cpp:738 src/netcam.cpp:1233
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Interrupted"
-msgstr ""
+msgstr "%s: Avbrutt"
 
-#: src/netcam.cpp:743
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: %s: %s"
-msgstr ""
+msgstr "%s: %s: %s"
 
-#: src/netcam.cpp:746
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: %s: Failed"
-msgstr ""
+msgstr "%s: %s: Mislyktes"
 
-#: src/netcam.cpp:752
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Decoder %s did not work."
-msgstr ""
+msgstr "%s: Dekoder %s fungerte ikke."
 
-#: src/netcam.cpp:755
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Ignoring and removing the user requested decoder %s"
-msgstr ""
+msgstr "%s: Ignorerer og fjerner den brukerforespurte dekoderen %s"
 
-#: src/netcam.cpp:786
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Initializing vaapi decoder"
-msgstr ""
+msgstr "%s: Initialiserer vaapi-dekoder"
 
-#: src/netcam.cpp:790
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Unable to find video device"
 msgid "%s: Unable to find vaapi hw device"
-msgstr ""
+msgstr "%s: Kan ikke finne vaapi hw-enhet"
 
-#: src/netcam.cpp:837
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Initializing decoder"
-msgstr ""
+msgstr "%s: Initialiserer dekoder"
 
-#: src/netcam.cpp:844
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Using codec %s"
 msgid "%s: Using decoder %s"
-msgstr ""
+msgstr "%s: Bruker dekoder %s"
 
-#: src/netcam.cpp:936
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Decoder opened"
-msgstr ""
+msgstr "%s: Dekoder åpnet"
 
-#: src/netcam.cpp:995
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Camera reading (%s) timed out"
-msgstr "%s: Kameralesing (%s) utløpt"
+msgstr "%s: Kameralesing (%s) ble tidsavbrutt"
 
-#: src/netcam.cpp:1011
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Camera (%s) timed out"
-msgstr "%s: Camera (%s) time out"
+msgstr "%s: Kamera (%s) ble tidsavbrutt"
 
-#: src/netcam.cpp:1035
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Unable to allocate swsframe_in."
 msgid "%s: Unable to allocate swsframe_in."
-msgstr ""
+msgstr "%s: Kan ikke tildele swsframe inn."
 
-#: src/netcam.cpp:1046
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Unable to allocate swsframe_out."
 msgid "%s: Unable to allocate swsframe_out."
-msgstr ""
+msgstr "%s: Kan ikke tildele swsframe ut."
 
-#: src/netcam.cpp:1059
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Pixel format %d will be converted."
-msgstr ""
+msgstr "%s: Pikselformat %d vil bli konvertert."
 
-#: src/netcam.cpp:1074
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Unable to allocate scaling context."
 msgid "%s: Unable to allocate scaling context."
-msgstr ""
+msgstr "%s: Kan ikke tildele skaleringskontekst."
 
-#: src/netcam.cpp:1088
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error determining size of frame out"
 msgid "%s: Error determining size of frame out"
-msgstr ""
+msgstr "%s: Feil ved å bestemme størrelsen på rammen ut"
 
-#: src/netcam.cpp:1130
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error allocating picture in: %s"
 msgid "%s: Error allocating picture in: %s"
-msgstr ""
+msgstr "%s: Feil ved tildeling av bilde i: %s"
 
-#: src/netcam.cpp:1149
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error allocating picture out: %s"
 msgid "%s: Error allocating picture out: %s"
-msgstr ""
+msgstr "%s: Feil ved tildeling av bilde ut: %s"
 
-#: src/netcam.cpp:1168
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error resizing/reformatting: %s"
 msgid "%s: Error resizing/reformatting: %s"
-msgstr ""
+msgstr "%s: Feil ved endring av størrelse/omformatering: %s"
 
-#: src/netcam.cpp:1186
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Error putting frame into output buffer: %s"
 msgid "%s: Error putting frame into output buffer: %s"
-msgstr ""
+msgstr "%s: Feil ved innsetting av ramme i utdatabuffer: %s"
 
-#: src/netcam.cpp:1238
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: av_read_frame: %s ,Interrupt: %s"
 msgid "%s: av_read_frame: %s"
-msgstr ""
+msgstr "%s: av leseramme: %s"
 
-#: src/netcam.cpp:1324
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using %d"
-msgstr ""
+msgstr "%s: fangsthastighet er ikke spesifisert i netcam-parametere. Bruker %d"
 
-#: src/netcam.cpp:1331
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
 msgstr ""
+"%s: fangsthastighet er ikke spesifisert i netcam-parametere. Bruker "
+"framerate %d"
 
-#: src/netcam.cpp:1355
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "The network camera is sending pictures in a different"
 msgid "The network camera is sending pictures at %dx%d"
-msgstr ""
+msgstr "Nettverkskameraet sender bilder på %dx%d"
 
-#: src/netcam.cpp:1357
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "requested in the configuration.  If possible change"
 msgid "resolution but config is %dx%d. If possible change"
-msgstr ""
+msgstr "oppløsning, men konfigurasjonen er %dx%d. Om mulig endre"
 
-#: src/netcam.cpp:1359
-#| msgid "netcam or configuration to indicate the same size"
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "the netcam or config so that the image height and"
-msgstr ""
+msgstr "nettkameraet eller konfigurasjonen slik at bildehøyden og"
 
-#: src/netcam.cpp:1360
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "width are the same to lower the CPU usage."
-msgstr ""
+msgstr "bredden er den samme for å redusere CPU-bruken."
 
-#: src/netcam.cpp:1384
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Setting rtsp transport to tcp"
 msgid "%s: Setting rtsp/rtmp"
-msgstr ""
+msgstr "%s: Innstilling av rtsp/rtmp"
 
-#: src/netcam.cpp:1391
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Setting http input_format mjpeg"
 msgid "%s: Setting input_format mjpeg"
-msgstr ""
+msgstr "%s: Innstilling av inndataformat mjpeg"
 
-#: src/netcam.cpp:1396
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Setting http input_format mjpeg"
 msgid "%s: Setting input_format video4linux2"
-msgstr ""
+msgstr "%s: Innstilling av inngangsformat video4linux2"
 
-#: src/netcam.cpp:1411
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Setting attributes to read file"
 msgid "%s: Setting up movie file"
-msgstr ""
+msgstr "%s: Setter opp filmfil"
 
-#: src/netcam.cpp:1414
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Setting up %s stream."
 msgid "%s: Setting up %s"
-msgstr ""
+msgstr "%s: Setter opp %s"
 
-#: src/netcam.cpp:1429
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: option: %s = %s"
-msgstr ""
+msgstr "%s: alternativ: %s = %s"
 
-#: src/netcam.cpp:1464
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Error getting userpass"
-msgstr "Feil ved å få brukerpass"
+msgstr "Feil ved henting av brukerpass"
 
-#: src/netcam.cpp:1472
-#| msgid "Setting up v4l2 via ffmpeg netcam"
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Setting up v4l2"
-msgstr ""
+msgstr "Sette opp v4l2"
 
-#: src/netcam.cpp:1477
-#| msgid "Setting up %s stream."
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Setting up file"
-msgstr ""
+msgstr "Setter opp fil"
 
-#: src/netcam.cpp:1482
-#| msgid "Setting up %s stream."
-msgid "Setting up http"
-msgstr ""
-
-#: src/netcam.cpp:1485
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Setting up %s stream."
 msgid "Setting up %s "
-msgstr ""
+msgstr "Setter opp %s"
 
-#: src/netcam.cpp:1517
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "High"
-msgstr ""
+msgstr "Høy"
 
-#: src/netcam.cpp:1524
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Norm"
-msgstr ""
+msgstr "Norm"
 
-#: src/netcam.cpp:1531
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Setting v4l2 framerate: %s"
 msgid "%s: Setting up camera."
-msgstr ""
+msgstr "%s: Setter opp kamera."
 
-#: src/netcam.cpp:1576
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Unknown"
 msgstr "Ukjent"
 
-#: src/netcam.cpp:1609
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Adjusting width to next higher multiple of 8 (%d)."
 msgid "%s: Adjusting width to next higher multiple of 8 (%d)."
-msgstr ""
+msgstr "%s: Justerer bredden til neste høyere multiplum av 8 (%d)."
 
-#: src/netcam.cpp:1649
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "Unable to copy codec parameters"
 msgid "%s: Unable to copy codec parameters"
-msgstr ""
+msgstr "%s: Kan ikke kopiere kodekparametere"
 
-#: src/netcam.cpp:1660
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Stream copied for pass-through"
-msgstr "Stream kopiert for gjennomføring"
+msgstr "Strømmen er kopiert for videresending"
 
-#: src/netcam.cpp:1665
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "ffmpeg too old"
 msgstr "ffmpeg for gammel"
 
-#: src/netcam.cpp:1684
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Null path passed to connect"
-msgstr "Null sti passert for å koble til"
+msgstr "Null bane passert for å koble til"
 
-#: src/netcam.cpp:1706
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Unable to open camera(%s): %s"
 msgstr "%s: Kan ikke åpne kamera (%s): %s"
 
-#: src/netcam.cpp:1717
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Opened camera(%s)"
 msgstr "%s: Åpnet kamera (%s)"
 
-#: src/netcam.cpp:1726
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Unable to find stream info: %s"
-msgstr "%s: Kan ikke finne strøminfo: %s"
+msgstr "%s: Kan ikke finne strøminformasjon: %s"
 
-#: src/netcam.cpp:1745
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Unable to open codec context: %s"
-msgstr "%s: Kan ikke åpne codec-kontekst: %s"
+msgstr "%s: Kan ikke åpne kodek-kontekst: %s"
 
-#: src/netcam.cpp:1750
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Unable to open codec context: %s"
 msgid "%s: Connected and unable to open codec context: %s"
-msgstr ""
+msgstr "%s: Tilkoblet og kan ikke åpne kodek-kontekst: %s"
 
-#: src/netcam.cpp:1760
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Camera image size is invalid"
-msgstr "%s: Kamerastørrelsen er ugyldig"
+msgstr "%s: Kameraets bildestørrelse er ugyldig"
 
-#: src/netcam.cpp:1774
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Unable to allocate frame."
 msgstr "%s: Kan ikke tildele ramme."
 
-#: src/netcam.cpp:1785
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Failed to copy stream for pass-through."
-msgstr "%s: Kunne ikke kopiere strømmen for gjennomføring."
+msgstr "%s: Kunne ikke kopiere strømmen for pass-through."
 
-#: src/netcam.cpp:1797
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Failed to read first image"
 msgstr "%s: Kunne ikke lese det første bildet"
 
-#: src/netcam.cpp:1832
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Camera (%s) connected"
-msgstr "%s: Camera (%s) tilkoblet"
+msgstr "%s: Kamera (%s) tilkoblet"
 
-#: src/netcam.cpp:1836
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Netcam capture FPS is %d."
-msgstr ""
+msgstr "%s: Netcam-fangst-FPS er %d."
 
-#: src/netcam.cpp:1841
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Camera (%s) timed out"
 msgid "%s: Camera source is %d FPS"
-msgstr ""
+msgstr "%s: Kamerakilden er %d FPS"
 
-#: src/netcam.cpp:1845
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Unable to open camera(%s)"
 msgid "%s: Unable to determine the camera source FPS."
-msgstr ""
+msgstr "%s: Kan ikke bestemme kamerakilden FPS."
 
-#: src/netcam.cpp:1851
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Capture FPS less than camera FPS. Decoding errors will occur."
-msgstr ""
+msgstr "%s: Fang FPS mindre enn kamera FPS. Dekodingsfeil vil oppstå."
 
-#: src/netcam.cpp:1854
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Capture FPS should be greater than camera FPS."
-msgstr ""
+msgstr "%s: Capture FPS bør være større enn kameraets FPS."
 
-#: src/netcam.cpp:1865
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid ""
 "%s: An audio stream was detected.  Capture_rate increased to compensate."
-msgstr ""
+msgstr "%s: En lydstrøm ble oppdaget. Fangsthastigheten økte for å kompensere."
 
-#: src/netcam.cpp:1942
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Reconnecting with camera...."
-msgstr "%s: Koble til igjen med kamera ...."
+msgstr "%s: Kobler til kameraet igjen..."
 
-#: src/netcam.cpp:1957 src/netcam.cpp:1964
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Camera did not reconnect."
-msgstr "%s: Kameraet koblet ikke til igjen."
+msgstr "%s: Kameraet ble ikke koblet til igjen."
 
-#: src/netcam.cpp:1959
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Checking for camera every 10 seconds."
-msgstr "%s: Søker etter kamera hvert 10. sekund."
+msgstr "%s: Ser etter kamera hvert 10. sekund."
 
-#: src/netcam.cpp:1966
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Checking for camera every 10 seconds."
 msgid "%s: Checking for camera every 10 minutes."
-msgstr ""
+msgstr "%s: Ser etter kamera hvert 10. minutt."
 
-#: src/netcam.cpp:1990
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Camera handler thread [%d] started"
-msgstr "%s: Camera handler thread [%d] startet"
+msgstr "%s: Kamerabehandlertråden [%d] startet"
 
-#: src/netcam.cpp:2013
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
-#| msgid "%s: Handler loop finished."
 msgid "%s: Loop finished."
-msgstr ""
+msgstr "%s: Sløyfe fullført."
 
-#: src/netcam.cpp:2022
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Exiting"
-msgstr ""
+msgstr "%s: Avslutter"
 
-#: src/netcam.cpp:2048
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Error starting handler thread"
-msgstr "%s: Feil ved start av håndteringstråd"
+msgstr "%s: Feil ved start av behandlertråd"
 
-#: src/netcam.cpp:2069
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Waiting for first image from the handler."
 msgstr "%s: Venter på første bilde fra behandleren."
 
-#: src/netcam.cpp:2105
-msgid "unable to create rtsp context"
-msgstr "klarer ikke å opprette rtsp-kontekst"
-
-#: src/netcam.cpp:2114
-msgid "unable to create rtsp high context"
-msgstr "klarer ikke å lage rtsp høy kontekst"
-
-#: src/netcam.cpp:2132
-#, c-format
-msgid "Failed trying to read first image - retval:%d"
-msgstr "Kunne ikke prøve å lese første bilde - retval: %d"
-
-#: src/netcam.cpp:2230
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: Shutting down network camera."
-msgstr "%s: Slå av nettverkskamera."
+msgstr "%s: Slår av nettverkskamera."
 
-#: src/netcam.cpp:2245
+#: /home/dave/source/motionplus/src/netcam.cpp
 #, c-format
 msgid "%s: No response from handler thread."
-msgstr "%s: Ingen respons fra håndteringstråden."
+msgstr "%s: Ingen respons fra behandlertråden."
 
-#: src/netcam.cpp:2267
-#| msgid "Normal resolution: Shut down complete."
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "Norm: Shut down complete."
-msgstr ""
+msgstr "Norm: Avslutning fullført."
 
-#: src/netcam.cpp:2270
-#| msgid "High resolution: Shut down complete."
+#: /home/dave/source/motionplus/src/netcam.cpp
 msgid "High: Shut down complete."
-msgstr ""
+msgstr "Høy: Avslutning fullført."
 
-#: src/picture.cpp:57
+#: /home/dave/source/motionplus/src/netcam.cpp
+msgid "Opening Netcam"
+msgstr "Åpner Netcam"
+
+#: /home/dave/source/motionplus/src/netcam.cpp
+msgid "unable to create rtsp context"
+msgstr "kan ikke opprette rtsp-kontekst"
+
+#: /home/dave/source/motionplus/src/netcam.cpp
+msgid "unable to create rtsp high context"
+msgstr "kan ikke lage rtsp høy kontekst"
+
+#: /home/dave/source/motionplus/src/netcam.cpp
+msgid "Failed trying to read first image"
+msgstr "Kunne ikke prøve å lese det første bildet"
+
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Unable to set set EXIF to webp chunk"
-msgstr "Kan ikke stille EXIF ​​til webp-deling"
+msgstr "Kan ikke sette EXIF til webp chunk"
 
-#: src/picture.cpp:74 src/picture.cpp:81
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "libwebp version error"
 msgstr "libwebp versjonsfeil"
 
-#: src/picture.cpp:89
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "libwebp image buffer allocation error"
-msgstr "libwebp tildelingsfeil for bildebuffer"
+msgstr "libwebp bildebuffertildelingsfeil"
 
-#: src/picture.cpp:106
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "libwebp image compression error"
 msgstr "libwebp bildekomprimeringsfeil"
 
-#: src/picture.cpp:121
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "unable to assemble webp image"
-msgstr "klarer ikke å sette sammen web-bilde"
+msgstr "kan ikke sette sammen webp-bilde"
 
-#: src/picture.cpp:126
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "unable to save webp image to file"
-msgstr "klarer ikke å lagre web-bilde til fil"
+msgstr "kan ikke lagre webp-bilde til fil"
 
-#: src/picture.cpp:310
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid ""
 "Can't write picture to file %s - check access rights to target directory\n"
 "Thread is going to finish due to this fatal error"
 msgstr ""
-"Kan ikke skrive bilde til fil %s - sjekk tilgangsrettigheter til "
-"målkatalogen \n"
-"Tråden kommer til å bli ferdig på grunn av denne fatale feilen"
+"Kan ikke skrive bilde til filen %s - sjekk tilgangsrettighetene til "
+"målkatalogen\n"
+"Tråden blir ferdig på grunn av denne fatale feilen"
 
-#: src/picture.cpp:318 src/picture.cpp:345
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "Can't write picture to file %s"
-msgstr "Kan ikke skrive bilde til fil %s"
+msgstr "Kan ikke skrive bilde til filen %s"
 
-#: src/picture.cpp:382
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Could not read from pgm file"
-msgstr "Kunne ikke lese fra pgm-fil"
+msgstr "Kunne ikke lese fra pgm-filen"
 
-#: src/picture.cpp:388
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "This is not a pgm file, starts with '%s'"
 msgstr "Dette er ikke en pgm-fil, starter med '%s'"
 
-#: src/picture.cpp:402
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Failed reading size in pgm file"
-msgstr "Mislykket lesestørrelse i pgm-fil"
+msgstr "Mislykket lesing av størrelse i pgm-fil"
 
-#: src/picture.cpp:415
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Failed reading maximum value in pgm file"
-msgstr "Kunne ikke lese maksimal verdi i pgm-fil"
+msgstr "Kunne ikke lese maksimalverdi i pgm-fil"
 
-#: src/picture.cpp:440
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "The mask file specified is not the same size as image from camera."
 msgstr ""
-"Maskefilen som er angitt, er ikke i samme størrelse som bilde fra kamera."
+"Maskefilen som er spesifisert har ikke samme størrelse som bildet fra "
+"kameraet."
 
-#: src/picture.cpp:442
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "Attempting to resize mask image from %dx%d to %dx%d"
-msgstr "Forsøker å endre størrelse på maskebilde fra %dx%d til %dx%d"
+msgstr "Forsøker å endre størrelsen på maskebildet fra %dx%d til %dx%d"
 
-#: src/picture.cpp:472
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "can't write mask file %s - check access rights to target directory"
-msgstr "kan ikke skrive maskefil %s - sjekk tilgangsrettigheter til målkatalog"
+msgstr ""
+"kan ikke skrive maskefilen %s - sjekk tilgangsrettighetene til målkatalogen"
 
-#: src/picture.cpp:477
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "can't write mask file %s"
 msgstr "kan ikke skrive maskefil %s"
 
-#: src/picture.cpp:491
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Failed writing default mask as pgm file"
 msgstr "Kunne ikke skrive standardmaske som pgm-fil"
 
-#: src/picture.cpp:498
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid ""
 "Creating empty mask %s\n"
 "Please edit this file and re-run motion to enable mask feature"
 msgstr ""
-"Opprette tom maske %s\n"
-"Vennligst rediger denne filen og kjør bevegelse igjen for å aktivere "
-"maskefunksjonen"
+"Oppretter tom maske %s\n"
+"Rediger denne filen og kjør bevegelsen på nytt for å aktivere maskefunksjonen"
 
-#: src/picture.cpp:574
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Opening privacy mask file"
-msgstr "Åpne personvernmaske-fil"
+msgstr "Åpner personvernmaskefil"
 
-#: src/picture.cpp:586
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Opening high resolution privacy mask file"
-msgstr "Åpne høyoppløselig personvernmaskefil"
+msgstr "Åpner personvernmaskefil med høy oppløsning"
 
-#: src/picture.cpp:595 src/picture.cpp:680
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "Error opening mask file %s"
-msgstr "Feil ved åpning av maskefil %s"
+msgstr "Feil ved åpning av maskefilen %s"
 
-#: src/picture.cpp:602
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Failed to read mask privacy image. Mask privacy feature disabled."
 msgstr ""
-"Kunne ikke lese personvernbildet til masken. Maskets personvernfunksjon er "
+"Kunne ikke lese maskens personvernbilde. Mask personvern funksjonen "
 "deaktivert."
 
-#: src/picture.cpp:605
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "Mask privacy file \"%s\" loaded."
-msgstr "Mask personvernfil \"%s\" lastet."
+msgstr "Maskepersonvernfil \"%s\" er lastet inn."
 
-#: src/picture.cpp:691
+#: /home/dave/source/motionplus/src/picture.cpp
 msgid "Failed to read mask image. Mask feature disabled."
-msgstr "Kunne ikke lese maskebilde. Maskefunksjonen er deaktivert."
+msgstr "Kunne ikke lese maskebildet. Maskefunksjonen er deaktivert."
 
-#: src/picture.cpp:694
+#: /home/dave/source/motionplus/src/picture.cpp
 #, c-format
 msgid "Maskfile \"%s\" loaded."
-msgstr "Maskfile \"%s\" lastet."
+msgstr "Maskefilen \"%s\" er lastet inn."
 
-#: src/rotate.cpp:196
+#: /home/dave/source/motionplus/src/rotate.cpp
 #, c-format
 msgid "Config option \"rotate\" not a multiple of 90: %d"
-msgstr "Konfigureringsalternativ \"rotate\" ikke et multiplum på 90: %d"
+msgstr "Konfigurasjonsalternativet \"roter\" ikke et multiplum av 90: %d"
 
-#: src/util.cpp:111
+#: /home/dave/source/motionplus/src/sound.cpp
 #, c-format
-#| msgid "Could not allocate output context"
-msgid "Could not allocate %llu bytes of memory!"
-msgstr ""
+msgid "Card %i(%s): %s [%s]"
+msgstr "Kort %i(%s): %s [%s]"
 
-#: src/util.cpp:127
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "  Device %i (%s,%d): %s [%s]"
+msgstr "Enhet %i (%s,%d): %s [%s]"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "  Subdevices: %i/%i"
+msgstr "Underenheter: %i/%i"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "control digital audio playback info (%i): %s"
+msgstr "kontroller digital lydavspillingsinformasjon (%i): %s"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "  Subdevice #%i: %s"
+msgstr "Underenhet #%i: %s"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "control hardware info (%i): %s"
+msgstr "kontroll maskinvareinformasjon (%i): %s"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "snd_ctl_pcm_next_device"
+msgstr "snd ctl pcm neste enhet"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "control digital audio info (%i): %s"
+msgstr "kontroller digital lydinformasjon (%i): %s"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "no soundcards found..."
+msgstr "ingen lydkort funnet..."
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Devices"
+msgstr "Enheter"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "control open (%i): %s"
+msgstr "kontroll åpen (%i): %s"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_open device %s (%s)"
+msgstr "feil: snd pcm åpen enhet %s (%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_malloc(%s)"
+msgstr "feil: snd pcm hw params malloc(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_any(%s)"
+msgstr "feil: snd pcm hw params any(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_set_access(%s)"
+msgstr "feil: snd pcm hw params sett tilgang (%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_set_format(%s)"
+msgstr "feil: snd pcm hw params sett format (%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_set_rate_near(%s)"
+msgstr "feil: snd pcm hw params sett hastighet nær(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_set_channels(%s)"
+msgstr "feil: snd pcm hw params setter kanaler (%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_set_period_size_near(%s)"
+msgstr "feil: snd pcm hw params sett periodestørrelse nær(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params(%s)"
+msgstr "feil: snd pcm hw params(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_prepare(%s)"
+msgstr "feil: snd pcm prepare(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_get_format(%s)"
+msgstr "feil: snd pcm hw params får format (%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_get_rate(%s)"
+msgstr "feil: snd pcm hw params får rate(%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: snd_pcm_hw_params_get_period_size(%s)"
+msgstr "feil: snd pcm hw params får periodestørrelse (%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "Actual rate %hu"
+msgstr "Faktisk rate %hu"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "Actual frames per %lu"
+msgstr "Faktiske rammer per %lu"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Sound format 16"
+msgstr "Lydformat 16"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Sound format 24"
+msgstr "Lydformat 24"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Sound format 32"
+msgstr "Lydformat 32"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "error: read from audio interface failed (%s)"
+msgstr "feil: lesing fra lydgrensesnitt mislyktes (%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "Error opening pulse (%s)"
+msgstr "Feil ved åpningspuls (%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "Error capturing PulseAudio (%s)"
+msgstr "Feil ved opptak av PulseAudio (%s)"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Opening FFTW plan"
+msgstr "Åpning av FFTW-plan"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Invalid sound source."
+msgstr "Ugyldig lydkilde."
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Detecting"
+msgstr "Oppdager"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "Freq: %.4f threshold: %d count: %d maximum: %d"
+msgstr "Frekvens: %.4f terskel: %d telling: %d maksimum: %d"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+#, c-format
+msgid "Sound Alert %d-%s : level %d count %d max vol %d"
+msgstr "Lydvarsel %d-%s : nivå %d telling %d maks vol %d"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Capture loop finished"
+msgstr "Capture loop ferdig"
+
+#: /home/dave/source/motionplus/src/sound.cpp
+msgid "Sound detection functionality not supported"
+msgstr "Lyddeteksjonsfunksjonalitet støttes ikke"
+
+#: /home/dave/source/motionplus/src/util.cpp
+#, c-format
+msgid "Could not allocate %llu bytes of memory!"
+msgstr "Kunne ikke tildele %llu byte med minne!"
+
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Warning! Function %s tries to resize memoryblock at %p to 0 bytes!"
 msgstr ""
+"Advarsel! Funksjonen %s prøver å endre størrelsen på minneblokken ved %p til "
+"0 byte!"
 
-#: src/util.cpp:133
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Could not resize memory-block at offset %p to %llu bytes (function %s)!"
 msgstr ""
+"Kunne ikke endre størrelse på minneblokk ved offset %p til %llu byte "
+"(funksjon %s)!"
 
-#: src/util.cpp:175
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
-#| msgid "Could not change directory"
+msgid "Creating %s"
+msgstr "Oppretter %s"
+
+#: /home/dave/source/motionplus/src/util.cpp
+#, c-format
 msgid "Problem creating directory %s"
-msgstr ""
+msgstr "Problem med å opprette katalogen %s"
 
-#: src/util.cpp:183
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
-#| msgid "no write access to target directory %s"
-msgid "creating directory %s"
-msgstr ""
-
-#: src/util.cpp:221
-#, c-format
-#| msgid "Error opening file %s"
 msgid "Error opening file %s with mode %s"
-msgstr ""
+msgstr "Feil ved åpning av filen %s med modus %s"
 
-#: src/util.cpp:234
-#| msgid "Error opening file %s"
+#: /home/dave/source/motionplus/src/util.cpp
 msgid "Error closing file"
-msgstr ""
+msgstr "Feil ved lukking av filen"
 
-#: src/util.cpp:294
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
-#| msgid "Invalid thread specified: %s"
 msgid "invalid format specifier keyword %*.*s"
-msgstr ""
+msgstr "ugyldig formatspesifikasjonsnøkkel %*.*s"
 
-#: src/util.cpp:523
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
-#| msgid "Unable to start stream for camera %d"
 msgid "Unable to set thread name %s"
-msgstr ""
+msgstr "Kan ikke angi trådnavnet %s"
 
-#: src/util.cpp:550
+#: /home/dave/source/motionplus/src/util.cpp
 msgid "FFMPEG version too old. Disabling pass-through processing."
-msgstr ""
+msgstr "FFMPEG-versjonen er for gammel. Deaktiverer pass-through-behandling."
 
-#: src/util.cpp:589
+#: /home/dave/source/motionplus/src/util.cpp
 msgid "Language: English"
-msgstr ""
+msgstr "Språk Engelsk"
 
-#: src/util.cpp:606
+#: /home/dave/source/motionplus/src/util.cpp
 msgid "Disabling native language support"
-msgstr ""
+msgstr "Deaktivere støtte for morsmål"
 
-#: src/util.cpp:613
+#: /home/dave/source/motionplus/src/util.cpp
 msgid "Enabling native language support"
-msgstr ""
+msgstr "Aktiver støtte for morsmål"
 
-#: src/util.cpp:885
+#: /home/dave/source/motionplus/src/util.cpp
+#, c-format
+msgid "parse file: %s"
+msgstr "parse fil: %s"
+
+#: /home/dave/source/motionplus/src/util.cpp
+msgid "Only one params_file specification is permitted."
+msgstr "Bare én params-filspesifikasjon er tillatt."
+
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Parsed: >%s< >%s<"
-msgstr ""
+msgstr "Parsed: >%s< >%s<"
 
-#: src/util.cpp:1047 src/util.cpp:1078 src/util.cpp:1098
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Parsing: >%s< >%ld %ld %ld %ld<"
-msgstr ""
+msgstr "Parsing: >%s< >%ld %ld %ld %ld<"
 
-#: src/util.cpp:1127
-#, c-format
-msgid "Starting parsing parameters: %s"
-msgstr ""
+#: /home/dave/source/motionplus/src/util.cpp
+msgid "Starting parsing parameters"
+msgstr "Starter parsing av parametere"
 
-#: src/util.cpp:1135
-#, c-format
-#| msgid "Failed to copy decoder parameters!: %s"
-msgid "Finished parsing parameters: %s"
-msgstr ""
-
-#: src/util.cpp:1197
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "New config: %s"
-msgstr ""
+msgstr "Ny konfigurasjon: %s"
 
-#: src/util.cpp:1233
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Unable to start external command '%s'"
 msgstr "Kan ikke starte ekstern kommando '%s'"
 
-#: src/util.cpp:1239
+#: /home/dave/source/motionplus/src/util.cpp
 #, c-format
 msgid "Executing external command '%s'"
-msgstr "Utføre ekstern kommando '%s'"
+msgstr "Utfører ekstern kommando '%s'"
 
-#: src/video_common.cpp:425 src/video_common.cpp:447
+#: /home/dave/source/motionplus/src/video_common.cpp
 msgid "Corrupt image ... continue"
 msgstr "Korrupt bilde ... fortsett"
 
-#: src/video_common.cpp:438
+#: /home/dave/source/motionplus/src/video_common.cpp
 #, c-format
 msgid "SOI position adjusted by %d bytes."
-msgstr "SOI-stilling justert av %d byte."
+msgstr "SOI-posisjon justert med %d byte."
 
-#: src/video_loopback.cpp:76
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 #, c-format
 msgid "Failed to open '%s'"
-msgstr "Kunne ikke åpne '%s'"
+msgstr "Kunne ikke åpne «%s»"
 
-#: src/video_loopback.cpp:86 src/video_loopback.cpp:108
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 #, c-format
 msgid "Error specifying buffer: %s"
-msgstr "Feil ved spesifisering av buffer: %s"
+msgstr "Feil ved spesifikasjon av buffer: %s"
 
-#: src/video_loopback.cpp:89
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 #, c-format
 msgid "Opening buffer: %s"
 msgstr "Åpningsbuffer: %s"
 
-#: src/video_loopback.cpp:98
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 #, c-format
 msgid "Read buffer: %s"
-msgstr "Les buffer: %s"
+msgstr "Lesebuffer: %s"
 
-#: src/video_loopback.cpp:112
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 #, c-format
 msgid "found video device '%s' %d"
-msgstr "funnet videoenhet '%s' %d"
+msgstr "fant videoenheten '%s' %d"
 
-#: src/video_loopback.cpp:131 src/video_loopback.cpp:180
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 #, c-format
 msgid "Opened %s as pipe output"
-msgstr "Åpnet %s som rørutgang"
+msgstr "Åpnet %s som pipeutgang"
 
-#: src/video_loopback.cpp:184
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 #, c-format
 msgid "Opening %s as pipe output failed"
-msgstr "Åpning av %s som rørutgang mislyktes"
+msgstr "Åpning av %s som pipeutgang mislyktes"
 
-#: src/video_loopback.cpp:204
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 msgid "Original pipe specifications"
 msgstr "Originale rørspesifikasjoner"
 
-#: src/video_loopback.cpp:215
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 msgid "Proposed pipe specifications"
-msgstr "Foreslåtte rørspesifikasjoner"
+msgstr "Forslag til rørspesifikasjoner"
 
-#: src/video_loopback.cpp:223
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 msgid "Final pipe specifications"
-msgstr "Endelig rørspesifikasjoner"
+msgstr "Endelige rørspesifikasjoner"
 
-#: src/video_loopback.cpp:251
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 msgid "Opening video loopback device for normal pictures"
-msgstr "Åpne video loopback-enhet for normale bilder"
+msgstr "Åpning av video loopback-enhet for normale bilder"
 
-#: src/video_loopback.cpp:258
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 msgid "Failed to open video loopback for normal pictures"
 msgstr "Kunne ikke åpne video loopback for normale bilder"
 
-#: src/video_loopback.cpp:267
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 msgid "Opening video loopback device for motion pictures"
-msgstr "Åpne video loopback-enhet for filmer"
+msgstr "Åpne video loopback-enhet for film"
 
-#: src/video_loopback.cpp:274
+#: /home/dave/source/motionplus/src/video_loopback.cpp
 msgid "Failed to open video loopback for motion pictures"
-msgstr "Kunne ikke åpne video loopback for filmer"
+msgstr "Kunne ikke åpne video loopback for film"
 
-#: src/video_v4l2.cpp:130
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "---------Controls---------"
-msgstr "--------- Kontroller ---------"
+msgstr "----------Kontroller---------"
 
-#: src/video_v4l2.cpp:131
-msgid "  V4L2 ID   Name and Range"
-msgstr "V4L2 ID-navn og -område"
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "  V4L2 ID :  Name : Range"
+msgstr "V4L2 ID : Navn : Rekkevidde"
 
-#: src/video_v4l2.cpp:159
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "No Controls found for device"
-msgstr "Ingen kontroller funnet for enheten"
+msgstr "Finner ingen kontroller for enheten"
 
-#: src/video_v4l2.cpp:240
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "setting control %s \"%s\" to %d failed with return code %d"
-msgstr "innstillingskontroll %s \"%s\" til %d mislyktes med returkode %d"
+msgstr "innstilling av kontroll %s \"%s\" til %d mislyktes med returkode %d"
 
-#: src/video_v4l2.cpp:245
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Set control \"%s\" to value %d"
-msgstr "Sett kontroll \"%s\" til verdi %d"
+msgstr "Sett kontroll \"%s\" til verdien %d"
 
-#: src/video_v4l2.cpp:285
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
-#| msgid "%s control option value %d is below minimum.  Using minimum"
 msgid "%s control option value %s is below minimum.  Skipping..."
-msgstr ""
+msgstr "%s kontrollalternativverdi %s er under minimum. Hopp over..."
 
-#: src/video_v4l2.cpp:289
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
-#| msgid "%s control option value %d is above maximum.  Using maximum"
 msgid "%s control option value %s is above maximum.  Skipping..."
-msgstr ""
+msgstr "%s kontrollalternativverdi %s er over maksimum. Hopp over..."
 
-#: src/video_v4l2.cpp:300
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "control type not supported yet"
 msgstr "kontrolltype støttes ikke ennå"
 
-#: src/video_v4l2.cpp:324
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid ""
 "Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input "
 "value in conf by -1"
 msgstr ""
-"Kan ikke spørre om inngang %d. VIDIOC ENUMINPUT, hvis du bruker en WEBCAM "
-"endre inngangverdi i konf. Med -1"
+"Kan ikke spørre inndata %d. VIDIOC ENUMINPUT, hvis du bruker en WEBCAM endre "
+"inngangverdi i konf med -1"
 
-#: src/video_v4l2.cpp:331
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Name = \"%s\", type 0x%08X, status %08x"
-msgstr "Navn = \"%s\", type 0x%08X, status %08x"
+msgstr "Navn = \"%s\", skriv inn 0x%08X, status %08x"
 
-#: src/video_v4l2.cpp:336
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Name = \"%s\",- TUNER"
-msgstr "Navn = \"%s\", - TUNER"
+msgstr "Navn = \"%s\",- TUNER"
 
-#: src/video_v4l2.cpp:340
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Name = \"%s\"- CAMERA"
-msgstr "Navn = \"%s\"- CAMERA"
+msgstr "Navn = \"%s\"- KAMERA"
 
-#: src/video_v4l2.cpp:345
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Error selecting input %d VIDIOC_S_INPUT"
 msgstr "Feil ved valg av inngang %d VIDIOC S INPUT"
 
-#: src/video_v4l2.cpp:363
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Device does not support specifying PAL/NTSC norm"
-msgstr "Enheten støtter ikke spesifisering av PAL / NTSC-norm"
+msgstr "Enheten støtter ikke spesifisering av PAL/NTSC-norm"
 
-#: src/video_v4l2.cpp:374
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "- video standard %s"
-msgstr "- video standard %s"
+msgstr "- videostandard %s"
 
-#: src/video_v4l2.cpp:392
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Error selecting standard method %d VIDIOC_S_STD"
 msgstr "Feil ved valg av standardmetode %d VIDIOC S STD"
 
-#: src/video_v4l2.cpp:397
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Video standard set to NTSC"
 msgstr "Videostandard satt til NTSC"
 
-#: src/video_v4l2.cpp:399
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Video standard set to SECAM"
 msgstr "Videostandard satt til SECAM"
 
-#: src/video_v4l2.cpp:401
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Video standard set to PAL"
 msgstr "Videostandard satt til PAL"
 
-#: src/video_v4l2.cpp:422
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "tuner %d VIDIOC_G_TUNER"
 msgstr "tuner %d VIDIOC G TUNER"
 
-#: src/video_v4l2.cpp:426
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Set tuner %d"
-msgstr "Set tuner %d"
+msgstr "Still inn tuner %d"
 
-#: src/video_v4l2.cpp:436
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "freq %ul VIDIOC_S_FREQUENCY"
-msgstr "freq %ul VIDIOC S FREQUENCY"
+msgstr "frekv %ul VIDIOC S FREKVENS"
 
-#: src/video_v4l2.cpp:440
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Set Frequency to %ul"
-msgstr "Sett frekvens til %ul"
+msgstr "Sett Frekvens til %ul"
 
-#: src/video_v4l2.cpp:461
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+#, c-format
+msgid "Unable to use palette %c%c%c%c (%dx%d)"
+msgstr "Kan ikke bruke paletten %c%c%c%c (%dx%d)"
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Testing palette %c%c%c%c (%dx%d)"
 msgstr "Testpalett %c%c%c%c (%dx%d)"
 
-#: src/video_v4l2.cpp:470
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+#, c-format
+msgid "Checking image size %dx%d with stride %d"
+msgstr "Kontrollerer bildestørrelse %dx%d med steg %d"
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "No stride value provided from device."
+msgstr "Ingen skrittverdi oppgitt fra enheten."
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+#, c-format
+msgid "Width(%d) must be less than stride(%d)"
+msgstr "Bredde(%d) må være mindre enn skritt(%d)"
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+#, c-format
+msgid "The image width(%d) is not multiple of the stride(%d)"
+msgstr "Bildebredden (%d) er ikke multiplum av skrittet (%d)"
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+#, c-format
+msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
+msgstr "Umulig tilstand: Bredde(%d), Skritt(%d), Per skritt(%d)"
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+#, c-format
+msgid "Image width will be padded %d bytes"
+msgstr "Bildebredden vil være polstret %d byte"
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Adjusting resolution from %ix%i to %ix%i."
-msgstr "Justere oppløsningen fra %ix%i til %ix%i."
+msgstr "Justerer oppløsningen fra %ix%i til %ix%i."
 
-#: src/video_v4l2.cpp:480
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Adjusted resolution not modulo 8."
 msgstr "Justert oppløsning ikke modulo 8."
 
-#: src/video_v4l2.cpp:482
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Specify different palette or width/height in config file."
-msgstr "Angi annen palett eller bredde / høyde i konfigurasjonsfilen."
+msgstr "Spesifiser annen palett eller bredde/høyde i konfigurasjonsfilen."
 
-#: src/video_v4l2.cpp:490
-msgid ""
-"Error setting pixel format.\n"
-"VIDIOC_S_FMT: "
-msgstr ""
-"Feil ved innstilling av pikselformat.\n"
-"VIDIOC S FMT:"
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "Error setting pixel format."
+msgstr "Feil ved innstilling av pikselformat."
 
-#: src/video_v4l2.cpp:497
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
-msgstr "Bruke palett %c%c%c%c (%dx%d)"
+msgstr "Bruker paletten %c%c%c%c (%dx%d)"
 
-#: src/video_v4l2.cpp:502
-#, c-format
-msgid "Bytesperlines %d sizeimage %d colorspace %08x"
-msgstr "Bytesperlines %d størrelse bilde bilde %d fargerom %08x"
-
-#: src/video_v4l2.cpp:518
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "config image width (%d) is not modulo 8"
-msgstr "config bildebredde (%d) er ikke modulo 8"
+msgstr "konfigurasjonsbildebredden (%d) er ikke modulo 8"
 
-#: src/video_v4l2.cpp:521
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Adjusting to width (%d)"
-msgstr "Justering til bredde (%d)"
+msgstr "Justerer til bredde (%d)"
 
-#: src/video_v4l2.cpp:526
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "config image height (%d) is not modulo 8"
-msgstr "konfigurasjonshøyde (%d) er ikke modulo 8"
+msgstr "konfigurasjonsbildehøyde (%d) er ikke modulo 8"
 
-#: src/video_v4l2.cpp:529
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Adjusting to height (%d)"
-msgstr "Justering til høyden (%d)"
+msgstr "Justerer til høyden (%d)"
 
-#: src/video_v4l2.cpp:548
-#| msgid ""
-#| "H264(21) format not supported via videodevice.  Changing to default "
-#| "palette"
-msgid ""
-"H264(21) format not supported via v4l2_device.  Changing to default palette"
-msgstr ""
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "Invalid palette.  Changing to default"
+msgstr "Ugyldig palett. Bytter til standard"
 
-#: src/video_v4l2.cpp:564
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "Supported palettes:"
+msgstr "Støttede paletter:"
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Configuration palette index %d (%s) for %dx%d doesn't work."
 msgstr "Konfigurasjonspalettindeks %d (%s) for %dx%d fungerer ikke."
 
-#: src/video_v4l2.cpp:573
-msgid "Supported palettes:"
-msgstr "Paletter som støttes:"
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "Unable to find a compatible palette format."
+msgstr "Kan ikke finne et kompatibelt palettformat."
 
-#: src/video_v4l2.cpp:581
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
-msgid "%d - %s (compressed : %d) (%#x)"
-msgstr "%d - %s (komprimert: %d) (% # x)"
+msgid "Palette selection failed for format %s"
+msgstr "Palettvalg mislyktes for formatet %s"
 
-#: src/video_v4l2.cpp:602
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Selected palette %s"
 msgstr "Valgt palett %s"
 
-#: src/video_v4l2.cpp:611
-#, c-format
-msgid "Palette selection failed for format %s"
-msgstr "Valg av palett mislyktes for format %s"
-
-#: src/video_v4l2.cpp:616
-msgid "Unable to find a compatible palette format."
-msgstr "Kan ikke finne et kompatibelt palettformat."
-
-#: src/video_v4l2.cpp:644
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Error requesting buffers %d for memory map. VIDIOC_REQBUFS"
 msgstr "Feil ved forespørsel om buffere %d for minnekart. VIDIOC REQBUFS"
 
-#: src/video_v4l2.cpp:651
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "mmap information: frames=%d"
-msgstr "mmap informasjon: rammer = %d"
+msgstr "mmap informasjon: frames=%d"
 
-#: src/video_v4l2.cpp:655
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Insufficient buffer memory %d < MIN_MMAP_BUFFERS."
-msgstr "Utilstrekkelig bufferminne %d < MIN MMAP BUFFERS."
+msgstr "Utilstrekkelig bufferminne %d < MIN MMAP BUFFERE."
 
-#: src/video_v4l2.cpp:662
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Out of memory."
-msgstr "Ut av minnet."
+msgstr "Tomt for minne."
 
-#: src/video_v4l2.cpp:677
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid ""
 "Error querying buffer %i\n"
 "VIDIOC_QUERYBUF: "
 msgstr ""
-"Feil ved spørring av buffer %i\n"
+"Feil ved spørring etter buffer %i\n"
 "VIDIOC QUERYBUF:"
 
-#: src/video_v4l2.cpp:692
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Error mapping buffer %i mmap"
-msgstr "Feil ved kartlegging av buffer %i mmap"
+msgstr "Feil ved tilordning av buffer %i mmap"
 
-#: src/video_v4l2.cpp:701
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "%i length=%d Address (%x)"
-msgstr "%i length = %d Address (%x)"
+msgstr "%i length=%d Adresse (%x)"
 
-#: src/video_v4l2.cpp:722
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Error starting stream. VIDIOC_STREAMON"
-msgstr "Feil ved start av strøm. VIDIOC STREAMON"
+msgstr "Feil ved start av strømmen. VIDIOC STREAMON"
 
-#: src/video_v4l2.cpp:945
-#| msgid "Error setting file name"
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Error setting device controls"
-msgstr ""
+msgstr "Feil ved innstilling av enhetskontroller"
 
-#: src/video_v4l2.cpp:965
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
-#| msgid "Closing video device %s"
 msgid "Opening video device %s"
-msgstr ""
+msgstr "Åpner videoenhet %s"
 
-#: src/video_v4l2.cpp:973
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Failed to open video device %s"
 msgstr "Kunne ikke åpne videoenheten %s"
 
-#: src/video_v4l2.cpp:979
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Not a V4L2 device?"
 msgstr "Ikke en V4L2-enhet?"
 
-#: src/video_v4l2.cpp:984
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 msgid "Device does not support capturing."
-msgstr "Enheten støtter ikke fangst."
+msgstr "Enheten støtter ikke opptak."
 
-#: src/video_v4l2.cpp:1059
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
-#| msgid "Testing palette %s (%c%c%c%c)"
 msgid "Supported palette %s (%c%c%c%c)"
-msgstr ""
+msgstr "Støttet palett %s (%c%c%c%c)"
 
-#: src/video_v4l2.cpp:1071
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "  Width: %d, Height %d"
-msgstr "Bredde: %d, høyde %d"
+msgstr "Bredde: %d, Høyde %d"
 
-#: src/video_v4l2.cpp:1082
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "    Framerate %d/%d"
-msgstr "Framerate %d / %d"
+msgstr "Framerate %d/%d"
 
-#: src/video_v4l2.cpp:1120
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Trying to set fps to %d"
 msgstr "Prøver å sette fps til %d"
 
-#: src/video_v4l2.cpp:1126
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Error setting fps. Return code %d"
 msgstr "Feil ved innstilling av fps. Returkode %d"
 
-#: src/video_v4l2.cpp:1130
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Device set fps to %d"
-msgstr "Enhetsinnstilling fps til %d"
+msgstr "Enheten satt fps til %d"
 
-#: src/video_v4l2.cpp:1146
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
 #, c-format
 msgid "Closing video device %s"
-msgstr "Lukking av videoenhet %s"
+msgstr "Lukker videoenheten %s"
 
-#: src/webu.cpp:220
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "Opening V4L2 device"
+msgstr "Åpner V4L2-enhet"
+
+#: /home/dave/source/motionplus/src/video_v4l2.cpp
+msgid "V4L2 device failed to open"
+msgstr "V4L2-enheten kunne ikke åpnes"
+
+#: /home/dave/source/motionplus/src/webu.cpp
 #, c-format
 msgid "Sent url: %s"
 msgstr "Sendt url: %s"
 
-#: src/webu.cpp:230
+#: /home/dave/source/motionplus/src/webu.cpp
 #, c-format
 msgid "Decoded url: %s"
-msgstr "Avkodet url: %s"
+msgstr "Dekodet url: %s"
 
-#: src/webu.cpp:339
+#: /home/dave/source/motionplus/src/webu.cpp
 #, c-format
 msgid "Full Host:  %s"
-msgstr ""
+msgstr "Full vert: %s"
 
-#: src/webu.cpp:352
+#: /home/dave/source/motionplus/src/webu.cpp
 #, c-format
 msgid "Failed authentication from %s"
-msgstr "Mislykket godkjenning fra %s"
+msgstr "Mislykket autentisering fra %s"
 
-#: src/webu.cpp:414
-#, c-format
-msgid "ignoring attempt from %s"
-msgstr ""
-
-#: src/webu.cpp:629
-msgid "No webcontrol user:pass provided"
-msgstr "Ingen nettkontrollbruker: pass gitt"
-
-#: src/webu.cpp:659 src/webu_stream.cpp:361 src/webu_stream.cpp:405
-msgid "Invalid response"
-msgstr "Ugyldig svar"
-
-#: src/webu.cpp:816 src/webu.cpp:830
-#| msgid "send page failed %d"
-msgid "send page failed."
-msgstr ""
-
-#: src/webu.cpp:864
-#| msgid "%s: Shutting down network camera."
-msgid "Shutting down camera"
-msgstr ""
-
-#: src/webu.cpp:887
+#: /home/dave/source/motionplus/src/webu.cpp
 #, c-format
 msgid "Connection from: %s"
 msgstr "Tilkobling fra: %s"
 
-#: src/webu.cpp:1007
+#: /home/dave/source/motionplus/src/webu.cpp
+#, c-format
+msgid "Ignoring connection from: %s"
+msgstr "Ignorerer tilkobling fra: %s"
+
+#: /home/dave/source/motionplus/src/webu.cpp
+msgid "No webcontrol user:pass provided"
+msgstr "Ingen webcontrol user:pass gitt"
+
+#: /home/dave/source/motionplus/src/webu.cpp
+#: /home/dave/source/motionplus/src/webu_stream.cpp
+msgid "Invalid response"
+msgstr "Ugyldig svar"
+
+#: /home/dave/source/motionplus/src/webu.cpp
+msgid "send page failed."
+msgstr "sende siden mislyktes."
+
+#: /home/dave/source/motionplus/src/webu.cpp
+msgid "Shutting down camera"
+msgstr "Slår av kameraet"
+
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "Basic authentication: available"
-msgstr "Grunnleggende godkjenning: tilgjengelig"
+msgstr "Grunnleggende autentisering: tilgjengelig"
 
-#: src/webu.cpp:1010 src/webu.cpp:1013
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "Basic authentication: disabled"
-msgstr "Grunnleggende godkjenning: deaktivert"
+msgstr "Grunnleggende autentisering: deaktivert"
 
-#: src/webu.cpp:1028
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "Digest authentication: available"
-msgstr "Digest autentisering: tilgjengelig"
+msgstr "Digest-autentisering: tilgjengelig"
 
-#: src/webu.cpp:1031 src/webu.cpp:1034
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "Digest authentication: disabled"
-msgstr "Digest autentisering: deaktivert"
+msgstr "Sammendragsgodkjenning: deaktivert"
 
-#: src/webu.cpp:1045
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "libmicrohttpd libary too old ipv6 disabled"
-msgstr "libmicrohttpd libary for gammel ipv6 deaktivert"
+msgstr "libmicrohttpd-biblioteket er for gammelt ipv6 deaktivert"
 
-#: src/webu.cpp:1054
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "IPV6: available"
 msgstr "IPV6: tilgjengelig"
 
-#: src/webu.cpp:1056
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "IPV6: disabled"
 msgstr "IPV6: deaktivert"
 
-#: src/webu.cpp:1069
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "libmicrohttpd libary too old SSL/TLS disabled"
-msgstr "libmicrohttpd libary for gammel SSL / TLS deaktivert"
+msgstr "libmicrohttpd-biblioteket er for gammelt SSL/TLS deaktivert"
 
-#: src/webu.cpp:1076
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "SSL/TLS: available"
-msgstr "SSL / TLS: tilgjengelig"
+msgstr "SSL/TLS: tilgjengelig"
 
-#: src/webu.cpp:1079 src/webu.cpp:1082
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "SSL/TLS: disabled"
-msgstr "SSL / TLS: deaktivert"
+msgstr "SSL/TLS: deaktivert"
 
-#: src/webu.cpp:1124
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "Error reading file for SSL/TLS support."
-msgstr "Feil ved lesing av fil for SSL / TLS-støtte."
+msgstr "Feil ved lesing av fil for SSL/TLS-støtte."
 
-#: src/webu.cpp:1142
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "SSL/TLS requested but no cert file provided.  SSL/TLS disabled"
-msgstr ""
-"SSL / TLS forespurt, men ingen certifikatfil oppgitt. SSL / TLS deaktivert"
+msgstr "SSL/TLS forespurt, men ingen sertifikatfil oppgitt. SSL/TLS deaktivert"
 
-#: src/webu.cpp:1147
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "SSL/TLS requested but no key file provided.  SSL/TLS disabled"
-msgstr "SSL / TLS forespurt, men ingen nøkkelfil gitt. SSL / TLS deaktivert"
+msgstr "SSL/TLS forespurt, men ingen nøkkelfil oppgitt. SSL/TLS deaktivert"
 
-#: src/webu.cpp:1291
+#: /home/dave/source/motionplus/src/webu.cpp
 #, c-format
 msgid "Starting webcontrol on port %d"
-msgstr "Starter webkontroll på port %d"
+msgstr "Starter webcontrol på port %d"
 
-#: src/webu.cpp:1320
+#: /home/dave/source/motionplus/src/webu.cpp
 msgid "Unable to start MHD"
 msgstr "Kan ikke starte MHD"
 
-#: src/webu.cpp:1323
+#: /home/dave/source/motionplus/src/webu.cpp
 #, c-format
 msgid "Started webcontrol on port %d"
-msgstr "Startet nettkontroll på port %d"
+msgstr "Startet webkontroll på port %d"
 
-#: src/webu_html.cpp:1118
+#: /home/dave/source/motionplus/src/webu_html.cpp
 #, c-format
-#| msgid "Invalid url: %s"
 msgid "Invalid user html file: %s"
-msgstr ""
+msgstr "Ugyldig bruker-html-fil: %s"
 
-#: src/webu_post.cpp:68 src/webu_post.cpp:267 src/webu_post.cpp:276
+#: /home/dave/source/motionplus/src/webu_post.cpp
+msgid "Restarting all cameras"
+msgstr "Starter alle kameraer på nytt"
+
+#: /home/dave/source/motionplus/src/webu_post.cpp
+#, c-format
+msgid "Restarting camera %d"
+msgstr "Starter kameraet på nytt %d"
+
+#: /home/dave/source/motionplus/src/webu_post.cpp
 #, c-format
 msgid "Stopping cam %d"
-msgstr ""
+msgstr "Stopper kamera %d"
 
-#: src/webu_post.cpp:241
-#| msgid "Restarting all threads"
-msgid "Restarting all cameras"
-msgstr ""
-
-#: src/webu_post.cpp:250
+#: /home/dave/source/motionplus/src/webu_post.cpp
 #, c-format
-#| msgid "Restarting thread %d"
-msgid "Restarting camera %d"
-msgstr ""
+msgid "Invalid character included in action user \"%c\""
+msgstr "Ugyldig tegn inkludert i handlingsbruker \"%c\""
 
-#: src/webu_post.cpp:338
-msgid "Native Language : on"
-msgstr "Native Language: on"
-
-#: src/webu_post.cpp:341
-msgid "Native Language : off"
-msgstr "Innfødt språk: av"
-
-#: src/webu_post.cpp:440
+#: /home/dave/source/motionplus/src/webu_post.cpp
 #, c-format
-#| msgid "Invalid action requested: >%s< >%s< >%s<"
+msgid "Executing user action on cam %d"
+msgstr "Utfører brukerhandling på kamera %d"
+
+#: /home/dave/source/motionplus/src/webu_post.cpp
+#, c-format
 msgid "Invalid action requested: command: >%s< threadnbr : >%d< "
-msgstr ""
+msgstr "Ugyldig handling forespurt: kommando: >%s< threadnbr : >%d<"
 
-#: src/webu_stream.cpp:247 src/webu_stream.cpp:254
+#: /home/dave/source/motionplus/src/webu_stream.cpp
 #, c-format
 msgid "Invalid thread specified: %s"
 msgstr "Ugyldig tråd spesifisert: %s"
 
-#: src/webu_stream.cpp:398
+#: /home/dave/source/motionplus/src/webu_stream.cpp
 msgid "Could not get image to stream."
-msgstr "Kunne ikke få bilde til å strømme."
-
+msgstr "Kunne ikke få bildet til å strømme."
