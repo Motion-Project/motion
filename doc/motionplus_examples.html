@@ -54,7 +54,7 @@
         <li> <a href="#haar_setup">Haar setup</a></li>
         <li> <a href="#hog_setup">HOG setup</a></li>
         <li> <a href="#dnn_setup">DNN setup</a></li>
-
+        <li> <a href="#haar_train">Haar Model Training</a></li>
         <p></p>
         <p></p>
       </ul>
@@ -306,6 +306,50 @@
           <li><code>classes_file</code>Default: none | Full path and name for a file with the names of the classes </li>
           <li><code>framework</code>Default: none | </li>
         </ul>
+
+      </ul>
+
+      <h3><a name="haar_train"></a>Haar Model Training</h3>
+      <ul>
+        The OpenCV documentation is the definitive source for instructions on how to train
+        a Haar model.  This brief introduction only provides a few scripts that may be
+        helpful in using MotionPlus to get positive and negative images to feed into the
+        training process.
+        <br>
+        <br>Start with creating positive images movie as input file.
+        <br>Run with picture_output_motion roi
+        <br>Remove any pictures that are not desired.
+        <br>Run the script to create the positive file list
+        <br>Run while in the directory with the positive images.
+        <small><code><ul>
+          opencv_createsamples -vec posfiles.vec -info poslist.txt -num 350 -h 96 -w 96
+        </ul></code></small>
+        Next get a sample file that does not have desired positives.
+        <br>Change to picture_output on and turn off motion roi
+        <br>Change threshold to tiny number and run to create negatives
+        <small><code><ul>
+        opencv_traincascade -data ./model -vec ./pos/posfiles.vec -bg neglist.txt -numPos 350 -numNeg 325
+        </ul></code></small>
+        The following are the simple scripts to create positive and negative list files for training
+        <small><small><code>
+        <ul>
+          !/bin/bash
+          <br>FILES=./pos/*.jpg
+          <br>for FULLNAME in $FILES
+          <br>do
+          <br>HW=$(identify -format '%w %h' $FULLNAME)
+          <br>printf "$FULLNAME 1 0 0 $HW \n" >>poslist.txt
+          <br>done
+        </ul>
+        <ul>
+          <br>!/bin/bash
+          <br>FILES=./neg/*.jpg
+          <br>for FULLNAME in $FILES
+          <br>do
+          <br>  printf "$FULLNAME \n" >>neglist.txt
+          <br>done
+        </ul>
+        </code></small></small>
 
       </ul>
 
