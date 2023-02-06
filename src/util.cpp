@@ -335,6 +335,27 @@ static void mystrftime_long (const ctx_dev *cam,
         return;
     }
 
+    if (SPECIFIERWORD("trig_freq")) {
+        if (cam->snd_info != NULL) {
+            snprintf (out, PATH_MAX, "%*s", width, cam->snd_info->trig_freq.c_str() );
+        }
+        return;
+    }
+
+    if (SPECIFIERWORD("trig_nbr")) {
+        if (cam->snd_info != NULL) {
+            snprintf (out, PATH_MAX, "%*s", width, cam->snd_info->trig_nbr.c_str() );
+        }
+        return;
+    }
+
+    if (SPECIFIERWORD("trig_nm")) {
+        if (cam->snd_info != NULL) {
+            snprintf (out, PATH_MAX, "%*s", width, cam->snd_info->trig_nm.c_str() );
+        }
+        return;
+    }
+
 
     // Not a valid modifier keyword. Log the error and ignore.
     MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO,

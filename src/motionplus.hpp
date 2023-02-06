@@ -379,6 +379,9 @@ struct ctx_snd_info {
     int                         buffer_size;
     int                         frames;
     std::string                 pulse_server;
+    std::string                 trig_freq;
+    std::string                 trig_nbr;
+    std::string                 trig_nm;
 };
 
 struct ctx_dev {

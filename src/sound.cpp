@@ -758,7 +758,6 @@ static void snd_check_alerts(ctx_dev *snd)
     float pImaginaryNbr;
     float pIntensity;
     bool trigger;
-    std::string pcmd;
     std::list<ctx_snd_alert>::iterator it;
     struct timespec trig_ts;
 
@@ -826,10 +825,10 @@ static void snd_check_alerts(ctx_dev *snd)
                     , it->volume_level, chkcnt
                     , info->vol_max);
                 if (snd->conf->on_sound_alert != "") {
-                    pcmd = snd->conf->on_sound_alert;
-                    pcmd = pcmd + " " + std::to_string(it->alert_id);
-                    pcmd = pcmd + " " + std::to_string(freq_value);
-                    util_exec_command(snd, pcmd.c_str(), NULL, 0);
+                    info->trig_freq =std::to_string(freq_value);
+                    info->trig_nbr = std::to_string(it->alert_id);
+                    info->trig_nm = it->alert_nm;
+                    util_exec_command(snd, snd->conf->on_sound_alert.c_str(), NULL, 0);
                 }
             }
         }
