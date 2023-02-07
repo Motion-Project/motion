@@ -671,9 +671,9 @@ static void mlp_init(ctx_dev *cam)
 
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize"));
 
-    mlp_init_values(cam);
-
     mlp_init_camera_type(cam);
+
+    mlp_init_values(cam);
 
     mlp_init_cam_start(cam);
 
