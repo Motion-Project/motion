@@ -3764,12 +3764,24 @@ static void conf_parm_config_dir(ctx_motapp *motapp, std::string confdir)
     if (dp != NULL) {
         while( (ep = readdir(dp)) ) {
             conf_file.assign(ep->d_name);
-            if (conf_file.find_first_of(".conf") != std::string::npos) {
-                conf_file = confdir + "/" + conf_file;
-                MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                    ,_("Processing config file %s"), conf_file.c_str() );
-                conf_camera_parm(motapp, conf_file);
-                motapp->cam_list[motapp->cam_cnt-1]->conf->from_conf_dir = true;
+            if (conf_file.length() >= 5) {
+                if (conf_file.substr(conf_file.length()-5,5) == ".conf") {
+                    if (conf_file.find("sound") == std::string::npos) {
+                        conf_file = confdir + "/" + conf_file;
+                        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                            ,_("Processing as camera config file %s")
+                            , conf_file.c_str() );
+                        conf_camera_parm(motapp, conf_file);
+                        motapp->cam_list[motapp->cam_cnt-1]->conf->from_conf_dir = true;
+                    } else {
+                        conf_file = confdir + "/" + conf_file;
+                        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                            ,_("Processing as sound config file %s")
+                            , conf_file.c_str() );
+                        conf_sound_parm(motapp, conf_file);
+                        motapp->snd_list[motapp->snd_cnt-1]->conf->from_conf_dir = true;
+                    }
+                }
             }
         }
     }
