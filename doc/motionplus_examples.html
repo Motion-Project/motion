@@ -55,6 +55,7 @@
         <li> <a href="#hog_setup">HOG setup</a></li>
         <li> <a href="#dnn_setup">DNN setup</a></li>
         <li> <a href="#haar_train">Haar Model Training</a></li>
+        <li> <a href="#sound_sample">Sound Frequency Sample</a></li>
         <p></p>
         <p></p>
       </ul>
@@ -348,6 +349,94 @@
           <br>do
           <br>  printf "$FULLNAME \n" >>neglist.txt
           <br>done
+        </ul>
+        </code></small></small>
+
+      </ul>
+
+      <h3><a name="sound_sample"></a>Sound Frequency Sample</h3>
+      <ul>
+        Since sound frequency processing is new to MotionPlus, the following provides an illustrative sample of setting
+        up the sound and the associated alerts processing.  This example will use ALSA.  For PulseAudio, MotionPlus uses
+        the default audio recording device.  Although MotionPlus has parameters for the PulseAudio server and device,
+        the set up is not straight forward and it is just recommended to change the PulseAudio default.
+        <br>
+        <br>Go to the command prompt and use <small><code>arecord -l</code></small> to get the
+        device name such as <small><code>hw:1,0</code></small>
+        <br>Specify log_level 8 in MotionPlus.conf
+        <br>Do not specify a log file so that it is console output.
+        <br>Specify snd_device and snd_show in the sound configuration file such as
+        <br><small><code>snd_device hw:1,0</code></small>
+        <br><small><code>snd_show on</code></small>
+        <br>Start MotionPlus and make a noise to test the output.
+        <br>Once MotionPlus responds to sounds, press the test button on the device to be monitored.
+        <br>Note that while the various devices being monitored may be the same, the detected frequency from
+        each may be slightly different.  Care should be taken to not be too precise in the setting of the alert
+        range for MotionPlus.  For example, the frequency may be reported as 3402.2456 and MotionPlus can be
+        set up to look for that precise number but devices age and the frequency may change.  Also, note that the
+        frequency resolution of MotionPlus is limited by the sample rate and frames from the audio device.
+        The maximum resolution is determined by the following formula.  Sample Rate / (frames * 2).  So with the
+        default sample rate of 44100hz, and frames of 2048, the maximum resolution is appoximately 10.7666hz.  This
+        means that the frequencies detected around the range reported above would be 3413.0122, 3402.2456
+        or 3391.4790 and no values between.
+        <br>Once the frequencies of all the devices have been logged, set up the alerts in the sound configuration
+        file as well as the on_sound_alert and turn off the showing of frequencies. (The frequencies in this sample
+        are random)
+        <small><code><ul>
+        <br>snd_alerts alert_id=01,volume_level=01,volume_count=10,freq_low=2976,freq_high=2977,alert_nm=smokedown1
+        <br>snd_alerts alert_id=02,volume_level=01,volume_count=10,freq_low=3400,freq_high=3450,alert_nm=smokelr
+        <br>snd_alerts alert_id=03,volume_level=01,volume_count=10,freq_low=3388,freq_high=3399,alert_nm=smokebr1
+        <br>snd_alerts alert_id=11,volume_level=01,volume_count=10,freq_low=3378,freq_high=3379,alert_nm=furnace
+        <br>snd_alerts alert_id=22,volume_level=01,volume_count=10,freq_low=3281,freq_high=3399,alert_nm=waterheater
+        <br>snd_alerts alert_id=22,volume_level=01,volume_count=10,freq_low=3270,freq_high=3279,alert_nm=kitchBath
+        <br>snd_show off
+        <br>on_sound_alert %{trig_nbr} %{trig_nm} %{trig_freq}
+        <br>&nbsp;
+        </ul></code></small>
+        Then you can set up a script to send email or text messages using the sendemail
+        application like below
+        <small><small><code>
+        <ul>
+          <br>#!/bin/bash
+          <br>&nbsp;  ALRTNBR=$1
+          <br>&nbsp;  ALRTNM=$2
+          <br>&nbsp;  FREQ=$3
+          <br>&nbsp;  ATCH=$4
+          <br>&nbsp;  MYSTR=""
+          <br>&nbsp;  MYSTR=$MYSTR" -f  \"Friendly Name <SendingEmailAddress@gwhatever.com>\" "
+          <br>&nbsp;  MYSTR=$MYSTR" -t  \"DestinationEmailAddress@gwhatever.com\" "
+          <br>&nbsp;  MYSTR=$MYSTR" -u  \"MotionPlus Notification\" "
+          <br>&nbsp;  MYSTR=$MYSTR" -s  \"smtp.gwhatever.com:587\" "
+          <br>&nbsp;  MYSTR=$MYSTR" -xu \"SendingEmailAddress@gwhatever.com\" "
+          <br>&nbsp;  MYSTR=$MYSTR" -xp \"SendingEmailPassword\" "
+          <br>&nbsp;  BODY=""
+          <br>&nbsp;  if [[ "$ALRTNBR" -ge 1 && "$ALRTNBR" -le 9 ]]; then
+          <br>&nbsp;&nbsp;    BODY="So, hey.  Sorry to bother you.  But thought I'd just let"
+          <br>&nbsp;&nbsp;    BODY=$BODY" you know that your house is burning down.  The neighbors"
+          <br>&nbsp;&nbsp;    BODY=$BODY" may get annoyed so you should think about doing something. "
+          <br>&nbsp;&nbsp;    BODY=$BODY" The "$ALRTNM" alert numbered "$ALRTNBR" was triggered with "
+          <br>&nbsp;&nbsp;    BODY=$BODY" frequency "$FREQ
+          <br>&nbsp;  elif [[ "$ALRTNBR" -ge 10 && "$ALRTNBR" -le 19 ]]; then
+          <br>&nbsp;&nbsp;    BODY="Hi.  So I noticed that the natural gas leak alarm is going off."
+          <br>&nbsp;&nbsp;    BODY=$BODY" Nothing too urgent or anything but when you get home, you"
+          <br>&nbsp;&nbsp;    BODY=$BODY" may want to hold off making any sparks to avoid blowing yourself up."
+          <br>&nbsp;&nbsp;    BODY=$BODY" The "$ALRTNM" alert numbered "$ALRTNBR" was triggered with "
+          <br>&nbsp;&nbsp;    BODY=$BODY" frequency "$FREQ
+          <br>&nbsp;  elif [[ "$ALRTNBR" -ge 20 && "$ALRTNBR" -le 29 ]]; then
+          <br>&nbsp;&nbsp;    BODY="Ahoy!  Your house is going to be next water park attraction in"
+          <br>&nbsp;&nbsp;    BODY=$BODY" the neighborhood!!!  The water is filling it up and the"
+          <br>&nbsp;&nbsp;    BODY=$BODY" children will be splashing around in it soon."
+          <br>&nbsp;&nbsp;    BODY=$BODY" The "$ALRTNM" alert numbered "$ALRTNBR" was triggered with "
+          <br>&nbsp;&nbsp;    BODY=$BODY" frequency "$FREQ
+          <br>&nbsp;  fi
+          <br>&nbsp;  if [ "$BODY" != "" ]; then
+          <br>&nbsp;&nbsp;    MYSTR=$MYSTR" -m \""$BODY"\" "
+          <br>&nbsp;&nbsp;    if [ -f "$ATCH" ]; then
+          <br>&nbsp;&nbsp;&nbsp;      MYSTR=$MYSTR" -m \""$ATCH"\" "
+          <br>&nbsp;&nbsp;    fi
+          <br>&nbsp;&nbsp;    sendemail $MYSTR
+          <br>&nbsp;  fi
+          <br>exit 0
         </ul>
         </code></small></small>
 
