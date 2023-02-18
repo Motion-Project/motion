@@ -459,6 +459,12 @@ static void mlp_init_firstimage(ctx_dev *cam)
         }
     }
 
+    if (cam->conf->threshold_maximum > cam->conf->threshold ) {
+        cam->threshold_maximum = cam->conf->threshold_maximum;
+    } else {
+        cam->threshold_maximum = (cam->imgs.height * cam->imgs.width * 3) / 2;
+    }
+
 }
 
 /** Check the image size to determine if modulo 8 and over 64 */
@@ -549,11 +555,6 @@ static void mlp_init_values(ctx_dev *cam)
     cam->noise = cam->conf->noise_level;
 
     cam->threshold = cam->conf->threshold;
-    if (cam->conf->threshold_maximum > cam->conf->threshold ) {
-        cam->threshold_maximum = cam->conf->threshold_maximum;
-    } else {
-        cam->threshold_maximum = (cam->imgs.height * cam->imgs.width * 3) / 2;
-    }
     cam->device_status = STATUS_CLOSED;
     cam->startup_frames = (cam->conf->framerate * 2) + cam->conf->pre_capture + cam->conf->minimum_motion_frames;
 
