@@ -1031,8 +1031,182 @@
         <p></p>
         <ul>
           <li> Values: String | Default: Not Defined</li>
-          Comma separated list of configuration parameters (aka controls) for the libcamera device.  Note that this parameter
-          is currently a placeholder only since no controls are currently available for libcamera devices.
+          Comma separated list of configuration parameters (aka controls) for the libcamera device.
+        </ul>
+        <ul>
+          <i><h4> Transform(string)</h4></i>
+           (These are libcamera interpretations of transform and rotate may not provide result you anticipate.)
+          <div><ul>
+            <li> Identity</h4></i>
+            <li> Rot0</li>
+            <li> HFlip</li>
+            <li> VFlip</li>
+            <li> HVFlip</li>
+            <li> Rot180</li>
+            <li> Transpose</li>
+            <li> Rot270</li>
+            <li> Rot90</li>
+            <li> Rot180Transpose</li>
+          </ul></div>
+
+          <i><h4> AeEnable(bool)</h4></i>
+          <i><h4> AeLocked(bool)</h4></i>
+          <i><h4> AeMeteringMode(int)</h4></i>
+          <div><ul>
+            <li> MeteringCentreWeighted = 0</h4></i>
+            <li> MeteringSpot = 1</li>
+            <li> MeteringMatrix = 2</li>
+            <li> MeteringCustom = 3</li>
+          </ul></div>
+          <i><h4> AeConstraintMode(int)</h4></i>
+          <div><ul>
+            <li> ConstraintNormal = 0</li>
+            <li> ConstraintHighlight = 1</li>
+            <li> ConstraintShadows = 2</li>
+            <li> ConstraintCustom = 3</li>
+          </ul></div>
+          <i><h4> AeExposureMode(int)</h4></i>
+          <div><ul>
+            <li> ExposureNormal = 0</li>
+            <li> ExposureShort = 1</li>
+            <li> ExposureLong = 2</li>
+            <li> ExposureCustom = 3</li>
+          </ul></div>
+          <i><h4> ExposureValue(float)</h4></i>
+          <i><h4> ExposureTime(int)</h4></i>
+          <i><h4> AnalogueGain(float)</h4></i>
+          <i><h4> Brightness(float)</h4></i>
+          <i><h4> Contrast(float)</h4></i>
+          <i><h4> Lux(float)</h4></i>
+          <i><h4> AwbEnable(bool)</h4></i>
+          <i><h4> AwbMode(int)</h4></i>
+          <div><ul>
+            <li> AwbAuto = 0</li>
+            <li> AwbIncandescent = 1</li>
+            <li> AwbTungsten = 2</li>
+            <li> AwbFluorescent = 3</li>
+            <li> AwbIndoor = 4</li>
+            <li> AwbDaylight = 5</li>
+            <li> AwbCloudy = 6</li>
+            <li> AwbCustom = 7</li>
+          </ul></div>
+          <i><h4> AwbLocked(bool)</h4></i>
+          <i><h4> ColourTemperature(int)</h4></i>
+          <i><h4> Saturation(float)</h4></i>
+          <i><h4> Sharpness(float)</h4></i>
+          <i><h4> FocusFoM(int)</h4></i>
+          <i><h4> ScalerCrop(Rect x-y-h-w)</h4></i>
+          <i><h4> DigitalGain(float)</h4></i>
+          <i><h4> FrameDuration(int)</h4></i>
+          <i><h4> SensorTemperature(float)</h4></i>
+          <i><h4> SensorTimestamp(int)</h4></i>
+          <i><h4> AfMode(int)</h4></i>
+          <div><ul>
+            <li> AfModeManual = 0</li>
+            <li> AfModeAuto = 1</li>
+            <li> AfModeContinuous = 2</li>
+          </ul></div>
+          <i><h4> AfRange(0-2)</h4></i>
+          <div><ul>
+            <li> AfRangeNormal = 0</li>
+            <li> AfRangeMacro = 1</li>
+            <li> AfRangeFull = 2</li>
+          </ul></div>
+          <i><h4> AfSpeed(int)</h4></i>
+          <div><ul>
+            <li> AfSpeedNormal = 0</li>
+            <li> AfSpeedFast = 1</li>
+          </ul></div>
+          <i><h4> AfMetering(int)</h4></i>
+          <div><ul>
+            <li> AfMeteringAuto = 0</li>
+            <li> AfMeteringWindows = 1</li>
+          </ul></div>
+          <i><h4> AfWindows(rect x-y-h-w)</h4></i>
+          <i><h4> AfTrigger(int)</h4></i>
+          <div><ul>
+            <li> AfTriggerStart = 0</li>
+            <li> AfTriggerCancel = 1</li>
+          </ul></div>
+          <i><h4> AfPause(int)</h4></i>
+          <div><ul>
+            <li> AfPauseImmediate = 0</li>
+            <li> AfPauseDeferred = 1</li>
+            <li> AfPauseResume = 2</li>
+          </ul></div>
+          <i><h4> LensPosition(float)</h4></i>
+          <i><h4> AfState(int)</h4></i>
+          <div><ul>
+            <li> AfStateIdle = 0</li>
+            <li> AfStateScanning = 1</li>
+            <li> AfStateFocused = 2</li>
+            <li> AfStateFailed = 3</li>
+          </ul></div>
+          <i><h4> AfPauseState(int)</h4></i>
+          <div><ul>
+            <li> AfPauseStateRunning = 0</li>
+            <li> AfPauseStatePausing = 1</li>
+            <li> AfPauseStatePaused = 2</li>
+          </ul></div>
+          <i><h4> AePrecaptureTrigger(int)</h4></i>
+          <div><ul>
+            <li> AePrecaptureTriggerIdle = 0</li>
+            <li> AePrecaptureTriggerStart = 1</li>
+            <li> AePrecaptureTriggerCancel = 2</li>
+          </ul></div>
+          <i><h4> NoiseReductionMode(int)</h4></i>
+          <div><ul>
+            <li> NoiseReductionModeOff = 0</li>
+            <li> NoiseReductionModeFast = 1</li>
+            <li> NoiseReductionModeHighQuality = 2</li>
+            <li> NoiseReductionModeMinimal = 3</li>
+            <li> NoiseReductionModeZSL = 4</li>
+          </ul></div>
+          <i><h4> ColorCorrectionAberrationMode(int)</h4></i>
+          <div><ul>
+            <li> ColorCorrectionAberrationOff = 0</li>
+            <li> ColorCorrectionAberrationFast = 1</li>
+            <li> ColorCorrectionAberrationHighQuality = 2</li>
+          </ul></div>
+          <i><h4> AeState(int)</h4></i>
+          <div><ul>
+            <li> AeStateSearching = 1</li>
+            <li> AeStateConverged = 2</li>
+            <li> AeStateLocked = 3</li>
+            <li> AeStateFlashRequired = 4</li>
+            <li> AeStatePrecapture = 5</li>
+          </ul></div>
+          <i><h4> AwbState(int)</h4></i>
+          <div><ul>
+            <li> AwbStateInactive = 0</li>
+            <li> AwbStateSearching = 1</li>
+            <li> AwbConverged = 2</li>
+            <li> AwbLocked = 3</li>
+          </ul></div>
+          <i><h4> SensorRollingShutterSkew(int)</h4></i>
+          <i><h4> LensShadingMapMode(int)</h4></i>
+          <div><ul>
+            <li> LensShadingMapModeOff = 0</li>
+            <li> LensShadingMapModeOn = 1</li>
+          </ul></div>
+          <i><h4> SceneFlicker(int)</h4></i>
+          <div><ul>
+            <li> SceneFickerOff = 0</li>
+            <li> SceneFicker50Hz = 1</li>
+            <li> SceneFicker60Hz = 2</li>
+          </ul></div>
+          <i><h4> PipelineDepth(int)</h4></i>
+          <i><h4> MaxLatency(int)</h4></i>
+          <i><h4> TestPatternMode(int)</h4></i>
+          <div><ul>
+            <li> TestPatternModeOff = 0</li>
+            <li> TestPatternModeSolidColor = 1</li>
+            <li> TestPatternModeColorBars = 2</li>
+            <li> TestPatternModeColorBarsFadeToGray = 3</li>
+            <li> TestPatternModePn9 = 4</li>
+            <li> TestPatternModeCustom1 = 256</li>
+          </ul></div>
+
         </ul>
         <p></p>
 

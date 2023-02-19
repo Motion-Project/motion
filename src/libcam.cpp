@@ -19,20 +19,14 @@
  */
 
 /* TODO:
- * 1.  Identify parameters for camera and print them out to the user.
- * 2.  Apply user provided parameters to the camera.
- * 3.  Determine if we need to have multiple requests or buffers.
+ * Determine if we need to have multiple requests or buffers.
  *     (The current logic is just a single request and buffer but
  *      this may need to change to allow for multiple requests or buffers
  *      so as to reduce latency.  As of now, it is kept simple with
  *      a single request and buffer.)
- * 4.  Need to determine flags for designating start up, shutdown
+ * Need to determine flags for designating start up, shutdown
  *     etc. and possibly add mutex locking.  Startup currently has
  *     a SLEEP to allow for initialization but this should change
- * 5.  The shutdown is not completely cleaning up something with libcamera.
- *     Upon a stop of a camera and starting it again libcamera reports
- *     that the v4l2 devices are busy and can not be opened.  Then it
- *     seg aborts upon us.
  */
 #include "motionplus.hpp"
 #include "conf.hpp"
@@ -45,6 +39,189 @@
 #ifdef HAVE_LIBCAM
 
 using namespace libcamera;
+
+bool cls_libcam:: cam_parm_bool(char *parm)
+{
+    if (mystrceq(parm,"1") || mystrceq(parm,"yes") || mystrceq(parm,"on") || mystrceq(parm,"true") ) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void cls_libcam:: cam_log_transform()
+{
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "Libcamera Transform Options:");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Identity");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rot0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  HFlip");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  VFlip");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  HVFlip");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rot180");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Transpose");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rot270");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rot90");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rot180Transpose");
+
+}
+
+void cls_libcam:: cam_log_controls()
+{
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "Libcamera Controls:");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AeEnable(bool)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AeLocked(bool)");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AeMeteringMode(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    MeteringCentreWeighted = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    MeteringSpot = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    MeteringMatrix = 2");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    MeteringCustom = 3");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AeConstraintMode(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    ConstraintNormal = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    ConstraintHighlight = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    ConstraintShadows = 2");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    ConstraintCustom = 3");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AeExposureMode(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    ExposureNormal = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    ExposureShort = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    ExposureLong = 2");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    ExposureCustom = 3");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  ExposureValue(float)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  ExposureTime(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AnalogueGain(float)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Brightness(float)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Contrast(float)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Lux(float)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AwbEnable(bool)");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AwbMode(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AwbAuto = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AwbIncandescent = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AwbTungsten = 2");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AwbFluorescent = 3");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AwbIndoor = 4");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AwbDaylight = 5");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AwbCloudy = 6");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AwbCustom = 7");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AwbLocked(bool)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  ColourTemperature(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Saturation(float)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Sharpness(float)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  FocusFoM(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  ScalerCrop(Rect x-y-h-w)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  DigitalGain(float)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  FrameDuration(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  SensorTemperature(float)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  SensorTimestamp(int)");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AfMode(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfModeManual = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfModeAuto = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfModeContinuous = 2");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AfRange(0-2)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfRangeNormal = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfRangeMacro = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfRangeFull = 2");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AfSpeed(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfSpeedNormal = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfSpeedFast = 1");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AfMetering(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfMeteringAuto = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfMeteringWindows = 1");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AfWindows(rect x-y-h-w)");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AfTrigger(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfTriggerStart = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfTriggerCancel = 1");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AfPause(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfPauseImmediate = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfPauseDeferred = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfPauseResume = 2");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  LensPosition(float)");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AfState(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfStateIdle = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfStateScanning = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfStateFocused = 2");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfStateFailed = 3");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AfPauseState(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfPauseStateRunning = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfPauseStatePausing = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfPauseStatePaused = 2");
+
+}
+
+void cls_libcam:: cam_log_draft()
+{
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "Libcamera Controls Draft:");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AePrecaptureTrigger(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AePrecaptureTriggerIdle = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AePrecaptureTriggerStart = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AePrecaptureTriggerCancel = 2");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  NoiseReductionMode(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    NoiseReductionModeOff = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    NoiseReductionModeFast = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    NoiseReductionModeHighQuality = 2");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    NoiseReductionModeMinimal = 3");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    NoiseReductionModeZSL = 4");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  ColorCorrectionAberrationMode(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    ColorCorrectionAberrationOff = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    ColorCorrectionAberrationFast = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    ColorCorrectionAberrationHighQuality = 2");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AeState(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AeStateSearching = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AeStateConverged = 2");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AeStateLocked = 3");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AeStateFlashRequired = 4");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AeStatePrecapture = 5");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AwbState(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AwbStateInactive = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AwbStateSearching = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AwbConverged = 2");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AwbLocked = 3");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  SensorRollingShutterSkew(int)");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  LensShadingMapMode(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    LensShadingMapModeOff = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    LensShadingMapModeOn = 1");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  SceneFlicker(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    SceneFickerOff = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    SceneFicker50Hz = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    SceneFicker60Hz = 2");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  PipelineDepth(int)");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  MaxLatency(int)");
+
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  TestPatternMode(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    TestPatternModeOff = 0");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    TestPatternModeSolidColor = 1");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    TestPatternModeColorBars = 2");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    TestPatternModeColorBarsFadeToGray = 3");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    TestPatternModePn9 = 4");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    TestPatternModeCustom1 = 256");
+
+}
 
 void cls_libcam::cam_start_params(ctx_dev *ptr)
 {
@@ -77,6 +254,7 @@ int cls_libcam::cam_start_mgr()
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
     cam_mgr = std::make_unique<CameraManager>();
+
     retcd = cam_mgr->start();
     if (retcd != 0) {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
@@ -104,6 +282,221 @@ int cls_libcam::cam_start_mgr()
     return 0;
 }
 
+void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
+{
+    if (mystrceq(pname, "AeEnable")) {
+        controls.set(controls::AeEnable, cam_parm_bool(pvalue));
+    }
+    if (mystrceq(pname, "AeLocked")) {
+        controls.set(controls::AeLocked, cam_parm_bool(pvalue));
+    }
+    if (mystrceq(pname,"AeMeteringMode")) {
+       controls.set(controls::AeMeteringMode, atoi(pvalue));
+    }
+    if (mystrceq(pname,"AeConstraintMode")) {
+        controls.set(controls::AeConstraintMode, atoi(pvalue));
+    }
+    if (mystrceq(pname,"AeExposureMode")) {
+        controls.set(controls::AeExposureMode, atoi(pvalue));
+    }
+    if (mystrceq(pname,"ExposureValue")) {
+        controls.set(controls::ExposureValue, atof(pvalue));
+    }
+    if (mystrceq(pname,"ExposureTime")) {
+        controls.set(controls::ExposureTime, atoi(pvalue));
+    }
+    if (mystrceq(pname,"AnalogueGain")) {
+        controls.set(controls::AnalogueGain, atof(pvalue));
+    }
+    if (mystrceq(pname,"Brightness")) {
+        controls.set(controls::Brightness, atof(pvalue));
+    }
+    if (mystrceq(pname,"Contrast")) {
+        controls.set(controls::Contrast, atof(pvalue));
+    }
+    if (mystrceq(pname,"Lux")) {
+        controls.set(controls::Lux, atof(pvalue));
+    }
+    if (mystrceq(pname, "AwbEnable")) {
+        controls.set(controls::AwbEnable, cam_parm_bool(pvalue));
+    }
+    if (mystrceq(pname,"AwbMode")) {
+        controls.set(controls::AwbMode, atoi(pvalue));
+    }
+    if (mystrceq(pname, "AwbLocked")) {
+        controls.set(controls::AwbLocked, cam_parm_bool(pvalue));
+    }
+    if (mystrceq(pname,"ColourTemperature")) {
+        controls.set(controls::ColourTemperature, atoi(pvalue));
+    }
+    if (mystrceq(pname,"Saturation")) {
+        controls.set(controls::Saturation, atof(pvalue));
+    }
+    if (mystrceq(pname,"Sharpness")) {
+        controls.set(controls::Sharpness, atof(pvalue));
+    }
+    if (mystrceq(pname,"FocusFoM")) {
+        controls.set(controls::FocusFoM, atoi(pvalue));
+    }
+    if (mystrceq(pname,"ScalerCrop")) {
+        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "ScalerCrop not implemented(Rect x-y-h-w)");
+    }
+    if (mystrceq(pname,"DigitalGain")) {
+        controls.set(controls::DigitalGain, atof(pvalue));
+    }
+    if (mystrceq(pname,"FrameDuration")) {
+        controls.set(controls::FrameDuration, atoi(pvalue));
+    }
+    if (mystrceq(pname,"SensorTemperature")) {
+        controls.set(controls::SensorTemperature, atof(pvalue));
+    }
+    if (mystrceq(pname,"SensorTimestamp")) {
+        controls.set(controls::SensorTimestamp, atoi(pvalue));
+    }
+    if (mystrceq(pname,"AfMode")) {
+        controls.set(controls::AfMode, atoi(pvalue));
+    }
+    if (mystrceq(pname,"AfRange")) {
+        controls.set(controls::AfRange, atoi(pvalue));
+    }
+    if (mystrceq(pname,"AfSpeed")) {
+        controls.set(controls::AfSpeed, atoi(pvalue));
+    }
+    if (mystrceq(pname,"AfMetering")) {
+        controls.set(controls::AfMetering, atoi(pvalue));
+    }
+    if (mystrceq(pname,"AfWindows")) {
+        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "AfWindows not implemented(Rect x-y-h-w)");
+    }
+    if (mystrceq(pname,"AfTrigger")) {
+        controls.set(controls::AfTrigger, atoi(pvalue));
+    }
+    if (mystrceq(pname,"AfPause")) {
+        controls.set(controls::AfPause, atoi(pvalue));
+    }
+    if (mystrceq(pname,"LensPosition")) {
+        controls.set(controls::LensPosition, atof(pvalue));
+    }
+    if (mystrceq(pname,"AfState")) {
+        controls.set(controls::AfState, atoi(pvalue));
+    }
+    if (mystrceq(pname,"AfPauseState")) {
+        controls.set(controls::AfPauseState, atoi(pvalue));
+    }
+
+    /* DRAFT*/
+    if (mystrceq(pname,"AePrecaptureTrigger")) {
+        controls.set(controls::draft::AePrecaptureTrigger, atoi(pvalue));
+    }
+    if (mystrceq(pname,"NoiseReductionMode")) {
+        controls.set(controls::draft::NoiseReductionMode, atoi(pvalue));
+    }
+    if (mystrceq(pname,"ColorCorrectionAberrationMode")) {
+        controls.set(controls::draft::ColorCorrectionAberrationMode, atoi(pvalue));
+    }
+    if (mystrceq(pname,"AeState")) {
+        controls.set(controls::draft::AeState, atoi(pvalue));
+    }
+    if (mystrceq(pname,"AwbState")) {
+        controls.set(controls::draft::AwbState, atoi(pvalue));
+    }
+    if (mystrceq(pname,"SensorRollingShutterSkew")) {
+        controls.set(controls::draft::SensorRollingShutterSkew, atoi(pvalue));
+    }
+    if (mystrceq(pname,"LensShadingMapMode")) {
+        controls.set(controls::draft::LensShadingMapMode, atoi(pvalue));
+    }
+    if (mystrceq(pname,"SceneFlicker")) {
+        controls.set(controls::draft::SceneFlicker, atoi(pvalue));
+    }
+    if (mystrceq(pname,"PipelineDepth")) {
+        controls.set(controls::draft::PipelineDepth, atoi(pvalue));
+    }
+    if (mystrceq(pname,"MaxLatency")) {
+        controls.set(controls::draft::MaxLatency, atoi(pvalue));
+    }
+    if (mystrceq(pname,"TestPatternMode")) {
+        controls.set(controls::draft::TestPatternMode, atoi(pvalue));
+    }
+
+}
+
+void cls_libcam:: cam_config_controls()
+{
+    int indx, retcd;
+
+    for (indx = 0; indx < camctx->libcam->params->params_count; indx++) {
+        cam_config_control_item(
+            camctx->libcam->params->params_array[indx].param_name
+            ,camctx->libcam->params->params_array[indx].param_value);
+    }
+
+    retcd = config->validate();
+    if (retcd == CameraConfiguration::Adjusted) {
+        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
+            , "Configuration adjusted.");
+    } else if (retcd == CameraConfiguration::Valid) {
+         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , "Configuration valid");
+    } else if (retcd == CameraConfiguration::Invalid) {
+         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            , "Configuration error");
+    }
+
+}
+
+void cls_libcam:: cam_config_transform()
+{
+    int indx, retcd;
+    ctx_params_item itm;
+
+    config->transform = Transform::Identity;
+
+    for (indx = 0; indx < camctx->libcam->params->params_count; indx++) {
+        itm = camctx->libcam->params->params_array[indx];
+        if (mystreq(itm.param_name,"transform")) {
+            if (mystrceq(itm.param_value,"identity")) {
+                config->transform = Transform::Identity;
+            } else if (mystrceq(itm.param_value,"rot0")) {
+                config->transform = Transform::Rot0;
+            } else if (mystrceq(itm.param_value,"hflip")) {
+                config->transform = Transform::HFlip;
+            } else if (mystrceq(itm.param_value,"vflip")) {
+                config->transform = Transform::VFlip;
+            } else if (mystrceq(itm.param_value,"hvflip")) {
+                config->transform = Transform::HVFlip;
+            } else if (mystrceq(itm.param_value,"rot180")) {
+                config->transform = Transform::Rot180;
+            } else if (mystrceq(itm.param_value,"transpose")) {
+                config->transform = Transform::Transpose;
+            } else if (mystrceq(itm.param_value,"rot270")) {
+                config->transform = Transform::Rot270;
+            } else if (mystrceq(itm.param_value,"rot90")) {
+                config->transform = Transform::Rot90;
+            } else if (mystrceq(itm.param_value,"rot180transpose")) {
+                config->transform = Transform::Rot180Transpose;
+            } else {
+                MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                    , "Invalid transform option: %s."
+                    , itm.param_value);
+            }
+        }
+    }
+
+    retcd = config->validate();
+    if (retcd == CameraConfiguration::Adjusted) {
+        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
+            , "Configuration adjusted.");
+    } else if (retcd == CameraConfiguration::Valid) {
+         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , "Configuration valid");
+    } else if (retcd == CameraConfiguration::Invalid) {
+         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            , "Configuration error");
+    }
+
+}
+
 int cls_libcam::cam_start_config()
 {
     int retcd;
@@ -112,6 +505,7 @@ int cls_libcam::cam_start_config()
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
     config = camera->generateConfiguration({ StreamRole::Viewfinder });
+
     config->at(0).pixelFormat = PixelFormat::fromString("YUV420");
 
     config->at(0).size.width = camctx->conf->width;
@@ -125,7 +519,13 @@ int cls_libcam::cam_start_config()
                 , "Pixel format was adjusted to %s."
                 , config->at(0).pixelFormat.toString().c_str());
             return -1;
+        } else {
+            MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                , "Configuration adjusted.");
         }
+    } else if (retcd == CameraConfiguration::Valid) {
+         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+            , "Configuration is valid");
     } else if (retcd == CameraConfiguration::Invalid) {
          MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Error setting configuration");
@@ -147,6 +547,13 @@ int cls_libcam::cam_start_config()
     camctx->imgs.size_norm = (camctx->imgs.width * camctx->imgs.height * 3) / 2;
     camctx->imgs.motionsize = camctx->imgs.width * camctx->imgs.height;
 
+    cam_log_transform();
+    cam_log_controls();
+    cam_log_draft();
+
+    cam_config_transform();
+    cam_config_controls();
+
     camera->configure(config.get());
 
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
@@ -163,7 +570,7 @@ int cls_libcam::req_add(Request *request)
 
 int cls_libcam::cam_start_req()
 {
-    int retcd, bytes;
+    int retcd, bytes, indx, width;
 
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
@@ -196,29 +603,40 @@ int cls_libcam::cam_start_req()
         return -1;
     }
 
+    started_req = true;
+
     const FrameBuffer::Plane &plane0 = buffer->planes()[0];
-    bytes = plane0.length;
-    if (buffer->planes().size() > 1) {
-        const FrameBuffer::Plane &plane1 = buffer->planes()[1];
-        bytes += plane1.length;
-    }
-    if (buffer->planes().size() > 2) {
-        const FrameBuffer::Plane &plane2 = buffer->planes()[2];
-        bytes += plane2.length;
-    }
-    if (bytes > camctx->imgs.size_norm){
-        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Image size error.  Usual size is %d but planes size is %d"
-            ,camctx->imgs.size_norm, bytes);
-        return -1;
+
+    bytes = 0;
+    for (indx=0; indx<(int)buffer->planes().size(); indx++){
+        bytes += buffer->planes()[indx].length;
+        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "Plane %d of %d length %d"
+            , indx, buffer->planes().size()
+            , buffer->planes()[indx].length);
     }
 
-    membuf.buf = (uint8_t *)mmap(NULL,bytes, PROT_READ
+    if (bytes > camctx->imgs.size_norm) {
+        width = (buffer->planes()[0].length / camctx->imgs.height);
+        if (((int)buffer->planes()[0].length != (width * camctx->imgs.height)) ||
+            (bytes > ((width * camctx->imgs.height * 3)/2))) {
+            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                , "Error setting image size.  Plane 0 length %d, total bytes %d"
+                , buffer->planes()[0].length, bytes);
+        }
+        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+            , "Image size adjusted from %d x %d to %d x %d"
+            , camctx->imgs.width,camctx->imgs.height
+            , width,camctx->imgs.height);
+        camctx->imgs.width = width;
+        camctx->imgs.size_norm = (camctx->imgs.width * camctx->imgs.height * 3) / 2;
+        camctx->imgs.motionsize = camctx->imgs.width * camctx->imgs.height;
+    }
+
+    membuf.buf = (uint8_t *)mmap(NULL, bytes, PROT_READ
         , MAP_SHARED, plane0.fd.get(), 0);
     membuf.bufsz = bytes;
 
     requests.push_back(std::move(request));
-    started_req = true;
 
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
 
@@ -312,6 +730,7 @@ void cls_libcam::cam_stop()
     if (started_aqr) {
         camera->stop();
     }
+
     if (started_req) {
         camera->requestCompleted.disconnect(this, &cls_libcam::req_complete);
         while (req_queue.empty() == false) {

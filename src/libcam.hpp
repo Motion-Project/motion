@@ -24,8 +24,6 @@
         #include <sys/mman.h>
         #include <libcamera/libcamera.h>
 
-        using namespace libcamera;
-
         /* Buffers and sizes for planes of image*/
         struct ctx_imgmap {
             uint8_t *buf;
@@ -43,27 +41,35 @@
                 ctx_dev     *camctx;
                 ctx_params  *params;
 
-                std::unique_ptr<CameraManager>          cam_mgr;
-                std::shared_ptr<Camera>                 camera;
-                std::unique_ptr<CameraConfiguration>    config;
-                std::unique_ptr<FrameBufferAllocator>   frmbuf;
-                std::vector<std::unique_ptr<Request>>   requests;
+                std::unique_ptr<libcamera::CameraManager>          cam_mgr;
+                std::shared_ptr<libcamera::Camera>                 camera;
+                std::unique_ptr<libcamera::CameraConfiguration>    config;
+                std::unique_ptr<libcamera::FrameBufferAllocator>   frmbuf;
+                std::vector<std::unique_ptr<libcamera::Request>>   requests;
 
-                std::queue<Request *>   req_queue;
-                ControlList             controls;
+                std::queue<libcamera::Request *>   req_queue;
+                libcamera::ControlList             controls;
                 ctx_imgmap              membuf;
                 bool                    started_cam;
                 bool                    started_mgr;
                 bool                    started_aqr;
                 bool                    started_req;
 
+                void cam_log_transform();
+                void cam_log_controls();
+                void cam_log_draft();
+
                 void cam_start_params(ctx_dev *ptr);
                 int cam_start_mgr();
                 int cam_start_config();
                 int cam_start_req();
                 int cam_start_capture();
-                void req_complete(Request *request);
-                int req_add(Request *request);
+                void cam_config_transform();
+                void cam_config_controls();
+                void req_complete(libcamera::Request *request);
+                int req_add(libcamera::Request *request);
+                bool cam_parm_bool(char *parm);
+                void cam_config_control_item(char *pmm, char *pval);
         };
     #else
         class cls_libcam {
