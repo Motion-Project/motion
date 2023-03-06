@@ -386,7 +386,7 @@ static GLOBAL(void) _jpeg_mem_dest(j_compress_ptr cinfo, JOCTET* buf, size_t buf
 static GLOBAL(int) _jpeg_mem_size(j_compress_ptr cinfo)
 {
     mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
-    return dest->jpegsize;
+    return (int)dest->jpegsize;
 }
 
 /*

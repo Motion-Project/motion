@@ -324,8 +324,8 @@ struct ctx_snd_alert {
     std::string     alert_nm;           /* Name of the alert*/
     int             volume_level;       /* Volume level required to consider the sample*/
     int             volume_count;       /* For each sample, number of times required to exceed volumne level*/
-    float           freq_low;           /* Lowest frequency for detecting this alert*/
-    float           freq_high;          /* Highest frequency for detecting this alert*/
+    double          freq_low;           /* Lowest frequency for detecting this alert*/
+    double          freq_high;          /* Highest frequency for detecting this alert*/
     int             trigger_count;      /* Count of how many times it has been triggered so far*/
     int             trigger_threshold;  /* How many times does it need to be triggered before an event*/
     timespec        trigger_time;       /* The last time the trigger was invoked */
@@ -361,7 +361,7 @@ struct ctx_snd_fftw {
         fftw_complex    *ff_out;
         int             bin_max;
         int             bin_min;
-        float           bin_size;
+        double          bin_size;
     #else
         int             dummy;
     #endif
@@ -369,8 +369,8 @@ struct ctx_snd_fftw {
 
 struct ctx_snd_info {
     std::string                 source;         /* Source string in ALSA format e.g. hw:1,0*/
-    unsigned int                sample_rate;    /* Sample rate of sound source*/
-    uint8_t                     channels;       /* Number of audio channels */
+    int                         sample_rate;    /* Sample rate of sound source*/
+    int                         channels;       /* Number of audio channels */
     std::list<ctx_snd_alert>    alerts;         /* list of sound alert criteria */
     int                         vol_min;        /* The minimum volume from alerts*/
     int                         vol_max;        /* Maximum volume of sample*/

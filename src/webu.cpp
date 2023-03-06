@@ -559,7 +559,7 @@ static void webu_mhd_auth_parse(ctx_webui *webui)
     myfree(&webui->auth_user);
     myfree(&webui->auth_pass);
 
-    auth_len = webui->motapp->conf->webcontrol_authentication.length();
+    auth_len = (int)webui->motapp->conf->webcontrol_authentication.length();
     col_pos =(char*) strstr(webui->motapp->conf->webcontrol_authentication.c_str() ,":");
     if (col_pos == NULL) {
         webui->auth_user = (char*)mymalloc(auth_len+1);
@@ -582,7 +582,7 @@ static mhdrslt webu_mhd_auth(ctx_webui *webui)
 {
     unsigned int rand1,rand2;
 
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
     rand1 = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
     rand2 = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
     snprintf(webui->auth_opaque, WEBUI_LEN_PARM, "%08x%08x", rand1, rand2);
@@ -1195,7 +1195,7 @@ static void webu_mhd_opts_localhost(ctx_mhdstart *mhdst)
         if (mhdst->ipv6) {
             memset(&mhdst->lpbk_ipv6, 0, sizeof(struct sockaddr_in6));
             mhdst->lpbk_ipv6.sin6_family = AF_INET6;
-            mhdst->lpbk_ipv6.sin6_port = htons(mhdst->motapp->conf->webcontrol_port);
+            mhdst->lpbk_ipv6.sin6_port = htons((uint16_t)mhdst->motapp->conf->webcontrol_port);
             mhdst->lpbk_ipv6.sin6_addr = in6addr_loopback;
 
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
@@ -1206,7 +1206,7 @@ static void webu_mhd_opts_localhost(ctx_mhdstart *mhdst)
         } else {
             memset(&mhdst->lpbk_ipv4, 0, sizeof(struct sockaddr_in));
             mhdst->lpbk_ipv4.sin_family = AF_INET;
-            mhdst->lpbk_ipv4.sin_port = htons(mhdst->motapp->conf->webcontrol_port);
+            mhdst->lpbk_ipv4.sin_port = htons((uint16_t)mhdst->motapp->conf->webcontrol_port);
             mhdst->lpbk_ipv4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
@@ -1351,7 +1351,7 @@ static void webu_init_webcontrol(ctx_motapp *motapp)
     mhdst.ipv6 = motapp->conf->webcontrol_ipv6;
 
     /* Set the rand number for webcontrol digest if needed */
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
     randnbr = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
     snprintf(motapp->webcontrol_digest_rand
         ,sizeof(motapp->webcontrol_digest_rand),"%d",randnbr);
@@ -1363,7 +1363,7 @@ static void webu_init_webcontrol(ctx_motapp *motapp)
 
     motapp->webcontrol_daemon = MHD_start_daemon (
         mhdst.mhd_flags
-        , motapp->conf->webcontrol_port
+        , (uint16_t)motapp->conf->webcontrol_port
         , NULL, NULL
         , &webu_answer, motapp->cam_list
         , MHD_OPTION_ARRAY, mhdst.mhd_ops

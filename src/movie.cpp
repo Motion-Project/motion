@@ -141,8 +141,8 @@ static int movie_get_oformat(ctx_movie *movie)
      * at the end and initialized to null, so that we can just memcpy in the
      * extensions
     */
-    len_full = strlen(movie->full_nm);
-    len_nm = strlen(movie->movie_nm);
+    len_full = (int)strlen(movie->full_nm);
+    len_nm = (int)strlen(movie->movie_nm);
 
     if (movie->tlapse == TIMELAPSE_APPEND) {
         movie->oc->oformat = av_guess_format("mpeg2video", NULL, NULL);
@@ -1106,7 +1106,7 @@ static void movie_passthru_minpts(ctx_movie *movie)
 
 static int movie_passthru_put(ctx_movie *movie, ctx_image_data *img_data)
 {
-    int idnbr_image, idnbr_lastwritten, idnbr_stop, idnbr_firstkey;
+    int64_t idnbr_image, idnbr_lastwritten, idnbr_stop, idnbr_firstkey;
     int indx, indx_lastwritten, indx_firstkey, indx_video;
 
     if (movie->netcam_data == NULL) {
@@ -1698,7 +1698,7 @@ int movie_init_norm(ctx_dev *cam, struct timespec *ts1)
     container = movie_init_container(cam);
 
     /* The increment of 10 is to allow for the extension and other chars*/
-    len = strlen(tmp) + cam->conf->target_dir.length() + 10;
+    len = (int)(strlen(tmp) + cam->conf->target_dir.length() + 10);
     cam->movie_norm->full_nm = (char*)mymalloc(len);
     if (mystreq(container, "test")) {
         retcd = snprintf(cam->movie_norm->full_nm, len, "%s/%s_%s"
@@ -1708,12 +1708,12 @@ int movie_init_norm(ctx_dev *cam, struct timespec *ts1)
             , cam->conf->target_dir.c_str(), tmp);
     }
 
-    len = cam->conf->target_dir.length() + 10;
+    len = (int)cam->conf->target_dir.length() + 10;
     cam->movie_norm->movie_dir = (char*)mymalloc(len);
     retcd = snprintf(cam->movie_norm->movie_dir,len,"%s"
         ,cam->conf->target_dir.c_str());
 
-    len = strlen(tmp) + 10;
+    len = (int)strlen(tmp) + 10;
     cam->movie_norm->movie_nm = (char*)mymalloc(len);
     retcd = snprintf(cam->movie_norm->movie_nm, len, "%s", tmp);
 
@@ -1771,7 +1771,7 @@ int movie_init_motion(ctx_dev *cam, struct timespec *ts1)
     container = movie_init_container(cam);
 
     /* The increment of 10 is to allow for the extension and other chars*/
-    len = strlen(tmp) + cam->conf->target_dir.length() + 10;
+    len = (int)(strlen(tmp) + cam->conf->target_dir.length() + 10);
     cam->movie_norm->full_nm = (char*)mymalloc(len);
     if (mystreq(container, "test")) {
         retcd = snprintf(cam->movie_motion->full_nm, len, "%s/%s_%sm"
@@ -1781,12 +1781,12 @@ int movie_init_motion(ctx_dev *cam, struct timespec *ts1)
             , cam->conf->target_dir.c_str(), tmp);
     }
 
-    len = cam->conf->target_dir.length() + 10;
+    len = (int)cam->conf->target_dir.length() + 10;
     cam->movie_norm->movie_dir = (char*)mymalloc(len);
     retcd = snprintf(cam->movie_norm->movie_dir,len,"%s"
         ,cam->conf->target_dir.c_str());
 
-    len = strlen(tmp) + 10;
+    len = (int)strlen(tmp) + 10;
     cam->movie_norm->movie_nm = (char*)mymalloc(len);
     retcd = snprintf(cam->movie_norm->movie_nm, len, "%s", tmp);
 
@@ -1837,17 +1837,17 @@ int movie_init_timelapse(ctx_dev *cam, struct timespec *ts1)
         , cam->conf->timelapse_filename.c_str(), ts1, NULL, 0);
 
     /* The increment of 10 is to allow for the extension and other chars*/
-    len = strlen(tmp) + cam->conf->target_dir.length() + 10;
+    len = (int)(strlen(tmp) + cam->conf->target_dir.length() + 10);
     cam->movie_norm->full_nm = (char*)mymalloc(len);
     retcd = snprintf(cam->movie_timelapse->full_nm, len, "%s/%s"
         , cam->conf->target_dir.c_str(), tmp);
 
-    len = cam->conf->target_dir.length() + 10;
+    len = (int)cam->conf->target_dir.length() + 10;
     cam->movie_norm->movie_dir = (char*)mymalloc(len);
     retcd = snprintf(cam->movie_norm->movie_dir,len,"%s"
         ,cam->conf->target_dir.c_str());
 
-    len = strlen(tmp) + 10;
+    len = (int)strlen(tmp) + 10;
     cam->movie_norm->movie_nm = (char*)mymalloc(len);
     retcd = snprintf(cam->movie_norm->movie_nm, len, "%s", tmp);
 

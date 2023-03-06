@@ -233,9 +233,9 @@ static void pic_save_ppm(FILE *picture, unsigned char *image, int width, int hei
                 b = 255;
             }
 
-            rgb[0] = b;
-            rgb[1] = g;
-            rgb[2] = r;
+            rgb[0] = (unsigned char)b;
+            rgb[1] = (unsigned char)g;
+            rgb[2] = (unsigned char)r;
 
             l++;
             if (x%2 != 0) {
@@ -433,7 +433,7 @@ unsigned char *pic_load_pgm(FILE *picture, int width, int height)
         }
 
         for (x = 0; x < mask_width; x++) {
-            image[y * mask_width + x] = (int)image[y * mask_width + x] * 255 / maxval;
+            image[y * mask_width + x] = (unsigned char)((int)image[y * mask_width + x] * 255 / maxval);
         }
 
     }

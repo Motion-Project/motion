@@ -725,7 +725,7 @@ static void mlp_areadetect(ctx_dev *cam)
     if ((cam->conf->area_detect != "" ) &&
         (cam->event_nr != cam->areadetect_eventnbr) &&
         (cam->current_image->flags & IMAGE_TRIGGER)) {
-        j = cam->conf->area_detect.length();
+        j = (int)cam->conf->area_detect.length();
         for (i = 0; i < j; i++) {
             z = cam->conf->area_detect[i] - 49; /* characters are stored as ascii 48-57 (0-9) */
             if ((z >= 0) && (z < 9)) {

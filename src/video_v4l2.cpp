@@ -492,7 +492,7 @@ static void v4l2_set_frequency(ctx_dev *cam)
         memset(&freq, 0, sizeof(struct v4l2_frequency));
         freq.tuner = v4l2cam->device_tuner;
         freq.type = V4L2_TUNER_ANALOG_TV;
-        freq.frequency = (spec / 1000) * 16;
+        freq.frequency = (unsigned int)((spec / 1000) * 16);
 
         if (xioctl(v4l2cam, VIDIOC_S_FREQUENCY, &freq) == -1) {
             MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO

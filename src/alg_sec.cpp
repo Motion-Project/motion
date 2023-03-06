@@ -25,13 +25,16 @@
 
 #ifdef HAVE_OPENCV
 
-#include <opencv2/objdetect.hpp>
-#include <opencv2/dnn.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/videoio.hpp>
-#include <opencv2/video.hpp>
+#pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wconversion"
+    #include <opencv2/objdetect.hpp>
+    #include <opencv2/dnn.hpp>
+    #include <opencv2/highgui.hpp>
+    #include <opencv2/imgproc.hpp>
+    #include <opencv2/imgcodecs.hpp>
+    #include <opencv2/videoio.hpp>
+    #include <opencv2/video.hpp>
+#pragma GCC diagnostic pop
 
 using namespace cv;
 using namespace dnn;

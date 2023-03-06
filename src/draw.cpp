@@ -1152,14 +1152,14 @@ int draw_text(unsigned char *image, int width, int height, int startx, int start
     txtlen = 0;
     while ((end = strstr(end, NEWLINE))) {
         if ((end - begin)>txtlen) {
-            txtlen = (end - begin);
+            txtlen = (int)(end - begin);
         }
         num_nl++;
         end += sizeof(NEWLINE)-1;
         begin = end;
     }
     if (txtlen == 0) {
-        txtlen = strlen(text);
+        txtlen = (int)strlen(text);
     }
 
     /* Adjust the factor if it is out of bounds
@@ -1186,7 +1186,7 @@ int draw_text(unsigned char *image, int width, int height, int startx, int start
     begin = end = text;
 
     while ((end = strstr(end, NEWLINE))) {
-        int len = end-begin;
+        int len = (int)(end-begin);
 
         draw_textn(image, startx, starty, width, begin, len, factor);
         end += sizeof(NEWLINE)-1;
@@ -1194,7 +1194,7 @@ int draw_text(unsigned char *image, int width, int height, int startx, int start
         starty += line_space;
     }
 
-    draw_textn(image, startx, starty, width, begin, strlen(begin), factor);
+    draw_textn(image, startx, starty, width, begin, (int)strlen(begin), factor);
 
     return 0;
 }

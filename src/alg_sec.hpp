@@ -23,10 +23,13 @@
 
 
 #ifdef HAVE_OPENCV
-    #include "opencv2/objdetect.hpp"
-    #include "opencv2/dnn.hpp"
-    #include "opencv2/highgui.hpp"
-    #include "opencv2/imgproc.hpp"
+    #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wconversion"
+        #include "opencv2/objdetect.hpp"
+        #include "opencv2/dnn.hpp"
+        #include "opencv2/highgui.hpp"
+        #include "opencv2/imgproc.hpp"
+    #pragma GCC diagnostic pop
 #endif
 
 
@@ -42,10 +45,10 @@ struct ctx_algsec_model {
     std::string                 image_type;
     int                         rotate;
 
-    float                       scalefactor;
-    float                       threshold;          /* Threshold for motion to use on detection*/
+    double                      scalefactor;
+    double                      threshold;          /* Threshold for motion to use on detection*/
 
-    float                       hog_threshold_model;  /* Threshold fed into the opencv model*/
+    double                      hog_threshold_model;  /* Threshold fed into the opencv model*/
     int                         hog_winstride;
     int                         hog_padding;
 
@@ -63,7 +66,7 @@ struct ctx_algsec_model {
     std::vector<std::string>    dnn_classes;
     int                         dnn_width;
     int                         dnn_height;
-    float                       dnn_scale;
+    double                      dnn_scale;
 
     bool                        isdetected;         /* Bool reset for each image as to whether a detection occurred */
 

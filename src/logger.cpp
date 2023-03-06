@@ -129,7 +129,7 @@ void motpls_log(int level, int type, int errno_flag,int fncname, const char *fmt
     char msg_buf[100]= {0};
 
     va_list ap;
-    int threadnr;
+    unsigned long threadnr;
 
     static int flood_cnt = 0;
     static char flood_msg[1024];
@@ -159,12 +159,12 @@ void motpls_log(int level, int type, int errno_flag,int fncname, const char *fmt
     mythreadname_get(threadname);
 
     if (log_mode == LOGMODE_FILE) {
-        n = snprintf(buf, sizeof(buf), "%s [%s][%s][%02d:%s] "
+        n = snprintf(buf, sizeof(buf), "%s [%s][%s][%02ld:%s] "
             , str_time(), log_level_str[level], log_type_str[type]
             , threadnr, threadname );
         timelen = 16;
     } else {
-        n = snprintf(buf, sizeof(buf), "[%s][%s][%02d:%s] "
+        n = snprintf(buf, sizeof(buf), "[%s][%s][%02ld:%s] "
             , log_level_str[level], log_type_str[type]
             , threadnr, threadname );
         timelen = 0;

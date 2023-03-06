@@ -90,7 +90,7 @@ static int vlp_open_vidpipe(void)
             }
 
             if ((fd = open(buffer, O_RDONLY|O_CLOEXEC)) >= 0) {
-                if ((len = read(fd, buffer, sizeof(buffer)-1)) < 0) {
+                if ((len = (int)read(fd, buffer, sizeof(buffer)-1)) < 0) {
                     close(fd);
                     continue;
                 }
@@ -232,7 +232,7 @@ int vlp_putpipe(int dev, unsigned char *image, int imgsize)
 {
 
     #if (defined(HAVE_V4L2)) && (!defined(BSD))
-        return write(dev, image, imgsize);
+        return (int)write(dev, image, imgsize);
     #else
         (void)dev;
         (void)image;

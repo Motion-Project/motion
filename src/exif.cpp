@@ -87,22 +87,22 @@ static unsigned const char exif_tzoffset_tag[12] = {
 
 static void put_uint16(JOCTET *buf, unsigned value)
 {
-    buf[0] = ( value & 0xFF00 ) >> 8;
-    buf[1] = ( value & 0x00FF );
+    buf[0] = (unsigned char)(( value & 0xFF00 ) >> 8);
+    buf[1] = (unsigned char)(( value & 0x00FF ));
 }
 
 static void put_sint16(JOCTET *buf, int value)
 {
-    buf[0] = ( value & 0xFF00 ) >> 8;
-    buf[1] = ( value & 0x00FF );
+    buf[0] = (unsigned char)(( value & 0xFF00 ) >> 8);
+    buf[1] = (unsigned char)(( value & 0x00FF ));
 }
 
 static void put_uint32(JOCTET *buf, unsigned value)
 {
-    buf[0] = ( value & 0xFF000000 ) >> 24;
-    buf[1] = ( value & 0x00FF0000 ) >> 16;
-    buf[2] = ( value & 0x0000FF00 ) >> 8;
-    buf[3] = ( value & 0x000000FF );
+    buf[0] = (unsigned char)(( value & 0xFF000000 ) >> 24);
+    buf[1] = (unsigned char)(( value & 0x00FF0000 ) >> 16);
+    buf[2] = (unsigned char)(( value & 0x0000FF00 ) >> 8);
+    buf[3] = (unsigned char)(( value & 0x000000FF ));
 }
 
 struct tiff_writing {
@@ -134,7 +134,7 @@ static void put_direntry(struct tiff_writing *into, const char *data, unsigned l
 
 static void put_stringentry(struct tiff_writing *into, unsigned tag, const char *str, int with_nul)
 {
-    unsigned stringlength = strlen(str) + (with_nul?1:0);
+    unsigned stringlength = (int)strlen(str) + (with_nul?1:0);
 
     put_uint16(into->buf, tag);
     put_uint16(into->buf + 2, TIFF_TYPE_ASCII);
@@ -221,7 +221,7 @@ unsigned exif_prepare(unsigned char **exif, ctx_dev *cam,
 
     if (description) {
         ifd0_tagcount ++;
-        datasize += 5 + strlen(description); /* Add 5 for NUL and alignment */
+        datasize += 5 + (int)strlen(description); /* Add 5 for NUL and alignment */
     }
 
     if (datetime) {
@@ -236,12 +236,12 @@ unsigned exif_prepare(unsigned char **exif, ctx_dev *cam,
         ifd0_tagcount++;
         /* It would be nice to use the same offset for both tags' values,
         * but I don't want to write the bookkeeping for that right now */
-        datasize += 2 * (5 + strlen(datetime));
+        datasize += 2 * (5 + (int)strlen(datetime));
     }
 
     if (subtime) {
         ifd1_tagcount++;
-        datasize += 5 + strlen(subtime);
+        datasize += 5 + (int)strlen(subtime);
     }
 
     if (box) {
@@ -305,7 +305,7 @@ unsigned exif_prepare(unsigned char **exif, ctx_dev *cam,
 
     if (datetime) {
         memcpy(writing.buf, exif_tzoffset_tag, 12);
-        put_sint16(writing.buf+8, timestamp_tm.tm_gmtoff / 3600);
+        put_sint16(writing.buf+8, int(timestamp_tm.tm_gmtoff / 3600));
         writing.buf += 12;
     }
 

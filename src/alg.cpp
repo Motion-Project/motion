@@ -35,7 +35,7 @@
 #define SMARTMASK_SENSITIVITY_INCR 5
 
 typedef struct {
-    short y, xl, xr, dy;
+    int y, xl, xr, dy;
 } Segment;
 
 
@@ -519,7 +519,7 @@ static void alg_despeckle(ctx_dev *cam)
     width = cam->imgs.width;
     height = cam->imgs.height;
     done = 0;
-    len = cam->conf->despeckle_filter.length();
+    len = (int)cam->conf->despeckle_filter.length();
     common_buffer = cam->imgs.common_buffer;
     cam->current_image->total_labels = 0;
     cam->imgs.largest_label = 0;
@@ -573,7 +573,8 @@ static void alg_despeckle(ctx_dev *cam)
 
 void alg_tune_smartmask(ctx_dev *cam)
 {
-    int i, diff;
+    int i;
+    unsigned char diff;
     int motionsize = cam->imgs.motionsize;
     unsigned char *smartmask = cam->imgs.smartmask;
     unsigned char *smartmask_final = cam->imgs.smartmask_final;
@@ -592,7 +593,7 @@ void alg_tune_smartmask(ctx_dev *cam)
             smartmask[i]--;
         }
         /* Increase smart_mask sensitivity based on the buffered values. */
-        diff = smartmask_buffer[i] / sensitivity;
+        diff = (unsigned char)(smartmask_buffer[i] / sensitivity);
 
         if (diff) {
             if (smartmask[i] <= diff + 80) {
@@ -610,9 +611,9 @@ void alg_tune_smartmask(ctx_dev *cam)
         }
     }
     /* Further expansion (here:erode due to inverted logic!) of the mask. */
-    diff = alg_erode9(smartmask_final, cam->imgs.width, cam->imgs.height,
+    alg_erode9(smartmask_final, cam->imgs.width, cam->imgs.height,
                       cam->imgs.common_buffer, 255);
-    diff = alg_erode5(smartmask_final, cam->imgs.width, cam->imgs.height,
+    alg_erode5(smartmask_final, cam->imgs.width, cam->imgs.height,
                       cam->imgs.common_buffer, 255);
     cam->smartmask_count = cam->smartmask_ratio;
 }
@@ -944,7 +945,7 @@ void alg_update_reference_frame(ctx_dev *cam, int action)
                     (*ref_dyn)++; /* Motionpixel? Keep excluding from ref frame. */
                 } else {
                     *ref_dyn = 0; /* Nothing special - release pixel. */
-                    *ref = (*ref + *image_virgin) / 2;
+                    *ref = (unsigned char)((*ref + *image_virgin) / 2);
                 }
 
             } else {  /* No motion: copy to ref frame. */
@@ -1048,7 +1049,7 @@ static void alg_location_dist(ctx_dev *cam)
             if (*(out++)) {
                 variance_x += ((x - cent->x) * (x - cent->x));
                 variance_y += ((y - cent->y) * (y - cent->y));
-                distance_mean += sqrt(
+                distance_mean += (uint64_t)sqrt(
                         ((x - cent->x) * (x - cent->x)) +
                         ((y - cent->y) * (y - cent->y)));
 
@@ -1074,9 +1075,9 @@ static void alg_location_dist(ctx_dev *cam)
         cent->maxx = cent->x + xdist / centc * 3;
         cent->miny = cent->y - ydist / centc * 3;
         cent->maxy = cent->y + ydist / centc * 3;
-        cent->stddev_x = sqrt((variance_x / centc));
-        cent->stddev_y = sqrt((variance_y / centc));
-        distance_mean = (distance_mean / centc);
+        cent->stddev_x = (int)sqrt((variance_x / centc));
+        cent->stddev_y = (int)sqrt((variance_y / centc));
+        distance_mean = (uint64_t)(distance_mean / centc);
     } else {
         cent->stddev_y = 0;
         cent->stddev_x = 0;
@@ -1089,16 +1090,16 @@ static void alg_location_dist(ctx_dev *cam)
         for (x = 0; x < width; x++) {
             if (*(out++)) {
                 variance_xy += (
-                    (sqrt(((x - cent->x) * (x - cent->x)) +
+                    ((uint64_t)sqrt(((x - cent->x) * (x - cent->x)) +
                           ((y - cent->y) * (y - cent->y))) - distance_mean) *
-                    (sqrt(((x - cent->x) * (x - cent->x)) +
+                    ((uint64_t)sqrt(((x - cent->x) * (x - cent->x)) +
                           ((y - cent->y) * (y - cent->y))) - distance_mean));
             }
         }
     }
     /* Per statistics, divide by n-1 for calc of a standard deviation */
     if ((centc-1) > 0) {
-        cent->stddev_xy = sqrt((variance_xy / (centc-1)));
+        cent->stddev_xy = (int)sqrt((variance_xy / (centc-1)));
     }
 }
 

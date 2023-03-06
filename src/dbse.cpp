@@ -218,19 +218,19 @@ static void dbse_rec_assign(ctx_dbse_rec *rec, char *col_nm, char *col_val)
 
     } else if (mystrceq(col_nm,"movie_nm")) {
         free(rec->movie_nm);
-        flen = strlen(col_val);
+        flen = (int)strlen(col_val);
         rec->movie_nm = (char*)mymalloc(flen + 1);
         snprintf(rec->movie_nm, flen+1,"%s",col_val);
 
     } else if (mystrceq(col_nm,"movie_dir")) {
         free(rec->movie_dir);
-        flen = strlen(col_val);
+        flen = (int)strlen(col_val);
         rec->movie_dir = (char*)mymalloc(flen + 1);
         snprintf(rec->movie_dir, flen+1,"%s",col_val);
 
     } else if (mystrceq(col_nm,"full_nm")) {
         free(rec->full_nm);
-        flen = strlen(col_val);
+        flen = (int)strlen(col_val);
         rec->full_nm = (char*)mymalloc(flen + 1);
         snprintf(rec->full_nm, flen+1,"%s",col_val);
         if (stat(rec->full_nm, &statbuf) == 0) {
@@ -245,7 +245,7 @@ static void dbse_rec_assign(ctx_dbse_rec *rec, char *col_nm, char *col_val)
 
     } else if (mystrceq(col_nm,"movie_tmc")) {
         free(rec->movie_tmc);
-        flen = strlen(col_val);
+        flen = (int)strlen(col_val);
         rec->movie_tmc =
             (char*)mymalloc(flen + 1);
         snprintf(rec->movie_tmc
@@ -253,7 +253,7 @@ static void dbse_rec_assign(ctx_dbse_rec *rec, char *col_nm, char *col_val)
 
     } else if (mystrceq(col_nm,"movie_tml")) {
         free(rec->movie_tml);
-        flen = strlen(col_val);
+        flen = (int)strlen(col_val);
         rec->movie_tml =
             (char*)mymalloc(flen + 1);
         snprintf(rec->movie_tml

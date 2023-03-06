@@ -81,19 +81,19 @@ static void event_newfile(ctx_dev *cam, motion_event evnt
 static void on_picture_save_command(ctx_dev *cam, motion_event evnt
         ,ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
 {
-
-    int filetype = (unsigned long)ftype;
+    /*Fix me*/
+    long filetype = (long)ftype;
 
     (void)evnt;
     (void)img_data;
     (void)ts1;
 
     if ((filetype & FTYPE_IMAGE_ANY) != 0 && (cam->conf->on_picture_save != "")) {
-        util_exec_command(cam, cam->conf->on_picture_save.c_str(), fname, filetype);
+        util_exec_command(cam, cam->conf->on_picture_save.c_str(), fname, (int)filetype);
     }
 
     if ((filetype & FTYPE_MOVIE_ANY) != 0 && (cam->conf->on_movie_start != "")) {
-        util_exec_command(cam, cam->conf->on_movie_start.c_str(), fname, filetype);
+        util_exec_command(cam, cam->conf->on_movie_start.c_str(), fname, (int)filetype);
     }
 }
 
@@ -280,7 +280,7 @@ static void event_image_snapshot(ctx_dev *cam, motion_event evnt
     (void)fname;
     (void)ftype;
 
-    offset = cam->conf->snapshot_filename.length() - 8;
+    offset = (int)cam->conf->snapshot_filename.length() - 8;
     if (offset < 0) {
         offset = 1;
     }
@@ -422,14 +422,14 @@ static void on_movie_end_command(ctx_dev *cam, motion_event evnt
         ,ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
 {
 
-    int filetype = (unsigned long) ftype;
+    long filetype = (long) ftype;
 
     (void)evnt;
     (void)img_data;
     (void)ts1;
 
     if ((filetype & FTYPE_MOVIE_ANY) && (cam->conf->on_movie_end != "")) {
-        util_exec_command(cam, cam->conf->on_movie_end.c_str(), fname, filetype);
+        util_exec_command(cam, cam->conf->on_movie_end.c_str(), fname, (int)filetype);
     }
 }
 

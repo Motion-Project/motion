@@ -50,14 +50,14 @@ static void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
         return;
     }
 
-    min_size_to_alloc = numbytes - (buff->size - buff->used);
+    min_size_to_alloc = (int)(numbytes - (buff->size - buff->used));
     real_alloc = ((min_size_to_alloc / NETCAM_BUFFSIZE) * NETCAM_BUFFSIZE);
 
     if ((min_size_to_alloc - real_alloc) > 0) {
         real_alloc += NETCAM_BUFFSIZE;
     }
 
-    new_size = buff->size + real_alloc;
+    new_size = (int)(buff->size + real_alloc);
 
     buff->ptr =(char*) myrealloc(buff->ptr, new_size,
                           "netcam_check_buf_size");
@@ -362,7 +362,8 @@ static void netcam_pktarray_resize(ctx_dev *cam, bool is_highres)
 
     /* The 30 is arbitrary */
     /* Double the size plus double last diff so we don't catch our tail */
-    newsize =((idnbr_first - idnbr_last) * 1 ) + ((netcam->idnbr - idnbr_last ) * 2);
+    newsize =(int)(((idnbr_first - idnbr_last) * 1 ) +
+        ((netcam->idnbr - idnbr_last ) * 2));
     if (newsize < 30) {
         newsize = 30;
     }
@@ -1296,7 +1297,7 @@ static int netcam_read_image(ctx_netcam *netcam)
     netcam_free_pkt(netcam);
 
     if (netcam->format_context->streams[netcam->video_stream_index]->avg_frame_rate.den > 0) {
-        netcam->src_fps = (
+        netcam->src_fps = (int)(
             (netcam->format_context->streams[netcam->video_stream_index]->avg_frame_rate.num /
             netcam->format_context->streams[netcam->video_stream_index]->avg_frame_rate.den) +
             0.5);
@@ -1544,7 +1545,7 @@ static void netcam_set_parms (ctx_dev *cam, ctx_netcam *netcam )
 
     for (indx = 0; indx < netcam->params->params_count; indx++) {
         if (mystreq(netcam->params->params_array[indx].param_name,"decoder")) {
-            val_len = strlen(netcam->params->params_array[indx].param_value) + 1;
+            val_len = (int)strlen(netcam->params->params_array[indx].param_value) + 1;
             netcam->decoder_nm = (char*)mymalloc(val_len);
             snprintf(netcam->decoder_nm, val_len
                 , "%s",netcam->params->params_array[indx].param_value);

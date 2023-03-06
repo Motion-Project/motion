@@ -340,10 +340,11 @@ static void snd_alsa_start(ctx_dev *snd)
     snd_pcm_hw_params_t *hw_params;
     snd_pcm_uframes_t frames_per;
     snd_pcm_format_t actl_sndfmt;
-    unsigned int actl_rate;
+    unsigned int actl_rate, smpl_rate;
     int retcd;
 
     frames_per = info->frames;
+    smpl_rate = (unsigned int)info->sample_rate;
 
     retcd = snd_pcm_open(&alsa->pcm_dev
         , snd->conf->snd_device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
@@ -394,7 +395,7 @@ static void snd_alsa_start(ctx_dev *snd)
     }
 
     retcd = snd_pcm_hw_params_set_rate_near(alsa->pcm_dev
-        , hw_params, &info->sample_rate, 0);
+        , hw_params, &smpl_rate, 0);
     if (retcd < 0) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_hw_params_set_rate_near(%s)")
@@ -484,7 +485,7 @@ static void snd_alsa_start(ctx_dev *snd)
     /*************************************************************/
     /** allocate and initialize the sound buffers                */
     /*************************************************************/
-    info->frames = frames_per;
+    info->frames = (int)frames_per;
     info->buffer_size = info->frames * 2;
     info->buffer = (int16_t*)mymalloc(info->buffer_size * sizeof(int16_t));
     memset(info->buffer, 0x00, info->buffer_size * sizeof(int16_t));
@@ -527,13 +528,13 @@ static void snd_alsa_capture(ctx_dev *snd)
     #ifdef HAVE_ALSA
         ctx_snd_info *info = snd->snd_info;
         ctx_snd_alsa *alsa = snd->snd_alsa;
-        int retcd;
+        long int retcd;
 
         retcd = snd_pcm_readi(alsa->pcm_dev, info->buffer, info->frames);
         if (retcd != info->frames) {
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("error: read from audio interface failed (%s)")
-                , snd_strerror (retcd));
+                , snd_strerror((int)retcd));
             snd->device_status = STATUS_CLOSED;
             snd->finish_dev = true;
             snd->restart_dev = false;
@@ -567,8 +568,8 @@ static void snd_pulse_init(ctx_dev *snd)
         ctx_snd_info *info = snd->snd_info;
         const pa_sample_spec specs = {
             .format = PA_SAMPLE_S16LE,
-            .rate = info->sample_rate,
-            .channels = info->channels
+            .rate = (uint32_t)info->sample_rate,
+            .channels = (uint8_t)info->channels
         };
         int errcd;
 
@@ -750,14 +751,14 @@ static void slp_init(ctx_dev *snd)
 static void snd_check_alerts(ctx_dev *snd)
 {
     ctx_snd_info *info = snd->snd_info;
-    float freq_value;
-    int   indx, chkval, chkcnt;
-    float pMaxIntensity;
-    int   pMaxBinIndex;
-    float pRealNbr;
-    float pImaginaryNbr;
-    float pIntensity;
-    bool trigger;
+    double freq_value;
+    int    indx, chkval, chkcnt;
+    double pMaxIntensity;
+    int    pMaxBinIndex;
+    double pRealNbr;
+    double pImaginaryNbr;
+    double pIntensity;
+    bool   trigger;
     std::list<ctx_snd_alert>::iterator it;
     struct timespec trig_ts;
 
