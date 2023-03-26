@@ -1001,13 +1001,13 @@ static void util_parms_next(std::string &parmline, size_t indxnm_st, size_t indx
     indxcm = parmline.find(",", indxvl_en);
 
     if (indxnm_st == 0) {
-        if ((indxcm + 1) > parmline.length() ) {
+        if (indxcm == std::string::npos) {
             parmline = "";
         } else {
             parmline = parmline.substr(indxcm + 1);
         }
     } else {
-        if ((indxcm + 1) > parmline.length() ) {
+        if (indxcm == std::string::npos) {
             parmline = parmline.substr(0, indxnm_st - 1);
         } else {
             parmline = parmline.substr(0, indxnm_st - 1) + parmline.substr(indxcm + 1);
@@ -1067,7 +1067,7 @@ void util_parms_parse_qte(ctx_params *params, std::string &parmline)
             indxvl_st = parmline.find("\"",indxeq + 1);
             indxcm = parmline.find(",", indxeq + 1);
             if (indxcm == std::string::npos) {
-                if (indxnm_st == std::string::npos) {
+                if (indxvl_st == std::string::npos) {
                     indxvl_st = indxeq + 1;
                     if (indxvl_st >= parmline.length()) {
                         indxvl_st = parmline.length() - 1;
