@@ -1290,7 +1290,7 @@ static char alg_diff_fast(struct context *cnt, int max_n_changes, unsigned char 
     i = imgs->motionsize;
 
     for (; i > 0; i -= step) {
-        register unsigned char curdiff = (int)(abs((char)(*ref - *new))); /* Using a temp variable is 12% faster. */
+        register unsigned char curdiff = (int)(abs(*ref - *new)); /* Using a temp variable is 12% faster. */
         if (curdiff >  noise) {
             diffs++;
             if (diffs > max_n_changes) {
