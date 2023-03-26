@@ -33,16 +33,18 @@
 #include "rotate.h"
 
 #ifdef HAVE_MMAL
-
-#include "interface/vcos/vcos.h"
-#include "interface/mmal/mmal.h"
-#include "interface/mmal/mmal_buffer.h"
-#include "interface/mmal/mmal_port.h"
-#include "interface/mmal/util/mmal_util.h"
-#include "interface/mmal/util/mmal_util_params.h"
-#include "interface/mmal/util/mmal_default_components.h"
-#include "interface/mmal/util/mmal_connection.h"
-#include "raspicam/RaspiCamControl.h"
+#pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wredundant-decls"
+    #include "interface/vcos/vcos.h"
+    #include "interface/mmal/mmal.h"
+    #include "interface/mmal/mmal_buffer.h"
+    #include "interface/mmal/mmal_port.h"
+    #include "interface/mmal/util/mmal_util.h"
+    #include "interface/mmal/util/mmal_util_params.h"
+    #include "interface/mmal/util/mmal_default_components.h"
+    #include "interface/mmal/util/mmal_connection.h"
+    #include "raspicam/RaspiCamControl.h"
+#pragma GCC diagnostic pop
 
 #define MMALCAM_OK        0
 #define MMALCAM_ERROR    -1

@@ -31,6 +31,7 @@ This file was modified to be used with the motion project. The controls are pars
 via "mmalcam_control_params" function in motion to the raspicam driver. To fulfill
 such functionality without bloating the motion code, the following changes were
 made:
+- Add pragma gcc diagnostic to whole module to ignore warnings
 - remove call to helper module "RaspiHelpers.h";
 - include only "mmal_status_to_int" function from "RaspiHelpers.h". This function
 was copied exactly as written in "RaspiHelpers.h" file.
@@ -40,6 +41,16 @@ was copied exactly as written in "RaspiHelpers.h" file.
 #include <stdio.h>
 #include <memory.h>
 #include <ctype.h>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wredundant-decls"
+#pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
+#pragma GCC diagnostic ignored "-Wunused"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wstrict-prototypes"
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include "interface/vcos/vcos.h"
 
@@ -1913,3 +1924,5 @@ void default_camera_control_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *bu
 
    mmal_buffer_header_release(buffer);
 }
+
+pragma GCC diagnostic pop
