@@ -163,9 +163,9 @@ static void webu_json_cam_status_single(struct webui_ctx *webui, struct context 
         const char *name;
         time_t value;
     } timestamps[] = {
-        { "lasttime", cnt->lasttime },
-        { "eventtime", cnt->eventtime },
-        { "connectionlosttime", cnt->connectionlosttime },
+        { "lasttime", cnt->last_tv.tv_sec },
+        { "eventtime", cnt->event_tv.tv_sec },
+        { "connectionlosttime", cnt->lostconnection_tv.tv_sec },
         { NULL, 0 },
     }, *cur_timestamp;
 
@@ -196,9 +196,9 @@ static void webu_json_cam_status_single(struct webui_ctx *webui, struct context 
     webu_write(webui, buf);
 
     webu_write(webui, ", \"currenttime\": ");
-    webu_json_write_timestamp(webui, cnt->currenttime);
+    webu_json_write_timestamp(webui, cnt->current_tv.tv_sec);
     webu_write(webui, ", \"currenttime_iso8601\": ");
-    webu_json_write_timestamp_iso8601(webui, cnt->currenttime);
+    webu_json_write_timestamp_iso8601(webui, cnt->current_tv.tv_sec);
 
     for (cur_timestamp = timestamps; cur_timestamp && cur_timestamp->name;
          ++cur_timestamp) {
@@ -220,7 +220,7 @@ static void webu_json_cam_status_single(struct webui_ctx *webui, struct context 
             webu_write(webui, "null");
         } else {
             webu_json_write_timestamp_elapsed(webui, cur_timestamp->value,
-                                              cnt->currenttime);
+                                              cnt->current_tv.tv_sec);
         }
     }
 

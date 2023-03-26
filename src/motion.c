@@ -514,6 +514,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
     struct config *conf = &cnt->conf;
     struct images *imgs = &cnt->imgs;
     struct coord *location = &img->location;
+    struct tm event_tm;
     int indx;
 
     /* Draw location */
@@ -552,10 +553,10 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
              * in both time_t and struct tm format.
              */
             cnt->prev_event = cnt->event_nr;
-            cnt->eventtime = img->timestamp_tv.tv_sec;
-            localtime_r(&cnt->eventtime, cnt->eventtime_tm);
+            cnt->event_tv = img->timestamp_tv;
+            localtime_r(&cnt->event_tv.tv_sec, &event_tm);
             sprintf(cnt->eventid,"%05d",cnt->camera_id);
-            strftime(cnt->eventid+5, 15,"%Y%m%d%H%M%S", cnt->eventtime_tm);
+            strftime(cnt->eventid+5, 15,"%Y%m%d%H%M%S", &event_tm);
             /*
              * Since this is a new event we create the event_text_string used for
              * the %C conversion specifier. We may already need it for
@@ -1047,11 +1048,7 @@ static int motion_init(struct context *cnt)
     /* Store thread number in TLS. */
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cnt->threadnr));
 
-    cnt->currenttime_tm = mymalloc(sizeof(struct tm));
-    cnt->eventtime_tm = mymalloc(sizeof(struct tm));
-    /* Init frame time */
-    cnt->currenttime = time(NULL);
-    localtime_r(&cnt->currenttime, cnt->currenttime_tm);
+    gettimeofday(&cnt->current_tv, NULL);
 
     cnt->smartmask_speed = 0;
 
@@ -1394,7 +1391,15 @@ static int motion_init(struct context *cnt)
     cnt->timenow = 0;
     cnt->timebefore = 0;
     cnt->rate_limit = 0;
-    cnt->lastframetime = 0;
+
+    cnt->last_tv.tv_sec = 0;
+    cnt->last_tv.tv_usec = 0;
+    cnt->lastframe_tv = cnt->last_tv;
+    cnt->event_tv = cnt->last_tv;
+    cnt->movie_tv = cnt->last_tv;
+    cnt->lostconnection_tv = cnt->last_tv;
+    cnt->lastframe_tv = cnt->last_tv;
+
     cnt->minimum_frame_time_downcounter = cnt->conf.minimum_frame_time;
     cnt->get_image = 1;
 
@@ -1546,14 +1551,6 @@ static void motion_cleanup(struct context *cnt)
         free(cnt->rolling_average_data);
         cnt->rolling_average_data = NULL;
     }
-
-    /* Cleanup the current time structure */
-    free(cnt->currenttime_tm);
-    cnt->currenttime_tm = NULL;
-
-    /* Cleanup the event time structure */
-    free(cnt->eventtime_tm);
-    cnt->eventtime_tm = NULL;
 
     dbse_deinit(cnt);
 
@@ -1726,23 +1723,17 @@ static void mlp_prepare(struct context *cnt)
     }
 
     /* Get time for current frame */
-    cnt->currenttime = time(NULL);
-
-    /*
-     * localtime returns static data and is not threadsafe
-     * so we use localtime_r which is reentrant and threadsafe
-     */
-    localtime_r(&cnt->currenttime, cnt->currenttime_tm);
+    gettimeofday(&cnt->current_tv, NULL);
 
     /*
      * If we have started on a new second we reset the shots variable
      * lastrate is updated to be the number of the last frame. last rate
      * is used as the ffmpeg framerate when motion is detected.
      */
-    if (cnt->lastframetime != cnt->currenttime) {
+    if (cnt->lastframe_tv.tv_sec != cnt->current_tv.tv_sec) {
         cnt->lastrate = cnt->shots + 1;
         cnt->shots = -1;
-        cnt->lastframetime = cnt->currenttime;
+        cnt->lastframe_tv = cnt->current_tv;
 
         if (cnt->conf.minimum_frame_time) {
             cnt->minimum_frame_time_downcounter--;
@@ -1815,7 +1806,7 @@ static void mlp_resetimages(struct context *cnt)
     }
 
     /* Store time with pre_captured image */
-    gettimeofday(&cnt->current_image->timestamp_tv, NULL);
+    cnt->current_image->timestamp_tv = cnt->current_tv;
 
     /* Store shot number with pre_captured image */
     cnt->current_image->shot = cnt->shots;
@@ -1826,7 +1817,7 @@ static int mlp_retry(struct context *cnt)
 {
     int size_high, height, width;
 
-    if (cnt->video_dev < 0 && cnt->currenttime % 10 == 0 && cnt->shots == 0) {
+    if (cnt->video_dev < 0 && cnt->current_tv.tv_sec % 10 == 0 && cnt->shots == 0) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Retrying until successful connection with camera"));
 
@@ -1904,7 +1895,8 @@ static int mlp_capture(struct context *cnt)
     // VALID PICTURE
     if (vid_return_code == 0) {
         cnt->lost_connection = 0;
-        cnt->connectionlosttime = 0;
+        cnt->lostconnection_tv.tv_sec = 0;
+        cnt->lostconnection_tv.tv_usec = 0;
 
         /* If all is well reset missing_frame_counter */
         if (cnt->missing_frame_counter >= MISSING_FRAMES_TIMEOUT * cnt->conf.framerate) {
@@ -1982,8 +1974,8 @@ static int mlp_capture(struct context *cnt)
          * First missed frame - store timestamp
          * Don't reset time when thread restarts
          */
-        if (cnt->connectionlosttime == 0) {
-            cnt->connectionlosttime = cnt->currenttime;
+        if (cnt->lostconnection_tv.tv_sec == 0) {
+            cnt->lostconnection_tv = cnt->current_tv;
         }
 
 
@@ -2008,10 +2000,9 @@ static int mlp_capture(struct context *cnt)
                 tmpin = "UNABLE TO OPEN VIDEO DEVICE\\nSINCE %Y-%m-%d %T";
             }
 
-            tv1.tv_sec=cnt->connectionlosttime;
-            tv1.tv_usec = 0;
             memset(cnt->current_image->image_norm, 0x80, cnt->imgs.size_norm);
-            mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tv1, NULL, 0);
+            mystrftime(cnt, tmpout, sizeof(tmpout), tmpin
+                , &cnt->lostconnection_tv, NULL, 0);
             draw_text(cnt->current_image->image_norm, cnt->imgs.width, cnt->imgs.height,
                       10, 20 * cnt->text_scale, tmpout, cnt->text_scale);
 
@@ -2020,7 +2011,8 @@ static int mlp_capture(struct context *cnt)
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                     ,_("Video signal lost - Adding grey image"));
                 // Event for lost video signal can be called from here
-                event(cnt, EVENT_CAMERA_LOST, NULL, NULL, NULL, &tv1);
+                event(cnt, EVENT_CAMERA_LOST, NULL, NULL, NULL
+                    , &cnt->lostconnection_tv);
             }
 
             /*
@@ -2433,7 +2425,7 @@ static void mlp_actions(struct context *cnt)
 
     /* Update last frame saved time, so we can end event after gap time */
     if (cnt->current_image->flags & IMAGE_SAVE) {
-        cnt->lasttime = cnt->current_image->timestamp_tv.tv_sec;
+        cnt->last_tv = cnt->current_image->timestamp_tv;
     }
 
     mlp_areadetect(cnt);
@@ -2442,7 +2434,7 @@ static void mlp_actions(struct context *cnt)
 
     /* Check event gap */
     if ((cnt->conf.event_gap > 0) &&
-        ((cnt->currenttime - cnt->lasttime) >= cnt->conf.event_gap )) {
+        ((cnt->current_tv.tv_sec - cnt->last_tv.tv_sec) >= cnt->conf.event_gap )) {
         cnt->event_stop = TRUE;
     }
     /* Note that event_stop can be set elsewhere in code as well */
@@ -2485,7 +2477,7 @@ static void mlp_actions(struct context *cnt)
      */
     if ((cnt->conf.movie_max_time > 0) &&
         (cnt->event_nr == cnt->prev_event) &&
-        (cnt->current_image->timestamp_tv.tv_sec - cnt->movietime >= cnt->conf.movie_max_time) &&
+        (cnt->current_image->timestamp_tv.tv_sec - cnt->movie_tv.tv_sec >= cnt->conf.movie_max_time) &&
         ( !(cnt->current_image->flags & IMAGE_POSTCAP)) &&
         ( !(cnt->current_image->flags & IMAGE_PRECAP))) {
         event(cnt, EVENT_MOVIE_END, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
@@ -2544,7 +2536,7 @@ static void mlp_snapshot(struct context *cnt)
      */
 
     /* time_current_frame is used both for snapshot and timelapse features */
-    cnt->time_current_frame = cnt->currenttime;
+    cnt->time_current_frame = cnt->current_tv.tv_sec;
 
     if ((cnt->conf.snapshot_interval > 0 && cnt->shots == 0 &&
          cnt->time_current_frame % cnt->conf.snapshot_interval <= cnt->time_last_frame % cnt->conf.snapshot_interval) ||

@@ -780,7 +780,8 @@ static void event_create_extpipe(struct context *cnt, motion_event eventtype
 
         cnt->movie_last_shot = -1;
         cnt->movie_fps = cnt->lastrate;
-        cnt->movietime = tv1->tv_sec;
+        cnt->movie_tv.tv_sec = tv1->tv_sec;
+        cnt->movie_tv.tv_usec = tv1->tv_usec;
 
         MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO, _("Source FPS %d"), cnt->movie_fps);
 
@@ -910,7 +911,8 @@ static void event_ffmpeg_newfile(struct context *cnt, motion_event eventtype
 
     cnt->movie_last_shot = -1;
     cnt->movie_fps = cnt->lastrate;
-    cnt->movietime = tv1->tv_sec;
+    cnt->movie_tv.tv_sec = tv1->tv_sec;
+    cnt->movie_tv.tv_usec = tv1->tv_usec;
 
     MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO, _("Source FPS %d"), cnt->movie_fps);
 

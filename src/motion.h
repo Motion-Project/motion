@@ -445,14 +445,13 @@ struct context {
     int postcap;                             /* downcounter, frames left to to send post event */
     int shots;
     unsigned int detecting_motion;
-    struct tm *currenttime_tm;
-    struct tm *eventtime_tm;
 
-    time_t currenttime;
-    time_t lasttime;
-    time_t eventtime;
-    time_t movietime;
-    time_t connectionlosttime;               /* timestamp from connection lost */
+    struct timeval current_tv;
+    struct timeval last_tv;
+    struct timeval event_tv;
+    struct timeval movie_tv;
+    struct timeval lostconnection_tv;               /* timestamp from connection lost */
+    struct timeval lastframe_tv;
 
     unsigned int lastrate;
     unsigned int startup_frames;
@@ -516,7 +515,6 @@ struct context {
     unsigned long long int timenow, timebefore;
 
     unsigned int rate_limit;
-    time_t lastframetime;
     int minimum_frame_time_downcounter;
     unsigned int get_image;    /* Flag used to signal that we capture new image when we run the loop */
 
