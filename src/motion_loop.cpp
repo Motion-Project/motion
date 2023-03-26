@@ -553,7 +553,7 @@ static void mlp_init_values(ctx_dev *cam)
     clock_gettime(CLOCK_MONOTONIC, &cam->frame_last_ts);
 
     cam->noise = cam->conf->noise_level;
-
+    cam->passflag = false;
     cam->threshold = cam->conf->threshold;
     cam->device_status = STATUS_CLOSED;
     cam->startup_frames = (cam->conf->framerate * 2) + cam->conf->pre_capture + cam->conf->minimum_motion_frames;
@@ -1315,7 +1315,7 @@ static void mlp_parmsupdate(ctx_dev *cam)
         return;
     }
 
-    if (cam->parms_changed ) {
+    if (cam->parms_changed  || (cam->passflag == false)) {
         draw_init_scale(cam);  /* Initialize and validate text_scale */
 
         if (cam->conf->picture_output == "on") {
@@ -1421,7 +1421,7 @@ static void mlp_frametiming(ctx_dev *cam)
             SLEEP(0, avgtime);
         }
     }
-    cam->passflag = 1;
+    cam->passflag = true;
 }
 
 /** main processing loop for each camera */

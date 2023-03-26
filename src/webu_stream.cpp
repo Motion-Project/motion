@@ -447,7 +447,7 @@ mhdrslt webu_stream_main(ctx_webui *webui)
         return MHD_NO;
     }
 
-    if ((webui->cam->passflag == 0) || (webui->cam->finish_dev)) {
+    if ((webui->cam->passflag == false) || (webui->cam->finish_dev)) {
         return MHD_NO;
     }
 

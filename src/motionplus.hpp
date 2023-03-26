@@ -473,7 +473,7 @@ struct ctx_dev {
     int                     smartmask_count;
     unsigned int            smartmask_lastrate;
     int previous_diffs, previous_location_x, previous_location_y;
-    unsigned int            passflag;  //only purpose is to flag first frame vs all others.....
+    bool                    passflag;  //flag first frame vs all others.
 
     pthread_mutex_t         parms_lock;
     ctx_params              *params;            /* Device parameters*/
