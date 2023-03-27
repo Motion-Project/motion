@@ -1925,4 +1925,4 @@ void default_camera_control_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *bu
    mmal_buffer_header_release(buffer);
 }
 
-pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
