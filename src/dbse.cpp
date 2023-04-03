@@ -660,6 +660,13 @@ static void dbse_mariadb_exec (ctx_motapp *motapp, const char *sqlquery)
             }
         }
     }
+    retcd = mysql_query(motapp->dbse->database_mariadb, "commit;");
+    if (retcd != 0) {
+        retcd = mysql_errno(motapp->dbse->database_mariadb);
+        MOTPLS_LOG(ERR, TYPE_DB, SHOW_ERRNO
+            , _("MariaDB query commit failed. %s error code %d")
+            , mysql_error(motapp->dbse->database_mariadb), retcd);
+    }
 
 }
 
