@@ -117,7 +117,7 @@
         struct ctx_dbse_rec *movie_list;    /* list of movies from the database*/
         int                 cols_cnt;       /* count of columns */
         struct ctx_dbse_col *cols_list;     /* columns of table from the database*/
-
+        bool                is_open;
 
     };
 
