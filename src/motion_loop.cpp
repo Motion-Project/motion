@@ -459,6 +459,8 @@ static void mlp_init_firstimage(ctx_dev *cam)
         }
     }
 
+    cam->noise = cam->conf->noise_level;
+    cam->threshold = cam->conf->threshold;
     if (cam->conf->threshold_maximum > cam->conf->threshold ) {
         cam->threshold_maximum = cam->conf->threshold_maximum;
     } else {
@@ -1359,17 +1361,6 @@ static void mlp_parmsupdate(ctx_dev *cam)
             cam->smartmask_lastrate = cam->lastrate;
             cam->smartmask_speed = cam->conf->smart_mask_speed;
             cam->smartmask_ratio = 5 * cam->lastrate * (11 - cam->smartmask_speed);
-        }
-
-        cam->threshold = cam->conf->threshold;
-        if (cam->conf->threshold_maximum > cam->conf->threshold ) {
-            cam->threshold_maximum = cam->conf->threshold_maximum;
-        } else {
-            cam->threshold_maximum = (cam->imgs.height * cam->imgs.width * 3) / 2;
-        }
-
-        if (!cam->conf->noise_tune) {
-            cam->noise = cam->conf->noise_level;
         }
 
         cam->parms_changed = false;
