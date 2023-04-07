@@ -2720,17 +2720,6 @@ static void mlp_parmsupdate(struct context *cnt)
 
     dbse_sqlmask_update(cnt);
 
-    cnt->threshold = cnt->conf.threshold;
-    if (cnt->conf.threshold_maximum > cnt->conf.threshold ) {
-        cnt->threshold_maximum = cnt->conf.threshold_maximum;
-    } else {
-        cnt->threshold_maximum = (cnt->imgs.height * cnt->imgs.width * 3) / 2;
-    }
-
-    if (!cnt->conf.noise_tune) {
-        cnt->noise = cnt->conf.noise_level;
-    }
-
 }
 
 static void mlp_frametiming(struct context *cnt)
