@@ -761,6 +761,7 @@ static void event_extpipe_end(struct context *cnt, motion_event eventtype
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("pclose return: %d"),
                    pclose(cnt->extpipe));
         event(cnt, EVENT_FILECLOSE, NULL, cnt->extpipefilename, (void *)FTYPE_MPEG, tv1);
+        cnt->extpipe = NULL;
     }
 }
 
