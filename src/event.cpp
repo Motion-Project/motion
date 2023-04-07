@@ -467,7 +467,7 @@ static void event_extpipe_end(ctx_dev *cam, motion_event evnt
             event(cam, EVENT_FILECLOSE, NULL, cam->extpipefilename, (void *)FTYPE_MOVIE, ts1);
             dbse_exec(cam, cam->extpipefilename, FTYPE_MOVIE, ts1, "movie_end");
         }
-
+        cam->extpipe = NULL;
     }
 }
 
