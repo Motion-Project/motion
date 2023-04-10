@@ -242,7 +242,48 @@
       access to the camera as a v4l2 device but this interface is only available when using a special
       application.  Users must run Motion using the
       command <i><small><code>libcamerify motion</code></small></i> and
-      then specify /dev/video0 in the Motion configuration file.
+      then specify the /dev/videoX device in the Motion configuration file.
+      <p></p>
+      The PI camera's drivers expose the camera's full functionality as a set of low-level /dev/videoX
+      devices, while Motion (and other applications) expect a single high-level /dev/videoX device. The
+      libcamerify wrapper transparently manages these low-level devices and presents a high-level
+      interface on one of the /dev/videoX device nodes to Motion
+      (<a href="https://libcamera.org/docs.html#v4l2-compatibility-layer">libcamera docs</a>).
+      <p></p>
+      With just one camera connected to the Pi, the device name should normally be
+      <i><small><code>/dev/video0</code></small></i>.  With multiple cameras connected, e.g. a regular
+      USB web and the Pi camera, you should use the device names provided by V4L
+      (<i><small><code>v4l2-ctl --list-devices</code></small></i>). The wrapper doesn't seem to affect
+      the device names seen by Motion. In the below example, the PI camera is at
+      <i><small><code>/dev/video2</code></small></i> while an external USB camera is at
+      <i><small><code>/dev/video0</code></small></i> ("CSI" stands for the
+      <a href="https://en.wikipedia.org/wiki/Camera_Serial_Interface">interface	used by the Pi camera</a>).
+      <p></p>
+      Also, /dev/videoN names are dynamically assigned and may not always point to the same camera (e.g.
+      when a USB camera is hot-plugged). Take a look at the stable symlinks under
+      <i><small><code>/dev/v4l/by-path/</code></small></i> and consider using them in your Motion config
+      instead of /dev/videoX.
+      <pre>
+root@raspberrypi:~# v4l2-ctl --list-devices
+unicam (platform:3f801000.csi):
+/dev/video2                        # <== PI Camera
+/dev/media2
+
+bcm2835-codec-decode (platform:bcm2835-codec):
+/dev/video10                       # <=== Low level devices
+/dev/video11                       # for the Pi cam, ignore
+....
+
+bcm2835-isp (platform:bcm2835-isp):
+/dev/video13                      # <=== Low level devices
+/dev/video14                      # for the Pi cam, ignore
+....
+
+Venus USB2.0 Camera: Venus USB2 (usb-3f980000.usb-1.2):
+/dev/video0                         # <== USB webcam
+/dev/video1
+/dev/media4
+      </pre>
       <p></p>
       For Raspbian releases prior to 'bullseye', the PI camera can be set up two different ways.  If Motion is installed by using the
       apt packages (e.g. apt-get install motion), then the camera must be set up using the bcm2835-v4l2 module which creates
