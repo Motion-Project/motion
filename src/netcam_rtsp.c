@@ -1347,10 +1347,13 @@ static void netcam_rtsp_set_options(struct rtsp_context *rtsp_data)
         util_parms_add_default(rtsp_data->parameters,"rtsp_transport","tcp");
         util_parms_add_default(rtsp_data->parameters,"allowed_media_types", "video");
 
-    } else if (strncmp(rtsp_data->service, "http", 4) == 0 ) {
+    } else if ((strncmp(rtsp_data->service, "mpegts", 6) == 0 ) ||
+               /*(strncmp(rtsp_data->service, "http", 4) == 0 ) ||*/
+               (strncmp(rtsp_data->service, "mjpeg", 5) == 0 )) {
+		
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: Setting input_format mjpeg"),rtsp_data->cameratype);
-        rtsp_data->format_context->iformat = av_find_input_format("mjpeg");
+            ,_("%s: Setting input_format %s"),rtsp_data->cameratype, rtsp_data->service);
+        rtsp_data->format_context->iformat = av_find_input_format(rtsp_data->service);
         util_parms_add_default(rtsp_data->parameters,"reconnect_on_network_error","1");
         util_parms_add_default(rtsp_data->parameters,"reconnect_at_eof","1");
         util_parms_add_default(rtsp_data->parameters,"reconnect","1");
@@ -1411,7 +1414,6 @@ static void netcam_rtsp_set_path (struct context *cnt, struct rtsp_context *rtsp
     struct url_t url;
 
     rtsp_data->path = NULL;
-    rtsp_data->service = NULL;
 
     memset(&url, 0, sizeof(url));
 
@@ -1463,8 +1465,19 @@ static void netcam_rtsp_set_path (struct context *cnt, struct rtsp_context *rtsp
         }
     }
 
-    rtsp_data->service = mymalloc(strlen(url.service)+1);
-    sprintf(rtsp_data->service, "%s",url.service);
+    /* Check if service was not yet set by netcam_params format= */
+    if (rtsp_data->service == NULL) {
+	if (mystreq(url.service, "http")) {
+	    /* Keep default behavior to interpret http url as mjpeg stream
+	       This was formerly translated in netcam_rtsp_set_options */
+	    rtsp_data->service = mymalloc(6);
+	    strcpy(rtsp_data->service, "mjpeg");
+	} else {
+	    /* Just use protocol part of url as service */
+            rtsp_data->service = mymalloc(strlen(url.service)+1);
+            sprintf(rtsp_data->service, "%s",url.service);
+	}
+    }
 
     netcam_url_free(&url);
     if (userpass) {
@@ -1526,6 +1539,13 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
             snprintf(rtsp_data->decoder_nm, val_len
                 , "%s",rtsp_data->parameters->params_array[indx].param_value);
         }
+        if ( mystreq(rtsp_data->parameters->params_array[indx].param_name,"format")) {
+            val_len = strlen(rtsp_data->parameters->params_array[indx].param_value) + 1;
+            rtsp_data->service = mymalloc(val_len);
+            snprintf(rtsp_data->service, val_len
+                , "%s",rtsp_data->parameters->params_array[indx].param_value);
+        }
+
 
         if ( mystreq(rtsp_data->parameters->params_array[indx].param_name,"capture_rate")) {
             rtsp_data->capture_rate = atoi(rtsp_data->parameters->params_array[indx].param_value);
