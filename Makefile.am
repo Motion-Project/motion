@@ -1,19 +1,18 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src po man
+SUBDIRS = src po
 
-sysconfdir = @sysconfdir@/$(PACKAGE)
-sysconf_DATA = \
+pkgsysconfdir = $(sysconfdir)/@PACKAGE@
+dist_pkgsysconf_DATA = \
 	data/motion-dist.conf \
 	data/camera1-dist.conf \
 	data/camera2-dist.conf \
 	data/camera3-dist.conf \
 	data/camera4-dist.conf
 
-man_MANS = man/motion.1
+dist_man_MANS = man/motion.1
 
-docdir = $(datadir)/doc/@PACKAGE@
-doc_DATA = \
+dist_doc_DATA = \
 	doc/mask1.png \
 	doc/normal.jpg \
 	doc/outputmotion1.jpg  \
