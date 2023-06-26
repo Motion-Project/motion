@@ -3458,7 +3458,7 @@ msgstr "Sprache: Deutsch"
 #: src/util.c
 #, c-format
 msgid "Could not allocate %llu bytes of memory!"
-msgstr "%Llu Bytes Speicher konnten nicht zugeordnet werden!"
+msgstr "%llu Bytes Speicher konnten nicht zugeordnet werden!"
 
 #: src/util.c
 #, c-format
