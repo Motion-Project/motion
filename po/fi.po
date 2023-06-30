@@ -3432,7 +3432,7 @@ msgstr "Kieli: englanti"
 #: src/util.c
 #, c-format
 msgid "Could not allocate %llu bytes of memory!"
-msgstr "%Llu-tavua muistia ei voitu varata!"
+msgstr "%llu-tavua muistia ei voitu varata!"
 
 #: src/util.c
 #, c-format
