@@ -3813,6 +3813,11 @@ void conf_process(ctx_motapp *motapp, ctx_config *conf)
         while (std::getline(ifs, line)) {
             mytrim(line);
             stpos = line.find(" ");
+            if (line.find('\t') != std::string::npos) {
+                if (line.find('\t') < stpos) {
+                    stpos =line.find('\t');
+                }
+            }
             if (stpos > line.find("=")) {
                 stpos = line.find("=");
             }

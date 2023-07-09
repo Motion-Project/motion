@@ -68,7 +68,7 @@ void myltrim(std::string &parm)
         return;
     }
 
-    while (parm.substr(0, 1) == " ") {
+    while (std::isspace(parm.at(0))) {
         if (parm.length() == 1) {
             parm="";
             return;
@@ -85,7 +85,7 @@ void myrtrim(std::string &parm)
         return;
     }
 
-    while (parm.substr(parm.length()-1,1) == " ") {
+    while (std::isspace(parm.at(parm.length()-1))) {
         if (parm.length() == 1) {
             parm="";
             return;
