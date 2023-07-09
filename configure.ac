@@ -616,7 +616,6 @@ AC_CONFIG_FILES([
 	Makefile
 	src/Makefile
   po/Makefile.in
-  man/Makefile
   data/camera1-dist.conf
   data/camera2-dist.conf
   data/camera3-dist.conf

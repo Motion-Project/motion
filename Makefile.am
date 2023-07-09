@@ -20,20 +20,19 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src po man
+SUBDIRS = src po
 
-sysconfdir = @sysconfdir@/$(PACKAGE)
-sysconf_DATA = \
+pkgsysconfdir = $(sysconfdir)/@PACKAGE@
+dist_pkgsysconf_DATA = \
 	data/motionplus-dist.conf \
 	data/camera1-dist.conf \
 	data/camera2-dist.conf \
 	data/camera3-dist.conf \
 	data/sound1-dist.conf
 
-man_MANS = man/motionplus.1
+dist_man_MANS = man/motionplus.1
 
-docdir = $(datadir)/doc/@PACKAGE@
-doc_DATA = \
+dist_doc_DATA = \
 	doc/motionplus_guide.html \
 	doc/motionplus_stylesheet.css \
 	doc/motionplus_build.html \
