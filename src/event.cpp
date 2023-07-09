@@ -611,7 +611,7 @@ static void event_movie_start(ctx_dev *cam, motion_event evnt
         retcd = movie_init_norm(cam, ts1);
         if (retcd < 0) {
             MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("Error opening ctx_dev for movie output."));
+                ,_("Error initializing movie output."));
             myfree(&cam->movie_norm);
             return;
         }

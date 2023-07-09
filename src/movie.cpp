@@ -811,6 +811,7 @@ static int movie_set_outputfile(ctx_movie *movie)
                 , errstr, movie->full_nm);
             if (errno == ENOENT) {
                 if (mycreate_path(movie->full_nm) == -1) {
+                    remove(movie->full_nm);
                     movie_free_context(movie);
                     return -1;
                 }
@@ -821,6 +822,7 @@ static int movie_set_outputfile(ctx_movie *movie)
                     MOTPLS_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
                         ,_("error %s opening file %s")
                         , errstr, movie->full_nm);
+                    remove(movie->full_nm);
                     movie_free_context(movie);
                     return -1;
                 }
@@ -828,6 +830,7 @@ static int movie_set_outputfile(ctx_movie *movie)
                 MOTPLS_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
                     ,_("Error opening file %s")
                     , movie->full_nm);
+                remove(movie->full_nm);
                 movie_free_context(movie);
                 return -1;
             }
@@ -839,6 +842,12 @@ static int movie_set_outputfile(ctx_movie *movie)
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                 ,_("Could not write movie header %s"),errstr);
+            if ((mystreq(movie->container_name,"mp4")) &&
+                (movie->strm_audio != NULL)) {
+                MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                    , _("Ensure audio codec is permitted with a MP4 container."));
+            }
+            remove(movie->full_nm);
             movie_free_context(movie);
             return -1;
         }
@@ -1338,7 +1347,7 @@ static int movie_passthru_open(ctx_movie *movie)
 
     retcd = movie_set_outputfile(movie);
     if (retcd < 0) {
-        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the output file"));
+        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not create output file"));
         return -1;
     }
 
@@ -1514,13 +1523,13 @@ int movie_open(ctx_movie *movie)
 
     retcd = movie_set_picture(movie);
     if (retcd < 0) {
-        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the stream"));
+        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the picture"));
         return -1;
     }
 
     retcd = movie_set_outputfile(movie);
     if (retcd < 0) {
-        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the stream"));
+        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not open output file"));
         return -1;
     }
 
