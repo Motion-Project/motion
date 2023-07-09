@@ -1345,7 +1345,6 @@ static void netcam_rtsp_set_options(struct rtsp_context *rtsp_data)
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("%s: Setting rtsp/rtmp")
             ,rtsp_data->cameratype);
         util_parms_add_default(rtsp_data->parameters,"rtsp_transport","tcp");
-        util_parms_add_default(rtsp_data->parameters,"allowed_media_types", "video");
 
     } else if (strncmp(rtsp_data->service, "http", 4) == 0 ) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
