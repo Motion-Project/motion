@@ -274,7 +274,7 @@ static void event_image_snapshot(ctx_dev *cam, motion_event evnt
     char filename[PATH_MAX];
     char filepath[PATH_MAX];
     char linkpath[PATH_MAX];
-    int offset, retcd;
+    int offset, retcd, passthrough;
 
     (void)evnt;
     (void)fname;
@@ -296,8 +296,12 @@ static void event_image_snapshot(ctx_dev *cam, motion_event evnt
         if (retcd <0) {
             MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
         }
-
-        pic_save_norm(cam, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
+        passthrough = mycheck_passthrough(cam);
+        if ((cam->imgs.size_high > 0) && (!passthrough)) {
+            pic_save_norm(cam, fullfilename, img_data->image_high, FTYPE_IMAGE_SNAPSHOT);
+        } else {
+            pic_save_norm(cam, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
+        }
         event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE_SNAPSHOT, ts1);
         dbse_exec(cam, fullfilename, FTYPE_IMAGE_SNAPSHOT, ts1, "pic_save");
 
@@ -322,7 +326,12 @@ static void event_image_snapshot(ctx_dev *cam, motion_event evnt
         }
 
         remove(fullfilename);
-        pic_save_norm(cam, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
+        passthrough = mycheck_passthrough(cam);
+        if ((cam->imgs.size_high > 0) && (!passthrough)) {
+            pic_save_norm(cam, fullfilename, img_data->image_high, FTYPE_IMAGE_SNAPSHOT);
+        } else {
+            pic_save_norm(cam, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
+        }
         event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE_SNAPSHOT, ts1);
         dbse_exec(cam, fullfilename, FTYPE_IMAGE_SNAPSHOT, ts1, "pic_save");
     }
