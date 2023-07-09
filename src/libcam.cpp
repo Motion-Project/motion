@@ -806,8 +806,6 @@ void libcam_start(ctx_dev *cam)
     #ifdef HAVE_LIBCAM
         int retcd;
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting experimental libcamera .");
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "EXPECT crashes and hung processes!!!");
         cam->libcam = new cls_libcam;
         retcd = cam->libcam->cam_start(cam);
         if (retcd < 0) {
