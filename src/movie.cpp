@@ -1394,33 +1394,6 @@ void movie_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list 
 
 }
 
-static void movie_put_pix_nv21(ctx_movie *movie, ctx_image_data *img_data)
-{
-    unsigned char *image,*imagecr, *imagecb;
-    int cr_len, x, y;
-
-    if (movie->high_resolution) {
-        image = img_data->image_high;
-    } else {
-        image = img_data->image_norm;
-    }
-
-    cr_len = movie->ctx_codec->width * movie->ctx_codec->height / 4;
-    imagecr = image + (movie->ctx_codec->width * movie->ctx_codec->height);
-    imagecb = image + (movie->ctx_codec->width * movie->ctx_codec->height) + cr_len;
-
-    memcpy(movie->picture->data[0], image, movie->ctx_codec->width * movie->ctx_codec->height);
-    for (y = 0; y < movie->ctx_codec->height; y++) {
-        for (x = 0; x < movie->ctx_codec->width/4; x++) {
-            movie->picture->data[1][y*movie->ctx_codec->width/2 + x*2] = *imagecb;
-            movie->picture->data[1][y*movie->ctx_codec->width/2 + x*2 + 1] = *imagecr;
-            imagecb++;
-            imagecr++;
-        }
-    }
-
-}
-
 static void movie_put_pix_yuv420(ctx_movie *movie, ctx_image_data *img_data)
 {
     unsigned char *image;
