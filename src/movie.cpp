@@ -1298,39 +1298,6 @@ static int movie_passthru_open(ctx_movie *movie)
     return 0;
 }
 
-void movie_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list vl)
-{
-
-    char buf[1024];
-    char *end;
-    int retcd;
-
-    (void)ignoreme;
-    (void)errno_flag;
-
-    /* Valgrind occasionally reports use of uninitialized values in here when we interrupt
-     * some rtsp functions.  The offending value is either fmt or vl and seems to be from a
-     * debug level of av functions.  To address it we flatten the message after we know
-     * the log level.  Now we put the avcodec messages to INF level since their error
-     * are not necessarily our errors.
-     */
-
-    if (errno_flag <= AV_LOG_WARNING) {
-        retcd = vsnprintf(buf, sizeof(buf), fmt, vl);
-        if (retcd >=1024) {
-            MOTPLS_LOG(DBG, TYPE_ENCODER, NO_ERRNO, "av message truncated %d bytes",(retcd - 1024));
-        }
-        end = buf + strlen(buf);
-        if (end > buf && end[-1] == '\n') {
-            *--end = 0;
-        }
-        if (strstr(buf, "Will reconnect at") == NULL) {
-            MOTPLS_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s", buf);
-        }
-    }
-
-}
-
 static void movie_put_pix_yuv420(ctx_movie *movie, ctx_image_data *img_data)
 {
     unsigned char *image;
@@ -1345,41 +1312,6 @@ static void movie_put_pix_yuv420(ctx_movie *movie, ctx_image_data *img_data)
     movie->picture->data[0] = image;
     movie->picture->data[1] = image + (movie->ctx_codec->width * movie->ctx_codec->height);
     movie->picture->data[2] = movie->picture->data[1] + ((movie->ctx_codec->width * movie->ctx_codec->height) / 4);
-
-}
-
-void movie_global_init(void)
-{
-
-    MOTPLS_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("libavcodec  version %d.%d.%d")
-        , LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO);
-    MOTPLS_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("libavformat version %d.%d.%d")
-        , LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
-
-    #if (MYFFVER < 58000)
-        av_register_all();
-        avcodec_register_all();
-    #endif
-
-    avformat_network_init();
-    avdevice_register_all();
-    av_log_set_callback(movie_avcodec_log);
-
-}
-
-void movie_global_deinit(void)
-{
-
-    avformat_network_deinit();
-
-    #if (MYFFVER < 58000)
-        /* TODO Determine if this is even needed for old versions */
-        if (av_lockmgr_register(NULL) < 0) {
-            MOTPLS_LOG(EMG, TYPE_ALL, SHOW_ERRNO
-                ,_("av_lockmgr_register reset failed on cleanup"));
-        }
-    #endif
-
 
 }
 

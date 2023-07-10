@@ -81,11 +81,6 @@ struct ctx_movie {
 
 };
 
-
-void movie_global_init(void);
-void movie_global_deinit(void);
-void movie_avcodec_log(void *, int, const char *, va_list);
-
 int movie_open(ctx_movie *movie);
 int movie_put_image(ctx_movie *movie, ctx_image_data *img_data, const struct timespec *tv1);
 void movie_close(ctx_movie *movie);
