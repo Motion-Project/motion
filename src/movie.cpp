@@ -383,13 +383,7 @@ static int movie_set_quality(ctx_movie *movie)
             movie->quality = 45; // default to 45% quality
         }
 
-        /* This next if statement needs validation.  Are mpeg4omx
-         * and v4l2m2m even MY_CODEC_ID_H264 or MY_CODEC_ID_HEVC
-         * such that it even would be possible to be part of this
-         * if block to start with? */
-        if ((movie->preferred_codec == USER_CODEC_H264OMX) ||
-            (movie->preferred_codec == USER_CODEC_MPEG4OMX) ||
-            (movie->preferred_codec == USER_CODEC_V4L2M2M)) {
+        if ((movie->preferred_codec == USER_CODEC_V4L2M2M)) {
 
             // bit_rate = movie->width * movie->height * movie->fps * quality_factor
             movie->quality = (int)(((int64_t)movie->width * movie->height * movie->fps * movie->quality) >> 7);
@@ -434,57 +428,13 @@ static int movie_set_quality(ctx_movie *movie)
     return 0;
 }
 
-struct blacklist_t
-{
-    const char *codec_name;
-    const char *reason;
-};
-
-static const char *movie_codec_is_blacklisted(const char *codec_name)
-{
-
-    static struct blacklist_t blacklisted_codec[] =
-    {
-    #if (MYFFVER <= 58029)
-            /* h264_omx & ffmpeg combination locks up on Raspberry Pi.
-            * Newer versions of ffmpeg allow zerocopy to be disabled to workaround
-            * this issue.
-            * To use h264_omx encoder on older versions of ffmpeg:
-            * - disable input_zerocopy in ffmpeg omx.c:omx_encode_init function.
-            * - remove the "h264_omx" from this blacklist.
-            * More information: https://github.com/Motion-Project/motion/issues/433
-            */
-            {"h264_omx", "Codec causes lock up on your FFMpeg version"},
-    #endif
-    #if (MYFFVER < 57041)
-            {"h264_v4l2m2m", "FFMpeg version is too old"},
-    #endif
-    };
-    size_t i, i_mx;
-
-    i_mx = (size_t)(sizeof(blacklisted_codec)/sizeof(blacklisted_codec[0]));
-    for (i = 0; i < i_mx; i++) {
-        if (mystreq(codec_name, blacklisted_codec[i].codec_name)) {
-            return blacklisted_codec[i].reason;
-        }
-    }
-    return NULL;
-}
-
 static int movie_set_codec_preferred(ctx_movie *movie)
 {
     size_t container_name_len = strcspn(movie->container_name, ":");
 
     movie->codec = NULL;
     if (movie->container_name[container_name_len]) {
-        const char *blacklist_reason = movie_codec_is_blacklisted(&movie->container_name[container_name_len+1]);
-        if (blacklist_reason) {
-            MOTPLS_LOG(WRN, TYPE_ENCODER, NO_ERRNO
-                ,_("Preferred codec %s has been blacklisted: %s")
-                ,&movie->container_name[container_name_len+1], blacklist_reason);
-        } else {
-            movie->codec = avcodec_find_encoder_by_name(&movie->container_name[container_name_len+1]);
-        }
+        movie->codec = avcodec_find_encoder_by_name(&movie->container_name[container_name_len+1]);
     }
     if (movie->codec == NULL) {
         movie->codec = avcodec_find_encoder(movie->oc->video_codec_id);
@@ -498,10 +448,6 @@ static int movie_set_codec_preferred(ctx_movie *movie)
 
     if (mystreq(movie->codec->name, "h264_v4l2m2m")) {
         movie->preferred_codec = USER_CODEC_V4L2M2M;
-    } else if (mystreq(movie->codec->name, "h264_omx")) {
-        movie->preferred_codec = USER_CODEC_H264OMX;
-    } else if (mystreq(movie->codec->name, "mpeg4_omx")) {
-        movie->preferred_codec = USER_CODEC_MPEG4OMX;
     } else {
         movie->preferred_codec = USER_CODEC_DEFAULT;
     }
@@ -590,15 +536,6 @@ static int movie_set_codec(ctx_movie *movie)
       movie->ctx_codec->level = 3;
     }
     movie->ctx_codec->flags |= MY_CODEC_FLAG_GLOBAL_HEADER;
-
-    if ((mystreq(movie->codec->name, "h264_omx")) ||
-        (mystreq(movie->codec->name, "mpeg4_omx"))) {
-        /* h264_omx & ffmpeg combination locks up on Raspberry Pi.
-         * To use h264_omx encoder, we need to disable zerocopy.
-         * More information: https://github.com/Motion-Project/motion/issues/433
-         */
-        av_dict_set(&movie->opts, "zerocopy", "0", 0);
-    }
 
     retcd = movie_set_quality(movie);
     if (retcd < 0) {
