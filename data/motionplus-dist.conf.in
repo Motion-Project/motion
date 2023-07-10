@@ -19,7 +19,7 @@ log_type ALL
 ;*****   Camera
 ;*************************************************
 device_name
-device_id 0
+device_id
 ;target_dir
 
 ;*************************************************
@@ -78,7 +78,7 @@ picture_filename %v-%Y%m%d%H%M%S-%q
 movie_output on
 movie_max_time 120
 movie_quality 45
-movie_codec mkv
+movie_container mkv
 movie_filename %v-%Y%m%d%H%M%S
 
 ;*************************************************
@@ -92,7 +92,7 @@ webcontrol_parms 0
 ;*****   Web Stream
 ;*************************************************
 stream_preview_scale 25
-stream_preview_method 0
+stream_preview_method mjpg
 
 ;*************************************************
 ; Device config files - One for each device.
