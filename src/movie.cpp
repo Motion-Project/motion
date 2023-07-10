@@ -583,11 +583,7 @@ static int movie_set_codec(ctx_movie *movie)
     movie->ctx_codec->height        = movie->height;
     movie->ctx_codec->time_base.num = 1;
     movie->ctx_codec->time_base.den = movie->fps;
-    if (movie->preferred_codec == USER_CODEC_V4L2M2M) {
-        movie->ctx_codec->pix_fmt   = AV_PIX_FMT_NV21;
-    } else {
-        movie->ctx_codec->pix_fmt   = MY_PIX_FMT_YUV420P;
-    }
+    movie->ctx_codec->pix_fmt   = MY_PIX_FMT_YUV420P;
     movie->ctx_codec->max_b_frames  = 0;
     if (mystreq(movie->container_name, "ffv1")) {
       movie->ctx_codec->strict_std_compliance = -2;
@@ -1594,11 +1590,7 @@ int movie_put_image(ctx_movie *movie, ctx_image_data *img_data, const struct tim
 
     if (movie->picture) {
 
-        if (movie->preferred_codec == USER_CODEC_V4L2M2M) {
-            movie_put_pix_nv21(movie, img_data);
-        } else {
-            movie_put_pix_yuv420(movie, img_data);
-        }
+        movie_put_pix_yuv420(movie, img_data);
 
         movie->gop_cnt ++;
         if (movie->gop_cnt == movie->ctx_codec->gop_size ) {
