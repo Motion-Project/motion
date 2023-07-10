@@ -502,6 +502,7 @@ struct ctx_motapp {
     volatile int        threads_running;
     volatile bool       finish_all;
     volatile bool       restart_all;
+    volatile bool       reload_all;
     volatile bool       cam_add;        /* Bool for whether to add a camera to the list */
     volatile int        cam_delete;     /* 0 for no action, other numbers specify camera to remove */
 

@@ -56,7 +56,7 @@ static void motpls_signal_process(ctx_motapp *motapp)
         }
         break;
     case MOTPLS_SIGNAL_SIGHUP:      /* Restart the threads */
-        motapp->restart_all = true;
+        motapp->reload_all = true;
         /*FALLTHROUGH*/
     case MOTPLS_SIGNAL_SIGTERM:     /* Quit application */
 
@@ -617,6 +617,7 @@ static void motpls_init(ctx_motapp *motapp, int argc, char *argv[])
     motapp->threads_running = 0;
     motapp->finish_all = false;
     motapp->restart_all = false;
+    motapp->reload_all = false;
     motapp->parms_changed = false;
     motapp->pause = false;
     motapp->cam_add = false;
@@ -643,8 +644,27 @@ static void motpls_init(ctx_motapp *motapp, int argc, char *argv[])
     pthread_mutex_init(&motapp->mutex_camlst, NULL);
     pthread_mutex_init(&motapp->mutex_post, NULL);
 
+    motpls_startup(motapp, true);
+
+    movie_global_init();
+
 }
 
+static void motpls_deinit(ctx_motapp *motapp)
+{
+    movie_global_deinit();
+
+    motpls_shutdown(motapp);
+
+    pthread_key_delete(tls_key_threadnr);
+    pthread_mutex_destroy(&motapp->global_lock);
+    pthread_mutex_destroy(&motapp->mutex_parms);
+    pthread_mutex_destroy(&motapp->mutex_camlst);
+    pthread_mutex_destroy(&motapp->mutex_post);
+
+    delete motapp->conf;
+
+}
 /* Check for whether to add a new cam */
 static void motpls_cam_add(ctx_motapp *motapp)
 {
@@ -743,13 +763,9 @@ int main (int argc, char **argv)
 
     motapp = new ctx_motapp;
 
-    motpls_init(motapp, argc, argv);
-
     setup_signals();
 
-    motpls_startup(motapp, true);
-
-    movie_global_init();
+    motpls_init(motapp, argc, argv);
 
     while (true) {
 
@@ -814,6 +830,9 @@ int main (int argc, char **argv)
 
         if (motapp->restart_all) {
             SLEEP(1, 0);    /* Rest before restarting */
+        } else if (motapp->reload_all) {
+            motpls_deinit(motapp);
+            motpls_init(motapp, argc, argv);
         } else {
             break;
         }
@@ -821,17 +840,7 @@ int main (int argc, char **argv)
 
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus terminating"));
 
-    movie_global_deinit();
-
-    motpls_shutdown(motapp);
-
-    pthread_key_delete(tls_key_threadnr);
-    pthread_mutex_destroy(&motapp->global_lock);
-    pthread_mutex_destroy(&motapp->mutex_parms);
-    pthread_mutex_destroy(&motapp->mutex_camlst);
-    pthread_mutex_destroy(&motapp->mutex_post);
-
-    delete motapp->conf;
+    motpls_deinit(motapp);
     delete motapp;
 
     return 0;
