@@ -374,13 +374,8 @@ void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
         controls.set(controls::AfMetering, atoi(pvalue));
     }
     if (mystrceq(pname,"AfWindows")) {
-        x = strtok(pvalue, "-");
-        y = strtok(0, "-");
-        w = strtok(0, "-");
-        h = strtok(0, "-");
-        if (h != NULL) {
-            controls.set(controls::AfWindows, Rectangle(atoi(x),atoi(y),atoi(w),atoi(h)));
-        }
+        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
+            , "AfWindows Not Implemented.");
     }
     if (mystrceq(pname,"AfTrigger")) {
         controls.set(controls::AfTrigger, atoi(pvalue));
