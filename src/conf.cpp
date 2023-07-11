@@ -167,6 +167,7 @@ ctx_parm config_parms[] = {
     {"webcontrol_actions",        PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
     {"webcontrol_lock_minutes",   PARM_TYP_INT,    PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
     {"webcontrol_lock_attempts",  PARM_TYP_INT,    PARM_CAT_13, WEBUI_LEVEL_ADVANCED },
+    {"webcontrol_lock_script",    PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
 
     {"stream_preview_scale",      PARM_TYP_INT,    PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {"stream_preview_newline",    PARM_TYP_BOOL,   PARM_CAT_14, WEBUI_LEVEL_LIMITED },
@@ -2396,6 +2397,19 @@ static void conf_edit_webcontrol_lock_attempts(ctx_config *conf, std::string &pa
     MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_lock_attempts",_("webcontrol_lock_attempts"));
 }
 
+static void conf_edit_webcontrol_lock_script(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        conf->webcontrol_lock_script = "";
+    } else if (pact == PARM_ACT_SET) {
+        conf->webcontrol_lock_script = parm;
+    } else if (pact == PARM_ACT_GET) {
+        parm = conf->webcontrol_lock_script;
+    }
+    return;
+    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_lock_script",_("webcontrol_lock_script"));
+}
+
 static void conf_edit_stream_preview_scale(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
@@ -3184,6 +3198,7 @@ static void conf_edit_cat13(ctx_config *conf, std::string parm_nm
     } else if (parm_nm == "webcontrol_actions") {          conf_edit_webcontrol_actions(conf, parm_val, pact);
     } else if (parm_nm == "webcontrol_lock_minutes") {     conf_edit_webcontrol_lock_minutes(conf, parm_val, pact);
     } else if (parm_nm == "webcontrol_lock_attempts") {    conf_edit_webcontrol_lock_attempts(conf, parm_val, pact);
+    } else if (parm_nm == "webcontrol_lock_script") {      conf_edit_webcontrol_lock_script(conf, parm_val, pact);
     }
 
 }

@@ -168,6 +168,7 @@
         std::string     webcontrol_actions;
         int             webcontrol_lock_minutes;
         int             webcontrol_lock_attempts;
+        std::string     webcontrol_lock_script;
 
         /* Live stream configuration parameters */
         int             stream_preview_scale;

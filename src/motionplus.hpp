@@ -213,6 +213,7 @@ struct ctx_webu_clients {
     bool                        authenticated;
     int                         conn_nbr;
     struct timespec             conn_time;
+    int                         userid_fail_nbr;
 };
 
 struct ctx_params_item {

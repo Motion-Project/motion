@@ -437,6 +437,9 @@
               <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_attempts" >webcontrol_lock_attempts</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_minutes" >webcontrol_lock_minutes</a> </td>
             </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_script" >webcontrol_lock_script</a> </td>
+            </tr>
             </tbody>
         </table>
         <p></p>
@@ -2090,6 +2093,30 @@
           The full path and file name for a user specified html page to use as the webcontrol.
         </ul>
         <p></p>
+
+        <h3><a name="webcontrol_lock_attempts"></a> webcontrol_lock_attempt</h3>
+        <ul>
+          <li> Values: Integer | Default: 3</li>
+          Number of permitted attempts to log in before triggering lockout.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_lock_minutes"></a> webcontrol_lock_minutes</h3>
+        <ul>
+          <li> Values: Integer | Default: 10</li>
+          Number of minutes that the IP will be locked out from further attempts to log in.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_lock_script"></a> webcontrol_lock_script</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Script to execute when a lockout has been triggered.  Two additional parameters are passed to this script
+          when executed.  The number of times the userid failed as well as the IP address attempting to log in.
+        </ul>
+        <p></p>
+
+
       </ul>
 
       <h3><a name="OptDetail_Stream"></a> Live Stream</a> </h3>

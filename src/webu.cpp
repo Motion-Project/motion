@@ -306,10 +306,10 @@ static void webu_hostname(ctx_webui *webui)
 }
 
 /* Log the failed authentication check */
-static void webu_failauth_log(ctx_webui *webui)
+static void webu_failauth_log(ctx_webui *webui, bool userid_fail)
 {
-    timespec                                tm_cnct;
-    ctx_webu_clients                 clients;
+    timespec            tm_cnct;
+    ctx_webu_clients    clients;
     std::list<ctx_webu_clients>::iterator   it;
 
     MOTPLS_LOG(ALR, TYPE_STREAM, NO_ERRNO
@@ -323,6 +323,9 @@ static void webu_failauth_log(ctx_webui *webui)
             it->conn_nbr++;
             it->conn_time.tv_sec =tm_cnct.tv_sec;
             it->authenticated = false;
+            if (userid_fail) {
+                it->userid_fail_nbr++;
+            }
             return;
         }
         it++;
@@ -332,6 +335,11 @@ static void webu_failauth_log(ctx_webui *webui)
     clients.conn_nbr = 1;
     clients.conn_time = tm_cnct;
     clients.authenticated = false;
+    if (userid_fail) {
+        clients.userid_fail_nbr = 1;
+    } else {
+        clients.userid_fail_nbr = 0;
+    }
 
     webui->motapp->webcontrol_clients.push_back(clients);
 
@@ -369,6 +377,7 @@ static void webu_client_connect(ctx_webui *webui)
             }
             it->authenticated = true;
             it->conn_nbr = 1;
+            it->userid_fail_nbr = 0;
             it->conn_time.tv_sec = tm_cnct.tv_sec;
             return;
         }
@@ -378,6 +387,7 @@ static void webu_client_connect(ctx_webui *webui)
     /* The ip was not already in our list. */
     clients.clientip = webui->clientip;
     clients.conn_nbr = 1;
+    clients.userid_fail_nbr = 0;
     clients.conn_time = tm_cnct;
     clients.authenticated = true;
     webui->motapp->webcontrol_clients.push_back(clients);
@@ -393,6 +403,7 @@ static mhdrslt webu_failauth_check(ctx_webui *webui)
 {
     timespec                                tm_cnct;
     std::list<ctx_webu_clients>::iterator   it;
+    std::string                             tmp;
 
     if (webui->motapp->webcontrol_clients.size() == 0) {
         return MHD_YES;
@@ -407,8 +418,14 @@ static mhdrslt webu_failauth_check(ctx_webui *webui)
             (it->authenticated == false) &&
             (it->conn_nbr > webui->motapp->conf->webcontrol_lock_attempts)) {
             MOTPLS_LOG(EMG, TYPE_STREAM, NO_ERRNO
-                ,_("Ignoring connection from: %s"), webui->clientip.c_str());
+                ,_("Ignoring connection from: %s")
+                , webui->clientip.c_str());
             it->conn_time = tm_cnct;
+            if (webui->motapp->conf->webcontrol_lock_script != "") {
+                tmp = webui->motapp->conf->webcontrol_lock_script + " " +
+                    std::to_string(it->userid_fail_nbr) + " " +  webui->clientip;
+                util_exec_command(webui->cam, tmp.c_str(), NULL, 0);
+            }
             return MHD_NO;
         } else if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >=
             (webui->motapp->conf->webcontrol_lock_minutes*60)) {
@@ -466,7 +483,7 @@ static mhdrslt webu_mhd_digest(ctx_webui *webui)
 
     /* Check for valid user name */
     if (mystrne(user, webui->auth_user)) {
-        webu_failauth_log(webui);
+        webu_failauth_log(webui, true);
         myfree(&user);
         return webu_mhd_digest_fail(webui, MHD_NO);
     }
@@ -477,7 +494,7 @@ static mhdrslt webu_mhd_digest(ctx_webui *webui)
         , webui->auth_user, webui->auth_pass, 300);
 
     if (retcd == MHD_NO) {
-        webu_failauth_log(webui);
+        webu_failauth_log(webui, false);
     }
 
     if ( (retcd == MHD_INVALID_NONCE) || (retcd == MHD_NO) )  {
@@ -535,7 +552,7 @@ static mhdrslt webu_mhd_basic(ctx_webui *webui)
     }
 
     if ((mystrne(user, webui->auth_user)) || (mystrne(pass, webui->auth_pass))) {
-        webu_failauth_log(webui);
+        webu_failauth_log(webui, mystrne(user, webui->auth_user));
         myfree(&user);
         myfree(&pass);
         return webu_mhd_basic_fail(webui);
