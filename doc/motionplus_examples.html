@@ -56,6 +56,7 @@
         <li> <a href="#dnn_setup">DNN setup</a></li>
         <li> <a href="#haar_train">Haar Model Training</a></li>
         <li> <a href="#sound_sample">Sound Frequency Sample</a></li>
+        <li> <a href="#fail2ban">Fail2Ban example</a></li>
         <p></p>
         <p></p>
       </ul>
@@ -442,6 +443,56 @@
 
       </ul>
 
+      <h3><a name="fail2ban"></a>Fail2Ban Example</h3>
+      <ul>
+        The following are example files to use with the fail2ban application.  This allows users to ban IPs that
+        may be attempting to get in.  This example was created using Debian 11.  Adjust as appropriate for other
+        distros and versions.
+        <br>
+        Install fail2ban and create the following files:
+        <br>File 1:
+        <small><small><code><ul>
+          <br>&nbsp;# Fail2Ban configuration file: /etc/fail2ban/filter.d/motionplus.conf
+          <br>&nbsp;# Author: Mr Dave
+          <br>&nbsp;#
+          <br>&nbsp;[INCLUDES]
+          <br>&nbsp;# Read common prefixes. If any customizations available -- read them from common.local
+          <br>&nbsp;before = common.conf
+          <br>&nbsp;
+          <br>&nbsp;[Definition]
+          <br>&nbsp;daemon = nsd
+          <br>&nbsp;
+          <br>&nbsp;# Option:  failregex
+          <br>&nbsp;# Notes.:
+          <br>&nbsp;#&nbsp;    regex to match the log in failures messages in the logfile. The
+          <br>&nbsp;#&nbsp;    host must be matched by a group named "host". The tag "<HOST>" can
+          <br>&nbsp;#&nbsp;    be used for standard IP/hostname matching and is only an alias for
+          <br>&nbsp;#&nbsp;    (?:::f{4,6}:)?(?P<host>[\w\-.^_]+)
+          <br>&nbsp;# Sample:  Jul 01 02:50:32 [EMG][STR][00:wc00] webu_failauth_check: Ignoring connection from: 192.168.1.10
+          <br>&nbsp;# Values:  TEXT
+          <br>&nbsp;
+          <br>&nbsp;failregex =  ^.*Ignoring connection from: <HOST>$
+          <br>&nbsp;
+          <br>&nbsp;ignoreregex =
+          <br>&nbsp;
+          <br>&nbsp;datepattern = {^LN-BEG}Epoch
+          <br>&nbsp;{^LN-BEG}
+          <br>&nbsp;
+        </ul></code></small></small>
+        <br>File2:
+        <small><small><code><ul>
+          <br>&nbsp;#Fail2Ban Jail Configuration File: /etc/fail2ban/jail.d/motionplus-jail.conf
+          <br>&nbsp;[motionplus]
+          <br>&nbsp;enabled   = true
+          <br>&nbsp;filter    = motionplus
+          <br>&nbsp;logpath   = /var/log/motionplus/motionplus.log
+          <br>&nbsp;bantime   = 23h
+          <br>&nbsp;banaction = iptables-allports[blocktype="DROP"]
+          <br>&nbsp;maxretry  = 0
+          <br>&nbsp;port      = 0:65535
+        </ul></code></small></small>
+        <br>Make sure to adjust the log file location indicated in the jail file as well as how long to ban the IP address.
+       </ul>
 
     </section>
   </body>
