@@ -82,7 +82,7 @@ static void log_set_mode(int mode)
     log_mode = mode;
 
     if (mode == LOGMODE_SYSLOG && prev_mode != LOGMODE_SYSLOG) {
-        openlog("motion", LOG_PID, LOG_USER);
+        openlog("motionplus", LOG_PID, LOG_USER);
     }
 
     if (mode != LOGMODE_SYSLOG && prev_mode == LOGMODE_SYSLOG) {
@@ -119,7 +119,7 @@ static char *str_time(void)
 
 /**
  *    This routine is used for printing all informational, debug or error
- *    messages produced by any of the other motion functions.
+ *    messages produced by any of the other motionplus functions.
  */
 void motpls_log(int level, int type, int errno_flag,int fncname, const char *fmt, ...)
 {
@@ -229,7 +229,7 @@ void motpls_log(int level, int type, int errno_flag,int fncname, const char *fmt
                 break;
 
             case LOGMODE_SYSLOG:
-                /* The syslog level values are one less than the motion numeric values*/
+                /* The syslog level values are one less than the motionplus numeric values*/
                 syslog(level-1, "%s", flood_repeats);
                 strncat(flood_repeats, "\n", 1024 - strlen(flood_repeats));
                 fputs(flood_repeats, stderr);
@@ -248,7 +248,7 @@ void motpls_log(int level, int type, int errno_flag,int fncname, const char *fmt
             break;
 
         case LOGMODE_SYSLOG:
-            /* The syslog level values are one less than the motion numeric values*/
+            /* The syslog level values are one less than the motionplus numeric values*/
             syslog(level-1, "%s", buf);
             strncat(buf, "\n", 1024 - strlen(buf));
             fputs(buf, stderr);
@@ -284,7 +284,7 @@ void log_init(ctx_motapp *motapp)
                 log_set_mode(LOGMODE_FILE);
             } else {
                 MOTPLS_LOG(EMG, TYPE_ALL, SHOW_ERRNO
-                    , _("Exit motion, cannot create log file %s")
+                    , _("Exit MotionPlus, cannot create log file %s")
                     , motapp->conf->log_file.c_str());
                 exit(0);
             }
