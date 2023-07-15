@@ -465,18 +465,18 @@
           <br>&nbsp;# Option:  failregex
           <br>&nbsp;# Notes.:
           <br>&nbsp;#&nbsp;    regex to match the log in failures messages in the logfile. The
-          <br>&nbsp;#&nbsp;    host must be matched by a group named "host". The tag "<HOST>" can
+          <br>&nbsp;#&nbsp;    host must be matched by a group named "host". The tag "&ltHOST&gt" can
           <br>&nbsp;#&nbsp;    be used for standard IP/hostname matching and is only an alias for
           <br>&nbsp;#&nbsp;    (?:::f{4,6}:)?(?P<host>[\w\-.^_]+)
           <br>&nbsp;# Sample:  Jul 01 02:50:32 [EMG][STR][00:wc00] webu_failauth_check: Ignoring connection from: 192.168.1.10
           <br>&nbsp;# Values:  TEXT
           <br>&nbsp;
-          <br>&nbsp;failregex =  ^.*Ignoring connection from: <HOST>$
+          <br>&nbsp;failregex =  ^.*Ignoring connection from: &ltHOST&gt$
           <br>&nbsp;
           <br>&nbsp;ignoreregex =
           <br>&nbsp;
           <br>&nbsp;datepattern = {^LN-BEG}Epoch
-          <br>&nbsp;{^LN-BEG}
+          <br>&nbsp;&nbsp;&nbsp;&nbsp;{^LN-BEG}
           <br>&nbsp;
         </ul></code></small></small>
         <br>File2:
