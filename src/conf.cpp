@@ -4028,7 +4028,7 @@ void conf_parms_write_app(ctx_motapp *motapp)
     if (conffile == NULL) {
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             , _("Failed to write configuration to %s")
-            , motapp->conf->conf_filename);
+            , motapp->conf->conf_filename.c_str());
         return;
     }
 
