@@ -455,6 +455,10 @@ static void webu_post_config(ctx_webui *webui)
     std::string tmpname;
     ctx_params *wact;
 
+    if (webui->threadnbr == -1) {
+        return;
+    }
+
     wact = webui->motapp->webcontrol_actions;
     for (indx = 0; indx < wact->params_count; indx++) {
         if (mystreq(wact->params_array[indx].param_name,"config")) {
