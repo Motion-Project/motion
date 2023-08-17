@@ -40,13 +40,18 @@
 
 using namespace libcamera;
 
-bool cls_libcam:: cam_parm_bool(char *parm)
+bool cls_libcam::cam_parm_bool(char *parm)
 {
     if (mystrceq(parm,"1") || mystrceq(parm,"yes") || mystrceq(parm,"on") || mystrceq(parm,"true") ) {
         return true;
     } else {
         return false;
     }
+}
+
+float cls_libcam::cam_parm_single(char *parm)
+{
+    return (float)atof(parm);
 }
 
 void cls_libcam:: cam_log_transform()
@@ -302,22 +307,22 @@ void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
         controls.set(controls::AeExposureMode, atoi(pvalue));
     }
     if (mystrceq(pname,"ExposureValue")) {
-        controls.set(controls::ExposureValue, atof(pvalue));
+        controls.set(controls::ExposureValue, cam_parm_single(pvalue));
     }
     if (mystrceq(pname,"ExposureTime")) {
         controls.set(controls::ExposureTime, atoi(pvalue));
     }
     if (mystrceq(pname,"AnalogueGain")) {
-        controls.set(controls::AnalogueGain, atof(pvalue));
+        controls.set(controls::AnalogueGain, cam_parm_single(pvalue));
     }
     if (mystrceq(pname,"Brightness")) {
-        controls.set(controls::Brightness, atof(pvalue));
+        controls.set(controls::Brightness, cam_parm_single(pvalue));
     }
     if (mystrceq(pname,"Contrast")) {
-        controls.set(controls::Contrast, atof(pvalue));
+        controls.set(controls::Contrast, cam_parm_single(pvalue));
     }
     if (mystrceq(pname,"Lux")) {
-        controls.set(controls::Lux, atof(pvalue));
+        controls.set(controls::Lux, cam_parm_single(pvalue));
     }
     if (mystrceq(pname, "AwbEnable")) {
         controls.set(controls::AwbEnable, cam_parm_bool(pvalue));
@@ -332,10 +337,10 @@ void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
         controls.set(controls::ColourTemperature, atoi(pvalue));
     }
     if (mystrceq(pname,"Saturation")) {
-        controls.set(controls::Saturation, atof(pvalue));
+        controls.set(controls::Saturation, cam_parm_single(pvalue));
     }
     if (mystrceq(pname,"Sharpness")) {
-        controls.set(controls::Sharpness, atof(pvalue));
+        controls.set(controls::Sharpness, cam_parm_single(pvalue));
     }
     if (mystrceq(pname,"FocusFoM")) {
         controls.set(controls::FocusFoM, atoi(pvalue));
@@ -350,13 +355,13 @@ void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
         }
     }
     if (mystrceq(pname,"DigitalGain")) {
-        controls.set(controls::DigitalGain, atof(pvalue));
+        controls.set(controls::DigitalGain, cam_parm_single(pvalue));
     }
     if (mystrceq(pname,"FrameDuration")) {
         controls.set(controls::FrameDuration, atoi(pvalue));
     }
     if (mystrceq(pname,"SensorTemperature")) {
-        controls.set(controls::SensorTemperature, atof(pvalue));
+        controls.set(controls::SensorTemperature, cam_parm_single(pvalue));
     }
     if (mystrceq(pname,"SensorTimestamp")) {
         controls.set(controls::SensorTimestamp, atoi(pvalue));
@@ -384,7 +389,7 @@ void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
         controls.set(controls::AfPause, atoi(pvalue));
     }
     if (mystrceq(pname,"LensPosition")) {
-        controls.set(controls::LensPosition, atof(pvalue));
+        controls.set(controls::LensPosition, cam_parm_single(pvalue));
     }
     if (mystrceq(pname,"AfState")) {
         controls.set(controls::AfState, atoi(pvalue));
