@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang='en'>
-<head> 
-<meta charset='UTF-8'> 
-<title>MotionPlus</title> 
-<meta name='viewport' content='width=device-width, initial-scale=1'> 
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<title>MotionPlusSamplePage</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     * {
       margin: 0;
@@ -237,51 +237,45 @@
   </style>
 </head>
 
-<body class='body' onload='initform()'>
-  <div id="divnav_main" class="sidenav">
-    <a class='closebtn' onclick='nav_close()'>X</a>
+<body class="body" onload="initform()">
+  <div id="divnav_main" class="sidenav" style="width: 10rem;">
+    <a class="closebtn" onclick="nav_close()">X</a>
     <div id="divnav_version">
-      <a>MotionPlus 0.0.1</a>
-    </div>
-    <button onclick='display_cameras()'  id='cam_btn' class='dropbtn'>Cameras</button>
-    <div id='divnav_cam' class='dropdown-content'>
       <!-- Filled in by script -->
     </div>
-    <button onclick='display_actions()'  id='actions_btn' class='dropbtn'>Actions</button>
-    <div id='divnav_actions' class='dropdown-content'>
-      <!-- Filled in by script -->
+    <button onclick="display_cameras()" id="cam_btn" class="dropbtn">Cameras</button>
+    <div id="divnav_cam" class="dropdown-content" style="display: none;">  
+    <!-- Filled in by script -->
     </div>
-    <button
-      onclick='display_config()' id='cfg_btn' class='dropbtn'>
+    <button onclick="display_actions()" id="actions_btn" class="dropbtn">Actions</button>
+    <div id="divnav_actions" class="dropdown-content" style="display: none;">
+    <!-- Filled in by script -->
+    </div>
+    <button onclick="display_config()" id="cfg_btn" class="dropbtn">
       Configuration
     </button>
-    <div id='divnav_config' class='dropdown-content'>
-      <!-- Filled in by script -->
+    <div id="divnav_config" class="dropdown-content" style="display: block;">
+    <!-- Filled in by script -->
     </div>
-    <button
-      onclick='display_movies()' id='mov_btn' class='dropbtn'>
+    <button onclick="display_movies()" id="mov_btn" class="dropbtn">
       Recordings
     </button>
-    <div id='divnav_movies' class='dropdown-content'>
-      <!-- Filled in by script -->
+    <div id="divnav_movies" class="dropdown-content" style="display: none;">
+    <!-- Filled in by script -->
     </div>
   </div>
-
-  <div id='divmain' style='margin-left:10rem' >
-    <button id='menu_btn' 
-      onclick='nav_open();' 
-      style='display:none' 
-      class='menubtn'>|||</button>
+  <div id="divmain" style="margin-left: 10rem;">
+    <button id="menu_btn" onclick="nav_open();" style="display: none;" class="menubtn">|||</button>
     <p></p>
-    <div id='div_cam' >
-      <!-- Filled in by script -->
+    <div id="div_cam" style="display: none;">
+    <!-- Filled in by script -->
     </div>
 
-    <div id='div_config'>
-      <!-- Filled in by script -->
+    <div id="div_config" style="display: inline;">
+    <!-- Filled in by script -->
     </div>
 
-    <div id='div_movies' class='cls_movies'>
+    <div id="div_movies" class="cls_movies" style="display: none;">
       <!-- Filled in by script -->
     </div>
 
@@ -351,12 +345,17 @@
       }
 
       var formData = new FormData();
-      var camid = pData['cameras'][gIndxCam]['id'];
+      var camid;
       var ans;
 
+      camid = assign_camid();
+
       if (actval == 'action_user') {
-       ans = prompt('Enter user parameter');
+        ans = prompt('Enter user parameter');
+      } else {
+        ans = '';
       }
+
       formData.append('command', actval);
       formData.append('camid', camid);
       formData.append('user', ans);
@@ -373,8 +372,10 @@
       var formData = new FormData();
       var request = new XMLHttpRequest();
       var xmlhttp = new XMLHttpRequest();
-      var camid = pData['cameras'][gIndxCam]['id'];
+      var camid;
       var ans;
+
+      camid = assign_camid();
 
       if (actval == 'camera_delete') {
         ans = confirm('Delete camera ' + camid);
@@ -386,7 +387,7 @@
       xmlhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
           pData = JSON.parse(this.responseText);
-          gIndxCam = 0;
+          gIndxCam = -1;
           assign_config_nav();
           assign_vals(0);
           assign_cams();
@@ -417,7 +418,8 @@
         sect.item(indx).selectedIndex =camobj.selectedIndex;
       }
 
-      for (indx = 0; indx <= pData['cameras']['count']; indx++) {
+      gIndxCam = -1;
+      for (indx = 0; indx < pData['cameras']['count']; indx++) {
         if (pData['cameras'][indx]['id'] == camobj.value) {
           gIndxCam = indx;
         }
@@ -442,6 +444,16 @@
       cams_reset();
     }
 
+    function assign_camid() {
+      if (gIndxCam == -1 ) {
+        camid = 0;
+      } else {
+        camid = pData['cameras'][gIndxCam]['id'];
+      }
+
+      return camid; 
+    }
+
     function assign_version() {
       var verstr ='<a>MotionPlus \n'+pData['version'] +'</a>';
       document.getElementById('divnav_version').innerHTML = verstr;
@@ -449,28 +461,31 @@
 
     function assign_cams() {
       var camcnt = pData['cameras']['count'];
+      var indx = 0;
       var html_drop = "\n";
       var html_nav = "\n";
-
       var html_mov = "\n";
 
       html_drop += " <select class='cls_drop' ";
       html_drop += " onchange='dropchange_cam(this)' ";
       html_drop += " name='camdrop'>\n";
 
-      for (var indx = 0; indx <= camcnt; indx++) {
+      for (indx=0; indx<camcnt; indx++) {
         if (indx == 0) {
           html_nav += "<a onclick='cams_all_click();'>";
           html_nav += "All Cameras</a>\n";
           html_nav += "<a onclick='cams_scan_click();'>";
           html_nav += "Scan Cameras</a>\n";
-        } else {
-          html_nav += "<a onclick='cams_one_click(" + indx + ");'>";
-          html_nav += pData["cameras"][indx]["name"] + "</a>\n";
-          html_mov += "<a onclick='movies_click(" + indx + ");'>";
-          html_mov += pData["cameras"][indx]["name"] + "</a>";
+
+          html_drop += "<option ";
+          html_drop += " value='0'>default";
+          html_drop += "</option>\n";
         }
 
+        html_nav += "<a onclick='cams_one_click(" + indx + ");'>";
+        html_nav += pData["cameras"][indx]["name"] + "</a>\n";
+        html_mov += "<a onclick='movies_click(" + indx + ");'>";
+        html_mov += pData["cameras"][indx]["name"] + "</a>";
         html_drop += "<option ";
         html_drop += " value='"+pData["cameras"][indx]["id"]+"'>";
         html_drop += pData["cameras"][indx]["name"];
@@ -493,57 +508,19 @@
     function assign_actions() {
       var html_actions = "\n";
       html_actions += "  ";
-      html_actions += "<a onclick=\"send_action(";
-      html_actions += "'eventstart');\">";
-      html_actions += "Start Event</a>\n";
-
-      html_actions += "<a onclick=\"send_action(";
-      html_actions += "'eventend');\">";
-      html_actions += "End Event</a>\n";
-
-      html_actions += "<a onclick=\"send_action(";
-      html_actions += "'snapshot');\">";
-      html_actions += "Snapshot</a>\n";
-
-      html_actions += "<a onclick=\"send_action(";
-      html_actions += "'pause');\">";
-      html_actions += "Pause</a>\n";
-
-      html_actions += "<a onclick=\"send_action(";
-      html_actions += "'unpause');\">";
-      html_actions += "Unpause</a>\n";
-
-      html_actions += "<a onclick=\"send_action(";
-      html_actions += "'restart');\">";
-      html_actions += "Start/Restart</a>\n";
-
-      html_actions += "<a onclick=\"send_action(";
-      html_actions += "'stop');\">";
-      html_actions += "Stop</a>\n";
-
-      html_actions += "<a onclick=\"send_action(";
-      html_actions += "'config_write');\">";
-      html_actions += "Save Config</a>\n";
-
-      html_actions += "<a onclick=\"send_reload(";
-      html_actions += "'camera_add');\">";
-      html_actions += "Add Camera</a>\n";
-
-      html_actions += "<a onclick=\"send_reload(";
-      html_actions += "'camera_delete');\">";
-      html_actions += "Delete Camera</a>\n";
-
-      html_actions += "<a onclick=\"send_action(";
-      html_actions += "'action_user');\">";
-      html_actions += "User Action</a>\n";
-
       document.getElementById("divnav_actions").innerHTML = html_actions;
 
       return;
     }
 
     function assign_vals(camid) {
-      var pCfg = pData["configuration"]["cam"+camid];
+      var pCfg;
+
+     if (camid == 0) {
+       pCfg = pData["configuration"]["default"];
+     } else {
+       pCfg = pData["configuration"]["cam"+camid];
+     }
 
       for (jkey in pCfg) {
         if (document.getElementsByName(jkey)[0] != null) {
@@ -565,7 +542,7 @@
     }
 
     function assign_config_nav() {
-      var pCfg = pData['configuration']['cam0'];
+      var pCfg = pData['configuration']['default'];
       var pCat = pData['categories'];
       var html_nav = "\n";
 
@@ -581,7 +558,7 @@
     }
 
     function assign_config_item(jkey) {
-      var pCfg = pData['configuration']['cam0'];
+      var pCfg = pData['configuration']['default'];
       var html_cfg = "";
       var indx_lst = 0;
 
@@ -620,7 +597,7 @@
     }
 
     function assign_config_cat(jcat) {
-      var pCfg = pData['configuration']['cam0'];
+      var pCfg = pData['configuration']['default'];
       var pCat = pData['categories'];
       var html_cfg = "";
 
@@ -675,7 +652,7 @@
       xmlhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
           pData = JSON.parse(this.responseText);
-          gIndxCam  = 0;
+          gIndxCam  = -1;
           gGetImgs  = 1;
           gIndxScan = -1;
 
@@ -712,10 +689,7 @@
       } else {
         document.getElementById('divnav_config').style.display = 'block';
       }
-      if (gIndxCam == -1) {
-        gIndxCam = 0; 
-        gIndxScan = -1; 
-      }
+      gIndxScan = -1; 
       cams_timer_stop();
     }
 
@@ -728,10 +702,7 @@
       } else {
         document.getElementById('divnav_movies').style.display = 'block';
       }
-      if (gIndxCam == -1) {
-        gIndxCam = 0; 
-        gIndxScan = -1; 
-      }
+      gIndxScan = -1; 
       cams_timer_stop();
     }
 
@@ -743,10 +714,7 @@
       } else {
         document.getElementById('divnav_actions').style.display = 'block';
       }
-      if (gIndxCam == -1) {
-        gIndxCam = 0; 
-        gIndxScan = -1; 
-      }
+      gIndxScan = -1; 
     }
 
     function camera_buttons_ptz() {
@@ -786,6 +754,10 @@
 
     function image_pantilt() {
 
+      if (gIndxCam == -1 ) {
+        return;
+      }
+
       document.getElementById('pic'+ gIndxCam).addEventListener('click',function(event){
         bounds=this.getBoundingClientRect();
         var x = Math.floor(event.pageX - bounds.left - window.scrollX);
@@ -815,7 +787,7 @@
     function cams_reset() {
       var indx, camcnt;
       camcnt = pData['cameras']['count'];
-      for (indx = 0; indx <= camcnt; indx++) {
+      for (indx=0; indx<camcnt; indx++) {
         if (document.getElementById('pic'+indx) != null) { 
           document.getElementById('pic'+indx).src = ''; 
         }
@@ -825,16 +797,17 @@
     function cams_all_click() {
 
       var html_preview = "";
+      var indx;
       var camid;
 
       config_hideall();
       cams_timer_stop();
-      gIndxCam = 0;
+      gIndxCam = -1;
       gIndxScan = -1; 
 
       var camcnt = pData['cameras']['count'];
       html_preview += "</table>";
-      for (var indx = 1; indx <= camcnt; indx++) {
+      for (indx=0; indx<camcnt; indx++) {
         camid = pData['cameras'][indx].id;
         if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {
           html_preview += "<a><img id='pic" + indx + "' src="
@@ -880,8 +853,11 @@
 
       gIndxScan = -1; 
 
-      camid = pData['cameras'][index_cam].id;
+      if (gIndxCam == -1 ) {
+        return;
+      }
 
+      camid = pData['cameras'][index_cam].id;
       if ((pData['configuration']['cam'+camid].stream_preview_ptz.value == true)) {
         html_preview += camera_buttons_ptz();
       }
@@ -922,6 +898,11 @@
     function cams_one_fnc () {
       var img = new Image();
       var camid;
+
+      if (gIndxCam == -1 ) {
+        return;
+      }
+
       camid = pData['cameras'][gIndxCam]['id'];
 
       if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {
@@ -940,7 +921,7 @@
       if (gGetImgs == 1) {
         gGetImgs = 0;
         var camcnt = pData['cameras']['count'];
-        var camindx = 1;
+        var camindx = 0;
         var indx;
         var img   = new Array(4);
         var maxchk = 1;
@@ -948,12 +929,12 @@
           pic_url[indx] = '';
           img[indx] = new Image();
         }
-        while ((camindx <= camcnt) && (maxchk < 10)) {
+        while ((camindx < camcnt) && (maxchk < 10)) {
           maxchk++;
           camid = pData['cameras'][camindx]['id'];
           if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {
             for (indx = 0; indx <= 3; indx++) {
-               if ((pic_url[indx] == '') && (camindx <= camcnt)) {
+               if ((pic_url[indx] == '') && (camindx < camcnt)) {
                  pic_url[indx] = pData['cameras'][camindx]['url'] + "static/stream/t" + new Date().getTime();
                  img[indx].onload = cams_img_onload(camindx, indx);
                  img[indx].src = pic_url[indx];
@@ -979,8 +960,8 @@
         return;
       }
 
-      if(gIndxScan == camcnt) {
-        gIndxScan = 1;
+      if(gIndxScan == (camcnt-1)) {
+        gIndxScan = 0;
       } else { 
         gIndxScan++;
       }
@@ -1010,7 +991,11 @@
       var indx, movcnt, camid, uri;
       var fname,fsize,fdate;
 
-      camid = pData['cameras'][gIndxCam].id;
+      if (gIndxCam == -1 ) {
+        return;
+      }
+
+      camid = assign_camid();
       uri = pHostFull+'/'+camid+'/movies/';
 
       movcnt = pMovies['movies'][gIndxCam].count;
@@ -1077,10 +1062,16 @@
 
     function movies_click(index_cam) {
       var camid, indx, camcnt, uri;
-      camid = pData['cameras'][index_cam].id;
-      uri = pHostFull+'/'+camid+'/movies.json';
+
+      if (gIndxCam == -1 ) {
+        return;
+      }
+
       gIndxCam = index_cam;
       gIndxScan = -1; 
+      camid = assign_camid();
+      uri = pHostFull+'/'+camid+'/movies.json';
+
       config_hideall();
       cams_reset();
       var xmlhttp = new XMLHttpRequest();
@@ -1096,5 +1087,6 @@
 
   </script>
 
-</body>
-</html>
+
+
+</body></html>
