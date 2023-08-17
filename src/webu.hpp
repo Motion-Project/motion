@@ -79,7 +79,7 @@
         size_t                      resp_used;      /* The amount of the response page used */
 
         std::string                 lang;           /* Two character abbreviation for locale language*/
-        int                         threadnbr;      /* Thread number provided from the uri */
+        int                         camindx;        /* Index number of the cam */
         enum WEBUI_CNCT             cnct_type;      /* Type of connection we are processing */
 
         int                         post_sz;        /* The number of entries in the post info */

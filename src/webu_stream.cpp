@@ -119,10 +119,10 @@ static void webu_stream_mjpeg_getimg(ctx_webui *webui)
     /* Copy jpg from the motion loop thread */
     pthread_mutex_lock(&webui->cam->stream.mutex);
         if ((!webui->cam->detecting_motion) &&
-            (webui->motapp->cam_list[webui->threadnbr]->conf->stream_motion)) {
+            (webui->motapp->cam_list[webui->camindx]->conf->stream_motion)) {
             webui->stream_fps = 1;
         } else {
-            webui->stream_fps = webui->motapp->cam_list[webui->threadnbr]->conf->stream_maxrate;
+            webui->stream_fps = webui->motapp->cam_list[webui->camindx]->conf->stream_maxrate;
         }
         if (local_stream->jpeg_data == NULL) {
             pthread_mutex_unlock(&webui->cam->stream.mutex);
@@ -244,14 +244,14 @@ static void webu_stream_static_getimg(ctx_webui *webui)
 static int webu_stream_checks(ctx_webui *webui)
 {
     pthread_mutex_lock(&webui->motapp->mutex_camlst);
-        if (webui->threadnbr == -1) {
+        if (webui->camindx == -1) {
             MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
                 , _("Invalid thread specified: %s"),webui->url.c_str());
             pthread_mutex_unlock(&webui->motapp->mutex_camlst);
             return -1;
         }
 
-        if (webui->threadnbr < 0) {
+        if (webui->camindx < 0) {
             MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
                 , _("Invalid thread specified: %s"),webui->url.c_str());
             pthread_mutex_unlock(&webui->motapp->mutex_camlst);

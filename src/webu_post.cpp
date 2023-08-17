@@ -80,14 +80,14 @@ static void webu_post_cam_delete(ctx_webui *webui)
         }
     }
 
-    if (webui->threadnbr == -1) {
+    if (webui->camindx == -1) {
         MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "No camera specified for deletion." );
         return;
     } else {
         MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Deleting camera.");
     }
 
-    webui->motapp->cam_delete = webui->threadnbr;
+    webui->motapp->cam_delete = webui->camindx;
 
     maxcnt = 100;
     indx = 0;
@@ -109,7 +109,7 @@ void webu_post_cmdthrd(ctx_webui *webui)
     int indx, camid;
 
     webui->post_cmd = "";
-    webui->threadnbr = -1;
+    webui->camindx = -1;
     camid = -1;
 
     for (indx = 0; indx < webui->post_sz; indx++) {
@@ -139,7 +139,7 @@ void webu_post_cmdthrd(ctx_webui *webui)
 
     for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
         if (webui->motapp->cam_list[indx]->device_id == camid) {
-            webui->threadnbr = indx;
+            webui->camindx = indx;
             break;
         }
     }
@@ -164,12 +164,12 @@ void webu_post_action_eventend(ctx_webui *webui)
         }
     }
 
-    if (webui->threadnbr == -1) {
+    if (webui->camindx == -1) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             webui->motapp->cam_list[indx]->event_stop = true;
         }
     } else {
-        webui->motapp->cam_list[webui->threadnbr]->event_stop = true;
+        webui->motapp->cam_list[webui->camindx]->event_stop = true;
     }
 
 }
@@ -192,12 +192,12 @@ void webu_post_action_eventstart(ctx_webui *webui)
         }
     }
 
-    if (webui->threadnbr == -1) {
+    if (webui->camindx == -1) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             webui->motapp->cam_list[indx]->event_user = true;
         }
     } else {
-        webui->motapp->cam_list[webui->threadnbr]->event_user = true;
+        webui->motapp->cam_list[webui->camindx]->event_user = true;
     }
 
 }
@@ -220,12 +220,12 @@ void webu_post_action_snapshot(ctx_webui *webui)
         }
     }
 
-    if (webui->threadnbr == -1) {
+    if (webui->camindx == -1) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             webui->motapp->cam_list[indx]->snapshot = true;
         }
     } else {
-        webui->motapp->cam_list[webui->threadnbr]->snapshot = true;
+        webui->motapp->cam_list[webui->camindx]->snapshot = true;
     }
 
 }
@@ -248,12 +248,12 @@ void webu_post_action_pause(ctx_webui *webui)
         }
     }
 
-    if (webui->threadnbr == -1) {
+    if (webui->camindx == -1) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             webui->motapp->cam_list[indx]->pause = true;
         }
     } else {
-        webui->motapp->cam_list[webui->threadnbr]->pause = true;
+        webui->motapp->cam_list[webui->camindx]->pause = true;
     }
 
 }
@@ -276,12 +276,12 @@ void webu_post_action_unpause(ctx_webui *webui)
         }
     }
 
-    if (webui->threadnbr == -1) {
+    if (webui->camindx == -1) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             webui->motapp->cam_list[indx]->pause = false;
         }
     } else {
-        webui->motapp->cam_list[webui->threadnbr]->pause = false;
+        webui->motapp->cam_list[webui->camindx]->pause = false;
     }
 
 }
@@ -303,7 +303,7 @@ void webu_post_action_restart(ctx_webui *webui)
             }
         }
     }
-    if (webui->threadnbr == -1) {
+    if (webui->camindx == -1) {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all cameras"));
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             webui->motapp->cam_list[indx]->restart_dev = true;
@@ -312,9 +312,9 @@ void webu_post_action_restart(ctx_webui *webui)
     } else {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Restarting camera %d")
-            , webui->motapp->cam_list[webui->threadnbr]->device_id);
-        webui->motapp->cam_list[webui->threadnbr]->restart_dev = true;
-        webui->motapp->cam_list[webui->threadnbr]->finish_dev = true;
+            , webui->motapp->cam_list[webui->camindx]->device_id);
+        webui->motapp->cam_list[webui->camindx]->restart_dev = true;
+        webui->motapp->cam_list[webui->camindx]->finish_dev = true;
     }
 }
 
@@ -335,7 +335,7 @@ void webu_post_action_stop(ctx_webui *webui)
             }
         }
     }
-    if (webui->threadnbr == -1) {
+    if (webui->camindx == -1) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Stopping cam %d")
@@ -348,11 +348,11 @@ void webu_post_action_stop(ctx_webui *webui)
     } else {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Stopping cam %d")
-            , webui->motapp->cam_list[webui->threadnbr]->device_id);
-        webui->motapp->cam_list[webui->threadnbr]->restart_dev = false;
-        webui->motapp->cam_list[webui->threadnbr]->event_stop = true;
-        webui->motapp->cam_list[webui->threadnbr]->event_user = false;
-        webui->motapp->cam_list[webui->threadnbr]->finish_dev = true;
+            , webui->motapp->cam_list[webui->camindx]->device_id);
+        webui->motapp->cam_list[webui->camindx]->restart_dev = false;
+        webui->motapp->cam_list[webui->camindx]->event_stop = true;
+        webui->motapp->cam_list[webui->camindx]->event_user = false;
+        webui->motapp->cam_list[webui->camindx]->finish_dev = true;
     }
 
 }
@@ -377,7 +377,7 @@ void webu_post_action_user(ctx_webui *webui)
         }
     }
 
-    if (webui->threadnbr == -1) {
+    if (webui->camindx == -1) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             cam = webui->motapp->cam_list[indx];
             cam->action_user[0] = '\0';
@@ -401,7 +401,7 @@ void webu_post_action_user(ctx_webui *webui)
             util_exec_command(cam, cam->conf->on_action_user.c_str(), NULL, 0);
         }
     } else {
-        cam = webui->motapp->cam_list[webui->threadnbr];
+        cam = webui->motapp->cam_list[webui->camindx];
         cam->action_user[0] = '\0';
         for (indx2 = 0; indx2 < webui->post_sz; indx2++) {
             if (mystreq(webui->post_info[indx2].key_nm, "user")) {
@@ -455,7 +455,7 @@ static void webu_post_config(ctx_webui *webui)
     std::string tmpname;
     ctx_params *wact;
 
-    if (webui->threadnbr == -1) {
+    if (webui->camindx == -1) {
         return;
     }
 
@@ -505,7 +505,7 @@ static void webu_post_config(ctx_webui *webui)
                         , config_parms[indx2].parm_name
                         , webui->post_info[indx].key_val);
                 } else {
-                    conf_edit_set(webui->motapp->cam_list[webui->threadnbr]->conf
+                    conf_edit_set(webui->motapp->cam_list[webui->camindx]->conf
                         , config_parms[indx2].parm_name
                         , webui->post_info[indx].key_val);
                 }
@@ -522,7 +522,7 @@ void webu_post_ptz(ctx_webui *webui)
     ctx_dev *cam;
     ctx_params *wact;
 
-    if (webui->threadnbr == -1) {
+    if (webui->camindx == -1) {
         return;
     }
 
@@ -537,7 +537,7 @@ void webu_post_ptz(ctx_webui *webui)
             }
         }
     }
-    cam = webui->motapp->cam_list[webui->threadnbr];
+    cam = webui->motapp->cam_list[webui->camindx];
 
     if ((webui->post_cmd == "pan_left") &&
         (cam->conf->ptz_pan_left != "")) {
@@ -632,8 +632,8 @@ void webu_post_main(ctx_webui *webui)
 
     } else {
         MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO
-            , _("Invalid action requested: command: >%s< threadnbr : >%d< ")
-            , webui->post_cmd.c_str(), webui->threadnbr);
+            , _("Invalid action requested: command: >%s< camindx : >%d< ")
+            , webui->post_cmd.c_str(), webui->camindx);
     }
 
 }

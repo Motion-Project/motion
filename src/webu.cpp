@@ -78,7 +78,7 @@ static void webu_context_init(ctx_motapp *motapp, ctx_webui *webui)
     webui->cnct_type     = WEBUI_CNCT_UNKNOWN;
     webui->resp_type     = WEBUI_RESP_HTML;             /* Default to html response */
     webui->cnct_method   = WEBUI_METHOD_GET;
-    webui->threadnbr      = -1;
+    webui->camindx      = -1;
 
     tmplang = setlocale(LC_ALL, NULL);
     if (tmplang == NULL) {
@@ -132,14 +132,14 @@ static void webu_parms_edit(ctx_webui *webui)
 
     for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
         if (webui->motapp->cam_list[indx]->device_id == device_id) {
-            webui->threadnbr = indx;
+            webui->camindx = indx;
             webui->cam = webui->motapp->cam_list[indx];
         }
     }
 
     MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
         , "camid: >%s< thread: >%d< cmd1: >%s< cmd2: >%s< cmd3: >%s<"
-        , webui->uri_camid.c_str(), webui->threadnbr
+        , webui->uri_camid.c_str(), webui->camindx
         , webui->uri_cmd1.c_str(), webui->uri_cmd2.c_str()
         , webui->uri_cmd3.c_str());
 
