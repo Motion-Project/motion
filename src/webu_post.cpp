@@ -103,21 +103,21 @@ static void webu_post_cam_delete(ctx_webui *webui)
 
 }
 
-/* Get the command and thread number from the post data */
-void webu_post_cmdthrd(ctx_webui *webui)
+/* Get the command, device_id and camera index from the post data */
+void webu_post_cmdindx(ctx_webui *webui)
 {
-    int indx, camid;
+    int indx;
 
     webui->post_cmd = "";
     webui->camindx = -1;
-    camid = -1;
+    webui->device_id = -1;
 
     for (indx = 0; indx < webui->post_sz; indx++) {
         if (mystreq(webui->post_info[indx].key_nm, "command")) {
             webui->post_cmd = webui->post_info[indx].key_val;
         }
         if (mystreq(webui->post_info[indx].key_nm, "camid")) {
-            camid = atoi(webui->post_info[indx].key_val);
+            webui->device_id = atoi(webui->post_info[indx].key_val);
         }
 
         MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,"key: %s  value: %s "
@@ -131,14 +131,14 @@ void webu_post_cmdthrd(ctx_webui *webui)
             , "Invalid post request.  No command");
         return;
     }
-    if (camid == -1) {
+    if (webui->device_id == -1) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , "Invalid post request.  No camera id provided");
         return;
     }
 
     for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
-        if (webui->motapp->cam_list[indx]->device_id == camid) {
+        if (webui->motapp->cam_list[indx]->device_id == webui->device_id) {
             webui->camindx = indx;
             break;
         }
@@ -164,7 +164,7 @@ void webu_post_action_eventend(ctx_webui *webui)
         }
     }
 
-    if (webui->camindx == -1) {
+    if (webui->device_id == 0) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             webui->motapp->cam_list[indx]->event_stop = true;
         }
@@ -192,7 +192,7 @@ void webu_post_action_eventstart(ctx_webui *webui)
         }
     }
 
-    if (webui->camindx == -1) {
+    if (webui->device_id == 0) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             webui->motapp->cam_list[indx]->event_user = true;
         }
@@ -220,7 +220,7 @@ void webu_post_action_snapshot(ctx_webui *webui)
         }
     }
 
-    if (webui->camindx == -1) {
+    if (webui->device_id == 0) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             webui->motapp->cam_list[indx]->snapshot = true;
         }
@@ -248,7 +248,7 @@ void webu_post_action_pause(ctx_webui *webui)
         }
     }
 
-    if (webui->camindx == -1) {
+    if (webui->device_id == 0) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             webui->motapp->cam_list[indx]->pause = true;
         }
@@ -276,7 +276,7 @@ void webu_post_action_unpause(ctx_webui *webui)
         }
     }
 
-    if (webui->camindx == -1) {
+    if (webui->device_id == 0) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             webui->motapp->cam_list[indx]->pause = false;
         }
@@ -303,7 +303,7 @@ void webu_post_action_restart(ctx_webui *webui)
             }
         }
     }
-    if (webui->camindx == -1) {
+    if (webui->device_id == 0) {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all cameras"));
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             webui->motapp->cam_list[indx]->restart_dev = true;
@@ -335,7 +335,7 @@ void webu_post_action_stop(ctx_webui *webui)
             }
         }
     }
-    if (webui->camindx == -1) {
+    if (webui->device_id == 0) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Stopping cam %d")
@@ -377,7 +377,7 @@ void webu_post_action_user(ctx_webui *webui)
         }
     }
 
-    if (webui->camindx == -1) {
+    if (webui->device_id == 0) {
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
             cam = webui->motapp->cam_list[indx];
             cam->action_user[0] = '\0';
@@ -579,7 +579,7 @@ void webu_post_ptz(ctx_webui *webui)
 void webu_post_main(ctx_webui *webui)
 {
 
-    webu_post_cmdthrd(webui);
+    webu_post_cmdindx(webui);
 
     if (webui->post_cmd == "")  {
         return;

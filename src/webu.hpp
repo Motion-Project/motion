@@ -80,6 +80,7 @@
 
         std::string                 lang;           /* Two character abbreviation for locale language*/
         int                         camindx;        /* Index number of the cam */
+        int                         device_id;      /* Device id number requested */
         enum WEBUI_CNCT             cnct_type;      /* Type of connection we are processing */
 
         int                         post_sz;        /* The number of entries in the post info */
