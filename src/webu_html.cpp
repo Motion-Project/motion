@@ -1335,7 +1335,7 @@ static void webu_html_script_cams_all_fnc(ctx_webui *webui)
         "          camid = pData['cameras'][camindx]['id'];\n"
         "          if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {\n"
         "            for (indx = 0; indx <= 3; indx++) {\n"
-        "               if ((pic_url[indx] == '') && (camindx <= camcnt)) {\n"
+        "               if ((pic_url[indx] == '') && (camindx < camcnt)) {\n"
         "                 pic_url[indx] = pData['cameras'][camindx]['url'] + \"static/stream/t\" + new Date().getTime();\n"
         "                 img[indx].onload = cams_img_onload(camindx, indx);\n"
         "                 img[indx].src = pic_url[indx];\n"
