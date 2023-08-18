@@ -1695,7 +1695,7 @@ static int netcam_open_context(ctx_netcam *netcam)
     if ((retcd < 0) || (netcam->interrupted) || (netcam->finish) ) {
         if (netcam->status == NETCAM_NOTCONNECTED) {
             av_strerror(retcd, errstr, sizeof(errstr));
-            MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Unable to open camera(%s): %s")
                 , netcam->cameratype, netcam->camera_name, errstr);
         }
@@ -1840,10 +1840,10 @@ static int netcam_connect(ctx_netcam *netcam)
         }
 
         if (netcam->capture_rate < netcam->src_fps) {
-            MOTPLS_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+            MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
                 , _("%s: Capture FPS less than camera FPS. Decoding errors will occur.")
                 , netcam->cameratype);
-            MOTPLS_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+            MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
                 , _("%s: Capture FPS should be greater than camera FPS.")
                 , netcam->cameratype);
         }
@@ -1945,7 +1945,7 @@ static void netcam_handler_reconnect(ctx_netcam *netcam)
 
     if ((netcam->status == NETCAM_CONNECTED) ||
         (netcam->status == NETCAM_READINGIMAGE)) {
-        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("%s: Reconnecting with camera...."),netcam->cameratype);
     }
     netcam->status = NETCAM_RECONNECTING;

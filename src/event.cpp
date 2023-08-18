@@ -456,10 +456,8 @@ static void event_extpipe_end(ctx_dev *cam, motion_event evnt
         cam->extpipe_open = 0;
         fflush(cam->extpipe);
         MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
-            ,_("CLOSING: extpipe file desc %d, error state %d")
+            ,_("Closing extpipe file %d, error state %d")
             ,fileno(cam->extpipe), ferror(cam->extpipe));
-        MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "pclose return: %d",
-                   pclose(cam->extpipe));
 
         if ((cam->conf->movie_retain == "secondary") && (cam->algsec_inuse)) {
             if (cam->algsec->isdetected == false) {
@@ -496,8 +494,8 @@ static void event_extpipe_start(ctx_dev *cam, motion_event evnt
         mystrftime(cam, stamp, sizeof(stamp), cam->conf->movie_filename.c_str(), ts1, NULL, 0);
         retcd = snprintf(cam->extpipefilename, PATH_MAX - 4, "%s/%s"
             , cam->conf->target_dir.c_str(), stamp);
-        if (retcd <0) {
-            MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
+        if (retcd < 0) {
+            MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error %d"), retcd);
         }
 
         if (access(cam->conf->target_dir.c_str(), W_OK)!= 0) {
@@ -535,9 +533,8 @@ static void event_extpipe_start(ctx_dev *cam, motion_event evnt
                 , _("Error specifying command line: %s"), cam->extpipecmdline);
             return;
         }
-        MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("pipe: %s"), cam->extpipecmdline);
-
-        MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "cam->moviefps: %d", cam->movie_fps);
+        MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
+            , _("fps %d pipe: %s"), cam->movie_fps, cam->extpipecmdline);
 
         event(cam, EVENT_FILECREATE, NULL, cam->extpipefilename, (void *)FTYPE_MOVIE, ts1);
         dbse_exec(cam, cam->extpipefilename, FTYPE_MOVIE, ts1, "movie_start");
@@ -566,7 +563,6 @@ static void event_extpipe_put(ctx_dev *cam, motion_event evnt
 
     /* Check use_extpipe enabled and ext_pipe not NULL */
     if ((cam->conf->movie_extpipe_use) && (cam->extpipe != NULL)) {
-        MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO, _("Using extpipe"));
         passthrough = mycheck_passthrough(cam);
         /* Check that is open */
         if ((cam->extpipe_open) && (fileno(cam->extpipe) > 0)) {

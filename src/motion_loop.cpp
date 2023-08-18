@@ -808,7 +808,7 @@ static void mlp_retry(ctx_dev *cam)
     if ((cam->device_status == STATUS_CLOSED) &&
         (cam->frame_curr_ts.tv_sec % 10 == 0) &&
         (cam->shots == 0)) {
-        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Retrying until successful connection with camera"));
 
         mlp_cam_start(cam);
