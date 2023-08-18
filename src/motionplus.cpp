@@ -55,9 +55,20 @@ static void motpls_signal_process(ctx_motapp *motapp)
             }
         }
         break;
-    case MOTPLS_SIGNAL_SIGHUP:      /* Restart the threads */
+    case MOTPLS_SIGNAL_SIGHUP:      /* Reload the parameters and restart*/
         motapp->reload_all = true;
-        /*FALLTHROUGH*/
+        motapp->webcontrol_finish = true;
+        for (indx=0; indx<motapp->cam_cnt; indx++) {
+            motapp->cam_list[indx]->event_stop = true;
+            motapp->cam_list[indx]->finish_dev = true;
+            motapp->cam_list[indx]->restart_dev = false;
+        }
+        for (indx=0; indx<motapp->snd_cnt; indx++) {
+            motapp->snd_list[indx]->event_stop = true;
+            motapp->snd_list[indx]->finish_dev = true;
+            motapp->snd_list[indx]->restart_dev = false;
+        }
+        break;
     case MOTPLS_SIGNAL_SIGTERM:     /* Quit application */
 
         motapp->webcontrol_finish = true;
