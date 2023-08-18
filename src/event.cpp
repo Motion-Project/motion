@@ -883,6 +883,10 @@ struct event_handlers event_handlers[] = {
     event_movie_end
     },
     {
+    EVENT_MOVIE_END,
+    event_extpipe_end
+    },
+    {
     EVENT_END,
     event_extpipe_end
     },
