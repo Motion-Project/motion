@@ -473,7 +473,7 @@ static void mlp_init_firstimage(ctx_dev *cam)
 static void mlp_check_szimg(ctx_dev *cam)
 {
     if ((cam->imgs.width % 8) || (cam->imgs.height % 8)) {
-        MOTPLS_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             ,_("Image width (%d) or height(%d) requested is not modulo 8.")
             ,cam->imgs.width, cam->imgs.height);
         cam->device_status = STATUS_RESET;
