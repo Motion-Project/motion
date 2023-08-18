@@ -829,6 +829,7 @@ void libcam_start(ctx_dev *cam)
             cam->device_status = STATUS_OPENED;
         }
     #else
+        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("libcam not available"));
         cam->device_status = STATUS_CLOSED;
     #endif
 }

@@ -1280,6 +1280,7 @@ void util_exec_command(ctx_dev *cam, const char *command, char *filename, int fi
 {
     char stamp[PATH_MAX];
     timespec tmpts;
+    int pid;
 
     if (cam->current_image == NULL) {
         clock_gettime(CLOCK_REALTIME, &tmpts);
@@ -1288,7 +1289,8 @@ void util_exec_command(ctx_dev *cam, const char *command, char *filename, int fi
         mystrftime(cam, stamp, sizeof(stamp), command, &cam->current_image->imgts, filename, filetype);
     }
 
-    if (!fork()) {
+    pid = fork();
+    if (!pid) {
         /* Detach from parent */
         setsid();
 
@@ -1299,6 +1301,13 @@ void util_exec_command(ctx_dev *cam, const char *command, char *filename, int fi
             ,_("Unable to start external command '%s'"), stamp);
 
         exit(1);
+    }
+
+    if (pid > 0) {
+        waitpid(pid, NULL, 0);
+    } else {
+        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+            ,_("Unable to start external command '%s'"), stamp);
     }
 
     MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO
