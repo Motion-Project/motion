@@ -418,7 +418,7 @@ static mhdrslt webu_failauth_check(ctx_webui *webui)
             (it->authenticated == false) &&
             (it->conn_nbr > webui->motapp->conf->webcontrol_lock_attempts)) {
             MOTPLS_LOG(EMG, TYPE_STREAM, NO_ERRNO
-                ,_("Ignoring connection from: %s")
+                , "Ignoring connection from: %s"
                 , webui->clientip.c_str());
             it->conn_time = tm_cnct;
             if (webui->motapp->conf->webcontrol_lock_script != "") {
