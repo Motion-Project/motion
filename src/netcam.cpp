@@ -565,8 +565,13 @@ static int netcam_decode_video(ctx_netcam *netcam)
             MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Error sending packet to codec: %s")
                 ,netcam->cameratype, errstr);
-            return -1;
-        }
+            /* This is non fatal for file processing */
+            if (mystreq(netcam->service, "file")) {
+                return 0;
+            } else {
+                return -1;
+            }
+      }
 
         if (netcam->hw_type == AV_HWDEVICE_TYPE_VAAPI) {
             retcd = netcam_decode_vaapi(netcam);
