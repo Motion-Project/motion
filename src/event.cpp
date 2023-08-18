@@ -445,7 +445,6 @@ static void on_movie_end_command(ctx_dev *cam, motion_event evnt
 static void event_extpipe_end(ctx_dev *cam, motion_event evnt
         ,ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
 {
-
     int retcd;
     (void)evnt;
     (void)img_data;
@@ -453,11 +452,10 @@ static void event_extpipe_end(ctx_dev *cam, motion_event evnt
     (void)ftype;
 
     if (cam->extpipe_open) {
+        MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO,_("Closing extpipe"));
         cam->extpipe_open = 0;
         fflush(cam->extpipe);
-        MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
-            ,_("Closing extpipe file %d, error state %d")
-            ,fileno(cam->extpipe), ferror(cam->extpipe));
+        pclose(cam->extpipe);
 
         if ((cam->conf->movie_retain == "secondary") && (cam->algsec_inuse)) {
             if (cam->algsec->isdetected == false) {
@@ -553,16 +551,16 @@ static void event_extpipe_start(ctx_dev *cam, motion_event evnt
 static void event_extpipe_put(ctx_dev *cam, motion_event evnt
         ,ctx_image_data *img_data, char *fname, void *ftype, struct timespec *ts1)
 {
-
-    int passthrough;
-
     (void)evnt;
     (void)fname;
     (void)ftype;
     (void)ts1;
+    int passthrough;
 
     /* Check use_extpipe enabled and ext_pipe not NULL */
-    if ((cam->conf->movie_extpipe_use) && (cam->extpipe != NULL)) {
+    if ((cam->conf->movie_extpipe_use) &&
+        (cam->extpipe != NULL) &&
+        (cam->finish_dev == false)) {
         passthrough = mycheck_passthrough(cam);
         /* Check that is open */
         if ((cam->extpipe_open) && (fileno(cam->extpipe) > 0)) {
