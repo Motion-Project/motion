@@ -149,7 +149,6 @@ static int webu_mpegts_getimg(ctx_webui *webui)
 {
     ctx_stream_data *local_stream;
     struct timespec curr_ts;
-    int conf_fps;
 
     if ((webui->motapp->webcontrol_finish) || (webui->cam->finish_dev)) {
         webu_mpegts_resetpos(webui);
@@ -175,21 +174,12 @@ static int webu_mpegts_getimg(ctx_webui *webui)
     } else {
         return 0;
     }
-    conf_fps = webui->motapp->cam_list[webui->camindx]->conf->stream_maxrate;
     pthread_mutex_lock(&webui->cam->stream.mutex);
-        /* Do not delay at the startup of the stream.*/
-        if ((curr_ts.tv_sec - webui->start_time.tv_sec) > 2) {
-            webui->stream_fps--;
-            if (conf_fps >= webui->stream_fps) {
-                if ((webui->cam->detecting_motion == false) &&
-                    (webui->motapp->cam_list[webui->camindx]->conf->stream_motion)) {
-                    webui->stream_fps = 1;
-                } else {
-                    webui->stream_fps = conf_fps;
-                }
-            }
+        if ((webui->cam->detecting_motion == false) &&
+            (webui->motapp->cam_list[webui->camindx]->conf->stream_motion)) {
+            webui->stream_fps = 1;
         } else {
-            webui->stream_fps = 30;
+            webui->stream_fps = webui->motapp->cam_list[webui->camindx]->conf->stream_maxrate;
         }
         if (local_stream->image == NULL) {
             pthread_mutex_unlock(&webui->cam->stream.mutex);
