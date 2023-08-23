@@ -270,6 +270,7 @@ int webu_mpegts_open(ctx_webui *webui)
     const AVCodec   *codec;
     AVDictionary    *opts;
 
+    opts = NULL;
     webui->picture = NULL;
     webui->ctx_codec = NULL;
     webui->fmtctx = NULL;
