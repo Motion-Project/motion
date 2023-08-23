@@ -51,5 +51,6 @@ motionplus_SOURCES = \
 	webu_html.hpp      webu_html.cpp \
 	webu_json.hpp      webu_json.cpp \
 	webu_post.hpp      webu_post.cpp \
-	webu_stream.hpp    webu_stream.cpp
+	webu_stream.hpp    webu_stream.cpp \
+	webu_mpegts.hpp    webu_mpegts.cpp
 

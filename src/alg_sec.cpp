@@ -51,7 +51,7 @@ static void algsec_image_show(ctx_dev *cam, Mat &mat_dst)
      * web stream will have something to start with.  After feeding in at least
      * the first image, we rely upon the connection count to tell us whether we
      * need to expend the CPU to compress and load the secondary images */
-    if ((cam->stream.secondary.cnct_count >0) ||
+    if ((cam->stream.secondary.jpg_cnct >0) ||
         (cam->imgs.size_secondary == 0) ||
         (cam->motapp->conf->log_level >= DBG)) {
 

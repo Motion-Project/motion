@@ -34,14 +34,19 @@
     };
 
     enum WEBUI_CNCT {
-        WEBUI_CNCT_CONTROL     = 0,
-        WEBUI_CNCT_FULL        = 1,
-        WEBUI_CNCT_SUB         = 2,
-        WEBUI_CNCT_MOTION      = 3,
-        WEBUI_CNCT_SOURCE      = 4,
-        WEBUI_CNCT_SECONDARY   = 5,
-        WEBUI_CNCT_FILE        = 6,
-        WEBUI_CNCT_UNKNOWN     = 99
+        WEBUI_CNCT_CONTROL,
+        WEBUI_CNCT_FILE,
+        WEBUI_CNCT_JPG_FULL,
+        WEBUI_CNCT_JPG_SUB,
+        WEBUI_CNCT_JPG_MOTION,
+        WEBUI_CNCT_JPG_SOURCE,
+        WEBUI_CNCT_JPG_SECONDARY,
+        WEBUI_CNCT_TS_FULL,
+        WEBUI_CNCT_TS_SUB,
+        WEBUI_CNCT_TS_MOTION,
+        WEBUI_CNCT_TS_SOURCE,
+        WEBUI_CNCT_TS_SECONDARY,
+        WEBUI_CNCT_UNKNOWN
     };
 
     enum WEBUI_RESP {
@@ -73,10 +78,16 @@
         int                         authenticated;  /* Boolean for whether authentication has been passed */
 
         std::string                 resp_page;      /* The response that will be sent */
-        char                        *resp_image;    /* Response image to provide to user */
+        unsigned char               *resp_image;    /* Response image to provide to user */
         int                         resp_type;      /* indicator for the type of response to provide. */
         size_t                      resp_size;      /* The allocated size of the response */
         size_t                      resp_used;      /* The amount of the response page used */
+        size_t                      aviobuf_sz;     /* The size of the mpegts avio buffer */
+        struct timespec             start_time;     /* Start time of the mpegts stream*/
+
+        AVFormatContext             *fmtctx;
+        AVCodecContext              *ctx_codec;
+        AVFrame                     *picture;       /* contains default image pointers */
 
         std::string                 lang;           /* Two character abbreviation for locale language*/
         int                         camindx;        /* Index number of the cam */

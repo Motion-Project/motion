@@ -17,15 +17,10 @@
  *    Copyright 2020-2023 MotionMrDave@gmail.com
 */
 
-#ifndef _INCLUDE_WEBU_STREAM_HPP_
-#define _INCLUDE_WEBU_STREAM_HPP_
+#ifndef _INCLUDE_WEBU_MPEGTS_HPP_
+#define _INCLUDE_WEBU_MPEGTS_HPP_
 
-    void webu_stream_init(ctx_dev *cam);
-    void webu_stream_deinit(ctx_dev *cam);
-    void webu_stream_getimg(ctx_dev *cam, ctx_image_data *img_data);
+    mhdrslt webu_mpegts_main(ctx_webui *webui);
+    void webu_mpegts_free_context(ctx_webui *webui);
 
-    mhdrslt webu_stream_main(ctx_webui *webui);
-    void webu_stream_delay(ctx_webui *webui);
-    void webu_stream_checkbuffers(ctx_webui *webui);
-
-#endif /* _INCLUDE_WEBU_STREAM_HPP_ */
+#endif /* _INCLUDE_WEBU_MPEGTS_HPP_ */

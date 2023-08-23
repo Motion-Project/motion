@@ -962,7 +962,8 @@ static void mlp_overlay(ctx_dev *cam)
         ((cam->conf->picture_output_motion != "off") ||
         cam->conf->movie_output_motion ||
         cam->motapp->conf->setup_mode ||
-        (cam->stream.motion.cnct_count > 0))) {
+        (cam->stream.motion.jpg_cnct > 0) ||
+        (cam->stream.motion.ts_cnct > 0))) {
         draw_smartmask(cam, cam->imgs.image_motion.image_norm);
     }
 
@@ -970,7 +971,8 @@ static void mlp_overlay(ctx_dev *cam)
         ((cam->conf->picture_output_motion != "off") ||
         cam->conf->movie_output_motion ||
         cam->motapp->conf->setup_mode ||
-        (cam->stream.motion.cnct_count > 0))) {
+        (cam->stream.motion.jpg_cnct > 0) ||
+        (cam->stream.motion.ts_cnct > 0))) {
         draw_largest_label(cam, cam->imgs.image_motion.image_norm);
     }
 
@@ -978,7 +980,8 @@ static void mlp_overlay(ctx_dev *cam)
         ((cam->conf->picture_output_motion != "off") ||
         cam->conf->movie_output_motion ||
         cam->motapp->conf->setup_mode ||
-        (cam->stream.motion.cnct_count > 0))) {
+        (cam->stream.motion.jpg_cnct > 0) ||
+        (cam->stream.motion.ts_cnct > 0))) {
         draw_fixed_mask(cam, cam->imgs.image_motion.image_norm);
     }
 
@@ -992,7 +995,9 @@ static void mlp_overlay(ctx_dev *cam)
                   cam->imgs.width - 10, 10, tmp, cam->text_scale);
     }
 
-    if (cam->motapp->conf->setup_mode || (cam->stream.motion.cnct_count > 0)) {
+    if (cam->motapp->conf->setup_mode ||
+        (cam->stream.motion.jpg_cnct > 0) ||
+        (cam->stream.motion.ts_cnct > 0)) {
         sprintf(tmp, "D:%5d L:%3d N:%3d", cam->current_image->diffs,
             cam->current_image->total_labels, cam->noise);
         draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
