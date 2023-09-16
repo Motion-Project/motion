@@ -381,7 +381,8 @@ mhdrslt webu_mpegts_main(ctx_webui *webui)
         }
     }
 
-    MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TRANSFER_ENCODING, "BINARY");
+    MHD_add_response_header(response, "Content-Transfer-Encoding", "BINARY");
+    MHD_add_response_header(response, "Content-Type", "application/octet-stream");
 
     retcd = MHD_queue_response (webui->connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
