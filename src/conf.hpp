@@ -153,6 +153,7 @@
 
         /* Webcontrol configuration parameters */
         int             webcontrol_port;
+        int             webcontrol_port2;
         std::string     webcontrol_base_path;
         bool            webcontrol_ipv6;
         bool            webcontrol_localhost;

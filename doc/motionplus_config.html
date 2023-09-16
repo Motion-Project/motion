@@ -415,29 +415,30 @@
           <tbody>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_port2" >webcontrol_port2</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_ipv6" >webcontrol_ipv6</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_parms" >webcontrol_parms</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_parms" >webcontrol_parms</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_interface" >webcontrol_interface</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_auth_method" >webcontrol_auth_method</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_tls" >webcontrol_tls</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_tls" >webcontrol_tls</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_cert" >webcontrol_cert</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_key" >webcontrol_key</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_headers" >webcontrol_headers</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_actions" >webcontrol_actions</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_actions" >webcontrol_actions</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_html" >webcontrol_html</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_base_path" >webcontrol_base_path</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_attempts" >webcontrol_lock_attempts</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_minutes" >webcontrol_lock_minutes</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_minutes" >webcontrol_lock_minutes</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_script" >webcontrol_lock_script</a> </td>
             </tr>
             </tbody>
@@ -1962,6 +1963,15 @@
         <ul>
           <li>Values: 0 to 65535 | Default: 0 (disabled)</li>
           The port number for the web based control of MotionPlus.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_port2"></a> webcontrol_port </h3>
+        <ul>
+          <li>Values: 0 to 65535 | Default: 0 (disabled)</li>
+          Second port for the web control that does not use TLS.  This allows for specifying one port that
+          provides a TLS connection (to be used externally) while this port serves the local lan without getting
+          certificate domain warnings.
         </ul>
         <p></p>
 

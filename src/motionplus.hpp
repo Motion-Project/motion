@@ -519,6 +519,7 @@ struct ctx_motapp {
     volatile int                webcontrol_running;
     volatile int                webcontrol_finish;
     struct MHD_Daemon           *webcontrol_daemon;
+    struct MHD_Daemon           *webcontrol_daemon2;
     char                        webcontrol_digest_rand[12];
     std::list<ctx_webu_clients> webcontrol_clients;         /* C++ list of client ips */
     ctx_params                  *webcontrol_headers;        /* parameters for header */

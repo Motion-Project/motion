@@ -39,6 +39,7 @@ struct ctx_mhdstart {
     ctx_motapp              *motapp;
     std::string             tls_cert;
     std::string             tls_key;
+    bool                    tls_use;
     struct MHD_OptionItem   *mhd_ops;
     int                     mhd_opt_nbr;
     unsigned int            mhd_flags;
@@ -1151,9 +1152,9 @@ static void webu_mhd_features_ipv6(ctx_mhdstart *mhdst)
 static void webu_mhd_features_tls(ctx_mhdstart *mhdst)
 {
     #if MHD_VERSION < 0x00094400
-        if (mhdst->motapp->conf->webcontrol_tls) {
+        if (mhdst->tls_use) {
             MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL/TLS disabled"));
-            mhdst->motapp->conf->webcontrol_tls = 0;
+            mhdst->tls_use = false;
         }
     #else
         mhdrslt retcd;
@@ -1161,9 +1162,9 @@ static void webu_mhd_features_tls(ctx_mhdstart *mhdst)
         if (retcd == MHD_YES) {
             MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: available"));
         } else {
-            if (mhdst->motapp->conf->webcontrol_tls) {
+            if (mhdst->tls_use) {
                 MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
-                mhdst->motapp->conf->webcontrol_tls = 0;
+                mhdst->tls_use = false;
             } else {
                 MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
             }
@@ -1183,6 +1184,7 @@ static void webu_mhd_features(ctx_mhdstart *mhdst)
     webu_mhd_features_tls(mhdst);
 
 }
+
 /* Load a either the key or cert file for MHD*/
 static std::string webu_mhd_loadfile(std::string fname)
 {
@@ -1222,16 +1224,16 @@ static std::string webu_mhd_loadfile(std::string fname)
 static void webu_mhd_checktls(ctx_mhdstart *mhdst)
 {
 
-    if (mhdst->motapp->conf->webcontrol_tls) {
+    if (mhdst->tls_use) {
         if ((mhdst->motapp->conf->webcontrol_cert == "") || (mhdst->tls_cert == "")) {
             MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
-            mhdst->motapp->conf->webcontrol_tls = 0;
+            mhdst->tls_use = false;
         }
         if ((mhdst->motapp->conf->webcontrol_key == "") || (mhdst->tls_key == "")) {
             MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 ,_("SSL/TLS requested but no key file provided.  SSL/TLS disabled"));
-            mhdst->motapp->conf->webcontrol_tls = 0;
+            mhdst->tls_use = false;
         }
     }
 
@@ -1313,7 +1315,7 @@ static void webu_mhd_opts_digest(ctx_mhdstart *mhdst)
 /* Set the MHD options needed when we want TLS connections */
 static void webu_mhd_opts_tls(ctx_mhdstart *mhdst)
 {
-    if (mhdst->motapp->conf->webcontrol_tls) {
+    if (mhdst->tls_use) {
 
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_HTTPS_MEM_CERT;
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
@@ -1361,7 +1363,7 @@ static void webu_mhd_flags(ctx_mhdstart *mhdst)
         mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_DUAL_STACK;
     }
 
-    if (mhdst->motapp->conf->webcontrol_tls) {
+    if (mhdst->tls_use) {
         mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_SSL;
     }
 
@@ -1417,6 +1419,7 @@ static void webu_init_webcontrol(ctx_motapp *motapp)
     mhdst.tls_key  = webu_mhd_loadfile(motapp->conf->webcontrol_key);
     mhdst.motapp = motapp;
     mhdst.ipv6 = motapp->conf->webcontrol_ipv6;
+    mhdst.tls_use = motapp->conf->webcontrol_tls;
 
     /* Set the rand number for webcontrol digest if needed */
     srand((unsigned int)time(NULL));
@@ -1446,6 +1449,41 @@ static void webu_init_webcontrol(ctx_motapp *motapp)
             ,motapp->conf->webcontrol_port);
     }
 
+    if ((motapp->conf->webcontrol_port2 != 0 ) &&
+        (motapp->conf->webcontrol_port2 != motapp->conf->webcontrol_port)) {
+        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            , _("Starting secondary webcontrol on port %d")
+            , motapp->conf->webcontrol_port2);
+
+        if (motapp->conf->webcontrol_tls) {
+            mhdst.tls_use = false;
+            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                , _("TLS will be disabled on webcontrol port %d")
+                , motapp->conf->webcontrol_port2);
+        }
+
+        mhdst.mhd_ops =(struct MHD_OptionItem*)mymalloc(sizeof(struct MHD_OptionItem)*WEBUI_MHD_OPTS);
+        webu_mhd_opts(&mhdst);
+        webu_mhd_flags(&mhdst);
+
+        motapp->webcontrol_daemon2 = MHD_start_daemon (
+            mhdst.mhd_flags
+            , (uint16_t)motapp->conf->webcontrol_port2
+            , NULL, NULL
+            , &webu_answer, motapp->cam_list
+            , MHD_OPTION_ARRAY, mhdst.mhd_ops
+            , MHD_OPTION_END);
+
+        free(mhdst.mhd_ops);
+        if (motapp->webcontrol_daemon2 == NULL) {
+            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Unable to start port2 MHD"));
+        } else {
+            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                ,_("Started webcontrol on port %d")
+                ,motapp->conf->webcontrol_port2);
+        }
+    }
+
     return;
 }
 
@@ -1456,6 +1494,11 @@ void webu_deinit(ctx_motapp *motapp)
     if (motapp->webcontrol_daemon != NULL) {
         motapp->webcontrol_finish = true;
         MHD_stop_daemon (motapp->webcontrol_daemon);
+    }
+
+    if (motapp->webcontrol_daemon2 != NULL) {
+        motapp->webcontrol_finish = true;
+        MHD_stop_daemon (motapp->webcontrol_daemon2);
     }
 
     util_parms_free(motapp->webcontrol_headers);
@@ -1480,6 +1523,7 @@ void webu_init(ctx_motapp *motapp)
     sigaction(SIGCHLD, &act, NULL);
 
     motapp->webcontrol_daemon = NULL;
+    motapp->webcontrol_daemon2 = NULL;
     motapp->webcontrol_finish = false;
 
      /* Start the webcontrol */
