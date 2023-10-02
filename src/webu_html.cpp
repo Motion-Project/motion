@@ -1254,10 +1254,6 @@ static void webu_html_script_movies_click(ctx_webui *webui)
         "    function movies_click(index_cam) {\n"
         "      var camid, indx, camcnt, uri;\n\n"
 
-        "      if (gIndxCam == -1 ) {\n"
-        "        return;\n"
-        "      }\n\n"
-
         "      gIndxCam = index_cam;\n"
         "      gIndxScan = -1; \n"
         "      camid = assign_camid();\n"
