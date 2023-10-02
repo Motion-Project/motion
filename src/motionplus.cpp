@@ -851,6 +851,13 @@ int main (int argc, char **argv)
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Motionplus pid: %d"), getpid());
 
+        if ((motapp->cam_cnt == 0) && (motapp->snd_cnt ==0)) {
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("No camera or sound configuration files specified."));
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Waiting for camera or sound configuration to be added via web control."));
+        }
+
         while (true) {
             SLEEP(1, 0);
 
