@@ -175,7 +175,7 @@ static int movie_get_oformat(ctx_movie *movie)
         movie->oc->video_codec_id = MY_CODEC_ID_THEORA;
     }
 
-    if (mystreq(container_name, "vp8")) {
+    if (mystreq(container_name, "webm")) {
         movie->oc->oformat = av_guess_format("webm", NULL, NULL);
         memcpy(movie->full_nm + len_full, ".webm", 5);
         memcpy(movie->movie_nm + len_nm, ".webm", 5);
@@ -1505,7 +1505,7 @@ static const char* movie_init_container(ctx_dev *cam)
         } else if (codenbr == 2) {
             return "ogg";
         } else if (codenbr == 3) {
-            return "vp8";
+            return "webm";
         } else if (codenbr == 4) {
             return "mp4";
         } else if (codenbr == 5) {
@@ -1517,7 +1517,7 @@ static const char* movie_init_container(ctx_dev *cam)
         } else if (codenbr == 8) {
             return "ogg";
         } else if (codenbr == 9) {
-            return "vp8";
+            return "webm";
         } else                   {
             return "mkv";
         }
