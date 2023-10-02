@@ -251,29 +251,11 @@ void webu_json_config(ctx_webui *webui)
 
 static void webu_json_movies_list(ctx_webui *webui)
 {
-    int indx_mov, indx_cam, indx;
-    int movie_cnt, indx_req;
+    int indx_mov, indx, movie_cnt;
     std::string response;
     char fmt[PATH_MAX];
     ctx_dbse_rec db;
     ctx_params *wact;
-
-    /* Get the indx we want */
-    indx_req = -1;
-    for (indx_cam=0; indx_cam<webui->motapp->cam_cnt; indx_cam++) {
-        if (webui->cam->device_id == webui->motapp->cam_list[indx_cam]->device_id){
-            indx_req = indx_cam;
-        }
-    }
-
-    webui->resp_page += "{\"count\" : 1";
-    webui->resp_page += ",\""+ std::to_string(indx_req) + "\":";
-
-    if (webui->cam == NULL) {
-        webui->resp_page += "{\"count\" : 0} ";
-        webui->resp_page += "}";
-        return;
-    }
 
     /* Validate movies permitted via params */
     wact = webui->motapp->webcontrol_actions;
@@ -282,6 +264,8 @@ static void webu_json_movies_list(ctx_webui *webui)
             if (mystreq(wact->params_array[indx].param_value,"off")) {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Movies via webcontrol disabled");
                 webui->resp_page += "{\"count\" : 0} ";
+                webui->resp_page += ",\"device_id\" : ";
+                webui->resp_page += std::to_string(webui->cam->device_id);
                 webui->resp_page += "}";
                 return;
             } else {
@@ -342,7 +326,8 @@ static void webu_json_movies_list(ctx_webui *webui)
         }
     }
     webui->resp_page += "\"count\" : " + std::to_string(indx);
-    webui->resp_page += "}";
+    webui->resp_page += ",\"device_id\" : ";
+    webui->resp_page += std::to_string(webui->cam->device_id);
     webui->resp_page += "}";
 
     return;
@@ -351,11 +336,33 @@ static void webu_json_movies_list(ctx_webui *webui)
 
 void webu_json_movies(ctx_webui *webui)
 {
+    int indx_cam, indx_req;
+
     webui->resp_type = WEBUI_RESP_JSON;
 
     webui->resp_page += "{\"movies\" : ";
-    webu_json_movies_list(webui);
+    if (webui->cam == NULL) {
+        webui->resp_page += "{\"count\" :" + std::to_string(webui->motapp->cam_cnt);
 
+        for (indx_cam=0; indx_cam<webui->motapp->cam_cnt; indx_cam++) {
+            webui->cam = webui->motapp->cam_list[indx_cam];
+            webui->resp_page += ",\""+ std::to_string(indx_cam) + "\":";
+            webu_json_movies_list(webui);
+        }
+        webui->resp_page += "}";
+        webui->cam = NULL;
+    } else {
+        indx_req = -1;
+        for (indx_cam=0; indx_cam<webui->motapp->cam_cnt; indx_cam++) {
+            if (webui->cam->device_id == webui->motapp->cam_list[indx_cam]->device_id){
+                indx_req = indx_cam;
+            }
+        }
+        webui->resp_page += "{\"count\" : 1";
+        webui->resp_page += ",\""+ std::to_string(indx_req) + "\":";
+        webu_json_movies_list(webui);
+        webui->resp_page += "}";
+    }
     webui->resp_page += "}";
 
 }
