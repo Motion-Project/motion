@@ -161,6 +161,13 @@ static int movie_get_oformat(ctx_movie *movie)
         return 0;
     }
 
+    if (mystreq(container_name, "mov")) {
+        movie->oc->oformat = av_guess_format("mov", NULL, NULL);
+        memcpy(movie->full_nm + len_full, ".mov", 4);
+        memcpy(movie->movie_nm + len_nm, ".mov", 4);
+        movie->oc->video_codec_id = MY_CODEC_ID_H264;
+    }
+
     if (mystreq(container_name, "flv")) {
         movie->oc->oformat = av_guess_format("flv", NULL, NULL);
         memcpy(movie->full_nm + len_full, ".flv", 4);
@@ -1258,7 +1265,9 @@ static int movie_passthru_open(ctx_movie *movie)
     movie->oc->interrupt_callback.opaque = movie;
     movie->cb_dur = 3;
 
-    if (mystrne(movie->container_name, "mp4") && mystrne(movie->container_name, "mkv")) {
+    if (mystrne(movie->container_name, "mp4") &&
+        mystrne(movie->container_name, "mov") &&
+        mystrne(movie->container_name, "mkv")) {
         MOTPLS_LOG(NTC, TYPE_ENCODER, NO_ERRNO
             ,_("Changing to MP4 container for pass-through."));
         movie->container_name = "mp4";
