@@ -987,7 +987,7 @@ static void movie_passthru_write(ctx_movie *movie, int indx)
         return;
     }
 
-    retcd = av_write_frame(movie->oc, movie->pkt);
+    retcd = av_interleaved_write_frame(movie->oc, movie->pkt);
     movie_free_pkt(movie);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
