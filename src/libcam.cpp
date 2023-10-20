@@ -420,9 +420,6 @@ void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
     if (mystrceq(pname,"LensShadingMapMode")) {
         controls.set(controls::draft::LensShadingMapMode, atoi(pvalue));
     }
-    if (mystrceq(pname,"SceneFlicker")) {
-        controls.set(controls::draft::SceneFlicker, atoi(pvalue));
-    }
     if (mystrceq(pname,"PipelineDepth")) {
         controls.set(controls::draft::PipelineDepth, atoi(pvalue));
     }
