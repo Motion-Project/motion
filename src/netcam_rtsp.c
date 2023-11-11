@@ -354,7 +354,6 @@ static int netcam_decode_vaapi(struct rtsp_context *rtsp_data)
             my_frame_free(hw_frame);
             return retcd;
         }
-        rtsp_data->frame->format=AV_PIX_FMT_YUV420P;
 
         retcd = av_hwframe_transfer_data(rtsp_data->frame, hw_frame, 0);
         if (retcd < 0) {
