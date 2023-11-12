@@ -1,3 +1,22 @@
+Summary of changes for version 4.6.0 are below
+    * Documentation updates
+    * Fix segfault on vaapi decoding
+    * Add support for DRM HW decode
+    * Remove default for allowed_media_types
+    * Fix libweb includes
+    * Fix autotools and translation files
+    * Update documentation on libcamerify
+    * Fix movie_extpipe
+    * Fix threshold_tune
+    * Add pragma for mmal code
+    * Update year in copyright notice
+    * Revise issue template
+    * Allow for bad packets when processing file
+    * Implement consistent time values
+    * Implement consistent calculation for pixel difference
+    * Fix compiler warnings
+    * Revise ioctl for devices to use long variable
+    * Print log message of signals
 Summary of changes for version 4.5.1 are below
     * Improve closing of v4l2 devices
     * Fix creation of pid_file

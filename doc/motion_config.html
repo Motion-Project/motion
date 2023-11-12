@@ -234,67 +234,18 @@
       <p></p>
 
       <a name="basic_setup_picam"></a>
-      <strong>The raspberry Pi camera</strong> is set up multiple ways depending upon the distro being used.
-      <p></p>
-      In the Raspbian version based upon Debian release of 'bullseye' (and presumably later releases), Raspbian
-      allows access to the PI camera via an application called
+      <strong>The raspberry Pi camera</strong> is set up via an application called
       <i><small><code>libcamera</code></small></i>.  <i><small><code>libcamera</code></small></i> provides
       access to the camera as a v4l2 device but this interface is only available when using a special
       application.  Users must run Motion using the
       command <i><small><code>libcamerify motion</code></small></i> and
       then specify the /dev/videoX device in the Motion configuration file.
       <p></p>
-      The PI camera's drivers expose the camera's full functionality as a set of low-level /dev/videoX
-      devices, while Motion (and other applications) expect a single high-level /dev/videoX device. The
-      libcamerify wrapper transparently manages these low-level devices and presents a high-level
-      interface on one of the /dev/videoX device nodes to Motion
-      (<a href="https://libcamera.org/docs.html#v4l2-compatibility-layer">libcamera docs</a>).
-      <p></p>
       With just one camera connected to the Pi, the device name should normally be
       <i><small><code>/dev/video0</code></small></i>.  With multiple cameras connected, e.g. a regular
-      USB web and the Pi camera, you should use the device names provided by V4L
-      (<i><small><code>v4l2-ctl --list-devices</code></small></i>). The wrapper doesn't seem to affect
-      the device names seen by Motion. In the below example, the PI camera is at
-      <i><small><code>/dev/video2</code></small></i> while an external USB camera is at
-      <i><small><code>/dev/video0</code></small></i> ("CSI" stands for the
-      <a href="https://en.wikipedia.org/wiki/Camera_Serial_Interface">interface	used by the Pi camera</a>).
-      <p></p>
-      Also, /dev/videoN names are dynamically assigned and may not always point to the same camera (e.g.
-      when a USB camera is hot-plugged). Take a look at the stable symlinks under
-      <i><small><code>/dev/v4l/by-path/</code></small></i> and consider using them in your Motion config
-      instead of /dev/videoX.
-      <pre>
-root@raspberrypi:~# v4l2-ctl --list-devices
-unicam (platform:3f801000.csi):
-/dev/video2                        # <== PI Camera
-/dev/media2
-
-bcm2835-codec-decode (platform:bcm2835-codec):
-/dev/video10                       # <=== Low level devices
-/dev/video11                       # for the Pi cam, ignore
-....
-
-bcm2835-isp (platform:bcm2835-isp):
-/dev/video13                      # <=== Low level devices
-/dev/video14                      # for the Pi cam, ignore
-....
-
-Venus USB2.0 Camera: Venus USB2 (usb-3f980000.usb-1.2):
-/dev/video0                         # <== USB webcam
-/dev/video1
-/dev/media4
-      </pre>
-      <p></p>
-      For Raspbian releases prior to 'bullseye', the PI camera can be set up two different ways.  If Motion is installed by using the
-      apt packages (e.g. apt-get install motion), then the camera must be set up using the bcm2835-v4l2 module which creates
-      a v4l2 device for the camera.  Users will need to install this module using the
-      command <code>sudo modprobe bcm2835-v4l2</code>.  This
-      will set up the camera as a normal v4l2 device and it can be accessed via a standard /dev/videoX device.  If Motion is
-      built from source or installed via the deb packages on the project release page, then an additional option is to set
-      up the camera using the <a href="#mmalcam_name" >mmalcam_name</a> parameter or using
-      the bcm2835-v4l2 module.  <strong>When Motion is installed via apt, the mmalcam option is not available.</strong>
-      It has been noted that this historical method of accessing the PI camera may be available in newer
-      releases via the enabling the legacy camera stack but it is unclear how long this method will be permitted.
+      USB web and the Pi camera, you will need to determine the device associated with the
+      Pi camera and the USB camera.  The list of devices can be seen using the command
+      (<i><small><code>v4l2-ctl --list-devices</code></small></i>).
       <p></p>
 
       <a name="basic_setup_composite"></a>

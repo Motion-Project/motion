@@ -42,39 +42,225 @@
     </section>
     <section class="main-content">
 
-      <h3><a name="Current_Release"></a> Latest Stable Release</h3>
-      <ul>
-      <li> <a href="motion_build.html"> Installing with apt/debs and building from source </a></li>
-      <li> <a href="motion_config.html"> Configuration </a></li>
-      <li> <a href="motion_config.html#commandlineoptions"> Command Line Options </a></li>
-      <li> <a href="motion_config.html#configfiles">Configuration Files</a></li>
-      <li> <a href="motion_config.html#Signals_Sent"> Signals (sent with e.g. kill command) </a></li>
-      <li> Configuration Options</li>
-        <ul>
-          <li> <a href="motion_config.html#Configuration_OptionsAlpha"> Listed alphabetically with mapping of old option names to current names </a></li>
-          <li> <a href="motion_config.html#Configuration_OptionsTopic"> Listed by topic </a></li>
-          <li> <a href="motion_config.html#Configuration_OptionsDetail"> Detail descriptions of each option</a></li>
-          </ul>
+      <p></p>
+      The links below provide the documentation associated with the various releases of the Motion and MotionPlus software.
       <p></p>
       <p></p>
-      </ul>
+
+
+      <h3><a name="Current_Release"></a>Documentation For Latest Releases</h3>
+      <div class="tblreleasecurrent">
+      <table style="border-width:0.5px; text-align: center;" cellspacing="0" cellpadding="0" >
+        <colgroup>
+          <col width="300px">
+          <col width="300px">
+          <col width="300px">
+        </colgroup>
+        <thead >
+          <tr >
+            <th word-wrap:break-word > Motion </th>
+            <td word-wrap:break-word > </td>
+            <th word-wrap:break-word > MotionPlus </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td word-wrap:break-word > <a href="motion_build.html">Installing and building from source </a></td>
+            <td word-wrap:break-word > </td>
+            <td word-wrap:break-word > <a href="motionplus_build.html">Installing and building from source </a></td>
+          </tr>
+          <tr>
+            <td word-wrap:break-word > <a href="motion_config.html">Configuration</a></td>
+            <td word-wrap:break-word > </td>
+            <td word-wrap:break-word > <a href="motionplus_config.html">Configuration</a></td>
+          </tr>
+          <tr>
+            <td word-wrap:break-word > </a></td>
+            <td word-wrap:break-word > </td>
+            <td word-wrap:break-word > <a href="motionplus_examples.html">Examples</a></td>
+          </tr>
+
+        </tbody>
+      </table>
+      </div>
+
       <p></p>
-      <h3><a name="Prior"></a> Prior Release Versions</h3>
-      <ul>
-      <li> <a href="4.3.2/motion_config.html"> Version 4.3.2</a></li>
-      <li> <a href="4.3.1/motion_config.html"> Version 4.3.1</a></li>
-      <li> <a href="4.3.0/motion_config.html"> Version 4.3.0</a></li>
-      <li> <a href="4.2.2/motion_config.html"> Version 4.2.2</a></li>
-      <li> <a href="4.2.1/motion_config.html"> Version 4.2.1</a></li>
-      <li> <a href="4.2/motion_config.html"> Version 4.2</a></li>
-      <li> <a href="4.1.1/motion_guide.html"> Version 4.1.1</a></li>
-      <li> <a href="4.1/motion_guide.html"> Version 4.1</a></li>
-      <li> <a href="4.0.1/motion_guide.html"> Version 4.0.1</a></li>
-      <li> <a href="4.0/motion_guide.html"> Version 4.0</a></li>
-      <li> <a href="3.4.1/motion_guide.html"> Version 3.4.1</a></li>
       <p></p>
       <p></p>
-      </ul>
+      <p></p>
+
+      <h3><a name="Comparison"></a>Comparison Of Motion vs MotionPlus</h3>
+      <div>
+      <table class="tblcomp" >
+        <colgroup>
+          <col width="300px">
+          <col width="300px">
+          <col width="300px">
+        </colgroup>
+        <thead >
+          <tr >
+            <th bgcolor="#edf4f9" word-wrap:break-word >Motion</th>
+            <th bgcolor="#edf4f9" word-wrap:break-word >Description</th>
+            <th bgcolor="#edf4f9" word-wrap:break-word >MotionPlus</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Limited</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Feature Enhancements</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Yes</td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Optional</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >FFmpeg Libraries</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Required</td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Supported</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Multiple input v4l2 cards(RoundRobin)</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Not Supported</td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Supported</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Brooktree video cards</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Not Supported</td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Internal partial legacy</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Camera Tracking</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >External scripts only</td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Optional</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Multiple ports for web control and streams</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Single port only</td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word >-</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >OpenCV Cascades/HOG/DNN</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Yes</td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word >-</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Direct libcamera support</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Yes</td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word >-</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Sound recording from passthrough cameras</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Yes</td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word >-</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Sound frequency detection</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Yes</td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word >-</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Download/Play movies via web page</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Yes</td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word >-</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Add/Delete cameras via web page</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Yes</td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word >-</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Additional Motion detection measures</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >Yes</td>
+          </tr>
+
+        </tbody>
+      </table>
+      </div>
+
+      <p></p>
+      <p></p>
+      <p></p>
+      <p></p>
+
+      <h3><a name="Prior"></a>Documentation For Prior Releases</h3>
+      <p></p>
+      The documentation is provided as it was included in each release.
+      <p></p>
+      <p></p>
+
+      <div class="tblreleaseprior">
+      <table style="border-width:0.5px; text-align: center;" cellspacing="0" cellpadding="0" >
+        <colgroup>
+          <col width="500px">
+          <col width="500px">
+        </colgroup>
+        <thead >
+          <tr >
+            <th word-wrap:break-word > Motion </th>
+            <th word-wrap:break-word > MotionPlus </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td word-wrap:break-word > <a href="4.5.1/motion_config.html"> Version 4.5.1</a> </td>
+            <td word-wrap:break-word > <a href="mp0.1.0/motionplus_config.html"> Version 0.1.0</a></td>
+          </tr>
+          <tr>
+            <td word-wrap:break-word > <a href="4.5.0/motion_config.html"> Version 4.5.0</a> </td>
+            <td word-wrap:break-word > </td>
+          </tr>
+          <tr>
+            <td word-wrap:break-word > <a href="4.4.0/motion_config.html"> Version 4.4.0</a> </td>
+            <td word-wrap:break-word > </td>
+          </tr>
+          <tr>
+            <td word-wrap:break-word > <a href="4.3.2/motion_config.html"> Version 4.3.2</a> </td>
+            <td word-wrap:break-word > </td>
+          </tr>
+          <tr>
+            <td word-wrap:break-word > <a href="4.3.1/motion_config.html"> Version 4.3.1</a></td>
+            <td word-wrap:break-word > </td>
+          </tr>
+          <tr>
+            <td word-wrap:break-word > <a href="4.3.0/motion_config.html"> Version 4.3.0</a></td>
+            <td word-wrap:break-word > </td>
+          </tr>
+          <tr>
+            <td word-wrap:break-word ><a href="4.2.2/motion_config.html"> Version 4.2.2</a> </td>
+            <td word-wrap:break-word > </td>
+          </tr>
+          <tr>
+            <td word-wrap:break-word ><a href="4.2.1/motion_config.html"> Version 4.2.1</a> </td>
+            <td word-wrap:break-word > </td>
+          </tr>
+          <tr>
+            <td word-wrap:break-word ><a href="4.2/motion_config.html"> Version 4.2</a> </td>
+            <td word-wrap:break-word > </td>
+          </tr>
+          <tr>
+            <td word-wrap:break-word ><a href="4.1.1/motion_guide.html"> Version 4.1.1</a> </td>
+            <td word-wrap:break-word > </td>
+          </tr>
+          <tr>
+            <td word-wrap:break-word ><a href="4.1/motion_guide.html"> Version 4.1</a></td>
+            <td word-wrap:break-word > </td>
+          </tr>
+          <tr>
+            <td word-wrap:break-word ><a href="4.0.1/motion_guide.html"> Version 4.0.1</a> </td>
+            <td word-wrap:break-word > </td>
+          </tr>
+          <tr>
+            <td word-wrap:break-word > <a href="4.0/motion_guide.html"> Version 4.0</a></td>
+            <td word-wrap:break-word > </td>
+          </tr>
+          <tr>
+            <td word-wrap:break-word ><a href="3.4.1/motion_guide.html"> Version 3.4.1</a> </td>
+            <td word-wrap:break-word > </td>
+          </tr>
+
+        </tbody>
+      </table>
+      </div>
+
+
     </section>
   </body>
 </html>
