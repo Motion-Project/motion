@@ -486,6 +486,15 @@ static int netcam_decode_vaapi(ctx_netcam *netcam)
 
         hw_frame = myframe_alloc();
 
+        retcd = av_hwframe_get_buffer(netcam->codec_context->hw_frames_ctx, hw_frame, 0);
+        if (retcd < 0) {
+            MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                , _("%s: Error getting hw frame buffer")
+                , netcam->cameratype);
+            myframe_free(hw_frame);
+            return -1;
+        }
+
         retcd = avcodec_receive_frame(netcam->codec_context, hw_frame);
         if ((netcam->interrupted) || (netcam->finish) || (retcd < 0)) {
             if (retcd == AVERROR(EAGAIN)) {
@@ -507,12 +516,13 @@ static int netcam_decode_vaapi(ctx_netcam *netcam)
             myframe_free(hw_frame);
             return retcd;
         }
-        netcam->frame->format=AV_PIX_FMT_YUV420P;
+
         retcd = av_hwframe_transfer_data(netcam->frame, hw_frame, 0);
         if (retcd < 0) {
             MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Error transferring HW decoded to system memory")
                 ,netcam->cameratype);
+            myframe_free(hw_frame);
             return -1;
         }
         myframe_free(hw_frame);
@@ -903,7 +913,8 @@ static void netcam_decoder_error(ctx_netcam *netcam, int retcd, const char* fnc_
 static int netcam_init_vaapi(ctx_netcam *netcam)
 {
     #if ( MYFFVER >= 57083)
-        int retcd;
+        int retcd, indx;
+        AVPixelFormat *pixelformats = NULL;
 
         MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("%s: Initializing vaapi decoder"),netcam->cameratype);
@@ -932,6 +943,7 @@ static int netcam_init_vaapi(ctx_netcam *netcam)
         netcam->codec_context->get_format  = netcam_getfmt_vaapi;
         av_opt_set_int(netcam->codec_context, "refcounted_frames", 1, 0);
         netcam->codec_context->sw_pix_fmt = AV_PIX_FMT_YUV420P;
+        netcam->codec_context->pix_fmt= AV_PIX_FMT_YUV420P;
         netcam->codec_context->hwaccel_flags=
             AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH |
             AV_HWACCEL_FLAG_IGNORE_LEVEL;
@@ -941,7 +953,64 @@ static int netcam_init_vaapi(ctx_netcam *netcam)
             netcam_decoder_error(netcam, retcd, "hwctx");
             return -1;
         }
+
         netcam->codec_context->hw_device_ctx = av_buffer_ref(netcam->hw_device_ctx);
+
+        AVBufferRef *hw_frames_ref = NULL;
+        AVHWFramesContext *frames_ctx = NULL;
+
+        hw_frames_ref = av_hwframe_ctx_alloc(
+            netcam->codec_context->hw_device_ctx);
+        if (hw_frames_ref == NULL) {
+            netcam_decoder_error(netcam, retcd, "initvaapi 2");
+            return -1;
+        }
+
+        frames_ctx = (AVHWFramesContext *)(hw_frames_ref->data);
+        frames_ctx->format    = AV_PIX_FMT_VAAPI;
+        frames_ctx->sw_format = AV_PIX_FMT_YUV420P;
+        frames_ctx->width     = netcam->codec_context->width;
+        frames_ctx->height    = netcam->codec_context->height;
+        frames_ctx->initial_pool_size = 20;
+        retcd = av_hwframe_ctx_init(hw_frames_ref);
+        if (retcd < 0) {
+            netcam_decoder_error(netcam, retcd, "initvaapi 2");
+            av_buffer_unref(&hw_frames_ref);
+            return -1;
+        }
+        netcam->codec_context->hw_frames_ctx = av_buffer_ref(hw_frames_ref);
+        if (netcam->codec_context->hw_frames_ctx == NULL) {
+            netcam_decoder_error(netcam, retcd, "initvaapi 2");
+            av_buffer_unref(&hw_frames_ref);
+            return -1;
+        }
+        av_buffer_unref(&hw_frames_ref);
+
+        retcd = av_hwframe_transfer_get_formats(
+            netcam->codec_context->hw_frames_ctx
+            , AV_HWFRAME_TRANSFER_DIRECTION_FROM
+            , &pixelformats
+            , 0);
+        if (retcd < 0) {
+            MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: Error enumerating HW pixel types")
+                ,netcam->cameratype);
+            netcam_decoder_error(netcam, retcd, "initvaapi 3");
+            return -1;
+        }
+        /* Note that while these are listed as available, there
+           is currently no way to get them from HW decoder without
+           triggering a segfault in vaapi driver.
+        */
+        const AVPixFmtDescriptor *descr;
+        for (indx=0; pixelformats[indx] != AV_PIX_FMT_NONE; indx++) {
+            descr = av_pix_fmt_desc_get(pixelformats[indx]);
+            MOTPLS_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+                , _("%s: Available HW pixel type: %s")
+                , netcam->cameratype
+                ,descr->name);
+        }
+        av_freep(&pixelformats);
 
         return 0;
     #else
@@ -1292,9 +1361,11 @@ static int netcam_open_sws(ctx_netcam *netcam)
      *  also if the format sent by the camera is not YUV420.
      */
     if (netcam_check_pixfmt(netcam) != 0) {
+        const AVPixFmtDescriptor *descr;
+        descr = av_pix_fmt_desc_get((AVPixelFormat)netcam->frame->format);
         MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            , _("%s: Pixel format %d will be converted.")
-            , netcam->cameratype, netcam->frame->format);
+            , _("%s: Pixel format %s will be converted.")
+            , netcam->cameratype, descr->name);
     }
 
     netcam->swsctx = sws_getContext(
