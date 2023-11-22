@@ -27,7 +27,7 @@
 
 static void webu_json_config_item(ctx_webui *webui, ctx_config *conf, int indx_parm)
 {
-    int indx;
+    size_t indx;
     std::string parm_orig, parm_val, parm_list, parm_enable;
 
     parm_orig = "";
@@ -43,15 +43,12 @@ static void webu_json_config_item(ctx_webui *webui, ctx_config *conf, int indx_p
     conf_edit_get(conf, config_parms[indx_parm].parm_name
         , parm_orig, config_parms[indx_parm].parm_cat);
 
-    if (parm_orig.find("\"") != std::string::npos) {
-        for (indx = 0; indx < (int)parm_orig.length(); indx++){
-            if (parm_orig[indx] == '"') {
-                parm_val += '\\';
-            }
-            parm_val += parm_orig[indx];
+    for (indx = 0; indx < parm_orig.length(); indx++) {
+        if ((parm_orig[indx] == '"') ||
+            (parm_orig[indx] == '\\')) {
+            parm_val += '\\';
         }
-    } else {
-        parm_val = parm_orig;
+        parm_val += parm_orig[indx];
     }
 
     if (config_parms[indx_parm].parm_type == PARM_TYP_INT) {
