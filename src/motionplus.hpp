@@ -59,13 +59,16 @@
 
 #include <errno.h>
 
-extern "C" {
-    #include <libavformat/avformat.h>
-    #include <libavutil/imgutils.h>
-    #include <libavutil/mathematics.h>
-    #include <libavdevice/avdevice.h>
-    #include <libavcodec/avcodec.h>
-}
+#pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wconversion"
+    extern "C" {
+        #include <libavformat/avformat.h>
+        #include <libavutil/imgutils.h>
+        #include <libavutil/mathematics.h>
+        #include <libavdevice/avdevice.h>
+        #include <libavcodec/avcodec.h>
+    }
+#pragma GCC diagnostic pop
 
 #ifdef HAVE_V4L2
     #if defined(HAVE_LINUX_VIDEODEV2_H)
