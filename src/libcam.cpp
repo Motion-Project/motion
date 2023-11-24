@@ -333,17 +333,35 @@ void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
     if (mystrceq(pname, "AwbLocked")) {
         controls.set(controls::AwbLocked, cam_parm_bool(pvalue));
     }
+    if (mystrceq(pname,"ColourGains")) {
+        //extern const Control<Span<const float, 2>> ColourGains;
+        /* Not functional (can not set a float to the Span)
+        controls.set(controls::ColourGains, cam_parm_single(pvalue));
+        */
+        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
+            , "ColourGains Not Implemented.");
+    }
     if (mystrceq(pname,"ColourTemperature")) {
         controls.set(controls::ColourTemperature, atoi(pvalue));
     }
     if (mystrceq(pname,"Saturation")) {
         controls.set(controls::Saturation, cam_parm_single(pvalue));
     }
+    if (mystrceq(pname,"SensorBlackLevels")) {
+        //extern const Control<Span<const int32_t, 4>> SensorBlackLevels;
+        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
+            , "SensorBlackLevels Not Implemented.");
+    }
     if (mystrceq(pname,"Sharpness")) {
         controls.set(controls::Sharpness, cam_parm_single(pvalue));
     }
     if (mystrceq(pname,"FocusFoM")) {
         controls.set(controls::FocusFoM, atoi(pvalue));
+    }
+    if (mystrceq(pname,"ColourCorrectionMatrix")) {
+        //extern const Control<Span<const float, 9>> ColourCorrectionMatrix;
+        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
+            , "SensorBlackLevels Not Implemented.");
     }
     if (mystrceq(pname,"ScalerCrop")) {
         x = strtok(pvalue, "-");
@@ -359,6 +377,11 @@ void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
     }
     if (mystrceq(pname,"FrameDuration")) {
         controls.set(controls::FrameDuration, atoi(pvalue));
+    }
+    if (mystrceq(pname,"FrameDurationLimits")) {
+        //extern const Control<Span<const int64_t, 2>> FrameDurationLimits;
+        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
+            , "FrameDurationLimits Not Implemented.");
     }
     if (mystrceq(pname,"SensorTemperature")) {
         controls.set(controls::SensorTemperature, cam_parm_single(pvalue));
@@ -379,6 +402,7 @@ void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
         controls.set(controls::AfMetering, atoi(pvalue));
     }
     if (mystrceq(pname,"AfWindows")) {
+        //extern const Control<Span<const Rectangle>> AfWindows;
         MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
             , "AfWindows Not Implemented.");
     }
