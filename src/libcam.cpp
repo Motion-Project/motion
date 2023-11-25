@@ -115,13 +115,22 @@ void cls_libcam:: cam_log_controls()
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AwbCustom = 7");
 
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AwbLocked(bool)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  ColourGains(Pipe delimited)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "     Red | Blue");
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  ColourTemperature(int)");
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Saturation(float)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  SensorBlackLevels(Pipe delimited)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "     var1|var2|var3|var4");
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Sharpness(float)");
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  FocusFoM(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  ScalerCrop(Rect x-y-h-w)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  ColourCorrectionMatrix(Pipe delimited)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "     var1|var2|...|var8|var9");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  ScalerCrop(Pipe delimited)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "     x | y | h | w");
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  DigitalGain(float)");
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  FrameDuration(int)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  FrameDurationLimits(Pipe delimited)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "     min | max");
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  SensorTemperature(float)");
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  SensorTimestamp(int)");
 
@@ -143,7 +152,8 @@ void cls_libcam:: cam_log_controls()
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfMeteringAuto = 0");
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfMeteringWindows = 1");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AfWindows(rect x-y-h-w)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AfWindows(Pipe delimited)");
+    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "     x | y | h | w");
 
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  AfTrigger(int)");
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    AfTriggerStart = 0");
@@ -208,11 +218,6 @@ void cls_libcam:: cam_log_draft()
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  LensShadingMapMode(int)");
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    LensShadingMapModeOff = 0");
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    LensShadingMapModeOn = 1");
-
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  SceneFlicker(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    SceneFickerOff = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    SceneFicker50Hz = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "    SceneFicker60Hz = 2");
 
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  PipelineDepth(int)");
 
@@ -289,8 +294,6 @@ int cls_libcam::cam_start_mgr()
 
 void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
 {
-    char *x, *y, *w, *h;
-
     if (mystrceq(pname, "AeEnable")) {
         controls.set(controls::AeEnable, cam_parm_bool(pvalue));
     }
@@ -334,12 +337,10 @@ void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
         controls.set(controls::AwbLocked, cam_parm_bool(pvalue));
     }
     if (mystrceq(pname,"ColourGains")) {
-        //extern const Control<Span<const float, 2>> ColourGains;
-        /* Not functional (can not set a float to the Span)
-        controls.set(controls::ColourGains, cam_parm_single(pvalue));
-        */
-        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
-            , "ColourGains Not Implemented.");
+        float cg[2];
+        cg[0] = cam_parm_single(strtok(pvalue, "|"));
+        cg[1] = cam_parm_single(strtok(0, "|"));
+        controls.set(controls::ColourGains, cg);
     }
     if (mystrceq(pname,"ColourTemperature")) {
         controls.set(controls::ColourTemperature, atoi(pvalue));
@@ -348,9 +349,12 @@ void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
         controls.set(controls::Saturation, cam_parm_single(pvalue));
     }
     if (mystrceq(pname,"SensorBlackLevels")) {
-        //extern const Control<Span<const int32_t, 4>> SensorBlackLevels;
-        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
-            , "SensorBlackLevels Not Implemented.");
+        int32_t sbl[4];
+        sbl[0] = atoi(strtok(pvalue, "|"));
+        sbl[1] = atoi(strtok(0, "|"));
+        sbl[2] = atoi(strtok(0, "|"));
+        sbl[3] = atoi(strtok(0, "|"));
+        controls.set(controls::SensorBlackLevels, sbl);
     }
     if (mystrceq(pname,"Sharpness")) {
         controls.set(controls::Sharpness, cam_parm_single(pvalue));
@@ -359,18 +363,25 @@ void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
         controls.set(controls::FocusFoM, atoi(pvalue));
     }
     if (mystrceq(pname,"ColourCorrectionMatrix")) {
-        //extern const Control<Span<const float, 9>> ColourCorrectionMatrix;
-        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
-            , "SensorBlackLevels Not Implemented.");
+        float ccm[9];
+        ccm[0] = cam_parm_single(strtok(pvalue, "|"));
+        ccm[1] = cam_parm_single(strtok(0, "|"));
+        ccm[2] = cam_parm_single(strtok(0, "|"));
+        ccm[3] = cam_parm_single(strtok(0, "|"));
+        ccm[4] = cam_parm_single(strtok(0, "|"));
+        ccm[5] = cam_parm_single(strtok(0, "|"));
+        ccm[6] = cam_parm_single(strtok(0, "|"));
+        ccm[7] = cam_parm_single(strtok(0, "|"));
+        ccm[8] = cam_parm_single(strtok(0, "|"));
+        controls.set(controls::ColourCorrectionMatrix, ccm);
     }
     if (mystrceq(pname,"ScalerCrop")) {
-        x = strtok(pvalue, "-");
-        y = strtok(0, "-");
-        w = strtok(0, "-");
-        h = strtok(0, "-");
-        if (h != NULL) {
-            controls.set(controls::ScalerCrop, Rectangle(atoi(x),atoi(y),atoi(w),atoi(h)));
-        }
+        Rectangle crop;
+        crop.x = atoi(strtok(pvalue, "|"));
+        crop.y = atoi(strtok(0, "|"));
+        crop.width = atoi(strtok(0, "|"));
+        crop.height = atoi(strtok(0, "|"));
+        controls.set(controls::ScalerCrop, crop);
     }
     if (mystrceq(pname,"DigitalGain")) {
         controls.set(controls::DigitalGain, cam_parm_single(pvalue));
@@ -379,9 +390,10 @@ void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
         controls.set(controls::FrameDuration, atoi(pvalue));
     }
     if (mystrceq(pname,"FrameDurationLimits")) {
-        //extern const Control<Span<const int64_t, 2>> FrameDurationLimits;
-        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
-            , "FrameDurationLimits Not Implemented.");
+        int64_t fdl[2];
+        fdl[0] = atol(strtok(pvalue, "|"));
+        fdl[1] = atol(strtok(0, "|"));
+        controls.set(controls::FrameDurationLimits, fdl);
     }
     if (mystrceq(pname,"SensorTemperature")) {
         controls.set(controls::SensorTemperature, cam_parm_single(pvalue));
@@ -402,9 +414,12 @@ void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
         controls.set(controls::AfMetering, atoi(pvalue));
     }
     if (mystrceq(pname,"AfWindows")) {
-        //extern const Control<Span<const Rectangle>> AfWindows;
-        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
-            , "AfWindows Not Implemented.");
+        Rectangle afwin[1];
+        afwin[0].x = atoi(strtok(pvalue, "|"));
+        afwin[0].y = atoi(strtok(0, "|"));
+        afwin[0].width = atoi(strtok(0, "|"));
+        afwin[0].height = atoi(strtok(0, "|"));
+        controls.set(controls::AfWindows, afwin);
     }
     if (mystrceq(pname,"AfTrigger")) {
         controls.set(controls::AfTrigger, atoi(pvalue));

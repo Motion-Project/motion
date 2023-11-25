@@ -1095,13 +1095,32 @@
             <li> AwbCustom = 7</li>
           </ul></div>
           <i><h4> AwbLocked(bool)</h4></i>
+          <i><h4> ColourGains(Pipe delimited)</h4></i>
+          <div><ul>
+            <li> Red | Blue</li>
+          </ul></div>
           <i><h4> ColourTemperature(int)</h4></i>
           <i><h4> Saturation(float)</h4></i>
+          <i><h4> SensorBlackLevels(Pipe delimited)</h4></i>
+          <div><ul>
+            <li> var1|var2|var3|var4</li>
+          </ul></div>
           <i><h4> Sharpness(float)</h4></i>
           <i><h4> FocusFoM(int)</h4></i>
-          <i><h4> ScalerCrop(Rect x-y-h-w)</h4></i>
+          <i><h4> ColourCorrectionMatrix(Pipe delimited)</h4></i>
+          <div><ul>
+            <li> var1|var2|var3|var4|var5|var6|var7|var8|var9</li>
+          </ul></div>
+          <i><h4> ScalerCrop(Pipe delimited)</h4></i>
+          <div><ul>
+            <li> x|y|height|width</li>
+          </ul></div>
           <i><h4> DigitalGain(float)</h4></i>
           <i><h4> FrameDuration(int)</h4></i>
+          <i><h4> FrameDurationLimits(Pipe delimited)</h4></i>
+          <div><ul>
+            <li> min|max</li>
+          </ul></div>
           <i><h4> SensorTemperature(float)</h4></i>
           <i><h4> SensorTimestamp(int)</h4></i>
           <i><h4> AfMode(int)</h4></i>
@@ -1126,7 +1145,10 @@
             <li> AfMeteringAuto = 0</li>
             <li> AfMeteringWindows = 1</li>
           </ul></div>
-          <i><h4> AfWindows(rect x-y-h-w)</h4></i>
+          <i><h4> AfWindows(Pipe delimited)</h4></i>
+          <div><ul>
+            <li> x|y|height|width</li>
+          </ul></div>
           <i><h4> AfTrigger(int)</h4></i>
           <div><ul>
             <li> AfTriggerStart = 0</li>
@@ -1192,12 +1214,6 @@
           <div><ul>
             <li> LensShadingMapModeOff = 0</li>
             <li> LensShadingMapModeOn = 1</li>
-          </ul></div>
-          <i><h4> SceneFlicker(int)</h4></i>
-          <div><ul>
-            <li> SceneFickerOff = 0</li>
-            <li> SceneFicker50Hz = 1</li>
-            <li> SceneFicker60Hz = 2</li>
           </ul></div>
           <i><h4> PipelineDepth(int)</h4></i>
           <i><h4> MaxLatency(int)</h4></i>
