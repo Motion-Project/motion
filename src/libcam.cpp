@@ -54,23 +54,25 @@ float cls_libcam::cam_parm_single(char *parm)
     return (float)atof(parm);
 }
 
-void cls_libcam:: cam_log_transform()
+void cls_libcam::cam_log_orientation()
 {
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "Libcamera Transform Options:");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Identity");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rot0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  HFlip");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  VFlip");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  HVFlip");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rot180");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Transpose");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rot270");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rot90");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rot180Transpose");
+    #if (LIBCAMVER >= 1000)
+        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "Libcamera Orientation Options:");
+        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rotate0");
+        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rotate0Mirror");
+        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rotate180");
+        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rotate180Mirror");
+        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rotate90");
+        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rotate90Mirror");
+        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rotate270");
+        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rotate270Mirror");
+    #else
+        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Orientation Not available");
+    #endif
 
 }
 
-void cls_libcam:: cam_log_controls()
+void cls_libcam::cam_log_controls()
 {
 
     motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "Libcamera Controls:");
@@ -484,66 +486,85 @@ void cls_libcam:: cam_config_controls()
     retcd = config->validate();
     if (retcd == CameraConfiguration::Adjusted) {
         MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
-            , "Configuration adjusted.");
+            , "Configuration controls adjusted.");
     } else if (retcd == CameraConfiguration::Valid) {
          MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-            , "Configuration valid");
+            , "Configuration controls valid");
     } else if (retcd == CameraConfiguration::Invalid) {
          MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Configuration error");
+            , "Configuration controls error");
     }
 
 }
 
-void cls_libcam:: cam_config_transform()
+void cls_libcam:: cam_config_orientation()
 {
-    int indx, retcd;
-    ctx_params_item itm;
+    #if (LIBCAMVER >= 1000)
+        int indx, retcd;
+        ctx_params_item itm;
+        std::string adjdesc;
 
-    config->transform = Transform::Identity;
-
-    for (indx = 0; indx < camctx->libcam->params->params_count; indx++) {
-        itm = camctx->libcam->params->params_array[indx];
-        if (mystreq(itm.param_name,"transform")) {
-            if (mystrceq(itm.param_value,"identity")) {
-                config->transform = Transform::Identity;
-            } else if (mystrceq(itm.param_value,"rot0")) {
-                config->transform = Transform::Rot0;
-            } else if (mystrceq(itm.param_value,"hflip")) {
-                config->transform = Transform::HFlip;
-            } else if (mystrceq(itm.param_value,"vflip")) {
-                config->transform = Transform::VFlip;
-            } else if (mystrceq(itm.param_value,"hvflip")) {
-                config->transform = Transform::HVFlip;
-            } else if (mystrceq(itm.param_value,"rot180")) {
-                config->transform = Transform::Rot180;
-            } else if (mystrceq(itm.param_value,"transpose")) {
-                config->transform = Transform::Transpose;
-            } else if (mystrceq(itm.param_value,"rot270")) {
-                config->transform = Transform::Rot270;
-            } else if (mystrceq(itm.param_value,"rot90")) {
-                config->transform = Transform::Rot90;
-            } else if (mystrceq(itm.param_value,"rot180transpose")) {
-                config->transform = Transform::Rot180Transpose;
-            } else {
-                MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                    , "Invalid transform option: %s."
-                    , itm.param_value);
+        for (indx = 0; indx < camctx->libcam->params->params_count; indx++) {
+            itm = camctx->libcam->params->params_array[indx];
+            if (mystreq(itm.param_name,"orientation")) {
+                if (mystrceq(itm.param_value,"Rotate0")) {
+                    config->orientation = Orientation::Rotate0;
+                } else if (mystrceq(itm.param_value,"Rotate0Mirror")) {
+                    config->orientation = Orientation::Rotate0Mirror;
+                } else if (mystrceq(itm.param_value,"Rotate180")) {
+                    config->orientation = Orientation::Rotate180;
+                } else if (mystrceq(itm.param_value,"Rotate180Mirror")) {
+                    config->orientation = Orientation::Rotate180Mirror;
+                } else if (mystrceq(itm.param_value,"Rotate90")) {
+                    config->orientation = Orientation::Rotate90;
+                } else if (mystrceq(itm.param_value,"Rotate90Mirror")) {
+                    config->orientation = Orientation::Rotate90Mirror;
+                } else if (mystrceq(itm.param_value,"Rotate270")) {
+                    config->orientation = Orientation::Rotate270;
+                } else if (mystrceq(itm.param_value,"Rotate270Mirror")) {
+                    config->orientation = Orientation::Rotate270Mirror;
+                } else {
+                    MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                        , "Invalid Orientation option: %s."
+                        , itm.param_value);
+                }
             }
         }
-    }
 
-    retcd = config->validate();
-    if (retcd == CameraConfiguration::Adjusted) {
-        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
-            , "Configuration adjusted.");
-    } else if (retcd == CameraConfiguration::Valid) {
-         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-            , "Configuration valid");
-    } else if (retcd == CameraConfiguration::Invalid) {
-         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Configuration error");
-    }
+        retcd = config->validate();
+        if (retcd == CameraConfiguration::Adjusted) {
+            if (config->orientation == Orientation::Rotate0) {
+                adjdesc = "Rotate0";
+            } else if (config->orientation == Orientation::Rotate0Mirror) {
+                adjdesc = "Rotate0Mirror";
+            } else if (config->orientation == Orientation::Rotate90) {
+                adjdesc = "Rotate90";
+            } else if (config->orientation == Orientation::Rotate90Mirror) {
+            adjdesc = "Rotate90Mirror";
+            } else if (config->orientation == Orientation::Rotate180) {
+                adjdesc = "Rotate180";
+            } else if (config->orientation == Orientation::Rotate180Mirror) {
+                adjdesc = "Rotate180Mirror";
+            } else if (config->orientation == Orientation::Rotate270) {
+                adjdesc = "Rotate270";
+            } else if (config->orientation == Orientation::Rotate270Mirror) {
+                adjdesc = "Rotate270Mirror";
+            } else {
+                adjdesc = "unknown";
+            }
+            MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
+                , "Configuration orientation adjusted to %s."
+                , adjdesc.c_str());
+        } else if (retcd == CameraConfiguration::Valid) {
+            MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+                , "Configuration orientation valid");
+        } else if (retcd == CameraConfiguration::Invalid) {
+            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                , "Configuration orientation error");
+        }
+    #else
+        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Orientation Not available");
+    #endif
 
 }
 
@@ -597,11 +618,11 @@ int cls_libcam::cam_start_config()
     camctx->imgs.size_norm = (camctx->imgs.width * camctx->imgs.height * 3) / 2;
     camctx->imgs.motionsize = camctx->imgs.width * camctx->imgs.height;
 
-    cam_log_transform();
+    cam_log_orientation();
     cam_log_controls();
     cam_log_draft();
 
-    cam_config_transform();
+    cam_config_orientation();
     cam_config_controls();
 
     camera->configure(config.get());

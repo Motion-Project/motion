@@ -24,6 +24,8 @@
         #include <sys/mman.h>
         #include <libcamera/libcamera.h>
 
+        #define LIBCAMVER (LIBCAMERA_VERSION_MAJOR * 1000000)+(LIBCAMERA_VERSION_MINOR* 1000) + LIBCAMERA_VERSION_PATCH
+
         /* Buffers and sizes for planes of image*/
         struct ctx_imgmap {
             uint8_t *buf;
@@ -55,7 +57,7 @@
                 bool                    started_aqr;
                 bool                    started_req;
 
-                void cam_log_transform();
+                void cam_log_orientation();
                 void cam_log_controls();
                 void cam_log_draft();
 
@@ -64,7 +66,7 @@
                 int cam_start_config();
                 int cam_start_req();
                 int cam_start_capture();
-                void cam_config_transform();
+                void cam_config_orientation();
                 void cam_config_controls();
                 void req_complete(libcamera::Request *request);
                 int req_add(libcamera::Request *request);
@@ -73,6 +75,7 @@
                 void cam_config_control_item(char *pmm, char *pval);
         };
     #else
+        #define LIBCAMVER 0
         class cls_libcam {
             public:
                 cls_libcam(){};
