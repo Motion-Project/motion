@@ -552,7 +552,7 @@ void pic_save_preview(ctx_dev *cam)
         cam->imgs.image_preview.diffs = 1;
     }
 
-    draw_locate_preview(cam);
+    draw_locate(cam);
 
 }
 

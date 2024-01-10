@@ -1427,64 +1427,38 @@ static void draw_red_location(ctx_coord *cent, ctx_images *imgs, int width
     }
 }
 
-void draw_locate_preview(ctx_dev *cam)
-{
-    /* Fixme.  Should location be on the preview image.
-        Combine locate preview with locate functions together */
-    /* draw locate box here when mode = LOCATE_PREVIEW */
-    if (cam->locate_motion_mode == LOCATE_PREVIEW) {
-        if (cam->locate_motion_style == LOCATE_BOX) {
-            draw_location(&cam->current_image->location
-                , &cam->imgs, cam->imgs.width
-                , cam->imgs.image_preview.image_norm
-                , LOCATE_BOX, LOCATE_NORMAL);
-        } else if (cam->locate_motion_style == LOCATE_REDBOX) {
-            draw_red_location(&cam->current_image->location
-                , &cam->imgs, cam->imgs.width
-                , cam->imgs.image_preview.image_norm
-                , LOCATE_REDBOX, LOCATE_NORMAL);
-        } else if (cam->locate_motion_style == LOCATE_CROSS) {
-            draw_location(&cam->current_image->location
-                , &cam->imgs, cam->imgs.width
-                , cam->imgs.image_preview.image_norm
-                , LOCATE_CROSS, LOCATE_NORMAL);
-        } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
-            draw_red_location(&cam->current_image->location
-                , &cam->imgs, cam->imgs.width
-                , cam->imgs.image_preview.image_norm
-                , LOCATE_REDCROSS, LOCATE_NORMAL);
-        }
-    }
-}
-
 void draw_locate(ctx_dev *cam)
 {
-    ctx_images *imgs = &cam->imgs;
-    ctx_coord *location = &cam->current_image->location;
+    ctx_images *imgs;
+    ctx_coord *location;
+    unsigned char *image_norm;
 
-    if (cam->locate_motion_mode == LOCATE_ON) {
-        if (cam->locate_motion_style == LOCATE_BOX) {
-            draw_location(location
-                , imgs, imgs->width
-                , cam->current_image->image_norm
-                , LOCATE_BOX, LOCATE_BOTH);
-        } else if (cam->locate_motion_style == LOCATE_REDBOX) {
-            draw_red_location(location
-                , imgs, imgs->width
-                , cam->current_image->image_norm
-                , LOCATE_REDBOX,LOCATE_BOTH);
-        } else if (cam->locate_motion_style == LOCATE_CROSS) {
-            draw_location(location
-                , imgs, imgs->width
-                , cam->current_image->image_norm
-                , LOCATE_CROSS, LOCATE_BOTH);
-        } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
-            draw_red_location(location
-                , imgs, imgs->width
-                , cam->current_image->image_norm
-                , LOCATE_REDCROSS, LOCATE_BOTH);
-        }
+    if (cam->locate_motion_mode == LOCATE_PREVIEW) {
+        imgs = &cam->imgs;
+        location = &cam->imgs.image_preview.location;
+        image_norm = cam->imgs.image_preview.image_norm;
+    } else if (cam->locate_motion_mode == LOCATE_ON) {
+        imgs = &cam->imgs;
+        location = &cam->current_image->location;
+        image_norm = cam->current_image->image_norm;
+    } else {
+        return;
     }
+
+    if (cam->locate_motion_style == LOCATE_BOX) {
+        draw_location(location, imgs, imgs->width
+            , image_norm, LOCATE_BOX, LOCATE_BOTH);
+    } else if (cam->locate_motion_style == LOCATE_REDBOX) {
+        draw_red_location(location, imgs, imgs->width
+            , image_norm, LOCATE_REDBOX,LOCATE_BOTH);
+    } else if (cam->locate_motion_style == LOCATE_CROSS) {
+        draw_location(location, imgs, imgs->width
+            , image_norm, LOCATE_CROSS, LOCATE_BOTH);
+    } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
+        draw_red_location(location, imgs, imgs->width
+            , image_norm, LOCATE_REDCROSS, LOCATE_BOTH);
+    }
+
 }
 
 void draw_smartmask(ctx_dev *cam, unsigned char *out)

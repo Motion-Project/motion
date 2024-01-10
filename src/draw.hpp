@@ -28,7 +28,6 @@
     int draw_init_chars(void);
     void draw_init_scale(ctx_dev *cam);
 
-    void draw_locate_preview(ctx_dev *cam);
     void draw_locate(ctx_dev *cam);
     void draw_smartmask(ctx_dev *cam, unsigned char *out);
     void draw_fixed_mask(ctx_dev *cam, unsigned char *out);
