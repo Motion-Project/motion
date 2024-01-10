@@ -56,7 +56,7 @@ float cls_libcam::cam_parm_single(char *parm)
 
 void cls_libcam::cam_log_orientation()
 {
-    #if (LIBCAMVER >= 1000)
+    #if (LIBCAMVER >= 2000)
         motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "Libcamera Orientation Options:");
         motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rotate0");
         motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0, "  Rotate0Mirror");
@@ -499,7 +499,7 @@ void cls_libcam:: cam_config_controls()
 
 void cls_libcam:: cam_config_orientation()
 {
-    #if (LIBCAMVER >= 1000)
+    #if (LIBCAMVER >= 2000)
         int indx, retcd;
         ctx_params_item itm;
         std::string adjdesc;
