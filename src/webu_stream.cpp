@@ -571,7 +571,7 @@ void webu_stream_deinit(ctx_dev *cam)
 }
 
 /* Get a normal image from the motion loop and compress it*/
-static void webu_stream_getimg_norm(ctx_dev *cam, ctx_image_data *img_data)
+static void webu_stream_getimg_norm(ctx_dev *cam)
 {
     if ((cam->stream.norm.jpg_cnct == 0) &&
         (cam->stream.norm.ts_cnct == 0)) {
@@ -582,11 +582,11 @@ static void webu_stream_getimg_norm(ctx_dev *cam, ctx_image_data *img_data)
         if (cam->stream.norm.jpeg_data == NULL) {
             cam->stream.norm.jpeg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
-        if (img_data->image_norm != NULL && cam->stream.norm.consumed) {
+        if (cam->current_image->image_norm != NULL && cam->stream.norm.consumed) {
             cam->stream.norm.jpeg_size = pic_put_memory(cam
                 ,cam->stream.norm.jpeg_data
                 ,cam->imgs.size_norm
-                ,img_data->image_norm
+                ,cam->current_image->image_norm
                 ,cam->conf->stream_quality
                 ,cam->imgs.width
                 ,cam->imgs.height);
@@ -597,12 +597,12 @@ static void webu_stream_getimg_norm(ctx_dev *cam, ctx_image_data *img_data)
         if (cam->stream.norm.image == NULL) {
             cam->stream.norm.image =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
-        memcpy(cam->stream.norm.image, img_data->image_norm, cam->imgs.size_norm);
+        memcpy(cam->stream.norm.image, cam->current_image->image_norm, cam->imgs.size_norm);
     }
 }
 
 /* Get a substream image from the motion loop and compress it*/
-static void webu_stream_getimg_sub(ctx_dev *cam, ctx_image_data *img_data)
+static void webu_stream_getimg_sub(ctx_dev *cam)
 {
     int subsize;
 
@@ -615,7 +615,7 @@ static void webu_stream_getimg_sub(ctx_dev *cam, ctx_image_data *img_data)
         if (cam->stream.sub.jpeg_data == NULL) {
             cam->stream.sub.jpeg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
-        if (img_data->image_norm != NULL && cam->stream.sub.consumed) {
+        if (cam->current_image->image_norm != NULL && cam->stream.sub.consumed) {
             /* Resulting substream image must be multiple of 8 */
             if (((cam->imgs.width  % 16) == 0)  &&
                 ((cam->imgs.height % 16) == 0)) {
@@ -626,7 +626,7 @@ static void webu_stream_getimg_sub(ctx_dev *cam, ctx_image_data *img_data)
                 }
                 pic_scale_img(cam->imgs.width
                     ,cam->imgs.height
-                    ,img_data->image_norm
+                    ,cam->current_image->image_norm
                     ,cam->imgs.image_substream);
                 cam->stream.sub.jpeg_size = pic_put_memory(cam
                     ,cam->stream.sub.jpeg_data
@@ -640,7 +640,7 @@ static void webu_stream_getimg_sub(ctx_dev *cam, ctx_image_data *img_data)
                 cam->stream.sub.jpeg_size = pic_put_memory(cam
                     ,cam->stream.sub.jpeg_data
                     ,cam->imgs.size_norm
-                    ,img_data->image_norm
+                    ,cam->current_image->image_norm
                     ,cam->conf->stream_quality
                     ,cam->imgs.width
                     ,cam->imgs.height);
@@ -661,11 +661,11 @@ static void webu_stream_getimg_sub(ctx_dev *cam, ctx_image_data *img_data)
             }
             pic_scale_img(cam->imgs.width
                 ,cam->imgs.height
-                ,img_data->image_norm
+                ,cam->current_image->image_norm
                 ,cam->imgs.image_substream);
             memcpy(cam->stream.sub.image, cam->imgs.image_substream, subsize);
         } else {
-            memcpy(cam->stream.sub.image, img_data->image_norm, cam->imgs.size_norm);
+            memcpy(cam->stream.sub.image, cam->current_image->image_norm, cam->imgs.size_norm);
         }
     }
 
@@ -738,7 +738,7 @@ static void webu_stream_getimg_source(ctx_dev *cam)
 }
 
 /* Get a secondary image from the motion loop and compress it*/
-static void webu_stream_getimg_secondary(ctx_dev *cam, ctx_image_data *img_data)
+static void webu_stream_getimg_secondary(ctx_dev *cam)
 {
      if ((cam->stream.secondary.jpg_cnct == 0) &&
         (cam->stream.secondary.ts_cnct == 0)) {
@@ -764,20 +764,20 @@ static void webu_stream_getimg_secondary(ctx_dev *cam, ctx_image_data *img_data)
             cam->stream.secondary.image =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
         memcpy(cam->stream.secondary.image
-            , img_data->image_norm, cam->imgs.size_norm);
+            , cam->current_image->image_norm, cam->imgs.size_norm);
     }
 
 }
 
 /* Get image from the motion loop and compress it*/
-void webu_stream_getimg(ctx_dev *cam, ctx_image_data *img_data)
+void webu_stream_getimg(ctx_dev *cam)
 {
     /*This is on the motion_loop thread */
     pthread_mutex_lock(&cam->stream.mutex);
-        webu_stream_getimg_norm(cam, img_data);
-        webu_stream_getimg_sub(cam, img_data);
+        webu_stream_getimg_norm(cam);
+        webu_stream_getimg_sub(cam);
         webu_stream_getimg_motion(cam);
         webu_stream_getimg_source(cam);
-        webu_stream_getimg_secondary(cam, img_data);
+        webu_stream_getimg_secondary(cam);
     pthread_mutex_unlock(&cam->stream.mutex);
 }

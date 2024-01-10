@@ -28,7 +28,7 @@
     void pic_save_roi(struct ctx_dev *cam, char *file, unsigned char *image);
     unsigned char *pic_load_pgm(FILE *picture, int width, int height);
     void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst);
-    void pic_save_preview(struct ctx_dev *cam, struct ctx_image_data *img);
+    void pic_save_preview(struct ctx_dev *cam);
     void pic_init_privacy(struct ctx_dev *cam);
     void pic_init_mask(struct ctx_dev *cam);
 

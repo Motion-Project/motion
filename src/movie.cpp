@@ -1677,7 +1677,7 @@ int movie_init_motion(ctx_dev *cam, struct timespec *ts1)
 
 }
 
-int movie_init_timelapse(ctx_dev *cam, struct timespec *ts1)
+int movie_init_timelapse(ctx_dev *cam)
 {
     char tmp[PATH_MAX];
     const char *container_mpg = "mpg";
@@ -1686,7 +1686,8 @@ int movie_init_timelapse(ctx_dev *cam, struct timespec *ts1)
 
     cam->movie_timelapse =(ctx_movie*)mymalloc(sizeof(ctx_movie));
     mystrftime(cam, tmp, sizeof(tmp)
-        , cam->conf->timelapse_filename.c_str(), ts1, NULL, 0);
+        , cam->conf->timelapse_filename.c_str()
+        , &cam->current_image->imgts, NULL, 0);
 
     /* The increment of 10 is to allow for the extension and other chars*/
     len = (int)(strlen(tmp) + cam->conf->target_dir.length() + 10);
@@ -1721,8 +1722,8 @@ int movie_init_timelapse(ctx_dev *cam, struct timespec *ts1)
     cam->movie_timelapse->fps = cam->conf->timelapse_fps;
     cam->movie_timelapse->bps = cam->conf->movie_bps;
     cam->movie_timelapse->quality = cam->conf->movie_quality;
-    cam->movie_timelapse->start_time.tv_sec = ts1->tv_sec;
-    cam->movie_timelapse->start_time.tv_nsec = ts1->tv_nsec;
+    cam->movie_timelapse->start_time.tv_sec = cam->current_image->imgts.tv_sec;
+    cam->movie_timelapse->start_time.tv_nsec = cam->current_image->imgts.tv_nsec;
     cam->movie_timelapse->last_pts = -1;
     cam->movie_timelapse->base_pts = 0;
     cam->movie_timelapse->test_mode = false;

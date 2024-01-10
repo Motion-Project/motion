@@ -135,26 +135,25 @@ static void mlp_ring_process(ctx_dev *cam)
 
         cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_out];
 
-        if (cam->imgs.image_ring[cam->imgs.ring_out].shot < cam->conf->framerate) {
+        if (cam->current_image->shot < cam->conf->framerate) {
             if (cam->motapp->conf->log_level >= DBG) {
                 mlp_ring_process_debug(cam);
             }
 
-            event(cam, EVENT_IMAGE_DETECTED,
-              &cam->imgs.image_ring[cam->imgs.ring_out], NULL, NULL);
+            event(cam, EVENT_IMAGE_DETECTED, NULL, NULL);
         }
 
-        cam->imgs.image_ring[cam->imgs.ring_out].flags |= IMAGE_SAVED;
+        cam->current_image->flags |= IMAGE_SAVED;
 
-        if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_MOTION) {
+        if (cam->current_image->flags & IMAGE_MOTION) {
             if (cam->new_img & NEWIMG_BEST) {
-                if (cam->imgs.image_ring[cam->imgs.ring_out].diffs > cam->imgs.image_preview.diffs) {
-                    pic_save_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
+                if (cam->current_image->diffs > cam->imgs.image_preview.diffs) {
+                    pic_save_preview(cam);
                 }
             }
             if (cam->new_img & NEWIMG_CENTER) {
-                if (cam->imgs.image_ring[cam->imgs.ring_out].cent_dist < cam->imgs.image_preview.cent_dist) {
-                    pic_save_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
+                if (cam->current_image->cent_dist < cam->imgs.image_preview.cent_dist) {
+                    pic_save_preview(cam);
                 }
             }
         }
@@ -179,12 +178,12 @@ static void mlp_info_reset(ctx_dev *cam)
 }
 
 /* Process the motion detected items*/
-static void mlp_detected_trigger(ctx_dev *cam, ctx_image_data *img)
+static void mlp_detected_trigger(ctx_dev *cam)
 {
     time_t raw_time;
     struct tm evt_tm;
 
-    if (img->flags & IMAGE_TRIGGER) {
+    if (cam->current_image->flags & IMAGE_TRIGGER) {
         if (cam->event_nr != cam->prev_event) {
             mlp_info_reset(cam);
             cam->prev_event = cam->event_nr;
@@ -201,19 +200,21 @@ static void mlp_detected_trigger(ctx_dev *cam, ctx_image_data *img)
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
                        cam->event_nr);
 
-            mystrftime(cam, cam->text_event_string, sizeof(cam->text_event_string),
-                       cam->conf->text_event.c_str(), &img->imgts, NULL, 0);
+            mystrftime(cam, cam->text_event_string
+                , sizeof(cam->text_event_string)
+                , cam->conf->text_event.c_str()
+                , &cam->current_image->imgts, NULL, 0);
 
-            event(cam, EVENT_START, img, NULL, NULL);
-            dbse_exec(cam, NULL, 0, &img->imgts, "event_start");
+            event(cam, EVENT_START, NULL, NULL);
+            dbse_exec(cam, NULL, 0, &cam->current_image->imgts, "event_start");
 
             if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)) {
-                pic_save_preview(cam, img);
+                pic_save_preview(cam);
             }
 
         }
 
-        event(cam, EVENT_MOTION, img, NULL, NULL);
+        event(cam, EVENT_MOTION, NULL, NULL);
     }
 }
 
@@ -229,43 +230,45 @@ static void mlp_track_center(ctx_dev *cam)
 }
 
 /* call ptz camera move */
-static void mlp_track_move(ctx_dev *cam, ctx_coord *cent)
+static void mlp_track_move(ctx_dev *cam)
 {
     if ((cam->conf->ptz_auto_track) && (cam->conf->ptz_move_track != "")) {
-            cam->track_posx += cent->x;
-            cam->track_posy += cent->y;
+            cam->track_posx += cam->current_image->location.x;
+            cam->track_posy += cam->current_image->location.y;
             util_exec_command(cam, cam->conf->ptz_move_track.c_str(), NULL, 0);
             cam->frame_skip = cam->conf->ptz_wait;
     }
 }
 
 /* motion detected */
-static void mlp_detected(ctx_dev *cam, ctx_image_data *img)
+static void mlp_detected(ctx_dev *cam)
 {
     ctx_config *conf = cam->conf;
     unsigned int distX, distY;
 
-    draw_locate(cam, img);
+    draw_locate(cam);
 
     /* Calculate how centric motion is if configured preview center*/
     if (cam->new_img & NEWIMG_CENTER) {
-        distX = abs((cam->imgs.width / 2) - img->location.x );
-        distY = abs((cam->imgs.height / 2) - img->location.y);
-        img->cent_dist = distX * distX + distY * distY;
+        distX = abs((cam->imgs.width / 2) - cam->current_image->location.x );
+        distY = abs((cam->imgs.height / 2) - cam->current_image->location.y);
+        cam->current_image->cent_dist = distX * distX + distY * distY;
     }
 
-    mlp_detected_trigger(cam, img);
+    mlp_detected_trigger(cam);
 
-    if (img->shot < conf->framerate) {
-        if (conf->stream_motion && !cam->motapp->conf->setup_mode && img->shot != 1) {
-            event(cam, EVENT_STREAM, img, NULL, NULL);
+    if (cam->current_image->shot < conf->framerate) {
+        if ((conf->stream_motion == true) &&
+            (cam->motapp->conf->setup_mode == false) &&
+            (cam->current_image->shot != 1)) {
+            event(cam, EVENT_STREAM, NULL, NULL);
         }
         if (conf->picture_output_motion != "off") {
-            event(cam, EVENT_IMAGEM_DETECTED, img, NULL, NULL);
+            event(cam, EVENT_IMAGEM_DETECTED, NULL, NULL);
         }
     }
 
-    mlp_track_move(cam, &img->location);
+    mlp_track_move(cam);
 }
 
 /* Apply the privacy mask to image*/
@@ -601,14 +604,14 @@ static void mlp_init_ref(ctx_dev *cam)
 /** clean up all memory etc. from motion init */
 void mlp_cleanup(ctx_dev *cam)
 {
-    event(cam, EVENT_TLAPSE_END, NULL, NULL, NULL);
+    event(cam, EVENT_TLAPSE_END, NULL, NULL);
     if (cam->event_nr == cam->prev_event) {
         mlp_ring_process(cam);
         if (cam->imgs.image_preview.diffs) {
-            event(cam, EVENT_IMAGE_PREVIEW, cam->current_image, NULL, NULL);
+            event(cam, EVENT_IMAGE_PREVIEW, NULL, NULL);
             cam->imgs.image_preview.diffs = 0;
         }
-        event(cam, EVENT_END, cam->current_image, NULL, NULL);
+        event(cam, EVENT_END, NULL, NULL);
         dbse_exec(cam, NULL, 0, &cam->current_image->imgts, "event_end");
     }
 
@@ -731,7 +734,7 @@ static void mlp_areadetect(ctx_dev *cam)
                     cam->current_image->location.x < cam->area_maxx[z] &&
                     cam->current_image->location.y > cam->area_miny[z] &&
                     cam->current_image->location.y < cam->area_maxy[z]) {
-                    event(cam, EVENT_AREA_DETECTED, cam->current_image, NULL, NULL);
+                    event(cam, EVENT_AREA_DETECTED, NULL, NULL);
                     cam->areadetect_eventnbr = cam->event_nr; /* Fire script only once per event */
                     MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
                         ,_("Motion in area %d detected."), z + 1);
@@ -847,7 +850,7 @@ static int mlp_capture(ctx_dev *cam)
 
         if (cam->missing_frame_counter >= (cam->conf->device_tmo * cam->conf->framerate)) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
-            event(cam, EVENT_CAMERA_FOUND, NULL, NULL, NULL);
+            event(cam, EVENT_CAMERA_FOUND, NULL, NULL);
         }
         cam->missing_frame_counter = 0;
         memcpy(cam->imgs.image_virgin, cam->current_image->image_norm, cam->imgs.size_norm);
@@ -883,7 +886,7 @@ static int mlp_capture(ctx_dev *cam)
             if (cam->missing_frame_counter == (cam->conf->device_tmo * cam->conf->framerate)) {
                 MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                     ,_("Video signal lost - Adding grey image"));
-                event(cam, EVENT_CAMERA_LOST, cam->current_image, NULL, NULL);
+                event(cam, EVENT_CAMERA_LOST, NULL, NULL);
             }
 
             if ((cam->device_status == STATUS_OPENED) &&
@@ -1044,7 +1047,7 @@ static void mlp_actions_emulate(ctx_dev *cam)
         cam->imgs.image_ring[indx].flags |= IMAGE_SAVE;
     }
 
-    mlp_detected(cam, cam->current_image);
+    mlp_detected(cam);
 }
 
 /* call the actions */
@@ -1086,7 +1089,7 @@ static void mlp_actions_motion(ctx_dev *cam)
         cam->current_image->flags |= IMAGE_PRECAP;
     }
 
-    mlp_detected(cam, cam->current_image);
+    mlp_detected(cam);
 }
 
 /* call the event actions*/
@@ -1103,17 +1106,17 @@ static void mlp_actions_event(ctx_dev *cam)
             mlp_ring_process(cam);
 
             if (cam->imgs.image_preview.diffs) {
-                event(cam, EVENT_IMAGE_PREVIEW, cam->current_image, NULL, NULL);
+                event(cam, EVENT_IMAGE_PREVIEW, NULL, NULL);
                 cam->imgs.image_preview.diffs = 0;
             }
-            event(cam, EVENT_END, cam->current_image, NULL, NULL);
+            event(cam, EVENT_END, NULL, NULL);
             dbse_exec(cam, NULL, 0, &cam->current_image->imgts, "event_end");
 
             mlp_track_center(cam);
 
             if (cam->algsec_inuse) {
                 if (cam->algsec->isdetected) {
-                    event(cam, EVENT_SECDETECT, cam->current_image, NULL, NULL);
+                    event(cam, EVENT_SECDETECT, NULL, NULL);
                 }
                 cam->algsec->isdetected = false;
             }
@@ -1134,9 +1137,9 @@ static void mlp_actions_event(ctx_dev *cam)
             cam->conf->movie_max_time) &&
         ( !(cam->current_image->flags & IMAGE_POSTCAP)) &&
         ( !(cam->current_image->flags & IMAGE_PRECAP))) {
-        event(cam, EVENT_MOVIE_END, cam->current_image, NULL, NULL);
+        event(cam, EVENT_MOVIE_END, NULL, NULL);
         mlp_info_reset(cam);
-        event(cam, EVENT_MOVIE_START, cam->current_image, NULL, NULL);
+        event(cam, EVENT_MOVIE_START, NULL, NULL);
     }
 
 }
@@ -1238,7 +1241,7 @@ static void mlp_snapshot(ctx_dev *cam)
          cam->frame_curr_ts.tv_sec % cam->conf->snapshot_interval <=
          cam->frame_last_ts.tv_sec % cam->conf->snapshot_interval) ||
          cam->snapshot) {
-        event(cam, EVENT_IMAGE_SNAPSHOT, cam->current_image, NULL, NULL);
+        event(cam, EVENT_IMAGE_SNAPSHOT, NULL, NULL);
         cam->snapshot = 0;
     }
 }
@@ -1257,21 +1260,21 @@ static void mlp_timelapse(ctx_dev *cam)
 
             if (cam->conf->timelapse_mode == "daily") {
                 if (timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TLAPSE_END, cam->current_image, NULL, NULL);
+                    event(cam, EVENT_TLAPSE_END, NULL, NULL);
                 }
             } else if (cam->conf->timelapse_mode == "hourly") {
-                event(cam, EVENT_TLAPSE_END, cam->current_image, NULL, NULL);
+                event(cam, EVENT_TLAPSE_END, NULL, NULL);
             } else if (cam->conf->timelapse_mode == "weekly-sunday") {
                 if (timestamp_tm.tm_wday == 0 && timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TLAPSE_END, cam->current_image, NULL, NULL);
+                    event(cam, EVENT_TLAPSE_END, NULL, NULL);
                 }
             } else if (cam->conf->timelapse_mode == "weekly-monday") {
                 if (timestamp_tm.tm_wday == 1 && timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TLAPSE_END, cam->current_image, NULL, NULL);
+                    event(cam, EVENT_TLAPSE_END, NULL, NULL);
                 }
             } else if (cam->conf->timelapse_mode == "monthly") {
                 if (timestamp_tm.tm_mday == 1 && timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TLAPSE_END, cam->current_image, NULL, NULL);
+                    event(cam, EVENT_TLAPSE_END, NULL, NULL);
                 }
             }
         }
@@ -1279,7 +1282,7 @@ static void mlp_timelapse(ctx_dev *cam)
         if (cam->shots == 0 &&
             cam->frame_curr_ts.tv_sec % cam->conf->timelapse_interval <=
             cam->frame_last_ts.tv_sec % cam->conf->timelapse_interval) {
-                event(cam, EVENT_TLAPSE_START, cam->current_image, NULL, NULL);
+                event(cam, EVENT_TLAPSE_START, NULL, NULL);
         }
 
     } else if (cam->movie_timelapse) {
@@ -1288,25 +1291,21 @@ static void mlp_timelapse(ctx_dev *cam)
      * This is an important feature that allows manual roll-over of timelapse file using the http
      * remote control via a cron job.
      */
-        event(cam, EVENT_TLAPSE_END, cam->current_image, NULL, NULL);
+        event(cam, EVENT_TLAPSE_END, NULL, NULL);
     }
 }
 
 /* send images to loopback device*/
 static void mlp_loopback(ctx_dev *cam)
 {
-    if (cam->motapp->conf->setup_mode) {
-        event(cam, EVENT_IMAGE, &cam->imgs.image_motion, NULL, &cam->pipe);
-        event(cam, EVENT_STREAM, &cam->imgs.image_motion, NULL, NULL);
-    } else {
-        event(cam, EVENT_IMAGE, cam->current_image, NULL, &cam->pipe);
 
-        if (!cam->conf->stream_motion || cam->shots == 0) {
-            event(cam, EVENT_STREAM, cam->current_image, NULL, NULL);
-        }
+    event(cam, EVENT_IMAGE, NULL, &cam->pipe);
+
+    if (!cam->conf->stream_motion || cam->shots == 0) {
+        event(cam, EVENT_STREAM, NULL, NULL);
     }
 
-    event(cam, EVENT_IMAGEM, &cam->imgs.image_motion, NULL, &cam->mpipe);
+    event(cam, EVENT_IMAGEM, NULL, &cam->mpipe);
 }
 
 /* Update parameters from web interface*/

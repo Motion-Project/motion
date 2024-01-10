@@ -521,7 +521,7 @@ void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsign
     return;
 }
 
-void pic_save_preview(ctx_dev *cam, ctx_image_data *img)
+void pic_save_preview(ctx_dev *cam)
 {
     unsigned char *image_norm, *image_high;
 
@@ -530,16 +530,18 @@ void pic_save_preview(ctx_dev *cam, ctx_image_data *img)
     image_high = cam->imgs.image_preview.image_high;
 
     /* Copy over the meta data from the img into preview */
-    memcpy(&cam->imgs.image_preview, img, sizeof(ctx_image_data));
+    memcpy(&cam->imgs.image_preview, cam->current_image, sizeof(ctx_image_data));
 
     /* Restore the pointers to the memory locations for images*/
     cam->imgs.image_preview.image_norm = image_norm;
     cam->imgs.image_preview.image_high = image_high;
 
     /* Copy the actual images for norm and high */
-    memcpy(cam->imgs.image_preview.image_norm, img->image_norm, cam->imgs.size_norm);
+    memcpy(cam->imgs.image_preview.image_norm
+        , cam->current_image->image_norm, cam->imgs.size_norm);
     if (cam->imgs.size_high > 0) {
-        memcpy(cam->imgs.image_preview.image_high, img->image_high, cam->imgs.size_high);
+        memcpy(cam->imgs.image_preview.image_high
+            , cam->current_image->image_high, cam->imgs.size_high);
     }
 
     /*
@@ -550,13 +552,12 @@ void pic_save_preview(ctx_dev *cam, ctx_image_data *img)
         cam->imgs.image_preview.diffs = 1;
     }
 
-    draw_locate_preview(cam, img);
+    draw_locate_preview(cam);
 
 }
 
 void pic_init_privacy(ctx_dev *cam)
 {
-
     int indxrow, indxcol;
     int start_cr, offset_cb, start_cb;
     int y_index, uv_index;

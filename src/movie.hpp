@@ -85,7 +85,7 @@ int movie_open(ctx_movie *movie);
 int movie_put_image(ctx_movie *movie, ctx_image_data *img_data, const struct timespec *tv1);
 void movie_close(ctx_movie *movie);
 void movie_reset_start_time(ctx_movie *movie, const struct timespec *tv1);
-int movie_init_timelapse(ctx_dev *cam, struct timespec *ts1);
+int movie_init_timelapse(ctx_dev *cam);
 int movie_init_norm(ctx_dev *cam, struct timespec *ts1);
 int movie_init_motion(ctx_dev *cam, struct timespec *ts1);
 void movie_free(ctx_movie *movie);

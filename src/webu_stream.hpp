@@ -22,7 +22,7 @@
 
     void webu_stream_init(ctx_dev *cam);
     void webu_stream_deinit(ctx_dev *cam);
-    void webu_stream_getimg(ctx_dev *cam, ctx_image_data *img_data);
+    void webu_stream_getimg(ctx_dev *cam);
 
     mhdrslt webu_stream_main(ctx_webui *webui);
     void webu_stream_delay(ctx_webui *webui);
