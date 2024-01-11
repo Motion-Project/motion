@@ -136,83 +136,54 @@ static void event_vlp_putpipem(ctx_dev *cam)
 
 static void event_image_detect(ctx_dev *cam)
 {
-    char fullfilename[PATH_MAX];
     char filename[PATH_MAX];
     int  passthrough, retcd;
 
     if (cam->new_img & NEWIMG_ON) {
-        mystrftime(cam, filename, sizeof(filename)
-            , cam->conf->picture_filename.c_str()
-            , &cam->current_image->imgts, NULL, 0);
-        retcd = snprintf(fullfilename, PATH_MAX, "%s/%s.%s"
-            , cam->conf->target_dir.c_str(), filename
-            , cam->conf->picture_type.c_str());
-        if ((retcd < 0) || (retcd >= PATH_MAX)) {
-            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("Error creating image file name"));
-            return;
-        }
+        mypicname(cam, filename,"%s/%s.%s"
+            , cam->conf->picture_filename
+            , cam->conf->picture_type);
         passthrough = mycheck_passthrough(cam);
         cam->filetype = FTYPE_IMAGE;
-        if ((cam->imgs.size_high > 0) && (!passthrough)) {
-            pic_save_norm(cam, fullfilename, cam->current_image->image_high);
+        if ((cam->imgs.size_high > 0) && (passthrough == false)) {
+            pic_save_norm(cam, filename, cam->current_image->image_high);
         } else {
-            pic_save_norm(cam, fullfilename,cam->current_image->image_norm);
+            pic_save_norm(cam, filename,cam->current_image->image_norm);
         }
-        on_picture_save_command(cam, fullfilename);
-        dbse_exec(cam, fullfilename, "pic_save");
+        on_picture_save_command(cam, filename);
+        dbse_exec(cam, filename, "pic_save");
     }
 }
 
 static void event_imagem_detect(ctx_dev *cam)
 {
-    char fullfilename[PATH_MAX];
     char filename[PATH_MAX];
-    int retcd;
 
     if (cam->conf->picture_output_motion == "on") {
-        mystrftime(cam, filename, sizeof(filename)
-            , cam->conf->picture_filename.c_str()
-            , &cam->current_image->imgts, NULL, 0);
-        retcd = snprintf(fullfilename, PATH_MAX, "%s/%sm.%s"
-            , cam->conf->target_dir.c_str(), filename
-            , cam->conf->picture_type.c_str());
-        if ((retcd < 0) || (retcd >= PATH_MAX)) {
-            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("Error creating image motion file name"));
-            return;
-        }
+        mypicname(cam, filename,"%s/%sm.%s"
+            , cam->conf->picture_filename
+            , cam->conf->picture_type);
         cam->filetype = FTYPE_IMAGE_MOTION;
-        pic_save_norm(cam, fullfilename, cam->imgs.image_motion.image_norm);
-        on_picture_save_command(cam, fullfilename);
-        dbse_exec(cam, fullfilename, "pic_save");
+        pic_save_norm(cam, filename, cam->imgs.image_motion.image_norm);
+        on_picture_save_command(cam, filename);
+        dbse_exec(cam, filename, "pic_save");
 
     } else if (cam->conf->picture_output_motion == "roi") {
-        mystrftime(cam, filename, sizeof(filename)
-            , cam->conf->picture_filename.c_str()
-            , &cam->current_image->imgts, NULL, 0);
-        retcd = snprintf(fullfilename, PATH_MAX, "%s/%sr.%s"
-            , cam->conf->target_dir.c_str(), filename
-            , cam->conf->picture_type.c_str());
-        if ((retcd < 0) || (retcd >= PATH_MAX)) {
-            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("Error creating image motion roi file name"));
-            return;
-        }
+        mypicname(cam, filename,"%s/%sr.%s"
+            , cam->conf->picture_filename
+            , cam->conf->picture_type);
         cam->filetype = FTYPE_IMAGE_ROI;
-        pic_save_roi(cam, fullfilename, cam->current_image->image_norm);
-        on_picture_save_command(cam, fullfilename);
-        dbse_exec(cam, fullfilename, "pic_save");
+        pic_save_roi(cam, filename, cam->current_image->image_norm);
+        on_picture_save_command(cam, filename);
+        dbse_exec(cam, filename, "pic_save");
     }
 }
 
 static void event_image_snapshot(ctx_dev *cam)
 {
-    char fullfilename[PATH_MAX];
     char filename[PATH_MAX];
-    char filepath[PATH_MAX];
     char linkpath[PATH_MAX];
-    int offset, retcd, passthrough;
+    int offset, passthrough;
 
     offset = (int)cam->conf->snapshot_filename.length() - 8;
     if (offset < 0) {
@@ -220,66 +191,43 @@ static void event_image_snapshot(ctx_dev *cam)
     }
 
     if (cam->conf->snapshot_filename.compare(offset, 8, "lastsnap") != 0) {
-        mystrftime(cam, filepath, sizeof(filepath)
-            , cam->conf->snapshot_filename.c_str()
-            , &cam->current_image->imgts, NULL, 0);
-        retcd = snprintf(filename, PATH_MAX, "%s.%s", filepath
-            , cam->conf->picture_type.c_str());
-        if (retcd <0) {
-            MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
-        }
-
-        retcd =snprintf(fullfilename, PATH_MAX, "%s/%s"
-            , cam->conf->target_dir.c_str(), filename);
-        if (retcd <0) {
-            MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
-        }
+        mypicname(cam, filename,"%s/%s.%s"
+            , cam->conf->snapshot_filename
+            , cam->conf->picture_type);
         passthrough = mycheck_passthrough(cam);
         cam->filetype = FTYPE_IMAGE_SNAPSHOT;
-        if ((cam->imgs.size_high > 0) && (!passthrough)) {
-            pic_save_norm(cam, fullfilename, cam->current_image->image_high);
+        if ((cam->imgs.size_high > 0) && (passthrough == false)) {
+            pic_save_norm(cam, filename, cam->current_image->image_high);
         } else {
-            pic_save_norm(cam, fullfilename, cam->current_image->image_norm);
+            pic_save_norm(cam, filename, cam->current_image->image_norm);
         }
-        on_picture_save_command(cam, fullfilename);
-        dbse_exec(cam, fullfilename, "pic_save");
+        on_picture_save_command(cam, filename);
+        dbse_exec(cam, filename, "pic_save");
 
         /* Update symbolic link */
-        snprintf(linkpath, PATH_MAX, "%s/lastsnap.%s"
-            , cam->conf->target_dir.c_str()
-            , cam->conf->picture_type.c_str());
+        mypicname(cam, linkpath,"%s/%s.%s"
+            , "lastsnap", cam->conf->picture_type);
         remove(linkpath);
         if (symlink(filename, linkpath)) {
             MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                 ,_("Could not create symbolic link [%s]"), filename);
             return;
         }
+
     } else {
-        mystrftime(cam, filepath, sizeof(filepath)
-            , cam->conf->snapshot_filename.c_str()
-            , &cam->current_image->imgts, NULL, 0);
-        retcd = snprintf(filename, PATH_MAX, "%s.%s", filepath
-            , cam->conf->picture_type.c_str());
-        if (retcd <0) {
-            MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
-        }
-
-        retcd = snprintf(fullfilename, PATH_MAX, "%s/%s"
-            , cam->conf->target_dir.c_str(), filename);
-        if (retcd <0) {
-            MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
-        }
-
-        remove(fullfilename);
+        mypicname(cam, filename,"%s/%s.%s"
+            , cam->conf->snapshot_filename
+            , cam->conf->picture_type);
+        remove(filename);
         passthrough = mycheck_passthrough(cam);
         cam->filetype = FTYPE_IMAGE_SNAPSHOT;
         if ((cam->imgs.size_high > 0) && (!passthrough)) {
-            pic_save_norm(cam, fullfilename, cam->current_image->image_high);
+            pic_save_norm(cam, filename, cam->current_image->image_high);
         } else {
-            pic_save_norm(cam, fullfilename, cam->current_image->image_norm);
+            pic_save_norm(cam, filename, cam->current_image->image_norm);
         }
-        on_picture_save_command(cam, fullfilename);
-        dbse_exec(cam, fullfilename, "pic_save");
+        on_picture_save_command(cam, filename);
+        dbse_exec(cam, filename, "pic_save");
     }
 
     cam->snapshot = 0;
@@ -287,38 +235,34 @@ static void event_image_snapshot(ctx_dev *cam)
 
 static void event_image_preview(ctx_dev *cam)
 {
-    char previewname[PATH_MAX];
     char filename[PATH_MAX];
     ctx_image_data *saved_current_image;
-    int passthrough, retcd;
+    int passthrough;
 
     if (cam->imgs.image_preview.diffs) {
         saved_current_image = cam->current_image;
+        saved_current_image->imgts= cam->current_image->imgts;
+
         cam->current_image = &cam->imgs.image_preview;
+        cam->current_image->imgts = cam->imgs.image_preview.imgts;
 
-        mystrftime(cam, filename, sizeof(filename), cam->conf->picture_filename.c_str()
-            , &cam->imgs.image_preview.imgts, NULL, 0);
+        mypicname(cam, filename,"%s/%s.%s"
+            , cam->conf->picture_filename
+            , cam->conf->picture_type);
 
-        retcd = snprintf(previewname, PATH_MAX, "%s/%s.%s"
-            , cam->conf->target_dir.c_str(), filename
-            , cam->conf->picture_type.c_str());
-        if ((retcd < 0) || (retcd >= PATH_MAX)) {
-            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("Error creating preview file name"));
-            return;
-        }
         passthrough = mycheck_passthrough(cam);
         cam->filetype = FTYPE_IMAGE;
-        if ((cam->imgs.size_high > 0) && (!passthrough)) {
-            pic_save_norm(cam, previewname, cam->imgs.image_preview.image_high);
+        if ((cam->imgs.size_high > 0) && (passthrough == false)) {
+            pic_save_norm(cam, filename, cam->imgs.image_preview.image_high);
         } else {
-            pic_save_norm(cam, previewname, cam->imgs.image_preview.image_norm);
+            pic_save_norm(cam, filename, cam->imgs.image_preview.image_norm);
         }
-        on_picture_save_command(cam, previewname);
-        dbse_exec(cam, previewname, "pic_save");
+        on_picture_save_command(cam, filename);
+        dbse_exec(cam, filename, "pic_save");
 
         /* Restore global context values. */
         cam->current_image = saved_current_image;
+        cam->current_image->imgts = saved_current_image->imgts;
     }
 }
 

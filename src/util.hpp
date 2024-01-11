@@ -108,6 +108,9 @@
     int myfclose(FILE *fh);
     size_t mystrftime(ctx_dev *cam, char *s, size_t max, const char *userformat,
         const struct timespec *ts1, const char *filename, int sqltype);
+    void mypicname(ctx_dev *cam
+        , char* fullname, std::string fmtstr
+        , std::string basename, std::string extname);
     void util_exec_command(ctx_dev *cam, const char *command, char *filename);
 
     void mythreadname_set(const char *abbr, int threadnbr, const char *threadname);
