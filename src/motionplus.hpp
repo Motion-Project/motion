@@ -471,6 +471,7 @@ struct ctx_dev {
     char                    extpipefilename[PATH_MAX];
     char                    extpipecmdline[PATH_MAX];
     bool                    movie_passthrough;
+    int                     filetype;
 
     int area_minx[9], area_miny[9], area_maxx[9], area_maxy[9];
     int                     areadetect_eventnbr;

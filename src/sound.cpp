@@ -829,7 +829,7 @@ static void snd_check_alerts(ctx_dev *snd)
                     info->trig_freq =std::to_string(freq_value);
                     info->trig_nbr = std::to_string(it->alert_id);
                     info->trig_nm = it->alert_nm;
-                    util_exec_command(snd, snd->conf->on_sound_alert.c_str(), NULL, 0);
+                    util_exec_command(snd, snd->conf->on_sound_alert.c_str(), NULL);
                 }
             }
         }

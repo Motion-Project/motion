@@ -44,9 +44,9 @@ typedef enum {
     EVENT_LAST,
 } motion_event;
 
-typedef void(* event_handler)(ctx_dev *cam, char *fname, void *ftype);
+typedef void(* event_handler)(ctx_dev *cam, char *fname);
 
-void event(ctx_dev *cam, motion_event evnt, char *fname, void *ftype);
+void event(ctx_dev *cam, motion_event evnt, char *fname);
 
 const char * imageext(ctx_dev *cam);
 

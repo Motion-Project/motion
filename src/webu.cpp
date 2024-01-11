@@ -426,7 +426,7 @@ static mhdrslt webu_failauth_check(ctx_webui *webui)
             if (webui->motapp->conf->webcontrol_lock_script != "") {
                 tmp = webui->motapp->conf->webcontrol_lock_script + " " +
                     std::to_string(it->userid_fail_nbr) + " " +  webui->clientip;
-                util_exec_command(webui->cam, tmp.c_str(), NULL, 0);
+                util_exec_command(webui->cam, tmp.c_str(), NULL);
             }
             return MHD_NO;
         } else if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >=

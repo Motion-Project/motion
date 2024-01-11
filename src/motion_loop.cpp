@@ -140,7 +140,7 @@ static void mlp_ring_process(ctx_dev *cam)
                 mlp_ring_process_debug(cam);
             }
 
-            event(cam, EVENT_IMAGE_DETECTED, NULL, NULL);
+            event(cam, EVENT_IMAGE_DETECTED, NULL);
         }
 
         cam->current_image->flags |= IMAGE_SAVED;
@@ -205,7 +205,7 @@ static void mlp_detected_trigger(ctx_dev *cam)
                 , cam->conf->text_event.c_str()
                 , &cam->current_image->imgts, NULL, 0);
 
-            event(cam, EVENT_START, NULL, NULL);
+            event(cam, EVENT_START, NULL);
             dbse_exec(cam, NULL, 0, &cam->current_image->imgts, "event_start");
 
             if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)) {
@@ -214,7 +214,7 @@ static void mlp_detected_trigger(ctx_dev *cam)
 
         }
 
-        event(cam, EVENT_MOTION, NULL, NULL);
+        event(cam, EVENT_MOTION, NULL);
     }
 }
 
@@ -224,7 +224,7 @@ static void mlp_track_center(ctx_dev *cam)
     if ((cam->conf->ptz_auto_track) && (cam->conf->ptz_move_track != "")) {
         cam->track_posx = 0;
         cam->track_posy = 0;
-        util_exec_command(cam, cam->conf->ptz_move_track.c_str(), NULL, 0);
+        util_exec_command(cam, cam->conf->ptz_move_track.c_str(), NULL);
         cam->frame_skip = cam->conf->ptz_wait;
     }
 }
@@ -235,7 +235,7 @@ static void mlp_track_move(ctx_dev *cam)
     if ((cam->conf->ptz_auto_track) && (cam->conf->ptz_move_track != "")) {
             cam->track_posx += cam->current_image->location.x;
             cam->track_posy += cam->current_image->location.y;
-            util_exec_command(cam, cam->conf->ptz_move_track.c_str(), NULL, 0);
+            util_exec_command(cam, cam->conf->ptz_move_track.c_str(), NULL);
             cam->frame_skip = cam->conf->ptz_wait;
     }
 }
@@ -261,10 +261,10 @@ static void mlp_detected(ctx_dev *cam)
         if ((conf->stream_motion == true) &&
             (cam->motapp->conf->setup_mode == false) &&
             (cam->current_image->shot != 1)) {
-            event(cam, EVENT_STREAM, NULL, NULL);
+            event(cam, EVENT_STREAM, NULL);
         }
         if (conf->picture_output_motion != "off") {
-            event(cam, EVENT_IMAGEM_DETECTED, NULL, NULL);
+            event(cam, EVENT_IMAGEM_DETECTED, NULL);
         }
     }
 
@@ -604,14 +604,14 @@ static void mlp_init_ref(ctx_dev *cam)
 /** clean up all memory etc. from motion init */
 void mlp_cleanup(ctx_dev *cam)
 {
-    event(cam, EVENT_TLAPSE_END, NULL, NULL);
+    event(cam, EVENT_TLAPSE_END, NULL);
     if (cam->event_nr == cam->prev_event) {
         mlp_ring_process(cam);
         if (cam->imgs.image_preview.diffs) {
-            event(cam, EVENT_IMAGE_PREVIEW, NULL, NULL);
+            event(cam, EVENT_IMAGE_PREVIEW, NULL);
             cam->imgs.image_preview.diffs = 0;
         }
-        event(cam, EVENT_END, NULL, NULL);
+        event(cam, EVENT_END, NULL);
         dbse_exec(cam, NULL, 0, &cam->current_image->imgts, "event_end");
     }
 
@@ -734,7 +734,7 @@ static void mlp_areadetect(ctx_dev *cam)
                     cam->current_image->location.x < cam->area_maxx[z] &&
                     cam->current_image->location.y > cam->area_miny[z] &&
                     cam->current_image->location.y < cam->area_maxy[z]) {
-                    event(cam, EVENT_AREA_DETECTED, NULL, NULL);
+                    event(cam, EVENT_AREA_DETECTED, NULL);
                     cam->areadetect_eventnbr = cam->event_nr; /* Fire script only once per event */
                     MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
                         ,_("Motion in area %d detected."), z + 1);
@@ -850,7 +850,7 @@ static int mlp_capture(ctx_dev *cam)
 
         if (cam->missing_frame_counter >= (cam->conf->device_tmo * cam->conf->framerate)) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
-            event(cam, EVENT_CAMERA_FOUND, NULL, NULL);
+            event(cam, EVENT_CAMERA_FOUND, NULL);
         }
         cam->missing_frame_counter = 0;
         memcpy(cam->imgs.image_virgin, cam->current_image->image_norm, cam->imgs.size_norm);
@@ -886,7 +886,7 @@ static int mlp_capture(ctx_dev *cam)
             if (cam->missing_frame_counter == (cam->conf->device_tmo * cam->conf->framerate)) {
                 MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                     ,_("Video signal lost - Adding grey image"));
-                event(cam, EVENT_CAMERA_LOST, NULL, NULL);
+                event(cam, EVENT_CAMERA_LOST, NULL);
             }
 
             if ((cam->device_status == STATUS_OPENED) &&
@@ -1106,17 +1106,17 @@ static void mlp_actions_event(ctx_dev *cam)
             mlp_ring_process(cam);
 
             if (cam->imgs.image_preview.diffs) {
-                event(cam, EVENT_IMAGE_PREVIEW, NULL, NULL);
+                event(cam, EVENT_IMAGE_PREVIEW, NULL);
                 cam->imgs.image_preview.diffs = 0;
             }
-            event(cam, EVENT_END, NULL, NULL);
+            event(cam, EVENT_END, NULL);
             dbse_exec(cam, NULL, 0, &cam->current_image->imgts, "event_end");
 
             mlp_track_center(cam);
 
             if (cam->algsec_inuse) {
                 if (cam->algsec->isdetected) {
-                    event(cam, EVENT_SECDETECT, NULL, NULL);
+                    event(cam, EVENT_SECDETECT, NULL);
                 }
                 cam->algsec->isdetected = false;
             }
@@ -1137,9 +1137,9 @@ static void mlp_actions_event(ctx_dev *cam)
             cam->conf->movie_max_time) &&
         ( !(cam->current_image->flags & IMAGE_POSTCAP)) &&
         ( !(cam->current_image->flags & IMAGE_PRECAP))) {
-        event(cam, EVENT_MOVIE_END, NULL, NULL);
+        event(cam, EVENT_MOVIE_END, NULL);
         mlp_info_reset(cam);
-        event(cam, EVENT_MOVIE_START, NULL, NULL);
+        event(cam, EVENT_MOVIE_START, NULL);
     }
 
 }
@@ -1241,7 +1241,7 @@ static void mlp_snapshot(ctx_dev *cam)
          cam->frame_curr_ts.tv_sec % cam->conf->snapshot_interval <=
          cam->frame_last_ts.tv_sec % cam->conf->snapshot_interval) ||
          cam->snapshot) {
-        event(cam, EVENT_IMAGE_SNAPSHOT, NULL, NULL);
+        event(cam, EVENT_IMAGE_SNAPSHOT, NULL);
         cam->snapshot = 0;
     }
 }
@@ -1260,21 +1260,21 @@ static void mlp_timelapse(ctx_dev *cam)
 
             if (cam->conf->timelapse_mode == "daily") {
                 if (timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TLAPSE_END, NULL, NULL);
+                    event(cam, EVENT_TLAPSE_END, NULL);
                 }
             } else if (cam->conf->timelapse_mode == "hourly") {
-                event(cam, EVENT_TLAPSE_END, NULL, NULL);
+                event(cam, EVENT_TLAPSE_END, NULL);
             } else if (cam->conf->timelapse_mode == "weekly-sunday") {
                 if (timestamp_tm.tm_wday == 0 && timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TLAPSE_END, NULL, NULL);
+                    event(cam, EVENT_TLAPSE_END, NULL);
                 }
             } else if (cam->conf->timelapse_mode == "weekly-monday") {
                 if (timestamp_tm.tm_wday == 1 && timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TLAPSE_END, NULL, NULL);
+                    event(cam, EVENT_TLAPSE_END, NULL);
                 }
             } else if (cam->conf->timelapse_mode == "monthly") {
                 if (timestamp_tm.tm_mday == 1 && timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TLAPSE_END, NULL, NULL);
+                    event(cam, EVENT_TLAPSE_END, NULL);
                 }
             }
         }
@@ -1282,7 +1282,7 @@ static void mlp_timelapse(ctx_dev *cam)
         if (cam->shots == 0 &&
             cam->frame_curr_ts.tv_sec % cam->conf->timelapse_interval <=
             cam->frame_last_ts.tv_sec % cam->conf->timelapse_interval) {
-                event(cam, EVENT_TLAPSE_START, NULL, NULL);
+                event(cam, EVENT_TLAPSE_START, NULL);
         }
 
     } else if (cam->movie_timelapse) {
@@ -1291,7 +1291,7 @@ static void mlp_timelapse(ctx_dev *cam)
      * This is an important feature that allows manual roll-over of timelapse file using the http
      * remote control via a cron job.
      */
-        event(cam, EVENT_TLAPSE_END, NULL, NULL);
+        event(cam, EVENT_TLAPSE_END, NULL);
     }
 }
 
@@ -1299,13 +1299,13 @@ static void mlp_timelapse(ctx_dev *cam)
 static void mlp_loopback(ctx_dev *cam)
 {
 
-    event(cam, EVENT_IMAGE, NULL, &cam->pipe);
+    event(cam, EVENT_IMAGE, NULL);
 
     if (!cam->conf->stream_motion || cam->shots == 0) {
-        event(cam, EVENT_STREAM, NULL, NULL);
+        event(cam, EVENT_STREAM, NULL);
     }
 
-    event(cam, EVENT_IMAGEM, NULL, &cam->mpipe);
+    event(cam, EVENT_IMAGEM, NULL);
 }
 
 /* Update parameters from web interface*/

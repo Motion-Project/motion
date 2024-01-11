@@ -1276,7 +1276,7 @@ void util_parms_update(ctx_params *params, std::string &confline)
  *      that the fork inherited from the parent in order not to pass
  *      the open handles on to the shell
  */
-void util_exec_command(ctx_dev *cam, const char *command, char *filename, int filetype)
+void util_exec_command(ctx_dev *cam, const char *command, char *filename)
 {
     char stamp[PATH_MAX];
     timespec tmpts;
@@ -1284,9 +1284,11 @@ void util_exec_command(ctx_dev *cam, const char *command, char *filename, int fi
 
     if (cam->current_image == NULL) {
         clock_gettime(CLOCK_REALTIME, &tmpts);
-        mystrftime(cam, stamp, sizeof(stamp), command, &tmpts, filename, filetype);
+        mystrftime(cam, stamp, sizeof(stamp), command
+            , &tmpts, filename, cam->filetype);
     } else {
-        mystrftime(cam, stamp, sizeof(stamp), command, &cam->current_image->imgts, filename, filetype);
+        mystrftime(cam, stamp, sizeof(stamp)
+            , command, &cam->current_image->imgts, filename, cam->filetype);
     }
 
     pid = fork();
