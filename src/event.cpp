@@ -55,16 +55,6 @@ const char *eventList[] = {
     "EVENT_LAST"
 };
 
-static void event_newfile(ctx_dev *cam, char *fname, void *ftype)
-{
-    (void)cam;
-    (void)ftype;
-
-    MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
-        ,_("File saved to: %s"), fname);
-}
-
-
 /**
  * on_picture_save_command
  *      handles both on_picture_save and on_movie_start
@@ -77,6 +67,9 @@ static void on_picture_save_command(ctx_dev *cam, char *fname, void *ftype)
 {
     /*Fix me*/
     long filetype = (long)ftype;
+
+    MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
+        ,_("File saved to: %s"), fname);
 
     if ((filetype & FTYPE_IMAGE_ANY) != 0 && (cam->conf->on_picture_save != "")) {
         util_exec_command(cam, cam->conf->on_picture_save.c_str(), fname, (int)filetype);
@@ -613,7 +606,7 @@ static void event_movie_start(ctx_dev *cam
     }
 
     if (cam->conf->movie_output) {
-        retcd = movie_init_norm(cam, &cam->current_image->imgts);
+        retcd = movie_init_norm(cam);
         if (retcd < 0) {
             MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error initializing movie output."));
@@ -627,7 +620,7 @@ static void event_movie_start(ctx_dev *cam
     }
 
     if (cam->conf->movie_output_motion) {
-        retcd = movie_init_motion(cam, &cam->current_image->imgts);
+        retcd = movie_init_motion(cam);
         if (retcd < 0) {
             MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating motion file [%s]"), cam->movie_motion->full_nm);
@@ -788,10 +781,6 @@ struct event_handlers event_handlers[] = {
     {
     EVENT_FILECREATE,
     on_picture_save_command
-    },
-    {
-    EVENT_FILECREATE,
-    event_newfile
     },
     {
     EVENT_MOTION,

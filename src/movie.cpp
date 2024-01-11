@@ -1536,7 +1536,7 @@ static const char* movie_init_container(ctx_dev *cam)
 
 }
 
-int movie_init_norm(ctx_dev *cam, struct timespec *ts1)
+int movie_init_norm(ctx_dev *cam)
 {
     char tmp[PATH_MAX];
     const char *container;
@@ -1545,7 +1545,8 @@ int movie_init_norm(ctx_dev *cam, struct timespec *ts1)
     cam->movie_norm =(ctx_movie*) mymalloc(sizeof(ctx_movie));
 
     mystrftime(cam, tmp, sizeof(tmp)
-        , cam->conf->movie_filename.c_str(), ts1, NULL, 0);
+        , cam->conf->movie_filename.c_str()
+        , &cam->current_image->imgts, NULL, 0);
 
     container = movie_init_container(cam);
 
@@ -1590,8 +1591,8 @@ int movie_init_norm(ctx_dev *cam, struct timespec *ts1)
     cam->movie_norm->fps = cam->lastrate;
     cam->movie_norm->bps = cam->conf->movie_bps;
     cam->movie_norm->quality = cam->conf->movie_quality;
-    cam->movie_norm->start_time.tv_sec = ts1->tv_sec;
-    cam->movie_norm->start_time.tv_nsec = ts1->tv_nsec;
+    cam->movie_norm->start_time.tv_sec = cam->current_image->imgts.tv_sec;
+    cam->movie_norm->start_time.tv_nsec = cam->current_image->imgts.tv_nsec;
     cam->movie_norm->last_pts = -1;
     cam->movie_norm->base_pts = 0;
     cam->movie_norm->gop_cnt = 0;
@@ -1610,7 +1611,7 @@ int movie_init_norm(ctx_dev *cam, struct timespec *ts1)
 
 }
 
-int movie_init_motion(ctx_dev *cam, struct timespec *ts1)
+int movie_init_motion(ctx_dev *cam)
 {
     char tmp[PATH_MAX];
     const char *container;
@@ -1619,7 +1620,8 @@ int movie_init_motion(ctx_dev *cam, struct timespec *ts1)
     cam->movie_motion =(ctx_movie*)mymalloc(sizeof(ctx_movie));
 
     mystrftime(cam, tmp, sizeof(tmp)
-        , cam->conf->movie_filename.c_str(), ts1, NULL, 0);
+        , cam->conf->movie_filename.c_str()
+        , &cam->imgs.image_motion.imgts, NULL, 0);
     container = movie_init_container(cam);
 
     /* The increment of 10 is to allow for the extension and other chars*/
@@ -1655,8 +1657,8 @@ int movie_init_motion(ctx_dev *cam, struct timespec *ts1)
     cam->movie_motion->fps = cam->lastrate;
     cam->movie_motion->bps = cam->conf->movie_bps;
     cam->movie_motion->quality = cam->conf->movie_quality;
-    cam->movie_motion->start_time.tv_sec = ts1->tv_sec;
-    cam->movie_motion->start_time.tv_nsec = ts1->tv_nsec;
+    cam->movie_motion->start_time.tv_sec = cam->imgs.image_motion.imgts.tv_sec;
+    cam->movie_motion->start_time.tv_nsec = cam->imgs.image_motion.imgts.tv_nsec;
     cam->movie_motion->last_pts = -1;
     cam->movie_motion->base_pts = 0;
     cam->movie_motion->gop_cnt = 0;
