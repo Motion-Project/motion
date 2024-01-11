@@ -33,7 +33,6 @@
 
 const char *eventList[] = {
     "NULL",
-    "EVENT_FILECREATE",
     "EVENT_MOTION",
     "EVENT_START",
     "EVENT_END",
@@ -55,24 +54,19 @@ const char *eventList[] = {
     "EVENT_LAST"
 };
 
-/**
- * on_picture_save_command
- *      handles both on_picture_save and on_movie_start
- *      If arg = FTYPE_IMAGE_ANY on_picture_save script is executed
- *      If arg = FTYPE_MOVIE_ANY on_movie_start script is executed
- *      The scripts are executed with the filename of picture or movie appended
- *      to the config parameter.
- */
 static void on_picture_save_command(ctx_dev *cam, char *fname)
 {
-    MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
-        ,_("File saved to: %s"), fname);
+    MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("File saved to: %s"), fname);
 
-    if ((cam->filetype & FTYPE_IMAGE_ANY) != 0 && (cam->conf->on_picture_save != "")) {
+    if (cam->conf->on_picture_save != "") {
         util_exec_command(cam, cam->conf->on_picture_save.c_str(), fname);
     }
+}
 
-    if ((cam->filetype & FTYPE_MOVIE_ANY) != 0 && (cam->conf->on_movie_start != "")) {
+static void on_movie_start_command(ctx_dev *cam, char *fname)
+{
+    MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("File saved to: %s"), fname);
+    if (cam->conf->on_movie_start != "") {
         util_exec_command(cam, cam->conf->on_movie_start.c_str(), fname);
     }
 }
@@ -184,7 +178,7 @@ static void event_image_detect(ctx_dev *cam, char *fname)
             pic_save_norm(cam, fullfilename
                 ,cam->current_image->image_norm,FTYPE_IMAGE);
         }
-        event(cam, EVENT_FILECREATE, fullfilename);
+        on_picture_save_command(cam, fullfilename);
         dbse_exec(cam, fullfilename, FTYPE_IMAGE
             , &cam->current_image->imgts, "pic_save");
     }
@@ -212,7 +206,7 @@ static void event_imagem_detect(ctx_dev *cam, char *fname)
         cam->filetype = FTYPE_IMAGE_MOTION;
         pic_save_norm(cam, fullfilename
             , cam->imgs.image_motion.image_norm, FTYPE_IMAGE_MOTION);
-        event(cam, EVENT_FILECREATE, fullfilename);
+        on_picture_save_command(cam, fullfilename);
         dbse_exec(cam, fullfilename, FTYPE_IMAGE_MOTION
             , &cam->current_image->imgts, "pic_save");
 
@@ -229,7 +223,7 @@ static void event_imagem_detect(ctx_dev *cam, char *fname)
         }
         cam->filetype = FTYPE_IMAGE_ROI;
         pic_save_roi(cam, fullfilename, cam->current_image->image_norm);
-        event(cam, EVENT_FILECREATE, fullfilename);
+        on_picture_save_command(cam, fullfilename);
         dbse_exec(cam, fullfilename, FTYPE_IMAGE_ROI
             , &cam->current_image->imgts, "pic_save");
     }
@@ -273,7 +267,7 @@ static void event_image_snapshot(ctx_dev *cam, char *fname)
             pic_save_norm(cam, fullfilename
                 , cam->current_image->image_norm, FTYPE_IMAGE_SNAPSHOT);
         }
-        event(cam, EVENT_FILECREATE, fullfilename);
+        on_picture_save_command(cam, fullfilename);
         dbse_exec(cam, fullfilename, FTYPE_IMAGE_SNAPSHOT
             , &cam->current_image->imgts, "pic_save");
 
@@ -311,7 +305,7 @@ static void event_image_snapshot(ctx_dev *cam, char *fname)
             pic_save_norm(cam, fullfilename
                 , cam->current_image->image_norm, FTYPE_IMAGE_SNAPSHOT);
         }
-        event(cam, EVENT_FILECREATE, fullfilename);
+        on_picture_save_command(cam, fullfilename);
         dbse_exec(cam, fullfilename, FTYPE_IMAGE_SNAPSHOT
             , &cam->current_image->imgts, "pic_save");
     }
@@ -351,7 +345,7 @@ static void event_image_preview(ctx_dev *cam, char *fname)
             pic_save_norm(cam, previewname
                 , cam->imgs.image_preview.image_norm, FTYPE_IMAGE);
         }
-        event(cam, EVENT_FILECREATE, previewname);
+        on_picture_save_command(cam, previewname);
         dbse_exec(cam, previewname, FTYPE_IMAGE
             , &cam->current_image->imgts, "pic_save");
 
@@ -488,7 +482,7 @@ static void event_extpipe_start(ctx_dev *cam, char *fname)
             , _("fps %d pipe: %s"), cam->movie_fps, cam->extpipecmdline);
 
         cam->filetype = FTYPE_MOVIE;
-        event(cam, EVENT_FILECREATE, cam->extpipefilename);
+        on_movie_start_command(cam, cam->extpipefilename);
         dbse_exec(cam, cam->extpipefilename, FTYPE_MOVIE
             , &cam->current_image->imgts, "movie_start");
         cam->extpipe = popen(cam->extpipecmdline, "we");
@@ -559,7 +553,7 @@ static void event_movie_start(ctx_dev *cam, char *fname)
             return;
         }
         cam->filetype = FTYPE_MOVIE;
-        event(cam, EVENT_FILECREATE, cam->movie_norm->full_nm);
+        on_movie_start_command(cam, cam->movie_norm->full_nm);
         dbse_exec(cam, cam->movie_norm->full_nm
             , FTYPE_MOVIE, &cam->current_image->imgts, "movie_start");
     }
@@ -677,7 +671,7 @@ static void event_tlapse_start(ctx_dev *cam, char *fname)
             return;
         }
         cam->filetype = FTYPE_MOVIE_TIMELAPSE;
-        event(cam, EVENT_FILECREATE, cam->movie_timelapse->full_nm);
+        on_movie_start_command(cam, cam->movie_timelapse->full_nm);
         dbse_exec(cam, cam->movie_timelapse->full_nm, FTYPE_MOVIE_TIMELAPSE
             , &cam->current_image->imgts, "movie_start");
     }
@@ -709,10 +703,6 @@ struct event_handlers {
 };
 
 struct event_handlers event_handlers[] = {
-    {
-    EVENT_FILECREATE,
-    on_picture_save_command
-    },
     {
     EVENT_MOTION,
     on_motion_detected_command

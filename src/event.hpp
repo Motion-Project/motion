@@ -20,8 +20,7 @@
 #define _INCLUDE_EVENT_HPP_
 
 typedef enum {
-    EVENT_FILECREATE = 1,
-    EVENT_MOTION,
+    EVENT_MOTION = 1,
     EVENT_START,
     EVENT_END,
     EVENT_TLAPSE_START,
