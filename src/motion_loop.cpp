@@ -206,7 +206,7 @@ static void mlp_detected_trigger(ctx_dev *cam)
                 , &cam->current_image->imgts, NULL, 0);
 
             event(cam, EVENT_START, NULL);
-            dbse_exec(cam, NULL, 0, &cam->current_image->imgts, "event_start");
+            dbse_exec(cam, NULL, "event_start");
 
             if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)) {
                 pic_save_preview(cam);
@@ -612,7 +612,7 @@ void mlp_cleanup(ctx_dev *cam)
             cam->imgs.image_preview.diffs = 0;
         }
         event(cam, EVENT_END, NULL);
-        dbse_exec(cam, NULL, 0, &cam->current_image->imgts, "event_end");
+        dbse_exec(cam, NULL, "event_end");
     }
 
     webu_stream_deinit(cam);
@@ -1110,7 +1110,7 @@ static void mlp_actions_event(ctx_dev *cam)
                 cam->imgs.image_preview.diffs = 0;
             }
             event(cam, EVENT_END, NULL);
-            dbse_exec(cam, NULL, 0, &cam->current_image->imgts, "event_end");
+            dbse_exec(cam, NULL, "event_end");
 
             mlp_track_center(cam);
 

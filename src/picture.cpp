@@ -272,13 +272,13 @@ int pic_put_memory(ctx_dev *cam, unsigned char* dest_image, int image_size
 }
 
 /* Write the picture to a file */
-static void pic_write(ctx_dev *cam, FILE *picture, unsigned char *image, int quality, int ftype)
+static void pic_write(ctx_dev *cam, FILE *picture, unsigned char *image, int quality)
 {
     int width, height;
     int passthrough;
 
     passthrough = mycheck_passthrough(cam);
-    if (((ftype == FTYPE_IMAGE) || (ftype == FTYPE_IMAGE_SNAPSHOT)) &&
+    if (((cam->filetype == FTYPE_IMAGE) || (cam->filetype == FTYPE_IMAGE_SNAPSHOT)) &&
          (cam->imgs.size_high > 0) && (!passthrough)) {
         width = cam->imgs.width_high;
         height = cam->imgs.height_high;
@@ -302,7 +302,7 @@ static void pic_write(ctx_dev *cam, FILE *picture, unsigned char *image, int qua
 }
 
 /* Saves image to a file in format requested */
-void pic_save_norm(ctx_dev *cam, char *file, unsigned char *image, int ftype)
+void pic_save_norm(ctx_dev *cam, char *file, unsigned char *image)
 {
     FILE *picture;
 
@@ -324,7 +324,7 @@ void pic_save_norm(ctx_dev *cam, char *file, unsigned char *image, int ftype)
         }
     }
 
-    pic_write(cam, picture, image, cam->conf->picture_quality, ftype);
+    pic_write(cam, picture, image, cam->conf->picture_quality);
 
     myfclose(picture);
 }

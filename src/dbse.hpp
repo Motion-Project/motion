@@ -125,8 +125,7 @@
     void dbse_init_motpls(ctx_motapp *motapp);
     void dbse_deinit(ctx_motapp *motapp);
     void dbse_deinit_motpls(ctx_motapp *motapp);
-    void dbse_exec(ctx_dev *cam, char *filename
-        , int sqltype, timespec *ts1, const char *cmd);
+    void dbse_exec(ctx_dev *cam, char *filename, const char *cmd);
     void dbse_movies_getlist(ctx_motapp *motapp, int device_id);
     void dbse_movies_addrec(ctx_dev *cam, ctx_movie *movie, timespec *ts1);
 

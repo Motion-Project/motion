@@ -1276,8 +1276,7 @@ void dbse_exec_sql(ctx_motapp *motapp, const char *sqlquery)
 }
 
 /* Create and execute user provided sql with mutex lock*/
-void dbse_exec(ctx_dev *cam, char *filename
-    , int sqltype, struct timespec *ts1, const char *cmd)
+void dbse_exec(ctx_dev *cam, char *filename, const char *cmd)
 {
     char sqlquery[PATH_MAX];
 
@@ -1295,23 +1294,23 @@ void dbse_exec(ctx_dev *cam, char *filename
     if (mystrceq(cmd,"pic_save")) {
         mystrftime(cam, sqlquery, sizeof(sqlquery)
             , cam->conf->sql_pic_save.c_str()
-            , ts1, filename, sqltype);
+            , &cam->current_image->imgts, filename, cam->filetype);
     } else if (mystrceq(cmd,"movie_start")) {
         mystrftime(cam, sqlquery, sizeof(sqlquery)
             , cam->conf->sql_movie_start.c_str()
-            , ts1, filename, sqltype);
+            , &cam->current_image->imgts, filename, cam->filetype);
     } else if (mystrceq(cmd,"movie_end")) {
         mystrftime(cam, sqlquery, sizeof(sqlquery)
             , cam->conf->sql_movie_end.c_str()
-            , ts1, filename, sqltype);
+            , &cam->current_image->imgts, filename, cam->filetype);
     } else if (mystrceq(cmd,"event_start")) {
         mystrftime(cam, sqlquery, sizeof(sqlquery)
             , cam->conf->sql_event_start.c_str()
-            , ts1, filename, sqltype);
+            , &cam->current_image->imgts, filename, cam->filetype);
     } else if (mystrceq(cmd,"event_end")) {
         mystrftime(cam, sqlquery, sizeof(sqlquery)
             , cam->conf->sql_event_end.c_str()
-            , ts1, filename, sqltype);
+            , &cam->current_image->imgts, filename, cam->filetype);
     }
 
     if (strlen(sqlquery) <= 0) {

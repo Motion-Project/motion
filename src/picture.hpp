@@ -24,7 +24,7 @@
 
     int pic_put_memory(struct ctx_dev *cam, unsigned char* dest_image
         , int image_size, unsigned char *image, int quality, int width, int height);
-    void pic_save_norm(struct ctx_dev *cam, char *file, unsigned char *image, int ftype);
+    void pic_save_norm(struct ctx_dev *cam, char *file, unsigned char *image);
     void pic_save_roi(struct ctx_dev *cam, char *file, unsigned char *image);
     unsigned char *pic_load_pgm(FILE *picture, int width, int height);
     void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst);
