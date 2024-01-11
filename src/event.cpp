@@ -46,7 +46,6 @@ const char *eventList[] = {
     "EVENT_IMAGE",
     "EVENT_IMAGEM",
     "EVENT_IMAGE_PREVIEW",
-    "EVENT_FILECLOSE",
     "EVENT_AREA_DETECTED",
     "EVENT_CAMERA_LOST",
     "EVENT_CAMERA_FOUND",
@@ -68,6 +67,13 @@ static void on_movie_start_command(ctx_dev *cam, char *fname)
     MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("File saved to: %s"), fname);
     if (cam->conf->on_movie_start != "") {
         util_exec_command(cam, cam->conf->on_movie_start.c_str(), fname);
+    }
+}
+
+static void on_movie_end_command(ctx_dev *cam, char *fname)
+{
+    if (cam->conf->on_movie_end != "") {
+        util_exec_command(cam, cam->conf->on_movie_end.c_str(), fname);
     }
 }
 
@@ -368,13 +374,6 @@ static void event_camera_found(ctx_dev *cam, char *fname)
     }
 }
 
-static void on_movie_end_command(ctx_dev *cam, char *fname)
-{
-    if ((cam->filetype & FTYPE_MOVIE_ANY) && (cam->conf->on_movie_end != "")) {
-        util_exec_command(cam, cam->conf->on_movie_end.c_str(), fname);
-    }
-}
-
 static void event_extpipe_end(ctx_dev *cam, char *fname)
 {
     int retcd;
@@ -396,11 +395,11 @@ static void event_extpipe_end(ctx_dev *cam, char *fname)
                         , _("Unable to remove file %s"), cam->extpipefilename);
                 }
             } else {
-                event(cam, EVENT_FILECLOSE, cam->extpipefilename);
+                on_movie_end_command(cam, cam->extpipefilename);
                 dbse_exec(cam, cam->extpipefilename, "movie_end");
             }
         } else {
-            event(cam, EVENT_FILECLOSE, cam->extpipefilename);
+            on_movie_end_command(cam, cam->extpipefilename);
             dbse_exec(cam, cam->extpipefilename, "movie_end");
         }
         cam->extpipe = NULL;
@@ -588,13 +587,13 @@ static void event_movie_end(ctx_dev *cam, char *fname)
                         , cam->movie_norm->full_nm);
                 }
             } else {
-                event(cam, EVENT_FILECLOSE, cam->movie_norm->full_nm);
+                on_movie_end_command(cam, cam->movie_norm->full_nm);
                 dbse_exec(cam, cam->movie_norm->full_nm, "movie_end");
                 dbse_movies_addrec(cam, cam->movie_norm
                     , &cam->current_image->imgts);
             }
         } else {
-            event(cam, EVENT_FILECLOSE, cam->movie_norm->full_nm);
+            on_movie_end_command(cam, cam->movie_norm->full_nm);
             dbse_exec(cam, cam->movie_norm->full_nm, "movie_end");
             dbse_movies_addrec(cam, cam->movie_norm
                 , &cam->current_image->imgts);
@@ -615,13 +614,13 @@ static void event_movie_end(ctx_dev *cam, char *fname)
                         , cam->movie_motion->full_nm);
                 }
             } else {
-                event(cam, EVENT_FILECLOSE, cam->movie_motion->full_nm);
+                on_movie_end_command(cam, cam->movie_motion->full_nm);
                 dbse_exec(cam, cam->movie_motion->full_nm, "movie_end");
                 dbse_movies_addrec(cam, cam->movie_motion
                     , &cam->imgs.image_motion.imgts);
             }
         } else {
-            event(cam, EVENT_FILECLOSE, cam->movie_motion->full_nm);
+            on_movie_end_command(cam, cam->movie_motion->full_nm);
             dbse_exec(cam, cam->movie_motion->full_nm, "movie_end");
             dbse_movies_addrec(cam, cam->movie_motion
                 , &cam->imgs.image_motion.imgts);
@@ -664,7 +663,7 @@ static void event_tlapse_end(ctx_dev *cam, char *fname)
 
     if (cam->movie_timelapse) {
         cam->filetype = FTYPE_MOVIE_TIMELAPSE;
-        event(cam, EVENT_FILECLOSE, cam->movie_timelapse->full_nm);
+        on_movie_end_command(cam, cam->movie_timelapse->full_nm);
         dbse_exec(cam, cam->movie_timelapse->full_nm, "movie_end");
         movie_close(cam->movie_timelapse);
         myfree(&cam->movie_timelapse);
@@ -760,10 +759,6 @@ struct event_handlers event_handlers[] = {
     {
     EVENT_TLAPSE_END,
     event_tlapse_end
-    },
-    {
-    EVENT_FILECLOSE,
-    on_movie_end_command
     },
     {
     EVENT_MOVIE_START,
