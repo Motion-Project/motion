@@ -42,8 +42,8 @@ typedef enum {
     EVENT_LAST,
 } motion_event;
 
-typedef void(* event_handler)(ctx_dev *cam, char *fname);
+typedef void(* event_handler)(ctx_dev *cam);
 
-void event(ctx_dev *cam, motion_event evnt, char *fname);
+void event(ctx_dev *cam, motion_event evnt);
 
 #endif /* _INCLUDE_EVENT_HPP_ */

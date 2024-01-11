@@ -77,54 +77,41 @@ static void on_movie_end_command(ctx_dev *cam, char *fname)
     }
 }
 
-static void on_motion_detected_command(ctx_dev *cam, char *fname)
+static void on_motion_detected_command(ctx_dev *cam)
 {
-    (void)fname;
-
     if (cam->conf->on_motion_detected != "") {
         util_exec_command(cam, cam->conf->on_motion_detected.c_str(), NULL);
     }
 }
 
-static void on_area_command(ctx_dev *cam, char *fname)
+static void on_area_command(ctx_dev *cam)
 {
-    (void)fname;
-
     if (cam->conf->on_area_detected != "") {
         util_exec_command(cam, cam->conf->on_area_detected.c_str(), NULL);
     }
 }
 
-static void on_event_start_command(ctx_dev *cam, char *fname)
+static void on_event_start_command(ctx_dev *cam)
 {
-    (void)fname;
-
     if (cam->conf->on_event_start != "") {
         util_exec_command(cam, cam->conf->on_event_start.c_str(), NULL);
     }
 }
 
-static void on_event_end_command(ctx_dev *cam, char *fname)
+static void on_event_end_command(ctx_dev *cam)
 {
-    (void)fname;
-
     if (cam->conf->on_event_end != "") {
         util_exec_command(cam, cam->conf->on_event_end.c_str(), NULL);
     }
 }
 
-static void event_stream_put(ctx_dev *cam, char *fname)
+static void event_stream_put(ctx_dev *cam)
 {
-    (void)fname;
-
     webu_stream_getimg(cam);
 }
 
-
-static void event_vlp_putpipe(ctx_dev *cam, char *fname)
+static void event_vlp_putpipe(ctx_dev *cam)
 {
-    (void)fname;
-
     if (cam->pipe >= 0) {
         if (vlp_putpipe(cam->pipe
                 , cam->current_image->image_norm
@@ -135,10 +122,8 @@ static void event_vlp_putpipe(ctx_dev *cam, char *fname)
     }
 }
 
-static void event_vlp_putpipem(ctx_dev *cam, char *fname)
+static void event_vlp_putpipem(ctx_dev *cam)
 {
-    (void)fname;
-
     if (cam->mpipe >= 0) {
         if (vlp_putpipe(cam->mpipe
                 , cam->imgs.image_motion.image_norm
@@ -149,13 +134,11 @@ static void event_vlp_putpipem(ctx_dev *cam, char *fname)
     }
 }
 
-static void event_image_detect(ctx_dev *cam, char *fname)
+static void event_image_detect(ctx_dev *cam)
 {
     char fullfilename[PATH_MAX];
     char filename[PATH_MAX];
     int  passthrough, retcd;
-
-    (void)fname;
 
     if (cam->new_img & NEWIMG_ON) {
         mystrftime(cam, filename, sizeof(filename)
@@ -181,13 +164,11 @@ static void event_image_detect(ctx_dev *cam, char *fname)
     }
 }
 
-static void event_imagem_detect(ctx_dev *cam, char *fname)
+static void event_imagem_detect(ctx_dev *cam)
 {
     char fullfilename[PATH_MAX];
     char filename[PATH_MAX];
     int retcd;
-
-    (void)fname;
 
     if (cam->conf->picture_output_motion == "on") {
         mystrftime(cam, filename, sizeof(filename)
@@ -225,15 +206,13 @@ static void event_imagem_detect(ctx_dev *cam, char *fname)
     }
 }
 
-static void event_image_snapshot(ctx_dev *cam, char *fname)
+static void event_image_snapshot(ctx_dev *cam)
 {
     char fullfilename[PATH_MAX];
     char filename[PATH_MAX];
     char filepath[PATH_MAX];
     char linkpath[PATH_MAX];
     int offset, retcd, passthrough;
-
-    (void)fname;
 
     offset = (int)cam->conf->snapshot_filename.length() - 8;
     if (offset < 0) {
@@ -306,14 +285,12 @@ static void event_image_snapshot(ctx_dev *cam, char *fname)
     cam->snapshot = 0;
 }
 
-static void event_image_preview(ctx_dev *cam, char *fname)
+static void event_image_preview(ctx_dev *cam)
 {
     char previewname[PATH_MAX];
     char filename[PATH_MAX];
     ctx_image_data *saved_current_image;
     int passthrough, retcd;
-
-    (void)fname;
 
     if (cam->imgs.image_preview.diffs) {
         saved_current_image = cam->current_image;
@@ -345,19 +322,15 @@ static void event_image_preview(ctx_dev *cam, char *fname)
     }
 }
 
-static void event_camera_lost(ctx_dev *cam, char *fname)
+static void event_camera_lost(ctx_dev *cam)
 {
-    (void)fname;
-
     if (cam->conf->on_camera_lost != "") {
         util_exec_command(cam, cam->conf->on_camera_lost.c_str(), NULL);
     }
 }
 
-static void event_secondary_detect(ctx_dev *cam, char *fname)
+static void event_secondary_detect(ctx_dev *cam)
 {
-    (void)fname;
-
     MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO,_("Event secondary detect"));
 
     if (cam->conf->on_secondary_detect != "") {
@@ -365,20 +338,16 @@ static void event_secondary_detect(ctx_dev *cam, char *fname)
     }
 }
 
-static void event_camera_found(ctx_dev *cam, char *fname)
+static void event_camera_found(ctx_dev *cam)
 {
-    (void)fname;
-
     if (cam->conf->on_camera_found != "") {
         util_exec_command(cam, cam->conf->on_camera_found.c_str(), NULL);
     }
 }
 
-static void event_movie_start(ctx_dev *cam, char *fname)
+static void event_movie_start(ctx_dev *cam)
 {
     int retcd;
-
-    (void)fname;
 
     cam->movie_start_time = cam->frame_curr_ts.tv_sec;
 
@@ -427,10 +396,8 @@ static void event_movie_start(ctx_dev *cam, char *fname)
     }
 }
 
-static void event_movie_put(ctx_dev *cam, char *fname)
+static void event_movie_put(ctx_dev *cam)
 {
-    (void)fname;
-
     if (cam->movie_norm) {
         if (movie_put_image(cam->movie_norm
                 , cam->current_image
@@ -454,11 +421,9 @@ static void event_movie_put(ctx_dev *cam, char *fname)
 
 }
 
-static void event_movie_end(ctx_dev *cam, char *fname)
+static void event_movie_end(ctx_dev *cam)
 {
     int retcd;
-
-    (void)fname;
 
     if (cam->movie_norm) {
         cam->filetype = FTYPE_MOVIE;
@@ -526,11 +491,9 @@ static void event_movie_end(ctx_dev *cam, char *fname)
     }
 }
 
-static void event_tlapse_start(ctx_dev *cam, char *fname)
+static void event_tlapse_start(ctx_dev *cam)
 {
     int retcd;
-
-    (void)fname;
 
     if (!cam->movie_timelapse) {
         retcd = movie_init_timelapse(cam);
@@ -552,10 +515,8 @@ static void event_tlapse_start(ctx_dev *cam, char *fname)
 
 }
 
-static void event_tlapse_end(ctx_dev *cam, char *fname)
+static void event_tlapse_end(ctx_dev *cam)
 {
-    (void)fname;
-
     if (cam->movie_timelapse) {
         cam->filetype = FTYPE_MOVIE_TIMELAPSE;
         on_movie_end_command(cam, cam->movie_timelapse->full_nm);
@@ -663,21 +624,13 @@ struct event_handlers event_handlers[] = {
 };
 
 
-/**
- * event
- *   defined with the following parameters:
- *      - Type as defined in event.h (EVENT_...)
- *      - The global context struct cam
-  *      - filename - A pointer to typically a string for a file path
- *      - eventdata - A void pointer that can be cast to anything. E.g. FTYPE_...
- */
-void event(ctx_dev *cam, motion_event evnt, char *fname)
+void event(ctx_dev *cam, motion_event evnt)
 {
     int i=-1;
 
     while (event_handlers[++i].handler) {
         if (evnt == event_handlers[i].type) {
-            event_handlers[i].handler(cam, fname);
+            event_handlers[i].handler(cam);
         }
     }
 }
