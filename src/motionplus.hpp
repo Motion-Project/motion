@@ -411,8 +411,6 @@ struct ctx_dev {
 
     cls_libcam      *libcam;
 
-    FILE                    *extpipe;
-    int                     extpipe_open;
     bool                    algsec_inuse;        /*Bool for whether we have secondary detection*/
     int                     track_posx;
     int                     track_posy;
@@ -468,9 +466,12 @@ struct ctx_dev {
     char                    action_user[40];
 
     int                     movie_fps;
-    char                    extpipefilename[PATH_MAX];
-    char                    extpipecmdline[PATH_MAX];
     bool                    movie_passthrough;
+
+    char                    extpipe_filename[PATH_MAX];
+    char                    extpipe_cmdline[PATH_MAX];
+    FILE                    *extpipe_stream;
+    bool                    extpipe_isopen;
     int                     filetype;
 
     int area_minx[9], area_miny[9], area_maxx[9], area_maxy[9];

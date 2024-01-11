@@ -83,11 +83,13 @@ struct ctx_movie {
 
 int movie_open(ctx_movie *movie);
 int movie_put_image(ctx_movie *movie, ctx_image_data *img_data, const struct timespec *tv1);
+int movie_put_extpipe(ctx_dev *cam);
 void movie_close(ctx_movie *movie);
 void movie_reset_start_time(ctx_movie *movie, const struct timespec *tv1);
 int movie_init_timelapse(ctx_dev *cam);
 int movie_init_norm(ctx_dev *cam);
 int movie_init_motion(ctx_dev *cam);
+int movie_init_extpipe(ctx_dev *cam);
 void movie_free(ctx_movie *movie);
 
 #endif /* #define _INCLUDE_MOVIE_HPP_ */

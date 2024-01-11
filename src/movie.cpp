@@ -1753,3 +1753,80 @@ int movie_init_timelapse(ctx_dev *cam)
     return retcd;
 
 }
+
+int movie_init_extpipe(ctx_dev *cam)
+{
+    int retcd;
+    char filename[PATH_MAX] = "";
+
+    mystrftime(cam, filename, sizeof(filename)
+        , cam->conf->movie_filename.c_str()
+        , &cam->current_image->imgts, NULL, 0);
+    if (cam->conf->movie_output) {
+        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            , _("Requested extpipe in addition to movie_output."));
+        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            , _("Adjusting file name of extpipe output."));
+        retcd = snprintf(cam->extpipe_filename, PATH_MAX - 4, "%s/%sp"
+            , cam->conf->target_dir.c_str(), filename);
+    } else {
+        retcd = snprintf(cam->extpipe_filename, PATH_MAX - 4, "%s/%s"
+            , cam->conf->target_dir.c_str(), filename);
+    }
+    if (retcd < 0) {
+        MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error %d"), retcd);
+    }
+
+    if (mycreate_path(cam->extpipe_filename) == -1) {
+        return -1;
+    }
+
+    mystrftime(cam, cam->extpipe_cmdline, sizeof(cam->extpipe_cmdline)
+        , cam->conf->movie_extpipe.c_str()
+        , &cam->current_image->imgts, cam->extpipe_filename, 0);
+
+    MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
+        , _("fps %d pipe cmd: %s")
+        , cam->movie_fps, cam->extpipe_cmdline);
+
+    cam->extpipe_stream = popen(cam->extpipe_cmdline, "we");
+    if (cam->extpipe_stream == NULL) {
+        MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, _("popen failed"));
+        cam->extpipe_isopen = false;
+        return -1;
+    }
+
+    setbuf(cam->extpipe_stream, NULL);
+    cam->extpipe_isopen = true;
+
+    return 0;
+}
+
+int movie_put_extpipe(ctx_dev *cam)
+{
+    int passthrough, retcd;
+
+    retcd = 0;
+    passthrough = mycheck_passthrough(cam);
+    if (fileno(cam->extpipe_stream) > 0) {
+        if ((cam->imgs.size_high > 0) && (passthrough == false)) {
+            if (!fwrite(cam->current_image->image_high
+                    , cam->imgs.size_high, 1, cam->extpipe_stream)) {
+                MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                    , _("Error writing in pipe , state error %d")
+                    , ferror(cam->extpipe_stream));
+                retcd = -1;
+            }
+        } else {
+            if (!fwrite(cam->current_image->image_norm
+                    , cam->imgs.size_norm, 1, cam->extpipe_stream)) {
+                MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                  ,_("Error writing in pipe , state error %d")
+                  , ferror(cam->extpipe_stream));
+                retcd = -1;
+            }
+        }
+    }
+    return retcd;
+}
+
