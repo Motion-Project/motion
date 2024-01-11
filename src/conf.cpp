@@ -1734,12 +1734,12 @@ static void conf_edit_picture_output_motion(ctx_config *conf, std::string &parm,
 static void conf_edit_picture_type(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        conf->picture_type = "jpeg";
+        conf->picture_type = "jpg";
     } else if (pact == PARM_ACT_SET) {
-        if ((parm == "jpeg") || (parm == "webp") || (parm == "ppm"))  {
+        if ((parm == "jpg") || (parm == "webp") || (parm == "ppm"))  {
             conf->picture_type = parm;
-        } else if (parm == "") {
-            conf->picture_type = "jpeg";
+        } else if ((parm == "") ||(parm == "jpeg"))  {
+            conf->picture_type = "jpg";
         } else {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_type %s"), parm.c_str());
         }
@@ -1747,7 +1747,7 @@ static void conf_edit_picture_type(ctx_config *conf, std::string &parm, enum PAR
         parm = conf->picture_type;
     } else if (pact == PARM_ACT_LIST) {
         parm = "[";
-        parm = parm +  "\"jpeg\",\"webp\",\"ppm\"";
+        parm = parm +  "\"jpg\",\"webp\",\"ppm\"";
         parm = parm + "]";
     }
     return;

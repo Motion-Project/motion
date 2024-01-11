@@ -46,6 +46,4 @@ typedef void(* event_handler)(ctx_dev *cam, char *fname);
 
 void event(ctx_dev *cam, motion_event evnt, char *fname);
 
-const char * imageext(ctx_dev *cam);
-
 #endif /* _INCLUDE_EVENT_HPP_ */

@@ -149,13 +149,6 @@ static void event_vlp_putpipem(ctx_dev *cam, char *fname)
     }
 }
 
-const char *imageext(ctx_dev *cam) {
-
-    if (cam->conf->picture_type == "ppm") return "ppm";
-    if (cam->conf->picture_type == "webp") return "webp";
-    return "jpg";
-}
-
 static void event_image_detect(ctx_dev *cam, char *fname)
 {
     char fullfilename[PATH_MAX];
@@ -169,7 +162,8 @@ static void event_image_detect(ctx_dev *cam, char *fname)
             , cam->conf->picture_filename.c_str()
             , &cam->current_image->imgts, NULL, 0);
         retcd = snprintf(fullfilename, PATH_MAX, "%s/%s.%s"
-            , cam->conf->target_dir.c_str(), filename, imageext(cam));
+            , cam->conf->target_dir.c_str(), filename
+            , cam->conf->picture_type.c_str());
         if ((retcd < 0) || (retcd >= PATH_MAX)) {
             MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating image file name"));
@@ -200,7 +194,8 @@ static void event_imagem_detect(ctx_dev *cam, char *fname)
             , cam->conf->picture_filename.c_str()
             , &cam->current_image->imgts, NULL, 0);
         retcd = snprintf(fullfilename, PATH_MAX, "%s/%sm.%s"
-            , cam->conf->target_dir.c_str(), filename, imageext(cam));
+            , cam->conf->target_dir.c_str(), filename
+            , cam->conf->picture_type.c_str());
         if ((retcd < 0) || (retcd >= PATH_MAX)) {
             MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating image motion file name"));
@@ -216,7 +211,8 @@ static void event_imagem_detect(ctx_dev *cam, char *fname)
             , cam->conf->picture_filename.c_str()
             , &cam->current_image->imgts, NULL, 0);
         retcd = snprintf(fullfilename, PATH_MAX, "%s/%sr.%s"
-            , cam->conf->target_dir.c_str(), filename, imageext(cam));
+            , cam->conf->target_dir.c_str(), filename
+            , cam->conf->picture_type.c_str());
         if ((retcd < 0) || (retcd >= PATH_MAX)) {
             MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating image motion roi file name"));
@@ -248,7 +244,8 @@ static void event_image_snapshot(ctx_dev *cam, char *fname)
         mystrftime(cam, filepath, sizeof(filepath)
             , cam->conf->snapshot_filename.c_str()
             , &cam->current_image->imgts, NULL, 0);
-        retcd = snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cam));
+        retcd = snprintf(filename, PATH_MAX, "%s.%s", filepath
+            , cam->conf->picture_type.c_str());
         if (retcd <0) {
             MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
         }
@@ -270,7 +267,8 @@ static void event_image_snapshot(ctx_dev *cam, char *fname)
 
         /* Update symbolic link */
         snprintf(linkpath, PATH_MAX, "%s/lastsnap.%s"
-            , cam->conf->target_dir.c_str(), imageext(cam));
+            , cam->conf->target_dir.c_str()
+            , cam->conf->picture_type.c_str());
         remove(linkpath);
         if (symlink(filename, linkpath)) {
             MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
@@ -281,7 +279,8 @@ static void event_image_snapshot(ctx_dev *cam, char *fname)
         mystrftime(cam, filepath, sizeof(filepath)
             , cam->conf->snapshot_filename.c_str()
             , &cam->current_image->imgts, NULL, 0);
-        retcd = snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cam));
+        retcd = snprintf(filename, PATH_MAX, "%s.%s", filepath
+            , cam->conf->picture_type.c_str());
         if (retcd <0) {
             MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error option"));
         }
@@ -324,7 +323,8 @@ static void event_image_preview(ctx_dev *cam, char *fname)
             , &cam->imgs.image_preview.imgts, NULL, 0);
 
         retcd = snprintf(previewname, PATH_MAX, "%s/%s.%s"
-            , cam->conf->target_dir.c_str(), filename, imageext(cam));
+            , cam->conf->target_dir.c_str(), filename
+            , cam->conf->picture_type.c_str());
         if ((retcd < 0) || (retcd >= PATH_MAX)) {
             MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error creating preview file name"));
