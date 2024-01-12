@@ -103,20 +103,19 @@ static void mlp_ring_process_debug(ctx_dev *cam)
     char tmp[32];
     const char *t;
 
-    if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_TRIGGER) {
+    if (cam->current_image->flags & IMAGE_TRIGGER) {
         t = "Trigger";
-    } else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_MOTION) {
+    } else if (cam->current_image->flags & IMAGE_MOTION) {
         t = "Motion";
-    } else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_PRECAP) {
+    } else if (cam->current_image->flags & IMAGE_PRECAP) {
         t = "Precap";
-    } else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_POSTCAP) {
+    } else if (cam->current_image->flags & IMAGE_POSTCAP) {
         t = "Postcap";
     } else {
         t = "Other";
     }
 
-    mystrftime(cam, tmp, sizeof(tmp), "%H%M%S-%q",
-                &cam->imgs.image_ring[cam->imgs.ring_out].imgts, NULL);
+    mystrftime(cam, tmp, sizeof(tmp), "%H%M%S-%q", NULL);
     draw_text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm,
                 cam->imgs.width, cam->imgs.height, 10, 20, tmp, cam->text_scale);
     draw_text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm,
@@ -202,8 +201,7 @@ static void mlp_detected_trigger(ctx_dev *cam)
 
             mystrftime(cam, cam->text_event_string
                 , sizeof(cam->text_event_string)
-                , cam->conf->text_event.c_str()
-                , &cam->current_image->imgts, NULL);
+                , cam->conf->text_event.c_str(), NULL);
 
             event(cam, EVENT_START);
             dbse_exec(cam, NULL, "event_start");
@@ -877,8 +875,8 @@ static int mlp_capture(ctx_dev *cam)
             }
 
             memset(cam->current_image->image_norm, 0x80, cam->imgs.size_norm);
-            mystrftime(cam, tmpout, sizeof(tmpout)
-                , tmpin, &cam->connectionlosttime, NULL);
+            cam->current_image->imgts =cam->connectionlosttime;
+            mystrftime(cam, tmpout, sizeof(tmpout), tmpin, NULL);
             draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
                       10, 20 * cam->text_scale, tmpout, cam->text_scale);
             cam->current_image->imgts = cam->connectionlosttime;
@@ -1011,16 +1009,14 @@ static void mlp_overlay(ctx_dev *cam)
 
     /* Add text in lower left corner of the pictures */
     if (cam->conf->text_left != "") {
-        mystrftime(cam, tmp, sizeof(tmp), cam->conf->text_left.c_str(),
-                   &cam->current_image->imgts, NULL);
+        mystrftime(cam, tmp, sizeof(tmp), cam->conf->text_left.c_str(), NULL);
         draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
                   10, cam->imgs.height - (10 * cam->text_scale), tmp, cam->text_scale);
     }
 
     /* Add text in lower right corner of the pictures */
     if (cam->conf->text_right != "") {
-        mystrftime(cam, tmp, sizeof(tmp), cam->conf->text_right.c_str(),
-                   &cam->current_image->imgts, NULL);
+        mystrftime(cam, tmp, sizeof(tmp), cam->conf->text_right.c_str(), NULL);
         draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
                   cam->imgs.width - 10, cam->imgs.height - (10 * cam->text_scale),
                   tmp, cam->text_scale);

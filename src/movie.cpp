@@ -1545,8 +1545,7 @@ int movie_init_norm(ctx_dev *cam)
     cam->movie_norm =(ctx_movie*) mymalloc(sizeof(ctx_movie));
 
     mystrftime(cam, tmp, sizeof(tmp)
-        , cam->conf->movie_filename.c_str()
-        , &cam->current_image->imgts, NULL);
+        , cam->conf->movie_filename.c_str(), NULL);
 
     container = movie_init_container(cam);
 
@@ -1615,18 +1614,23 @@ int movie_init_motion(ctx_dev *cam)
 {
     char tmp[PATH_MAX];
     const char *container;
+    ctx_image_data save_data;
     int retcd, len;
 
     cam->movie_motion =(ctx_movie*)mymalloc(sizeof(ctx_movie));
 
-    mystrftime(cam, tmp, sizeof(tmp)
-        , cam->conf->movie_filename.c_str()
-        , &cam->imgs.image_motion.imgts, NULL);
+    /* copy pointers and meta data to current image for use in format*/
+    memcpy(&save_data, cam->current_image, sizeof(ctx_image_data));
+        memcpy(cam->current_image, &cam->imgs.image_motion, sizeof(ctx_image_data));
+        mystrftime(cam, tmp, sizeof(tmp)
+            , cam->conf->movie_filename.c_str(), NULL);
+    memcpy(cam->current_image, &save_data, sizeof(ctx_image_data));
+
     container = movie_init_container(cam);
 
     /* The increment of 10 is to allow for the extension and other chars*/
     len = (int)(strlen(tmp) + cam->conf->target_dir.length() + 10);
-    cam->movie_norm->full_nm = (char*)mymalloc(len);
+    cam->movie_motion->full_nm = (char*)mymalloc(len);
     if (mystreq(container, "test")) {
         retcd = snprintf(cam->movie_motion->full_nm, len, "%s/%s_%sm"
             , cam->conf->target_dir.c_str(), container, tmp);
@@ -1636,13 +1640,13 @@ int movie_init_motion(ctx_dev *cam)
     }
 
     len = (int)cam->conf->target_dir.length() + 10;
-    cam->movie_norm->movie_dir = (char*)mymalloc(len);
-    retcd = snprintf(cam->movie_norm->movie_dir,len,"%s"
+    cam->movie_motion->movie_dir = (char*)mymalloc(len);
+    retcd = snprintf(cam->movie_motion->movie_dir,len,"%s"
         ,cam->conf->target_dir.c_str());
 
     len = (int)strlen(tmp) + 10;
-    cam->movie_norm->movie_nm = (char*)mymalloc(len);
-    retcd = snprintf(cam->movie_norm->movie_nm, len, "%s", tmp);
+    cam->movie_motion->movie_nm = (char*)mymalloc(len);
+    retcd = snprintf(cam->movie_motion->movie_nm, len, "%s", tmp);
 
     if (retcd < 0) {
         MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
@@ -1688,8 +1692,7 @@ int movie_init_timelapse(ctx_dev *cam)
 
     cam->movie_timelapse =(ctx_movie*)mymalloc(sizeof(ctx_movie));
     mystrftime(cam, tmp, sizeof(tmp)
-        , cam->conf->timelapse_filename.c_str()
-        , &cam->current_image->imgts, NULL);
+        , cam->conf->timelapse_filename.c_str(), NULL);
 
     /* The increment of 10 is to allow for the extension and other chars*/
     len = (int)(strlen(tmp) + cam->conf->target_dir.length() + 10);
@@ -1760,8 +1763,7 @@ int movie_init_extpipe(ctx_dev *cam)
     char filename[PATH_MAX] = "";
 
     mystrftime(cam, filename, sizeof(filename)
-        , cam->conf->movie_filename.c_str()
-        , &cam->current_image->imgts, NULL);
+        , cam->conf->movie_filename.c_str(), NULL);
     if (cam->conf->movie_output) {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Requested extpipe in addition to movie_output."));
@@ -1782,8 +1784,7 @@ int movie_init_extpipe(ctx_dev *cam)
     }
 
     mystrftime(cam, cam->extpipe_cmdline, sizeof(cam->extpipe_cmdline)
-        , cam->conf->movie_extpipe.c_str()
-        , &cam->current_image->imgts, cam->extpipe_filename);
+        , cam->conf->movie_extpipe.c_str(), cam->extpipe_filename);
 
     MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
         , _("fps %d pipe cmd: %s")

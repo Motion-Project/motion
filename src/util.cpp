@@ -379,15 +379,13 @@ static void mystrftime_long (const ctx_dev *cam,
  *   s          - destination string
  *   max        - max number of bytes to write
  *   userformat - format string
- *   tm         - time information
  *   filename   - string containing full path of filename
  *                set this to NULL if not relevant
- *   sqltype    - Filetype as used in SQL feature, set to 0 if not relevant
  *
  * Returns: number of bytes written to the string s
  */
-size_t mystrftime(ctx_dev *cam, char *s, size_t max, const char *userformat,
-        const struct timespec *ts1, const char *filename)
+size_t mystrftime(ctx_dev *cam, char *s, size_t max
+        , const char *userformat, const char *filename)
 {
     char formatstring[PATH_MAX] = "";
     char tempstring[PATH_MAX] = "";
@@ -395,8 +393,15 @@ size_t mystrftime(ctx_dev *cam, char *s, size_t max, const char *userformat,
     const char *pos_userformat;
     int width;
     struct tm timestamp_tm;
+    timespec ts1;
 
-    localtime_r(&ts1->tv_sec, &timestamp_tm);
+    if (cam->current_image == NULL) {
+        clock_gettime(CLOCK_REALTIME, &ts1);
+    } else {
+        ts1 = cam->current_image->imgts;
+    }
+
+    localtime_r(&ts1.tv_sec, &timestamp_tm);
 
     format = formatstring;
 
@@ -565,7 +570,7 @@ void mypicname(ctx_dev *cam
     int  retcd;
 
     mystrftime(cam, filename, sizeof(filename)
-        , basename.c_str(), &cam->current_image->imgts, NULL);
+        , basename.c_str(), NULL);
     retcd = snprintf(fullname, PATH_MAX, fmtstr.c_str()
         , cam->conf->target_dir.c_str(), filename, extname.c_str());
     if ((retcd < 0) || (retcd >= PATH_MAX)) {
@@ -1297,17 +1302,9 @@ void util_parms_update(ctx_params *params, std::string &confline)
 void util_exec_command(ctx_dev *cam, const char *command, char *filename)
 {
     char stamp[PATH_MAX];
-    timespec tmpts;
     int pid;
 
-    if (cam->current_image == NULL) {
-        clock_gettime(CLOCK_REALTIME, &tmpts);
-        mystrftime(cam, stamp, sizeof(stamp), command
-            , &tmpts, filename);
-    } else {
-        mystrftime(cam, stamp, sizeof(stamp)
-            , command, &cam->current_image->imgts, filename);
-    }
+    mystrftime(cam, stamp, sizeof(stamp), command, filename);
 
     pid = fork();
     if (!pid) {

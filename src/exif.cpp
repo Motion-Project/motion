@@ -205,7 +205,7 @@ unsigned exif_prepare(unsigned char **exif, ctx_dev *cam,
 
     if (cam->conf->picture_exif != "") {
         description =(char*) malloc(PATH_MAX);
-        mystrftime(cam, description, PATH_MAX-1, cam->conf->picture_exif.c_str(), &ts1, NULL);
+        mystrftime(cam, description, PATH_MAX-1, cam->conf->picture_exif.c_str(), NULL);
     } else {
         description = NULL;
     }
