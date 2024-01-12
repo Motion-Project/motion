@@ -752,16 +752,15 @@ static void mlp_prepare(ctx_dev *cam)
     cam->frame_last_ts.tv_nsec = cam->frame_curr_ts.tv_nsec;
     clock_gettime(CLOCK_MONOTONIC, &cam->frame_curr_ts);
 
+    if (cam->frame_last_ts.tv_sec != cam->frame_curr_ts.tv_sec) {
+        cam->lastrate = cam->shots_mt + 1;
+        cam->shots_mt = -1;
+    }
+    cam->shots_mt++;
+
     if (cam->conf->pre_capture < 0) {
         cam->conf->pre_capture = 0;
     }
-
-    if (cam->frame_last_ts.tv_sec != cam->frame_curr_ts.tv_sec) {
-        cam->lastrate = cam->shots + 1;
-        cam->shots = -1;
-    }
-
-    cam->shots++;
 
     if (cam->startup_frames > 0) {
         cam->startup_frames--;
@@ -771,7 +770,10 @@ static void mlp_prepare(ctx_dev *cam)
 /* reset the images */
 static void mlp_resetimages(ctx_dev *cam)
 {
+    int64_t tmpsec;
+
     /* ring_buffer_in is pointing to current pos, update before put in a new image */
+    tmpsec =cam->current_image->imgts.tv_sec;
     if (++cam->imgs.ring_in >= cam->imgs.ring_size) {
         cam->imgs.ring_in = 0;
     }
@@ -793,8 +795,14 @@ static void mlp_resetimages(ctx_dev *cam)
     clock_gettime(CLOCK_REALTIME, &cam->current_image->imgts);
     clock_gettime(CLOCK_MONOTONIC, &cam->current_image->monots);
 
+    if (tmpsec != cam->current_image->imgts.tv_sec) {
+        cam->shots_rt = 1;
+    }  else {
+        cam->shots_rt++;
+    }
     /* Store shot number with pre_captured image */
-    cam->current_image->shot = cam->shots;
+    cam->current_image->shot = cam->shots_rt;
+
 }
 
 /* Try to reconnect to camera */
@@ -804,7 +812,7 @@ static void mlp_retry(ctx_dev *cam)
 
     if ((cam->device_status == STATUS_CLOSED) &&
         (cam->frame_curr_ts.tv_sec % 10 == 0) &&
-        (cam->shots == 0)) {
+        (cam->shots_mt == 0)) {
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Retrying until successful connection with camera"));
 
@@ -920,7 +928,7 @@ static void mlp_detection(ctx_dev *cam)
 /* tune the detection parameters*/
 static void mlp_tuning(ctx_dev *cam)
 {
-    if ((cam->conf->noise_tune && cam->shots == 0) &&
+    if ((cam->conf->noise_tune && cam->shots_mt == 0) &&
           (!cam->detecting_motion && (cam->current_image->diffs <= cam->threshold))) {
         alg_noise_tune(cam);
     }
@@ -1233,7 +1241,7 @@ static void mlp_setupmode(ctx_dev *cam)
 /* Snapshot interval*/
 static void mlp_snapshot(ctx_dev *cam)
 {
-    if ((cam->conf->snapshot_interval > 0 && cam->shots == 0 &&
+    if ((cam->conf->snapshot_interval > 0 && cam->shots_mt == 0 &&
          cam->frame_curr_ts.tv_sec % cam->conf->snapshot_interval <=
          cam->frame_last_ts.tv_sec % cam->conf->snapshot_interval) ||
          cam->snapshot) {
@@ -1252,7 +1260,7 @@ static void mlp_timelapse(ctx_dev *cam)
 
         if (timestamp_tm.tm_min == 0 &&
             (cam->frame_curr_ts.tv_sec % 60 < cam->frame_last_ts.tv_sec % 60) &&
-            cam->shots == 0) {
+            cam->shots_mt == 0) {
 
             if (cam->conf->timelapse_mode == "daily") {
                 if (timestamp_tm.tm_hour == 0) {
@@ -1275,7 +1283,7 @@ static void mlp_timelapse(ctx_dev *cam)
             }
         }
 
-        if (cam->shots == 0 &&
+        if (cam->shots_mt == 0 &&
             cam->frame_curr_ts.tv_sec % cam->conf->timelapse_interval <=
             cam->frame_last_ts.tv_sec % cam->conf->timelapse_interval) {
                 event(cam, EVENT_TLAPSE_START);
@@ -1297,7 +1305,7 @@ static void mlp_loopback(ctx_dev *cam)
 
     event(cam, EVENT_IMAGE);
 
-    if (!cam->conf->stream_motion || cam->shots == 0) {
+    if (!cam->conf->stream_motion || cam->shots_mt == 0) {
         event(cam, EVENT_STREAM);
     }
 
@@ -1308,7 +1316,7 @@ static void mlp_loopback(ctx_dev *cam)
 static void mlp_parmsupdate(ctx_dev *cam)
 {
     /* Check for some config parameter changes but only every second */
-    if (cam->shots != 0) {
+    if (cam->shots_mt != 0) {
         return;
     }
 
