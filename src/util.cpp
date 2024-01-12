@@ -393,15 +393,16 @@ size_t mystrftime(ctx_dev *cam, char *s, size_t max
     const char *pos_userformat;
     int width;
     struct tm timestamp_tm;
-    timespec ts1;
+    ctx_image_data img;
 
     if (cam->current_image == NULL) {
-        clock_gettime(CLOCK_REALTIME, &ts1);
+        memset(&img, 0, sizeof(ctx_image_data));
+        clock_gettime(CLOCK_REALTIME, &img.imgts);
     } else {
-        ts1 = cam->current_image->imgts;
+        memcpy(&img, cam->current_image, sizeof(ctx_image_data));
     }
 
-    localtime_r(&ts1.tv_sec, &timestamp_tm);
+    localtime_r(&img.imgts.tv_sec, &timestamp_tm);
 
     format = formatstring;
 
@@ -438,12 +439,11 @@ size_t mystrftime(ctx_dev *cam, char *s, size_t max
                 break;
 
             case 'q': // shots
-                sprintf(tempstr, "%0*d", width ? width : 2,
-                    cam->current_image->shot);
+                sprintf(tempstr, "%0*d", width ? width : 2, img.shot);
                 break;
 
             case 'D': // diffs
-                sprintf(tempstr, "%*d", width, cam->current_image->diffs);
+                sprintf(tempstr, "%*d", width, img.diffs);
                 break;
 
             case 'N': // noise
@@ -451,21 +451,19 @@ size_t mystrftime(ctx_dev *cam, char *s, size_t max
                 break;
 
             case 'i': // motion width
-                sprintf(tempstr, "%*d", width,
-                    cam->current_image->location.width);
+                sprintf(tempstr, "%*d", width, img.location.width);
                 break;
 
             case 'J': // motion height
-                sprintf(tempstr, "%*d", width,
-                    cam->current_image->location.height);
+                sprintf(tempstr, "%*d", width, img.location.height);
                 break;
 
             case 'K': // motion center x
-                sprintf(tempstr, "%*d", width, cam->current_image->location.x);
+                sprintf(tempstr, "%*d", width, img.location.x);
                 break;
 
             case 'L': // motion center y
-                sprintf(tempstr, "%*d", width, cam->current_image->location.y);
+                sprintf(tempstr, "%*d", width, img.location.y);
                 break;
 
             case 'o': // threshold
@@ -473,8 +471,7 @@ size_t mystrftime(ctx_dev *cam, char *s, size_t max
                 break;
 
             case 'Q': // number of labels
-                sprintf(tempstr, "%*d", width,
-                    cam->current_image->total_labels);
+                sprintf(tempstr, "%*d", width, img.total_labels);
                 break;
 
             case 't': // device id
