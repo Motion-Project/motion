@@ -107,7 +107,7 @@
     FILE *myfopen(const char *path, const char *mode);
     int myfclose(FILE *fh);
     size_t mystrftime(ctx_dev *cam, char *s, size_t max, const char *userformat,
-        const struct timespec *ts1, const char *filename, int sqltype);
+        const struct timespec *ts1, const char *filename);
     void mypicname(ctx_dev *cam
         , char* fullname, std::string fmtstr
         , std::string basename, std::string extname);

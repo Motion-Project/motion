@@ -1294,23 +1294,23 @@ void dbse_exec(ctx_dev *cam, char *filename, const char *cmd)
     if (mystrceq(cmd,"pic_save")) {
         mystrftime(cam, sqlquery, sizeof(sqlquery)
             , cam->conf->sql_pic_save.c_str()
-            , &cam->current_image->imgts, filename, cam->filetype);
+            , &cam->current_image->imgts, filename);
     } else if (mystrceq(cmd,"movie_start")) {
         mystrftime(cam, sqlquery, sizeof(sqlquery)
             , cam->conf->sql_movie_start.c_str()
-            , &cam->current_image->imgts, filename, cam->filetype);
+            , &cam->current_image->imgts, filename);
     } else if (mystrceq(cmd,"movie_end")) {
         mystrftime(cam, sqlquery, sizeof(sqlquery)
             , cam->conf->sql_movie_end.c_str()
-            , &cam->current_image->imgts, filename, cam->filetype);
+            , &cam->current_image->imgts, filename);
     } else if (mystrceq(cmd,"event_start")) {
         mystrftime(cam, sqlquery, sizeof(sqlquery)
             , cam->conf->sql_event_start.c_str()
-            , &cam->current_image->imgts, filename, cam->filetype);
+            , &cam->current_image->imgts, filename);
     } else if (mystrceq(cmd,"event_end")) {
         mystrftime(cam, sqlquery, sizeof(sqlquery)
             , cam->conf->sql_event_end.c_str()
-            , &cam->current_image->imgts, filename, cam->filetype);
+            , &cam->current_image->imgts, filename);
     }
 
     if (strlen(sqlquery) <= 0) {

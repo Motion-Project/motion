@@ -1546,7 +1546,7 @@ int movie_init_norm(ctx_dev *cam)
 
     mystrftime(cam, tmp, sizeof(tmp)
         , cam->conf->movie_filename.c_str()
-        , &cam->current_image->imgts, NULL, 0);
+        , &cam->current_image->imgts, NULL);
 
     container = movie_init_container(cam);
 
@@ -1621,7 +1621,7 @@ int movie_init_motion(ctx_dev *cam)
 
     mystrftime(cam, tmp, sizeof(tmp)
         , cam->conf->movie_filename.c_str()
-        , &cam->imgs.image_motion.imgts, NULL, 0);
+        , &cam->imgs.image_motion.imgts, NULL);
     container = movie_init_container(cam);
 
     /* The increment of 10 is to allow for the extension and other chars*/
@@ -1689,7 +1689,7 @@ int movie_init_timelapse(ctx_dev *cam)
     cam->movie_timelapse =(ctx_movie*)mymalloc(sizeof(ctx_movie));
     mystrftime(cam, tmp, sizeof(tmp)
         , cam->conf->timelapse_filename.c_str()
-        , &cam->current_image->imgts, NULL, 0);
+        , &cam->current_image->imgts, NULL);
 
     /* The increment of 10 is to allow for the extension and other chars*/
     len = (int)(strlen(tmp) + cam->conf->target_dir.length() + 10);
@@ -1761,7 +1761,7 @@ int movie_init_extpipe(ctx_dev *cam)
 
     mystrftime(cam, filename, sizeof(filename)
         , cam->conf->movie_filename.c_str()
-        , &cam->current_image->imgts, NULL, 0);
+        , &cam->current_image->imgts, NULL);
     if (cam->conf->movie_output) {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Requested extpipe in addition to movie_output."));
@@ -1783,7 +1783,7 @@ int movie_init_extpipe(ctx_dev *cam)
 
     mystrftime(cam, cam->extpipe_cmdline, sizeof(cam->extpipe_cmdline)
         , cam->conf->movie_extpipe.c_str()
-        , &cam->current_image->imgts, cam->extpipe_filename, 0);
+        , &cam->current_image->imgts, cam->extpipe_filename);
 
     MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
         , _("fps %d pipe cmd: %s")

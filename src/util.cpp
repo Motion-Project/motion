@@ -387,7 +387,7 @@ static void mystrftime_long (const ctx_dev *cam,
  * Returns: number of bytes written to the string s
  */
 size_t mystrftime(ctx_dev *cam, char *s, size_t max, const char *userformat,
-        const struct timespec *ts1, const char *filename, int sqltype)
+        const struct timespec *ts1, const char *filename)
 {
     char formatstring[PATH_MAX] = "";
     char tempstring[PATH_MAX] = "";
@@ -501,9 +501,9 @@ size_t mystrftime(ctx_dev *cam, char *s, size_t max, const char *userformat,
                 }
                 break;
 
-            case 'n': // sqltype
-                if (sqltype) {
-                    sprintf(tempstr, "%*d", width, sqltype);
+            case 'n': // filetype
+                if (cam->filetype) {
+                    sprintf(tempstr, "%*d", width, cam->filetype);
                 } else {
                     ++pos_userformat;
                 }
@@ -565,7 +565,7 @@ void mypicname(ctx_dev *cam
     int  retcd;
 
     mystrftime(cam, filename, sizeof(filename)
-        , basename.c_str(), &cam->current_image->imgts, NULL, 0);
+        , basename.c_str(), &cam->current_image->imgts, NULL);
     retcd = snprintf(fullname, PATH_MAX, fmtstr.c_str()
         , cam->conf->target_dir.c_str(), filename, extname.c_str());
     if ((retcd < 0) || (retcd >= PATH_MAX)) {
@@ -1303,10 +1303,10 @@ void util_exec_command(ctx_dev *cam, const char *command, char *filename)
     if (cam->current_image == NULL) {
         clock_gettime(CLOCK_REALTIME, &tmpts);
         mystrftime(cam, stamp, sizeof(stamp), command
-            , &tmpts, filename, cam->filetype);
+            , &tmpts, filename);
     } else {
         mystrftime(cam, stamp, sizeof(stamp)
-            , command, &cam->current_image->imgts, filename, cam->filetype);
+            , command, &cam->current_image->imgts, filename);
     }
 
     pid = fork();
