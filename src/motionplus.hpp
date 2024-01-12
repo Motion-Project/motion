@@ -441,7 +441,8 @@ struct ctx_dev {
     int                     text_scale;
 
     int                     postcap;                             /* downcounter, frames left to to send post event */
-    int                     shots;
+    int                     shots_mt;   /* Monotonic clock shots count*/
+    int                     shots_rt;   /* Realtime  clock shots count*/
     int                     ref_lag;
     bool                    detecting_motion;
     long                    frame_wait[AVGCNT];   /* Last wait times through motion loop*/
