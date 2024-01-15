@@ -197,14 +197,6 @@ msgid "netcam_userpass"
 msgstr "„netcam“ vartotojo pasas"
 
 #: src/conf.c
-msgid "mmalcam_name"
-msgstr "mmalcam vardas"
-
-#: src/conf.c
-msgid "mmalcam_params"
-msgstr "mmalcam params"
-
-#: src/conf.c
 msgid "width"
 msgstr "plotis"
 
@@ -1326,98 +1318,6 @@ msgstr "Netinkami JPEG vaizdo matmenys"
 msgid "JPEG image size %dx%d, JPEG was %dx%d"
 msgstr "JPEG vaizdo dydis %dx %d, JPEG buvo %dx %d"
 
-#: src/mmalcam.c
-#, c-format
-msgid "Received unexpected camera control callback event, 0x%08x"
-msgstr "Gautas netikėtas fotoaparato valdymo atšaukimo įvykis, 0x %08x"
-
-#: src/mmalcam.c
-msgid "A high frame rate can cause problems with exposure of images"
-msgstr "Didelis kadrų dažnis gali sukelti vaizdų ekspozicijos problemų"
-
-#: src/mmalcam.c
-msgid "If autoexposure is not working, try a lower frame rate."
-msgstr "Jei automatinė ekspozicija neveikia, išbandykite mažesnę kadrų dažnį."
-
-#: src/mmalcam.c
-#, c-format
-msgid "Failed to create MMAL camera component %s"
-msgstr "Nepavyko sukurti MMAL fotoaparato komponento %s"
-
-#: src/mmalcam.c
-#, c-format
-msgid "MMAL camera %s doesn't have output ports"
-msgstr "MMAL kamera %s neturi išvesties prievadų"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to enable control port : error %d"
-msgstr "Neįmanoma įjungti valdymo prievado: klaida %d"
-
-#: src/mmalcam.c
-msgid "MMAL no-padding setup failed"
-msgstr "Nepavyko nustatyti MMAL padėklo"
-
-#: src/mmalcam.c
-msgid "camera video format couldn't be set"
-msgstr "Nepavyko nustatyti kameros vaizdo įrašo formato"
-
-#: src/mmalcam.c
-msgid "camera component couldn't be enabled"
-msgstr "fotoaparato komponento negalima įgalinti"
-
-#: src/mmalcam.c
-msgid "MMAL camera component created"
-msgstr "Sukurtas MMAL fotoaparato komponentas"
-
-#: src/mmalcam.c
-msgid "MMAL camera buffer pool creation failed"
-msgstr "Nepavyko sukurti MMAL fotoaparato buferio"
-
-#: src/mmalcam.c
-msgid "MMAL camera buffer queue creation failed"
-msgstr "Nepavyko sukurti MMAL fotoaparato buferio eilės"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to get a required buffer %d from pool queue"
-msgstr "Nepavyko gauti reikiamo buferio %d iš baseino eilės"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to send a buffer to port (%d)"
-msgstr "Neįmanoma nusiųsti buferio į uostą ( %d)"
-
-#: src/mmalcam.c
-#, c-format
-msgid "MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps"
-msgstr "MMAL kameros siūlas prasideda ... kamerai ( %s) %dx %d, %d fps"
-
-#: src/mmalcam.c
-msgid "camera params couldn't be allocated"
-msgstr "fotoaparato parametrų nebuvo galima paskirstyti"
-
-#: src/mmalcam.c
-msgid "MMAL camera capture port enabling failed"
-msgstr "Nepavyko įjungti MMAL fotoaparato jungties"
-
-#: src/mmalcam.c
-msgid "MMAL camera capture start failed"
-msgstr "Nepavyko užfiksuoti MMAL fotoaparato"
-
-#: src/mmalcam.c
-msgid "MMAL Camera cleanup"
-msgstr "MMAL fotoaparato valymas"
-
-#: src/mmalcam.c
-#, c-format
-msgid "cmd %d flags %08x size %d/%d at %08x, img_size=%d"
-msgstr "cmd %d vėliavos %08x dydis %d / %d at %08x, img size = %d"
-
-#: src/mmalcam.c
-msgid "Unable to return a buffer to the camera video port"
-msgstr "Neįmanoma grąžinti buferio į fotoaparato vaizdo prievadą"
-
 #: src/motion.c
 #, c-format
 msgid "Resizing pre_capture buffer to %d items"
@@ -1447,8 +1347,8 @@ msgid "Added %d fillerframes into movie"
 msgstr "Į filmą pridėta %d užpildų kadrų"
 
 #: src/motion.c
-msgid "Unable to determine camera type (MMAL, Netcam, V4L2, BKTR)"
-msgstr "Neįmanoma nustatyti kameros tipo (MMAL, „Netcam“, V4L2, BKTR)"
+msgid "Unable to determine camera type (Netcam, V4L2, BKTR)"
+msgstr "Neįmanoma nustatyti kameros tipo („Netcam“, V4L2, BKTR)"
 
 #: src/motion.c
 msgid "Opening privacy mask file"
@@ -1766,14 +1666,6 @@ msgstr "„webp“: yra"
 #: src/motion.c
 msgid "webp   : not available"
 msgstr "„webp“: nėra"
-
-#: src/motion.c
-msgid "mmal   : available"
-msgstr "Mmal: yra"
-
-#: src/motion.c
-msgid "mmal   : not available"
-msgstr "Mmal: nėra"
 
 #: src/motion.c
 msgid "ffmpeg : available"
@@ -3771,10 +3663,6 @@ msgid "SOI position adjusted by %d bytes."
 msgstr "SOI padėtis pakoreguota %d baitais."
 
 #: src/video_common.c
-msgid "calling mmalcam_cleanup"
-msgstr "iškviečiant „mmalcam“ valymą"
-
-#: src/video_common.c
 msgid "calling netcam_cleanup"
 msgstr "iškviečiant „netcam“ valymą"
 
@@ -3791,16 +3679,8 @@ msgid "Cleaning up BKTR device"
 msgstr "BKTR prietaiso valymas"
 
 #: src/video_common.c
-msgid "No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)"
-msgstr "Nėra fotoaparato įrenginio valymo (MMAL, „Netcam“, V4L2, BKTR)"
-
-#: src/video_common.c
-msgid "Opening MMAL cam"
-msgstr "Atidaroma MMAL kamera"
-
-#: src/video_common.c
-msgid "MMAL cam failed to open"
-msgstr "MMAL kameros nepavyko atidaryti"
+msgid "No Camera device cleanup (Netcam, V4L2, BKTR)"
+msgstr "Nėra fotoaparato įrenginio valymo („Netcam“, V4L2, BKTR)"
 
 #: src/video_common.c
 msgid "Opening Netcam"
@@ -3835,8 +3715,8 @@ msgid "BKTR device failed to open"
 msgstr "Nepavyko atidaryti BKTR įrenginio"
 
 #: src/video_common.c
-msgid "No Camera device specified (MMAL, Netcam, V4L2, BKTR)"
-msgstr "Nenurodytas kameros įrenginys (MMAL, „Netcam“, V4L2, BKTR)"
+msgid "No Camera device specified (Netcam, V4L2, BKTR)"
+msgstr "Nenurodytas kameros įrenginys (Netcam, V4L2, BKTR)"
 
 #: src/video_loopback.c
 #, c-format

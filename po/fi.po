@@ -195,14 +195,6 @@ msgid "netcam_userpass"
 msgstr "netcam userpass"
 
 #: src/conf.c
-msgid "mmalcam_name"
-msgstr "mmalcam nimi"
-
-#: src/conf.c
-msgid "mmalcam_params"
-msgstr "mmalcam -avustajat"
-
-#: src/conf.c
 msgid "width"
 msgstr "leveys"
 
@@ -1324,99 +1316,6 @@ msgstr "Virheelliset JPEG-kuvan mitat"
 msgid "JPEG image size %dx%d, JPEG was %dx%d"
 msgstr "JPEG-kuvan koko %dx %d, JPEG oli %dx %d"
 
-#: src/mmalcam.c
-#, c-format
-msgid "Received unexpected camera control callback event, 0x%08x"
-msgstr ""
-"Vastaanotettu odottamaton kameran ohjauksen takaisinsoitto-tapahtuma, 0x %08x"
-
-#: src/mmalcam.c
-msgid "A high frame rate can cause problems with exposure of images"
-msgstr "Suuri kuvanopeus voi aiheuttaa ongelmia kuvien valotuksessa"
-
-#: src/mmalcam.c
-msgid "If autoexposure is not working, try a lower frame rate."
-msgstr "Jos automaattinen valotus ei toimi, kokeile pienempää kuvanopeutta."
-
-#: src/mmalcam.c
-#, c-format
-msgid "Failed to create MMAL camera component %s"
-msgstr "MMAL-kamerakomponentin luominen epäonnistui %s"
-
-#: src/mmalcam.c
-#, c-format
-msgid "MMAL camera %s doesn't have output ports"
-msgstr "MMAL-kameralla %s ei ole lähtöportteja"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to enable control port : error %d"
-msgstr "Ohjausporttia ei voi ottaa käyttöön: virhe %d"
-
-#: src/mmalcam.c
-msgid "MMAL no-padding setup failed"
-msgstr "MMAL no-poltin asennus epäonnistui"
-
-#: src/mmalcam.c
-msgid "camera video format couldn't be set"
-msgstr "kameran videoformaattia ei voitu asettaa"
-
-#: src/mmalcam.c
-msgid "camera component couldn't be enabled"
-msgstr "kamerakomponenttia ei voitu ottaa käyttöön"
-
-#: src/mmalcam.c
-msgid "MMAL camera component created"
-msgstr "MMAL-kamerakomponentti luotu"
-
-#: src/mmalcam.c
-msgid "MMAL camera buffer pool creation failed"
-msgstr "MMAL-kameran puskurialtaan luominen epäonnistui"
-
-#: src/mmalcam.c
-msgid "MMAL camera buffer queue creation failed"
-msgstr "MMAL-kamerapuskurijonojen luonti epäonnistui"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to get a required buffer %d from pool queue"
-msgstr "Vaadittua puskuria %d ei voida saada poolijonoon"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to send a buffer to port (%d)"
-msgstr "Puskuria ei voi lähettää porttiin ( %d)"
-
-#: src/mmalcam.c
-#, c-format
-msgid "MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps"
-msgstr "MMAL Kameralanka alkaa ... kameralle ( %s) %dx %d nopeudella %d fps"
-
-#: src/mmalcam.c
-msgid "camera params couldn't be allocated"
-msgstr "kameraparameareja ei voitu allokoida"
-
-#: src/mmalcam.c
-msgid "MMAL camera capture port enabling failed"
-msgstr "MMAL-kameran sieppausportti ei ole onnistunut"
-
-#: src/mmalcam.c
-msgid "MMAL camera capture start failed"
-msgstr "MMAL-kameran sieppauksen aloitus epäonnistui"
-
-#: src/mmalcam.c
-msgid "MMAL Camera cleanup"
-msgstr "MMAL-kameran puhdistus"
-
-#: src/mmalcam.c
-#, c-format
-msgid "cmd %d flags %08x size %d/%d at %08x, img_size=%d"
-msgstr "cmd %d liput %08x koko %d / %d %08x, img size = %d"
-
-#: src/mmalcam.c
-msgid "Unable to return a buffer to the camera video port"
-msgstr "Puskuria ei voida palauttaa kameran videoporttiin"
-
 #: src/motion.c
 #, c-format
 msgid "Resizing pre_capture buffer to %d items"
@@ -1446,8 +1345,8 @@ msgid "Added %d fillerframes into movie"
 msgstr "Lisätty %d täytekehystä elokuvaan"
 
 #: src/motion.c
-msgid "Unable to determine camera type (MMAL, Netcam, V4L2, BKTR)"
-msgstr "Kameratyyppiä ei voida määrittää (MMAL, Netcam, V4L2, BKTR)"
+msgid "Unable to determine camera type (Netcam, V4L2, BKTR)"
+msgstr "Kameratyyppiä ei voida määrittää (Netcam, V4L2, BKTR)"
 
 #: src/motion.c
 msgid "Opening privacy mask file"
@@ -1762,14 +1661,6 @@ msgstr "webp: saatavana"
 #: src/motion.c
 msgid "webp   : not available"
 msgstr "webp: ei saatavilla"
-
-#: src/motion.c
-msgid "mmal   : available"
-msgstr "mmal: saatavana"
-
-#: src/motion.c
-msgid "mmal   : not available"
-msgstr "mmal: ei saatavilla"
 
 #: src/motion.c
 msgid "ffmpeg : available"
@@ -3757,10 +3648,6 @@ msgid "SOI position adjusted by %d bytes."
 msgstr "SOI-asema säädetään %d tavulla."
 
 #: src/video_common.c
-msgid "calling mmalcam_cleanup"
-msgstr "kutsutaan mmalcam-siivousta"
-
-#: src/video_common.c
 msgid "calling netcam_cleanup"
 msgstr "kutsutaan netcam-siivousta"
 
@@ -3777,16 +3664,8 @@ msgid "Cleaning up BKTR device"
 msgstr "BKTR-laitteen puhdistaminen"
 
 #: src/video_common.c
-msgid "No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)"
-msgstr "Ei kameralaitteen puhdistusta (MMAL, Netcam, V4L2, BKTR)"
-
-#: src/video_common.c
-msgid "Opening MMAL cam"
-msgstr "MMAL-kameran avaaminen"
-
-#: src/video_common.c
-msgid "MMAL cam failed to open"
-msgstr "MMAL-kamera ei avautunut"
+msgid "No Camera device cleanup (Netcam, V4L2, BKTR)"
+msgstr "Ei kameralaitteen puhdistusta (Netcam, V4L2, BKTR)"
 
 #: src/video_common.c
 msgid "Opening Netcam"
@@ -3821,8 +3700,8 @@ msgid "BKTR device failed to open"
 msgstr "BKTR-laite ei avautunut"
 
 #: src/video_common.c
-msgid "No Camera device specified (MMAL, Netcam, V4L2, BKTR)"
-msgstr "Kameralaitetta ei ole määritetty (MMAL, Netcam, V4L2, BKTR)"
+msgid "No Camera device specified (Netcam, V4L2, BKTR)"
+msgstr "Kameralaitetta ei ole määritetty (Netcam, V4L2, BKTR)"
 
 #: src/video_loopback.c
 #, c-format

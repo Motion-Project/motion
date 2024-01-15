@@ -195,14 +195,6 @@ msgid "netcam_userpass"
 msgstr "넷캠 사용자 패스"
 
 #: src/conf.c
-msgid "mmalcam_name"
-msgstr "mmalcam 이름"
-
-#: src/conf.c
-msgid "mmalcam_params"
-msgstr "mmalcam 매개변수"
-
-#: src/conf.c
 msgid "width"
 msgstr "폭"
 
@@ -1322,98 +1314,6 @@ msgstr "잘못된 JPEG 이미지 크기"
 msgid "JPEG image size %dx%d, JPEG was %dx%d"
 msgstr "JPEG 이미지 크기 %dx %d, JPEG는 %dx %d"
 
-#: src/mmalcam.c
-#, c-format
-msgid "Received unexpected camera control callback event, 0x%08x"
-msgstr "예기치 않은 카메라 제어 콜백 이벤트 수신 : 0x %08x"
-
-#: src/mmalcam.c
-msgid "A high frame rate can cause problems with exposure of images"
-msgstr "높은 프레임 속도는 이미지 노출에 문제를 일으킬 수 있습니다"
-
-#: src/mmalcam.c
-msgid "If autoexposure is not working, try a lower frame rate."
-msgstr "자동 노출이 작동하지 않으면 더 낮은 프레임 속도를 시도하십시오."
-
-#: src/mmalcam.c
-#, c-format
-msgid "Failed to create MMAL camera component %s"
-msgstr "MMAL 카메라 구성 요소 %s를 만들지 못했습니다."
-
-#: src/mmalcam.c
-#, c-format
-msgid "MMAL camera %s doesn't have output ports"
-msgstr "MMAL 카메라 %s에 출력 포트가 없습니다"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to enable control port : error %d"
-msgstr "제어 포트를 활성화 할 수 없습니다 : 오류 %d"
-
-#: src/mmalcam.c
-msgid "MMAL no-padding setup failed"
-msgstr "MMAL 패딩 없음 설정 실패"
-
-#: src/mmalcam.c
-msgid "camera video format couldn't be set"
-msgstr "카메라 비디오 형식을 설정할 수 없습니다"
-
-#: src/mmalcam.c
-msgid "camera component couldn't be enabled"
-msgstr "카메라 구성 요소를 사용할 수 없습니다"
-
-#: src/mmalcam.c
-msgid "MMAL camera component created"
-msgstr "MMAL 카메라 컴포넌트 생성"
-
-#: src/mmalcam.c
-msgid "MMAL camera buffer pool creation failed"
-msgstr "MMAL 카메라 버퍼 풀 생성 실패"
-
-#: src/mmalcam.c
-msgid "MMAL camera buffer queue creation failed"
-msgstr "MMAL 카메라 버퍼 큐 생성 실패"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to get a required buffer %d from pool queue"
-msgstr "풀 큐에서 필요한 버퍼 %d을 (를) 가져올 수 없습니다."
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to send a buffer to port (%d)"
-msgstr "포트로 버퍼를 보낼 수 없습니다 ( %d)."
-
-#: src/mmalcam.c
-#, c-format
-msgid "MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps"
-msgstr "MMAL 카메라 스레드 시작 중 ... 카메라 (%s). %d x %d 에서 %d fps"
-
-#: src/mmalcam.c
-msgid "camera params couldn't be allocated"
-msgstr "카메라 매개 변수를 할당 할 수 없습니다"
-
-#: src/mmalcam.c
-msgid "MMAL camera capture port enabling failed"
-msgstr "MMAL 카메라 캡처 포트 활성화 실패"
-
-#: src/mmalcam.c
-msgid "MMAL camera capture start failed"
-msgstr "MMAL 카메라 캡처 시작 실패"
-
-#: src/mmalcam.c
-msgid "MMAL Camera cleanup"
-msgstr "MMAL 카메라 정리"
-
-#: src/mmalcam.c
-#, c-format
-msgid "cmd %d flags %08x size %d/%d at %08x, img_size=%d"
-msgstr "cmd %d 플래그 %08x 크기 %d / %d에서 %08x, img 크기 = %d"
-
-#: src/mmalcam.c
-msgid "Unable to return a buffer to the camera video port"
-msgstr "카메라 비디오 포트로 버퍼를 반환 할 수 없습니다"
-
 #: src/motion.c
 #, c-format
 msgid "Resizing pre_capture buffer to %d items"
@@ -1443,8 +1343,8 @@ msgid "Added %d fillerframes into movie"
 msgstr "영화에 %d 필러 프레임 추가"
 
 #: src/motion.c
-msgid "Unable to determine camera type (MMAL, Netcam, V4L2, BKTR)"
-msgstr "카메라 유형을 확인할 수 없습니다 (MMAL, Netcam, V4L2, BKTR)"
+msgid "Unable to determine camera type (Netcam, V4L2, BKTR)"
+msgstr "카메라 유형을 확인할 수 없습니다 (Netcam, V4L2, BKTR)"
 
 #: src/motion.c
 msgid "Opening privacy mask file"
@@ -1756,14 +1656,6 @@ msgstr "webp : 가능"
 #: src/motion.c
 msgid "webp   : not available"
 msgstr "webp : 사용할 수 없음"
-
-#: src/motion.c
-msgid "mmal   : available"
-msgstr "mmal : 가능"
-
-#: src/motion.c
-msgid "mmal   : not available"
-msgstr "mmal : 자료 없음"
 
 #: src/motion.c
 msgid "ffmpeg : available"
@@ -3731,10 +3623,6 @@ msgid "SOI position adjusted by %d bytes."
 msgstr "SOI 위치가 %d 바이트 씩 조정되었습니다."
 
 #: src/video_common.c
-msgid "calling mmalcam_cleanup"
-msgstr "mmalcam 정리 호출"
-
-#: src/video_common.c
 msgid "calling netcam_cleanup"
 msgstr "넷캠 정리 호출"
 
@@ -3751,16 +3639,8 @@ msgid "Cleaning up BKTR device"
 msgstr "BKTR 장치 정리"
 
 #: src/video_common.c
-msgid "No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)"
-msgstr "카메라 장치 정리 없음 (MMAL, Netcam, V4L2, BKTR)"
-
-#: src/video_common.c
-msgid "Opening MMAL cam"
-msgstr "MMAL 캠 열기"
-
-#: src/video_common.c
-msgid "MMAL cam failed to open"
-msgstr "MMAL 캠을 열지 못했습니다"
+msgid "No Camera device cleanup (Netcam, V4L2, BKTR)"
+msgstr "카메라 장치 정리 없음 (Netcam, V4L2, BKTR)"
 
 #: src/video_common.c
 msgid "Opening Netcam"
@@ -3795,8 +3675,8 @@ msgid "BKTR device failed to open"
 msgstr "BKTR 장치를 열지 못했습니다"
 
 #: src/video_common.c
-msgid "No Camera device specified (MMAL, Netcam, V4L2, BKTR)"
-msgstr "카메라 장치를 지정하지 않았습니다 (MMAL, Netcam, V4L2, BKTR)"
+msgid "No Camera device specified (Netcam, V4L2, BKTR)"
+msgstr "카메라 장치를 지정하지 않았습니다 (Netcam, V4L2, BKTR)"
 
 #: src/video_loopback.c
 #, c-format

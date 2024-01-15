@@ -200,14 +200,6 @@ msgid "netcam_userpass"
 msgstr "ネットカムユーザーパス"
 
 #: src/conf.c
-msgid "mmalcam_name"
-msgstr "ラズベリーパイカメラ名"
-
-#: src/conf.c
-msgid "mmalcam_params"
-msgstr "ラズベリーパイカメラパラメータ"
-
-#: src/conf.c
 msgid "width"
 msgstr "幅"
 
@@ -1326,97 +1318,6 @@ msgstr "無効なJPEG画像サイズ"
 msgid "JPEG image size %dx%d, JPEG was %dx%d"
 msgstr "JPEG画像サイズ %dx %d、JPEGは %dx %dでした"
 
-#: src/mmalcam.c
-#, c-format
-msgid "Received unexpected camera control callback event, 0x%08x"
-msgstr "予期しないカメラ制御コールバックイベント、0x %08xを受信しました"
-
-#: src/mmalcam.c
-msgid "A high frame rate can cause problems with exposure of images"
-msgstr "高フレームレートは、画像の露出に問題を引き起こす可能性があります"
-
-#: src/mmalcam.c
-msgid "If autoexposure is not working, try a lower frame rate."
-msgstr "自動露出が機能しない場合は、低いフレームレートを試してください"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Failed to create MMAL camera component %s"
-msgstr "MMALカメラコンポーネント %sを作成できませんでした"
-
-#: src/mmalcam.c
-#, c-format
-msgid "MMAL camera %s doesn't have output ports"
-msgstr "MMALカメラ %sには出力ポートがありません"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to enable control port : error %d"
-msgstr "制御ポートを有効にできません:エラー %d"
-
-#: src/mmalcam.c
-msgid "MMAL no-padding setup failed"
-msgstr "MMALパディングなしのセットアップに失敗しました"
-
-#: src/mmalcam.c
-msgid "camera video format couldn't be set"
-msgstr "カメラのビデオ形式を設定できませんでした"
-
-#: src/mmalcam.c
-msgid "camera component couldn't be enabled"
-msgstr "カメラコンポーネントを有効にできませんでした"
-
-#: src/mmalcam.c
-msgid "MMAL camera component created"
-msgstr "作成されたMMALカメラコンポーネント"
-
-#: src/mmalcam.c
-msgid "MMAL camera buffer pool creation failed"
-msgstr "MMALカメラバッファープールの作成に失敗しました"
-
-#: src/mmalcam.c
-msgid "MMAL camera buffer queue creation failed"
-msgstr "MMALカメラバッファキューの作成に失敗しました"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to get a required buffer %d from pool queue"
-msgstr "プールキューから必要なバッファ %dを取得できません"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to send a buffer to port (%d)"
-msgstr "ポートにバッファを送信できません(%d)"
-
-#: src/mmalcam.c
-#, c-format
-msgid "MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps"
-msgstr "MMALカメラスレッドの開始. カメラ用(%s). %d x%d. %d fps"
-
-#: src/mmalcam.c
-msgid "camera params couldn't be allocated"
-msgstr "カメラのパラメータを割り当てることができませんでした"
-
-#: src/mmalcam.c
-msgid "MMAL camera capture port enabling failed"
-msgstr "MMALカメラキャプチャポートの有効化に失敗しました"
-
-#: src/mmalcam.c
-msgid "MMAL camera capture start failed"
-msgstr "MMALカメラのキャプチャ開始に失敗しました"
-
-#: src/mmalcam.c
-msgid "MMAL Camera cleanup"
-msgstr "MMALカメラのクリーンアップ"
-
-#: src/mmalcam.c
-#, c-format
-msgid "cmd %d flags %08x size %d/%d at %08x, img_size=%d"
-msgstr "cmd %dフラグ %08xサイズ %d/%d at %08x、img size = %d"
-
-#: src/mmalcam.c
-msgid "Unable to return a buffer to the camera video port"
-msgstr "バッファをカメラのビデオポートに戻すことができません"
 
 #: src/motion.c
 #, c-format
@@ -1447,8 +1348,8 @@ msgid "Added %d fillerframes into movie"
 msgstr "映画に %dフィラーフレームを追加しました"
 
 #: src/motion.c
-msgid "Unable to determine camera type (MMAL, Netcam, V4L2, BKTR)"
-msgstr "カメラのタイプを判別できません(MMAL、Netcam、V4L2、BKTR)"
+msgid "Unable to determine camera type (Netcam, V4L2, BKTR)"
+msgstr "カメラのタイプを判別できません(etcam、V4L2、BKTR)"
 
 #: src/motion.c
 msgid "Opening privacy mask file"
@@ -1761,14 +1662,6 @@ msgstr "webp:利用可能"
 #: src/motion.c
 msgid "webp   : not available"
 msgstr "webp:利用できません"
-
-#: src/motion.c
-msgid "mmal   : available"
-msgstr "mmal:利用可能"
-
-#: src/motion.c
-msgid "mmal   : not available"
-msgstr "mmal:利用できません"
 
 #: src/motion.c
 msgid "ffmpeg : available"
@@ -3793,10 +3686,6 @@ msgid "SOI position adjusted by %d bytes."
 msgstr "SOIの位置が%dバイトに調整しました"
 
 #: src/video_common.c
-msgid "calling mmalcam_cleanup"
-msgstr "mmalcamクリーンアップの呼び出し"
-
-#: src/video_common.c
 msgid "calling netcam_cleanup"
 msgstr "ネットカメラクリーンアップの呼び出し"
 
@@ -3813,16 +3702,8 @@ msgid "Cleaning up BKTR device"
 msgstr "BKTRデバイスのクリーンアップ"
 
 #: src/video_common.c
-msgid "No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)"
-msgstr "カメラデバイスのクリーンアップなし(MMAL、Netcam、V4L2、BKTR)"
-
-#: src/video_common.c
-msgid "Opening MMAL cam"
-msgstr "MMALカムを開く"
-
-#: src/video_common.c
-msgid "MMAL cam failed to open"
-msgstr "MMALカムを開けませんでした"
+msgid "No Camera device cleanup (Netcam, V4L2, BKTR)"
+msgstr "カメラデバイスのクリーンアップなし(Netcam、V4L2、BKTR)"
 
 #: src/video_common.c
 msgid "Opening Netcam"
@@ -3857,8 +3738,8 @@ msgid "BKTR device failed to open"
 msgstr "BKTRデバイスを開けませんでした"
 
 #: src/video_common.c
-msgid "No Camera device specified (MMAL, Netcam, V4L2, BKTR)"
-msgstr "カメラデバイスが指定されていません(MMAL、Netcam、V4L2、BKTR)"
+msgid "No Camera device specified (Netcam, V4L2, BKTR)"
+msgstr "カメラデバイスが指定されていません(Netcam、V4L2、BKTR)"
 
 #: src/video_loopback.c
 #, c-format

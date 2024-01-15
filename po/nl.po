@@ -195,14 +195,6 @@ msgid "netcam_userpass"
 msgstr "netcam gebruikerspas"
 
 #: src/conf.c
-msgid "mmalcam_name"
-msgstr "mmalcam naam"
-
-#: src/conf.c
-msgid "mmalcam_params"
-msgstr "mmalcam params"
-
-#: src/conf.c
 msgid "width"
 msgstr "breedte"
 
@@ -1324,101 +1316,6 @@ msgstr "Ongeldige JPEG-afbeeldingsafmetingen"
 msgid "JPEG image size %dx%d, JPEG was %dx%d"
 msgstr "JPEG-beeldgrootte %dx %d, JPEG was %dx %d"
 
-#: src/mmalcam.c
-#, c-format
-msgid "Received unexpected camera control callback event, 0x%08x"
-msgstr "Onverwachte terugbelgebeurtenis van camerabesturing, 0x %08x"
-
-#: src/mmalcam.c
-msgid "A high frame rate can cause problems with exposure of images"
-msgstr ""
-"Een hoge framesnelheid kan problemen veroorzaken met de belichting van "
-"afbeeldingen"
-
-#: src/mmalcam.c
-msgid "If autoexposure is not working, try a lower frame rate."
-msgstr ""
-"Als automatische belichting niet werkt, probeer dan een lagere framesnelheid."
-
-#: src/mmalcam.c
-#, c-format
-msgid "Failed to create MMAL camera component %s"
-msgstr "Kan MMAL-cameracomponent %s niet maken"
-
-#: src/mmalcam.c
-#, c-format
-msgid "MMAL camera %s doesn't have output ports"
-msgstr "MMAL camera %s heeft geen uitvoerpoorten"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to enable control port : error %d"
-msgstr "Kan controlepoort niet inschakelen: fout %d"
-
-#: src/mmalcam.c
-msgid "MMAL no-padding setup failed"
-msgstr "MMAL instellen zonder padding mislukt"
-
-#: src/mmalcam.c
-msgid "camera video format couldn't be set"
-msgstr "camera videoformaat kon niet worden ingesteld"
-
-#: src/mmalcam.c
-msgid "camera component couldn't be enabled"
-msgstr "camera component kon niet worden ingeschakeld"
-
-#: src/mmalcam.c
-msgid "MMAL camera component created"
-msgstr "MMAL camera component gemaakt"
-
-#: src/mmalcam.c
-msgid "MMAL camera buffer pool creation failed"
-msgstr "Maken van MMAL camerabufferpool is mislukt"
-
-#: src/mmalcam.c
-msgid "MMAL camera buffer queue creation failed"
-msgstr "Maken van MMAL camerabufferwachtrij is mislukt"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to get a required buffer %d from pool queue"
-msgstr "Kan de vereiste buffer %d niet ophalen uit de poolwachtrij"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to send a buffer to port (%d)"
-msgstr "Kan geen buffer naar poort verzenden ( %d)"
-
-#: src/mmalcam.c
-#, c-format
-msgid "MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps"
-msgstr "MMAL Cameradraad start ... voor camera ( %s) van %dx %d bij %d fps"
-
-#: src/mmalcam.c
-msgid "camera params couldn't be allocated"
-msgstr "camera params konden niet worden toegewezen"
-
-#: src/mmalcam.c
-msgid "MMAL camera capture port enabling failed"
-msgstr "MMAL camera-opnamepoort inschakelen mislukt"
-
-#: src/mmalcam.c
-msgid "MMAL camera capture start failed"
-msgstr "Het starten van de MMAL-camera is mislukt"
-
-#: src/mmalcam.c
-msgid "MMAL Camera cleanup"
-msgstr "MMAL Camera opruimen"
-
-#: src/mmalcam.c
-#, c-format
-msgid "cmd %d flags %08x size %d/%d at %08x, img_size=%d"
-msgstr "cmd %d vlaggen %08x grootte %d / %d bij %08x, img grootte = %d"
-
-#: src/mmalcam.c
-msgid "Unable to return a buffer to the camera video port"
-msgstr "Kan geen buffer terugzenden naar de videopoort van de camera"
-
 #: src/motion.c
 #, c-format
 msgid "Resizing pre_capture buffer to %d items"
@@ -1448,8 +1345,8 @@ msgid "Added %d fillerframes into movie"
 msgstr "%d fillerframes toegevoegd aan film"
 
 #: src/motion.c
-msgid "Unable to determine camera type (MMAL, Netcam, V4L2, BKTR)"
-msgstr "Kan cameratype niet bepalen (MMAL, Netcam, V4L2, BKTR)"
+msgid "Unable to determine camera type (Netcam, V4L2, BKTR)"
+msgstr "Kan cameratype niet bepalen (Netcam, V4L2, BKTR)"
 
 #: src/motion.c
 msgid "Opening privacy mask file"
@@ -1767,14 +1664,6 @@ msgstr "webp: beschikbaar"
 #: src/motion.c
 msgid "webp   : not available"
 msgstr "webp: niet beschikbaar"
-
-#: src/motion.c
-msgid "mmal   : available"
-msgstr "mmal: beschikbaar"
-
-#: src/motion.c
-msgid "mmal   : not available"
-msgstr "mmal: niet beschikbaar"
 
 #: src/motion.c
 msgid "ffmpeg : available"
@@ -3766,10 +3655,6 @@ msgid "SOI position adjusted by %d bytes."
 msgstr "SOI-positie aangepast met %d bytes."
 
 #: src/video_common.c
-msgid "calling mmalcam_cleanup"
-msgstr "bellen mmalcam opruimen"
-
-#: src/video_common.c
 msgid "calling netcam_cleanup"
 msgstr "opgeroepen netcam opruimen"
 
@@ -3786,16 +3671,8 @@ msgid "Cleaning up BKTR device"
 msgstr "BKTR-apparaat opschonen"
 
 #: src/video_common.c
-msgid "No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)"
-msgstr "Geen camera-apparaat opruimen (MMAL, Netcam, V4L2, BKTR)"
-
-#: src/video_common.c
-msgid "Opening MMAL cam"
-msgstr "MMAL-opening openen"
-
-#: src/video_common.c
-msgid "MMAL cam failed to open"
-msgstr "MMAL-cam kan niet worden geopend"
+msgid "No Camera device cleanup (Netcam, V4L2, BKTR)"
+msgstr "Geen camera-apparaat opruimen (Netcam, V4L2, BKTR)"
 
 #: src/video_common.c
 msgid "Opening Netcam"
@@ -3830,8 +3707,8 @@ msgid "BKTR device failed to open"
 msgstr "BKTR-apparaat kan niet worden geopend"
 
 #: src/video_common.c
-msgid "No Camera device specified (MMAL, Netcam, V4L2, BKTR)"
-msgstr "Geen camera-apparaat opgegeven (MMAL, Netcam, V4L2, BKTR)"
+msgid "No Camera device specified (Netcam, V4L2, BKTR)"
+msgstr "Geen camera-apparaat opgegeven (Netcam, V4L2, BKTR)"
 
 #: src/video_loopback.c
 #, c-format

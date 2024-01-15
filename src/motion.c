@@ -777,13 +777,6 @@ static int init_camera_type(struct context *cnt)
 
     cnt->camera_type = CAMERA_TYPE_UNKNOWN;
 
-    #ifdef HAVE_MMAL
-        if (cnt->conf.mmalcam_name) {
-            cnt->camera_type = CAMERA_TYPE_MMAL;
-            return 0;
-        }
-    #endif // HAVE_MMAL
-
     if (cnt->conf.netcam_url) {
         if ((strncmp(cnt->conf.netcam_url,"mjpeg",5) == 0) ||
             (strncmp(cnt->conf.netcam_url,"ftp" ,3) == 0) ||
@@ -812,7 +805,7 @@ static int init_camera_type(struct context *cnt)
 
 
     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-        , _("Unable to determine camera type (MMAL, Netcam, V4L2, BKTR)"));
+        , _("Unable to determine camera type (Netcam, V4L2, BKTR)"));
     return -1;
 
 }
@@ -3049,12 +3042,6 @@ static void motion_ntc(void)
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("webp   : available"));
     #else
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("webp   : not available"));
-    #endif
-
-    #ifdef HAVE_MMAL
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("mmal   : available"));
-    #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("mmal   : not available"));
     #endif
 
     #ifdef HAVE_FFMPEG

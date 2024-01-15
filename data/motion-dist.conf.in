@@ -39,12 +39,6 @@ video_device /dev/video0
 # The full URL of the network camera stream.
 ; netcam_url value
 
-# Name of mmal camera (e.g. vc.ril.camera for pi camera).
-; mmalcam_name value
-
-# Camera control parameters (see raspivid/raspistill tool documentation)
-; mmalcam_params value
-
 ############################################################
 # Image Processing configuration parameters
 ############################################################

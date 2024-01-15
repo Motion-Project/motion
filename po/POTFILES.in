@@ -7,7 +7,6 @@ src/event.c
 src/ffmpeg.c
 src/jpegutils.c
 src/logger.c
-src/mmalcam.c
 src/motion.c
 src/netcam.c
 src/netcam_ftp.c

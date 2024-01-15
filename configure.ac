@@ -201,53 +201,6 @@ AS_IF([test "${WEBP}" = "yes" ], [
 )
 
 ##############################################################################
-###  raspberry pi mmal - Optional.
-##############################################################################
-AC_ARG_WITH([mmal],
-  AS_HELP_STRING([--with-mmal[=DIR]],[Compile with RasperryPi mmal camera support]),
-  [MMAL="$withval"],
-  [MMAL="yes"]
-)
-
-AS_IF([test "${MMAL}" = "no"], [
-    AC_MSG_CHECKING(for MMAL)
-    AC_MSG_RESULT(skipped)
-  ],[
-    AC_MSG_CHECKING(MMAL pkg-config path)
-    TEMP_PATH=$PKG_CONFIG_PATH
-    AS_IF([test "${MMAL}" != "yes"], [
-        PKG_CONFIG_PATH=${MMAL}/lib/pkgconfig:$PKG_CONFIG_PATH
-        MMAL="yes"
-      ],[
-        PKG_CONFIG_PATH=.:/opt/vc/lib/pkgconfig
-      ]
-    )
-    export PKG_CONFIG_PATH
-    AC_MSG_RESULT($PKG_CONFIG_PATH)
-
-    AS_IF([pkg-config mmal], [
-      AC_CHECK_HEADERS(interface/vcos/vcos.h interface/mmal/mmal.h,,[MMAL="no"])
-      AC_MSG_CHECKING(for MMAL)
-      AS_IF([test "${MMAL}" = "no"], [
-        AC_MSG_RESULT([no])
-      ],[
-        TEMP_CFLAGS="$TEMP_CFLAGS -Irasppicam "`pkg-config --cflags mmal`
-        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs mmal`" -lvchostif "
-        AC_MSG_RESULT([yes])
-        AC_DEFINE([HAVE_MMAL], [1], [Define to 1 if MMAL is around])
-      ])
-    ],[
-      AC_MSG_CHECKING(for MMAL)
-      AC_MSG_RESULT([no])
-      MMAL="no"
-    ])
-    PKG_CONFIG_PATH=$TEMP_PATH
-    export PKG_CONFIG_PATH
-  ]
-)
-AM_CONDITIONAL([INC_MMAL_SRC],[test x${MMAL} = xyes])
-
-##############################################################################
 ###  Check for ffmpeg - Optional.
 ##############################################################################
 FFMPEG_VER="--"
@@ -532,7 +485,6 @@ echo "XSI error           : $XSI_STRERROR"
 echo "webp support        : $WEBP"
 echo "V4L2 support        : $V4L2"
 echo "BKTR support        : $BKTR"
-echo "MMAL support        : $MMAL"
 echo "FFmpeg support      : $FFMPEG"
 echo "libavformat version : $FFMPEG_VER"
 echo "SQLite3 support     : $SQLITE3"

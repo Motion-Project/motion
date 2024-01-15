@@ -68,9 +68,6 @@ struct config conf_template = {
     .netcam_high_params =              NULL,
     .netcam_userpass =                 NULL,
 
-    .mmalcam_name =                    NULL,
-    .mmalcam_params =                  NULL,
-
     /* Image processing configuration parameters */
     .width =                           DEF_WIDTH,
     .height =                          DEF_HEIGHT,
@@ -457,24 +454,6 @@ config_param config_params[] = {
     "# Username and password for network camera. Syntax username:password",
     0,
     CONF_OFFSET(netcam_userpass),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "mmalcam_name",
-    "# Name of mmal camera (e.g. vc.ril.camera for pi camera).",
-    0,
-    CONF_OFFSET(mmalcam_name),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "mmalcam_params",
-    "# Camera control parameters (see raspivid/raspistill tool documentation)",
-    0,
-    CONF_OFFSET(mmalcam_params),
     copy_string,
     print_string,
     WEBUI_LEVEL_ADVANCED
@@ -2066,14 +2045,6 @@ dep_config_param dep_config_params[] = {
     copy_string
     },
     {
-    "mmalcam_control_params",
-    "4.3.2",
-    "\"mmalcam_control_params\" replaced with \"mmalcam_params\"",
-    CONF_OFFSET(mmalcam_params),
-    "mmalcam_params",
-    copy_string
-    },
-    {
     "netcam_highres",
     "4.3.2",
     "\"netcam_highres\" replaced with \"netcam_high_url\"",
@@ -3272,8 +3243,6 @@ static void config_parms_intl()
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_high_url",_("netcam_high_url"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_high_params",_("netcam_high_params"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_userpass",_("netcam_userpass"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mmalcam_name",_("mmalcam_name"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mmalcam_params",_("mmalcam_params"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","width",_("width"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","height",_("height"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","framerate",_("framerate"));

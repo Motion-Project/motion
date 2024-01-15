@@ -196,14 +196,6 @@ msgid "netcam_userpass"
 msgstr "网络摄像头用户密码"
 
 #: src/conf.c
-msgid "mmalcam_name"
-msgstr "mmalcam名称"
-
-#: src/conf.c
-msgid "mmalcam_params"
-msgstr "mmalcam 参数"
-
-#: src/conf.c
 msgid "width"
 msgstr "宽度"
 
@@ -1314,103 +1306,6 @@ msgstr "无效的JPEG图像尺寸"
 msgid "JPEG image size %dx%d, JPEG was %dx%d"
 msgstr "JPEG图像大小 %dx %d，JPEG为 %dx %d"
 
-#: src/mmalcam.c
-#, c-format
-msgid "Received unexpected camera control callback event, 0x%08x"
-msgstr "收到意外的摄像机控制回调事件，0x %08x"
-
-#: src/mmalcam.c
-msgid "A high frame rate can cause problems with exposure of images"
-msgstr "高帧频会导致图像曝光问题"
-
-#: src/mmalcam.c
-msgid "If autoexposure is not working, try a lower frame rate."
-msgstr "如果自动曝光不起作用，请尝试降低帧速率。"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Failed to create MMAL camera component %s"
-msgstr "无法创建MMAL相机组件 %s"
-
-#: src/mmalcam.c
-#, c-format
-msgid "MMAL camera %s doesn't have output ports"
-msgstr "MMAL相机 %s没有输出端口"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to enable control port : error %d"
-msgstr "无法启用控制端口：错误 %d"
-
-#: src/mmalcam.c
-msgid "MMAL no-padding setup failed"
-msgstr "MMAL无填充设置失败"
-
-#: src/mmalcam.c
-msgid "camera video format couldn't be set"
-msgstr "无法设置相机视频格式"
-
-#: src/mmalcam.c
-msgid "camera component couldn't be enabled"
-msgstr "相机组件无法启用"
-
-#: src/mmalcam.c
-msgid "MMAL camera component created"
-msgstr "创建了MMAL相机组件"
-
-#: src/mmalcam.c
-msgid "MMAL camera buffer pool creation failed"
-msgstr "MMAL相机缓冲池创建失败"
-
-#: src/mmalcam.c
-msgid "MMAL camera buffer queue creation failed"
-msgstr "MMAL相机缓冲区队列创建失败"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to get a required buffer %d from pool queue"
-msgstr "无法从池队列中获取所需的缓冲区 %d"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to send a buffer to port (%d)"
-msgstr "无法将缓冲区发送到端口（ %d）"
-
-#: src/mmalcam.c
-#, c-format
-msgid "MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps"
-msgstr "MMAL相机线程启动。 对于相机（%s）。 大小%d x%d。 每秒帧数%d"
-
-#: src/mmalcam.c
-msgid "camera params couldn't be allocated"
-msgstr "无法分配相机参数"
-
-#: src/mmalcam.c
-msgid "MMAL camera capture port enabling failed"
-msgstr "MMAL相机捕获端口启用失败"
-
-#: src/mmalcam.c
-msgid "MMAL camera capture start failed"
-msgstr "MMAL摄像机捕获启动失败"
-
-#: src/mmalcam.c
-msgid "MMAL Camera cleanup"
-msgstr "MMAL相机清理"
-
-#: src/mmalcam.c
-#, c-format
-msgid "cmd %d flags %08x size %d/%d at %08x, img_size=%d"
-msgstr "cmd%d。 标志%08x。 大小%d /%d。 在%08x。 图片尺寸=%d"
-
-#: src/mmalcam.c
-msgid "Unable to return a buffer to the camera video port"
-msgstr "无法将缓冲区返回到摄像机视频端口"
-
-#: src/motion.c
-#, c-format
-msgid "Resizing pre_capture buffer to %d items"
-msgstr "将预捕获缓冲区的大小调整为 %d个项目"
-
 #: src/motion.c
 msgid "Removed process id file (pid file)."
 msgstr "删除了进程ID文件（PID文件）。"
@@ -1435,8 +1330,8 @@ msgid "Added %d fillerframes into movie"
 msgstr "在电影中添加了 %d个填充框"
 
 #: src/motion.c
-msgid "Unable to determine camera type (MMAL, Netcam, V4L2, BKTR)"
-msgstr "无法确定摄像机类型（MMAL，Netcam，V4L2，BKTR）"
+msgid "Unable to determine camera type (Netcam, V4L2, BKTR)"
+msgstr "无法确定摄像机类型（Netcam，V4L2，BKTR）"
 
 #: src/motion.c
 msgid "Opening privacy mask file"
@@ -1744,14 +1639,6 @@ msgstr "webp：可用"
 #: src/motion.c
 msgid "webp   : not available"
 msgstr "webp：不可用"
-
-#: src/motion.c
-msgid "mmal   : available"
-msgstr "mmal：可用"
-
-#: src/motion.c
-msgid "mmal   : not available"
-msgstr "mmal：不可用"
 
 #: src/motion.c
 msgid "ffmpeg : available"
@@ -3693,10 +3580,6 @@ msgid "SOI position adjusted by %d bytes."
 msgstr "SOI位置由 %d个字节调整。"
 
 #: src/video_common.c
-msgid "calling mmalcam_cleanup"
-msgstr "调用mmalcam清理"
-
-#: src/video_common.c
 msgid "calling netcam_cleanup"
 msgstr "调用网络摄像头清理"
 
@@ -3713,16 +3596,8 @@ msgid "Cleaning up BKTR device"
 msgstr "清理BKTR设备"
 
 #: src/video_common.c
-msgid "No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)"
-msgstr "不清除相机设备（MMAL，Netcam，V4L2，BKTR）"
-
-#: src/video_common.c
-msgid "Opening MMAL cam"
-msgstr "打开MMAL凸轮"
-
-#: src/video_common.c
-msgid "MMAL cam failed to open"
-msgstr "MMAL凸轮无法打开"
+msgid "No Camera device cleanup (Netcam, V4L2, BKTR)"
+msgstr "不清除相机设备（Netcam，V4L2，BKTR）"
 
 #: src/video_common.c
 msgid "Opening Netcam"
@@ -3757,8 +3632,8 @@ msgid "BKTR device failed to open"
 msgstr "BKTR设备无法打开"
 
 #: src/video_common.c
-msgid "No Camera device specified (MMAL, Netcam, V4L2, BKTR)"
-msgstr "未指定摄像头设备（MMAL，Netcam，V4L2，BKTR）"
+msgid "No Camera device specified (Netcam, V4L2, BKTR)"
+msgstr "未指定摄像头设备（Netcam，V4L2，BKTR）"
 
 #: src/video_loopback.c
 #, c-format

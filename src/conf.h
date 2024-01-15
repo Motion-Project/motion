@@ -58,9 +58,6 @@ struct config {
     char            *netcam_high_params;
     const char      *netcam_userpass;
 
-    const char      *mmalcam_name;
-    const char      *mmalcam_params;
-
     /* Image processing configuration parameters */
     int             width;
     int             height;

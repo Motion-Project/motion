@@ -114,10 +114,6 @@ struct ffmpeg;
 #include "conf.h"
 #include "track.h"
 
-#ifdef HAVE_MMAL
-    #include "mmalcam.h"
-#endif
-
 
 /*
 *  The macro below defines a version of sleep using nanosleep
@@ -227,7 +223,6 @@ enum CAMERA_TYPE {
     CAMERA_TYPE_UNKNOWN,
     CAMERA_TYPE_V4L2,
     CAMERA_TYPE_BKTR,
-    CAMERA_TYPE_MMAL,
     CAMERA_TYPE_RTSP,
     CAMERA_TYPE_NETCAM
 };
@@ -393,9 +388,6 @@ struct context {
 
     enum CAMERA_TYPE      camera_type;
     struct netcam_context *netcam;
-    #ifdef HAVE_MMAL
-        struct mmalcam_context *mmalcam;
-    #endif
     struct rtsp_context *rtsp;              /* this structure contains the context for normal RTSP connection */
     struct rtsp_context *rtsp_high;         /* this structure contains the context for high resolution RTSP connection */
 

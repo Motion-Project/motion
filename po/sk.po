@@ -195,14 +195,6 @@ msgid "netcam_userpass"
 msgstr "netcam userpass"
 
 #: src/conf.c
-msgid "mmalcam_name"
-msgstr "mmalcam name"
-
-#: src/conf.c
-msgid "mmalcam_params"
-msgstr "mmalcam params"
-
-#: src/conf.c
 msgid "width"
 msgstr "šírka"
 
@@ -1325,101 +1317,6 @@ msgstr "Neplatné rozmery obrázka JPEG"
 msgid "JPEG image size %dx%d, JPEG was %dx%d"
 msgstr "Veľkosť obrázka JPEG %dx %d, JPEG bolo %dx %d"
 
-#: src/mmalcam.c
-#, c-format
-msgid "Received unexpected camera control callback event, 0x%08x"
-msgstr "Prijatá neočakávaná udalosť spätného volania s kamerou, 0x %08x"
-
-#: src/mmalcam.c
-msgid "A high frame rate can cause problems with exposure of images"
-msgstr ""
-"Vysoká snímková frekvencia môže spôsobiť problémy s expozíciou obrázkov"
-
-#: src/mmalcam.c
-msgid "If autoexposure is not working, try a lower frame rate."
-msgstr ""
-"Ak automatická expozícia nefunguje, skúste použiť nižšiu obnovovaciu "
-"frekvenciu."
-
-#: src/mmalcam.c
-#, c-format
-msgid "Failed to create MMAL camera component %s"
-msgstr "Nepodarilo sa vytvoriť zložku kamery MMAL %s"
-
-#: src/mmalcam.c
-#, c-format
-msgid "MMAL camera %s doesn't have output ports"
-msgstr "Kamera MMAL %s nemá výstupné porty"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to enable control port : error %d"
-msgstr "Nemožno povoliť riadiaci port: chyba %d"
-
-#: src/mmalcam.c
-msgid "MMAL no-padding setup failed"
-msgstr "Nastavenie bez vypnutia MMAL zlyhalo"
-
-#: src/mmalcam.c
-msgid "camera video format couldn't be set"
-msgstr "video formát kamery nie je možné nastaviť"
-
-#: src/mmalcam.c
-msgid "camera component couldn't be enabled"
-msgstr "komponent fotoaparátu nebolo možné povoliť"
-
-#: src/mmalcam.c
-msgid "MMAL camera component created"
-msgstr "Komponent kamery MMAL bol vytvorený"
-
-#: src/mmalcam.c
-msgid "MMAL camera buffer pool creation failed"
-msgstr "Vytvorenie fondu vyrovnávacej pamäte MMAL kamery zlyhalo"
-
-#: src/mmalcam.c
-msgid "MMAL camera buffer queue creation failed"
-msgstr "Vytvorenie frontu vyrovnávacej pamäte kamery MMAL zlyhalo"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to get a required buffer %d from pool queue"
-msgstr "Požadovaný buffer %d sa nedá získať z frontu oblasti"
-
-#: src/mmalcam.c
-#, c-format
-msgid "Unable to send a buffer to port (%d)"
-msgstr "Nepodarilo sa poslať vyrovnávaciu pamäť na port ( %d)"
-
-#: src/mmalcam.c
-#, c-format
-msgid "MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps"
-msgstr "MMAL Začiatok vlákna kamery ... pre kameru ( %s) %dx %d pri %d fps"
-
-#: src/mmalcam.c
-msgid "camera params couldn't be allocated"
-msgstr "parametre fotoaparátu nebolo možné priradiť"
-
-#: src/mmalcam.c
-msgid "MMAL camera capture port enabling failed"
-msgstr "Povolenie portu na zachytenie kamery MMAL zlyhalo"
-
-#: src/mmalcam.c
-msgid "MMAL camera capture start failed"
-msgstr "Začatie snímania kamery MMAL zlyhalo"
-
-#: src/mmalcam.c
-msgid "MMAL Camera cleanup"
-msgstr "MMAL Vyčistenie kamery"
-
-#: src/mmalcam.c
-#, c-format
-msgid "cmd %d flags %08x size %d/%d at %08x, img_size=%d"
-msgstr "cmd %d príznaky %08x veľkosť %d / %d pri %08x, veľkosť img = %d"
-
-#: src/mmalcam.c
-msgid "Unable to return a buffer to the camera video port"
-msgstr "Nie je možné vrátiť vyrovnávaciu pamäť na port videa kamery"
-
 #: src/motion.c
 #, c-format
 msgid "Resizing pre_capture buffer to %d items"
@@ -1449,8 +1346,8 @@ msgid "Added %d fillerframes into movie"
 msgstr "Do filmu bolo pridané %d výplňové snímky"
 
 #: src/motion.c
-msgid "Unable to determine camera type (MMAL, Netcam, V4L2, BKTR)"
-msgstr "Nie je možné určiť typ kamery (MMAL, Netcam, V4L2, BKTR)"
+msgid "Unable to determine camera type (Netcam, V4L2, BKTR)"
+msgstr "Nie je možné určiť typ kamery (Netcam, V4L2, BKTR)"
 
 #: src/motion.c
 msgid "Opening privacy mask file"
@@ -1766,14 +1663,6 @@ msgstr "webp: k dispozícii"
 #: src/motion.c
 msgid "webp   : not available"
 msgstr "webp: nie je k dispozícii"
-
-#: src/motion.c
-msgid "mmal   : available"
-msgstr "mmal: k dispozícii"
-
-#: src/motion.c
-msgid "mmal   : not available"
-msgstr "mmal: nie je k dispozícii"
 
 #: src/motion.c
 msgid "ffmpeg : available"
@@ -3764,10 +3653,6 @@ msgid "SOI position adjusted by %d bytes."
 msgstr "Poloha SOI upravená o %d bajtov."
 
 #: src/video_common.c
-msgid "calling mmalcam_cleanup"
-msgstr "volanie mmalcam čistenie"
-
-#: src/video_common.c
 msgid "calling netcam_cleanup"
 msgstr "volanie vyčistenia netcam"
 
@@ -3784,16 +3669,8 @@ msgid "Cleaning up BKTR device"
 msgstr "Čistenie zariadenia BKTR"
 
 #: src/video_common.c
-msgid "No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)"
-msgstr "Žiadne čistenie zariadenia fotoaparátu (MMAL, Netcam, V4L2, BKTR)"
-
-#: src/video_common.c
-msgid "Opening MMAL cam"
-msgstr "Otvorenie vačky MMAL"
-
-#: src/video_common.c
-msgid "MMAL cam failed to open"
-msgstr "Nepodarilo sa otvoriť kameru MMAL"
+msgid "No Camera device cleanup (Netcam, V4L2, BKTR)"
+msgstr "Žiadne čistenie zariadenia fotoaparátu (Netcam, V4L2, BKTR)"
 
 #: src/video_common.c
 msgid "Opening Netcam"
@@ -3828,9 +3705,9 @@ msgid "BKTR device failed to open"
 msgstr "Zariadenie BKTR sa nepodarilo otvoriť"
 
 #: src/video_common.c
-msgid "No Camera device specified (MMAL, Netcam, V4L2, BKTR)"
+msgid "No Camera device specified (Netcam, V4L2, BKTR)"
 msgstr ""
-"Nie je zadané žiadne zariadenie s fotoaparátom (MMAL, Netcam, V4L2, BKTR)"
+"Nie je zadané žiadne zariadenie s fotoaparátom (Netcam, V4L2, BKTR)"
 
 #: src/video_loopback.c
 #, c-format

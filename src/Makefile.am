@@ -12,7 +12,6 @@ motion_SOURCES = \
 	ffmpeg.h ffmpeg.c \
 	jpegutils.h jpegutils.c \
 	logger.h logger.c \
-	mmalcam.h mmalcam.c \
 	motion.h motion.c \
 	netcam.h netcam.c \
 	netcam_ftp.h netcam_ftp.c \
@@ -36,8 +35,3 @@ motion_SOURCES = \
 	webu_text.h webu_text.c \
 	mmx.h pwc-ioctl.h
 
-if INC_MMAL_SRC
-motion_SOURCES += \
-	raspicam/RaspiCamControl.h raspicam/RaspiCamControl.c \
-	raspicam/RaspiCLI.h raspicam/RaspiCLI.c
-endif
