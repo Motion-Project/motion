@@ -85,7 +85,6 @@
         <a href="#conversion_specifiers">Conversion Specifiers</a>
         <a href="#OptTopic_Video4Linux_Devices">Video4Linux Devices</a>
         <a href="#OptTopic_Network_Cameras">Network Cameras</a>
-        <a href="#OptTopic_Raspi_Cameras">Pi Cameras</a>
       </div>
     </div>
     <div class="dropdown">
@@ -741,18 +740,6 @@
           <td align="left">minimum_motion_frames</td>
           <td align="left">minimum_motion_frames</td>
           <td align="left"><a href="#minimum_motion_frames" >minimum_motion_frames</a></td>
-        </tr>
-        <tr>
-          <td align="left">mmalcam_name</td>
-          <td align="left">mmalcam_name</td>
-          <td align="left">mmalcam_name</td>
-          <td align="left"><a href="#mmalcam_name" >mmalcam_name</a></td>
-        </tr>
-        <tr>
-          <td align="left">mmalcam_control_params</td>
-          <td align="left">mmalcam_control_params</td>
-          <td align="left">mmalcam_params</td>
-          <td align="left"><a href="#mmalcam_params" >mmalcam_params</a></td>
         </tr>
         <tr>
           <td align="left">movie_bps</td>
@@ -1504,6 +1491,18 @@
           <td align="left">width</td>
           <td align="left"><a href="#width" >width</td>
         </tr>
+        <tr>
+          <td align="left">mmalcam_name</td>
+          <td align="left">mmalcam_name</td>
+          <td align="left">mmalcam_name</td>
+          <td align="left">removed</td>
+        </tr>
+        <tr>
+          <td align="left">mmalcam_control_params</td>
+          <td align="left">mmalcam_control_params</td>
+          <td align="left">mmalcam_params</td>
+          <td align="left">removed</td>
+        </tr>
       </table>
       </div>
     </ul>
@@ -1608,28 +1607,6 @@
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#netcam_userpass" >netcam_userpass</a> </td>
-            </tr>
-          </tbody>
-        </table>
-        <p></p>
-        <p></p>
-        <p></p>
-      </ul>
-
-      <a name="OptTopic_Raspi_Cameras" ></a>
-      <a href="#OptDetail_Raspi_Cameras" >Raspberry Pi Camera-General Info</a>
-      <ul>
-        <table class="tbldetail" border="1" class="fixed" >
-          <colgroup>
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-          </colgroup>
-          <tbody>
-            <tr>
-              <td bgcolor="#edf4f9" ><a href="#mmalcam_name" >mmalcam_name</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#mmalcam_params" >mmalcam_params</a> </td>
             </tr>
           </tbody>
         </table>
@@ -3216,59 +3193,6 @@
         If the camera does not have any authentication to the stream, leave this option empty.
         <p></p>
 
-        <p></p>
-      </ul>
-
-      <h3><a name="OptDetail_Raspi_Cameras"></a>Raspberry Pi Camera</h3>
-      <ul>
-        <p></p>
-        Motion can use the Raspberry Pi camera when connected and Motion is compiled and installed with the
-        MMAL support.  Before setting up Motion with the camera, it is recommended that the user first
-        validate that the camera is functional with the raspistill/raspivid applications.
-        <p></p>
-        Please refer to the <a href="#Basic_Setup">Basic Setup</a> section
-        of this guide for an additional discussion of network camera and how to test and specify them correctly for Motion.
-        <p></p>
-        <h3><a name="mmalcam_name"></a> mmalcam_name </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
-        </ul>
-        <p></p>
-        Name of camera to use if you are using a camera accessed through OpenMax/MMAL.  The standard
-        Raspberry Pi camera device name is "vc.ril.camera" without the quotes.
-        <p></p>
-            Motion will ignore this option when the MMAL support is not included.  In these situations,
-            users will need to use the modprobe method of setting up the camera as a v4l2 device.  See
-            the <a href="#Basic_Setup">Basic Setup</a> section of this guide for further details.
-        <p></p>
-
-        <h3><a name="mmalcam_params"></a> mmalcam_params</h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined</li>
-        </ul>
-        <p></p>
-        This option allows the user to specify control parameters to the Pi camera.  The documentation of
-        all of the options available to the Raspberry Camera module is beyond the scope of this guide.  In
-        general, the command line options that are available via the raspistill / raspivid applications are
-        the options that can be specified in this Motion configuration option.
-
-        Some of the more frequently used options are:
-        <ul>
-          <li>Horizontal Flip:  -hf</li>
-          <li>Vertical Flip:    -vf</li>
-          <li>Rotation:         -rot</li>
-        </ul>
-        <p></p>
-        <p></p>
-            Motion will ignore this option when the MMAL support is not included.  In these situations,
-            users will need to use the modprobe method of setting up the camera as a v4l2 device.  See
-            the <a href="#Basic_Setup">Basic Setup</a> section of this guide for further details.
         <p></p>
       </ul>
 
