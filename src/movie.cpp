@@ -1696,18 +1696,18 @@ int movie_init_timelapse(ctx_dev *cam)
 
     /* The increment of 10 is to allow for the extension and other chars*/
     len = (int)(strlen(tmp) + cam->conf->target_dir.length() + 10);
-    cam->movie_norm->full_nm = (char*)mymalloc(len);
+    cam->movie_timelapse->full_nm = (char*)mymalloc(len);
     retcd = snprintf(cam->movie_timelapse->full_nm, len, "%s/%s"
         , cam->conf->target_dir.c_str(), tmp);
 
     len = (int)cam->conf->target_dir.length() + 10;
-    cam->movie_norm->movie_dir = (char*)mymalloc(len);
-    retcd = snprintf(cam->movie_norm->movie_dir,len,"%s"
+    cam->movie_timelapse->movie_dir = (char*)mymalloc(len);
+    retcd = snprintf(cam->movie_timelapse->movie_dir,len,"%s"
         ,cam->conf->target_dir.c_str());
 
     len = (int)strlen(tmp) + 10;
-    cam->movie_norm->movie_nm = (char*)mymalloc(len);
-    retcd = snprintf(cam->movie_norm->movie_nm, len, "%s", tmp);
+    cam->movie_timelapse->movie_nm = (char*)mymalloc(len);
+    retcd = snprintf(cam->movie_timelapse->movie_nm, len, "%s", tmp);
 
     if (retcd < 0) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
