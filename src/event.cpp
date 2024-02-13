@@ -137,7 +137,7 @@ static void event_vlp_putpipem(ctx_dev *cam)
 static void event_image_detect(ctx_dev *cam)
 {
     char filename[PATH_MAX];
-    int  passthrough, retcd;
+    int  passthrough;
 
     if (cam->new_img & NEWIMG_ON) {
         mypicname(cam, filename,"%s/%s.%s"
@@ -367,8 +367,6 @@ static void event_movie_put(ctx_dev *cam)
 
 static void event_movie_end(ctx_dev *cam)
 {
-    int retcd;
-
     if (cam->movie_norm) {
         cam->filetype = FTYPE_MOVIE;
         on_movie_end_command(cam, cam->movie_norm->full_nm);
