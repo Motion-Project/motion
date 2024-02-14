@@ -1569,14 +1569,13 @@ static int v4l2_fps_set(struct context *cnt, struct video_dev *curdev)
 
     retcd = xioctl(vid_source, VIDIOC_S_PARM, &setfps);
     if (retcd != 0) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            ,_("Error setting fps. Return code %d"), retcd);
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+            ,_("Could not set the fps on the device."));
+    } else {
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
+            , _("Device set fps to %d")
+            , setfps.parm.capture.timeperframe.denominator);
     }
-
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
-        , _("Device set fps to %d")
-        , setfps.parm.capture.timeperframe.denominator);
-
     return 0;
 }
 
