@@ -390,19 +390,15 @@ static void sig_handler(int signo)
             while (cnt_list[++i]) {
                 cnt_list[i]->webcontrol_finish = TRUE;
                 cnt_list[i]->event_stop = TRUE;
-                cnt_list[i]->finish = 1;
-                /*
-                 * Don't restart thread when it ends,
-                 * all threads restarts if global restart is set
-                 */
-                 cnt_list[i]->restart = 0;
+                cnt_list[i]->finish = TRUE;
+                cnt_list[i]->restart = FALSE;
             }
         }
         /*
          * Set flag we want to quit main check threads loop
          * if restart is set (above) we start up again
          */
-        finish = 1;
+        finish = TRUE;
         break;
     case SIGVTALRM:
         printf("SIGVTALRM went off\n");
@@ -2817,7 +2813,7 @@ static void *motion_loop(void *arg)
         }
     }
 
-    cnt->lost_connection = 1;
+    cnt->lost_connection = TRUE;
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Thread exiting"));
 
     motion_cleanup(cnt);
@@ -2826,8 +2822,8 @@ static void *motion_loop(void *arg)
         threads_running--;
     pthread_mutex_unlock(&global_lock);
 
-    cnt->running = 0;
-    cnt->finish = 0;
+    cnt->running = FALSE;
+    cnt->finish = FALSE;
 
     pthread_exit(NULL);
 }
@@ -3266,11 +3262,10 @@ static void motion_start_thread(struct context *cnt)
      * 'threads_running'.
      */
     pthread_mutex_lock(&global_lock);
-    threads_running++;
+        threads_running++;
     pthread_mutex_unlock(&global_lock);
 
-    /* Set a flag that we want this thread running */
-    cnt->restart = 1;
+    cnt->restart = TRUE;
 
     /* Give the thread watchdog to start */
     cnt->watchdog = cnt->conf.watchdog_tmo;
@@ -3278,14 +3273,14 @@ static void motion_start_thread(struct context *cnt)
     /* Flag it as running outside of the thread, otherwise if the main loop
      * checked if it is was running before the thread set it to 1, it would
      * start another thread for this device. */
-    cnt->running = 1;
+    cnt->running = TRUE;
 
     pthread_attr_init(&thread_attr);
     pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
 
     if (pthread_create(&cnt->thread_id, &thread_attr, &motion_loop, cnt)) {
         /* thread create failed, undo running state */
-        cnt->running = 0;
+        cnt->running = FALSE;
         pthread_mutex_lock(&global_lock);
         threads_running--;
         pthread_mutex_unlock(&global_lock);
@@ -3329,23 +3324,21 @@ static void motion_watchdog(int indx)
      * Best to just not get into a watchdog situation...
      */
 
-    if (!cnt_list[indx]->running) {
+    if (cnt_list[indx]->running == FALSE) {
         return;
     }
 
     cnt_list[indx]->watchdog--;
     if (cnt_list[indx]->watchdog == 0) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Thread %d - Watchdog timeout. Trying to do a graceful restart")
-            , cnt_list[indx]->threadnr);
+            ,_("Watchdog timeout. Trying restart"));
         cnt_list[indx]->event_stop = TRUE; /* Trigger end of event */
-        cnt_list[indx]->finish = 1;
+        cnt_list[indx]->finish = TRUE;
     }
 
     if (cnt_list[indx]->watchdog == -cnt_list[indx]->conf.watchdog_kill) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Thread %d - Watchdog timeout did NOT restart, killing it!")
-            , cnt_list[indx]->threadnr);
+            ,_("Watchdog did not restart. Calling pthread_cancel."));
         if ((cnt_list[indx]->camera_type == CAMERA_TYPE_RTSP) &&
             (cnt_list[indx]->rtsp != NULL)) {
             pthread_cancel(cnt_list[indx]->rtsp->thread_id);
@@ -3361,61 +3354,43 @@ static void motion_watchdog(int indx)
         pthread_cancel(cnt_list[indx]->thread_id);
     }
 
-    if (cnt_list[indx]->watchdog < -cnt_list[indx]->conf.watchdog_kill) {
-        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (cnt_list[indx]->rtsp != NULL)) {
-            if (!cnt_list[indx]->rtsp->handler_finished &&
-                pthread_kill(cnt_list[indx]->rtsp->thread_id, 0) == ESRCH) {
-                cnt_list[indx]->rtsp->handler_finished = TRUE;
-                pthread_mutex_lock(&global_lock);
-                    threads_running--;
-                pthread_mutex_unlock(&global_lock);
-                netcam_rtsp_cleanup(cnt_list[indx],FALSE);
-            } else {
-                pthread_kill(cnt_list[indx]->rtsp->thread_id, SIGVTALRM);
-            }
-        }
-        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (cnt_list[indx]->rtsp_high != NULL)) {
-            if (!cnt_list[indx]->rtsp_high->handler_finished &&
-                pthread_kill(cnt_list[indx]->rtsp_high->thread_id, 0) == ESRCH) {
-                cnt_list[indx]->rtsp_high->handler_finished = TRUE;
-                pthread_mutex_lock(&global_lock);
-                    threads_running--;
-                pthread_mutex_unlock(&global_lock);
-                netcam_rtsp_cleanup(cnt_list[indx],FALSE);
-            } else {
-                pthread_kill(cnt_list[indx]->rtsp_high->thread_id, SIGVTALRM);
-            }
-        }
-        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (cnt_list[indx]->netcam != NULL)) {
-            if (!cnt_list[indx]->netcam->handler_finished &&
-                pthread_kill(cnt_list[indx]->netcam->thread_id, 0) == ESRCH) {
-                pthread_mutex_lock(&global_lock);
-                    threads_running--;
-                pthread_mutex_unlock(&global_lock);
-                cnt_list[indx]->netcam->handler_finished = TRUE;
-                cnt_list[indx]->netcam->finish = FALSE;
-            } else {
-                pthread_kill(cnt_list[indx]->netcam->thread_id, SIGVTALRM);
-            }
-        }
-        if (cnt_list[indx]->running &&
-            pthread_kill(cnt_list[indx]->thread_id, 0) == ESRCH) {
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
-                ,_("Thread %d - Cleaning thread.")
-                , cnt_list[indx]->threadnr);
+    if (cnt_list[indx]->watchdog < -(cnt_list[indx]->conf.watchdog_kill*2)) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("pthread_cancel failed.  Killing threads!!!"));
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Memory leaks will occur!!!"));
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Fix the cause of camera/system locking and restart Motion."));
+        if (cnt_list[indx]->rtsp != NULL) {
+            pthread_kill(cnt_list[indx]->rtsp->thread_id, SIGVTALRM);
+            cnt_list[indx]->rtsp->handler_finished = TRUE;
             pthread_mutex_lock(&global_lock);
                 threads_running--;
             pthread_mutex_unlock(&global_lock);
-            motion_cleanup(cnt_list[indx]);
-            cnt_list[indx]->running = 0;
-            cnt_list[indx]->finish = 0;
-        } else {
-            pthread_kill(cnt_list[indx]->thread_id,SIGVTALRM);
+            netcam_rtsp_cleanup(cnt_list[indx], FALSE);
         }
+        if (cnt_list[indx]->rtsp_high != NULL) {
+            pthread_kill(cnt_list[indx]->rtsp_high->thread_id, SIGVTALRM);
+            cnt_list[indx]->rtsp_high->handler_finished = TRUE;
+            pthread_mutex_lock(&global_lock);
+                threads_running--;
+            pthread_mutex_unlock(&global_lock);
+            netcam_rtsp_cleanup(cnt_list[indx],FALSE);
+        }
+        if (cnt_list[indx]->netcam != NULL) {
+            pthread_kill(cnt_list[indx]->netcam->thread_id, SIGVTALRM);
+            pthread_mutex_lock(&global_lock);
+                threads_running--;
+            pthread_mutex_unlock(&global_lock);
+            cnt_list[indx]->netcam->handler_finished = TRUE;
+            cnt_list[indx]->netcam->finish = FALSE;
+        }
+        pthread_kill(cnt_list[indx]->thread_id, SIGVTALRM);
+        pthread_mutex_lock(&global_lock);
+            threads_running--;
+        pthread_mutex_unlock(&global_lock);
+        motion_cleanup(cnt_list[indx]);
+        cnt_list[indx]->running = FALSE;
+        cnt_list[indx]->lost_connection = TRUE;
     }
+
 }
 
 static int motion_check_threadcount(void)
@@ -3519,7 +3494,8 @@ int main (int argc, char **argv)
 
             for (i = (cnt_list[1] != NULL ? 1 : 0); cnt_list[i]; i++) {
                 /* Check if threads wants to be restarted */
-                if ((!cnt_list[i]->running) && (cnt_list[i]->restart)) {
+                if ((cnt_list[i]->running == FALSE) &&
+                    (cnt_list[i]->restart == TRUE)) {
                     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                         ,_("Motion thread %d restart"), cnt_list[i]->threadnr);
                     motion_start_thread(cnt_list[i]);
