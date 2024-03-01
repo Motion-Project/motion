@@ -729,11 +729,7 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg)
     ffmpeg->ctx_codec->height        = ffmpeg->height;
     ffmpeg->ctx_codec->time_base.num = 1;
     ffmpeg->ctx_codec->time_base.den = ffmpeg->fps;
-    if (ffmpeg->preferred_codec == USER_CODEC_V4L2M2M) {
-        ffmpeg->ctx_codec->pix_fmt   = AV_PIX_FMT_NV21;
-    } else {
-        ffmpeg->ctx_codec->pix_fmt   = MY_PIX_FMT_YUV420P;
-    }
+    ffmpeg->ctx_codec->pix_fmt   = MY_PIX_FMT_YUV420P;
     ffmpeg->ctx_codec->max_b_frames  = 0;
     if (mystreq(ffmpeg->codec_name, "ffv1")) {
       ffmpeg->ctx_codec->strict_std_compliance = -2;
@@ -1315,33 +1311,6 @@ void ffmpeg_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list
     }
 }
 
-static void ffmpeg_put_pix_nv21(struct ffmpeg *ffmpeg, struct image_data *img_data)
-{
-    unsigned char *image,*imagecr, *imagecb;
-    int cr_len, x, y;
-
-    if (ffmpeg->high_resolution) {
-        image = img_data->image_high;
-    } else {
-        image = img_data->image_norm;
-    }
-
-    cr_len = ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height / 4;
-    imagecr = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
-    imagecb = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height) + cr_len;
-
-    memcpy(ffmpeg->picture->data[0], image, ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
-    for (y = 0; y < ffmpeg->ctx_codec->height; y++) {
-        for (x = 0; x < ffmpeg->ctx_codec->width/4; x++) {
-            ffmpeg->picture->data[1][y*ffmpeg->ctx_codec->width/2 + x*2] = *imagecb;
-            ffmpeg->picture->data[1][y*ffmpeg->ctx_codec->width/2 + x*2 + 1] = *imagecr;
-            imagecb++;
-            imagecr++;
-        }
-    }
-
-}
-
 static void ffmpeg_put_pix_yuv420(struct ffmpeg *ffmpeg, struct image_data *img_data)
 {
     unsigned char *image;
@@ -1521,11 +1490,7 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const s
 
         if (ffmpeg->picture) {
 
-            if (ffmpeg->preferred_codec == USER_CODEC_V4L2M2M) {
-                ffmpeg_put_pix_nv21(ffmpeg, img_data);
-            } else {
-                ffmpeg_put_pix_yuv420(ffmpeg, img_data);
-            }
+            ffmpeg_put_pix_yuv420(ffmpeg, img_data);
 
             ffmpeg->gop_cnt ++;
             if (ffmpeg->gop_cnt == ffmpeg->ctx_codec->gop_size ) {
