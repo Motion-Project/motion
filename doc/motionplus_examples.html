@@ -57,6 +57,7 @@
         <li> <a href="#haar_train">Haar Model Training</a></li>
         <li> <a href="#sound_sample">Sound Frequency Sample</a></li>
         <li> <a href="#fail2ban">Fail2Ban example</a></li>
+        <li> <a href="#ptz">PTZ command examples</a></li>
         <p></p>
         <p></p>
       </ul>
@@ -500,6 +501,97 @@
           <br>&nbsp;port      = 0:65535
         </ul></code></small></small>
         <br>Make sure to adjust the log file location indicated in the jail file as well as how long to ban the IP address.
+       </ul>
+
+      <h3><a name="ptz"></a>PTZ command examples</h3>
+      <ul>
+        The following are some example sources and scripts to send PTZ (Pan Tilt Zoom) commands to cameras.
+        <br><br>
+        <a href="https://github.com/667bdrm/sofiactl">sofiactl</a> is a Perl script that can control many imported inexpensive cameras.
+        <br> Adjust script location, timing, cameraip, user, etc as appropriate.
+        <small><small><code><ul>
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp;sofiactl.pl --user admin --host cameraip --port 34567 --command OPPTZControl --sd ZoomTile --s2 0.5
+          <br>&nbsp;&nbsp;sofiactl.pl --user admin --host cameraip --port 34567 --command OPPTZControl --sd ZoomWide --s2 0.5
+          <br>&nbsp;&nbsp;sofiactl.pl --user admin --host cameraip --port 34567 --command OPPTZControl --sd DirectionUp --s2 2.0
+          <br>&nbsp;&nbsp;sofiactl.pl --user admin --host cameraip --port 34567 --command OPPTZControl --sd DirectionDown --s2 2.0
+          <br>&nbsp;&nbsp;sofiactl.pl --user admin --host cameraip --port 34567 --command OPPTZControl --sd DirectionLeft --s2 2.0
+          <br>&nbsp;&nbsp;sofiactl.pl --user admin --host cameraip --port 34567 --command OPPTZControl --sd DirectionRight --s2 2.0
+          <br>&nbsp;exit
+        </ul></code></small></small>
+
+        <br>
+        <a href="https://github.com/Mr-Dave/camxmctl">camxmctl</a> is a c++ program with a sample HTML page that makes adjusting the parameters
+        easier.  It reuses some of the code from Motionplus and is based upon the JSON files and commands in the
+        <a href="https://github.com/667bdrm/sofiactl">sofiactl</a> script.
+        <br> Adjust location, timing, cameraip, user, etc as appropriate.
+        <small><small><code><ul>
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp; tbd.  Review sample page to see post commands.
+          <br>&nbsp;exit
+        </ul></code></small></small>
+
+        <br>
+        curl scripts.  Example 1
+        <br> Adjust as appropriate.
+        <small><small><code><ul>
+          <br>&nbsp;#!/bin/bash
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=1'     http://admin@cameraip:80/PTZ/1/TurnDown
+            <br>&nbsp;&nbsp;sleep 2
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=0'     http://admin@cameraip:80/PTZ/1/TurnDown
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=1'     http://admin@cameraip:80/PTZ/1/TurnLeft
+            <br>&nbsp;&nbsp;sleep 2
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=0'     http://admin@cameraip:80/PTZ/1/TurnLeft
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=1'     http://admin@cameraip:80/PTZ/1/TurnRight
+            <br>&nbsp;&nbsp;sleep 2
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=0'     http://admin@cameraip:80/PTZ/1/TurnRight
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=1'     http://admin@cameraip:80/PTZ/1/TurnUp
+            <br>&nbsp;&nbsp;sleep 2
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=0'     http://admin@cameraip:80/PTZ/1/TurnUp
+          <br>&nbsp;exit
+        </ul></code></small></small>
+
+        <br>
+        curl scripts.  Example 2
+        <br> Adjust as appropriate.
+        <small><small><code><ul>
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=left&-speed=45'
+          <br>&nbsp;&nbsp;sleep 1
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=stop&-speed=45'
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=right&-speed=45'
+          <br>&nbsp;&nbsp;sleep 1
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=stop&-speed=45'
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=down&-speed=45'
+          <br>&nbsp;&nbsp;sleep 1
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=stop&-speed=45'
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=up&-speed=45'
+          <br>&nbsp;&nbsp;sleep 1
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=stop&-speed=45'
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=zoomin&-speed=45'
+          <br>&nbsp;&nbsp;sleep 1
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=stop&-speed=45'
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=zoomout&-speed=45'
+          <br>&nbsp;&nbsp;sleep 1
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=stop&-speed=45'
+          <br>&nbsp;exit
+        </ul></code></small></small>
        </ul>
 
     </section>
