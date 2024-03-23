@@ -3547,7 +3547,7 @@ std::string conf_cat_desc(enum PARM_CAT pcat, bool shrt) {
 /** Prints usage and options allowed from Command-line. */
 static void usage(void)
 {
-    printf("MotionPlus version %s, Copyright 2020-2023\n",PACKAGE_VERSION);
+    printf("MotionPlus version %s, Copyright 2020-2024\n",PACKAGE_VERSION);
     printf("\nusage:\tmotionplus [options]\n");
     printf("\n\n");
     printf("Possible options:\n\n");
