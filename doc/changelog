@@ -1,3 +1,90 @@
+Summary of changes for version 0.2.0 are below
+    * Revise copyright year
+    * Revise module documentation header
+    * Add PTZ examples
+    * Fix timelapse
+    * Remove unused variables
+    * Update default port for https cameras.  Closes #114
+    * Updated file for shots revision
+    * Fix frame counter specifier.  Closes #116
+    * Revise for possible null current_image
+    * Use time from current_image for format
+    * Eliminate sqltype as separate parameter
+    * Add mypicname function
+    * Remove event fname
+    * Move extpipe to movie module
+    * Revise imageext
+    * Revise event fileclose
+    * Additional revisions for ftype
+    * Separate on_picture_save vs on_movie_start
+    * Revise event use of ftype
+    * Revise movie_init parameters
+    * Remove unused motion_event parameter
+    * Consolidate draw_locate
+    * Revise to use cam->current_image
+    * Revise event to use time from image
+    * Revise required libcam version number
+    * Revise to use orientation.  Closes #115
+    * Implements remaining libcamera control parameters.
+    * Add placeholders for missing libcamera parameters
+    * Add diagnostic push/pop on ffmpeg includes
+    * Revise doc for libcamera
+    * Escape backslash in parameters
+    * Adjust vaapi decoding
+    * Remove SceneFlicker.  Closes #103
+    * Revise to use interleaved_write
+    * Add mov container
+    * Additional log messages
+    * Fix update of movies web page
+    * Revise container option from vp8 to webm
+    * Update example for mariadb packages
+    * Fix movies.json for all cameras.  Closes #96
+    * Update flip_axis documentation.  Closes #95
+    * Add option for non TLS webcontrol port
+    * Revise headers for mpegts
+    * Initialize av dictionary variable
+    * Remove startup fps adjustment
+    * Add urls providing mpeg transport streams
+    * Fix extpipe examples and processing
+    * Fix SIGHUP reload process
+    * Revise log level for message
+    * Do not translate ignore message
+    * Add cuda and drm hw decoding
+    * Allow for bad packet on files
+    * Revise log messages
+    * Revise message log
+    * Remove defunct process.  Closes #77 Closes #78
+    * Close extpipe on movie end.  Closes #87
+    * Use device_id of zero to indicate process all cameras
+    * Revise webu threadnbr to camindx
+    * Fix process for invalid cam ids.  Closes #85
+    * Update sample web page
+    * Fix static image refresh
+    * Resolve compiler warnings
+    * Documentation update for packages
+    * Fix log message
+    * Adjust example for proper display
+    * Revise logger messages
+    * Create example for fail2ban
+    * Add webcontrol_lock_script paramater
+    * Move av init functions to motionplus module
+    * Revise defaults in config file
+    * Remove encoding via OMX
+    * Remove unused function for nv21
+    * Fix v4l2m2m codec
+    * Revert libcam AfWindows
+    * Fix reload all parms signal. Closes #60
+    * Add libcam ScalerCrop and AfWindows controls. Closes #68
+    * Revise libcam log messages
+    * Remove failed movie files. Closes #61
+    * Fix snapshot when using netcam_high_url
+    * Allow tabs in config file.  Closes #75
+    * Fix webp libs.  Closes #74
+    * Update makefile
+    * Revise threshold
+    * Assign extpipe to NULL upon close
+    * Allow for database being down when MotionPlus starts
+    * Commit mariadb transactions
 Summary of changes for version 0.1.1 are below
     * Fix picture parameters
     * Fix parsing for incorrect parameters
