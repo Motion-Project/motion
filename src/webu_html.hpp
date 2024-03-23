@@ -14,7 +14,6 @@
  *    You should have received a copy of the GNU General Public License
  *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
  *
- *    Copyright 2020-2023 MotionMrDave@gmail.com
 */
 
 #ifndef _INCLUDE_WEBU_HTML_HPP_
