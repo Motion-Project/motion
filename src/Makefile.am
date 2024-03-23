@@ -1,6 +1,11 @@
 AM_CPPFLAGS= -Dsysconfdir=\"$(sysconfdir)/motion\" -DLOCALEDIR=\"$(localedir)\"
 LDADD = $(LIBINTL)
 
+if INC_MHTTP_SRC
+MHTTP_SRC=webu.h webu.c webu_html.h webu_html.c webu_status.h webu_status.c \
+					webu_stream.h webustream.c webu_text.h webu_text.c
+endif
+
 bin_PROGRAMS = motion
 
 motion_SOURCES = \
@@ -28,10 +33,6 @@ motion_SOURCES = \
 	video_common.h video_common.c \
 	video_loopback.h video_loopback.c \
 	video_v4l2.h video_v4l2.c \
-	webu.h webu.c \
-	webu_html.h webu_html.c \
-	webu_status.h webu_status.c \
-	webu_stream.h webu_stream.c \
-	webu_text.h webu_text.c \
+	$(MHTTP_SRC) \
 	mmx.h pwc-ioctl.h
 

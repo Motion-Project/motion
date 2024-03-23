@@ -36,7 +36,9 @@
 #include "event.h"
 #include "picture.h"
 #include "rotate.h"
+#if defined(HAVE_MHTTP)
 #include "webu.h"
+#endif
 #include "draw.h"
 #include "dbse.h"
 
@@ -2964,7 +2966,9 @@ static void motion_shutdown(void)
 
     motion_remove_pid();
 
+#if defined(HAVE_MHTTP)
     webu_stop(cnt_list);
+#endif
 
     indx = -1;
     while (cnt_list[++indx]) {
@@ -3180,7 +3184,9 @@ static void motion_startup(int daemonize, int argc, char *argv[])
 
     initialize_chars();
 
+#if defined(HAVE_MHTTP)
     webu_start(cnt_list);
+#endif
 
     vid_mutex_init();
 

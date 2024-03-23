@@ -62,25 +62,45 @@ AS_IF([test "${JPGS}" != "yes" ], [
 CFLAGS="$HOLD_CFLAGS"
 
 ##############################################################################
-###  Check libmicrohttpd - Required.  Needed for stream/webcontrol
+###  Check libmicrohttpd Needed for stream/webcontrol - Optional
 ##############################################################################
-AS_IF([pkg-config libmicrohttpd ], [
-    TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags libmicrohttpd`
-    TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libmicrohttpd`
+AC_ARG_WITH(libmicrohttpd,
+  AS_HELP_STRING([--with-libmicrohttpd[=DIR]],[Build with libmicrohttpd support]),
+  [MHTTP="$withval"],
+  [MHTTP="yes"]
+)
+
+AS_IF([test "${MHTTP}" = "no"], [
+    AC_MSG_CHECKING(for libmicrohttpd)
+    AC_MSG_RESULT(skipped)
   ],[
-    AC_MSG_ERROR([Required package libmicrohttpd-dev not found, please check motion_guide.html and install necessary dependencies])
+    TEMP_PATH=$PKG_CONFIG_PATH
+    AC_MSG_CHECKING(libmicrohttpd pkg-config path)
+    AS_IF([test "${MHTTP}" != "yes"], [
+        PKG_CONFIG_PATH=${MHTTP}/lib/pkgconfig:$PKG_CONFIG_PATH
+        MHTTP="yes"
+      ]
+    )
+    export PKG_CONFIG_PATH
+    AC_MSG_RESULT($PKG_CONFIG_PATH)
+
+    AC_MSG_CHECKING(for libmicrohttpd)
+    AS_IF([pkg-config libmicrohttpd], [
+        TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags libmicrohttpd`
+        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libmicrohttpd`
+        AC_DEFINE([HAVE_MHTTP], [1], [Define to 1 if you have libmicrohttpd support])
+      ],[
+        MHTTP="no"
+      ]
+    )
+
+    AC_MSG_RESULT([$MHTTP])
+    PKG_CONFIG_PATH=$TEMP_PATH
+    export PKG_CONFIG_PATH
   ]
 )
-HOLD_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS $TEMP_CFLAGS"
-AC_CHECK_HEADERS(microhttpd.h,[MHTTP="yes"],[MHTTP="no"])
-AC_MSG_CHECKING(libmicrohttpd libraries)
-AC_MSG_RESULT($MHTTP)
-AS_IF([test "${MHTTP}" != "yes" ], [
-    AC_MSG_ERROR([Required package libmicrohttpd-dev not found, please check motion_guide.html and install necessary dependencies])
-  ]
-)
-CFLAGS="$HOLD_CFLAGS"
+
+AM_CONDITIONAL([INC_MHTTP_SRC],[test x${MHTTP} = xyes])
 
 ##############################################################################
 ###  Check setting/getting thread names
@@ -477,20 +497,21 @@ echo
 echo "LDFLAGS: $TEMP_LDFLAGS $LDFLAGS"
 echo
 echo
-echo "OS                  : $host_os"
-echo "pthread_np          : $PTHREAD_NP"
-echo "pthread_setname_np  : $PTHREAD_SETNAME_NP"
-echo "pthread_getname_np  : $PTHREAD_GETNAME_NP"
-echo "XSI error           : $XSI_STRERROR"
-echo "webp support        : $WEBP"
-echo "V4L2 support        : $V4L2"
-echo "BKTR support        : $BKTR"
-echo "FFmpeg support      : $FFMPEG"
-echo "libavformat version : $FFMPEG_VER"
-echo "SQLite3 support     : $SQLITE3"
-echo "MYSQL support       : $MYSQL"
-echo "PostgreSQL support  : $PGSQL"
-echo "MariaDB support     : $MARIADB"
+echo "OS                    : $host_os"
+echo "pthread_np            : $PTHREAD_NP"
+echo "pthread_setname_np    : $PTHREAD_SETNAME_NP"
+echo "pthread_getname_np    : $PTHREAD_GETNAME_NP"
+echo "XSI error             : $XSI_STRERROR"
+echo "webp support          : $WEBP"
+echo "V4L2 support          : $V4L2"
+echo "BKTR support          : $BKTR"
+echo "FFmpeg support        : $FFMPEG"
+echo "libavformat version   : $FFMPEG_VER"
+echo "SQLite3 support       : $SQLITE3"
+echo "MYSQL support         : $MYSQL"
+echo "PostgreSQL support    : $PGSQL"
+echo "MariaDB support       : $MARIADB"
+echo "libmicrohttpd support : $MHTTP"
 echo
 echo  "Install prefix:       $prefix"
 echo

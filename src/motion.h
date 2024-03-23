@@ -54,8 +54,11 @@ struct ffmpeg;
 #include <sys/param.h>
 #include <stdint.h>
 #include <pthread.h>
-#include <microhttpd.h>
 #include <regex.h>
+
+#if defined(HAVE_MHTTP)
+    #include <microhttpd.h>
+#endif
 
 
 #if defined(HAVE_PTHREAD_NP_H)
