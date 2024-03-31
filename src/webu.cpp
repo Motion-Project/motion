@@ -1058,7 +1058,7 @@ static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
     }
 
     if (webui != NULL) {
-        MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Closing connection"));
+        //MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Closing connection"));
         if ((webui->cnct_type == WEBUI_CNCT_TS_FULL) ||
             (webui->cnct_type == WEBUI_CNCT_TS_SUB) ||
             (webui->cnct_type == WEBUI_CNCT_TS_MOTION) ||
