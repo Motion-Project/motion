@@ -1165,7 +1165,7 @@ static void webu_html_script_cams_all_click(ctx_webui *webui)
         "      cams_reset();\n"
         "      document.getElementById('div_cam').style.display='block';\n"
         "      document.getElementById('div_cam').innerHTML = html_preview;\n"
-        "      cams_all_timer = setInterval(cams_all_fnc, 2000);\n\n"
+        "      cams_all_timer = setInterval(cams_all_fnc, 1000);\n\n"
         "  }\n\n";
 }
 /* Create the movies_page javascript function */
@@ -1307,41 +1307,18 @@ static void webu_html_script_cams_one_fnc(ctx_webui *webui)
 static void webu_html_script_cams_all_fnc(ctx_webui *webui)
 {
     webui->resp_page +=
-        "    function cams_img_onload(camindx, indx) {\n"
-        "      document.getElementById('pic'+camindx).src = pic_url[indx];\n"
-        "      pic_url[indx] = '';\n"
-        "    }\n\n";
-
-    webui->resp_page +=
         "    function cams_all_fnc () {\n"
-        "      if (gGetImgs == 1) {\n"
+        "      var previndx = gGetImgs;\n"
+        "      gGetImgs++;\n"
+        "      if (gGetImgs >= pData['cameras']['count']) {\n"
         "        gGetImgs = 0;\n"
-        "        var camcnt = pData['cameras']['count'];\n"
-        "        var camindx = 0;\n"
-        "        var indx;\n"
-        "        var img   = new Array(4);\n"
-        "        var maxchk = 1;\n"
-        "        for (indx = 0; indx <= 3; indx++) {\n"
-        "          pic_url[indx] = '';\n"
-        "          img[indx] = new Image();\n"
-        "        }\n"
-        "        while ((camindx < camcnt) && (maxchk < 10)) {\n"
-        "          maxchk++;\n"
-        "          camid = pData['cameras'][camindx]['id'];\n"
-        "          if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {\n"
-        "            for (indx = 0; indx <= 3; indx++) {\n"
-        "               if ((pic_url[indx] == '') && (camindx < camcnt)) {\n"
-        "                 pic_url[indx] = pData['cameras'][camindx]['url'] + \"static/stream/t\" + new Date().getTime();\n"
-        "                 img[indx].onload = cams_img_onload(camindx, indx);\n"
-        "                 img[indx].src = pic_url[indx];\n"
-        "                 camindx++;\n"
-        "               }\n"
-        "            }\n"
-        "          } else {\n"
-        "            camindx++;\n"
-        "          }\n"
-        "        }\n"
-        "        gGetImgs = 1;\n"
+        "      }\n"
+        "      camid = pData['cameras'][gGetImgs]['id'];\n"
+        "      if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {\n"
+        "        document.getElementById('pic'+previndx).src =\n"
+        "          pData['cameras'][previndx]['url'] + \"static/stream/t\" + new Date().getTime();\n"
+        "        document.getElementById('pic'+gGetImgs).src =\n"
+        "          pData['cameras'][gGetImgs]['url'] + \"mjpg/stream\";\n"
         "      }\n"
         "    }\n\n";
 
