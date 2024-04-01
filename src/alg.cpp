@@ -652,6 +652,7 @@ static void alg_diff_nomask(ctx_dev *cam)
     }
     cam->current_image->diffs_raw = diffs;
     cam->current_image->diffs = diffs;
+    cam->imgs.image_motion.imgts = cam->current_image->imgts;
 
     if (diffs > 0 ) {
         cam->current_image->diffs_ratio = (abs(diffs_net) * 100) / diffs;
@@ -700,6 +701,7 @@ static void alg_diff_mask(ctx_dev *cam)
     }
     cam->current_image->diffs_raw = diffs;
     cam->current_image->diffs = diffs;
+    cam->imgs.image_motion.imgts = cam->current_image->imgts;
 
     if (diffs > 0 ) {
         cam->current_image->diffs_ratio = (abs(diffs_net) * 100) / diffs;
@@ -759,6 +761,7 @@ static void alg_diff_smart(ctx_dev *cam)
     }
     cam->current_image->diffs_raw = diffs;
     cam->current_image->diffs = diffs;
+    cam->imgs.image_motion.imgts = cam->current_image->imgts;
 
     if (diffs > 0 ) {
         cam->current_image->diffs_ratio = (abs(diffs_net) * 100) / diffs;
@@ -825,6 +828,7 @@ static void alg_diff_masksmart(ctx_dev *cam)
 
     cam->current_image->diffs_raw = diffs;
     cam->current_image->diffs = diffs;
+    cam->imgs.image_motion.imgts = cam->current_image->imgts;
 
     if (diffs > 0 ) {
         cam->current_image->diffs_ratio = (abs(diffs_net) * 100) / diffs;

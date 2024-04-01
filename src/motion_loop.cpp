@@ -1039,6 +1039,10 @@ static void mlp_actions_emulate(ctx_dev *cam)
         movie_reset_start_time(cam->movie_norm, &cam->current_image->imgts);
     }
 
+    if ( (cam->detecting_motion == false) && (cam->movie_motion != NULL) ) {
+        movie_reset_start_time(cam->movie_motion, &cam->imgs.image_motion.imgts);
+    }
+
     cam->detecting_motion = true;
     if (cam->conf->post_capture > 0) {
         cam->postcap = cam->conf->post_capture;
@@ -1076,6 +1080,9 @@ static void mlp_actions_motion(ctx_dev *cam)
 
         if ( (cam->detecting_motion == false) && (cam->movie_norm != NULL) ) {
             movie_reset_start_time(cam->movie_norm, &cam->current_image->imgts);
+        }
+        if ( (cam->detecting_motion == false) && (cam->movie_motion != NULL) ) {
+            movie_reset_start_time(cam->movie_motion, &cam->imgs.image_motion.imgts);
         }
         cam->detecting_motion = true;
         cam->postcap = cam->conf->post_capture;
