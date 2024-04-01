@@ -886,7 +886,7 @@ static int mlp_capture(ctx_dev *cam)
             mystrftime(cam, tmpout, sizeof(tmpout), tmpin, NULL);
             draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
                       10, 20 * cam->text_scale, tmpout, cam->text_scale);
-            cam->current_image->imgts = cam->connectionlosttime;
+
             /* Write error message only once */
             if (cam->missing_frame_counter == (cam->conf->device_tmo * cam->conf->framerate)) {
                 MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
