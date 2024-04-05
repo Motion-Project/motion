@@ -747,6 +747,7 @@ static void v4l2_palette_set(ctx_dev *cam)
 
     v4l2_params_check(cam);
 
+    indxp = 17;
     for (indx = 0; indx < cam->v4l2cam->params->params_count; indx++) {
         if (mystreq(cam->v4l2cam->params->params_array[indx].param_name,"palette")) {
             indxp =  atoi(cam->v4l2cam->params->params_array[indx].param_value);
