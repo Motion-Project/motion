@@ -541,7 +541,7 @@ void webu_stream_init(ctx_dev *cam)
     cam->stream.secondary.jpeg_data = NULL;
     cam->stream.secondary.jpg_cnct = 0;
     cam->stream.secondary.ts_cnct = 0;
-    cam->stream.source.consumed = true;
+    cam->stream.secondary.consumed = true;
     cam->stream.secondary.image = NULL;
 
 }
