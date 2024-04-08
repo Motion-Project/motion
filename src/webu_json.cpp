@@ -279,13 +279,13 @@ static void webu_json_movies_list(ctx_webui *webui)
         db = webui->motapp->dbse->movie_list[indx_mov];
         if (db.found == true) {
             if ((db.movie_sz/1000) < 1000) {
-                snprintf(fmt,PATH_MAX,"%'.1fKB"
+                snprintf(fmt,PATH_MAX,"%.1fKB"
                     ,((double)db.movie_sz/1000));
             } else if ((db.movie_sz/1000000) < 1000) {
-                snprintf(fmt,PATH_MAX,"%'.1fMB"
+                snprintf(fmt,PATH_MAX,"%.1fMB"
                     ,((double)db.movie_sz/1000000));
             } else {
-                snprintf(fmt,PATH_MAX,"%'.1fGB"
+                snprintf(fmt,PATH_MAX,"%.1fGB"
                     ,((double)db.movie_sz/1000000000));
             }
             webui->resp_page += "\""+ std::to_string(indx) + "\":";
