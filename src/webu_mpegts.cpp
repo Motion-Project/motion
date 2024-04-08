@@ -84,7 +84,7 @@ static int webu_mpegts_pic_send(ctx_webui *webui, unsigned char *img)
     pts_interval = ((1000000L * (curr_ts.tv_sec - webui->start_time.tv_sec)) +
         (curr_ts.tv_nsec/1000) - (webui->start_time.tv_nsec/1000));
     webui->picture->pts = av_rescale_q(pts_interval
-        ,(AVRational){1, 1000000L}, webui->ctx_codec->time_base);
+        ,av_make_q(1,1000000L), webui->ctx_codec->time_base);
 
     retcd = avcodec_send_frame(webui->ctx_codec, webui->picture);
     if (retcd < 0 ) {
