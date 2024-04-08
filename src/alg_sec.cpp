@@ -424,7 +424,7 @@ static void algsec_params_log(ctx_dev *cam)
 
     if (algmdl->method != "none") {
         for (indx = 0; indx < algmdl->algsec_params->params_count; indx++) {
-            motpls_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %s"
+            motpls_log(INF, TYPE_ALL, NO_ERRNO,0, NULL, "%-25s %s"
                 ,algmdl->algsec_params->params_array[indx].param_name
                 ,algmdl->algsec_params->params_array[indx].param_value);
         }

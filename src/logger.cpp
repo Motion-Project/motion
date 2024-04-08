@@ -120,7 +120,7 @@ static char *str_time(void)
  *    This routine is used for printing all informational, debug or error
  *    messages produced by any of the other motionplus functions.
  */
-void motpls_log(int level, int type, int errno_flag,int fncname, const char *fmt, ...)
+void motpls_log(int msg_level, int msg_type, int msg_err, int msg_fnc, const char *msg_fncnm, ...)
 {
     int errno_save, n, prefixlen, timelen;
     char buf[1024]= {0};
@@ -143,10 +143,10 @@ void motpls_log(int level, int type, int errno_flag,int fncname, const char *fmt
     pthread_mutex_unlock(&log_motapp->mutex_parms);
 
     /*Exit if not our level or type */
-    if (level > applvl) {
+    if (msg_level > applvl) {
         return;
     }
-    if ((apptyp != TYPE_ALL) && (apptyp != type)) {
+    if ((apptyp != TYPE_ALL) && (apptyp != msg_type)) {
         return;
     }
 
@@ -159,50 +159,40 @@ void motpls_log(int level, int type, int errno_flag,int fncname, const char *fmt
 
     if (log_mode == LOGMODE_FILE) {
         n = snprintf(buf, sizeof(buf), "%s [%s][%s][%02ld:%s] "
-            , str_time(), log_level_str[level], log_type_str[type]
+            , str_time(), log_level_str[msg_level], log_type_str[msg_type]
             , threadnr, threadname );
         timelen = 16;
     } else {
         n = snprintf(buf, sizeof(buf), "[%s][%s][%02ld:%s] "
-            , log_level_str[level], log_type_str[type]
+            , log_level_str[msg_level], log_type_str[msg_type]
             , threadnr, threadname );
         timelen = 0;
     }
     prefixlen = n;
 
     /* Prepend the format specifier for the function name */
-    if (fncname) {
-        va_start(ap, fmt);
-        prefixlen += snprintf(usrfmt, sizeof(usrfmt),"%s: ", va_arg(ap, char *));
-        va_end(ap);
-        snprintf(usrfmt, sizeof (usrfmt),"%s: %s", "%s", fmt);
-    } else {
-        snprintf(usrfmt, sizeof (usrfmt),"%s",fmt);
-    }
 
-    /* Next add the user's message. */
-    va_start(ap, fmt);
+    va_start(ap, msg_fncnm);
+    if (msg_fnc) {
+        prefixlen += (int)strlen(msg_fncnm)+2;
+        snprintf(usrfmt, sizeof (usrfmt),"%s: %s", msg_fncnm, va_arg(ap, char *));
+    } else {
+        snprintf(usrfmt, sizeof (usrfmt),"%s", va_arg(ap, char *));
+    }
     n += vsnprintf(buf + n, sizeof(buf) - n, usrfmt, ap);
     va_end(ap);
     buf[1023] = '\0';
 
-    /* If errno_flag is set, add on the library error message. */
-    if (errno_flag) {
-      size_t buf_len = strlen(buf);
-
-      // just knock off 10 characters if we're that close...
-      if (buf_len + 10 > 1024) {
-          buf[1024 - 10] = '\0';
-          buf_len = 1024 - 10;
-      }
-
-      strncat(buf, ": ", 1024 - buf_len);
-      n += 2;
-        /*
-         * This is bad - apparently gcc/libc wants to use the non-standard GNU
-         * version of strerror_r, which doesn't actually put the message into
-         * my buffer :-(.  I have put in a 'hack' to get around this.
-         */
+    /* If msg_err is set, add on the library error message. */
+    if (msg_err) {
+        size_t buf_len = strlen(buf);
+        // just knock off 10 characters if we're that close...
+        if (buf_len + 10 > 1024) {
+            buf[1024 - 10] = '\0';
+            buf_len = 1024 - 10;
+        }
+        strncat(buf, ": ", 1024 - buf_len);
+        n += 2;
         #if defined(XSI_STRERROR_R)
             /* XSI-compliant strerror_r() */
             strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
@@ -229,7 +219,7 @@ void motpls_log(int level, int type, int errno_flag,int fncname, const char *fmt
 
             case LOGMODE_SYSLOG:
                 /* The syslog level values are one less than the motionplus numeric values*/
-                syslog(level-1, "%s", flood_repeats);
+                syslog(msg_level-1, "%s", flood_repeats);
                 strncat(flood_repeats, "\n", 1024 - strlen(flood_repeats));
                 fputs(flood_repeats, stderr);
                 fflush(stderr);
@@ -248,7 +238,7 @@ void motpls_log(int level, int type, int errno_flag,int fncname, const char *fmt
 
         case LOGMODE_SYSLOG:
             /* The syslog level values are one less than the motionplus numeric values*/
-            syslog(level-1, "%s", buf);
+            syslog(msg_level-1, "%s", buf);
             strncat(buf, "\n", 1024 - strlen(buf));
             fputs(buf, stderr);
             fflush(stderr);

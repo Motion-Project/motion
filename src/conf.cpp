@@ -3898,16 +3898,16 @@ void conf_parms_log_parm(std::string parm_nm, std::string parm_vl)
         (parm_nm == "database_user") ||
         (parm_nm == "database_password"))
     {
-        motpls_log(INF, TYPE_ALL, NO_ERRNO,0
+        motpls_log(INF, TYPE_ALL, NO_ERRNO, 0, NULL
             ,_("%-25s <redacted>"), parm_nm.c_str());
     } else {
         if ((parm_nm.compare(0,4,"text") == 0) ||
             (parm_vl.compare(0,1, " ") != 0)) {
-            motpls_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %s"
-                , parm_nm.c_str(), parm_vl.c_str());
+            motpls_log(INF, TYPE_ALL, NO_ERRNO,0, NULL
+                , "%-25s %s", parm_nm.c_str(), parm_vl.c_str());
         } else {
-            motpls_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s \"%s\""
-                , parm_nm.c_str(), parm_vl.c_str());
+            motpls_log(INF, TYPE_ALL, NO_ERRNO, 0, NULL
+                , "%-25s \"%s\"", parm_nm.c_str(), parm_vl.c_str());
         }
     }
 
@@ -3926,8 +3926,8 @@ void conf_parms_log(ctx_motapp *motapp)
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
         ,_("Logging configuration parameters from all files"));
 
-    motpls_log(INF, TYPE_ALL, NO_ERRNO,0, _("Config file: %s")
-        , motapp->conf->conf_filename.c_str());
+    motpls_log(INF, TYPE_ALL, NO_ERRNO,0, NULL
+        , _("Config file: %s"), motapp->conf->conf_filename.c_str());
 
     i = 0;
     while (config_parms[i].parm_name != "") {
@@ -3951,7 +3951,7 @@ void conf_parms_log(ctx_motapp *motapp)
     }
 
     for (indx=0; indx<motapp->cam_cnt; indx++) {
-        motpls_log(INF, TYPE_ALL, NO_ERRNO, 0
+        motpls_log(INF, TYPE_ALL, NO_ERRNO, 0, NULL
             , _("Camera %d - Config file: %s")
             , motapp->cam_list[indx]->conf->device_id
             , motapp->cam_list[indx]->conf->conf_filename.c_str());
@@ -3978,7 +3978,7 @@ void conf_parms_log(ctx_motapp *motapp)
     }
 
     for (indx=0; indx<motapp->snd_cnt; indx++) {
-        motpls_log(INF, TYPE_ALL, NO_ERRNO, 0
+        motpls_log(INF, TYPE_ALL, NO_ERRNO, 0, NULL
             , _("Sound %d - Config file: %s")
             , motapp->snd_list[indx]->conf->device_id
             , motapp->snd_list[indx]->conf->conf_filename.c_str());

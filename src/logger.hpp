@@ -52,9 +52,10 @@
     #define TYPE_DEFAULT            TYPE_ALL      /* Default type      */
     #define TYPE_DEFAULT_STR        "ALL"         /* Default name logs */
 
-    #define MOTPLS_LOG(x, y, z, format, args...)  motpls_log(x, y, z, 1, format, __FUNCTION__, ##args)
+    #define MOTPLS_LOG(x, y, z, args...)  motpls_log(x, y, z, 1, __FUNCTION__, ##args)
 
-    void motpls_log(int loglevel, int logtype, int errno_flag,int fncname, const char *fmt, ...);
+    void motpls_log(int msg_level, int msg_type, int msg_err, int msg_fnc, const char *msg_fncnm, ...);
+
     void log_init(ctx_motapp *motapp);
     void log_deinit(ctx_motapp *motapp);
     void log_set_level(int new_level);
