@@ -565,12 +565,12 @@ static void snd_pulse_init(ctx_dev *snd)
 {
     #ifdef HAVE_PULSE
         ctx_snd_info *info = snd->snd_info;
-        const pa_sample_spec specs = {
-            .format = PA_SAMPLE_S16LE,
-            .rate = (uint32_t)info->sample_rate,
-            .channels = (uint8_t)info->channels
-        };
+        pa_sample_spec specs;
         int errcd;
+
+        specs.format = PA_SAMPLE_S16LE;
+        specs.rate = (uint32_t)info->sample_rate;
+        specs.channels = (uint8_t)info->channels;
 
         snd->snd_pulse->dev = NULL;
         snd->snd_pulse->dev = pa_simple_new(
