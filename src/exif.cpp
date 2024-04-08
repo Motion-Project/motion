@@ -105,7 +105,7 @@ static void put_uint32(JOCTET *buf, unsigned value)
 }
 
 struct tiff_writing {
-    JOCTET * const base;
+    JOCTET *base;
     JOCTET *buf;
     unsigned data_offset;
 };
@@ -275,11 +275,11 @@ unsigned exif_prepare(unsigned char **exif, ctx_dev *cam,
     JOCTET *marker =(JOCTET *) malloc(buffer_size);
     memcpy(marker, exif_marker_start, 14); /* EXIF and TIFF headers */
 
-    struct tiff_writing writing = (struct tiff_writing) {
-    .base = marker + 6, /* base address for intra-TIFF offsets */
-    .buf = marker + 14, /* current write position */
-    .data_offset =(unsigned int) (8 + ifds_size), /* where to start storing data */
-    };
+    struct tiff_writing writing;
+
+    writing.base = marker + 6; /* base address for intra-TIFF offsets */
+    writing.buf = marker + 14; /* current write position */
+    writing.data_offset =(unsigned int) (8 + ifds_size); /* where to start storing data */
 
     /* Write IFD 0 */
     /* Note that tags are stored in numerical order */
