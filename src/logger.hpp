@@ -52,7 +52,7 @@
     #define TYPE_DEFAULT            TYPE_ALL      /* Default type      */
     #define TYPE_DEFAULT_STR        "ALL"         /* Default name logs */
 
-    #define MOTPLS_LOG(x, y, z, args...)  motpls_log(x, y, z, 1, __FUNCTION__, ##args)
+    #define MOTPLS_LOG(x, y, z, ...)  motpls_log(x, y, z, 1, __FUNCTION__, __VA_ARGS__)
 
     void motpls_log(int msg_level, int msg_type, int msg_err, int msg_fnc, const char *msg_fncnm, ...);
 
