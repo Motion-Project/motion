@@ -87,8 +87,8 @@
 
 #define SLEEP(seconds, nanoseconds) {              \
                 struct timespec ts1;                \
-                ts1.tv_sec = (seconds);             \
-                ts1.tv_nsec = (nanoseconds);        \
+                ts1.tv_sec = seconds;             \
+                ts1.tv_nsec = (long)nanoseconds;        \
                 while (nanosleep(&ts1, &ts1) == -1); \
         }
 

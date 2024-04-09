@@ -102,7 +102,7 @@
 
         enum WEBUI_METHOD           cnct_method;    /* Connection method.  Get or Post */
 
-        uint64_t                    stream_pos;     /* Stream position of sent image */
+        size_t                      stream_pos;     /* Stream position of sent image */
         int                         stream_fps;     /* Stream rate per second */
         struct timespec             time_last;      /* Keep track of processing time for stream thread*/
         int                         mhd_first;      /* Boolean for whether it is the first connection*/

@@ -31,7 +31,7 @@ static ssize_t webu_file_reader (void *cls, uint64_t pos, char *buf, size_t max)
 {
     ctx_webui *webui =(ctx_webui *)cls;
 
-    (void)fseek (webui->req_file, pos, SEEK_SET);
+    (void)fseek (webui->req_file, (long)pos, SEEK_SET);
     return fread (buf, 1, max, webui->req_file);
 }
 
