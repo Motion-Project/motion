@@ -335,6 +335,137 @@ static void motpls_shutdown(ctx_motapp *motapp)
 
 }
 
+/* Validate or set the position on the all cameras image*/
+static void motpls_allcams_init(ctx_motapp *motapp)
+{
+    int indx, indx1, row, col, mx_row, mx_col, col_chk;
+    bool cfg_valid, chk;
+    std::string cfg, cfg_row, cfg_col;
+
+    motapp->all_img->image = NULL;
+    motapp->all_img->jpeg_data = NULL;
+
+    if (motapp->cam_cnt < 1) {
+        return;
+    }
+
+    for (indx=0; indx<motapp->cam_cnt; indx++) {
+        cfg = motapp->cam_list[indx]->conf->stream_preview_location;
+        if (cfg.find("|") == std::string::npos) {
+            cfg = "";
+        }
+        if (cfg == "") {
+            row++;
+            motapp->cam_list[indx]->all_loc.col = 1;
+            motapp->cam_list[indx]->all_loc.row = row;
+        } else {
+            motapp->cam_list[indx]->all_loc.row =
+                stoi(cfg.substr(0,cfg.find("|")));
+            motapp->cam_list[indx]->all_loc.col =
+                stoi(cfg.substr(cfg.find("|")+1));
+        }
+    }
+
+    cfg_valid = true;
+    mx_row = 0;
+    mx_col = 0;
+    for (indx=0; indx<motapp->cam_cnt; indx++) {
+        for (indx1=0; indx1<motapp->cam_cnt; indx1++) {
+            if ((motapp->cam_list[indx]->all_loc.col ==
+                 motapp->cam_list[indx1]->all_loc.col) &&
+                (motapp->cam_list[indx]->all_loc.row ==
+                motapp->cam_list[indx1]->all_loc.row) &&
+                (indx != indx1)) {
+                MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                    , "Duplicate stream_preview_location "
+                     " cam %d, cam %d row %d col %d"
+                    , motapp->cam_list[indx]->conf->device_id
+                    , motapp->cam_list[indx1]->conf->device_id
+                    , motapp->cam_list[indx]->all_loc.row
+                    , motapp->cam_list[indx]->all_loc.col);
+                cfg_valid = false;
+            }
+        }
+        if (mx_col < motapp->cam_list[indx]->all_loc.col) {
+            mx_col = motapp->cam_list[indx]->all_loc.col;
+        }
+        if (mx_row < motapp->cam_list[indx]->all_loc.row) {
+            mx_row = motapp->cam_list[indx]->all_loc.row;
+        }
+        if (motapp->cam_list[indx]->all_loc.row == 0) {
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , "Invalid stream_preview_location row cam %d, row %d"
+                , motapp->cam_list[indx]->conf->device_id
+                , motapp->cam_list[indx]->all_loc.row);
+            cfg_valid = false;
+        }
+        if (motapp->cam_list[indx]->all_loc.col == 0) {
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , "Invalid stream_preview_location col cam %d, col %d"
+                , motapp->cam_list[indx]->conf->device_id
+                , motapp->cam_list[indx]->all_loc.col);
+            cfg_valid = false;
+        }
+    }
+
+    for (row=1; row<=mx_row; row++) {
+        chk = false;
+        for (indx=0; indx<motapp->cam_cnt; indx++) {
+            if (row == motapp->cam_list[indx]->all_loc.row) {
+                chk = true;
+            }
+        }
+        if (chk == false) {
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , "Invalid stream_preview_location combination. "
+                " Missing row %d", row);
+            cfg_valid = false;
+        }
+        col_chk = 0;
+        for (col=1; col<=mx_col; col++) {
+            for (indx=0; indx<motapp->cam_cnt; indx++) {
+                if ((row == motapp->cam_list[indx]->all_loc.row) &&
+                    (col == motapp->cam_list[indx]->all_loc.col)) {
+                    if ((col_chk+1) == col) {
+                        col_chk = col;
+                    } else {
+                        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                            , "Invalid stream_preview_location combination. "
+                            " Missing row %d column %d", row, col_chk+1);
+                        cfg_valid = false;
+                    }
+                }
+            }
+        }
+    }
+
+    if (cfg_valid == false) {
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            ,"Creating default stream_preview_location values");
+        row = 0;
+        col = 0;
+        for (indx=0; indx<motapp->cam_cnt; indx++) {
+            if (col == 1) {
+                col++;
+            } else {
+                row++;
+                col = 1;
+            }
+            motapp->cam_list[indx]->all_loc.col = col;
+            motapp->cam_list[indx]->all_loc.row = row;
+        }
+    }
+
+    for (indx=0; indx<motapp->cam_cnt; indx++) {
+        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
+            ,"stream_preview_location values. Device %d row %d col %d"
+            , motapp->cam_list[indx]->device_id
+            , motapp->cam_list[indx]->all_loc.row
+            , motapp->cam_list[indx]->all_loc.col);
+    }
+
+}
+
 static void motpls_device_ids(ctx_motapp *motapp)
 {
     /* Set the device id's on the ctx_dev.  They must be unique */
@@ -495,6 +626,8 @@ static void motpls_startup(ctx_motapp *motapp, int daemonize)
     draw_init_chars();
 
     webu_init(motapp);
+
+    motpls_allcams_init(motapp);
 
 }
 
@@ -692,6 +825,8 @@ static void motpls_init(ctx_motapp *motapp, int argc, char *argv[])
     motapp->snd_cnt = 0;
 
     motapp->conf = new ctx_config;
+    motapp->all_img = new ctx_all_img;
+
     motapp->dbse = NULL;
 
     motapp->webcontrol_running = false;

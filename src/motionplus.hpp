@@ -306,6 +306,23 @@ struct ctx_images {
 
 };
 
+struct ctx_all_loc {
+    int     row;
+    int     col;
+    int     offset_row;
+    int     offset_col;
+};
+
+struct ctx_all_img {
+    int             width;
+    int             height;
+    int             imgsz;
+    unsigned char   *jpeg_data; /* Image compressed as JPG */
+    long            jpeg_size;  /* The number of bytes for jpg */
+    unsigned char   *image;     /* The base data used for image */
+};
+
+
 struct ctx_stream_data {
     unsigned char   *jpeg_data; /* Image compressed as JPG */
     long            jpeg_size;  /* The number of bytes for jpg */
@@ -313,6 +330,7 @@ struct ctx_stream_data {
     unsigned char   *image;     /* The base data used for image */
     int             jpg_cnct;   /* Counter of the number of jpg connections*/
     int             ts_cnct;    /* Counter of the number of mpegts connections */
+    int             all_cnct;   /* Counter of the number of all camera connections */
 };
 
 struct ctx_stream {
@@ -483,6 +501,8 @@ struct ctx_dev {
     int previous_diffs, previous_location_x, previous_location_y;
     bool                    passflag;  //flag first frame vs all others.
 
+    ctx_all_loc             all_loc;    /* position on all camera image */
+
     pthread_mutex_t         parms_lock;
     ctx_params              *params;            /* Device parameters*/
     bool                    parms_changed;      /*bool indicating if the parms have changed */
@@ -520,6 +540,7 @@ struct ctx_motapp {
     ctx_config          *conf;
     int                 cam_cnt;
     int                 snd_cnt;
+    ctx_all_img         *all_img;
 
     volatile int                webcontrol_running;
     volatile int                webcontrol_finish;

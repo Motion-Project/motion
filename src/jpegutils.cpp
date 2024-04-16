@@ -579,7 +579,9 @@ int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
 
     jpeg_start_compress(&cinfo, TRUE);
 
-    put_jpeg_exif(&cinfo, cam, ts1, box);
+    if (cam != NULL) {
+        put_jpeg_exif(&cinfo, cam, ts1, box);
+    }
 
     /* If the image is not a multiple of 16, this overruns the buffers
      * we'll just pad those last bytes with zeros
@@ -647,7 +649,9 @@ int jpgutl_put_grey(unsigned char *dest_image, int image_size,
 
     jpeg_start_compress (&cjpeg, TRUE);
 
-    put_jpeg_exif(&cjpeg, cam, ts1, box);
+    if (cam != NULL) {
+        put_jpeg_exif(&cjpeg, cam, ts1, box);
+    }
 
     row_ptr[0] = input_image;
 
