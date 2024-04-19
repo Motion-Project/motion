@@ -104,6 +104,10 @@
 
         FILE                        *req_file;      /* requested file*/
 
+        unsigned char               *all_img_data;       /* Image for all cameras */
+
+        //unsigned char   *jpg_data;  /* Compressed image JPG */
+
         enum WEBUI_METHOD           cnct_method;    /* Connection method.  Get or Post */
 
         size_t                      stream_pos;     /* Stream position of sent image */

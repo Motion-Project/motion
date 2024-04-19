@@ -146,10 +146,12 @@ static void webu_mpegts_resetpos(ctx_webui *webui)
 
 static int webu_mpegts_getimg(ctx_webui *webui)
 {
-    ctx_stream_data *local_stream;
+    ctx_stream_data *strm;
     struct timespec curr_ts;
+    unsigned char *img_data;
+    int img_sz;
 
-    if ((webui->motapp->webcontrol_finish) || (webui->cam->finish_dev)) {
+    if (webu_stream_check_finish(webui)) {
         webu_mpegts_resetpos(webui);
         return 0;
     }
@@ -159,37 +161,50 @@ static int webu_mpegts_getimg(ctx_webui *webui)
     memset(webui->resp_image, '\0', webui->resp_size);
     webui->resp_used = 0;
 
-    /* Assign to a local pointer the stream we want */
-    if (webui->cnct_type == WEBUI_CNCT_TS_FULL) {
-        local_stream = &webui->cam->stream.norm;
-    } else if (webui->cnct_type == WEBUI_CNCT_TS_SUB) {
-        local_stream = &webui->cam->stream.sub;
-    } else if (webui->cnct_type == WEBUI_CNCT_TS_MOTION) {
-        local_stream = &webui->cam->stream.motion;
-    } else if (webui->cnct_type == WEBUI_CNCT_TS_SOURCE) {
-        local_stream = &webui->cam->stream.source;
-    } else if (webui->cnct_type == WEBUI_CNCT_TS_SECONDARY) {
-        local_stream = &webui->cam->stream.secondary;
-    } else {
-        return 0;
-    }
-    pthread_mutex_lock(&webui->cam->stream.mutex);
+    if (webui->device_id > 0) {
         if ((webui->cam->detecting_motion == false) &&
             (webui->motapp->cam_list[webui->camindx]->conf->stream_motion)) {
             webui->stream_fps = 1;
         } else {
             webui->stream_fps = webui->motapp->cam_list[webui->camindx]->conf->stream_maxrate;
         }
-        if (local_stream->image == NULL) {
-            pthread_mutex_unlock(&webui->cam->stream.mutex);
-            return -1;
+        /* Assign to a local pointer the stream we want */
+        if (webui->cnct_type == WEBUI_CNCT_TS_FULL) {
+            strm = &webui->cam->stream.norm;
+        } else if (webui->cnct_type == WEBUI_CNCT_TS_SUB) {
+            strm = &webui->cam->stream.sub;
+        } else if (webui->cnct_type == WEBUI_CNCT_TS_MOTION) {
+            strm = &webui->cam->stream.motion;
+        } else if (webui->cnct_type == WEBUI_CNCT_TS_SOURCE) {
+            strm = &webui->cam->stream.source;
+        } else if (webui->cnct_type == WEBUI_CNCT_TS_SECONDARY) {
+            strm = &webui->cam->stream.secondary;
+        } else {
+            return 0;
         }
-        if (webu_mpegts_pic_send(webui, local_stream->image) < 0) {
-            pthread_mutex_unlock(&webui->cam->stream.mutex);
-            return -1;
-        }
-        local_stream->consumed = true;
-    pthread_mutex_unlock(&webui->cam->stream.mutex);
+        img_sz = (webui->ctx_codec->width * webui->ctx_codec->height * 3)/2;
+        img_data = (unsigned char*) mymalloc(img_sz);
+        pthread_mutex_lock(&webui->cam->stream.mutex);
+            if (strm->img_data == NULL) {
+                memset(img_data, 0x00, img_sz);
+            } else {
+                memcpy(img_data, strm->img_data, img_sz);
+                strm->consumed = true;
+            }
+        pthread_mutex_unlock(&webui->cam->stream.mutex);
+    } else {
+        webu_stream_all_getimg(webui);
+
+        img_data = (unsigned char*) mymalloc(webui->motapp->all_sizes->img_sz);
+
+        memcpy(img_data, webui->all_img_data, webui->motapp->all_sizes->img_sz);
+    }
+
+    if (webu_mpegts_pic_send(webui, img_data) < 0) {
+        myfree(&img_data);
+        return -1;
+    }
+    myfree(&img_data);
 
     if (webu_mpegts_pic_get(webui) < 0) {
         return -1;
@@ -225,7 +240,7 @@ static ssize_t webu_mpegts_response(void *cls, uint64_t pos, char *buf, size_t m
     size_t sent_bytes;
     (void)pos;
 
-    if ((webui->motapp->webcontrol_finish) || (webui->cam->finish_dev)) {
+    if (webu_stream_check_finish(webui)) {
         return -1;
     }
 
@@ -262,7 +277,7 @@ static ssize_t webu_mpegts_response(void *cls, uint64_t pos, char *buf, size_t m
 
 int webu_mpegts_open(ctx_webui *webui)
 {
-    int retcd;
+    int retcd, img_w, img_h;
     char errstr[128];
     unsigned char   *buf_image;
     AVStream        *strm;
@@ -283,13 +298,21 @@ int webu_mpegts_open(ctx_webui *webui)
     codec = avcodec_find_encoder(MY_CODEC_ID_H264);
     strm = avformat_new_stream(webui->fmtctx, codec);
 
+    if (webui->device_id > 0) {
+        webu_stream_img_sizes(webui, webui->cam, img_w, img_h);
+    } else {
+        webu_stream_all_sizes(webui);
+        img_w = webui->motapp->all_sizes->width;
+        img_h = webui->motapp->all_sizes->height;
+    }
+
     webui->ctx_codec = avcodec_alloc_context3(codec);
     webui->ctx_codec->gop_size      = 15;
     webui->ctx_codec->codec_id      = MY_CODEC_ID_H264;
     webui->ctx_codec->codec_type    = AVMEDIA_TYPE_VIDEO;
     webui->ctx_codec->bit_rate      = 400000;
-    webui->ctx_codec->width         = webui->cam->imgs.width;
-    webui->ctx_codec->height        = webui->cam->imgs.height;
+    webui->ctx_codec->width         = img_w;
+    webui->ctx_codec->height        = img_h;
     webui->ctx_codec->time_base.num = 1;
     webui->ctx_codec->time_base.den = 90000;
     webui->ctx_codec->pix_fmt       = MY_PIX_FMT_YUV420P;
@@ -323,7 +346,11 @@ int webu_mpegts_open(ctx_webui *webui)
         return -1;
     }
 
-    webu_stream_checkbuffers(webui);
+    if (webui->device_id > 0) {
+        webu_stream_checkbuffers(webui);
+    } else {
+        webu_stream_all_buffers(webui);
+    }
 
     webui->aviobuf_sz = 4096;
     buf_image = (unsigned char*)av_malloc(webui->aviobuf_sz);

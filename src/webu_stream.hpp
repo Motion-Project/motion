@@ -26,5 +26,10 @@
     mhdrslt webu_stream_main(ctx_webui *webui);
     void webu_stream_delay(ctx_webui *webui);
     void webu_stream_checkbuffers(ctx_webui *webui);
+    void webu_stream_img_sizes(ctx_webui *webui, ctx_dev *cam, int &img_w, int &img_h);
+    void webu_stream_all_sizes(ctx_webui *webui);
+    void webu_stream_all_buffers(ctx_webui *webui);
+    void webu_stream_all_getimg(ctx_webui *webui);
+    bool webu_stream_check_finish(ctx_webui *webui);
 
 #endif /* _INCLUDE_WEBU_STREAM_HPP_ */

@@ -27,12 +27,14 @@
 #include "alg_sec.hpp"
 #include "jpegutils.hpp"
 
-/* Allocate buffers if needed */
+/* Allocate buffers if needed. */
 void webu_stream_checkbuffers(ctx_webui *webui)
 {
+
     if (webui->cam == NULL) {
         return;
     }
+    /* Use simple approach of not bothering to reduce size when doing a substream  */
     if (webui->resp_size < (size_t)webui->cam->imgs.size_norm) {
         if (webui->resp_image != NULL) {
             myfree(&webui->resp_image);
@@ -44,52 +46,76 @@ void webu_stream_checkbuffers(ctx_webui *webui)
     }
 }
 
-void webu_stream_allsize(ctx_webui *webui)
+void webu_stream_img_sizes(ctx_webui *webui, ctx_dev *cam, int &img_w, int &img_h)
+{
+    if (((webui->cnct_type == WEBUI_CNCT_JPG_SUB) ||
+         (webui->cnct_type == WEBUI_CNCT_TS_SUB)) &&
+        (((cam->imgs.width  % 16) == 0) &&
+         ((cam->imgs.height % 16) == 0))) {
+        img_w = (cam->imgs.width/2);
+        img_h = (cam->imgs.height/2);
+    } else {
+        img_w = cam->imgs.width;
+        img_h = cam->imgs.height;
+    }
+}
+
+void webu_stream_all_sizes(ctx_webui *webui)
 {
     int indx, row, col;
     int chk_sz, chk_w, mx_col, mx_row;
-    int mx_h, mx_w;
+    int mx_h, mx_w, img_h, img_w;
+    ctx_dev *cam;
 
-    /* Calculate total image size*/
+    if (webui->motapp->all_sizes->reset == false) {
+        return;
+    }
+
+    /* Calculate a new total image size*/
     mx_row = 0;
     mx_col = 0;
     for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
-        if (mx_row < webui->motapp->cam_list[indx]->all_loc.row) {
-            mx_row = webui->motapp->cam_list[indx]->all_loc.row;
+        cam = webui->motapp->cam_list[indx];
+        if (mx_row < cam->all_loc.row) {
+            mx_row = cam->all_loc.row;
         }
-        if (mx_col < webui->motapp->cam_list[indx]->all_loc.col) {
-            mx_col = webui->motapp->cam_list[indx]->all_loc.col;
+        if (mx_col < cam->all_loc.col) {
+            mx_col = cam->all_loc.col;
         }
     }
 
-    webui->motapp->all_img->width = 0;
-    webui->motapp->all_img->height = 0;
+    webui->motapp->all_sizes->width = 0;
+    webui->motapp->all_sizes->height = 0;
     for (row=1; row<=mx_row; row++) {
         chk_sz = 0;
         mx_h = 0;
         for (col=1; col<=mx_col; col++) {
             for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
-                if ((row == webui->motapp->cam_list[indx]->all_loc.row) &&
-                    (col == webui->motapp->cam_list[indx]->all_loc.col)) {
-                    webui->motapp->cam_list[indx]->all_loc.offset_col = chk_sz;
-                    chk_sz += webui->motapp->cam_list[indx]->imgs.width;
-                    if (mx_h < webui->motapp->cam_list[indx]->imgs.height) {
-                        mx_h = webui->motapp->cam_list[indx]->imgs.height;
+                cam = webui->motapp->cam_list[indx];
+                webu_stream_img_sizes(webui, cam, img_w, img_h);
+                if ((row == cam->all_loc.row) &&
+                    (col == cam->all_loc.col)) {
+                    cam->all_loc.offset_col = chk_sz;
+                    chk_sz += img_w;
+                    if (mx_h < img_h) {
+                        mx_h = img_h;
                     }
                 }
             }
         }
         /* Align/center vert. the images in each row*/
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
-            if (webui->motapp->cam_list[indx]->all_loc.row == row) {
-                webui->motapp->cam_list[indx]->all_loc.offset_row =
-                    webui->motapp->all_img->height +
-                    ((mx_h -webui->motapp->cam_list[indx]->imgs.height)/2) ;
+            cam = webui->motapp->cam_list[indx];
+            webu_stream_img_sizes(webui, cam, img_w, img_h);
+            if (cam->all_loc.row == row) {
+                cam->all_loc.offset_row =
+                    webui->motapp->all_sizes->height +
+                    ((mx_h - img_h)/2) ;
             }
         }
-        webui->motapp->all_img->height += mx_h;
-        if (webui->motapp->all_img->width < chk_sz) {
-            webui->motapp->all_img->width = chk_sz;
+        webui->motapp->all_sizes->height += mx_h;
+        if (webui->motapp->all_sizes->width < chk_sz) {
+            webui->motapp->all_sizes->width = chk_sz;
         }
     }
 
@@ -99,34 +125,37 @@ void webu_stream_allsize(ctx_webui *webui)
         chk_sz = 0;
         mx_w = 0;
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
-            if (webui->motapp->cam_list[indx]->all_loc.col == col) {
-                if (webui->motapp->cam_list[indx]->all_loc.offset_col < chk_w) {
-                    webui->motapp->cam_list[indx]->all_loc.offset_col = chk_w;
+            cam = webui->motapp->cam_list[indx];
+            webu_stream_img_sizes(webui, cam, img_w, img_h);
+            if (cam->all_loc.col == col) {
+                if (cam->all_loc.offset_col < chk_w) {
+                    cam->all_loc.offset_col = chk_w;
                 }
-                if (chk_sz < webui->motapp->cam_list[indx]->all_loc.offset_col) {
-                    chk_sz = webui->motapp->cam_list[indx]->all_loc.offset_col;
+                if (chk_sz < cam->all_loc.offset_col) {
+                    chk_sz = cam->all_loc.offset_col;
                 }
-                if (mx_w < webui->motapp->cam_list[indx]->imgs.width) {
-                    mx_w = webui->motapp->cam_list[indx]->imgs.width;
+                if (mx_w < img_w) {
+                    mx_w = img_w;
                 }
             }
         }
         for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
-            if (webui->motapp->cam_list[indx]->all_loc.col == col) {
-                webui->motapp->cam_list[indx]->all_loc.offset_col = chk_sz +
-                    ((mx_w - webui->motapp->cam_list[indx]->imgs.width) /2) ;
+            cam = webui->motapp->cam_list[indx];
+            webu_stream_img_sizes(webui, cam, img_w, img_h);
+            if (cam->all_loc.col == col) {
+                cam->all_loc.offset_col =
+                    chk_sz + ((mx_w - img_w) /2) ;
             }
         }
         chk_w = mx_w + chk_sz;
-        if (webui->motapp->all_img->width < chk_w) {
-            webui->motapp->all_img->width = chk_w;
+        if (webui->motapp->all_sizes->width < chk_w) {
+            webui->motapp->all_sizes->width = chk_w;
         }
     }
 
-
-    webui->motapp->all_img->imgsz =((
-        webui->motapp->all_img->height *
-        webui->motapp->all_img->width * 3)/2);
+    webui->motapp->all_sizes->img_sz =((
+        webui->motapp->all_sizes->height *
+        webui->motapp->all_sizes->width * 3)/2);
 
     /*
     for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
@@ -141,20 +170,51 @@ void webu_stream_allsize(ctx_webui *webui)
 
 }
 
-void webu_stream_allbuffer(ctx_webui *webui)
+void webu_stream_all_buffers(ctx_webui *webui)
 {
-    if (webui->resp_size < (size_t)webui->motapp->all_img->imgsz) {
+    if (webui->resp_size < (size_t)webui->motapp->all_sizes->img_sz) {
         if (webui->resp_image != NULL) {
             myfree(&webui->resp_image);
         }
-        webui->resp_size = webui->motapp->all_img->imgsz;
+        webui->resp_size = webui->motapp->all_sizes->img_sz;
         webui->resp_image = (unsigned char*) mymalloc(webui->resp_size);
         memset(webui->resp_image, '\0', webui->resp_size);
         webui->resp_used = 0;
     }
+
+    if (webui->all_img_data  == NULL) {
+        webui->all_img_data  = (unsigned char*)
+            mymalloc((size_t)webui->motapp->all_sizes->img_sz);
+    }
+
 }
 
-static bool webu_stream_check_finish(ctx_webui *webui)
+bool webu_stream_all_ready(ctx_webui *webui)
+{
+    int indx, indx1;
+    ctx_dev *cam;
+
+    for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
+        cam = webui->motapp->cam_list[indx];
+        if (cam->passflag == false) {
+            webui->motapp->all_sizes->reset = true;
+            indx1 = 0;
+            while (indx1 < 1000) {
+                SLEEP(0, 1000);
+                if (cam->passflag) {
+                    break;
+                }
+                indx1++;
+            }
+            if (cam->passflag == false) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool webu_stream_check_finish(ctx_webui *webui)
 {
     if (webui->motapp->webcontrol_finish){
         webui->resp_used = 0;
@@ -207,122 +267,156 @@ void webu_stream_delay(ctx_webui *webui)
 
 }
 
-static void webu_stream_get_allimg(ctx_webui *webui)
+void webu_stream_all_getimg(ctx_webui *webui)
 {
     int a_y, a_u, a_v; /* all img y,u,v */
     int c_y, c_u, c_v; /* camera img y,u,v */
-    char resp_head[80];
-    int  header_len, indx, row;
+    int img_h, img_w, img_sz, img_orow, img_ocol;
+    int indx, row, indx1;
+    unsigned char *img_data;
+    ctx_stream_data *strm;
+    ctx_all_sizes *all_sz;
+    ctx_dev *cam;
 
     memset(webui->resp_image, '\0', webui->resp_size);
 
-    myfree(&webui->motapp->all_img->image);
-    myfree(&webui->motapp->all_img->jpeg_data);
+    all_sz = webui->motapp->all_sizes;
 
     a_y = 0;
-    a_u = (webui->motapp->all_img->width *webui->motapp->all_img->height);
+    a_u = (all_sz->width * all_sz->height);
     a_v = a_u + (a_u / 4);
 
-    webui->motapp->all_img->image = (unsigned char*) mymalloc(
-        (size_t)webui->motapp->all_img->imgsz);
-    webui->motapp->all_img->jpeg_data = (unsigned char*) mymalloc(
-        (size_t)webui->motapp->all_img->imgsz);
-
-    memset(webui->motapp->all_img->image, 0x00, (size_t)a_u);
-    memset(webui->motapp->all_img->image + a_u, 0x10, (size_t)(a_u/2));
+    memset(webui->all_img_data , 0x00, (size_t)a_u);
+    memset(webui->all_img_data  + a_u, 0x10, (size_t)(a_u/2));
 
     for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
-        a_y = (webui->motapp->cam_list[indx]->all_loc.offset_row *
-            webui->motapp->all_img->width) +
-            webui->motapp->cam_list[indx]->all_loc.offset_col;
-        a_u =
-            (webui->motapp->all_img->height * webui->motapp->all_img->width) +
-            ((webui->motapp->cam_list[indx]->all_loc.offset_row/4) *
-            webui->motapp->all_img->width) +
-            (webui->motapp->cam_list[indx]->all_loc.offset_col / 2) ;
+        cam = webui->motapp->cam_list[indx];
+        webu_stream_img_sizes(webui, cam, img_w, img_h);
+        img_sz = (img_h * img_w * 3)/2;
+        img_orow = cam->all_loc.offset_row;
+        img_ocol = cam->all_loc.offset_col;
+        img_data = (unsigned char*) mymalloc(img_sz);
 
-        a_v = a_u + ((webui->motapp->all_img->height *
-            webui->motapp->all_img->width) / 4);
+        if ((webui->cnct_type == WEBUI_CNCT_JPG_FULL) ||
+            (webui->cnct_type == WEBUI_CNCT_TS_FULL)) {
+            strm = &cam->stream.norm;
+        } else if ((webui->cnct_type == WEBUI_CNCT_JPG_SUB) ||
+            (webui->cnct_type == WEBUI_CNCT_TS_SUB)) {
+            strm = &cam->stream.sub;
+        } else if ((webui->cnct_type == WEBUI_CNCT_JPG_MOTION) ||
+            (webui->cnct_type == WEBUI_CNCT_TS_MOTION)) {
+            strm = &cam->stream.motion;
+        } else if ((webui->cnct_type == WEBUI_CNCT_JPG_SOURCE)  ||
+            (webui->cnct_type == WEBUI_CNCT_TS_SOURCE )) {
+            strm = &cam->stream.source;
+        } else if ((webui->cnct_type == WEBUI_CNCT_JPG_SECONDARY)  ||
+            (webui->cnct_type == WEBUI_CNCT_TS_SECONDARY)) {
+            strm = &cam->stream.secondary;
+        } else { /* Should not be possible*/
+            myfree(&img_data);
+            return;
+        }
+        pthread_mutex_lock(&cam->stream.mutex);
+            indx1=0;
+            while (indx1 < 1000) {
+                if (strm->img_data == NULL) {
+                    pthread_mutex_unlock(&cam->stream.mutex);
+                        SLEEP(0, 1000);
+                    pthread_mutex_lock(&cam->stream.mutex);
+                } else {
+                    break;
+                }
+                indx1++;
+            }
+            if (strm->img_data == NULL) {
+                memset(img_data, 0x00, img_sz);
+            } else {
+                /*
+                MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+                , "Got image. %d connection count %d sleep wait %d"
+                , cam->device_id, strm->all_cnct, indx1);
+                */
+                memcpy(img_data, strm->img_data, img_sz);
+            }
+        pthread_mutex_unlock(&cam->stream.mutex);
 
-        /*
-        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            , "r %d c %d a %d %d %d w %d h %d"
-            , webui->motapp->cam_list[indx]->all_loc.offset_row
-            , webui->motapp->cam_list[indx]->all_loc.offset_col
-            , a_y, a_u, a_v
-            , webui->motapp->all_img->width
-            , webui->motapp->all_img->height);
-        */
+        a_y = (img_orow * all_sz->width) + img_ocol;
+        a_u =(all_sz->height * all_sz->width) +
+            ((img_orow / 4) * all_sz->width) + (img_ocol / 2) ;
+        a_v = a_u + ((all_sz->height * all_sz->width) / 4);
+
         c_y = 0;
-        c_u = (webui->motapp->cam_list[indx]->imgs.width *
-            webui->motapp->cam_list[indx]->imgs.height);
+        c_u = (img_w * img_h);
         c_v = c_u + (c_u / 4);
 
-        for (row=0; row<webui->motapp->cam_list[indx]->imgs.height; row++) {
-            memcpy(webui->motapp->all_img->image + a_y
-                , webui->motapp->cam_list[indx]->current_image->image_norm + c_y
-                , webui->motapp->cam_list[indx]->imgs.width);
-            a_y += webui->motapp->all_img->width;
-            c_y += webui->motapp->cam_list[indx]->imgs.width;
+        /*
+        MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+            , "r %d c %d a %d %d %d h %d w %d"
+            , img_orow, img_ocol
+            , a_y, a_u, a_v
+            , all_sz->height, all_sz->width);
+        */
+
+        for (row=0; row<img_h; row++) {
+            memcpy(webui->all_img_data  + a_y, img_data + c_y, img_w);
+            a_y += all_sz->width;
+            c_y += img_w;
             if (row % 2) {
-                memcpy(webui->motapp->all_img->image + a_u
-                    , webui->motapp->cam_list[indx]->current_image->image_norm + c_u
-                    , (webui->motapp->cam_list[indx]->imgs.width/2));
-                //memset(webui->motapp->all_img->image + a_u, 0xFA
-                //    , (webui->motapp->cam_list[indx]->imgs.width/2));
-                a_u += (webui->motapp->all_img->width/2);
-                c_u += (webui->motapp->cam_list[indx]->imgs.width/2);
-                memcpy(webui->motapp->all_img->image + a_v
-                    , webui->motapp->cam_list[indx]->current_image->image_norm + c_v
-                    , (webui->motapp->cam_list[indx]->imgs.width/2));
-                a_v += (webui->motapp->all_img->width/2);
-                c_v += (webui->motapp->cam_list[indx]->imgs.width/2);
+                memcpy(webui->all_img_data  + a_u, img_data + c_u, img_w / 2);
+                //memset(webui->all_img_data  + a_u, 0xFA, img_w/2);
+                a_u += (all_sz->width / 2);
+                c_u += (img_w / 2);
+                memcpy(webui->all_img_data  + a_v, img_data + c_v, img_w / 2);
+                a_v += (all_sz->width / 2);
+                c_v += (img_w / 2);
             }
         }
+        myfree(&img_data);
     }
 
-    webui->motapp->all_img->jpeg_size = jpgutl_put_yuv420p(
-        webui->motapp->all_img->jpeg_data
-        , webui->motapp->all_img->imgsz
-        , webui->motapp->all_img->image
-        , webui->motapp->all_img->width
-        , webui->motapp->all_img->height
-        , 70, NULL,NULL,NULL);
+}
 
+static void webu_stream_mjpeg_all_img(ctx_webui *webui)
+{
+    int header_len, jpg_sz;
+    char resp_head[80];
+    ctx_all_sizes *all_sz;
+    unsigned char *jpg_data;
+
+    if (webu_stream_check_finish(webui)) {
+        return;
+    }
+
+    if (webu_stream_all_ready(webui) == false) {
+        return;
+    }
+    webu_stream_all_sizes(webui);
+    webu_stream_all_buffers(webui);
+    webu_stream_all_getimg(webui);
+
+    all_sz = webui->motapp->all_sizes;
+
+    jpg_data = (unsigned char*) mymalloc(all_sz->img_sz);
+
+    jpg_sz = jpgutl_put_yuv420p(jpg_data, all_sz->img_sz
+        , webui->all_img_data, all_sz->width, all_sz->height
+        , 70, NULL,NULL,NULL);
     webui->stream_fps = 1;
 
     header_len = snprintf(resp_head, 80
         ,"--BoundaryString\r\n"
         "Content-type: image/jpeg\r\n"
-        "Content-Length: %9ld\r\n\r\n"
-        ,webui->motapp->all_img->jpeg_size);
+        "Content-Length: %9d\r\n\r\n"
+        ,jpg_sz);
     memcpy(webui->resp_image, resp_head, header_len);
-    memcpy(webui->resp_image + header_len
-        , webui->motapp->all_img->jpeg_data
-        , webui->motapp->all_img->jpeg_size);
-    /* Copy in the terminator after the jpg data at the end*/
-    memcpy(webui->resp_image + header_len +
-        webui->motapp->all_img->jpeg_size,"\r\n",2);
-    webui->resp_used = header_len + webui->motapp->all_img->jpeg_size + 2;
-
-    myfree(&webui->motapp->all_img->image);
-    myfree(&webui->motapp->all_img->jpeg_data);
-
-}
-
-static void webu_stream_mjpeg_allimg(ctx_webui *webui)
-{
-    if (webu_stream_check_finish(webui)) {
-        return;
-    }
-    webu_stream_allsize(webui);
-    webu_stream_allbuffer(webui);
-    webu_stream_get_allimg(webui);
+    memcpy(webui->resp_image + header_len, jpg_data, jpg_sz);
+    memcpy(webui->resp_image + header_len + jpg_sz,"\r\n",2);
+    webui->resp_used = header_len + jpg_sz + 2;
+    myfree(&jpg_data);
 }
 
 static void webu_stream_mjpeg_getimg(ctx_webui *webui)
 {
-    long jpeg_size;
     char resp_head[80];
     int  header_len;
     ctx_stream_data *strm;
@@ -358,23 +452,22 @@ static void webu_stream_mjpeg_getimg(ctx_webui *webui)
         } else {
             webui->stream_fps = webui->motapp->cam_list[webui->camindx]->conf->stream_maxrate;
         }
-        if (strm->jpeg_data == NULL) {
+        if (strm->jpg_data == NULL) {
             pthread_mutex_unlock(&webui->cam->stream.mutex);
             return;
         }
-        jpeg_size = strm->jpeg_size;
         header_len = snprintf(resp_head, 80
             ,"--BoundaryString\r\n"
             "Content-type: image/jpeg\r\n"
-            "Content-Length: %9ld\r\n\r\n"
-            ,jpeg_size);
+            "Content-Length: %9d\r\n\r\n"
+            ,strm->jpg_sz);
         memcpy(webui->resp_image, resp_head, header_len);
         memcpy(webui->resp_image + header_len
-            ,strm->jpeg_data
-            ,jpeg_size);
+            ,strm->jpg_data
+            ,strm->jpg_sz);
         /* Copy in the terminator after the jpg data at the end*/
-        memcpy(webui->resp_image + header_len + jpeg_size,"\r\n",2);
-        webui->resp_used = header_len + jpeg_size + 2;
+        memcpy(webui->resp_image + header_len + strm->jpg_sz,"\r\n",2);
+        webui->resp_used = header_len + strm->jpg_sz + 2;
         strm->consumed = true;
     pthread_mutex_unlock(&webui->cam->stream.mutex);
 
@@ -399,7 +492,7 @@ static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, s
         webui->resp_used = 0;
 
         if (webui->device_id == 0) {
-            webu_stream_mjpeg_allimg(webui);
+            webu_stream_mjpeg_all_img(webui);
         } else {
             webu_stream_mjpeg_getimg(webui);
         }
@@ -451,45 +544,30 @@ static void webu_stream_all_cnct(ctx_webui *webui)
 }
 
 /* Obtain the current image for the camera.*/
-static void webu_stream_static_allimg(ctx_webui *webui)
+static void webu_stream_static_all_img(ctx_webui *webui)
 {
-    ctx_stream_data *strm;
+    ctx_all_sizes *all_sz;
+    unsigned char *jpg_data;
 
-    webu_stream_all_cnct(webui);
-
-    webui->resp_used = 0;
-
-    memset(webui->resp_image, '\0', webui->resp_size);
-
-    /* Assign to a local pointer the stream we want */
-    if (webui->cam == NULL) {
-        return;
-    } else if (webui->cnct_type == WEBUI_CNCT_JPG_FULL) {
-        strm = &webui->cam->stream.norm;
-    } else if (webui->cnct_type == WEBUI_CNCT_JPG_SUB) {
-        strm = &webui->cam->stream.sub;
-    } else if (webui->cnct_type == WEBUI_CNCT_JPG_MOTION) {
-        strm = &webui->cam->stream.motion;
-    } else if (webui->cnct_type == WEBUI_CNCT_JPG_SOURCE) {
-        strm = &webui->cam->stream.source;
-    } else if (webui->cnct_type == WEBUI_CNCT_JPG_SECONDARY) {
-        strm = &webui->cam->stream.secondary;
-    } else {
+    if (webu_stream_check_finish(webui)) {
         return;
     }
 
-    pthread_mutex_lock(&webui->cam->stream.mutex);
-        if (strm->jpeg_data == NULL) {
-            pthread_mutex_unlock(&webui->cam->stream.mutex);
-            return;
-        }
-        memcpy(webui->resp_image
-            ,strm->jpeg_data
-            ,strm->jpeg_size);
-        webui->resp_used =strm->jpeg_size;
-        strm->consumed = true;
-    pthread_mutex_unlock(&webui->cam->stream.mutex);
+    if (webu_stream_all_ready(webui) == false) {
+        return;
+    }
+    webu_stream_all_sizes(webui);
+    webu_stream_all_buffers(webui);
+    webu_stream_all_getimg(webui);
 
+    all_sz = webui->motapp->all_sizes;
+    jpg_data = (unsigned char*)mymalloc((size_t)all_sz->img_sz);
+
+    webui->resp_used = jpgutl_put_yuv420p(jpg_data
+        , all_sz->img_sz, webui->all_img_data, all_sz->width
+        , all_sz->height, 70, NULL,NULL,NULL);
+    memcpy(webui->resp_image, jpg_data, webui->resp_used);
+    myfree(&jpg_data);
 }
 
 /* Increment the jpg stream counters */
@@ -530,8 +608,6 @@ static void webu_stream_static_getimg(ctx_webui *webui)
 {
     ctx_stream_data *strm;
 
-    webu_stream_jpg_cnct(webui);
-
     webu_stream_checkbuffers(webui);
 
     webui->resp_used = 0;
@@ -555,14 +631,14 @@ static void webu_stream_static_getimg(ctx_webui *webui)
     }
 
     pthread_mutex_lock(&webui->cam->stream.mutex);
-        if (strm->jpeg_data == NULL) {
+        if (strm->jpg_data == NULL) {
             pthread_mutex_unlock(&webui->cam->stream.mutex);
             return;
         }
         memcpy(webui->resp_image
-            ,strm->jpeg_data
-            ,strm->jpeg_size);
-        webui->resp_used =strm->jpeg_size;
+            ,strm->jpg_data
+            ,strm->jpg_sz);
+        webui->resp_used =strm->jpg_sz;
         strm->consumed = true;
     pthread_mutex_unlock(&webui->cam->stream.mutex);
 
@@ -771,9 +847,11 @@ mhdrslt webu_stream_main(ctx_webui *webui)
 
     if (webui->uri_cmd1 == "static") {
         if (webui->device_id > 0) {
+            webu_stream_jpg_cnct(webui);
             webu_stream_static_getimg(webui);
         } else {
-            webu_stream_static_allimg(webui);
+            webu_stream_all_cnct(webui);
+            webu_stream_static_all_img(webui);
         }
         retcd = webu_stream_static(webui);
     } else if (webui->uri_cmd1 == "mjpg") {
@@ -787,6 +865,9 @@ mhdrslt webu_stream_main(ctx_webui *webui)
     } else if (webui->uri_cmd1 == "mpegts") {
         if (webui->device_id > 0) {
             webu_stream_ts_cnct(webui);
+            retcd = webu_mpegts_main(webui);
+        } else {
+            webu_stream_all_cnct(webui);
             retcd = webu_mpegts_main(webui);
         }
     } else {
@@ -805,45 +886,45 @@ void webu_stream_init(ctx_dev *cam)
 
     cam->imgs.image_substream = NULL;
 
-    cam->stream.norm.jpeg_size = 0;
-    cam->stream.norm.jpeg_data = NULL;
+    cam->stream.norm.jpg_sz = 0;
+    cam->stream.norm.jpg_data = NULL;
     cam->stream.norm.jpg_cnct = 0;
     cam->stream.norm.ts_cnct = 0;
     cam->stream.norm.all_cnct = 0;
     cam->stream.norm.consumed = true;
-    cam->stream.norm.image = NULL;
+    cam->stream.norm.img_data = NULL;
 
-    cam->stream.sub.jpeg_size = 0;
-    cam->stream.sub.jpeg_data = NULL;
+    cam->stream.sub.jpg_sz = 0;
+    cam->stream.sub.jpg_data = NULL;
     cam->stream.sub.jpg_cnct = 0;
     cam->stream.sub.ts_cnct = 0;
     cam->stream.sub.all_cnct = 0;
     cam->stream.sub.consumed = true;
-    cam->stream.sub.image = NULL;
+    cam->stream.sub.img_data = NULL;
 
-    cam->stream.motion.jpeg_size = 0;
-    cam->stream.motion.jpeg_data = NULL;
+    cam->stream.motion.jpg_sz = 0;
+    cam->stream.motion.jpg_data = NULL;
     cam->stream.motion.jpg_cnct = 0;
     cam->stream.motion.ts_cnct = 0;
     cam->stream.motion.all_cnct = 0;
     cam->stream.motion.consumed = true;
-    cam->stream.motion.image = NULL;
+    cam->stream.motion.img_data = NULL;
 
-    cam->stream.source.jpeg_size = 0;
-    cam->stream.source.jpeg_data = NULL;
+    cam->stream.source.jpg_sz = 0;
+    cam->stream.source.jpg_data = NULL;
     cam->stream.source.jpg_cnct = 0;
     cam->stream.source.ts_cnct = 0;
     cam->stream.source.all_cnct = 0;
     cam->stream.source.consumed = true;
-    cam->stream.source.image = NULL;
+    cam->stream.source.img_data = NULL;
 
-    cam->stream.secondary.jpeg_size = 0;
-    cam->stream.secondary.jpeg_data = NULL;
+    cam->stream.secondary.jpg_sz = 0;
+    cam->stream.secondary.jpg_data = NULL;
     cam->stream.secondary.jpg_cnct = 0;
     cam->stream.secondary.ts_cnct = 0;
     cam->stream.secondary.all_cnct = 0;
     cam->stream.secondary.consumed = true;
-    cam->stream.secondary.image = NULL;
+    cam->stream.secondary.img_data = NULL;
 
 }
 
@@ -856,17 +937,17 @@ void webu_stream_deinit(ctx_dev *cam)
 
     myfree(&cam->imgs.image_substream);
 
-    myfree(&cam->stream.norm.jpeg_data);
-    myfree(&cam->stream.sub.jpeg_data);
-    myfree(&cam->stream.motion.jpeg_data);
-    myfree(&cam->stream.source.jpeg_data);
-    myfree(&cam->stream.secondary.jpeg_data);
+    myfree(&cam->stream.norm.jpg_data);
+    myfree(&cam->stream.sub.jpg_data);
+    myfree(&cam->stream.motion.jpg_data);
+    myfree(&cam->stream.source.jpg_data);
+    myfree(&cam->stream.secondary.jpg_data);
 
-    myfree(&cam->stream.norm.image);
-    myfree(&cam->stream.sub.image);
-    myfree(&cam->stream.motion.image);
-    myfree(&cam->stream.source.image);
-    myfree(&cam->stream.secondary.image);
+    myfree(&cam->stream.norm.img_data) ;
+    myfree(&cam->stream.sub.img_data) ;
+    myfree(&cam->stream.motion.img_data) ;
+    myfree(&cam->stream.source.img_data) ;
+    myfree(&cam->stream.secondary.img_data) ;
 
 }
 
@@ -880,12 +961,12 @@ static void webu_stream_getimg_norm(ctx_dev *cam)
     }
 
     if (cam->stream.norm.jpg_cnct > 0) {
-        if (cam->stream.norm.jpeg_data == NULL) {
-            cam->stream.norm.jpeg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
+        if (cam->stream.norm.jpg_data == NULL) {
+            cam->stream.norm.jpg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
         if (cam->current_image->image_norm != NULL && cam->stream.norm.consumed) {
-            cam->stream.norm.jpeg_size = pic_put_memory(cam
-                ,cam->stream.norm.jpeg_data
+            cam->stream.norm.jpg_sz = pic_put_memory(cam
+                ,cam->stream.norm.jpg_data
                 ,cam->imgs.size_norm
                 ,cam->current_image->image_norm
                 ,cam->conf->stream_quality
@@ -895,10 +976,10 @@ static void webu_stream_getimg_norm(ctx_dev *cam)
         }
     }
     if ((cam->stream.norm.ts_cnct > 0) || (cam->stream.norm.all_cnct > 0)) {
-        if (cam->stream.norm.image == NULL) {
-            cam->stream.norm.image =(unsigned char*)mymalloc(cam->imgs.size_norm);
+        if (cam->stream.norm.img_data == NULL) {
+            cam->stream.norm.img_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
-        memcpy(cam->stream.norm.image, cam->current_image->image_norm, cam->imgs.size_norm);
+        memcpy(cam->stream.norm.img_data, cam->current_image->image_norm, cam->imgs.size_norm);
     }
 }
 
@@ -914,8 +995,8 @@ static void webu_stream_getimg_sub(ctx_dev *cam)
     }
 
     if (cam->stream.sub.jpg_cnct > 0) {
-        if (cam->stream.sub.jpeg_data == NULL) {
-            cam->stream.sub.jpeg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
+        if (cam->stream.sub.jpg_data == NULL) {
+            cam->stream.sub.jpg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
         if (cam->current_image->image_norm != NULL && cam->stream.sub.consumed) {
             /* Resulting substream image must be multiple of 8 */
@@ -930,8 +1011,8 @@ static void webu_stream_getimg_sub(ctx_dev *cam)
                     ,cam->imgs.height
                     ,cam->current_image->image_norm
                     ,cam->imgs.image_substream);
-                cam->stream.sub.jpeg_size = pic_put_memory(cam
-                    ,cam->stream.sub.jpeg_data
+                cam->stream.sub.jpg_sz = pic_put_memory(cam
+                    ,cam->stream.sub.jpg_data
                     ,subsize
                     ,cam->imgs.image_substream
                     ,cam->conf->stream_quality
@@ -939,8 +1020,8 @@ static void webu_stream_getimg_sub(ctx_dev *cam)
                     ,(cam->imgs.height / 2));
             } else {
                 /* Substream was not multiple of 8 so send full image*/
-                cam->stream.sub.jpeg_size = pic_put_memory(cam
-                    ,cam->stream.sub.jpeg_data
+                cam->stream.sub.jpg_sz = pic_put_memory(cam
+                    ,cam->stream.sub.jpg_data
                     ,cam->imgs.size_norm
                     ,cam->current_image->image_norm
                     ,cam->conf->stream_quality
@@ -952,8 +1033,8 @@ static void webu_stream_getimg_sub(ctx_dev *cam)
     }
 
     if ((cam->stream.sub.ts_cnct > 0) || (cam->stream.sub.all_cnct > 0)) {
-        if (cam->stream.sub.image == NULL) {
-            cam->stream.sub.image =(unsigned char*)mymalloc(cam->imgs.size_norm);
+        if (cam->stream.sub.img_data == NULL) {
+            cam->stream.sub.img_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
         if (((cam->imgs.width  % 16) == 0)  &&
             ((cam->imgs.height % 16) == 0)) {
@@ -965,9 +1046,9 @@ static void webu_stream_getimg_sub(ctx_dev *cam)
                 ,cam->imgs.height
                 ,cam->current_image->image_norm
                 ,cam->imgs.image_substream);
-            memcpy(cam->stream.sub.image, cam->imgs.image_substream, subsize);
+            memcpy(cam->stream.sub.img_data, cam->imgs.image_substream, subsize);
         } else {
-            memcpy(cam->stream.sub.image, cam->current_image->image_norm, cam->imgs.size_norm);
+            memcpy(cam->stream.sub.img_data, cam->current_image->image_norm, cam->imgs.size_norm);
         }
     }
 
@@ -983,12 +1064,12 @@ static void webu_stream_getimg_motion(ctx_dev *cam)
     }
 
     if (cam->stream.motion.jpg_cnct > 0) {
-        if (cam->stream.motion.jpeg_data == NULL) {
-            cam->stream.motion.jpeg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
+        if (cam->stream.motion.jpg_data == NULL) {
+            cam->stream.motion.jpg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
         if (cam->imgs.image_motion.image_norm != NULL  && cam->stream.motion.consumed) {
-            cam->stream.motion.jpeg_size = pic_put_memory(cam
-                ,cam->stream.motion.jpeg_data
+            cam->stream.motion.jpg_sz = pic_put_memory(cam
+                ,cam->stream.motion.jpg_data
                 ,cam->imgs.size_norm
                 ,cam->imgs.image_motion.image_norm
                 ,cam->conf->stream_quality
@@ -998,10 +1079,10 @@ static void webu_stream_getimg_motion(ctx_dev *cam)
         }
     }
     if ((cam->stream.motion.ts_cnct > 0) || (cam->stream.motion.all_cnct > 0)) {
-        if (cam->stream.motion.image == NULL) {
-            cam->stream.motion.image =(unsigned char*)mymalloc(cam->imgs.size_norm);
+        if (cam->stream.motion.img_data == NULL) {
+            cam->stream.motion.img_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
-        memcpy(cam->stream.motion.image
+        memcpy(cam->stream.motion.img_data
             , cam->imgs.image_motion.image_norm
             , cam->imgs.size_norm);
     }
@@ -1017,12 +1098,12 @@ static void webu_stream_getimg_source(ctx_dev *cam)
     }
 
     if (cam->stream.source.jpg_cnct > 0) {
-        if (cam->stream.source.jpeg_data == NULL) {
-            cam->stream.source.jpeg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
+        if (cam->stream.source.jpg_data == NULL) {
+            cam->stream.source.jpg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
         if (cam->imgs.image_virgin != NULL && cam->stream.source.consumed) {
-            cam->stream.source.jpeg_size = pic_put_memory(cam
-                ,cam->stream.source.jpeg_data
+            cam->stream.source.jpg_sz = pic_put_memory(cam
+                ,cam->stream.source.jpg_data
                 ,cam->imgs.size_norm
                 ,cam->imgs.image_virgin
                 ,cam->conf->stream_quality
@@ -1032,10 +1113,10 @@ static void webu_stream_getimg_source(ctx_dev *cam)
         }
     }
     if ((cam->stream.source.ts_cnct > 0) || (cam->stream.source.all_cnct > 0)) {
-        if (cam->stream.source.image == NULL) {
-            cam->stream.source.image =(unsigned char*)mymalloc(cam->imgs.size_norm);
+        if (cam->stream.source.img_data == NULL) {
+            cam->stream.source.img_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
-        memcpy(cam->stream.source.image
+        memcpy(cam->stream.source.img_data
             , cam->imgs.image_virgin
             , cam->imgs.size_norm);
     }
@@ -1053,22 +1134,22 @@ static void webu_stream_getimg_secondary(ctx_dev *cam)
     if (cam->stream.secondary.jpg_cnct > 0) {
         if (cam->imgs.size_secondary>0) {
             pthread_mutex_lock(&cam->algsec->mutex);
-                if (cam->stream.secondary.jpeg_data == NULL) {
-                    cam->stream.secondary.jpeg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
+                if (cam->stream.secondary.jpg_data == NULL) {
+                    cam->stream.secondary.jpg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
                 }
 
-                memcpy(cam->stream.secondary.jpeg_data,cam->imgs.image_secondary,cam->imgs.size_secondary);
-                cam->stream.secondary.jpeg_size = cam->imgs.size_secondary;
+                memcpy(cam->stream.secondary.jpg_data,cam->imgs.image_secondary,cam->imgs.size_secondary);
+                cam->stream.secondary.jpg_sz = cam->imgs.size_secondary;
             pthread_mutex_unlock(&cam->algsec->mutex);
         } else {
-            myfree(&cam->stream.secondary.jpeg_data);
+            myfree(&cam->stream.secondary.jpg_data);
         }
     }
     if ((cam->stream.secondary.ts_cnct > 0) || (cam->stream.secondary.all_cnct > 0)) {
-        if (cam->stream.secondary.image == NULL) {
-            cam->stream.secondary.image =(unsigned char*)mymalloc(cam->imgs.size_norm);
+        if (cam->stream.secondary.img_data == NULL) {
+            cam->stream.secondary.img_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
-        memcpy(cam->stream.secondary.image
+        memcpy(cam->stream.secondary.img_data
             , cam->current_image->image_norm, cam->imgs.size_norm);
     }
 

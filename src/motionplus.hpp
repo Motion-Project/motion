@@ -313,21 +313,19 @@ struct ctx_all_loc {
     int     offset_col;
 };
 
-struct ctx_all_img {
-    int             width;
-    int             height;
-    int             imgsz;
-    unsigned char   *jpeg_data; /* Image compressed as JPG */
-    long            jpeg_size;  /* The number of bytes for jpg */
-    unsigned char   *image;     /* The base data used for image */
+struct ctx_all_sizes {
+    int     width;
+    int     height;
+    int     img_sz;     /* Image size*/
+    bool    reset;
 };
 
 
 struct ctx_stream_data {
-    unsigned char   *jpeg_data; /* Image compressed as JPG */
-    long            jpeg_size;  /* The number of bytes for jpg */
+    unsigned char   *jpg_data;  /* Image compressed as JPG */
+    int             jpg_sz;     /* The number of bytes for jpg */
     int             consumed;   /* Bool for whether the jpeg data was consumed*/
-    unsigned char   *image;     /* The base data used for image */
+    unsigned char   *img_data;  /* The base data used for image */
     int             jpg_cnct;   /* Counter of the number of jpg connections*/
     int             ts_cnct;    /* Counter of the number of mpegts connections */
     int             all_cnct;   /* Counter of the number of all camera connections */
@@ -540,7 +538,7 @@ struct ctx_motapp {
     ctx_config          *conf;
     int                 cam_cnt;
     int                 snd_cnt;
-    ctx_all_img         *all_img;
+    ctx_all_sizes       *all_sizes;
 
     volatile int                webcontrol_running;
     volatile int                webcontrol_finish;

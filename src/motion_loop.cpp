@@ -552,6 +552,7 @@ static void mlp_init_values(ctx_dev *cam)
 
     cam->noise = cam->conf->noise_level;
     cam->passflag = false;
+    cam->motapp->all_sizes->reset= true;
     cam->threshold = cam->conf->threshold;
     cam->device_status = STATUS_CLOSED;
     cam->startup_frames = (cam->conf->framerate * 2) + cam->conf->pre_capture + cam->conf->minimum_motion_frames;

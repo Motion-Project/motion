@@ -81,6 +81,7 @@ static void webu_context_init(ctx_motapp *motapp, ctx_webui *webui)
     webui->cnct_method   = WEBUI_METHOD_GET;
     webui->camindx       = -1;
     webui->device_id     = -1;
+    webui->all_img_data  = NULL;
 
     tmplang = setlocale(LC_ALL, NULL);
     if (tmplang == NULL) {
@@ -102,6 +103,7 @@ static void webu_context_free(ctx_webui *webui)
     myfree(&webui->auth_opaque);
     myfree(&webui->auth_realm);
     myfree(&webui->resp_image);
+    myfree(&webui->all_img_data);
 
     for (indx = 0; indx<webui->post_sz; indx++) {
         myfree(&webui->post_info[indx].key_nm);
@@ -981,44 +983,58 @@ static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
     (void)toe;
     ctx_webui *webui =(ctx_webui *) *con_cls;
     ctx_stream_data *strm;
+    ctx_dev *cam;
+    int indx, cam_max, cam_min;
 
-    if (webui->cam == NULL) {
-        strm = NULL;
-    } else if ( (webui->cnct_type == WEBUI_CNCT_JPG_FULL) ||
-        (webui->cnct_type == WEBUI_CNCT_TS_FULL)) {
-        strm = &webui->cam->stream.norm;
-    } else if ( (webui->cnct_type == WEBUI_CNCT_JPG_SUB) ||
-                (webui->cnct_type == WEBUI_CNCT_TS_SUB)) {
-        strm = &webui->cam->stream.sub;
-    } else if ( (webui->cnct_type == WEBUI_CNCT_JPG_MOTION) ||
-                (webui->cnct_type == WEBUI_CNCT_TS_MOTION )) {
-        strm = &webui->cam->stream.motion;
-    } else if ( (webui->cnct_type == WEBUI_CNCT_JPG_SOURCE) ||
-                (webui->cnct_type == WEBUI_CNCT_TS_SOURCE)) {
-        strm = &webui->cam->stream.source;
-    } else if ( (webui->cnct_type == WEBUI_CNCT_JPG_SECONDARY) ||
-                (webui->cnct_type == WEBUI_CNCT_TS_SECONDARY)) {
-        strm = &webui->cam->stream.secondary;
+    if (webui->device_id == 0) {
+        cam_min = 0;
+        cam_max = webui->motapp->cam_cnt;
+    } else {
+        cam_min = webui->camindx;
+        cam_max = cam_min +1;
     }
 
-    if ((strm != NULL) &&
-        (webui->cnct_type > WEBUI_CNCT_JPG_MIN) &&
-        (webui->cnct_type < WEBUI_CNCT_JPG_MAX)) {
-        pthread_mutex_lock(&webui->cam->stream.mutex);
-            if ((webui->device_id == 0) && (strm->all_cnct > 0)) {
-                strm->all_cnct--;
-            } else if ((webui->device_id > 0) && (strm->jpg_cnct > 0)) {
-                strm->jpg_cnct--;
+    for (indx=cam_min; indx<cam_max; indx++) {
+        cam = webui->motapp->cam_list[indx];
+        pthread_mutex_lock(&cam->stream.mutex);
+            if ((webui->cnct_type == WEBUI_CNCT_JPG_FULL) ||
+                (webui->cnct_type == WEBUI_CNCT_TS_FULL)) {
+                strm = &cam->stream.norm;
+            } else if ( (webui->cnct_type == WEBUI_CNCT_JPG_SUB) ||
+                        (webui->cnct_type == WEBUI_CNCT_TS_SUB)) {
+                strm = &cam->stream.sub;
+            } else if ( (webui->cnct_type == WEBUI_CNCT_JPG_MOTION) ||
+                        (webui->cnct_type == WEBUI_CNCT_TS_MOTION )) {
+                strm = &cam->stream.motion;
+            } else if ( (webui->cnct_type == WEBUI_CNCT_JPG_SOURCE) ||
+                        (webui->cnct_type == WEBUI_CNCT_TS_SOURCE)) {
+                strm = &cam->stream.source;
+            } else if ( (webui->cnct_type == WEBUI_CNCT_JPG_SECONDARY) ||
+                        (webui->cnct_type == WEBUI_CNCT_TS_SECONDARY)) {
+                strm = &cam->stream.secondary;
             }
-        pthread_mutex_unlock(&webui->cam->stream.mutex);
-    } else if ((strm != NULL) &&
-        (webui->cnct_type > WEBUI_CNCT_TS_MIN) &&
-        (webui->cnct_type < WEBUI_CNCT_TS_MAX)) {
-        pthread_mutex_lock(&webui->cam->stream.mutex);
-            if (strm->ts_cnct > 0) {
-                strm->ts_cnct--;
+            if ((webui->cnct_type > WEBUI_CNCT_JPG_MIN) &&
+                (webui->cnct_type < WEBUI_CNCT_JPG_MAX)) {
+                if ((webui->device_id == 0) && (strm->all_cnct > 0)) {
+                    strm->all_cnct--;
+                } else if ((webui->device_id > 0) && (strm->jpg_cnct > 0)) {
+                    strm->jpg_cnct--;
+                }
+            } else if ((webui->cnct_type > WEBUI_CNCT_TS_MIN) &&
+                (webui->cnct_type < WEBUI_CNCT_TS_MAX)) {
+                if ((webui->device_id == 0) && (strm->all_cnct > 0)) {
+                    strm->all_cnct--;
+                } else if ((webui->device_id > 0) && (strm->ts_cnct > 0)) {
+                    strm->ts_cnct--;
+                }
             }
-        pthread_mutex_unlock(&webui->cam->stream.mutex);
+            if ((strm->all_cnct == 0) &&
+                (strm->jpg_cnct == 0) &&
+                (strm->ts_cnct == 0)) {
+                    myfree(&strm->img_data);
+                    myfree(&strm->jpg_data);
+            }
+        pthread_mutex_unlock(&cam->stream.mutex);
     }
 
     if ((webui->cnct_type > WEBUI_CNCT_TS_MIN) &&
