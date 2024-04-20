@@ -989,9 +989,12 @@ static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
     if (webui->device_id == 0) {
         cam_min = 0;
         cam_max = webui->motapp->cam_cnt;
-    } else {
+    } else if (webui->device_id > 0) {
         cam_min = webui->camindx;
         cam_max = cam_min +1;
+    } else {
+        cam_min = 1;
+        cam_max = 0;
     }
 
     for (indx=cam_min; indx<cam_max; indx++) {
