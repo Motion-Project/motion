@@ -170,6 +170,7 @@ ctx_parm config_parms[] = {
     {"webcontrol_lock_script",    PARM_TYP_STRING, PARM_CAT_13, WEBUI_LEVEL_RESTRICTED },
 
     {"stream_preview_scale",      PARM_TYP_INT,    PARM_CAT_14, WEBUI_LEVEL_LIMITED },
+    {"stream_preview_newline",    PARM_TYP_BOOL,   PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {"stream_preview_location",   PARM_TYP_STRING, PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {"stream_preview_method",     PARM_TYP_LIST,   PARM_CAT_14, WEBUI_LEVEL_LIMITED },
     {"stream_preview_ptz",        PARM_TYP_BOOL,   PARM_CAT_14, WEBUI_LEVEL_LIMITED },
@@ -2448,6 +2449,19 @@ static void conf_edit_stream_preview_scale(ctx_config *conf, std::string &parm, 
     MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_scale",_("stream_preview_scale"));
 }
 
+static void conf_edit_stream_preview_newline(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
+ {
+     if (pact == PARM_ACT_DFLT) {
+        conf->stream_preview_newline = false;
+     } else if (pact == PARM_ACT_SET) {
+        conf_edit_set_bool(conf->stream_preview_newline, parm);
+     } else if (pact == PARM_ACT_GET) {
+        conf_edit_get_bool(parm, conf->stream_preview_newline);
+     }
+     return;
+    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_newline",_("stream_preview_newline"));
+ }
+
 static void conf_edit_stream_preview_location(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
@@ -3227,6 +3241,7 @@ static void conf_edit_cat14(ctx_config *conf, std::string parm_nm
         , std::string &parm_val, enum PARM_ACT pact)
 {
     if (parm_nm == "stream_preview_scale") {               conf_edit_stream_preview_scale(conf, parm_val, pact);
+    } else if (parm_nm == "stream_preview_newline") {      conf_edit_stream_preview_newline(conf, parm_val, pact);
     } else if (parm_nm == "stream_preview_location") {     conf_edit_stream_preview_location(conf, parm_val, pact);
     } else if (parm_nm == "stream_preview_method") {       conf_edit_stream_preview_method(conf, parm_val, pact);
     } else if (parm_nm == "stream_preview_ptz") {          conf_edit_stream_preview_ptz(conf, parm_val, pact);
