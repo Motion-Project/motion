@@ -2195,9 +2195,21 @@
 
         <h3><a name="stream_preview_method"></a> stream_preview_method </h3>
         <ul>
-          <li> Values: `mjpg`, `static` | Default: `mjpg`</li>
-          This option determines the method used for displaying images on the webcontrol page.  Use
-          `static` to get around browser limits on the concurrent number connections to server.
+          <li> Values: `combined`, `mjpg`, `static` | Default: `combined`</li>
+          This option determines the method used for displaying images on the webcontrol page.
+          <ul>
+          <li>`mjpg`<br> The webcontrol page is created with a mjpg stream for each camera.  This method
+          creates a connection to the server for each camera.  Note that if there are many cameras,
+          this method may not show/refresh properly in the browser due to browser settings regarding
+          the maximum number of concurrent connections.</li>
+          <br><li> `static`<br> The webcontrol page loops through all the cameras and refreshes the
+          images using static jpgs.  This method provides a slower refresh rate
+          than the mjpg option but allows for a higher number of cameras to get around the
+          browser concurrent connection limits.</li>
+          <br><li>`combined`<br>The webcontrol page uses a combined single mjpg stream.  The
+          combined single mjpg stream is constructed by Motionplus from all of the cameras
+          currently running.</li>
+          </ul>
         </ul>
         <p></p>
 

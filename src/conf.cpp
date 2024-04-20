@@ -2478,12 +2478,12 @@ static void conf_edit_stream_preview_location(ctx_config *conf, std::string &par
 static void conf_edit_stream_preview_method(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        conf->stream_preview_method = "mjpg";
+        conf->stream_preview_method = "combined";
     } else if (pact == PARM_ACT_SET) {
-        if ((parm == "mjpg") || (parm == "static"))  {
+        if ((parm == "mjpg") || (parm == "static") || (parm == "combined"))  {
             conf->stream_preview_method = parm;
         } else if (parm == "") {
-            conf->stream_preview_method = "mjpg";
+            conf->stream_preview_method = "combined";
         } else {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid stream_preview_method %s"), parm.c_str());
         }
