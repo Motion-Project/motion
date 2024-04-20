@@ -462,16 +462,17 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#stream_preview_scale" >stream_preview_scale</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_preview_newline" >stream_preview_newline</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_preview_location" >stream_preview_location</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_preview_method" >stream_preview_method</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_preview_ptz" >stream_preview_ptz</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#stream_preview_ptz" >stream_preview_ptz</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_quality" >stream_quality</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_grey" >stream_grey</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_maxrate" >stream_maxrate</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_motion" >stream_motion</a> </td>
             </tr>
            <tr>
+              <td bgcolor="#edf4f9" ><a href="#stream_motion" >stream_motion</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_scan_time" >stream_scan_time</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_scan_scale" >stream_scan_scale</a> </td>
            </tr>
@@ -2159,6 +2160,36 @@
         <ul>
           <li> Values: on, off | Default: off</li>
           Insert a new line indicator prior to the image on the webcontrol web page.
+        </ul>
+        <p></p>
+
+        <h3><a name="stream_preview_location"></a> stream_preview_location</h3>
+        <ul>
+         <li> Values: String | Default: Not Defined</li>
+          Comma separated row and col parameters for location on the consolidated image.
+          The consolidated image puts together a single image of all the cameras currently
+          running. Format is row=value1,col=value2
+          <p></p>
+          Note that the row and col must be continuous without gaps in the numbers.
+          e.g. If one of the cameras specifies a row number of 5, then some of the other
+          cameras must specify numbers 1 to 4 inclusive.  Likewise on the col parameter.
+          For each row, the col must start at 1 and increase sequentially.  It is however
+          permitted to have a different number of cameras on each row.
+          <div>
+            <p></p>
+            <h4>Illustrative sample:</h4>
+            <p></p>
+            Two cameras on first row, one camera on second row, three cameras on third row.
+            <ul style="list-style: none;">
+              <li>camera1 configuration: <code><small>stream_preview_location row=3,col=1</small></code></li>
+              <li>camera2 configuration: <code><small>stream_preview_location row=1,col=2</small></code></li>
+              <li>camera3 configuration: <code><small>stream_preview_location row=3,col=3</small></code></li>
+              <li>camera4 configuration: <code><small>stream_preview_location row=1,col=1</small></code></li>
+              <li>camera5 configuration: <code><small>stream_preview_location row=3,col=2</small></code></li>
+              <li>camera6 configuration: <code><small>stream_preview_location row=2,col=1</small></code></li>
+            </ul>
+            <p></p>
+          </div>
         </ul>
         <p></p>
 

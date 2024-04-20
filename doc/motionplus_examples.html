@@ -232,14 +232,16 @@
           <li><code>{IP}:{port0}/0/status.json</code> JSON object with information about status of all cameras</li>
           <li><code>{IP}:{port0}/0/movies.json</code> JSON object with information about all movies</li>
         </ul>
-        The following mjpg pages are available via the webcontrol. (Update automatically)
+        The following mjpg streams are available via the webcontrol. (Update automatically).  Specify {camid}
+        as 0 to obtain a consolidated mjpg stream of all cameras.
         <ul>
           <li><code>{IP}:{port0}/{camid}/mjpg</code> Primary stream for the camera updated as a mjpg</li>
           <li><code>{IP}:{port0}/{camid}/mjpg/substream</code> Substream for the camera updated as a mjpg</li>
           <li><code>{IP}:{port0}/{camid}/mjpg/motion</code> Stream of motion images for the camera as a mjpg</li>
           <li><code>{IP}:{port0}/{camid}/mjpg/source</code> Source image stream of the camera as a mjpg</li>
         </ul>
-        The following mpegts pages are available via the webcontrol. (Update automatically)
+        The following mpegts streams are available via the webcontrol. (Update automatically) Specify {camid}
+        as 0 to obtain a consolidated mpegts stream of all cameras.
         <ul>
           <li><code>{IP}:{port0}/{camid}/mpegts</code> Primary stream for the camera updated as a mpeg transport stream</li>
           <li><code>{IP}:{port0}/{camid}/mpegts/substream</code> Substream for the camera updated as a mpeg transport stream</li>
@@ -247,7 +249,8 @@
           <li><code>{IP}:{port0}/{camid}/mpegts/source</code> Source image stream of the camera as a mpeg transport stream</li>
         </ul>
 
-        The following static pages are available via the webcontrol. (Update manually)
+        The following static pages are available via the webcontrol. (Update manually) Specify {camid}
+        as 0 to obtain a consolidated image of all cameras.
         <ul>
           <li><code>{IP}:{port0}/{camid}/static</code> Primary image for the camera</li>
           <li><code>{IP}:{port0}/{camid}/static/substream</code> Substream image for the camera</li>
