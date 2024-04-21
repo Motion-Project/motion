@@ -1448,11 +1448,11 @@ int movie_put_image(ctx_movie *movie, ctx_image_data *img_data, const struct tim
         movie->gop_cnt ++;
         if (movie->gop_cnt == movie->ctx_codec->gop_size ) {
             movie->picture->pict_type = AV_PICTURE_TYPE_I;
-            movie->picture->key_frame = 1;
+            myframe_key(movie->picture);
             movie->gop_cnt = 0;
         } else {
             movie->picture->pict_type = AV_PICTURE_TYPE_P;
-            movie->picture->key_frame = 0;
+             myframe_interlaced(movie->picture);
         }
 
         /* A return code of -2 is thrown by the put_frame

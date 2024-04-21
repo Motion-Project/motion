@@ -130,6 +130,8 @@
 
     AVFrame *myframe_alloc(void);
     void myframe_free(AVFrame *frame);
+    void myframe_key(AVFrame *frame);
+    void myframe_interlaced(AVFrame *frame);
     void mypacket_free(AVPacket *pkt);
     void myavcodec_close(AVCodecContext *codec_context);
     int myimage_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height);

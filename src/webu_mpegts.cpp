@@ -26,6 +26,13 @@
 #include "webu_mpegts.hpp"
 #include "alg_sec.hpp"
 
+/* Version independent uint */
+#if (MYFFVER < 60016)
+    typedef uint8_t myuint;
+#else
+    typedef const uint8_t myuint;
+#endif
+
 void webu_mpegts_free_context(ctx_webui *webui)
 {
     if (webui->picture != NULL) {
@@ -70,7 +77,7 @@ static int webu_mpegts_pic_send(ctx_webui *webui, unsigned char *img)
         webui->picture->height = webui->ctx_codec->height;
 
         webui->picture->pict_type = AV_PICTURE_TYPE_I;
-        webui->picture->key_frame = 1;
+        myframe_key(webui->picture);
         webui->picture->pts = 1;
     }
 
@@ -213,7 +220,7 @@ static int webu_mpegts_getimg(ctx_webui *webui)
     return 0;
 }
 
-static int webu_mpegts_avio_buf(void *opaque, uint8_t *buf, int buf_size)
+static int webu_mpegts_avio_buf(void *opaque, myuint *buf, int buf_size)
 {
     ctx_webui *webui =(ctx_webui *)opaque;
 

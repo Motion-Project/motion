@@ -713,7 +713,7 @@ char* mytranslate_text(const char *msgid, int setnls)
  *  These are designed to be extremely simple version specific
  *  variants of the libav functions.
  ****************************************************************************/
-
+/*********************************************/
 /*********************************************/
 AVFrame *myframe_alloc(void)
 {
@@ -734,6 +734,26 @@ void myframe_free(AVFrame *frame)
         av_freep(&frame);
     #endif
 }
+/*********************************************/
+void myframe_key(AVFrame *frame)
+{
+    #if (MYFFVER < 60016)
+        frame->key_frame = 1;
+    #else
+        frame->flags |= AV_FRAME_FLAG_KEY;
+    #endif
+}
+/*********************************************/
+void myframe_interlaced(AVFrame *frame)
+{
+    #if (MYFFVER < 60016)
+        frame->key_frame = 0;
+    #else
+        frame->flags |= AV_FRAME_FLAG_INTERLACED;
+    #endif
+}
+
+
 /*********************************************/
 int myimage_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height)
 {
