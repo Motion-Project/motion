@@ -1033,7 +1033,8 @@ static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
             }
             if ((strm->all_cnct == 0) &&
                 (strm->jpg_cnct == 0) &&
-                (strm->ts_cnct == 0)) {
+                (strm->ts_cnct == 0) &&
+                (cam->passflag)) {
                     myfree(&strm->img_data);
                     myfree(&strm->jpg_data);
             }
