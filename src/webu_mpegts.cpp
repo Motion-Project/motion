@@ -27,7 +27,7 @@
 #include "alg_sec.hpp"
 
 /* Version independent uint */
-#if (MYFFVER < 60016)
+#if (MYFFVER <= 60016)
     typedef uint8_t myuint;
 #else
     typedef const uint8_t myuint;
