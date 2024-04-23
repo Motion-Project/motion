@@ -974,17 +974,15 @@ static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *co
     return webui;
 }
 
-/* Clean up when the MHD connection closes */
-static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
-        , void **con_cls, enum MHD_RequestTerminationCode toe)
+static void webu_mhd_deinit_counter(ctx_webui *webui)
 {
-    (void)connection;
-    (void)cls;
-    (void)toe;
-    ctx_webui *webui =(ctx_webui *) *con_cls;
     ctx_stream_data *strm;
     ctx_dev *cam;
     int indx, cam_max, cam_min;
+
+    if (webui->cnct_type < WEBUI_CNCT_JPG_MIN) {
+        return;
+    }
 
     if (webui->device_id == 0) {
         cam_min = 0;
@@ -1040,6 +1038,18 @@ static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
             }
         pthread_mutex_unlock(&cam->stream.mutex);
     }
+}
+
+/* Clean up when the MHD connection closes */
+static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
+        , void **con_cls, enum MHD_RequestTerminationCode toe)
+{
+    (void)connection;
+    (void)cls;
+    (void)toe;
+    ctx_webui *webui =(ctx_webui *) *con_cls;
+
+    webu_mhd_deinit_counter(webui);
 
     if ((webui->cnct_type > WEBUI_CNCT_TS_MIN) &&
         (webui->cnct_type < WEBUI_CNCT_TS_MAX)) {
@@ -1049,6 +1059,7 @@ static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
     if (webui->cnct_method == WEBUI_METHOD_POST) {
         MHD_destroy_post_processor (webui->post_processor);
     }
+
     webu_context_free(webui);
 
     return;

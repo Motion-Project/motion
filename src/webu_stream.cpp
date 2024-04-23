@@ -286,8 +286,8 @@ void webu_stream_all_getimg(ctx_webui *webui)
     a_u = (all_sz->width * all_sz->height);
     a_v = a_u + (a_u / 4);
 
-    memset(webui->all_img_data , 0x00, (size_t)a_u);
-    memset(webui->all_img_data  + a_u, 0x10, (size_t)(a_u/2));
+    memset(webui->all_img_data , 0x80, (size_t)a_u);
+    memset(webui->all_img_data  + a_u, 0x80, (size_t)(a_u/2));
 
     for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
         cam = webui->motapp->cam_list[indx];
@@ -320,6 +320,9 @@ void webu_stream_all_getimg(ctx_webui *webui)
             indx1=0;
             while (indx1 < 1000) {
                 if (strm->img_data == NULL) {
+                    if (strm->all_cnct == 0){
+                        strm->all_cnct++;
+                    }
                     pthread_mutex_unlock(&cam->stream.mutex);
                         SLEEP(0, 1000);
                     pthread_mutex_lock(&cam->stream.mutex);
@@ -329,6 +332,9 @@ void webu_stream_all_getimg(ctx_webui *webui)
                 indx1++;
             }
             if (strm->img_data == NULL) {
+                MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+                    , "Could not get image for device %d"
+                    , cam->device_id);
                 memset(img_data, 0x00, img_sz);
             } else {
                 /*
