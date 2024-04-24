@@ -987,7 +987,7 @@ static void webu_mhd_deinit_counter(ctx_webui *webui)
     if (webui->device_id == 0) {
         cam_min = 0;
         cam_max = webui->motapp->cam_cnt;
-    } else if (webui->device_id > 0) {
+    } else if ((webui->device_id > 0) && (webui->camindx >= 0)) {
         cam_min = webui->camindx;
         cam_max = cam_min +1;
     } else {
