@@ -92,7 +92,7 @@ webcontrol_parms 0
 ;*****   Web Stream
 ;*************************************************
 stream_preview_scale 25
-stream_preview_method mjpg
+stream_preview_method combined
 
 ;*************************************************
 ; Device config files - One for each device.

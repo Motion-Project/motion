@@ -30,11 +30,9 @@
 /* Allocate buffers if needed. */
 void webu_stream_checkbuffers(ctx_webui *webui)
 {
-
     if (webui->cam == NULL) {
         return;
     }
-    /* Use simple approach of not bothering to reduce size when doing a substream  */
     if (webui->resp_size < (size_t)webui->cam->imgs.size_norm) {
         if (webui->resp_image != NULL) {
             myfree(&webui->resp_image);
@@ -44,6 +42,100 @@ void webu_stream_checkbuffers(ctx_webui *webui)
         webui->resp_size = webui->cam->imgs.size_norm;
         webui->resp_used = 0;
     }
+}
+
+void webu_stream_img_resize(ctx_dev *cam, uint8_t *src, uint8_t *dst, int dst_w, int dst_h)
+{
+    int     retcd, img_sz, src_h, src_w;
+    char    errstr[128];
+    uint8_t *buf;
+    AVFrame *frm_in, *frm_out;
+
+    src_h = cam->imgs.height;
+    src_w = cam->imgs.width;
+
+    img_sz = (dst_h * dst_w * 3)/2;
+    memset(dst, 0x00, (size_t)img_sz);
+
+    if (cam->swsctx == NULL) {
+        cam->swsctx = sws_getContext(
+            src_w, src_h, MY_PIX_FMT_YUV420P
+            ,dst_w, dst_h, MY_PIX_FMT_YUV420P
+            ,SWS_BICUBIC, NULL, NULL, NULL);
+        if (cam->swsctx == NULL) {
+            MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                , _("Unable to allocate scaling context."));
+            return;
+        }
+    }
+
+    frm_in = myframe_alloc();
+    if (frm_in == NULL) {
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , _("Unable to allocate frm_in."));
+        return;
+    }
+
+    frm_out = myframe_alloc();
+    if (frm_out == NULL) {
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , _("Unable to allocate frm_out."));
+        myframe_free(frm_in);
+        return;
+    }
+
+    retcd = myimage_fill_arrays(frm_in, src, MY_PIX_FMT_YUV420P, src_w, src_h);
+    if (retcd < 0) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , "Error filling arrays: %s", errstr);
+        myframe_free(frm_in);
+        myframe_free(frm_out);
+        return;
+    }
+
+    buf = (uint8_t *)mymalloc((size_t)img_sz);
+
+    retcd = myimage_fill_arrays(frm_out, buf, MY_PIX_FMT_YUV420P, dst_w, dst_h);
+    if (retcd < 0) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , "Error Filling array 2: %s", errstr);
+        free(buf);
+        myframe_free(frm_in);
+        myframe_free(frm_out);
+        return;
+    }
+
+    retcd = sws_scale(cam->swsctx
+        , (const uint8_t* const *)frm_in->data, frm_in->linesize
+        , 0, src_h, frm_out->data, frm_out->linesize);
+    if (retcd < 0) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            ,_("Error resizing/reformatting: %s"), errstr);
+        free(buf);
+        myframe_free(frm_in);
+        myframe_free(frm_out);
+        return;
+    }
+
+    retcd = myimage_copy_to_buffer(
+         frm_out, (uint8_t *)dst
+        ,MY_PIX_FMT_YUV420P, dst_w, dst_h, img_sz);
+    if (retcd < 0) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            ,_("Error putting frame into output buffer: %s"), errstr);
+        free(buf);
+        myframe_free(frm_in);
+        myframe_free(frm_out);
+        return;
+    }
+
+    free(buf);
+    myframe_free(frm_in);
+    myframe_free(frm_out);
 }
 
 void webu_stream_img_sizes(ctx_webui *webui, ctx_dev *cam, int &img_w, int &img_h)
@@ -58,6 +150,22 @@ void webu_stream_img_sizes(ctx_webui *webui, ctx_dev *cam, int &img_w, int &img_
         img_w = cam->imgs.width;
         img_h = cam->imgs.height;
     }
+    img_w = ((cam->all_loc.scale * img_w) / 100);
+    if ((img_w % 16) != 0) {
+        img_w = img_w - (img_w % 16) + 16;
+    }
+
+    img_h = ((cam->all_loc.scale * img_h) / 100);
+    if ((img_h % 16) != 0) {
+        img_h = img_h - (img_h % 16) + 16;
+    }
+
+    if (img_w < 64){
+        img_w = 64;
+    }
+    if (img_h < 64){
+        img_h = 64;
+    }
 }
 
 void webu_stream_all_sizes(ctx_webui *webui)
@@ -65,13 +173,13 @@ void webu_stream_all_sizes(ctx_webui *webui)
     int indx, row, col;
     int chk_sz, chk_w, mx_col, mx_row;
     int mx_h, mx_w, img_h, img_w;
+    bool dflt_scale;
     ctx_dev *cam;
 
     if (webui->motapp->all_sizes->reset == false) {
         return;
     }
 
-    /* Calculate a new total image size*/
     mx_row = 0;
     mx_col = 0;
     for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
@@ -81,6 +189,46 @@ void webu_stream_all_sizes(ctx_webui *webui)
         }
         if (mx_col < cam->all_loc.col) {
             mx_col = cam->all_loc.col;
+        }
+    }
+
+    dflt_scale = false;
+    for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
+        if (webui->motapp->cam_list[indx]->all_loc.scale == -1) {
+            dflt_scale = true;
+        }
+    }
+    if (dflt_scale) {
+        for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
+            webui->motapp->cam_list[indx]->all_loc.scale = 100;
+        }
+        for (row=1; row<=mx_row; row++) {
+            mx_h = 0;
+            for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
+                cam = webui->motapp->cam_list[indx];
+                if (row == cam->all_loc.row) {
+                    webu_stream_img_sizes(webui, cam, img_w, img_h);
+                    if (mx_h < img_h) {
+                        mx_h = img_h;
+                    }
+                }
+            }
+            for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
+                cam = webui->motapp->cam_list[indx];
+                if (row == cam->all_loc.row) {
+                    webu_stream_img_sizes(webui, cam, img_w, img_h);
+                    cam->all_loc.scale = (int)((float)(mx_h*100 / img_h ));
+                }
+            }
+            for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
+                cam = webui->motapp->cam_list[indx];
+                webu_stream_img_sizes(webui, cam, img_w, img_h);
+                MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+                    , "Device %d Original Size %dx%d Scale %d New Size %dx%d"
+                    , cam->device_id
+                    , cam->imgs.width, cam->imgs.height
+                    , cam->all_loc.scale, img_w, img_h);
+            }
         }
     }
 
@@ -153,6 +301,46 @@ void webu_stream_all_sizes(ctx_webui *webui)
         }
     }
 
+    for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
+        cam = webui->motapp->cam_list[indx];
+        webu_stream_img_sizes(webui, cam, img_w, img_h);
+
+        chk_sz = cam->all_loc.offset_col + cam->all_loc.offset_user_col;
+        if (chk_sz < 0) {
+           MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+                , "Device %d invalid image column offset. (%d + %d) less than zero "
+                , cam->device_id
+                , cam->all_loc.offset_col
+                , cam->all_loc.offset_user_col);
+         } else if ((chk_sz + img_w) > webui->motapp->all_sizes->width) {
+           MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+                , "Device %d invalid image column offset. (%d + %d) over image size"
+                , cam->device_id
+                , cam->all_loc.offset_col
+                , cam->all_loc.offset_user_col);
+         } else {
+            cam->all_loc.offset_col = chk_sz;
+        }
+
+        chk_sz = cam->all_loc.offset_row + cam->all_loc.offset_user_row;
+        if (chk_sz < 0 ) {
+            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+                , "Device %d invalid image row offset. (%d + %d) less than zero "
+                , cam->device_id
+                , cam->all_loc.offset_row
+                , cam->all_loc.offset_user_row);
+        } else if ((chk_sz + img_h) > webui->motapp->all_sizes->height) {
+            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+                , "Device %d invalid image row offset. (%d + %d) over image size"
+                , cam->device_id
+                , cam->all_loc.offset_row
+                , cam->all_loc.offset_user_row);
+        } else {
+            cam->all_loc.offset_row = chk_sz;
+        }
+
+    }
+
     webui->motapp->all_sizes->img_sz =((
         webui->motapp->all_sizes->height *
         webui->motapp->all_sizes->width * 3)/2);
@@ -181,12 +369,10 @@ void webu_stream_all_buffers(ctx_webui *webui)
         memset(webui->resp_image, '\0', webui->resp_size);
         webui->resp_used = 0;
     }
-
     if (webui->all_img_data  == NULL) {
         webui->all_img_data  = (unsigned char*)
             mymalloc((size_t)webui->motapp->all_sizes->img_sz);
     }
-
 }
 
 bool webu_stream_all_ready(ctx_webui *webui)
@@ -271,9 +457,9 @@ void webu_stream_all_getimg(ctx_webui *webui)
 {
     int a_y, a_u, a_v; /* all img y,u,v */
     int c_y, c_u, c_v; /* camera img y,u,v */
-    int img_h, img_w, img_sz, img_orow, img_ocol;
+    int dst_h, dst_w, dst_sz, src_sz, img_orow, img_ocol;
     int indx, row, indx1;
-    unsigned char *img_data;
+    unsigned char *dst_img, *src_img;
     ctx_stream_data *strm;
     ctx_all_sizes *all_sz;
     ctx_dev *cam;
@@ -291,11 +477,12 @@ void webu_stream_all_getimg(ctx_webui *webui)
 
     for (indx=0; indx<webui->motapp->cam_cnt; indx++) {
         cam = webui->motapp->cam_list[indx];
-        webu_stream_img_sizes(webui, cam, img_w, img_h);
-        img_sz = (img_h * img_w * 3)/2;
+        webu_stream_img_sizes(webui, cam, dst_w, dst_h);
+
+        dst_sz = (dst_h * dst_w * 3)/2;
+        src_sz = (cam->imgs.width * cam->imgs.height * 3)/2;
         img_orow = cam->all_loc.offset_row;
         img_ocol = cam->all_loc.offset_col;
-        img_data = (unsigned char*) mymalloc(img_sz);
 
         if ((webui->cnct_type == WEBUI_CNCT_JPG_FULL) ||
             (webui->cnct_type == WEBUI_CNCT_TS_FULL)) {
@@ -313,9 +500,12 @@ void webu_stream_all_getimg(ctx_webui *webui)
             (webui->cnct_type == WEBUI_CNCT_TS_SECONDARY)) {
             strm = &cam->stream.secondary;
         } else { /* Should not be possible*/
-            myfree(&img_data);
             return;
         }
+
+        dst_img = (unsigned char*) mymalloc(dst_sz);
+        src_img = (unsigned char*) mymalloc(src_sz);
+
         pthread_mutex_lock(&cam->stream.mutex);
             indx1=0;
             while (indx1 < 1000) {
@@ -333,26 +523,29 @@ void webu_stream_all_getimg(ctx_webui *webui)
             }
             if (strm->img_data == NULL) {
                 MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
-                    , "Could not get image for device %d"
-                    , cam->device_id);
-                memset(img_data, 0x00, img_sz);
+                    , "Could not get image for device %d", cam->device_id);
+                memset(src_img, 0x00, src_sz);
             } else {
-                /*
-                MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
-                , "Got image. %d connection count %d sleep wait %d"
-                , cam->device_id, strm->all_cnct, indx1);
-                */
-                memcpy(img_data, strm->img_data, img_sz);
+                memcpy(src_img, strm->img_data, src_sz);
             }
         pthread_mutex_unlock(&cam->stream.mutex);
 
+        webu_stream_img_resize(cam, src_img, dst_img, dst_w, dst_h);
+
+        /*
+        MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+            , "src w %d h %d dst w %d h %d all w %d h %d "
+            , cam->imgs.width, cam->imgs.height
+            , dst_w, dst_h
+            , all_sz->width,all_sz->height);
+        */
         a_y = (img_orow * all_sz->width) + img_ocol;
         a_u =(all_sz->height * all_sz->width) +
             ((img_orow / 4) * all_sz->width) + (img_ocol / 2) ;
         a_v = a_u + ((all_sz->height * all_sz->width) / 4);
 
         c_y = 0;
-        c_u = (img_w * img_h);
+        c_u = (dst_w * dst_h);
         c_v = c_u + (c_u / 4);
 
         /*
@@ -363,23 +556,23 @@ void webu_stream_all_getimg(ctx_webui *webui)
             , all_sz->height, all_sz->width);
         */
 
-        for (row=0; row<img_h; row++) {
-            memcpy(webui->all_img_data  + a_y, img_data + c_y, img_w);
+        for (row=0; row<dst_h; row++) {
+            memcpy(webui->all_img_data  + a_y, dst_img + c_y, dst_w);
             a_y += all_sz->width;
-            c_y += img_w;
+            c_y += dst_w;
             if (row % 2) {
-                memcpy(webui->all_img_data  + a_u, img_data + c_u, img_w / 2);
-                //memset(webui->all_img_data  + a_u, 0xFA, img_w/2);
+                memcpy(webui->all_img_data  + a_u, dst_img + c_u, dst_w / 2);
+                //memset(webui->all_img_data  + a_u, 0xFA, dst_w/2);
                 a_u += (all_sz->width / 2);
-                c_u += (img_w / 2);
-                memcpy(webui->all_img_data  + a_v, img_data + c_v, img_w / 2);
+                c_u += (dst_w / 2);
+                memcpy(webui->all_img_data  + a_v, dst_img + c_v, dst_w / 2);
                 a_v += (all_sz->width / 2);
-                c_v += (img_w / 2);
+                c_v += (dst_w / 2);
             }
         }
-        myfree(&img_data);
+        myfree(&dst_img);
+        myfree(&src_img);
     }
-
 }
 
 static void webu_stream_mjpeg_all_img(ctx_webui *webui)

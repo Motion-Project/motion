@@ -66,6 +66,13 @@
         #include <libavutil/mathematics.h>
         #include <libavdevice/avdevice.h>
         #include <libavcodec/avcodec.h>
+        #include <libavformat/avio.h>
+        #include <libswscale/swscale.h>
+        #include <libavutil/avutil.h>
+        #include "libavutil/buffer.h"
+        #include "libavutil/error.h"
+        #include "libavutil/hwcontext.h"
+        #include "libavutil/mem.h"
     }
 #pragma GCC diagnostic pop
 
@@ -311,6 +318,9 @@ struct ctx_all_loc {
     int     col;
     int     offset_row;
     int     offset_col;
+    int     offset_user_row;
+    int     offset_user_col;
+    int     scale;
 };
 
 struct ctx_all_sizes {
@@ -500,6 +510,7 @@ struct ctx_dev {
     bool                    passflag;  //flag first frame vs all others.
 
     ctx_all_loc             all_loc;    /* position on all camera image */
+    struct SwsContext       *swsctx;    /* Context for the resizing of the image */
 
     pthread_mutex_t         parms_lock;
     ctx_params              *params;            /* Device parameters*/

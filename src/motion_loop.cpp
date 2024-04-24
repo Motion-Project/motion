@@ -544,6 +544,7 @@ static void mlp_init_values(ctx_dev *cam)
 {
     cam->event_nr = 1;
     cam->prev_event = 0;
+    cam->swsctx = NULL;
 
     cam->watchdog = cam->conf->watchdog_tmo;
 
@@ -640,6 +641,9 @@ void mlp_cleanup(ctx_dev *cam)
     myfree(&cam->imgs.image_secondary);
     myfree(&cam->imgs.image_preview.image_norm);
     myfree(&cam->imgs.image_preview.image_high);
+    if (cam->swsctx != NULL) {
+        sws_freeContext(cam->swsctx);
+    }
 
     mlp_ring_destroy(cam); /* Cleanup the precapture ring buffer */
 

@@ -347,9 +347,13 @@ static void motpls_allcams_init(ctx_motapp *motapp)
     }
 
     for (indx=0; indx<motapp->cam_cnt; indx++) {
-        cfg = motapp->cam_list[indx]->conf->stream_preview_location;
         motapp->cam_list[indx]->all_loc.row = -1;
         motapp->cam_list[indx]->all_loc.col = -1;
+        motapp->cam_list[indx]->all_loc.offset_user_col = 0;
+        motapp->cam_list[indx]->all_loc.offset_user_row = 0;
+        motapp->cam_list[indx]->all_loc.scale =
+            motapp->cam_list[indx]->conf->stream_preview_scale;
+        cfg = motapp->cam_list[indx]->conf->stream_preview_location;
         params_loc = (ctx_params*)mymalloc(sizeof(ctx_params));
         params_loc->update_params = true;
         util_parms_parse(params_loc, cfg);
@@ -360,6 +364,14 @@ static void motpls_allcams_init(ctx_motapp *motapp)
             }
             if (mystreq(params_loc->params_array[indx1].param_name,"col")) {
                 motapp->cam_list[indx]->all_loc.col =
+                    atoi(params_loc->params_array[indx1].param_value);
+            }
+            if (mystreq(params_loc->params_array[indx1].param_name,"offset_col")) {
+                motapp->cam_list[indx]->all_loc.offset_user_col =
+                    atoi(params_loc->params_array[indx1].param_value);
+            }
+            if (mystreq(params_loc->params_array[indx1].param_name,"offset_row")) {
+                motapp->cam_list[indx]->all_loc.offset_user_row =
                     atoi(params_loc->params_array[indx1].param_value);
             }
         }
@@ -452,7 +464,7 @@ static void motpls_allcams_init(ctx_motapp *motapp)
 
     if (cfg_valid == false) {
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,"Creating default stream_preview_location values");
+            ,"Creating default stream preview values");
         row = 0;
         col = 0;
         for (indx=0; indx<motapp->cam_cnt; indx++) {
@@ -464,6 +476,7 @@ static void motpls_allcams_init(ctx_motapp *motapp)
             }
             motapp->cam_list[indx]->all_loc.col = col;
             motapp->cam_list[indx]->all_loc.row = row;
+            motapp->cam_list[indx]->all_loc.scale = -1;
         }
     }
 

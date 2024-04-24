@@ -2152,7 +2152,8 @@
         <ul>
           <li> Values: Integer | Default: 25</li>
           The percentage to scale the stream image when it is placed on the webcontrol
-          page.  Numbers greater than 100 are permitted.
+          page or into the combined image when the stream_preview_method is set to combined.
+          <br>Numbers greater than 100 are permitted.
         </ul>
         <p></p>
 
@@ -2160,21 +2161,81 @@
         <ul>
           <li> Values: on, off | Default: off</li>
           Insert a new line indicator prior to the image on the webcontrol web page.
+        <p></p>
+          Note that this parameter is ignored when the stream_preview_method is set to
+          combined.
         </ul>
         <p></p>
 
         <h3><a name="stream_preview_location"></a> stream_preview_location</h3>
         <ul>
          <li> Values: String | Default: Not Defined</li>
-          Comma separated row and col parameters for location on the consolidated image.
+          Comma separated parameters for the location on the consolidated image.
           The consolidated image puts together a single image of all the cameras currently
-          running. Format is row=value1,col=value2
+          running. Format is parm1=value1,parm2=value2 etc.
+          <p></p>
+          Note that this parameter is ignored when the stream_preview_method is set to
+          any value other than combined.
+          <div>
+            <i><h4>row</h4></i>
+            <ul>
+              <li> Values: positive integers | Default: Not Defined </li>
+              On the preview home page, the row number that the image will be shown.
+              Row numbers are counts of images on the page and not pixels.  For example,
+              if there are six cameras running and they are all stacked on top of each other
+              on the page, the last image will be at row 6 (Not image1 height + image2 height +
+              ...image 5 height)
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>col</h4></i>
+            <ul>
+              <li> Values: positive integers | Default: Not Defined </li>
+              On the preview home page, the column number that the image will be shown.
+              Column numbers are counts of images on the page and not pixels.  For example,
+              if there are six cameras running and they are all put side by side
+              on the page, the last image will be at column 6 (Not image1 width + image2 width +
+              ...image 5 width)
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>offset_col</h4></i>
+            <ul>
+              <li> Values: positive and negative integers | Default: 0 </li>
+              On the preview home page, Motionplus will arrange the image of
+              the camera into the row and columns indicated by the other parameters.
+              After the image is positioned, Motionplus centers the image in the
+              row and column grid space.  This parameter allows the user to move the image
+              to the left(negative values) or right(positive values) from that center position.
+              <p></p>
+              This parameter is in pixels.
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>offset_row </h4></i>
+            <ul>
+              <li> Values: positive and negative integers | Default: 0 </li>
+              On the preview home page, Motionplus will arrange the image of
+              the camera into the row and columns indicated by the other parameters.
+              After the image is positioned, Motionplus centers the image in the
+              row and column grid space.  This parameter allows the user to move the image
+              up (negative values) or down(positive values) from that center position.
+              <p></p>
+              This parameter is in pixels.
+            </ul>
+            <p></p>
+          </div>
+
           <p></p>
           Note that the row and col must be continuous without gaps in the numbers.
           e.g. If one of the cameras specifies a row number of 5, then some of the other
           cameras must specify numbers 1 to 4 inclusive.  Likewise on the col parameter.
           For each row, the col must start at 1 and increase sequentially.  It is however
           permitted to have a different number of cameras on each row.
+          <p></p>
           <div>
             <p></p>
             <h4>Illustrative sample:</h4>
