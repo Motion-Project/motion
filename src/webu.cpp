@@ -1495,25 +1495,13 @@ void webu_deinit(ctx_motapp *motapp)
 /* Start the webcontrol and streams */
 void webu_init(ctx_motapp *motapp)
 {
-    struct sigaction act;
-
-    /* We need to block some signals otherwise MHD will not function correctly. */
-    /* set signal handlers TO IGNORE */
-    memset(&act, 0, sizeof(act));
-    sigemptyset(&act.sa_mask);
-    act.sa_handler = SIG_IGN;
-    sigaction(SIGPIPE, &act, NULL);
-    sigaction(SIGCHLD, &act, NULL);
-
     motapp->webcontrol_daemon = NULL;
     motapp->webcontrol_daemon2 = NULL;
     motapp->webcontrol_finish = false;
 
-     /* Start the webcontrol */
     if (motapp->conf->webcontrol_port != 0 ) {
         webu_init_webcontrol(motapp);
     }
 
     return;
-
 }
