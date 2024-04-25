@@ -57,18 +57,6 @@ typedef struct netcam_image_buff {
 } netcam_buff;
 typedef netcam_buff *netcam_buff_ptr;
 
-extern "C" {
-    #include <libavcodec/avcodec.h>
-    #include <libavformat/avformat.h>
-    #include <libavformat/avio.h>
-    #include <libswscale/swscale.h>
-    #include <libavutil/avutil.h>
-    #include <libavutil/imgutils.h>
-    #include "libavutil/buffer.h"
-    #include "libavutil/error.h"
-    #include "libavutil/hwcontext.h"
-    #include "libavutil/mem.h"
-}
 struct ctx_packet_item{
     AVPacket                 *packet;
     int64_t                   idnbr;
