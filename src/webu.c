@@ -2399,22 +2399,10 @@ void webu_stop(struct context **cnt)
 
 }
 
+/* Start the webcontrol and streams.*/
 void webu_start(struct context **cnt)
 {
-    /* This function is called from the main motion thread to start up the
-     * webcontrol and streams.  We need to block some signals otherwise MHD
-     * will not function correctly.
-     */
-    struct sigaction act;
     int indxthrd;
-
-    /* set signal handlers TO IGNORE */
-    memset(&act, 0, sizeof(act));
-    sigemptyset(&act.sa_mask);
-    act.sa_handler = SIG_IGN;
-    sigaction(SIGPIPE, &act, NULL);
-    sigaction(SIGCHLD, &act, NULL);
-
 
     indxthrd = 0;
     while (cnt[indxthrd] != NULL) {
