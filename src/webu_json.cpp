@@ -251,13 +251,12 @@ static void webu_json_movies_list(ctx_webui *webui)
     std::string response;
     char fmt[PATH_MAX];
     ctx_dbse_rec db;
-    ctx_params *wact;
+    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_it it;
 
-    /* Validate movies permitted via params */
-    wact = webui->motapp->webcontrol_actions;
-    for (indx = 0; indx < wact->params_count; indx++) {
-        if (mystreq(wact->params_array[indx].param_name,"movies")) {
-            if (mystreq(wact->params_array[indx].param_value,"off")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "movies") {
+            if (it->param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Movies via webcontrol disabled");
                 webui->resp_page += "{\"count\" : 0} ";
                 webui->resp_page += ",\"device_id\" : ";

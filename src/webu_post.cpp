@@ -27,12 +27,12 @@
 static void webu_post_cam_add(ctx_webui *webui)
 {
     int indx, maxcnt;
-    ctx_params *wact;
+    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_it it;
 
-    wact = webui->motapp->webcontrol_actions;
-    for (indx = 0; indx < wact->params_count; indx++) {
-        if (mystreq(wact->params_array[indx].param_name,"camera_add")) {
-            if (mystreq(wact->params_array[indx].param_value,"off")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "camera_add") {
+            if (it->param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Camera add action disabled");
                 return;
             } else {
@@ -65,12 +65,12 @@ static void webu_post_cam_add(ctx_webui *webui)
 static void webu_post_cam_delete(ctx_webui *webui)
 {
     int indx, maxcnt;
-    ctx_params *wact;
+    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_it it;
 
-    wact = webui->motapp->webcontrol_actions;
-    for (indx = 0; indx < wact->params_count; indx++) {
-        if (mystreq(wact->params_array[indx].param_name,"camera_delete")) {
-            if (mystreq(wact->params_array[indx].param_value,"off")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "camera_delete") {
+            if (it->param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Camera delete action disabled");
                 return;
             } else {
@@ -149,12 +149,12 @@ void webu_post_cmdindx(ctx_webui *webui)
 void webu_post_action_eventend(ctx_webui *webui)
 {
     int indx;
-    ctx_params *wact;
+    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_it it;
 
-    wact = webui->motapp->webcontrol_actions;
-    for (indx = 0; indx < wact->params_count; indx++) {
-        if (mystreq(wact->params_array[indx].param_name,"event")) {
-            if (mystreq(wact->params_array[indx].param_value,"off")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "event") {
+            if (it->param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Event end action disabled");
                 return;
             } else {
@@ -177,12 +177,12 @@ void webu_post_action_eventend(ctx_webui *webui)
 void webu_post_action_eventstart(ctx_webui *webui)
 {
     int indx;
-    ctx_params *wact;
+    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_it it;
 
-    wact = webui->motapp->webcontrol_actions;
-    for (indx = 0; indx < wact->params_count; indx++) {
-        if (mystreq(wact->params_array[indx].param_name,"event")) {
-            if (mystreq(wact->params_array[indx].param_value,"off")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "event") {
+            if (it->param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Event start action disabled");
                 return;
             } else {
@@ -205,12 +205,12 @@ void webu_post_action_eventstart(ctx_webui *webui)
 void webu_post_action_snapshot(ctx_webui *webui)
 {
     int indx;
-    ctx_params *wact;
+    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_it it;
 
-    wact = webui->motapp->webcontrol_actions;
-    for (indx = 0; indx < wact->params_count; indx++) {
-        if (mystreq(wact->params_array[indx].param_name,"snapshot")) {
-            if (mystreq(wact->params_array[indx].param_value,"off")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "snapshot") {
+            if (it->param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Snapshot action disabled");
                 return;
             } else {
@@ -233,12 +233,12 @@ void webu_post_action_snapshot(ctx_webui *webui)
 void webu_post_action_pause(ctx_webui *webui)
 {
     int indx;
-    ctx_params *wact;
+    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_it it;
 
-    wact = webui->motapp->webcontrol_actions;
-    for (indx = 0; indx < wact->params_count; indx++) {
-        if (mystreq(wact->params_array[indx].param_name,"pause")) {
-            if (mystreq(wact->params_array[indx].param_value,"off")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "pause") {
+            if (it->param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
                 return;
             } else {
@@ -261,12 +261,12 @@ void webu_post_action_pause(ctx_webui *webui)
 void webu_post_action_unpause(ctx_webui *webui)
 {
     int indx;
-    ctx_params *wact;
+    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_it it;
 
-    wact = webui->motapp->webcontrol_actions;
-    for (indx = 0; indx < wact->params_count; indx++) {
-        if (mystreq(wact->params_array[indx].param_name,"pause")) {
-            if (mystreq(wact->params_array[indx].param_value,"off")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "pause") {
+            if (it->param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
                 return;
             } else {
@@ -289,12 +289,12 @@ void webu_post_action_unpause(ctx_webui *webui)
 void webu_post_action_restart(ctx_webui *webui)
 {
     int indx;
-    ctx_params *wact;
+    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_it it;
 
-    wact = webui->motapp->webcontrol_actions;
-    for (indx = 0; indx < wact->params_count; indx++) {
-        if (mystreq(wact->params_array[indx].param_name,"restart")) {
-            if (mystreq(wact->params_array[indx].param_value,"off")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "restart") {
+            if (it->param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Restart action disabled");
                 return;
             } else {
@@ -321,12 +321,12 @@ void webu_post_action_restart(ctx_webui *webui)
 void webu_post_action_stop(ctx_webui *webui)
 {
     int indx;
-    ctx_params *wact;
+    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_it it;
 
-    wact = webui->motapp->webcontrol_actions;
-    for (indx = 0; indx < wact->params_count; indx++) {
-        if (mystreq(wact->params_array[indx].param_name,"stop")) {
-            if (mystreq(wact->params_array[indx].param_value,"off")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "stop") {
+            if (it->param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Stop action disabled");
                 return;
             } else {
@@ -360,14 +360,14 @@ void webu_post_action_stop(ctx_webui *webui)
 void webu_post_action_user(ctx_webui *webui)
 {
     int indx, indx2;
-    ctx_params *wact;
     ctx_dev *cam;
     std::string tmp;
+    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_it it;
 
-    wact = webui->motapp->webcontrol_actions;
-    for (indx = 0; indx < wact->params_count; indx++) {
-        if (mystreq(wact->params_array[indx].param_name,"action_user")) {
-            if (mystreq(wact->params_array[indx].param_value,"off")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "action_user") {
+            if (it->param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "User action disabled");
                 return;
             } else {
@@ -428,13 +428,12 @@ void webu_post_action_user(ctx_webui *webui)
 /* Process the write config action */
 void webu_post_write_config(ctx_webui *webui)
 {
-    int indx;
-    ctx_params *wact;
+    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_it it;
 
-    wact = webui->motapp->webcontrol_actions;
-    for (indx = 0; indx < wact->params_count; indx++) {
-        if (mystreq(wact->params_array[indx].param_name,"config_write")) {
-            if (mystreq(wact->params_array[indx].param_value,"off")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "config_write") {
+            if (it->param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Config write action disabled");
                 return;
             } else {
@@ -452,16 +451,16 @@ static void webu_post_config(ctx_webui *webui)
 {
     int indx, indx2;
     std::string tmpname;
-    ctx_params *wact;
+    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_it it;
 
     if (webui->camindx == -1) {
         return;
     }
 
-    wact = webui->motapp->webcontrol_actions;
-    for (indx = 0; indx < wact->params_count; indx++) {
-        if (mystreq(wact->params_array[indx].param_name,"config")) {
-            if (mystreq(wact->params_array[indx].param_value,"off")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "config") {
+            if (it->param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Config save actions disabled");
                 return;
             } else {
@@ -517,18 +516,17 @@ static void webu_post_config(ctx_webui *webui)
 /* Process the ptz action */
 void webu_post_ptz(ctx_webui *webui)
 {
-    int indx;
     ctx_dev *cam;
-    ctx_params *wact;
+    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_it it;
 
     if (webui->camindx == -1) {
         return;
     }
 
-    wact = webui->motapp->webcontrol_actions;
-    for (indx = 0; indx < wact->params_count; indx++) {
-        if (mystreq(wact->params_array[indx].param_name,"ptz")) {
-            if (mystreq(wact->params_array[indx].param_value,"off")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "ptz") {
+            if (it->param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "PTZ actions disabled");
                 return;
             } else {

@@ -865,7 +865,8 @@ static enum AVPixelFormat netcam_getfmt_drm(AVCodecContext *avctx, const enum AV
 static void netcam_decoder_error(ctx_netcam *netcam, int retcd, const char* fnc_nm)
 {
     char errstr[128];
-    int indx;
+    p_lst *lst = &netcam->params->params_array;
+    p_it it;
 
     if (netcam->interrupted) {
         MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
@@ -889,11 +890,9 @@ static void netcam_decoder_error(ctx_netcam *netcam, int retcd, const char* fnc_
             ,_("%s: Ignoring and removing the user requested decoder %s")
             ,netcam->cameratype, netcam->decoder_nm);
 
-        for (indx = 0; indx < netcam->params->params_count; indx++) {
-            if (mystreq(netcam->params->params_array[indx].param_name,"decoder") ) {
-                myfree(&netcam->params->params_array[indx].param_value);
-                netcam->params->params_array[indx].param_value = (char*)mymalloc(5);
-                snprintf(netcam->params->params_array[indx].param_value, 5, "%s","NULL");
+        for (it = lst->begin(); it != lst->end(); it++) {
+            if (it->param_name == "decoder") {
+                it->param_value = "NULL";
                 break;
             }
         }
@@ -908,7 +907,6 @@ static void netcam_decoder_error(ctx_netcam *netcam, int retcd, const char* fnc_
         netcam->decoder_nm = (char*)mymalloc(5);
         snprintf(netcam->decoder_nm, 5, "%s","NULL");
     }
-
 }
 
 static int netcam_init_vaapi(ctx_netcam *netcam)
@@ -1269,18 +1267,6 @@ static int netcam_open_codec(ctx_netcam *netcam)
         return retcd;
     #endif
 
-}
-
-static ctx_netcam *netcam_new_context(void)
-{
-    ctx_netcam *ret;
-
-    /* Note that mymalloc will exit on any problem. */
-    ret =(ctx_netcam*) mymalloc(sizeof(ctx_netcam));
-
-    memset(ret, 0, sizeof(ctx_netcam));
-
-    return ret;
 }
 
 static int netcam_interrupt(void *ctx)
@@ -1682,16 +1668,9 @@ static int netcam_ntc(ctx_netcam *netcam)
 
 static void netcam_set_options(ctx_netcam *netcam)
 {
-
-    int indx;
-    char *tmpval;
-
-    /* The log messages are a bit short in this function intentionally.
-     * The function name is printed in each message so that is being
-     * considered as part of the message.
-     */
-
-    tmpval = (char*)mymalloc(PATH_MAX);
+    char    tmpval[PATH_MAX];
+    p_lst   *lst = &netcam->params->params_array;
+    p_it    it;
 
     if (mystreq(netcam->service, "rtsp") ||
         mystreq(netcam->service, "rtsps") ||
@@ -1723,8 +1702,6 @@ static void netcam_set_options(ctx_netcam *netcam)
         sprintf(tmpval,"%dx%d",netcam->conf->width, netcam->conf->height);
         util_parms_add_default(netcam->params,"video_size", tmpval);
 
-        /* Allow a bit more time for the v4l2 device to start up */
-        //netcam->motapp-> ->watchdog = 60;
         netcam->interruptduration = 55;
 
     } else if (mystreq(netcam->service, "file")) {
@@ -1736,26 +1713,18 @@ static void netcam_set_options(ctx_netcam *netcam)
             ,netcam->cameratype, netcam->service);
     }
 
-    free(tmpval);
-
-    /* Write the options to the context, while skipping the Motion ones */
-    for (indx = 0; indx < netcam->params->params_count; indx++) {
-        if (mystrne(netcam->params->params_array[indx].param_name,"decoder") &&
-            mystrne(netcam->params->params_array[indx].param_name,"capture_rate")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if ((it->param_name != "decoder") &&
+            (it->param_name != "capture_rate")) {
             av_dict_set(&netcam->opts
-                , netcam->params->params_array[indx].param_name
-                , netcam->params->params_array[indx].param_value
-                , 0);
+                , it->param_name.c_str(), it->param_value.c_str(), 0);
             if (netcam->status == NETCAM_NOTCONNECTED) {
                 MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("%s: option: %s = %s")
                     ,netcam->cameratype
-                    ,netcam->params->params_array[indx].param_name
-                    ,netcam->params->params_array[indx].param_value
-                );
+                    ,it->param_name.c_str(),it->param_value.c_str());
             }
         }
     }
-
 }
 
 static void netcam_set_path (ctx_dev *cam, ctx_netcam *netcam )
@@ -1819,8 +1788,8 @@ static void netcam_set_path (ctx_dev *cam, ctx_netcam *netcam )
 
 static void netcam_set_parms (ctx_dev *cam, ctx_netcam *netcam )
 {
-    /* Set the parameters to be used with our camera */
-    int indx, val_len;
+    p_lst   *lst = &netcam->params->params_array;
+    p_it    it;
 
     netcam->motapp = cam->motapp;
     netcam->conf = cam->conf;
@@ -1833,16 +1802,16 @@ static void netcam_set_parms (ctx_dev *cam, ctx_netcam *netcam )
         netcam->imgsize.width = 0;
         netcam->imgsize.height = 0;
         snprintf(netcam->cameratype, 29, "%s",_("High"));
-        netcam->params = (ctx_params*)mymalloc(sizeof(ctx_params));
         netcam->params->update_params = true;
-        util_parms_parse(netcam->params, cam->conf->netcam_high_params);
+        util_parms_parse(netcam->params
+            ,"netcam_high_params", cam->conf->netcam_high_params);
     } else {
         netcam->imgsize.width = cam->conf->width;
         netcam->imgsize.height = cam->conf->height;
         snprintf(netcam->cameratype, 29, "%s",_("Norm"));
-        netcam->params = (ctx_params*)mymalloc(sizeof(ctx_params));
         netcam->params->update_params = true;
-        util_parms_parse(netcam->params, cam->conf->netcam_params);
+        util_parms_parse(netcam->params
+            ,"netcam_params", cam->conf->netcam_params);
     }
 
     MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
@@ -1870,18 +1839,17 @@ static void netcam_set_parms (ctx_dev *cam, ctx_netcam *netcam )
     netcam->audio_stream_index = -1;
     netcam->last_stream_index = -1;
 
-    for (indx = 0; indx < netcam->params->params_count; indx++) {
-        if (mystreq(netcam->params->params_array[indx].param_name,"decoder")) {
-            val_len = (int)strlen(netcam->params->params_array[indx].param_value) + 1;
-            netcam->decoder_nm = (char*)mymalloc(val_len);
-            snprintf(netcam->decoder_nm, val_len
-                , "%s",netcam->params->params_array[indx].param_value);
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "decoder") {
+            netcam->decoder_nm = (char*)mymalloc(it->param_value.length()+1);
+            snprintf(netcam->decoder_nm
+                , it->param_value.length()+1, "%s",it->param_value.c_str());
         }
-        if (mystreq(netcam->params->params_array[indx].param_name,"capture_rate")) {
-            if (mystreq(netcam->params->params_array[indx].param_value,"pts")) {
+        if (it->param_name == "capture_rate") {
+            if (it->param_value == "pts") {
                 netcam->pts_adj = true;
             } else {
-                netcam->capture_rate = atoi(netcam->params->params_array[indx].param_value);
+                netcam->capture_rate = mtoi(it->param_value);
             }
         }
     }
@@ -1946,6 +1914,7 @@ static void netcam_set_dimensions (ctx_dev *cam)
 
 }
 
+/* Make a static copy of the stream information for use in passthrough processing */
 static int netcam_copy_stream(ctx_netcam *netcam)
 {
     /* Make a static copy of the stream information for use in passthrough processing */
@@ -2215,8 +2184,6 @@ static void netcam_shutdown(ctx_netcam *netcam)
         }
 
         myfree(&netcam->decoder_nm);
-        util_parms_free(netcam->params);
-        myfree(&netcam->params);
     }
 
 }
@@ -2466,7 +2433,8 @@ void netcam_cleanup(ctx_dev *cam)
             pthread_mutex_destroy(&netcam->mutex_pktarray);
             pthread_mutex_destroy(&netcam->mutex_transfer);
 
-            myfree(&netcam);
+            delete netcam->params;
+            delete netcam;
 
             if (indx_cam == 1) {
                 MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
@@ -2506,27 +2474,18 @@ void netcam_start(ctx_dev *cam)
     while (indx_cam <= indx_max) {
 
         if (indx_cam == 1) {
-            cam->netcam = netcam_new_context();
-            if (cam->netcam == NULL) {
-                MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                    ,_("unable to create rtsp context"));
-                netcam_cleanup(cam);
-                return;
-            }
+            cam->netcam = new ctx_netcam;
             netcam = cam->netcam;
-            netcam->high_resolution = false;           /* Set flag for this being the normal resolution camera */
+            memset(netcam, 0, sizeof(ctx_netcam));
+            netcam->high_resolution = false;
         } else {
-            cam->netcam_high = netcam_new_context();
-            if (cam->netcam_high == NULL) {
-                MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                    ,_("unable to create rtsp high context"));
-                netcam_cleanup(cam);
-                return;
-            }
+            cam->netcam_high = new ctx_netcam;
             netcam = cam->netcam_high;
-            netcam->high_resolution = true;            /* Set flag for this being the high resolution camera */
+            memset(netcam, 0, sizeof(ctx_netcam));
+            netcam->high_resolution = true;
         }
 
+        cam->netcam->params = new ctx_params;
         netcam_null_context(netcam);
         netcam_set_parms(cam, netcam);
         if (netcam_connect(netcam) != 0) {

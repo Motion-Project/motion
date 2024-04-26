@@ -34,8 +34,7 @@
 
 struct ctx_algsec_model {
     std::string                 config;             //Source params line
-    ctx_params                  *algsec_params;
-
+    ctx_params                  *params;
 
     std::string                 model_file;
     int                         frame_interval;

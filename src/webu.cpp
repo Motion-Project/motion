@@ -638,7 +638,8 @@ static mhdrslt webu_mhd_send(ctx_webui *webui)
 {
     mhdrslt retcd;
     struct MHD_Response *response;
-    int indx;
+    p_lst *lst = &webui->motapp->webcontrol_headers->params_array;
+    p_it it;
 
     response = MHD_create_response_from_buffer(webui->resp_page.length()
         ,(void *)webui->resp_page.c_str(), MHD_RESPMEM_PERSISTENT);
@@ -648,11 +649,9 @@ static mhdrslt webu_mhd_send(ctx_webui *webui)
     }
 
     if (webui->motapp->webcontrol_headers->params_count > 0) {
-        for (indx = 0; indx < webui->motapp->webcontrol_headers->params_count; indx++) {
+        for (it = lst->begin(); it != lst->end(); it++) {
             MHD_add_response_header (response
-                , webui->motapp->webcontrol_headers->params_array[indx].param_name
-                , webui->motapp->webcontrol_headers->params_array[indx].param_value
-            );
+                , it->param_name.c_str(),it->param_value.c_str());
         }
     }
 
@@ -1357,9 +1356,10 @@ static void webu_init_actions(ctx_motapp *motapp)
 {
     std::string parm_vl;
 
-    motapp->webcontrol_actions = (ctx_params*)mymalloc(sizeof(ctx_params));
+    motapp->webcontrol_actions = new ctx_params;
     motapp->webcontrol_actions->update_params = true;
-    util_parms_parse(motapp->webcontrol_actions, motapp->conf->webcontrol_actions);
+    util_parms_parse(motapp->webcontrol_actions
+        ,"webcontrol_actions", motapp->conf->webcontrol_actions);
 
     if (motapp->conf->webcontrol_parms == 0) {
         parm_vl = "off";
@@ -1379,7 +1379,6 @@ static void webu_init_actions(ctx_motapp *motapp)
     util_parms_add_default(motapp->webcontrol_actions,"ptz",parm_vl);
     util_parms_add_default(motapp->webcontrol_actions,"movies","on");
     util_parms_add_default(motapp->webcontrol_actions,"action_user",parm_vl);
-
 }
 
 /* Start the webcontrol */
@@ -1392,9 +1391,10 @@ static void webu_init_webcontrol(ctx_motapp *motapp)
         , _("Starting webcontrol on port %d")
         , motapp->conf->webcontrol_port);
 
-    motapp->webcontrol_headers = (ctx_params*)mymalloc(sizeof(ctx_params));
+    motapp->webcontrol_headers = new ctx_params;
     motapp->webcontrol_headers->update_params = true;
-    util_parms_parse(motapp->webcontrol_headers, motapp->conf->webcontrol_headers);
+    util_parms_parse(motapp->webcontrol_headers
+        , "webcontrol_headers", motapp->conf->webcontrol_headers);
 
     webu_init_actions(motapp);
 
@@ -1473,7 +1473,6 @@ static void webu_init_webcontrol(ctx_motapp *motapp)
 /* Shut down the webcontrol */
 void webu_deinit(ctx_motapp *motapp)
 {
-
     if (motapp->webcontrol_daemon != NULL) {
         motapp->webcontrol_finish = true;
         MHD_stop_daemon (motapp->webcontrol_daemon);
@@ -1484,12 +1483,8 @@ void webu_deinit(ctx_motapp *motapp)
         MHD_stop_daemon (motapp->webcontrol_daemon2);
     }
 
-    util_parms_free(motapp->webcontrol_headers);
-    myfree(&motapp->webcontrol_headers);
-
-    util_parms_free(motapp->webcontrol_actions);
-    myfree(&motapp->webcontrol_actions);
-
+    delete motapp->webcontrol_actions;
+    delete motapp->webcontrol_headers;
 }
 
 /* Start the webcontrol and streams */

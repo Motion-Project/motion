@@ -69,9 +69,8 @@
                 void cam_config_controls();
                 void req_complete(libcamera::Request *request);
                 int req_add(libcamera::Request *request);
-                bool cam_parm_bool(char *parm);
-                float cam_parm_single(char *parm);
-                void cam_config_control_item(char *pmm, char *pval);
+                void cam_config_control_item(
+                    std::string pname, std::string pvalue);
         };
     #else
         #define LIBCAMVER 0

@@ -420,13 +420,13 @@ static void algsec_load_dnn(ctx_dev *cam)
 static void algsec_params_log(ctx_dev *cam)
 {
     ctx_algsec_model *algmdl = &cam->algsec->models;
-    int indx;
+    p_lst *lst = &cam->algsec->models.params->params_array;
+    p_it it;
 
     if (algmdl->method != "none") {
-        for (indx = 0; indx < algmdl->algsec_params->params_count; indx++) {
+        for (it  = lst->begin(); it != lst->end(); it++) {
             motpls_log(INF, TYPE_ALL, NO_ERRNO,0, NULL, "%-25s %s"
-                ,algmdl->algsec_params->params_array[indx].param_name
-                ,algmdl->algsec_params->params_array[indx].param_value);
+                ,it->param_name.c_str(), it->param_value.c_str());
         }
     }
 }
@@ -434,62 +434,59 @@ static void algsec_params_log(ctx_dev *cam)
 static void algsec_params_model(ctx_dev *cam)
 {
     ctx_algsec_model *algmdl = &cam->algsec->models;
-    int indx;
-    char *param_nm, *param_vl;
+    p_lst *lst = &cam->algsec->models.params->params_array;
+    p_it it;
 
-    for (indx = 0; indx < algmdl->algsec_params->params_count; indx++) {
-        param_nm = algmdl->algsec_params->params_array[indx].param_name;
-        param_vl = algmdl->algsec_params->params_array[indx].param_value;
-
-        if (mystreq(param_nm, "model_file")) {
-            algmdl->model_file = param_vl;
-        } else if (mystreq(param_nm,"frame_interval")) {
-            algmdl->frame_interval = atoi(param_vl);
-        } else if (mystreq(param_nm,"image_type")) {
-            algmdl->image_type = param_vl;
-        } else if (mystreq(param_nm,"threshold")) {
-            algmdl->threshold = atof(param_vl);
-        } else if (mystreq(param_nm,"scalefactor")) {
-            algmdl->scalefactor = atof(param_vl);
-        } else if (mystreq(param_nm,"rotate")) {
-            algmdl->rotate = atoi(param_vl);
+    for (it  = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "model_file") {
+            algmdl->model_file = it->param_value;
+        } else if (it->param_name == "frame_interval") {
+            algmdl->frame_interval = mtoi(it->param_value);
+        } else if (it->param_name == "image_type") {
+            algmdl->image_type = it->param_value;
+        } else if (it->param_name == "threshold") {
+            algmdl->threshold = mtof(it->param_value);
+        } else if (it->param_name == "scalefactor") {
+            algmdl->scalefactor = mtof(it->param_value);
+        } else if (it->param_name == "rotate") {
+            algmdl->rotate = mtoi(it->param_value);
         }
 
         if (algmdl->method == "hog") {
-            if (mystreq(param_nm,"padding")) {
-                algmdl->hog_padding = atoi(param_vl);
-            } else if (mystreq(param_nm,"threshold_model")) {
-                algmdl->hog_threshold_model = atof(param_vl);
-            } else if (mystreq(param_nm,"winstride")) {
-                algmdl->hog_winstride = atoi(param_vl);
+            if (it->param_name =="padding") {
+                algmdl->hog_padding = mtoi(it->param_value);
+            } else if (it->param_name =="threshold_model") {
+                algmdl->hog_threshold_model = mtof(it->param_value);
+            } else if (it->param_name =="winstride") {
+                algmdl->hog_winstride = mtoi(it->param_value);
             }
         } else if (algmdl->method == "haar") {
-            if (mystreq(param_nm,"flags")) {
-                algmdl->haar_flags = atoi(param_vl);
-            } else if (mystreq(param_nm,"maxsize")) {
-                algmdl->haar_maxsize = atoi(param_vl);
-            } else if (mystreq(param_nm,"minsize")) {
-                algmdl->haar_minsize = atoi(param_vl);
-            } else if (mystreq(param_nm,"minneighbors")) {
-                algmdl->haar_minneighbors = atoi(param_vl);
+            if (it->param_name =="flags") {
+                algmdl->haar_flags = mtoi(it->param_value);
+            } else if (it->param_name =="maxsize") {
+                algmdl->haar_maxsize = mtoi(it->param_value);
+            } else if (it->param_name =="minsize") {
+                algmdl->haar_minsize = mtoi(it->param_value);
+            } else if (it->param_name =="minneighbors") {
+                algmdl->haar_minneighbors = mtoi(it->param_value);
             }
         } else if (algmdl->method == "dnn") {
-            if (mystreq(param_nm, "config")) {
-                algmdl->dnn_config = param_vl;
-            } else if (mystreq(param_nm, "classes_file")) {
-                algmdl->dnn_classes_file = param_vl;
-            } else if (mystreq(param_nm,"framework")) {
-                algmdl->dnn_framework = param_vl;
-            } else if (mystreq(param_nm,"backend")) {
-                algmdl->dnn_backend = atoi(param_vl);
-            } else if (mystreq(param_nm,"target")) {
-                algmdl->dnn_target = atoi(param_vl);
-            } else if (mystreq(param_nm,"scale")) {
-                algmdl->dnn_scale = atof(param_vl);
-            } else if (mystreq(param_nm,"width")) {
-                algmdl->dnn_width = atoi(param_vl);
-            } else if (mystreq(param_nm,"height")) {
-                algmdl->dnn_height = atoi(param_vl);
+            if (it->param_name == "config") {
+                algmdl->dnn_config = it->param_value;
+            } else if (it->param_name == "classes_file") {
+                algmdl->dnn_classes_file = it->param_value;
+            } else if (it->param_name =="framework") {
+                algmdl->dnn_framework = it->param_value;
+            } else if (it->param_name =="backend") {
+                algmdl->dnn_backend = mtoi(it->param_value);
+            } else if (it->param_name =="target") {
+                algmdl->dnn_target = mtoi(it->param_value);
+            } else if (it->param_name =="scale") {
+                algmdl->dnn_scale = mtof(it->param_value);
+            } else if (it->param_name =="width") {
+                algmdl->dnn_width = mtoi(it->param_value);
+            } else if (it->param_name =="height") {
+                algmdl->dnn_height = mtoi(it->param_value);
             }
         }
     }
@@ -499,54 +496,32 @@ static void algsec_params_defaults(ctx_dev *cam)
 {
     ctx_algsec_model *algmdl = &cam->algsec->models;
 
-    util_parms_add_default(algmdl->algsec_params, "model_file", "");
-    util_parms_add_default(algmdl->algsec_params, "frame_interval", "5");
-    util_parms_add_default(algmdl->algsec_params, "image_type", "full");
-    util_parms_add_default(algmdl->algsec_params, "rotate", "0");
+    util_parms_add_default(algmdl->params, "model_file", "");
+    util_parms_add_default(algmdl->params, "frame_interval", "5");
+    util_parms_add_default(algmdl->params, "image_type", "full");
+    util_parms_add_default(algmdl->params, "rotate", "0");
 
     if (algmdl->method == "haar") {
-        util_parms_add_default(algmdl->algsec_params, "threshold", "1.1");
-        util_parms_add_default(algmdl->algsec_params, "scalefactor", "1.1");
-        util_parms_add_default(algmdl->algsec_params, "flags", "0");
-        util_parms_add_default(algmdl->algsec_params, "maxsize", "1024");
-        util_parms_add_default(algmdl->algsec_params, "minsize", "8");
-        util_parms_add_default(algmdl->algsec_params, "minneighbors", "8");
+        util_parms_add_default(algmdl->params, "threshold", "1.1");
+        util_parms_add_default(algmdl->params, "scalefactor", "1.1");
+        util_parms_add_default(algmdl->params, "flags", "0");
+        util_parms_add_default(algmdl->params, "maxsize", "1024");
+        util_parms_add_default(algmdl->params, "minsize", "8");
+        util_parms_add_default(algmdl->params, "minneighbors", "8");
     } else if (algmdl->method == "hog") {
-        util_parms_add_default(algmdl->algsec_params, "threshold", "1.1");
-        util_parms_add_default(algmdl->algsec_params, "threshold_model", "2");
-        util_parms_add_default(algmdl->algsec_params, "scalefactor", "1.05");
-        util_parms_add_default(algmdl->algsec_params, "padding", "8");
-        util_parms_add_default(algmdl->algsec_params, "winstride", "8");
+        util_parms_add_default(algmdl->params, "threshold", "1.1");
+        util_parms_add_default(algmdl->params, "threshold_model", "2");
+        util_parms_add_default(algmdl->params, "scalefactor", "1.05");
+        util_parms_add_default(algmdl->params, "padding", "8");
+        util_parms_add_default(algmdl->params, "winstride", "8");
     } else if (algmdl->method == "dnn") {
-        util_parms_add_default(algmdl->algsec_params, "backend", DNN_BACKEND_DEFAULT);
-        util_parms_add_default(algmdl->algsec_params, "target", DNN_TARGET_CPU);
-        util_parms_add_default(algmdl->algsec_params, "threshold", "0.75");
-        util_parms_add_default(algmdl->algsec_params, "width", cam->imgs.width);
-        util_parms_add_default(algmdl->algsec_params, "height", cam->imgs.height);
-        util_parms_add_default(algmdl->algsec_params, "scale", "1.0");
+        util_parms_add_default(algmdl->params, "backend", DNN_BACKEND_DEFAULT);
+        util_parms_add_default(algmdl->params, "target", DNN_TARGET_CPU);
+        util_parms_add_default(algmdl->params, "threshold", "0.75");
+        util_parms_add_default(algmdl->params, "width", cam->imgs.width);
+        util_parms_add_default(algmdl->params, "height", cam->imgs.height);
+        util_parms_add_default(algmdl->params, "scale", "1.0");
     }
-
-}
-
-static void algsec_params_deinit(ctx_dev *cam)
-{
-    ctx_algsec_model *algmdl = &cam->algsec->models;
-
-    if (algmdl->algsec_params != NULL){
-        util_parms_free(algmdl->algsec_params);
-        myfree(&algmdl->algsec_params);
-    }
-}
-
-static void algsec_params_init(ctx_dev *cam)
-{
-    ctx_algsec_model *algmdl = &cam->algsec->models;
-
-    algmdl->algsec_params = (ctx_params*) mymalloc(sizeof(ctx_params));
-    memset(algmdl->algsec_params, 0, sizeof(ctx_params));
-    algmdl->algsec_params->params_array = NULL;
-    algmdl->algsec_params->params_count = 0;
-    algmdl->algsec_params->update_params = true;     /*Set trigger to update parameters */
 }
 
 /**Load the parms from the config to algsec struct */
@@ -565,9 +540,9 @@ static void algsec_load_params(ctx_dev *cam)
     cam->algsec->closing = false;
     cam->algsec->thread_running = false;
 
-    algsec_params_init(cam);
-
-    util_parms_parse(cam->algsec->models.algsec_params, cam->conf->secondary_params);
+    cam->algsec->models.params->update_params = true;
+    util_parms_parse(cam->algsec->models.params
+        , "secondary_params", cam->conf->secondary_params);
 
     algsec_params_defaults(cam);
 
@@ -673,6 +648,7 @@ void algsec_init(ctx_dev *cam)
     #ifdef HAVE_OPENCV
         mythreadname_set("cv",cam->threadnr,cam->conf->device_name.c_str());
             cam->algsec = new ctx_algsec;
+            cam->algsec->models.params = new ctx_params;
             algsec_load_params(cam);
             algsec_load_models(cam);
             algsec_start_handler(cam);
@@ -704,12 +680,11 @@ void algsec_deinit(ctx_dev *cam)
             }
         }
 
-        algsec_params_deinit(cam);
-
         myfree(&cam->algsec->image_norm);
 
         pthread_mutex_destroy(&cam->algsec->mutex);
 
+        delete cam->algsec->models.params;
         delete cam->algsec;
         cam->algsec = NULL;
         cam->algsec_inuse = false;

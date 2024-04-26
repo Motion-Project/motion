@@ -140,12 +140,20 @@
     int mycopy_packet(AVPacket *dest_pkt, AVPacket *src_pkt);
     AVPacket *mypacket_alloc(AVPacket *pkt);
 
-    void util_parms_parse(ctx_params *params, std::string confline);
+    void util_parms_parse(ctx_params *params, std::string parm_desc, std::string confline);
     void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl);
     void util_parms_add_default(ctx_params *params, std::string parm_nm, int parm_vl);
-    void util_parms_add(ctx_params *params, const char *parm_nm, const char *parm_val);
-    void util_parms_free(ctx_params *params);
+    void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_val);
     void util_parms_update(ctx_params *params, std::string &confline);
 
+    int mtoi(std::string parm);
+    int mtoi(char *parm);
+    float mtof(char *parm);
+    float mtof(std::string parm);
+    bool mtob(std::string parm);
+    bool mtob(char *parm);
+    long mtol(std::string parm);
+    long mtol(char *parm);
+    std::string mtok(std::string &parm, std::string tok);
 
 #endif /* _INCLUDE_UTIL_HPP_ */

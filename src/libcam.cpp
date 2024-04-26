@@ -39,20 +39,6 @@
 
 using namespace libcamera;
 
-bool cls_libcam::cam_parm_bool(char *parm)
-{
-    if (mystrceq(parm,"1") || mystrceq(parm,"yes") || mystrceq(parm,"on") || mystrceq(parm,"true") ) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-float cls_libcam::cam_parm_single(char *parm)
-{
-    return (float)atof(parm);
-}
-
 void cls_libcam::cam_log_orientation()
 {
     #if (LIBCAMVER >= 2000)
@@ -236,24 +222,21 @@ void cls_libcam:: cam_log_draft()
 
 void cls_libcam::cam_start_params(ctx_dev *ptr)
 {
-    int indx;
-
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
-
     camctx = ptr;
+    p_lst *lst;
+    p_it it;
 
-    camctx->libcam->params = (ctx_params*)mymalloc(sizeof(ctx_params));
+    camctx->libcam->params = new ctx_params;
     camctx->libcam->params->update_params = true;
-    util_parms_parse(camctx->libcam->params, camctx->conf->libcam_params);
+    util_parms_parse(camctx->libcam->params
+        ,"libcam_params", camctx->conf->libcam_params);
 
-    for (indx = 0; indx < camctx->libcam->params->params_count; indx++) {
+    lst = &camctx->libcam->params->params_array;
+
+    for (it = lst->begin(); it != lst->end(); it++) {
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s : %s"
-            ,camctx->libcam->params->params_array[indx].param_name
-            ,camctx->libcam->params->params_array[indx].param_value
-            );
+            ,it->param_name.c_str(), it->param_value.c_str());
     }
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
-
 }
 
 int cls_libcam::cam_start_mgr()
@@ -292,194 +275,194 @@ int cls_libcam::cam_start_mgr()
 
     return 0;
 }
-
-void cls_libcam::cam_config_control_item(char *pname, char *pvalue)
+/* Set named control to configuration value */
+void cls_libcam::cam_config_control_item(std::string pname, std::string pvalue)
 {
-    if (mystrceq(pname, "AeEnable")) {
-        controls.set(controls::AeEnable, cam_parm_bool(pvalue));
+    if (pname == "AeEnable") {
+        controls.set(controls::AeEnable, mtob(pvalue));
     }
-    if (mystrceq(pname, "AeLocked")) {
-        controls.set(controls::AeLocked, cam_parm_bool(pvalue));
+    if (pname == "AeLocked") {
+        controls.set(controls::AeLocked, mtob(pvalue));
     }
-    if (mystrceq(pname,"AeMeteringMode")) {
-       controls.set(controls::AeMeteringMode, atoi(pvalue));
+    if (pname == "AeMeteringMode") {
+       controls.set(controls::AeMeteringMode, mtoi(pvalue));
     }
-    if (mystrceq(pname,"AeConstraintMode")) {
-        controls.set(controls::AeConstraintMode, atoi(pvalue));
+    if (pname == "AeConstraintMode") {
+        controls.set(controls::AeConstraintMode, mtoi(pvalue));
     }
-    if (mystrceq(pname,"AeExposureMode")) {
-        controls.set(controls::AeExposureMode, atoi(pvalue));
+    if (pname == "AeExposureMode") {
+        controls.set(controls::AeExposureMode, mtoi(pvalue));
     }
-    if (mystrceq(pname,"ExposureValue")) {
-        controls.set(controls::ExposureValue, cam_parm_single(pvalue));
+    if (pname == "ExposureValue") {
+        controls.set(controls::ExposureValue, mtof(pvalue));
     }
-    if (mystrceq(pname,"ExposureTime")) {
-        controls.set(controls::ExposureTime, atoi(pvalue));
+    if (pname == "ExposureTime") {
+        controls.set(controls::ExposureTime, mtoi(pvalue));
     }
-    if (mystrceq(pname,"AnalogueGain")) {
-        controls.set(controls::AnalogueGain, cam_parm_single(pvalue));
+    if (pname == "AnalogueGain") {
+        controls.set(controls::AnalogueGain, mtof(pvalue));
     }
-    if (mystrceq(pname,"Brightness")) {
-        controls.set(controls::Brightness, cam_parm_single(pvalue));
+    if (pname == "Brightness") {
+        controls.set(controls::Brightness, mtof(pvalue));
     }
-    if (mystrceq(pname,"Contrast")) {
-        controls.set(controls::Contrast, cam_parm_single(pvalue));
+    if (pname == "Contrast") {
+        controls.set(controls::Contrast, mtof(pvalue));
     }
-    if (mystrceq(pname,"Lux")) {
-        controls.set(controls::Lux, cam_parm_single(pvalue));
+    if (pname == "Lux") {
+        controls.set(controls::Lux, mtof(pvalue));
     }
-    if (mystrceq(pname, "AwbEnable")) {
-        controls.set(controls::AwbEnable, cam_parm_bool(pvalue));
+    if (pname == "AwbEnable") {
+        controls.set(controls::AwbEnable, mtob(pvalue));
     }
-    if (mystrceq(pname,"AwbMode")) {
-        controls.set(controls::AwbMode, atoi(pvalue));
+    if (pname == "AwbMode") {
+        controls.set(controls::AwbMode, mtoi(pvalue));
     }
-    if (mystrceq(pname, "AwbLocked")) {
-        controls.set(controls::AwbLocked, cam_parm_bool(pvalue));
+    if (pname == "AwbLocked") {
+        controls.set(controls::AwbLocked, mtob(pvalue));
     }
-    if (mystrceq(pname,"ColourGains")) {
+    if (pname == "ColourGains") {
         float cg[2];
-        cg[0] = cam_parm_single(strtok(pvalue, "|"));
-        cg[1] = cam_parm_single(strtok(0, "|"));
+        cg[0] = mtof(mtok(pvalue,"|"));
+        cg[1] = mtof(mtok(pvalue,"|"));
         controls.set(controls::ColourGains, cg);
     }
-    if (mystrceq(pname,"ColourTemperature")) {
-        controls.set(controls::ColourTemperature, atoi(pvalue));
+    if (pname == "ColourTemperature") {
+        controls.set(controls::ColourTemperature, mtoi(pvalue));
     }
-    if (mystrceq(pname,"Saturation")) {
-        controls.set(controls::Saturation, cam_parm_single(pvalue));
+    if (pname == "Saturation") {
+        controls.set(controls::Saturation, mtof(pvalue));
     }
-    if (mystrceq(pname,"SensorBlackLevels")) {
+    if (pname == "SensorBlackLevels") {
         int32_t sbl[4];
-        sbl[0] = atoi(strtok(pvalue, "|"));
-        sbl[1] = atoi(strtok(0, "|"));
-        sbl[2] = atoi(strtok(0, "|"));
-        sbl[3] = atoi(strtok(0, "|"));
+        sbl[0] = mtoi(mtok(pvalue,"|"));
+        sbl[1] = mtoi(mtok(pvalue,"|"));
+        sbl[2] = mtoi(mtok(pvalue,"|"));
+        sbl[3] = mtoi(mtok(pvalue,"|"));
         controls.set(controls::SensorBlackLevels, sbl);
     }
-    if (mystrceq(pname,"Sharpness")) {
-        controls.set(controls::Sharpness, cam_parm_single(pvalue));
+    if (pname == "Sharpness") {
+        controls.set(controls::Sharpness, mtof(pvalue));
     }
-    if (mystrceq(pname,"FocusFoM")) {
-        controls.set(controls::FocusFoM, atoi(pvalue));
+    if (pname == "FocusFoM") {
+        controls.set(controls::FocusFoM, mtoi(pvalue));
     }
-    if (mystrceq(pname,"ColourCorrectionMatrix")) {
+    if (pname == "ColourCorrectionMatrix") {
         float ccm[9];
-        ccm[0] = cam_parm_single(strtok(pvalue, "|"));
-        ccm[1] = cam_parm_single(strtok(0, "|"));
-        ccm[2] = cam_parm_single(strtok(0, "|"));
-        ccm[3] = cam_parm_single(strtok(0, "|"));
-        ccm[4] = cam_parm_single(strtok(0, "|"));
-        ccm[5] = cam_parm_single(strtok(0, "|"));
-        ccm[6] = cam_parm_single(strtok(0, "|"));
-        ccm[7] = cam_parm_single(strtok(0, "|"));
-        ccm[8] = cam_parm_single(strtok(0, "|"));
+        ccm[0] = mtof(mtok(pvalue,"|"));
+        ccm[1] = mtof(mtok(pvalue,"|"));
+        ccm[2] = mtof(mtok(pvalue,"|"));
+        ccm[3] = mtof(mtok(pvalue,"|"));
+        ccm[4] = mtof(mtok(pvalue,"|"));
+        ccm[5] = mtof(mtok(pvalue,"|"));
+        ccm[6] = mtof(mtok(pvalue,"|"));
+        ccm[7] = mtof(mtok(pvalue,"|"));
+        ccm[8] = mtof(mtok(pvalue,"|"));
         controls.set(controls::ColourCorrectionMatrix, ccm);
     }
-    if (mystrceq(pname,"ScalerCrop")) {
+    if (pname == "ScalerCrop") {
         Rectangle crop;
-        crop.x = atoi(strtok(pvalue, "|"));
-        crop.y = atoi(strtok(0, "|"));
-        crop.width = atoi(strtok(0, "|"));
-        crop.height = atoi(strtok(0, "|"));
+        crop.x = mtoi(mtok(pvalue,"|"));
+        crop.y = mtoi(mtok(pvalue,"|"));
+        crop.width = mtoi(mtok(pvalue,"|"));
+        crop.height = mtoi(mtok(pvalue,"|"));
         controls.set(controls::ScalerCrop, crop);
     }
-    if (mystrceq(pname,"DigitalGain")) {
-        controls.set(controls::DigitalGain, cam_parm_single(pvalue));
+    if (pname == "DigitalGain") {
+        controls.set(controls::DigitalGain, mtof(pvalue));
     }
-    if (mystrceq(pname,"FrameDuration")) {
-        controls.set(controls::FrameDuration, atoi(pvalue));
+    if (pname == "FrameDuration") {
+        controls.set(controls::FrameDuration, mtoi(pvalue));
     }
-    if (mystrceq(pname,"FrameDurationLimits")) {
+    if (pname == "FrameDurationLimits") {
         int64_t fdl[2];
-        fdl[0] = atol(strtok(pvalue, "|"));
-        fdl[1] = atol(strtok(0, "|"));
+        fdl[0] = mtol(mtok(pvalue,"|"));
+        fdl[1] = mtol(mtok(pvalue,"|"));
         controls.set(controls::FrameDurationLimits, fdl);
     }
-    if (mystrceq(pname,"SensorTemperature")) {
-        controls.set(controls::SensorTemperature, cam_parm_single(pvalue));
+    if (pname == "SensorTemperature") {
+        controls.set(controls::SensorTemperature, mtof(pvalue));
     }
-    if (mystrceq(pname,"SensorTimestamp")) {
-        controls.set(controls::SensorTimestamp, atoi(pvalue));
+    if (pname == "SensorTimestamp") {
+        controls.set(controls::SensorTimestamp, mtoi(pvalue));
     }
-    if (mystrceq(pname,"AfMode")) {
-        controls.set(controls::AfMode, atoi(pvalue));
+    if (pname == "AfMode") {
+        controls.set(controls::AfMode, mtoi(pvalue));
     }
-    if (mystrceq(pname,"AfRange")) {
-        controls.set(controls::AfRange, atoi(pvalue));
+    if (pname == "AfRange") {
+        controls.set(controls::AfRange, mtoi(pvalue));
     }
-    if (mystrceq(pname,"AfSpeed")) {
-        controls.set(controls::AfSpeed, atoi(pvalue));
+    if (pname == "AfSpeed") {
+        controls.set(controls::AfSpeed, mtoi(pvalue));
     }
-    if (mystrceq(pname,"AfMetering")) {
-        controls.set(controls::AfMetering, atoi(pvalue));
+    if (pname == "AfMetering") {
+        controls.set(controls::AfMetering, mtoi(pvalue));
     }
-    if (mystrceq(pname,"AfWindows")) {
+    if (pname == "AfWindows") {
         Rectangle afwin[1];
-        afwin[0].x = atoi(strtok(pvalue, "|"));
-        afwin[0].y = atoi(strtok(0, "|"));
-        afwin[0].width = atoi(strtok(0, "|"));
-        afwin[0].height = atoi(strtok(0, "|"));
+        afwin[0].x = mtoi(mtok(pvalue,"|"));
+        afwin[0].y = mtoi(mtok(pvalue,"|"));
+        afwin[0].width = mtoi(mtok(pvalue,"|"));
+        afwin[0].height = mtoi(mtok(pvalue,"|"));
         controls.set(controls::AfWindows, afwin);
     }
-    if (mystrceq(pname,"AfTrigger")) {
-        controls.set(controls::AfTrigger, atoi(pvalue));
+    if (pname == "AfTrigger") {
+        controls.set(controls::AfTrigger, mtoi(pvalue));
     }
-    if (mystrceq(pname,"AfPause")) {
-        controls.set(controls::AfPause, atoi(pvalue));
+    if (pname == "AfPause") {
+        controls.set(controls::AfPause, mtoi(pvalue));
     }
-    if (mystrceq(pname,"LensPosition")) {
-        controls.set(controls::LensPosition, cam_parm_single(pvalue));
+    if (pname == "LensPosition") {
+        controls.set(controls::LensPosition, mtof(pvalue));
     }
-    if (mystrceq(pname,"AfState")) {
-        controls.set(controls::AfState, atoi(pvalue));
+    if (pname == "AfState") {
+        controls.set(controls::AfState, mtoi(pvalue));
     }
-    if (mystrceq(pname,"AfPauseState")) {
-        controls.set(controls::AfPauseState, atoi(pvalue));
+    if (pname == "AfPauseState") {
+        controls.set(controls::AfPauseState, mtoi(pvalue));
     }
 
     /* DRAFT*/
-    if (mystrceq(pname,"AePrecaptureTrigger")) {
-        controls.set(controls::draft::AePrecaptureTrigger, atoi(pvalue));
+    if (pname == "AePrecaptureTrigger") {
+        controls.set(controls::draft::AePrecaptureTrigger, mtoi(pvalue));
     }
-    if (mystrceq(pname,"NoiseReductionMode")) {
-        controls.set(controls::draft::NoiseReductionMode, atoi(pvalue));
+    if (pname == "NoiseReductionMode") {
+        controls.set(controls::draft::NoiseReductionMode, mtoi(pvalue));
     }
-    if (mystrceq(pname,"ColorCorrectionAberrationMode")) {
-        controls.set(controls::draft::ColorCorrectionAberrationMode, atoi(pvalue));
+    if (pname == "ColorCorrectionAberrationMode") {
+        controls.set(controls::draft::ColorCorrectionAberrationMode, mtoi(pvalue));
     }
-    if (mystrceq(pname,"AeState")) {
-        controls.set(controls::draft::AeState, atoi(pvalue));
+    if (pname == "AeState") {
+        controls.set(controls::draft::AeState, mtoi(pvalue));
     }
-    if (mystrceq(pname,"AwbState")) {
-        controls.set(controls::draft::AwbState, atoi(pvalue));
+    if (pname == "AwbState") {
+        controls.set(controls::draft::AwbState, mtoi(pvalue));
     }
-    if (mystrceq(pname,"SensorRollingShutterSkew")) {
-        controls.set(controls::draft::SensorRollingShutterSkew, atoi(pvalue));
+    if (pname == "SensorRollingShutterSkew") {
+        controls.set(controls::draft::SensorRollingShutterSkew, mtoi(pvalue));
     }
-    if (mystrceq(pname,"LensShadingMapMode")) {
-        controls.set(controls::draft::LensShadingMapMode, atoi(pvalue));
+    if (pname == "LensShadingMapMode") {
+        controls.set(controls::draft::LensShadingMapMode, mtoi(pvalue));
     }
-    if (mystrceq(pname,"PipelineDepth")) {
-        controls.set(controls::draft::PipelineDepth, atoi(pvalue));
+    if (pname == "PipelineDepth") {
+        controls.set(controls::draft::PipelineDepth, mtoi(pvalue));
     }
-    if (mystrceq(pname,"MaxLatency")) {
-        controls.set(controls::draft::MaxLatency, atoi(pvalue));
+    if (pname == "MaxLatency") {
+        controls.set(controls::draft::MaxLatency, mtoi(pvalue));
     }
-    if (mystrceq(pname,"TestPatternMode")) {
-        controls.set(controls::draft::TestPatternMode, atoi(pvalue));
+    if (pname == "TestPatternMode") {
+        controls.set(controls::draft::TestPatternMode, mtoi(pvalue));
     }
 
 }
 
 void cls_libcam:: cam_config_controls()
 {
-    int indx, retcd;
+    int retcd;
+    p_lst *lst = &camctx->libcam->params->params_array;
+    p_it it;
 
-    for (indx = 0; indx < camctx->libcam->params->params_count; indx++) {
-        cam_config_control_item(
-            camctx->libcam->params->params_array[indx].param_name
-            ,camctx->libcam->params->params_array[indx].param_value);
+    for (it = lst->begin(); it != lst->end(); it++) {
+        cam_config_control_item(it->param_name, it->param_value);
     }
 
     retcd = config->validate();
@@ -499,33 +482,33 @@ void cls_libcam:: cam_config_controls()
 void cls_libcam:: cam_config_orientation()
 {
     #if (LIBCAMVER >= 2000)
-        int indx, retcd;
-        ctx_params_item itm;
+        int retcd;
         std::string adjdesc;
+        p_lst *lst = &camctx->libcam->params.params_array;
+        p_it it;
 
-        for (indx = 0; indx < camctx->libcam->params->params_count; indx++) {
-            itm = camctx->libcam->params->params_array[indx];
-            if (mystreq(itm.param_name,"orientation")) {
-                if (mystrceq(itm.param_value,"Rotate0")) {
+        for (it = lst->begin(); it != lst->end(); it++) {
+            if (it->param_name == "orientation") {
+                if (it->param_value == "Rotate0") {
                     config->orientation = Orientation::Rotate0;
-                } else if (mystrceq(itm.param_value,"Rotate0Mirror")) {
+                } else if (it->param_value == "Rotate0Mirror") {
                     config->orientation = Orientation::Rotate0Mirror;
-                } else if (mystrceq(itm.param_value,"Rotate180")) {
+                } else if (it->param_value == "Rotate180") {
                     config->orientation = Orientation::Rotate180;
-                } else if (mystrceq(itm.param_value,"Rotate180Mirror")) {
+                } else if (it->param_value == "Rotate180Mirror") {
                     config->orientation = Orientation::Rotate180Mirror;
-                } else if (mystrceq(itm.param_value,"Rotate90")) {
+                } else if (it->param_value == "Rotate90") {
                     config->orientation = Orientation::Rotate90;
-                } else if (mystrceq(itm.param_value,"Rotate90Mirror")) {
+                } else if (it->param_value == "Rotate90Mirror") {
                     config->orientation = Orientation::Rotate90Mirror;
-                } else if (mystrceq(itm.param_value,"Rotate270")) {
+                } else if (it->param_value == "Rotate270") {
                     config->orientation = Orientation::Rotate270;
-                } else if (mystrceq(itm.param_value,"Rotate270Mirror")) {
+                } else if (it->param_value == "Rotate270Mirror") {
                     config->orientation = Orientation::Rotate270Mirror;
                 } else {
                     MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                         , "Invalid Orientation option: %s."
-                        , itm.param_value);
+                        , it->param_value.cstr());
                 }
             }
         }
@@ -793,9 +776,7 @@ int cls_libcam::cam_start(ctx_dev *cam)
 
 void cls_libcam::cam_stop()
 {
-    util_parms_free(camctx->libcam->params);
-    myfree(&camctx->libcam->params);
-    camctx->libcam->params = NULL;
+    delete camctx->libcam->params;
 
     if (started_aqr) {
         camera->stop();

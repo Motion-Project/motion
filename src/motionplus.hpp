@@ -226,14 +226,18 @@ struct ctx_webu_clients {
 };
 
 struct ctx_params_item {
-    char    *param_name;       /* The name or description of the ID as requested by user*/
-    char    *param_value;      /* The value that the user wants the control set to*/
+    std::string     param_name;       /* The name or description of the ID as requested by user*/
+    std::string     param_value;      /* The value that the user wants the control set to*/
 };
 
+typedef std::list<ctx_params_item> p_lst;
+typedef p_lst::iterator p_it;
+
 struct ctx_params {
-    ctx_params_item *params_array;     /*Array of the controls the user specified*/
-    int params_count;                         /*Count of the controls the user specified*/
-    bool update_params;                       /*Bool for whether to update the parameters on the device*/
+    p_lst   params_array;       /*List of the controls the user specified*/
+    int     params_count;       /*Count of the controls the user specified*/
+    bool    update_params;      /*Bool for whether to update the parameters on the device*/
+    std::string params_desc;    /* Description of params*/
 };
 
 struct ctx_coord {
@@ -413,6 +417,10 @@ struct ctx_snd_info {
     std::string                 trig_freq;
     std::string                 trig_nbr;
     std::string                 trig_nm;
+    ctx_params                  *params;        /* Device parameters*/
+    ctx_snd_fftw                *snd_fftw;      /* fftw for sound*/
+    ctx_snd_alsa                *snd_alsa;      /* Alsa device for sound*/
+    ctx_snd_pulse               *snd_pulse;     /* PulseAudio for sound*/
 };
 
 struct ctx_dev {
@@ -433,7 +441,7 @@ struct ctx_dev {
     ctx_movie       *movie_motion;
     ctx_movie       *movie_timelapse;
     ctx_stream      stream;
-
+    ctx_snd_info    *snd_info;      /* Values for sound processing*/
     cls_libcam      *libcam;
 
     bool                    algsec_inuse;        /*Bool for whether we have secondary detection*/
@@ -513,19 +521,13 @@ struct ctx_dev {
     struct SwsContext       *swsctx;    /* Context for the resizing of the image */
 
     pthread_mutex_t         parms_lock;
-    ctx_params              *params;            /* Device parameters*/
-    bool                    parms_changed;      /*bool indicating if the parms have changed */
+    bool                    parms_changed;  /*bool indicating if the parms have changed */
 
     uint64_t                info_diff_tot;
     uint64_t                info_diff_cnt;
     int                     info_sdev_min;
     int                     info_sdev_max;
     uint64_t                info_sdev_tot;
-
-    ctx_snd_fftw            *snd_fftw;  /* fftw for sound*/
-    ctx_snd_alsa            *snd_alsa;  /* Alsa device for sound*/
-    ctx_snd_pulse           *snd_pulse; /* PulseAudio for sound*/
-    ctx_snd_info            *snd_info;  /* Values for sound processing*/
 
 };
 

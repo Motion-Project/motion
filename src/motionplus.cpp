@@ -332,11 +332,12 @@ static void motpls_allcams_init(ctx_motapp *motapp)
 {
     int indx, indx1, row, col, mx_row, mx_col, col_chk;
     bool cfg_valid, chk;
-    std::string cfg, cfg_row, cfg_col;
+    std::string cfg_row, cfg_col;
     ctx_params  *params_loc;
+    p_lst *lst;
+    p_it it;
 
     motapp->all_sizes = new ctx_all_sizes;
-
     motapp->all_sizes->height = 0;
     motapp->all_sizes->width = 0;
     motapp->all_sizes->img_sz = 0;
@@ -346,6 +347,8 @@ static void motpls_allcams_init(ctx_motapp *motapp)
         return;
     }
 
+    params_loc = new ctx_params;
+
     for (indx=0; indx<motapp->cam_cnt; indx++) {
         motapp->cam_list[indx]->all_loc.row = -1;
         motapp->cam_list[indx]->all_loc.col = -1;
@@ -353,31 +356,33 @@ static void motpls_allcams_init(ctx_motapp *motapp)
         motapp->cam_list[indx]->all_loc.offset_user_row = 0;
         motapp->cam_list[indx]->all_loc.scale =
             motapp->cam_list[indx]->conf->stream_preview_scale;
-        cfg = motapp->cam_list[indx]->conf->stream_preview_location;
-        params_loc = (ctx_params*)mymalloc(sizeof(ctx_params));
+
         params_loc->update_params = true;
-        util_parms_parse(params_loc, cfg);
-        for (indx1 = 0; indx1 < params_loc->params_count; indx1++) {
-            if (mystreq(params_loc->params_array[indx1].param_name,"row")) {
-                motapp->cam_list[indx]->all_loc.row =
-                    atoi(params_loc->params_array[indx1].param_value);
+        util_parms_parse(params_loc
+            , "stream_preview_location"
+            , motapp->cam_list[indx]->conf->stream_preview_location);
+        lst = &params_loc->params_array;
+
+        for (it = lst->begin(); it != lst->end(); it++) {
+            if (it->param_name == "row") {
+                motapp->cam_list[indx]->all_loc.row = mtoi(it->param_value);
             }
-            if (mystreq(params_loc->params_array[indx1].param_name,"col")) {
-                motapp->cam_list[indx]->all_loc.col =
-                    atoi(params_loc->params_array[indx1].param_value);
+            if (it->param_name == "col") {
+                motapp->cam_list[indx]->all_loc.col = mtoi(it->param_value);
             }
-            if (mystreq(params_loc->params_array[indx1].param_name,"offset_col")) {
+            if (it->param_name,"offset_col") {
                 motapp->cam_list[indx]->all_loc.offset_user_col =
-                    atoi(params_loc->params_array[indx1].param_value);
+                    mtoi(it->param_value);
             }
-            if (mystreq(params_loc->params_array[indx1].param_name,"offset_row")) {
+            if (it->param_name == "offset_row") {
                 motapp->cam_list[indx]->all_loc.offset_user_row =
-                    atoi(params_loc->params_array[indx1].param_value);
+                    mtoi(it->param_value);
             }
         }
-        util_parms_free(params_loc);
-        myfree(&params_loc);
+        params_loc->params_array.clear();
     }
+
+    delete params_loc;
 
     mx_row = 0;
     mx_col = 0;

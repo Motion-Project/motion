@@ -50,7 +50,8 @@ mhdrslt webu_file_main(ctx_webui *webui)
     struct MHD_Response *response;
     std::string full_nm;
     int indx;
-    ctx_params *wact;
+    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_it it;
 
     /*If we have not fully started yet, simply return*/
     if (webui->cam->motapp->dbse == NULL) {
@@ -61,10 +62,9 @@ mhdrslt webu_file_main(ctx_webui *webui)
         dbse_movies_getlist(webui->cam->motapp, webui->cam->device_id);
     }
 
-    wact = webui->motapp->webcontrol_actions;
-    for (indx = 0; indx < wact->params_count; indx++) {
-        if (mystreq(wact->params_array[indx].param_name,"movies")) {
-            if (mystreq(wact->params_array[indx].param_value,"off")) {
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "movies") {
+            if (it->param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Movies via webcontrol disabled");
                 return MHD_NO;
             } else {

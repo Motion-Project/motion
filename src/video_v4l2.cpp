@@ -272,10 +272,11 @@ static void v4l2_ctrls_set(ctx_dev *cam)
 
 static int v4l2_parms_set(ctx_dev *cam)
 {
-    int indx_dev, indx_user;
-    ctx_params_item *usritem;
+    int indx_dev;
     ctx_v4l2cam_ctrl  *devitem;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
+    p_lst *lst = &v4l2cam->params->params_array;
+    p_it it;
 
     if (v4l2cam->devctrl_count == 0) {
         v4l2cam->params->update_params = false;
@@ -283,34 +284,33 @@ static int v4l2_parms_set(ctx_dev *cam)
     }
 
     for (indx_dev = 0; indx_dev < v4l2cam->devctrl_count; indx_dev++) {
-
         devitem=&v4l2cam->devctrl_array[indx_dev];
         devitem->ctrl_newval = devitem->ctrl_default;
-
-        for (indx_user = 0; indx_user < v4l2cam->params->params_count; indx_user++){
-
-            usritem=&v4l2cam->params->params_array[indx_user];
-
-            if ((mystrceq(devitem->ctrl_iddesc,usritem->param_name)) ||
-                (mystrceq(devitem->ctrl_name  ,usritem->param_name))) {
+        for (it = lst->begin(); it != lst->end(); it++) {
+            if ((mystrceq(devitem->ctrl_iddesc,it->param_name.c_str())) ||
+                (mystrceq(devitem->ctrl_name  ,it->param_name.c_str()))) {
                 switch (devitem->ctrl_type) {
                 case V4L2_CTRL_TYPE_MENU:
                     /*FALLTHROUGH*/
                 case V4L2_CTRL_TYPE_INTEGER:
-                    if (atoi(usritem->param_value) < devitem->ctrl_minimum) {
+                    if (mtoi(it->param_value.c_str()) < devitem->ctrl_minimum) {
                         MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
                             ,_("%s control option value %s is below minimum.  Skipping...")
-                            ,devitem->ctrl_name, usritem->param_value, devitem->ctrl_minimum);
-                    } else if (atoi(usritem->param_value) > devitem->ctrl_maximum) {
+                            ,devitem->ctrl_name
+                            , it->param_value.c_str()
+                            , devitem->ctrl_minimum);
+                    } else if (mtoi(it->param_value.c_str()) > devitem->ctrl_maximum) {
                         MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
                             ,_("%s control option value %s is above maximum.  Skipping...")
-                            ,devitem->ctrl_name, usritem->param_value, devitem->ctrl_maximum);
+                            , devitem->ctrl_name
+                            , it->param_value.c_str()
+                            , devitem->ctrl_maximum);
                     } else {
-                        devitem->ctrl_newval = atoi(usritem->param_value);
+                        devitem->ctrl_newval = mtoi(it->param_value.c_str());
                     }
                     break;
                 case V4L2_CTRL_TYPE_BOOLEAN:
-                    devitem->ctrl_newval = usritem->param_value ? 1 : 0;
+                    devitem->ctrl_newval = mtob(it->param_value.c_str()) ? 1 : 0;
                     break;
                 default:
                     MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
@@ -327,18 +327,20 @@ static int v4l2_parms_set(ctx_dev *cam)
 /* Set the device to the input number requested by user */
 static void v4l2_set_input(ctx_dev *cam)
 {
-    int indx, spec;
+    int spec;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_input    input;
+    p_lst *lst = &v4l2cam->params->params_array;
+    p_it it;
 
     if (cam->v4l2cam->fd_device == -1) {
         return;
     }
 
     spec = -1;
-    for (indx = 0; indx < cam->v4l2cam->params->params_count; indx++) {
-        if (mystreq(cam->v4l2cam->params->params_array[indx].param_name,"input")) {
-            spec =  atoi(cam->v4l2cam->params->params_array[indx].param_value);
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "input") {
+            spec =  mtoi(it->param_value);
             break;
         }
     }
@@ -388,19 +390,21 @@ static void v4l2_set_input(ctx_dev *cam)
 /* Set the video standard(norm) for the device to the user requested value*/
 static void v4l2_set_norm(ctx_dev *cam)
 {
-    int indx, spec;
+    int spec;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_standard standard;
     v4l2_std_id std_id;
+    p_lst *lst = &v4l2cam->params->params_array;
+    p_it it;
 
     if (cam->v4l2cam->fd_device == -1) {
         return;
     }
 
     spec = 1;
-    for (indx = 0; indx < cam->v4l2cam->params->params_count; indx++) {
-        if (mystreq(cam->v4l2cam->params->params_array[indx].param_name,"norm")) {
-            spec =  atoi(cam->v4l2cam->params->params_array[indx].param_value);
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "norm") {
+            spec =  mtoi(it->param_value);
             break;
         }
     }
@@ -455,20 +459,21 @@ static void v4l2_set_norm(ctx_dev *cam)
 /* Set the frequency on the device to the user requested value */
 static void v4l2_set_frequency(ctx_dev *cam)
 {
-    int indx;
     long spec;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     struct v4l2_tuner     tuner;
     struct v4l2_frequency freq;
+    p_lst *lst = &v4l2cam->params->params_array;
+    p_it it;
 
     if (cam->v4l2cam->fd_device == -1) {
         return;
     }
 
     spec = 0;
-    for (indx = 0; indx < cam->v4l2cam->params->params_count; indx++) {
-        if (mystreq(cam->v4l2cam->params->params_array[indx].param_name,"frequency")) {
-            spec =  atol(cam->v4l2cam->params->params_array[indx].param_value);
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "frequency") {
+            spec =  mtol(it->param_value);
             break;
         }
     }
@@ -660,8 +665,10 @@ static int v4l2_pixfmt_set(ctx_dev *cam, unsigned int pixformat)
 
 static void v4l2_params_check(ctx_dev *cam)
 {
-    int indx, spec;
+    int spec;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
+    p_lst *lst = &v4l2cam->params->params_array;
+    p_it it;
 
     if (v4l2cam->width % 8) {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
@@ -680,9 +687,9 @@ static void v4l2_params_check(ctx_dev *cam)
     }
 
     spec = 17;
-    for (indx = 0; indx < cam->v4l2cam->params->params_count; indx++) {
-        if (mystreq(cam->v4l2cam->params->params_array[indx].param_name,"palette")) {
-            spec =  atoi(cam->v4l2cam->params->params_array[indx].param_value);
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "palette") {
+            spec =  mtoi(it->param_value);
             break;
         }
     }
@@ -734,9 +741,11 @@ static int v4l2_pixfmt_list(ctx_dev *cam, palette_item *palette_array)
 /* Find and select the pixel format for camera*/
 static void v4l2_palette_set(ctx_dev *cam)
 {
-    int indxp, indx, retcd;
+    int indxp, retcd;
     ctx_v4l2cam *v4l2cam = cam->v4l2cam;
     palette_item *palette_array;
+    p_lst *lst = &v4l2cam->params->params_array;
+    p_it it;
 
     if (cam->v4l2cam->fd_device == -1) {
         return;
@@ -748,9 +757,9 @@ static void v4l2_palette_set(ctx_dev *cam)
     v4l2_params_check(cam);
 
     indxp = 17;
-    for (indx = 0; indx < cam->v4l2cam->params->params_count; indx++) {
-        if (mystreq(cam->v4l2cam->params->params_array[indx].param_name,"palette")) {
-            indxp =  atoi(cam->v4l2cam->params->params_array[indx].param_value);
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "palette") {
+            indxp =  mtoi(it->param_value);
             break;
         }
     }
@@ -1048,13 +1057,10 @@ static void v4l2_device_init(ctx_dev *cam)
     cam->v4l2cam->finish = cam->finish_dev;
     cam->v4l2cam->buffers = NULL;
 
-    cam->v4l2cam->params =(ctx_params*) mymalloc(sizeof(ctx_params));
-    memset(cam->v4l2cam->params, 0, sizeof(ctx_params));
-    cam->v4l2cam->params->params_array = NULL;
+    cam->v4l2cam->params = new ctx_params;
     cam->v4l2cam->params->params_count = 0;
-    cam->v4l2cam->params->update_params = true;     /*Set trigger to update the params */
-
-    util_parms_parse(cam->v4l2cam->params, cam->conf->v4l2_params);
+    cam->v4l2cam->params->update_params = true;
+    util_parms_parse(cam->v4l2cam->params, "v4l2_params", cam->conf->v4l2_params);
     util_parms_add_default(cam->v4l2cam->params, "input", "-1");
     util_parms_add_default(cam->v4l2cam->params, "palette", "17");
     util_parms_add_default(cam->v4l2cam->params, "norm", "0");
@@ -1073,7 +1079,8 @@ static void v4l2_device_select(ctx_dev *cam)
 
     if (cam->v4l2cam->params->update_params == true) {
 
-        util_parms_parse(cam->v4l2cam->params, cam->conf->v4l2_params);
+        util_parms_parse(cam->v4l2cam->params
+            , "v4l2_params", cam->conf->v4l2_params);
 
         retcd = v4l2_parms_set(cam);
         if (retcd < 0 ) {
@@ -1308,10 +1315,7 @@ void v4l2_cleanup(ctx_dev *cam)
             myfree(&cam->v4l2cam->devctrl_array);
         }
         cam->v4l2cam->devctrl_count=0;
-
-        util_parms_free(cam->v4l2cam->params);
-        myfree(&cam->v4l2cam->params);
-
+        delete cam->v4l2cam->params;
         myfree(&cam->v4l2cam);
     #endif // HAVE_V4L2
 

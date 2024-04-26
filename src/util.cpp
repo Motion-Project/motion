@@ -136,8 +136,9 @@ void *mymalloc(size_t nbytes)
     void *dummy = calloc(nbytes, 1);
 
     if (!dummy) {
-        MOTPLS_LOG(EMG, TYPE_ALL, SHOW_ERRNO, _("Could not allocate %llu bytes of memory!")
-            ,(unsigned long long)nbytes);
+        MOTPLS_LOG(EMG, TYPE_ALL, SHOW_ERRNO
+            , _("Could not allocate %llu bytes of memory!")
+            , (unsigned long long)nbytes);
         exit(1);
     }
 
@@ -356,8 +357,8 @@ static void mystrftime_long (const ctx_dev *cam,
 
 
     // Not a valid modifier keyword. Log the error and ignore.
-    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO,
-        _("invalid format specifier keyword %*.*s"), l, l, word);
+    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        ,_("invalid format specifier keyword %*.*s"), l, l, word);
 
     // Do not let the output buffer empty, or else where to restart the
     // interpretation of the user string will become dependent to far too
@@ -861,36 +862,62 @@ AVPacket *mypacket_alloc(AVPacket *pkt)
 }
 
 /*********************************************/
-
-void util_parms_free(ctx_params *params)
+/**
+ * util_exec_command
+ *      Execute 'command' with 'arg' as its argument.
+ *      if !arg command is started with no arguments
+ *      Before we call execl we need to close all the file handles
+ *      that the fork inherited from the parent in order not to pass
+ *      the open handles on to the shell
+ */
+void util_exec_command(ctx_dev *cam, const char *command, char *filename)
 {
-    int indx_parm;
+    char stamp[PATH_MAX];
+    int pid;
 
-    if (params == NULL ) {
-        return;
+    mystrftime(cam, stamp, sizeof(stamp), command, filename);
+
+    pid = fork();
+    if (!pid) {
+        /* Detach from parent */
+        setsid();
+
+        execl("/bin/sh", "sh", "-c", stamp, " &",(char*)NULL);
+
+        /* if above function succeeds the program never reach here */
+        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+            ,_("Unable to start external command '%s'"), stamp);
+
+        exit(1);
     }
 
-    for (indx_parm=0; indx_parm<params->params_count; indx_parm++) {
-        myfree(&params->params_array[indx_parm].param_name);
-        myfree(&params->params_array[indx_parm].param_value);
+    if (pid > 0) {
+        waitpid(pid, NULL, 0);
+    } else {
+        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+            ,_("Unable to start external command '%s'"), stamp);
     }
-    myfree(&params->params_array);
 
-    params->params_count = 0;
-
+    MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO
+        ,_("Executing external command '%s'"), stamp);
 }
-static void util_parms_file(ctx_params *params, const char *params_file)
+
+/*********************************************/
+static void util_parms_file(ctx_params *params, std::string params_file)
 {
-    int indx, chk;
+    int chk;
     size_t stpos;
+    p_it  it;
     std::string line, parm_nm, parm_vl;
     std::ifstream ifs;
 
     MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
-                , _("parse file: %s"), params_file);
+        ,_("parse file: %s"), params_file.c_str());
+
     chk = 0;
-    for (indx = 0; indx < params->params_count; indx++) {
-        if (mystreq(params->params_array[indx].param_name, "params_file") ) {
+    for (it  = params->params_array.begin();
+         it != params->params_array.end(); it++) {
+        if (it->param_name == "params_file" ) {
             chk++;
         }
     }
@@ -900,10 +927,10 @@ static void util_parms_file(ctx_params *params, const char *params_file)
         return;
     }
 
-    ifs.open(params_file);
+    ifs.open(params_file.c_str());
         if (ifs.is_open() == false) {
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
-                , _("params_file not found: %s"), params_file);
+                ,_("params_file not found: %s"), params_file.c_str());
             return;
         }
         while (std::getline(ifs, line)) {
@@ -926,55 +953,36 @@ static void util_parms_file(ctx_params *params, const char *params_file)
                 (line.substr(0, 1) != ";") &&
                 (line.substr(0, 1) != "#")) {
                 MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
-                , _("Unable to parse line: %s"), line.c_str());
+                    ,_("Unable to parse line: %s"), line.c_str());
             }
         }
     ifs.close();
 
 }
 
-void util_parms_add(ctx_params *params, const char *parm_nm, const char *parm_val)
+void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_val)
 {
-    int indx;
+    p_it  it;
+    ctx_params_item parm_itm;
 
-    for (indx = 0; indx < params->params_count; indx++) {
-        if (mystreq(params->params_array[indx].param_name, parm_nm) ) {
-            break;
+    for (it  = params->params_array.begin();
+         it != params->params_array.end(); it++) {
+        if (it->param_name == parm_nm) {
+            it->param_value.assign(parm_val);
+            return;
         }
     }
 
-    if (indx == params->params_count) {
-        params->params_count++;
-        if (params->params_count == 1) {
-            params->params_array =(ctx_params_item *) mymalloc(sizeof(ctx_params_item));
-        } else {
-            params->params_array =(ctx_params_item *)realloc(params->params_array
-                , sizeof(ctx_params_item)*params->params_count);
-        }
-    } else {
-        free(params->params_array[indx].param_name);
-        free(params->params_array[indx].param_value);
-    }
+    /* This is a new parameter*/
+    params->params_count++;
+    parm_itm.param_name.assign(parm_nm);
+    parm_itm.param_value.assign(parm_val);
+    params->params_array.push_back(parm_itm);
 
-    if (parm_nm != NULL) {
-        params->params_array[indx].param_name =(char*)mymalloc(strlen(parm_nm)+1);
-        sprintf(params->params_array[indx].param_name,"%s",parm_nm);
-    } else {
-        params->params_array[indx].param_name = NULL;
-    }
+    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s: >%s< >%s<"
+        ,params->params_desc.c_str(), parm_nm.c_str(),parm_val.c_str());
 
-    if (parm_val != NULL) {
-        params->params_array[indx].param_value =(char*)mymalloc(strlen(parm_val)+1);
-        sprintf(params->params_array[indx].param_value,"%s",parm_val);
-    } else {
-        params->params_array[indx].param_value = NULL;
-    }
-
-    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Parsed: >%s< >%s<")
-        ,params->params_array[params->params_count-1].param_name
-        ,params->params_array[params->params_count-1].param_value);
-
-    if (mystrceq(parm_nm, "params_file") && (parm_val != NULL)) {
+    if ((parm_nm == "params_file") && (parm_val != "")) {
         util_parms_file(params, parm_val);
     }
 }
@@ -1135,8 +1143,8 @@ void util_parms_parse_qte(ctx_params *params, std::string &parmline)
             }
         }
 
-        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
-            ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+        //MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"Parsing: >%s< >%ld %ld %ld %ld<"
+        //    ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
         util_parms_next(parmline, indxnm_st, indxvl_en);
@@ -1166,8 +1174,8 @@ void util_parms_parse_comma(ctx_params *params, std::string &parmline)
             indxvl_en = parmline.find(",",indxvl_st) - 1;
         }
 
-        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
-            ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+        //MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
+        //    ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
         util_parms_next(parmline, indxnm_st, indxvl_en);
@@ -1186,8 +1194,8 @@ void util_parms_parse_comma(ctx_params *params, std::string &parmline)
         }
         indxvl_en = parmline.length() - 1;
 
-        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
-            ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+        //MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"Parsing: >%s< >%ld %ld %ld %ld<"
+        //    ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
         util_parms_next(parmline, indxnm_st, indxvl_en);
@@ -1196,17 +1204,8 @@ void util_parms_parse_comma(ctx_params *params, std::string &parmline)
 }
 
 /* Parse through the config line and put into the array */
-void util_parms_parse(ctx_params *params, std::string confline)
+void util_parms_parse(ctx_params *params, std::string parm_desc, std::string confline)
 {
-    /* Parse through the configuration option to get values
-     * The values are separated by commas but may also have
-     * double quotes around the names which include a comma.
-     * Examples:
-     * v4l2_params ID01234= 1, ID23456=2
-     * v4l2_params "Brightness, auto" = 1, ID23456=2
-     * v4l2_params ID23456=2, "Brightness, auto" = 1,ID2222=5
-     */
-
     std::string parmline;
 
     if ((params->update_params == false) ||
@@ -1216,9 +1215,9 @@ void util_parms_parse(ctx_params *params, std::string confline)
     /* We make a copy because the parsing destroys the value passed */
     parmline = confline;
 
-    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Starting parsing parameters"));
-
-    util_parms_free(params);
+    params->params_array.clear();
+    params->params_count = 0;
+    params->params_desc = parm_desc;
 
     util_parms_parse_qte(params, parmline);
 
@@ -1230,120 +1229,154 @@ void util_parms_parse(ctx_params *params, std::string confline)
 
 }
 
+/* Add the requested int value as a default if the parm_nm does have anything yet */
 void util_parms_add_default(ctx_params *params, std::string parm_nm, int parm_vl)
 {
-    int indx;
     bool dflt;
+    p_it  it;
 
     dflt = true;
-    for (indx = 0; indx < params->params_count; indx++) {
-        if (mystreq(params->params_array[indx].param_name, parm_nm.c_str()) ) {
+    for (it  = params->params_array.begin();
+         it != params->params_array.end(); it++) {
+        if (it->param_name == parm_nm) {
             dflt = false;
         }
     }
     if (dflt == true) {
-        util_parms_add(params, parm_nm.c_str(), std::to_string(parm_vl).c_str());
+        util_parms_add(params, parm_nm, std::to_string(parm_vl));
     }
-
 }
 
+/* Add the requested string value as a default if the parm_nm does have anything yet */
 void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl)
 {
-    int indx;
     bool dflt;
+    p_it  it;
 
     dflt = true;
-    for (indx = 0; indx < params->params_count; indx++) {
-        if (mystreq(params->params_array[indx].param_name, parm_nm.c_str()) ) {
+    for (it  = params->params_array.begin();
+         it != params->params_array.end(); it++) {
+        if (it->param_name == parm_nm) {
             dflt = false;
         }
     }
     if (dflt == true) {
-        util_parms_add(params, parm_nm.c_str(), parm_vl.c_str());
+        util_parms_add(params, parm_nm, parm_vl);
     }
-
 }
 
 /* Update config line with the values from the params array */
 void util_parms_update(ctx_params *params, std::string &confline)
 {
-    int indx;
-    char *tst;
     std::string parmline;
+    std::string comma;
+    p_it  it;
 
-    for (indx = 0; indx < params->params_count; indx++) {
-        if (indx == 0) {
-            parmline = " ";
-        } else {
-            parmline += ",";
-        }
-        tst = strstr(params->params_array[indx].param_name," ");
-        if (tst == NULL) {
-            parmline += params->params_array[indx].param_name;
+    comma = "";
+    parmline = "";
+    for (it  = params->params_array.begin();
+         it != params->params_array.end(); it++) {
+        parmline += comma;
+        comma = ",";
+        if (it->param_name.find(" ") == std::string::npos) {
+            parmline += it->param_name;
         } else {
             parmline += "\"";
-            parmline += params->params_array[indx].param_name;
+            parmline += it->param_name;
             parmline += "\"";
         }
+
         parmline += "=";
-
-        tst = strstr(params->params_array[indx].param_value," ");
-        if (tst == NULL) {
-            parmline += params->params_array[indx].param_value;
+        if (it->param_value.find(" ") == std::string::npos) {
+            parmline += it->param_value;
         } else {
             parmline += "\"";
-            parmline += params->params_array[indx].param_value;
+            parmline += it->param_value;
             parmline += "\"";
         }
-
     }
     parmline += " ";
 
     confline = parmline;
 
-    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("New config: %s"), confline.c_str());
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+        ,_("New config: %s"), confline.c_str());
 
     return;
-
 }
 
-/**
- * util_exec_command
- *      Execute 'command' with 'arg' as its argument.
- *      if !arg command is started with no arguments
- *      Before we call execl we need to close all the file handles
- *      that the fork inherited from the parent in order not to pass
- *      the open handles on to the shell
- */
-void util_exec_command(ctx_dev *cam, const char *command, char *filename)
+/* my to integer*/
+int mtoi(std::string parm)
 {
-    char stamp[PATH_MAX];
-    int pid;
-
-    mystrftime(cam, stamp, sizeof(stamp), command, filename);
-
-    pid = fork();
-    if (!pid) {
-        /* Detach from parent */
-        setsid();
-
-        execl("/bin/sh", "sh", "-c", stamp, " &",(char*)NULL);
-
-        /* if above function succeeds the program never reach here */
-        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
-            ,_("Unable to start external command '%s'"), stamp);
-
-        exit(1);
-    }
-
-    if (pid > 0) {
-        waitpid(pid, NULL, 0);
+    return atoi(parm.c_str());
+}
+/* my to integer*/
+int mtoi(char *parm)
+{
+    return atoi(parm);
+}
+/* my to long*/
+long mtol(std::string parm)
+{
+    return atol(parm.c_str());
+}
+/* my to long*/
+long mtol(char *parm)
+{
+    return atol(parm);
+}
+/* my to float*/
+float mtof(char *parm)
+{
+    return (float)atof(parm);
+}
+/* my to float*/
+float mtof(std::string parm)
+{
+    return (float)atof(parm.c_str());
+}
+/* my to bool*/
+bool mtob(std::string parm)
+{
+    if (mystrceq(parm.c_str(),"1") ||
+        mystrceq(parm.c_str(),"yes") ||
+        mystrceq(parm.c_str(),"on") ||
+        mystrceq(parm.c_str(),"true") ) {
+        return true;
     } else {
-        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
-            ,_("Unable to start external command '%s'"), stamp);
+        return false;
     }
+}
+/* my to bool*/
+bool mtob(char *parm)
+{
+    if (mystrceq(parm,"1") ||
+        mystrceq(parm,"yes") ||
+        mystrceq(parm,"on") ||
+        mystrceq(parm,"true") ) {
+        return true;
+    } else {
+        return false;
+    }
+}
+/* my token for strings.  Parm is modified*/
+std::string mtok(std::string &parm, std::string tok)
+{
+    size_t loc;
+    std::string tmp;
 
-    MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO
-        ,_("Executing external command '%s'"), stamp);
+    if (parm == "") {
+        tmp = "";
+    } else {
+        loc = parm.find(tok);
+        if (loc == std::string::npos) {
+            tmp = parm;
+            parm = "";
+        } else {
+            tmp = parm.substr(0, loc);
+            parm = parm.substr(loc+1);
+        }
+    }
+    return tmp;
 }
 

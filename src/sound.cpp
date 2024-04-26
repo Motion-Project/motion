@@ -36,12 +36,12 @@ static void snd_init_values(ctx_dev *snd)
 {
     ctx_snd_info *info = snd->snd_info;
 
-    snd->snd_fftw->bin_max = 0;
-    snd->snd_fftw->bin_min = 0;
-    snd->snd_fftw->bin_size = 0;
-    snd->snd_fftw->ff_in = NULL;
-    snd->snd_fftw->ff_out = NULL;
-    snd->snd_fftw->ff_plan = NULL;
+    snd->snd_info->snd_fftw->bin_max = 0;
+    snd->snd_info->snd_fftw->bin_min = 0;
+    snd->snd_info->snd_fftw->bin_size = 0;
+    snd->snd_info->snd_fftw->ff_in = NULL;
+    snd->snd_info->snd_fftw->ff_out = NULL;
+    snd->snd_info->snd_fftw->ff_plan = NULL;
 
     info->sample_rate = 0;
     info->channels = 0;
@@ -126,48 +126,48 @@ static void snd_load_alerts(ctx_dev *snd)
     ctx_snd_info *info = snd->snd_info;
     ctx_snd_alert  tmp_alert;
     std::list<std::string> parm_val;
-    std::list<std::string>::iterator  it_p;
-    ctx_params      *tmp_params;
-    int     indx;
+    std::list<std::string>::iterator  it_a;
+    ctx_params  *tmp_params;
+    p_it        it;
 
     conf_edit_get(snd->conf, "snd_alerts", parm_val, PARM_CAT_18);
 
-    for (it_p=parm_val.begin(); it_p!=parm_val.end(); it_p++) {
-        tmp_params = (ctx_params*)mymalloc(sizeof(ctx_params));
+    tmp_params = new ctx_params;
+    for (it_a=parm_val.begin(); it_a!=parm_val.end(); it_a++) {
         tmp_params->update_params = true;
-        util_parms_parse(tmp_params, it_p->c_str());
+        util_parms_parse(tmp_params,"snd_alerts", it_a->c_str());
         snd_init_alerts(&tmp_alert);
-        for (indx=0; indx<tmp_params->params_count; indx++) {
-            if (mystreq(tmp_params->params_array[indx].param_name,"alert_id")) {
-                tmp_alert.alert_id = atoi(tmp_params->params_array[indx].param_value);
+        for (it = tmp_params->params_array.begin();
+            it != tmp_params->params_array.end(); it++) {
+            if (it->param_name == "alert_id") {
+                tmp_alert.alert_id = mtoi(it->param_value);
             }
-            if (mystreq(tmp_params->params_array[indx].param_name,"alert_nm")) {
-                tmp_alert.alert_nm = (tmp_params->params_array[indx].param_value);
+            if (it->param_name == "alert_nm") {
+                tmp_alert.alert_nm = it->param_value;
             }
-            if (mystreq(tmp_params->params_array[indx].param_name,"freq_low")) {
-                tmp_alert.freq_low = atof(tmp_params->params_array[indx].param_value);
+            if (it->param_name == "freq_low") {
+                tmp_alert.freq_low = mtof(it->param_value);
             }
-            if (mystreq(tmp_params->params_array[indx].param_name,"freq_high")) {
-                tmp_alert.freq_high = atof(tmp_params->params_array[indx].param_value);
+            if (it->param_name == "freq_high") {
+                tmp_alert.freq_high = mtof(it->param_value);
             }
-            if (mystreq(tmp_params->params_array[indx].param_name,"volume_count")) {
-                tmp_alert.volume_count = atoi(tmp_params->params_array[indx].param_value);
+            if (it->param_name == "volume_count") {
+                tmp_alert.volume_count = mtoi(it->param_value);
             }
-            if (mystreq(tmp_params->params_array[indx].param_name,"volume_level")) {
-                tmp_alert.volume_level = atoi(tmp_params->params_array[indx].param_value);
+            if (it->param_name == "volume_level") {
+                tmp_alert.volume_level = mtoi(it->param_value);
             }
-            if (mystreq(tmp_params->params_array[indx].param_name,"trigger_threshold")) {
-                tmp_alert.trigger_threshold = atoi(tmp_params->params_array[indx].param_value);
+            if (it->param_name == "trigger_threshold") {
+                tmp_alert.trigger_threshold = mtoi(it->param_value);
             }
-            if (mystreq(tmp_params->params_array[indx].param_name,"trigger_duration")) {
-                tmp_alert.trigger_duration = atoi(tmp_params->params_array[indx].param_value);
+            if (it->param_name == "trigger_duration") {
+                tmp_alert.trigger_duration = mtoi(it->param_value);
             }
         }
         info->alerts.push_back(tmp_alert);
-        util_parms_free(tmp_params);
-        myfree(&tmp_params);
-        tmp_params = NULL;
     }
+
+    delete tmp_params;
 
     snd_edit_alerts(snd);
 }
@@ -175,42 +175,41 @@ static void snd_load_alerts(ctx_dev *snd)
 static void snd_load_params(ctx_dev *snd)
 {
     ctx_snd_info *info = snd->snd_info;
-    int indx;
+    p_it    it;
+    p_lst   *lst;
 
-    snd->params = (ctx_params*)mymalloc(sizeof(ctx_params));
-    snd->params->update_params = true;
-    util_parms_parse(snd->params, snd->conf->snd_params);
+    snd->snd_info->params->update_params = true;
+    util_parms_parse(snd->snd_info->params,"snd_params", snd->conf->snd_params);
 
-    util_parms_add_default(snd->params,"source","alsa");
-    util_parms_add_default(snd->params,"channels","1");
-    util_parms_add_default(snd->params,"frames","2048");
-    util_parms_add_default(snd->params,"sample_rate","44100");
+    util_parms_add_default(snd->snd_info->params,"source","alsa");
+    util_parms_add_default(snd->snd_info->params,"channels","1");
+    util_parms_add_default(snd->snd_info->params,"frames","2048");
+    util_parms_add_default(snd->snd_info->params,"sample_rate","44100");
 
-    for (indx = 0; indx < snd->params->params_count; indx++) {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s : %s"
-            , snd->params->params_array[indx].param_name
-            , snd->params->params_array[indx].param_value
-            );
+    lst = &snd->snd_info->params->params_array;
+
+    for (it = lst->begin(); it != lst->end(); it++) {
+       MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s : %s"
+            , it->param_name.c_str(), it->param_value.c_str());
     }
 
-    for (indx = 0; indx < snd->params->params_count; indx++) {
-        if (mystreq(snd->params->params_array[indx].param_name,"source")) {
-            info->source = snd->params->params_array[indx].param_value;
+    for (it = lst->begin(); it != lst->end(); it++) {
+        if (it->param_name == "source") {
+            info->source = it->param_value;
         }
-        if (mystreq(snd->params->params_array[indx].param_name,"channels")) {
-            info->channels =atoi(snd->params->params_array[indx].param_value);
+        if (it->param_name == "channels") {
+            info->channels = mtoi(it->param_value);
         }
-        if (mystreq(snd->params->params_array[indx].param_name,"frames")) {
-            info->frames =atoi(snd->params->params_array[indx].param_value);
+        if (it->param_name == "frames") {
+            info->frames = mtoi(it->param_value);
         }
-        if (mystreq(snd->params->params_array[indx].param_name,"sample_rate")) {
-            info->sample_rate =atoi(snd->params->params_array[indx].param_value);
+        if (it->param_name == "sample_rate") {
+            info->sample_rate = mtoi(it->param_value);
         }
-        if (mystreq(snd->params->params_array[indx].param_name,"pulse_server")) {
-            info->pulse_server = snd->params->params_array[indx].param_value;
+        if (it->param_name == "pulse_server") {
+            info->pulse_server = it->param_value;
         }
     }
-
 }
 
 /************ Start ALSA *******************/
@@ -218,7 +217,7 @@ static void snd_load_params(ctx_dev *snd)
 
 static void snd_alsa_list_subdev(ctx_dev *snd)
 {
-    ctx_snd_alsa *alsa = snd->snd_alsa;
+    ctx_snd_alsa *alsa = snd->snd_info->snd_alsa;
     int indx, retcd, cnt;
 
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Card %i(%s): %s [%s]")
@@ -253,7 +252,7 @@ static void snd_alsa_list_subdev(ctx_dev *snd)
 
 static void snd_alsa_list_card(ctx_dev *snd)
 {
-    ctx_snd_alsa *alsa = snd->snd_alsa;
+    ctx_snd_alsa *alsa = snd->snd_info->snd_alsa;
     int retcd;
 
     retcd = snd_ctl_card_info(alsa->ctl_hdl, alsa->card_info);
@@ -294,7 +293,7 @@ static void snd_alsa_list_card(ctx_dev *snd)
 
 static void snd_alsa_list(ctx_dev *snd)
 {
-    ctx_snd_alsa *alsa = snd->snd_alsa;
+    ctx_snd_alsa *alsa = snd->snd_info->snd_alsa;
     int retcd;
 
     if (snd->device_status == STATUS_CLOSED) {
@@ -334,7 +333,7 @@ static void snd_alsa_list(ctx_dev *snd)
 
 static void snd_alsa_start(ctx_dev *snd)
 {
-    ctx_snd_alsa *alsa = snd->snd_alsa;
+    ctx_snd_alsa *alsa = snd->snd_info->snd_alsa;
     ctx_snd_info *info = snd->snd_info;
     snd_pcm_hw_params_t *hw_params;
     snd_pcm_uframes_t frames_per;
@@ -499,7 +498,7 @@ static void snd_alsa_start(ctx_dev *snd)
 static void snd_alsa_init(ctx_dev *snd)
 {
     #ifdef HAVE_ALSA
-        ctx_snd_alsa *alsa = snd->snd_alsa;
+        ctx_snd_alsa *alsa = snd->snd_info->snd_alsa;
 
         alsa->pcm_dev = NULL;
         alsa->pcm_info = NULL;
@@ -526,7 +525,7 @@ static void snd_alsa_capture(ctx_dev *snd)
 {
     #ifdef HAVE_ALSA
         ctx_snd_info *info = snd->snd_info;
-        ctx_snd_alsa *alsa = snd->snd_alsa;
+        ctx_snd_alsa *alsa = snd->snd_info->snd_alsa;
         long int retcd;
 
         retcd = snd_pcm_readi(alsa->pcm_dev, info->buffer, info->frames);
@@ -548,8 +547,8 @@ static void snd_alsa_capture(ctx_dev *snd)
 static void snd_alsa_cleanup(ctx_dev *snd)
 {
     #ifdef HAVE_ALSA
-        if (snd->snd_alsa->pcm_dev != NULL) {
-            snd_pcm_close(snd->snd_alsa->pcm_dev);
+        if (snd->snd_info->snd_alsa->pcm_dev != NULL) {
+            snd_pcm_close(snd->snd_info->snd_alsa->pcm_dev);
             snd_config_update_free_global();
         }
     #else
@@ -572,13 +571,13 @@ static void snd_pulse_init(ctx_dev *snd)
         specs.rate = (uint32_t)info->sample_rate;
         specs.channels = (uint8_t)info->channels;
 
-        snd->snd_pulse->dev = NULL;
-        snd->snd_pulse->dev = pa_simple_new(
+        snd->snd_info->snd_pulse->dev = NULL;
+        snd->snd_info->snd_pulse->dev = pa_simple_new(
             (info->pulse_server=="" ? NULL : info->pulse_server.c_str())
             , "motionplus", PA_STREAM_RECORD
             , (snd->conf->snd_device=="" ? NULL : snd->conf->snd_device.c_str())
             , "motionplus", &specs, NULL, NULL, &errcd);
-        if (snd->snd_pulse->dev == NULL) {
+        if (snd->snd_info->snd_pulse->dev == NULL) {
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("Error opening pulse (%s)")
                 , pa_strerror(errcd));
@@ -605,7 +604,7 @@ static void snd_pulse_capture(ctx_dev *snd)
 {
     #ifdef HAVE_PULSE
         ctx_snd_info *info = snd->snd_info;
-        ctx_snd_pulse *pulse = snd->snd_pulse;
+        ctx_snd_pulse *pulse = snd->snd_info->snd_pulse;
         int errcd, retcd;
 
         retcd = pa_simple_read(pulse->dev, info->buffer
@@ -628,8 +627,8 @@ static void snd_pulse_capture(ctx_dev *snd)
 static void snd_pulse_cleanup(ctx_dev *snd)
 {
     #ifdef HAVE_PULSE
-        if (snd->snd_pulse->dev != NULL) {
-            pa_simple_free(snd->snd_pulse->dev);
+        if (snd->snd_info->snd_pulse->dev != NULL) {
+            pa_simple_free(snd->snd_info->snd_pulse->dev);
         }
     #else
         snd->device_status = STATUS_CLOSED;
@@ -643,7 +642,7 @@ static void snd_pulse_cleanup(ctx_dev *snd)
 
 static void snd_fftw_open(ctx_dev *snd)
 {
-    ctx_snd_fftw *fftw = snd->snd_fftw;
+    ctx_snd_fftw *fftw = snd->snd_info->snd_fftw;
     ctx_snd_info *info = snd->snd_info;
     int indx;
 
@@ -700,13 +699,9 @@ void snd_cleanup(ctx_dev *snd)
         snd->snd_info->buffer = NULL;
     }
 
-    util_parms_free(snd->params);
-    myfree(&snd->params);
-    snd->params = NULL;
-
-    fftw_destroy_plan(snd->snd_fftw->ff_plan);
-    fftw_free(snd->snd_fftw->ff_in);
-    fftw_free(snd->snd_fftw->ff_out);
+    fftw_destroy_plan(snd->snd_info->snd_fftw->ff_plan);
+    fftw_free(snd->snd_info->snd_fftw->ff_in);
+    fftw_free(snd->snd_info->snd_fftw->ff_out);
 
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Stopped.");
 
@@ -763,22 +758,22 @@ static void snd_check_alerts(ctx_dev *snd)
 
     for (indx=0;indx <info->frames;indx++){
         if (snd->conf->snd_window == "hamming") {
-            snd->snd_fftw->ff_in[indx] = info->buffer[indx] * HammingWindow(indx, info->frames);
+            snd->snd_info->snd_fftw->ff_in[indx] = info->buffer[indx] * HammingWindow(indx, info->frames);
         } else if (snd->conf->snd_window == "hann") {
-            snd->snd_fftw->ff_in[indx] = info->buffer[indx] * HannWindow(indx, info->frames);
+            snd->snd_info->snd_fftw->ff_in[indx] = info->buffer[indx] * HannWindow(indx, info->frames);
         } else {
-            snd->snd_fftw->ff_in[indx] = info->buffer[indx];
+            snd->snd_info->snd_fftw->ff_in[indx] = info->buffer[indx];
         }
     }
 
-    fftw_execute(snd->snd_fftw->ff_plan);
+    fftw_execute(snd->snd_info->snd_fftw->ff_plan);
 
     pMaxIntensity = 0;
     pMaxBinIndex = 0;
 
-    for (indx = snd->snd_fftw->bin_min; indx <= snd->snd_fftw->bin_max; indx++){
-        pRealNbr = snd->snd_fftw->ff_out[indx][0];
-        pImaginaryNbr = snd->snd_fftw->ff_out[indx][1];
+    for (indx = snd->snd_info->snd_fftw->bin_min; indx <= snd->snd_info->snd_fftw->bin_max; indx++){
+        pRealNbr = snd->snd_info->snd_fftw->ff_out[indx][0];
+        pImaginaryNbr = snd->snd_info->snd_fftw->ff_out[indx][1];
         pIntensity = pRealNbr * pRealNbr + pImaginaryNbr * pImaginaryNbr;
         if (pIntensity > pMaxIntensity){
             pMaxIntensity = pIntensity;
@@ -786,7 +781,7 @@ static void snd_check_alerts(ctx_dev *snd)
         }
     }
 
-    freq_value = (snd->snd_fftw->bin_size * pMaxBinIndex * info->channels);
+    freq_value = (snd->snd_info->snd_fftw->bin_size * pMaxBinIndex * info->channels);
 
     if (snd->conf->snd_show) {
         MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
@@ -873,10 +868,11 @@ void *snd_loop(void *arg)
     mythreadname_set("sl", snd->threadnr, snd->conf->device_name.c_str());
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)snd->threadnr));
 
-    snd->snd_fftw = new ctx_snd_fftw;
-    snd->snd_alsa = new ctx_snd_alsa;
     snd->snd_info = new ctx_snd_info;
-    snd->snd_pulse = new ctx_snd_pulse;
+    snd->snd_info->params = new ctx_params;
+    snd->snd_info->snd_fftw = new ctx_snd_fftw;
+    snd->snd_info->snd_alsa = new ctx_snd_alsa;
+    snd->snd_info->snd_pulse = new ctx_snd_pulse;
     snd->running_dev = true;
     snd->finish_dev = false;
     snd->restart_dev = false;
@@ -898,10 +894,11 @@ void *snd_loop(void *arg)
 
     snd->finish_dev = true;
     snd->running_dev = false;
-    delete snd->snd_alsa;
-    delete snd->snd_fftw;
+    delete snd->snd_info->snd_alsa;
+    delete snd->snd_info->snd_fftw;
+    delete snd->snd_info->snd_pulse;
+    delete snd->snd_info->params;
     delete snd->snd_info;
-    delete snd->snd_pulse;
 
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Exiting"));
 

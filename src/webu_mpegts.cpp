@@ -389,7 +389,8 @@ mhdrslt webu_mpegts_main(ctx_webui *webui)
 {
     mhdrslt retcd;
     struct MHD_Response *response;
-    int indx;
+    p_lst *lst = &webui->motapp->webcontrol_headers->params_array;
+    p_it it;
 
     if (webu_mpegts_open(webui) < 0 ) {
         MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Unable top open mpegts"));
@@ -406,11 +407,9 @@ mhdrslt webu_mpegts_main(ctx_webui *webui)
     }
 
     if (webui->motapp->webcontrol_headers->params_count > 0) {
-        for (indx = 0; indx < webui->motapp->webcontrol_headers->params_count; indx++) {
+        for (it = lst->begin(); it != lst->end(); it++) {
             MHD_add_response_header (response
-                , webui->motapp->webcontrol_headers->params_array[indx].param_name
-                , webui->motapp->webcontrol_headers->params_array[indx].param_value
-            );
+                , it->param_name.c_str(), it->param_value.c_str());
         }
     }
 
