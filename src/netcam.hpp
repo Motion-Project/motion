@@ -106,7 +106,7 @@ struct ctx_netcam {
     bool                      passthrough;      /* Boolean for whether we are doing pass-through processing */
 
     char                     *path;             /* The connection string to use for the camera */
-    char                      service[5];       /* String specifying the type of camera http, rtsp, v4l2 */
+    char                      service[6];       /* String specifying the type of camera http, rtsp, v4l2 */
     char                      camera_name[PATH_MAX];      /* The name of the camera as provided in the config file */
     char                      cameratype[30];   /* String specifying Normal or High for use in logging */
     ctx_imgsize               imgsize;          /* The image size parameters */
