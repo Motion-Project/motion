@@ -1719,7 +1719,7 @@ static void netcam_set_options(ctx_netcam *netcam)
             av_dict_set(&netcam->opts
                 , it->param_name.c_str(), it->param_value.c_str(), 0);
             if (netcam->status == NETCAM_NOTCONNECTED) {
-                MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("%s: option: %s = %s")
+                MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("%s:%s = %s")
                     ,netcam->cameratype
                     ,it->param_name.c_str(),it->param_value.c_str());
             }
