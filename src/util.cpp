@@ -1208,16 +1208,20 @@ void util_parms_parse(ctx_params *params, std::string parm_desc, std::string con
 {
     std::string parmline;
 
-    if ((params->update_params == false) ||
-        (confline == "")) {
+    if (params->update_params == false) {
         return;
     }
+
     /* We make a copy because the parsing destroys the value passed */
     parmline = confline;
 
     params->params_array.clear();
     params->params_count = 0;
     params->params_desc = parm_desc;
+
+    if (confline == "") {
+        return;
+    }
 
     util_parms_parse_qte(params, parmline);
 
