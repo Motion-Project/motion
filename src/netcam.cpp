@@ -1627,7 +1627,10 @@ static int netcam_read_image(ctx_netcam *netcam)
             netcam->capture_rate = netcam->conf->framerate;
             if (netcam->pts_adj == false) {
                MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s: capture_rate not specified in netcam_params. Using framerate %d")
+                    ,_("%s: capture_rate not specified.")
+                    ,netcam->cameratype);
+               MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s: Using framerate %d")
                     ,netcam->cameratype, netcam->capture_rate);
             }
         }
