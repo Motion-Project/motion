@@ -1540,6 +1540,11 @@ static int netcam_ntc(ctx_netcam *netcam)
         return 0;
     }
 
+    if ((netcam->imgsize.width == 0) || (netcam->imgsize.height == 0) ||
+        (netcam->frame->width == 0) || (netcam->frame->height == 0)){
+            return 0;
+    }
+
     if ((netcam->imgsize.width  != netcam->frame->width) ||
         (netcam->imgsize.height != netcam->frame->height)) {
         MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "");
