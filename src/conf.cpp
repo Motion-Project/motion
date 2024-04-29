@@ -1902,8 +1902,22 @@ static void conf_edit_movie_quality(ctx_config *conf, std::string &parm, enum PA
         conf->movie_quality = 60;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 100)) {
+        if ((parm_in <= 0) || (parm_in > 100)) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid movie_quality %d"),parm_in);
+        } else if (parm_in > 90) {
+            /*
+               Many movie players can not handle the 100% quality
+               setting from ffmpeg.  It sets baseline and x265 to high, etc.
+               As a result, we limit it to an arbritrary number less
+               than 100 (i.e. 90)
+            */
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Movie quality settings greater than 90 are not permitted."));
+            conf->movie_quality = 90;
+        } else if (parm_in < 5) {
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Movie quality settings less then 5 are not permitted."));
+            conf->movie_quality = 5;
         } else {
             conf->movie_quality = parm_in;
         }
