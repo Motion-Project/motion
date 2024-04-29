@@ -114,6 +114,7 @@
 
     void mythreadname_set(const char *abbr, int threadnbr, const char *threadname);
     void mythreadname_get(char *threadname);
+    void mythreadname_get(std::string &threadname);
     bool mycheck_passthrough(ctx_dev *cam);
 
     char* mytranslate_text(const char *msgid, int setnls);

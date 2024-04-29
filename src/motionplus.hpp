@@ -17,7 +17,6 @@
  *
 */
 
-
 #ifndef _INCLUDE_MOTIONPLUS_HPP_
 #define _INCLUDE_MOTIONPLUS_HPP_
 
@@ -51,6 +50,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <regex.h>
 
 #if defined(HAVE_PTHREAD_NP_H)
     #include <pthread_np.h>

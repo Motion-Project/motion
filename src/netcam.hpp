@@ -36,11 +36,11 @@ struct ctx_imgsize {
 };
 
 struct ctx_url {
-    char *service;
-    char *userpass;
-    char *host;
+    std::string service;
+    std::string userpass;
+    std::string host;
     int port;
-    char *path;
+    std::string path;
 };
 
 /*
@@ -65,7 +65,6 @@ struct ctx_packet_item{
 };
 
 struct ctx_netcam {
-
     AVFormatContext          *format_context;        /* Main format context for the camera */
     AVCodecContext           *codec_context;         /* Codec being sent from the camera */
     AVStream                 *strm;
@@ -105,16 +104,16 @@ struct ctx_netcam {
     bool                      first_image;      /* Boolean for whether we have captured the first image */
     bool                      passthrough;      /* Boolean for whether we are doing pass-through processing */
 
-    char                     *path;             /* The connection string to use for the camera */
-    char                      service[6];       /* String specifying the type of camera http, rtsp, v4l2 */
-    char                      camera_name[PATH_MAX];      /* The name of the camera as provided in the config file */
-    char                      cameratype[30];   /* String specifying Normal or High for use in logging */
+    std::string               path;             /* The connection string to use for the camera */
+    std::string               service;          /* String specifying the type of camera http, rtsp, v4l2 */
+    std::string               camera_name;      /* The name of the camera as provided in the config file */
+    std::string               cameratype;       /* String specifying Normal or High for use in logging */
     ctx_imgsize               imgsize;          /* The image size parameters */
 
     int                       capture_rate;     /* Frames per second from configuration file */
     int                       reconnect_count;  /* Count of the times reconnection is tried*/
     int                       src_fps;          /* The fps provided from source*/
-    char                      *decoder_nm;      /* User requested decoder */
+    std::string               decoder_nm;       /* User requested decoder */
 
     struct timespec           connection_tm;    /* Time when camera was connected*/
     int64_t                   connection_pts;   /* PTS from the connection */
@@ -127,7 +126,7 @@ struct ctx_netcam {
     ctx_config                *conf;            /* Pointer to conf parms of parent cam*/
     ctx_params                *params;          /* parameters for the camera */
 
-    char                      threadname[16];   /* The thread name*/
+    std::string               threadname;       /* The thread name*/
     int                       threadnbr;        /* The thread number */
     pthread_t                 thread_id;        /* thread i.d. for a camera-handling thread (if required). */
     pthread_mutex_t           mutex;            /* mutex used with conditional waits */

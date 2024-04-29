@@ -606,6 +606,17 @@ void mythreadname_set(const char *abbr, int threadnbr, const char *threadname)
 
 }
 
+void mythreadname_get(std::string &threadname)
+{
+    #if ((!defined(BSD) && HAVE_PTHREAD_GETNAME_NP) || defined(__APPLE__))
+        char currname[16];
+        pthread_getname_np(pthread_self(), currname, sizeof(currname));
+        threadname = currname;
+    #else
+        threadname = "Unknown";
+    #endif
+}
+
 void mythreadname_get(char *threadname)
 {
     #if ((!defined(BSD) && HAVE_PTHREAD_GETNAME_NP) || defined(__APPLE__))
