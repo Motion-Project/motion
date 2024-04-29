@@ -1153,7 +1153,6 @@ static void mlp_actions_event(ctx_dev *cam)
         ( !(cam->current_image->flags & IMAGE_POSTCAP)) &&
         ( !(cam->current_image->flags & IMAGE_PRECAP))) {
         event(cam, EVENT_MOVIE_END);
-        mlp_info_reset(cam);
         event(cam, EVENT_MOVIE_START);
     }
 
