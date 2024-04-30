@@ -435,7 +435,7 @@ size_t mystrftime(ctx_dev *cam, char *s, size_t max
                 break;
 
             case 'v': // event
-                sprintf(tempstr, "%0*d", width ? width : 2, cam->event_nr);
+                sprintf(tempstr, "%0*d", width ? width : 2, cam->event_curr_nbr);
                 break;
 
             case 'q': // shots

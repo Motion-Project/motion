@@ -467,8 +467,8 @@ struct ctx_dev {
     bool                    running_dev;     /* Device thread is running*/
     volatile int            watchdog;
 
-    int                     event_nr;
-    int                     prev_event;
+    int                     event_curr_nbr;
+    int                     event_prev_nbr;
     char                    eventid[20];        /* Cam ID + Date/Time 99999yyyymmddhhmmss */
     char                    text_event_string[PATH_MAX];        /* The text for conv. spec. %C - */
     int                     text_scale;

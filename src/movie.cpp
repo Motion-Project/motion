@@ -1510,7 +1510,7 @@ static const char* movie_init_container(ctx_dev *cam)
 
     if (cam->conf->movie_container == "test") {
         MOTPLS_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "Running test of the various output formats.");
-        codenbr = cam->event_nr % 10;
+        codenbr = cam->event_curr_nbr % 10;
         if (codenbr == 1) {
             return "flv";
         } else if (codenbr == 2) {
