@@ -248,7 +248,6 @@ int cls_libcam::cam_start_mgr()
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
     cam_mgr = std::make_unique<CameraManager>();
-
     retcd = cam_mgr->start();
     if (retcd != 0) {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
@@ -260,6 +259,11 @@ int cls_libcam::cam_start_mgr()
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "cam_mgr started.");
 
     if (camctx->conf->libcam_device == "camera0"){
+        if (cam_mgr->cameras().size() == 0) {
+            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                , "No camera devices found");
+            return -1;
+        };
         camid = cam_mgr->cameras()[0]->id();
     } else {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
