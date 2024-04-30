@@ -437,6 +437,8 @@ static void mlp_init_firstimage(ctx_dev *cam)
             }
             SLEEP(2, 0);
         }
+    } else {
+        indx = 0
     }
 
     if ((indx >= 5) || (cam->device_status != STATUS_OPENED)) {
