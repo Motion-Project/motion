@@ -175,7 +175,7 @@ void motpls_log(int msg_level, int msg_type, int msg_err, int msg_fnc, const cha
     va_start(ap, msg_fncnm);
     if (msg_fnc) {
         prefixlen += (int)strlen(msg_fncnm)+2;
-        snprintf(usrfmt, sizeof (usrfmt),"%s: %s", msg_fncnm, va_arg(ap, char *));
+        snprintf(usrfmt, sizeof (usrfmt),"%s:%s", msg_fncnm, va_arg(ap, char *));
     } else {
         snprintf(usrfmt, sizeof (usrfmt),"%s", va_arg(ap, char *));
     }

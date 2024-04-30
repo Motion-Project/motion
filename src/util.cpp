@@ -923,7 +923,7 @@ static void util_parms_file(ctx_params *params, std::string params_file)
     std::ifstream ifs;
 
     MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
-        ,_("parse file: %s"), params_file.c_str());
+        ,_("parse file:%s"), params_file.c_str());
 
     chk = 0;
     for (it  = params->params_array.begin();
@@ -964,7 +964,7 @@ static void util_parms_file(ctx_params *params, std::string params_file)
                 (line.substr(0, 1) != ";") &&
                 (line.substr(0, 1) != "#")) {
                 MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
-                    ,_("Unable to parse line: %s"), line.c_str());
+                    ,_("Unable to parse line:%s"), line.c_str());
             }
         }
     ifs.close();
@@ -990,7 +990,7 @@ void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_va
     parm_itm.param_value.assign(parm_val);
     params->params_array.push_back(parm_itm);
 
-    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s: >%s< >%s<"
+    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:>%s< >%s<"
         ,params->params_desc.c_str(), parm_nm.c_str(),parm_val.c_str());
 
     if ((parm_nm == "params_file") && (parm_val != "")) {
@@ -1315,7 +1315,7 @@ void util_parms_update(ctx_params *params, std::string &confline)
     confline = parmline;
 
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
-        ,_("New config: %s"), confline.c_str());
+        ,_("New config:%s"), confline.c_str());
 
     return;
 }
