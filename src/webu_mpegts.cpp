@@ -306,7 +306,15 @@ int webu_mpegts_open(ctx_webui *webui)
     strm = avformat_new_stream(webui->fmtctx, codec);
 
     if (webui->device_id > 0) {
-        webu_stream_img_sizes(webui, webui->cam, img_w, img_h);
+        if ((webui->cnct_type == WEBUI_CNCT_TS_SUB) &&
+            ((webui->cam->imgs.width  % 16) == 0) &&
+            ((webui->cam->imgs.height % 16) == 0)) {
+            img_w = (webui->cam->imgs.width/2);
+            img_h = (webui->cam->imgs.height/2);
+        } else {
+            img_w = webui->cam->imgs.width;
+            img_h = webui->cam->imgs.height;
+        }
     } else {
         webu_stream_all_sizes(webui);
         img_w = webui->motapp->all_sizes->width;

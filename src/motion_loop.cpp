@@ -438,7 +438,7 @@ static void mlp_init_firstimage(ctx_dev *cam)
             SLEEP(2, 0);
         }
     } else {
-        indx = 0
+        indx = 0;
     }
 
     if ((indx >= 5) || (cam->device_status != STATUS_OPENED)) {
@@ -546,7 +546,6 @@ static void mlp_init_values(ctx_dev *cam)
 {
     cam->event_curr_nbr = 1;
     cam->event_prev_nbr = 0;
-    cam->swsctx = NULL;
 
     cam->watchdog = cam->conf->watchdog_tmo;
 
@@ -643,9 +642,6 @@ void mlp_cleanup(ctx_dev *cam)
     myfree(&cam->imgs.image_secondary);
     myfree(&cam->imgs.image_preview.image_norm);
     myfree(&cam->imgs.image_preview.image_high);
-    if (cam->swsctx != NULL) {
-        sws_freeContext(cam->swsctx);
-    }
 
     mlp_ring_destroy(cam); /* Cleanup the precapture ring buffer */
 

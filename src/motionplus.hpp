@@ -518,7 +518,6 @@ struct ctx_dev {
     bool                    passflag;  //flag first frame vs all others.
 
     ctx_all_loc             all_loc;    /* position on all camera image */
-    struct SwsContext       *swsctx;    /* Context for the resizing of the image */
 
     pthread_mutex_t         parms_lock;
     bool                    parms_changed;  /*bool indicating if the parms have changed */

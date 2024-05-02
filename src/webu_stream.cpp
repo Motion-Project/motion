@@ -50,24 +50,13 @@ void webu_stream_img_resize(ctx_dev *cam, uint8_t *src, uint8_t *dst, int dst_w,
     char    errstr[128];
     uint8_t *buf;
     AVFrame *frm_in, *frm_out;
+    struct SwsContext *swsctx;
 
     src_h = cam->imgs.height;
     src_w = cam->imgs.width;
 
     img_sz = (dst_h * dst_w * 3)/2;
     memset(dst, 0x00, (size_t)img_sz);
-
-    if (cam->swsctx == NULL) {
-        cam->swsctx = sws_getContext(
-            src_w, src_h, MY_PIX_FMT_YUV420P
-            ,dst_w, dst_h, MY_PIX_FMT_YUV420P
-            ,SWS_BICUBIC, NULL, NULL, NULL);
-        if (cam->swsctx == NULL) {
-            MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                , _("Unable to allocate scaling context."));
-            return;
-        }
-    }
 
     frm_in = myframe_alloc();
     if (frm_in == NULL) {
@@ -107,7 +96,20 @@ void webu_stream_img_resize(ctx_dev *cam, uint8_t *src, uint8_t *dst, int dst_w,
         return;
     }
 
-    retcd = sws_scale(cam->swsctx
+    swsctx = sws_getContext(
+            src_w, src_h, MY_PIX_FMT_YUV420P
+            ,dst_w, dst_h, MY_PIX_FMT_YUV420P
+            ,SWS_BICUBIC, NULL, NULL, NULL);
+    if (swsctx == NULL) {
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , _("Unable to allocate scaling context."));
+        free(buf);
+        myframe_free(frm_in);
+        myframe_free(frm_out);
+        return;
+    }
+
+    retcd = sws_scale(swsctx
         , (const uint8_t* const *)frm_in->data, frm_in->linesize
         , 0, src_h, frm_out->data, frm_out->linesize);
     if (retcd < 0) {
@@ -117,6 +119,7 @@ void webu_stream_img_resize(ctx_dev *cam, uint8_t *src, uint8_t *dst, int dst_w,
         free(buf);
         myframe_free(frm_in);
         myframe_free(frm_out);
+        sws_freeContext(swsctx);
         return;
     }
 
@@ -130,12 +133,15 @@ void webu_stream_img_resize(ctx_dev *cam, uint8_t *src, uint8_t *dst, int dst_w,
         free(buf);
         myframe_free(frm_in);
         myframe_free(frm_out);
+        sws_freeContext(swsctx);
         return;
     }
 
     free(buf);
     myframe_free(frm_in);
     myframe_free(frm_out);
+    sws_freeContext(swsctx);
+
 }
 
 void webu_stream_img_sizes(ctx_webui *webui, ctx_dev *cam, int &img_w, int &img_h)
@@ -489,7 +495,11 @@ void webu_stream_all_getimg(ctx_webui *webui)
             strm = &cam->stream.norm;
         } else if ((webui->cnct_type == WEBUI_CNCT_JPG_SUB) ||
             (webui->cnct_type == WEBUI_CNCT_TS_SUB)) {
-            strm = &cam->stream.sub;
+            /* The use of the full size image is is is not an error here.
+              For the all_img, we are using a different scaling/resizing method
+              and as a result, we need to start with the full size image then
+              resize to substream and stream_preview_scale*/
+            strm = &cam->stream.norm; /* <<==Normal size is correct here*/
         } else if ((webui->cnct_type == WEBUI_CNCT_JPG_MOTION) ||
             (webui->cnct_type == WEBUI_CNCT_TS_MOTION)) {
             strm = &cam->stream.motion;
