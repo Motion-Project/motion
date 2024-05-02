@@ -993,7 +993,7 @@ static void movie_passthru_write(ctx_movie *movie, int indx)
     movie_free_pkt(movie);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+        MOTPLS_LOG(DBG, TYPE_ENCODER, NO_ERRNO
             ,_("Error while writing video frame: %s"),errstr);
         return;
     }
