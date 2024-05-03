@@ -1012,6 +1012,8 @@ static void webu_mhd_deinit_counter(ctx_webui *webui)
             } else if ( (webui->cnct_type == WEBUI_CNCT_JPG_SECONDARY) ||
                         (webui->cnct_type == WEBUI_CNCT_TS_SECONDARY)) {
                 strm = &cam->stream.secondary;
+            } else {
+                strm = &cam->stream.norm;
             }
             if ((webui->cnct_type > WEBUI_CNCT_JPG_MIN) &&
                 (webui->cnct_type < WEBUI_CNCT_JPG_MAX)) {
