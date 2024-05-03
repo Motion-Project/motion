@@ -164,12 +164,13 @@ AC_ARG_WITH([webp],
   [WEBP="$withval"],
   [WEBP="yes]"
 )
-
+WEBP_VER=""
 AS_IF([test "${WEBP}" = "yes" ], [
     AC_MSG_CHECKING(for webp)
     AS_IF([pkgconf libwebpmux ], [
         AC_MSG_RESULT(yes)
         AC_DEFINE([HAVE_WEBP], [1], [Define to 1 if WEBP is around])
+        WEBP_VER="("`pkgconf --modversion libwebp`")"
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags libwebpmux libwebp`
         TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs libwebpmux libwebp`
       ],[
@@ -180,14 +181,14 @@ AS_IF([test "${WEBP}" = "yes" ], [
 )
 
 ##############################################################################
-###  raspberry pi libcamera - Optional.
+###  libcamera - Optional.
 ##############################################################################
 AC_ARG_WITH([libcam],
-  AS_HELP_STRING([--with-libcam[=DIR]],[Compile with RasperryPi libcamera support]),
+  AS_HELP_STRING([--with-libcam[=DIR]],[Compile with libcamera support]),
   [LIBCAM="$withval"],
   [LIBCAM="yes"]
 )
-
+LIBCAM_VER=""
 AS_IF([test "${LIBCAM}" = "no"], [
     AC_MSG_CHECKING(for LIBCAM)
     AC_MSG_RESULT(skipped)
@@ -206,6 +207,7 @@ AS_IF([test "${LIBCAM}" = "no"], [
 
     AC_MSG_CHECKING(for LIBCAM)
     AS_IF([pkgconf libcamera], [
+        LIBCAM_VER="("`pkgconf --modversion libcamera`")"
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags libcamera`
         TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs libcamera`
         AC_MSG_RESULT([yes])
@@ -229,7 +231,7 @@ AC_ARG_WITH([ffmpeg],
   [FFMPEG=$withval],
   [FFMPEG="yes"]
 )
-
+FFMPEG_VER=""
 AS_IF([test "${FFMPEG}" = "no"], [
     AC_MSG_CHECKING(for FFmpeg)
     AC_MSG_ERROR([Package ffmpeg is required.])
@@ -247,7 +249,7 @@ AS_IF([test "${FFMPEG}" = "no"], [
     FFMPEG_DEPS="libavutil libavformat libavcodec libswscale libavdevice"
     AC_MSG_CHECKING(for FFmpeg)
     AS_IF([pkgconf $FFMPEG_DEPS], [
-        FFMPEG_VER=`pkgconf --modversion libavformat`
+        FFMPEG_VER="("`pkgconf --modversion libavformat`")"
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags $FFMPEG_DEPS`
         TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs $FFMPEG_DEPS`
         AC_MSG_RESULT(yes)
@@ -269,7 +271,7 @@ AC_ARG_WITH([opencv],
   [OPENCV=$withval],
   [OPENCV="yes"]
 )
-
+OPENCV_VER=""
 AS_IF([test "${OPENCV}" = "no"], [
     AC_MSG_CHECKING(for OpenCV support)
     AC_MSG_RESULT(skipped)
@@ -288,13 +290,13 @@ AS_IF([test "${OPENCV}" = "no"], [
     AS_IF([pkgconf opencv], [
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags opencv`
         TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs opencv`
-        OPENCV_VER=`pkgconf --modversion opencv`
+        OPENCV_VER="("`pkgconf --modversion opencv`")"
         AC_DEFINE([HAVE_OPENCV], [1], [Define to 1 if OpenCV is around])
       ],[
         AS_IF([pkgconf opencv4], [
             TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags opencv4`
             TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs opencv4`
-            OPENCV_VER=`pkgconf --modversion opencv4`
+            OPENCV_VER="("`pkgconf --modversion opencv4`")"
             AC_DEFINE([HAVE_OPENCV], [1], [Define to 1 if OpenCV is around])
           ],[
             OPENCV="no"
@@ -317,7 +319,7 @@ AC_ARG_WITH(mariadb,
   [MARIADB="$withval"],
   [MARIADB="yes"]
 )
-
+MARIADB_VER=""
 AS_IF([test "${MARIADB}" = "no"], [
     AC_MSG_CHECKING(for MariaDB)
     AC_MSG_RESULT(skipped)
@@ -334,6 +336,7 @@ AS_IF([test "${MARIADB}" = "no"], [
 
     AC_MSG_CHECKING(for MariaDB)
     AS_IF([pkgconf libmariadb], [
+        MARIADB_VER="("`pkgconf --modversion libmariadb`")"
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags libmariadb`
         TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs libmariadb`
         AC_DEFINE([HAVE_MARIADB], [1], [Define to 1 if you have MariaDB support])
@@ -365,7 +368,7 @@ AC_ARG_WITH(mysql,
   [MYSQL="$withval"],
   [MYSQL="yes"]
 )
-
+MYSQL_VER=""
 AS_IF([test "${MYSQL}" = "no"], [
     AC_MSG_CHECKING(for MySQL)
     AC_MSG_RESULT(skipped)
@@ -382,6 +385,7 @@ AS_IF([test "${MYSQL}" = "no"], [
 
     AC_MSG_CHECKING(for MySQL)
     AS_IF([pkgconf mysqlclient], [
+        MYSQL_VER="("`pkgconf --modversion mysqlclient`")"
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags mysqlclient`
         TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs mysqlclient`
         AC_DEFINE([HAVE_MARIADB], [1], [Define to 1 if you have MySQL/MariaDB support])
@@ -403,7 +407,7 @@ AC_ARG_WITH(pgsql,
   [PGSQL="$withval"],
   [PGSQL="yes"]
 )
-
+PGSQL_VER=""
 AS_IF([test "${PGSQL}" = "no"], [
     AC_MSG_CHECKING(for PostgreSQL)
     AC_MSG_RESULT(skipped)
@@ -420,6 +424,7 @@ AS_IF([test "${PGSQL}" = "no"], [
 
     AC_MSG_CHECKING(for PostgreSQL)
     AS_IF([pkgconf libpq], [
+        PGSQL_VER="("`pkgconf --modversion libpq`")"
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags libpq`
         TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs libpq`
         AC_DEFINE([HAVE_PGSQL], [1], [Define to 1 if you have PostgreSQL support])
@@ -441,7 +446,7 @@ AC_ARG_WITH([sqlite3],
   [SQLITE3=$withval],
   [SQLITE3="yes"]
 )
-
+SQLITE3_VER=""
 AS_IF([test "${SQLITE3}" = "no"], [
     AC_MSG_CHECKING(for SQLite3)
     AC_MSG_RESULT(skipped)
@@ -458,6 +463,7 @@ AS_IF([test "${SQLITE3}" = "no"], [
 
     AC_MSG_CHECKING(for SQLite3)
     AS_IF([pkgconf sqlite3], [
+        SQLITE3_VER="("`pkgconf --modversion sqlite3`")"
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags sqlite3`
         TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs sqlite3`
         AC_DEFINE([HAVE_SQLITE3], [1], [Define to 1 if you have SQLITE3 support])
@@ -481,7 +487,7 @@ AC_ARG_WITH([pulse],
   [PULSE=$withval],
   [PULSE="yes"]
 )
-
+PULSE_VER=""
 AS_IF([test "${PULSE}" = "no"], [
     AC_MSG_CHECKING(for PulseAudio)
     AC_MSG_RESULT(skipped)
@@ -498,6 +504,7 @@ AS_IF([test "${PULSE}" = "no"], [
 
     AC_MSG_CHECKING(for PulseAudio)
     AS_IF([pkgconf libpulse], [
+        PULSE_VER="("`pkgconf --modversion libpulse`")"
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags libpulse`
         TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs libpulse`" -lpulse-simple "
         AC_DEFINE([HAVE_PULSE], [1], [Define to 1 if you have PulseAudio support])
@@ -521,7 +528,7 @@ AC_ARG_WITH([alsa],
   [ALSA=$withval],
   [ALSA="yes"]
 )
-
+ALSA_VER=""
 AS_IF([test "${ALSA}" = "no"], [
     AC_MSG_CHECKING(for ALSA)
     AC_MSG_RESULT(skipped)
@@ -538,6 +545,7 @@ AS_IF([test "${ALSA}" = "no"], [
 
     AC_MSG_CHECKING(for ALSA)
     AS_IF([pkgconf alsa], [
+        ALSA_VER="("`pkgconf --modversion alsa`")"
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags alsa`
         TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs alsa`
         AC_DEFINE([HAVE_ALSA], [1], [Define to 1 if you have ALSA support])
@@ -561,7 +569,7 @@ AC_ARG_WITH([fftw3],
   [FFTW3=$withval],
   [FFTW3="yes"]
 )
-
+FFTW3_VER=""
 AS_IF([test "${FFTW3}" = "no"], [
     AC_MSG_CHECKING(for FFTW3)
     AC_MSG_RESULT(skipped)
@@ -578,6 +586,7 @@ AS_IF([test "${FFTW3}" = "no"], [
 
     AC_MSG_CHECKING(for FFTW3)
     AS_IF([pkgconf fftw3], [
+        FFTW3_VER="("`pkgconf --modversion fftw3`")"
         TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags fftw3`
         TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs fftw3`
         AC_DEFINE([HAVE_FFTW3], [1], [Define to 1 if you have FFTW3 support])
@@ -649,20 +658,18 @@ echo "pthread_np            : $PTHREAD_NP"
 echo "pthread_setname_np    : $PTHREAD_SETNAME_NP"
 echo "pthread_getname_np    : $PTHREAD_GETNAME_NP"
 echo "XSI error             : $XSI_STRERROR"
-echo "webp support          : $WEBP"
-echo "V4L2 support          : $V4L2"
-echo "libcamera support     : $LIBCAM"
-echo "FFmpeg support        : $FFMPEG"
-echo "  libavformat version : $FFMPEG_VER"
-echo "OpenCV                : $OPENCV"
-echo "  version             : $OPENCV_VER"
-echo "SQLite3 support       : $SQLITE3"
-echo "MYSQL support         : $MYSQL"
-echo "PostgreSQL support    : $PGSQL"
-echo "MariaDB support       : $MARIADB"
-echo "ALSA support          : $ALSA"
-echo "PulseAudio support    : $PULSE"
-echo "FFTW support          : $FFTW3"
+echo "V4L2                  : $V4L2"
+echo "webp                  : $WEBP$WEBP_VER"
+echo "libcamera             : $LIBCAM$LIBCAM_VER"
+echo "FFmpeg                : $FFMPEG$FFMPEG_VER"
+echo "OpenCV                : $OPENCV$OPENCV_VER"
+echo "SQLite3               : $SQLITE3$SQLITE3_VER"
+echo "MYSQL                 : $MYSQL$MYSQL_VER"
+echo "PostgreSQL            : $PGSQL$PGSQL_VER"
+echo "MariaDB               : $MARIADB$MARIADB_VER"
+echo "ALSA                  : $ALSA$ALSA_VER"
+echo "PulseAudio            : $PULSE$PULSE_VER"
+echo "FFTW                  : $FFTW3$FFTW3_VER"
 echo
-echo  "Install prefix:       $prefix"
+echo "Install prefix        : $prefix"
 echo
