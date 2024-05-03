@@ -116,7 +116,7 @@ static void webu_json_config_parms(ctx_webui *webui, ctx_config *conf)
     indx_parm = 0;
     first = true;
     while ((config_parms[indx_parm].parm_name != "") ) {
-        if ((config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER)) {
+        if (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) {
             indx_parm++;
             continue;
         }

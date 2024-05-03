@@ -392,7 +392,7 @@ static int movie_set_quality(ctx_movie *movie)
             movie->quality = 45; // default to 45% quality
         }
 
-        if ((movie->preferred_codec == USER_CODEC_V4L2M2M)) {
+        if (movie->preferred_codec == USER_CODEC_V4L2M2M) {
 
             // bit_rate = movie->width * movie->height * movie->fps * quality_factor
             movie->quality = (int)(((int64_t)movie->width * movie->height * movie->fps * movie->quality) >> 7);
