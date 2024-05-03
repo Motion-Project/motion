@@ -370,7 +370,7 @@ static void motpls_allcams_init(ctx_motapp *motapp)
             if (it->param_name == "col") {
                 motapp->cam_list[indx]->all_loc.col = mtoi(it->param_value);
             }
-            if (it->param_name,"offset_col") {
+            if (it->param_name == "offset_col") {
                 motapp->cam_list[indx]->all_loc.offset_user_col =
                     mtoi(it->param_value);
             }
