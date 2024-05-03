@@ -488,7 +488,7 @@ void cls_libcam:: cam_config_orientation()
     #if (LIBCAMVER >= 2000)
         int retcd;
         std::string adjdesc;
-        p_lst *lst = &camctx->libcam->params.params_array;
+        p_lst *lst = &camctx->libcam->params->params_array;
         p_it it;
 
         for (it = lst->begin(); it != lst->end(); it++) {
