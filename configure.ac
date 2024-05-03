@@ -3,7 +3,6 @@ AM_INIT_AUTOMAKE([subdir-objects foreign])
 CXXFLAGS="$CXXFLAGS -std=c++17"
 AC_PROG_CC
 AC_PROG_CXX
-AC_GNU_SOURCE
 AC_CONFIG_HEADERS([config.hpp])
 AC_CONFIG_SRCDIR([src/motionplus.cpp])
 AC_CANONICAL_HOST
