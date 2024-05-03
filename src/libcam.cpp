@@ -512,7 +512,7 @@ void cls_libcam:: cam_config_orientation()
                 } else {
                     MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                         , "Invalid Orientation option: %s."
-                        , it->param_value.cstr());
+                        , it->param_value.c_str());
                 }
             }
         }
