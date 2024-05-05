@@ -710,6 +710,12 @@
         <ul>
           <li> Values: on, off | Default: off</li>
           Run in setup mode and provide lots of messages related to images processed.
+          <br>
+          Prints the image differences, labels, noise values, thread number and the word
+          setup on the output image.  Also outputs the image in the "motion" negative format
+          instead of the normal output.
+          <br>
+          Prints the label values, difference values, noise level to the log file.
         </ul>
         <p></p>
 
@@ -731,6 +737,24 @@
         <ul>
           <li> Values: 1 - 9 | Default: 6</li>
           Verbosity level(EMR, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL) of messages.
+          <br>
+          At the DBG Level(8) and higher:
+          <br>Additional values related to the trigger,
+          motion, precap and postcap are overlayed on the images.
+          <br>Additional information regarding the available parameters to libcamera are
+          printed to the log.
+          <br>Additional information regarding the available parameters to v4l2 devices is
+          printed to the log.
+          <br>
+          If a secondary detection algorithms is specified:
+          <br>
+          The image sent to the secondary algorithm for detection will
+          be saved to the target directory with the name src_"algorithm".jpg
+          e.g. src_haar.jpg
+          <br>
+          If the secondary algorithm is triggered by the image, the resulting
+          image will be saved into the target directory with the name
+          detect_"algorithm".jpg e.g. detect_haar.jpg
         </ul>
         <p></p>
 
