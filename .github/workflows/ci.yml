@@ -95,10 +95,3 @@ jobs:
         run: |
           file ./src/motionplus
           ./src/motionplus -h || true
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@main
-        with:
-          name: motionplus-${{ matrix.cc }}-${{ matrix.libc }}-${{ github.sha }}
-          path: src/motionplus
-          compression-level: 9
