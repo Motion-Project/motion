@@ -133,7 +133,7 @@ static void mlp_ring_process(ctx_dev *cam)
 
         cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_out];
 
-        if (cam->current_image->shot < cam->conf->framerate) {
+        if (cam->current_image->shot <= cam->conf->framerate) {
             if (cam->motapp->conf->log_level >= DBG) {
                 mlp_ring_process_debug(cam);
             }
@@ -254,7 +254,7 @@ static void mlp_detected(ctx_dev *cam)
 
     mlp_detected_trigger(cam);
 
-    if (cam->current_image->shot < conf->framerate) {
+    if (cam->current_image->shot <= conf->framerate) {
         if ((conf->stream_motion == true) &&
             (cam->motapp->conf->setup_mode == false) &&
             (cam->current_image->shot != 1)) {
