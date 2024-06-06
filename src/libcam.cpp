@@ -568,6 +568,7 @@ int cls_libcam::cam_start_config()
     config->at(0).size.width = camctx->conf->width;
     config->at(0).size.height = camctx->conf->height;
     config->at(0).bufferCount = 1;
+    config->at(0).stride = 0;
 
     retcd = config->validate();
     if (retcd == CameraConfiguration::Adjusted) {
