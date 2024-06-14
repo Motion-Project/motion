@@ -64,6 +64,12 @@ struct ctx_packet_item{
     bool                      iswritten;
 };
 
+struct ctx_filelist_item {
+    std::string   fullnm;
+    std::string   filenm;
+    std::string   displaynm;
+};
+
 struct ctx_netcam {
     AVFormatContext          *format_context;        /* Main format context for the camera */
     AVCodecContext           *codec_context;         /* Codec being sent from the camera */
@@ -133,6 +139,9 @@ struct ctx_netcam {
     pthread_mutex_t           mutex_transfer;   /* mutex used with transferring stream info for pass-through */
     pthread_mutex_t           mutex_pktarray;   /* mutex used with the packet array */
 
+    std::vector<ctx_filelist_item>    filelist;
+    std::string                 filedir;
+    int                       filenbr;
 };
 
 void netcam_start(ctx_dev *cam);

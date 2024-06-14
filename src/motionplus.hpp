@@ -51,6 +51,8 @@
 #include <iostream>
 #include <fstream>
 #include <regex.h>
+#include <dirent.h>
+#include <algorithm>
 
 #if defined(HAVE_PTHREAD_NP_H)
     #include <pthread_np.h>

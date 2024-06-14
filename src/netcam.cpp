@@ -25,6 +25,84 @@
 #include "netcam.hpp"
 #include "movie.hpp"
 
+bool netcam_filelist_cmp(const ctx_filelist_item &a, const ctx_filelist_item &b)
+{
+    return a.filenm < b.filenm;
+}
+
+static void netcam_filelist_load(ctx_netcam *netcam)
+{
+    DIR             *d;
+    struct dirent   *dir_ent;
+    struct stat     sbuf;
+    ctx_filelist_item fileitm;
+    int             retcd;
+    size_t          chkloc;
+
+    netcam->filenbr++;
+    if ((netcam->filenbr == (int)netcam->filelist.size()) ||
+        (netcam->path == "")) {
+        netcam->filelist.clear();
+        retcd = stat(netcam->filedir.c_str(), &sbuf);
+        if ((sbuf.st_mode & S_IFREG ) && (retcd == 0)) {
+            MOTPLS_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+                , _("File specified: %s"),netcam->filedir.c_str());
+            fileitm.fullnm = netcam->filedir;
+            chkloc = fileitm.fullnm.find_last_of("/");
+            if (chkloc == std::string::npos) {
+                fileitm.filenm = fileitm.fullnm;
+            } else {
+                fileitm.filenm = fileitm.fullnm.substr(chkloc+1);
+            }
+            chkloc = fileitm.filenm.find_last_of(".");
+            if (chkloc == std::string::npos) {
+                fileitm.displaynm = fileitm.filenm;
+            } else {
+                fileitm.displaynm = fileitm.filenm.substr(0,chkloc);
+            }
+            netcam->filelist.push_back(fileitm);
+        } else if ((sbuf.st_mode & S_IFDIR ) && (retcd == 0)) {
+            MOTPLS_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+                , _("Directory specified: %s"),netcam->filedir.c_str());
+            d = opendir(netcam->filedir.c_str());
+            if (d != NULL) {
+                while ((dir_ent=readdir(d)) != NULL) {
+                    fileitm.fullnm = netcam->filedir;
+                    fileitm.fullnm += dir_ent->d_name;
+                    fileitm.filenm = dir_ent->d_name;
+                    chkloc = fileitm.filenm.find_last_of(".");
+                    if (chkloc == std::string::npos) {
+                        fileitm.displaynm = fileitm.filenm;
+                    } else {
+                        fileitm.displaynm = fileitm.filenm.substr(0,chkloc);
+                    }
+                    retcd = stat(fileitm.fullnm.c_str(), &sbuf);
+                    if ((sbuf.st_mode & S_IFREG) && (retcd == 0)) {
+                        netcam->filelist.push_back(fileitm);
+                    }
+                }
+            } else {
+                MOTPLS_LOG(DBG, TYPE_NETCAM, SHOW_ERRNO
+                    , _("Directory did not open: %s"),netcam->filedir.c_str());
+            }
+            closedir(d);
+            std::sort(netcam->filelist.begin()
+                , netcam->filelist.end()
+                , netcam_filelist_cmp);
+        }
+        netcam->filenbr = 0;
+    }
+    if (netcam->filelist.size() == 0) {
+        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            , _("Directory/file not found: %s"), netcam->filedir.c_str());
+    } else {
+        netcam->path = netcam->filelist[netcam->filenbr].fullnm;
+    }
+    MOTPLS_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+            , _("Netcam Path: %s"),netcam->path.c_str());
+
+}
+
 static void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
 {
     int min_size_to_alloc;
@@ -77,6 +155,7 @@ static void netcam_url_invalid(ctx_url *parse_url)
     parse_url->userpass = "INVALID";
 
 }
+
 static void netcam_url_parse(ctx_url *parse_url, std::string text_url)
 {
     char *s;
@@ -86,7 +165,9 @@ static void netcam_url_parse(ctx_url *parse_url, std::string text_url)
     regex_t pattbuf;
     regmatch_t matches[10];
 
-    if (text_url.substr(0,4) == "file") {
+    if (text_url.substr(0,3) == "dir") {
+        regstr = "(dir)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
+    } else if (text_url.substr(0,4) == "file") {
         regstr = "(file)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
     } else if (text_url.substr(0,4) == "v4l2") {
         regstr = "(v4l2)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
@@ -1649,7 +1730,8 @@ static void netcam_set_path (ctx_dev *cam, ctx_netcam *netcam )
         MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("Setting up v4l2"));
     } else if (url.service == "file") {
-        netcam->path = url.path;
+        netcam->filedir = url.path;
+        netcam_filelist_load(netcam);
         MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("Setting up file"));
     } else {
@@ -1737,6 +1819,9 @@ static void netcam_set_parms (ctx_dev *cam, ctx_netcam *netcam )
     netcam->hw_pix_fmt = AV_PIX_FMT_NONE;
     netcam->connection_pts = 0;
     netcam->last_pts = 0;
+    netcam->filenbr = 0;
+    netcam->filelist.clear();
+    netcam->filedir = "";
 
     for (it = netcam->params->params_array.begin();
         it != netcam->params->params_array.end(); it++) {
@@ -2124,7 +2209,14 @@ static void netcam_handler_reconnect(ctx_netcam *netcam)
 {
     int retcd, indx;
 
-    if ((netcam->status == NETCAM_CONNECTED) ||
+    if ((netcam->service == "file") ||
+        (netcam->service == "dir")) {
+        netcam_filelist_load(netcam);
+        MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            ,_("%s:Processing file: %s")
+            ,netcam->cameratype.c_str()
+            ,netcam->path.c_str());
+    } else if ((netcam->status == NETCAM_CONNECTED) ||
         (netcam->status == NETCAM_READINGIMAGE)) {
         MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("%s:Reconnecting with camera....")
@@ -2341,7 +2433,7 @@ void netcam_cleanup(ctx_dev *cam)
 
 void netcam_start(ctx_dev *cam)
 {
-    int indx_cam, indx_max;
+    int indx_cam, indx_max, retcd;
     ctx_netcam *netcam;
 
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening Netcam"));
@@ -2369,9 +2461,22 @@ void netcam_start(ctx_dev *cam)
             netcam->high_resolution = true;
         }
         netcam_set_parms(cam, netcam);
-        if (netcam_connect(netcam) != 0) {
-            netcam_cleanup(cam);
-            return;
+        if (netcam->service == "file") {
+            retcd = netcam_connect(netcam);
+            while ((retcd != 0) &&
+                (netcam->filenbr < (int)netcam->filelist.size())) {
+                netcam_filelist_load(netcam);
+                retcd = netcam_connect(netcam);
+            }
+            if (retcd != 0) {
+                netcam_cleanup(cam);
+                return;
+            }
+        } else {
+            if (netcam_connect(netcam) != 0) {
+                netcam_cleanup(cam);
+                return;
+            }
         }
         if (netcam_read_image(netcam) != 0) {
             MOTPLS_LOG(CRT, TYPE_NETCAM, NO_ERRNO
