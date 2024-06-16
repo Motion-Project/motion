@@ -165,9 +165,7 @@ static void netcam_url_parse(ctx_url *parse_url, std::string text_url)
     regex_t pattbuf;
     regmatch_t matches[10];
 
-    if (text_url.substr(0,3) == "dir") {
-        regstr = "(dir)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
-    } else if (text_url.substr(0,4) == "file") {
+    if (text_url.substr(0,4) == "file") {
         regstr = "(file)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
     } else if (text_url.substr(0,4) == "v4l2") {
         regstr = "(v4l2)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
@@ -2209,8 +2207,7 @@ static void netcam_handler_reconnect(ctx_netcam *netcam)
 {
     int retcd, indx;
 
-    if ((netcam->service == "file") ||
-        (netcam->service == "dir")) {
+    if (netcam->service == "file") {
         netcam_filelist_load(netcam);
         MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("%s:Processing file: %s")
