@@ -1572,6 +1572,126 @@
             <p></p>
           </div>
 
+          <div>
+            <i><h4>threshold</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>scalefactor</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>minsize</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>maxsize</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>padding</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>threshold_model</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>winstride</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>flags</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>minneighbors</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>config</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>classes_file</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>framework</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>backend</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>target</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>scale</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>width</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>height</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+
          </ul>
         <p></p>
 
@@ -1793,10 +1913,13 @@
 
         <h3><a name="picture_output_motion"></a> picture_output_motion </h3>
         <ul>
-          <li> Values: on, off | Default: off</li>
+          <li> Values: on, off, roi | Default: off</li>
           Save the motion(debug) pictures with the pixels that change as a graytone image.  If
           labeling is enabled via the despeckele option, the largest area will be blue and
           areas in red are those determined by the smartmask option.
+          <p></p>
+          The option of 'roi' provides a smaller normal image of just the section
+          that caused the motion. i.e. The Region Of Interest).
         </ul>
         <p></p>
 
