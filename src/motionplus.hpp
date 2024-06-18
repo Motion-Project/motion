@@ -120,10 +120,9 @@ struct ctx_movie;
 struct ctx_netcam;
 struct ctx_algsec;
 struct ctx_config;
-struct ctx_v4l2cam;
-struct ctx_webui;
 struct ctx_netcam;
 
+class cls_v4l2cam;
 class cls_libcam;
 class cls_webu;
 class cls_webu_ans;
@@ -448,7 +447,7 @@ struct ctx_dev {
     ctx_images      imgs;
     ctx_netcam      *netcam;            /* this structure contains the context for normal RTSP connection */
     ctx_netcam      *netcam_high;       /* this structure contains the context for high resolution RTSP connection */
-    ctx_v4l2cam     *v4l2cam;
+    cls_v4l2cam     *v4l2cam;
     ctx_image_data  *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
     ctx_algsec      *algsec;
     ctx_rotate      *rotate_data;       /* rotation data is thread-specific */

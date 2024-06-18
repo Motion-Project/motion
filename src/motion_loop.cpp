@@ -365,8 +365,9 @@ void mlp_cam_close(ctx_dev *cam)
         return;
     }
 
-    if (cam->v4l2cam != NULL) {
-        v4l2_cleanup(cam);
+    if (cam->v4l2cam != nullptr) {
+        delete cam->v4l2cam;
+        cam->v4l2cam = nullptr;
         return;
     }
 
@@ -383,7 +384,7 @@ void mlp_cam_start(ctx_dev *cam)
     } else if (cam->camera_type == CAMERA_TYPE_NETCAM) {
         netcam_start(cam);
     } else if (cam->camera_type == CAMERA_TYPE_V4L2) {
-        v4l2_start(cam);
+        cam->v4l2cam = new cls_v4l2cam(cam);
     } else {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("No Camera device specified"));
@@ -399,7 +400,7 @@ int mlp_cam_next(ctx_dev *cam, ctx_image_data *img_data)
     } else if (cam->camera_type == CAMERA_TYPE_NETCAM) {
         return netcam_next(cam, img_data);
     } else if (cam->camera_type == CAMERA_TYPE_V4L2) {
-        return v4l2_next(cam, img_data);
+        return cam->v4l2cam->next(img_data);
     }
 
     return CAPTURE_FAILURE;
@@ -570,6 +571,8 @@ static void mlp_init_values(ctx_dev *cam)
     } else {
         cam->pause = cam->conf->pause;
     }
+    cam->v4l2cam = nullptr;
+
 }
 
 /* start the camera */

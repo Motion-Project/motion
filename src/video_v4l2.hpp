@@ -45,31 +45,70 @@ struct ctx_v4l2cam_ctrl {
     bool            ctrl_menuitem;   /* bool for whether item is a menu item description */
 };
 
-struct ctx_v4l2cam {
-    int                     fd_device;
-    int                     width;
-    int                     height;
-    int                     fps;
-    int                     pixfmt_src;
-    int                     buffer_count;
-    ctx_v4l2cam_ctrl        *devctrl_array;        /*Array of all the controls in the device*/
-    int                     devctrl_count;         /*Count of the controls in the device*/
-    int                     device_type;           /*Camera, tuner, etc as provided by driver enum*/
-    int                     device_tuner;          /*Tuner number if applicable from driver*/
-    ctx_params              *params;               /*User parameters for the camera */
-    video_buff              *buffers;
-    int                     pframe;
-    volatile bool           finish;                /* End the thread */
-    #ifdef HAVE_V4L2
-        struct v4l2_capability cap;
-        struct v4l2_format fmt;
-        struct v4l2_requestbuffers req;
-        struct v4l2_buffer buf;
-    #endif
+class cls_v4l2cam {
+    public:
+        cls_v4l2cam(ctx_dev *p_cam);
+        ~cls_v4l2cam();
+
+        int next(ctx_image_data *img_data);
+        void restart_cam();
+
+    private:
+        ctx_dev *cam;
+        int     fd_device;
+        int     width;
+        int     height;
+        int     fps;
+        int     pixfmt_src;
+        int     buffer_count;
+        ctx_v4l2cam_ctrl        *devctrl_array;        /*Array of all the controls in the device*/
+        int     devctrl_count;         /*Count of the controls in the device*/
+        int     device_type;           /*Camera, tuner, etc as provided by driver enum*/
+        int     device_tuner;          /*Tuner number if applicable from driver*/
+        ctx_params              *params;               /*User parameters for the camera */
+        video_buff              *buffers;
+        int                     pframe;
+        volatile bool           finish;                /* End the thread */
+        #ifdef HAVE_V4L2
+            struct v4l2_capability cap;
+            struct v4l2_format fmt;
+            struct v4l2_requestbuffers req;
+            struct v4l2_buffer v4l2buf;
+        #endif
+
+        void start_cam();
+        void stop_cam();
+
+        void palette_init(palette_item *palette_array);
+        int xioctl(unsigned long request, void *arg);
+        void device_close();
+        void ctrls_count();
+        void ctrls_log();
+        void ctrls_list();
+        void ctrls_set();
+        int parms_set();
+        void set_input();
+        void set_norm();
+        void set_frequency();
+        int pixfmt_try(uint pixformat);
+        int pixfmt_stride();
+        int pixfmt_adjust();
+        int pixfmt_set(uint pixformat);
+        void params_check();
+        int pixfmt_list(palette_item *palette_array);
+        void palette_set();
+        void set_mmap();
+        void set_imgs();
+        int capture();
+        int convert(unsigned char *img_norm);
+        void device_init();
+        void device_select();
+        void device_open();
+        void log_types();
+        void log_formats();
+        void set_fps();
+
 };
 
-    void v4l2_start(ctx_dev *cam);
-    int v4l2_next(ctx_dev *cam,  ctx_image_data *img_data);
-    void v4l2_cleanup(ctx_dev *cam);
 
 #endif /* _INCLUDE_VIDEO_V4L2_HPP_ */
