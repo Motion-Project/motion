@@ -37,7 +37,7 @@
 #include "webu.hpp"
 #include "dbse.hpp"
 #include "draw.hpp"
-#include "webu_stream.hpp"
+#include "webu_getimg.hpp"
 
 /* Resize the image ring */
 static void mlp_ring_resize(ctx_dev *cam)
@@ -615,7 +615,7 @@ void mlp_cleanup(ctx_dev *cam)
         dbse_exec(cam, NULL, "event_end");
     }
 
-    webu_stream_deinit(cam);
+    webu_getimg_deinit(cam);
 
     algsec_deinit(cam);
 
@@ -685,7 +685,7 @@ static void mlp_init(ctx_dev *cam)
 
     mlp_init_buffers(cam);
 
-    webu_stream_init(cam);
+    webu_getimg_init(cam);
 
     algsec_init(cam);
 

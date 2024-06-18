@@ -92,11 +92,17 @@
                 while (nanosleep(&ts1, &ts1) == -1); \
         }
 
-    #if MHD_VERSION >= 0x00097002
-        typedef enum MHD_Result mhdrslt; /* Version independent return result from MHD */
-    #else
-        typedef int             mhdrslt; /* Version independent return result from MHD */
-    #endif
+#if MHD_VERSION >= 0x00097002
+    typedef enum MHD_Result mhdrslt; /* Version independent return result from MHD */
+#else
+    typedef int             mhdrslt; /* Version independent return result from MHD */
+#endif
+/* Version independent uint */
+#if (MYFFVER <= 60016)
+    typedef uint8_t myuint;
+#else
+    typedef const uint8_t myuint;
+#endif
 
     void myfree(void *ptr_addr);
 

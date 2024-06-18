@@ -18,9 +18,25 @@
 
 #ifndef _INCLUDE_WEBU_JSON_HPP_
 #define _INCLUDE_WEBU_JSON_HPP_
-
-    void webu_json_config(ctx_webui *webui);
-    void webu_json_movies(ctx_webui *webui);
-    void webu_json_status(ctx_webui *webui);
+    class cls_webu_json {
+        public:
+            cls_webu_json(cls_webu_ans *p_webua);
+            ~cls_webu_json();
+            void main();
+        private:
+            ctx_motapp      *app;
+            cls_webu        *webu;
+            cls_webu_ans    *webua;
+            void parms_item(ctx_config *conf, int indx_parm);
+            void parms_one(ctx_config *conf);
+            void parms_all();
+            void cameras_list();
+            void categories_list();
+            void config();
+            void movies_list();
+            void movies();
+            void status_vars(int indx_cam);
+            void status();
+    };
 
 #endif /* _INCLUDE_WEBU_JSON_HPP_ */

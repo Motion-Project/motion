@@ -21,13 +21,14 @@
 #include "logger.hpp"
 #include "util.hpp"
 #include "webu.hpp"
+#include "webu_common.hpp"
+#include "webu_ans.hpp"
 #include "webu_html.hpp"
 
-
 /* Create the CSS styles used in the navigation bar/side of the page */
-static void webu_html_style_navbar(ctx_webui *webui)
+void cls_webu_html::style_navbar()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    .sidenav {\n"
         "      height: 100%;\n"
         "      width: 10rem;\n"
@@ -108,9 +109,9 @@ static void webu_html_style_navbar(ctx_webui *webui)
 }
 
 /* Create the css styles used in the config sections */
-static void webu_html_style_config(ctx_webui *webui)
+void cls_webu_html::style_config()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    .cls_config {\n"
         "      background-color: #000000;\n"
         "      color: #fff;\n"
@@ -221,10 +222,9 @@ static void webu_html_style_config(ctx_webui *webui)
 }
 
 /* Write out the starting style section of the web page */
-static void webu_html_style_base(ctx_webui *webui)
+void cls_webu_html::style_base()
 {
-
-    webui->resp_page +=
+    webua->resp_page +=
         "    * {\n"
         "      margin: 0;\n"
         "      padding: 0;\n"
@@ -277,39 +277,36 @@ static void webu_html_style_base(ctx_webui *webui)
 }
 
 /* Write out the style section of the web page */
-static void webu_html_style(ctx_webui *webui)
+void cls_webu_html::style()
 {
-    webui->resp_page += "  <style>\n";
+    webua->resp_page += "  <style>\n";
 
-    webu_html_style_base(webui);
+    style_base();
 
-    webu_html_style_navbar(webui);
+    style_navbar();
 
-    webu_html_style_config(webui);
+    style_config();
 
-    webui->resp_page += "  </style>\n";
-
+    webua->resp_page += "  </style>\n";
 }
 
 /* Create the header section of the page */
-static void webu_html_head(ctx_webui *webui)
+void cls_webu_html::head()
 {
-
-    webui->resp_page += "<head> \n"
+    webua->resp_page += "<head> \n"
         "<meta charset='UTF-8'> \n"
         "<title>MotionPlus</title> \n"
         "<meta name='viewport' content='width=device-width, initial-scale=1'> \n";
 
-    webu_html_style(webui);
+    style();
 
-    webui->resp_page += "</head>\n\n";
-
+    webua->resp_page += "</head>\n\n";
 }
 
 /* Create the navigation bar section of the page */
-static void webu_html_navbar(ctx_webui *webui)
+void cls_webu_html::navbar()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "  <div id=\"divnav_main\" class=\"sidenav\">\n"
         "    <a class='closebtn' onclick='nav_close()'>X</a>\n"
         "    <div id=\"divnav_version\">\n"
@@ -340,13 +337,12 @@ static void webu_html_navbar(ctx_webui *webui)
         "      <!-- Filled in by script -->\n"
         "    </div>\n"
         "  </div>\n\n";
-
 }
 
 /* Create the body main section of the page */
-static void webu_html_divmain(ctx_webui *webui)
+void cls_webu_html::divmain()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "  <div id='divmain' style='margin-left:10rem' >\n"
         "    <button id='menu_btn' \n"
         "      onclick='nav_open();' \n"
@@ -363,13 +359,12 @@ static void webu_html_divmain(ctx_webui *webui)
         "      <!-- Filled in by script -->\n"
         "    </div>\n\n"
         "  </div>\n\n";
-
 }
 
 /* Create the javascript function send_config */
-static void webu_html_script_nav(ctx_webui *webui)
+void cls_webu_html::script_nav()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function nav_open() {\n"
         "      document.getElementById('divnav_main').style.width = '10rem';\n"
         "      document.getElementById('divmain').style.marginLeft = '10rem';\n"
@@ -384,9 +379,9 @@ static void webu_html_script_nav(ctx_webui *webui)
 }
 
 /* Create the javascript function send_config */
-static void webu_html_script_send_config(ctx_webui *webui)
+void cls_webu_html::script_send_config()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function send_config(category) {\n"
         "      var formData = new FormData();\n"
         "      var request = new XMLHttpRequest();\n"
@@ -426,9 +421,9 @@ static void webu_html_script_send_config(ctx_webui *webui)
 }
 
 /* Create the send_action javascript function */
-static void webu_html_script_send_action(ctx_webui *webui)
+void cls_webu_html::script_send_action()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function send_action(actval) {\n\n"
 
         "      var dsp_cam = document.getElementById('div_cam').style.display;\n"
@@ -459,9 +454,9 @@ static void webu_html_script_send_action(ctx_webui *webui)
 }
 
 /* Create the send_reload javascript function */
-static void webu_html_script_send_reload(ctx_webui *webui)
+void cls_webu_html::script_send_reload()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function send_reload(actval) {\n\n"
         "      var formData = new FormData();\n"
         "      var request = new XMLHttpRequest();\n"
@@ -505,9 +500,9 @@ static void webu_html_script_send_reload(ctx_webui *webui)
 }
 
 /* Create the javascript function dropchange_cam */
-static void webu_html_script_dropchange_cam(ctx_webui *webui)
+void cls_webu_html::script_dropchange_cam()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function dropchange_cam(camobj) {\n"
         "      var indx;\n\n"
 
@@ -529,9 +524,9 @@ static void webu_html_script_dropchange_cam(ctx_webui *webui)
 }
 
 /* Create the javascript function config_hideall */
-static void webu_html_script_config_hideall(ctx_webui *webui)
+void cls_webu_html::script_config_hideall()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function config_hideall() {\n"
         "      var sect = document.getElementsByClassName('cls_config');\n"
         "      for (var i = 0; i < sect.length; i++) {\n"
@@ -542,9 +537,9 @@ static void webu_html_script_config_hideall(ctx_webui *webui)
 }
 
 /* Create the javascript function config_click */
-static void webu_html_script_config_click(ctx_webui *webui)
+void cls_webu_html::script_config_click()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function config_click(actval) {\n"
         "      config_hideall();\n"
         "      document.getElementById('div_cam').style.display='none';\n"
@@ -556,9 +551,9 @@ static void webu_html_script_config_click(ctx_webui *webui)
 }
 
 /* Create the javascript function assign_camid */
-static void webu_html_script_assign_camid(ctx_webui *webui)
+void cls_webu_html::script_assign_camid()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function assign_camid() {\n"
         "      if (gIndxCam == -1 ) {\n"
         "        camid = 0;\n"
@@ -567,25 +562,22 @@ static void webu_html_script_assign_camid(ctx_webui *webui)
         "      }\n\n"
         "      return camid; \n"
         "    }\n\n";
-
 }
 
-
 /* Create the javascript function assign_version */
-static void webu_html_script_assign_version(ctx_webui *webui)
+void cls_webu_html::script_assign_version()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function assign_version() {\n"
         "      var verstr ='<a>MotionPlus \\n'+pData['version'] +'</a>';\n"
         "      document.getElementById('divnav_version').innerHTML = verstr;\n"
         "    }\n\n";
-
 }
 
 /* Create the javascript function assign_cams */
-static void webu_html_script_assign_cams(ctx_webui *webui)
+void cls_webu_html::script_assign_cams()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function assign_cams() {\n"
         "      var camcnt = pData['cameras']['count'];\n"
         "      var indx = 0;\n"
@@ -626,12 +618,12 @@ static void webu_html_script_assign_cams(ctx_webui *webui)
 }
 
 /* Create the javascript function assign_actions */
-static void webu_html_script_assign_actions(ctx_webui *webui)
+void cls_webu_html::script_assign_actions()
 {
-    p_lst *lst = &webui->motapp->webcontrol_actions->params_array;
+    p_lst *lst = &webu->wb_actions->params_array;
     p_it it;
 
-    webui->resp_page +=
+    webua->resp_page +=
         "    function assign_actions() {\n"
         "      var html_actions = \"\\n\";\n"
         "      html_actions += \"  \";\n";
@@ -639,14 +631,14 @@ static void webu_html_script_assign_actions(ctx_webui *webui)
     for (it = lst->begin(); it != lst->end(); it++) {
         if ((it->param_name == "snapshot") &&
             (it->param_value == "on")) {
-            webui->resp_page +=
+            webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_action(\";\n"
                 "      html_actions += \"'snapshot');\\\">\";\n"
                 "      html_actions += \"Snapshot</a>\\n\";\n\n"
                 ;
         } else if ((it->param_name == "event") &&
             (it->param_value == "on")) {
-            webui->resp_page +=
+            webua->resp_page +=
             "      html_actions += \"<a onclick=\\\"send_action(\";\n"
             "      html_actions += \"'eventstart');\\\">\";\n"
             "      html_actions += \"Start Event</a>\\n\";\n\n"
@@ -657,7 +649,7 @@ static void webu_html_script_assign_actions(ctx_webui *webui)
             ;
         } else if ((it->param_name == "pause") &&
             (it->param_value == "on")) {
-            webui->resp_page +=
+            webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_action(\";\n"
                 "      html_actions += \"'pause');\\\">\";\n"
                 "      html_actions += \"Pause</a>\\n\";\n\n"
@@ -668,42 +660,42 @@ static void webu_html_script_assign_actions(ctx_webui *webui)
                 ;
         } else if ((it->param_name == "camera_add") &&
             (it->param_value == "on")) {
-            webui->resp_page +=
+            webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_reload(\";\n"
                 "      html_actions += \"'camera_add');\\\">\";\n"
                 "      html_actions += \"Add Camera</a>\\n\";\n\n"
                 ;
         } else if ((it->param_name == "camera_delete") &&
             (it->param_value == "on")) {
-            webui->resp_page +=
+            webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_reload(\";\n"
                 "      html_actions += \"'camera_delete');\\\">\";\n"
                 "      html_actions += \"Delete Camera</a>\\n\";\n\n"
                 ;
         } else if ((it->param_name == "config_write") &&
             (it->param_value == "on")) {
-            webui->resp_page +=
+            webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_action(\";\n"
                 "      html_actions += \"'config_write');\\\">\";\n"
                 "      html_actions += \"Save Config</a>\\n\";\n\n"
                 ;
         } else if ((it->param_name == "stop") &&
             (it->param_value == "on")) {
-            webui->resp_page +=
+            webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_action(\";\n"
                 "      html_actions += \"'stop');\\\">\";\n"
                 "      html_actions += \"Stop</a>\\n\";\n\n"
                 ;
         } else if ((it->param_name == "restart") &&
             (it->param_value == "on")) {
-            webui->resp_page +=
+            webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_action(\";\n"
                 "      html_actions += \"'restart');\\\">\";\n"
                 "      html_actions += \"Start/Restart</a>\\n\";\n\n"
                 ;
         } else if ((it->param_name == "action_user") &&
             (it->param_value == "on")) {
-            webui->resp_page +=
+            webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_action(\";\n"
                 "      html_actions += \"'action_user');\\\">\";\n"
                 "      html_actions += \"User Action</a>\\n\";\n\n"
@@ -711,20 +703,17 @@ static void webu_html_script_assign_actions(ctx_webui *webui)
         }
     }
 
-    webui->resp_page +=
+    webua->resp_page +=
         "      document.getElementById(\"divnav_actions\").innerHTML = html_actions;\n\n"
         "      return;\n"
 
         "    }\n\n";
-
-
 }
 
-
 /* Create the javascript function assign_vals */
-static void webu_html_script_assign_vals(ctx_webui *webui)
+void cls_webu_html::script_assign_vals()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function assign_vals(camid) {\n"
         "      var pCfg;\n\n"
 
@@ -755,9 +744,9 @@ static void webu_html_script_assign_vals(ctx_webui *webui)
 }
 
 /* Create the javascript function assign_config_nav */
-static void webu_html_script_assign_config_nav(ctx_webui *webui)
+void cls_webu_html::script_assign_config_nav()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function assign_config_nav() {\n"
         "      var pCfg = pData['configuration']['default'];\n"
         "      var pCat = pData['categories'];\n"
@@ -775,9 +764,9 @@ static void webu_html_script_assign_config_nav(ctx_webui *webui)
 }
 
 /* Create the javascript function assign_config_item */
-static void webu_html_script_assign_config_item(ctx_webui *webui)
+void cls_webu_html::script_assign_config_item()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function assign_config_item(jkey) {\n"
         "      var pCfg = pData['configuration']['default'];\n"
         "      var html_cfg = \"\";\n"
@@ -814,9 +803,9 @@ static void webu_html_script_assign_config_item(ctx_webui *webui)
 }
 
 /* Create the javascript function assign_config_cat */
-static void webu_html_script_assign_config_cat(ctx_webui *webui)
+void cls_webu_html::script_assign_config_cat()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function assign_config_cat(jcat) {\n"
         "      var pCfg = pData['configuration']['default'];\n"
         "      var pCat = pData['categories'];\n"
@@ -851,10 +840,9 @@ static void webu_html_script_assign_config_cat(ctx_webui *webui)
 }
 
 /* Create the javascript function assign_config */
-static void webu_html_script_assign_config(ctx_webui *webui)
+void cls_webu_html::script_assign_config()
 {
-
-    webui->resp_page +=
+    webua->resp_page +=
         "    function assign_config() {\n"
         "      var pCat = pData['categories'];\n"
         "      var html_cfg = \"\";\n\n"
@@ -871,9 +859,9 @@ static void webu_html_script_assign_config(ctx_webui *webui)
 }
 
 /* Create the javascript function init_form */
-static void webu_html_script_initform(ctx_webui *webui)
+void cls_webu_html::script_initform()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function initform() {\n"
         "      var xmlhttp = new XMLHttpRequest();\n\n"
 
@@ -903,9 +891,9 @@ static void webu_html_script_initform(ctx_webui *webui)
 }
 
 /* Create the javascript function display_cameras */
-static void webu_html_script_display_cameras(ctx_webui *webui)
+void cls_webu_html::script_display_cameras()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function display_cameras() {\n"
         "      document.getElementById('divnav_config').style.display = 'none';\n"
         "      document.getElementById('divnav_actions').style.display = 'none';\n"
@@ -919,9 +907,9 @@ static void webu_html_script_display_cameras(ctx_webui *webui)
 }
 
 /* Create the javascript function display_config */
-static void webu_html_script_display_config(ctx_webui *webui)
+void cls_webu_html::script_display_config()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function display_config() {\n"
         "      document.getElementById('divnav_cam').style.display = 'none';\n"
         "      document.getElementById('divnav_actions').style.display = 'none';\n"
@@ -937,9 +925,9 @@ static void webu_html_script_display_config(ctx_webui *webui)
 }
 
 /* Create the javascript function display_movies */
-static void webu_html_script_display_movies(ctx_webui *webui)
+void cls_webu_html::script_display_movies()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function display_movies() {\n"
         "      document.getElementById('divnav_cam').style.display = 'none';\n"
         "      document.getElementById('divnav_actions').style.display = 'none';\n"
@@ -955,13 +943,13 @@ static void webu_html_script_display_movies(ctx_webui *webui)
 }
 
 /* Create the javascript function display_actions */
-static void webu_html_script_display_actions(ctx_webui *webui)
+void cls_webu_html::script_display_actions()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function display_actions() {\n"
         "      document.getElementById('divnav_cam').style.display = 'none';\n"
         "      document.getElementById('divnav_config').style.display = 'none';\n"
-         "     if (document.getElementById('divnav_actions').style.display == 'block') {\n"
+        "     if (document.getElementById('divnav_actions').style.display == 'block') {\n"
         "        document.getElementById('divnav_actions').style.display = 'none';\n"
         "      } else {\n"
         "        document.getElementById('divnav_actions').style.display = 'block';\n"
@@ -971,10 +959,9 @@ static void webu_html_script_display_actions(ctx_webui *webui)
 }
 
 /* Create the camera_buttons_ptz javascript function */
-static void webu_html_script_camera_buttons_ptz(ctx_webui *webui)
+void cls_webu_html::script_camera_buttons_ptz()
 {
-
-    webui->resp_page +=
+    webua->resp_page +=
         "    function camera_buttons_ptz() {\n\n"
         "      var html_preview = \"\";\n"
 
@@ -1016,13 +1003,12 @@ static void webu_html_script_camera_buttons_ptz(ctx_webui *webui)
         "      return html_preview;\n\n"
 
         "    }\n\n";
-
 }
 
 /* Create the image_pantilt javascript function */
-static void webu_html_script_image_pantilt(ctx_webui *webui)
+void cls_webu_html::script_image_pantilt()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function image_pantilt() {\n\n"
         "      if (gIndxCam == -1 ) {\n"
         "        return;\n"
@@ -1046,21 +1032,19 @@ static void webu_html_script_image_pantilt(ctx_webui *webui)
         "        }\n"
         "      });\n"
         "    }\n\n";
-
 }
 
 /* Create the cams_reset javascript function */
-static void webu_html_script_cams_reset(ctx_webui *webui)
+void cls_webu_html::script_cams_reset()
 {
-
-    webui->resp_page +=
+    webua->resp_page +=
         "    function cams_timer_stop() {\n"
         "      clearInterval(cams_one_timer);\n"
         "      clearInterval(cams_all_timer);\n"
         "      clearInterval(cams_scan_timer);\n"
         "    }\n\n";
 
-    webui->resp_page +=
+    webua->resp_page +=
         "    function cams_reset() {\n"
         "      var indx, camcnt;\n"
         "      camcnt = pData['cameras']['count'];\n"
@@ -1070,14 +1054,12 @@ static void webu_html_script_cams_reset(ctx_webui *webui)
         "        }\n"
         "      }\n"
         "    } \n\n";
-
 }
 
 /* Create the cams_one_click javascript function */
-static void webu_html_script_cams_one_click(ctx_webui *webui)
+void cls_webu_html::script_cams_one_click()
 {
-
-    webui->resp_page +=
+    webua->resp_page +=
         "    function cams_one_click(index_cam) {\n\n"
         "      var html_preview = \"\";\n"
         "      var camid;\n\n"
@@ -1114,14 +1096,12 @@ static void webu_html_script_cams_one_click(ctx_webui *webui)
         "      image_pantilt();\n\n"
         "      cams_one_timer = setInterval(cams_one_fnc, 1000);\n\n"
         "    }\n\n";
-
 }
 
 /* Create the cams_all_click javascript function */
-static void webu_html_script_cams_all_click(ctx_webui *webui)
+void cls_webu_html::script_cams_all_click()
 {
-
-    webui->resp_page +=
+    webua->resp_page +=
         "    function cams_all_click() {\n\n"
         "      var html_preview = \"\";\n"
         "      var indx, chk;\n"
@@ -1182,10 +1162,11 @@ static void webu_html_script_cams_all_click(ctx_webui *webui)
         "      cams_all_timer = setInterval(cams_all_fnc, 1000);\n\n"
         "  }\n\n";
 }
+
 /* Create the movies_page javascript function */
-static void webu_html_script_movies_page(ctx_webui *webui)
+void cls_webu_html::script_movies_page()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function movies_page() {\n\n"
         "      var html_tab = \"<div>\";\n"
         "      var indx, movcnt, camid, uri;\n"
@@ -1256,14 +1237,12 @@ static void webu_html_script_movies_page(ctx_webui *webui)
         "      document.getElementById('div_movies').style.display='block';\n"
         "      document.getElementById('div_movies').innerHTML = html_tab;\n\n"
         "    }\n\n";
-
 }
 
 /* Create the movies_page javascript function */
-static void webu_html_script_movies_click(ctx_webui *webui)
+void cls_webu_html::script_movies_click()
 {
-
-    webui->resp_page +=
+    webua->resp_page +=
         "    function movies_click(index_cam) {\n"
         "      var camid, indx, camcnt, uri;\n\n"
 
@@ -1283,12 +1262,12 @@ static void webu_html_script_movies_click(ctx_webui *webui)
         "      xmlhttp.open('GET', uri);\n"
         "      xmlhttp.send();\n"
         "    }\n\n";
-
 }
+
 /* Create the cams_scan_click javascript function */
-static void webu_html_script_cams_scan_click(ctx_webui *webui)
+void cls_webu_html::script_cams_scan_click()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function cams_scan_click() {\n\n"
         "      cams_timer_stop();\n\n"
         "      gIndxCam = -1; \n"
@@ -1298,9 +1277,9 @@ static void webu_html_script_cams_scan_click(ctx_webui *webui)
 }
 
 /* Create the cams_one_fnc javascript function */
-static void webu_html_script_cams_one_fnc(ctx_webui *webui)
+void cls_webu_html::script_cams_one_fnc()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function cams_one_fnc () {\n"
         "      var img = new Image();\n"
         "      var camid;\n\n"
@@ -1314,13 +1293,12 @@ static void webu_html_script_cams_one_fnc(ctx_webui *webui)
         "        document.getElementById('pic'+gIndxCam).src = pic_url[0];\n"
         "      }\n"
         "    }\n\n ";
-
 }
 
 /* Create the cams_all_fnc javascript function */
-static void webu_html_script_cams_all_fnc(ctx_webui *webui)
+void cls_webu_html::script_cams_all_fnc()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function cams_all_fnc () {\n"
         "      var previndx = gGetImgs;\n"
         "      gGetImgs++;\n"
@@ -1335,13 +1313,12 @@ static void webu_html_script_cams_all_fnc(ctx_webui *webui)
         "          pData['cameras'][gGetImgs]['url'] + \"mjpg/stream\";\n"
         "      }\n"
         "    }\n\n";
-
 }
 
 /* Create the scancam_function javascript function */
-static void webu_html_script_cams_scan_fnc(ctx_webui *webui)
+void cls_webu_html::script_cams_scan_fnc()
 {
-    webui->resp_page +=
+    webua->resp_page +=
         "    function cams_scan_fnc() {\n"
         "      var html_preview = \"\";\n"
         "      var camid;\n"
@@ -1379,131 +1356,131 @@ static void webu_html_script_cams_scan_fnc(ctx_webui *webui)
         "      document.getElementById('div_cam').style.display='block';\n"
         "      document.getElementById('div_cam').innerHTML = html_preview;\n"
         "    };\n\n";
-
 }
 
 /* Call all the functions to create the java scripts of page*/
-static void webu_html_script(ctx_webui *webui)
+void cls_webu_html::script()
 {
-    webui->resp_page += "  <script>\n"
+    webua->resp_page += "  <script>\n"
         "    var pData, pMovies, pHostFull;\n"
         "    var gIndxScan, gIndxCam, gGetImgs;\n"
         "    var pic_url = Array(4);\n"
         "    var cams_scan_timer, cams_all_timer, cams_one_timer;\n\n";
 
-    webu_html_script_nav(webui);
+    script_nav();
 
-    webu_html_script_send_config(webui);
-    webu_html_script_send_action(webui);
-    webu_html_script_send_reload(webui);
+    script_send_config();
+    script_send_action();
+    script_send_reload();
 
-    webu_html_script_dropchange_cam(webui);
-    webu_html_script_config_hideall(webui);
-    webu_html_script_config_click(webui);
+    script_dropchange_cam();
+    script_config_hideall();
+    script_config_click();
 
-    webu_html_script_assign_camid(webui);
-    webu_html_script_assign_version(webui);
-    webu_html_script_assign_cams(webui);
-    webu_html_script_assign_actions(webui);
-    webu_html_script_assign_vals(webui);
-    webu_html_script_assign_config_nav(webui);
-    webu_html_script_assign_config_item(webui);
-    webu_html_script_assign_config_cat(webui);
-    webu_html_script_assign_config(webui);
+    script_assign_camid();
+    script_assign_version();
+    script_assign_cams();
+    script_assign_actions();
+    script_assign_vals();
+    script_assign_config_nav();
+    script_assign_config_item();
+    script_assign_config_cat();
+    script_assign_config();
 
-    webu_html_script_initform(webui);
-    webu_html_script_display_cameras(webui);
-    webu_html_script_display_config(webui);
-    webu_html_script_display_movies(webui);
-    webu_html_script_display_actions(webui);
+    script_initform();
+    script_display_cameras();
+    script_display_config();
+    script_display_movies();
+    script_display_actions();
 
-    webu_html_script_camera_buttons_ptz(webui);
-    webu_html_script_image_pantilt(webui);
+    script_camera_buttons_ptz();
+    script_image_pantilt();
 
-    webu_html_script_cams_reset(webui);
+    script_cams_reset();
 
-    webu_html_script_cams_all_click(webui);
-    webu_html_script_cams_one_click(webui);
-    webu_html_script_cams_scan_click(webui);
+    script_cams_all_click();
+    script_cams_one_click();
+    script_cams_scan_click();
 
-    webu_html_script_cams_one_fnc(webui);
-    webu_html_script_cams_all_fnc(webui);
-    webu_html_script_cams_scan_fnc(webui);
+    script_cams_one_fnc();
+    script_cams_all_fnc();
+    script_cams_scan_fnc();
 
-    webu_html_script_movies_page(webui);
-    webu_html_script_movies_click(webui);
+    script_movies_page();
+    script_movies_click();
 
-    webui->resp_page += "  </script>\n\n";
-
+    webua->resp_page += "  </script>\n\n";
 }
 
 /* Create the body section of the web page */
-static void webu_html_body(ctx_webui *webui)
+void cls_webu_html::body()
 {
-    webui->resp_page += "<body class='body' onload='initform()'>\n";
+    webua->resp_page += "<body class='body' onload='initform()'>\n";
 
-    webu_html_navbar(webui);
+    navbar();
 
-    webu_html_divmain(webui);
+    divmain();
 
-    webu_html_script(webui);
+    script();
 
-    webui->resp_page += "</body>\n";
-
+    webua->resp_page += "</body>\n";
 }
 
-/* Create the default motionplus page */
-void webu_html_page(ctx_webui *webui)
+void cls_webu_html::default_page()
 {
-    webui->resp_page += "<!DOCTYPE html>\n"
-        "<html lang='" + webui->lang + "'>\n";
-
-    webu_html_head(webui);
-
-    webu_html_body(webui);
-
-    webui->resp_page += "</html>\n";
+    webua->resp_page += "<!DOCTYPE html>\n"
+        "<html lang='" + webua->lang + "'>\n";
+    head();
+    body();
+    webua->resp_page += "</html>\n";
 }
 
-/*Create the bad request page*/
-void webu_html_badreq(ctx_webui *webui)
-{
-    webui->resp_page =
-        "<!DOCTYPE html>\n"
-        "<html>\n"
-        "<body>\n"
-        "<p>Bad Request</p>\n"
-        "<p>The server did not understand your request.</p>\n"
-        "</body>\n"
-        "</html>\n";
-
-}
-
-/* Load a user provided html page */
-void webu_html_user(ctx_webui *webui)
+void cls_webu_html::user_page()
 {
     char response[PATH_MAX];
     FILE *fp = NULL;
 
-    fp = myfopen(webui->motapp->conf->webcontrol_html.c_str(), "re");
-
+    webua->resp_page = "";
+    fp = myfopen(app->conf->webcontrol_html.c_str(), "re");
     if (fp == NULL) {
         MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
             , _("Invalid user html file: %s")
-            , webui->motapp->conf->webcontrol_html.c_str());
-
-        webu_html_badreq(webui);
-
-        return;
+            , app->conf->webcontrol_html.c_str());
+    } else {
+        while (fgets(response, PATH_MAX-1, fp)) {
+            webua->resp_page += response;
+        }
+        myfclose(fp);
     }
-
-    webui->resp_page = "";
-    while (fgets(response, PATH_MAX-1, fp)) {
-        webui->resp_page += response;
-    }
-
-    myfclose(fp);
-
 }
 
+void cls_webu_html::main()
+{
+    pthread_mutex_lock(&app->mutex_post);
+        if (app->conf->webcontrol_interface == "user") {
+            user_page();
+        } else {
+            default_page();
+        }
+    pthread_mutex_unlock(&app->mutex_post);
 
+    if (webua->resp_page == "") {
+        webua->bad_request();
+    } else {
+        webua->mhd_send();
+    }
+}
+
+cls_webu_html::cls_webu_html(cls_webu_ans *p_webua)
+{
+    app    = p_webua->app;
+    webu   = p_webua->webu;
+    webua  = p_webua;
+}
+
+cls_webu_html::~cls_webu_html()
+{
+    app    = nullptr;
+    webu   = nullptr;
+    webua  = nullptr;
+}

@@ -16,17 +16,11 @@
  *
 */
 
-#ifndef _INCLUDE_WEBU_FILE_HPP_
-#define _INCLUDE_WEBU_FILE_HPP_
-    class cls_webu_file {
-        public:
-            cls_webu_file(cls_webu_ans *p_webua);
-            ~cls_webu_file();
-            void main();
-        private:
-            ctx_motapp      *app;
-            cls_webu        *webu;
-            cls_webu_ans    *webua;
-    };
+#ifndef _INCLUDE_WEBU_GETIMG_HPP_
+#define _INCLUDE_WEBU_GETIMG_HPP_
 
-#endif /* _INCLUDE_WEBU_FILE_HPP_ */
+    void webu_getimg_init(ctx_dev *cam);
+    void webu_getimg_deinit(ctx_dev *cam);
+    void webu_getimg_main(ctx_dev *cam);
+
+#endif

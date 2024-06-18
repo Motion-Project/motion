@@ -19,7 +19,31 @@
 #ifndef _INCLUDE_WEBU_MPEGTS_HPP_
 #define _INCLUDE_WEBU_MPEGTS_HPP_
 
-    mhdrslt webu_mpegts_main(ctx_webui *webui);
-    void webu_mpegts_free_context(ctx_webui *webui);
+    class cls_webu_mpegts {
+        public:
+            cls_webu_mpegts(cls_webu_ans *p_webua);
+            ~cls_webu_mpegts();
+            int avio_buf(myuint *buf, int buf_size);
+            ssize_t response(char *buf, size_t max);
+            mhdrslt main();
+
+        private:
+            ctx_motapp      *app;
+            cls_webu        *webu;
+            cls_webu_ans    *webua;
+            cls_webu_common *webuc;
+
+            AVFrame         *picture;
+            AVFormatContext *fmtctx;
+            AVCodecContext  *ctx_codec;
+            size_t          stream_pos;     /* Stream position of sent image */
+            struct timespec start_time;     /* Start time of the stream*/
+
+            int pic_send(unsigned char *img);
+            int pic_get();
+            void resetpos();
+            int getimg();
+            int open_mpegts();
+    };
 
 #endif /* _INCLUDE_WEBU_MPEGTS_HPP_ */

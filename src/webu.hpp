@@ -64,61 +64,52 @@
         size_t                      key_sz;         /* The size of the value */
     };
 
-    struct ctx_webui {
-        std::string                 url;            /* The URL sent from the client */
-        std::string                 uri_camid;      /* Parsed camera number from the url eg /camid/cmd1/cmd2/cmd3 */
-        std::string                 uri_cmd1;       /* Parsed command1 from the url eg /camid/cmd1/cmd2/cmd3 */
-        std::string                 uri_cmd2;       /* Parsed command2 from the url eg /camid/cmd1/cmd2/cmd3 */
-        std::string                 uri_cmd3;       /* Parsed command3 from the url eg /camid/cmd1/cmd2/cmd3 */
-
-        std::string                 clientip;       /* IP of the connecting client */
-        std::string                 hostfull;       /* Full http name for host with port number */
-
-        char                        *auth_opaque;   /* Opaque string for digest authentication*/
-        char                        *auth_realm;    /* Realm string for digest authentication*/
-        char                        *auth_user;     /* Parsed user from config authentication string*/
-        char                        *auth_pass;     /* Parsed password from config authentication string*/
-        int                         authenticated;  /* Boolean for whether authentication has been passed */
-
-        std::string                 resp_page;      /* The response that will be sent */
-        unsigned char               *resp_image;    /* Response image to provide to user */
-        int                         resp_type;      /* indicator for the type of response to provide. */
-        size_t                      resp_size;      /* The allocated size of the response */
-        size_t                      resp_used;      /* The amount of the response page used */
-        size_t                      aviobuf_sz;     /* The size of the mpegts avio buffer */
-        struct timespec             start_time;     /* Start time of the mpegts stream*/
-
-        AVFormatContext             *fmtctx;
-        AVCodecContext              *ctx_codec;
-        AVFrame                     *picture;       /* contains default image pointers */
-
-        std::string                 lang;           /* Two character abbreviation for locale language*/
-        int                         camindx;        /* Index number of the cam */
-        int                         device_id;      /* Device id number requested */
-        enum WEBUI_CNCT             cnct_type;      /* Type of connection we are processing */
-
-        int                         post_sz;        /* The number of entries in the post info */
-        std::string                 post_cmd;       /* The command sent with the post */
-        ctx_key                     *post_info;     /* Structure of the entries provided from the post data */
-        struct MHD_PostProcessor    *post_processor; /* Processor for handling Post method connections */
-
-        FILE                        *req_file;      /* requested file*/
-
-        unsigned char               *all_img_data;  /* Image for all cameras */
-
-        enum WEBUI_METHOD           cnct_method;    /* Connection method.  Get or Post */
-
-        size_t                      stream_pos;     /* Stream position of sent image */
-        int                         stream_fps;     /* Stream rate per second */
-        struct timespec             time_last;      /* Keep track of processing time for stream thread*/
-        int                         mhd_first;      /* Boolean for whether it is the first connection*/
-        struct MHD_Connection       *connection;    /* The MHD connection value from the client */
-        ctx_motapp                  *motapp;        /* The motionplus context pointer */
-        ctx_dev                     *cam;           /* The ctx_dev information for the camera requested */
-
+    /* Context to pass the parms to functions to start mhd */
+    struct ctx_mhdstart {
+        std::string             tls_cert;
+        std::string             tls_key;
+        bool                    tls_use;
+        struct MHD_OptionItem   *mhd_ops;
+        int                     mhd_opt_nbr;
+        unsigned int            mhd_flags;
+        int                     ipv6;
+        struct sockaddr_in      lpbk_ipv4;
+        struct sockaddr_in6     lpbk_ipv6;
     };
 
-    void webu_init(ctx_motapp *motapp);
-    void webu_deinit(ctx_motapp *motapp);
+    class cls_webu {
+        public:
+            cls_webu(ctx_motapp *p_motapp);
+            ~cls_webu();
+            bool                        wb_finish;
+            ctx_params                  *wb_headers;
+            ctx_params                  *wb_actions;
+            char                        wb_digest_rand[12];
+            struct MHD_Daemon           *wb_daemon;
+            struct MHD_Daemon           *wb_daemon2;
+            std::list<ctx_webu_clients> wb_clients;
+            int                         cnct_cnt;
 
-#endif /* _INCLUDE_WEBU_HPP_ */
+        private:
+            ctx_mhdstart *mhdst;
+            ctx_motapp *c_motapp;
+            void init_actions();
+            void start_daemon_port1();
+            void start_daemon_port2();
+            void mhd_features_basic();
+            void mhd_features_digest();
+            void mhd_features_ipv6();
+            void mhd_features_tls();
+            void mhd_features();
+            void mhd_loadfile(std::string fname, std::string &filestr);
+            void mhd_checktls();
+            void mhd_opts_init();
+            void mhd_opts_deinit();
+            void mhd_opts_localhost();
+            void mhd_opts_digest();
+            void mhd_opts_tls();
+            void mhd_opts();
+            void mhd_flags();
+    };
+
+#endif

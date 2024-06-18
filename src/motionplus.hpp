@@ -53,6 +53,10 @@
 #include <regex.h>
 #include <dirent.h>
 #include <algorithm>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+
 
 #if defined(HAVE_PTHREAD_NP_H)
     #include <pthread_np.h>
@@ -121,6 +125,15 @@ struct ctx_webui;
 struct ctx_netcam;
 
 class cls_libcam;
+class cls_webu;
+class cls_webu_ans;
+class cls_webu_file;
+class cls_webu_html;
+class cls_webu_json;
+class cls_webu_mpegts;
+class cls_webu_post;
+class cls_webu_common;
+class cls_webu_stream;
 
 #define MYFFVER (LIBAVFORMAT_VERSION_MAJOR * 1000)+LIBAVFORMAT_VERSION_MINOR
 
@@ -553,16 +566,8 @@ struct ctx_motapp {
     int                 cam_cnt;
     int                 snd_cnt;
     ctx_all_sizes       *all_sizes;
-
-    volatile int                webcontrol_running;
-    volatile int                webcontrol_finish;
-    struct MHD_Daemon           *webcontrol_daemon;
-    struct MHD_Daemon           *webcontrol_daemon2;
-    char                        webcontrol_digest_rand[12];
-    std::list<ctx_webu_clients> webcontrol_clients;         /* C++ list of client ips */
-    ctx_params                  *webcontrol_headers;        /* parameters for header */
-    ctx_params                  *webcontrol_actions;        /* parameters for actions */
-    ctx_dbse                    *dbse;                      /* user specified database */
+    cls_webu            *webu;
+    ctx_dbse            *dbse;                      /* user specified database */
 
     bool                parms_changed;      /*bool indicating if the parms have changed */
     pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */

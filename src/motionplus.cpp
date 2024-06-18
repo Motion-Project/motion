@@ -56,7 +56,7 @@ static void motpls_signal_process(ctx_motapp *motapp)
         break;
     case MOTPLS_SIGNAL_SIGHUP:      /* Reload the parameters and restart*/
         motapp->reload_all = true;
-        motapp->webcontrol_finish = true;
+        motapp->webu->wb_finish = true;
         for (indx=0; indx<motapp->cam_cnt; indx++) {
             motapp->cam_list[indx]->event_stop = true;
             motapp->cam_list[indx]->finish_dev = true;
@@ -70,7 +70,7 @@ static void motpls_signal_process(ctx_motapp *motapp)
         break;
     case MOTPLS_SIGNAL_SIGTERM:     /* Quit application */
 
-        motapp->webcontrol_finish = true;
+        motapp->webu->wb_finish = true;
         for (indx=0; indx<motapp->cam_cnt; indx++) {
             motapp->cam_list[indx]->event_stop = true;
             motapp->cam_list[indx]->finish_dev = true;
@@ -501,13 +501,17 @@ static void motpls_shutdown(ctx_motapp *motapp)
 
     log_deinit(motapp);
 
-    webu_deinit(motapp);
+    delete motapp->webu;
 
     dbse_deinit(motapp);
 
     conf_deinit(motapp);
 
+    delete motapp->conf;
+    motapp->conf  = nullptr;;
+
     motpls_allcams_deinit(motapp);
+
 }
 
 static void motpls_device_ids(ctx_motapp *motapp)
@@ -635,8 +639,9 @@ static void motpls_ntc(void)
 /** Initialize upon start up or restart */
 static void motpls_startup(ctx_motapp *motapp, int daemonize)
 {
-
     log_init_app(motapp);  /* This is needed prior to any function possibly calling motion_log*/
+
+    motapp->conf = new ctx_config;
 
     conf_init(motapp);
 
@@ -669,7 +674,7 @@ static void motpls_startup(ctx_motapp *motapp, int daemonize)
 
     draw_init_chars();
 
-    webu_init(motapp);
+    motapp->webu = new cls_webu(motapp);
 
     motpls_allcams_init(motapp);
 
@@ -810,7 +815,7 @@ static void motpls_watchdog(ctx_motapp *motapp, int camindx)
     }
     motapp->restart_all = true;
     motapp->finish_all = true;
-    motapp->webcontrol_finish = true;
+    motapp->webu->wb_finish = true;
     motapp->threads_running = 0;
 
 }
@@ -832,8 +837,8 @@ static int motpls_check_threadcount(ctx_motapp *motapp)
         }
     }
 
-    if ((motapp->webcontrol_finish == false) &&
-        (motapp->webcontrol_daemon != NULL)) {
+    if ((motapp->webu->wb_finish == false) &&
+        (motapp->webu->wb_daemon != NULL)) {
         thrdcnt++;
     }
 
@@ -868,17 +873,9 @@ static void motpls_init(ctx_motapp *motapp, int argc, char *argv[])
     motapp->cam_cnt = 0;
     motapp->snd_cnt = 0;
 
-    motapp->conf = new ctx_config;
-
-    motapp->dbse = NULL;
-
-    motapp->webcontrol_running = false;
-    motapp->webcontrol_finish = false;
-    motapp->webcontrol_daemon = NULL;
-    motapp->webcontrol_headers = NULL;
-    motapp->webcontrol_actions = NULL;
-    motapp->webcontrol_clients.clear();
-    memset(motapp->webcontrol_digest_rand, 0, sizeof(motapp->webcontrol_digest_rand));
+    motapp->conf = nullptr;
+    motapp->dbse = nullptr;
+    motapp->webu = nullptr;
 
     pthread_key_create(&tls_key_threadnr, NULL);
     pthread_setspecific(tls_key_threadnr, (void *)(0));

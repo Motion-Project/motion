@@ -27,7 +27,7 @@
 #include "dbse.hpp"
 #include "video_loopback.hpp"
 #include "video_common.hpp"
-#include "webu_stream.hpp"
+#include "webu_getimg.hpp"
 #include "alg_sec.hpp"
 
 const char *eventList[] = {
@@ -106,7 +106,7 @@ static void on_event_end_command(ctx_dev *cam)
 
 static void event_stream_put(ctx_dev *cam)
 {
-    webu_stream_getimg(cam);
+    webu_getimg_main(cam);
 }
 
 static void event_vlp_putpipe(ctx_dev *cam)

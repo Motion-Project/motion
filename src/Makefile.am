@@ -46,10 +46,13 @@ motionplus_SOURCES = \
 	video_common.hpp   video_common.cpp \
 	video_loopback.hpp video_loopback.cpp \
 	webu.hpp           webu.cpp \
+	webu_ans.hpp       webu_ans.cpp \
 	webu_file.hpp      webu_file.cpp \
 	webu_html.hpp      webu_html.cpp \
 	webu_json.hpp      webu_json.cpp \
 	webu_post.hpp      webu_post.cpp \
+	webu_common.hpp    webu_common.cpp \
 	webu_stream.hpp    webu_stream.cpp \
+	webu_getimg.hpp    webu_getimg.cpp \
 	webu_mpegts.hpp    webu_mpegts.cpp
 
