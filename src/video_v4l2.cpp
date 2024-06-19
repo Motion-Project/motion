@@ -25,49 +25,50 @@
 #include "video_v4l2.hpp"
 #include <sys/mman.h>
 
-
 #define MMAP_BUFFERS            4
 #define MIN_MMAP_BUFFERS        2
-#define V4L2_PALETTE_COUNT_MAX 21
 
 #ifdef HAVE_V4L2
 
-void cls_v4l2cam::palette_init(palette_item *palette_array)
+void cls_v4l2cam::palette_add(uint p_v4l2id)
 {
-    int indx;
+    char    tmp4cc[5];
+    ctx_palette_item    p_itm;
 
-    /* When adding here, update the max defined as V4L2_PALETTE_COUNT_MAX above */
-    palette_array[0].v4l2id = V4L2_PIX_FMT_SN9C10X;
-    palette_array[1].v4l2id = V4L2_PIX_FMT_SBGGR16;
-    palette_array[2].v4l2id = V4L2_PIX_FMT_SBGGR8;
-    palette_array[3].v4l2id = V4L2_PIX_FMT_SPCA561;
-    palette_array[4].v4l2id = V4L2_PIX_FMT_SGBRG8;
-    palette_array[5].v4l2id = V4L2_PIX_FMT_SGRBG8;
-    palette_array[6].v4l2id = V4L2_PIX_FMT_PAC207;
-    palette_array[7].v4l2id = V4L2_PIX_FMT_PJPG;
-    palette_array[8].v4l2id = V4L2_PIX_FMT_MJPEG;
-    palette_array[9].v4l2id = V4L2_PIX_FMT_JPEG;
-    palette_array[10].v4l2id = V4L2_PIX_FMT_RGB24;
-    palette_array[11].v4l2id = V4L2_PIX_FMT_SPCA501;
-    palette_array[12].v4l2id = V4L2_PIX_FMT_SPCA505;
-    palette_array[13].v4l2id = V4L2_PIX_FMT_SPCA508;
-    palette_array[14].v4l2id = V4L2_PIX_FMT_UYVY;
-    palette_array[15].v4l2id = V4L2_PIX_FMT_YUYV;
-    palette_array[16].v4l2id = V4L2_PIX_FMT_YUV422P;
-    palette_array[17].v4l2id = V4L2_PIX_FMT_YUV420; /* most efficient for motion */
-    palette_array[18].v4l2id = V4L2_PIX_FMT_Y10;
-    palette_array[19].v4l2id = V4L2_PIX_FMT_Y12;
-    palette_array[20].v4l2id = V4L2_PIX_FMT_GREY;
-    palette_array[21].v4l2id = V4L2_PIX_FMT_SRGGB8;
+    sprintf(tmp4cc,"%c%c%c%c"
+        , p_v4l2id >> 0 , p_v4l2id >> 8
+        , p_v4l2id >> 16, p_v4l2id >> 24);
+    p_itm.v4l2id = p_v4l2id;
+    p_itm.fourcc = tmp4cc;
+    palette.push_back(p_itm);
+}
 
-    for (indx = 0; indx <= V4L2_PALETTE_COUNT_MAX; indx++) {
-        sprintf(palette_array[indx].fourcc ,"%c%c%c%c"
-                ,palette_array[indx].v4l2id >> 0
-                ,palette_array[indx].v4l2id >> 8
-                ,palette_array[indx].v4l2id >> 16
-                ,palette_array[indx].v4l2id >> 24);
-    }
+void cls_v4l2cam::palette_init()
+{
+    palette.clear();
 
+    palette_add(V4L2_PIX_FMT_SN9C10X);
+    palette_add(V4L2_PIX_FMT_SBGGR16);
+    palette_add(V4L2_PIX_FMT_SBGGR8);
+    palette_add(V4L2_PIX_FMT_SPCA561);
+    palette_add(V4L2_PIX_FMT_SGBRG8);
+    palette_add(V4L2_PIX_FMT_SGRBG8);
+    palette_add(V4L2_PIX_FMT_PAC207);
+    palette_add(V4L2_PIX_FMT_PJPG);
+    palette_add(V4L2_PIX_FMT_MJPEG);
+    palette_add(V4L2_PIX_FMT_JPEG);
+    palette_add(V4L2_PIX_FMT_RGB24);
+    palette_add(V4L2_PIX_FMT_SPCA501);
+    palette_add(V4L2_PIX_FMT_SPCA505);
+    palette_add(V4L2_PIX_FMT_SPCA508);
+    palette_add(V4L2_PIX_FMT_UYVY);
+    palette_add(V4L2_PIX_FMT_YUYV);
+    palette_add(V4L2_PIX_FMT_YUV422P);
+    palette_add(V4L2_PIX_FMT_YUV420);
+    palette_add(V4L2_PIX_FMT_Y10);
+    palette_add(V4L2_PIX_FMT_Y12);
+    palette_add(V4L2_PIX_FMT_GREY);
+    palette_add(V4L2_PIX_FMT_SRGGB8);
 }
 
 /* Execute the request to the device */
@@ -92,139 +93,89 @@ void cls_v4l2cam::device_close()
     fd_device = -1;
 }
 
-/* Get the count of how many controls and menu items the device supports */
-void cls_v4l2cam::ctrls_count()
-{
-    int indx;
-
-    struct v4l2_queryctrl       vid_ctrl;
-    struct v4l2_querymenu       vid_menu;
-
-    if (fd_device == -1) {
-        return;
-    }
-
-    devctrl_count = 0;
-
-    memset(&vid_ctrl, 0, sizeof(struct v4l2_queryctrl));
-    vid_ctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
-
-    while (xioctl(VIDIOC_QUERYCTRL, &vid_ctrl) == 0) {
-        if (vid_ctrl.type == V4L2_CTRL_TYPE_CTRL_CLASS) {
-            vid_ctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
-            continue;
-        }
-        devctrl_count++;
-        if (vid_ctrl.type == V4L2_CTRL_TYPE_MENU) {
-            for (indx = vid_ctrl.minimum; indx <= vid_ctrl.maximum; indx++) {
-                memset(&vid_menu, 0, sizeof(struct v4l2_querymenu));
-                vid_menu.id = vid_ctrl.id;
-                vid_menu.index = indx;
-                if (xioctl(VIDIOC_QUERYMENU, &vid_menu) == 0) {
-                    devctrl_count++;
-                }
-            }
-        }
-        vid_ctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
-    }
-
-}
-
 /* Print the device controls to the log */
 void cls_v4l2cam::ctrls_log()
 {
-    int indx;
+    it_v4l2ctrl it;
 
-    if (devctrl_count != 0 ) {
+    if (device_ctrls.size() >0) {
         MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("---------Controls---------"));
         MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("  V4L2 ID :  Name : Range"));
-        for (indx = 0; indx < devctrl_count; indx++) {
-            if (devctrl_array[indx].ctrl_menuitem) {
+        for (it = device_ctrls.begin();it!=device_ctrls.end();it++){
+            if (it->ctrl_menuitem) {
                 MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "  %s : %s"
-                    ,devctrl_array[indx].ctrl_iddesc
-                    ,devctrl_array[indx].ctrl_name);
+                    ,it->ctrl_iddesc.c_str()
+                    ,it->ctrl_name.c_str());
             } else {
                 MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s : %s : %d to %d"
-                    ,devctrl_array[indx].ctrl_iddesc
-                    ,devctrl_array[indx].ctrl_name
-                    ,devctrl_array[indx].ctrl_minimum
-                    ,devctrl_array[indx].ctrl_maximum);
+                    ,it->ctrl_iddesc.c_str()
+                    ,it->ctrl_name.c_str()
+                    ,it->ctrl_minimum
+                    ,it->ctrl_maximum);
             }
         }
         MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "--------------------------");
     }
-
 }
 
 /* Get names of the controls and menu items the device supports */
 void cls_v4l2cam::ctrls_list()
 {
-    int indx, indx_ctrl;
-    struct v4l2_queryctrl       vid_ctrl;
-    struct v4l2_querymenu       vid_menu;
+    int indx;
+    v4l2_queryctrl      vid_ctrl;
+    v4l2_querymenu      vid_menu;
+    ctx_v4l2ctrl_item   vid_item;
+    char tmp_desc[40];
 
     if (fd_device == -1) {
         return;
     }
 
-    devctrl_array = NULL;
-    if (devctrl_count == 0) {
-        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("No Controls found for device"));
-        return;
-    }
-
-    devctrl_array =(ctx_v4l2cam_ctrl*) malloc(devctrl_count * sizeof(ctx_v4l2cam_ctrl));
-
+    device_ctrls.clear();
     memset(&vid_ctrl, 0, sizeof(struct v4l2_queryctrl));
     vid_ctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
-    indx_ctrl = 0;
     while (xioctl(VIDIOC_QUERYCTRL, &vid_ctrl) == 0) {
         if (vid_ctrl.type == V4L2_CTRL_TYPE_CTRL_CLASS) {
             vid_ctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
             continue;
         }
-
-        devctrl_array[indx_ctrl].ctrl_id = vid_ctrl.id;
-        devctrl_array[indx_ctrl].ctrl_type = vid_ctrl.type;
-        devctrl_array[indx_ctrl].ctrl_default = vid_ctrl.default_value;
-        devctrl_array[indx_ctrl].ctrl_currval = vid_ctrl.default_value;
-        devctrl_array[indx_ctrl].ctrl_newval = vid_ctrl.default_value;
-        devctrl_array[indx_ctrl].ctrl_menuitem = false;
-
-        devctrl_array[indx_ctrl].ctrl_name =(char*) malloc(32);
-        sprintf(devctrl_array[indx_ctrl].ctrl_name,"%s",vid_ctrl.name);
-
-        devctrl_array[indx_ctrl].ctrl_iddesc =(char*) malloc(15);
-        sprintf(devctrl_array[indx_ctrl].ctrl_iddesc,"ID%08d",vid_ctrl.id);
-
-        devctrl_array[indx_ctrl].ctrl_minimum = vid_ctrl.minimum;
-        devctrl_array[indx_ctrl].ctrl_maximum = vid_ctrl.maximum;
+        vid_item.ctrl_id = vid_ctrl.id;
+        vid_item.ctrl_type = vid_ctrl.type;
+        vid_item.ctrl_default = vid_ctrl.default_value;
+        vid_item.ctrl_currval = vid_ctrl.default_value;
+        vid_item.ctrl_newval = vid_ctrl.default_value;
+        vid_item.ctrl_menuitem = false;
+        vid_item.ctrl_name =(char*)vid_ctrl.name;
+        sprintf(tmp_desc,"ID%08d",vid_ctrl.id);
+        vid_item.ctrl_iddesc = tmp_desc;
+        vid_item.ctrl_minimum = vid_ctrl.minimum;
+        vid_item.ctrl_maximum = vid_ctrl.maximum;
+        device_ctrls.push_back(vid_item);
 
         if (vid_ctrl.type == V4L2_CTRL_TYPE_MENU) {
             for (indx = vid_ctrl.minimum; indx <= vid_ctrl.maximum; indx++) {
                 memset(&vid_menu, 0, sizeof(struct v4l2_querymenu));
                 vid_menu.id = vid_ctrl.id;
                 vid_menu.index = indx;
-
                 if (xioctl(VIDIOC_QUERYMENU, &vid_menu) == 0) {
-                    indx_ctrl++;
-                    devctrl_array[indx_ctrl].ctrl_id = vid_ctrl.id;
-                    devctrl_array[indx_ctrl].ctrl_type = 0;
-                    devctrl_array[indx_ctrl].ctrl_menuitem = true;
-
-                    devctrl_array[indx_ctrl].ctrl_name =(char*) malloc(32);
-                    sprintf(devctrl_array[indx_ctrl].ctrl_name,"%s",vid_menu.name);
-
-                    devctrl_array[indx_ctrl].ctrl_iddesc =(char*) malloc(40);
-                    sprintf(devctrl_array[indx_ctrl].ctrl_iddesc,"menu item: Value %d",indx);
-
-                    devctrl_array[indx_ctrl].ctrl_minimum = 0;
-                    devctrl_array[indx_ctrl].ctrl_maximum = 0;
+                    vid_item.ctrl_id = vid_ctrl.id;
+                    vid_item.ctrl_type = 0;
+                    vid_item.ctrl_menuitem = true;
+                    vid_item.ctrl_name =(char*)vid_menu.name;
+                    sprintf(tmp_desc,"menu item: Value %d",indx);
+                    vid_item.ctrl_iddesc = tmp_desc;
+                    vid_item.ctrl_minimum = 0;
+                    vid_item.ctrl_maximum = 0;
+                    device_ctrls.push_back(vid_item);
                 }
            }
         }
-        indx_ctrl++;
         vid_ctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
+    }
+
+    if (device_ctrls.size() == 0) {
+        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("No Controls found for device"));
+        return;
     }
 
     ctrls_log();
@@ -234,90 +185,83 @@ void cls_v4l2cam::ctrls_list()
 /* Set the control array items to the device */
 void cls_v4l2cam::ctrls_set()
 {
-    int indx_dev, retcd;
-    ctx_v4l2cam_ctrl *devitem;
-    struct v4l2_control     vid_ctrl;
+    int retcd;
+    struct v4l2_control vid_ctrl;
+    it_v4l2ctrl it;
 
     if (fd_device == -1) {
         return;
     }
 
-    for (indx_dev = 0; indx_dev < devctrl_count; indx_dev++) {
-        devitem=&devctrl_array[indx_dev];
-        if (!devitem->ctrl_menuitem) {
-            if (devitem->ctrl_currval != devitem->ctrl_newval) {
+    for (it = device_ctrls.begin();it!=device_ctrls.end();it++) {
+        if (it->ctrl_menuitem == false) {
+            if (it->ctrl_currval != it->ctrl_newval) {
                 memset(&vid_ctrl, 0, sizeof (struct v4l2_control));
-                vid_ctrl.id = devitem->ctrl_id;
-                vid_ctrl.value = devitem->ctrl_newval;
+                vid_ctrl.id = it->ctrl_id;
+                vid_ctrl.value = it->ctrl_newval;
                 retcd = xioctl(VIDIOC_S_CTRL, &vid_ctrl);
                 if (retcd < 0) {
                     MOTPLS_LOG(WRN, TYPE_VIDEO, SHOW_ERRNO
                         ,_("setting control %s \"%s\" to %d failed with return code %d")
-                        ,devitem->ctrl_iddesc, devitem->ctrl_name
-                        ,devitem->ctrl_newval,retcd);
+                        ,it->ctrl_iddesc, it->ctrl_name
+                        ,it->ctrl_newval, retcd);
                 } else {
                     MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
                         ,_("Set control \"%s\" to value %d")
-                        ,devitem->ctrl_name, devitem->ctrl_newval);
-                   devitem->ctrl_currval = devitem->ctrl_newval;
+                        ,it->ctrl_name, it->ctrl_newval);
+                   it->ctrl_currval = it->ctrl_newval;
                 }
             }
         }
      }
-
 }
 
-int cls_v4l2cam::parms_set()
+void cls_v4l2cam::parms_set()
 {
-    int indx_dev;
-    ctx_v4l2cam_ctrl  *devitem;
-
     p_lst *lst = &params->params_array;
-    p_it it;
+    p_it it_p;
+    it_v4l2ctrl it_d;
 
-    if (devctrl_count == 0) {
+    if (device_ctrls.size() == 0) {
         params->update_params = false;
-        return 0;
+        return;
     }
 
-    for (indx_dev = 0; indx_dev < devctrl_count; indx_dev++) {
-        devitem=&devctrl_array[indx_dev];
-        devitem->ctrl_newval = devitem->ctrl_default;
-        for (it = lst->begin(); it != lst->end(); it++) {
-            if ((mystrceq(devitem->ctrl_iddesc,it->param_name.c_str())) ||
-                (mystrceq(devitem->ctrl_name  ,it->param_name.c_str()))) {
-                switch (devitem->ctrl_type) {
+    for (it_d = device_ctrls.begin(); it_d != device_ctrls.end(); it_d++) {
+        it_d->ctrl_newval = it_d->ctrl_default;
+        for (it_p = lst->begin(); it_p != lst->end(); it_p++) {
+            if ((it_d->ctrl_iddesc == it_p->param_name) ||
+                (it_d->ctrl_name == it_p->param_name)) {
+                switch (it_d->ctrl_type) {
                 case V4L2_CTRL_TYPE_MENU:
                     /*FALLTHROUGH*/
                 case V4L2_CTRL_TYPE_INTEGER:
-                    if (mtoi(it->param_value.c_str()) < devitem->ctrl_minimum) {
+                    if (mtoi(it_p->param_value.c_str()) < it_d->ctrl_minimum) {
                         MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
                             ,_("%s control option value %s is below minimum.  Skipping...")
-                            ,devitem->ctrl_name
-                            , it->param_value.c_str()
-                            , devitem->ctrl_minimum);
-                    } else if (mtoi(it->param_value.c_str()) > devitem->ctrl_maximum) {
+                            , it_d->ctrl_name.c_str()
+                            , it_p->param_value.c_str()
+                            , it_d->ctrl_minimum);
+                    } else if (mtoi(it_p->param_value.c_str()) > it_d->ctrl_maximum) {
                         MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
                             ,_("%s control option value %s is above maximum.  Skipping...")
-                            , devitem->ctrl_name
-                            , it->param_value.c_str()
-                            , devitem->ctrl_maximum);
+                            , it_d->ctrl_name.c_str()
+                            , it_p->param_value.c_str()
+                            , it_d->ctrl_maximum);
                     } else {
-                        devitem->ctrl_newval = mtoi(it->param_value.c_str());
+                        it_d->ctrl_newval = mtoi(it_p->param_value.c_str());
                     }
                     break;
                 case V4L2_CTRL_TYPE_BOOLEAN:
-                    devitem->ctrl_newval = mtob(it->param_value.c_str()) ? 1 : 0;
+                    it_d->ctrl_newval = mtob(it_p->param_value.c_str()) ? 1 : 0;
                     break;
                 default:
                     MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-                        ,_("control type not supported yet"));
+                        ,_("control type not supported"));
                 }
             }
         }
     }
-
-    return 0;
 
 }
 
@@ -508,16 +452,16 @@ int cls_v4l2cam::pixfmt_try(uint pixformat)
 {
     int retcd;
 
-    memset(&fmt, 0, sizeof(struct v4l2_format));
+    memset(&vidfmt, 0, sizeof(struct v4l2_format));
 
-    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    fmt.fmt.pix.width = width;
-    fmt.fmt.pix.height = height;
-    fmt.fmt.pix.pixelformat = pixformat;
-    fmt.fmt.pix.field = V4L2_FIELD_ANY;
+    vidfmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    vidfmt.fmt.pix.width = width;
+    vidfmt.fmt.pix.height = height;
+    vidfmt.fmt.pix.pixelformat = pixformat;
+    vidfmt.fmt.pix.field = V4L2_FIELD_ANY;
 
-    retcd = xioctl(VIDIOC_TRY_FMT, &fmt);
-    if ((retcd == -1) || (fmt.fmt.pix.pixelformat != pixformat)) {
+    retcd = xioctl(VIDIOC_TRY_FMT, &vidfmt);
+    if ((retcd == -1) || (vidfmt.fmt.pix.pixelformat != pixformat)) {
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             ,_("Unable to use palette %c%c%c%c (%dx%d)")
             ,pixformat >> 0, pixformat >> 8
@@ -539,10 +483,10 @@ int cls_v4l2cam::pixfmt_stride()
 {
     int wd, bpl, wps;
 
-    width = (int)fmt.fmt.pix.width;
-    height = (int)fmt.fmt.pix.height;
+    width = (int)vidfmt.fmt.pix.width;
+    height = (int)vidfmt.fmt.pix.height;
 
-    bpl = (int)fmt.fmt.pix.bytesperline;
+    bpl = (int)vidfmt.fmt.pix.bytesperline;
     wd = width;
 
     MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
@@ -589,17 +533,17 @@ int cls_v4l2cam::pixfmt_stride()
 
 int cls_v4l2cam::pixfmt_adjust()
 {
-    if (fmt.fmt.pix.width != (uint)width ||
-        fmt.fmt.pix.height != (uint)height) {
+    if ((vidfmt.fmt.pix.width != (uint)width) ||
+        (vidfmt.fmt.pix.height != (uint)height)) {
 
         MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             ,_("Adjusting resolution from %ix%i to %ix%i.")
             ,width, height
-            ,fmt.fmt.pix.width
-            ,fmt.fmt.pix.height);
+            ,vidfmt.fmt.pix.width
+            ,vidfmt.fmt.pix.height);
 
-        width = fmt.fmt.pix.width;
-        height = fmt.fmt.pix.height;
+        width = vidfmt.fmt.pix.width;
+        height = vidfmt.fmt.pix.height;
 
         if ((width % 8) || (height % 8)) {
             MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
@@ -630,7 +574,7 @@ int cls_v4l2cam::pixfmt_set(uint pixformat)
     if (retcd != 0) {
         return -1;
     }
-    retcd = xioctl(VIDIOC_S_FMT, &fmt);
+    retcd = xioctl(VIDIOC_S_FMT, &vidfmt);
     if (retcd == -1) {
         MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
             ,_("Error setting pixel format."));
@@ -679,7 +623,7 @@ void cls_v4l2cam::params_check()
         }
     }
 
-    if ((spec < 0) || (spec > V4L2_PALETTE_COUNT_MAX)) {
+    if ((spec < 0) || (spec > (int)palette.size())) {
         MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             ,_("Invalid palette.  Changing to default"));
         util_parms_add(params,"palette","17");
@@ -688,7 +632,7 @@ void cls_v4l2cam::params_check()
 }
 
 /*List camera palettes and return index of one that Motionplus supports*/
-int cls_v4l2cam::pixfmt_list(palette_item *palette_array)
+int cls_v4l2cam::pixfmt_list()
 {
     int v4l2_pal, indx_palette, indx;
     struct v4l2_fmtdesc fmtd;
@@ -707,8 +651,8 @@ int cls_v4l2cam::pixfmt_list(palette_item *palette_array)
             , fmtd.pixelformat >> 0, fmtd.pixelformat >> 8
             , fmtd.pixelformat >> 16, fmtd.pixelformat >> 24
             , fmtd.description);
-        for (indx = 0; indx <= V4L2_PALETTE_COUNT_MAX; indx++) {
-            if (palette_array[indx].v4l2id == fmtd.pixelformat) {
+        for (indx = 0; indx < (int)palette.size(); indx++) {
+            if (palette[indx].v4l2id == fmtd.pixelformat) {
                 indx_palette = indx;
             }
         }
@@ -726,16 +670,12 @@ int cls_v4l2cam::pixfmt_list(palette_item *palette_array)
 void cls_v4l2cam::palette_set()
 {
     int indxp, retcd;
-    palette_item *palette_array;
     p_lst *lst = &params->params_array;
     p_it it;
 
     if (fd_device == -1) {
         return;
     }
-
-    palette_array =(palette_item*) malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
-    palette_init(palette_array);
 
     params_check();
 
@@ -747,40 +687,36 @@ void cls_v4l2cam::palette_set()
         }
     }
 
-    retcd = pixfmt_set(palette_array[indxp].v4l2id);
+    retcd = pixfmt_set(palette[indxp].v4l2id);
     if (retcd == 0) {
-        myfree(&palette_array);
         return;
     }
 
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         ,_("Configuration palette index %d (%s) for %dx%d doesn't work.")
-        , indxp, palette_array[indxp].fourcc
+        , indxp, palette[indxp].fourcc.c_str()
         ,width, height);
 
-    indxp = pixfmt_list(palette_array);
+    indxp = pixfmt_list();
     if (indxp < 0) {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("Unable to find a compatible palette format."));
-        myfree(&palette_array);
         device_close();
         return;
     }
 
-    retcd = pixfmt_set(palette_array[indxp].v4l2id);
+    retcd = pixfmt_set(palette[indxp].v4l2id);
     if (retcd < 0) {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , _("Palette selection failed for format %s")
-            , palette_array[indxp].fourcc);
+            , palette[indxp].fourcc.c_str());
         device_close();
         return;
     }
 
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-        ,_("Selected palette %s")
-        ,palette_array[indxp].fourcc);
-
-    myfree(&palette_array);
+        ,_("Selected palette index %d (%s)")
+        ,indxp, palette[indxp].fourcc.c_str());
 
 }
 
@@ -794,24 +730,24 @@ void cls_v4l2cam::set_mmap()
         return;
     }
 
-    if (!(cap.capabilities & V4L2_CAP_STREAMING)) {
+    if (!(vidcap.capabilities & V4L2_CAP_STREAMING)) {
         device_close();
         return;
     }
 
-    memset(&req, 0, sizeof(struct v4l2_requestbuffers));
+    memset(&vidreq, 0, sizeof(struct v4l2_requestbuffers));
 
-    req.count = MMAP_BUFFERS;
-    req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    req.memory = V4L2_MEMORY_MMAP;
-    if (xioctl(VIDIOC_REQBUFS, &req) == -1) {
+    vidreq.count = MMAP_BUFFERS;
+    vidreq.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    vidreq.memory = V4L2_MEMORY_MMAP;
+    if (xioctl(VIDIOC_REQBUFS, &vidreq) == -1) {
         MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
             ,_("Error requesting buffers %d for memory map. VIDIOC_REQBUFS")
-            ,req.count);
+            ,vidreq.count);
         device_close();
         return;
     }
-    buffer_count = req.count;
+    buffer_count = vidreq.count;
 
     MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
         ,_("mmap information: frames=%d"), buffer_count);
@@ -825,7 +761,7 @@ void cls_v4l2cam::set_mmap()
     }
 
     buffers =(video_buff*) calloc(buffer_count, sizeof(video_buff));
-    if (buffers == NULL) {
+    if (buffers == nullptr) {
         MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, _("Out of memory."));
         device_close();
         return;
@@ -850,7 +786,7 @@ void cls_v4l2cam::set_mmap()
 
         buffers[buffer_index].size = p_buf.length;
         buffers[buffer_index].ptr =(unsigned char*) mmap(
-            NULL, p_buf.length, PROT_READ | PROT_WRITE
+            nullptr, p_buf.length, PROT_READ | PROT_WRITE
             , MAP_SHARED, fd_device, p_buf.m.offset);
 
         if (buffers[buffer_index].ptr == MAP_FAILED) {
@@ -867,13 +803,13 @@ void cls_v4l2cam::set_mmap()
     }
 
     for (buffer_index = 0; buffer_index < buffer_count; buffer_index++) {
-        memset(&v4l2buf, 0, sizeof(struct v4l2_buffer));
+        memset(&vidbuf, 0, sizeof(struct v4l2_buffer));
 
-        v4l2buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        v4l2buf.memory = V4L2_MEMORY_MMAP;
-        v4l2buf.index = buffer_index;
+        vidbuf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        vidbuf.memory = V4L2_MEMORY_MMAP;
+        vidbuf.index = buffer_index;
 
-        if (xioctl(VIDIOC_QBUF, &v4l2buf) == -1) {
+        if (xioctl(VIDIOC_QBUF, &vidbuf) == -1) {
             MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_QBUF");
             device_close();
             return;
@@ -918,35 +854,35 @@ int cls_v4l2cam::capture()
     sigaddset(&set, SIGUSR1);
     sigaddset(&set, SIGTERM);
     sigaddset(&set, SIGHUP);
+
     pthread_sigmask(SIG_BLOCK, &set, &old);
 
     if (pframe >= 0) {
-        retcd = xioctl(VIDIOC_QBUF, &v4l2buf);
+        retcd = xioctl(VIDIOC_QBUF, &vidbuf);
         if (retcd == -1) {
             MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_QBUF");
-            pthread_sigmask(SIG_UNBLOCK, &old, NULL);
+            pthread_sigmask(SIG_UNBLOCK, &old, nullptr);
             return -1;
         }
     }
 
-    memset(&v4l2buf, 0, sizeof(struct v4l2_buffer));
+    memset(&vidbuf, 0, sizeof(struct v4l2_buffer));
 
-    v4l2buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    v4l2buf.memory = V4L2_MEMORY_MMAP;
-    v4l2buf.bytesused = 0;
+    vidbuf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    vidbuf.memory = V4L2_MEMORY_MMAP;
+    vidbuf.bytesused = 0;
 
-    retcd = xioctl(VIDIOC_DQBUF, &v4l2buf);
+    retcd = xioctl(VIDIOC_DQBUF, &vidbuf);
     if (retcd == -1) {
         MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_DQBUF");
-        pthread_sigmask(SIG_UNBLOCK, &old, NULL);
+        pthread_sigmask(SIG_UNBLOCK, &old, nullptr);
         return -1;
     }
 
-    pframe = v4l2buf.index;
-    buffers[v4l2buf.index].used = v4l2buf.bytesused;
-    buffers[v4l2buf.index].content_length = v4l2buf.bytesused;
-
-    pthread_sigmask(SIG_UNBLOCK, &old, NULL);    /*undo the signal blocking */
+    pframe = vidbuf.index;
+    buffers[vidbuf.index].used = vidbuf.bytesused;
+    buffers[vidbuf.index].content_length = vidbuf.bytesused;
+    pthread_sigmask(SIG_UNBLOCK, &old, nullptr);    /*undo the signal blocking */
 
     return 0;
 
@@ -955,7 +891,7 @@ int cls_v4l2cam::capture()
 /* Convert captured image to the standard pixel format*/
 int cls_v4l2cam::convert(unsigned char *img_norm)
 {
-    video_buff *the_buffer = &buffers[v4l2buf.index];
+    video_buff *the_buffer = &buffers[vidbuf.index];
 
     /*The FALLTHROUGH is a special comment required by compiler. */
     switch (pixfmt_src) {
@@ -1030,12 +966,10 @@ int cls_v4l2cam::convert(unsigned char *img_norm)
 
 void cls_v4l2cam::device_init()
 {
-    devctrl_array = NULL;
-    devctrl_count = 0;
     buffer_count= 0;
     pframe = -1;
     finish = cam->finish_dev;
-    buffers = NULL;
+    buffers = nullptr;
 
     params = new ctx_params;
     params->params_count = 0;
@@ -1049,7 +983,6 @@ void cls_v4l2cam::device_init()
     height = cam->conf->height;
     width = cam->conf->width;
     fps =cam->conf->framerate;
-
 }
 
 /* Update and set user params if needed */
@@ -1057,11 +990,7 @@ void cls_v4l2cam::device_select()
 {
     if (params->update_params == true) {
         util_parms_parse(params, "v4l2_params", cam->conf->v4l2_params);
-        if (parms_set() < 0 ) {
-            MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-            ,_("Error setting device controls"));
-            return;
-        }
+        parms_set();
         ctrls_set();
     }
 }
@@ -1083,18 +1012,17 @@ void cls_v4l2cam::device_open()
         return;
     }
 
-    if (xioctl(VIDIOC_QUERYCAP, &cap) < 0) {
+    if (xioctl(VIDIOC_QUERYCAP, &vidcap) < 0) {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("Not a V4L2 device?"));
         device_close();
         return;
     }
 
-    if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
+    if (!(vidcap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("Device does not support capturing."));
         device_close();
         return;
     }
-
 }
 
 void cls_v4l2cam::log_types()
@@ -1104,46 +1032,46 @@ void cls_v4l2cam::log_types()
     }
 
     MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "------------------------");
-    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.driver: \"%s\"",cap.driver);
-    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.card: \"%s\"",cap.card);
-    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.bus_info: \"%s\"",cap.bus_info);
-    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.capabilities=0x%08X",cap.capabilities);
+    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.driver: \"%s\"",vidcap.driver);
+    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.card: \"%s\"",vidcap.card);
+    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.bus_info: \"%s\"",vidcap.bus_info);
+    MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.capabilities=0x%08X",vidcap.capabilities);
     MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "------------------------");
 
-    if (cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
+    if (vidcap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VIDEO_CAPTURE");
     }
-    if (cap.capabilities & V4L2_CAP_VIDEO_OUTPUT) {
+    if (vidcap.capabilities & V4L2_CAP_VIDEO_OUTPUT) {
         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VIDEO_OUTPUT");
     }
-    if (cap.capabilities & V4L2_CAP_VIDEO_OVERLAY) {
+    if (vidcap.capabilities & V4L2_CAP_VIDEO_OVERLAY) {
         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VIDEO_OVERLAY");
     }
-    if (cap.capabilities & V4L2_CAP_VBI_CAPTURE) {
+    if (vidcap.capabilities & V4L2_CAP_VBI_CAPTURE) {
         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VBI_CAPTURE");
     }
-    if (cap.capabilities & V4L2_CAP_VBI_OUTPUT) {
+    if (vidcap.capabilities & V4L2_CAP_VBI_OUTPUT) {
         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VBI_OUTPUT");
     }
-    if (cap.capabilities & V4L2_CAP_RDS_CAPTURE) {
+    if (vidcap.capabilities & V4L2_CAP_RDS_CAPTURE) {
         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- RDS_CAPTURE");
     }
-    if (cap.capabilities & V4L2_CAP_TUNER) {
+    if (vidcap.capabilities & V4L2_CAP_TUNER) {
         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- TUNER");
     }
-    if (cap.capabilities & V4L2_CAP_AUDIO) {
+    if (vidcap.capabilities & V4L2_CAP_AUDIO) {
         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- AUDIO");
     }
-    if (cap.capabilities & V4L2_CAP_READWRITE) {
+    if (vidcap.capabilities & V4L2_CAP_READWRITE) {
         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- READWRITE");
     }
-    if (cap.capabilities & V4L2_CAP_ASYNCIO) {
+    if (vidcap.capabilities & V4L2_CAP_ASYNCIO) {
         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- ASYNCIO");
     }
-    if (cap.capabilities & V4L2_CAP_STREAMING) {
+    if (vidcap.capabilities & V4L2_CAP_STREAMING) {
         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- STREAMING");
     }
-    if (cap.capabilities & V4L2_CAP_TIMEPERFRAME) {
+    if (vidcap.capabilities & V4L2_CAP_TIMEPERFRAME) {
         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- TIMEPERFRAME");
     }
 
@@ -1151,7 +1079,6 @@ void cls_v4l2cam::log_types()
 
 void cls_v4l2cam::log_formats()
 {
-    palette_item *palette_array;
     struct v4l2_fmtdesc         dev_format;
     struct v4l2_frmsizeenum     dev_sizes;
     struct v4l2_frmivalenum     dev_frameint;
@@ -1160,10 +1087,6 @@ void cls_v4l2cam::log_formats()
     if (fd_device == -1) {
         return;
     }
-
-    palette_array = (palette_item *)malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
-
-    palette_init(palette_array);
 
     memset(&dev_format, 0, sizeof(struct v4l2_fmtdesc));
     dev_format.index = indx_format = 0;
@@ -1210,8 +1133,6 @@ void cls_v4l2cam::log_formats()
         dev_format.index = ++indx_format;
         dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     }
-
-    myfree(&palette_array);
 
 }
 
@@ -1262,47 +1183,40 @@ void cls_v4l2cam::stop_cam()
         device_close();
     }
 
-    if (buffers != NULL) {
-        for (indx = 0; indx < (int)req.count; indx++){
+    if (buffers != nullptr) {
+        for (indx = 0; indx < (int)vidreq.count; indx++){
             munmap(buffers[indx].ptr, buffers[indx].size);
         }
         myfree(&buffers);
     }
 
-    if (devctrl_count != 0) {
-        for (indx = 0; indx < devctrl_count; indx++){
-            myfree(&devctrl_array[indx].ctrl_iddesc);
-            myfree(&devctrl_array[indx].ctrl_name);
-        }
-        myfree(&devctrl_array);
-    }
-    devctrl_count=0;
     delete params;
 }
 
 void cls_v4l2cam::start_cam()
 {
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening V4L2 device"));
-        device_init();
-        device_open();
-        log_types();
-        log_formats();
-        set_input();
-        set_norm();
-        set_frequency();
-        palette_set();
-        set_fps();
-        ctrls_count();
-        ctrls_list();
-        ctrls_set();
-        set_mmap();
-        set_imgs();
-        if (fd_device == -1) {
-            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("V4L2 device failed to open"));
-            stop_cam();
-            return;
-        }
-        cam->device_status = STATUS_OPENED;
+    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening V4L2 device"));
+    palette_init();
+    device_init();
+    device_open();
+    log_types();
+    log_formats();
+    set_input();
+    set_norm();
+    set_frequency();
+    palette_set();
+    set_fps();
+    ctrls_list();
+    ctrls_set();
+    set_mmap();
+    set_imgs();
+    if (fd_device == -1) {
+        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("V4L2 device failed to open"));
+        stop_cam();
+        return;
+    }
+    cam->device_status = STATUS_OPENED;
+
 }
 
 #endif /* HAVE_V4L2 */
