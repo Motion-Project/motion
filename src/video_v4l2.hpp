@@ -60,10 +60,15 @@ class cls_v4l2cam {
 
     private:
         ctx_dev *cam;
+
+        /* Isolated variables from user config*/
+        int         width;
+        int         height;
+        int         fps;
+        std::string v4l2_device;
+        std::string v4l2_params;
+
         int     fd_device;
-        int     width;
-        int     height;
-        int     fps;
         int     pixfmt_src;
         int     buffer_count;
 
@@ -90,6 +95,8 @@ class cls_v4l2cam {
         void palette_add(uint v4l2id);
         void palette_init();
         int xioctl(unsigned long request, void *arg);
+        void init_vars();
+        void device_open();
         void device_close();
         void ctrls_log();
         void ctrls_list();
@@ -109,9 +116,6 @@ class cls_v4l2cam {
         void set_imgs();
         int capture();
         int convert(unsigned char *img_norm);
-        void device_init();
-        void device_select();
-        void device_open();
         void log_types();
         void log_formats();
         void set_fps();

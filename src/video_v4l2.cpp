@@ -964,35 +964,29 @@ int cls_v4l2cam::convert(unsigned char *img_norm)
 
 }
 
-void cls_v4l2cam::device_init()
+void cls_v4l2cam::init_vars()
 {
     buffer_count= 0;
     pframe = -1;
     finish = cam->finish_dev;
     buffers = nullptr;
 
+    height = cam->conf->height;
+    width = cam->conf->width;
+    fps =cam->conf->framerate;
+    v4l2_device = cam->conf->v4l2_device;
+    v4l2_params = cam->conf->v4l2_params;
+
     params = new ctx_params;
     params->params_count = 0;
     params->update_params = true;
-    util_parms_parse(params, "v4l2_params", cam->conf->v4l2_params);
+    util_parms_parse(params, "v4l2_params", v4l2_params);
     util_parms_add_default(params, "input", "-1");
     util_parms_add_default(params, "palette", "17");
     util_parms_add_default(params, "norm", "0");
     util_parms_add_default(params, "frequency", "0");
 
-    height = cam->conf->height;
-    width = cam->conf->width;
-    fps =cam->conf->framerate;
-}
-
-/* Update and set user params if needed */
-void cls_v4l2cam::device_select()
-{
-    if (params->update_params == true) {
-        util_parms_parse(params, "v4l2_params", cam->conf->v4l2_params);
-        parms_set();
-        ctrls_set();
-    }
+    palette_init();
 }
 
 /* Open the device */
@@ -1000,14 +994,14 @@ void cls_v4l2cam::device_open()
 {
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         , _("Opening video device %s")
-        , cam->conf->v4l2_device.c_str());
+        , v4l2_device.c_str());
 
     cam->watchdog = 60;
-    fd_device = open(cam->conf->v4l2_device.c_str(), O_RDWR|O_CLOEXEC);
+    fd_device = open(v4l2_device.c_str(), O_RDWR|O_CLOEXEC);
     if (fd_device <= 0) {
         MOTPLS_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
             , _("Failed to open video device %s")
-            , cam->conf->v4l2_device.c_str());
+            , v4l2_device.c_str());
         fd_device = -1;
         return;
     }
@@ -1174,7 +1168,7 @@ void cls_v4l2cam::stop_cam()
     int indx;
 
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-        ,_("Closing video device %s"), cam->conf->v4l2_device.c_str());
+        ,_("Closing video device %s"), v4l2_device);
 
     p_type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
@@ -1196,8 +1190,7 @@ void cls_v4l2cam::stop_cam()
 void cls_v4l2cam::start_cam()
 {
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening V4L2 device"));
-    palette_init();
-    device_init();
+    init_vars();
     device_open();
     log_types();
     log_formats();
@@ -1225,8 +1218,6 @@ int cls_v4l2cam::next(ctx_image_data *img_data)
 {
     #ifdef HAVE_V4L2
         int retcd;
-
-        device_select();
 
         retcd = capture();
         if (retcd != 0) {
