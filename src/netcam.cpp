@@ -2545,7 +2545,7 @@ int netcam_next(ctx_dev *cam, ctx_image_data *img_data)
         pthread_mutex_unlock(&cam->netcam_high->mutex);
     }
 
-    rotate_map(cam, img_data);
+    cam->rotate->process(img_data);
 
     return CAPTURE_SUCCESS;
 }

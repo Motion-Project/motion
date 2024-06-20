@@ -572,7 +572,7 @@ static void mlp_init_values(ctx_dev *cam)
         cam->pause = cam->conf->pause;
     }
     cam->v4l2cam = nullptr;
-
+    cam->rotate = nullptr;
 }
 
 /* start the camera */
@@ -648,7 +648,9 @@ void mlp_cleanup(ctx_dev *cam)
 
     mlp_ring_destroy(cam); /* Cleanup the precapture ring buffer */
 
-    rotate_deinit(cam); /* cleanup image rotation data */
+    if (cam->rotate != nullptr){
+        delete cam->rotate;
+    }
 
     if (cam->pipe != -1) {
         close(cam->pipe);
@@ -692,7 +694,7 @@ static void mlp_init(ctx_dev *cam)
 
     algsec_init(cam);
 
-    rotate_init(cam);
+    cam->rotate = new cls_rotate(cam);
 
     draw_init_scale(cam);
 

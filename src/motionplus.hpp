@@ -112,7 +112,7 @@
 
 /* Forward declarations, used in functional definitions of headers */
 struct ctx_motapp;
-struct ctx_rotate;
+
 struct ctx_images;
 struct ctx_image_data;
 struct ctx_dbse;
@@ -122,6 +122,7 @@ struct ctx_algsec;
 struct ctx_config;
 struct ctx_netcam;
 
+class cls_rotate;
 class cls_v4l2cam;
 class cls_convert;
 class cls_libcam;
@@ -448,15 +449,17 @@ struct ctx_dev {
     ctx_images      imgs;
     ctx_netcam      *netcam;            /* this structure contains the context for normal RTSP connection */
     ctx_netcam      *netcam_high;       /* this structure contains the context for high resolution RTSP connection */
-    cls_v4l2cam     *v4l2cam;
+
     ctx_image_data  *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
     ctx_algsec      *algsec;
-    ctx_rotate      *rotate_data;       /* rotation data is thread-specific */
     ctx_movie       *movie_norm;
     ctx_movie       *movie_motion;
     ctx_movie       *movie_timelapse;
     ctx_stream      stream;
     ctx_snd_info    *snd_info;      /* Values for sound processing*/
+
+    cls_rotate      *rotate;
+    cls_v4l2cam     *v4l2cam;
     cls_libcam      *libcam;
 
     bool                    algsec_inuse;        /*Bool for whether we have secondary detection*/

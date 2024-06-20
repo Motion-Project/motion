@@ -888,7 +888,7 @@ int libcam_next(ctx_dev *cam,  ctx_image_data *img_data)
 
         retcd = cam->libcam->cam_next(img_data);
         if (retcd == CAPTURE_SUCCESS) {
-            rotate_map(cam, img_data);
+            cam->rotate->process(img_data);
         }
 
         return retcd;
