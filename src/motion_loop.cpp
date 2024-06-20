@@ -33,7 +33,6 @@
 #include "alg_sec.hpp"
 #include "event.hpp"
 #include "picture.hpp"
-#include "rotate.hpp"
 #include "webu.hpp"
 #include "dbse.hpp"
 #include "draw.hpp"
@@ -146,12 +145,12 @@ static void mlp_ring_process(ctx_dev *cam)
         if (cam->current_image->flags & IMAGE_MOTION) {
             if (cam->new_img & NEWIMG_BEST) {
                 if (cam->current_image->diffs > cam->imgs.image_preview.diffs) {
-                    pic_save_preview(cam);
+                    cam->picture->save_preview();
                 }
             }
             if (cam->new_img & NEWIMG_CENTER) {
                 if (cam->current_image->cent_dist < cam->imgs.image_preview.cent_dist) {
-                    pic_save_preview(cam);
+                    cam->picture->save_preview();
                 }
             }
         }
@@ -206,7 +205,7 @@ static void mlp_detected_trigger(ctx_dev *cam)
             dbse_exec(cam, NULL, "event_start");
 
             if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)) {
-                pic_save_preview(cam);
+                cam->picture->save_preview();
             }
 
         }
@@ -573,6 +572,8 @@ static void mlp_init_values(ctx_dev *cam)
     }
     cam->v4l2cam = nullptr;
     cam->rotate = nullptr;
+    cam->picture = nullptr;
+
 }
 
 /* start the camera */
@@ -652,6 +653,10 @@ void mlp_cleanup(ctx_dev *cam)
         delete cam->rotate;
     }
 
+    if (cam->picture != nullptr){
+        delete cam->picture;
+    }
+
     if (cam->pipe != -1) {
         close(cam->pipe);
         cam->pipe = -1;
@@ -702,9 +707,7 @@ static void mlp_init(ctx_dev *cam)
 
     vlp_init(cam);
 
-    pic_init_mask(cam);
-
-    pic_init_privacy(cam);
+    cam->picture = new cls_picture(cam);
 
     mlp_init_areadetect(cam);
 

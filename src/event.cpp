@@ -144,9 +144,9 @@ static void event_image_detect(ctx_dev *cam)
         passthrough = mycheck_passthrough(cam);
         cam->filetype = FTYPE_IMAGE;
         if ((cam->imgs.size_high > 0) && (passthrough == false)) {
-            pic_save_norm(cam, filename, cam->current_image->image_high);
+            cam->picture->save_norm(filename, cam->current_image->image_high);
         } else {
-            pic_save_norm(cam, filename,cam->current_image->image_norm);
+            cam->picture->save_norm(filename,cam->current_image->image_norm);
         }
         on_picture_save_command(cam, filename);
         dbse_exec(cam, filename, "pic_save");
@@ -162,7 +162,7 @@ static void event_imagem_detect(ctx_dev *cam)
             , cam->conf->picture_filename
             , cam->conf->picture_type);
         cam->filetype = FTYPE_IMAGE_MOTION;
-        pic_save_norm(cam, filename, cam->imgs.image_motion.image_norm);
+        cam->picture->save_norm(filename, cam->imgs.image_motion.image_norm);
         on_picture_save_command(cam, filename);
         dbse_exec(cam, filename, "pic_save");
 
@@ -171,7 +171,7 @@ static void event_imagem_detect(ctx_dev *cam)
             , cam->conf->picture_filename
             , cam->conf->picture_type);
         cam->filetype = FTYPE_IMAGE_ROI;
-        pic_save_roi(cam, filename, cam->current_image->image_norm);
+        cam->picture->save_roi(filename, cam->current_image->image_norm);
         on_picture_save_command(cam, filename);
         dbse_exec(cam, filename, "pic_save");
     }
@@ -195,9 +195,9 @@ static void event_image_snapshot(ctx_dev *cam)
         passthrough = mycheck_passthrough(cam);
         cam->filetype = FTYPE_IMAGE_SNAPSHOT;
         if ((cam->imgs.size_high > 0) && (passthrough == false)) {
-            pic_save_norm(cam, filename, cam->current_image->image_high);
+            cam->picture->save_norm(filename, cam->current_image->image_high);
         } else {
-            pic_save_norm(cam, filename, cam->current_image->image_norm);
+            cam->picture->save_norm(filename, cam->current_image->image_norm);
         }
         on_picture_save_command(cam, filename);
         dbse_exec(cam, filename, "pic_save");
@@ -220,9 +220,9 @@ static void event_image_snapshot(ctx_dev *cam)
         passthrough = mycheck_passthrough(cam);
         cam->filetype = FTYPE_IMAGE_SNAPSHOT;
         if ((cam->imgs.size_high > 0) && (!passthrough)) {
-            pic_save_norm(cam, filename, cam->current_image->image_high);
+            cam->picture->save_norm(filename, cam->current_image->image_high);
         } else {
-            pic_save_norm(cam, filename, cam->current_image->image_norm);
+            cam->picture->save_norm(filename, cam->current_image->image_norm);
         }
         on_picture_save_command(cam, filename);
         dbse_exec(cam, filename, "pic_save");
@@ -251,9 +251,9 @@ static void event_image_preview(ctx_dev *cam)
         passthrough = mycheck_passthrough(cam);
         cam->filetype = FTYPE_IMAGE;
         if ((cam->imgs.size_high > 0) && (passthrough == false)) {
-            pic_save_norm(cam, filename, cam->imgs.image_preview.image_high);
+            cam->picture->save_norm(filename, cam->imgs.image_preview.image_high);
         } else {
-            pic_save_norm(cam, filename, cam->imgs.image_preview.image_norm);
+            cam->picture->save_norm(filename, cam->imgs.image_preview.image_norm);
         }
         on_picture_save_command(cam, filename);
         dbse_exec(cam, filename, "pic_save");

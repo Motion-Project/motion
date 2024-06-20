@@ -113,8 +113,8 @@ static void webu_getimg_norm(ctx_dev *cam)
             cam->stream.norm.jpg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
         if (cam->current_image->image_norm != NULL && cam->stream.norm.consumed) {
-            cam->stream.norm.jpg_sz = pic_put_memory(cam
-                ,cam->stream.norm.jpg_data
+            cam->stream.norm.jpg_sz = cam->picture->put_memory(
+                cam->stream.norm.jpg_data
                 ,cam->imgs.size_norm
                 ,cam->current_image->image_norm
                 ,cam->conf->stream_quality
@@ -155,12 +155,12 @@ static void webu_getimg_sub(ctx_dev *cam)
                 if (cam->imgs.image_substream == NULL) {
                     cam->imgs.image_substream =(unsigned char*)mymalloc(subsize);
                 }
-                pic_scale_img(cam->imgs.width
+                cam->picture->scale_img(cam->imgs.width
                     ,cam->imgs.height
                     ,cam->current_image->image_norm
                     ,cam->imgs.image_substream);
-                cam->stream.sub.jpg_sz = pic_put_memory(cam
-                    ,cam->stream.sub.jpg_data
+                cam->stream.sub.jpg_sz = cam->picture->put_memory(
+                    cam->stream.sub.jpg_data
                     ,subsize
                     ,cam->imgs.image_substream
                     ,cam->conf->stream_quality
@@ -168,8 +168,8 @@ static void webu_getimg_sub(ctx_dev *cam)
                     ,(cam->imgs.height / 2));
             } else {
                 /* Substream was not multiple of 8 so send full image*/
-                cam->stream.sub.jpg_sz = pic_put_memory(cam
-                    ,cam->stream.sub.jpg_data
+                cam->stream.sub.jpg_sz = cam->picture->put_memory(
+                    cam->stream.sub.jpg_data
                     ,cam->imgs.size_norm
                     ,cam->current_image->image_norm
                     ,cam->conf->stream_quality
@@ -190,7 +190,7 @@ static void webu_getimg_sub(ctx_dev *cam)
             if (cam->imgs.image_substream == NULL) {
                 cam->imgs.image_substream =(unsigned char*)mymalloc(subsize);
             }
-            pic_scale_img(cam->imgs.width
+            cam->picture->scale_img(cam->imgs.width
                 ,cam->imgs.height
                 ,cam->current_image->image_norm
                 ,cam->imgs.image_substream);
@@ -216,8 +216,8 @@ static void webu_getimg_motion(ctx_dev *cam)
             cam->stream.motion.jpg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
         if (cam->imgs.image_motion.image_norm != NULL  && cam->stream.motion.consumed) {
-            cam->stream.motion.jpg_sz = pic_put_memory(cam
-                ,cam->stream.motion.jpg_data
+            cam->stream.motion.jpg_sz = cam->picture->put_memory(
+                cam->stream.motion.jpg_data
                 ,cam->imgs.size_norm
                 ,cam->imgs.image_motion.image_norm
                 ,cam->conf->stream_quality
@@ -250,8 +250,8 @@ static void webu_getimg_source(ctx_dev *cam)
             cam->stream.source.jpg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
         if (cam->imgs.image_virgin != NULL && cam->stream.source.consumed) {
-            cam->stream.source.jpg_sz = pic_put_memory(cam
-                ,cam->stream.source.jpg_data
+            cam->stream.source.jpg_sz = cam->picture->put_memory(
+                cam->stream.source.jpg_data
                 ,cam->imgs.size_norm
                 ,cam->imgs.image_virgin
                 ,cam->conf->stream_quality

@@ -122,6 +122,7 @@ struct ctx_algsec;
 struct ctx_config;
 struct ctx_netcam;
 
+class cls_picture;
 class cls_rotate;
 class cls_v4l2cam;
 class cls_convert;
@@ -458,6 +459,7 @@ struct ctx_dev {
     ctx_stream      stream;
     ctx_snd_info    *snd_info;      /* Values for sound processing*/
 
+    cls_picture     *picture;
     cls_rotate      *rotate;
     cls_v4l2cam     *v4l2cam;
     cls_libcam      *libcam;
