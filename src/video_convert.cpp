@@ -20,12 +20,7 @@
 #include "logger.hpp"
 #include "util.hpp"
 #include "jpegutils.hpp"
-
-typedef struct {
-    int is_abs;
-    int len;
-    int val;
-} code_table;
+#include "video_convert.hpp"
 
 /**
  * sonix_decompress_init
@@ -35,7 +30,7 @@ typedef struct {
  *   present at the MSB of byte x.
  *
  */
-static void vid_sonix_decompress_init(code_table *table)
+void cls_convert::sonix_decompress_init(sonix_table *table)
 {
     int i;
     int is_abs, val, len;
@@ -101,21 +96,21 @@ static void vid_sonix_decompress_init(code_table *table)
  *         Returns <0 if operation failed.
  *
  */
-int vid_sonix_decompress(unsigned char *img_dst, unsigned char *img_src, int width, int height)
+int cls_convert::sonix_decompress(u_char *img_dst, u_char *img_src)
 {
     int row, col;
     int val;
     int bitpos;
-    unsigned char code;
-    unsigned char *addr;
+    u_char code;
+    u_char *addr;
 
     /* Local storage */
-    static code_table table[256];
+    static sonix_table table[256];
     static int init_done = 0;
 
     if (!init_done) {
         init_done = 1;
-        vid_sonix_decompress_init(table);
+        sonix_decompress_init(table);
     }
 
     bitpos = 0;
@@ -126,13 +121,13 @@ int vid_sonix_decompress(unsigned char *img_dst, unsigned char *img_src, int wid
         /* First two pixels in first two rows are stored as raw 8-bit. */
         if (row < 2) {
             addr = img_src + (bitpos >> 3);
-            code =(unsigned char)( (addr[0] << (bitpos & 7)) |
+            code =(u_char)( (addr[0] << (bitpos & 7)) |
                     (addr[1] >> (8 - (bitpos & 7))));
             bitpos += 8;
             *img_dst++ = code;
 
             addr = img_src + (bitpos >> 3);
-            code = (unsigned char)((addr[0] << (bitpos & 7)) |
+            code = (u_char)((addr[0] << (bitpos & 7)) |
                     (addr[1] >> (8 - (bitpos & 7))));
             bitpos += 8;
             *img_dst++ = code;
@@ -143,7 +138,7 @@ int vid_sonix_decompress(unsigned char *img_dst, unsigned char *img_src, int wid
         while (col < width) {
             /* Get bitcode from bitstream. */
             addr = img_src + (bitpos >> 3);
-            code =(unsigned char)((addr[0] << (bitpos & 7)) |
+            code =(u_char)((addr[0] << (bitpos & 7)) |
                 (addr[1] >> (8 - (bitpos & 7))));
 
             /* Update bit position. */
@@ -171,7 +166,7 @@ int vid_sonix_decompress(unsigned char *img_dst, unsigned char *img_src, int wid
             } else if (val > 255) {
                 *img_dst++ = 255;
             } else {
-                *img_dst++ =(unsigned char)val;
+                *img_dst++ =(u_char)val;
             }
             col++;
         }
@@ -188,10 +183,10 @@ int vid_sonix_decompress(unsigned char *img_dst, unsigned char *img_src, int wid
  * Takafumi Mizuno <taka-qce@ls-a.jp>
  *
  */
-void vid_bayer2rgb24(unsigned char *img_dst, unsigned char *img_src, long int width, long int height)
+void cls_convert::bayer2rgb24(u_char *img_dst, u_char *img_src)
 {
     long int i;
-    unsigned char *rawpt, *scanpt;
+    u_char *rawpt, *scanpt;
     long int size;
 
     rawpt = img_src;
@@ -203,70 +198,70 @@ void vid_bayer2rgb24(unsigned char *img_dst, unsigned char *img_src, long int wi
             if ((i & 1) == 0) {
                 /* B */
                 if ((i > width) && ((i % width) > 0)) {
-                    *scanpt++ = (unsigned char)(*rawpt);        /* B */
-                    *scanpt++ = (unsigned char)((*(rawpt - 1) +
+                    *scanpt++ = (u_char)(*rawpt);        /* B */
+                    *scanpt++ = (u_char)((*(rawpt - 1) +
                                 *(rawpt + 1) +
                                 *(rawpt + width) +
                                 *(rawpt - width)) / 4);         /* G */
-                    *scanpt++ = (unsigned char)((*(rawpt - width - 1) +
+                    *scanpt++ = (u_char)((*(rawpt - width - 1) +
                                 *(rawpt - width + 1) +
                                 *(rawpt + width - 1) +
                                 *(rawpt + width + 1)) / 4);     /* R */
                 } else {
                     /* First line or left column. */
-                    *scanpt++ = (unsigned char)(*rawpt);        /* B */
-                    *scanpt++ = (unsigned char)((*(rawpt + 1) +
+                    *scanpt++ = (u_char)(*rawpt);        /* B */
+                    *scanpt++ = (u_char)((*(rawpt + 1) +
                                 *(rawpt + width)) / 2);         /* G */
-                    *scanpt++ = (unsigned char)(*(rawpt + width + 1));       /* R */
+                    *scanpt++ = (u_char)(*(rawpt + width + 1));       /* R */
                 }
             } else {
                 /* (B)G */
                 if ((i > width) && ((i % width) < (width - 1))) {
-                    *scanpt++ = (unsigned char)((*(rawpt - 1) +
+                    *scanpt++ = (u_char)((*(rawpt - 1) +
                                 *(rawpt + 1)) / 2);             /* B */
-                    *scanpt++ = (unsigned char)(*rawpt);        /* G */
-                    *scanpt++ = (unsigned char)((*(rawpt + width) +
+                    *scanpt++ = (u_char)(*rawpt);        /* G */
+                    *scanpt++ = (u_char)((*(rawpt + width) +
                                 *(rawpt - width)) / 2);  /* R */
                 } else {
                     /* First line or right column. */
-                    *scanpt++ = (unsigned char)(*(rawpt - 1));      /* B */
-                    *scanpt++ = (unsigned char)(*rawpt);            /* G */
-                    *scanpt++ = (unsigned char)(*(rawpt + width));  /* R */
+                    *scanpt++ = (u_char)(*(rawpt - 1));      /* B */
+                    *scanpt++ = (u_char)(*rawpt);            /* G */
+                    *scanpt++ = (u_char)(*(rawpt + width));  /* R */
                 }
             }
         } else {
             if ((i & 1) == 0) {
                 /* G(R) */
                 if ((i < (width * (height - 1))) && ((i % width) > 0)) {
-                    *scanpt++ =(unsigned char)( (*(rawpt + width) +
+                    *scanpt++ =(u_char)( (*(rawpt + width) +
                                 *(rawpt - width)) / 2);                 /* B */
-                    *scanpt++ =(unsigned char)( *rawpt);                /* G */
-                    *scanpt++ =(unsigned char)( (*(rawpt - 1) +
+                    *scanpt++ =(u_char)( *rawpt);                /* G */
+                    *scanpt++ =(u_char)( (*(rawpt - 1) +
                                 *(rawpt + 1)) / 2);                     /* R */
                 } else {
                     /* Bottom line or left column. */
-                    *scanpt++ = (unsigned char)(*(rawpt - width));      /* B */
-                    *scanpt++ = (unsigned char)(*rawpt);                /* G */
-                    *scanpt++ = (unsigned char)(*(rawpt + 1));          /* R */
+                    *scanpt++ = (u_char)(*(rawpt - width));      /* B */
+                    *scanpt++ = (u_char)(*rawpt);                /* G */
+                    *scanpt++ = (u_char)(*(rawpt + 1));          /* R */
                 }
             } else {
                 /* R */
                 if (i < (width * (height - 1)) && ((i % width) < (width - 1))) {
-                    *scanpt++ = (unsigned char)( (*(rawpt - width - 1) +
+                    *scanpt++ = (u_char)( (*(rawpt - width - 1) +
                                 *(rawpt - width + 1) +
                                 *(rawpt + width - 1) +
                                 *(rawpt + width + 1)) / 4);             /* B */
-                    *scanpt++ = (unsigned char)((*(rawpt - 1) +
+                    *scanpt++ = (u_char)((*(rawpt - 1) +
                                 *(rawpt + 1) +
                                 *(rawpt - width) +
                                 *(rawpt + width)) / 4);                 /* G */
-                    *scanpt++ = (unsigned char)(*rawpt);                /* R */
+                    *scanpt++ = (u_char)(*rawpt);                /* R */
                 } else {
                     /* Bottom line or right column. */
-                    *scanpt++ = (unsigned char)(*(rawpt - width - 1));  /* B */
-                    *scanpt++ = (unsigned char)((*(rawpt - 1) +
+                    *scanpt++ = (u_char)(*(rawpt - width - 1));  /* B */
+                    *scanpt++ = (u_char)((*(rawpt - 1) +
                                 *(rawpt - width)) / 2);                 /* G */
-                    *scanpt++ = (unsigned char)(*rawpt);                /* R */
+                    *scanpt++ = (u_char)(*rawpt);                /* R */
                 }
             }
         }
@@ -275,9 +270,9 @@ void vid_bayer2rgb24(unsigned char *img_dst, unsigned char *img_src, long int wi
 
 }
 
-void vid_yuv422to420p(unsigned char *img_dst, unsigned char *img_src, int width, int height)
+void cls_convert::yuv422to420p(u_char *img_dst, u_char *img_src)
 {
-    unsigned char *src, *dest, *src2, *dest2;
+    u_char *src, *dest, *src2, *dest2;
     int i, j;
 
     /* Create the Y plane. */
@@ -294,11 +289,11 @@ void vid_yuv422to420p(unsigned char *img_dst, unsigned char *img_src, int width,
     dest2 = dest + (width * height) / 4;
     for (i = height / 2; i > 0; i--) {
         for (j = width / 2; j > 0; j--) {
-            *dest = (unsigned char)(((int) *src + (int) *src2) / 2);
+            *dest = (u_char)(((int) *src + (int) *src2) / 2);
             src += 2;
             src2 += 2;
             dest++;
-            *dest2 = (unsigned char)(((int) *src + (int) *src2) / 2);
+            *dest2 = (u_char)(((int) *src + (int) *src2) / 2);
             src += 2;
             src2 += 2;
             dest2++;
@@ -308,10 +303,10 @@ void vid_yuv422to420p(unsigned char *img_dst, unsigned char *img_src, int width,
     }
 }
 
-void vid_yuv422pto420p(unsigned char *img_dst, unsigned char *img_src, int width, int height)
+void cls_convert::yuv422pto420p(u_char *img_dst, u_char *img_src)
 {
-    unsigned char *src, *dest, *dest2;
-    unsigned char *src_u, *src_u2, *src_v, *src_v2;
+    u_char *src, *dest, *dest2;
+    u_char *src_u, *src_u2, *src_v, *src_v2;
 
     int i, j;
     /*Planar version of 422 */
@@ -332,12 +327,12 @@ void vid_yuv422pto420p(unsigned char *img_dst, unsigned char *img_src, int width
         src_v2 = src_v  + (width/2);
 
         for (j = 0; j < (width / 2); j++) {
-            *dest = (unsigned char)(((int) *src_u + (int) *src_u2) / 2);
+            *dest = (u_char)(((int) *src_u + (int) *src_u2) / 2);
             src_u ++;
             src_u2++;
             dest++;
 
-            *dest2 = (unsigned char)(((int) *src_v + (int) *src_v2) / 2);
+            *dest2 = (u_char)(((int) *src_v + (int) *src_v2) / 2);
             src_v ++;
             src_v2++;
             dest2++;
@@ -345,12 +340,12 @@ void vid_yuv422pto420p(unsigned char *img_dst, unsigned char *img_src, int width
     }
 }
 
-void vid_uyvyto420p(unsigned char *img_dst, unsigned char *img_src, int width, int height)
+void cls_convert::uyvyto420p(u_char *img_dst, u_char *img_src)
 {
-    unsigned char *pY = img_dst;
-    unsigned char *pU = pY + (width * height);
-    unsigned char *pV = pU + (width * height) / 4;
-    unsigned int uv_offset = width * 2 * sizeof(unsigned char);
+    u_char *pY = img_dst;
+    u_char *pU = pY + (width * height);
+    u_char *pV = pU + (width * height) / 4;
+    unsigned int uv_offset = width * 2 * sizeof(u_char);
     int ix, jx;
 
     for (ix = 0; ix < height; ix++) {
@@ -361,7 +356,7 @@ void vid_uyvyto420p(unsigned char *img_dst, unsigned char *img_src, int width, i
                 calc = *img_src;
                 calc += *(img_src + uv_offset);
                 calc /= 2;
-                *pU++ = (unsigned char) calc;
+                *pU++ = (u_char) calc;
             }
 
             img_src++;
@@ -371,7 +366,7 @@ void vid_uyvyto420p(unsigned char *img_dst, unsigned char *img_src, int width, i
                 calc = *img_src;
                 calc += *(img_src + uv_offset);
                 calc /= 2;
-                *pV++ = (unsigned char) calc;
+                *pV++ = (u_char) calc;
             }
 
             img_src++;
@@ -380,11 +375,10 @@ void vid_uyvyto420p(unsigned char *img_dst, unsigned char *img_src, int width, i
     }
 }
 
-static void vid_rgb_bgr(unsigned char *img_dst, unsigned char *img_src
-    , int width, int height, int rgb)
+void cls_convert::rgb_bgr(u_char *img_dst, u_char *img_src, int rgb)
 {
-    unsigned char *y, *u, *v;
-    unsigned char *r, *g, *b;
+    u_char *y, *u, *v;
+    u_char *r, *g, *b;
     int i, loop;
 
     if (rgb == 1) {
@@ -405,15 +399,15 @@ static void vid_rgb_bgr(unsigned char *img_dst, unsigned char *img_src
 
     for (loop = 0; loop < height; loop++) {
         for (i = 0; i < width; i += 2) {
-            *y++ = (unsigned char)((9796 ** r + 19235 ** g + 3736 ** b) >> 15);
-            *u += (unsigned char)(((-4784 ** r - 9437 ** g + 14221 ** b) >> 17) + 32);
-            *v += (unsigned char)(((20218 ** r - 16941 ** g - 3277 ** b) >> 17) + 32);
+            *y++ = (u_char)((9796 ** r + 19235 ** g + 3736 ** b) >> 15);
+            *u += (u_char)(((-4784 ** r - 9437 ** g + 14221 ** b) >> 17) + 32);
+            *v += (u_char)(((20218 ** r - 16941 ** g - 3277 ** b) >> 17) + 32);
             r += 3;
             g += 3;
             b += 3;
-            *y++ = (unsigned char)((9796 ** r + 19235 ** g + 3736 ** b) >> 15);
-            *u += (unsigned char)(((-4784 ** r - 9437 ** g + 14221 ** b) >> 17) + 32);
-            *v += (unsigned char)(((20218 ** r - 16941 ** g - 3277 ** b) >> 17) + 32);
+            *y++ = (u_char)((9796 ** r + 19235 ** g + 3736 ** b) >> 15);
+            *u += (u_char)(((-4784 ** r - 9437 ** g + 14221 ** b) >> 17) + 32);
+            *v += (u_char)(((20218 ** r - 16941 ** g - 3277 ** b) >> 17) + 32);
             r += 3;
             g += 3;
             b += 3;
@@ -428,16 +422,16 @@ static void vid_rgb_bgr(unsigned char *img_dst, unsigned char *img_src
     }
 }
 
-void vid_rgb24toyuv420p(unsigned char *img_dst, unsigned char *img_src
-    , int width, int height)
+void cls_convert::rgb24toyuv420p(u_char *img_dst, u_char *img_src
+    )
 {
-    vid_rgb_bgr(img_dst, img_src, width, height, 1);
+    rgb_bgr(img_dst, img_src, 1);
 }
 
-void vid_bgr24toyuv420p(unsigned char *img_dst, unsigned char *img_src
-    , int width, int height)
+void cls_convert::bgr24toyuv420p(u_char *img_dst, u_char *img_src
+    )
 {
-    vid_rgb_bgr(img_dst, img_src, width, height, 0);
+    rgb_bgr(img_dst, img_src, 0);
 }
 
 /**
@@ -449,13 +443,13 @@ void vid_bgr24toyuv420p(unsigned char *img_dst, unsigned char *img_src
  *  2  if jpeg lib threw a "corrupt jpeg data" warning.
  *     in this case, "a damaged output image is likely."
  */
-int vid_mjpegtoyuv420p(unsigned char *img_dst, unsigned char *img_src, int width, int height, unsigned int size)
+int cls_convert::mjpegtoyuv420p(u_char *img_dst, u_char *img_src, int size)
 {
-    unsigned char *ptr_buffer;
+    u_char *ptr_buffer;
     size_t soi_pos = 0;
     int ret = 0;
 
-    ptr_buffer =(unsigned char*) memmem(img_src, size, "\xff\xd8", 2);
+    ptr_buffer =(u_char*) memmem(img_src, size, "\xff\xd8", 2);
     if (ptr_buffer == NULL) {
         MOTPLS_LOG(CRT, TYPE_VIDEO, NO_ERRNO,_("Corrupt image ... continue"));
         return 1;
@@ -466,7 +460,7 @@ int vid_mjpegtoyuv420p(unsigned char *img_dst, unsigned char *img_src, int width
     */
     while (ptr_buffer != NULL && ((size - soi_pos - 1) > 2) ){
         soi_pos = ptr_buffer - img_src;
-        ptr_buffer =(unsigned char*) memmem(img_src + soi_pos + 1, size - soi_pos - 1, "\xff\xd8", 2);
+        ptr_buffer =(u_char*) memmem(img_src + soi_pos + 1, size - soi_pos - 1, "\xff\xd8", 2);
     }
 
     if (soi_pos != 0) {
@@ -485,7 +479,7 @@ int vid_mjpegtoyuv420p(unsigned char *img_dst, unsigned char *img_src, int width
     return ret;
 }
 
-void vid_y10torgb24(unsigned char *img_dst, unsigned char *img_src, int width, int height, int shift)
+void cls_convert::y10torgb24(u_char *img_dst, u_char *img_src, int shift)
 {
     /* Source code: raw2rgbpnm project */
     /* url: http://salottisipuli.retiisi.org.uk/cgi-bin/gitweb.cgi?p=~sailus/raw2rgbpnm.git;a=summary */
@@ -507,18 +501,108 @@ void vid_y10torgb24(unsigned char *img_dst, unsigned char *img_src, int width, i
         for (src_x = 0, dst_x = 0; dst_x < src_size[0]; src_x++, dst_x++) {
             a = (img_src[src_y*src_stride + src_x*2+0] |
                 (img_src[src_y*src_stride + src_x*2+1] << 8)) >> shift;
-            img_dst[dst_y*rgb_stride+3*dst_x+0] = (unsigned char)a;
-            img_dst[dst_y*rgb_stride+3*dst_x+1] = (unsigned char)a;
-            img_dst[dst_y*rgb_stride+3*dst_x+2] = (unsigned char)a;
+            img_dst[dst_y*rgb_stride+3*dst_x+0] = (u_char)a;
+            img_dst[dst_y*rgb_stride+3*dst_x+1] = (u_char)a;
+            img_dst[dst_y*rgb_stride+3*dst_x+2] = (u_char)a;
         }
     }
 }
 
-void vid_greytoyuv420p(unsigned char *img_dst, unsigned char *img_src, int width, int height)
+void cls_convert::greytoyuv420p(u_char *img_dst, u_char *img_src)
 {
-
     memcpy(img_dst, img_src, (width*height));
     memset(img_dst+(width*height), 128, (width * height) / 2);
+}
 
+/* Convert captured image to the standard pixel format*/
+int cls_convert::process(u_char *img_dst, u_char *img_src, int clen)
+{
+    /*The FALLTHROUGH is a special comment required by compiler. */
+    switch (pixfmt_src) {
+    case V4L2_PIX_FMT_RGB24:
+        rgb24toyuv420p(img_dst, img_src);
+        return 0;
+
+    case V4L2_PIX_FMT_UYVY:
+        uyvyto420p(img_dst, img_src);
+        return 0;
+
+    case V4L2_PIX_FMT_YUYV:
+        yuv422to420p(img_dst, img_src);
+        return 0;
+
+    case V4L2_PIX_FMT_YUV422P:
+        yuv422pto420p(img_dst, img_src);
+        return 0;
+
+    case V4L2_PIX_FMT_YUV420:
+        memcpy(img_dst, img_src, clen);
+        return 0;
+
+    case V4L2_PIX_FMT_PJPG:
+        /*FALLTHROUGH*/
+    case V4L2_PIX_FMT_JPEG:
+        /*FALLTHROUGH*/
+    case V4L2_PIX_FMT_MJPEG:
+        return mjpegtoyuv420p(img_dst, img_src, clen);
+
+    case V4L2_PIX_FMT_SBGGR16:
+        /*FALLTHROUGH*/
+    case V4L2_PIX_FMT_SGBRG8:
+        /*FALLTHROUGH*/
+    case V4L2_PIX_FMT_SGRBG8:
+        /*FALLTHROUGH*/
+    case V4L2_PIX_FMT_SBGGR8:    /* bayer */
+        bayer2rgb24(common_buffer, img_src);
+        rgb24toyuv420p(img_dst, common_buffer);
+        return 0;
+
+    case V4L2_PIX_FMT_SRGGB8: /*New Pi Camera format*/
+        bayer2rgb24(common_buffer, img_src);
+        rgb24toyuv420p(img_dst, common_buffer);
+        return 0;
+
+    case V4L2_PIX_FMT_SPCA561:
+        /*FALLTHROUGH*/
+    case V4L2_PIX_FMT_SN9C10X:
+        sonix_decompress(img_dst, img_src);
+        bayer2rgb24(common_buffer, img_dst);
+        rgb24toyuv420p(img_dst, common_buffer);
+        return 0;
+
+    case V4L2_PIX_FMT_Y12:
+        y10torgb24(common_buffer, img_src, 2);
+        rgb24toyuv420p(img_dst, common_buffer);
+        return 0;
+    case V4L2_PIX_FMT_Y10:
+        y10torgb24(common_buffer, img_src, 4);
+        rgb24toyuv420p(img_dst, common_buffer);
+        return 0;
+    case V4L2_PIX_FMT_GREY:
+        greytoyuv420p(img_dst, img_src);
+        return 0;
+    }
+
+    return -1;
+
+}
+
+
+cls_convert::cls_convert(ctx_dev *p_cam, int p_pix, int p_w, int p_h)
+{
+    cam = p_cam;
+    width = p_w;
+    height = p_h;
+    pixfmt_src = p_pix;
+
+    common_buffer =(u_char*) mymalloc(3 * width * height);
+
+}
+
+cls_convert::~cls_convert()
+{
+    if (common_buffer != nullptr) {
+        free(common_buffer);
+    }
 }
 

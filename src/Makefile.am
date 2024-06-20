@@ -43,7 +43,7 @@ motionplus_SOURCES = \
 	sound.hpp          sound.cpp \
 	util.hpp           util.cpp \
 	video_v4l2.hpp     video_v4l2.cpp \
-	video_common.hpp   video_common.cpp \
+	video_convert.hpp  video_convert.cpp \
 	video_loopback.hpp video_loopback.cpp \
 	webu.hpp           webu.cpp \
 	webu_ans.hpp       webu_ans.cpp \

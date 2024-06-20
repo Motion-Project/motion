@@ -56,10 +56,10 @@ class cls_v4l2cam {
         ~cls_v4l2cam();
 
         int next(ctx_image_data *img_data);
-        void restart_cam();
 
     private:
         ctx_dev *cam;
+        cls_convert *convert;
 
         /* Isolated variables from user config*/
         int         width;
@@ -87,38 +87,37 @@ class cls_v4l2cam {
             struct v4l2_format          vidfmt;
             struct v4l2_requestbuffers  vidreq;
             struct v4l2_buffer          vidbuf;
+
+            void start_cam();
+            void stop_cam();
+
+            void palette_add(uint v4l2id);
+            void palette_init();
+            int xioctl(unsigned long request, void *arg);
+            void init_vars();
+            void device_open();
+            void device_close();
+            void ctrls_log();
+            void ctrls_list();
+            void ctrls_set();
+            void parms_set();
+            void set_input();
+            void set_norm();
+            void set_frequency();
+            int pixfmt_try(uint pixformat);
+            int pixfmt_stride();
+            int pixfmt_adjust();
+            int pixfmt_set(uint pixformat);
+            void params_check();
+            int pixfmt_list();
+            void palette_set();
+            void set_mmap();
+            void set_imgs();
+            int capture();
+            void log_types();
+            void log_formats();
+            void set_fps();
         #endif
-
-        void start_cam();
-        void stop_cam();
-
-        void palette_add(uint v4l2id);
-        void palette_init();
-        int xioctl(unsigned long request, void *arg);
-        void init_vars();
-        void device_open();
-        void device_close();
-        void ctrls_log();
-        void ctrls_list();
-        void ctrls_set();
-        void parms_set();
-        void set_input();
-        void set_norm();
-        void set_frequency();
-        int pixfmt_try(uint pixformat);
-        int pixfmt_stride();
-        int pixfmt_adjust();
-        int pixfmt_set(uint pixformat);
-        void params_check();
-        int pixfmt_list();
-        void palette_set();
-        void set_mmap();
-        void set_imgs();
-        int capture();
-        int convert(unsigned char *img_norm);
-        void log_types();
-        void log_formats();
-        void set_fps();
 
 
 };

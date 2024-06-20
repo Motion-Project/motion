@@ -21,7 +21,7 @@
 #include "logger.hpp"
 #include "util.hpp"
 #include "rotate.hpp"
-#include "video_common.hpp"
+#include "video_convert.hpp"
 #include "video_v4l2.hpp"
 #include <sys/mman.h>
 
@@ -839,6 +839,9 @@ void cls_v4l2cam::set_imgs()
     cam->imgs.size_norm = (cam->imgs.motionsize * 3) / 2;
     cam->conf->width = width;
     cam->conf->height = height;
+
+    convert = new cls_convert(cam, pixfmt_src, width, height);
+
 }
 
 /* Capture the image into the buffer */
@@ -888,88 +891,13 @@ int cls_v4l2cam::capture()
 
 }
 
-/* Convert captured image to the standard pixel format*/
-int cls_v4l2cam::convert(unsigned char *img_norm)
-{
-    video_buff *the_buffer = &buffers[vidbuf.index];
-
-    /*The FALLTHROUGH is a special comment required by compiler. */
-    switch (pixfmt_src) {
-    case V4L2_PIX_FMT_RGB24:
-        vid_rgb24toyuv420p(img_norm, the_buffer->ptr, width, height);
-        return 0;
-
-    case V4L2_PIX_FMT_UYVY:
-        vid_uyvyto420p(img_norm, the_buffer->ptr, width, height);
-        return 0;
-
-    case V4L2_PIX_FMT_YUYV:
-        vid_yuv422to420p(img_norm, the_buffer->ptr, width, height);
-        return 0;
-
-    case V4L2_PIX_FMT_YUV422P:
-        vid_yuv422pto420p(img_norm, the_buffer->ptr, width, height);
-        return 0;
-
-    case V4L2_PIX_FMT_YUV420:
-        memcpy(img_norm, the_buffer->ptr, the_buffer->content_length);
-        return 0;
-
-    case V4L2_PIX_FMT_PJPG:
-        /*FALLTHROUGH*/
-    case V4L2_PIX_FMT_JPEG:
-        /*FALLTHROUGH*/
-    case V4L2_PIX_FMT_MJPEG:
-        return vid_mjpegtoyuv420p(img_norm, the_buffer->ptr, width, height
-                                    ,the_buffer->content_length);
-
-    case V4L2_PIX_FMT_SBGGR16:
-        /*FALLTHROUGH*/
-    case V4L2_PIX_FMT_SGBRG8:
-        /*FALLTHROUGH*/
-    case V4L2_PIX_FMT_SGRBG8:
-        /*FALLTHROUGH*/
-    case V4L2_PIX_FMT_SBGGR8:    /* bayer */
-        vid_bayer2rgb24(cam->imgs.common_buffer, the_buffer->ptr, width, height);
-        vid_rgb24toyuv420p(img_norm, cam->imgs.common_buffer, width, height);
-        return 0;
-
-    case V4L2_PIX_FMT_SRGGB8: /*New Pi Camera format*/
-        vid_bayer2rgb24(cam->imgs.common_buffer, the_buffer->ptr, width, height);
-        vid_rgb24toyuv420p(img_norm, cam->imgs.common_buffer, width, height);
-        return 0;
-
-    case V4L2_PIX_FMT_SPCA561:
-        /*FALLTHROUGH*/
-    case V4L2_PIX_FMT_SN9C10X:
-        vid_sonix_decompress(img_norm, the_buffer->ptr, width, height);
-        vid_bayer2rgb24(cam->imgs.common_buffer, img_norm, width, height);
-        vid_rgb24toyuv420p(img_norm, cam->imgs.common_buffer, width, height);
-        return 0;
-
-    case V4L2_PIX_FMT_Y12:
-        vid_y10torgb24(cam->imgs.common_buffer, the_buffer->ptr, width, height, 2);
-        vid_rgb24toyuv420p(img_norm, cam->imgs.common_buffer, width, height);
-        return 0;
-    case V4L2_PIX_FMT_Y10:
-        vid_y10torgb24(cam->imgs.common_buffer, the_buffer->ptr, width, height, 4);
-        vid_rgb24toyuv420p(img_norm, cam->imgs.common_buffer, width, height);
-        return 0;
-    case V4L2_PIX_FMT_GREY:
-        vid_greytoyuv420p(img_norm, the_buffer->ptr, width, height);
-        return 0;
-    }
-
-    return -1;
-
-}
-
 void cls_v4l2cam::init_vars()
 {
     buffer_count= 0;
     pframe = -1;
     finish = cam->finish_dev;
     buffers = nullptr;
+    convert = nullptr;
 
     height = cam->conf->height;
     width = cam->conf->width;
@@ -1184,6 +1112,10 @@ void cls_v4l2cam::stop_cam()
         myfree(&buffers);
     }
 
+    if (convert != nullptr) {
+        delete convert;
+    }
+
     delete params;
 }
 
@@ -1224,7 +1156,10 @@ int cls_v4l2cam::next(ctx_image_data *img_data)
             return CAPTURE_FAILURE;
         }
 
-        retcd = convert(img_data->image_norm);
+        retcd = convert->process(
+            img_data->image_norm
+            , buffers[vidbuf.index].ptr
+            , buffers[vidbuf.index].content_length);
         if (retcd != 0) {
             return CAPTURE_FAILURE;
         }
@@ -1236,12 +1171,6 @@ int cls_v4l2cam::next(ctx_image_data *img_data)
         (void)img_data;
         return CAPTURE_FAILURE;
     #endif // HAVE_V4L2
-}
-
-void cls_v4l2cam::restart_cam()
-{
-    stop_cam();
-    start_cam();
 }
 
 cls_v4l2cam::cls_v4l2cam(ctx_dev *p_cam)

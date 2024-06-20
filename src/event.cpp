@@ -26,7 +26,6 @@
 #include "event.hpp"
 #include "dbse.hpp"
 #include "video_loopback.hpp"
-#include "video_common.hpp"
 #include "webu_getimg.hpp"
 #include "alg_sec.hpp"
 

@@ -32,7 +32,6 @@
 #include "logger.hpp"
 #include "util.hpp"
 #include "rotate.hpp"
-#include "video_common.hpp"
 #include "libcam.hpp"
 
 #ifdef HAVE_LIBCAM

@@ -123,6 +123,7 @@ struct ctx_config;
 struct ctx_netcam;
 
 class cls_v4l2cam;
+class cls_convert;
 class cls_libcam;
 class cls_webu;
 class cls_webu_ans;

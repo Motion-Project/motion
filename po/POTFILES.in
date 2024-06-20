@@ -2,7 +2,7 @@
 src/alg.cpp
 src/exif.cpp
 src/movie.cpp
-src/video_common.cpp
+src/video_convert.cpp
 src/webu_json.cpp
 src/alg_sec.cpp
 src/jpegutils.cpp
