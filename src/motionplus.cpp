@@ -793,7 +793,7 @@ static void motpls_watchdog(ctx_motapp *motapp, int camindx)
                 MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                     , _("Camera %d - Watchdog netcam kill.")
                     , motapp->cam_list[indx]->device_id);
-                pthread_kill(motapp->cam_list[indx]->netcam->thread_id, SIGVTALRM);
+                pthread_kill(motapp->cam_list[indx]->netcam->net_thread.native_handle(), SIGVTALRM);
             }
         }
         if (motapp->cam_list[indx]->netcam_high != NULL) {
@@ -801,7 +801,7 @@ static void motpls_watchdog(ctx_motapp *motapp, int camindx)
                 MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                     , _("Camera %d - Watchdog netcam_high kill.")
                     , motapp->cam_list[indx]->device_id);
-                pthread_kill(motapp->cam_list[indx]->netcam_high->thread_id, SIGVTALRM);
+                pthread_kill(motapp->cam_list[indx]->netcam_high->net_thread.native_handle(), SIGVTALRM);
             }
         }
         if (motapp->cam_list[indx]->running_dev == true) {

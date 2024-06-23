@@ -56,7 +56,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
-
+#include <thread>
 
 #if defined(HAVE_PTHREAD_NP_H)
     #include <pthread_np.h>
@@ -120,8 +120,8 @@ struct ctx_movie;
 struct ctx_netcam;
 struct ctx_algsec;
 struct ctx_config;
-struct ctx_netcam;
 
+class cls_netcam;
 class cls_picture;
 class cls_rotate;
 class cls_v4l2cam;
@@ -448,8 +448,6 @@ struct ctx_dev {
 
     ctx_config      *conf;
     ctx_images      imgs;
-    ctx_netcam      *netcam;            /* this structure contains the context for normal RTSP connection */
-    ctx_netcam      *netcam_high;       /* this structure contains the context for high resolution RTSP connection */
 
     ctx_image_data  *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
     ctx_algsec      *algsec;
@@ -459,6 +457,8 @@ struct ctx_dev {
     ctx_stream      stream;
     ctx_snd_info    *snd_info;      /* Values for sound processing*/
 
+    cls_netcam      *netcam;            /* normal RTSP connection */
+    cls_netcam      *netcam_high;       /* high resolution RTSP connection */
     cls_picture     *picture;
     cls_rotate      *rotate;
     cls_v4l2cam     *v4l2cam;

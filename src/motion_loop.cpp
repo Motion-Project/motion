@@ -356,22 +356,22 @@ void mlp_cam_close(ctx_dev *cam)
 {
     if (cam->libcam != NULL) {
         libcam_cleanup(cam);
-        return;
-    }
-
-    if (cam->netcam != NULL) {
-        netcam_cleanup(cam);
-        return;
     }
 
     if (cam->v4l2cam != nullptr) {
         delete cam->v4l2cam;
         cam->v4l2cam = nullptr;
-        return;
     }
 
-    MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("No Camera device cleanup"));
-    return;
+    if (cam->netcam != nullptr) {
+        delete cam->netcam;
+        cam->netcam = nullptr;
+    }
+
+    if (cam->netcam_high != nullptr) {
+        delete cam->netcam_high;
+        cam->netcam_high = nullptr;
+    }
 
 }
 
@@ -381,7 +381,10 @@ void mlp_cam_start(ctx_dev *cam)
     if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
         libcam_start(cam);
     } else if (cam->camera_type == CAMERA_TYPE_NETCAM) {
-        netcam_start(cam);
+        cam->netcam = new cls_netcam(cam, false);
+        if (cam->conf->netcam_high_url != "") {
+            cam->netcam_high = new cls_netcam(cam, true);
+        }
     } else if (cam->camera_type == CAMERA_TYPE_V4L2) {
         cam->v4l2cam = new cls_v4l2cam(cam);
     } else {
@@ -394,15 +397,23 @@ void mlp_cam_start(ctx_dev *cam)
 /* Get next image from camera */
 int mlp_cam_next(ctx_dev *cam, ctx_image_data *img_data)
 {
+    int retcd;
+
     if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
-        return libcam_next(cam, img_data);
+        retcd = libcam_next(cam, img_data);
     } else if (cam->camera_type == CAMERA_TYPE_NETCAM) {
-        return netcam_next(cam, img_data);
+        retcd = cam->netcam->next(img_data);
+        if ((retcd == CAPTURE_SUCCESS) &&
+            (cam->netcam_high != nullptr)) {
+            retcd = cam->netcam->next(img_data);
+        }
+        cam->rotate->process(img_data);
     } else if (cam->camera_type == CAMERA_TYPE_V4L2) {
-        return cam->v4l2cam->next(img_data);
+        retcd = cam->v4l2cam->next(img_data);
     }
 
-    return CAPTURE_FAILURE;
+    return retcd;
+
 }
 
 /* Assign the camera type */
@@ -573,6 +584,8 @@ static void mlp_init_values(ctx_dev *cam)
     cam->v4l2cam = nullptr;
     cam->rotate = nullptr;
     cam->picture = nullptr;
+    cam->netcam = nullptr;
+    cam->netcam_high = nullptr;
 
 }
 

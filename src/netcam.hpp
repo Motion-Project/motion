@@ -70,82 +70,138 @@ struct ctx_filelist_item {
     std::string   displaynm;
 };
 
-struct ctx_netcam {
-    AVFormatContext          *format_context;        /* Main format context for the camera */
-    AVCodecContext           *codec_context;         /* Codec being sent from the camera */
-    AVStream                 *strm;
-    AVFrame                  *frame;                 /* Reusable frame for images from camera */
-    AVFrame                  *swsframe_in;           /* Used when resizing image sent from camera */
-    AVFrame                  *swsframe_out;          /* Used when resizing image sent from camera */
-    struct SwsContext        *swsctx;                /* Context for the resizing of the image */
-    AVPacket                 *packet_recv;           /* The packet that is currently being processed */
-    AVFormatContext          *transfer_format;       /* Format context just for transferring to pass-through */
-    ctx_packet_item          *pktarray;              /* Pointer to array of packets for passthru processing */
-    int                       pktarray_size;         /* The number of packets in array.  1 based */
-    int                       pktarray_index;        /* The index to the most current packet in array */
-    int64_t                   idnbr;                 /* A ID number to track the packet vs image */
-    AVDictionary             *opts;                  /* AVOptions when opening the format context */
-    int                       swsframe_size;         /* The size of the image after resizing */
-    int                       video_stream_index;    /* Stream index associated with video from camera */
-    int                       audio_stream_index;    /* Stream index associated with video from camera */
-    int                       last_stream_index;     /* Index of the last packet read */
+class cls_netcam {
+    public:
+        cls_netcam(ctx_dev *p_cam, bool p_is_high);
+        ~cls_netcam();
+        int next(ctx_image_data *img_data);
 
-    enum AVHWDeviceType       hw_type;
-    enum AVPixelFormat        hw_pix_fmt;
-    AVBufferRef              *hw_device_ctx;
-    myAVCodec                *decoder;
+        bool                      interrupted;      /* Boolean for whether interrupt has been tripped */
+        bool                      finish;           /* Boolean for whether we are finishing the application */
+        enum NETCAM_STATUS        status;                /* Status of whether the camera is connecting, closed, etc*/
+        struct timespec           ist_tm;    /* The time set before calling the av functions */
+        struct timespec           icur_tm;  /* Time during the interrupt to determine duration since start*/
+        int                       idur;      /* Seconds permitted before triggering a interrupt */
+        std::string               camera_name;      /* The name of the camera as provided in the config file */
+        std::string               cameratype;       /* String specifying Normal or High for use in logging */
 
-    enum NETCAM_STATUS        status;                /* Status of whether the camera is connecting, closed, etc*/
-    struct timespec           interruptstarttime;    /* The time set before calling the av functions */
-    struct timespec           interruptcurrenttime;  /* Time during the interrupt to determine duration since start*/
-    int                       interruptduration;      /* Seconds permitted before triggering a interrupt */
+        bool                      handler_finished; /* Boolean for whether the handler is running or not */
 
-    netcam_buff_ptr           img_recv;         /* The image buffer that is currently being processed */
-    netcam_buff_ptr           img_latest;       /* The most recent image buffer that finished processing */
+        pthread_mutex_t           mutex;            /* mutex used with conditional waits */
+        pthread_mutex_t           mutex_transfer;   /* mutex used with transferring stream info for pass-through */
+        pthread_mutex_t           mutex_pktarray;   /* mutex used with the packet array */
+        std::thread net_thread;
 
-    bool                      interrupted;      /* Boolean for whether interrupt has been tripped */
-    bool                      finish;           /* Boolean for whether we are finishing the application */
-    bool                      high_resolution;  /* Boolean for whether this context is the Norm or High */
-    bool                      handler_finished; /* Boolean for whether the handler is running or not */
-    bool                      first_image;      /* Boolean for whether we have captured the first image */
-    bool                      passthrough;      /* Boolean for whether we are doing pass-through processing */
+        AVFormatContext          *transfer_format;       /* Format context just for transferring to pass-through */
+        ctx_packet_item          *pktarray;              /* Pointer to array of packets for passthru processing */
+        int                       pktarray_size;         /* The number of packets in array.  1 based */
+        int                       video_stream_index;    /* Stream index associated with video from camera */
+        int                       audio_stream_index;    /* Stream index associated with video from camera */
 
-    std::string               path;             /* The connection string to use for the camera */
-    std::string               service;          /* String specifying the type of camera http, rtsp, v4l2 */
-    std::string               camera_name;      /* The name of the camera as provided in the config file */
-    std::string               cameratype;       /* String specifying Normal or High for use in logging */
-    ctx_imgsize               imgsize;          /* The image size parameters */
 
-    int                       capture_rate;     /* Frames per second from configuration file */
-    int                       reconnect_count;  /* Count of the times reconnection is tried*/
-    int                       src_fps;          /* The fps provided from source*/
-    std::string               decoder_nm;       /* User requested decoder */
+    private:
+        ctx_dev *cam;
 
-    struct timespec           connection_tm;    /* Time when camera was connected*/
-    int64_t                   connection_pts;   /* PTS from the connection */
-    int64_t                   last_pts;         /* PTS from the last packet read */
-    bool                      pts_adj;          /* Bool for whether to use pts for timing */
+        AVFormatContext          *format_context;        /* Main format context for the camera */
+        AVCodecContext           *codec_context;         /* Codec being sent from the camera */
+        AVStream                 *strm;
+        AVFrame                  *frame;                 /* Reusable frame for images from camera */
+        AVFrame                  *swsframe_in;           /* Used when resizing image sent from camera */
+        AVFrame                  *swsframe_out;          /* Used when resizing image sent from camera */
+        struct SwsContext        *swsctx;                /* Context for the resizing of the image */
+        AVPacket                 *packet_recv;           /* The packet that is currently being processed */
 
-    struct timespec           frame_prev_tm;    /* The time set before calling the av functions */
-    struct timespec           frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
-    ctx_motapp                *motapp;          /* Pointer to parent application context  */
-    ctx_config                *conf;            /* Pointer to conf parms of parent cam*/
-    ctx_params                *params;          /* parameters for the camera */
+        int                       pktarray_index;        /* The index to the most current packet in array */
+        int64_t                   idnbr;                 /* A ID number to track the packet vs image */
+        AVDictionary             *opts;                  /* AVOptions when opening the format context */
+        int                       swsframe_size;         /* The size of the image after resizing */
+        int                       last_stream_index;     /* Index of the last packet read */
 
-    std::string               threadname;       /* The thread name*/
-    int                       threadnbr;        /* The thread number */
-    pthread_t                 thread_id;        /* thread i.d. for a camera-handling thread (if required). */
-    pthread_mutex_t           mutex;            /* mutex used with conditional waits */
-    pthread_mutex_t           mutex_transfer;   /* mutex used with transferring stream info for pass-through */
-    pthread_mutex_t           mutex_pktarray;   /* mutex used with the packet array */
+        enum AVHWDeviceType       hw_type;
+        enum AVPixelFormat        hw_pix_fmt;
+        AVBufferRef              *hw_device_ctx;
+        myAVCodec                *decoder;
 
-    std::vector<ctx_filelist_item>    filelist;
-    std::string                 filedir;
-    int                       filenbr;
+        netcam_buff_ptr           img_recv;         /* The image buffer that is currently being processed */
+        netcam_buff_ptr           img_latest;       /* The most recent image buffer that finished processing */
+
+        bool                      high_resolution;  /* Boolean for whether this context is the Norm or High */
+
+        bool                      first_image;      /* Boolean for whether we have captured the first image */
+        bool                      passthrough;      /* Boolean for whether we are doing pass-through processing */
+
+        std::string               path;             /* The connection string to use for the camera */
+        std::string               service;          /* String specifying the type of camera http, rtsp, v4l2 */
+        ctx_imgsize               imgsize;          /* The image size parameters */
+
+        int                       capture_rate;     /* Frames per second from configuration file */
+        int                       reconnect_count;  /* Count of the times reconnection is tried*/
+        int                       src_fps;          /* The fps provided from source*/
+        std::string               decoder_nm;       /* User requested decoder */
+
+        struct timespec           connection_tm;    /* Time when camera was connected*/
+        int64_t                   connection_pts;   /* PTS from the connection */
+        int64_t                   last_pts;         /* PTS from the last packet read */
+        bool                      pts_adj;          /* Bool for whether to use pts for timing */
+
+        struct timespec           frame_prev_tm;    /* The time set before calling the av functions */
+        struct timespec           frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
+
+        ctx_motapp                *motapp;          /* Pointer to parent application context  */
+        ctx_params                *params;          /* parameters for the camera */
+
+        std::string               threadname;       /* The thread name*/
+        int                       threadnbr;        /* The thread number */
+        int         cfg_width;
+        int         cfg_height;
+        int         cfg_framerate;
+        std::string cfg_params;
+
+        std::vector<ctx_filelist_item>    filelist;
+        std::string                 filedir;
+        int                       filenbr;
+
+        void filelist_load();
+        void check_buffsize(netcam_buff_ptr buff, size_t numbytes);
+        char *url_match(regmatch_t m, const char *input);
+        void url_invalid(ctx_url *parse_url);
+        void url_parse(ctx_url *parse_url, std::string text_url);
+        void free_pkt();
+        int check_pixfmt();
+        void pktarray_free();
+        void context_null();
+        void context_close();
+        void pktarray_resize();
+        void pktarray_add();
+        int decode_sw();
+        int decode_vaapi();
+        int decode_cuda();
+        int decode_drm();
+        int decode_video();
+        int decode_packet();
+        void hwdecoders();
+        void decoder_error(int retcd, const char* fnc_nm);
+        int init_vaapi();
+        int init_cuda();
+        int init_drm();
+        int init_swdecoder();
+        int open_codec();
+        int open_sws();
+        int resize();
+        int read_image();
+        int ntc();
+        void set_options();
+        void set_path ();
+        void set_parms ();
+        int copy_stream();
+        int open_context();
+        int connect();
+        void shutdown();
+        void handler_wait();
+        void handler_reconnect();
+        void handler();
+        void start_handler();
+
 };
-
-void netcam_start(ctx_dev *cam);
-int netcam_next(ctx_dev *cam, ctx_image_data *img_data);
-void netcam_cleanup(ctx_dev *cam);
 
 #endif /* _INCLUDE_NETCAM_HPP_ */

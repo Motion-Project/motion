@@ -50,7 +50,7 @@ struct ctx_movie {
     AVPacket            *pkt;
     AVFrame             *picture;       /* contains default image pointers */
     AVDictionary        *opts;
-    ctx_netcam          *netcam_data;
+    cls_netcam          *netcam_data;
     int                 width;
     int                 height;
     enum TIMELAPSE_TYPE tlapse;
