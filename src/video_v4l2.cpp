@@ -203,12 +203,12 @@ void cls_v4l2cam::ctrls_set()
                 if (retcd < 0) {
                     MOTPLS_LOG(WRN, TYPE_VIDEO, SHOW_ERRNO
                         ,_("setting control %s \"%s\" to %d failed with return code %d")
-                        ,it->ctrl_iddesc, it->ctrl_name
+                        ,it->ctrl_iddesc.c_str(), it->ctrl_name.c_str()
                         ,it->ctrl_newval, retcd);
                 } else {
                     MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
                         ,_("Set control \"%s\" to value %d")
-                        ,it->ctrl_name, it->ctrl_newval);
+                        ,it->ctrl_name.c_str(), it->ctrl_newval);
                    it->ctrl_currval = it->ctrl_newval;
                 }
             }
@@ -1096,7 +1096,7 @@ void cls_v4l2cam::stop_cam()
     int indx;
 
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-        ,_("Closing video device %s"), v4l2_device);
+        ,_("Closing video device %s"), v4l2_device.c_str());
 
     p_type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
