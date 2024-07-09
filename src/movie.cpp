@@ -1405,7 +1405,6 @@ void movie_free(ctx_movie *movie)
 
 void movie_close(ctx_movie *movie)
 {
-
     if (movie != NULL) {
         clock_gettime(CLOCK_MONOTONIC, &movie->cb_st_ts);
 
@@ -1424,9 +1423,7 @@ void movie_close(ctx_movie *movie)
                 }
             }
         }
-        movie_free(movie);
     }
-
 }
 
 int movie_put_image(ctx_movie *movie, ctx_image_data *img_data, const struct timespec *ts1)

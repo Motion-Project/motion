@@ -367,6 +367,7 @@ static void event_movie_end(ctx_dev *cam)
 {
     if (cam->movie_norm) {
         cam->filetype = FTYPE_MOVIE;
+        movie_close(cam->movie_norm);
         on_movie_end_command(cam, cam->movie_norm->full_nm);
         dbse_exec(cam, cam->movie_norm->full_nm, "movie_end");
         if ((cam->conf->movie_retain == "secondary") &&
@@ -381,12 +382,13 @@ static void event_movie_end(ctx_dev *cam)
         } else {
             dbse_movies_addrec(cam, cam->movie_norm, &cam->current_image->imgts);
         }
-        movie_close(cam->movie_norm);
+        movie_free(cam->movie_norm);
         myfree(&cam->movie_norm);
     }
 
     if (cam->movie_motion) {
         cam->filetype = FTYPE_MOVIE;
+        movie_close(cam->movie_motion);
         on_movie_end_command(cam, cam->movie_motion->full_nm);
         dbse_exec(cam, cam->movie_motion->full_nm, "movie_end");
 
@@ -402,7 +404,7 @@ static void event_movie_end(ctx_dev *cam)
         } else {
             dbse_movies_addrec(cam, cam->movie_motion, &cam->imgs.image_motion.imgts);
         }
-        movie_close(cam->movie_motion);
+        movie_free(cam->movie_motion);
         myfree(&cam->movie_motion);
     }
 
@@ -459,9 +461,10 @@ static void event_tlapse_end(ctx_dev *cam)
 {
     if (cam->movie_timelapse) {
         cam->filetype = FTYPE_MOVIE_TIMELAPSE;
+        movie_close(cam->movie_timelapse);
         on_movie_end_command(cam, cam->movie_timelapse->full_nm);
         dbse_exec(cam, cam->movie_timelapse->full_nm, "movie_end");
-        movie_close(cam->movie_timelapse);
+        movie_free(cam->movie_timelapse);
         myfree(&cam->movie_timelapse);
     }
 }
