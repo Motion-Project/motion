@@ -1742,6 +1742,12 @@ static void mlp_prepare(struct context *cnt)
         cnt->startup_frames--;
     }
 
+    /* Restart to avoid overflow */
+    if (cnt->event_nr > 2000000000) {
+        cnt->restart = TRUE;
+        cnt->event_stop = TRUE;
+        cnt->finish = TRUE;
+    }
 
 }
 
