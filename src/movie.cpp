@@ -19,18 +19,6 @@
 /*
  * The contents of this file has been derived from the output_example.c
  * and apiexample.c from the FFmpeg distribution.
- *
- * This file has been modified so that only major versions greater than
- * 53 are supported.
- * Note that while the conditions are based upon LIBAVFORMAT, not all of the changes are
- * specific to libavformat.h.  Some changes could be related to other components of ffmpeg.
- * This is for simplicity.  The avformat version has historically changed at the same time
- * as the other components so it is easier to have a single version number to track rather
- * than the particular version numbers which are associated with each component.
- * The libav variant also has different apis with the same major/minor version numbers.
- * As such, it is occasionally necessary to look at the microversion number.  Numbers
- * greater than 100 for micro version indicate ffmpeg whereas numbers less than 100
- * indicate libav
 */
 
 #include "motionplus.hpp"
@@ -43,7 +31,7 @@
 
 static void movie_free_pkt(ctx_movie *movie)
 {
-    mypacket_free(movie->pkt);
+    av_packet_free(&movie->pkt);
     movie->pkt = NULL;
 }
 
@@ -108,12 +96,12 @@ static void movie_free_context(ctx_movie *movie)
 {
 
         if (movie->picture != NULL) {
-            myframe_free(movie->picture);
+            av_frame_free(&movie->picture);
             movie->picture = NULL;
         }
 
         if (movie->ctx_codec != NULL) {
-            myavcodec_close(movie->ctx_codec);
+            avcodec_free_context(&movie->ctx_codec);
             movie->ctx_codec = NULL;
         }
 
@@ -232,9 +220,6 @@ static int movie_get_oformat(ctx_movie *movie)
 
 static int movie_encode_video(ctx_movie *movie)
 {
-
-    #if (MYFFVER >= 57041)
-        //ffmpeg version 3.1 and after
         int retcd = 0;
         char errstr[128];
 
@@ -264,76 +249,6 @@ static int movie_encode_video(ctx_movie *movie)
         }
 
         return 0;
-
-    #elif (MYFFVER > 54006)
-
-        int retcd = 0;
-        char errstr[128];
-        int got_packet_ptr;
-
-        retcd = avcodec_encode_video2(movie->ctx_codec, movie->pkt, movie->picture, &got_packet_ptr);
-        if (retcd < 0 ) {
-            av_strerror(retcd, errstr, sizeof(errstr));
-            MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error encoding video:%s"),errstr);
-            //Packet is freed upon failure of encoding
-            return -1;
-        }
-        if (got_packet_ptr == 0) {
-            //Buffered packet.  Throw special return code
-            movie_free_pkt(movie);
-            return -2;
-        }
-
-        /* This kills compiler warnings.  Nal setting is only for recent movie versions*/
-        if (movie->preferred_codec == USER_CODEC_V4L2M2M) {
-            movie_encode_nal(movie);
-        }
-
-        return 0;
-
-    #else
-
-        int retcd = 0;
-        uint8_t *video_outbuf;
-        int video_outbuf_size;
-
-        video_outbuf_size = (movie->ctx_codec->width +16) * (movie->ctx_codec->height +16) * 1;
-        video_outbuf =(uint8_t *) mymalloc(video_outbuf_size);
-
-        retcd = avcodec_encode_video(movie->strm_video->codec, video_outbuf, video_outbuf_size, movie->picture);
-        if (retcd < 0 ) {
-            MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error encoding video"));
-            movie_free_pkt(movie);
-            return -1;
-        }
-        if (retcd == 0 ) {
-            // No bytes encoded => buffered=>special handling
-            movie_free_pkt(movie);
-            return -2;
-        }
-
-        // Encoder did not provide metadata, set it up manually
-        movie->pkt->size = retcd;
-        movie->pkt->data = video_outbuf;
-
-        if (movie->picture->key_frame == 1) {
-            movie->pkt->flags |= AV_PKT_FLAG_KEY;
-        }
-
-        movie->pkt->pts = movie->picture->pts;
-        movie->pkt->dts = movie->pkt->pts;
-
-        myfree(&video_outbuf);
-
-        /* This kills compiler warnings.  Nal setting is only for recent movie versions*/
-        if (movie->preferred_codec == USER_CODEC_V4L2M2M) {
-            movie_encode_nal(movie);
-        }
-
-        return 0;
-
-    #endif
-
 }
 
 static int movie_set_pts(ctx_movie *movie, const struct timespec *ts1)
@@ -481,7 +396,6 @@ static int movie_set_codec(ctx_movie *movie)
         return retcd;
     }
 
-    #if (MYFFVER >= 57041)
         movie->strm_video = avformat_new_stream(movie->oc, movie->codec);
         if (!movie->strm_video) {
             MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
@@ -494,16 +408,6 @@ static int movie_set_codec(ctx_movie *movie)
             movie_free_context(movie);
             return -1;
         }
-    #else
-        movie->strm_video = avformat_new_stream(movie->oc, movie->codec);
-        if (!movie->strm_video) {
-            MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
-            movie_free_context(movie);
-            return -1;
-        }
-        movie->ctx_codec = movie->strm_video->codec;
-    #endif
-
 
     if (movie->tlapse != TIMELAPSE_NONE) {
         movie->ctx_codec->gop_size = 1;
@@ -584,8 +488,6 @@ static int movie_set_codec(ctx_movie *movie)
 
 static int movie_set_stream(ctx_movie *movie)
 {
-
-    #if (MYFFVER >= 57041)
         int retcd;
         char errstr[128];
 
@@ -597,7 +499,6 @@ static int movie_set_stream(ctx_movie *movie)
             movie_free_context(movie);
             return -1;
         }
-    #endif
 
     movie->strm_video->time_base =  av_make_q(1, movie->fps);
 
@@ -679,7 +580,7 @@ static int movie_set_picture(ctx_movie *movie)
     int retcd;
     char errstr[128];
 
-    movie->picture = myframe_alloc();
+    movie->picture = av_frame_alloc();
     if (!movie->picture) {
         MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("could not alloc frame"));
         movie_free_context(movie);
@@ -732,15 +633,6 @@ static int movie_set_outputfile(ctx_movie *movie)
 {
     int retcd;
     char errstr[128];
-
-    #if (MYFFVER < 58000)
-        retcd = snprintf(movie->oc->full_nm, sizeof(movie->oc->full_nm), "%s", movie->full_nm);
-        if ((retcd < 0) || (retcd >= PATH_MAX)) {
-            MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                ,_("Error setting file name"));
-            return -1;
-        }
-    #endif
 
     /* Open the output file, if needed. */
     if ((movie_timelapse_exists(movie->full_nm) == 0) || (movie->tlapse != TIMELAPSE_APPEND)) {
@@ -807,9 +699,6 @@ static int movie_set_outputfile(ctx_movie *movie)
 
 static int movie_flush_codec(ctx_movie *movie)
 {
-    #if (MYFFVER >= 57041)
-        //ffmpeg version 3.1 and after
-
         int retcd;
         int recv_cd = 0;
         char errstr[128];
@@ -856,11 +745,6 @@ static int movie_flush_codec(ctx_movie *movie)
             }
         }
         return 0;
-    #else
-        (void)movie;
-        return 0;
-    #endif
-
 }
 
 static int movie_put_frame(ctx_movie *movie, const struct timespec *ts1)
@@ -975,7 +859,7 @@ static void movie_passthru_write(ctx_movie *movie, int indx)
     movie->pkt = mypacket_alloc(movie->pkt);
     movie->netcam_data->pktarray[indx].iswritten = true;
 
-    retcd = mycopy_packet(movie->pkt, movie->netcam_data->pktarray[indx].packet);
+    retcd = av_packet_ref(movie->pkt, movie->netcam_data->pktarray[indx].packet);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTPLS_LOG(INF, TYPE_ENCODER, NO_ERRNO, "av_copy_packet: %s",errstr);
@@ -1198,7 +1082,6 @@ static int movie_passthru_streams_audio(ctx_movie *movie, AVStream *stream_in)
 
 static int movie_passthru_streams(ctx_movie *movie)
 {
-    #if (MYFFVER >= 57041)
         int         retcd, indx;
         AVStream    *stream_in;
 
@@ -1222,11 +1105,6 @@ static int movie_passthru_streams(ctx_movie *movie)
         pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
 
         return 0;
-    #else
-        /* This is disabled in the check_passthrough but we need it here for compiling */
-        MOTPLS_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("Pass-through disabled.  ffmpeg too old"));
-        return -1;
-    #endif
 }
 
 static int movie_passthru_check(ctx_movie *movie)
@@ -1804,12 +1682,11 @@ int movie_init_extpipe(ctx_dev *cam)
 
 int movie_put_extpipe(ctx_dev *cam)
 {
-    int passthrough, retcd;
+    int retcd;
 
     retcd = 0;
-    passthrough = mycheck_passthrough(cam);
     if (fileno(cam->extpipe_stream) > 0) {
-        if ((cam->imgs.size_high > 0) && (passthrough == false)) {
+        if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
             if (!fwrite(cam->current_image->image_high
                     , cam->imgs.size_high, 1, cam->extpipe_stream)) {
                 MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO

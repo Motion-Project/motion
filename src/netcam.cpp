@@ -28,7 +28,6 @@
 
 enum AVPixelFormat netcam_getfmt_vaapi(AVCodecContext *avctx, const enum AVPixelFormat *pix_fmts)
 {
-    #if ( MYFFVER >= 57083)
         const enum AVPixelFormat *p;
         (void)avctx;
 
@@ -40,16 +39,10 @@ enum AVPixelFormat netcam_getfmt_vaapi(AVCodecContext *avctx, const enum AVPixel
 
         MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Failed to get vaapi pix format"));
         return AV_PIX_FMT_NONE;
-    #else
-        (void)avctx;
-        (void)pix_fmts;
-        return AV_PIX_FMT_NONE;
-    #endif
 }
 
 enum AVPixelFormat netcam_getfmt_cuda(AVCodecContext *avctx, const enum AVPixelFormat *pix_fmts)
 {
-    #if ( MYFFVER >= 57083)
         const enum AVPixelFormat *p;
         (void)avctx;
 
@@ -59,16 +52,10 @@ enum AVPixelFormat netcam_getfmt_cuda(AVCodecContext *avctx, const enum AVPixelF
 
         MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Failed to get cuda pix format"));
         return AV_PIX_FMT_NONE;
-    #else
-        (void)avctx;
-        (void)pix_fmts;
-        return AV_PIX_FMT_NONE;
-    #endif
 }
 
 enum AVPixelFormat netcam_getfmt_drm(AVCodecContext *avctx, const enum AVPixelFormat *pix_fmts)
 {
-    #if ( MYFFVER >= 57083)
         const enum AVPixelFormat *p;
         (void)avctx;
 
@@ -78,11 +65,6 @@ enum AVPixelFormat netcam_getfmt_drm(AVCodecContext *avctx, const enum AVPixelFo
 
         MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Failed to get drm pix format"));
         return AV_PIX_FMT_NONE;
-    #else
-        (void)avctx;
-        (void)pix_fmts;
-        return AV_PIX_FMT_NONE;
-    #endif
 }
 
 int netcam_interrupt(void *ctx)
@@ -353,7 +335,7 @@ void cls_netcam::url_parse(ctx_url *parse_url, std::string text_url)
 
 void cls_netcam::free_pkt()
 {
-    mypacket_free(packet_recv);
+    av_packet_free(&packet_recv);
     packet_recv = nullptr;
 }
 
@@ -373,7 +355,7 @@ void cls_netcam::pktarray_free()
     pthread_mutex_lock(&mutex_pktarray);
         if (pktarray_size > 0) {
             for(indx = 0; indx < pktarray_size; indx++) {
-                mypacket_free(pktarray[indx].packet);
+                av_packet_free(&pktarray[indx].packet);
                 pktarray[indx].packet = NULL;
             }
         }
@@ -398,11 +380,11 @@ void cls_netcam::context_null()
 void cls_netcam::context_close()
 {
     if (swsctx          != nullptr) sws_freeContext(swsctx);
-    if (swsframe_in     != nullptr) myframe_free(swsframe_in);
-    if (swsframe_out    != nullptr) myframe_free(swsframe_out);
-    if (frame           != nullptr) myframe_free(frame);
+    if (swsframe_in     != nullptr) av_frame_free(&swsframe_in);
+    if (swsframe_out    != nullptr) av_frame_free(&swsframe_out);
+    if (frame           != nullptr) av_frame_free(&frame);
     if (pktarray        != nullptr) pktarray_free();
-    if (codec_context   != nullptr) myavcodec_close(codec_context);
+    if (codec_context   != nullptr) avcodec_free_context(&codec_context);
     if (format_context  != nullptr) avformat_close_input(&format_context);
     if (transfer_format != nullptr) avformat_close_input(&transfer_format);
     if (hw_device_ctx   != nullptr) av_buffer_unref(&hw_device_ctx);
@@ -500,18 +482,18 @@ void cls_netcam::pktarray_add()
 
         pktarray[indx_next].idnbr = idnbr;
 
-        mypacket_free(pktarray[indx_next].packet);
+        av_packet_free(&pktarray[indx_next].packet);
         pktarray[indx_next].packet = nullptr;
         pktarray[indx_next].packet = mypacket_alloc(pktarray[indx_next].packet);
 
-        retcd = mycopy_packet(pktarray[indx_next].packet, packet_recv);
+        retcd = av_packet_ref(pktarray[indx_next].packet, packet_recv);
         if ((interrupted) || (retcd < 0)) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s:av_copy_packet:%s ,Interrupt:%s")
                 ,cameratype.c_str()
                 ,errstr, interrupted ? _("true"):_("false"));
-            mypacket_free(pktarray[indx_next].packet);
+            av_packet_free(&pktarray[indx_next].packet);
             pktarray[indx_next].packet = nullptr;
         }
 
@@ -528,7 +510,6 @@ void cls_netcam::pktarray_add()
 
 int cls_netcam::decode_sw()
 {
-    #if (MYFFVER >= 57041)
         int retcd;
         char errstr[128];
 
@@ -554,27 +535,22 @@ int cls_netcam::decode_sw()
         }
 
         return 1;
-    #else
-        (void)netcam;
-        return -1;
-    #endif
 }
 
 int cls_netcam::decode_vaapi()
 {
-    #if ( MYFFVER >= 57083)
         int retcd;
         char errstr[128];
         AVFrame *hw_frame = nullptr;
 
-        hw_frame = myframe_alloc();
+        hw_frame = av_frame_alloc();
 
         retcd = av_hwframe_get_buffer(codec_context->hw_frames_ctx, hw_frame, 0);
         if (retcd < 0) {
             MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 , _("%s:Error getting hw frame buffer")
                 , cameratype.c_str());
-            myframe_free(hw_frame);
+            av_frame_free(&hw_frame);
             return -1;
         }
 
@@ -596,7 +572,7 @@ int cls_netcam::decode_vaapi()
             } else {
                 retcd = -1;
             }
-            myframe_free(hw_frame);
+            av_frame_free(&hw_frame);
             return retcd;
         }
 
@@ -605,26 +581,21 @@ int cls_netcam::decode_vaapi()
             MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s:Error transferring HW decoded to system memory")
                 ,cameratype.c_str());
-            myframe_free(hw_frame);
+            av_frame_free(&hw_frame);
             return -1;
         }
-        myframe_free(hw_frame);
+        av_frame_free(&hw_frame);
 
         return 1;
-    #else
-        (void)netcam;
-        return -1;
-    #endif
 }
 
 int cls_netcam::decode_cuda()
 {
-    #if ( MYFFVER >= 57083)
         int retcd;
         char errstr[128];
         AVFrame *hw_frame = nullptr;
 
-        hw_frame = myframe_alloc();
+        hw_frame = av_frame_alloc();
 
         retcd = avcodec_receive_frame(codec_context, hw_frame);
         if ((interrupted) || (finish) || (retcd < 0) ){
@@ -644,7 +615,7 @@ int cls_netcam::decode_cuda()
             } else {
                 retcd = -1;
             }
-            myframe_free(hw_frame);
+            av_frame_free(&hw_frame);
             return retcd;
         }
         frame->format=AV_PIX_FMT_NV12;
@@ -654,27 +625,22 @@ int cls_netcam::decode_cuda()
             MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s:Error transferring HW decoded to system memory")
                 ,cameratype.c_str());
-            myframe_free(hw_frame);
+            av_frame_free(&hw_frame);
             return -1;
         }
 
-        myframe_free(hw_frame);
+        av_frame_free(&hw_frame);
 
         return 1;
-    #else
-        (void)netcam;
-        return 1;
-    #endif
 }
 
 int cls_netcam::decode_drm()
 {
-    #if ( MYFFVER >= 57083)
         int retcd;
         char errstr[128];
         AVFrame *hw_frame = nullptr;
 
-        hw_frame = myframe_alloc();
+        hw_frame = av_frame_alloc();
 
         retcd = avcodec_receive_frame(codec_context, hw_frame);
         if ((interrupted) || (finish) || (retcd < 0) ){
@@ -694,7 +660,7 @@ int cls_netcam::decode_drm()
             } else {
                 retcd = -1;
             }
-            myframe_free(hw_frame);
+            av_frame_free(&hw_frame);
             return retcd;
         }
         frame->format=AV_PIX_FMT_NV12;
@@ -704,22 +670,17 @@ int cls_netcam::decode_drm()
             MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s:Error transferring HW decoded to system memory")
                 ,cameratype.c_str());
-            myframe_free(hw_frame);
+            av_frame_free(&hw_frame);
             return -1;
         }
 
-        myframe_free(hw_frame);
+        av_frame_free(&hw_frame);
 
         return 1;
-    #else
-        (void)netcam;
-        return 1;
-    #endif
 }
 
 int cls_netcam::decode_video()
 {
-    #if (MYFFVER >= 57041)
         int retcd;
         char errstr[128];
 
@@ -768,40 +729,6 @@ int cls_netcam::decode_video()
         }
 
         return retcd;
-
-    #else
-        int retcd;
-        int check = 0;
-        char errstr[128];
-
-        (void)decode_sw;
-        (void)decode_vaapi;
-        (void)decode_cuda;
-        (void)decode_drm;
-
-        if (finish) {
-            return 0;
-        }
-        retcd = avcodec_decode_video2(codec_context, frame, &check, &packet_recv);
-        if ((interrupted) || (finish)) {
-            return -1;
-        }
-        if (retcd == AVERROR_INVALIDDATA) {
-            MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Ignoring packet with invalid data"));
-            return 0;
-        }
-
-        if (retcd < 0) {
-            av_strerror(retcd, errstr, sizeof(errstr));
-            MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Error decoding packet: %s"),errstr);
-            return -1;
-        }
-
-        if (check == 0 || retcd == 0) {
-            return 0;
-        }
-        return 1;
-    #endif
 }
 
 int cls_netcam::decode_packet()
@@ -823,19 +750,20 @@ int cls_netcam::decode_packet()
     if (retcd <= 0) {
         return retcd;
     }
-    frame_size = myimage_get_buffer_size((enum AVPixelFormat) frame->format
-                                        ,frame->width
-                                        ,frame->height);
+    frame_size = av_image_get_buffer_size(
+        (enum AVPixelFormat) frame->format
+        , frame->width, frame->height, 1);
 
     check_buffsize(img_recv, frame_size);
     check_buffsize(img_latest, frame_size);
 
-    retcd = myimage_copy_to_buffer(frame
-                                    ,(uint8_t *)img_recv->ptr
-                                    ,(enum AVPixelFormat) frame->format
-                                    ,frame->width
-                                    ,frame->height
-                                    ,frame_size);
+    retcd = av_image_copy_to_buffer(
+        (uint8_t *)img_recv->ptr
+        , frame_size
+        , (const uint8_t * const*)frame
+        , frame->linesize
+        , (enum AVPixelFormat)frame->format
+        , frame->width, frame->height, 1);
     if ((retcd < 0) || (interrupted)) {
         MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             ,_("%s:Error decoding video packet:Copying to buffer")
@@ -850,7 +778,6 @@ int cls_netcam::decode_packet()
 
 void cls_netcam::hwdecoders()
 {
-    #if ( MYFFVER >= 57083)
         /* High Res pass through does not decode images into frames*/
         if (high_resolution && passthrough) {
             return;
@@ -876,10 +803,6 @@ void cls_netcam::hwdecoders()
             }
         }
         return;
-    #else
-        (void)netcam;
-        return;
-    #endif
 }
 
 void cls_netcam::decoder_error(int retcd, const char* fnc_nm)
@@ -927,7 +850,6 @@ void cls_netcam::decoder_error(int retcd, const char* fnc_nm)
 
 int cls_netcam::init_vaapi()
 {
-    #if ( MYFFVER >= 57083)
         int retcd, indx;
         AVPixelFormat *pixelformats = nullptr;
 
@@ -1015,8 +937,8 @@ int cls_netcam::init_vaapi()
             return -1;
         }
         /* Note that while these are listed as available, there
-           is currently no way to get them from HW decoder without
-           triggering a segfault in vaapi driver.
+            is currently no way to get them from HW decoder without
+            triggering a segfault in vaapi driver.
         */
         const AVPixFmtDescriptor *descr;
         for (indx=0; pixelformats[indx] != AV_PIX_FMT_NONE; indx++) {
@@ -1029,16 +951,10 @@ int cls_netcam::init_vaapi()
         av_freep(&pixelformats);
 
         return 0;
-    #else
-        (void)netcam;
-        (void)getfmt_vaapi;
-        return -1;
-    #endif
 }
 
 int cls_netcam::init_cuda()
 {
-    #if ( MYFFVER >= 57083)
         int retcd;
 
         MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
@@ -1080,16 +996,10 @@ int cls_netcam::init_cuda()
         codec_context->hw_device_ctx = av_buffer_ref(hw_device_ctx);
 
         return 0;
-    #else
-        (void)netcam;
-        (void)getfmt_cuda;
-        return 0;
-    #endif
 }
 
 int cls_netcam::init_drm()
 {
-    #if ( MYFFVER >= 57083)
         int retcd;
 
         MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
@@ -1132,16 +1042,10 @@ int cls_netcam::init_drm()
         codec_context->hw_device_ctx = av_buffer_ref(hw_device_ctx);
 
         return 0;
-    #else
-        (void)netcam;
-        (void)getfmt_drm;
-        return 0;
-    #endif
 }
 
 int cls_netcam::init_swdecoder()
 {
-    #if ( MYFFVER >= 57041)
         int retcd;
 
         MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
@@ -1184,27 +1088,10 @@ int cls_netcam::init_swdecoder()
         codec_context->err_recognition = AV_EF_EXPLODE;
 
         return 0;
-    #else
-        int retcd;
-        codec_context = strm->codec;
-        decoder = avcodec_find_decoder(codec_context->codec_id);
-        if ((decoder == nullptr) || (interrupted)) {
-            decoder_error(0, "avcodec_find_decoder");
-            return -1;
-        }
-        retcd = avcodec_open2(codec_context, decoder, nullptr);
-        if ((retcd < 0) || (interrupted)) {
-            decoder_error(retcd, "avcodec_open2");
-            return -1;
-        }
-        return 0;
-    #endif
 }
 
 int cls_netcam::open_codec()
 {
-    #if ( MYFFVER >= 57041)
-
         int retcd;
 
         if (finish) {
@@ -1241,7 +1128,7 @@ int cls_netcam::open_codec()
                 decoder_error(retcd, "hwcuda_init");
                 return -1;
             }
-	    } else if (decoder_nm == "drm"){
+        } else if (decoder_nm == "drm"){
             if (init_drm() < 0) {;
                 decoder_error(retcd, "hwdrm_init");
                 return -1;
@@ -1260,35 +1147,7 @@ int cls_netcam::open_codec()
             ,_("%s:Decoder opened"),cameratype.c_str());
 
         return 0;
-    #else
-        int retcd;
-
-        (void)init_vaapi;
-        (void)init_cuda;
-        (void)init_drm;
-
-        if (finish) {
-
-            return -1;
-        }
-
-        hwdecoders();
-        decoder = nullptr;
-
-        retcd = av_find_best_stream(format_context, AVMEDIA_TYPE_VIDEO, -1, -1, nullptr, 0);
-        if ((retcd < 0) || (interrupted)) {
-            decoder_error(retcd, "av_find_best_stream");
-            return -1;
-        }
-        video_stream_index = retcd;
-        strm = format_context->streams[video_stream_index];
-
-        retcd = init_swdecoder();
-
-        return retcd;
-    #endif
 }
-
 
 int cls_netcam::open_sws()
 {
@@ -1296,7 +1155,7 @@ int cls_netcam::open_sws()
         return -1;
     }
 
-    swsframe_in = myframe_alloc();
+    swsframe_in = av_frame_alloc();
     if (swsframe_in == nullptr) {
         if (status == NETCAM_NOTCONNECTED) {
             MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
@@ -1307,7 +1166,7 @@ int cls_netcam::open_sws()
         return -1;
     }
 
-    swsframe_out = myframe_alloc();
+    swsframe_out = av_frame_alloc();
     if (swsframe_out == nullptr) {
         if (status == NETCAM_NOTCONNECTED) {
             MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
@@ -1348,10 +1207,8 @@ int cls_netcam::open_sws()
         return -1;
     }
 
-    swsframe_size = myimage_get_buffer_size(
-            MY_PIX_FMT_YUV420P
-            ,imgsize.width
-            ,imgsize.height);
+    swsframe_size = av_image_get_buffer_size(
+        MY_PIX_FMT_YUV420P, imgsize.width, imgsize.height, 1);
     if (swsframe_size <= 0) {
         if (status == NETCAM_NOTCONNECTED) {
             MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
@@ -1384,13 +1241,12 @@ int cls_netcam::resize()
             return -1;
         }
     }
-
-    retcd=myimage_fill_arrays(
-        swsframe_in
-        ,(uint8_t*)img_recv->ptr
-        ,(enum AVPixelFormat)frame->format
-        ,frame->width
-        ,frame->height);
+    retcd = av_image_fill_arrays(
+        swsframe_in->data
+        , swsframe_in->linesize
+        , (uint8_t*)img_recv->ptr
+        , (enum AVPixelFormat)frame->format
+        , frame->width, frame->height, 1);
     if (retcd < 0) {
         if (status == NETCAM_NOTCONNECTED) {
             av_strerror(retcd, errstr, sizeof(errstr));
@@ -1404,12 +1260,11 @@ int cls_netcam::resize()
 
     buffer_out=(uint8_t *)av_malloc(swsframe_size*sizeof(uint8_t));
 
-    retcd=myimage_fill_arrays(
-        swsframe_out
-        ,buffer_out
-        ,MY_PIX_FMT_YUV420P
-        ,imgsize.width
-        ,imgsize.height);
+    retcd = av_image_fill_arrays(
+        swsframe_out->data
+        , swsframe_out->linesize
+        , buffer_out, MY_PIX_FMT_YUV420P
+        , imgsize.width, imgsize.height, 1);
     if (retcd < 0) {
         if (status == NETCAM_NOTCONNECTED) {
             av_strerror(retcd, errstr, sizeof(errstr));
@@ -1440,13 +1295,13 @@ int cls_netcam::resize()
         return -1;
     }
 
-    retcd=myimage_copy_to_buffer(
-         swsframe_out
-        ,(uint8_t *)img_recv->ptr
-        ,MY_PIX_FMT_YUV420P
-        ,imgsize.width
-        ,imgsize.height
-        ,swsframe_size);
+    retcd = av_image_copy_to_buffer(
+        (uint8_t *)img_recv->ptr
+        , swsframe_size
+        , (const uint8_t * const*)swsframe_out
+        , swsframe_out->linesize
+        , MY_PIX_FMT_YUV420P
+        , imgsize.width, imgsize.height, 1);
     if (retcd < 0) {
         if (status == NETCAM_NOTCONNECTED) {
             av_strerror(retcd, errstr, sizeof(errstr));
@@ -1804,7 +1659,6 @@ void cls_netcam::set_parms ()
         , cameratype.c_str(), camera_name.c_str());
 
     status = NETCAM_NOTCONNECTED;
-    mycheck_passthrough(cam);
     util_parms_add_default(params,"decoder","NULL");
     img_recv =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
     img_recv->ptr =(char*) mymalloc(NETCAM_BUFFSIZE);
@@ -1855,7 +1709,7 @@ void cls_netcam::set_parms ()
         (cam->conf->netcam_high_url != "")) {
         passthrough = false;
     } else {
-        passthrough = mycheck_passthrough(cam);
+        passthrough = cam->movie_passthrough;
     }
 
     threadname = _("Unknown");
@@ -1875,8 +1729,6 @@ void cls_netcam::set_parms ()
 /* Make a static copy of the stream information for use in passthrough processing */
 int cls_netcam::copy_stream()
 {
-    /* Make a static copy of the stream information for use in passthrough processing */
-    #if (MYFFVER >= 57041)
         AVStream  *transfer_stream, *stream_in;
         int        retcd, indx;
 
@@ -1906,13 +1758,6 @@ int cls_netcam::copy_stream()
 
         MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Stream copied for pass-through"));
         return 0;
-    #else
-        /* This is disabled in the mycheck_passthrough but we need it here for compiling */
-        if (netcam != nullptr) {
-            MOTPLS_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("ffmpeg too old"));
-        }
-        return -1;
-    #endif
 }
 
 int cls_netcam::open_context()
@@ -2014,7 +1859,7 @@ int cls_netcam::open_context()
         imgsize.height = codec_context->height;
     }
 
-    frame = myframe_alloc();
+    frame = av_frame_alloc();
     if (frame == nullptr) {
         if (status == NETCAM_NOTCONNECTED) {
             MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO

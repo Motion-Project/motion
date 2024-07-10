@@ -54,7 +54,7 @@ int cls_webu_mpegts::pic_send(unsigned char *img)
     int64_t pts_interval;
 
     if (picture == NULL) {
-        picture = myframe_alloc();
+        picture = av_frame_alloc();
         picture->linesize[0] = ctx_codec->width;
         picture->linesize[1] = ctx_codec->width / 2;
         picture->linesize[2] = ctx_codec->width / 2;
@@ -85,7 +85,7 @@ int cls_webu_mpegts::pic_send(unsigned char *img)
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
             , _("Error sending frame for encoding:%s"), errstr);
-        myframe_free(picture);
+        av_frame_free(&picture);
         picture = NULL;
         return -1;
     }
@@ -104,7 +104,7 @@ int cls_webu_mpegts::pic_get()
 
     retcd = avcodec_receive_packet(ctx_codec, pkt);
     if (retcd == AVERROR(EAGAIN)) {
-        mypacket_free(pkt);
+        av_packet_free(&pkt);
         pkt = NULL;
         return -1;
     }
@@ -126,7 +126,7 @@ int cls_webu_mpegts::pic_get()
         return -1;
     }
 
-    mypacket_free(pkt);
+    av_packet_free(&pkt);
     pkt = NULL;
 
     return 0;
@@ -421,11 +421,11 @@ cls_webu_mpegts::~cls_webu_mpegts()
     webua  = nullptr;
     delete webuc;
     if (picture != nullptr) {
-        myframe_free(picture);
+        av_frame_free(&picture);
         picture = nullptr;
     }
     if (ctx_codec != nullptr) {
-        myavcodec_close(ctx_codec);
+        avcodec_free_context(&ctx_codec);
         ctx_codec = nullptr;
     }
     if (fmtctx != nullptr) {

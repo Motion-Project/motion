@@ -139,41 +139,47 @@ void cls_webu_common::img_resize(ctx_dev *p_cam
     img_sz = (dst_h * dst_w * 3)/2;
     memset(dst, 0x00, (size_t)img_sz);
 
-    frm_in = myframe_alloc();
+    frm_in = av_frame_alloc();
     if (frm_in == NULL) {
         MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             , _("Unable to allocate frm_in."));
         return;
     }
 
-    frm_out = myframe_alloc();
+    frm_out = av_frame_alloc();
     if (frm_out == NULL) {
         MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             , _("Unable to allocate frm_out."));
-        myframe_free(frm_in);
+        av_frame_free(&frm_in);
         return;
     }
 
-    retcd = myimage_fill_arrays(frm_in, src, MY_PIX_FMT_YUV420P, src_w, src_h);
+    retcd = av_image_fill_arrays(
+        frm_in->data, frm_in->linesize
+        , src, MY_PIX_FMT_YUV420P
+        , src_w, src_h, 1);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             , "Error filling arrays: %s", errstr);
-        myframe_free(frm_in);
-        myframe_free(frm_out);
+        av_frame_free(&frm_in);
+        av_frame_free(&frm_out);
         return;
     }
 
     buf = (uint8_t *)mymalloc((size_t)img_sz);
 
-    retcd = myimage_fill_arrays(frm_out, buf, MY_PIX_FMT_YUV420P, dst_w, dst_h);
+    retcd = av_image_fill_arrays(
+        frm_out->data, frm_out->linesize
+        , buf, MY_PIX_FMT_YUV420P
+        , dst_w, dst_h, 1);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             , "Error Filling array 2: %s", errstr);
         free(buf);
-        myframe_free(frm_in);
-        myframe_free(frm_out);
+        av_frame_free(&frm_in);
+        av_frame_free(&frm_out);
         return;
     }
 
@@ -185,8 +191,8 @@ void cls_webu_common::img_resize(ctx_dev *p_cam
         MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             , _("Unable to allocate scaling context."));
         free(buf);
-        myframe_free(frm_in);
-        myframe_free(frm_out);
+        av_frame_free(&frm_in);
+        av_frame_free(&frm_out);
         return;
     }
 
@@ -198,29 +204,32 @@ void cls_webu_common::img_resize(ctx_dev *p_cam
         MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             ,_("Error resizing/reformatting: %s"), errstr);
         free(buf);
-        myframe_free(frm_in);
-        myframe_free(frm_out);
+        av_frame_free(&frm_in);
+        av_frame_free(&frm_out);
         sws_freeContext(swsctx);
         return;
     }
 
-    retcd = myimage_copy_to_buffer(
-         frm_out, (uint8_t *)dst
-        ,MY_PIX_FMT_YUV420P, dst_w, dst_h, img_sz);
+    retcd = av_image_copy_to_buffer(
+        (uint8_t *)dst, img_sz
+        , (const uint8_t * const*)frm_out
+        , frm_out->linesize
+        , MY_PIX_FMT_YUV420P, dst_w, dst_h, 1);
+
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             ,_("Error putting frame into output buffer: %s"), errstr);
         free(buf);
-        myframe_free(frm_in);
-        myframe_free(frm_out);
+        av_frame_free(&frm_in);
+        av_frame_free(&frm_out);
         sws_freeContext(swsctx);
         return;
     }
 
     free(buf);
-    myframe_free(frm_in);
-    myframe_free(frm_out);
+    av_frame_free(&frm_in);
+    av_frame_free(&frm_out);
     sws_freeContext(swsctx);
 }
 

@@ -20,57 +20,27 @@
 #ifndef _INCLUDE_UTIL_HPP_
 #define _INCLUDE_UTIL_HPP_
 
-#if (MYFFVER >= 56000)
-    #define MY_PIX_FMT_YUV420P   AV_PIX_FMT_YUV420P
-    #define MY_PIX_FMT_YUVJ420P  AV_PIX_FMT_YUVJ420P
-    #define MyPixelFormat AVPixelFormat
-#else  //Old ffmpeg pixel formats
-    #define MY_PIX_FMT_YUV420P   PIX_FMT_YUV420P
-    #define MY_PIX_FMT_YUVJ420P  PIX_FMT_YUVJ420P
-    #define MyPixelFormat PixelFormat
-#endif  //Libavformat >= 56
+#define MY_PIX_FMT_YUV420P   AV_PIX_FMT_YUV420P
+#define MY_PIX_FMT_YUVJ420P  AV_PIX_FMT_YUVJ420P
+#define MyPixelFormat AVPixelFormat
 
-#if (MYFFVER > 54006)
-    #define MY_FLAG_READ       AVIO_FLAG_READ
-    #define MY_FLAG_WRITE      AVIO_FLAG_WRITE
-    #define MY_FLAG_READ_WRITE AVIO_FLAG_READ_WRITE
-#else  //Older versions
-    #define MY_FLAG_READ       URL_RDONLY
-    #define MY_FLAG_WRITE      URL_WRONLY
-    #define MY_FLAG_READ_WRITE URL_RDWR
-#endif
+#define MY_FLAG_READ       AVIO_FLAG_READ
+#define MY_FLAG_WRITE      AVIO_FLAG_WRITE
+#define MY_FLAG_READ_WRITE AVIO_FLAG_READ_WRITE
 
-#if (MYFFVER >= 56000)
-    #define MY_CODEC_ID_MSMPEG4V2  AV_CODEC_ID_MSMPEG4V2
-    #define MY_CODEC_ID_FLV1       AV_CODEC_ID_FLV1
-    #define MY_CODEC_ID_FFV1       AV_CODEC_ID_FFV1
-    #define MY_CODEC_ID_NONE       AV_CODEC_ID_NONE
-    #define MY_CODEC_ID_MPEG2VIDEO AV_CODEC_ID_MPEG2VIDEO
-    #define MY_CODEC_ID_H264       AV_CODEC_ID_H264
-    #define MY_CODEC_ID_HEVC       AV_CODEC_ID_HEVC
-    #define MY_CODEC_ID_THEORA     AV_CODEC_ID_THEORA
-    #define MY_CODEC_ID_VP8        AV_CODEC_ID_VP8
-    #define MY_CODEC_ID_VP9        AV_CODEC_ID_VP9
-#else
-    #define MY_CODEC_ID_MSMPEG4V2  CODEC_ID_MSMPEG4V2
-    #define MY_CODEC_ID_FLV1       CODEC_ID_FLV1
-    #define MY_CODEC_ID_FFV1       CODEC_ID_FFV1
-    #define MY_CODEC_ID_NONE       CODEC_ID_NONE
-    #define MY_CODEC_ID_MPEG2VIDEO CODEC_ID_MPEG2VIDEO
-    #define MY_CODEC_ID_H264       CODEC_ID_H264
-    #define MY_CODEC_ID_HEVC       CODEC_ID_H264
-    #define MY_CODEC_ID_THEORA     CODEC_ID_THEORA
-    #define MY_CODEC_ID_VP8        CODEC_ID_VP8
-    #define MY_CODEC_ID_VP9        CODEC_ID_VP9
-#endif
+#define MY_CODEC_ID_MSMPEG4V2  AV_CODEC_ID_MSMPEG4V2
+#define MY_CODEC_ID_FLV1       AV_CODEC_ID_FLV1
+#define MY_CODEC_ID_FFV1       AV_CODEC_ID_FFV1
+#define MY_CODEC_ID_NONE       AV_CODEC_ID_NONE
+#define MY_CODEC_ID_MPEG2VIDEO AV_CODEC_ID_MPEG2VIDEO
+#define MY_CODEC_ID_H264       AV_CODEC_ID_H264
+#define MY_CODEC_ID_HEVC       AV_CODEC_ID_HEVC
+#define MY_CODEC_ID_THEORA     AV_CODEC_ID_THEORA
+#define MY_CODEC_ID_VP8        AV_CODEC_ID_VP8
+#define MY_CODEC_ID_VP9        AV_CODEC_ID_VP9
 
-#if (LIBAVCODEC_VERSION_MAJOR >= 57)
-    #define MY_CODEC_FLAG_GLOBAL_HEADER AV_CODEC_FLAG_GLOBAL_HEADER
-    #define MY_CODEC_FLAG_QSCALE        AV_CODEC_FLAG_QSCALE
-#else
-    #define MY_CODEC_FLAG_GLOBAL_HEADER CODEC_FLAG_GLOBAL_HEADER
-    #define MY_CODEC_FLAG_QSCALE        CODEC_FLAG_QSCALE
-#endif
+#define MY_CODEC_FLAG_GLOBAL_HEADER AV_CODEC_FLAG_GLOBAL_HEADER
+#define MY_CODEC_FLAG_QSCALE        AV_CODEC_FLAG_QSCALE
 
 #if (LIBAVCODEC_VERSION_MAJOR >= 59)
     typedef const AVCodec myAVCodec; /* Version independent definition for AVCodec*/
@@ -121,7 +91,6 @@
     void mythreadname_set(const char *abbr, int threadnbr, const char *threadname);
     void mythreadname_get(char *threadname);
     void mythreadname_get(std::string &threadname);
-    bool mycheck_passthrough(ctx_dev *cam);
 
     char* mytranslate_text(const char *msgid, int setnls);
     void mytranslate_init(void);
@@ -135,16 +104,8 @@
     void mytrim(std::string &parm);
     void myunquote(std::string &parm);
 
-    AVFrame *myframe_alloc(void);
-    void myframe_free(AVFrame *frame);
     void myframe_key(AVFrame *frame);
     void myframe_interlaced(AVFrame *frame);
-    void mypacket_free(AVPacket *pkt);
-    void myavcodec_close(AVCodecContext *codec_context);
-    int myimage_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height);
-    int myimage_copy_to_buffer(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height,int dest_size);
-    int myimage_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height);
-    int mycopy_packet(AVPacket *dest_pkt, AVPacket *src_pkt);
     AVPacket *mypacket_alloc(AVPacket *pkt);
 
     void util_parms_parse(ctx_params *params, std::string parm_desc, std::string confline);

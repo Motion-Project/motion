@@ -628,24 +628,6 @@ void mythreadname_get(char *threadname)
     #endif
 }
 
-bool mycheck_passthrough(ctx_dev *cam)
-{
-    #if (MYFFVER >= 57041)
-        if (cam->movie_passthrough) {
-            return true;
-        } else {
-            return false;
-        }
-    #else
-        if (cam->movie_passthrough) {
-            MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("FFMPEG version too old. Disabling pass-through processing."));
-        }
-        return false;
-    #endif
-
-}
-
 static void mytranslate_locale_chg(const char *langcd)
 {
     #ifdef HAVE_GETTEXT
@@ -727,26 +709,6 @@ char* mytranslate_text(const char *msgid, int setnls)
  ****************************************************************************/
 /*********************************************/
 /*********************************************/
-AVFrame *myframe_alloc(void)
-{
-    AVFrame *pic;
-    #if (MYFFVER >= 55000)
-        pic = av_frame_alloc();
-    #else
-        pic = avcodec_alloc_frame();
-    #endif
-    return pic;
-}
-/*********************************************/
-void myframe_free(AVFrame *frame)
-{
-    #if (MYFFVER >= 55000)
-        av_frame_free(&frame);
-    #else
-        av_freep(&frame);
-    #endif
-}
-/*********************************************/
 void myframe_key(AVFrame *frame)
 {
     #if (MYFFVER < 60016)
@@ -765,101 +727,11 @@ void myframe_interlaced(AVFrame *frame)
     #endif
 }
 
-
-/*********************************************/
-int myimage_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height)
-{
-    int retcd = 0;
-    #if (MYFFVER >= 57000)
-        int align = 1;
-        retcd = av_image_get_buffer_size(pix_fmt, width, height, align);
-    #else
-        retcd = avpicture_get_size(pix_fmt, width, height);
-    #endif
-    return retcd;
-}
-/*********************************************/
-int myimage_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum MyPixelFormat pix_fmt
-        , int width, int height, int dest_size)
-{
-    int retcd = 0;
-    #if (MYFFVER >= 57000)
-        int align = 1;
-        retcd = av_image_copy_to_buffer((uint8_t *)buffer_ptr,dest_size
-            ,(const uint8_t * const*)frame,frame->linesize,pix_fmt,width,height,align);
-    #else
-        retcd = avpicture_layout((const AVPicture*)frame,pix_fmt,width,height
-            ,(unsigned char *)buffer_ptr,dest_size);
-    #endif
-    return retcd;
-}
-/*********************************************/
-int myimage_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt
-        , int width,int height)
-{
-    int retcd = 0;
-    #if (MYFFVER >= 57000)
-        int align = 1;
-        retcd = av_image_fill_arrays(
-            frame->data
-            ,frame->linesize
-            ,buffer_ptr
-            ,pix_fmt
-            ,width
-            ,height
-            ,align
-        );
-    #else
-        retcd = avpicture_fill(
-            (AVPicture *)frame
-            ,buffer_ptr
-            ,pix_fmt
-            ,width
-            ,height);
-    #endif
-    return retcd;
-}
-/*********************************************/
-void mypacket_free(AVPacket *pkt)
-{
-    #if (MYFFVER >= 57041)
-        av_packet_free(&pkt);
-    #else
-        av_free_packet(pkt);
-    #endif
-
-}
-/*********************************************/
-void myavcodec_close(AVCodecContext *codec_context)
-{
-    #if (MYFFVER >= 57041)
-        avcodec_free_context(&codec_context);
-    #else
-        avcodec_close(codec_context);
-    #endif
-}
-/*********************************************/
-int mycopy_packet(AVPacket *dest_pkt, AVPacket *src_pkt)
-{
-    #if (MYFFVER >= 55000)
-        return av_packet_ref(dest_pkt, src_pkt);
-    #else
-        /* Old versions of libav do not support copying packet
-        * We therefore disable the pass through recording and
-        * for this function, simply do not do anything
-        */
-        if (dest_pkt == src_pkt ) {
-            return 0;
-        } else {
-            return 0;
-        }
-    #endif
-}
 /*********************************************/
 AVPacket *mypacket_alloc(AVPacket *pkt)
 {
     if (pkt != NULL) {
-        mypacket_free(pkt);
+        av_packet_free(&pkt);
     };
     pkt = av_packet_alloc();
     #if (MYFFVER < 58076)

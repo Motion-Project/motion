@@ -135,15 +135,13 @@ static void event_vlp_putpipem(ctx_dev *cam)
 static void event_image_detect(ctx_dev *cam)
 {
     char filename[PATH_MAX];
-    int  passthrough;
 
     if (cam->new_img & NEWIMG_ON) {
         mypicname(cam, filename,"%s/%s.%s"
             , cam->conf->picture_filename
             , cam->conf->picture_type);
-        passthrough = mycheck_passthrough(cam);
         cam->filetype = FTYPE_IMAGE;
-        if ((cam->imgs.size_high > 0) && (passthrough == false)) {
+        if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
             cam->picture->save_norm(filename, cam->current_image->image_high);
         } else {
             cam->picture->save_norm(filename,cam->current_image->image_norm);
@@ -181,7 +179,7 @@ static void event_image_snapshot(ctx_dev *cam)
 {
     char filename[PATH_MAX];
     char linkpath[PATH_MAX];
-    int offset, passthrough;
+    int offset;
 
     offset = (int)cam->conf->snapshot_filename.length() - 8;
     if (offset < 0) {
@@ -192,9 +190,8 @@ static void event_image_snapshot(ctx_dev *cam)
         mypicname(cam, filename,"%s/%s.%s"
             , cam->conf->snapshot_filename
             , cam->conf->picture_type);
-        passthrough = mycheck_passthrough(cam);
         cam->filetype = FTYPE_IMAGE_SNAPSHOT;
-        if ((cam->imgs.size_high > 0) && (passthrough == false)) {
+        if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
             cam->picture->save_norm(filename, cam->current_image->image_high);
         } else {
             cam->picture->save_norm(filename, cam->current_image->image_norm);
@@ -217,9 +214,8 @@ static void event_image_snapshot(ctx_dev *cam)
             , cam->conf->snapshot_filename
             , cam->conf->picture_type);
         remove(filename);
-        passthrough = mycheck_passthrough(cam);
         cam->filetype = FTYPE_IMAGE_SNAPSHOT;
-        if ((cam->imgs.size_high > 0) && (!passthrough)) {
+        if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
             cam->picture->save_norm(filename, cam->current_image->image_high);
         } else {
             cam->picture->save_norm(filename, cam->current_image->image_norm);
@@ -235,7 +231,6 @@ static void event_image_preview(ctx_dev *cam)
 {
     char filename[PATH_MAX];
     ctx_image_data *saved_current_image;
-    int passthrough;
 
     if (cam->imgs.image_preview.diffs) {
         saved_current_image = cam->current_image;
@@ -248,9 +243,8 @@ static void event_image_preview(ctx_dev *cam)
             , cam->conf->picture_filename
             , cam->conf->picture_type);
 
-        passthrough = mycheck_passthrough(cam);
         cam->filetype = FTYPE_IMAGE;
-        if ((cam->imgs.size_high > 0) && (passthrough == false)) {
+        if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
             cam->picture->save_norm(filename, cam->imgs.image_preview.image_high);
         } else {
             cam->picture->save_norm(filename, cam->imgs.image_preview.image_norm);

@@ -262,11 +262,9 @@ int cls_picture::put_memory(u_char *img_dst, int image_size
 void cls_picture::pic_write(FILE *picture, u_char *image, int quality)
 {
     int width, height;
-    int passthrough;
 
-    passthrough = mycheck_passthrough(cam);
     if (((cam->filetype == FTYPE_IMAGE) || (cam->filetype == FTYPE_IMAGE_SNAPSHOT)) &&
-         (cam->imgs.size_high > 0) && (!passthrough)) {
+         (cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
         width = cam->imgs.width_high;
         height = cam->imgs.height_high;
     } else {
