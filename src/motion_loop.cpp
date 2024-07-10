@@ -255,7 +255,6 @@ static void mlp_detected(ctx_dev *cam)
 
     if (cam->current_image->shot <= conf->framerate) {
         if ((conf->stream_motion == true) &&
-            (cam->motapp->conf->setup_mode == false) &&
             (cam->current_image->shot != 1)) {
             event(cam, EVENT_STREAM);
         }
@@ -989,7 +988,6 @@ static void mlp_overlay(ctx_dev *cam)
     if (cam->smartmask_speed &&
         ((cam->conf->picture_output_motion != "off") ||
         cam->conf->movie_output_motion ||
-        cam->motapp->conf->setup_mode ||
         (cam->stream.motion.jpg_cnct > 0) ||
         (cam->stream.motion.ts_cnct > 0))) {
         draw_smartmask(cam, cam->imgs.image_motion.image_norm);
@@ -998,7 +996,6 @@ static void mlp_overlay(ctx_dev *cam)
     if (cam->imgs.largest_label &&
         ((cam->conf->picture_output_motion != "off") ||
         cam->conf->movie_output_motion ||
-        cam->motapp->conf->setup_mode ||
         (cam->stream.motion.jpg_cnct > 0) ||
         (cam->stream.motion.ts_cnct > 0))) {
         draw_largest_label(cam, cam->imgs.image_motion.image_norm);
@@ -1007,7 +1004,6 @@ static void mlp_overlay(ctx_dev *cam)
     if (cam->imgs.mask &&
         ((cam->conf->picture_output_motion != "off") ||
         cam->conf->movie_output_motion ||
-        cam->motapp->conf->setup_mode ||
         (cam->stream.motion.jpg_cnct > 0) ||
         (cam->stream.motion.ts_cnct > 0))) {
         draw_fixed_mask(cam, cam->imgs.image_motion.image_norm);
@@ -1023,8 +1019,7 @@ static void mlp_overlay(ctx_dev *cam)
                   cam->imgs.width - 10, 10, tmp, cam->text_scale);
     }
 
-    if (cam->motapp->conf->setup_mode ||
-        (cam->stream.motion.jpg_cnct > 0) ||
+    if ((cam->stream.motion.jpg_cnct > 0) ||
         (cam->stream.motion.ts_cnct > 0)) {
         sprintf(tmp, "D:%5d L:%3d N:%3d", cam->current_image->diffs,
             cam->current_image->total_labels, cam->noise);
@@ -1231,40 +1226,6 @@ static void mlp_actions(ctx_dev *cam)
 
     mlp_actions_event(cam);
 
-}
-
-/* Process for setup mode */
-static void mlp_setupmode(ctx_dev *cam)
-{
-    if (cam->motapp->conf->setup_mode) {
-        char msg[1024] = "\0";
-        char part[100];
-
-        if (cam->conf->despeckle_filter != "") {
-            snprintf(part, 99, _("changes after '%s': %5d")
-                , cam->conf->despeckle_filter.c_str(), cam->current_image->diffs);
-            strcat(msg, part);
-            if (cam->conf->despeckle_filter.find('l') != std::string::npos) {
-                snprintf(part, 99,_(" - labels: %3d"), cam->current_image->total_labels);
-                strcat(msg, part);
-            }
-        } else {
-            snprintf(part, 99,_("Changes: %5d"), cam->current_image->diffs);
-            strcat(msg, part);
-        }
-
-        if (cam->conf->noise_tune) {
-            snprintf(part, 99,_(" - noise level: %2d"), cam->noise);
-            strcat(msg, part);
-        }
-
-        if (cam->conf->threshold_tune) {
-            snprintf(part, 99, _(" - threshold: %d"), cam->threshold);
-            strcat(msg, part);
-        }
-
-        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "%s", msg);
-    }
 }
 
 /* Snapshot interval*/
@@ -1475,7 +1436,6 @@ void *mlp_main(void *arg)
         mlp_tuning(cam);
         mlp_overlay(cam);
         mlp_actions(cam);
-        mlp_setupmode(cam);
         mlp_snapshot(cam);
         mlp_timelapse(cam);
         mlp_loopback(cam);

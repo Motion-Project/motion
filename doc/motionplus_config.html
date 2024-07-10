@@ -115,23 +115,22 @@
           <tbody>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#daemon" >daemon</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#setup_mode" >setup_mode</a> </td>
               <td bgcolor="#edf4f9" ><a href="#pid_file" >pid_file</a> </td>
               <td bgcolor="#edf4f9" ><a href="#log_file" >log_file</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#log_level" >log_level</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#log_level" >log_level</a> </td>
               <td bgcolor="#edf4f9" ><a href="#log_type" >log_type</a> </td>
               <td bgcolor="#edf4f9" ><a href="#native_language" >native_language</a> </td>
               <td bgcolor="#edf4f9" ><a href="#target_dir" >target_dir</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#device_name" >device_name</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#device_name" >device_name</a> </td>
               <td bgcolor="#edf4f9" ><a href="#device_id" >device_id</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#device_tmo" >device_tmo</a> </td>
               <td bgcolor="#edf4f9" ><a href="#camera" >camera</a> </td>
               <td bgcolor="#edf4f9" ><a href="#config_dir" >config_dir</a> </td>
             </tr>
-              <td bgcolor="#edf4f9" ><a href="#device_tmo" >device_tmo</a> </td>
               <td bgcolor="#edf4f9" ><a href="#watchdog_tmo" >watchdog_tmo</a> </td>
               <td bgcolor="#edf4f9" ><a href="#watchdog_kill" >watchdog_kill</a> </td>
               <td bgcolor="#edf4f9" ><a href="#pause" >pause</a> </td>
@@ -703,19 +702,6 @@
         <ul>
           <li> Values: on, off | Default: off</li>
           Run in daemon mode.  When running MotionPlus under systemd specify as off.
-        </ul>
-        <p></p>
-
-        <h3><a name="setup_mode"></a> setup_mode </h3>
-        <ul>
-          <li> Values: on, off | Default: off</li>
-          Run in setup mode and provide lots of messages related to images processed.
-          <br>
-          Prints the image differences, labels, noise values, thread number and the word
-          setup on the output image.  Also outputs the image in the "motion" negative format
-          instead of the normal output.
-          <br>
-          Prints the label values, difference values, noise level to the log file.
         </ul>
         <p></p>
 
@@ -2840,7 +2826,6 @@
         <li>-h : Show help screen</li>
         <li>-b : Run in daemon mode</li>
         <li>-n : Run in non-daemon mode</li>
-        <li>-s : Run in setup mode. Also forces non-daemon mode.</li>
         <li>-d : Run with message log level 1 - 9</li>
         <li>-k : Run with message log type 1 - 9</li>
         <li>-l : Full path and file name for log file</li>

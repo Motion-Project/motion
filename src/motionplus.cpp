@@ -652,14 +652,10 @@ static void motpls_startup(ctx_motapp *motapp, int daemonize)
     mytranslate_text("",motapp->conf->native_language);
 
     if (daemonize) {
-        if (motapp->conf->daemon && motapp->conf->setup_mode == 0) {
+        if (motapp->conf->daemon) {
             motpls_daemon();
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus running as daemon process"));
         }
-    }
-
-    if (motapp->conf->setup_mode) {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("MotionPlus running in setup mode."));
     }
 
     conf_parms_log(motapp);

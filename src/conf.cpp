@@ -37,7 +37,6 @@ void conf_process(ctx_motapp *motapp, ctx_config *conf);
 /*Configuration parameters */
 ctx_parm config_parms[] = {
     {"daemon",                    PARM_TYP_BOOL,   PARM_CAT_00, WEBUI_LEVEL_ADVANCED },
-    {"setup_mode",                PARM_TYP_BOOL,   PARM_CAT_00, WEBUI_LEVEL_LIMITED },
     {"conf_filename",             PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_ADVANCED },
     {"pid_file",                  PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_ADVANCED },
     {"log_file",                  PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_ADVANCED },
@@ -469,19 +468,6 @@ static void conf_edit_daemon(ctx_config *conf, std::string &parm, enum PARM_ACT 
     }
     return;
     MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","daemon",_("daemon"));
-}
-
-static void conf_edit_setup_mode(ctx_config *conf, std::string &parm, int pact)
-{
-    if (pact == PARM_ACT_DFLT) {
-        conf->setup_mode = false;
-    } else if (pact == PARM_ACT_SET) {
-        conf_edit_set_bool(conf->setup_mode, parm);
-    } else if (pact == PARM_ACT_GET) {
-        conf_edit_get_bool(parm, conf->setup_mode);
-    }
-    return;
-    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","setup_mode",_("setup_mode"));
 }
 
 static void conf_edit_conf_filename(ctx_config *conf, std::string &parm, enum PARM_ACT pact)
@@ -3038,7 +3024,6 @@ static void conf_edit_cat00(ctx_config *conf, std::string cmd
 {
     if (cmd == "daemon") {                         conf_edit_daemon(conf, parm_val, pact);
     } else if (cmd == "conf_filename") {           conf_edit_conf_filename(conf, parm_val, pact);
-    } else if (cmd == "setup_mode") {              conf_edit_setup_mode(conf, parm_val, pact);
     } else if (cmd == "pid_file") {                conf_edit_pid_file(conf, parm_val, pact);
     } else if (cmd == "log_file") {                conf_edit_log_file(conf, parm_val, pact);
     } else if (cmd == "log_level") {               conf_edit_log_level(conf, parm_val, pact);
@@ -3608,9 +3593,6 @@ static void conf_cmdline(ctx_motapp *motapp)
             break;
         case 'n':
             conf_edit_set(motapp->conf, "daemon", "off");
-            break;
-        case 's':
-            conf_edit_set(motapp->conf, "setup_mode", "on");
             break;
         case 'd':
             conf_edit_set(motapp->conf, "log_level", optarg);

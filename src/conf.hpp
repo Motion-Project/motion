@@ -33,7 +33,6 @@
         std::string     log_type_str;
         int             log_level;
         int             log_type;
-        bool            setup_mode;
         bool            native_language;
 
         std::string     device_name;

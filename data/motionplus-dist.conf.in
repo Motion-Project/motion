@@ -10,7 +10,6 @@
 ;*****   System
 ;*************************************************
 daemon off
-setup_mode off
 ;log_file
 log_level 6
 log_type ALL
