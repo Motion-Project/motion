@@ -28,43 +28,43 @@
 
 enum AVPixelFormat netcam_getfmt_vaapi(AVCodecContext *avctx, const enum AVPixelFormat *pix_fmts)
 {
-        const enum AVPixelFormat *p;
-        (void)avctx;
+    const enum AVPixelFormat *p;
+    (void)avctx;
 
-        for (p = pix_fmts; *p != -1; p++) {
-            if (*p == AV_PIX_FMT_VAAPI) {
-                return *p;
-            }
+    for (p = pix_fmts; *p != -1; p++) {
+        if (*p == AV_PIX_FMT_VAAPI) {
+            return *p;
         }
+    }
 
-        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Failed to get vaapi pix format"));
-        return AV_PIX_FMT_NONE;
+    MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Failed to get vaapi pix format"));
+    return AV_PIX_FMT_NONE;
 }
 
 enum AVPixelFormat netcam_getfmt_cuda(AVCodecContext *avctx, const enum AVPixelFormat *pix_fmts)
 {
-        const enum AVPixelFormat *p;
-        (void)avctx;
+    const enum AVPixelFormat *p;
+    (void)avctx;
 
-        for (p = pix_fmts; *p != -1; p++) {
-            if (*p == AV_PIX_FMT_CUDA) return *p;
-        }
+    for (p = pix_fmts; *p != -1; p++) {
+        if (*p == AV_PIX_FMT_CUDA) return *p;
+    }
 
-        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Failed to get cuda pix format"));
-        return AV_PIX_FMT_NONE;
+    MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Failed to get cuda pix format"));
+    return AV_PIX_FMT_NONE;
 }
 
 enum AVPixelFormat netcam_getfmt_drm(AVCodecContext *avctx, const enum AVPixelFormat *pix_fmts)
 {
-        const enum AVPixelFormat *p;
-        (void)avctx;
+    const enum AVPixelFormat *p;
+    (void)avctx;
 
-        for (p = pix_fmts; *p != -1; p++) {
-            if (*p == AV_PIX_FMT_DRM_PRIME) return *p;
-        }
+    for (p = pix_fmts; *p != -1; p++) {
+        if (*p == AV_PIX_FMT_DRM_PRIME) return *p;
+    }
 
-        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Failed to get drm pix format"));
-        return AV_PIX_FMT_NONE;
+    MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Failed to get drm pix format"));
+    return AV_PIX_FMT_NONE;
 }
 
 int netcam_interrupt(void *ctx)
@@ -510,225 +510,225 @@ void cls_netcam::pktarray_add()
 
 int cls_netcam::decode_sw()
 {
-        int retcd;
-        char errstr[128];
+    int retcd;
+    char errstr[128];
 
-        retcd = avcodec_receive_frame(codec_context, frame);
-        if ((interrupted) || (finish) || (retcd < 0)) {
-            if (retcd == AVERROR(EAGAIN)) {
-                retcd = 0;
-            } else if (retcd == AVERROR_INVALIDDATA) {
+    retcd = avcodec_receive_frame(codec_context, frame);
+    if ((interrupted) || (finish) || (retcd < 0)) {
+        if (retcd == AVERROR(EAGAIN)) {
+            retcd = 0;
+        } else if (retcd == AVERROR_INVALIDDATA) {
+            MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("%s:Ignoring packet with invalid data")
+                ,cameratype.c_str());
+            retcd = 0;
+        } else if (retcd < 0) {
+            av_strerror(retcd, errstr, sizeof(errstr));
                 MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s:Ignoring packet with invalid data")
-                    ,cameratype.c_str());
-                retcd = 0;
-            } else if (retcd < 0) {
-                av_strerror(retcd, errstr, sizeof(errstr));
-                    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                        ,_("%s:Rec frame error:%s")
-                        ,cameratype.c_str(), errstr);
-                retcd = -1;
-            } else {
-                retcd = -1;
-            }
-            return retcd;
+                    ,_("%s:Rec frame error:%s")
+                    ,cameratype.c_str(), errstr);
+            retcd = -1;
+        } else {
+            retcd = -1;
         }
+        return retcd;
+    }
 
-        return 1;
+    return 1;
 }
 
 int cls_netcam::decode_vaapi()
 {
-        int retcd;
-        char errstr[128];
-        AVFrame *hw_frame = nullptr;
+    int retcd;
+    char errstr[128];
+    AVFrame *hw_frame = nullptr;
 
-        hw_frame = av_frame_alloc();
+    hw_frame = av_frame_alloc();
 
-        retcd = av_hwframe_get_buffer(codec_context->hw_frames_ctx, hw_frame, 0);
-        if (retcd < 0) {
+    retcd = av_hwframe_get_buffer(codec_context->hw_frames_ctx, hw_frame, 0);
+    if (retcd < 0) {
+        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            , _("%s:Error getting hw frame buffer")
+            , cameratype.c_str());
+        av_frame_free(&hw_frame);
+        return -1;
+    }
+
+    retcd = avcodec_receive_frame(codec_context, hw_frame);
+    if ((interrupted) || (finish) || (retcd < 0)) {
+        if (retcd == AVERROR(EAGAIN)) {
+            retcd = 0;
+        } else if (retcd == AVERROR_INVALIDDATA) {
             MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                , _("%s:Error getting hw frame buffer")
-                , cameratype.c_str());
-            av_frame_free(&hw_frame);
-            return -1;
-        }
-
-        retcd = avcodec_receive_frame(codec_context, hw_frame);
-        if ((interrupted) || (finish) || (retcd < 0)) {
-            if (retcd == AVERROR(EAGAIN)) {
-                retcd = 0;
-            } else if (retcd == AVERROR_INVALIDDATA) {
-                MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s:Ignoring packet with invalid data")
-                    ,cameratype.c_str());
-                retcd = 0;
-            } else if (retcd < 0) {
-                av_strerror(retcd, errstr, sizeof(errstr));
-                    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                        ,_("%s:Rec frame error:%s")
-                        ,cameratype.c_str(), errstr);
-                retcd = -1;
-            } else {
-                retcd = -1;
-            }
-            av_frame_free(&hw_frame);
-            return retcd;
-        }
-
-        retcd = av_hwframe_transfer_data(frame, hw_frame, 0);
-        if (retcd < 0) {
-            MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Error transferring HW decoded to system memory")
+                ,_("%s:Ignoring packet with invalid data")
                 ,cameratype.c_str());
-            av_frame_free(&hw_frame);
-            return -1;
+            retcd = 0;
+        } else if (retcd < 0) {
+            av_strerror(retcd, errstr, sizeof(errstr));
+                MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:Rec frame error:%s")
+                    ,cameratype.c_str(), errstr);
+            retcd = -1;
+        } else {
+            retcd = -1;
         }
         av_frame_free(&hw_frame);
+        return retcd;
+    }
 
-        return 1;
+    retcd = av_hwframe_transfer_data(frame, hw_frame, 0);
+    if (retcd < 0) {
+        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s:Error transferring HW decoded to system memory")
+            ,cameratype.c_str());
+        av_frame_free(&hw_frame);
+        return -1;
+    }
+    av_frame_free(&hw_frame);
+
+    return 1;
 }
 
 int cls_netcam::decode_cuda()
 {
-        int retcd;
-        char errstr[128];
-        AVFrame *hw_frame = nullptr;
+    int retcd;
+    char errstr[128];
+    AVFrame *hw_frame = nullptr;
 
-        hw_frame = av_frame_alloc();
+    hw_frame = av_frame_alloc();
 
-        retcd = avcodec_receive_frame(codec_context, hw_frame);
-        if ((interrupted) || (finish) || (retcd < 0) ){
-            if (retcd == AVERROR(EAGAIN)){
-                retcd = 0;
-            } else if (retcd == AVERROR_INVALIDDATA) {
-                MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s:Ignoring packet with invalid data")
-                    ,cameratype.c_str());
-                retcd = 0;
-            } else if (retcd < 0) {
-                av_strerror(retcd, errstr, sizeof(errstr));
-                    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                        ,_("%s:Rec frame error:%s")
-                        ,cameratype.c_str(), errstr);
-                retcd = -1;
-            } else {
-                retcd = -1;
-            }
-            av_frame_free(&hw_frame);
-            return retcd;
-        }
-        frame->format=AV_PIX_FMT_NV12;
-
-        retcd = av_hwframe_transfer_data(frame, hw_frame, 0);
-        if (retcd < 0) {
+    retcd = avcodec_receive_frame(codec_context, hw_frame);
+    if ((interrupted) || (finish) || (retcd < 0) ){
+        if (retcd == AVERROR(EAGAIN)){
+            retcd = 0;
+        } else if (retcd == AVERROR_INVALIDDATA) {
             MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Error transferring HW decoded to system memory")
+                ,_("%s:Ignoring packet with invalid data")
                 ,cameratype.c_str());
-            av_frame_free(&hw_frame);
-            return -1;
+            retcd = 0;
+        } else if (retcd < 0) {
+            av_strerror(retcd, errstr, sizeof(errstr));
+                MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:Rec frame error:%s")
+                    ,cameratype.c_str(), errstr);
+            retcd = -1;
+        } else {
+            retcd = -1;
         }
-
         av_frame_free(&hw_frame);
+        return retcd;
+    }
+    frame->format=AV_PIX_FMT_NV12;
 
-        return 1;
+    retcd = av_hwframe_transfer_data(frame, hw_frame, 0);
+    if (retcd < 0) {
+        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s:Error transferring HW decoded to system memory")
+            ,cameratype.c_str());
+        av_frame_free(&hw_frame);
+        return -1;
+    }
+
+    av_frame_free(&hw_frame);
+
+    return 1;
 }
 
 int cls_netcam::decode_drm()
 {
-        int retcd;
-        char errstr[128];
-        AVFrame *hw_frame = nullptr;
+    int retcd;
+    char errstr[128];
+    AVFrame *hw_frame = nullptr;
 
-        hw_frame = av_frame_alloc();
+    hw_frame = av_frame_alloc();
 
-        retcd = avcodec_receive_frame(codec_context, hw_frame);
-        if ((interrupted) || (finish) || (retcd < 0) ){
-            if (retcd == AVERROR(EAGAIN)){
-                retcd = 0;
-            } else if (retcd == AVERROR_INVALIDDATA) {
-                MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s:Ignoring packet with invalid data")
-                    ,cameratype.c_str());
-                retcd = 0;
-            } else if (retcd < 0) {
-                av_strerror(retcd, errstr, sizeof(errstr));
-                    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                        ,_("%s:Rec frame error:%s")
-                        ,cameratype.c_str(), errstr);
-                retcd = -1;
-            } else {
-                retcd = -1;
-            }
-            av_frame_free(&hw_frame);
-            return retcd;
-        }
-        frame->format=AV_PIX_FMT_NV12;
-
-        retcd = av_hwframe_transfer_data(frame, hw_frame, 0);
-        if (retcd < 0) {
+    retcd = avcodec_receive_frame(codec_context, hw_frame);
+    if ((interrupted) || (finish) || (retcd < 0) ){
+        if (retcd == AVERROR(EAGAIN)){
+            retcd = 0;
+        } else if (retcd == AVERROR_INVALIDDATA) {
             MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Error transferring HW decoded to system memory")
+                ,_("%s:Ignoring packet with invalid data")
                 ,cameratype.c_str());
-            av_frame_free(&hw_frame);
-            return -1;
+            retcd = 0;
+        } else if (retcd < 0) {
+            av_strerror(retcd, errstr, sizeof(errstr));
+                MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:Rec frame error:%s")
+                    ,cameratype.c_str(), errstr);
+            retcd = -1;
+        } else {
+            retcd = -1;
         }
-
         av_frame_free(&hw_frame);
+        return retcd;
+    }
+    frame->format=AV_PIX_FMT_NV12;
 
-        return 1;
+    retcd = av_hwframe_transfer_data(frame, hw_frame, 0);
+    if (retcd < 0) {
+        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s:Error transferring HW decoded to system memory")
+            ,cameratype.c_str());
+        av_frame_free(&hw_frame);
+        return -1;
+    }
+
+    av_frame_free(&hw_frame);
+
+    return 1;
 }
 
 int cls_netcam::decode_video()
 {
-        int retcd;
-        char errstr[128];
+    int retcd;
+    char errstr[128];
 
-        /* The Invalid data problem comes frequently.  Usually at startup of rtsp cameras.
-        * We now ignore those packets so this function would need to fail on a different error.
-        * We should consider adding a maximum count of these errors and reset every time
-        * we get a good image.
-        */
-        if (finish) {
+    /* The Invalid data problem comes frequently.  Usually at startup of rtsp cameras.
+    * We now ignore those packets so this function would need to fail on a different error.
+    * We should consider adding a maximum count of these errors and reset every time
+    * we get a good image.
+    */
+    if (finish) {
+        return 0;
+    }
+
+    retcd = avcodec_send_packet(codec_context, packet_recv);
+    if ((interrupted) || (finish)) {
+        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s:Interrupted or finish on send")
+            ,cameratype.c_str());
+        return -1;
+    }
+    if (retcd == AVERROR_INVALIDDATA) {
+        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s:Send ignoring packet with invalid data")
+            ,cameratype.c_str());
+        return 0;
+    }
+    if (retcd < 0 && retcd != AVERROR_EOF) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s:Error sending packet to codec:%s")
+            ,cameratype.c_str(), errstr);
+        if (service == "file") {
             return 0;
-        }
-
-        retcd = avcodec_send_packet(codec_context, packet_recv);
-        if ((interrupted) || (finish)) {
-            MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Interrupted or finish on send")
-                ,cameratype.c_str());
+        } else {
             return -1;
         }
-        if (retcd == AVERROR_INVALIDDATA) {
-            MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Send ignoring packet with invalid data")
-                ,cameratype.c_str());
-            return 0;
-        }
-        if (retcd < 0 && retcd != AVERROR_EOF) {
-            av_strerror(retcd, errstr, sizeof(errstr));
-            MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Error sending packet to codec:%s")
-                ,cameratype.c_str(), errstr);
-            if (service == "file") {
-                return 0;
-            } else {
-                return -1;
-            }
-        }
+    }
 
-        if (hw_type == AV_HWDEVICE_TYPE_VAAPI) {
-            retcd = decode_vaapi();
-        } else if (hw_type == AV_HWDEVICE_TYPE_CUDA) {
-            retcd = decode_cuda();
-        } else if (hw_type == AV_HWDEVICE_TYPE_DRM) {
-            retcd = decode_drm();
-        } else {
-            retcd = decode_sw();
-        }
+    if (hw_type == AV_HWDEVICE_TYPE_VAAPI) {
+        retcd = decode_vaapi();
+    } else if (hw_type == AV_HWDEVICE_TYPE_CUDA) {
+        retcd = decode_cuda();
+    } else if (hw_type == AV_HWDEVICE_TYPE_DRM) {
+        retcd = decode_drm();
+    } else {
+        retcd = decode_sw();
+    }
 
-        return retcd;
+    return retcd;
 }
 
 int cls_netcam::decode_packet()
@@ -778,31 +778,31 @@ int cls_netcam::decode_packet()
 
 void cls_netcam::hwdecoders()
 {
-        /* High Res pass through does not decode images into frames*/
-        if (high_resolution && passthrough) {
-            return;
-        }
-        if ((hw_type == AV_HWDEVICE_TYPE_NONE) && (first_image)) {
-            MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:HW Devices:")
-                , cameratype.c_str());
-            while((hw_type = av_hwdevice_iterate_types(hw_type)) != AV_HWDEVICE_TYPE_NONE){
-                if ((hw_type == AV_HWDEVICE_TYPE_VAAPI) ||
-                    (hw_type == AV_HWDEVICE_TYPE_CUDA)  ||
-                    (hw_type == AV_HWDEVICE_TYPE_DRM)) {
-                    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                        ,_("%s: %s(available)")
-                        , cameratype.c_str()
-                        , av_hwdevice_get_type_name(hw_type));
-                } else {
-                    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                        ,_("%s: %s(not implemented)")
-                        , cameratype.c_str()
-                        , av_hwdevice_get_type_name(hw_type));
-                }
+    /* High Res pass through does not decode images into frames*/
+    if (high_resolution && passthrough) {
+        return;
+    }
+    if ((hw_type == AV_HWDEVICE_TYPE_NONE) && (first_image)) {
+        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s:HW Devices:")
+            , cameratype.c_str());
+        while((hw_type = av_hwdevice_iterate_types(hw_type)) != AV_HWDEVICE_TYPE_NONE){
+            if ((hw_type == AV_HWDEVICE_TYPE_VAAPI) ||
+                (hw_type == AV_HWDEVICE_TYPE_CUDA)  ||
+                (hw_type == AV_HWDEVICE_TYPE_DRM)) {
+                MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s: %s(available)")
+                    , cameratype.c_str()
+                    , av_hwdevice_get_type_name(hw_type));
+            } else {
+                MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s: %s(not implemented)")
+                    , cameratype.c_str()
+                    , av_hwdevice_get_type_name(hw_type));
             }
         }
-        return;
+    }
+    return;
 }
 
 void cls_netcam::decoder_error(int retcd, const char* fnc_nm)
@@ -850,303 +850,303 @@ void cls_netcam::decoder_error(int retcd, const char* fnc_nm)
 
 int cls_netcam::init_vaapi()
 {
-        int retcd, indx;
-        AVPixelFormat *pixelformats = nullptr;
+    int retcd, indx;
+    AVPixelFormat *pixelformats = nullptr;
 
-        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s:Initializing vaapi decoder")
-            ,cameratype.c_str());
+    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("%s:Initializing vaapi decoder")
+        ,cameratype.c_str());
 
-        hw_type = av_hwdevice_find_type_by_name("vaapi");
-        if (hw_type == AV_HWDEVICE_TYPE_NONE) {
-            MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("%s:Unable to find vaapi hw device")
-                , cameratype.c_str());
-            decoder_error(0, "av_hwdevice");
-            return -1;
-        }
+    hw_type = av_hwdevice_find_type_by_name("vaapi");
+    if (hw_type == AV_HWDEVICE_TYPE_NONE) {
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("%s:Unable to find vaapi hw device")
+            , cameratype.c_str());
+        decoder_error(0, "av_hwdevice");
+        return -1;
+    }
 
-        codec_context = avcodec_alloc_context3(decoder);
-        if ((codec_context == nullptr) || (interrupted)) {
-            decoder_error(0, "avcodec_alloc_context3");
-            return -1;
-        }
+    codec_context = avcodec_alloc_context3(decoder);
+    if ((codec_context == nullptr) || (interrupted)) {
+        decoder_error(0, "avcodec_alloc_context3");
+        return -1;
+    }
 
-        retcd = avcodec_parameters_to_context(codec_context,strm->codecpar);
-        if ((retcd < 0) || (interrupted)) {
-            decoder_error(retcd, "avcodec_parameters_to_context");
-            return -1;
-        }
+    retcd = avcodec_parameters_to_context(codec_context,strm->codecpar);
+    if ((retcd < 0) || (interrupted)) {
+        decoder_error(retcd, "avcodec_parameters_to_context");
+        return -1;
+    }
 
-        hw_pix_fmt = AV_PIX_FMT_VAAPI;
-        codec_context->get_format  = netcam_getfmt_vaapi;
-        av_opt_set_int(codec_context, "refcounted_frames", 1, 0);
-        codec_context->sw_pix_fmt = AV_PIX_FMT_YUV420P;
-        codec_context->pix_fmt= AV_PIX_FMT_YUV420P;
-        codec_context->hwaccel_flags=
-            AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH |
-            AV_HWACCEL_FLAG_IGNORE_LEVEL;
+    hw_pix_fmt = AV_PIX_FMT_VAAPI;
+    codec_context->get_format  = netcam_getfmt_vaapi;
+    av_opt_set_int(codec_context, "refcounted_frames", 1, 0);
+    codec_context->sw_pix_fmt = AV_PIX_FMT_YUV420P;
+    codec_context->pix_fmt= AV_PIX_FMT_YUV420P;
+    codec_context->hwaccel_flags=
+        AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH |
+        AV_HWACCEL_FLAG_IGNORE_LEVEL;
 
-        retcd = av_hwdevice_ctx_create(&hw_device_ctx, hw_type, NULL, NULL, 0);
-        if (retcd < 0) {
-            decoder_error(retcd, "hwctx");
-            return -1;
-        }
+    retcd = av_hwdevice_ctx_create(&hw_device_ctx, hw_type, NULL, NULL, 0);
+    if (retcd < 0) {
+        decoder_error(retcd, "hwctx");
+        return -1;
+    }
 
-        codec_context->hw_device_ctx = av_buffer_ref(hw_device_ctx);
+    codec_context->hw_device_ctx = av_buffer_ref(hw_device_ctx);
 
-        AVBufferRef *hw_frames_ref = nullptr;
-        AVHWFramesContext *frames_ctx = nullptr;
+    AVBufferRef *hw_frames_ref = nullptr;
+    AVHWFramesContext *frames_ctx = nullptr;
 
-        hw_frames_ref = av_hwframe_ctx_alloc(
-            codec_context->hw_device_ctx);
-        if (hw_frames_ref == nullptr) {
-            decoder_error(retcd, "initvaapi 2");
-            return -1;
-        }
+    hw_frames_ref = av_hwframe_ctx_alloc(
+        codec_context->hw_device_ctx);
+    if (hw_frames_ref == nullptr) {
+        decoder_error(retcd, "initvaapi 2");
+        return -1;
+    }
 
-        frames_ctx = (AVHWFramesContext *)(hw_frames_ref->data);
-        frames_ctx->format    = AV_PIX_FMT_VAAPI;
-        frames_ctx->sw_format = AV_PIX_FMT_YUV420P;
-        frames_ctx->width     = codec_context->width;
-        frames_ctx->height    = codec_context->height;
-        frames_ctx->initial_pool_size = 20;
-        retcd = av_hwframe_ctx_init(hw_frames_ref);
-        if (retcd < 0) {
-            decoder_error(retcd, "initvaapi 2");
-            av_buffer_unref(&hw_frames_ref);
-            return -1;
-        }
-        codec_context->hw_frames_ctx = av_buffer_ref(hw_frames_ref);
-        if (codec_context->hw_frames_ctx == nullptr) {
-            decoder_error(retcd, "initvaapi 2");
-            av_buffer_unref(&hw_frames_ref);
-            return -1;
-        }
+    frames_ctx = (AVHWFramesContext *)(hw_frames_ref->data);
+    frames_ctx->format    = AV_PIX_FMT_VAAPI;
+    frames_ctx->sw_format = AV_PIX_FMT_YUV420P;
+    frames_ctx->width     = codec_context->width;
+    frames_ctx->height    = codec_context->height;
+    frames_ctx->initial_pool_size = 20;
+    retcd = av_hwframe_ctx_init(hw_frames_ref);
+    if (retcd < 0) {
+        decoder_error(retcd, "initvaapi 2");
         av_buffer_unref(&hw_frames_ref);
+        return -1;
+    }
+    codec_context->hw_frames_ctx = av_buffer_ref(hw_frames_ref);
+    if (codec_context->hw_frames_ctx == nullptr) {
+        decoder_error(retcd, "initvaapi 2");
+        av_buffer_unref(&hw_frames_ref);
+        return -1;
+    }
+    av_buffer_unref(&hw_frames_ref);
 
-        retcd = av_hwframe_transfer_get_formats(
-            codec_context->hw_frames_ctx
-            , AV_HWFRAME_TRANSFER_DIRECTION_FROM
-            , &pixelformats
-            , 0);
-        if (retcd < 0) {
-            MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Error enumerating HW pixel types")
-                ,cameratype.c_str());
-            decoder_error(retcd, "initvaapi 3");
-            return -1;
-        }
-        /* Note that while these are listed as available, there
-            is currently no way to get them from HW decoder without
-            triggering a segfault in vaapi driver.
-        */
-        const AVPixFmtDescriptor *descr;
-        for (indx=0; pixelformats[indx] != AV_PIX_FMT_NONE; indx++) {
-            descr = av_pix_fmt_desc_get(pixelformats[indx]);
-            MOTPLS_LOG(DBG, TYPE_NETCAM, NO_ERRNO
-                , _("%s:Available HW pixel type:%s")
-                , cameratype.c_str()
-                ,descr->name);
-        }
-        av_freep(&pixelformats);
+    retcd = av_hwframe_transfer_get_formats(
+        codec_context->hw_frames_ctx
+        , AV_HWFRAME_TRANSFER_DIRECTION_FROM
+        , &pixelformats
+        , 0);
+    if (retcd < 0) {
+        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s:Error enumerating HW pixel types")
+            ,cameratype.c_str());
+        decoder_error(retcd, "initvaapi 3");
+        return -1;
+    }
+    /* Note that while these are listed as available, there
+        is currently no way to get them from HW decoder without
+        triggering a segfault in vaapi driver.
+    */
+    const AVPixFmtDescriptor *descr;
+    for (indx=0; pixelformats[indx] != AV_PIX_FMT_NONE; indx++) {
+        descr = av_pix_fmt_desc_get(pixelformats[indx]);
+        MOTPLS_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+            , _("%s:Available HW pixel type:%s")
+            , cameratype.c_str()
+            ,descr->name);
+    }
+    av_freep(&pixelformats);
 
-        return 0;
+    return 0;
 }
 
 int cls_netcam::init_cuda()
 {
-        int retcd;
+    int retcd;
 
-        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s:Initializing cuda decoder"),cameratype.c_str());
+    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("%s:Initializing cuda decoder"),cameratype.c_str());
 
-        hw_type = av_hwdevice_find_type_by_name("cuda");
-        if (hw_type == AV_HWDEVICE_TYPE_NONE){
-            MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("%s:Unable to find cuda hw device")
-                , cameratype.c_str());
-            decoder_error(0, "av_hwdevice");
-            return -1;
-        }
+    hw_type = av_hwdevice_find_type_by_name("cuda");
+    if (hw_type == AV_HWDEVICE_TYPE_NONE){
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("%s:Unable to find cuda hw device")
+            , cameratype.c_str());
+        decoder_error(0, "av_hwdevice");
+        return -1;
+    }
 
-        codec_context = avcodec_alloc_context3(decoder);
-        if ((codec_context == nullptr) || (interrupted)){
-            decoder_error(0, "avcodec_alloc_context3");
-            return -1;
-        }
+    codec_context = avcodec_alloc_context3(decoder);
+    if ((codec_context == nullptr) || (interrupted)){
+        decoder_error(0, "avcodec_alloc_context3");
+        return -1;
+    }
 
-        retcd = avcodec_parameters_to_context(codec_context,strm->codecpar);
-        if ((retcd < 0) || (interrupted)) {
-            decoder_error(retcd, "avcodec_parameters_to_context");
-            return -1;
-        }
+    retcd = avcodec_parameters_to_context(codec_context,strm->codecpar);
+    if ((retcd < 0) || (interrupted)) {
+        decoder_error(retcd, "avcodec_parameters_to_context");
+        return -1;
+    }
 
-        hw_pix_fmt = AV_PIX_FMT_CUDA;
-        codec_context->get_format  = netcam_getfmt_cuda;
-        av_opt_set_int(codec_context, "refcounted_frames", 1, 0);
-        codec_context->sw_pix_fmt = AV_PIX_FMT_YUV420P;
-        codec_context->hwaccel_flags=
-            AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH |
-            AV_HWACCEL_FLAG_IGNORE_LEVEL;
+    hw_pix_fmt = AV_PIX_FMT_CUDA;
+    codec_context->get_format  = netcam_getfmt_cuda;
+    av_opt_set_int(codec_context, "refcounted_frames", 1, 0);
+    codec_context->sw_pix_fmt = AV_PIX_FMT_YUV420P;
+    codec_context->hwaccel_flags=
+        AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH |
+        AV_HWACCEL_FLAG_IGNORE_LEVEL;
 
-        retcd = av_hwdevice_ctx_create(&hw_device_ctx, hw_type, NULL, NULL, 0);
-        if (retcd < 0){
-            decoder_error(retcd, "hwctx");
-            return -1;
-        }
-        codec_context->hw_device_ctx = av_buffer_ref(hw_device_ctx);
+    retcd = av_hwdevice_ctx_create(&hw_device_ctx, hw_type, NULL, NULL, 0);
+    if (retcd < 0){
+        decoder_error(retcd, "hwctx");
+        return -1;
+    }
+    codec_context->hw_device_ctx = av_buffer_ref(hw_device_ctx);
 
-        return 0;
+    return 0;
 }
 
 int cls_netcam::init_drm()
 {
-        int retcd;
+    int retcd;
 
-        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s:Initializing drm decoder")
-            ,cameratype.c_str());
+    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("%s:Initializing drm decoder")
+        ,cameratype.c_str());
 
-        hw_type = av_hwdevice_find_type_by_name("drm");
-        if (hw_type == AV_HWDEVICE_TYPE_NONE){
-            MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("%s:Unable to find drm hw device")
-                , cameratype.c_str());
-            decoder_error(0, "av_hwdevice");
-            return -1;
-        }
+    hw_type = av_hwdevice_find_type_by_name("drm");
+    if (hw_type == AV_HWDEVICE_TYPE_NONE){
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("%s:Unable to find drm hw device")
+            , cameratype.c_str());
+        decoder_error(0, "av_hwdevice");
+        return -1;
+    }
 
-        codec_context = avcodec_alloc_context3(decoder);
-        if ((codec_context == nullptr) || (interrupted)){
-            decoder_error(0, "avcodec_alloc_context3");
-            return -1;
-        }
+    codec_context = avcodec_alloc_context3(decoder);
+    if ((codec_context == nullptr) || (interrupted)){
+        decoder_error(0, "avcodec_alloc_context3");
+        return -1;
+    }
 
-        retcd = avcodec_parameters_to_context(codec_context,strm->codecpar);
-        if ((retcd < 0) || (interrupted)) {
-            decoder_error(retcd, "avcodec_parameters_to_context");
-            return -1;
-        }
+    retcd = avcodec_parameters_to_context(codec_context,strm->codecpar);
+    if ((retcd < 0) || (interrupted)) {
+        decoder_error(retcd, "avcodec_parameters_to_context");
+        return -1;
+    }
 
-        hw_pix_fmt = AV_PIX_FMT_DRM_PRIME;
-        codec_context->get_format  = netcam_getfmt_drm;
-        av_opt_set_int(codec_context, "refcounted_frames", 1, 0);
-        codec_context->sw_pix_fmt = AV_PIX_FMT_YUV420P;
-        codec_context->hwaccel_flags=
-            AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH |
-            AV_HWACCEL_FLAG_IGNORE_LEVEL;
+    hw_pix_fmt = AV_PIX_FMT_DRM_PRIME;
+    codec_context->get_format  = netcam_getfmt_drm;
+    av_opt_set_int(codec_context, "refcounted_frames", 1, 0);
+    codec_context->sw_pix_fmt = AV_PIX_FMT_YUV420P;
+    codec_context->hwaccel_flags=
+        AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH |
+        AV_HWACCEL_FLAG_IGNORE_LEVEL;
 
-        retcd = av_hwdevice_ctx_create(&hw_device_ctx, hw_type, NULL, NULL, 0);
-        if (retcd < 0){
-            decoder_error(retcd, "hwctx");
-            return -1;
-        }
-        codec_context->hw_device_ctx = av_buffer_ref(hw_device_ctx);
+    retcd = av_hwdevice_ctx_create(&hw_device_ctx, hw_type, NULL, NULL, 0);
+    if (retcd < 0){
+        decoder_error(retcd, "hwctx");
+        return -1;
+    }
+    codec_context->hw_device_ctx = av_buffer_ref(hw_device_ctx);
 
-        return 0;
+    return 0;
 }
 
 int cls_netcam::init_swdecoder()
 {
-        int retcd;
+    int retcd;
 
-        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s:Initializing decoder"),cameratype.c_str());
+    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("%s:Initializing decoder"),cameratype.c_str());
 
-        if (decoder_nm != "NULL") {
-            decoder = avcodec_find_decoder_by_name(
-                decoder_nm.c_str());
-            if (decoder == nullptr) {
-                decoder_error(0
-                    , "avcodec_find_decoder_by_name");
-            } else {
-                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s:Using decoder %s")
-                    , cameratype.c_str()
-                    , decoder_nm.c_str());
-            }
-        }
+    if (decoder_nm != "NULL") {
+        decoder = avcodec_find_decoder_by_name(
+            decoder_nm.c_str());
         if (decoder == nullptr) {
-            decoder = avcodec_find_decoder(strm->codecpar->codec_id);
+            decoder_error(0
+                , "avcodec_find_decoder_by_name");
+        } else {
+            MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                ,_("%s:Using decoder %s")
+                , cameratype.c_str()
+                , decoder_nm.c_str());
         }
-        if ((decoder == nullptr) || (interrupted)) {
-            decoder_error(0, "avcodec_find_decoder");
-            return -1;
-        }
+    }
+    if (decoder == nullptr) {
+        decoder = avcodec_find_decoder(strm->codecpar->codec_id);
+    }
+    if ((decoder == nullptr) || (interrupted)) {
+        decoder_error(0, "avcodec_find_decoder");
+        return -1;
+    }
 
-        codec_context = avcodec_alloc_context3(decoder);
-        if ((codec_context == nullptr) || (interrupted)) {
-            decoder_error(0, "avcodec_alloc_context3");
-            return -1;
-        }
+    codec_context = avcodec_alloc_context3(decoder);
+    if ((codec_context == nullptr) || (interrupted)) {
+        decoder_error(0, "avcodec_alloc_context3");
+        return -1;
+    }
 
-        retcd = avcodec_parameters_to_context(codec_context, strm->codecpar);
-        if ((retcd < 0) || (interrupted)) {
-            decoder_error(retcd, "avcodec_parameters_to_context");
-            return -1;
-        }
+    retcd = avcodec_parameters_to_context(codec_context, strm->codecpar);
+    if ((retcd < 0) || (interrupted)) {
+        decoder_error(retcd, "avcodec_parameters_to_context");
+        return -1;
+    }
 
-        codec_context->error_concealment = FF_EC_GUESS_MVS | FF_EC_DEBLOCK;
-        codec_context->err_recognition = AV_EF_EXPLODE;
+    codec_context->error_concealment = FF_EC_GUESS_MVS | FF_EC_DEBLOCK;
+    codec_context->err_recognition = AV_EF_EXPLODE;
 
-        return 0;
+    return 0;
 }
 
 int cls_netcam::open_codec()
 {
-        int retcd;
+    int retcd;
 
-        if (finish) {
+    if (finish) {
+        return -1;
+    }
+
+    hwdecoders();
+
+    retcd = av_find_best_stream(format_context
+                , AVMEDIA_TYPE_AUDIO, -1, -1, nullptr, 0);
+    if ((retcd < 0) || (interrupted)) {
+        audio_stream_index = -1;
+    } else {
+        audio_stream_index = retcd;
+    }
+
+    decoder = nullptr;
+    retcd = av_find_best_stream(format_context
+                , AVMEDIA_TYPE_VIDEO, -1, -1, &decoder, 0);
+    if ((retcd < 0) || (interrupted)) {
+        decoder_error(retcd, "av_find_best_stream");
+        return -1;
+    }
+    video_stream_index = retcd;
+    strm = format_context->streams[video_stream_index];
+
+    if (decoder_nm == "vaapi") {
+        if (init_vaapi() < 0) {
+            decoder_error(retcd, "hwvaapi_init");
             return -1;
         }
-
-        hwdecoders();
-
-        retcd = av_find_best_stream(format_context
-                    , AVMEDIA_TYPE_AUDIO, -1, -1, nullptr, 0);
-        if ((retcd < 0) || (interrupted)) {
-            audio_stream_index = -1;
-        } else {
-            audio_stream_index = retcd;
-        }
-
-        decoder = nullptr;
-        retcd = av_find_best_stream(format_context
-                    , AVMEDIA_TYPE_VIDEO, -1, -1, &decoder, 0);
-        if ((retcd < 0) || (interrupted)) {
-            decoder_error(retcd, "av_find_best_stream");
+    } else if (decoder_nm == "cuda"){
+        if (init_cuda() <0 ) {
+            decoder_error(retcd, "hwcuda_init");
             return -1;
         }
-        video_stream_index = retcd;
-        strm = format_context->streams[video_stream_index];
-
-        if (decoder_nm == "vaapi") {
-            if (init_vaapi() < 0) {
-                decoder_error(retcd, "hwvaapi_init");
-                return -1;
-            }
-        } else if (decoder_nm == "cuda"){
-            if (init_cuda() <0 ) {
-                decoder_error(retcd, "hwcuda_init");
-                return -1;
-            }
-        } else if (decoder_nm == "drm"){
-            if (init_drm() < 0) {;
-                decoder_error(retcd, "hwdrm_init");
-                return -1;
-            }
-        } else {
-            init_swdecoder();
-        }
-
-        retcd = avcodec_open2(codec_context, decoder, nullptr);
-        if ((retcd < 0) || (interrupted)) {
-            decoder_error(retcd, "avcodec_open2");
+    } else if (decoder_nm == "drm"){
+        if (init_drm() < 0) {;
+            decoder_error(retcd, "hwdrm_init");
             return -1;
         }
+    } else {
+        init_swdecoder();
+    }
 
-        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s:Decoder opened"),cameratype.c_str());
+    retcd = avcodec_open2(codec_context, decoder, nullptr);
+    if ((retcd < 0) || (interrupted)) {
+        decoder_error(retcd, "avcodec_open2");
+        return -1;
+    }
 
-        return 0;
+    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("%s:Decoder opened"),cameratype.c_str());
+
+    return 0;
 }
 
 int cls_netcam::open_sws()
@@ -1729,35 +1729,35 @@ void cls_netcam::set_parms ()
 /* Make a static copy of the stream information for use in passthrough processing */
 int cls_netcam::copy_stream()
 {
-        AVStream  *transfer_stream, *stream_in;
-        int        retcd, indx;
+    AVStream  *transfer_stream, *stream_in;
+    int        retcd, indx;
 
-        pthread_mutex_lock(&mutex_transfer);
-            if (transfer_format != nullptr) {
-                avformat_close_input(&transfer_format);
-            }
-            transfer_format = avformat_alloc_context();
-            for (indx = 0; indx < (int)format_context->nb_streams; indx++) {
-                if ((audio_stream_index == indx) ||
-                    (video_stream_index == indx)) {
-                    transfer_stream = avformat_new_stream(transfer_format, nullptr);
-                    stream_in = format_context->streams[indx];
-                    retcd = avcodec_parameters_copy(transfer_stream->codecpar, stream_in->codecpar);
-                    if (retcd < 0) {
-                        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                            ,_("%s:Unable to copy codec parameters")
-                            , cameratype.c_str());
-                        pthread_mutex_unlock(&mutex_transfer);
-                        return -1;
-                    }
-                    transfer_stream->time_base = stream_in->time_base;
-                    transfer_stream->avg_frame_rate = stream_in->avg_frame_rate;
+    pthread_mutex_lock(&mutex_transfer);
+        if (transfer_format != nullptr) {
+            avformat_close_input(&transfer_format);
+        }
+        transfer_format = avformat_alloc_context();
+        for (indx = 0; indx < (int)format_context->nb_streams; indx++) {
+            if ((audio_stream_index == indx) ||
+                (video_stream_index == indx)) {
+                transfer_stream = avformat_new_stream(transfer_format, nullptr);
+                stream_in = format_context->streams[indx];
+                retcd = avcodec_parameters_copy(transfer_stream->codecpar, stream_in->codecpar);
+                if (retcd < 0) {
+                    MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                        ,_("%s:Unable to copy codec parameters")
+                        , cameratype.c_str());
+                    pthread_mutex_unlock(&mutex_transfer);
+                    return -1;
                 }
+                transfer_stream->time_base = stream_in->time_base;
+                transfer_stream->avg_frame_rate = stream_in->avg_frame_rate;
             }
-        pthread_mutex_unlock(&mutex_transfer);
+        }
+    pthread_mutex_unlock(&mutex_transfer);
 
-        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Stream copied for pass-through"));
-        return 0;
+    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Stream copied for pass-through"));
+    return 0;
 }
 
 int cls_netcam::open_context()

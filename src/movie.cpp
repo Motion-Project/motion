@@ -94,27 +94,24 @@ static int movie_timelapse_append(ctx_movie *movie, AVPacket *pkt)
 
 static void movie_free_context(ctx_movie *movie)
 {
+    if (movie->picture != NULL) {
+        av_frame_free(&movie->picture);
+        movie->picture = NULL;
+    }
 
-        if (movie->picture != NULL) {
-            av_frame_free(&movie->picture);
-            movie->picture = NULL;
-        }
+    if (movie->ctx_codec != NULL) {
+        avcodec_free_context(&movie->ctx_codec);
+        movie->ctx_codec = NULL;
+    }
 
-        if (movie->ctx_codec != NULL) {
-            avcodec_free_context(&movie->ctx_codec);
-            movie->ctx_codec = NULL;
-        }
-
-        if (movie->oc != NULL) {
-            avformat_free_context(movie->oc);
-            movie->oc = NULL;
-        }
-
+    if (movie->oc != NULL) {
+        avformat_free_context(movie->oc);
+        movie->oc = NULL;
+    }
 }
 
 static int movie_get_oformat(ctx_movie *movie)
 {
-
     size_t container_name_len;
     char *container_name;
     int len_full, len_nm;
@@ -220,40 +217,39 @@ static int movie_get_oformat(ctx_movie *movie)
 
 static int movie_encode_video(ctx_movie *movie)
 {
-        int retcd = 0;
-        char errstr[128];
+    int retcd = 0;
+    char errstr[128];
 
-        retcd = avcodec_send_frame(movie->ctx_codec, movie->picture);
-        if (retcd < 0 ) {
-            av_strerror(retcd, errstr, sizeof(errstr));
-            MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                ,_("Error sending frame for encoding:%s"),errstr);
-            return -1;
-        }
-        retcd = avcodec_receive_packet(movie->ctx_codec, movie->pkt);
-        if (retcd == AVERROR(EAGAIN)) {
-            //Buffered packet.  Throw special return code
-            movie_free_pkt(movie);
-            return -2;
-        }
-        if (retcd < 0 ) {
-            av_strerror(retcd, errstr, sizeof(errstr));
-            MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                ,_("Error receiving encoded packet video:%s"),errstr);
-            //Packet is freed upon failure of encoding
-            return -1;
-        }
+    retcd = avcodec_send_frame(movie->ctx_codec, movie->picture);
+    if (retcd < 0 ) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+            ,_("Error sending frame for encoding:%s"),errstr);
+        return -1;
+    }
+    retcd = avcodec_receive_packet(movie->ctx_codec, movie->pkt);
+    if (retcd == AVERROR(EAGAIN)) {
+        //Buffered packet.  Throw special return code
+        movie_free_pkt(movie);
+        return -2;
+    }
+    if (retcd < 0 ) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+            ,_("Error receiving encoded packet video:%s"),errstr);
+        //Packet is freed upon failure of encoding
+        return -1;
+    }
 
-        if (movie->preferred_codec == USER_CODEC_V4L2M2M) {
-            movie_encode_nal(movie);
-        }
+    if (movie->preferred_codec == USER_CODEC_V4L2M2M) {
+        movie_encode_nal(movie);
+    }
 
-        return 0;
+    return 0;
 }
 
 static int movie_set_pts(ctx_movie *movie, const struct timespec *ts1)
 {
-
     int64_t pts_interval;
 
     if (movie->tlapse != TIMELAPSE_NONE) {
@@ -296,7 +292,6 @@ static int movie_set_pts(ctx_movie *movie, const struct timespec *ts1)
 
 static int movie_set_quality(ctx_movie *movie)
 {
-
     movie->opts = 0;
     if (movie->quality > 100) {
         movie->quality = 100;
@@ -386,7 +381,6 @@ static int movie_set_codec_preferred(ctx_movie *movie)
 
 static int movie_set_codec(ctx_movie *movie)
 {
-
     int retcd;
     char errstr[128];
     int chkrate;
@@ -396,18 +390,18 @@ static int movie_set_codec(ctx_movie *movie)
         return retcd;
     }
 
-        movie->strm_video = avformat_new_stream(movie->oc, movie->codec);
-        if (!movie->strm_video) {
-            MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
-            movie_free_context(movie);
-            return -1;
-        }
-        movie->ctx_codec = avcodec_alloc_context3(movie->codec);
-        if (movie->ctx_codec == NULL) {
-            MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Failed to allocate codec context!"));
-            movie_free_context(movie);
-            return -1;
-        }
+    movie->strm_video = avformat_new_stream(movie->oc, movie->codec);
+    if (!movie->strm_video) {
+        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
+        movie_free_context(movie);
+        return -1;
+    }
+    movie->ctx_codec = avcodec_alloc_context3(movie->codec);
+    if (movie->ctx_codec == NULL) {
+        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Failed to allocate codec context!"));
+        movie_free_context(movie);
+        return -1;
+    }
 
     if (movie->tlapse != TIMELAPSE_NONE) {
         movie->ctx_codec->gop_size = 1;
@@ -488,22 +482,21 @@ static int movie_set_codec(ctx_movie *movie)
 
 static int movie_set_stream(ctx_movie *movie)
 {
-        int retcd;
-        char errstr[128];
+    int retcd;
+    char errstr[128];
 
-        retcd = avcodec_parameters_from_context(movie->strm_video->codecpar,movie->ctx_codec);
-        if (retcd < 0) {
-            av_strerror(retcd, errstr, sizeof(errstr));
-            MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                ,_("Failed to copy decoder parameters!: %s"), errstr);
-            movie_free_context(movie);
-            return -1;
-        }
+    retcd = avcodec_parameters_from_context(movie->strm_video->codecpar,movie->ctx_codec);
+    if (retcd < 0) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+            ,_("Failed to copy decoder parameters!: %s"), errstr);
+        movie_free_context(movie);
+        return -1;
+    }
 
     movie->strm_video->time_base =  av_make_q(1, movie->fps);
 
     return 0;
-
 }
 
 /*Special allocation of video buffer for v4l2m2m codec*/
@@ -576,7 +569,6 @@ static int movie_alloc_video_buffer(AVFrame *frame, int align)
 
 static int movie_set_picture(ctx_movie *movie)
 {
-
     int retcd;
     char errstr[128];
 
@@ -611,7 +603,6 @@ static int movie_set_picture(ctx_movie *movie)
     }
 
     return 0;
-
 }
 
 static int movie_interrupt(void *ctx)
@@ -694,57 +685,56 @@ static int movie_set_outputfile(ctx_movie *movie)
     }
 
     return 0;
-
 }
 
 static int movie_flush_codec(ctx_movie *movie)
 {
-        int retcd;
-        int recv_cd = 0;
-        char errstr[128];
+    int retcd;
+    int recv_cd = 0;
+    char errstr[128];
 
-        if (movie->passthrough) {
-            return 0;
-        }
-
-        retcd = 0;
-        recv_cd = 0;
-        if (movie->tlapse == TIMELAPSE_NONE) {
-            retcd = avcodec_send_frame(movie->ctx_codec, NULL);
-            if (retcd < 0 ) {
-                av_strerror(retcd, errstr, sizeof(errstr));
-                MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                    ,_("Error entering draining mode:%s"),errstr);
-                return -1;
-            }
-            while (recv_cd != AVERROR_EOF){
-                movie->pkt = mypacket_alloc(movie->pkt);
-                recv_cd = avcodec_receive_packet(movie->ctx_codec, movie->pkt);
-                if (recv_cd != AVERROR_EOF) {
-                    if (recv_cd < 0) {
-                        av_strerror(recv_cd, errstr, sizeof(errstr));
-                        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                            ,_("Error draining codec:%s"),errstr);
-                        movie_free_pkt(movie);
-                        return -1;
-                    }
-                    // v4l2_m2m encoder uses pts 0 and size 0 to indicate AVERROR_EOF
-                    if ((movie->pkt->pts == 0) || (movie->pkt->size == 0)) {
-                        recv_cd = AVERROR_EOF;
-                        movie_free_pkt(movie);
-                        continue;
-                    }
-                    retcd = av_write_frame(movie->oc, movie->pkt);
-                    if (retcd < 0) {
-                        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                            ,_("Error writing draining video frame"));
-                        return -1;
-                    }
-                }
-                movie_free_pkt(movie);
-            }
-        }
+    if (movie->passthrough) {
         return 0;
+    }
+
+    retcd = 0;
+    recv_cd = 0;
+    if (movie->tlapse == TIMELAPSE_NONE) {
+        retcd = avcodec_send_frame(movie->ctx_codec, NULL);
+        if (retcd < 0 ) {
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                ,_("Error entering draining mode:%s"),errstr);
+            return -1;
+        }
+        while (recv_cd != AVERROR_EOF){
+            movie->pkt = mypacket_alloc(movie->pkt);
+            recv_cd = avcodec_receive_packet(movie->ctx_codec, movie->pkt);
+            if (recv_cd != AVERROR_EOF) {
+                if (recv_cd < 0) {
+                    av_strerror(recv_cd, errstr, sizeof(errstr));
+                    MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                        ,_("Error draining codec:%s"),errstr);
+                    movie_free_pkt(movie);
+                    return -1;
+                }
+                // v4l2_m2m encoder uses pts 0 and size 0 to indicate AVERROR_EOF
+                if ((movie->pkt->pts == 0) || (movie->pkt->size == 0)) {
+                    recv_cd = AVERROR_EOF;
+                    movie_free_pkt(movie);
+                    continue;
+                }
+                retcd = av_write_frame(movie->oc, movie->pkt);
+                if (retcd < 0) {
+                    MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                        ,_("Error writing draining video frame"));
+                    return -1;
+                }
+            }
+            movie_free_pkt(movie);
+        }
+    }
+    return 0;
 }
 
 static int movie_put_frame(ctx_movie *movie, const struct timespec *ts1)
@@ -1082,29 +1072,29 @@ static int movie_passthru_streams_audio(ctx_movie *movie, AVStream *stream_in)
 
 static int movie_passthru_streams(ctx_movie *movie)
 {
-        int         retcd, indx;
-        AVStream    *stream_in;
+    int         retcd, indx;
+    AVStream    *stream_in;
 
-        if (movie->netcam_data->finish == true) {
-            return -1;
-        }
+    if (movie->netcam_data->finish == true) {
+        return -1;
+    }
 
-        pthread_mutex_lock(&movie->netcam_data->mutex_transfer);
-            for (indx= 0; indx < (int)movie->netcam_data->transfer_format->nb_streams; indx++) {
-                stream_in = movie->netcam_data->transfer_format->streams[indx];
-                if (stream_in->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-                    retcd = movie_passthru_streams_video(movie, stream_in);
-                } else if (stream_in->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-                    retcd = movie_passthru_streams_audio(movie, stream_in);
-                }
-                if (retcd < 0) {
-                    pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
-                    return retcd;
-                }
+    pthread_mutex_lock(&movie->netcam_data->mutex_transfer);
+        for (indx= 0; indx < (int)movie->netcam_data->transfer_format->nb_streams; indx++) {
+            stream_in = movie->netcam_data->transfer_format->streams[indx];
+            if (stream_in->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+                retcd = movie_passthru_streams_video(movie, stream_in);
+            } else if (stream_in->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+                retcd = movie_passthru_streams_audio(movie, stream_in);
             }
-        pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
+            if (retcd < 0) {
+                pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
+                return retcd;
+            }
+        }
+    pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
 
-        return 0;
+    return 0;
 }
 
 static int movie_passthru_check(ctx_movie *movie)
@@ -1201,7 +1191,6 @@ static void movie_put_pix_yuv420(ctx_movie *movie, ctx_image_data *img_data)
     movie->picture->data[0] = image;
     movie->picture->data[1] = image + (movie->ctx_codec->width * movie->ctx_codec->height);
     movie->picture->data[2] = movie->picture->data[1] + ((movie->ctx_codec->width * movie->ctx_codec->height) / 4);
-
 }
 
 int movie_open(ctx_movie *movie)
@@ -1261,7 +1250,6 @@ int movie_open(ctx_movie *movie)
     }
 
     return 0;
-
 }
 
 void movie_free(ctx_movie *movie)
@@ -1353,7 +1341,6 @@ int movie_put_image(ctx_movie *movie, ctx_image_data *img_data, const struct tim
     }
 
     return retcd;
-
 }
 
 void movie_reset_start_time(ctx_movie *movie, const struct timespec *ts1)
@@ -1631,7 +1618,6 @@ int movie_init_timelapse(ctx_dev *cam)
     }
 
     return retcd;
-
 }
 
 int movie_init_extpipe(ctx_dev *cam)
