@@ -902,7 +902,7 @@ static void movie_passthru_minpts(ctx_movie *movie)
                 movie->pass_audio_base = movie->netcam_data->pktarray[indx].packet->pts;
             };
             if ((movie->netcam_data->pktarray[indx].packet->stream_index == indx_audio) &&
-                (movie->netcam_data->pktarray[indx].packet->pts != AV_NOPTS_VALUE) &&
+                (movie->netcam_data->pktarray[indx].packet->dts != AV_NOPTS_VALUE) &&
                 (movie->netcam_data->pktarray[indx].packet->dts < movie->pass_audio_base)) {
                 movie->pass_audio_base = movie->netcam_data->pktarray[indx].packet->dts;
             };
@@ -912,7 +912,7 @@ static void movie_passthru_minpts(ctx_movie *movie)
                 movie->pass_video_base = movie->netcam_data->pktarray[indx].packet->pts;
             };
             if ((movie->netcam_data->pktarray[indx].packet->stream_index == indx_video) &&
-                (movie->netcam_data->pktarray[indx].packet->pts != AV_NOPTS_VALUE) &&
+                (movie->netcam_data->pktarray[indx].packet->dts != AV_NOPTS_VALUE) &&
                 (movie->netcam_data->pktarray[indx].packet->dts < movie->pass_video_base)) {
                 movie->pass_video_base = movie->netcam_data->pktarray[indx].packet->dts;
             };
