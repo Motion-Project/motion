@@ -93,6 +93,8 @@
         private:
             ctx_mhdstart *mhdst;
             ctx_motapp *c_motapp;
+            void webu_start();
+            void webu_stop();
             void init_actions();
             void start_daemon_port1();
             void start_daemon_port2();

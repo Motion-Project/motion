@@ -701,7 +701,7 @@ void cls_webu_post::iterate_post_new(const char *key
     post_info[post_sz-1].key_sz = datasz;
 
     if (retcd < 0) {
-        printf("Error processing post data\n");
+        MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error processing post data"));
     }
 }
 
@@ -748,8 +748,6 @@ mhdrslt cls_webu_post::processor_start(const char *upload_data, size_t *upload_d
         webu_html = new cls_webu_html(webua);
         webu_html->main();
         delete webu_html;
-        webu_html = nullptr;
-        webua->mhd_send();
         retcd = MHD_YES;
     }
     return retcd;

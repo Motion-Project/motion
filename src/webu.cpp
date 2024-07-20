@@ -464,11 +464,9 @@ void cls_webu::start_daemon_port2()
 
 }
 
-cls_webu::cls_webu(ctx_motapp *motapp)
+void cls_webu::webu_start()
 {
     unsigned int randnbr;
-
-    c_motapp = motapp;
     wb_daemon = nullptr;
     wb_daemon2 = nullptr;
     wb_finish = false;
@@ -499,9 +497,10 @@ cls_webu::cls_webu(ctx_motapp *motapp)
 
     start_daemon_port2();
     cnct_cnt = 0;
+
 }
 
-cls_webu::~cls_webu()
+void cls_webu::webu_stop()
 {
     int chkcnt;
 
@@ -531,4 +530,16 @@ cls_webu::~cls_webu()
 
     delete wb_actions;
     delete wb_headers;
+
+}
+
+cls_webu::cls_webu(ctx_motapp *motapp)
+{
+    c_motapp = motapp;
+    webu_start();
+}
+
+cls_webu::~cls_webu()
+{
+    webu_stop();
 }
