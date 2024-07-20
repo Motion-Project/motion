@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #ifndef __USE_GNU
     #define __USE_GNU
 #endif
@@ -116,11 +117,10 @@ struct ctx_motapp;
 struct ctx_images;
 struct ctx_image_data;
 struct ctx_dbse;
-struct ctx_movie;
-struct ctx_netcam;
 struct ctx_algsec;
 struct ctx_config;
 
+class cls_movie;
 class cls_netcam;
 class cls_picture;
 class cls_rotate;
@@ -232,6 +232,12 @@ enum DEVICE_STATUS {
     STATUS_INIT,     /* First time initialize */
     STATUS_RESET,    /* Clean up and re-initialize */
     STATUS_OPENED    /* Successfully started the camera */
+};
+
+enum TIMELAPSE_TYPE {
+    TIMELAPSE_NONE,         /* No timelapse, regular processing */
+    TIMELAPSE_APPEND,       /* Use append version of timelapse */
+    TIMELAPSE_NEW           /* Use create new file version of timelapse */
 };
 
 struct ctx_webu_clients {
@@ -451,9 +457,12 @@ struct ctx_dev {
 
     ctx_image_data  *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
     ctx_algsec      *algsec;
-    ctx_movie       *movie_norm;
-    ctx_movie       *movie_motion;
-    ctx_movie       *movie_timelapse;
+
+    cls_movie       *movie_norm;
+    cls_movie       *movie_motion;
+    cls_movie       *movie_timelapse;
+    cls_movie       *movie_extpipe;
+
     ctx_stream      stream;
     ctx_snd_info    *snd_info;      /* Values for sound processing*/
 
@@ -522,10 +531,6 @@ struct ctx_dev {
     int                     movie_fps;
     bool                    movie_passthrough;
 
-    char                    extpipe_filename[PATH_MAX];
-    char                    extpipe_cmdline[PATH_MAX];
-    FILE                    *extpipe_stream;
-    bool                    extpipe_isopen;
     int                     filetype;
 
     int area_minx[9], area_miny[9], area_maxx[9], area_maxy[9];

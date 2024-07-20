@@ -753,7 +753,7 @@ AVPacket *mypacket_alloc(AVPacket *pkt)
  *      that the fork inherited from the parent in order not to pass
  *      the open handles on to the shell
  */
-void util_exec_command(ctx_dev *cam, const char *command, char *filename)
+void util_exec_command(ctx_dev *cam, const char *command, const char *filename)
 {
     char stamp[PATH_MAX];
     int pid;

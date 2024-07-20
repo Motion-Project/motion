@@ -1275,7 +1275,7 @@ void dbse_exec_sql(ctx_motapp *motapp, const char *sqlquery)
 }
 
 /* Create and execute user provided sql with mutex lock*/
-void dbse_exec(ctx_dev *cam, char *filename, const char *cmd)
+void dbse_exec(ctx_dev *cam, const char *filename, const char *cmd)
 {
     char sqlquery[PATH_MAX];
 
@@ -1317,7 +1317,7 @@ void dbse_exec(ctx_dev *cam, char *filename, const char *cmd)
 }
 
 /* Add a record to motionplus table for new movies */
-void dbse_movies_addrec(ctx_dev *cam, ctx_movie *movie, timespec *ts1)
+void dbse_movies_addrec(ctx_dev *cam, cls_movie *movie, timespec *ts1)
 {
     std::string sqlquery;
     struct stat statbuf;
@@ -1334,7 +1334,7 @@ void dbse_movies_addrec(ctx_dev *cam, ctx_movie *movie, timespec *ts1)
     }
 
     /* Movie file times */
-    if (stat(movie->full_nm, &statbuf) == 0) {
+    if (stat(movie->full_nm.c_str(), &statbuf) == 0) {
         bsz = statbuf.st_size;
     } else {
         bsz = 0;
@@ -1359,9 +1359,9 @@ void dbse_movies_addrec(ctx_dev *cam, ctx_movie *movie, timespec *ts1)
     sqlquery += " (device_id, movie_nm, movie_dir, full_nm, movie_sz, movie_dtl";
     sqlquery += " , movie_tmc, movie_tml, diff_avg, sdev_min, sdev_max, sdev_avg)";
     sqlquery += " values ("+std::to_string(cam->device_id);
-    sqlquery += " ,'" + std::string(movie->movie_nm) + "'";
-    sqlquery += " ,'" + std::string(movie->movie_dir) + "'";
-    sqlquery += " ,'" + std::string(movie->full_nm) + "'";
+    sqlquery += " ,'" + movie->movie_nm + "'";
+    sqlquery += " ,'" + movie->movie_dir + "'";
+    sqlquery += " ,'" + movie->full_nm + "'";
     sqlquery += " ,"  + std::to_string(bsz);
     sqlquery += " ,"  + std::string(dtl);
     sqlquery += " ,'" + std::string(tmc)+ "'";

@@ -60,21 +60,6 @@ static void on_picture_save_command(ctx_dev *cam, char *fname)
     }
 }
 
-static void on_movie_start_command(ctx_dev *cam, char *fname)
-{
-    MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("File saved to: %s"), fname);
-    if (cam->conf->on_movie_start != "") {
-        util_exec_command(cam, cam->conf->on_movie_start.c_str(), fname);
-    }
-}
-
-static void on_movie_end_command(ctx_dev *cam, char *fname)
-{
-    if (cam->conf->on_movie_end != "") {
-        util_exec_command(cam, cam->conf->on_movie_end.c_str(), fname);
-    }
-}
-
 static void on_motion_detected_command(ctx_dev *cam)
 {
     if (cam->conf->on_motion_detected != "") {
@@ -283,8 +268,6 @@ static void event_camera_found(ctx_dev *cam)
 
 static void event_movie_start(ctx_dev *cam)
 {
-    int retcd;
-
     cam->movie_start_time = cam->frame_curr_ts.tv_sec;
 
     if (cam->lastrate < 2) {
@@ -293,174 +276,33 @@ static void event_movie_start(ctx_dev *cam)
         cam->movie_fps = cam->lastrate;
     }
 
-    if (cam->conf->movie_output) {
-        retcd = movie_init_norm(cam);
-        if (retcd < 0) {
-            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("Error initializing movie."));
-            myfree(&cam->movie_norm);
-            return;
-        }
-        cam->filetype = FTYPE_MOVIE;
-        on_movie_start_command(cam, cam->movie_norm->full_nm);
-        dbse_exec(cam, cam->movie_norm->full_nm, "movie_start");
-    }
+    cam->movie_norm->start();
+    cam->movie_motion->start();
+    cam->movie_extpipe->start();
 
-    if (cam->conf->movie_output_motion) {
-        retcd = movie_init_motion(cam);
-        if (retcd < 0) {
-            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("Error initializing motion movie"));
-            myfree(&cam->movie_motion);
-            return;
-        }
-        cam->filetype = FTYPE_MOVIE;
-        on_movie_start_command(cam, cam->movie_motion->full_nm);
-        dbse_exec(cam, cam->movie_motion->full_nm, "movie_start");
-    }
-
-    if ((cam->conf->movie_extpipe_use) && (cam->conf->movie_extpipe != "" )) {
-        retcd = movie_init_extpipe(cam);
-        if (retcd < 0) {
-            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("Error initializing extpipe movie."));
-            return;
-        }
-        cam->filetype = FTYPE_MOVIE;
-        on_movie_start_command(cam, cam->extpipe_filename);
-        dbse_exec(cam, cam->extpipe_filename, "movie_start");
-    }
 }
 
 static void event_movie_put(ctx_dev *cam)
 {
-    if (cam->movie_norm) {
-        if (movie_put_image(cam->movie_norm
-                , cam->current_image
-                , &cam->current_image->imgts) == -1) {
-            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
-        }
+    if (cam->movie_norm->put_image(cam->current_image
+            , &cam->current_image->imgts) == -1) {
+        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
     }
-    if (cam->movie_motion) {
-        if (movie_put_image(cam->movie_motion
-                , &cam->imgs.image_motion
-                , &cam->imgs.image_motion.imgts) == -1) {
-            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
-        }
+    if (cam->movie_motion->put_image(&cam->imgs.image_motion
+            , &cam->imgs.image_motion.imgts) == -1) {
+        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
     }
-
-    if (cam->extpipe_isopen) {
-        if (movie_put_extpipe(cam) == -1) {
-            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
-        }
+    if (cam->movie_extpipe->put_image(cam->current_image
+            , &cam->current_image->imgts) == -1) {
+        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
     }
-
 }
 
 static void event_movie_end(ctx_dev *cam)
 {
-    if (cam->movie_norm) {
-        cam->filetype = FTYPE_MOVIE;
-        movie_close(cam->movie_norm);
-        on_movie_end_command(cam, cam->movie_norm->full_nm);
-        dbse_exec(cam, cam->movie_norm->full_nm, "movie_end");
-        if ((cam->conf->movie_retain == "secondary") &&
-            (cam->algsec_inuse) && (cam->algsec->isdetected == false)) {
-            if (remove(cam->movie_norm->full_nm) != 0) {
-                MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
-                    , _("Unable to remove file %s"), cam->movie_norm->full_nm);
-            } else {
-                dbse_movies_addrec(cam, cam->movie_norm
-                    , &cam->current_image->imgts);
-            }
-        } else {
-            dbse_movies_addrec(cam, cam->movie_norm, &cam->current_image->imgts);
-        }
-        movie_free(cam->movie_norm);
-        myfree(&cam->movie_norm);
-    }
-
-    if (cam->movie_motion) {
-        cam->filetype = FTYPE_MOVIE;
-        movie_close(cam->movie_motion);
-        on_movie_end_command(cam, cam->movie_motion->full_nm);
-        dbse_exec(cam, cam->movie_motion->full_nm, "movie_end");
-
-        if ((cam->conf->movie_retain == "secondary") &&
-            (cam->algsec_inuse) && (cam->algsec->isdetected == false)) {
-            if (remove(cam->movie_motion->full_nm) != 0) {
-                MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
-                    , _("Unable to remove file %s")
-                    , cam->movie_motion->full_nm);
-            } else {
-                dbse_movies_addrec(cam, cam->movie_motion, &cam->imgs.image_motion.imgts);
-            }
-        } else {
-            dbse_movies_addrec(cam, cam->movie_motion, &cam->imgs.image_motion.imgts);
-        }
-        movie_free(cam->movie_motion);
-        myfree(&cam->movie_motion);
-    }
-
-    if (cam->extpipe_isopen) {
-        MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO,_("Closing extpipe"));
-        cam->extpipe_isopen = false;
-        fflush(cam->extpipe_stream);
-        pclose(cam->extpipe_stream);
-        cam->extpipe_stream = NULL;
-
-        cam->filetype = FTYPE_MOVIE;
-        on_movie_end_command(cam, cam->extpipe_filename);
-        dbse_exec(cam, cam->extpipe_filename, "movie_end");
-
-        if ((cam->conf->movie_retain == "secondary") &&
-            (cam->algsec_inuse) && (cam->algsec->isdetected == false)) {
-            if (remove(cam->extpipe_filename) != 0) {
-                MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
-                    , _("Unable to remove file %s"), cam->extpipe_filename);
-            } else {
-                MOTPLS_LOG(INF, TYPE_EVENTS, NO_ERRNO
-                    , _("No secondary detection. Removed file %s.  ")
-                    , cam->extpipe_filename);
-            }
-        }
-    }
-}
-
-static void event_tlapse_start(ctx_dev *cam)
-{
-    int retcd;
-
-    if (!cam->movie_timelapse) {
-        retcd = movie_init_timelapse(cam);
-        if (retcd < 0) {
-            MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("Error creating timelapse file [%s]"), cam->movie_timelapse->full_nm);
-            myfree(&cam->movie_timelapse);
-            return;
-        }
-        cam->filetype = FTYPE_MOVIE_TIMELAPSE;
-        on_movie_start_command(cam, cam->movie_timelapse->full_nm);
-        dbse_exec(cam, cam->movie_timelapse->full_nm, "movie_start");
-    }
-
-    if (movie_put_image(cam->movie_timelapse
-            , cam->current_image, &cam->current_image->imgts) == -1) {
-        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
-    }
-
-}
-
-static void event_tlapse_end(ctx_dev *cam)
-{
-    if (cam->movie_timelapse) {
-        cam->filetype = FTYPE_MOVIE_TIMELAPSE;
-        movie_close(cam->movie_timelapse);
-        on_movie_end_command(cam, cam->movie_timelapse->full_nm);
-        dbse_exec(cam, cam->movie_timelapse->full_nm, "movie_end");
-        movie_free(cam->movie_timelapse);
-        myfree(&cam->movie_timelapse);
-    }
+    cam->movie_norm->stop();
+    cam->movie_motion->stop();
+    cam->movie_extpipe->stop();
 }
 
 struct event_handlers {
@@ -528,14 +370,6 @@ struct event_handlers event_handlers[] = {
     {
     EVENT_MOVIE_PUT,
     event_movie_put
-    },
-    {
-    EVENT_TLAPSE_START,
-    event_tlapse_start
-    },
-    {
-    EVENT_TLAPSE_END,
-    event_tlapse_end
     },
     {
     EVENT_MOVIE_START,

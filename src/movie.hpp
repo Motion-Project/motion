@@ -17,78 +17,119 @@
  *
 */
 
-
 #ifndef _INCLUDE_MOVIE_HPP_
 #define _INCLUDE_MOVIE_HPP_
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <sys/time.h>
-#include <stdint.h>
+class cls_movie {
+    public:
+        cls_movie(ctx_dev *p_cam, std::string pmovie_type);
+        ~cls_movie();
+        void start();
+        void stop();
+        int put_image(ctx_image_data *img_data, const struct timespec *ts1);
+        void reset_start_time(const struct timespec *ts1);
 
-enum TIMELAPSE_TYPE {
-    TIMELAPSE_NONE,         /* No timelapse, regular processing */
-    TIMELAPSE_APPEND,       /* Use append version of timelapse */
-    TIMELAPSE_NEW           /* Use create new file version of timelapse */
+        struct timespec     cb_st_ts;    /* The time set before calling the av functions */
+        struct timespec     cb_cr_ts;    /* Time during the interrupt to determine duration since start*/
+        int                 cb_dur;      /* Seconds permitted before triggering a interrupt */
+        std::string         full_nm;
+        std::string         movie_nm;
+        std::string         movie_dir;
+        bool                is_running;
+
+    private:
+        ctx_dev *cam;
+
+        void free_pkt();
+        void free_nal();
+        void encode_nal();
+        int timelapse_exists(const char *fname);
+        int encode_video();
+        int timelapse_append(AVPacket *pkt);
+        void free_context();
+        int get_oformat();
+        int set_pts(const struct timespec *ts1);
+        int set_quality();
+        int set_codec_preferred();
+        int set_codec();
+        int set_stream();
+        int alloc_video_buffer(AVFrame *frame, int align);
+        int set_picture();
+        int set_outputfile();
+        int flush_codec();
+        int put_frame(const struct timespec *ts1);
+        void put_pix_yuv420(ctx_image_data *img_data);
+        int movie_open();
+        void init_container();
+        void init_vars();
+        void init_conf();
+
+        void passthru_reset();
+        int passthru_pktpts();
+        void passthru_write(int indx);
+        void passthru_minpts();
+        int passthru_put(ctx_image_data *img_data);
+        int passthru_streams_video(AVStream *stream_in);
+        int passthru_streams_audio(AVStream *stream_in);
+        int passthru_streams();
+        int passthru_check();
+        int passthru_open();
+
+        void start_norm();
+        void start_motion();
+        void start_timelapse();
+        void start_extpipe();
+        int extpipe_put();
+        void on_movie_start();
+        void on_movie_end();
+
+        AVFormatContext     *oc;
+        AVStream            *strm_video;
+        AVStream            *strm_audio;
+        AVCodecContext      *ctx_codec;
+        myAVCodec           *codec;
+        AVPacket            *pkt;
+        AVFrame             *picture;       /* contains default image pointers */
+        AVDictionary        *opts;
+        cls_netcam          *netcam_data;
+        int                 width;
+        int                 height;
+        enum TIMELAPSE_TYPE tlapse;
+        int                 fps;
+        int64_t             last_pts;
+        int64_t             base_pts;
+        int64_t             pass_audio_base;
+        int64_t             pass_video_base;
+        bool                test_mode;
+        int                 gop_cnt;
+        struct timespec     start_time;
+        bool                high_resolution;
+        bool                motion_images;
+        bool                passthrough;
+
+        char                *nal_info;
+        int                 nal_info_len;
+        FILE                *extpipe_stream;
+        std::string         container;
+        std::string         preferred_codec;
+        std::string         movie_type;
+
+        std::string         conf_container;
+        std::string         conf_target_dir;
+        std::string         conf_movie_filename;
+        std::string         conf_timelapse_filename;
+        std::string         conf_timelapse_container;
+        int                 conf_movie_quality;
+        int                 conf_movie_bps;
+        int                 conf_timelapse_fps;
+        bool                conf_movie_output;
+        bool                conf_movie_output_motion;
+        bool                conf_movie_extpipe_use;
+        std::string         conf_movie_extpipe;
+        std::string         conf_movie_retain;
+        std::string         conf_on_movie_start;
+        std::string         conf_on_movie_end;
+
 };
-
-/* Enumeration of the user requested codecs that need special handling */
-enum USER_CODEC {
-    USER_CODEC_V4L2M2M,    /* Requested codec for movie is h264_v4l2m2m */
-    USER_CODEC_H264OMX,    /* Requested h264_omx */
-    USER_CODEC_MPEG4OMX,   /* Requested mpeg4_omx */
-    USER_CODEC_DEFAULT     /* All other default codecs */
-};
-
-
-struct ctx_movie {
-    AVFormatContext     *oc;
-    AVStream            *strm_video;
-    AVStream            *strm_audio;
-    AVCodecContext      *ctx_codec;
-    myAVCodec           *codec;
-    AVPacket            *pkt;
-    AVFrame             *picture;       /* contains default image pointers */
-    AVDictionary        *opts;
-    cls_netcam          *netcam_data;
-    int                 width;
-    int                 height;
-    enum TIMELAPSE_TYPE tlapse;
-    int                 fps;
-    int                 bps;
-    char                *movie_nm;
-    char                *movie_dir;
-    char                *full_nm;
-    int                 quality;
-    const char          *container_name;
-    int64_t             last_pts;
-    int64_t             base_pts;
-    int64_t             pass_audio_base;
-    int64_t             pass_video_base;
-    bool                test_mode;
-    int                 gop_cnt;
-    struct timespec     start_time;
-    bool                high_resolution;
-    bool                motion_images;
-    bool                passthrough;
-    enum USER_CODEC     preferred_codec;
-    char                *nal_info;
-    int                 nal_info_len;
-    struct timespec     cb_st_ts;    /* The time set before calling the av functions */
-    struct timespec     cb_cr_ts;    /* Time during the interrupt to determine duration since start*/
-    int                 cb_dur;      /* Seconds permitted before triggering a interrupt */
-
-};
-
-int movie_open(ctx_movie *movie);
-int movie_put_image(ctx_movie *movie, ctx_image_data *img_data, const struct timespec *tv1);
-int movie_put_extpipe(ctx_dev *cam);
-void movie_close(ctx_movie *movie);
-void movie_reset_start_time(ctx_movie *movie, const struct timespec *tv1);
-int movie_init_timelapse(ctx_dev *cam);
-int movie_init_norm(ctx_dev *cam);
-int movie_init_motion(ctx_dev *cam);
-int movie_init_extpipe(ctx_dev *cam);
-void movie_free(ctx_movie *movie);
 
 #endif /* #define _INCLUDE_MOVIE_HPP_ */

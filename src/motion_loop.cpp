@@ -620,7 +620,7 @@ static void mlp_init_ref(ctx_dev *cam)
 /** clean up all memory etc. from motion init */
 void mlp_cleanup(ctx_dev *cam)
 {
-    event(cam, EVENT_TLAPSE_END);
+    cam->movie_timelapse->stop();
     if (cam->event_curr_nbr == cam->event_prev_nbr) {
         mlp_ring_process(cam);
         if (cam->imgs.image_preview.diffs) {
@@ -1054,12 +1054,14 @@ static void mlp_actions_emulate(ctx_dev *cam)
 {
     int indx;
 
-    if ( (cam->detecting_motion == false) && (cam->movie_norm != NULL) ) {
-        movie_reset_start_time(cam->movie_norm, &cam->current_image->imgts);
+    if ((cam->detecting_motion == false) &&
+        (cam->movie_norm->is_running == true)) {
+        cam->movie_norm->reset_start_time(&cam->current_image->imgts);
     }
 
-    if ( (cam->detecting_motion == false) && (cam->movie_motion != NULL) ) {
-        movie_reset_start_time(cam->movie_motion, &cam->imgs.image_motion.imgts);
+    if ((cam->detecting_motion == false) &&
+        (cam->movie_motion->is_running == true)) {
+        cam->movie_motion->reset_start_time(&cam->imgs.image_motion.imgts);
     }
 
     cam->detecting_motion = true;
@@ -1097,11 +1099,13 @@ static void mlp_actions_motion(ctx_dev *cam)
 
         cam->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
 
-        if ( (cam->detecting_motion == false) && (cam->movie_norm != NULL) ) {
-            movie_reset_start_time(cam->movie_norm, &cam->current_image->imgts);
+        if ((cam->detecting_motion == false) &&
+            (cam->movie_norm->is_running == true)) {
+            cam->movie_norm->reset_start_time(&cam->current_image->imgts);
         }
-        if ( (cam->detecting_motion == false) && (cam->movie_motion != NULL) ) {
-            movie_reset_start_time(cam->movie_motion, &cam->imgs.image_motion.imgts);
+        if ((cam->detecting_motion == false) &&
+            (cam->movie_motion->is_running == true)) {
+            cam->movie_motion->reset_start_time(&cam->imgs.image_motion.imgts);
         }
         cam->detecting_motion = true;
         cam->postcap = cam->conf->post_capture;
@@ -1254,21 +1258,21 @@ static void mlp_timelapse(ctx_dev *cam)
 
             if (cam->conf->timelapse_mode == "daily") {
                 if (timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TLAPSE_END);
+                    cam->movie_timelapse->stop();
                 }
             } else if (cam->conf->timelapse_mode == "hourly") {
-                event(cam, EVENT_TLAPSE_END);
+                cam->movie_timelapse->stop();
             } else if (cam->conf->timelapse_mode == "weekly-sunday") {
                 if (timestamp_tm.tm_wday == 0 && timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TLAPSE_END);
+                    cam->movie_timelapse->stop();
                 }
             } else if (cam->conf->timelapse_mode == "weekly-monday") {
                 if (timestamp_tm.tm_wday == 1 && timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TLAPSE_END);
+                    cam->movie_timelapse->stop();
                 }
             } else if (cam->conf->timelapse_mode == "monthly") {
                 if (timestamp_tm.tm_mday == 1 && timestamp_tm.tm_hour == 0) {
-                    event(cam, EVENT_TLAPSE_END);
+                    cam->movie_timelapse->stop();
                 }
             }
         }
@@ -1276,16 +1280,20 @@ static void mlp_timelapse(ctx_dev *cam)
         if (cam->shots_mt == 0 &&
             cam->frame_curr_ts.tv_sec % cam->conf->timelapse_interval <=
             cam->frame_last_ts.tv_sec % cam->conf->timelapse_interval) {
-                event(cam, EVENT_TLAPSE_START);
+            cam->movie_timelapse->start();
+            if (cam->movie_timelapse->put_image(
+                cam->current_image, &cam->current_image->imgts) == -1) {
+                MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+            }
         }
 
-    } else if (cam->movie_timelapse) {
+    } else if (cam->movie_timelapse->is_running) {
     /*
      * If timelapse movie is in progress but conf.timelapse_interval is zero then close timelapse file
      * This is an important feature that allows manual roll-over of timelapse file using the http
      * remote control via a cron job.
      */
-        event(cam, EVENT_TLAPSE_END);
+        cam->movie_timelapse->stop();
     }
 }
 
@@ -1426,6 +1434,12 @@ void *mlp_main(void *arg)
     cam->restart_dev = false;
     cam->device_status = STATUS_INIT;
 
+    cam->movie_norm = new cls_movie(cam, "norm");
+    cam->movie_motion = new cls_movie(cam, "motion");
+    cam->movie_timelapse = new cls_movie(cam, "timelapse");
+    cam->movie_extpipe = new cls_movie(cam, "extpipe");
+
+
     while (cam->finish_dev == false) {
         mlp_init(cam);
         mlp_prepare(cam);
@@ -1446,6 +1460,11 @@ void *mlp_main(void *arg)
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Exiting"));
 
     mlp_cleanup(cam);
+
+    delete cam->movie_norm;
+    delete cam->movie_motion;
+    delete cam->movie_timelapse;
+    delete cam->movie_extpipe;
 
     pthread_mutex_lock(&cam->motapp->global_lock);
         cam->motapp->threads_running--;
