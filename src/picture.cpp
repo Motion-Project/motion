@@ -22,21 +22,15 @@
 #include "picture.hpp"
 #include "jpegutils.hpp"
 #include "event.hpp"
-#include "exif.hpp"
 #include "draw.hpp"
 #include "picture.hpp"
 
 #ifdef HAVE_WEBP
-/*
- * webp_exif writes the EXIF APP1 chunk to the webp file.
- * It must be called after WebPEncode() and the result
- * can then be written out to webp a file
- */
 void cls_picture::webp_exif(WebPMux* webp_mux
         , const struct timespec *ts1, ctx_coord *box)
 {
     u_char *exif = NULL;
-    unsigned exif_len = exif_prepare(&exif, cam, ts1, box);
+    int exif_len = jpgutl_exif(&exif, cam, ts1, box);
 
     if(exif_len > 0) {
         WebPData webp_exif;

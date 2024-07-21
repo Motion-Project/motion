@@ -1,6 +1,5 @@
 # main sources
 src/alg.cpp
-src/exif.cpp
 src/movie.cpp
 src/video_convert.cpp
 src/webu_json.cpp

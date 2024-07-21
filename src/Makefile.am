@@ -30,7 +30,6 @@ motionplus_SOURCES = \
 	dbse.hpp           dbse.cpp \
 	draw.hpp           draw.cpp \
 	event.hpp          event.cpp \
-	exif.hpp           exif.cpp \
 	jpegutils.hpp      jpegutils.cpp \
 	libcam.hpp         libcam.cpp \
 	logger.hpp         logger.cpp \
