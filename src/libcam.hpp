@@ -33,13 +33,11 @@
 
         class cls_libcam {
             public:
-                cls_libcam(){};
-                ~cls_libcam(){};
-                int cam_start(ctx_dev *cam);
-                void cam_stop();
-                int cam_next(ctx_image_data *img_data);
+                cls_libcam(ctx_dev *p_cam);
+                ~cls_libcam();
+                int next(ctx_image_data *img_data);
             private:
-                ctx_dev     *camctx;
+                ctx_dev     *cam;
                 ctx_params  *params;
 
                 std::unique_ptr<libcamera::CameraManager>          cam_mgr;
@@ -56,21 +54,30 @@
                 bool                    started_aqr;
                 bool                    started_req;
 
-                void cam_log_orientation();
-                void cam_log_controls();
-                void cam_log_draft();
+                std::string             conf_libcam_params;
+                std::string             conf_libcam_device;
+                int                     conf_width;
+                int                     conf_height;
 
-                void cam_start_params(ctx_dev *ptr);
-                int cam_start_mgr();
-                int cam_start_config();
-                int cam_start_req();
-                int cam_start_capture();
-                void cam_config_orientation();
-                void cam_config_controls();
+                void log_orientation();
+                void log_controls();
+                void log_draft();
+
+                int libcam_start();
+                void libcam_stop();
+
+                void start_params();
+                int start_mgr();
+                int start_config();
+                int start_req();
+                int start_capture();
+                void config_orientation();
+                void config_controls();
+                void config_control_item(std::string pname, std::string pvalue);
                 void req_complete(libcamera::Request *request);
                 int req_add(libcamera::Request *request);
-                void cam_config_control_item(
-                    std::string pname, std::string pvalue);
+
+
         };
     #else
         #define LIBCAMVER 0
@@ -80,9 +87,5 @@
                 ~cls_libcam(){};
         };
     #endif
-
-    void libcam_start (ctx_dev *cam);
-    int libcam_next (ctx_dev *cam, ctx_image_data *img_data);
-    void libcam_cleanup (ctx_dev *cam);
 
 #endif /* _INCLUDE_LIBCAM_HPP_ */

@@ -353,8 +353,9 @@ static void mlp_mask_privacy(ctx_dev *cam)
 /* Close and clean up camera*/
 void mlp_cam_close(ctx_dev *cam)
 {
-    if (cam->libcam != NULL) {
-        libcam_cleanup(cam);
+    if (cam->libcam != nullptr) {
+        delete cam->libcam;
+        cam->libcam = nullptr;
     }
 
     if (cam->v4l2cam != nullptr) {
@@ -378,7 +379,7 @@ void mlp_cam_close(ctx_dev *cam)
 void mlp_cam_start(ctx_dev *cam)
 {
     if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
-        libcam_start(cam);
+        cam->libcam = new cls_libcam(cam);
     } else if (cam->camera_type == CAMERA_TYPE_NETCAM) {
         cam->netcam = new cls_netcam(cam, false);
         if (cam->conf->netcam_high_url != "") {
@@ -399,7 +400,7 @@ int mlp_cam_next(ctx_dev *cam, ctx_image_data *img_data)
     int retcd;
 
     if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
-        retcd = libcam_next(cam, img_data);
+        retcd = cam->libcam->next(img_data);
     } else if (cam->camera_type == CAMERA_TYPE_NETCAM) {
         retcd = cam->netcam->next(img_data);
         if ((retcd == CAPTURE_SUCCESS) &&

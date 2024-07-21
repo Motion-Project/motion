@@ -38,7 +38,7 @@
 
 using namespace libcamera;
 
-void cls_libcam::cam_log_orientation()
+void cls_libcam::log_orientation()
 {
     #if (LIBCAMVER >= 2000)
         MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Orientation Options:");
@@ -56,9 +56,8 @@ void cls_libcam::cam_log_orientation()
 
 }
 
-void cls_libcam::cam_log_controls()
+void cls_libcam::log_controls()
 {
-
     MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls:");
 
     MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeEnable(bool)");
@@ -165,7 +164,7 @@ void cls_libcam::cam_log_controls()
 
 }
 
-void cls_libcam:: cam_log_draft()
+void cls_libcam:: log_draft()
 {
     MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls Draft:");
 
@@ -219,18 +218,16 @@ void cls_libcam:: cam_log_draft()
 
 }
 
-void cls_libcam::cam_start_params(ctx_dev *ptr)
+void cls_libcam::start_params()
 {
-    camctx = ptr;
     p_lst *lst;
     p_it it;
 
-    camctx->libcam->params = new ctx_params;
-    camctx->libcam->params->update_params = true;
-    util_parms_parse(camctx->libcam->params
-        ,"libcam_params", camctx->conf->libcam_params);
+    params = new ctx_params;
+    params->update_params = true;
+    util_parms_parse(params,"libcam_params", conf_libcam_params);
 
-    lst = &camctx->libcam->params->params_array;
+    lst = &params->params_array;
 
     for (it = lst->begin(); it != lst->end(); it++) {
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s : %s"
@@ -238,7 +235,7 @@ void cls_libcam::cam_start_params(ctx_dev *ptr)
     }
 }
 
-int cls_libcam::cam_start_mgr()
+int cls_libcam::start_mgr()
 {
     int retcd;
     std::string camid;
@@ -257,7 +254,7 @@ int cls_libcam::cam_start_mgr()
 
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "cam_mgr started.");
 
-    if (camctx->conf->libcam_device == "camera0"){
+    if (conf_libcam_device == "camera0"){
         if (cam_mgr->cameras().size() == 0) {
             MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 , "No camera devices found");
@@ -267,7 +264,7 @@ int cls_libcam::cam_start_mgr()
     } else {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Invalid libcam_device '%s'.  The only name supported is 'camera0' "
-            ,camctx->conf->libcam_device.c_str());
+            ,conf_libcam_device.c_str());
         return -1;
     }
     camera = cam_mgr->get(camid);
@@ -278,8 +275,8 @@ int cls_libcam::cam_start_mgr()
 
     return 0;
 }
-/* Set named control to configuration value */
-void cls_libcam::cam_config_control_item(std::string pname, std::string pvalue)
+
+void cls_libcam::config_control_item(std::string pname, std::string pvalue)
 {
     if (pname == "AeEnable") {
         controls.set(controls::AeEnable, mtob(pvalue));
@@ -458,14 +455,14 @@ void cls_libcam::cam_config_control_item(std::string pname, std::string pvalue)
 
 }
 
-void cls_libcam:: cam_config_controls()
+void cls_libcam::config_controls()
 {
     int retcd;
-    p_lst *lst = &camctx->libcam->params->params_array;
+    p_lst *lst = &params->params_array;
     p_it it;
 
     for (it = lst->begin(); it != lst->end(); it++) {
-        cam_config_control_item(it->param_name, it->param_value);
+        config_control_item(it->param_name, it->param_value);
     }
 
     retcd = config->validate();
@@ -482,12 +479,12 @@ void cls_libcam:: cam_config_controls()
 
 }
 
-void cls_libcam:: cam_config_orientation()
+void cls_libcam:: config_orientation()
 {
     #if (LIBCAMVER >= 2000)
         int retcd;
         std::string adjdesc;
-        p_lst *lst = &camctx->libcam->params->params_array;
+        p_lst *lst = &params->params_array;
         p_it it;
 
         for (it = lst->begin(); it != lst->end(); it++) {
@@ -553,7 +550,7 @@ void cls_libcam:: cam_config_orientation()
 
 }
 
-int cls_libcam::cam_start_config()
+int cls_libcam::start_config()
 {
     int retcd;
     libcamera::Size picsz;
@@ -564,8 +561,8 @@ int cls_libcam::cam_start_config()
 
     config->at(0).pixelFormat = PixelFormat::fromString("YUV420");
 
-    config->at(0).size.width = camctx->conf->width;
-    config->at(0).size.height = camctx->conf->height;
+    config->at(0).size.width = conf_width;
+    config->at(0).size.height = conf_height;
     config->at(0).bufferCount = 1;
     config->at(0).stride = 0;
 
@@ -589,27 +586,25 @@ int cls_libcam::cam_start_config()
         return -1;
     }
 
-    if ((config->at(0).size.width != (unsigned int)camctx->conf->width) ||
-        (config->at(0).size.height != (unsigned int)camctx->conf->height)) {
+    if ((config->at(0).size.width != (unsigned int)conf_width) ||
+        (config->at(0).size.height != (unsigned int)conf_height)) {
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             , "Image size adjusted from %d x %d to %d x %d"
-            , camctx->conf->width
-            , camctx->conf->height
-            , config->at(0).size.width
-            , config->at(0).size.height);
+            , conf_width, conf_height
+            , config->at(0).size.width, config->at(0).size.height);
     }
 
-    camctx->imgs.width = config->at(0).size.width;
-    camctx->imgs.height = config->at(0).size.height;
-    camctx->imgs.size_norm = (camctx->imgs.width * camctx->imgs.height * 3) / 2;
-    camctx->imgs.motionsize = camctx->imgs.width * camctx->imgs.height;
+    cam->imgs.width = config->at(0).size.width;
+    cam->imgs.height = config->at(0).size.height;
+    cam->imgs.size_norm = (cam->imgs.width * cam->imgs.height * 3) / 2;
+    cam->imgs.motionsize = cam->imgs.width * cam->imgs.height;
 
-    cam_log_orientation();
-    cam_log_controls();
-    cam_log_draft();
+    log_orientation();
+    log_controls();
+    log_draft();
 
-    cam_config_orientation();
-    cam_config_controls();
+    config_orientation();
+    config_controls();
 
     camera->configure(config.get());
 
@@ -625,7 +620,7 @@ int cls_libcam::req_add(Request *request)
     return retcd;
 }
 
-int cls_libcam::cam_start_req()
+int cls_libcam::start_req()
 {
     int retcd, bytes, indx, width;
 
@@ -672,21 +667,21 @@ int cls_libcam::cam_start_req()
             , buffer->planes()[indx].length);
     }
 
-    if (bytes > camctx->imgs.size_norm) {
-        width = (buffer->planes()[0].length / camctx->imgs.height);
-        if (((int)buffer->planes()[0].length != (width * camctx->imgs.height)) ||
-            (bytes > ((width * camctx->imgs.height * 3)/2))) {
+    if (bytes > cam->imgs.size_norm) {
+        width = (buffer->planes()[0].length / cam->imgs.height);
+        if (((int)buffer->planes()[0].length != (width * cam->imgs.height)) ||
+            (bytes > ((width * cam->imgs.height * 3)/2))) {
             MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 , "Error setting image size.  Plane 0 length %d, total bytes %d"
                 , buffer->planes()[0].length, bytes);
         }
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             , "Image size adjusted from %d x %d to %d x %d"
-            , camctx->imgs.width,camctx->imgs.height
-            , width,camctx->imgs.height);
-        camctx->imgs.width = width;
-        camctx->imgs.size_norm = (camctx->imgs.width * camctx->imgs.height * 3) / 2;
-        camctx->imgs.motionsize = camctx->imgs.width * camctx->imgs.height;
+            , cam->imgs.width,cam->imgs.height
+            , width,cam->imgs.height);
+        cam->imgs.width = width;
+        cam->imgs.size_norm = (cam->imgs.width * cam->imgs.height * 3) / 2;
+        cam->imgs.motionsize = cam->imgs.width * cam->imgs.height;
     }
 
     membuf.buf = (uint8_t *)mmap(NULL, bytes, PROT_READ
@@ -700,7 +695,7 @@ int cls_libcam::cam_start_req()
     return 0;
 }
 
-int cls_libcam::cam_start_capture()
+int cls_libcam::start_capture()
 {
     int retcd;
 
@@ -738,34 +733,25 @@ void cls_libcam::req_complete(Request *request)
     req_queue.push(request);
 }
 
-int cls_libcam::cam_start(ctx_dev *cam)
+int cls_libcam::libcam_start()
 {
-    int retcd;
-
     started_cam = false;
     started_mgr = false;
     started_aqr = false;
     started_req = false;
 
-    cam_start_params(cam);
+    start_params();
 
-    retcd = cam_start_mgr();
-    if (retcd != 0) {
+    if (start_mgr() != 0) {
         return -1;
     }
-
-    retcd = cam_start_config();
-    if (retcd != 0) {
+    if (start_config() != 0) {
         return -1;
     }
-
-    retcd = cam_start_req();
-    if (retcd != 0) {
+    if (start_req() != 0) {
         return -1;
     }
-
-    retcd = cam_start_capture();
-    if (retcd != 0) {
+    if (start_capture() != 0) {
         return -1;
     }
 
@@ -773,14 +759,14 @@ int cls_libcam::cam_start(ctx_dev *cam)
 
     started_cam = true;
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Started all.");
+    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera started");
 
     return 0;
 }
 
-void cls_libcam::cam_stop()
+void cls_libcam::libcam_stop()
 {
-    delete camctx->libcam->params;
+    delete params;
 
     if (started_aqr) {
         camera->stop();
@@ -807,95 +793,78 @@ void cls_libcam::cam_stop()
         cam_mgr->stop();
         cam_mgr.reset();
     }
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Stopped.");
-}
-
-/* get the image from libcam */
-int cls_libcam::cam_next(ctx_image_data *img_data)
-{
-    int indx;
-
-    if (started_cam == false) {
-        return CAPTURE_FAILURE;
-    }
-
-    /* Allow time for request to finish.*/
-    indx=0;
-    while ((req_queue.empty() == true) && (indx < 50)) {
-        SLEEP(0,2000)
-        indx++;
-    }
-
-    if (req_queue.empty() == false) {
-        Request *request = this->req_queue.front();
-
-        memcpy(img_data->image_norm, membuf.buf, membuf.bufsz);
-
-        this->req_queue.pop();
-
-        request->reuse(Request::ReuseBuffers);
-        req_add(request);
-        return CAPTURE_SUCCESS;
-
-    } else {
-        return CAPTURE_FAILURE;
-    }
+    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera stopped.");
 }
 
 #endif
 
-/** close and stop libcam */
-void libcam_cleanup(ctx_dev *cam)
+int cls_libcam::next(ctx_image_data *img_data)
 {
     #ifdef HAVE_LIBCAM
-        cam->libcam->cam_stop();
-        delete cam->libcam;
-        cam->libcam = nullptr;
+        int indx;
+
+        if (started_cam == false) {
+            return CAPTURE_FAILURE;
+        }
+
+        /* Allow time for request to finish.*/
+        indx=0;
+        while ((req_queue.empty() == true) && (indx < 50)) {
+            SLEEP(0,2000)
+            indx++;
+        }
+
+        if (req_queue.empty() == false) {
+            Request *request = this->req_queue.front();
+
+            memcpy(img_data->image_norm, membuf.buf, membuf.bufsz);
+
+            this->req_queue.pop();
+            request->reuse(Request::ReuseBuffers);
+            req_add(request);
+
+            cam->rotate->process(img_data);
+            return CAPTURE_SUCCESS;
+
+        } else {
+            return CAPTURE_FAILURE;
+        }
+    #else
+        (void)img_data;
+        return CAPTURE_FAILURE;
     #endif
-    cam->device_status = STATUS_CLOSED;
 }
 
-/** initialize and start libcam */
-void libcam_start(ctx_dev *cam)
+cls_libcam::cls_libcam(ctx_dev *p_cam)
 {
     #ifdef HAVE_LIBCAM
-        int retcd;
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
-        cam->libcam = new cls_libcam;
-        retcd = cam->libcam->cam_start(cam);
-        if (retcd < 0) {
+        cam = p_cam;
+        conf_libcam_params = cam->conf->libcam_params;
+        conf_libcam_device = cam->conf->libcam_device;
+        conf_width          = cam->conf->width;
+        conf_height         = cam->conf->height;
+
+
+        if (libcam_start() < 0) {
             MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
-            libcam_cleanup(cam);
+            libcam_stop();
         } else {
             cam->device_status = STATUS_OPENED;
         }
     #else
+        (void)p_cam;
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("libcam not available"));
         cam->device_status = STATUS_CLOSED;
     #endif
+
 }
 
-
-/** get next image from libcam */
-int libcam_next(ctx_dev *cam,  ctx_image_data *img_data)
+cls_libcam::~cls_libcam()
 {
     #ifdef HAVE_LIBCAM
-        int retcd;
-
-        if (cam->libcam == nullptr){
-            return CAPTURE_FAILURE;
-        }
-
-        retcd = cam->libcam->cam_next(img_data);
-        if (retcd == CAPTURE_SUCCESS) {
-            cam->rotate->process(img_data);
-        }
-
-        return retcd;
-    #else
-        (void)cam;
-        (void)img_data;
-        return CAPTURE_FAILURE;
+        libcam_stop();
     #endif
+    cam->device_status = STATUS_CLOSED;
 }
 
