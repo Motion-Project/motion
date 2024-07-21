@@ -1367,11 +1367,6 @@ static void mlp_parmsupdate(ctx_dev *cam)
         cam->parms_changed = false;
     }
 
-    if (cam->motapp->parms_changed) {
-        log_set_level(cam->motapp->conf->log_level);
-        log_set_type(cam->motapp->conf->log_type_str.c_str());
-        cam->motapp->parms_changed = false;
-    }
 }
 
 /* sleep the loop to get framerate requested */

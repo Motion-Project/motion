@@ -41,15 +41,15 @@ using namespace libcamera;
 void cls_libcam::cam_log_orientation()
 {
     #if (LIBCAMVER >= 2000)
-        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "Libcamera Orientation Options:");
-        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  Rotate0");
-        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  Rotate0Mirror");
-        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  Rotate180");
-        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  Rotate180Mirror");
-        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  Rotate90");
-        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  Rotate90Mirror");
-        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  Rotate270");
-        motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  Rotate270Mirror");
+        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Orientation Options:");
+        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate0");
+        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate0Mirror");
+        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate180");
+        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate180Mirror");
+        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate90");
+        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate90Mirror");
+        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate270");
+        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate270Mirror");
     #else
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Orientation Not available");
     #endif
@@ -59,163 +59,163 @@ void cls_libcam::cam_log_orientation()
 void cls_libcam::cam_log_controls()
 {
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "Libcamera Controls:");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls:");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AeEnable(bool)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AeLocked(bool)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeEnable(bool)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeLocked(bool)");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AeMeteringMode(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    MeteringCentreWeighted = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    MeteringSpot = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    MeteringMatrix = 2");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    MeteringCustom = 3");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeMeteringMode(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringCentreWeighted = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringSpot = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringMatrix = 2");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringCustom = 3");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AeConstraintMode(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    ConstraintNormal = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    ConstraintHighlight = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    ConstraintShadows = 2");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    ConstraintCustom = 3");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeConstraintMode(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintNormal = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintHighlight = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintShadows = 2");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintCustom = 3");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AeExposureMode(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    ExposureNormal = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    ExposureShort = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    ExposureLong = 2");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    ExposureCustom = 3");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeExposureMode(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureNormal = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureShort = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureLong = 2");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureCustom = 3");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  ExposureValue(float)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  ExposureTime(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AnalogueGain(float)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  Brightness(float)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  Contrast(float)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  Lux(float)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AwbEnable(bool)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ExposureValue(float)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ExposureTime(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AnalogueGain(float)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Brightness(float)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Contrast(float)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Lux(float)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbEnable(bool)");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AwbMode(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AwbAuto = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AwbIncandescent = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AwbTungsten = 2");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AwbFluorescent = 3");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AwbIndoor = 4");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AwbDaylight = 5");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AwbCloudy = 6");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AwbCustom = 7");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbMode(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbAuto = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbIncandescent = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbTungsten = 2");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbFluorescent = 3");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbIndoor = 4");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbDaylight = 5");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbCloudy = 6");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbCustom = 7");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AwbLocked(bool)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  ColourGains(Pipe delimited)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "     Red | Blue");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  ColourTemperature(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  Saturation(float)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  SensorBlackLevels(Pipe delimited)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "     var1|var2|var3|var4");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  Sharpness(float)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  FocusFoM(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  ColourCorrectionMatrix(Pipe delimited)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "     var1|var2|...|var8|var9");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  ScalerCrop(Pipe delimited)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "     x | y | h | w");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  DigitalGain(float)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  FrameDuration(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  FrameDurationLimits(Pipe delimited)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "     min | max");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  SensorTemperature(float)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  SensorTimestamp(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbLocked(bool)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourGains(Pipe delimited)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     Red | Blue");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourTemperature(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Saturation(float)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorBlackLevels(Pipe delimited)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     var1|var2|var3|var4");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Sharpness(float)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FocusFoM(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourCorrectionMatrix(Pipe delimited)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     var1|var2|...|var8|var9");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ScalerCrop(Pipe delimited)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     x | y | h | w");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  DigitalGain(float)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FrameDuration(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FrameDurationLimits(Pipe delimited)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     min | max");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorTemperature(float)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorTimestamp(int)");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AfMode(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfModeManual = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfModeAuto = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfModeContinuous = 2");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfMode(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeManual = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeAuto = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeContinuous = 2");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AfRange(0-2)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfRangeNormal = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfRangeMacro = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfRangeFull = 2");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfRange(0-2)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeNormal = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeMacro = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeFull = 2");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AfSpeed(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfSpeedNormal = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfSpeedFast = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfSpeed(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfSpeedNormal = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfSpeedFast = 1");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AfMetering(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfMeteringAuto = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfMeteringWindows = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfMetering(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfMeteringAuto = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfMeteringWindows = 1");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AfWindows(Pipe delimited)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "     x | y | h | w");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfWindows(Pipe delimited)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     x | y | h | w");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AfTrigger(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfTriggerStart = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfTriggerCancel = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfTrigger(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfTriggerStart = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfTriggerCancel = 1");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AfPause(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfPauseImmediate = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfPauseDeferred = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfPauseResume = 2");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfPause(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseImmediate = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseDeferred = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseResume = 2");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  LensPosition(float)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  LensPosition(float)");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AfState(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfStateIdle = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfStateScanning = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfStateFocused = 2");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfStateFailed = 3");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfState(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateIdle = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateScanning = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateFocused = 2");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateFailed = 3");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AfPauseState(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfPauseStateRunning = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfPauseStatePausing = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AfPauseStatePaused = 2");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfPauseState(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStateRunning = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStatePausing = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStatePaused = 2");
 
 }
 
 void cls_libcam:: cam_log_draft()
 {
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "Libcamera Controls Draft:");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls Draft:");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AePrecaptureTrigger(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AePrecaptureTriggerIdle = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AePrecaptureTriggerStart = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AePrecaptureTriggerCancel = 2");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AePrecaptureTrigger(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerIdle = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerStart = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerCancel = 2");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  NoiseReductionMode(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    NoiseReductionModeOff = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    NoiseReductionModeFast = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    NoiseReductionModeHighQuality = 2");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    NoiseReductionModeMinimal = 3");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    NoiseReductionModeZSL = 4");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  NoiseReductionMode(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeOff = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeFast = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeHighQuality = 2");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeMinimal = 3");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeZSL = 4");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  ColorCorrectionAberrationMode(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    ColorCorrectionAberrationOff = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    ColorCorrectionAberrationFast = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    ColorCorrectionAberrationHighQuality = 2");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColorCorrectionAberrationMode(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationOff = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationFast = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationHighQuality = 2");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AeState(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AeStateSearching = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AeStateConverged = 2");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AeStateLocked = 3");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AeStateFlashRequired = 4");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AeStatePrecapture = 5");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeState(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateSearching = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateConverged = 2");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateLocked = 3");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateFlashRequired = 4");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStatePrecapture = 5");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  AwbState(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AwbStateInactive = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AwbStateSearching = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AwbConverged = 2");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    AwbLocked = 3");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbState(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbStateInactive = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbStateSearching = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbConverged = 2");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbLocked = 3");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  SensorRollingShutterSkew(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorRollingShutterSkew(int)");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  LensShadingMapMode(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    LensShadingMapModeOff = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    LensShadingMapModeOn = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  LensShadingMapMode(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    LensShadingMapModeOff = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    LensShadingMapModeOn = 1");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  PipelineDepth(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  PipelineDepth(int)");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  MaxLatency(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  MaxLatency(int)");
 
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "  TestPatternMode(int)");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    TestPatternModeOff = 0");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    TestPatternModeSolidColor = 1");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    TestPatternModeColorBars = 2");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    TestPatternModeColorBarsFadeToGray = 3");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    TestPatternModePn9 = 4");
-    motpls_log(DBG, TYPE_VIDEO, NO_ERRNO,0,NULL, "    TestPatternModeCustom1 = 256");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  TestPatternMode(int)");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeOff = 0");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeSolidColor = 1");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeColorBars = 2");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeColorBarsFadeToGray = 3");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModePn9 = 4");
+    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeCustom1 = 256");
 
 }
 

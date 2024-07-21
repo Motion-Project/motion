@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <syslog.h>
 #ifndef __USE_GNU
     #define __USE_GNU
 #endif
@@ -111,7 +112,6 @@
     }
 #endif
 
-/* Forward declarations, used in functional definitions of headers */
 struct ctx_motapp;
 
 struct ctx_images;
@@ -120,6 +120,7 @@ struct ctx_dbse;
 struct ctx_algsec;
 struct ctx_config;
 
+class cls_log;
 class cls_movie;
 class cls_netcam;
 class cls_picture;

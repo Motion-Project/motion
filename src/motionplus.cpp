@@ -316,15 +316,7 @@ void motpls_av_init(void)
 
 void motpls_av_deinit(void)
 {
-
     avformat_network_deinit();
-
-}
-
-/* Free the all_img items*/
-static void motpls_allcams_deinit(ctx_motapp *motapp)
-{
-    delete motapp->all_sizes;
 }
 
 /* Validate or set the position on the all cameras image*/
@@ -499,8 +491,6 @@ static void motpls_shutdown(ctx_motapp *motapp)
 {
     motpls_pid_remove(motapp);
 
-    log_deinit(motapp);
-
     delete motapp->webu;
 
     dbse_deinit(motapp);
@@ -510,7 +500,10 @@ static void motpls_shutdown(ctx_motapp *motapp)
     delete motapp->conf;
     motapp->conf  = nullptr;;
 
-    motpls_allcams_deinit(motapp);
+    delete motlog;
+    motlog = nullptr;
+
+    delete motapp->all_sizes;
 
 }
 
@@ -639,13 +632,15 @@ static void motpls_ntc(void)
 /** Initialize upon start up or restart */
 static void motpls_startup(ctx_motapp *motapp, int daemonize)
 {
-    log_init_app(motapp);  /* This is needed prior to any function possibly calling motion_log*/
-
     motapp->conf = new ctx_config;
+
+    motlog = new cls_log(motapp);
 
     conf_init(motapp);
 
-    log_init(motapp);
+    motlog->log_level = motapp->conf->log_level;
+    motlog->log_fflevel = 3;
+    motlog->set_log_file(motapp->conf->log_file);
 
     mytranslate_init();
 

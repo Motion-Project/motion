@@ -17,8 +17,8 @@
  */
 #ifndef _INCLUDE_LOGGER_HPP_
 #define _INCLUDE_LOGGER_HPP_
+    extern cls_log *motlog;
 
-    /* Logging mode */
     #define LOGMODE_NONE            0   /* No logging             */
     #define LOGMODE_FILE            1   /* Log messages to file   */
     #define LOGMODE_SYSLOG          2   /* Log messages to syslog */
@@ -26,7 +26,6 @@
     #define NO_ERRNO                0   /* Flag to avoid how message associated to errno */
     #define SHOW_ERRNO              1   /* Flag to show message associated to errno */
 
-    /* Log levels */
     #define LOG_ALL                 9
     #define EMG                     1
     #define ALR                     2
@@ -52,14 +51,34 @@
     #define TYPE_DEFAULT            TYPE_ALL      /* Default type      */
     #define TYPE_DEFAULT_STR        "ALL"         /* Default name logs */
 
-    #define MOTPLS_LOG(x, y, z, ...)  motpls_log(x, y, z, 1, __FUNCTION__, __VA_ARGS__)
+    #define MOTPLS_LOG(x, y, z, ...) motlog->write_msg(x, y, z, true, __FUNCTION__, __VA_ARGS__)
+    #define MOTPLS_SHT(x, y, z, ...) motlog->write_msg(x, y, z, false, __VA_ARGS__)
 
-    void motpls_log(int msg_level, int msg_type, int msg_err, int msg_fnc, const char *msg_fncnm, ...);
+    class cls_log {
+        public:
+            cls_log(ctx_motapp *p_motapp);
+            ~cls_log();
+            int     log_level;
+            int     log_fflevel;
+            void set_log_file(std::string pname);
+            void write_msg(int loglvl, int msg_type, int flgerr, bool flgfnc, ...);
+        private:
+            ctx_motapp          *c_motapp;
+            pthread_mutex_t     mtx;
+            int                 log_mode;
+            FILE                *log_file_ptr;
+            std::string         log_file_name;
+            char                msg_prefix[512];
+            char                msg_flood[1024];
+            char                msg_full[1024];
+            int                 flood_cnt;
+            void set_mode(int mode);
+            void write_flood(int loglvl);
+            void write_norm(int loglvl, int prefixlen);
+            void add_errmsg(int flgerr, int err_save);
+            void log_stop();
 
-    void log_init(ctx_motapp *motapp);
-    void log_deinit(ctx_motapp *motapp);
-    void log_set_level(int new_level);
-    void log_set_type(const char *new_logtype);
-    void log_init_app(ctx_motapp *motapp);
+    };
+
 
 #endif /* _INCLUDE_LOGGER_HPP_ */
