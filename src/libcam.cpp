@@ -855,7 +855,7 @@ cls_libcam::cls_libcam(ctx_dev *p_cam)
     #else
         (void)p_cam;
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("libcam not available"));
-        cam->device_status = STATUS_CLOSED;
+        p_cam->device_status = STATUS_CLOSED;
     #endif
 
 }
@@ -864,7 +864,8 @@ cls_libcam::~cls_libcam()
 {
     #ifdef HAVE_LIBCAM
         libcam_stop();
+        cam->device_status = STATUS_CLOSED;
     #endif
-    cam->device_status = STATUS_CLOSED;
+
 }
 

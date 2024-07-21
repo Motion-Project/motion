@@ -83,8 +83,9 @@
         #define LIBCAMVER 0
         class cls_libcam {
             public:
-                cls_libcam(){};
-                ~cls_libcam(){};
+                cls_libcam(ctx_dev *p_cam);
+                ~cls_libcam();
+                int next(ctx_image_data *img_data);
         };
     #endif
 
