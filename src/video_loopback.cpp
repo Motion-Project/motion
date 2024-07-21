@@ -204,11 +204,11 @@ int vlp_startpipe(const char *dev_name, int width, int height)
     vlp_show_vfmt(&v);
 
     v.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
-    v.fmt.pix.width = width;
-    v.fmt.pix.height = height;
+    v.fmt.pix.width = (uint)width;
+    v.fmt.pix.height = (uint)height;
     v.fmt.pix.pixelformat = V4L2_PIX_FMT_YUV420;
-    v.fmt.pix.sizeimage = 3 * width * height / 2;
-    v.fmt.pix.bytesperline = width;
+    v.fmt.pix.sizeimage =(uint)(3 * width * height / 2);
+    v.fmt.pix.bytesperline = (uint)width;
     v.fmt.pix.field = V4L2_FIELD_NONE;
     v.fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
     MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Proposed pipe specifications"));
@@ -231,7 +231,7 @@ int vlp_putpipe(int dev, unsigned char *image, int imgsize)
 {
 
     #if (defined(HAVE_V4L2)) && (!defined(BSD))
-        return (int)write(dev, image, imgsize);
+        return (int)write(dev, image, (uint)imgsize);
     #else
         (void)dev;
         (void)image;

@@ -171,7 +171,7 @@ static void event_image_snapshot(ctx_dev *cam)
         offset = 1;
     }
 
-    if (cam->conf->snapshot_filename.compare(offset, 8, "lastsnap") != 0) {
+    if (cam->conf->snapshot_filename.compare((uint)offset, 8, "lastsnap") != 0) {
         mypicname(cam, filename,"%s/%s.%s"
             , cam->conf->snapshot_filename
             , cam->conf->picture_type);

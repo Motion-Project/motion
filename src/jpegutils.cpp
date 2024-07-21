@@ -137,7 +137,7 @@ static void put_direntry(struct tiff_writing *into, const char *data, uint lengt
 
 static void put_stringentry(struct tiff_writing *into, uint tag, const char *str, int with_nul)
 {
-    uint stringlength = (int)strlen(str) + (with_nul?1:0);
+    uint stringlength = (uint)strlen(str) + (with_nul?1:0);
 
     put_uint16(into->buf, tag);
     put_uint16(into->buf + 2, TIFF_TYPE_ASCII);
@@ -155,10 +155,10 @@ static void put_subjectarea(struct tiff_writing *into, ctx_coord *box)
     put_uint32(into->buf + 8, into->data_offset);
     into->buf += 12;
     JOCTET *ool = into->base + into->data_offset;
-    put_uint16(ool  , box->x); /* Center.x */
-    put_uint16(ool+2, box->y); /* Center.y */
-    put_uint16(ool+4, box->width);
-    put_uint16(ool+6, box->height);
+    put_uint16(ool  , (uint)box->x); /* Center.x */
+    put_uint16(ool+2, (uint)box->y); /* Center.y */
+    put_uint16(ool+4, (uint)box->width);
+    put_uint16(ool+6, (uint)box->height);
     into->data_offset += 8;
 }
 
@@ -224,7 +224,7 @@ void jpgutl_exif_tags(ctx_exif_info *exif_info)
     /* Count up the number of tags and max amount of OOL data */
     if (exif_info->description != nullptr) {
         exif_info->ifd0_tagcount ++;
-        exif_info->datasize += 5 + (int)strlen(exif_info->description); /* Add 5 for NUL and alignment */
+        exif_info->datasize += 5 + (uint)strlen(exif_info->description); /* Add 5 for NUL and alignment */
     }
 
     if (exif_info->datetime != nullptr) {
@@ -239,12 +239,12 @@ void jpgutl_exif_tags(ctx_exif_info *exif_info)
         exif_info->ifd0_tagcount++;
         /* It would be nice to use the same offset for both tags' values,
         * but I don't want to write the bookkeeping for that right now */
-        exif_info->datasize += 2 * (5 + (int)strlen(exif_info->datetime));
+        exif_info->datasize += 2 * (5 + (uint)strlen(exif_info->datetime));
     }
 
     if (exif_info->subtime != nullptr) {
         exif_info->ifd1_tagcount++;
-        exif_info->datasize += 5 + (int)strlen(exif_info->subtime);
+        exif_info->datasize += 5 + (uint)strlen(exif_info->subtime);
     }
 
     if (exif_info->box) {
@@ -270,7 +270,7 @@ void jpgutl_exif_tags(ctx_exif_info *exif_info)
 void jpgutl_exif_writeifd0(ctx_exif_info *exif_info)
 {
     /* Note that tags are stored in numerical order */
-    put_uint16(exif_info->writing.buf, exif_info->ifd0_tagcount);
+    put_uint16(exif_info->writing.buf, (uint)exif_info->ifd0_tagcount);
     exif_info->writing.buf += 2;
 
     if (exif_info->description) {
@@ -285,7 +285,7 @@ void jpgutl_exif_writeifd0(ctx_exif_info *exif_info)
 
     if (exif_info->ifd1_tagcount > 0) {
         /* Offset of IFD1 - TIFF header + IFD0 size. */
-        uint ifd1_offset = 8 + 6 + ( 12 * exif_info->ifd0_tagcount );
+        uint ifd1_offset = 8 + 6 + ( 12 * (uint)exif_info->ifd0_tagcount);
         memcpy(exif_info->writing.buf, exif_subifd_tag, 8);
         put_uint32(exif_info->writing.buf + 8, ifd1_offset);
         exif_info->writing.buf += 12;
@@ -294,7 +294,7 @@ void jpgutl_exif_writeifd0(ctx_exif_info *exif_info)
     if (exif_info->datetime) {
         memcpy(exif_info->writing.buf, exif_tzoffset_tag, 12);
         put_sint16(exif_info->writing.buf+8
-            , int(exif_info->timestamp_tm.tm_gmtoff / 3600));
+            , (int)(exif_info->timestamp_tm.tm_gmtoff / 3600));
         exif_info->writing.buf += 12;
     }
 
@@ -308,7 +308,7 @@ void jpgutl_exif_writeifd1(ctx_exif_info *exif_info)
     /* Write IFD 1 */
     if (exif_info->ifd1_tagcount > 0) {
         /* (remember that the tags in any IFD must be in numerical order by tag) */
-        put_uint16(exif_info->writing.buf, exif_info->ifd1_tagcount);
+        put_uint16(exif_info->writing.buf, (uint)exif_info->ifd1_tagcount);
         memcpy(exif_info->writing.buf + 2, exif_version_tag, 12); /* tag 0x9000 */
         exif_info->writing.buf += 14;
 
@@ -332,7 +332,7 @@ void jpgutl_exif_writeifd1(ctx_exif_info *exif_info)
 
 }
 
-int jpgutl_exif(u_char **exif, ctx_dev *cam, timespec *ts_in1, ctx_coord *box)
+uint jpgutl_exif(u_char **exif, ctx_dev *cam, timespec *ts_in1, ctx_coord *box)
 {
     struct ctx_exif_info *exif_info;
     int buffer_size;
@@ -353,7 +353,7 @@ int jpgutl_exif(u_char **exif, ctx_dev *cam, timespec *ts_in1, ctx_coord *box)
     }
 
     buffer_size = 14 + /* EXIF and TIFF headers */
-        exif_info->ifds_size + exif_info->datasize;
+        exif_info->ifds_size + (int)exif_info->datasize;
 
     marker =(JOCTET *)mymalloc(buffer_size);
     memcpy(marker, exif_marker_start, 14); /* EXIF and TIFF headers */
@@ -413,7 +413,7 @@ static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr, const UI
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("%s: Given jpeg buffer was too small"));
     }
 
-    memcpy((*htblptr)->huffval, val, nsymbols * sizeof(UINT8));
+    memcpy((*htblptr)->huffval, val, (uint)nsymbols * sizeof(UINT8));
 }
 
 static void std_huff_tables (j_decompress_ptr dinfo){
@@ -584,7 +584,7 @@ static void jpgutl_buffer_src(j_decompress_ptr cinfo, u_char *buffer, long buffe
     cinfo->src->skip_input_data = jpgutl_skip_data;
     cinfo->src->resync_to_restart = jpeg_resync_to_restart;    /* Use default method */
     cinfo->src->term_source = jpgutl_term_source;
-    cinfo->src->bytes_in_buffer = buffer_len;
+    cinfo->src->bytes_in_buffer = (ulong)buffer_len;
     cinfo->src->next_input_byte = (JOCTET *) buffer;
 
 
@@ -720,7 +720,7 @@ static void put_jpeg_exif(j_compress_ptr cinfo, ctx_dev *cam,
         timespec *ts1, ctx_coord *box)
 {
     u_char *exif = NULL;
-    int exif_len = jpgutl_exif(&exif, cam, ts1, box);
+    uint exif_len = jpgutl_exif(&exif, cam, ts1, box);
 
     if(exif_len > 0) {
         /* EXIF data lives in a JPEG APP1 marker */
@@ -802,8 +802,9 @@ int jpgutl_decode_jpeg (u_char *jpeg_data_in, int jpeg_data_len,
     img_cr = img_cb + (dinfo.output_width * dinfo.output_height) / 4;
 
     /* Allocate space for one line. */
-    line = (*dinfo.mem->alloc_sarray)((j_common_ptr) &dinfo, JPOOL_IMAGE,
-                                       dinfo.output_width * dinfo.output_components, 1);
+    line = (*dinfo.mem->alloc_sarray)
+        ((j_common_ptr) &dinfo, JPOOL_IMAGE
+        ,dinfo.output_width * (uint)dinfo.output_components, 1);
 
     wline = line[0];
     offset_y = 0;
@@ -876,8 +877,8 @@ int jpgutl_put_yuv420p(u_char *dest_image, int image_size,
         return -1;
     }
 
-    cinfo.image_width = width;
-    cinfo.image_height = height;
+    cinfo.image_width = (uint)width;
+    cinfo.image_height = (uint)height;
     cinfo.input_components = 3;
     jpeg_set_defaults(&cinfo);
 
@@ -897,8 +898,7 @@ int jpgutl_put_yuv420p(u_char *dest_image, int image_size,
     jpeg_set_quality(&cinfo, quality, TRUE);
     cinfo.dct_method = JDCT_FASTEST;
 
-    _jpeg_mem_dest(&cinfo, dest_image, image_size);  // Data written to mem
-
+    _jpeg_mem_dest(&cinfo, dest_image, (uint)image_size);
 
     jpeg_start_compress(&cinfo, TRUE);
 
@@ -959,8 +959,8 @@ int jpgutl_put_grey(u_char *dest_image, int image_size,
         return -1;
     }
 
-    cjpeg.image_width = width;
-    cjpeg.image_height = height;
+    cjpeg.image_width = (uint)width;
+    cjpeg.image_height = (uint)height;
     cjpeg.input_components = 1; /* One colour component */
     cjpeg.in_color_space = JCS_GRAYSCALE;
 
@@ -968,7 +968,7 @@ int jpgutl_put_grey(u_char *dest_image, int image_size,
 
     jpeg_set_quality(&cjpeg, quality, TRUE);
     cjpeg.dct_method = JDCT_FASTEST;
-    _jpeg_mem_dest(&cjpeg, dest_image, image_size);  // Data written to mem
+    _jpeg_mem_dest(&cjpeg, dest_image, (uint)image_size);
 
     jpeg_start_compress (&cjpeg, TRUE);
 

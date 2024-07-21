@@ -51,8 +51,8 @@
     #define TYPE_DEFAULT            TYPE_ALL      /* Default type      */
     #define TYPE_DEFAULT_STR        "ALL"         /* Default name logs */
 
-    #define MOTPLS_LOG(x, y, z, ...) motlog->write_msg(x, y, z, true, __FUNCTION__, __VA_ARGS__)
-    #define MOTPLS_SHT(x, y, z, ...) motlog->write_msg(x, y, z, false, __VA_ARGS__)
+    #define MOTPLS_LOG(x, y, z, ...) motlog->write_msg(x, y, z, 1, __FUNCTION__, __VA_ARGS__)
+    #define MOTPLS_SHT(x, y, z, ...) motlog->write_msg(x, y, z, 0, __VA_ARGS__)
 
     class cls_log {
         public:
@@ -61,7 +61,7 @@
             int     log_level;
             int     log_fflevel;
             void set_log_file(std::string pname);
-            void write_msg(int loglvl, int msg_type, int flgerr, bool flgfnc, ...);
+            void write_msg(int loglvl, int msg_type, int flgerr, int flgfnc, ...);
         private:
             ctx_motapp          *c_motapp;
             pthread_mutex_t     mtx;
@@ -74,7 +74,7 @@
             int                 flood_cnt;
             void set_mode(int mode);
             void write_flood(int loglvl);
-            void write_norm(int loglvl, int prefixlen);
+            void write_norm(int loglvl, uint prefixlen);
             void add_errmsg(int flgerr, int err_save);
             void log_stop();
 

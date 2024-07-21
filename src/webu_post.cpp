@@ -408,10 +408,10 @@ void cls_webu_post::action_user()
                 }
             }
             for (indx2 = 0; indx2<(int)tmp.length(); indx2++) {
-                if (isalnum(tmp.at(indx2)) == false) {
+                if (isalnum(tmp.at((uint)indx2)) == false) {
                     MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                         , _("Invalid character included in action user \"%c\"")
-                        , tmp.at(indx2));
+                        , tmp.at((uint)indx2));
                     return;
                 }
             }
@@ -430,10 +430,10 @@ void cls_webu_post::action_user()
             }
         }
         for (indx2 = 0; indx2<(int)tmp.length(); indx2++) {
-            if (isalnum(tmp.at(indx2)) == false) {
+            if (isalnum(tmp.at((uint)indx2)) == false) {
                 MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     , _("Invalid character included in action user \"%c\"")
-                    , tmp.at(indx2));
+                    , tmp.at((uint)indx2));
                 return;
             }
         }
@@ -686,7 +686,7 @@ void cls_webu_post::iterate_post_new(const char *key
         post_info = (ctx_key *)malloc(sizeof(ctx_key));
     } else {
         post_info = (ctx_key *)realloc(post_info
-            , post_sz * sizeof(ctx_key));
+            , (uint)post_sz * sizeof(ctx_key));
     }
 
     post_info[post_sz-1].key_nm = (char*)malloc(strlen(key)+1);

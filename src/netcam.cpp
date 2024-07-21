@@ -189,7 +189,7 @@ void cls_netcam::filelist_load()
         MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
             , _("Directory/file not found: %s"), filedir.c_str());
     } else {
-        path = filelist[filenbr].fullnm;
+        path = filelist[(uint)filenbr].fullnm;
     }
     MOTPLS_LOG(DBG, TYPE_NETCAM, NO_ERRNO
             , _("Netcam Path: %s"),path.c_str());
@@ -200,7 +200,7 @@ void cls_netcam::check_buffsize(netcam_buff_ptr buff, size_t numbytes)
 {
     int min_size_to_alloc;
     int real_alloc;
-    int new_size;
+    uint new_size;
 
     if ((buff->size - buff->used) >= numbytes) {
         return;
@@ -213,10 +213,9 @@ void cls_netcam::check_buffsize(netcam_buff_ptr buff, size_t numbytes)
         real_alloc += NETCAM_BUFFSIZE;
     }
 
-    new_size = (int)(buff->size + real_alloc);
+    new_size = (uint)buff->size + (uint)real_alloc;
 
-    buff->ptr =(char*) myrealloc(buff->ptr, new_size,
-                          "check_buf_size");
+    buff->ptr =(char*) myrealloc(buff->ptr, new_size,"check_buf_size");
     buff->size = new_size;
 }
 
@@ -229,7 +228,7 @@ char *cls_netcam::url_match(regmatch_t m, const char *input)
         len = m.rm_eo - m.rm_so;
 
         if ((match =(char*) mymalloc(len + 1)) != NULL) {
-            strncpy(match, input + m.rm_so, len);
+            strncpy(match, input + m.rm_so, (uint)len);
             match[len] = '\0';
         }
     }
@@ -437,9 +436,9 @@ void cls_netcam::pktarray_resize()
 
     pthread_mutex_lock(&mutex_pktarray);
         if ((pktarray_size < newsize) ||  (pktarray_size < 30)) {
-            tmp =(ctx_packet_item*) mymalloc(newsize * sizeof(ctx_packet_item));
+            tmp =(ctx_packet_item*) mymalloc((uint)newsize * sizeof(ctx_packet_item));
             if (pktarray_size > 0 ) {
-                memcpy(tmp, pktarray, sizeof(ctx_packet_item) * pktarray_size);
+                memcpy(tmp, pktarray, sizeof(ctx_packet_item) * (uint)pktarray_size);
             }
             for(indx = pktarray_size; indx < newsize; indx++) {
                 tmp[indx].packet = nullptr;
@@ -754,8 +753,8 @@ int cls_netcam::decode_packet()
         (enum AVPixelFormat) frame->format
         , frame->width, frame->height, 1);
 
-    check_buffsize(img_recv, frame_size);
-    check_buffsize(img_latest, frame_size);
+    check_buffsize(img_recv, (uint)frame_size);
+    check_buffsize(img_latest, (uint)frame_size);
 
     retcd = av_image_copy_to_buffer(
         (uint8_t *)img_recv->ptr
@@ -771,7 +770,7 @@ int cls_netcam::decode_packet()
         return -1;
     }
 
-    img_recv->used = frame_size;
+    img_recv->used = (uint)frame_size;
 
     return frame_size;
 }
@@ -1220,8 +1219,8 @@ int cls_netcam::open_sws()
     }
 
     /* the image buffers must be big enough to hold the final frame after resizing */
-    check_buffsize(img_recv, swsframe_size);
-    check_buffsize(img_latest, swsframe_size);
+    check_buffsize(img_recv, (uint)swsframe_size);
+    check_buffsize(img_latest, (uint)swsframe_size);
 
     return 0;
 }
@@ -1258,7 +1257,7 @@ int cls_netcam::resize()
         return -1;
     }
 
-    buffer_out=(uint8_t *)av_malloc(swsframe_size*sizeof(uint8_t));
+    buffer_out=(uint8_t *)av_malloc((uint)swsframe_size*sizeof(uint8_t));
 
     retcd = av_image_fill_arrays(
         swsframe_out->data
@@ -1312,7 +1311,7 @@ int cls_netcam::resize()
         context_close();
         return -1;
     }
-    img_recv->used = swsframe_size;
+    img_recv->used = (uint)swsframe_size;
 
     av_free(buffer_out);
 

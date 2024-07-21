@@ -137,7 +137,7 @@ void cls_webu_common::img_resize(ctx_dev *p_cam
     src_w = p_cam->imgs.width;
 
     img_sz = (dst_h * dst_w * 3)/2;
-    memset(dst, 0x00, (size_t)img_sz);
+    mymemset(dst, 0x00, (size_t)img_sz);
 
     frm_in = av_frame_alloc();
     if (frm_in == NULL) {
@@ -244,7 +244,7 @@ void cls_webu_common::all_getimg()
     ctx_all_sizes *all_sz;
     ctx_dev *p_cam;
 
-    memset(resp_image, '\0', resp_size);
+    mymemset(resp_image, '\0', resp_size);
 
     all_sz = app->all_sizes;
 
@@ -252,8 +252,8 @@ void cls_webu_common::all_getimg()
     a_u = (all_sz->width * all_sz->height);
     a_v = a_u + (a_u / 4);
 
-    memset(all_img_data , 0x80, (size_t)a_u);
-    memset(all_img_data  + a_u, 0x80, (size_t)(a_u/2));
+    mymemset(all_img_data , 0x80, (size_t)a_u);
+    mymemset(all_img_data  + a_u, 0x80, (size_t)(a_u/2));
 
     for (indx=0; indx<app->cam_cnt; indx++) {
         p_cam = app->cam_list[indx];
@@ -308,9 +308,9 @@ void cls_webu_common::all_getimg()
             if (strm->img_data == NULL) {
                 MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
                     , "Could not get image for device %d", p_cam->device_id);
-                memset(src_img, 0x00, src_sz);
+                mymemset(src_img, 0x00, src_sz);
             } else {
-                memcpy(src_img, strm->img_data, src_sz);
+                mymemcpy(src_img, strm->img_data, src_sz);
             }
         pthread_mutex_unlock(&p_cam->stream.mutex);
 
@@ -341,15 +341,15 @@ void cls_webu_common::all_getimg()
         */
 
         for (row=0; row<dst_h; row++) {
-            memcpy(all_img_data  + a_y, dst_img + c_y, dst_w);
+            mymemcpy(all_img_data  + a_y, dst_img + c_y, dst_w);
             a_y += all_sz->width;
             c_y += dst_w;
             if (row % 2) {
-                memcpy(all_img_data  + a_u, dst_img + c_u, dst_w / 2);
-                //memset(webui->all_img_data  + a_u, 0xFA, dst_w/2);
+                mymemcpy(all_img_data  + a_u, dst_img + c_u, dst_w / 2);
+                //mymemset(webui->all_img_data  + a_u, 0xFA, dst_w/2);
                 a_u += (all_sz->width / 2);
                 c_u += (dst_w / 2);
-                memcpy(all_img_data  + a_v, dst_img + c_v, dst_w / 2);
+                mymemcpy(all_img_data  + a_v, dst_img + c_v, dst_w / 2);
                 a_v += (all_sz->width / 2);
                 c_v += (dst_w / 2);
             }
@@ -561,8 +561,8 @@ void cls_webu_common::one_buffer()
             myfree(&resp_image);
         }
         resp_image = (unsigned char*) mymalloc(webua->cam->imgs.size_norm);
-        memset(resp_image,'\0',webua->cam->imgs.size_norm);
-        resp_size = webua->cam->imgs.size_norm;
+        mymemset(resp_image,'\0',webua->cam->imgs.size_norm);
+        resp_size = (uint)webua->cam->imgs.size_norm;
         resp_used = 0;
     }
 }
@@ -573,9 +573,9 @@ void cls_webu_common::all_buffer()
         if (resp_image != nullptr) {
             myfree(&resp_image);
         }
-        resp_size = app->all_sizes->img_sz;
+        resp_size = (uint)app->all_sizes->img_sz;
         resp_image = (unsigned char*) mymalloc(resp_size);
-        memset(resp_image, '\0', resp_size);
+        mymemset(resp_image, '\0', resp_size);
         resp_used = 0;
     }
     if ((all_img_data  == nullptr) &&

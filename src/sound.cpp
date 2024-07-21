@@ -235,7 +235,7 @@ static void snd_alsa_list_subdev(ctx_dev *snd)
         , snd_pcm_info_get_subdevices_avail(alsa->pcm_info),cnt);
 
     for (indx=0; indx<cnt; indx++) {
-        snd_pcm_info_set_subdevice(alsa->pcm_info,indx);
+        snd_pcm_info_set_subdevice(alsa->pcm_info, (uint)indx);
         retcd = snd_ctl_pcm_info(alsa->ctl_hdl, alsa->pcm_info);
         if (retcd < 0) {
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
@@ -272,7 +272,7 @@ static void snd_alsa_list_card(ctx_dev *snd)
     }
 
     while (alsa->device_id >= 0) {
-        snd_pcm_info_set_device(alsa->pcm_info, alsa->device_id);
+        snd_pcm_info_set_device(alsa->pcm_info, (uint)alsa->device_id);
         snd_pcm_info_set_subdevice(alsa->pcm_info, 0);
         snd_pcm_info_set_stream(alsa->pcm_info, SND_PCM_STREAM_CAPTURE);
         retcd = snd_ctl_pcm_info(alsa->ctl_hdl, alsa->pcm_info);
@@ -341,7 +341,7 @@ static void snd_alsa_start(ctx_dev *snd)
     unsigned int actl_rate, smpl_rate;
     int retcd;
 
-    frames_per = info->frames;
+    frames_per = (uint)info->frames;
     smpl_rate = (unsigned int)info->sample_rate;
 
     retcd = snd_pcm_open(&alsa->pcm_dev
@@ -403,7 +403,7 @@ static void snd_alsa_start(ctx_dev *snd)
     }
 
     retcd = snd_pcm_hw_params_set_channels(alsa->pcm_dev
-        , hw_params, info->channels);
+        , hw_params, (uint)info->channels);
     if (retcd < 0) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_hw_params_set_channels(%s)")
@@ -485,8 +485,8 @@ static void snd_alsa_start(ctx_dev *snd)
     /*************************************************************/
     info->frames = (int)frames_per;
     info->buffer_size = info->frames * 2;
-    info->buffer = (int16_t*)mymalloc(info->buffer_size * sizeof(int16_t));
-    memset(info->buffer, 0x00, info->buffer_size * sizeof(int16_t));
+    info->buffer = (int16_t*)mymalloc((uint)info->buffer_size * sizeof(int16_t));
+    mymemset(info->buffer, 0x00, (uint)info->buffer_size * sizeof(int16_t));
 
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Started.");
     snd->device_status =STATUS_OPENED;
@@ -528,7 +528,7 @@ static void snd_alsa_capture(ctx_dev *snd)
         ctx_snd_alsa *alsa = snd->snd_info->snd_alsa;
         long int retcd;
 
-        retcd = snd_pcm_readi(alsa->pcm_dev, info->buffer, info->frames);
+        retcd = snd_pcm_readi(alsa->pcm_dev, info->buffer, (uint)info->frames);
         if (retcd != info->frames) {
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("error: read from audio interface failed (%s)")
@@ -587,8 +587,8 @@ static void snd_pulse_init(ctx_dev *snd)
             return;
         }
         info->buffer_size = info->frames * 2;
-        info->buffer = (int16_t*)mymalloc(info->buffer_size * sizeof(int16_t));
-        memset(info->buffer, 0x00, info->buffer_size * sizeof(int16_t));
+        info->buffer = (int16_t*)mymalloc((uint)info->buffer_size * sizeof(int16_t));
+        mymemset(info->buffer, 0x00, (uint)info->buffer_size * sizeof(int16_t));
 
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Started.");
         snd->device_status =STATUS_OPENED;
@@ -608,7 +608,7 @@ static void snd_pulse_capture(ctx_dev *snd)
         int errcd, retcd;
 
         retcd = pa_simple_read(pulse->dev, info->buffer
-            , info->buffer_size, &errcd);
+            , (uint)info->buffer_size, &errcd);
         if (retcd < 0) {
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("Error capturing PulseAudio (%s)")
@@ -656,9 +656,9 @@ static void snd_fftw_open(ctx_dev *snd)
         , _("Opening FFTW plan"));
 
     fftw->ff_in   = (double*) fftw_malloc(
-        sizeof(fftw_complex) * info->frames);
+        sizeof(fftw_complex) * (uint)info->frames);
     fftw->ff_out  = (fftw_complex*) fftw_malloc(
-        sizeof(fftw_complex) * info->frames);
+        sizeof(fftw_complex) * (uint)info->frames);
     fftw->ff_plan = fftw_plan_dft_r2c_1d(
         info->frames, fftw->ff_in, fftw->ff_out, FFTW_MEASURE);
 

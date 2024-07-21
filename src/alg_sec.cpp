@@ -168,7 +168,7 @@ static void algsec_image_label(ctx_dev *cam, Mat &mat_dst
         label = format("%s: %.4f"
             , (algmdl->dnn_classes.empty() ?
                 format("Class #%d", classIdPoint.x).c_str() :
-                algmdl->dnn_classes[classIdPoint.x].c_str())
+                algmdl->dnn_classes[(uint)classIdPoint.x].c_str())
             , confidence);
 
         putText(mat_dst , label, Point(0, 15)
@@ -714,7 +714,7 @@ void algsec_detect(ctx_dev *cam)
             if (cam->algsec->detecting){
                 cam->algsec->frame_missed++;
             } else {
-                memcpy(cam->algsec->image_norm
+                mymemcpy(cam->algsec->image_norm
                     , cam->imgs.image_virgin
                     , cam->imgs.size_norm);
 

@@ -127,7 +127,7 @@ static void webu_getimg_norm(ctx_dev *cam)
         if (cam->stream.norm.img_data == NULL) {
             cam->stream.norm.img_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
-        memcpy(cam->stream.norm.img_data, cam->current_image->image_norm, cam->imgs.size_norm);
+        mymemcpy(cam->stream.norm.img_data, cam->current_image->image_norm, cam->imgs.size_norm);
     }
 }
 
@@ -194,9 +194,9 @@ static void webu_getimg_sub(ctx_dev *cam)
                 ,cam->imgs.height
                 ,cam->current_image->image_norm
                 ,cam->imgs.image_substream);
-            memcpy(cam->stream.sub.img_data, cam->imgs.image_substream, subsize);
+            mymemcpy(cam->stream.sub.img_data, cam->imgs.image_substream, subsize);
         } else {
-            memcpy(cam->stream.sub.img_data, cam->current_image->image_norm, cam->imgs.size_norm);
+            mymemcpy(cam->stream.sub.img_data, cam->current_image->image_norm, cam->imgs.size_norm);
         }
     }
 
@@ -230,7 +230,7 @@ static void webu_getimg_motion(ctx_dev *cam)
         if (cam->stream.motion.img_data == NULL) {
             cam->stream.motion.img_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
-        memcpy(cam->stream.motion.img_data
+        mymemcpy(cam->stream.motion.img_data
             , cam->imgs.image_motion.image_norm
             , cam->imgs.size_norm);
     }
@@ -264,7 +264,7 @@ static void webu_getimg_source(ctx_dev *cam)
         if (cam->stream.source.img_data == NULL) {
             cam->stream.source.img_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
-        memcpy(cam->stream.source.img_data
+        mymemcpy(cam->stream.source.img_data
             , cam->imgs.image_virgin
             , cam->imgs.size_norm);
     }
@@ -286,7 +286,7 @@ static void webu_getimg_secondary(ctx_dev *cam)
                     cam->stream.secondary.jpg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
                 }
 
-                memcpy(cam->stream.secondary.jpg_data,cam->imgs.image_secondary,cam->imgs.size_secondary);
+                mymemcpy(cam->stream.secondary.jpg_data,cam->imgs.image_secondary,cam->imgs.size_secondary);
                 cam->stream.secondary.jpg_sz = cam->imgs.size_secondary;
             pthread_mutex_unlock(&cam->algsec->mutex);
         } else {
@@ -297,7 +297,7 @@ static void webu_getimg_secondary(ctx_dev *cam)
         if (cam->stream.secondary.img_data == NULL) {
             cam->stream.secondary.img_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
         }
-        memcpy(cam->stream.secondary.img_data
+        mymemcpy(cam->stream.secondary.img_data
             , cam->current_image->image_norm, cam->imgs.size_norm);
     }
 

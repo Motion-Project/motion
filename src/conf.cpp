@@ -3667,7 +3667,9 @@ void conf_camera_add(ctx_motapp *motapp)
 
     motapp->cam_cnt++;
     motapp->cam_list = (ctx_dev **)myrealloc(
-        motapp->cam_list, sizeof(ctx_dev *) * (motapp->cam_cnt + 1), "config_camera");
+        motapp->cam_list
+        , sizeof(ctx_dev *) * (uint)(motapp->cam_cnt + 1)
+        , "config_camera");
 
     motapp->cam_list[motapp->cam_cnt-1] = new ctx_dev;
     memset(motapp->cam_list[motapp->cam_cnt-1],0,sizeof(ctx_dev));
@@ -3757,7 +3759,9 @@ void conf_sound_add(ctx_motapp *motapp)
 
     motapp->snd_cnt++;
     motapp->snd_list = (ctx_dev **)myrealloc(
-        motapp->snd_list, sizeof(ctx_dev *) * (motapp->snd_cnt + 1), "config_sound");
+        motapp->snd_list
+        , sizeof(ctx_dev *) * (uint)(motapp->snd_cnt + 1)
+        , "config_sound");
 
     motapp->snd_list[motapp->snd_cnt-1] = new ctx_dev;
     memset(motapp->snd_list[motapp->snd_cnt-1],0,sizeof(ctx_dev));

@@ -152,7 +152,7 @@ int cls_webu_mpegts::getimg()
 
     clock_gettime(CLOCK_REALTIME, &curr_ts);
 
-    memset(webuc->resp_image, '\0', webuc->resp_size);
+    mymemset(webuc->resp_image, '\0', webuc->resp_size);
     webuc->resp_used = 0;
 
     if (webua->device_id > 0) {
@@ -175,9 +175,9 @@ int cls_webu_mpegts::getimg()
         img_data = (unsigned char*) mymalloc(img_sz);
         pthread_mutex_lock(&webua->cam->stream.mutex);
             if (strm->img_data == NULL) {
-                memset(img_data, 0x00, img_sz);
+                mymemset(img_data, 0x00, img_sz);
             } else {
-                memcpy(img_data, strm->img_data, img_sz);
+                mymemcpy(img_data, strm->img_data, img_sz);
                 strm->consumed = true;
             }
         pthread_mutex_unlock(&webua->cam->stream.mutex);
@@ -186,7 +186,7 @@ int cls_webu_mpegts::getimg()
 
         img_data = (unsigned char*) mymalloc(app->all_sizes->img_sz);
 
-        memcpy(img_data, webuc->all_img_data, app->all_sizes->img_sz);
+        mymemcpy(img_data, webuc->all_img_data, app->all_sizes->img_sz);
     }
 
     if (pic_send(img_data) < 0) {
@@ -204,8 +204,8 @@ int cls_webu_mpegts::getimg()
 
 int cls_webu_mpegts::avio_buf(myuint *buf, int buf_size)
 {
-    if (webuc->resp_size < (size_t)(buf_size + webuc->resp_used)) {
-        webuc->resp_size = (size_t)(buf_size + webuc->resp_used);
+    if (webuc->resp_size < (size_t)buf_size + webuc->resp_used) {
+        webuc->resp_size = (size_t)buf_size + webuc->resp_used;
         webuc->resp_image = (unsigned char*)realloc(
             webuc->resp_image, webuc->resp_size);
         MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
@@ -215,8 +215,8 @@ int cls_webu_mpegts::avio_buf(myuint *buf, int buf_size)
             ,buf_size);
     }
 
-    memcpy(webuc->resp_image + webuc->resp_used, buf, buf_size);
-    webuc->resp_used += buf_size;
+    mymemcpy(webuc->resp_image + webuc->resp_used, buf, buf_size);
+    webuc->resp_used += (uint)buf_size;
 
     return buf_size;
 }
@@ -249,14 +249,14 @@ ssize_t cls_webu_mpegts::response(char *buf, size_t max)
         sent_bytes = webuc->resp_used - stream_pos;
     }
 
-    memcpy(buf, webuc->resp_image + stream_pos, sent_bytes);
+    mymemcpy(buf, webuc->resp_image + stream_pos, sent_bytes);
 
     stream_pos = stream_pos + sent_bytes;
     if (stream_pos >= webuc->resp_used) {
         stream_pos = 0;
     }
 
-    return sent_bytes;
+    return (ssize_t)sent_bytes;
 }
 
 int cls_webu_mpegts::open_mpegts()

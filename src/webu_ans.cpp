@@ -148,7 +148,7 @@ void cls_webu_ans::parms_edit()
     if (uri_camid.length() > 0) {
         is_nbr = true;
         for (indx=0; indx < (int)uri_camid.length(); indx++) {
-            if ((uri_camid[indx] > '9') || (uri_camid[indx] < '0')) {
+            if ((uri_camid[(uint)indx] > '9') || (uri_camid[(uint)indx] < '0')) {
                 is_nbr = false;
             }
         }
@@ -505,13 +505,13 @@ void cls_webu_ans::mhd_auth_parse()
     if (col_pos == NULL) {
         auth_user = (char*)mymalloc(auth_len+1);
         auth_pass = (char*)mymalloc(2);
-        snprintf(auth_user, auth_len + 1, "%s"
+        snprintf(auth_user, (uint)auth_len + 1, "%s"
             ,app->conf->webcontrol_authentication.c_str());
         snprintf(auth_pass, 2, "%s","");
     } else {
-        auth_user = (char*)mymalloc(auth_len - strlen(col_pos) + 1);
+        auth_user = (char*)mymalloc((uint)auth_len - strlen(col_pos) + 1);
         auth_pass =(char*)mymalloc(strlen(col_pos));
-        snprintf(auth_user, auth_len - strlen(col_pos) + 1, "%s"
+        snprintf(auth_user, (uint)auth_len - strlen(col_pos) + 1, "%s"
             ,app->conf->webcontrol_authentication.c_str());
         snprintf(auth_pass, strlen(col_pos), "%s", col_pos + 1);
     }

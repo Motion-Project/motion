@@ -29,7 +29,7 @@
     int jpgutl_put_grey(unsigned char *dest_image, int image_size,
         unsigned char *input_image, int width, int height, int quality,
         ctx_dev *cam, timespec *ts1, ctx_coord *box);
-    int jpgutl_exif(u_char **exif, ctx_dev *cam
+    uint jpgutl_exif(u_char **exif, ctx_dev *cam
         , timespec *ts_in1, ctx_coord *box);
 
 #endif /*  _INCLUDE_JPEGUTILS_HPP_ */

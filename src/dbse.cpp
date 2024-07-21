@@ -111,7 +111,7 @@ static void dbse_cols_list(ctx_motapp *motapp)
     /* 50 is an arbitrary "high" number */
     motapp->dbse->cols_cnt = 50;
     motapp->dbse->cols_list =(ctx_dbse_col *)
-        mymalloc(sizeof(ctx_dbse_col) * motapp->dbse->cols_cnt);
+        mymalloc(sizeof(ctx_dbse_col) * (uint)motapp->dbse->cols_cnt);
 
     /* The size of 30 is arbitrary */
     for (indx=0; indx<motapp->dbse->cols_cnt; indx++) {
@@ -205,7 +205,7 @@ static void dbse_rec_default(ctx_dbse_rec *rec)
 /* Assign values to rec from the database */
 static void dbse_rec_assign(ctx_dbse_rec *rec, char *col_nm, char *col_val)
 {
-    int flen;
+    size_t flen;
     struct stat statbuf;
 
     if (mystrceq(col_nm,"record_id")) {
@@ -216,19 +216,19 @@ static void dbse_rec_assign(ctx_dbse_rec *rec, char *col_nm, char *col_val)
 
     } else if (mystrceq(col_nm,"movie_nm")) {
         free(rec->movie_nm);
-        flen = (int)strlen(col_val);
+        flen = strlen(col_val);
         rec->movie_nm = (char*)mymalloc(flen + 1);
         snprintf(rec->movie_nm, flen+1,"%s",col_val);
 
     } else if (mystrceq(col_nm,"movie_dir")) {
         free(rec->movie_dir);
-        flen = (int)strlen(col_val);
+        flen = strlen(col_val);
         rec->movie_dir = (char*)mymalloc(flen + 1);
         snprintf(rec->movie_dir, flen+1,"%s",col_val);
 
     } else if (mystrceq(col_nm,"full_nm")) {
         free(rec->full_nm);
-        flen = (int)strlen(col_val);
+        flen = strlen(col_val);
         rec->full_nm = (char*)mymalloc(flen + 1);
         snprintf(rec->full_nm, flen+1,"%s",col_val);
         if (stat(rec->full_nm, &statbuf) == 0) {
@@ -243,19 +243,15 @@ static void dbse_rec_assign(ctx_dbse_rec *rec, char *col_nm, char *col_val)
 
     } else if (mystrceq(col_nm,"movie_tmc")) {
         free(rec->movie_tmc);
-        flen = (int)strlen(col_val);
-        rec->movie_tmc =
-            (char*)mymalloc(flen + 1);
-        snprintf(rec->movie_tmc
-            ,flen+1,"%s",col_val);
+        flen = strlen(col_val);
+        rec->movie_tmc = (char*)mymalloc(flen + 1);
+        snprintf(rec->movie_tmc, flen+1,"%s",col_val);
 
     } else if (mystrceq(col_nm,"movie_tml")) {
         free(rec->movie_tml);
-        flen = (int)strlen(col_val);
-        rec->movie_tml =
-            (char*)mymalloc(flen + 1);
-        snprintf(rec->movie_tml
-            ,flen+1,"%s",col_val);
+        flen = strlen(col_val);
+        rec->movie_tml = (char*)mymalloc(flen + 1);
+        snprintf(rec->movie_tml,flen+1,"%s",col_val);
 
     } else if (mystrceq(col_nm,"diff_avg")) {
         rec->diff_avg =atoi(col_val);
@@ -569,7 +565,7 @@ static void dbse_sqlite3_movlst(ctx_motapp *motapp, int device_id)
 
     if (motapp->dbse->movie_cnt > 0) {
         motapp->dbse->movie_list =(ctx_dbse_rec *)
-            mymalloc(sizeof(ctx_dbse_rec)*motapp->dbse->movie_cnt);
+            mymalloc(sizeof(ctx_dbse_rec)*(uint)motapp->dbse->movie_cnt);
         motapp->dbse->rec_indx = 0;
 
         motapp->dbse->dbse_action = DBSE_MOV_SELECT;
@@ -622,7 +618,7 @@ static void dbse_mariadb_exec (ctx_motapp *motapp, const char *sqlquery)
     MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing MariaDB query");
     retcd = mysql_query(motapp->dbse->database_mariadb, sqlquery);
     if (retcd != 0) {
-        retcd = mysql_errno(motapp->dbse->database_mariadb);
+        retcd = (int)mysql_errno(motapp->dbse->database_mariadb);
         MOTPLS_LOG(ERR, TYPE_DB, SHOW_ERRNO
             , _("MariaDB query '%s' failed. %s error code %d")
             , sqlquery, mysql_error(motapp->dbse->database_mariadb)
@@ -634,7 +630,7 @@ static void dbse_mariadb_exec (ctx_motapp *motapp, const char *sqlquery)
     }
     retcd = mysql_query(motapp->dbse->database_mariadb, "commit;");
     if (retcd != 0) {
-        retcd = mysql_errno(motapp->dbse->database_mariadb);
+        retcd = (int)mysql_errno(motapp->dbse->database_mariadb);
         MOTPLS_LOG(ERR, TYPE_DB, SHOW_ERRNO
             , _("MariaDB query commit failed. %s error code %d")
             , mysql_error(motapp->dbse->database_mariadb), retcd);
@@ -671,9 +667,9 @@ static void dbse_mariadb_recs (ctx_motapp *motapp, const char *sqlquery)
         return;
     }
 
-    qry_fields = mysql_num_fields(qry_result);
+    qry_fields = (int)mysql_num_fields(qry_result);
     cols =(ctx_dbse_col *)
-        mymalloc(sizeof(ctx_dbse_col) * qry_fields);
+        mymalloc(sizeof(ctx_dbse_col) * (uint)qry_fields);
     for(indx = 0; indx < qry_fields; indx++) {
         qry_col = mysql_fetch_field(qry_result);
         cols[indx].col_nm = (char*)mymalloc(qry_col->name_length + 1);
@@ -815,7 +811,7 @@ static void dbse_mariadb_init(ctx_motapp *motapp)
         , motapp->dbse->database_user.c_str()
         , motapp->dbse->database_password.c_str()
         , motapp->dbse->database_dbname.c_str()
-        , motapp->dbse->database_port, NULL, 0) == NULL) {
+        , (uint)motapp->dbse->database_port, NULL, 0) == NULL) {
 
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Cannot connect to MariaDB database %s on host %s with user %s")
@@ -862,7 +858,7 @@ static void dbse_mariadb_movlst(ctx_motapp *motapp, int device_id )
 
     if (motapp->dbse->movie_cnt > 0) {
         motapp->dbse->movie_list =(ctx_dbse_rec *)
-            mymalloc(sizeof(ctx_dbse_rec)*motapp->dbse->movie_cnt);
+            mymalloc(sizeof(ctx_dbse_rec)*(uint)motapp->dbse->movie_cnt);
 
         motapp->dbse->dbse_action = DBSE_MOV_SELECT;
         dbse_sql_motpls(motapp->dbse, sql, device_id);
@@ -1104,7 +1100,7 @@ static void dbse_pgsql_movlst(ctx_motapp *motapp, int device_id)
 
     if (motapp->dbse->movie_cnt > 0) {
         motapp->dbse->movie_list =(ctx_dbse_rec *)
-            mymalloc(sizeof(ctx_dbse_rec)*motapp->dbse->movie_cnt);
+            mymalloc(sizeof(ctx_dbse_rec)*(uint)motapp->dbse->movie_cnt);
 
         motapp->dbse->dbse_action = DBSE_MOV_SELECT;
         dbse_sql_motpls(motapp->dbse, sql, device_id);

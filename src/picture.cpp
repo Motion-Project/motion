@@ -30,7 +30,7 @@ void cls_picture::webp_exif(WebPMux* webp_mux
         , timespec *ts1, ctx_coord *box)
 {
     u_char *exif = NULL;
-    int exif_len = jpgutl_exif(&exif, cam, ts1, box);
+        uint exif_len = jpgutl_exif(&exif, cam, ts1, box);
 
     if(exif_len > 0) {
         WebPData webp_exif;
@@ -147,7 +147,7 @@ void cls_picture::save_yuv420p(FILE *fp, u_char *image, int width, int height,
     u_char *buf =(u_char*) mymalloc(image_size);
 
     sz = jpgutl_put_yuv420p(buf, image_size, image, width, height, quality, cam ,ts1, box);
-    fwrite(buf, sz, 1, fp);
+    fwrite(buf, (uint)sz, 1, fp);
 
     free(buf);
 
@@ -164,7 +164,7 @@ void cls_picture::save_grey(FILE *picture, u_char *image, int width, int height,
     u_char *buf =(u_char*) mymalloc(image_size);
 
     sz = jpgutl_put_grey(buf, image_size, image, width, height, quality, cam ,ts1, box);
-    fwrite(buf, sz, 1, picture);
+    fwrite(buf, (uint)sz, 1, picture);
 
     free(buf);
 }
@@ -335,7 +335,9 @@ void cls_picture::save_roi(char *file, u_char *image)
     img =(u_char*) mymalloc(image_size);
 
     for (indxh=bx->miny; indxh< bx->miny + bx->height; indxh++){
-        memcpy(img+((indxh - bx->miny)* bx->width), image+(indxh*cam->imgs.width) + bx->minx, bx->width);
+        mymemcpy(img+((indxh - bx->miny)* bx->width)
+            , image+(indxh*cam->imgs.width) + bx->minx
+            , bx->width);
     }
 
     sz = jpgutl_put_grey(buf, image_size, img
@@ -343,7 +345,7 @@ void cls_picture::save_roi(char *file, u_char *image)
         , picture_quality, cam
         ,&(cam->current_image->imgts), bx);
 
-    fwrite(buf, sz, 1, picture);
+    fwrite(buf, (uint)sz, 1, picture);
 
     free(buf);
     free(img);
@@ -406,7 +408,7 @@ u_char *cls_picture::load_pgm(FILE *picture, int width, int height)
     image =(u_char*) mymalloc((mask_width * mask_height * 3) / 2);
 
     for (y = 0; y < mask_height; y++) {
-        if ((int)fread(&image[y * mask_width], 1, mask_width, picture) != mask_width) {
+        if ((int)fread(&image[y * mask_width], 1, (uint)mask_width, picture) != mask_width) {
             MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Failed reading image data from pgm file");
         }
 
@@ -459,7 +461,7 @@ void cls_picture::write_mask(const char *file)
         }
         return;
     }
-    memset(cam->imgs.image_motion.image_norm, 255, cam->imgs.motionsize); /* Initialize to unset */
+    mymemset(cam->imgs.image_motion.image_norm, 255, cam->imgs.motionsize); /* Initialize to unset */
 
     /* Write pgm-header. */
     fprintf(picture, "P5\n");
@@ -467,7 +469,7 @@ void cls_picture::write_mask(const char *file)
     fprintf(picture, "%d\n", 255);
 
     /* Write pgm image data at once. */
-    if ((int)fwrite(cam->imgs.image_motion.image_norm, cfg_w, cfg_h, picture) != cfg_h) {
+    if ((int)fwrite(cam->imgs.image_motion.image_norm, (uint)cfg_w, (uint)cfg_h, picture) != cfg_h) {
         MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
             ,_("Failed writing default mask as pgm file"));
         return;
@@ -514,10 +516,10 @@ void cls_picture::save_preview()
     cam->imgs.image_preview.image_high = image_high;
 
     /* Copy the actual images for norm and high */
-    memcpy(cam->imgs.image_preview.image_norm
+    mymemcpy(cam->imgs.image_preview.image_norm
         , cam->current_image->image_norm, cam->imgs.size_norm);
     if (cam->imgs.size_high > 0) {
-        memcpy(cam->imgs.image_preview.image_high
+        mymemcpy(cam->imgs.image_preview.image_high
             , cam->current_image->image_high, cam->imgs.size_high);
     }
 

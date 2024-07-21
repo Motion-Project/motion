@@ -119,6 +119,25 @@ void myunquote(std::string &parm)
 
 }
 
+void mymemset(void *dst, int src, int sz)
+{
+    memset(dst, src, (ulong)sz);
+}
+
+void mymemset(void *dst, int src, ulong sz)
+{
+    memset(dst, src, sz);
+}
+
+void mymemcpy(void *dst, void *src, int sz)
+{
+    memcpy(dst, src, (ulong)sz);
+}
+
+void mymemcpy(void *dst, void *src, ulong sz)
+{
+    memcpy(dst, src, sz);
+}
 
 /* Free memory and set the pointer to NULL*/
 void myfree(void *ptr_addr) {
@@ -128,6 +147,36 @@ void myfree(void *ptr_addr) {
         free(*ptr);
         *ptr = NULL;
     }
+}
+
+/** mymalloc */
+void *mymalloc(int nbytes)
+{
+    void *dummy = calloc((size_t)nbytes, 1);
+
+    if (!dummy) {
+        MOTPLS_LOG(EMG, TYPE_ALL, SHOW_ERRNO
+            , _("Could not allocate %d bytes of memory!")
+            , nbytes);
+        exit(1);
+    }
+
+    return dummy;
+}
+
+/** mymalloc */
+void *mymalloc(uint nbytes)
+{
+    void *dummy = calloc((size_t)nbytes, 1);
+
+    if (!dummy) {
+        MOTPLS_LOG(EMG, TYPE_ALL, SHOW_ERRNO
+            , _("Could not allocate %llu bytes of memory!")
+            , (unsigned long long)nbytes);
+        exit(1);
+    }
+
+    return dummy;
 }
 
 /** mymalloc */
@@ -282,7 +331,7 @@ static void mystrftime_long (const ctx_dev *cam,
         int width, const char *word, int l, char *out)
 {
 
-    #define SPECIFIERWORD(k) ((strlen(k)==l) && (!strncmp (k, word, l)))
+    #define SPECIFIERWORD(k) ((strlen(k)==(uint)l) && (!strncmp(k, word, (uint)l)))
 
     if (SPECIFIERWORD("host")) {
         snprintf (out, PATH_MAX, "%*s", width, cam->hostname);

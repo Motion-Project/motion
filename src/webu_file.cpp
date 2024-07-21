@@ -33,7 +33,7 @@ static ssize_t webu_file_reader (void *cls, uint64_t pos, char *buf, size_t max)
     cls_webu_ans *webu_ans =(cls_webu_ans *)cls;
 
     (void)fseek (webu_ans->req_file, (long)pos, SEEK_SET);
-    return fread (buf, 1, max, webu_ans->req_file);
+    return (ssize_t)fread (buf, 1, max, webu_ans->req_file);
 }
 
 /* Close the requested file */
@@ -98,10 +98,10 @@ void cls_webu_file::main() {
             "</head><body>Bad File</body></html>";
         webua->resp_type = WEBUI_RESP_HTML;
         webua->mhd_send();
-
+        retcd = MHD_YES;
     } else {
         response = MHD_create_response_from_callback (
-            statbuf.st_size, 32 * 1024
+            (size_t)statbuf.st_size, 32 * 1024
             , &webu_file_reader
             , this
             , &webu_file_free);

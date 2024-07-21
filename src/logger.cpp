@@ -81,7 +81,7 @@ void cls_log::write_flood(int loglvl)
     }
 }
 
-void cls_log::write_norm(int loglvl, int prefixlen)
+void cls_log::write_norm(int loglvl, uint prefixlen)
 {
     flood_cnt = 1;
 
@@ -145,7 +145,7 @@ void cls_log::set_log_file(std::string pname)
         }
         if (log_file_name == "") {
             set_mode(LOGMODE_SYSLOG);
-            log_file_name == "syslog";
+            log_file_name = "syslog";
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Logging to syslog");
         }
 
@@ -170,9 +170,10 @@ void cls_log::set_log_file(std::string pname)
     }
 }
 
-void cls_log::write_msg(int loglvl, int msg_type, int flgerr, bool flgfnc, ...)
+void cls_log::write_msg(int loglvl, int msg_type, int flgerr, int flgfnc, ...)
 {
-    int err_save, n, prefixlen;
+    int err_save, n;
+    uint prefixlen;
     std::string usrfmt;
     char msg_time[32];
     char threadname[32];
@@ -203,14 +204,17 @@ void cls_log::write_msg(int loglvl, int msg_type, int flgerr, bool flgfnc, ...)
         , "[%s][%s][%s] "
         , log_level_str[loglvl],log_type_str[msg_type], threadname );
     }
-    prefixlen = n;
+    prefixlen = (uint)n;
 
+    /* flgfnc must be an int.  Bool has compile error*/
     va_start(ap, flgfnc);
         usrfmt = va_arg(ap, char *);
-        if (flgfnc) {
+        if (flgfnc == 1) {
             usrfmt.append(": ").append(va_arg(ap, char *));
         }
-        n += vsnprintf(msg_full + n, sizeof(msg_full)-n-1, usrfmt.c_str(), ap);
+        n += vsnprintf(msg_full + n
+            , sizeof(msg_full) - (uint)n - 1
+            , usrfmt.c_str(), ap);
     va_end(ap);
 
     add_errmsg(flgerr, err_save);

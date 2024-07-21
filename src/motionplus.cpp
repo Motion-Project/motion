@@ -964,7 +964,7 @@ static void motpls_cam_delete(ctx_motapp *motapp)
     }
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Camera stopped");
 
-    tmp = (ctx_dev **)mymalloc(sizeof(ctx_dev *) * (motapp->cam_cnt));
+    tmp = (ctx_dev **)mymalloc(sizeof(ctx_dev *) * (uint)(motapp->cam_cnt));
     tmp[motapp->cam_cnt-1] = NULL;
 
     indx2 = 0;

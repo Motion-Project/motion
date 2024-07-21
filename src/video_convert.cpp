@@ -345,7 +345,7 @@ void cls_convert::uyvyto420p(u_char *img_dst, u_char *img_src)
     u_char *pY = img_dst;
     u_char *pU = pY + (width * height);
     u_char *pV = pU + (width * height) / 4;
-    unsigned int uv_offset = width * 2 * sizeof(u_char);
+    unsigned int uv_offset = (uint)width * 2 * sizeof(u_char);
     int ix, jx;
 
     for (ix = 0; ix < height; ix++) {
@@ -394,8 +394,8 @@ void cls_convert::rgb_bgr(u_char *img_dst, u_char *img_src, int rgb)
     y = img_dst;
     u = y + width * height;
     v = u + (width * height) / 4;
-    memset(u, 0, width * height / 4);
-    memset(v, 0, width * height / 4);
+    mymemset(u, 0, width * height / 4);
+    mymemset(v, 0, width * height / 4);
 
     for (loop = 0; loop < height; loop++) {
         for (i = 0; i < width; i += 2) {
@@ -449,7 +449,7 @@ int cls_convert::mjpegtoyuv420p(u_char *img_dst, u_char *img_src, int size)
     size_t soi_pos = 0;
     int ret = 0;
 
-    ptr_buffer =(u_char*) memmem(img_src, size, "\xff\xd8", 2);
+    ptr_buffer =(u_char*) memmem(img_src, (uint)size, "\xff\xd8", 2);
     if (ptr_buffer == NULL) {
         MOTPLS_LOG(CRT, TYPE_VIDEO, NO_ERRNO,_("Corrupt image ... continue"));
         return 1;
@@ -458,19 +458,21 @@ int cls_convert::mjpegtoyuv420p(u_char *img_dst, u_char *img_src, int size)
      Some cameras are sending multiple SOIs in the buffer.
      Move the pointer to the last SOI in the buffer and proceed.
     */
-    while (ptr_buffer != NULL && ((size - soi_pos - 1) > 2) ){
-        soi_pos = ptr_buffer - img_src;
-        ptr_buffer =(u_char*) memmem(img_src + soi_pos + 1, size - soi_pos - 1, "\xff\xd8", 2);
+    while (ptr_buffer != NULL && (((uint)size - soi_pos - 1) > 2) ){
+        soi_pos = (uint)(ptr_buffer - img_src);
+        ptr_buffer =(u_char*) memmem(
+            img_src + soi_pos + 1
+            , (uint)size - soi_pos - 1, "\xff\xd8", 2);
     }
 
     if (soi_pos != 0) {
         MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("SOI position adjusted by %d bytes."), soi_pos);
     }
 
-    memmove(img_src, img_src + soi_pos, size - soi_pos);
+    memmove(img_src, img_src + soi_pos, (uint)size - soi_pos);
     size -= (unsigned int)soi_pos;
 
-    ret = jpgutl_decode_jpeg(img_src,size, width, height, img_dst);
+    ret = jpgutl_decode_jpeg(img_src,size, (uint)width, (uint)height, img_dst);
 
     if (ret == -1) {
         MOTPLS_LOG(CRT, TYPE_VIDEO, NO_ERRNO,_("Corrupt image ... continue"));
@@ -491,27 +493,27 @@ void cls_convert::y10torgb24(u_char *img_dst, u_char *img_src, int shift)
 
     int src_size[2] = {width,height};
     int bpp = 16;
-    unsigned int src_stride = (src_size[0] * bpp) / 8;
-    unsigned int rgb_stride = src_size[0] * 3;
+    int src_stride =((src_size[0] * bpp) / 8);
+    int rgb_stride =(src_size[0] * 3);
     int a = 0;
     int src_x = 0, src_y = 0;
     int dst_x = 0, dst_y = 0;
 
     for (src_y = 0, dst_y = 0; dst_y < src_size[1]; src_y++, dst_y++) {
         for (src_x = 0, dst_x = 0; dst_x < src_size[0]; src_x++, dst_x++) {
-            a = (img_src[src_y*src_stride + src_x*2+0] |
-                (img_src[src_y*src_stride + src_x*2+1] << 8)) >> shift;
-            img_dst[dst_y*rgb_stride+3*dst_x+0] = (u_char)a;
-            img_dst[dst_y*rgb_stride+3*dst_x+1] = (u_char)a;
-            img_dst[dst_y*rgb_stride+3*dst_x+2] = (u_char)a;
+            a = (img_src[(uint)(src_y*src_stride + src_x*2+0)] |
+                (img_src[(uint)(src_y*src_stride + src_x*2+1)] << 8)) >> shift;
+            img_dst[(uint)(dst_y*rgb_stride+3*dst_x+0)] = (u_char)a;
+            img_dst[(uint)(dst_y*rgb_stride+3*dst_x+1)] = (u_char)a;
+            img_dst[(uint)(dst_y*rgb_stride+3*dst_x+2)] = (u_char)a;
         }
     }
 }
 
 void cls_convert::greytoyuv420p(u_char *img_dst, u_char *img_src)
 {
-    memcpy(img_dst, img_src, (width*height));
-    memset(img_dst+(width*height), 128, (width * height) / 2);
+    memcpy(img_dst, img_src, (uint)(width*height));
+    mymemset(img_dst+(width*height), 128, (width * height) / 2);
 }
 
 /* Convert captured image to the standard pixel format*/
@@ -537,7 +539,7 @@ int cls_convert::process(u_char *img_dst, u_char *img_src, int clen)
             return 0;
 
         case V4L2_PIX_FMT_YUV420:
-            memcpy(img_dst, img_src, clen);
+            mymemcpy(img_dst, img_src, clen);
             return 0;
 
         case V4L2_PIX_FMT_PJPG:

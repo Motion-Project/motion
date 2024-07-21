@@ -188,7 +188,7 @@ void cls_webu::mhd_loadfile(std::string fname,std::string &filestr)
         infile = myfopen(fname.c_str() , "rbe");
         if (infile != NULL) {
             fseek(infile, 0, SEEK_END);
-            file_size = ftell(infile);
+            file_size = (size_t)(infile);
             if (file_size > 0 ) {
                 file_char = (char*)mymalloc(file_size +1);
                 fseek(infile, 0, SEEK_SET);

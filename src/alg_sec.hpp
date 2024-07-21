@@ -23,12 +23,16 @@
 
 #ifdef HAVE_OPENCV
     #pragma GCC diagnostic push
+    #pragma clang diagnostic push
         #pragma GCC diagnostic ignored "-Wconversion"
+        #pragma clang diagnostic ignored "-Wc11-extensions"
         #include "opencv2/objdetect.hpp"
         #include "opencv2/dnn.hpp"
         #include "opencv2/highgui.hpp"
         #include "opencv2/imgproc.hpp"
+    #pragma clang diagnostic pop
     #pragma GCC diagnostic pop
+
 #endif
 
 

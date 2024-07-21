@@ -239,7 +239,6 @@ int cls_libcam::start_mgr()
 {
     int retcd;
     std::string camid;
-    libcamera::Size picsz;
 
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
@@ -363,8 +362,8 @@ void cls_libcam::config_control_item(std::string pname, std::string pvalue)
         Rectangle crop;
         crop.x = mtoi(mtok(pvalue,"|"));
         crop.y = mtoi(mtok(pvalue,"|"));
-        crop.width = mtoi(mtok(pvalue,"|"));
-        crop.height = mtoi(mtok(pvalue,"|"));
+        crop.width =(uint)mtoi(mtok(pvalue,"|"));
+        crop.height =(uint)mtoi(mtok(pvalue,"|"));
         controls.set(controls::ScalerCrop, crop);
     }
     if (pname == "DigitalGain") {
@@ -401,8 +400,8 @@ void cls_libcam::config_control_item(std::string pname, std::string pvalue)
         Rectangle afwin[1];
         afwin[0].x = mtoi(mtok(pvalue,"|"));
         afwin[0].y = mtoi(mtok(pvalue,"|"));
-        afwin[0].width = mtoi(mtok(pvalue,"|"));
-        afwin[0].height = mtoi(mtok(pvalue,"|"));
+        afwin[0].width = (uint)mtoi(mtok(pvalue,"|"));
+        afwin[0].height = (uint)mtoi(mtok(pvalue,"|"));
         controls.set(controls::AfWindows, afwin);
     }
     if (pname == "AfTrigger") {
@@ -553,7 +552,6 @@ void cls_libcam:: config_orientation()
 int cls_libcam::start_config()
 {
     int retcd;
-    libcamera::Size picsz;
 
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
@@ -561,8 +559,8 @@ int cls_libcam::start_config()
 
     config->at(0).pixelFormat = PixelFormat::fromString("YUV420");
 
-    config->at(0).size.width = conf_width;
-    config->at(0).size.height = conf_height;
+    config->at(0).size.width = (uint)conf_width;
+    config->at(0).size.height = (uint)conf_height;
     config->at(0).bufferCount = 1;
     config->at(0).stride = 0;
 
@@ -594,8 +592,8 @@ int cls_libcam::start_config()
             , config->at(0).size.width, config->at(0).size.height);
     }
 
-    cam->imgs.width = config->at(0).size.width;
-    cam->imgs.height = config->at(0).size.height;
+    cam->imgs.width = (int)config->at(0).size.width;
+    cam->imgs.height = (int)config->at(0).size.height;
     cam->imgs.size_norm = (cam->imgs.width * cam->imgs.height * 3) / 2;
     cam->imgs.motionsize = cam->imgs.width * cam->imgs.height;
 
@@ -661,14 +659,14 @@ int cls_libcam::start_req()
 
     bytes = 0;
     for (indx=0; indx<(int)buffer->planes().size(); indx++){
-        bytes += buffer->planes()[indx].length;
+        bytes += buffer->planes()[(uint)indx].length;
         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "Plane %d of %d length %d"
             , indx, buffer->planes().size()
-            , buffer->planes()[indx].length);
+            , buffer->planes()[(uint)indx].length);
     }
 
     if (bytes > cam->imgs.size_norm) {
-        width = (buffer->planes()[0].length / cam->imgs.height);
+        width = ((int)buffer->planes()[0].length / cam->imgs.height);
         if (((int)buffer->planes()[0].length != (width * cam->imgs.height)) ||
             (bytes > ((width * cam->imgs.height * 3)/2))) {
             MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
@@ -684,7 +682,7 @@ int cls_libcam::start_req()
         cam->imgs.motionsize = cam->imgs.width * cam->imgs.height;
     }
 
-    membuf.buf = (uint8_t *)mmap(NULL, bytes, PROT_READ
+    membuf.buf = (uint8_t *)mmap(NULL, (uint)bytes, PROT_READ
         , MAP_SHARED, plane0.fd.get(), 0);
     membuf.bufsz = bytes;
 
@@ -817,7 +815,7 @@ int cls_libcam::next(ctx_image_data *img_data)
         if (req_queue.empty() == false) {
             Request *request = this->req_queue.front();
 
-            memcpy(img_data->image_norm, membuf.buf, membuf.bufsz);
+            mymemcpy(img_data->image_norm, membuf.buf, membuf.bufsz);
 
             this->req_queue.pop();
             request->reuse(Request::ReuseBuffers);

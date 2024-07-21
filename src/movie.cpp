@@ -60,17 +60,17 @@ void cls_movie::encode_nal()
     if ((pkt->pts == 0) && (!(pkt->flags & AV_PKT_FLAG_KEY))) {
         free_nal();
         nal_info_len = pkt->size;
-        nal_info =(char*) malloc(nal_info_len);
+        nal_info =(char*)mymalloc(nal_info_len);
         if (nal_info) {
-            memcpy(nal_info, &pkt->data[0], nal_info_len);
+            mymemcpy(nal_info, &pkt->data[0], nal_info_len);
         } else {
             nal_info_len = 0;
         }
     } else if (nal_info) {
         int old_size = pkt->size;
         av_grow_packet(pkt, nal_info_len);
-        memmove(&pkt->data[nal_info_len], &pkt->data[0], old_size);
-        memcpy(&pkt->data[0], nal_info, nal_info_len);
+        memmove(&pkt->data[nal_info_len], &pkt->data[0],(uint)old_size);
+        mymemcpy(&pkt->data[0], nal_info, nal_info_len);
         free_nal();
     }
 }
@@ -94,7 +94,7 @@ int cls_movie::timelapse_append(AVPacket *p_pkt)
         return -1;
     }
 
-    fwrite(p_pkt->data, 1, p_pkt->size, file);
+    fwrite(p_pkt->data, 1, (uint)p_pkt->size, file);
 
     myfclose(file);
 
@@ -492,7 +492,9 @@ int cls_movie::alloc_video_buffer(AVFrame *frame, int align)
         return AVERROR(EINVAL);
     }
 
-    if ((ret = av_image_check_size(frame->width, frame->height, 0, nullptr)) < 0) {
+    if ((ret = av_image_check_size(
+            (uint)frame->width, (uint)frame->height
+            , 0, nullptr)) < 0) {
         return ret;
     }
 
@@ -526,13 +528,13 @@ int cls_movie::alloc_video_buffer(AVFrame *frame, int align)
         return ret;
     }
 
-    frame->buf[0] = av_buffer_alloc(ret + 4*plane_padding);
+    frame->buf[0] = av_buffer_alloc((uint)ret + 4*(uint)plane_padding);
     if (!frame->buf[0]) {
         ret = AVERROR(ENOMEM);
         av_frame_unref(frame);
         return ret;
     }
-    frame->buf[1] = av_buffer_alloc(ret + 4*plane_padding);
+    frame->buf[1] = av_buffer_alloc((uint)ret + 4*(uint)plane_padding);
     if (!frame->buf[1]) {
         ret = AVERROR(ENOMEM);
         av_frame_unref(frame);
@@ -1302,7 +1304,7 @@ int cls_movie::extpipe_put()
     if (fileno(extpipe_stream) > 0) {
         if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
             if (!fwrite(cam->current_image->image_high
-                    , cam->imgs.size_high, 1, extpipe_stream)) {
+                    , (uint)cam->imgs.size_high, 1, extpipe_stream)) {
                 MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     , _("Error writing in pipe , state error %d")
                     , ferror(extpipe_stream));
@@ -1310,7 +1312,7 @@ int cls_movie::extpipe_put()
             }
         } else {
             if (!fwrite(cam->current_image->image_norm
-                    , cam->imgs.size_norm, 1, extpipe_stream)) {
+                    , (uint)cam->imgs.size_norm, 1, extpipe_stream)) {
                 MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                   ,_("Error writing in pipe , state error %d")
                   , ferror(extpipe_stream));

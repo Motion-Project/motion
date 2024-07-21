@@ -516,12 +516,12 @@ struct ctx_dev {
     time_t                  lasttime;
     time_t                  movie_start_time;
     struct timespec         connectionlosttime;               /* timestamp from connection lost */
-    unsigned int            lastrate;
-    unsigned int            startup_frames;
-    unsigned int            frame_skip;
+    int                     lastrate;
+    int                     startup_frames;
+    int                     frame_skip;
     volatile bool           pause;
     int                     missing_frame_counter;               /* counts failed attempts to fetch picture frame from camera */
-    unsigned int            lost_connection;
+    int                     lost_connection;
 
     int                     pipe;
     int                     mpipe;
@@ -539,7 +539,7 @@ struct ctx_dev {
 
     int                     smartmask_ratio;
     int                     smartmask_count;
-    unsigned int            smartmask_lastrate;
+    int                     smartmask_lastrate;
     int previous_diffs, previous_location_x, previous_location_y;
     bool                    passflag;  //flag first frame vs all others.
 
