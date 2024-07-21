@@ -17,31 +17,6 @@
  *
 */
 
- /*
- * jpegutils.cpp
- *  Purpose:
- *    Decompress jpeg data into images for use in other parts of program.
- *    Currently this module only decompresses and it is only called from
- *    the vid_mjpegtoyuv420p function
- *  Functional Prefixes
- *    All functions within the module will use the prefix "jpgutl" for identification
- *  Module Level Variables:
- *    EOI_data    Constant value to indicate the end of an image.
- *  Module Level Structures:
- *    jpgutl_error_mgr  Used by the JPEG libraries as the error manager to catch/trap messages from library.
- *  Static Functions:
- *    The following functions are required by the JPEG library to decompress images.
- *      jpgutl_init_source
- *      jpgutl_fill_input_buffer
- *      jpgutl_skip_data
- *      jpgutl_term_source
- *      jpgutl_buffer_src
- *      jpgutl_error_exit
- *      jpgutl_emit_message
- *  Exposed Functions
- *    jpgutl_decode_jpeg
- */
-
 #include "motionplus.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
@@ -51,10 +26,6 @@
 #include <jpeglib.h>
 #include <jerror.h>
 #include <assert.h>
-
-
-
-
 
 /* EXIF image data is always in TIFF format, even if embedded in another
  * file type. This consists of a constant header (TIFF file header,
@@ -89,59 +60,61 @@
 #define TIFF_TYPE_UNDEF  7  /* Byte blob */
 #define TIFF_TYPE_SSHORT 8  /* Signed 16-bit int */
 
+static const uint8_t EOI_data[2] = { 0xFF, 0xD9 };
+
 static const char exif_marker_start[14] = {
     'E', 'x', 'i', 'f', 0, 0,   /* EXIF marker signature */
     'M', 'M', 0, 42,            /* TIFF file header (big-endian) */
     0, 0, 0, 8,                 /* Offset to first toplevel IFD */
 };
 
-static unsigned const char exif_version_tag[12] = {
+static u_char exif_version_tag[12] = {
     0x90, 0x00,                 /* EXIF version tag, 0x9000 */
     0x00, 0x07,                 /* Data type 7 = "unknown" (raw byte blob) */
     0x00, 0x00, 0x00, 0x04,     /* Data length */
     0x30, 0x32, 0x32, 0x30      /* Inline data, EXIF version 2.2 */
 };
 
-static unsigned const char exif_subifd_tag[8] = {
+static u_char exif_subifd_tag[8] = {
     0x87, 0x69,                 /* EXIF Sub-IFD tag */
     0x00, 0x04,                 /* Data type 4 = uint32 */
     0x00, 0x00, 0x00, 0x01,     /* Number of values */
 };
 
-static unsigned const char exif_tzoffset_tag[12] = {
+static u_char exif_tzoffset_tag[12] = {
     0x88, 0x2A,                 /* TIFF/EP time zone offset tag */
     0x00, 0x08,                 /* Data type 8 = sint16 */
     0x00, 0x00, 0x00, 0x01,     /* Number of values */
     0, 0, 0, 0                  /* Dummy data */
 };
 
-static void put_uint16(JOCTET *buf, unsigned value)
+static void put_uint16(JOCTET *buf, uint value)
 {
-    buf[0] = (unsigned char)(( value & 0xFF00 ) >> 8);
-    buf[1] = (unsigned char)(( value & 0x00FF ));
+    buf[0] = (u_char)(( value & 0xFF00 ) >> 8);
+    buf[1] = (u_char)(( value & 0x00FF ));
 }
 
 static void put_sint16(JOCTET *buf, int value)
 {
-    buf[0] = (unsigned char)(( value & 0xFF00 ) >> 8);
-    buf[1] = (unsigned char)(( value & 0x00FF ));
+    buf[0] = (u_char)(( value & 0xFF00 ) >> 8);
+    buf[1] = (u_char)(( value & 0x00FF ));
 }
 
-static void put_uint32(JOCTET *buf, unsigned value)
+static void put_uint32(JOCTET *buf, uint value)
 {
-    buf[0] = (unsigned char)(( value & 0xFF000000 ) >> 24);
-    buf[1] = (unsigned char)(( value & 0x00FF0000 ) >> 16);
-    buf[2] = (unsigned char)(( value & 0x0000FF00 ) >> 8);
-    buf[3] = (unsigned char)(( value & 0x000000FF ));
+    buf[0] = (u_char)(( value & 0xFF000000 ) >> 24);
+    buf[1] = (u_char)(( value & 0x00FF0000 ) >> 16);
+    buf[2] = (u_char)(( value & 0x0000FF00 ) >> 8);
+    buf[3] = (u_char)(( value & 0x000000FF ));
 }
 
 struct tiff_writing {
     JOCTET *base;
     JOCTET *buf;
-    unsigned data_offset;
+    uint data_offset;
 };
 
-static void put_direntry(struct tiff_writing *into, const char *data, unsigned length)
+static void put_direntry(struct tiff_writing *into, const char *data, uint length)
 {
     if (length <= 4) {
         /* Entries that fit in the directory entry are stored there */
@@ -149,7 +122,7 @@ static void put_direntry(struct tiff_writing *into, const char *data, unsigned l
         memcpy(into->buf, data, length);
     } else {
         /* Longer entries are stored out-of-line */
-        unsigned offset = into->data_offset;
+        uint offset = into->data_offset;
 
         while ((offset & 0x03) != 0) {  /* Alignment */
             into->base[offset] = 0;
@@ -162,9 +135,9 @@ static void put_direntry(struct tiff_writing *into, const char *data, unsigned l
     }
 }
 
-static void put_stringentry(struct tiff_writing *into, unsigned tag, const char *str, int with_nul)
+static void put_stringentry(struct tiff_writing *into, uint tag, const char *str, int with_nul)
 {
-    unsigned stringlength = (int)strlen(str) + (with_nul?1:0);
+    uint stringlength = (int)strlen(str) + (with_nul?1:0);
 
     put_uint16(into->buf, tag);
     put_uint16(into->buf + 2, TIFF_TYPE_ASCII);
@@ -189,25 +162,34 @@ static void put_subjectarea(struct tiff_writing *into, ctx_coord *box)
     into->data_offset += 8;
 }
 
-int jpgutl_exif(u_char **exif, ctx_dev *cam,
-        const struct timespec *ts_in1, ctx_coord *box)
-{
-    /* description, datetime, and subtime are the values that are actually
-     * put into the EXIF data
-    */
-    char *description, *datetime, *subtime;
-    char datetime_buf[22];
-    char tmpbuf[45];
+struct ctx_exif_info {
+    ctx_dev *cam;
+    timespec *ts_in1;
+    ctx_coord *box;
     struct tm timestamp_tm;
+    char *description;
+    char *datetime;
+    char *subtime;
+    int ifd0_tagcount;
+    int ifd1_tagcount;
+    uint datasize;
+    int ifds_size;
+    uint marker_len;
+    struct tiff_writing writing;
+};
+
+void jpgutl_exif_date(ctx_exif_info *exif_info)
+{
+    char tmpbuf[45];
     struct timespec ts1;
 
     clock_gettime(CLOCK_REALTIME, &ts1);
-    if (ts_in1 != NULL) {
-        ts1.tv_sec = ts_in1->tv_sec;
-        ts1.tv_nsec = ts_in1->tv_nsec;
+    if (exif_info->ts_in1 != NULL) {
+        ts1.tv_sec = exif_info->ts_in1->tv_sec;
+        ts1.tv_nsec = exif_info->ts_in1->tv_nsec;
     }
 
-    localtime_r(&ts1.tv_sec, &timestamp_tm);
+    localtime_r(&ts1.tv_sec, &exif_info->timestamp_tm);
     /* Exif requires this exact format */
     /* The compiler is twitchy on truncating formats and the exif is twitchy
      * on the length of the whole string.  So we do it in two steps of printing
@@ -215,168 +197,185 @@ int jpgutl_exif(u_char **exif, ctx_dev *cam,
      * buffer that exif wants..TODO  Find better method
      */
     snprintf(tmpbuf, 45, "%04d:%02d:%02d %02d:%02d:%02d",
-            timestamp_tm.tm_year + 1900,
-            timestamp_tm.tm_mon + 1,
-            timestamp_tm.tm_mday,
-            timestamp_tm.tm_hour,
-            timestamp_tm.tm_min,
-            timestamp_tm.tm_sec);
-    snprintf(datetime_buf, 22,"%.21s",tmpbuf);
-    datetime = datetime_buf;
+            exif_info->timestamp_tm.tm_year + 1900,
+            exif_info->timestamp_tm.tm_mon + 1,
+            exif_info->timestamp_tm.tm_mday,
+            exif_info->timestamp_tm.tm_hour,
+            exif_info->timestamp_tm.tm_min,
+            exif_info->timestamp_tm.tm_sec);
 
-    // TODO: Extract subsecond timestamp from somewhere, but only
-    // use as much of it as is indicated by conf->frame_limit
-    subtime = NULL;
+    exif_info->datetime =(char*)mymalloc(PATH_MAX);
+    snprintf(exif_info->datetime, 22,"%.21s",tmpbuf);
 
-    if (cam->conf->picture_exif != "") {
-        description =(char*) malloc(PATH_MAX);
-        mystrftime(cam, description, PATH_MAX-1, cam->conf->picture_exif.c_str(), NULL);
+    exif_info->subtime = nullptr;
+
+    if (exif_info->cam->conf->picture_exif != "") {
+        exif_info->description =(char*)mymalloc(PATH_MAX);
+        mystrftime(exif_info->cam, exif_info->description, PATH_MAX-1
+            , exif_info->cam->conf->picture_exif.c_str(), NULL);
     } else {
-        description = NULL;
+        exif_info->description = nullptr;
     }
 
-    /* Calculate an upper bound on the size of the APP1 marker so
-     * we can allocate a buffer for it.
-     */
+}
 
+void jpgutl_exif_tags(ctx_exif_info *exif_info)
+{
     /* Count up the number of tags and max amount of OOL data */
-    int ifd0_tagcount = 0;
-    int ifd1_tagcount = 0;
-    unsigned datasize = 0;
-
-    if (description) {
-        ifd0_tagcount ++;
-        datasize += 5 + (int)strlen(description); /* Add 5 for NUL and alignment */
+    if (exif_info->description != nullptr) {
+        exif_info->ifd0_tagcount ++;
+        exif_info->datasize += 5 + (int)strlen(exif_info->description); /* Add 5 for NUL and alignment */
     }
 
-    if (datetime) {
+    if (exif_info->datetime != nullptr) {
     /* We write this to both the TIFF datetime tag (which most programs
      * treat as "last-modified-date") and the EXIF "time of creation of
      * original image" tag (which many programs ignore). This is
      * redundant but seems to be the thing to do.
      */
-        ifd0_tagcount++;
-        ifd1_tagcount++;
+        exif_info->ifd0_tagcount++;
+        exif_info->ifd1_tagcount++;
         /* We also write the timezone-offset tag in IFD0 */
-        ifd0_tagcount++;
+        exif_info->ifd0_tagcount++;
         /* It would be nice to use the same offset for both tags' values,
         * but I don't want to write the bookkeeping for that right now */
-        datasize += 2 * (5 + (int)strlen(datetime));
+        exif_info->datasize += 2 * (5 + (int)strlen(exif_info->datetime));
     }
 
-    if (subtime) {
-        ifd1_tagcount++;
-        datasize += 5 + (int)strlen(subtime);
+    if (exif_info->subtime != nullptr) {
+        exif_info->ifd1_tagcount++;
+        exif_info->datasize += 5 + (int)strlen(exif_info->subtime);
     }
 
-    if (box) {
-        ifd1_tagcount++;
-        datasize += 2 * 4;  /* Four 16-bit ints */
+    if (exif_info->box) {
+        exif_info->ifd1_tagcount++;
+        exif_info->datasize += 2 * 4;  /* Four 16-bit ints */
     }
 
-    if (ifd1_tagcount > 0) {
+    if (exif_info->ifd1_tagcount > 0) {
         /* If we're writing the Exif sub-IFD, account for the
         * two tags that requires */
-        ifd0_tagcount ++; /* The tag in IFD0 that points to IFD1 */
-        ifd1_tagcount ++; /* The EXIF version tag */
+        exif_info->ifd0_tagcount ++; /* The tag in IFD0 that points to IFD1 */
+        exif_info->ifd1_tagcount ++; /* The EXIF version tag */
     }
-
     /* Each IFD takes 12 bytes per tag, plus six more (the tag count and the
      * pointer to the next IFD, always zero in our case)
      */
-    int ifds_size =
-    ( ifd1_tagcount > 0 ? ( 12 * ifd1_tagcount + 6 ) : 0 ) +
-    ( ifd0_tagcount > 0 ? ( 12 * ifd0_tagcount + 6 ) : 0 );
+    exif_info->ifds_size =
+        (exif_info->ifd1_tagcount > 0 ? ( 12 * exif_info->ifd1_tagcount + 6 ) : 0 ) +
+        (exif_info->ifd0_tagcount > 0 ? ( 12 * exif_info->ifd0_tagcount + 6 ) : 0 );
 
-    if (ifds_size == 0) {
-        /* We're not actually going to write any information. */
+}
+
+void jpgutl_exif_writeifd0(ctx_exif_info *exif_info)
+{
+    /* Note that tags are stored in numerical order */
+    put_uint16(exif_info->writing.buf, exif_info->ifd0_tagcount);
+    exif_info->writing.buf += 2;
+
+    if (exif_info->description) {
+        put_stringentry(&exif_info->writing
+            , TIFF_TAG_IMAGE_DESCRIPTION, exif_info->description, 1);
+    }
+
+    if (exif_info->datetime) {
+        put_stringentry(&exif_info->writing
+            , TIFF_TAG_DATETIME, exif_info->datetime, 1);
+    }
+
+    if (exif_info->ifd1_tagcount > 0) {
+        /* Offset of IFD1 - TIFF header + IFD0 size. */
+        uint ifd1_offset = 8 + 6 + ( 12 * exif_info->ifd0_tagcount );
+        memcpy(exif_info->writing.buf, exif_subifd_tag, 8);
+        put_uint32(exif_info->writing.buf + 8, ifd1_offset);
+        exif_info->writing.buf += 12;
+    }
+
+    if (exif_info->datetime) {
+        memcpy(exif_info->writing.buf, exif_tzoffset_tag, 12);
+        put_sint16(exif_info->writing.buf+8
+            , int(exif_info->timestamp_tm.tm_gmtoff / 3600));
+        exif_info->writing.buf += 12;
+    }
+
+    put_uint32(exif_info->writing.buf, 0); /* Next IFD offset = 0 (no next IFD) */
+    exif_info->writing.buf += 4;
+
+}
+
+void jpgutl_exif_writeifd1(ctx_exif_info *exif_info)
+{
+    /* Write IFD 1 */
+    if (exif_info->ifd1_tagcount > 0) {
+        /* (remember that the tags in any IFD must be in numerical order by tag) */
+        put_uint16(exif_info->writing.buf, exif_info->ifd1_tagcount);
+        memcpy(exif_info->writing.buf + 2, exif_version_tag, 12); /* tag 0x9000 */
+        exif_info->writing.buf += 14;
+
+        if (exif_info->datetime) {
+            put_stringentry(&exif_info->writing
+                , EXIF_TAG_ORIGINAL_DATETIME, exif_info->datetime, 1);
+        }
+
+        if (exif_info->box) {
+            put_subjectarea(&exif_info->writing, exif_info->box);
+        }
+
+        if (exif_info->subtime) {
+            put_stringentry(&exif_info->writing
+                , EXIF_TAG_ORIGINAL_DATETIME_SS, exif_info->subtime, 0);
+        }
+
+        put_uint32(exif_info->writing.buf, 0); /* Next IFD = 0 (no next IFD) */
+        exif_info->writing.buf += 4;
+    }
+
+}
+
+int jpgutl_exif(u_char **exif, ctx_dev *cam, timespec *ts_in1, ctx_coord *box)
+{
+    struct ctx_exif_info *exif_info;
+    int buffer_size;
+    JOCTET *marker;
+
+    exif_info = (ctx_exif_info*)mymalloc(sizeof(ctx_exif_info));
+    memset(exif_info, 0, sizeof(sizeof(ctx_exif_info)));
+    exif_info->cam = cam;
+    exif_info->ts_in1 = ts_in1;
+    exif_info->box = box;
+
+    jpgutl_exif_date(exif_info);
+
+    jpgutl_exif_tags(exif_info);
+
+    if (exif_info->ifds_size == 0) {
         return 0;
     }
 
-    unsigned int buffer_size = 6 /* EXIF marker signature */ +
-                               8 /* TIFF file header */ +
-                               ifds_size /* the tag directories */ +
-                               datasize;
+    buffer_size = 14 + /* EXIF and TIFF headers */
+        exif_info->ifds_size + exif_info->datasize;
 
-    JOCTET *marker =(JOCTET *) malloc(buffer_size);
+    marker =(JOCTET *)mymalloc(buffer_size);
     memcpy(marker, exif_marker_start, 14); /* EXIF and TIFF headers */
 
-    struct tiff_writing writing;
+    exif_info->writing.base = marker + 6; /* base address for intra-TIFF offsets */
+    exif_info->writing.buf = marker + 14; /* current write position */
+    exif_info->writing.data_offset =(uint)(8 + exif_info->ifds_size); /* where to start storing data */
 
-    writing.base = marker + 6; /* base address for intra-TIFF offsets */
-    writing.buf = marker + 14; /* current write position */
-    writing.data_offset =(unsigned int) (8 + ifds_size); /* where to start storing data */
+    jpgutl_exif_writeifd0(exif_info);
+    jpgutl_exif_writeifd1(exif_info);
 
-    /* Write IFD 0 */
-    /* Note that tags are stored in numerical order */
-    put_uint16(writing.buf, ifd0_tagcount);
-    writing.buf += 2;
+    exif_info->marker_len = exif_info->writing.data_offset + 6;
 
-    if (description) {
-        put_stringentry(&writing, TIFF_TAG_IMAGE_DESCRIPTION, description, 1);
-    }
+    myfree(exif_info->description);
+    myfree(exif_info->datetime);
 
-    if (datetime) {
-        put_stringentry(&writing, TIFF_TAG_DATETIME, datetime, 1);
-    }
-
-    if (ifd1_tagcount > 0) {
-        /* Offset of IFD1 - TIFF header + IFD0 size. */
-        unsigned ifd1_offset = 8 + 6 + ( 12 * ifd0_tagcount );
-        memcpy(writing.buf, exif_subifd_tag, 8);
-        put_uint32(writing.buf + 8, ifd1_offset);
-        writing.buf += 12;
-    }
-
-    if (datetime) {
-        memcpy(writing.buf, exif_tzoffset_tag, 12);
-        put_sint16(writing.buf+8, int(timestamp_tm.tm_gmtoff / 3600));
-        writing.buf += 12;
-    }
-
-    put_uint32(writing.buf, 0); /* Next IFD offset = 0 (no next IFD) */
-    writing.buf += 4;
-
-    /* Write IFD 1 */
-    if (ifd1_tagcount > 0) {
-        /* (remember that the tags in any IFD must be in numerical order
-        * by tag) */
-        put_uint16(writing.buf, ifd1_tagcount);
-        memcpy(writing.buf + 2, exif_version_tag, 12); /* tag 0x9000 */
-        writing.buf += 14;
-
-        if (datetime) {
-            put_stringentry(&writing, EXIF_TAG_ORIGINAL_DATETIME, datetime, 1);
-        }
-
-        if (box) {
-            put_subjectarea(&writing, box);
-        }
-
-        if (subtime) {
-            put_stringentry(&writing, EXIF_TAG_ORIGINAL_DATETIME_SS, subtime, 0);
-        }
-
-        put_uint32(writing.buf, 0); /* Next IFD = 0 (no next IFD) */
-        writing.buf += 4;
-    }
-
-    /* We should have met up with the OOL data */
-    assert( (writing.buf - writing.base) == 8 + ifds_size );
-
-    /* The buffer is complete; write it out */
-    unsigned marker_len = 6 + writing.data_offset;
-
-    /* assert we didn't underestimate the original buffer size */
-    assert(marker_len <= buffer_size);
-
-    myfree(&description);
+    myfree(exif_info);
 
     *exif = marker;
-    return marker_len;
-}
 
-static const uint8_t EOI_data[2] = { 0xFF, 0xD9 };
+    return exif_info->marker_len;
+}
 
 struct jpgutl_error_mgr {
     struct jpeg_error_mgr pub;   /* "public" fields */
@@ -571,7 +570,7 @@ static void jpgutl_term_source(j_decompress_ptr cinfo)
  *  Return values:
  *    None
  */
-static void jpgutl_buffer_src(j_decompress_ptr cinfo, unsigned char *buffer, long buffer_len)
+static void jpgutl_buffer_src(j_decompress_ptr cinfo, u_char *buffer, long buffer_len)
 {
 
     if (cinfo->src == NULL) {    /* First time for this JPEG object? */
@@ -718,9 +717,9 @@ static GLOBAL(int) _jpeg_mem_size(j_compress_ptr cinfo)
  * any image data is written by jpeg_write_scanlines().
  */
 static void put_jpeg_exif(j_compress_ptr cinfo, ctx_dev *cam,
-        const struct timespec *ts1, ctx_coord *box)
+        timespec *ts1, ctx_coord *box)
 {
-    unsigned char *exif = NULL;
+    u_char *exif = NULL;
     int exif_len = jpgutl_exif(&exif, cam, ts1, box);
 
     if(exif_len > 0) {
@@ -745,14 +744,14 @@ static void put_jpeg_exif(j_compress_ptr cinfo, ctx_dev *cam,
  *  Return Values
  *    Success 0, Failure -1
  */
-int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
-        unsigned int width, unsigned int height, unsigned char *volatile img_out)
+int jpgutl_decode_jpeg (u_char *jpeg_data_in, int jpeg_data_len,
+        uint width, uint height, u_char *volatile img_out)
 {
     JSAMPARRAY      line;           /* Array of decomp data lines */
-    unsigned char  *wline;          /* Will point to line[0] */
-    unsigned int    i;
-    unsigned char  *img_y, *img_cb, *img_cr;
-    unsigned char   offset_y;
+    u_char  *wline;          /* Will point to line[0] */
+    uint    i;
+    u_char  *img_y, *img_cb, *img_cr;
+    u_char   offset_y;
 
     struct jpeg_decompress_struct dinfo;
     struct jpgutl_error_mgr jerr;
@@ -844,9 +843,9 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
 
 }
 
-int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
-        unsigned char *input_image, int width, int height, int quality,
-        ctx_dev *cam, struct timespec *ts1, ctx_coord *box)
+int jpgutl_put_yuv420p(u_char *dest_image, int image_size,
+        u_char *input_image, int width, int height, int quality,
+        ctx_dev *cam, timespec *ts1, ctx_coord *box)
 
 {
     int i, j, jpeg_image_size;
@@ -935,9 +934,9 @@ int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
 }
 
 
-int jpgutl_put_grey(unsigned char *dest_image, int image_size,
-        unsigned char *input_image, int width, int height, int quality,
-        ctx_dev *cam, struct timespec *ts1, ctx_coord *box)
+int jpgutl_put_grey(u_char *dest_image, int image_size,
+        u_char *input_image, int width, int height, int quality,
+        ctx_dev *cam, timespec *ts1, ctx_coord *box)
 {
     int y, dest_image_size;
     JSAMPROW row_ptr[1];

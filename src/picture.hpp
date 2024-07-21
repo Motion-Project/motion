@@ -52,17 +52,17 @@ class cls_picture {
 
         #ifdef HAVE_WEBP
             void webp_exif(WebPMux* webp_mux
-                , const struct timespec *ts1, ctx_coord *box);
+                , timespec *ts1, ctx_coord *box);
         #endif
         void save_webp(FILE *fp, u_char *image
             , int width, int height, int quality
-            , struct timespec *ts1, ctx_coord *box);
+            , timespec *ts1, ctx_coord *box);
         void save_yuv420p(FILE *fp, u_char *image
             , int width, int height, int quality
-            , struct timespec *ts1, ctx_coord *box);
+            , timespec *ts1, ctx_coord *box);
         void save_grey(FILE *picture, u_char *image
             , int width, int height, int quality
-            , struct timespec *ts1, ctx_coord *box);
+            , timespec *ts1, ctx_coord *box);
         void save_ppm(FILE *picture, u_char *image, int width, int height);
         void pic_write(FILE *picture, u_char *image, int quality);
         void write_mask(const char *file);

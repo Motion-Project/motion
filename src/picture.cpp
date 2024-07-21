@@ -27,7 +27,7 @@
 
 #ifdef HAVE_WEBP
 void cls_picture::webp_exif(WebPMux* webp_mux
-        , const struct timespec *ts1, ctx_coord *box)
+        , timespec *ts1, ctx_coord *box)
 {
     u_char *exif = NULL;
     int exif_len = jpgutl_exif(&exif, cam, ts1, box);
@@ -50,7 +50,7 @@ void cls_picture::webp_exif(WebPMux* webp_mux
 
 /** Save image as webp to file */
 void cls_picture::save_webp(FILE *fp, u_char *image, int width, int height,
-        int quality, struct timespec *ts1, ctx_coord *box)
+        int quality, timespec *ts1, ctx_coord *box)
 {
     #ifdef HAVE_WEBP
         /* Create a config present and check for compatible library version */
@@ -138,7 +138,7 @@ void cls_picture::save_webp(FILE *fp, u_char *image, int width, int height,
 
 /** Save image as yuv420p jpeg to file */
 void cls_picture::save_yuv420p(FILE *fp, u_char *image, int width, int height,
-        int quality, struct timespec *ts1, ctx_coord *box)
+        int quality, timespec *ts1, ctx_coord *box)
 {
 
     int sz, image_size;
@@ -155,7 +155,7 @@ void cls_picture::save_yuv420p(FILE *fp, u_char *image, int width, int height,
 
 /** Save image as grey jpeg to file */
 void cls_picture::save_grey(FILE *picture, u_char *image, int width, int height,
-        int quality, struct timespec *ts1, ctx_coord *box)
+        int quality, timespec *ts1, ctx_coord *box)
 {
     int sz, image_size;
 
