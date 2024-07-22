@@ -528,13 +528,13 @@ int cls_movie::alloc_video_buffer(AVFrame *frame, int align)
         return ret;
     }
 
-    frame->buf[0] = av_buffer_alloc((uint)ret + 4*(uint)plane_padding);
+    frame->buf[0] = av_buffer_alloc((uint)(ret + 4*plane_padding));
     if (!frame->buf[0]) {
         ret = AVERROR(ENOMEM);
         av_frame_unref(frame);
         return ret;
     }
-    frame->buf[1] = av_buffer_alloc((uint)ret + 4*(uint)plane_padding);
+    frame->buf[1] = av_buffer_alloc((uint)(ret + 4*plane_padding));
     if (!frame->buf[1]) {
         ret = AVERROR(ENOMEM);
         av_frame_unref(frame);

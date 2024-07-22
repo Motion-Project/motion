@@ -88,7 +88,7 @@ void cls_log::write_norm(int loglvl, uint prefixlen)
     snprintf(msg_flood, sizeof(msg_flood)
         , "%s", &msg_full[prefixlen]);
 
-    snprintf(msg_prefix, prefixlen, "%s", msg_full);
+    (void)snprintf(msg_prefix, prefixlen, "%s", msg_full);
 
     if (log_mode == LOGMODE_FILE) {
         strcpy(msg_full + strlen(msg_full),"\n");
@@ -112,7 +112,7 @@ void cls_log::add_errmsg(int flgerr, int err_save)
     }
 
     memset(err_buf, 0, sizeof(err_buf));
-    strerror_r(err_save, err_buf, sizeof(err_buf));
+    (void)strerror_r(err_save, err_buf, sizeof(err_buf));
     errsz = strlen(err_buf);
     msgsz = strlen(msg_full);
 
