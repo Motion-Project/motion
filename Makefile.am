@@ -59,7 +59,7 @@ all-local:
 	@rm -f po/*.po\~
 
 maintainer-clang:
-	./configure --with-developer-flags CC=clang CXX=clang++ LD=clang++  && $(MAKE) clean && $(MAKE)
+	./configure --with-clang-flags CC=clang CXX=clang++ LD=clang++  && $(MAKE) clean && $(MAKE)
 
 maintainer-check:
 	./configure --with-developer-flags                   && $(MAKE) clean && $(MAKE)

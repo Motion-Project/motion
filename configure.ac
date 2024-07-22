@@ -610,13 +610,21 @@ AC_ARG_WITH([developer-flags],
     [DEVELOPER_FLAGS=$withval],
     [DEVELOPER_FLAGS=no])
 
+AC_ARG_WITH([clang-flags],
+    AS_HELP_STRING([--with-clang-flags],
+    [clang warning flags]),
+    [CLANG_FLAGS=$withval],
+    [CLANG_FLAGS=no])
+
 AS_IF([test "${DEVELOPER_FLAGS}" = "yes"], [
     TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -pedantic -Werror -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -ggdb -g3"
   ],[
-    TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -O3 -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -ggdb -g3"
-  ]
-)
-
+    AS_IF([test "${CLANG_FLAGS}" = "yes"], [
+      TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -pedantic -Werror -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -ggdb -g3 -Wno-c11-extensions"
+    ],[
+      TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -O3 -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -ggdb -g3"
+    ])
+  ])
 
 CPPFLAGS="$CPPFLAGS $TEMP_CPPFLAGS"
 LIBS="$LIBS $TEMP_LIBS"
