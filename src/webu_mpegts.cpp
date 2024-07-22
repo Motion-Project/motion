@@ -215,7 +215,7 @@ int cls_webu_mpegts::avio_buf(myuint *buf, int buf_size)
             ,buf_size);
     }
 
-    mymemcpy(webuc->resp_image + webuc->resp_used, buf, buf_size);
+    memcpy(webuc->resp_image + webuc->resp_used, buf, (uint)buf_size);
     webuc->resp_used += (uint)buf_size;
 
     return buf_size;
