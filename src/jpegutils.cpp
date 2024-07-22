@@ -174,7 +174,6 @@ struct ctx_exif_info {
     int ifd1_tagcount;
     uint datasize;
     int ifds_size;
-    uint marker_len;
     struct tiff_writing writing;
 };
 
@@ -336,6 +335,7 @@ uint jpgutl_exif(u_char **exif, ctx_dev *cam, timespec *ts_in1, ctx_coord *box)
 {
     struct ctx_exif_info *exif_info;
     int buffer_size;
+    uint marker_len;
     JOCTET *marker;
 
     exif_info = (ctx_exif_info*)mymalloc(sizeof(ctx_exif_info));
@@ -365,16 +365,16 @@ uint jpgutl_exif(u_char **exif, ctx_dev *cam, timespec *ts_in1, ctx_coord *box)
     jpgutl_exif_writeifd0(exif_info);
     jpgutl_exif_writeifd1(exif_info);
 
-    exif_info->marker_len = exif_info->writing.data_offset + 6;
+    marker_len = exif_info->writing.data_offset + 6;
 
-    myfree(exif_info->description);
-    myfree(exif_info->datetime);
+    myfree(&exif_info->description);
+    myfree(&exif_info->datetime);
 
-    myfree(exif_info);
+    myfree(&exif_info);
 
     *exif = marker;
 
-    return exif_info->marker_len;
+    return marker_len;
 }
 
 struct jpgutl_error_mgr {
