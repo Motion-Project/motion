@@ -588,6 +588,8 @@ static void mlp_init_values(ctx_dev *cam)
     cam->picture = nullptr;
     cam->netcam = nullptr;
     cam->netcam_high = nullptr;
+    gethostname (cam->hostname, PATH_MAX);
+    cam->hostname[PATH_MAX-1] = '\0';
 
 }
 
