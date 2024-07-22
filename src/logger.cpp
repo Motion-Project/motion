@@ -112,7 +112,12 @@ void cls_log::add_errmsg(int flgerr, int err_save)
     }
 
     memset(err_buf, 0, sizeof(err_buf));
-    (void)strerror_r(err_save, err_buf, sizeof(err_buf));
+    #if defined(XSI_STRERROR_R) /* XSI-compliant strerror_r() */
+        (void)strerror_r(err_save, err_buf, sizeof(err_buf));
+    #else/* GNU-specific strerror_r() */
+        (void)snprintf(err_buf, sizeof(err_buf),"%s"
+            , strerror_r(err_save, err_buf, sizeof(err_buf)));
+    #endif
     errsz = strlen(err_buf);
     msgsz = strlen(msg_full);
 
