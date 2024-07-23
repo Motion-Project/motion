@@ -21,7 +21,6 @@ src/draw.cpp
 src/motion_loop.cpp
 src/sound.cpp
 src/webu_file.cpp
-src/event.cpp
 src/motionplus.cpp
 src/util.cpp
 src/webu_html.cpp

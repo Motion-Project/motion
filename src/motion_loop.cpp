@@ -17,7 +17,6 @@
  *
 */
 
-
 #include "motionplus.hpp"
 #include "logger.hpp"
 #include "util.hpp"
@@ -31,7 +30,6 @@
 #include "conf.hpp"
 #include "alg.hpp"
 #include "alg_sec.hpp"
-#include "event.hpp"
 #include "picture.hpp"
 #include "webu.hpp"
 #include "dbse.hpp"

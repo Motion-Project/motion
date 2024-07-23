@@ -22,7 +22,6 @@
 #include "util.hpp"
 #include "netcam.hpp"
 #include "dbse.hpp"
-#include "event.hpp"
 #include "alg_sec.hpp"
 #include "movie.hpp"
 

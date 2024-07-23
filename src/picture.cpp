@@ -21,7 +21,6 @@
 #include "util.hpp"
 #include "picture.hpp"
 #include "jpegutils.hpp"
-#include "event.hpp"
 #include "draw.hpp"
 #include "dbse.hpp"
 #include "picture.hpp"
