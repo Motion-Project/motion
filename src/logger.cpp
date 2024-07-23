@@ -85,10 +85,12 @@ void cls_log::write_norm(int loglvl, uint prefixlen)
 {
     flood_cnt = 1;
 
-    snprintf(msg_flood, sizeof(msg_flood)
-        , "%s", &msg_full[prefixlen]);
-
-    (void)snprintf(msg_prefix, prefixlen, "%s", msg_full);
+    if (snprintf(msg_flood, sizeof(msg_flood), "%s", &msg_full[prefixlen]) < 0) {
+        return;
+    }
+    if (snprintf(msg_prefix, prefixlen, "%s", msg_full) < 0) {
+        return;
+    }
 
     if (log_mode == LOGMODE_FILE) {
         strcpy(msg_full + strlen(msg_full),"\n");
