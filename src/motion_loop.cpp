@@ -897,7 +897,9 @@ static int mlp_capture(ctx_dev *cam)
 
         if (cam->missing_frame_counter >= (cam->conf->device_tmo * cam->conf->framerate)) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
-            event(cam, EVENT_CAMERA_FOUND);
+            if (cam->conf->on_camera_found != "") {
+                util_exec_command(cam, cam->conf->on_camera_found.c_str(), NULL);
+            }
         }
         cam->missing_frame_counter = 0;
         mymemcpy(cam->imgs.image_virgin, cam->current_image->image_norm, cam->imgs.size_norm);
@@ -933,7 +935,9 @@ static int mlp_capture(ctx_dev *cam)
             if (cam->missing_frame_counter == (cam->conf->device_tmo * cam->conf->framerate)) {
                 MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                     ,_("Video signal lost - Adding grey image"));
-                event(cam, EVENT_CAMERA_LOST);
+                if (cam->conf->on_camera_lost != "") {
+                    util_exec_command(cam, cam->conf->on_camera_lost.c_str(), NULL);
+                }
             }
 
             if ((cam->device_status == STATUS_OPENED) &&

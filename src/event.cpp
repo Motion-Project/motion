@@ -42,8 +42,6 @@ const char *eventList[] = {
     "EVENT_IMAGE",
     "EVENT_IMAGEM",
     "EVENT_AREA_DETECTED",
-    "EVENT_CAMERA_LOST",
-    "EVENT_CAMERA_FOUND",
     "EVENT_MOVIE_PUT",
     "EVENT_LAST"
 };
@@ -105,28 +103,12 @@ static void event_vlp_putpipem(ctx_dev *cam)
     }
 }
 
-
-
-static void event_camera_lost(ctx_dev *cam)
-{
-    if (cam->conf->on_camera_lost != "") {
-        util_exec_command(cam, cam->conf->on_camera_lost.c_str(), NULL);
-    }
-}
-
 static void event_secondary_detect(ctx_dev *cam)
 {
     MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO,_("Event secondary detect"));
 
     if (cam->conf->on_secondary_detect != "") {
         util_exec_command(cam, cam->conf->on_secondary_detect.c_str(), NULL);
-    }
-}
-
-static void event_camera_found(ctx_dev *cam)
-{
-    if (cam->conf->on_camera_found != "") {
-        util_exec_command(cam, cam->conf->on_camera_found.c_str(), NULL);
     }
 }
 
@@ -222,14 +204,6 @@ struct event_handlers event_handlers[] = {
     {
     EVENT_MOVIE_END,
     event_movie_end
-    },
-    {
-    EVENT_CAMERA_LOST,
-    event_camera_lost
-    },
-    {
-    EVENT_CAMERA_FOUND,
-    event_camera_found
     },
     {
     EVENT_SECDETECT,
