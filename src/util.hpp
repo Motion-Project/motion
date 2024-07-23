@@ -80,6 +80,7 @@
     void mymemcpy(void *dst, void *src, ulong sz);
 
     void myfree(void *ptr_addr);
+    #define mydelete(x) {if(x!=nullptr) {delete x; x=nullptr;}}
 
     void *mymalloc(size_t nbytes);
     void *mymalloc(uint nbytes);

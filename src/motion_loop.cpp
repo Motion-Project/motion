@@ -391,26 +391,10 @@ static void mlp_mask_privacy(ctx_dev *cam)
 /* Close and clean up camera*/
 void mlp_cam_close(ctx_dev *cam)
 {
-    if (cam->libcam != nullptr) {
-        delete cam->libcam;
-        cam->libcam = nullptr;
-    }
-
-    if (cam->v4l2cam != nullptr) {
-        delete cam->v4l2cam;
-        cam->v4l2cam = nullptr;
-    }
-
-    if (cam->netcam != nullptr) {
-        delete cam->netcam;
-        cam->netcam = nullptr;
-    }
-
-    if (cam->netcam_high != nullptr) {
-        delete cam->netcam_high;
-        cam->netcam_high = nullptr;
-    }
-
+    mydelete(cam->libcam);
+    mydelete(cam->v4l2cam);
+    mydelete(cam->netcam);
+    mydelete(cam->netcam_high);
 }
 
 /* Start camera */
@@ -715,14 +699,13 @@ void mlp_cleanup(ctx_dev *cam)
 
     mlp_ring_destroy(cam); /* Cleanup the precapture ring buffer */
 
-    delete cam->rotate;
-    delete cam->picture;
-    delete cam->movie_norm;
-    delete cam->movie_norm;
-    delete cam->movie_motion;
-    delete cam->movie_timelapse;
-    delete cam->movie_extpipe;
-    delete cam->draw;
+    mydelete(cam->rotate);
+    mydelete(cam->picture);
+    mydelete(cam->movie_norm);
+    mydelete(cam->movie_motion);
+    mydelete(cam->movie_timelapse);
+    mydelete(cam->movie_extpipe);
+    mydelete(cam->draw);
 
     if (cam->pipe != -1) {
         close(cam->pipe);
