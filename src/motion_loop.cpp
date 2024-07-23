@@ -1362,13 +1362,12 @@ static void mlp_timelapse(ctx_dev *cam)
 static void mlp_loopback(ctx_dev *cam)
 {
 
-    event(cam, EVENT_IMAGE);
+    vlp_putpipe(cam);
 
     if (!cam->conf->stream_motion || cam->shots_mt == 0) {
         webu_getimg_main(cam);
     }
 
-    event(cam, EVENT_IMAGEM);
 }
 
 /* Update parameters from web interface*/

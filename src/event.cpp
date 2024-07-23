@@ -31,34 +31,9 @@
 
 const char *eventList[] = {
     "NULL",
-    "EVENT_IMAGE",
-    "EVENT_IMAGEM",
     "EVENT_LAST"
 };
 
-static void event_vlp_putpipe(ctx_dev *cam)
-{
-    if (cam->pipe >= 0) {
-        if (vlp_putpipe(cam->pipe
-                , cam->current_image->image_norm
-                , cam->imgs.size_norm) == -1) {
-            MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
-                ,_("Failed to put image into video pipe"));
-        }
-    }
-}
-
-static void event_vlp_putpipem(ctx_dev *cam)
-{
-    if (cam->mpipe >= 0) {
-        if (vlp_putpipe(cam->mpipe
-                , cam->imgs.image_motion.image_norm
-                , cam->imgs.size_norm) == -1) {
-            MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
-                ,_("Failed to put image into video pipe"));
-        }
-    }
-}
 
 struct event_handlers {
     motion_event type;
@@ -66,14 +41,6 @@ struct event_handlers {
 };
 
 struct event_handlers event_handlers[] = {
-    {
-    EVENT_IMAGE,
-    event_vlp_putpipe
-    },
-    {
-    EVENT_IMAGEM,
-    event_vlp_putpipem
-    },
     {(motion_event)0, NULL}
 };
 

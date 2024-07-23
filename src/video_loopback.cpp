@@ -227,22 +227,36 @@ int vlp_startpipe(const char *dev_name, int width, int height)
 
 #endif /* HAVE_V4L2 && !BSD */
 
-int vlp_putpipe(int dev, unsigned char *image, int imgsize)
+void vlp_putpipe(ctx_dev *cam)
 {
-
     #if (defined(HAVE_V4L2)) && (!defined(BSD))
-        return (int)write(dev, image, (uint)imgsize);
+        ssize_t retcd;
+
+        if (cam->pipe >= 0) {
+            retcd = write(cam->pipe
+                , cam->current_image->image_norm
+                , (uint)cam->imgs.size_norm);
+            if (retcd < 0) {
+                MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                    ,_("Failed to put image into video pipe"));
+            }
+        }
+        if (cam->mpipe >= 0) {
+            retcd = write(cam->mpipe
+                , cam->imgs.image_motion.image_norm
+                , (uint)cam->imgs.size_norm);
+            if (retcd < 0) {
+                MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                    ,_("Failed to put image into motion video pipe"));
+            }
+        }
     #else
-        (void)dev;
-        (void)image;
-        (void)imgsize;
-        return -1;
+        (void)cam;
     #endif
 }
 
 void vlp_init(ctx_dev *cam)
 {
-
     #if defined(HAVE_V4L2) && !defined(BSD)
         /* open video loopback devices if enabled */
         if (cam->conf->video_pipe != "") {
@@ -281,5 +295,4 @@ void vlp_init(ctx_dev *cam)
         cam->pipe = -1;
     #endif /* HAVE_V4L2 && !BSD */
 }
-
 
