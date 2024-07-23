@@ -23,14 +23,9 @@
 #include "logger.hpp"
 #include "draw.hpp"
 
-/* Highest ascii value is 126 (~) */
-#define ASCII_MAX 127
-
-unsigned char *char_arr_ptr[ASCII_MAX];
-
 struct draw_char {
-    unsigned char ascii;
-    unsigned char pix[8][7];
+    u_char ascii;
+    u_char pix[8][7];
 };
 
 struct draw_char draw_table[]= {
@@ -1076,15 +1071,14 @@ struct draw_char draw_table[]= {
     }
 };
 
-#define NEWLINE "\\n"
-
-static int draw_textn(unsigned char *image, int startx,  int starty,  int width
+int cls_draw::textn(u_char *image
+        , int startx,  int starty,  int width
         , const char *text, int len, int factor)
 {
 
     int x, y;
     int pos, line_offset, next_char_offs;
-    unsigned char *image_ptr, *char_ptr;
+    u_char *image_ptr, *char_ptr;
 
     if (startx > width / 2) {
         startx -= len * (6 * factor);
@@ -1139,7 +1133,8 @@ static int draw_textn(unsigned char *image, int startx,  int starty,  int width
     return 0;
 }
 
-int draw_text(unsigned char *image, int width, int height, int startx, int starty
+int cls_draw::text(u_char *image
+        , int width, int height, int startx, int starty
         , const char *text, int factor)
 {
     int num_nl = 0;
@@ -1187,18 +1182,18 @@ int draw_text(unsigned char *image, int width, int height, int startx, int start
     while ((end = strstr(end, NEWLINE))) {
         int len = (int)(end-begin);
 
-        draw_textn(image, startx, starty, width, begin, len, factor);
+        textn(image, startx, starty, width, begin, len, factor);
         end += sizeof(NEWLINE)-1;
         begin = end;
         starty += line_space;
     }
 
-    draw_textn(image, startx, starty, width, begin, (int)strlen(begin), factor);
+    textn(image, startx, starty, width, begin, (int)strlen(begin), factor);
 
     return 0;
 }
 
-int draw_init_chars(void)
+void cls_draw::init_chars(void)
 {
     unsigned int i;
     size_t draw_table_size;
@@ -1215,18 +1210,11 @@ int draw_init_chars(void)
         char_arr_ptr[(int)draw_table[i].ascii] = &draw_table[i].pix[0][0];
     }
 
-    return 0;
 }
 
-void draw_init_scale(ctx_dev *cam)
+void cls_draw::init_scale()
 {
-
-    /* Consider that web interface may change conf values at any moment.
-     * The below can put two sections in the image so make sure that after
-     * scaling does not occupy more than 1/4 of image (10 pixels * 2 lines)
-     */
-
-    cam->text_scale = cam->conf->text_scale;
+    cam->text_scale = cfg_text_scale;
     if (cam->text_scale <= 0) {
         cam->text_scale = 1;
     }
@@ -1250,14 +1238,14 @@ void draw_init_scale(ctx_dev *cam)
     }
 
     /* If we had to modify the scale, change conf so we don't get another message */
-    cam->conf->text_scale = cam->text_scale;
+    cfg_text_scale = cam->text_scale;
 
 }
 
-static void draw_location(ctx_coord *cent, ctx_images *imgs, int width
-        , unsigned char *new_var, int style, int mode)
+void cls_draw::location(ctx_coord *cent, ctx_images *imgs, int width
+        , u_char *new_var, int style, int mode)
 {
-    unsigned char *out = imgs->image_motion.image_norm;
+    u_char *out = imgs->image_motion.image_norm;
     int x, y;
 
     out = imgs->image_motion.image_norm;
@@ -1317,11 +1305,12 @@ static void draw_location(ctx_coord *cent, ctx_images *imgs, int width
     }
 }
 
-static void draw_red_location(ctx_coord *cent, ctx_images *imgs, int width
-        , unsigned char *new_var, int style, int mode)
+void cls_draw::red_location(ctx_coord *cent
+        , ctx_images *imgs, int width
+        , u_char *new_var, int style, int mode)
 {
-    unsigned char *out = imgs->image_motion.image_norm;
-    unsigned char *new_u, *new_v;
+    u_char *out = imgs->image_motion.image_norm;
+    u_char *new_u, *new_v;
     int x, y, v, cwidth, cblock;
 
     cwidth = width / 2;
@@ -1426,46 +1415,47 @@ static void draw_red_location(ctx_coord *cent, ctx_images *imgs, int width
     }
 }
 
-void draw_locate(ctx_dev *cam)
+void cls_draw::locate()
 {
     ctx_images *imgs;
-    ctx_coord *location;
-    unsigned char *image_norm;
+    ctx_coord *p_loc;
+    u_char *image_norm;
 
     if (cam->locate_motion_mode == LOCATE_PREVIEW) {
         imgs = &cam->imgs;
-        location = &cam->imgs.image_preview.location;
+        p_loc = &cam->imgs.image_preview.location;
         image_norm = cam->imgs.image_preview.image_norm;
     } else if (cam->locate_motion_mode == LOCATE_ON) {
         imgs = &cam->imgs;
-        location = &cam->current_image->location;
+        p_loc = &cam->current_image->location;
         image_norm = cam->current_image->image_norm;
     } else {
         return;
     }
 
     if (cam->locate_motion_style == LOCATE_BOX) {
-        draw_location(location, imgs, imgs->width
+        location(p_loc, imgs, imgs->width
             , image_norm, LOCATE_BOX, LOCATE_BOTH);
     } else if (cam->locate_motion_style == LOCATE_REDBOX) {
-        draw_red_location(location, imgs, imgs->width
+        red_location(p_loc, imgs, imgs->width
             , image_norm, LOCATE_REDBOX,LOCATE_BOTH);
     } else if (cam->locate_motion_style == LOCATE_CROSS) {
-        draw_location(location, imgs, imgs->width
+        location(p_loc, imgs, imgs->width
             , image_norm, LOCATE_CROSS, LOCATE_BOTH);
     } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
-        draw_red_location(location, imgs, imgs->width
+        red_location(p_loc, imgs, imgs->width
             , image_norm, LOCATE_REDCROSS, LOCATE_BOTH);
     }
 
 }
 
-void draw_smartmask(ctx_dev *cam, unsigned char *out)
+void cls_draw::smartmask()
 {
     int i, x, v, width, height, line;
     ctx_images *imgs = &cam->imgs;
-    unsigned char *smartmask = imgs->smartmask_final;
-    unsigned char *out_y, *out_u, *out_v;
+    u_char *smartmask = imgs->smartmask_final;
+    u_char *out_y, *out_u, *out_v;
+    u_char *out = cam->imgs.image_motion.image_norm;
 
     i = imgs->motionsize;
     v = i + ((imgs->motionsize) / 4);
@@ -1499,12 +1489,13 @@ void draw_smartmask(ctx_dev *cam, unsigned char *out)
     }
 }
 
-void draw_fixed_mask(ctx_dev *cam, unsigned char *out)
+void cls_draw::fixed_mask()
 {
     int i, x, v, width, height, line;
     ctx_images *imgs = &cam->imgs;
-    unsigned char *mask = imgs->mask;
-    unsigned char *out_y, *out_u, *out_v;
+    u_char *mask = imgs->mask;
+    u_char *out_y, *out_u, *out_v;
+    u_char *out = cam->imgs.image_motion.image_norm;
 
     i = imgs->motionsize;
     v = i + ((imgs->motionsize) / 4);
@@ -1538,12 +1529,13 @@ void draw_fixed_mask(ctx_dev *cam, unsigned char *out)
     }
 }
 
-void draw_largest_label(ctx_dev *cam, unsigned char *out)
+void cls_draw::largest_label()
 {
     int i, x, v, width, height, line;
     ctx_images *imgs = &cam->imgs;
     int *labels = imgs->labels;
-    unsigned char *out_y, *out_u, *out_v;
+    u_char *out_y, *out_u, *out_v;
+    u_char *out = cam->imgs.image_motion.image_norm;
 
     i = imgs->motionsize;
     v = i + ((imgs->motionsize) / 4);
@@ -1575,4 +1567,19 @@ void draw_largest_label(ctx_dev *cam, unsigned char *out)
         }
         out_y++;
     }
+}
+
+cls_draw::cls_draw(ctx_dev *p_cam)
+{
+    cam = p_cam;
+    cfg_text_scale = cam->conf->text_scale;
+
+    init_chars();
+    init_scale();
+
+}
+
+cls_draw::~cls_draw()
+{
+
 }

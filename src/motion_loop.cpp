@@ -112,10 +112,12 @@ static void mlp_ring_process_debug(ctx_dev *cam)
     }
 
     mystrftime(cam, tmp, sizeof(tmp), "%H%M%S-%q", NULL);
-    draw_text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm,
-                cam->imgs.width, cam->imgs.height, 10, 20, tmp, cam->text_scale);
-    draw_text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm,
-                cam->imgs.width, cam->imgs.height, 10, 30, t, cam->text_scale);
+    cam->draw->text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm
+            , cam->imgs.width, cam->imgs.height
+            , 10, 20, tmp, cam->text_scale);
+    cam->draw->text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm
+            , cam->imgs.width, cam->imgs.height
+            , 10, 30, t, cam->text_scale);
 }
 
 static void mlp_ring_process_image(ctx_dev *cam)
@@ -280,7 +282,7 @@ static void mlp_detected(ctx_dev *cam)
     ctx_config *conf = cam->conf;
     unsigned int distX, distY;
 
-    draw_locate(cam);
+    cam->draw->locate();
 
     /* Calculate how centric motion is if configured preview center*/
     if (cam->new_img & NEWIMG_CENTER) {
@@ -500,9 +502,10 @@ static void mlp_init_firstimage(ctx_dev *cam)
         for (indx = 0; indx<cam->imgs.ring_size; indx++) {
             mymemset(cam->imgs.image_ring[indx].image_norm
                 , 0x80, cam->imgs.size_norm);
-            draw_text(cam->imgs.image_ring[indx].image_norm
+            cam->draw->text(cam->imgs.image_ring[indx].image_norm
                 , cam->imgs.width, cam->imgs.height
-                , 10, 20 * cam->text_scale, msg, cam->text_scale);
+                , 10, 20 * cam->text_scale
+                , msg, cam->text_scale);
         }
     }
 
@@ -620,10 +623,17 @@ static void mlp_init_values(ctx_dev *cam)
         cam->pause = cam->conf->pause;
     }
     cam->v4l2cam = nullptr;
-    cam->rotate = nullptr;
-    cam->picture = nullptr;
     cam->netcam = nullptr;
     cam->netcam_high = nullptr;
+    cam->rotate = nullptr;
+    cam->picture = nullptr;
+    cam->movie_norm = nullptr;
+    cam->movie_norm = nullptr;
+    cam->movie_motion = nullptr;
+    cam->movie_timelapse = nullptr;
+    cam->movie_extpipe = nullptr;
+    cam->draw = nullptr;
+
     gethostname (cam->hostname, PATH_MAX);
     cam->hostname[PATH_MAX-1] = '\0';
 
@@ -705,13 +715,14 @@ void mlp_cleanup(ctx_dev *cam)
 
     mlp_ring_destroy(cam); /* Cleanup the precapture ring buffer */
 
-    if (cam->rotate != nullptr){
-        delete cam->rotate;
-    }
-
-    if (cam->picture != nullptr){
-        delete cam->picture;
-    }
+    delete cam->rotate;
+    delete cam->picture;
+    delete cam->movie_norm;
+    delete cam->movie_norm;
+    delete cam->movie_motion;
+    delete cam->movie_timelapse;
+    delete cam->movie_extpipe;
+    delete cam->draw;
 
     if (cam->pipe != -1) {
         close(cam->pipe);
@@ -757,13 +768,16 @@ static void mlp_init(ctx_dev *cam)
 
     cam->rotate = new cls_rotate(cam);
 
-    draw_init_scale(cam);
-
     mlp_init_firstimage(cam);
 
     vlp_init(cam);
 
     cam->picture = new cls_picture(cam);
+    cam->draw = new cls_draw(cam);
+    cam->movie_norm = new cls_movie(cam, "norm");
+    cam->movie_motion = new cls_movie(cam, "motion");
+    cam->movie_timelapse = new cls_movie(cam, "timelapse");
+    cam->movie_extpipe = new cls_movie(cam, "extpipe");
 
     mlp_init_areadetect(cam);
 
@@ -955,8 +969,10 @@ static int mlp_capture(ctx_dev *cam)
             mymemset(cam->current_image->image_norm, 0x80, cam->imgs.size_norm);
             cam->current_image->imgts =cam->connectionlosttime;
             mystrftime(cam, tmpout, sizeof(tmpout), tmpin, NULL);
-            draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
-                      10, 20 * cam->text_scale, tmpout, cam->text_scale);
+            cam->draw->text(cam->current_image->image_norm
+                    , cam->imgs.width, cam->imgs.height
+                    , 10, 20 * cam->text_scale
+                    , tmpout, cam->text_scale);
 
             /* Write error message only once */
             if (cam->missing_frame_counter == (cam->conf->device_tmo * cam->conf->framerate)) {
@@ -1040,7 +1056,7 @@ static void mlp_overlay(ctx_dev *cam)
         cam->conf->movie_output_motion ||
         (cam->stream.motion.jpg_cnct > 0) ||
         (cam->stream.motion.ts_cnct > 0))) {
-        draw_smartmask(cam, cam->imgs.image_motion.image_norm);
+        cam->draw->smartmask();
     }
 
     if (cam->imgs.largest_label &&
@@ -1048,7 +1064,7 @@ static void mlp_overlay(ctx_dev *cam)
         cam->conf->movie_output_motion ||
         (cam->stream.motion.jpg_cnct > 0) ||
         (cam->stream.motion.ts_cnct > 0))) {
-        draw_largest_label(cam, cam->imgs.image_motion.image_norm);
+        cam->draw->largest_label();
     }
 
     if (cam->imgs.mask &&
@@ -1056,7 +1072,7 @@ static void mlp_overlay(ctx_dev *cam)
         cam->conf->movie_output_motion ||
         (cam->stream.motion.jpg_cnct > 0) ||
         (cam->stream.motion.ts_cnct > 0))) {
-        draw_fixed_mask(cam, cam->imgs.image_motion.image_norm);
+        cam->draw->fixed_mask();
     }
 
     if (cam->conf->text_changes) {
@@ -1065,37 +1081,45 @@ static void mlp_overlay(ctx_dev *cam)
         } else {
             sprintf(tmp, "-");
         }
-        draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
-                  cam->imgs.width - 10, 10, tmp, cam->text_scale);
+        cam->draw->text(cam->current_image->image_norm
+                , cam->imgs.width, cam->imgs.height
+                , cam->imgs.width - 10, 10
+                , tmp, cam->text_scale);
     }
 
     if ((cam->stream.motion.jpg_cnct > 0) ||
         (cam->stream.motion.ts_cnct > 0)) {
         sprintf(tmp, "D:%5d L:%3d N:%3d", cam->current_image->diffs,
             cam->current_image->total_labels, cam->noise);
-        draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
-            cam->imgs.width - 10, cam->imgs.height - (30 * cam->text_scale),
-            tmp, cam->text_scale);
+        cam->draw->text(cam->imgs.image_motion.image_norm
+                , cam->imgs.width, cam->imgs.height
+                , cam->imgs.width - 10
+                , cam->imgs.height - (30 * cam->text_scale)
+                , tmp, cam->text_scale);
         sprintf(tmp, "THREAD %d SETUP", cam->threadnr);
-        draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
-            cam->imgs.width - 10, cam->imgs.height - (10 * cam->text_scale),
-            tmp, cam->text_scale);
-
+        cam->draw->text(cam->imgs.image_motion.image_norm
+                , cam->imgs.width, cam->imgs.height
+                , cam->imgs.width - 10
+                , cam->imgs.height - (10 * cam->text_scale)
+                , tmp, cam->text_scale);
     }
 
     /* Add text in lower left corner of the pictures */
     if (cam->conf->text_left != "") {
         mystrftime(cam, tmp, sizeof(tmp), cam->conf->text_left.c_str(), NULL);
-        draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
-                  10, cam->imgs.height - (10 * cam->text_scale), tmp, cam->text_scale);
+        cam->draw->text(cam->current_image->image_norm
+                , cam->imgs.width, cam->imgs.height
+                , 10, cam->imgs.height - (10 * cam->text_scale)
+                , tmp, cam->text_scale);
     }
 
     /* Add text in lower right corner of the pictures */
     if (cam->conf->text_right != "") {
         mystrftime(cam, tmp, sizeof(tmp), cam->conf->text_right.c_str(), NULL);
-        draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
-                  cam->imgs.width - 10, cam->imgs.height - (10 * cam->text_scale),
-                  tmp, cam->text_scale);
+        cam->draw->text(cam->current_image->image_norm
+                , cam->imgs.width, cam->imgs.height
+                , cam->imgs.width - 10, cam->imgs.height - (10 * cam->text_scale)
+                , tmp, cam->text_scale);
     }
 }
 
@@ -1377,8 +1401,6 @@ static void mlp_parmsupdate(ctx_dev *cam)
     }
 
     if (cam->parms_changed  || (cam->passflag == false)) {
-        draw_init_scale(cam);  /* Initialize and validate text_scale */
-
         if (cam->conf->picture_output == "on") {
             cam->new_img = NEWIMG_ON;
         } else if (cam->conf->picture_output == "first") {
@@ -1487,12 +1509,6 @@ void *mlp_main(void *arg)
     cam->restart_dev = false;
     cam->device_status = STATUS_INIT;
 
-    cam->movie_norm = new cls_movie(cam, "norm");
-    cam->movie_motion = new cls_movie(cam, "motion");
-    cam->movie_timelapse = new cls_movie(cam, "timelapse");
-    cam->movie_extpipe = new cls_movie(cam, "extpipe");
-
-
     while (cam->finish_dev == false) {
         mlp_init(cam);
         mlp_prepare(cam);
@@ -1513,11 +1529,6 @@ void *mlp_main(void *arg)
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Exiting"));
 
     mlp_cleanup(cam);
-
-    delete cam->movie_norm;
-    delete cam->movie_motion;
-    delete cam->movie_timelapse;
-    delete cam->movie_extpipe;
 
     pthread_mutex_lock(&cam->motapp->global_lock);
         cam->motapp->threads_running--;

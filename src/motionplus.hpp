@@ -120,6 +120,7 @@ struct ctx_dbse;
 struct ctx_algsec;
 struct ctx_config;
 
+class cls_draw;
 class cls_log;
 class cls_movie;
 class cls_netcam;
@@ -467,6 +468,7 @@ struct ctx_dev {
     ctx_stream      stream;
     ctx_snd_info    *snd_info;      /* Values for sound processing*/
 
+    cls_draw        *draw;
     cls_netcam      *netcam;            /* normal RTSP connection */
     cls_netcam      *netcam_high;       /* high resolution RTSP connection */
     cls_picture     *picture;

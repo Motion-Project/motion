@@ -683,7 +683,7 @@ void cls_picture::save_preview()
         cam->imgs.image_preview.diffs = 1;
     }
 
-    draw_locate(cam);
+    cam->draw->locate();
 
 }
 

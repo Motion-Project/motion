@@ -27,7 +27,6 @@
 #include "video_v4l2.hpp"
 #include "movie.hpp"
 #include "netcam.hpp"
-#include "draw.hpp"
 
 pthread_key_t tls_key_threadnr;
 volatile enum MOTPLS_SIGNAL motsignal;
@@ -662,8 +661,6 @@ static void motpls_startup(ctx_motapp *motapp, int daemonize)
     motpls_device_ids(motapp);
 
     dbse_init(motapp);
-
-    draw_init_chars();
 
     motapp->webu = new cls_webu(motapp);
 
