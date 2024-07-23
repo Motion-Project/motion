@@ -119,14 +119,14 @@ AC_MSG_CHECKING([for XSI strerror_r])
 HOLD_CPPFLAGS="$CPPFLAGS"
 CPPFLAGS="$CPPFLAGS -Werror"
 AC_LINK_IFELSE(
-  [AC_LANG_SOURCE([
+  [AC_LANG_SOURCE([[
     #include <string.h>
     #include <errno.h>
     int main(int argc, char** argv) {
       char buf[1024];
       int ret = strerror_r(ENOMEM, buf, sizeof(buf));
       return ret;
-    }])
+    }]])
   ],[
     AC_DEFINE([XSI_STRERROR_R], [1], [Define if you have XSI strerror_r function.])
     XSI_STRERROR="yes"
