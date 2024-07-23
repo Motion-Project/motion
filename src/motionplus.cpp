@@ -490,19 +490,15 @@ static void motpls_shutdown(ctx_motapp *motapp)
 {
     motpls_pid_remove(motapp);
 
-    delete motapp->webu;
+    mydelete(motapp->webu);
 
     dbse_deinit(motapp);
 
     conf_deinit(motapp);
 
-    delete motapp->conf;
-    motapp->conf  = nullptr;;
-
-    delete motlog;
-    motlog = nullptr;
-
-    delete motapp->all_sizes;
+    mydelete(motapp->conf);
+    mydelete(motapp->all_sizes);
+    mydelete(motlog);
 
 }
 
@@ -891,8 +887,6 @@ static void motpls_deinit(ctx_motapp *motapp)
     pthread_mutex_destroy(&motapp->mutex_camlst);
     pthread_mutex_destroy(&motapp->mutex_post);
 
-    delete motapp->conf;
-
 }
 /* Check for whether to add a new cam */
 static void motpls_cam_add(ctx_motapp *motapp)
@@ -1075,8 +1069,8 @@ int main (int argc, char **argv)
     }
 
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus terminating"));
-
     motpls_deinit(motapp);
+
     delete motapp;
 
     return 0;
