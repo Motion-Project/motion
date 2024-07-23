@@ -190,6 +190,26 @@ static void mlp_info_reset(ctx_dev *cam)
     cam->info_sdev_tot = 0;
 }
 
+static void mlp_movie_start(ctx_dev *cam)
+{
+    cam->movie_start_time = cam->frame_curr_ts.tv_sec;
+    if (cam->lastrate < 2) {
+        cam->movie_fps = 2;
+    } else {
+        cam->movie_fps = cam->lastrate;
+    }
+    cam->movie_norm->start();
+    cam->movie_motion->start();
+    cam->movie_extpipe->start();
+}
+
+static void mlp_movie_end(ctx_dev *cam)
+{
+    cam->movie_norm->stop();
+    cam->movie_motion->stop();
+    cam->movie_extpipe->stop();
+}
+
 /* Process the motion detected items*/
 static void mlp_detected_trigger(ctx_dev *cam)
 {
@@ -217,7 +237,10 @@ static void mlp_detected_trigger(ctx_dev *cam)
                 , sizeof(cam->text_event_string)
                 , cam->conf->text_event.c_str(), NULL);
 
-            event(cam, EVENT_START);
+            if (cam->conf->on_event_start != "") {
+                util_exec_command(cam, cam->conf->on_event_start.c_str(), NULL);
+            }
+            mlp_movie_start(cam);
             dbse_exec(cam, NULL, "event_start");
 
             if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)) {
@@ -225,8 +248,9 @@ static void mlp_detected_trigger(ctx_dev *cam)
             }
 
         }
-
-        event(cam, EVENT_MOTION);
+        if (cam->conf->on_motion_detected != "") {
+            util_exec_command(cam, cam->conf->on_motion_detected.c_str(), NULL);
+        }
     }
 }
 
@@ -272,7 +296,7 @@ static void mlp_detected(ctx_dev *cam)
     if (cam->current_image->shot <= conf->framerate) {
         if ((conf->stream_motion == true) &&
             (cam->current_image->shot != 1)) {
-            event(cam, EVENT_STREAM);
+            webu_getimg_main(cam);
         }
         cam->picture->process_motion();
     }
@@ -646,7 +670,10 @@ void mlp_cleanup(ctx_dev *cam)
             cam->picture->process_preview();
             cam->imgs.image_preview.diffs = 0;
         }
-        event(cam, EVENT_END);
+        if (cam->conf->on_event_end != "") {
+            util_exec_command(cam, cam->conf->on_event_end.c_str(), NULL);
+        }
+        mlp_movie_end(cam);
         dbse_exec(cam, NULL, "event_end");
     }
 
@@ -773,7 +800,9 @@ static void mlp_areadetect(ctx_dev *cam)
                     cam->current_image->location.x < cam->area_maxx[z] &&
                     cam->current_image->location.y > cam->area_miny[z] &&
                     cam->current_image->location.y < cam->area_maxy[z]) {
-                    event(cam, EVENT_AREA_DETECTED);
+                    if (cam->conf->on_area_detected != "") {
+                        util_exec_command(cam, cam->conf->on_area_detected.c_str(), NULL);
+                    }
                     cam->areadetect_eventnbr = cam->event_curr_nbr; /* Fire script only once per event */
                     MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
                         ,_("Motion in area %d detected."), z + 1);
@@ -1165,14 +1194,23 @@ static void mlp_actions_event(ctx_dev *cam)
                 cam->picture->process_preview();
                 cam->imgs.image_preview.diffs = 0;
             }
-            event(cam, EVENT_END);
+            if (cam->conf->on_event_end != "") {
+                util_exec_command(cam, cam->conf->on_event_end.c_str(), NULL);
+            }
+            mlp_movie_end(cam);
             dbse_exec(cam, NULL, "event_end");
 
             mlp_track_center(cam);
 
             if (cam->algsec_inuse) {
                 if (cam->algsec->isdetected) {
-                    event(cam, EVENT_SECDETECT);
+                    MOTPLS_LOG(NTC, TYPE_EVENTS
+                        , NO_ERRNO, _("Secondary detect"));
+                    if (cam->conf->on_secondary_detect != "") {
+                        util_exec_command(cam
+                            , cam->conf->on_secondary_detect.c_str()
+                            , NULL);
+                    }
                 }
                 cam->algsec->isdetected = false;
             }
@@ -1193,8 +1231,8 @@ static void mlp_actions_event(ctx_dev *cam)
             cam->conf->movie_max_time) &&
         ( !(cam->current_image->flags & IMAGE_POSTCAP)) &&
         ( !(cam->current_image->flags & IMAGE_PRECAP))) {
-        event(cam, EVENT_MOVIE_END);
-        event(cam, EVENT_MOVIE_START);
+        mlp_movie_end(cam);
+        mlp_movie_start(cam);
     }
 
 }
@@ -1327,7 +1365,7 @@ static void mlp_loopback(ctx_dev *cam)
     event(cam, EVENT_IMAGE);
 
     if (!cam->conf->stream_motion || cam->shots_mt == 0) {
-        event(cam, EVENT_STREAM);
+        webu_getimg_main(cam);
     }
 
     event(cam, EVENT_IMAGEM);
