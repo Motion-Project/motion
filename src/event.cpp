@@ -38,27 +38,15 @@ const char *eventList[] = {
     "EVENT_TLAPSE_START",
     "EVENT_TLAPSE_END",
     "EVENT_STREAM",
-    "EVENT_IMAGE_DETECTED",
-    "EVENT_IMAGEM_DETECTED",
     "EVENT_IMAGE_SNAPSHOT",
     "EVENT_IMAGE",
     "EVENT_IMAGEM",
-    "EVENT_IMAGE_PREVIEW",
     "EVENT_AREA_DETECTED",
     "EVENT_CAMERA_LOST",
     "EVENT_CAMERA_FOUND",
     "EVENT_MOVIE_PUT",
     "EVENT_LAST"
 };
-
-static void on_picture_save_command(ctx_dev *cam, char *fname)
-{
-    MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("File saved to: %s"), fname);
-
-    if (cam->conf->on_picture_save != "") {
-        util_exec_command(cam, cam->conf->on_picture_save.c_str(), fname);
-    }
-}
 
 static void on_motion_detected_command(ctx_dev *cam)
 {
@@ -117,131 +105,7 @@ static void event_vlp_putpipem(ctx_dev *cam)
     }
 }
 
-static void event_image_detect(ctx_dev *cam)
-{
-    char filename[PATH_MAX];
 
-    if (cam->new_img & NEWIMG_ON) {
-        mypicname(cam, filename,"%s/%s.%s"
-            , cam->conf->picture_filename
-            , cam->conf->picture_type);
-        cam->filetype = FTYPE_IMAGE;
-        if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
-            cam->picture->save_norm(filename, cam->current_image->image_high);
-        } else {
-            cam->picture->save_norm(filename,cam->current_image->image_norm);
-        }
-        on_picture_save_command(cam, filename);
-        dbse_exec(cam, filename, "pic_save");
-    }
-}
-
-static void event_imagem_detect(ctx_dev *cam)
-{
-    char filename[PATH_MAX];
-
-    if (cam->conf->picture_output_motion == "on") {
-        mypicname(cam, filename,"%s/%sm.%s"
-            , cam->conf->picture_filename
-            , cam->conf->picture_type);
-        cam->filetype = FTYPE_IMAGE_MOTION;
-        cam->picture->save_norm(filename, cam->imgs.image_motion.image_norm);
-        on_picture_save_command(cam, filename);
-        dbse_exec(cam, filename, "pic_save");
-
-    } else if (cam->conf->picture_output_motion == "roi") {
-        mypicname(cam, filename,"%s/%sr.%s"
-            , cam->conf->picture_filename
-            , cam->conf->picture_type);
-        cam->filetype = FTYPE_IMAGE_ROI;
-        cam->picture->save_roi(filename, cam->current_image->image_norm);
-        on_picture_save_command(cam, filename);
-        dbse_exec(cam, filename, "pic_save");
-    }
-}
-
-static void event_image_snapshot(ctx_dev *cam)
-{
-    char filename[PATH_MAX];
-    char linkpath[PATH_MAX];
-    int offset;
-
-    offset = (int)cam->conf->snapshot_filename.length() - 8;
-    if (offset < 0) {
-        offset = 1;
-    }
-
-    if (cam->conf->snapshot_filename.compare((uint)offset, 8, "lastsnap") != 0) {
-        mypicname(cam, filename,"%s/%s.%s"
-            , cam->conf->snapshot_filename
-            , cam->conf->picture_type);
-        cam->filetype = FTYPE_IMAGE_SNAPSHOT;
-        if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
-            cam->picture->save_norm(filename, cam->current_image->image_high);
-        } else {
-            cam->picture->save_norm(filename, cam->current_image->image_norm);
-        }
-        on_picture_save_command(cam, filename);
-        dbse_exec(cam, filename, "pic_save");
-
-        /* Update symbolic link */
-        mypicname(cam, linkpath,"%s/%s.%s"
-            , "lastsnap", cam->conf->picture_type);
-        remove(linkpath);
-        if (symlink(filename, linkpath)) {
-            MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
-                ,_("Could not create symbolic link [%s]"), filename);
-            return;
-        }
-
-    } else {
-        mypicname(cam, filename,"%s/%s.%s"
-            , cam->conf->snapshot_filename
-            , cam->conf->picture_type);
-        remove(filename);
-        cam->filetype = FTYPE_IMAGE_SNAPSHOT;
-        if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
-            cam->picture->save_norm(filename, cam->current_image->image_high);
-        } else {
-            cam->picture->save_norm(filename, cam->current_image->image_norm);
-        }
-        on_picture_save_command(cam, filename);
-        dbse_exec(cam, filename, "pic_save");
-    }
-
-    cam->snapshot = 0;
-}
-
-static void event_image_preview(ctx_dev *cam)
-{
-    char filename[PATH_MAX];
-    ctx_image_data *saved_current_image;
-
-    if (cam->imgs.image_preview.diffs) {
-        saved_current_image = cam->current_image;
-        saved_current_image->imgts= cam->current_image->imgts;
-
-        cam->current_image = &cam->imgs.image_preview;
-        cam->current_image->imgts = cam->imgs.image_preview.imgts;
-
-        mypicname(cam, filename,"%s/%s.%s"
-            , cam->conf->picture_filename
-            , cam->conf->picture_type);
-
-        cam->filetype = FTYPE_IMAGE;
-        if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
-            cam->picture->save_norm(filename, cam->imgs.image_preview.image_high);
-        } else {
-            cam->picture->save_norm(filename, cam->imgs.image_preview.image_norm);
-        }
-        on_picture_save_command(cam, filename);
-        dbse_exec(cam, filename, "pic_save");
-
-        /* Restore global context values. */
-        cam->current_image = saved_current_image;
-        cam->current_image->imgts = saved_current_image->imgts;
-    }
-}
 
 static void event_camera_lost(ctx_dev *cam)
 {
@@ -336,32 +200,12 @@ struct event_handlers event_handlers[] = {
     event_movie_end
     },
     {
-    EVENT_IMAGE_DETECTED,
-    event_image_detect
-    },
-    {
-    EVENT_IMAGE_DETECTED,
-    event_movie_put
-    },
-    {
-    EVENT_IMAGEM_DETECTED,
-    event_imagem_detect
-    },
-    {
-    EVENT_IMAGE_SNAPSHOT,
-    event_image_snapshot
-    },
-    {
     EVENT_IMAGE,
     event_vlp_putpipe
     },
     {
     EVENT_IMAGEM,
     event_vlp_putpipem
-    },
-    {
-    EVENT_IMAGE_PREVIEW,
-    event_image_preview
     },
     {
     EVENT_STREAM,

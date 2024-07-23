@@ -29,45 +29,56 @@ class cls_picture {
         cls_picture(ctx_dev *p_cam);
         ~cls_picture();
 
-
         int put_memory(u_char* img_dst
             , int image_size, u_char *image, int quality, int width, int height);
-        void save_norm( char *file, u_char *image);
-        void save_roi( char *file, u_char *image);
-        u_char *load_pgm(FILE *picture, int width, int height);
         void scale_img(int width_src, int height_src, u_char *img_src, u_char *img_dst);
         void save_preview();
+        void process_norm();
+        void process_motion();
+        void process_snapshot();
+        void process_preview();
 
     private:
         ctx_dev *cam;
 
-        bool stream_grey;
-        std::string picture_type;
-        std::string mask_file;
-        std::string mask_privacy;
         int cfg_w;
         int cfg_h;
-        int picture_quality;
-
+        int cfg_picture_quality;
+        bool cfg_stream_grey;
+        std::string cfg_mask_file;
+        std::string cfg_mask_privacy;
+        std::string cfg_on_picture_save;
+        std::string cfg_target_dir;
+        std::string cfg_picture_filename;
+        std::string cfg_picture_type;
+        std::string cfg_snapshot_filename;
+        std::string cfg_picture_output_motion;
 
         #ifdef HAVE_WEBP
             void webp_exif(WebPMux* webp_mux
                 , timespec *ts1, ctx_coord *box);
         #endif
         void save_webp(FILE *fp, u_char *image
-            , int width, int height, int quality
+            , int width, int height
             , timespec *ts1, ctx_coord *box);
         void save_yuv420p(FILE *fp, u_char *image
-            , int width, int height, int quality
+            , int width, int height
             , timespec *ts1, ctx_coord *box);
         void save_grey(FILE *picture, u_char *image
-            , int width, int height, int quality
+            , int width, int height
             , timespec *ts1, ctx_coord *box);
+        void save_norm( char *file, u_char *image);
+        void save_roi( char *file, u_char *image);
         void save_ppm(FILE *picture, u_char *image, int width, int height);
-        void pic_write(FILE *picture, u_char *image, int quality);
+        void pic_write(FILE *picture, u_char *image);
+        u_char *load_pgm(FILE *picture, int width, int height);
         void write_mask(const char *file);
         void init_privacy();
         void init_mask();
+        void init_cfg();
+        void on_picture_save_command(char *fname);
+        void picname(char* fullname, std::string fmtstr
+            , std::string basename, std::string extname);
 
 };
 

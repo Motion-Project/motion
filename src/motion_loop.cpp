@@ -120,6 +120,23 @@ static void mlp_ring_process_debug(ctx_dev *cam)
                 cam->imgs.width, cam->imgs.height, 10, 30, t, cam->text_scale);
 }
 
+static void mlp_ring_process_image(ctx_dev *cam)
+{
+    cam->picture->process_norm();
+    if (cam->movie_norm->put_image(cam->current_image
+            , &cam->current_image->imgts) == -1) {
+        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+    }
+    if (cam->movie_motion->put_image(&cam->imgs.image_motion
+            , &cam->imgs.image_motion.imgts) == -1) {
+        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+    }
+    if (cam->movie_extpipe->put_image(cam->current_image
+            , &cam->current_image->imgts) == -1) {
+        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+    }
+}
+
 /* Process the entire image ring */
 static void mlp_ring_process(ctx_dev *cam)
 {
@@ -136,8 +153,7 @@ static void mlp_ring_process(ctx_dev *cam)
             if (cam->motapp->conf->log_level >= DBG) {
                 mlp_ring_process_debug(cam);
             }
-
-            event(cam, EVENT_IMAGE_DETECTED);
+            mlp_ring_process_image(cam);
         }
 
         cam->current_image->flags |= IMAGE_SAVED;
@@ -258,9 +274,7 @@ static void mlp_detected(ctx_dev *cam)
             (cam->current_image->shot != 1)) {
             event(cam, EVENT_STREAM);
         }
-        if (conf->picture_output_motion != "off") {
-            event(cam, EVENT_IMAGEM_DETECTED);
-        }
+        cam->picture->process_motion();
     }
 
     mlp_track_move(cam);
@@ -629,7 +643,7 @@ void mlp_cleanup(ctx_dev *cam)
     if (cam->event_curr_nbr == cam->event_prev_nbr) {
         mlp_ring_process(cam);
         if (cam->imgs.image_preview.diffs) {
-            event(cam, EVENT_IMAGE_PREVIEW);
+            cam->picture->process_preview();
             cam->imgs.image_preview.diffs = 0;
         }
         event(cam, EVENT_END);
@@ -1144,7 +1158,7 @@ static void mlp_actions_event(ctx_dev *cam)
             mlp_ring_process(cam);
 
             if (cam->imgs.image_preview.diffs) {
-                event(cam, EVENT_IMAGE_PREVIEW);
+                cam->picture->process_preview();
                 cam->imgs.image_preview.diffs = 0;
             }
             event(cam, EVENT_END);
@@ -1244,7 +1258,7 @@ static void mlp_snapshot(ctx_dev *cam)
          cam->frame_curr_ts.tv_sec % cam->conf->snapshot_interval <=
          cam->frame_last_ts.tv_sec % cam->conf->snapshot_interval) ||
          cam->snapshot) {
-        event(cam, EVENT_IMAGE_SNAPSHOT);
+        cam->picture->process_snapshot();
         cam->snapshot = 0;
     }
 }

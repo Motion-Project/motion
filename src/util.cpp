@@ -608,24 +608,6 @@ size_t mystrftime(ctx_dev *cam, char *s, size_t max
     return strftime(s, max, format, &timestamp_tm);
 }
 
-void mypicname(ctx_dev *cam
-    , char* fullname, std::string fmtstr
-    , std::string basename, std::string extname)
-{
-    char filename[PATH_MAX];
-    int  retcd;
-
-    mystrftime(cam, filename, sizeof(filename)
-        , basename.c_str(), NULL);
-    retcd = snprintf(fullname, PATH_MAX, fmtstr.c_str()
-        , cam->conf->target_dir.c_str(), filename, extname.c_str());
-    if ((retcd < 0) || (retcd >= PATH_MAX)) {
-        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-            ,_("Error creating picture file name"));
-        return;
-    }
-}
-
 void mythreadname_set(const char *abbr, int threadnbr, const char *threadname)
 {
     /* When the abbreviation is sent in as null, that means we are being
