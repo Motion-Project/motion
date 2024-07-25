@@ -533,7 +533,7 @@ static void algsec_load_params(ctx_dev *cam)
     cam->algsec->height = cam->imgs.height;
     cam->algsec->width = cam->imgs.width;
     cam->algsec->models.method = cam->conf->secondary_method;
-    cam->algsec->image_norm = (unsigned char*)mymalloc(cam->imgs.size_norm);
+    cam->algsec->image_norm = (unsigned char*)mymalloc((size_t)cam->imgs.size_norm);
     cam->algsec->frame_missed = 0;
     cam->algsec->too_slow = 0;
     cam->algsec->detecting = false;
@@ -714,9 +714,9 @@ void algsec_detect(ctx_dev *cam)
             if (cam->algsec->detecting){
                 cam->algsec->frame_missed++;
             } else {
-                mymemcpy(cam->algsec->image_norm
+                memcpy(cam->algsec->image_norm
                     , cam->imgs.image_virgin
-                    , cam->imgs.size_norm);
+                    , (uint)cam->imgs.size_norm);
 
                 /*Set the bool to detect on the new image and reset interval */
                 cam->algsec->detecting = true;

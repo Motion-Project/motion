@@ -394,8 +394,8 @@ void cls_convert::rgb_bgr(u_char *img_dst, u_char *img_src, int rgb)
     y = img_dst;
     u = y + width * height;
     v = u + (width * height) / 4;
-    mymemset(u, 0, width * height / 4);
-    mymemset(v, 0, width * height / 4);
+    memset(u, 0, (uint)(width * height) / 4);
+    memset(v, 0, (uint)(width * height) / 4);
 
     for (loop = 0; loop < height; loop++) {
         for (i = 0; i < width; i += 2) {
@@ -513,7 +513,7 @@ void cls_convert::y10torgb24(u_char *img_dst, u_char *img_src, int shift)
 void cls_convert::greytoyuv420p(u_char *img_dst, u_char *img_src)
 {
     memcpy(img_dst, img_src, (uint)(width*height));
-    mymemset(img_dst+(width*height), 128, (width * height) / 2);
+    memset(img_dst+(width*height), 128, (uint)(width * height) / 2);
 }
 
 /* Convert captured image to the standard pixel format*/
@@ -539,7 +539,7 @@ int cls_convert::process(u_char *img_dst, u_char *img_src, int clen)
             return 0;
 
         case V4L2_PIX_FMT_YUV420:
-            mymemcpy(img_dst, img_src, clen);
+            memcpy(img_dst, img_src, (uint)clen);
             return 0;
 
         case V4L2_PIX_FMT_PJPG:
@@ -602,7 +602,7 @@ cls_convert::cls_convert(ctx_dev *p_cam, int p_pix, int p_w, int p_h)
     height = p_h;
     pixfmt_src = p_pix;
 
-    common_buffer =(u_char*) mymalloc(3 * width * height);
+    common_buffer =(u_char*) mymalloc((uint)(3 * width * height));
 
 }
 

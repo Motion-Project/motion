@@ -503,7 +503,7 @@ void cls_webu_ans::mhd_auth_parse()
     auth_len = (int)app->conf->webcontrol_authentication.length();
     col_pos =(char*) strstr(app->conf->webcontrol_authentication.c_str() ,":");
     if (col_pos == NULL) {
-        auth_user = (char*)mymalloc(auth_len+1);
+        auth_user = (char*)mymalloc((uint)(auth_len+1));
         auth_pass = (char*)mymalloc(2);
         snprintf(auth_user, (uint)auth_len + 1, "%s"
             ,app->conf->webcontrol_authentication.c_str());

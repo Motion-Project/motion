@@ -226,10 +226,11 @@ char *cls_netcam::url_match(regmatch_t m, const char *input)
 
     if (m.rm_so != -1) {
         len = m.rm_eo - m.rm_so;
-
-        if ((match =(char*) mymalloc(len + 1)) != NULL) {
-            strncpy(match, input + m.rm_so, (uint)len);
-            match[len] = '\0';
+        if (len > 0) {
+            if ((match =(char*) mymalloc(uint(len + 1))) != NULL) {
+                strncpy(match, input + m.rm_so, (uint)len);
+                match[len] = '\0';
+            }
         }
     }
 

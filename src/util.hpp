@@ -74,17 +74,10 @@
     typedef const uint8_t myuint;
 #endif
 
-    void mymemset(void *dst, int src, int sz);
-    void mymemset(void *dst, int src, ulong sz);
-    void mymemcpy(void *dst, void *src, int sz);
-    void mymemcpy(void *dst, void *src, ulong sz);
-
     void myfree(void *ptr_addr);
     #define mydelete(x) {if(x!=nullptr) {delete x; x=nullptr;}}
 
     void *mymalloc(size_t nbytes);
-    void *mymalloc(uint nbytes);
-    void *mymalloc(int nbytes);
 
     void *myrealloc(void *ptr, size_t size, const char *desc);
     int mycreate_path(const char *path);

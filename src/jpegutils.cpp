@@ -170,10 +170,10 @@ struct ctx_exif_info {
     char *description;
     char *datetime;
     char *subtime;
-    int ifd0_tagcount;
-    int ifd1_tagcount;
+    uint ifd0_tagcount;
+    uint ifd1_tagcount;
     uint datasize;
-    int ifds_size;
+    uint ifds_size;
     struct tiff_writing writing;
 };
 
@@ -334,7 +334,7 @@ void jpgutl_exif_writeifd1(ctx_exif_info *exif_info)
 uint jpgutl_exif(u_char **exif, ctx_dev *cam, timespec *ts_in1, ctx_coord *box)
 {
     struct ctx_exif_info *exif_info;
-    int buffer_size;
+    uint buffer_size;
     uint marker_len;
     JOCTET *marker;
 
@@ -353,7 +353,7 @@ uint jpgutl_exif(u_char **exif, ctx_dev *cam, timespec *ts_in1, ctx_coord *box)
     }
 
     buffer_size = 14 + /* EXIF and TIFF headers */
-        exif_info->ifds_size + (int)exif_info->datasize;
+        exif_info->ifds_size + exif_info->datasize;
 
     marker =(JOCTET *)mymalloc(buffer_size);
     memcpy(marker, exif_marker_start, 14); /* EXIF and TIFF headers */

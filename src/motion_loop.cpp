@@ -53,11 +53,11 @@ static void mlp_ring_resize(ctx_dev *cam)
     tmp =(ctx_image_data*) mymalloc((uint)new_size * sizeof(ctx_image_data));
 
     for(i = 0; i < new_size; i++) {
-        tmp[i].image_norm =(unsigned char*) mymalloc(cam->imgs.size_norm);
-        mymemset(tmp[i].image_norm, 0x80, cam->imgs.size_norm);
+        tmp[i].image_norm =(unsigned char*) mymalloc((uint)cam->imgs.size_norm);
+        memset(tmp[i].image_norm, 0x80, (uint)cam->imgs.size_norm);
         if (cam->imgs.size_high > 0) {
-            tmp[i].image_high =(unsigned char*) mymalloc(cam->imgs.size_high);
-            mymemset(tmp[i].image_high, 0x80, cam->imgs.size_high);
+            tmp[i].image_high =(unsigned char*) mymalloc((uint)cam->imgs.size_high);
+            memset(tmp[i].image_high, 0x80, (uint)cam->imgs.size_high);
         }
     }
 
@@ -484,8 +484,8 @@ static void mlp_init_firstimage(ctx_dev *cam)
         }
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", msg);
         for (indx = 0; indx<cam->imgs.ring_size; indx++) {
-            mymemset(cam->imgs.image_ring[indx].image_norm
-                , 0x80, cam->imgs.size_norm);
+            memset(cam->imgs.image_ring[indx].image_norm
+                , 0x80, (uint)cam->imgs.size_norm);
             cam->draw->text(cam->imgs.image_ring[indx].image_norm
                 , cam->imgs.width, cam->imgs.height
                 , 10, 20 * cam->text_scale
@@ -553,28 +553,28 @@ static void mlp_init_areadetect(ctx_dev *cam)
 /** Allocate the required buffers */
 static void mlp_init_buffers(ctx_dev *cam)
 {
-    cam->imgs.ref =(unsigned char*) mymalloc(cam->imgs.size_norm);
-    cam->imgs.image_motion.image_norm = (unsigned char*)mymalloc(cam->imgs.size_norm);
+    cam->imgs.ref =(unsigned char*) mymalloc((uint)cam->imgs.size_norm);
+    cam->imgs.image_motion.image_norm = (unsigned char*)mymalloc((uint)cam->imgs.size_norm);
     cam->imgs.ref_dyn =(int*) mymalloc((uint)cam->imgs.motionsize * sizeof(*cam->imgs.ref_dyn));
-    cam->imgs.image_virgin =(unsigned char*) mymalloc(cam->imgs.size_norm);
-    cam->imgs.image_vprvcy = (unsigned char*)mymalloc(cam->imgs.size_norm);
-    cam->imgs.smartmask =(unsigned char*) mymalloc(cam->imgs.motionsize);
-    cam->imgs.smartmask_final =(unsigned char*) mymalloc(cam->imgs.motionsize);
+    cam->imgs.image_virgin =(unsigned char*) mymalloc((uint)cam->imgs.size_norm);
+    cam->imgs.image_vprvcy = (unsigned char*)mymalloc((uint)cam->imgs.size_norm);
+    cam->imgs.smartmask =(unsigned char*) mymalloc((uint)cam->imgs.motionsize);
+    cam->imgs.smartmask_final =(unsigned char*) mymalloc((uint)cam->imgs.motionsize);
     cam->imgs.smartmask_buffer =(int*) mymalloc((uint)cam->imgs.motionsize * sizeof(*cam->imgs.smartmask_buffer));
     cam->imgs.labels =(int*)mymalloc((uint)cam->imgs.motionsize * sizeof(*cam->imgs.labels));
     cam->imgs.labelsize =(int*) mymalloc((uint)(cam->imgs.motionsize/2+1) * sizeof(*cam->imgs.labelsize));
-    cam->imgs.image_preview.image_norm =(unsigned char*) mymalloc(cam->imgs.size_norm);
-    cam->imgs.common_buffer =(unsigned char*) mymalloc(3 * cam->imgs.width * cam->imgs.height);
-    cam->imgs.image_secondary =(unsigned char*) mymalloc(3 * cam->imgs.width * cam->imgs.height);
+    cam->imgs.image_preview.image_norm =(unsigned char*) mymalloc((uint)cam->imgs.size_norm);
+    cam->imgs.common_buffer =(unsigned char*) mymalloc((uint)(3 * cam->imgs.width * cam->imgs.height));
+    cam->imgs.image_secondary =(unsigned char*) mymalloc((uint)(3 * cam->imgs.width * cam->imgs.height));
     if (cam->imgs.size_high > 0) {
-        cam->imgs.image_preview.image_high =(unsigned char*) mymalloc(cam->imgs.size_high);
+        cam->imgs.image_preview.image_high =(unsigned char*) mymalloc((uint)cam->imgs.size_high);
     } else {
         cam->imgs.image_preview.image_high = NULL;
     }
 
-    mymemset(cam->imgs.smartmask, 0, cam->imgs.motionsize);
-    mymemset(cam->imgs.smartmask_final, 255, cam->imgs.motionsize);
-    mymemset(cam->imgs.smartmask_buffer, 0, (uint)cam->imgs.motionsize * sizeof(*cam->imgs.smartmask_buffer));
+    memset(cam->imgs.smartmask, 0, (uint)cam->imgs.motionsize);
+    memset(cam->imgs.smartmask_final, 255, (uint)cam->imgs.motionsize);
+    memset(cam->imgs.smartmask_buffer, 0, (uint)cam->imgs.motionsize * sizeof(*cam->imgs.smartmask_buffer));
 }
 
 /* Initialize loop values */
@@ -643,11 +643,13 @@ static void mlp_init_cam_start(ctx_dev *cam)
 /* initialize reference images*/
 static void mlp_init_ref(ctx_dev *cam)
 {
-    mymemcpy(cam->imgs.image_virgin, cam->current_image->image_norm, cam->imgs.size_norm);
+    memcpy(cam->imgs.image_virgin, cam->current_image->image_norm
+        , (uint)cam->imgs.size_norm);
 
     mlp_mask_privacy(cam);
 
-    mymemcpy(cam->imgs.image_vprvcy, cam->current_image->image_norm, cam->imgs.size_norm);
+    memcpy(cam->imgs.image_vprvcy, cam->current_image->image_norm
+        , (uint)cam->imgs.size_norm);
 
     alg_update_reference_frame(cam, RESET_REF_FRAME);
 }
@@ -926,9 +928,11 @@ static int mlp_capture(ctx_dev *cam)
             }
         }
         cam->missing_frame_counter = 0;
-        mymemcpy(cam->imgs.image_virgin, cam->current_image->image_norm, cam->imgs.size_norm);
+        memcpy(cam->imgs.image_virgin, cam->current_image->image_norm
+            , (uint)cam->imgs.size_norm);
         mlp_mask_privacy(cam);
-        mymemcpy(cam->imgs.image_vprvcy, cam->current_image->image_norm, cam->imgs.size_norm);
+        memcpy(cam->imgs.image_vprvcy, cam->current_image->image_norm
+            , (uint)cam->imgs.size_norm);
 
     } else {
         if (cam->connectionlosttime.tv_sec == 0) {
@@ -940,7 +944,8 @@ static int mlp_capture(ctx_dev *cam)
         if ((cam->device_status == STATUS_OPENED) &&
             (cam->missing_frame_counter <
                 (cam->conf->device_tmo * cam->conf->framerate))) {
-            mymemcpy(cam->current_image->image_norm, cam->imgs.image_vprvcy, cam->imgs.size_norm);
+            memcpy(cam->current_image->image_norm, cam->imgs.image_vprvcy
+                , (uint)cam->imgs.size_norm);
         } else {
             cam->lost_connection = 1;
             if (cam->device_status == STATUS_OPENED) {
@@ -949,7 +954,7 @@ static int mlp_capture(ctx_dev *cam)
                 tmpin = "UNABLE TO OPEN VIDEO DEVICE\\nSINCE %Y-%m-%d %T";
             }
 
-            mymemset(cam->current_image->image_norm, 0x80, cam->imgs.size_norm);
+            memset(cam->current_image->image_norm, 0x80, (uint)cam->imgs.size_norm);
             cam->current_image->imgts =cam->connectionlosttime;
             mystrftime(cam, tmpout, sizeof(tmpout), tmpin, NULL);
             cam->draw->text(cam->current_image->image_norm
@@ -1419,8 +1424,8 @@ static void mlp_parmsupdate(ctx_dev *cam)
         if (cam->conf->smart_mask_speed != cam->smartmask_speed ||
             cam->smartmask_lastrate != cam->lastrate) {
             if (cam->conf->smart_mask_speed == 0) {
-                mymemset(cam->imgs.smartmask, 0, cam->imgs.motionsize);
-                mymemset(cam->imgs.smartmask_final, 255, cam->imgs.motionsize);
+                memset(cam->imgs.smartmask, 0, (uint)cam->imgs.motionsize);
+                memset(cam->imgs.smartmask_final, 255, (uint)cam->imgs.motionsize);
             }
             cam->smartmask_lastrate = cam->lastrate;
             cam->smartmask_speed = cam->conf->smart_mask_speed;

@@ -110,7 +110,8 @@ static void webu_getimg_norm(ctx_dev *cam)
 
     if (cam->stream.norm.jpg_cnct > 0) {
         if (cam->stream.norm.jpg_data == NULL) {
-            cam->stream.norm.jpg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
+            cam->stream.norm.jpg_data =(unsigned char*)
+                mymalloc((uint)cam->imgs.size_norm);
         }
         if (cam->current_image->image_norm != NULL && cam->stream.norm.consumed) {
             cam->stream.norm.jpg_sz = cam->picture->put_memory(
@@ -125,9 +126,11 @@ static void webu_getimg_norm(ctx_dev *cam)
     }
     if ((cam->stream.norm.ts_cnct > 0) || (cam->stream.norm.all_cnct > 0)) {
         if (cam->stream.norm.img_data == NULL) {
-            cam->stream.norm.img_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
+            cam->stream.norm.img_data =(unsigned char*)
+                mymalloc((uint)cam->imgs.size_norm);
         }
-        mymemcpy(cam->stream.norm.img_data, cam->current_image->image_norm, cam->imgs.size_norm);
+        memcpy(cam->stream.norm.img_data, cam->current_image->image_norm
+            , (uint)cam->imgs.size_norm);
     }
 }
 
@@ -144,7 +147,8 @@ static void webu_getimg_sub(ctx_dev *cam)
 
     if (cam->stream.sub.jpg_cnct > 0) {
         if (cam->stream.sub.jpg_data == NULL) {
-            cam->stream.sub.jpg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
+            cam->stream.sub.jpg_data =(unsigned char*)
+                mymalloc((uint)cam->imgs.size_norm);
         }
         if (cam->current_image->image_norm != NULL && cam->stream.sub.consumed) {
             /* Resulting substream image must be multiple of 8 */
@@ -153,7 +157,8 @@ static void webu_getimg_sub(ctx_dev *cam)
 
                 subsize = ((cam->imgs.width / 2) * (cam->imgs.height / 2) * 3 / 2);
                 if (cam->imgs.image_substream == NULL) {
-                    cam->imgs.image_substream =(unsigned char*)mymalloc(subsize);
+                    cam->imgs.image_substream =(unsigned char*)
+                        mymalloc((uint)subsize);
                 }
                 cam->picture->scale_img(cam->imgs.width
                     ,cam->imgs.height
@@ -182,21 +187,22 @@ static void webu_getimg_sub(ctx_dev *cam)
 
     if ((cam->stream.sub.ts_cnct > 0) || (cam->stream.sub.all_cnct > 0)) {
         if (cam->stream.sub.img_data == NULL) {
-            cam->stream.sub.img_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
+            cam->stream.sub.img_data =(unsigned char*)mymalloc((uint)cam->imgs.size_norm);
         }
         if (((cam->imgs.width  % 16) == 0)  &&
             ((cam->imgs.height % 16) == 0)) {
             subsize = ((cam->imgs.width / 2) * (cam->imgs.height / 2) * 3 / 2);
             if (cam->imgs.image_substream == NULL) {
-                cam->imgs.image_substream =(unsigned char*)mymalloc(subsize);
+                cam->imgs.image_substream =(unsigned char*)mymalloc((uint)subsize);
             }
             cam->picture->scale_img(cam->imgs.width
                 ,cam->imgs.height
                 ,cam->current_image->image_norm
                 ,cam->imgs.image_substream);
-            mymemcpy(cam->stream.sub.img_data, cam->imgs.image_substream, subsize);
+            memcpy(cam->stream.sub.img_data, cam->imgs.image_substream, (uint)subsize);
         } else {
-            mymemcpy(cam->stream.sub.img_data, cam->current_image->image_norm, cam->imgs.size_norm);
+            memcpy(cam->stream.sub.img_data, cam->current_image->image_norm
+                , (uint)cam->imgs.size_norm);
         }
     }
 
@@ -213,7 +219,7 @@ static void webu_getimg_motion(ctx_dev *cam)
 
     if (cam->stream.motion.jpg_cnct > 0) {
         if (cam->stream.motion.jpg_data == NULL) {
-            cam->stream.motion.jpg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
+            cam->stream.motion.jpg_data =(unsigned char*)mymalloc((uint)cam->imgs.size_norm);
         }
         if (cam->imgs.image_motion.image_norm != NULL  && cam->stream.motion.consumed) {
             cam->stream.motion.jpg_sz = cam->picture->put_memory(
@@ -228,11 +234,11 @@ static void webu_getimg_motion(ctx_dev *cam)
     }
     if ((cam->stream.motion.ts_cnct > 0) || (cam->stream.motion.all_cnct > 0)) {
         if (cam->stream.motion.img_data == NULL) {
-            cam->stream.motion.img_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
+            cam->stream.motion.img_data =(unsigned char*)mymalloc((uint)cam->imgs.size_norm);
         }
-        mymemcpy(cam->stream.motion.img_data
+        memcpy(cam->stream.motion.img_data
             , cam->imgs.image_motion.image_norm
-            , cam->imgs.size_norm);
+            , (uint)cam->imgs.size_norm);
     }
 }
 
@@ -247,7 +253,7 @@ static void webu_getimg_source(ctx_dev *cam)
 
     if (cam->stream.source.jpg_cnct > 0) {
         if (cam->stream.source.jpg_data == NULL) {
-            cam->stream.source.jpg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
+            cam->stream.source.jpg_data =(unsigned char*)mymalloc((uint)cam->imgs.size_norm);
         }
         if (cam->imgs.image_virgin != NULL && cam->stream.source.consumed) {
             cam->stream.source.jpg_sz = cam->picture->put_memory(
@@ -262,11 +268,11 @@ static void webu_getimg_source(ctx_dev *cam)
     }
     if ((cam->stream.source.ts_cnct > 0) || (cam->stream.source.all_cnct > 0)) {
         if (cam->stream.source.img_data == NULL) {
-            cam->stream.source.img_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
+            cam->stream.source.img_data =(unsigned char*)mymalloc((uint)cam->imgs.size_norm);
         }
-        mymemcpy(cam->stream.source.img_data
+        memcpy(cam->stream.source.img_data
             , cam->imgs.image_virgin
-            , cam->imgs.size_norm);
+            , (uint)cam->imgs.size_norm);
     }
 }
 
@@ -283,10 +289,13 @@ static void webu_getimg_secondary(ctx_dev *cam)
         if (cam->imgs.size_secondary>0) {
             pthread_mutex_lock(&cam->algsec->mutex);
                 if (cam->stream.secondary.jpg_data == NULL) {
-                    cam->stream.secondary.jpg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
+                    cam->stream.secondary.jpg_data =(unsigned char*)
+                        mymalloc((uint)cam->imgs.size_norm);
                 }
 
-                mymemcpy(cam->stream.secondary.jpg_data,cam->imgs.image_secondary,cam->imgs.size_secondary);
+                memcpy(cam->stream.secondary.jpg_data
+                    , cam->imgs.image_secondary
+                    , (uint)cam->imgs.size_secondary);
                 cam->stream.secondary.jpg_sz = cam->imgs.size_secondary;
             pthread_mutex_unlock(&cam->algsec->mutex);
         } else {
@@ -295,10 +304,11 @@ static void webu_getimg_secondary(ctx_dev *cam)
     }
     if ((cam->stream.secondary.ts_cnct > 0) || (cam->stream.secondary.all_cnct > 0)) {
         if (cam->stream.secondary.img_data == NULL) {
-            cam->stream.secondary.img_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
+            cam->stream.secondary.img_data =(unsigned char*)
+                mymalloc((uint)cam->imgs.size_norm);
         }
-        mymemcpy(cam->stream.secondary.img_data
-            , cam->current_image->image_norm, cam->imgs.size_norm);
+        memcpy(cam->stream.secondary.img_data
+            , cam->current_image->image_norm, (uint)cam->imgs.size_norm);
     }
 
 }

@@ -815,7 +815,7 @@ int cls_libcam::next(ctx_image_data *img_data)
         if (req_queue.empty() == false) {
             Request *request = this->req_queue.front();
 
-            mymemcpy(img_data->image_norm, membuf.buf, membuf.bufsz);
+            memcpy(img_data->image_norm, membuf.buf, (uint)membuf.bufsz);
 
             this->req_queue.pop();
             request->reuse(Request::ReuseBuffers);

@@ -132,7 +132,7 @@ void cls_v4l2cam::ctrls_list()
     }
 
     device_ctrls.clear();
-    mymemset(&vid_ctrl, 0, sizeof(struct v4l2_queryctrl));
+    memset(&vid_ctrl, 0, sizeof(struct v4l2_queryctrl));
     vid_ctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
     while (xioctl(VIDIOC_QUERYCTRL, &vid_ctrl) == 0) {
         if (vid_ctrl.type == V4L2_CTRL_TYPE_CTRL_CLASS) {
@@ -154,7 +154,7 @@ void cls_v4l2cam::ctrls_list()
 
         if (vid_ctrl.type == V4L2_CTRL_TYPE_MENU) {
             for (indx = vid_ctrl.minimum; indx <= vid_ctrl.maximum; indx++) {
-                mymemset(&vid_menu, 0, sizeof(struct v4l2_querymenu));
+                memset(&vid_menu, 0, sizeof(struct v4l2_querymenu));
                 vid_menu.id = vid_ctrl.id;
                 vid_menu.index = (uint)indx;
                 if (xioctl(VIDIOC_QUERYMENU, &vid_menu) == 0) {
@@ -196,7 +196,7 @@ void cls_v4l2cam::ctrls_set()
     for (it = device_ctrls.begin();it!=device_ctrls.end();it++) {
         if (it->ctrl_menuitem == false) {
             if (it->ctrl_currval != it->ctrl_newval) {
-                mymemset(&vid_ctrl, 0, sizeof (struct v4l2_control));
+                memset(&vid_ctrl, 0, sizeof (struct v4l2_control));
                 vid_ctrl.id = it->ctrl_id;
                 vid_ctrl.value = it->ctrl_newval;
                 retcd = xioctl(VIDIOC_S_CTRL, &vid_ctrl);
@@ -285,7 +285,7 @@ void cls_v4l2cam::set_input()
         }
     }
 
-    mymemset(&input, 0, sizeof (struct v4l2_input));
+    memset(&input, 0, sizeof (struct v4l2_input));
     if (spec == -1) {
         input.index = 0;
     } else {
@@ -355,7 +355,7 @@ void cls_v4l2cam::set_norm()
     }
 
     if (std_id) {
-        mymemset(&standard, 0, sizeof(struct v4l2_standard));
+        memset(&standard, 0, sizeof(struct v4l2_standard));
         standard.index = 0;
 
         while (xioctl(VIDIOC_ENUMSTD, &standard) == 0) {
@@ -419,7 +419,7 @@ void cls_v4l2cam::set_frequency()
     /* If this input is attached to a tuner, set the frequency. */
     if (device_type & V4L2_INPUT_TYPE_TUNER) {
         /* Query the tuners capabilities. */
-        mymemset(&tuner, 0, sizeof(struct v4l2_tuner));
+        memset(&tuner, 0, sizeof(struct v4l2_tuner));
         tuner.index = (uint)device_tuner;
 
         if (xioctl(VIDIOC_G_TUNER, &tuner) == -1) {
@@ -431,7 +431,7 @@ void cls_v4l2cam::set_frequency()
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Set tuner %d"), tuner.index);
 
         /* Set the frequency. */
-        mymemset(&freq, 0, sizeof(struct v4l2_frequency));
+        memset(&freq, 0, sizeof(struct v4l2_frequency));
         freq.tuner = (uint)device_tuner;
         freq.type = V4L2_TUNER_ANALOG_TV;
         freq.frequency = (uint)((spec / 1000) * 16);
@@ -452,7 +452,7 @@ int cls_v4l2cam::pixfmt_try(uint pixformat)
 {
     int retcd;
 
-    mymemset(&vidfmt, 0, sizeof(struct v4l2_format));
+    memset(&vidfmt, 0, sizeof(struct v4l2_format));
 
     vidfmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     vidfmt.fmt.pix.width = (uint)width;
@@ -640,7 +640,7 @@ int cls_v4l2cam::pixfmt_list()
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Supported palettes:"));
 
     v4l2_pal = 0;
-    mymemset(&fmtd, 0, sizeof(struct v4l2_fmtdesc));
+    memset(&fmtd, 0, sizeof(struct v4l2_fmtdesc));
     fmtd.index = (uint)v4l2_pal;
     fmtd.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     indx_palette = -1; /* -1 says not yet selected */
@@ -658,7 +658,7 @@ int cls_v4l2cam::pixfmt_list()
         }
 
         v4l2_pal++;
-        mymemset(&fmtd, 0, sizeof(struct v4l2_fmtdesc));
+        memset(&fmtd, 0, sizeof(struct v4l2_fmtdesc));
         fmtd.index = (uint)v4l2_pal;
         fmtd.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     }
@@ -735,7 +735,7 @@ void cls_v4l2cam::set_mmap()
         return;
     }
 
-    mymemset(&vidreq, 0, sizeof(struct v4l2_requestbuffers));
+    memset(&vidreq, 0, sizeof(struct v4l2_requestbuffers));
 
     vidreq.count = MMAP_BUFFERS;
     vidreq.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -770,7 +770,7 @@ void cls_v4l2cam::set_mmap()
     for (buffer_index = 0; buffer_index < buffer_count; buffer_index++) {
         struct v4l2_buffer p_buf;
 
-        mymemset(&p_buf, 0, sizeof(struct v4l2_buffer));
+        memset(&p_buf, 0, sizeof(struct v4l2_buffer));
 
         p_buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         p_buf.memory = V4L2_MEMORY_MMAP;
@@ -803,7 +803,7 @@ void cls_v4l2cam::set_mmap()
     }
 
     for (buffer_index = 0; buffer_index < buffer_count; buffer_index++) {
-        mymemset(&vidbuf, 0, sizeof(struct v4l2_buffer));
+        memset(&vidbuf, 0, sizeof(struct v4l2_buffer));
 
         vidbuf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         vidbuf.memory = V4L2_MEMORY_MMAP;
@@ -869,7 +869,7 @@ int cls_v4l2cam::capture()
         }
     }
 
-    mymemset(&vidbuf, 0, sizeof(struct v4l2_buffer));
+    memset(&vidbuf, 0, sizeof(struct v4l2_buffer));
 
     vidbuf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     vidbuf.memory = V4L2_MEMORY_MMAP;
@@ -1010,7 +1010,7 @@ void cls_v4l2cam::log_formats()
         return;
     }
 
-    mymemset(&dev_format, 0, sizeof(struct v4l2_fmtdesc));
+    memset(&dev_format, 0, sizeof(struct v4l2_fmtdesc));
     dev_format.index = indx_format = 0;
     dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     while (xioctl(VIDIOC_ENUM_FMT, &dev_format) != -1) {
@@ -1022,7 +1022,7 @@ void cls_v4l2cam::log_formats()
             ,dev_format.pixelformat >> 16
             ,dev_format.pixelformat >> 24);
 
-        mymemset(&dev_sizes, 0, sizeof(struct v4l2_frmsizeenum));
+        memset(&dev_sizes, 0, sizeof(struct v4l2_frmsizeenum));
         dev_sizes.index = indx_sizes = 0;
         dev_sizes.pixel_format = dev_format.pixelformat;
         while (xioctl(VIDIOC_ENUM_FRAMESIZES, &dev_sizes) != -1) {
@@ -1031,7 +1031,7 @@ void cls_v4l2cam::log_formats()
                 ,dev_sizes.discrete.width
                 ,dev_sizes.discrete.height);
 
-            mymemset(&dev_frameint, 0, sizeof(struct v4l2_frmivalenum));
+            memset(&dev_frameint, 0, sizeof(struct v4l2_frmivalenum));
             dev_frameint.index = indx_frameint = 0;
             dev_frameint.pixel_format = dev_format.pixelformat;
             dev_frameint.width = dev_sizes.discrete.width;
@@ -1041,17 +1041,17 @@ void cls_v4l2cam::log_formats()
                     ,_("    Framerate %d/%d")
                     ,dev_frameint.discrete.numerator
                     ,dev_frameint.discrete.denominator);
-                mymemset(&dev_frameint, 0, sizeof(struct v4l2_frmivalenum));
+                memset(&dev_frameint, 0, sizeof(struct v4l2_frmivalenum));
                 dev_frameint.index = (uint)(++indx_frameint);
                 dev_frameint.pixel_format = dev_format.pixelformat;
                 dev_frameint.width = dev_sizes.discrete.width;
                 dev_frameint.height = dev_sizes.discrete.height;
             }
-            mymemset(&dev_sizes, 0, sizeof(struct v4l2_frmsizeenum));
+            memset(&dev_sizes, 0, sizeof(struct v4l2_frmsizeenum));
             dev_sizes.index = (uint)(++indx_sizes);
             dev_sizes.pixel_format = dev_format.pixelformat;
         }
-        mymemset(&dev_format, 0, sizeof(struct v4l2_fmtdesc));
+        memset(&dev_format, 0, sizeof(struct v4l2_fmtdesc));
         dev_format.index = (uint)(++indx_format);
         dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     }
@@ -1068,7 +1068,7 @@ void cls_v4l2cam::set_fps()
         return;
     }
 
-    mymemset(&setfps, 0, sizeof(struct v4l2_streamparm));
+    memset(&setfps, 0, sizeof(struct v4l2_streamparm));
 
     setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     setfps.parm.capture.timeperframe.numerator = 1;

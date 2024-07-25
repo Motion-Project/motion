@@ -216,7 +216,7 @@ static int alg_labeling(ctx_dev *cam)
     imgs->labels_above = 0;
 
     /* Init: 0 means no label set / not checked. */
-    mymemset(labels, 0,(uint)(width * height) * sizeof(*labels));
+    memset(labels, 0,(uint)(width * height) * sizeof(*labels));
     pixelpos = 0;
 
     for (iy = 0; iy < height - 1; iy++) {
@@ -284,8 +284,8 @@ static int alg_dilate9(unsigned char *img, int width, int height, void *buffer)
     row3 = row2 + width;
 
     /* Init rows 2 and 3. */
-    mymemset(row2, 0, width);
-    mymemcpy(row3, img, width);
+    memset(row2, 0, (uint)width);
+    memcpy(row3, img, (uint)width);
 
     /* Pointer to the current row in img. */
     yp = img;
@@ -299,9 +299,9 @@ static int alg_dilate9(unsigned char *img, int width, int height, void *buffer)
 
         /* If we're at the last row, fill with zeros, otherwise copy from img. */
         if (y == height - 1) {
-            mymemset(row3, 0, width);
+            memset(row3, 0, (uint)width);
         } else {
-            mymemcpy(row3, yp + width, width);
+            memcpy(row3, yp + width, (uint)width);
         }
 
         /* Init slots 0 and 1 in the moving window. */
@@ -367,8 +367,8 @@ static int alg_dilate5(unsigned char *img, int width, int height, void *buffer)
     row3 = row2 + width;
 
     /* Init rows 2 and 3. */
-    mymemset(row2, 0, width);
-    mymemcpy(row3, img, width);
+    memset(row2, 0, (uint)width);
+    memcpy(row3, img, (uint)width);
 
     /* Pointer to the current row in img. */
     yp = img;
@@ -382,9 +382,9 @@ static int alg_dilate5(unsigned char *img, int width, int height, void *buffer)
 
         /* If we're at the last row, fill with zeros, otherwise copy from img. */
         if (y == height - 1) {
-            mymemset(row3, 0, width);
+            memset(row3, 0, (uint)width);
         } else {
-            mymemcpy(row3, yp + width, width);
+            memcpy(row3, yp + width, (uint)width);
         }
 
         /* Init mem and set blob to force an evaluation of the entire + shape. */
@@ -428,17 +428,17 @@ static int alg_erode9(unsigned char *img, int width, int height, void *buffer, u
     Row1 = (char *)buffer;
     Row2 = Row1 + width;
     Row3 = Row1 + 2 * width;
-    mymemset(Row2, flag, width);
-    mymemcpy(Row3, img, width);
+    memset(Row2, flag, (uint)width);
+    memcpy(Row3, img, (uint)width);
 
     for (y = 0; y < height; y++) {
-        mymemcpy(Row1, Row2, width);
-        mymemcpy(Row2, Row3, width);
+        memcpy(Row1, Row2, (uint)width);
+        memcpy(Row2, Row3, (uint)width);
 
         if (y == height - 1) {
-            mymemset(Row3, flag, width);
+            memset(Row3, flag, (uint)width);
         } else {
-            mymemcpy(Row3, img + (y + 1) * width, width);
+            memcpy(Row3, img + (y + 1) * width, (uint)width);
         }
 
         for (i = width - 2; i >= 1; i--) {
@@ -471,17 +471,17 @@ static int alg_erode5(unsigned char *img, int width, int height, void *buffer, u
     Row1 = (char *)buffer;
     Row2 = Row1 + width;
     Row3 = Row1 + 2 * width;
-    mymemset(Row2, flag, width);
-    mymemcpy(Row3, img, width);
+    memset(Row2, flag, (uint)width);
+    memcpy(Row3, img, (uint)width);
 
     for (y = 0; y < height; y++) {
-        mymemcpy(Row1, Row2, width);
-        mymemcpy(Row2, Row3, width);
+        memcpy(Row1, Row2, (uint)width);
+        memcpy(Row2, Row3, (uint)width);
 
         if (y == height - 1) {
-            mymemset(Row3, flag, width);
+            memset(Row3, flag, (uint)width);
         } else {
-            mymemcpy(Row3, img + (y + 1) * width, width);
+            memcpy(Row3, img + (y + 1) * width, (uint)width);
         }
 
         for (i = width - 2; i >= 1; i--) {
@@ -633,8 +633,8 @@ static void alg_diff_nomask(ctx_dev *cam)
     int noise = cam->noise;
     int lrgchg = cam->conf->threshold_ratio_change;
 
-    mymemset(out + imgsz, 128, (imgsz / 2));
-    mymemset(out, 0, imgsz);
+    memset(out + imgsz, 128, (uint)(imgsz / 2));
+    memset(out, 0, (uint)imgsz);
 
     for (i = 0; i < imgsz; i++) {
         curdiff = (*ref - *new_img);
@@ -676,8 +676,8 @@ static void alg_diff_mask(ctx_dev *cam)
     int noise = cam->noise;
     int lrgchg = cam->conf->threshold_ratio_change;
 
-    mymemset(out + imgsz, 128, (imgsz / 2));
-    mymemset(out, 0, imgsz);
+    memset(out + imgsz, 128, (uint)(imgsz / 2));
+    memset(out, 0, (uint)imgsz);
 
     for (i = 0; i < imgsz; i++) {
         curdiff = (*ref - *new_img);
@@ -729,8 +729,8 @@ static void alg_diff_smart(ctx_dev *cam)
     int lrgchg = cam->conf->threshold_ratio_change;
 
     imgsz = cam->imgs.motionsize;
-    mymemset(out + imgsz, 128, (imgsz / 2));
-    mymemset(out, 0, imgsz);
+    memset(out + imgsz, 128, (uint)(imgsz / 2));
+    memset(out, 0, (uint)imgsz);
 
     for (i = 0; i < imgsz; i++) {
         curdiff = (*ref - *new_img);
@@ -788,8 +788,8 @@ static void alg_diff_masksmart(ctx_dev *cam)
     int lrgchg = cam->conf->threshold_ratio_change;
 
     imgsz= cam->imgs.motionsize;
-    mymemset(out + imgsz, 128, (imgsz / 2));
-    mymemset(out, 0, imgsz);
+    memset(out + imgsz, 128, ((uint)imgsz / 2));
+    memset(out, 0, (uint)imgsz);
 
     for (i = 0; i < imgsz; i++) {
         curdiff = (*ref - *new_img);
@@ -966,9 +966,9 @@ void alg_update_reference_frame(ctx_dev *cam, int action)
 
     } else {   /* action == RESET_REF_FRAME - also used to initialize the frame at startup. */
         /* Copy fresh image */
-        mymemcpy(cam->imgs.ref, cam->imgs.image_vprvcy, cam->imgs.size_norm);
+        memcpy(cam->imgs.ref, cam->imgs.image_vprvcy, (uint)cam->imgs.size_norm);
         /* Reset static objects */
-        mymemset(cam->imgs.ref_dyn, 0
+        memset(cam->imgs.ref_dyn, 0
             ,(uint)cam->imgs.motionsize * sizeof(*cam->imgs.ref_dyn));
     }
 }
@@ -978,7 +978,7 @@ void alg_new_update_frame(ctx_dev *cam)
 {
 
     /* There used to be a lot more to this function before.....*/
-    mymemcpy(cam->imgs.ref, cam->imgs.image_vprvcy, cam->imgs.size_norm);
+    memcpy(cam->imgs.ref, cam->imgs.image_vprvcy, (uint)cam->imgs.size_norm);
 
 }
 

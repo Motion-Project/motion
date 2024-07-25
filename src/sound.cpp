@@ -486,7 +486,7 @@ static void snd_alsa_start(ctx_dev *snd)
     info->frames = (int)frames_per;
     info->buffer_size = info->frames * 2;
     info->buffer = (int16_t*)mymalloc((uint)info->buffer_size * sizeof(int16_t));
-    mymemset(info->buffer, 0x00, (uint)info->buffer_size * sizeof(int16_t));
+    memset(info->buffer, 0x00, (uint)info->buffer_size * sizeof(int16_t));
 
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Started.");
     snd->device_status =STATUS_OPENED;
@@ -588,7 +588,7 @@ static void snd_pulse_init(ctx_dev *snd)
         }
         info->buffer_size = info->frames * 2;
         info->buffer = (int16_t*)mymalloc((uint)info->buffer_size * sizeof(int16_t));
-        mymemset(info->buffer, 0x00, (uint)info->buffer_size * sizeof(int16_t));
+        memset(info->buffer, 0x00, (uint)info->buffer_size * sizeof(int16_t));
 
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Started.");
         snd->device_status =STATUS_OPENED;

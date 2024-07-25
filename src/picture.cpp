@@ -293,7 +293,7 @@ void cls_picture::save_yuv420p(FILE *fp, u_char *image, int width, int height
     int sz, image_size;
 
     image_size = (width * height * 3)/2;
-    u_char *buf =(u_char*) mymalloc(image_size);
+    u_char *buf =(u_char*) mymalloc((uint)image_size);
 
     sz = jpgutl_put_yuv420p(buf, image_size, image, width, height
         , cfg_picture_quality, cam ,ts1, box);
@@ -311,7 +311,7 @@ void cls_picture::save_grey(FILE *picture, u_char *image, int width, int height
 
     image_size = (width * height * 3)/2;
 
-    u_char *buf =(u_char*) mymalloc(image_size);
+    u_char *buf =(u_char*) mymalloc((uint)image_size);
 
     sz = jpgutl_put_grey(buf, image_size, image, width, height
         , cfg_picture_quality, cam ,ts1, box);
@@ -483,13 +483,13 @@ void cls_picture::save_roi(char *file, u_char *image)
 
     image_size = bx->width * bx->height;
 
-    buf =(u_char*) mymalloc(image_size);
-    img =(u_char*) mymalloc(image_size);
+    buf =(u_char*) mymalloc((uint)image_size);
+    img =(u_char*) mymalloc((uint)image_size);
 
     for (indxh=bx->miny; indxh< bx->miny + bx->height; indxh++){
-        mymemcpy(img+((indxh - bx->miny)* bx->width)
+        memcpy(img+((indxh - bx->miny)* bx->width)
             , image+(indxh*cam->imgs.width) + bx->minx
-            , bx->width);
+            , (uint)bx->width);
     }
 
     sz = jpgutl_put_grey(buf, image_size, img
@@ -557,7 +557,7 @@ u_char *cls_picture::load_pgm(FILE *picture, int width, int height)
     ** this image for masking privacy which needs the space for
     ** the cr / cb components
     */
-    image =(u_char*) mymalloc((mask_width * mask_height * 3) / 2);
+    image =(u_char*) mymalloc((uint)((mask_width * mask_height * 3) / 2));
 
     for (y = 0; y < mask_height; y++) {
         if ((int)fread(&image[y * mask_width], 1, (uint)mask_width, picture) != mask_width) {
@@ -578,7 +578,7 @@ u_char *cls_picture::load_pgm(FILE *picture, int width, int height)
             ,_("Attempting to resize mask image from %dx%d to %dx%d")
             ,mask_width, mask_height, width, height);
 
-        resized_image =(u_char*) mymalloc((width * height * 3) / 2);
+        resized_image =(u_char*) mymalloc((uint)((width * height * 3) / 2));
 
         for (y = 0; y < height; y++) {
             for (x = 0; x < width; x++) {
@@ -613,7 +613,7 @@ void cls_picture::write_mask(const char *file)
         }
         return;
     }
-    mymemset(cam->imgs.image_motion.image_norm, 255, cam->imgs.motionsize); /* Initialize to unset */
+    memset(cam->imgs.image_motion.image_norm, 255, (uint)cam->imgs.motionsize); /* Initialize to unset */
 
     /* Write pgm-header. */
     fprintf(picture, "P5\n");
@@ -668,11 +668,11 @@ void cls_picture::save_preview()
     cam->imgs.image_preview.image_high = image_high;
 
     /* Copy the actual images for norm and high */
-    mymemcpy(cam->imgs.image_preview.image_norm
-        , cam->current_image->image_norm, cam->imgs.size_norm);
+    memcpy(cam->imgs.image_preview.image_norm
+        , cam->current_image->image_norm, (uint)cam->imgs.size_norm);
     if (cam->imgs.size_high > 0) {
-        mymemcpy(cam->imgs.image_preview.image_high
-            , cam->current_image->image_high, cam->imgs.size_high);
+        memcpy(cam->imgs.image_preview.image_high
+            , cam->current_image->image_high, (uint)cam->imgs.size_high);
     }
 
     /*
@@ -716,13 +716,15 @@ void cls_picture::init_privacy()
             cam->imgs.mask_privacy = load_pgm(picture, cam->imgs.width, cam->imgs.height);
 
             /* We only need the "or" mask for the U & V chrominance area.  */
-            cam->imgs.mask_privacy_uv =(u_char*) mymalloc((cam->imgs.height * cam->imgs.width) / 2);
+            cam->imgs.mask_privacy_uv =(u_char*) mymalloc((uint)
+                ((cam->imgs.height * cam->imgs.width) / 2));
             if (cam->imgs.size_high > 0) {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
                     ,_("Opening high resolution privacy mask file"));
                 rewind(picture);
                 cam->imgs.mask_privacy_high = load_pgm(picture, cam->imgs.width_high, cam->imgs.height_high);
-                cam->imgs.mask_privacy_high_uv =(u_char*) mymalloc((cam->imgs.height_high * cam->imgs.width_high) / 2);
+                cam->imgs.mask_privacy_high_uv =(u_char*) mymalloc((uint)
+                    ((cam->imgs.height_high * cam->imgs.width_high) / 2));
             }
 
             myfclose(picture);

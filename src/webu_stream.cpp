@@ -82,7 +82,7 @@ void cls_webu_stream::mjpeg_all_img()
 
     all_sz = app->all_sizes;
 
-    jpg_data = (unsigned char*) mymalloc(all_sz->img_sz);
+    jpg_data = (unsigned char*) mymalloc((uint)all_sz->img_sz);
 
     jpg_sz = jpgutl_put_yuv420p(jpg_data, all_sz->img_sz
         , webuc->all_img_data, all_sz->width, all_sz->height
@@ -94,8 +94,8 @@ void cls_webu_stream::mjpeg_all_img()
         "Content-type: image/jpeg\r\n"
         "Content-Length: %9d\r\n\r\n"
         ,jpg_sz);
-    mymemcpy(webuc->resp_image, resp_head, header_len);
-    mymemcpy(webuc->resp_image + header_len, jpg_data, jpg_sz);
+    memcpy(webuc->resp_image, resp_head, (uint)header_len);
+    memcpy(webuc->resp_image + header_len, jpg_data, (uint)jpg_sz);
     memcpy(webuc->resp_image + header_len + jpg_sz,"\r\n",(uint)2);
     webuc->resp_used =(uint)(header_len + jpg_sz + 2);
     myfree(&jpg_data);
@@ -143,10 +143,10 @@ void cls_webu_stream::mjpeg_one_img()
             "Content-type: image/jpeg\r\n"
             "Content-Length: %9d\r\n\r\n"
             ,strm->jpg_sz);
-        mymemcpy(webuc->resp_image, resp_head, header_len);
-        mymemcpy(webuc->resp_image + header_len
-            ,strm->jpg_data
-            ,strm->jpg_sz);
+        memcpy(webuc->resp_image, resp_head, (uint)header_len);
+        memcpy(webuc->resp_image + header_len
+            , strm->jpg_data
+            , (uint)strm->jpg_sz);
         /* Copy in the terminator after the jpg data at the end*/
         memcpy(webuc->resp_image + header_len + strm->jpg_sz,"\r\n",2);
         webuc->resp_used =(uint)(header_len + strm->jpg_sz + 2);
@@ -187,7 +187,7 @@ ssize_t cls_webu_stream::mjpeg_response (char *buf, size_t max)
         sent_bytes = webuc->resp_used - stream_pos;
     }
 
-    mymemcpy(buf, webuc->resp_image + stream_pos, sent_bytes);
+    memcpy(buf, webuc->resp_image + stream_pos, sent_bytes);
 
     stream_pos = stream_pos + sent_bytes;
     if (stream_pos >= webuc->resp_used) {
@@ -239,12 +239,12 @@ void cls_webu_stream::static_all_img()
     webuc->all_getimg();
 
     all_sz = app->all_sizes;
-    jpg_data = (unsigned char*)mymalloc((size_t)all_sz->img_sz);
+    jpg_data = (unsigned char*)mymalloc((uint)all_sz->img_sz);
 
     webuc->resp_used = (uint)jpgutl_put_yuv420p(jpg_data
         , all_sz->img_sz, webuc->all_img_data, all_sz->width
         , all_sz->height, 70, NULL,NULL,NULL);
-    mymemcpy(webuc->resp_image, jpg_data, webuc->resp_used);
+    memcpy(webuc->resp_image, jpg_data, webuc->resp_used);
     myfree(&jpg_data);
 }
 
@@ -313,9 +313,9 @@ void cls_webu_stream::static_one_img()
             pthread_mutex_unlock(&webua->cam->stream.mutex);
             return;
         }
-        mymemcpy(webuc->resp_image
-            ,strm->jpg_data
-            ,strm->jpg_sz);
+        memcpy(webuc->resp_image
+            , strm->jpg_data
+            , (uint)strm->jpg_sz);
         webuc->resp_used =(uint)strm->jpg_sz;
         strm->consumed = true;
     pthread_mutex_unlock(&webua->cam->stream.mutex);

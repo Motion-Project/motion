@@ -152,7 +152,7 @@ int cls_webu_mpegts::getimg()
 
     clock_gettime(CLOCK_REALTIME, &curr_ts);
 
-    mymemset(webuc->resp_image, '\0', webuc->resp_size);
+    memset(webuc->resp_image, '\0', webuc->resp_size);
     webuc->resp_used = 0;
 
     if (webua->device_id > 0) {
@@ -172,21 +172,21 @@ int cls_webu_mpegts::getimg()
             return 0;
         }
         img_sz = (ctx_codec->width * ctx_codec->height * 3)/2;
-        img_data = (unsigned char*) mymalloc(img_sz);
+        img_data = (unsigned char*) mymalloc((uint)img_sz);
         pthread_mutex_lock(&webua->cam->stream.mutex);
             if (strm->img_data == NULL) {
-                mymemset(img_data, 0x00, img_sz);
+                memset(img_data, 0x00, (uint)img_sz);
             } else {
-                mymemcpy(img_data, strm->img_data, img_sz);
+                memcpy(img_data, strm->img_data, (uint)img_sz);
                 strm->consumed = true;
             }
         pthread_mutex_unlock(&webua->cam->stream.mutex);
     } else {
         webuc->all_getimg();
 
-        img_data = (unsigned char*) mymalloc(app->all_sizes->img_sz);
+        img_data = (unsigned char*) mymalloc((uint)app->all_sizes->img_sz);
 
-        mymemcpy(img_data, webuc->all_img_data, app->all_sizes->img_sz);
+        memcpy(img_data, webuc->all_img_data, (uint)app->all_sizes->img_sz);
     }
 
     if (pic_send(img_data) < 0) {
@@ -249,7 +249,7 @@ ssize_t cls_webu_mpegts::response(char *buf, size_t max)
         sent_bytes = webuc->resp_used - stream_pos;
     }
 
-    mymemcpy(buf, webuc->resp_image + stream_pos, sent_bytes);
+    memcpy(buf, webuc->resp_image + stream_pos, (uint)sent_bytes);
 
     stream_pos = stream_pos + sent_bytes;
     if (stream_pos >= webuc->resp_used) {

@@ -191,7 +191,7 @@ void cls_rotate::process(ctx_image_data *img_data)
             rot90cw(img, temp_buff, wh, width, height);
             rot90cw(img + wh, temp_buff + wh, wh4, w2, h2);
             rot90cw(img + wh + wh4, temp_buff + wh + wh4, wh4, w2, h2);
-            mymemcpy(img, temp_buff, size);
+            memcpy(img, temp_buff, (uint)size);
             break;
         case 180:
             reverse_inplace_quad(img, wh);
@@ -202,7 +202,7 @@ void cls_rotate::process(ctx_image_data *img_data)
             rot90ccw(img, temp_buff, wh, width, height);
             rot90ccw(img + wh, temp_buff + wh, wh4, w2, h2);
             rot90ccw(img + wh + wh4, temp_buff + wh + wh4, wh4, w2, h2);
-            mymemcpy(img, temp_buff, size);
+            memcpy(img, temp_buff, (uint)size);
             break;
         default:
             break;
@@ -268,9 +268,9 @@ cls_rotate::cls_rotate(ctx_dev *p_cam)
     }
 
     if ((degrees == 90) || (degrees == 270)) {
-        buffer_norm =(u_char*) mymalloc(size_norm);
+        buffer_norm =(u_char*) mymalloc((uint)size_norm);
         if (size_high > 0 ) {
-            buffer_high =(u_char*) mymalloc(size_high);
+            buffer_high =(u_char*) mymalloc((uint)size_high);
         }
     }
 

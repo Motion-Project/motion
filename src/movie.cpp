@@ -59,9 +59,9 @@ void cls_movie::encode_nal()
     if ((pkt->pts == 0) && (!(pkt->flags & AV_PKT_FLAG_KEY))) {
         free_nal();
         nal_info_len = pkt->size;
-        nal_info =(char*)mymalloc(nal_info_len);
+        nal_info =(char*)mymalloc((uint)nal_info_len);
         if (nal_info) {
-            mymemcpy(nal_info, &pkt->data[0], nal_info_len);
+            memcpy(nal_info, &pkt->data[0], (uint)nal_info_len);
         } else {
             nal_info_len = 0;
         }
@@ -69,7 +69,7 @@ void cls_movie::encode_nal()
         int old_size = pkt->size;
         av_grow_packet(pkt, nal_info_len);
         memmove(&pkt->data[nal_info_len], &pkt->data[0],(uint)old_size);
-        mymemcpy(&pkt->data[0], nal_info, nal_info_len);
+        memcpy(&pkt->data[0], nal_info, (uint)nal_info_len);
         free_nal();
     }
 }
