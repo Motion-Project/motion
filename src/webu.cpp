@@ -180,7 +180,8 @@ void cls_webu::mhd_loadfile(std::string fname,std::string &filestr)
 {
     /* This needs conversion to c++ stream */
     FILE        *infile;
-    size_t      file_size, read_size;
+    size_t      read_size, file_size;
+    long        retcd;
     char        *file_char;
 
     filestr = "";
@@ -188,8 +189,9 @@ void cls_webu::mhd_loadfile(std::string fname,std::string &filestr)
         infile = myfopen(fname.c_str() , "rbe");
         if (infile != NULL) {
             fseek(infile, 0, SEEK_END);
-            file_size = (size_t)(infile);
-            if (file_size > 0 ) {
+            retcd = ftell(infile);
+            if (retcd > 0 ) {
+                file_size = (size_t)retcd;
                 file_char = (char*)mymalloc(file_size +1);
                 fseek(infile, 0, SEEK_SET);
                 read_size = fread(file_char, file_size, 1, infile);
@@ -388,7 +390,7 @@ void cls_webu::start_daemon_port1()
     mhdst->ipv6 = c_motapp->conf->webcontrol_ipv6;
     mhdst->tls_use = c_motapp->conf->webcontrol_tls;
 
-    mhdst->mhd_ops =(struct MHD_OptionItem*)mymalloc(sizeof(struct MHD_OptionItem)*WEBUI_MHD_OPTS);
+    mhdst->mhd_ops =(struct MHD_OptionItem*)mymalloc(sizeof(struct MHD_OptionItem) * WEBUI_MHD_OPTS);
     mhd_features();
     mhd_opts();
     mhd_flags();
