@@ -79,20 +79,20 @@ void webu_getimg_init(ctx_dev *cam)
 void webu_getimg_deinit(ctx_dev *cam)
 {
     /* NOTE:  This runs on the motion_loop thread. */
-    myfree(&cam->imgs.image_substream);
+    myfree(cam->imgs.image_substream);
 
     pthread_mutex_lock(&cam->stream.mutex);
-        myfree(&cam->stream.norm.jpg_data);
-        myfree(&cam->stream.sub.jpg_data);
-        myfree(&cam->stream.motion.jpg_data);
-        myfree(&cam->stream.source.jpg_data);
-        myfree(&cam->stream.secondary.jpg_data);
+        myfree(cam->stream.norm.jpg_data);
+        myfree(cam->stream.sub.jpg_data);
+        myfree(cam->stream.motion.jpg_data);
+        myfree(cam->stream.source.jpg_data);
+        myfree(cam->stream.secondary.jpg_data);
 
-        myfree(&cam->stream.norm.img_data) ;
-        myfree(&cam->stream.sub.img_data) ;
-        myfree(&cam->stream.motion.img_data) ;
-        myfree(&cam->stream.source.img_data) ;
-        myfree(&cam->stream.secondary.img_data) ;
+        myfree(cam->stream.norm.img_data) ;
+        myfree(cam->stream.sub.img_data) ;
+        myfree(cam->stream.motion.img_data) ;
+        myfree(cam->stream.source.img_data) ;
+        myfree(cam->stream.secondary.img_data) ;
     pthread_mutex_unlock(&cam->stream.mutex);
 
     pthread_mutex_destroy(&cam->stream.mutex);
@@ -299,7 +299,7 @@ static void webu_getimg_secondary(ctx_dev *cam)
                 cam->stream.secondary.jpg_sz = cam->imgs.size_secondary;
             pthread_mutex_unlock(&cam->algsec->mutex);
         } else {
-            myfree(&cam->stream.secondary.jpg_data);
+            myfree(cam->stream.secondary.jpg_data);
         }
     }
     if ((cam->stream.secondary.ts_cnct > 0) || (cam->stream.secondary.all_cnct > 0)) {

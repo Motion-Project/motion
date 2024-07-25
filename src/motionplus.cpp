@@ -969,7 +969,7 @@ static void motpls_cam_delete(ctx_motapp *motapp)
     pthread_mutex_lock(&motapp->mutex_camlst);
         delete motapp->cam_list[motapp->cam_delete]->conf;
         delete motapp->cam_list[motapp->cam_delete];
-        myfree(&motapp->cam_list);
+        myfree(motapp->cam_list);
         motapp->cam_cnt--;
         motapp->cam_list = tmp;
     pthread_mutex_unlock(&motapp->mutex_camlst);

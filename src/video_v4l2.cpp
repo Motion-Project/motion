@@ -779,7 +779,7 @@ void cls_v4l2cam::set_mmap()
             MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
                 ,_("Error querying buffer %i\nVIDIOC_QUERYBUF: ")
                 ,buffer_index);
-            myfree(&buffers);
+            myfree(buffers);
             device_close();
             return;
         }
@@ -792,7 +792,7 @@ void cls_v4l2cam::set_mmap()
         if (buffers[buffer_index].ptr == MAP_FAILED) {
             MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
                 ,_("Error mapping buffer %i mmap"), buffer_index);
-            myfree(&buffers);
+            myfree(buffers);
             device_close();
             return;
         }
@@ -1109,7 +1109,7 @@ void cls_v4l2cam::stop_cam()
         for (indx = 0; indx < (int)vidreq.count; indx++){
             munmap(buffers[indx].ptr, buffers[indx].size);
         }
-        myfree(&buffers);
+        myfree(buffers);
     }
 
     if (convert != nullptr) {

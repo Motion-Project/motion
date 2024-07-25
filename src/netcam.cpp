@@ -359,7 +359,7 @@ void cls_netcam::pktarray_free()
                 pktarray[indx].packet = NULL;
             }
         }
-        myfree(&pktarray);
+        myfree(pktarray);
         pktarray_size = 0;
         pktarray_index = -1;
     pthread_mutex_unlock(&mutex_pktarray);
@@ -449,7 +449,7 @@ void cls_netcam::pktarray_resize()
                 tmp[indx].iswritten = false;
             }
 
-            myfree(&pktarray);
+            myfree(pktarray);
             pktarray = tmp;
             pktarray_size = newsize;
 

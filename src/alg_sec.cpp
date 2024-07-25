@@ -680,7 +680,7 @@ void algsec_deinit(ctx_dev *cam)
             }
         }
 
-        myfree(&cam->algsec->image_norm);
+        myfree(cam->algsec->image_norm);
 
         pthread_mutex_destroy(&cam->algsec->mutex);
 

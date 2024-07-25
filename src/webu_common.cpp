@@ -355,8 +355,8 @@ void cls_webu_common::all_getimg()
             }
         }
 
-        myfree(&dst_img);
-        myfree(&src_img);
+        myfree(dst_img);
+        myfree(src_img);
     }
 
 }
@@ -558,7 +558,7 @@ void cls_webu_common::one_buffer()
     }
     if (resp_size < (size_t)webua->cam->imgs.size_norm) {
         if (resp_image != NULL) {
-            myfree(&resp_image);
+            myfree(resp_image);
         }
         resp_image = (unsigned char*) mymalloc((uint)webua->cam->imgs.size_norm);
         memset(resp_image,'\0', (uint)webua->cam->imgs.size_norm);
@@ -571,7 +571,7 @@ void cls_webu_common::all_buffer()
 {
     if (resp_size < (size_t)app->all_sizes->img_sz) {
         if (resp_image != nullptr) {
-            myfree(&resp_image);
+            myfree(resp_image);
         }
         resp_size = (uint)app->all_sizes->img_sz;
         resp_image = (unsigned char*) mymalloc(resp_size);
@@ -603,6 +603,6 @@ cls_webu_common::~cls_webu_common()
     app    = nullptr;
     webu   = nullptr;
     webua  = nullptr;
-    myfree(&resp_image);
-    myfree(&all_img_data);
+    myfree(resp_image);
+    myfree(all_img_data);
 }

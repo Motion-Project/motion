@@ -70,10 +70,10 @@ static void dbse_cols_free(ctx_motapp *motapp)
 
     if (motapp->dbse->cols_list != NULL) {
         for (indx=0; indx<motapp->dbse->cols_cnt; indx++) {
-            myfree(&motapp->dbse->cols_list[indx].col_nm);
-            myfree(&motapp->dbse->cols_list[indx].col_typ);
+            myfree(motapp->dbse->cols_list[indx].col_nm);
+            myfree(motapp->dbse->cols_list[indx].col_typ);
         }
-        myfree(&motapp->dbse->cols_list);
+        myfree(motapp->dbse->cols_list);
     }
     motapp->dbse->cols_cnt = 0;
 
@@ -86,14 +86,14 @@ static void dbse_movies_free(ctx_motapp *motapp)
 
     if (motapp->dbse->movie_list != NULL) {
         for (indx=0; indx<motapp->dbse->movie_cnt; indx++) {
-            myfree(&motapp->dbse->movie_list[indx].movie_nm);
-            myfree(&motapp->dbse->movie_list[indx].movie_dir);
-            myfree(&motapp->dbse->movie_list[indx].full_nm);
-            myfree(&motapp->dbse->movie_list[indx].movie_tmc);
-            myfree(&motapp->dbse->movie_list[indx].movie_tml);
+            myfree(motapp->dbse->movie_list[indx].movie_nm);
+            myfree(motapp->dbse->movie_list[indx].movie_dir);
+            myfree(motapp->dbse->movie_list[indx].full_nm);
+            myfree(motapp->dbse->movie_list[indx].movie_tmc);
+            myfree(motapp->dbse->movie_list[indx].movie_tml);
 
         }
-        myfree(&motapp->dbse->movie_list);
+        myfree(motapp->dbse->movie_list);
     }
     motapp->dbse->movie_cnt = 0;
 

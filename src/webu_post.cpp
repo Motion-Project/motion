@@ -774,8 +774,8 @@ cls_webu_post::~cls_webu_post()
     }
 
     for (indx = 0; indx<post_sz; indx++) {
-        myfree(&post_info[indx].key_nm);
-        myfree(&post_info[indx].key_val);
+        myfree(post_info[indx].key_nm);
+        myfree(post_info[indx].key_val);
     }
-    myfree(&post_info);
+    myfree(post_info);
 }

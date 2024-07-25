@@ -278,7 +278,7 @@ cls_rotate::cls_rotate(ctx_dev *p_cam)
 
 cls_rotate::~cls_rotate()
 {
-    myfree(&buffer_norm);
-    myfree(&buffer_high);
+    myfree(buffer_norm);
+    myfree(buffer_high);
 
 }

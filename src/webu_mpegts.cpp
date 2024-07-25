@@ -190,10 +190,10 @@ int cls_webu_mpegts::getimg()
     }
 
     if (pic_send(img_data) < 0) {
-        myfree(&img_data);
+        myfree(img_data);
         return -1;
     }
-    myfree(&img_data);
+    myfree(img_data);
 
     if (pic_get() < 0) {
         return -1;

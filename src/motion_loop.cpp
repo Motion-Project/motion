@@ -79,10 +79,10 @@ static void mlp_ring_destroy(ctx_dev *cam)
     }
 
     for (i = 0; i < cam->imgs.ring_size; i++) {
-        myfree(&cam->imgs.image_ring[i].image_norm);
-        myfree(&cam->imgs.image_ring[i].image_high);
+        myfree(cam->imgs.image_ring[i].image_norm);
+        myfree(cam->imgs.image_ring[i].image_high);
     }
-    myfree(&cam->imgs.image_ring);
+    myfree(cam->imgs.image_ring);
 
     /*
      * current_image is an alias from the pointers above which have
@@ -679,25 +679,25 @@ void mlp_cleanup(ctx_dev *cam)
         mlp_cam_close(cam);
     }
 
-    myfree(&cam->imgs.image_motion.image_norm);
-    myfree(&cam->imgs.ref);
-    myfree(&cam->imgs.ref_dyn);
-    myfree(&cam->imgs.image_virgin);
-    myfree(&cam->imgs.image_vprvcy);
-    myfree(&cam->imgs.labels);
-    myfree(&cam->imgs.labelsize);
-    myfree(&cam->imgs.smartmask);
-    myfree(&cam->imgs.smartmask_final);
-    myfree(&cam->imgs.smartmask_buffer);
-    myfree(&cam->imgs.mask);
-    myfree(&cam->imgs.mask_privacy);
-    myfree(&cam->imgs.mask_privacy_uv);
-    myfree(&cam->imgs.mask_privacy_high);
-    myfree(&cam->imgs.mask_privacy_high_uv);
-    myfree(&cam->imgs.common_buffer);
-    myfree(&cam->imgs.image_secondary);
-    myfree(&cam->imgs.image_preview.image_norm);
-    myfree(&cam->imgs.image_preview.image_high);
+    myfree(cam->imgs.image_motion.image_norm);
+    myfree(cam->imgs.ref);
+    myfree(cam->imgs.ref_dyn);
+    myfree(cam->imgs.image_virgin);
+    myfree(cam->imgs.image_vprvcy);
+    myfree(cam->imgs.labels);
+    myfree(cam->imgs.labelsize);
+    myfree(cam->imgs.smartmask);
+    myfree(cam->imgs.smartmask_final);
+    myfree(cam->imgs.smartmask_buffer);
+    myfree(cam->imgs.mask);
+    myfree(cam->imgs.mask_privacy);
+    myfree(cam->imgs.mask_privacy_uv);
+    myfree(cam->imgs.mask_privacy_high);
+    myfree(cam->imgs.mask_privacy_high_uv);
+    myfree(cam->imgs.common_buffer);
+    myfree(cam->imgs.image_secondary);
+    myfree(cam->imgs.image_preview.image_norm);
+    myfree(cam->imgs.image_preview.image_high);
 
     mlp_ring_destroy(cam); /* Cleanup the precapture ring buffer */
 

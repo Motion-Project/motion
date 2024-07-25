@@ -410,10 +410,10 @@ mhdrslt cls_webu_ans::mhd_digest()
     /* Check for valid user name */
     if (mystrne(user, auth_user)) {
         failauth_log(true);
-        myfree(&user);
+        myfree(user);
         return mhd_digest_fail(MHD_NO);
     }
-    myfree(&user);
+    myfree(user);
 
     /* Check the password as well*/
     retcd = MHD_digest_auth_check(connection, auth_realm
@@ -470,20 +470,20 @@ mhdrslt cls_webu_ans::mhd_basic()
 
     user = MHD_basic_auth_get_username_password (connection, &pass);
     if ((user == NULL) || (pass == NULL)) {
-        myfree(&user);
-        myfree(&pass);
+        myfree(user);
+        myfree(pass);
         return mhd_basic_fail();
     }
 
     if ((mystrne(user, auth_user)) || (mystrne(pass, auth_pass))) {
         failauth_log(mystrne(user, auth_user));
-        myfree(&user);
-        myfree(&pass);
+        myfree(user);
+        myfree(pass);
         return mhd_basic_fail();
     }
 
-    myfree(&user);
-    myfree(&pass);
+    myfree(user);
+    myfree(pass);
 
     authenticated = true;
 
@@ -497,8 +497,8 @@ void cls_webu_ans::mhd_auth_parse()
     int auth_len;
     char *col_pos;
 
-    myfree(&auth_user);
-    myfree(&auth_pass);
+    myfree(auth_user);
+    myfree(auth_pass);
 
     auth_len = (int)app->conf->webcontrol_authentication.length();
     col_pos =(char*) strstr(app->conf->webcontrol_authentication.c_str() ,":");
@@ -821,8 +821,8 @@ void cls_webu_ans::deinit_counter()
                 (strm->jpg_cnct == 0) &&
                 (strm->ts_cnct == 0) &&
                 (p_cam->passflag)) {
-                    myfree(&strm->img_data);
-                    myfree(&strm->jpg_data);
+                    myfree(strm->img_data);
+                    myfree(strm->jpg_data);
             }
         pthread_mutex_unlock(&p_cam->stream.mutex);
     }
@@ -848,9 +848,9 @@ cls_webu_ans::~cls_webu_ans()
         delete webu_stream;
     }
 
-    myfree(&auth_user);
-    myfree(&auth_pass);
-    myfree(&auth_opaque);
-    myfree(&auth_realm);
+    myfree(auth_user);
+    myfree(auth_pass);
+    myfree(auth_opaque);
+    myfree(auth_realm);
     webu->cnct_cnt--;
 }

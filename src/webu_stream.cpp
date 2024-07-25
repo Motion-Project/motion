@@ -98,7 +98,7 @@ void cls_webu_stream::mjpeg_all_img()
     memcpy(webuc->resp_image + header_len, jpg_data, (uint)jpg_sz);
     memcpy(webuc->resp_image + header_len + jpg_sz,"\r\n",(uint)2);
     webuc->resp_used =(uint)(header_len + jpg_sz + 2);
-    myfree(&jpg_data);
+    myfree(jpg_data);
 
 }
 
@@ -245,7 +245,7 @@ void cls_webu_stream::static_all_img()
         , all_sz->img_sz, webuc->all_img_data, all_sz->width
         , all_sz->height, 70, NULL,NULL,NULL);
     memcpy(webuc->resp_image, jpg_data, webuc->resp_used);
-    myfree(&jpg_data);
+    myfree(jpg_data);
 }
 
 /* Increment the jpg stream counters */

@@ -367,10 +367,10 @@ uint jpgutl_exif(u_char **exif, ctx_dev *cam, timespec *ts_in1, ctx_coord *box)
 
     marker_len = exif_info->writing.data_offset + 6;
 
-    myfree(&exif_info->description);
-    myfree(&exif_info->datetime);
+    myfree(exif_info->description);
+    myfree(exif_info->datetime);
 
-    myfree(&exif_info);
+    myfree(exif_info);
 
     *exif = marker;
 

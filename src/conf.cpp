@@ -4326,14 +4326,14 @@ void conf_deinit(ctx_motapp *motapp)
         delete motapp->cam_list[indx]->conf;
         delete motapp->cam_list[indx];
     }
-    myfree(&motapp->cam_list);
+    myfree(motapp->cam_list);
     motapp->cam_cnt = 0;
 
     for (indx=0; indx<motapp->snd_cnt; indx++) {
         delete motapp->snd_list[indx]->conf;
         delete motapp->snd_list[indx];
     }
-    myfree(&motapp->snd_list);
+    myfree(motapp->snd_list);
     motapp->snd_cnt = 0;
 
 }

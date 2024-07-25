@@ -119,16 +119,6 @@ void myunquote(std::string &parm)
 
 }
 
-/* Free memory and set the pointer to NULL*/
-void myfree(void *ptr_addr) {
-    void **ptr = (void **)ptr_addr;
-
-    if (*ptr != NULL) {
-        free(*ptr);
-        *ptr = NULL;
-    }
-}
-
 /** mymalloc */
 void *mymalloc(size_t nbytes)
 {
