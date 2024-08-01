@@ -427,7 +427,7 @@ int mlp_cam_next(ctx_dev *cam, ctx_image_data *img_data)
         retcd = cam->netcam->next(img_data);
         if ((retcd == CAPTURE_SUCCESS) &&
             (cam->netcam_high != nullptr)) {
-            retcd = cam->netcam->next(img_data);
+            retcd = cam->netcam_high->next(img_data);
         }
         cam->rotate->process(img_data);
     } else if (cam->camera_type == CAMERA_TYPE_V4L2) {
