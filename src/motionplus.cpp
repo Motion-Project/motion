@@ -491,8 +491,7 @@ static void motpls_shutdown(ctx_motapp *motapp)
     motpls_pid_remove(motapp);
 
     mydelete(motapp->webu);
-
-    dbse_deinit(motapp);
+    mydelete(motapp->dbse);
 
     conf_deinit(motapp);
 
@@ -656,8 +655,7 @@ static void motpls_startup(ctx_motapp *motapp, int daemonize)
 
     motpls_device_ids(motapp);
 
-    dbse_init(motapp);
-
+    motapp->dbse = new cls_dbse(motapp);
     motapp->webu = new cls_webu(motapp);
 
     motpls_allcams_init(motapp);

@@ -2618,7 +2618,7 @@ static void conf_edit_database_type(ctx_config *conf, std::string &parm, enum PA
     if (pact == PARM_ACT_DFLT) {
         conf->database_type = "";
     } else if (pact == PARM_ACT_SET) {
-        if ((parm == "mysql") || (parm == "mariadb") || (parm == "") ||
+        if ((parm == "mariadb") || (parm == "") ||
             (parm == "postgresql") || (parm == "sqlite3")) {
             conf->database_type = parm;
         } else {
@@ -2628,7 +2628,7 @@ static void conf_edit_database_type(ctx_config *conf, std::string &parm, enum PA
         parm = conf->database_type;
     } else if (pact == PARM_ACT_LIST) {
         parm = "[";
-        parm = parm +  "\"\",\"mysql\",\"mariadb\",\"postgresql\",\"sqlite3\"";
+        parm = parm +  "\"\",\"mariadb\",\"postgresql\",\"sqlite3\"";
         parm = parm + "]";
     }
     return;

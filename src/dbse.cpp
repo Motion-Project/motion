@@ -23,298 +23,150 @@
 #include "movie.hpp"
 #include "dbse.hpp"
 
-/* Forward Declare */
-void dbse_close(ctx_motapp *motapp);
-
-static void dbse_edits(ctx_motapp *motapp)
+static int dbse_sqlite3db_cb (void *ptr, int arg_nb, char **arg_val, char **col_nm)
 {
-    int retcd = 0;
-
-    if ((motapp->dbse->database_type != "") &&
-        (motapp->dbse->database_dbname == "")) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
-            , _("Invalid database name"));
-        retcd = -1;
-    }
-    if (((motapp->dbse->database_type == "mariadb") ||
-         (motapp->dbse->database_type == "pgsql")) &&
-         (motapp->dbse->database_port == 0)) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
-            ,_("Must specify database port for mariadb/pgsql"));
-        retcd = -1;
-    }
-
-    if ((motapp->dbse->database_type == "sqlite3") &&
-        (motapp->dbse->database_dbname == "")) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
-            ,_("Must specify database name for sqlite3"));
-        retcd = -1;
-    }
-
-    if ((motapp->dbse->database_type != "") && (retcd == -1)) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
-            ,_("Database functionality disabled."));
-        motapp->dbse->database_type = "";
-    }
-
-}
-
-/* Free the cols lists*/
-static void dbse_cols_free(ctx_motapp *motapp)
-{
-    int indx;
-
-    if (motapp->dbse == NULL) {
-        return;
-    }
-
-    if (motapp->dbse->cols_list != NULL) {
-        for (indx=0; indx<motapp->dbse->cols_cnt; indx++) {
-            myfree(motapp->dbse->cols_list[indx].col_nm);
-            myfree(motapp->dbse->cols_list[indx].col_typ);
-        }
-        myfree(motapp->dbse->cols_list);
-    }
-    motapp->dbse->cols_cnt = 0;
-
-}
-
-/* Free the movies lists*/
-static void dbse_movies_free(ctx_motapp *motapp)
-{
-    int indx;
-
-    if (motapp->dbse->movie_list != NULL) {
-        for (indx=0; indx<motapp->dbse->movie_cnt; indx++) {
-            myfree(motapp->dbse->movie_list[indx].movie_nm);
-            myfree(motapp->dbse->movie_list[indx].movie_dir);
-            myfree(motapp->dbse->movie_list[indx].full_nm);
-            myfree(motapp->dbse->movie_list[indx].movie_tmc);
-            myfree(motapp->dbse->movie_list[indx].movie_tml);
-
-        }
-        myfree(motapp->dbse->movie_list);
-    }
-    motapp->dbse->movie_cnt = 0;
-
+    cls_dbse *dbse = (cls_dbse*)ptr;
+    dbse->sqlite3db_cb(arg_nb, arg_val, col_nm);
+    return 0;
 }
 
 #ifdef HAVE_DBSE
 
-/* Create array of all the columns in current version */
-static void dbse_cols_list(ctx_motapp *motapp)
+void cls_dbse::cols_add_itm(std::string nm, std::string typ)
 {
-    int indx;
+    ctx_col_item col_itm;
 
-    dbse_cols_free(motapp);
+    col_itm.found = false;
+    col_itm.col_nm = nm;
+    col_itm.col_typ = typ;
+    col_names.push_back(col_itm);
+}
 
-    /* 50 is an arbitrary "high" number */
-    motapp->dbse->cols_cnt = 50;
-    motapp->dbse->cols_list =(ctx_dbse_col *)
-        mymalloc(sizeof(ctx_dbse_col) * (uint)motapp->dbse->cols_cnt);
-
-    /* The size of 30 is arbitrary */
-    for (indx=0; indx<motapp->dbse->cols_cnt; indx++) {
-        motapp->dbse->cols_list[indx].col_nm = (char*)mymalloc(30);
-        motapp->dbse->cols_list[indx].col_typ = (char*)mymalloc(30);
-        motapp->dbse->cols_list[indx].found = false;
-    }
-
-    indx=0;
-    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "device_id");
-    snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "int");
-
-    indx++;
-    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "movie_nm");
-    snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "text");
-
-    indx++;
-    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "movie_dir");
-    snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "text");
-
-    indx++;
-    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "full_nm");
-    snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "text");
-
-    indx++;
-    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "movie_sz");
-    snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "int");
-
-    indx++;
-    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "movie_dtl");
-    snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "int");
-
-    indx++;
-    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "movie_tmc");
-    snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "text");
-
-    indx++;
-    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "movie_tml");
-    snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "text");
-
-    indx++;
-    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "diff_avg");
-    snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "int");
-
-    indx++;
-    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "sdev_min");
-    snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "int");
-
-    indx++;
-    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "sdev_max");
-    snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "int");
-
-    indx++;
-    snprintf(motapp->dbse->cols_list[indx].col_nm,  30, "%s", "sdev_avg");
-    snprintf(motapp->dbse->cols_list[indx].col_typ, 30, "%s", "int");
-
+/* Create list of all the columns in current version */
+void cls_dbse::get_cols_list()
+{
+    col_names.clear();
+    cols_add_itm("device_id","int");
+    cols_add_itm("movie_nm","text");
+    cols_add_itm("movie_dir","text");
+    cols_add_itm("full_nm","text");
+    cols_add_itm("movie_sz","int");
+    cols_add_itm("movie_dtl","int");
+    cols_add_itm("movie_tmc","text");
+    cols_add_itm("movie_tml","text");
+    cols_add_itm("diff_avg","int");
+    cols_add_itm("sdev_min","int");
+    cols_add_itm("sdev_max","int");
+    cols_add_itm("sdev_avg","int");
 }
 
 /* Assign default values for records from database*/
-static void dbse_rec_default(ctx_dbse_rec *rec)
+void cls_dbse::movie_item_default()
 {
-    rec->found     = false;
-    rec->record_id  = -1;
-    rec->device_id     = -1;
-
-    rec->movie_nm = (char*)mymalloc(5);
-    snprintf(rec->movie_nm, 5,"%s", "null");
-
-    rec->movie_dir = (char*)mymalloc(5);
-    snprintf(rec->movie_dir, 5,"%s", "null");
-
-    rec->full_nm = (char*)mymalloc(5);
-    snprintf(rec->full_nm, 5,"%s", "null");
-
-    rec->movie_sz  = 0;
-    rec->movie_dtl = 0;
-
-    rec->movie_tmc = (char*)mymalloc(5);
-    snprintf(rec->movie_tmc, 5,"%s", "null");
-
-    rec->movie_tml = (char*)mymalloc(5);
-    snprintf(rec->movie_tml, 5,"%s", "null");
-
-    rec->diff_avg  = 0;
-    rec->sdev_min  = 0;
-    rec->sdev_max  = 0;
-    rec->sdev_avg  = 0;
+    movie_item.found     = false;
+    movie_item.record_id  = -1;
+    movie_item.device_id     = -1;
+    movie_item.movie_nm = "null";
+    movie_item.movie_dir = "null";
+    movie_item.full_nm = "null";
+    movie_item.movie_sz  = 0;
+    movie_item.movie_dtl = 0;
+    movie_item.movie_tmc = "null";
+    movie_item.movie_tml = "null";
+    movie_item.diff_avg  = 0;
+    movie_item.sdev_min  = 0;
+    movie_item.sdev_max  = 0;
+    movie_item.sdev_avg  = 0;
 
 }
 
 /* Assign values to rec from the database */
-static void dbse_rec_assign(ctx_dbse_rec *rec, char *col_nm, char *col_val)
+void cls_dbse::movie_item_assign(std::string col_nm, std::string col_val)
 {
-    size_t flen;
     struct stat statbuf;
 
-    if (mystrceq(col_nm,"record_id")) {
-        rec->record_id = atoi(col_val);
-
-    } else if (mystrceq(col_nm,"device_id")) {
-        rec->device_id = atoi(col_val);
-
-    } else if (mystrceq(col_nm,"movie_nm")) {
-        free(rec->movie_nm);
-        flen = strlen(col_val);
-        rec->movie_nm = (char*)mymalloc(flen + 1);
-        snprintf(rec->movie_nm, flen+1,"%s",col_val);
-
-    } else if (mystrceq(col_nm,"movie_dir")) {
-        free(rec->movie_dir);
-        flen = strlen(col_val);
-        rec->movie_dir = (char*)mymalloc(flen + 1);
-        snprintf(rec->movie_dir, flen+1,"%s",col_val);
-
-    } else if (mystrceq(col_nm,"full_nm")) {
-        free(rec->full_nm);
-        flen = strlen(col_val);
-        rec->full_nm = (char*)mymalloc(flen + 1);
-        snprintf(rec->full_nm, flen+1,"%s",col_val);
-        if (stat(rec->full_nm, &statbuf) == 0) {
-            rec->found = true;
+    if (col_nm == "record_id") {
+        movie_item.record_id = mtoi(col_val);
+    } else if (col_nm == "device_id") {
+        movie_item.device_id = mtoi(col_val);
+    } else if (col_nm == "movie_nm") {
+        movie_item.movie_nm = col_val;
+    } else if (col_nm == "movie_dir") {
+        movie_item.movie_dir = col_val;
+    } else if (col_nm == "full_nm") {
+        movie_item.full_nm = col_val;
+        if (stat(movie_item.full_nm.c_str(), &statbuf) == 0) {
+            movie_item.found = true;
         }
-
-    } else if (mystrceq(col_nm,"movie_sz")) {
-        rec->movie_sz =atoi(col_val);
-
-    } else if (mystrceq(col_nm,"movie_dtl")) {
-        rec->movie_dtl =atoi(col_val);
-
-    } else if (mystrceq(col_nm,"movie_tmc")) {
-        free(rec->movie_tmc);
-        flen = strlen(col_val);
-        rec->movie_tmc = (char*)mymalloc(flen + 1);
-        snprintf(rec->movie_tmc, flen+1,"%s",col_val);
-
-    } else if (mystrceq(col_nm,"movie_tml")) {
-        free(rec->movie_tml);
-        flen = strlen(col_val);
-        rec->movie_tml = (char*)mymalloc(flen + 1);
-        snprintf(rec->movie_tml,flen+1,"%s",col_val);
-
-    } else if (mystrceq(col_nm,"diff_avg")) {
-        rec->diff_avg =atoi(col_val);
-    } else if (mystrceq(col_nm,"sdev_min")) {
-        rec->sdev_min =atoi(col_val);
-    } else if (mystrceq(col_nm,"sdev_max")) {
-        rec->sdev_max =atoi(col_val);
-    } else if (mystrceq(col_nm,"sdev_avg")) {
-        rec->sdev_avg =atoi(col_val);
+    } else if (col_nm == "movie_sz") {
+        movie_item.movie_sz = mtoi(col_val);
+    } else if (col_nm == "movie_dtl") {
+        movie_item.movie_dtl =mtoi(col_val);
+    } else if (col_nm == "movie_tmc") {
+        movie_item.movie_tmc = col_val;
+    } else if (col_nm == "movie_tml") {
+        movie_item.movie_tml = col_val;
+    } else if (col_nm == "diff_avg") {
+        movie_item.diff_avg = mtoi(col_val);
+    } else if (col_nm == "sdev_min") {
+        movie_item.sdev_min = mtoi(col_val);
+    } else if (col_nm == "sdev_max") {
+        movie_item.sdev_max = mtoi(col_val);
+    } else if (col_nm == "sdev_avg") {
+        movie_item.sdev_avg = mtoi(col_val);
     }
-
 }
 
-static void dbse_sql_motpls(ctx_dbse *dbse, std::string &sql)
+void cls_dbse::sql_motpls(std::string &sql)
 {
     std::string delimit;
-    int indx;
+    it_movies it;
 
     sql = "";
 
-    if (dbse->dbse_action == DBSE_TBL_CHECK) {
-        if (dbse->database_type == "mariadb") {
+    if (dbse_action == DBSE_TBL_CHECK) {
+        if (cfg_database_type == "mariadb") {
             sql = "Select table_name "
                 " from information_schema.tables "
                 " where table_name = 'motionplus';";
-        } else if (dbse->database_type == "postgresql") {
+        } else if (cfg_database_type == "postgresql") {
             sql = " select tablename as table_nm "
                 " from pg_catalog.pg_tables "
                 " where schemaname != 'pg_catalog' "
                 " and schemaname != 'information_schema' "
                 " and tablename = 'motionplus';";
-        } else if (dbse->database_type == "sqlite3") {
+        } else if (cfg_database_type == "sqlite3") {
             sql = "select name from sqlite_master"
                 " where type='table' "
                 " and name='motionplus';";
         }
-    } else if (dbse->dbse_action == DBSE_TBL_CREATE) {
+    } else if (dbse_action == DBSE_TBL_CREATE) {
         sql = "create table motionplus (";
-        if ((dbse->database_type == "mariadb") ||
-            (dbse->database_type == "postgresql")) {
+        if ((cfg_database_type == "mariadb") ||
+            (cfg_database_type == "postgresql")) {
             sql += " record_id serial ";
-        } else if (dbse->database_type == "sqlite3") {
+        } else if (cfg_database_type == "sqlite3") {
             /* Autoincrement is discouraged but I want compatibility*/
             sql += " record_id integer primary key autoincrement ";
         }
         sql += ");";
 
-    } else if (dbse->dbse_action == DBSE_COLS_LIST) {
+    } else if (dbse_action == DBSE_COLS_LIST) {
         sql = " select * from motionplus;";
 
-    } else if (dbse->dbse_action == DBSE_MOV_CLEAN) {
+    } else if (dbse_action == DBSE_MOV_CLEAN) {
         sql = " delete from motionplus "
             " where record_id in (";
         delimit = " ";
-        for (indx=0; indx<dbse->movie_cnt; indx++) {
-            if (dbse->movie_list[indx].found == false) {
-                sql += delimit + std::to_string(
-                    dbse->movie_list[indx].record_id);
+        for (it = movielist->begin();
+            it != movielist->end(); it++) {
+            if (it->found == false) {
+                sql += delimit + std::to_string(it->record_id);
                 delimit = ",";
             }
             /* 5000 is arbitrary */
             if (sql.length() > 5000) {
-                indx = dbse->movie_cnt;
+                it = movielist->end();
             }
         }
         if (delimit == ",") {
@@ -322,23 +174,8 @@ static void dbse_sql_motpls(ctx_dbse *dbse, std::string &sql)
         } else {
             sql = "";
         }
-    }
 
-}
-
-static void dbse_sql_motpls(ctx_dbse *dbse, std::string &sql, int device_id)
-{
-    sql = "";
-
-    if (dbse->dbse_action == DBSE_MOV_COUNT) {
-        sql  = " select ";
-        sql += "   count(*) as movie_cnt ";
-        sql += " from motionplus ";
-        sql += " where ";
-        sql += "   device_id = " + std::to_string(device_id);
-        sql += ";";
-
-    } else if (dbse->dbse_action == DBSE_MOV_SELECT) {
+    } else if (dbse_action == DBSE_MOV_SELECT) {
         sql  = " select * ";
         sql += " from motionplus ";
         sql += " where ";
@@ -350,37 +187,34 @@ static void dbse_sql_motpls(ctx_dbse *dbse, std::string &sql, int device_id)
 
 }
 
-static void dbse_sql_motpls(ctx_dbse *dbse, std::string &sql, char *col_nm, char *col_typ)
+void cls_dbse::sql_motpls(std::string &sql, std::string col_nm, std::string col_typ)
 {
     sql = "";
 
-    if ((dbse->dbse_action == DBSE_COLS_ADD) &&
-        (strlen(col_nm)  > 0) && (strlen(col_typ) > 0)) {
+    if ((dbse_action == DBSE_COLS_ADD) &&
+        (col_nm != "") && (col_typ != "")) {
         sql = "Alter table motionplus add column ";
-        sql += std::string(col_nm) + " ";
-        sql += std::string(col_typ) + " ;";
+        sql += col_nm + " " + col_typ + " ;";
     }
 
 }
 
 #endif /* HAVE_DBSE */
 
-#ifdef HAVE_SQLITE3
+#ifdef HAVE_SQLITE3DB
 
-static void dbse_sqlite3_exec(ctx_motapp *motapp, const char *sqlquery)
+void cls_dbse::sqlite3db_exec(std::string sql)
 {
     int retcd;
-    char *errmsg = NULL;
+    char *errmsg = nullptr;
 
-    if ((motapp->dbse->database_sqlite3 == NULL) ||
-        (strlen(sqlquery) == 0)) {
+    if ((database_sqlite3db == nullptr) || (sql =="")) {
         return;
     };
 
     MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing query");
-    retcd = sqlite3_exec(
-        motapp->dbse->database_sqlite3
-        , sqlquery, NULL, 0, &errmsg);
+    retcd = sqlite3_exec(database_sqlite3db
+        , sql.c_str(), nullptr, 0, &errmsg);
     if (retcd != SQLITE_OK ) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("SQLite error was %s"), errmsg);
@@ -389,63 +223,50 @@ static void dbse_sqlite3_exec(ctx_motapp *motapp, const char *sqlquery)
     MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "Finished query");
 }
 
-static int dbse_sqlite3_cb (
-    void *ptr, int arg_nb, char **arg_val, char **col_nm)
+void cls_dbse::sqlite3db_cb (int arg_nb, char **arg_val, char **col_nm)
 {
-    ctx_motapp *motapp = (ctx_motapp *)ptr;
-    int indx, indx2, rnbr;
+    int indx;
+    it_cols it;
 
-    if (motapp->dbse->dbse_action == DBSE_TBL_CHECK) {
+    if (dbse_action == DBSE_TBL_CHECK) {
         for (indx=0; indx < arg_nb; indx++) {
             if (mystrceq(arg_val[indx],"motionplus")) {
-                motapp->dbse->table_ok = true;
+                table_ok = true;
             }
         }
-    } else if (motapp->dbse->dbse_action == DBSE_MOV_COUNT) {
-        for (indx=0; indx < arg_nb; indx++) {
-            if (mystrceq(col_nm[indx],"movie_cnt")) {
-                motapp->dbse->movie_cnt =atoi(arg_val[indx]);
-            }
-        }
-    } else if (motapp->dbse->dbse_action == DBSE_COLS_LIST) {
-        for (indx=0; indx < arg_nb; indx++) {
-            for (indx2=0; indx2 < motapp->dbse->cols_cnt; indx2++) {
-                if (mystrceq(col_nm[indx]
-                    , motapp->dbse->cols_list[indx2].col_nm)) {
-                    motapp->dbse->cols_list[indx2].found = true;
-                }
-            }
-        }
-    } else if (motapp->dbse->dbse_action == DBSE_MOV_SELECT) {
-        rnbr = motapp->dbse->rec_indx;
-        if (rnbr < motapp->dbse->movie_cnt) {
-            dbse_rec_default(&motapp->dbse->movie_list[rnbr]);
-            for (indx=0; indx < arg_nb; indx++) {
-                if (arg_val[indx] != NULL) {
-                    dbse_rec_assign(&motapp->dbse->movie_list[rnbr]
-                        , (char*)col_nm[indx]
-                        , (char*)arg_val[indx]);
-                }
-            }
-        }
-        motapp->dbse->rec_indx++;
-    }
 
-    return 0;
+    } else if (dbse_action == DBSE_COLS_LIST) {
+        for (indx=0; indx < arg_nb; indx++) {
+            for (it = col_names.begin(); it != col_names.end();it++) {
+                if (mystrceq(col_nm[indx], it->col_nm.c_str())) {
+                    it->found = true;
+                }
+            }
+        }
+    } else if (dbse_action == DBSE_MOV_SELECT) {
+        movie_item_default();
+        for (indx=0; indx < arg_nb; indx++) {
+            if (arg_val[indx] != nullptr) {
+                movie_item_assign((char*)col_nm[indx], (char*)arg_val[indx]);
+            }
+        }
+        movielist->push_back(movie_item);
+    }
 }
 
-static void dbse_sqlite3_cols(ctx_motapp *motapp)
+void cls_dbse::sqlite3db_cols()
 {
-    int retcd, indx;
+    int retcd;
+    it_cols it;
     char *errmsg = 0;
     std::string sql;
 
-    dbse_cols_list(motapp);
+    get_cols_list();
 
-    motapp->dbse->dbse_action = DBSE_COLS_LIST;
-    dbse_sql_motpls(motapp->dbse, sql);
-    retcd = sqlite3_exec(motapp->dbse->database_sqlite3
-        , sql.c_str(), dbse_sqlite3_cb, motapp, &errmsg);
+    dbse_action = DBSE_COLS_LIST;
+    sql_motpls(sql);
+    retcd = sqlite3_exec(database_sqlite3db
+        , sql.c_str(), dbse_sqlite3db_cb, this, &errmsg);
     if (retcd != SQLITE_OK ) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error retrieving table columns: %s"), errmsg);
@@ -453,74 +274,65 @@ static void dbse_sqlite3_cols(ctx_motapp *motapp)
         return;
     }
 
-    for (indx=0; indx<motapp->dbse->cols_cnt; indx++) {
-        if (motapp->dbse->cols_list[indx].found == false) {
-            motapp->dbse->dbse_action = DBSE_COLS_ADD;
-            dbse_sql_motpls(motapp->dbse, sql
-                , motapp->dbse->cols_list[indx].col_nm
-                , motapp->dbse->cols_list[indx].col_typ);
-            dbse_sqlite3_exec(motapp, sql.c_str());
+    for (it = col_names.begin(); it != col_names.end();it++) {
+        if (it->found == false) {
+            dbse_action = DBSE_COLS_ADD;
+            sql_motpls(sql, it->col_nm, it->col_typ);
+            sqlite3db_exec(sql.c_str());
         }
     }
-
-    dbse_cols_free(motapp);
-
 }
 
-static void dbse_sqlite3_init(ctx_motapp *motapp)
+void cls_dbse::sqlite3db_init()
 {
     int retcd;
-    const char *err_open  = NULL;
-    char *err_qry  = NULL;
+    const char *err_open  = nullptr;
+    char *err_qry  = nullptr;
     std::string sql;
 
-    motapp->dbse->database_sqlite3 = NULL;
+    database_sqlite3db = nullptr;
 
-    if (motapp->dbse->database_type != "sqlite3") {
+    if (cfg_database_type != "sqlite3") {
         return;
     }
 
     MOTPLS_LOG(NTC, TYPE_DB, NO_ERRNO
         , _("SQLite3 Database filename %s")
-        , motapp->dbse->database_dbname.c_str());
+        , cfg_database_dbname.c_str());
     retcd = sqlite3_open(
-        motapp->dbse->database_dbname.c_str()
-        , &motapp->dbse->database_sqlite3);
+        cfg_database_dbname.c_str()
+        , &database_sqlite3db);
     if (retcd != SQLITE_OK) {
-        err_open =sqlite3_errmsg(motapp->dbse->database_sqlite3);
+        err_open =sqlite3_errmsg(database_sqlite3db);
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Can't open database %s : %s")
-            , motapp->dbse->database_dbname.c_str()
+            , cfg_database_dbname.c_str()
             , err_open);
-        sqlite3_close(motapp->dbse->database_sqlite3);
+        sqlite3_close(database_sqlite3db);
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Could not initialize database %s")
-            , motapp->dbse->database_dbname.c_str());
-        motapp->dbse->is_open = false;
-        motapp->dbse->database_sqlite3 = NULL;
+            , cfg_database_dbname.c_str());
+        is_open = false;
+        database_sqlite3db = nullptr;
         return;
     }
 
-    motapp->dbse->is_open = true;
+    is_open = true;
     MOTPLS_LOG(NTC, TYPE_DB, NO_ERRNO
         ,  _("database_busy_timeout %d msec")
-        , motapp->dbse->database_busy_timeout);
-    retcd = sqlite3_busy_timeout(
-        motapp->dbse->database_sqlite3
-        , motapp->dbse->database_busy_timeout);
+        , cfg_database_busy_timeout);
+    retcd = sqlite3_busy_timeout(database_sqlite3db, cfg_database_busy_timeout);
     if (retcd != SQLITE_OK) {
-        err_open = sqlite3_errmsg(
-            motapp->dbse->database_sqlite3);
+        err_open = sqlite3_errmsg(database_sqlite3db);
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("database_busy_timeout failed %s"), err_open);
     }
 
-    motapp->dbse->table_ok = false;
-    motapp->dbse->dbse_action = DBSE_TBL_CHECK;
-    dbse_sql_motpls(motapp->dbse, sql);
-    retcd = sqlite3_exec(
-        motapp->dbse->database_sqlite3
-        , sql.c_str(), dbse_sqlite3_cb, motapp, &err_qry);
+    table_ok = false;
+    dbse_action = DBSE_TBL_CHECK;
+    sql_motpls(sql);
+    retcd = sqlite3_exec(database_sqlite3db
+        , sql.c_str(), dbse_sqlite3db_cb, this, &err_qry);
     if (retcd != SQLITE_OK ) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error checking table: %s"), err_qry);
@@ -528,11 +340,10 @@ static void dbse_sqlite3_init(ctx_motapp *motapp)
         return;
     }
 
-    if (motapp->dbse->table_ok == false) {
-        motapp->dbse->dbse_action = DBSE_TBL_CREATE;
-        dbse_sql_motpls(motapp->dbse, sql);
-        retcd = sqlite3_exec(motapp->dbse->database_sqlite3
-            , sql.c_str(), 0, 0, &err_qry);
+    if (table_ok == false) {
+        dbse_action = DBSE_TBL_CREATE;
+        sql_motpls(sql);
+        retcd = sqlite3_exec(database_sqlite3db, sql.c_str(), 0, 0, &err_qry);
         if (retcd != SQLITE_OK ) {
             MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
                 , _("Error creating table: %s"), err_qry);
@@ -541,64 +352,44 @@ static void dbse_sqlite3_init(ctx_motapp *motapp)
         }
     }
 
-    dbse_sqlite3_cols(motapp);
+    sqlite3db_cols();
 
 }
 
-static void dbse_sqlite3_movlst(ctx_motapp *motapp, int device_id)
+void cls_dbse::sqlite3db_movielist()
 {
     int retcd;
-    char *errmsg  = NULL;
+    char *errmsg  = nullptr;
     std::string sql;
 
-    motapp->dbse->dbse_action = DBSE_MOV_COUNT;
-    dbse_sql_motpls(motapp->dbse, sql, device_id);
-    retcd = sqlite3_exec(
-        motapp->dbse->database_sqlite3
-        , sql.c_str(), dbse_sqlite3_cb, motapp, &errmsg);
+    dbse_action = DBSE_MOV_SELECT;
+    sql_motpls(sql);
+    retcd = sqlite3_exec(database_sqlite3db, sql.c_str()
+        , dbse_sqlite3db_cb, this, &errmsg);
     if (retcd != SQLITE_OK ) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
-            , _("Error counting table: %s"), errmsg);
+            , _("Error retrieving table: %s"), errmsg);
         sqlite3_free(errmsg);
         return;
     }
 
-    if (motapp->dbse->movie_cnt > 0) {
-        motapp->dbse->movie_list =(ctx_dbse_rec *)
-            mymalloc(sizeof(ctx_dbse_rec)*(uint)motapp->dbse->movie_cnt);
-        motapp->dbse->rec_indx = 0;
+    dbse_action = DBSE_MOV_CLEAN;
+    sql_motpls(sql);
+    sqlite3db_exec(sql.c_str());
 
-        motapp->dbse->dbse_action = DBSE_MOV_SELECT;
-        dbse_sql_motpls(motapp->dbse, sql, device_id);
-        retcd = sqlite3_exec(
-            motapp->dbse->database_sqlite3
-            , sql.c_str(), dbse_sqlite3_cb, motapp, &errmsg);
-        if (retcd != SQLITE_OK ) {
-            MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
-                , _("Error retrieving table: %s"), errmsg);
-            sqlite3_free(errmsg);
-            return;
-        }
+    sql = " vacuum;";
+    sqlite3db_exec(sql.c_str());
 
-        motapp->dbse->dbse_action = DBSE_MOV_CLEAN;
-        dbse_sql_motpls(motapp->dbse, sql, device_id);
-        dbse_sqlite3_exec(motapp, sql.c_str());
-
-        sql = " vacuum;";
-        dbse_sqlite3_exec(motapp, sql.c_str());
-
-    }
-    return;
 }
 
-static void dbse_sqlite3_close(ctx_motapp *motapp)
+void cls_dbse::sqlite3db_close()
 {
-    if (motapp->dbse->database_type == "sqlite3") {
-        if (motapp->dbse->database_sqlite3 != NULL) {
-            sqlite3_close(motapp->dbse->database_sqlite3);
-            motapp->dbse->database_sqlite3 = NULL;
+    if (cfg_database_type == "sqlite3") {
+        if (database_sqlite3db != nullptr) {
+            sqlite3_close(database_sqlite3db);
+            database_sqlite3db = nullptr;
         }
-        motapp->dbse->is_open = false;
+        is_open = false;
     }
 }
 
@@ -606,338 +397,308 @@ static void dbse_sqlite3_close(ctx_motapp *motapp)
 
 #ifdef HAVE_MARIADB
 
-static void dbse_mariadb_exec (ctx_motapp *motapp, const char *sqlquery)
+void cls_dbse::mariadb_exec (std::string sql)
 {
     int retcd;
 
-    if ((motapp->dbse->database_mariadb == NULL) ||
-        (strlen(sqlquery) == 0)) {
+    if ((database_mariadb == nullptr) || (sql == "")) {
         return;
     }
 
     MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing MariaDB query");
-    retcd = mysql_query(motapp->dbse->database_mariadb, sqlquery);
+    retcd = mysql_query(database_mariadb, sql.c_str());
     if (retcd != 0) {
-        retcd = (int)mysql_errno(motapp->dbse->database_mariadb);
+        retcd = (int)mysql_errno(database_mariadb);
         MOTPLS_LOG(ERR, TYPE_DB, SHOW_ERRNO
             , _("MariaDB query '%s' failed. %s error code %d")
-            , sqlquery, mysql_error(motapp->dbse->database_mariadb)
+            , sql.c_str()
+            , mysql_error(database_mariadb)
             , retcd);
         if (retcd >= 2000) {
-            dbse_close(motapp);
+            dbse_close();
             return;
         }
     }
-    retcd = mysql_query(motapp->dbse->database_mariadb, "commit;");
+    retcd = mysql_query(database_mariadb, "commit;");
     if (retcd != 0) {
-        retcd = (int)mysql_errno(motapp->dbse->database_mariadb);
+        retcd = (int)mysql_errno(database_mariadb);
         MOTPLS_LOG(ERR, TYPE_DB, SHOW_ERRNO
             , _("MariaDB query commit failed. %s error code %d")
-            , mysql_error(motapp->dbse->database_mariadb), retcd);
+            , mysql_error(database_mariadb), retcd);
         if (retcd >= 2000) {
-            dbse_close(motapp);
+            dbse_close();
             return;
         }
     }
 
 }
 
-static void dbse_mariadb_recs (ctx_motapp *motapp, const char *sqlquery)
+void cls_dbse::mariadb_recs (std::string sql)
 {
-    int retcd, indx, indx2;
-    int qry_fields, rnbr;
+    int retcd, indx;
+    int qry_fields;
     MYSQL_RES *qry_result;
     MYSQL_ROW qry_row;
     MYSQL_FIELD *qry_col;
-    ctx_dbse_col *cols;
+    lst_cols dbcol_lst;
+    ctx_col_item dbcol_itm;
+    it_cols it_db, it;
 
-    retcd = mysql_query(motapp->dbse->database_mariadb, sqlquery);
+    retcd = mysql_query(database_mariadb, sql.c_str());
     if (retcd != 0){
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
-            , _("Query error: %s"),sqlquery);
-        dbse_close(motapp);
+            , _("Query error: %s"),sql.c_str());
+        dbse_close();
         return;
     }
 
-    qry_result = mysql_store_result(motapp->dbse->database_mariadb);
-    if (qry_result == NULL) {
+    qry_result = mysql_store_result(database_mariadb);
+    if (qry_result == nullptr) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
-            , _("Query store error: %s"),sqlquery);
-        dbse_close(motapp);
+            , _("Query store error: %s"),sql.c_str());
+        dbse_close();
         return;
     }
 
     qry_fields = (int)mysql_num_fields(qry_result);
-    cols =(ctx_dbse_col *)
-        mymalloc(sizeof(ctx_dbse_col) * (uint)qry_fields);
     for(indx = 0; indx < qry_fields; indx++) {
         qry_col = mysql_fetch_field(qry_result);
-        cols[indx].col_nm = (char*)mymalloc(qry_col->name_length + 1);
-        snprintf(cols[indx].col_nm, qry_col->name_length + 1
-            , "%s", qry_col->name);
+        dbcol_itm.col_nm = qry_col->name;
+        dbcol_itm.col_idx = indx;
+        dbcol_lst.push_back(dbcol_itm);
     }
 
     qry_row = mysql_fetch_row(qry_result);
 
-    if (motapp->dbse->dbse_action == DBSE_TBL_CHECK) {
-        motapp->dbse->table_ok = false;
-        while (qry_row != NULL) {
+    if (dbse_action == DBSE_TBL_CHECK) {
+        table_ok = false;
+        while (qry_row != nullptr) {
             for(indx = 0; indx < qry_fields; indx++) {
-                if (qry_row[indx] != NULL) {
+                if (qry_row[indx] != nullptr) {
                     if (mystrceq(qry_row[indx], "motionplus")) {
-                        motapp->dbse->table_ok = true;
+                        table_ok = true;
                     }
                 }
             }
             qry_row = mysql_fetch_row(qry_result);
         }
 
-    } else if (motapp->dbse->dbse_action == DBSE_MOV_COUNT) {
-        motapp->dbse->movie_cnt = 0;
-        while (qry_row != NULL) {
-            for(indx = 0; indx < qry_fields; indx++) {
-                if (mystrceq(cols[indx].col_nm, "movie_cnt")) {
-                    motapp->dbse->movie_cnt =atoi(qry_row[indx]);
-                }
-            }
-            qry_row = mysql_fetch_row(qry_result);
-        }
-
-    } else if (motapp->dbse->dbse_action == DBSE_COLS_LIST) {
-        for(indx = 0; indx < qry_fields; indx++) {
-            for (indx2=0; indx2 < motapp->dbse->cols_cnt; indx2++) {
-                if (mystrceq(cols[indx].col_nm
-                    , motapp->dbse->cols_list[indx2].col_nm)) {
-                    motapp->dbse->cols_list[indx2].found = true;
+    } else if (dbse_action == DBSE_COLS_LIST) {
+        for (it_db = dbcol_lst.begin();
+            it_db != dbcol_lst.end();it_db++) {
+            for (it = col_names.begin();
+                it != col_names.end();it++) {
+                if (it_db->col_nm == it->col_nm) {
+                    it->found = true;
                 }
             }
         }
 
-    } else if (motapp->dbse->dbse_action == DBSE_MOV_SELECT) {
-        motapp->dbse->rec_indx = 0;
-        while (qry_row != NULL) {
-            rnbr = motapp->dbse->rec_indx;
-            dbse_rec_default(&motapp->dbse->movie_list[rnbr]);
-            for(indx = 0; indx < qry_fields; indx++) {
-                if (qry_row[indx] != NULL) {
-                    dbse_rec_assign(&motapp->dbse->movie_list[rnbr]
-                        , (char*)cols[indx].col_nm
-                        , (char*)qry_row[indx]);
+    } else if (dbse_action == DBSE_MOV_SELECT) {
+        while (qry_row != nullptr) {
+            movie_item_default();
+            for (it_db = dbcol_lst.begin();
+                it_db != dbcol_lst.end();it_db++) {
+                if (qry_row[it_db->col_idx] != nullptr) {
+                    movie_item_assign(it_db->col_nm
+                        , (char*)qry_row[it_db->col_idx]);
                 }
             }
-            motapp->dbse->rec_indx++;
+            movielist->push_back(movie_item);
             qry_row = mysql_fetch_row(qry_result);
         }
     }
     mysql_free_result(qry_result);
 
-    for(indx = 0; indx < qry_fields; indx++) {
-        free(cols[indx].col_nm);
-    }
-    free(cols);
-
-    return;
 }
 
-static void dbse_mariadb_cols(ctx_motapp *motapp)
+void cls_dbse::mariadb_cols()
 {
-    int indx;
     std::string sql;
+    it_cols it;
 
-    dbse_cols_list(motapp);
+    get_cols_list();
 
-    motapp->dbse->dbse_action = DBSE_COLS_LIST;
-    dbse_sql_motpls(motapp->dbse, sql);
-    dbse_mariadb_recs(motapp, sql.c_str());
+    dbse_action = DBSE_COLS_LIST;
+    sql_motpls(sql);
+    mariadb_recs(sql.c_str());
 
-    for (indx=0; indx<motapp->dbse->cols_cnt; indx++) {
-        if (motapp->dbse->cols_list[indx].found == false) {
-            motapp->dbse->dbse_action = DBSE_COLS_ADD;
-            dbse_sql_motpls(motapp->dbse, sql
-                , motapp->dbse->cols_list[indx].col_nm
-                , motapp->dbse->cols_list[indx].col_typ);
-            dbse_mariadb_exec(motapp, sql.c_str());
+    for (it = col_names.begin();
+        it != col_names.end();it++) {
+        if (it->found == false) {
+            dbse_action = DBSE_COLS_ADD;
+            sql_motpls(sql,it->col_nm,it->col_typ);
+            mariadb_exec(sql.c_str());
         }
     }
-
-    dbse_cols_free(motapp);
-
 }
 
-static void dbse_mariadb_setup(ctx_motapp *motapp)
+void cls_dbse::mariadb_setup()
 {
     std::string sql;
 
-    motapp->dbse->dbse_action = DBSE_TBL_CHECK;
-    dbse_sql_motpls(motapp->dbse, sql);
-    dbse_mariadb_recs(motapp, sql.c_str());
+    dbse_action = DBSE_TBL_CHECK;
+    sql_motpls(sql);
+    mariadb_recs(sql.c_str());
 
-    if (motapp->dbse->table_ok == false) {
+    if (table_ok == false) {
         MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
             , _("Creating motionplus table"));
-        motapp->dbse->dbse_action = DBSE_TBL_CREATE;
-        dbse_sql_motpls(motapp->dbse, sql);
-        dbse_mariadb_exec(motapp,sql.c_str());
+        dbse_action = DBSE_TBL_CREATE;
+        sql_motpls(sql);
+        mariadb_exec(sql.c_str());
     }
 
-    dbse_mariadb_cols(motapp);
+    mariadb_cols();
 
 }
 
-static void dbse_mariadb_init(ctx_motapp *motapp)
+void cls_dbse::mariadb_init()
 {
     bool my_true = true;
 
-    motapp->dbse->database_mariadb = NULL;
+    database_mariadb = nullptr;
 
-    if (motapp->dbse->database_type != "mariadb") {
+    if (cfg_database_type != "mariadb") {
         return;
     }
 
-    if (mysql_library_init(0, NULL, NULL)) {
+    if (mysql_library_init(0, nullptr, nullptr)) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Could not initialize database %s")
-            , motapp->dbse->database_type.c_str());
-        motapp->dbse->is_open = false;
+            , cfg_database_type.c_str());
+        is_open = false;
         return;
     }
 
-    motapp->dbse->database_mariadb = (MYSQL *) mymalloc(sizeof(MYSQL));
-    mysql_init(motapp->dbse->database_mariadb);
+    database_mariadb = (MYSQL *) mymalloc(sizeof(MYSQL));
+    mysql_init(database_mariadb);
 
     if (mysql_real_connect(
-        motapp->dbse->database_mariadb
-        , motapp->dbse->database_host.c_str()
-        , motapp->dbse->database_user.c_str()
-        , motapp->dbse->database_password.c_str()
-        , motapp->dbse->database_dbname.c_str()
-        , (uint)motapp->dbse->database_port, NULL, 0) == NULL) {
+        database_mariadb
+        , cfg_database_host.c_str()
+        , cfg_database_user.c_str()
+        , cfg_database_password.c_str()
+        , cfg_database_dbname.c_str()
+        , (uint)cfg_database_port, nullptr, 0) == nullptr) {
 
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Cannot connect to MariaDB database %s on host %s with user %s")
-            , motapp->dbse->database_dbname.c_str()
-            , motapp->dbse->database_host.c_str()
-            , motapp->dbse->database_user.c_str());
+            , cfg_database_dbname.c_str()
+            , cfg_database_host.c_str()
+            , cfg_database_user.c_str());
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("MariaDB error was %s")
-            , mysql_error(motapp->dbse->database_mariadb));
-        dbse_close(motapp);
+            , mysql_error(database_mariadb));
+        dbse_close();
         return;
     }
-    motapp->dbse->is_open = true;
-    mysql_options(motapp->dbse->database_mariadb
+    is_open = true;
+    mysql_options(database_mariadb
         , MYSQL_OPT_RECONNECT, &my_true);
 
-    dbse_mariadb_setup(motapp);
+    mariadb_setup();
 
     MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
         , _("%s database opened")
-        , motapp->dbse->database_dbname.c_str() );
+        , cfg_database_dbname.c_str() );
 }
 
-static void dbse_mariadb_close(ctx_motapp *motapp)
+void cls_dbse::mariadb_close()
 {
-    if (motapp->dbse->database_type == "mariadb") {
+    if (cfg_database_type == "mariadb") {
         mysql_library_end();
-        if (motapp->dbse->database_mariadb != NULL) {
-            mysql_close(motapp->dbse->database_mariadb);
-            free(motapp->dbse->database_mariadb);
-            motapp->dbse->database_mariadb = NULL;
+        if (database_mariadb != nullptr) {
+            mysql_close(database_mariadb);
+            free(database_mariadb);
+            database_mariadb = nullptr;
         }
-        motapp->dbse->is_open = false;
+        is_open = false;
     }
 }
 
-static void dbse_mariadb_movlst(ctx_motapp *motapp, int device_id )
+void cls_dbse::mariadb_movielist()
 {
     std::string sql;
 
-    motapp->dbse->dbse_action = DBSE_MOV_COUNT;
-    dbse_sql_motpls(motapp->dbse, sql, device_id);
-    dbse_mariadb_recs(motapp, sql.c_str());
+    dbse_action = DBSE_MOV_SELECT;
+    sql_motpls(sql);
+    mariadb_recs(sql.c_str());
 
-    if (motapp->dbse->movie_cnt > 0) {
-        motapp->dbse->movie_list =(ctx_dbse_rec *)
-            mymalloc(sizeof(ctx_dbse_rec)*(uint)motapp->dbse->movie_cnt);
+    dbse_action = DBSE_MOV_CLEAN;
+    sql_motpls(sql);
+    mariadb_exec(sql.c_str());
 
-        motapp->dbse->dbse_action = DBSE_MOV_SELECT;
-        dbse_sql_motpls(motapp->dbse, sql, device_id);
-        dbse_mariadb_recs(motapp, sql.c_str());
-
-        motapp->dbse->dbse_action = DBSE_MOV_CLEAN;
-        dbse_sql_motpls(motapp->dbse, sql);
-        dbse_mariadb_exec(motapp, sql.c_str());
-    }
 }
 
 #endif  /*HAVE_MARIADB*/
 
-#ifdef HAVE_PGSQL
+#ifdef HAVE_PGSQLDB
 
-static void dbse_pgsql_exec(ctx_motapp *motapp, const char *sqlquery)
+void cls_dbse::pgsqldb_exec(std::string sql)
 {
     PGresult    *res;
 
-    if ((motapp->dbse->database_pgsql == NULL) ||
-        (strlen(sqlquery) == 0)) {
+    if ((database_pgsqldb == nullptr) || (sql == "")) {
         return;
     }
 
     MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing postgresql query");
-    res = PQexec(motapp->dbse->database_pgsql, sqlquery);
-    if (PQstatus(motapp->dbse->database_pgsql) == CONNECTION_BAD) {
+    res = PQexec(database_pgsqldb, sql.c_str());
+    if (PQstatus(database_pgsqldb) == CONNECTION_BAD) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Connection to PostgreSQL database '%s' failed: %s")
-            , motapp->dbse->database_dbname.c_str()
-            , PQerrorMessage(motapp->dbse->database_pgsql));
-        PQreset(motapp->dbse->database_pgsql);
-        if (PQstatus(motapp->dbse->database_pgsql) == CONNECTION_BAD) {
+            , cfg_database_dbname.c_str()
+            , PQerrorMessage(database_pgsqldb));
+        PQreset(database_pgsqldb);
+        if (PQstatus(database_pgsqldb) == CONNECTION_BAD) {
             MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
                 , _("Re-Connection to PostgreSQL database '%s' failed: %s")
-                , motapp->dbse->database_dbname.c_str()
-                , PQerrorMessage(motapp->dbse->database_pgsql));
+                , cfg_database_dbname.c_str()
+                , PQerrorMessage(database_pgsqldb));
             PQclear(res);
-            dbse_close(motapp);
+            dbse_close();
             return;
         } else {
             MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
                 , _("Re-Connection to PostgreSQL database '%s' Succeed")
-                , motapp->dbse->database_dbname.c_str());
+                , cfg_database_dbname.c_str());
         }
     } else if (!(PQresultStatus(res) == PGRES_COMMAND_OK || PQresultStatus(res) == PGRES_TUPLES_OK)) {
         MOTPLS_LOG(ERR, TYPE_DB, SHOW_ERRNO
             , "PGSQL query failed: [%s]  %s %s"
-            , sqlquery
+            , sql.c_str()
             , PQresStatus(PQresultStatus(res))
             , PQresultErrorMessage(res));
     }
     PQclear(res);
 }
 
-static void dbse_pgsql_close(ctx_motapp *motapp)
+void cls_dbse::pgsqldb_close()
 {
-    if (motapp->dbse->database_type == "postgresql") {
-        if (motapp->dbse->database_pgsql != NULL) {
-            PQfinish(motapp->dbse->database_pgsql);
-            motapp->dbse->database_pgsql = NULL;
+    if (cfg_database_type == "postgresql") {
+        if (database_pgsqldb != nullptr) {
+            PQfinish(database_pgsqldb);
+            database_pgsqldb = nullptr;
         }
-        motapp->dbse->is_open = false;
+        is_open = false;
     }
 }
 
-static void dbse_pgsql_recs (ctx_motapp *motapp, const char *sqlquery)
+void cls_dbse::pgsqldb_recs (std::string sql)
 {
     PGresult    *res;
-    int indx, indx2, rows, cols, rnbr;
+    int indx, indx2, rows, cols;
+    it_cols it;
 
-    if (motapp->dbse->database_pgsql == NULL) {
+    if (database_pgsqldb == nullptr) {
         return;
     }
 
-    res = PQexec(motapp->dbse->database_pgsql, sqlquery);
+    res = PQexec(database_pgsqldb, sql.c_str());
 
-    if (motapp->dbse->dbse_action == DBSE_TBL_CHECK) {
-        motapp->dbse->table_ok = false;
+    if (dbse_action == DBSE_TBL_CHECK) {
+        table_ok = false;
         if (PQresultStatus(res) != PGRES_TUPLES_OK) {
             PQclear(res);
             return;
@@ -949,44 +710,25 @@ static void dbse_pgsql_recs (ctx_motapp *motapp, const char *sqlquery)
             for (indx2 = 0; indx2 < cols; indx2++){
                 if (mystrceq("table_nm", PQfname(res, indx2)) &&
                     mystrceq("motionplus", PQgetvalue(res, indx, indx2))) {
-                        motapp->dbse->table_ok = true;
+                        table_ok = true;
                 }
             }
         }
         PQclear(res);
 
-    } else if (motapp->dbse->dbse_action == DBSE_MOV_COUNT) {
-        motapp->dbse->movie_cnt = 0;
-        if (PQresultStatus(res) != PGRES_TUPLES_OK) {
-            PQclear(res);
-            return;
-        }
-
-        cols = PQnfields(res);
-        rows = PQntuples(res);
-        for(indx = 0; indx < rows; indx++) {
-            for (indx2 = 0; indx2 < cols; indx2++){
-                if (mystrceq("movie_cnt", PQfname(res, indx2))) {
-                    motapp->dbse->movie_cnt =atoi(PQgetvalue(res, indx, indx2));
-                }
-            }
-        }
-        PQclear(res);
-
-    } else if (motapp->dbse->dbse_action == DBSE_COLS_LIST) {
+    } else if (dbse_action == DBSE_COLS_LIST) {
         cols = PQnfields(res);
         for(indx = 0; indx < cols; indx++) {
-            for (indx2=0; indx2 < motapp->dbse->cols_cnt; indx2++) {
-                if (mystrceq(PQfname(res, indx)
-                    , motapp->dbse->cols_list[indx2].col_nm)) {
-                    motapp->dbse->cols_list[indx2].found = true;
+            for (it = col_names.begin();
+                it != col_names.end();it++) {
+                if (mystrceq(PQfname(res, indx), it->col_nm.c_str())) {
+                    it->found = true;
                 }
             }
         }
         PQclear(res);
 
-    } else if (motapp->dbse->dbse_action == DBSE_MOV_SELECT) {
-        motapp->dbse->rec_indx = 0;
+    } else if (dbse_action == DBSE_MOV_SELECT) {
         if (PQresultStatus(res) != PGRES_TUPLES_OK) {
             PQclear(res);
             return;
@@ -995,325 +737,249 @@ static void dbse_pgsql_recs (ctx_motapp *motapp, const char *sqlquery)
         cols = PQnfields(res);
         rows = PQntuples(res);
         for(indx = 0; indx < rows; indx++) {
-            rnbr = motapp->dbse->rec_indx;
-            dbse_rec_default(&motapp->dbse->movie_list[rnbr]);
+            movie_item_default();
             for (indx2 = 0; indx2 < cols; indx2++) {
-                if (PQgetvalue(res, indx, indx2) != NULL) {
-                    dbse_rec_assign(&motapp->dbse->movie_list[rnbr]
-                        , (char*)PQfname(res, indx2)
+                if (PQgetvalue(res, indx, indx2) != nullptr) {
+                    movie_item_assign((char*)PQfname(res, indx2)
                         , (char*)PQgetvalue(res, indx, indx2));
                 }
             }
-            motapp->dbse->rec_indx++;
+            movielist->push_back(movie_item);
         }
         PQclear(res);
     }
 
-    return;
 }
 
-static void dbse_pgsql_cols(ctx_motapp *motapp)
+void cls_dbse::pgsqldb_cols()
 {
-    int indx;
     std::string sql;
+    it_cols it;
 
-    dbse_cols_list(motapp);
+    get_cols_list();
 
-    motapp->dbse->dbse_action = DBSE_COLS_LIST;
-    dbse_sql_motpls(motapp->dbse, sql);
-    dbse_pgsql_recs(motapp, sql.c_str());
+    dbse_action = DBSE_COLS_LIST;
+    sql_motpls(sql);
+    pgsqldb_recs(sql.c_str());
 
-    for (indx=0; indx<motapp->dbse->cols_cnt; indx++) {
-        if (motapp->dbse->cols_list[indx].found == false) {
-            motapp->dbse->dbse_action = DBSE_COLS_ADD;
-            dbse_sql_motpls(motapp->dbse, sql
-                , motapp->dbse->cols_list[indx].col_nm
-                , motapp->dbse->cols_list[indx].col_typ);
-            dbse_pgsql_exec(motapp,sql.c_str());
+    for (it = col_names.begin();
+        it != col_names.end();it++) {
+        if (it->found == false) {
+            dbse_action = DBSE_COLS_ADD;
+            sql_motpls(sql, it->col_nm, it->col_typ);
+            pgsqldb_exec(sql.c_str());
         }
     }
-
-    dbse_cols_free(motapp);
-
 }
 
-static void dbse_pgsql_setup(ctx_motapp *motapp)
+void cls_dbse::pgsqldb_setup()
 {
     std::string sql;
 
-    motapp->dbse->dbse_action = DBSE_TBL_CHECK;
-    dbse_sql_motpls(motapp->dbse, sql);
-    dbse_pgsql_recs(motapp,sql.c_str());
+    dbse_action = DBSE_TBL_CHECK;
+    sql_motpls(sql);
+    pgsqldb_recs(sql.c_str());
 
-    if (motapp->dbse->table_ok == false) {
+    if (table_ok == false) {
         MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
             , _("Creating motionplus table"));
-        motapp->dbse->dbse_action = DBSE_TBL_CREATE;
-        dbse_sql_motpls(motapp->dbse, sql);
-        dbse_pgsql_exec(motapp,sql.c_str());
+        dbse_action = DBSE_TBL_CREATE;
+        sql_motpls(sql);
+        pgsqldb_exec(sql.c_str());
     }
 
-    dbse_pgsql_cols(motapp);
+    pgsqldb_cols();
 
 }
 
-static void dbse_pgsql_init(ctx_motapp *motapp)
+void cls_dbse::pgsqldb_init()
 {
     std::string constr;
 
-    motapp->dbse->database_pgsql = NULL;
+    database_pgsqldb = nullptr;
 
-    if (motapp->dbse->database_type != "postgresql") {
+    if (cfg_database_type != "postgresql") {
         return;
     }
 
-    constr = "dbname='" + motapp->dbse->database_dbname + "' ";
-    constr += " host='" + motapp->dbse->database_host + "' ";
-    constr += " user='" + motapp->dbse->database_user + "' ";
-    constr += " password='" + motapp->dbse->database_password + "' ";
-    constr += " port="+std::to_string(motapp->dbse->database_port) + " ";
-    motapp->dbse->database_pgsql = PQconnectdb(constr.c_str());
-    if (PQstatus(motapp->dbse->database_pgsql) == CONNECTION_BAD) {
+    constr = "dbname='" + cfg_database_dbname + "' ";
+    constr += " host='" + cfg_database_host + "' ";
+    constr += " user='" + cfg_database_user + "' ";
+    constr += " password='" + cfg_database_password + "' ";
+    constr += " port="+std::to_string(cfg_database_port) + " ";
+    database_pgsqldb = PQconnectdb(constr.c_str());
+    if (PQstatus(database_pgsqldb) == CONNECTION_BAD) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Connection to PostgreSQL database '%s' failed: %s")
-            , motapp->dbse->database_dbname.c_str()
-            , PQerrorMessage(motapp->dbse->database_pgsql));
-        dbse_close(motapp);
+            , cfg_database_dbname.c_str()
+            , PQerrorMessage(database_pgsqldb));
+        dbse_close();
         return;
     }
-    motapp->dbse->is_open = true;
+    is_open = true;
 
-    dbse_pgsql_setup(motapp);
+    pgsqldb_setup();
 
     MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
         , _("%s database opened")
-        , motapp->dbse->database_dbname.c_str() );
+        , cfg_database_dbname.c_str() );
 }
 
-static void dbse_pgsql_movlst(ctx_motapp *motapp, int device_id)
+void cls_dbse::pgsqldb_movielist()
 {
     std::string sql;
 
-    motapp->dbse->dbse_action = DBSE_MOV_COUNT;
-    dbse_sql_motpls(motapp->dbse, sql, device_id);
-    dbse_pgsql_recs(motapp, sql.c_str());
+    dbse_action = DBSE_MOV_SELECT;
+    sql_motpls(sql);
+    pgsqldb_recs(sql.c_str());
 
-    if (motapp->dbse->movie_cnt > 0) {
-        motapp->dbse->movie_list =(ctx_dbse_rec *)
-            mymalloc(sizeof(ctx_dbse_rec)*(uint)motapp->dbse->movie_cnt);
+    dbse_action = DBSE_MOV_CLEAN;
+    sql_motpls(sql);
+    pgsqldb_exec(sql.c_str());
 
-        motapp->dbse->dbse_action = DBSE_MOV_SELECT;
-        dbse_sql_motpls(motapp->dbse, sql, device_id);
-        dbse_pgsql_recs(motapp, sql.c_str());
-
-        motapp->dbse->dbse_action = DBSE_MOV_CLEAN;
-        dbse_sql_motpls(motapp->dbse, sql);
-        dbse_pgsql_exec(motapp, sql.c_str());
-    }
-    return;
 }
 
 #endif  /*HAVE_PGSQL*/
 
-static bool dbse_open(ctx_motapp *motapp)
+bool cls_dbse::dbse_open()
 {
+    if (is_open) {
+        return true;
+    }
 
-    if (motapp->dbse->database_type == "") {
+    if (cfg_database_type == "") {
+        is_open = false;
         return false;
     }
 
-    pthread_mutex_lock(&motapp->dbse->mutex_dbse);
-
-        if (motapp->dbse->is_open) {
-            pthread_mutex_unlock(&motapp->dbse->mutex_dbse);
-            return true;
-        }
-
+    pthread_mutex_lock(&mutex_dbse);
         MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO,_("Opening database"));
 
         #ifdef HAVE_MARIADB
-            if (motapp->dbse->database_type == "mariadb") {
-                dbse_mariadb_init(motapp);
+            if (cfg_database_type == "mariadb") {
+                mariadb_init();
             }
         #endif
-        #ifdef HAVE_PGSQL
-            if (motapp->dbse->database_type == "postgresql") {
-                dbse_pgsql_init(motapp);
+        #ifdef HAVE_PGSQLDB
+            if (cfg_database_type == "postgresql") {
+                pgsqldb_init();
             }
         #endif
-        #ifdef HAVE_SQLITE3
-            if (motapp->dbse->database_type == "sqlite3") {
-                dbse_sqlite3_init(motapp);
+        #ifdef HAVE_SQLITE3DB
+            if (cfg_database_type == "sqlite3") {
+                sqlite3db_init();
             }
         #endif
-    pthread_mutex_unlock(&motapp->dbse->mutex_dbse);
+    pthread_mutex_unlock(&mutex_dbse);
 
-    return motapp->dbse->is_open;
+    return is_open;
 }
 
-void dbse_init(ctx_motapp *motapp)
+/* Get list of movies from the database*/
+void cls_dbse::movielist_get(int p_device_id, lst_movies *p_movielist)
 {
-    motapp->dbse = new ctx_dbse;
-    motapp->dbse->database_busy_timeout = motapp->conf->database_busy_timeout;
-    motapp->dbse->database_dbname = motapp->conf->database_dbname;
-    motapp->dbse->database_host = motapp->conf->database_host;
-    motapp->dbse->database_password = motapp->conf->database_password;
-    motapp->dbse->database_port = motapp->conf->database_port;
-    motapp->dbse->database_type = motapp->conf->database_type;
-    motapp->dbse->database_user = motapp->conf->database_user;
-    motapp->dbse->movie_cnt = 0;
-    motapp->dbse->movie_list = NULL;
-    motapp->dbse->cols_cnt = 0;
-    motapp->dbse->cols_list = NULL;
-    motapp->dbse->is_open = false;
-
-    pthread_mutex_init(&motapp->dbse->mutex_dbse, NULL);
-
-    dbse_edits(motapp);
-
-    dbse_open(motapp);
-}
-
-/* Populate the list of the movies from the database*/
-void dbse_movies_getlist(ctx_motapp *motapp, int device_id)
-{
-
-     if (dbse_open(motapp) == false) {
+    if (dbse_open() == false) {
         return;
     }
 
-    dbse_movies_free(motapp);
+    pthread_mutex_lock(&mutex_dbse);
+        device_id = p_device_id;
+        movielist = p_movielist;
+        movielist->clear();
 
-    pthread_mutex_lock(&motapp->dbse->mutex_dbse);
         #ifdef HAVE_MARIADB
-            if (motapp->dbse->database_type == "mariadb") {
-                dbse_mariadb_movlst(motapp, device_id);
+            if (cfg_database_type == "mariadb") {
+                mariadb_movielist();
             }
         #endif
-        #ifdef HAVE_PGSQL
-            if (motapp->dbse->database_type == "postgresql") {
-                dbse_pgsql_movlst(motapp, device_id);
+        #ifdef HAVE_PGSQLDB
+            if (cfg_database_type == "postgresql") {
+                pgsqldb_movielist();
             }
         #endif
-        #ifdef HAVE_SQLITE3
-            if (motapp->dbse->database_type == "sqlite3") {
-                dbse_sqlite3_movlst(motapp, device_id);
+        #ifdef HAVE_SQLITE3DB
+            if (cfg_database_type == "sqlite3") {
+                sqlite3db_movielist();
             }
         #endif
-        #ifndef HAVE_DBSE
-            (void)device_id;
-        #endif
-    pthread_mutex_unlock(&motapp->dbse->mutex_dbse);
+    pthread_mutex_unlock(&mutex_dbse);
 
 }
 
-void dbse_close(ctx_motapp *motapp)
+void cls_dbse::dbse_close()
 {
     #ifdef HAVE_MARIADB
-        dbse_mariadb_close(motapp);
+        mariadb_close();
     #endif
-    #ifdef HAVE_PGSQL
-        dbse_pgsql_close(motapp);
+    #ifdef HAVE_PGSQLDB
+        pgsqldb_close();
     #endif
-    #ifdef HAVE_SQLITE3
-        dbse_sqlite3_close(motapp);
-    #endif
-    #ifndef HAVE_DBSE
-        (void)motapp;
+    #ifdef HAVE_SQLITE3DB
+        sqlite3db_close();
     #endif
 }
 
-void dbse_deinit(ctx_motapp *motapp)
+void cls_dbse::exec_sql(std::string sql)
 {
-    dbse_movies_free(motapp);
-
-    dbse_cols_free(motapp);
-
-    dbse_close(motapp);
-
-    pthread_mutex_destroy(&motapp->dbse->mutex_dbse);
-
-    if (motapp->dbse != NULL) {
-        delete motapp->dbse;
-    }
-
-}
-
-/* Execute sql against database with mutex lock */
-void dbse_exec_sql(ctx_motapp *motapp, const char *sqlquery)
-{
-
-    if (dbse_open(motapp) == false) {
+    if (dbse_open() == false) {
         return;
     }
 
-    pthread_mutex_lock(&motapp->dbse->mutex_dbse);
+    pthread_mutex_lock(&mutex_dbse);
         #ifdef HAVE_MARIADB
-            if (motapp->dbse->database_type == "mariadb") {
-                dbse_mariadb_exec(motapp, sqlquery);
+            if (cfg_database_type == "mariadb") {
+                mariadb_exec(sql);
             }
         #endif
-        #ifdef HAVE_PGSQL
-            if (motapp->dbse->database_type == "postgresql") {
-                dbse_pgsql_exec(motapp, sqlquery);
+        #ifdef HAVE_PGSQLDB
+            if (cfg_database_type == "postgresql") {
+                pgsqldb_exec(sql);
             }
         #endif
-        #ifdef HAVE_SQLITE3
-            if (motapp->dbse->database_type == "sqlite3") {
-                dbse_sqlite3_exec(motapp, sqlquery);
+        #ifdef HAVE_SQLITE3DB
+            if (cfg_database_type == "sqlite3") {
+                sqlite3db_exec(sql);
             }
         #endif
         #ifndef HAVE_DBSE
-            (void)sqlquery;
+            (void)sql;
         #endif
-    pthread_mutex_unlock(&motapp->dbse->mutex_dbse);
+    pthread_mutex_unlock(&mutex_dbse);
 
 }
 
-/* Create and execute user provided sql with mutex lock*/
-void dbse_exec(ctx_dev *cam, const char *filename, const char *cmd)
+void cls_dbse::exec(ctx_dev *cam, std::string fname, std::string cmd)
 {
-    char sqlquery[PATH_MAX];
+    std::string sql;
 
-    /* This is to prevent flooding log with open/fail messages*/
-    if (mystrceq(cmd,"event_start")) {
-        if (dbse_open(cam->motapp) == false) {
-            return;
-        }
-    } else {
-        if (cam->motapp->dbse->is_open == false) {
-            return;
-        }
-    }
-
-    if (mystrceq(cmd,"pic_save")) {
-        mystrftime(cam, sqlquery, sizeof(sqlquery)
-            , cam->conf->sql_pic_save.c_str(), filename);
-    } else if (mystrceq(cmd,"movie_start")) {
-        mystrftime(cam, sqlquery, sizeof(sqlquery)
-            , cam->conf->sql_movie_start.c_str(), filename);
-    } else if (mystrceq(cmd,"movie_end")) {
-        mystrftime(cam, sqlquery, sizeof(sqlquery)
-            , cam->conf->sql_movie_end.c_str(), filename);
-    } else if (mystrceq(cmd,"event_start")) {
-        mystrftime(cam, sqlquery, sizeof(sqlquery)
-            , cam->conf->sql_event_start.c_str(), filename);
-    } else if (mystrceq(cmd,"event_end")) {
-        mystrftime(cam, sqlquery, sizeof(sqlquery)
-            , cam->conf->sql_event_end.c_str(), filename);
-    }
-
-    if (strlen(sqlquery) <= 0) {
+    if (dbse_open() == false) {
         return;
     }
-    MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "%s query: %s", cmd, sqlquery);
 
-    dbse_exec_sql(cam->motapp, sqlquery);
+    if (cmd == "pic_save") {
+        mystrftime(cam, sql, cam->conf->sql_pic_save, fname);
+    } else if (cmd == "movie_start") {
+        mystrftime(cam, sql, cam->conf->sql_movie_start, fname);
+    } else if (cmd == "movie_end") {
+        mystrftime(cam, sql, cam->conf->sql_movie_end, fname);
+    } else if (cmd == "event_start") {
+        mystrftime(cam, sql, cam->conf->sql_event_start, fname);
+    } else if (cmd == "event_end") {
+        mystrftime(cam, sql, cam->conf->sql_event_end, fname);
+    }
+
+    if (sql == "") {
+        return;
+    }
+    MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "%s query: %s"
+        , cmd.c_str(), sql.c_str());
+
+    exec_sql(sql);
 
 }
 
-/* Add a record to motionplus table for new movies */
-void dbse_movies_addrec(ctx_dev *cam, cls_movie *movie, timespec *ts1)
+/* Add a record to motionplus table */
+void cls_dbse::movielist_add(ctx_dev *cam, cls_movie *movie, timespec *ts1)
 {
     std::string sqlquery;
     struct stat statbuf;
@@ -1325,7 +991,7 @@ void dbse_movies_addrec(ctx_dev *cam, cls_movie *movie, timespec *ts1)
     uint64_t diff_avg, sdev_avg;
     struct tm timestamp_tm;
 
-    if (dbse_open(cam->motapp) == false) {
+    if (dbse_open() == false) {
         return;
     }
 
@@ -1368,7 +1034,76 @@ void dbse_movies_addrec(ctx_dev *cam, cls_movie *movie, timespec *ts1)
     sqlquery += " ,"  + std::to_string(sdev_avg);
     sqlquery += ")";
 
-    dbse_exec_sql(cam->motapp, sqlquery.c_str());
+    exec_sql(sqlquery);
 
 }
 
+void cls_dbse::dbse_edits()
+{
+    int retcd = 0;
+
+    if ((cfg_database_type != "") &&
+        (cfg_database_dbname == "")) {
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+            , _("Invalid database name"));
+        retcd = -1;
+    }
+
+    if ((cfg_database_type != "mariadb") &&
+        (cfg_database_type != "pgsql") &&
+        (cfg_database_type != "sqlite3") &&
+        (cfg_database_type != "")) {
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+            ,_("Invalid database_type %s")
+            , cfg_database_type.c_str());
+        retcd = -1;
+    }
+
+    if (((cfg_database_type == "mariadb") ||
+         (cfg_database_type == "pgsql")) &&
+         (cfg_database_port == 0)) {
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+            ,_("Must specify database port for mariadb/pgsql"));
+        retcd = -1;
+    }
+
+    if ((cfg_database_type == "sqlite3") &&
+        (cfg_database_dbname == "")) {
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+            ,_("Must specify database name for sqlite3"));
+        retcd = -1;
+    }
+
+    if ((cfg_database_type != "") && (retcd == -1)) {
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+            ,_("Database functionality disabled."));
+        cfg_database_type = "";
+    }
+
+}
+
+cls_dbse::cls_dbse(ctx_motapp *p_motapp)
+{
+    cfg_database_busy_timeout = p_motapp->conf->database_busy_timeout;
+    cfg_database_dbname = p_motapp->conf->database_dbname;
+    cfg_database_host = p_motapp->conf->database_host;
+    cfg_database_password = p_motapp->conf->database_password;
+    cfg_database_port = p_motapp->conf->database_port;
+    cfg_database_type = p_motapp->conf->database_type;
+    cfg_database_user = p_motapp->conf->database_user;
+
+    is_open = false;
+
+    pthread_mutex_init(&mutex_dbse, nullptr);
+
+    dbse_edits();
+
+    dbse_open();
+}
+
+cls_dbse::~cls_dbse()
+{
+    dbse_close();
+
+    pthread_mutex_destroy(&mutex_dbse);
+}

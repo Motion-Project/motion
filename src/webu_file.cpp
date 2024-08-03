@@ -31,7 +31,6 @@
 static ssize_t webu_file_reader (void *cls, uint64_t pos, char *buf, size_t max)
 {
     cls_webu_ans *webu_ans =(cls_webu_ans *)cls;
-
     (void)fseek (webu_ans->req_file, (long)pos, SEEK_SET);
     return (ssize_t)fread (buf, 1, max, webu_ans->req_file);
 }
@@ -40,7 +39,12 @@ static ssize_t webu_file_reader (void *cls, uint64_t pos, char *buf, size_t max)
 static void webu_file_free (void *cls)
 {
     cls_webu_ans *webu_ans =(cls_webu_ans *)cls;
-    myfclose(webu_ans->req_file);
+
+    if (webu_ans->req_file != nullptr) {
+        myfclose(webu_ans->req_file);
+        webu_ans->req_file = nullptr;
+    }
+
 }
 
 /****************************************************/
@@ -50,18 +54,15 @@ void cls_webu_file::main() {
     struct stat statbuf;
     struct MHD_Response *response;
     std::string full_nm;
-    int indx;
     p_lst *lst = &webu->wb_actions->params_array;
     p_it it;
+    lst_movies movies;
+    it_movies  m_it;
 
     /*If we have not fully started yet, simply return*/
     if (app->dbse == NULL) {
         webua->bad_request();
         return;
-    }
-
-    if (app->dbse->movie_cnt == 0) {
-        dbse_movies_getlist(app, webua->cam->device_id);
     }
 
     for (it = lst->begin(); it != lst->end(); it++) {
@@ -76,24 +77,29 @@ void cls_webu_file::main() {
         }
     }
 
+    app->dbse->movielist_get(webua->cam->device_id, &movies);
+    if (movies.size() == 0) {
+        webua->bad_request();
+        return;
+    }
+
     full_nm = "";
-    for (indx=0; indx < app->dbse->movie_cnt; indx++) {
-        if (mystreq(app->dbse->movie_list[indx].movie_nm
-            ,webua->uri_cmd2.c_str())) {
-            full_nm = app->dbse->movie_list[indx].full_nm;
+    for (m_it = movies.begin(); m_it != movies.end();m_it++) {
+        if (m_it->movie_nm == webua->uri_cmd2) {
+            full_nm = m_it->full_nm;
         }
     }
 
     if (stat(full_nm.c_str(), &statbuf) == 0) {
         webua->req_file = myfopen(full_nm.c_str(), "rbe");
     } else {
-        webua->req_file = NULL;
+        webua->req_file = nullptr;
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             ,"Security warning: Client IP %s requested file: %s"
             ,webua->clientip.c_str(), webua->uri_cmd2.c_str());
     }
 
-    if (webua->req_file == NULL) {
+    if (webua->req_file == nullptr) {
         webua->resp_page = "<html><head><title>Bad File</title>"
             "</head><body>Bad File</body></html>";
         webua->resp_type = WEBUI_RESP_HTML;
@@ -103,10 +109,13 @@ void cls_webu_file::main() {
         response = MHD_create_response_from_callback (
             (size_t)statbuf.st_size, 32 * 1024
             , &webu_file_reader
-            , this
+            , webua
             , &webu_file_free);
         if (response == NULL) {
-            myfclose(webua->req_file);
+            if (webua->req_file != nullptr) {
+                myfclose(webua->req_file);
+                webua->req_file = nullptr;
+            }
             webua->bad_request();
             return;
         }

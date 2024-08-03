@@ -116,10 +116,10 @@ struct ctx_motapp;
 
 struct ctx_images;
 struct ctx_image_data;
-struct ctx_dbse;
 struct ctx_algsec;
 struct ctx_config;
 
+class cls_dbse;
 class cls_draw;
 class cls_log;
 class cls_movie;
@@ -254,7 +254,11 @@ struct ctx_params_item {
     std::string     param_name;       /* The name or description of the ID as requested by user*/
     std::string     param_value;      /* The value that the user wants the control set to*/
 };
-
+/* TODO  Change this to lst_p and it_p so we have a type then descr.  Avoids
+  conflicts with var names which I'll try not to have start with a abbrev
+  for their type.  Types with start with something indicating their type.
+  cls, ctx, it, lst, vec, etc)
+*/
 typedef std::list<ctx_params_item> p_lst;
 typedef p_lst::iterator p_it;
 
@@ -264,6 +268,36 @@ struct ctx_params {
     bool    update_params;      /*Bool for whether to update the parameters on the device*/
     std::string params_desc;    /* Description of params*/
 };
+
+/* Record structure of motionplus table */
+struct ctx_movie_item {
+    bool        found;      /*Bool for whether the file exists*/
+    int64_t     record_id;  /*record_id*/
+    int         device_id;  /*camera id */
+    std::string movie_nm;  /*Name of the movie file*/
+    std::string movie_dir; /*Directory of the movie file */
+    std::string full_nm;   /*Full name of the movie file with dir*/
+    int64_t     movie_sz;   /*Size of the movie file in bytes*/
+    int         movie_dtl;  /*Date in yyyymmdd format for the movie file*/
+    std::string movie_tmc; /*Movie time 12h format*/
+    std::string movie_tml; /*Movie time 24h format*/
+    int         diff_avg;   /*Average diffs for motion frames */
+    int         sdev_min;   /*std dev min */
+    int         sdev_max;   /*std dev max */
+    int         sdev_avg;   /*std dev average */
+};
+typedef std::list<ctx_movie_item> lst_movies;
+typedef lst_movies::iterator it_movies;
+
+/* Column item attributes in the motionplus table */
+struct ctx_col_item {
+    bool        found;      /*Bool for whether the col in existing db*/
+    std::string col_nm;     /*Name of the column*/
+    std::string col_typ;    /*Data type of the column*/
+    int         col_idx;    /*Sequence index*/
+};
+typedef std::list<ctx_col_item> lst_cols;
+typedef lst_cols::iterator it_cols;
 
 struct ctx_coord {
     int x;
@@ -580,7 +614,7 @@ struct ctx_motapp {
     int                 snd_cnt;
     ctx_all_sizes       *all_sizes;
     cls_webu            *webu;
-    ctx_dbse            *dbse;                      /* user specified database */
+    cls_dbse            *dbse;
 
     bool                parms_changed;      /*bool indicating if the parms have changed */
     pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */

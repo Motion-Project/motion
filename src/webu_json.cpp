@@ -238,10 +238,11 @@ void cls_webu_json::config()
 
 void cls_webu_json::movies_list()
 {
-    int indx_mov, indx, movie_cnt;
+    int indx;
     std::string response;
     char fmt[PATH_MAX];
-    ctx_dbse_rec db;
+    lst_movies movielist;
+    it_movies m_it;
     p_lst *lst = &webu->wb_actions->params_array;
     p_it it;
 
@@ -260,51 +261,47 @@ void cls_webu_json::movies_list()
         }
     }
 
-    dbse_movies_getlist(app, webua->cam->device_id);
+    app->dbse->movielist_get(webua->cam->device_id, &movielist);
 
-    movie_cnt = app->dbse->movie_cnt;
     webua->resp_page += "{";
     indx = 0;
-    for (indx_mov=0; indx_mov < movie_cnt; indx_mov++) {
-        db = app->dbse->movie_list[indx_mov];
-        if (db.found == true) {
-            if ((db.movie_sz/1000) < 1000) {
+    for (m_it = movielist.begin(); m_it != movielist.end(); m_it++){
+        if (m_it->found == true) {
+            if ((m_it->movie_sz/1000) < 1000) {
                 snprintf(fmt,PATH_MAX,"%.1fKB"
-                    ,((double)db.movie_sz/1000));
-            } else if ((db.movie_sz/1000000) < 1000) {
+                    ,((double)m_it->movie_sz/1000));
+            } else if ((m_it->movie_sz/1000000) < 1000) {
                 snprintf(fmt,PATH_MAX,"%.1fMB"
-                    ,((double)db.movie_sz/1000000));
+                    ,((double)m_it->movie_sz/1000000));
             } else {
                 snprintf(fmt,PATH_MAX,"%.1fGB"
-                    ,((double)db.movie_sz/1000000000));
+                    ,((double)m_it->movie_sz/1000000000));
             }
             webua->resp_page += "\""+ std::to_string(indx) + "\":";
 
             webua->resp_page += "{\"name\": \"";
-            webua->resp_page += std::string(db.movie_nm) + "\"";
+            webua->resp_page += m_it->movie_nm + "\"";
 
             webua->resp_page += ",\"size\": \"";
             webua->resp_page += std::string(fmt) + "\"";
 
             webua->resp_page += ",\"date\": \"";
-            webua->resp_page += std::to_string(db.movie_dtl) + "\"";
+            webua->resp_page += std::to_string(m_it->movie_dtl) + "\"";
 
-            if (db.movie_tmc != NULL) {
-                webua->resp_page += ",\"time\": \"";
-                webua->resp_page += std::string(db.movie_tmc) + "\"";
-            }
+            webua->resp_page += ",\"time\": \"";
+            webua->resp_page += m_it->movie_tmc + "\"";
 
             webua->resp_page += ",\"diff_avg\": \"";
-            webua->resp_page += std::to_string(db.diff_avg) + "\"";
+            webua->resp_page += std::to_string(m_it->diff_avg) + "\"";
 
             webua->resp_page += ",\"sdev_min\": \"";
-            webua->resp_page += std::to_string(db.sdev_min) + "\"";
+            webua->resp_page += std::to_string(m_it->sdev_min) + "\"";
 
             webua->resp_page += ",\"sdev_max\": \"";
-            webua->resp_page += std::to_string(db.sdev_max) + "\"";
+            webua->resp_page += std::to_string(m_it->sdev_max) + "\"";
 
             webua->resp_page += ",\"sdev_avg\": \"";
-            webua->resp_page += std::to_string(db.sdev_avg) + "\"";
+            webua->resp_page += std::to_string(m_it->sdev_avg) + "\"";
 
             webua->resp_page += "}";
             webua->resp_page += ",";

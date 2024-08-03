@@ -1271,22 +1271,22 @@ void cls_movie::stop()
     if ((movie_type == "norm") || (movie_type == "motion") || (movie_type == "extpipe")) {
         cam->filetype = FTYPE_MOVIE;
         on_movie_end();
-        dbse_exec(cam, full_nm.c_str(), "movie_end");
+        cam->motapp->dbse->exec(cam, full_nm, "movie_end");
         if ((conf_movie_retain == "secondary") &&
             (cam->algsec->isdetected == false) && (cam->algsec_inuse)) {
             if (remove(full_nm.c_str()) != 0) {
                 MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     , _("Unable to remove file %s"), full_nm.c_str());
             } else {
-                dbse_movies_addrec(cam, this, ts);
+                cam->motapp->dbse->movielist_add(cam, this, ts);
             }
         } else {
-            dbse_movies_addrec(cam, this, ts);
+            cam->motapp->dbse->movielist_add(cam, this, ts);
         }
     } else if (movie_type == "timelapse") {
         cam->filetype = FTYPE_MOVIE_TIMELAPSE;
         on_movie_end();
-        dbse_exec(cam, full_nm.c_str(), "movie_end");
+        cam->motapp->dbse->exec(cam, full_nm, "movie_end");
     } else {
         MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO,_("Invalid movie type"));
     }
@@ -1496,7 +1496,7 @@ void cls_movie::start_norm()
 
     on_movie_start();
 
-    dbse_exec(cam, full_nm.c_str(), "movie_start");
+    cam->motapp->dbse->exec(cam, full_nm, "movie_start");
 
     is_running = true;
 
@@ -1556,7 +1556,7 @@ void cls_movie::start_motion()
 
     cam->filetype = FTYPE_MOVIE;
     on_movie_start();
-    dbse_exec(cam, full_nm.c_str(), "movie_start");
+    cam->motapp->dbse->exec(cam, full_nm, "movie_start");
     is_running = true;
 
 }
@@ -1612,7 +1612,7 @@ void cls_movie::start_timelapse()
 
     cam->filetype = FTYPE_MOVIE_TIMELAPSE;
     on_movie_start();
-    dbse_exec(cam, full_nm.c_str(), "movie_start");
+    cam->motapp->dbse->exec(cam, full_nm, "movie_start");
 
     is_running = true;
 }
@@ -1662,7 +1662,7 @@ void cls_movie::start_extpipe()
 
     cam->filetype = FTYPE_MOVIE;
     on_movie_start();
-    dbse_exec(cam, full_nm.c_str(), "movie_start");
+    cam->motapp->dbse->exec(cam, full_nm, "movie_start");
     is_running = true;
 
 }

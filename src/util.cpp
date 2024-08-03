@@ -238,35 +238,6 @@ int myfclose(FILE* fh)
     return rval;
 }
 
-/**
- * mystrftime_long
- *
- *   Motion-specific long form of format specifiers.
- *
- * Parameters:
- *
- *   cam        - current thread's context structure.
- *   width      - width associated with the format specifier.
- *   word       - beginning of the format specifier's word.
- *   l          - length of the format specifier's word.
- *   out        - output buffer where to store the result. Size: PATH_MAX.
- *
- * This is called if a format specifier with the format below was found:
- *
- *   % { word }
- *
- * As a special edge case, an incomplete format at the end of the string
- * is processed as well:
- *
- *   % { word \0
- *
- * Any valid format specified width is supported, e.g. "%12{host}".
- *
- * The following specifier keywords are currently supported:
- *
- * host    Replaced with the name of the local machine (see gethostname(2)).
- * fps     Equivalent to %fps.
- */
 static void mystrftime_long (const ctx_dev *cam,
         int width, const char *word, int l, char *out)
 {
@@ -356,24 +327,7 @@ static void mystrftime_long (const ctx_dev *cam,
     out[0] = '~'; out[1] = 0;
 }
 
-/**
- * mystrftime
- *
- *   Motion-specific variant of strftime(3) that supports additional format
- *   specifiers in the format string.
- *
- * Parameters:
- *
- *   cam        - current thread's context structure
- *   s          - destination string
- *   max        - max number of bytes to write
- *   userformat - format string
- *   filename   - string containing full path of filename
- *                set this to NULL if not relevant
- *
- * Returns: number of bytes written to the string s
- */
-size_t mystrftime(ctx_dev *cam, char *s, size_t max
+size_t mystrftime_base(ctx_dev *cam, char *s, size_t max
         , const char *userformat, const char *filename)
 {
     char formatstring[PATH_MAX] = "";
@@ -546,6 +500,21 @@ size_t mystrftime(ctx_dev *cam, char *s, size_t max
     format = formatstring;
 
     return strftime(s, max, format, &timestamp_tm);
+}
+
+void mystrftime(ctx_dev *cam, char *s, size_t mx_sz
+    , const char *usrfmt, const char *fname)
+{
+    mystrftime_base(cam, s, mx_sz, usrfmt,fname);
+}
+
+void mystrftime(ctx_dev *cam, std::string &rslt
+    , std::string usrfmt, std::string fname)
+{
+    char tmp[PATH_MAX] = "";
+
+    mystrftime_base(cam, tmp, sizeof(tmp), usrfmt.c_str(),fname.c_str());
+    rslt = tmp;
 }
 
 void mythreadname_set(const char *abbr, int threadnbr, const char *threadname)
