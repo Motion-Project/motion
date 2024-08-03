@@ -61,7 +61,6 @@
             void movielist_add(ctx_dev *cam, cls_movie *movie, timespec *ts1);
             void movielist_get(int p_device_id, lst_movies *p_movielist);
         private:
-            ctx_motapp *motapp;
             #ifdef HAVE_SQLITE3DB
                 sqlite3 *database_sqlite3db;
                 void sqlite3db_exec(std::string sql);
