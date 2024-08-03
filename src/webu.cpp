@@ -55,6 +55,10 @@ static void webu_mhd_deinit(void *cls, struct MHD_Connection *connection
     cls_webu_ans *webua =(cls_webu_ans *) *con_cls;
 
     if (webua != nullptr) {
+        if (webua->req_file != nullptr) {
+            myfclose(webua->req_file);
+            webua->req_file = nullptr;
+        }
         delete webua;
         webua = nullptr;
     }

@@ -35,20 +35,6 @@ static ssize_t webu_file_reader (void *cls, uint64_t pos, char *buf, size_t max)
     return (ssize_t)fread (buf, 1, max, webu_ans->req_file);
 }
 
-/* Close the requested file */
-static void webu_file_free (void *cls)
-{
-    cls_webu_ans *webu_ans =(cls_webu_ans *)cls;
-
-    if (webu_ans->req_file != nullptr) {
-        myfclose(webu_ans->req_file);
-        webu_ans->req_file = nullptr;
-    }
-
-}
-
-/****************************************************/
-
 void cls_webu_file::main() {
     mhdrslt retcd;
     struct stat statbuf;
@@ -109,8 +95,7 @@ void cls_webu_file::main() {
         response = MHD_create_response_from_callback (
             (size_t)statbuf.st_size, 32 * 1024
             , &webu_file_reader
-            , webua
-            , &webu_file_free);
+            , webua, NULL);
         if (response == NULL) {
             if (webua->req_file != nullptr) {
                 myfclose(webua->req_file);
