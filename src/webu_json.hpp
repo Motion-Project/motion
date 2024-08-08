@@ -27,8 +27,8 @@
             ctx_motapp      *app;
             cls_webu        *webu;
             cls_webu_ans    *webua;
-            void parms_item(ctx_config *conf, int indx_parm);
-            void parms_one(ctx_config *conf);
+            void parms_item(cls_config *conf, int indx_parm);
+            void parms_one(cls_config *conf);
             void parms_all();
             void cameras_list();
             void categories_list();

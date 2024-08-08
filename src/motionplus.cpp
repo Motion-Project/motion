@@ -492,9 +492,6 @@ static void motpls_shutdown(ctx_motapp *motapp)
 
     mydelete(motapp->webu);
     mydelete(motapp->dbse);
-
-    conf_deinit(motapp);
-
     mydelete(motapp->conf);
     mydelete(motapp->all_sizes);
     mydelete(motlog);
@@ -626,11 +623,11 @@ static void motpls_ntc(void)
 /** Initialize upon start up or restart */
 static void motpls_startup(ctx_motapp *motapp, int daemonize)
 {
-    motapp->conf = new ctx_config;
+    motapp->conf = new cls_config;
 
     motlog = new cls_log(motapp);
 
-    conf_init(motapp);
+    motapp->conf->init(motapp);
 
     motlog->log_level = motapp->conf->log_level;
     motlog->log_fflevel = 3;
@@ -647,7 +644,7 @@ static void motpls_startup(ctx_motapp *motapp, int daemonize)
         }
     }
 
-    conf_parms_log(motapp);
+    motapp->conf->parms_log(motapp);
 
     motpls_pid_write(motapp);
 
@@ -839,10 +836,10 @@ static void motpls_init(ctx_motapp *motapp, int argc, char *argv[])
     motapp->argv = argv;
 
     motapp->cam_list = (ctx_dev **)mymalloc(sizeof(ctx_dev *));
-    motapp->cam_list[0] = NULL;
+    motapp->cam_list[0] = nullptr;
 
     motapp->snd_list = (ctx_dev **)mymalloc(sizeof(ctx_dev *));
-    motapp->snd_list[0] = NULL;
+    motapp->snd_list[0] = nullptr;
 
     motapp->threads_running = 0;
     motapp->finish_all = false;
@@ -875,9 +872,27 @@ static void motpls_init(ctx_motapp *motapp, int argc, char *argv[])
 
 static void motpls_deinit(ctx_motapp *motapp)
 {
+    int indx;
+
     motpls_av_deinit();
 
     motpls_shutdown(motapp);
+
+    indx = 0;
+    while (motapp->cam_list[indx] != nullptr) {
+        mydelete(motapp->cam_list[indx]->conf);
+        mydelete(motapp->cam_list[indx]);
+        indx++;
+    };
+    myfree(motapp->cam_list);
+
+    indx = 0;
+    while (motapp->snd_list[indx] != nullptr) {
+        mydelete(motapp->snd_list[indx]->conf);
+        mydelete(motapp->snd_list[indx]);
+        indx++;
+    };
+    myfree(motapp->snd_list);
 
     pthread_key_delete(tls_key_threadnr);
     pthread_mutex_destroy(&motapp->global_lock);
@@ -896,7 +911,7 @@ static void motpls_cam_add(ctx_motapp *motapp)
     }
 
     pthread_mutex_lock(&motapp->mutex_camlst);
-        conf_camera_add(motapp);
+        motapp->conf->camera_add(motapp);
     pthread_mutex_unlock(&motapp->mutex_camlst);
 
     indx = 1;

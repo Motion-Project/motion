@@ -464,7 +464,7 @@ void cls_webu_post::write_config()
         }
     }
 
-    conf_parms_write(app);
+    app->conf->parms_write(app);
 
 }
 
@@ -521,12 +521,12 @@ void cls_webu_post::config()
 
             if (config_parms[indx2].parm_name != "") {
                 if (config_parms[indx2].parm_cat == PARM_CAT_00) {
-                    conf_edit_set(app->conf
-                        , config_parms[indx2].parm_name
+                    app->conf->edit_set(
+                        config_parms[indx2].parm_name
                         , post_info[indx].key_val);
                 } else {
-                    conf_edit_set(app->cam_list[webua->camindx]->conf
-                        , config_parms[indx2].parm_name
+                    app->cam_list[webua->camindx]->conf->edit_set(
+                        config_parms[indx2].parm_name
                         , post_info[indx].key_val);
                 }
             }

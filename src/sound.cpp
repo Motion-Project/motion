@@ -130,7 +130,7 @@ static void snd_load_alerts(ctx_dev *snd)
     ctx_params  *tmp_params;
     p_it        it;
 
-    conf_edit_get(snd->conf, "snd_alerts", parm_val, PARM_CAT_18);
+    snd->conf->edit_get("snd_alerts", parm_val, PARM_CAT_18);
 
     tmp_params = new ctx_params;
     for (it_a=parm_val.begin(); it_a!=parm_val.end(); it_a++) {

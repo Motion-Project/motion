@@ -113,12 +113,11 @@
 #endif
 
 struct ctx_motapp;
-
 struct ctx_images;
 struct ctx_image_data;
 struct ctx_algsec;
-struct ctx_config;
 
+class cls_config;
 class cls_dbse;
 class cls_draw;
 class cls_log;
@@ -488,7 +487,7 @@ struct ctx_dev {
     int             threadnr;
     pthread_t       thread_id;
 
-    ctx_config      *conf;
+    cls_config      *conf;
     ctx_images      imgs;
 
     ctx_image_data  *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
@@ -609,7 +608,7 @@ struct ctx_motapp {
     int                 argc;
     char                **argv;
     bool                pause;
-    ctx_config          *conf;
+    cls_config          *conf;
     int                 cam_cnt;
     int                 snd_cnt;
     ctx_all_sizes       *all_sizes;

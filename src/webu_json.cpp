@@ -26,7 +26,7 @@
 #include "webu_json.hpp"
 #include "dbse.hpp"
 
-void cls_webu_json::parms_item(ctx_config *conf, int indx_parm)
+void cls_webu_json::parms_item(cls_config *conf, int indx_parm)
 {
     size_t indx;
     std::string parm_orig, parm_val, parm_list, parm_enable;
@@ -41,7 +41,7 @@ void cls_webu_json::parms_item(ctx_config *conf, int indx_parm)
         parm_enable = "true";
     }
 
-    conf_edit_get(conf, config_parms[indx_parm].parm_name
+    conf->edit_get(config_parms[indx_parm].parm_name
         , parm_orig, config_parms[indx_parm].parm_cat);
 
     for (indx = 0; indx < parm_orig.length(); indx++) {
@@ -59,7 +59,7 @@ void cls_webu_json::parms_item(ctx_config *conf, int indx_parm)
             " \"value\":" + parm_val +
             ",\"enabled\":" + parm_enable +
             ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
-            ",\"type\":\"" + conf_type_desc(config_parms[indx_parm].parm_type) + "\"" +
+            ",\"type\":\"" + conf->type_desc(config_parms[indx_parm].parm_type) + "\"" +
             "}";
 
     } else if (config_parms[indx_parm].parm_type == PARM_TYP_BOOL) {
@@ -70,7 +70,7 @@ void cls_webu_json::parms_item(ctx_config *conf, int indx_parm)
                 " \"value\":true" +
                 ",\"enabled\":" + parm_enable +
                 ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
-                ",\"type\":\"" + conf_type_desc(config_parms[indx_parm].parm_type) + "\""+
+                ",\"type\":\"" + conf->type_desc(config_parms[indx_parm].parm_type) + "\""+
                 "}";
         } else {
             webua->resp_page +=
@@ -79,11 +79,11 @@ void cls_webu_json::parms_item(ctx_config *conf, int indx_parm)
                 " \"value\":false" +
                 ",\"enabled\":" + parm_enable +
                 ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
-                ",\"type\":\"" + conf_type_desc(config_parms[indx_parm].parm_type) + "\"" +
+                ",\"type\":\"" + conf->type_desc(config_parms[indx_parm].parm_type) + "\"" +
                 "}";
         }
     } else if (config_parms[indx_parm].parm_type == PARM_TYP_LIST) {
-        conf_edit_list(conf, config_parms[indx_parm].parm_name
+        conf->edit_list(config_parms[indx_parm].parm_name
             , parm_list, config_parms[indx_parm].parm_cat);
 
         webua->resp_page +=
@@ -92,7 +92,7 @@ void cls_webu_json::parms_item(ctx_config *conf, int indx_parm)
             " \"value\": \"" + parm_val + "\"" +
             ",\"enabled\":" + parm_enable +
             ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
-            ",\"type\":\"" + conf_type_desc(config_parms[indx_parm].parm_type) + "\"" +
+            ",\"type\":\"" + conf->type_desc(config_parms[indx_parm].parm_type) + "\"" +
             ",\"list\":" + parm_list +
             "}";
 
@@ -103,12 +103,12 @@ void cls_webu_json::parms_item(ctx_config *conf, int indx_parm)
             " \"value\":\"" + parm_val + "\"" +
             ",\"enabled\":" + parm_enable +
             ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
-            ",\"type\":\""+ conf_type_desc(config_parms[indx_parm].parm_type) + "\"" +
+            ",\"type\":\""+ conf->type_desc(config_parms[indx_parm].parm_type) + "\"" +
             "}";
     }
 }
 
-void cls_webu_json::parms_one(ctx_config *conf)
+void cls_webu_json::parms_one(cls_config *conf)
 {
     int indx_parm;
     bool first;
@@ -138,7 +138,7 @@ void cls_webu_json::parms_one(ctx_config *conf)
                 " \"value\":\"\"" +
                 ",\"enabled\":false" +
                 ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
-                ",\"type\":\""+ conf_type_desc(config_parms[indx_parm].parm_type) + "\"";
+                ",\"type\":\""+ conf->type_desc(config_parms[indx_parm].parm_type) + "\"";
 
             if (config_parms[indx_parm].parm_type == PARM_TYP_LIST) {
                 webua->resp_page += ",\"list\":[\"na\"]";
@@ -207,8 +207,8 @@ void cls_webu_json::categories_list()
         }
         webua->resp_page += "\"" + std::to_string(indx_cat) + "\": ";
 
-        catnm_long = conf_cat_desc((enum PARM_CAT)indx_cat, false);
-        catnm_short = conf_cat_desc((enum PARM_CAT)indx_cat, true);
+        catnm_long = webua->app->conf->cat_desc((enum PARM_CAT)indx_cat, false);
+        catnm_short = webua->app->conf->cat_desc((enum PARM_CAT)indx_cat, true);
 
         webua->resp_page += "{\"name\":\"" + catnm_short + "\",\"display\":\"" + catnm_long + "\"}";
 

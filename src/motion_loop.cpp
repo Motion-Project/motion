@@ -279,7 +279,6 @@ static void mlp_track_move(ctx_dev *cam)
 /* motion detected */
 static void mlp_detected(ctx_dev *cam)
 {
-    ctx_config *conf = cam->conf;
     unsigned int distX, distY;
 
     cam->draw->locate();
@@ -293,8 +292,8 @@ static void mlp_detected(ctx_dev *cam)
 
     mlp_detected_trigger(cam);
 
-    if (cam->current_image->shot <= conf->framerate) {
-        if ((conf->stream_motion == true) &&
+    if (cam->current_image->shot <= cam->conf->framerate) {
+        if ((cam->conf->stream_motion == true) &&
             (cam->current_image->shot != 1)) {
             webu_getimg_main(cam);
         }
