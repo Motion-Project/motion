@@ -213,8 +213,52 @@
           <p></p>
 
           <div>
-            <i><h4>pgsql</h4></i>
-            ToDo
+            <i><h4>postgresql</h4></i>
+            The following describes the process to set up a PostgreSQL database.
+            If your machine already has a PostgreSQL database,
+            adjust as appropriate to the situation that exists on your computer.
+            Those with more experience with PostgreSQL are
+            invited to provide suggestions and corrections to these steps.
+            <small><small><code>
+            <ul>
+            sudo apt install postgresql postgresql-contrib
+            <br>sudo -u postgres psql
+              <ul>
+              CREATE ROLE 'your_username_here' LOGIN PASSWORD 'YourPasswordHere';
+              <br>CREATE DATABASE motionplus WITH OWNER = your_username_here;
+              <br>GRANT ALL PRIVILEGES ON DATABASE motionplus TO your_username_here;
+              <br>\quit
+              </ul>
+            </code></small></small>
+            </ul>
+
+            Once the database is set up, check the status via systemctl.
+            <ul>
+            <small><small><code>
+            sudo systemctl status postgresql
+            </code></small></small>
+            </ul>
+
+            Check the login information via the following command line. (note that the
+            username only seems to accept lowercase)
+            <ul>
+            <small><small><code>
+            psql -h localhost -d motionplus -U your_username_here -p 5432
+            </code></small></small>
+
+            Specify the following in the MotionPlus configuration parameters.
+            <ul>
+            <small><small><code>
+            database_type postgresql
+            <br>database_dbname motionplus
+            <br>database_host localhost
+            <br>database_port 5432
+            <br>database_user your_username_here
+            <br>database_password YourPasswordHere
+            </code></small></small>
+            </ul>
+
+          </div>
           <p></p>
 
 

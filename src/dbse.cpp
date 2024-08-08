@@ -1050,7 +1050,7 @@ void cls_dbse::dbse_edits()
     }
 
     if ((cfg_database_type != "mariadb") &&
-        (cfg_database_type != "pgsql") &&
+        (cfg_database_type != "postgresql") &&
         (cfg_database_type != "sqlite3") &&
         (cfg_database_type != "")) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
@@ -1060,7 +1060,7 @@ void cls_dbse::dbse_edits()
     }
 
     if (((cfg_database_type == "mariadb") ||
-         (cfg_database_type == "pgsql")) &&
+         (cfg_database_type == "postgresql")) &&
          (cfg_database_port == 0)) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             ,_("Must specify database port for mariadb/pgsql"));
