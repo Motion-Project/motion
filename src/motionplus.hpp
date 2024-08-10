@@ -115,8 +115,8 @@
 struct ctx_motapp;
 struct ctx_images;
 struct ctx_image_data;
-struct ctx_algsec;
 
+class cls_algsec;
 class cls_alg;
 class cls_config;
 class cls_dbse;
@@ -489,7 +489,7 @@ struct ctx_dev {
     ctx_images      imgs;
 
     ctx_image_data  *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
-    ctx_algsec      *algsec;
+    cls_algsec      *algsec;
     cls_alg         *alg;
 
     cls_movie       *movie_norm;
@@ -508,7 +508,6 @@ struct ctx_dev {
     cls_v4l2cam     *v4l2cam;
     cls_libcam      *libcam;
 
-    bool                    algsec_inuse;        /*Bool for whether we have secondary detection*/
     int                     track_posx;
     int                     track_posy;
     int                     device_id;

@@ -221,9 +221,7 @@ static void mlp_detected_trigger(ctx_dev *cam)
             mlp_info_reset(cam);
             cam->event_prev_nbr = cam->event_curr_nbr;
 
-            if (cam->algsec_inuse) {
-                cam->algsec->isdetected = false;
-            }
+            cam->algsec->detected = false;
 
             time(&raw_time);
             localtime_r(&raw_time, &evt_tm);
@@ -672,8 +670,6 @@ void mlp_cleanup(ctx_dev *cam)
 
     webu_getimg_deinit(cam);
 
-    algsec_deinit(cam);
-
     if (cam->device_status == STATUS_OPENED) {
         mlp_cam_close(cam);
     }
@@ -701,6 +697,7 @@ void mlp_cleanup(ctx_dev *cam)
     mlp_ring_destroy(cam); /* Cleanup the precapture ring buffer */
 
     mydelete(cam->alg);
+    mydelete(cam->algsec);
     mydelete(cam->rotate);
     mydelete(cam->picture);
     mydelete(cam->movie_norm);
@@ -749,14 +746,13 @@ static void mlp_init(ctx_dev *cam)
 
     webu_getimg_init(cam);
 
-    algsec_init(cam);
-
     cam->rotate = new cls_rotate(cam);
 
     mlp_init_firstimage(cam);
 
     vlp_init(cam);
     cam->alg = new cls_alg(cam);
+    cam->algsec = new cls_algsec(cam);
     cam->picture = new cls_picture(cam);
     cam->draw = new cls_draw(cam);
     cam->movie_norm = new cls_movie(cam, "norm");
@@ -1212,18 +1208,16 @@ static void mlp_actions_event(ctx_dev *cam)
 
             mlp_track_center(cam);
 
-            if (cam->algsec_inuse) {
-                if (cam->algsec->isdetected) {
-                    MOTPLS_LOG(NTC, TYPE_EVENTS
-                        , NO_ERRNO, _("Secondary detect"));
-                    if (cam->conf->on_secondary_detect != "") {
-                        util_exec_command(cam
-                            , cam->conf->on_secondary_detect.c_str()
-                            , NULL);
-                    }
+            if (cam->algsec->detected) {
+                MOTPLS_LOG(NTC, TYPE_EVENTS
+                    , NO_ERRNO, _("Secondary detect"));
+                if (cam->conf->on_secondary_detect != "") {
+                    util_exec_command(cam
+                        , cam->conf->on_secondary_detect.c_str()
+                        , NULL);
                 }
-                cam->algsec->isdetected = false;
             }
+            cam->algsec->detected = false;
 
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), cam->event_curr_nbr);
 
@@ -1292,7 +1286,7 @@ static void mlp_actions(ctx_dev *cam)
     }
 
     if (cam->detecting_motion) {
-        algsec_detect(cam);
+        cam->algsec->detect();
     }
 
     mlp_areadetect(cam);

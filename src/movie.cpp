@@ -1273,7 +1273,8 @@ void cls_movie::stop()
         on_movie_end();
         cam->motapp->dbse->exec(cam, full_nm, "movie_end");
         if ((conf_movie_retain == "secondary") &&
-            (cam->algsec->isdetected == false) && (cam->algsec_inuse)) {
+            (cam->algsec->detected == false) &&
+            (cam->algsec->method != "none")) {
             if (remove(full_nm.c_str()) != 0) {
                 MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     , _("Unable to remove file %s"), full_nm.c_str());

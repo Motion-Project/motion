@@ -282,8 +282,8 @@ static void mystrftime_long (const ctx_dev *cam,
     }
 
     if (SPECIFIERWORD("secdetect")) {
-        if (cam->algsec_inuse) {
-            if (cam->algsec->isdetected) {
+        if (cam->algsec->method != "none") {
+            if (cam->algsec->detected) {
                 sprintf(out, "%*s", width, "Y");
             } else {
                 sprintf(out, "%*s", width, "N");

@@ -38,13 +38,11 @@
 using namespace cv;
 using namespace dnn;
 
-static void algsec_image_show(ctx_dev *cam, Mat &mat_dst)
+void cls_algsec::image_show(Mat &mat_dst)
 {
     //std::string testdir;
     std::vector<uchar> buff;    //buffer for coding
     std::vector<int> param(2);
-    ctx_algsec_model *algmdl = &cam->algsec->models;
-
 
     /* We check the size so that we at least fill in the first image so the
      * web stream will have something to start with.  After feeding in at least
@@ -52,31 +50,31 @@ static void algsec_image_show(ctx_dev *cam, Mat &mat_dst)
      * need to expend the CPU to compress and load the secondary images */
     if ((cam->stream.secondary.jpg_cnct >0) ||
         (cam->imgs.size_secondary == 0) ||
-        (cam->motapp->conf->log_level >= DBG)) {
+        (cfg_log_level >= DBG)) {
 
-        if ((cam->motapp->conf->log_level >= DBG) &&
-            (algmdl->isdetected == true)) {
+        if ((cfg_log_level >= DBG) &&
+            (detected == true)) {
             MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO, "Saved detected image: %s%s%s%s"
-                , cam->conf->target_dir.c_str()
+                , cfg_target_dir.c_str()
                 ,  "/detect_"
-                , algmdl->method.c_str()
+                , method.c_str()
                 , ".jpg");
-            imwrite(cam->conf->target_dir  + "/detect_" + algmdl->method + ".jpg"
+            imwrite(cfg_target_dir  + "/detect_" + method + ".jpg"
                 , mat_dst);
         }
 
         param[0] = cv::IMWRITE_JPEG_QUALITY;
         param[1] = 75;
         cv::imencode(".jpg", mat_dst, buff, param);
-        pthread_mutex_lock(&cam->algsec->mutex);
+        pthread_mutex_lock(&mutex);
             std::copy(buff.begin(), buff.end(), cam->imgs.image_secondary);
             cam->imgs.size_secondary = (int)buff.size();
-        pthread_mutex_unlock(&cam->algsec->mutex);
+        pthread_mutex_unlock(&mutex);
     }
 
 }
 
-static void algsec_image_label(ctx_dev *cam, Mat &mat_dst
+void cls_algsec::label_image(Mat &mat_dst
     , std::vector<Rect> &src_pos, std::vector<double> &src_weights)
 {
     std::vector<Rect> fltr_pos;
@@ -86,18 +84,17 @@ static void algsec_image_label(ctx_dev *cam, Mat &mat_dst
     std::vector<uchar> buff;    //buffer for coding
     std::vector<int> param(2);
     char wstr[10];
-    ctx_algsec_model *algmdl = &cam->algsec->models;
 
     try {
-        algmdl->isdetected = false;
+        detected = false;
 
-        if (cam->motapp->conf->log_level >= DBG) {
-            imwrite(cam->conf->target_dir  + "/src_" + algmdl->method + ".jpg"
+        if (cfg_log_level >= DBG) {
+            imwrite(cfg_target_dir  + "/src_" + method + ".jpg"
                 , mat_dst);
             MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO, "Saved source image: %s%s%s%s"
-                , cam->conf->target_dir.c_str()
+                , cfg_target_dir.c_str()
                 ,  "/src_"
-                , algmdl->method.c_str()
+                , method.c_str()
                 , ".jpg");
         }
 
@@ -110,14 +107,14 @@ static void algsec_image_label(ctx_dev *cam, Mat &mat_dst
                     break;
                 }
             }
-            if ((indx1==src_pos.size()) && (w > algmdl->threshold)) {
+            if ((indx1==src_pos.size()) && (w > threshold)) {
                 fltr_pos.push_back(r);
                 fltr_weights.push_back(w);
-                algmdl->isdetected = true;
+                detected = true;
             }
         }
 
-        if (algmdl->isdetected) {
+        if (detected) {
             for (indx0=0; indx0<fltr_pos.size(); indx0++) {
                 Rect r = fltr_pos[indx0];
                 r.x += cvRound(r.width*0.1);
@@ -130,93 +127,81 @@ static void algsec_image_label(ctx_dev *cam, Mat &mat_dst
             }
         }
 
-        algsec_image_show(cam, mat_dst);
+        image_show(mat_dst);
 
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
-        algmdl->method = "none";
+        method = "none";
     }
 
 }
 
-static void algsec_image_label(ctx_dev *cam, Mat &mat_dst
-    , double confidence, Point classIdPoint)
+void cls_algsec::label_image(Mat &mat_dst, double confidence, Point classIdPoint)
 {
-    ctx_algsec_model *algmdl = &cam->algsec->models;
     std::string label;
 
     try {
-        algmdl->isdetected = false;
+        detected = false;
 
-        if (cam->motapp->conf->log_level >= DBG) {
-            imwrite(cam->conf->target_dir  + "/src_" + algmdl->method + ".jpg"
+        if (cfg_log_level >= DBG) {
+            imwrite(cfg_target_dir  + "/src_" + method + ".jpg"
                 , mat_dst);
             MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO, "Saved source image: %s%s%s%s"
-                , cam->conf->target_dir.c_str()
+                , cfg_target_dir.c_str()
                 ,  "/src_"
-                , algmdl->method.c_str()
+                , method.c_str()
                 , ".jpg");
         }
 
-        if (confidence < algmdl->threshold) {
+        if (confidence < threshold) {
             return;
         }
 
-        algmdl->isdetected = true;
+        detected = true;
         label = format("%s: %.4f"
-            , (algmdl->dnn_classes.empty() ?
+            , (dnn_classes.empty() ?
                 format("Class #%d", classIdPoint.x).c_str() :
-                algmdl->dnn_classes[(uint)classIdPoint.x].c_str())
+                dnn_classes[(uint)classIdPoint.x].c_str())
             , confidence);
 
         putText(mat_dst , label, Point(0, 15)
             , FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0));
 
-        algsec_image_show(cam, mat_dst);
+        image_show(mat_dst);
 
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
-        algmdl->method = "none";
+        method = "none";
     }
 
 }
 
-static void algsec_image_roi(ctx_dev *cam, Mat &mat_src, Mat &mat_dst)
+void cls_algsec::get_image_roi(Mat &mat_src, Mat &mat_dst)
 {
     cv::Rect roi;
-    int width, height, x, y;
 
-    x = cam->current_image->location.minx;
-    y = cam->current_image->location.miny;
-    width = cam->current_image->location.width;
-    height = cam->current_image->location.height;
+    roi.x = cam->current_image->location.minx;
+    roi.y = cam->current_image->location.miny;
+    roi.width = cam->current_image->location.width;
+    roi.height = cam->current_image->location.height;
 
-    if ((y + height) > cam->imgs.height) {
-        height = cam->imgs.height - y;
+    if ((roi.y + roi.height) > height) {
+        roi.height = height - roi.y;
     }
-    if ((x + width) > cam->imgs.width) {
-        width = cam->imgs.width - x;
+    if ((roi.x + roi.width) > width) {
+        roi.width = width - roi.x;
     }
-
-    roi.x = x;
-    roi.y = y;
-    roi.width = width;
-    roi.height = height;
 
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Base %d %d (%dx%d) img(%dx%d)"
         ,cam->current_image->location.minx
         ,cam->current_image->location.miny
         ,cam->current_image->location.width
         ,cam->current_image->location.height
-        ,cam->imgs.width
-        ,cam->imgs.height);
-    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Set %d %d %d %d"
-        ,x,y,width,height);
-
+        ,width,height);
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Opencv %d %d %d %d"
         ,roi.x,roi.y,roi.width,roi.height);
 
@@ -224,14 +209,12 @@ static void algsec_image_roi(ctx_dev *cam, Mat &mat_src, Mat &mat_dst)
 
 }
 
-static void algsec_image_type(ctx_dev *cam, Mat &mat_dst)
+void cls_algsec::get_image(Mat &mat_dst)
 {
-    ctx_algsec_model *algmdl = &cam->algsec->models;
-
-    if ((algmdl->image_type == "gray") || (algmdl->image_type == "grey")) {
+    if ((image_type == "gray") || (image_type == "grey")) {
         mat_dst = Mat(cam->imgs.height, cam->imgs.width
-            , CV_8UC1, (void*)cam->algsec->image_norm);
-    } else if (algmdl->image_type == "roi") {
+            , CV_8UC1, (void*)image_norm);
+    } else if (image_type == "roi") {
         /*Discard really small and large images */
         if ((cam->current_image->location.width < 64) ||
             (cam->current_image->location.height < 64) ||
@@ -240,101 +223,98 @@ static void algsec_image_type(ctx_dev *cam, Mat &mat_dst)
             return;
         }
         Mat mat_src = Mat(cam->imgs.height*3/2, cam->imgs.width
-            , CV_8UC1, (void*)cam->algsec->image_norm);
+            , CV_8UC1, (void*)image_norm);
         cvtColor(mat_src, mat_src, COLOR_YUV2RGB_YV12);
-        algsec_image_roi(cam, mat_src, mat_dst);
+        get_image_roi(mat_src, mat_dst);
     } else {
         Mat mat_src = Mat(cam->imgs.height*3/2, cam->imgs.width
-            , CV_8UC1, (void*)cam->algsec->image_norm);
+            , CV_8UC1, (void*)image_norm);
         cvtColor(mat_src, mat_dst, COLOR_YUV2RGB_YV12);
     }
 
 }
 
-static void algsec_detect_hog(ctx_dev *cam)
+void cls_algsec::detect_hog()
 {
     std::vector<double> detect_weights;
     std::vector<Rect> detect_pos;
     Mat mat_dst;
-    ctx_algsec_model *algmdl = &cam->algsec->models;
 
     try {
-        algsec_image_type(cam, mat_dst);
+        get_image(mat_dst);
         if (mat_dst.empty() == true) {
             return;
         }
         equalizeHist(mat_dst, mat_dst);
 
-        algmdl->hog.setSVMDetector(HOGDescriptor::getDefaultPeopleDetector());
+        hog.setSVMDetector(HOGDescriptor::getDefaultPeopleDetector());
 
-        algmdl->hog.detectMultiScale(mat_dst, detect_pos, detect_weights, 0
-            ,Size(algmdl->hog_winstride, algmdl->hog_winstride)
-            ,Size(algmdl->hog_padding, algmdl->hog_padding)
-            ,algmdl->scalefactor
-            ,algmdl->hog_threshold_model
+        hog.detectMultiScale(mat_dst, detect_pos, detect_weights, 0
+            ,Size(hog_winstride, hog_winstride)
+            ,Size(hog_padding, hog_padding)
+            ,scalefactor
+            ,hog_threshold_model
             ,false);
 
-        algsec_image_label(cam, mat_dst, detect_pos, detect_weights);
+        label_image(mat_dst, detect_pos, detect_weights);
 
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
-        algmdl->method = "none";
+        method = "none";
     }
 }
 
-static void algsec_detect_haar(ctx_dev *cam)
+void cls_algsec::detect_haar()
 {
-    ctx_algsec_model *algmdl = &cam->algsec->models;
     std::vector<double> detect_weights;
     std::vector<Rect> detect_pos;
     std::vector<int> levels;
     Mat mat_dst;
 
     try {
-        algsec_image_type(cam, mat_dst);
+        get_image(mat_dst);
         if (mat_dst.empty() == true) {
             return;
         }
         equalizeHist(mat_dst, mat_dst);
 
-        algmdl->haar_cascade.detectMultiScale(
+        haar_cascade.detectMultiScale(
             mat_dst, detect_pos, levels, detect_weights
-            ,algmdl->scalefactor, algmdl->haar_minneighbors,algmdl->haar_flags
-            , Size(algmdl->haar_minsize,algmdl->haar_minsize)
-            , Size(algmdl->haar_maxsize,algmdl->haar_maxsize), true);
+            ,scalefactor, haar_minneighbors,haar_flags
+            , Size(haar_minsize,haar_minsize)
+            , Size(haar_maxsize,haar_maxsize), true);
 
-        algsec_image_label(cam, mat_dst, detect_pos, detect_weights);
+        label_image(mat_dst, detect_pos, detect_weights);
 
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
-        algmdl->method = "none";
+        method = "none";
     }
 }
 
-static void algsec_detect_dnn(ctx_dev *cam)
+void cls_algsec::detect_dnn()
 {
-    ctx_algsec_model *algmdl = &cam->algsec->models;
     Mat mat_dst, softmaxProb;
     double confidence;
     float maxProb = 0.0, sum = 0.0;
     Point classIdPoint;
 
     try {
-        algsec_image_type(cam, mat_dst);
+        get_image(mat_dst);
         if (mat_dst.empty() == true) {
             return;
         }
 
         Mat blob = blobFromImage(mat_dst
-            , algmdl->dnn_scale
-            , Size(algmdl->dnn_width, algmdl->dnn_height)
+            , dnn_scale
+            , Size(dnn_width, dnn_height)
             , Scalar());
-        algmdl->net.setInput(blob);
-        Mat prob = algmdl->net.forward();
+        net.setInput(blob);
+        Mat prob = net.forward();
 
         maxProb = *std::max_element(prob.begin<float>(), prob.end<float>());
         cv::exp(prob-maxProb, softmaxProb);
@@ -342,69 +322,67 @@ static void algsec_detect_dnn(ctx_dev *cam)
         softmaxProb /= sum;
         minMaxLoc(softmaxProb.reshape(1, 1), 0, &confidence, 0, &classIdPoint);
 
-        algsec_image_label(cam, mat_dst, confidence, classIdPoint);
+        label_image(mat_dst, confidence, classIdPoint);
 
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Disabling secondary detection"));
-        algmdl->method = "none";
+        method = "none";
     }
 }
 
-static void algsec_load_haar(ctx_dev *cam)
+void cls_algsec::load_haar()
 {
-    ctx_algsec_model *algmdl = &cam->algsec->models;
     try {
-        if (algmdl->model_file == "") {
-            algmdl->method = "none";
+        if (model_file == "") {
+            method = "none";
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("No secondary model specified."));
             return;
         }
-        if (algmdl->haar_cascade.load(algmdl->model_file) == false) {
+        if (haar_cascade.load(model_file) == false) {
             /* Loading failed, reset method*/
-            algmdl->method = "none";
+            method = "none";
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
-                ,algmdl->model_file.c_str());
+                ,model_file.c_str());
         };
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
-            , algmdl->model_file.c_str());
-        algmdl->method = "none";
+            , model_file.c_str());
+        method = "none";
     }
 }
 
-static void algsec_load_dnn(ctx_dev *cam)
+void cls_algsec::load_dnn()
 {
-    ctx_algsec_model *algmdl = &cam->algsec->models;
     std::string line;
     std::ifstream ifs;
 
     try {
-        if (algmdl->model_file == "") {
-            algmdl->method = "none";
+        if (model_file == "") {
+            method = "none";
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("No secondary model specified."));
             return;
         }
-        algmdl->net = readNet(
-            algmdl->model_file
-            , algmdl->dnn_config
-            , algmdl->dnn_framework);
-        algmdl->net.setPreferableBackend(algmdl->dnn_backend);
-        algmdl->net.setPreferableTarget(algmdl->dnn_target);
+        net = readNet(
+            model_file
+            , dnn_config
+            , dnn_framework);
+        net.setPreferableBackend(dnn_backend);
+        net.setPreferableTarget(dnn_target);
 
-        ifs.open(algmdl->dnn_classes_file.c_str());
+        ifs.open(dnn_classes_file.c_str());
             if (ifs.is_open() == false) {
-                algmdl->method = "none";
+                method = "none";
                 MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                     , _("Classes file not found: %s")
-                    ,algmdl->dnn_classes_file.c_str());
+                    ,dnn_classes_file.c_str());
                 return;
             }
             while (std::getline(ifs, line)) {
-                algmdl->dnn_classes.push_back(line);
+                dnn_classes.push_back(line);
             }
         ifs.close();
 
@@ -412,18 +390,17 @@ static void algsec_load_dnn(ctx_dev *cam)
         const char* err_msg = e.what();
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
-            , algmdl->model_file.c_str());
-        algmdl->method = "none";
+            , model_file.c_str());
+        method = "none";
     }
 }
 
-static void algsec_params_log(ctx_dev *cam)
+void cls_algsec::params_log()
 {
-    ctx_algsec_model *algmdl = &cam->algsec->models;
-    p_lst *lst = &cam->algsec->models.params->params_array;
+    p_lst *lst = &params->params_array;
     p_it it;
 
-    if (algmdl->method != "none") {
+    if (method != "none") {
         for (it  = lst->begin(); it != lst->end(); it++) {
             MOTPLS_SHT(INF, TYPE_ALL, NO_ERRNO, "%-25s %s"
                 ,it->param_name.c_str(), it->param_value.c_str());
@@ -431,318 +408,287 @@ static void algsec_params_log(ctx_dev *cam)
     }
 }
 
-static void algsec_params_model(ctx_dev *cam)
+void cls_algsec::params_model()
 {
-    ctx_algsec_model *algmdl = &cam->algsec->models;
-    p_lst *lst = &cam->algsec->models.params->params_array;
+    p_lst *lst = &params->params_array;
     p_it it;
 
     for (it  = lst->begin(); it != lst->end(); it++) {
         if (it->param_name == "model_file") {
-            algmdl->model_file = it->param_value;
+            model_file = it->param_value;
         } else if (it->param_name == "frame_interval") {
-            algmdl->frame_interval = mtoi(it->param_value);
+            frame_interval = mtoi(it->param_value);
         } else if (it->param_name == "image_type") {
-            algmdl->image_type = it->param_value;
+            image_type = it->param_value;
         } else if (it->param_name == "threshold") {
-            algmdl->threshold = mtof(it->param_value);
+            threshold = mtof(it->param_value);
         } else if (it->param_name == "scalefactor") {
-            algmdl->scalefactor = mtof(it->param_value);
+            scalefactor = mtof(it->param_value);
         } else if (it->param_name == "rotate") {
-            algmdl->rotate = mtoi(it->param_value);
+            rotate = mtoi(it->param_value);
         }
 
-        if (algmdl->method == "hog") {
+        if (method == "hog") {
             if (it->param_name =="padding") {
-                algmdl->hog_padding = mtoi(it->param_value);
+                hog_padding = mtoi(it->param_value);
             } else if (it->param_name =="threshold_model") {
-                algmdl->hog_threshold_model = mtof(it->param_value);
+                hog_threshold_model = mtof(it->param_value);
             } else if (it->param_name =="winstride") {
-                algmdl->hog_winstride = mtoi(it->param_value);
+                hog_winstride = mtoi(it->param_value);
             }
-        } else if (algmdl->method == "haar") {
+        } else if (method == "haar") {
             if (it->param_name =="flags") {
-                algmdl->haar_flags = mtoi(it->param_value);
+                haar_flags = mtoi(it->param_value);
             } else if (it->param_name =="maxsize") {
-                algmdl->haar_maxsize = mtoi(it->param_value);
+                haar_maxsize = mtoi(it->param_value);
             } else if (it->param_name =="minsize") {
-                algmdl->haar_minsize = mtoi(it->param_value);
+                haar_minsize = mtoi(it->param_value);
             } else if (it->param_name =="minneighbors") {
-                algmdl->haar_minneighbors = mtoi(it->param_value);
+                haar_minneighbors = mtoi(it->param_value);
             }
-        } else if (algmdl->method == "dnn") {
+        } else if (method == "dnn") {
             if (it->param_name == "config") {
-                algmdl->dnn_config = it->param_value;
+                dnn_config = it->param_value;
             } else if (it->param_name == "classes_file") {
-                algmdl->dnn_classes_file = it->param_value;
+                dnn_classes_file = it->param_value;
             } else if (it->param_name =="framework") {
-                algmdl->dnn_framework = it->param_value;
+                dnn_framework = it->param_value;
             } else if (it->param_name =="backend") {
-                algmdl->dnn_backend = mtoi(it->param_value);
+                dnn_backend = mtoi(it->param_value);
             } else if (it->param_name =="target") {
-                algmdl->dnn_target = mtoi(it->param_value);
+                dnn_target = mtoi(it->param_value);
             } else if (it->param_name =="scale") {
-                algmdl->dnn_scale = mtof(it->param_value);
+                dnn_scale = mtof(it->param_value);
             } else if (it->param_name =="width") {
-                algmdl->dnn_width = mtoi(it->param_value);
+                dnn_width = mtoi(it->param_value);
             } else if (it->param_name =="height") {
-                algmdl->dnn_height = mtoi(it->param_value);
+                dnn_height = mtoi(it->param_value);
             }
         }
     }
 }
 
-static void algsec_params_defaults(ctx_dev *cam)
+void cls_algsec::params_defaults()
 {
-    ctx_algsec_model *algmdl = &cam->algsec->models;
+    util_parms_add_default(params, "model_file", "");
+    util_parms_add_default(params, "frame_interval", "5");
+    util_parms_add_default(params, "image_type", "full");
+    util_parms_add_default(params, "rotate", "0");
 
-    util_parms_add_default(algmdl->params, "model_file", "");
-    util_parms_add_default(algmdl->params, "frame_interval", "5");
-    util_parms_add_default(algmdl->params, "image_type", "full");
-    util_parms_add_default(algmdl->params, "rotate", "0");
-
-    if (algmdl->method == "haar") {
-        util_parms_add_default(algmdl->params, "threshold", "1.1");
-        util_parms_add_default(algmdl->params, "scalefactor", "1.1");
-        util_parms_add_default(algmdl->params, "flags", "0");
-        util_parms_add_default(algmdl->params, "maxsize", "1024");
-        util_parms_add_default(algmdl->params, "minsize", "8");
-        util_parms_add_default(algmdl->params, "minneighbors", "8");
-    } else if (algmdl->method == "hog") {
-        util_parms_add_default(algmdl->params, "threshold", "1.1");
-        util_parms_add_default(algmdl->params, "threshold_model", "2");
-        util_parms_add_default(algmdl->params, "scalefactor", "1.05");
-        util_parms_add_default(algmdl->params, "padding", "8");
-        util_parms_add_default(algmdl->params, "winstride", "8");
-    } else if (algmdl->method == "dnn") {
-        util_parms_add_default(algmdl->params, "backend", DNN_BACKEND_DEFAULT);
-        util_parms_add_default(algmdl->params, "target", DNN_TARGET_CPU);
-        util_parms_add_default(algmdl->params, "threshold", "0.75");
-        util_parms_add_default(algmdl->params, "width", cam->imgs.width);
-        util_parms_add_default(algmdl->params, "height", cam->imgs.height);
-        util_parms_add_default(algmdl->params, "scale", "1.0");
+    if (method == "haar") {
+        util_parms_add_default(params, "threshold", "1.1");
+        util_parms_add_default(params, "scalefactor", "1.1");
+        util_parms_add_default(params, "flags", "0");
+        util_parms_add_default(params, "maxsize", "1024");
+        util_parms_add_default(params, "minsize", "8");
+        util_parms_add_default(params, "minneighbors", "8");
+    } else if (method == "hog") {
+        util_parms_add_default(params, "threshold", "1.1");
+        util_parms_add_default(params, "threshold_model", "2");
+        util_parms_add_default(params, "scalefactor", "1.05");
+        util_parms_add_default(params, "padding", "8");
+        util_parms_add_default(params, "winstride", "8");
+    } else if (method == "dnn") {
+        util_parms_add_default(params, "backend", DNN_BACKEND_DEFAULT);
+        util_parms_add_default(params, "target", DNN_TARGET_CPU);
+        util_parms_add_default(params, "threshold", "0.75");
+        util_parms_add_default(params, "width", cam->imgs.width);
+        util_parms_add_default(params, "height", cam->imgs.height);
+        util_parms_add_default(params, "scale", "1.0");
     }
 }
 
 /**Load the parms from the config to algsec struct */
-static void algsec_load_params(ctx_dev *cam)
+void cls_algsec::load_params()
 {
-    pthread_mutex_init(&cam->algsec->mutex, NULL);
+    pthread_mutex_init(&mutex, NULL);
 
-    cam->algsec->isdetected = false;
-    cam->algsec->height = cam->imgs.height;
-    cam->algsec->width = cam->imgs.width;
-    cam->algsec->models.method = cam->conf->secondary_method;
-    cam->algsec->image_norm = (unsigned char*)mymalloc((size_t)cam->imgs.size_norm);
-    cam->algsec->frame_missed = 0;
-    cam->algsec->too_slow = 0;
-    cam->algsec->detecting = false;
-    cam->algsec->closing = false;
-    cam->algsec->thread_running = false;
+    method = cam->conf->secondary_method;
+    handler_finished = true;
+    image_norm = nullptr;
+    params = nullptr;
+    detected = false;
+    height = cam->imgs.height;
+    width = cam->imgs.width;
+    frame_missed = 0;
+    too_slow = 0;
+    in_process = false;
+    handler_stop = false;
+    cfg_framerate = cam->conf->framerate;
+    cfg_log_level = cam->motapp->conf->log_level;
+    cfg_target_dir = cam->conf->target_dir;
 
-    cam->algsec->models.params->update_params = true;
-    util_parms_parse(cam->algsec->models.params
-        , "secondary_params", cam->conf->secondary_params);
-
-    algsec_params_defaults(cam);
-
-    algsec_params_log(cam);
-
-    algsec_params_model(cam);
-
-    cam->algsec->frame_cnt = cam->algsec->models.frame_interval;
-
-}
-
-/**Preload the models and initialize them */
-static void algsec_load_models(ctx_dev *cam)
-{
-    if (cam->algsec->models.method == "haar") {
-        algsec_load_haar(cam);
-    } else if (cam->algsec->models.method == "hog") {
-        //algsec_load_hog(cam->algsec->models);
-    } else if (cam->algsec->models.method == "dnn") {
-        algsec_load_dnn(cam);
-    } else {
-        cam->algsec->models.method = "none";
+    if (method == "none") {
+        return;
     }
 
-    /* If model fails to load, the method is changed to none*/
-    if ((cam->algsec->models.method == "haar") ||
-        (cam->algsec->models.method == "hog") ||
-        (cam->algsec->models.method == "dnn")) {
-        cam->algsec_inuse = true;
-    } else {
-        cam->algsec_inuse = false;
-    }
+    image_norm = (u_char*)mymalloc((size_t)cam->imgs.size_norm);
+
+    params = new ctx_params;
+    params->update_params = true;
+    util_parms_parse(params, "secondary_params"
+        , cam->conf->secondary_params);
+
+    params_defaults();
+
+    params_log();
+
+    params_model();
+
+    frame_cnt = frame_interval;
 
 }
 
 /**Detection thread processing loop */
-static void *algsec_handler(void *arg)
+void cls_algsec::handler()
 {
-    ctx_dev *cam = (ctx_dev*)arg;
     long interval;
 
-    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("Starting."));
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Secondary detection starting."));
 
-    cam->algsec->closing = false;
-    cam->algsec->thread_running = true;
+    handler_finished = false;
+    cam->motapp->threads_running++;
+    handler_stop = false;
 
-    interval = 1000000L / cam->conf->framerate;
+    interval = 1000000L / cfg_framerate;
 
-    while (cam->algsec->closing == false) {
-        if (cam->algsec->detecting){
-            if (cam->algsec->models.method == "haar") {
-                algsec_detect_haar(cam);
-            } else if (cam->algsec->models.method == "hog") {
-                algsec_detect_hog(cam);
-            } else if (cam->algsec->models.method == "dnn") {
-                algsec_detect_dnn(cam);
+    while (handler_stop == false) {
+        if (in_process){
+            if (method == "haar") {
+                detect_haar();
+            } else if (method == "hog") {
+                detect_hog();
+            } else if (method == "dnn") {
+                detect_dnn();
             }
-            cam->algsec->detecting = false;
-            /*Set the event based isdetected bool */
-            if (cam->algsec->models.isdetected) {
-                cam->algsec->isdetected = true;
+            if (method == "none") { /* Error during detect */
+                handler_stop = true;
             }
+            in_process = false;
         } else {
             SLEEP(0,interval)
         }
     }
-    cam->algsec->closing = false;
-    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("Exiting."));
-    cam->algsec->thread_running = false;
-    pthread_exit(NULL);
-
+    handler_stop = false;
+    handler_finished = true;
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Secondary detection exiting."));
 }
 
-/**Start the detection thread*/
-static void algsec_start_handler(ctx_dev *cam)
+/**load the models and start handler processing thread */
+void cls_algsec::start_model()
 {
-    int retcd;
-    pthread_attr_t handler_attribute;
-
-    if (cam->algsec->models.method == "none") {
-        return;
+    if (method == "haar") {
+        load_haar();
+    } else if (method == "hog") {
+        //load_hog(models);
+    } else if (method == "dnn") {
+        load_dnn();
+    } else {
+        method = "none";
     }
 
-    pthread_attr_init(&handler_attribute);
-    pthread_attr_setdetachstate(&handler_attribute, PTHREAD_CREATE_DETACHED);
-    retcd = pthread_create(&cam->algsec->threadid, &handler_attribute, &algsec_handler, cam);
-    if (retcd < 0) {
-        MOTPLS_LOG(ALR, TYPE_NETCAM, SHOW_ERRNO
-            ,_("Error starting algsec handler thread"));
-        cam->algsec->models.method = "none";
+    /* If model fails to load, the method is changed to none*/
+    handler_finished = true;
+    if ((method == "haar") ||
+        (method == "hog") ||
+        (method == "dnn")) {
+        handler_thread = std::thread(&cls_algsec::handler, this);
+        handler_thread.detach();
     }
-    pthread_attr_destroy(&handler_attribute);
-
 }
 
 #endif
 
-/** Initialize the secondary processes and parameters */
-void algsec_init(ctx_dev *cam)
-{
-    cam->algsec_inuse = false;
-
-    #ifdef HAVE_OPENCV
-        mythreadname_set("cv",cam->threadnr,cam->conf->device_name.c_str());
-            cam->algsec = new ctx_algsec;
-            cam->algsec->models.params = new ctx_params;
-            algsec_load_params(cam);
-            algsec_load_models(cam);
-            algsec_start_handler(cam);
-        mythreadname_set("ml",cam->threadnr,cam->conf->device_name.c_str());
-    #endif
-}
-
 /** Shut down the secondary detection components */
-void algsec_deinit(ctx_dev *cam)
+void cls_algsec::deinit()
 {
     #ifdef HAVE_OPENCV
         int waitcnt = 0;
 
-        if (cam->algsec == NULL) {
-            return;
-        }
-
-        if (cam->algsec->thread_running == true) {
-            if (cam->algsec->closing == false) {
-                cam->algsec->closing = true;
-                while ((cam->algsec->closing) && (waitcnt <1000)){
-                    SLEEP(0,1000000)
+        if (handler_finished == false) {
+            if (handler_stop == false) {
+                handler_stop = true;
+                while ((handler_stop) && (waitcnt <10)){
+                    SLEEP(1,0)
                     waitcnt++;
                 }
             }
-            if (waitcnt == 1000){
-                MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                    ,_("Graceful shutdown of secondary detector thread failed"));
+            if (waitcnt == 10) {
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    ,_("Shutdown of secondary detector failed"));
+                pthread_kill(handler_thread.native_handle(), SIGVTALRM);
+                pthread_mutex_lock(&cam->motapp->global_lock);
+                    cam->motapp->threads_running--;
+                pthread_mutex_unlock(&cam->motapp->global_lock);
             }
         }
 
-        myfree(cam->algsec->image_norm);
-
-        pthread_mutex_destroy(&cam->algsec->mutex);
-
-        delete cam->algsec->models.params;
-        delete cam->algsec;
-        cam->algsec = NULL;
-        cam->algsec_inuse = false;
-
-    #else
-        (void)cam;
+        pthread_mutex_destroy(&mutex);
+        myfree(image_norm);
+        mydelete(params);
     #endif
 }
 
 /*Invoke the secondary detetction method*/
-void algsec_detect(ctx_dev *cam)
+void cls_algsec::detect()
 {
     #ifdef HAVE_OPENCV
-        if (cam->algsec_inuse == false){
+        if (method == "none") {
             return;
         }
 
-        if (cam->algsec->isdetected) {
-            return;
+        if (frame_cnt > 0) {
+            frame_cnt--;
         }
 
-        if (cam->algsec->frame_cnt > 0) {
-            cam->algsec->frame_cnt--;
-        }
-
-        if (cam->algsec->frame_cnt == 0){
-            if (cam->algsec->detecting){
-                cam->algsec->frame_missed++;
+        if (frame_cnt == 0){
+            if (in_process){
+                frame_missed++;
             } else {
-                memcpy(cam->algsec->image_norm
+                memcpy(image_norm
                     , cam->imgs.image_virgin
                     , (uint)cam->imgs.size_norm);
 
                 /*Set the bool to detect on the new image and reset interval */
-                cam->algsec->detecting = true;
-                cam->algsec->frame_cnt = cam->algsec->models.frame_interval;
-                if (cam->algsec->frame_missed >10){
-                    if (cam->algsec->too_slow == 0) {
-                        MOTPLS_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                in_process = true;
+                frame_cnt = frame_interval;
+                if (frame_missed >10){
+                    if (too_slow == 0) {
+                        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
                             ,_("Your computer is too slow for these settings."));
-                   } else if (cam->algsec->too_slow == 10){
-                        MOTPLS_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                    } else if (too_slow == 10){
+                        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
                             ,_("Missed many frames for secondary detection."));
-                        MOTPLS_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
                             ,_("Your computer is too slow."));
                     }
-                    cam->algsec->too_slow++;
+                    too_slow++;
                 }
-                cam->algsec->frame_missed = 0;
+                frame_missed = 0;
             }
         }
 
-        /* If the method was changed to none, then an error occurred*/
-        if (cam->algsec->models.method == "none") {
-            algsec_deinit(cam);
+        /* If the method was changed to none, an error occurred*/
+        if (method == "none") {
+            deinit();
         }
 
-    #else
-        (void)cam;
     #endif
 }
+
+cls_algsec::cls_algsec(ctx_dev *p_cam)
+{
+    cam = p_cam;
+    #ifdef HAVE_OPENCV
+        mythreadname_set("cv",cam->threadnr,cam->conf->device_name.c_str());
+            load_params();
+            start_model();
+        mythreadname_set("ml",cam->threadnr,cam->conf->device_name.c_str());
+    #endif
+}
+
+cls_algsec::~cls_algsec()
+{
+    deinit();
+}
+

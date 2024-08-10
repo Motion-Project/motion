@@ -392,7 +392,7 @@ void cls_webu_stream::set_cnct_type()
             if (webua->cam == NULL) {
                 webua->cnct_type = WEBUI_CNCT_UNKNOWN;
             } else {
-                if (webua->cam->algsec_inuse) {
+                if (webua->cam->algsec->method != "none") {
                     webua->cnct_type = WEBUI_CNCT_TS_SECONDARY;
                 } else {
                     webua->cnct_type = WEBUI_CNCT_UNKNOWN;
@@ -416,7 +416,7 @@ void cls_webu_stream::set_cnct_type()
             if (webua->cam == NULL) {
                 webua->cnct_type = WEBUI_CNCT_UNKNOWN;
             } else {
-                if (webua->cam->algsec_inuse) {
+                if (webua->cam->algsec->method != "none") {
                     webua->cnct_type = WEBUI_CNCT_JPG_SECONDARY;
                 } else {
                     webua->cnct_type = WEBUI_CNCT_UNKNOWN;
