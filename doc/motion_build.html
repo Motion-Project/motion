@@ -68,7 +68,6 @@
       <div class="dropdown-content">
         <a href="#Preparation_For_Building"> Preparation For Building </a>
         <a href="#BUILD_DEBIAN">Debian/Ubuntu/Raspberry Pi OS</a>
-        <a href="#BUILD_OPENSUSE">Open SUSE</a>
         <a href="#BUILD_FREEBSD">Free BSD</a>
         <a href="#BUILD_CENTOS">CentOS</a>
         <a href="#BUILD_MACOSX">MacOSX </a>
@@ -307,72 +306,6 @@
           </ul>
 
         </ul>
-      </ul>
-      <p></p>
-      <p></p>
-
-      <h4><a name="BUILD_OPENSUSE"></a>openSUSE</a> </h4>
-      <ul>
-        <li>Required</li>
-        <ul>
-          <p></p>
-          <code><strong>sudo zypper install autoconf automake autopoint libtool git </strong></code>
-          <p></p>
-          <code><strong>sudo zypper install --type pattern devel_basis </strong></code>
-          <p></p>
-          <code><strong>sudo zypper install libjpeg8-devel gettext libmicrohttpd </strong></code>
-          <p></p>
-          <code><strong>sudo zypper install -t pattern devel_C_C++ </strong></code>
-          <p></p>
-        </ul>
-        <p></p>
-        <li>Optional Packages</li>
-        <ul>
-          <li>FFMpeg Functionality(Required for creating movies, using network cameras, etc.  SEE NOTE BELOW!)</li>
-          <ul>
-            <p></p>
-            <code><strong>sudo zypper ar -f -n packman-essentials http://packman.inode.at/suse/openSUSE_13.1/Essentials/ packman-essentials</strong></code>
-            <p></p>
-            <code><strong>sudo zypper ar -f -n packman-multimedia http://packman.inode.at/suse/openSUSE_13.1/Multimedia/ packman-multimedia</strong></code>
-            <p></p>
-            <code><strong>sudo zypper install libffmpeg-devel</strong></code>
-            <p></p>
-          </ul>
-          <li>MySQL database functionality</li>
-          <ul>
-            <p></p>
-            <code><strong>Not known by author</strong></code>
-            <p></p>
-          </ul>
-          <li>MariaDB database functionality</li>
-          <ul>
-            <p></p>
-            <code><strong>Not known by author</strong></code>
-            <p></p>
-          </ul>
-          <li>PostgreSQL database functionality</li>
-          <ul>
-            <p></p>
-            <code><strong>Not known by author</strong></code>
-            <p></p>
-          </ul>
-          <li>SQLite3 database functionality</li>
-          <ul>
-            <p></p>
-            <code><strong>Not known by author</strong></code>
-            <p></p>
-          </ul>
-          <li>Webp Image Support</li>
-          <ul>
-            <p></p>
-            <code><strong>sudo zypper install libwebp-devel </strong></code>
-            <p></p>
-          </ul>
-        </ul>
-        Important ffmpeg note:  The ffmpeg libraries indicated above are provided by a external repository.  This may
-        change in the future.  Validate that the repository is still valid when doing the install on openSUSE systems.
-        The default for the configure is to require that ffmpeg is installed.  Use the configure option to
-        compile without the ffmpeg functionality.
       </ul>
       <p></p>
       <p></p>
