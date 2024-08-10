@@ -19,12 +19,54 @@
 #ifndef _INCLUDE_ALG_HPP_
 #define _INCLUDE_ALG_HPP_
 
-    void alg_diff(ctx_dev *cam);
-    void alg_noise_tune(ctx_dev *cam);
-    void alg_threshold_tune(ctx_dev *cam);
-    void alg_tune_smartmask(ctx_dev *cam);
-    void alg_update_reference_frame(ctx_dev *cam, int action);
-    void alg_stddev(ctx_dev *cam);
-    void alg_location(ctx_dev *cam);
+    class cls_alg {
+        public:
+            cls_alg(ctx_dev *p_cam);
+            ~cls_alg();
+            void diff();
+            void noise_tune();
+            void threshold_tune();
+            void tune_smartmask();
+            void ref_frame_update();
+            void ref_frame_reset();
+            void stddev();
+            void location();
+        private:
+            ctx_dev *cam;
+
+            int cfg_threshold_sdevx;
+            int cfg_threshold_sdevy;
+            int cfg_threshold_sdevxy;
+            int cfg_threshold;
+            std::string cfg_despeckle_filter;
+            int cfg_threshold_ratio_change;
+            int cfg_lightswitch_percent;
+            int cfg_lightswitch_frames;
+            int cfg_static_object_time;
+
+            bool calc_stddev;
+
+            int iflood(int x, int y, int width, int height,
+                u_char *out, int *labels, int newvalue, int oldvalue);
+            int labeling();
+            int dilate9(u_char *img, int width, int height, void *buffer);
+            int dilate5(u_char *img, int width, int height, void *buffer);
+            int erode9(u_char *img, int width, int height, void *buffer, u_char flag);
+            int erode5(u_char *img, int width, int height, void *buffer, u_char flag);
+            void despeckle();
+            void diff_nomask();
+            void diff_mask();
+            void diff_smart();
+            void diff_masksmart();
+            bool diff_fast();
+            void diff_standard();
+            void lightswitch();
+            void location_center();
+            void location_dist_stddev();
+            void location_dist_basic();
+            void location_minmax();
+            void init_conf();
+
+    };
 
 #endif /* _INCLUDE_ALG_HPP_ */

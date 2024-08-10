@@ -650,7 +650,7 @@ static void mlp_init_ref(ctx_dev *cam)
     memcpy(cam->imgs.image_vprvcy, cam->current_image->image_norm
         , (uint)cam->imgs.size_norm);
 
-    alg_update_reference_frame(cam, RESET_REF_FRAME);
+    cam->alg->ref_frame_reset();
 }
 
 /** clean up all memory etc. from motion init */
@@ -700,6 +700,7 @@ void mlp_cleanup(ctx_dev *cam)
 
     mlp_ring_destroy(cam); /* Cleanup the precapture ring buffer */
 
+    mydelete(cam->alg);
     mydelete(cam->rotate);
     mydelete(cam->picture);
     mydelete(cam->movie_norm);
@@ -755,7 +756,7 @@ static void mlp_init(ctx_dev *cam)
     mlp_init_firstimage(cam);
 
     vlp_init(cam);
-
+    cam->alg = new cls_alg(cam);
     cam->picture = new cls_picture(cam);
     cam->draw = new cls_draw(cam);
     cam->movie_norm = new cls_movie(cam, "norm");
@@ -992,7 +993,7 @@ static void mlp_detection(ctx_dev *cam)
     }
 
     if (cam->pause == false) {
-        alg_diff(cam);
+        cam->alg->diff();
     } else {
         cam->current_image->diffs = 0;
         cam->current_image->diffs_raw = 0;
@@ -1005,17 +1006,17 @@ static void mlp_tuning(ctx_dev *cam)
 {
     if ((cam->conf->noise_tune && cam->shots_mt == 0) &&
           (!cam->detecting_motion && (cam->current_image->diffs <= cam->threshold))) {
-        alg_noise_tune(cam);
+        cam->alg->noise_tune();
     }
 
     if (cam->conf->threshold_tune) {
-        alg_threshold_tune(cam);
+        cam->alg->threshold_tune();
     }
 
     if ((cam->current_image->diffs > cam->threshold) &&
         (cam->current_image->diffs < cam->threshold_maximum)) {
-        alg_location(cam);
-        alg_stddev(cam);
+        cam->alg->location();
+        cam->alg->stddev();
 
     }
 
@@ -1023,10 +1024,10 @@ static void mlp_tuning(ctx_dev *cam)
         cam->current_image->diffs = 0;
     }
 
-    alg_tune_smartmask(cam);
+    cam->alg->tune_smartmask();
 
 
-    alg_update_reference_frame(cam, UPDATE_REF_FRAME);
+    cam->alg->ref_frame_update();
 
     cam->previous_diffs = cam->current_image->diffs;
     cam->previous_location_x = cam->current_image->location.x;

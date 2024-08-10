@@ -117,6 +117,7 @@ struct ctx_images;
 struct ctx_image_data;
 struct ctx_algsec;
 
+class cls_alg;
 class cls_config;
 class cls_dbse;
 class cls_draw;
@@ -171,9 +172,6 @@ class cls_webu_stream;
 
 #define LOCATE_NORMAL     1
 #define LOCATE_BOTH       2
-
-#define UPDATE_REF_FRAME  1
-#define RESET_REF_FRAME   2
 
 #define AVGCNT            30
 
@@ -492,6 +490,7 @@ struct ctx_dev {
 
     ctx_image_data  *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
     ctx_algsec      *algsec;
+    cls_alg         *alg;
 
     cls_movie       *movie_norm;
     cls_movie       *movie_motion;
