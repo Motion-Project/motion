@@ -1385,26 +1385,6 @@ static void mlp_parmsupdate(ctx_dev *cam)
             cam->new_img = NEWIMG_OFF;
         }
 
-        if (cam->conf->locate_motion_mode == "on") {
-            cam->locate_motion_mode = LOCATE_ON;
-        } else if (cam->conf->locate_motion_mode == "preview") {
-            cam->locate_motion_mode = LOCATE_PREVIEW;
-        } else {
-            cam->locate_motion_mode = LOCATE_OFF;
-        }
-
-        if (cam->conf->locate_motion_style == "box") {
-            cam->locate_motion_style = LOCATE_BOX;
-        } else if (cam->conf->locate_motion_style == "redbox") {
-            cam->locate_motion_style = LOCATE_REDBOX;
-        } else if (cam->conf->locate_motion_style == "cross") {
-            cam->locate_motion_style = LOCATE_CROSS;
-        } else if (cam->conf->locate_motion_style == "redcross") {
-            cam->locate_motion_style = LOCATE_REDCROSS;
-        } else {
-            cam->locate_motion_style = LOCATE_BOX;
-        }
-
         cam->parms_changed = false;
     }
 

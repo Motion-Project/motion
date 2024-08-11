@@ -1243,62 +1243,57 @@ void cls_draw::init_scale()
 
 }
 
-void cls_draw::location(ctx_coord *cent, ctx_images *imgs, int width
-        , u_char *new_var, int style, int mode)
+void cls_draw::location(ctx_coord *cent, ctx_images *imgs
+    , int width, u_char *new_var)
 {
     u_char *out = imgs->image_motion.image_norm;
-    int x, y;
+    int x, y, centy;
+    int width_miny, width_maxy;
+    int width_miny_x, width_maxy_x;
+    int width_minx_y, width_maxx_y;
 
     out = imgs->image_motion.image_norm;
 
-    /* Debug image always gets a 'normal' box. */
-    if (mode == LOCATE_BOTH) {
-        int width_miny = width * cent->miny;
-        int width_maxy = width * cent->maxy;
-
-        for (x = cent->minx; x <= cent->maxx; x++) {
-            int width_miny_x = x + width_miny;
-            int width_maxy_x = x + width_maxy;
-
-            out[width_miny_x] =~out[width_miny_x];
-            out[width_maxy_x] =~out[width_maxy_x];
-        }
-
-        for (y = cent->miny; y <= cent->maxy; y++) {
-            int width_minx_y = cent->minx + y * width;
-            int width_maxx_y = cent->maxx + y * width;
-
-            out[width_minx_y] =~out[width_minx_y];
-            out[width_maxx_y] =~out[width_maxx_y];
-        }
+    width_miny = width * cent->miny;
+    width_maxy = width * cent->maxy;
+    for (x = cent->minx; x <= cent->maxx; x++) {
+        width_miny_x = x + width_miny;
+        width_maxy_x = x + width_maxy;
+        out[width_miny_x] =~out[width_miny_x];
+        out[width_maxy_x] =~out[width_maxy_x];
     }
-    if (style == LOCATE_BOX) { /* Draw a box on normal images. */
-        int width_miny = width * cent->miny;
-        int width_maxy = width * cent->maxy;
+
+    for (y = cent->miny; y <= cent->maxy; y++) {
+        width_minx_y = cent->minx + y * width;
+        width_maxx_y = cent->maxx + y * width;
+
+        out[width_minx_y] =~out[width_minx_y];
+        out[width_maxx_y] =~out[width_maxx_y];
+    }
+
+    if (cfg_locate_motion_style == "box") {
+        width_miny = width * cent->miny;
+        width_maxy = width * cent->maxy;
 
         for (x = cent->minx; x <= cent->maxx; x++) {
-            int width_miny_x = x + width_miny;
-            int width_maxy_x = x + width_maxy;
-
+            width_miny_x = x + width_miny;
+            width_maxy_x = x + width_maxy;
             new_var[width_miny_x] =~new_var[width_miny_x];
             new_var[width_maxy_x] =~new_var[width_maxy_x];
         }
 
         for (y = cent->miny; y <= cent->maxy; y++) {
-            int width_minx_y = cent->minx + y * width;
-            int width_maxx_y = cent->maxx + y * width;
-
+            width_minx_y = cent->minx + y * width;
+            width_maxx_y = cent->maxx + y * width;
             new_var[width_minx_y] =~new_var[width_minx_y];
             new_var[width_maxx_y] =~new_var[width_maxx_y];
         }
-    } else if (style == LOCATE_CROSS) { /* Draw a cross on normal images. */
-        int centy = cent->y * width;
-
+    } else if (cfg_locate_motion_style == "cross") {
+        centy = cent->y * width;
         for (x = cent->x - 10;  x <= cent->x + 10; x++) {
             new_var[centy + x] =~new_var[centy + x];
             out[centy + x] =~out[centy + x];
         }
-
         for (y = cent->y - 10; y <= cent->y + 10; y++) {
             new_var[cent->x + y * width] =~new_var[cent->x + y * width];
             out[cent->x + y * width] =~out[cent->x + y * width];
@@ -1307,12 +1302,17 @@ void cls_draw::location(ctx_coord *cent, ctx_images *imgs, int width
 }
 
 void cls_draw::red_location(ctx_coord *cent
-        , ctx_images *imgs, int width
-        , u_char *new_var, int style, int mode)
+        , ctx_images *imgs, int width, u_char *new_var)
 {
     u_char *out = imgs->image_motion.image_norm;
     u_char *new_u, *new_v;
     int x, y, v, cwidth, cblock;
+    int width_miny, width_maxy;
+    int width_miny_x, width_maxy_x;
+    int width_minx_y, width_maxx_y;
+    int cwidth_miny, cwidth_maxy;
+    int cwidth_miny_x, cwidth_maxy_x;
+    int cwidth_minx_y,cwidth_maxx_y;
 
     cwidth = width / 2;
     cblock = imgs->motionsize / 4;
@@ -1322,39 +1322,35 @@ void cls_draw::red_location(ctx_coord *cent
     new_u = new_var + x;
     new_v = new_var + v;
 
-    /* Debug image always gets a 'normal' box. */
-    if (mode == LOCATE_BOTH) {
-        int width_miny = width * cent->miny;
-        int width_maxy = width * cent->maxy;
+    width_miny = width * cent->miny;
+    width_maxy = width * cent->maxy;
 
-        for (x = cent->minx; x <= cent->maxx; x++) {
-            int width_miny_x = x + width_miny;
-            int width_maxy_x = x + width_maxy;
-
-            out[width_miny_x] =~out[width_miny_x];
-            out[width_maxy_x] =~out[width_maxy_x];
-        }
-
-        for (y = cent->miny; y <= cent->maxy; y++) {
-            int width_minx_y = cent->minx + y * width;
-            int width_maxx_y = cent->maxx + y * width;
-
-            out[width_minx_y] =~out[width_minx_y];
-            out[width_maxx_y] =~out[width_maxx_y];
-        }
+    for (x = cent->minx; x <= cent->maxx; x++) {
+        width_miny_x = x + width_miny;
+        width_maxy_x = x + width_maxy;
+        out[width_miny_x] =~out[width_miny_x];
+        out[width_maxy_x] =~out[width_maxy_x];
     }
 
-    if (style == LOCATE_REDBOX) { /* Draw a red box on normal images. */
-        int width_miny = width * cent->miny;
-        int width_maxy = width * cent->maxy;
-        int cwidth_miny = cwidth * (cent->miny / 2);
-        int cwidth_maxy = cwidth * (cent->maxy / 2);
+    for (y = cent->miny; y <= cent->maxy; y++) {
+        width_minx_y = cent->minx + y * width;
+        width_maxx_y = cent->maxx + y * width;
+
+        out[width_minx_y] =~out[width_minx_y];
+        out[width_maxx_y] =~out[width_maxx_y];
+    }
+
+    if (cfg_locate_motion_style == "redbox") {
+        width_miny = width * cent->miny;
+        width_maxy = width * cent->maxy;
+        cwidth_miny = cwidth * (cent->miny / 2);
+        cwidth_maxy = cwidth * (cent->maxy / 2);
 
         for (x = cent->minx + 2; x <= cent->maxx - 2; x += 2) {
-            int width_miny_x = x + width_miny;
-            int width_maxy_x = x + width_maxy;
-            int cwidth_miny_x = x / 2 + cwidth_miny;
-            int cwidth_maxy_x = x / 2 + cwidth_maxy;
+            width_miny_x = x + width_miny;
+            width_maxy_x = x + width_maxy;
+            cwidth_miny_x = x / 2 + cwidth_miny;
+            cwidth_maxy_x = x / 2 + cwidth_maxy;
 
             new_u[cwidth_miny_x] = 128;
             new_u[cwidth_maxy_x] = 128;
@@ -1375,10 +1371,10 @@ void cls_draw::red_location(ctx_coord *cent
         }
 
         for (y = cent->miny; y <= cent->maxy; y += 2) {
-            int width_minx_y = cent->minx + y * width;
-            int width_maxx_y = cent->maxx + y * width;
-            int cwidth_minx_y = (cent->minx / 2) + (y / 2) * cwidth;
-            int cwidth_maxx_y = (cent->maxx / 2) + (y / 2) * cwidth;
+            width_minx_y = cent->minx + y * width;
+            width_maxx_y = cent->maxx + y * width;
+            cwidth_minx_y = (cent->minx / 2) + (y / 2) * cwidth;
+            cwidth_maxx_y = (cent->maxx / 2) + (y / 2) * cwidth;
 
             new_u[cwidth_minx_y] = 128;
             new_u[cwidth_maxx_y] = 128;
@@ -1397,19 +1393,17 @@ void cls_draw::red_location(ctx_coord *cent
             new_var[width_minx_y + width + 1] = 128;
             new_var[width_maxx_y + width + 1] = 128;
         }
-    } else if (style == LOCATE_REDCROSS) { /* Draw a red cross on normal images. */
-        int cwidth_maxy = cwidth * (cent->y / 2);
+    } else if (cfg_locate_motion_style == "redcross") {
+        cwidth_maxy = cwidth * (cent->y / 2);
 
         for (x = cent->x - 10; x <= cent->x + 10; x += 2) {
-            int cwidth_maxy_x = x / 2 + cwidth_maxy;
-
+            cwidth_maxy_x = x / 2 + cwidth_maxy;
             new_u[cwidth_maxy_x] = 128;
             new_v[cwidth_maxy_x] = 255;
         }
 
         for (y = cent->y - 10; y <= cent->y + 10; y += 2) {
-            int cwidth_minx_y = (cent->x / 2) + (y / 2) * cwidth;
-
+            cwidth_minx_y = (cent->x / 2) + (y / 2) * cwidth;
             new_u[cwidth_minx_y] = 128;
             new_v[cwidth_minx_y] = 255;
         }
@@ -1422,11 +1416,11 @@ void cls_draw::locate()
     ctx_coord *p_loc;
     u_char *image_norm;
 
-    if (cam->locate_motion_mode == LOCATE_PREVIEW) {
+    if (cfg_locate_motion_mode == "preview") {
         imgs = &cam->imgs;
         p_loc = &cam->imgs.image_preview.location;
         image_norm = cam->imgs.image_preview.image_norm;
-    } else if (cam->locate_motion_mode == LOCATE_ON) {
+    } else if (cfg_locate_motion_mode == "on") {
         imgs = &cam->imgs;
         p_loc = &cam->current_image->location;
         image_norm = cam->current_image->image_norm;
@@ -1434,18 +1428,12 @@ void cls_draw::locate()
         return;
     }
 
-    if (cam->locate_motion_style == LOCATE_BOX) {
-        location(p_loc, imgs, imgs->width
-            , image_norm, LOCATE_BOX, LOCATE_BOTH);
-    } else if (cam->locate_motion_style == LOCATE_REDBOX) {
-        red_location(p_loc, imgs, imgs->width
-            , image_norm, LOCATE_REDBOX,LOCATE_BOTH);
-    } else if (cam->locate_motion_style == LOCATE_CROSS) {
-        location(p_loc, imgs, imgs->width
-            , image_norm, LOCATE_CROSS, LOCATE_BOTH);
-    } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
-        red_location(p_loc, imgs, imgs->width
-            , image_norm, LOCATE_REDCROSS, LOCATE_BOTH);
+    if ((cfg_locate_motion_style == "box") ||
+        (cfg_locate_motion_style == "cross")) {
+        location(p_loc, imgs, imgs->width, image_norm);
+    } else if ((cfg_locate_motion_style == "redbox")||
+        (cfg_locate_motion_style == "redcross")) {
+        red_location(p_loc, imgs, imgs->width, image_norm);
     }
 
 }
@@ -1574,6 +1562,8 @@ cls_draw::cls_draw(ctx_dev *p_cam)
 {
     cam = p_cam;
     cfg_text_scale = cam->conf->text_scale;
+    cfg_locate_motion_mode = cam->conf->locate_motion_mode;
+    cfg_locate_motion_style = cam->conf->locate_motion_style;
 
     init_chars();
     init_scale();
@@ -1584,3 +1574,4 @@ cls_draw::~cls_draw()
 {
 
 }
+

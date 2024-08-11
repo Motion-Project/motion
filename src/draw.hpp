@@ -38,18 +38,19 @@
 
             u_char *char_arr_ptr[ASCII_MAX];
 
-            int cfg_text_scale;
+            int             cfg_text_scale;
+            std::string     cfg_locate_motion_mode;
+            std::string     cfg_locate_motion_style;
 
             int textn(u_char *image
                 , int startx,  int starty,  int width
                 , const char *text, int len, int factor);
             void init_chars(void);
             void init_scale();
-            void location(ctx_coord *cent, ctx_images *imgs, int width
-                , u_char *new_var, int style, int mode);
+            void location(ctx_coord *cent
+                , ctx_images *imgs, int width, u_char *new_var);
             void red_location(ctx_coord *cent
-                , ctx_images *imgs, int width
-                , u_char *new_var, int style, int mode);
+                , ctx_images *imgs, int width, u_char *new_var);
 
     };
 

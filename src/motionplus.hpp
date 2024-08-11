@@ -162,17 +162,6 @@ class cls_webu_stream;
 #define NEWIMG_BEST       4
 #define NEWIMG_CENTER     8
 
-#define LOCATE_OFF        0
-#define LOCATE_ON         1
-#define LOCATE_PREVIEW    2
-#define LOCATE_BOX        1
-#define LOCATE_REDBOX     2
-#define LOCATE_CROSS      4
-#define LOCATE_REDCROSS   8
-
-#define LOCATE_NORMAL     1
-#define LOCATE_BOTH       2
-
 #define AVGCNT            30
 
 /*
@@ -512,8 +501,6 @@ struct ctx_dev {
     enum CAMERA_TYPE        camera_type;
     enum DEVICE_STATUS      device_status;
     unsigned int            new_img;
-    int                     locate_motion_mode;
-    int                     locate_motion_style;
     int                     noise;
     int                     threshold;
     int                     threshold_maximum;
