@@ -555,9 +555,6 @@ static void mlp_init_buffers(ctx_dev *cam)
     cam->imgs.ref_dyn =(int*) mymalloc((uint)cam->imgs.motionsize * sizeof(*cam->imgs.ref_dyn));
     cam->imgs.image_virgin =(unsigned char*) mymalloc((uint)cam->imgs.size_norm);
     cam->imgs.image_vprvcy = (unsigned char*)mymalloc((uint)cam->imgs.size_norm);
-    cam->imgs.smartmask =(unsigned char*) mymalloc((uint)cam->imgs.motionsize);
-    cam->imgs.smartmask_final =(unsigned char*) mymalloc((uint)cam->imgs.motionsize);
-    cam->imgs.smartmask_buffer =(int*) mymalloc((uint)cam->imgs.motionsize * sizeof(*cam->imgs.smartmask_buffer));
     cam->imgs.labels =(int*)mymalloc((uint)cam->imgs.motionsize * sizeof(*cam->imgs.labels));
     cam->imgs.labelsize =(int*) mymalloc((uint)(cam->imgs.motionsize/2+1) * sizeof(*cam->imgs.labelsize));
     cam->imgs.image_preview.image_norm =(unsigned char*) mymalloc((uint)cam->imgs.size_norm);
@@ -569,9 +566,6 @@ static void mlp_init_buffers(ctx_dev *cam)
         cam->imgs.image_preview.image_high = NULL;
     }
 
-    memset(cam->imgs.smartmask, 0, (uint)cam->imgs.motionsize);
-    memset(cam->imgs.smartmask_final, 255, (uint)cam->imgs.motionsize);
-    memset(cam->imgs.smartmask_buffer, 0, (uint)cam->imgs.motionsize * sizeof(*cam->imgs.smartmask_buffer));
 }
 
 /* Initialize loop values */
@@ -681,9 +675,6 @@ void mlp_cleanup(ctx_dev *cam)
     myfree(cam->imgs.image_vprvcy);
     myfree(cam->imgs.labels);
     myfree(cam->imgs.labelsize);
-    myfree(cam->imgs.smartmask);
-    myfree(cam->imgs.smartmask_final);
-    myfree(cam->imgs.smartmask_buffer);
     myfree(cam->imgs.mask);
     myfree(cam->imgs.mask_privacy);
     myfree(cam->imgs.mask_privacy_uv);
@@ -1022,7 +1013,6 @@ static void mlp_tuning(ctx_dev *cam)
 
     cam->alg->tune_smartmask();
 
-
     cam->alg->ref_frame_update();
 
     cam->previous_diffs = cam->current_image->diffs;
@@ -1035,7 +1025,7 @@ static void mlp_overlay(ctx_dev *cam)
 {
     char tmp[PATH_MAX];
 
-    if (cam->smartmask_speed &&
+    if ((cam->conf->smart_mask_speed >0) &&
         ((cam->conf->picture_output_motion != "off") ||
         cam->conf->movie_output_motion ||
         (cam->stream.motion.jpg_cnct > 0) ||
@@ -1413,17 +1403,6 @@ static void mlp_parmsupdate(ctx_dev *cam)
             cam->locate_motion_style = LOCATE_REDCROSS;
         } else {
             cam->locate_motion_style = LOCATE_BOX;
-        }
-
-        if (cam->conf->smart_mask_speed != cam->smartmask_speed ||
-            cam->smartmask_lastrate != cam->lastrate) {
-            if (cam->conf->smart_mask_speed == 0) {
-                memset(cam->imgs.smartmask, 0, (uint)cam->imgs.motionsize);
-                memset(cam->imgs.smartmask_final, 255, (uint)cam->imgs.motionsize);
-            }
-            cam->smartmask_lastrate = cam->lastrate;
-            cam->smartmask_speed = cam->conf->smart_mask_speed;
-            cam->smartmask_ratio = 5 * cam->lastrate * (11 - cam->smartmask_speed);
         }
 
         cam->parms_changed = false;

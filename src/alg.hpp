@@ -31,8 +31,12 @@
             void ref_frame_reset();
             void stddev();
             void location();
+            u_char  *smartmask_final;
         private:
             ctx_dev *cam;
+            int     smartmask_count;
+            u_char  *smartmask;
+            int     *smartmask_buffer;
 
             int cfg_threshold_sdevx;
             int cfg_threshold_sdevy;
@@ -43,6 +47,7 @@
             int cfg_lightswitch_percent;
             int cfg_lightswitch_frames;
             int cfg_static_object_time;
+            int cfg_smart_mask_speed;
 
             bool calc_stddev;
 

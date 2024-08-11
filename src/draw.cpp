@@ -21,6 +21,7 @@
 #include "conf.hpp"
 #include "util.hpp"
 #include "logger.hpp"
+#include "alg.hpp"
 #include "draw.hpp"
 
 struct draw_char {
@@ -1453,7 +1454,7 @@ void cls_draw::smartmask()
 {
     int i, x, v, width, height, line;
     ctx_images *imgs = &cam->imgs;
-    u_char *smartmask = imgs->smartmask_final;
+    u_char *mask_final = cam->alg->smartmask_final;
     u_char *out_y, *out_u, *out_v;
     u_char *out = cam->imgs.image_motion.image_norm;
 
@@ -1468,9 +1469,9 @@ void cls_draw::smartmask()
     for (i = 0; i < height; i += 2) {
         line = i * width;
         for (x = 0; x < width; x += 2) {
-            if (smartmask[line + x] == 0 || smartmask[line + x + 1] == 0 ||
-                smartmask[line + width + x] == 0 ||
-                smartmask[line + width + x + 1] == 0) {
+            if (mask_final[line + x] == 0 || mask_final[line + x + 1] == 0 ||
+                mask_final[line + width + x] == 0 ||
+                mask_final[line + width + x + 1] == 0) {
 
                 *out_v = 255;
                 *out_u = 128;
@@ -1482,7 +1483,7 @@ void cls_draw::smartmask()
     out_y = out;
     /* Set colour intensity for smartmask. */
     for (i = 0; i < imgs->motionsize; i++) {
-        if (smartmask[i] == 0) {
+        if (mask_final[i] == 0) {
             *out_y = 0;
         }
         out_y++;

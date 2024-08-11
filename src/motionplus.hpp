@@ -335,8 +335,6 @@ struct ctx_images {
     unsigned char *ref;               /* The reference frame */
     unsigned char *ref_next;          /* The reference frame */
     unsigned char *mask;              /* Buffer for the mask file */
-    unsigned char *smartmask;
-    unsigned char *smartmask_final;
     unsigned char *common_buffer;
     unsigned char *image_substream;
     unsigned char *image_virgin;            /* Last picture frame with no text or locate overlay */
@@ -352,7 +350,6 @@ struct ctx_images {
     int ring_out;               /* Index in image ring buffer we want to process next time */
 
     int *ref_dyn;               /* Dynamic objects to be excluded from reference frame */
-    int *smartmask_buffer;
     int *labels;
     int *labelsize;
 
@@ -489,6 +486,7 @@ struct ctx_dev {
     ctx_images      imgs;
 
     ctx_image_data  *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
+
     cls_algsec      *algsec;
     cls_alg         *alg;
 
@@ -520,7 +518,6 @@ struct ctx_dev {
     int                     threshold;
     int                     threshold_maximum;
     int                     diffs_last[THRESHOLD_TUNE_LENGTH];
-    int                     smartmask_speed;
 
     volatile bool           snapshot;    /* Make a snapshot */
     volatile bool           event_stop;  /* Boolean for whether to stop a event */
@@ -570,9 +567,6 @@ struct ctx_dev {
     int area_minx[9], area_miny[9], area_maxx[9], area_maxy[9];
     int                     areadetect_eventnbr;
 
-    int                     smartmask_ratio;
-    int                     smartmask_count;
-    int                     smartmask_lastrate;
     int previous_diffs, previous_location_x, previous_location_y;
     bool                    passflag;  //flag first frame vs all others.
 

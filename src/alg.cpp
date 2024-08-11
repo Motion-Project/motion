@@ -51,7 +51,7 @@ void cls_alg::noise_tune()
     u_char *ref = imgs->ref;
     int diff, sum = 0, count = 0;
     u_char *mask = imgs->mask;
-    u_char *smartmask = imgs->smartmask_final;
+    u_char *mask_final = smartmask_final;
     u_char *new_img = cam->imgs.image_vprvcy;
 
 
@@ -64,14 +64,14 @@ void cls_alg::noise_tune()
             diff = ((diff * *mask++) / 255);
         }
 
-        if (*smartmask) {
+        if (*mask_final) {
             sum += diff + 1;
             count++;
         }
 
         ref++;
         new_img++;
-        smartmask++;
+        mask_final++;
     }
 
     if (count > 3)  {
@@ -575,14 +575,11 @@ void cls_alg::tune_smartmask()
     int i;
     u_char diff;
     int motionsize = cam->imgs.motionsize;
-    u_char *smartmask = cam->imgs.smartmask;
-    u_char *smartmask_final = cam->imgs.smartmask_final;
-    int *smartmask_buffer = cam->imgs.smartmask_buffer;
-    int sensitivity = cam->lastrate * (11 - cam->smartmask_speed);
+    int sensitivity = cam->lastrate * (11 - cfg_smart_mask_speed);
 
-    if (!cam->smartmask_speed ||
+    if ((cfg_smart_mask_speed == 0) ||
         (cam->event_curr_nbr == cam->event_prev_nbr) ||
-        (--cam->smartmask_count)) {
+        (--smartmask_count)) {
         return;
     }
 
@@ -614,11 +611,8 @@ void cls_alg::tune_smartmask()
                       cam->imgs.common_buffer, 255);
     erode5(smartmask_final, cam->imgs.width, cam->imgs.height,
                       cam->imgs.common_buffer, 255);
-    cam->smartmask_count = cam->smartmask_ratio;
+    smartmask_count = 5 * cam->lastrate * (11 - cfg_smart_mask_speed);
 }
-
-/* Increment for *smartmask_buffer in alg_diff_standard. */
-#define SMARTMASK_SENSITIVITY_INCR 5
 
 void cls_alg::diff_nomask()
 {
@@ -716,15 +710,14 @@ void cls_alg::diff_smart()
 
     u_char *ref  = cam->imgs.ref;
     u_char *out  = cam->imgs.image_motion.image_norm;
-    u_char *smartmask_final = cam->imgs.smartmask_final;
+    u_char *mask_final = smartmask_final;
     u_char *new_img = cam->imgs.image_vprvcy;
 
     int i, curdiff;
     int imgsz = cam->imgs.motionsize;
     int diffs = 0, diffs_net = 0;
     int noise = cam->noise;
-    int smartmask_speed = cam->smartmask_speed;
-    int *smartmask_buffer = cam->imgs.smartmask_buffer;
+    int *mask_buffer = smartmask_buffer;
     int lrgchg = cfg_threshold_ratio_change;
 
     imgsz = cam->imgs.motionsize;
@@ -733,17 +726,17 @@ void cls_alg::diff_smart()
 
     for (i = 0; i < imgsz; i++) {
         curdiff = (*ref - *new_img);
-        if (smartmask_speed) {
+        if (cfg_smart_mask_speed) {
             if (abs(curdiff) > noise) {
                 if (cam->event_curr_nbr != cam->event_prev_nbr) {
-                    (*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
+                    (*mask_buffer) += SMARTMASK_SENSITIVITY_INCR;
                 }
-                if (!*smartmask_final) {
+                if (!*mask_final) {
                     curdiff = 0;
                 }
             }
-            smartmask_final++;
-            smartmask_buffer++;
+            mask_final++;
+            mask_buffer++;
         }
         /* Pixel still in motion after all the masks? */
         if (abs(curdiff) > noise) {
@@ -775,15 +768,14 @@ void cls_alg::diff_masksmart()
     u_char *ref = cam->imgs.ref;
     u_char *out = cam->imgs.image_motion.image_norm;
     u_char *mask = cam->imgs.mask;
-    u_char *smartmask_final = cam->imgs.smartmask_final;
+    u_char *mask_final = smartmask_final;
     u_char *new_img = cam->imgs.image_vprvcy;
 
     int i, curdiff;
     int imgsz = cam->imgs.motionsize;
     int diffs = 0, diffs_net = 0;
     int noise = cam->noise;
-    int smartmask_speed = cam->smartmask_speed;
-    int *smartmask_buffer = cam->imgs.smartmask_buffer;
+    int *mask_buffer = smartmask_buffer;
     int lrgchg = cfg_threshold_ratio_change;
 
     imgsz= cam->imgs.motionsize;
@@ -796,17 +788,17 @@ void cls_alg::diff_masksmart()
             curdiff = ((curdiff * *mask) / 255);
         }
 
-        if (smartmask_speed) {
+        if (cfg_smart_mask_speed) {
             if (abs(curdiff) > noise) {
                 if (cam->event_curr_nbr != cam->event_prev_nbr) {
-                    (*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
+                    (*mask_buffer) += SMARTMASK_SENSITIVITY_INCR;
                 }
-                if (!*smartmask_final) {
+                if (!*mask_final) {
                     curdiff = 0;
                 }
             }
-            smartmask_final++;
-            smartmask_buffer++;
+            mask_final++;
+            mask_buffer++;
         }
 
         /* Pixel still in motion after all the masks? */
@@ -873,7 +865,7 @@ bool cls_alg::diff_fast()
 
 void cls_alg::diff_standard()
 {
-    if (cam->smartmask_speed == 0) {
+    if (cfg_smart_mask_speed == 0) {
         if (cam->imgs.mask == NULL) {
             diff_nomask();
         } else {
@@ -909,7 +901,7 @@ void cls_alg::ref_frame_update()
     int *ref_dyn = cam->imgs.ref_dyn;
     u_char *image_virgin = cam->imgs.image_vprvcy;
     u_char *ref = cam->imgs.ref;
-    u_char *smartmask = cam->imgs.smartmask_final;
+    u_char *mask_final = smartmask_final;
     u_char *out = cam->imgs.image_motion.image_norm;
 
     if (cam->lastrate > 5) {
@@ -921,7 +913,7 @@ void cls_alg::ref_frame_update()
 
     for (i = cam->imgs.motionsize; i > 0; i--) {
         /* Exclude pixels from ref frame well below noise level. */
-        if (((int)(abs(*ref - *image_virgin)) > threshold_ref) && (*smartmask)) {
+        if (((int)(abs(*ref - *image_virgin)) > threshold_ref) && (*mask_final)) {
             if (*ref_dyn == 0) { /* Always give new pixels a chance. */
                 *ref_dyn = 1;
             } else if (*ref_dyn > accept_timer) { /* Include static Object after some time. */
@@ -940,7 +932,7 @@ void cls_alg::ref_frame_update()
 
         ref++;
         image_virgin++;
-        smartmask++;
+        mask_final++;
         ref_dyn++;
         out++;
     }
@@ -1230,12 +1222,13 @@ void cls_alg::init_conf()
     cfg_lightswitch_percent = cam->conf->lightswitch_percent;
     cfg_lightswitch_frames = cam->conf->lightswitch_frames;
     cfg_static_object_time = cam->conf->static_object_time;
-
+    cfg_smart_mask_speed = cam->conf->smart_mask_speed;
 }
 
 cls_alg::cls_alg(ctx_dev *p_cam)
 {
     cam = p_cam;
+
     init_conf();
 
     if ((cfg_threshold_sdevx == 0) &&
@@ -1245,10 +1238,22 @@ cls_alg::cls_alg(ctx_dev *p_cam)
     } else {
         calc_stddev = true;
     }
+
+    smartmask =(unsigned char*) mymalloc((uint)cam->imgs.motionsize);
+    smartmask_final =(unsigned char*) mymalloc((uint)cam->imgs.motionsize);
+    smartmask_buffer =(int*) mymalloc((uint)cam->imgs.motionsize * sizeof(*smartmask_buffer));
+
+    memset(smartmask, 0, (uint)cam->imgs.motionsize);
+    memset(smartmask_final, 255, (uint)cam->imgs.motionsize);
+    memset(smartmask_buffer, 0, (uint)cam->imgs.motionsize * sizeof(*smartmask_buffer));
+
 }
 
 cls_alg::~cls_alg()
 {
+    myfree(smartmask);
+    myfree(smartmask_final);
+    myfree(smartmask_buffer);
 
 }
 
