@@ -56,7 +56,7 @@ void cls_picture::process_norm()
 {
     char filename[PATH_MAX];
 
-    if (cam->new_img & NEWIMG_ON) {
+    if (cfg_picture_output == "on") {
         picname(filename,"%s/%s.%s"
             , cfg_picture_filename
             , cfg_picture_type);
@@ -851,6 +851,7 @@ void cls_picture::init_cfg()
     cfg_picture_filename        = cam->conf->picture_filename;
     cfg_snapshot_filename       = cam->conf->snapshot_filename;
     cfg_picture_output_motion   = cam->conf->picture_output_motion;
+    cfg_picture_output          = cam->conf->picture_output;
 }
 
 cls_picture::cls_picture(ctx_dev *p_cam)

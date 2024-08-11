@@ -159,12 +159,12 @@ static void mlp_ring_process(ctx_dev *cam)
         cam->current_image->flags |= IMAGE_SAVED;
 
         if (cam->current_image->flags & IMAGE_MOTION) {
-            if (cam->new_img & NEWIMG_BEST) {
+            if (cam->conf->picture_output == "best") {
                 if (cam->current_image->diffs > cam->imgs.image_preview.diffs) {
                     cam->picture->save_preview();
                 }
             }
-            if (cam->new_img & NEWIMG_CENTER) {
+            if (cam->conf->picture_output == "center") {
                 if (cam->current_image->cent_dist < cam->imgs.image_preview.cent_dist) {
                     cam->picture->save_preview();
                 }
@@ -241,7 +241,9 @@ static void mlp_detected_trigger(ctx_dev *cam)
             mlp_movie_start(cam);
             cam->motapp->dbse->exec(cam, "", "event_start");
 
-            if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)) {
+            if ((cam->conf->picture_output == "first") ||
+                (cam->conf->picture_output == "best") ||
+                (cam->conf->picture_output == "center")) {
                 cam->picture->save_preview();
             }
 
@@ -282,7 +284,7 @@ static void mlp_detected(ctx_dev *cam)
     cam->draw->locate();
 
     /* Calculate how centric motion is if configured preview center*/
-    if (cam->new_img & NEWIMG_CENTER) {
+    if (cam->conf->picture_output == "center") {
         distX = (uint)abs((cam->imgs.width / 2) - cam->current_image->location.x );
         distY = (uint)abs((cam->imgs.height / 2) - cam->current_image->location.y);
         cam->current_image->cent_dist = distX * distX + distY * distY;
@@ -1364,32 +1366,6 @@ static void mlp_loopback(ctx_dev *cam)
 
 }
 
-/* Update parameters from web interface*/
-static void mlp_parmsupdate(ctx_dev *cam)
-{
-    /* Check for some config parameter changes but only every second */
-    if (cam->shots_mt != 0) {
-        return;
-    }
-
-    if (cam->parms_changed  || (cam->passflag == false)) {
-        if (cam->conf->picture_output == "on") {
-            cam->new_img = NEWIMG_ON;
-        } else if (cam->conf->picture_output == "first") {
-            cam->new_img = NEWIMG_FIRST;
-        } else if (cam->conf->picture_output == "best") {
-            cam->new_img = NEWIMG_BEST;
-        } else if (cam->conf->picture_output == "center") {
-            cam->new_img = NEWIMG_CENTER;
-        } else {
-            cam->new_img = NEWIMG_OFF;
-        }
-
-        cam->parms_changed = false;
-    }
-
-}
-
 /* sleep the loop to get framerate requested */
 static void mlp_frametiming(ctx_dev *cam)
 {
@@ -1463,7 +1439,6 @@ void *mlp_main(void *arg)
         mlp_snapshot(cam);
         mlp_timelapse(cam);
         mlp_loopback(cam);
-        mlp_parmsupdate(cam);
         mlp_frametiming(cam);
     }
 

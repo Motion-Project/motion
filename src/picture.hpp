@@ -53,6 +53,7 @@ class cls_picture {
         std::string cfg_picture_type;
         std::string cfg_snapshot_filename;
         std::string cfg_picture_output_motion;
+        std::string cfg_picture_output;
 
         #ifdef HAVE_WEBP
             void webp_exif(WebPMux* webp_mux

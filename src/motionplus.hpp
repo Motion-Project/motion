@@ -153,13 +153,6 @@ class cls_webu_stream;
 #define FTYPE_MOVIE_ANY   (FTYPE_MOVIE | FTYPE_MOVIE_MOTION | FTYPE_MOVIE_TIMELAPSE)
 #define FTYPE_IMAGE_ANY   (FTYPE_IMAGE | FTYPE_IMAGE_SNAPSHOT | FTYPE_IMAGE_MOTION | FTYPE_IMAGE_ROI)
 
-/* What types of images files do we want to have */
-#define NEWIMG_OFF        0
-#define NEWIMG_ON         1
-#define NEWIMG_FIRST      2
-#define NEWIMG_BEST       4
-#define NEWIMG_CENTER     8
-
 #define AVGCNT            30
 
 /*
@@ -496,11 +489,9 @@ struct ctx_dev {
     int                     device_id;
     enum CAMERA_TYPE        camera_type;
     enum DEVICE_STATUS      device_status;
-    unsigned int            new_img;
     int                     noise;
     int                     threshold;
     int                     threshold_maximum;
-
 
     volatile bool           snapshot;    /* Make a snapshot */
     volatile bool           event_stop;  /* Boolean for whether to stop a event */
