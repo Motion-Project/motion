@@ -18,6 +18,7 @@
 
 #ifndef _INCLUDE_ALG_HPP_
 #define _INCLUDE_ALG_HPP_
+    #define THRESHOLD_TUNE_LENGTH  256
 
     class cls_alg {
         public:
@@ -37,6 +38,7 @@
             int     smartmask_count;
             u_char  *smartmask;
             int     *smartmask_buffer;
+            int     diffs_last[THRESHOLD_TUNE_LENGTH];
 
             int cfg_threshold_sdevx;
             int cfg_threshold_sdevy;

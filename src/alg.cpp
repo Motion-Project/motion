@@ -101,21 +101,21 @@ void cls_alg::threshold_tune()
     }
 
     for (i = 0; i < THRESHOLD_TUNE_LENGTH - 1; i++) {
-        sum += cam->diffs_last[i];
+        sum += diffs_last[i];
 
-        if (cam->diffs_last[i + 1] && !motion) {
-            cam->diffs_last[i] = cam->diffs_last[i + 1];
+        if (diffs_last[i + 1] && !motion) {
+            diffs_last[i] = diffs_last[i + 1];
         } else {
-            cam->diffs_last[i] = cam->threshold / 4;
+            diffs_last[i] = cam->threshold / 4;
         }
 
-        if (cam->diffs_last[i] > top) {
-            top = cam->diffs_last[i];
+        if (diffs_last[i] > top) {
+            top = diffs_last[i];
         }
     }
 
-    sum += cam->diffs_last[i];
-    cam->diffs_last[i] = diffs;
+    sum += diffs_last[i];
+    diffs_last[i] = diffs;
 
     sum /= THRESHOLD_TUNE_LENGTH / 4;
 
@@ -1227,6 +1227,8 @@ void cls_alg::init_conf()
 
 cls_alg::cls_alg(ctx_dev *p_cam)
 {
+    int i;
+
     cam = p_cam;
 
     init_conf();
@@ -1246,6 +1248,10 @@ cls_alg::cls_alg(ctx_dev *p_cam)
     memset(smartmask, 0, (uint)cam->imgs.motionsize);
     memset(smartmask_final, 255, (uint)cam->imgs.motionsize);
     memset(smartmask_buffer, 0, (uint)cam->imgs.motionsize * sizeof(*smartmask_buffer));
+
+    for (i = 0; i < THRESHOLD_TUNE_LENGTH - 1; i++) {
+        diffs_last[i] = 0;
+    }
 
 }
 

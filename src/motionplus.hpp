@@ -141,8 +141,6 @@ class cls_webu_stream;
 
 #define MYFFVER (LIBAVFORMAT_VERSION_MAJOR * 1000)+LIBAVFORMAT_VERSION_MINOR
 
-#define THRESHOLD_TUNE_LENGTH  256
-
 /* Filetype defines */
 #define FTYPE_IMAGE             1
 #define FTYPE_IMAGE_SNAPSHOT    2
@@ -466,7 +464,6 @@ struct ctx_snd_info {
 };
 
 struct ctx_dev {
-
     ctx_motapp      *motapp;
     int             threadnr;
     pthread_t       thread_id;
@@ -474,22 +471,21 @@ struct ctx_dev {
     cls_config      *conf;
     ctx_images      imgs;
 
-    ctx_image_data  *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
+    ctx_image_data  *current_image;
 
-    cls_algsec      *algsec;
     cls_alg         *alg;
-
+    cls_algsec      *algsec;
     cls_movie       *movie_norm;
     cls_movie       *movie_motion;
     cls_movie       *movie_timelapse;
     cls_movie       *movie_extpipe;
 
     ctx_stream      stream;
-    ctx_snd_info    *snd_info;      /* Values for sound processing*/
+    ctx_snd_info    *snd_info;
 
     cls_draw        *draw;
-    cls_netcam      *netcam;            /* normal RTSP connection */
-    cls_netcam      *netcam_high;       /* high resolution RTSP connection */
+    cls_netcam      *netcam;
+    cls_netcam      *netcam_high;
     cls_picture     *picture;
     cls_rotate      *rotate;
     cls_v4l2cam     *v4l2cam;
@@ -504,7 +500,7 @@ struct ctx_dev {
     int                     noise;
     int                     threshold;
     int                     threshold_maximum;
-    int                     diffs_last[THRESHOLD_TUNE_LENGTH];
+
 
     volatile bool           snapshot;    /* Make a snapshot */
     volatile bool           event_stop;  /* Boolean for whether to stop a event */
@@ -523,7 +519,6 @@ struct ctx_dev {
     int                     postcap;                             /* downcounter, frames left to to send post event */
     int                     shots_mt;   /* Monotonic clock shots count*/
     int                     shots_rt;   /* Realtime  clock shots count*/
-    int                     ref_lag;
     bool                    detecting_motion;
     long                    frame_wait[AVGCNT];   /* Last wait times through motion loop*/
 
