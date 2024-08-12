@@ -423,8 +423,6 @@ void cls_sound::alsa_start()
         return;
     }
 
-    snd_pcm_hw_params_free(hw_params);
-
     retcd = snd_pcm_prepare(alsa->pcm_dev);
     if (retcd < 0) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
@@ -461,6 +459,8 @@ void cls_sound::alsa_start()
         device_status = STATUS_CLOSED;
         return;
     }
+
+    snd_pcm_hw_params_free(hw_params);
 
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Actual rate %hu"), actl_rate);
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Actual frames per %lu"), frames_per);
