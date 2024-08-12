@@ -120,17 +120,18 @@
               <td bgcolor="#edf4f9" ><a href="#log_level" >log_level</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#log_fflevel" >log_fflevel</a> </td>
               <td bgcolor="#edf4f9" ><a href="#log_type" >log_type</a> </td>
               <td bgcolor="#edf4f9" ><a href="#native_language" >native_language</a> </td>
               <td bgcolor="#edf4f9" ><a href="#target_dir" >target_dir</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#device_name" >device_name</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#device_name" >device_name</a> </td>
               <td bgcolor="#edf4f9" ><a href="#device_id" >device_id</a> </td>
               <td bgcolor="#edf4f9" ><a href="#device_tmo" >device_tmo</a> </td>
               <td bgcolor="#edf4f9" ><a href="#camera" >camera</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#config_dir" >config_dir</a> </td>
             </tr>
+              <td bgcolor="#edf4f9" ><a href="#config_dir" >config_dir</a> </td>
               <td bgcolor="#edf4f9" ><a href="#watchdog_tmo" >watchdog_tmo</a> </td>
               <td bgcolor="#edf4f9" ><a href="#watchdog_kill" >watchdog_kill</a> </td>
               <td bgcolor="#edf4f9" ><a href="#pause" >pause</a> </td>
@@ -741,6 +742,25 @@
           If the secondary algorithm is triggered by the image, the resulting
           image will be saved into the target directory with the name
           detect_"algorithm".jpg e.g. detect_haar.jpg
+        </ul>
+        <p></p>
+
+       <h3><a name="log_fflevel"></a> log_fflevel </h3>
+        <ul>
+          <li> Values: 1 - 9 | Default: 3</li>
+          Verbosity level of ffmpeg messages.
+          <br>
+            <ul>
+              <li>1 = AV_LOG_QUIET</li>
+              <li>2 = AV_LOG_PANIC</li>
+              <li>3 = AV_LOG_FATAL</li>
+              <li>4 = AV_LOG_ERROR</li>
+              <li>5 = AV_LOG_WARNING</li>
+              <li>6 = AV_LOG_INFO</li>
+              <li>7 = AV_LOG_VERBOSE</li>
+              <li>8 = AV_LOG_DEBUG</li>
+              <li>9 = AV_LOG_TRACE</li>
+            </ul>
         </ul>
         <p></p>
 

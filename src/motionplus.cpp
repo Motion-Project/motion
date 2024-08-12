@@ -628,7 +628,7 @@ static void motpls_startup(ctx_motapp *motapp, int daemonize)
     motapp->conf->init(motapp);
 
     motlog->log_level = motapp->conf->log_level;
-    motlog->log_fflevel = 3;
+    motlog->log_fflevel = motapp->conf->log_fflevel;
     motlog->set_log_file(motapp->conf->log_file);
 
     mytranslate_init();

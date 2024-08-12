@@ -29,6 +29,7 @@ ctx_parm config_parms[] = {
     {"pid_file",                  PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_ADVANCED },
     {"log_file",                  PARM_TYP_STRING, PARM_CAT_00, WEBUI_LEVEL_ADVANCED },
     {"log_level",                 PARM_TYP_LIST,   PARM_CAT_00, WEBUI_LEVEL_LIMITED },
+    {"log_fflevel",               PARM_TYP_LIST,   PARM_CAT_00, WEBUI_LEVEL_LIMITED },
     {"log_type",                  PARM_TYP_LIST,   PARM_CAT_00, WEBUI_LEVEL_LIMITED },
     {"native_language",           PARM_TYP_BOOL,   PARM_CAT_00, WEBUI_LEVEL_LIMITED },
 
@@ -527,6 +528,31 @@ void cls_config::edit_log_level(std::string &parm, enum PARM_ACT pact)
 
     return;
     MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","log_level",_("log_level"));
+}
+
+void cls_config::edit_log_fflevel(std::string &parm, enum PARM_ACT pact)
+{
+    int parm_in;
+    if (pact == PARM_ACT_DFLT) {
+        log_fflevel = 3;
+    } else if (pact == PARM_ACT_SET) {
+        parm_in = atoi(parm.c_str());
+        if ((parm_in < 1) || (parm_in > 9)) {
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid log_fflevel %d"),parm_in);
+        } else {
+            log_fflevel = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET) {
+        parm = std::to_string(log_fflevel);
+    } else if (pact == PARM_ACT_LIST) {
+        parm = "[";
+        parm = parm + "\"1\",\"2\",\"3\",\"4\",\"5\"";
+        parm = parm + ",\"6\",\"7\",\"8\",\"9\"";
+        parm = parm + "]";
+    }
+
+    return;
+    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","log_fflevel",_("log_fflevel"));
 }
 
 void cls_config::edit_log_type(std::string &parm, enum PARM_ACT pact)
@@ -2998,6 +3024,7 @@ void cls_config::edit_cat00(std::string cmd, std::string &parm_val, enum PARM_AC
     } else if (cmd == "pid_file") {                edit_pid_file(parm_val, pact);
     } else if (cmd == "log_file") {                edit_log_file(parm_val, pact);
     } else if (cmd == "log_level") {               edit_log_level(parm_val, pact);
+    } else if (cmd == "log_fflevel") {             edit_log_fflevel(parm_val, pact);
     } else if (cmd == "log_type") {                edit_log_type(parm_val, pact);
     } else if (cmd == "native_language") {         edit_native_language(parm_val, pact);
     }

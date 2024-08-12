@@ -92,6 +92,7 @@
             std::string     log_file;
             std::string     log_type_str;
             int             log_level;
+            int             log_fflevel;
             int             log_type;
             bool            native_language;
 
@@ -342,6 +343,7 @@
             void edit_pid_file(std::string &parm, int pact);
             void edit_log_file(std::string &parm, enum PARM_ACT pact);
             void edit_log_level(std::string &parm, enum PARM_ACT pact);
+            void edit_log_fflevel(std::string &parm, enum PARM_ACT pact);
             void edit_log_type(std::string &parm, enum PARM_ACT pact);
             void edit_native_language(std::string &parm, enum PARM_ACT pact);
 
