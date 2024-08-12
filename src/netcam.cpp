@@ -1085,7 +1085,7 @@ int cls_netcam::init_swdecoder()
     }
 
     codec_context->error_concealment = FF_EC_GUESS_MVS | FF_EC_DEBLOCK;
-    codec_context->err_recognition = AV_EF_EXPLODE;
+    codec_context->err_recognition = AV_EF_IGNORE_ERR;
 
     return 0;
 }
