@@ -60,6 +60,7 @@
 #include <sys/socket.h>
 #include <thread>
 
+
 #if defined(HAVE_PTHREAD_NP_H)
     #include <pthread_np.h>
 #endif
@@ -116,6 +117,7 @@ struct ctx_motapp;
 struct ctx_images;
 struct ctx_image_data;
 
+class cls_sound;
 class cls_algsec;
 class cls_alg;
 class cls_config;
@@ -155,15 +157,6 @@ class cls_webu_stream;
 
 #define AVGCNT            30
 
-/*
- * Structure to hold images information
- * The idea is that this should have all information about a picture e.g. diffs, timestamp etc.
- * The exception is the label information, it uses a lot of memory
- * When the image is stored all texts motion marks etc. is written to the image
- * so we only have to send it out when/if we want.
- */
-
-/* A image can have detected motion in it, but dosn't trigger an event, if we use minimum_motion_frames */
 #define IMAGE_MOTION     1
 #define IMAGE_TRIGGER    2
 #define IMAGE_SAVE       4
@@ -207,10 +200,10 @@ enum CAPTURE_RESULT {
 };
 
 enum DEVICE_STATUS {
-    STATUS_CLOSED,   /* Camera is closed */
+    STATUS_CLOSED,   /* Device is closed */
     STATUS_INIT,     /* First time initialize */
     STATUS_RESET,    /* Clean up and re-initialize */
-    STATUS_OPENED    /* Successfully started the camera */
+    STATUS_OPENED    /* Successfully started the device */
 };
 
 enum TIMELAPSE_TYPE {
@@ -387,74 +380,6 @@ struct ctx_stream {
     ctx_stream_data  secondary;  /* Copy of the image to use for web stream*/
 };
 
-struct ctx_snd_alert {
-    int             alert_id;           /* Id number for the alert*/
-    std::string     alert_nm;           /* Name of the alert*/
-    int             volume_level;       /* Volume level required to consider the sample*/
-    int             volume_count;       /* For each sample, number of times required to exceed volumne level*/
-    double          freq_low;           /* Lowest frequency for detecting this alert*/
-    double          freq_high;          /* Highest frequency for detecting this alert*/
-    int             trigger_count;      /* Count of how many times it has been triggered so far*/
-    int             trigger_threshold;  /* How many times does it need to be triggered before an event*/
-    timespec        trigger_time;       /* The last time the trigger was invoked */
-    int             trigger_duration;   /* Min. duration to trigger a new /event */
-};
-
-struct ctx_snd_alsa {
-   #ifdef HAVE_ALSA
-        int                     device_id;
-        std::string             device_nm;
-        snd_pcm_t               *pcm_dev;
-        snd_pcm_info_t          *pcm_info;
-        int                     card_id;
-        snd_ctl_card_info_t     *card_info;
-        snd_ctl_t               *ctl_hdl;
-    #else
-        int             dummy;
-    #endif
-};
-
-struct ctx_snd_pulse {
-   #ifdef HAVE_PULSE
-        pa_simple       *dev;
-    #else
-        int             dummy;
-    #endif
-};
-
-struct ctx_snd_fftw {
-    #ifdef HAVE_FFTW3
-        fftw_plan       ff_plan;
-        double          *ff_in;
-        fftw_complex    *ff_out;
-        int             bin_max;
-        int             bin_min;
-        double          bin_size;
-    #else
-        int             dummy;
-    #endif
-};
-
-struct ctx_snd_info {
-    std::string                 source;         /* Source string in ALSA format e.g. hw:1,0*/
-    int                         sample_rate;    /* Sample rate of sound source*/
-    int                         channels;       /* Number of audio channels */
-    std::list<ctx_snd_alert>    alerts;         /* list of sound alert criteria */
-    int                         vol_min;        /* The minimum volume from alerts*/
-    int                         vol_max;        /* Maximum volume of sample*/
-    int                         vol_count;      /* Number of times volumne exceeded user specified volume level */
-    int16_t                     *buffer;
-    int                         buffer_size;
-    int                         frames;
-    std::string                 pulse_server;
-    std::string                 trig_freq;
-    std::string                 trig_nbr;
-    std::string                 trig_nm;
-    ctx_params                  *params;        /* Device parameters*/
-    ctx_snd_fftw                *snd_fftw;      /* fftw for sound*/
-    ctx_snd_alsa                *snd_alsa;      /* Alsa device for sound*/
-    ctx_snd_pulse               *snd_pulse;     /* PulseAudio for sound*/
-};
 
 struct ctx_dev {
     ctx_motapp      *motapp;
@@ -474,7 +399,6 @@ struct ctx_dev {
     cls_movie       *movie_extpipe;
 
     ctx_stream      stream;
-    ctx_snd_info    *snd_info;
 
     cls_draw        *draw;
     cls_netcam      *netcam;
@@ -556,11 +480,14 @@ struct ctx_dev {
 
 };
 
-/*  ctx_motapp for whole motion application including all the cameras */
+typedef std::vector<cls_sound*> vec_snd;
+typedef vec_snd::iterator it_snd;
+
 struct ctx_motapp {
 
     ctx_dev             **cam_list;
-    ctx_dev             **snd_list;
+    vec_snd     snd_list;
+
     pthread_mutex_t     global_lock;
 
     volatile int        threads_running;
@@ -575,7 +502,6 @@ struct ctx_motapp {
     bool                pause;
     cls_config          *conf;
     int                 cam_cnt;
-    int                 snd_cnt;
     ctx_all_sizes       *all_sizes;
     cls_webu            *webu;
     cls_dbse            *dbse;

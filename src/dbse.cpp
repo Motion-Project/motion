@@ -23,13 +23,6 @@
 #include "movie.hpp"
 #include "dbse.hpp"
 
-static int dbse_sqlite3db_cb (void *ptr, int arg_nb, char **arg_val, char **col_nm)
-{
-    cls_dbse *dbse = (cls_dbse*)ptr;
-    dbse->sqlite3db_cb(arg_nb, arg_val, col_nm);
-    return 0;
-}
-
 #ifdef HAVE_DBSE
 
 void cls_dbse::cols_add_itm(std::string nm, std::string typ)
@@ -202,6 +195,13 @@ void cls_dbse::sql_motpls(std::string &sql, std::string col_nm, std::string col_
 #endif /* HAVE_DBSE */
 
 #ifdef HAVE_SQLITE3DB
+
+static int dbse_sqlite3db_cb (void *ptr, int arg_nb, char **arg_val, char **col_nm)
+{
+    cls_dbse *dbse = (cls_dbse*)ptr;
+    dbse->sqlite3db_cb(arg_nb, arg_val, col_nm);
+    return 0;
+}
 
 void cls_dbse::sqlite3db_exec(std::string sql)
 {

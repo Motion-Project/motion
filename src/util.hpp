@@ -87,7 +87,9 @@
         , const char *usrfmt, const char *fname);
     void mystrftime(ctx_dev *cam, std::string &rslt
         , std::string usrfmt, std::string fname);
+    void mystrftime(cls_sound *snd, std::string &dst, std::string fmt);
     void util_exec_command(ctx_dev *cam, const char *command, const char *filename);
+    void util_exec_command(cls_sound *snd, std::string cmd);
 
     void mythreadname_set(const char *abbr, int threadnbr, const char *threadname);
     void mythreadname_get(char *threadname);

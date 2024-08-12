@@ -62,25 +62,36 @@ maintainer-clang:
 	./configure --with-clang-flags CC=clang CXX=clang++ LD=clang++  && $(MAKE) clean && $(MAKE)
 
 maintainer-check:
-	./configure --with-developer-flags                   && $(MAKE) clean && $(MAKE)
-	./configure --with-developer-flags --without-libcam  && $(MAKE) clean && $(MAKE)
-	./configure --with-developer-flags --without-opencv  && $(MAKE) clean && $(MAKE)
-	./configure --with-developer-flags --without-mariadb && $(MAKE) clean && $(MAKE)
-	./configure --with-developer-flags --without-mysql   && $(MAKE) clean && $(MAKE)
-	./configure --with-developer-flags --without-mariadb && $(MAKE) clean && $(MAKE)
-	./configure --with-developer-flags --without-sqlite3 && $(MAKE) clean && $(MAKE)
-	./configure --with-developer-flags --without-pgsql   && $(MAKE) clean && $(MAKE)
-	./configure --with-developer-flags --without-v4l2    && $(MAKE) clean && $(MAKE)
-	./configure --with-developer-flags --without-webp    && $(MAKE) clean && $(MAKE)
-	./configure --with-developer-flags --without-alsa    && $(MAKE) clean && $(MAKE)
-	./configure --with-developer-flags --without-fftw3   && $(MAKE) clean && $(MAKE)
+	./configure --with-developer-flags                   && $(MAKE) clean && $(MAKE) -j6
+	./configure --with-developer-flags --without-libcam  && $(MAKE) clean && $(MAKE) -j6
+	./configure --with-developer-flags --without-opencv  && $(MAKE) clean && $(MAKE) -j6
+	./configure --with-developer-flags --without-mariadb && $(MAKE) clean && $(MAKE) -j6
+	./configure --with-developer-flags --without-mysql   && $(MAKE) clean && $(MAKE) -j6
+	./configure --with-developer-flags --without-mariadb && $(MAKE) clean && $(MAKE) -j6
+	./configure --with-developer-flags --without-sqlite3 && $(MAKE) clean && $(MAKE) -j6
+	./configure --with-developer-flags --without-pgsql   && $(MAKE) clean && $(MAKE) -j6
+	./configure --with-developer-flags --without-v4l2    && $(MAKE) clean && $(MAKE) -j6
+	./configure --with-developer-flags --without-webp    && $(MAKE) clean && $(MAKE) -j6
+	./configure --with-developer-flags --without-alsa    && $(MAKE) clean && $(MAKE) -j6
+	./configure --with-developer-flags --without-pulse   && $(MAKE) clean && $(MAKE) -j6
+	./configure --with-developer-flags --without-fftw3   && $(MAKE) clean && $(MAKE) -j6
 	./configure --with-developer-flags \
 		--without-mysql \
 		--without-mariadb \
-		&& $(MAKE) clean && $(MAKE)
+		&& $(MAKE) clean && $(MAKE) -j6
 	./configure --with-developer-flags \
 		--without-mysql \
 		--without-mariadb \
 		--without-sqlite3 \
 		--without-pgsql \
-		&& $(MAKE) clean && $(MAKE)
+		&& $(MAKE) clean && $(MAKE) -j6
+	./configure --with-developer-flags \
+		--without-alsa \
+		--without-pulse \
+		&& $(MAKE) clean && $(MAKE) -j6
+	./configure --with-developer-flags \
+		--without-alsa \
+		--without-pulse \
+		--without-fftw3 \
+		&& $(MAKE) clean && $(MAKE) -j6
+

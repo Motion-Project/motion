@@ -197,7 +197,6 @@
             bool            movie_extpipe_use;
             std::string     movie_extpipe;
 
-
             /* Timelapse movie configuration parameters */
             int             timelapse_interval;
             std::string     timelapse_mode;
@@ -275,7 +274,9 @@
             bool                    snd_show;
 
             void camera_add(ctx_motapp *motapp);
-            void sound_add(ctx_motapp *motapp);
+            void sound_add(ctx_motapp *motapp, std::string fname, bool srcdir);
+            void sound_filenm(ctx_motapp *motapp);
+            void process(ctx_motapp *motapp);
 
             void edit_set(std::string parm_nm, std::string parm_val);
             void edit_get(std::string parm_nm, std::string &parm_val, enum PARM_CAT parm_cat);
@@ -294,12 +295,8 @@
             void cmdline(ctx_motapp *motapp);
             void defaults();
 
-            void process(ctx_motapp *motapp);
-
             void camera_filenm(ctx_motapp *motapp);
             void camera_parm(ctx_motapp *motapp, std::string filename);
-            void sound_filenm(ctx_motapp *motapp);
-            void sound_parm(ctx_motapp *motapp, std::string filename);
             void config_dir_parm(ctx_motapp *motapp, std::string confdir);
 
             void parms_log_parm(std::string parm_nm, std::string parm_vl);

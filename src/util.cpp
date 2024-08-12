@@ -21,7 +21,8 @@
 #include "conf.hpp"
 #include "util.hpp"
 #include "logger.hpp"
-#include "alg_sec.hpp" /* For sec detect in format output */
+#include "alg_sec.hpp"
+#include "sound.hpp"
 
 
 /** Non case sensitive equality check for strings*/
@@ -280,7 +281,6 @@ static void mystrftime_long (const ctx_dev *cam,
         sprintf(out, "%*s", width,  cam->action_user);
         return;
     }
-
     if (SPECIFIERWORD("secdetect")) {
         if (cam->algsec->method != "none") {
             if (cam->algsec->detected) {
@@ -290,27 +290,6 @@ static void mystrftime_long (const ctx_dev *cam,
             }
         } else {
             sprintf(out, "%*s", width, "N");
-        }
-        return;
-    }
-
-    if (SPECIFIERWORD("trig_freq")) {
-        if (cam->snd_info != NULL) {
-            snprintf (out, PATH_MAX, "%*s", width, cam->snd_info->trig_freq.c_str() );
-        }
-        return;
-    }
-
-    if (SPECIFIERWORD("trig_nbr")) {
-        if (cam->snd_info != NULL) {
-            snprintf (out, PATH_MAX, "%*s", width, cam->snd_info->trig_nbr.c_str() );
-        }
-        return;
-    }
-
-    if (SPECIFIERWORD("trig_nm")) {
-        if (cam->snd_info != NULL) {
-            snprintf (out, PATH_MAX, "%*s", width, cam->snd_info->trig_nm.c_str() );
         }
         return;
     }
@@ -325,6 +304,53 @@ static void mystrftime_long (const ctx_dev *cam,
     // many conditions. Maybe change loop to "if (*pos_userformat == '%') {
     // ...} __else__ ..."?
     out[0] = '~'; out[1] = 0;
+}
+
+void mystrftime(cls_sound *snd, std::string &dst, std::string fmt)
+{
+    char tmp[PATH_MAX];
+    struct tm timestamp_tm;
+    timespec  curr_ts;
+    std::string user_fmt;
+    uint indx;
+
+    clock_gettime(CLOCK_REALTIME, &curr_ts);
+    localtime_r(&curr_ts.tv_sec, &timestamp_tm);
+
+    if (fmt == "") {
+        dst = "";
+        return;
+    }
+
+    user_fmt = "";
+    for (indx=0;indx<fmt.length();indx++){
+        memset(tmp, 0, sizeof(tmp));
+        if (fmt.substr(indx,2) == "%t") {
+            sprintf(tmp, "%d", snd->device_id);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%$") {
+            user_fmt.append(snd->device_name);
+            indx++;
+        } else if (fmt.substr(indx,strlen("%{ver}")) == "%{ver}") {
+            user_fmt.append(VERSION);
+            indx += (strlen("%{ver}")-1);
+        } else if (fmt.substr(indx,strlen("%{trig_freq}")) == "%{trig_freq}") {
+            user_fmt.append(snd->snd_info->trig_freq);
+            indx += (strlen("%{trig_freq}")-1);
+        } else if (fmt.substr(indx,strlen("%{trig_nbr}")) == "%{trig_nbr}") {
+            user_fmt.append(snd->snd_info->trig_nbr);
+            indx += (strlen("%{trig_nbr}")-1);
+        } else if (fmt.substr(indx,strlen("%{trig_nm}")) == "%{trig_nm}") {
+            user_fmt.append(snd->snd_info->trig_nm);
+            indx += (strlen("%{trig_nm}")-1);
+        } else {
+            user_fmt.append(fmt.substr(indx,1));
+        }
+    }
+    memset(tmp, 0, sizeof(tmp));
+    strftime(tmp, sizeof(tmp),user_fmt.c_str(), &timestamp_tm);
+    dst.assign(tmp);
 }
 
 size_t mystrftime_base(ctx_dev *cam, char *s, size_t max
@@ -684,15 +710,6 @@ AVPacket *mypacket_alloc(AVPacket *pkt)
 
 }
 
-/*********************************************/
-/**
- * util_exec_command
- *      Execute 'command' with 'arg' as its argument.
- *      if !arg command is started with no arguments
- *      Before we call execl we need to close all the file handles
- *      that the fork inherited from the parent in order not to pass
- *      the open handles on to the shell
- */
 void util_exec_command(ctx_dev *cam, const char *command, const char *filename)
 {
     char stamp[PATH_MAX];
@@ -723,6 +740,38 @@ void util_exec_command(ctx_dev *cam, const char *command, const char *filename)
 
     MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO
         ,_("Executing external command '%s'"), stamp);
+}
+
+void util_exec_command(cls_sound *snd, std::string cmd)
+{
+    std::string dst;
+    int pid;
+
+    mystrftime(snd, dst, cmd);
+
+    pid = fork();
+    if (!pid) {
+        /* Detach from parent */
+        setsid();
+
+        execl("/bin/sh", "sh", "-c", dst.c_str(), " &",(char*)NULL);
+
+        /* if above function succeeds the program never reach here */
+        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+            ,_("Unable to start external command '%s'"),dst.c_str());
+
+        exit(1);
+    }
+
+    if (pid > 0) {
+        waitpid(pid, NULL, 0);
+    } else {
+        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+            ,_("Unable to start external command '%s'"), dst.c_str());
+    }
+
+    MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO
+        ,_("Executing external command '%s'"), dst.c_str());
 }
 
 /*********************************************/

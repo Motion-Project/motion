@@ -16,12 +16,11 @@
  *
  */
 
-#include <dirent.h>
-#include <string>
 #include "motionplus.hpp"
 #include "util.hpp"
 #include "logger.hpp"
 #include "conf.hpp"
+#include "sound.hpp"
 
 /*Configuration parameters */
 ctx_parm config_parms[] = {
@@ -3649,16 +3648,13 @@ void cls_config::camera_parm(ctx_motapp *motapp, std::string filename)
 
 }
 
+/* Create default configuration file name*/
 void cls_config::sound_filenm(ctx_motapp *motapp)
 {
-    int indx_snd, indx;
+    uint indx_snd, indx;
     std::string dirnm, fullnm;
     struct stat statbuf;
     size_t lstpos;
-
-    if (motapp->snd_list[motapp->snd_cnt-1]->conf->conf_filename != "") {
-        return;
-    }
 
     lstpos = motapp->conf->conf_filename.find_last_of("/");
     if (lstpos != std::string::npos) {
@@ -3670,8 +3666,8 @@ void cls_config::sound_filenm(ctx_motapp *motapp)
     fullnm = "";
     while (fullnm == "") {
         fullnm = dirnm + "sound" + std::to_string(indx_snd) + ".conf";
-        for (indx=0;indx<motapp->snd_cnt;indx++) {
-            if (fullnm == motapp->snd_list[indx_snd]->conf->conf_filename) {
+        for (indx = 0; indx<motapp->snd_list.size(); indx++) {
+            if (fullnm == motapp->snd_list[indx]->conf->conf_filename) {
                 fullnm = "";
             }
         }
@@ -3685,56 +3681,42 @@ void cls_config::sound_filenm(ctx_motapp *motapp)
         }
     }
 
-    motapp->snd_list[motapp->snd_cnt-1]->conf->conf_filename = fullnm;
-
+    conf_filename = fullnm;
 }
 
-void cls_config::sound_add(ctx_motapp *motapp)
+void cls_config::sound_add(ctx_motapp *motapp, std::string fname, bool srcdir)
 {
+    struct stat statbuf;
     int indx;
-    std::string parm_val;
+    std::string parm_val, parm_nm;
+    cls_sound *snd_cls;
 
-    motapp->snd_cnt++;
-    motapp->snd_list = (ctx_dev **)myrealloc(
-        motapp->snd_list
-        , sizeof(ctx_dev *) * (uint)(motapp->snd_cnt + 1)
-        , "config_sound");
-
-    motapp->snd_list[motapp->snd_cnt-1] = new ctx_dev;
-    memset(motapp->snd_list[motapp->snd_cnt-1],0,sizeof(ctx_dev));
-    motapp->snd_list[motapp->snd_cnt-1]->conf = new cls_config;
-
-    motapp->snd_list[motapp->snd_cnt] = NULL;
-    motapp->snd_list[motapp->snd_cnt-1]->motapp = motapp;
+    snd_cls = new cls_sound(motapp);
+    snd_cls->conf = new cls_config;
 
     indx = 0;
     while (config_parms[indx].parm_name != "") {
-        if (mystrne(config_parms[indx].parm_name.c_str(),"device_id")) {
-            motapp->conf->edit_get(config_parms[indx].parm_name
-                , parm_val, config_parms[indx].parm_cat);
-            motapp->snd_list[motapp->snd_cnt-1]->conf->edit_set(
-                config_parms[indx].parm_name, parm_val);
+        parm_nm =config_parms[indx].parm_name;
+        if (parm_nm == "device_id") {
+            motapp->conf->edit_get(parm_nm, parm_val, config_parms[indx].parm_cat);
+            snd_cls->conf->edit_set(parm_nm, parm_val);
         }
         indx++;
     }
 
-    sound_filenm(motapp);
+    snd_cls->conf->from_conf_dir = srcdir;
+    snd_cls->conf->conf_filename = fname;
 
-}
-
-void cls_config::sound_parm(ctx_motapp *motapp, std::string filename)
-{
-    struct stat statbuf;
-
-    if (stat(filename.c_str(), &statbuf) != 0) {
+    if (fname == "") {
+        snd_cls->conf->sound_filenm(motapp);
+    } else if (stat(fname.c_str(), &statbuf) != 0) {
         MOTPLS_LOG(ALR, TYPE_ALL, SHOW_ERRNO
-            ,_("Sound config file %s not found"), filename.c_str());
-        return;
+            ,_("Sound config file %s not found"), fname.c_str());
+    } else {
+        snd_cls->conf->process(motapp);
     }
 
-    sound_add(motapp);
-    motapp->snd_list[motapp->snd_cnt-1]->conf->conf_filename = filename;
-    motapp->snd_list[motapp->snd_cnt-1]->conf->process(motapp);
+    motapp->snd_list.push_back(snd_cls);
 
 }
 
@@ -3762,8 +3744,7 @@ void cls_config::config_dir_parm(ctx_motapp *motapp, std::string confdir)
                         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                             ,_("Processing as sound config file %s")
                             , file.c_str() );
-                        sound_parm(motapp, file);
-                        motapp->snd_list[motapp->snd_cnt-1]->conf->from_conf_dir = true;
+                        sound_add(motapp, file, true);
                     }
                 }
             }
@@ -3816,7 +3797,7 @@ void cls_config::process(ctx_motapp *motapp)
                 if ((parm_nm == "camera") && (motapp->conf == this)) {
                     camera_parm(motapp, parm_vl);
                 } else if ((parm_nm == "sound") && (motapp->conf == this)) {
-                    sound_parm(motapp, parm_vl);
+                    sound_add(motapp, parm_vl, false);
                 } else if ((parm_nm == "config_dir") && (motapp->conf == this)){
                     config_dir_parm(motapp, parm_vl);
                 } else if ((parm_nm != "camera") && (parm_nm != "sound") &&
@@ -3863,7 +3844,7 @@ void cls_config::parms_log_parm(std::string parm_nm, std::string parm_vl)
 
 void cls_config::parms_log(ctx_motapp *motapp)
 {
-    int i, indx;
+    uint i, indx;
     std::string parm_vl, parm_main, parm_nm;
     std::list<std::string> parm_array;
     std::list<std::string>::iterator it;
@@ -3897,7 +3878,7 @@ void cls_config::parms_log(ctx_motapp *motapp)
         i++;
     }
 
-    for (indx=0; indx<motapp->cam_cnt; indx++) {
+    for (indx=0; indx<(uint)motapp->cam_cnt; indx++) {
         MOTPLS_SHT(INF, TYPE_ALL, NO_ERRNO
             , _("Camera %d - Config file: %s")
             , motapp->cam_list[indx]->device_id
@@ -3925,7 +3906,7 @@ void cls_config::parms_log(ctx_motapp *motapp)
         }
     }
 
-    for (indx=0; indx<motapp->snd_cnt; indx++) {
+    for (indx=0; indx<motapp->snd_list.size(); indx++) {
         MOTPLS_SHT(INF, TYPE_ALL, NO_ERRNO
             , _("Sound %d - Config file: %s")
             , motapp->snd_list[indx]->device_id
@@ -3980,7 +3961,7 @@ void cls_config::parms_write_parms(FILE *conffile, std::string parm_nm
 
 void cls_config::parms_write_app(ctx_motapp *motapp)
 {
-    int i, indx;
+    uint i, indx;
     std::string parm_vl, parm_main, parm_nm;
     std::list<std::string> parm_array;
     std::list<std::string>::iterator it;
@@ -4027,7 +4008,7 @@ void cls_config::parms_write_app(ctx_motapp *motapp)
         i++;
     }
 
-    for (indx=0; indx<motapp->cam_cnt; indx++) {
+    for (indx=0; indx<(uint)motapp->cam_cnt; indx++) {
         if (motapp->cam_list[indx]->conf->from_conf_dir == false) {
             parms_write_parms(conffile, "camera"
                 , motapp->cam_list[indx]->conf->conf_filename
@@ -4035,7 +4016,7 @@ void cls_config::parms_write_app(ctx_motapp *motapp)
         }
     }
 
-    for (indx=0; indx<motapp->snd_cnt; indx++) {
+    for (indx=0; indx<motapp->snd_list.size(); indx++) {
         if (motapp->snd_list[indx]->conf->from_conf_dir == false) {
             parms_write_parms(conffile, "sound"
                 , motapp->snd_list[indx]->conf->conf_filename
@@ -4119,7 +4100,7 @@ void cls_config::parms_write_cam(ctx_motapp *motapp)
 
 void cls_config::parms_write_snd(ctx_motapp *motapp)
 {
-    int i, indx;
+    uint i, indx;
     std::string parm_vl, parm_main, parm_nm;
     std::list<std::string> parm_array;
     std::list<std::string>::iterator it;
@@ -4131,7 +4112,7 @@ void cls_config::parms_write_snd(ctx_motapp *motapp)
     time_t now = time(0);
     strftime(timestamp, 32, "%Y-%m-%dT%H:%M:%S", localtime(&now));
 
-    for (indx=0; indx<motapp->snd_cnt; indx++) {
+    for (indx=0; indx<motapp->snd_list.size(); indx++) {
         conffile = myfopen(motapp->snd_list[indx]->conf->conf_filename.c_str(), "we");
         if (conffile == NULL) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
@@ -4189,7 +4170,7 @@ void cls_config::init(ctx_motapp *motapp)
     std::string filename;
     char path[PATH_MAX];
     struct stat statbuf;
-    int indx;
+    uint indx;
 
     defaults();
 
@@ -4240,12 +4221,12 @@ void cls_config::init(ctx_motapp *motapp)
 
     cmdline(motapp);
 
-    for (indx=0; indx<motapp->cam_cnt; indx++) {
-        motapp->cam_list[indx]->threadnr = indx;
+    for (indx=0; indx<(uint)motapp->cam_cnt; indx++) {
+        motapp->cam_list[indx]->threadnr = (int)indx;
     }
 
-    for (indx=0; indx<motapp->snd_cnt; indx++) {
-        motapp->snd_list[indx]->threadnr = indx + motapp->cam_cnt;
+    for (indx=0; indx<motapp->snd_list.size(); indx++) {
+        motapp->snd_list[indx]->threadnr = (int)indx + motapp->cam_cnt;
     }
 
 }
@@ -4260,13 +4241,14 @@ void cls_config::deinit(ctx_motapp *motapp)
     }
     myfree(motapp->cam_list);
     motapp->cam_cnt = 0;
-
+/*
     for (indx=0; indx<motapp->snd_cnt; indx++) {
         delete motapp->snd_list[indx]->conf;
         delete motapp->snd_list[indx];
     }
     myfree(motapp->snd_list);
     motapp->snd_cnt = 0;
+*/
 
 }
 

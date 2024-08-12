@@ -597,38 +597,35 @@ void cls_algsec::start_model()
     }
 }
 
-#endif
-
 /** Shut down the secondary detection components */
 void cls_algsec::deinit()
 {
-    #ifdef HAVE_OPENCV
-        int waitcnt = 0;
+    int waitcnt = 0;
 
-        if (handler_finished == false) {
-            if (handler_stop == false) {
-                handler_stop = true;
-                while ((handler_stop) && (waitcnt <10)){
-                    SLEEP(1,0)
-                    waitcnt++;
-                }
-            }
-            if (waitcnt == 10) {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
-                    ,_("Shutdown of secondary detector failed"));
-                pthread_kill(handler_thread.native_handle(), SIGVTALRM);
-                pthread_mutex_lock(&cam->motapp->global_lock);
-                    cam->motapp->threads_running--;
-                pthread_mutex_unlock(&cam->motapp->global_lock);
+    if (handler_finished == false) {
+        if (handler_stop == false) {
+            handler_stop = true;
+            while ((handler_stop) && (waitcnt <10)){
+                SLEEP(1,0)
+                waitcnt++;
             }
         }
+        if (waitcnt == 10) {
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                ,_("Shutdown of secondary detector failed"));
+            pthread_kill(handler_thread.native_handle(), SIGVTALRM);
+            pthread_mutex_lock(&cam->motapp->global_lock);
+                cam->motapp->threads_running--;
+            pthread_mutex_unlock(&cam->motapp->global_lock);
+        }
+    }
 
-        pthread_mutex_destroy(&mutex);
-        myfree(image_norm);
-        mydelete(params);
-    #endif
+    pthread_mutex_destroy(&mutex);
+    myfree(image_norm);
+    mydelete(params);
 }
 
+#endif
 /*Invoke the secondary detetction method*/
 void cls_algsec::detect()
 {
@@ -678,17 +675,21 @@ void cls_algsec::detect()
 
 cls_algsec::cls_algsec(ctx_dev *p_cam)
 {
-    cam = p_cam;
     #ifdef HAVE_OPENCV
+        cam = p_cam;
         mythreadname_set("cv",cam->threadnr,cam->conf->device_name.c_str());
             load_params();
             start_model();
         mythreadname_set("ml",cam->threadnr,cam->conf->device_name.c_str());
+    #else
+        (void)p_cam;
     #endif
 }
 
 cls_algsec::~cls_algsec()
 {
-    deinit();
+    #ifdef HAVE_OPENCV
+        deinit();
+    #endif
 }
 
