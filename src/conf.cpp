@@ -2931,10 +2931,6 @@ void cls_config::edit_snd_alerts(std::string &parm, enum PARM_ACT pact)
             return;
         }
         snd_alerts.push_back(parm);   /* Add to the end of list*/
-        for (it= snd_alerts.begin(); it != snd_alerts.end(); it++) {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,"%s:%s"
-                ,"snd_alerts", it->c_str());
-        }
     } else if (pact == PARM_ACT_GET) {
         if (snd_alerts.empty()) {
             parm = "";
@@ -3697,7 +3693,7 @@ void cls_config::sound_add(ctx_motapp *motapp, std::string fname, bool srcdir)
     indx = 0;
     while (config_parms[indx].parm_name != "") {
         parm_nm =config_parms[indx].parm_name;
-        if (parm_nm == "device_id") {
+        if (parm_nm != "device_id") {
             motapp->conf->edit_get(parm_nm, parm_val, config_parms[indx].parm_cat);
             snd_cls->conf->edit_set(parm_nm, parm_val);
         }
@@ -3880,8 +3876,7 @@ void cls_config::parms_log(ctx_motapp *motapp)
 
     for (indx=0; indx<(uint)motapp->cam_cnt; indx++) {
         MOTPLS_SHT(INF, TYPE_ALL, NO_ERRNO
-            , _("Camera %d - Config file: %s")
-            , motapp->cam_list[indx]->device_id
+            , _("Camera config file: %s")
             , motapp->cam_list[indx]->conf->conf_filename.c_str());
         i = 0;
         while (config_parms[i].parm_name != "") {
@@ -3908,8 +3903,7 @@ void cls_config::parms_log(ctx_motapp *motapp)
 
     for (indx=0; indx<motapp->snd_list.size(); indx++) {
         MOTPLS_SHT(INF, TYPE_ALL, NO_ERRNO
-            , _("Sound %d - Config file: %s")
-            , motapp->snd_list[indx]->device_id
+            , _("Sound config file: %s")
             , motapp->snd_list[indx]->conf->conf_filename.c_str());
         i = 0;
         while (config_parms[i].parm_name != "") {
