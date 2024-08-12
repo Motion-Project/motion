@@ -23,6 +23,16 @@
 #include "util.hpp"
 #include "sound.hpp"
 
+void cls_sound::init_conf()
+{
+    cfg_snd_params = conf->snd_params;
+    cfg_snd_device = conf->snd_device;
+    cfg_snd_window = conf->snd_window;
+    cfg_snd_show = conf->snd_show;
+    cfg_on_sound_alert = conf->on_sound_alert;
+
+}
+
 void cls_sound::init_values()
 {
     #ifdef HAVE_FFTW3
@@ -165,7 +175,7 @@ void cls_sound::load_params()
     p_lst   *lst;
 
     snd_info->params->update_params = true;
-    util_parms_parse(snd_info->params,"snd_params", conf->snd_params);
+    util_parms_parse(snd_info->params,"snd_params", cfg_snd_params);
 
     util_parms_add_default(snd_info->params,"source","alsa");
     util_parms_add_default(snd_info->params,"channels","1");
@@ -327,11 +337,11 @@ void cls_sound::alsa_start()
     smpl_rate = (unsigned int)snd_info->sample_rate;
 
     retcd = snd_pcm_open(&alsa->pcm_dev
-        , conf->snd_device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
+        , cfg_snd_device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
     if (retcd < 0) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_open device %s (%s)")
-            , conf->snd_device.c_str(), snd_strerror (retcd));
+            , cfg_snd_device.c_str(), snd_strerror (retcd));
         device_status = STATUS_CLOSED;
         return;
     }
@@ -551,7 +561,7 @@ void cls_sound::pulse_init()
     snd_info->snd_pulse->dev = pa_simple_new(
         (snd_info->pulse_server=="" ? NULL : snd_info->pulse_server.c_str())
         , "motionplus", PA_STREAM_RECORD
-        , (conf->snd_device=="" ? NULL : conf->snd_device.c_str())
+        , (cfg_snd_device=="" ? NULL : cfg_snd_device.c_str())
         , "motionplus", &specs, NULL, NULL, &errcd);
     if (snd_info->snd_pulse->dev == NULL) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
@@ -655,10 +665,10 @@ void cls_sound::check_alerts()
     struct timespec trig_ts;
 
     for (indx=0;indx <snd_info->frames;indx++){
-        if (conf->snd_window == "hamming") {
+        if (cfg_snd_window == "hamming") {
             snd_info->snd_fftw->ff_in[indx] =
                 snd_info->buffer[indx] * HammingWindow(indx, snd_info->frames);
-        } else if (conf->snd_window == "hann") {
+        } else if (cfg_snd_window == "hann") {
             snd_info->snd_fftw->ff_in[indx] =
                 snd_info->buffer[indx] * HannWindow(indx, snd_info->frames);
         } else {
@@ -684,7 +694,7 @@ void cls_sound::check_alerts()
 
     freq_value = (snd_info->snd_fftw->bin_size * pMaxBinIndex * snd_info->channels);
 
-    if (conf->snd_show) {
+    if (cfg_snd_show) {
         MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
             , _("Freq: %.4f threshold: %d count: %d maximum: %d")
             , freq_value, snd_info->vol_min
@@ -720,11 +730,11 @@ void cls_sound::check_alerts()
                     , it->alert_id ,it->alert_nm.c_str()
                     , it->volume_level, chkcnt
                     , snd_info->vol_max);
-                if (conf->on_sound_alert != "") {
+                if (cfg_on_sound_alert != "") {
                     snd_info->trig_freq =std::to_string(freq_value);
                     snd_info->trig_nbr = std::to_string(it->alert_id);
                     snd_info->trig_nm = it->alert_nm;
-                    util_exec_command(this, conf->on_sound_alert);
+                    util_exec_command(this, cfg_on_sound_alert);
                 }
             }
         }
@@ -788,13 +798,17 @@ void cls_sound::init()
         restart = false;
     }
 
+    mythreadname_set("sl", threadnr, conf->device_name.c_str());
+
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize"));
+
     snd_info = new ctx_snd_info;
     snd_info->params = new ctx_params;
     snd_info->snd_fftw = new ctx_snd_fftw;
     snd_info->snd_alsa = new ctx_snd_alsa;
     snd_info->snd_pulse = new ctx_snd_pulse;
 
+    init_conf();
     init_values();
     load_params();
     load_alerts();
@@ -850,10 +864,7 @@ void cls_sound::handler()
         motapp->threads_running++;
     pthread_mutex_unlock(&motapp->global_lock);
 
-    mythreadname_set("sl", threadnr, conf->device_name.c_str());
-
     device_status = STATUS_INIT;
-
     handler_finished = false;
     handler_stop = false;
 

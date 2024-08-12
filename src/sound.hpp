@@ -109,16 +109,23 @@ class cls_sound {
     private:
         ctx_motapp      *motapp;
         std::thread     handler_thread;
+        std::string     cfg_snd_params;
+        std::string     cfg_snd_device;
+        std::string     cfg_snd_window;
+        bool            cfg_snd_show;
+        std::string     cfg_on_sound_alert;
+
 
         void cleanup();
         void handler();
+        void init_conf();
         void init_values();
+        void init();
         void init_alerts(ctx_snd_alert  *tmp_alert);
         void edit_alerts();
         void load_alerts();
         void load_params();
         void capture();
-        void init();
         void check_levels();
 
         #ifdef HAVE_ALSA
