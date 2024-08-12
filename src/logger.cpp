@@ -135,7 +135,7 @@ void cls_log::add_errmsg(int flgerr, int err_save)
 void cls_log::set_mode(int mode_new)
 {
     if ((log_mode != LOGMODE_SYSLOG) && (mode_new == LOGMODE_SYSLOG)) {
-        openlog("restream", LOG_PID, LOG_USER);
+        openlog("motionplus", LOG_PID, LOG_USER);
     }
     if ((log_mode == LOGMODE_SYSLOG) && (mode_new != LOGMODE_SYSLOG)) {
         closelog();
