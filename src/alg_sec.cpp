@@ -603,12 +603,10 @@ void cls_algsec::deinit()
     int waitcnt = 0;
 
     if (handler_finished == false) {
-        if (handler_stop == false) {
-            handler_stop = true;
-            while ((handler_stop) && (waitcnt <10)){
-                SLEEP(1,0)
-                waitcnt++;
-            }
+        handler_stop = true;
+        while ((handler_finished == false) && (waitcnt <10)){
+            SLEEP(1,0)
+            waitcnt++;
         }
         if (waitcnt == 10) {
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
