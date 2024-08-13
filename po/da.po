@@ -1408,129 +1408,129 @@ msgstr "Brug af logtype (%s) logniveau (%s)"
 msgid "Closing logfile (%s)."
 msgstr "Lukker logfil (%s)."
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Resizing buffer to %d items"
 msgstr "Ændrer størrelse på buffer til %d elementer"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Motion detected - starting event %d"
 msgstr "Bevægelse registreret - starthændelse %d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "No Camera device cleanup"
 msgstr "Ingen oprydning af kameraenhed"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "No Camera device specified"
 msgstr "Ingen kameraenhed angivet"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Unable to determine camera type"
 msgstr "Kan ikke bestemme kameratype"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Image width (%d) or height(%d) requested is not modulo 8."
 msgstr "Den ønskede billedbredde (%d) eller højde (%d) er ikke modulo 8."
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
 msgstr ""
 "Bevægelse understøtter kun bredde og højde større end eller lig med 64 %dx%d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Substream not available.  Image sizes not modulo 16."
 msgstr "Substream ikke tilgængelig. Billedstørrelser ikke modulo 16."
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Pass-through processing disabled."
 msgstr "Pass-through-behandling er deaktiveret."
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Failed to start camera."
 msgstr "Kameraet kunne ikke startes."
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #: /home/dave/source/motionplus/src/sound.cpp
 msgid "Initialize"
 msgstr "Initialiser"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Camera %d started: motion detection %s"
 msgstr "Kamera %d startet: bevægelsesdetektering %s"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Disabled"
 msgstr "handicappet"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Enabled"
 msgstr "Aktiveret"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Emulating motion"
 msgstr "Emulerende bevægelse"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Motion in area %d detected."
 msgstr "Bevægelse i område %d registreret."
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Retrying until successful connection with camera"
 msgstr "Prøver igen, indtil der er oprettet forbindelse til kameraet"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Resetting image buffers"
 msgstr "Nulstilling af billedbuffere"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Video signal re-acquired"
 msgstr "Videosignal genindhentet"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Video signal lost - Adding grey image"
 msgstr "Videosignal tabt - Tilføjer gråt billede"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Video signal still lost - Trying to close video device"
 msgstr "Videosignal stadig tabt - Forsøger at lukke videoenheden"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "End of event %d"
 msgstr "Slut på begivenhed %d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "changes after '%s': %5d"
 msgstr "ændringer efter '%s': %5d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid " - labels: %3d"
 msgstr "- etiketter: %3d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Changes: %5d"
 msgstr "Ændringer: %5d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid " - noise level: %2d"
 msgstr "- støjniveau: %2d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid " - threshold: %d"
 msgstr "- tærskel: %d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #: /home/dave/source/motionplus/src/sound.cpp
 msgid "Exiting"
 msgstr "Afslutter"

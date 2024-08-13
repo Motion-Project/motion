@@ -20,7 +20,7 @@
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
-#include "motion_loop.hpp"
+#include "camera.hpp"
 #include "sound.hpp"
 #include "dbse.hpp"
 #include "webu.hpp"

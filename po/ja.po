@@ -1408,128 +1408,128 @@ msgstr "ログ タイプ (%s) ログ レベル (%s) を使用"
 msgid "Closing logfile (%s)."
 msgstr "ログファイル (%s) を閉じています。"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Resizing buffer to %d items"
 msgstr "バッファのサイズを %d 項目に変更"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Motion detected - starting event %d"
 msgstr "モーションが検出されました - イベント %d の開始"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "No Camera device cleanup"
 msgstr "カメラデバイスのクリーンアップなし"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "No Camera device specified"
 msgstr "カメラ デバイスが指定されていません"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Unable to determine camera type"
 msgstr "カメラの種類を特定できません"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Image width (%d) or height(%d) requested is not modulo 8."
 msgstr "要求された画像の幅 (%d) または高さ (%d) はモジュロ 8 ではありません。"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
 msgstr "モーションは 64 %dx%d 以上の幅と高さのみをサポートします"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Substream not available.  Image sizes not modulo 16."
 msgstr "サブストリームは利用できません。モジュロ 16 ではない画像サイズ。"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Pass-through processing disabled."
 msgstr "パススルー処理を無効にしました。"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Failed to start camera."
 msgstr "カメラの起動に失敗しました。"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #: /home/dave/source/motionplus/src/sound.cpp
 msgid "Initialize"
 msgstr "初期化する"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Camera %d started: motion detection %s"
 msgstr "カメラ %d が開始しました: モーション検出 %s"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Disabled"
 msgstr "無効"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Enabled"
 msgstr "有効"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Emulating motion"
 msgstr "モーションのエミュレート"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Motion in area %d detected."
 msgstr "領域 %d でモーションが検出されました。"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Retrying until successful connection with camera"
 msgstr "カメラとの接続が成功するまでリトライ中"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Resetting image buffers"
 msgstr "画像バッファのリセット"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Video signal re-acquired"
 msgstr "ビデオ信号を再取得"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Video signal lost - Adding grey image"
 msgstr "ビデオ信号の損失 - グレーの画像を追加"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Video signal still lost - Trying to close video device"
 msgstr "ビデオ信号がまだ失われています - ビデオ デバイスを閉じようとしています"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "End of event %d"
 msgstr "イベント %d の終了"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "changes after '%s': %5d"
 msgstr "'%s' の後の変更: %5d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid " - labels: %3d"
 msgstr "- ラベル: %3d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Changes: %5d"
 msgstr "変更: %5d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid " - noise level: %2d"
 msgstr "- 騒音レベル: %2d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid " - threshold: %d"
 msgstr "- しきい値: %d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #: /home/dave/source/motionplus/src/sound.cpp
 msgid "Exiting"
 msgstr "終了"

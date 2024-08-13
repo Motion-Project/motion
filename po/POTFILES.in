@@ -18,7 +18,7 @@ src/logger.cpp
 src/rotate.cpp
 src/webu.cpp
 src/draw.cpp
-src/motion_loop.cpp
+src/camera.cpp
 src/sound.cpp
 src/webu_file.cpp
 src/motionplus.cpp

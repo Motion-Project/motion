@@ -20,7 +20,7 @@
 #include "motionplus.hpp"
 #include "logger.hpp"
 #include "util.hpp"
-#include "motion_loop.hpp"
+#include "camera.hpp"
 #include "rotate.hpp"
 #include "movie.hpp"
 #include "libcam.hpp"

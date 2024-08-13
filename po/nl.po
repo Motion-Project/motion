@@ -1407,130 +1407,130 @@ msgstr "Gebruik van logtype (%s) logniveau (%s)"
 msgid "Closing logfile (%s)."
 msgstr "Logbestand sluiten (%s)."
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Resizing buffer to %d items"
 msgstr "Formaat van buffer wijzigen naar %d items"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Motion detected - starting event %d"
 msgstr "Beweging gedetecteerd - startgebeurtenis %d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "No Camera device cleanup"
 msgstr "Geen opschoning van camera-apparaat"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "No Camera device specified"
 msgstr "Geen camera-apparaat opgegeven"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Unable to determine camera type"
 msgstr "Kan het cameratype niet bepalen"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Image width (%d) or height(%d) requested is not modulo 8."
 msgstr "De gevraagde afbeeldingsbreedte (%d) of hoogte (%d) is niet modulo 8."
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
 msgstr ""
 "Beweging ondersteunt alleen breedte en hoogte groter dan of gelijk aan 64 %dx"
 "%d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Substream not available.  Image sizes not modulo 16."
 msgstr "Substream niet beschikbaar. Beeldformaten niet modulo 16."
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Pass-through processing disabled."
 msgstr "Pass-through-verwerking uitgeschakeld."
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Failed to start camera."
 msgstr "Kan de camera niet starten."
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #: /home/dave/source/motionplus/src/sound.cpp
 msgid "Initialize"
 msgstr "Initialiseren"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Camera %d started: motion detection %s"
 msgstr "Camera %d gestart: bewegingsdetectie %s"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Disabled"
 msgstr "Gehandicapt"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Enabled"
 msgstr "Ingeschakeld"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Emulating motion"
 msgstr "Beweging nabootsen"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Motion in area %d detected."
 msgstr "Beweging in gebied %d gedetecteerd."
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Retrying until successful connection with camera"
 msgstr "Opnieuw proberen tot succesvolle verbinding met camera"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Resetting image buffers"
 msgstr "Beeldbuffers resetten"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Video signal re-acquired"
 msgstr "Videosignaal opnieuw verkregen"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Video signal lost - Adding grey image"
 msgstr "Videosignaal verloren - Grijs beeld toegevoegd"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 msgid "Video signal still lost - Trying to close video device"
 msgstr "Videosignaal nog steeds verloren - Probeert videoapparaat te sluiten"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "End of event %d"
 msgstr "Einde van evenement %d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "changes after '%s': %5d"
 msgstr "wijzigingen na '%s': %5d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid " - labels: %3d"
 msgstr "- labels: %3d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid "Changes: %5d"
 msgstr "Wijzigingen: %5d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid " - noise level: %2d"
 msgstr "- geluidsniveau: %2d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #, c-format
 msgid " - threshold: %d"
 msgstr "- drempel: %d"
 
-#: /home/dave/source/motionplus/src/motion_loop.cpp
+#: /home/dave/source/motionplus/src/camera.cpp
 #: /home/dave/source/motionplus/src/sound.cpp
 msgid "Exiting"
 msgstr "Verlaten"

@@ -24,7 +24,7 @@
 #include "webu_getimg.hpp"
 #include "alg_sec.hpp"
 
-/* NOTE:  These run on the motion_loop thread. */
+/* NOTE:  These run on the camera thread. */
 
 /* Initial the stream context items for the camera */
 void webu_getimg_init(ctx_dev *cam)
@@ -78,7 +78,7 @@ void webu_getimg_init(ctx_dev *cam)
 /* Free the stream buffers and mutex for shutdown */
 void webu_getimg_deinit(ctx_dev *cam)
 {
-    /* NOTE:  This runs on the motion_loop thread. */
+    /* NOTE:  This runs on the camera thread. */
     myfree(cam->imgs.image_substream);
 
     pthread_mutex_lock(&cam->stream.mutex);
@@ -316,7 +316,7 @@ static void webu_getimg_secondary(ctx_dev *cam)
 /* Get image from the motion loop and compress it*/
 void webu_getimg_main(ctx_dev *cam)
 {
-    /*This is on the motion_loop thread */
+    /*This is on the camera thread */
     pthread_mutex_lock(&cam->stream.mutex);
         webu_getimg_norm(cam);
         webu_getimg_sub(cam);

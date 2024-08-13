@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _INCLUDE_MOTION_LOOP_HPP_
-#define _INCLUDE_MOTION_LOOP_HPP_
+#ifndef _INCLUDE_CAMERA_HPP_
+#define _INCLUDE_CAMERA_HPP_
 
 void *mlp_main(void *arg);
 void mlp_cleanup(ctx_dev *cam);

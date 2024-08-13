@@ -33,7 +33,7 @@ motionplus_SOURCES = \
 	libcam.hpp         libcam.cpp \
 	logger.hpp         logger.cpp \
 	motionplus.hpp     motionplus.cpp \
-	motion_loop.hpp    motion_loop.cpp \
+	camera.hpp         camera.cpp \
 	movie.hpp          movie.cpp \
 	netcam.hpp         netcam.cpp \
 	picture.hpp        picture.cpp \
