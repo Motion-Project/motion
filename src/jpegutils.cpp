@@ -18,6 +18,7 @@
 */
 
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
@@ -163,7 +164,7 @@ static void put_subjectarea(struct tiff_writing *into, ctx_coord *box)
 }
 
 struct ctx_exif_info {
-    ctx_dev *cam;
+    cls_camera *cam;
     timespec *ts_in1;
     ctx_coord *box;
     struct tm timestamp_tm;
@@ -331,7 +332,7 @@ void jpgutl_exif_writeifd1(ctx_exif_info *exif_info)
 
 }
 
-uint jpgutl_exif(u_char **exif, ctx_dev *cam, timespec *ts_in1, ctx_coord *box)
+uint jpgutl_exif(u_char **exif, cls_camera *cam, timespec *ts_in1, ctx_coord *box)
 {
     struct ctx_exif_info *exif_info;
     uint buffer_size;
@@ -716,7 +717,7 @@ static GLOBAL(int) _jpeg_mem_size(j_compress_ptr cinfo)
  * It must be called after jpeg_start_compress() but before
  * any image data is written by jpeg_write_scanlines().
  */
-static void put_jpeg_exif(j_compress_ptr cinfo, ctx_dev *cam,
+static void put_jpeg_exif(j_compress_ptr cinfo, cls_camera *cam,
         timespec *ts1, ctx_coord *box)
 {
     u_char *exif = NULL;
@@ -846,7 +847,7 @@ int jpgutl_decode_jpeg (u_char *jpeg_data_in, int jpeg_data_len,
 
 int jpgutl_put_yuv420p(u_char *dest_image, int image_size,
         u_char *input_image, int width, int height, int quality,
-        ctx_dev *cam, timespec *ts1, ctx_coord *box)
+        cls_camera *cam, timespec *ts1, ctx_coord *box)
 
 {
     int i, j, jpeg_image_size;
@@ -936,7 +937,7 @@ int jpgutl_put_yuv420p(u_char *dest_image, int image_size,
 
 int jpgutl_put_grey(u_char *dest_image, int image_size,
         u_char *input_image, int width, int height, int quality,
-        ctx_dev *cam, timespec *ts1, ctx_coord *box)
+        cls_camera *cam, timespec *ts1, ctx_coord *box)
 {
     int y, dest_image_size;
     JSAMPROW row_ptr[1];

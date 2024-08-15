@@ -17,6 +17,7 @@
 */
 
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
@@ -243,10 +244,10 @@ void cls_webu_post::action_snapshot()
 
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
-            app->cam_list[indx]->snapshot = true;
+            app->cam_list[indx]->action_snapshot = true;
         }
     } else {
-        app->cam_list[webua->camindx]->snapshot = true;
+        app->cam_list[webua->camindx]->action_snapshot = true;
     }
 
 }
@@ -327,15 +328,13 @@ void cls_webu_post::action_restart()
     if (webua->device_id == 0) {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all cameras"));
         for (indx=0; indx<app->cam_cnt; indx++) {
-            app->cam_list[indx]->restart_dev = true;
-            app->cam_list[indx]->finish_dev = true;
+            app->cam_list[indx]->restart = true;
         }
     } else {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Restarting camera %d")
             , app->cam_list[webua->camindx]->device_id);
-        app->cam_list[webua->camindx]->restart_dev = true;
-        app->cam_list[webua->camindx]->finish_dev = true;
+        app->cam_list[webua->camindx]->restart = true;
     }
 }
 
@@ -361,19 +360,19 @@ void cls_webu_post::action_stop()
             MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Stopping cam %d")
                 , app->cam_list[indx]->device_id);
-            app->cam_list[indx]->restart_dev = false;
+            app->cam_list[indx]->restart = false;
             app->cam_list[indx]->event_stop = true;
             app->cam_list[indx]->event_user = false;
-            app->cam_list[indx]->finish_dev = true;
+            app->cam_list[indx]->handler_stop = true;
         }
     } else {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Stopping cam %d")
             , app->cam_list[webua->camindx]->device_id);
-        app->cam_list[webua->camindx]->restart_dev = false;
+        app->cam_list[webua->camindx]->restart = false;
         app->cam_list[webua->camindx]->event_stop = true;
         app->cam_list[webua->camindx]->event_user = false;
-        app->cam_list[webua->camindx]->finish_dev = true;
+        app->cam_list[webua->camindx]->handler_stop = true;
     }
 
 }
@@ -382,7 +381,7 @@ void cls_webu_post::action_stop()
 void cls_webu_post::action_user()
 {
     int indx, indx2;
-    ctx_dev *cam;
+    cls_camera *cam;
     std::string tmp;
     p_lst *lst = &webu->wb_actions->params_array;
     p_it it;
@@ -538,7 +537,7 @@ void cls_webu_post::config()
 /* Process the ptz action */
 void cls_webu_post::ptz()
 {
-    ctx_dev *cam;
+    cls_camera *cam;
     p_lst *lst = &webu->wb_actions->params_array;
     p_it it;
 

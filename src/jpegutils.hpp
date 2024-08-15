@@ -25,11 +25,11 @@
         unsigned int width, unsigned int height, unsigned char *volatile img_out);
     int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
         unsigned char *input_image, int width, int height, int quality,
-        ctx_dev *cam, timespec *ts1, ctx_coord *box);
+        cls_camera *cam, timespec *ts1, ctx_coord *box);
     int jpgutl_put_grey(unsigned char *dest_image, int image_size,
         unsigned char *input_image, int width, int height, int quality,
-        ctx_dev *cam, timespec *ts1, ctx_coord *box);
-    uint jpgutl_exif(u_char **exif, ctx_dev *cam
+        cls_camera *cam, timespec *ts1, ctx_coord *box);
+    uint jpgutl_exif(u_char **exif, cls_camera *cam
         , timespec *ts_in1, ctx_coord *box);
 
 #endif /*  _INCLUDE_JPEGUTILS_HPP_ */

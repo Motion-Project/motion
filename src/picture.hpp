@@ -26,7 +26,7 @@
 
 class cls_picture {
     public:
-        cls_picture(ctx_dev *p_cam);
+        cls_picture(cls_camera *p_cam);
         ~cls_picture();
 
         int put_memory(u_char* img_dst
@@ -39,7 +39,7 @@ class cls_picture {
         void process_preview();
 
     private:
-        ctx_dev *cam;
+        cls_camera *cam;
 
         int cfg_w;
         int cfg_h;

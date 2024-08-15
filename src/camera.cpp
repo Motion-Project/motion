@@ -36,13 +36,19 @@
 #include "draw.hpp"
 #include "webu_getimg.hpp"
 
+static void *camera_handler(void *arg)
+{
+    ((cls_camera *)arg)->handler();
+    return nullptr;
+}
+
 /* Resize the image ring */
-static void mlp_ring_resize(ctx_dev *cam)
+void cls_camera::ring_resize()
 {
     int i, new_size;
     ctx_image_data *tmp;
 
-    new_size = cam->conf->pre_capture + cam->conf->minimum_motion_frames;
+    new_size = conf->pre_capture + conf->minimum_motion_frames;
     if (new_size < 1) {
         new_size = 1;
     }
@@ -53,260 +59,260 @@ static void mlp_ring_resize(ctx_dev *cam)
     tmp =(ctx_image_data*) mymalloc((uint)new_size * sizeof(ctx_image_data));
 
     for(i = 0; i < new_size; i++) {
-        tmp[i].image_norm =(unsigned char*) mymalloc((uint)cam->imgs.size_norm);
-        memset(tmp[i].image_norm, 0x80, (uint)cam->imgs.size_norm);
-        if (cam->imgs.size_high > 0) {
-            tmp[i].image_high =(unsigned char*) mymalloc((uint)cam->imgs.size_high);
-            memset(tmp[i].image_high, 0x80, (uint)cam->imgs.size_high);
+        tmp[i].image_norm =(u_char*) mymalloc((uint)imgs.size_norm);
+        memset(tmp[i].image_norm, 0x80, (uint)imgs.size_norm);
+        if (imgs.size_high > 0) {
+            tmp[i].image_high =(u_char*) mymalloc((uint)imgs.size_high);
+            memset(tmp[i].image_high, 0x80, (uint)imgs.size_high);
         }
     }
 
-    cam->imgs.image_ring = tmp;
-    cam->current_image = NULL;
-    cam->imgs.ring_size = new_size;
-    cam->imgs.ring_in = 0;
-    cam->imgs.ring_out = 0;
+    imgs.image_ring = tmp;
+    current_image = NULL;
+    imgs.ring_size = new_size;
+    imgs.ring_in = 0;
+    imgs.ring_out = 0;
 
 }
 
 /* Clean image ring */
-static void mlp_ring_destroy(ctx_dev *cam)
+void cls_camera::ring_destroy()
 {
     int i;
 
-    if (cam->imgs.image_ring == NULL) {
+    if (imgs.image_ring == NULL) {
         return;
     }
 
-    for (i = 0; i < cam->imgs.ring_size; i++) {
-        myfree(cam->imgs.image_ring[i].image_norm);
-        myfree(cam->imgs.image_ring[i].image_high);
+    for (i = 0; i < imgs.ring_size; i++) {
+        myfree(imgs.image_ring[i].image_norm);
+        myfree(imgs.image_ring[i].image_high);
     }
-    myfree(cam->imgs.image_ring);
+    myfree(imgs.image_ring);
 
     /*
      * current_image is an alias from the pointers above which have
      * already been freed so we just set it equal to NULL here
     */
-    cam->current_image = NULL;
+    current_image = NULL;
 
-    cam->imgs.ring_size = 0;
+    imgs.ring_size = 0;
 }
 
 /* Add debug messsage to image */
-static void mlp_ring_process_debug(ctx_dev *cam)
+void cls_camera::ring_process_debug()
 {
     char tmp[32];
     const char *t;
 
-    if (cam->current_image->flags & IMAGE_TRIGGER) {
+    if (current_image->flags & IMAGE_TRIGGER) {
         t = "Trigger";
-    } else if (cam->current_image->flags & IMAGE_MOTION) {
+    } else if (current_image->flags & IMAGE_MOTION) {
         t = "Motion";
-    } else if (cam->current_image->flags & IMAGE_PRECAP) {
+    } else if (current_image->flags & IMAGE_PRECAP) {
         t = "Precap";
-    } else if (cam->current_image->flags & IMAGE_POSTCAP) {
+    } else if (current_image->flags & IMAGE_POSTCAP) {
         t = "Postcap";
     } else {
         t = "Other";
     }
 
-    mystrftime(cam, tmp, sizeof(tmp), "%H%M%S-%q", NULL);
-    cam->draw->text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm
-            , cam->imgs.width, cam->imgs.height
-            , 10, 20, tmp, cam->text_scale);
-    cam->draw->text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm
-            , cam->imgs.width, cam->imgs.height
-            , 10, 30, t, cam->text_scale);
+    mystrftime(this, tmp, sizeof(tmp), "%H%M%S-%q", NULL);
+    draw->text(imgs.image_ring[imgs.ring_out].image_norm
+            , imgs.width, imgs.height
+            , 10, 20, tmp, text_scale);
+    draw->text(imgs.image_ring[imgs.ring_out].image_norm
+            , imgs.width, imgs.height
+            , 10, 30, t, text_scale);
 }
 
-static void mlp_ring_process_image(ctx_dev *cam)
+void cls_camera::ring_process_image()
 {
-    cam->picture->process_norm();
-    if (cam->movie_norm->put_image(cam->current_image
-            , &cam->current_image->imgts) == -1) {
+    picture->process_norm();
+    if (movie_norm->put_image(current_image
+            , &current_image->imgts) == -1) {
         MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
     }
-    if (cam->movie_motion->put_image(&cam->imgs.image_motion
-            , &cam->imgs.image_motion.imgts) == -1) {
+    if (movie_motion->put_image(&imgs.image_motion
+            , &imgs.image_motion.imgts) == -1) {
         MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
     }
-    if (cam->movie_extpipe->put_image(cam->current_image
-            , &cam->current_image->imgts) == -1) {
+    if (movie_extpipe->put_image(current_image
+            , &current_image->imgts) == -1) {
         MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
     }
 }
 
 /* Process the entire image ring */
-static void mlp_ring_process(ctx_dev *cam)
+void cls_camera::ring_process()
 {
-    ctx_image_data *saved_current_image = cam->current_image;
+    ctx_image_data *saved_current_image = current_image;
 
     do {
-        if ((cam->imgs.image_ring[cam->imgs.ring_out].flags & (IMAGE_SAVE | IMAGE_SAVED)) != IMAGE_SAVE) {
+        if ((imgs.image_ring[imgs.ring_out].flags & (IMAGE_SAVE | IMAGE_SAVED)) != IMAGE_SAVE) {
             break;
         }
 
-        cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_out];
+        current_image = &imgs.image_ring[imgs.ring_out];
 
-        if (cam->current_image->shot <= cam->conf->framerate) {
-            if (cam->motapp->conf->log_level >= DBG) {
-                mlp_ring_process_debug(cam);
+        if (current_image->shot <= conf->framerate) {
+            if (motapp->conf->log_level >= DBG) {
+                ring_process_debug();
             }
-            mlp_ring_process_image(cam);
+            ring_process_image();
         }
 
-        cam->current_image->flags |= IMAGE_SAVED;
+        current_image->flags |= IMAGE_SAVED;
 
-        if (cam->current_image->flags & IMAGE_MOTION) {
-            if (cam->conf->picture_output == "best") {
-                if (cam->current_image->diffs > cam->imgs.image_preview.diffs) {
-                    cam->picture->save_preview();
+        if (current_image->flags & IMAGE_MOTION) {
+            if (conf->picture_output == "best") {
+                if (current_image->diffs > imgs.image_preview.diffs) {
+                    picture->save_preview();
                 }
             }
-            if (cam->conf->picture_output == "center") {
-                if (cam->current_image->cent_dist < cam->imgs.image_preview.cent_dist) {
-                    cam->picture->save_preview();
+            if (conf->picture_output == "center") {
+                if (current_image->cent_dist < imgs.image_preview.cent_dist) {
+                    picture->save_preview();
                 }
             }
         }
 
-        if (++cam->imgs.ring_out >= cam->imgs.ring_size) {
-            cam->imgs.ring_out = 0;
+        if (++imgs.ring_out >= imgs.ring_size) {
+            imgs.ring_out = 0;
         }
 
-    } while (cam->imgs.ring_out != cam->imgs.ring_in);
+    } while (imgs.ring_out != imgs.ring_in);
 
-    cam->current_image = saved_current_image;
+    current_image = saved_current_image;
 }
 
 /* Reset the image info variables*/
-static void mlp_info_reset(ctx_dev *cam)
+void cls_camera::info_reset()
 {
-    cam->info_diff_cnt = 0;
-    cam->info_diff_tot = 0;
-    cam->info_sdev_min = 99999999;
-    cam->info_sdev_max = 0;
-    cam->info_sdev_tot = 0;
+    info_diff_cnt = 0;
+    info_diff_tot = 0;
+    info_sdev_min = 99999999;
+    info_sdev_max = 0;
+    info_sdev_tot = 0;
 }
 
-static void mlp_movie_start(ctx_dev *cam)
+void cls_camera::movie_start()
 {
-    cam->movie_start_time = cam->frame_curr_ts.tv_sec;
-    if (cam->lastrate < 2) {
-        cam->movie_fps = 2;
+    movie_start_time = frame_curr_ts.tv_sec;
+    if (lastrate < 2) {
+        movie_fps = 2;
     } else {
-        cam->movie_fps = cam->lastrate;
+        movie_fps = lastrate;
     }
-    cam->movie_norm->start();
-    cam->movie_motion->start();
-    cam->movie_extpipe->start();
+    movie_norm->start();
+    movie_motion->start();
+    movie_extpipe->start();
 }
 
-static void mlp_movie_end(ctx_dev *cam)
+void cls_camera::movie_end()
 {
-    cam->movie_norm->stop();
-    cam->movie_motion->stop();
-    cam->movie_extpipe->stop();
+    movie_norm->stop();
+    movie_motion->stop();
+    movie_extpipe->stop();
 }
 
 /* Process the motion detected items*/
-static void mlp_detected_trigger(ctx_dev *cam)
+void cls_camera::detected_trigger()
 {
     time_t raw_time;
     struct tm evt_tm;
 
-    if (cam->current_image->flags & IMAGE_TRIGGER) {
-        if (cam->event_curr_nbr != cam->event_prev_nbr) {
-            mlp_info_reset(cam);
-            cam->event_prev_nbr = cam->event_curr_nbr;
+    if (current_image->flags & IMAGE_TRIGGER) {
+        if (event_curr_nbr != event_prev_nbr) {
+            info_reset();
+            event_prev_nbr = event_curr_nbr;
 
-            cam->algsec->detected = false;
+            algsec->detected = false;
 
             time(&raw_time);
             localtime_r(&raw_time, &evt_tm);
-            sprintf(cam->eventid, "%05d", cam->device_id);
-            strftime(cam->eventid+5, 15, "%Y%m%d%H%M%S", &evt_tm);
+            sprintf(eventid, "%05d", device_id);
+            strftime(eventid+5, 15, "%Y%m%d%H%M%S", &evt_tm);
 
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
-                       cam->event_curr_nbr);
+                       event_curr_nbr);
 
-            mystrftime(cam, cam->text_event_string
-                , sizeof(cam->text_event_string)
-                , cam->conf->text_event.c_str(), NULL);
+            mystrftime(this, text_event_string
+                , sizeof(text_event_string)
+                , conf->text_event.c_str(), NULL);
 
-            if (cam->conf->on_event_start != "") {
-                util_exec_command(cam, cam->conf->on_event_start.c_str(), NULL);
+            if (conf->on_event_start != "") {
+                util_exec_command(this, conf->on_event_start.c_str(), NULL);
             }
-            mlp_movie_start(cam);
-            cam->motapp->dbse->exec(cam, "", "event_start");
+            movie_start();
+            motapp->dbse->exec(this, "", "event_start");
 
-            if ((cam->conf->picture_output == "first") ||
-                (cam->conf->picture_output == "best") ||
-                (cam->conf->picture_output == "center")) {
-                cam->picture->save_preview();
+            if ((conf->picture_output == "first") ||
+                (conf->picture_output == "best") ||
+                (conf->picture_output == "center")) {
+                picture->save_preview();
             }
 
         }
-        if (cam->conf->on_motion_detected != "") {
-            util_exec_command(cam, cam->conf->on_motion_detected.c_str(), NULL);
+        if (conf->on_motion_detected != "") {
+            util_exec_command(this, conf->on_motion_detected.c_str(), NULL);
         }
     }
 }
 
 /* call ptz camera center */
-static void mlp_track_center(ctx_dev *cam)
+void cls_camera::track_center()
 {
-    if ((cam->conf->ptz_auto_track) && (cam->conf->ptz_move_track != "")) {
-        cam->track_posx = 0;
-        cam->track_posy = 0;
-        util_exec_command(cam, cam->conf->ptz_move_track.c_str(), NULL);
-        cam->frame_skip = cam->conf->ptz_wait;
+    if ((conf->ptz_auto_track) && (conf->ptz_move_track != "")) {
+        track_posx = 0;
+        track_posy = 0;
+        util_exec_command(this, conf->ptz_move_track.c_str(), NULL);
+        frame_skip = conf->ptz_wait;
     }
 }
 
 /* call ptz camera move */
-static void mlp_track_move(ctx_dev *cam)
+void cls_camera::track_move()
 {
-    if ((cam->conf->ptz_auto_track) && (cam->conf->ptz_move_track != "")) {
-            cam->track_posx += cam->current_image->location.x;
-            cam->track_posy += cam->current_image->location.y;
-            util_exec_command(cam, cam->conf->ptz_move_track.c_str(), NULL);
-            cam->frame_skip = cam->conf->ptz_wait;
+    if ((conf->ptz_auto_track) && (conf->ptz_move_track != "")) {
+            track_posx += current_image->location.x;
+            track_posy += current_image->location.y;
+            util_exec_command(this, conf->ptz_move_track.c_str(), NULL);
+            frame_skip = conf->ptz_wait;
     }
 }
 
 /* motion detected */
-static void mlp_detected(ctx_dev *cam)
+void cls_camera::detected()
 {
     unsigned int distX, distY;
 
-    cam->draw->locate();
+    draw->locate();
 
     /* Calculate how centric motion is if configured preview center*/
-    if (cam->conf->picture_output == "center") {
-        distX = (uint)abs((cam->imgs.width / 2) - cam->current_image->location.x );
-        distY = (uint)abs((cam->imgs.height / 2) - cam->current_image->location.y);
-        cam->current_image->cent_dist = distX * distX + distY * distY;
+    if (conf->picture_output == "center") {
+        distX = (uint)abs((imgs.width / 2) - current_image->location.x );
+        distY = (uint)abs((imgs.height / 2) - current_image->location.y);
+        current_image->cent_dist = distX * distX + distY * distY;
     }
 
-    mlp_detected_trigger(cam);
+    detected_trigger();
 
-    if (cam->current_image->shot <= cam->conf->framerate) {
-        if ((cam->conf->stream_motion == true) &&
-            (cam->current_image->shot != 1)) {
-            webu_getimg_main(cam);
+    if (current_image->shot <= conf->framerate) {
+        if ((conf->stream_motion == true) &&
+            (current_image->shot != 1)) {
+            webu_getimg_main(this);
         }
-        cam->picture->process_motion();
+        picture->process_motion();
     }
 
-    mlp_track_move(cam);
+    track_move();
 }
 
 /* Apply the privacy mask to image*/
-static void mlp_mask_privacy(ctx_dev *cam)
+void cls_camera::mask_privacy()
 {
-    if (cam->imgs.mask_privacy == NULL) {
+    if (imgs.mask_privacy == NULL) {
         return;
     }
 
@@ -315,9 +321,9 @@ static void mlp_mask_privacy(ctx_dev *cam)
     * bytes at a time, providing a significant boost in performance.
     * Then a trailer loop takes care of any remaining bytes.
     */
-    unsigned char *image;
-    const unsigned char *mask;
-    const unsigned char *maskuv;
+    u_char *image;
+    const u_char *mask;
+    const u_char *maskuv;
 
     int index_y;
     int index_crcb;
@@ -326,7 +332,7 @@ static void mlp_mask_privacy(ctx_dev *cam)
     int indx_max;                /* 1 if we are only doing norm, 2 if we are doing both norm and high */
 
     indx_img = 1;
-    if (cam->imgs.size_high > 0) {
+    if (imgs.size_high > 0) {
         indx_max = 2;
     } else {
         indx_max = 1;
@@ -336,18 +342,18 @@ static void mlp_mask_privacy(ctx_dev *cam)
     while (indx_img <= indx_max) {
         if (indx_img == 1) {
             /* Normal Resolution */
-            index_y = cam->imgs.height * cam->imgs.width;
-            image = cam->current_image->image_norm;
-            mask = cam->imgs.mask_privacy;
-            index_crcb = cam->imgs.size_norm - index_y;
-            maskuv = cam->imgs.mask_privacy_uv;
+            index_y = imgs.height * imgs.width;
+            image = current_image->image_norm;
+            mask = imgs.mask_privacy;
+            index_crcb = imgs.size_norm - index_y;
+            maskuv = imgs.mask_privacy_uv;
         } else {
             /* High Resolution */
-            index_y = cam->imgs.height_high * cam->imgs.width_high;
-            image = cam->current_image->image_high;
-            mask = cam->imgs.mask_privacy_high;
-            index_crcb = cam->imgs.size_high - index_y;
-            maskuv = cam->imgs.mask_privacy_high_uv;
+            index_y = imgs.height_high * imgs.width_high;
+            image = current_image->image_high;
+            mask = imgs.mask_privacy_high;
+            index_crcb = imgs.size_high - index_y;
+            maskuv = imgs.mask_privacy_high_uv;
         }
 
         while (index_y >= increment) {
@@ -388,49 +394,52 @@ static void mlp_mask_privacy(ctx_dev *cam)
 }
 
 /* Close and clean up camera*/
-void mlp_cam_close(ctx_dev *cam)
+void cls_camera::cam_close()
 {
-    mydelete(cam->libcam);
-    mydelete(cam->v4l2cam);
-    mydelete(cam->netcam);
-    mydelete(cam->netcam_high);
+    mydelete(libcam);
+    mydelete(v4l2cam);
+    mydelete(netcam);
+    mydelete(netcam_high);
 }
 
 /* Start camera */
-void mlp_cam_start(ctx_dev *cam)
+void cls_camera::cam_start()
 {
-    if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
-        cam->libcam = new cls_libcam(cam);
-    } else if (cam->camera_type == CAMERA_TYPE_NETCAM) {
-        cam->netcam = new cls_netcam(cam, false);
-        if (cam->conf->netcam_high_url != "") {
-            cam->netcam_high = new cls_netcam(cam, true);
+    watchdog = conf->watchdog_tmo;
+    if (camera_type == CAMERA_TYPE_LIBCAM) {
+        libcam = new cls_libcam(this);
+    } else if (camera_type == CAMERA_TYPE_NETCAM) {
+        netcam = new cls_netcam(this, false);
+        if (conf->netcam_high_url != "") {
+            watchdog = conf->watchdog_tmo;
+            netcam_high = new cls_netcam(this, true);
         }
-    } else if (cam->camera_type == CAMERA_TYPE_V4L2) {
-        cam->v4l2cam = new cls_v4l2cam(cam);
+    } else if (camera_type == CAMERA_TYPE_V4L2) {
+        v4l2cam = new cls_v4l2cam(this);
     } else {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("No Camera device specified"));
-        cam->device_status = STATUS_CLOSED;
+        device_status = STATUS_CLOSED;
     }
+    watchdog = conf->watchdog_tmo;
 }
 
 /* Get next image from camera */
-int mlp_cam_next(ctx_dev *cam, ctx_image_data *img_data)
+int cls_camera::cam_next(ctx_image_data *img_data)
 {
     int retcd;
 
-    if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
-        retcd = cam->libcam->next(img_data);
-    } else if (cam->camera_type == CAMERA_TYPE_NETCAM) {
-        retcd = cam->netcam->next(img_data);
+    if (camera_type == CAMERA_TYPE_LIBCAM) {
+        retcd = libcam->next(img_data);
+    } else if (camera_type == CAMERA_TYPE_NETCAM) {
+        retcd = netcam->next(img_data);
         if ((retcd == CAPTURE_SUCCESS) &&
-            (cam->netcam_high != nullptr)) {
-            retcd = cam->netcam_high->next(img_data);
+            (netcam_high != nullptr)) {
+            retcd = netcam_high->next(img_data);
         }
-        cam->rotate->process(img_data);
-    } else if (cam->camera_type == CAMERA_TYPE_V4L2) {
-        retcd = cam->v4l2cam->next(img_data);
+        rotate->process(img_data);
+    } else if (camera_type == CAMERA_TYPE_V4L2) {
+        retcd = v4l2cam->next(img_data);
     } else {
         retcd = -1;
     }
@@ -440,33 +449,33 @@ int mlp_cam_next(ctx_dev *cam, ctx_image_data *img_data)
 }
 
 /* Assign the camera type */
-static void mlp_init_camera_type(ctx_dev *cam)
+void cls_camera::init_camera_type()
 {
-    if (cam->conf->libcam_device != "") {
-        cam->camera_type = CAMERA_TYPE_LIBCAM;
-    } else if (cam->conf->netcam_url != "") {
-        cam->camera_type = CAMERA_TYPE_NETCAM;
-    } else if (cam->conf->v4l2_device != "") {
-        cam->camera_type = CAMERA_TYPE_V4L2;
+    if (conf->libcam_device != "") {
+        camera_type = CAMERA_TYPE_LIBCAM;
+    } else if (conf->netcam_url != "") {
+        camera_type = CAMERA_TYPE_NETCAM;
+    } else if (conf->v4l2_device != "") {
+        camera_type = CAMERA_TYPE_V4L2;
     } else {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("Unable to determine camera type"));
-        cam->camera_type = CAMERA_TYPE_UNKNOWN;
-        cam->finish_dev = true;
-        cam->restart_dev = false;
+        camera_type = CAMERA_TYPE_UNKNOWN;
+        handler_stop = true;
+        restart = false;
     }
 }
 
 /** Get first images from camera at startup */
-static void mlp_init_firstimage(ctx_dev *cam)
+void cls_camera::init_firstimage()
 {
     int indx;
     const char *msg;
 
-    cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
-    if (cam->device_status == STATUS_OPENED) {
+    current_image = &imgs.image_ring[imgs.ring_in];
+    if (device_status == STATUS_OPENED) {
         for (indx = 0; indx < 5; indx++) {
-            if (mlp_cam_next(cam, cam->current_image) == CAPTURE_SUCCESS) {
+            if (cam_next(current_image) == CAPTURE_SUCCESS) {
                 break;
             }
             SLEEP(2, 0);
@@ -475,50 +484,50 @@ static void mlp_init_firstimage(ctx_dev *cam)
         indx = 0;
     }
 
-    if ((indx >= 5) || (cam->device_status != STATUS_OPENED)) {
-        if (cam->device_status != STATUS_OPENED) {
+    if ((indx >= 5) || (device_status != STATUS_OPENED)) {
+        if (device_status != STATUS_OPENED) {
             msg = "Unable to open camera";
         } else {
             msg = "Error capturing first image";
         }
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", msg);
-        for (indx = 0; indx<cam->imgs.ring_size; indx++) {
-            memset(cam->imgs.image_ring[indx].image_norm
-                , 0x80, (uint)cam->imgs.size_norm);
-            cam->draw->text(cam->imgs.image_ring[indx].image_norm
-                , cam->imgs.width, cam->imgs.height
-                , 10, 20 * cam->text_scale
-                , msg, cam->text_scale);
+        for (indx = 0; indx<imgs.ring_size; indx++) {
+            memset(imgs.image_ring[indx].image_norm
+                , 0x80, (uint)imgs.size_norm);
+            draw->text(imgs.image_ring[indx].image_norm
+                , imgs.width, imgs.height
+                , 10, 20 * text_scale
+                , msg, text_scale);
         }
     }
 
-    cam->noise = cam->conf->noise_level;
-    cam->threshold = cam->conf->threshold;
-    if (cam->conf->threshold_maximum > cam->conf->threshold ) {
-        cam->threshold_maximum = cam->conf->threshold_maximum;
+    noise = conf->noise_level;
+    threshold = conf->threshold;
+    if (conf->threshold_maximum > conf->threshold ) {
+        threshold_maximum = conf->threshold_maximum;
     } else {
-        cam->threshold_maximum = (cam->imgs.height * cam->imgs.width * 3) / 2;
+        threshold_maximum = (imgs.height * imgs.width * 3) / 2;
     }
 
 }
 
 /** Check the image size to determine if modulo 8 and over 64 */
-static void mlp_check_szimg(ctx_dev *cam)
+void cls_camera::check_szimg()
 {
-    if ((cam->imgs.width % 8) || (cam->imgs.height % 8)) {
+    if ((imgs.width % 8) || (imgs.height % 8)) {
         MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             ,_("Image width (%d) or height(%d) requested is not modulo 8.")
-            ,cam->imgs.width, cam->imgs.height);
-        cam->device_status = STATUS_RESET;
+            ,imgs.width, imgs.height);
+        device_status = STATUS_CLOSED;
     }
-    if ((cam->imgs.width  < 64) || (cam->imgs.height < 64)) {
+    if ((imgs.width  < 64) || (imgs.height < 64)) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
-            ,cam->imgs.width, cam->imgs.height);
-        cam->device_status = STATUS_RESET;
+            ,imgs.width, imgs.height);
+        device_status = STATUS_CLOSED;
     }
     /* Substream size notification*/
-    if ((cam->imgs.width % 16) || (cam->imgs.height % 16)) {
+    if ((imgs.width % 16) || (imgs.height % 16)) {
         MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("Substream not available.  Image sizes not modulo 16."));
     }
@@ -526,270 +535,286 @@ static void mlp_check_szimg(ctx_dev *cam)
 }
 
 /** Set the items required for the area detect */
-static void mlp_init_areadetect(ctx_dev *cam)
+void cls_camera::init_areadetect()
 {
-    cam->area_minx[0] = cam->area_minx[3] = cam->area_minx[6] = 0;
-    cam->area_miny[0] = cam->area_miny[1] = cam->area_miny[2] = 0;
+    area_minx[0] = area_minx[3] = area_minx[6] = 0;
+    area_miny[0] = area_miny[1] = area_miny[2] = 0;
 
-    cam->area_minx[1] = cam->area_minx[4] = cam->area_minx[7] = cam->imgs.width / 3;
-    cam->area_maxx[0] = cam->area_maxx[3] = cam->area_maxx[6] = cam->imgs.width / 3;
+    area_minx[1] = area_minx[4] = area_minx[7] = imgs.width / 3;
+    area_maxx[0] = area_maxx[3] = area_maxx[6] = imgs.width / 3;
 
-    cam->area_minx[2] = cam->area_minx[5] = cam->area_minx[8] = cam->imgs.width / 3 * 2;
-    cam->area_maxx[1] = cam->area_maxx[4] = cam->area_maxx[7] = cam->imgs.width / 3 * 2;
+    area_minx[2] = area_minx[5] = area_minx[8] = imgs.width / 3 * 2;
+    area_maxx[1] = area_maxx[4] = area_maxx[7] = imgs.width / 3 * 2;
 
-    cam->area_miny[3] = cam->area_miny[4] = cam->area_miny[5] = cam->imgs.height / 3;
-    cam->area_maxy[0] = cam->area_maxy[1] = cam->area_maxy[2] = cam->imgs.height / 3;
+    area_miny[3] = area_miny[4] = area_miny[5] = imgs.height / 3;
+    area_maxy[0] = area_maxy[1] = area_maxy[2] = imgs.height / 3;
 
-    cam->area_miny[6] = cam->area_miny[7] = cam->area_miny[8] = cam->imgs.height / 3 * 2;
-    cam->area_maxy[3] = cam->area_maxy[4] = cam->area_maxy[5] = cam->imgs.height / 3 * 2;
+    area_miny[6] = area_miny[7] = area_miny[8] = imgs.height / 3 * 2;
+    area_maxy[3] = area_maxy[4] = area_maxy[5] = imgs.height / 3 * 2;
 
-    cam->area_maxx[2] = cam->area_maxx[5] = cam->area_maxx[8] = cam->imgs.width;
-    cam->area_maxy[6] = cam->area_maxy[7] = cam->area_maxy[8] = cam->imgs.height;
+    area_maxx[2] = area_maxx[5] = area_maxx[8] = imgs.width;
+    area_maxy[6] = area_maxy[7] = area_maxy[8] = imgs.height;
 
-    cam->areadetect_eventnbr = 0;
+    areadetect_eventnbr = 0;
 }
 
 /** Allocate the required buffers */
-static void mlp_init_buffers(ctx_dev *cam)
+void cls_camera::init_buffers()
 {
-    cam->imgs.ref =(unsigned char*) mymalloc((uint)cam->imgs.size_norm);
-    cam->imgs.image_motion.image_norm = (unsigned char*)mymalloc((uint)cam->imgs.size_norm);
-    cam->imgs.ref_dyn =(int*) mymalloc((uint)cam->imgs.motionsize * sizeof(*cam->imgs.ref_dyn));
-    cam->imgs.image_virgin =(unsigned char*) mymalloc((uint)cam->imgs.size_norm);
-    cam->imgs.image_vprvcy = (unsigned char*)mymalloc((uint)cam->imgs.size_norm);
-    cam->imgs.labels =(int*)mymalloc((uint)cam->imgs.motionsize * sizeof(*cam->imgs.labels));
-    cam->imgs.labelsize =(int*) mymalloc((uint)(cam->imgs.motionsize/2+1) * sizeof(*cam->imgs.labelsize));
-    cam->imgs.image_preview.image_norm =(unsigned char*) mymalloc((uint)cam->imgs.size_norm);
-    cam->imgs.common_buffer =(unsigned char*) mymalloc((uint)(3 * cam->imgs.width * cam->imgs.height));
-    cam->imgs.image_secondary =(unsigned char*) mymalloc((uint)(3 * cam->imgs.width * cam->imgs.height));
-    if (cam->imgs.size_high > 0) {
-        cam->imgs.image_preview.image_high =(unsigned char*) mymalloc((uint)cam->imgs.size_high);
+    imgs.ref =(u_char*) mymalloc((uint)imgs.size_norm);
+    imgs.image_motion.image_norm = (u_char*)mymalloc((uint)imgs.size_norm);
+    imgs.ref_dyn =(int*) mymalloc((uint)imgs.motionsize * sizeof(*imgs.ref_dyn));
+    imgs.image_virgin =(u_char*) mymalloc((uint)imgs.size_norm);
+    imgs.image_vprvcy = (u_char*)mymalloc((uint)imgs.size_norm);
+    imgs.labels =(int*)mymalloc((uint)imgs.motionsize * sizeof(*imgs.labels));
+    imgs.labelsize =(int*) mymalloc((uint)(imgs.motionsize/2+1) * sizeof(*imgs.labelsize));
+    imgs.image_preview.image_norm =(u_char*) mymalloc((uint)imgs.size_norm);
+    imgs.common_buffer =(u_char*) mymalloc((uint)(3 * imgs.width * imgs.height));
+    imgs.image_secondary =(u_char*) mymalloc((uint)(3 * imgs.width * imgs.height));
+    if (imgs.size_high > 0) {
+        imgs.image_preview.image_high =(u_char*) mymalloc((uint)imgs.size_high);
     } else {
-        cam->imgs.image_preview.image_high = NULL;
+        imgs.image_preview.image_high = NULL;
     }
 
 }
 
 /* Initialize loop values */
-static void mlp_init_values(ctx_dev *cam)
+void cls_camera::init_values()
 {
-    cam->event_curr_nbr = 1;
-    cam->event_prev_nbr = 0;
+    int indx;
 
-    cam->watchdog = cam->conf->watchdog_tmo;
+    event_curr_nbr = 1;
+    event_prev_nbr = 0;
 
-    clock_gettime(CLOCK_MONOTONIC, &cam->frame_curr_ts);
-    clock_gettime(CLOCK_MONOTONIC, &cam->frame_last_ts);
+    watchdog = conf->watchdog_tmo;
 
-    cam->noise = cam->conf->noise_level;
-    cam->passflag = false;
-    cam->motapp->all_sizes->reset= true;
-    cam->threshold = cam->conf->threshold;
-    cam->device_status = STATUS_CLOSED;
-    cam->startup_frames = (cam->conf->framerate * 2) + cam->conf->pre_capture + cam->conf->minimum_motion_frames;
+    clock_gettime(CLOCK_MONOTONIC, &frame_curr_ts);
+    clock_gettime(CLOCK_MONOTONIC, &frame_last_ts);
 
-    cam->movie_passthrough = cam->conf->movie_passthrough;
-    if ((cam->camera_type != CAMERA_TYPE_NETCAM) &&
-        (cam->movie_passthrough)) {
+    noise = conf->noise_level;
+    passflag = false;
+    motapp->all_sizes->reset= true;
+    threshold = conf->threshold;
+    device_status = STATUS_CLOSED;
+    startup_frames = (conf->framerate * 2) + conf->pre_capture + conf->minimum_motion_frames;
+    missing_frame_counter = 0;
+    frame_skip = 0;
+    detecting_motion = false;
+    shots_mt = 0;
+    lastrate = conf->framerate;
+    event_user = false;
+    lasttime = frame_curr_ts.tv_sec;
+    postcap = 0;
+
+    movie_passthrough = conf->movie_passthrough;
+    if ((camera_type != CAMERA_TYPE_NETCAM) &&
+        (movie_passthrough)) {
         MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
-        cam->movie_passthrough = false;
+        movie_passthrough = false;
     }
-    if (cam->motapp->pause) {
-        cam->pause = true;
+    if (motapp->pause) {
+        pause = true;
     } else {
-        cam->pause = cam->conf->pause;
+        pause = conf->pause;
     }
-    cam->v4l2cam = nullptr;
-    cam->netcam = nullptr;
-    cam->netcam_high = nullptr;
-    cam->rotate = nullptr;
-    cam->picture = nullptr;
-    cam->movie_norm = nullptr;
-    cam->movie_norm = nullptr;
-    cam->movie_motion = nullptr;
-    cam->movie_timelapse = nullptr;
-    cam->movie_extpipe = nullptr;
-    cam->draw = nullptr;
+    v4l2cam = nullptr;
+    netcam = nullptr;
+    netcam_high = nullptr;
+    libcam = nullptr;
+    rotate = nullptr;
+    picture = nullptr;
+    movie_norm = nullptr;
+    movie_norm = nullptr;
+    movie_motion = nullptr;
+    movie_timelapse = nullptr;
+    movie_extpipe = nullptr;
+    draw = nullptr;
 
-    gethostname (cam->hostname, PATH_MAX);
-    cam->hostname[PATH_MAX-1] = '\0';
+    gethostname (hostname, PATH_MAX);
+    hostname[PATH_MAX-1] = '\0';
+
+    for (indx=0; indx<AVGCNT-1; indx++) {
+        frame_wait[indx]=0;
+    }
 
 }
 
 /* start the camera */
-static void mlp_init_cam_start(ctx_dev *cam)
+void cls_camera::init_cam_start()
 {
-    mlp_cam_start(cam);
+    cam_start();
 
-    if (cam->device_status == STATUS_CLOSED) {
+    if (device_status == STATUS_CLOSED) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Failed to start camera."));
-        cam->imgs.width = cam->conf->width;
-        cam->imgs.height = cam->conf->height;
+        imgs.width = conf->width;
+        imgs.height = conf->height;
     }
 
-    cam->imgs.motionsize = (cam->imgs.width * cam->imgs.height);
-    cam->imgs.size_norm  = (cam->imgs.width * cam->imgs.height * 3) / 2;
-    cam->imgs.size_high  = (cam->imgs.width_high * cam->imgs.height_high * 3) / 2;
-
+    imgs.motionsize = (imgs.width * imgs.height);
+    imgs.size_norm  = (imgs.width * imgs.height * 3) / 2;
+    imgs.size_high  = (imgs.width_high * imgs.height_high * 3) / 2;
+    imgs.labelsize_max = 0;
+    imgs.largest_label = 0;
 }
 
 /* initialize reference images*/
-static void mlp_init_ref(ctx_dev *cam)
+void cls_camera::init_ref()
 {
-    memcpy(cam->imgs.image_virgin, cam->current_image->image_norm
-        , (uint)cam->imgs.size_norm);
+    memcpy(imgs.image_virgin, current_image->image_norm
+        , (uint)imgs.size_norm);
 
-    mlp_mask_privacy(cam);
+    mask_privacy();
 
-    memcpy(cam->imgs.image_vprvcy, cam->current_image->image_norm
-        , (uint)cam->imgs.size_norm);
+    memcpy(imgs.image_vprvcy, current_image->image_norm
+        , (uint)imgs.size_norm);
 
-    cam->alg->ref_frame_reset();
+    alg->ref_frame_reset();
 }
 
 /** clean up all memory etc. from motion init */
-void mlp_cleanup(ctx_dev *cam)
+void cls_camera::cleanup()
 {
-    cam->movie_timelapse->stop();
-    if (cam->event_curr_nbr == cam->event_prev_nbr) {
-        mlp_ring_process(cam);
-        if (cam->imgs.image_preview.diffs) {
-            cam->picture->process_preview();
-            cam->imgs.image_preview.diffs = 0;
+    movie_timelapse->stop();
+    if (event_curr_nbr == event_prev_nbr) {
+        ring_process();
+        if (imgs.image_preview.diffs) {
+            picture->process_preview();
+            imgs.image_preview.diffs = 0;
         }
-        if (cam->conf->on_event_end != "") {
-            util_exec_command(cam, cam->conf->on_event_end.c_str(), NULL);
+        if (conf->on_event_end != "") {
+            util_exec_command(this, conf->on_event_end.c_str(), NULL);
         }
-        mlp_movie_end(cam);
-        cam->motapp->dbse->exec(cam, "", "event_end");
+        movie_end();
+        motapp->dbse->exec(this, "", "event_end");
     }
 
-    webu_getimg_deinit(cam);
+    webu_getimg_deinit(this);
 
-    if (cam->device_status == STATUS_OPENED) {
-        mlp_cam_close(cam);
+    if (device_status == STATUS_OPENED) {
+        cam_close();
     }
 
-    myfree(cam->imgs.image_motion.image_norm);
-    myfree(cam->imgs.ref);
-    myfree(cam->imgs.ref_dyn);
-    myfree(cam->imgs.image_virgin);
-    myfree(cam->imgs.image_vprvcy);
-    myfree(cam->imgs.labels);
-    myfree(cam->imgs.labelsize);
-    myfree(cam->imgs.mask);
-    myfree(cam->imgs.mask_privacy);
-    myfree(cam->imgs.mask_privacy_uv);
-    myfree(cam->imgs.mask_privacy_high);
-    myfree(cam->imgs.mask_privacy_high_uv);
-    myfree(cam->imgs.common_buffer);
-    myfree(cam->imgs.image_secondary);
-    myfree(cam->imgs.image_preview.image_norm);
-    myfree(cam->imgs.image_preview.image_high);
+    myfree(imgs.image_motion.image_norm);
+    myfree(imgs.ref);
+    myfree(imgs.ref_dyn);
+    myfree(imgs.image_virgin);
+    myfree(imgs.image_vprvcy);
+    myfree(imgs.labels);
+    myfree(imgs.labelsize);
+    myfree(imgs.mask);
+    myfree(imgs.mask_privacy);
+    myfree(imgs.mask_privacy_uv);
+    myfree(imgs.mask_privacy_high);
+    myfree(imgs.mask_privacy_high_uv);
+    myfree(imgs.common_buffer);
+    myfree(imgs.image_secondary);
+    myfree(imgs.image_preview.image_norm);
+    myfree(imgs.image_preview.image_high);
 
-    mlp_ring_destroy(cam); /* Cleanup the precapture ring buffer */
+    ring_destroy(); /* Cleanup the precapture ring buffer */
 
-    mydelete(cam->alg);
-    mydelete(cam->algsec);
-    mydelete(cam->rotate);
-    mydelete(cam->picture);
-    mydelete(cam->movie_norm);
-    mydelete(cam->movie_motion);
-    mydelete(cam->movie_timelapse);
-    mydelete(cam->movie_extpipe);
-    mydelete(cam->draw);
+    mydelete(alg);
+    mydelete(algsec);
+    mydelete(rotate);
+    mydelete(picture);
+    mydelete(movie_norm);
+    mydelete(movie_motion);
+    mydelete(movie_timelapse);
+    mydelete(movie_extpipe);
+    mydelete(draw);
 
-    if (cam->pipe != -1) {
-        close(cam->pipe);
-        cam->pipe = -1;
+    if (pipe != -1) {
+        close(pipe);
+        pipe = -1;
     }
 
-    if (cam->mpipe != -1) {
-        close(cam->mpipe);
-        cam->mpipe = -1;
+    if (mpipe != -1) {
+        close(mpipe);
+        mpipe = -1;
     }
 
 }
 
 /* initialize everything for the loop */
-static void mlp_init(ctx_dev *cam)
+void cls_camera::init()
 {
-    if ((cam->device_status != STATUS_INIT) &&
-        (cam->device_status != STATUS_RESET)) {
+    if ((device_status != STATUS_INIT) &&
+        (restart != true)) {
         return;
     }
 
-    if (cam->device_status == STATUS_RESET) {
-        mlp_cleanup(cam);
+    if (restart == true) {
+        cleanup();
     }
+    restart = false;
 
-    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize"));
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize Camera"));
 
-    mlp_init_camera_type(cam);
+    init_camera_type();
 
-    mlp_init_values(cam);
+    init_values();
 
-    mlp_init_cam_start(cam);
+    init_cam_start();
 
-    mlp_check_szimg(cam);
+    check_szimg();
 
-    mlp_ring_resize(cam);
+    ring_resize();
 
-    mlp_init_buffers(cam);
+    init_buffers();
 
-    webu_getimg_init(cam);
+    webu_getimg_init(this);
 
-    cam->rotate = new cls_rotate(cam);
+    rotate = new cls_rotate(this);
 
-    mlp_init_firstimage(cam);
+    init_firstimage();
 
-    vlp_init(cam);
-    cam->alg = new cls_alg(cam);
-    cam->algsec = new cls_algsec(cam);
-    cam->picture = new cls_picture(cam);
-    cam->draw = new cls_draw(cam);
-    cam->movie_norm = new cls_movie(cam, "norm");
-    cam->movie_motion = new cls_movie(cam, "motion");
-    cam->movie_timelapse = new cls_movie(cam, "timelapse");
-    cam->movie_extpipe = new cls_movie(cam, "extpipe");
+    vlp_init(this);
+    alg = new cls_alg(this);
+    algsec = new cls_algsec(this);
+    picture = new cls_picture(this);
+    draw = new cls_draw(this);
+    movie_norm = new cls_movie(this, "norm");
+    movie_motion = new cls_movie(this, "motion");
+    movie_timelapse = new cls_movie(this, "timelapse");
+    movie_extpipe = new cls_movie(this, "extpipe");
 
-    mlp_init_areadetect(cam);
+    init_areadetect();
 
-    mlp_init_ref(cam);
+    init_ref();
 
-    if (cam->device_status == STATUS_OPENED) {
+    if (device_status == STATUS_OPENED) {
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Camera %d started: motion detection %s"),
-            cam->device_id, cam->pause ? _("Disabled"):_("Enabled"));
+            device_id, pause ? _("Disabled"):_("Enabled"));
 
-        if (cam->conf->emulate_motion) {
+        if (conf->emulate_motion) {
             MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, _("Emulating motion"));
         }
     }
+
 }
 
-
-
 /* check the area detect */
-static void mlp_areadetect(ctx_dev *cam)
+void cls_camera::areadetect()
 {
     int i, j, z = 0;
 
-    if ((cam->conf->area_detect != "" ) &&
-        (cam->event_curr_nbr != cam->areadetect_eventnbr) &&
-        (cam->current_image->flags & IMAGE_TRIGGER)) {
-        j = (int)cam->conf->area_detect.length();
+    if ((conf->area_detect != "" ) &&
+        (event_curr_nbr != areadetect_eventnbr) &&
+        (current_image->flags & IMAGE_TRIGGER)) {
+        j = (int)conf->area_detect.length();
         for (i = 0; i < j; i++) {
-            z = cam->conf->area_detect[(uint)i] - 49; /* characters are stored as ascii 48-57 (0-9) */
+            z = conf->area_detect[(uint)i] - 49; /* characters are stored as ascii 48-57 (0-9) */
             if ((z >= 0) && (z < 9)) {
-                if (cam->current_image->location.x > cam->area_minx[z] &&
-                    cam->current_image->location.x < cam->area_maxx[z] &&
-                    cam->current_image->location.y > cam->area_miny[z] &&
-                    cam->current_image->location.y < cam->area_maxy[z]) {
-                    if (cam->conf->on_area_detected != "") {
-                        util_exec_command(cam, cam->conf->on_area_detected.c_str(), NULL);
+                if (current_image->location.x > area_minx[z] &&
+                    current_image->location.x < area_maxx[z] &&
+                    current_image->location.y > area_miny[z] &&
+                    current_image->location.y < area_maxy[z]) {
+                    if (conf->on_area_detected != "") {
+                        util_exec_command(this, conf->on_area_detected.c_str(), NULL);
                     }
-                    cam->areadetect_eventnbr = cam->event_curr_nbr; /* Fire script only once per event */
+                    areadetect_eventnbr = event_curr_nbr; /* Fire script only once per event */
                     MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
                         ,_("Motion in area %d detected."), z + 1);
                     break;
@@ -800,171 +825,173 @@ static void mlp_areadetect(ctx_dev *cam)
 }
 
 /* Prepare for the next iteration of loop*/
-static void mlp_prepare(ctx_dev *cam)
+void cls_camera::prepare()
 {
-    cam->watchdog = cam->conf->watchdog_tmo;
+    watchdog = conf->watchdog_tmo;
 
-    cam->frame_last_ts.tv_sec = cam->frame_curr_ts.tv_sec;
-    cam->frame_last_ts.tv_nsec = cam->frame_curr_ts.tv_nsec;
-    clock_gettime(CLOCK_MONOTONIC, &cam->frame_curr_ts);
+    frame_last_ts.tv_sec = frame_curr_ts.tv_sec;
+    frame_last_ts.tv_nsec = frame_curr_ts.tv_nsec;
+    clock_gettime(CLOCK_MONOTONIC, &frame_curr_ts);
 
-    if (cam->frame_last_ts.tv_sec != cam->frame_curr_ts.tv_sec) {
-        cam->lastrate = cam->shots_mt + 1;
-        cam->shots_mt = -1;
+    if (frame_last_ts.tv_sec != frame_curr_ts.tv_sec) {
+        lastrate = shots_mt + 1;
+        shots_mt = -1;
     }
-    cam->shots_mt++;
+    shots_mt++;
 
-    if (cam->conf->pre_capture < 0) {
-        cam->conf->pre_capture = 0;
+    if (conf->pre_capture < 0) {
+        conf->pre_capture = 0;
     }
 
-    if (cam->startup_frames > 0) {
-        cam->startup_frames--;
+    if (startup_frames > 0) {
+        startup_frames--;
     }
 }
 
 /* reset the images */
-static void mlp_resetimages(ctx_dev *cam)
+void cls_camera::resetimages()
 {
     int64_t tmpsec;
 
     /* ring_buffer_in is pointing to current pos, update before put in a new image */
-    tmpsec =cam->current_image->imgts.tv_sec;
-    if (++cam->imgs.ring_in >= cam->imgs.ring_size) {
-        cam->imgs.ring_in = 0;
+    tmpsec =current_image->imgts.tv_sec;
+    if (++imgs.ring_in >= imgs.ring_size) {
+        imgs.ring_in = 0;
     }
 
     /* Check if we have filled the ring buffer, throw away last image */
-    if (cam->imgs.ring_in == cam->imgs.ring_out) {
-        if (++cam->imgs.ring_out >= cam->imgs.ring_size) {
-            cam->imgs.ring_out = 0;
+    if (imgs.ring_in == imgs.ring_out) {
+        if (++imgs.ring_out >= imgs.ring_size) {
+            imgs.ring_out = 0;
         }
     }
 
-    cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
-    cam->current_image->diffs = 0;
-    cam->current_image->flags = 0;
-    cam->current_image->cent_dist = 0;
-    memset(&cam->current_image->location, 0, sizeof(cam->current_image->location));
-    cam->current_image->total_labels = 0;
+    current_image = &imgs.image_ring[imgs.ring_in];
+    current_image->diffs = 0;
+    current_image->flags = 0;
+    current_image->cent_dist = 0;
+    memset(&current_image->location, 0, sizeof(current_image->location));
+    current_image->total_labels = 0;
 
-    clock_gettime(CLOCK_REALTIME, &cam->current_image->imgts);
-    clock_gettime(CLOCK_MONOTONIC, &cam->current_image->monots);
+    clock_gettime(CLOCK_REALTIME, &current_image->imgts);
+    clock_gettime(CLOCK_MONOTONIC, &current_image->monots);
 
-    if (tmpsec != cam->current_image->imgts.tv_sec) {
-        cam->shots_rt = 1;
+    if (tmpsec != current_image->imgts.tv_sec) {
+        shots_rt = 1;
     }  else {
-        cam->shots_rt++;
+        shots_rt++;
     }
     /* Store shot number with pre_captured image */
-    cam->current_image->shot = cam->shots_rt;
+    current_image->shot = shots_rt;
 
 }
 
 /* Try to reconnect to camera */
-static void mlp_retry(ctx_dev *cam)
+void cls_camera::retry()
 {
     int size_high;
 
-    if ((cam->device_status == STATUS_CLOSED) &&
-        (cam->frame_curr_ts.tv_sec % 10 == 0) &&
-        (cam->shots_mt == 0)) {
+    if ((device_status == STATUS_CLOSED) &&
+        (frame_curr_ts.tv_sec % 10 == 0) &&
+        (shots_mt == 0)) {
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Retrying until successful connection with camera"));
 
-        mlp_cam_start(cam);
+        cam_start();
 
-        mlp_check_szimg(cam);
+        check_szimg();
 
-        if (cam->imgs.width != cam->conf->width || cam->imgs.height != cam->conf->height) {
+        if (imgs.width != conf->width || imgs.height != conf->height) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Resetting image buffers"));
-            cam->device_status = STATUS_RESET;
+            device_status = STATUS_CLOSED;
+            restart = true;
         }
         /*
          * For high res, we check the size of buffer to determine whether to break out
-         * the init_motion function allocated the buffer for high using the cam->imgs.size_high
-         * and the mlp_cam_start ONLY re-populates the height/width so we can check the size here.
+         * the init_motion function allocated the buffer for high using the imgs.size_high
+         * and the cam_start ONLY re-populates the height/width so we can check the size here.
          */
-        size_high = (cam->imgs.width_high * cam->imgs.height_high * 3) / 2;
-        if (cam->imgs.size_high != size_high) {
-            cam->device_status = STATUS_RESET;
+        size_high = (imgs.width_high * imgs.height_high * 3) / 2;
+        if (imgs.size_high != size_high) {
+            device_status = STATUS_CLOSED;
+            restart = true;
         }
     }
 
 }
 
 /* Get next image from camera */
-static int mlp_capture(ctx_dev *cam)
+int cls_camera::capture()
 {
     const char *tmpin;
     char tmpout[80];
     int retcd;
 
-    if (cam->device_status != STATUS_OPENED) {
+    if (device_status != STATUS_OPENED) {
         return 0;
     }
 
-    retcd = mlp_cam_next(cam, cam->current_image);
+    retcd = cam_next(current_image);
 
     if (retcd == CAPTURE_SUCCESS) {
-        cam->lost_connection = 0;
-        cam->connectionlosttime.tv_sec = 0;
+        lost_connection = 0;
+        connectionlosttime.tv_sec = 0;
 
-        if (cam->missing_frame_counter >= (cam->conf->device_tmo * cam->conf->framerate)) {
+        if (missing_frame_counter >= (conf->device_tmo * conf->framerate)) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
-            if (cam->conf->on_camera_found != "") {
-                util_exec_command(cam, cam->conf->on_camera_found.c_str(), NULL);
+            if (conf->on_camera_found != "") {
+                util_exec_command(this, conf->on_camera_found.c_str(), NULL);
             }
         }
-        cam->missing_frame_counter = 0;
-        memcpy(cam->imgs.image_virgin, cam->current_image->image_norm
-            , (uint)cam->imgs.size_norm);
-        mlp_mask_privacy(cam);
-        memcpy(cam->imgs.image_vprvcy, cam->current_image->image_norm
-            , (uint)cam->imgs.size_norm);
+        missing_frame_counter = 0;
+        memcpy(imgs.image_virgin, current_image->image_norm
+            , (uint)imgs.size_norm);
+        mask_privacy();
+        memcpy(imgs.image_vprvcy, current_image->image_norm
+            , (uint)imgs.size_norm);
 
     } else {
-        if (cam->connectionlosttime.tv_sec == 0) {
-            clock_gettime(CLOCK_REALTIME, &cam->connectionlosttime);
+        if (connectionlosttime.tv_sec == 0) {
+            clock_gettime(CLOCK_REALTIME, &connectionlosttime);
         }
 
-        cam->missing_frame_counter++;
+        missing_frame_counter++;
 
-        if ((cam->device_status == STATUS_OPENED) &&
-            (cam->missing_frame_counter <
-                (cam->conf->device_tmo * cam->conf->framerate))) {
-            memcpy(cam->current_image->image_norm, cam->imgs.image_vprvcy
-                , (uint)cam->imgs.size_norm);
+        if ((device_status == STATUS_OPENED) &&
+            (missing_frame_counter <
+                (conf->device_tmo * conf->framerate))) {
+            memcpy(current_image->image_norm, imgs.image_vprvcy
+                , (uint)imgs.size_norm);
         } else {
-            cam->lost_connection = 1;
-            if (cam->device_status == STATUS_OPENED) {
+            lost_connection = 1;
+            if (device_status == STATUS_OPENED) {
                 tmpin = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
             } else {
                 tmpin = "UNABLE TO OPEN VIDEO DEVICE\\nSINCE %Y-%m-%d %T";
             }
 
-            memset(cam->current_image->image_norm, 0x80, (uint)cam->imgs.size_norm);
-            cam->current_image->imgts =cam->connectionlosttime;
-            mystrftime(cam, tmpout, sizeof(tmpout), tmpin, NULL);
-            cam->draw->text(cam->current_image->image_norm
-                    , cam->imgs.width, cam->imgs.height
-                    , 10, 20 * cam->text_scale
-                    , tmpout, cam->text_scale);
+            memset(current_image->image_norm, 0x80, (uint)imgs.size_norm);
+            current_image->imgts =connectionlosttime;
+            mystrftime(this, tmpout, sizeof(tmpout), tmpin, NULL);
+            draw->text(current_image->image_norm
+                    , imgs.width, imgs.height
+                    , 10, 20 * text_scale
+                    , tmpout, text_scale);
 
             /* Write error message only once */
-            if (cam->missing_frame_counter == (cam->conf->device_tmo * cam->conf->framerate)) {
+            if (missing_frame_counter == (conf->device_tmo * conf->framerate)) {
                 MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                     ,_("Video signal lost - Adding grey image"));
-                if (cam->conf->on_camera_lost != "") {
-                    util_exec_command(cam, cam->conf->on_camera_lost.c_str(), NULL);
+                if (conf->on_camera_lost != "") {
+                    util_exec_command(this, conf->on_camera_lost.c_str(), NULL);
                 }
             }
 
-            if ((cam->device_status == STATUS_OPENED) &&
-                (cam->missing_frame_counter == ((cam->conf->device_tmo * 4) * cam->conf->framerate))) {
+            if ((device_status == STATUS_OPENED) &&
+                (missing_frame_counter == ((conf->device_tmo * 4) * conf->framerate))) {
                 MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Video signal still lost - Trying to close video device"));
-                mlp_cam_close(cam);
+                cam_close();
             }
         }
     }
@@ -973,486 +1000,542 @@ static int mlp_capture(ctx_dev *cam)
 }
 
 /* call detection */
-static void mlp_detection(ctx_dev *cam)
+void cls_camera::detection()
 {
-    if (cam->frame_skip) {
-        cam->frame_skip--;
-        cam->current_image->diffs = 0;
+    if (frame_skip) {
+        frame_skip--;
+        current_image->diffs = 0;
         return;
     }
 
-    if (cam->pause == false) {
-        cam->alg->diff();
+    if (pause == false) {
+        alg->diff();
     } else {
-        cam->current_image->diffs = 0;
-        cam->current_image->diffs_raw = 0;
-        cam->current_image->diffs_ratio = 100;
+        current_image->diffs = 0;
+        current_image->diffs_raw = 0;
+        current_image->diffs_ratio = 100;
     }
 }
 
 /* tune the detection parameters*/
-static void mlp_tuning(ctx_dev *cam)
+void cls_camera::tuning()
 {
-    if ((cam->conf->noise_tune && cam->shots_mt == 0) &&
-          (!cam->detecting_motion && (cam->current_image->diffs <= cam->threshold))) {
-        cam->alg->noise_tune();
+    if ((conf->noise_tune && shots_mt == 0) &&
+          (!detecting_motion && (current_image->diffs <= threshold))) {
+        alg->noise_tune();
     }
 
-    if (cam->conf->threshold_tune) {
-        cam->alg->threshold_tune();
+    if (conf->threshold_tune) {
+        alg->threshold_tune();
     }
 
-    if ((cam->current_image->diffs > cam->threshold) &&
-        (cam->current_image->diffs < cam->threshold_maximum)) {
-        cam->alg->location();
-        cam->alg->stddev();
+    if ((current_image->diffs > threshold) &&
+        (current_image->diffs < threshold_maximum)) {
+        alg->location();
+        alg->stddev();
 
     }
 
-    if (cam->current_image->diffs_ratio < cam->conf->threshold_ratio) {
-        cam->current_image->diffs = 0;
+    if (current_image->diffs_ratio < conf->threshold_ratio) {
+        current_image->diffs = 0;
     }
 
-    cam->alg->tune_smartmask();
+    alg->tune_smartmask();
 
-    cam->alg->ref_frame_update();
+    alg->ref_frame_update();
 
-    cam->previous_diffs = cam->current_image->diffs;
-    cam->previous_location_x = cam->current_image->location.x;
-    cam->previous_location_y = cam->current_image->location.y;
+    previous_diffs = current_image->diffs;
+    previous_location_x = current_image->location.x;
+    previous_location_y = current_image->location.y;
 }
 
 /* apply image overlays */
-static void mlp_overlay(ctx_dev *cam)
+void cls_camera::overlay()
 {
     char tmp[PATH_MAX];
 
-    if ((cam->conf->smart_mask_speed >0) &&
-        ((cam->conf->picture_output_motion != "off") ||
-        cam->conf->movie_output_motion ||
-        (cam->stream.motion.jpg_cnct > 0) ||
-        (cam->stream.motion.ts_cnct > 0))) {
-        cam->draw->smartmask();
+    if ((conf->smart_mask_speed >0) &&
+        ((conf->picture_output_motion != "off") ||
+        conf->movie_output_motion ||
+        (stream.motion.jpg_cnct > 0) ||
+        (stream.motion.ts_cnct > 0))) {
+        draw->smartmask();
     }
 
-    if (cam->imgs.largest_label &&
-        ((cam->conf->picture_output_motion != "off") ||
-        cam->conf->movie_output_motion ||
-        (cam->stream.motion.jpg_cnct > 0) ||
-        (cam->stream.motion.ts_cnct > 0))) {
-        cam->draw->largest_label();
+    if (imgs.largest_label &&
+        ((conf->picture_output_motion != "off") ||
+        conf->movie_output_motion ||
+        (stream.motion.jpg_cnct > 0) ||
+        (stream.motion.ts_cnct > 0))) {
+        draw->largest_label();
     }
 
-    if (cam->imgs.mask &&
-        ((cam->conf->picture_output_motion != "off") ||
-        cam->conf->movie_output_motion ||
-        (cam->stream.motion.jpg_cnct > 0) ||
-        (cam->stream.motion.ts_cnct > 0))) {
-        cam->draw->fixed_mask();
+    if (imgs.mask &&
+        ((conf->picture_output_motion != "off") ||
+        conf->movie_output_motion ||
+        (stream.motion.jpg_cnct > 0) ||
+        (stream.motion.ts_cnct > 0))) {
+        draw->fixed_mask();
     }
 
-    if (cam->conf->text_changes) {
-        if (cam->pause == false) {
-            sprintf(tmp, "%d", cam->current_image->diffs);
+    if (conf->text_changes) {
+        if (pause == false) {
+            sprintf(tmp, "%d", current_image->diffs);
         } else {
             sprintf(tmp, "-");
         }
-        cam->draw->text(cam->current_image->image_norm
-                , cam->imgs.width, cam->imgs.height
-                , cam->imgs.width - 10, 10
-                , tmp, cam->text_scale);
+        draw->text(current_image->image_norm
+                , imgs.width, imgs.height
+                , imgs.width - 10, 10
+                , tmp, text_scale);
     }
 
-    if ((cam->stream.motion.jpg_cnct > 0) ||
-        (cam->stream.motion.ts_cnct > 0)) {
-        sprintf(tmp, "D:%5d L:%3d N:%3d", cam->current_image->diffs,
-            cam->current_image->total_labels, cam->noise);
-        cam->draw->text(cam->imgs.image_motion.image_norm
-                , cam->imgs.width, cam->imgs.height
-                , cam->imgs.width - 10
-                , cam->imgs.height - (30 * cam->text_scale)
-                , tmp, cam->text_scale);
-        sprintf(tmp, "THREAD %d SETUP", cam->threadnr);
-        cam->draw->text(cam->imgs.image_motion.image_norm
-                , cam->imgs.width, cam->imgs.height
-                , cam->imgs.width - 10
-                , cam->imgs.height - (10 * cam->text_scale)
-                , tmp, cam->text_scale);
+    if ((stream.motion.jpg_cnct > 0) ||
+        (stream.motion.ts_cnct > 0)) {
+        sprintf(tmp, "D:%5d L:%3d N:%3d", current_image->diffs,
+            current_image->total_labels, noise);
+        draw->text(imgs.image_motion.image_norm
+                , imgs.width, imgs.height
+                , imgs.width - 10
+                , imgs.height - (30 * text_scale)
+                , tmp, text_scale);
+        sprintf(tmp, "THREAD %d SETUP", threadnr);
+        draw->text(imgs.image_motion.image_norm
+                , imgs.width, imgs.height
+                , imgs.width - 10
+                , imgs.height - (10 * text_scale)
+                , tmp, text_scale);
     }
 
     /* Add text in lower left corner of the pictures */
-    if (cam->conf->text_left != "") {
-        mystrftime(cam, tmp, sizeof(tmp), cam->conf->text_left.c_str(), NULL);
-        cam->draw->text(cam->current_image->image_norm
-                , cam->imgs.width, cam->imgs.height
-                , 10, cam->imgs.height - (10 * cam->text_scale)
-                , tmp, cam->text_scale);
+    if (conf->text_left != "") {
+        mystrftime(this, tmp, sizeof(tmp), conf->text_left.c_str(), NULL);
+        draw->text(current_image->image_norm
+                , imgs.width, imgs.height
+                , 10, imgs.height - (10 * text_scale)
+                , tmp, text_scale);
     }
 
     /* Add text in lower right corner of the pictures */
-    if (cam->conf->text_right != "") {
-        mystrftime(cam, tmp, sizeof(tmp), cam->conf->text_right.c_str(), NULL);
-        cam->draw->text(cam->current_image->image_norm
-                , cam->imgs.width, cam->imgs.height
-                , cam->imgs.width - 10, cam->imgs.height - (10 * cam->text_scale)
-                , tmp, cam->text_scale);
+    if (conf->text_right != "") {
+        mystrftime(this, tmp, sizeof(tmp), conf->text_right.c_str(), NULL);
+        draw->text(current_image->image_norm
+                , imgs.width, imgs.height
+                , imgs.width - 10, imgs.height - (10 * text_scale)
+                , tmp, text_scale);
     }
 }
 
 /* emulate motion */
-static void mlp_actions_emulate(ctx_dev *cam)
+void cls_camera::actions_emulate()
 {
     int indx;
 
-    if ((cam->detecting_motion == false) &&
-        (cam->movie_norm->is_running == true)) {
-        cam->movie_norm->reset_start_time(&cam->current_image->imgts);
+    if ((detecting_motion == false) &&
+        (movie_norm->is_running == true)) {
+        movie_norm->reset_start_time(&current_image->imgts);
     }
 
-    if ((cam->detecting_motion == false) &&
-        (cam->movie_motion->is_running == true)) {
-        cam->movie_motion->reset_start_time(&cam->imgs.image_motion.imgts);
+    if ((detecting_motion == false) &&
+        (movie_motion->is_running == true)) {
+        movie_motion->reset_start_time(&imgs.image_motion.imgts);
     }
 
-    cam->detecting_motion = true;
-    if (cam->conf->post_capture > 0) {
-        cam->postcap = cam->conf->post_capture;
+    detecting_motion = true;
+    if (conf->post_capture > 0) {
+        postcap = conf->post_capture;
     }
 
-    cam->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
+    current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
     /* Mark all images in image_ring to be saved */
-    for (indx = 0; indx < cam->imgs.ring_size; indx++) {
-        cam->imgs.image_ring[indx].flags |= IMAGE_SAVE;
+    for (indx = 0; indx < imgs.ring_size; indx++) {
+        imgs.image_ring[indx].flags |= IMAGE_SAVE;
     }
 
-    mlp_detected(cam);
+    detected();
 }
 
 /* call the actions */
-static void mlp_actions_motion(ctx_dev *cam)
+void cls_camera::actions_motion()
 {
     int indx, frame_count = 0;
-    int pos = cam->imgs.ring_in;
+    int pos = imgs.ring_in;
 
-    for (indx = 0; indx < cam->conf->minimum_motion_frames; indx++) {
-        if (cam->imgs.image_ring[pos].flags & IMAGE_MOTION) {
+    for (indx = 0; indx < conf->minimum_motion_frames; indx++) {
+        if (imgs.image_ring[pos].flags & IMAGE_MOTION) {
             frame_count++;
         }
         if (pos == 0) {
-            pos = cam->imgs.ring_size-1;
+            pos = imgs.ring_size-1;
         } else {
             pos--;
         }
     }
 
-    if (frame_count >= cam->conf->minimum_motion_frames) {
+    if (frame_count >= conf->minimum_motion_frames) {
 
-        cam->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
+        current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
 
-        if ((cam->detecting_motion == false) &&
-            (cam->movie_norm->is_running == true)) {
-            cam->movie_norm->reset_start_time(&cam->current_image->imgts);
+        if ((detecting_motion == false) &&
+            (movie_norm->is_running == true)) {
+            movie_norm->reset_start_time(&current_image->imgts);
         }
-        if ((cam->detecting_motion == false) &&
-            (cam->movie_motion->is_running == true)) {
-            cam->movie_motion->reset_start_time(&cam->imgs.image_motion.imgts);
+        if ((detecting_motion == false) &&
+            (movie_motion->is_running == true)) {
+            movie_motion->reset_start_time(&imgs.image_motion.imgts);
         }
-        cam->detecting_motion = true;
-        cam->postcap = cam->conf->post_capture;
+        detecting_motion = true;
+        postcap = conf->post_capture;
 
-        for (indx = 0; indx < cam->imgs.ring_size; indx++) {
-            cam->imgs.image_ring[indx].flags |= IMAGE_SAVE;
+        for (indx = 0; indx < imgs.ring_size; indx++) {
+            imgs.image_ring[indx].flags |= IMAGE_SAVE;
         }
 
-    } else if (cam->postcap > 0) {
+    } else if (postcap > 0) {
         /* we have motion in this frame, but not enough frames for trigger. Check postcap */
-        cam->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
-        cam->postcap--;
+        current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
+        postcap--;
     } else {
-        cam->current_image->flags |= IMAGE_PRECAP;
+        current_image->flags |= IMAGE_PRECAP;
     }
 
-    mlp_detected(cam);
+    detected();
 }
 
 /* call the event actions*/
-static void mlp_actions_event(ctx_dev *cam)
+void cls_camera::actions_event()
 {
-    if ((cam->conf->event_gap > 0) &&
-        ((cam->frame_curr_ts.tv_sec - cam->lasttime ) >= cam->conf->event_gap)) {
-        cam->event_stop = true;
+    if ((conf->event_gap > 0) &&
+        ((frame_curr_ts.tv_sec - lasttime ) >= conf->event_gap)) {
+        event_stop = true;
     }
 
-    if (cam->event_stop) {
-        if (cam->event_curr_nbr == cam->event_prev_nbr) {
+    if (event_stop) {
+        if (event_curr_nbr == event_prev_nbr) {
 
-            mlp_ring_process(cam);
+            ring_process();
 
-            if (cam->imgs.image_preview.diffs) {
-                cam->picture->process_preview();
-                cam->imgs.image_preview.diffs = 0;
+            if (imgs.image_preview.diffs) {
+                picture->process_preview();
+                imgs.image_preview.diffs = 0;
             }
-            if (cam->conf->on_event_end != "") {
-                util_exec_command(cam, cam->conf->on_event_end.c_str(), NULL);
+            if (conf->on_event_end != "") {
+                util_exec_command(this, conf->on_event_end.c_str(), NULL);
             }
-            mlp_movie_end(cam);
-            cam->motapp->dbse->exec(cam, "", "event_end");
+            movie_end();
+            motapp->dbse->exec(this, "", "event_end");
 
-            mlp_track_center(cam);
+            track_center();
 
-            if (cam->algsec->detected) {
+            if (algsec->detected) {
                 MOTPLS_LOG(NTC, TYPE_EVENTS
                     , NO_ERRNO, _("Secondary detect"));
-                if (cam->conf->on_secondary_detect != "") {
-                    util_exec_command(cam
-                        , cam->conf->on_secondary_detect.c_str()
+                if (conf->on_secondary_detect != "") {
+                    util_exec_command(this
+                        , conf->on_secondary_detect.c_str()
                         , NULL);
                 }
             }
-            cam->algsec->detected = false;
+            algsec->detected = false;
 
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), cam->event_curr_nbr);
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), event_curr_nbr);
 
-            cam->postcap = 0;
-            cam->event_curr_nbr++;
-            cam->text_event_string[0] = '\0';
+            postcap = 0;
+            event_curr_nbr++;
+            text_event_string[0] = '\0';
         }
-        cam->event_stop = false;
-        cam->event_user = false;
+        event_stop = false;
+        event_user = false;
     }
 
-    if ((cam->conf->movie_max_time > 0) &&
-        (cam->event_curr_nbr == cam->event_prev_nbr) &&
-        ((cam->frame_curr_ts.tv_sec - cam->movie_start_time) >=
-            cam->conf->movie_max_time) &&
-        ( !(cam->current_image->flags & IMAGE_POSTCAP)) &&
-        ( !(cam->current_image->flags & IMAGE_PRECAP))) {
-        mlp_movie_end(cam);
-        mlp_movie_start(cam);
+    if ((conf->movie_max_time > 0) &&
+        (event_curr_nbr == event_prev_nbr) &&
+        ((frame_curr_ts.tv_sec - movie_start_time) >=
+            conf->movie_max_time) &&
+        ( !(current_image->flags & IMAGE_POSTCAP)) &&
+        ( !(current_image->flags & IMAGE_PRECAP))) {
+        movie_end();
+        movie_start();
     }
 
 }
 
-static void mlp_actions(ctx_dev *cam)
+void cls_camera::actions()
 {
-     if ((cam->current_image->diffs > cam->threshold) &&
-        (cam->current_image->diffs < cam->threshold_maximum)) {
-        cam->current_image->flags |= IMAGE_MOTION;
-        cam->info_diff_cnt++;
-        cam->info_diff_tot += (uint)cam->current_image->diffs;
-        cam->info_sdev_tot += (uint)cam->current_image->location.stddev_xy;
-        if (cam->info_sdev_min > cam->current_image->location.stddev_xy ) {
-            cam->info_sdev_min = cam->current_image->location.stddev_xy;
+     if ((current_image->diffs > threshold) &&
+        (current_image->diffs < threshold_maximum)) {
+        current_image->flags |= IMAGE_MOTION;
+        info_diff_cnt++;
+        info_diff_tot += (uint)current_image->diffs;
+        info_sdev_tot += (uint)current_image->location.stddev_xy;
+        if (info_sdev_min > current_image->location.stddev_xy ) {
+            info_sdev_min = current_image->location.stddev_xy;
         }
-        if (cam->info_sdev_max < cam->current_image->location.stddev_xy ) {
-            cam->info_sdev_max = cam->current_image->location.stddev_xy;
+        if (info_sdev_max < current_image->location.stddev_xy ) {
+            info_sdev_max = current_image->location.stddev_xy;
         }
         /*
         MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
         , "dev_x %d dev_y %d dev_xy %d, diff %d ratio %d"
-        , cam->current_image->location.stddev_x
-        , cam->current_image->location.stddev_y
-        , cam->current_image->location.stddev_xy
-        , cam->current_image->diffs
-        , cam->current_image->diffs_ratio);
+        , current_image->location.stddev_x
+        , current_image->location.stddev_y
+        , current_image->location.stddev_xy
+        , current_image->diffs
+        , current_image->diffs_ratio);
         */
     }
 
-    if ((cam->conf->emulate_motion || cam->event_user) && (cam->startup_frames == 0)) {
-        mlp_actions_emulate(cam);
-    } else if ((cam->current_image->flags & IMAGE_MOTION) && (cam->startup_frames == 0)) {
-        mlp_actions_motion(cam);
-    } else if (cam->postcap > 0) {
-        cam->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
-        cam->postcap--;
+    if ((conf->emulate_motion || event_user) && (startup_frames == 0)) {
+        actions_emulate();
+    } else if ((current_image->flags & IMAGE_MOTION) && (startup_frames == 0)) {
+        actions_motion();
+    } else if (postcap > 0) {
+        current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
+        postcap--;
     } else {
-        cam->current_image->flags |= IMAGE_PRECAP;
-        if ((cam->conf->event_gap == 0) && cam->detecting_motion) {
-            cam->event_stop = true;
+        current_image->flags |= IMAGE_PRECAP;
+        if ((conf->event_gap == 0) && detecting_motion) {
+            event_stop = true;
         }
-        cam->detecting_motion = false;
+        detecting_motion = false;
     }
 
-    if (cam->current_image->flags & IMAGE_SAVE) {
-        cam->lasttime = cam->current_image->monots.tv_sec;
+    if (current_image->flags & IMAGE_SAVE) {
+        lasttime = current_image->monots.tv_sec;
     }
 
-    if (cam->detecting_motion) {
-        cam->algsec->detect();
+    if (detecting_motion) {
+        algsec->detect();
     }
 
-    mlp_areadetect(cam);
+    areadetect();
 
-    mlp_ring_process(cam);
+    ring_process();
 
-    mlp_actions_event(cam);
+    actions_event();
 
 }
 
 /* Snapshot interval*/
-static void mlp_snapshot(ctx_dev *cam)
+void cls_camera::snapshot()
 {
-    if ((cam->conf->snapshot_interval > 0 && cam->shots_mt == 0 &&
-         cam->frame_curr_ts.tv_sec % cam->conf->snapshot_interval <=
-         cam->frame_last_ts.tv_sec % cam->conf->snapshot_interval) ||
-         cam->snapshot) {
-        cam->picture->process_snapshot();
-        cam->snapshot = 0;
+    if ((conf->snapshot_interval > 0 && shots_mt == 0 &&
+         frame_curr_ts.tv_sec % conf->snapshot_interval <=
+         frame_last_ts.tv_sec % conf->snapshot_interval) ||
+         action_snapshot) {
+        picture->process_snapshot();
+        action_snapshot = false;
     }
 }
 
 /* Create timelapse video*/
-static void mlp_timelapse(ctx_dev *cam)
+void cls_camera::timelapse()
 {
     struct tm timestamp_tm;
 
-    if (cam->conf->timelapse_interval) {
-        localtime_r(&cam->current_image->imgts.tv_sec, &timestamp_tm);
+    if (conf->timelapse_interval) {
+        localtime_r(&current_image->imgts.tv_sec, &timestamp_tm);
 
         if (timestamp_tm.tm_min == 0 &&
-            (cam->frame_curr_ts.tv_sec % 60 < cam->frame_last_ts.tv_sec % 60) &&
-            cam->shots_mt == 0) {
+            (frame_curr_ts.tv_sec % 60 < frame_last_ts.tv_sec % 60) &&
+            shots_mt == 0) {
 
-            if (cam->conf->timelapse_mode == "daily") {
+            if (conf->timelapse_mode == "daily") {
                 if (timestamp_tm.tm_hour == 0) {
-                    cam->movie_timelapse->stop();
+                    movie_timelapse->stop();
                 }
-            } else if (cam->conf->timelapse_mode == "hourly") {
-                cam->movie_timelapse->stop();
-            } else if (cam->conf->timelapse_mode == "weekly-sunday") {
+            } else if (conf->timelapse_mode == "hourly") {
+                movie_timelapse->stop();
+            } else if (conf->timelapse_mode == "weekly-sunday") {
                 if (timestamp_tm.tm_wday == 0 && timestamp_tm.tm_hour == 0) {
-                    cam->movie_timelapse->stop();
+                    movie_timelapse->stop();
                 }
-            } else if (cam->conf->timelapse_mode == "weekly-monday") {
+            } else if (conf->timelapse_mode == "weekly-monday") {
                 if (timestamp_tm.tm_wday == 1 && timestamp_tm.tm_hour == 0) {
-                    cam->movie_timelapse->stop();
+                    movie_timelapse->stop();
                 }
-            } else if (cam->conf->timelapse_mode == "monthly") {
+            } else if (conf->timelapse_mode == "monthly") {
                 if (timestamp_tm.tm_mday == 1 && timestamp_tm.tm_hour == 0) {
-                    cam->movie_timelapse->stop();
+                    movie_timelapse->stop();
                 }
             }
         }
 
-        if (cam->shots_mt == 0 &&
-            cam->frame_curr_ts.tv_sec % cam->conf->timelapse_interval <=
-            cam->frame_last_ts.tv_sec % cam->conf->timelapse_interval) {
-            cam->movie_timelapse->start();
-            if (cam->movie_timelapse->put_image(
-                cam->current_image, &cam->current_image->imgts) == -1) {
+        if (shots_mt == 0 &&
+            frame_curr_ts.tv_sec % conf->timelapse_interval <=
+            frame_last_ts.tv_sec % conf->timelapse_interval) {
+            movie_timelapse->start();
+            if (movie_timelapse->put_image(
+                current_image, &current_image->imgts) == -1) {
                 MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
             }
         }
 
-    } else if (cam->movie_timelapse->is_running) {
+    } else if (movie_timelapse->is_running) {
     /*
      * If timelapse movie is in progress but conf.timelapse_interval is zero then close timelapse file
      * This is an important feature that allows manual roll-over of timelapse file using the http
      * remote control via a cron job.
      */
-        cam->movie_timelapse->stop();
+        movie_timelapse->stop();
     }
 }
 
 /* send images to loopback device*/
-static void mlp_loopback(ctx_dev *cam)
+void cls_camera::loopback()
 {
 
-    vlp_putpipe(cam);
+    vlp_putpipe(this);
 
-    if (!cam->conf->stream_motion || cam->shots_mt == 0) {
-        webu_getimg_main(cam);
+    if (!conf->stream_motion || shots_mt == 0) {
+        webu_getimg_main(this);
     }
 
 }
 
 /* sleep the loop to get framerate requested */
-static void mlp_frametiming(ctx_dev *cam)
+void cls_camera::frametiming()
 {
     int indx;
     struct timespec ts2;
     int64_t avgtime;
 
     /* Shuffle the last wait times*/
-    for (indx=0; indx<AVGCNT-1; indx++) {
-        cam->frame_wait[indx]=cam->frame_wait[indx+1];
+    for (indx=0; indx<AVGCNT-2; indx++) {
+        frame_wait[indx]=frame_wait[indx+1];
     }
 
-    if (cam->conf->framerate) {
-        cam->frame_wait[AVGCNT-1] = 1000000L / cam->conf->framerate;
+    if (conf->framerate) {
+        frame_wait[AVGCNT-1] = 1000000L / conf->framerate;
     } else {
-        cam->frame_wait[AVGCNT-1] = 0;
+        frame_wait[AVGCNT-1] = 0;
     }
 
     clock_gettime(CLOCK_MONOTONIC, &ts2);
 
-    cam->frame_wait[AVGCNT-1] = cam->frame_wait[AVGCNT-1] -
-            (1000000L * (ts2.tv_sec - cam->frame_curr_ts.tv_sec)) -
-            ((ts2.tv_nsec - cam->frame_curr_ts.tv_nsec)/1000);
+    frame_wait[AVGCNT-1] = frame_wait[AVGCNT-1] -
+            (1000000L * (ts2.tv_sec - frame_curr_ts.tv_sec)) -
+            ((ts2.tv_nsec - frame_curr_ts.tv_nsec)/1000);
 
     avgtime = 0;
     for (indx=0; indx<AVGCNT; indx++) {
-        avgtime = avgtime + cam->frame_wait[indx];
+        avgtime += frame_wait[indx];
     }
-    avgtime = (avgtime/AVGCNT);
+    avgtime = (int64_t)((avgtime / AVGCNT) * 1000);
 
-    if (avgtime > 0) {
-        avgtime = avgtime * 1000;
-        /* If over 1 second, just do one*/
-        if (avgtime > 999999999) {
-            SLEEP(1, 0);
-        } else {
-            SLEEP(0, avgtime);
-        }
+    /* If over 1 second, just do one*/
+    if (avgtime > 999999999L) {
+        SLEEP(1, 0);
+    } else if (avgtime > 0) {
+        SLEEP(0, avgtime);
     }
-    cam->passflag = true;
+
+    passflag = true;
 }
 
-/** main processing loop for each camera */
-void *mlp_main(void *arg)
+void cls_camera::handler()
 {
-    ctx_dev *cam =(ctx_dev *) arg;
+    mythreadname_set("cl", conf->device_id, conf->device_name.c_str());
+    device_status = STATUS_INIT;
 
-    cam->running_dev = true;
-
-    pthread_mutex_lock(&cam->motapp->global_lock);
-        cam->motapp->threads_running++;
-    pthread_mutex_unlock(&cam->motapp->global_lock);
-
-    mythreadname_set("ml",cam->threadnr,cam->conf->device_name.c_str());
-    pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cam->threadnr));
-
-    cam->finish_dev = false;
-    cam->restart_dev = false;
-    cam->device_status = STATUS_INIT;
-
-    while (cam->finish_dev == false) {
-        mlp_init(cam);
-        mlp_prepare(cam);
-        mlp_resetimages(cam);
-        mlp_retry(cam);
-        mlp_capture(cam);
-        mlp_detection(cam);
-        mlp_tuning(cam);
-        mlp_overlay(cam);
-        mlp_actions(cam);
-        mlp_snapshot(cam);
-        mlp_timelapse(cam);
-        mlp_loopback(cam);
-        mlp_frametiming(cam);
+    while (handler_stop == false) {
+        init();
+        prepare();
+        resetimages();
+        retry();
+        capture();
+        detection();
+        tuning();
+        overlay();
+        actions();
+        snapshot();
+        timelapse();
+        loopback();
+        frametiming();
+        if (device_status == STATUS_CLOSED) {
+            handler_stop = true;
+        }
     }
 
-    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Exiting"));
+    cleanup();
 
-    mlp_cleanup(cam);
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Camera closed"));
 
-    pthread_mutex_lock(&cam->motapp->global_lock);
-        cam->motapp->threads_running--;
-    pthread_mutex_unlock(&cam->motapp->global_lock);
-
-    cam->finish_dev = true;
-    cam->running_dev = false;
-
+    handler_finished = true;
     pthread_exit(NULL);
 }
 
+void cls_camera::start()
+{
+    int retcd;
+    pthread_attr_t thread_attr;
+
+    if (handler_finished == true) {
+        handler_finished = false;
+        handler_stop = false;
+        pthread_attr_init(&thread_attr);
+        pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
+        retcd = pthread_create(&handler_thread, &thread_attr, &camera_handler, this);
+        if (retcd != 0) {
+            MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start camera thread."));
+        }
+        pthread_attr_destroy(&thread_attr);
+    }
+}
+
+void cls_camera::stop()
+{
+    int waitcnt;
+
+    if (handler_finished == false) {
+        handler_stop = true;
+        waitcnt = 0;
+        while ((handler_finished == false) && (waitcnt < conf->watchdog_tmo)){
+            SLEEP(1,0)
+            waitcnt++;
+        }
+        if (waitcnt == conf->watchdog_tmo) {
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                , _("Normal shutdown of camera failed"));
+            if (conf->watchdog_kill > 0) {
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    ,_("Waiting additional %d seconds (watchdog_kill).")
+                    ,conf->watchdog_kill);
+                waitcnt = 0;
+                while ((handler_finished == false) && (waitcnt < conf->watchdog_kill)){
+                    SLEEP(1,0)
+                    waitcnt++;
+                }
+                if (waitcnt == conf->watchdog_kill) {
+                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                        , _("No response to shutdown.  Killing it."));
+                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                        , _("Memory leaks will occur."));
+                    pthread_kill(handler_thread, SIGVTALRM);
+                }
+            } else {
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    , _("watchdog_kill set to terminate application."));
+                exit(1);
+            }
+        }
+        handler_finished = true;
+        watchdog = conf->watchdog_tmo;
+    }
+
+}
+
+cls_camera::cls_camera(ctx_motapp *p_motapp)
+{
+    motapp = p_motapp;
+    handler_finished = true;
+    handler_stop = true;
+    restart = false;
+    action_snapshot = false;
+    watchdog = 30;
+}
+
+cls_camera::~cls_camera()
+{
+    mydelete(conf);
+}

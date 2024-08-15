@@ -32,7 +32,7 @@
 
 class cls_algsec {
     public:
-        cls_algsec(ctx_dev *p_cam);
+        cls_algsec(cls_camera *p_cam);
         ~cls_algsec();
         void        detect();
         bool        detected;
@@ -41,7 +41,7 @@ class cls_algsec {
 
     private:
         #ifdef HAVE_OPENCV
-            ctx_dev         *cam;
+            cls_camera         *cam;
             std::thread     handler_thread;
             bool            handler_finished;
             bool            handler_stop;

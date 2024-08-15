@@ -860,10 +860,6 @@ void cls_sound::check_levels()
 
 void cls_sound::handler()
 {
-    pthread_mutex_lock(&motapp->global_lock);
-        motapp->threads_running++;
-    pthread_mutex_unlock(&motapp->global_lock);
-
     device_status = STATUS_INIT;
     handler_finished = false;
     handler_stop = false;
@@ -878,10 +874,6 @@ void cls_sound::handler()
     }
 
     cleanup();
-
-    pthread_mutex_lock(&motapp->global_lock);
-        motapp->threads_running--;
-    pthread_mutex_unlock(&motapp->global_lock);
 
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Sound exiting"));
 
@@ -916,9 +908,6 @@ void cls_sound::stop()
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 ,_("Shutdown of sound frequency detection failed"));
             pthread_kill(handler_thread.native_handle(), SIGVTALRM);
-            pthread_mutex_lock(&motapp->global_lock);
-                motapp->threads_running--;
-            pthread_mutex_unlock(&motapp->global_lock);
         }
     }
 
@@ -928,6 +917,7 @@ cls_sound::cls_sound(ctx_motapp *p_motapp)
 {
     motapp = p_motapp;
     handler_finished = true;
+    handler_stop = true;
     restart = false;
 }
 

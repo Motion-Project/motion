@@ -22,7 +22,7 @@
 
 class cls_movie {
     public:
-        cls_movie(ctx_dev *p_cam, std::string pmovie_type);
+        cls_movie(cls_camera *p_cam, std::string pmovie_type);
         ~cls_movie();
         void start();
         void stop();
@@ -38,7 +38,7 @@ class cls_movie {
         bool                is_running;
 
     private:
-        ctx_dev *cam;
+        cls_camera *cam;
 
         void free_pkt();
         void free_nal();

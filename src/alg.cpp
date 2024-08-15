@@ -18,9 +18,10 @@
 #include "motionplus.hpp"
 #include "conf.hpp"
 #include "util.hpp"
-#include "alg.hpp"
+#include "camera.hpp"
 #include "draw.hpp"
 #include "logger.hpp"
+#include "alg.hpp"
 
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MAX3(x, y, z) ((x) > (y) ? ((x) > (z) ? (x) : (z)) : ((y) > (z) ? (y) : (z)))
@@ -1225,7 +1226,7 @@ void cls_alg::init_conf()
     cfg_smart_mask_speed = cam->conf->smart_mask_speed;
 }
 
-cls_alg::cls_alg(ctx_dev *p_cam)
+cls_alg::cls_alg(cls_camera *p_cam)
 {
     int i;
 

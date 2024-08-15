@@ -57,8 +57,8 @@
             ~cls_dbse();
             void sqlite3db_cb (int arg_nb, char **arg_val, char **col_nm);
             pthread_mutex_t     mutex_dbse;
-            void exec(ctx_dev *cam, std::string filename, std::string cmd);
-            void movielist_add(ctx_dev *cam, cls_movie *movie, timespec *ts1);
+            void exec(cls_camera *cam, std::string filename, std::string cmd);
+            void movielist_add(cls_camera *cam, cls_movie *movie, timespec *ts1);
             void movielist_get(int p_device_id, lst_movies *p_movielist);
         private:
             #ifdef HAVE_SQLITE3DB

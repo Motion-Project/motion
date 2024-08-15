@@ -17,6 +17,7 @@
  */
 
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "jpegutils.hpp"
@@ -595,7 +596,7 @@ int cls_convert::process(u_char *img_dst, u_char *img_src, int clen)
 }
 
 
-cls_convert::cls_convert(ctx_dev *p_cam, int p_pix, int p_w, int p_h)
+cls_convert::cls_convert(cls_camera *p_cam, int p_pix, int p_w, int p_h)
 {
     cam = p_cam;
     width = p_w;

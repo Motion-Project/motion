@@ -274,8 +274,9 @@
             std::string             snd_window;
             bool                    snd_show;
 
-            void camera_add(ctx_motapp *motapp);
+            void camera_add(ctx_motapp *motapp, std::string fname, bool srcdir);
             void sound_add(ctx_motapp *motapp, std::string fname, bool srcdir);
+            void camera_filenm(ctx_motapp *motapp);
             void sound_filenm(ctx_motapp *motapp);
             void process(ctx_motapp *motapp);
 
@@ -288,16 +289,13 @@
             std::string cat_desc(enum PARM_CAT pcat, bool shrt);
             void usage();
             void init(ctx_motapp *motapp);
-            void deinit(ctx_motapp *motapp);
             void parms_log(ctx_motapp *motapp);
             void parms_write(ctx_motapp *motapp);
 
         private:
             void cmdline(ctx_motapp *motapp);
             void defaults();
-
-            void camera_filenm(ctx_motapp *motapp);
-            void camera_parm(ctx_motapp *motapp, std::string filename);
+            int get_next_devid(ctx_motapp *motapp);
             void config_dir_parm(ctx_motapp *motapp, std::string confdir);
 
             void parms_log_parm(std::string parm_nm, std::string parm_vl);

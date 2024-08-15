@@ -27,12 +27,12 @@ typedef struct {
 
 class cls_convert {
     public:
-        cls_convert(ctx_dev *p_cam, int p_pix, int p_w, int p_h);
+        cls_convert(cls_camera *p_cam, int p_pix, int p_w, int p_h);
         ~cls_convert();
         int process(u_char *img_dest, u_char *img_src, int clen);
 
     private:
-        ctx_dev *cam;
+        cls_camera *cam;
 
         int width;
         int height;

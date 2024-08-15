@@ -16,8 +16,8 @@
  *
  */
 
-#include <ctype.h>
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "util.hpp"
 #include "logger.hpp"
@@ -1558,7 +1558,7 @@ void cls_draw::largest_label()
     }
 }
 
-cls_draw::cls_draw(ctx_dev *p_cam)
+cls_draw::cls_draw(cls_camera *p_cam)
 {
     cam = p_cam;
     cfg_text_scale = cam->conf->text_scale;

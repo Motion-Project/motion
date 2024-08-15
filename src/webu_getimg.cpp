@@ -20,14 +20,15 @@
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
+#include "camera.hpp"
 #include "picture.hpp"
-#include "webu_getimg.hpp"
 #include "alg_sec.hpp"
+#include "webu_getimg.hpp"
 
 /* NOTE:  These run on the camera thread. */
 
 /* Initial the stream context items for the camera */
-void webu_getimg_init(ctx_dev *cam)
+void webu_getimg_init(cls_camera *cam)
 {
     pthread_mutex_init(&cam->stream.mutex, NULL);
 
@@ -76,7 +77,7 @@ void webu_getimg_init(ctx_dev *cam)
 }
 
 /* Free the stream buffers and mutex for shutdown */
-void webu_getimg_deinit(ctx_dev *cam)
+void webu_getimg_deinit(cls_camera *cam)
 {
     /* NOTE:  This runs on the camera thread. */
     myfree(cam->imgs.image_substream);
@@ -100,7 +101,7 @@ void webu_getimg_deinit(ctx_dev *cam)
 }
 
 /* Get a normal image from the motion loop and compress it*/
-static void webu_getimg_norm(ctx_dev *cam)
+static void webu_getimg_norm(cls_camera *cam)
 {
     if ((cam->stream.norm.jpg_cnct == 0) &&
         (cam->stream.norm.ts_cnct == 0) &&
@@ -135,7 +136,7 @@ static void webu_getimg_norm(ctx_dev *cam)
 }
 
 /* Get a substream image from the motion loop and compress it*/
-static void webu_getimg_sub(ctx_dev *cam)
+static void webu_getimg_sub(cls_camera *cam)
 {
     int subsize;
 
@@ -209,7 +210,7 @@ static void webu_getimg_sub(ctx_dev *cam)
 }
 
 /* Get a motion image from the motion loop and compress it*/
-static void webu_getimg_motion(ctx_dev *cam)
+static void webu_getimg_motion(cls_camera *cam)
 {
     if ((cam->stream.motion.jpg_cnct == 0) &&
         (cam->stream.motion.ts_cnct == 0) &&
@@ -243,7 +244,7 @@ static void webu_getimg_motion(ctx_dev *cam)
 }
 
 /* Get a source image from the motion loop and compress it*/
-static void webu_getimg_source(ctx_dev *cam)
+static void webu_getimg_source(cls_camera *cam)
 {
     if ((cam->stream.source.jpg_cnct == 0) &&
         (cam->stream.source.ts_cnct == 0) &&
@@ -277,7 +278,7 @@ static void webu_getimg_source(ctx_dev *cam)
 }
 
 /* Get a secondary image from the motion loop and compress it*/
-static void webu_getimg_secondary(ctx_dev *cam)
+static void webu_getimg_secondary(cls_camera *cam)
 {
      if ((cam->stream.secondary.jpg_cnct == 0) &&
          (cam->stream.secondary.ts_cnct == 0) &&
@@ -314,7 +315,7 @@ static void webu_getimg_secondary(ctx_dev *cam)
 }
 
 /* Get image from the motion loop and compress it*/
-void webu_getimg_main(ctx_dev *cam)
+void webu_getimg_main(cls_camera *cam)
 {
     /*This is on the camera thread */
     pthread_mutex_lock(&cam->stream.mutex);

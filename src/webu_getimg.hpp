@@ -19,8 +19,8 @@
 #ifndef _INCLUDE_WEBU_GETIMG_HPP_
 #define _INCLUDE_WEBU_GETIMG_HPP_
 
-    void webu_getimg_init(ctx_dev *cam);
-    void webu_getimg_deinit(ctx_dev *cam);
-    void webu_getimg_main(ctx_dev *cam);
+    void webu_getimg_init(cls_camera *cam);
+    void webu_getimg_deinit(cls_camera *cam);
+    void webu_getimg_main(cls_camera *cam);
 
 #endif

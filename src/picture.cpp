@@ -16,6 +16,7 @@
  *
  */
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
@@ -62,9 +63,9 @@ void cls_picture::process_norm()
             , cfg_picture_type);
         cam->filetype = FTYPE_IMAGE;
         if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
-            cam->picture->save_norm(filename, cam->current_image->image_high);
+            save_norm(filename, cam->current_image->image_high);
         } else {
-            cam->picture->save_norm(filename,cam->current_image->image_norm);
+            save_norm(filename,cam->current_image->image_norm);
         }
         on_picture_save_command(filename);
         cam->motapp->dbse->exec(cam, filename, "pic_save");
@@ -78,14 +79,14 @@ void cls_picture::process_motion()
     if (cfg_picture_output_motion == "on") {
         picname(filename,"%s/%sm.%s", cfg_picture_filename, cfg_picture_type);
         cam->filetype = FTYPE_IMAGE_MOTION;
-        cam->picture->save_norm(filename, cam->imgs.image_motion.image_norm);
+        save_norm(filename, cam->imgs.image_motion.image_norm);
         on_picture_save_command(filename);
         cam->motapp->dbse->exec(cam, filename, "pic_save");
 
     } else if (cfg_picture_output_motion == "roi") {
         picname(filename,"%s/%sr.%s", cfg_picture_filename, cfg_picture_type);
         cam->filetype = FTYPE_IMAGE_ROI;
-        cam->picture->save_roi(filename, cam->current_image->image_norm);
+        save_roi(filename, cam->current_image->image_norm);
         on_picture_save_command(filename);
         cam->motapp->dbse->exec(cam, filename, "pic_save");
     }
@@ -108,9 +109,9 @@ void cls_picture::process_snapshot()
             , cfg_picture_type);
         cam->filetype = FTYPE_IMAGE_SNAPSHOT;
         if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
-            cam->picture->save_norm(filename, cam->current_image->image_high);
+            save_norm(filename, cam->current_image->image_high);
         } else {
-            cam->picture->save_norm(filename, cam->current_image->image_norm);
+            save_norm(filename, cam->current_image->image_norm);
         }
         on_picture_save_command(filename);
         cam->motapp->dbse->exec(cam, filename, "pic_save");
@@ -132,15 +133,15 @@ void cls_picture::process_snapshot()
         remove(filename);
         cam->filetype = FTYPE_IMAGE_SNAPSHOT;
         if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
-            cam->picture->save_norm(filename, cam->current_image->image_high);
+            save_norm(filename, cam->current_image->image_high);
         } else {
-            cam->picture->save_norm(filename, cam->current_image->image_norm);
+            save_norm(filename, cam->current_image->image_norm);
         }
         on_picture_save_command(filename);
         cam->motapp->dbse->exec(cam, filename, "pic_save");
     }
 
-    cam->snapshot = 0;
+    cam->action_snapshot = false;
 }
 
 void cls_picture::process_preview()
@@ -161,9 +162,9 @@ void cls_picture::process_preview()
 
         cam->filetype = FTYPE_IMAGE;
         if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
-            cam->picture->save_norm(filename, cam->imgs.image_preview.image_high);
+            save_norm(filename, cam->imgs.image_preview.image_high);
         } else {
-            cam->picture->save_norm(filename, cam->imgs.image_preview.image_norm);
+            save_norm(filename, cam->imgs.image_preview.image_norm);
         }
         on_picture_save_command(filename);
         cam->motapp->dbse->exec(cam, filename, "pic_save");
@@ -439,20 +440,9 @@ void cls_picture::save_norm(char *file, u_char *image)
 
     picture = myfopen(file, "wbe");
     if (!picture) {
-        /* Report to syslog - suggest solution if the problem is access rights to target dir. */
-        if (errno ==  EACCES) {
-            MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
-                ,_("Can't write picture to file %s - check access rights to target directory\n"
-                "Thread is going to finish due to this fatal error"), file);
-            cam->finish_dev = true;
-            cam->restart_dev = false;
-            return;
-        } else {
-            /* If target dir is temporarily unavailable we may survive. */
-            MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
-                ,_("Can't write picture to file %s"), file);
-            return;
-        }
+        MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            ,_("Can't write picture to file %s"), file);
+        return;
     }
 
     pic_write(picture, image);
@@ -854,7 +844,7 @@ void cls_picture::init_cfg()
     cfg_picture_output          = cam->conf->picture_output;
 }
 
-cls_picture::cls_picture(ctx_dev *p_cam)
+cls_picture::cls_picture(cls_camera *p_cam)
 {
     cam = p_cam;
     init_cfg();

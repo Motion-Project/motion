@@ -60,7 +60,6 @@
 #include <sys/socket.h>
 #include <thread>
 
-
 #if defined(HAVE_PTHREAD_NP_H)
     #include <pthread_np.h>
 #endif
@@ -117,6 +116,7 @@ struct ctx_motapp;
 struct ctx_images;
 struct ctx_image_data;
 
+class cls_camera;
 class cls_sound;
 class cls_algsec;
 class cls_alg;
@@ -202,7 +202,6 @@ enum CAPTURE_RESULT {
 enum DEVICE_STATUS {
     STATUS_CLOSED,   /* Device is closed */
     STATUS_INIT,     /* First time initialize */
-    STATUS_RESET,    /* Clean up and re-initialize */
     STATUS_OPENED    /* Successfully started the device */
 };
 
@@ -269,80 +268,6 @@ struct ctx_col_item {
 typedef std::list<ctx_col_item> lst_cols;
 typedef lst_cols::iterator it_cols;
 
-struct ctx_coord {
-    int x;
-    int y;
-    int width;
-    int height;
-    int minx;
-    int maxx;
-    int miny;
-    int maxy;
-    int stddev_x;
-    int stddev_y;
-    int stddev_xy;
-};
-
-struct ctx_image_data {
-    unsigned char       *image_norm;
-    unsigned char       *image_high;
-    int                 diffs;
-    int                 diffs_raw;
-    int                 diffs_ratio;
-    int64_t             idnbr_norm;
-    int64_t             idnbr_high;
-    struct timespec     imgts;          /* Realtime for display */
-    struct timespec     monots;         /* Montonic clock for timing */
-    int                 shot;           /* Sub second timestamp count */
-    unsigned long       cent_dist;      /* Movement center to img center distance * Note: Dist is calculated distX*distX + distY*distY */
-    unsigned int        flags;          /* See IMAGE_* defines */
-    ctx_coord           location;       /* coordinates for center and size of last motion detection*/
-    int                 total_labels;
-};
-
-struct ctx_images {
-    ctx_image_data *image_ring;    /* The base address of the image ring buffer */
-    ctx_image_data image_motion;   /* Picture buffer for motion images */
-    ctx_image_data image_preview;  /* Picture buffer for best image when enables */
-
-    unsigned char *ref;               /* The reference frame */
-    unsigned char *ref_next;          /* The reference frame */
-    unsigned char *mask;              /* Buffer for the mask file */
-    unsigned char *common_buffer;
-    unsigned char *image_substream;
-    unsigned char *image_virgin;            /* Last picture frame with no text or locate overlay */
-    unsigned char *image_vprvcy;            /* Virgin image with the privacy mask applied */
-    unsigned char *mask_privacy;            /* Buffer for the privacy mask values */
-    unsigned char *mask_privacy_uv;         /* Buffer for the privacy U&V values */
-    unsigned char *mask_privacy_high;       /* Buffer for the privacy mask values */
-    unsigned char *mask_privacy_high_uv;    /* Buffer for the privacy U&V values */
-    unsigned char *image_secondary;         /* Buffer for JPG from alg_sec methods */
-
-    int ring_size;
-    int ring_in;                /* Index in image ring buffer we last added a image into */
-    int ring_out;               /* Index in image ring buffer we want to process next time */
-
-    int *ref_dyn;               /* Dynamic objects to be excluded from reference frame */
-    int *labels;
-    int *labelsize;
-
-    int width;
-    int height;
-    int size_norm;                    /* Number of bytes for normal size image */
-
-    int width_high;
-    int height_high;
-    int size_high;                 /* Number of bytes for high resolution image */
-
-    int motionsize;
-    int labelgroup_max;
-    int labels_above;
-    int labelsize_max;
-    int largest_label;
-    int size_secondary;             /* Size of the jpg put into image_secondary*/
-
-};
-
 struct ctx_all_loc {
     int     row;
     int     col;
@@ -360,160 +285,34 @@ struct ctx_all_sizes {
     bool    reset;
 };
 
-
-struct ctx_stream_data {
-    unsigned char   *jpg_data;  /* Image compressed as JPG */
-    int             jpg_sz;     /* The number of bytes for jpg */
-    int             consumed;   /* Bool for whether the jpeg data was consumed*/
-    unsigned char   *img_data;  /* The base data used for image */
-    int             jpg_cnct;   /* Counter of the number of jpg connections*/
-    int             ts_cnct;    /* Counter of the number of mpegts connections */
-    int             all_cnct;   /* Counter of the number of all camera connections */
-};
-
-struct ctx_stream {
-    pthread_mutex_t  mutex;
-    ctx_stream_data  norm;       /* Copy of the image to use for web stream*/
-    ctx_stream_data  sub;        /* Copy of the image to use for web stream*/
-    ctx_stream_data  motion;     /* Copy of the image to use for web stream*/
-    ctx_stream_data  source;     /* Copy of the image to use for web stream*/
-    ctx_stream_data  secondary;  /* Copy of the image to use for web stream*/
-};
-
-
-struct ctx_dev {
-    ctx_motapp      *motapp;
-    int             threadnr;
-    pthread_t       thread_id;
-
-    cls_config      *conf;
-    ctx_images      imgs;
-
-    ctx_image_data  *current_image;
-
-    cls_alg         *alg;
-    cls_algsec      *algsec;
-    cls_movie       *movie_norm;
-    cls_movie       *movie_motion;
-    cls_movie       *movie_timelapse;
-    cls_movie       *movie_extpipe;
-
-    ctx_stream      stream;
-
-    cls_draw        *draw;
-    cls_netcam      *netcam;
-    cls_netcam      *netcam_high;
-    cls_picture     *picture;
-    cls_rotate      *rotate;
-    cls_v4l2cam     *v4l2cam;
-    cls_libcam      *libcam;
-
-    int                     track_posx;
-    int                     track_posy;
-    int                     device_id;
-    enum CAMERA_TYPE        camera_type;
-    enum DEVICE_STATUS      device_status;
-    int                     noise;
-    int                     threshold;
-    int                     threshold_maximum;
-
-    volatile bool           snapshot;    /* Make a snapshot */
-    volatile bool           event_stop;  /* Boolean for whether to stop a event */
-    volatile bool           event_user;  /* Boolean for whether to user triggered an event */
-    volatile bool           finish_dev;      /* End the device thread */
-    volatile bool           restart_dev;     /* Restart the device thread when it ends */
-    bool                    running_dev;     /* Device thread is running*/
-    volatile int            watchdog;
-
-    int                     event_curr_nbr;
-    int                     event_prev_nbr;
-    char                    eventid[20];        /* Cam ID + Date/Time 99999yyyymmddhhmmss */
-    char                    text_event_string[PATH_MAX];        /* The text for conv. spec. %C - */
-    int                     text_scale;
-
-    int                     postcap;                             /* downcounter, frames left to to send post event */
-    int                     shots_mt;   /* Monotonic clock shots count*/
-    int                     shots_rt;   /* Realtime  clock shots count*/
-    bool                    detecting_motion;
-    long                    frame_wait[AVGCNT];   /* Last wait times through motion loop*/
-
-    struct timespec         frame_curr_ts;
-    struct timespec         frame_last_ts;
-
-    time_t                  lasttime;
-    time_t                  movie_start_time;
-    struct timespec         connectionlosttime;               /* timestamp from connection lost */
-    int                     lastrate;
-    int                     startup_frames;
-    int                     frame_skip;
-    volatile bool           pause;
-    int                     missing_frame_counter;               /* counts failed attempts to fetch picture frame from camera */
-    int                     lost_connection;
-
-    int                     pipe;
-    int                     mpipe;
-
-    char                    hostname[PATH_MAX];
-    char                    action_user[40];
-
-    int                     movie_fps;
-    bool                    movie_passthrough;
-
-    int                     filetype;
-
-    int area_minx[9], area_miny[9], area_maxx[9], area_maxy[9];
-    int                     areadetect_eventnbr;
-
-    int previous_diffs, previous_location_x, previous_location_y;
-    bool                    passflag;  //flag first frame vs all others.
-
-    ctx_all_loc             all_loc;    /* position on all camera image */
-
-    pthread_mutex_t         parms_lock;
-    bool                    parms_changed;  /*bool indicating if the parms have changed */
-
-    uint64_t                info_diff_tot;
-    uint64_t                info_diff_cnt;
-    int                     info_sdev_min;
-    int                     info_sdev_max;
-    uint64_t                info_sdev_tot;
-
-};
-
+typedef std::vector<cls_camera*> vec_cam;
 typedef std::vector<cls_sound*> vec_snd;
-typedef vec_snd::iterator it_snd;
 
 struct ctx_motapp {
 
-    ctx_dev             **cam_list;
+    vec_cam     cam_list;
     vec_snd     snd_list;
 
-    pthread_mutex_t     global_lock;
+    bool    reload_all;
+    bool    cam_add;
+    int     cam_delete;     /* 0 for no action, other numbers specify camera to remove */
+    int     cam_cnt;
+    int     snd_cnt;
+    int     argc;
+    char    **argv;
+    bool    pause;
 
-    volatile int        threads_running;
-    volatile bool       finish_all;
-    volatile bool       restart_all;
-    volatile bool       reload_all;
-    volatile bool       cam_add;        /* Bool for whether to add a camera to the list */
-    volatile int        cam_delete;     /* 0 for no action, other numbers specify camera to remove */
-
-    int                 argc;
-    char                **argv;
-    bool                pause;
     cls_config          *conf;
-    int                 cam_cnt;
     ctx_all_sizes       *all_sizes;
     cls_webu            *webu;
     cls_dbse            *dbse;
 
     bool                parms_changed;      /*bool indicating if the parms have changed */
+    pthread_mutex_t     global_lock;
     pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */
     pthread_mutex_t     mutex_camlst;       /* Lock the list of cams while adding/removing */
     pthread_mutex_t     mutex_post;         /* mutex to allow for processing of post actions*/
 
-
 };
-
-extern pthread_key_t tls_key_threadnr; /* key for thread number */
 
 #endif /* _INCLUDE_MOTIONPLUS_HPP_ */

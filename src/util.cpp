@@ -18,6 +18,7 @@
 */
 
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "util.hpp"
 #include "logger.hpp"
@@ -239,7 +240,7 @@ int myfclose(FILE* fh)
     return rval;
 }
 
-static void mystrftime_long (const ctx_dev *cam,
+static void mystrftime_long (const cls_camera *cam,
         int width, const char *word, int l, char *out)
 {
 
@@ -353,7 +354,7 @@ void mystrftime(cls_sound *snd, std::string &dst, std::string fmt)
     dst.assign(tmp);
 }
 
-size_t mystrftime_base(ctx_dev *cam, char *s, size_t max
+size_t mystrftime_base(cls_camera *cam, char *s, size_t max
         , const char *userformat, const char *filename)
 {
     char formatstring[PATH_MAX] = "";
@@ -528,13 +529,13 @@ size_t mystrftime_base(ctx_dev *cam, char *s, size_t max
     return strftime(s, max, format, &timestamp_tm);
 }
 
-void mystrftime(ctx_dev *cam, char *s, size_t mx_sz
+void mystrftime(cls_camera *cam, char *s, size_t mx_sz
     , const char *usrfmt, const char *fname)
 {
     mystrftime_base(cam, s, mx_sz, usrfmt,fname);
 }
 
-void mystrftime(ctx_dev *cam, std::string &rslt
+void mystrftime(cls_camera *cam, std::string &rslt
     , std::string usrfmt, std::string fname)
 {
     char tmp[PATH_MAX] = "";
@@ -575,7 +576,7 @@ void mythreadname_set(const char *abbr, int threadnbr, const char *threadname)
 void mythreadname_get(std::string &threadname)
 {
     #if ((!defined(BSD) && HAVE_PTHREAD_GETNAME_NP) || defined(__APPLE__))
-        char currname[16];
+        char currname[32];
         pthread_getname_np(pthread_self(), currname, sizeof(currname));
         threadname = currname;
     #else
@@ -586,7 +587,7 @@ void mythreadname_get(std::string &threadname)
 void mythreadname_get(char *threadname)
 {
     #if ((!defined(BSD) && HAVE_PTHREAD_GETNAME_NP) || defined(__APPLE__))
-        char currname[16];
+        char currname[32];
         pthread_getname_np(pthread_self(), currname, sizeof(currname));
         snprintf(threadname, sizeof(currname), "%s",currname);
     #else
@@ -710,7 +711,7 @@ AVPacket *mypacket_alloc(AVPacket *pkt)
 
 }
 
-void util_exec_command(ctx_dev *cam, const char *command, const char *filename)
+void util_exec_command(cls_camera *cam, const char *command, const char *filename)
 {
     char stamp[PATH_MAX];
     int pid;

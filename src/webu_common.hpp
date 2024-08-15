@@ -43,8 +43,8 @@
             cls_webu        *webu;
             cls_webu_ans    *webua;
 
-            void img_sizes(ctx_dev *cam, int &img_w, int &img_h);
-            void img_resize(ctx_dev *cam
+            void img_sizes(cls_camera *cam, int &img_w, int &img_h);
+            void img_resize(cls_camera *cam
                 , uint8_t *src, uint8_t *dst, int dst_w, int dst_h);
 
     };

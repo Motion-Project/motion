@@ -16,6 +16,7 @@
  *
  */
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
@@ -227,7 +228,7 @@ int vlp_startpipe(const char *dev_name, int width, int height)
 
 #endif /* HAVE_V4L2 && !BSD */
 
-void vlp_putpipe(ctx_dev *cam)
+void vlp_putpipe(cls_camera *cam)
 {
     #if (defined(HAVE_V4L2)) && (!defined(BSD))
         ssize_t retcd;
@@ -255,7 +256,7 @@ void vlp_putpipe(ctx_dev *cam)
     #endif
 }
 
-void vlp_init(ctx_dev *cam)
+void vlp_init(cls_camera *cam)
 {
     #if defined(HAVE_V4L2) && !defined(BSD)
         /* open video loopback devices if enabled */

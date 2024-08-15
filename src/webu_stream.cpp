@@ -17,6 +17,7 @@
 */
 
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
@@ -39,7 +40,7 @@ static ssize_t webu_mjpeg_response (void *cls, uint64_t pos, char *buf, size_t m
 bool cls_webu_stream::all_ready()
 {
     int indx, indx1;
-    ctx_dev *p_cam;
+    cls_camera *p_cam;
 
     for (indx=0; indx<app->cam_cnt; indx++) {
         p_cam = app->cam_list[indx];
@@ -511,7 +512,7 @@ mhdrslt cls_webu_stream::main()
     }
 
     if (webua->cam != NULL) {
-        if ((webua->cam->passflag == false) || (webua->cam->finish_dev)) {
+        if ((webua->cam->passflag == false) || (webua->cam->handler_stop)) {
             return MHD_NO;
         }
     }

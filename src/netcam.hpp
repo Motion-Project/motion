@@ -72,7 +72,7 @@ struct ctx_filelist_item {
 
 class cls_netcam {
     public:
-        cls_netcam(ctx_dev *p_cam, bool p_is_high);
+        cls_netcam(cls_camera *p_cam, bool p_is_high);
         ~cls_netcam();
         int next(ctx_image_data *img_data);
 
@@ -100,7 +100,7 @@ class cls_netcam {
 
 
     private:
-        ctx_dev *cam;
+        cls_camera *cam;
 
         AVFormatContext          *format_context;        /* Main format context for the camera */
         AVCodecContext           *codec_context;         /* Codec being sent from the camera */

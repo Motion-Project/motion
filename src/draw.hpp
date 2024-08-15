@@ -23,7 +23,7 @@
 
     class cls_draw {
         public:
-            cls_draw(ctx_dev *p_cam);
+            cls_draw(cls_camera *p_cam);
             ~cls_draw();
             int text(u_char *image
                 , int width, int height, int startx, int starty
@@ -34,7 +34,7 @@
             void largest_label();
 
         private:
-            ctx_dev *cam;
+            cls_camera *cam;
 
             u_char *char_arr_ptr[ASCII_MAX];
 

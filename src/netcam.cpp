@@ -18,6 +18,7 @@
 */
 
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
@@ -1617,11 +1618,8 @@ void cls_netcam::set_parms ()
     pthread_mutex_init(&mutex_pktarray, nullptr);
     pthread_mutex_init(&mutex_transfer, nullptr);
 
-    pthread_mutex_lock(&motapp->global_lock);
-        threadnbr = ++motapp->threads_running;
-    pthread_mutex_unlock(&motapp->global_lock);
-
     context_null();
+    threadnbr = cam->device_id;
     cfg_width = cam->conf->width;
     cfg_height = cam->conf->height;
     cfg_framerate = cam->conf->framerate;
@@ -1901,6 +1899,7 @@ int cls_netcam::open_context()
 
 int cls_netcam::connect()
 {
+
     if (open_context() < 0) {
         return -1;
     }
@@ -2069,8 +2068,6 @@ void cls_netcam::handler()
 
     mythreadname_set("nc", threadnbr, camera_name.c_str());
 
-    pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)threadnbr));
-
     MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
         ,_("%s:Camera handler started")
         ,cameratype.c_str());
@@ -2097,11 +2094,6 @@ void cls_netcam::handler()
     MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("%s:Loop finished."),cameratype.c_str());
 
-    /* Our thread is finished - decrement app's thread count. */
-    pthread_mutex_lock(&motapp->global_lock);
-        motapp->threads_running--;
-    pthread_mutex_unlock(&motapp->global_lock);
-
     MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("%s:Exiting"),cameratype.c_str());
     handler_finished = true;
@@ -2123,6 +2115,7 @@ void cls_netcam::start_handler()
      */
     wait_counter = 60;
     while (wait_counter > 0) {
+
         pthread_mutex_lock(&mutex);
             if (img_latest->ptr != nullptr ) {
                 wait_counter = -1;
@@ -2160,9 +2153,6 @@ void cls_netcam::shutdown()
             ,_("%s:No response from handler thread.")
             ,cameratype.c_str());
         pthread_kill(net_thread.native_handle(), SIGVTALRM);
-        pthread_mutex_lock(&motapp->global_lock);
-            motapp->threads_running--;
-        pthread_mutex_unlock(&motapp->global_lock);
     }
 
     context_close();
@@ -2223,7 +2213,7 @@ int cls_netcam::next(ctx_image_data *img_data)
     return CAPTURE_SUCCESS;
 }
 
-cls_netcam::cls_netcam(ctx_dev *p_cam, bool p_is_high)
+cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
 {
     int retcd;
 

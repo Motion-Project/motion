@@ -17,6 +17,7 @@
  */
 
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "util.hpp"
 #include "logger.hpp"
@@ -948,7 +949,7 @@ void cls_dbse::exec_sql(std::string sql)
 
 }
 
-void cls_dbse::exec(ctx_dev *cam, std::string fname, std::string cmd)
+void cls_dbse::exec(cls_camera *cam, std::string fname, std::string cmd)
 {
     std::string sql;
 
@@ -979,7 +980,7 @@ void cls_dbse::exec(ctx_dev *cam, std::string fname, std::string cmd)
 }
 
 /* Add a record to motionplus table */
-void cls_dbse::movielist_add(ctx_dev *cam, cls_movie *movie, timespec *ts1)
+void cls_dbse::movielist_add(cls_camera *cam, cls_movie *movie, timespec *ts1)
 {
     std::string sqlquery;
     struct stat statbuf;

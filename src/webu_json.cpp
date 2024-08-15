@@ -17,6 +17,7 @@
 */
 
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
@@ -173,7 +174,7 @@ void cls_webu_json::cameras_list()
     int indx_cam;
     std::string response;
     std::string strid;
-    ctx_dev     *cam;
+    cls_camera     *cam;
 
     webua->resp_page += "{\"count\" : " + std::to_string(app->cam_cnt);
 
@@ -351,7 +352,7 @@ void cls_webu_json::status_vars(int indx_cam)
     char buf[32];
     struct tm timestamp_tm;
     struct timespec curr_ts;
-    ctx_dev *cam;
+    cls_camera *cam;
 
     cam = app->cam_list[indx_cam];
 

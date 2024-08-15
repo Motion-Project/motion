@@ -28,55 +28,44 @@
 #include "movie.hpp"
 #include "netcam.hpp"
 
-pthread_key_t tls_key_threadnr;
 volatile enum MOTPLS_SIGNAL motsignal;
 
 /** Process signals sent */
 static void motpls_signal_process(ctx_motapp *motapp)
 {
-    uint indx;
+    int indx;
 
     switch(motsignal){
     case MOTPLS_SIGNAL_ALARM:       /* Trigger snapshot */
-        if (motapp->cam_list != NULL) {
-            for (indx=0; indx<(uint)motapp->cam_cnt; indx++) {
-                if (motapp->cam_list[indx]->conf->snapshot_interval) {
-                    motapp->cam_list[indx]->snapshot = true;
-                }
-            }
+        for (indx=0; indx<motapp->cam_cnt; indx++) {
+            motapp->cam_list[indx]->action_snapshot = true;
         }
         break;
     case MOTPLS_SIGNAL_USR1:        /* Trigger the end of a event */
-        if (motapp->cam_list != NULL) {
-            for (indx=0; indx<(uint)motapp->cam_cnt; indx++) {
-                motapp->cam_list[indx]->event_stop = true;
-            }
+        for (indx=0; indx<motapp->cam_cnt; indx++) {
+            motapp->cam_list[indx]->event_stop = true;
         }
         break;
     case MOTPLS_SIGNAL_SIGHUP:      /* Reload the parameters and restart*/
         motapp->reload_all = true;
         motapp->webu->wb_finish = true;
-        for (indx=0; indx<(uint)motapp->cam_cnt; indx++) {
+        for (indx=0; indx<motapp->cam_cnt; indx++) {
             motapp->cam_list[indx]->event_stop = true;
-            motapp->cam_list[indx]->finish_dev = true;
-            motapp->cam_list[indx]->restart_dev = false;
+            motapp->cam_list[indx]->stop();
         }
-        for (indx=0; indx<motapp->snd_list.size(); indx++) {
-            motapp->snd_list[indx]->handler_stop = true;
+        for (indx=0; indx<motapp->snd_cnt; indx++) {
+            motapp->snd_list[indx]->stop();
         }
         break;
     case MOTPLS_SIGNAL_SIGTERM:     /* Quit application */
-
         motapp->webu->wb_finish = true;
-        for (indx=0; indx<(uint)motapp->cam_cnt; indx++) {
+        for (indx=0; indx<motapp->cam_cnt; indx++) {
             motapp->cam_list[indx]->event_stop = true;
-            motapp->cam_list[indx]->finish_dev = true;
-            motapp->cam_list[indx]->restart_dev = false;
+            motapp->cam_list[indx]->stop();
         }
-        for (indx=0; indx<motapp->snd_list.size(); indx++) {
-            motapp->snd_list[indx]->handler_stop = true;
+        for (indx=0; indx<motapp->snd_cnt; indx++) {
+            motapp->snd_list[indx]->stop();
         }
-        motapp->finish_all = true;
     default:
         break;
     }
@@ -86,7 +75,6 @@ static void motpls_signal_process(ctx_motapp *motapp)
 /** Handle signals sent */
 static void sig_handler(int signo)
 {
-
     /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
     switch(signo) {
     case SIGALRM:
@@ -108,7 +96,6 @@ static void sig_handler(int signo)
     case SIGSEGV:
         exit(0);
     case SIGVTALRM:
-        printf("SIGVTALRM went off\n");
         pthread_exit(NULL);
         break;
     }
@@ -118,12 +105,9 @@ static void sig_handler(int signo)
 static void sigchild_handler(int signo)
 {
     (void)signo;
-
     #ifdef WNOHANG
         while (waitpid(-1, NULL, WNOHANG) > 0) {};
     #endif /* WNOHANG */
-
-    return;
 }
 
 /** Attach handlers to a number of signals that MotionPlus need to catch. */
@@ -184,24 +168,24 @@ static void motpls_pid_write(ctx_motapp *motapp)
                 , motapp->conf->pid_file.c_str());
         }
     }
+
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Motionplus pid: %d"), getpid());
+
 }
 
 /** Remove the process id file ( pid file ) before MotionPlus exit. */
 static void motpls_pid_remove(ctx_motapp *motapp)
 {
-
     if ((motapp->conf->pid_file != "") &&
-        (motapp->restart_all == false)) {
+        (motapp->reload_all == false)) {
         if (!unlink(motapp->conf->pid_file.c_str())) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Removed process id file (pid file)."));
         } else{
             MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error removing pid file"));
         }
     }
-
 }
 
-/**  Turn MotionPlus into a daemon through forking. */
 static void motpls_daemon()
 {
     int fd;
@@ -260,37 +244,6 @@ static void motpls_daemon()
     sigaction(SIGTSTP, &sig_ign_action, NULL);
 }
 
-void motpls_av_log(void *ignoreme, int errno_flag, const char *fmt, va_list vl)
-{
-    char buf[1024];
-    char *end;
-    int retcd;
-
-    (void)ignoreme;
-
-    /* Valgrind occasionally reports use of uninitialized values in here when we interrupt
-     * some rtsp functions.  The offending value is either fmt or vl and seems to be from a
-     * debug level of av functions.  To address it we flatten the message after we know
-     * the log level.  Now we put the avcodec messages to INF level since their error
-     * are not necessarily our errors.
-     */
-
-    if (errno_flag <= AV_LOG_WARNING) {
-        retcd = vsnprintf(buf, sizeof(buf), fmt, vl);
-        if (retcd >=1024) {
-            MOTPLS_LOG(DBG, TYPE_ENCODER, NO_ERRNO, "av message truncated %d bytes",(retcd - 1024));
-        }
-        end = buf + strlen(buf);
-        if (end > buf && end[-1] == '\n') {
-            *--end = 0;
-        }
-        if (strstr(buf, "Will reconnect at") == NULL) {
-            MOTPLS_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s", buf);
-        }
-    }
-
-}
-
 void motpls_av_init(void)
 {
     MOTPLS_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("libavcodec  version %d.%d.%d")
@@ -305,8 +258,6 @@ void motpls_av_init(void)
 
     avformat_network_init();
     avdevice_register_all();
-    av_log_set_callback(motpls_av_log);
-
 }
 
 void motpls_av_deinit(void)
@@ -317,7 +268,8 @@ void motpls_av_deinit(void)
 /* Validate or set the position on the all cameras image*/
 static void motpls_allcams_init(ctx_motapp *motapp)
 {
-    int indx, indx1, row, col, mx_row, mx_col, col_chk;
+    int indx, indx1;
+    int row, col, mx_row, mx_col, col_chk;
     bool cfg_valid, chk;
     std::string cfg_row, cfg_col;
     ctx_params  *params_loc;
@@ -482,58 +434,43 @@ static void motpls_allcams_init(ctx_motapp *motapp)
 
 }
 
-static void motpls_shutdown(ctx_motapp *motapp)
-{
-    motpls_pid_remove(motapp);
-
-    mydelete(motapp->webu);
-    mydelete(motapp->dbse);
-    mydelete(motapp->conf);
-    mydelete(motapp->all_sizes);
-    mydelete(motlog);
-
-}
-
 static void motpls_device_ids(ctx_motapp *motapp)
 {
-    uint indx, indx2, sndmx, cammx;
+    int indx, indx2;
     int invalid_ids;
 
-    sndmx = (uint)motapp->snd_list.size();
-    cammx = (uint)motapp->cam_cnt;
-
-    /* Defaults */
-    for (indx=0; indx<cammx; indx++) {
+     /* Defaults */
+    for (indx=0; indx<motapp->cam_cnt; indx++) {
         if (motapp->cam_list[indx]->conf->device_id != 0) {
             motapp->cam_list[indx]->device_id = motapp->cam_list[indx]->conf->device_id;
         } else {
             motapp->cam_list[indx]->device_id = (int)indx + 1;
         }
     }
-    for (indx=0; indx<sndmx; indx++) {
+    for (indx=0; indx<motapp->snd_cnt; indx++) {
         if (motapp->snd_list[indx]->conf->device_id != 0) {
             motapp->snd_list[indx]->device_id = motapp->snd_list[indx]->conf->device_id;
         } else {
-            motapp->snd_list[indx]->device_id = motapp->cam_cnt + (int)indx + 1;
+            motapp->snd_list[indx]->device_id =  (int)(motapp->cam_cnt + indx + 1);
         }
     }
 
     /*Check for unique values*/
     invalid_ids = false;
-    for (indx=0; indx<cammx; indx++) {
-        for (indx2=indx+1; indx2<cammx; indx2++) {
+    for (indx=0; indx<motapp->cam_cnt; indx++) {
+        for (indx2=indx+1; indx2<motapp->cam_cnt; indx2++) {
            if (motapp->cam_list[indx]->device_id == motapp->cam_list[indx2]->device_id) {
                 invalid_ids = true;
             }
         }
-        for (indx2=0; indx2<sndmx; indx2++) {
+        for (indx2=0; indx2<motapp->snd_cnt; indx2++) {
            if (motapp->cam_list[indx]->device_id == motapp->snd_list[indx2]->device_id) {
                 invalid_ids = true;
             }
         }
     }
-    for (indx=0; indx<sndmx; indx++) {
-        for (indx2=indx+1; indx2<sndmx; indx2++) {
+    for (indx=0; indx<motapp->snd_cnt; indx++) {
+        for (indx2=indx+1; indx2<motapp->snd_cnt; indx2++) {
            if (motapp->snd_list[indx]->device_id == motapp->snd_list[indx2]->device_id) {
                 invalid_ids = true;
             }
@@ -543,11 +480,11 @@ static void motpls_device_ids(ctx_motapp *motapp)
     if (invalid_ids) {
         MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Device IDs are not unique."));
         MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Falling back to sequence numbers"));
-        for (indx=0; indx<cammx; indx++) {
-            motapp->cam_list[indx]->device_id = (int)indx + 1;
+        for (indx=0; indx<motapp->cam_cnt; indx++) {
+            motapp->cam_list[indx]->device_id = indx + 1;
         }
-        for (indx=0; indx<sndmx; indx++) {
-            motapp->snd_list[indx]->device_id = motapp->cam_cnt + (int)indx + 1;
+        for (indx=0; indx<motapp->snd_cnt; indx++) {
+            motapp->snd_list[indx]->device_id = motapp->cam_cnt+ indx + 1;
         }
     }
 
@@ -618,13 +555,117 @@ static void motpls_ntc(void)
 
 }
 
-/** Initialize upon start up or restart */
-static void motpls_startup(ctx_motapp *motapp, int daemonize)
+/* Check for whether any cams are locked */
+static void motpls_watchdog(ctx_motapp *motapp, uint camindx)
 {
+    int indx;
+
+    if (motapp->cam_list[camindx]->handler_finished == true) {
+        return;
+    }
+
+    motapp->cam_list[camindx]->watchdog--;
+    if (motapp->cam_list[camindx]->watchdog > 0) {
+        return;
+    }
+
+    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        , _("Camera %d - Watchdog timeout.")
+        , motapp->cam_list[camindx]->device_id);
+
+    /* Shut down all the cameras */
+    for (indx=0; indx<motapp->cam_cnt; indx++) {
+        motapp->cam_list[indx]->event_stop = true;
+        pthread_mutex_unlock(&motapp->mutex_camlst);
+        pthread_mutex_unlock(&motapp->mutex_parms);
+        pthread_mutex_unlock(&motapp->mutex_post);
+        pthread_mutex_unlock(&motapp->dbse->mutex_dbse);
+        pthread_mutex_unlock(&motapp->global_lock);
+        pthread_mutex_unlock(&motapp->cam_list[indx]->stream.mutex);
+
+        if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
+            (motapp->cam_list[indx]->netcam != nullptr)) {
+            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam->mutex);
+            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam->mutex_pktarray);
+            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam->mutex_transfer);
+            motapp->cam_list[indx]->netcam->finish = true;
+        }
+        if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
+            (motapp->cam_list[indx]->netcam_high != nullptr)) {
+            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam_high->mutex);
+            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam_high->mutex_pktarray);
+            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam_high->mutex_transfer);
+            motapp->cam_list[indx]->netcam_high->finish = true;
+        }
+
+        motapp->cam_list[indx]->stop();
+        if (motsignal != MOTPLS_SIGNAL_SIGTERM) {
+            motapp->cam_list[indx]->handler_stop = false;   /*Trigger a restart*/
+        }
+    }
+
+}
+
+static bool motpls_check_devices(ctx_motapp *motapp)
+{
+    int indx;
+    bool retcd;
+
+    for (indx=0; indx<motapp->cam_cnt; indx++) {
+        motpls_watchdog(motapp, indx);
+    }
+
+    retcd = false;
+    for (indx=0; indx<motapp->cam_cnt; indx++) {
+        if (motapp->cam_list[indx]->handler_finished == false) {
+            retcd = true;
+        } else if (motapp->cam_list[indx]->handler_stop == false) {
+            motapp->cam_list[indx]->start();
+            retcd = true;
+        }
+    }
+    for (indx=0; indx<motapp->snd_cnt; indx++) {
+        if (motapp->snd_list[indx]->handler_finished == false) {
+            retcd = true;
+        } else if (motapp->snd_list[indx]->handler_stop == false) {
+            motapp->snd_list[indx]->start();
+            retcd = true;
+        }
+    }
+
+    if ((motapp->webu->wb_finish == false) &&
+        (motapp->webu->wb_daemon != NULL)) {
+        retcd = true;
+    }
+
+    return retcd;
+
+}
+
+static void motpls_init(ctx_motapp *motapp, int argc, char *argv[])
+{
+    int indx;
+
+    motapp->argc = argc;
+    motapp->argv = argv;
+
+    motapp->reload_all = false;
+    motapp->parms_changed = false;
+    motapp->pause = false;
+    motapp->cam_add = false;
+    motapp->cam_delete = -1;
+    motapp->cam_cnt = 0;
+    motapp->snd_cnt = 0;
+    motapp->conf = nullptr;
+    motapp->dbse = nullptr;
+    motapp->webu = nullptr;
+
+    pthread_mutex_init(&motapp->global_lock, NULL);
+    pthread_mutex_init(&motapp->mutex_parms, NULL);
+    pthread_mutex_init(&motapp->mutex_camlst, NULL);
+    pthread_mutex_init(&motapp->mutex_post, NULL);
+
     motapp->conf = new cls_config;
-
-    motlog = new cls_log(motapp);
-
     motapp->conf->init(motapp);
 
     motlog->log_level = motapp->conf->log_level;
@@ -635,11 +676,9 @@ static void motpls_startup(ctx_motapp *motapp, int daemonize)
 
     mytranslate_text("",motapp->conf->native_language);
 
-    if (daemonize) {
-        if (motapp->conf->daemon) {
-            motpls_daemon();
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus running as daemon process"));
-        }
+    if (motapp->conf->daemon) {
+        motpls_daemon();
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus running as daemon process"));
     }
 
     motapp->conf->parms_log(motapp);
@@ -655,219 +694,44 @@ static void motpls_startup(ctx_motapp *motapp, int daemonize)
 
     motpls_allcams_init(motapp);
 
-}
-
-/** Start a camera thread */
-static void motpls_start_thread_cam(ctx_dev *cam)
-{
-    int retcd;
-    pthread_attr_t thread_attr;
-
-    pthread_attr_init(&thread_attr);
-    pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
-
-    cam->restart_dev = true;
-    retcd = pthread_create(&cam->thread_id, &thread_attr, &mlp_main, cam);
-    if (retcd != 0) {
-        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start camera thread."));
-    }
-    pthread_attr_destroy(&thread_attr);
-
-}
-
-static void motpls_restart(ctx_motapp *motapp)
-{
-
-    MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Restarting MotionPlus."));
-
-    motpls_shutdown(motapp);
-
-    SLEEP(2, 0);
-
-    motpls_startup(motapp, false);
-
-    MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("MotionPlus restarted"));
-
-    motapp->restart_all = false;
-
-}
-
-/* Check for whether any cams are locked */
-static void motpls_watchdog(ctx_motapp *motapp, uint camindx)
-{
-    int indx;
-
-    if (motapp->cam_list[camindx]->running_dev == false) {
-        return;
-    }
-
-    motapp->cam_list[camindx]->watchdog--;
-    if (motapp->cam_list[camindx]->watchdog > 0) {
-        return;
-    }
-
-    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
-        , _("Camera %d - Watchdog timeout.")
-        , motapp->cam_list[camindx]->device_id);
-
-    /* Shut down all the cameras */
-    for (indx=0; indx<motapp->cam_cnt; indx++) {
-        pthread_mutex_unlock(&motapp->mutex_camlst);
-        pthread_mutex_unlock(&motapp->mutex_parms);
-        pthread_mutex_unlock(&motapp->mutex_camlst);
-        pthread_mutex_unlock(&motapp->mutex_post);
-        if (motapp->dbse != NULL) {
-            pthread_mutex_unlock(&motapp->dbse->mutex_dbse);
-        }
-        pthread_mutex_unlock(&motapp->global_lock);
-        pthread_mutex_unlock(&motapp->cam_list[indx]->stream.mutex);
-        pthread_mutex_unlock(&motapp->cam_list[indx]->parms_lock);
-
-        if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (motapp->cam_list[indx]->netcam != NULL)) {
-            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam->mutex);
-            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam->mutex_pktarray);
-            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam->mutex_transfer);
-            motapp->cam_list[indx]->netcam->finish = true;
-        }
-        if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
-            (motapp->cam_list[indx]->netcam_high != NULL)) {
-            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam_high->mutex);
-            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam_high->mutex_pktarray);
-            pthread_mutex_unlock(&motapp->cam_list[indx]->netcam_high->mutex_transfer);
-            motapp->cam_list[indx]->netcam_high->finish = true;
-        }
-        motapp->cam_list[indx]->event_stop = true;
-        motapp->cam_list[indx]->finish_dev = true;
-    }
-
-    SLEEP(motapp->cam_list[camindx]->conf->watchdog_kill, 0);
-
-    /* When in a watchdog timeout and we get to a kill situation,
-     * we WILL have to leak memory because the freeing/deinit
-     * processes could lock this thread which would stop everything.
-    */
-    for (indx=0; indx<motapp->cam_cnt; indx++) {
-        if (motapp->cam_list[indx]->netcam != NULL) {
-            if (motapp->cam_list[indx]->netcam->handler_finished == false) {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
-                    , _("Camera %d - Watchdog netcam kill.")
-                    , motapp->cam_list[indx]->device_id);
-                pthread_kill(motapp->cam_list[indx]->netcam->net_thread.native_handle(), SIGVTALRM);
-            }
-        }
-        if (motapp->cam_list[indx]->netcam_high != NULL) {
-            if (motapp->cam_list[indx]->netcam_high->handler_finished == false) {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
-                    , _("Camera %d - Watchdog netcam_high kill.")
-                    , motapp->cam_list[indx]->device_id);
-                pthread_kill(motapp->cam_list[indx]->netcam_high->net_thread.native_handle(), SIGVTALRM);
-            }
-        }
-        if (motapp->cam_list[indx]->running_dev == true) {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
-                , _("Camera %d - Watchdog kill.")
-                , motapp->cam_list[indx]->device_id);
-            pthread_kill(motapp->cam_list[indx]->thread_id, SIGVTALRM);
-        };
-        motapp->cam_list[indx]->running_dev = false;
-        motapp->cam_list[indx]->restart_dev = false;
-    }
-    motapp->restart_all = true;
-    motapp->finish_all = true;
-    motapp->webu->wb_finish = true;
-    motapp->threads_running = 0;
-
-}
-
-static int motpls_check_threadcount(ctx_motapp *motapp)
-{
-    uint thrdcnt, indx;
-
-    thrdcnt = 0;
-
-    for (indx=0; indx<(uint)motapp->cam_cnt; indx++) {
-        if (motapp->cam_list[indx]->running_dev || motapp->cam_list[indx]->restart_dev) {
-            thrdcnt++;
-        }
-    }
-    for (indx=0; indx<motapp->snd_list.size(); indx++) {
-        if (motapp->snd_list[indx]->handler_finished == false) {
-            thrdcnt++;
-        }
-    }
-
-    if ((motapp->webu->wb_finish == false) &&
-        (motapp->webu->wb_daemon != NULL)) {
-        thrdcnt++;
-    }
-
-    if (((thrdcnt == 0) && motapp->finish_all) ||
-        ((thrdcnt == 0) && (motapp->threads_running == 0))) {
-        return 1;
-    } else {
-        return 0;
-    }
-
-}
-
-static void motpls_init(ctx_motapp *motapp, int argc, char *argv[])
-{
-    motapp->argc = argc;
-    motapp->argv = argv;
-
-    motapp->cam_list = (ctx_dev **)mymalloc(sizeof(ctx_dev *));
-    motapp->cam_list[0] = nullptr;
-
-    motapp->threads_running = 0;
-    motapp->finish_all = false;
-    motapp->restart_all = false;
-    motapp->reload_all = false;
-    motapp->parms_changed = false;
-    motapp->pause = false;
-    motapp->cam_add = false;
-    motapp->cam_delete = -1;
-    motapp->cam_cnt = 0;
-
-    motapp->conf = nullptr;
-    motapp->dbse = nullptr;
-    motapp->webu = nullptr;
-
-    pthread_key_create(&tls_key_threadnr, NULL);
-    pthread_setspecific(tls_key_threadnr, (void *)(0));
-
-    pthread_mutex_init(&motapp->global_lock, NULL);
-    pthread_mutex_init(&motapp->mutex_parms, NULL);
-    pthread_mutex_init(&motapp->mutex_camlst, NULL);
-    pthread_mutex_init(&motapp->mutex_post, NULL);
-
-    motpls_startup(motapp, true);
-
     motpls_av_init();
+
+    if ((motapp->cam_cnt > 0) || (motapp->snd_cnt > 0)) {
+        for (indx=0; indx<motapp->cam_cnt; indx++) {
+            motapp->cam_list[indx]->start();
+        }
+        for (indx=0; indx<motapp->snd_cnt; indx++) {
+            motapp->snd_list[indx]->start();
+        }
+    } else {
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            , _("No camera or sound configuration files specified."));
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            , _("Waiting for camera or sound configuration to be added via web control."));
+    }
 
 }
 
 static void motpls_deinit(ctx_motapp *motapp)
 {
-    uint indx;
+    int indx;
 
     motpls_av_deinit();
+    motpls_pid_remove(motapp);
 
-    motpls_shutdown(motapp);
+    mydelete(motapp->webu);
+    mydelete(motapp->dbse);
+    mydelete(motapp->conf);
+    mydelete(motapp->all_sizes);
 
-    indx = 0;
-    while (motapp->cam_list[indx] != nullptr) {
-        mydelete(motapp->cam_list[indx]->conf);
+    for (indx = 0; indx < motapp->cam_cnt;indx++) {
         mydelete(motapp->cam_list[indx]);
-        indx++;
     }
-    myfree(motapp->cam_list);
 
-    for (indx = 0; indx < motapp->snd_list.size();indx++) {
+    for (indx = 0; indx < motapp->snd_cnt;indx++) {
         mydelete(motapp->snd_list[indx]);
     }
 
-    pthread_key_delete(tls_key_threadnr);
     pthread_mutex_destroy(&motapp->global_lock);
     pthread_mutex_destroy(&motapp->mutex_parms);
     pthread_mutex_destroy(&motapp->mutex_camlst);
@@ -877,44 +741,29 @@ static void motpls_deinit(ctx_motapp *motapp)
 /* Check for whether to add a new cam */
 static void motpls_cam_add(ctx_motapp *motapp)
 {
-    int indx_cam, indx;
-
     if (motapp->cam_add == false) {
         return;
     }
 
     pthread_mutex_lock(&motapp->mutex_camlst);
-        motapp->conf->camera_add(motapp);
+        motapp->conf->camera_add(motapp, "", false);
     pthread_mutex_unlock(&motapp->mutex_camlst);
-
-    indx = 1;
-    for (indx_cam=0; indx_cam<motapp->cam_cnt; indx_cam++) {
-        if (indx < motapp->cam_list[indx_cam]->device_id) {
-            indx = motapp->cam_list[indx_cam]->device_id;
-        }
-    }
-    indx++;
-
-    motapp->cam_list[motapp->cam_cnt-1]->device_id = indx;
-    motapp->cam_list[motapp->cam_cnt-1]->conf->device_id = indx;
-    motapp->cam_list[motapp->cam_cnt-1]->conf->webcontrol_port = 0;
 
     motapp->cam_add = false;
 
 }
-
 /* Check for whether to delete a new cam */
 static void motpls_cam_delete(ctx_motapp *motapp)
 {
-    int indx1, indx2, maxcnt;
-    ctx_dev **tmp, *cam;
+    cls_camera *cam;
 
-    if ((motapp->cam_delete == -1) || (motapp->cam_cnt == 0)) {
+    if ((motapp->cam_delete == -1) ||
+        (motapp->cam_cnt == 0)) {
         motapp->cam_delete = -1;
         return;
     }
 
-    if (motapp->cam_delete >= motapp->cam_cnt) {
+    if (motapp->cam_delete >= (int)motapp->cam_cnt) {
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             , _("Invalid camera specified for deletion. %d"), motapp->cam_delete);
         motapp->cam_delete = -1;
@@ -925,39 +774,19 @@ static void motpls_cam_delete(ctx_motapp *motapp)
 
     MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Stopping %s device_id %d")
         , cam->conf->device_name.c_str(), cam->device_id);
-    cam->restart_dev = false;
-    cam->finish_dev = true;
 
-    maxcnt = 100;
-    indx1 = 0;
-    while ((cam->running_dev) && (indx1 < maxcnt)) {
-        SLEEP(0, 50000000)
-        indx1++;
-    }
-    if (indx1 == maxcnt) {
+    cam->stop();
+
+    if (cam->handler_finished == false) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error stopping camera.  Timed out shutting down");
         motapp->cam_delete = -1;
         return;
     }
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Camera stopped");
 
-    tmp = (ctx_dev **)mymalloc(sizeof(ctx_dev *) * (uint)(motapp->cam_cnt));
-    tmp[motapp->cam_cnt-1] = NULL;
-
-    indx2 = 0;
-    for (indx1=0; indx1<motapp->cam_cnt; indx1++) {
-        if (indx1 != motapp->cam_delete) {
-            tmp[indx2] = motapp->cam_list[indx1];
-            indx2++;
-        }
-    }
-
     pthread_mutex_lock(&motapp->mutex_camlst);
-        delete motapp->cam_list[motapp->cam_delete]->conf;
-        delete motapp->cam_list[motapp->cam_delete];
-        myfree(motapp->cam_list);
-        motapp->cam_cnt--;
-        motapp->cam_list = tmp;
+        mydelete(motapp->cam_list[motapp->cam_delete]);
+        motapp->cam_list.erase(motapp->cam_list.begin() + motapp->cam_delete);
     pthread_mutex_unlock(&motapp->mutex_camlst);
 
     motapp->cam_delete = -1;
@@ -967,104 +796,39 @@ static void motpls_cam_delete(ctx_motapp *motapp)
 /** Main entry point of MotionPlus. */
 int main (int argc, char **argv)
 {
-    uint indx;
     ctx_motapp *motapp;
 
     motapp = new ctx_motapp;
+    motlog = new cls_log(motapp);
 
     setup_signals();
-
-    motpls_init(motapp, argc, argv);
-
-    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-        ,_("Motionplus pid: %d"), getpid());
-
+    mythreadname_set("mp",0,"");
 
     while (true) {
-        if (motapp->restart_all) {
-            motpls_restart(motapp);
-        }
-
-        for (indx=0; indx<(uint)motapp->cam_cnt; indx++) {
-            motpls_start_thread_cam(motapp->cam_list[indx]);
-        }
-        for (indx=0; indx<motapp->snd_list.size(); indx++) {
-            motapp->snd_list[indx]->start();
-        }
-
-        if ((motapp->cam_cnt == 0) &&
-            (motapp->snd_list.size() ==0)) {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , _("No camera or sound configuration files specified."));
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , _("Waiting for camera or sound configuration to be added via web control."));
-        }
-
-        while (true) {
+        motpls_init(motapp, argc, argv);
+        while (motpls_check_devices(motapp)) {
             SLEEP(1, 0);
-
-            if (motpls_check_threadcount(motapp)) {
-                break;
-            }
-
-            for (indx=0; indx<(uint)motapp->cam_cnt; indx++) {
-                /* Check if threads wants to be restarted */
-                if ((motapp->cam_list[indx]->running_dev == false) &&
-                    (motapp->cam_list[indx]->restart_dev == true)) {
-                    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                        ,_("MotionPlus camera %d restart")
-                        , motapp->cam_list[indx]->device_id);
-                    motpls_start_thread_cam(motapp->cam_list[indx]);
-                }
-                motpls_watchdog(motapp, indx);
-            }
-            for (indx=0; indx<motapp->snd_list.size(); indx++) {
-                if ((motapp->snd_list[indx]->handler_finished == true) &&
-                    (motapp->snd_list[indx]->restart == true)) {
-                    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                        ,_("MotionPlus sound %d restart")
-                        , motapp->snd_list[indx]->device_id);
-                    motapp->snd_list[indx]->start();
-                }
-                if ((motapp->snd_list[indx]->handler_finished == false) &&
-                    (motapp->snd_list[indx]->handler_stop == true)) {
-                    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                        ,_("MotionPlus stop sound %d")
-                        , motapp->snd_list[indx]->device_id);
-                    motapp->snd_list[indx]->stop();
-                }
-            }
-
             if (motsignal != MOTPLS_SIGNAL_NONE) {
                 motpls_signal_process(motapp);
             }
-
             motpls_cam_add(motapp);
             motpls_cam_delete(motapp);
-
         }
-
-        /* If there are no cameras running, this allows for adding */
-        motpls_cam_add(motapp);
-
-        motapp->finish_all = false;
-
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motionplus devices finished"));
-
-        if (motapp->restart_all) {
-            SLEEP(1, 0);    /* Rest before restarting */
-        } else if (motapp->reload_all) {
+        if (motapp->reload_all) {
             motpls_deinit(motapp);
-            motpls_init(motapp, argc, argv);
+            motapp->reload_all = false;
         } else {
             break;
         }
     }
 
-    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus terminating"));
     motpls_deinit(motapp);
 
-    delete motapp;
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus terminating"));
+
+    mydelete(motlog);
+    mydelete(motapp);
 
     return 0;
 }

@@ -16,6 +16,7 @@
  *
  */
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
@@ -213,7 +214,7 @@ void cls_rotate::process(ctx_image_data *img_data)
     return;
 }
 
-cls_rotate::cls_rotate(ctx_dev *p_cam)
+cls_rotate::cls_rotate(cls_camera *p_cam)
 {
     cam = p_cam;
     int size_norm, size_high;

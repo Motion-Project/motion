@@ -22,7 +22,7 @@
 
     class cls_alg {
         public:
-            cls_alg(ctx_dev *p_cam);
+            cls_alg(cls_camera *p_cam);
             ~cls_alg();
             void diff();
             void noise_tune();
@@ -34,7 +34,7 @@
             void location();
             u_char  *smartmask_final;
         private:
-            ctx_dev *cam;
+            cls_camera *cam;
             int     smartmask_count;
             u_char  *smartmask;
             int     *smartmask_buffer;

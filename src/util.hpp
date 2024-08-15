@@ -83,12 +83,12 @@
     int mycreate_path(const char *path);
     FILE *myfopen(const char *path, const char *mode);
     int myfclose(FILE *fh);
-    void mystrftime(ctx_dev *cam, char *s, size_t mx_sz
+    void mystrftime(cls_camera *cam, char *s, size_t mx_sz
         , const char *usrfmt, const char *fname);
-    void mystrftime(ctx_dev *cam, std::string &rslt
+    void mystrftime(cls_camera *cam, std::string &rslt
         , std::string usrfmt, std::string fname);
     void mystrftime(cls_sound *snd, std::string &dst, std::string fmt);
-    void util_exec_command(ctx_dev *cam, const char *command, const char *filename);
+    void util_exec_command(cls_camera *cam, const char *command, const char *filename);
     void util_exec_command(cls_sound *snd, std::string cmd);
 
     void mythreadname_set(const char *abbr, int threadnbr, const char *threadname);

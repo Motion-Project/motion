@@ -31,7 +31,7 @@
 
             ctx_motapp      *app;
             cls_webu        *webu;
-            ctx_dev         *cam;
+            cls_camera         *cam;
 
             struct MHD_Connection   *connection;
 

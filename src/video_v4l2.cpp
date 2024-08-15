@@ -17,6 +17,7 @@
 */
 
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
@@ -82,7 +83,7 @@ int cls_v4l2cam::xioctl(unsigned long request, void *arg)
 
     do {
         retcd = ioctl(fd_device, request, arg);
-    } while (-1 == retcd && EINTR == errno && !finish);
+    } while (-1 == retcd && EINTR == errno);
 
     return retcd;
 }
@@ -895,7 +896,6 @@ void cls_v4l2cam::init_vars()
 {
     buffer_count= 0;
     pframe = -1;
-    finish = cam->finish_dev;
     buffers = nullptr;
     convert = nullptr;
 
@@ -1173,7 +1173,7 @@ int cls_v4l2cam::next(ctx_image_data *img_data)
     #endif // HAVE_V4L2
 }
 
-cls_v4l2cam::cls_v4l2cam(ctx_dev *p_cam)
+cls_v4l2cam::cls_v4l2cam(cls_camera *p_cam)
 {
     cam = p_cam;
     #ifdef HAVE_V4L2

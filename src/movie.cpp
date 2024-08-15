@@ -17,6 +17,7 @@
  */
 
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
@@ -1747,7 +1748,7 @@ void cls_movie::init_vars()
 
 }
 
-cls_movie::cls_movie(ctx_dev *p_cam, std::string pmovie_type)
+cls_movie::cls_movie(cls_camera *p_cam, std::string pmovie_type)
 {
     cam = p_cam;
 

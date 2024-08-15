@@ -20,13 +20,13 @@
 
 class cls_rotate {
     public:
-        cls_rotate(ctx_dev *p_cam);
+        cls_rotate(cls_camera *p_cam);
         ~cls_rotate();
 
         void process(ctx_image_data *img_data);
 
     private:
-        ctx_dev *cam;
+        cls_camera *cam;
 
         u_char *buffer_norm; /* Temp low res buffer for 90 and 270 degrees rotation */
         u_char *buffer_high; /* Temp high res buffer for 90 and 270 degrees rotation */

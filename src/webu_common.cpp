@@ -17,6 +17,7 @@
 */
 
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
@@ -39,7 +40,7 @@ bool cls_webu_common::check_finish()
         return true;
     }
     if (webua->cam != NULL) {
-        if ((webua->cam->finish_dev == true) ||
+        if ((webua->cam->handler_stop == true) ||
             (webua->cam->passflag == false)) {
             resp_used = 0;
             return true;
@@ -94,7 +95,7 @@ void cls_webu_common::delay()
     clock_gettime(CLOCK_MONOTONIC, &time_last);
 }
 
-void cls_webu_common::img_sizes(ctx_dev *p_cam, int &img_w, int &img_h)
+void cls_webu_common::img_sizes(cls_camera *p_cam, int &img_w, int &img_h)
 {
     if (((webua->cnct_type == WEBUI_CNCT_JPG_SUB) ||
          (webua->cnct_type == WEBUI_CNCT_TS_SUB)) &&
@@ -124,7 +125,7 @@ void cls_webu_common::img_sizes(ctx_dev *p_cam, int &img_w, int &img_h)
     }
 }
 
-void cls_webu_common::img_resize(ctx_dev *p_cam
+void cls_webu_common::img_resize(cls_camera *p_cam
     , uint8_t *src, uint8_t *dst, int dst_w, int dst_h)
 {
     int     retcd, img_sz, src_h, src_w;
@@ -242,7 +243,7 @@ void cls_webu_common::all_getimg()
     unsigned char *dst_img, *src_img;
     ctx_stream_data *strm;
     ctx_all_sizes *all_sz;
-    ctx_dev *p_cam;
+    cls_camera *p_cam;
 
     memset(resp_image, '\0', resp_size);
 
@@ -367,7 +368,7 @@ void cls_webu_common::all_sizes()
     int chk_sz, chk_w, mx_col, mx_row;
     int mx_h, mx_w, img_h, img_w;
     bool dflt_scale;
-    ctx_dev *p_cam;
+    cls_camera *p_cam;
 
     if (app->all_sizes->reset == false) {
         return;

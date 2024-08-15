@@ -17,6 +17,7 @@
 */
 
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
@@ -651,13 +652,8 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
         return MHD_YES;
     }
 
-    if (app->finish_all) {
-        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
-        return MHD_NO;
-    }
-
     if (cam != NULL) {
-        if (cam->finish_dev) {
+        if (cam->handler_stop) {
            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
            return MHD_NO;
         }
@@ -762,7 +758,7 @@ cls_webu_ans::cls_webu_ans(ctx_motapp *p_motapp, const char *uri)
 void cls_webu_ans::deinit_counter()
 {
     ctx_stream_data *strm;
-    ctx_dev *p_cam;
+    cls_camera *p_cam;
     int indx, cam_max, cam_min;
 
     if (cnct_type < WEBUI_CNCT_JPG_MIN) {

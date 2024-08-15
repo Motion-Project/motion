@@ -33,11 +33,11 @@
 
         class cls_libcam {
             public:
-                cls_libcam(ctx_dev *p_cam);
+                cls_libcam(cls_camera *p_cam);
                 ~cls_libcam();
                 int next(ctx_image_data *img_data);
             private:
-                ctx_dev     *cam;
+                cls_camera     *cam;
                 ctx_params  *params;
 
                 std::unique_ptr<libcamera::CameraManager>          cam_mgr;
@@ -83,7 +83,7 @@
         #define LIBCAMVER 0
         class cls_libcam {
             public:
-                cls_libcam(ctx_dev *p_cam);
+                cls_libcam(cls_camera *p_cam);
                 ~cls_libcam();
                 int next(ctx_image_data *img_data);
         };

@@ -17,6 +17,6 @@
  */
 #ifndef _INCLUDE_VIDEO_LOOPBACK_HPP_
 #define _INCLUDE_VIDEO_LOOPBACK_HPP_
-    void vlp_putpipe(ctx_dev *cam);
-    void vlp_init(ctx_dev *cam);
+    void vlp_putpipe(cls_camera *cam);
+    void vlp_init(cls_camera *cam);
 #endif /* _INCLUDE_VIDEO_LOOPBACK_HPP_ */

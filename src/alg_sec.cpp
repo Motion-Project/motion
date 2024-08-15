@@ -17,6 +17,7 @@
  */
 
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "util.hpp"
 #include "logger.hpp"
@@ -547,7 +548,6 @@ void cls_algsec::handler()
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Secondary detection starting."));
 
     handler_finished = false;
-    cam->motapp->threads_running++;
     handler_stop = false;
 
     interval = 1000000L / cfg_framerate;
@@ -612,9 +612,6 @@ void cls_algsec::deinit()
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 ,_("Shutdown of secondary detector failed"));
             pthread_kill(handler_thread.native_handle(), SIGVTALRM);
-            pthread_mutex_lock(&cam->motapp->global_lock);
-                cam->motapp->threads_running--;
-            pthread_mutex_unlock(&cam->motapp->global_lock);
         }
     }
 
@@ -671,14 +668,14 @@ void cls_algsec::detect()
     #endif
 }
 
-cls_algsec::cls_algsec(ctx_dev *p_cam)
+cls_algsec::cls_algsec(cls_camera *p_cam)
 {
     #ifdef HAVE_OPENCV
         cam = p_cam;
-        mythreadname_set("cv",cam->threadnr,cam->conf->device_name.c_str());
+        mythreadname_set("cv",cam->device_id, cam->conf->device_name.c_str());
             load_params();
             start_model();
-        mythreadname_set("ml",cam->threadnr,cam->conf->device_name.c_str());
+        mythreadname_set("cl",cam->device_id, cam->conf->device_name.c_str());
     #else
         (void)p_cam;
     #endif

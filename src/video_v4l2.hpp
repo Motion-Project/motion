@@ -52,13 +52,13 @@ typedef vec_palette::iterator it_palette;
 
 class cls_v4l2cam {
     public:
-        cls_v4l2cam(ctx_dev *p_cam);
+        cls_v4l2cam(cls_camera *p_cam);
         ~cls_v4l2cam();
 
         int next(ctx_image_data *img_data);
 
     private:
-        ctx_dev *cam;
+        cls_camera *cam;
         cls_convert *convert;
 
         /* Isolated variables from user config*/
@@ -80,7 +80,6 @@ class cls_v4l2cam {
         vec_palette     palette;
 
         int                     pframe;
-        volatile bool           finish;
 
         #ifdef HAVE_V4L2
             struct v4l2_capability      vidcap;

@@ -17,17 +17,8 @@
  *
  */
 
-/* TODO:
- * Determine if we need to have multiple requests or buffers.
- *     (The current logic is just a single request and buffer but
- *      this may need to change to allow for multiple requests or buffers
- *      so as to reduce latency.  As of now, it is kept simple with
- *      a single request and buffer.)
- * Need to determine flags for designating start up, shutdown
- *     etc. and possibly add mutex locking.  Startup currently has
- *     a SLEEP to allow for initialization but this should change
- */
 #include "motionplus.hpp"
+#include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
@@ -833,11 +824,12 @@ int cls_libcam::next(ctx_image_data *img_data)
     #endif
 }
 
-cls_libcam::cls_libcam(ctx_dev *p_cam)
+cls_libcam::cls_libcam(cls_camera *p_cam)
 {
     #ifdef HAVE_LIBCAM
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
         cam = p_cam;
+        params = nullptr;
         conf_libcam_params = cam->conf->libcam_params;
         conf_libcam_device = cam->conf->libcam_device;
         conf_width          = cam->conf->width;

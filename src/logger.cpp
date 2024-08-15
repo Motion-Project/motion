@@ -53,7 +53,7 @@ void ff_log(void *var1, int errnbr, const char *fmt, va_list vlist)
 
     fflvl = ((motlog->log_fflevel -2) * 8);
 
-    if (errnbr < fflvl) {
+    if (errnbr <= fflvl ) {
         MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,"%s",buff );
     }
 }
@@ -256,6 +256,7 @@ cls_log::cls_log(ctx_motapp *p_motapp)
     c_motapp = p_motapp;
     log_mode = LOGMODE_NONE;
     log_level = LEVEL_DEFAULT;
+    log_fflevel = 4;
     log_file_ptr  = nullptr;
     log_file_name = "";
     flood_cnt = 0;
