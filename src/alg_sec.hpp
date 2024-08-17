@@ -34,17 +34,21 @@ class cls_algsec {
     public:
         cls_algsec(cls_camera *p_cam);
         ~cls_algsec();
+
         void        detect();
         bool        detected;
+
         std::string method;
         pthread_mutex_t mutex;
 
+        bool            handler_stop;
+        bool            handler_finished;
+        pthread_t       handler_thread;
+        void            handler();
+
     private:
         #ifdef HAVE_OPENCV
-            cls_camera         *cam;
-            std::thread     handler_thread;
-            bool            handler_finished;
-            bool            handler_stop;
+            cls_camera      *cam;
             bool            in_process;
             int             frame_cnt;
             int             frame_missed;
@@ -56,8 +60,10 @@ class cls_algsec {
             int             cfg_log_level;
             std::string     cfg_target_dir;
 
+            void stop();
+            void start();
+
             void deinit();
-            void handler();
             void start_model();
             void load_params();
             void params_defaults();

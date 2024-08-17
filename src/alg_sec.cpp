@@ -39,6 +39,12 @@
 using namespace cv;
 using namespace dnn;
 
+static void *algsec_handler(void *arg)
+{
+    ((cls_algsec *)arg)->handler();
+    return nullptr;
+}
+
 void cls_algsec::image_show(Mat &mat_dst)
 {
     //std::string testdir;
@@ -538,45 +544,6 @@ void cls_algsec::load_params()
 
     frame_cnt = frame_interval;
 
-}
-
-/**Detection thread processing loop */
-void cls_algsec::handler()
-{
-    long interval;
-
-    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Secondary detection starting."));
-
-    handler_finished = false;
-    handler_stop = false;
-
-    interval = 1000000L / cfg_framerate;
-
-    while (handler_stop == false) {
-        if (in_process){
-            if (method == "haar") {
-                detect_haar();
-            } else if (method == "hog") {
-                detect_hog();
-            } else if (method == "dnn") {
-                detect_dnn();
-            }
-            if (method == "none") { /* Error during detect */
-                handler_stop = true;
-            }
-            in_process = false;
-        } else {
-            SLEEP(0,interval)
-        }
-    }
-    handler_stop = false;
-    handler_finished = true;
-    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Secondary detection exiting."));
-}
-
-/**load the models and start handler processing thread */
-void cls_algsec::start_model()
-{
     if (method == "haar") {
         load_haar();
     } else if (method == "hog") {
@@ -587,40 +554,117 @@ void cls_algsec::start_model()
         method = "none";
     }
 
-    /* If model fails to load, the method is changed to none*/
+}
+
+/**Detection thread processing loop */
+void cls_algsec::handler()
+{
+    long interval;
+
+    mythreadname_set("cv",cam->device_id, cam->cfg->device_name.c_str());
+
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Secondary detection starting."));
+
+    handler_finished = false;
+    handler_stop = false;
+
+    load_params();
+
+    interval = 1000000L / cfg_framerate;
+
+    while ((handler_stop == false) && (method != "none")) {
+        if (in_process){
+            if (method == "haar") {
+                detect_haar();
+            } else if (method == "hog") {
+                detect_hog();
+            } else if (method == "dnn") {
+                detect_dnn();
+            }
+            in_process = false;
+        } else {
+            SLEEP(0,interval)
+        }
+    }
+
+    handler_stop = false;
     handler_finished = true;
-    if ((method == "haar") ||
-        (method == "hog") ||
-        (method == "dnn")) {
-        handler_thread = std::thread(&cls_algsec::handler, this);
-        handler_thread.detach();
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Secondary detection stopped."));
+
+    pthread_exit(nullptr);
+}
+
+void cls_algsec::start()
+{
+    int retcd;
+    pthread_attr_t thread_attr;
+
+    if (cam->cfg->secondary_method == "none") {
+        return;
+    }
+
+    if (handler_finished == true) {
+        handler_finished = false;
+        handler_stop = false;
+        pthread_attr_init(&thread_attr);
+        pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
+        retcd = pthread_create(&handler_thread, &thread_attr, &algsec_handler, this);
+        if (retcd != 0) {
+            MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start secondary detection"));
+            handler_finished = true;
+            handler_stop = true;
+        }
+        pthread_attr_destroy(&thread_attr);
     }
 }
 
-/** Shut down the secondary detection components */
-void cls_algsec::deinit()
+void cls_algsec::stop()
 {
-    int waitcnt = 0;
+    int waitcnt;
 
     if (handler_finished == false) {
         handler_stop = true;
-        while ((handler_finished == false) && (waitcnt <10)){
+        waitcnt = 0;
+        while ((handler_finished == false) && (waitcnt < cam->cfg->watchdog_tmo)){
             SLEEP(1,0)
             waitcnt++;
         }
-        if (waitcnt == 10) {
+        if (waitcnt == cam->cfg->watchdog_tmo) {
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
-                ,_("Shutdown of secondary detector failed"));
-            pthread_kill(handler_thread.native_handle(), SIGVTALRM);
+                , _("Normal shutdown of camera failed"));
+            if (cam->cfg->watchdog_kill > 0) {
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    ,_("Waiting additional %d seconds (watchdog_kill).")
+                    ,cam->cfg->watchdog_kill);
+                waitcnt = 0;
+                while ((handler_finished == false) && (waitcnt < cam->cfg->watchdog_kill)){
+                    SLEEP(1,0)
+                    waitcnt++;
+                }
+                if (waitcnt == cam->cfg->watchdog_kill) {
+                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                        , _("No response to shutdown.  Killing it."));
+                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                        , _("Memory leaks will occur."));
+                    pthread_kill(handler_thread, SIGVTALRM);
+                }
+            } else {
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    , _("watchdog_kill set to terminate application."));
+                exit(1);
+            }
         }
+        handler_finished = true;
     }
-
     pthread_mutex_destroy(&mutex);
     myfree(image_norm);
     mydelete(params);
+
 }
 
 #endif
+
+
 /*Invoke the secondary detetction method*/
 void cls_algsec::detect()
 {
@@ -662,7 +706,7 @@ void cls_algsec::detect()
 
         /* If the method was changed to none, an error occurred*/
         if (method == "none") {
-            deinit();
+            stop();
         }
 
     #endif
@@ -672,10 +716,11 @@ cls_algsec::cls_algsec(cls_camera *p_cam)
 {
     #ifdef HAVE_OPENCV
         cam = p_cam;
-        mythreadname_set("cv",cam->device_id, cam->cfg->device_name.c_str());
-            load_params();
-            start_model();
-        mythreadname_set("cl",cam->device_id, cam->cfg->device_name.c_str());
+        handler_finished = true;
+        handler_stop = true;
+        image_norm = nullptr;
+        params = nullptr;
+        start();
     #else
         (void)p_cam;
     #endif
@@ -684,7 +729,7 @@ cls_algsec::cls_algsec(cls_camera *p_cam)
 cls_algsec::~cls_algsec()
 {
     #ifdef HAVE_OPENCV
-        deinit();
+        stop();
     #endif
 }
 
