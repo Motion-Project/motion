@@ -792,6 +792,7 @@ static void motpls_cam_delete(ctx_motapp *app)
     pthread_mutex_lock(&app->mutex_camlst);
         mydelete(app->cam_list[app->cam_delete]);
         app->cam_list.erase(app->cam_list.begin() + app->cam_delete);
+        app->cam_cnt--;
     pthread_mutex_unlock(&app->mutex_camlst);
 
     app->cam_delete = -1;
