@@ -694,7 +694,6 @@ static void motpls_init(ctx_motapp *app, int argc, char *argv[])
     motpls_device_ids(app);
 
     app->dbse = new cls_dbse(app);
-    app->webu = new cls_webu(app);
 
     motpls_allcams_init(app);
 
@@ -713,6 +712,9 @@ static void motpls_init(ctx_motapp *app, int argc, char *argv[])
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             , _("Waiting for camera or sound configuration to be added via web control."));
     }
+
+    /* Start web control last */
+    app->webu = new cls_webu(app);
 
 }
 
