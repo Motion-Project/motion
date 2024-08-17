@@ -720,6 +720,7 @@ cls_algsec::cls_algsec(cls_camera *p_cam)
         handler_stop = true;
         image_norm = nullptr;
         params = nullptr;
+        method = "none";
         handler_startup();
     #else
         (void)p_cam;
