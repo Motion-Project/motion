@@ -1272,7 +1272,7 @@ void cls_movie::stop()
     if ((movie_type == "norm") || (movie_type == "motion") || (movie_type == "extpipe")) {
         cam->filetype = FTYPE_MOVIE;
         on_movie_end();
-        cam->motapp->dbse->exec(cam, full_nm, "movie_end");
+        cam->app->dbse->exec(cam, full_nm, "movie_end");
         if ((cam->cfg->movie_retain == "secondary") &&
             (cam->algsec->detected == false) &&
             (cam->algsec->method != "none")) {
@@ -1280,15 +1280,15 @@ void cls_movie::stop()
                 MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     , _("Unable to remove file %s"), full_nm.c_str());
             } else {
-                cam->motapp->dbse->movielist_add(cam, this, ts);
+                cam->app->dbse->movielist_add(cam, this, ts);
             }
         } else {
-            cam->motapp->dbse->movielist_add(cam, this, ts);
+            cam->app->dbse->movielist_add(cam, this, ts);
         }
     } else if (movie_type == "timelapse") {
         cam->filetype = FTYPE_MOVIE_TIMELAPSE;
         on_movie_end();
-        cam->motapp->dbse->exec(cam, full_nm, "movie_end");
+        cam->app->dbse->exec(cam, full_nm, "movie_end");
     } else {
         MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO,_("Invalid movie type"));
     }
@@ -1498,7 +1498,7 @@ void cls_movie::start_norm()
 
     on_movie_start();
 
-    cam->motapp->dbse->exec(cam, full_nm, "movie_start");
+    cam->app->dbse->exec(cam, full_nm, "movie_start");
 
     is_running = true;
 
@@ -1558,7 +1558,7 @@ void cls_movie::start_motion()
 
     cam->filetype = FTYPE_MOVIE;
     on_movie_start();
-    cam->motapp->dbse->exec(cam, full_nm, "movie_start");
+    cam->app->dbse->exec(cam, full_nm, "movie_start");
     is_running = true;
 
 }
@@ -1614,7 +1614,7 @@ void cls_movie::start_timelapse()
 
     cam->filetype = FTYPE_MOVIE_TIMELAPSE;
     on_movie_start();
-    cam->motapp->dbse->exec(cam, full_nm, "movie_start");
+    cam->app->dbse->exec(cam, full_nm, "movie_start");
 
     is_running = true;
 }
@@ -1664,7 +1664,7 @@ void cls_movie::start_extpipe()
 
     cam->filetype = FTYPE_MOVIE;
     on_movie_start();
-    cam->motapp->dbse->exec(cam, full_nm, "movie_start");
+    cam->app->dbse->exec(cam, full_nm, "movie_start");
     is_running = true;
 
 }

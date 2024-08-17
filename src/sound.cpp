@@ -946,9 +946,9 @@ void cls_sound::handler_shutdown()
 
 }
 
-cls_sound::cls_sound(ctx_motapp *p_motapp)
+cls_sound::cls_sound(ctx_motapp *p_app)
 {
-    motapp = p_motapp;
+    app = p_app;
     handler_finished = true;
     handler_stop = true;
     restart = false;

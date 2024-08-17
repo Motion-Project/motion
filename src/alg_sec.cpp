@@ -522,7 +522,7 @@ void cls_algsec::load_params()
     in_process = false;
     handler_stop = false;
     cfg_framerate = cam->cfg->framerate;
-    cfg_log_level = cam->motapp->cfg->log_level;
+    cfg_log_level = cam->app->cfg->log_level;
     cfg_target_dir = cam->cfg->target_dir;
 
     if (method == "none") {

@@ -156,7 +156,7 @@ void cls_camera::ring_process()
         current_image = &imgs.image_ring[imgs.ring_out];
 
         if (current_image->shot <= cfg->framerate) {
-            if (motapp->cfg->log_level >= DBG) {
+            if (app->cfg->log_level >= DBG) {
                 ring_process_debug();
             }
             ring_process_image();
@@ -245,7 +245,7 @@ void cls_camera::detected_trigger()
                 util_exec_command(this, cfg->on_event_start.c_str(), NULL);
             }
             movie_start();
-            motapp->dbse->exec(this, "", "event_start");
+            app->dbse->exec(this, "", "event_start");
 
             if ((cfg->picture_output == "first") ||
                 (cfg->picture_output == "best") ||
@@ -594,7 +594,7 @@ void cls_camera::init_values()
 
     noise = cfg->noise_level;
     passflag = false;
-    motapp->all_sizes->reset= true;
+    app->all_sizes->reset= true;
     threshold = cfg->threshold;
     device_status = STATUS_CLOSED;
     startup_frames = (cfg->framerate * 2) + cfg->pre_capture + cfg->minimum_motion_frames;
@@ -613,7 +613,7 @@ void cls_camera::init_values()
         MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
         movie_passthrough = false;
     }
-    if (motapp->pause) {
+    if (app->pause) {
         pause = true;
     } else {
         pause = cfg->pause;
@@ -686,7 +686,7 @@ void cls_camera::cleanup()
             util_exec_command(this, cfg->on_event_end.c_str(), NULL);
         }
         movie_end();
-        motapp->dbse->exec(this, "", "event_end");
+        app->dbse->exec(this, "", "event_end");
     }
 
     webu_getimg_deinit(this);
@@ -1229,7 +1229,7 @@ void cls_camera::actions_event()
                 util_exec_command(this, cfg->on_event_end.c_str(), NULL);
             }
             movie_end();
-            motapp->dbse->exec(this, "", "event_end");
+            app->dbse->exec(this, "", "event_end");
 
             track_center();
 
@@ -1533,9 +1533,9 @@ void cls_camera::handler_shutdown()
 
 }
 
-cls_camera::cls_camera(ctx_motapp *p_motapp)
+cls_camera::cls_camera(ctx_motapp *p_app)
 {
-    motapp = p_motapp;
+    app = p_app;
     handler_finished = true;
     handler_stop = true;
     restart = false;

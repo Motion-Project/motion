@@ -116,10 +116,10 @@ struct ctx_stream {
 
 class cls_camera {
     public:
-        cls_camera(ctx_motapp *p_motapp);
+        cls_camera(ctx_motapp *p_app);
         ~cls_camera();
 
-        ctx_motapp      *motapp;
+        ctx_motapp      *app;
         cls_config      *cfg;
         cls_config      *conf_src;
         ctx_images      imgs;

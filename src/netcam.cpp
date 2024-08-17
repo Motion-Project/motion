@@ -1615,7 +1615,6 @@ void cls_netcam::set_parms ()
 {
     p_it    it;
 
-    motapp = cam->motapp;
     params = new ctx_params;
 
     pthread_mutex_init(&mutex, nullptr);

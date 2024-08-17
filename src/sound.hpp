@@ -90,7 +90,7 @@ struct ctx_snd_info {
 
 class cls_sound {
     public:
-        cls_sound(ctx_motapp *p_motapp);
+        cls_sound(ctx_motapp *p_app);
         ~cls_sound();
 
         enum DEVICE_STATUS      device_status;
@@ -111,7 +111,7 @@ class cls_sound {
         void            handler_shutdown();
 
     private:
-        ctx_motapp      *motapp;
+        ctx_motapp      *app;
         int             watchdog;
 
         void cleanup();

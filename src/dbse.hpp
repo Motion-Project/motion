@@ -89,7 +89,7 @@
                 void pgsqldb_init();
                 void pgsqldb_movielist();
             #endif
-            ctx_motapp *motapp;
+            ctx_motapp      *app;
             enum DBSE_ACT       dbse_action;    /* action to perform with query*/
             bool                table_ok;       /* bool of whether table exists*/
             bool                is_open;

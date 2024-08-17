@@ -147,7 +147,6 @@ class cls_netcam {
         struct timespec           frame_prev_tm;    /* The time set before calling the av functions */
         struct timespec           frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
 
-        ctx_motapp                *motapp;          /* Pointer to parent application context  */
         ctx_params                *params;          /* parameters for the camera */
 
         std::string               threadname;       /* The thread name*/

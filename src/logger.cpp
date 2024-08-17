@@ -251,9 +251,9 @@ void cls_log::log_stop()
     }
 }
 
-cls_log::cls_log(ctx_motapp *p_motapp)
+cls_log::cls_log(ctx_motapp *p_app)
 {
-    c_motapp = p_motapp;
+    app = p_app;
     log_mode = LOGMODE_NONE;
     log_level = LEVEL_DEFAULT;
     log_fflevel = 4;

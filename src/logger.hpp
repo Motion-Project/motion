@@ -56,14 +56,14 @@
 
     class cls_log {
         public:
-            cls_log(ctx_motapp *p_motapp);
+            cls_log(ctx_motapp *p_app);
             ~cls_log();
             int     log_level;
             int     log_fflevel;
             void set_log_file(std::string pname);
             void write_msg(int loglvl, int msg_type, int flgerr, int flgfnc, ...);
         private:
-            ctx_motapp          *c_motapp;
+            ctx_motapp          *app;
             pthread_mutex_t     mtx;
             int                 log_mode;
             FILE                *log_file_ptr;

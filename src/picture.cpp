@@ -68,7 +68,7 @@ void cls_picture::process_norm()
             save_norm(filename,cam->current_image->image_norm);
         }
         on_picture_save_command(filename);
-        cam->motapp->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->exec(cam, filename, "pic_save");
     }
 }
 
@@ -81,14 +81,14 @@ void cls_picture::process_motion()
         cam->filetype = FTYPE_IMAGE_MOTION;
         save_norm(filename, cam->imgs.image_motion.image_norm);
         on_picture_save_command(filename);
-        cam->motapp->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->exec(cam, filename, "pic_save");
 
     } else if (cam->cfg->picture_output_motion == "roi") {
         picname(filename,"%s/%sr.%s", cam->cfg->picture_filename, cam->cfg->picture_type);
         cam->filetype = FTYPE_IMAGE_ROI;
         save_roi(filename, cam->current_image->image_norm);
         on_picture_save_command(filename);
-        cam->motapp->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->exec(cam, filename, "pic_save");
     }
 }
 
@@ -114,7 +114,7 @@ void cls_picture::process_snapshot()
             save_norm(filename, cam->current_image->image_norm);
         }
         on_picture_save_command(filename);
-        cam->motapp->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->exec(cam, filename, "pic_save");
 
         /* Update symbolic link */
         picname(linkpath,"%s/%s.%s"
@@ -138,7 +138,7 @@ void cls_picture::process_snapshot()
             save_norm(filename, cam->current_image->image_norm);
         }
         on_picture_save_command(filename);
-        cam->motapp->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->exec(cam, filename, "pic_save");
     }
 
     cam->action_snapshot = false;
@@ -167,7 +167,7 @@ void cls_picture::process_preview()
             save_norm(filename, cam->imgs.image_preview.image_norm);
         }
         on_picture_save_command(filename);
-        cam->motapp->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->exec(cam, filename, "pic_save");
 
         /* Restore global context values. */
         cam->current_image = saved_current_image;

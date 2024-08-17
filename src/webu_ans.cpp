@@ -704,10 +704,10 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
 
 }
 
-cls_webu_ans::cls_webu_ans(ctx_motapp *p_motapp, const char *uri)
+cls_webu_ans::cls_webu_ans(ctx_motapp *p_app, const char *uri)
 {
-    app = p_motapp;
-    webu = p_motapp->webu;
+    app = p_app;
+    webu = p_app->webu;
 
     char *tmplang;
 
