@@ -1484,6 +1484,8 @@ void cls_camera::start()
         retcd = pthread_create(&handler_thread, &thread_attr, &camera_handler, this);
         if (retcd != 0) {
             MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start camera thread."));
+            handler_finished = true;
+            handler_stop = true;
         }
         pthread_attr_destroy(&thread_attr);
     }

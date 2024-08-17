@@ -104,15 +104,17 @@ class cls_sound {
         ctx_snd_info    *snd_info;
         int             threadnr;
         bool            restart;
+
         bool            handler_stop;
         bool            handler_finished;
+        pthread_t       handler_thread;
+        void            handler();
 
     private:
         ctx_motapp      *motapp;
-        std::thread     handler_thread;
+        int             watchdog;
 
         void cleanup();
-        void handler();
         void init_values();
         void init();
         void init_alerts(ctx_snd_alert  *tmp_alert);

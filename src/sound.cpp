@@ -23,6 +23,13 @@
 #include "util.hpp"
 #include "sound.hpp"
 
+static void *sound_handler(void *arg)
+{
+    ((cls_sound *)arg)->handler();
+
+    return nullptr;
+}
+
 void cls_sound::init_values()
 {
     #ifdef HAVE_FFTW3
@@ -852,10 +859,9 @@ void cls_sound::check_levels()
 void cls_sound::handler()
 {
     device_status = STATUS_INIT;
-    handler_finished = false;
-    handler_stop = false;
 
     while (handler_stop == false) {
+        watchdog = cfg->watchdog_tmo;
         init();
         capture();
         check_levels();
@@ -869,10 +875,14 @@ void cls_sound::handler()
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Sound exiting"));
 
     handler_finished = true;
+    pthread_exit(nullptr);
 }
 
 void cls_sound::start()
 {
+    int retcd;
+    pthread_attr_t thread_attr;
+
     #if  !defined(HAVE_FFTW3) || (!defined(HAVE_ALSA) && !defined(HAVE_PULSE))
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Required packages not installed"));
         device_status = STATUS_CLOSED;
@@ -880,26 +890,58 @@ void cls_sound::start()
     #endif
 
     if (handler_finished == true) {
-        handler_thread = std::thread(&cls_sound::handler, this);
-        handler_thread.detach();
+        handler_finished = false;
+        handler_stop = false;
+        pthread_attr_init(&thread_attr);
+        pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
+        retcd = pthread_create(&handler_thread, &thread_attr, &sound_handler, this);
+        if (retcd != 0) {
+            MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start sound frequency detection loop."));
+            handler_finished = true;
+            handler_stop = true;
+        }
+        pthread_attr_destroy(&thread_attr);
     }
 }
 
 void cls_sound::stop()
 {
-    int waitcnt = 0;
+    int waitcnt;
 
     if (handler_finished == false) {
         handler_stop = true;
-        while ((handler_finished == false) && (waitcnt <10)){
+        waitcnt = 0;
+        while ((handler_finished == false) && (waitcnt < cfg->watchdog_tmo)){
             SLEEP(1,0)
             waitcnt++;
         }
-        if (waitcnt == 10) {
+        if (waitcnt == cfg->watchdog_tmo) {
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
-                ,_("Shutdown of sound frequency detection failed"));
-            pthread_kill(handler_thread.native_handle(), SIGVTALRM);
+                , _("Normal shutdown of sound frequency detection failed"));
+            if (cfg->watchdog_kill > 0) {
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    ,_("Waiting additional %d seconds (watchdog_kill).")
+                    ,cfg->watchdog_kill);
+                waitcnt = 0;
+                while ((handler_finished == false) && (waitcnt < cfg->watchdog_kill)){
+                    SLEEP(1,0)
+                    waitcnt++;
+                }
+                if (waitcnt == cfg->watchdog_kill) {
+                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                        , _("No response to shutdown.  Killing it."));
+                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                        , _("Memory leaks will occur."));
+                    pthread_kill(handler_thread, SIGVTALRM);
+                }
+            } else {
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    , _("watchdog_kill set to terminate application."));
+                exit(1);
+            }
         }
+        handler_finished = true;
+        watchdog = cfg->watchdog_tmo;
     }
 
 }
@@ -910,6 +952,7 @@ cls_sound::cls_sound(ctx_motapp *p_motapp)
     handler_finished = true;
     handler_stop = true;
     restart = false;
+    watchdog = 30;
 }
 
 cls_sound::~cls_sound()
