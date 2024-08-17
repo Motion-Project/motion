@@ -594,7 +594,7 @@ void cls_algsec::handler()
     pthread_exit(nullptr);
 }
 
-void cls_algsec::start()
+void cls_algsec::handler_startup()
 {
     int retcd;
     pthread_attr_t thread_attr;
@@ -618,7 +618,7 @@ void cls_algsec::start()
     }
 }
 
-void cls_algsec::stop()
+void cls_algsec::handler_shutdown()
 {
     int waitcnt;
 
@@ -706,7 +706,7 @@ void cls_algsec::detect()
 
         /* If the method was changed to none, an error occurred*/
         if (method == "none") {
-            stop();
+            handler_shutdown();
         }
 
     #endif
@@ -720,7 +720,7 @@ cls_algsec::cls_algsec(cls_camera *p_cam)
         handler_stop = true;
         image_norm = nullptr;
         params = nullptr;
-        start();
+        handler_startup();
     #else
         (void)p_cam;
     #endif
@@ -729,7 +729,7 @@ cls_algsec::cls_algsec(cls_camera *p_cam)
 cls_algsec::~cls_algsec()
 {
     #ifdef HAVE_OPENCV
-        stop();
+        handler_shutdown();
     #endif
 }
 

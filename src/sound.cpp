@@ -878,7 +878,7 @@ void cls_sound::handler()
     pthread_exit(nullptr);
 }
 
-void cls_sound::start()
+void cls_sound::handler_startup()
 {
     int retcd;
     pthread_attr_t thread_attr;
@@ -904,7 +904,7 @@ void cls_sound::start()
     }
 }
 
-void cls_sound::stop()
+void cls_sound::handler_shutdown()
 {
     int waitcnt;
 

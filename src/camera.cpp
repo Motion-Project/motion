@@ -1471,7 +1471,7 @@ void cls_camera::handler()
     pthread_exit(NULL);
 }
 
-void cls_camera::start()
+void cls_camera::handler_startup()
 {
     int retcd;
     pthread_attr_t thread_attr;
@@ -1491,7 +1491,7 @@ void cls_camera::start()
     }
 }
 
-void cls_camera::stop()
+void cls_camera::handler_shutdown()
 {
     int waitcnt;
 

@@ -60,11 +60,9 @@ class cls_algsec {
             int             cfg_log_level;
             std::string     cfg_target_dir;
 
-            void stop();
-            void start();
+            void handler_startup();
+            void handler_shutdown();
 
-            void deinit();
-            void start_model();
             void load_params();
             void params_defaults();
             void params_model();

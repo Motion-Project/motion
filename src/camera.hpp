@@ -118,8 +118,6 @@ class cls_camera {
     public:
         cls_camera(ctx_motapp *p_motapp);
         ~cls_camera();
-        void start();
-        void stop();
 
         ctx_motapp      *motapp;
         cls_config      *cfg;
@@ -143,6 +141,8 @@ class cls_camera {
         bool            handler_finished;
         pthread_t       handler_thread;
         void            handler();
+        void            handler_startup();
+        void            handler_shutdown();
 
         int     threadnr;
         int     noise;

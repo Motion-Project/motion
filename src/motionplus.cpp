@@ -51,20 +51,20 @@ static void motpls_signal_process(ctx_motapp *motapp)
         motapp->webu->wb_finish = true;
         for (indx=0; indx<motapp->cam_cnt; indx++) {
             motapp->cam_list[indx]->event_stop = true;
-            motapp->cam_list[indx]->stop();
+            motapp->cam_list[indx]->handler_shutdown();
         }
         for (indx=0; indx<motapp->snd_cnt; indx++) {
-            motapp->snd_list[indx]->stop();
+            motapp->snd_list[indx]->handler_shutdown();
         }
         break;
     case MOTPLS_SIGNAL_SIGTERM:     /* Quit application */
         motapp->webu->wb_finish = true;
         for (indx=0; indx<motapp->cam_cnt; indx++) {
             motapp->cam_list[indx]->event_stop = true;
-            motapp->cam_list[indx]->stop();
+            motapp->cam_list[indx]->handler_shutdown();
         }
         for (indx=0; indx<motapp->snd_cnt; indx++) {
-            motapp->snd_list[indx]->stop();
+            motapp->snd_list[indx]->handler_shutdown();
         }
     default:
         break;
@@ -598,7 +598,7 @@ static void motpls_watchdog(ctx_motapp *motapp, uint camindx)
             motapp->cam_list[indx]->netcam_high->handler_stop = true;
         }
 
-        motapp->cam_list[indx]->stop();
+        motapp->cam_list[indx]->handler_shutdown();
         if (motsignal != MOTPLS_SIGNAL_SIGTERM) {
             motapp->cam_list[indx]->handler_stop = false;   /*Trigger a restart*/
         }
@@ -620,7 +620,7 @@ static bool motpls_check_devices(ctx_motapp *motapp)
         if (motapp->cam_list[indx]->handler_finished == false) {
             retcd = true;
         } else if (motapp->cam_list[indx]->handler_stop == false) {
-            motapp->cam_list[indx]->start();
+            motapp->cam_list[indx]->handler_startup();
             retcd = true;
         }
     }
@@ -628,7 +628,7 @@ static bool motpls_check_devices(ctx_motapp *motapp)
         if (motapp->snd_list[indx]->handler_finished == false) {
             retcd = true;
         } else if (motapp->snd_list[indx]->handler_stop == false) {
-            motapp->snd_list[indx]->start();
+            motapp->snd_list[indx]->handler_startup();
             retcd = true;
         }
     }
@@ -702,10 +702,10 @@ static void motpls_init(ctx_motapp *motapp, int argc, char *argv[])
 
     if ((motapp->cam_cnt > 0) || (motapp->snd_cnt > 0)) {
         for (indx=0; indx<motapp->cam_cnt; indx++) {
-            motapp->cam_list[indx]->start();
+            motapp->cam_list[indx]->handler_startup();
         }
         for (indx=0; indx<motapp->snd_cnt; indx++) {
-            motapp->snd_list[indx]->start();
+            motapp->snd_list[indx]->handler_startup();
         }
     } else {
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
@@ -780,7 +780,7 @@ static void motpls_cam_delete(ctx_motapp *motapp)
     MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Stopping %s device_id %d")
         , cam->cfg->device_name.c_str(), cam->device_id);
 
-    cam->stop();
+    cam->handler_shutdown();
 
     if (cam->handler_finished == false) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error stopping camera.  Timed out shutting down");

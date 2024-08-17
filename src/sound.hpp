@@ -92,8 +92,6 @@ class cls_sound {
     public:
         cls_sound(ctx_motapp *p_motapp);
         ~cls_sound();
-        void start();
-        void stop();
 
         enum DEVICE_STATUS      device_status;
 
@@ -109,6 +107,8 @@ class cls_sound {
         bool            handler_finished;
         pthread_t       handler_thread;
         void            handler();
+        void            handler_startup();
+        void            handler_shutdown();
 
     private:
         ctx_motapp      *motapp;
