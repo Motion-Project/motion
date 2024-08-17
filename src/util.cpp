@@ -554,9 +554,11 @@ void mythreadname_set(const char *abbr, int threadnbr, const char *threadname)
 
     char tname[32];
     if (abbr != NULL) {
-        snprintf(tname, sizeof(tname), "%s%02d%s%s",abbr,threadnbr,
-             threadname ? ":" : "",
-             threadname ? threadname : "");
+        if (strlen(threadname) == 0) {
+            snprintf(tname, sizeof(tname), "%s%02d",abbr,threadnbr);
+        } else {
+            snprintf(tname, sizeof(tname), "%s%02d:%s",abbr,threadnbr, threadname);
+        }
     } else {
         snprintf(tname, sizeof(tname), "%s",threadname);
     }
