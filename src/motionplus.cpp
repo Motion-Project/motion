@@ -588,14 +588,14 @@ static void motpls_watchdog(ctx_motapp *motapp, uint camindx)
             pthread_mutex_unlock(&motapp->cam_list[indx]->netcam->mutex);
             pthread_mutex_unlock(&motapp->cam_list[indx]->netcam->mutex_pktarray);
             pthread_mutex_unlock(&motapp->cam_list[indx]->netcam->mutex_transfer);
-            motapp->cam_list[indx]->netcam->finish = true;
+            motapp->cam_list[indx]->netcam->handler_stop = true;
         }
         if ((motapp->cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
             (motapp->cam_list[indx]->netcam_high != nullptr)) {
             pthread_mutex_unlock(&motapp->cam_list[indx]->netcam_high->mutex);
             pthread_mutex_unlock(&motapp->cam_list[indx]->netcam_high->mutex_pktarray);
             pthread_mutex_unlock(&motapp->cam_list[indx]->netcam_high->mutex_transfer);
-            motapp->cam_list[indx]->netcam_high->finish = true;
+            motapp->cam_list[indx]->netcam_high->handler_stop = true;
         }
 
         motapp->cam_list[indx]->stop();

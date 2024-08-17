@@ -77,7 +77,6 @@ class cls_netcam {
         int next(ctx_image_data *img_data);
 
         bool                      interrupted;      /* Boolean for whether interrupt has been tripped */
-        bool                      finish;           /* Boolean for whether we are finishing the application */
         enum NETCAM_STATUS        status;                /* Status of whether the camera is connecting, closed, etc*/
         struct timespec           ist_tm;    /* The time set before calling the av functions */
         struct timespec           icur_tm;  /* Time during the interrupt to determine duration since start*/
@@ -85,12 +84,9 @@ class cls_netcam {
         std::string               camera_name;      /* The name of the camera as provided in the config file */
         std::string               cameratype;       /* String specifying Normal or High for use in logging */
 
-        bool                      handler_finished; /* Boolean for whether the handler is running or not */
-
         pthread_mutex_t           mutex;            /* mutex used with conditional waits */
         pthread_mutex_t           mutex_transfer;   /* mutex used with transferring stream info for pass-through */
         pthread_mutex_t           mutex_pktarray;   /* mutex used with the packet array */
-        std::thread net_thread;
 
         AVFormatContext          *transfer_format;       /* Format context just for transferring to pass-through */
         ctx_packet_item          *pktarray;              /* Pointer to array of packets for passthru processing */
@@ -98,6 +94,10 @@ class cls_netcam {
         int                       video_stream_index;    /* Stream index associated with video from camera */
         int                       audio_stream_index;    /* Stream index associated with video from camera */
 
+        bool            handler_stop;
+        bool            handler_finished;
+        pthread_t       handler_thread;
+        void            handler();
 
     private:
         cls_camera *cam;
@@ -196,11 +196,11 @@ class cls_netcam {
         int copy_stream();
         int open_context();
         int connect();
-        void shutdown();
+
         void handler_wait();
         void handler_reconnect();
-        void handler();
-        void start_handler();
+        void handler_startup();
+        void handler_shutdown();
 
 };
 

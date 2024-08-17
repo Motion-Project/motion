@@ -26,6 +26,11 @@
 #include "netcam.hpp"
 #include "movie.hpp"
 
+static void *netcam_handler(void *arg)
+{
+    ((cls_netcam *)arg)->handler();
+    return nullptr;
+}
 
 enum AVPixelFormat netcam_getfmt_vaapi(AVCodecContext *avctx, const enum AVPixelFormat *pix_fmts)
 {
@@ -72,7 +77,7 @@ int netcam_interrupt(void *ctx)
 {
     cls_netcam *netcam = (cls_netcam *)ctx;
 
-    if (netcam->finish) {
+    if (netcam->handler_stop) {
         netcam->interrupted = true;
         return true;
     }
@@ -515,7 +520,7 @@ int cls_netcam::decode_sw()
     char errstr[128];
 
     retcd = avcodec_receive_frame(codec_context, frame);
-    if ((interrupted) || (finish) || (retcd < 0)) {
+    if ((interrupted) || (handler_stop) || (retcd < 0)) {
         if (retcd == AVERROR(EAGAIN)) {
             retcd = 0;
         } else if (retcd == AVERROR_INVALIDDATA) {
@@ -556,7 +561,7 @@ int cls_netcam::decode_vaapi()
     }
 
     retcd = avcodec_receive_frame(codec_context, hw_frame);
-    if ((interrupted) || (finish) || (retcd < 0)) {
+    if ((interrupted) || (handler_stop) || (retcd < 0)) {
         if (retcd == AVERROR(EAGAIN)) {
             retcd = 0;
         } else if (retcd == AVERROR_INVALIDDATA) {
@@ -599,7 +604,7 @@ int cls_netcam::decode_cuda()
     hw_frame = av_frame_alloc();
 
     retcd = avcodec_receive_frame(codec_context, hw_frame);
-    if ((interrupted) || (finish) || (retcd < 0) ){
+    if ((interrupted) || (handler_stop) || (retcd < 0) ){
         if (retcd == AVERROR(EAGAIN)){
             retcd = 0;
         } else if (retcd == AVERROR_INVALIDDATA) {
@@ -644,7 +649,7 @@ int cls_netcam::decode_drm()
     hw_frame = av_frame_alloc();
 
     retcd = avcodec_receive_frame(codec_context, hw_frame);
-    if ((interrupted) || (finish) || (retcd < 0) ){
+    if ((interrupted) || (handler_stop) || (retcd < 0) ){
         if (retcd == AVERROR(EAGAIN)){
             retcd = 0;
         } else if (retcd == AVERROR_INVALIDDATA) {
@@ -690,14 +695,14 @@ int cls_netcam::decode_video()
     * We should consider adding a maximum count of these errors and reset every time
     * we get a good image.
     */
-    if (finish) {
+    if (handler_stop) {
         return 0;
     }
 
     retcd = avcodec_send_packet(codec_context, packet_recv);
-    if ((interrupted) || (finish)) {
+    if ((interrupted) || (handler_stop)) {
         MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s:Interrupted or finish on send")
+            ,_("%s:Interrupted or handler_stop on send")
             ,cameratype.c_str());
         return -1;
     }
@@ -737,7 +742,7 @@ int cls_netcam::decode_packet()
     int frame_size;
     int retcd;
 
-    if (finish) {
+    if (handler_stop) {
         return -1;
     }
 
@@ -1095,7 +1100,7 @@ int cls_netcam::open_codec()
 {
     int retcd;
 
-    if (finish) {
+    if (handler_stop) {
         return -1;
     }
 
@@ -1152,7 +1157,7 @@ int cls_netcam::open_codec()
 
 int cls_netcam::open_sws()
 {
-    if (finish) {
+    if (handler_stop) {
         return -1;
     }
 
@@ -1233,7 +1238,7 @@ int cls_netcam::resize()
     char     errstr[128];
     uint8_t *buffer_out;
 
-    if (finish) {
+    if (handler_stop) {
         return -1;
     }
 
@@ -1327,7 +1332,7 @@ int cls_netcam::read_image()
     char errstr[128];
     netcam_buff *xchg;
 
-    if (finish) {
+    if (handler_stop) {
         return -1;
     }
 
@@ -1468,7 +1473,7 @@ int cls_netcam::read_image()
 
 int cls_netcam::ntc()
 {
-    if ((finish) || (!first_image)) {
+    if ((handler_stop) || (!first_image)) {
         return 0;
     }
 
@@ -1610,7 +1615,6 @@ void cls_netcam::set_parms ()
 {
     p_it    it;
 
-    finish = false;
     motapp = cam->motapp;
     params = new ctx_params;
 
@@ -1666,7 +1670,6 @@ void cls_netcam::set_parms ()
     pktarray_index = -1;
     pktarray = nullptr;
     packet_recv = nullptr;
-    handler_finished = true;
     first_image = true;
     reconnect_count = 0;
     src_fps =  -1; /* Default to neg so we know it has not been set */
@@ -1763,7 +1766,7 @@ int cls_netcam::open_context()
     int  retcd;
     char errstr[128];
 
-    if (finish) {
+    if (handler_stop) {
         return -1;
     }
 
@@ -1788,7 +1791,7 @@ int cls_netcam::open_context()
 
     retcd = avformat_open_input(&format_context
         , path.c_str(), nullptr, &opts);
-    if ((retcd < 0) || (interrupted) || (finish) ) {
+    if ((retcd < 0) || (interrupted) || (handler_stop) ) {
         if (status == NETCAM_NOTCONNECTED) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
@@ -1808,7 +1811,7 @@ int cls_netcam::open_context()
 
     /* fill out stream information */
     retcd = avformat_find_stream_info(format_context, nullptr);
-    if ((retcd < 0) || (interrupted) || (finish) ) {
+    if ((retcd < 0) || (interrupted) || (handler_stop) ) {
         if (status == NETCAM_NOTCONNECTED) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
@@ -1827,7 +1830,7 @@ int cls_netcam::open_context()
     mythreadname_set("av", threadnbr, camera_name.c_str());
         retcd = open_codec();
     mythreadname_set(nullptr, 0, threadname.c_str());
-    if ((retcd < 0) || (interrupted) || (finish) ) {
+    if ((retcd < 0) || (interrupted) || (handler_stop) ) {
         if (status == NETCAM_NOTCONNECTED) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
@@ -2072,7 +2075,7 @@ void cls_netcam::handler()
         ,_("%s:Camera handler started")
         ,cameratype.c_str());
 
-    while (finish == false) {
+    while (handler_stop == false) {
         if (format_context == nullptr) {      /* We must have disconnected.  Try to reconnect */
             clock_gettime(CLOCK_MONOTONIC, &frame_prev_tm);
             handler_reconnect();
@@ -2080,7 +2083,7 @@ void cls_netcam::handler()
         } else {            /* We think we are connected...*/
             clock_gettime(CLOCK_MONOTONIC, &frame_prev_tm);
             if (read_image() < 0) {
-                if (!finish) {   /* Nope.  We are not or got bad image.  Reconnect*/
+                if (handler_stop == false) {   /* Nope.  We are not or got bad image.  Reconnect*/
                     handler_reconnect();
                 }
                 continue;
@@ -2092,22 +2095,31 @@ void cls_netcam::handler()
     }
 
     MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-        ,_("%s:Loop finished."),cameratype.c_str());
-
-    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-        ,_("%s:Exiting"),cameratype.c_str());
+        ,_("%s:Camera handler stopped"),cameratype.c_str());
     handler_finished = true;
+    pthread_exit(nullptr);
 
 }
 
-void cls_netcam::start_handler()
+void cls_netcam::handler_startup()
 {
-    int wait_counter;
+    int wait_counter, retcd;
+    pthread_attr_t thread_attr;
 
-    handler_finished = true;
-
-    net_thread = std::thread(&cls_netcam::handler, this);
-    net_thread.detach();
+    if (handler_finished == true) {
+        handler_finished = false;
+        handler_stop = false;
+        pthread_attr_init(&thread_attr);
+        pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
+        retcd = pthread_create(&handler_thread, &thread_attr, &netcam_handler, this);
+        if (retcd != 0) {
+            MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start camera thread."));
+            handler_finished = true;
+            handler_stop = true;
+            return;
+        }
+        pthread_attr_destroy(&thread_attr);
+    }
 
     /* Now give a few tries to check that an image has been captured.
      * This ensures that by the time the setup routine exits, the
@@ -2115,13 +2127,11 @@ void cls_netcam::start_handler()
      */
     wait_counter = 60;
     while (wait_counter > 0) {
-
         pthread_mutex_lock(&mutex);
             if (img_latest->ptr != nullptr ) {
                 wait_counter = -1;
             }
         pthread_mutex_unlock(&mutex);
-
         if (wait_counter > 0 ) {
             MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s:Waiting for first image from the handler.")
@@ -2133,26 +2143,49 @@ void cls_netcam::start_handler()
 
 }
 
-void cls_netcam::shutdown()
+void cls_netcam::handler_shutdown()
 {
-    int wait_counter;
+    int waitcnt;
 
     MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("%s:Shutting down network camera.")
         ,cameratype.c_str());
 
-    finish = true;
     idur = 0;
-    wait_counter = 0;
-    while ((handler_finished == false) && (wait_counter < 10)) {
-        SLEEP(1,0);
-        wait_counter++;
-    }
+    handler_stop = true;
+
     if (handler_finished == false) {
-        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s:No response from handler thread.")
-            ,cameratype.c_str());
-        pthread_kill(net_thread.native_handle(), SIGVTALRM);
+        waitcnt = 0;
+        while ((handler_finished == false) && (waitcnt < cam->cfg->watchdog_tmo)){
+            SLEEP(1,0)
+            waitcnt++;
+        }
+        if (waitcnt == cam->cfg->watchdog_tmo) {
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                , _("Normal shutdown of camera failed"));
+            if (cam->cfg->watchdog_kill > 0) {
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    ,_("Waiting additional %d seconds (watchdog_kill).")
+                    ,cam->cfg->watchdog_kill);
+                waitcnt = 0;
+                while ((handler_finished == false) && (waitcnt < cam->cfg->watchdog_kill)){
+                    SLEEP(1,0)
+                    waitcnt++;
+                }
+                if (waitcnt == cam->cfg->watchdog_kill) {
+                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                        , _("No response to shutdown.  Killing it."));
+                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                        , _("Memory leaks will occur."));
+                    pthread_kill(handler_thread, SIGVTALRM);
+                }
+            } else {
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    , _("watchdog_kill set to terminate application."));
+                exit(1);
+            }
+        }
+        handler_finished = true;
     }
 
     context_close();
@@ -2219,6 +2252,8 @@ cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
 
     cam = p_cam;
     high_resolution = p_is_high;
+    handler_finished = true;
+    handler_stop = false;
 
     if (high_resolution == false) {
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Norm: Opening Netcam"));
@@ -2235,12 +2270,12 @@ cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
             retcd = connect();
         }
         if (retcd != 0) {
-            shutdown();
+            handler_shutdown();
             return;
         }
     } else {
         if (connect() != 0) {
-            shutdown();
+            handler_shutdown();
             return;
         }
     }
@@ -2248,7 +2283,7 @@ cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
         MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("Failed trying to read first image"));
         status = NETCAM_NOTCONNECTED;
-        shutdown();
+        handler_shutdown();
         return;
     }
     /* When running dual, there seems to be contamination across norm/high with codec functions. */
@@ -2261,7 +2296,7 @@ cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
         cam->imgs.height_high = imgsize.height;
     }
 
-    start_handler();
+    handler_startup();
 
     cam->device_status = STATUS_OPENED;
 
@@ -2269,6 +2304,6 @@ cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
 
 cls_netcam::~cls_netcam()
 {
-    shutdown();
+    handler_shutdown();
 }
 

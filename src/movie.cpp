@@ -1042,7 +1042,7 @@ int cls_movie::passthru_streams()
     int         retcd, indx;
     AVStream    *stream_in;
 
-    if (netcam_data->finish == true) {
+    if (netcam_data->handler_stop == true) {
         return -1;
     }
 
