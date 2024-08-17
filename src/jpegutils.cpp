@@ -209,10 +209,10 @@ void jpgutl_exif_date(ctx_exif_info *exif_info)
 
     exif_info->subtime = nullptr;
 
-    if (exif_info->cam->conf->picture_exif != "") {
+    if (exif_info->cam->cfg->picture_exif != "") {
         exif_info->description =(char*)mymalloc(PATH_MAX);
         mystrftime(exif_info->cam, exif_info->description, PATH_MAX-1
-            , exif_info->cam->conf->picture_exif.c_str(), NULL);
+            , exif_info->cam->cfg->picture_exif.c_str(), NULL);
     } else {
         exif_info->description = nullptr;
     }

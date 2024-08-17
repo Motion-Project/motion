@@ -57,7 +57,7 @@ int cls_webu_ans::parseurl()
 
     MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),url.c_str());
 
-    baselen = app->conf->webcontrol_base_path.length();
+    baselen = app->cfg->webcontrol_base_path.length();
 
     if (url.length() < baselen) {
         return -1;
@@ -68,7 +68,7 @@ int cls_webu_ans::parseurl()
     }
 
     if (url.substr(0, baselen) !=
-        app->conf->webcontrol_base_path) {
+        app->cfg->webcontrol_base_path) {
         return -1;
     }
 
@@ -184,7 +184,7 @@ void cls_webu_ans::clientip_get()
     int is_ipv6;
 
     is_ipv6 = false;
-    if (app->conf->webcontrol_ipv6) {
+    if (app->cfg->webcontrol_ipv6) {
         is_ipv6 = true;
     }
 
@@ -220,11 +220,11 @@ void cls_webu_ans::hostname_get()
     hdr = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_HOST);
     if (hdr == NULL) {
         hostfull = "//localhost:" +
-            std::to_string(app->conf->webcontrol_port) +
-            app->conf->webcontrol_base_path;
+            std::to_string(app->cfg->webcontrol_port) +
+            app->cfg->webcontrol_base_path;
     } else {
         hostfull = "//" +  std::string(hdr) +
-            app->conf->webcontrol_base_path;
+            app->cfg->webcontrol_base_path;
     }
 
     MOTPLS_LOG(DBG,TYPE_ALL, NO_ERRNO, _("Full Host:  %s"), hostfull.c_str());
@@ -286,7 +286,7 @@ void cls_webu_ans::client_connect()
     it = webu->wb_clients.begin();
     while (it != webu->wb_clients.end()) {
         if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >=
-            (app->conf->webcontrol_lock_minutes*60)) {
+            (app->cfg->webcontrol_lock_minutes*60)) {
             it = webu->wb_clients.erase(it);
         }
         it++;
@@ -341,21 +341,21 @@ mhdrslt cls_webu_ans::failauth_check()
     while (it != webu->wb_clients.end()) {
         if ((it->clientip == clientip) &&
             ((tm_cnct.tv_sec - it->conn_time.tv_sec) <
-             (app->conf->webcontrol_lock_minutes*60)) &&
+             (app->cfg->webcontrol_lock_minutes*60)) &&
             (it->authenticated == false) &&
-            (it->conn_nbr > app->conf->webcontrol_lock_attempts)) {
+            (it->conn_nbr > app->cfg->webcontrol_lock_attempts)) {
             MOTPLS_LOG(EMG, TYPE_STREAM, NO_ERRNO
                 , "Ignoring connection from: %s"
                 , clientip.c_str());
             it->conn_time = tm_cnct;
-            if (app->conf->webcontrol_lock_script != "") {
-                tmp = app->conf->webcontrol_lock_script + " " +
+            if (app->cfg->webcontrol_lock_script != "") {
+                tmp = app->cfg->webcontrol_lock_script + " " +
                     std::to_string(it->userid_fail_nbr) + " " +  clientip;
                 util_exec_command(cam, tmp.c_str(), NULL);
             }
             return MHD_NO;
         } else if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >=
-            (app->conf->webcontrol_lock_minutes*60)) {
+            (app->cfg->webcontrol_lock_minutes*60)) {
             it = webu->wb_clients.erase(it);
         } else {
             it++;
@@ -501,19 +501,19 @@ void cls_webu_ans::mhd_auth_parse()
     myfree(auth_user);
     myfree(auth_pass);
 
-    auth_len = (int)app->conf->webcontrol_authentication.length();
-    col_pos =(char*) strstr(app->conf->webcontrol_authentication.c_str() ,":");
+    auth_len = (int)app->cfg->webcontrol_authentication.length();
+    col_pos =(char*) strstr(app->cfg->webcontrol_authentication.c_str() ,":");
     if (col_pos == NULL) {
         auth_user = (char*)mymalloc((uint)(auth_len+1));
         auth_pass = (char*)mymalloc(2);
         snprintf(auth_user, (uint)auth_len + 1, "%s"
-            ,app->conf->webcontrol_authentication.c_str());
+            ,app->cfg->webcontrol_authentication.c_str());
         snprintf(auth_pass, 2, "%s","");
     } else {
         auth_user = (char*)mymalloc((uint)auth_len - strlen(col_pos) + 1);
         auth_pass =(char*)mymalloc(strlen(col_pos));
         snprintf(auth_user, (uint)auth_len - strlen(col_pos) + 1, "%s"
-            ,app->conf->webcontrol_authentication.c_str());
+            ,app->cfg->webcontrol_authentication.c_str());
         snprintf(auth_pass, strlen(col_pos), "%s", col_pos + 1);
     }
 }
@@ -530,9 +530,9 @@ mhdrslt cls_webu_ans::mhd_auth()
 
     snprintf(auth_realm, WEBUI_LEN_PARM, "%s","Motion");
 
-    if (app->conf->webcontrol_authentication == "") {
+    if (app->cfg->webcontrol_authentication == "") {
         authenticated = true;
-        if (app->conf->webcontrol_auth_method != "none") {
+        if (app->cfg->webcontrol_auth_method != "none") {
             MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No webcontrol user:pass provided"));
         }
         return MHD_YES;
@@ -542,9 +542,9 @@ mhdrslt cls_webu_ans::mhd_auth()
         mhd_auth_parse();
     }
 
-    if (app->conf->webcontrol_auth_method == "basic") {
+    if (app->cfg->webcontrol_auth_method == "basic") {
         return mhd_basic();
-    } else if (app->conf->webcontrol_auth_method == "digest") {
+    } else if (app->cfg->webcontrol_auth_method == "digest") {
         return mhd_digest();
     }
 

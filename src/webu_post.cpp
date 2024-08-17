@@ -418,7 +418,7 @@ void cls_webu_post::action_user()
             MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Executing user action on cam %d")
                 , cam->device_id);
-            util_exec_command(cam, cam->conf->on_action_user.c_str(), NULL);
+            util_exec_command(cam, cam->cfg->on_action_user.c_str(), NULL);
         }
     } else {
         cam = app->cam_list[webua->camindx];
@@ -441,7 +441,7 @@ void cls_webu_post::action_user()
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Executing user action on cam %d")
             , cam->device_id);
-        util_exec_command(cam, cam->conf->on_action_user.c_str(), NULL);
+        util_exec_command(cam, cam->cfg->on_action_user.c_str(), NULL);
     }
 
 }
@@ -463,7 +463,7 @@ void cls_webu_post::write_config()
         }
     }
 
-    app->conf->parms_write(app);
+    app->conf_src->parms_write(app);
 
 }
 
@@ -507,7 +507,7 @@ void cls_webu_post::config()
             /* Ignore any requests for parms above webcontrol_parms level. */
             indx2=0;
             while (config_parms[indx2].parm_name != "") {
-                if ((config_parms[indx2].webui_level > app->conf->webcontrol_parms) ||
+                if ((config_parms[indx2].webui_level > app->conf_src->webcontrol_parms) ||
                     (config_parms[indx2].webui_level == WEBUI_LEVEL_NEVER) ) {
                     indx2++;
                     continue;
@@ -520,11 +520,11 @@ void cls_webu_post::config()
 
             if (config_parms[indx2].parm_name != "") {
                 if (config_parms[indx2].parm_cat == PARM_CAT_00) {
-                    app->conf->edit_set(
+                    app->conf_src->edit_set(
                         config_parms[indx2].parm_name
                         , post_info[indx].key_val);
                 } else {
-                    app->cam_list[webua->camindx]->conf->edit_set(
+                    app->cam_list[webua->camindx]->conf_src->edit_set(
                         config_parms[indx2].parm_name
                         , post_info[indx].key_val);
                 }
@@ -558,34 +558,34 @@ void cls_webu_post::ptz()
     cam = app->cam_list[webua->camindx];
 
     if ((post_cmd == "pan_left") &&
-        (cam->conf->ptz_pan_left != "")) {
-        cam->frame_skip = cam->conf->ptz_wait;
-        util_exec_command(cam, cam->conf->ptz_pan_left.c_str(), NULL);
+        (cam->cfg->ptz_pan_left != "")) {
+        cam->frame_skip = cam->cfg->ptz_wait;
+        util_exec_command(cam, cam->cfg->ptz_pan_left.c_str(), NULL);
 
     } else if ((post_cmd == "pan_right") &&
-        (cam->conf->ptz_pan_right != "")) {
-        cam->frame_skip = cam->conf->ptz_wait;
-        util_exec_command(cam, cam->conf->ptz_pan_right.c_str(), NULL);
+        (cam->cfg->ptz_pan_right != "")) {
+        cam->frame_skip = cam->cfg->ptz_wait;
+        util_exec_command(cam, cam->cfg->ptz_pan_right.c_str(), NULL);
 
     } else if ((post_cmd == "tilt_up") &&
-        (cam->conf->ptz_tilt_up != "")) {
-        cam->frame_skip = cam->conf->ptz_wait;
-        util_exec_command(cam, cam->conf->ptz_tilt_up.c_str(), NULL);
+        (cam->cfg->ptz_tilt_up != "")) {
+        cam->frame_skip = cam->cfg->ptz_wait;
+        util_exec_command(cam, cam->cfg->ptz_tilt_up.c_str(), NULL);
 
     } else if ((post_cmd == "tilt_down") &&
-        (cam->conf->ptz_tilt_down != "")) {
-        cam->frame_skip = cam->conf->ptz_wait;
-        util_exec_command(cam, cam->conf->ptz_tilt_down.c_str(), NULL);
+        (cam->cfg->ptz_tilt_down != "")) {
+        cam->frame_skip = cam->cfg->ptz_wait;
+        util_exec_command(cam, cam->cfg->ptz_tilt_down.c_str(), NULL);
 
     } else if ((post_cmd == "zoom_in") &&
-        (cam->conf->ptz_zoom_in != "")) {
-        cam->frame_skip = cam->conf->ptz_wait;
-        util_exec_command(cam, cam->conf->ptz_zoom_in.c_str(), NULL);
+        (cam->cfg->ptz_zoom_in != "")) {
+        cam->frame_skip = cam->cfg->ptz_wait;
+        util_exec_command(cam, cam->cfg->ptz_zoom_in.c_str(), NULL);
 
     } else if ((post_cmd == "zoom_out") &&
-        (cam->conf->ptz_zoom_out != "")) {
-        cam->frame_skip = cam->conf->ptz_wait;
-        util_exec_command(cam, cam->conf->ptz_zoom_out.c_str(), NULL);
+        (cam->cfg->ptz_zoom_out != "")) {
+        cam->frame_skip = cam->cfg->ptz_wait;
+        util_exec_command(cam, cam->cfg->ptz_zoom_out.c_str(), NULL);
 
     } else {
         return;

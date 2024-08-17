@@ -302,7 +302,8 @@ struct ctx_motapp {
     char    **argv;
     bool    pause;
 
-    cls_config          *conf;
+    cls_config          *conf_src;
+    cls_config          *cfg;
     ctx_all_sizes       *all_sizes;
     cls_webu            *webu;
     cls_dbse            *dbse;

@@ -62,7 +62,6 @@ class cls_movie {
         int movie_open();
         void init_container();
         void init_vars();
-        void init_conf();
 
         void passthru_reset();
         int passthru_pktpts();
@@ -113,22 +112,6 @@ class cls_movie {
         std::string         container;
         std::string         preferred_codec;
         std::string         movie_type;
-
-        std::string         conf_container;
-        std::string         conf_target_dir;
-        std::string         conf_movie_filename;
-        std::string         conf_timelapse_filename;
-        std::string         conf_timelapse_container;
-        int                 conf_movie_quality;
-        int                 conf_movie_bps;
-        int                 conf_timelapse_fps;
-        bool                conf_movie_output;
-        bool                conf_movie_output_motion;
-        bool                conf_movie_extpipe_use;
-        std::string         conf_movie_extpipe;
-        std::string         conf_movie_retain;
-        std::string         conf_on_movie_start;
-        std::string         conf_on_movie_end;
 
 };
 

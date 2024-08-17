@@ -124,7 +124,7 @@ void cls_alg::threshold_tune()
         sum = top * 2;
     }
 
-    if (sum < cfg_threshold) {
+    if (sum < cam->cfg->threshold) {
         cam->threshold = (cam->threshold + sum) / 2;
     }
 }
@@ -507,7 +507,7 @@ void cls_alg::despeckle()
     uint i, len;
     u_char *out, *common_buffer;
 
-    if ((cfg_despeckle_filter == "") || cam->current_image->diffs <= 0) {
+    if ((cam->cfg->despeckle_filter == "") || cam->current_image->diffs <= 0) {
         if (cam->imgs.labelsize_max) {
             cam->imgs.labelsize_max = 0;
         }
@@ -519,13 +519,13 @@ void cls_alg::despeckle()
     width = cam->imgs.width;
     height = cam->imgs.height;
     done = 0;
-    len = (uint)cfg_despeckle_filter.length();
+    len = (uint)cam->cfg->despeckle_filter.length();
     common_buffer = cam->imgs.common_buffer;
     cam->current_image->total_labels = 0;
     cam->imgs.largest_label = 0;
 
     for (i = 0; i < len; i++) {
-        switch (cfg_despeckle_filter[i]) {
+        switch (cam->cfg->despeckle_filter[i]) {
         case 'E':
             diffs = erode9(out, width, height, common_buffer, 0);
             if (diffs == 0) {
@@ -576,9 +576,9 @@ void cls_alg::tune_smartmask()
     int i;
     u_char diff;
     int motionsize = cam->imgs.motionsize;
-    int sensitivity = cam->lastrate * (11 - cfg_smart_mask_speed);
+    int sensitivity = cam->lastrate * (11 - cam->cfg->smart_mask_speed);
 
-    if ((cfg_smart_mask_speed == 0) ||
+    if ((cam->cfg->smart_mask_speed == 0) ||
         (cam->event_curr_nbr == cam->event_prev_nbr) ||
         (--smartmask_count)) {
         return;
@@ -612,7 +612,7 @@ void cls_alg::tune_smartmask()
                       cam->imgs.common_buffer, 255);
     erode5(smartmask_final, cam->imgs.width, cam->imgs.height,
                       cam->imgs.common_buffer, 255);
-    smartmask_count = 5 * cam->lastrate * (11 - cfg_smart_mask_speed);
+    smartmask_count = 5 * cam->lastrate * (11 - cam->cfg->smart_mask_speed);
 }
 
 void cls_alg::diff_nomask()
@@ -625,7 +625,7 @@ void cls_alg::diff_nomask()
     int imgsz = cam->imgs.motionsize;
     int diffs = 0, diffs_net = 0;
     int noise = cam->noise;
-    int lrgchg = cfg_threshold_ratio_change;
+    int lrgchg = cam->cfg->threshold_ratio_change;
 
     memset(out + imgsz, 128, (uint)(imgsz / 2));
     memset(out, 0, (uint)imgsz);
@@ -668,7 +668,7 @@ void cls_alg::diff_mask()
     int imgsz = cam->imgs.motionsize;
     int diffs = 0, diffs_net = 0;
     int noise = cam->noise;
-    int lrgchg = cfg_threshold_ratio_change;
+    int lrgchg = cam->cfg->threshold_ratio_change;
 
     memset(out + imgsz, 128, (uint)(imgsz / 2));
     memset(out, 0, (uint)imgsz);
@@ -719,7 +719,7 @@ void cls_alg::diff_smart()
     int diffs = 0, diffs_net = 0;
     int noise = cam->noise;
     int *mask_buffer = smartmask_buffer;
-    int lrgchg = cfg_threshold_ratio_change;
+    int lrgchg = cam->cfg->threshold_ratio_change;
 
     imgsz = cam->imgs.motionsize;
     memset(out + imgsz, 128, (uint)(imgsz / 2));
@@ -727,7 +727,7 @@ void cls_alg::diff_smart()
 
     for (i = 0; i < imgsz; i++) {
         curdiff = (*ref - *new_img);
-        if (cfg_smart_mask_speed) {
+        if (cam->cfg->smart_mask_speed) {
             if (abs(curdiff) > noise) {
                 if (cam->event_curr_nbr != cam->event_prev_nbr) {
                     (*mask_buffer) += SMARTMASK_SENSITIVITY_INCR;
@@ -777,7 +777,7 @@ void cls_alg::diff_masksmart()
     int diffs = 0, diffs_net = 0;
     int noise = cam->noise;
     int *mask_buffer = smartmask_buffer;
-    int lrgchg = cfg_threshold_ratio_change;
+    int lrgchg = cam->cfg->threshold_ratio_change;
 
     imgsz= cam->imgs.motionsize;
     memset(out + imgsz, 128, ((uint)imgsz / 2));
@@ -789,7 +789,7 @@ void cls_alg::diff_masksmart()
             curdiff = ((curdiff * *mask) / 255);
         }
 
-        if (cfg_smart_mask_speed) {
+        if (cam->cfg->smart_mask_speed) {
             if (abs(curdiff) > noise) {
                 if (cam->event_curr_nbr != cam->event_prev_nbr) {
                     (*mask_buffer) += SMARTMASK_SENSITIVITY_INCR;
@@ -837,7 +837,7 @@ bool cls_alg::diff_fast()
     int i, curdiff, diffs = 0;
     int step = cam->imgs.motionsize / 10000;
     int noise = cam->noise;
-    int max_n_changes = cfg_threshold / 2;
+    int max_n_changes = cam->cfg->threshold / 2;
     u_char *ref = imgs->ref;
     u_char *new_img = cam->imgs.image_vprvcy;
 
@@ -866,7 +866,7 @@ bool cls_alg::diff_fast()
 
 void cls_alg::diff_standard()
 {
-    if (cfg_smart_mask_speed == 0) {
+    if (cam->cfg->smart_mask_speed == 0) {
         if (cam->imgs.mask == NULL) {
             diff_nomask();
         } else {
@@ -883,11 +883,11 @@ void cls_alg::diff_standard()
 
 void cls_alg::lightswitch()
 {
-    if (cfg_lightswitch_percent >= 1 && !cam->lost_connection) {
-        if (cam->current_image->diffs > (cam->imgs.motionsize * cfg_lightswitch_percent / 100)) {
+    if (cam->cfg->lightswitch_percent >= 1 && !cam->lost_connection) {
+        if (cam->current_image->diffs > (cam->imgs.motionsize * cam->cfg->lightswitch_percent / 100)) {
             MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
-            if (cam->frame_skip < cfg_lightswitch_frames) {
-                cam->frame_skip = cfg_lightswitch_frames;
+            if (cam->frame_skip < cam->cfg->lightswitch_frames) {
+                cam->frame_skip = cam->cfg->lightswitch_frames;
             }
             cam->current_image->diffs = 0;
             ref_frame_update();
@@ -897,7 +897,7 @@ void cls_alg::lightswitch()
 
 void cls_alg::ref_frame_update()
 {
-    int accept_timer = cam->lastrate * cfg_static_object_time;
+    int accept_timer = cam->lastrate * cam->cfg->static_object_time;
     int i, threshold_ref;
     int *ref_dyn = cam->imgs.ref_dyn;
     u_char *image_virgin = cam->imgs.image_vprvcy;
@@ -1177,18 +1177,18 @@ void cls_alg::stddev()
     if (calc_stddev == false) {
         return;
     }
-    if (cfg_threshold_sdevx > 0) {
-        if (cam->current_image->location.stddev_x > cfg_threshold_sdevx) {
+    if (cam->cfg->threshold_sdevx > 0) {
+        if (cam->current_image->location.stddev_x > cam->cfg->threshold_sdevx) {
             cam->current_image->diffs = 0;
             return;
         }
-    } else if (cfg_threshold_sdevy > 0) {
-        if (cam->current_image->location.stddev_y > cfg_threshold_sdevy) {
+    } else if (cam->cfg->threshold_sdevy > 0) {
+        if (cam->current_image->location.stddev_y > cam->cfg->threshold_sdevy) {
             cam->current_image->diffs = 0;
             return;
         }
-    } else if (cfg_threshold_sdevxy > 0) {
-        if (cam->current_image->location.stddev_xy > cfg_threshold_sdevxy) {
+    } else if (cam->cfg->threshold_sdevxy > 0) {
+        if (cam->current_image->location.stddev_xy > cam->cfg->threshold_sdevxy) {
             cam->current_image->diffs = 0;
             return;
         }
@@ -1212,31 +1212,15 @@ void cls_alg::diff()
     despeckle();
 }
 
-void cls_alg::init_conf()
-{
-    cfg_threshold_sdevx = cam->conf->threshold_sdevx;
-    cfg_threshold_sdevy = cam->conf->threshold_sdevy;
-    cfg_threshold_sdevxy = cam->conf->threshold_sdevxy;
-    cfg_threshold = cam->conf->threshold;
-    cfg_despeckle_filter = cam->conf->despeckle_filter;
-    cfg_threshold_ratio_change = cam->conf->threshold_ratio_change;
-    cfg_lightswitch_percent = cam->conf->lightswitch_percent;
-    cfg_lightswitch_frames = cam->conf->lightswitch_frames;
-    cfg_static_object_time = cam->conf->static_object_time;
-    cfg_smart_mask_speed = cam->conf->smart_mask_speed;
-}
-
 cls_alg::cls_alg(cls_camera *p_cam)
 {
     int i;
 
     cam = p_cam;
 
-    init_conf();
-
-    if ((cfg_threshold_sdevx == 0) &&
-        (cfg_threshold_sdevy == 0) &&
-        (cfg_threshold_sdevxy == 0)) {
+    if ((cam->cfg->threshold_sdevx == 0) &&
+        (cam->cfg->threshold_sdevy == 0) &&
+        (cam->cfg->threshold_sdevxy == 0)) {
         calc_stddev = false;
     } else {
         calc_stddev = true;

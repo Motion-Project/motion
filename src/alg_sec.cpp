@@ -504,7 +504,7 @@ void cls_algsec::load_params()
 {
     pthread_mutex_init(&mutex, NULL);
 
-    method = cam->conf->secondary_method;
+    method = cam->cfg->secondary_method;
     handler_finished = true;
     image_norm = nullptr;
     params = nullptr;
@@ -515,9 +515,9 @@ void cls_algsec::load_params()
     too_slow = 0;
     in_process = false;
     handler_stop = false;
-    cfg_framerate = cam->conf->framerate;
-    cfg_log_level = cam->motapp->conf->log_level;
-    cfg_target_dir = cam->conf->target_dir;
+    cfg_framerate = cam->cfg->framerate;
+    cfg_log_level = cam->motapp->cfg->log_level;
+    cfg_target_dir = cam->cfg->target_dir;
 
     if (method == "none") {
         return;
@@ -528,7 +528,7 @@ void cls_algsec::load_params()
     params = new ctx_params;
     params->update_params = true;
     util_parms_parse(params, "secondary_params"
-        , cam->conf->secondary_params);
+        , cam->cfg->secondary_params);
 
     params_defaults();
 
@@ -672,10 +672,10 @@ cls_algsec::cls_algsec(cls_camera *p_cam)
 {
     #ifdef HAVE_OPENCV
         cam = p_cam;
-        mythreadname_set("cv",cam->device_id, cam->conf->device_name.c_str());
+        mythreadname_set("cv",cam->device_id, cam->cfg->device_name.c_str());
             load_params();
             start_model();
-        mythreadname_set("cl",cam->device_id, cam->conf->device_name.c_str());
+        mythreadname_set("cl",cam->device_id, cam->cfg->device_name.c_str());
     #else
         (void)p_cam;
     #endif

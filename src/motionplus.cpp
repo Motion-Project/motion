@@ -154,18 +154,18 @@ static void motpls_pid_write(ctx_motapp *motapp)
 {
     FILE *pidf = NULL;
 
-    if (motapp->conf->pid_file != "") {
-        pidf = myfopen(motapp->conf->pid_file.c_str(), "w+e");
+    if (motapp->cfg->pid_file != "") {
+        pidf = myfopen(motapp->cfg->pid_file.c_str(), "w+e");
         if (pidf) {
             (void)fprintf(pidf, "%d\n", getpid());
             myfclose(pidf);
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Created process id file %s. Process ID is %d")
-                ,motapp->conf->pid_file.c_str(), getpid());
+                ,motapp->cfg->pid_file.c_str(), getpid());
         } else {
             MOTPLS_LOG(EMG, TYPE_ALL, SHOW_ERRNO
                 , _("Cannot create process id file (pid file) %s")
-                , motapp->conf->pid_file.c_str());
+                , motapp->cfg->pid_file.c_str());
         }
     }
 
@@ -176,9 +176,9 @@ static void motpls_pid_write(ctx_motapp *motapp)
 /** Remove the process id file ( pid file ) before MotionPlus exit. */
 static void motpls_pid_remove(ctx_motapp *motapp)
 {
-    if ((motapp->conf->pid_file != "") &&
+    if ((motapp->cfg->pid_file != "") &&
         (motapp->reload_all == false)) {
-        if (!unlink(motapp->conf->pid_file.c_str())) {
+        if (!unlink(motapp->cfg->pid_file.c_str())) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Removed process id file (pid file)."));
         } else{
             MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error removing pid file"));
@@ -294,12 +294,12 @@ static void motpls_allcams_init(ctx_motapp *motapp)
         motapp->cam_list[indx]->all_loc.offset_user_col = 0;
         motapp->cam_list[indx]->all_loc.offset_user_row = 0;
         motapp->cam_list[indx]->all_loc.scale =
-            motapp->cam_list[indx]->conf->stream_preview_scale;
+            motapp->cam_list[indx]->cfg->stream_preview_scale;
 
         params_loc->update_params = true;
         util_parms_parse(params_loc
             , "stream_preview_location"
-            , motapp->cam_list[indx]->conf->stream_preview_location);
+            , motapp->cam_list[indx]->cfg->stream_preview_location);
         lst = &params_loc->params_array;
 
         for (it = lst->begin(); it != lst->end(); it++) {
@@ -340,7 +340,7 @@ static void motpls_allcams_init(ctx_motapp *motapp)
             cfg_valid = false;
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                 , "No stream_preview_location for cam %d"
-                , motapp->cam_list[indx]->conf->device_id);
+                , motapp->cam_list[indx]->cfg->device_id);
         } else {
             for (indx1=0; indx1<motapp->cam_cnt; indx1++) {
                 if ((motapp->cam_list[indx]->all_loc.col ==
@@ -351,8 +351,8 @@ static void motpls_allcams_init(ctx_motapp *motapp)
                     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                         , "Duplicate stream_preview_location "
                         " cam %d, cam %d row %d col %d"
-                        , motapp->cam_list[indx]->conf->device_id
-                        , motapp->cam_list[indx1]->conf->device_id
+                        , motapp->cam_list[indx]->cfg->device_id
+                        , motapp->cam_list[indx1]->cfg->device_id
                         , motapp->cam_list[indx]->all_loc.row
                         , motapp->cam_list[indx]->all_loc.col);
                     cfg_valid = false;
@@ -362,14 +362,14 @@ static void motpls_allcams_init(ctx_motapp *motapp)
         if (motapp->cam_list[indx]->all_loc.row == 0) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                 , "Invalid stream_preview_location row cam %d, row %d"
-                , motapp->cam_list[indx]->conf->device_id
+                , motapp->cam_list[indx]->cfg->device_id
                 , motapp->cam_list[indx]->all_loc.row);
             cfg_valid = false;
         }
         if (motapp->cam_list[indx]->all_loc.col == 0) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                 , "Invalid stream_preview_location col cam %d, col %d"
-                , motapp->cam_list[indx]->conf->device_id
+                , motapp->cam_list[indx]->cfg->device_id
                 , motapp->cam_list[indx]->all_loc.col);
             cfg_valid = false;
         }
@@ -441,15 +441,15 @@ static void motpls_device_ids(ctx_motapp *motapp)
 
      /* Defaults */
     for (indx=0; indx<motapp->cam_cnt; indx++) {
-        if (motapp->cam_list[indx]->conf->device_id != 0) {
-            motapp->cam_list[indx]->device_id = motapp->cam_list[indx]->conf->device_id;
+        if (motapp->cam_list[indx]->cfg->device_id != 0) {
+            motapp->cam_list[indx]->device_id = motapp->cam_list[indx]->cfg->device_id;
         } else {
             motapp->cam_list[indx]->device_id = (int)indx + 1;
         }
     }
     for (indx=0; indx<motapp->snd_cnt; indx++) {
-        if (motapp->snd_list[indx]->conf->device_id != 0) {
-            motapp->snd_list[indx]->device_id = motapp->snd_list[indx]->conf->device_id;
+        if (motapp->snd_list[indx]->cfg->device_id != 0) {
+            motapp->snd_list[indx]->device_id = motapp->snd_list[indx]->cfg->device_id;
         } else {
             motapp->snd_list[indx]->device_id =  (int)(motapp->cam_cnt + indx + 1);
         }
@@ -656,7 +656,8 @@ static void motpls_init(ctx_motapp *motapp, int argc, char *argv[])
     motapp->cam_delete = -1;
     motapp->cam_cnt = 0;
     motapp->snd_cnt = 0;
-    motapp->conf = nullptr;
+    motapp->conf_src = nullptr;
+    motapp->cfg = nullptr;
     motapp->dbse = nullptr;
     motapp->webu = nullptr;
 
@@ -665,23 +666,26 @@ static void motpls_init(ctx_motapp *motapp, int argc, char *argv[])
     pthread_mutex_init(&motapp->mutex_camlst, NULL);
     pthread_mutex_init(&motapp->mutex_post, NULL);
 
-    motapp->conf = new cls_config;
-    motapp->conf->init(motapp);
+    motapp->conf_src = new cls_config;
+    motapp->conf_src->init(motapp);
 
-    motlog->log_level = motapp->conf->log_level;
-    motlog->log_fflevel = motapp->conf->log_fflevel;
-    motlog->set_log_file(motapp->conf->log_file);
+    motapp->cfg = new cls_config;
+    motapp->cfg->parms_copy(motapp->conf_src);
+
+    motlog->log_level = motapp->cfg->log_level;
+    motlog->log_fflevel = motapp->cfg->log_fflevel;
+    motlog->set_log_file(motapp->cfg->log_file);
 
     mytranslate_init();
 
-    mytranslate_text("",motapp->conf->native_language);
+    mytranslate_text("",motapp->cfg->native_language);
 
-    if (motapp->conf->daemon) {
+    if (motapp->cfg->daemon) {
         motpls_daemon();
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus running as daemon process"));
     }
 
-    motapp->conf->parms_log(motapp);
+    motapp->cfg->parms_log(motapp);
 
     motpls_pid_write(motapp);
 
@@ -721,7 +725,8 @@ static void motpls_deinit(ctx_motapp *motapp)
 
     mydelete(motapp->webu);
     mydelete(motapp->dbse);
-    mydelete(motapp->conf);
+    mydelete(motapp->conf_src);
+    mydelete(motapp->cfg);
     mydelete(motapp->all_sizes);
 
     for (indx = 0; indx < motapp->cam_cnt;indx++) {
@@ -746,7 +751,7 @@ static void motpls_cam_add(ctx_motapp *motapp)
     }
 
     pthread_mutex_lock(&motapp->mutex_camlst);
-        motapp->conf->camera_add(motapp, "", false);
+        motapp->cfg->camera_add(motapp, "", false);
     pthread_mutex_unlock(&motapp->mutex_camlst);
 
     motapp->cam_add = false;
@@ -773,7 +778,7 @@ static void motpls_cam_delete(ctx_motapp *motapp)
     cam = motapp->cam_list[motapp->cam_delete];
 
     MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Stopping %s device_id %d")
-        , cam->conf->device_name.c_str(), cam->device_id);
+        , cam->cfg->device_name.c_str(), cam->device_id);
 
     cam->stop();
 

@@ -61,13 +61,6 @@ class cls_v4l2cam {
         cls_camera *cam;
         cls_convert *convert;
 
-        /* Isolated variables from user config*/
-        int         width;
-        int         height;
-        int         fps;
-        std::string v4l2_device;
-        std::string v4l2_params;
-
         int     fd_device;
         int     pixfmt_src;
         int     buffer_count;

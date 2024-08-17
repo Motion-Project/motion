@@ -1572,13 +1572,13 @@ void cls_netcam::set_path ()
     path = "";
 
     if (high_resolution) {
-        url_parse(&url, cam->conf->netcam_high_url);
+        url_parse(&url, cam->cfg->netcam_high_url);
     } else {
-        url_parse(&url, cam->conf->netcam_url);
+        url_parse(&url, cam->cfg->netcam_url);
     }
 
-    if (cam->conf->netcam_userpass != "") {
-        url.userpass = cam->conf->netcam_userpass;
+    if (cam->cfg->netcam_userpass != "") {
+        url.userpass = cam->cfg->netcam_userpass;
     }
 
     if  (url.service == "v4l2") {
@@ -1620,9 +1620,9 @@ void cls_netcam::set_parms ()
 
     context_null();
     threadnbr = cam->device_id;
-    cfg_width = cam->conf->width;
-    cfg_height = cam->conf->height;
-    cfg_framerate = cam->conf->framerate;
+    cfg_width = cam->cfg->width;
+    cfg_height = cam->cfg->height;
+    cfg_framerate = cam->cfg->framerate;
 
     cam->imgs.width = cfg_width;
     cam->imgs.height = cfg_height;
@@ -1637,7 +1637,7 @@ void cls_netcam::set_parms ()
         imgsize.width = 0;
         imgsize.height = 0;
         cameratype = _("High");
-        cfg_params = cam->conf->netcam_high_params;
+        cfg_params = cam->cfg->netcam_high_params;
         params->update_params = true;
         util_parms_parse(params
             ,"netcam_high_params", cfg_params);
@@ -1645,12 +1645,12 @@ void cls_netcam::set_parms ()
         imgsize.width = cfg_width;
         imgsize.height = cfg_height;
         cameratype = _("Norm");
-        cfg_params = cam->conf->netcam_params;
+        cfg_params = cam->cfg->netcam_params;
         params->update_params = true;
         util_parms_parse(params
             ,"netcam_params", cfg_params);
     }
-    camera_name = cam->conf->device_name;
+    camera_name = cam->cfg->device_name;
 
     MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
         , _("%s:Setting up camera(%s).")
@@ -1704,7 +1704,7 @@ void cls_netcam::set_parms ()
 
     /* If this is the norm and we have a highres, then disable passthru on the norm */
     if ((high_resolution == false) &&
-        (cam->conf->netcam_high_url != "")) {
+        (cam->cfg->netcam_high_url != "")) {
         passthrough = false;
     } else {
         passthrough = cam->movie_passthrough;

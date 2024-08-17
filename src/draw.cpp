@@ -1215,7 +1215,7 @@ void cls_draw::init_chars(void)
 
 void cls_draw::init_scale()
 {
-    cam->text_scale = cfg_text_scale;
+    cam->text_scale = cam->cfg->text_scale;
     if (cam->text_scale <= 0) {
         cam->text_scale = 1;
     }
@@ -1239,7 +1239,7 @@ void cls_draw::init_scale()
     }
 
     /* If we had to modify the scale, change conf so we don't get another message */
-    cfg_text_scale = cam->text_scale;
+    cam->cfg->text_scale = cam->text_scale;
 
 }
 
@@ -1271,7 +1271,7 @@ void cls_draw::location(ctx_coord *cent, ctx_images *imgs
         out[width_maxx_y] =~out[width_maxx_y];
     }
 
-    if (cfg_locate_motion_style == "box") {
+    if (cam->cfg->locate_motion_style == "box") {
         width_miny = width * cent->miny;
         width_maxy = width * cent->maxy;
 
@@ -1288,7 +1288,7 @@ void cls_draw::location(ctx_coord *cent, ctx_images *imgs
             new_var[width_minx_y] =~new_var[width_minx_y];
             new_var[width_maxx_y] =~new_var[width_maxx_y];
         }
-    } else if (cfg_locate_motion_style == "cross") {
+    } else if (cam->cfg->locate_motion_style == "cross") {
         centy = cent->y * width;
         for (x = cent->x - 10;  x <= cent->x + 10; x++) {
             new_var[centy + x] =~new_var[centy + x];
@@ -1340,7 +1340,7 @@ void cls_draw::red_location(ctx_coord *cent
         out[width_maxx_y] =~out[width_maxx_y];
     }
 
-    if (cfg_locate_motion_style == "redbox") {
+    if (cam->cfg->locate_motion_style == "redbox") {
         width_miny = width * cent->miny;
         width_maxy = width * cent->maxy;
         cwidth_miny = cwidth * (cent->miny / 2);
@@ -1393,7 +1393,7 @@ void cls_draw::red_location(ctx_coord *cent
             new_var[width_minx_y + width + 1] = 128;
             new_var[width_maxx_y + width + 1] = 128;
         }
-    } else if (cfg_locate_motion_style == "redcross") {
+    } else if (cam->cfg->locate_motion_style == "redcross") {
         cwidth_maxy = cwidth * (cent->y / 2);
 
         for (x = cent->x - 10; x <= cent->x + 10; x += 2) {
@@ -1416,11 +1416,11 @@ void cls_draw::locate()
     ctx_coord *p_loc;
     u_char *image_norm;
 
-    if (cfg_locate_motion_mode == "preview") {
+    if (cam->cfg->locate_motion_mode == "preview") {
         imgs = &cam->imgs;
         p_loc = &cam->imgs.image_preview.location;
         image_norm = cam->imgs.image_preview.image_norm;
-    } else if (cfg_locate_motion_mode == "on") {
+    } else if (cam->cfg->locate_motion_mode == "on") {
         imgs = &cam->imgs;
         p_loc = &cam->current_image->location;
         image_norm = cam->current_image->image_norm;
@@ -1428,11 +1428,11 @@ void cls_draw::locate()
         return;
     }
 
-    if ((cfg_locate_motion_style == "box") ||
-        (cfg_locate_motion_style == "cross")) {
+    if ((cam->cfg->locate_motion_style == "box") ||
+        (cam->cfg->locate_motion_style == "cross")) {
         location(p_loc, imgs, imgs->width, image_norm);
-    } else if ((cfg_locate_motion_style == "redbox")||
-        (cfg_locate_motion_style == "redcross")) {
+    } else if ((cam->cfg->locate_motion_style == "redbox")||
+        (cam->cfg->locate_motion_style == "redcross")) {
         red_location(p_loc, imgs, imgs->width, image_norm);
     }
 
@@ -1561,10 +1561,6 @@ void cls_draw::largest_label()
 cls_draw::cls_draw(cls_camera *p_cam)
 {
     cam = p_cam;
-    cfg_text_scale = cam->conf->text_scale;
-    cfg_locate_motion_mode = cam->conf->locate_motion_mode;
-    cfg_locate_motion_style = cam->conf->locate_motion_style;
-
     init_chars();
     init_scale();
 

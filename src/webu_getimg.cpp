@@ -119,7 +119,7 @@ static void webu_getimg_norm(cls_camera *cam)
                 cam->stream.norm.jpg_data
                 ,cam->imgs.size_norm
                 ,cam->current_image->image_norm
-                ,cam->conf->stream_quality
+                ,cam->cfg->stream_quality
                 ,cam->imgs.width
                 ,cam->imgs.height);
             cam->stream.norm.consumed = false;
@@ -169,7 +169,7 @@ static void webu_getimg_sub(cls_camera *cam)
                     cam->stream.sub.jpg_data
                     ,subsize
                     ,cam->imgs.image_substream
-                    ,cam->conf->stream_quality
+                    ,cam->cfg->stream_quality
                     ,(cam->imgs.width / 2)
                     ,(cam->imgs.height / 2));
             } else {
@@ -178,7 +178,7 @@ static void webu_getimg_sub(cls_camera *cam)
                     cam->stream.sub.jpg_data
                     ,cam->imgs.size_norm
                     ,cam->current_image->image_norm
-                    ,cam->conf->stream_quality
+                    ,cam->cfg->stream_quality
                     ,cam->imgs.width
                     ,cam->imgs.height);
             }
@@ -227,7 +227,7 @@ static void webu_getimg_motion(cls_camera *cam)
                 cam->stream.motion.jpg_data
                 ,cam->imgs.size_norm
                 ,cam->imgs.image_motion.image_norm
-                ,cam->conf->stream_quality
+                ,cam->cfg->stream_quality
                 ,cam->imgs.width
                 ,cam->imgs.height);
             cam->stream.motion.consumed = false;
@@ -261,7 +261,7 @@ static void webu_getimg_source(cls_camera *cam)
                 cam->stream.source.jpg_data
                 ,cam->imgs.size_norm
                 ,cam->imgs.image_virgin
-                ,cam->conf->stream_quality
+                ,cam->cfg->stream_quality
                 ,cam->imgs.width
                 ,cam->imgs.height);
             cam->stream.source.consumed = false;

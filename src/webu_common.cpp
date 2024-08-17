@@ -52,10 +52,10 @@ bool cls_webu_common::check_finish()
 void cls_webu_common::set_fps()
 {
     if ((webua->cam->detecting_motion == false) &&
-        (app->cam_list[webua->camindx]->conf->stream_motion)) {
+        (app->cam_list[webua->camindx]->cfg->stream_motion)) {
         stream_fps = 1;
     } else {
-        stream_fps = app->cam_list[webua->camindx]->conf->stream_maxrate;
+        stream_fps = app->cam_list[webua->camindx]->cfg->stream_maxrate;
     }
 }
 

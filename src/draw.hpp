@@ -38,10 +38,6 @@
 
             u_char *char_arr_ptr[ASCII_MAX];
 
-            int             cfg_text_scale;
-            std::string     cfg_locate_motion_mode;
-            std::string     cfg_locate_motion_style;
-
             int textn(u_char *image
                 , int startx,  int starty,  int width
                 , const char *text, int len, int factor);

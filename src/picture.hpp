@@ -41,20 +41,6 @@ class cls_picture {
     private:
         cls_camera *cam;
 
-        int cfg_w;
-        int cfg_h;
-        int cfg_picture_quality;
-        bool cfg_stream_grey;
-        std::string cfg_mask_file;
-        std::string cfg_mask_privacy;
-        std::string cfg_on_picture_save;
-        std::string cfg_target_dir;
-        std::string cfg_picture_filename;
-        std::string cfg_picture_type;
-        std::string cfg_snapshot_filename;
-        std::string cfg_picture_output_motion;
-        std::string cfg_picture_output;
-
         #ifdef HAVE_WEBP
             void webp_exif(WebPMux* webp_mux
                 , timespec *ts1, ctx_coord *box);

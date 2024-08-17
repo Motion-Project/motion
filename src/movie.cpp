@@ -283,7 +283,7 @@ int cls_movie::set_quality()
     int quality;
 
     opts = 0;
-    quality = conf_movie_quality;
+    quality = cam->cfg->movie_quality;
     if (quality > 100) {
         quality = 100;
     }
@@ -418,7 +418,7 @@ int cls_movie::set_codec()
 
     ctx_codec->codec_id      = codec->id;
     ctx_codec->codec_type    = AVMEDIA_TYPE_VIDEO;
-    ctx_codec->bit_rate      = conf_movie_bps;
+    ctx_codec->bit_rate      = cam->cfg->movie_bps;
     ctx_codec->width         = width;
     ctx_codec->height        = height;
     ctx_codec->time_base.num = 1;
@@ -562,9 +562,9 @@ int cls_movie::set_picture()
         return -1;
     }
 
-    if (conf_movie_quality) {
+    if (cam->cfg->movie_quality) {
         picture->quality = (int)(FF_LAMBDA_MAX *
-            (float)((100-conf_movie_quality)/100))+1;
+            (float)((100-cam->cfg->movie_quality)/100))+1;
     }
 
     picture->linesize[0] = ctx_codec->width;
@@ -1163,16 +1163,16 @@ void cls_movie::put_pix_yuv420(ctx_image_data *img_data)
 void cls_movie::on_movie_start()
 {
     MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO, _("Creating movie: %s"),full_nm.c_str());
-    if (conf_on_movie_start != "") {
-        util_exec_command(cam, conf_on_movie_start.c_str(), full_nm.c_str());
+    if (cam->cfg->on_movie_start != "") {
+        util_exec_command(cam, cam->cfg->on_movie_start.c_str(), full_nm.c_str());
     }
 }
 
 void cls_movie::on_movie_end()
 {
     MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO, _("Finished movie: %s"),full_nm.c_str());
-    if (conf_on_movie_end != "") {
-        util_exec_command(cam, conf_on_movie_end.c_str(), full_nm.c_str());
+    if (cam->cfg->on_movie_end != "") {
+        util_exec_command(cam, cam->cfg->on_movie_end.c_str(), full_nm.c_str());
     }
 }
 
@@ -1273,7 +1273,7 @@ void cls_movie::stop()
         cam->filetype = FTYPE_MOVIE;
         on_movie_end();
         cam->motapp->dbse->exec(cam, full_nm, "movie_end");
-        if ((conf_movie_retain == "secondary") &&
+        if ((cam->cfg->movie_retain == "secondary") &&
             (cam->algsec->detected == false) &&
             (cam->algsec->method != "none")) {
             if (remove(full_nm.c_str()) != 0) {
@@ -1401,7 +1401,7 @@ void cls_movie::init_container()
     int codenbr;
     size_t col_pos;
 
-    if (conf_container == "test") {
+    if (cam->cfg->movie_container == "test") {
         MOTPLS_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "Running test of the various output formats.");
         codenbr = cam->event_curr_nbr % 10;
         if (codenbr == 1) {
@@ -1426,7 +1426,7 @@ void cls_movie::init_container()
             container = "mkv";
         }
     } else {
-        container = conf_container;
+        container = cam->cfg->movie_container;
     }
 
     col_pos = container.find(":");
@@ -1443,17 +1443,17 @@ void cls_movie::start_norm()
 {
     char tmp[PATH_MAX];
 
-    if (conf_movie_output == false) {
+    if (cam->cfg->movie_output == false) {
         is_running = false;
         return;
     }
 
     init_container();
 
-    mystrftime(cam, tmp, sizeof(tmp), conf_movie_filename.c_str(), nullptr);
+    mystrftime(cam, tmp, sizeof(tmp), cam->cfg->movie_filename.c_str(), nullptr);
 
     movie_nm = tmp;
-    movie_dir = conf_target_dir;
+    movie_dir = cam->cfg->target_dir;
     if (container =="test") {
         full_nm = movie_dir + "/"  + container + "_" + movie_nm;
     } else {
@@ -1480,7 +1480,7 @@ void cls_movie::start_norm()
     base_pts = 0;
     gop_cnt = 0;
 
-    if (conf_container == "test") {
+    if (cam->cfg->movie_container == "test") {
         test_mode = true;
     } else {
         test_mode = false;
@@ -1509,7 +1509,7 @@ void cls_movie::start_motion()
     char tmp[PATH_MAX];
     ctx_image_data save_data;
 
-    if (conf_movie_output_motion == false) {
+    if (cam->cfg->movie_output_motion == false) {
         is_running = false;
         return;
     }
@@ -1519,11 +1519,11 @@ void cls_movie::start_motion()
     memcpy(&save_data, cam->current_image, sizeof(ctx_image_data));
         memcpy(cam->current_image, &cam->imgs.image_motion, sizeof(ctx_image_data));
         mystrftime(cam, tmp, sizeof(tmp)
-            , conf_movie_filename.c_str(), nullptr);
+            , cam->cfg->movie_filename.c_str(), nullptr);
     memcpy(cam->current_image, &save_data, sizeof(ctx_image_data));
 
     movie_nm.assign(tmp).append("m");
-    movie_dir = conf_target_dir;
+    movie_dir = cam->cfg->target_dir;
     if (container =="test") {
         full_nm = movie_dir + "/"  + container + "_" + movie_nm;
     } else {
@@ -1567,10 +1567,10 @@ void cls_movie::start_timelapse()
 {
     char tmp[PATH_MAX];
 
-    mystrftime(cam, tmp, sizeof(tmp), conf_timelapse_filename.c_str(), nullptr);
+    mystrftime(cam, tmp, sizeof(tmp), cam->cfg->timelapse_filename.c_str(), nullptr);
 
     movie_nm = tmp;
-    movie_dir = conf_target_dir.c_str();
+    movie_dir = cam->cfg->target_dir.c_str();
     full_nm = movie_dir + "/" + movie_nm;
 
     if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
@@ -1583,7 +1583,7 @@ void cls_movie::start_timelapse()
         high_resolution = false;
     }
     pkt = nullptr;
-    fps = conf_timelapse_fps;
+    fps = cam->cfg->timelapse_fps;
     start_time.tv_sec = cam->current_image->imgts.tv_sec;
     start_time.tv_nsec = cam->current_image->imgts.tv_nsec;
     last_pts = -1;
@@ -1594,7 +1594,7 @@ void cls_movie::start_timelapse()
     passthrough = false;
     netcam_data = nullptr;
 
-    if (conf_timelapse_container == "mpg") {
+    if (cam->cfg->timelapse_container == "mpg") {
         MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Timelapse using mpg container."));
         MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Events will be appended to file"));
         tlapse = TIMELAPSE_APPEND;
@@ -1623,17 +1623,17 @@ void cls_movie::start_extpipe()
 {
     char tmp[PATH_MAX];
 
-    if (conf_movie_extpipe_use == false) {
+    if (cam->cfg->movie_extpipe_use == false) {
         is_running = false;
         return;
     }
 
-    mystrftime(cam, tmp, sizeof(tmp), conf_movie_filename.c_str(), nullptr);
+    mystrftime(cam, tmp, sizeof(tmp), cam->cfg->movie_filename.c_str(), nullptr);
 
     movie_nm = tmp;
-    movie_dir = conf_target_dir;
+    movie_dir = cam->cfg->target_dir;
 
-    if (conf_movie_output) {
+    if (cam->cfg->movie_output) {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Requested extpipe in addition to movie_output."));
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
@@ -1650,7 +1650,7 @@ void cls_movie::start_extpipe()
 
     memset(&tmp,0,PATH_MAX);
     mystrftime(cam, tmp, sizeof(tmp)
-        , conf_movie_extpipe.c_str(), full_nm.c_str());
+        , cam->cfg->movie_extpipe.c_str(), full_nm.c_str());
 
     MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("extpipe cmd: %s"), tmp);
 
@@ -1682,27 +1682,6 @@ void cls_movie::start()
     } else {
         MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO,_("Invalid movie type"));
     }
-}
-
-void cls_movie::init_conf()
-{
-    /* copy conf parms so we do not conflict with web updates*/
-    conf_container          = cam->conf->movie_container;
-    conf_target_dir         = cam->conf->target_dir;
-    conf_movie_filename     = cam->conf->movie_filename;
-    conf_timelapse_filename = cam->conf->timelapse_filename;
-    conf_timelapse_container = cam->conf->timelapse_container;
-    conf_movie_quality      = cam->conf->movie_quality;
-    conf_movie_bps          = cam->conf->movie_bps;
-    conf_timelapse_fps      = cam->conf->timelapse_fps;
-    conf_movie_output       = cam->conf->movie_output;
-    conf_movie_output_motion = cam->conf->movie_output_motion;
-    conf_movie_extpipe_use  = cam->conf->movie_extpipe_use;
-    conf_movie_extpipe      = cam->conf->movie_extpipe;
-    conf_movie_retain       = cam->conf->movie_retain;
-    conf_on_movie_start     = cam->conf->on_movie_start;
-    conf_on_movie_end       = cam->conf->on_movie_end;
-
 }
 
 void cls_movie::init_vars()
@@ -1755,8 +1734,6 @@ cls_movie::cls_movie(cls_camera *p_cam, std::string pmovie_type)
     is_running = false;
 
     movie_type = pmovie_type;
-
-    init_conf();
 
     init_vars();
 }

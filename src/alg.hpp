@@ -39,19 +39,7 @@
             u_char  *smartmask;
             int     *smartmask_buffer;
             int     diffs_last[THRESHOLD_TUNE_LENGTH];
-
-            int cfg_threshold_sdevx;
-            int cfg_threshold_sdevy;
-            int cfg_threshold_sdevxy;
-            int cfg_threshold;
-            std::string cfg_despeckle_filter;
-            int cfg_threshold_ratio_change;
-            int cfg_lightswitch_percent;
-            int cfg_lightswitch_frames;
-            int cfg_static_object_time;
-            int cfg_smart_mask_speed;
-
-            bool calc_stddev;
+            bool    calc_stddev;
 
             int iflood(int x, int y, int width, int height,
                 u_char *out, int *labels, int newvalue, int oldvalue);
@@ -72,7 +60,6 @@
             void location_dist_stddev();
             void location_dist_basic();
             void location_minmax();
-            void init_conf();
 
     };
 

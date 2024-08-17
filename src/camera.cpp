@@ -48,7 +48,7 @@ void cls_camera::ring_resize()
     int i, new_size;
     ctx_image_data *tmp;
 
-    new_size = conf->pre_capture + conf->minimum_motion_frames;
+    new_size = cfg->pre_capture + cfg->minimum_motion_frames;
     if (new_size < 1) {
         new_size = 1;
     }
@@ -155,8 +155,8 @@ void cls_camera::ring_process()
 
         current_image = &imgs.image_ring[imgs.ring_out];
 
-        if (current_image->shot <= conf->framerate) {
-            if (motapp->conf->log_level >= DBG) {
+        if (current_image->shot <= cfg->framerate) {
+            if (motapp->cfg->log_level >= DBG) {
                 ring_process_debug();
             }
             ring_process_image();
@@ -165,12 +165,12 @@ void cls_camera::ring_process()
         current_image->flags |= IMAGE_SAVED;
 
         if (current_image->flags & IMAGE_MOTION) {
-            if (conf->picture_output == "best") {
+            if (cfg->picture_output == "best") {
                 if (current_image->diffs > imgs.image_preview.diffs) {
                     picture->save_preview();
                 }
             }
-            if (conf->picture_output == "center") {
+            if (cfg->picture_output == "center") {
                 if (current_image->cent_dist < imgs.image_preview.cent_dist) {
                     picture->save_preview();
                 }
@@ -239,23 +239,23 @@ void cls_camera::detected_trigger()
 
             mystrftime(this, text_event_string
                 , sizeof(text_event_string)
-                , conf->text_event.c_str(), NULL);
+                , cfg->text_event.c_str(), NULL);
 
-            if (conf->on_event_start != "") {
-                util_exec_command(this, conf->on_event_start.c_str(), NULL);
+            if (cfg->on_event_start != "") {
+                util_exec_command(this, cfg->on_event_start.c_str(), NULL);
             }
             movie_start();
             motapp->dbse->exec(this, "", "event_start");
 
-            if ((conf->picture_output == "first") ||
-                (conf->picture_output == "best") ||
-                (conf->picture_output == "center")) {
+            if ((cfg->picture_output == "first") ||
+                (cfg->picture_output == "best") ||
+                (cfg->picture_output == "center")) {
                 picture->save_preview();
             }
 
         }
-        if (conf->on_motion_detected != "") {
-            util_exec_command(this, conf->on_motion_detected.c_str(), NULL);
+        if (cfg->on_motion_detected != "") {
+            util_exec_command(this, cfg->on_motion_detected.c_str(), NULL);
         }
     }
 }
@@ -263,22 +263,22 @@ void cls_camera::detected_trigger()
 /* call ptz camera center */
 void cls_camera::track_center()
 {
-    if ((conf->ptz_auto_track) && (conf->ptz_move_track != "")) {
+    if ((cfg->ptz_auto_track) && (cfg->ptz_move_track != "")) {
         track_posx = 0;
         track_posy = 0;
-        util_exec_command(this, conf->ptz_move_track.c_str(), NULL);
-        frame_skip = conf->ptz_wait;
+        util_exec_command(this, cfg->ptz_move_track.c_str(), NULL);
+        frame_skip = cfg->ptz_wait;
     }
 }
 
 /* call ptz camera move */
 void cls_camera::track_move()
 {
-    if ((conf->ptz_auto_track) && (conf->ptz_move_track != "")) {
+    if ((cfg->ptz_auto_track) && (cfg->ptz_move_track != "")) {
             track_posx += current_image->location.x;
             track_posy += current_image->location.y;
-            util_exec_command(this, conf->ptz_move_track.c_str(), NULL);
-            frame_skip = conf->ptz_wait;
+            util_exec_command(this, cfg->ptz_move_track.c_str(), NULL);
+            frame_skip = cfg->ptz_wait;
     }
 }
 
@@ -290,7 +290,7 @@ void cls_camera::detected()
     draw->locate();
 
     /* Calculate how centric motion is if configured preview center*/
-    if (conf->picture_output == "center") {
+    if (cfg->picture_output == "center") {
         distX = (uint)abs((imgs.width / 2) - current_image->location.x );
         distY = (uint)abs((imgs.height / 2) - current_image->location.y);
         current_image->cent_dist = distX * distX + distY * distY;
@@ -298,8 +298,8 @@ void cls_camera::detected()
 
     detected_trigger();
 
-    if (current_image->shot <= conf->framerate) {
-        if ((conf->stream_motion == true) &&
+    if (current_image->shot <= cfg->framerate) {
+        if ((cfg->stream_motion == true) &&
             (current_image->shot != 1)) {
             webu_getimg_main(this);
         }
@@ -405,13 +405,13 @@ void cls_camera::cam_close()
 /* Start camera */
 void cls_camera::cam_start()
 {
-    watchdog = conf->watchdog_tmo;
+    watchdog = cfg->watchdog_tmo;
     if (camera_type == CAMERA_TYPE_LIBCAM) {
         libcam = new cls_libcam(this);
     } else if (camera_type == CAMERA_TYPE_NETCAM) {
         netcam = new cls_netcam(this, false);
-        if (conf->netcam_high_url != "") {
-            watchdog = conf->watchdog_tmo;
+        if (cfg->netcam_high_url != "") {
+            watchdog = cfg->watchdog_tmo;
             netcam_high = new cls_netcam(this, true);
         }
     } else if (camera_type == CAMERA_TYPE_V4L2) {
@@ -421,7 +421,7 @@ void cls_camera::cam_start()
             ,_("No Camera device specified"));
         device_status = STATUS_CLOSED;
     }
-    watchdog = conf->watchdog_tmo;
+    watchdog = cfg->watchdog_tmo;
 }
 
 /* Get next image from camera */
@@ -451,11 +451,11 @@ int cls_camera::cam_next(ctx_image_data *img_data)
 /* Assign the camera type */
 void cls_camera::init_camera_type()
 {
-    if (conf->libcam_device != "") {
+    if (cfg->libcam_device != "") {
         camera_type = CAMERA_TYPE_LIBCAM;
-    } else if (conf->netcam_url != "") {
+    } else if (cfg->netcam_url != "") {
         camera_type = CAMERA_TYPE_NETCAM;
-    } else if (conf->v4l2_device != "") {
+    } else if (cfg->v4l2_device != "") {
         camera_type = CAMERA_TYPE_V4L2;
     } else {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
@@ -501,10 +501,10 @@ void cls_camera::init_firstimage()
         }
     }
 
-    noise = conf->noise_level;
-    threshold = conf->threshold;
-    if (conf->threshold_maximum > conf->threshold ) {
-        threshold_maximum = conf->threshold_maximum;
+    noise = cfg->noise_level;
+    threshold = cfg->threshold;
+    if (cfg->threshold_maximum > cfg->threshold ) {
+        threshold_maximum = cfg->threshold_maximum;
     } else {
         threshold_maximum = (imgs.height * imgs.width * 3) / 2;
     }
@@ -587,27 +587,27 @@ void cls_camera::init_values()
     event_curr_nbr = 1;
     event_prev_nbr = 0;
 
-    watchdog = conf->watchdog_tmo;
+    watchdog = cfg->watchdog_tmo;
 
     clock_gettime(CLOCK_MONOTONIC, &frame_curr_ts);
     clock_gettime(CLOCK_MONOTONIC, &frame_last_ts);
 
-    noise = conf->noise_level;
+    noise = cfg->noise_level;
     passflag = false;
     motapp->all_sizes->reset= true;
-    threshold = conf->threshold;
+    threshold = cfg->threshold;
     device_status = STATUS_CLOSED;
-    startup_frames = (conf->framerate * 2) + conf->pre_capture + conf->minimum_motion_frames;
+    startup_frames = (cfg->framerate * 2) + cfg->pre_capture + cfg->minimum_motion_frames;
     missing_frame_counter = 0;
     frame_skip = 0;
     detecting_motion = false;
     shots_mt = 0;
-    lastrate = conf->framerate;
+    lastrate = cfg->framerate;
     event_user = false;
     lasttime = frame_curr_ts.tv_sec;
     postcap = 0;
 
-    movie_passthrough = conf->movie_passthrough;
+    movie_passthrough = cfg->movie_passthrough;
     if ((camera_type != CAMERA_TYPE_NETCAM) &&
         (movie_passthrough)) {
         MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
@@ -616,7 +616,7 @@ void cls_camera::init_values()
     if (motapp->pause) {
         pause = true;
     } else {
-        pause = conf->pause;
+        pause = cfg->pause;
     }
     v4l2cam = nullptr;
     netcam = nullptr;
@@ -647,8 +647,8 @@ void cls_camera::init_cam_start()
 
     if (device_status == STATUS_CLOSED) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Failed to start camera."));
-        imgs.width = conf->width;
-        imgs.height = conf->height;
+        imgs.width = cfg->width;
+        imgs.height = cfg->height;
     }
 
     imgs.motionsize = (imgs.width * imgs.height);
@@ -682,8 +682,8 @@ void cls_camera::cleanup()
             picture->process_preview();
             imgs.image_preview.diffs = 0;
         }
-        if (conf->on_event_end != "") {
-            util_exec_command(this, conf->on_event_end.c_str(), NULL);
+        if (cfg->on_event_end != "") {
+            util_exec_command(this, cfg->on_event_end.c_str(), NULL);
         }
         movie_end();
         motapp->dbse->exec(this, "", "event_end");
@@ -746,10 +746,16 @@ void cls_camera::init()
 
     if (restart == true) {
         cleanup();
+        restart = false;
     }
-    restart = false;
+
+    cfg->parms_copy(conf_src);
+
+    mythreadname_set("cl",cfg->device_id, cfg->device_name.c_str());
 
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize Camera"));
+
+    cfg->parms_copy(conf_src);
 
     init_camera_type();
 
@@ -788,7 +794,7 @@ void cls_camera::init()
             ,_("Camera %d started: motion detection %s"),
             device_id, pause ? _("Disabled"):_("Enabled"));
 
-        if (conf->emulate_motion) {
+        if (cfg->emulate_motion) {
             MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, _("Emulating motion"));
         }
     }
@@ -800,19 +806,19 @@ void cls_camera::areadetect()
 {
     int i, j, z = 0;
 
-    if ((conf->area_detect != "" ) &&
+    if ((cfg->area_detect != "" ) &&
         (event_curr_nbr != areadetect_eventnbr) &&
         (current_image->flags & IMAGE_TRIGGER)) {
-        j = (int)conf->area_detect.length();
+        j = (int)cfg->area_detect.length();
         for (i = 0; i < j; i++) {
-            z = conf->area_detect[(uint)i] - 49; /* characters are stored as ascii 48-57 (0-9) */
+            z = cfg->area_detect[(uint)i] - 49; /* characters are stored as ascii 48-57 (0-9) */
             if ((z >= 0) && (z < 9)) {
                 if (current_image->location.x > area_minx[z] &&
                     current_image->location.x < area_maxx[z] &&
                     current_image->location.y > area_miny[z] &&
                     current_image->location.y < area_maxy[z]) {
-                    if (conf->on_area_detected != "") {
-                        util_exec_command(this, conf->on_area_detected.c_str(), NULL);
+                    if (cfg->on_area_detected != "") {
+                        util_exec_command(this, cfg->on_area_detected.c_str(), NULL);
                     }
                     areadetect_eventnbr = event_curr_nbr; /* Fire script only once per event */
                     MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
@@ -827,7 +833,7 @@ void cls_camera::areadetect()
 /* Prepare for the next iteration of loop*/
 void cls_camera::prepare()
 {
-    watchdog = conf->watchdog_tmo;
+    watchdog = cfg->watchdog_tmo;
 
     frame_last_ts.tv_sec = frame_curr_ts.tv_sec;
     frame_last_ts.tv_nsec = frame_curr_ts.tv_nsec;
@@ -839,8 +845,8 @@ void cls_camera::prepare()
     }
     shots_mt++;
 
-    if (conf->pre_capture < 0) {
-        conf->pre_capture = 0;
+    if (cfg->pre_capture < 0) {
+        cfg->pre_capture = 0;
     }
 
     if (startup_frames > 0) {
@@ -901,7 +907,7 @@ void cls_camera::retry()
 
         check_szimg();
 
-        if (imgs.width != conf->width || imgs.height != conf->height) {
+        if (imgs.width != cfg->width || imgs.height != cfg->height) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Resetting image buffers"));
             device_status = STATUS_CLOSED;
             restart = true;
@@ -937,10 +943,10 @@ int cls_camera::capture()
         lost_connection = 0;
         connectionlosttime.tv_sec = 0;
 
-        if (missing_frame_counter >= (conf->device_tmo * conf->framerate)) {
+        if (missing_frame_counter >= (cfg->device_tmo * cfg->framerate)) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
-            if (conf->on_camera_found != "") {
-                util_exec_command(this, conf->on_camera_found.c_str(), NULL);
+            if (cfg->on_camera_found != "") {
+                util_exec_command(this, cfg->on_camera_found.c_str(), NULL);
             }
         }
         missing_frame_counter = 0;
@@ -959,7 +965,7 @@ int cls_camera::capture()
 
         if ((device_status == STATUS_OPENED) &&
             (missing_frame_counter <
-                (conf->device_tmo * conf->framerate))) {
+                (cfg->device_tmo * cfg->framerate))) {
             memcpy(current_image->image_norm, imgs.image_vprvcy
                 , (uint)imgs.size_norm);
         } else {
@@ -979,16 +985,16 @@ int cls_camera::capture()
                     , tmpout, text_scale);
 
             /* Write error message only once */
-            if (missing_frame_counter == (conf->device_tmo * conf->framerate)) {
+            if (missing_frame_counter == (cfg->device_tmo * cfg->framerate)) {
                 MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                     ,_("Video signal lost - Adding grey image"));
-                if (conf->on_camera_lost != "") {
-                    util_exec_command(this, conf->on_camera_lost.c_str(), NULL);
+                if (cfg->on_camera_lost != "") {
+                    util_exec_command(this, cfg->on_camera_lost.c_str(), NULL);
                 }
             }
 
             if ((device_status == STATUS_OPENED) &&
-                (missing_frame_counter == ((conf->device_tmo * 4) * conf->framerate))) {
+                (missing_frame_counter == ((cfg->device_tmo * 4) * cfg->framerate))) {
                 MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Video signal still lost - Trying to close video device"));
                 cam_close();
@@ -1020,12 +1026,12 @@ void cls_camera::detection()
 /* tune the detection parameters*/
 void cls_camera::tuning()
 {
-    if ((conf->noise_tune && shots_mt == 0) &&
+    if ((cfg->noise_tune && shots_mt == 0) &&
           (!detecting_motion && (current_image->diffs <= threshold))) {
         alg->noise_tune();
     }
 
-    if (conf->threshold_tune) {
+    if (cfg->threshold_tune) {
         alg->threshold_tune();
     }
 
@@ -1036,7 +1042,7 @@ void cls_camera::tuning()
 
     }
 
-    if (current_image->diffs_ratio < conf->threshold_ratio) {
+    if (current_image->diffs_ratio < cfg->threshold_ratio) {
         current_image->diffs = 0;
     }
 
@@ -1054,31 +1060,31 @@ void cls_camera::overlay()
 {
     char tmp[PATH_MAX];
 
-    if ((conf->smart_mask_speed >0) &&
-        ((conf->picture_output_motion != "off") ||
-        conf->movie_output_motion ||
+    if ((cfg->smart_mask_speed >0) &&
+        ((cfg->picture_output_motion != "off") ||
+        cfg->movie_output_motion ||
         (stream.motion.jpg_cnct > 0) ||
         (stream.motion.ts_cnct > 0))) {
         draw->smartmask();
     }
 
     if (imgs.largest_label &&
-        ((conf->picture_output_motion != "off") ||
-        conf->movie_output_motion ||
+        ((cfg->picture_output_motion != "off") ||
+        cfg->movie_output_motion ||
         (stream.motion.jpg_cnct > 0) ||
         (stream.motion.ts_cnct > 0))) {
         draw->largest_label();
     }
 
     if (imgs.mask &&
-        ((conf->picture_output_motion != "off") ||
-        conf->movie_output_motion ||
+        ((cfg->picture_output_motion != "off") ||
+        cfg->movie_output_motion ||
         (stream.motion.jpg_cnct > 0) ||
         (stream.motion.ts_cnct > 0))) {
         draw->fixed_mask();
     }
 
-    if (conf->text_changes) {
+    if (cfg->text_changes) {
         if (pause == false) {
             sprintf(tmp, "%d", current_image->diffs);
         } else {
@@ -1108,8 +1114,8 @@ void cls_camera::overlay()
     }
 
     /* Add text in lower left corner of the pictures */
-    if (conf->text_left != "") {
-        mystrftime(this, tmp, sizeof(tmp), conf->text_left.c_str(), NULL);
+    if (cfg->text_left != "") {
+        mystrftime(this, tmp, sizeof(tmp), cfg->text_left.c_str(), NULL);
         draw->text(current_image->image_norm
                 , imgs.width, imgs.height
                 , 10, imgs.height - (10 * text_scale)
@@ -1117,8 +1123,8 @@ void cls_camera::overlay()
     }
 
     /* Add text in lower right corner of the pictures */
-    if (conf->text_right != "") {
-        mystrftime(this, tmp, sizeof(tmp), conf->text_right.c_str(), NULL);
+    if (cfg->text_right != "") {
+        mystrftime(this, tmp, sizeof(tmp), cfg->text_right.c_str(), NULL);
         draw->text(current_image->image_norm
                 , imgs.width, imgs.height
                 , imgs.width - 10, imgs.height - (10 * text_scale)
@@ -1142,8 +1148,8 @@ void cls_camera::actions_emulate()
     }
 
     detecting_motion = true;
-    if (conf->post_capture > 0) {
-        postcap = conf->post_capture;
+    if (cfg->post_capture > 0) {
+        postcap = cfg->post_capture;
     }
 
     current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
@@ -1161,7 +1167,7 @@ void cls_camera::actions_motion()
     int indx, frame_count = 0;
     int pos = imgs.ring_in;
 
-    for (indx = 0; indx < conf->minimum_motion_frames; indx++) {
+    for (indx = 0; indx < cfg->minimum_motion_frames; indx++) {
         if (imgs.image_ring[pos].flags & IMAGE_MOTION) {
             frame_count++;
         }
@@ -1172,7 +1178,7 @@ void cls_camera::actions_motion()
         }
     }
 
-    if (frame_count >= conf->minimum_motion_frames) {
+    if (frame_count >= cfg->minimum_motion_frames) {
 
         current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
 
@@ -1185,7 +1191,7 @@ void cls_camera::actions_motion()
             movie_motion->reset_start_time(&imgs.image_motion.imgts);
         }
         detecting_motion = true;
-        postcap = conf->post_capture;
+        postcap = cfg->post_capture;
 
         for (indx = 0; indx < imgs.ring_size; indx++) {
             imgs.image_ring[indx].flags |= IMAGE_SAVE;
@@ -1205,8 +1211,8 @@ void cls_camera::actions_motion()
 /* call the event actions*/
 void cls_camera::actions_event()
 {
-    if ((conf->event_gap > 0) &&
-        ((frame_curr_ts.tv_sec - lasttime ) >= conf->event_gap)) {
+    if ((cfg->event_gap > 0) &&
+        ((frame_curr_ts.tv_sec - lasttime ) >= cfg->event_gap)) {
         event_stop = true;
     }
 
@@ -1219,8 +1225,8 @@ void cls_camera::actions_event()
                 picture->process_preview();
                 imgs.image_preview.diffs = 0;
             }
-            if (conf->on_event_end != "") {
-                util_exec_command(this, conf->on_event_end.c_str(), NULL);
+            if (cfg->on_event_end != "") {
+                util_exec_command(this, cfg->on_event_end.c_str(), NULL);
             }
             movie_end();
             motapp->dbse->exec(this, "", "event_end");
@@ -1230,9 +1236,9 @@ void cls_camera::actions_event()
             if (algsec->detected) {
                 MOTPLS_LOG(NTC, TYPE_EVENTS
                     , NO_ERRNO, _("Secondary detect"));
-                if (conf->on_secondary_detect != "") {
+                if (cfg->on_secondary_detect != "") {
                     util_exec_command(this
-                        , conf->on_secondary_detect.c_str()
+                        , cfg->on_secondary_detect.c_str()
                         , NULL);
                 }
             }
@@ -1248,10 +1254,10 @@ void cls_camera::actions_event()
         event_user = false;
     }
 
-    if ((conf->movie_max_time > 0) &&
+    if ((cfg->movie_max_time > 0) &&
         (event_curr_nbr == event_prev_nbr) &&
         ((frame_curr_ts.tv_sec - movie_start_time) >=
-            conf->movie_max_time) &&
+            cfg->movie_max_time) &&
         ( !(current_image->flags & IMAGE_POSTCAP)) &&
         ( !(current_image->flags & IMAGE_PRECAP))) {
         movie_end();
@@ -1285,7 +1291,7 @@ void cls_camera::actions()
         */
     }
 
-    if ((conf->emulate_motion || event_user) && (startup_frames == 0)) {
+    if ((cfg->emulate_motion || event_user) && (startup_frames == 0)) {
         actions_emulate();
     } else if ((current_image->flags & IMAGE_MOTION) && (startup_frames == 0)) {
         actions_motion();
@@ -1294,7 +1300,7 @@ void cls_camera::actions()
         postcap--;
     } else {
         current_image->flags |= IMAGE_PRECAP;
-        if ((conf->event_gap == 0) && detecting_motion) {
+        if ((cfg->event_gap == 0) && detecting_motion) {
             event_stop = true;
         }
         detecting_motion = false;
@@ -1319,9 +1325,9 @@ void cls_camera::actions()
 /* Snapshot interval*/
 void cls_camera::snapshot()
 {
-    if ((conf->snapshot_interval > 0 && shots_mt == 0 &&
-         frame_curr_ts.tv_sec % conf->snapshot_interval <=
-         frame_last_ts.tv_sec % conf->snapshot_interval) ||
+    if ((cfg->snapshot_interval > 0 && shots_mt == 0 &&
+         frame_curr_ts.tv_sec % cfg->snapshot_interval <=
+         frame_last_ts.tv_sec % cfg->snapshot_interval) ||
          action_snapshot) {
         picture->process_snapshot();
         action_snapshot = false;
@@ -1333,28 +1339,28 @@ void cls_camera::timelapse()
 {
     struct tm timestamp_tm;
 
-    if (conf->timelapse_interval) {
+    if (cfg->timelapse_interval) {
         localtime_r(&current_image->imgts.tv_sec, &timestamp_tm);
 
         if (timestamp_tm.tm_min == 0 &&
             (frame_curr_ts.tv_sec % 60 < frame_last_ts.tv_sec % 60) &&
             shots_mt == 0) {
 
-            if (conf->timelapse_mode == "daily") {
+            if (cfg->timelapse_mode == "daily") {
                 if (timestamp_tm.tm_hour == 0) {
                     movie_timelapse->stop();
                 }
-            } else if (conf->timelapse_mode == "hourly") {
+            } else if (cfg->timelapse_mode == "hourly") {
                 movie_timelapse->stop();
-            } else if (conf->timelapse_mode == "weekly-sunday") {
+            } else if (cfg->timelapse_mode == "weekly-sunday") {
                 if (timestamp_tm.tm_wday == 0 && timestamp_tm.tm_hour == 0) {
                     movie_timelapse->stop();
                 }
-            } else if (conf->timelapse_mode == "weekly-monday") {
+            } else if (cfg->timelapse_mode == "weekly-monday") {
                 if (timestamp_tm.tm_wday == 1 && timestamp_tm.tm_hour == 0) {
                     movie_timelapse->stop();
                 }
-            } else if (conf->timelapse_mode == "monthly") {
+            } else if (cfg->timelapse_mode == "monthly") {
                 if (timestamp_tm.tm_mday == 1 && timestamp_tm.tm_hour == 0) {
                     movie_timelapse->stop();
                 }
@@ -1362,8 +1368,8 @@ void cls_camera::timelapse()
         }
 
         if (shots_mt == 0 &&
-            frame_curr_ts.tv_sec % conf->timelapse_interval <=
-            frame_last_ts.tv_sec % conf->timelapse_interval) {
+            frame_curr_ts.tv_sec % cfg->timelapse_interval <=
+            frame_last_ts.tv_sec % cfg->timelapse_interval) {
             movie_timelapse->start();
             if (movie_timelapse->put_image(
                 current_image, &current_image->imgts) == -1) {
@@ -1387,7 +1393,7 @@ void cls_camera::loopback()
 
     vlp_putpipe(this);
 
-    if (!conf->stream_motion || shots_mt == 0) {
+    if (!cfg->stream_motion || shots_mt == 0) {
         webu_getimg_main(this);
     }
 
@@ -1405,8 +1411,8 @@ void cls_camera::frametiming()
         frame_wait[indx]=frame_wait[indx+1];
     }
 
-    if (conf->framerate) {
-        frame_wait[AVGCNT-1] = 1000000L / conf->framerate;
+    if (cfg->framerate) {
+        frame_wait[AVGCNT-1] = 1000000L / cfg->framerate;
     } else {
         frame_wait[AVGCNT-1] = 0;
     }
@@ -1435,7 +1441,7 @@ void cls_camera::frametiming()
 
 void cls_camera::handler()
 {
-    mythreadname_set("cl", conf->device_id, conf->device_name.c_str());
+    mythreadname_set("cl", cfg->device_id, cfg->device_name.c_str());
     device_status = STATUS_INIT;
 
     while (handler_stop == false) {
@@ -1490,23 +1496,23 @@ void cls_camera::stop()
     if (handler_finished == false) {
         handler_stop = true;
         waitcnt = 0;
-        while ((handler_finished == false) && (waitcnt < conf->watchdog_tmo)){
+        while ((handler_finished == false) && (waitcnt < cfg->watchdog_tmo)){
             SLEEP(1,0)
             waitcnt++;
         }
-        if (waitcnt == conf->watchdog_tmo) {
+        if (waitcnt == cfg->watchdog_tmo) {
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("Normal shutdown of camera failed"));
-            if (conf->watchdog_kill > 0) {
+            if (cfg->watchdog_kill > 0) {
                 MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Waiting additional %d seconds (watchdog_kill).")
-                    ,conf->watchdog_kill);
+                    ,cfg->watchdog_kill);
                 waitcnt = 0;
-                while ((handler_finished == false) && (waitcnt < conf->watchdog_kill)){
+                while ((handler_finished == false) && (waitcnt < cfg->watchdog_kill)){
                     SLEEP(1,0)
                     waitcnt++;
                 }
-                if (waitcnt == conf->watchdog_kill) {
+                if (waitcnt == cfg->watchdog_kill) {
                     MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                         , _("No response to shutdown.  Killing it."));
                     MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
@@ -1520,7 +1526,7 @@ void cls_camera::stop()
             }
         }
         handler_finished = true;
-        watchdog = conf->watchdog_tmo;
+        watchdog = cfg->watchdog_tmo;
     }
 
 }
@@ -1537,5 +1543,6 @@ cls_camera::cls_camera(ctx_motapp *p_motapp)
 
 cls_camera::~cls_camera()
 {
-    mydelete(conf);
+    mydelete(conf_src);
+    mydelete(cfg);
 }

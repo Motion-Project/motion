@@ -89,16 +89,7 @@
                 void pgsqldb_init();
                 void pgsqldb_movielist();
             #endif
-
-            std::string     cfg_database_type;
-            std::string     cfg_database_dbname;
-            std::string     cfg_database_host;
-            std::string     cfg_database_user;
-            std::string     cfg_database_password;
-
-            int             cfg_database_port;
-            int             cfg_database_busy_timeout;
-
+            ctx_motapp *motapp;
             enum DBSE_ACT       dbse_action;    /* action to perform with query*/
             bool                table_ok;       /* bool of whether table exists*/
             bool                is_open;

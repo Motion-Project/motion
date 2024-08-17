@@ -456,8 +456,8 @@ int cls_v4l2cam::pixfmt_try(uint pixformat)
     memset(&vidfmt, 0, sizeof(struct v4l2_format));
 
     vidfmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    vidfmt.fmt.pix.width = (uint)width;
-    vidfmt.fmt.pix.height = (uint)height;
+    vidfmt.fmt.pix.width = (uint)cam->cfg->width;
+    vidfmt.fmt.pix.height = (uint)cam->cfg->height;
     vidfmt.fmt.pix.pixelformat = pixformat;
     vidfmt.fmt.pix.field = V4L2_FIELD_ANY;
 
@@ -467,7 +467,7 @@ int cls_v4l2cam::pixfmt_try(uint pixformat)
             ,_("Unable to use palette %c%c%c%c (%dx%d)")
             ,pixformat >> 0, pixformat >> 8
             ,pixformat >> 16, pixformat >> 24
-            ,width, height);
+            ,cam->cfg->width, cam->cfg->height);
         return -1;
     }
 
@@ -475,7 +475,7 @@ int cls_v4l2cam::pixfmt_try(uint pixformat)
         ,_("Testing palette %c%c%c%c (%dx%d)")
         ,pixformat >> 0, pixformat >> 8
         ,pixformat >> 16, pixformat >> 24
-        ,width, height);
+        ,cam->cfg->width, cam->cfg->height);
 
     return 0;
 }
@@ -484,15 +484,15 @@ int cls_v4l2cam::pixfmt_stride()
 {
     int wd, bpl, wps;
 
-    width = (int)vidfmt.fmt.pix.width;
-    height = (int)vidfmt.fmt.pix.height;
+    cam->cfg->width = (int)vidfmt.fmt.pix.width;
+    cam->cfg->height = (int)vidfmt.fmt.pix.height;
 
     bpl = (int)vidfmt.fmt.pix.bytesperline;
-    wd = width;
+    wd = cam->cfg->width;
 
     MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
         , _("Checking image size %dx%d with stride %d")
-        , width, height, bpl);
+        , cam->cfg->width, cam->cfg->height, bpl);
 
     if (bpl == 0) {
         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
@@ -526,7 +526,7 @@ int cls_v4l2cam::pixfmt_stride()
     MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
         , _("Image width will be padded %d bytes"), ((bpl % wd)/wps));
 
-    width = wd + ((bpl % wd)/wps);
+    cam->cfg->width = wd + ((bpl % wd)/wps);
 
     return 0;
 
@@ -534,19 +534,19 @@ int cls_v4l2cam::pixfmt_stride()
 
 int cls_v4l2cam::pixfmt_adjust()
 {
-    if ((vidfmt.fmt.pix.width != (uint)width) ||
-        (vidfmt.fmt.pix.height != (uint)height)) {
+    if ((vidfmt.fmt.pix.width != (uint)cam->cfg->width) ||
+        (vidfmt.fmt.pix.height != (uint)cam->cfg->height)) {
 
         MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             ,_("Adjusting resolution from %ix%i to %ix%i.")
-            ,width, height
+            ,cam->cfg->width, cam->cfg->height
             ,vidfmt.fmt.pix.width
             ,vidfmt.fmt.pix.height);
 
-        width = (int)vidfmt.fmt.pix.width;
-        height = (int)vidfmt.fmt.pix.height;
+        cam->cfg->width = (int)vidfmt.fmt.pix.width;
+        cam->cfg->height = (int)vidfmt.fmt.pix.height;
 
-        if ((width % 8) || (height % 8)) {
+        if ((cam->cfg->width % 8) || (cam->cfg->height % 8)) {
             MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 ,_("Adjusted resolution not modulo 8."));
             MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
@@ -588,7 +588,7 @@ int cls_v4l2cam::pixfmt_set(uint pixformat)
         ,_("Using palette %c%c%c%c (%dx%d)")
         ,pixformat >> 0 , pixformat >> 8
         ,pixformat >> 16, pixformat >> 24
-        ,width, height);
+        ,cam->cfg->width, cam->cfg->height);
 
     return 0;
 }
@@ -600,20 +600,20 @@ void cls_v4l2cam::params_check()
     p_lst *lst = &params->params_array;
     p_it it;
 
-    if (width % 8) {
+    if (cam->cfg->width % 8) {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            ,_("config image width (%d) is not modulo 8"), width);
-        width = width - (width % 8) + 8;
+            ,_("config image width (%d) is not modulo 8"), cam->cfg->width);
+        cam->cfg->width = cam->cfg->width - (cam->cfg->width % 8) + 8;
         MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-            , _("Adjusting to width (%d)"), width);
+            , _("Adjusting to width (%d)"), cam->cfg->width);
     }
 
-    if (height % 8) {
+    if (cam->cfg->height % 8) {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            ,_("config image height (%d) is not modulo 8"), height);
-        height = height - (height % 8) + 8;
+            ,_("config image height (%d) is not modulo 8"), cam->cfg->height);
+        cam->cfg->height = cam->cfg->height - (cam->cfg->height % 8) + 8;
         MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-            ,_("Adjusting to height (%d)"), height);
+            ,_("Adjusting to height (%d)"), cam->cfg->height);
     }
 
     spec = 17;
@@ -696,7 +696,7 @@ void cls_v4l2cam::palette_set()
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         ,_("Configuration palette index %d (%s) for %dx%d doesn't work.")
         , indxp, palette[(uint)indxp].fourcc.c_str()
-        ,width, height);
+        ,cam->cfg->width, cam->cfg->height);
 
     indxp = pixfmt_list();
     if (indxp < 0) {
@@ -834,14 +834,12 @@ void cls_v4l2cam::set_imgs()
     if (fd_device == -1) {
         return;
     }
-    cam->imgs.width = width;
-    cam->imgs.height = height;
+    cam->imgs.width = cam->cfg->width;
+    cam->imgs.height = cam->cfg->height;
     cam->imgs.motionsize = cam->imgs.width * cam->imgs.height;
     cam->imgs.size_norm = (cam->imgs.motionsize * 3) / 2;
-    cam->conf->width = width;
-    cam->conf->height = height;
 
-    convert = new cls_convert(cam, pixfmt_src, width, height);
+    convert = new cls_convert(cam, pixfmt_src, cam->cfg->width, cam->cfg->height);
 
 }
 
@@ -899,16 +897,10 @@ void cls_v4l2cam::init_vars()
     buffers = nullptr;
     convert = nullptr;
 
-    height = cam->conf->height;
-    width = cam->conf->width;
-    fps =cam->conf->framerate;
-    v4l2_device = cam->conf->v4l2_device;
-    v4l2_params = cam->conf->v4l2_params;
-
     params = new ctx_params;
     params->params_count = 0;
     params->update_params = true;
-    util_parms_parse(params, "v4l2_params", v4l2_params);
+    util_parms_parse(params, "v4l2_params", cam->cfg->v4l2_params);
     util_parms_add_default(params, "input", "-1");
     util_parms_add_default(params, "palette", "17");
     util_parms_add_default(params, "norm", "0");
@@ -922,14 +914,14 @@ void cls_v4l2cam::device_open()
 {
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         , _("Opening video device %s")
-        , v4l2_device.c_str());
+        , cam->cfg->v4l2_device.c_str());
 
     cam->watchdog = 60;
-    fd_device = open(v4l2_device.c_str(), O_RDWR|O_CLOEXEC);
+    fd_device = open(cam->cfg->v4l2_device.c_str(), O_RDWR|O_CLOEXEC);
     if (fd_device <= 0) {
         MOTPLS_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
             , _("Failed to open video device %s")
-            , v4l2_device.c_str());
+            , cam->cfg->v4l2_device.c_str());
         fd_device = -1;
         return;
     }
@@ -1072,7 +1064,7 @@ void cls_v4l2cam::set_fps()
 
     setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     setfps.parm.capture.timeperframe.numerator = 1;
-    setfps.parm.capture.timeperframe.denominator = (uint)fps;
+    setfps.parm.capture.timeperframe.denominator = (uint)cam->cfg->framerate;
 
     MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
         , _("Trying to set fps to %d")
@@ -1096,7 +1088,7 @@ void cls_v4l2cam::stop_cam()
     int indx;
 
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-        ,_("Closing video device %s"), v4l2_device.c_str());
+        ,_("Closing video device %s"), cam->cfg->v4l2_device.c_str());
 
     p_type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 

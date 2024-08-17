@@ -23,16 +23,6 @@
 #include "util.hpp"
 #include "sound.hpp"
 
-void cls_sound::init_conf()
-{
-    cfg_snd_params = conf->snd_params;
-    cfg_snd_device = conf->snd_device;
-    cfg_snd_window = conf->snd_window;
-    cfg_snd_show = conf->snd_show;
-    cfg_on_sound_alert = conf->on_sound_alert;
-
-}
-
 void cls_sound::init_values()
 {
     #ifdef HAVE_FFTW3
@@ -127,7 +117,7 @@ void cls_sound::load_alerts()
     ctx_params  *tmp_params;
     p_it        it;
 
-    conf->edit_get("snd_alerts", parm_val, PARM_CAT_18);
+    cfg->edit_get("snd_alerts", parm_val, PARM_CAT_18);
 
     tmp_params = new ctx_params;
     for (it_a=parm_val.begin(); it_a!=parm_val.end(); it_a++) {
@@ -175,7 +165,7 @@ void cls_sound::load_params()
     p_lst   *lst;
 
     snd_info->params->update_params = true;
-    util_parms_parse(snd_info->params,"snd_params", cfg_snd_params);
+    util_parms_parse(snd_info->params,"snd_params", cfg->snd_params);
 
     util_parms_add_default(snd_info->params,"source","alsa");
     util_parms_add_default(snd_info->params,"channels","1");
@@ -337,11 +327,11 @@ void cls_sound::alsa_start()
     smpl_rate = (unsigned int)snd_info->sample_rate;
 
     retcd = snd_pcm_open(&alsa->pcm_dev
-        , cfg_snd_device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
+        , cfg->snd_device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
     if (retcd < 0) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("error: snd_pcm_open device %s (%s)")
-            , cfg_snd_device.c_str(), snd_strerror (retcd));
+            , cfg->snd_device.c_str(), snd_strerror (retcd));
         device_status = STATUS_CLOSED;
         return;
     }
@@ -561,7 +551,7 @@ void cls_sound::pulse_init()
     snd_info->snd_pulse->dev = pa_simple_new(
         (snd_info->pulse_server=="" ? NULL : snd_info->pulse_server.c_str())
         , "motionplus", PA_STREAM_RECORD
-        , (cfg_snd_device=="" ? NULL : cfg_snd_device.c_str())
+        , (cfg->snd_device=="" ? NULL : cfg->snd_device.c_str())
         , "motionplus", &specs, NULL, NULL, &errcd);
     if (snd_info->snd_pulse->dev == NULL) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
@@ -665,10 +655,10 @@ void cls_sound::check_alerts()
     struct timespec trig_ts;
 
     for (indx=0;indx <snd_info->frames;indx++){
-        if (cfg_snd_window == "hamming") {
+        if (cfg->snd_window == "hamming") {
             snd_info->snd_fftw->ff_in[indx] =
                 snd_info->buffer[indx] * HammingWindow(indx, snd_info->frames);
-        } else if (cfg_snd_window == "hann") {
+        } else if (cfg->snd_window == "hann") {
             snd_info->snd_fftw->ff_in[indx] =
                 snd_info->buffer[indx] * HannWindow(indx, snd_info->frames);
         } else {
@@ -694,7 +684,7 @@ void cls_sound::check_alerts()
 
     freq_value = (snd_info->snd_fftw->bin_size * pMaxBinIndex * snd_info->channels);
 
-    if (cfg_snd_show) {
+    if (cfg->snd_show) {
         MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
             , _("Freq: %.4f threshold: %d count: %d maximum: %d")
             , freq_value, snd_info->vol_min
@@ -730,11 +720,11 @@ void cls_sound::check_alerts()
                     , it->alert_id ,it->alert_nm.c_str()
                     , it->volume_level, chkcnt
                     , snd_info->vol_max);
-                if (cfg_on_sound_alert != "") {
+                if (cfg->on_sound_alert != "") {
                     snd_info->trig_freq =std::to_string(freq_value);
                     snd_info->trig_nbr = std::to_string(it->alert_id);
                     snd_info->trig_nm = it->alert_nm;
-                    util_exec_command(this, cfg_on_sound_alert);
+                    util_exec_command(this, cfg->on_sound_alert);
                 }
             }
         }
@@ -798,9 +788,11 @@ void cls_sound::init()
         restart = false;
     }
 
-    mythreadname_set("sl", threadnr, conf->device_name.c_str());
+    cfg->parms_copy(conf_src);
 
-    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize"));
+    mythreadname_set("sl",cfg->device_id, cfg->device_name.c_str());
+
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize sound frequency"));
 
     snd_info = new ctx_snd_info;
     snd_info->params = new ctx_params;
@@ -808,7 +800,6 @@ void cls_sound::init()
     snd_info->snd_alsa = new ctx_snd_alsa;
     snd_info->snd_pulse = new ctx_snd_pulse;
 
-    init_conf();
     init_values();
     load_params();
     load_alerts();
@@ -923,6 +914,7 @@ cls_sound::cls_sound(ctx_motapp *p_motapp)
 
 cls_sound::~cls_sound()
 {
-    mydelete(conf);
+    mydelete(conf_src);
+    mydelete(cfg);
 }
 

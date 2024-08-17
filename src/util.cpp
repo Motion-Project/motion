@@ -494,8 +494,8 @@ size_t mystrftime_base(cls_camera *cam, char *s, size_t max
                 break;
 
             case '$': // thread name
-                if (cam->conf->device_name != "") {
-                    cam->conf->device_name.copy(tempstr, PATH_MAX);
+                if (cam->cfg->device_name != "") {
+                    cam->cfg->device_name.copy(tempstr, PATH_MAX);
                 } else {
                     ++pos_userformat;
                 }

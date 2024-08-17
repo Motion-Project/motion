@@ -1442,11 +1442,11 @@ void cls_webu_html::user_page()
     FILE *fp = NULL;
 
     webua->resp_page = "";
-    fp = myfopen(app->conf->webcontrol_html.c_str(), "re");
+    fp = myfopen(app->cfg->webcontrol_html.c_str(), "re");
     if (fp == NULL) {
         MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
             , _("Invalid user html file: %s")
-            , app->conf->webcontrol_html.c_str());
+            , app->cfg->webcontrol_html.c_str());
     } else {
         while (fgets(response, PATH_MAX-1, fp)) {
             webua->resp_page += response;
@@ -1458,7 +1458,7 @@ void cls_webu_html::user_page()
 void cls_webu_html::main()
 {
     pthread_mutex_lock(&app->mutex_post);
-        if (app->conf->webcontrol_interface == "user") {
+        if (app->cfg->webcontrol_interface == "user") {
             user_page();
         } else {
             default_page();

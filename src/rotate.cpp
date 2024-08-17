@@ -222,19 +222,19 @@ cls_rotate::cls_rotate(cls_camera *p_cam)
     buffer_norm = nullptr;
     buffer_high = nullptr;
 
-    if ((cam->conf->rotate % 90) > 0) {
+    if ((cam->cfg->rotate % 90) > 0) {
         MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Config option \"rotate\" not a multiple of 90: %d")
-            ,cam->conf->rotate);
-        cam->conf->rotate = 0;     /* Disable rotation. */
+            ,cam->cfg->rotate);
+        cam->cfg->rotate = 0;     /* Disable rotation. */
         degrees = 0; /* Force return below. */
     } else {
-        degrees = cam->conf->rotate % 360; /* Range: 0..359 */
+        degrees = cam->cfg->rotate % 360; /* Range: 0..359 */
     }
 
-    if (cam->conf->flip_axis == "horizontal") {
+    if (cam->cfg->flip_axis == "horizontal") {
         axis = FLIP_TYPE_HORIZONTAL;
-    } else if (cam->conf->flip_axis == "vertical") {
+    } else if (cam->cfg->flip_axis == "vertical") {
         axis = FLIP_TYPE_VERTICAL;
     } else {
         axis = FLIP_TYPE_NONE;

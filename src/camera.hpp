@@ -122,7 +122,8 @@ class cls_camera {
         void stop();
 
         ctx_motapp      *motapp;
-        cls_config      *conf;
+        cls_config      *cfg;
+        cls_config      *conf_src;
         ctx_images      imgs;
         ctx_stream      stream;
         ctx_image_data  *current_image;
@@ -207,6 +208,7 @@ class cls_camera {
         int                     areadetect_eventnbr;
         int previous_diffs, previous_location_x, previous_location_y;
 
+
         void ring_resize();
         void ring_destroy();
         void ring_process_debug();
@@ -231,6 +233,7 @@ class cls_camera {
         void init_values();
         void init_cam_start();
         void init_ref();
+        void init_conf();
         void cleanup();
         void init();
         void areadetect();

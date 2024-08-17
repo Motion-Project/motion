@@ -36,7 +36,7 @@ void cls_webu_json::parms_item(cls_config *conf, int indx_parm)
     parm_val = "";
     parm_list = "";
 
-    if (app->conf->webcontrol_parms < WEBUI_LEVEL_LIMITED) {
+    if (app->cfg->webcontrol_parms < WEBUI_LEVEL_LIMITED) {
         parm_enable = "false";
     } else {
         parm_enable = "true";
@@ -130,7 +130,7 @@ void cls_webu_json::parms_one(cls_config *conf)
         }
         /* Allow limited parameters to be read only to the web page */
         if ((config_parms[indx_parm].webui_level >
-                app->conf->webcontrol_parms) &&
+                app->cfg->webcontrol_parms) &&
             (config_parms[indx_parm].webui_level > WEBUI_LEVEL_LIMITED)) {
 
             webua->resp_page +=
@@ -159,12 +159,12 @@ void cls_webu_json::parms_all()
 
     webua->resp_page += "{";
     webua->resp_page += "\"default\": ";
-    parms_one(app->conf);
+    parms_one(app->cfg);
 
     for (indx_cam=0; indx_cam<app->cam_cnt; indx_cam++) {
         webua->resp_page += ",\"cam" +
             std::to_string(app->cam_list[indx_cam]->device_id) + "\": ";
-        parms_one(app->cam_list[indx_cam]->conf);
+        parms_one(app->cam_list[indx_cam]->cfg);
     }
     webua->resp_page += "}";
 }
@@ -182,10 +182,10 @@ void cls_webu_json::cameras_list()
         cam = app->cam_list[indx_cam];
         strid =std::to_string(cam->device_id);
         webua->resp_page += ",\"" + std::to_string(indx_cam) + "\":";
-        if (cam->conf->device_name == "") {
+        if (cam->cfg->device_name == "") {
             webua->resp_page += "{\"name\": \"camera " + strid + "\"";
         } else {
-            webua->resp_page += "{\"name\": \"" + cam->conf->device_name + "\"";
+            webua->resp_page += "{\"name\": \"" + cam->cfg->device_name + "\"";
         }
         webua->resp_page += ",\"id\": " + strid;
         webua->resp_page += ",\"url\": \"" + webua->hostfull + "/" + strid + "/\"} ";
@@ -208,8 +208,8 @@ void cls_webu_json::categories_list()
         }
         webua->resp_page += "\"" + std::to_string(indx_cat) + "\": ";
 
-        catnm_long = webua->app->conf->cat_desc((enum PARM_CAT)indx_cat, false);
-        catnm_short = webua->app->conf->cat_desc((enum PARM_CAT)indx_cat, true);
+        catnm_long = webua->app->cfg->cat_desc((enum PARM_CAT)indx_cat, false);
+        catnm_short = webua->app->cfg->cat_desc((enum PARM_CAT)indx_cat, true);
 
         webua->resp_page += "{\"name\":\"" + catnm_short + "\",\"display\":\"" + catnm_long + "\"}";
 
@@ -358,7 +358,7 @@ void cls_webu_json::status_vars(int indx_cam)
 
     webua->resp_page += "{";
 
-    webua->resp_page += "\"name\":\"" + cam->conf->device_name+"\"";
+    webua->resp_page += "\"name\":\"" + cam->cfg->device_name+"\"";
     webua->resp_page += ",\"id\":" + std::to_string(cam->device_id);
     webua->resp_page += ",\"width\":" + std::to_string(cam->imgs.width);
     webua->resp_page += ",\"height\":" + std::to_string(cam->imgs.height);

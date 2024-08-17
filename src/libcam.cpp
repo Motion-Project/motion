@@ -216,7 +216,7 @@ void cls_libcam::start_params()
 
     params = new ctx_params;
     params->update_params = true;
-    util_parms_parse(params,"libcam_params", conf_libcam_params);
+    util_parms_parse(params,"libcam_params", cam->cfg->libcam_params);
 
     lst = &params->params_array;
 
@@ -244,7 +244,7 @@ int cls_libcam::start_mgr()
 
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "cam_mgr started.");
 
-    if (conf_libcam_device == "camera0"){
+    if (cam->cfg->libcam_device == "camera0"){
         if (cam_mgr->cameras().size() == 0) {
             MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 , "No camera devices found");
@@ -254,7 +254,7 @@ int cls_libcam::start_mgr()
     } else {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Invalid libcam_device '%s'.  The only name supported is 'camera0' "
-            ,conf_libcam_device.c_str());
+            ,cam->cfg->libcam_device.c_str());
         return -1;
     }
     camera = cam_mgr->get(camid);
@@ -550,8 +550,8 @@ int cls_libcam::start_config()
 
     config->at(0).pixelFormat = PixelFormat::fromString("YUV420");
 
-    config->at(0).size.width = (uint)conf_width;
-    config->at(0).size.height = (uint)conf_height;
+    config->at(0).size.width = (uint)cam->cfg->width;
+    config->at(0).size.height = (uint)cam->cfg->height;
     config->at(0).bufferCount = 1;
     config->at(0).stride = 0;
 
@@ -575,11 +575,11 @@ int cls_libcam::start_config()
         return -1;
     }
 
-    if ((config->at(0).size.width != (unsigned int)conf_width) ||
-        (config->at(0).size.height != (unsigned int)conf_height)) {
+    if ((config->at(0).size.width != (uint)cam->cfg->width) ||
+        (config->at(0).size.height != (uint)cam->cfg->height)) {
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             , "Image size adjusted from %d x %d to %d x %d"
-            , conf_width, conf_height
+            , cam->cfg->width, cam->cfg->height
             , config->at(0).size.width, config->at(0).size.height);
     }
 
@@ -830,11 +830,6 @@ cls_libcam::cls_libcam(cls_camera *p_cam)
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
         cam = p_cam;
         params = nullptr;
-        conf_libcam_params = cam->conf->libcam_params;
-        conf_libcam_device = cam->conf->libcam_device;
-        conf_width          = cam->conf->width;
-        conf_height         = cam->conf->height;
-
 
         if (libcam_start() < 0) {
             MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));

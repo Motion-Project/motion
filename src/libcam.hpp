@@ -37,7 +37,7 @@
                 ~cls_libcam();
                 int next(ctx_image_data *img_data);
             private:
-                cls_camera     *cam;
+                cls_camera  *cam;
                 ctx_params  *params;
 
                 std::unique_ptr<libcamera::CameraManager>          cam_mgr;
@@ -53,11 +53,6 @@
                 bool                    started_mgr;
                 bool                    started_aqr;
                 bool                    started_req;
-
-                std::string             conf_libcam_params;
-                std::string             conf_libcam_device;
-                int                     conf_width;
-                int                     conf_height;
 
                 void log_orientation();
                 void log_controls();

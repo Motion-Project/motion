@@ -119,27 +119,27 @@ void cls_dbse::sql_motpls(std::string &sql)
     sql = "";
 
     if (dbse_action == DBSE_TBL_CHECK) {
-        if (cfg_database_type == "mariadb") {
+        if (motapp->cfg->database_type == "mariadb") {
             sql = "Select table_name "
                 " from information_schema.tables "
                 " where table_name = 'motionplus';";
-        } else if (cfg_database_type == "postgresql") {
+        } else if (motapp->cfg->database_type == "postgresql") {
             sql = " select tablename as table_nm "
                 " from pg_catalog.pg_tables "
                 " where schemaname != 'pg_catalog' "
                 " and schemaname != 'information_schema' "
                 " and tablename = 'motionplus';";
-        } else if (cfg_database_type == "sqlite3") {
+        } else if (motapp->cfg->database_type == "sqlite3") {
             sql = "select name from sqlite_master"
                 " where type='table' "
                 " and name='motionplus';";
         }
     } else if (dbse_action == DBSE_TBL_CREATE) {
         sql = "create table motionplus (";
-        if ((cfg_database_type == "mariadb") ||
-            (cfg_database_type == "postgresql")) {
+        if ((motapp->cfg->database_type == "mariadb") ||
+            (motapp->cfg->database_type == "postgresql")) {
             sql += " record_id serial ";
-        } else if (cfg_database_type == "sqlite3") {
+        } else if (motapp->cfg->database_type == "sqlite3") {
             /* Autoincrement is discouraged but I want compatibility*/
             sql += " record_id integer primary key autoincrement ";
         }
@@ -293,26 +293,26 @@ void cls_dbse::sqlite3db_init()
 
     database_sqlite3db = nullptr;
 
-    if (cfg_database_type != "sqlite3") {
+    if (motapp->cfg->database_type != "sqlite3") {
         return;
     }
 
     MOTPLS_LOG(NTC, TYPE_DB, NO_ERRNO
         , _("SQLite3 Database filename %s")
-        , cfg_database_dbname.c_str());
+        , motapp->cfg->database_dbname.c_str());
     retcd = sqlite3_open(
-        cfg_database_dbname.c_str()
+        motapp->cfg->database_dbname.c_str()
         , &database_sqlite3db);
     if (retcd != SQLITE_OK) {
         err_open =sqlite3_errmsg(database_sqlite3db);
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Can't open database %s : %s")
-            , cfg_database_dbname.c_str()
+            , motapp->cfg->database_dbname.c_str()
             , err_open);
         sqlite3_close(database_sqlite3db);
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Could not initialize database %s")
-            , cfg_database_dbname.c_str());
+            , motapp->cfg->database_dbname.c_str());
         is_open = false;
         database_sqlite3db = nullptr;
         return;
@@ -321,8 +321,8 @@ void cls_dbse::sqlite3db_init()
     is_open = true;
     MOTPLS_LOG(NTC, TYPE_DB, NO_ERRNO
         ,  _("database_busy_timeout %d msec")
-        , cfg_database_busy_timeout);
-    retcd = sqlite3_busy_timeout(database_sqlite3db, cfg_database_busy_timeout);
+        , motapp->cfg->database_busy_timeout);
+    retcd = sqlite3_busy_timeout(database_sqlite3db, motapp->cfg->database_busy_timeout);
     if (retcd != SQLITE_OK) {
         err_open = sqlite3_errmsg(database_sqlite3db);
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
@@ -385,7 +385,7 @@ void cls_dbse::sqlite3db_movielist()
 
 void cls_dbse::sqlite3db_close()
 {
-    if (cfg_database_type == "sqlite3") {
+    if (motapp->cfg->database_type == "sqlite3") {
         if (database_sqlite3db != nullptr) {
             sqlite3_close(database_sqlite3db);
             database_sqlite3db = nullptr;
@@ -560,14 +560,14 @@ void cls_dbse::mariadb_init()
 
     database_mariadb = nullptr;
 
-    if (cfg_database_type != "mariadb") {
+    if (motapp->cfg->database_type != "mariadb") {
         return;
     }
 
     if (mysql_library_init(0, nullptr, nullptr)) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Could not initialize database %s")
-            , cfg_database_type.c_str());
+            , motapp->cfg->database_type.c_str());
         is_open = false;
         return;
     }
@@ -577,17 +577,17 @@ void cls_dbse::mariadb_init()
 
     if (mysql_real_connect(
         database_mariadb
-        , cfg_database_host.c_str()
-        , cfg_database_user.c_str()
-        , cfg_database_password.c_str()
-        , cfg_database_dbname.c_str()
-        , (uint)cfg_database_port, nullptr, 0) == nullptr) {
+        , motapp->cfg->database_host.c_str()
+        , motapp->cfg->database_user.c_str()
+        , motapp->cfg->database_password.c_str()
+        , motapp->cfg->database_dbname.c_str()
+        , (uint)motapp->cfg->database_port, nullptr, 0) == nullptr) {
 
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Cannot connect to MariaDB database %s on host %s with user %s")
-            , cfg_database_dbname.c_str()
-            , cfg_database_host.c_str()
-            , cfg_database_user.c_str());
+            , motapp->cfg->database_dbname.c_str()
+            , motapp->cfg->database_host.c_str()
+            , motapp->cfg->database_user.c_str());
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("MariaDB error was %s")
             , mysql_error(database_mariadb));
@@ -602,12 +602,12 @@ void cls_dbse::mariadb_init()
 
     MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
         , _("%s database opened")
-        , cfg_database_dbname.c_str() );
+        , motapp->cfg->database_dbname.c_str() );
 }
 
 void cls_dbse::mariadb_close()
 {
-    if (cfg_database_type == "mariadb") {
+    if (motapp->cfg->database_type == "mariadb") {
         mysql_library_end();
         if (database_mariadb != nullptr) {
             mysql_close(database_mariadb);
@@ -649,13 +649,13 @@ void cls_dbse::pgsqldb_exec(std::string sql)
     if (PQstatus(database_pgsqldb) == CONNECTION_BAD) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Connection to PostgreSQL database '%s' failed: %s")
-            , cfg_database_dbname.c_str()
+            , motapp->cfg->database_dbname.c_str()
             , PQerrorMessage(database_pgsqldb));
         PQreset(database_pgsqldb);
         if (PQstatus(database_pgsqldb) == CONNECTION_BAD) {
             MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
                 , _("Re-Connection to PostgreSQL database '%s' failed: %s")
-                , cfg_database_dbname.c_str()
+                , motapp->cfg->database_dbname.c_str()
                 , PQerrorMessage(database_pgsqldb));
             PQclear(res);
             dbse_close();
@@ -663,7 +663,7 @@ void cls_dbse::pgsqldb_exec(std::string sql)
         } else {
             MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
                 , _("Re-Connection to PostgreSQL database '%s' Succeed")
-                , cfg_database_dbname.c_str());
+                , motapp->cfg->database_dbname.c_str());
         }
     } else if (!(PQresultStatus(res) == PGRES_COMMAND_OK || PQresultStatus(res) == PGRES_TUPLES_OK)) {
         MOTPLS_LOG(ERR, TYPE_DB, SHOW_ERRNO
@@ -677,7 +677,7 @@ void cls_dbse::pgsqldb_exec(std::string sql)
 
 void cls_dbse::pgsqldb_close()
 {
-    if (cfg_database_type == "postgresql") {
+    if (motapp->cfg->database_type == "postgresql") {
         if (database_pgsqldb != nullptr) {
             PQfinish(database_pgsqldb);
             database_pgsqldb = nullptr;
@@ -799,20 +799,20 @@ void cls_dbse::pgsqldb_init()
 
     database_pgsqldb = nullptr;
 
-    if (cfg_database_type != "postgresql") {
+    if (motapp->cfg->database_type != "postgresql") {
         return;
     }
 
-    constr = "dbname='" + cfg_database_dbname + "' ";
-    constr += " host='" + cfg_database_host + "' ";
-    constr += " user='" + cfg_database_user + "' ";
-    constr += " password='" + cfg_database_password + "' ";
-    constr += " port="+std::to_string(cfg_database_port) + " ";
+    constr = "dbname='" + motapp->cfg->database_dbname + "' ";
+    constr += " host='" + motapp->cfg->database_host + "' ";
+    constr += " user='" + motapp->cfg->database_user + "' ";
+    constr += " password='" + motapp->cfg->database_password + "' ";
+    constr += " port="+std::to_string(motapp->cfg->database_port) + " ";
     database_pgsqldb = PQconnectdb(constr.c_str());
     if (PQstatus(database_pgsqldb) == CONNECTION_BAD) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Connection to PostgreSQL database '%s' failed: %s")
-            , cfg_database_dbname.c_str()
+            , motapp->cfg->database_dbname.c_str()
             , PQerrorMessage(database_pgsqldb));
         dbse_close();
         return;
@@ -823,7 +823,7 @@ void cls_dbse::pgsqldb_init()
 
     MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
         , _("%s database opened")
-        , cfg_database_dbname.c_str() );
+        , motapp->cfg->database_dbname.c_str() );
 }
 
 void cls_dbse::pgsqldb_movielist()
@@ -848,7 +848,7 @@ bool cls_dbse::dbse_open()
         return true;
     }
 
-    if (cfg_database_type == "") {
+    if (motapp->cfg->database_type == "") {
         is_open = false;
         return false;
     }
@@ -857,17 +857,17 @@ bool cls_dbse::dbse_open()
         MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO,_("Opening database"));
 
         #ifdef HAVE_MARIADB
-            if (cfg_database_type == "mariadb") {
+            if (motapp->cfg->database_type == "mariadb") {
                 mariadb_init();
             }
         #endif
         #ifdef HAVE_PGSQLDB
-            if (cfg_database_type == "postgresql") {
+            if (motapp->cfg->database_type == "postgresql") {
                 pgsqldb_init();
             }
         #endif
         #ifdef HAVE_SQLITE3DB
-            if (cfg_database_type == "sqlite3") {
+            if (motapp->cfg->database_type == "sqlite3") {
                 sqlite3db_init();
             }
         #endif
@@ -889,17 +889,17 @@ void cls_dbse::movielist_get(int p_device_id, lst_movies *p_movielist)
         movielist->clear();
 
         #ifdef HAVE_MARIADB
-            if (cfg_database_type == "mariadb") {
+            if (motapp->cfg->database_type == "mariadb") {
                 mariadb_movielist();
             }
         #endif
         #ifdef HAVE_PGSQLDB
-            if (cfg_database_type == "postgresql") {
+            if (motapp->cfg->database_type == "postgresql") {
                 pgsqldb_movielist();
             }
         #endif
         #ifdef HAVE_SQLITE3DB
-            if (cfg_database_type == "sqlite3") {
+            if (motapp->cfg->database_type == "sqlite3") {
                 sqlite3db_movielist();
             }
         #endif
@@ -928,17 +928,17 @@ void cls_dbse::exec_sql(std::string sql)
 
     pthread_mutex_lock(&mutex_dbse);
         #ifdef HAVE_MARIADB
-            if (cfg_database_type == "mariadb") {
+            if (motapp->cfg->database_type == "mariadb") {
                 mariadb_exec(sql);
             }
         #endif
         #ifdef HAVE_PGSQLDB
-            if (cfg_database_type == "postgresql") {
+            if (motapp->cfg->database_type == "postgresql") {
                 pgsqldb_exec(sql);
             }
         #endif
         #ifdef HAVE_SQLITE3DB
-            if (cfg_database_type == "sqlite3") {
+            if (motapp->cfg->database_type == "sqlite3") {
                 sqlite3db_exec(sql);
             }
         #endif
@@ -958,15 +958,15 @@ void cls_dbse::exec(cls_camera *cam, std::string fname, std::string cmd)
     }
 
     if (cmd == "pic_save") {
-        mystrftime(cam, sql, cam->conf->sql_pic_save, fname);
+        mystrftime(cam, sql, cam->cfg->sql_pic_save, fname);
     } else if (cmd == "movie_start") {
-        mystrftime(cam, sql, cam->conf->sql_movie_start, fname);
+        mystrftime(cam, sql, cam->cfg->sql_movie_start, fname);
     } else if (cmd == "movie_end") {
-        mystrftime(cam, sql, cam->conf->sql_movie_end, fname);
+        mystrftime(cam, sql, cam->cfg->sql_movie_end, fname);
     } else if (cmd == "event_start") {
-        mystrftime(cam, sql, cam->conf->sql_event_start, fname);
+        mystrftime(cam, sql, cam->cfg->sql_event_start, fname);
     } else if (cmd == "event_end") {
-        mystrftime(cam, sql, cam->conf->sql_event_end, fname);
+        mystrftime(cam, sql, cam->cfg->sql_event_end, fname);
     }
 
     if (sql == "") {
@@ -1043,55 +1043,49 @@ void cls_dbse::dbse_edits()
 {
     int retcd = 0;
 
-    if ((cfg_database_type != "") &&
-        (cfg_database_dbname == "")) {
+    if ((motapp->cfg->database_type != "") &&
+        (motapp->cfg->database_dbname == "")) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Invalid database name"));
         retcd = -1;
     }
 
-    if ((cfg_database_type != "mariadb") &&
-        (cfg_database_type != "postgresql") &&
-        (cfg_database_type != "sqlite3") &&
-        (cfg_database_type != "")) {
+    if ((motapp->cfg->database_type != "mariadb") &&
+        (motapp->cfg->database_type != "postgresql") &&
+        (motapp->cfg->database_type != "sqlite3") &&
+        (motapp->cfg->database_type != "")) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             ,_("Invalid database_type %s")
-            , cfg_database_type.c_str());
+            , motapp->cfg->database_type.c_str());
         retcd = -1;
     }
 
-    if (((cfg_database_type == "mariadb") ||
-         (cfg_database_type == "postgresql")) &&
-         (cfg_database_port == 0)) {
+    if (((motapp->cfg->database_type == "mariadb") ||
+         (motapp->cfg->database_type == "postgresql")) &&
+         (motapp->cfg->database_port == 0)) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             ,_("Must specify database port for mariadb/pgsql"));
         retcd = -1;
     }
 
-    if ((cfg_database_type == "sqlite3") &&
-        (cfg_database_dbname == "")) {
+    if ((motapp->cfg->database_type == "sqlite3") &&
+        (motapp->cfg->database_dbname == "")) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             ,_("Must specify database name for sqlite3"));
         retcd = -1;
     }
 
-    if ((cfg_database_type != "") && (retcd == -1)) {
+    if ((motapp->cfg->database_type != "") && (retcd == -1)) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             ,_("Database functionality disabled."));
-        cfg_database_type = "";
+        motapp->cfg->database_type = "";
     }
 
 }
 
 cls_dbse::cls_dbse(ctx_motapp *p_motapp)
 {
-    cfg_database_busy_timeout = p_motapp->conf->database_busy_timeout;
-    cfg_database_dbname = p_motapp->conf->database_dbname;
-    cfg_database_host = p_motapp->conf->database_host;
-    cfg_database_password = p_motapp->conf->database_password;
-    cfg_database_port = p_motapp->conf->database_port;
-    cfg_database_type = p_motapp->conf->database_type;
-    cfg_database_user = p_motapp->conf->database_user;
+    motapp = p_motapp;
 
     is_open = false;
 

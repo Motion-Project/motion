@@ -97,7 +97,8 @@ class cls_sound {
 
         enum DEVICE_STATUS      device_status;
 
-        cls_config      *conf;
+        cls_config      *conf_src;
+        cls_config      *cfg;
         int             device_id;
         std::string     device_name;
         ctx_snd_info    *snd_info;
@@ -109,16 +110,9 @@ class cls_sound {
     private:
         ctx_motapp      *motapp;
         std::thread     handler_thread;
-        std::string     cfg_snd_params;
-        std::string     cfg_snd_device;
-        std::string     cfg_snd_window;
-        bool            cfg_snd_show;
-        std::string     cfg_on_sound_alert;
-
 
         void cleanup();
         void handler();
-        void init_conf();
         void init_values();
         void init();
         void init_alerts(ctx_snd_alert  *tmp_alert);

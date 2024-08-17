@@ -291,6 +291,7 @@
             void init(ctx_motapp *motapp);
             void parms_log(ctx_motapp *motapp);
             void parms_write(ctx_motapp *motapp);
+            void parms_copy(cls_config *src);
 
         private:
             void cmdline(ctx_motapp *motapp);
