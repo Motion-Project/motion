@@ -240,73 +240,6 @@ int myfclose(FILE* fh)
     return rval;
 }
 
-static void mystrftime_long (const cls_camera *cam,
-        int width, const char *word, int l, char *out)
-{
-
-    #define SPECIFIERWORD(k) ((strlen(k)==(uint)l) && (!strncmp(k, word, (uint)l)))
-
-    if (SPECIFIERWORD("host")) {
-        snprintf (out, PATH_MAX, "%*s", width, cam->hostname);
-        return;
-    }
-    if (SPECIFIERWORD("fps")) {
-        sprintf(out, "%*d", width, cam->movie_fps);
-        return;
-    }
-    if (SPECIFIERWORD("eventid")) {
-        sprintf(out, "%*s", width, cam->eventid);
-        return;
-    }
-    if (SPECIFIERWORD("ver")) {
-        sprintf(out, "%*s", width, VERSION);
-        return;
-    }
-    if (SPECIFIERWORD("sdevx")) {
-        sprintf(out, "%*d", width,  cam->current_image->location.stddev_x);
-        return;
-    }
-    if (SPECIFIERWORD("sdevy")) {
-        sprintf(out, "%*d", width,  cam->current_image->location.stddev_y);
-        return;
-    }
-    if (SPECIFIERWORD("sdevxy")) {
-        sprintf(out, "%*d", width,  cam->current_image->location.stddev_xy);
-        return;
-    }
-    if (SPECIFIERWORD("ratio")) {
-        sprintf(out, "%*d", width,  cam->current_image->diffs_ratio);
-        return;
-    }
-    if (SPECIFIERWORD("action_user")) {
-        sprintf(out, "%*s", width,  cam->action_user);
-        return;
-    }
-    if (SPECIFIERWORD("secdetect")) {
-        if (cam->algsec->method != "none") {
-            if (cam->algsec->detected) {
-                sprintf(out, "%*s", width, "Y");
-            } else {
-                sprintf(out, "%*s", width, "N");
-            }
-        } else {
-            sprintf(out, "%*s", width, "N");
-        }
-        return;
-    }
-
-
-    // Not a valid modifier keyword. Log the error and ignore.
-    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
-        ,_("invalid format specifier keyword %*.*s"), l, l, word);
-
-    // Do not let the output buffer empty, or else where to restart the
-    // interpretation of the user string will become dependent to far too
-    // many conditions. Maybe change loop to "if (*pos_userformat == '%') {
-    // ...} __else__ ..."?
-    out[0] = '~'; out[1] = 0;
-}
-
 void mystrftime(cls_sound *snd, std::string &dst, std::string fmt)
 {
     char tmp[PATH_MAX];
@@ -354,194 +287,166 @@ void mystrftime(cls_sound *snd, std::string &dst, std::string fmt)
     dst.assign(tmp);
 }
 
-size_t mystrftime_base(cls_camera *cam, char *s, size_t max
-        , const char *userformat, const char *filename)
+void mystrftime_base(cls_camera *cam
+    , std::string &dst, std::string fmt, std::string fname)
 {
-    char formatstring[PATH_MAX] = "";
-    char tempstring[PATH_MAX] = "";
-    char *format, *tempstr;
-    const char *pos_userformat;
-    int width;
+    char tmp[PATH_MAX];
     struct tm timestamp_tm;
+    timespec  curr_ts;
+    std::string user_fmt;
+    uint indx;
     ctx_image_data img;
 
-    if (cam->current_image == NULL) {
+    if (cam->current_image == nullptr) {
+        clock_gettime(CLOCK_REALTIME, &curr_ts);
+        localtime_r(&curr_ts.tv_sec, &timestamp_tm);
         memset(&img, 0, sizeof(ctx_image_data));
-        clock_gettime(CLOCK_REALTIME, &img.imgts);
     } else {
+        localtime_r(&cam->current_image->imgts.tv_sec, &timestamp_tm);
         memcpy(&img, cam->current_image, sizeof(ctx_image_data));
     }
 
-    localtime_r(&img.imgts.tv_sec, &timestamp_tm);
-
-    format = formatstring;
-
-    /* if mystrftime is called with userformat = NULL we return a zero length string */
-    if (userformat == NULL) {
-        *s = '\0';
-        return 0;
+    if (fmt == "") {
+        dst = "";
+        return;
     }
 
-    for (pos_userformat = userformat; *pos_userformat; ++pos_userformat) {
-
-        if (*pos_userformat == '%') {
-            /*
-             * Reset 'tempstr' to point to the beginning of 'tempstring',
-             * otherwise we will eat up tempstring if there are many
-             * format specifiers.
-             */
-            tempstr = tempstring;
-            tempstr[0] = '\0';
-            width = 0;
-            while ('0' <= pos_userformat[1] && pos_userformat[1] <= '9') {
-                width *= 10;
-                width += pos_userformat[1] - '0';
-                ++pos_userformat;
+    user_fmt = "";
+    for (indx=0; indx<fmt.length(); indx++){
+        memset(tmp, 0, sizeof(tmp));
+        if (fmt.substr(indx,2) == "%v") {
+            sprintf(tmp, "%02d", cam->event_curr_nbr);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%q") {
+            sprintf(tmp, "%d", img.shot);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%D") {
+            sprintf(tmp, "%d", img.diffs);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%N") {
+            sprintf(tmp, "%d", cam->noise);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%i") {
+            sprintf(tmp, "%d", img.location.width);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%J") {
+            sprintf(tmp, "%d", img.location.height);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%K") {
+            sprintf(tmp, "%d", img.location.x);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%L") {
+            sprintf(tmp, "%d", img.location.y);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%o") {
+            sprintf(tmp, "%d", cam->threshold);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%Q") {
+            sprintf(tmp, "%d", img.total_labels);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%t") {
+            sprintf(tmp, "%d", cam->device_id);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%C") {
+            user_fmt.append(cam->text_event_string);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%w") {
+            sprintf(tmp, "%d", cam->imgs.width);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%h") {
+            sprintf(tmp, "%d", cam->imgs.height);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%f") {
+            user_fmt.append(fname);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%n") {
+            sprintf(tmp, "%d", cam->filetype);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%$") {
+            user_fmt.append(cam->cfg->device_name);
+            indx++;
+        } else if (fmt.substr(indx,strlen("%{host}")) == "%{host}") {
+            user_fmt.append(cam->hostname);
+            indx += (strlen("%{host}")-1);
+        } else if (fmt.substr(indx,strlen("%{fps}")) == "%{fps}") {
+            sprintf(tmp, "%d", cam->movie_fps);
+            user_fmt.append(tmp);
+            indx += (strlen("%{fps}")-1);
+        } else if (fmt.substr(indx,strlen("%{eventid}")) == "%{eventid}") {
+            user_fmt.append(cam->eventid);
+            indx += (strlen("%{eventid}")-1);
+        } else if (fmt.substr(indx,strlen("%{ver}")) == "%{ver}") {
+            user_fmt.append(VERSION);
+            indx += (strlen("%{ver}")-1);
+        } else if (fmt.substr(indx,strlen("%{sdevx}")) == "%{sdevx}") {
+            sprintf(tmp, "%d", cam->current_image->location.stddev_x);
+            user_fmt.append(tmp);
+            indx += (strlen("%{sdevx}")-1);
+        } else if (fmt.substr(indx,strlen("%{sdevy}")) == "%{sdevy}") {
+            sprintf(tmp, "%d", cam->current_image->location.stddev_y);
+            user_fmt.append(tmp);
+            indx += (strlen("%{sdevy}")-1);
+        } else if (fmt.substr(indx,strlen("%{sdevxy}")) == "%{sdevxy}") {
+            sprintf(tmp, "%d", cam->current_image->location.stddev_xy);
+            user_fmt.append(tmp);
+            indx += (strlen("%{sdevxy}")-1);
+        } else if (fmt.substr(indx,strlen("%{ratio}")) == "%{ratio}") {
+            sprintf(tmp, "%d", cam->current_image->diffs_ratio);
+            user_fmt.append(tmp);
+            indx += (strlen("%{ratio}")-1);
+        } else if (fmt.substr(indx,strlen("%{action_user}")) == "%{action_user}") {
+            user_fmt.append(cam->action_user);
+            indx += (strlen("%{action_user}")-1);
+        } else if (fmt.substr(indx,strlen("%{secdetect}")) == "%{secdetect}") {
+            if (cam->algsec->detected) {
+                user_fmt.append("Y");
+            } else {
+                user_fmt.append("N");
             }
-
-            switch (*++pos_userformat) {
-            case '\0': // end of string
-                --pos_userformat;
-                break;
-
-            case 'v': // event
-                sprintf(tempstr, "%0*d", width ? width : 2, cam->event_curr_nbr);
-                break;
-
-            case 'q': // shots
-                sprintf(tempstr, "%0*d", width ? width : 2, img.shot);
-                break;
-
-            case 'D': // diffs
-                sprintf(tempstr, "%*d", width, img.diffs);
-                break;
-
-            case 'N': // noise
-                sprintf(tempstr, "%*d", width, cam->noise);
-                break;
-
-            case 'i': // motion width
-                sprintf(tempstr, "%*d", width, img.location.width);
-                break;
-
-            case 'J': // motion height
-                sprintf(tempstr, "%*d", width, img.location.height);
-                break;
-
-            case 'K': // motion center x
-                sprintf(tempstr, "%*d", width, img.location.x);
-                break;
-
-            case 'L': // motion center y
-                sprintf(tempstr, "%*d", width, img.location.y);
-                break;
-
-            case 'o': // threshold
-                sprintf(tempstr, "%*d", width, cam->threshold);
-                break;
-
-            case 'Q': // number of labels
-                sprintf(tempstr, "%*d", width, img.total_labels);
-                break;
-
-            case 't': // device id
-                sprintf(tempstr, "%*d", width, cam->device_id);
-                break;
-
-            case 'C': // text_event
-                if (cam->text_event_string[0]) {
-                    snprintf(tempstr, PATH_MAX, "%*s", width,
-                        cam->text_event_string);
-                } else {
-                    ++pos_userformat;
-                }
-                break;
-
-            case 'w': // picture width
-                sprintf(tempstr, "%*d", width, cam->imgs.width);
-                break;
-
-            case 'h': // picture height
-                sprintf(tempstr, "%*d", width, cam->imgs.height);
-                break;
-
-            case 'f': // filename
-                if (filename) {
-                    snprintf(tempstr, PATH_MAX, "%*s", width, filename);
-                } else {
-                    ++pos_userformat;
-                }
-                break;
-
-            case 'n': // filetype
-                if (cam->filetype) {
-                    sprintf(tempstr, "%*d", width, cam->filetype);
-                } else {
-                    ++pos_userformat;
-                }
-                break;
-
-            case '{': // long format specifier word.
-                {
-                    const char *word = ++pos_userformat;
-                    while ((*pos_userformat != '}') && (*pos_userformat != 0))
-                        ++pos_userformat;
-                    mystrftime_long (cam, width, word, (int)(pos_userformat-word), tempstr);
-                    if (*pos_userformat == '\0') {
-                        --pos_userformat;
-                    }
-                }
-                break;
-
-            case '$': // thread name
-                if (cam->cfg->device_name != "") {
-                    cam->cfg->device_name.copy(tempstr, PATH_MAX);
-                } else {
-                    ++pos_userformat;
-                }
-                break;
-
-            default: // Any other code is copied with the %-sign
-                *format++ = '%';
-                *format++ = *pos_userformat;
-                continue;
-            }
-
-            /*
-             * If a format specifier was found and used, copy the result from
-             * 'tempstr' to 'format'.
-             */
-            if (tempstr[0]) {
-                while ((*format = *tempstr++) != '\0') {
-                    ++format;
-                }
-                continue;
-            }
+            indx += (strlen("%{secdetect}")-1);
+        } else {
+            user_fmt.append(fmt.substr(indx,1));
         }
-
-        /* For any other character than % we just simply copy the character */
-        *format++ = *pos_userformat;
     }
 
-    *format = '\0';
-    format = formatstring;
-
-    return strftime(s, max, format, &timestamp_tm);
+    memset(tmp, 0, sizeof(tmp));
+    strftime(tmp, sizeof(tmp),user_fmt.c_str(), &timestamp_tm);
+    dst.assign(tmp);
 }
 
+/* Old method for temporary use only. */
 void mystrftime(cls_camera *cam, char *s, size_t mx_sz
     , const char *usrfmt, const char *fname)
 {
-    mystrftime_base(cam, s, mx_sz, usrfmt,fname);
+    std::string rslt, tmpnm;
+    (void)mx_sz;
+    if (fname == nullptr) {
+        tmpnm = "";
+    } else {
+        tmpnm.assign(fname);
+    }
+    mystrftime_base(cam, rslt, usrfmt, tmpnm);
+    sprintf(s, "%s",rslt.c_str());
 }
 
 void mystrftime(cls_camera *cam, std::string &rslt
     , std::string usrfmt, std::string fname)
 {
-    char tmp[PATH_MAX] = "";
-
-    mystrftime_base(cam, tmp, sizeof(tmp), usrfmt.c_str(),fname.c_str());
-    rslt = tmp;
+    mystrftime_base(cam, rslt, usrfmt, fname);
 }
 
 void mythreadname_set(const char *abbr, int threadnbr, const char *threadname)
@@ -554,7 +459,9 @@ void mythreadname_set(const char *abbr, int threadnbr, const char *threadname)
 
     char tname[32];
     if (abbr != NULL) {
-        if (strlen(threadname) == 0) {
+        if (threadname == nullptr) {
+            snprintf(tname, sizeof(tname), "%s%02d",abbr,threadnbr);
+        } else if (strlen(threadname) == 0) {
             snprintf(tname, sizeof(tname), "%s%02d",abbr,threadnbr);
         } else {
             snprintf(tname, sizeof(tname), "%s%02d:%s",abbr,threadnbr, threadname);
