@@ -26,9 +26,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <syslog.h>
-#ifndef __USE_GNU
-    #define __USE_GNU
-#endif
 #include <locale.h>
 #include <string.h>
 #include <unistd.h>
