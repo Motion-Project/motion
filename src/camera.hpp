@@ -21,6 +21,19 @@
 #ifndef _INCLUDE_CAMERA_HPP_
 #define _INCLUDE_CAMERA_HPP_
 
+enum CAMERA_TYPE {
+    CAMERA_TYPE_UNKNOWN,
+    CAMERA_TYPE_V4L2,
+    CAMERA_TYPE_LIBCAM,
+    CAMERA_TYPE_NETCAM
+};
+enum CAPTURE_RESULT {
+    CAPTURE_SUCCESS,
+    CAPTURE_FAILURE,
+    CAPTURE_ATTEMPTED
+};
+
+
 struct ctx_coord {
     int x;
     int y;
