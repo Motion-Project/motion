@@ -28,7 +28,7 @@
             mhdrslt processor_start(const char *upload_data, size_t *upload_data_size);
 
         private:
-            ctx_motapp      *app;
+            cls_motapp      *app;
             cls_webu        *webu;
             cls_webu_ans    *webua;
             cls_webu_html   *webu_html;

@@ -251,7 +251,7 @@ void cls_log::log_stop()
     }
 }
 
-cls_log::cls_log(ctx_motapp *p_app)
+cls_log::cls_log(cls_motapp *p_app)
 {
     app = p_app;
     log_mode = LOGMODE_NONE;

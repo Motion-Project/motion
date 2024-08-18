@@ -3554,7 +3554,7 @@ void cls_config::usage(void)
     printf("\n");
 }
 
-void cls_config::cmdline(ctx_motapp *app)
+void cls_config::cmdline(cls_motapp *app)
 {
     int c;
 
@@ -3594,7 +3594,7 @@ void cls_config::cmdline(ctx_motapp *app)
     optind = 1;
 }
 
-void cls_config::camera_filenm(ctx_motapp *app)
+void cls_config::camera_filenm(cls_motapp *app)
 {
     int indx_cam, indx;
     std::string dirnm, fullnm;
@@ -3629,7 +3629,7 @@ void cls_config::camera_filenm(ctx_motapp *app)
     conf_filename = fullnm;
 }
 
-int cls_config::get_next_devid(ctx_motapp *app)
+int cls_config::get_next_devid(cls_motapp *app)
 {
     int indx, dev_id;
     bool  chkid;
@@ -3657,7 +3657,7 @@ int cls_config::get_next_devid(ctx_motapp *app)
 
 }
 
-void cls_config::camera_add(ctx_motapp *app, std::string fname, bool srcdir)
+void cls_config::camera_add(cls_motapp *app, std::string fname, bool srcdir)
 {
     struct stat statbuf;
     int indx;
@@ -3699,7 +3699,7 @@ void cls_config::camera_add(ctx_motapp *app, std::string fname, bool srcdir)
 }
 
 /* Create default configuration file name*/
-void cls_config::sound_filenm(ctx_motapp *app)
+void cls_config::sound_filenm(cls_motapp *app)
 {
     int indx_snd, indx;
     std::string dirnm, fullnm;
@@ -3734,7 +3734,7 @@ void cls_config::sound_filenm(ctx_motapp *app)
     conf_filename = fullnm;
 }
 
-void cls_config::sound_add(ctx_motapp *app, std::string fname, bool srcdir)
+void cls_config::sound_add(cls_motapp *app, std::string fname, bool srcdir)
 {
     struct stat statbuf;
     int indx;
@@ -3775,7 +3775,7 @@ void cls_config::sound_add(ctx_motapp *app, std::string fname, bool srcdir)
     app->snd_cnt = (int)app->snd_list.size();
 }
 
-void cls_config::config_dir_parm(ctx_motapp *app, std::string confdir)
+void cls_config::config_dir_parm(cls_motapp *app, std::string confdir)
 {
     DIR *dp;
     dirent *ep;
@@ -3810,7 +3810,7 @@ void cls_config::config_dir_parm(ctx_motapp *app, std::string confdir)
 
 }
 
-void cls_config::process(ctx_motapp *app)
+void cls_config::process(cls_motapp *app)
 {
     size_t stpos;
     std::string line, parm_nm, parm_vl;
@@ -3896,7 +3896,7 @@ void cls_config::parms_log_parm(std::string parm_nm, std::string parm_vl)
 
 }
 
-void cls_config::parms_log(ctx_motapp *app)
+void cls_config::parms_log(cls_motapp *app)
 {
     int i, indx;
     std::string parm_vl, parm_main, parm_nm;
@@ -4011,7 +4011,7 @@ void cls_config::parms_write_parms(FILE *conffile, std::string parm_nm
     }
 }
 
-void cls_config::parms_write_app(ctx_motapp *app)
+void cls_config::parms_write_app(cls_motapp *app)
 {
     int i, indx;
     std::string parm_vl, parm_main, parm_nm;
@@ -4090,7 +4090,7 @@ void cls_config::parms_write_app(ctx_motapp *app)
 
 }
 
-void cls_config::parms_write_cam(ctx_motapp *app)
+void cls_config::parms_write_cam(cls_motapp *app)
 {
     int i, indx;
     std::string parm_vl, parm_main, parm_nm;
@@ -4150,7 +4150,7 @@ void cls_config::parms_write_cam(ctx_motapp *app)
 
 }
 
-void cls_config::parms_write_snd(ctx_motapp *app)
+void cls_config::parms_write_snd(cls_motapp *app)
 {
     int i, indx;
     std::string parm_vl, parm_main, parm_nm;
@@ -4210,7 +4210,7 @@ void cls_config::parms_write_snd(ctx_motapp *app)
 }
 
 
-void cls_config::parms_write(ctx_motapp *app)
+void cls_config::parms_write(cls_motapp *app)
 {
     parms_write_app(app);
     parms_write_cam(app);
@@ -4232,7 +4232,7 @@ void cls_config::parms_copy(cls_config *src)
 
 }
 
-void cls_config::init(ctx_motapp *app)
+void cls_config::init(cls_motapp *app)
 {
     std::string filename;
     char path[PATH_MAX];

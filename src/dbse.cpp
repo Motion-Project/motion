@@ -1083,7 +1083,7 @@ void cls_dbse::dbse_edits()
 
 }
 
-cls_dbse::cls_dbse(ctx_motapp *p_app)
+cls_dbse::cls_dbse(cls_motapp *p_app)
 {
     app = p_app;
 

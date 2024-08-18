@@ -36,7 +36,7 @@
 static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *connection)
 {
     (void)connection;
-    ctx_motapp      *p_app =(ctx_motapp *)cls;
+    cls_motapp      *p_app =(cls_motapp *)cls;
     cls_webu_ans    *webua;
 
     mythreadname_set("wc", 0, NULL);
@@ -539,7 +539,7 @@ void cls_webu::webu_stop()
 
 }
 
-cls_webu::cls_webu(ctx_motapp *p_app)
+cls_webu::cls_webu(cls_motapp *p_app)
 {
     app = p_app;
     webu_start();

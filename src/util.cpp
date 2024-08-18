@@ -532,9 +532,9 @@ void mytranslate_init(void)
         //translate_locale_chg("li");
         mytranslate_locale_chg("es");
 
-        bindtextdomain ("motion", LOCALEDIR);
-        bind_textdomain_codeset ("motion", "UTF-8");
-        textdomain ("motion");
+        bindtextdomain ("motionplus", LOCALEDIR);
+        bind_textdomain_codeset ("motionplus", "UTF-8");
+        textdomain ("motionplus");
 
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Language: English"));
 

@@ -103,12 +103,7 @@ void cls_webu_post::cam_delete()
         }
     }
 
-    if (webua->camindx == -1) {
-        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "No camera specified for deletion." );
-        return;
-    } else {
-        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Deleting camera.");
-    }
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Deleting camera.");
 
     app->cam_delete = webua->camindx;
 
@@ -159,13 +154,21 @@ void cls_webu_post::parse_cmd()
         return;
     }
 
-    for (indx=0; indx<app->cam_cnt; indx++) {
-        if (app->cam_list[indx]->device_id == webua->device_id) {
-            webua->camindx = indx;
-            break;
+    if (webua->device_id != 0) {
+        for (indx=0; indx<app->cam_cnt; indx++) {
+            if (app->cam_list[indx]->device_id == webua->device_id) {
+                webua->camindx = indx;
+                break;
+            }
+        }
+        if (webua->camindx == -1) {
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                , "Invalid request.  Device id %d not found"
+                , webua->device_id);
+            webua->device_id = -1;
+            return;
         }
     }
-
 }
 
 /* Process the event end action */
@@ -598,7 +601,7 @@ void cls_webu_post::process_actions()
 {
     parse_cmd();
 
-    if (post_cmd == "")  {
+    if ((post_cmd == "") || (webua->device_id == -1)) {
         return;
     }
 

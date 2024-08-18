@@ -24,7 +24,7 @@
             ~cls_webu_file();
             void main();
         private:
-            ctx_motapp      *app;
+            cls_motapp      *app;
             cls_webu        *webu;
             cls_webu_ans    *webua;
     };

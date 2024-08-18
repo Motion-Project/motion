@@ -112,10 +112,10 @@
     }
 #endif
 
-struct ctx_motapp;
 struct ctx_images;
 struct ctx_image_data;
 
+class cls_motapp;
 class cls_camera;
 class cls_sound;
 class cls_algsec;
@@ -288,31 +288,50 @@ struct ctx_all_sizes {
 typedef std::vector<cls_camera*> vec_cam;
 typedef std::vector<cls_sound*> vec_snd;
 
-struct ctx_motapp {
+class cls_motapp {
+    public:
+        cls_motapp();
+        ~cls_motapp();
 
-    vec_cam     cam_list;
-    vec_snd     snd_list;
+        vec_cam     cam_list;
+        vec_snd     snd_list;
 
-    bool    reload_all;
-    bool    cam_add;
-    int     cam_delete;     /* 0 for no action, other numbers specify camera to remove */
-    int     cam_cnt;
-    int     snd_cnt;
-    int     argc;
-    char    **argv;
-    bool    pause;
+        bool    reload_all;
+        bool    cam_add;
+        int     cam_delete;     /* 0 for no action, other numbers specify camera to remove */
+        int     cam_cnt;
+        int     snd_cnt;
 
-    cls_config          *conf_src;
-    cls_config          *cfg;
-    ctx_all_sizes       *all_sizes;
-    cls_webu            *webu;
-    cls_dbse            *dbse;
+        int     argc;
+        char    **argv;
+        bool    pause;
 
-    bool                parms_changed;      /*bool indicating if the parms have changed */
-    pthread_mutex_t     global_lock;
-    pthread_mutex_t     mutex_parms;        /* mutex used to lock when changing parms */
-    pthread_mutex_t     mutex_camlst;       /* Lock the list of cams while adding/removing */
-    pthread_mutex_t     mutex_post;         /* mutex to allow for processing of post actions*/
+        cls_config          *conf_src;
+        cls_config          *cfg;
+        ctx_all_sizes       *all_sizes;
+        cls_webu            *webu;
+        cls_dbse            *dbse;
+
+        pthread_mutex_t     mutex_camlst;       /* Lock the list of cams while adding/removing */
+        pthread_mutex_t     mutex_post;         /* mutex to allow for processing of post actions*/
+
+        void signal_process();
+        bool check_devices();
+        void init(int p_argc, char *p_argv[]);
+        void deinit();
+        void camera_add();
+        void camera_delete();
+
+    private:
+        void pid_write();
+        void pid_remove();
+        void daemon();
+        void av_init();
+        void av_deinit();
+        void allcams_init();
+        void device_ids();
+        void ntc();
+        void watchdog(uint camindx);
 
 };
 

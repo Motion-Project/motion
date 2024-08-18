@@ -53,7 +53,7 @@
 
     class cls_dbse {
         public:
-            cls_dbse(ctx_motapp *p_app);
+            cls_dbse(cls_motapp *p_app);
             ~cls_dbse();
             void sqlite3db_cb (int arg_nb, char **arg_val, char **col_nm);
             pthread_mutex_t     mutex_dbse;
@@ -89,7 +89,7 @@
                 void pgsqldb_init();
                 void pgsqldb_movielist();
             #endif
-            ctx_motapp      *app;
+            cls_motapp      *app;
             enum DBSE_ACT       dbse_action;    /* action to perform with query*/
             bool                table_ok;       /* bool of whether table exists*/
             bool                is_open;

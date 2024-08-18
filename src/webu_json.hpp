@@ -24,7 +24,7 @@
             ~cls_webu_json();
             void main();
         private:
-            ctx_motapp      *app;
+            cls_motapp      *app;
             cls_webu        *webu;
             cls_webu_ans    *webua;
             void parms_item(cls_config *conf, int indx_parm);

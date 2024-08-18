@@ -1533,7 +1533,7 @@ void cls_camera::handler_shutdown()
 
 }
 
-cls_camera::cls_camera(ctx_motapp *p_app)
+cls_camera::cls_camera(cls_motapp *p_app)
 {
     app = p_app;
     handler_finished = true;

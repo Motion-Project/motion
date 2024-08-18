@@ -27,7 +27,7 @@
             ssize_t mjpeg_response (char *buf, size_t max);
 
         private:
-            ctx_motapp      *app;
+            cls_motapp      *app;
             cls_webu        *webu;
             cls_webu_ans    *webua;
             cls_webu_common *webuc;

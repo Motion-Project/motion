@@ -20,7 +20,7 @@
 #define _INCLUDE_WEBU_ANS_HPP_
     class cls_webu_ans {
         public:
-            cls_webu_ans(ctx_motapp *p_motapp, const char *uri);
+            cls_webu_ans(cls_motapp *p_motapp, const char *uri);
             ~cls_webu_ans();
 
             mhdrslt answer_main(struct MHD_Connection *connection, const char *method
@@ -29,7 +29,7 @@
             void            mhd_send();
             void            bad_request();
 
-            ctx_motapp      *app;
+            cls_motapp      *app;
             cls_webu        *webu;
             cls_camera         *cam;
 

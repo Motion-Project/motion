@@ -79,7 +79,7 @@
 
     class cls_webu {
         public:
-            cls_webu(ctx_motapp *p_app);
+            cls_webu(cls_motapp *p_app);
             ~cls_webu();
             bool                        wb_finish;
             ctx_params                  *wb_headers;
@@ -92,7 +92,7 @@
 
         private:
             ctx_mhdstart *mhdst;
-            ctx_motapp *app;
+            cls_motapp *app;
             void webu_start();
             void webu_stop();
             void init_actions();
