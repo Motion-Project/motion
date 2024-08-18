@@ -951,7 +951,7 @@ static int netcam_init_swdecoder(struct rtsp_context *rtsp_data)
         }
 
         rtsp_data->codec_context->error_concealment = FF_EC_GUESS_MVS | FF_EC_DEBLOCK;
-        rtsp_data->codec_context->err_recognition = AV_EF_EXPLODE;
+        rtsp_data->codec_context->err_recognition = AV_EF_IGNORE_ERR;
 
         return 0;
     #else
