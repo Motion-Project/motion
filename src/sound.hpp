@@ -19,6 +19,26 @@
 #ifndef _INCLUDE_SOUND_HPP_
 #define _INCLUDE_SOUND_HPP_
 
+#ifdef HAVE_ALSA
+    extern "C" {
+        #include <alsa/asoundlib.h>
+    }
+#endif
+
+#ifdef HAVE_PULSE
+    extern "C" {
+        #include <pulse/simple.h>
+        #include <pulse/error.h>
+    }
+#endif
+
+
+#ifdef HAVE_FFTW3
+    extern "C" {
+        #include <fftw3.h>
+    }
+#endif
+
 struct ctx_snd_alert {
     int             alert_id;           /* Id number for the alert*/
     std::string     alert_nm;           /* Name of the alert*/

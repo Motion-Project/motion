@@ -89,25 +89,6 @@
     #endif
 #endif
 
-#ifdef HAVE_ALSA
-    extern "C" {
-        #include <alsa/asoundlib.h>
-    }
-#endif
-
-#ifdef HAVE_PULSE
-    extern "C" {
-        #include <pulse/simple.h>
-        #include <pulse/error.h>
-    }
-#endif
-
-
-#ifdef HAVE_FFTW3
-    extern "C" {
-        #include <fftw3.h>
-    }
-#endif
 
 struct ctx_images;
 struct ctx_image_data;
