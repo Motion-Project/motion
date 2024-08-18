@@ -58,6 +58,14 @@
         WEBUI_RESP_TEXT     = 2
     };
 
+    struct ctx_webu_clients {
+        std::string                 clientip;
+        bool                        authenticated;
+        int                         conn_nbr;
+        struct timespec             conn_time;
+        int                         userid_fail_nbr;
+    };
+
     struct ctx_key {
         char                        *key_nm;        /* Name of the key item */
         char                        *key_val;       /* Value of the key item */

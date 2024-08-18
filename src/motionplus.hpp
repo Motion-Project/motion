@@ -211,14 +211,6 @@ enum TIMELAPSE_TYPE {
     TIMELAPSE_NEW           /* Use create new file version of timelapse */
 };
 
-struct ctx_webu_clients {
-    std::string                 clientip;
-    bool                        authenticated;
-    int                         conn_nbr;
-    struct timespec             conn_time;
-    int                         userid_fail_nbr;
-};
-
 struct ctx_params_item {
     std::string     param_name;       /* The name or description of the ID as requested by user*/
     std::string     param_value;      /* The value that the user wants the control set to*/
