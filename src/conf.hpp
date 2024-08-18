@@ -50,12 +50,12 @@
         , PARM_TYP_BOOL
         , PARM_TYP_ARRAY
     };
-    enum WEBUI_LEVEL{
-        WEBUI_LEVEL_ALWAYS     = 0,
-        WEBUI_LEVEL_LIMITED    = 1,
-        WEBUI_LEVEL_ADVANCED   = 2,
-        WEBUI_LEVEL_RESTRICTED = 3,
-        WEBUI_LEVEL_NEVER      = 99
+    enum PARM_LEVEL{
+        PARM_LEVEL_ALWAYS      = 0
+        ,PARM_LEVEL_LIMITED    = 1
+        ,PARM_LEVEL_ADVANCED   = 2
+        ,PARM_LEVEL_RESTRICTED = 3
+        ,PARM_LEVEL_NEVER      = 99
     };
 
     /** Current parameters in the config file */

@@ -511,7 +511,7 @@ void cls_webu_post::config()
             indx2=0;
             while (config_parms[indx2].parm_name != "") {
                 if ((config_parms[indx2].webui_level > app->conf_src->webcontrol_parms) ||
-                    (config_parms[indx2].webui_level == WEBUI_LEVEL_NEVER) ) {
+                    (config_parms[indx2].webui_level == PARM_LEVEL_NEVER) ) {
                     indx2++;
                     continue;
                 }

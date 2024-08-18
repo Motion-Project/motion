@@ -36,7 +36,7 @@ void cls_webu_json::parms_item(cls_config *conf, int indx_parm)
     parm_val = "";
     parm_list = "";
 
-    if (app->cfg->webcontrol_parms < WEBUI_LEVEL_LIMITED) {
+    if (app->cfg->webcontrol_parms < PARM_LEVEL_LIMITED) {
         parm_enable = "false";
     } else {
         parm_enable = "true";
@@ -118,7 +118,7 @@ void cls_webu_json::parms_one(cls_config *conf)
     indx_parm = 0;
     first = true;
     while ((config_parms[indx_parm].parm_name != "") ) {
-        if (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) {
+        if (config_parms[indx_parm].webui_level == PARM_LEVEL_NEVER) {
             indx_parm++;
             continue;
         }
@@ -131,7 +131,7 @@ void cls_webu_json::parms_one(cls_config *conf)
         /* Allow limited parameters to be read only to the web page */
         if ((config_parms[indx_parm].webui_level >
                 app->cfg->webcontrol_parms) &&
-            (config_parms[indx_parm].webui_level > WEBUI_LEVEL_LIMITED)) {
+            (config_parms[indx_parm].webui_level > PARM_LEVEL_LIMITED)) {
 
             webua->resp_page +=
                 "\""+config_parms[indx_parm].parm_name+"\"" +
