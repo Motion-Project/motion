@@ -20,6 +20,13 @@
 #ifndef _INCLUDE_MOVIE_HPP_
 #define _INCLUDE_MOVIE_HPP_
 
+enum TIMELAPSE_TYPE {
+    TIMELAPSE_NONE,         /* No timelapse, regular processing */
+    TIMELAPSE_APPEND,       /* Use append version of timelapse */
+    TIMELAPSE_NEW           /* Use create new file version of timelapse */
+};
+
+
 class cls_movie {
     public:
         cls_movie(cls_camera *p_cam, std::string pmovie_type);

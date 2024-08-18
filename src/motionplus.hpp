@@ -205,12 +205,6 @@ enum DEVICE_STATUS {
     STATUS_OPENED    /* Successfully started the device */
 };
 
-enum TIMELAPSE_TYPE {
-    TIMELAPSE_NONE,         /* No timelapse, regular processing */
-    TIMELAPSE_APPEND,       /* Use append version of timelapse */
-    TIMELAPSE_NEW           /* Use create new file version of timelapse */
-};
-
 struct ctx_params_item {
     std::string     param_name;       /* The name or description of the ID as requested by user*/
     std::string     param_value;      /* The value that the user wants the control set to*/
