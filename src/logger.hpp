@@ -62,10 +62,12 @@
             int     log_fflevel;
             void set_log_file(std::string pname);
             void write_msg(int loglvl, int msg_type, int flgerr, int flgfnc, ...);
+            pthread_mutex_t     mutex_log;
+            void shutdown();
+            void startup();
             bool restart;
         private:
             cls_motapp          *app;
-            pthread_mutex_t     mtx;
             int                 log_mode;
             FILE                *log_file_ptr;
             std::string         log_file_name;

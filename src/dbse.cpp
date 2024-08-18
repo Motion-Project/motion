@@ -416,7 +416,7 @@ void cls_dbse::mariadb_exec (std::string sql)
             , mysql_error(database_mariadb)
             , retcd);
         if (retcd >= 2000) {
-            dbse_close();
+            shutdown();
             return;
         }
     }
@@ -427,7 +427,7 @@ void cls_dbse::mariadb_exec (std::string sql)
             , _("MariaDB query commit failed. %s error code %d")
             , mysql_error(database_mariadb), retcd);
         if (retcd >= 2000) {
-            dbse_close();
+            shutdown();
             return;
         }
     }
@@ -449,7 +449,7 @@ void cls_dbse::mariadb_recs (std::string sql)
     if (retcd != 0){
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Query error: %s"),sql.c_str());
-        dbse_close();
+        shutdown();
         return;
     }
 
@@ -457,7 +457,7 @@ void cls_dbse::mariadb_recs (std::string sql)
     if (qry_result == nullptr) {
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Query store error: %s"),sql.c_str());
-        dbse_close();
+        shutdown();
         return;
     }
 
@@ -591,7 +591,7 @@ void cls_dbse::mariadb_init()
         MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("MariaDB error was %s")
             , mysql_error(database_mariadb));
-        dbse_close();
+        shutdown();
         return;
     }
     is_open = true;
@@ -658,7 +658,7 @@ void cls_dbse::pgsqldb_exec(std::string sql)
                 , app->cfg->database_dbname.c_str()
                 , PQerrorMessage(database_pgsqldb));
             PQclear(res);
-            dbse_close();
+            shutdown();
             return;
         } else {
             MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
@@ -814,7 +814,7 @@ void cls_dbse::pgsqldb_init()
             , _("Connection to PostgreSQL database '%s' failed: %s")
             , app->cfg->database_dbname.c_str()
             , PQerrorMessage(database_pgsqldb));
-        dbse_close();
+        shutdown();
         return;
     }
     is_open = true;
@@ -853,25 +853,23 @@ bool cls_dbse::dbse_open()
         return false;
     }
 
-    pthread_mutex_lock(&mutex_dbse);
-        MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO,_("Opening database"));
+    MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO,_("Opening database"));
 
-        #ifdef HAVE_MARIADB
-            if (app->cfg->database_type == "mariadb") {
-                mariadb_init();
-            }
-        #endif
-        #ifdef HAVE_PGSQLDB
-            if (app->cfg->database_type == "postgresql") {
-                pgsqldb_init();
-            }
-        #endif
-        #ifdef HAVE_SQLITE3DB
-            if (app->cfg->database_type == "sqlite3") {
-                sqlite3db_init();
-            }
-        #endif
-    pthread_mutex_unlock(&mutex_dbse);
+    #ifdef HAVE_MARIADB
+        if (app->cfg->database_type == "mariadb") {
+            mariadb_init();
+        }
+    #endif
+    #ifdef HAVE_PGSQLDB
+        if (app->cfg->database_type == "postgresql") {
+            pgsqldb_init();
+        }
+    #endif
+    #ifdef HAVE_SQLITE3DB
+        if (app->cfg->database_type == "sqlite3") {
+            sqlite3db_init();
+        }
+    #endif
 
     return is_open;
 }
@@ -907,7 +905,7 @@ void cls_dbse::movielist_get(int p_device_id, lst_movies *p_movielist)
 
 }
 
-void cls_dbse::dbse_close()
+void cls_dbse::shutdown()
 {
     #ifdef HAVE_MARIADB
         mariadb_close();
@@ -1083,22 +1081,30 @@ void cls_dbse::dbse_edits()
 
 }
 
-cls_dbse::cls_dbse(cls_motapp *p_app)
+void cls_dbse::startup()
 {
-    app = p_app;
-
     is_open = false;
-
-    pthread_mutex_init(&mutex_dbse, nullptr);
 
     dbse_edits();
 
     dbse_open();
 }
 
+cls_dbse::cls_dbse(cls_motapp *p_app)
+{
+    app = p_app;
+
+    pthread_mutex_init(&mutex_dbse, nullptr);
+
+    pthread_mutex_lock(&mutex_dbse);
+        startup();
+    pthread_mutex_unlock(&mutex_dbse);
+
+}
+
 cls_dbse::~cls_dbse()
 {
-    dbse_close();
+    shutdown();
 
     pthread_mutex_destroy(&mutex_dbse);
 }

@@ -98,12 +98,12 @@
             std::list<ctx_webu_clients> wb_clients;
             int                         cnct_cnt;
             bool restart;
+            void startup();
+            void shutdown();
 
         private:
             ctx_mhdstart *mhdst;
             cls_motapp *app;
-            void webu_start();
-            void webu_stop();
             void init_actions();
             void start_daemon_port1();
             void start_daemon_port2();

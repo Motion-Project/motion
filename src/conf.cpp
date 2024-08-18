@@ -4232,6 +4232,23 @@ void cls_config::parms_copy(cls_config *src)
 
 }
 
+void cls_config::parms_copy(cls_config *src, PARM_CAT p_cat)
+{
+    int indx;
+    std::string parm_nm, parm_val;
+
+    indx = 0;
+    while (config_parms[indx].parm_name != "") {
+        if (config_parms[indx].parm_cat == p_cat) {
+            parm_nm =config_parms[indx].parm_name;
+            src->edit_get(parm_nm, parm_val, p_cat);
+            edit_set(parm_nm, parm_val);
+        }
+        indx++;
+    }
+
+}
+
 void cls_config::init(cls_motapp *app)
 {
     std::string filename;

@@ -470,7 +470,7 @@ void cls_webu::start_daemon_port2()
 
 }
 
-void cls_webu::webu_start()
+void cls_webu::startup()
 {
     unsigned int randnbr;
     wb_daemon = nullptr;
@@ -506,7 +506,7 @@ void cls_webu::webu_start()
 
 }
 
-void cls_webu::webu_stop()
+void cls_webu::shutdown()
 {
     int chkcnt;
 
@@ -542,10 +542,10 @@ void cls_webu::webu_stop()
 cls_webu::cls_webu(cls_motapp *p_app)
 {
     app = p_app;
-    webu_start();
+    startup();
 }
 
 cls_webu::~cls_webu()
 {
-    webu_stop();
+    shutdown();
 }

@@ -175,6 +175,7 @@ class cls_motapp {
 
         void signal_process();
         bool check_devices();
+        void check_restart();
         void init(int p_argc, char *p_argv[]);
         void deinit();
         void camera_add();

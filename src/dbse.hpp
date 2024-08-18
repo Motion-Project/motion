@@ -90,6 +90,8 @@ class cls_dbse {
         void movielist_add(cls_camera *cam, cls_movie *movie, timespec *ts1);
         void movielist_get(int p_device_id, lst_movies *p_movielist);
         bool    restart;
+        void shutdown();
+        void startup();
     private:
         #ifdef HAVE_SQLITE3DB
             sqlite3 *database_sqlite3db;
@@ -137,7 +139,6 @@ class cls_dbse {
 
         void dbse_edits();
         bool dbse_open();
-        void dbse_close();
         void exec_sql(std::string sql);
 
 };

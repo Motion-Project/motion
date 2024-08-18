@@ -601,6 +601,48 @@ void cls_motapp::watchdog(uint camindx)
 
 }
 
+void cls_motapp::check_restart()
+{
+    std::string parm_pid_org, parm_pid_new;
+
+    if (motlog->restart == true) {
+        cfg->edit_get("pid_file",parm_pid_org, PARM_CAT_00);
+        conf_src->edit_get("pid_file",parm_pid_new, PARM_CAT_00);
+        if (parm_pid_org != parm_pid_new) {
+            pid_remove();
+        }
+
+        pthread_mutex_lock(&motlog->mutex_log);
+            motlog->shutdown();
+            cfg->parms_copy(conf_src, PARM_CAT_00);
+            motlog->startup();
+        pthread_mutex_unlock(&motlog->mutex_log);
+
+        mytranslate_text("",cfg->native_language);
+        if (parm_pid_org != parm_pid_new) {
+            pid_write();
+        }
+        motlog->restart = false;
+    }
+
+    if (dbse->restart == true) {
+        pthread_mutex_lock(&dbse->mutex_dbse);
+            dbse->shutdown();
+            cfg->parms_copy(conf_src, PARM_CAT_15);
+            dbse->startup();
+        pthread_mutex_lock(&dbse->mutex_dbse);
+        dbse->restart = false;
+    }
+
+    if (webu->restart == true) {
+        webu->shutdown();
+        cfg->parms_copy(conf_src, PARM_CAT_13);
+        webu->startup();
+        webu->restart = false;
+    }
+
+}
+
 bool cls_motapp::check_devices()
 {
     int indx;
@@ -664,9 +706,7 @@ void cls_motapp::init(int p_argc, char *p_argv[])
     cfg = new cls_config;
     cfg->parms_copy(conf_src);
 
-    motlog->log_level = cfg->log_level;
-    motlog->log_fflevel = cfg->log_fflevel;
-    motlog->set_log_file(cfg->log_file);
+    motlog->startup();
 
     mytranslate_init();
 
@@ -813,6 +853,7 @@ int main (int p_argc, char **p_argv)
             }
             app->camera_add();
             app->camera_delete();
+            app->check_restart();
         }
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motionplus devices finished"));
         if (app->reload_all) {

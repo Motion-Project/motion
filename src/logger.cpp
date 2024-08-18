@@ -191,7 +191,7 @@ void cls_log::write_msg(int loglvl, int msg_type, int flgerr, int flgfnc, ...)
         return;
     }
 
-    pthread_mutex_lock(&mtx);
+    pthread_mutex_lock(&mutex_log);
 
     err_save = errno;
     memset(msg_full, 0, sizeof(msg_full));
@@ -229,7 +229,7 @@ void cls_log::write_msg(int loglvl, int msg_type, int flgerr, int flgfnc, ...)
     if ((flood_cnt <= 5000) &&
         mystreq(msg_flood, &msg_full[prefixlen])) {
         flood_cnt++;
-        pthread_mutex_unlock(&mtx);
+        pthread_mutex_unlock(&mutex_log);
         return;
     }
 
@@ -237,11 +237,11 @@ void cls_log::write_msg(int loglvl, int msg_type, int flgerr, int flgfnc, ...)
 
     write_norm(loglvl, prefixlen);
 
-    pthread_mutex_unlock(&mtx);
+    pthread_mutex_unlock(&mutex_log);
 
 }
 
-void cls_log::log_stop()
+void cls_log::shutdown()
 {
     if (log_file_ptr != nullptr) {
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Closing log_file (%s)."
@@ -249,6 +249,13 @@ void cls_log::log_stop()
         myfclose(log_file_ptr);
         log_file_ptr = nullptr;
     }
+}
+
+void cls_log::startup()
+{
+    motlog->log_level = app->cfg->log_level;
+    motlog->log_fflevel = app->cfg->log_fflevel;
+    motlog->set_log_file(app->cfg->log_file);
 }
 
 cls_log::cls_log(cls_motapp *p_app)
@@ -261,7 +268,7 @@ cls_log::cls_log(cls_motapp *p_app)
     log_file_name = "";
     flood_cnt = 0;
     set_mode(LOGMODE_SYSLOG);
-    pthread_mutex_init(&mtx, NULL);
+    pthread_mutex_init(&mutex_log, NULL);
     memset(msg_prefix,0,sizeof(msg_prefix));
     memset(msg_flood,0,sizeof(msg_flood));
     memset(msg_full,0,sizeof(msg_full));
@@ -271,8 +278,8 @@ cls_log::cls_log(cls_motapp *p_app)
 
 cls_log::~cls_log()
 {
-    log_stop();
-    pthread_mutex_destroy(&mtx);
+    shutdown();
+    pthread_mutex_destroy(&mutex_log);
 }
 
 

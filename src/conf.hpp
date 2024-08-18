@@ -299,6 +299,7 @@
             void parms_log(cls_motapp *app);
             void parms_write(cls_motapp *app);
             void parms_copy(cls_config *src);
+            void parms_copy(cls_config *src, PARM_CAT p_cat);
 
         private:
             void cmdline(cls_motapp *app);
