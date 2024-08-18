@@ -372,10 +372,6 @@ void mystrftime_base(cls_camera *cam
         } else if (fmt.substr(indx,2) == "%f") {
             user_fmt.append(fname);
             indx++;
-        } else if (fmt.substr(indx,2) == "%n") {
-            sprintf(tmp, "%d", cam->filetype);
-            user_fmt.append(tmp);
-            indx++;
         } else if (fmt.substr(indx,2) == "%$") {
             user_fmt.append(cam->cfg->device_name);
             indx++;

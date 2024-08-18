@@ -61,7 +61,6 @@ void cls_picture::process_norm()
         picname(filename,"%s/%s.%s"
             , cam->cfg->picture_filename
             , cam->cfg->picture_type);
-        cam->filetype = FTYPE_IMAGE;
         if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
             save_norm(filename, cam->current_image->image_high);
         } else {
@@ -78,14 +77,12 @@ void cls_picture::process_motion()
 
     if (cam->cfg->picture_output_motion == "on") {
         picname(filename,"%s/%sm.%s", cam->cfg->picture_filename, cam->cfg->picture_type);
-        cam->filetype = FTYPE_IMAGE_MOTION;
         save_norm(filename, cam->imgs.image_motion.image_norm);
         on_picture_save_command(filename);
         cam->app->dbse->exec(cam, filename, "pic_save");
 
     } else if (cam->cfg->picture_output_motion == "roi") {
         picname(filename,"%s/%sr.%s", cam->cfg->picture_filename, cam->cfg->picture_type);
-        cam->filetype = FTYPE_IMAGE_ROI;
         save_roi(filename, cam->current_image->image_norm);
         on_picture_save_command(filename);
         cam->app->dbse->exec(cam, filename, "pic_save");
@@ -107,7 +104,6 @@ void cls_picture::process_snapshot()
         picname(filename,"%s/%s.%s"
             , cam->cfg->snapshot_filename
             , cam->cfg->picture_type);
-        cam->filetype = FTYPE_IMAGE_SNAPSHOT;
         if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
             save_norm(filename, cam->current_image->image_high);
         } else {
@@ -131,7 +127,6 @@ void cls_picture::process_snapshot()
             , cam->cfg->snapshot_filename
             , cam->cfg->picture_type);
         remove(filename);
-        cam->filetype = FTYPE_IMAGE_SNAPSHOT;
         if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
             save_norm(filename, cam->current_image->image_high);
         } else {
@@ -160,7 +155,6 @@ void cls_picture::process_preview()
             , cam->cfg->picture_filename
             , cam->cfg->picture_type);
 
-        cam->filetype = FTYPE_IMAGE;
         if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
             save_norm(filename, cam->imgs.image_preview.image_high);
         } else {
@@ -410,8 +404,7 @@ void cls_picture::pic_write(FILE *picture, u_char *image)
 {
     int width, height;
 
-    if (((cam->filetype == FTYPE_IMAGE) || (cam->filetype == FTYPE_IMAGE_SNAPSHOT)) &&
-         (cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
+    if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
         width = cam->imgs.width_high;
         height = cam->imgs.height_high;
     } else {

@@ -169,7 +169,6 @@ class cls_camera {
         int     text_scale;
         int     watchdog;
         bool    movie_passthrough;
-        int     filetype;
         char    eventid[20];
         char    text_event_string[PATH_MAX];
         char    hostname[PATH_MAX];

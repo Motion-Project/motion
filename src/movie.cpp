@@ -1270,7 +1270,6 @@ void cls_movie::stop()
     }
 
     if ((movie_type == "norm") || (movie_type == "motion") || (movie_type == "extpipe")) {
-        cam->filetype = FTYPE_MOVIE;
         on_movie_end();
         cam->app->dbse->exec(cam, full_nm, "movie_end");
         if ((cam->cfg->movie_retain == "secondary") &&
@@ -1286,7 +1285,6 @@ void cls_movie::stop()
             cam->app->dbse->movielist_add(cam, this, ts);
         }
     } else if (movie_type == "timelapse") {
-        cam->filetype = FTYPE_MOVIE_TIMELAPSE;
         on_movie_end();
         cam->app->dbse->exec(cam, full_nm, "movie_end");
     } else {
@@ -1494,8 +1492,6 @@ void cls_movie::start_norm()
         return;
     }
 
-    cam->filetype = FTYPE_MOVIE;
-
     on_movie_start();
 
     cam->app->dbse->exec(cam, full_nm, "movie_start");
@@ -1556,7 +1552,6 @@ void cls_movie::start_motion()
         return;
     }
 
-    cam->filetype = FTYPE_MOVIE;
     on_movie_start();
     cam->app->dbse->exec(cam, full_nm, "movie_start");
     is_running = true;
@@ -1612,7 +1607,6 @@ void cls_movie::start_timelapse()
         return;
     }
 
-    cam->filetype = FTYPE_MOVIE_TIMELAPSE;
     on_movie_start();
     cam->app->dbse->exec(cam, full_nm, "movie_start");
 
@@ -1662,7 +1656,6 @@ void cls_movie::start_extpipe()
 
     setbuf(extpipe_stream, nullptr);
 
-    cam->filetype = FTYPE_MOVIE;
     on_movie_start();
     cam->app->dbse->exec(cam, full_nm, "movie_start");
     is_running = true;
