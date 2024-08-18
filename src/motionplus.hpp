@@ -146,16 +146,13 @@ struct ctx_all_sizes {
     bool    reset;
 };
 
-typedef std::vector<cls_camera*> vec_cam;
-typedef std::vector<cls_sound*> vec_snd;
-
 class cls_motapp {
     public:
         cls_motapp();
         ~cls_motapp();
 
-        vec_cam     cam_list;
-        vec_snd     snd_list;
+        std::vector<cls_camera*>    cam_list;
+        std::vector<cls_sound*>     snd_list;
 
         bool    reload_all;
         bool    cam_add;
