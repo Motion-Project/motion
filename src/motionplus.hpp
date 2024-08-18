@@ -61,8 +61,6 @@
     #include <pthread_np.h>
 #endif
 
-#include <errno.h>
-
 #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wconversion"
     extern "C" {
@@ -116,15 +114,6 @@ class cls_webu_common;
 class cls_webu_stream;
 
 #define MYFFVER (LIBAVFORMAT_VERSION_MAJOR * 1000)+LIBAVFORMAT_VERSION_MINOR
-
-#define AVGCNT            30
-
-#define IMAGE_MOTION     1
-#define IMAGE_TRIGGER    2
-#define IMAGE_SAVE       4
-#define IMAGE_SAVED      8
-#define IMAGE_PRECAP    16
-#define IMAGE_POSTCAP   32
 
 enum MOTPLS_SIGNAL {
     MOTPLS_SIGNAL_NONE,

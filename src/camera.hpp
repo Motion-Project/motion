@@ -21,6 +21,15 @@
 #ifndef _INCLUDE_CAMERA_HPP_
 #define _INCLUDE_CAMERA_HPP_
 
+#define AVGCNT            30
+
+#define IMAGE_MOTION     1
+#define IMAGE_TRIGGER    2
+#define IMAGE_SAVE       4
+#define IMAGE_SAVED      8
+#define IMAGE_PRECAP    16
+#define IMAGE_POSTCAP   32
+
 enum CAMERA_TYPE {
     CAMERA_TYPE_UNKNOWN,
     CAMERA_TYPE_V4L2,
