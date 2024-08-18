@@ -89,10 +89,6 @@
     #endif
 #endif
 
-
-struct ctx_images;
-struct ctx_image_data;
-
 class cls_motapp;
 class cls_camera;
 class cls_sound;
