@@ -940,6 +940,7 @@ int cls_camera::capture()
     retcd = cam_next(current_image);
 
     if (retcd == CAPTURE_SUCCESS) {
+        watchdog = cfg->watchdog_tmo;
         lost_connection = 0;
         connectionlosttime.tv_sec = 0;
 
