@@ -18,6 +18,12 @@
 #ifndef _INCLUDE_ROTATE_HPP_
 #define _INCLUDE_ROTATE_HPP_
 
+enum FLIP_TYPE {
+    FLIP_TYPE_NONE,
+    FLIP_TYPE_HORIZONTAL,
+    FLIP_TYPE_VERTICAL
+};
+
 class cls_rotate {
     public:
         cls_rotate(cls_camera *p_cam);
