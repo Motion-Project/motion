@@ -97,6 +97,7 @@
             struct MHD_Daemon           *wb_daemon2;
             std::list<ctx_webu_clients> wb_clients;
             int                         cnct_cnt;
+            bool restart;
 
         private:
             ctx_mhdstart *mhdst;

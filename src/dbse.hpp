@@ -89,6 +89,7 @@ class cls_dbse {
         void exec(cls_camera *cam, std::string filename, std::string cmd);
         void movielist_add(cls_camera *cam, cls_movie *movie, timespec *ts1);
         void movielist_get(int p_device_id, lst_movies *p_movielist);
+        bool    restart;
     private:
         #ifdef HAVE_SQLITE3DB
             sqlite3 *database_sqlite3db;

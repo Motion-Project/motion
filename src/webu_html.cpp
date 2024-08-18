@@ -387,8 +387,13 @@ void cls_webu_html::script_send_config()
         "      var formData = new FormData();\n"
         "      var request = new XMLHttpRequest();\n"
         "      var xmlhttp = new XMLHttpRequest();\n"
-        "      var camid = document.getElementsByName('camdrop')[0].value;\n"
-        "      var pCfg = pData['configuration']['cam'+camid];\n\n"
+        "      var camid = document.getElementsByName('camdrop')[0].value;\n\n"
+
+        "      if (camid == 0) {\n"
+        "        var pCfg = pData['configuration']['default'];\n"
+        "      } else {\n"
+        "        var pCfg = pData['configuration']['cam'+camid];\n"
+        "      }\n\n"
 
         "      xmlhttp.onreadystatechange = function() {\n"
         "        if (this.readyState == 4 && this.status == 200) {\n"
