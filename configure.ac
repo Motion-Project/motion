@@ -618,12 +618,12 @@ AC_ARG_WITH([clang-flags],
     [CLANG_FLAGS=no])
 
 AS_IF([test "${DEVELOPER_FLAGS}" = "yes"], [
-    TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -pedantic -Werror -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -ggdb -g3"
+    TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -pedantic -Werror -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wno-sign-conversion -ggdb -g3"
   ],[
     AS_IF([test "${CLANG_FLAGS}" = "yes"], [
-      TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -pedantic -Werror -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -ggdb -g3 -Wno-c11-extensions"
+      TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -pedantic -Werror -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wno-c11-extensions -Wno-sign-conversion -ggdb -g3 "
     ],[
-      TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -O3 -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -ggdb -g3"
+      TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -O3 -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wno-sign-conversion -ggdb -g3 "
     ])
   ])
 
