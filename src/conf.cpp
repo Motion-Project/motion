@@ -621,7 +621,7 @@ void cls_config::edit_device_name(std::string &parm, enum PARM_ACT pact)
 
 void cls_config::edit_device_id(std::string &parm, enum PARM_ACT pact)
 {
-    int parm_in;
+    int parm_in, indx;
 
     if (pact == PARM_ACT_DFLT) {
         device_id = 0;
@@ -635,6 +635,22 @@ void cls_config::edit_device_id(std::string &parm, enum PARM_ACT pact)
             } else if (parm_in > 32000) {
                 MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid device_id %d"),parm_in);
             } else {
+                for (indx=0;indx<app->cam_list.size();indx++){
+                    if ((app->cam_list[indx]->conf_src->device_id == parm_in) &&
+                        (app->cam_list[indx]->cfg != this)) {
+                        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                            , _("Duplicate device_id %d not permitted"),parm_in);
+                        return;
+                    }
+                }
+                for (indx=0;indx<app->snd_list.size();indx++){
+                    if ((app->snd_list[indx]->conf_src->device_id == parm_in) &&
+                        (app->snd_list[indx]->cfg != this)) {
+                        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                            , _("Duplicate device_id %d not permitted"),parm_in);
+                        return;
+                    }
+                }
                 device_id = parm_in;
             }
         }
@@ -3644,21 +3660,17 @@ int cls_config::get_next_devid()
         dev_id++;
         chkid = false;
         for (indx = 0; indx<app->cam_cnt;indx++) {
-            if ((app->cam_list[indx]->conf_src->device_id == dev_id) ||
-                (app->cam_list[indx]->device_id == dev_id)) {
+            if (app->cam_list[indx]->conf_src->device_id == dev_id) {
                 chkid = true;
             }
         }
         for (indx = 0; indx<app->snd_cnt;indx++) {
-            if ((app->snd_list[indx]->conf_src->device_id == dev_id) ||
-                (app->snd_list[indx]->device_id == dev_id)) {
+            if (app->snd_list[indx]->conf_src->device_id == dev_id) {
                 chkid = true;
             }
         }
     }
-
     return dev_id;
-
 }
 
 void cls_config::camera_add(std::string fname, bool srcdir)
@@ -3684,7 +3696,6 @@ void cls_config::camera_add(std::string fname, bool srcdir)
     cam_cls->conf_src->from_conf_dir = srcdir;
     cam_cls->conf_src->conf_filename = fname;
     cam_cls->conf_src->device_id = get_next_devid();
-    cam_cls->device_id = cam_cls->conf_src->device_id;
 
     if (fname == "") {
         cam_cls->conf_src->camera_filenm();
@@ -3761,7 +3772,6 @@ void cls_config::sound_add(std::string fname, bool srcdir)
     snd_cls->conf_src->from_conf_dir = srcdir;
     snd_cls->conf_src->conf_filename = fname;
     snd_cls->conf_src->device_id = get_next_devid();
-    snd_cls->device_id = snd_cls->conf_src->device_id;
 
     if (fname == "") {
         snd_cls->conf_src->sound_filenm();

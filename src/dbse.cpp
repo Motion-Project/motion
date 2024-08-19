@@ -1019,7 +1019,7 @@ void cls_dbse::movielist_add(cls_camera *cam, cls_movie *movie, timespec *ts1)
     sqlquery =  "insert into motionplus ";
     sqlquery += " (device_id, movie_nm, movie_dir, full_nm, movie_sz, movie_dtl";
     sqlquery += " , movie_tmc, movie_tml, diff_avg, sdev_min, sdev_max, sdev_avg)";
-    sqlquery += " values ("+std::to_string(cam->device_id);
+    sqlquery += " values ("+std::to_string(cam->cfg->device_id);
     sqlquery += " ,'" + movie->movie_nm + "'";
     sqlquery += " ,'" + movie->movie_dir + "'";
     sqlquery += " ,'" + movie->full_nm + "'";

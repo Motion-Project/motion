@@ -559,7 +559,7 @@ void cls_algsec::handler()
 {
     long interval;
 
-    mythreadname_set("cv",cam->device_id, cam->cfg->device_name.c_str());
+    mythreadname_set("cv",cam->cfg->device_id, cam->cfg->device_name.c_str());
 
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Secondary detection starting."));
 

@@ -260,7 +260,7 @@ void mystrftime(cls_sound *snd, std::string &dst, std::string fmt)
     for (indx=0;indx<fmt.length();indx++){
         memset(tmp, 0, sizeof(tmp));
         if (fmt.substr(indx,2) == "%t") {
-            sprintf(tmp, "%d", snd->device_id);
+            sprintf(tmp, "%d", snd->cfg->device_id);
             user_fmt.append(tmp);
             indx++;
         } else if (fmt.substr(indx,2) == "%$") {
@@ -355,7 +355,7 @@ void mystrftime_base(cls_camera *cam
             user_fmt.append(tmp);
             indx++;
         } else if (fmt.substr(indx,2) == "%t") {
-            sprintf(tmp, "%d", cam->device_id);
+            sprintf(tmp, "%d", cam->cfg->device_id);
             user_fmt.append(tmp);
             indx++;
         } else if (fmt.substr(indx,2) == "%C") {

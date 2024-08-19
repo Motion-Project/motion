@@ -158,7 +158,7 @@ void cls_webu_post::parse_cmd()
 
     if (webua->device_id != 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
-            if (app->cam_list[indx]->device_id == webua->device_id) {
+            if (app->cam_list[indx]->cfg->device_id == webua->device_id) {
                 webua->camindx = indx;
                 break;
             }
@@ -338,7 +338,7 @@ void cls_webu_post::action_restart()
     } else {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Restarting camera %d")
-            , app->cam_list[webua->camindx]->device_id);
+            , app->cam_list[webua->camindx]->cfg->device_id);
         app->cam_list[webua->camindx]->restart = true;
     }
 }
@@ -364,7 +364,7 @@ void cls_webu_post::action_stop()
         for (indx=0; indx<app->cam_cnt; indx++) {
             MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Stopping cam %d")
-                , app->cam_list[indx]->device_id);
+                , app->cam_list[indx]->cfg->device_id);
             app->cam_list[indx]->restart = false;
             app->cam_list[indx]->event_stop = true;
             app->cam_list[indx]->event_user = false;
@@ -373,7 +373,7 @@ void cls_webu_post::action_stop()
     } else {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Stopping cam %d")
-            , app->cam_list[webua->camindx]->device_id);
+            , app->cam_list[webua->camindx]->cfg->device_id);
         app->cam_list[webua->camindx]->restart = false;
         app->cam_list[webua->camindx]->event_stop = true;
         app->cam_list[webua->camindx]->event_user = false;
@@ -422,7 +422,7 @@ void cls_webu_post::action_user()
             snprintf(cam->action_user, 40, "%s", tmp.c_str());
             MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Executing user action on cam %d")
-                , cam->device_id);
+                , cam->cfg->device_id);
             util_exec_command(cam, cam->cfg->on_action_user.c_str(), NULL);
         }
     } else {
@@ -445,7 +445,7 @@ void cls_webu_post::action_user()
 
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Executing user action on cam %d")
-            , cam->device_id);
+            , cam->cfg->device_id);
         util_exec_command(cam, cam->cfg->on_action_user.c_str(), NULL);
     }
 
@@ -472,35 +472,6 @@ void cls_webu_post::write_config()
 
 }
 
-bool cls_webu_post::config_devid(std::string parm_vl)
-{
-    int chkval, indx;
-
-    chkval = mtoi(parm_vl);
-    if (chkval == 0) {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Setting device_id to zero is not permitted");
-        return false;
-    } else {
-        for (indx=0;indx<app->cam_cnt;indx++) {
-            if (chkval == app->cam_list[indx]->device_id) {
-                if (webua->camindx != indx) {
-                    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,
-                        "Duplicate device_id not permitted.");
-                }
-                return false;
-            }
-        }
-        for (indx=0;indx<app->snd_cnt;indx++) {
-            if (chkval == app->snd_list[indx]->device_id) {
-                MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,
-                    "Duplicate device_id not permitted.");
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 void cls_webu_post::config_set(int indx_parm, std::string parm_vl)
 {
     std::string parm_nm, parm_vl_dflt, parm_vl_dev;
@@ -509,12 +480,6 @@ void cls_webu_post::config_set(int indx_parm, std::string parm_vl)
 
     parm_nm = config_parms[indx_parm].parm_name;
     parm_ct = config_parms[indx_parm].parm_cat;
-
-    if (parm_nm == "device_id") {
-        if (config_devid(parm_vl) == false) {
-            return;
-        }
-    }
 
     if (webua->device_id == 0) {
         app->conf_src->edit_get(parm_nm, parm_vl_dflt, parm_ct);
@@ -681,12 +646,12 @@ void cls_webu_post::config()
                 app->cam_list[restart_list[indx].comp_indx]->restart = true;
                 MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,
                     "Restart request for camera %d"
-                    , app->cam_list[restart_list[indx].comp_indx]->device_id);
+                    , app->cam_list[restart_list[indx].comp_indx]->cfg->device_id);
             } else if (restart_list[indx].comp_type == "snd") {
                 app->snd_list[restart_list[indx].comp_indx]->restart = true;
                 MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,
                     "Restart request for sound %d"
-                    , app->cam_list[restart_list[indx].comp_indx]->device_id);
+                    , app->cam_list[restart_list[indx].comp_indx]->cfg->device_id);
             } else {
                 MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "Bad programming");
             }

@@ -308,7 +308,7 @@ void cls_webu_common::all_getimg()
             }
             if (strm->img_data == NULL) {
                 MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
-                    , "Could not get image for device %d", p_cam->device_id);
+                    , "Could not get image for device %d", p_cam->cfg->device_id);
                 memset(src_img, 0x00, (uint)src_sz);
             } else {
                 memcpy(src_img, strm->img_data, (uint)src_sz);
@@ -419,7 +419,7 @@ void cls_webu_common::all_sizes()
                 img_sizes(p_cam, img_w, img_h);
                 MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
                     , "Device %d Original Size %dx%d Scale %d New Size %dx%d"
-                    , p_cam->device_id
+                    , p_cam->cfg->device_id
                     , p_cam->imgs.width, p_cam->imgs.height
                     , p_cam->all_loc.scale, img_w, img_h);
             }
@@ -503,13 +503,13 @@ void cls_webu_common::all_sizes()
         if (chk_sz < 0) {
            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
                 , "Device %d invalid image column offset. (%d + %d) less than zero "
-                , p_cam->device_id
+                , p_cam->cfg->device_id
                 , p_cam->all_loc.offset_col
                 , p_cam->all_loc.offset_user_col);
          } else if ((chk_sz + img_w) > app->all_sizes->width) {
            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
                 , "Device %d invalid image column offset. (%d + %d) over image size"
-                , p_cam->device_id
+                , p_cam->cfg->device_id
                 , p_cam->all_loc.offset_col
                 , p_cam->all_loc.offset_user_col);
          } else {
@@ -520,13 +520,13 @@ void cls_webu_common::all_sizes()
         if (chk_sz < 0 ) {
             MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
                 , "Device %d invalid image row offset. (%d + %d) less than zero "
-                , p_cam->device_id
+                , p_cam->cfg->device_id
                 , p_cam->all_loc.offset_row
                 , p_cam->all_loc.offset_user_row);
         } else if ((chk_sz + img_h) > app->all_sizes->height) {
             MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
                 , "Device %d invalid image row offset. (%d + %d) over image size"
-                , p_cam->device_id
+                , p_cam->cfg->device_id
                 , p_cam->all_loc.offset_row
                 , p_cam->all_loc.offset_user_row);
         } else {

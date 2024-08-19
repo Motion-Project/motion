@@ -1622,7 +1622,7 @@ void cls_netcam::set_parms ()
     pthread_mutex_init(&mutex_transfer, nullptr);
 
     context_null();
-    threadnbr = cam->device_id;
+    threadnbr = cam->cfg->device_id;
     cfg_width = cam->cfg->width;
     cfg_height = cam->cfg->height;
     cfg_framerate = cam->cfg->framerate;

@@ -425,65 +425,9 @@ void cls_motapp::allcams_init()
     for (indx=0; indx<cam_cnt; indx++) {
         MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
             ,"stream_preview_location values. Device %d row %d col %d"
-            , cam_list[indx]->device_id
+            , cam_list[indx]->cfg->device_id
             , cam_list[indx]->all_loc.row
             , cam_list[indx]->all_loc.col);
-    }
-
-}
-
-void cls_motapp::device_ids()
-{
-    int indx, indx2;
-    int invalid_ids;
-
-     /* Defaults */
-    for (indx=0; indx<cam_cnt; indx++) {
-        if (cam_list[indx]->cfg->device_id != 0) {
-            cam_list[indx]->device_id = cam_list[indx]->cfg->device_id;
-        } else {
-            cam_list[indx]->device_id = (int)indx + 1;
-        }
-    }
-    for (indx=0; indx<snd_cnt; indx++) {
-        if (snd_list[indx]->cfg->device_id != 0) {
-            snd_list[indx]->device_id = snd_list[indx]->cfg->device_id;
-        } else {
-            snd_list[indx]->device_id =  (int)(cam_cnt + indx + 1);
-        }
-    }
-
-    /*Check for unique values*/
-    invalid_ids = false;
-    for (indx=0; indx<cam_cnt; indx++) {
-        for (indx2=indx+1; indx2<cam_cnt; indx2++) {
-           if (cam_list[indx]->device_id == cam_list[indx2]->device_id) {
-                invalid_ids = true;
-            }
-        }
-        for (indx2=0; indx2<snd_cnt; indx2++) {
-           if (cam_list[indx]->device_id == snd_list[indx2]->device_id) {
-                invalid_ids = true;
-            }
-        }
-    }
-    for (indx=0; indx<snd_cnt; indx++) {
-        for (indx2=indx+1; indx2<snd_cnt; indx2++) {
-           if (snd_list[indx]->device_id == snd_list[indx2]->device_id) {
-                invalid_ids = true;
-            }
-        }
-    }
-
-    if (invalid_ids) {
-        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Device IDs are not unique."));
-        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Falling back to sequence numbers"));
-        for (indx=0; indx<cam_cnt; indx++) {
-            cam_list[indx]->device_id = indx + 1;
-        }
-        for (indx=0; indx<snd_cnt; indx++) {
-            snd_list[indx]->device_id = cam_cnt+ indx + 1;
-        }
     }
 
 }
@@ -568,7 +512,7 @@ void cls_motapp::watchdog(uint camindx)
 
     MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
         , _("Camera %d - Watchdog timeout.")
-        , cam_list[camindx]->device_id);
+        , cam_list[camindx]->cfg->device_id);
 
     /* Shut down all the cameras */
     for (indx=0; indx<cam_cnt; indx++) {
@@ -723,8 +667,6 @@ void cls_motapp::init(int p_argc, char *p_argv[])
 
     ntc();
 
-    device_ids();
-
     dbse = new cls_dbse(this);
 
     allcams_init();
@@ -811,7 +753,7 @@ void cls_motapp::camera_delete()
     cam = cam_list[cam_delete];
 
     MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Stopping %s device_id %d")
-        , cam->cfg->device_name.c_str(), cam->device_id);
+        , cam->cfg->device_name.c_str(), cam->cfg->device_id);
 
     cam->handler_shutdown();
 

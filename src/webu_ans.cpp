@@ -159,7 +159,7 @@ void cls_webu_ans::parms_edit()
     }
 
     for (indx=0; indx<app->cam_cnt; indx++) {
-        if (app->cam_list[indx]->device_id == device_id) {
+        if (app->cam_list[indx]->cfg->device_id == device_id) {
             camindx = indx;
             cam = app->cam_list[indx];
         }

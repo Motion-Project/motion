@@ -163,7 +163,7 @@ void cls_webu_json::parms_all()
 
     for (indx_cam=0; indx_cam<app->cam_cnt; indx_cam++) {
         webua->resp_page += ",\"cam" +
-            std::to_string(app->cam_list[indx_cam]->device_id) + "\": ";
+            std::to_string(app->cam_list[indx_cam]->cfg->device_id) + "\": ";
         parms_one(app->cam_list[indx_cam]->cfg);
     }
     webua->resp_page += "}";
@@ -180,7 +180,7 @@ void cls_webu_json::cameras_list()
 
     for (indx_cam=0; indx_cam<app->cam_cnt; indx_cam++) {
         cam = app->cam_list[indx_cam];
-        strid =std::to_string(cam->device_id);
+        strid =std::to_string(cam->cfg->device_id);
         webua->resp_page += ",\"" + std::to_string(indx_cam) + "\":";
         if (cam->cfg->device_name == "") {
             webua->resp_page += "{\"name\": \"camera " + strid + "\"";
@@ -253,7 +253,7 @@ void cls_webu_json::movies_list()
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Movies via webcontrol disabled");
                 webua->resp_page += "{\"count\" : 0} ";
                 webua->resp_page += ",\"device_id\" : ";
-                webua->resp_page += std::to_string(webua->cam->device_id);
+                webua->resp_page += std::to_string(webua->cam->cfg->device_id);
                 webua->resp_page += "}";
                 return;
             } else {
@@ -262,7 +262,7 @@ void cls_webu_json::movies_list()
         }
     }
 
-    app->dbse->movielist_get(webua->cam->device_id, &movielist);
+    app->dbse->movielist_get(webua->cam->cfg->device_id, &movielist);
 
     webua->resp_page += "{";
     indx = 0;
@@ -311,7 +311,7 @@ void cls_webu_json::movies_list()
     }
     webua->resp_page += "\"count\" : " + std::to_string(indx);
     webua->resp_page += ",\"device_id\" : ";
-    webua->resp_page += std::to_string(webua->cam->device_id);
+    webua->resp_page += std::to_string(webua->cam->cfg->device_id);
     webua->resp_page += "}";
 }
 
@@ -335,7 +335,7 @@ void cls_webu_json::movies()
     } else {
         indx_req = -1;
         for (indx_cam=0; indx_cam<app->cam_cnt; indx_cam++) {
-            if (webua->cam->device_id == app->cam_list[indx_cam]->device_id){
+            if (webua->cam->cfg->device_id == app->cam_list[indx_cam]->cfg->device_id){
                 indx_req = indx_cam;
             }
         }
@@ -359,7 +359,7 @@ void cls_webu_json::status_vars(int indx_cam)
     webua->resp_page += "{";
 
     webua->resp_page += "\"name\":\"" + cam->cfg->device_name+"\"";
-    webua->resp_page += ",\"id\":" + std::to_string(cam->device_id);
+    webua->resp_page += ",\"id\":" + std::to_string(cam->cfg->device_id);
     webua->resp_page += ",\"width\":" + std::to_string(cam->imgs.width);
     webua->resp_page += ",\"height\":" + std::to_string(cam->imgs.height);
     webua->resp_page += ",\"fps\":" + std::to_string(cam->lastrate);
@@ -412,7 +412,7 @@ void cls_webu_json::status()
     webua->resp_page += "{\"count\" : " + std::to_string(app->cam_cnt);
         for (indx_cam=0; indx_cam<app->cam_cnt; indx_cam++) {
             webua->resp_page += ",\"cam" +
-                std::to_string(app->cam_list[indx_cam]->device_id) + "\": ";
+                std::to_string(app->cam_list[indx_cam]->cfg->device_id) + "\": ";
             status_vars(indx_cam);
         }
     webua->resp_page += "}";

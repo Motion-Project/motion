@@ -231,7 +231,7 @@ void cls_camera::detected_trigger()
 
             time(&raw_time);
             localtime_r(&raw_time, &evt_tm);
-            sprintf(eventid, "%05d", device_id);
+            sprintf(eventid, "%05d", cfg->device_id);
             strftime(eventid+5, 15, "%Y%m%d%H%M%S", &evt_tm);
 
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
@@ -790,7 +790,7 @@ void cls_camera::init()
     if (device_status == STATUS_OPENED) {
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Camera %d started: motion detection %s"),
-            device_id, pause ? _("Disabled"):_("Enabled"));
+            cfg->device_id, pause ? _("Disabled"):_("Enabled"));
 
         if (cfg->emulate_motion) {
             MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, _("Emulating motion"));

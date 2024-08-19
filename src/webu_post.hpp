@@ -60,7 +60,6 @@
             void action_stop();
             void action_user();
             void write_config();
-            bool config_devid(std::string parm_vl);
             void config_set(int indx_parm, std::string parm_val);
             void config_restart_set(std::string p_type, int p_indx);
             void config_restart_reset();

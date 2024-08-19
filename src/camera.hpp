@@ -154,9 +154,6 @@ class cls_camera {
         cls_draw        *draw;
         cls_picture     *picture;
 
-        int             device_id;
-        bool            restart;
-
         bool            handler_stop;
         bool            handler_finished;
         pthread_t       handler_thread;
@@ -164,6 +161,7 @@ class cls_camera {
         void            handler_startup();
         void            handler_shutdown();
 
+        bool    restart;
         int     threadnr;
         int     noise;
         bool    detecting_motion;

@@ -64,7 +64,7 @@ void cls_webu_file::main() {
         }
     }
 
-    app->dbse->movielist_get(webua->cam->device_id, &movies);
+    app->dbse->movielist_get(webua->cam->cfg->device_id, &movies);
     if (movies.size() == 0) {
         webua->bad_request();
         return;

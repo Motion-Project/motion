@@ -117,7 +117,6 @@ class cls_sound {
 
         cls_config      *conf_src;
         cls_config      *cfg;
-        int             device_id;
         std::string     device_name;
         ctx_snd_info    *snd_info;
         int             threadnr;

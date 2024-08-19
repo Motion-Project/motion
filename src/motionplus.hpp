@@ -188,7 +188,6 @@ class cls_motapp {
         void av_init();
         void av_deinit();
         void allcams_init();
-        void device_ids();
         void ntc();
         void watchdog(uint camindx);
 
