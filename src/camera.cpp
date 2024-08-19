@@ -638,6 +638,8 @@ void cls_camera::init_values()
         frame_wait[indx]=0;
     }
 
+    memset(&imgs,0,sizeof(ctx_images));
+
 }
 
 /* start the camera */
