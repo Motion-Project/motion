@@ -509,7 +509,6 @@ void cls_algsec::params_defaults()
 void cls_algsec::load_params()
 {
     method = cam->cfg->secondary_method;
-    handler_finished = true;
     image_norm = nullptr;
     params = nullptr;
     detected = false;
