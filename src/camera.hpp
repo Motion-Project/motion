@@ -21,8 +21,6 @@
 #ifndef _INCLUDE_CAMERA_HPP_
 #define _INCLUDE_CAMERA_HPP_
 
-#define AVGCNT            30
-
 #define IMAGE_MOTION     1
 #define IMAGE_TRIGGER    2
 #define IMAGE_SAVE       4
@@ -219,7 +217,6 @@ class cls_camera {
         int                     postcap;                             /* downcounter, frames left to to send post event */
         int                     shots_mt;   /* Monotonic clock shots count*/
         int                     shots_rt;   /* Realtime  clock shots count*/
-        long                   frame_wait[30];   /* Last wait times through motion loop*/
         struct timespec         frame_curr_ts;
         struct timespec         frame_last_ts;
         time_t                  lasttime;

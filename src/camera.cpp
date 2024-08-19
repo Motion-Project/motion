@@ -582,8 +582,6 @@ void cls_camera::init_buffers()
 /* Initialize loop values */
 void cls_camera::init_values()
 {
-    int indx;
-
     event_curr_nbr = 1;
     event_prev_nbr = 0;
 
@@ -606,6 +604,8 @@ void cls_camera::init_values()
     event_user = false;
     lasttime = frame_curr_ts.tv_sec;
     postcap = 0;
+    event_stop = false;
+    info_reset();
 
     movie_passthrough = cfg->movie_passthrough;
     if ((camera_type != CAMERA_TYPE_NETCAM) &&
@@ -633,10 +633,6 @@ void cls_camera::init_values()
 
     gethostname (hostname, PATH_MAX);
     hostname[PATH_MAX-1] = '\0';
-
-    for (indx=0; indx<AVGCNT-1; indx++) {
-        frame_wait[indx]=0;
-    }
 
     memset(&imgs,0,sizeof(ctx_images));
 
@@ -1405,38 +1401,20 @@ void cls_camera::loopback()
 /* sleep the loop to get framerate requested */
 void cls_camera::frametiming()
 {
-    int indx;
     struct timespec ts2;
-    int64_t avgtime;
-
-    /* Shuffle the last wait times*/
-    for (indx=0; indx<AVGCNT-2; indx++) {
-        frame_wait[indx]=frame_wait[indx+1];
-    }
-
-    if (cfg->framerate) {
-        frame_wait[AVGCNT-1] = 1000000L / cfg->framerate;
-    } else {
-        frame_wait[AVGCNT-1] = 0;
-    }
+    int64_t sleeptm;
 
     clock_gettime(CLOCK_MONOTONIC, &ts2);
 
-    frame_wait[AVGCNT-1] = frame_wait[AVGCNT-1] -
-            (1000000L * (ts2.tv_sec - frame_curr_ts.tv_sec)) -
-            ((ts2.tv_nsec - frame_curr_ts.tv_nsec)/1000);
-
-    avgtime = 0;
-    for (indx=0; indx<AVGCNT; indx++) {
-        avgtime += frame_wait[indx];
-    }
-    avgtime = (int64_t)((avgtime / AVGCNT) * 1000);
+    sleeptm = ((1000000L / cfg->framerate) -
+          (1000000L * (ts2.tv_sec - frame_curr_ts.tv_sec)) -
+          ((ts2.tv_nsec - frame_curr_ts.tv_nsec)/1000))*1000;
 
     /* If over 1 second, just do one*/
-    if (avgtime > 999999999L) {
+    if (sleeptm > 999999999L) {
         SLEEP(1, 0);
-    } else if (avgtime > 0) {
-        SLEEP(0, avgtime);
+    } else if (sleeptm > 0) {
+        SLEEP(0, sleeptm);
     }
 
     passflag = true;
