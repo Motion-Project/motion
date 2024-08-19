@@ -5,29 +5,25 @@ MotionPlus
 
 MotionPlus is a break from Motion version 4.2.2 to provide an application for enhancements.  MotionPlus removes some of the outdated processes, cleans up the code base and introduces new functionality.
 
-The following are some of the things that are plus.
-- Compiled in C++
+The following are some of the things that are different from Motion.
 - Secondary detection method via OpenCV
   - HOG (Histogram of Oriented Gradients)
   - Haar cascade classifiers
   - Deep neural networks(Caffe, TensorFlow, etc.)
+- Direct Pi camera support and ability to change camera parameters
+- Consolidated stream(a single image) showing all cameras
+- Video streams via MPEGTS format
 - Sound frequency detection
 - Additional primary detection parameters
-- Sound recording from certain camera sources
-- Direct processing of libcamera sources
-- JSON configuration parameters
-- User provided web pages
-- Add/delete camera via web interface
+- Sound recording from certain network camera sources
 - List/download movies via the web interface
-- Additional control parameters
-- Edits on user configuration parameters
+- Add/delete camera via web interface
+- Web control allows for changing/updating parameters
+- User provided web pages
+- JSON status/configuration parameters
+- Edits on configuration parameters
 - POST web control processing
 - ROI picture output
-
-## Documentation
-
-The documentation for MotionPlus is currently in the process of being updated from the old
-Motion application.
 
 ## License
 
