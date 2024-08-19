@@ -267,6 +267,7 @@ cls_log::cls_log(cls_motapp *p_app)
     log_file_ptr  = nullptr;
     log_file_name = "";
     flood_cnt = 0;
+    restart = false;
     set_mode(LOGMODE_SYSLOG);
     pthread_mutex_init(&mutex_log, NULL);
     memset(msg_prefix,0,sizeof(msg_prefix));

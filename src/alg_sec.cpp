@@ -508,8 +508,6 @@ void cls_algsec::params_defaults()
 /**Load the parms from the config to algsec struct */
 void cls_algsec::load_params()
 {
-    pthread_mutex_init(&mutex, NULL);
-
     method = cam->cfg->secondary_method;
     handler_finished = true;
     image_norm = nullptr;
@@ -656,7 +654,7 @@ void cls_algsec::handler_shutdown()
         }
         handler_finished = true;
     }
-    pthread_mutex_destroy(&mutex);
+
     myfree(image_norm);
     mydelete(params);
 
@@ -721,6 +719,7 @@ cls_algsec::cls_algsec(cls_camera *p_cam)
         image_norm = nullptr;
         params = nullptr;
         method = "none";
+        pthread_mutex_init(&mutex, NULL);
         handler_startup();
     #else
         (void)p_cam;
@@ -731,6 +730,7 @@ cls_algsec::~cls_algsec()
 {
     #ifdef HAVE_OPENCV
         handler_shutdown();
+        pthread_mutex_destroy(&mutex);
     #endif
 }
 

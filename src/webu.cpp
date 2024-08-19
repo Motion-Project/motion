@@ -542,6 +542,7 @@ void cls_webu::shutdown()
 cls_webu::cls_webu(cls_motapp *p_app)
 {
     app = p_app;
+    restart = false;
     startup();
 }
 

@@ -1095,6 +1095,7 @@ cls_dbse::cls_dbse(cls_motapp *p_app)
     app = p_app;
 
     pthread_mutex_init(&mutex_dbse, nullptr);
+    restart = false;
 
     pthread_mutex_lock(&mutex_dbse);
         startup();
