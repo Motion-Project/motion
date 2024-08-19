@@ -86,7 +86,7 @@
 
     class cls_config {
         public:
-            cls_config();
+            cls_config(cls_motapp *p_app);
             ~cls_config();
 
             /* Overall system configuration parameters */
@@ -281,11 +281,11 @@
             std::string             snd_window;
             bool                    snd_show;
 
-            void camera_add(cls_motapp *app, std::string fname, bool srcdir);
-            void sound_add(cls_motapp *app, std::string fname, bool srcdir);
-            void camera_filenm(cls_motapp *app);
-            void sound_filenm(cls_motapp *app);
-            void process(cls_motapp *app);
+            void camera_add(std::string fname, bool srcdir);
+            void sound_add(std::string fname, bool srcdir);
+            void camera_filenm();
+            void sound_filenm();
+            void process();
 
             void edit_set(std::string parm_nm, std::string parm_val);
             void edit_get(std::string parm_nm, std::string &parm_val, enum PARM_CAT parm_cat);
@@ -295,23 +295,24 @@
             std::string type_desc(enum PARM_TYP ptype);
             std::string cat_desc(enum PARM_CAT pcat, bool shrt);
             void usage();
-            void init(cls_motapp *app);
-            void parms_log(cls_motapp *app);
-            void parms_write(cls_motapp *app);
+            void init();
+            void parms_log();
+            void parms_write();
             void parms_copy(cls_config *src);
             void parms_copy(cls_config *src, PARM_CAT p_cat);
 
         private:
-            void cmdline(cls_motapp *app);
+            cls_motapp *app;
+            void cmdline();
             void defaults();
-            int get_next_devid(cls_motapp *app);
-            void config_dir_parm(cls_motapp *app, std::string confdir);
+            int get_next_devid();
+            void config_dir_parm(std::string confdir);
 
             void parms_log_parm(std::string parm_nm, std::string parm_vl);
-            void parms_write_app(cls_motapp *app);
-            void parms_write_cam(cls_motapp *app);
+            void parms_write_app();
+            void parms_write_cam();
             void parms_write_parms(FILE *conffile, std::string parm_nm, std::string parm_vl, enum PARM_CAT parm_ct, bool reset);
-            void parms_write_snd(cls_motapp *app);
+            void parms_write_snd();
 
             int edit_set_active(std::string parm_nm, std::string parm_val);
             int edit_set_depr(std::string &parm_nm, std::string &parm_val);

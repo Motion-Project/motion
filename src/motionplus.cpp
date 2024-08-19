@@ -700,10 +700,10 @@ void cls_motapp::init(int p_argc, char *p_argv[])
     pthread_mutex_init(&mutex_camlst, NULL);
     pthread_mutex_init(&mutex_post, NULL);
 
-    conf_src = new cls_config;
-    conf_src->init(this);
+    conf_src = new cls_config(this);
+    conf_src->init();
 
-    cfg = new cls_config;
+    cfg = new cls_config(this);
     cfg->parms_copy(conf_src);
 
     motlog->startup();
@@ -717,7 +717,7 @@ void cls_motapp::init(int p_argc, char *p_argv[])
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus running as daemon process"));
     }
 
-    cfg->parms_log(this);
+    cfg->parms_log();
 
     pid_write();
 
@@ -783,7 +783,7 @@ void cls_motapp::camera_add()
     }
 
     pthread_mutex_lock(&mutex_camlst);
-        cfg->camera_add(this, "", false);
+        cfg->camera_add("", false);
     pthread_mutex_unlock(&mutex_camlst);
 
     cam_add = false;

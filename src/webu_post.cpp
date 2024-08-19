@@ -468,7 +468,7 @@ void cls_webu_post::write_config()
         }
     }
 
-    app->conf_src->parms_write(app);
+    app->conf_src->parms_write();
 
 }
 
