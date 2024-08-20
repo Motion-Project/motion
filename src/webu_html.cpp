@@ -526,6 +526,14 @@ void cls_webu_html::script_dropchange_cam()
         "        }\n"
         "      }\n\n"
 
+        "      if (gIndxCam == -1) {\n"
+        "        document.getElementById('cfgpic').src =\n"
+        "          pHostFull+\"/0/mjpg/stream\";\n"
+        "      } else {\n"
+        "        document.getElementById('cfgpic').src =\n"
+        "          pData['cameras'][gIndxCam]['url'] + \"mjpg/stream\" ;\n"
+        "      }\n\n"
+
         "    }\n\n";
 }
 
@@ -820,10 +828,13 @@ void cls_webu_html::script_assign_config_cat()
         "      html_cfg += \"<div id='div_\";\n"
         "      html_cfg += pCat[jcat][\"name\"];\n"
         "      html_cfg += \"' style='display:none' class='cls_config'>\\n\";\n"
-        "      html_cfg += \"<h3>\";\n"
+
+        "      html_cfg += \"<table style='float: left'>\";\n"
+        "      html_cfg += \"<tr><th colspan='2'>\";\n"
         "      html_cfg += pCat[jcat][\"display\"];\n"
-        "      html_cfg += \" Parameters</h3>\\n\";\n"
-        "      html_cfg += \"<table><tr> <td><label for 'camdrop'>camera</label></td>\\n\";\n"
+        "      html_cfg += \" Parameters</th></tr>\\n\";\n"
+
+        "      html_cfg += \"<tr><td><label for 'camdrop'>camera</label></td>\\n\";\n"
         "      html_cfg += \"<td class='cls_camdrop'>\";\n"
         "      html_cfg += \"<select class='cls_drop' \";\n"
         "      html_cfg += \"onchange='dropchange_cam.call(this)' \";\n"
@@ -858,6 +869,13 @@ void cls_webu_html::script_assign_config()
         "      for (jcat in pCat) {\n"
         "        html_cfg += assign_config_cat(jcat);\n"
         "      }\n\n"
+
+        "      html_cfg += \"<br><br><br>\";\n"
+        "      html_cfg += \"<a><img id='cfgpic'\";\n"
+        "      html_cfg += \"' src=\" + pHostFull + \"/0/mjpg/stream\";\n"
+        "      html_cfg += \" border=0 width=45%></a>\\n\";\n"
+        "      html_cfg += \"<div style='clear: both'></div>\\n;\"\n\n"
+
 
         "      document.getElementById(\"div_config\").innerHTML = html_cfg;\n\n"
 
