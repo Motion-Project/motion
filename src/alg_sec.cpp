@@ -45,11 +45,39 @@ static void *algsec_handler(void *arg)
     return nullptr;
 }
 
+void cls_algsec::debug_notice(Mat &mat_dst, bool isdetect)
+{
+    if (handler_stop == true) {
+        return;
+    }
+
+    if (cfg_log_level >= DBG) {
+        if (first_pass == true) {
+            MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
+                , "Secondary detect and debug enabled.");
+            MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
+                , "Saving source and detected images to %s"
+                , cfg_target_dir.c_str());
+            first_pass = false;
+        }
+        if (isdetect == true) {
+            imwrite(cfg_target_dir  + "/detect_" + method + ".jpg"
+                , mat_dst);
+        } else {
+            imwrite(cfg_target_dir  + "/src_" + method + ".jpg"
+                , mat_dst);
+        }
+    }
+}
+
 void cls_algsec::image_show(Mat &mat_dst)
 {
-    //std::string testdir;
-    std::vector<uchar> buff;    //buffer for coding
+    std::vector<uchar> buff;
     std::vector<int> param(2);
+
+    if (handler_stop == true) {
+        return;
+    }
 
     /* We check the size so that we at least fill in the first image so the
      * web stream will have something to start with.  After feeding in at least
@@ -59,16 +87,7 @@ void cls_algsec::image_show(Mat &mat_dst)
         (cam->imgs.size_secondary == 0) ||
         (cfg_log_level >= DBG)) {
 
-        if ((cfg_log_level >= DBG) &&
-            (detected == true)) {
-            MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO, "Saved detected image: %s%s%s%s"
-                , cfg_target_dir.c_str()
-                ,  "/detect_"
-                , method.c_str()
-                , ".jpg");
-            imwrite(cfg_target_dir  + "/detect_" + method + ".jpg"
-                , mat_dst);
-        }
+        debug_notice(mat_dst, detected);
 
         param[0] = cv::IMWRITE_JPEG_QUALITY;
         param[1] = 75;
@@ -88,22 +107,14 @@ void cls_algsec::label_image(Mat &mat_dst
     std::vector<double> fltr_weights;
     std::string testdir;
     std::size_t indx0, indx1;
-    std::vector<uchar> buff;    //buffer for coding
+    std::vector<uchar> buff;
     std::vector<int> param(2);
     char wstr[10];
 
     try {
         detected = false;
 
-        if (cfg_log_level >= DBG) {
-            imwrite(cfg_target_dir  + "/src_" + method + ".jpg"
-                , mat_dst);
-            MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO, "Saved source image: %s%s%s%s"
-                , cfg_target_dir.c_str()
-                ,  "/src_"
-                , method.c_str()
-                , ".jpg");
-        }
+        debug_notice(mat_dst, detected);
 
         for (indx0=0; indx0<src_pos.size(); indx0++) {
             Rect r = src_pos[indx0];
@@ -151,16 +162,7 @@ void cls_algsec::label_image(Mat &mat_dst, double confidence, Point classIdPoint
 
     try {
         detected = false;
-
-        if (cfg_log_level >= DBG) {
-            imwrite(cfg_target_dir  + "/src_" + method + ".jpg"
-                , mat_dst);
-            MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO, "Saved source image: %s%s%s%s"
-                , cfg_target_dir.c_str()
-                ,  "/src_"
-                , method.c_str()
-                , ".jpg");
-        }
+        debug_notice(mat_dst, detected);
 
         if (confidence < threshold) {
             return;
@@ -196,13 +198,27 @@ void cls_algsec::get_image_roi(Mat &mat_src, Mat &mat_dst)
     roi.width = cam->current_image->location.width;
     roi.height = cam->current_image->location.height;
 
-    if ((roi.y + roi.height) > height) {
+    /* Images smaller than 100 cause seg faults.  112 is the nearest
+     multiple of 16 greater than 100*/
+    if (roi.height < 112) {
+        roi.height = 112;
+    }
+    if ((roi.y + roi.height) > (height-112)) {
+        roi.y = height - roi.height;
+    } else if ((roi.y + roi.height) > height) {
         roi.height = height - roi.y;
     }
-    if ((roi.x + roi.width) > width) {
+
+    if (roi.width < 112) {
+        roi.width = 112;
+    }
+    if ((roi.x + roi.width) > (width-112)) {
+        roi.x = width - roi.width;
+    } else {
         roi.width = width - roi.x;
     }
 
+    /*
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Base %d %d (%dx%d) img(%dx%d)"
         ,cam->current_image->location.minx
         ,cam->current_image->location.miny
@@ -211,17 +227,19 @@ void cls_algsec::get_image_roi(Mat &mat_src, Mat &mat_dst)
         ,width,height);
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Opencv %d %d %d %d"
         ,roi.x,roi.y,roi.width,roi.height);
-
+    */
     mat_dst = mat_src(roi);
 
 }
 
 void cls_algsec::get_image(Mat &mat_dst)
 {
-    if ((image_type == "gray") || (image_type == "grey")) {
+    Mat mat_src;
+
+    if (image_type == "grey") {
         mat_dst = Mat(cam->imgs.height, cam->imgs.width
             , CV_8UC1, (void*)image_norm);
-    } else if (image_type == "roi") {
+    } else if ((image_type == "roi") || (image_type == "greyroi")) {
         /*Discard really small and large images */
         if ((cam->current_image->location.width < 64) ||
             (cam->current_image->location.height < 64) ||
@@ -229,16 +247,20 @@ void cls_algsec::get_image(Mat &mat_dst)
             ((cam->current_image->location.height/cam->imgs.height) > 0.7)) {
             return;
         }
-        Mat mat_src = Mat(cam->imgs.height*3/2, cam->imgs.width
-            , CV_8UC1, (void*)image_norm);
-        cvtColor(mat_src, mat_src, COLOR_YUV2RGB_YV12);
+        if (image_type == "roi") {
+            mat_src = Mat(cam->imgs.height*3/2, cam->imgs.width
+                , CV_8UC1, (void*)image_norm);
+            cvtColor(mat_src, mat_src, COLOR_YUV2RGB_YV12);
+        } else {
+            mat_src = Mat(cam->imgs.height, cam->imgs.width
+                , CV_8UC1, (void*)image_norm);
+        }
         get_image_roi(mat_src, mat_dst);
     } else {
-        Mat mat_src = Mat(cam->imgs.height*3/2, cam->imgs.width
+        mat_src = Mat(cam->imgs.height*3/2, cam->imgs.width
             , CV_8UC1, (void*)image_norm);
         cvtColor(mat_src, mat_dst, COLOR_YUV2RGB_YV12);
     }
-
 }
 
 void cls_algsec::detect_hog()
@@ -327,7 +349,7 @@ void cls_algsec::detect_dnn()
         cv::exp(prob-maxProb, softmaxProb);
         sum = (float)cv::sum(softmaxProb)[0];
         softmaxProb /= sum;
-        minMaxLoc(softmaxProb.reshape(1, 1), 0, &confidence, 0, &classIdPoint);
+        cv::minMaxLoc(softmaxProb.reshape(1, 1), 0, &confidence, 0, &classIdPoint);
 
         label_image(mat_dst, confidence, classIdPoint);
 
@@ -359,6 +381,17 @@ void cls_algsec::load_haar()
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
             , model_file.c_str());
         method = "none";
+    }
+}
+
+void cls_algsec::load_hog()
+{
+    if (image_type == "roi") {
+        image_type = "greyroi";
+    } else if (
+        (image_type != "grey") &&
+        (image_type != "greyroi")) {
+        image_type = "grey";
     }
 }
 
@@ -515,9 +548,12 @@ void cls_algsec::load_params()
     height = cam->imgs.height;
     width = cam->imgs.width;
     frame_missed = 0;
+    frame_cnt = 0;
     too_slow = 0;
     in_process = false;
+    first_pass = true;
     handler_stop = false;
+
     cfg_framerate = cam->cfg->framerate;
     cfg_log_level = cam->app->cfg->log_level;
     cfg_target_dir = cam->cfg->target_dir;
@@ -544,7 +580,7 @@ void cls_algsec::load_params()
     if (method == "haar") {
         load_haar();
     } else if (method == "hog") {
-        //load_hog(models);
+        load_hog();
     } else if (method == "dnn") {
         load_dnn();
     } else {
@@ -568,7 +604,7 @@ void cls_algsec::handler()
     load_params();
 
     interval = 1000000L / cfg_framerate;
-
+    is_started = true;
     while ((handler_stop == false) && (method != "none")) {
         if (in_process){
             if (method == "haar") {
@@ -583,7 +619,7 @@ void cls_algsec::handler()
             SLEEP(0,interval)
         }
     }
-
+    is_started = false;
     handler_stop = false;
     handler_finished = true;
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Secondary detection stopped."));
@@ -669,6 +705,9 @@ void cls_algsec::detect()
         if (method == "none") {
             return;
         }
+        if (is_started == false) {
+            return;
+        }
 
         if (frame_cnt > 0) {
             frame_cnt--;
@@ -718,6 +757,7 @@ cls_algsec::cls_algsec(cls_camera *p_cam)
         image_norm = nullptr;
         params = nullptr;
         method = "none";
+        is_started = false;
         pthread_mutex_init(&mutex, NULL);
         handler_startup();
     #else

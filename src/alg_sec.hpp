@@ -23,10 +23,13 @@
 #ifdef HAVE_OPENCV
     #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wconversion"
-        #include "opencv2/objdetect.hpp"
-        #include "opencv2/dnn.hpp"
-        #include "opencv2/highgui.hpp"
-        #include "opencv2/imgproc.hpp"
+        #include <opencv2/objdetect.hpp>
+        #include <opencv2/dnn.hpp>
+        #include <opencv2/highgui.hpp>
+        #include <opencv2/imgproc.hpp>
+        #include <opencv2/imgcodecs.hpp>
+        #include <opencv2/videoio.hpp>
+        #include <opencv2/video.hpp>
     #pragma GCC diagnostic pop
 #endif
 
@@ -50,6 +53,8 @@ class cls_algsec {
         #ifdef HAVE_OPENCV
             cls_camera      *cam;
             bool            in_process;
+            bool            is_started;
+            bool            first_pass;
             int             frame_cnt;
             int             frame_missed;
             int             too_slow;
@@ -70,6 +75,7 @@ class cls_algsec {
 
             void load_dnn();
             void load_haar();
+            void load_hog();
             void detect_dnn();
             void detect_haar();
             void detect_hog();
@@ -79,13 +85,13 @@ class cls_algsec {
             void label_image(cv::Mat &mat_dst, std::vector<cv::Rect> &src_pos
                 , std::vector<double> &src_weights);
             void image_show(cv::Mat &mat_dst);
+            void debug_notice(cv::Mat &mat_dst,bool isdetect);
 
             std::string                 config;
             ctx_params                  *params;
 
             std::string                 model_file;
             int                         frame_interval;
-
             std::string                 image_type;
             int                         rotate;
 

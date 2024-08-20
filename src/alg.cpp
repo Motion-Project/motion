@@ -897,7 +897,7 @@ void cls_alg::lightswitch()
 
 void cls_alg::ref_frame_update()
 {
-    int accept_timer = cam->lastrate * cam->cfg->static_object_time;
+    int accept_timer;
     int i, threshold_ref;
     int *ref_dyn = cam->imgs.ref_dyn;
     u_char *image_virgin = cam->imgs.image_vprvcy;
@@ -905,11 +905,7 @@ void cls_alg::ref_frame_update()
     u_char *mask_final = smartmask_final;
     u_char *out = cam->imgs.image_motion.image_norm;
 
-    if (cam->lastrate > 5) {
-        /* Match rate limit */
-        accept_timer /= (cam->lastrate / 3);
-    }
-
+    accept_timer = cam->cfg->static_object_time * cam->cfg->framerate;
     threshold_ref = cam->noise * EXCLUDE_LEVEL_PERCENT / 100;
 
     for (i = cam->imgs.motionsize; i > 0; i--) {
