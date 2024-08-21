@@ -218,7 +218,27 @@ void cls_webu_html::style_config()
         "      color: black;\n"
         "      background-color: transparent;\n"
         "      text-decoration: none;\n"
-        "    }\n";
+        "    }\n"
+
+        "   .cls_log {\n"
+        "     background-color: transparent;\n"
+        "     color: white;\n"
+        "     text-align: center;\n"
+        "     margin-top: 0rem;\n"
+        "     margin-bottom: 0rem;\n"
+        "     font-weight: normal;\n"
+        "     font-size: 0.90rem;\n"
+        "   }\n"
+
+        "   .cls_log textarea {\n"
+        "     overflow-y: scroll;\n"
+        "     background-color: lightgrey;\n"
+        "     padding: 0rem;\n"
+        "     height: 10rem;\n"
+        "     width: 50rem;\n"
+        "     text-align: left;\n"
+        "   }\n";
+
 
 }
 
@@ -359,7 +379,11 @@ void cls_webu_html::divmain()
         "    <div id='div_movies' class='cls_movies'>\n"
         "      <!-- Filled in by script -->\n"
         "    </div>\n\n"
+        "    <div id='div_log' class='cls_log' style='display:none' >\n"
+        "      <textarea id='txta_log' ></textarea>\n"
+        "    </div>\n\n"
         "  </div>\n\n";
+
 }
 
 /* Create the javascript function send_config */
@@ -716,6 +740,10 @@ void cls_webu_html::script_assign_actions()
                 ;
         }
     }
+
+    webua->resp_page +=
+        "      html_actions += \"<a onclick=\\\"log_showhide();\\\">\";\n"
+        "      html_actions += \"Show/hide log</a>\\n\";\n\n";
 
     webua->resp_page +=
         "      document.getElementById(\"divnav_actions\").innerHTML = html_actions;\n\n"
@@ -1077,6 +1105,7 @@ void cls_webu_html::script_cams_reset()
         "          document.getElementById('pic'+indx).src = ''; \n"
         "        }\n"
         "      }\n"
+        "      document.getElementById('cfgpic').src = ''; \n"
         "    } \n\n";
 }
 
@@ -1382,6 +1411,66 @@ void cls_webu_html::script_cams_scan_fnc()
         "    };\n\n";
 }
 
+void cls_webu_html::script_log_display()
+{
+    webua->resp_page +=
+        "    function log_display() {\n"
+        "      var itm, msg, nbr, indx, txtalog;\n"
+        "      txtalog = document.getElementById('txta_log').value;\n"
+        "      for (indx = 0; indx < 1000; indx++) {\n"
+        "        itm = pLog[indx];\n"
+        "        if (typeof(itm) != 'undefined') {\n"
+        "          msg = pLog[indx]['logmsg'];\n"
+        "          nbr = pLog[indx]['lognbr'];\n"
+        "          if (txtalog.length > 1000) {\n"
+        "            txtalog = txtalog.substring(txtalog.search('\\n'));\n"
+        "          }\n"
+        "          txtalog += '\\n' + msg;\n"
+        "        }\n"
+        "      }\n"
+        "      document.getElementById('txta_log').enabled = true;\n"
+        "      document.getElementById('txta_log').value = txtalog;\n"
+        "      document.getElementById('txta_log').scrollTop =\n"
+        "        document.getElementById('txta_log').scrollHeight;\n"
+        "      document.getElementById('txta_log').enabled = false;\n"
+        "    }\n\n";
+
+}
+
+void cls_webu_html::script_log_get()
+{
+    webua->resp_page +=
+        "    function log_get() {\n"
+        "      var xmlhttp = new XMLHttpRequest();\n"
+        "      xmlhttp.onreadystatechange = function() {\n"
+        "        if (this.readyState == 4 && this.status == 200) {\n"
+        "          pLog = JSON.parse(this.responseText);\n"
+        "          log_display();\n"
+        "        }\n"
+        "      };\n"
+        "      xmlhttp.open('GET', pHostFull+'/0/log/0');\n"
+        "      xmlhttp.send();\n"
+        "    }\n\n";
+
+}
+
+void cls_webu_html::script_log_showhide()
+{
+    webua->resp_page +=
+        "    function log_showhide() {\n"
+        "      if (document.getElementById('div_log').style.display == 'none') {\n"
+        "        document.getElementById('div_log').style.display='block';\n"
+        "        document.getElementById('txta_log').value = '';\n"
+        "        log_timer = setInterval(log_get, 2000);\n"
+        "      } else {\n"
+        "        document.getElementById('div_log').style.display='none';\n"
+        "        document.getElementById('txta_log').value = '';\n"
+        "        clearInterval(log_timer);\n"
+        "      }\n"
+        "    }\n\n";
+
+}
+
 /* Call all the functions to create the java scripts of page*/
 void cls_webu_html::script()
 {
@@ -1389,6 +1478,7 @@ void cls_webu_html::script()
         "    var pData, pMovies, pHostFull;\n"
         "    var gIndxScan, gIndxCam, gGetImgs;\n"
         "    var pic_url = Array(4);\n"
+        "    var log_timer;\n"
         "    var cams_scan_timer, cams_all_timer, cams_one_timer;\n\n";
 
     script_nav();
@@ -1432,6 +1522,10 @@ void cls_webu_html::script()
 
     script_movies_page();
     script_movies_click();
+
+    script_log_display();
+    script_log_get();
+    script_log_showhide();
 
     webua->resp_page += "  </script>\n\n";
 }

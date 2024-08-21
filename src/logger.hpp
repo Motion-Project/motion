@@ -54,6 +54,11 @@
     #define MOTPLS_LOG(x, y, z, ...) motlog->write_msg(x, y, z, 1, __FUNCTION__, __VA_ARGS__)
     #define MOTPLS_SHT(x, y, z, ...) motlog->write_msg(x, y, z, 0, __VA_ARGS__)
 
+    struct ctx_log_item {
+        uint64_t    log_nbr;
+        std::string log_msg;
+    };
+
     class cls_log {
         public:
             cls_log(cls_motapp *p_app);
@@ -66,6 +71,7 @@
             void shutdown();
             void startup();
             bool restart;
+            std::vector<ctx_log_item> log_vec;
         private:
             cls_motapp          *app;
             int                 log_mode;
@@ -75,11 +81,13 @@
             char                msg_flood[1024];
             char                msg_full[1024];
             int                 flood_cnt;
+
             void set_mode(int mode);
             void write_flood(int loglvl);
             void write_norm(int loglvl, uint prefixlen);
             void add_errmsg(int flgerr, int err_save);
-            void log_stop();
+            void log_history_init();
+            void log_history_add(std::string msg);
 
     };
 

@@ -623,7 +623,7 @@ void cls_webu_ans::answer_get()
         }
         webu_file->main();
 
-    } else if ((uri_cmd1 == "config.json") ||
+    } else if ((uri_cmd1 == "config.json") || (uri_cmd1 == "log") ||
         (uri_cmd1 == "movies.json") || (uri_cmd1 == "status.json")) {
         if (webu_json == nullptr) {
             webu_json = new cls_webu_json(this);

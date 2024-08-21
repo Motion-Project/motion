@@ -420,6 +420,41 @@ void cls_webu_json::status()
     webua->resp_page += "}";
 }
 
+void cls_webu_json::loghistory()
+{
+    int indx, cnt;
+    bool frst;
+
+    webua->resp_type = WEBUI_RESP_JSON;
+
+    pthread_mutex_lock(&motlog->mutex_log);
+        frst = true;
+        cnt = 0;
+        for (indx=0; indx<motlog->log_vec.size();indx++) {
+            if (motlog->log_vec[indx].log_nbr > mtoi(webua->uri_cmd2)) {
+                if (frst == true) {
+                    webua->resp_page += "{";
+                    frst = false;
+                } else {
+                    webua->resp_page += ",";
+                }
+                webua->resp_page += "\"" + std::to_string(indx) +"\" : {";
+                webua->resp_page += "\"lognbr\" :\"" +
+                    std::to_string(motlog->log_vec[indx].log_nbr) + "\", ";
+                webua->resp_page += "\"logmsg\" :\"" +
+                    motlog->log_vec[indx].log_msg.substr(0,
+                        motlog->log_vec[indx].log_msg.length()-1) + "\" ";
+                webua->resp_page += "}";
+                cnt++;
+            }
+        }
+    pthread_mutex_unlock(&motlog->mutex_log);
+    if (frst == true) {
+        webua->resp_page += "{\"0\": \"\" ";
+    }
+    webua->resp_page += ",\"count\":\""+std::to_string(cnt)+"\"}";
+}
+
 void cls_webu_json::main()
 {
     pthread_mutex_lock(&app->mutex_post);
@@ -428,7 +463,10 @@ void cls_webu_json::main()
         } else if (webua->uri_cmd1 == "movies.json") {
             movies();
         } else if (webua->uri_cmd1 == "status.json") {
-            status();
+            //status();
+            loghistory();
+        } else if (webua->uri_cmd1 == "log") {
+            loghistory();
         } else {
             webua->bad_request();
             pthread_mutex_unlock(&app->mutex_post);

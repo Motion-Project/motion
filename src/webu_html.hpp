@@ -67,6 +67,9 @@
             void script_cams_one_fnc();
             void script_cams_all_fnc();
             void script_cams_scan_fnc();
+            void script_log_display();
+            void script_log_get();
+            void script_log_showhide();
             void script();
             void body();
             void default_page();

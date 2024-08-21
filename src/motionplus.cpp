@@ -556,6 +556,7 @@ void cls_motapp::check_restart()
             pid_remove();
         }
 
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarting log"));
         pthread_mutex_lock(&motlog->mutex_log);
             motlog->shutdown();
             cfg->parms_copy(conf_src, PARM_CAT_00);
@@ -570,6 +571,7 @@ void cls_motapp::check_restart()
     }
 
     if (dbse->restart == true) {
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarting database"));
         pthread_mutex_lock(&dbse->mutex_dbse);
             dbse->shutdown();
             cfg->parms_copy(conf_src, PARM_CAT_15);
@@ -579,6 +581,7 @@ void cls_motapp::check_restart()
     }
 
     if (webu->restart == true) {
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarting webcontrol"));
         webu->shutdown();
         cfg->parms_copy(conf_src, PARM_CAT_13);
         webu->startup();

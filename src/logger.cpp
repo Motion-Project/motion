@@ -58,6 +58,37 @@ void ff_log(void *var1, int errnbr, const char *fmt, va_list vlist)
     }
 }
 
+void cls_log::log_history_init()
+{
+    int             indx;
+    ctx_log_item    log_item;
+
+    log_item.log_msg= "";
+    for (indx=0;indx<200;indx++){
+        log_item.log_nbr = indx;
+        log_vec.push_back(log_item);
+    }
+}
+
+void cls_log::log_history_add(std::string msg)
+{
+    int indx, mx;
+
+    mx = (int)log_vec.size();
+    for (indx=0;indx<mx-1;indx++) {
+        log_vec[indx].log_nbr = log_vec[indx+1].log_nbr;
+        log_vec[indx].log_msg = log_vec[indx+1].log_msg;
+    }
+
+    /*Arbritrary large number*/
+    if (log_vec[mx-1].log_nbr >50000000L) {
+        log_history_init();
+    }
+    log_vec[mx-1].log_nbr++;
+    log_vec[mx-1].log_msg = msg;
+
+}
+
 void cls_log::write_flood(int loglvl)
 {
     char flood_repeats[1024];
@@ -79,6 +110,7 @@ void cls_log::write_flood(int loglvl)
         fputs(flood_repeats, stderr);
         fflush(stderr);
     }
+    log_history_add(flood_repeats);
 }
 
 void cls_log::write_norm(int loglvl, uint prefixlen)
@@ -102,6 +134,7 @@ void cls_log::write_norm(int loglvl, uint prefixlen)
         fputs(msg_full, stderr);
         fflush(stderr);
     }
+    log_history_add(msg_full);
 }
 
 void cls_log::add_errmsg(int flgerr, int err_save)
@@ -273,7 +306,7 @@ cls_log::cls_log(cls_motapp *p_app)
     memset(msg_prefix,0,sizeof(msg_prefix));
     memset(msg_flood,0,sizeof(msg_flood));
     memset(msg_full,0,sizeof(msg_full));
-
+    log_history_init();
     av_log_set_callback(ff_log);
 }
 

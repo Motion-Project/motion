@@ -37,6 +37,7 @@
             void movies();
             void status_vars(int indx_cam);
             void status();
+            void loghistory();
     };
 
 #endif /* _INCLUDE_WEBU_JSON_HPP_ */
