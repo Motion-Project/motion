@@ -1,3 +1,11 @@
+Summary of changes for version 4.7.0 are below
+    * Documentation updates
+    * Remove outdated MMAL camera source.
+    * Fix reaping of zombie processes from Motion.
+    * Allow for network cameras that are not completely standards compliant
+    * Fix v4l2M2M encoding.
+    * Fix fps conversion specifier.
+    * Allow for large date time and event numbers.
 Summary of changes for version 4.6.0 are below
     * Documentation updates
     * Fix segfault on vaapi decoding
