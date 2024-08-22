@@ -84,8 +84,8 @@ movie_filename %v-%Y%m%d%H%M%S
 ;*****   Web Control
 ;*************************************************
 webcontrol_port 8080
-webcontrol_localhost on
-webcontrol_parms 0
+webcontrol_localhost off
+webcontrol_parms 2
 
 ;*************************************************
 ;*****   Web Stream
@@ -96,7 +96,7 @@ stream_preview_method combined
 ;*************************************************
 ; Device config files - One for each device.
 ;*************************************************
-; camera @prefix@/etc/motionplus/camera1.conf
+camera @prefix@/etc/motionplus/camera1.conf
 ; camera @prefix@/etc/motionplus/camera2.conf
 ; camera @prefix@/etc/motionplus/camera3.conf
 ; sound @prefix@/etc/motionplus/sound1.conf
