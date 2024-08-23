@@ -11,26 +11,24 @@ The following are some of the things that are different from Motion.
   - Haar cascade classifiers
   - Deep neural networks(Caffe, TensorFlow, etc.)
 - Direct Pi camera support and ability to change camera parameters
-- Consolidated stream(a single image) showing all cameras
-- Video streams via MPEGTS format
 - Sound frequency detection
 - Additional primary detection parameters
-- Sound recording from certain network camera sources
-- List/download movies via the web interface
-- Add/delete camera via web interface
-- Web control allows for changing/updating parameters
-- User provided web pages
-- JSON status/configuration parameters
-- Edits on configuration parameters
-- POST web control processing
-- ROI picture output
+- Sound recording from network camera sources
+- ROI pictures for output or secondary detection
+- Enhanced web contorl
+  - Only needs a single port for all camera video streams and controls
+  - Consolidated stream(a single image) showing all cameras
+  - List/download movies
+  - Add/delete cameras
+  - Live view of the Motionplus log output
+  - Video streams via MPEGTS format
+  - Change/update configuration parameters
+  - Permits a user created web page
+  - JSON status/configuration pages
+  - POST web control processing
 
 ## License
 
 MotionPlus is distributed under the GNU GENERAL PUBLIC LICENSE (GPL) version 3 or later.
-
-## Contributing
-
-Issues and pull requests will considered at the developers discretion.  It is best to open issues for discussion prior to coding a PR since not all will be accepted.
 
 
