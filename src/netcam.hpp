@@ -154,6 +154,7 @@ class cls_netcam {
         int         cfg_width;
         int         cfg_height;
         int         cfg_framerate;
+        int         cfg_idur;
         std::string cfg_params;
 
         std::vector<ctx_filelist_item>    filelist;

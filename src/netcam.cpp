@@ -1340,7 +1340,7 @@ int cls_netcam::read_image()
 
     interrupted=false;
     clock_gettime(CLOCK_MONOTONIC, &ist_tm);
-    idur = 10;
+    idur = cfg_idur;
 
     status = NETCAM_READINGIMAGE;
     img_recv->used = 0;
@@ -1543,8 +1543,6 @@ void cls_netcam::set_options()
             std::to_string(cfg_height);
         util_parms_add_default(params,"video_size", tmp);
 
-        idur = 55;
-
     } else if (service == "file") {
         MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("%s:Setting up movie file")
@@ -1689,6 +1687,7 @@ void cls_netcam::set_parms ()
     filenbr = 0;
     filelist.clear();
     filedir = "";
+    cfg_idur = 20;
 
     for (it = params->params_array.begin();
         it != params->params_array.end(); it++) {
@@ -1701,6 +1700,9 @@ void cls_netcam::set_parms ()
             } else {
                 capture_rate = mtoi(it->param_value);
             }
+        }
+        if (it->param_name == "interrupt") {
+            cfg_idur = mtoi(it->param_value);
         }
     }
 
@@ -1720,7 +1722,6 @@ void cls_netcam::set_parms ()
     clock_gettime(CLOCK_MONOTONIC, &ist_tm);
     clock_gettime(CLOCK_MONOTONIC, &icur_tm);
 
-    idur = 5;
     interrupted = false;
 
     set_path();
@@ -1784,7 +1785,7 @@ int cls_netcam::open_context()
 
     clock_gettime(CLOCK_MONOTONIC, &ist_tm);
 
-    idur = 20;
+    idur = cfg_idur * 3; /*3 is arbritrary multiplier to give connect more time than other steps*/
 
     set_options();
 
