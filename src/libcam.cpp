@@ -744,7 +744,8 @@ int cls_libcam::libcam_start()
         return -1;
     }
 
-    SLEEP(2,0);
+    cam->watchdog = cam->cfg->watchdog_tmo;
+    SLEEP(1,0);
 
     started_cam = true;
 
@@ -796,6 +797,7 @@ int cls_libcam::next(ctx_image_data *img_data)
             return CAPTURE_FAILURE;
         }
 
+        cam->watchdog = cam->cfg->watchdog_tmo;
         /* Allow time for request to finish.*/
         indx=0;
         while ((req_queue.empty() == true) && (indx < 50)) {
@@ -803,6 +805,7 @@ int cls_libcam::next(ctx_image_data *img_data)
             indx++;
         }
 
+        cam->watchdog = cam->cfg->watchdog_tmo;
         if (req_queue.empty() == false) {
             Request *request = this->req_queue.front();
 
@@ -830,7 +833,7 @@ cls_libcam::cls_libcam(cls_camera *p_cam)
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
         cam = p_cam;
         params = nullptr;
-
+        cam->watchdog = cam->cfg->watchdog_tmo;
         if (libcam_start() < 0) {
             MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
             libcam_stop();

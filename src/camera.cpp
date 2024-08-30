@@ -1521,7 +1521,7 @@ cls_camera::cls_camera(cls_motapp *p_app)
     handler_stop = true;
     restart = false;
     action_snapshot = false;
-    watchdog = 30;
+    watchdog = 90;
 }
 
 cls_camera::~cls_camera()

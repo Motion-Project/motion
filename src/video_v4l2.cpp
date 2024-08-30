@@ -80,7 +80,7 @@ int cls_v4l2cam::xioctl(unsigned long request, void *arg)
     if (fd_device < 0) {
         return -1;
     }
-
+    cam->watchdog = cam->cfg->watchdog_tmo;
     do {
         retcd = ioctl(fd_device, request, arg);
     } while (-1 == retcd && EINTR == errno);
@@ -916,7 +916,7 @@ void cls_v4l2cam::device_open()
         , _("Opening video device %s")
         , cam->cfg->v4l2_device.c_str());
 
-    cam->watchdog = 60;
+    cam->watchdog = cam->cfg->watchdog_tmo * 3; /* 3 is arbritrary multiplier to give open function more time*/
     fd_device = open(cam->cfg->v4l2_device.c_str(), O_RDWR|O_CLOEXEC);
     if (fd_device <= 0) {
         MOTPLS_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
@@ -1143,6 +1143,7 @@ int cls_v4l2cam::next(ctx_image_data *img_data)
     #ifdef HAVE_V4L2
         int retcd;
 
+        cam->watchdog = cam->cfg->watchdog_tmo;
         retcd = capture();
         if (retcd != 0) {
             return CAPTURE_FAILURE;
@@ -1169,6 +1170,7 @@ cls_v4l2cam::cls_v4l2cam(cls_camera *p_cam)
 {
     cam = p_cam;
     #ifdef HAVE_V4L2
+        cam->watchdog = cam->cfg->watchdog_tmo;
         start_cam();
     #else
         cam->device_status = STATUS_CLOSED;

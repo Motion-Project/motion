@@ -1339,7 +1339,6 @@ int cls_netcam::read_image()
     packet_recv = mypacket_alloc(packet_recv);
 
     interrupted=false;
-    clock_gettime(CLOCK_MONOTONIC, &ist_tm);
     idur = cfg_idur;
 
     status = NETCAM_READINGIMAGE;
@@ -1350,6 +1349,7 @@ int cls_netcam::read_image()
     nodata = 0;
 
     while ((!haveimage) && (!interrupted)) {
+        clock_gettime(CLOCK_MONOTONIC, &ist_tm);
         retcd = av_read_frame(format_context, packet_recv);
         if (retcd < 0 ) {
             errcnt++;
@@ -1403,6 +1403,7 @@ int cls_netcam::read_image()
             }
         }
     }
+    clock_gettime(CLOCK_MONOTONIC, &ist_tm);
     clock_gettime(CLOCK_MONOTONIC, &img_recv->image_time);
     last_stream_index = packet_recv->stream_index;
     last_pts = packet_recv->pts;
@@ -1439,6 +1440,7 @@ int cls_netcam::read_image()
         }
     pthread_mutex_unlock(&mutex);
 
+    clock_gettime(CLOCK_MONOTONIC, &ist_tm);
     free_pkt();
 
     if (format_context->streams[video_stream_index]->avg_frame_rate.den > 0) {
@@ -1803,6 +1805,7 @@ int cls_netcam::open_context()
         context_close();
         return -1;
     }
+    clock_gettime(CLOCK_MONOTONIC, &ist_tm);
     av_dict_free(&opts);
     MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("%s:Opened camera(%s)"), cameratype.c_str()
@@ -1822,6 +1825,7 @@ int cls_netcam::open_context()
         return -1;
     }
 
+    clock_gettime(CLOCK_MONOTONIC, &ist_tm);
     /* there is no way to set the avcodec thread names, but they inherit
      * our thread name - so temporarily change our thread name to the
      * desired name */
@@ -1860,6 +1864,7 @@ int cls_netcam::open_context()
         imgsize.height = codec_context->height;
     }
 
+    clock_gettime(CLOCK_MONOTONIC, &ist_tm);
     frame = av_frame_alloc();
     if (frame == nullptr) {
         if (status == NETCAM_NOTCONNECTED) {
@@ -1883,6 +1888,7 @@ int cls_netcam::open_context()
         }
     }
 
+    clock_gettime(CLOCK_MONOTONIC, &ist_tm);
     /* Validate that the previous steps opened the camera */
     retcd = read_image();
     if ((retcd < 0) || (interrupted)) {
@@ -2279,6 +2285,7 @@ cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
             return;
         }
     }
+    cam->watchdog = cam->cfg->watchdog_tmo;
     if (read_image() != 0) {
         MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("Failed trying to read first image"));
@@ -2286,6 +2293,7 @@ cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
         handler_shutdown();
         return;
     }
+    cam->watchdog = cam->cfg->watchdog_tmo;
     /* When running dual, there seems to be contamination across norm/high with codec functions. */
     context_close();       /* Close in this thread to open it again within handler thread */
     status = NETCAM_RECONNECTING;      /* Set as reconnecting to avoid excess messages when starting */
@@ -2295,7 +2303,7 @@ cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
         cam->imgs.width_high = imgsize.width;
         cam->imgs.height_high = imgsize.height;
     }
-
+    cam->watchdog = cam->cfg->watchdog_tmo;
     handler_startup();
 
     cam->device_status = STATUS_OPENED;
