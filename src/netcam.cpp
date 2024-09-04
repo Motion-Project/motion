@@ -1689,7 +1689,7 @@ void cls_netcam::set_parms ()
     filenbr = 0;
     filelist.clear();
     filedir = "";
-    cfg_idur = 20;
+    cfg_idur = 90;
 
     for (it = params->params_array.begin();
         it != params->params_array.end(); it++) {
@@ -2266,7 +2266,7 @@ cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
     } else {
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("High: Opening Netcam"));
     }
-
+    cam->watchdog = cam->cfg->watchdog_tmo * 3; /* 3 is arbitrary multiplier to give startup more time*/
     set_parms();
     if (service == "file") {
         retcd = connect();
@@ -2285,14 +2285,14 @@ cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
             return;
         }
     }
-    cam->watchdog = cam->cfg->watchdog_tmo;
+    cam->watchdog = cam->cfg->watchdog_tmo * 3; /* 3 is arbitrary multiplier to give startup more time*/
     if (read_image() != 0) {
         MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("Failed trying to read first image"));
         handler_shutdown();
         return;
     }
-    cam->watchdog = cam->cfg->watchdog_tmo;
+    cam->watchdog = cam->cfg->watchdog_tmo * 3; /* 3 is arbitrary multiplier to give startup more time*/
     /* When running dual, there seems to be contamination across norm/high with codec functions. */
     context_close();       /* Close in this thread to open it again within handler thread */
     status = NETCAM_RECONNECTING;      /* Set as reconnecting to avoid excess messages when starting */
@@ -2302,7 +2302,7 @@ cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
         cam->imgs.width_high = imgsize.width;
         cam->imgs.height_high = imgsize.height;
     }
-    cam->watchdog = cam->cfg->watchdog_tmo;
+    cam->watchdog = cam->cfg->watchdog_tmo * 3; /* 3 is arbitrary multiplier to give startup more time*/
     handler_startup();
 
     cam->device_status = STATUS_OPENED;

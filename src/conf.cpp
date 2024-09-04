@@ -729,7 +729,7 @@ void cls_config::edit_watchdog_tmo(std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        watchdog_tmo = 30;
+        watchdog_tmo = 90;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if (parm_in < 1) {

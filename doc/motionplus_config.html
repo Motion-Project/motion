@@ -824,17 +824,21 @@
 
         <h3><a name="watchdog_tmo"></a>watchdog_tmo</h3>
         <ul>
-          <li> Values: Integer | Default: 30 </li>
+          <li> Values: Integer | Default: 90 </li>
           Number of seconds that elapse before a camera is deemed to be unresponsive and MotionPlus triggers
-          a watchdog timeout and begins to force the camera to shut down.
+          a watchdog timeout and begins to force the camera to shut down.  When camera is initially starting, the
+          timeout is set to three(3) times this value.
         </ul>
         <p></p>
 
         <h3><a name="watchdog_kill"></a>watchdog_kill</h3>
         <ul>
-          <li> Values: Integer | Default: 10 </li>
-          Number of seconds that elapse after the watchdog_tmo that MotionPlus waits until the
-          kill processes begin to force the camera to shut down.
+          <li> Values: Integer | Default: 0 </li>
+          Specifying a value of zero indicates that Motionplus will completely terminate after the watchdog_tmo.
+          Values greater than zero represent the number of additional seconds after the watchdog_tmo MotionPlus will wait
+          until camera processes are forcefully terminated.  Forceful termination of camera processes will result in memory
+          leaks and detrimental effects therefore the default is to completely terminate the application let external processes
+          such as systemctl or cron jobs restart Motionplus.
         </ul>
         <p></p>
 
@@ -1299,9 +1303,9 @@
 
           <div>
             <i><h4>interrupt</h4></i>
-            The duration in seconds permitted for reading an image from the netcam source.  For the initial connection
+            The duration in seconds permitted for the library functions to respond.  For the initial connection
             to the camera, the maximum duration is set equal to three times the interrupt specified.  The default
-            number of seconds is 20.
+            is 90 seconds.
           </div>
           <p></p>
 

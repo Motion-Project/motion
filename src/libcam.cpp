@@ -833,7 +833,7 @@ cls_libcam::cls_libcam(cls_camera *p_cam)
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
         cam = p_cam;
         params = nullptr;
-        cam->watchdog = cam->cfg->watchdog_tmo;
+        cam->watchdog = cam->cfg->watchdog_tmo * 3; /* 3 is arbitrary multiplier to give startup more time*/
         if (libcam_start() < 0) {
             MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
             libcam_stop();
