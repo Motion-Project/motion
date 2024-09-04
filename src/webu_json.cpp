@@ -463,8 +463,7 @@ void cls_webu_json::main()
         } else if (webua->uri_cmd1 == "movies.json") {
             movies();
         } else if (webua->uri_cmd1 == "status.json") {
-            //status();
-            loghistory();
+            status();
         } else if (webua->uri_cmd1 == "log") {
             loghistory();
         } else {
