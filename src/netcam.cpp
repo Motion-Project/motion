@@ -2197,14 +2197,14 @@ void cls_netcam::handler_shutdown()
     context_close();
 
     if (img_latest != nullptr) {
-        free(img_latest->ptr);
-        free(img_latest);
+        myfree(img_latest->ptr);
+        myfree(img_latest);
         img_latest = nullptr;
     }
 
     if (img_recv != nullptr) {
-        free(img_recv->ptr);
-        free(img_recv);
+        myfree(img_recv->ptr);
+        myfree(img_recv);
         img_recv   = nullptr;
     }
 
@@ -2218,7 +2218,7 @@ void cls_netcam::handler_shutdown()
     }
 
     cam->device_status = STATUS_CLOSED;
-
+    status = NETCAM_NOTCONNECTED;
     MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
         ,_("%s: Shut down complete.")
         ,cameratype.c_str());
@@ -2289,7 +2289,6 @@ cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
     if (read_image() != 0) {
         MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("Failed trying to read first image"));
-        status = NETCAM_NOTCONNECTED;
         handler_shutdown();
         return;
     }

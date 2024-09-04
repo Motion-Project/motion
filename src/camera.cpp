@@ -400,6 +400,7 @@ void cls_camera::cam_close()
     mydelete(v4l2cam);
     mydelete(netcam);
     mydelete(netcam_high);
+    device_status = STATUS_CLOSED;
 }
 
 /* Start camera */
@@ -470,7 +471,6 @@ void cls_camera::init_camera_type()
 void cls_camera::init_firstimage()
 {
     int indx;
-    const char *msg;
 
     current_image = &imgs.image_ring[imgs.ring_in];
     if (device_status == STATUS_OPENED) {
@@ -486,18 +486,13 @@ void cls_camera::init_firstimage()
 
     if ((indx >= 5) || (device_status != STATUS_OPENED)) {
         if (device_status != STATUS_OPENED) {
-            msg = "Unable to open camera";
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", "Unable to open camera");
         } else {
-            msg = "Error capturing first image";
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", "Error capturing first image");
         }
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", msg);
         for (indx = 0; indx<imgs.ring_size; indx++) {
             memset(imgs.image_ring[indx].image_norm
                 , 0x80, (uint)imgs.size_norm);
-            draw->text(imgs.image_ring[indx].image_norm
-                , imgs.width, imgs.height
-                , 10, 20 * text_scale
-                , msg, text_scale);
         }
     }
 
@@ -605,6 +600,7 @@ void cls_camera::init_values()
     lasttime = frame_curr_ts.tv_sec;
     postcap = 0;
     event_stop = false;
+    text_scale = cfg->text_scale;
     info_reset();
 
     movie_passthrough = cfg->movie_passthrough;
@@ -689,9 +685,7 @@ void cls_camera::cleanup()
 
     webu_getimg_deinit(this);
 
-    if (device_status == STATUS_OPENED) {
-        cam_close();
-    }
+    cam_close();
 
     myfree(imgs.image_motion.image_norm);
     myfree(imgs.ref);
@@ -1522,10 +1516,12 @@ cls_camera::cls_camera(cls_motapp *p_app)
     restart = false;
     action_snapshot = false;
     watchdog = 90;
+    pthread_mutex_init(&stream.mutex, NULL);
 }
 
 cls_camera::~cls_camera()
 {
     mydelete(conf_src);
     mydelete(cfg);
+    pthread_mutex_destroy(&stream.mutex);
 }

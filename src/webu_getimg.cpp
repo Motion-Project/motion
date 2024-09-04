@@ -30,8 +30,6 @@
 /* Initial the stream context items for the camera */
 void webu_getimg_init(cls_camera *cam)
 {
-    pthread_mutex_init(&cam->stream.mutex, NULL);
-
     cam->imgs.image_substream = NULL;
 
     cam->stream.norm.jpg_sz = 0;
@@ -95,8 +93,6 @@ void webu_getimg_deinit(cls_camera *cam)
         myfree(cam->stream.source.img_data) ;
         myfree(cam->stream.secondary.img_data) ;
     pthread_mutex_unlock(&cam->stream.mutex);
-
-    pthread_mutex_destroy(&cam->stream.mutex);
 
 }
 
