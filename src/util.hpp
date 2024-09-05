@@ -20,33 +20,20 @@
 #ifndef _INCLUDE_UTIL_HPP_
 #define _INCLUDE_UTIL_HPP_
 
-#define MY_PIX_FMT_YUV420P   AV_PIX_FMT_YUV420P
-#define MY_PIX_FMT_YUVJ420P  AV_PIX_FMT_YUVJ420P
-#define MyPixelFormat AVPixelFormat
-
-#define MY_FLAG_READ       AVIO_FLAG_READ
-#define MY_FLAG_WRITE      AVIO_FLAG_WRITE
-#define MY_FLAG_READ_WRITE AVIO_FLAG_READ_WRITE
-
-#define MY_CODEC_ID_MSMPEG4V2  AV_CODEC_ID_MSMPEG4V2
-#define MY_CODEC_ID_FLV1       AV_CODEC_ID_FLV1
-#define MY_CODEC_ID_FFV1       AV_CODEC_ID_FFV1
-#define MY_CODEC_ID_NONE       AV_CODEC_ID_NONE
-#define MY_CODEC_ID_MPEG2VIDEO AV_CODEC_ID_MPEG2VIDEO
-#define MY_CODEC_ID_H264       AV_CODEC_ID_H264
-#define MY_CODEC_ID_HEVC       AV_CODEC_ID_HEVC
-#define MY_CODEC_ID_THEORA     AV_CODEC_ID_THEORA
-#define MY_CODEC_ID_VP8        AV_CODEC_ID_VP8
-#define MY_CODEC_ID_VP9        AV_CODEC_ID_VP9
-
-#define MY_CODEC_FLAG_GLOBAL_HEADER AV_CODEC_FLAG_GLOBAL_HEADER
-#define MY_CODEC_FLAG_QSCALE        AV_CODEC_FLAG_QSCALE
+#define MYFFVER (LIBAVFORMAT_VERSION_MAJOR * 1000)+LIBAVFORMAT_VERSION_MINOR
 
 #if (LIBAVCODEC_VERSION_MAJOR >= 59)
     typedef const AVCodec myAVCodec; /* Version independent definition for AVCodec*/
 #else
     typedef AVCodec myAVCodec; /* Version independent definition for AVCodec*/
 #endif
+
+#if (MYFFVER <= 60016)
+    typedef uint8_t myuint;         /* Version independent uint */
+#else
+    typedef const uint8_t myuint;   /* Version independent uint */
+#endif
+
 
 #ifdef HAVE_GETTEXT
     #include <libintl.h>
@@ -68,12 +55,6 @@
     typedef enum MHD_Result mhdrslt; /* Version independent return result from MHD */
 #else
     typedef int             mhdrslt; /* Version independent return result from MHD */
-#endif
-/* Version independent uint */
-#if (MYFFVER <= 60016)
-    typedef uint8_t myuint;
-#else
-    typedef const uint8_t myuint;
 #endif
 
 struct ctx_params_item {

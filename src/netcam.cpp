@@ -348,8 +348,8 @@ void cls_netcam::free_pkt()
 int cls_netcam::check_pixfmt()
 {
     int retcd = -1;
-    if (((enum AVPixelFormat)frame->format == MY_PIX_FMT_YUV420P) ||
-        ((enum AVPixelFormat)frame->format == MY_PIX_FMT_YUVJ420P)) {
+    if (((enum AVPixelFormat)frame->format == AV_PIX_FMT_YUV420P) ||
+        ((enum AVPixelFormat)frame->format == AV_PIX_FMT_YUVJ420P)) {
         retcd = 0;
     }
     return retcd;
@@ -1201,7 +1201,7 @@ int cls_netcam::open_sws()
         ,(enum AVPixelFormat)frame->format
         ,imgsize.width
         ,imgsize.height
-        ,MY_PIX_FMT_YUV420P
+        ,AV_PIX_FMT_YUV420P
         ,SWS_BICUBIC,nullptr,nullptr,nullptr);
     if (swsctx == nullptr) {
         if (status == NETCAM_NOTCONNECTED) {
@@ -1214,7 +1214,7 @@ int cls_netcam::open_sws()
     }
 
     swsframe_size = av_image_get_buffer_size(
-        MY_PIX_FMT_YUV420P, imgsize.width, imgsize.height, 1);
+        AV_PIX_FMT_YUV420P, imgsize.width, imgsize.height, 1);
     if (swsframe_size <= 0) {
         if (status == NETCAM_NOTCONNECTED) {
             MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
@@ -1269,7 +1269,7 @@ int cls_netcam::resize()
     retcd = av_image_fill_arrays(
         swsframe_out->data
         , swsframe_out->linesize
-        , buffer_out, MY_PIX_FMT_YUV420P
+        , buffer_out, AV_PIX_FMT_YUV420P
         , imgsize.width, imgsize.height, 1);
     if (retcd < 0) {
         if (status == NETCAM_NOTCONNECTED) {
@@ -1306,7 +1306,7 @@ int cls_netcam::resize()
         , swsframe_size
         , (const uint8_t * const*)swsframe_out
         , swsframe_out->linesize
-        , MY_PIX_FMT_YUV420P
+        , AV_PIX_FMT_YUV420P
         , imgsize.width, imgsize.height, 1);
     if (retcd < 0) {
         if (status == NETCAM_NOTCONNECTED) {

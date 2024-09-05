@@ -123,7 +123,7 @@ int cls_movie::get_oformat()
 {
     if (tlapse == TIMELAPSE_APPEND) {
         oc->oformat = av_guess_format("mpeg2video", nullptr, nullptr);
-        oc->video_codec_id = MY_CODEC_ID_MPEG2VIDEO;
+        oc->video_codec_id = AV_CODEC_ID_MPEG2VIDEO;
         full_nm += ".mpg";
         movie_nm += ".mpg";
         if (oc->oformat == nullptr) {
@@ -140,50 +140,50 @@ int cls_movie::get_oformat()
         oc->oformat = av_guess_format("mov", nullptr, nullptr);
         full_nm += ".mov";
         movie_nm += ".mov";
-        oc->video_codec_id = MY_CODEC_ID_H264;
+        oc->video_codec_id = AV_CODEC_ID_H264;
     }
 
     if (container == "flv") {
         oc->oformat = av_guess_format("flv", nullptr, nullptr);
         full_nm += ".flv";
         movie_nm += ".flv";
-        oc->video_codec_id = MY_CODEC_ID_FLV1;
+        oc->video_codec_id = AV_CODEC_ID_FLV1;
     }
 
     if (container == "ogg") {
         oc->oformat = av_guess_format("ogg", nullptr, nullptr);
         full_nm += ".ogg";
         movie_nm += ".ogg";
-        oc->video_codec_id = MY_CODEC_ID_THEORA;
+        oc->video_codec_id = AV_CODEC_ID_THEORA;
     }
 
     if (container == "webm") {
         oc->oformat = av_guess_format("webm", nullptr, nullptr);
         full_nm += ".webm";
         movie_nm += ".webm";
-        oc->video_codec_id = MY_CODEC_ID_VP8;
+        oc->video_codec_id = AV_CODEC_ID_VP8;
     }
 
     if (container == "mp4") {
         oc->oformat = av_guess_format("mp4", nullptr, nullptr);
         full_nm += ".mp4";
         movie_nm += ".mp4";
-        oc->video_codec_id = MY_CODEC_ID_H264;
+        oc->video_codec_id = AV_CODEC_ID_H264;
     }
 
     if (container == "mkv") {
         oc->oformat = av_guess_format("matroska", nullptr, nullptr);
         full_nm += ".mkv";
         movie_nm += ".mkv";
-        oc->video_codec_id = MY_CODEC_ID_H264;
+        oc->video_codec_id = AV_CODEC_ID_H264;
     }
 
     if (container == "hevc") {
-        oc->video_codec_id = MY_CODEC_ID_HEVC;
+        oc->video_codec_id = AV_CODEC_ID_HEVC;
         oc->oformat = av_guess_format("mp4", nullptr, nullptr);
         full_nm += ".mp4";
         movie_nm += ".mp4";
-        oc->video_codec_id = MY_CODEC_ID_HEVC;
+        oc->video_codec_id = AV_CODEC_ID_HEVC;
     }
 
     if (oc->oformat == nullptr) {
@@ -194,7 +194,7 @@ int cls_movie::get_oformat()
         return -1;
     }
 
-    if (oc->oformat->video_codec == MY_CODEC_ID_NONE) {
+    if (oc->oformat->video_codec == AV_CODEC_ID_NONE) {
         MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get the container"));
         free_context();
         return -1;
@@ -287,8 +287,8 @@ int cls_movie::set_quality()
     if (quality > 100) {
         quality = 100;
     }
-    if (ctx_codec->codec_id == MY_CODEC_ID_H264 ||
-        ctx_codec->codec_id == MY_CODEC_ID_HEVC) {
+    if (ctx_codec->codec_id == AV_CODEC_ID_H264 ||
+        ctx_codec->codec_id == AV_CODEC_ID_HEVC) {
         if (quality <= 0) {
             quality = 45; // default to 45%
         }
@@ -317,7 +317,7 @@ int cls_movie::set_quality()
             char crf[10];
             quality = (int)(( (100-quality) * 51)/100);
             snprintf(crf, 10, "%d", quality);
-            if (ctx_codec->codec_id == MY_CODEC_ID_H264) {
+            if (ctx_codec->codec_id == AV_CODEC_ID_H264) {
                 av_opt_set(ctx_codec->priv_data, "profile", "high", 0);
             }
             av_opt_set(ctx_codec->priv_data, "crf", crf, 0);
@@ -328,7 +328,7 @@ int cls_movie::set_quality()
         /* The selection of 8000 is a subjective number based upon viewing output files */
         if (quality > 0) {
             quality =(int)(((100-quality)*(100-quality)*(100-quality) * 8000) / 1000000) + 1;
-            ctx_codec->flags |= MY_CODEC_FLAG_QSCALE;
+            ctx_codec->flags |= AV_CODEC_FLAG_QSCALE;
             ctx_codec->global_quality=quality;
         }
     }
@@ -423,9 +423,9 @@ int cls_movie::set_codec()
     ctx_codec->height        = height;
     ctx_codec->time_base.num = 1;
     ctx_codec->time_base.den = fps;
-    ctx_codec->pix_fmt   = MY_PIX_FMT_YUV420P;
+    ctx_codec->pix_fmt   = AV_PIX_FMT_YUV420P;
     ctx_codec->max_b_frames  = 0;
-    ctx_codec->flags |= MY_CODEC_FLAG_GLOBAL_HEADER;
+    ctx_codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
     if (set_quality() < 0) {
         MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to set quality"));
@@ -597,7 +597,7 @@ int cls_movie::set_outputfile()
     if ((timelapse_exists(full_nm.c_str()) == 0) || (tlapse != TIMELAPSE_APPEND)) {
         clock_gettime(CLOCK_MONOTONIC, &cb_st_ts);
         retcd = avio_open(&oc->pb, full_nm.c_str()
-            , MY_FLAG_WRITE|AVIO_FLAG_NONBLOCK);
+            , AVIO_FLAG_WRITE|AVIO_FLAG_NONBLOCK);
         if (retcd < 0) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTPLS_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
@@ -610,7 +610,7 @@ int cls_movie::set_outputfile()
                     return -1;
                 }
                 clock_gettime(CLOCK_MONOTONIC, &cb_st_ts);
-                retcd = avio_open(&oc->pb, full_nm.c_str(), MY_FLAG_WRITE| AVIO_FLAG_NONBLOCK);
+                retcd = avio_open(&oc->pb, full_nm.c_str(), AVIO_FLAG_WRITE| AVIO_FLAG_NONBLOCK);
                 if (retcd < 0) {
                     av_strerror(retcd, errstr, sizeof(errstr));
                     MOTPLS_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO

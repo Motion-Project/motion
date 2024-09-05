@@ -113,8 +113,6 @@ class cls_webu_post;
 class cls_webu_common;
 class cls_webu_stream;
 
-#define MYFFVER (LIBAVFORMAT_VERSION_MAJOR * 1000)+LIBAVFORMAT_VERSION_MINOR
-
 enum MOTPLS_SIGNAL {
     MOTPLS_SIGNAL_NONE,
     MOTPLS_SIGNAL_ALARM,

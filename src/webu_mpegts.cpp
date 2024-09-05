@@ -277,9 +277,9 @@ int cls_webu_mpegts::open_mpegts()
 
     fmtctx = avformat_alloc_context();
     fmtctx->oformat = av_guess_format("mpegts", NULL, NULL);
-    fmtctx->video_codec_id = MY_CODEC_ID_H264;
+    fmtctx->video_codec_id = AV_CODEC_ID_H264;
 
-    codec = avcodec_find_encoder(MY_CODEC_ID_H264);
+    codec = avcodec_find_encoder(AV_CODEC_ID_H264);
     strm = avformat_new_stream(fmtctx, codec);
 
     if (webua->device_id > 0) {
@@ -300,16 +300,16 @@ int cls_webu_mpegts::open_mpegts()
 
     ctx_codec = avcodec_alloc_context3(codec);
     ctx_codec->gop_size      = 15;
-    ctx_codec->codec_id      = MY_CODEC_ID_H264;
+    ctx_codec->codec_id      = AV_CODEC_ID_H264;
     ctx_codec->codec_type    = AVMEDIA_TYPE_VIDEO;
     ctx_codec->bit_rate      = 400000;
     ctx_codec->width         = img_w;
     ctx_codec->height        = img_h;
     ctx_codec->time_base.num = 1;
     ctx_codec->time_base.den = 90000;
-    ctx_codec->pix_fmt       = MY_PIX_FMT_YUV420P;
+    ctx_codec->pix_fmt       = AV_PIX_FMT_YUV420P;
     ctx_codec->max_b_frames  = 1;
-    ctx_codec->flags         |= MY_CODEC_FLAG_GLOBAL_HEADER;
+    ctx_codec->flags         |= AV_CODEC_FLAG_GLOBAL_HEADER;
     ctx_codec->framerate.num  = 1;
     ctx_codec->framerate.den  = 1;
     av_opt_set(ctx_codec->priv_data, "profile", "main", 0);

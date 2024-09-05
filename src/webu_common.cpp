@@ -157,7 +157,7 @@ void cls_webu_common::img_resize(cls_camera *p_cam
 
     retcd = av_image_fill_arrays(
         frm_in->data, frm_in->linesize
-        , src, MY_PIX_FMT_YUV420P
+        , src, AV_PIX_FMT_YUV420P
         , src_w, src_h, 1);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
@@ -172,7 +172,7 @@ void cls_webu_common::img_resize(cls_camera *p_cam
 
     retcd = av_image_fill_arrays(
         frm_out->data, frm_out->linesize
-        , buf, MY_PIX_FMT_YUV420P
+        , buf, AV_PIX_FMT_YUV420P
         , dst_w, dst_h, 1);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
@@ -185,8 +185,8 @@ void cls_webu_common::img_resize(cls_camera *p_cam
     }
 
     swsctx = sws_getContext(
-            src_w, src_h, MY_PIX_FMT_YUV420P
-            ,dst_w, dst_h, MY_PIX_FMT_YUV420P
+            src_w, src_h, AV_PIX_FMT_YUV420P
+            ,dst_w, dst_h, AV_PIX_FMT_YUV420P
             ,SWS_BICUBIC, NULL, NULL, NULL);
     if (swsctx == NULL) {
         MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
@@ -215,7 +215,7 @@ void cls_webu_common::img_resize(cls_camera *p_cam
         (uint8_t *)dst, img_sz
         , (const uint8_t * const*)frm_out
         , frm_out->linesize
-        , MY_PIX_FMT_YUV420P, dst_w, dst_h, 1);
+        , AV_PIX_FMT_YUV420P, dst_w, dst_h, 1);
 
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
