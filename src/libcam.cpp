@@ -756,7 +756,7 @@ int cls_libcam::libcam_start()
 
 void cls_libcam::libcam_stop()
 {
-    delete params;
+    mydelete(params);
 
     if (started_aqr) {
         camera->stop();
@@ -783,10 +783,47 @@ void cls_libcam::libcam_stop()
         cam_mgr->stop();
         cam_mgr.reset();
     }
+    cam->device_status = STATUS_CLOSED;
     MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera stopped.");
 }
 
 #endif
+
+void cls_libcam::noimage()
+{
+    #ifdef HAVE_LIBCAM
+        int slp_dur;
+
+        if (reconnect_count < 100) {
+            reconnect_count++;
+        } else {
+            if (reconnect_count >= 500) {
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 2 hours."));
+                slp_dur = 7200;
+            } else if (reconnect_count >= 200) {
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 10 minutes."));
+                reconnect_count++;
+                slp_dur = 600;
+            } else {
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 30 seconds."));
+                reconnect_count++;
+                slp_dur = 30;
+            }
+            cam->watchdog = slp_dur + (cam->cfg->watchdog_tmo * 3);
+            SLEEP(slp_dur,0);
+            libcam_stop();
+            if (libcam_start() < 0) {
+                MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
+                libcam_stop();
+            } else {
+                cam->device_status = STATUS_OPENED;
+            }
+        }
+    #endif
+}
 
 int cls_libcam::next(ctx_image_data *img_data)
 {
@@ -816,6 +853,8 @@ int cls_libcam::next(ctx_image_data *img_data)
             req_add(request);
 
             cam->rotate->process(img_data);
+            reconnect_count = 0;
+
             return CAPTURE_SUCCESS;
 
         } else {
@@ -829,10 +868,11 @@ int cls_libcam::next(ctx_image_data *img_data)
 
 cls_libcam::cls_libcam(cls_camera *p_cam)
 {
+    cam = p_cam;
     #ifdef HAVE_LIBCAM
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
-        cam = p_cam;
         params = nullptr;
+        reconnect_count = 0;
         cam->watchdog = cam->cfg->watchdog_tmo * 3; /* 3 is arbitrary multiplier to give startup more time*/
         if (libcam_start() < 0) {
             MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
@@ -841,19 +881,16 @@ cls_libcam::cls_libcam(cls_camera *p_cam)
             cam->device_status = STATUS_OPENED;
         }
     #else
-        (void)p_cam;
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("libcam not available"));
-        p_cam->device_status = STATUS_CLOSED;
+        cam->device_status = STATUS_CLOSED;
     #endif
-
 }
 
 cls_libcam::~cls_libcam()
 {
     #ifdef HAVE_LIBCAM
         libcam_stop();
-        cam->device_status = STATUS_CLOSED;
     #endif
-
+    cam->device_status = STATUS_CLOSED;
 }
 

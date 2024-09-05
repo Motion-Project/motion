@@ -883,7 +883,7 @@ void cls_alg::diff_standard()
 
 void cls_alg::lightswitch()
 {
-    if (cam->cfg->lightswitch_percent >= 1 && !cam->lost_connection) {
+    if (cam->cfg->lightswitch_percent >= 1) {
         if (cam->current_image->diffs > (cam->imgs.motionsize * cam->cfg->lightswitch_percent / 100)) {
             MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
             if (cam->frame_skip < cam->cfg->lightswitch_frames) {

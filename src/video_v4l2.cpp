@@ -1105,10 +1105,10 @@ void cls_v4l2cam::stop_cam()
     }
 
     if (convert != nullptr) {
-        delete convert;
+        mydelete(convert);
     }
 
-    delete params;
+    mydelete(params);
 }
 
 void cls_v4l2cam::start_cam()
@@ -1137,6 +1137,37 @@ void cls_v4l2cam::start_cam()
 }
 
 #endif /* HAVE_V4L2 */
+
+void cls_v4l2cam::noimage()
+{
+    #ifdef HAVE_V4L2
+        int slp_dur;
+
+        if (reconnect_count < 100) {
+            reconnect_count++;
+        } else {
+            if (reconnect_count >= 500) {
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 2 hours."));
+                slp_dur = 7200;
+            } else if (reconnect_count >= 200) {
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 10 minutes."));
+                reconnect_count++;
+                slp_dur = 600;
+            } else {
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 30 seconds."));
+                reconnect_count++;
+                slp_dur = 30;
+            }
+            cam->watchdog = slp_dur + (cam->cfg->watchdog_tmo * 3);
+            SLEEP(slp_dur,0);
+            stop_cam();
+            start_cam();
+        }
+    #endif
+}
 
 int cls_v4l2cam::next(ctx_image_data *img_data)
 {
@@ -1170,7 +1201,7 @@ cls_v4l2cam::cls_v4l2cam(cls_camera *p_cam)
 {
     cam = p_cam;
     #ifdef HAVE_V4L2
-        cam->watchdog = cam->cfg->watchdog_tmo;
+        cam->watchdog = cam->cfg->watchdog_tmo * 3;
         start_cam();
     #else
         cam->device_status = STATUS_CLOSED;

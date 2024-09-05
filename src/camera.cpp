@@ -428,7 +428,11 @@ void cls_camera::cam_start()
 /* Get next image from camera */
 int cls_camera::cam_next(ctx_image_data *img_data)
 {
-    int retcd;
+    int retcd, imgsz;
+
+    if (device_status != STATUS_OPENED) {
+        return CAPTURE_FAILURE;
+    }
 
     if (camera_type == CAMERA_TYPE_LIBCAM) {
         retcd = libcam->next(img_data);
@@ -442,7 +446,23 @@ int cls_camera::cam_next(ctx_image_data *img_data)
     } else if (camera_type == CAMERA_TYPE_V4L2) {
         retcd = v4l2cam->next(img_data);
     } else {
-        retcd = -1;
+        return CAPTURE_FAILURE;
+    }
+
+    if (retcd == CAPTURE_SUCCESS) {
+        imgsz = (imgs.width * imgs.height * 3) / 2;
+        if (imgs.size_norm != imgsz) {
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Resetting image buffers"));
+            device_status = STATUS_CLOSED;
+            restart = true;
+            return CAPTURE_FAILURE;
+        }
+        imgsz = (imgs.width_high * imgs.height_high * 3) / 2;
+        if (imgs.size_high != imgsz) {
+            device_status = STATUS_CLOSED;
+            restart = true;
+            return CAPTURE_FAILURE;
+        }
     }
 
     return retcd;
@@ -601,6 +621,8 @@ void cls_camera::init_values()
     postcap = 0;
     event_stop = false;
     text_scale = cfg->text_scale;
+    connectionlosttime.tv_sec = 0;
+    connectionlosttime.tv_nsec = 0;
     info_reset();
 
     movie_passthrough = cfg->movie_passthrough;
@@ -731,8 +753,8 @@ void cls_camera::cleanup()
 /* initialize everything for the loop */
 void cls_camera::init()
 {
-    if ((device_status != STATUS_INIT) &&
-        (restart != true)) {
+    if (((device_status != STATUS_INIT) && (restart != true)) ||
+        (handler_stop == true)) {
         return;
     }
 
@@ -825,6 +847,10 @@ void cls_camera::areadetect()
 /* Prepare for the next iteration of loop*/
 void cls_camera::prepare()
 {
+    if ((restart == true) || (handler_stop == true)) {
+        return;
+    }
+
     watchdog = cfg->watchdog_tmo;
 
     frame_last_ts.tv_sec = frame_curr_ts.tv_sec;
@@ -846,10 +872,13 @@ void cls_camera::prepare()
     }
 }
 
-/* reset the images */
 void cls_camera::resetimages()
 {
     int64_t tmpsec;
+
+    if ((restart == true) || (handler_stop == true)) {
+        return;
+    }
 
     /* ring_buffer_in is pointing to current pos, update before put in a new image */
     tmpsec =current_image->imgts.tv_sec;
@@ -884,56 +913,21 @@ void cls_camera::resetimages()
 
 }
 
-/* Try to reconnect to camera */
-void cls_camera::retry()
-{
-    int size_high;
-
-    if ((device_status == STATUS_CLOSED) &&
-        (frame_curr_ts.tv_sec % 10 == 0) &&
-        (shots_mt == 0)) {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,_("Retrying until successful connection with camera"));
-
-        cam_start();
-
-        check_szimg();
-
-        if (imgs.width != cfg->width || imgs.height != cfg->height) {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Resetting image buffers"));
-            device_status = STATUS_CLOSED;
-            restart = true;
-        }
-        /*
-         * For high res, we check the size of buffer to determine whether to break out
-         * the init_motion function allocated the buffer for high using the imgs.size_high
-         * and the cam_start ONLY re-populates the height/width so we can check the size here.
-         */
-        size_high = (imgs.width_high * imgs.height_high * 3) / 2;
-        if (imgs.size_high != size_high) {
-            device_status = STATUS_CLOSED;
-            restart = true;
-        }
-    }
-
-}
-
-/* Get next image from camera */
 int cls_camera::capture()
 {
     const char *tmpin;
     char tmpout[80];
     int retcd;
 
-    if (device_status != STATUS_OPENED) {
+    retcd = cam_next(current_image);
+
+    if ((restart == true) || (handler_stop == true)) {
         return 0;
     }
 
-    retcd = cam_next(current_image);
-
     if (retcd == CAPTURE_SUCCESS) {
         watchdog = cfg->watchdog_tmo;
-        lost_connection = 0;
+        lost_connection = false;
         connectionlosttime.tv_sec = 0;
 
         if (missing_frame_counter >= (cfg->device_tmo * cfg->framerate)) {
@@ -962,7 +956,7 @@ int cls_camera::capture()
             memcpy(current_image->image_norm, imgs.image_vprvcy
                 , (uint)imgs.size_norm);
         } else {
-            lost_connection = 1;
+            lost_connection = true;
             if (device_status == STATUS_OPENED) {
                 tmpin = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
             } else {
@@ -986,11 +980,14 @@ int cls_camera::capture()
                 }
             }
 
-            if ((device_status == STATUS_OPENED) &&
-                (missing_frame_counter == ((cfg->device_tmo * 4) * cfg->framerate))) {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
-                    ,_("Video signal still lost - Trying to close video device"));
-                cam_close();
+            if (camera_type == CAMERA_TYPE_LIBCAM) {
+                libcam->noimage();
+            } else if (camera_type == CAMERA_TYPE_NETCAM) {
+                netcam->noimage();
+            } else if (camera_type == CAMERA_TYPE_V4L2) {
+                v4l2cam->noimage();
+            } else {
+                MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Unknown camera type"));
             }
         }
     }
@@ -1001,6 +998,10 @@ int cls_camera::capture()
 /* call detection */
 void cls_camera::detection()
 {
+    if ((restart == true) || (handler_stop == true)) {
+        return;
+    }
+
     if (frame_skip) {
         frame_skip--;
         current_image->diffs = 0;
@@ -1019,6 +1020,10 @@ void cls_camera::detection()
 /* tune the detection parameters*/
 void cls_camera::tuning()
 {
+    if ((restart == true) || (handler_stop == true)) {
+        return;
+    }
+
     if ((cfg->noise_tune && shots_mt == 0) &&
           (!detecting_motion && (current_image->diffs <= threshold))) {
         alg->noise_tune();
@@ -1051,6 +1056,10 @@ void cls_camera::tuning()
 /* apply image overlays */
 void cls_camera::overlay()
 {
+    if ((restart == true) || (handler_stop == true)) {
+        return;
+    }
+
     char tmp[PATH_MAX];
 
     if ((cfg->smart_mask_speed >0) &&
@@ -1261,6 +1270,10 @@ void cls_camera::actions_event()
 
 void cls_camera::actions()
 {
+    if ((restart == true) || (handler_stop == true)) {
+        return;
+    }
+
      if ((current_image->diffs > threshold) &&
         (current_image->diffs < threshold_maximum)) {
         current_image->flags |= IMAGE_MOTION;
@@ -1318,6 +1331,10 @@ void cls_camera::actions()
 /* Snapshot interval*/
 void cls_camera::snapshot()
 {
+    if ((restart == true) || (handler_stop == true)) {
+        return;
+    }
+
     if ((cfg->snapshot_interval > 0 && shots_mt == 0 &&
          frame_curr_ts.tv_sec % cfg->snapshot_interval <=
          frame_last_ts.tv_sec % cfg->snapshot_interval) ||
@@ -1331,6 +1348,10 @@ void cls_camera::snapshot()
 void cls_camera::timelapse()
 {
     struct tm timestamp_tm;
+
+    if ((restart == true) || (handler_stop == true)) {
+        return;
+    }
 
     if (cfg->timelapse_interval) {
         localtime_r(&current_image->imgts.tv_sec, &timestamp_tm);
@@ -1383,6 +1404,9 @@ void cls_camera::timelapse()
 /* send images to loopback device*/
 void cls_camera::loopback()
 {
+    if ((restart == true) || (handler_stop == true)) {
+        return;
+    }
 
     vlp_putpipe(this);
 
@@ -1397,6 +1421,10 @@ void cls_camera::frametiming()
 {
     struct timespec ts2;
     int64_t sleeptm;
+
+    if ((restart == true) || (handler_stop == true)) {
+        return;
+    }
 
     clock_gettime(CLOCK_MONOTONIC, &ts2);
 
@@ -1423,7 +1451,6 @@ void cls_camera::handler()
         init();
         prepare();
         resetimages();
-        retry();
         capture();
         detection();
         tuning();
@@ -1433,9 +1460,6 @@ void cls_camera::handler()
         timelapse();
         loopback();
         frametiming();
-        if (device_status == STATUS_CLOSED) {
-            handler_stop = true;
-        }
     }
 
     cleanup();

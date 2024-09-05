@@ -54,9 +54,8 @@ class cls_v4l2cam {
     public:
         cls_v4l2cam(cls_camera *p_cam);
         ~cls_v4l2cam();
-
         int next(ctx_image_data *img_data);
-
+        void noimage();
     private:
         cls_camera *cam;
         cls_convert *convert;
@@ -72,7 +71,8 @@ class cls_v4l2cam {
         video_buff      *buffers;
         vec_palette     palette;
 
-        int                     pframe;
+        int     pframe;
+        int     reconnect_count;
 
         #ifdef HAVE_V4L2
             struct v4l2_capability      vidcap;

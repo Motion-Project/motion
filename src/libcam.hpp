@@ -36,6 +36,7 @@
                 cls_libcam(cls_camera *p_cam);
                 ~cls_libcam();
                 int next(ctx_image_data *img_data);
+                void noimage();
             private:
                 cls_camera  *cam;
                 ctx_params  *params;
@@ -49,11 +50,11 @@
                 std::queue<libcamera::Request *>   req_queue;
                 libcamera::ControlList             controls;
                 ctx_imgmap              membuf;
-                bool                    started_cam;
-                bool                    started_mgr;
-                bool                    started_aqr;
-                bool                    started_req;
-
+                bool    started_cam;
+                bool    started_mgr;
+                bool    started_aqr;
+                bool    started_req;
+                int     reconnect_count;
                 void log_orientation();
                 void log_controls();
                 void log_draft();
@@ -81,6 +82,9 @@
                 cls_libcam(cls_camera *p_cam);
                 ~cls_libcam();
                 int next(ctx_image_data *img_data);
+                void noimage();
+            private:
+                cls_camera  *cam;
         };
     #endif
 

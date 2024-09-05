@@ -1617,10 +1617,6 @@ void cls_netcam::set_parms ()
 
     params = new ctx_params;
 
-    pthread_mutex_init(&mutex, nullptr);
-    pthread_mutex_init(&mutex_pktarray, nullptr);
-    pthread_mutex_init(&mutex_transfer, nullptr);
-
     context_null();
     threadnbr = cam->cfg->device_id;
     cfg_width = cam->cfg->width;
@@ -1670,7 +1666,6 @@ void cls_netcam::set_parms ()
     pktarray = nullptr;
     packet_recv = nullptr;
     first_image = true;
-    reconnect_count = 0;
     src_fps =  -1; /* Default to neg so we know it has not been set */
     pts_adj = false;
     capture_rate = -1;
@@ -2017,7 +2012,7 @@ void cls_netcam::handler_wait()
 
 void cls_netcam::handler_reconnect()
 {
-    int retcd;
+    int retcd, slp_dur;
 
     if (service == "file") {
         filelist_load();
@@ -2036,35 +2031,40 @@ void cls_netcam::handler_reconnect()
         cam->event_stop = true;
     }
 
-    /*
-    * The retry count of 100 is arbritrary.
-    * We want to try many times quickly to not lose too much information
-    * before we go into the long wait phase
-    */
     retcd = connect();
     if (retcd < 0) {
         if (reconnect_count < 100) {
             reconnect_count++;
-        } else if ((reconnect_count >= 100) && (reconnect_count <= 199)) {
-            MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Camera did not reconnect.")
-                , cameratype.c_str());
-            MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Checking for camera every 10 seconds.")
-                ,cameratype.c_str());
-            reconnect_count++;
-            SLEEP(10,0);
-        } else if (reconnect_count >= 200) {
-            MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Camera did not reconnect.")
-                , cameratype.c_str());
-            MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Checking for camera every 10 minutes.")
-                ,cameratype.c_str());
-            SLEEP(600,0);
         } else {
-            reconnect_count++;
-            SLEEP(600,0);
+            if (reconnect_count >= 500) {
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:Camera did not reconnect.")
+                    , cameratype.c_str());
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:Checking for camera every 2 hours.")
+                    ,cameratype.c_str());
+                slp_dur = 7200;
+            } else if (reconnect_count >= 200) {
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:Camera did not reconnect.")
+                    , cameratype.c_str());
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:Checking for camera every 10 minutes.")
+                    ,cameratype.c_str());
+                reconnect_count++;
+                slp_dur = 600;
+            } else {
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:Camera did not reconnect.")
+                    , cameratype.c_str());
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:Checking for camera every 10 seconds.")
+                    ,cameratype.c_str());
+                reconnect_count++;
+                slp_dur = 10;
+            }
+            cam->watchdog = slp_dur + (cam->cfg->watchdog_tmo * 3);
+            SLEEP(slp_dur,0);
         }
     } else {
         reconnect_count = 0;
@@ -2082,14 +2082,17 @@ void cls_netcam::handler()
         ,cameratype.c_str());
 
     while (handler_stop == false) {
-        if (format_context == nullptr) {      /* We must have disconnected.  Try to reconnect */
+        if (format_context == nullptr) {
+            /* We have disconnected.  Try to reconnect */
             clock_gettime(CLOCK_MONOTONIC, &frame_prev_tm);
             handler_reconnect();
             continue;
-        } else {            /* We think we are connected...*/
+        } else {
+            /* We think we are connected...*/
             clock_gettime(CLOCK_MONOTONIC, &frame_prev_tm);
             if (read_image() < 0) {
-                if (handler_stop == false) {   /* Nope.  We are not or got bad image.  Reconnect*/
+                /* We are not connected or got bad image.*/
+                if (handler_stop == false) {
                     handler_reconnect();
                 }
                 continue;
@@ -2208,14 +2211,7 @@ void cls_netcam::handler_shutdown()
         img_recv   = nullptr;
     }
 
-    pthread_mutex_destroy(&mutex);
-    pthread_mutex_destroy(&mutex_pktarray);
-    pthread_mutex_destroy(&mutex_transfer);
-
-    if (params != nullptr) {
-        delete params;
-        params = nullptr;
-    }
+    mydelete(params);
 
     cam->device_status = STATUS_CLOSED;
     status = NETCAM_NOTCONNECTED;
@@ -2225,39 +2221,10 @@ void cls_netcam::handler_shutdown()
 
 }
 
-int cls_netcam::next(ctx_image_data *img_data)
-{
-    if ((status == NETCAM_RECONNECTING) ||
-        (status == NETCAM_NOTCONNECTED)) {
-        return CAPTURE_ATTEMPTED;
-    }
-
-    pthread_mutex_lock(&mutex);
-        pktarray_resize();
-        if (high_resolution == false) {
-            memcpy(img_data->image_norm
-                , img_latest->ptr
-                , img_latest->used);
-            img_data->idnbr_norm = idnbr;
-        } else {
-            img_data->idnbr_high = idnbr;
-            if (cam->netcam_high->passthrough == false) {
-                memcpy(img_data->image_high
-                    , img_latest->ptr
-                    , img_latest->used);
-            }
-        }
-    pthread_mutex_unlock(&mutex);
-
-    return CAPTURE_SUCCESS;
-}
-
-cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
+void cls_netcam::netcam_start()
 {
     int retcd;
 
-    cam = p_cam;
-    high_resolution = p_is_high;
     handler_finished = true;
     handler_stop = false;
 
@@ -2309,8 +2276,87 @@ cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
 
 }
 
-cls_netcam::~cls_netcam()
+void cls_netcam::netcam_stop()
 {
     handler_shutdown();
+}
+
+void cls_netcam::noimage()
+{
+    int slp_dur;
+
+    if (handler_finished == true ) {    /* handler is not running */
+        if (reconnect_count >= 500) {
+            MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
+            MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 2 hours."));
+            slp_dur = 7200;
+        } else if (reconnect_count >= 200) {
+            MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
+            MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 10 minutes."));
+            reconnect_count++;
+            slp_dur = 600;
+        } else {
+            MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
+            MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 30 seconds."));
+            reconnect_count++;
+            slp_dur = 30;
+        }
+        cam->watchdog = slp_dur + (cam->cfg->watchdog_tmo * 3);
+        SLEEP(slp_dur,0);
+        cam->watchdog = (cam->cfg->watchdog_tmo * 3);
+        netcam_stop();
+        netcam_start();
+    }
+}
+
+int cls_netcam::next(ctx_image_data *img_data)
+{
+    if ((status == NETCAM_RECONNECTING) ||
+        (status == NETCAM_NOTCONNECTED)) {
+        return CAPTURE_ATTEMPTED;
+    }
+
+    pthread_mutex_lock(&mutex);
+        pktarray_resize();
+        if (high_resolution == false) {
+            memcpy(img_data->image_norm
+                , img_latest->ptr
+                , img_latest->used);
+            img_data->idnbr_norm = idnbr;
+        } else {
+            img_data->idnbr_high = idnbr;
+            if (cam->netcam_high->passthrough == false) {
+                memcpy(img_data->image_high
+                    , img_latest->ptr
+                    , img_latest->used);
+            }
+        }
+    pthread_mutex_unlock(&mutex);
+
+    return CAPTURE_SUCCESS;
+}
+
+cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
+{
+    cam = p_cam;
+    high_resolution = p_is_high;
+    reconnect_count = 0;
+
+    pthread_mutex_init(&mutex, nullptr);
+    pthread_mutex_init(&mutex_pktarray, nullptr);
+    pthread_mutex_init(&mutex_transfer, nullptr);
+
+    netcam_start();
+
+}
+
+cls_netcam::~cls_netcam()
+{
+    netcam_stop();
+
+    pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&mutex_pktarray);
+    pthread_mutex_destroy(&mutex_transfer);
+
 }
 

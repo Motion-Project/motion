@@ -170,7 +170,7 @@ class cls_camera {
         int     threshold;
         int     lastrate;
         int     frame_skip;
-        int     lost_connection;
+        bool    lost_connection;
         int     text_scale;
         int     watchdog;
         bool    movie_passthrough;

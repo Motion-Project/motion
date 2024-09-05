@@ -75,6 +75,7 @@ class cls_netcam {
         cls_netcam(cls_camera *p_cam, bool p_is_high);
         ~cls_netcam();
         int next(ctx_image_data *img_data);
+        void noimage();
 
         bool                      interrupted;      /* Boolean for whether interrupt has been tripped */
         enum NETCAM_STATUS        status;                /* Status of whether the camera is connecting, closed, etc*/
@@ -201,6 +202,9 @@ class cls_netcam {
         void handler_reconnect();
         void handler_startup();
         void handler_shutdown();
+
+        void netcam_start();
+        void netcam_stop();
 
 };
 
