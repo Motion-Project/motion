@@ -683,9 +683,8 @@ void util_exec_command(cls_sound *snd, std::string cmd)
 /*********************************************/
 static void util_parms_file(ctx_params *params, std::string params_file)
 {
-    int chk;
+    int chk, indx;
     size_t stpos;
-    p_it  it;
     std::string line, parm_nm, parm_vl;
     std::ifstream ifs;
 
@@ -693,9 +692,8 @@ static void util_parms_file(ctx_params *params, std::string params_file)
         ,_("parse file:%s"), params_file.c_str());
 
     chk = 0;
-    for (it  = params->params_array.begin();
-         it != params->params_array.end(); it++) {
-        if (it->param_name == "params_file" ) {
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == "params_file") {
             chk++;
         }
     }
@@ -740,19 +738,18 @@ static void util_parms_file(ctx_params *params, std::string params_file)
 
 void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_val)
 {
-    p_it  it;
+    int indx;
     ctx_params_item parm_itm;
 
-    for (it  = params->params_array.begin();
-         it != params->params_array.end(); it++) {
-        if (it->param_name == parm_nm) {
-            it->param_value.assign(parm_val);
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == parm_nm) {
+            params->params_array[indx].param_value.assign(parm_val);
             return;
         }
     }
 
     /* This is a new parameter*/
-    params->params_count++;
+    params->params_cnt++;
     parm_itm.param_name.assign(parm_nm);
     parm_itm.param_value.assign(parm_val);
     params->params_array.push_back(parm_itm);
@@ -986,15 +983,11 @@ void util_parms_parse(ctx_params *params, std::string parm_desc, std::string con
 {
     std::string parmline;
 
-    if (params->update_params == false) {
-        return;
-    }
-
     /* We make a copy because the parsing destroys the value passed */
     parmline = confline;
 
     params->params_array.clear();
-    params->params_count = 0;
+    params->params_cnt = 0;
     params->params_desc = parm_desc;
 
     if (confline == "") {
@@ -1005,22 +998,17 @@ void util_parms_parse(ctx_params *params, std::string parm_desc, std::string con
 
     util_parms_parse_comma(params, parmline);
 
-    params->update_params = false;
-
-    return;
-
 }
 
 /* Add the requested int value as a default if the parm_nm does have anything yet */
 void util_parms_add_default(ctx_params *params, std::string parm_nm, int parm_vl)
 {
     bool dflt;
-    p_it  it;
+    int indx;
 
     dflt = true;
-    for (it  = params->params_array.begin();
-         it != params->params_array.end(); it++) {
-        if (it->param_name == parm_nm) {
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == parm_nm) {
             dflt = false;
         }
     }
@@ -1033,12 +1021,11 @@ void util_parms_add_default(ctx_params *params, std::string parm_nm, int parm_vl
 void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl)
 {
     bool dflt;
-    p_it  it;
+    int indx;
 
     dflt = true;
-    for (it  = params->params_array.begin();
-         it != params->params_array.end(); it++) {
-        if (it->param_name == parm_nm) {
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == parm_nm) {
             dflt = false;
         }
     }
@@ -1052,28 +1039,27 @@ void util_parms_update(ctx_params *params, std::string &confline)
 {
     std::string parmline;
     std::string comma;
-    p_it  it;
+    int indx;
 
     comma = "";
     parmline = "";
-    for (it  = params->params_array.begin();
-         it != params->params_array.end(); it++) {
+    for (indx=0;indx<params->params_cnt;indx++) {
         parmline += comma;
         comma = ",";
-        if (it->param_name.find(" ") == std::string::npos) {
-            parmline += it->param_name;
+        if (params->params_array[indx].param_name.find(" ") == std::string::npos) {
+            parmline += params->params_array[indx].param_name;
         } else {
             parmline += "\"";
-            parmline += it->param_name;
+            parmline += params->params_array[indx].param_name;
             parmline += "\"";
         }
 
         parmline += "=";
-        if (it->param_value.find(" ") == std::string::npos) {
-            parmline += it->param_value;
+        if (params->params_array[indx].param_value.find(" ") == std::string::npos) {
+            parmline += params->params_array[indx].param_value;
         } else {
             parmline += "\"";
-            parmline += it->param_value;
+            parmline += params->params_array[indx].param_value;
             parmline += "\"";
         }
     }
@@ -1084,7 +1070,6 @@ void util_parms_update(ctx_params *params, std::string &confline)
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
         ,_("New config:%s"), confline.c_str());
 
-    return;
 }
 
 /* my to integer*/

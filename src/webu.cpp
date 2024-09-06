@@ -362,9 +362,7 @@ void cls_webu::init_actions()
     std::string parm_vl;
 
     wb_actions = new ctx_params;
-    wb_actions->update_params = true;
-    util_parms_parse(wb_actions
-        ,"webcontrol_actions", app->cfg->webcontrol_actions);
+    util_parms_parse(wb_actions,"webcontrol_actions", app->cfg->webcontrol_actions);
 
     if (app->cfg->webcontrol_parms == 0) {
         parm_vl = "off";
@@ -489,9 +487,7 @@ void cls_webu::startup()
         , app->cfg->webcontrol_port);
 
     wb_headers = new ctx_params;
-    wb_headers->update_params = true;
-    util_parms_parse(wb_headers
-        , "webcontrol_headers", app->cfg->webcontrol_headers);
+    util_parms_parse(wb_headers, "webcontrol_headers", app->cfg->webcontrol_headers);
 
     init_actions();
 

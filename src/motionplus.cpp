@@ -271,8 +271,7 @@ void cls_motapp::allcams_init()
     bool cfg_valid, chk;
     std::string cfg_row, cfg_col;
     ctx_params  *params_loc;
-    p_lst *lst;
-    p_it it;
+    ctx_params_item *itm;
 
     all_sizes = new ctx_all_sizes;
     all_sizes->height = 0;
@@ -294,32 +293,31 @@ void cls_motapp::allcams_init()
         cam_list[indx]->all_loc.scale =
             cam_list[indx]->cfg->stream_preview_scale;
 
-        params_loc->update_params = true;
         util_parms_parse(params_loc
             , "stream_preview_location"
             , cam_list[indx]->cfg->stream_preview_location);
-        lst = &params_loc->params_array;
 
-        for (it = lst->begin(); it != lst->end(); it++) {
-            if (it->param_name == "row") {
-                cam_list[indx]->all_loc.row = mtoi(it->param_value);
+        for (indx1=0;indx1<params_loc->params_cnt;indx1++) {
+            itm = &params_loc->params_array[indx];
+            if (itm->param_name == "row") {
+                cam_list[indx]->all_loc.row = mtoi(itm->param_value);
             }
-            if (it->param_name == "col") {
-                cam_list[indx]->all_loc.col = mtoi(it->param_value);
+            if (itm->param_name == "col") {
+                cam_list[indx]->all_loc.col = mtoi(itm->param_value);
             }
-            if (it->param_name == "offset_col") {
+            if (itm->param_name == "offset_col") {
                 cam_list[indx]->all_loc.offset_user_col =
-                    mtoi(it->param_value);
+                    mtoi(itm->param_value);
             }
-            if (it->param_name == "offset_row") {
+            if (itm->param_name == "offset_row") {
                 cam_list[indx]->all_loc.offset_user_row =
-                    mtoi(it->param_value);
+                    mtoi(itm->param_value);
             }
         }
         params_loc->params_array.clear();
     }
 
-    delete params_loc;
+    mydelete(params_loc);
 
     mx_row = 0;
     mx_col = 0;

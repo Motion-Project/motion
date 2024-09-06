@@ -370,8 +370,7 @@ mhdrslt cls_webu_mpegts::main()
 {
     mhdrslt retcd;
     struct MHD_Response *response;
-    p_lst *lst = &webu->wb_headers->params_array;
-    p_it it;
+    int indx;
 
     if (open_mpegts() < 0 ) {
         MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Unable to open mpegts"));
@@ -387,10 +386,11 @@ mhdrslt cls_webu_mpegts::main()
         return MHD_NO;
     }
 
-    if (webu->wb_headers->params_count > 0) {
-        for (it = lst->begin(); it != lst->end(); it++) {
+    if (webu->wb_headers->params_cnt > 0) {
+        for (indx=0;indx<webu->wb_headers->params_cnt;indx++) {
             MHD_add_response_header (response
-                , it->param_name.c_str(), it->param_value.c_str());
+                , webu->wb_headers->params_array[indx].param_name.c_str()
+                , webu->wb_headers->params_array[indx].param_value.c_str());
         }
     }
 

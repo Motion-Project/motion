@@ -559,8 +559,7 @@ void cls_webu_ans::mhd_send()
 {
     mhdrslt retcd;
     struct MHD_Response *response;
-    p_lst *lst = &webu->wb_headers->params_array;
-    p_it it;
+    int indx;
 
     response = MHD_create_response_from_buffer(resp_page.length()
         ,(void *)resp_page.c_str(), MHD_RESPMEM_PERSISTENT);
@@ -569,10 +568,11 @@ void cls_webu_ans::mhd_send()
         return;
     }
 
-    if (webu->wb_headers->params_count > 0) {
-        for (it = lst->begin(); it != lst->end(); it++) {
+    if (webu->wb_headers->params_cnt > 0) {
+        for (indx=0;indx<webu->wb_headers->params_cnt; indx++) {
             MHD_add_response_header (response
-                , it->param_name.c_str(),it->param_value.c_str());
+                ,webu->wb_headers->params_array[indx].param_name.c_str()
+                ,webu->wb_headers->params_array[indx].param_value.c_str());
         }
     }
 

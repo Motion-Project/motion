@@ -45,10 +45,7 @@ struct ctx_v4l2ctrl_item {
 };
 
 typedef std::vector<ctx_v4l2ctrl_item> vec_v4l2ctrl;
-typedef vec_v4l2ctrl::iterator it_v4l2ctrl;
 typedef std::vector<ctx_palette_item> vec_palette;
-typedef vec_palette::iterator it_palette;
-
 
 class cls_v4l2cam {
     public:

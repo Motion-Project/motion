@@ -52,12 +52,10 @@ mhdrslt webup_iterate_post (void *ptr, enum MHD_ValueKind kind
 void cls_webu_post::cam_add()
 {
     int indx, maxcnt;
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "camera_add") {
-            if (it->param_value == "off") {
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "camera_add") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Camera add action disabled");
                 return;
             } else {
@@ -91,12 +89,10 @@ void cls_webu_post::cam_add()
 void cls_webu_post::cam_delete()
 {
     int indx, maxcnt;
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "camera_delete") {
-            if (it->param_value == "off") {
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "camera_delete") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Camera delete action disabled");
                 return;
             } else {
@@ -177,12 +173,10 @@ void cls_webu_post::parse_cmd()
 void cls_webu_post::action_eventend()
 {
     int indx;
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "event") {
-            if (it->param_value == "off") {
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "event") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Event end action disabled");
                 return;
             } else {
@@ -205,12 +199,10 @@ void cls_webu_post::action_eventend()
 void cls_webu_post::action_eventstart()
 {
     int indx;
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "event") {
-            if (it->param_value == "off") {
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "event") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Event start action disabled");
                 return;
             } else {
@@ -218,6 +210,7 @@ void cls_webu_post::action_eventstart()
             }
         }
     }
+
 
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
@@ -233,12 +226,10 @@ void cls_webu_post::action_eventstart()
 void cls_webu_post::action_snapshot()
 {
     int indx;
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "snapshot") {
-            if (it->param_value == "off") {
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "snapshot") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Snapshot action disabled");
                 return;
             } else {
@@ -246,6 +237,7 @@ void cls_webu_post::action_snapshot()
             }
         }
     }
+
 
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
@@ -261,12 +253,10 @@ void cls_webu_post::action_snapshot()
 void cls_webu_post::action_pause()
 {
     int indx;
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "pause") {
-            if (it->param_value == "off") {
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "pause") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
                 return;
             } else {
@@ -289,12 +279,10 @@ void cls_webu_post::action_pause()
 void cls_webu_post::action_unpause()
 {
     int indx;
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "pause") {
-            if (it->param_value == "off") {
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "pause") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
                 return;
             } else {
@@ -317,12 +305,10 @@ void cls_webu_post::action_unpause()
 void cls_webu_post::action_restart()
 {
     int indx;
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "restart") {
-            if (it->param_value == "off") {
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "restart") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Restart action disabled");
                 return;
             } else {
@@ -330,6 +316,7 @@ void cls_webu_post::action_restart()
             }
         }
     }
+
     if (webua->device_id == 0) {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all cameras"));
         for (indx=0; indx<app->cam_cnt; indx++) {
@@ -347,12 +334,10 @@ void cls_webu_post::action_restart()
 void cls_webu_post::action_stop()
 {
     int indx;
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "stop") {
-            if (it->param_value == "off") {
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "stop") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Stop action disabled");
                 return;
             } else {
@@ -360,6 +345,7 @@ void cls_webu_post::action_stop()
             }
         }
     }
+
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
             MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
@@ -388,12 +374,10 @@ void cls_webu_post::action_user()
     int indx, indx2;
     cls_camera *cam;
     std::string tmp;
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "action_user") {
-            if (it->param_value == "off") {
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "action_user") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "User action disabled");
                 return;
             } else {
@@ -454,12 +438,11 @@ void cls_webu_post::action_user()
 /* Process the write config action */
 void cls_webu_post::write_config()
 {
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
+    int indx;
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "config_write") {
-            if (it->param_value == "off") {
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "config_write") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Config write action disabled");
                 return;
             } else {
@@ -578,13 +561,11 @@ void cls_webu_post::config()
 {
     int indx, indx2;
     std::string tmpname;
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "config") {
-            if (it->param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Config save actions disabled");
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "config") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Config save action disabled");
                 return;
             } else {
                 break;
@@ -664,16 +645,15 @@ void cls_webu_post::config()
 void cls_webu_post::ptz()
 {
     cls_camera *cam;
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
+    int indx;
 
     if (webua->camindx == -1) {
         return;
     }
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "ptz") {
-            if (it->param_value == "off") {
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "ptz") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "PTZ actions disabled");
                 return;
             } else {
@@ -681,6 +661,7 @@ void cls_webu_post::ptz()
             }
         }
     }
+
     cam = app->cam_list[webua->camindx];
 
     if ((post_cmd == "pan_left") &&

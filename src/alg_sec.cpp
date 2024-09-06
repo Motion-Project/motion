@@ -437,72 +437,74 @@ void cls_algsec::load_dnn()
 
 void cls_algsec::params_log()
 {
-    p_lst *lst = &params->params_array;
-    p_it it;
+    ctx_params_item *itm;
+    int indx;
 
     if (method != "none") {
-        for (it  = lst->begin(); it != lst->end(); it++) {
+        for (indx=0;indx<params->params_cnt;indx++) {
+            itm = &params->params_array[indx];
             MOTPLS_SHT(INF, TYPE_ALL, NO_ERRNO, "%-25s %s"
-                ,it->param_name.c_str(), it->param_value.c_str());
+                ,itm->param_name.c_str(),itm->param_value.c_str());
         }
     }
 }
 
 void cls_algsec::params_model()
 {
-    p_lst *lst = &params->params_array;
-    p_it it;
+    ctx_params_item *itm;
+    int indx;
 
-    for (it  = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "model_file") {
-            model_file = it->param_value;
-        } else if (it->param_name == "frame_interval") {
-            frame_interval = mtoi(it->param_value);
-        } else if (it->param_name == "image_type") {
-            image_type = it->param_value;
-        } else if (it->param_name == "threshold") {
-            threshold = mtof(it->param_value);
-        } else if (it->param_name == "scalefactor") {
-            scalefactor = mtof(it->param_value);
-        } else if (it->param_name == "rotate") {
-            rotate = mtoi(it->param_value);
+    for (indx=0;indx<params->params_cnt;indx++) {
+        itm = &params->params_array[indx];
+        if (itm->param_name == "model_file") {
+            model_file = itm->param_value;
+        } else if (itm->param_name == "frame_interval") {
+            frame_interval = mtoi(itm->param_value);
+        } else if (itm->param_name == "image_type") {
+            image_type = itm->param_value;
+        } else if (itm->param_name == "threshold") {
+            threshold = mtof(itm->param_value);
+        } else if (itm->param_name == "scalefactor") {
+            scalefactor = mtof(itm->param_value);
+        } else if (itm->param_name == "rotate") {
+            rotate = mtoi(itm->param_value);
         }
 
         if (method == "hog") {
-            if (it->param_name =="padding") {
-                hog_padding = mtoi(it->param_value);
-            } else if (it->param_name =="threshold_model") {
-                hog_threshold_model = mtof(it->param_value);
-            } else if (it->param_name =="winstride") {
-                hog_winstride = mtoi(it->param_value);
+            if (itm->param_name =="padding") {
+                hog_padding = mtoi(itm->param_value);
+            } else if (itm->param_name =="threshold_model") {
+                hog_threshold_model = mtof(itm->param_value);
+            } else if (itm->param_name =="winstride") {
+                hog_winstride = mtoi(itm->param_value);
             }
         } else if (method == "haar") {
-            if (it->param_name =="flags") {
-                haar_flags = mtoi(it->param_value);
-            } else if (it->param_name =="maxsize") {
-                haar_maxsize = mtoi(it->param_value);
-            } else if (it->param_name =="minsize") {
-                haar_minsize = mtoi(it->param_value);
-            } else if (it->param_name =="minneighbors") {
-                haar_minneighbors = mtoi(it->param_value);
+            if (itm->param_name =="flags") {
+                haar_flags = mtoi(itm->param_value);
+            } else if (itm->param_name =="maxsize") {
+                haar_maxsize = mtoi(itm->param_value);
+            } else if (itm->param_name =="minsize") {
+                haar_minsize = mtoi(itm->param_value);
+            } else if (itm->param_name =="minneighbors") {
+                haar_minneighbors = mtoi(itm->param_value);
             }
         } else if (method == "dnn") {
-            if (it->param_name == "config") {
-                dnn_config = it->param_value;
-            } else if (it->param_name == "classes_file") {
-                dnn_classes_file = it->param_value;
-            } else if (it->param_name =="framework") {
-                dnn_framework = it->param_value;
-            } else if (it->param_name =="backend") {
-                dnn_backend = mtoi(it->param_value);
-            } else if (it->param_name =="target") {
-                dnn_target = mtoi(it->param_value);
-            } else if (it->param_name =="scale") {
-                dnn_scale = mtof(it->param_value);
-            } else if (it->param_name =="width") {
-                dnn_width = mtoi(it->param_value);
-            } else if (it->param_name =="height") {
-                dnn_height = mtoi(it->param_value);
+            if (itm->param_name == "config") {
+                dnn_config = itm->param_value;
+            } else if (itm->param_name == "classes_file") {
+                dnn_classes_file = itm->param_value;
+            } else if (itm->param_name =="framework") {
+                dnn_framework = itm->param_value;
+            } else if (itm->param_name =="backend") {
+                dnn_backend = mtoi(itm->param_value);
+            } else if (itm->param_name =="target") {
+                dnn_target = mtoi(itm->param_value);
+            } else if (itm->param_name =="scale") {
+                dnn_scale = mtof(itm->param_value);
+            } else if (itm->param_name =="width") {
+                dnn_width = mtoi(itm->param_value);
+            } else if (itm->param_name =="height") {
+                dnn_height = mtoi(itm->param_value);
             }
         }
     }
@@ -565,9 +567,7 @@ void cls_algsec::load_params()
     image_norm = (u_char*)mymalloc((size_t)cam->imgs.size_norm);
 
     params = new ctx_params;
-    params->update_params = true;
-    util_parms_parse(params, "secondary_params"
-        , cam->cfg->secondary_params);
+    util_parms_parse(params, "secondary_params", cam->cfg->secondary_params);
 
     params_defaults();
 

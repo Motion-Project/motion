@@ -97,22 +97,24 @@ void cls_v4l2cam::device_close()
 /* Print the device controls to the log */
 void cls_v4l2cam::ctrls_log()
 {
-    it_v4l2ctrl it;
+    int indx;
+    ctx_v4l2ctrl_item *itm;
 
     if (device_ctrls.size() >0) {
         MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("---------Controls---------"));
         MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("  V4L2 ID :  Name : Range"));
-        for (it = device_ctrls.begin();it!=device_ctrls.end();it++){
-            if (it->ctrl_menuitem) {
+        for (indx=0;indx<device_ctrls.size();indx++){
+            itm = &device_ctrls[indx];
+            if (itm->ctrl_menuitem) {
                 MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "  %s : %s"
-                    ,it->ctrl_iddesc.c_str()
-                    ,it->ctrl_name.c_str());
+                    ,itm->ctrl_iddesc.c_str()
+                    ,itm->ctrl_name.c_str());
             } else {
                 MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s : %s : %d to %d"
-                    ,it->ctrl_iddesc.c_str()
-                    ,it->ctrl_name.c_str()
-                    ,it->ctrl_minimum
-                    ,it->ctrl_maximum);
+                    ,itm->ctrl_iddesc.c_str()
+                    ,itm->ctrl_name.c_str()
+                    ,itm->ctrl_minimum
+                    ,itm->ctrl_maximum);
             }
         }
         MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "--------------------------");
@@ -186,31 +188,32 @@ void cls_v4l2cam::ctrls_list()
 /* Set the control array items to the device */
 void cls_v4l2cam::ctrls_set()
 {
-    int retcd;
+    int retcd, indx;
     struct v4l2_control vid_ctrl;
-    it_v4l2ctrl it;
+    ctx_v4l2ctrl_item *itm;
 
     if (fd_device == -1) {
         return;
     }
 
-    for (it = device_ctrls.begin();it!=device_ctrls.end();it++) {
-        if (it->ctrl_menuitem == false) {
-            if (it->ctrl_currval != it->ctrl_newval) {
+    for (indx=0;indx<device_ctrls.size();indx++) {
+        itm = &device_ctrls[indx];
+        if (itm->ctrl_menuitem == false) {
+            if (itm->ctrl_currval != itm->ctrl_newval) {
                 memset(&vid_ctrl, 0, sizeof (struct v4l2_control));
-                vid_ctrl.id = it->ctrl_id;
-                vid_ctrl.value = it->ctrl_newval;
+                vid_ctrl.id = itm->ctrl_id;
+                vid_ctrl.value = itm->ctrl_newval;
                 retcd = xioctl(VIDIOC_S_CTRL, &vid_ctrl);
                 if (retcd < 0) {
                     MOTPLS_LOG(WRN, TYPE_VIDEO, SHOW_ERRNO
                         ,_("setting control %s \"%s\" to %d failed with return code %d")
-                        ,it->ctrl_iddesc.c_str(), it->ctrl_name.c_str()
-                        ,it->ctrl_newval, retcd);
+                        ,itm->ctrl_iddesc.c_str(), itm->ctrl_name.c_str()
+                        ,itm->ctrl_newval, retcd);
                 } else {
                     MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
                         ,_("Set control \"%s\" to value %d")
-                        ,it->ctrl_name.c_str(), it->ctrl_newval);
-                   it->ctrl_currval = it->ctrl_newval;
+                        ,itm->ctrl_name.c_str(), itm->ctrl_newval);
+                   itm->ctrl_currval = itm->ctrl_newval;
                 }
             }
         }
@@ -219,42 +222,43 @@ void cls_v4l2cam::ctrls_set()
 
 void cls_v4l2cam::parms_set()
 {
-    p_lst *lst = &params->params_array;
-    p_it it_p;
-    it_v4l2ctrl it_d;
+    int indx_p, indx_d;
+    ctx_params_item *itm_p;
+    ctx_v4l2ctrl_item *itm_d;
 
     if (device_ctrls.size() == 0) {
-        params->update_params = false;
         return;
     }
 
-    for (it_d = device_ctrls.begin(); it_d != device_ctrls.end(); it_d++) {
-        it_d->ctrl_newval = it_d->ctrl_default;
-        for (it_p = lst->begin(); it_p != lst->end(); it_p++) {
-            if ((it_d->ctrl_iddesc == it_p->param_name) ||
-                (it_d->ctrl_name == it_p->param_name)) {
-                switch (it_d->ctrl_type) {
+    for (indx_d = 0;indx_d< device_ctrls.size(); indx_d++) {
+        itm_d = &device_ctrls[indx_d];
+        itm_d->ctrl_newval = itm_d->ctrl_default;
+        for (indx_p=0;indx_p<params->params_cnt;indx_p++) {
+            itm_p = &params->params_array[indx_p];
+            if ((itm_d->ctrl_iddesc == itm_p->param_name) ||
+                (itm_d->ctrl_name == itm_p->param_name)) {
+                switch (itm_d->ctrl_type) {
                 case V4L2_CTRL_TYPE_MENU:
                     /*FALLTHROUGH*/
                 case V4L2_CTRL_TYPE_INTEGER:
-                    if (mtoi(it_p->param_value.c_str()) < it_d->ctrl_minimum) {
+                    if (mtoi(itm_p->param_value.c_str()) < itm_d->ctrl_minimum) {
                         MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
                             ,_("%s control option value %s is below minimum.  Skipping...")
-                            , it_d->ctrl_name.c_str()
-                            , it_p->param_value.c_str()
-                            , it_d->ctrl_minimum);
-                    } else if (mtoi(it_p->param_value.c_str()) > it_d->ctrl_maximum) {
+                            , itm_d->ctrl_name.c_str()
+                            , itm_p->param_value.c_str()
+                            , itm_d->ctrl_minimum);
+                    } else if (mtoi(itm_p->param_value.c_str()) > itm_d->ctrl_maximum) {
                         MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
                             ,_("%s control option value %s is above maximum.  Skipping...")
-                            , it_d->ctrl_name.c_str()
-                            , it_p->param_value.c_str()
-                            , it_d->ctrl_maximum);
+                            , itm_d->ctrl_name.c_str()
+                            , itm_p->param_value.c_str()
+                            , itm_d->ctrl_maximum);
                     } else {
-                        it_d->ctrl_newval = mtoi(it_p->param_value.c_str());
+                        itm_d->ctrl_newval = mtoi(itm_p->param_value.c_str());
                     }
                     break;
                 case V4L2_CTRL_TYPE_BOOLEAN:
-                    it_d->ctrl_newval = mtob(it_p->param_value.c_str()) ? 1 : 0;
+                    itm_d->ctrl_newval = mtob(itm_p->param_value.c_str()) ? 1 : 0;
                     break;
                 default:
                     MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
@@ -269,19 +273,17 @@ void cls_v4l2cam::parms_set()
 /* Set the device to the input number requested by user */
 void cls_v4l2cam::set_input()
 {
-    int spec;
+    int spec, indx;
     struct v4l2_input    input;
-    p_lst *lst = &params->params_array;
-    p_it it;
 
     if (fd_device == -1) {
         return;
     }
 
     spec = -1;
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "input") {
-            spec =  mtoi(it->param_value);
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == "input") {
+            spec =  mtoi(params->params_array[indx].param_value);
             break;
         }
     }
@@ -331,20 +333,18 @@ void cls_v4l2cam::set_input()
 /* Set the video standard(norm) for the device to the user requested value*/
 void cls_v4l2cam::set_norm()
 {
-    int spec;
+    int spec, indx;
     struct v4l2_standard standard;
     v4l2_std_id std_id;
-    p_lst *lst = &params->params_array;
-    p_it it;
 
     if (fd_device == -1) {
         return;
     }
 
     spec = 1;
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "norm") {
-            spec =  mtoi(it->param_value);
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == "norm") {
+            spec =  mtoi(params->params_array[indx].param_value);
             break;
         }
     }
@@ -399,20 +399,18 @@ void cls_v4l2cam::set_norm()
 /* Set the frequency on the device to the user requested value */
 void cls_v4l2cam::set_frequency()
 {
-    long spec;
+    long spec, indx;
     struct v4l2_tuner     tuner;
     struct v4l2_frequency freq;
-    p_lst *lst = &params->params_array;
-    p_it it;
 
     if (fd_device == -1) {
         return;
     }
 
     spec = 0;
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "frequency") {
-            spec =  mtol(it->param_value);
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == "frequency") {
+            spec =  mtol(params->params_array[indx].param_value);
             break;
         }
     }
@@ -595,10 +593,7 @@ int cls_v4l2cam::pixfmt_set(uint pixformat)
 
 void cls_v4l2cam::params_check()
 {
-    int spec;
-
-    p_lst *lst = &params->params_array;
-    p_it it;
+    int spec, indx;
 
     if (cam->cfg->width % 8) {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
@@ -617,9 +612,9 @@ void cls_v4l2cam::params_check()
     }
 
     spec = 17;
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "palette") {
-            spec =  mtoi(it->param_value);
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == "palette") {
+            spec =  mtoi(params->params_array[indx].param_value);
             break;
         }
     }
@@ -670,9 +665,7 @@ int cls_v4l2cam::pixfmt_list()
 /* Find and select the pixel format for camera*/
 void cls_v4l2cam::palette_set()
 {
-    int indxp, retcd;
-    p_lst *lst = &params->params_array;
-    p_it it;
+    int indxp, retcd, indx;
 
     if (fd_device == -1) {
         return;
@@ -681,9 +674,9 @@ void cls_v4l2cam::palette_set()
     params_check();
 
     indxp = 17;
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "palette") {
-            indxp =  mtoi(it->param_value);
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == "palette") {
+            indxp =  mtoi(params->params_array[indx].param_value);
             break;
         }
     }
@@ -898,8 +891,7 @@ void cls_v4l2cam::init_vars()
     convert = nullptr;
 
     params = new ctx_params;
-    params->params_count = 0;
-    params->update_params = true;
+    params->params_cnt = 0;
     util_parms_parse(params, "v4l2_params", cam->cfg->v4l2_params);
     util_parms_add_default(params, "input", "-1");
     util_parms_add_default(params, "palette", "17");

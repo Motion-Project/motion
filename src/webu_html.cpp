@@ -658,24 +658,25 @@ void cls_webu_html::script_assign_cams()
 /* Create the javascript function assign_actions */
 void cls_webu_html::script_assign_actions()
 {
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
+    int indx;
+    ctx_params_item *itm;
 
     webua->resp_page +=
         "    function assign_actions() {\n"
         "      var html_actions = \"\\n\";\n"
         "      html_actions += \"  \";\n";
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if ((it->param_name == "snapshot") &&
-            (it->param_value == "on")) {
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        itm = &webu->wb_actions->params_array[indx];
+        if ((itm->param_name == "snapshot") &&
+            (itm->param_value == "on")) {
             webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_action(\";\n"
                 "      html_actions += \"'snapshot');\\\">\";\n"
                 "      html_actions += \"Snapshot</a>\\n\";\n\n"
                 ;
-        } else if ((it->param_name == "event") &&
-            (it->param_value == "on")) {
+        } else if ((itm->param_name == "event") &&
+            (itm->param_value == "on")) {
             webua->resp_page +=
             "      html_actions += \"<a onclick=\\\"send_action(\";\n"
             "      html_actions += \"'eventstart');\\\">\";\n"
@@ -685,8 +686,8 @@ void cls_webu_html::script_assign_actions()
             "      html_actions += \"'eventend');\\\">\";\n"
             "      html_actions += \"End Event</a>\\n\";\n\n"
             ;
-        } else if ((it->param_name == "pause") &&
-            (it->param_value == "on")) {
+        } else if ((itm->param_name == "pause") &&
+            (itm->param_value == "on")) {
             webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_action(\";\n"
                 "      html_actions += \"'pause');\\\">\";\n"
@@ -696,43 +697,43 @@ void cls_webu_html::script_assign_actions()
                 "      html_actions += \"'unpause');\\\">\";\n"
                 "      html_actions += \"Unpause</a>\\n\";\n\n"
                 ;
-        } else if ((it->param_name == "camera_add") &&
-            (it->param_value == "on")) {
+        } else if ((itm->param_name == "camera_add") &&
+            (itm->param_value == "on")) {
             webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_reload(\";\n"
                 "      html_actions += \"'camera_add');\\\">\";\n"
                 "      html_actions += \"Add Camera</a>\\n\";\n\n"
                 ;
-        } else if ((it->param_name == "camera_delete") &&
-            (it->param_value == "on")) {
+        } else if ((itm->param_name == "camera_delete") &&
+            (itm->param_value == "on")) {
             webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_reload(\";\n"
                 "      html_actions += \"'camera_delete');\\\">\";\n"
                 "      html_actions += \"Delete Camera</a>\\n\";\n\n"
                 ;
-        } else if ((it->param_name == "config_write") &&
-            (it->param_value == "on")) {
+        } else if ((itm->param_name == "config_write") &&
+            (itm->param_value == "on")) {
             webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_action(\";\n"
                 "      html_actions += \"'config_write');\\\">\";\n"
                 "      html_actions += \"Save Config</a>\\n\";\n\n"
                 ;
-        } else if ((it->param_name == "stop") &&
-            (it->param_value == "on")) {
+        } else if ((itm->param_name == "stop") &&
+            (itm->param_value == "on")) {
             webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_action(\";\n"
                 "      html_actions += \"'stop');\\\">\";\n"
                 "      html_actions += \"Stop</a>\\n\";\n\n"
                 ;
-        } else if ((it->param_name == "restart") &&
-            (it->param_value == "on")) {
+        } else if ((itm->param_name == "restart") &&
+            (itm->param_value == "on")) {
             webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_action(\";\n"
                 "      html_actions += \"'restart');\\\">\";\n"
                 "      html_actions += \"Start/Restart</a>\\n\";\n\n"
                 ;
-        } else if ((it->param_name == "action_user") &&
-            (it->param_value == "on")) {
+        } else if ((itm->param_name == "action_user") &&
+            (itm->param_value == "on")) {
             webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_action(\";\n"
                 "      html_actions += \"'action_user');\\\">\";\n"

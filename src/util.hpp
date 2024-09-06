@@ -61,19 +61,11 @@ struct ctx_params_item {
     std::string     param_name;       /* The name or description of the ID as requested by user*/
     std::string     param_value;      /* The value that the user wants the control set to*/
 };
-/* TODO  Change this to lst_p and it_p so we have a type then descr.  Avoids
-  conflicts with var names which I'll try not to have start with a abbrev
-  for their type.  Types with start with something indicating their type.
-  cls, ctx, it, lst, vec, etc)
-*/
-typedef std::list<ctx_params_item> p_lst;
-typedef p_lst::iterator p_it;
-
+typedef std::vector<ctx_params_item> vec_params;
 struct ctx_params {
-    p_lst   params_array;       /*List of the controls the user specified*/
-    int     params_count;       /*Count of the controls the user specified*/
-    bool    update_params;      /*Bool for whether to update the parameters on the device*/
-    std::string params_desc;    /* Description of params*/
+    vec_params  params_array;
+    int         params_cnt;
+    std::string params_desc;
 };
 
     void *mymalloc(size_t nbytes);

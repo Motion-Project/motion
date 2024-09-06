@@ -244,12 +244,10 @@ void cls_webu_json::movies_list()
     char fmt[PATH_MAX];
     lst_movies movielist;
     it_movies m_it;
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "movies") {
-            if (it->param_value == "off") {
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "movies") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Movies via webcontrol disabled");
                 webua->resp_page += "{\"count\" : 0} ";
                 webua->resp_page += ",\"device_id\" : ";

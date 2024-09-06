@@ -122,56 +122,55 @@ void cls_sound::load_alerts()
     std::list<std::string> parm_val;
     std::list<std::string>::iterator  it_a;
     ctx_params  *tmp_params;
-    p_it        it;
+    ctx_params_item *itm;
+    int indx;
 
     cfg->edit_get("snd_alerts", parm_val, PARM_CAT_18);
 
     tmp_params = new ctx_params;
     for (it_a=parm_val.begin(); it_a!=parm_val.end(); it_a++) {
-        tmp_params->update_params = true;
         util_parms_parse(tmp_params,"snd_alerts", it_a->c_str());
         init_alerts(&tmp_alert);
-        for (it = tmp_params->params_array.begin();
-            it != tmp_params->params_array.end(); it++) {
-            if (it->param_name == "alert_id") {
-                tmp_alert.alert_id = mtoi(it->param_value);
+        for (indx=0;indx<tmp_params->params_cnt;indx++) {
+            itm = &tmp_params->params_array[indx];
+            if (itm->param_name == "alert_id") {
+                tmp_alert.alert_id = mtoi(itm->param_value);
             }
-            if (it->param_name == "alert_nm") {
-                tmp_alert.alert_nm = it->param_value;
+            if (itm->param_name == "alert_nm") {
+                tmp_alert.alert_nm = itm->param_value;
             }
-            if (it->param_name == "freq_low") {
-                tmp_alert.freq_low = mtof(it->param_value);
+            if (itm->param_name == "freq_low") {
+                tmp_alert.freq_low = mtof(itm->param_value);
             }
-            if (it->param_name == "freq_high") {
-                tmp_alert.freq_high = mtof(it->param_value);
+            if (itm->param_name == "freq_high") {
+                tmp_alert.freq_high = mtof(itm->param_value);
             }
-            if (it->param_name == "volume_count") {
-                tmp_alert.volume_count = mtoi(it->param_value);
+            if (itm->param_name == "volume_count") {
+                tmp_alert.volume_count = mtoi(itm->param_value);
             }
-            if (it->param_name == "volume_level") {
-                tmp_alert.volume_level = mtoi(it->param_value);
+            if (itm->param_name == "volume_level") {
+                tmp_alert.volume_level = mtoi(itm->param_value);
             }
-            if (it->param_name == "trigger_threshold") {
-                tmp_alert.trigger_threshold = mtoi(it->param_value);
+            if (itm->param_name == "trigger_threshold") {
+                tmp_alert.trigger_threshold = mtoi(itm->param_value);
             }
-            if (it->param_name == "trigger_duration") {
-                tmp_alert.trigger_duration = mtoi(it->param_value);
+            if (itm->param_name == "trigger_duration") {
+                tmp_alert.trigger_duration = mtoi(itm->param_value);
             }
         }
         snd_info->alerts.push_back(tmp_alert);
     }
 
-    delete tmp_params;
+    mydelete(tmp_params);
 
     edit_alerts();
 }
 
 void cls_sound::load_params()
 {
-    p_it    it;
-    p_lst   *lst;
+    int indx;
+    ctx_params_item *itm;
 
-    snd_info->params->update_params = true;
     util_parms_parse(snd_info->params,"snd_params", cfg->snd_params);
 
     util_parms_add_default(snd_info->params,"source","alsa");
@@ -179,28 +178,28 @@ void cls_sound::load_params()
     util_parms_add_default(snd_info->params,"frames","2048");
     util_parms_add_default(snd_info->params,"sample_rate","44100");
 
-    lst = &snd_info->params->params_array;
-
-    for (it = lst->begin(); it != lst->end(); it++) {
-       MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s : %s"
-            , it->param_name.c_str(), it->param_value.c_str());
+    for (indx=0;indx<snd_info->params->params_cnt;indx++) {
+        itm = &snd_info->params->params_array[indx];
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s : %s"
+            ,itm->param_name.c_str(),itm->param_value.c_str());
     }
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "source") {
-            snd_info->source = it->param_value;
+    for (indx=0;indx<snd_info->params->params_cnt;indx++) {
+        itm = &snd_info->params->params_array[indx];
+        if (itm->param_name == "source") {
+            snd_info->source = itm->param_value;
         }
-        if (it->param_name == "channels") {
-            snd_info->channels = mtoi(it->param_value);
+        if (itm->param_name == "channels") {
+            snd_info->channels = mtoi(itm->param_value);
         }
-        if (it->param_name == "frames") {
-            snd_info->frames = mtoi(it->param_value);
+        if (itm->param_name == "frames") {
+            snd_info->frames = mtoi(itm->param_value);
         }
-        if (it->param_name == "sample_rate") {
-            snd_info->sample_rate = mtoi(it->param_value);
+        if (itm->param_name == "sample_rate") {
+            snd_info->sample_rate = mtoi(itm->param_value);
         }
-        if (it->param_name == "pulse_server") {
-            snd_info->pulse_server = it->param_value;
+        if (itm->param_name == "pulse_server") {
+            snd_info->pulse_server = itm->param_value;
         }
     }
 }

@@ -211,18 +211,16 @@ void cls_libcam:: log_draft()
 
 void cls_libcam::start_params()
 {
-    p_lst *lst;
-    p_it it;
+    ctx_params_item *itm;
+    int indx;
 
     params = new ctx_params;
-    params->update_params = true;
     util_parms_parse(params,"libcam_params", cam->cfg->libcam_params);
 
-    lst = &params->params_array;
-
-    for (it = lst->begin(); it != lst->end(); it++) {
+    for (indx=0;indx<params->params_cnt;indx++) {
+        itm = &params->params_array[indx];
         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s : %s"
-            ,it->param_name.c_str(), it->param_value.c_str());
+            ,itm->param_name.c_str(), itm->param_value.c_str());
     }
 }
 
@@ -447,12 +445,12 @@ void cls_libcam::config_control_item(std::string pname, std::string pvalue)
 
 void cls_libcam::config_controls()
 {
-    int retcd;
-    p_lst *lst = &params->params_array;
-    p_it it;
+    int retcd, indx;
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        config_control_item(it->param_name, it->param_value);
+    for (indx=0;indx<params->params_cnt;indx++) {
+        config_control_item(
+            params->params_array[indx].param_name
+            ,params->params_array[indx].param_value);
     }
 
     retcd = config->validate();
@@ -472,33 +470,33 @@ void cls_libcam::config_controls()
 void cls_libcam:: config_orientation()
 {
     #if (LIBCAMVER >= 2000)
-        int retcd;
+        int retcd, indx;
         std::string adjdesc;
-        p_lst *lst = &params->params_array;
-        p_it it;
+        ctx_params_item *itm;
 
-        for (it = lst->begin(); it != lst->end(); it++) {
-            if (it->param_name == "orientation") {
-                if (it->param_value == "Rotate0") {
+        for (indx=0;indx<params->params_cnt;indx++) {
+            itm = &params->params_array[indx];
+            if (itm->param_name == "orientation") {
+                if (itm->param_value == "Rotate0") {
                     config->orientation = Orientation::Rotate0;
-                } else if (it->param_value == "Rotate0Mirror") {
+                } else if (itm->param_value == "Rotate0Mirror") {
                     config->orientation = Orientation::Rotate0Mirror;
-                } else if (it->param_value == "Rotate180") {
+                } else if (itm->param_value == "Rotate180") {
                     config->orientation = Orientation::Rotate180;
-                } else if (it->param_value == "Rotate180Mirror") {
+                } else if (itm->param_value == "Rotate180Mirror") {
                     config->orientation = Orientation::Rotate180Mirror;
-                } else if (it->param_value == "Rotate90") {
+                } else if (itm->param_value == "Rotate90") {
                     config->orientation = Orientation::Rotate90;
-                } else if (it->param_value == "Rotate90Mirror") {
+                } else if (itm->param_value == "Rotate90Mirror") {
                     config->orientation = Orientation::Rotate90Mirror;
-                } else if (it->param_value == "Rotate270") {
+                } else if (itm->param_value == "Rotate270") {
                     config->orientation = Orientation::Rotate270;
-                } else if (it->param_value == "Rotate270Mirror") {
+                } else if (itm->param_value == "Rotate270Mirror") {
                     config->orientation = Orientation::Rotate270Mirror;
                 } else {
                     MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                         , "Invalid Orientation option: %s."
-                        , it->param_value.c_str());
+                        , itm->param_value.c_str());
                 }
             }
         }

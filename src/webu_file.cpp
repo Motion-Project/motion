@@ -41,10 +41,9 @@ void cls_webu_file::main() {
     struct stat statbuf;
     struct MHD_Response *response;
     std::string full_nm;
-    p_lst *lst = &webu->wb_actions->params_array;
-    p_it it;
     lst_movies movies;
     it_movies  m_it;
+    int indx;
 
     /*If we have not fully started yet, simply return*/
     if (app->dbse == NULL) {
@@ -52,9 +51,9 @@ void cls_webu_file::main() {
         return;
     }
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if (it->param_name == "movies") {
-            if (it->param_value == "off") {
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "movies") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
                 MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Movies via webcontrol disabled");
                 webua->bad_request();
                 return;

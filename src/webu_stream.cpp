@@ -435,8 +435,7 @@ mhdrslt cls_webu_stream::stream_mjpeg()
 {
     mhdrslt retcd;
     struct MHD_Response *response;
-    p_lst *lst = &webu->wb_headers->params_array;
-    p_it it;
+    int indx;
 
     clock_gettime(CLOCK_MONOTONIC, &webuc->time_last);
 
@@ -447,10 +446,11 @@ mhdrslt cls_webu_stream::stream_mjpeg()
         return MHD_NO;
     }
 
-    if (webu->wb_headers->params_count > 0) {
-        for (it = lst->begin(); it != lst->end(); it++) {
+    if (webu->wb_headers->params_cnt > 0) {
+        for (indx=0;indx<webu->wb_headers->params_cnt;indx++) {
             MHD_add_response_header (response
-                , it->param_name.c_str(), it->param_value.c_str());
+                , webu->wb_headers->params_array[indx].param_name.c_str()
+                , webu->wb_headers->params_array[indx].param_value.c_str());
         }
     }
 
@@ -469,8 +469,7 @@ mhdrslt cls_webu_stream::stream_static()
     mhdrslt retcd;
     struct MHD_Response *response;
     char resp_used[20];
-    p_lst *lst = &webu->wb_headers->params_array;
-    p_it it;
+    int indx;
 
     if (webuc->resp_used == 0) {
         MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Could not get image to stream."));
@@ -485,10 +484,11 @@ mhdrslt cls_webu_stream::stream_static()
         return MHD_NO;
     }
 
-    if (webu->wb_headers->params_count > 0) {
-        for (it = lst->begin(); it != lst->end(); it++) {
+    if (webu->wb_headers->params_cnt > 0) {
+        for (indx=0;indx<webu->wb_headers->params_cnt;indx++) {
             MHD_add_response_header (response
-                , it->param_name.c_str(), it->param_value.c_str());
+                , webu->wb_headers->params_array[indx].param_name.c_str()
+                , webu->wb_headers->params_array[indx].param_value.c_str());
         }
     }
 

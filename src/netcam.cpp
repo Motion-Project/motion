@@ -814,8 +814,7 @@ void cls_netcam::hwdecoders()
 void cls_netcam::decoder_error(int retcd, const char* fnc_nm)
 {
     char errstr[128];
-    p_lst *lst = &params->params_array;
-    p_it it;
+    int indx;
 
     if (interrupted) {
         MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
@@ -841,9 +840,9 @@ void cls_netcam::decoder_error(int retcd, const char* fnc_nm)
             ,_("%s:Ignoring and removing the user requested decoder %s")
             ,cameratype.c_str(), decoder_nm.c_str());
 
-        for (it = lst->begin(); it != lst->end(); it++) {
-            if (it->param_name == "decoder") {
-                it->param_value = "NULL";
+        for (indx=0;indx<params->params_cnt;indx++) {
+            if (params->params_array[indx].param_name == "decoder") {
+                params->params_array[indx].param_value = "NULL";
                 break;
             }
         }
@@ -1509,8 +1508,8 @@ int cls_netcam::ntc()
 void cls_netcam::set_options()
 {
     std::string tmp;
-    p_lst   *lst = &params->params_array;
-    p_it    it;
+    int indx;
+    ctx_params_item *itm;
 
     if ((service == "rtsp") ||
         (service == "rtsps") ||
@@ -1556,15 +1555,16 @@ void cls_netcam::set_options()
             , service.c_str());
     }
 
-    for (it = lst->begin(); it != lst->end(); it++) {
-        if ((it->param_name != "decoder") &&
-            (it->param_name != "capture_rate")) {
+    for (indx=0;indx<params->params_cnt;indx++) {
+        itm = &params->params_array[indx];
+        if ((itm->param_name != "decoder") &&
+            (itm->param_name != "capture_rate")) {
             av_dict_set(&opts
-                , it->param_name.c_str(), it->param_value.c_str(), 0);
+                , itm->param_name.c_str(), itm->param_value.c_str(), 0);
             if (status == NETCAM_NOTCONNECTED) {
                 MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("%s:%s = %s")
                     ,cameratype.c_str()
-                    ,it->param_name.c_str(),it->param_value.c_str());
+                    ,itm->param_name.c_str(),itm->param_value.c_str());
             }
         }
     }
@@ -1613,7 +1613,7 @@ void cls_netcam::set_path ()
 
 void cls_netcam::set_parms ()
 {
-    p_it    it;
+    int indx;
 
     params = new ctx_params;
 
@@ -1637,17 +1637,13 @@ void cls_netcam::set_parms ()
         imgsize.height = 0;
         cameratype = _("High");
         cfg_params = cam->cfg->netcam_high_params;
-        params->update_params = true;
-        util_parms_parse(params
-            ,"netcam_high_params", cfg_params);
+        util_parms_parse(params,"netcam_high_params", cfg_params);
     } else {
         imgsize.width = cfg_width;
         imgsize.height = cfg_height;
         cameratype = _("Norm");
         cfg_params = cam->cfg->netcam_params;
-        params->update_params = true;
-        util_parms_parse(params
-            ,"netcam_params", cfg_params);
+        util_parms_parse(params,"netcam_params", cfg_params);
     }
     camera_name = cam->cfg->device_name;
 
@@ -1686,20 +1682,19 @@ void cls_netcam::set_parms ()
     filedir = "";
     cfg_idur = 90;
 
-    for (it = params->params_array.begin();
-        it != params->params_array.end(); it++) {
-        if (it->param_name == "decoder") {
-            decoder_nm = it->param_value;
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == "decoder") {
+            decoder_nm = params->params_array[indx].param_value;
         }
-        if (it->param_name == "capture_rate") {
-            if (it->param_value == "pts") {
+        if (params->params_array[indx].param_name == "capture_rate") {
+            if (params->params_array[indx].param_value == "pts") {
                 pts_adj = true;
             } else {
-                capture_rate = mtoi(it->param_value);
+                capture_rate = mtoi(params->params_array[indx].param_value);
             }
         }
-        if (it->param_name == "interrupt") {
-            cfg_idur = mtoi(it->param_value);
+        if (params->params_array[indx].param_name == "interrupt") {
+            cfg_idur = mtoi(params->params_array[indx].param_value);
         }
     }
 
