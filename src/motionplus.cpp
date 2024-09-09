@@ -127,6 +127,12 @@ void cls_motapp::signal_process()
         webu->wb_finish = true;
         for (indx=0; indx<cam_cnt; indx++) {
             cam_list[indx]->event_stop = true;
+            cam_list[indx]->handler_stop = true;
+        }
+        for (indx=0; indx<snd_cnt; indx++) {
+            snd_list[indx]->handler_stop = true;
+        }
+        for (indx=0; indx<cam_cnt; indx++) {
             cam_list[indx]->handler_shutdown();
         }
         for (indx=0; indx<snd_cnt; indx++) {
@@ -137,11 +143,20 @@ void cls_motapp::signal_process()
         webu->wb_finish = true;
         for (indx=0; indx<cam_cnt; indx++) {
             cam_list[indx]->event_stop = true;
+            cam_list[indx]->restart = false;
+            cam_list[indx]->handler_stop = true;
+        }
+        for (indx=0; indx<snd_cnt; indx++) {
+            snd_list[indx]->restart = false;
+            snd_list[indx]->handler_stop = true;
+        }
+        for (indx=0; indx<cam_cnt; indx++) {
             cam_list[indx]->handler_shutdown();
         }
         for (indx=0; indx<snd_cnt; indx++) {
             snd_list[indx]->handler_shutdown();
         }
+
     default:
         break;
     }
