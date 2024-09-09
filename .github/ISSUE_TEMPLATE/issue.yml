@@ -29,6 +29,10 @@ body:
         - 4.4.x
         - 4.5.x
         - 4.6.x
+        - 4.7.x
+        - 4.8.x
+        - 4.9.x
+        - 4.10.x
     validations:
       required: true
   - type: dropdown
