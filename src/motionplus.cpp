@@ -298,7 +298,7 @@ void cls_motapp::allcams_init()
             , cam_list[indx]->cfg->stream_preview_location);
 
         for (indx1=0;indx1<params_loc->params_cnt;indx1++) {
-            itm = &params_loc->params_array[indx];
+            itm = &params_loc->params_array[indx1];
             if (itm->param_name == "row") {
                 cam_list[indx]->all_loc.row = mtoi(itm->param_value);
             }
