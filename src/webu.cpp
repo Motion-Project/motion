@@ -408,7 +408,12 @@ void cls_webu::start_daemon_port1()
 
     free(mhdst->mhd_ops);
     if (wb_daemon == nullptr) {
-        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Unable to start MHD"));
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            ,_("Unable to start webserver on port %d")
+            ,app->cfg->webcontrol_port);
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            ,_("Validate no other applications/instances are using port %d")
+            ,app->cfg->webcontrol_port);
     } else {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             ,_("Started webcontrol on port %d")
@@ -456,7 +461,12 @@ void cls_webu::start_daemon_port2()
 
     free(mhdst->mhd_ops);
     if (wb_daemon2 == nullptr) {
-        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Unable to start port2 MHD"));
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            ,_("Unable to start secondary webserver on port %d")
+            ,app->cfg->webcontrol_port2);
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            ,_("Validate no other applications/instances are using port %d")
+            ,app->cfg->webcontrol_port2);
     } else {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             ,_("Started webcontrol on port %d")
