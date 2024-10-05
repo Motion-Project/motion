@@ -1296,8 +1296,8 @@
           <div>
             <i><h4>decoder</h4></i>
             The ffmpeg hardware decoder to use.  Note that not all of the hardware decoders provided by ffmpeg are
-            available.  The only hardware decoders are those that do not require customization of libary usage.  The
-            ffmpeg libaries on the computer must usually be built from source in order to enable hardware decoding.
+            available.  The only hardware decoders are those that do not require customization of library usage.  The
+            ffmpeg libraries on the computer must usually be built from source in order to enable hardware decoding.
           </div>
           <p></p>
 
@@ -1306,6 +1306,14 @@
             The duration in seconds permitted for the library functions to respond.  For the initial connection
             to the camera, the maximum duration is set equal to three times the interrupt specified.  The default
             is 90 seconds.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>input_format</h4></i>
+            The ffmpeg input format to use for the network camera.  For  cameras using http/https the
+            input_format defaults to mjpeg.  Another common option for this parameter with
+            a http/https stream would be mpegts.
           </div>
           <p></p>
 
@@ -1348,6 +1356,14 @@
             the FPS that the camera is sending images.  Users can also specify the capture_rate as
             <code>pts</code>.  When using <code>pts</code> as the capture_rate MotionPlus will sync the timing
             of the capture to match between the clock and the presentation time stamps sent from the camera.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>input_format</h4></i>
+            The ffmpeg input format to use for the network camera.  For  cameras using http/https the
+            input_format defaults to mjpeg.  Another common option for this parameter with
+            a http/https stream would be mpegts.
           </div>
           <p></p>
 

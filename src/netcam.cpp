@@ -1514,17 +1514,12 @@ void cls_netcam::set_options()
     if ((service == "rtsp") ||
         (service == "rtsps") ||
         (service == "rtmp")) {
-        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("%s:Setting rtsp/rtmp")
-            ,cameratype.c_str());
         util_parms_add_default(params,"rtsp_transport","tcp");
-        //util_parms_add_default(params,"allowed_media_types", "video");
+        util_parms_add_default(params,"input_format","");
 
     } else if ((service == "http") ||
                (service == "https")) {
-        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s:Setting input_format mjpeg")
-            ,cameratype.c_str());
-        format_context->iformat = av_find_input_format("mjpeg");
+        util_parms_add_default(params,"input_format","mjpeg");
         util_parms_add_default(params,"reconnect_on_network_error","1");
         util_parms_add_default(params,"reconnect_at_eof","1");
         util_parms_add_default(params,"reconnect","1");
@@ -1532,10 +1527,7 @@ void cls_netcam::set_options()
         util_parms_add_default(params,"reconnect_streamed","1");
 
     } else if (service == "v4l2") {
-        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s:Setting input_format video4linux2")
-            ,cameratype.c_str());
-        format_context->iformat = av_find_input_format("video4linux2");
+        util_parms_add_default(params,"input_format","video4linux2");
 
         tmp = std::to_string(cfg_framerate);
         util_parms_add_default(params,"framerate", tmp);
@@ -1545,20 +1537,18 @@ void cls_netcam::set_options()
         util_parms_add_default(params,"video_size", tmp);
 
     } else if (service == "file") {
-        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s:Setting up movie file")
-            ,cameratype.c_str());
+        util_parms_add_default(params,"input_format","");
 
     } else {
-        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("%s:Setting up %s")
-            , cameratype.c_str()
-            , service.c_str());
+        util_parms_add_default(params,"input_format","");
     }
 
     for (indx=0;indx<params->params_cnt;indx++) {
         itm = &params->params_array[indx];
         if ((itm->param_name != "decoder") &&
-            (itm->param_name != "capture_rate")) {
+            (itm->param_name != "capture_rate") &&
+            (itm->param_name != "interrupt") &&
+            (itm->param_name != "input_format")) {
             av_dict_set(&opts
                 , itm->param_name.c_str(), itm->param_value.c_str(), 0);
             if (status == NETCAM_NOTCONNECTED) {
@@ -1566,6 +1556,15 @@ void cls_netcam::set_options()
                     ,cameratype.c_str()
                     ,itm->param_name.c_str(),itm->param_value.c_str());
             }
+        } else if ((itm->param_name == "input_format") &&
+            (itm->param_value != "")) {
+            format_context->iformat = av_find_input_format(itm->param_value.c_str());
+            if (status == NETCAM_NOTCONNECTED) {
+                MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("%s:%s = %s")
+                    ,cameratype.c_str()
+                    ,itm->param_name.c_str(),itm->param_value.c_str());
+            }
+
         }
     }
 }
