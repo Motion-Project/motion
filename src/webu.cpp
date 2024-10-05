@@ -181,13 +181,15 @@ void cls_webu::mhd_features()
 }
 
 /* Load a either the key or cert file for MHD*/
-void cls_webu::mhd_loadfile(std::string fname,std::string &filestr)
+void cls_webu::mhd_loadfile(std::string fname, std::string &filestr)
 {
     /* This needs conversion to c++ stream */
     FILE        *infile;
     size_t      read_size, file_size;
     long        retcd;
     char        *file_char;
+    struct stat file_attrib;
+    char        file_time[50];
 
     filestr = "";
     if (fname != "") {
@@ -210,6 +212,15 @@ void cls_webu::mhd_loadfile(std::string fname,std::string &filestr)
                 free(file_char);
             }
             myfclose(infile);
+        }
+        memset(&file_attrib, 0, sizeof(struct stat));
+        if (stat(fname.c_str(), &file_attrib) == 0) {
+            strftime(file_time, 50, "%Y%m%d-%H%M%S-"
+                , localtime(&file_attrib.st_mtime));
+            info_tls.append(file_time);
+            info_tls.append(std::to_string(file_attrib.st_size));
+        } else {
+            info_tls += "FileError";
         }
     }
 }
@@ -308,7 +319,6 @@ void cls_webu::mhd_opts_digest()
 void cls_webu::mhd_opts_tls()
 {
     if (mhdst->tls_use) {
-
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_HTTPS_MEM_CERT;
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = (void *)mhdst->tls_cert.c_str();
@@ -318,6 +328,8 @@ void cls_webu::mhd_opts_tls()
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = (void *)mhdst->tls_key.c_str();
         mhdst->mhd_opt_nbr++;
+    } else {
+        info_tls = "";
     }
 
 }
@@ -388,6 +400,7 @@ void cls_webu::start_daemon_port1()
 {
     mhdst = new ctx_mhdstart;
 
+    info_tls = "";
     mhd_loadfile(app->cfg->webcontrol_cert, mhdst->tls_cert);
     mhd_loadfile(app->cfg->webcontrol_key, mhdst->tls_key);
     mhdst->ipv6 = app->cfg->webcontrol_ipv6;

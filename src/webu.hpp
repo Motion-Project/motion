@@ -96,14 +96,15 @@
             struct MHD_Daemon           *wb_daemon;
             struct MHD_Daemon           *wb_daemon2;
             std::list<ctx_webu_clients> wb_clients;
+            std::string                 info_tls;
             int                         cnct_cnt;
-            bool restart;
+            bool                        restart;
             void startup();
             void shutdown();
 
         private:
-            ctx_mhdstart *mhdst;
-            cls_motapp *app;
+            ctx_mhdstart    *mhdst;
+            cls_motapp      *app;
             void init_actions();
             void start_daemon_port1();
             void start_daemon_port2();

@@ -31,7 +31,7 @@
 
             cls_motapp      *app;
             cls_webu        *webu;
-            cls_camera         *cam;
+            cls_camera      *cam;
 
             struct MHD_Connection   *connection;
 
@@ -67,6 +67,7 @@
             bool            authenticated;  /* Boolean for whether authentication has been passed */
             enum WEBUI_METHOD   cnct_method;    /* Connection method.  Get or Post */
 
+            int check_tls();
             void parms_edit();
             int parseurl();
             void clientip_get();

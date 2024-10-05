@@ -33,6 +33,52 @@
 #include "video_v4l2.hpp"
 
 
+int cls_webu_ans::check_tls()
+{
+    struct stat file_attrib;
+    char        file_time[50];
+    std::string file_chk;
+
+    if (webu->info_tls == "") {
+        return 0;
+    }
+
+    file_chk = "";
+    if (app->cfg->webcontrol_cert != "") {
+        memset(&file_attrib, 0, sizeof(struct stat));
+        if (stat(app->cfg->webcontrol_cert.c_str(), &file_attrib) == 0) {
+            strftime(file_time, 50, "%Y%m%d-%H%M%S-"
+                , localtime(&file_attrib.st_mtime));
+            file_chk.append(file_time);
+            file_chk.append(std::to_string(file_attrib.st_size));
+        } else {
+            file_chk += "FileError";
+        }
+    }
+
+    if (app->cfg->webcontrol_key != "") {
+        memset(&file_attrib, 0, sizeof(struct stat));
+        if (stat(app->cfg->webcontrol_key.c_str(), &file_attrib) == 0) {
+            strftime(file_time, 50, "%Y%m%d-%H%M%S-"
+                , localtime(&file_attrib.st_mtime));
+            file_chk.append(file_time);
+            file_chk.append(std::to_string(file_attrib.st_size));
+        } else {
+            file_chk += "FileError";
+        }
+    }
+
+    if (file_chk != webu->info_tls) {
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+            , _("Webcontrol files have changed.  Restarting webcontrol"));
+        webu->restart = true;
+        return -1;
+    }
+
+    return 0;
+
+}
+
 /* Extract the camid and cmds from the url */
 int cls_webu_ans::parseurl()
 {
@@ -657,6 +703,11 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
            return MHD_NO;
         }
+    }
+
+
+    if (check_tls() != 0) {
+        return MHD_NO;
     }
 
     if (clientip.length() == 0) {
