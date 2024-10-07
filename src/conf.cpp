@@ -4301,7 +4301,7 @@ void cls_config::init()
     }
 
     if (filename == "") {
-        filename = std::string( sysconfdir ) + std::string("/motionplus.conf");
+        filename = std::string( configdir ) + std::string("/motionplus.conf");
         if (stat(filename.c_str(), &statbuf) != 0) {
             filename = "";
         }

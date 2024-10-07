@@ -21,8 +21,9 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = src po
 
-pkgsysconfdir = $(sysconfdir)/@PACKAGE@
-dist_pkgsysconf_DATA = \
+pkglocalstatedir = $(localstatedir)/lib/@PACKAGE@
+
+dist_pkglocalstate_DATA = \
 	data/motionplus-dist.conf \
 	data/camera1-dist.conf \
 	data/camera2-dist.conf \
