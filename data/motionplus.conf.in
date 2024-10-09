@@ -96,12 +96,12 @@ stream_preview_method combined
 ;*************************************************
 ; Device config files - One for each device.
 ;*************************************************
-camera @prefix@/etc/motionplus/camera1.conf
-; camera @prefix@/etc/motionplus/camera2.conf
-; camera @prefix@/etc/motionplus/camera3.conf
-; sound @prefix@/etc/motionplus/sound1.conf
+camera @localstatedir@/lib/@PACKAGE_NAME@/camera1.conf
+; camera @localstatedir@/lib/@PACKAGE_NAME@/camera2.conf
+; camera @localstatedir@/lib/@PACKAGE_NAME@/camera3.conf
+; sound @localstatedir@/lib/@PACKAGE_NAME@/sound1.conf
 
 ;*************************************************
 ; Directory to read '.conf' files for devices.
 ;*************************************************
-; config_dir @prefix@/etc/motionplus/conf.d
+; config_dir @localstatedir@/lib/@PACKAGE_NAME@/conf.d

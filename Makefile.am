@@ -21,14 +21,14 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = src po
 
-pkglocalstatedir = $(localstatedir)/lib/@PACKAGE@
+libstatedir = $(localstatedir)/lib/@PACKAGE@
 
-dist_pkglocalstate_DATA = \
-	data/motionplus-dist.conf \
-	data/camera1-dist.conf \
-	data/camera2-dist.conf \
-	data/camera3-dist.conf \
-	data/sound1-dist.conf
+dist_libstate_DATA = \
+	data/motionplus.conf \
+	data/camera1.conf \
+	data/camera2.conf \
+	data/camera3.conf \
+	data/sound1.conf
 
 dist_man_MANS = man/motionplus.1
 
@@ -37,6 +37,13 @@ dist_doc_DATA = \
 	doc/motionplus_stylesheet.css \
 	doc/motionplus_build.html \
 	doc/motionplus_config.html
+
+###################################################################
+## Clean tilde crumbs and add prefix in config file.
+###################################################################
+all-local:
+	@rm -f po/*.po\~
+	@sed -e 's|$${prefix}|$(prefix)|' data/motionplus.conf > data/motionplus.conf.tmp && mv -f data/motionplus.conf.tmp data/motionplus.conf
 
 ###################################################################
 ## Create pristine directories to match exactly distributed files
@@ -49,16 +56,13 @@ cleanall: distclean
 	@rm -f po/Makevars.template po/quot.sed po/remove-potcdate.sin
 	@rm -f po/Rules-quot po/stamp-po po/*.gmo po/motionplus.pot po/boldquot.sed
 	@rm -f Makefile.in src/Makefile.in po/Makefile.in.in man/Makefile.in
-	@rm -f data/motionplus.service data/motionplus-dist.conf
-	@rm -f data/camera1-dist.conf data/camera2-dist.conf
-	@rm -f data/camera3-dist.conf data/sound1-dist.conf
+	@rm -f data/motionplus.service data/motionplus.conf
+	@rm -f data/camera1.conf data/camera2.conf
+	@rm -f data/camera3.conf data/sound1.conf
 
 ###################################################################
-## Clean out the tilde crumb files left by gettext autotool processing
+## Testing options for maintainer
 ###################################################################
-all-local:
-	@rm -f po/*.po\~
-
 maintainer-clang:
 	./configure --with-clang-flags CC=clang CXX=clang++ LD=clang++  && $(MAKE) clean && $(MAKE)
 

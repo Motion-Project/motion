@@ -2890,10 +2890,12 @@
       MotionPlus will search for the configuration file called 'motionplus.conf' in the following order:
       <p></p>
       <ol>
-        <li> Current directory where MotionPlus was invoked</li>
+        <li> Current directory where motionplus was invoked</li>
         <li> The directory called '.motionplus' in the current users home directory</li>
-        <li> The directory defined by --sysconfdir=DIR during the configure step of installation. If this was
-          not defined, it will default to /etc/motionplus</li>
+        <li> The sub directory of lib/motionplus from the directory defined
+          by --localstatedir=DIR during the configure step of installation. If this was
+          not defined, it will default to /var/lib/motionplus or /usr/local/var/lib/motionplus
+          depending upon your system</li>
       </ol>
       <p></p>
       The motionplus.conf file specifies parameters for the entire MotionPlus application and defaults for
