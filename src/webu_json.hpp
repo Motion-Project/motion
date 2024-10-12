@@ -38,6 +38,7 @@
             void status_vars(int indx_cam);
             void status();
             void loghistory();
+            std::string escstr(std::string invar);
     };
 
 #endif /* _INCLUDE_WEBU_JSON_HPP_ */

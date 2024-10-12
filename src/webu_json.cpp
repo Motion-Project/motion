@@ -27,9 +27,22 @@
 #include "webu_json.hpp"
 #include "dbse.hpp"
 
+std::string cls_webu_json::escstr(std::string invar)
+{
+    std::string  outvar;
+    size_t indx;
+    for (indx = 0; indx <invar.length(); indx++) {
+        if (invar[indx] == '\\' ||
+            invar[indx] == '\"') {
+                outvar += '\\';
+            }
+        outvar += invar[indx];
+    }
+    return outvar;
+}
+
 void cls_webu_json::parms_item(cls_config *conf, int indx_parm)
 {
-    size_t indx;
     std::string parm_orig, parm_val, parm_list, parm_enable;
 
     parm_orig = "";
@@ -45,13 +58,7 @@ void cls_webu_json::parms_item(cls_config *conf, int indx_parm)
     conf->edit_get(config_parms[indx_parm].parm_name
         , parm_orig, config_parms[indx_parm].parm_cat);
 
-    for (indx = 0; indx < parm_orig.length(); indx++) {
-        if ((parm_orig[indx] == '"') ||
-            (parm_orig[indx] == '\\')) {
-            parm_val += '\\';
-        }
-        parm_val += parm_orig[indx];
-    }
+    parm_val = escstr(parm_orig);
 
     if (config_parms[indx_parm].parm_type == PARM_TYP_INT) {
         webua->resp_page +=
@@ -185,7 +192,7 @@ void cls_webu_json::cameras_list()
         if (cam->cfg->device_name == "") {
             webua->resp_page += "{\"name\": \"camera " + strid + "\"";
         } else {
-            webua->resp_page += "{\"name\": \"" + cam->cfg->device_name + "\"";
+            webua->resp_page += "{\"name\": \"" + escstr(cam->cfg->device_name) + "\"";
         }
         webua->resp_page += ",\"id\": " + strid;
         webua->resp_page += ",\"url\": \"" + webua->hostfull + "/" + strid + "/\"} ";
@@ -279,7 +286,7 @@ void cls_webu_json::movies_list()
             webua->resp_page += "\""+ std::to_string(indx) + "\":";
 
             webua->resp_page += "{\"name\": \"";
-            webua->resp_page += m_it->movie_nm + "\"";
+            webua->resp_page += escstr(m_it->movie_nm) + "\"";
 
             webua->resp_page += ",\"size\": \"";
             webua->resp_page += std::string(fmt) + "\"";
@@ -356,7 +363,7 @@ void cls_webu_json::status_vars(int indx_cam)
 
     webua->resp_page += "{";
 
-    webua->resp_page += "\"name\":\"" + cam->cfg->device_name+"\"";
+    webua->resp_page += "\"name\":\"" + escstr(cam->cfg->device_name)+"\"";
     webua->resp_page += ",\"id\":" + std::to_string(cam->cfg->device_id);
     webua->resp_page += ",\"width\":" + std::to_string(cam->imgs.width);
     webua->resp_page += ",\"height\":" + std::to_string(cam->imgs.height);
@@ -440,8 +447,8 @@ void cls_webu_json::loghistory()
                 webua->resp_page += "\"lognbr\" :\"" +
                     std::to_string(motlog->log_vec[indx].log_nbr) + "\", ";
                 webua->resp_page += "\"logmsg\" :\"" +
-                    motlog->log_vec[indx].log_msg.substr(0,
-                        motlog->log_vec[indx].log_msg.length()-1) + "\" ";
+                    escstr(motlog->log_vec[indx].log_msg.substr(0,
+                        motlog->log_vec[indx].log_msg.length()-1)) + "\" ";
                 webua->resp_page += "}";
                 cnt++;
             }
