@@ -56,6 +56,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <thread>
+#include "zlib.h"
 
 #if defined(HAVE_PTHREAD_NP_H)
     #include <pthread_np.h>

@@ -32,6 +32,22 @@
 #include "webu_file.hpp"
 #include "video_v4l2.hpp"
 
+static mhdrslt webua_connection_values (void *cls
+    , enum MHD_ValueKind kind, const char *src_key, const char *src_val)
+{
+    (void) kind;
+    std::string parm_val;
+    cls_webu_ans *webua =(cls_webu_ans *) cls;
+
+    if (mystreq(src_key,"Accept-Encoding")) {
+        parm_val = src_val;
+        if (parm_val.find("gzip") != std::string::npos) {
+            webua->gzip_encode = true;
+        }
+    }
+
+  return MHD_YES;
+}
 
 int cls_webu_ans::check_tls()
 {
@@ -600,6 +616,32 @@ mhdrslt cls_webu_ans::mhd_auth()
 
 }
 
+void cls_webu_ans::gzip_deflate()
+{
+    myfree(gzip_resp);
+    gzip_size = 0;
+
+    gzip_resp = (u_char*)mymalloc(resp_page.length());
+
+    z_stream zs;
+    zs.zalloc = Z_NULL;
+    zs.zfree = Z_NULL;
+    zs.opaque = Z_NULL;
+    zs.avail_in = (uInt)resp_page.length();
+    zs.next_in = (Bytef *)resp_page.c_str();
+    zs.avail_out = (uInt)resp_page.length();
+    zs.next_out = (Bytef *)gzip_resp;
+
+    deflateInit2(&zs
+        , Z_DEFAULT_COMPRESSION
+        , Z_DEFLATED
+        , 15 | 16, 8
+        , Z_DEFAULT_STRATEGY);
+    deflate(&zs, Z_FINISH);
+    deflateEnd(&zs);
+    gzip_size = zs.total_out;
+}
+
 /* Send the response that we created back to the user.  */
 void cls_webu_ans::mhd_send()
 {
@@ -607,9 +649,23 @@ void cls_webu_ans::mhd_send()
     struct MHD_Response *response;
     int indx;
 
-    response = MHD_create_response_from_buffer(resp_page.length()
-        ,(void *)resp_page.c_str(), MHD_RESPMEM_PERSISTENT);
-    if (!response) {
+    if (gzip_encode == true) {
+        gzip_deflate();
+        if (gzip_size > 0) {
+            response = MHD_create_response_from_buffer(
+                gzip_size, (void *)gzip_resp
+                , MHD_RESPMEM_PERSISTENT);
+        } else {
+            gzip_encode = false;
+            resp_page = "Error in gzip response";
+            response = MHD_create_response_from_buffer(resp_page.length()
+                ,(void *)resp_page.c_str(), MHD_RESPMEM_PERSISTENT);
+        }
+    } else {
+        response = MHD_create_response_from_buffer(resp_page.length()
+            ,(void *)resp_page.c_str(), MHD_RESPMEM_PERSISTENT);
+    }
+    if (response == NULL) {
         MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
         return;
     }
@@ -628,6 +684,10 @@ void cls_webu_ans::mhd_send()
         MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "application/json;");
     } else {
         MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
+    }
+
+    if (gzip_encode == true) {
+        MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_ENCODING, "gzip");
     }
 
     retcd = MHD_queue_response (connection, MHD_HTTP_OK, response);
@@ -656,17 +716,20 @@ void cls_webu_ans::answer_get()
 {
     MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,"processing get");
 
+
     if ((uri_cmd1 == "mjpg") || (uri_cmd1 == "mpegts") ||
         (uri_cmd1 == "static")) {
         if (webu_stream == nullptr) {
             webu_stream  = new cls_webu_stream(this);
         }
+        gzip_encode = false;
         webu_stream->main();
 
     } else if (uri_cmd1 == "movies") {
         if (webu_file == nullptr) {
             webu_file = new cls_webu_file(this);
         }
+        gzip_encode = false;
         webu_file->main();
 
     } else if ((uri_cmd1 == "config.json") || (uri_cmd1 == "log") ||
@@ -692,6 +755,9 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
 
     cnct_type = WEBUI_CNCT_CONTROL;
     connection = p_connection;
+
+    MHD_get_connection_values (p_connection
+        , MHD_HEADER_KIND, webua_connection_values, this);
 
     if (url.length() == 0) {
         bad_request();
@@ -778,6 +844,9 @@ cls_webu_ans::cls_webu_ans(cls_motapp *p_app, const char *uri)
 
     resp_page     = "";                          /* The response being constructed */
     req_file      = nullptr;
+    gzip_resp     = nullptr;
+    gzip_size     = 0;
+    gzip_encode   = false;
 
     cnct_type     = WEBUI_CNCT_UNKNOWN;
     resp_type     = WEBUI_RESP_HTML;             /* Default to html response */
@@ -899,5 +968,7 @@ cls_webu_ans::~cls_webu_ans()
     myfree(auth_pass);
     myfree(auth_opaque);
     myfree(auth_realm);
+    myfree(gzip_resp);
+
     webu->cnct_cnt--;
 }

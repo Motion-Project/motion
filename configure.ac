@@ -82,6 +82,27 @@ AS_IF([test "${MHTTP}" != "yes" ], [
 CPPFLAGS="$HOLD_CPPFLAGS"
 
 ##############################################################################
+###  Check zlib - Required.  Needed for stream/webcontrol
+##############################################################################
+AS_IF([pkgconf zlib ], [
+    TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags zlib`
+    TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs zlib`
+  ],[
+    AC_MSG_ERROR([Required package zlib not found, please check motionplus_guide.html and install necessary dependencies])
+  ]
+)
+HOLD_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $TEMP_CPPFLAGS"
+AC_CHECK_HEADERS(zlib.h,[ZLIB="yes"],[ZLIB="no"])
+AC_MSG_CHECKING(zlib libraries)
+AC_MSG_RESULT($ZLIB)
+AS_IF([test "${ZLIB}" != "yes" ], [
+    AC_MSG_ERROR([Required package zlib not found, please check motionplus_guide.html and install necessary dependencies])
+  ]
+)
+CPPFLAGS="$HOLD_CPPFLAGS"
+
+##############################################################################
 ###  Check setting/getting thread names
 ##############################################################################
 AC_CHECK_HEADERS(pthread_np.h,[PTHREAD_NP="yes"],[PTHREAD_NP="no"])

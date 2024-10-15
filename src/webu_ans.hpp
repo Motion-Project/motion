@@ -51,6 +51,7 @@
             enum WEBUI_CNCT cnct_type;      /* Type of connection we are processing */
             std::string     clientip;       /* IP of the connecting client */
             std::string     hostfull;       /* Full http name for host with port number */
+            bool            gzip_encode;    /* Bool for whether to gzip response */
 
         private:
             cls_webu_file   *webu_file;
@@ -66,6 +67,8 @@
             char            *auth_pass;     /* Parsed password from config authentication string*/
             bool            authenticated;  /* Boolean for whether authentication has been passed */
             enum WEBUI_METHOD   cnct_method;    /* Connection method.  Get or Post */
+            u_char  *gzip_resp;     /* Response in gzip format */
+            ulong    gzip_size;     /* Size of response in gzip format */
 
             int check_tls();
             void parms_edit();
@@ -83,6 +86,8 @@
             mhdrslt mhd_auth();
             void deinit_counter();
             void answer_get();
+            void gzip_deflate();
+
     };
 
 #endif
