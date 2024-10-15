@@ -1679,7 +1679,7 @@ void cls_netcam::set_parms ()
     filenbr = 0;
     filelist.clear();
     filedir = "";
-    cfg_idur = 90;
+    cfg_idur = 3;
 
     for (indx=0;indx<params->params_cnt;indx++) {
         if (params->params_array[indx].param_name == "decoder") {
@@ -1780,6 +1780,7 @@ int cls_netcam::open_context()
 
     set_options();
 
+    MOTPLS_LOG(DBG, TYPE_NETCAM, NO_ERRNO, _("Opening camera"));
     retcd = avformat_open_input(&format_context
         , path.c_str(), nullptr, &opts);
     if ((retcd < 0) || (interrupted) || (handler_stop) ) {
@@ -2058,7 +2059,14 @@ void cls_netcam::handler_reconnect()
                 slp_dur = 10;
             }
             cam->watchdog = slp_dur + (cam->cfg->watchdog_tmo * 3);
-            SLEEP(slp_dur,0);
+
+            while ((cam->handler_stop == false) && (slp_dur > 0)) {
+                SLEEP(1, 0);
+                slp_dur--;
+            }
+
+            cam->watchdog = (cam->cfg->watchdog_tmo * 3);
+
         }
     } else {
         reconnect_count = 0;
@@ -2210,7 +2218,7 @@ void cls_netcam::handler_shutdown()
     cam->device_status = STATUS_CLOSED;
     status = NETCAM_NOTCONNECTED;
     MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-        ,_("%s: Shut down complete.")
+        ,_("%s:Shut down complete.")
         ,cameratype.c_str());
 
 }
@@ -2218,6 +2226,10 @@ void cls_netcam::handler_shutdown()
 void cls_netcam::netcam_start()
 {
     int retcd;
+
+    if (cam->handler_stop == true) {
+        return;
+    }
 
     handler_finished = true;
     handler_stop = false;
@@ -2295,10 +2307,17 @@ void cls_netcam::noimage()
             reconnect_count++;
             slp_dur = 30;
         }
-        cam->watchdog = slp_dur + (cam->cfg->watchdog_tmo * 3);
-        SLEEP(slp_dur,0);
-        cam->watchdog = (cam->cfg->watchdog_tmo * 3);
         netcam_stop();
+
+        cam->watchdog = slp_dur + (cam->cfg->watchdog_tmo * 3);
+
+        while ((cam->handler_stop == false) && (slp_dur > 0)) {
+            SLEEP(1, 0);
+            slp_dur--;
+        }
+
+        cam->watchdog = (cam->cfg->watchdog_tmo * 3);
+
         netcam_start();
     }
 }
