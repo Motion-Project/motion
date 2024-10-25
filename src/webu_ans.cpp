@@ -18,13 +18,13 @@
 
 #include "motionplus.hpp"
 #include "camera.hpp"
+#include "allcam.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "webu.hpp"
 #include "webu_ans.hpp"
 #include "webu_html.hpp"
-#include "webu_common.hpp"
 #include "webu_stream.hpp"
 #include "webu_mpegts.hpp"
 #include "webu_json.hpp"
@@ -714,8 +714,8 @@ void cls_webu_ans::bad_request()
 /* Answer the get request from the user */
 void cls_webu_ans::answer_get()
 {
-    MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,"processing get");
-
+    MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+        ,"processing get: %s",uri_cmd1.c_str());
 
     if ((uri_cmd1 == "mjpg") || (uri_cmd1 == "mpegts") ||
         (uri_cmd1 == "static")) {
@@ -765,7 +765,7 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
     }
 
     if (cam != NULL) {
-        if (cam->handler_stop) {
+        if (cam->finish) {
            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
            return MHD_NO;
         }
@@ -805,7 +805,6 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
             cnct_method = WEBUI_METHOD_GET;
             retcd = MHD_YES;
         }
-
         return retcd;
     }
 
@@ -819,60 +818,6 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
     }
     return retcd;
 
-}
-
-cls_webu_ans::cls_webu_ans(cls_motapp *p_app, const char *uri)
-{
-    app = p_app;
-    webu = p_app->webu;
-
-    char *tmplang;
-
-    url           = "";
-    uri_camid     = "";
-    uri_cmd1      = "";
-    uri_cmd2      = "";
-    uri_cmd3      = "";
-    clientip      = "";
-    lang          = "";                          /* Two digit lang code */
-
-    auth_opaque   = (char*)mymalloc(WEBUI_LEN_PARM);
-    auth_realm    = (char*)mymalloc(WEBUI_LEN_PARM);
-    auth_user     = nullptr;                        /* Buffer to hold the user name*/
-    auth_pass     = nullptr;                        /* Buffer to hold the password */
-    authenticated = false;                       /* boolean for whether we are authenticated*/
-
-    resp_page     = "";                          /* The response being constructed */
-    req_file      = nullptr;
-    gzip_resp     = nullptr;
-    gzip_size     = 0;
-    gzip_encode   = false;
-
-    cnct_type     = WEBUI_CNCT_UNKNOWN;
-    resp_type     = WEBUI_RESP_HTML;             /* Default to html response */
-    cnct_method   = WEBUI_METHOD_GET;
-    camindx       = -1;
-    device_id     = -1;
-
-    tmplang = setlocale(LC_ALL, NULL);
-    if (tmplang == nullptr) {
-        lang = "en";
-    } else {
-        lang.assign(tmplang, 2);
-    }
-    mhd_first = true;
-
-    cam       = nullptr;
-    webu_file = nullptr;
-    webu_html = nullptr;
-    webu_json = nullptr;
-    webu_post = nullptr;
-    webu_stream = nullptr;
-
-    url.assign(uri);
-
-    parms_edit();
-    webu->cnct_cnt++;
 }
 
 void cls_webu_ans::deinit_counter()
@@ -942,27 +887,98 @@ void cls_webu_ans::deinit_counter()
             }
         pthread_mutex_unlock(&p_cam->stream.mutex);
     }
+    if (device_id == 0) {
+        pthread_mutex_lock(&app->allcam->stream.mutex);
+            if ((cnct_type == WEBUI_CNCT_JPG_FULL) ||
+                (cnct_type == WEBUI_CNCT_TS_FULL)) {
+                strm = &app->allcam->stream.norm;
+            } else if ( (cnct_type == WEBUI_CNCT_JPG_SUB) ||
+                        (cnct_type == WEBUI_CNCT_TS_SUB)) {
+                strm = &app->allcam->stream.sub;
+            } else if ( (cnct_type == WEBUI_CNCT_JPG_MOTION) ||
+                        (cnct_type == WEBUI_CNCT_TS_MOTION )) {
+                strm = &app->allcam->stream.motion;
+            } else if ( (cnct_type == WEBUI_CNCT_JPG_SOURCE) ||
+                        (cnct_type == WEBUI_CNCT_TS_SOURCE)) {
+                strm = &app->allcam->stream.source;
+            } else if ( (cnct_type == WEBUI_CNCT_JPG_SECONDARY) ||
+                        (cnct_type == WEBUI_CNCT_TS_SECONDARY)) {
+                strm = &app->allcam->stream.secondary;
+            } else {
+                strm = &app->allcam->stream.norm;
+            }
+
+            if (strm->all_cnct > 0) {
+                strm->all_cnct--;
+            }
+        pthread_mutex_unlock(&app->allcam->stream.mutex);
+    }
+}
+
+cls_webu_ans::cls_webu_ans(cls_motapp *p_app, const char *uri)
+{
+    app = p_app;
+    webu = p_app->webu;
+
+    char *tmplang;
+
+    url           = "";
+    uri_camid     = "";
+    uri_cmd1      = "";
+    uri_cmd2      = "";
+    uri_cmd3      = "";
+    clientip      = "";
+    lang          = "";                          /* Two digit lang code */
+
+    auth_opaque   = (char*)mymalloc(WEBUI_LEN_PARM);
+    auth_realm    = (char*)mymalloc(WEBUI_LEN_PARM);
+    auth_user     = nullptr;                        /* Buffer to hold the user name*/
+    auth_pass     = nullptr;                        /* Buffer to hold the password */
+    authenticated = false;                       /* boolean for whether we are authenticated*/
+
+    resp_page     = "";                          /* The response being constructed */
+    req_file      = nullptr;
+    gzip_resp     = nullptr;
+    gzip_size     = 0;
+    gzip_encode   = false;
+
+    cnct_type     = WEBUI_CNCT_UNKNOWN;
+    resp_type     = WEBUI_RESP_HTML;             /* Default to html response */
+    cnct_method   = WEBUI_METHOD_GET;
+    camindx       = -1;
+    device_id     = -1;
+
+    tmplang = setlocale(LC_ALL, NULL);
+    if (tmplang == nullptr) {
+        lang = "en";
+    } else {
+        lang.assign(tmplang, 2);
+    }
+    mhd_first = true;
+
+    cam       = nullptr;
+    webu_file = nullptr;
+    webu_html = nullptr;
+    webu_json = nullptr;
+    webu_post = nullptr;
+    webu_stream = nullptr;
+
+    url.assign(uri);
+
+    parms_edit();
+    webu->cnct_cnt++;
+
 }
 
 cls_webu_ans::~cls_webu_ans()
 {
     deinit_counter();
 
-    if (webu_file != nullptr) {
-        delete webu_file;
-    }
-    if (webu_html != nullptr) {
-        delete webu_html;
-    }
-    if (webu_json != nullptr) {
-        delete webu_json;
-    }
-    if (webu_post != nullptr) {
-        delete webu_post;
-    }
-    if (webu_stream != nullptr) {
-        delete webu_stream;
-    }
+    mydelete(webu_file);
+    mydelete(webu_html);
+    mydelete(webu_json);
+    mydelete(webu_post);
+    mydelete(webu_stream);
 
     myfree(auth_user);
     myfree(auth_pass);

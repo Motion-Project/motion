@@ -630,6 +630,9 @@ void cls_config::edit_device_id(std::string &parm, enum PARM_ACT pact)
             device_id = 0;
         } else {
             parm_in = atoi(parm.c_str());
+            if (device_id == parm_in) {
+                return;
+            }
             if (parm_in < 1) {
                 MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid device_id %d"),parm_in);
             } else if (parm_in > 32000) {

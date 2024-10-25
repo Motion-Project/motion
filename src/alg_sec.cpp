@@ -598,7 +598,7 @@ void cls_algsec::handler()
 
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Secondary detection starting."));
 
-    handler_finished = false;
+    handler_running = true;
     handler_stop = false;
 
     load_params();
@@ -621,7 +621,7 @@ void cls_algsec::handler()
     }
     is_started = false;
     handler_stop = false;
-    handler_finished = true;
+    handler_running = false;
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Secondary detection stopped."));
 
     pthread_exit(nullptr);
@@ -636,15 +636,15 @@ void cls_algsec::handler_startup()
         return;
     }
 
-    if (handler_finished == true) {
-        handler_finished = false;
+    if (handler_running == false) {
+        handler_running = true;
         handler_stop = false;
         pthread_attr_init(&thread_attr);
         pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
         retcd = pthread_create(&handler_thread, &thread_attr, &algsec_handler, this);
         if (retcd != 0) {
             MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start secondary detection"));
-            handler_finished = true;
+            handler_running = false;
             handler_stop = true;
         }
         pthread_attr_destroy(&thread_attr);
@@ -655,10 +655,10 @@ void cls_algsec::handler_shutdown()
 {
     int waitcnt;
 
-    if (handler_finished == false) {
+    if (handler_running == true) {
         handler_stop = true;
         waitcnt = 0;
-        while ((handler_finished == false) && (waitcnt < cam->cfg->watchdog_tmo)){
+        while ((handler_running == true) && (waitcnt < cam->cfg->watchdog_tmo)){
             SLEEP(1,0)
             waitcnt++;
         }
@@ -670,7 +670,7 @@ void cls_algsec::handler_shutdown()
                     ,_("Waiting additional %d seconds (watchdog_kill).")
                     ,cam->cfg->watchdog_kill);
                 waitcnt = 0;
-                while ((handler_finished == false) && (waitcnt < cam->cfg->watchdog_kill)){
+                while ((handler_running == true) && (waitcnt < cam->cfg->watchdog_kill)){
                     SLEEP(1,0)
                     waitcnt++;
                 }
@@ -687,7 +687,7 @@ void cls_algsec::handler_shutdown()
                 exit(1);
             }
         }
-        handler_finished = true;
+        handler_running = false;
     }
 
     myfree(image_norm);
@@ -752,7 +752,7 @@ cls_algsec::cls_algsec(cls_camera *p_cam)
 {
     #ifdef HAVE_OPENCV
         cam = p_cam;
-        handler_finished = true;
+        handler_running = false;
         handler_stop = true;
         image_norm = nullptr;
         params = nullptr;

@@ -2075,7 +2075,7 @@ void cls_netcam::handler_reconnect()
 
 void cls_netcam::handler()
 {
-    handler_finished = false;
+    handler_running = true;
 
     mythreadname_set("nc", threadnbr, camera_name.c_str());
 
@@ -2107,7 +2107,7 @@ void cls_netcam::handler()
 
     MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("%s:Camera handler stopped"),cameratype.c_str());
-    handler_finished = true;
+    handler_running = false;
     pthread_exit(nullptr);
 
 }
@@ -2117,15 +2117,15 @@ void cls_netcam::handler_startup()
     int wait_counter, retcd;
     pthread_attr_t thread_attr;
 
-    if (handler_finished == true) {
-        handler_finished = false;
+    if (handler_running == false) {
+        handler_running = true;
         handler_stop = false;
         pthread_attr_init(&thread_attr);
         pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
         retcd = pthread_create(&handler_thread, &thread_attr, &netcam_handler, this);
         if (retcd != 0) {
             MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start camera thread."));
-            handler_finished = true;
+            handler_running = false;
             handler_stop = true;
             return;
         }
@@ -2165,9 +2165,9 @@ void cls_netcam::handler_shutdown()
     idur = 0;
     handler_stop = true;
 
-    if (handler_finished == false) {
+    if (handler_running == true) {
         waitcnt = 0;
-        while ((handler_finished == false) && (waitcnt < cam->cfg->watchdog_tmo)){
+        while ((handler_running == true) && (waitcnt < cam->cfg->watchdog_tmo)){
             SLEEP(1,0)
             waitcnt++;
         }
@@ -2179,7 +2179,7 @@ void cls_netcam::handler_shutdown()
                     ,_("Waiting additional %d seconds (watchdog_kill).")
                     ,cam->cfg->watchdog_kill);
                 waitcnt = 0;
-                while ((handler_finished == false) && (waitcnt < cam->cfg->watchdog_kill)){
+                while ((handler_running == true) && (waitcnt < cam->cfg->watchdog_kill)){
                     SLEEP(1,0)
                     waitcnt++;
                 }
@@ -2196,7 +2196,7 @@ void cls_netcam::handler_shutdown()
                 exit(1);
             }
         }
-        handler_finished = true;
+        handler_running = false;
     }
 
     context_close();
@@ -2231,7 +2231,7 @@ void cls_netcam::netcam_start()
         return;
     }
 
-    handler_finished = true;
+    handler_running = false;
     handler_stop = false;
 
     if (high_resolution == false) {
@@ -2291,7 +2291,7 @@ void cls_netcam::noimage()
 {
     int slp_dur;
 
-    if (handler_finished == true ) {    /* handler is not running */
+    if (handler_running == false ) {
         if (reconnect_count >= 500) {
             MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
             MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 2 hours."));

@@ -18,12 +18,12 @@
 
 #include "motionplus.hpp"
 #include "camera.hpp"
+#include "allcam.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "picture.hpp"
 #include "webu.hpp"
-#include "webu_common.hpp"
 #include "webu_ans.hpp"
 #include "webu_stream.hpp"
 #include "webu_mpegts.hpp"
@@ -136,7 +136,7 @@ int cls_webu_mpegts::pic_get()
 void cls_webu_mpegts::resetpos()
 {
     stream_pos = 0;
-    webuc->resp_used = 0;
+    webus->resp_used = 0;
 }
 
 int cls_webu_mpegts::getimg()
@@ -146,18 +146,18 @@ int cls_webu_mpegts::getimg()
     unsigned char *img_data;
     int img_sz;
 
-    if (webuc->check_finish()) {
+    if (webus->check_finish() == true) {
         resetpos();
         return 0;
     }
 
     clock_gettime(CLOCK_REALTIME, &curr_ts);
 
-    memset(webuc->resp_image, '\0', webuc->resp_size);
-    webuc->resp_used = 0;
+    memset(webus->resp_image, '\0', webus->resp_size);
+    webus->resp_used = 0;
 
     if (webua->device_id > 0) {
-        webuc->set_fps();
+        webus->set_fps();
         /* Assign to a local pointer the stream we want */
         if (webua->cnct_type == WEBUI_CNCT_TS_FULL) {
             strm = &webua->cam->stream.norm;
@@ -183,11 +183,30 @@ int cls_webu_mpegts::getimg()
             }
         pthread_mutex_unlock(&webua->cam->stream.mutex);
     } else {
-        webuc->all_getimg();
+        if (webua->cnct_type == WEBUI_CNCT_TS_FULL) {
+            strm = &webua->app->allcam->stream.norm;
+        } else if (webua->cnct_type == WEBUI_CNCT_TS_SUB) {
+            strm = &webua->app->allcam->stream.sub;
+        } else if (webua->cnct_type == WEBUI_CNCT_TS_MOTION) {
+            strm = &webua->app->allcam->stream.motion;
+        } else if (webua->cnct_type == WEBUI_CNCT_TS_SOURCE) {
+            strm = &webua->app->allcam->stream.source;
+        } else if (webua->cnct_type == WEBUI_CNCT_TS_SECONDARY) {
+            strm = &webua->app->allcam->stream.secondary;
+        } else {
+            return 0;
+        }
+        img_sz = app->allcam->all_sizes.img_sz;
+        img_data = (unsigned char*) mymalloc((uint)img_sz);
+        pthread_mutex_lock(&webua->app->allcam->stream.mutex);
+            if (strm->img_data == nullptr) {
+                memset(img_data, 0x00, (uint)img_sz);
+            } else {
+                memcpy(img_data, strm->img_data, (uint)img_sz);
+                strm->consumed = true;
+            }
+        pthread_mutex_unlock(&webua->app->allcam->stream.mutex);
 
-        img_data = (unsigned char*) mymalloc((uint)app->all_sizes->img_sz);
-
-        memcpy(img_data, webuc->all_img_data, (uint)app->all_sizes->img_sz);
     }
 
     if (pic_send(img_data) < 0) {
@@ -205,19 +224,19 @@ int cls_webu_mpegts::getimg()
 
 int cls_webu_mpegts::avio_buf(myuint *buf, int buf_size)
 {
-    if (webuc->resp_size < (size_t)buf_size + webuc->resp_used) {
-        webuc->resp_size = (size_t)buf_size + webuc->resp_used;
-        webuc->resp_image = (unsigned char*)realloc(
-            webuc->resp_image, webuc->resp_size);
+    if (webus->resp_size < (size_t)buf_size + webus->resp_used) {
+        webus->resp_size = (size_t)buf_size + webus->resp_used;
+        webus->resp_image = (unsigned char*)realloc(
+            webus->resp_image, webus->resp_size);
         MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
             ,_("resp_image reallocated %d %d %d")
-            ,webuc->resp_size
-            ,webuc->resp_used
+            ,webus->resp_size
+            ,webus->resp_used
             ,buf_size);
     }
 
-    memcpy(webuc->resp_image + webuc->resp_used, buf, (uint)buf_size);
-    webuc->resp_used += (uint)buf_size;
+    memcpy(webus->resp_image + webus->resp_used, buf, (uint)buf_size);
+    webus->resp_used += (uint)buf_size;
 
     return buf_size;
 }
@@ -226,12 +245,19 @@ ssize_t cls_webu_mpegts::response(char *buf, size_t max)
 {
     size_t sent_bytes;
 
-    if (webuc->check_finish()) {
+    if (webus->check_finish()) {
         return -1;
     }
 
+    if (ctx_codec != nullptr) {
+        if ((webua->app->allcam->all_sizes.height != ctx_codec->height ) ||
+            (webua->app->allcam->all_sizes.width != ctx_codec->width)) {
+            return -1;
+        }
+    }
+
     if (stream_pos == 0) {
-        webuc->delay();
+        webus->delay();
         resetpos();
         if (getimg() < 0) {
             return 0;
@@ -239,21 +265,21 @@ ssize_t cls_webu_mpegts::response(char *buf, size_t max)
     }
 
     /* If we don't have anything in the avio buffer at this point bail out */
-    if (webuc->resp_used == 0) {
+    if (webus->resp_used == 0) {
         resetpos();
         return 0;
     }
 
-    if ((webuc->resp_used - stream_pos) > max) {
+    if ((webus->resp_used - stream_pos) > max) {
         sent_bytes = max;
     } else {
-        sent_bytes = webuc->resp_used - stream_pos;
+        sent_bytes = webus->resp_used - stream_pos;
     }
 
-    memcpy(buf, webuc->resp_image + stream_pos, (uint)sent_bytes);
+    memcpy(buf, webus->resp_image + stream_pos, (uint)sent_bytes);
 
     stream_pos = stream_pos + sent_bytes;
-    if (stream_pos >= webuc->resp_used) {
+    if (stream_pos >= webus->resp_used) {
         stream_pos = 0;
     }
 
@@ -271,7 +297,7 @@ int cls_webu_mpegts::open_mpegts()
     size_t          aviobuf_sz;
 
     opts = NULL;
-    webuc->stream_fps = 10000;   /* For quick start up*/
+    webus->stream_fps = 10000;   /* For quick start up*/
     aviobuf_sz = 4096;
     clock_gettime(CLOCK_REALTIME, &start_time);
 
@@ -293,9 +319,11 @@ int cls_webu_mpegts::open_mpegts()
             img_h = webua->cam->imgs.height;
         }
     } else {
-        webuc->all_sizes();
-        img_w = app->all_sizes->width;
-        img_h = app->all_sizes->height;
+        if (webus->all_ready() == false) {
+            return -1;
+        }
+        img_w = app->allcam->all_sizes.width;
+        img_h = app->allcam->all_sizes.height;
     }
 
     ctx_codec = avcodec_alloc_context3(codec);
@@ -322,7 +350,8 @@ int cls_webu_mpegts::open_mpegts()
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            ,_("Failed to copy decoder parameters!: %s"), errstr);
+            ,_("Failed to open codec context for %dx%d transport stream: %s")
+            , img_w, img_h, errstr);
         av_dict_free(&opts);
         return -1;
     }
@@ -336,10 +365,10 @@ int cls_webu_mpegts::open_mpegts()
         return -1;
     }
 
-    if (webua->device_id > 0) {
-        webuc->one_buffer();
+    if (webua->device_id == 0) {
+        webus->all_buffer();
     } else {
-        webuc->all_buffer();
+        webus->one_buffer();
     }
 
 
@@ -359,7 +388,7 @@ int cls_webu_mpegts::open_mpegts()
     }
 
     stream_pos = 0;
-    webuc->resp_used = 0;
+    webus->resp_used = 0;
 
     av_dict_free(&opts);
 
@@ -377,7 +406,7 @@ mhdrslt cls_webu_mpegts::main()
         return MHD_NO;
     }
 
-    clock_gettime(CLOCK_MONOTONIC, &webuc->time_last);
+    clock_gettime(CLOCK_MONOTONIC, &webus->time_last);
 
     response = MHD_create_response_from_callback (MHD_SIZE_UNKNOWN, 4096
         ,&webu_mpegts_response, this, NULL);
@@ -403,12 +432,13 @@ mhdrslt cls_webu_mpegts::main()
     return retcd;
 }
 
-cls_webu_mpegts::cls_webu_mpegts(cls_webu_ans *p_webua)
+cls_webu_mpegts::cls_webu_mpegts(cls_webu_ans *p_webua, cls_webu_stream *p_webus)
 {
     app    = p_webua->app;
     webu   = p_webua->webu;
     webua  = p_webua;
-    webuc  = new cls_webu_common(p_webua);
+    webus  = p_webus;
+
     stream_pos    = 0;
     picture = nullptr;;
     ctx_codec = nullptr;
@@ -420,7 +450,6 @@ cls_webu_mpegts::~cls_webu_mpegts()
     app    = nullptr;
     webu   = nullptr;
     webua  = nullptr;
-    delete webuc;
     if (picture != nullptr) {
         av_frame_free(&picture);
         picture = nullptr;

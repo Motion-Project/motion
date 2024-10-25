@@ -27,7 +27,6 @@
 #include "webu_json.hpp"
 #include "webu_post.hpp"
 #include "webu_file.hpp"
-#include "webu_common.hpp"
 #include "webu_stream.hpp"
 #include "webu_mpegts.hpp"
 #include "video_v4l2.hpp"
@@ -496,7 +495,7 @@ void cls_webu::startup()
     unsigned int randnbr;
     wb_daemon = nullptr;
     wb_daemon2 = nullptr;
-    wb_finish = false;
+    finish = false;
     wb_clients.clear();
 
     memset(wb_digest_rand, 0, sizeof(wb_digest_rand));
@@ -529,7 +528,7 @@ void cls_webu::shutdown()
 {
     int chkcnt;
 
-    wb_finish = true;
+    finish = true;
 
     MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Closing webcontrol"));
 

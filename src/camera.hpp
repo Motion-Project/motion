@@ -17,7 +17,6 @@
  *
 */
 
-
 #ifndef _INCLUDE_CAMERA_HPP_
 #define _INCLUDE_CAMERA_HPP_
 
@@ -34,12 +33,12 @@ enum CAMERA_TYPE {
     CAMERA_TYPE_LIBCAM,
     CAMERA_TYPE_NETCAM
 };
+
 enum CAPTURE_RESULT {
     CAPTURE_SUCCESS,
     CAPTURE_FAILURE,
     CAPTURE_ATTEMPTED
 };
-
 
 struct ctx_coord {
     int x;
@@ -115,25 +114,6 @@ struct ctx_images {
 
 };
 
-struct ctx_stream_data {
-    u_char   *jpg_data;  /* Image compressed as JPG */
-    int             jpg_sz;     /* The number of bytes for jpg */
-    int             consumed;   /* Bool for whether the jpeg data was consumed*/
-    u_char   *img_data;  /* The base data used for image */
-    int             jpg_cnct;   /* Counter of the number of jpg connections*/
-    int             ts_cnct;    /* Counter of the number of mpegts connections */
-    int             all_cnct;   /* Counter of the number of all camera connections */
-};
-
-struct ctx_stream {
-    pthread_mutex_t  mutex;
-    ctx_stream_data  norm;       /* Copy of the image to use for web stream*/
-    ctx_stream_data  sub;        /* Copy of the image to use for web stream*/
-    ctx_stream_data  motion;     /* Copy of the image to use for web stream*/
-    ctx_stream_data  source;     /* Copy of the image to use for web stream*/
-    ctx_stream_data  secondary;  /* Copy of the image to use for web stream*/
-};
-
 class cls_camera {
     public:
         cls_camera(cls_motapp *p_app);
@@ -151,17 +131,19 @@ class cls_camera {
         cls_netcam      *netcam;
         cls_netcam      *netcam_high;
         ctx_all_loc     all_loc;
+        ctx_all_sizes   all_sizes;
         cls_draw        *draw;
         cls_picture     *picture;
 
         bool            handler_stop;
-        bool            handler_finished;
+        bool            handler_running;
         pthread_t       handler_thread;
         void            handler();
         void            handler_startup();
         void            handler_shutdown();
 
         bool    restart;
+        bool    finish;
         int     threadnr;
         int     noise;
         bool    detecting_motion;
@@ -255,7 +237,6 @@ class cls_camera {
         void areadetect();
         void prepare();
         void resetimages();
-        void retry();
         int capture();
         void detection();
         void tuning();

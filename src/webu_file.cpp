@@ -24,7 +24,6 @@
 #include "picture.hpp"
 #include "webu.hpp"
 #include "webu_ans.hpp"
-#include "webu_common.hpp"
 #include "webu_file.hpp"
 #include "dbse.hpp"
 

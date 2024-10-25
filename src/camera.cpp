@@ -607,7 +607,6 @@ void cls_camera::init_values()
 
     noise = cfg->noise_level;
     passflag = false;
-    app->all_sizes->reset= true;
     threshold = cfg->threshold;
     device_status = STATUS_CLOSED;
     startup_frames = (cfg->framerate * 2) + cfg->pre_capture + cfg->minimum_motion_frames;
@@ -753,7 +752,7 @@ void cls_camera::cleanup()
 /* initialize everything for the loop */
 void cls_camera::init()
 {
-    if (((device_status != STATUS_INIT) && (restart != true)) ||
+    if (((device_status != STATUS_INIT) && (restart == false)) ||
         (handler_stop == true)) {
         return;
     }
@@ -768,8 +767,6 @@ void cls_camera::init()
     mythreadname_set("cl",cfg->device_id, cfg->device_name.c_str());
 
     MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize Camera"));
-
-    cfg->parms_copy(conf_src);
 
     init_camera_type();
 
@@ -1466,7 +1463,7 @@ void cls_camera::handler()
 
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Camera closed"));
 
-    handler_finished = true;
+    handler_running = false;
     pthread_exit(NULL);
 }
 
@@ -1475,15 +1472,16 @@ void cls_camera::handler_startup()
     int retcd;
     pthread_attr_t thread_attr;
 
-    if (handler_finished == true) {
-        handler_finished = false;
+    if (handler_running == false) {
+        handler_running = true;
         handler_stop = false;
+        restart = false;
         pthread_attr_init(&thread_attr);
         pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
         retcd = pthread_create(&handler_thread, &thread_attr, &camera_handler, this);
         if (retcd != 0) {
             MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start camera thread."));
-            handler_finished = true;
+            handler_running = false;
             handler_stop = true;
         }
         pthread_attr_destroy(&thread_attr);
@@ -1494,10 +1492,10 @@ void cls_camera::handler_shutdown()
 {
     int waitcnt;
 
-    if (handler_finished == false) {
+    if (handler_running == true) {
         handler_stop = true;
         waitcnt = 0;
-        while ((handler_finished == false) && (waitcnt < cfg->watchdog_tmo)){
+        while ((handler_running == true) && (waitcnt < cfg->watchdog_tmo)){
             SLEEP(1,0)
             waitcnt++;
         }
@@ -1509,7 +1507,7 @@ void cls_camera::handler_shutdown()
                     ,_("Waiting additional %d seconds (watchdog_kill).")
                     ,cfg->watchdog_kill);
                 waitcnt = 0;
-                while ((handler_finished == false) && (waitcnt < cfg->watchdog_kill)){
+                while ((handler_running == true) && (waitcnt < cfg->watchdog_kill)){
                     SLEEP(1,0)
                     waitcnt++;
                 }
@@ -1526,21 +1524,75 @@ void cls_camera::handler_shutdown()
                 exit(1);
             }
         }
-        handler_finished = true;
+        handler_running = false;
         watchdog = cfg->watchdog_tmo;
     }
-
 }
 
 cls_camera::cls_camera(cls_motapp *p_app)
 {
     app = p_app;
-    handler_finished = true;
+
+    cfg = nullptr;
+    conf_src = nullptr;
+    current_image = nullptr;
+    alg = nullptr;
+    algsec = nullptr;
+    rotate = nullptr;
+    netcam = nullptr;
+    netcam_high = nullptr;
+    draw = nullptr;
+    picture = nullptr;
+
+    threadnr = -1;
+    noise = -1;
+    detecting_motion = false;
+    event_curr_nbr = -1;
+    event_prev_nbr = -1;
+    threshold = -1;
+    lastrate = -1;
+    frame_skip = -1;
+    lost_connection = false;
+    text_scale = 1;
+    movie_passthrough = false;
+
+    memset(&eventid, 0, sizeof(eventid));
+    memset(&text_event_string, 0, sizeof(text_event_string));
+    memset(hostname, 0, sizeof(hostname));
+    memset(action_user, 0, sizeof(action_user));
+
+    movie_fps = -1;
+    pipe = -1;
+    mpipe = -1;
+    pause = false;
+    missing_frame_counter = -1;
+
+    info_diff_tot = 0;
+    info_diff_cnt = 0;
+    info_sdev_min = 0;
+    info_sdev_max = 0;
+    info_sdev_tot = 0;
+
+    action_snapshot = false;
+    event_stop = false;
+    event_user = false;
+    camera_type = CAMERA_TYPE_UNKNOWN;
+    connectionlosttime.tv_sec = 0;
+    connectionlosttime.tv_nsec = 0;
+
+    handler_running = false;
     handler_stop = true;
     restart = false;
-    action_snapshot = false;
+    finish = false;
     watchdog = 90;
+    passflag = false;
     pthread_mutex_init(&stream.mutex, NULL);
+    device_status = STATUS_CLOSED;
+    memset(&imgs, 0, sizeof(ctx_images));
+    memset(&stream, 0, sizeof(ctx_stream));
+    memset(&all_loc, 0, sizeof(ctx_all_loc));
+    memset(&all_sizes, 0, sizeof(ctx_all_sizes));
+    all_sizes.reset = true;
 }
 
 cls_camera::~cls_camera()
@@ -1548,4 +1600,5 @@ cls_camera::~cls_camera()
     mydelete(conf_src);
     mydelete(cfg);
     pthread_mutex_destroy(&stream.mutex);
+    device_status = STATUS_CLOSED;
 }

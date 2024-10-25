@@ -20,6 +20,7 @@
 #include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
+#include "allcam.hpp"
 #include "camera.hpp"
 #include "sound.hpp"
 #include "dbse.hpp"
@@ -124,7 +125,7 @@ void cls_motapp::signal_process()
         break;
     case MOTPLS_SIGNAL_SIGHUP:      /* Reload the parameters and restart*/
         reload_all = true;
-        webu->wb_finish = true;
+        webu->finish = true;
         for (indx=0; indx<cam_cnt; indx++) {
             cam_list[indx]->event_stop = true;
             cam_list[indx]->handler_stop = true;
@@ -140,7 +141,7 @@ void cls_motapp::signal_process()
         }
         break;
     case MOTPLS_SIGNAL_SIGTERM:     /* Quit application */
-        webu->wb_finish = true;
+        webu->finish = true;
         for (indx=0; indx<cam_cnt; indx++) {
             cam_list[indx]->event_stop = true;
             cam_list[indx]->restart = false;
@@ -152,9 +153,11 @@ void cls_motapp::signal_process()
         }
         for (indx=0; indx<cam_cnt; indx++) {
             cam_list[indx]->handler_shutdown();
+            cam_list[indx]->finish = true;
         }
         for (indx=0; indx<snd_cnt; indx++) {
             snd_list[indx]->handler_shutdown();
+            snd_list[indx]->finish = true;
         }
 
     default:
@@ -278,173 +281,6 @@ void cls_motapp::av_deinit()
     avformat_network_deinit();
 }
 
-/* Validate or set the position on the all cameras image*/
-void cls_motapp::allcams_init()
-{
-    int indx, indx1;
-    int row, col, mx_row, mx_col, col_chk;
-    bool cfg_valid, chk;
-    std::string cfg_row, cfg_col;
-    ctx_params  *params_loc;
-    ctx_params_item *itm;
-
-    all_sizes = new ctx_all_sizes;
-    all_sizes->height = 0;
-    all_sizes->width = 0;
-    all_sizes->img_sz = 0;
-    all_sizes->reset = true;
-
-    if (cam_cnt < 1) {
-        return;
-    }
-
-    params_loc = new ctx_params;
-
-    for (indx=0; indx<cam_cnt; indx++) {
-        cam_list[indx]->all_loc.row = -1;
-        cam_list[indx]->all_loc.col = -1;
-        cam_list[indx]->all_loc.offset_user_col = 0;
-        cam_list[indx]->all_loc.offset_user_row = 0;
-        cam_list[indx]->all_loc.scale =
-            cam_list[indx]->cfg->stream_preview_scale;
-
-        util_parms_parse(params_loc
-            , "stream_preview_location"
-            , cam_list[indx]->cfg->stream_preview_location);
-
-        for (indx1=0;indx1<params_loc->params_cnt;indx1++) {
-            itm = &params_loc->params_array[indx1];
-            if (itm->param_name == "row") {
-                cam_list[indx]->all_loc.row = mtoi(itm->param_value);
-            }
-            if (itm->param_name == "col") {
-                cam_list[indx]->all_loc.col = mtoi(itm->param_value);
-            }
-            if (itm->param_name == "offset_col") {
-                cam_list[indx]->all_loc.offset_user_col =
-                    mtoi(itm->param_value);
-            }
-            if (itm->param_name == "offset_row") {
-                cam_list[indx]->all_loc.offset_user_row =
-                    mtoi(itm->param_value);
-            }
-        }
-        params_loc->params_array.clear();
-    }
-
-    mydelete(params_loc);
-
-    mx_row = 0;
-    mx_col = 0;
-    for (indx=0; indx<cam_cnt; indx++) {
-        if (mx_col < cam_list[indx]->all_loc.col) {
-            mx_col = cam_list[indx]->all_loc.col;
-        }
-        if (mx_row < cam_list[indx]->all_loc.row) {
-            mx_row = cam_list[indx]->all_loc.row;
-        }
-    }
-    cfg_valid = true;
-    for (indx=0; indx<cam_cnt; indx++) {
-        if ((cam_list[indx]->all_loc.col == -1) ||
-            (cam_list[indx]->all_loc.row == -1)) {
-            cfg_valid = false;
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "No stream_preview_location for cam %d"
-                , cam_list[indx]->cfg->device_id);
-        } else {
-            for (indx1=0; indx1<cam_cnt; indx1++) {
-                if ((cam_list[indx]->all_loc.col ==
-                    cam_list[indx1]->all_loc.col) &&
-                    (cam_list[indx]->all_loc.row ==
-                    cam_list[indx1]->all_loc.row) &&
-                    (indx != indx1)) {
-                    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                        , "Duplicate stream_preview_location "
-                        " cam %d, cam %d row %d col %d"
-                        , cam_list[indx]->cfg->device_id
-                        , cam_list[indx1]->cfg->device_id
-                        , cam_list[indx]->all_loc.row
-                        , cam_list[indx]->all_loc.col);
-                    cfg_valid = false;
-                }
-            }
-        }
-        if (cam_list[indx]->all_loc.row == 0) {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "Invalid stream_preview_location row cam %d, row %d"
-                , cam_list[indx]->cfg->device_id
-                , cam_list[indx]->all_loc.row);
-            cfg_valid = false;
-        }
-        if (cam_list[indx]->all_loc.col == 0) {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "Invalid stream_preview_location col cam %d, col %d"
-                , cam_list[indx]->cfg->device_id
-                , cam_list[indx]->all_loc.col);
-            cfg_valid = false;
-        }
-    }
-
-    for (row=1; row<=mx_row; row++) {
-        chk = false;
-        for (indx=0; indx<cam_cnt; indx++) {
-            if (row == cam_list[indx]->all_loc.row) {
-                chk = true;
-            }
-        }
-        if (chk == false) {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "Invalid stream_preview_location combination. "
-                " Missing row %d", row);
-            cfg_valid = false;
-        }
-        col_chk = 0;
-        for (col=1; col<=mx_col; col++) {
-            for (indx=0; indx<cam_cnt; indx++) {
-                if ((row == cam_list[indx]->all_loc.row) &&
-                    (col == cam_list[indx]->all_loc.col)) {
-                    if ((col_chk+1) == col) {
-                        col_chk = col;
-                    } else {
-                        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                            , "Invalid stream_preview_location combination. "
-                            " Missing row %d column %d", row, col_chk+1);
-                        cfg_valid = false;
-                    }
-                }
-            }
-        }
-    }
-
-    if (cfg_valid == false) {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,"Creating default stream preview values");
-        row = 0;
-        col = 0;
-        for (indx=0; indx<cam_cnt; indx++) {
-            if (col == 1) {
-                col++;
-            } else {
-                row++;
-                col = 1;
-            }
-            cam_list[indx]->all_loc.col = col;
-            cam_list[indx]->all_loc.row = row;
-            cam_list[indx]->all_loc.scale = -1;
-        }
-    }
-
-    for (indx=0; indx<cam_cnt; indx++) {
-        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
-            ,"stream_preview_location values. Device %d row %d col %d"
-            , cam_list[indx]->cfg->device_id
-            , cam_list[indx]->all_loc.row
-            , cam_list[indx]->all_loc.col);
-    }
-
-}
-
 void cls_motapp::ntc()
 {
     #ifdef HAVE_V4L2
@@ -514,7 +350,7 @@ void cls_motapp::watchdog(uint camindx)
 {
     int indx;
 
-    if (cam_list[camindx]->handler_finished == true) {
+    if (cam_list[camindx]->handler_running == false) {
         return;
     }
 
@@ -614,23 +450,27 @@ bool cls_motapp::check_devices()
 
     retcd = false;
     for (indx=0; indx<cam_cnt; indx++) {
-        if (cam_list[indx]->handler_finished == false) {
+        if (cam_list[indx]->finish == false) {
             retcd = true;
-        } else if (cam_list[indx]->handler_stop == false) {
+        }
+        if ((cam_list[indx]->handler_stop == false) &&
+            (cam_list[indx]->handler_running == false)) {
             cam_list[indx]->handler_startup();
             retcd = true;
         }
     }
     for (indx=0; indx<snd_cnt; indx++) {
-        if (snd_list[indx]->handler_finished == false) {
+        if (snd_list[indx]->finish == false) {
             retcd = true;
-        } else if (snd_list[indx]->handler_stop == false) {
+        }
+        if ((snd_list[indx]->handler_stop == false) &&
+            (snd_list[indx]->handler_running == false)) {
             snd_list[indx]->handler_startup();
             retcd = true;
         }
     }
 
-    if ((webu->wb_finish == false) &&
+    if ((webu->finish == false) &&
         (webu->wb_daemon != NULL)) {
         retcd = true;
     }
@@ -656,6 +496,7 @@ void cls_motapp::init(int p_argc, char *p_argv[])
     cfg = nullptr;
     dbse = nullptr;
     webu = nullptr;
+    allcam = nullptr;
 
     pthread_mutex_init(&mutex_camlst, NULL);
     pthread_mutex_init(&mutex_post, NULL);
@@ -683,11 +524,11 @@ void cls_motapp::init(int p_argc, char *p_argv[])
 
     ntc();
 
-    dbse = new cls_dbse(this);
-
-    allcams_init();
-
     av_init();
+
+    dbse = new cls_dbse(this);
+    webu = new cls_webu(this);
+    allcam = new cls_allcam(this);
 
     if ((cam_cnt > 0) || (snd_cnt > 0)) {
         for (indx=0; indx<cam_cnt; indx++) {
@@ -703,9 +544,6 @@ void cls_motapp::init(int p_argc, char *p_argv[])
             , _("Waiting for camera or sound configuration to be added via web control."));
     }
 
-    /* Start web control last */
-    webu = new cls_webu(this);
-
 }
 
 void cls_motapp::deinit()
@@ -717,9 +555,9 @@ void cls_motapp::deinit()
 
     mydelete(webu);
     mydelete(dbse);
+    mydelete(allcam)
     mydelete(conf_src);
     mydelete(cfg);
-    mydelete(all_sizes);
 
     for (indx = 0; indx < cam_cnt;indx++) {
         mydelete(cam_list[indx]);
@@ -773,7 +611,7 @@ void cls_motapp::camera_delete()
 
     cam->handler_shutdown();
 
-    if (cam->handler_finished == false) {
+    if (cam->handler_running == true) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error stopping camera.  Timed out shutting down");
         cam_delete = -1;
         return;
@@ -787,6 +625,7 @@ void cls_motapp::camera_delete()
     pthread_mutex_unlock(&mutex_camlst);
 
     cam_delete = -1;
+    allcam->all_sizes.reset = true;
 
 }
 

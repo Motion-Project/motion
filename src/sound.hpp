@@ -121,9 +121,10 @@ class cls_sound {
         ctx_snd_info    *snd_info;
         int             threadnr;
         bool            restart;
+        bool            finish;
 
         bool            handler_stop;
-        bool            handler_finished;
+        bool            handler_running;
         pthread_t       handler_thread;
         void            handler();
         void            handler_startup();

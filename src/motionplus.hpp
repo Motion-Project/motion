@@ -90,6 +90,7 @@
 
 class cls_motapp;
 class cls_camera;
+class cls_allcam;
 class cls_sound;
 class cls_algsec;
 class cls_alg;
@@ -141,8 +142,27 @@ struct ctx_all_loc {
 struct ctx_all_sizes {
     int     width;
     int     height;
-    int     img_sz;     /* Image size*/
+    int     img_sz;
     bool    reset;
+};
+
+struct ctx_stream_data {
+    u_char  *jpg_data;  /* Image compressed as JPG */
+    int     jpg_sz;     /* The number of bytes for jpg */
+    int     consumed;   /* Bool for whether the jpeg data was consumed*/
+    u_char  *img_data;  /* The base data used for image */
+    int     jpg_cnct;   /* Counter of the number of jpg connections*/
+    int     ts_cnct;    /* Counter of the number of mpegts connections */
+    int     all_cnct;   /* Counter of the number of all camera connections */
+};
+
+struct ctx_stream {
+    pthread_mutex_t  mutex;
+    ctx_stream_data  norm;       /* Copy of the image to use for web stream*/
+    ctx_stream_data  sub;        /* Copy of the image to use for web stream*/
+    ctx_stream_data  motion;     /* Copy of the image to use for web stream*/
+    ctx_stream_data  source;     /* Copy of the image to use for web stream*/
+    ctx_stream_data  secondary;  /* Copy of the image to use for web stream*/
 };
 
 class cls_motapp {
@@ -165,9 +185,9 @@ class cls_motapp {
 
         cls_config          *conf_src;
         cls_config          *cfg;
-        ctx_all_sizes       *all_sizes;
         cls_webu            *webu;
         cls_dbse            *dbse;
+        cls_allcam          *allcam;
 
         pthread_mutex_t     mutex_camlst;       /* Lock the list of cams while adding/removing */
         pthread_mutex_t     mutex_post;         /* mutex to allow for processing of post actions*/
@@ -186,10 +206,8 @@ class cls_motapp {
         void daemon();
         void av_init();
         void av_deinit();
-        void allcams_init();
         void ntc();
         void watchdog(uint camindx);
-
 };
 
 #endif /* _INCLUDE_MOTIONPLUS_HPP_ */

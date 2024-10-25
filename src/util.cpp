@@ -1147,3 +1147,109 @@ std::string mtok(std::string &parm, std::string tok)
     return tmp;
 }
 
+void util_resize(uint8_t *src, int src_w, int src_h
+    , uint8_t *dst, int dst_w, int dst_h)
+{
+    int     retcd, img_sz;
+    char    errstr[128];
+    uint8_t *buf;
+    AVFrame *frm_in, *frm_out;
+    struct SwsContext *swsctx;
+
+    img_sz = (dst_h * dst_w * 3)/2;
+    memset(dst, 0x00, (size_t)img_sz);
+
+    frm_in = av_frame_alloc();
+    if (frm_in == NULL) {
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , _("Unable to allocate frm_in."));
+        return;
+    }
+
+    frm_out = av_frame_alloc();
+    if (frm_out == NULL) {
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , _("Unable to allocate frm_out."));
+        av_frame_free(&frm_in);
+        return;
+    }
+
+    retcd = av_image_fill_arrays(
+        frm_in->data, frm_in->linesize
+        , src, AV_PIX_FMT_YUV420P
+        , src_w, src_h, 1);
+    if (retcd < 0) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , "Error filling arrays: %s", errstr);
+        av_frame_free(&frm_in);
+        av_frame_free(&frm_out);
+        return;
+    }
+
+    buf = (uint8_t *)mymalloc((size_t)img_sz);
+
+    retcd = av_image_fill_arrays(
+        frm_out->data, frm_out->linesize
+        , buf, AV_PIX_FMT_YUV420P
+        , dst_w, dst_h, 1);
+    if (retcd < 0) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , "Error Filling array 2: %s", errstr);
+        free(buf);
+        av_frame_free(&frm_in);
+        av_frame_free(&frm_out);
+        return;
+    }
+
+    swsctx = sws_getContext(
+            src_w, src_h, AV_PIX_FMT_YUV420P
+            ,dst_w, dst_h, AV_PIX_FMT_YUV420P
+            ,SWS_BICUBIC, NULL, NULL, NULL);
+    if (swsctx == NULL) {
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , _("Unable to allocate scaling context."));
+        free(buf);
+        av_frame_free(&frm_in);
+        av_frame_free(&frm_out);
+        return;
+    }
+
+    retcd = sws_scale(swsctx
+        , (const uint8_t* const *)frm_in->data, frm_in->linesize
+        , 0, src_h, frm_out->data, frm_out->linesize);
+    if (retcd < 0) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            ,_("Error resizing/reformatting: %s"), errstr);
+        free(buf);
+        av_frame_free(&frm_in);
+        av_frame_free(&frm_out);
+        sws_freeContext(swsctx);
+        return;
+    }
+
+    retcd = av_image_copy_to_buffer(
+        (uint8_t *)dst, img_sz
+        , (const uint8_t * const*)frm_out
+        , frm_out->linesize
+        , AV_PIX_FMT_YUV420P, dst_w, dst_h, 1);
+
+    if (retcd < 0) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            ,_("Error putting frame into output buffer: %s"), errstr);
+        free(buf);
+        av_frame_free(&frm_in);
+        av_frame_free(&frm_out);
+        sws_freeContext(swsctx);
+        return;
+    }
+
+    free(buf);
+    av_frame_free(&frm_in);
+    av_frame_free(&frm_out);
+    sws_freeContext(swsctx);
+}
+

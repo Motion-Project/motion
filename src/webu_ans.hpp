@@ -23,12 +23,6 @@
             cls_webu_ans(cls_motapp *p_motapp, const char *uri);
             ~cls_webu_ans();
 
-            mhdrslt answer_main(struct MHD_Connection *connection, const char *method
-                , const char *upload_data, size_t *upload_data_size);
-
-            void            mhd_send();
-            void            bad_request();
-
             cls_motapp      *app;
             cls_webu        *webu;
             cls_camera      *cam;
@@ -46,12 +40,19 @@
 
             enum WEBUI_RESP resp_type;      /* indicator for the type of response to provide. */
             std::string     resp_page;      /* The response that will be sent */
+
             int             camindx;        /* Index number of the cam */
             int             device_id;      /* Device id number requested */
             enum WEBUI_CNCT cnct_type;      /* Type of connection we are processing */
             std::string     clientip;       /* IP of the connecting client */
             std::string     hostfull;       /* Full http name for host with port number */
             bool            gzip_encode;    /* Bool for whether to gzip response */
+
+            void mhd_send();
+            void bad_request();
+
+            mhdrslt answer_main(struct MHD_Connection *connection, const char *method
+                , const char *upload_data, size_t *upload_data_size);
 
         private:
             cls_webu_file   *webu_file;

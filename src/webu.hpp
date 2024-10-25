@@ -89,7 +89,7 @@
         public:
             cls_webu(cls_motapp *p_app);
             ~cls_webu();
-            bool                        wb_finish;
+            bool                        finish;
             ctx_params                  *wb_headers;
             ctx_params                  *wb_actions;
             char                        wb_digest_rand[12];

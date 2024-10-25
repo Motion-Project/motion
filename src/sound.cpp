@@ -873,7 +873,7 @@ void cls_sound::handler()
 
     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Sound exiting"));
 
-    handler_finished = true;
+    handler_running = false;
     pthread_exit(nullptr);
 }
 
@@ -888,15 +888,15 @@ void cls_sound::handler_startup()
         return;
     #endif
 
-    if (handler_finished == true) {
-        handler_finished = false;
+    if (handler_running == false) {
+        handler_running = true;
         handler_stop = false;
         pthread_attr_init(&thread_attr);
         pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
         retcd = pthread_create(&handler_thread, &thread_attr, &sound_handler, this);
         if (retcd != 0) {
             MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start sound frequency detection loop."));
-            handler_finished = true;
+            handler_running = false;
             handler_stop = true;
         }
         pthread_attr_destroy(&thread_attr);
@@ -907,10 +907,10 @@ void cls_sound::handler_shutdown()
 {
     int waitcnt;
 
-    if (handler_finished == false) {
+    if (handler_running == true) {
         handler_stop = true;
         waitcnt = 0;
-        while ((handler_finished == false) && (waitcnt < cfg->watchdog_tmo)){
+        while ((handler_running == true) && (waitcnt < cfg->watchdog_tmo)){
             SLEEP(1,0)
             waitcnt++;
         }
@@ -922,7 +922,7 @@ void cls_sound::handler_shutdown()
                     ,_("Waiting additional %d seconds (watchdog_kill).")
                     ,cfg->watchdog_kill);
                 waitcnt = 0;
-                while ((handler_finished == false) && (waitcnt < cfg->watchdog_kill)){
+                while ((handler_running == true) && (waitcnt < cfg->watchdog_kill)){
                     SLEEP(1,0)
                     waitcnt++;
                 }
@@ -939,7 +939,7 @@ void cls_sound::handler_shutdown()
                 exit(1);
             }
         }
-        handler_finished = true;
+        handler_running = false;
         watchdog = cfg->watchdog_tmo;
     }
 
@@ -948,7 +948,7 @@ void cls_sound::handler_shutdown()
 cls_sound::cls_sound(cls_motapp *p_app)
 {
     app = p_app;
-    handler_finished = true;
+    handler_running = false;
     handler_stop = true;
     restart = false;
     watchdog = 30;

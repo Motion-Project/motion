@@ -26,7 +26,6 @@
 #include "webu.hpp"
 #include "webu_ans.hpp"
 #include "webu_html.hpp"
-#include "webu_common.hpp"
 #include "webu_post.hpp"
 
 /**************Callback functions for MHD **********************/
@@ -320,12 +319,14 @@ void cls_webu_post::action_restart()
     if (webua->device_id == 0) {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all cameras"));
         for (indx=0; indx<app->cam_cnt; indx++) {
+            app->cam_list[indx]->handler_stop = false;
             app->cam_list[indx]->restart = true;
         }
     } else {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Restarting camera %d")
             , app->cam_list[webua->camindx]->cfg->device_id);
+        app->cam_list[webua->camindx]->handler_stop = false;
         app->cam_list[webua->camindx]->restart = true;
     }
 }
@@ -479,25 +480,29 @@ void cls_webu_post::config_set(int indx_parm, std::string parm_vl)
             app->conf_src->edit_set(parm_nm, parm_vl);
             config_restart_set("dbse",0);
         } else {
-            for (indx=0;indx<app->cam_cnt;indx++){
-                app->cam_list[indx]->conf_src->edit_get(
-                    parm_nm, parm_vl_dev, parm_ct);
-                if (parm_vl_dev == parm_vl_dflt) {
-                    app->cam_list[indx]->conf_src->edit_set(
-                        parm_nm, parm_vl);
-                    config_restart_set("cam",indx);
-                }
-            }
-            for (indx=0;indx<app->snd_cnt;indx++) {
-                app->snd_list[indx]->conf_src->edit_get(
-                    parm_nm, parm_vl_dev, parm_ct);
-                if (parm_vl_dev == parm_vl_dflt) {
-                    app->snd_list[indx]->conf_src->edit_set(
-                        parm_nm, parm_vl);
-                    config_restart_set("snd",indx);
-                }
-            }
             app->conf_src->edit_set(parm_nm, parm_vl);
+            if (app->cam_list[webua->camindx]->handler_running == false) {
+                app->cfg->edit_set(parm_nm, parm_vl);
+            } else {
+                for (indx=0;indx<app->cam_cnt;indx++){
+                    app->cam_list[indx]->conf_src->edit_get(
+                        parm_nm, parm_vl_dev, parm_ct);
+                    if (parm_vl_dev == parm_vl_dflt) {
+                        app->cam_list[indx]->conf_src->edit_set(
+                            parm_nm, parm_vl);
+                        config_restart_set("cam",indx);
+                    }
+                }
+                for (indx=0;indx<app->snd_cnt;indx++) {
+                    app->snd_list[indx]->conf_src->edit_get(
+                        parm_nm, parm_vl_dev, parm_ct);
+                    if (parm_vl_dev == parm_vl_dflt) {
+                        app->snd_list[indx]->conf_src->edit_set(
+                            parm_nm, parm_vl);
+                        config_restart_set("snd",indx);
+                    }
+                }
+            }
         }
     } else {
         if ((parm_ct == PARM_CAT_00) ||
@@ -505,9 +510,16 @@ void cls_webu_post::config_set(int indx_parm, std::string parm_vl)
             (parm_ct == PARM_CAT_15)) {
             return;
         }
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Config edit set. %s:%s"
+            ,parm_nm.c_str(), parm_vl.c_str());
         app->cam_list[webua->camindx]->conf_src->edit_set(
             parm_nm, parm_vl);
-        config_restart_set("cam", webua->camindx);
+        if (app->cam_list[webua->camindx]->handler_running == true) {
+            config_restart_set("cam", webua->camindx);
+        } else {
+            app->cam_list[webua->camindx]->cfg->edit_set(
+                parm_nm, parm_vl);
+        }
     }
 
 }

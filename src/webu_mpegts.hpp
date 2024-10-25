@@ -21,7 +21,7 @@
 
     class cls_webu_mpegts {
         public:
-            cls_webu_mpegts(cls_webu_ans *p_webua);
+            cls_webu_mpegts(cls_webu_ans *p_webua, cls_webu_stream *p_webus);
             ~cls_webu_mpegts();
             int avio_buf(myuint *buf, int buf_size);
             ssize_t response(char *buf, size_t max);
@@ -31,7 +31,7 @@
             cls_motapp      *app;
             cls_webu        *webu;
             cls_webu_ans    *webua;
-            cls_webu_common *webuc;
+            cls_webu_stream *webus;
 
             AVFrame         *picture;
             AVFormatContext *fmtctx;

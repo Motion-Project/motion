@@ -45,7 +45,7 @@ class cls_algsec {
         pthread_mutex_t mutex;
 
         bool            handler_stop;
-        bool            handler_finished;
+        bool            handler_running;
         pthread_t       handler_thread;
         void            handler();
 

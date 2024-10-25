@@ -96,7 +96,7 @@ class cls_netcam {
         int                       audio_stream_index;    /* Stream index associated with video from camera */
 
         bool            handler_stop;
-        bool            handler_finished;
+        bool            handler_running;
         pthread_t       handler_thread;
         void            handler();
 

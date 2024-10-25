@@ -23,14 +23,25 @@
             cls_webu_stream(cls_webu_ans *webua);
             ~cls_webu_stream();
 
+            int     stream_fps;
+            size_t  resp_size;      /* The allocated size of the response */
+            size_t  resp_used;      /* The amount of the response page used */
+            u_char  *resp_image;    /* Response image to provide to user */
+
             mhdrslt main();
             ssize_t mjpeg_response (char *buf, size_t max);
+            bool check_finish();
+            void delay();
+            void set_fps();
+            void one_buffer();
+            void all_buffer();
+            bool all_ready();
+            struct timespec time_last;      /* Keep track of processing time for stream thread*/
 
         private:
             cls_motapp      *app;
             cls_webu        *webu;
             cls_webu_ans    *webua;
-            cls_webu_common *webuc;
             cls_webu_mpegts *webu_mpegts;
 
             size_t          stream_pos;
@@ -42,8 +53,7 @@
             mhdrslt stream_static();
             mhdrslt stream_mjpeg();
 
-            int checks();
-            bool all_ready();
+            bool valid_request();
             void all_cnct();
             void jpg_cnct();
             void ts_cnct();
