@@ -411,9 +411,11 @@ void cls_camera::cam_start()
         libcam = new cls_libcam(this);
     } else if (camera_type == CAMERA_TYPE_NETCAM) {
         netcam = new cls_netcam(this, false);
+        netcam->netcam_start();
         if (cfg->netcam_high_url != "") {
             watchdog = cfg->watchdog_tmo;
             netcam_high = new cls_netcam(this, true);
+            netcam_high->netcam_start();
         }
     } else if (camera_type == CAMERA_TYPE_V4L2) {
         v4l2cam = new cls_v4l2cam(this);
@@ -502,6 +504,10 @@ void cls_camera::init_firstimage()
         }
     } else {
         indx = 0;
+    }
+
+    if (finish == true) {
+        return;
     }
 
     if ((indx >= 5) || (device_status != STATUS_OPENED)) {

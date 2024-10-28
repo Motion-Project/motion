@@ -142,22 +142,31 @@ void cls_motapp::signal_process()
         break;
     case MOTPLS_SIGNAL_SIGTERM:     /* Quit application */
         webu->finish = true;
-        for (indx=0; indx<cam_cnt; indx++) {
-            cam_list[indx]->event_stop = true;
-            cam_list[indx]->restart = false;
-            cam_list[indx]->handler_stop = true;
-        }
         for (indx=0; indx<snd_cnt; indx++) {
             snd_list[indx]->restart = false;
             snd_list[indx]->handler_stop = true;
         }
-        for (indx=0; indx<cam_cnt; indx++) {
-            cam_list[indx]->handler_shutdown();
-            cam_list[indx]->finish = true;
-        }
         for (indx=0; indx<snd_cnt; indx++) {
             snd_list[indx]->handler_shutdown();
             snd_list[indx]->finish = true;
+        }
+
+        for (indx=0; indx<cam_cnt; indx++) {
+            cam_list[indx]->event_stop = true;
+            cam_list[indx]->restart = false;
+            cam_list[indx]->handler_stop = true;
+            cam_list[indx]->finish = true;
+            if (cam_list[indx]->camera_type == CAMERA_TYPE_NETCAM) {
+                if (cam_list[indx]->netcam != nullptr) {
+                    cam_list[indx]->netcam->idur = 0;
+                }
+                if (cam_list[indx]->netcam_high != nullptr) {
+                    cam_list[indx]->netcam_high->idur = 0;
+                }
+            }
+        }
+        for (indx=0; indx<cam_cnt; indx++) {
+            cam_list[indx]->handler_shutdown();
         }
 
     default:

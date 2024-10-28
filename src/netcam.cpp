@@ -88,9 +88,11 @@ int netcam_interrupt(void *ctx)
         clock_gettime(CLOCK_MONOTONIC, &netcam->icur_tm);
         if ((netcam->icur_tm.tv_sec -
              netcam->ist_tm.tv_sec ) > netcam->idur){
-            MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Camera reading (%s) timed out")
-                , netcam->cameratype.c_str(), netcam->camera_name.c_str());
+            if (netcam->cam->finish == false) {
+                MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:Camera reading (%s) timed out")
+                    , netcam->cameratype.c_str(), netcam->camera_name.c_str());
+            }
             netcam->interrupted = true;
             return true;
         } else{
@@ -104,9 +106,11 @@ int netcam_interrupt(void *ctx)
         */
         clock_gettime(CLOCK_MONOTONIC, &netcam->icur_tm);
         if ((netcam->icur_tm.tv_sec - netcam->ist_tm.tv_sec ) > netcam->idur){
-            MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Camera (%s) timed out")
-                , netcam->cameratype.c_str(), netcam->camera_name.c_str());
+            if (netcam->cam->finish == false) {
+                MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:Camera (%s) timed out")
+                    , netcam->cameratype.c_str(), netcam->camera_name.c_str());
+            }
             netcam->interrupted = true;
             return true;
         } else{
@@ -122,12 +126,6 @@ bool netcam_filelist_cmp(const ctx_filelist_item &a, const ctx_filelist_item &b)
 {
     return a.filenm < b.filenm;
 }
-
-
-
-
-
-
 
 void cls_netcam::filelist_load()
 {
@@ -1785,11 +1783,18 @@ int cls_netcam::open_context()
         , path.c_str(), nullptr, &opts);
     if ((retcd < 0) || (interrupted) || (handler_stop) ) {
         if (status == NETCAM_NOTCONNECTED) {
-            av_strerror(retcd, errstr, sizeof(errstr));
-            MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Unable to open camera(%s):%s")
-                , cameratype.c_str()
-                , camera_name.c_str(), errstr);
+            if (retcd < 0) {
+                av_strerror(retcd, errstr, sizeof(errstr));
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:Unable to open camera(%s):%s")
+                    , cameratype.c_str()
+                    , camera_name.c_str(), errstr);
+            } else if (interrupted) {
+                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:Unable to open camera(%s):timeout")
+                    , cameratype.c_str()
+                    , camera_name.c_str());
+            }
         }
         av_dict_free(&opts);
         context_close();
@@ -1806,10 +1811,16 @@ int cls_netcam::open_context()
     retcd = avformat_find_stream_info(format_context, nullptr);
     if ((retcd < 0) || (interrupted) || (handler_stop) ) {
         if (status == NETCAM_NOTCONNECTED) {
-            av_strerror(retcd, errstr, sizeof(errstr));
-            MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Unable to find stream info:%s")
-                ,cameratype.c_str(), errstr);
+            if (retcd < 0) {
+                av_strerror(retcd, errstr, sizeof(errstr));
+                MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:Unable to find stream info:%s")
+                    ,cameratype.c_str(), errstr);
+            } else if (interrupted) {
+                MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:Unable to find stream info:%s")
+                    ,cameratype.c_str(), errstr);
+            }
         }
         context_close();
         return -1;
@@ -1825,13 +1836,12 @@ int cls_netcam::open_context()
         retcd = open_codec();
     mythreadname_set(nullptr, 0, threadname.c_str());
     if ((retcd < 0) || (interrupted) || (handler_stop) ) {
+        av_strerror(retcd, errstr, sizeof(errstr));
         if (status == NETCAM_NOTCONNECTED) {
-            av_strerror(retcd, errstr, sizeof(errstr));
             MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
                 ,_("%s:Unable to open codec context:%s")
                 ,cameratype.c_str(), errstr);
         } else {
-            av_strerror(retcd, errstr, sizeof(errstr));
             MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
                 ,_("%s:Connected and unable to open codec context:%s")
                 ,cameratype.c_str(), errstr);
@@ -2158,14 +2168,13 @@ void cls_netcam::handler_shutdown()
 {
     int waitcnt;
 
-    MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
-        ,_("%s:Shutting down network camera.")
-        ,cameratype.c_str());
-
     idur = 0;
     handler_stop = true;
 
     if (handler_running == true) {
+        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s:Shutting down network camera.")
+            ,cameratype.c_str());
         waitcnt = 0;
         while ((handler_running == true) && (waitcnt < cam->cfg->watchdog_tmo)){
             SLEEP(1,0)
@@ -2359,13 +2368,11 @@ cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
     pthread_mutex_init(&mutex_pktarray, nullptr);
     pthread_mutex_init(&mutex_transfer, nullptr);
 
-    netcam_start();
-
 }
 
 cls_netcam::~cls_netcam()
 {
-    netcam_stop();
+    handler_shutdown();
 
     pthread_mutex_destroy(&mutex);
     pthread_mutex_destroy(&mutex_pktarray);

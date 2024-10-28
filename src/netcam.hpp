@@ -74,9 +74,8 @@ class cls_netcam {
     public:
         cls_netcam(cls_camera *p_cam, bool p_is_high);
         ~cls_netcam();
-        int next(ctx_image_data *img_data);
-        void noimage();
 
+        cls_camera *cam;
         bool                      interrupted;      /* Boolean for whether interrupt has been tripped */
         enum NETCAM_STATUS        status;                /* Status of whether the camera is connecting, closed, etc*/
         struct timespec           ist_tm;    /* The time set before calling the av functions */
@@ -100,9 +99,12 @@ class cls_netcam {
         pthread_t       handler_thread;
         void            handler();
 
-    private:
-        cls_camera *cam;
+        int next(ctx_image_data *img_data);
+        void noimage();
+        void netcam_start();
+        void netcam_stop();
 
+    private:
         AVFormatContext          *format_context;        /* Main format context for the camera */
         AVCodecContext           *codec_context;         /* Codec being sent from the camera */
         AVStream                 *strm;
@@ -202,9 +204,6 @@ class cls_netcam {
         void handler_reconnect();
         void handler_startup();
         void handler_shutdown();
-
-        void netcam_start();
-        void netcam_stop();
 
 };
 
