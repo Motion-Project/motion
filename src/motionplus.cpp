@@ -591,13 +591,11 @@ void cls_motapp::camera_delete()
 {
     cls_camera *cam;
 
-    if ((cam_delete == -1) ||
-        (cam_cnt == 0)) {
-        cam_delete = -1;
+    if (cam_delete < 0) {
         return;
     }
 
-    if (cam_delete >= (int)cam_cnt) {
+    if ((cam_delete >= cam_cnt) || (cam_cnt == 0)) {
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             , _("Invalid camera specified for deletion. %d"), cam_delete);
         cam_delete = -1;
@@ -609,6 +607,7 @@ void cls_motapp::camera_delete()
     MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Stopping %s device_id %d")
         , cam->cfg->device_name.c_str(), cam->cfg->device_id);
 
+    cam->finish = true;
     cam->handler_shutdown();
 
     if (cam->handler_running == true) {

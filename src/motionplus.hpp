@@ -175,7 +175,7 @@ class cls_motapp {
 
         bool    reload_all;
         bool    cam_add;
-        int     cam_delete;     /* 0 for no action, other numbers specify camera to remove */
+        int     cam_delete;
         int     cam_cnt;
         int     snd_cnt;
 

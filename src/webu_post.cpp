@@ -115,6 +115,8 @@ void cls_webu_post::cam_delete()
         app->cam_delete = -1;
         return;
     }
+    webua->cam = nullptr;
+    webua->camindx = -1;
 }
 
 /* Get the command, device_id and camera index from the post data */
