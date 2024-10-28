@@ -1664,6 +1664,10 @@ void cls_movie::start_extpipe()
 
 void cls_movie::start()
 {
+    if (is_running == true) {
+        return;
+    };
+
     if (movie_type == "norm") {
         start_norm();
     } else if (movie_type == "motion") {
