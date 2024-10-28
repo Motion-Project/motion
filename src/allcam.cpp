@@ -209,8 +209,6 @@ void cls_allcam::stream_free()
         }
         myfree(strm->img_data);
         myfree(strm->jpg_data);
-        strm->img_data = (unsigned char*)
-            mymalloc((size_t)all_sizes.img_sz);
     }
 
 }
