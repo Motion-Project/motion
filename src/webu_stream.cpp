@@ -39,6 +39,10 @@ static ssize_t webu_mjpeg_response (void *cls, uint64_t pos, char *buf, size_t m
 
 void cls_webu_stream::set_fps()
 {
+    if (webua->device_id == 0) {
+        stream_fps = app->cfg->stream_maxrate;
+        return;
+    }
     if (webua->camindx >= app->cam_list.size()) {
         stream_fps = 1;
     } else if ((webua->cam->detecting_motion == false) &&
@@ -148,10 +152,18 @@ bool cls_webu_stream::all_ready()
                 indx1++;
             }
             if (p_cam->passflag == false) {
+                MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+                    , "Camera %d not ready", p_cam->cfg->device_id);
                 return false;
             }
         }
     }
+    if ((webua->app->allcam->all_sizes.height == 0) ||
+        (webua->app->allcam->all_sizes.width == 0)) {
+            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO, "All cameras not ready");
+            return false;
+    }
+
     return true;
 }
 
@@ -689,8 +701,7 @@ mhdrslt cls_webu_stream::main()
         }
         retcd = webu_mpegts->main();
         if (retcd == MHD_NO) {
-            delete webu_mpegts;
-            webu_mpegts = nullptr;
+            mydelete(webu_mpegts);
         }
 
     } else {

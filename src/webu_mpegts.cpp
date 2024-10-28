@@ -157,7 +157,6 @@ int cls_webu_mpegts::getimg()
     webus->resp_used = 0;
 
     if (webua->device_id > 0) {
-        webus->set_fps();
         /* Assign to a local pointer the stream we want */
         if (webua->cnct_type == WEBUI_CNCT_TS_FULL) {
             strm = &webua->cam->stream.norm;
@@ -250,8 +249,9 @@ ssize_t cls_webu_mpegts::response(char *buf, size_t max)
     }
 
     if (ctx_codec != nullptr) {
-        if ((webua->app->allcam->all_sizes.height != ctx_codec->height ) ||
-            (webua->app->allcam->all_sizes.width != ctx_codec->width)) {
+        if ((webua->device_id == 0) &&
+            ((webua->app->allcam->all_sizes.height != ctx_codec->height ) ||
+             (webua->app->allcam->all_sizes.width != ctx_codec->width))) {
             return -1;
         }
     }
@@ -392,6 +392,8 @@ int cls_webu_mpegts::open_mpegts()
 
     av_dict_free(&opts);
 
+    webus->set_fps();
+
     return 0;
 }
 
@@ -400,6 +402,12 @@ mhdrslt cls_webu_mpegts::main()
     mhdrslt retcd;
     struct MHD_Response *response;
     int indx;
+
+    if (webua->device_id == 0) {
+        if (webus->all_ready() == false) {
+            return MHD_NO;
+        }
+    }
 
     if (open_mpegts() < 0 ) {
         MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Unable to open mpegts"));
