@@ -19,6 +19,7 @@
 #include "motionplus.hpp"
 #include "util.hpp"
 #include "camera.hpp"
+#include "allcam.hpp"
 #include "sound.hpp"
 #include "dbse.hpp"
 #include "conf.hpp"
@@ -483,10 +484,14 @@ void cls_webu_post::config_set(int indx_parm, std::string parm_vl)
             config_restart_set("dbse",0);
         } else {
             app->conf_src->edit_set(parm_nm, parm_vl);
-            if (app->cam_list[webua->camindx]->handler_running == false) {
+            if (parm_ct == PARM_CAT_14) {
                 app->cfg->edit_set(parm_nm, parm_vl);
-            } else {
-                for (indx=0;indx<app->cam_cnt;indx++){
+                app->allcam->all_sizes.reset = true;
+            }
+            for (indx=0;indx<app->cam_cnt;indx++){
+                if (app->cam_list[indx]->handler_running == false) {
+                    app->cfg->edit_set(parm_nm, parm_vl);
+                } else {
                     app->cam_list[indx]->conf_src->edit_get(
                         parm_nm, parm_vl_dev, parm_ct);
                     if (parm_vl_dev == parm_vl_dflt) {
@@ -495,14 +500,14 @@ void cls_webu_post::config_set(int indx_parm, std::string parm_vl)
                         config_restart_set("cam",indx);
                     }
                 }
-                for (indx=0;indx<app->snd_cnt;indx++) {
-                    app->snd_list[indx]->conf_src->edit_get(
-                        parm_nm, parm_vl_dev, parm_ct);
-                    if (parm_vl_dev == parm_vl_dflt) {
-                        app->snd_list[indx]->conf_src->edit_set(
-                            parm_nm, parm_vl);
-                        config_restart_set("snd",indx);
-                    }
+            }
+            for (indx=0;indx<app->snd_cnt;indx++) {
+                app->snd_list[indx]->conf_src->edit_get(
+                    parm_nm, parm_vl_dev, parm_ct);
+                if (parm_vl_dev == parm_vl_dflt) {
+                    app->snd_list[indx]->conf_src->edit_set(
+                        parm_nm, parm_vl);
+                    config_restart_set("snd",indx);
                 }
             }
         }
