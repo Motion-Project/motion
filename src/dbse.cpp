@@ -943,6 +943,8 @@ void cls_dbse::exec(cls_camera *cam, std::string fname, std::string cmd)
         return;
     }
 
+    cam->watchdog = cam->cfg->watchdog_tmo;
+
     if (cmd == "pic_save") {
         mystrftime(cam, sql, cam->cfg->sql_pic_save, fname);
     } else if (cmd == "movie_start") {
@@ -981,6 +983,8 @@ void cls_dbse::movielist_add(cls_camera *cam, cls_movie *movie, timespec *ts1)
     if (dbse_open() == false) {
         return;
     }
+
+    cam->watchdog = cam->cfg->watchdog_tmo;
 
     /* Movie file times */
     if (stat(movie->full_nm.c_str(), &statbuf) == 0) {
