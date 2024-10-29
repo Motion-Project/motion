@@ -1819,7 +1819,7 @@ int cls_netcam::open_context()
             } else if (interrupted) {
                 MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
                     ,_("%s:Unable to find stream info:%s")
-                    ,cameratype.c_str(), errstr);
+                    ,cameratype.c_str());
             }
         }
         context_close();
@@ -2363,6 +2363,7 @@ cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)
     cam = p_cam;
     high_resolution = p_is_high;
     reconnect_count = 0;
+    cameratype = "";
 
     pthread_mutex_init(&mutex, nullptr);
     pthread_mutex_init(&mutex_pktarray, nullptr);
