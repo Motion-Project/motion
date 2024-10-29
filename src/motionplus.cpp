@@ -142,6 +142,12 @@ void cls_motapp::signal_process()
         break;
     case MOTPLS_SIGNAL_SIGTERM:     /* Quit application */
         webu->finish = true;
+        webu->restart = false;
+
+        dbse->finish = true;
+        dbse->restart = false;
+        dbse->handler_stop = true;
+
         for (indx=0; indx<snd_cnt; indx++) {
             snd_list[indx]->restart = false;
             snd_list[indx]->handler_stop = true;

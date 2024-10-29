@@ -24,6 +24,12 @@
 #include "movie.hpp"
 #include "dbse.hpp"
 
+static void *dbse_handler(void *arg)
+{
+    ((cls_dbse *)arg)->handler();
+    return nullptr;
+}
+
 #ifdef HAVE_DBSE
 
 void cls_dbse::cols_add_itm(std::string nm, std::string typ)
@@ -148,27 +154,6 @@ void cls_dbse::sql_motpls(std::string &sql)
     } else if (dbse_action == DBSE_COLS_LIST) {
         sql = " select * from motionplus;";
 
-    } else if (dbse_action == DBSE_MOV_CLEAN) {
-        sql = " delete from motionplus "
-            " where record_id in (";
-        delimit = " ";
-        for (it = movielist->begin();
-            it != movielist->end(); it++) {
-            if (it->found == false) {
-                sql += delimit + std::to_string(it->record_id);
-                delimit = ",";
-            }
-            /* 5000 is arbitrary */
-            if (sql.length() > 5000) {
-                it = movielist->end();
-            }
-        }
-        if (delimit == ",") {
-            sql += ");";
-        } else {
-            sql = "";
-        }
-
     } else if (dbse_action == DBSE_MOV_SELECT) {
         sql  = " select * ";
         sql += " from motionplus ";
@@ -228,6 +213,10 @@ void cls_dbse::sqlite3db_cb (int arg_nb, char **arg_val, char **col_nm)
 {
     int indx;
     it_cols it;
+
+    if (check_exit() == true) {
+        return;
+    }
 
     if (dbse_action == DBSE_TBL_CHECK) {
         for (indx=0; indx < arg_nb; indx++) {
@@ -373,14 +362,6 @@ void cls_dbse::sqlite3db_movielist()
         sqlite3_free(errmsg);
         return;
     }
-
-    dbse_action = DBSE_MOV_CLEAN;
-    sql_motpls(sql);
-    sqlite3db_exec(sql.c_str());
-
-    sql = " vacuum;";
-    sqlite3db_exec(sql.c_str());
-
 }
 
 void cls_dbse::sqlite3db_close()
@@ -497,6 +478,10 @@ void cls_dbse::mariadb_recs (std::string sql)
 
     } else if (dbse_action == DBSE_MOV_SELECT) {
         while (qry_row != nullptr) {
+            if (check_exit() == true) {
+                mysql_free_result(qry_result);
+                return;
+            }
             movie_item_default();
             for (it_db = dbcol_lst.begin();
                 it_db != dbcol_lst.end();it_db++) {
@@ -626,10 +611,6 @@ void cls_dbse::mariadb_movielist()
     sql_motpls(sql);
     mariadb_recs(sql.c_str());
 
-    dbse_action = DBSE_MOV_CLEAN;
-    sql_motpls(sql);
-    mariadb_exec(sql.c_str());
-
 }
 
 #endif  /*HAVE_MARIADB*/
@@ -696,6 +677,10 @@ void cls_dbse::pgsqldb_recs (std::string sql)
         return;
     }
 
+    if (check_exit() == true) {
+        return;
+    }
+
     res = PQexec(database_pgsqldb, sql.c_str());
 
     if (dbse_action == DBSE_TBL_CHECK) {
@@ -738,6 +723,10 @@ void cls_dbse::pgsqldb_recs (std::string sql)
         cols = PQnfields(res);
         rows = PQntuples(res);
         for(indx = 0; indx < rows; indx++) {
+            if (check_exit() == true) {
+                PQclear(res);
+                return;
+            }
             movie_item_default();
             for (indx2 = 0; indx2 < cols; indx2++) {
                 if (PQgetvalue(res, indx, indx2) != nullptr) {
@@ -834,10 +823,6 @@ void cls_dbse::pgsqldb_movielist()
     sql_motpls(sql);
     pgsqldb_recs(sql.c_str());
 
-    dbse_action = DBSE_MOV_CLEAN;
-    sql_motpls(sql);
-    pgsqldb_exec(sql.c_str());
-
 }
 
 #endif  /*HAVE_PGSQL*/
@@ -878,6 +863,9 @@ bool cls_dbse::dbse_open()
 void cls_dbse::movielist_get(int p_device_id, lst_movies *p_movielist)
 {
     if (dbse_open() == false) {
+        return;
+    }
+    if (check_exit() == true) {
         return;
     }
 
@@ -1081,13 +1069,170 @@ void cls_dbse::dbse_edits()
 
 }
 
+void cls_dbse::dbse_clean()
+{
+    lst_movies mvlist;
+    it_movies it;
+    int delcnt, indx;
+    std::string sql, delimit;
+    struct stat statbuf;
+
+    for (indx=0;indx<app->cam_cnt;indx++) {
+        if (check_exit() == true) {
+            return;
+        }
+        movielist_get(app->cam_list[indx]->cfg->device_id, &mvlist);
+        delcnt = 0;
+        for (it = mvlist.begin();
+            it != mvlist.end(); it++) {
+            if (check_exit() == true) {
+                return;
+            }
+            if (stat(it->full_nm.c_str(), &statbuf) != 0) {
+                if (sql == "") {
+                    sql = " delete from motionplus "
+                        " where record_id in (";
+                    delimit = " ";
+                    delcnt = 0;
+                }
+                sql += delimit + std::to_string(it->record_id);
+                delimit = ",";
+                delcnt++;
+            }
+            if (delcnt == 20) {
+                sql += ");";
+                exec_sql(sql);
+                sql = "";
+            }
+        }
+        if (delcnt != 0) {
+            sql += ");";
+            exec_sql(sql);
+        }
+    }
+
+    if (app->cfg->database_type == "sqlite3") {
+        sql = " vacuum;";
+        exec_sql(sql);
+    }
+
+}
+
 void cls_dbse::startup()
 {
     is_open = false;
-
     dbse_edits();
-
     dbse_open();
+}
+
+bool cls_dbse::check_exit()
+{
+    if ((handler_stop == true) ||
+        (finish == true)) {
+        return true;
+    }
+    return false;
+}
+
+void cls_dbse::timing()
+{
+    int waitcnt;
+
+    waitcnt = 0;
+    while (waitcnt < 30) {
+        if (check_exit() == true) {
+            return;
+        }
+        SLEEP(1,0);
+        waitcnt++;
+    }
+}
+
+void cls_dbse::handler()
+{
+    struct timespec ts2;
+    struct tm lcl_tm;
+    int hr_cur, hr_prev;
+
+    mythreadname_set("dl", 0, "dbsl");
+
+    hr_prev = 0;
+    while (check_exit() == false) {
+        clock_gettime(CLOCK_MONOTONIC, &ts2);
+        localtime_r(&ts2.tv_sec, &lcl_tm);
+        hr_cur = lcl_tm.tm_hour;
+        if (hr_cur != hr_prev) {
+            dbse_clean();
+            hr_prev = hr_cur;
+        }
+        timing();
+    }
+
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Database handler closed"));
+
+    handler_running = false;
+    pthread_exit(NULL);
+}
+
+void cls_dbse::handler_startup()
+{
+    int retcd;
+    pthread_attr_t thread_attr;
+
+    if (handler_running == false) {
+        handler_running = true;
+        handler_stop = false;
+        restart = false;
+        pthread_attr_init(&thread_attr);
+        pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
+        retcd = pthread_create(&handler_thread, &thread_attr, &dbse_handler, this);
+        if (retcd != 0) {
+            MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start database handler thread."));
+            handler_running = false;
+            handler_stop = true;
+        }
+        pthread_attr_destroy(&thread_attr);
+    }
+}
+
+void cls_dbse::handler_shutdown()
+{
+    int waitcnt;
+
+    if (handler_running == true) {
+        handler_stop = true;
+        waitcnt = 0;
+        while ((handler_running == true) && (waitcnt < app->cfg->watchdog_tmo)){
+            SLEEP(1,0)
+            waitcnt++;
+        }
+        if (waitcnt == app->cfg->watchdog_tmo) {
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                , _("Normal shutdown of database handler failed"));
+            if (app->cfg->watchdog_kill > 0) {
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    ,_("Waiting additional %d seconds (watchdog_kill).")
+                    ,app->cfg->watchdog_kill);
+                waitcnt = 0;
+                while ((handler_running == true) && (waitcnt < app->cfg->watchdog_kill)){
+                    SLEEP(1,0)
+                    waitcnt++;
+                }
+                if (waitcnt == app->cfg->watchdog_kill) {
+                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                        , _("No response to shutdown.  Killing it."));
+                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                        , _("Memory leaks will occur."));
+                    pthread_kill(handler_thread, SIGVTALRM);
+                }
+            } else {
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    , _("watchdog_kill set to terminate application."));
+                exit(1);
+            }
+        }
+        handler_running = false;
+    }
 }
 
 cls_dbse::cls_dbse(cls_motapp *p_app)
@@ -1096,16 +1241,21 @@ cls_dbse::cls_dbse(cls_motapp *p_app)
 
     pthread_mutex_init(&mutex_dbse, nullptr);
     restart = false;
+    finish = false;
+    handler_running = false;
+    handler_stop = true;
 
     pthread_mutex_lock(&mutex_dbse);
         startup();
     pthread_mutex_unlock(&mutex_dbse);
 
+    handler_startup();
+
 }
 
 cls_dbse::~cls_dbse()
 {
+    handler_shutdown();
     shutdown();
-
     pthread_mutex_destroy(&mutex_dbse);
 }

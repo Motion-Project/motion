@@ -44,7 +44,6 @@ enum DBSE_ACT {
     DBSE_TBL_CHECK,
     DBSE_TBL_CREATE,
     DBSE_MOV_SELECT,
-    DBSE_MOV_CLEAN,
     DBSE_COLS_LIST,
     DBSE_COLS_ADD,
     DBSE_END
@@ -89,9 +88,16 @@ class cls_dbse {
         void exec(cls_camera *cam, std::string filename, std::string cmd);
         void movielist_add(cls_camera *cam, cls_movie *movie, timespec *ts1);
         void movielist_get(int p_device_id, lst_movies *p_movielist);
-        bool    restart;
+        bool restart;
+        bool finish;
         void shutdown();
         void startup();
+
+        bool            handler_stop;
+        bool            handler_running;
+        pthread_t       handler_thread;
+        void            handler();
+
     private:
         #ifdef HAVE_SQLITE3DB
             sqlite3 *database_sqlite3db;
@@ -121,7 +127,7 @@ class cls_dbse {
             void pgsqldb_init();
             void pgsqldb_movielist();
         #endif
-        cls_motapp      *app;
+        cls_motapp          *app;
         enum DBSE_ACT       dbse_action;    /* action to perform with query*/
         bool                table_ok;       /* bool of whether table exists*/
         bool                is_open;
@@ -129,6 +135,12 @@ class cls_dbse {
         lst_movies          *movielist;
         int                 device_id;
         ctx_movie_item      movie_item;
+
+        void handler_startup();
+        void handler_shutdown();
+        void timing();
+        bool check_exit();
+        void dbse_clean();
 
         void cols_add_itm(std::string nm, std::string typ);
         void get_cols_list();
