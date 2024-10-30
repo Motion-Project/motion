@@ -24,11 +24,11 @@ SUBDIRS = src po
 libstatedir = $(localstatedir)/lib/@PACKAGE@
 
 dist_libstate_DATA = \
-	data/motionplus.conf \
-	data/camera1.conf \
-	data/camera2.conf \
-	data/camera3.conf \
-	data/sound1.conf
+	data/motionplus-dist.conf \
+	data/camera1-dist.conf \
+	data/camera2-dist.conf \
+	data/camera3-dist.conf \
+	data/sound1-dist.conf
 
 dist_man_MANS = man/motionplus.1
 
@@ -43,7 +43,14 @@ dist_doc_DATA = \
 ###################################################################
 all-local:
 	@rm -f po/*.po\~
-	@sed -e 's|$${prefix}|$(prefix)|' data/motionplus.conf > data/motionplus.conf.tmp && mv -f data/motionplus.conf.tmp data/motionplus.conf
+	@sed -e 's|$${prefix}|$(prefix)|' data/motionplus-dist.conf > data/motionplus-dist.conf.tmp && mv -f data/motionplus-dist.conf.tmp data/motionplus-dist.conf
+
+###################################################################
+## Install default configuration files
+###################################################################
+install: install-am
+	@cp -n "$(localstatedir)/lib/@PACKAGE@/motionplus-dist.conf" "$(localstatedir)/lib/@PACKAGE@/motionplus.conf"
+	@cp -n "$(localstatedir)/lib/@PACKAGE@/camera1-dist.conf" "$(localstatedir)/lib/@PACKAGE@/camera1.conf"
 
 ###################################################################
 ## Create pristine directories to match exactly distributed files
@@ -56,9 +63,9 @@ cleanall: distclean
 	@rm -f po/Makevars.template po/quot.sed po/remove-potcdate.sin
 	@rm -f po/Rules-quot po/stamp-po po/*.gmo po/motionplus.pot po/boldquot.sed
 	@rm -f Makefile.in src/Makefile.in po/Makefile.in.in man/Makefile.in
-	@rm -f data/motionplus.service data/motionplus.conf
-	@rm -f data/camera1.conf data/camera2.conf
-	@rm -f data/camera3.conf data/sound1.conf
+	@rm -f data/motionplus-dist.service data/motionplus-dist.conf
+	@rm -f data/camera1-dist.conf data/camera2-dist.conf
+	@rm -f data/camera3-dist.conf data/sound1-dist.conf
 
 ###################################################################
 ## Testing options for maintainer
