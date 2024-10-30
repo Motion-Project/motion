@@ -277,8 +277,6 @@ void cls_log::write_msg(int loglvl, int msg_type, int flgerr, int flgfnc, ...)
 void cls_log::shutdown()
 {
     if (log_file_ptr != nullptr) {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Closing log_file (%s)."
-            , log_file_name.c_str());
         myfclose(log_file_ptr);
         log_file_ptr = nullptr;
     }

@@ -430,10 +430,12 @@ void cls_webu_json::loghistory()
     bool frst;
 
     webua->resp_type = WEBUI_RESP_JSON;
+    webua->resp_page = "";
+
+    frst = true;
+    cnt = 0;
 
     pthread_mutex_lock(&motlog->mutex_log);
-        frst = true;
-        cnt = 0;
         for (indx=0; indx<motlog->log_vec.size();indx++) {
             if (motlog->log_vec[indx].log_nbr > mtoi(webua->uri_cmd2)) {
                 if (frst == true) {
@@ -454,9 +456,10 @@ void cls_webu_json::loghistory()
         }
     pthread_mutex_unlock(&motlog->mutex_log);
     if (frst == true) {
-        webua->resp_page += "{\"0\": \"\" ";
+        webua->resp_page += "{\"0\":\"\" ";
     }
     webua->resp_page += ",\"count\":\""+std::to_string(cnt)+"\"}";
+
 }
 
 void cls_webu_json::main()

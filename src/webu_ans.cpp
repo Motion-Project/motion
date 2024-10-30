@@ -618,18 +618,26 @@ mhdrslt cls_webu_ans::mhd_auth()
 
 void cls_webu_ans::gzip_deflate()
 {
-    myfree(gzip_resp);
-    gzip_size = 0;
+    uint sz;
+    int retcd;
 
-    gzip_resp = (u_char*)mymalloc(resp_page.length());
+    /* Add extra 1024(arbitrary number) bytes to output buffer
+       The buffer MUST be large enough to do in a single call
+       to deflate.  (Not currently coded for multiple calls)
+    */
+    sz = (uint)resp_page.length()+1024;
+
+    myfree(gzip_resp);
+    gzip_resp = (u_char*)mymalloc(sz);
+    gzip_size = 0;
 
     z_stream zs;
     zs.zalloc = Z_NULL;
     zs.zfree = Z_NULL;
     zs.opaque = Z_NULL;
-    zs.avail_in = (uInt)resp_page.length();
+    zs.avail_in = (uint)resp_page.length();
     zs.next_in = (Bytef *)resp_page.c_str();
-    zs.avail_out = (uInt)resp_page.length();
+    zs.avail_out = sz;
     zs.next_out = (Bytef *)gzip_resp;
 
     deflateInit2(&zs
@@ -637,9 +645,29 @@ void cls_webu_ans::gzip_deflate()
         , Z_DEFLATED
         , 15 | 16, 8
         , Z_DEFAULT_STRATEGY);
-    deflate(&zs, Z_FINISH);
-    deflateEnd(&zs);
-    gzip_size = zs.total_out;
+
+    retcd = deflate(&zs, Z_FINISH);
+    if (retcd < Z_OK) {
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            , _("deflate failed: %d") ,retcd);
+        gzip_size = 0;
+    } else {
+        gzip_size = (ulong)zs.total_out;
+    }
+
+    retcd = deflateEnd(&zs);
+    if (retcd < Z_OK) {
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            , _("deflateEnd failed: %d"), retcd);
+        gzip_size = 0;
+    }
+
+    if (zs.avail_in != 0) {
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            , _("deflate failed avail in: %d"), zs.avail_in);
+        gzip_size = 0;
+    }
+
 }
 
 /* Send the response that we created back to the user.  */
@@ -651,15 +679,15 @@ void cls_webu_ans::mhd_send()
 
     if (gzip_encode == true) {
         gzip_deflate();
-        if (gzip_size > 0) {
-            response = MHD_create_response_from_buffer(
-                gzip_size, (void *)gzip_resp
-                , MHD_RESPMEM_PERSISTENT);
-        } else {
+        if (gzip_size == 0) {
             gzip_encode = false;
             resp_page = "Error in gzip response";
             response = MHD_create_response_from_buffer(resp_page.length()
                 ,(void *)resp_page.c_str(), MHD_RESPMEM_PERSISTENT);
+        } else {
+            response = MHD_create_response_from_buffer(
+                gzip_size, (void *)gzip_resp
+                , MHD_RESPMEM_PERSISTENT);
         }
     } else {
         response = MHD_create_response_from_buffer(resp_page.length()

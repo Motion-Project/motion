@@ -414,24 +414,24 @@ void cls_motapp::check_restart()
     std::string parm_pid_org, parm_pid_new;
 
     if (motlog->restart == true) {
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarting log"));
+
         cfg->edit_get("pid_file",parm_pid_org, PARM_CAT_00);
         conf_src->edit_get("pid_file",parm_pid_new, PARM_CAT_00);
         if (parm_pid_org != parm_pid_new) {
             pid_remove();
         }
 
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarting log"));
-        pthread_mutex_lock(&motlog->mutex_log);
-            motlog->shutdown();
-            cfg->parms_copy(conf_src, PARM_CAT_00);
-            motlog->startup();
-        pthread_mutex_unlock(&motlog->mutex_log);
+        motlog->shutdown();
+        cfg->parms_copy(conf_src, PARM_CAT_00);
+        motlog->startup();
 
         mytranslate_text("",cfg->native_language);
         if (parm_pid_org != parm_pid_new) {
             pid_write();
         }
         motlog->restart = false;
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarted log"));
     }
 
     if (dbse->restart == true) {
@@ -442,6 +442,7 @@ void cls_motapp::check_restart()
             dbse->startup();
         pthread_mutex_lock(&dbse->mutex_dbse);
         dbse->restart = false;
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarted database"));
     }
 
     if (webu->restart == true) {
@@ -450,6 +451,7 @@ void cls_motapp::check_restart()
         cfg->parms_copy(conf_src, PARM_CAT_13);
         webu->startup();
         webu->restart = false;
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarted webcontrol"));
     }
 
 }
