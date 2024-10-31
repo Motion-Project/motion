@@ -21,7 +21,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = src po
 
-libstatedir = $(localstatedir)/lib/@PACKAGE@
+libstatedir = @localstatedir@/lib/@PACKAGE@
 
 dist_libstate_DATA = \
 	data/motionplus-dist.conf \
@@ -48,9 +48,9 @@ all-local:
 ###################################################################
 ## Install default configuration files
 ###################################################################
-install: install-am
-	@cp -n "$(localstatedir)/lib/@PACKAGE@/motionplus-dist.conf" "$(localstatedir)/lib/@PACKAGE@/motionplus.conf"
-	@cp -n "$(localstatedir)/lib/@PACKAGE@/camera1-dist.conf" "$(localstatedir)/lib/@PACKAGE@/camera1.conf"
+install: all install-am
+	@cp -n "$(DESTDIR)@localstatedir@/lib/@PACKAGE@/motionplus-dist.conf" "$(DESTDIR)@localstatedir@/lib/@PACKAGE@/motionplus.conf"
+	@cp -n "$(DESTDIR)@localstatedir@/lib/@PACKAGE@/camera1-dist.conf" "$(DESTDIR)@localstatedir@/lib/@PACKAGE@/camera1.conf"
 
 ###################################################################
 ## Create pristine directories to match exactly distributed files
