@@ -1107,6 +1107,7 @@ void cls_dbse::dbse_clean()
                 sql += ");";
                 exec_sql(sql);
                 sql = "";
+                delcnt = 0;
             }
         }
         if (delcnt != 0) {
