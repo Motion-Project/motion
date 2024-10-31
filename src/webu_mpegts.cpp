@@ -257,6 +257,11 @@ ssize_t cls_webu_mpegts::response(char *buf, size_t max)
     }
 
     if (stream_pos == 0) {
+        if ((webus->time_last.tv_sec - st_mono_time.tv_sec) < 2) {
+            webus->stream_fps = 30;
+        } else {
+            webus->set_fps();
+        }
         webus->delay();
         resetpos();
         if (getimg() < 0) {
@@ -297,9 +302,10 @@ int cls_webu_mpegts::open_mpegts()
     size_t          aviobuf_sz;
 
     opts = NULL;
-    webus->stream_fps = 10000;   /* For quick start up*/
+    webus->stream_fps = 30;
     aviobuf_sz = 4096;
     clock_gettime(CLOCK_REALTIME, &start_time);
+    clock_gettime(CLOCK_MONOTONIC, &st_mono_time);
 
     fmtctx = avformat_alloc_context();
     fmtctx->oformat = av_guess_format("mpegts", NULL, NULL);
@@ -391,8 +397,6 @@ int cls_webu_mpegts::open_mpegts()
     webus->resp_used = 0;
 
     av_dict_free(&opts);
-
-    webus->set_fps();
 
     return 0;
 }

@@ -38,6 +38,7 @@
             AVCodecContext  *ctx_codec;
             size_t          stream_pos;     /* Stream position of sent image */
             struct timespec start_time;     /* Start time of the stream*/
+            struct timespec st_mono_time;
 
             int pic_send(unsigned char *img);
             int pic_get();
