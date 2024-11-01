@@ -1058,6 +1058,33 @@ void cls_webu_html::script_camera_buttons_ptz()
         "    }\n\n";
 }
 
+void cls_webu_html::script_image_picall()
+{
+    webua->resp_page +=
+        "    function image_picall() {\n\n"
+        "      document.getElementById('picall').addEventListener('click',function(event){\n"
+        "        bounds=this.getBoundingClientRect();\n"
+        "        var locx,locy,locw, loch,pctx,pcty;\n"
+        "        var indx, camcnt, caminfo;\n"
+        "        locx = Math.floor(event.pageX - bounds.left - window.scrollX);\n"
+        "        locy = Math.floor(event.pageY - bounds.top - window.scrollY);\n"
+        "        locw = Math.floor(bounds.width);\n"
+        "        loch = Math.floor(bounds.height);\n"
+        "        pctx = ((locx*100)/locw);\n"
+        "        pcty = ((locy*100)/loch);\n"
+        "        camcnt = pData['cameras']['count'];\n"
+        "        for (indx=0; indx<camcnt; indx++) {\n"
+        "          if ((pctx >= pData['cameras'][indx]['all_xpct_st']) &&\n"
+        "              (pctx <= pData['cameras'][indx]['all_xpct_en']) &&\n"
+        "              (pcty >= pData['cameras'][indx]['all_ypct_st']) &&\n"
+        "              (pcty <= pData['cameras'][indx]['all_ypct_en'])) {\n"
+        "              cams_one_click(indx);\n"
+        "          }\n"
+        "        }\n"
+        "      });\n"
+        "    }\n\n";
+}
+
 /* Create the image_pantilt javascript function */
 void cls_webu_html::script_image_pantilt()
 {
@@ -1202,7 +1229,7 @@ void cls_webu_html::script_cams_all_click()
         "          } \n"
         "        }\n"
         "      } else { \n"
-        "        html_preview += \"<a><img id='pic\" + indx + \"' src=\"\n"
+        "        html_preview += \"<a><img id='picall' src=\"\n"
         "        html_preview += pHostFull;\n"
         "        html_preview += \"/0/mjpg/stream\" ;\n"
         "        html_preview += \" border=0 width=95\";\n"
@@ -1213,8 +1240,12 @@ void cls_webu_html::script_cams_all_click()
         "      cams_reset();\n"
         "      document.getElementById('div_cam').style.display='block';\n"
         "      document.getElementById('div_cam').innerHTML = html_preview;\n"
-        "      cams_all_timer = setInterval(cams_all_fnc, 1000);\n\n"
-        "  }\n\n";
+        "      if (chk == 0) {\n"
+        "        cams_all_timer = setInterval(cams_all_fnc, 1000);\n"
+        "      } else {\n"
+        "        image_picall();\n"
+        "      }\n\n"
+        "    }\n\n";
 }
 
 /* Create the movies_page javascript function */
@@ -1512,6 +1543,7 @@ void cls_webu_html::script()
     script_display_actions();
 
     script_camera_buttons_ptz();
+    script_image_picall();
     script_image_pantilt();
 
     script_cams_reset();

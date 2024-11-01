@@ -137,6 +137,10 @@ struct ctx_all_loc {
     int     offset_user_row;
     int     offset_user_col;
     int     scale;
+    int     xpct_st;    /*Starting x location of image on percentage basis*/
+    int     xpct_en;    /*Ending x location of image on percentage basis*/
+    int     ypct_st;    /*Starting y location of image on percentage basis*/
+    int     ypct_en;    /*Ending y location of image on percentage basis*/
 };
 
 struct ctx_all_sizes {

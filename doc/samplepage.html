@@ -848,6 +848,30 @@
 
     }
 
+    function image_picall() {
+
+      document.getElementById('picall').addEventListener('click',function(event){
+        bounds=this.getBoundingClientRect();
+        var locx,locy,locw, loch,pctx,pcty;
+        var indx, camcnt, caminfo;
+        locx = Math.floor(event.pageX - bounds.left - window.scrollX);
+        locy = Math.floor(event.pageY - bounds.top - window.scrollY);
+        locw = Math.floor(bounds.width);
+        loch = Math.floor(bounds.height);
+        pctx = ((locx*100)/locw);
+        pcty = ((locy*100)/loch);
+        camcnt = pData['cameras']['count'];
+        for (indx=0; indx<camcnt; indx++) {
+          if ((pctx >= pData['cameras'][indx]['all_xpct_st']) &&
+              (pctx <= pData['cameras'][indx]['all_xpct_en']) &&
+              (pcty >= pData['cameras'][indx]['all_ypct_st']) &&
+              (pcty <= pData['cameras'][indx]['all_ypct_en'])) {
+              cams_one_click(indx);
+          }
+        }
+      });
+    }
+
     function image_pantilt() {
 
       if (gIndxCam == -1 ) {
@@ -939,7 +963,7 @@
           }
         }
       } else {
-        html_preview += "<a><img id='pic" + indx + "' src="
+        html_preview += "<a><img id='picall' src="
         html_preview += pHostFull;
         html_preview += "/0/mjpg/stream" ;
         html_preview += " border=0 width=95";
@@ -950,9 +974,13 @@
       cams_reset();
       document.getElementById('div_cam').style.display='block';
       document.getElementById('div_cam').innerHTML = html_preview;
-      cams_all_timer = setInterval(cams_all_fnc, 1000);
+      if (chk == 0) {
+        cams_all_timer = setInterval(cams_all_fnc, 1000);
+      } else {
+        image_picall();
+      }
 
-  }
+    }
 
     function cams_one_click(index_cam) {
 
@@ -1223,251 +1251,3 @@
 
 </body>
 </html>
-<style>
-    * {
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      padding: 0;
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 1rem;
-      line-height: 1;
-      color: #606c71;
-      background-color: #159957;
-      background-image: linear-gradient(120deg, #155799, #159957);
-      margin-left:0.5% ;
-      margin-right:0.5% ;
-      width: device-width ;
-    }
-    .page-header {
-      color: #fff;
-      text-align: center;
-      margin-top: 0rem;
-      margin-bottom: 0rem;
-      font-weight: normal;
-    }
-    .page-header h3 {
-      height: 2rem;
-      padding: 0;
-      margin: 1rem;
-      border: 0;
-    }
-    h3 {
-      margin-left: 10rem;
-    }
-    .header-right{
-      float: right;
-      color: white;
-    }
-    .header-center {
-      text-align: center;
-      color: white;
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-    }
-    .border {
-      border-width: 1rem;
-      border-color: white;
-      border-style: solid;
-    }
-    .sidenav {
-      height: 100%;
-      width: 10rem;
-      position: fixed;
-      z-index: 1;
-      top: 0;
-      left: 0;
-      background-color: lightgrey;
-      overflow-x: hidden;
-      overflow: auto;
-    }
-    .sidenav a, .dropbtn {
-      padding: 0.5rem 0rem 0.5em 1rem;
-      text-decoration: none;
-      font-size: 1rem;
-      display: block;
-      border: none;
-      background: none;
-      width:90%;
-      text-align: left;
-      cursor: pointer;
-      outline: none;
-      color: black;
-      background-color: lightgray;
-    }
-    .sidenav a:hover, .dropbtn:hover {
-      background-color: #555;
-      color: white;
-    }
-    .sidenav .closebtn {
-      color: black;
-      top: 0;
-      margin-left: 80%;
-      width: 1rem;
-      font-size: 1rem;
-      background-color: lightgray;
-    }
-    .sidenav .closebtn:hover {
-      background-color: lightgray;
-      color: white;
-    }
-    .menubtn {
-      top: 0;
-      width: 1rem;
-      margin-left: 0.5rem;
-      margin-bottom: 0.25rem;
-      font-size: 1.5rem;
-      color:black;
-      transform: rotate(90deg);
-      -webkit-transform: rotate(90deg);
-      background-color: transparent;
-      border-color: transparent;
-    }
-    .menubtn:hover {
-      color: white;
-    }
-    .dropdown-content {
-      display: none;
-      background-color:lightgray;
-      padding-left: 1rem;
-    }
-    .actionbtn {
-      padding: 0.25rem;
-      text-decoration: none;
-      font-size: 0.5rem;
-      display: block;
-      border: none;
-      background: none;
-      width: 3rem;
-      text-align: center;
-      cursor: pointer;
-      outline: none;
-      color: black;
-      background-color: lightgray;
-    }
-    .cls_config {
-      background-color: #000000;
-      color: #fff;
-      text-align: center;
-      margin-top: 0rem;
-      margin-bottom: 0rem;
-      font-weight: normal;
-      font-size: 0.90rem;
-    }
-    .cls_config table {
-      display: table;
-      border-spacing: 1rem;
-      margin: auto;
-    }
-    .cls_config label {
-      padding: 0rem;
-      text-align: right;
-      width: 10rem;
-      height: 2.5rem;
-    }
-    .cls_config textarea {
-      margin: auto;
-      text-align: center;
-      width: 15.5rem;
-      height: 2.5rem;
-    }
-    .cls_button {
-      width: 10rem;
-      height: 2rem;
-      padding: 0rem;
-    }
-    .cls_drop {
-      padding: 0rem;
-      text-align: right;
-      width: 10rem;
-      height: 2.25rem;
-    }
-    .cls_text {
-      padding: 0rem;
-      width: 10em;
-      text-align: right;
-    }
-    .cls_text_nbr {
-      padding: 0rem;
-      width: 10rem;
-      text-align: right;
-    }
-    .cls_text_wide {
-      padding: 0rem;
-      height: 3rem;
-      width: 20rem;
-      text-align: right;
-    }
-    .cls_camdrop {
-      /* Only used to identify all the cam drops on page */
-    }
-    .arrow {
-      border: solid black;
-      border-width: 0 1rem 1rem 0;
-      border: double black;
-      border-width: 0 0.75rem 0.75rem 0;
-      display: inline-block;
-      padding: 1rem;
-      font-size: 0.5rem;
-    }
-    .right {
-      transform: rotate(-45deg);
-      -webkit-transform: rotate(-45deg);
-    }
-    .left {
-      transform: rotate(135deg);
-      -webkit-transform: rotate(135deg);
-    }
-    .up {
-      transform: rotate(-135deg);
-      -webkit-transform: rotate(-135deg);
-    }
-    .down {
-      transform: rotate(45deg);
-      -webkit-transform: rotate(45deg);
-    }
-    .zoombtn {
-      font-size:1.25rem;
-      width: 3rem;
-      height: 1.5rem;
-      margin: 0;
-    }
-    .cls_movies {
-      background-color: transparent;
-      color: white;
-      text-align: center;
-      margin-top: 0rem;
-      margin-bottom: 0rem;
-      font-weight: normal;
-      font-size: 0.90rem;
-    }
-    a:link {
-      color: white;
-      background-color: transparent;
-      text-decoration: none;
-    }
-    a:visited {
-      color: black;
-      background-color: transparent;
-      text-decoration: none;
-    }
-   .cls_log {
-     background-color: transparent;
-     color: white;
-     text-align: center;
-     margin-top: 0rem;
-     margin-bottom: 0rem;
-     font-weight: normal;
-     font-size: 0.90rem;
-   }
-   .cls_log textarea {
-     overflow-y: scroll;
-     background-color: lightgrey;
-     padding: 0rem;
-     height: 10rem;
-     width: 50rem;
-     text-align: left;
-   }
-  </style>

@@ -57,6 +57,7 @@
             void script_display_movies();
             void script_display_actions();
             void script_camera_buttons_ptz();
+            void script_image_picall();
             void script_image_pantilt();
             void script_cams_reset();
             void script_cams_one_click();

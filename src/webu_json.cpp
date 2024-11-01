@@ -194,6 +194,10 @@ void cls_webu_json::cameras_list()
             webua->resp_page += "{\"name\": \"" + escstr(cam->cfg->device_name) + "\"";
         }
         webua->resp_page += ",\"id\": " + strid;
+        webua->resp_page += ",\"all_xpct_st\": " + std::to_string(cam->all_loc.xpct_st);
+        webua->resp_page += ",\"all_xpct_en\": " + std::to_string(cam->all_loc.xpct_en);
+        webua->resp_page += ",\"all_ypct_st\": " + std::to_string(cam->all_loc.ypct_st);
+        webua->resp_page += ",\"all_ypct_en\": " + std::to_string(cam->all_loc.ypct_en);
         webua->resp_page += ",\"url\": \"" + webua->hostfull + "/" + strid + "/\"} ";
     }
     webua->resp_page += "}";

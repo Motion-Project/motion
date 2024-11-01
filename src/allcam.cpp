@@ -477,6 +477,17 @@ void cls_allcam::getsizes()
         all_sizes.width * 3)/2);
     all_sizes.reset = false;
 
+    for (indx=0; indx<active_cnt; indx++) {
+        p_cam = active_cam[indx];
+        getsizes_img(p_cam, img_w, img_h);
+        p_cam->all_loc.xpct_st = ((p_cam->all_loc.offset_col * 100) /all_sizes.width);
+        p_cam->all_loc.xpct_en =
+            (((p_cam->all_loc.offset_col+img_w) * 100) /all_sizes.width);
+        p_cam->all_loc.ypct_st = ((p_cam->all_loc.offset_row * 100) /all_sizes.height);
+        p_cam->all_loc.ypct_en =
+            (((p_cam->all_loc.offset_row+img_h) * 100) /all_sizes.height);
+    }
+
     stream_free();
     stream_alloc();
 
