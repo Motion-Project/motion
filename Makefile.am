@@ -46,13 +46,6 @@ all-local:
 	@sed -e 's|$${prefix}|$(prefix)|' data/motionplus-dist.conf > data/motionplus-dist.conf.tmp && mv -f data/motionplus-dist.conf.tmp data/motionplus-dist.conf
 
 ###################################################################
-## Install default configuration files
-###################################################################
-install: all install-am
-	@cp -n "$(DESTDIR)@localstatedir@/lib/@PACKAGE@/motionplus-dist.conf" "$(DESTDIR)@localstatedir@/lib/@PACKAGE@/motionplus.conf"
-	@cp -n "$(DESTDIR)@localstatedir@/lib/@PACKAGE@/camera1-dist.conf" "$(DESTDIR)@localstatedir@/lib/@PACKAGE@/camera1.conf"
-
-###################################################################
 ## Create pristine directories to match exactly distributed files
 ###################################################################
 cleanall: distclean
