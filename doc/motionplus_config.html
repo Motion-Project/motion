@@ -2896,6 +2896,11 @@
           by --localstatedir=DIR during the configure step of installation. If this was
           not defined, it will default to /var/lib/motionplus or /usr/local/var/lib/motionplus
           depending upon your system</li>
+        <li> The directory defined by --sysconfdir=DIR during the configure step of installation.
+          If this was not defined, it will default to /etc/motionplus or /usr/local/etc/motionplus
+          depending upon your system.  Please note that the use of this directory for the configuration
+          files is deprecated.  Some significant functionality of Motionplus will not be available
+          if the configuration files are in this directory.</li>
       </ol>
       <p></p>
       The motionplus.conf file specifies parameters for the entire MotionPlus application and defaults for

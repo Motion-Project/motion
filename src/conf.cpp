@@ -4311,6 +4311,21 @@ void cls_config::init()
     }
 
     if (filename == "") {
+        filename = std::string( sysconfdir ) + std::string("/motionplus.conf");
+        if (stat(filename.c_str(), &statbuf) != 0) {
+            filename = "";
+        }
+        if (filename != "") {
+            MOTPLS_LOG(WRN, TYPE_ALL, SHOW_ERRNO
+                ,_("The configuration file location '%s' is deprecated.")
+                , sysconfdir );
+            MOTPLS_LOG(WRN, TYPE_ALL, SHOW_ERRNO
+                ,_("The new default configuration file location is '%s'")
+                , configdir );
+        }
+    }
+
+    if (filename == "") {
         MOTPLS_LOG(ALR, TYPE_ALL, SHOW_ERRNO
             ,_("Could not open configuration file"));
         exit(-1);

@@ -21,6 +21,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = src po
 
+pkgsysconfdir = $(sysconfdir)/@PACKAGE@
 libstatedir = @localstatedir@/lib/@PACKAGE@
 
 dist_libstate_DATA = \

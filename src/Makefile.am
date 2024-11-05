@@ -17,7 +17,10 @@
 # */
 
 
-AM_CPPFLAGS= -Dconfigdir=\"$(localstatedir)/lib/@PACKAGE@\" -DLOCALEDIR=\"$(localedir)\"
+AM_CPPFLAGS= \
+	-Dconfigdir=\"$(localstatedir)/lib/@PACKAGE@\" \
+	-Dsysconfdir=\"$(sysconfdir)/motionplus\" \
+	-DLOCALEDIR=\"$(localedir)\"
 
 LDADD = $(LIBINTL)
 
