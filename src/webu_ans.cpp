@@ -17,11 +17,11 @@
 */
 
 #include "motionplus.hpp"
+#include "util.hpp"
 #include "camera.hpp"
 #include "allcam.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
-#include "util.hpp"
 #include "webu.hpp"
 #include "webu_ans.hpp"
 #include "webu_html.hpp"

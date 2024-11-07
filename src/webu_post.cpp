@@ -269,10 +269,10 @@ void cls_webu_post::action_pause()
 
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
-            app->cam_list[indx]->pause = true;
+            app->cam_list[indx]->user_pause = true;
         }
     } else {
-        app->cam_list[webua->camindx]->pause = true;
+        app->cam_list[webua->camindx]->user_pause = true;
     }
 
 }
@@ -295,10 +295,10 @@ void cls_webu_post::action_unpause()
 
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
-            app->cam_list[indx]->pause = false;
+            app->cam_list[indx]->user_pause = false;
         }
     } else {
-        app->cam_list[webua->camindx]->pause = false;
+        app->cam_list[webua->camindx]->user_pause = false;
     }
 
 }

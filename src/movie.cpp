@@ -17,10 +17,10 @@
  */
 
 #include "motionplus.hpp"
+#include "util.hpp"
 #include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
-#include "util.hpp"
 #include "netcam.hpp"
 #include "dbse.hpp"
 #include "alg_sec.hpp"

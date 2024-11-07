@@ -17,9 +17,9 @@
 */
 
 #include "motionplus.hpp"
+#include "util.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
-#include "util.hpp"
 #include "camera.hpp"
 #include "picture.hpp"
 #include "alg_sec.hpp"

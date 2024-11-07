@@ -18,8 +18,8 @@
 */
 
 #include "motionplus.hpp"
-#include "logger.hpp"
 #include "util.hpp"
+#include "logger.hpp"
 #include "camera.hpp"
 #include "rotate.hpp"
 #include "movie.hpp"
@@ -636,11 +636,15 @@ void cls_camera::init_values()
         MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
         movie_passthrough = false;
     }
-    if (app->pause) {
-        pause = true;
-    } else {
-        pause = cfg->pause;
+
+    user_pause = false;
+    if (app->user_pause) {
+        user_pause = true;
+    } else if (cfg->pause) {
+        user_pause = true;
     }
+
+    pause = user_pause;
     v4l2cam = nullptr;
     netcam = nullptr;
     netcam_high = nullptr;
@@ -755,6 +759,137 @@ void cls_camera::cleanup()
 
 }
 
+void cls_camera::init_schedule()
+{
+    int indx, indx1;
+    bool dflt_detect, rev_detect;
+    ctx_params  *params;
+    std::string  pnm, pvl, tst, action;
+    std::vector<ctx_schedule_data> sched_day;
+    ctx_schedule_data sched_itm;
+
+    if (cfg->schedule_params == "") {
+        return;
+    }
+
+    params = new ctx_params;
+    util_parms_parse(params, "schedule_params", cfg->schedule_params);
+
+    if (params->params_cnt == 0) {
+        return;
+    }
+
+    action = "pause";
+    dflt_detect = true;
+    for (indx=0; indx<params->params_cnt; indx++) {
+        pnm = params->params_array[indx].param_name;
+        pvl = params->params_array[indx].param_value;
+        if (pnm == "default") {
+            dflt_detect = mtob(params->params_array[indx].param_value);
+        }
+        if (pnm == "action") {
+            if (pvl == "stop") {
+                action = "stop";
+            } else {
+                action = "pause";
+            }
+        }
+    }
+
+    if (dflt_detect) {
+        rev_detect = false;
+    } else {
+        rev_detect = true;
+    }
+
+    for (indx=0; indx<7; indx++) {
+        sched_day.clear();
+
+        sched_itm.st_hr = 0;
+        sched_itm.st_min = 0;
+        sched_itm.en_hr = 23;
+        sched_itm.en_min = 59;
+        sched_itm.action = action;
+        sched_itm.detect = dflt_detect;
+        sched_day.push_back(sched_itm);
+
+        sched_itm.st_hr = -1;
+        sched_itm.st_min = -1;
+        sched_itm.en_hr = -1;
+        sched_itm.en_min = -1;
+        sched_itm.action = action;
+        sched_itm.detect = rev_detect;
+
+        if (indx == 0) {        tst = "sun";
+        } else if (indx == 1) { tst = "mon";
+        } else if (indx == 2) { tst = "tue";
+        } else if (indx == 3) { tst = "wed";
+        } else if (indx == 4) { tst = "thu";
+        } else if (indx == 5) { tst = "fri";
+        } else if (indx == 6) { tst = "sat";
+        }
+        for (indx1=0; indx1<params->params_cnt; indx1++) {
+            pnm = params->params_array[indx1].param_name;
+            pvl = params->params_array[indx1].param_value;
+            if ((pnm == tst) || (pnm == "sun-sat") ||
+                ((pnm == "mon-fri") && (indx>=1) && (indx<=5))) {
+                //example:  mon 0902-1430
+                sched_itm.st_hr = mtoi(pvl.substr(0,2));
+                sched_itm.st_min = mtoi(pvl.substr(2,2));
+                sched_itm.en_hr = mtoi(pvl.substr(5,2));
+                sched_itm.en_min = mtoi(pvl.substr(7,2));
+                sched_itm.action = action;
+                sched_itm.detect = rev_detect;
+                if ((sched_itm.st_hr  < 0) || (sched_itm.st_hr  > 23) ||
+                    (sched_itm.st_min < 0) || (sched_itm.st_min > 59) ||
+                    (sched_itm.en_hr  < 0) || (sched_itm.en_hr  > 23) ||
+                    (sched_itm.en_min < 0) || (sched_itm.en_min > 59) ||
+                    (sched_itm.st_hr  > sched_itm.en_hr) ||
+                    (pvl.length() != 9)) {
+                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                        ,_("Invalid schedule parameter: %s %s")
+                        , pnm.c_str(), pvl.c_str());
+                } else {
+                    sched_day.push_back(sched_itm);
+                }
+            }
+        }
+        schedule.push_back(sched_day);
+    }
+
+    for (indx=0; indx<7; indx++) {
+        if (indx == 0) {        tst = "sun";
+        } else if (indx == 1) { tst = "mon";
+        } else if (indx == 2) { tst = "tue";
+        } else if (indx == 3) { tst = "wed";
+        } else if (indx == 4) { tst = "thu";
+        } else if (indx == 5) { tst = "fri";
+        } else if (indx == 6) { tst = "sat";
+        }
+        for (indx1=0; indx1<schedule[indx].size(); indx1++) {
+            if ((schedule[indx][indx1].action == "stop") &&
+                (schedule[indx][indx1].detect == false)) {
+                action = "stopped";
+            } else if (sched_day[indx1].detect == false) {
+               action = "paused";
+            } else {
+                action = "active";
+            }
+            MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+                ,_("Schedule: %s %02d:%02d to %02d:%02d %s")
+                ,tst.c_str()
+                ,sched_day[indx1].st_hr
+                ,sched_day[indx1].st_min
+                ,sched_day[indx1].en_hr
+                ,sched_day[indx1].en_min
+                ,action.c_str()
+                );
+        }
+    }
+
+    mydelete(params);
+}
+
 /* initialize everything for the loop */
 void cls_camera::init()
 {
@@ -793,6 +928,7 @@ void cls_camera::init()
     init_firstimage();
 
     vlp_init(this);
+
     alg = new cls_alg(this);
     algsec = new cls_algsec(this);
     picture = new cls_picture(this);
@@ -802,6 +938,8 @@ void cls_camera::init()
     movie_timelapse = new cls_movie(this, "timelapse");
     movie_extpipe = new cls_movie(this, "extpipe");
 
+    init_schedule();
+
     init_areadetect();
 
     init_ref();
@@ -809,7 +947,7 @@ void cls_camera::init()
     if (device_status == STATUS_OPENED) {
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Camera %d started: motion detection %s"),
-            cfg->device_id, pause ? _("Disabled"):_("Enabled"));
+            cfg->device_id, pause ? _("disabled"):_("enabled"));
 
         if (cfg->emulate_motion) {
             MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, _("Emulating motion"));
@@ -1419,6 +1557,60 @@ void cls_camera::loopback()
 
 }
 
+void cls_camera::check_schedule()
+{
+    struct tm c_tm;
+    int indx, cur_dy;
+    bool prev;
+
+    if ((restart == true) || (handler_stop == true)) {
+        return;
+    }
+
+    if (user_pause) {
+        pause = true;
+        return;
+    }
+
+    if (schedule.size() == 0) {
+        return;
+    }
+
+    localtime_r(&current_image->imgts.tv_sec, &c_tm);
+    cur_dy = c_tm.tm_wday;
+    prev = pause;
+
+    for (indx=0; indx<schedule[cur_dy].size(); indx++) {
+        if ((schedule[cur_dy][indx].action == "pause") &&
+            (c_tm.tm_hour >= schedule[cur_dy][indx].st_hr) &&
+            (c_tm.tm_min  >= schedule[cur_dy][indx].st_min) &&
+            (c_tm.tm_hour <= schedule[cur_dy][indx].en_hr) &&
+            (c_tm.tm_min  <= schedule[cur_dy][indx].en_min) ) {
+            if (schedule[cur_dy][indx].detect) {
+                pause = false;
+            } else {
+                pause = true;
+            }
+        }
+    }
+    if (prev != pause) {
+        MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
+            , _("Scheduled action. Motion detection %s")
+            , pause ? _("disabled"):_("enabled"));
+    }
+
+    /*
+    MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
+    , "Motion %02d:%02d %02d:%02d detection %d %d"
+    ,schedule[cur_dy][indx].st_hr
+    ,schedule[cur_dy][indx].st_min
+    ,schedule[cur_dy][indx].en_hr
+    ,schedule[cur_dy][indx].en_min
+    ,schedule[cur_dy][indx].detect
+    ,pause);
+    */
+}
+
 /* sleep the loop to get framerate requested */
 void cls_camera::frametiming()
 {
@@ -1462,6 +1654,7 @@ void cls_camera::handler()
         snapshot();
         timelapse();
         loopback();
+        check_schedule();
         frametiming();
     }
 
@@ -1571,7 +1764,9 @@ cls_camera::cls_camera(cls_motapp *p_app)
     pipe = -1;
     mpipe = -1;
     pause = false;
+    user_pause = false;
     missing_frame_counter = -1;
+    schedule.clear();
 
     info_diff_tot = 0;
     info_diff_cnt = 0;

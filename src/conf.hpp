@@ -111,6 +111,7 @@
             int             watchdog_kill;
             int             device_tmo;
             bool            pause;
+            std::string     schedule_params;
 
             /* Capture device configuration parameters */
             std::string     v4l2_device;
@@ -358,7 +359,8 @@
             void edit_device_name(std::string &parm, enum PARM_ACT pact);
             void edit_device_id(std::string &parm, enum PARM_ACT pact);
             void edit_device_tmo(std::string &parm, enum PARM_ACT pact);
-            void edit_pause(std::string &parm, int pact);
+            void edit_pause(std::string &parm, enum PARM_ACT pact);
+            void edit_schedule_params(std::string &parm, enum PARM_ACT pact);
             void edit_target_dir(std::string &parm, enum PARM_ACT pact);
             void edit_watchdog_kill(std::string &parm, enum PARM_ACT pact);
             void edit_watchdog_tmo(std::string &parm, enum PARM_ACT pact);

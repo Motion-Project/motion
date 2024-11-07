@@ -37,6 +37,7 @@ motionplus_SOURCES = \
 	logger.hpp         logger.cpp \
 	motionplus.hpp     motionplus.cpp \
 	allcam.hpp         allcam.cpp \
+	schedule.hpp       schedule.cpp \
 	camera.hpp         camera.cpp \
 	movie.hpp          movie.cpp \
 	netcam.hpp         netcam.cpp \

@@ -17,10 +17,10 @@
 */
 
 #include "motionplus.hpp"
+#include "util.hpp"
 #include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
-#include "util.hpp"
 #include "rotate.hpp"
 #include "video_convert.hpp"
 #include "video_v4l2.hpp"

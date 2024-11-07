@@ -16,8 +16,8 @@
  *
  */
 #include "motionplus.hpp"
-#include "conf.hpp"
 #include "util.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 
 cls_log *motlog;

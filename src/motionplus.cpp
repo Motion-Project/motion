@@ -17,10 +17,11 @@
  *
 */
 #include "motionplus.hpp"
+#include "util.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
-#include "util.hpp"
 #include "allcam.hpp"
+#include "schedule.hpp"
 #include "camera.hpp"
 #include "sound.hpp"
 #include "dbse.hpp"
@@ -504,7 +505,7 @@ void cls_motapp::init(int p_argc, char *p_argv[])
     argv = p_argv;
 
     reload_all = false;
-    pause = false;
+    user_pause = false;
     cam_add = false;
     cam_delete = -1;
     cam_cnt = 0;
@@ -514,6 +515,7 @@ void cls_motapp::init(int p_argc, char *p_argv[])
     dbse = nullptr;
     webu = nullptr;
     allcam = nullptr;
+    schedule = nullptr;
 
     pthread_mutex_init(&mutex_camlst, NULL);
     pthread_mutex_init(&mutex_post, NULL);
@@ -546,6 +548,7 @@ void cls_motapp::init(int p_argc, char *p_argv[])
     dbse = new cls_dbse(this);
     webu = new cls_webu(this);
     allcam = new cls_allcam(this);
+    schedule = new cls_schedule(this);
 
     if ((cam_cnt > 0) || (snd_cnt > 0)) {
         for (indx=0; indx<cam_cnt; indx++) {
@@ -573,6 +576,7 @@ void cls_motapp::deinit()
     mydelete(webu);
     mydelete(dbse);
     mydelete(allcam)
+    mydelete(schedule)
     mydelete(conf_src);
     mydelete(cfg);
 

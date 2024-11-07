@@ -114,6 +114,15 @@ struct ctx_images {
 
 };
 
+struct ctx_schedule_data {
+    int         st_hr;
+    int         st_min;
+    int         en_hr;
+    int         en_min;
+    bool        detect;
+    std::string action;
+};
+
 class cls_camera {
     public:
         cls_camera(cls_motapp *p_app);
@@ -165,13 +174,15 @@ class cls_camera {
         int     pipe;
         int     mpipe;
         bool    pause;
+        bool    user_pause;
         int     missing_frame_counter;
 
-        uint64_t                info_diff_tot;
-        uint64_t                info_diff_cnt;
-        int                     info_sdev_min;
-        int                     info_sdev_max;
-        uint64_t                info_sdev_tot;
+        uint64_t    info_diff_tot;
+        uint64_t    info_diff_cnt;
+        int         info_sdev_min;
+        int         info_sdev_max;
+        uint64_t    info_sdev_tot;
+        std::vector<std::vector<ctx_schedule_data>> schedule;
 
         bool    action_snapshot;    /* Make a snapshot */
         bool    event_stop;  /* Boolean for whether to stop a event */
@@ -206,7 +217,6 @@ class cls_camera {
         int                     areadetect_eventnbr;
         int previous_diffs, previous_location_x, previous_location_y;
 
-
         void ring_resize();
         void ring_destroy();
         void ring_process_debug();
@@ -231,7 +241,7 @@ class cls_camera {
         void init_values();
         void init_cam_start();
         void init_ref();
-        void init_conf();
+        void init_schedule();
         void cleanup();
         void init();
         void areadetect();
@@ -248,9 +258,8 @@ class cls_camera {
         void snapshot();
         void timelapse();
         void loopback();
+        void check_schedule();
         void frametiming();
-
-
 };
 
 #endif /* _INCLUDE_CAMERA_HPP_ */

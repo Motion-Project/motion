@@ -18,9 +18,9 @@
 */
 
 #include "motionplus.hpp"
+#include "util.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
-#include "util.hpp"
 #include "allcam.hpp"
 #include "camera.hpp"
 #include "jpegutils.hpp"

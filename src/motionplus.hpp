@@ -91,6 +91,7 @@
 class cls_motapp;
 class cls_camera;
 class cls_allcam;
+class cls_schedule;
 class cls_sound;
 class cls_algsec;
 class cls_alg;
@@ -185,13 +186,14 @@ class cls_motapp {
 
         int     argc;
         char    **argv;
-        bool    pause;
+        bool    user_pause;
 
         cls_config          *conf_src;
         cls_config          *cfg;
         cls_webu            *webu;
         cls_dbse            *dbse;
         cls_allcam          *allcam;
+        cls_schedule        *schedule;
 
         pthread_mutex_t     mutex_camlst;       /* Lock the list of cams while adding/removing */
         pthread_mutex_t     mutex_post;         /* mutex to allow for processing of post actions*/

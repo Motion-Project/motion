@@ -18,10 +18,10 @@
 */
 
 #include "motionplus.hpp"
+#include "util.hpp"
 #include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
-#include "util.hpp"
 #include "jpegutils.hpp"
 #include <setjmp.h>
 #include <jpeglib.h>

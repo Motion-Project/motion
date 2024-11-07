@@ -57,7 +57,8 @@
       <div class="dropdown-content">
         <a href="#OptTopic_System_Processing">System Processing</a>
         <a href="#conversion_specifiers">Conversion Specifiers</a>
-        <a href="#OptTopic_Devices">Devices</a>
+        <a href="#OptDetail_Camera_Parameters" >General Device Parameters</a>
+        <a href="#OptTopic_Devices">Camera Source Parameters</a>
       </div>
     </div>
     <div class="dropdown">
@@ -125,16 +126,38 @@
               <td bgcolor="#edf4f9" ><a href="#native_language" >native_language</a> </td>
               <td bgcolor="#edf4f9" ><a href="#target_dir" >target_dir</a> </td>
             </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Camera_Parameters" ></a>
+      <a href="#OptDetail_Camera_Parameters" >General Device Parameters</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#device_name" >device_name</a> </td>
               <td bgcolor="#edf4f9" ><a href="#device_id" >device_id</a> </td>
               <td bgcolor="#edf4f9" ><a href="#device_tmo" >device_tmo</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#camera" >camera</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#pause" >pause</a> </td>
             </tr>
-              <td bgcolor="#edf4f9" ><a href="#config_dir" >config_dir</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#schedule_params" >schedule_params</a> </td>
               <td bgcolor="#edf4f9" ><a href="#watchdog_tmo" >watchdog_tmo</a> </td>
               <td bgcolor="#edf4f9" ><a href="#watchdog_kill" >watchdog_kill</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#pause" >pause</a> </td>
+            <tr>
+            </tr>
+              <td bgcolor="#edf4f9" ><a href="#target_dir" >target_dir</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#camera" >camera</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#config_dir" >config_dir</a> </td>
             <tr>
             </tr>
           </tbody>
@@ -145,7 +168,7 @@
       </ul>
 
       <a name="OptTopic_Devices" ></a>
-      <a href="#OptDetail_Devices" >Devices-General Info</a>
+      <a href="#OptDetail_Devices" >Camera Source Parameters</a>
       <ul>
         <table class="tbldetail" border="1" class="fixed" >
           <colgroup>
@@ -168,7 +191,7 @@
               <td bgcolor="#edf4f9" ><a href="#netcam_high_params" >netcam_high_params</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#netcam_userpass" >netcam_proxy</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_userpass" >netcam_userpass</a> </td>
             </tr>
           </tbody>
         </table>
@@ -799,27 +822,77 @@
         </ul>
         <p></p>
 
-        <h3><a name="camera"></a> camera </h3>
-        <p></p>
-        <ul>
-          <li> Values: String | Default: Not defined</li>
-          The full path and file name with the configuration parameters for the individual camera.
-        </ul>
-        <p></p>
-
-        <h3><a name="config_dir"></a> config_dir </h3>
-        <ul>
-          <li> Values: String | Default: Not defined</li>
-          Directory containing individual device configuration files.  Any files ending in '.conf' in
-          the directory will be read as a device configuration file.
-        </ul>
-        <p></p>
-
         <h3><a name="device_tmo"></a>device_tmo</h3>
         <ul>
           <li> Values: Integer | Default: 30 </li>
           Number of seconds that elapse before the device is deemed to be lost.
         </ul>
+        <p></p>
+
+        <h3><a name="pause"></a>pause</h3>
+        <ul>
+          <li> Values: Boolean | Default: false </li>
+          Pause detection at start up.
+        </ul>
+        <p></p>
+
+        <h3><a name="schedule_params"></a>schedule_params</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters.  Format is: option=value,option2=value2
+        </ul>
+        <ul>
+          <p></p>
+          This parameter specifies the time of the day that Motionplus will perform
+          motion detection.
+          <p></p>
+
+          <div>
+            <i><h4>default</h4></i>
+            Boolean specifying the default for the motion detection.  The times specified for the
+            other parameters will then indicate the times for the inverse of this option.  For
+            example, if the default is specified as <code><small>on</small></code>, then motion
+            detection will be on by default and the times specified will have motion detection
+            turned off.  And if the default is specified as <code><small>off</small></code> the
+            times specified would indicate when motion detection would be on.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>action</h4></i>
+            This parameter has the option values of <code><small>pause</small></code> or
+            <code><small>stop</small></code>.  When the <code><small>pause</small></code> value
+            is specified the motion detection is paused and the camera will continue to process
+            images.  This will allow the webcontrol to continue to show
+            images.  When this option is specified as <code><small>stop</small></code>, the
+            camera will be shut down and therefore images will not be available via the
+            webcontrol.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>sun, mon, tue, wed, thu, fri, sat</h4></i>
+            These parameters specify the day and the values specify the time period.  The
+            time period is specified in the format <code><small>hhmm-hhmm</small></code> where
+            the first <code><small>hhmm</small></code> specifies the start time and the
+            second <code><small>hhmm</small></code> is the end time.  If the hours or minutes is
+            less than 10, leading zeros must be included.  Each time value is also inclusive meaning
+            that the criteria is greater than or equal or less than or equal.  For multiple
+            time periods during the same day specify the parameter multiple times.  For example,
+            <code><small>wed=0905-1130,wed=1330-1605</small></code>.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4> params_file </h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+              Full path and file name for a file containing the params listed one per line.
+            </ul>
+          </div>
+          <p></p>
+
+         </ul>
         <p></p>
 
         <h3><a name="watchdog_tmo"></a>watchdog_tmo</h3>
@@ -842,10 +915,19 @@
         </ul>
         <p></p>
 
-        <h3><a name="pause"></a>pause</h3>
+        <h3><a name="camera"></a> camera </h3>
+        <p></p>
         <ul>
-          <li> Values: Boolean | Default: false </li>
-          Pause detection at start up.
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name with the configuration parameters for the individual camera.
+        </ul>
+        <p></p>
+
+        <h3><a name="config_dir"></a> config_dir </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          Directory containing individual device configuration files.  Any files ending in '.conf' in
+          the directory will be read as a device configuration file.
         </ul>
         <p></p>
 

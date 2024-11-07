@@ -18,9 +18,9 @@
  */
 
 #include "motionplus.hpp"
+#include "util.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
-#include "util.hpp"
 #include "sound.hpp"
 
 static void *sound_handler(void *arg)

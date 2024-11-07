@@ -16,10 +16,10 @@
  *
  */
 #include "motionplus.hpp"
+#include "util.hpp"
 #include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
-#include "util.hpp"
 #include "picture.hpp"
 #include "jpegutils.hpp"
 #include "draw.hpp"

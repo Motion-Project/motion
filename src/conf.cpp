@@ -49,6 +49,7 @@ ctx_parm config_parms[] = {
     {"device_id",                 PARM_TYP_INT,    PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"device_tmo",                PARM_TYP_INT,    PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"pause",                     PARM_TYP_BOOL,   PARM_CAT_01, PARM_LEVEL_LIMITED },
+    {"schedule_params",           PARM_TYP_STRING, PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"target_dir",                PARM_TYP_STRING, PARM_CAT_01, PARM_LEVEL_ADVANCED },
     {"watchdog_tmo",              PARM_TYP_INT,    PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"watchdog_kill",             PARM_TYP_INT,    PARM_CAT_01, PARM_LEVEL_LIMITED },
@@ -683,7 +684,7 @@ void cls_config::edit_device_tmo(std::string &parm, enum PARM_ACT pact)
     MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","device_tmo",_("device_tmo"));
 }
 
-void cls_config::edit_pause(std::string &parm, int pact)
+void cls_config::edit_pause(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
         pause = false;
@@ -694,6 +695,19 @@ void cls_config::edit_pause(std::string &parm, int pact)
     }
     return;
     MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","pause",_("pause"));
+}
+
+void cls_config::edit_schedule_params(std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        schedule_params = "";
+    } else if (pact == PARM_ACT_SET) {
+        schedule_params = parm;
+    } else if (pact == PARM_ACT_GET) {
+        parm = schedule_params;
+    }
+    return;
+    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","schedule_params",_("schedule_params"));
 }
 
 void cls_config::edit_config_dir(std::string &parm, enum PARM_ACT pact)
@@ -3073,6 +3087,7 @@ void cls_config::edit_cat01(std::string parm_nm, std::string &parm_val, enum PAR
     } else if (parm_nm == "device_id") {             edit_device_id(parm_val, pact);
     } else if (parm_nm == "device_tmo") {            edit_device_tmo(parm_val, pact);
     } else if (parm_nm == "pause") {                 edit_pause(parm_val, pact);
+    } else if (parm_nm == "schedule_params") {       edit_schedule_params(parm_val, pact);
     } else if (parm_nm == "target_dir") {            edit_target_dir(parm_val, pact);
     } else if (parm_nm == "watchdog_tmo") {          edit_watchdog_tmo(parm_val, pact);
     } else if (parm_nm == "watchdog_kill") {         edit_watchdog_kill(parm_val, pact);
@@ -3605,7 +3620,7 @@ void cls_config::cmdline()
             edit_set("log_file", optarg);
             break;
         case 'm':
-            app->pause = true;
+            app->user_pause = true;
             break;
         case 'h':
         case '?':
@@ -3856,13 +3871,16 @@ void cls_config::process()
             if (stpos > line.find("=")) {
                 stpos = line.find("=");
             }
-            if ((stpos != std::string::npos) &&
-                (stpos != line.length()-1) &&
+            if ((stpos != line.length()-1) &&
                 (stpos != 0) &&
                 (line.substr(0, 1) != ";") &&
                 (line.substr(0, 1) != "#")) {
                 parm_nm = line.substr(0, stpos);
-                parm_vl = line.substr(stpos+1, line.length()-stpos);
+                if (stpos != std::string::npos) {
+                    parm_vl = line.substr(stpos+1, line.length()-stpos);
+                } else {
+                    parm_vl = "";
+                }
                 myunquote(parm_nm);
                 myunquote(parm_vl);
                 if ((parm_nm == "camera") && (app->conf_src == this)) {
@@ -3877,8 +3895,7 @@ void cls_config::process()
                 }
             } else if ((line != "") &&
                 (line.substr(0, 1) != ";") &&
-                (line.substr(0, 1) != "#") &&
-                (stpos != std::string::npos) ) {
+                (line.substr(0, 1) != "#") ) {
                 MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("Unable to parse line: %s"), line.c_str());
             }
@@ -4225,7 +4242,6 @@ void cls_config::parms_write_snd()
             , app->snd_list[indx]->conf_src->conf_filename.c_str());
     }
 }
-
 
 void cls_config::parms_write()
 {
