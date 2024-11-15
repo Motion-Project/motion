@@ -648,6 +648,38 @@ void util_exec_command(cls_camera *cam, const char *command, const char *filenam
         ,_("Executing external command '%s'"), stamp);
 }
 
+void util_exec_command(cls_camera *cam, std::string cmd)
+{
+    std::string dst;
+    int pid;
+
+    mystrftime(cam, dst, cmd, "");
+
+    pid = fork();
+    if (!pid) {
+        /* Detach from parent */
+        setsid();
+
+        execl("/bin/sh", "sh", "-c", dst.c_str(), " &",(char*)NULL);
+
+        /* if above function succeeds the program never reach here */
+        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+            ,_("Unable to start external command '%s'"),dst.c_str());
+
+        exit(1);
+    }
+
+    if (pid > 0) {
+        waitpid(pid, NULL, 0);
+    } else {
+        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+            ,_("Unable to start external command '%s'"), dst.c_str());
+    }
+
+    MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO
+        ,_("Executing external command '%s'"), dst.c_str());
+}
+
 void util_exec_command(cls_sound *snd, std::string cmd)
 {
     std::string dst;

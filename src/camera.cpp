@@ -657,6 +657,7 @@ void cls_camera::init_values()
     movie_timelapse = nullptr;
     movie_extpipe = nullptr;
     draw = nullptr;
+    cleandir = nullptr;
 
     gethostname (hostname, PATH_MAX);
     hostname[PATH_MAX-1] = '\0';
@@ -746,6 +747,7 @@ void cls_camera::cleanup()
     mydelete(movie_timelapse);
     mydelete(movie_extpipe);
     mydelete(draw);
+    mydelete(cleandir);
 
     if (pipe != -1) {
         close(pipe);
@@ -756,6 +758,248 @@ void cls_camera::cleanup()
         close(mpipe);
         mpipe = -1;
     }
+
+}
+
+void cls_camera::init_cleandir_default()
+{
+    if ((cleandir->action != "delete") &&
+        (cleandir->action != "script")) {
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Invalid clean directory action : %s")
+            ,cleandir->action.c_str());
+        cleandir->action = "";
+    }
+    if (cleandir->action == "") {
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            ,_("Setting default clean directory action to delete."));
+        cleandir->action = "delete";
+    }
+
+    if ((cleandir->freq != "hourly") &&
+        (cleandir->freq != "daily") &&
+        (cleandir->freq != "weekly")) {
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Invalid clean directory freq : %s")
+            ,cleandir->freq.c_str());
+        cleandir->freq = "";
+    }
+    if (cleandir->freq == "") {
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            ,_("Setting default clean directory frequency to weekly."));
+        cleandir->freq = "weekly";
+    }
+
+    if (cleandir->runtime == "") {
+        if (cleandir->freq == "hourly") {
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Setting default clean directory runtime to 15."));
+            cleandir->runtime = "15";
+        } else if (cleandir->freq == "daily") {
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Setting default clean directory runtime to 0115."));
+            cleandir->runtime = "0115";
+        } else if (cleandir->freq == "weekly") {
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Setting default clean directory runtime to mon-0115."));
+            cleandir->runtime = "mon-0115";
+        }
+    }
+
+    if ((cleandir->dur_unit != "m") &&
+        (cleandir->dur_unit != "h") &&
+        (cleandir->dur_unit != "d") &&
+        (cleandir->dur_unit != "w")) {
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Invalid clean directory duration unit : %s")
+            ,cleandir->dur_unit.c_str());
+        cleandir->dur_unit = "";
+    }
+    if (cleandir->dur_unit == "") {
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            ,_("Setting default clean directory duration unit to d."));
+        cleandir->dur_unit = "d";
+    }
+
+    if ((cleandir->dur_val == 0 )) {
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Invalid clean directory duration number : %d")
+            ,cleandir->dur_val);
+        cleandir->dur_val = -1;
+    }
+    if (cleandir->dur_val <= 0) {
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            ,_("Setting default clean directory duration value to 7."));
+        cleandir->dur_val = 7;
+    }
+}
+
+void cls_camera::init_cleandir_runtime()
+{
+    std::string ptst,punit,premove;
+    struct tm c_tm;
+    struct timespec curr_ts;
+    int p_min, p_hr, p_dow;
+
+    clock_gettime(CLOCK_REALTIME, &curr_ts);
+    localtime_r(&curr_ts.tv_sec, &c_tm);
+
+    cleandir->next_ts.tv_nsec = 0;
+    cleandir->next_ts.tv_sec = curr_ts.tv_sec;
+
+    if (cleandir->freq == "hourly") {
+        punit = "hours";
+        if (cleandir->runtime.length() < 2) {
+            p_min = -1;
+        } else {
+            p_min = mtoi(cleandir->runtime);
+        }
+        if ((p_min > 59) || (p_min < 0)) {
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                ,_("Invalid clean directory hourly runtime : %s")
+                ,cleandir->runtime.c_str());
+            cleandir->runtime = "";
+            p_min = 15;
+        }
+        cleandir->next_ts.tv_sec += ((p_min - c_tm.tm_min) * 60);
+        if (cleandir->next_ts.tv_sec < curr_ts.tv_sec) {
+            cleandir->next_ts.tv_sec += 3600;
+        }
+
+    } else if (cleandir->freq == "daily") {
+        punit = "days";
+        if (cleandir->runtime.length() < 4) {
+            p_min = -1;
+        } else {
+            p_hr = mtoi(cleandir->runtime.substr(0,2));
+            p_min = mtoi(cleandir->runtime.substr(2,2));
+        }
+        if ((p_min > 59) || (p_min < 0) ||
+            (p_hr > 23)  || (p_hr < 0)) {
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                ,_("Invalid clean directory daily runtime : %s")
+                ,cleandir->runtime.c_str());
+            cleandir->runtime = "";
+            p_min = 15;
+            p_hr = 1;
+        }
+        cleandir->next_ts.tv_sec += ((p_min - c_tm.tm_min) * 60);
+        cleandir->next_ts.tv_sec += ((p_hr - c_tm.tm_hour) * 3600);
+        if (cleandir->next_ts.tv_sec < curr_ts.tv_sec) {
+            cleandir->next_ts.tv_sec += (60 * 60 * 24);
+        }
+
+    } else if (cleandir->freq == "weekly") {
+        punit = "weeks";
+        if (cleandir->runtime.length() < 8) {
+            p_min = -1;
+        } else {
+            ptst = cleandir->runtime.substr(0,3);   /*"mon-0115"*/
+            if (ptst == "sun") {        p_dow = 0;
+            } else if (ptst == "mon") { p_dow = 1;
+            } else if (ptst == "tue") { p_dow = 2;
+            } else if (ptst == "wed") { p_dow = 3;
+            } else if (ptst == "thu") { p_dow = 4;
+            } else if (ptst == "fri") { p_dow = 5;
+            } else if (ptst == "sat") { p_dow = 6;
+            } else {                    p_dow= -1;
+            }
+            p_hr = mtoi(cleandir->runtime.substr(4,2));
+            p_min = mtoi(cleandir->runtime.substr(6,2));
+        }
+        if ((p_min > 59) || (p_min < 0) ||
+            (p_hr > 23)  || (p_hr < 0) ||
+            (p_dow == -1)) {
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                ,_("Invalid clean directory weekly runtime : %s")
+                ,cleandir->runtime.c_str());
+            cleandir->runtime = "";
+            p_min = 15;
+            p_hr = 1;
+            p_dow = 1;
+        }
+        cleandir->next_ts.tv_sec += ((p_min - c_tm.tm_min) * 60);
+        cleandir->next_ts.tv_sec += ((p_hr - c_tm.tm_hour) * 3600);
+        cleandir->next_ts.tv_sec += ((p_dow - c_tm.tm_wday) * 86400);
+        if (cleandir->next_ts.tv_sec < curr_ts.tv_sec) {
+            cleandir->next_ts.tv_sec += (60 * 60 * 24 * 7);
+        }
+    }
+
+    localtime_r(&cleandir->next_ts.tv_sec, &c_tm);
+    cleandir->next_ts.tv_sec -= c_tm.tm_sec;
+
+    if (cleandir->action == "delete") {
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+            , _("Cleandir next run:%04d-%02d-%02d %02d:%02d Criteria:%d%s RemoveDir:%s")
+            ,c_tm.tm_year+1900,c_tm.tm_mon+1,c_tm.tm_mday
+            ,c_tm.tm_hour,c_tm.tm_min
+            ,cleandir->dur_val
+            ,cleandir->dur_unit.c_str()
+            ,cleandir->removedir ? "Y":"N");
+    } else {
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+            , _("Clean directory set to run script at %04d-%02d-%02d %02d:%02d")
+            ,c_tm.tm_year+1900,c_tm.tm_mon+1,c_tm.tm_mday
+            ,c_tm.tm_hour,c_tm.tm_min);
+    }
+
+}
+
+void cls_camera::init_cleandir()
+{
+    int indx;
+    ctx_params  *params;
+    std::string  pnm, pvl;
+
+    if (cfg->cleandir_params == "") {
+        return;
+    }
+
+    params = new ctx_params;
+    util_parms_parse(params, "cleandir_params", cfg->cleandir_params);
+
+    if (params->params_cnt == 0) {
+        mydelete(params);
+        return;
+    }
+
+    cleandir = new ctx_cleandir;
+    cleandir->action = "delete";
+    cleandir->freq = "weekly";
+    cleandir->script = "";
+    cleandir->runtime = "mon-0115";
+    cleandir->removedir = false;
+    cleandir->dur_unit = "w";
+    cleandir->dur_val = 2;
+
+    for (indx=0; indx<params->params_cnt; indx++) {
+        pnm = params->params_array[indx].param_name;
+        pvl = params->params_array[indx].param_value;
+        if (pnm == "runtime") {
+            cleandir->runtime = pvl;
+        }
+        if (pnm == "freq") {
+            cleandir->freq = pvl;
+        }
+        if (pnm == "action") {
+            cleandir->action = pvl;
+        }
+        if (pnm == "script") {
+            cleandir->script = pvl;
+        }
+        if (pnm == "dur_val") {
+            cleandir->dur_val =mtoi(pvl);
+        }
+        if (pnm == "dur_unit") {
+            cleandir->dur_unit = pvl;
+        }
+        if (pnm == "removedir") {
+            cleandir->removedir = mtob(pvl);
+        }
+    }
+    init_cleandir_default();
+    init_cleandir_runtime();
 
 }
 
@@ -776,6 +1020,7 @@ void cls_camera::init_schedule()
     util_parms_parse(params, "schedule_params", cfg->schedule_params);
 
     if (params->params_cnt == 0) {
+        mydelete(params);
         return;
     }
 
@@ -937,6 +1182,8 @@ void cls_camera::init()
     movie_motion = new cls_movie(this, "motion");
     movie_timelapse = new cls_movie(this, "timelapse");
     movie_extpipe = new cls_movie(this, "extpipe");
+
+    init_cleandir();
 
     init_schedule();
 
@@ -1767,6 +2014,7 @@ cls_camera::cls_camera(cls_motapp *p_app)
     user_pause = false;
     missing_frame_counter = -1;
     schedule.clear();
+    cleandir = nullptr;
 
     info_diff_tot = 0;
     info_diff_cnt = 0;

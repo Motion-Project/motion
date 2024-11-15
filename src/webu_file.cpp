@@ -40,9 +40,9 @@ void cls_webu_file::main() {
     struct stat statbuf;
     struct MHD_Response *response;
     std::string full_nm;
-    lst_movies movies;
-    it_movies  m_it;
+    vec_files flst;
     int indx;
+    std::string sql;
 
     /*If we have not fully started yet, simply return*/
     if (app->dbse == NULL) {
@@ -62,16 +62,20 @@ void cls_webu_file::main() {
         }
     }
 
-    app->dbse->movielist_get(webua->cam->cfg->device_id, &movies);
-    if (movies.size() == 0) {
+
+    sql  = " select * from motionplus ";
+    sql += " where device_id = " + std::to_string(webua->cam->cfg->device_id);
+    sql += " order by file_dtl, file_tml;";
+    app->dbse->filelist_get(sql, flst);
+    if (flst.size() == 0) {
         webua->bad_request();
         return;
     }
 
     full_nm = "";
-    for (m_it = movies.begin(); m_it != movies.end();m_it++) {
-        if (m_it->movie_nm == webua->uri_cmd2) {
-            full_nm = m_it->full_nm;
+    for (indx=0;indx<flst.size();indx++) {
+        if (flst[indx].file_nm == webua->uri_cmd2) {
+            full_nm = flst[indx].full_nm;
         }
     }
 

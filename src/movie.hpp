@@ -40,8 +40,8 @@ class cls_movie {
         struct timespec     cb_cr_ts;    /* Time during the interrupt to determine duration since start*/
         int                 cb_dur;      /* Seconds permitted before triggering a interrupt */
         std::string         full_nm;
-        std::string         movie_nm;
-        std::string         movie_dir;
+        std::string         file_nm;
+        std::string         file_dir;
         bool                is_running;
 
     private:

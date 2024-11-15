@@ -21,7 +21,6 @@
 #include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
-#include "movie.hpp"
 #include "dbse.hpp"
 
 static void *dbse_handler(void *arg)
@@ -32,95 +31,99 @@ static void *dbse_handler(void *arg)
 
 #ifdef HAVE_DBSE
 
-void cls_dbse::cols_add_itm(std::string nm, std::string typ)
+void cls_dbse::cols_vec_add(std::string nm, std::string typ)
 {
     ctx_col_item col_itm;
-
     col_itm.found = false;
     col_itm.col_nm = nm;
     col_itm.col_typ = typ;
     col_names.push_back(col_itm);
 }
 
-/* Create list of all the columns in current version */
-void cls_dbse::get_cols_list()
+void cls_dbse::cols_vec_create()
 {
     col_names.clear();
-    cols_add_itm("device_id","int");
-    cols_add_itm("movie_nm","text");
-    cols_add_itm("movie_dir","text");
-    cols_add_itm("full_nm","text");
-    cols_add_itm("movie_sz","int");
-    cols_add_itm("movie_dtl","int");
-    cols_add_itm("movie_tmc","text");
-    cols_add_itm("movie_tml","text");
-    cols_add_itm("diff_avg","int");
-    cols_add_itm("sdev_min","int");
-    cols_add_itm("sdev_max","int");
-    cols_add_itm("sdev_avg","int");
+    cols_vec_add("device_id","int");
+    cols_vec_add("file_typ","text");
+    cols_vec_add("file_nm","text");
+    cols_vec_add("file_dir","text");
+    cols_vec_add("full_nm","text");
+    cols_vec_add("file_sz","int");
+    cols_vec_add("file_dtl","int");
+    cols_vec_add("file_tmc","text");
+    cols_vec_add("file_tml","text");
+    cols_vec_add("diff_avg","int");
+    cols_vec_add("sdev_min","int");
+    cols_vec_add("sdev_max","int");
+    cols_vec_add("sdev_avg","int");
 }
 
-/* Assign default values for records from database*/
-void cls_dbse::movie_item_default()
+void cls_dbse::item_default()
 {
-    movie_item.found     = false;
-    movie_item.record_id  = -1;
-    movie_item.device_id     = -1;
-    movie_item.movie_nm = "null";
-    movie_item.movie_dir = "null";
-    movie_item.full_nm = "null";
-    movie_item.movie_sz  = 0;
-    movie_item.movie_dtl = 0;
-    movie_item.movie_tmc = "null";
-    movie_item.movie_tml = "null";
-    movie_item.diff_avg  = 0;
-    movie_item.sdev_min  = 0;
-    movie_item.sdev_max  = 0;
-    movie_item.sdev_avg  = 0;
+    file_item.found = false;
+    file_item.record_id = -1;
+    file_item.device_id = -1;
+    file_item.file_typ = "null";
+    file_item.file_nm = "null";
+    file_item.file_dir = "null";
+    file_item.full_nm = "null";
+    file_item.file_sz  = 0;
+    file_item.file_dtl = 0;
+    file_item.file_tmc = "null";
+    file_item.file_tml = "null";
+    file_item.diff_avg  = 0;
+    file_item.sdev_min  = 0;
+    file_item.sdev_max  = 0;
+    file_item.sdev_avg  = 0;
 
 }
 
 /* Assign values to rec from the database */
-void cls_dbse::movie_item_assign(std::string col_nm, std::string col_val)
+void cls_dbse::item_assign(std::string col_nm, std::string col_val)
 {
     struct stat statbuf;
 
     if (col_nm == "record_id") {
-        movie_item.record_id = mtoi(col_val);
+        file_item.record_id = mtoi(col_val);
     } else if (col_nm == "device_id") {
-        movie_item.device_id = mtoi(col_val);
-    } else if (col_nm == "movie_nm") {
-        movie_item.movie_nm = col_val;
-    } else if (col_nm == "movie_dir") {
-        movie_item.movie_dir = col_val;
+        file_item.device_id = mtoi(col_val);
+    } else if (col_nm == "file_typ") {
+        file_item.file_typ = col_val;
+    } else if (col_nm == "file_nm") {
+        file_item.file_nm = col_val;
+    } else if (col_nm == "file_dir") {
+        file_item.file_dir = col_val;
     } else if (col_nm == "full_nm") {
-        movie_item.full_nm = col_val;
-        if (stat(movie_item.full_nm.c_str(), &statbuf) == 0) {
-            movie_item.found = true;
+        file_item.full_nm = col_val;
+        if (stat(file_item.full_nm.c_str(), &statbuf) == 0) {
+            file_item.found = true;
         }
-    } else if (col_nm == "movie_sz") {
-        movie_item.movie_sz = mtoi(col_val);
-    } else if (col_nm == "movie_dtl") {
-        movie_item.movie_dtl =mtoi(col_val);
-    } else if (col_nm == "movie_tmc") {
-        movie_item.movie_tmc = col_val;
-    } else if (col_nm == "movie_tml") {
-        movie_item.movie_tml = col_val;
+    } else if (col_nm == "file_sz") {
+        file_item.file_sz = mtoi(col_val);
+    } else if (col_nm == "file_dtl") {
+        file_item.file_dtl =mtoi(col_val);
+    } else if (col_nm == "file_tmc") {
+        file_item.file_tmc = col_val;
+    } else if (col_nm == "file_tml") {
+        file_item.file_tml = col_val;
     } else if (col_nm == "diff_avg") {
-        movie_item.diff_avg = mtoi(col_val);
+        file_item.diff_avg = mtoi(col_val);
     } else if (col_nm == "sdev_min") {
-        movie_item.sdev_min = mtoi(col_val);
+        file_item.sdev_min = mtoi(col_val);
     } else if (col_nm == "sdev_max") {
-        movie_item.sdev_max = mtoi(col_val);
+        file_item.sdev_max = mtoi(col_val);
     } else if (col_nm == "sdev_avg") {
-        movie_item.sdev_avg = mtoi(col_val);
+        file_item.sdev_avg = mtoi(col_val);
     }
 }
 
 void cls_dbse::sql_motpls(std::string &sql)
 {
     std::string delimit;
-    it_movies it;
+
+    if ((is_open == false) || (finish == true)) {
+        return;
+    }
 
     sql = "";
 
@@ -151,31 +154,30 @@ void cls_dbse::sql_motpls(std::string &sql)
         }
         sql += ");";
 
-    } else if (dbse_action == DBSE_COLS_LIST) {
+    } else if ((dbse_action == DBSE_COLS_LIST) || (dbse_action == DBSE_COLS_CURRENT)) {
         sql = " select * from motionplus;";
-
-    } else if (dbse_action == DBSE_MOV_SELECT) {
-        sql  = " select * ";
-        sql += " from motionplus ";
-        sql += " where ";
-        sql += "   device_id = " + std::to_string(device_id);
-        sql += " order by ";
-        sql += "   movie_dtl, movie_tml;";
 
     }
 
 }
 
-void cls_dbse::sql_motpls(std::string &sql, std::string col_nm, std::string col_typ)
+void cls_dbse::sql_motpls(std::string &sql, std::string col_p1, std::string col_p2)
 {
+    if ((is_open == false) || (finish == true)) {
+        return;
+    }
+
     sql = "";
 
     if ((dbse_action == DBSE_COLS_ADD) &&
-        (col_nm != "") && (col_typ != "")) {
+        (col_p1 != "") && (col_p2 != "")) {
         sql = "Alter table motionplus add column ";
-        sql += col_nm + " " + col_typ + " ;";
+        sql += col_p1 + " " + col_p2 + " ;";
+    } else if ((dbse_action == DBSE_COLS_RENAME) &&
+        (col_p1 != "") && (col_p2 != "")) {
+        sql = "Alter table motionplus rename column ";
+        sql += col_p1 + " to " + col_p2 + " ;";
     }
-
 }
 
 #endif /* HAVE_DBSE */
@@ -194,9 +196,9 @@ void cls_dbse::sqlite3db_exec(std::string sql)
     int retcd;
     char *errmsg = nullptr;
 
-    if ((database_sqlite3db == nullptr) || (sql =="")) {
+    if ((finish == true) || (database_sqlite3db == nullptr) || (is_open == false)) {
         return;
-    };
+    }
 
     MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing query");
     retcd = sqlite3_exec(database_sqlite3db
@@ -211,10 +213,9 @@ void cls_dbse::sqlite3db_exec(std::string sql)
 
 void cls_dbse::sqlite3db_cb (int arg_nb, char **arg_val, char **col_nm)
 {
-    int indx;
-    it_cols it;
+    int indx, indx2;
 
-    if (check_exit() == true) {
+    if ((finish == true) || (database_sqlite3db == nullptr) || (is_open == false)) {
         return;
     }
 
@@ -227,31 +228,39 @@ void cls_dbse::sqlite3db_cb (int arg_nb, char **arg_val, char **col_nm)
 
     } else if (dbse_action == DBSE_COLS_LIST) {
         for (indx=0; indx < arg_nb; indx++) {
-            for (it = col_names.begin(); it != col_names.end();it++) {
-                if (mystrceq(col_nm[indx], it->col_nm.c_str())) {
-                    it->found = true;
+            for (indx2=0; indx2 < col_names.size(); indx2++) {
+                if (mystrceq(col_nm[indx], col_names[indx2].col_nm.c_str())) {
+                    col_names[indx2].found = true;
                 }
             }
         }
+    } else if (dbse_action == DBSE_COLS_CURRENT) {
+        col_names.clear();
+        for (indx=0; indx < arg_nb; indx++) {
+            cols_vec_add(col_nm[indx],"");
+        }
     } else if (dbse_action == DBSE_MOV_SELECT) {
-        movie_item_default();
+        item_default();
         for (indx=0; indx < arg_nb; indx++) {
             if (arg_val[indx] != nullptr) {
-                movie_item_assign((char*)col_nm[indx], (char*)arg_val[indx]);
+                item_assign((char*)col_nm[indx], (char*)arg_val[indx]);
             }
         }
-        movielist->push_back(movie_item);
+        filelist.push_back(file_item);
     }
 }
 
-void cls_dbse::sqlite3db_cols()
+void cls_dbse::sqlite3db_cols_verify()
 {
-    int retcd;
-    it_cols it;
+    int retcd, indx;
     char *errmsg = 0;
     std::string sql;
 
-    get_cols_list();
+    if ((finish == true) || (database_sqlite3db == nullptr) || (is_open == false)) {
+        return;
+    }
+
+    cols_vec_create();
 
     dbse_action = DBSE_COLS_LIST;
     sql_motpls(sql);
@@ -264,11 +273,45 @@ void cls_dbse::sqlite3db_cols()
         return;
     }
 
-    for (it = col_names.begin(); it != col_names.end();it++) {
-        if (it->found == false) {
+    for (indx=0;indx<col_names.size();indx++) {
+        if (col_names[indx].found == false) {
             dbse_action = DBSE_COLS_ADD;
-            sql_motpls(sql, it->col_nm, it->col_typ);
+            sql_motpls(sql
+                , col_names[indx].col_nm
+                , col_names[indx].col_typ);
             sqlite3db_exec(sql.c_str());
+        }
+    }
+}
+
+void cls_dbse::sqlite3db_cols_rename()
+{
+    int retcd, indx;
+    char *errmsg = 0;
+    std::string sql, tmp;
+
+    if ((finish == true) || (database_sqlite3db == nullptr) || (is_open == false)) {
+        return;
+    }
+
+    dbse_action = DBSE_COLS_CURRENT;
+    sql_motpls(sql);
+    retcd = sqlite3_exec(database_sqlite3db
+        , sql.c_str(), dbse_sqlite3db_cb, this, &errmsg);
+    if (retcd != SQLITE_OK ) {
+        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+            , _("Error retrieving table columns: %s"), errmsg);
+        sqlite3_free(errmsg);
+        return;
+    }
+    for (indx=0;indx<col_names.size();indx++) {
+        if (col_names[indx].col_nm.length() > 5) {
+            if (col_names[indx].col_nm.substr(0,5) == "movie") {
+                dbse_action = DBSE_COLS_RENAME;
+                tmp = "file"+col_names[indx].col_nm.substr(5);
+                sql_motpls(sql,col_names[indx].col_nm, tmp);
+                sqlite3db_exec(sql.c_str());
+            }
         }
     }
 }
@@ -342,18 +385,21 @@ void cls_dbse::sqlite3db_init()
         }
     }
 
-    sqlite3db_cols();
+    sqlite3db_cols_rename();
+    sqlite3db_cols_verify();
 
 }
 
-void cls_dbse::sqlite3db_movielist()
+void cls_dbse::sqlite3db_filelist(std::string sql)
 {
     int retcd;
     char *errmsg  = nullptr;
-    std::string sql;
+
+    if ((finish == true) || (database_sqlite3db == nullptr) || (is_open == false)) {
+        return;
+    }
 
     dbse_action = DBSE_MOV_SELECT;
-    sql_motpls(sql);
     retcd = sqlite3_exec(database_sqlite3db, sql.c_str()
         , dbse_sqlite3db_cb, this, &errmsg);
     if (retcd != SQLITE_OK ) {
@@ -383,7 +429,7 @@ void cls_dbse::mariadb_exec (std::string sql)
 {
     int retcd;
 
-    if ((database_mariadb == nullptr) || (sql == "")) {
+    if ((finish == true) || (database_mariadb == nullptr) || (is_open == false)) {
         return;
     }
 
@@ -415,16 +461,19 @@ void cls_dbse::mariadb_exec (std::string sql)
 
 }
 
-void cls_dbse::mariadb_recs (std::string sql)
+void cls_dbse::mariadb_recs(std::string sql)
 {
-    int retcd, indx;
+    int retcd, indx, indx2;
     int qry_fields;
     MYSQL_RES *qry_result;
     MYSQL_ROW qry_row;
     MYSQL_FIELD *qry_col;
-    lst_cols dbcol_lst;
     ctx_col_item dbcol_itm;
-    it_cols it_db, it;
+    vec_cols dbcol_lst;
+
+    if ((finish == true) || (database_mariadb == nullptr) || (is_open == false)) {
+        return;
+    }
 
     retcd = mysql_query(database_mariadb, sql.c_str());
     if (retcd != 0){
@@ -466,55 +515,87 @@ void cls_dbse::mariadb_recs (std::string sql)
         }
 
     } else if (dbse_action == DBSE_COLS_LIST) {
-        for (it_db = dbcol_lst.begin();
-            it_db != dbcol_lst.end();it_db++) {
-            for (it = col_names.begin();
-                it != col_names.end();it++) {
-                if (it_db->col_nm == it->col_nm) {
-                    it->found = true;
+        for (indx=0;indx < dbcol_lst.size(); indx++) {
+            for (indx2=0;indx2<col_names.size();indx2++) {
+                if (dbcol_lst[indx].col_nm == col_names[indx2].col_nm) {
+                    col_names[indx2].found = true;
                 }
             }
+        }
+
+    } else if (dbse_action == DBSE_COLS_CURRENT) {
+        col_names.clear();
+        for (indx=0;indx < dbcol_lst.size(); indx++) {
+            cols_vec_add(dbcol_lst[indx].col_nm,"");
         }
 
     } else if (dbse_action == DBSE_MOV_SELECT) {
         while (qry_row != nullptr) {
-            if (check_exit() == true) {
+            if (finish == true) {
                 mysql_free_result(qry_result);
                 return;
             }
-            movie_item_default();
-            for (it_db = dbcol_lst.begin();
-                it_db != dbcol_lst.end();it_db++) {
-                if (qry_row[it_db->col_idx] != nullptr) {
-                    movie_item_assign(it_db->col_nm
-                        , (char*)qry_row[it_db->col_idx]);
+            item_default();
+            for (indx=0;indx<dbcol_lst.size();indx++) {
+                if (qry_row[dbcol_lst[indx].col_idx] != nullptr) {
+                    item_assign(dbcol_lst[indx].col_nm
+                        , (char*)qry_row[dbcol_lst[indx].col_idx]);
                 }
             }
-            movielist->push_back(movie_item);
+            filelist.push_back(file_item);
             qry_row = mysql_fetch_row(qry_result);
         }
     }
     mysql_free_result(qry_result);
-
 }
 
-void cls_dbse::mariadb_cols()
+void cls_dbse::mariadb_cols_verify()
 {
     std::string sql;
-    it_cols it;
+    int indx;
 
-    get_cols_list();
+    if ((finish == true) || (database_mariadb == nullptr) || (is_open == false)) {
+        return;
+    }
+
+    cols_vec_create();
 
     dbse_action = DBSE_COLS_LIST;
     sql_motpls(sql);
     mariadb_recs(sql.c_str());
 
-    for (it = col_names.begin();
-        it != col_names.end();it++) {
-        if (it->found == false) {
+    for (indx=0;indx<col_names.size();indx++) {
+        if (col_names[indx].found == false) {
             dbse_action = DBSE_COLS_ADD;
-            sql_motpls(sql,it->col_nm,it->col_typ);
+            sql_motpls(sql
+                ,col_names[indx].col_nm
+                ,col_names[indx].col_typ);
             mariadb_exec(sql.c_str());
+        }
+    }
+}
+
+void cls_dbse::mariadb_cols_rename()
+{
+    std::string sql, tmp;
+    int indx;
+
+    if ((finish == true) || (database_mariadb == nullptr) || (is_open == false)) {
+        return;
+    }
+
+    dbse_action = DBSE_COLS_CURRENT;
+    sql_motpls(sql);
+    mariadb_recs(sql.c_str());
+
+    for (indx=0;indx<col_names.size();indx++) {
+        if (col_names[indx].col_nm.length() > 5) {
+            if (col_names[indx].col_nm.substr(0,5) == "movie") {
+                dbse_action = DBSE_COLS_RENAME;
+                tmp = "file"+col_names[indx].col_nm.substr(5);
+                sql_motpls(sql,col_names[indx].col_nm, tmp);
+                mariadb_exec(sql.c_str());
+            }
         }
     }
 }
@@ -522,6 +603,10 @@ void cls_dbse::mariadb_cols()
 void cls_dbse::mariadb_setup()
 {
     std::string sql;
+
+    if ((finish == true) || (database_mariadb == nullptr) || (is_open == false)) {
+        return;
+    }
 
     dbse_action = DBSE_TBL_CHECK;
     sql_motpls(sql);
@@ -535,7 +620,8 @@ void cls_dbse::mariadb_setup()
         mariadb_exec(sql.c_str());
     }
 
-    mariadb_cols();
+    mariadb_cols_rename();
+    mariadb_cols_verify();
 
 }
 
@@ -603,14 +689,10 @@ void cls_dbse::mariadb_close()
     }
 }
 
-void cls_dbse::mariadb_movielist()
+void cls_dbse::mariadb_filelist(std::string sql)
 {
-    std::string sql;
-
     dbse_action = DBSE_MOV_SELECT;
-    sql_motpls(sql);
     mariadb_recs(sql.c_str());
-
 }
 
 #endif  /*HAVE_MARIADB*/
@@ -621,7 +703,7 @@ void cls_dbse::pgsqldb_exec(std::string sql)
 {
     PGresult    *res;
 
-    if ((database_pgsqldb == nullptr) || (sql == "")) {
+    if ((database_pgsqldb == nullptr) || (sql == "") || (is_open == false)) {
         return;
     }
 
@@ -671,13 +753,8 @@ void cls_dbse::pgsqldb_recs (std::string sql)
 {
     PGresult    *res;
     int indx, indx2, rows, cols;
-    it_cols it;
 
-    if (database_pgsqldb == nullptr) {
-        return;
-    }
-
-    if (check_exit() == true) {
+    if ((finish == true) || (database_pgsqldb == nullptr) || (is_open == false)) {
         return;
     }
 
@@ -704,13 +781,21 @@ void cls_dbse::pgsqldb_recs (std::string sql)
 
     } else if (dbse_action == DBSE_COLS_LIST) {
         cols = PQnfields(res);
-        for(indx = 0; indx < cols; indx++) {
-            for (it = col_names.begin();
-                it != col_names.end();it++) {
-                if (mystrceq(PQfname(res, indx), it->col_nm.c_str())) {
-                    it->found = true;
+        for(indx=0;indx<cols;indx++) {
+            for (indx2=0;indx2<col_names.size();indx2++) {
+                if (mystrceq(PQfname(res, indx)
+                    , col_names[indx2].col_nm.c_str())) {
+                    col_names[indx2].found = true;
                 }
             }
+        }
+        PQclear(res);
+
+    } else if (dbse_action == DBSE_COLS_CURRENT) {
+        col_names.clear();
+        cols = PQnfields(res);
+        for(indx=0;indx<cols;indx++) {
+            cols_vec_add(PQfname(res, indx),"");
         }
         PQclear(res);
 
@@ -723,41 +808,70 @@ void cls_dbse::pgsqldb_recs (std::string sql)
         cols = PQnfields(res);
         rows = PQntuples(res);
         for(indx = 0; indx < rows; indx++) {
-            if (check_exit() == true) {
+            if (finish == true) {
                 PQclear(res);
                 return;
             }
-            movie_item_default();
+            item_default();
             for (indx2 = 0; indx2 < cols; indx2++) {
                 if (PQgetvalue(res, indx, indx2) != nullptr) {
-                    movie_item_assign((char*)PQfname(res, indx2)
+                    item_assign((char*)PQfname(res, indx2)
                         , (char*)PQgetvalue(res, indx, indx2));
                 }
             }
-            movielist->push_back(movie_item);
+            filelist.push_back(file_item);
         }
         PQclear(res);
     }
-
 }
 
-void cls_dbse::pgsqldb_cols()
+void cls_dbse::pgsqldb_cols_verify()
 {
     std::string sql;
-    it_cols it;
+    int indx;
 
-    get_cols_list();
+    if ((finish == true) || (database_pgsqldb == nullptr) || (is_open == false)) {
+        return;
+    }
+
+    cols_vec_create();
 
     dbse_action = DBSE_COLS_LIST;
     sql_motpls(sql);
     pgsqldb_recs(sql.c_str());
 
-    for (it = col_names.begin();
-        it != col_names.end();it++) {
-        if (it->found == false) {
+    for (indx=0;indx<col_names.size();indx++) {
+        if (col_names[indx].found == false) {
             dbse_action = DBSE_COLS_ADD;
-            sql_motpls(sql, it->col_nm, it->col_typ);
+            sql_motpls(sql
+                , col_names[indx].col_nm
+                , col_names[indx].col_typ);
             pgsqldb_exec(sql.c_str());
+        }
+    }
+}
+
+void cls_dbse::pgsqldb_cols_rename()
+{
+    int indx;
+    std::string sql, tmp;
+
+    if ((finish == true) || (database_pgsqldb == nullptr) || (is_open == false)) {
+        return;
+    }
+
+    dbse_action = DBSE_COLS_CURRENT;
+    sql_motpls(sql);
+    pgsqldb_recs(sql.c_str());
+
+    for (indx=0;indx<col_names.size();indx++) {
+        if (col_names[indx].col_nm.length() > 5) {
+            if (col_names[indx].col_nm.substr(0,5) == "movie") {
+                dbse_action = DBSE_COLS_RENAME;
+                tmp = "file"+col_names[indx].col_nm.substr(5);
+                sql_motpls(sql,col_names[indx].col_nm, tmp);
+                pgsqldb_exec(sql.c_str());
+            }
         }
     }
 }
@@ -765,6 +879,10 @@ void cls_dbse::pgsqldb_cols()
 void cls_dbse::pgsqldb_setup()
 {
     std::string sql;
+
+    if ((finish == true) || (database_pgsqldb == nullptr) || (is_open == false)) {
+        return;
+    }
 
     dbse_action = DBSE_TBL_CHECK;
     sql_motpls(sql);
@@ -778,7 +896,8 @@ void cls_dbse::pgsqldb_setup()
         pgsqldb_exec(sql.c_str());
     }
 
-    pgsqldb_cols();
+    pgsqldb_cols_rename();
+    pgsqldb_cols_verify();
 
 }
 
@@ -815,14 +934,10 @@ void cls_dbse::pgsqldb_init()
         , app->cfg->database_dbname.c_str() );
 }
 
-void cls_dbse::pgsqldb_movielist()
+void cls_dbse::pgsqldb_filelist(std::string sql)
 {
-    std::string sql;
-
     dbse_action = DBSE_MOV_SELECT;
-    sql_motpls(sql);
     pgsqldb_recs(sql.c_str());
-
 }
 
 #endif  /*HAVE_PGSQL*/
@@ -859,36 +974,37 @@ bool cls_dbse::dbse_open()
     return is_open;
 }
 
-/* Get list of movies from the database*/
-void cls_dbse::movielist_get(int p_device_id, lst_movies *p_movielist)
+void cls_dbse::filelist_get(std::string sql, vec_files &p_flst)
 {
+    int indx;
     if (dbse_open() == false) {
         return;
     }
-    if (check_exit() == true) {
+    if (finish == true) {
         return;
     }
 
     pthread_mutex_lock(&mutex_dbse);
-        device_id = p_device_id;
-        movielist = p_movielist;
-        movielist->clear();
-
+        p_flst.clear();
+        filelist.clear();
         #ifdef HAVE_MARIADB
             if (app->cfg->database_type == "mariadb") {
-                mariadb_movielist();
+                mariadb_filelist(sql);
             }
         #endif
         #ifdef HAVE_PGSQLDB
             if (app->cfg->database_type == "postgresql") {
-                pgsqldb_movielist();
+                pgsqldb_filelist(sql);
             }
         #endif
         #ifdef HAVE_SQLITE3DB
             if (app->cfg->database_type == "sqlite3") {
-                sqlite3db_movielist();
+                sqlite3db_filelist(sql);
             }
         #endif
+        for (indx=0;indx<filelist.size();indx++){
+            p_flst.push_back(filelist[indx]);
+        }
     pthread_mutex_unlock(&mutex_dbse);
 
 }
@@ -967,8 +1083,8 @@ void cls_dbse::exec(cls_camera *cam, std::string fname, std::string cmd)
 
 }
 
-/* Add a record to motionplus table */
-void cls_dbse::movielist_add(cls_camera *cam, cls_movie *movie, timespec *ts1)
+void cls_dbse::filelist_add(cls_camera *cam, timespec *ts1, std::string ftyp
+    ,std::string filenm, std::string fullnm, std::string dirnm)
 {
     std::string sqlquery;
     struct stat statbuf;
@@ -986,8 +1102,7 @@ void cls_dbse::movielist_add(cls_camera *cam, cls_movie *movie, timespec *ts1)
 
     cam->watchdog = cam->cfg->watchdog_tmo;
 
-    /* Movie file times */
-    if (stat(movie->full_nm.c_str(), &statbuf) == 0) {
+    if (stat(fullnm.c_str(), &statbuf) == 0) {
         bsz = statbuf.st_size;
     } else {
         bsz = 0;
@@ -1009,12 +1124,15 @@ void cls_dbse::movielist_add(cls_camera *cam, cls_movie *movie, timespec *ts1)
     }
 
     sqlquery =  "insert into motionplus ";
-    sqlquery += " (device_id, movie_nm, movie_dir, full_nm, movie_sz, movie_dtl";
-    sqlquery += " , movie_tmc, movie_tml, diff_avg, sdev_min, sdev_max, sdev_avg)";
+    sqlquery += " (device_id, file_nm, file_typ, file_dir";
+    sqlquery += " , full_nm, file_sz, file_dtl";
+    sqlquery += " , file_tmc, file_tml, diff_avg";
+    sqlquery += " , sdev_min, sdev_max, sdev_avg)";
     sqlquery += " values ("+std::to_string(cam->cfg->device_id);
-    sqlquery += " ,'" + movie->movie_nm + "'";
-    sqlquery += " ,'" + movie->movie_dir + "'";
-    sqlquery += " ,'" + movie->full_nm + "'";
+    sqlquery += " ,'" + filenm + "'";
+    sqlquery += " ,'" + ftyp + "'";
+    sqlquery += " ,'" + dirnm + "'";
+    sqlquery += " ,'" + fullnm + "'";
     sqlquery += " ,"  + std::to_string(bsz);
     sqlquery += " ,"  + std::string(dtl);
     sqlquery += " ,'" + std::string(tmc)+ "'";
@@ -1075,31 +1193,35 @@ void cls_dbse::dbse_edits()
 
 void cls_dbse::dbse_clean()
 {
-    lst_movies mvlist;
-    it_movies it;
     int delcnt, indx;
     std::string sql, delimit;
     struct stat statbuf;
+    vec_files flst;
 
     for (indx=0;indx<app->cam_cnt;indx++) {
         if (check_exit() == true) {
             return;
         }
-        movielist_get(app->cam_list[indx]->cfg->device_id, &mvlist);
+
+        sql  = " select * from motionplus ";
+        sql += " where device_id = ";
+        sql += std::to_string(app->cam_list[indx]->cfg->device_id);
+        sql += " order by file_dtl, file_tml;";
+        filelist_get(sql, flst);
+
         delcnt = 0;
-        for (it = mvlist.begin();
-            it != mvlist.end(); it++) {
+        for (indx=0;indx<flst.size();indx++) {
             if (check_exit() == true) {
                 return;
             }
-            if (stat(it->full_nm.c_str(), &statbuf) != 0) {
+            if (stat(flst[indx].full_nm.c_str(), &statbuf) != 0) {
                 if (sql == "") {
                     sql = " delete from motionplus "
                         " where record_id in (";
                     delimit = " ";
                     delcnt = 0;
                 }
-                sql += delimit + std::to_string(it->record_id);
+                sql += delimit + std::to_string(flst[indx].record_id);
                 delimit = ",";
                 delcnt++;
             }
@@ -1132,8 +1254,7 @@ void cls_dbse::startup()
 
 bool cls_dbse::check_exit()
 {
-    if ((handler_stop == true) ||
-        (finish == true)) {
+    if ((handler_stop == true) || (finish == true)) {
         return true;
     }
     return false;

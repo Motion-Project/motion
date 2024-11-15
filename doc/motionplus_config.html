@@ -151,11 +151,11 @@
               <td bgcolor="#edf4f9" ><a href="#pause" >pause</a> </td>
             </tr>
               <td bgcolor="#edf4f9" ><a href="#schedule_params" >schedule_params</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#cleandir_params" >cleandir_params</a> </td>
               <td bgcolor="#edf4f9" ><a href="#watchdog_tmo" >watchdog_tmo</a> </td>
               <td bgcolor="#edf4f9" ><a href="#watchdog_kill" >watchdog_kill</a> </td>
             <tr>
             </tr>
-              <td bgcolor="#edf4f9" ><a href="#target_dir" >target_dir</a> </td>
               <td bgcolor="#edf4f9" ><a href="#camera" >camera</a> </td>
               <td bgcolor="#edf4f9" ><a href="#config_dir" >config_dir</a> </td>
             <tr>
@@ -880,6 +880,92 @@
             that the criteria is greater than or equal or less than or equal.  For multiple
             time periods during the same day specify the parameter multiple times.  For example,
             <code><small>wed=0905-1130,wed=1330-1605</small></code>.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4> params_file </h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+              Full path and file name for a file containing the params listed one per line.
+            </ul>
+          </div>
+          <p></p>
+
+         </ul>
+        <p></p>
+
+        <h3><a name="cleandir_params"></a>cleandir_params</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters.  Format is: option=value,option2=value2
+        </ul>
+        <ul>
+          <p></p>
+          This parameter specifies the information used for purging older recording and pictures created by Motionplus.  This option
+          is only applicable if a database has been specified.  The default for this parameter is an empty string which means that
+          no clean directory actions will be performed.
+          <p></p>
+
+          <div>
+            <i><h4>action</h4></i>
+            String specifying either <code><small>delete</small></code> or <code><small>script</small></code>.  If the option
+            of <code><small>script</small></code> is specified, then the provided script will be executed at the specified
+            interval.  If the option of <code><small>delete</small></code> is specified, then all files that were created
+            by Motionplus will be deleted from the system according to the schedule.  The default for this
+            parameter is <code><small>delete</small></code>
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>freq</h4></i>
+            This parameter specifies the frequency that the clean directory will be run.  Valid options for this parameter
+            are <code><small>hourly</small></code>, <code><small>daily</small></code> or <code><small>weekly</small></code>.
+            The default value for this parameter is <code><small>weekly</small></code>.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>runtime</h4></i>
+            This parameter specifies the timing for running the clean directory actions.  The format of this value
+            varies depending upon the frequency specified.
+            <ul>
+              <li><code><small>hourly</small></code> | Specify the minute of the hour using the format mm. e.g. 05 for 5 minutes past each hour</li>
+              <li><code><small>daily</small></code> | Specify the hour and minute using the format hhmm. e.g. 1420 for 2:20pm</li>
+              <li><code><small>weekly</small></code> | Specify the day, hour and minute using the format dow-hhmm. e.g. tue-1420 for Tuesdays at 2:20pm</li>
+            </ul>
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>dur_unit</h4></i>
+            This parameter specifies the unit of duration for the criteria used to select files.  Valid options for this parameter
+            are <code><small>m</small></code>, <code><small>h</small></code>,<code><small>d</small></code> or <code><small>w</small></code>. For
+            minutes, hours, days or weeks. The default value for this parameter is <code><small>d</small></code>.  As an
+            example, if the <code><small>dur_unit=d</small></code>
+            and the <code><small>dur_val=7</small></code> then all files older than 7 days would be deleted.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>dur_val</h4></i>
+            This parameter specifies the number associated with the duration units for the criteria used to select files.
+            The default value for this parameter is <code><small>7</small></code>.  As an example, if the <code><small>dur_unit=d</small></code>
+            and the <code><small>dur_val=7</small></code> then all files older than 7 days would be deleted.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>removedir</h4></i>
+            This parameter is a boolean that specifies whether the associated directory (only one level up) should be
+            removed if there are no longer any files in it after the clean process has run. If there are other files
+            in the directory that are not created by Motionplus, then the directory will not be removed.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>script</h4></i>
+            This parameter specifies the full path to a script to run at the scheduled time.
           </div>
           <p></p>
 

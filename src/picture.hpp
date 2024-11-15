@@ -41,6 +41,10 @@ class cls_picture {
     private:
         cls_camera *cam;
 
+        std::string         full_nm;
+        std::string         file_nm;
+        std::string         file_dir;
+
         #ifdef HAVE_WEBP
             void webp_exif(WebPMux* webp_mux
                 , timespec *ts1, ctx_coord *box);

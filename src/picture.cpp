@@ -42,6 +42,10 @@ void cls_picture::picname(char* fullname, std::string fmtstr
             ,_("Error creating picture file name"));
         return;
     }
+    full_nm = fullname;
+    file_dir =full_nm.substr(0,full_nm.find_last_of("/"));
+    file_nm = full_nm.substr(file_dir.length()+1);
+
 }
 
 void cls_picture::on_picture_save_command(char *fname)
@@ -68,6 +72,8 @@ void cls_picture::process_norm()
         }
         on_picture_save_command(filename);
         cam->app->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->filelist_add(cam, &cam->current_image->imgts
+            ,"pic", file_nm, full_nm, file_dir);
     }
 }
 
@@ -80,12 +86,18 @@ void cls_picture::process_motion()
         save_norm(filename, cam->imgs.image_motion.image_norm);
         on_picture_save_command(filename);
         cam->app->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->filelist_add(cam, &cam->imgs.image_motion.imgts
+            ,"pic", file_nm, full_nm, file_dir);
+
 
     } else if (cam->cfg->picture_output_motion == "roi") {
         picname(filename,"%s/%sr.%s", cam->cfg->picture_filename, cam->cfg->picture_type);
         save_roi(filename, cam->current_image->image_norm);
         on_picture_save_command(filename);
         cam->app->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->filelist_add(cam, &cam->current_image->imgts
+            ,"pic", file_nm, full_nm, file_dir);
+
     }
 }
 
@@ -111,6 +123,8 @@ void cls_picture::process_snapshot()
         }
         on_picture_save_command(filename);
         cam->app->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->filelist_add(cam, &cam->current_image->imgts
+            ,"pic", file_nm, full_nm, file_dir);
 
         /* Update symbolic link */
         picname(linkpath,"%s/%s.%s"
@@ -134,6 +148,8 @@ void cls_picture::process_snapshot()
         }
         on_picture_save_command(filename);
         cam->app->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->filelist_add(cam, &cam->current_image->imgts
+            ,"pic", file_nm, full_nm, file_dir);
     }
 
     cam->action_snapshot = false;
@@ -162,6 +178,8 @@ void cls_picture::process_preview()
         }
         on_picture_save_command(filename);
         cam->app->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->filelist_add(cam, &cam->imgs.image_preview.imgts
+            ,"pic", file_nm, full_nm, file_dir);
 
         /* Restore global context values. */
         cam->current_image = saved_current_image;

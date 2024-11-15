@@ -81,6 +81,7 @@ struct ctx_params {
     void mystrftime(cls_sound *snd, std::string &dst, std::string fmt);
     void util_exec_command(cls_camera *cam, const char *command, const char *filename);
     void util_exec_command(cls_sound *snd, std::string cmd);
+    void util_exec_command(cls_camera *cam, std::string cmd);
 
     void mythreadname_set(const char *abbr, int threadnbr, const char *threadname);
     void mythreadname_get(char *threadname);

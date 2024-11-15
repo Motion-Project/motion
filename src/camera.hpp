@@ -123,6 +123,17 @@ struct ctx_schedule_data {
     std::string action;
 };
 
+struct ctx_cleandir {
+    struct timespec next_ts;
+    std::string freq;
+    std::string action;
+    std::string script;
+    std::string runtime;
+    bool removedir;
+    std::string dur_unit;
+    int dur_val;
+};
+
 class cls_camera {
     public:
         cls_camera(cls_motapp *p_app);
@@ -183,6 +194,7 @@ class cls_camera {
         int         info_sdev_max;
         uint64_t    info_sdev_tot;
         std::vector<std::vector<ctx_schedule_data>> schedule;
+        ctx_cleandir    *cleandir;
 
         bool    action_snapshot;    /* Make a snapshot */
         bool    event_stop;  /* Boolean for whether to stop a event */
@@ -242,6 +254,9 @@ class cls_camera {
         void init_cam_start();
         void init_ref();
         void init_schedule();
+        void init_cleandir_runtime();
+        void init_cleandir_default();
+        void init_cleandir();
         void cleanup();
         void init();
         void areadetect();

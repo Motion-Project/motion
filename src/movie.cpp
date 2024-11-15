@@ -125,7 +125,7 @@ int cls_movie::get_oformat()
         oc->oformat = av_guess_format("mpeg2video", nullptr, nullptr);
         oc->video_codec_id = AV_CODEC_ID_MPEG2VIDEO;
         full_nm += ".mpg";
-        movie_nm += ".mpg";
+        file_nm += ".mpg";
         if (oc->oformat == nullptr) {
             MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                 ,_("Error setting timelapse append for container %s")
@@ -139,42 +139,42 @@ int cls_movie::get_oformat()
     if (container == "mov") {
         oc->oformat = av_guess_format("mov", nullptr, nullptr);
         full_nm += ".mov";
-        movie_nm += ".mov";
+        file_nm += ".mov";
         oc->video_codec_id = AV_CODEC_ID_H264;
     }
 
     if (container == "flv") {
         oc->oformat = av_guess_format("flv", nullptr, nullptr);
         full_nm += ".flv";
-        movie_nm += ".flv";
+        file_nm += ".flv";
         oc->video_codec_id = AV_CODEC_ID_FLV1;
     }
 
     if (container == "ogg") {
         oc->oformat = av_guess_format("ogg", nullptr, nullptr);
         full_nm += ".ogg";
-        movie_nm += ".ogg";
+        file_nm += ".ogg";
         oc->video_codec_id = AV_CODEC_ID_THEORA;
     }
 
     if (container == "webm") {
         oc->oformat = av_guess_format("webm", nullptr, nullptr);
         full_nm += ".webm";
-        movie_nm += ".webm";
+        file_nm += ".webm";
         oc->video_codec_id = AV_CODEC_ID_VP8;
     }
 
     if (container == "mp4") {
         oc->oformat = av_guess_format("mp4", nullptr, nullptr);
         full_nm += ".mp4";
-        movie_nm += ".mp4";
+        file_nm += ".mp4";
         oc->video_codec_id = AV_CODEC_ID_H264;
     }
 
     if (container == "mkv") {
         oc->oformat = av_guess_format("matroska", nullptr, nullptr);
         full_nm += ".mkv";
-        movie_nm += ".mkv";
+        file_nm += ".mkv";
         oc->video_codec_id = AV_CODEC_ID_H264;
     }
 
@@ -182,7 +182,7 @@ int cls_movie::get_oformat()
         oc->video_codec_id = AV_CODEC_ID_HEVC;
         oc->oformat = av_guess_format("mp4", nullptr, nullptr);
         full_nm += ".mp4";
-        movie_nm += ".mp4";
+        file_nm += ".mp4";
         oc->video_codec_id = AV_CODEC_ID_HEVC;
     }
 
@@ -599,10 +599,6 @@ int cls_movie::set_outputfile()
         retcd = avio_open(&oc->pb, full_nm.c_str()
             , AVIO_FLAG_WRITE|AVIO_FLAG_NONBLOCK);
         if (retcd < 0) {
-            av_strerror(retcd, errstr, sizeof(errstr));
-            MOTPLS_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
-                ,_("avio_open: %s File %s")
-                , errstr, full_nm.c_str());
             if (errno == ENOENT) {
                 if (mycreate_path(full_nm.c_str()) == -1) {
                     remove(full_nm.c_str());
@@ -621,9 +617,10 @@ int cls_movie::set_outputfile()
                     return -1;
                 }
             } else {
+                av_strerror(retcd, errstr, sizeof(errstr));
                 MOTPLS_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
-                    ,_("Error opening file %s")
-                    , full_nm.c_str());
+                    ,_("avio_open: %s File %s")
+                    , errstr, full_nm.c_str());
                 remove(full_nm.c_str());
                 free_context();
                 return -1;
@@ -1279,10 +1276,12 @@ void cls_movie::stop()
                 MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     , _("Unable to remove file %s"), full_nm.c_str());
             } else {
-                cam->app->dbse->movielist_add(cam, this, ts);
+                cam->app->dbse->filelist_add(cam, ts, "movie"
+                    , file_nm, full_nm, file_dir);
             }
         } else {
-            cam->app->dbse->movielist_add(cam, this, ts);
+            cam->app->dbse->filelist_add(cam, ts, "movie"
+                    , file_nm, full_nm, file_dir);
         }
     } else if (movie_type == "timelapse") {
         on_movie_end();
@@ -1450,13 +1449,14 @@ void cls_movie::start_norm()
 
     mystrftime(cam, tmp, sizeof(tmp), cam->cfg->movie_filename.c_str(), nullptr);
 
-    movie_nm = tmp;
-    movie_dir = cam->cfg->target_dir;
+    file_nm = tmp;
     if (container =="test") {
-        full_nm = movie_dir + "/"  + container + "_" + movie_nm;
+        full_nm = cam->cfg->target_dir + "/"  + container + "_" + file_nm;
     } else {
-        full_nm = movie_dir + "/"  + movie_nm;
+        full_nm = cam->cfg->target_dir + "/"  + file_nm;
     }
+    file_dir =full_nm.substr(0,full_nm.find_last_of("/"));
+    file_nm = full_nm.substr(file_dir.length()+1);
 
     if (cam->imgs.size_high > 0) {
         width  = cam->imgs.width_high;
@@ -1518,13 +1518,14 @@ void cls_movie::start_motion()
             , cam->cfg->movie_filename.c_str(), nullptr);
     memcpy(cam->current_image, &save_data, sizeof(ctx_image_data));
 
-    movie_nm.assign(tmp).append("m");
-    movie_dir = cam->cfg->target_dir;
+    file_nm.assign(tmp).append("m");
     if (container =="test") {
-        full_nm = movie_dir + "/"  + container + "_" + movie_nm;
+        full_nm = cam->cfg->target_dir + "/"  + container + "_" + file_nm;
     } else {
-        full_nm = movie_dir + "/"  + movie_nm;
+        full_nm = cam->cfg->target_dir + "/"  + file_nm;
     }
+    file_dir =full_nm.substr(0,full_nm.find_last_of("/"));
+    file_nm = full_nm.substr(file_dir.length()+1);
 
     pkt = nullptr;
     width  = cam->imgs.width;
@@ -1564,9 +1565,10 @@ void cls_movie::start_timelapse()
 
     mystrftime(cam, tmp, sizeof(tmp), cam->cfg->timelapse_filename.c_str(), nullptr);
 
-    movie_nm = tmp;
-    movie_dir = cam->cfg->target_dir.c_str();
-    full_nm = movie_dir + "/" + movie_nm;
+    file_nm = tmp;
+    full_nm = cam->cfg->target_dir + "/" + file_nm;
+    file_dir =full_nm.substr(0,full_nm.find_last_of("/"));
+    file_nm = full_nm.substr(file_dir.length()+1);
 
     if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
         width  = cam->imgs.width_high;
@@ -1624,18 +1626,18 @@ void cls_movie::start_extpipe()
 
     mystrftime(cam, tmp, sizeof(tmp), cam->cfg->movie_filename.c_str(), nullptr);
 
-    movie_nm = tmp;
-    movie_dir = cam->cfg->target_dir;
-
+    file_nm = tmp;
     if (cam->cfg->movie_output) {
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Requested extpipe in addition to movie_output."));
         MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Adjusting file name of extpipe output."));
-        full_nm = movie_dir + "/"  + movie_nm + "p";
+        full_nm = cam->cfg->target_dir + "/"  + file_nm + "p";
     } else {
-        full_nm = movie_dir + "/"  + movie_nm;
+        full_nm = cam->cfg->target_dir + "/"  + file_nm;
     }
+    file_dir =full_nm.substr(0,full_nm.find_last_of("/"));
+    file_nm = full_nm.substr(file_dir.length()+1);
 
     if (mycreate_path(full_nm.c_str()) == -1) {
         MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, _("create path failed"));
@@ -1688,8 +1690,8 @@ void cls_movie::init_vars()
     cb_cr_ts = cb_st_ts;
     cb_dur =0;
     full_nm = "";
-    movie_nm = "";
-    movie_dir = "";
+    file_nm = "";
+    file_dir = "";
 
     oc = nullptr;
     strm_video = nullptr;
