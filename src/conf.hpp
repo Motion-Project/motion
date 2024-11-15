@@ -241,7 +241,7 @@
             /* Live stream configuration parameters */
             int             stream_preview_scale;
             bool            stream_preview_newline;
-            std::string     stream_preview_location;
+            std::string     stream_preview_params;
             std::string     stream_preview_method;
             bool            stream_preview_ptz;
             int             stream_quality;
@@ -484,7 +484,7 @@
             void edit_stream_grey(std::string &parm, enum PARM_ACT pact);
             void edit_stream_maxrate(std::string &parm, enum PARM_ACT pact);
             void edit_stream_motion(std::string &parm, enum PARM_ACT pact);
-            void edit_stream_preview_location(std::string &parm, enum PARM_ACT pact);
+            void edit_stream_preview_params(std::string &parm, enum PARM_ACT pact);
             void edit_stream_preview_method(std::string &parm, enum PARM_ACT pact);
             void edit_stream_preview_newline(std::string &parm, enum PARM_ACT pact);
             void edit_stream_preview_ptz(std::string &parm, enum PARM_ACT pact);

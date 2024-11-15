@@ -173,7 +173,7 @@ ctx_parm config_parms[] = {
 
     {"stream_preview_scale",      PARM_TYP_INT,    PARM_CAT_14, PARM_LEVEL_LIMITED },
     {"stream_preview_newline",    PARM_TYP_BOOL,   PARM_CAT_14, PARM_LEVEL_LIMITED },
-    {"stream_preview_location",   PARM_TYP_STRING, PARM_CAT_14, PARM_LEVEL_LIMITED },
+    {"stream_preview_params",   PARM_TYP_STRING, PARM_CAT_14, PARM_LEVEL_LIMITED },
     {"stream_preview_method",     PARM_TYP_LIST,   PARM_CAT_14, PARM_LEVEL_LIMITED },
     {"stream_preview_ptz",        PARM_TYP_BOOL,   PARM_CAT_14, PARM_LEVEL_LIMITED },
     {"stream_quality",            PARM_TYP_INT,    PARM_CAT_14, PARM_LEVEL_LIMITED },
@@ -2561,17 +2561,17 @@ void cls_config::edit_stream_preview_newline(std::string &parm, enum PARM_ACT pa
     MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_newline",_("stream_preview_newline"));
  }
 
-void cls_config::edit_stream_preview_location(std::string &parm, enum PARM_ACT pact)
+void cls_config::edit_stream_preview_params(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        stream_preview_location = "";
+        stream_preview_params = "";
     } else if (pact == PARM_ACT_SET) {
-        stream_preview_location = parm;
+        stream_preview_params = parm;
     } else if (pact == PARM_ACT_GET) {
-        parm = stream_preview_location;
+        parm = stream_preview_params;
     }
     return;
-    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_location",_("stream_preview_location"));
+    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_params",_("stream_preview_params"));
 }
 
 void cls_config::edit_stream_preview_method(std::string &parm, enum PARM_ACT pact)
@@ -3322,7 +3322,7 @@ void cls_config::edit_cat14(std::string parm_nm, std::string &parm_val, enum PAR
 {
     if (parm_nm == "stream_preview_scale") {               edit_stream_preview_scale(parm_val, pact);
     } else if (parm_nm == "stream_preview_newline") {      edit_stream_preview_newline(parm_val, pact);
-    } else if (parm_nm == "stream_preview_location") {     edit_stream_preview_location(parm_val, pact);
+    } else if (parm_nm == "stream_preview_params") {     edit_stream_preview_params(parm_val, pact);
     } else if (parm_nm == "stream_preview_method") {       edit_stream_preview_method(parm_val, pact);
     } else if (parm_nm == "stream_preview_ptz") {          edit_stream_preview_ptz(parm_val, pact);
     } else if (parm_nm == "stream_quality") {              edit_stream_quality(parm_val, pact);

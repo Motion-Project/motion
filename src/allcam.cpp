@@ -523,8 +523,8 @@ void cls_allcam::init_params()
             app->cam_list[indx]->cfg->stream_preview_scale;
 
         util_parms_parse(params_loc
-            , "stream_preview_location"
-            , app->cam_list[indx]->cfg->stream_preview_location);
+            , "stream_preview_params"
+            , app->cam_list[indx]->cfg->stream_preview_params);
 
         for (indx1=0;indx1<params_loc->params_cnt;indx1++) {
             itm = &params_loc->params_array[indx1];
@@ -575,7 +575,7 @@ bool cls_allcam::init_validate()
             (app->cam_list[indx]->all_loc.row == -1)) {
             cfg_valid = false;
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "No stream_preview_location for cam %d"
+                , "No stream_preview_params for cam %d"
                 , app->cam_list[indx]->cfg->device_id);
         } else {
             for (indx1=0; indx1<app->cam_cnt; indx1++) {
@@ -585,7 +585,7 @@ bool cls_allcam::init_validate()
                     app->cam_list[indx1]->all_loc.row) &&
                     (indx != indx1)) {
                     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                        , "Duplicate stream_preview_location "
+                        , "Duplicate stream_preview_params "
                         " cam %d, cam %d row %d col %d"
                         , app->cam_list[indx]->cfg->device_id
                         , app->cam_list[indx1]->cfg->device_id
@@ -597,14 +597,14 @@ bool cls_allcam::init_validate()
         }
         if (app->cam_list[indx]->all_loc.row == 0) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "Invalid stream_preview_location row cam %d, row %d"
+                , "Invalid stream_preview_params row cam %d, row %d"
                 , app->cam_list[indx]->cfg->device_id
                 , app->cam_list[indx]->all_loc.row);
             cfg_valid = false;
         }
         if (app->cam_list[indx]->all_loc.col == 0) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "Invalid stream_preview_location col cam %d, col %d"
+                , "Invalid stream_preview_params col cam %d, col %d"
                 , app->cam_list[indx]->cfg->device_id
                 , app->cam_list[indx]->all_loc.col);
             cfg_valid = false;
@@ -620,7 +620,7 @@ bool cls_allcam::init_validate()
         }
         if (chk == false) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "Invalid stream_preview_location combination. "
+                , "Invalid stream_preview_params combination. "
                 " Missing row %d", row);
             cfg_valid = false;
         }
@@ -633,7 +633,7 @@ bool cls_allcam::init_validate()
                         col_chk = col;
                     } else {
                         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
-                            , "Invalid stream_preview_location combination. "
+                            , "Invalid stream_preview_params combination. "
                             " Missing row %d column %d", row, col_chk+1);
                         cfg_valid = false;
                     }
@@ -676,7 +676,7 @@ void cls_allcam::init_cams()
 
     for (indx=0; indx<app->cam_cnt; indx++) {
         MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
-            ,"stream_preview_location values. Device %d row %d col %d"
+            ,"stream_preview_params values. Device %d row %d col %d"
             , app->cam_list[indx]->cfg->device_id
             , app->cam_list[indx]->all_loc.row
             , app->cam_list[indx]->all_loc.col);

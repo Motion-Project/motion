@@ -485,7 +485,7 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#stream_preview_scale" >stream_preview_scale</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_preview_newline" >stream_preview_newline</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_preview_location" >stream_preview_location</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_preview_params" >stream_preview_params</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_preview_method" >stream_preview_method</a> </td>
             </tr>
             <tr>
@@ -2516,20 +2516,18 @@
         </ul>
         <p></p>
 
-        <h3><a name="stream_preview_location"></a> stream_preview_location</h3>
+        <h3><a name="stream_preview_params"></a> stream_preview_params</h3>
         <ul>
          <li> Values: String | Default: Not Defined</li>
-          Comma separated parameters for the location on the consolidated image.
+          Comma separated parameters for the video streams and consolidated image.
           The consolidated image puts together a single image of all the cameras currently
           running. Format is parm1=value1,parm2=value2 etc.
           <p></p>
-          Note that this parameter is ignored when the stream_preview_method is set to
-          any value other than combined.
           <div>
             <i><h4>row</h4></i>
             <ul>
               <li> Values: positive integers | Default: Not Defined </li>
-              On the preview home page, the row number that the image will be shown.
+              On the consolidated image, the row number that the image will be shown.
               Row numbers are counts of images on the page and not pixels.  For example,
               if there are six cameras running and they are all stacked on top of each other
               on the page, the last image will be at row 6 (Not image1 height + image2 height +
@@ -2541,7 +2539,7 @@
             <i><h4>col</h4></i>
             <ul>
               <li> Values: positive integers | Default: Not Defined </li>
-              On the preview home page, the column number that the image will be shown.
+              On the consolidated image, the column number that the image will be shown.
               Column numbers are counts of images on the page and not pixels.  For example,
               if there are six cameras running and they are all put side by side
               on the page, the last image will be at column 6 (Not image1 width + image2 width +
@@ -2553,7 +2551,7 @@
             <i><h4>offset_col</h4></i>
             <ul>
               <li> Values: positive and negative integers | Default: 0 </li>
-              On the preview home page, Motionplus will arrange the image of
+              On the consolidated image, Motionplus will arrange the image of
               the camera into the row and columns indicated by the other parameters.
               After the image is positioned, Motionplus centers the image in the
               row and column grid space.  This parameter allows the user to move the image
@@ -2567,7 +2565,7 @@
             <i><h4>offset_row </h4></i>
             <ul>
               <li> Values: positive and negative integers | Default: 0 </li>
-              On the preview home page, Motionplus will arrange the image of
+              On the consolidated image, Motionplus will arrange the image of
               the camera into the row and columns indicated by the other parameters.
               After the image is positioned, Motionplus centers the image in the
               row and column grid space.  This parameter allows the user to move the image
@@ -2591,12 +2589,12 @@
             <p></p>
             Two cameras on first row, one camera on second row, three cameras on third row.
             <ul style="list-style: none;">
-              <li>camera1 configuration: <code><small>stream_preview_location row=3,col=1</small></code></li>
-              <li>camera2 configuration: <code><small>stream_preview_location row=1,col=2</small></code></li>
-              <li>camera3 configuration: <code><small>stream_preview_location row=3,col=3</small></code></li>
-              <li>camera4 configuration: <code><small>stream_preview_location row=1,col=1</small></code></li>
-              <li>camera5 configuration: <code><small>stream_preview_location row=3,col=2</small></code></li>
-              <li>camera6 configuration: <code><small>stream_preview_location row=2,col=1</small></code></li>
+              <li>camera1 configuration: <code><small>stream_preview_params row=3,col=1</small></code></li>
+              <li>camera2 configuration: <code><small>stream_preview_params row=1,col=2</small></code></li>
+              <li>camera3 configuration: <code><small>stream_preview_params row=3,col=3</small></code></li>
+              <li>camera4 configuration: <code><small>stream_preview_params row=1,col=1</small></code></li>
+              <li>camera5 configuration: <code><small>stream_preview_params row=3,col=2</small></code></li>
+              <li>camera6 configuration: <code><small>stream_preview_params row=2,col=1</small></code></li>
             </ul>
             <p></p>
           </div>
