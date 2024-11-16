@@ -32,49 +32,100 @@ static void *allcam_handler(void *arg)
     return nullptr;
 }
 
-void cls_allcam::getsizes_img(cls_camera *p_cam, int &img_w, int &img_h)
+void cls_allcam::getsizes_img(cls_camera *p_cam)
 {
-    int src_w, src_h;
+    int src_w, src_h, dst_w, dst_h;
 
-    src_w = p_cam->all_sizes.width;
-    src_h = p_cam->all_sizes.height;
+    src_w = p_cam->all_sizes.src_w;
+    src_h = p_cam->all_sizes.src_h;
 
-    img_w = ((p_cam->all_loc.scale * src_w) / 100);
-    if ((img_w % 16) != 0) {
-        img_w = img_w - (img_w % 16) + 16;
+    dst_w = ((p_cam->all_loc.scale * src_w) / 100);
+    if ((dst_w % 8) != 0) {
+        dst_w = dst_w - (dst_w % 8) + 8;
+    }
+    if (dst_w < 64){
+        dst_w = 64;
+    }
+    p_cam->all_sizes.dst_w = dst_w;
+
+    dst_h = ((p_cam->all_loc.scale * src_h) / 100);
+    if ((dst_h % 8) != 0) {
+        dst_h = dst_h - (dst_h % 8) + 8;
+    }
+    if (dst_h < 64) {
+        dst_h = 64;
+    }
+    p_cam->all_sizes.dst_h = dst_h;
+    p_cam->all_sizes.dst_sz = (dst_w * dst_h * 3)/2;
+}
+
+void cls_allcam::getimg_src(cls_camera *p_cam, std::string imgtyp, u_char *dst_img, u_char *src_img)
+{
+    int indx;
+    ctx_stream_data *strm_c;
+
+    if (imgtyp == "norm") {
+        strm_c = &p_cam->stream.norm;
+    } else if (imgtyp == "motion") {
+        strm_c = &p_cam->stream.motion;
+    } else if (imgtyp == "source") {
+        strm_c = &p_cam->stream.source;
+    } else if (imgtyp == "secondary") {
+        strm_c = &p_cam->stream.secondary;
+    } else {
+        return;
     }
 
-    img_h = ((p_cam->all_loc.scale * src_h) / 100);
-    if ((img_h % 16) != 0) {
-        img_h = img_h - (img_h % 16) + 16;
-    }
+    pthread_mutex_lock(&p_cam->stream.mutex);
+        indx=0;
+        while (indx < 1000) {
+            if (strm_c->img_data == nullptr) {
+                if (strm_c->all_cnct == 0){
+                    strm_c->all_cnct++;
+                }
+                pthread_mutex_unlock(&p_cam->stream.mutex);
+                    SLEEP(0, 1000);
+                pthread_mutex_lock(&p_cam->stream.mutex);
+            } else {
+                break;
+            }
+            indx++;
+        }
+        if ((p_cam->imgs.height != p_cam->all_sizes.src_h) ||
+            (p_cam->imgs.width  != p_cam->all_sizes.src_w)) {
+            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                , "Image has changed. Device: %d"
+                , p_cam->cfg->device_id);
+            memset(src_img, 0x00, (uint)p_cam->all_sizes.src_sz);
+            p_cam->all_sizes.reset = true;
+        } else if (strm_c->img_data == nullptr) {
+            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+                , "Could not get image for device %d"
+                , p_cam->cfg->device_id);
+            memset(src_img, 0x00, (uint)p_cam->all_sizes.src_sz);
+        } else {
+            memcpy(src_img, strm_c->img_data, (uint)p_cam->all_sizes.src_sz);
+        }
+    pthread_mutex_unlock(&p_cam->stream.mutex);
 
-    if (img_w < 64){
-        img_w = 64;
-    }
-    if (img_h < 64){
-        img_h = 64;
-    }
+    util_resize(src_img, p_cam->all_sizes.src_w, p_cam->all_sizes.src_h
+        , dst_img, p_cam->all_sizes.dst_w, p_cam->all_sizes.dst_h);
+
 }
 
 void cls_allcam::getimg(ctx_stream_data *strm_a, std::string imgtyp)
 {
     int a_y, a_u, a_v; /* all img y,u,v */
     int c_y, c_u, c_v; /* camera img y,u,v */
-    int dst_h, dst_w, dst_sz, src_sz, img_orow, img_ocol;
-    int indx, row, indx1;
-    int src_w, src_h;
-    unsigned char *dst_img, *src_img;
-    ctx_stream_data *strm_c;
-    ctx_all_sizes *all_sz;
+    int img_orow, img_ocol;
+    int indx, row, dst_w, dst_h;
+    u_char *dst_img, *src_img;
     cls_camera *p_cam;
 
     getsizes();
 
-    all_sz = &all_sizes;
-
     a_y = 0;
-    a_u = (all_sz->width * all_sz->height);
+    a_u = (all_sizes.src_w * all_sizes.src_h);
     a_v = a_u + (a_u / 4);
 
     memset(strm_a->img_data , 0x80, (size_t)a_u);
@@ -82,99 +133,38 @@ void cls_allcam::getimg(ctx_stream_data *strm_a, std::string imgtyp)
 
     for (indx=0; indx<active_cnt; indx++) {
         p_cam = active_cam[indx];
-        src_h = p_cam->imgs.height;
-        src_w = p_cam->imgs.width;
+        dst_w = p_cam->all_sizes.dst_w;
+        dst_h = p_cam->all_sizes.dst_h;
 
-        getsizes_img(p_cam, dst_w, dst_h);
 
-        dst_sz = (dst_h * dst_w * 3)/2;
-        src_sz = (src_h * src_w * 3)/2;
         img_orow = p_cam->all_loc.offset_row;
         img_ocol = p_cam->all_loc.offset_col;
-        if (imgtyp == "norm") {
-            strm_c = &p_cam->stream.norm;
-        } else if (imgtyp == "motion") {
-            strm_c = &p_cam->stream.motion;
-        } else if (imgtyp == "source") {
-            strm_c = &p_cam->stream.source;
-        } else if (imgtyp == "secondary") {
-            strm_c = &p_cam->stream.secondary;
-        } else {
-            return;
-        }
 
-        dst_img = (unsigned char*) mymalloc((uint)dst_sz);
-        src_img = (unsigned char*) mymalloc((uint)src_sz);
+        dst_img = (unsigned char*) mymalloc((uint)p_cam->all_sizes.dst_sz);
+        src_img = (unsigned char*) mymalloc((uint)p_cam->all_sizes.src_sz);
 
-        pthread_mutex_lock(&p_cam->stream.mutex);
-            indx1=0;
-            while (indx1 < 1000) {
-                if (strm_c->img_data == NULL) {
-                    if (strm_c->all_cnct == 0){
-                        strm_c->all_cnct++;
-                    }
-                    pthread_mutex_unlock(&p_cam->stream.mutex);
-                        SLEEP(0, 1000);
-                    pthread_mutex_lock(&p_cam->stream.mutex);
-                } else {
-                    break;
-                }
-                indx1++;
-            }
-            if ((p_cam->all_sizes.width != src_w) ||
-                (p_cam->all_sizes.height != src_h)) {
-                MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
-                    , "Image has changed. Device: %d"
-                    , p_cam->cfg->device_id);
-                memset(src_img, 0x00, (uint)src_sz);
-                p_cam->all_sizes.reset = true;
-            } else if (strm_c->img_data == NULL) {
-                MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
-                    , "Could not get image for device %d"
-                    , p_cam->cfg->device_id);
-                memset(src_img, 0x00, (uint)src_sz);
-            } else {
-                memcpy(src_img, strm_c->img_data, (uint)src_sz);
-            }
-        pthread_mutex_unlock(&p_cam->stream.mutex);
+        getimg_src(p_cam, imgtyp, dst_img, src_img);
 
-        util_resize(src_img, src_w, src_h, dst_img, dst_w, dst_h);
-
-        /*
-        MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
-            , "src w %d h %d dst w %d h %d all w %d h %d "
-            , p_cam->imgs.width, p_cam->imgs.height
-            , dst_w, dst_h
-            , all_sz->width,all_sz->height);
-        */
-        a_y = (img_orow * all_sz->width) + img_ocol;
-        a_u =(all_sz->height * all_sz->width) +
-            ((img_orow / 4) * all_sz->width) + (img_ocol / 2) ;
-        a_v = a_u + ((all_sz->height * all_sz->width) / 4);
+        a_y = (img_orow * all_sizes.src_w) + img_ocol;
+        a_u =(all_sizes.src_h * all_sizes.src_w) +
+            ((img_orow / 4) * all_sizes.src_w) + (img_ocol / 2) ;
+        a_v = a_u + ((all_sizes.src_h * all_sizes.src_w) / 4);
 
         c_y = 0;
         c_u = (dst_w * dst_h);
         c_v = c_u + (c_u / 4);
 
-        /*
-        MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
-            , "r %d c %d a %d %d %d h %d w %d"
-            , img_orow, img_ocol
-            , a_y, a_u, a_v
-            , all_sz->height, all_sz->width);
-        */
-
         for (row=0; row<dst_h; row++) {
             memcpy(strm_a->img_data  + a_y, dst_img + c_y, (uint)dst_w);
-            a_y += all_sz->width;
+            a_y += all_sizes.src_w;
             c_y += dst_w;
             if (row % 2) {
                 memcpy(strm_a->img_data  + a_u, dst_img + c_u, (uint)dst_w / 2);
                 //mymemset(strm_a->img_data  + a_u, 0xFA, dst_w/2);
-                a_u += (all_sz->width / 2);
+                a_u += (all_sizes.src_w / 2);
                 c_u += (dst_w / 2);
                 memcpy(strm_a->img_data  + a_v, dst_img + c_v, (uint)dst_w / 2);
-                a_v += (all_sz->width / 2);
+                a_v += (all_sizes.src_w / 2);
                 c_v += (dst_w / 2);
             }
         }
@@ -182,10 +172,17 @@ void cls_allcam::getimg(ctx_stream_data *strm_a, std::string imgtyp)
         myfree(dst_img);
         myfree(src_img);
     }
+
+    dst_img = (unsigned char*) mymalloc((uint)all_sizes.dst_sz);
+    util_resize(strm_a->img_data
+        , all_sizes.src_w, all_sizes.src_h
+        , dst_img, all_sizes.dst_w, all_sizes.dst_h);
+
     strm_a->jpg_sz = jpgutl_put_yuv420p(
-        strm_a->jpg_data, all_sz->img_sz
-        ,strm_a->img_data, all_sz->width, all_sz->height
+        strm_a->jpg_data, all_sizes.src_sz,dst_img
+        , all_sizes.dst_w, all_sizes.dst_h
         , 70, NULL,NULL,NULL);
+
     strm_a->consumed = false;
 
 }
@@ -231,84 +228,78 @@ void cls_allcam::stream_alloc()
             strm = &stream.sub;
         }
         strm->img_data = (unsigned char*)
-            mymalloc((size_t)all_sizes.img_sz);
+            mymalloc((size_t)all_sizes.src_sz);
         strm->jpg_data = (unsigned char*)
-            mymalloc((size_t)all_sizes.img_sz);
+            mymalloc((size_t)all_sizes.dst_sz);
         strm->consumed = true;
     }
 
 }
 
-void cls_allcam::getsizes_scale(int mx_row)
+void cls_allcam::getsizes_scale()
 {
-    int indx, row;
-    int mx_h, img_h, img_w;
+    int indx, row, mx_h;
     bool dflt_scale;
     cls_camera *p_cam;
 
     dflt_scale = false;
     for (indx=0; indx<active_cnt; indx++) {
         p_cam = active_cam[indx];
-        if (active_cam[indx]->all_loc.scale == -1) {
+        if (p_cam->all_loc.scale == -1) {
             dflt_scale = true;
         }
     }
     if (dflt_scale) {
-        for (indx=0; indx<active_cnt; indx++) {
-            p_cam = active_cam[indx];
-            active_cam[indx]->all_loc.scale = 100;
-        }
-        for (row=1; row<=mx_row; row++) {
+        for (row=1; row<=max_row; row++) {
             mx_h = 0;
             for (indx=0; indx<active_cnt; indx++) {
                 p_cam = active_cam[indx];
                 if (row == p_cam->all_loc.row) {
-                    getsizes_img(p_cam, img_w, img_h);
-                    if (mx_h < img_h) {
-                        mx_h = img_h;
+                    if (mx_h < p_cam->all_sizes.src_h) {
+                        mx_h = p_cam->all_sizes.src_h;
                     }
                 }
             }
             for (indx=0; indx<active_cnt; indx++) {
                 p_cam = active_cam[indx];
                 if (row == p_cam->all_loc.row) {
-                    getsizes_img(p_cam, img_w, img_h);
-                    p_cam->all_loc.scale = (int)((float)(mx_h*100 / img_h ));
+                    p_cam->all_loc.scale = (int)((float)(mx_h*100 / p_cam->all_sizes.src_h));
                 }
-            }
-            for (indx=0; indx<active_cnt; indx++) {
-                p_cam = active_cam[indx];
-                getsizes_img(p_cam, img_w, img_h);
-                MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
-                    , "Device %d Original Size %dx%d Scale %d New Size %dx%d"
-                    , p_cam->cfg->device_id
-                    , p_cam->imgs.width, p_cam->imgs.height
-                    , p_cam->all_loc.scale, img_w, img_h);
             }
         }
     }
+
+    for (indx=0; indx<active_cnt; indx++) {
+        p_cam = active_cam[indx];
+        getsizes_img(p_cam);
+        MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+            , "Device %d Original Size %dx%d Scale %d New Size %dx%d"
+            , p_cam->cfg->device_id
+            , p_cam->all_sizes.src_w, p_cam->all_sizes.src_h
+            , p_cam->all_loc.scale
+            , p_cam->all_sizes.dst_w, p_cam->all_sizes.dst_h);
+    }
 }
 
-void cls_allcam::getsizes_alignv(int mx_row, int mx_col)
+void cls_allcam::getsizes_alignv()
 {
     int indx, row, col;
     int chk_sz;
-    int mx_h, img_h, img_w;
+    int mx_h;
     cls_camera *p_cam;
 
-    for (row=1; row<=mx_row; row++) {
+    for (row=1; row<=max_row; row++) {
         chk_sz = 0;
         mx_h = 0;
-        for (col=1; col<=mx_col; col++) {
+        for (col=1; col<=max_col; col++) {
             for (indx=0; indx<active_cnt; indx++) {
                 p_cam = active_cam[indx];
-                getsizes_img(p_cam, img_w, img_h);
                 if ((row == p_cam->all_loc.row) &&
                     (col == p_cam->all_loc.col)) {
                     p_cam->all_loc.offset_col = chk_sz;
-                    chk_sz += img_w;
-                    if (mx_h < img_h) {
-                        mx_h = img_h;
+                    chk_sz += p_cam->all_sizes.dst_w;
+                    if (mx_h < p_cam->all_sizes.dst_h) {
+                        mx_h = p_cam->all_sizes.dst_h;
                     }
                 }
             }
@@ -316,35 +307,32 @@ void cls_allcam::getsizes_alignv(int mx_row, int mx_col)
         /* Align/center vert. the images in each row*/
         for (indx=0; indx<active_cnt; indx++) {
             p_cam = active_cam[indx];
-            getsizes_img(p_cam, img_w, img_h);
             if (p_cam->all_loc.row == row) {
                 p_cam->all_loc.offset_row =
-                    all_sizes.height +
-                    ((mx_h - img_h)/2) ;
+                    all_sizes.src_h +
+                    ((mx_h - p_cam->all_sizes.dst_h)/2) ;
             }
         }
-        all_sizes.height += mx_h;
-        if (all_sizes.width < chk_sz) {
-            all_sizes.width = chk_sz;
+        all_sizes.src_h += mx_h;
+        if (all_sizes.src_w < chk_sz) {
+            all_sizes.src_w = chk_sz;
         }
     }
 }
 
-void cls_allcam::getsizes_alignh(int mx_col)
+void cls_allcam::getsizes_alignh()
 {
     int indx, col;
-    int chk_sz, chk_w;
-    int mx_w, img_h, img_w;
+    int chk_sz, chk_w, mx_w;
     cls_camera *p_cam;
 
     /* Align/center horiz. the images within each column area */
     chk_w = 0;
-    for (col=1; col<=mx_col; col++) {
+    for (col=1; col<=max_col; col++) {
         chk_sz = 0;
         mx_w = 0;
         for (indx=0; indx<active_cnt; indx++) {
             p_cam = active_cam[indx];
-            getsizes_img(p_cam, img_w, img_h);
             if (p_cam->all_loc.col == col) {
                 if (p_cam->all_loc.offset_col < chk_w) {
                     p_cam->all_loc.offset_col = chk_w;
@@ -352,85 +340,33 @@ void cls_allcam::getsizes_alignh(int mx_col)
                 if (chk_sz < p_cam->all_loc.offset_col) {
                     chk_sz = p_cam->all_loc.offset_col;
                 }
-                if (mx_w < img_w) {
-                    mx_w = img_w;
+                if (mx_w < p_cam->all_sizes.dst_w) {
+                    mx_w = p_cam->all_sizes.dst_w;
                 }
             }
         }
         for (indx=0; indx<active_cnt; indx++) {
             p_cam = active_cam[indx];
-            getsizes_img(p_cam, img_w, img_h);
+
             if (p_cam->all_loc.col == col) {
                 p_cam->all_loc.offset_col =
-                    chk_sz + ((mx_w - img_w) /2) ;
+                    chk_sz + ((mx_w - p_cam->all_sizes.dst_w) /2) ;
             }
         }
         chk_w = mx_w + chk_sz;
-        if (all_sizes.width < chk_w) {
-            all_sizes.width = chk_w;
+        if (all_sizes.src_w < chk_w) {
+            all_sizes.src_w = chk_w;
         }
     }
 }
 
-void cls_allcam::getsizes()
+void cls_allcam::getsizes_offset_user()
 {
-    int indx;
-    int chk_sz, mx_col, mx_row;
-    int img_h, img_w;
-    bool    chk;
+    int indx, chk_sz;
     cls_camera *p_cam;
 
-    if (all_sizes.reset == true) {
-        chk = true;
-    } else {
-        chk = false;
-    }
-
-    active_cam.clear();
-    active_cnt = 0;
-    for (indx=0;indx<app->cam_cnt;indx++) {
-        p_cam = app->cam_list[indx];
-        if (p_cam->device_status == STATUS_OPENED) {
-            if (p_cam->all_sizes.reset == true) {
-                chk = true;
-            }
-            active_cnt++;
-            active_cam.push_back(p_cam);
-            p_cam->all_sizes.width = p_cam->imgs.width;
-            p_cam->all_sizes.height = p_cam->imgs.height;
-            p_cam->all_sizes.img_sz = ((p_cam->imgs.height * p_cam->imgs.width * 3)/2);
-            p_cam->all_sizes.reset = false;
-        }
-    }
-
-    if (chk == false) {
-        return;
-    }
-
-    init_cams();
-
-    all_sizes.width = 0;
-    all_sizes.height = 0;
-
-    mx_row = 0;
-    mx_col = 0;
     for (indx=0; indx<active_cnt; indx++) {
         p_cam = active_cam[indx];
-        if (mx_row < p_cam->all_loc.row) {
-            mx_row = p_cam->all_loc.row;
-        }
-        if (mx_col < p_cam->all_loc.col) {
-            mx_col = p_cam->all_loc.col;
-        }
-    }
-
-    getsizes_scale(mx_row);
-    getsizes_alignv(mx_row, mx_col);
-    getsizes_alignh(mx_col);
-
-    for (indx=0; indx<active_cnt; indx++) {
-        p_cam = active_cam[indx];
-        getsizes_img(p_cam, img_w, img_h);
 
         chk_sz = p_cam->all_loc.offset_col + p_cam->all_loc.offset_user_col;
         if (chk_sz < 0) {
@@ -439,7 +375,7 @@ void cls_allcam::getsizes()
                 , p_cam->cfg->device_id
                 , p_cam->all_loc.offset_col
                 , p_cam->all_loc.offset_user_col);
-         } else if ((chk_sz + img_w) > all_sizes.width) {
+         } else if ((chk_sz + p_cam->all_sizes.dst_w) > all_sizes.src_w) {
            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
                 , "Device %d invalid image column offset. (%d + %d) over image size"
                 , p_cam->cfg->device_id
@@ -456,7 +392,7 @@ void cls_allcam::getsizes()
                 , p_cam->cfg->device_id
                 , p_cam->all_loc.offset_row
                 , p_cam->all_loc.offset_user_row);
-        } else if ((chk_sz + img_h) > all_sizes.height) {
+        } else if ((chk_sz + p_cam->all_sizes.dst_h) > all_sizes.src_h) {
             MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
                 , "Device %d invalid image row offset. (%d + %d) over image size"
                 , p_cam->cfg->device_id
@@ -467,154 +403,195 @@ void cls_allcam::getsizes()
         }
     }
 
-    if ((all_sizes.height ==0) ||
-        (all_sizes.width == 0)) {
-        all_sizes.width = 320;
-        all_sizes.height = 240;
+}
+
+bool cls_allcam::getsizes_reset()
+{
+    int indx;
+    bool reset;
+    cls_camera *p_cam;
+
+    if (all_sizes.reset == true) {
+        reset = true;
+    } else {
+        reset = false;
     }
-    all_sizes.img_sz =((
-        all_sizes.height *
-        all_sizes.width * 3)/2);
+
+    active_cam.clear();
+    active_cnt = 0;
+    for (indx=0;indx<app->cam_cnt;indx++) {
+        p_cam = app->cam_list[indx];
+        if (p_cam->device_status == STATUS_OPENED) {
+            if (p_cam->all_sizes.reset == true) {
+                reset = true;
+                p_cam->all_sizes.reset = false;
+            }
+            active_cnt++;
+            active_cam.push_back(p_cam);
+        }
+    }
+    return reset;
+}
+
+void cls_allcam::getsizes_pct()
+{
+    int indx;
+    cls_camera *p_cam;
+
+    if ((all_sizes.src_h ==0) || (all_sizes.src_w == 0)) {
+        all_sizes.src_w = 320;
+        all_sizes.src_h = 240;
+    }
+    all_sizes.src_sz =((all_sizes.src_h * all_sizes.src_w * 3)/2);
     all_sizes.reset = false;
 
     for (indx=0; indx<active_cnt; indx++) {
         p_cam = active_cam[indx];
-        getsizes_img(p_cam, img_w, img_h);
-        p_cam->all_loc.xpct_st = ((p_cam->all_loc.offset_col * 100) /all_sizes.width);
+        p_cam->all_loc.xpct_st = ((p_cam->all_loc.offset_col * 100) /all_sizes.src_w);
         p_cam->all_loc.xpct_en =
-            (((p_cam->all_loc.offset_col+img_w) * 100) /all_sizes.width);
-        p_cam->all_loc.ypct_st = ((p_cam->all_loc.offset_row * 100) /all_sizes.height);
+            (((p_cam->all_loc.offset_col+p_cam->all_sizes.dst_w) * 100) /all_sizes.src_w);
+        p_cam->all_loc.ypct_st = ((p_cam->all_loc.offset_row * 100) /all_sizes.src_h);
         p_cam->all_loc.ypct_en =
-            (((p_cam->all_loc.offset_row+img_h) * 100) /all_sizes.height);
+            (((p_cam->all_loc.offset_row+p_cam->all_sizes.dst_h) * 100) /all_sizes.src_h);
     }
 
-    stream_free();
-    stream_alloc();
-
-    /*
-    for (indx=0; indx<active_cnt; indx++) {
-        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            , "row %d col %d offset row %d offset col %d"
-            , active_cam[indx]->all_loc.row
-            , active_cam[indx]->all_loc.col
-            , active_cam[indx]->all_loc.offset_row
-            , active_cam[indx]->all_loc.offset_col);
+    if (all_sizes.src_w > all_sizes.src_h) {
+        all_sizes.dst_w = 1280;
+        all_sizes.dst_h = (int)((float)(all_sizes.dst_w * all_sizes.src_h /all_sizes.src_w));
+        if ((all_sizes.dst_h % 8) != 0) {
+            all_sizes.dst_h = all_sizes.dst_h - (all_sizes.dst_h % 8) + 8;
+        }
+        all_sizes.dst_sz = (all_sizes.dst_w * all_sizes.dst_h *3)/2;
+    } else {
+        all_sizes.dst_h = 720;
+        all_sizes.dst_w = (int)((float)(all_sizes.dst_h * all_sizes.src_w /all_sizes.src_h));
+        if ((all_sizes.dst_h % 8) != 0) {
+            all_sizes.dst_h = all_sizes.dst_h - (all_sizes.dst_h % 8) + 8;
+        }
+        all_sizes.dst_sz = (all_sizes.dst_w * all_sizes.dst_h *3)/2;
     }
-    */
+    MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+        , "Combined image source size %dx%d scaled to %dx%d"
+        , all_sizes.src_w, all_sizes.src_h
+        , all_sizes.dst_w, all_sizes.dst_h);
 
 }
 
 void cls_allcam::init_params()
 {
     int indx, indx1;
-    ctx_params  *params_loc;
+    ctx_params  *params;
     ctx_params_item *itm;
+    cls_camera *p_cam;
 
     memset(&all_sizes, 0, sizeof(ctx_all_sizes));
 
-    params_loc = new ctx_params;
+    params = new ctx_params;
 
-    for (indx=0; indx<app->cam_cnt; indx++) {
-        app->cam_list[indx]->all_loc.row = -1;
-        app->cam_list[indx]->all_loc.col = -1;
-        app->cam_list[indx]->all_loc.offset_user_col = 0;
-        app->cam_list[indx]->all_loc.offset_user_row = 0;
-        app->cam_list[indx]->all_loc.scale =
-            app->cam_list[indx]->cfg->stream_preview_scale;
+    for (indx=0; indx<active_cnt; indx++) {
+        p_cam = active_cam[indx];
+        p_cam->all_loc.row = -1;
+        p_cam->all_loc.col = -1;
+        p_cam->all_loc.offset_user_col = 0;
+        p_cam->all_loc.offset_user_row = 0;
+        p_cam->all_loc.scale = p_cam->cfg->stream_preview_scale;
 
-        util_parms_parse(params_loc
+        util_parms_parse(params
             , "stream_preview_params"
-            , app->cam_list[indx]->cfg->stream_preview_params);
+            , p_cam->cfg->stream_preview_params);
 
-        for (indx1=0;indx1<params_loc->params_cnt;indx1++) {
-            itm = &params_loc->params_array[indx1];
+        for (indx1=0;indx1<params->params_cnt;indx1++) {
+            itm = &params->params_array[indx1];
             if (itm->param_name == "row") {
-                app->cam_list[indx]->all_loc.row = mtoi(itm->param_value);
+                p_cam->all_loc.row = mtoi(itm->param_value);
             }
             if (itm->param_name == "col") {
-                app->cam_list[indx]->all_loc.col = mtoi(itm->param_value);
+                p_cam->all_loc.col = mtoi(itm->param_value);
             }
             if (itm->param_name == "offset_col") {
-                app->cam_list[indx]->all_loc.offset_user_col =
+                p_cam->all_loc.offset_user_col =
                     mtoi(itm->param_value);
             }
             if (itm->param_name == "offset_row") {
-                app->cam_list[indx]->all_loc.offset_user_row =
+                p_cam->all_loc.offset_user_row =
                     mtoi(itm->param_value);
             }
         }
-        params_loc->params_array.clear();
+        params->params_array.clear();
     }
 
-    mydelete(params_loc);
+    mydelete(params);
 
 }
 
-bool cls_allcam::init_validate()
+void cls_allcam::init_validate()
 {
     int indx, indx1;
     int row, col, mx_row, mx_col, col_chk;
     bool cfg_valid, chk;
     std::string cfg_row, cfg_col;
+    cls_camera *p_cam, *p_cam1;
 
     mx_row = 0;
     mx_col = 0;
-    for (indx=0; indx<app->cam_cnt; indx++) {
-        if (mx_col < app->cam_list[indx]->all_loc.col) {
-            mx_col = app->cam_list[indx]->all_loc.col;
+    for (indx=0; indx<active_cnt; indx++) {
+        p_cam = active_cam[indx];
+        if (mx_col < p_cam->all_loc.col) {
+            mx_col = p_cam->all_loc.col;
         }
-        if (mx_row < app->cam_list[indx]->all_loc.row) {
-            mx_row = app->cam_list[indx]->all_loc.row;
+        if (mx_row < p_cam->all_loc.row) {
+            mx_row = p_cam->all_loc.row;
         }
     }
 
     cfg_valid = true;
 
-    for (indx=0; indx<app->cam_cnt; indx++) {
-        if ((app->cam_list[indx]->all_loc.col == -1) ||
-            (app->cam_list[indx]->all_loc.row == -1)) {
+    for (indx=0; indx<active_cnt; indx++) {
+        p_cam = active_cam[indx];
+        if ((p_cam->all_loc.col == -1) ||
+            (p_cam->all_loc.row == -1)) {
             cfg_valid = false;
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                 , "No stream_preview_params for cam %d"
-                , app->cam_list[indx]->cfg->device_id);
+                , p_cam->cfg->device_id);
         } else {
-            for (indx1=0; indx1<app->cam_cnt; indx1++) {
-                if ((app->cam_list[indx]->all_loc.col ==
-                    app->cam_list[indx1]->all_loc.col) &&
-                    (app->cam_list[indx]->all_loc.row ==
-                    app->cam_list[indx1]->all_loc.row) &&
+            for (indx1=0; indx1<active_cnt; indx1++) {
+                p_cam1 = active_cam[indx1];
+                if ((p_cam->all_loc.col == p_cam1->all_loc.col) &&
+                    (p_cam->all_loc.row == p_cam1->all_loc.row) &&
                     (indx != indx1)) {
                     MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                         , "Duplicate stream_preview_params "
                         " cam %d, cam %d row %d col %d"
-                        , app->cam_list[indx]->cfg->device_id
-                        , app->cam_list[indx1]->cfg->device_id
-                        , app->cam_list[indx]->all_loc.row
-                        , app->cam_list[indx]->all_loc.col);
+                        , p_cam->cfg->device_id
+                        , p_cam1->cfg->device_id
+                        , p_cam->all_loc.row
+                        , p_cam->all_loc.col);
                     cfg_valid = false;
                 }
             }
         }
-        if (app->cam_list[indx]->all_loc.row == 0) {
+        if (p_cam->all_loc.row == 0) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                 , "Invalid stream_preview_params row cam %d, row %d"
-                , app->cam_list[indx]->cfg->device_id
-                , app->cam_list[indx]->all_loc.row);
+                , p_cam->cfg->device_id
+                , p_cam->all_loc.row);
             cfg_valid = false;
         }
-        if (app->cam_list[indx]->all_loc.col == 0) {
+        if (p_cam->all_loc.col == 0) {
             MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
                 , "Invalid stream_preview_params col cam %d, col %d"
-                , app->cam_list[indx]->cfg->device_id
-                , app->cam_list[indx]->all_loc.col);
+                , p_cam->cfg->device_id
+                , p_cam->all_loc.col);
             cfg_valid = false;
         }
     }
 
     for (row=1; row<=mx_row; row++) {
         chk = false;
-        for (indx=0; indx<app->cam_cnt; indx++) {
-            if (row == app->cam_list[indx]->all_loc.row) {
+        for (indx=0; indx<active_cnt; indx++) {
+            p_cam = active_cam[indx];
+            if (row == p_cam->all_loc.row) {
                 chk = true;
             }
         }
@@ -626,9 +603,10 @@ bool cls_allcam::init_validate()
         }
         col_chk = 0;
         for (col=1; col<=mx_col; col++) {
-            for (indx=0; indx<app->cam_cnt; indx++) {
-                if ((row == app->cam_list[indx]->all_loc.row) &&
-                    (col == app->cam_list[indx]->all_loc.col)) {
+            for (indx=0; indx<active_cnt; indx++) {
+                p_cam = active_cam[indx];
+                if ((row == p_cam->all_loc.row) &&
+                    (col == p_cam->all_loc.col)) {
                     if ((col_chk+1) == col) {
                         col_chk = col;
                     } else {
@@ -642,45 +620,76 @@ bool cls_allcam::init_validate()
         }
     }
 
-    return cfg_valid;
-
-}
-
-void cls_allcam::init_cams()
-{
-    int row, col, indx;
-
-    if (app->cam_cnt < 1) {
-        return;
-    }
-
-    init_params();
-
-    if (init_validate() == false) {
+    if (cfg_valid == false) {
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,"Creating default stream preview values");
         row = 0;
         col = 0;
-        for (indx=0; indx<app->cam_cnt; indx++) {
+        for (indx=0; indx<active_cnt; indx++) {
+            p_cam = active_cam[indx];
             if (col == 1) {
                 col++;
             } else {
                 row++;
                 col = 1;
             }
-            app->cam_list[indx]->all_loc.col = col;
-            app->cam_list[indx]->all_loc.row = row;
-            app->cam_list[indx]->all_loc.scale = -1;
+            p_cam->all_loc.col = col;
+            p_cam->all_loc.row = row;
         }
     }
 
-    for (indx=0; indx<app->cam_cnt; indx++) {
+}
+
+void cls_allcam::init_cams()
+{
+    int indx;
+    cls_camera *p_cam;
+
+    init_params();
+    init_validate();
+
+    for (indx=0; indx<active_cnt; indx++) {
+        p_cam = active_cam[indx];
         MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
             ,"stream_preview_params values. Device %d row %d col %d"
-            , app->cam_list[indx]->cfg->device_id
-            , app->cam_list[indx]->all_loc.row
-            , app->cam_list[indx]->all_loc.col);
+            , p_cam->cfg->device_id
+            , p_cam->all_loc.row
+            , p_cam->all_loc.col);
     }
+
+    all_sizes.src_w = 0;
+    all_sizes.src_h = 0;
+    all_sizes.src_sz = 0;
+
+    max_row = 1;
+    max_col = 1;
+    for (indx=0; indx<active_cnt; indx++) {
+        p_cam = active_cam[indx];
+        p_cam->all_sizes.src_w = p_cam->imgs.width;
+        p_cam->all_sizes.src_h = p_cam->imgs.height;
+        p_cam->all_sizes.src_sz = ((p_cam->imgs.height * p_cam->imgs.width * 3)/2);
+        if (max_row < p_cam->all_loc.row) {
+            max_row = p_cam->all_loc.row;
+        }
+        if (max_col < p_cam->all_loc.col) {
+            max_col = p_cam->all_loc.col;
+        }
+    }
+}
+
+void cls_allcam::getsizes()
+{
+    if (getsizes_reset() == false) {
+        return;
+    }
+    init_cams();
+    getsizes_scale();
+    getsizes_alignv();
+    getsizes_alignh();
+    getsizes_offset_user();
+    getsizes_pct();
+    stream_free();
+    stream_alloc();
 
 }
 

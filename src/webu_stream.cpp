@@ -107,11 +107,11 @@ void cls_webu_stream::one_buffer()
 
 void cls_webu_stream::all_buffer()
 {
-    if (resp_size < (size_t)app->allcam->all_sizes.img_sz) {
+    if (resp_size < (size_t)app->allcam->all_sizes.dst_sz) {
         if (resp_image != nullptr) {
             myfree(resp_image);
         }
-        resp_size = (uint)app->allcam->all_sizes.img_sz;
+        resp_size = (uint)app->allcam->all_sizes.dst_sz;
         resp_image = (unsigned char*) mymalloc(resp_size);
         memset(resp_image, '\0', resp_size);
         resp_used = 0;
@@ -158,8 +158,8 @@ bool cls_webu_stream::all_ready()
             }
         }
     }
-    if ((webua->app->allcam->all_sizes.height == 0) ||
-        (webua->app->allcam->all_sizes.width == 0)) {
+    if ((webua->app->allcam->all_sizes.dst_h == 0) ||
+        (webua->app->allcam->all_sizes.dst_w == 0)) {
             MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO, "All cameras not ready");
             return false;
     }

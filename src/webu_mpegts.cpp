@@ -195,7 +195,7 @@ int cls_webu_mpegts::getimg()
         } else {
             return 0;
         }
-        img_sz = app->allcam->all_sizes.img_sz;
+        img_sz = app->allcam->all_sizes.dst_sz;
         img_data = (unsigned char*) mymalloc((uint)img_sz);
         pthread_mutex_lock(&webua->app->allcam->stream.mutex);
             if (strm->img_data == nullptr) {
@@ -250,8 +250,8 @@ ssize_t cls_webu_mpegts::response(char *buf, size_t max)
 
     if (ctx_codec != nullptr) {
         if ((webua->device_id == 0) &&
-            ((webua->app->allcam->all_sizes.height != ctx_codec->height ) ||
-             (webua->app->allcam->all_sizes.width != ctx_codec->width))) {
+            ((webua->app->allcam->all_sizes.dst_h != ctx_codec->height ) ||
+             (webua->app->allcam->all_sizes.dst_w != ctx_codec->width))) {
             return -1;
         }
     }
@@ -328,8 +328,8 @@ int cls_webu_mpegts::open_mpegts()
         if (webus->all_ready() == false) {
             return -1;
         }
-        img_w = app->allcam->all_sizes.width;
-        img_h = app->allcam->all_sizes.height;
+        img_w = app->allcam->all_sizes.dst_w;
+        img_h = app->allcam->all_sizes.dst_h;
     }
 
     ctx_codec = avcodec_alloc_context3(codec);

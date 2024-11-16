@@ -145,9 +145,12 @@ struct ctx_all_loc {
 };
 
 struct ctx_all_sizes {
-    int     width;
-    int     height;
-    int     img_sz;
+    int     src_w;
+    int     src_h;
+    int     src_sz;
+    int     dst_w;
+    int     dst_h;
+    int     dst_sz;
     bool    reset;
 };
 

@@ -39,8 +39,9 @@ class cls_allcam {
 
         std::vector<cls_camera*>    active_cam;
         int active_cnt;
-
         int watchdog;
+        int max_col;
+        int max_row;
         struct timespec     curr_ts;
 
         void handler_startup();
@@ -48,14 +49,18 @@ class cls_allcam {
         void timing();
         void stream_free();
         void stream_alloc();
-        void getsizes_img(cls_camera *p_cam, int &img_w, int &img_h);
-        void getsizes_scale(int mx_row);
-        void getsizes_alignv(int mx_row, int mx_col);
-        void getsizes_alignh(int mx_col);
+        void getsizes_img(cls_camera *p_cam);
+        void getsizes_scale();
+        void getsizes_alignv();
+        void getsizes_alignh();
+        void getsizes_offset_user();
+        bool getsizes_reset();
+        void getsizes_pct();
         void getsizes();
         void init_params();
-        bool init_validate();
+        void init_validate();
         void init_cams();
+        void getimg_src(cls_camera *p_cam, std::string imgtyp, u_char *dst_img, u_char *src_img);
         void getimg(ctx_stream_data *strm_a, std::string imgtyp);
 
 };
