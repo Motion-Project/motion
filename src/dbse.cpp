@@ -1210,14 +1210,15 @@ void cls_dbse::dbse_clean()
         filelist_get(sql, flst);
 
         delcnt = 0;
+        sql = "";
         for (indx=0;indx<flst.size();indx++) {
             if (check_exit() == true) {
                 return;
             }
             if (stat(flst[indx].full_nm.c_str(), &statbuf) != 0) {
                 if (sql == "") {
-                    sql = " delete from motionplus "
-                        " where record_id in (";
+                    sql  = " delete from motionplus ";
+                    sql += " where record_id in (";
                     delimit = " ";
                     delcnt = 0;
                 }
