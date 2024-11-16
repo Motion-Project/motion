@@ -465,8 +465,8 @@ void cls_allcam::getsizes_pct()
     } else {
         all_sizes.dst_h = 720;
         all_sizes.dst_w = (int)((float)(all_sizes.dst_h * all_sizes.src_w /all_sizes.src_h));
-        if ((all_sizes.dst_h % 8) != 0) {
-            all_sizes.dst_h = all_sizes.dst_h - (all_sizes.dst_h % 8) + 8;
+        if ((all_sizes.dst_w % 8) != 0) {
+            all_sizes.dst_w = all_sizes.dst_w - (all_sizes.dst_w % 8) + 8;
         }
         all_sizes.dst_sz = (all_sizes.dst_w * all_sizes.dst_h *3)/2;
     }
