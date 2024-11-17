@@ -119,7 +119,7 @@ void cls_allcam::getimg(ctx_stream_data *strm_a, std::string imgtyp)
     int c_y, c_u, c_v; /* camera img y,u,v */
     int img_orow, img_ocol;
     int indx, row, dst_w, dst_h;
-    u_char *dst_img, *src_img;
+    u_char *dst_img, *src_img, *all_img;
     cls_camera *p_cam;
 
     getsizes();
@@ -128,14 +128,14 @@ void cls_allcam::getimg(ctx_stream_data *strm_a, std::string imgtyp)
     a_u = (all_sizes.src_w * all_sizes.src_h);
     a_v = a_u + (a_u / 4);
 
-    memset(strm_a->img_data , 0x80, (size_t)a_u);
-    memset(strm_a->img_data  + a_u, 0x80, (size_t)(a_u/2));
+    all_img = (unsigned char*) mymalloc((uint)all_sizes.src_sz);
+    memset(all_img , 0x80, (size_t)a_u);
+    memset(all_img  + a_u, 0x80, (size_t)(a_u/2));
 
     for (indx=0; indx<active_cnt; indx++) {
         p_cam = active_cam[indx];
         dst_w = p_cam->all_sizes.dst_w;
         dst_h = p_cam->all_sizes.dst_h;
-
 
         img_orow = p_cam->all_loc.offset_row;
         img_ocol = p_cam->all_loc.offset_col;
@@ -155,15 +155,15 @@ void cls_allcam::getimg(ctx_stream_data *strm_a, std::string imgtyp)
         c_v = c_u + (c_u / 4);
 
         for (row=0; row<dst_h; row++) {
-            memcpy(strm_a->img_data  + a_y, dst_img + c_y, (uint)dst_w);
+            memcpy(all_img  + a_y, dst_img + c_y, (uint)dst_w);
             a_y += all_sizes.src_w;
             c_y += dst_w;
             if (row % 2) {
-                memcpy(strm_a->img_data  + a_u, dst_img + c_u, (uint)dst_w / 2);
-                //mymemset(strm_a->img_data  + a_u, 0xFA, dst_w/2);
+                memcpy(all_img  + a_u, dst_img + c_u, (uint)dst_w / 2);
+                //mymemset(all_img  + a_u, 0xFA, dst_w/2);
                 a_u += (all_sizes.src_w / 2);
                 c_u += (dst_w / 2);
-                memcpy(strm_a->img_data  + a_v, dst_img + c_v, (uint)dst_w / 2);
+                memcpy(all_img  + a_v, dst_img + c_v, (uint)dst_w / 2);
                 a_v += (all_sizes.src_w / 2);
                 c_v += (dst_w / 2);
             }
@@ -173,13 +173,13 @@ void cls_allcam::getimg(ctx_stream_data *strm_a, std::string imgtyp)
         myfree(src_img);
     }
 
-    dst_img = (unsigned char*) mymalloc((uint)all_sizes.dst_sz);
-    util_resize(strm_a->img_data
-        , all_sizes.src_w, all_sizes.src_h
-        , dst_img, all_sizes.dst_w, all_sizes.dst_h);
+    memset(strm_a->img_data, 0x80, (size_t)all_sizes.dst_sz);
+    util_resize(all_img, all_sizes.src_w, all_sizes.src_h
+        , strm_a->img_data, all_sizes.dst_w, all_sizes.dst_h);
+    myfree(all_img);
 
     strm_a->jpg_sz = jpgutl_put_yuv420p(
-        strm_a->jpg_data, all_sizes.src_sz,dst_img
+        strm_a->jpg_data, all_sizes.dst_sz, strm_a->img_data
         , all_sizes.dst_w, all_sizes.dst_h
         , 70, NULL,NULL,NULL);
 
@@ -228,7 +228,7 @@ void cls_allcam::stream_alloc()
             strm = &stream.sub;
         }
         strm->img_data = (unsigned char*)
-            mymalloc((size_t)all_sizes.src_sz);
+            mymalloc((size_t)all_sizes.dst_sz);
         strm->jpg_data = (unsigned char*)
             mymalloc((size_t)all_sizes.dst_sz);
         strm->consumed = true;
