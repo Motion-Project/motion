@@ -173,17 +173,19 @@ void cls_allcam::getimg(ctx_stream_data *strm_a, std::string imgtyp)
         myfree(src_img);
     }
 
-    memset(strm_a->img_data, 0x80, (size_t)all_sizes.dst_sz);
-    util_resize(all_img, all_sizes.src_w, all_sizes.src_h
-        , strm_a->img_data, all_sizes.dst_w, all_sizes.dst_h);
-    myfree(all_img);
+    pthread_mutex_lock(&stream.mutex);
+        memset(strm_a->img_data, 0x80, (size_t)all_sizes.dst_sz);
+        util_resize(all_img, all_sizes.src_w, all_sizes.src_h
+            , strm_a->img_data, all_sizes.dst_w, all_sizes.dst_h);
+        myfree(all_img);
 
-    strm_a->jpg_sz = jpgutl_put_yuv420p(
-        strm_a->jpg_data, all_sizes.dst_sz, strm_a->img_data
-        , all_sizes.dst_w, all_sizes.dst_h
-        , 70, NULL,NULL,NULL);
+        strm_a->jpg_sz = jpgutl_put_yuv420p(
+            strm_a->jpg_data, all_sizes.dst_sz, strm_a->img_data
+            , all_sizes.dst_w, all_sizes.dst_h
+            , 70, NULL,NULL,NULL);
 
-    strm_a->consumed = false;
+        strm_a->consumed = false;
+    pthread_mutex_unlock(&stream.mutex);
 
 }
 
