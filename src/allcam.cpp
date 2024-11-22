@@ -437,7 +437,7 @@ bool cls_allcam::getsizes_reset()
 
 void cls_allcam::getsizes_pct()
 {
-    int indx;
+    int indx, dst_w, dst_h, dst_scale;
     cls_camera *p_cam;
 
     if ((all_sizes.src_h ==0) || (all_sizes.src_w == 0)) {
@@ -457,24 +457,31 @@ void cls_allcam::getsizes_pct()
             (((p_cam->all_loc.offset_row+p_cam->all_sizes.dst_h) * 100) /all_sizes.src_h);
     }
 
-    if (all_sizes.src_w > all_sizes.src_h) {
-        all_sizes.dst_w = 1280;
-        all_sizes.dst_h = (int)((float)(all_sizes.dst_w * all_sizes.src_h /all_sizes.src_w));
-        if ((all_sizes.dst_h % 8) != 0) {
-            all_sizes.dst_h = all_sizes.dst_h - (all_sizes.dst_h % 8) + 8;
-        }
-        all_sizes.dst_sz = (all_sizes.dst_w * all_sizes.dst_h *3)/2;
-    } else {
-        all_sizes.dst_h = 720;
-        all_sizes.dst_w = (int)((float)(all_sizes.dst_h * all_sizes.src_w /all_sizes.src_h));
-        if ((all_sizes.dst_w % 8) != 0) {
-            all_sizes.dst_w = all_sizes.dst_w - (all_sizes.dst_w % 8) + 8;
-        }
-        all_sizes.dst_sz = (all_sizes.dst_w * all_sizes.dst_h *3)/2;
+    dst_scale = app->cfg->stream_preview_scale;
+
+    dst_w = ((dst_scale * all_sizes.src_w) / 100);
+    if ((dst_w % 8) != 0) {
+        dst_w = dst_w - (dst_w % 8) + 8;
     }
+    if (dst_w < 64){
+        dst_w = 64;
+    }
+    all_sizes.dst_w = dst_w;
+
+    dst_h = ((dst_scale * all_sizes.src_h) / 100);
+    if ((dst_h % 8) != 0) {
+        dst_h = dst_h - (dst_h % 8) + 8;
+    }
+    if (dst_h < 64) {
+        dst_h = 64;
+    }
+    all_sizes.dst_h = dst_h;
+    all_sizes.dst_sz = (dst_w * dst_h * 3)/2;
+
     MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
-        , "Combined image source size %dx%d scaled to %dx%d"
+        , "Combined Image Original Size %dx%d Scale %d New Size %dx%d"
         , all_sizes.src_w, all_sizes.src_h
+        , dst_scale
         , all_sizes.dst_w, all_sizes.dst_h);
 
 }
