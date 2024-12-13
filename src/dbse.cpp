@@ -978,9 +978,11 @@ void cls_dbse::filelist_get(std::string sql, vec_files &p_flst)
 {
     int indx;
     if (dbse_open() == false) {
+        p_flst.clear();
         return;
     }
     if (finish == true) {
+        p_flst.clear();
         return;
     }
 
@@ -1193,19 +1195,19 @@ void cls_dbse::dbse_edits()
 
 void cls_dbse::dbse_clean()
 {
-    int delcnt, indx;
+    int delcnt, indx, camindx;
     std::string sql, delimit;
     struct stat statbuf;
     vec_files flst;
 
-    for (indx=0;indx<app->cam_cnt;indx++) {
+    for (camindx=0;camindx<app->cam_cnt;camindx++) {
         if (check_exit() == true) {
             return;
         }
 
         sql  = " select * from motionplus ";
         sql += " where device_id = ";
-        sql += std::to_string(app->cam_list[indx]->cfg->device_id);
+        sql += std::to_string(app->cam_list[camindx]->cfg->device_id);
         sql += " order by file_dtl, file_tml;";
         filelist_get(sql, flst);
 
