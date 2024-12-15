@@ -689,12 +689,16 @@ void cls_webu_html::script_assign_actions()
             (itm->param_value == "on")) {
             webua->resp_page +=
                 "      html_actions += \"<a onclick=\\\"send_action(\";\n"
-                "      html_actions += \"'pause');\\\">\";\n"
-                "      html_actions += \"Pause</a>\\n\";\n\n"
+                "      html_actions += \"'pause_on');\\\">\";\n"
+                "      html_actions += \"Pause On</a>\\n\";\n\n"
 
                 "      html_actions += \"<a onclick=\\\"send_action(\";\n"
-                "      html_actions += \"'unpause');\\\">\";\n"
-                "      html_actions += \"Unpause</a>\\n\";\n\n"
+                "      html_actions += \"'pause_off');\\\">\";\n"
+                "      html_actions += \"Pause Off</a>\\n\";\n\n"
+
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'pause_schedule');\\\">\";\n"
+                "      html_actions += \"Pause Schedule</a>\\n\";\n\n"
                 ;
         } else if ((itm->param_name == "camera_add") &&
             (itm->param_value == "on")) {

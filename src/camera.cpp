@@ -637,14 +637,15 @@ void cls_camera::init_values()
         movie_passthrough = false;
     }
 
-    user_pause = false;
-    if (app->user_pause) {
-        user_pause = true;
-    } else if (cfg->pause) {
-        user_pause = true;
+    if (app->user_pause == "on") {
+        user_pause = "on";
+    } else {
+        user_pause = cfg->pause;
+    }
+    if (user_pause == "on") {
+        pause = true;
     }
 
-    pause = user_pause;
     v4l2cam = nullptr;
     netcam = nullptr;
     netcam_high = nullptr;
@@ -1814,10 +1815,14 @@ void cls_camera::check_schedule()
         return;
     }
 
-    if (user_pause) {
+    if (user_pause == "on") {
         pause = true;
         return;
+    } else if (user_pause == "off") {
+        pause = false;
+        return;
     }
+
 
     if (schedule.size() == 0) {
         return;
@@ -2011,7 +2016,7 @@ cls_camera::cls_camera(cls_motapp *p_app)
     pipe = -1;
     mpipe = -1;
     pause = false;
-    user_pause = false;
+    user_pause = "schedule";
     missing_frame_counter = -1;
     schedule.clear();
     cleandir = nullptr;

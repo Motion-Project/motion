@@ -251,8 +251,7 @@ void cls_webu_post::action_snapshot()
 
 }
 
-/* Process the pause action */
-void cls_webu_post::action_pause()
+void cls_webu_post::action_pause_on()
 {
     int indx;
 
@@ -269,16 +268,15 @@ void cls_webu_post::action_pause()
 
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
-            app->cam_list[indx]->user_pause = true;
+            app->cam_list[indx]->user_pause = "on";
         }
     } else {
-        app->cam_list[webua->camindx]->user_pause = true;
+        app->cam_list[webua->camindx]->user_pause = "on";
     }
 
 }
 
-/* Process the unpause action */
-void cls_webu_post::action_unpause()
+void cls_webu_post::action_pause_off()
 {
     int indx;
 
@@ -295,10 +293,35 @@ void cls_webu_post::action_unpause()
 
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
-            app->cam_list[indx]->user_pause = false;
+            app->cam_list[indx]->user_pause = "off";
         }
     } else {
-        app->cam_list[webua->camindx]->user_pause = false;
+        app->cam_list[webua->camindx]->user_pause = "off";
+    }
+
+}
+
+void cls_webu_post::action_pause_schedule()
+{
+    int indx;
+
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "pause") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
+                return;
+            } else {
+                break;
+            }
+        }
+    }
+
+    if (webua->device_id == 0) {
+        for (indx=0; indx<app->cam_cnt; indx++) {
+            app->cam_list[indx]->user_pause = "schedule";
+        }
+    } else {
+        app->cam_list[webua->camindx]->user_pause = "schedule";
     }
 
 }
@@ -738,10 +761,23 @@ void cls_webu_post::process_actions()
         action_snapshot();
 
     } else if (post_cmd == "pause") {
-        action_pause();
+        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            , _("pause action deprecated.  Use pause_on"));
+        action_pause_on();
 
     } else if (post_cmd == "unpause") {
-        action_unpause();
+        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            , _("unpause action deprecated.  Use pause_off"));
+        action_pause_off();
+
+    } else if (post_cmd == "pause_on") {
+        action_pause_on();
+
+    } else if (post_cmd == "pause_off") {
+        action_pause_off();
+
+    } else if (post_cmd == "pause_schedule") {
+        action_pause_schedule();
 
     } else if (post_cmd == "restart") {
         action_restart();

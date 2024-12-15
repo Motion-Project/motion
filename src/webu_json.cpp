@@ -408,6 +408,8 @@ void cls_webu_json::status_vars(int indx_cam)
         webua->resp_page += ",\"pause\":false";
     }
 
+    webua->resp_page += ",\"user_pause\":\"" + cam->user_pause +"\"";
+
     webua->resp_page += "}";
 }
 

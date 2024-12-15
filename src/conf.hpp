@@ -110,7 +110,7 @@
             int             watchdog_tmo;
             int             watchdog_kill;
             int             device_tmo;
-            bool            pause;
+            std::string     pause;
             std::string     schedule_params;
             std::string     cleandir_params;
 

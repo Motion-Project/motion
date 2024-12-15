@@ -832,7 +832,9 @@
         <h3><a name="pause"></a>pause</h3>
         <ul>
           <li> Values: Boolean | Default: false </li>
-          Pause detection at start up.
+          <li> Values: on, off, schedule | Default: schedule</li>
+          Use 'on' and 'off' to pause or enable motion detection respectively.  Use
+          'schedule' to allow the schedule process to pause or enable detection.
         </ul>
         <p></p>
 
@@ -844,7 +846,7 @@
         <ul>
           <p></p>
           This parameter specifies the time of the day that Motionplus will perform
-          motion detection.
+          motion detection.  To use this, the pause parameter must be set to schedule.
           <p></p>
 
           <div>
@@ -2444,7 +2446,7 @@
           Comma separated list of the actions=values to allow and show on the web control page.  The
           following parameters are recognized.
           <ul>
-            <li> pause:  Applies for both Pause and Unpause actions</li>
+            <li> pause:  Applies for Pause On, Pause Off and Pause schedule actions</li>
             <li> event:  Applies for both Start Event and End Event actions</li>
             <li> snapshot</li>
             <li> camera_add</li>

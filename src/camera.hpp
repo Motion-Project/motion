@@ -185,7 +185,7 @@ class cls_camera {
         int     pipe;
         int     mpipe;
         bool    pause;
-        bool    user_pause;
+        std::string user_pause;
         int     missing_frame_counter;
 
         uint64_t    info_diff_tot;

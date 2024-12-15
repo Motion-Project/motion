@@ -48,7 +48,7 @@ ctx_parm config_parms[] = {
     {"device_name",               PARM_TYP_STRING, PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"device_id",                 PARM_TYP_INT,    PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"device_tmo",                PARM_TYP_INT,    PARM_CAT_01, PARM_LEVEL_LIMITED },
-    {"pause",                     PARM_TYP_BOOL,   PARM_CAT_01, PARM_LEVEL_LIMITED },
+    {"pause",                     PARM_TYP_LIST,   PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"schedule_params",           PARM_TYP_STRING, PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"cleandir_params",           PARM_TYP_STRING, PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"target_dir",                PARM_TYP_STRING, PARM_CAT_01, PARM_LEVEL_ADVANCED },
@@ -688,11 +688,35 @@ void cls_config::edit_device_tmo(std::string &parm, enum PARM_ACT pact)
 void cls_config::edit_pause(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        pause = false;
+        pause = "schedule";
     } else if (pact == PARM_ACT_SET) {
-        edit_set_bool(pause, parm);
+        if ((parm == "schedule") ||
+            (parm == "1")   || (parm == "yes") ||
+            (parm == "on")  || (parm == "true") ||
+            (parm == "0")   || (parm == "no") ||
+            (parm == "off") || (parm == "false")) {
+            if ((parm == "schedule") || (parm == "on") || (parm == "off")) {
+                pause = parm;
+            } else if ((parm == "1") || (parm == "yes") || (parm == "true")) {
+                MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
+                    , _("Old type specified for pause %s. Use 'on' instead")
+                    ,parm.c_str());
+                pause = "on";
+            } else if ((parm == "0") || (parm == "no") || (parm == "false")) {
+                MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
+                    , _("Old type specified for pause %s.  Use 'off' instead")
+                    ,parm.c_str());
+                pause = "off";
+            }
+        } else {
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid pause %s"),parm.c_str());
+        }
     } else if (pact == PARM_ACT_GET) {
-        edit_get_bool(parm, pause);
+        parm = pause;
+    } else if (pact == PARM_ACT_LIST) {
+        parm = "[";
+        parm = parm + "\"schedule\",\"on\",\"off\"";
+        parm = parm + "]";
     }
     return;
     MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","pause",_("pause"));
@@ -3668,7 +3692,7 @@ void cls_config::cmdline()
             edit_set("log_file", optarg);
             break;
         case 'm':
-            app->user_pause = true;
+            app->user_pause = "on";
             break;
         case 'h':
         case '?':

@@ -54,8 +54,9 @@
             void action_eventend();
             void action_eventstart();
             void action_snapshot();
-            void action_pause();
-            void action_unpause();
+            void action_pause_on();
+            void action_pause_off();
+            void action_pause_schedule();
             void action_restart();
             void action_stop();
             void action_user();

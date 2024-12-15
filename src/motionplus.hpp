@@ -189,7 +189,7 @@ class cls_motapp {
 
         int     argc;
         char    **argv;
-        bool    user_pause;
+        std::string user_pause;
 
         cls_config          *conf_src;
         cls_config          *cfg;
