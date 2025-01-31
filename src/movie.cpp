@@ -853,33 +853,33 @@ void cls_movie::passthru_minpts()
             if ((netcam_data->pktarray[indx].packet->stream_index == indx_audio) &&
                 (netcam_data->pktarray[indx].packet->pts != AV_NOPTS_VALUE)) {
                 pass_audio_base = netcam_data->pktarray[indx].packet->pts;
-            };
+            }
             if ((netcam_data->pktarray[indx].packet->stream_index == indx_video) &&
                 (netcam_data->pktarray[indx].packet->pts != AV_NOPTS_VALUE)) {
                 pass_video_base = netcam_data->pktarray[indx].packet->pts;
-            };
+            }
         }
         for (indx = 0; indx < netcam_data->pktarray_size; indx++) {
             if ((netcam_data->pktarray[indx].packet->stream_index == indx_audio) &&
                 (netcam_data->pktarray[indx].packet->pts != AV_NOPTS_VALUE) &&
                 (netcam_data->pktarray[indx].packet->pts < pass_audio_base)) {
                 pass_audio_base = netcam_data->pktarray[indx].packet->pts;
-            };
+            }
             if ((netcam_data->pktarray[indx].packet->stream_index == indx_audio) &&
                 (netcam_data->pktarray[indx].packet->dts != AV_NOPTS_VALUE) &&
                 (netcam_data->pktarray[indx].packet->dts < pass_audio_base)) {
                 pass_audio_base = netcam_data->pktarray[indx].packet->dts;
-            };
+            }
             if ((netcam_data->pktarray[indx].packet->stream_index == indx_video) &&
                 (netcam_data->pktarray[indx].packet->pts != AV_NOPTS_VALUE) &&
                 (netcam_data->pktarray[indx].packet->pts < pass_video_base)) {
                 pass_video_base = netcam_data->pktarray[indx].packet->pts;
-            };
+            }
             if ((netcam_data->pktarray[indx].packet->stream_index == indx_video) &&
                 (netcam_data->pktarray[indx].packet->dts != AV_NOPTS_VALUE) &&
                 (netcam_data->pktarray[indx].packet->dts < pass_video_base)) {
                 pass_video_base = netcam_data->pktarray[indx].packet->dts;
-            };
+            }
         }
     pthread_mutex_unlock(&netcam_data->mutex_pktarray);
 
@@ -1668,7 +1668,7 @@ void cls_movie::start()
 {
     if (is_running == true) {
         return;
-    };
+    }
 
     if (movie_type == "norm") {
         start_norm();

@@ -247,7 +247,7 @@ int cls_libcam::start_mgr()
             MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 , "No camera devices found");
             return -1;
-        };
+        }
         camid = cam_mgr->cameras()[0]->id();
     } else {
         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO

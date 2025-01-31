@@ -604,7 +604,7 @@ AVPacket *mypacket_alloc(AVPacket *pkt)
 {
     if (pkt != NULL) {
         av_packet_free(&pkt);
-    };
+    }
     pkt = av_packet_alloc();
     #if (MYFFVER < 58076)
         av_init_packet(pkt);

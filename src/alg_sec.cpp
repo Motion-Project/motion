@@ -374,7 +374,7 @@ void cls_algsec::load_haar()
             method = "none";
             MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Failed loading model %s")
                 ,model_file.c_str());
-        };
+        }
     } catch ( cv::Exception& e ) {
         const char* err_msg = e.what();
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error %s"),err_msg);
