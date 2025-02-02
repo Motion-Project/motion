@@ -91,8 +91,8 @@ class cls_netcam {
         AVFormatContext          *transfer_format;       /* Format context just for transferring to pass-through */
         ctx_packet_item          *pktarray;              /* Pointer to array of packets for passthru processing */
         int                       pktarray_size;         /* The number of packets in array.  1 based */
-        int                       video_stream_index;    /* Stream index associated with video from camera */
-        int                       audio_stream_index;    /* Stream index associated with video from camera */
+        int                       video_stream_index;       /* Stream index associated with video from camera */
+        int                       audio_stream_index;       /* Stream index associated with audio from camera */
 
         bool            handler_stop;
         bool            handler_running;
@@ -118,7 +118,6 @@ class cls_netcam {
         int64_t                   idnbr;                 /* A ID number to track the packet vs image */
         AVDictionary             *opts;                  /* AVOptions when opening the format context */
         int                       swsframe_size;         /* The size of the image after resizing */
-        int                       last_stream_index;     /* Index of the last packet read */
 
         enum AVHWDeviceType       hw_type;
         enum AVPixelFormat        hw_pix_fmt;
@@ -145,6 +144,7 @@ class cls_netcam {
         struct timespec           connection_tm;    /* Time when camera was connected*/
         int64_t                   connection_pts;   /* PTS from the connection */
         int64_t                   last_pts;         /* PTS from the last packet read */
+        int                       last_stream_index;    /* Stream index for last packet */
         bool                      pts_adj;          /* Bool for whether to use pts for timing */
 
         struct timespec           frame_prev_tm;    /* The time set before calling the av functions */
@@ -191,6 +191,7 @@ class cls_netcam {
         int open_codec();
         int open_sws();
         int resize();
+        void pkt_ts();
         int read_image();
         int ntc();
         void set_options();

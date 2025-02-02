@@ -1322,6 +1322,50 @@ int cls_netcam::resize()
     return 0;
 }
 
+void cls_netcam::pkt_ts()
+{
+    int64_t usec_ltncy;
+    AVRational tbase;
+    struct timespec tmp_tm;
+
+    if (connection_pts == -1) {
+        if (packet_recv->pts == AV_NOPTS_VALUE) {
+            connection_pts = 0;
+        } else {
+            connection_pts = packet_recv->pts;
+        }
+        clock_gettime(CLOCK_MONOTONIC, &connection_tm);
+    }
+
+    if (packet_recv->pts == AV_NOPTS_VALUE) {
+        clock_gettime(CLOCK_MONOTONIC, &tmp_tm);
+
+        tbase = format_context->streams[packet_recv->stream_index]->time_base;
+        if (tbase.num == 0) {
+            tbase.num = 1;
+        }
+        usec_ltncy = (((tmp_tm.tv_sec - connection_tm.tv_sec) * 1000000) +
+                ((tmp_tm.tv_nsec - connection_tm.tv_nsec) / 1000));
+        if (usec_ltncy < 0) {
+            MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                ,_("%s:Latency calculation error ")
+                , cameratype.c_str());
+            usec_ltncy = 0;
+        }
+
+        packet_recv->pts = connection_pts
+            + av_rescale(usec_ltncy, tbase.den/tbase.num, 1000000);
+
+    }
+
+    if (packet_recv->dts == AV_NOPTS_VALUE) {
+        packet_recv->dts = packet_recv->pts;
+    }
+
+    last_pts = packet_recv->pts;
+
+}
+
 int cls_netcam::read_image()
 {
     int  size_decoded, retcd, errcnt, nodata;
@@ -1403,7 +1447,8 @@ int cls_netcam::read_image()
     clock_gettime(CLOCK_MONOTONIC, &ist_tm);
     clock_gettime(CLOCK_MONOTONIC, &img_recv->image_time);
     last_stream_index = packet_recv->stream_index;
-    last_pts = packet_recv->pts;
+
+    pkt_ts();
 
     if (!first_image) {
         status = NETCAM_CONNECTED;
@@ -1672,7 +1717,7 @@ void cls_netcam::set_parms ()
     swsframe_size = 0;
     hw_type = AV_HWDEVICE_TYPE_NONE;
     hw_pix_fmt = AV_PIX_FMT_NONE;
-    connection_pts = 0;
+    connection_pts = -1;
     last_pts = 0;
     filenbr = 0;
     filelist.clear();
@@ -1901,8 +1946,6 @@ int cls_netcam::open_context()
         return -1;
     }
 
-    connection_pts = AV_NOPTS_VALUE;
-
     return 0;
 }
 
@@ -1996,18 +2039,11 @@ void cls_netcam::handler_wait()
 
     /* Adjust to clock and pts timer */
     if (pts_adj == true) {
-        if (connection_pts == AV_NOPTS_VALUE) {
-            connection_pts = last_pts;
-            clock_gettime(CLOCK_MONOTONIC, &connection_tm);
-            return;
-        }
-        if (last_pts != AV_NOPTS_VALUE) {
-            usec_ltncy +=
-                + (av_rescale(last_pts, 1000000, tbase.den/tbase.num)
-                  - av_rescale(connection_pts, 1000000, tbase.den/tbase.num))
-                -(((tmp_tm.tv_sec - connection_tm.tv_sec) * 1000000) +
-                  ((tmp_tm.tv_nsec - connection_tm.tv_nsec) / 1000));
-        }
+        usec_ltncy +=
+            + (av_rescale(last_pts, 1000000, tbase.den/tbase.num)
+            - av_rescale(connection_pts, 1000000, tbase.den/tbase.num))
+            -(((tmp_tm.tv_sec - connection_tm.tv_sec) * 1000000) +
+                ((tmp_tm.tv_nsec - connection_tm.tv_nsec) / 1000));
     }
 
     if ((usec_ltncy > 0) && (usec_ltncy < 1000000L)) {

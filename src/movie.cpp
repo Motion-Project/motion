@@ -770,27 +770,40 @@ int cls_movie::passthru_pktpts()
 
     if (pkt->pts != AV_NOPTS_VALUE) {
         if (pkt->pts < base_pdts) {
-            ts_interval = 0;
+            MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Invalid pkt->pts");
+            return -1;
         } else {
             ts_interval = pkt->pts - base_pdts;
         }
         pkt->pts = av_rescale_q(ts_interval
             , netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
+    } else {
+        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "pkt->pts is AV_NOPTS_VALUE");
+        return -1;
     }
 
     if (pkt->dts != AV_NOPTS_VALUE) {
         if (pkt->dts < base_pdts) {
-            ts_interval = 0;
+            MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "pkt->dts is invalid");
+            return -1;
         } else {
             ts_interval = pkt->dts - base_pdts;
         }
         pkt->dts = av_rescale_q(ts_interval
             , netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
+    } else {
+        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "pkt->dts is AV_NOPTS_VALUE");
+        return -1;
     }
 
     ts_interval = pkt->duration;
     pkt->duration = av_rescale_q(ts_interval
         , netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
+
+    if ((pkt->pts == AV_NOPTS_VALUE) || (pkt->dts == AV_NOPTS_VALUE)) {
+        MOTPLS_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "pkt->dts or pkt->pts is AV_NOPTS_VALUE");
+        return -1;
+    }
 
     /*
     MOTPLS_LOG(INF, TYPE_ENCODER, NO_ERRNO
