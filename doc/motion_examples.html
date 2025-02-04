@@ -2,10 +2,10 @@
 <html lang="en-us">
   <head>
     <meta charset="UTF-8">
-    <link href="motionplus.png" rel="icon" type="image/png">
-    <title>MotionPlus</title>
+    <link href="motion.png" rel="icon" type="image/png">
+    <title>Motion</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="motionplus_stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="motion_stylesheet.css" media="screen">
     <script>
       function fnc_topnav() {
         var x = document.getElementById("id_topnav");
@@ -19,7 +19,7 @@
   </head>
   <body>
     <div class="topnav" id="id_topnav">
-      <img class="logoimg" src="motionplus.gif">
+      <img class="logoimg" src="motion.gif">
 
       <a class="topnav-d" href="https://motion-project.github.io/motion_support.html">Support</a>
       <a class="topnav-d" href="https://motion-project.github.io/motion_news.html" >News</a>
@@ -44,7 +44,7 @@
 
       <h3><a name="Examples"></a> Examples</h3>
       <ul>
-        The following provides some sample configuration options and examples for MotionPlus.
+        The following provides some sample configuration options and examples for Motion.
         <li> <a href="#persistent_device"> Persistent v4l2 device name </a></li>
         <li> <a href="#extpipe_commands"> Sample extpipe commands </a></li>
         <li> <a href="#loopback_setup">Loopback device setup</a></li>
@@ -133,12 +133,12 @@
 
       <h3><a name="ffmpeg_input_device"></a>Use ffmpeg as input device</h3>
       <ul>
-      Sometimes the particular device is not function for MotionPlus but does work with FFmpeg.  In
-      this situation the device can be setup to be used in MotionPlus using FFMpeg as an intermediate
+      Sometimes the particular device is not function for Motion but does work with FFmpeg.  In
+      this situation the device can be setup to be used in Motion using FFMpeg as an intermediate
       application.  The process would be to set up a loopback device and then have FFmpeg feed the
       video into that device and then Motion can read from it.  The following are some examples.  First set up
       the loopback device and set it to /dev/video0.  Then start ffmpeg using options such as the following.
-      <code> ffmpeg -re -i mymovie.mp4 -f v4l2 /dev/video0 </code>  Then in a separate terminal, start MotionPlus
+      <code> ffmpeg -re -i mymovie.mp4 -f v4l2 /dev/video0 </code>  Then in a separate terminal, start Motion
       with it set to use the <code>/dev/video0</code> device as input.  This method can can also be used to
       reformat the content to a different format.  The following outputs the original movie into a gray pixel format.
       <code> ffmpeg -re -i mymovie.mp4 -f v4l2 -pix_fmt gray /dev/video0 </code>
@@ -146,16 +146,16 @@
 
       <h3><a name="database_setup"></a>Database Setup</h3>
       <ul>
-        If a database is specified in the MotionPlus configuration, upon start up, MotionPlus will check for a table in
-        the database called "motionplus" and if it is not found, it will create it.  This MotionPlus specific table is
-        required so that movies can be displayed on the webcontrol page.  It tracks the movies created by MotionPlus along
+        If a database is specified in the Motion configuration, upon start up, Motion will check for a table in
+        the database called "motion" and if it is not found, it will create it.  This Motion specific table is
+        required so that movies can be displayed on the webcontrol page.  It tracks the movies created by Motion along
         with the various metadata about the movies.  The following is a brief overview of how to create a simple database
-        and specify it within the MotionPlus parameters so recordings can be downloaded from the webcontrol.
+        and specify it within the Motion parameters so recordings can be downloaded from the webcontrol.
        <ul>
           <div>
             <i><h4>sqlite3</h4></i>
             This database type is by far the easiest to set up since it is file based.  Simply provide the
-            parameters in the MotionPlus configuration parameters
+            parameters in the Motion configuration parameters
             <ul>
             <small><small><code>
             database_type sqlite3
@@ -163,7 +163,7 @@
             </code></small></small>
             </ul>
             While this is the easiest to set up, it has also been observed that it can at times be unstable.  This
-            is especially true if the database file is included as part of a archive process while in use by MotionPlus.
+            is especially true if the database file is included as part of a archive process while in use by Motion.
           </div>
           <p></p>
 
@@ -184,8 +184,8 @@
             mariadb -u YourUserNameHere -p
               <ul>
               {enter YourPasswordHere}
-              <br>create database motionplus;
-              <br>use motionplus;
+              <br>create database motion;
+              <br>use motion;
               <br>quit;
               </ul>
             </code></small></small>
@@ -198,11 +198,11 @@
             </code></small></small>
             </ul>
 
-            Specify the following in the MotionPlus configuration parameters.
+            Specify the following in the Motion configuration parameters.
             <ul>
             <small><small><code>
             database_type mariadb
-            <br>database_dbname motionplus
+            <br>database_dbname motion
             <br>database_host localhost
             <br>database_port 3306
             <br>database_user YourUserNameHere
@@ -225,8 +225,8 @@
             <br>sudo -u postgres psql
               <ul>
               CREATE ROLE 'your_username_here' LOGIN PASSWORD 'YourPasswordHere';
-              <br>CREATE DATABASE motionplus WITH OWNER = your_username_here;
-              <br>GRANT ALL PRIVILEGES ON DATABASE motionplus TO your_username_here;
+              <br>CREATE DATABASE motion WITH OWNER = your_username_here;
+              <br>GRANT ALL PRIVILEGES ON DATABASE motion TO your_username_here;
               <br>\quit
               </ul>
             </code></small></small>
@@ -243,14 +243,14 @@
             username only seems to accept lowercase)
             <ul>
             <small><small><code>
-            psql -h localhost -d motionplus -U your_username_here -p 5432
+            psql -h localhost -d motion -U your_username_here -p 5432
             </code></small></small>
 
-            Specify the following in the MotionPlus configuration parameters.
+            Specify the following in the Motion configuration parameters.
             <ul>
             <small><small><code>
             database_type postgresql
-            <br>database_dbname motionplus
+            <br>database_dbname motion
             <br>database_host localhost
             <br>database_port 5432
             <br>database_user your_username_here
@@ -313,7 +313,7 @@
           <li><code>pause_schedule</code>Allow schedule to pause or enable motion detection</li>
           <li><code>restart</code>Restart camera</li>
           <li><code>stop</code>Stop camera</li>
-          <li><code>config_write</code>Write out the configuration to file.  User account running Motionplus must have write access to directory</li>
+          <li><code>config_write</code>Write out the configuration to file.  User account running Motion must have write access to directory</li>
           <li><code>camera_add</code>Add a camera</li>
           <li><code>camera_delete</code>Delete camera</li>
           <li><code>config</code>Set configuration item</li>
@@ -334,7 +334,7 @@
 
       <h3><a name="haar_setup"></a>HAAR setup</h3>
       <ul>
-        <li>Set the following Motionplus items within the secondardy_params</li>
+        <li>Set the following Motion items within the secondardy_params</li>
         <ul>
           <li><code>frame_interval</code>Default: 5 | The number of images between each secondary detection</li>
           <li><code>image_type</code>Default: full | Type of image to process through secondary detection</li>
@@ -400,7 +400,7 @@
       <ul>
         The OpenCV documentation is the definitive source for instructions on how to train
         a Haar model.  This brief introduction only provides a few scripts that may be
-        helpful in using MotionPlus to get positive and negative images to feed into the
+        helpful in using Motion to get positive and negative images to feed into the
         training process.
         <br>
         <br>Start with creating positive images movie as input file.
@@ -442,25 +442,25 @@
 
       <h3><a name="sound_sample"></a>Sound Frequency Sample</h3>
       <ul>
-        Since sound frequency processing is new to MotionPlus, the following provides an illustrative sample of setting
-        up the sound and the associated alerts processing.  This example will use ALSA.  For PulseAudio, MotionPlus uses
-        the default audio recording device.  Although MotionPlus has parameters for the PulseAudio server and device,
+        Since sound frequency processing is new to Motion, the following provides an illustrative sample of setting
+        up the sound and the associated alerts processing.  This example will use ALSA.  For PulseAudio, Motion uses
+        the default audio recording device.  Although Motion has parameters for the PulseAudio server and device,
         the set up is not straight forward and it is just recommended to change the PulseAudio default.
         <br>
         <br>Go to the command prompt and use <small><code>arecord -l</code></small> to get the
         device name such as <small><code>hw:1,0</code></small>
-        <br>Specify log_level 8 in MotionPlus.conf
+        <br>Specify log_level 8 in Motion.conf
         <br>Do not specify a log file so that it is console output.
         <br>Specify snd_device and snd_show in the sound configuration file such as
         <br><small><code>snd_device hw:1,0</code></small>
         <br><small><code>snd_show on</code></small>
-        <br>Start MotionPlus and make a noise to test the output.
-        <br>Once MotionPlus responds to sounds, press the test button on the device to be monitored.
+        <br>Start Motion and make a noise to test the output.
+        <br>Once Motion responds to sounds, press the test button on the device to be monitored.
         <br>Note that while the various devices being monitored may be the same, the detected frequency from
         each may be slightly different.  Care should be taken to not be too precise in the setting of the alert
-        range for MotionPlus.  For example, the frequency may be reported as 3402.2456 and MotionPlus can be
+        range for Motion.  For example, the frequency may be reported as 3402.2456 and Motion can be
         set up to look for that precise number but devices age and the frequency may change.  Also, note that the
-        frequency resolution of MotionPlus is limited by the sample rate and frames from the audio device.
+        frequency resolution of Motion is limited by the sample rate and frames from the audio device.
         The maximum resolution is determined by the following formula.  Sample Rate / (frames * 2).  So with the
         default sample rate of 44100hz, and frames of 2048, the maximum resolution is appoximately 10.7666hz.  This
         means that the frequencies detected around the range reported above would be 3413.0122, 3402.2456
@@ -491,7 +491,7 @@
           <br>&nbsp;  MYSTR=""
           <br>&nbsp;  MYSTR=$MYSTR" -f  \"Friendly Name <SendingEmailAddress@gwhatever.com>\" "
           <br>&nbsp;  MYSTR=$MYSTR" -t  \"DestinationEmailAddress@gwhatever.com\" "
-          <br>&nbsp;  MYSTR=$MYSTR" -u  \"MotionPlus Notification\" "
+          <br>&nbsp;  MYSTR=$MYSTR" -u  \"Motion Notification\" "
           <br>&nbsp;  MYSTR=$MYSTR" -s  \"smtp.gwhatever.com:587\" "
           <br>&nbsp;  MYSTR=$MYSTR" -xu \"SendingEmailAddress@gwhatever.com\" "
           <br>&nbsp;  MYSTR=$MYSTR" -xp \"SendingEmailPassword\" "
@@ -537,7 +537,7 @@
         Install fail2ban and create the following files:
         <br>File 1:
         <small><small><code><ul>
-          <br>&nbsp;# Fail2Ban configuration file: /etc/fail2ban/filter.d/motionplus.conf
+          <br>&nbsp;# Fail2Ban configuration file: /etc/fail2ban/filter.d/motion.conf
           <br>&nbsp;# Author: Mr Dave
           <br>&nbsp;#
           <br>&nbsp;[INCLUDES]
@@ -566,11 +566,11 @@
         </ul></code></small></small>
         <br>File2:
         <small><small><code><ul>
-          <br>&nbsp;#Fail2Ban Jail Configuration File: /etc/fail2ban/jail.d/motionplus-jail.conf
-          <br>&nbsp;[motionplus]
+          <br>&nbsp;#Fail2Ban Jail Configuration File: /etc/fail2ban/jail.d/motion-jail.conf
+          <br>&nbsp;[motion]
           <br>&nbsp;enabled   = true
-          <br>&nbsp;filter    = motionplus
-          <br>&nbsp;logpath   = /var/log/motionplus/motionplus.log
+          <br>&nbsp;filter    = motion
+          <br>&nbsp;logpath   = /var/log/motion/motion.log
           <br>&nbsp;bantime   = 23h
           <br>&nbsp;banaction = iptables-allports[blocktype="DROP"]
           <br>&nbsp;maxretry  = 0
@@ -598,7 +598,7 @@
 
         <br>
         <a href="https://github.com/Mr-Dave/camxmctl">camxmctl</a> is a c++ program with a sample HTML page that makes adjusting the parameters
-        easier.  It reuses some of the code from Motionplus and is based upon the JSON files and commands in the
+        easier.  It reuses some of the code from Motion and is based upon the JSON files and commands in the
         <a href="https://github.com/667bdrm/sofiactl">sofiactl</a> script.
         <br> Adjust location, timing, cameraip, user, etc as appropriate.
         <small><small><code><ul>

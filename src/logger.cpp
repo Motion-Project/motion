@@ -1,21 +1,21 @@
 /*
- *    This file is part of MotionPlus.
+ *    This file is part of Motion.
  *
- *    MotionPlus is free software: you can redistribute it and/or modify
+ *    Motion is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
  *    (at your option) any later version.
  *
- *    MotionPlus is distributed in the hope that it will be useful,
+ *    Motion is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
-#include "motionplus.hpp"
+#include "motion.hpp"
 #include "util.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
@@ -168,7 +168,7 @@ void cls_log::add_errmsg(int flgerr, int err_save)
 void cls_log::set_mode(int mode_new)
 {
     if ((log_mode != LOGMODE_SYSLOG) && (mode_new == LOGMODE_SYSLOG)) {
-        openlog("motionplus", LOG_PID, LOG_USER);
+        openlog("motion", LOG_PID, LOG_USER);
     }
     if ((log_mode == LOGMODE_SYSLOG) && (mode_new != LOGMODE_SYSLOG)) {
         closelog();

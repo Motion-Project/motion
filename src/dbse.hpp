@@ -1,18 +1,18 @@
 /*
- *    This file is part of MotionPlus.
+ *    This file is part of Motion.
  *
- *    MotionPlus is free software: you can redistribute it and/or modify
+ *    Motion is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
  *    (at your option) any later version.
  *
- *    MotionPlus is distributed in the hope that it will be useful,
+ *    Motion is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
@@ -71,7 +71,7 @@ struct ctx_file_item {
 };
 typedef std::vector<ctx_file_item> vec_files;
 
-/* Column item attributes in the motionplus table */
+/* Column item attributes in the motion table */
 struct ctx_col_item {
     bool        found;      /*Bool for whether the col in existing db*/
     std::string col_nm;     /*Name of the column*/

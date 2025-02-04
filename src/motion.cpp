@@ -1,22 +1,22 @@
 /*
- *    This file is part of MotionPlus.
+ *    This file is part of Motion.
  *
- *    MotionPlus is free software: you can redistribute it and/or modify
+ *    Motion is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
  *    (at your option) any later version.
  *
- *    MotionPlus is distributed in the hope that it will be useful,
+ *    Motion is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
  *
 */
-#include "motionplus.hpp"
+#include "motion.hpp"
 #include "util.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
@@ -70,7 +70,7 @@ static void sigchild_handler(int signo)
     #endif /* WNOHANG */
 }
 
-/** Attach handlers to a number of signals that MotionPlus need to catch. */
+/** Attach handlers to a number of signals that Motion need to catch. */
 static void setup_signals(void)
 {
     struct sigaction sig_handler_action;
@@ -201,11 +201,11 @@ void cls_motapp::pid_write()
         }
     }
 
-    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Motionplus pid: %d"), getpid());
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Motion pid: %d"), getpid());
 
 }
 
-/** Remove the process id file ( pid file ) before MotionPlus exit. */
+/** Remove the process id file ( pid file ) before Motion exit. */
 void cls_motapp::pid_remove()
 {
     if ((cfg->pid_file != "") &&
@@ -233,13 +233,13 @@ void cls_motapp::daemon()
     sigemptyset(&sig_ign_action.sa_mask);
 
     if (fork()) {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus going to daemon mode"));
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion going to daemon mode"));
         exit(0);
     }
 
     /*
      * Changing dir to root enables people to unmount a disk
-     * without having to stop MotionPlus
+     * without having to stop Motion
      */
     if (chdir("/")) {
         MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Could not change directory"));
@@ -534,7 +534,7 @@ void cls_motapp::init(int p_argc, char *p_argv[])
 
     if (cfg->daemon) {
         daemon();
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus running as daemon process"));
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion running as daemon process"));
     }
 
     cfg->parms_log();
@@ -649,7 +649,7 @@ void cls_motapp::camera_delete()
 
 }
 
-/** Main entry point of MotionPlus. */
+/** Main entry point of Motion. */
 int main (int p_argc, char **p_argv)
 {
     cls_motapp *app;
@@ -672,7 +672,7 @@ int main (int p_argc, char **p_argv)
             app->camera_delete();
             app->check_restart();
         }
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motionplus devices finished"));
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion devices finished"));
         if (app->reload_all) {
             app->deinit();
             app->reload_all = false;
@@ -683,7 +683,7 @@ int main (int p_argc, char **p_argv)
 
     app->deinit();
 
-    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("MotionPlus terminating"));
+    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion terminating"));
 
     mydelete(motlog);
     mydelete(app);

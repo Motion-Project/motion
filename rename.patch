@@ -1,0 +1,383 @@
+From 5d8f33e4ecf3715580f1353eadbcae68d0fc65f3 Mon Sep 17 00:00:00 2001
+From: Mr-Dave <MotionMrDave@gmail.com>
+Date: Tue, 4 Feb 2025 14:57:34 -0700
+Subject: [PATCH] Rename files to prepare for merge with 5.0 branch
+
+---
+ doc/{CHANGELOG => changelog}                 | 0
+ doc/{CODE_STANDARD => code_standard}         | 0
+ src/{alg.c => alg.cpp}                       | 0
+ src/{alg.h => alg.hpp}                       | 0
+ src/{conf.c => conf.cpp}                     | 0
+ src/{conf.h => conf.hpp}                     | 0
+ src/{dbse.c => dbse.cpp}                     | 0
+ src/{dbse.h => dbse.hpp}                     | 0
+ src/{draw.c => draw.cpp}                     | 0
+ src/{draw.h => draw.hpp}                     | 0
+ src/{event.c => event.cpp}                   | 0
+ src/{event.h => event.hpp}                   | 0
+ src/{ffmpeg.c => ffmpeg.cpp}                 | 0
+ src/{ffmpeg.h => ffmpeg.hpp}                 | 0
+ src/{jpegutils.c => jpegutils.cpp}           | 0
+ src/{jpegutils.h => jpegutils.hpp}           | 0
+ src/{logger.c => logger.cpp}                 | 0
+ src/{logger.h => logger.hpp}                 | 0
+ src/{mmx.h => mmx.hpp}                       | 0
+ src/{motion.c => motion.cpp}                 | 0
+ src/{motion.h => motion.hpp}                 | 0
+ src/{netcam.c => netcam.cpp}                 | 0
+ src/{netcam.h => netcam.hpp}                 | 0
+ src/{netcam_ftp.c => netcam_ftp.cpp}         | 0
+ src/{netcam_ftp.h => netcam_ftp.hpp}         | 0
+ src/{netcam_http.c => netcam_http.cpp}       | 0
+ src/{netcam_http.h => netcam_http.hpp}       | 0
+ src/{netcam_jpeg.c => netcam_jpeg.cpp}       | 0
+ src/{netcam_jpeg.h => netcam_jpeg.hpp}       | 0
+ src/{netcam_rtsp.c => netcam_rtsp.cpp}       | 0
+ src/{netcam_rtsp.h => netcam_rtsp.hpp}       | 0
+ src/{netcam_wget.c => netcam_wget.cpp}       | 0
+ src/{netcam_wget.h => netcam_wget.hpp}       | 0
+ src/{picture.c => picture.cpp}               | 0
+ src/{picture.h => picture.hpp}               | 0
+ src/{pwc-ioctl.h => pwc-ioctl.hpp}           | 0
+ src/{rotate.c => rotate.cpp}                 | 0
+ src/{rotate.h => rotate.hpp}                 | 0
+ src/{track.c => track.cpp}                   | 0
+ src/{track.h => track.hpp}                   | 0
+ src/{translate.c => translate.cpp}           | 0
+ src/{translate.h => translate.hpp}           | 0
+ src/{util.c => util.cpp}                     | 0
+ src/{util.h => util.hpp}                     | 0
+ src/{video_bktr.c => video_bktr.cpp}         | 0
+ src/{video_bktr.h => video_bktr.hpp}         | 0
+ src/{video_common.c => video_common.cpp}     | 0
+ src/{video_common.h => video_common.hpp}     | 0
+ src/{video_loopback.c => video_loopback.cpp} | 0
+ src/{video_loopback.h => video_loopback.hpp} | 0
+ src/{video_v4l2.c => video_v4l2.cpp}         | 0
+ src/{video_v4l2.h => video_v4l2.hpp}         | 0
+ src/{webu.c => webu.cpp}                     | 0
+ src/{webu.h => webu.hpp}                     | 0
+ src/{webu_html.c => webu_html.cpp}           | 0
+ src/{webu_html.h => webu_html.hpp}           | 0
+ src/{webu_status.c => webu_status.cpp}       | 0
+ src/{webu_status.h => webu_status.hpp}       | 0
+ src/{webu_stream.c => webu_stream.cpp}       | 0
+ src/{webu_stream.h => webu_stream.hpp}       | 0
+ src/{webu_text.c => webu_text.cpp}           | 0
+ src/{webu_text.h => webu_text.hpp}           | 0
+ 62 files changed, 0 insertions(+), 0 deletions(-)
+ rename doc/{CHANGELOG => changelog} (100%)
+ rename doc/{CODE_STANDARD => code_standard} (100%)
+ rename src/{alg.c => alg.cpp} (100%)
+ rename src/{alg.h => alg.hpp} (100%)
+ rename src/{conf.c => conf.cpp} (100%)
+ rename src/{conf.h => conf.hpp} (100%)
+ rename src/{dbse.c => dbse.cpp} (100%)
+ rename src/{dbse.h => dbse.hpp} (100%)
+ rename src/{draw.c => draw.cpp} (100%)
+ rename src/{draw.h => draw.hpp} (100%)
+ rename src/{event.c => event.cpp} (100%)
+ rename src/{event.h => event.hpp} (100%)
+ rename src/{ffmpeg.c => ffmpeg.cpp} (100%)
+ rename src/{ffmpeg.h => ffmpeg.hpp} (100%)
+ rename src/{jpegutils.c => jpegutils.cpp} (100%)
+ rename src/{jpegutils.h => jpegutils.hpp} (100%)
+ rename src/{logger.c => logger.cpp} (100%)
+ rename src/{logger.h => logger.hpp} (100%)
+ rename src/{mmx.h => mmx.hpp} (100%)
+ rename src/{motion.c => motion.cpp} (100%)
+ rename src/{motion.h => motion.hpp} (100%)
+ rename src/{netcam.c => netcam.cpp} (100%)
+ rename src/{netcam.h => netcam.hpp} (100%)
+ rename src/{netcam_ftp.c => netcam_ftp.cpp} (100%)
+ rename src/{netcam_ftp.h => netcam_ftp.hpp} (100%)
+ rename src/{netcam_http.c => netcam_http.cpp} (100%)
+ rename src/{netcam_http.h => netcam_http.hpp} (100%)
+ rename src/{netcam_jpeg.c => netcam_jpeg.cpp} (100%)
+ rename src/{netcam_jpeg.h => netcam_jpeg.hpp} (100%)
+ rename src/{netcam_rtsp.c => netcam_rtsp.cpp} (100%)
+ rename src/{netcam_rtsp.h => netcam_rtsp.hpp} (100%)
+ rename src/{netcam_wget.c => netcam_wget.cpp} (100%)
+ rename src/{netcam_wget.h => netcam_wget.hpp} (100%)
+ rename src/{picture.c => picture.cpp} (100%)
+ rename src/{picture.h => picture.hpp} (100%)
+ rename src/{pwc-ioctl.h => pwc-ioctl.hpp} (100%)
+ rename src/{rotate.c => rotate.cpp} (100%)
+ rename src/{rotate.h => rotate.hpp} (100%)
+ rename src/{track.c => track.cpp} (100%)
+ rename src/{track.h => track.hpp} (100%)
+ rename src/{translate.c => translate.cpp} (100%)
+ rename src/{translate.h => translate.hpp} (100%)
+ rename src/{util.c => util.cpp} (100%)
+ rename src/{util.h => util.hpp} (100%)
+ rename src/{video_bktr.c => video_bktr.cpp} (100%)
+ rename src/{video_bktr.h => video_bktr.hpp} (100%)
+ rename src/{video_common.c => video_common.cpp} (100%)
+ rename src/{video_common.h => video_common.hpp} (100%)
+ rename src/{video_loopback.c => video_loopback.cpp} (100%)
+ rename src/{video_loopback.h => video_loopback.hpp} (100%)
+ rename src/{video_v4l2.c => video_v4l2.cpp} (100%)
+ rename src/{video_v4l2.h => video_v4l2.hpp} (100%)
+ rename src/{webu.c => webu.cpp} (100%)
+ rename src/{webu.h => webu.hpp} (100%)
+ rename src/{webu_html.c => webu_html.cpp} (100%)
+ rename src/{webu_html.h => webu_html.hpp} (100%)
+ rename src/{webu_status.c => webu_status.cpp} (100%)
+ rename src/{webu_status.h => webu_status.hpp} (100%)
+ rename src/{webu_stream.c => webu_stream.cpp} (100%)
+ rename src/{webu_stream.h => webu_stream.hpp} (100%)
+ rename src/{webu_text.c => webu_text.cpp} (100%)
+ rename src/{webu_text.h => webu_text.hpp} (100%)
+
+diff --git a/doc/CHANGELOG b/doc/changelog
+similarity index 100%
+rename from doc/CHANGELOG
+rename to doc/changelog
+diff --git a/doc/CODE_STANDARD b/doc/code_standard
+similarity index 100%
+rename from doc/CODE_STANDARD
+rename to doc/code_standard
+diff --git a/src/alg.c b/src/alg.cpp
+similarity index 100%
+rename from src/alg.c
+rename to src/alg.cpp
+diff --git a/src/alg.h b/src/alg.hpp
+similarity index 100%
+rename from src/alg.h
+rename to src/alg.hpp
+diff --git a/src/conf.c b/src/conf.cpp
+similarity index 100%
+rename from src/conf.c
+rename to src/conf.cpp
+diff --git a/src/conf.h b/src/conf.hpp
+similarity index 100%
+rename from src/conf.h
+rename to src/conf.hpp
+diff --git a/src/dbse.c b/src/dbse.cpp
+similarity index 100%
+rename from src/dbse.c
+rename to src/dbse.cpp
+diff --git a/src/dbse.h b/src/dbse.hpp
+similarity index 100%
+rename from src/dbse.h
+rename to src/dbse.hpp
+diff --git a/src/draw.c b/src/draw.cpp
+similarity index 100%
+rename from src/draw.c
+rename to src/draw.cpp
+diff --git a/src/draw.h b/src/draw.hpp
+similarity index 100%
+rename from src/draw.h
+rename to src/draw.hpp
+diff --git a/src/event.c b/src/event.cpp
+similarity index 100%
+rename from src/event.c
+rename to src/event.cpp
+diff --git a/src/event.h b/src/event.hpp
+similarity index 100%
+rename from src/event.h
+rename to src/event.hpp
+diff --git a/src/ffmpeg.c b/src/ffmpeg.cpp
+similarity index 100%
+rename from src/ffmpeg.c
+rename to src/ffmpeg.cpp
+diff --git a/src/ffmpeg.h b/src/ffmpeg.hpp
+similarity index 100%
+rename from src/ffmpeg.h
+rename to src/ffmpeg.hpp
+diff --git a/src/jpegutils.c b/src/jpegutils.cpp
+similarity index 100%
+rename from src/jpegutils.c
+rename to src/jpegutils.cpp
+diff --git a/src/jpegutils.h b/src/jpegutils.hpp
+similarity index 100%
+rename from src/jpegutils.h
+rename to src/jpegutils.hpp
+diff --git a/src/logger.c b/src/logger.cpp
+similarity index 100%
+rename from src/logger.c
+rename to src/logger.cpp
+diff --git a/src/logger.h b/src/logger.hpp
+similarity index 100%
+rename from src/logger.h
+rename to src/logger.hpp
+diff --git a/src/mmx.h b/src/mmx.hpp
+similarity index 100%
+rename from src/mmx.h
+rename to src/mmx.hpp
+diff --git a/src/motion.c b/src/motion.cpp
+similarity index 100%
+rename from src/motion.c
+rename to src/motion.cpp
+diff --git a/src/motion.h b/src/motion.hpp
+similarity index 100%
+rename from src/motion.h
+rename to src/motion.hpp
+diff --git a/src/netcam.c b/src/netcam.cpp
+similarity index 100%
+rename from src/netcam.c
+rename to src/netcam.cpp
+diff --git a/src/netcam.h b/src/netcam.hpp
+similarity index 100%
+rename from src/netcam.h
+rename to src/netcam.hpp
+diff --git a/src/netcam_ftp.c b/src/netcam_ftp.cpp
+similarity index 100%
+rename from src/netcam_ftp.c
+rename to src/netcam_ftp.cpp
+diff --git a/src/netcam_ftp.h b/src/netcam_ftp.hpp
+similarity index 100%
+rename from src/netcam_ftp.h
+rename to src/netcam_ftp.hpp
+diff --git a/src/netcam_http.c b/src/netcam_http.cpp
+similarity index 100%
+rename from src/netcam_http.c
+rename to src/netcam_http.cpp
+diff --git a/src/netcam_http.h b/src/netcam_http.hpp
+similarity index 100%
+rename from src/netcam_http.h
+rename to src/netcam_http.hpp
+diff --git a/src/netcam_jpeg.c b/src/netcam_jpeg.cpp
+similarity index 100%
+rename from src/netcam_jpeg.c
+rename to src/netcam_jpeg.cpp
+diff --git a/src/netcam_jpeg.h b/src/netcam_jpeg.hpp
+similarity index 100%
+rename from src/netcam_jpeg.h
+rename to src/netcam_jpeg.hpp
+diff --git a/src/netcam_rtsp.c b/src/netcam_rtsp.cpp
+similarity index 100%
+rename from src/netcam_rtsp.c
+rename to src/netcam_rtsp.cpp
+diff --git a/src/netcam_rtsp.h b/src/netcam_rtsp.hpp
+similarity index 100%
+rename from src/netcam_rtsp.h
+rename to src/netcam_rtsp.hpp
+diff --git a/src/netcam_wget.c b/src/netcam_wget.cpp
+similarity index 100%
+rename from src/netcam_wget.c
+rename to src/netcam_wget.cpp
+diff --git a/src/netcam_wget.h b/src/netcam_wget.hpp
+similarity index 100%
+rename from src/netcam_wget.h
+rename to src/netcam_wget.hpp
+diff --git a/src/picture.c b/src/picture.cpp
+similarity index 100%
+rename from src/picture.c
+rename to src/picture.cpp
+diff --git a/src/picture.h b/src/picture.hpp
+similarity index 100%
+rename from src/picture.h
+rename to src/picture.hpp
+diff --git a/src/pwc-ioctl.h b/src/pwc-ioctl.hpp
+similarity index 100%
+rename from src/pwc-ioctl.h
+rename to src/pwc-ioctl.hpp
+diff --git a/src/rotate.c b/src/rotate.cpp
+similarity index 100%
+rename from src/rotate.c
+rename to src/rotate.cpp
+diff --git a/src/rotate.h b/src/rotate.hpp
+similarity index 100%
+rename from src/rotate.h
+rename to src/rotate.hpp
+diff --git a/src/track.c b/src/track.cpp
+similarity index 100%
+rename from src/track.c
+rename to src/track.cpp
+diff --git a/src/track.h b/src/track.hpp
+similarity index 100%
+rename from src/track.h
+rename to src/track.hpp
+diff --git a/src/translate.c b/src/translate.cpp
+similarity index 100%
+rename from src/translate.c
+rename to src/translate.cpp
+diff --git a/src/translate.h b/src/translate.hpp
+similarity index 100%
+rename from src/translate.h
+rename to src/translate.hpp
+diff --git a/src/util.c b/src/util.cpp
+similarity index 100%
+rename from src/util.c
+rename to src/util.cpp
+diff --git a/src/util.h b/src/util.hpp
+similarity index 100%
+rename from src/util.h
+rename to src/util.hpp
+diff --git a/src/video_bktr.c b/src/video_bktr.cpp
+similarity index 100%
+rename from src/video_bktr.c
+rename to src/video_bktr.cpp
+diff --git a/src/video_bktr.h b/src/video_bktr.hpp
+similarity index 100%
+rename from src/video_bktr.h
+rename to src/video_bktr.hpp
+diff --git a/src/video_common.c b/src/video_common.cpp
+similarity index 100%
+rename from src/video_common.c
+rename to src/video_common.cpp
+diff --git a/src/video_common.h b/src/video_common.hpp
+similarity index 100%
+rename from src/video_common.h
+rename to src/video_common.hpp
+diff --git a/src/video_loopback.c b/src/video_loopback.cpp
+similarity index 100%
+rename from src/video_loopback.c
+rename to src/video_loopback.cpp
+diff --git a/src/video_loopback.h b/src/video_loopback.hpp
+similarity index 100%
+rename from src/video_loopback.h
+rename to src/video_loopback.hpp
+diff --git a/src/video_v4l2.c b/src/video_v4l2.cpp
+similarity index 100%
+rename from src/video_v4l2.c
+rename to src/video_v4l2.cpp
+diff --git a/src/video_v4l2.h b/src/video_v4l2.hpp
+similarity index 100%
+rename from src/video_v4l2.h
+rename to src/video_v4l2.hpp
+diff --git a/src/webu.c b/src/webu.cpp
+similarity index 100%
+rename from src/webu.c
+rename to src/webu.cpp
+diff --git a/src/webu.h b/src/webu.hpp
+similarity index 100%
+rename from src/webu.h
+rename to src/webu.hpp
+diff --git a/src/webu_html.c b/src/webu_html.cpp
+similarity index 100%
+rename from src/webu_html.c
+rename to src/webu_html.cpp
+diff --git a/src/webu_html.h b/src/webu_html.hpp
+similarity index 100%
+rename from src/webu_html.h
+rename to src/webu_html.hpp
+diff --git a/src/webu_status.c b/src/webu_status.cpp
+similarity index 100%
+rename from src/webu_status.c
+rename to src/webu_status.cpp
+diff --git a/src/webu_status.h b/src/webu_status.hpp
+similarity index 100%
+rename from src/webu_status.h
+rename to src/webu_status.hpp
+diff --git a/src/webu_stream.c b/src/webu_stream.cpp
+similarity index 100%
+rename from src/webu_stream.c
+rename to src/webu_stream.cpp
+diff --git a/src/webu_stream.h b/src/webu_stream.hpp
+similarity index 100%
+rename from src/webu_stream.h
+rename to src/webu_stream.hpp
+diff --git a/src/webu_text.c b/src/webu_text.cpp
+similarity index 100%
+rename from src/webu_text.c
+rename to src/webu_text.cpp
+diff --git a/src/webu_text.h b/src/webu_text.hpp
+similarity index 100%
+rename from src/webu_text.h
+rename to src/webu_text.hpp
+-- 
+2.39.5
+

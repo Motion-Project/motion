@@ -1,22 +1,22 @@
 /*
- *    This file is part of MotionPlus.
+ *    This file is part of Motion.
  *
- *    MotionPlus is free software: you can redistribute it and/or modify
+ *    Motion is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
  *    (at your option) any later version.
  *
- *    MotionPlus is distributed in the hope that it will be useful,
+ *    Motion is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
 */
 
-#include "motionplus.hpp"
+#include "motion.hpp"
 #include "util.hpp"
 #include "camera.hpp"
 #include "conf.hpp"
@@ -315,7 +315,7 @@ void cls_webu_html::head()
 {
     webua->resp_page += "<head> \n"
         "<meta charset='UTF-8'> \n"
-        "<title>MotionPlus</title> \n"
+        "<title>Motion</title> \n"
         "<meta name='viewport' content='width=device-width, initial-scale=1'> \n";
 
     style();
@@ -606,7 +606,7 @@ void cls_webu_html::script_assign_version()
 {
     webua->resp_page +=
         "    function assign_version() {\n"
-        "      var verstr ='<a>MotionPlus \\n'+pData['version'] +'</a>';\n"
+        "      var verstr ='<a>Motion \\n'+pData['version'] +'</a>';\n"
         "      document.getElementById('divnav_version').innerHTML = verstr;\n"
         "    }\n\n";
 }

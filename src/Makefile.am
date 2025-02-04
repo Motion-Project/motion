@@ -1,32 +1,32 @@
 #/*
-# *    This file is part of MotionPlus.
+# *    This file is part of Motion.
 # *
-# *    MotionPlus is free software: you can redistribute it and/or modify
+# *    Motion is free software: you can redistribute it and/or modify
 # *    it under the terms of the GNU General Public License as published by
 # *    the Free Software Foundation, either version 3 of the License, or
 # *    (at your option) any later version.
 # *
-# *    MotionPlus is distributed in the hope that it will be useful,
+# *    Motion is distributed in the hope that it will be useful,
 # *    but WITHOUT ANY WARRANTY; without even the implied warranty of
 # *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # *    GNU General Public License for more details.
 # *
 # *    You should have received a copy of the GNU General Public License
-# *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
+# *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
 # *
 # */
 
 
 AM_CPPFLAGS= \
 	-Dconfigdir=\"$(localstatedir)/lib/@PACKAGE@\" \
-	-Dsysconfdir=\"$(sysconfdir)/motionplus\" \
+	-Dsysconfdir=\"$(sysconfdir)/motion\" \
 	-DLOCALEDIR=\"$(localedir)\"
 
 LDADD = $(LIBINTL)
 
-bin_PROGRAMS = motionplus
+bin_PROGRAMS = motion
 
-motionplus_SOURCES = \
+motion_SOURCES = \
 	alg.hpp            alg.cpp \
 	alg_sec.hpp        alg_sec.cpp \
 	conf.hpp           conf.cpp \
@@ -35,7 +35,7 @@ motionplus_SOURCES = \
 	jpegutils.hpp      jpegutils.cpp \
 	libcam.hpp         libcam.cpp \
 	logger.hpp         logger.cpp \
-	motionplus.hpp     motionplus.cpp \
+	motion.hpp         motion.cpp \
 	allcam.hpp         allcam.cpp \
 	schedule.hpp       schedule.cpp \
 	camera.hpp         camera.cpp \

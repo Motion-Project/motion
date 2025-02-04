@@ -21,6 +21,6 @@ src/draw.cpp
 src/camera.cpp
 src/sound.cpp
 src/webu_file.cpp
-src/motionplus.cpp
+src/motion.cpp
 src/util.cpp
 src/webu_html.cpp

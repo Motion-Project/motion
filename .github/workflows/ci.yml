@@ -93,5 +93,5 @@ jobs:
 
       - name: Run artifact
         run: |
-          file ./src/motionplus
-          ./src/motionplus -h || true
+          file ./src/motion
+          ./src/motion -h || true

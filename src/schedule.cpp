@@ -1,23 +1,23 @@
 /*
- *    This file is part of MotionPlus.
+ *    This file is part of Motion.
  *
- *    MotionPlus is free software: you can redistribute it and/or modify
+ *    Motion is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
  *    (at your option) any later version.
  *
- *    MotionPlus is distributed in the hope that it will be useful,
+ *    Motion is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
  *
 */
 
-#include "motionplus.hpp"
+#include "motion.hpp"
 #include "util.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
@@ -130,7 +130,7 @@ void cls_schedule::cleandir_remove(std::string sql, bool removedir)
             MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
                 , _("Removing %s"),flst[indx].full_nm.c_str());
             remove(flst[indx].full_nm.c_str());
-            sql  = " delete from motionplus ";
+            sql  = " delete from motion ";
             sql += " where record_id  = ";
             sql += std::to_string(flst[indx].record_id);
             app->dbse->exec_sql(sql);
@@ -160,7 +160,7 @@ void cls_schedule::cleandir_sql(int device_id, std::string &sql, struct timespec
     tmp_tml = tmp;
 
     sql  = " select * ";
-    sql += " from motionplus ";
+    sql += " from motion ";
     sql += " where ";
     sql += " device_id = " + std::to_string(device_id);
     sql += " and ((file_dtl < " + tmp_dtl + ") ";

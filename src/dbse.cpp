@@ -1,22 +1,22 @@
 /*
- *    This file is part of MotionPlus.
+ *    This file is part of Motion.
  *
- *    MotionPlus is free software: you can redistribute it and/or modify
+ *    Motion is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
  *    (at your option) any later version.
  *
- *    MotionPlus is distributed in the hope that it will be useful,
+ *    Motion is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
-#include "motionplus.hpp"
+#include "motion.hpp"
 #include "util.hpp"
 #include "camera.hpp"
 #include "conf.hpp"
@@ -131,20 +131,20 @@ void cls_dbse::sql_motpls(std::string &sql)
         if (app->cfg->database_type == "mariadb") {
             sql = "Select table_name "
                 " from information_schema.tables "
-                " where table_name = 'motionplus';";
+                " where table_name = 'motion';";
         } else if (app->cfg->database_type == "postgresql") {
             sql = " select tablename as table_nm "
                 " from pg_catalog.pg_tables "
                 " where schemaname != 'pg_catalog' "
                 " and schemaname != 'information_schema' "
-                " and tablename = 'motionplus';";
+                " and tablename = 'motion';";
         } else if (app->cfg->database_type == "sqlite3") {
             sql = "select name from sqlite_master"
                 " where type='table' "
-                " and name='motionplus';";
+                " and name='motion';";
         }
     } else if (dbse_action == DBSE_TBL_CREATE) {
-        sql = "create table motionplus (";
+        sql = "create table motion (";
         if ((app->cfg->database_type == "mariadb") ||
             (app->cfg->database_type == "postgresql")) {
             sql += " record_id serial ";
@@ -155,7 +155,7 @@ void cls_dbse::sql_motpls(std::string &sql)
         sql += ");";
 
     } else if ((dbse_action == DBSE_COLS_LIST) || (dbse_action == DBSE_COLS_CURRENT)) {
-        sql = " select * from motionplus;";
+        sql = " select * from motion;";
 
     }
 
@@ -171,11 +171,11 @@ void cls_dbse::sql_motpls(std::string &sql, std::string col_p1, std::string col_
 
     if ((dbse_action == DBSE_COLS_ADD) &&
         (col_p1 != "") && (col_p2 != "")) {
-        sql = "Alter table motionplus add column ";
+        sql = "Alter table motion add column ";
         sql += col_p1 + " " + col_p2 + " ;";
     } else if ((dbse_action == DBSE_COLS_RENAME) &&
         (col_p1 != "") && (col_p2 != "")) {
-        sql = "Alter table motionplus rename column ";
+        sql = "Alter table motion rename column ";
         sql += col_p1 + " to " + col_p2 + " ;";
     }
 }
@@ -221,7 +221,7 @@ void cls_dbse::sqlite3db_cb (int arg_nb, char **arg_val, char **col_nm)
 
     if (dbse_action == DBSE_TBL_CHECK) {
         for (indx=0; indx < arg_nb; indx++) {
-            if (mystrceq(arg_val[indx],"motionplus")) {
+            if (mystrceq(arg_val[indx],"motion")) {
                 table_ok = true;
             }
         }
@@ -506,7 +506,7 @@ void cls_dbse::mariadb_recs(std::string sql)
         while (qry_row != nullptr) {
             for(indx = 0; indx < qry_fields; indx++) {
                 if (qry_row[indx] != nullptr) {
-                    if (mystrceq(qry_row[indx], "motionplus")) {
+                    if (mystrceq(qry_row[indx], "motion")) {
                         table_ok = true;
                     }
                 }
@@ -614,7 +614,7 @@ void cls_dbse::mariadb_setup()
 
     if (table_ok == false) {
         MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
-            , _("Creating motionplus table"));
+            , _("Creating motion table"));
         dbse_action = DBSE_TBL_CREATE;
         sql_motpls(sql);
         mariadb_exec(sql.c_str());
@@ -772,7 +772,7 @@ void cls_dbse::pgsqldb_recs (std::string sql)
         for(indx = 0; indx < rows; indx++) {
             for (indx2 = 0; indx2 < cols; indx2++){
                 if (mystrceq("table_nm", PQfname(res, indx2)) &&
-                    mystrceq("motionplus", PQgetvalue(res, indx, indx2))) {
+                    mystrceq("motion", PQgetvalue(res, indx, indx2))) {
                         table_ok = true;
                 }
             }
@@ -890,7 +890,7 @@ void cls_dbse::pgsqldb_setup()
 
     if (table_ok == false) {
         MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
-            , _("Creating motionplus table"));
+            , _("Creating motion table"));
         dbse_action = DBSE_TBL_CREATE;
         sql_motpls(sql);
         pgsqldb_exec(sql.c_str());
@@ -1125,7 +1125,7 @@ void cls_dbse::filelist_add(cls_camera *cam, timespec *ts1, std::string ftyp
         sdev_avg =0;
     }
 
-    sqlquery =  "insert into motionplus ";
+    sqlquery =  "insert into motion ";
     sqlquery += " (device_id, file_nm, file_typ, file_dir";
     sqlquery += " , full_nm, file_sz, file_dtl";
     sqlquery += " , file_tmc, file_tml, diff_avg";
@@ -1205,7 +1205,7 @@ void cls_dbse::dbse_clean()
             return;
         }
 
-        sql  = " select * from motionplus ";
+        sql  = " select * from motion ";
         sql += " where device_id = ";
         sql += std::to_string(app->cam_list[camindx]->cfg->device_id);
         sql += " order by file_dtl, file_tml;";
@@ -1219,7 +1219,7 @@ void cls_dbse::dbse_clean()
             }
             if (stat(flst[indx].full_nm.c_str(), &statbuf) != 0) {
                 if (sql == "") {
-                    sql  = " delete from motionplus ";
+                    sql  = " delete from motion ";
                     sql += " where record_id in (";
                     delimit = " ";
                     delcnt = 0;

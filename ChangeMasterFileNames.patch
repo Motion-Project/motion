@@ -1,0 +1,1414 @@
+From 5d8f33e4ecf3715580f1353eadbcae68d0fc65f3 Mon Sep 17 00:00:00 2001
+From: Mr-Dave <MotionMrDave@gmail.com>
+Date: Tue, 4 Feb 2025 14:57:34 -0700
+Subject: [PATCH 1/2] Rename files to prepare for merge with 5.0 branch
+
+---
+ doc/{CHANGELOG => changelog}                 | 0
+ doc/{CODE_STANDARD => code_standard}         | 0
+ src/{alg.c => alg.cpp}                       | 0
+ src/{alg.h => alg.hpp}                       | 0
+ src/{conf.c => conf.cpp}                     | 0
+ src/{conf.h => conf.hpp}                     | 0
+ src/{dbse.c => dbse.cpp}                     | 0
+ src/{dbse.h => dbse.hpp}                     | 0
+ src/{draw.c => draw.cpp}                     | 0
+ src/{draw.h => draw.hpp}                     | 0
+ src/{event.c => event.cpp}                   | 0
+ src/{event.h => event.hpp}                   | 0
+ src/{ffmpeg.c => ffmpeg.cpp}                 | 0
+ src/{ffmpeg.h => ffmpeg.hpp}                 | 0
+ src/{jpegutils.c => jpegutils.cpp}           | 0
+ src/{jpegutils.h => jpegutils.hpp}           | 0
+ src/{logger.c => logger.cpp}                 | 0
+ src/{logger.h => logger.hpp}                 | 0
+ src/{mmx.h => mmx.hpp}                       | 0
+ src/{motion.c => motion.cpp}                 | 0
+ src/{motion.h => motion.hpp}                 | 0
+ src/{netcam.c => netcam.cpp}                 | 0
+ src/{netcam.h => netcam.hpp}                 | 0
+ src/{netcam_ftp.c => netcam_ftp.cpp}         | 0
+ src/{netcam_ftp.h => netcam_ftp.hpp}         | 0
+ src/{netcam_http.c => netcam_http.cpp}       | 0
+ src/{netcam_http.h => netcam_http.hpp}       | 0
+ src/{netcam_jpeg.c => netcam_jpeg.cpp}       | 0
+ src/{netcam_jpeg.h => netcam_jpeg.hpp}       | 0
+ src/{netcam_rtsp.c => netcam_rtsp.cpp}       | 0
+ src/{netcam_rtsp.h => netcam_rtsp.hpp}       | 0
+ src/{netcam_wget.c => netcam_wget.cpp}       | 0
+ src/{netcam_wget.h => netcam_wget.hpp}       | 0
+ src/{picture.c => picture.cpp}               | 0
+ src/{picture.h => picture.hpp}               | 0
+ src/{pwc-ioctl.h => pwc-ioctl.hpp}           | 0
+ src/{rotate.c => rotate.cpp}                 | 0
+ src/{rotate.h => rotate.hpp}                 | 0
+ src/{track.c => track.cpp}                   | 0
+ src/{track.h => track.hpp}                   | 0
+ src/{translate.c => translate.cpp}           | 0
+ src/{translate.h => translate.hpp}           | 0
+ src/{util.c => util.cpp}                     | 0
+ src/{util.h => util.hpp}                     | 0
+ src/{video_bktr.c => video_bktr.cpp}         | 0
+ src/{video_bktr.h => video_bktr.hpp}         | 0
+ src/{video_common.c => video_common.cpp}     | 0
+ src/{video_common.h => video_common.hpp}     | 0
+ src/{video_loopback.c => video_loopback.cpp} | 0
+ src/{video_loopback.h => video_loopback.hpp} | 0
+ src/{video_v4l2.c => video_v4l2.cpp}         | 0
+ src/{video_v4l2.h => video_v4l2.hpp}         | 0
+ src/{webu.c => webu.cpp}                     | 0
+ src/{webu.h => webu.hpp}                     | 0
+ src/{webu_html.c => webu_html.cpp}           | 0
+ src/{webu_html.h => webu_html.hpp}           | 0
+ src/{webu_status.c => webu_status.cpp}       | 0
+ src/{webu_status.h => webu_status.hpp}       | 0
+ src/{webu_stream.c => webu_stream.cpp}       | 0
+ src/{webu_stream.h => webu_stream.hpp}       | 0
+ src/{webu_text.c => webu_text.cpp}           | 0
+ src/{webu_text.h => webu_text.hpp}           | 0
+ 62 files changed, 0 insertions(+), 0 deletions(-)
+ rename doc/{CHANGELOG => changelog} (100%)
+ rename doc/{CODE_STANDARD => code_standard} (100%)
+ rename src/{alg.c => alg.cpp} (100%)
+ rename src/{alg.h => alg.hpp} (100%)
+ rename src/{conf.c => conf.cpp} (100%)
+ rename src/{conf.h => conf.hpp} (100%)
+ rename src/{dbse.c => dbse.cpp} (100%)
+ rename src/{dbse.h => dbse.hpp} (100%)
+ rename src/{draw.c => draw.cpp} (100%)
+ rename src/{draw.h => draw.hpp} (100%)
+ rename src/{event.c => event.cpp} (100%)
+ rename src/{event.h => event.hpp} (100%)
+ rename src/{ffmpeg.c => ffmpeg.cpp} (100%)
+ rename src/{ffmpeg.h => ffmpeg.hpp} (100%)
+ rename src/{jpegutils.c => jpegutils.cpp} (100%)
+ rename src/{jpegutils.h => jpegutils.hpp} (100%)
+ rename src/{logger.c => logger.cpp} (100%)
+ rename src/{logger.h => logger.hpp} (100%)
+ rename src/{mmx.h => mmx.hpp} (100%)
+ rename src/{motion.c => motion.cpp} (100%)
+ rename src/{motion.h => motion.hpp} (100%)
+ rename src/{netcam.c => netcam.cpp} (100%)
+ rename src/{netcam.h => netcam.hpp} (100%)
+ rename src/{netcam_ftp.c => netcam_ftp.cpp} (100%)
+ rename src/{netcam_ftp.h => netcam_ftp.hpp} (100%)
+ rename src/{netcam_http.c => netcam_http.cpp} (100%)
+ rename src/{netcam_http.h => netcam_http.hpp} (100%)
+ rename src/{netcam_jpeg.c => netcam_jpeg.cpp} (100%)
+ rename src/{netcam_jpeg.h => netcam_jpeg.hpp} (100%)
+ rename src/{netcam_rtsp.c => netcam_rtsp.cpp} (100%)
+ rename src/{netcam_rtsp.h => netcam_rtsp.hpp} (100%)
+ rename src/{netcam_wget.c => netcam_wget.cpp} (100%)
+ rename src/{netcam_wget.h => netcam_wget.hpp} (100%)
+ rename src/{picture.c => picture.cpp} (100%)
+ rename src/{picture.h => picture.hpp} (100%)
+ rename src/{pwc-ioctl.h => pwc-ioctl.hpp} (100%)
+ rename src/{rotate.c => rotate.cpp} (100%)
+ rename src/{rotate.h => rotate.hpp} (100%)
+ rename src/{track.c => track.cpp} (100%)
+ rename src/{track.h => track.hpp} (100%)
+ rename src/{translate.c => translate.cpp} (100%)
+ rename src/{translate.h => translate.hpp} (100%)
+ rename src/{util.c => util.cpp} (100%)
+ rename src/{util.h => util.hpp} (100%)
+ rename src/{video_bktr.c => video_bktr.cpp} (100%)
+ rename src/{video_bktr.h => video_bktr.hpp} (100%)
+ rename src/{video_common.c => video_common.cpp} (100%)
+ rename src/{video_common.h => video_common.hpp} (100%)
+ rename src/{video_loopback.c => video_loopback.cpp} (100%)
+ rename src/{video_loopback.h => video_loopback.hpp} (100%)
+ rename src/{video_v4l2.c => video_v4l2.cpp} (100%)
+ rename src/{video_v4l2.h => video_v4l2.hpp} (100%)
+ rename src/{webu.c => webu.cpp} (100%)
+ rename src/{webu.h => webu.hpp} (100%)
+ rename src/{webu_html.c => webu_html.cpp} (100%)
+ rename src/{webu_html.h => webu_html.hpp} (100%)
+ rename src/{webu_status.c => webu_status.cpp} (100%)
+ rename src/{webu_status.h => webu_status.hpp} (100%)
+ rename src/{webu_stream.c => webu_stream.cpp} (100%)
+ rename src/{webu_stream.h => webu_stream.hpp} (100%)
+ rename src/{webu_text.c => webu_text.cpp} (100%)
+ rename src/{webu_text.h => webu_text.hpp} (100%)
+
+diff --git a/doc/CHANGELOG b/doc/changelog
+similarity index 100%
+rename from doc/CHANGELOG
+rename to doc/changelog
+diff --git a/doc/CODE_STANDARD b/doc/code_standard
+similarity index 100%
+rename from doc/CODE_STANDARD
+rename to doc/code_standard
+diff --git a/src/alg.c b/src/alg.cpp
+similarity index 100%
+rename from src/alg.c
+rename to src/alg.cpp
+diff --git a/src/alg.h b/src/alg.hpp
+similarity index 100%
+rename from src/alg.h
+rename to src/alg.hpp
+diff --git a/src/conf.c b/src/conf.cpp
+similarity index 100%
+rename from src/conf.c
+rename to src/conf.cpp
+diff --git a/src/conf.h b/src/conf.hpp
+similarity index 100%
+rename from src/conf.h
+rename to src/conf.hpp
+diff --git a/src/dbse.c b/src/dbse.cpp
+similarity index 100%
+rename from src/dbse.c
+rename to src/dbse.cpp
+diff --git a/src/dbse.h b/src/dbse.hpp
+similarity index 100%
+rename from src/dbse.h
+rename to src/dbse.hpp
+diff --git a/src/draw.c b/src/draw.cpp
+similarity index 100%
+rename from src/draw.c
+rename to src/draw.cpp
+diff --git a/src/draw.h b/src/draw.hpp
+similarity index 100%
+rename from src/draw.h
+rename to src/draw.hpp
+diff --git a/src/event.c b/src/event.cpp
+similarity index 100%
+rename from src/event.c
+rename to src/event.cpp
+diff --git a/src/event.h b/src/event.hpp
+similarity index 100%
+rename from src/event.h
+rename to src/event.hpp
+diff --git a/src/ffmpeg.c b/src/ffmpeg.cpp
+similarity index 100%
+rename from src/ffmpeg.c
+rename to src/ffmpeg.cpp
+diff --git a/src/ffmpeg.h b/src/ffmpeg.hpp
+similarity index 100%
+rename from src/ffmpeg.h
+rename to src/ffmpeg.hpp
+diff --git a/src/jpegutils.c b/src/jpegutils.cpp
+similarity index 100%
+rename from src/jpegutils.c
+rename to src/jpegutils.cpp
+diff --git a/src/jpegutils.h b/src/jpegutils.hpp
+similarity index 100%
+rename from src/jpegutils.h
+rename to src/jpegutils.hpp
+diff --git a/src/logger.c b/src/logger.cpp
+similarity index 100%
+rename from src/logger.c
+rename to src/logger.cpp
+diff --git a/src/logger.h b/src/logger.hpp
+similarity index 100%
+rename from src/logger.h
+rename to src/logger.hpp
+diff --git a/src/mmx.h b/src/mmx.hpp
+similarity index 100%
+rename from src/mmx.h
+rename to src/mmx.hpp
+diff --git a/src/motion.c b/src/motion.cpp
+similarity index 100%
+rename from src/motion.c
+rename to src/motion.cpp
+diff --git a/src/motion.h b/src/motion.hpp
+similarity index 100%
+rename from src/motion.h
+rename to src/motion.hpp
+diff --git a/src/netcam.c b/src/netcam.cpp
+similarity index 100%
+rename from src/netcam.c
+rename to src/netcam.cpp
+diff --git a/src/netcam.h b/src/netcam.hpp
+similarity index 100%
+rename from src/netcam.h
+rename to src/netcam.hpp
+diff --git a/src/netcam_ftp.c b/src/netcam_ftp.cpp
+similarity index 100%
+rename from src/netcam_ftp.c
+rename to src/netcam_ftp.cpp
+diff --git a/src/netcam_ftp.h b/src/netcam_ftp.hpp
+similarity index 100%
+rename from src/netcam_ftp.h
+rename to src/netcam_ftp.hpp
+diff --git a/src/netcam_http.c b/src/netcam_http.cpp
+similarity index 100%
+rename from src/netcam_http.c
+rename to src/netcam_http.cpp
+diff --git a/src/netcam_http.h b/src/netcam_http.hpp
+similarity index 100%
+rename from src/netcam_http.h
+rename to src/netcam_http.hpp
+diff --git a/src/netcam_jpeg.c b/src/netcam_jpeg.cpp
+similarity index 100%
+rename from src/netcam_jpeg.c
+rename to src/netcam_jpeg.cpp
+diff --git a/src/netcam_jpeg.h b/src/netcam_jpeg.hpp
+similarity index 100%
+rename from src/netcam_jpeg.h
+rename to src/netcam_jpeg.hpp
+diff --git a/src/netcam_rtsp.c b/src/netcam_rtsp.cpp
+similarity index 100%
+rename from src/netcam_rtsp.c
+rename to src/netcam_rtsp.cpp
+diff --git a/src/netcam_rtsp.h b/src/netcam_rtsp.hpp
+similarity index 100%
+rename from src/netcam_rtsp.h
+rename to src/netcam_rtsp.hpp
+diff --git a/src/netcam_wget.c b/src/netcam_wget.cpp
+similarity index 100%
+rename from src/netcam_wget.c
+rename to src/netcam_wget.cpp
+diff --git a/src/netcam_wget.h b/src/netcam_wget.hpp
+similarity index 100%
+rename from src/netcam_wget.h
+rename to src/netcam_wget.hpp
+diff --git a/src/picture.c b/src/picture.cpp
+similarity index 100%
+rename from src/picture.c
+rename to src/picture.cpp
+diff --git a/src/picture.h b/src/picture.hpp
+similarity index 100%
+rename from src/picture.h
+rename to src/picture.hpp
+diff --git a/src/pwc-ioctl.h b/src/pwc-ioctl.hpp
+similarity index 100%
+rename from src/pwc-ioctl.h
+rename to src/pwc-ioctl.hpp
+diff --git a/src/rotate.c b/src/rotate.cpp
+similarity index 100%
+rename from src/rotate.c
+rename to src/rotate.cpp
+diff --git a/src/rotate.h b/src/rotate.hpp
+similarity index 100%
+rename from src/rotate.h
+rename to src/rotate.hpp
+diff --git a/src/track.c b/src/track.cpp
+similarity index 100%
+rename from src/track.c
+rename to src/track.cpp
+diff --git a/src/track.h b/src/track.hpp
+similarity index 100%
+rename from src/track.h
+rename to src/track.hpp
+diff --git a/src/translate.c b/src/translate.cpp
+similarity index 100%
+rename from src/translate.c
+rename to src/translate.cpp
+diff --git a/src/translate.h b/src/translate.hpp
+similarity index 100%
+rename from src/translate.h
+rename to src/translate.hpp
+diff --git a/src/util.c b/src/util.cpp
+similarity index 100%
+rename from src/util.c
+rename to src/util.cpp
+diff --git a/src/util.h b/src/util.hpp
+similarity index 100%
+rename from src/util.h
+rename to src/util.hpp
+diff --git a/src/video_bktr.c b/src/video_bktr.cpp
+similarity index 100%
+rename from src/video_bktr.c
+rename to src/video_bktr.cpp
+diff --git a/src/video_bktr.h b/src/video_bktr.hpp
+similarity index 100%
+rename from src/video_bktr.h
+rename to src/video_bktr.hpp
+diff --git a/src/video_common.c b/src/video_common.cpp
+similarity index 100%
+rename from src/video_common.c
+rename to src/video_common.cpp
+diff --git a/src/video_common.h b/src/video_common.hpp
+similarity index 100%
+rename from src/video_common.h
+rename to src/video_common.hpp
+diff --git a/src/video_loopback.c b/src/video_loopback.cpp
+similarity index 100%
+rename from src/video_loopback.c
+rename to src/video_loopback.cpp
+diff --git a/src/video_loopback.h b/src/video_loopback.hpp
+similarity index 100%
+rename from src/video_loopback.h
+rename to src/video_loopback.hpp
+diff --git a/src/video_v4l2.c b/src/video_v4l2.cpp
+similarity index 100%
+rename from src/video_v4l2.c
+rename to src/video_v4l2.cpp
+diff --git a/src/video_v4l2.h b/src/video_v4l2.hpp
+similarity index 100%
+rename from src/video_v4l2.h
+rename to src/video_v4l2.hpp
+diff --git a/src/webu.c b/src/webu.cpp
+similarity index 100%
+rename from src/webu.c
+rename to src/webu.cpp
+diff --git a/src/webu.h b/src/webu.hpp
+similarity index 100%
+rename from src/webu.h
+rename to src/webu.hpp
+diff --git a/src/webu_html.c b/src/webu_html.cpp
+similarity index 100%
+rename from src/webu_html.c
+rename to src/webu_html.cpp
+diff --git a/src/webu_html.h b/src/webu_html.hpp
+similarity index 100%
+rename from src/webu_html.h
+rename to src/webu_html.hpp
+diff --git a/src/webu_status.c b/src/webu_status.cpp
+similarity index 100%
+rename from src/webu_status.c
+rename to src/webu_status.cpp
+diff --git a/src/webu_status.h b/src/webu_status.hpp
+similarity index 100%
+rename from src/webu_status.h
+rename to src/webu_status.hpp
+diff --git a/src/webu_stream.c b/src/webu_stream.cpp
+similarity index 100%
+rename from src/webu_stream.c
+rename to src/webu_stream.cpp
+diff --git a/src/webu_stream.h b/src/webu_stream.hpp
+similarity index 100%
+rename from src/webu_stream.h
+rename to src/webu_stream.hpp
+diff --git a/src/webu_text.c b/src/webu_text.cpp
+similarity index 100%
+rename from src/webu_text.c
+rename to src/webu_text.cpp
+diff --git a/src/webu_text.h b/src/webu_text.hpp
+similarity index 100%
+rename from src/webu_text.h
+rename to src/webu_text.hpp
+-- 
+2.39.5
+
+
+From 4a5c38292082b8a2b9d43c2f12c593743ec63b30 Mon Sep 17 00:00:00 2001
+From: Mr-Dave <MotionMrDave@gmail.com>
+Date: Tue, 4 Feb 2025 15:17:33 -0700
+Subject: [PATCH 2/2] Revise file names
+
+---
+ configure.ac           |  8 +++---
+ po/POTFILES.in         | 58 ++++++++++++++++++++--------------------
+ src/Makefile.am        | 60 +++++++++++++++++++++---------------------
+ src/alg.cpp            | 10 +++----
+ src/alg.hpp            |  2 +-
+ src/conf.cpp           |  8 +++---
+ src/dbse.cpp           | 10 +++----
+ src/draw.cpp           |  6 ++---
+ src/event.cpp          | 24 ++++++++---------
+ src/ffmpeg.cpp         | 14 +++++-----
+ src/ffmpeg.hpp         |  2 +-
+ src/jpegutils.cpp      | 14 +++++-----
+ src/logger.cpp         |  4 +--
+ src/logger.hpp         |  2 +-
+ src/motion.cpp         | 38 +++++++++++++-------------
+ src/motion.hpp         |  6 ++---
+ src/netcam.cpp         | 14 +++++-----
+ src/netcam.hpp         |  4 +--
+ src/netcam_ftp.cpp     | 12 ++++-----
+ src/netcam_http.cpp    | 12 ++++-----
+ src/netcam_jpeg.cpp    | 14 +++++-----
+ src/netcam_rtsp.cpp    | 16 +++++------
+ src/netcam_wget.cpp    |  8 +++---
+ src/netcam_wget.hpp    |  2 +-
+ src/picture.cpp        | 16 +++++------
+ src/rotate.cpp         | 10 +++----
+ src/track.cpp          | 10 +++----
+ src/track.hpp          |  2 +-
+ src/translate.cpp      |  6 ++---
+ src/util.cpp           |  8 +++---
+ src/video_bktr.cpp     | 14 +++++-----
+ src/video_common.cpp   | 20 +++++++-------
+ src/video_loopback.cpp | 10 +++----
+ src/video_v4l2.cpp     | 14 +++++-----
+ src/webu.cpp           | 18 ++++++-------
+ src/webu_html.cpp      | 12 ++++-----
+ src/webu_status.cpp    |  6 ++---
+ src/webu_stream.cpp    | 12 ++++-----
+ src/webu_text.cpp      | 12 ++++-----
+ 39 files changed, 259 insertions(+), 259 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index ef7cb3e..1c41c8e 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -4,8 +4,8 @@ AM_MAINTAINER_MODE([enable])
+ AC_PROG_CC
+ AC_PROG_CXX
+ AC_GNU_SOURCE
+-AC_CONFIG_HEADERS([config.h])
+-AC_CONFIG_SRCDIR([src/motion.c])
++AC_CONFIG_HEADERS([config.hpp])
++AC_CONFIG_SRCDIR([src/motion.cpp])
+ AC_CANONICAL_HOST
+ AC_CONFIG_MACRO_DIR([m4])
+ 
+@@ -37,7 +37,7 @@ AS_IF([test "${PKGCONFIG}" = "no" ],[
+ ###  Check pthread
+ ##############################################################################
+ AC_CHECK_HEADERS(pthread.h,,AC_MSG_ERROR([pthread is required.]))
+-TEMP_CFLAGS="-D_THREAD_SAFE"
++TEMP_CFLAGS="-x c -D_THREAD_SAFE"
+ LIBS="$LIBS -pthread "
+ 
+ ##############################################################################
+@@ -440,7 +440,7 @@ AS_IF([test "${PROTOTYPE_FLAGS}" = "yes"], [
+   ]
+ )
+ 
+-
++CPPFLAGS="$CPPFLAGS $TEMP_CFLAGS"
+ AC_SUBST(AM_CFLAGS, "$TEMP_CFLAGS")
+ LIBS="$LIBS $TEMP_LIBS"
+ AC_SUBST(AM_LDFLAGS, "$TEMP_LDFLAGS")
+diff --git a/po/POTFILES.in b/po/POTFILES.in
+index 1e91632..72c7eb4 100644
+--- a/po/POTFILES.in
++++ b/po/POTFILES.in
+@@ -1,30 +1,30 @@
+ # main sources
+-src/alg.c
+-src/conf.c
+-src/dbse.c
+-src/draw.c
+-src/event.c
+-src/ffmpeg.c
+-src/jpegutils.c
+-src/logger.c
+-src/motion.c
+-src/netcam.c
+-src/netcam_ftp.c
+-src/netcam_http.c
+-src/netcam_jpeg.c
+-src/netcam_rtsp.c
+-src/netcam_wget.c
+-src/picture.c
+-src/rotate.c
+-src/track.c
+-src/translate.c
+-src/util.c
+-src/video_bktr.c
+-src/video_common.c
+-src/video_loopback.c
+-src/video_v4l2.c
+-src/webu.c
+-src/webu_html.c
+-src/webu_status.c
+-src/webu_stream.c
+-src/webu_text.c
++src/alg.cpp
++src/conf.cpp
++src/dbse.cpp
++src/draw.cpp
++src/event.cpp
++src/ffmpeg.cpp
++src/jpegutils.cpp
++src/logger.cpp
++src/motion.cpp
++src/netcam.cpp
++src/netcam_ftp.cpp
++src/netcam_http.cpp
++src/netcam_jpeg.cpp
++src/netcam_rtsp.cpp
++src/netcam_wget.cpp
++src/picture.cpp
++src/rotate.cpp
++src/track.cpp
++src/translate.cpp
++src/util.cpp
++src/video_bktr.cpp
++src/video_common.cpp
++src/video_loopback.cpp
++src/video_v4l2.cpp
++src/webu.cpp
++src/webu_html.cpp
++src/webu_status.cpp
++src/webu_stream.cpp
++src/webu_text.cpp
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 827bf19..868d3b4 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -4,34 +4,34 @@ LDADD = $(LIBINTL)
+ bin_PROGRAMS = motion
+ 
+ motion_SOURCES = \
+-	alg.h alg.c \
+-	conf.h conf.c \
+-	dbse.h dbse.c \
+-	draw.h draw.c \
+-	event.h event.c \
+-	ffmpeg.h ffmpeg.c \
+-	jpegutils.h jpegutils.c \
+-	logger.h logger.c \
+-	motion.h motion.c \
+-	netcam.h netcam.c \
+-	netcam_ftp.h netcam_ftp.c \
+-	netcam_http.h netcam_http.c \
+-	netcam_jpeg.h netcam_jpeg.c \
+-	netcam_rtsp.h netcam_rtsp.c \
+-	netcam_wget.h netcam_wget.c \
+-	picture.h picture.c \
+-	rotate.h rotate.c \
+-	track.h track.c \
+-	translate.h translate.c \
+-	util.h util.c \
+-	video_bktr.h video_bktr.c \
+-	video_common.h video_common.c \
+-	video_loopback.h video_loopback.c \
+-	video_v4l2.h video_v4l2.c \
+-	webu.h webu.c \
+-	webu_html.h webu_html.c \
+-	webu_status.h webu_status.c \
+-	webu_stream.h webu_stream.c \
+-	webu_text.h webu_text.c \
+-	mmx.h pwc-ioctl.h
++	alg.hpp alg.cpp  \
++	conf.hpp conf.cpp  \
++	dbse.hpp dbse.cpp  \
++	draw.hpp draw.cpp  \
++	event.hpp event.cpp  \
++	ffmpeg.hpp ffmpeg.cpp  \
++	jpegutils.hpp jpegutils.cpp  \
++	logger.hpp logger.cpp  \
++	motion.hpp motion.cpp  \
++	netcam.hpp netcam.cpp  \
++	netcam_ftp.hpp netcam_ftp.cpp  \
++	netcam_http.hpp netcam_http.cpp  \
++	netcam_jpeg.hpp netcam_jpeg.cpp  \
++	netcam_rtsp.hpp netcam_rtsp.cpp  \
++	netcam_wget.hpp netcam_wget.cpp  \
++	picture.hpp picture.cpp  \
++	rotate.hpp rotate.cpp  \
++	track.hpp track.cpp  \
++	translate.hpp translate.cpp  \
++	util.hpp util.cpp  \
++	video_bktr.hpp video_bktr.cpp  \
++	video_common.hpp video_common.cpp  \
++	video_loopback.hpp video_loopback.cpp  \
++	video_v4l2.hpp video_v4l2.cpp  \
++	webu.hpp webu.cpp  \
++	webu_html.hpp webu_html.cpp  \
++	webu_status.hpp webu_status.cpp  \
++	webu_stream.hpp webu_stream.cpp  \
++	webu_text.hpp webu_text.cpp  \
++	mmx.hpp pwc-ioctl.hpp
+ 
+diff --git a/src/alg.cpp b/src/alg.cpp
+index c8ca553..a87e76c 100644
+--- a/src/alg.cpp
++++ b/src/alg.cpp
+@@ -21,14 +21,14 @@
+  *
+  */
+ 
+-#include "motion.h"
+-#include "util.h"
+-#include "draw.h"
+-#include "alg.h"
++#include "motion.hpp"
++#include "util.hpp"
++#include "draw.hpp"
++#include "alg.hpp"
+ 
+ #ifdef __MMX__
+     #define HAVE_MMX
+-    #include "mmx.h"
++    #include "mmx.hpp"
+ #endif
+ 
+ #define MAX2(x, y) ((x) > (y) ? (x) : (y))
+diff --git a/src/alg.hpp b/src/alg.hpp
+index 59f872c..342db09 100644
+--- a/src/alg.hpp
++++ b/src/alg.hpp
+@@ -23,7 +23,7 @@
+ #ifndef _INCLUDE_ALG_H
+ #define _INCLUDE_ALG_H
+ 
+-#include "motion.h"
++#include "motion.hpp"
+ 
+ struct coord {
+     int x;
+diff --git a/src/conf.cpp b/src/conf.cpp
+index 41b8a0f..d19fde2 100644
+--- a/src/conf.cpp
++++ b/src/conf.cpp
+@@ -29,10 +29,10 @@
+ 
+ #include <dirent.h>
+ #include <string.h>
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
+ 
+ #define EXTENSION ".conf"
+ 
+diff --git a/src/dbse.cpp b/src/dbse.cpp
+index d4a5de6..62872f2 100644
+--- a/src/dbse.cpp
++++ b/src/dbse.cpp
+@@ -21,11 +21,11 @@
+  *
+  */
+ 
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "dbse.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "dbse.hpp"
+ 
+ pthread_mutex_t dbse_lock;
+ 
+diff --git a/src/draw.cpp b/src/draw.cpp
+index aee2224..be7fb40 100644
+--- a/src/draw.cpp
++++ b/src/draw.cpp
+@@ -24,9 +24,9 @@
+  */
+ 
+ #include <ctype.h>
+-#include "motion.h"
+-#include "util.h"
+-#include "draw.h"
++#include "motion.hpp"
++#include "util.hpp"
++#include "draw.hpp"
+ 
+ /* Highest ascii value is 126 (~) */
+ #define ASCII_MAX 127
+diff --git a/src/event.cpp b/src/event.cpp
+index a36e249..6b05eba 100644
+--- a/src/event.cpp
++++ b/src/event.cpp
+@@ -22,18 +22,18 @@
+     Copyright Jeroen Vreeken, 2002
+ */
+ 
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "picture.h"
+-#include "netcam.h"
+-#include "netcam_rtsp.h"
+-#include "ffmpeg.h"
+-#include "event.h"
+-#include "video_loopback.h"
+-#include "video_common.h"
+-#include "dbse.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "picture.hpp"
++#include "netcam.hpp"
++#include "netcam_rtsp.hpp"
++#include "ffmpeg.hpp"
++#include "event.hpp"
++#include "video_loopback.hpp"
++#include "video_common.hpp"
++#include "dbse.hpp"
+ 
+ /*
+  * TODO Items:
+diff --git a/src/ffmpeg.cpp b/src/ffmpeg.cpp
+index 988d662..496d02e 100644
+--- a/src/ffmpeg.cpp
++++ b/src/ffmpeg.cpp
+@@ -34,13 +34,13 @@
+  * indicate libav
+ */
+ 
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "netcam.h"
+-#include "netcam_rtsp.h"
+-#include "ffmpeg.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "netcam.hpp"
++#include "netcam_rtsp.hpp"
++#include "ffmpeg.hpp"
+ 
+ #ifdef HAVE_FFMPEG
+ 
+diff --git a/src/ffmpeg.hpp b/src/ffmpeg.hpp
+index 2043689..b694290 100644
+--- a/src/ffmpeg.hpp
++++ b/src/ffmpeg.hpp
+@@ -26,7 +26,7 @@
+ #include <stdarg.h>
+ #include <sys/time.h>
+ #include <stdint.h>
+-#include "config.h"
++#include "config.hpp"
+ struct image_data; /* forward declare for functions */
+ struct rtsp_context;
+ 
+diff --git a/src/jpegutils.cpp b/src/jpegutils.cpp
+index a606f7a..099034f 100644
+--- a/src/jpegutils.cpp
++++ b/src/jpegutils.cpp
+@@ -51,13 +51,13 @@
+  *    jpgutl_decode_jpeg
+  */
+ 
+-#include "motion.h"
+-#include "config.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "jpegutils.h"
+-#include "picture.h"    /* For the prepare_exif */
++#include "motion.hpp"
++#include "config.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "jpegutils.hpp"
++#include "picture.hpp"    /* For the prepare_exif */
+ #include <setjmp.h>
+ 
+ 
+diff --git a/src/logger.cpp b/src/logger.cpp
+index d6ac5fc..3324961 100644
+--- a/src/logger.cpp
++++ b/src/logger.cpp
+@@ -24,8 +24,8 @@
+  *
+  */
+ 
+-#include "logger.h"   /* already includes motion.h */
+-#include "util.h"
++#include "logger.hpp"   /* already includes motion.h */
++#include "util.hpp"
+ #include <stdarg.h>
+ 
+ static int log_mode = LOGMODE_SYSLOG;
+diff --git a/src/logger.hpp b/src/logger.hpp
+index 5e25aaf..e492ec0 100644
+--- a/src/logger.hpp
++++ b/src/logger.hpp
+@@ -24,7 +24,7 @@
+ #ifndef _INCLUDE_LOGGER_H_
+ #define _INCLUDE_LOGGER_H_
+ 
+-#include "motion.h"
++#include "motion.hpp"
+ #include <syslog.h>
+ 
+ /* Logging mode */
+diff --git a/src/motion.cpp b/src/motion.cpp
+index 2d9da20..b5eb335 100644
+--- a/src/motion.cpp
++++ b/src/motion.cpp
+@@ -20,25 +20,25 @@
+  *    Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
+  *
+  */
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "ffmpeg.h"
+-#include "netcam.h"
+-#include "netcam_rtsp.h"
+-#include "video_common.h"
+-#include "video_v4l2.h"
+-#include "video_loopback.h"
+-#include "conf.h"
+-#include "alg.h"
+-#include "track.h"
+-#include "event.h"
+-#include "picture.h"
+-#include "rotate.h"
+-#include "webu.h"
+-#include "draw.h"
+-#include "dbse.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "ffmpeg.hpp"
++#include "netcam.hpp"
++#include "netcam_rtsp.hpp"
++#include "video_common.hpp"
++#include "video_v4l2.hpp"
++#include "video_loopback.hpp"
++#include "conf.hpp"
++#include "alg.hpp"
++#include "track.hpp"
++#include "event.hpp"
++#include "picture.hpp"
++#include "rotate.hpp"
++#include "webu.hpp"
++#include "draw.hpp"
++#include "dbse.hpp"
+ 
+ 
+ /**
+diff --git a/src/motion.hpp b/src/motion.hpp
+index 8563a72..d1a312d 100644
+--- a/src/motion.hpp
++++ b/src/motion.hpp
+@@ -29,7 +29,7 @@ struct image_data;
+ struct rtsp_context;
+ struct ffmpeg;
+ 
+-#include "config.h"
++#include "config.hpp"
+ 
+ /* Includes */
+ #include <stdio.h>
+@@ -111,8 +111,8 @@ struct ffmpeg;
+ #endif
+ 
+ /* Due to the pointer magic method of conf, the conf.h and track.h must stay in here */
+-#include "conf.h"
+-#include "track.h"
++#include "conf.hpp"
++#include "track.hpp"
+ 
+ 
+ /*
+diff --git a/src/netcam.cpp b/src/netcam.cpp
+index 4c3a141..e929896 100644
+--- a/src/netcam.cpp
++++ b/src/netcam.cpp
+@@ -21,13 +21,13 @@
+  *
+  */
+ 
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "netcam.h"
+-#include "netcam_http.h"
+-#include "netcam_ftp.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "netcam.hpp"
++#include "netcam_http.hpp"
++#include "netcam_ftp.hpp"
+ 
+ /*
+  * The following three routines (netcam_url_match, netcam_url_parse and
+diff --git a/src/netcam.hpp b/src/netcam.hpp
+index dea3c62..6bace9f 100644
+--- a/src/netcam.hpp
++++ b/src/netcam.hpp
+@@ -55,8 +55,8 @@
+ 
+ typedef struct netcam_context *netcam_context_ptr;
+ 
+-#include "netcam_wget.h"
+-#include "netcam_jpeg.h"
++#include "netcam_wget.hpp"
++#include "netcam_jpeg.hpp"
+ 
+ #define NETCAM_BUFFSIZE 4096    /* Initial size reserved for a JPEG
+                                   image.  If expansion is required,
+diff --git a/src/netcam_ftp.cpp b/src/netcam_ftp.cpp
+index b460a8c..7740d2f 100644
+--- a/src/netcam_ftp.cpp
++++ b/src/netcam_ftp.cpp
+@@ -22,15 +22,15 @@
+  *      Copyright 2005, William M. Brack
+  *
+  */
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
+ #include <ctype.h>
+ #include <netdb.h>
+ #include <netinet/in.h>
+-#include "netcam.h"
+-#include "netcam_ftp.h"
++#include "netcam.hpp"
++#include "netcam_ftp.hpp"
+ 
+ /**
+ * ftp_new_context
+diff --git a/src/netcam_http.cpp b/src/netcam_http.cpp
+index 57262e9..c8301bd 100644
+--- a/src/netcam_http.cpp
++++ b/src/netcam_http.cpp
+@@ -25,12 +25,12 @@
+  *      Copyright 2005, William M. Brack
+  ***********************************************************/
+ 
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "netcam.h"
+-#include "netcam_http.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "netcam.hpp"
++#include "netcam_http.hpp"
+ 
+ #define CONNECT_TIMEOUT        10     /* Timeout on remote connection attempt */
+ #define READ_TIMEOUT            5     /* Default timeout on recv requests */
+diff --git a/src/netcam_jpeg.cpp b/src/netcam_jpeg.cpp
+index 87583fd..65cf5b9 100644
+--- a/src/netcam_jpeg.cpp
++++ b/src/netcam_jpeg.cpp
+@@ -26,13 +26,13 @@
+  *
+  *    Copyright 2005, William M. Brack
+  */
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "rotate.h"
+-#include "netcam.h"
+-#include "netcam_jpeg.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "rotate.hpp"
++#include "netcam.hpp"
++#include "netcam_jpeg.hpp"
+ 
+ /* This is a workaround regarding these defines.  The config.h file defines
+  * HAVE_STDLIB_H as 1 whereas the jpeglib.h just defines it without a value.
+diff --git a/src/netcam_rtsp.cpp b/src/netcam_rtsp.cpp
+index 80b643d..46c690a 100644
+--- a/src/netcam_rtsp.cpp
++++ b/src/netcam_rtsp.cpp
+@@ -40,17 +40,17 @@
+  ***********************************************************/
+ 
+ #include <stdio.h>
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "rotate.h"
+-#include "netcam.h"
+-#include "netcam_rtsp.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "rotate.hpp"
++#include "netcam.hpp"
++#include "netcam_rtsp.hpp"
+ 
+ #ifdef HAVE_FFMPEG
+ 
+-#include "ffmpeg.h"
++#include "ffmpeg.hpp"
+ 
+ static void netcam_rtsp_free_pkt(struct rtsp_context *rtsp_data)
+ {
+diff --git a/src/netcam_wget.cpp b/src/netcam_wget.cpp
+index 63e8aa4..8f44586 100644
+--- a/src/netcam_wget.cpp
++++ b/src/netcam_wget.cpp
+@@ -27,10 +27,10 @@
+  *
+  */
+ 
+-#include "motion.h"
+-#include "util.h"
+-#include "netcam.h"
+-#include "netcam_wget.h"
++#include "motion.hpp"
++#include "util.hpp"
++#include "netcam.hpp"
++#include "netcam_wget.hpp"
+ #include <ctype.h>
+ #include <sys/types.h>
+ #include <sys/socket.h>
+diff --git a/src/netcam_wget.hpp b/src/netcam_wget.hpp
+index 8d2aa44..d3e2163 100644
+--- a/src/netcam_wget.hpp
++++ b/src/netcam_wget.hpp
+@@ -29,7 +29,7 @@
+ #ifndef NETCAM_WGET_H
+ #define NETCAM_WGET_H
+ 
+-#include "netcam.h"
++#include "netcam.hpp"
+ 
+ /* Retrieval stream */
+ struct rbuf
+diff --git a/src/picture.cpp b/src/picture.cpp
+index 53d9439..7611899 100644
+--- a/src/picture.cpp
++++ b/src/picture.cpp
+@@ -22,14 +22,14 @@
+  *    Portions of this file are Copyright 2010 by Wim Lewis (wiml@hhhh.org)
+  *
+  */
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "picture.h"
+-#include "jpegutils.h"
+-#include "event.h"
+-#include "netcam.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "picture.hpp"
++#include "jpegutils.hpp"
++#include "event.hpp"
++#include "netcam.hpp"
+ 
+ #include <assert.h>
+ 
+diff --git a/src/rotate.cpp b/src/rotate.cpp
+index 9078628..43fd9b6 100644
+--- a/src/rotate.cpp
++++ b/src/rotate.cpp
+@@ -42,11 +42,11 @@
+  *                       - speed optimization, including bswap
+  *      v1 (28-Aug-2004) - initial version
+  */
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "rotate.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "rotate.hpp"
+ #include <stdint.h>
+ #if defined(__APPLE__)
+     #include <libkern/OSByteOrder.h>
+diff --git a/src/track.cpp b/src/track.cpp
+index a5b67ef..8104222 100644
+--- a/src/track.cpp
++++ b/src/track.cpp
+@@ -21,10 +21,10 @@
+  *    Copyright 2000, Jeroen Vreeken
+  */
+ #include <math.h>
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
+ 
+ #ifdef HAVE_V4L2
+     #if defined(HAVE_LINUX_VIDEODEV2_H)
+@@ -32,7 +32,7 @@
+     #else
+         #include <sys/videoio.h>
+     #endif
+-    #include "pwc-ioctl.h"
++    #include "pwc-ioctl.hpp"
+ #endif
+ 
+ 
+diff --git a/src/track.hpp b/src/track.hpp
+index f5e0a41..33936e7 100644
+--- a/src/track.hpp
++++ b/src/track.hpp
+@@ -23,7 +23,7 @@
+ #ifndef _INCLUDE_TRACK_H
+ #define _INCLUDE_TRACK_H
+ 
+-#include "alg.h"
++#include "alg.hpp"
+ #include <termios.h>
+ 
+ struct trackoptions {
+diff --git a/src/translate.cpp b/src/translate.cpp
+index 870d84b..f482504 100644
+--- a/src/translate.cpp
++++ b/src/translate.cpp
+@@ -21,9 +21,9 @@
+  */
+ 
+ #include <locale.h>
+-#include "motion.h"
+-#include "logger.h"
+-#include "translate.h"
++#include "motion.hpp"
++#include "logger.hpp"
++#include "translate.hpp"
+ 
+ int nls_enabled;
+ 
+diff --git a/src/util.cpp b/src/util.cpp
+index cc3d28b..4f55e3a 100644
+--- a/src/util.cpp
++++ b/src/util.cpp
+@@ -21,10 +21,10 @@
+  *
+  */
+ 
+-#include "motion.h"
+-#include "translate.h"
+-#include "logger.h"
+-#include "util.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "logger.hpp"
++#include "util.hpp"
+ 
+ #ifdef HAVE_FFMPEG
+ 
+diff --git a/src/video_bktr.cpp b/src/video_bktr.cpp
+index 7c5185c..d960d9a 100644
+--- a/src/video_bktr.cpp
++++ b/src/video_bktr.cpp
+@@ -22,13 +22,13 @@
+  */
+ 
+ /* For rotation */
+-#include "motion.h"
+-#include "util.h"
+-#include "translate.h"
+-#include "logger.h"
+-#include "rotate.h"
+-#include "video_common.h"
+-#include "video_bktr.h"
++#include "motion.hpp"
++#include "util.hpp"
++#include "translate.hpp"
++#include "logger.hpp"
++#include "rotate.hpp"
++#include "video_common.hpp"
++#include "video_bktr.hpp"
+ 
+ #ifdef HAVE_BKTR
+ 
+diff --git a/src/video_common.cpp b/src/video_common.cpp
+index 13ee5d0..e7f96b0 100644
+--- a/src/video_common.cpp
++++ b/src/video_common.cpp
+@@ -22,16 +22,16 @@
+  *                2007 by Angel Carpintero (motiondevelop@gmail.com)
+  *
+  */
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "video_common.h"
+-#include "netcam.h"
+-#include "netcam_rtsp.h"
+-#include "video_v4l2.h"
+-#include "video_bktr.h"
+-#include "jpegutils.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "video_common.hpp"
++#include "netcam.hpp"
++#include "netcam_rtsp.hpp"
++#include "video_v4l2.hpp"
++#include "video_bktr.hpp"
++#include "jpegutils.hpp"
+ 
+ typedef unsigned char uint8_t;
+ typedef unsigned short int uint16_t;
+diff --git a/src/video_loopback.cpp b/src/video_loopback.cpp
+index 9c68ec3..191924c 100644
+--- a/src/video_loopback.cpp
++++ b/src/video_loopback.cpp
+@@ -22,14 +22,14 @@
+  *    Copyright 2008 by Angel Carpintero (motiondevelop@gmail.com)
+  *
+  */
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
+ 
+ #if (defined(HAVE_V4L2)) && (!defined(BSD))
+ 
+-#include "video_loopback.h"
++#include "video_loopback.hpp"
+ #include <dirent.h>
+ #include <sys/ioctl.h>
+ #include <linux/videodev2.h>
+diff --git a/src/video_v4l2.cpp b/src/video_v4l2.cpp
+index 662bc66..3011bfa 100644
+--- a/src/video_v4l2.cpp
++++ b/src/video_v4l2.cpp
+@@ -23,13 +23,13 @@
+  *    Refactor/rewrite code:  2018 MrDave
+  *
+ */
+-#include "motion.h"
+-#include "translate.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "rotate.h"
+-#include "video_common.h"
+-#include "video_v4l2.h"
++#include "motion.hpp"
++#include "translate.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "rotate.hpp"
++#include "video_common.hpp"
++#include "video_v4l2.hpp"
+ #include <sys/mman.h>
+ 
+ 
+diff --git a/src/webu.cpp b/src/webu.cpp
+index 02866e2..3eca379 100644
+--- a/src/webu.cpp
++++ b/src/webu.cpp
+@@ -45,15 +45,15 @@
+ #include <arpa/inet.h>
+ #include <sys/socket.h>
+ 
+-#include "motion.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "webu.h"
+-#include "webu_html.h"
+-#include "webu_text.h"
+-#include "webu_stream.h"
+-#include "webu_status.h"
+-#include "translate.h"
++#include "motion.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "webu.hpp"
++#include "webu_html.hpp"
++#include "webu_text.hpp"
++#include "webu_stream.hpp"
++#include "webu_status.hpp"
++#include "translate.hpp"
+ 
+ static mymhd_retcd webu_mhd_send(struct webui_ctx *webui, int ctrl);
+ 
+diff --git a/src/webu_html.cpp b/src/webu_html.cpp
+index 2c444c6..4e01b3f 100644
+--- a/src/webu_html.cpp
++++ b/src/webu_html.cpp
+@@ -46,12 +46,12 @@
+  *
+  */
+ 
+-#include "motion.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "webu.h"
+-#include "webu_html.h"
+-#include "translate.h"
++#include "motion.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "webu.hpp"
++#include "webu_html.hpp"
++#include "translate.hpp"
+ 
+ /* struct to save information regarding the links to include in html page */
+ struct strminfo_ctx {
+diff --git a/src/webu_status.cpp b/src/webu_status.cpp
+index ade6d7d..8594019 100644
+--- a/src/webu_status.cpp
++++ b/src/webu_status.cpp
+@@ -24,9 +24,9 @@
+ #include <ctype.h>
+ #include <inttypes.h>
+ 
+-#include "motion.h"
+-#include "webu.h"
+-#include "webu_status.h"
++#include "motion.hpp"
++#include "webu.hpp"
++#include "webu_status.hpp"
+ 
+ /* Conservatively encode characters in an array as a JSON string */
+ static void webu_json_write_string(struct webui_ctx *webui, const char *str)
+diff --git a/src/webu_stream.cpp b/src/webu_stream.cpp
+index cc72ae9..b1874f3 100644
+--- a/src/webu_stream.cpp
++++ b/src/webu_stream.cpp
+@@ -26,12 +26,12 @@
+  *    webu_stream_checks    - Edit/validate request from user
+  */
+ 
+-#include "motion.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "webu.h"
+-#include "webu_stream.h"
+-#include "translate.h"
++#include "motion.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "webu.hpp"
++#include "webu_stream.hpp"
++#include "translate.hpp"
+ 
+ void webu_stream_deinit(struct webui_ctx *webui, struct stream_data *stream)
+ {
+diff --git a/src/webu_text.cpp b/src/webu_text.cpp
+index 10a7b0b..c24a374 100644
+--- a/src/webu_text.cpp
++++ b/src/webu_text.cpp
+@@ -32,12 +32,12 @@
+  *
+  */
+ 
+-#include "motion.h"
+-#include "util.h"
+-#include "logger.h"
+-#include "webu.h"
+-#include "webu_text.h"
+-#include "translate.h"
++#include "motion.hpp"
++#include "util.hpp"
++#include "logger.hpp"
++#include "webu.hpp"
++#include "webu_text.hpp"
++#include "translate.hpp"
+ 
+ static void webu_text_seteol(struct webui_ctx *webui)
+ {
+-- 
+2.39.5
+

@@ -1,7 +1,7 @@
 The following is a brief overview of the building and installing instructions for Debian / Ubuntu.
 
-For full instructions on how to build and install MotionPlus, see the motionplus_build.html that is
-distributed with this source code. 
+For full instructions on how to build and install Motion, see the motion_build.html that is
+distributed with this source code.
 
 The packages and library names change frequently and vary across base operating systems.
 Adjust the following lines as required by the base operating system.
@@ -18,5 +18,5 @@ Once required packages are installed, execute:
     make install
 
 Sample custom configuration options:
-    --prefix               :  Specify the install location for the motionplus package
+    --prefix               :  Specify the install location for the motion package
     --with-ffmpeg=[dir]    :  Specify the location in which ffmpeg/libav is installed.

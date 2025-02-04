@@ -1,23 +1,23 @@
 /*
- *    This file is part of MotionPlus.
+ *    This file is part of Motion.
  *
- *    MotionPlus is free software: you can redistribute it and/or modify
+ *    Motion is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
  *    (at your option) any later version.
  *
- *    MotionPlus is distributed in the hope that it will be useful,
+ *    Motion is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
  *
 */
 
-#include "motionplus.hpp"
+#include "motion.hpp"
 #include "util.hpp"
 #include "camera.hpp"
 #include "conf.hpp"
@@ -528,9 +528,9 @@ void mytranslate_init(void)
         //translate_locale_chg("li");
         mytranslate_locale_chg("es");
 
-        bindtextdomain ("motionplus", LOCALEDIR);
-        bind_textdomain_codeset ("motionplus", "UTF-8");
-        textdomain ("motionplus");
+        bindtextdomain ("motion", LOCALEDIR);
+        bind_textdomain_codeset ("motion", "UTF-8");
+        textdomain ("motion");
 
         MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Language: English"));
 

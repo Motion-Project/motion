@@ -1,22 +1,22 @@
 /*
- *    This file is part of MotionPlus.
+ *    This file is part of Motion.
  *
- *    MotionPlus is free software: you can redistribute it and/or modify
+ *    Motion is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
  *    (at your option) any later version.
  *
- *    MotionPlus is distributed in the hope that it will be useful,
+ *    Motion is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
 */
 
-#include "motionplus.hpp"
+#include "motion.hpp"
 #include "util.hpp"
 #include "camera.hpp"
 #include "conf.hpp"
@@ -270,7 +270,7 @@ void cls_webu_json::movies_list()
         }
     }
 
-    sql  = " select * from motionplus ";
+    sql  = " select * from motion ";
     sql += " where device_id = " + std::to_string(webua->cam->cfg->device_id);
     sql += " order by file_dtl, file_tml;";
     app->dbse->filelist_get(sql, flst);

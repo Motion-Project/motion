@@ -20,8 +20,8 @@ missing
 stamp-h1
 
 #data
-data/motionplus-dist.service
-data/motionplus-dist.conf
+data/motion-dist.service
+data/motion-dist.conf
 data/camera1-dist.conf
 data/camera2-dist.conf
 data/camera3-dist.conf
@@ -29,7 +29,7 @@ data/sound1-dist.conf
 
 #src
 src/*.o
-src/motionplus
+src/motion
 src/Makefile
 src/Makefile.in
 src/.deps/
@@ -52,7 +52,7 @@ po/en@boldquot.header
 po/en@quot.header
 po/insert-header.sin
 po/quot.sed
-po/motionplus.pot
+po/motion.pot
 po/remove-potcdate.sed
 po/remove-potcdate.sin
 po/stamp-po

@@ -1,23 +1,23 @@
 /*
- *    This file is part of MotionPlus.
+ *    This file is part of Motion.
  *
- *    MotionPlus is free software: you can redistribute it and/or modify
+ *    Motion is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
  *    (at your option) any later version.
  *
- *    MotionPlus is distributed in the hope that it will be useful,
+ *    Motion is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with MotionPlus.  If not, see <https://www.gnu.org/licenses/>.
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
  *
  */
 
-#include "motionplus.hpp"
+#include "motion.hpp"
 #include "util.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
@@ -556,9 +556,9 @@ void cls_sound::pulse_init()
     snd_info->snd_pulse->dev = NULL;
     snd_info->snd_pulse->dev = pa_simple_new(
         (snd_info->pulse_server=="" ? NULL : snd_info->pulse_server.c_str())
-        , "motionplus", PA_STREAM_RECORD
+        , "motion", PA_STREAM_RECORD
         , (cfg->snd_device=="" ? NULL : cfg->snd_device.c_str())
-        , "motionplus", &specs, NULL, NULL, &errcd);
+        , "motion", &specs, NULL, NULL, &errcd);
     if (snd_info->snd_pulse->dev == NULL) {
         MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("Error opening pulse (%s)")

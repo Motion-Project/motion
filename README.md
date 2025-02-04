@@ -1,11 +1,15 @@
-MotionPlus
+Motion
 =============
 
 ## Description
 
-MotionPlus is a break from Motion version 4.2.2 to provide an application for enhancements.  MotionPlus removes some of the outdated processes, cleans up the code base and introduces new functionality.
+Motion is a program that monitors the signal from video cameras
+and detects changes in the images.  Version 5.0 and later versions
+remove some of the outdated processes, cleans up the code base and
+introduces new functionality.
 
-The following are some of the things that are different from Motion.
+The following are some of the things that are different from earlier
+version of Motion (versions 4.7 and lower).
 - Secondary detection method via OpenCV
   - HOG (Histogram of Oriented Gradients)
   - Haar cascade classifiers
@@ -16,11 +20,11 @@ The following are some of the things that are different from Motion.
 - Sound recording from network camera sources
 - ROI pictures for output or secondary detection
 - Enhanced web contorl
-  - Only needs a single port for all camera video streams and controls
+  - Single port for all camera video streams and controls
   - Consolidated stream(a single image) showing all cameras
   - List/download movies
   - Add/delete cameras
-  - Live view of the Motionplus log output
+  - Live view of the Motion log output
   - Video streams via MPEGTS format
   - Change/update configuration parameters
   - Permits a user created web page
@@ -29,6 +33,6 @@ The following are some of the things that are different from Motion.
 
 ## License
 
-MotionPlus is distributed under the GNU GENERAL PUBLIC LICENSE (GPL) version 3 or later.
+Motion version 5.0 and later is distributed under the GNU GENERAL PUBLIC LICENSE (GPL) version 3 or later.
 
 
