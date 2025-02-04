@@ -4,8 +4,8 @@ AM_MAINTAINER_MODE([enable])
 AC_PROG_CC
 AC_PROG_CXX
 AC_GNU_SOURCE
-AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_SRCDIR([src/motion.c])
+AC_CONFIG_HEADERS([config.hpp])
+AC_CONFIG_SRCDIR([src/motion.cpp])
 AC_CANONICAL_HOST
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -37,7 +37,7 @@ AS_IF([test "${PKGCONFIG}" = "no" ],[
 ###  Check pthread
 ##############################################################################
 AC_CHECK_HEADERS(pthread.h,,AC_MSG_ERROR([pthread is required.]))
-TEMP_CFLAGS="-D_THREAD_SAFE"
+TEMP_CFLAGS="-x c -D_THREAD_SAFE"
 LIBS="$LIBS -pthread "
 
 ##############################################################################
@@ -440,7 +440,7 @@ AS_IF([test "${PROTOTYPE_FLAGS}" = "yes"], [
   ]
 )
 
-
+CPPFLAGS="$CPPFLAGS $TEMP_CFLAGS"
 AC_SUBST(AM_CFLAGS, "$TEMP_CFLAGS")
 LIBS="$LIBS $TEMP_LIBS"
 AC_SUBST(AM_LDFLAGS, "$TEMP_LDFLAGS")
