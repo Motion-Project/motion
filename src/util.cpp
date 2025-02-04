@@ -1,226 +1,156 @@
-/*   This file is part of Motion.
+/*
+ *    This file is part of Motion.
  *
- *   Motion is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 2 of the License, or
- *   (at your option) any later version.
+ *    Motion is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
  *
- *   Motion is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    Motion is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
- */
-
-/**
- *      util.c
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
- *      Module of utility and "my" functions used across Motion application.
  *
- */
+*/
 
 #include "motion.hpp"
-#include "translate.hpp"
-#include "logger.hpp"
 #include "util.hpp"
+#include "camera.hpp"
+#include "conf.hpp"
+#include "logger.hpp"
+#include "alg_sec.hpp"
+#include "sound.hpp"
 
-#ifdef HAVE_FFMPEG
 
+/** Non case sensitive equality check for strings*/
+int mystrceq(const char* var1, const char* var2)
+{
+    if ((var1 == NULL) || (var2 == NULL)) {
+        return 0;
+    }
+    return (strcasecmp(var1,var2) ? 0 : 1);
+}
 
-/*********************************************/
-AVFrame *my_frame_alloc(void)
+/** Non case sensitive inequality check for strings*/
+int mystrcne(const char* var1, const char* var2)
 {
-    AVFrame *pic;
-    #if ( MYFFVER >= 55000)
-        pic = av_frame_alloc();
-    #else
-        pic = avcodec_alloc_frame();
-    #endif
-    return pic;
+    if ((var1 == NULL) || (var2 == NULL)) {
+        return 0;
+    }
+    return (strcasecmp(var1,var2) ? 1: 0);
 }
-/*********************************************/
-void my_frame_free(AVFrame *frame)
+
+/** Case sensitive equality check for strings*/
+int mystreq(const char* var1, const char* var2)
 {
-    #if ( MYFFVER >= 55000)
-        av_frame_free(&frame);
-    #else
-        av_freep(&frame);
-    #endif
+    if ((var1 == NULL) || (var2 == NULL)) {
+        return 0;
+    }
+    return (strcmp(var1,var2) ? 0 : 1);
 }
-/*********************************************/
-int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height)
+
+/** Case sensitive inequality check for strings*/
+int mystrne(const char* var1, const char* var2)
 {
-    int retcd = 0;
-    #if ( MYFFVER >= 57000)
-        int align = 1;
-        retcd = av_image_get_buffer_size(pix_fmt, width, height, align);
-    #else
-        retcd = avpicture_get_size(pix_fmt, width, height);
-    #endif
-    return retcd;
+    if ((var1 == NULL) ||(var2 == NULL)) {
+        return 0;
+    }
+    return (strcmp(var1,var2) ? 1: 0);
 }
-/*********************************************/
-int my_image_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum MyPixelFormat pix_fmt,int width, int height,int dest_size)
+
+/* Trim whitespace from left side */
+void myltrim(std::string &parm)
 {
-    int retcd = 0;
-    #if ( MYFFVER >= 57000)
-        int align = 1;
-        retcd = av_image_copy_to_buffer((uint8_t *)buffer_ptr,dest_size
-            ,(const uint8_t * const*)frame,frame->linesize,pix_fmt,width,height,align);
-    #else
-        retcd = avpicture_layout((const AVPicture*)frame,pix_fmt,width,height
-            ,(unsigned char *)buffer_ptr,dest_size);
-    #endif
-    return retcd;
-}
-/*********************************************/
-int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height)
-{
-    int retcd = 0;
-    #if ( MYFFVER >= 57000)
-        int align = 1;
-        retcd = av_image_fill_arrays(
-            frame->data
-            ,frame->linesize
-            ,buffer_ptr
-            ,pix_fmt
-            ,width
-            ,height
-            ,align
-        );
-    #else
-        retcd = avpicture_fill(
-            (AVPicture *)frame
-            ,buffer_ptr
-            ,pix_fmt
-            ,width
-            ,height);
-    #endif
-    return retcd;
-}
-/*********************************************/
-void my_packet_free(AVPacket *pkt)
-{
-    #if (MYFFVER >= 57041)
-        av_packet_free(&pkt);
-    #else
-        av_free_packet(pkt);
-    #endif
-}
-/*********************************************/
-void my_avcodec_close(AVCodecContext *codec_context)
-{
-    #if ( MYFFVER >= 57041)
-        avcodec_free_context(&codec_context);
-    #else
-        avcodec_close(codec_context);
-    #endif
-}
-/*********************************************/
-int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt)
-{
-    #if ( MYFFVER >= 55000)
-        return av_packet_ref(dest_pkt, src_pkt);
-    #else
-        /* Old versions of libav do not support copying packet
-        * We therefore disable the pass through recording and
-        * for this function, simply do not do anything
-        */
-        if (dest_pkt == src_pkt ) {
-            return 0;
+    if (parm.length() == 0 ) {
+        return;
+    }
+
+    while (std::isspace(parm.at(0))) {
+        if (parm.length() == 1) {
+            parm="";
+            return;
         } else {
-            return 0;
+            parm = parm.substr(1);
         }
-    #endif
+    }
 }
 
-/*********************************************/
-AVPacket *my_packet_alloc(AVPacket *pkt)
+/* Trim whitespace from right side */
+void myrtrim(std::string &parm)
 {
-     if (pkt != NULL) {
-        my_packet_free(pkt);
-    };
-    pkt = av_packet_alloc();
-    #if (MYFFVER < 58076)
-        av_init_packet(pkt);
-        pkt->data = NULL;
-        pkt->size = 0;
-    #endif
+    if (parm.length() == 0 ) {
+        return;
+    }
 
-    return pkt;
+    while (std::isspace(parm.at(parm.length()-1))) {
+        if (parm.length() == 1) {
+            parm="";
+            return;
+        } else {
+            parm = parm.substr(0,parm.length()-1);
+        }
+    }
 }
 
-#endif
+/* Trim left and right whitespace */
+void mytrim(std::string &parm)
+{
+    myrtrim(parm);
+    myltrim(parm);
+}
 
-/*********************************************/
+/* Remove surrounding quotes */
+void myunquote(std::string &parm)
+{
+    size_t plen;
 
-/**
- * mymalloc
- *
- *   Allocates some memory and checks if that succeeded or not. If it failed,
- *   do some errorlogging and bail out.
- *
- *   NOTE: Kenneth Lavrsen changed printing of size_t types so instead of using
- *   conversion specifier %zd I changed it to %llu and casted the size_t
- *   variable to unsigned long long. The reason for this nonsense is that older
- *   versions of gcc like 2.95 uses %Zd and does not understand %zd. So to avoid
- *   this mess I used a more generic way. Long long should have enough bits for
- *   64-bit machines with large memory areas.
- *
- * Parameters:
- *
- *   nbytes - no. of bytes to allocate
- *
- * Returns: a pointer to the allocated memory
- */
+    mytrim(parm);
+
+    plen = parm.length();
+    while ((plen >= 2) &&
+        (((parm.substr(0,1)== "\"") && (parm.substr(plen,1)== "\"")) ||
+         ((parm.substr(0,1)== "'") && (parm.substr(plen,1)== "'")))) {
+
+        parm = parm.substr(1, plen-2);
+        plen = parm.length();
+    }
+
+}
+
+/** mymalloc */
 void *mymalloc(size_t nbytes)
 {
     void *dummy = calloc(nbytes, 1);
 
     if (!dummy) {
-        MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, _("Could not allocate %llu bytes of memory!")
-            ,(unsigned long long)nbytes);
-        motion_remove_pid();
+        MOTPLS_LOG(EMG, TYPE_ALL, SHOW_ERRNO
+            , _("Could not allocate %llu bytes of memory!")
+            , (unsigned long long)nbytes);
         exit(1);
     }
 
     return dummy;
 }
 
-/**
- * myrealloc
- *
- *   Re-allocate (i.e., resize) some memory and check if that succeeded or not.
- *   If it failed, do some errorlogging and bail out. If the new memory size
- *   is 0, the memory is freed.
- *
- * Parameters:
- *
- *   ptr  - pointer to the memory to resize/reallocate
- *   size - new memory size
- *   desc - name of the calling function
- *
- * Returns: a pointer to the reallocated memory, or NULL if the memory was
- *          freed
- */
+/** myrealloc */
 void *myrealloc(void *ptr, size_t size, const char *desc)
 {
     void *dummy = NULL;
 
     if (size == 0) {
         free(ptr);
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
-            ,_("Warning! Function %s tries to resize memoryblock to 0 bytes!")
-            ,desc);
+        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
+            ,_("Warning! Function %s tries to resize 0 bytes!"),desc);
     } else {
         dummy = realloc(ptr, size);
         if (!dummy) {
-            MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO
+            MOTPLS_LOG(EMG, TYPE_ALL, NO_ERRNO
                 ,_("Could not resize memory-block at offset %p to %llu bytes (function %s)!")
                 ,ptr, (unsigned long long)size, desc);
-            motion_remove_pid();
             exit(1);
         }
     }
@@ -228,385 +158,294 @@ void *myrealloc(void *ptr, size_t size, const char *desc)
     return dummy;
 }
 
+
 /**
  * mycreate_path
- *
- *   This function creates a whole path, like mkdir -p. Example paths:
- *      this/is/an/example/
- *      /this/is/an/example/
- *   Warning: a path *must* end with a slash!
- *
- * Parameters:
- *
- *   cnt  - current thread's context structure (for logging)
- *   path - the path to create
- *
- * Returns: 0 on success, -1 on failure
+ *   Create whole path.
+ *   Path provided *must* end with a slash!
  */
 int mycreate_path(const char *path)
 {
-    char *start;
-    mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
+    std::string tmp;
+    mode_t mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
+    size_t indx_pos;
+    int retcd;
+    struct stat statbuf;
 
-    if (path[0] == '/') {
-        start = strchr(path + 1, '/');
+    tmp = std::string(path);
+
+    if (tmp.substr(0, 1) == "/") {
+        indx_pos = tmp.find("/", 1);
     } else {
-        start = strchr(path, '/');
+        indx_pos = tmp.find("/", 0);
     }
 
-    while (start) {
-        char *buffer = mystrdup(path);
-        buffer[start-path] = 0x00;
-
-        if (mkdir(buffer, mode) == -1 && errno != EEXIST) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
-                ,_("Problem creating directory %s"), buffer);
-            free(buffer);
-            return -1;
+    while (indx_pos != std::string::npos) {
+        if (stat(tmp.substr(0, indx_pos + 1).c_str(), &statbuf) != 0) {
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Creating %s"), tmp.substr(0, indx_pos + 1).c_str());
+            retcd = mkdir(tmp.substr(0, indx_pos + 1).c_str(), mode);
+            if (retcd == -1 && errno != EEXIST) {
+                MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+                    ,_("Problem creating directory %s")
+                    , tmp.substr(0, indx_pos + 1).c_str());
+                return -1;
+            }
         }
-
-        start = strchr(start + 1, '/');
-
-        if (!start) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("creating directory %s"), buffer);
+        indx_pos++;
+        if (indx_pos >= tmp.length()) {
+            break;
         }
-
-        free(buffer);
+        indx_pos = tmp.find("/", indx_pos);
     }
 
     return 0;
 }
 
-/**
- * myfopen
- *
- *   This function opens a file, if that failed because of an ENOENT error
- *   (which is: path does not exist), the path is created and then things are
- *   tried again. This is faster then trying to create that path over and over
- *   again. If someone removes the path after it was created, myfopen will
- *   recreate the path automatically.
- *
- * Parameters:
- *
- *   path - path to the file to open
- *   mode - open mode
- *
- * Returns: the file stream object
- */
+/* myfopen */
 FILE *myfopen(const char *path, const char *mode)
 {
-    /* first, just try to open the file */
-    FILE *dummy = fopen(path, mode);
-    if (dummy) {
-        return dummy;
+    FILE *fp;
+
+    fp = fopen(path, mode);
+    if (fp) {
+        return fp;
     }
 
-    /* could not open file... */
-    /* path did not exist? */
+    /* If path did not exist, create and try again*/
     if (errno == ENOENT) {
-
-        /* create path for file... */
         if (mycreate_path(path) == -1) {
             return NULL;
         }
-
-        /* and retry opening the file */
-        dummy = fopen(path, mode);
+        fp = fopen(path, mode);
     }
-    if (!dummy) {
-        /*
-         * Two possibilities
-         * 1: there was an other error while trying to open the file for the
-         * first time
-         * 2: could still not open the file after the path was created
-         */
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+    if (!fp) {
+        MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
             ,_("Error opening file %s with mode %s"), path, mode);
         return NULL;
     }
 
-    return dummy;
+    return fp;
 }
 
-/**
- * myfclose
- *
- *  Motion-specific variant of fclose()
- *
- * Returns: fclose() return value
- */
-int myfclose(FILE *fh)
+/** myfclose */
+int myfclose(FILE* fh)
 {
     int rval = fclose(fh);
 
     if (rval != 0) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error closing file"));
+        MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error closing file"));
     }
 
     return rval;
 }
 
-/**
- * mystrftime_long
- *
- *   Motion-specific long form of format specifiers.
- *
- * Parameters:
- *
- *   cnt        - current thread's context structure.
- *   width      - width associated with the format specifier.
- *   word       - beginning of the format specifier's word.
- *   l          - length of the format specifier's word.
- *   out        - output buffer where to store the result. Size: PATH_MAX.
- *
- * This is called if a format specifier with the format below was found:
- *
- *   % { word }
- *
- * As a special edge case, an incomplete format at the end of the string
- * is processed as well:
- *
- *   % { word \0
- *
- * Any valid format specified width is supported, e.g. "%12{host}".
- *
- * The following specifier keywords are currently supported:
- *
- * host    Replaced with the name of the local machine (see gethostname(2)).
- * fps     Equivalent to %fps.
- */
-static void mystrftime_long (const struct context *cnt, int width, const char *word, int l, char *out)
+void mystrftime(cls_sound *snd, std::string &dst, std::string fmt)
 {
-    #define SPECIFIERWORD(k) ((strlen(k)==l) && (!strncmp (k, word, l)))
-
-    if (SPECIFIERWORD("host")) {
-        snprintf (out, PATH_MAX, "%*s", width, cnt->hostname);
-        return;
-    }
-    if (SPECIFIERWORD("fps")) {
-        sprintf(out, "%*d", width, cnt->movie_fps);
-        return;
-    }
-    if (SPECIFIERWORD("dbeventid")) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO,
-            _("{dbeventid} is not supported. Use eventid."));
-        return;
-    }
-    if (SPECIFIERWORD("ver")) {
-        sprintf(out, "%*s", width, VERSION);
-        return;
-    }
-    if (SPECIFIERWORD("eventid")) {
-        sprintf(out, "%*s", width,  cnt->eventid);
-        return;
-    }
-
-    // Not a valid modifier keyword. Log the error and ignore.
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
-        _("invalid format specifier keyword %*.*s"), l, l, word);
-
-    // Do not let the output buffer empty, or else where to restart the
-    // interpretation of the user string will become dependent to far too
-    // many conditions. Maybe change loop to "if (*pos_userformat == '%') {
-    // ...} __else__ ..."?
-    out[0] = '~'; out[1] = 0;
-}
-
-/**
- * mystrftime
- *
- *   Motion-specific variant of strftime(3) that supports additional format
- *   specifiers in the format string.
- *
- * Parameters:
- *
- *   cnt        - current thread's context structure
- *   s          - destination string
- *   max        - max number of bytes to write
- *   userformat - format string
- *   tm         - time information
- *   filename   - string containing full path of filename
- *                set this to NULL if not relevant
- *   sqltype    - Filetype as used in SQL feature, set to 0 if not relevant
- *
- * Returns: number of bytes written to the string s
- */
-size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *userformat
-            , const struct timeval *tv1, const char *filename, int sqltype)
-{
-    char formatstring[PATH_MAX] = "";
-    char tempstring[PATH_MAX] = "";
-    char *format, *tempstr;
-    const char *pos_userformat;
-    int width;
+    char tmp[PATH_MAX];
     struct tm timestamp_tm;
+    timespec  curr_ts;
+    std::string user_fmt;
+    uint indx;
 
-    localtime_r(&tv1->tv_sec, &timestamp_tm);
+    clock_gettime(CLOCK_REALTIME, &curr_ts);
+    localtime_r(&curr_ts.tv_sec, &timestamp_tm);
 
-    format = formatstring;
-
-    /* if mystrftime is called with userformat = NULL we return a zero length string */
-    if (userformat == NULL) {
-        *s = '\0';
-        return 0;
+    if (fmt == "") {
+        dst = "";
+        return;
     }
 
-    for (pos_userformat = userformat; *pos_userformat; ++pos_userformat) {
-
-        if (*pos_userformat == '%') {
-            /*
-             * Reset 'tempstr' to point to the beginning of 'tempstring',
-             * otherwise we will eat up tempstring if there are many
-             * format specifiers.
-             */
-            tempstr = tempstring;
-            tempstr[0] = '\0';
-            width = 0;
-            while ('0' <= pos_userformat[1] && pos_userformat[1] <= '9') {
-                width *= 10;
-                width += pos_userformat[1] - '0';
-                ++pos_userformat;
-            }
-
-            switch (*++pos_userformat) {
-            case '\0': // end of string
-                --pos_userformat;
-                break;
-
-            case 'v': // event
-                sprintf(tempstr, "%0*d", width ? width : 2, cnt->event_nr);
-                break;
-
-            case 'q': // shots
-                sprintf(tempstr, "%0*d", width ? width : 2,
-                    cnt->current_image->shot);
-                break;
-
-            case 'D': // diffs
-                sprintf(tempstr, "%*d", width, cnt->current_image->diffs);
-                break;
-
-            case 'N': // noise
-                sprintf(tempstr, "%*d", width, cnt->noise);
-                break;
-
-            case 'i': // motion width
-                sprintf(tempstr, "%*d", width,
-                    cnt->current_image->location.width);
-                break;
-
-            case 'J': // motion height
-                sprintf(tempstr, "%*d", width,
-                    cnt->current_image->location.height);
-                break;
-
-            case 'K': // motion center x
-                sprintf(tempstr, "%*d", width, cnt->current_image->location.x);
-                break;
-
-            case 'L': // motion center y
-                sprintf(tempstr, "%*d", width, cnt->current_image->location.y);
-                break;
-
-            case 'o': // threshold
-                sprintf(tempstr, "%*d", width, cnt->threshold);
-                break;
-
-            case 'Q': // number of labels
-                sprintf(tempstr, "%*d", width,
-                    cnt->current_image->total_labels);
-                break;
-
-            case 't': // camera id
-                sprintf(tempstr, "%*d", width, cnt->camera_id);
-                break;
-
-            case 'C': // text_event
-                if (cnt->text_event_string[0]) {
-                    snprintf(tempstr, PATH_MAX, "%*s", width,
-                        cnt->text_event_string);
-                } else {
-                    ++pos_userformat;
-                }
-                break;
-
-            case 'w': // picture width
-                sprintf(tempstr, "%*d", width, cnt->imgs.width);
-                break;
-
-            case 'h': // picture height
-                sprintf(tempstr, "%*d", width, cnt->imgs.height);
-                break;
-
-            case 'f': // filename
-                if (filename) {
-                    snprintf(tempstr, PATH_MAX, "%*s", width, filename);
-                } else {
-                    ++pos_userformat;
-                }
-                break;
-
-            case 'n': // sqltype
-                if (sqltype) {
-                    sprintf(tempstr, "%*d", width, sqltype);
-                } else {
-                    ++pos_userformat;
-                }
-                break;
-
-            case '{': // long format specifier word.
-                {
-                    const char *word = ++pos_userformat;
-                    while ((*pos_userformat != '}') && (*pos_userformat != 0)) {
-                        ++pos_userformat;
-                    }
-                    mystrftime_long ((struct context *)cnt, width, word, (int)(pos_userformat-word), tempstr);
-                    if (*pos_userformat == '\0') {
-                        --pos_userformat;
-                    }
-                }
-                break;
-
-            case '$': // thread name
-                if (cnt->conf.camera_name && cnt->conf.camera_name[0]) {
-                    snprintf(tempstr, PATH_MAX, "%s", cnt->conf.camera_name);
-                } else {
-                    ++pos_userformat;
-                }
-                break;
-
-            default: // Any other code is copied with the %-sign
-                *format++ = '%';
-                *format++ = *pos_userformat;
-                continue;
-            }
-
-            /*
-             * If a format specifier was found and used, copy the result from
-             * 'tempstr' to 'format'.
-             */
-            if (tempstr[0]) {
-                while ((*format = *tempstr++) != '\0') {
-                    ++format;
-                }
-                continue;
-            }
+    user_fmt = "";
+    for (indx=0;indx<fmt.length();indx++){
+        memset(tmp, 0, sizeof(tmp));
+        if (fmt.substr(indx,2) == "%t") {
+            sprintf(tmp, "%d", snd->cfg->device_id);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%$") {
+            user_fmt.append(snd->device_name);
+            indx++;
+        } else if (fmt.substr(indx,strlen("%{ver}")) == "%{ver}") {
+            user_fmt.append(VERSION);
+            indx += (strlen("%{ver}")-1);
+        } else if (fmt.substr(indx,strlen("%{trig_freq}")) == "%{trig_freq}") {
+            user_fmt.append(snd->snd_info->trig_freq);
+            indx += (strlen("%{trig_freq}")-1);
+        } else if (fmt.substr(indx,strlen("%{trig_nbr}")) == "%{trig_nbr}") {
+            user_fmt.append(snd->snd_info->trig_nbr);
+            indx += (strlen("%{trig_nbr}")-1);
+        } else if (fmt.substr(indx,strlen("%{trig_nm}")) == "%{trig_nm}") {
+            user_fmt.append(snd->snd_info->trig_nm);
+            indx += (strlen("%{trig_nm}")-1);
+        } else {
+            user_fmt.append(fmt.substr(indx,1));
         }
-
-        /* For any other character than % we just simply copy the character */
-        *format++ = *pos_userformat;
     }
-
-    *format = '\0';
-    format = formatstring;
-
-    return strftime(s, max, format, &timestamp_tm);
+    memset(tmp, 0, sizeof(tmp));
+    strftime(tmp, sizeof(tmp),user_fmt.c_str(), &timestamp_tm);
+    dst.assign(tmp);
 }
 
-/* This is a temporary location for these util functions.  All the generic utility
- * functions will be collected here and ultimately moved into a new common "util" module
- */
-void util_threadname_set(const char *abbr, int threadnbr, const char *threadname)
+void mystrftime_base(cls_camera *cam
+    , std::string &dst, std::string fmt, std::string fname)
+{
+    char tmp[PATH_MAX];
+    struct tm timestamp_tm;
+    timespec  curr_ts;
+    std::string user_fmt;
+    uint indx;
+    ctx_image_data img;
+
+    if (cam->current_image == nullptr) {
+        clock_gettime(CLOCK_REALTIME, &curr_ts);
+        localtime_r(&curr_ts.tv_sec, &timestamp_tm);
+        memset(&img, 0, sizeof(ctx_image_data));
+    } else {
+        localtime_r(&cam->current_image->imgts.tv_sec, &timestamp_tm);
+        memcpy(&img, cam->current_image, sizeof(ctx_image_data));
+    }
+
+    if (fmt == "") {
+        dst = "";
+        return;
+    }
+
+    user_fmt = "";
+    for (indx=0; indx<fmt.length(); indx++){
+        memset(tmp, 0, sizeof(tmp));
+        if (fmt.substr(indx,2) == "%v") {
+            sprintf(tmp, "%02d", cam->event_curr_nbr);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%q") {
+            sprintf(tmp, "%d", img.shot);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%D") {
+            sprintf(tmp, "%d", img.diffs);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%N") {
+            sprintf(tmp, "%d", cam->noise);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%i") {
+            sprintf(tmp, "%d", img.location.width);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%J") {
+            sprintf(tmp, "%d", img.location.height);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%K") {
+            sprintf(tmp, "%d", img.location.x);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%L") {
+            sprintf(tmp, "%d", img.location.y);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%o") {
+            sprintf(tmp, "%d", cam->threshold);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%Q") {
+            sprintf(tmp, "%d", img.total_labels);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%t") {
+            sprintf(tmp, "%d", cam->cfg->device_id);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%C") {
+            user_fmt.append(cam->text_event_string);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%w") {
+            sprintf(tmp, "%d", cam->imgs.width);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%h") {
+            sprintf(tmp, "%d", cam->imgs.height);
+            user_fmt.append(tmp);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%f") {
+            user_fmt.append(fname);
+            indx++;
+        } else if (fmt.substr(indx,2) == "%$") {
+            user_fmt.append(cam->cfg->device_name);
+            indx++;
+        } else if (fmt.substr(indx,strlen("%{host}")) == "%{host}") {
+            user_fmt.append(cam->hostname);
+            indx += (strlen("%{host}")-1);
+        } else if (fmt.substr(indx,strlen("%{fps}")) == "%{fps}") {
+            sprintf(tmp, "%d", cam->movie_fps);
+            user_fmt.append(tmp);
+            indx += (strlen("%{fps}")-1);
+        } else if (fmt.substr(indx,strlen("%{eventid}")) == "%{eventid}") {
+            user_fmt.append(cam->eventid);
+            indx += (strlen("%{eventid}")-1);
+        } else if (fmt.substr(indx,strlen("%{ver}")) == "%{ver}") {
+            user_fmt.append(VERSION);
+            indx += (strlen("%{ver}")-1);
+        } else if (fmt.substr(indx,strlen("%{sdevx}")) == "%{sdevx}") {
+            sprintf(tmp, "%d", cam->current_image->location.stddev_x);
+            user_fmt.append(tmp);
+            indx += (strlen("%{sdevx}")-1);
+        } else if (fmt.substr(indx,strlen("%{sdevy}")) == "%{sdevy}") {
+            sprintf(tmp, "%d", cam->current_image->location.stddev_y);
+            user_fmt.append(tmp);
+            indx += (strlen("%{sdevy}")-1);
+        } else if (fmt.substr(indx,strlen("%{sdevxy}")) == "%{sdevxy}") {
+            sprintf(tmp, "%d", cam->current_image->location.stddev_xy);
+            user_fmt.append(tmp);
+            indx += (strlen("%{sdevxy}")-1);
+        } else if (fmt.substr(indx,strlen("%{ratio}")) == "%{ratio}") {
+            sprintf(tmp, "%d", cam->current_image->diffs_ratio);
+            user_fmt.append(tmp);
+            indx += (strlen("%{ratio}")-1);
+        } else if (fmt.substr(indx,strlen("%{action_user}")) == "%{action_user}") {
+            user_fmt.append(cam->action_user);
+            indx += (strlen("%{action_user}")-1);
+        } else if (fmt.substr(indx,strlen("%{secdetect}")) == "%{secdetect}") {
+            if (cam->algsec->detected) {
+                user_fmt.append("Y");
+            } else {
+                user_fmt.append("N");
+            }
+            indx += (strlen("%{secdetect}")-1);
+        } else {
+            user_fmt.append(fmt.substr(indx,1));
+        }
+    }
+
+    memset(tmp, 0, sizeof(tmp));
+    strftime(tmp, sizeof(tmp),user_fmt.c_str(), &timestamp_tm);
+    dst.assign(tmp);
+}
+
+/* Old method for temporary use only. */
+void mystrftime(cls_camera *cam, char *s, size_t mx_sz
+    , const char *usrfmt, const char *fname)
+{
+    std::string rslt, tmpnm;
+    (void)mx_sz;
+    if (fname == nullptr) {
+        tmpnm = "";
+    } else {
+        tmpnm.assign(fname);
+    }
+    mystrftime_base(cam, rslt, usrfmt, tmpnm);
+    sprintf(s, "%s",rslt.c_str());
+}
+
+void mystrftime(cls_camera *cam, std::string &rslt
+    , std::string usrfmt, std::string fname)
+{
+    mystrftime_base(cam, rslt, usrfmt, fname);
+}
+
+void mythreadname_set(const char *abbr, int threadnbr, const char *threadname)
 {
     /* When the abbreviation is sent in as null, that means we are being
      * provided a fully filled out thread name (usually obtained from a
@@ -614,11 +453,15 @@ void util_threadname_set(const char *abbr, int threadnbr, const char *threadname
      *  formatting.
      */
 
-    char tname[16];
+    char tname[32];
     if (abbr != NULL) {
-        snprintf(tname, sizeof(tname), "%s%d%s%s",abbr,threadnbr,
-             threadname ? ":" : "",
-             threadname ? threadname : "");
+        if (threadname == nullptr) {
+            snprintf(tname, sizeof(tname), "%s%02d",abbr,threadnbr);
+        } else if (strlen(threadname) == 0) {
+            snprintf(tname, sizeof(tname), "%s%02d",abbr,threadnbr);
+        } else {
+            snprintf(tname, sizeof(tname), "%s%02d:%s",abbr,threadnbr, threadname);
+        }
     } else {
         snprintf(tname, sizeof(tname), "%s",threadname);
     }
@@ -630,724 +473,815 @@ void util_threadname_set(const char *abbr, int threadnbr, const char *threadname
     #elif HAVE_PTHREAD_SETNAME_NP
         pthread_setname_np(pthread_self(), tname);
     #else
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Unable to set thread name %s"), tname);
+        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Unable to set thread name %s"), tname);
     #endif
 
 }
 
-void util_threadname_get(char *threadname)
+void mythreadname_get(std::string &threadname)
 {
-
     #if ((!defined(BSD) && HAVE_PTHREAD_GETNAME_NP) || defined(__APPLE__))
-        char currname[16];
+        char currname[32];
+        pthread_getname_np(pthread_self(), currname, sizeof(currname));
+        threadname = currname;
+    #else
+        threadname = "Unknown";
+    #endif
+}
+
+void mythreadname_get(char *threadname)
+{
+    #if ((!defined(BSD) && HAVE_PTHREAD_GETNAME_NP) || defined(__APPLE__))
+        char currname[32];
         pthread_getname_np(pthread_self(), currname, sizeof(currname));
         snprintf(threadname, sizeof(currname), "%s",currname);
     #else
         snprintf(threadname, 8, "%s","Unknown");
     #endif
-
 }
 
-int util_check_passthrough(struct context *cnt)
+static void mytranslate_locale_chg(const char *langcd)
 {
-    #if ( MYFFVER < 55000)
-        if (cnt->movie_passthrough) {
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("FFMPEG version too old. Disabling pass-through processing."));
-        }
-        return 0;
+    #ifdef HAVE_GETTEXT
+        /* This routine is for development testing only.  It is not used for
+        * regular users because once this locale is change, it changes the
+        * whole computer over to the new locale.  Therefore, we just return
+        */
+        return;
+
+        setenv ("LANGUAGE", langcd, 1);
+        /* Invoke external function to change locale*/
+        ++_nl_msg_cat_cntr;
     #else
-        if (cnt->movie_passthrough) {
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                ,_("pass-through enabled."));
-            return 1;
-        } else {
-            return 0;
+        if (langcd != NULL) {
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,"No native language support");
         }
     #endif
 }
 
-/* util_trim
- * Trim away any leading or trailing whitespace in the string
-*/
-void util_trim(char *parm)
+void mytranslate_init(void)
 {
-    int indx, indx_st, indx_en;
+    #ifdef HAVE_GETTEXT
+        mytranslate_text("", 1);
+        setlocale (LC_ALL, "");
 
-    if (parm == NULL) {
-        return;
-    }
+        //translate_locale_chg("li");
+        mytranslate_locale_chg("es");
 
-    indx_en = strlen(parm) - 1;
-    if (indx_en == -1) {
-        return;
-    }
+        bindtextdomain ("motion", LOCALEDIR);
+        bind_textdomain_codeset ("motion", "UTF-8");
+        textdomain ("motion");
 
-    indx_st = 0;
+        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Language: English"));
 
-    while (isspace(parm[indx_st]) && (indx_st <= indx_en)) {
-        indx_st++;
-    }
-    if (indx_st > indx_en) {
-        parm[0]= '\0';
-        return;
-    }
+    #else
+        /* Disable native language support */
+        mytranslate_text("", 0);
 
-    while (isspace(parm[indx_en]) && (indx_en > indx_st)) {
-        indx_en--;
-    }
-
-    for (indx = indx_st; indx<=indx_en; indx++) {
-        parm[indx-indx_st] = parm[indx];
-    }
-    parm[indx_en-indx_st+1] = '\0';
-
+        /* This avoids a unused function warning */
+        mytranslate_locale_chg("en");
+    #endif
 }
 
-/* util_parms_add
- * Add the parsed out parameter and value to the control array.
-*/
-static void util_parms_add(struct params_context *parameters
-            , const char *parm_nm, const char *parm_vl, int logmsg)
+char* mytranslate_text(const char *msgid, int setnls)
 {
-    int indx, retcd;
+    static bool nls_enabled = true;
 
-    indx=parameters->params_count;
-    parameters->params_count++;
-
-    if (indx == 0) {
-        parameters->params_array =(struct params_item_ctx *) mymalloc(sizeof(struct params_item_ctx));
-    } else {
-        parameters->params_array =
-            (struct params_item_ctx *)realloc(parameters->params_array
-                , sizeof(struct params_item_ctx)*(indx+1));
-    }
-
-    if (parm_nm != NULL) {
-        parameters->params_array[indx].param_name = (char*)mymalloc(strlen(parm_nm)+1);
-        retcd = sprintf(parameters->params_array[indx].param_name,"%s",parm_nm);
-        if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >%s<"),parm_nm);
-            free(parameters->params_array[indx].param_name);
-            parameters->params_array[indx].param_name = NULL;
+    if (setnls == 0) {
+        if (nls_enabled) {
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Disabling native language support"));
         }
-    } else {
-        parameters->params_array[indx].param_name = NULL;
-    }
+        nls_enabled = false;
+        return NULL;
 
-    if (parm_vl != NULL) {
-        parameters->params_array[indx].param_value = (char*)mymalloc(strlen(parm_vl)+1);
-        retcd = sprintf(parameters->params_array[indx].param_value,"%s",parm_vl);
-        if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting parm >%s<"),parm_vl);
-            free(parameters->params_array[indx].param_value);
-            parameters->params_array[indx].param_value = NULL;
+    } else if (setnls == 1) {
+        if (!nls_enabled) {
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Enabling native language support"));
         }
-    } else {
-        parameters->params_array[indx].param_value = NULL;
-    }
+        nls_enabled = true;
+        return NULL;
 
-    if (logmsg) {
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsed: >%s< >%s<")
-            ,parameters->params_array[indx].param_name
-            ,parameters->params_array[indx].param_value);
     } else {
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsed: >redacted< >redacted<"));
+        #ifdef HAVE_GETTEXT
+            if (nls_enabled) {
+                return (char*)gettext(msgid);
+            } else {
+                return (char*)msgid;
+            }
+        #else
+            return (char*)msgid;
+        #endif
     }
 }
 
-/* util_parms_extract
- * Extract out of the configuration string the name and values at the location specified.
-*/
-static void util_parms_extract(struct params_context *parameters, char *parmlne
-            , size_t indxnm_st, size_t indxnm_en, size_t indxvl_st, size_t indxvl_en
-            , int logmsg)
+/****************************************************************************
+ *  The section below is the "my" section of functions.
+ *  These are designed to be extremely simple version specific
+ *  variants of the libav functions.
+ ****************************************************************************/
+/*********************************************/
+/*********************************************/
+void myframe_key(AVFrame *frame)
 {
-    char *parm_nm, *parm_vl;
-    int retcd, chksz;
+    #if (MYFFVER < 60016)
+        frame->key_frame = 1;
+    #else
+        frame->flags |= AV_FRAME_FLAG_KEY;
+    #endif
+}
+/*********************************************/
+void myframe_interlaced(AVFrame *frame)
+{
+    #if (MYFFVER < 60016)
+        frame->key_frame = 0;
+    #else
+        frame->flags |= AV_FRAME_FLAG_INTERLACED;
+    #endif
+}
 
-    /*
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,"%s", parmlne);
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,"012345678901234567890123456789012345678901234567890");
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,"%d %d, %d, %d"
-        , indxnm_st, indxnm_en, indxvl_st, indxvl_en);
-    */
-
-    if ((indxnm_en != 0) &&
-        (indxvl_st != 0) &&
-        ((int)(indxnm_en - indxnm_st) >= 0) &&
-        ((int)(indxvl_en - indxvl_st) >= 0)) {
-        parm_nm = mymalloc(PATH_MAX);
-        parm_vl = mymalloc(PATH_MAX);
-
-        chksz = indxnm_en - indxnm_st + 2;
-        retcd = snprintf(parm_nm, chksz, "%s", parmlne + indxnm_st);
-        if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_nm controls: %s"), parmlne);
-            free(parm_nm);
-            parm_nm = NULL;
-        }
-
-        chksz = indxvl_en - indxvl_st + 2;
-        retcd = snprintf(parm_vl, chksz, "%s", parmlne + indxvl_st);
-        if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error parsing parm_vl controls: %s"), parmlne);
-            free(parm_vl);
-            parm_vl = NULL;
-        }
-
-        util_trim(parm_nm);
-        util_trim(parm_vl);
-
-        util_parms_add(parameters, parm_nm, parm_vl, logmsg);
-
-        if (parm_nm != NULL) {
-            free(parm_nm);
-        }
-        if (parm_vl != NULL) {
-            free(parm_vl);
-        }
+/*********************************************/
+AVPacket *mypacket_alloc(AVPacket *pkt)
+{
+    if (pkt != NULL) {
+        av_packet_free(&pkt);
     }
+    pkt = av_packet_alloc();
+    #if (MYFFVER < 58076)
+        av_init_packet(pkt);
+        pkt->data = NULL;
+        pkt->size = 0;
+    #endif
+
+    return pkt;
 
 }
 
-/* util_parms_next
- * Remove the parameter parsed out in previous steps from the parms string
- * and set up the string for parsing out the next parameter.
-*/
-static void util_parms_next(char *parmlne, size_t indxpr_st, size_t indxpr_en)
+void util_exec_command(cls_camera *cam, const char *command, const char *filename)
 {
-    char *parm_tmp;
-    int retcd;
+    char stamp[PATH_MAX];
+    int pid;
 
-    /*
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,"%s", parmlne);
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,"012345678901234567890123456789012345678901234567890");
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,"%d %d", indxpr_st, indxpr_en);
-    */
+    mystrftime(cam, stamp, sizeof(stamp), command, filename);
 
-    parm_tmp = mymalloc(PATH_MAX);
-    retcd = snprintf(parm_tmp, PATH_MAX, "%s", parmlne);
-    if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error setting temp: %s"), parmlne);
-        free(parm_tmp);
+    pid = fork();
+    if (!pid) {
+        /* Detach from parent */
+        setsid();
+
+        execl("/bin/sh", "sh", "-c", stamp, " &",(char*)NULL);
+
+        /* if above function succeeds the program never reach here */
+        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+            ,_("Unable to start external command '%s'"), stamp);
+
+        exit(1);
+    }
+
+    if (pid > 0) {
+        waitpid(pid, NULL, 0);
+    } else {
+        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+            ,_("Unable to start external command '%s'"), stamp);
+    }
+
+    MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO
+        ,_("Executing external command '%s'"), stamp);
+}
+
+void util_exec_command(cls_camera *cam, std::string cmd)
+{
+    std::string dst;
+    int pid;
+
+    mystrftime(cam, dst, cmd, "");
+
+    pid = fork();
+    if (!pid) {
+        /* Detach from parent */
+        setsid();
+
+        execl("/bin/sh", "sh", "-c", dst.c_str(), " &",(char*)NULL);
+
+        /* if above function succeeds the program never reach here */
+        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+            ,_("Unable to start external command '%s'"),dst.c_str());
+
+        exit(1);
+    }
+
+    if (pid > 0) {
+        waitpid(pid, NULL, 0);
+    } else {
+        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+            ,_("Unable to start external command '%s'"), dst.c_str());
+    }
+
+    MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO
+        ,_("Executing external command '%s'"), dst.c_str());
+}
+
+void util_exec_command(cls_sound *snd, std::string cmd)
+{
+    std::string dst;
+    int pid;
+
+    mystrftime(snd, dst, cmd);
+
+    pid = fork();
+    if (!pid) {
+        /* Detach from parent */
+        setsid();
+
+        execl("/bin/sh", "sh", "-c", dst.c_str(), " &",(char*)NULL);
+
+        /* if above function succeeds the program never reach here */
+        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+            ,_("Unable to start external command '%s'"),dst.c_str());
+
+        exit(1);
+    }
+
+    if (pid > 0) {
+        waitpid(pid, NULL, 0);
+    } else {
+        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+            ,_("Unable to start external command '%s'"), dst.c_str());
+    }
+
+    MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO
+        ,_("Executing external command '%s'"), dst.c_str());
+}
+
+/*********************************************/
+static void util_parms_file(ctx_params *params, std::string params_file)
+{
+    int chk, indx;
+    size_t stpos;
+    std::string line, parm_nm, parm_vl;
+    std::ifstream ifs;
+
+    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        ,_("parse file:%s"), params_file.c_str());
+
+    chk = 0;
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == "params_file") {
+            chk++;
+        }
+    }
+    if (chk > 1){
+        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Only one params_file specification is permitted."));
         return;
     }
 
-    if (indxpr_st == 0) {
-        if (indxpr_en >= strlen(parmlne)) {
-            parmlne[0]='\0';
+    ifs.open(params_file.c_str());
+        if (ifs.is_open() == false) {
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                ,_("params_file not found: %s"), params_file.c_str());
+            return;
+        }
+        while (std::getline(ifs, line)) {
+            mytrim(line);
+            stpos = line.find(" ");
+            if (stpos > line.find("=")) {
+                stpos = line.find("=");
+            }
+            if ((stpos != std::string::npos) &&
+                (stpos != line.length()-1) &&
+                (stpos != 0) &&
+                (line.substr(0, 1) != ";") &&
+                (line.substr(0, 1) != "#")) {
+                parm_nm = line.substr(0, stpos);
+                parm_vl = line.substr(stpos+1, line.length()-stpos);
+                mytrim(parm_nm);
+                mytrim(parm_vl);
+                util_parms_add(params, parm_nm.c_str(), parm_vl.c_str());
+            } else if ((line != "") &&
+                (line.substr(0, 1) != ";") &&
+                (line.substr(0, 1) != "#")) {
+                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    ,_("Unable to parse line:%s"), line.c_str());
+            }
+        }
+    ifs.close();
+
+}
+
+void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_val)
+{
+    int indx;
+    ctx_params_item parm_itm;
+
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == parm_nm) {
+            params->params_array[indx].param_value.assign(parm_val);
+            return;
+        }
+    }
+
+    /* This is a new parameter*/
+    params->params_cnt++;
+    parm_itm.param_name.assign(parm_nm);
+    parm_itm.param_value.assign(parm_val);
+    params->params_array.push_back(parm_itm);
+
+    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:>%s< >%s<"
+        ,params->params_desc.c_str(), parm_nm.c_str(),parm_val.c_str());
+
+    if ((parm_nm == "params_file") && (parm_val != "")) {
+        util_parms_file(params, parm_val);
+    }
+}
+
+static void util_parms_strip_qte(std::string &parm)
+{
+
+    if (parm.length() == 0) {
+        return;
+    }
+
+    if (parm.substr(0, 1)=="\"") {
+        if (parm.length() == 1) {
+            parm = "";
+            return;
         } else {
-            retcd = snprintf(parmlne, strlen(parm_tmp) - indxpr_en + 2
-                , "%s", parm_tmp + indxpr_en + 1);
+            parm = parm.substr(1);
         }
-    } else {
-        if (indxpr_en >= strlen(parmlne)) {
-            retcd = snprintf(parmlne, indxpr_st, "%s", parm_tmp);
+    }
+
+    if (parm.substr(parm.length() -1, 1)== "\"") {
+        if (parm.length() == 1) {
+            parm = "";
+            return;
         } else {
-            retcd = snprintf(parmlne, PATH_MAX, "%.*s%.*s"
-                , (int)indxpr_st, parm_tmp
-                , (int)(strlen(parm_tmp) - indxpr_en)
-                , parm_tmp + indxpr_en + 1);
+            parm = parm.substr(0, parm.length() - 1);
         }
     }
-
-    if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error reparsing controls: %s"), parmlne);
-    }
-
-    free(parm_tmp);
 
 }
 
-/* util_parms_parse_qte
- * Split out the parameters that have quotes around the name.
-*/
-static void util_parms_parse_qte(struct params_context *parameters, char *parmlne, int logmsg)
+static void util_parms_extract(ctx_params *params, std::string &parmline
+        ,size_t indxnm_st,size_t indxnm_en,size_t indxvl_st,size_t indxvl_en)
 {
-    size_t indxnm_st, indxnm_en, indxvl_st, indxvl_en;
-    size_t indxcm, indxeq, indxqte_st, indxqte_en;
-    size_t indxpr_st, indxpr_en;
+    std::string parm_nm, parm_vl;
 
-    while (strstr(parmlne,"\"") != NULL) {
-        indxnm_st = 0;
-        indxnm_en = 0;
-        indxvl_st = 0;
-        indxvl_en = strlen(parmlne);
-        indxpr_st = 0;
-        indxpr_en = strlen(parmlne);
+    if ((indxnm_st != std::string::npos) &&
+        (indxnm_en != std::string::npos) &&
+        (indxvl_st != std::string::npos) &&
+        (indxvl_en != std::string::npos)) {
 
-        indxqte_st = strcspn(parmlne,"\"");
-        indxqte_en = strlen(parmlne);
-        if (strstr(parmlne + indxqte_st + 1,"\"") != NULL) {
-            indxqte_en = strcspn(parmlne + indxqte_st + 1,"\"") + indxqte_st + 1;
+        parm_nm = parmline.substr(indxnm_st, indxnm_en - indxnm_st + 1);
+        parm_vl = parmline.substr(indxvl_st, indxvl_en - indxvl_st + 1);
+
+        mytrim(parm_nm);
+        mytrim(parm_vl);
+
+        util_parms_strip_qte(parm_nm);
+        util_parms_strip_qte(parm_vl);
+
+        util_parms_add(params, parm_nm.c_str(), parm_vl.c_str());
+
+    }
+
+}
+
+/* Cut out the parameter that was just extracted from the parmline string */
+static void util_parms_next(std::string &parmline, size_t indxnm_st, size_t indxvl_en)
+{
+    size_t indxcm;
+
+    indxcm = parmline.find(",", indxvl_en);
+
+    if (indxnm_st == 0) {
+        if (indxcm == std::string::npos) {
+            parmline = "";
+        } else {
+            parmline = parmline.substr(indxcm + 1);
+        }
+    } else {
+        if (indxcm == std::string::npos) {
+            parmline = parmline.substr(0, indxnm_st - 1);
+        } else {
+            parmline = parmline.substr(0, indxnm_st - 1) + parmline.substr(indxcm + 1);
+        }
+    }
+    mytrim(parmline);
+
+}
+
+void util_parms_parse_qte(ctx_params *params, std::string &parmline)
+{
+    size_t indxnm_st, indxnm_en;
+    size_t indxvl_st, indxvl_en;
+    size_t indxcm, indxeq;
+
+    /* Parse out all the items within quotes first */
+    while (parmline.find("\"", 0) != std::string::npos) {
+
+        indxnm_st = parmline.find("\"", 0);
+
+        indxnm_en = parmline.find("\"", indxnm_st + 1);
+        if (indxnm_en == std::string::npos) {
+            indxnm_en = parmline.length() - 1;
         }
 
-        indxcm = strlen(parmlne);
-        if (strstr(parmlne + indxqte_en + 1,",") != NULL) {
-            indxcm = strcspn(parmlne + indxqte_en + 1,",") + indxqte_en + 1;
+        indxcm = parmline.find(",", indxnm_en + 1);
+        if (indxcm == std::string::npos) {
+            indxcm = parmline.length() - 1;
         }
 
-        indxeq = strlen(parmlne);
-        if (strstr(parmlne + indxqte_en + 1,"=") != NULL) {
-            indxeq = strcspn(parmlne + indxqte_en + 1,"=") + indxqte_en + 1;
+        indxeq = parmline.find("=", indxnm_en + 1);
+        if (indxeq == std::string::npos) {
+            indxeq = parmline.length() - 1;
         }
 
         if (indxcm <= indxeq) {
-            /* The quoted item is not followed by an equal so it is the value. */
-            indxvl_st = indxqte_st + 1;
-            indxvl_en = indxqte_en - 1;
+            /* The quoted part of the parm was the value not the name */
+            indxvl_st = indxnm_st;
+            indxvl_en = indxnm_en;
 
-            if (strstr(parmlne, ",") != NULL) {
-                indxcm = 0;
-                while ((strstr(parmlne + indxcm, ",") != NULL) &&
-                       ((strcspn(parmlne + indxcm, ",") + indxcm) < indxvl_st)) {
-                    indxcm = strcspn(parmlne + indxcm, ",") + indxcm + 1;
-                }
-                indxnm_st = indxcm;
-            } else {
+            indxnm_st = parmline.find_last_of(",", indxvl_st);
+            if (indxnm_st == std::string::npos) {
                 indxnm_st = 0;
+            } else {
+                indxnm_st++; /* Move past the comma */
             }
 
-            indxnm_en = indxnm_st;
-            if (strstr(parmlne + indxnm_st, "=") != NULL) {
-                indxnm_en = strcspn(parmlne + indxnm_st, "=") + indxnm_st - 1;
+            indxnm_en = parmline.find("=", indxnm_st);
+            if ((indxnm_en == std::string::npos) ||
+                (indxnm_en > indxvl_st)) {
+                indxnm_en = indxvl_st + 1;
             }
-
-            indxpr_st = indxnm_st;
+            indxnm_en--; /* do not include the = */
 
         } else {
-            /*The quoted item is the name, now check the value*/
-            indxnm_st = indxqte_st + 1;
-            indxnm_en = indxqte_en - 1;
-            indxpr_st = indxqte_st;
-
-            indxvl_st = indxeq + 1;
-            if (indxvl_st > strlen(parmlne)) {
-                /* There is not any equal */
-                indxvl_st = strlen(parmlne);
-                indxvl_en = strlen(parmlne);
-            } else {
-                if (strstr(parmlne + indxvl_st,"\"") != NULL) {
-                    indxqte_st = strcspn(parmlne + indxvl_st,"\"") + indxvl_st + 1;
-                    if (indxqte_st > indxcm) {
-                        /*The quoted item is for the next parm */
-                        indxvl_en = indxcm - 1;
-                    } else {
-                        /*The value is also quoted*/
-                        indxqte_en = strlen(parmlne);
-                        if (strstr(parmlne + indxqte_st,"\"") != NULL) {
-                            indxqte_en = strcspn(parmlne + indxqte_st,"\"")+ indxqte_st;
-                        }
-                        indxvl_st = indxqte_st;
-                        indxvl_en = indxqte_en - 1;
+            /* The quoted part of the parm was the name */
+            indxvl_st = parmline.find("\"",indxeq + 1);
+            indxcm = parmline.find(",", indxeq + 1);
+            if (indxcm == std::string::npos) {
+                if (indxvl_st == std::string::npos) {
+                    indxvl_st = indxeq + 1;
+                    if (indxvl_st >= parmline.length()) {
+                        indxvl_st = parmline.length() - 1;
                     }
+                    indxvl_en = parmline.length() - 1;
                 } else {
-                    /* No more quotes so end is the comma position*/
-                    indxvl_en = indxcm - 1;
+                    /* The value is also enclosed in quotes */
+                    indxvl_en=parmline.find("\"", indxvl_st + 1);
+                    if (indxvl_en == std::string::npos) {
+                        indxvl_en = parmline.length() - 1;
+                    }
+                }
+            } else if (indxvl_st == std::string::npos) {
+                /* There are no more quotes in the line */
+                indxvl_st = indxeq + 1;
+                indxvl_en = parmline.find(",",indxvl_st) - 1;
+            } else if (indxcm < indxvl_st) {
+                /* The quotes belong to next item */
+                indxvl_st = indxeq + 1;
+                indxvl_en = parmline.find(",",indxvl_st) - 1;
+            } else {
+                /* The value is also enclosed in quotes */
+                indxvl_en=parmline.find("\"", indxvl_st + 1);
+                if (indxvl_en == std::string::npos) {
+                    indxvl_en = parmline.length() - 1;
                 }
             }
         }
 
-        /* Find the next comma or end of line */
-        if ((strstr(parmlne + indxvl_en, ",") != NULL)) {
-            indxpr_en = strcspn(parmlne + indxvl_en, ",") + indxvl_en;
-        } else {
-            indxpr_en = strlen(parmlne);
-        }
+        //MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"Parsing: >%s< >%ld %ld %ld %ld<"
+        //    ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
-        util_parms_extract(parameters, parmlne, indxnm_st, indxnm_en, indxvl_st, indxvl_en, logmsg);
-        util_parms_next(parmlne, indxpr_st, indxpr_en);
+        util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+        util_parms_next(parmline, indxnm_st, indxvl_en);
+
     }
 }
 
-/* util_parms_parse_comma
- * Split out the parameters between the commas.
-*/
-static void util_parms_parse_comma(struct params_context *parameters, char *parmlne, int logmsg)
+void util_parms_parse_comma(ctx_params *params, std::string &parmline)
 {
-    size_t indxnm_st, indxnm_en, indxvl_st, indxvl_en;
+    size_t indxnm_st, indxnm_en;
+    size_t indxvl_st, indxvl_en;
 
-    while (strstr(parmlne,",") != NULL) {
+    while (parmline.find(",", 0) != std::string::npos) {
         indxnm_st = 0;
-        indxnm_en = 0;
-        indxvl_st = 0;
-        indxvl_en = strcspn(parmlne, ",") - 1;
-
-        if (strstr(parmlne, "=") != NULL) {
-            indxnm_en = strcspn(parmlne, "=") - 1;
-            indxvl_st = indxnm_en + 2;
+        indxnm_en = parmline.find("=", 1);
+        if (indxnm_en == std::string::npos) {
+            indxnm_en = 0;
+            indxvl_st = 0;
+        } else {
+            indxvl_st = indxnm_en + 1;  /* Position past = */
+            indxnm_en--;                /* Position before = */
         }
-        util_parms_extract(parameters, parmlne, indxnm_st, indxnm_en, indxvl_st, indxvl_en, logmsg);
-        util_parms_next(parmlne, indxnm_st, indxvl_en + 1);
+
+        if (parmline.find(",", indxvl_st) == std::string::npos) {
+            indxvl_en = parmline.length() - 1;
+        } else {
+            indxvl_en = parmline.find(",",indxvl_st) - 1;
+        }
+
+        //MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
+        //    ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+
+        util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+        util_parms_next(parmline, indxnm_st, indxvl_en);
+    }
+
+    /* Take care of last parameter */
+    if (parmline != "") {
+        indxnm_st = 0;
+        indxnm_en = parmline.find("=", 1);
+        if (indxnm_en == std::string::npos) {
+            /* If no value then we are done */
+            return;
+        } else {
+            indxvl_st = indxnm_en + 1;  /* Position past = */
+            indxnm_en--;                /* Position before = */
+        }
+        indxvl_en = parmline.length() - 1;
+
+        //MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"Parsing: >%s< >%ld %ld %ld %ld<"
+        //    ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+
+        util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
+        util_parms_next(parmline, indxnm_st, indxvl_en);
     }
 
 }
 
-/* util_parms_free
- * Free all the memory associated with the parameter control array.
-*/
-void util_parms_free(struct params_context *parameters)
+/* Parse through the config line and put into the array */
+void util_parms_parse(ctx_params *params, std::string parm_desc, std::string confline)
 {
-    int indx;
+    std::string parmline;
 
-    if (parameters == NULL) {
+    /* We make a copy because the parsing destroys the value passed */
+    parmline = confline;
+
+    params->params_array.clear();
+    params->params_cnt = 0;
+    params->params_desc = parm_desc;
+
+    if (confline == "") {
         return;
     }
 
-    for (indx = 0; indx < parameters->params_count; indx++) {
-        if (parameters->params_array[indx].param_name != NULL) {
-            free(parameters->params_array[indx].param_name);
-        }
-        parameters->params_array[indx].param_name = NULL;
+    util_parms_parse_qte(params, parmline);
 
-        if (parameters->params_array[indx].param_value != NULL) {
-            free(parameters->params_array[indx].param_value);
-        }
-        parameters->params_array[indx].param_value = NULL;
-    }
-
-    if (parameters->params_array != NULL) {
-        free(parameters->params_array);
-    }
-    parameters->params_array = NULL;
-
-    parameters->params_count = 0;
+    util_parms_parse_comma(params, parmline);
 
 }
 
-/* util_parms_parse
- * Parse the user provided string of parameters into a array.
-*/
-void util_parms_parse(struct params_context *parameters, char *confparm, int logmsg)
+/* Add the requested int value as a default if the parm_nm does have anything yet */
+void util_parms_add_default(ctx_params *params, std::string parm_nm, int parm_vl)
 {
-    /* Parse through the configuration option to get values
-     * The values are separated by commas but may also have
-     * double quotes around the names which include a comma.
-     * Examples:
-     * video_params "Brightness, auto" = 1, ID23456=2
-     * netcam_params newparm = "1,2,3,r,a,b,c",other=a
-     * video_params "a,b,d" = "1,2,3"
-     */
+    bool dflt;
+    int indx;
 
-    int retcd;
-    size_t indxnm_st, indxnm_en, indxvl_st, indxvl_en;
-    char *parmlne;
-
-    util_parms_free(parameters);
-    parmlne = NULL;
-
-    if (confparm != NULL) {
-        if (logmsg) {
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
-                ,_("Parsing: %s"), confparm);
-        } else {
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
-                ,_("Parsing: <redacted>"));
+    dflt = true;
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == parm_nm) {
+            dflt = false;
         }
-        parmlne = mymalloc(PATH_MAX);
-
-        retcd = snprintf(parmlne, PATH_MAX, "%s", confparm);
-        if ((retcd < 0) || (retcd > PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                ,_("Error parsing controls: %s"), confparm);
-            free(parmlne);
-            return;
-        }
-
-        util_parms_parse_qte(parameters, parmlne, logmsg);
-
-        util_parms_parse_comma(parameters, parmlne, logmsg);
-
-        if (strlen(parmlne) != 0) {
-            indxnm_st = 0;
-            indxnm_en = 0;
-            indxvl_st = 0;
-            indxvl_en = strlen(parmlne);
-            if (strstr(parmlne,"=") != NULL) {
-                indxnm_en = strcspn(parmlne,"=") - 1;
-                indxvl_st = indxnm_en + 2;
-            }
-
-            util_parms_extract(parameters, parmlne, indxnm_st, indxnm_en, indxvl_st, indxvl_en, logmsg);
-        }
-        free(parmlne);
     }
-
-    return;
-
+    if (dflt == true) {
+        util_parms_add(params, parm_nm, std::to_string(parm_vl));
+    }
 }
 
-void util_parms_add_default(struct params_context *parameters, const char *parm_nm, const char *parm_vl)
+/* Add the requested string value as a default if the parm_nm does have anything yet */
+void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl)
 {
+    bool dflt;
+    int indx;
 
-    int indx, dflt;
-
-    dflt = TRUE;
-    for (indx = 0; indx < parameters->params_count; indx++) {
-        if ( mystreq(parameters->params_array[indx].param_name, parm_nm) ) {
-            dflt = FALSE;
+    dflt = true;
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == parm_nm) {
+            dflt = false;
         }
     }
-    if (dflt == TRUE) {
-        util_parms_add(parameters, parm_nm, parm_vl, TRUE);
+    if (dflt == true) {
+        util_parms_add(params, parm_nm, parm_vl);
     }
-
-}
-
-/* util_parms_add_update
- * Add a new value or update an existing one.
-*/
-void util_parms_add_update(struct params_context *parameters, const char *parm_nm, const char *parm_vl)
-{
-
-    int indx, newval, retcd;
-
-    newval = TRUE;
-    for (indx = 0; indx < parameters->params_count; indx++) {
-        if ( mystreq(parameters->params_array[indx].param_name, parm_nm) ) {
-            newval = FALSE;
-        }
-    }
-
-    if (newval == TRUE) {
-        util_parms_add(parameters, parm_nm, parm_vl, TRUE);
-    } else {
-        for (indx = 0; indx < parameters->params_count; indx++) {
-            if ( mystreq(parameters->params_array[indx].param_name, parm_nm) ) {
-                free(parameters->params_array[indx].param_value);
-                parameters->params_array[indx].param_value = mymalloc(strlen(parm_vl) + 1);
-                retcd = snprintf(parameters->params_array[indx].param_value
-                    , strlen(parm_vl) + 1 , "%s", parm_vl);
-                if ((retcd < 0) || (retcd > PATH_MAX)) {
-                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s")
-                        , parameters->params_array[indx].param_value);
-                }
-            }
-        }
-    }
-
 }
 
 /* Update config line with the values from the params array */
-void util_parms_update(struct params_context *params, struct context *cnt, const char *cfgitm)
+void util_parms_update(ctx_params *params, std::string &confline)
 {
-    int indx, retcd;
-    char newline[PATH_MAX];
-    char cpyline[PATH_MAX];
-    char fmt[15];
+    std::string parmline;
+    std::string comma;
+    int indx;
 
-    memset(newline,'\0', PATH_MAX);
-    memset(cpyline,'\0', PATH_MAX);
-
-    for (indx = 0; indx < params->params_count; indx++) {
-
-        /* Determine format spec for newline*/
-        memset(fmt,'\0', 15);
-        if (indx > 0) {
-            memcpy(fmt,"%s,", 3);
-        }
-
-        if ((strstr(params->params_array[indx].param_name," ") == NULL) &&
-            (strstr(params->params_array[indx].param_name,",") == NULL) &&
-            (strstr(params->params_array[indx].param_name,"=") == NULL)) {
-            memcpy(fmt + strlen(fmt),"%s", 2);
+    comma = "";
+    parmline = "";
+    for (indx=0;indx<params->params_cnt;indx++) {
+        parmline += comma;
+        comma = ",";
+        if (params->params_array[indx].param_name.find(" ") == std::string::npos) {
+            parmline += params->params_array[indx].param_name;
         } else {
-            memcpy(fmt + strlen(fmt),"\"%s\"", 4);
+            parmline += "\"";
+            parmline += params->params_array[indx].param_name;
+            parmline += "\"";
         }
 
-        if ((strstr(params->params_array[indx].param_value," ") == NULL) &&
-            (strstr(params->params_array[indx].param_value,",") == NULL) &&
-            (strstr(params->params_array[indx].param_value,"=") == NULL)) {
-            memcpy(fmt + strlen(fmt),"=%s", 3);
+        parmline += "=";
+        if (params->params_array[indx].param_value.find(" ") == std::string::npos) {
+            parmline += params->params_array[indx].param_value;
         } else {
-            memcpy(fmt + strlen(fmt),"=\"%s\"", 5);
-        }
-
-        /*Create the new line */
-        if (indx > 0) {
-            retcd = snprintf(newline, PATH_MAX , fmt, cpyline
-                , params->params_array[indx].param_name
-                , params->params_array[indx].param_value);
-        } else {
-            retcd = snprintf(newline, PATH_MAX , fmt
-                , params->params_array[indx].param_name
-                , params->params_array[indx].param_value);
-        }
-        if ((retcd < 0) || (retcd > PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
-        }
-        /* Create a copy of our new line for use in next iteration of loop*/
-        retcd = snprintf(cpyline, PATH_MAX, "%s", newline);
-        if ((retcd < 0) || (retcd > PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
+            parmline += "\"";
+            parmline += params->params_array[indx].param_value;
+            parmline += "\"";
         }
     }
+    parmline += " ";
 
-    /* Assign finished new parameter line to the config item */
-    if (mystreq(cfgitm, "netcam_params")) {
-        free(cnt->conf.netcam_params);
-        cnt->conf.netcam_params = mymalloc(strlen(newline)+1);
-        retcd = snprintf(cnt->conf.netcam_params, strlen(newline)+1, "%s", newline);
-        if ((retcd < 0) || (retcd > PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
-        }
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("New netcam_params: %s"), newline);
+    confline = parmline;
 
-    } else if (mystreq(cfgitm, "netcam_high_params")) {
-        free(cnt->conf.netcam_high_params);
-        cnt->conf.netcam_high_params = mymalloc(strlen(newline)+1);
-        retcd = snprintf(cnt->conf.netcam_high_params, strlen(newline)+1, "%s", newline);
-        if ((retcd < 0) || (retcd > PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
-        }
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("New netcam_high_params: %s"), newline);
+    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+        ,_("New config:%s"), confline.c_str());
 
-    } else if (mystreq(cfgitm, "video_params")) {
-        free(cnt->conf.video_params);
-        cnt->conf.video_params = mymalloc(strlen(newline)+1);
-        retcd = snprintf(cnt->conf.video_params, strlen(newline)+1, "%s", newline);
-        if ((retcd < 0) || (retcd > PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
-        }
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("New video_params: %s"), newline);
+}
 
-    } else if (mystreq(cfgitm, "webcontrol_header_params")) {
-        free(cnt->conf.webcontrol_header_params);
-        cnt->conf.webcontrol_header_params = mymalloc(strlen(newline)+1);
-        retcd = snprintf(cnt->conf.webcontrol_header_params, strlen(newline)+1, "%s", newline);
-        if ((retcd < 0) || (retcd > PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
-        }
-        if (cnt->conf.webcontrol_localhost) {
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("New webcontrol_header_params: %s"), newline);
-        } else {
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("New webcontrol_header_params: <redacted>"));
-        }
-
-    } else if (mystreq(cfgitm, "stream_header_params")) {
-        free(cnt->conf.stream_header_params);
-        cnt->conf.stream_header_params = mymalloc(strlen(newline)+1);
-        retcd = snprintf(cnt->conf.stream_header_params, strlen(newline)+1, "%s", newline);
-        if ((retcd < 0) || (retcd > PATH_MAX)) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error: %s"), newline);
-        }
-        if (cnt->conf.stream_localhost) {
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("New stream_header_params: %s"), newline);
-        } else {
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("New stream_header_params: <redacted>"));
-        }
-
+/* my to integer*/
+int mtoi(std::string parm)
+{
+    return atoi(parm.c_str());
+}
+/* my to integer*/
+int mtoi(char *parm)
+{
+    return atoi(parm);
+}
+/* my to long*/
+long mtol(std::string parm)
+{
+    return atol(parm.c_str());
+}
+/* my to long*/
+long mtol(char *parm)
+{
+    return atol(parm);
+}
+/* my to float*/
+float mtof(char *parm)
+{
+    return (float)atof(parm);
+}
+/* my to float*/
+float mtof(std::string parm)
+{
+    return (float)atof(parm.c_str());
+}
+/* my to bool*/
+bool mtob(std::string parm)
+{
+    if (mystrceq(parm.c_str(),"1") ||
+        mystrceq(parm.c_str(),"yes") ||
+        mystrceq(parm.c_str(),"on") ||
+        mystrceq(parm.c_str(),"true") ) {
+        return true;
     } else {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Programming error.  Unknown configuration item: %s"), cfgitm);
+        return false;
     }
-
-    return;
-
 }
-
-/** Non case sensitive equality check for strings*/
-int mystrceq(const char *var1, const char *var2)
+/* my to bool*/
+bool mtob(char *parm)
 {
-    if ((var1 == NULL) || (var2 == NULL)) {
-        return FALSE;
-    }
-    return (strcasecmp(var1,var2) ? FALSE : TRUE);
-}
-
-/** Non case sensitive inequality check for strings*/
-int mystrcne(const char *var1, const char *var2)
-{
-    if ((var1 == NULL) || (var2 == NULL)) {
-        return FALSE;
-    }
-    return (strcasecmp(var1,var2) ? TRUE : FALSE);
-}
-
-/** Case sensitive equality check for strings*/
-int mystreq(const char *var1, const char *var2)
-{
-    if ((var1 == NULL) || (var2 == NULL)) {
-        return FALSE;
-    }
-    return (strcmp(var1,var2) ? FALSE : TRUE);
-}
-
-/** Case sensitive inequality check for strings*/
-int mystrne(const char *var1, const char *var2)
-{
-    if ((var1 == NULL) ||(var2 == NULL)) {
-        return FALSE;
-    }
-    return (strcmp(var1,var2) ? TRUE : FALSE);
-}
-
-/**
- * mystrcpy
- *      Is used to assign string type fields (e.g. config options)
- *      In a way so that we the memory is malloc'ed to fit the string.
- *      If a field is already pointing to a string (not NULL) the memory of the
- *      old string is free'd and new memory is malloc'ed and filled with the
- *      new string is copied into the the memory and with the char pointer
- *      pointing to the new string.
- *
- *      from - pointer to the new string we want to copy
- *      to   - the pointer to the current string (or pointing to NULL)
- *              If not NULL the memory it points to is free'd.
- *
- * Returns pointer to the new string which is in malloc'ed memory
- * FIXME The strings that are malloc'ed with this function should be freed
- * when the motion program is terminated normally instead of relying on the
- * OS to clean up.
- */
-char *mystrcpy(char *to, const char *from)
-{
-    /*
-     * Free the memory used by the to string, if such memory exists,
-     * and return a pointer to a freshly malloc()'d string with the
-     * same value as from.
-     */
-
-    if (to != NULL) {
-        free(to);
-    }
-
-    return mystrdup(from);
-}
-
-/**
- * mystrdup
- *      Truncates the string to the length given by the environment
- *      variable PATH_MAX to ensure that config options can always contain
- *      a really long path but no more than that.
- *
- * Returns a pointer to a freshly malloc()'d string with the same
- *      value as the string that the input parameter 'from' points to,
- *      or NULL if the from string is 0 characters.
- */
-char *mystrdup(const char *from)
-{
-    char *tmp;
-    size_t stringlength;
-
-    if (from == NULL || !strlen(from)) {
-        tmp = NULL;
+    if (mystrceq(parm,"1") ||
+        mystrceq(parm,"yes") ||
+        mystrceq(parm,"on") ||
+        mystrceq(parm,"true") ) {
+        return true;
     } else {
-        stringlength = strlen(from);
-        stringlength = (stringlength < PATH_MAX ? stringlength : PATH_MAX);
-        tmp = mymalloc(stringlength + 1);
-        strncpy(tmp, from, stringlength);
-
-        /*
-         * We must ensure the string always has a NULL terminator.
-         * This necessary because strncpy will not append a NULL terminator
-         * if the original string is greater than string length.
-         */
-        tmp += stringlength;
-        *tmp = '\0';
-        tmp -= stringlength;
+        return false;
     }
+}
+/* my token for strings.  Parm is modified*/
+std::string mtok(std::string &parm, std::string tok)
+{
+    size_t loc;
+    std::string tmp;
 
+    if (parm == "") {
+        tmp = "";
+    } else {
+        loc = parm.find(tok);
+        if (loc == std::string::npos) {
+            tmp = parm;
+            parm = "";
+        } else {
+            tmp = parm.substr(0, loc);
+            parm = parm.substr(loc+1);
+        }
+    }
     return tmp;
 }
+
+void util_resize(uint8_t *src, int src_w, int src_h
+    , uint8_t *dst, int dst_w, int dst_h)
+{
+    int     retcd, img_sz;
+    char    errstr[128];
+    uint8_t *buf;
+    AVFrame *frm_in, *frm_out;
+    struct SwsContext *swsctx;
+
+    img_sz = (dst_h * dst_w * 3)/2;
+    memset(dst, 0x00, (size_t)img_sz);
+
+    frm_in = av_frame_alloc();
+    if (frm_in == NULL) {
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , _("Unable to allocate frm_in."));
+        return;
+    }
+
+    frm_out = av_frame_alloc();
+    if (frm_out == NULL) {
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , _("Unable to allocate frm_out."));
+        av_frame_free(&frm_in);
+        return;
+    }
+
+    retcd = av_image_fill_arrays(
+        frm_in->data, frm_in->linesize
+        , src, AV_PIX_FMT_YUV420P
+        , src_w, src_h, 1);
+    if (retcd < 0) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , "Error filling arrays: %s", errstr);
+        av_frame_free(&frm_in);
+        av_frame_free(&frm_out);
+        return;
+    }
+
+    buf = (uint8_t *)mymalloc((size_t)img_sz);
+
+    retcd = av_image_fill_arrays(
+        frm_out->data, frm_out->linesize
+        , buf, AV_PIX_FMT_YUV420P
+        , dst_w, dst_h, 1);
+    if (retcd < 0) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , "Error Filling array 2: %s", errstr);
+        free(buf);
+        av_frame_free(&frm_in);
+        av_frame_free(&frm_out);
+        return;
+    }
+
+    swsctx = sws_getContext(
+            src_w, src_h, AV_PIX_FMT_YUV420P
+            ,dst_w, dst_h, AV_PIX_FMT_YUV420P
+            ,SWS_BICUBIC, NULL, NULL, NULL);
+    if (swsctx == NULL) {
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , _("Unable to allocate scaling context."));
+        free(buf);
+        av_frame_free(&frm_in);
+        av_frame_free(&frm_out);
+        return;
+    }
+
+    retcd = sws_scale(swsctx
+        , (const uint8_t* const *)frm_in->data, frm_in->linesize
+        , 0, src_h, frm_out->data, frm_out->linesize);
+    if (retcd < 0) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            ,_("Error resizing/reformatting: %s"), errstr);
+        free(buf);
+        av_frame_free(&frm_in);
+        av_frame_free(&frm_out);
+        sws_freeContext(swsctx);
+        return;
+    }
+
+    retcd = av_image_copy_to_buffer(
+        (uint8_t *)dst, img_sz
+        , (const uint8_t * const*)frm_out
+        , frm_out->linesize
+        , AV_PIX_FMT_YUV420P, dst_w, dst_h, 1);
+
+    if (retcd < 0) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            ,_("Error putting frame into output buffer: %s"), errstr);
+        free(buf);
+        av_frame_free(&frm_in);
+        av_frame_free(&frm_out);
+        sws_freeContext(swsctx);
+        return;
+    }
+
+    free(buf);
+    av_frame_free(&frm_in);
+    av_frame_free(&frm_out);
+    sws_freeContext(swsctx);
+}
+

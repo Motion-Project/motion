@@ -1,4412 +1,3453 @@
 # Motion Application
-# Copyright (2018)
+# Copyright (2020 - 2023)
 # This file is distributed under the same license as the Motion package.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.x\n"
+"Project-Id-Version: 0.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-24 08:29-0600\n"
-"PO-Revision-Date: 2022-10-24 08:36-0600\n"
+"POT-Creation-Date: 2023-02-04 18:23-0700\n"
+"PO-Revision-Date: 2023-02-048 21:45-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: no\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 2.0.6\n"
 
-#: src/conf.c
+#: src/alg.cpp
+msgid "Lightswitch detected"
+msgstr "Lysbryter oppdaget"
+
+#: src/alg_sec.cpp
 #, c-format
-msgid "%s after version %s"
-msgstr "%s etter versjon %s"
+msgid "Error %s"
+msgstr "Feil %s"
 
-#: src/conf.c
+#: src/alg_sec.cpp
+msgid "Disabling secondary detection"
+msgstr "Deaktiverer sekundær deteksjon"
+
+#: src/alg_sec.cpp
+msgid "No secondary model specified."
+msgstr "Ingen sekundærmodell spesifisert."
+
+#: src/alg_sec.cpp
+#, c-format
+msgid "Failed loading model %s"
+msgstr "Kunne ikke laste modellen %s"
+
+#: src/alg_sec.cpp
+#, c-format
+msgid "Classes file not found: %s"
+msgstr "Klassefilen ble ikke funnet: %s"
+
+#: src/alg_sec.cpp
+msgid "Starting."
+msgstr "Starter."
+
+#: src/alg_sec.cpp
+msgid "Exiting."
+msgstr "Avslutter."
+
+#: src/alg_sec.cpp
+msgid "Error starting algsec handler thread"
+msgstr "Feil ved start av tråd for algsec-behandler"
+
+#: src/alg_sec.cpp
+msgid "Graceful shutdown of secondary detector thread failed"
+msgstr "Grasiøs avstenging av sekundær detektortråd mislyktes"
+
+#: src/alg_sec.cpp
+msgid "Your computer is too slow for these settings."
+msgstr "Datamaskinen din er for treg for disse innstillingene."
+
+#: src/alg_sec.cpp
+msgid "Missed many frames for secondary detection."
+msgstr "Savnet mange bilder for sekundær deteksjon."
+
+#: src/alg_sec.cpp
+msgid "Your computer is too slow."
+msgstr "Datamaskinen din er for treg."
+
+#: src/conf.cpp
+msgid "daemon"
+msgstr "demon"
+
+#: src/conf.cpp
+msgid "setup_mode"
+msgstr "oppsettmodus"
+
+#: src/conf.cpp
+msgid "log_file"
+msgstr "loggfil"
+
+#: src/conf.cpp
+msgid "pid_file"
+msgstr "pid-fil"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid log_level %d"
+msgstr "Ugyldig loggnivå %d"
+
+#: src/conf.cpp
+msgid "log_level"
+msgstr "loggnivå"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid log_type %s"
+msgstr "Ugyldig loggtype %s"
+
+#: src/conf.cpp
+msgid "log_type"
+msgstr "loggtype"
+
+#: src/conf.cpp
+msgid "native_language"
+msgstr "morsmål"
+
+#: src/conf.cpp
+msgid "camera"
+msgstr "kamera"
+
+#: src/conf.cpp
+msgid "device_name"
+msgstr "enhetsnavn"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid device_id %d"
+msgstr "Ugyldig enhets-ID %d"
+
+#: src/conf.cpp
+msgid "device_id"
+msgstr "enhets-ID"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid device_tmo %d"
+msgstr "Ugyldig enhet tmo %d"
+
+#: src/conf.cpp
+msgid "device_tmo"
+msgstr "enhet tmo"
+
+#: src/conf.cpp
+msgid "pause"
+msgstr "pause"
+
+#: src/conf.cpp
+msgid "config_dir"
+msgstr "konfig dir"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid target_dir.  Conversion specifiers not permitted. %s"
+msgstr "Ugyldig måldir. Konverteringsspesifikasjoner er ikke tillatt. %s"
+
+#: src/conf.cpp
+msgid "target_dir"
+msgstr "mål dir"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid watchdog timeout %d"
+msgstr "Ugyldig tidsavbrudd for vakthund %d"
+
+#: src/conf.cpp
+msgid "watchdog_tmo"
+msgstr "vakthund tmo"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid watchdog kill timeout %d"
+msgstr "Ugyldig timeout for vakthunddrep %d"
+
+#: src/conf.cpp
+msgid "watchdog_kill"
+msgstr "vakthund drepe"
+
+#: src/conf.cpp
+msgid "v4l2_device"
+msgstr "v4l2 enhet"
+
+#: src/conf.cpp
+msgid "v4l2_params"
+msgstr "v4l2 parametere"
+
+#: src/conf.cpp
+msgid "netcam_url"
+msgstr "netcam url"
+
+#: src/conf.cpp
+msgid "netcam_params"
+msgstr "netcam params"
+
+#: src/conf.cpp
+msgid "netcam_high_url"
+msgstr "netcam høy url"
+
+#: src/conf.cpp
+msgid "netcam_high_params"
+msgstr "netcam høye parametere"
+
+#: src/conf.cpp
+msgid "netcam_userpass"
+msgstr "netcam brukerpass"
+
+#: src/conf.cpp
+msgid "libcam_device"
+msgstr "libcam-enhet"
+
+#: src/conf.cpp
+msgid "libcam_params"
+msgstr "libcam params"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid width %d"
+msgstr "Ugyldig bredde %d"
+
+#: src/conf.cpp
+#: src/netcam.cpp
+#, c-format
+msgid "Image width (%d) requested is not modulo 8."
+msgstr "Bildebredde (%d) forespurt er ikke modulo 8."
+
+#: src/conf.cpp
+#, c-format
+msgid "Adjusting width to next higher multiple of 8 (%d)."
+msgstr "Justerer bredden til neste høyere multiplum på 8 (%d)."
+
+#: src/conf.cpp
+msgid "width"
+msgstr "bredde"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid height %d"
+msgstr "Ugyldig høyde %d"
+
+#: src/conf.cpp
+#: src/netcam.cpp
+#, c-format
+msgid "Image height (%d) requested is not modulo 8."
+msgstr "Bildehøyde (%d) forespurt er ikke modulo 8."
+
+#: src/conf.cpp
+#: src/netcam.cpp
+#, c-format
+msgid "Adjusting height to next higher multiple of 8 (%d)."
+msgstr "Justerer høyden til neste høyere multiplum på 8 (%d)."
+
+#: src/conf.cpp
+msgid "height"
+msgstr "høyde"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid framerate %d"
+msgstr "Ugyldig rammehastighet %d"
+
+#: src/conf.cpp
+msgid "framerate"
+msgstr "framerate"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid rotate %d"
+msgstr "Ugyldig rotasjon %d"
+
+#: src/conf.cpp
+msgid "rotate"
+msgstr "rotere"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid flip_axis %s"
+msgstr "Ugyldig vippeakse %s"
+
+#: src/conf.cpp
+msgid "flip_axis"
+msgstr "snu aksen"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid locate_motion_mode %s"
+msgstr "Ugyldig lokalisering av bevegelsesmodus %s"
+
+#: src/conf.cpp
+msgid "locate_motion_mode"
+msgstr "finn bevegelsesmodus"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid locate_motion_style %s"
+msgstr "Ugyldig lokalisering av bevegelsesstil %s"
+
+#: src/conf.cpp
+msgid "locate_motion_style"
+msgstr "finn bevegelsesstil"
+
+#: src/conf.cpp
+msgid "text_left"
+msgstr "tekst til venstre"
+
+#: src/conf.cpp
+msgid "text_right"
+msgstr "tekst høyre"
+
+#: src/conf.cpp
+msgid "text_changes"
+msgstr "tekstendringer"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid text_scale %d"
+msgstr "Ugyldig tekstskala %d"
+
+#: src/conf.cpp
+msgid "text_scale"
+msgstr "tekst skala"
+
+#: src/conf.cpp
+msgid "text_event"
+msgstr "teksthendelse"
+
+#: src/conf.cpp
+msgid "emulate_motion"
+msgstr "etterligne bevegelse"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid threshold %d"
+msgstr "Ugyldig terskel %d"
+
+#: src/conf.cpp
+msgid "threshold"
+msgstr "terskel"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid threshold_maximum %d"
+msgstr "Ugyldig maksimumsgrense %d"
+
+#: src/conf.cpp
+msgid "threshold_maximum"
+msgstr "terskel maksimum"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid threshold_sdevx %d"
+msgstr "Ugyldig terskel sdevx %d"
+
+#: src/conf.cpp
+msgid "threshold_sdevx"
+msgstr "terskel sdevx"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid threshold_sdevy %d"
+msgstr "Ugyldig terskel sdevy %d"
+
+#: src/conf.cpp
+msgid "threshold_sdevy"
+msgstr "terskel sdevy"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid threshold_sdevxy %d"
+msgstr "Ugyldig terskel sdevxy %d"
+
+#: src/conf.cpp
+msgid "threshold_sdevxy"
+msgstr "terskel sdevxy"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid threshold_ratio %d"
+msgstr "Ugyldig terskelforhold %d"
+
+#: src/conf.cpp
+msgid "threshold_ratio"
+msgstr "terskelforhold"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid threshold_ratio_change %d"
+msgstr "Ugyldig endring av terskelforhold %d"
+
+#: src/conf.cpp
+msgid "threshold_ratio_change"
+msgstr "terskelforholdsendring"
+
+#: src/conf.cpp
+msgid "threshold_tune"
+msgstr "terskelmelodi"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid secondary_method %s"
+msgstr "Ugyldig sekundær metode %s"
+
+#: src/conf.cpp
+msgid "secondary_method"
+msgstr "sekundær metode"
+
+#: src/conf.cpp
+msgid "secondary_params"
+msgstr "sekundære paramer"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid noise_level %d"
+msgstr "Ugyldig støynivå %d"
+
+#: src/conf.cpp
+msgid "noise_level"
+msgstr "støynivå"
+
+#: src/conf.cpp
+msgid "noise_tune"
+msgstr "støy melodi"
+
+#: src/conf.cpp
+msgid "despeckle_filter"
+msgstr "flekkete filter"
+
+#: src/conf.cpp
+msgid "area_detect"
+msgstr "område oppdage"
+
+#: src/conf.cpp
+msgid "mask_file"
+msgstr "maske fil"
+
+#: src/conf.cpp
+msgid "mask_privacy"
+msgstr "maske personvern"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid smart_mask_speed %d"
+msgstr "Ugyldig smartmaskehastighet %d"
+
+#: src/conf.cpp
+msgid "smart_mask_speed"
+msgstr "smart maskehastighet"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid lightswitch_percent %d"
+msgstr "Ugyldig lysbryterprosent %d"
+
+#: src/conf.cpp
+msgid "lightswitch_percent"
+msgstr "lysbryter prosent"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid lightswitch_frames %d"
+msgstr "Ugyldige lysbryterrammer %d"
+
+#: src/conf.cpp
+msgid "lightswitch_frames"
+msgstr "lysbryterrammer"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid minimum_motion_frames %d"
+msgstr "Ugyldige minimumsbevegelsesrammer %d"
+
+#: src/conf.cpp
+msgid "minimum_motion_frames"
+msgstr "minimum bevegelsesrammer"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid static_object_time %d"
+msgstr "Ugyldig statisk objekttid %d"
+
+#: src/conf.cpp
+msgid "static_object_time"
+msgstr "statisk objekttid"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid event_gap %d"
+msgstr "Ugyldig hendelsesgap %d"
+
+#: src/conf.cpp
+msgid "event_gap"
+msgstr "hendelsesgap"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid pre_capture %d"
+msgstr "Ugyldig forhåndsfangst %d"
+
+#: src/conf.cpp
+msgid "pre_capture"
+msgstr "forhåndsfangst"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid post_capture %d"
+msgstr "Ugyldig postfangst %d"
+
+#: src/conf.cpp
+msgid "post_capture"
+msgstr "postfangst"
+
+#: src/conf.cpp
+msgid "on_event_start"
+msgstr "ved arrangementets start"
+
+#: src/conf.cpp
+msgid "on_event_end"
+msgstr "på slutten av arrangementet"
+
+#: src/conf.cpp
+msgid "on_picture_save"
+msgstr "på bildelagring"
+
+#: src/conf.cpp
+msgid "on_area_detected"
+msgstr "på oppdaget område"
+
+#: src/conf.cpp
+msgid "on_motion_detected"
+msgstr "på bevegelse oppdaget"
+
+#: src/conf.cpp
+msgid "on_movie_start"
+msgstr "på filmstart"
+
+#: src/conf.cpp
+msgid "on_movie_end"
+msgstr "på slutten av filmen"
+
+#: src/conf.cpp
+msgid "on_camera_lost"
+msgstr "på kamera tapt"
+
+#: src/conf.cpp
+msgid "on_camera_found"
+msgstr "på kamera funnet"
+
+#: src/conf.cpp
+msgid "on_secondary_detect"
+msgstr "på sekundær deteksjon"
+
+#: src/conf.cpp
+msgid "on_action_user"
+msgstr "på handling bruker"
+
+#: src/conf.cpp
+msgid "on_sound_alert"
+msgstr "på lydvarsling"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid picture_output %s"
+msgstr "Ugyldig bildeutgang %s"
+
+#: src/conf.cpp
+msgid "picture_output"
+msgstr "bildeutgang"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid picture_output_motion %s"
+msgstr "Ugyldig bildeutgangsbevegelse %s"
+
+#: src/conf.cpp
+msgid "picture_output_motion"
+msgstr "bildeutgang bevegelse"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid picture_type %s"
+msgstr "Ugyldig bildetype %s"
+
+#: src/conf.cpp
+msgid "picture_type"
+msgstr "bildetype"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid picture_quality %d"
+msgstr "Ugyldig bildekvalitet %d"
+
+#: src/conf.cpp
+msgid "picture_quality"
+msgstr "bildekvalitet"
+
+#: src/conf.cpp
+msgid "picture_exif"
+msgstr "bilde exif"
+
+#: src/conf.cpp
+msgid "picture_filename"
+msgstr "bildefilnavn"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid snapshot_interval %d"
+msgstr "Ugyldig øyeblikksbildeintervall %d"
+
+#: src/conf.cpp
+msgid "snapshot_interval"
+msgstr "øyeblikksbildeintervall"
+
+#: src/conf.cpp
+msgid "snapshot_filename"
+msgstr "snapshot filnavn"
+
+#: src/conf.cpp
+msgid "movie_output"
+msgstr "filmutgang"
+
+#: src/conf.cpp
+msgid "movie_output_motion"
+msgstr "filmutgangsbevegelse"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid movie_max_time %d"
+msgstr "Ugyldig filmmaks tid %d"
+
+#: src/conf.cpp
+msgid "movie_max_time"
+msgstr "film maks tid"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid movie_bps %d"
+msgstr "Ugyldig filmbps %d"
+
+#: src/conf.cpp
+msgid "movie_bps"
+msgstr "film bps"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid movie_quality %d"
+msgstr "Ugyldig filmkvalitet %d"
+
+#: src/conf.cpp
+msgid "movie_quality"
+msgstr "filmkvalitet"
+
+#: src/conf.cpp
+msgid "movie_container"
+msgstr "filmbeholder"
+
+#: src/conf.cpp
+msgid "movie_passthrough"
+msgstr "filmgjennomgang"
+
+#: src/conf.cpp
+msgid "movie_filename"
+msgstr "filmfilnavn"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid movie_retain %s"
+msgstr "Ugyldig filmbehold %s"
+
+#: src/conf.cpp
+msgid "movie_retain"
+msgstr "filmen beholde"
+
+#: src/conf.cpp
+msgid "movie_extpipe_use"
+msgstr "bruk av filmextpipe"
+
+#: src/conf.cpp
+msgid "movie_extpipe"
+msgstr "filmextpipe"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid timelapse_interval %d"
+msgstr "Ugyldig timelapse-intervall %d"
+
+#: src/conf.cpp
+msgid "timelapse_interval"
+msgstr "timelapse-intervall"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid timelapse_mode %s"
+msgstr "Ugyldig timelapse-modus %s"
+
+#: src/conf.cpp
+msgid "timelapse_mode"
+msgstr "timelapse-modus"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid timelapse_fps %d"
+msgstr "Ugyldig timelapse fps %d"
+
+#: src/conf.cpp
+msgid "timelapse_fps"
+msgstr "timelapse fps"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid timelapse_container %s"
+msgstr "Ugyldig timelapse-beholder %s"
+
+#: src/conf.cpp
+msgid "timelapse_container"
+msgstr "timelapse-beholder"
+
+#: src/conf.cpp
+msgid "timelapse_filename"
+msgstr "timelapse filnavn"
+
+#: src/conf.cpp
+msgid "video_pipe"
+msgstr "videopipe"
+
+#: src/conf.cpp
+msgid "video_pipe_motion"
+msgstr "videorørbevegelse"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid webcontrol_port %d"
+msgstr "Ugyldig webkontrollport %d"
+
+#: src/conf.cpp
+msgid "webcontrol_port"
+msgstr "webkontroll port"
+
+#: src/conf.cpp
+msgid "Invalid webcontrol_base_path: Use blank instead of single / "
+msgstr "Ugyldig webkontroll-basebane: Bruk tom i stedet for enkelt /"
+
+#: src/conf.cpp
+msgid "Invalid webcontrol_base_path:  Must start with a / "
+msgstr "Ugyldig webkontroll-basebane: Må starte med en /"
+
+#: src/conf.cpp
+msgid "webcontrol_base_path"
+msgstr "webcontrols basebane"
+
+#: src/conf.cpp
+msgid "webcontrol_ipv6"
+msgstr "webkontroll ipv6"
+
+#: src/conf.cpp
+msgid "webcontrol_localhost"
+msgstr "webcontrol localhost"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid webcontrol_parms %d"
+msgstr "Ugyldig webkontroll-parms %d"
+
+#: src/conf.cpp
+msgid "webcontrol_parms"
+msgstr "webcontrol parms"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid webcontrol_interface %s"
+msgstr "Ugyldig webkontroll-grensesnitt %s"
+
+#: src/conf.cpp
+msgid "webcontrol_interface"
+msgstr "webkontroll grensesnitt"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid webcontrol_auth_method %s"
+msgstr "Ugyldig webkontroll-autentiseringsmetode %s"
+
+#: src/conf.cpp
+msgid "webcontrol_auth_method"
+msgstr "webcontrol auth metode"
+
+#: src/conf.cpp
+msgid "webcontrol_authentication"
+msgstr "webcontrol-autentisering"
+
+#: src/conf.cpp
+msgid "webcontrol_tls"
+msgstr "webcontrol tls"
+
+#: src/conf.cpp
+msgid "webcontrol_cert"
+msgstr "webkontroll sertifikat"
+
+#: src/conf.cpp
+msgid "webcontrol_key"
+msgstr "webkontroll nøkkel"
+
+#: src/conf.cpp
+msgid "webcontrol_headers"
+msgstr "webkontroll-hoder"
+
+#: src/conf.cpp
+msgid "webcontrol_html"
+msgstr "webkontroll html"
+
+#: src/conf.cpp
+msgid "webcontrol_actions"
+msgstr "webkontrollhandlinger"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid webcontrol_lock_minutes %d"
+msgstr "Ugyldig webkontroll-lås minutter %d"
+
+#: src/conf.cpp
+msgid "webcontrol_lock_minutes"
+msgstr "webcontrol lås minutter"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid webcontrol_lock_attempts %d"
+msgstr "Ugyldige webcontrol-låseforsøk %d"
+
+#: src/conf.cpp
+msgid "webcontrol_lock_attempts"
+msgstr "webcontrol låseforsøk"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid stream_preview_scale %d"
+msgstr "Ugyldig skala for forhåndsvisning av strøm %d"
+
+#: src/conf.cpp
+msgid "stream_preview_scale"
+msgstr "skala for forhåndsvisning av strøm"
+
+#: src/conf.cpp
+msgid "stream_preview_newline"
+msgstr "stream forhåndsvisning ny linje"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid stream_preview_method %s"
+msgstr "Ugyldig forhåndsvisningsmetode for strøm %s"
+
+#: src/conf.cpp
+msgid "stream_preview_method"
+msgstr "stream forhåndsvisningsmetode"
+
+#: src/conf.cpp
+msgid "stream_preview_ptz"
+msgstr "stream forhåndsvisning ptz"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid stream_quality %d"
+msgstr "Ugyldig strømkvalitet %d"
+
+#: src/conf.cpp
+msgid "stream_quality"
+msgstr "strømkvalitet"
+
+#: src/conf.cpp
+msgid "stream_grey"
+msgstr "strøm grå"
+
+#: src/conf.cpp
+msgid "stream_motion"
+msgstr "strømmebevegelse"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid stream_maxrate %d"
+msgstr "Ugyldig strømmaksrate %d"
+
+#: src/conf.cpp
+msgid "stream_maxrate"
+msgstr "stream maksrate"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid stream_scan_time %d"
+msgstr "Ugyldig strømskanningstid %d"
+
+#: src/conf.cpp
+msgid "stream_scan_time"
+msgstr "strømskanningstid"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid stream_scan_scale %d"
+msgstr "Ugyldig strømskanningsskala %d"
+
+#: src/conf.cpp
+msgid "stream_scan_scale"
+msgstr "strømskanningsskala"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid database_type %s"
+msgstr "Ugyldig databasetype %s"
+
+#: src/conf.cpp
+msgid "database_type"
+msgstr "databasetype"
+
+#: src/conf.cpp
+msgid "database_dbname"
+msgstr "database dbname"
+
+#: src/conf.cpp
+msgid "database_host"
+msgstr "databasevert"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid database_port %d"
+msgstr "Ugyldig databaseport %d"
+
+#: src/conf.cpp
+msgid "database_port"
+msgstr "databaseport"
+
+#: src/conf.cpp
+msgid "database_user"
+msgstr "database bruker"
+
+#: src/conf.cpp
+msgid "database_password"
+msgstr "databasepassord"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid database_busy_timeout %d"
+msgstr "Ugyldig tidsavbrudd for opptatt database %d"
+
+#: src/conf.cpp
+msgid "database_busy_timeout"
+msgstr "database opptatt tidsavbrudd"
+
+#: src/conf.cpp
+msgid "sql_event_start"
+msgstr "sql-arrangementstart"
+
+#: src/conf.cpp
+msgid "sql_event_end"
+msgstr "sql-hendelse slutt"
+
+#: src/conf.cpp
+msgid "sql_movie_start"
+msgstr "sql film start"
+
+#: src/conf.cpp
+msgid "sql_movie_end"
+msgstr "sql film slutt"
+
+#: src/conf.cpp
+msgid "sql_pic_save"
+msgstr "sql bilde lagre"
+
+#: src/conf.cpp
+msgid "ptz_auto_track"
+msgstr "ptz autospor"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid ptz_wait %d"
+msgstr "Ugyldig ptz-vent %d"
+
+#: src/conf.cpp
+msgid "ptz_wait"
+msgstr "ptz vent"
+
+#: src/conf.cpp
+msgid "ptz_move_track"
+msgstr "ptz flytte spor"
+
+#: src/conf.cpp
+msgid "ptz_pan_left"
+msgstr "ptz panne igjen"
+
+#: src/conf.cpp
+msgid "ptz_pan_right"
+msgstr "ptz panorer høyre"
+
+#: src/conf.cpp
+msgid "ptz_tilt_up"
+msgstr "ptz tilt opp"
+
+#: src/conf.cpp
+msgid "ptz_tilt_down"
+msgstr "ptz vippes ned"
+
+#: src/conf.cpp
+msgid "ptz_zoom_in"
+msgstr "ptz zoom inn"
+
+#: src/conf.cpp
+msgid "ptz_zoom_out"
+msgstr "ptz zoome ut"
+
+#: src/conf.cpp
+msgid "snd_device"
+msgstr "snd enhet"
+
+#: src/conf.cpp
+msgid "snd_params"
+msgstr "snd params"
+
+#: src/conf.cpp
+msgid "snd_alerts"
+msgstr "snd varsler"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid snd_window %s"
+msgstr "Ugyldig snd-vindu %s"
+
+#: src/conf.cpp
+msgid "snd_window"
+msgstr "snd vindu"
+
+#: src/conf.cpp
+msgid "snd_show"
+msgstr "snd show"
+
+#: src/conf.cpp
 #, c-format
 msgid "Unknown config option \"%s\""
-msgstr "Ukjent konfigurasjonsalternativ \" %s \""
+msgstr "Ukjent konfigurasjonsalternativ \"%s\""
 
-#: src/conf.c
+#: src/conf.cpp
 #, c-format
-msgid "Writing config file to %s"
-msgstr "Skriver konfigurasjonsfil til %s"
+msgid "Camera config file %s not found"
+msgstr "Finner ikke kamerakonfigurasjonsfilen %s"
 
-#: src/conf.c
+#: src/conf.cpp
 #, c-format
-msgid "Configfile %s not found - trying defaults."
-msgstr "Konfigurering %s ikke funnet - prøver standardverdier."
+msgid "Sound config file %s not found"
+msgstr "Finner ikke lydkonfigurasjonsfilen %s"
 
-#: src/conf.c
-msgid "Error getcwd"
-msgstr "Feil getcwd"
-
-#: src/conf.c
-#, c-format
-msgid "could not open configfile %s"
-msgstr "kunne ikke åpne configfile %s"
-
-#: src/conf.c
-#, c-format
-msgid "Invalid file name %s"
-msgstr "Ugyldig filnavn %s"
-
-#: src/conf.c
-#, c-format
-msgid "Processing thread 0 - config file %s"
-msgstr "Behandler tråd 0 - konfigurasjonsfil %s"
-
-#: src/conf.c
-msgid "No config file to process, using default values"
-msgstr "Ingen konfigurasjonsfil å behandle ved å bruke standardverdier"
-
-#: src/conf.c
-#, c-format
-msgid "Writing configuration parameters from all files (%d):"
-msgstr "Skrive konfigurasjonsparametere fra alle filer ( %d):"
-
-#: src/conf.c
-#, c-format
-msgid "Thread %d - Config file: %s"
-msgstr "Tråd %d - Konfigurasjonsfil: %s"
-
-#: src/conf.c
-#, c-format
-msgid "%-25s <redacted>"
-msgstr "%-25s <omhandlet>"
-
-#: src/conf.c
+#: src/conf.cpp
 #, c-format
 msgid "Processing config file %s"
 msgstr "Behandler konfigurasjonsfilen %s"
 
-#: src/conf.c
+#: src/conf.cpp
+#: src/util.cpp
 #, c-format
-msgid "Camera directory config %s not found"
-msgstr "Kamerakatalogkonfigurasjon %s ikke funnet"
+msgid "params_file not found: %s"
+msgstr "params-fil ikke funnet: %s"
 
-#: src/conf.c
+#: src/conf.cpp
+#: src/util.cpp
 #, c-format
-msgid "Camera config file %s not found"
-msgstr "Kamerakonfigurasjonsfil %s ikke funnet"
+msgid "Unable to parse line: %s"
+msgstr "Kan ikke analysere linje: %s"
 
-#: src/conf.c
+#: src/conf.cpp
 #, c-format
-msgid "Processing camera config file %s"
-msgstr "Behandler kamerakonfigur %s"
+msgid "%-25s <redacted>"
+msgstr "%-25s <redigert>"
 
-#: src/conf.c
-msgid "daemon"
-msgstr "daemon"
+#: src/conf.cpp
+msgid "Logging configuration parameters from all files"
+msgstr "Logging av konfigurasjonsparametere fra alle filer"
 
-#: src/conf.c
-msgid "setup_mode"
-msgstr "oppsettmodus"
-
-#: src/conf.c
-msgid "pid_file"
-msgstr "pid-fil"
-
-#: src/conf.c
-msgid "log_file"
-msgstr "loggfil"
-
-#: src/conf.c
-msgid "log_level"
-msgstr "loggenivå"
-
-#: src/conf.c
-msgid "log_type"
-msgstr "loggtype"
-
-#: src/conf.c
-msgid "quiet"
-msgstr "stille"
-
-#: src/conf.c
-msgid "watchdog_tmo"
-msgstr "vakthund tmo"
-
-#: src/conf.c
-msgid "watchdog_kill"
-msgstr "vakthund drepe"
-
-#: src/conf.c
-msgid "native_language"
-msgstr "morsmål"
-
-#: src/conf.c
-msgid "camera_name"
-msgstr "kameranavn"
-
-#: src/conf.c
-msgid "camera_id"
-msgstr "kamera-ID"
-
-#: src/conf.c
-msgid "target_dir"
-msgstr "mål dir"
-
-#: src/conf.c
-msgid "video_device"
-msgstr "videoenhet"
-
-#: src/conf.c
-msgid "video_params"
-msgstr "video params"
-
-#: src/conf.c
-msgid "auto_brightness"
-msgstr "automatisk lysstyrke"
-
-#: src/conf.c
-msgid "tuner_device"
-msgstr "tuner"
-
-#: src/conf.c
-msgid "roundrobin_frames"
-msgstr "roundrobin rammer"
-
-#: src/conf.c
-msgid "roundrobin_skip"
-msgstr "roundrobin hoppe"
-
-#: src/conf.c
-msgid "roundrobin_switchfilter"
-msgstr "roundrobin switchfilter"
-
-#: src/conf.c
-msgid "netcam_url"
-msgstr "nettkamera url"
-
-#: src/conf.c
-msgid "netcam_params"
-msgstr "netcam params"
-
-#: src/conf.c
-msgid "netcam_high_url"
-msgstr "nettkamera høy url"
-
-#: src/conf.c
-msgid "netcam_high_params"
-msgstr "netcam høye params"
-
-#: src/conf.c
-msgid "netcam_userpass"
-msgstr "netcam brukerpass"
-
-#: src/conf.c
-msgid "width"
-msgstr "bredde"
-
-#: src/conf.c
-msgid "height"
-msgstr "høyde"
-
-#: src/conf.c
-msgid "framerate"
-msgstr "framerate"
-
-#: src/conf.c
-msgid "minimum_frame_time"
-msgstr "minimum rammetid"
-
-#: src/conf.c
-msgid "rotate"
-msgstr "rotere"
-
-#: src/conf.c
-msgid "flip_axis"
-msgstr "snu aksen"
-
-#: src/conf.c
-msgid "locate_motion_mode"
-msgstr "Finn bevegelsesmodus"
-
-#: src/conf.c
-msgid "locate_motion_style"
-msgstr "Finn bevegelsesstil"
-
-#: src/conf.c
-msgid "text_left"
-msgstr "tekst igjen"
-
-#: src/conf.c
-msgid "text_right"
-msgstr "tekst riktig"
-
-#: src/conf.c
-msgid "text_changes"
-msgstr "tekstendringer"
-
-#: src/conf.c
-msgid "text_scale"
-msgstr "tekst skala"
-
-#: src/conf.c
-msgid "text_event"
-msgstr "tekstbegivenhet"
-
-#: src/conf.c
-msgid "emulate_motion"
-msgstr "emulere bevegelse"
-
-#: src/conf.c
-msgid "pause"
-msgstr "pause"
-
-#: src/conf.c
-msgid "threshold"
-msgstr "terskel"
-
-#: src/conf.c
-msgid "threshold_maximum"
-msgstr "maksimum terskel"
-
-#: src/conf.c
-msgid "threshold_tune"
-msgstr "terskelinnstilling"
-
-#: src/conf.c
-msgid "noise_level"
-msgstr "støynivå"
-
-#: src/conf.c
-msgid "noise_tune"
-msgstr "støy melodi"
-
-#: src/conf.c
-msgid "despeckle_filter"
-msgstr "vrakfilter"
-
-#: src/conf.c
-msgid "area_detect"
-msgstr "området oppdage"
-
-#: src/conf.c
-msgid "mask_file"
-msgstr "maskefil"
-
-#: src/conf.c
-msgid "mask_privacy"
-msgstr "maske privatliv"
-
-#: src/conf.c
-msgid "smart_mask_speed"
-msgstr "smart maskehastighet"
-
-#: src/conf.c
-msgid "lightswitch_percent"
-msgstr "lysbryter prosent"
-
-#: src/conf.c
-msgid "lightswitch_frames"
-msgstr "lysbryterrammer"
-
-#: src/conf.c
-msgid "minimum_motion_frames"
-msgstr "minimum bevegelsesrammer"
-
-#: src/conf.c
-msgid "event_gap"
-msgstr "hendelsesgap"
-
-#: src/conf.c
-msgid "pre_capture"
-msgstr "før fangst"
-
-#: src/conf.c
-msgid "post_capture"
-msgstr "etterfangst"
-
-#: src/conf.c
-msgid "on_event_start"
-msgstr "på eventstart"
-
-#: src/conf.c
-msgid "on_event_end"
-msgstr "på slutten av arrangementet"
-
-#: src/conf.c
-msgid "on_picture_save"
-msgstr "på bildet lagre"
-
-#: src/conf.c
-msgid "on_area_detected"
-msgstr "på område oppdaget"
-
-#: src/conf.c
-msgid "on_motion_detected"
-msgstr "på bevegelse oppdaget"
-
-#: src/conf.c
-msgid "on_movie_start"
-msgstr "på filmstart"
-
-#: src/conf.c
-msgid "on_movie_end"
-msgstr "på film slutt"
-
-#: src/conf.c
-msgid "on_camera_lost"
-msgstr "på kamera tapt"
-
-#: src/conf.c
-msgid "on_camera_found"
-msgstr "på kamera funnet"
-
-#: src/conf.c
-msgid "picture_output"
-msgstr "bildeutgang"
-
-#: src/conf.c
-msgid "picture_output_motion"
-msgstr "bildeutgangsbevegelse"
-
-#: src/conf.c
-msgid "picture_type"
-msgstr "bildetype"
-
-#: src/conf.c
-msgid "picture_quality"
-msgstr "bildekvalitet"
-
-#: src/conf.c
-msgid "picture_exif"
-msgstr "bilde exif"
-
-#: src/conf.c
-msgid "picture_filename"
-msgstr "bilde filnavn"
-
-#: src/conf.c
-msgid "snapshot_interval"
-msgstr "øyeblikksbilde-intervall"
-
-#: src/conf.c
-msgid "snapshot_filename"
-msgstr "øyeblikksbilde filnavn"
-
-#: src/conf.c
-msgid "movie_output"
-msgstr "filmutgang"
-
-#: src/conf.c
-msgid "movie_output_motion"
-msgstr "filmutgang"
-
-#: src/conf.c
-msgid "movie_max_time"
-msgstr "film maks tid"
-
-#: src/conf.c
-msgid "movie_bps"
-msgstr "film bps"
-
-#: src/conf.c
-msgid "movie_quality"
-msgstr "filmkvalitet"
-
-#: src/conf.c
-msgid "movie_codec"
-msgstr "filmkodek"
-
-#: src/conf.c
-msgid "movie_duplicate_frames"
-msgstr "film dupliserte rammer"
-
-#: src/conf.c
-msgid "movie_passthrough"
-msgstr "filmgjennomgang"
-
-#: src/conf.c
-msgid "movie_filename"
-msgstr "filnavn"
-
-#: src/conf.c
-msgid "movie_extpipe_use"
-msgstr "bruk av film extpipe"
-
-#: src/conf.c
-msgid "movie_extpipe"
-msgstr "filmuttrekk"
-
-#: src/conf.c
-msgid "timelapse_interval"
-msgstr "tidsintervall"
-
-#: src/conf.c
-msgid "timelapse_mode"
-msgstr "timelapse-modus"
-
-#: src/conf.c
-msgid "timelapse_fps"
-msgstr "timelapse fps"
-
-#: src/conf.c
-msgid "timelapse_codec"
-msgstr "timelapse codec"
-
-#: src/conf.c
-msgid "timelapse_filename"
-msgstr "timelapse filnavn"
-
-#: src/conf.c
-msgid "video_pipe"
-msgstr "videorør"
-
-#: src/conf.c
-msgid "video_pipe_motion"
-msgstr "bevegelse av videorør"
-
-#: src/conf.c
-msgid "webcontrol_port"
-msgstr "nettkontrollport"
-
-#: src/conf.c
-msgid "webcontrol_ipv6"
-msgstr "webcontrol ipv6"
-
-#: src/conf.c
-msgid "webcontrol_localhost"
-msgstr "webkontroll localhost"
-
-#: src/conf.c
-msgid "webcontrol_parms"
-msgstr "nettkontrollparmer"
-
-#: src/conf.c
-msgid "webcontrol_interface"
-msgstr "nettkontrollgrensesnitt"
-
-#: src/conf.c
-msgid "webcontrol_auth_method"
-msgstr "nettkontroll autorisasjonsmetode"
-
-#: src/conf.c
-msgid "webcontrol_authentication"
-msgstr "godkjenning på nettet"
-
-#: src/conf.c
-msgid "webcontrol_tls"
-msgstr "webkontroll tls"
-
-#: src/conf.c
-msgid "webcontrol_cert"
-msgstr "webcontrol cert"
-
-#: src/conf.c
-msgid "webcontrol_key"
-msgstr "nettkontrollnøkkel"
-
-#: src/conf.c
-msgid "webcontrol_header_params"
-msgstr "webkontroll overskrift params"
-
-#: src/conf.c
-msgid "webcontrol_lock_minutes"
-msgstr "webkontrolllås minutter"
-
-#: src/conf.c
-msgid "webcontrol_lock_attempts"
-msgstr "webkontrolllåsforsøk"
-
-#: src/conf.c
-msgid "webcontrol_lock_max_ips"
-msgstr "webkontrolllås maks. ips"
-
-#: src/conf.c
-msgid "stream_port"
-msgstr "strømhavn"
-
-#: src/conf.c
-msgid "stream_localhost"
-msgstr "strøm localhost"
-
-#: src/conf.c
-msgid "stream_auth_method"
-msgstr "strøm autorisasjonsmetode"
-
-#: src/conf.c
-msgid "stream_authentication"
-msgstr "stream autentisering"
-
-#: src/conf.c
-msgid "stream_tls"
-msgstr "stream tls"
-
-#: src/conf.c
-msgid "stream_header_params"
-msgstr "stream header params"
-
-#: src/conf.c
-msgid "stream_preview_scale"
-msgstr "stream forhåndsvisningsskala"
-
-#: src/conf.c
-msgid "stream_preview_newline"
-msgstr "stream forhåndsvisning newline"
-
-#: src/conf.c
-msgid "stream_preview_method"
-msgstr "stream preview-metoden"
-
-#: src/conf.c
-msgid "stream_quality"
-msgstr "strømkvalitet"
-
-#: src/conf.c
-msgid "stream_grey"
-msgstr "strømgrå"
-
-#: src/conf.c
-msgid "stream_motion"
-msgstr "strøm bevegelse"
-
-#: src/conf.c
-msgid "stream_maxrate"
-msgstr "stream maksrate"
-
-#: src/conf.c
-msgid "stream_limit"
-msgstr "strømgrense"
-
-#: src/conf.c
-msgid "database_type"
-msgstr "databasetype"
-
-#: src/conf.c
-msgid "database_dbname"
-msgstr "database dbname"
-
-#: src/conf.c
-msgid "database_host"
-msgstr "database vert"
-
-#: src/conf.c
-msgid "database_port"
-msgstr "databaseport"
-
-#: src/conf.c
-msgid "database_user"
-msgstr "databasebruker"
-
-#: src/conf.c
-msgid "database_password"
-msgstr "database passord"
-
-#: src/conf.c
-msgid "database_busy_timeout"
-msgstr "timeout for database opptatt"
-
-#: src/conf.c
-msgid "sql_log_picture"
-msgstr "sql loggbilde"
-
-#: src/conf.c
-msgid "sql_log_snapshot"
-msgstr "stillbilde av sql log"
-
-#: src/conf.c
-msgid "sql_log_movie"
-msgstr "sql loggfilm"
-
-#: src/conf.c
-msgid "sql_log_timelapse"
-msgstr "sql log timelapse"
-
-#: src/conf.c
-msgid "sql_query_start"
-msgstr "sql spørringsstart"
-
-#: src/conf.c
-msgid "sql_query_stop"
-msgstr "sql spørringsstopp"
-
-#: src/conf.c
-msgid "sql_query"
-msgstr "sql spørring"
-
-#: src/conf.c
-msgid "track_type"
-msgstr "banetype"
-
-#: src/conf.c
-msgid "track_auto"
-msgstr "spore auto"
-
-#: src/conf.c
-msgid "track_port"
-msgstr "sporport"
-
-#: src/conf.c
-msgid "track_motorx"
-msgstr "spormotor"
-
-#: src/conf.c
-msgid "track_motorx_reverse"
-msgstr "spor motorx revers"
-
-#: src/conf.c
-msgid "track_motory"
-msgstr "spormotor"
-
-#: src/conf.c
-msgid "track_motory_reverse"
-msgstr "spore motiv revers"
-
-#: src/conf.c
-msgid "track_maxx"
-msgstr "spor maks"
-
-#: src/conf.c
-msgid "track_minx"
-msgstr "spor minx"
-
-#: src/conf.c
-msgid "track_maxy"
-msgstr "spor maks"
-
-#: src/conf.c
-msgid "track_miny"
-msgstr "spore miny"
-
-#: src/conf.c
-msgid "track_homex"
-msgstr "spor hjemmex"
-
-#: src/conf.c
-msgid "track_homey"
-msgstr "spor hjemlig"
-
-#: src/conf.c
-msgid "track_iomojo_id"
-msgstr "spor iomojo id"
-
-#: src/conf.c
-msgid "track_step_angle_x"
-msgstr "spor trinnsvinkel x"
-
-#: src/conf.c
-msgid "track_step_angle_y"
-msgstr "spor trinn vinkel y"
-
-#: src/conf.c
-msgid "track_move_wait"
-msgstr "spor flytte vent"
-
-#: src/conf.c
-msgid "track_speed"
-msgstr "sporhastighet"
-
-#: src/conf.c
-msgid "track_stepsize"
-msgstr "spor trinnstørrelse"
-
-#: src/conf.c
-msgid "track_generic_move"
-msgstr "spore generisk trekk"
-
-#: src/conf.c
-msgid "camera"
-msgstr "kamera"
-
-#: src/conf.c
-msgid "camera_dir"
-msgstr "camera dir"
-
-#: src/dbse.c
-msgid "Closing MySQL library"
-msgstr "Lukker MySQL -bibliotek"
-
-#: src/dbse.c
-msgid "Closing MariaDB library"
-msgstr "Lukker MariaDB -biblioteket"
-
-#: src/dbse.c
-msgid "Database closed"
-msgstr "Databasen stengt"
-
-#: src/dbse.c
-msgid "Initializing database"
-msgstr "Initierer databasen"
-
-#: src/dbse.c
+#: src/conf.cpp
 #, c-format
-msgid "Cannot connect to MySQL database %s on host %s with user %s"
-msgstr "Kan ikke koble til MySQL-databasen %s på verten %s med brukeren %s"
+msgid "Config file: %s"
+msgstr "Konfigurasjonsfil: %s"
 
-#: src/dbse.c
+#: src/conf.cpp
 #, c-format
-msgid "MySQL error was %s"
-msgstr "MySQL-feilen var %s"
+msgid "Camera %d - Config file: %s"
+msgstr "Kamera %d - Konfigurasjonsfil: %s"
 
-#: src/dbse.c
+#: src/conf.cpp
 #, c-format
-msgid "Cannot connect to MariaDB database %s on host %s with user %s"
-msgstr "Kan ikke koble til MariaDB -databasen %s på verten %s med brukeren %s"
+msgid "Sound %d - Config file: %s"
+msgstr "Lyd %d - Konfigurasjonsfil: %s"
 
-#: src/dbse.c
+#: src/conf.cpp
 #, c-format
-msgid "MariaDB error was %s"
-msgstr "MariaDB -feilen var %s"
+msgid "Failed to write configuration to %s"
+msgstr "Kunne ikke skrive konfigurasjon til %s"
 
-#: src/dbse.c
+#: src/conf.cpp
 #, c-format
-msgid "Opening database %s"
-msgstr "Åpner database %s"
+msgid "Configuration written to %s"
+msgstr "Konfigurasjon skrevet til %s"
 
-#: src/dbse.c
+#: src/conf.cpp
+msgid "Error getcwd"
+msgstr "Feil getcwd"
+
+#: src/conf.cpp
+msgid "Could not open configuration file"
+msgstr "Kunne ikke åpne konfigurasjonsfilen"
+
+#: src/dbse.cpp
+msgid "Invalid database name"
+msgstr "Ugyldig databasenavn"
+
+#: src/dbse.cpp
+msgid "Must specify database port for mariadb/pgsql"
+msgstr "Må spesifisere databaseport for mariadb/pgsql"
+
+#: src/dbse.cpp
+msgid "Must specify database name for sqlite3"
+msgstr "Må spesifisere databasenavn for sqlite3"
+
+#: src/dbse.cpp
+msgid "Database functionality disabled."
+msgstr "Databasefunksjonalitet deaktivert."
+
+#: src/dbse.cpp
 #, c-format
-msgid "Can't open SQLite3 database %s.  Error %d : %s"
-msgstr "Kan ikke åpne SQLite3-databasen %s. Feil %d: %s"
+msgid "SQLite error was %s"
+msgstr "SQLite-feilen var %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Setting busy timeout to %d msec"
-msgstr "Setter opptatt tidsavbrudd til %d msec"
+msgid "Error retrieving table columns: %s"
+msgstr "Feil ved henting av tabellkolonner: %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Setting busy timeout failed.  Error %d:%s"
-msgstr "Innstilling av opptatt tidsavbrudd mislyktes. Feil %d:%s"
+msgid "SQLite3 Database filename %s"
+msgstr "SQLite3 Database filnavn %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Connection to PostgreSQL database '%s' failed: %s"
-msgstr "Tilkobling til PostgreSQL-databasen ' %s' mislyktes: %s"
+msgid "Can't open database %s : %s"
+msgstr "Kan ikke åpne databasen %s: %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Database type %s"
-msgstr "Databasetype %s"
+msgid "Could not initialize database %s"
+msgstr "Kunne ikke initialisere databasen %s"
 
-#: src/dbse.c
-msgid "Executing MySQL query"
-msgstr "Utfører MySQL -forespørsel"
-
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "MySQL query failed %s error code %d"
-msgstr "MySQL -spørringen mislyktes %s feilkode %d"
+msgid "database_busy_timeout %d msec"
+msgstr "database opptatt tidsavbrudd %d msek"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid ""
-"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error "
-"was %s"
-msgstr ""
-"Kan ikke koble til MySQL-database %s på verten %s med bruker %s MySQL-feil "
-"igjenvar %s"
+msgid "database_busy_timeout failed %s"
+msgstr "databaseopptatt tidsavbrudd mislyktes %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Re-Connection to MySQL database '%s' Succeed"
-msgstr "Koble til MySQL-databasen '%s' på nytt"
+msgid "Error checking table: %s"
+msgstr "Feil ved kontroll av tabellen: %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "after re-connection MySQL query failed %s error code %d"
-msgstr "etter ny tilkobling mislyktes MySQL-spørringen %s feilkode %d"
+msgid "Error creating table: %s"
+msgstr "Feil ved opprettelse av tabell: %s"
 
-#: src/dbse.c
-msgid "Executing MariaDB query"
-msgstr "Utfører MariaDB -spørringen"
-
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "MariaDB query failed %s error code %d"
-msgstr "MariaDB -spørringen mislyktes %s feilkode %d"
+msgid "Error counting table: %s"
+msgstr "Feil ved telletabell: %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
+#, c-format
+msgid "Error retrieving table: %s"
+msgstr "Feil ved henting av tabell: %s"
+
+#: src/dbse.cpp
+#, c-format
+msgid "MariaDB query '%s' failed. %s error code %d"
+msgstr "MariaDB-spørringen '%s' mislyktes. %s feilkode %d"
+
+#: src/dbse.cpp
 #, c-format
 msgid ""
 "Cannot reconnect to MariaDB database %s on host %s with user %s MariaDB "
 "error was %s"
 msgstr ""
-"Kan ikke koble til MariaDB -databasen %s på verten %s igjen med brukeren %s "
+"Kan ikke koble til MariaDB-databasen %s på verten %s med brukeren %s "
 "MariaDBfeilen var %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
 msgid "Re-Connection to MariaDB database '%s' Succeed"
-msgstr "Tilkobling til MariaDB-databasen%s lykkes på nytt"
+msgstr "Re-tilkobling til MariaDB-databasen '%s' lykkes"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
 msgid "after re-connection MariaDB query failed %s error code %d"
-msgstr "etter ny tilkobling mislyktes MariaDB-spørringen %s feilkode %d"
+msgstr "etter re-tilkobling mislyktes MariaDB-spørringen %s feilkode %d"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Re-connected to PostgreSQL database '%s'"
-msgstr "Tilkoblet på nytt til PostgreSQL-databasen '%s'"
+msgid "Query error: %s"
+msgstr "Spørringsfeil: %s"
 
-#: src/dbse.c
-msgid "Executing PostgreSQL query"
-msgstr "Utfører PostgreSQL -forespørsel"
-
-#: src/dbse.c
-#, c-format
-msgid "Attempting reconnect to PostgreSQL database '%s': %s"
-msgstr "Prøver å koble til PostgreSQL -databasen ' %s' på nytt: %s"
-
-#: src/dbse.c
-#, c-format
-msgid "PGSQL query failed: [%s]  %s %s"
-msgstr "PGSQL-spørring mislyktes: [%s] %s %s"
-
-#: src/dbse.c
-#, c-format
-msgid "Executing %s"
-msgstr "Utfører %s"
-
-#: src/dbse.c
-#, c-format
-msgid "SQLite3 error %d : %s"
-msgstr "SQLite3-feil %d: %s"
-
-#: src/dbse.c
-msgid "Ignoring empty sql query"
-msgstr "Ignorerer tom sql-spørring"
-
-#: src/event.c src/track.c
-#, c-format
-msgid "Unable to start external command '%s'"
-msgstr "Kan ikke starte ekstern kommando ' %s'"
-
-#: src/event.c src/track.c
-#, c-format
-msgid "Executing external command '%s'"
-msgstr "Utfører ekstern kommando ' %s'"
-
-#: src/event.c
-#, c-format
-msgid "Writing image to file: %s"
-msgstr "Skriver bilde til fil: %s"
-
-#: src/event.c
-#, c-format
-msgid "Writing movie to file: %s"
-msgstr "Skriver film til fil: %s"
-
-#: src/event.c
-#, c-format
-msgid "Saved image to file: %s"
-msgstr "Lagret bilde i filen: %s"
-
-#: src/event.c
-#, c-format
-msgid "Saved movie to file: %s"
-msgstr "Filmen er lagret i filen: %s"
-
-#: src/event.c
-msgid "Failed to put image into video pipe"
-msgstr "Kunne ikke sette bilde i videorøret"
-
-#: src/event.c
-#, c-format
-msgid "Could not create symbolic link [%s]"
-msgstr "Kunne ikke opprette symbolsk lenke [ %s]"
-
-#: src/event.c
-#, c-format
-msgid "Error creating preview pipe name %d %s"
-msgstr "Feil ved oppretting av forhåndsvisningsrørnavn %d %s"
-
-#: src/event.c
-#, c-format
-msgid "Error creating file name base %d %s"
-msgstr "Feil ved oppretting av filnavnbase %d %s"
-
-#: src/event.c
-#, c-format
-msgid "Error creating preview name %d %s"
-msgstr "Feil ved oppretting av forhåndsvisningsnavn %d %s"
-
-#: src/event.c
-#, c-format
-msgid "CLOSING: extpipe file desc %d, error state %d"
-msgstr "LUKKING: extpipe fil desc %d, feiltilstand %d"
-
-#: src/event.c
-#, c-format
-msgid "pclose return: %d"
-msgstr "pclose return: %d"
-
-#: src/event.c
-#, c-format
-msgid "Source FPS %d"
-msgstr "Kilde FPS %d"
-
-#: src/event.c
-#, c-format
-msgid "moviepath: %s"
-msgstr "filmsti: %s"
-
-#: src/event.c
-#, c-format
-msgid "no write access to target directory %s"
-msgstr "ingen skrivetilgang til målkatalogen %s"
-
-#: src/event.c
-#, c-format
-msgid "path not found, trying to create it %s ..."
-msgstr "banen ikke funnet, prøver å opprette den %s ..."
-
-#: src/event.c
-#, c-format
-msgid "error accesing path %s"
-msgstr "feil ved tiltredelse av bane %s"
-
-#: src/event.c
-#, c-format
-msgid "Error specifying command line: %s"
-msgstr "Feil ved spesifisering av kommandolinjen: %s"
-
-#: src/event.c
-#, c-format
-msgid "pipe: %s"
-msgstr "pipe: %s"
-
-#: src/event.c
-#, c-format
-msgid "cnt->moviefps: %d"
-msgstr "cnt-> moviefps: %d"
-
-#: src/event.c
-msgid "popen failed"
-msgstr "popen mislyktes"
-
-#: src/event.c
-msgid "Using extpipe"
-msgstr "Ved hjelp av extpipe"
-
-#: src/event.c
-#, c-format
-msgid "Error writing in pipe , state error %d"
-msgstr "Feil ved skriving i røret, angi feil %d"
-
-#: src/event.c
-#, c-format
-msgid "pipe %s not created or closed already "
-msgstr "pipe %s ikke allerede opprettet eller lukket"
-
-#: src/event.c
-msgid "The ogg container is no longer supported.  Changing to mpeg4"
-msgstr "Ogg-beholderen støttes ikke lenger. Skiftes til mpeg4"
-
-#: src/event.c
-msgid "Running test of the various output formats."
-msgstr "Kjører test av de forskjellige utdataformatene."
-
-#: src/event.c
-msgid "Error opening context for movie output."
-msgstr "Feil ved åpning av kontekst for filmutgang."
-
-#: src/event.c
-#, c-format
-msgid "ffopen_open error creating (motion) file [%s]"
-msgstr "ffopen åpen feil ved å lage (bevegelses) fil [ %s]"
-
-#: src/event.c
-msgid ""
-"The swf container for timelapse no longer supported.  Using mpg container."
-msgstr ""
-"Swf-beholderen for timelapse støttes ikke lenger. Bruker mpg-container."
-
-#: src/event.c
-msgid "Timelapse using mpg codec."
-msgstr "Timelapse ved hjelp av mpg-kodek."
-
-#: src/event.c
-msgid "Events will be appended to file"
-msgstr "Hendelser legges ved i filen"
-
-#: src/event.c
-msgid "Timelapse using mpeg4 codec."
-msgstr "Timelapse ved hjelp av mpeg4 codec."
-
-#: src/event.c
-msgid "Events will be trigger new files"
-msgstr "Hendelser vil utløse nye filer"
-
-#: src/event.c
-#, c-format
-msgid "ffopen_open error creating (timelapse) file [%s]"
-msgstr "ffopen åpen feil ved å lage (timelapse) fil [ %s]"
-
-#: src/event.c
-msgid "Error encoding image"
-msgstr "Feil ved koding av bilde"
-
-#: src/ffmpeg.c
-msgid "Failed to allocate memory for codec name"
-msgstr "Kunne ikke tildele minne for kodekenavn"
-
-#: src/ffmpeg.c
-msgid ""
-"The frame rate specified is too high for the ffmpeg movie type specified. "
-"Choose a different ffmpeg container or lower framerate."
-msgstr ""
-"Den angitte bildefrekvensen er for høy for den angitte ffmpeg-filmtypen.Velg "
-"en annen ffmpeg-beholder eller lavere ramme."
-
-#: src/ffmpeg.c
-msgid "Error setting base file name"
-msgstr "Feil ved innstilling av basisfilnavn"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Error setting timelapse append for codec %s"
-msgstr "Feil ved innstilling av timelapse vedlegg for codec %s"
-
-#: src/ffmpeg.c
-msgid "Error setting file name"
-msgstr "Feil ved innstilling av filnavn"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "codec option value %s is not supported"
-msgstr "codec-alternativverdien %s støttes ikke"
-
-#: src/ffmpeg.c
-msgid "Could not get the codec"
-msgstr "Kunne ikke hente kodeken"
-
-#: src/ffmpeg.c
+#: src/dbse.cpp
 #, c-format
-msgid "Error sending frame for encoding:%s"
-msgstr "Feil ved sending av ramme for koding: %s"
+msgid "Query store error: %s"
+msgstr "Spørringslagerfeil: %s"
 
-#: src/ffmpeg.c
-#, c-format
-msgid "Receive packet threw EAGAIN returning -2 code :%s"
-msgstr "Motta pakken kastet EAGAIN og returnerte -2 kode: %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Error receiving encoded packet video:%s"
-msgstr "Feil ved mottak av kodet pakkevideo: %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Error encoding video:%s"
-msgstr "Feil ved koding av video: %s"
-
-#: src/ffmpeg.c
-msgid "Error encoding video"
-msgstr "Feil ved koding av video"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d"
-msgstr ""
-"PTS %<PRId64> Base PTS %<PRId64> ms intervall %<PRId64> tidsbase %d- %d"
-
-#: src/ffmpeg.c
-msgid "BAD TIMING!! Frame skipped."
-msgstr "DÅRLIG TIMING!! Rammen hoppet over."
-
-#: src/ffmpeg.c
-#, c-format
-msgid ""
-"PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change "
-"%d"
-msgstr ""
-"PTS %<PRId64> Base PTS %<PRId64> ms intervall %<PRId64> tidsbase %d- %d "
-"Endring%d"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "%s codec vbr/crf/bit_rate: %d"
-msgstr "%s codec vbr / crf / bit rate: %d"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Preferred codec %s has been blacklisted: %s"
-msgstr "Foretrukket codec %s er svartelistet: %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Codec %s not found"
-msgstr "Kodeks %s ikke funnet"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Using codec %s"
-msgstr "Bruker kodek %s"
-
-#: src/ffmpeg.c
-msgid "Could not alloc stream"
-msgstr "Kunne ikke tildele strøm"
-
-#: src/ffmpeg.c
-msgid "Failed to allocate codec!"
-msgstr "Kunne ikke tildele codec!"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Low fps. Encoding %d frames into a %d frames container."
-msgstr "Lav fps. Koder %d rammer i en %d rammer container."
-
-#: src/ffmpeg.c
-msgid "Unable to set quality"
-msgstr "Kan ikke angi kvalitet"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Reported FPS Supported %d/%d"
-msgstr "Rapportert FPS-støtte %d / %d"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Could not open codec %s"
-msgstr "Kunne ikke åpne codec %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Failed to copy decoder parameters!: %s"
-msgstr "Kunne ikke kopiere dekoderparametere !: %s"
-
-#: src/ffmpeg.c
-msgid "could not alloc frame"
-msgstr "kunne ikke tildele ramme"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "could not alloc buffers %s"
-msgstr "kunne ikke tildele buffere %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "error opening file %s"
-msgstr "feil ved åpning av fil %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Permission denied. %s"
-msgstr "Tillatelse avslått. %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Error opening file %s"
-msgstr "Feil ved åpning av fil %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Could not write ffmpeg header %s"
-msgstr "Kunne ikke skrive ffmpeg header %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Error entering draining mode:%s"
-msgstr "Feil ved start av tappemodus: %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Error draining codec:%s"
-msgstr "Feil ved tapping av codec: %s"
-
-#: src/ffmpeg.c
-msgid "Error writing draining video frame"
-msgstr "Feil ved skriving av tapping av videoramme"
-
-#: src/ffmpeg.c
-msgid "Error while encoding picture"
-msgstr "Feil under koding av bilde"
-
-#: src/ffmpeg.c
-msgid "Error while writing video frame"
-msgstr "Feil under skriving av videoramme"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "av_copy_packet: %s"
-msgstr "av_copy_packet: %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Error while writing video frame: %s"
-msgstr "Feil under skriving av videoramme: %s"
-
-#: src/ffmpeg.c
-msgid "RTSP context not available."
-msgstr "RTSP-kontekst ikke tilgjengelig."
-
-#: src/ffmpeg.c
-msgid "rtsp camera not ready for pass-through."
-msgstr "rtsp kamera er ikke klart for gjennomføring."
-
-#: src/ffmpeg.c
-msgid "pass-through mode enabled.  Changing to MP4 container."
-msgstr "gjennomgangsmodus aktivert. Skiftes til MP4-beholder."
-
-#: src/ffmpeg.c
-msgid "Could not get codec!"
-msgstr "Kunne ikke få kodek!"
-
-#: src/ffmpeg.c src/netcam_rtsp.c
-msgid "Unable to copy codec parameters"
-msgstr "Kan ikke kopiere kodekparametere"
-
-#: src/ffmpeg.c
-msgid "Pass-through disabled.  ffmpeg too old"
-msgstr "Gjennomgang deaktivert. ffmpeg for gammel"
-
-#: src/ffmpeg.c
-msgid "Pass-through stream opened"
-msgstr "Gjennomstrømning åpnet"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "ffmpeg libavcodec version %d.%d.%d libavformat version %d.%d.%d"
-msgstr "ffmpeg libavcodec versjon %d. %d. %d libavformat versjon %d. %d. %d"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "av_lockmgr_register failed (%d)"
-msgstr "av lockmgr-register mislyktes ( %d)"
-
-#: src/ffmpeg.c
-msgid "No ffmpeg functionality included"
-msgstr "Ingen ffmpeg-funksjonalitet inkludert"
-
-#: src/ffmpeg.c
-msgid "av_lockmgr_register reset failed on cleanup"
-msgstr "av lockmgr register reset mislyktes ved opprydding"
-
-#: src/ffmpeg.c
-msgid "Could not allocate output context"
-msgstr "Kunne ikke tildele utgangskontekst"
-
-#: src/ffmpeg.c
-msgid "Could not setup passthru!"
-msgstr "Kunne ikke konfigurere passthru!"
-
-#: src/ffmpeg.c
-msgid "Could not set the stream"
-msgstr "Kunne ikke stille strømmen"
-
-#: src/ffmpeg.c
-msgid "Error flushing codec"
-msgstr "Feil ved skylling av kodeken"
-
-#: src/ffmpeg.c
-msgid "Excessive attempts to clear buffered packet"
-msgstr "For store forsøk på å tømme buffret pakke"
+#: src/dbse.cpp
+msgid "Creating motion table"
+msgstr "Opprette motion-tabell"
 
-#: src/ffmpeg.c
-msgid "Buffered packet"
-msgstr "Bufret pakke"
-
-#: src/jpegutils.c
-#, c-format
-msgid "%s: Given jpeg buffer was too small"
-msgstr "%s: Gitt jpeg-buffer var for liten"
-
-#: src/jpegutils.c
-msgid "Invalid JPEG image dimensions"
-msgstr "Ugyldige JPEG-bildedimensjoner"
-
-#: src/jpegutils.c src/netcam_jpeg.c
+#: src/dbse.cpp
 #, c-format
-msgid "JPEG image size %dx%d, JPEG was %dx%d"
-msgstr "JPEG bildestørrelse %dx %d, JPEG var %dx %d"
+msgid "Cannot connect to MariaDB database %s on host %s with user %s"
+msgstr "Kan ikke koble til MariaDB-databasen %s på vert %s med bruker %s"
 
-#: src/motion.c
+#: src/dbse.cpp
 #, c-format
-msgid "Resizing pre_capture buffer to %d items"
-msgstr "Endre størrelse på forhåndsfangstbuffer til %d elementer"
-
-#: src/motion.c
-msgid "Removed process id file (pid file)."
-msgstr "Fjernet prosess-id-fil (pid-fil)."
+msgid "MariaDB error was %s"
+msgstr "MariaDB-feilen var %s"
 
-#: src/motion.c
-msgid "Error removing pid file"
-msgstr "Feil ved fjerning av pid-fil"
+#: src/dbse.cpp
+msgid "Disabling database functionality"
+msgstr "Deaktiverer databasefunksjonalitet"
 
-#: src/motion.c
+#: src/dbse.cpp
 #, c-format
-msgid "Closing logfile (%s)."
-msgstr "Lukker loggfil ( %s)."
+msgid "%s database opened"
+msgstr "%s database åpnet"
 
-#: src/motion.c
+#: src/dbse.cpp
 #, c-format
-msgid "Motion detected - starting event %d."
-msgstr "Bevegelse oppdaget - starthendelse %d."
+msgid "Connection to PostgreSQL database '%s' failed: %s"
+msgstr "Tilkobling til PostgreSQL-databasen '%s' mislyktes: %s"
 
-#: src/motion.c
+#: src/dbse.cpp
 #, c-format
-msgid "Added %d fillerframes into movie"
-msgstr "Lagt %d fyllerammer inn i filmen"
+msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
+msgstr "Gjentilkobling til PostgreSQL-databasen '%s' mislyktes: %s"
 
-#: src/motion.c
-msgid "Unable to determine camera type (Netcam, V4L2, BKTR)"
-msgstr "Kan ikke bestemme kameratype (Netcam, V4L2, BKTR)"
-
-#: src/motion.c
-msgid "Opening privacy mask file"
-msgstr "Åpning av personvernmaske"
-
-#: src/motion.c
-msgid "Opening high resolution privacy mask file"
-msgstr "Åpner fil med maskefil med høy oppløsning"
-
-#: src/motion.c
+#: src/dbse.cpp
 #, c-format
-msgid "Error opening mask file %s"
-msgstr "Feil ved åpning av maskefil %s"
+msgid "Re-Connection to PostgreSQL database '%s' Succeed"
+msgstr "Re-tilkobling til PostgreSQL-databasen '%s' lykkes"
 
-#: src/motion.c
-msgid "Failed to read mask privacy image. Mask privacy feature disabled."
-msgstr ""
-"Kunne ikke lese personvernbildet til masken. Funksjon for maske-personvern "
-"er deaktivert."
-
-#: src/motion.c
-#, c-format
-msgid "Mask privacy file \"%s\" loaded."
-msgstr "Maske personvernfil \" %s \" lastet."
+#: src/dbse.cpp
+msgid "Initializing database"
+msgstr "Initialiserer database"
 
-#: src/motion.c
+#: src/draw.cpp
 #, c-format
 msgid "Invalid text scale.  Adjusted to %d"
 msgstr "Ugyldig tekstskala. Justert til %d"
 
-#: src/motion.c
+#: src/event.cpp
 #, c-format
-msgid "Camera %d started: motion detection %s"
-msgstr "Kamera %d startet: bevegelsesdeteksjon %s"
+msgid "File saved to: %s"
+msgstr "Filen er lagret til: %s"
 
-#: src/motion.c
-msgid "Disabled"
-msgstr "Funksjonshemmet"
+#: src/event.cpp
+msgid "Failed to put image into video pipe"
+msgstr "Kunne ikke legge bildet inn i videopipe"
 
-#: src/motion.c
-msgid "Enabled"
-msgstr "aktivert"
+#: src/event.cpp
+msgid "Error creating image file name"
+msgstr "Feil ved opprettelse av bildefilnavn"
 
-#: src/motion.c
-msgid "Pass-through processing disabled."
-msgstr "Gjennomgangsbehandling deaktivert."
+#: src/event.cpp
+msgid "Error creating image motion file name"
+msgstr "Feil ved oppretting av navn på bildebevegelsesfil"
 
-#: src/motion.c
+#: src/event.cpp
+msgid "Error creating image motion roi file name"
+msgstr "Feil ved opprettelse av image motion roi-filnavn"
+
+#: src/event.cpp
+msgid "Error option"
+msgstr "Feilalternativ"
+
+#: src/event.cpp
 #, c-format
-msgid "Invalid configuration dimensions %dx%d"
-msgstr "Ugyldige konfigurasjonsdimensjoner %dx %d"
+msgid "Could not create symbolic link [%s]"
+msgstr "Kunne ikke opprette symbolsk lenke [%s]"
 
-#: src/motion.c
+#: src/event.cpp
+msgid "Error creating preview file name"
+msgstr "Feil ved opprettelse av forhåndsvisningsfilnavn"
+
+#: src/event.cpp
+msgid "Event secondary detect"
+msgstr "Hendelse sekundær oppdage"
+
+#: src/event.cpp
 #, c-format
-msgid "Using default dimensions %dx%d"
-msgstr "Bruker standarddimensjoner %dx %d"
+msgid "CLOSING: extpipe file desc %d, error state %d"
+msgstr "SLUTTER: extpipe fil desc %d, feiltilstand %d"
 
-#: src/motion.c src/netcam_rtsp.c
+#: src/event.cpp
 #, c-format
-msgid "Image width (%d) requested is not modulo 8."
-msgstr "Bildebredde ( %d) forespurt er ikke modulo 8."
+msgid "Unable to remove file %s"
+msgstr "Kan ikke fjerne filen %s"
 
-#: src/motion.c src/netcam_rtsp.c
+#: src/event.cpp
 #, c-format
-msgid "Adjusting width to next higher multiple of 8 (%d)."
-msgstr "Justere bredden til neste høyere multippel på 8 ( %d)."
+msgid "no write access to target directory %s"
+msgstr "ingen skrivetilgang til målkatalogen %s"
 
-#: src/motion.c src/netcam_rtsp.c
+#: src/event.cpp
 #, c-format
-msgid "Image height (%d) requested is not modulo 8."
-msgstr "Bildehøyde ( %d) forespurt er ikke modulo 8."
+msgid "path not found, trying to create it %s ..."
+msgstr "bane ikke funnet, prøver å lage den %s ..."
 
-#: src/motion.c src/netcam_rtsp.c
+#: src/event.cpp
 #, c-format
-msgid "Adjusting height to next higher multiple of 8 (%d)."
-msgstr "Justere høyden til neste høyere multippel på 8 ( %d)."
+msgid "error accesing path %s"
+msgstr "feil ved tilgang til banen %s"
 
-#: src/motion.c
-msgid "Could not fetch initial image from camera "
-msgstr "Kunne ikke hente det første bildet fra kameraet"
-
-#: src/motion.c
-msgid "Motion continues using width and height from config file(s)"
-msgstr ""
-"Bevegelse fortsetter å bruke bredde og høyde fra konfigurasjonsfil (er)"
-
-#: src/motion.c
-msgid "Motion only supports width and height modulo 8"
-msgstr "Bevegelse støtter bare bredde og høydemodul 8"
-
-#: src/motion.c
+#: src/event.cpp
 #, c-format
-msgid "Image width (%d) or height(%d) requested is not modulo 8."
-msgstr "Bildebredde ( %d) eller høyde ( %d) forespurt er ikke modulo 8."
+msgid "Error specifying command line: %s"
+msgstr "Feil ved spesifisering av kommandolinje: %s"
 
-#: src/motion.c
+#: src/event.cpp
 #, c-format
-msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
-msgstr "Bevegelse støtter bare bredde og høyde større enn eller lik 64 %dx %d"
+msgid "pipe: %s"
+msgstr "rør: %s"
 
-#: src/motion.c
-msgid "Substream not available.  Image sizes not modulo 16."
-msgstr "Understrøm ikke tilgjengelig. Bildestørrelser ikke modulo 16."
+#: src/event.cpp
+msgid "popen failed"
+msgstr "popen mislyktes"
 
-#: src/motion.c
-msgid "webp image format is not available, failing back to jpeg"
-msgstr "webp-bildeformat er ikke tilgjengelig, og går ikke tilbake til jpeg"
+#: src/event.cpp
+msgid "Using extpipe"
+msgstr "Bruker extpipe"
 
-#: src/motion.c
-msgid "Error capturing first image"
-msgstr "Feil ved fange av første bilde"
-
-#: src/motion.c
-msgid "Opening video loopback device for normal pictures"
-msgstr "Åpne video loopback-enhet for normale bilder"
-
-#: src/motion.c
-msgid "Failed to open video loopback for normal pictures"
-msgstr "Kunne ikke åpne video loopback for vanlige bilder"
-
-#: src/motion.c
-msgid "Opening video loopback device for motion pictures"
-msgstr "Åpne video loopback-enhet for film"
-
-#: src/motion.c
-msgid "Failed to open video loopback for motion pictures"
-msgstr "Kunne ikke åpne video loopback for film"
-
-#: src/motion.c
-msgid "Failed to read mask image. Mask feature disabled."
-msgstr "Kunne ikke lese maskebildet. Maskefunksjonen er deaktivert."
-
-#: src/motion.c
+#: src/event.cpp
 #, c-format
-msgid "Maskfile \"%s\" loaded."
-msgstr "Maskfile \" %s \" lastet."
+msgid "Error writing in pipe , state error %d"
+msgstr "Feil ved skriving i rør, tilstandsfeil %d"
 
-#: src/motion.c
-msgid "Emulating motion"
-msgstr "Emulerende bevegelse"
-
-#: src/motion.c
+#: src/event.cpp
 #, c-format
-msgid "Motion in area %d detected."
-msgstr "Bevegelse i område %d oppdaget."
+msgid "pipe %s not created or closed already "
+msgstr "pipe %s er ikke opprettet eller lukket allerede"
 
-#: src/motion.c
-msgid "Retrying until successful connection with camera"
-msgstr "Forsøk på nytt til vellykket tilkobling med kamera"
+#: src/event.cpp
+msgid "Error opening ctx_dev for movie output."
+msgstr "Feil ved åpning av ctx dev for filmutgang."
 
-#: src/motion.c
-msgid "Camera has become available."
-msgstr "Kamera har blitt tilgjengelig."
-
-#: src/motion.c
+#: src/event.cpp
 #, c-format
-msgid ""
-"Restarting Motion.\n"
-"Image width (%d) or height(%d) requested is not modulo 8."
-msgstr ""
-"Starter bevegelse på nytt.\n"
-"Forespurt bildebredde (%d) eller høyde (%d) er ikke modulo 8."
+msgid "Error creating motion file [%s]"
+msgstr "Feil ved opprettelse av bevegelsesfil [%s]"
 
-#: src/motion.c
+#: src/event.cpp
+msgid "Error encoding image"
+msgstr "Feil ved koding av bildet"
+
+#: src/event.cpp
 #, c-format
-msgid ""
-"Restarting Motion.\n"
-"Motion only supports width and height greater than or equal to 64 %dx%d"
-msgstr ""
-"Starter bevegelse på nytt.\n"
-"Bevegelse støtter bare bredde og høyde større enn eller lik 64 %dx%d"
+msgid "Error creating timelapse file [%s]"
+msgstr "Feil ved opprettelse av timelapse-fil [%s]"
 
-#: src/motion.c
-msgid ""
-"Restarting Motion.\n"
-"Height or width has changed on camera."
-msgstr ""
-"Starter bevegelse på nytt.\n"
-"Høyde eller bredde har endret seg på kameraet."
-
-#: src/motion.c
-msgid ""
-"Restarting Motion.\n"
-"High resolution has changed on camera."
-msgstr ""
-"Starter bevegelse på nytt.\n"
-"Høy oppløsning er endret på kameraet."
-
-#: src/motion.c
-msgid "Video signal re-acquired"
-msgstr "Ervervet videosignal"
-
-#: src/motion.c
-msgid "Video device fatal error - Closing video device"
-msgstr "Dødelig feil på videoenhet - Lukking av videoenhet"
-
-#: src/motion.c
-msgid "Restarting Motion thread to reinitialize all image buffers"
-msgstr "Start Motion thread på nytt for å initialisere alle bildebuffere"
-
-#: src/motion.c
-msgid "Video signal lost - Adding grey image"
-msgstr "Videosignal mistet - Legger til grått bilde"
-
-#: src/motion.c
-msgid "Video signal still lost - Trying to close video device"
-msgstr "Fortsatt tapt videosignal - Prøver å lukke videoenhet"
-
-#: src/motion.c
-msgid "Lightswitch detected"
-msgstr "Lysbryter oppdaget"
-
-#: src/motion.c
-msgid "Switchfilter detected"
-msgstr "Bryterfilter oppdaget"
-
-#: src/motion.c
-msgid "micro-lightswitch!"
-msgstr "mikro-lysbryter!"
-
-#: src/motion.c
+#: src/jpegutils.cpp
 #, c-format
-msgid "End of event %d"
-msgstr "Slutt på hendelsen %d"
+msgid "%s: Given jpeg buffer was too small"
+msgstr "%s: Gitt at jpeg-bufferen var for liten"
 
-#: src/motion.c
+#: src/jpegutils.cpp
+msgid "Invalid JPEG image dimensions"
+msgstr "Ugyldige JPEG-bildedimensjoner"
+
+#: src/jpegutils.cpp
 #, c-format
-msgid "Raw changes: %5d - changes after '%s': %5d"
-msgstr "Rå endringer: %5d - endringer etter ' %s': %5d"
+msgid "JPEG image size %dx%d, JPEG was %dx%d"
+msgstr "JPEG-bildestørrelse %dx%d, JPEG var %dx%d"
 
-#: src/motion.c
-#, c-format
-msgid " - labels: %3d"
-msgstr "- etiketter: %3d"
+#: src/libcam.cpp
+msgid "Opening libcam"
+msgstr "Åpner libcam"
 
-#: src/motion.c
-#, c-format
-msgid "Changes: %5d"
-msgstr "Endringer: %5d"
+#: src/libcam.cpp
+msgid "libcam failed to open"
+msgstr "libcam kunne ikke åpnes"
 
-#: src/motion.c
-#, c-format
-msgid " - noise level: %2d"
-msgstr "- støynivå: %2d"
-
-#: src/motion.c
-#, c-format
-msgid " - threshold: %d"
-msgstr "- terskel: %d"
-
-#: src/motion.c
-#, c-format
-msgid "Invalid timelapse_mode argument '%s'"
-msgstr "Ugyldig argument for timelapse-modus ' %s'"
-
-#: src/motion.c
-msgid "%:s Defaulting to manual timelapse mode"
-msgstr "%: s Standard til manuell timelapse-modus"
-
-#: src/motion.c
-msgid "Thread exiting"
-msgstr "Tråd spennende"
-
-#: src/motion.c
-msgid "Motion going to daemon mode"
-msgstr "Bevegelse går til demonmodus"
-
-#: src/motion.c
-#, c-format
-msgid "Exit motion, cannot create process id file (pid file) %s"
-msgstr "Avslutt bevegelse, kan ikke opprette prosess-id-fil (pid-fil) %s"
-
-#: src/motion.c
-msgid "Could not change directory"
-msgstr "Kunne ikke endre katalogen"
-
-#: src/motion.c
-#, c-format
-msgid "Created process id file %s. Process ID is %d"
-msgstr "Opprettet prosess-id-fil %s. Prosess-ID er %d"
-
-#: src/motion.c
-msgid ""
-"Camara IDs are not unique or have values over 32,000.  Falling back to "
-"thread numbers"
-msgstr ""
-"Camara-ID-er er ikke unike eller har verdier over 32 000. Faller tilbake "
-"tiltrådnumre"
-
-#: src/motion.c
-msgid "v4l2   : available"
-msgstr "v4l2: tilgjengelig"
-
-#: src/motion.c
-msgid "v4l2   : not available"
-msgstr "v4l2: ikke tilgjengelig"
-
-#: src/motion.c
-msgid "bktr   : available"
-msgstr "bktr: tilgjengelig"
-
-#: src/motion.c
-msgid "bktr   : not available"
-msgstr "bktr: ikke tilgjengelig"
-
-#: src/motion.c
-msgid "webp   : available"
-msgstr "webp: tilgjengelig"
-
-#: src/motion.c
-msgid "webp   : not available"
-msgstr "webp: ikke tilgjengelig"
-
-#: src/motion.c
-msgid "ffmpeg : available"
-msgstr "ffmpeg: tilgjengelig"
-
-#: src/motion.c
-msgid "ffmpeg : not available"
-msgstr "ffmpeg: ikke tilgjengelig"
-
-#: src/motion.c
-msgid "mysql  : available"
-msgstr "mysql: tilgjengelig"
-
-#: src/motion.c
-msgid "mysql  : not available"
-msgstr "mysql: ikke tilgjengelig"
-
-#: src/motion.c
-msgid "MariaDB: available"
-msgstr "MariaDB: tilgjengelig"
-
-#: src/motion.c
-msgid "MariaDB: not available"
-msgstr "MariaDB: ikke tilgjengelig"
-
-#: src/motion.c
-msgid "sqlite3: available"
-msgstr "sqlite3: tilgjengelig"
-
-#: src/motion.c
-msgid "sqlite3: not available"
-msgstr "sqlite3: ikke tilgjengelig"
-
-#: src/motion.c
-msgid "pgsql  : available"
-msgstr "pgsql: tilgjengelig"
-
-#: src/motion.c
-msgid "pgsql  : not available"
-msgstr "pgsql: ikke tilgjengelig"
-
-#: src/motion.c
-msgid "nls    : available"
-msgstr "nls: tilgjengelig"
-
-#: src/motion.c
-msgid "nls    : not available"
-msgstr "nls: ikke tilgjengelig"
-
-#: src/motion.c
+#: src/logger.cpp
 #, c-format
 msgid "Using default log level (%s) (%d)"
-msgstr "Bruker standard loggnivå ( %s) ( %d)"
+msgstr "Bruker standard loggnivå (%s) (%d)"
 
-#: src/motion.c
+#: src/logger.cpp
 #, c-format
 msgid "Logging to file (%s)"
-msgstr "Logger på fil ( %s)"
+msgstr "Logger til fil (%s)"
 
-#: src/motion.c
+#: src/logger.cpp
 #, c-format
 msgid "Exit motion, cannot create log file %s"
 msgstr "Avslutt bevegelse, kan ikke opprette loggfil %s"
 
-#: src/motion.c
+#: src/logger.cpp
 msgid "Logging to syslog"
-msgstr "Logger på syslog"
+msgstr "Logger til syslog"
 
-#: src/motion.c
-#, c-format
-msgid "Motion %s Started"
-msgstr "Bevegelse %s startet"
-
-#: src/motion.c
-#, c-format
-msgid "Using default log type (%s)"
-msgstr "Bruker standard loggtype ( %s)"
-
-#: src/motion.c
+#: src/logger.cpp
 #, c-format
 msgid "Using log type (%s) log level (%s)"
-msgstr "Bruker loggtype ( %s) loggenivå ( %s)"
+msgstr "Bruker loggtype (%s) loggnivå (%s)"
 
-#: src/motion.c
+#: src/logger.cpp
+#, c-format
+msgid "Closing logfile (%s)."
+msgstr "Lukker loggfil (%s)."
+
+#: src/camera.cpp
+#, c-format
+msgid "Resizing buffer to %d items"
+msgstr "Endre størrelse på buffer til %d elementer"
+
+#: src/camera.cpp
+#, c-format
+msgid "Motion detected - starting event %d"
+msgstr "Bevegelse oppdaget - starthendelse %d"
+
+#: src/camera.cpp
+msgid "No Camera device cleanup"
+msgstr "Ingen opprydding av kameraenhet"
+
+#: src/camera.cpp
+msgid "No Camera device specified"
+msgstr "Ingen kameraenhet spesifisert"
+
+#: src/camera.cpp
+msgid "Unable to determine camera type"
+msgstr "Kan ikke bestemme kameratype"
+
+#: src/camera.cpp
+#, c-format
+msgid "Image width (%d) or height(%d) requested is not modulo 8."
+msgstr "Forespurt bildebredde (%d) eller høyde (%d) er ikke modulo 8."
+
+#: src/camera.cpp
+#, c-format
+msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
+msgstr "Bevegelse støtter bare bredde og høyde større enn eller lik 64 %dx%d"
+
+#: src/camera.cpp
+msgid "Substream not available.  Image sizes not modulo 16."
+msgstr "Substream ikke tilgjengelig. Bildestørrelser ikke modulo 16."
+
+#: src/camera.cpp
+msgid "Pass-through processing disabled."
+msgstr "Pass-through-behandling er deaktivert."
+
+#: src/camera.cpp
+msgid "Failed to start camera."
+msgstr "Kunne ikke starte kameraet."
+
+#: src/camera.cpp
+#: src/sound.cpp
+msgid "Initialize"
+msgstr "Initialiser"
+
+#: src/camera.cpp
+#, c-format
+msgid "Camera %d started: motion detection %s"
+msgstr "Kamera %d startet: bevegelsesdeteksjon %s"
+
+#: src/camera.cpp
+msgid "Disabled"
+msgstr "Funksjonshemmet"
+
+#: src/camera.cpp
+msgid "Enabled"
+msgstr "Aktivert"
+
+#: src/camera.cpp
+msgid "Emulating motion"
+msgstr "Emulerende bevegelse"
+
+#: src/camera.cpp
+#, c-format
+msgid "Motion in area %d detected."
+msgstr "Bevegelse i området %d oppdaget."
+
+#: src/camera.cpp
+msgid "Retrying until successful connection with camera"
+msgstr "Prøver på nytt til vellykket tilkobling med kamera"
+
+#: src/camera.cpp
+msgid "Resetting image buffers"
+msgstr "Tilbakestilling av bildebuffere"
+
+#: src/camera.cpp
+msgid "Video signal re-acquired"
+msgstr "Videosignal gjenopprettet"
+
+#: src/camera.cpp
+msgid "Video signal lost - Adding grey image"
+msgstr "Videosignal tapt - Legger til grått bilde"
+
+#: src/camera.cpp
+msgid "Video signal still lost - Trying to close video device"
+msgstr "Videosignal fortsatt tapt - Prøver å lukke videoenheten"
+
+#: src/camera.cpp
+#, c-format
+msgid "End of event %d"
+msgstr "Slutt på hendelsen %d"
+
+#: src/camera.cpp
+#, c-format
+msgid "changes after '%s': %5d"
+msgstr "endringer etter '%s': %5d"
+
+#: src/camera.cpp
+#, c-format
+msgid " - labels: %3d"
+msgstr "- etiketter: %3d"
+
+#: src/camera.cpp
+#, c-format
+msgid "Changes: %5d"
+msgstr "Endringer: %5d"
+
+#: src/camera.cpp
+#, c-format
+msgid " - noise level: %2d"
+msgstr "- støynivå: %2d"
+
+#: src/camera.cpp
+#, c-format
+msgid " - threshold: %d"
+msgstr "- terskel: %d"
+
+#: src/camera.cpp
+#: src/sound.cpp
+msgid "Exiting"
+msgstr "Avslutter"
+
+#: src/motion.cpp
+#, c-format
+msgid "Created process id file %s. Process ID is %d"
+msgstr "Opprettet prosess-ID-fil %s. Prosess-ID er %d"
+
+#: src/motion.cpp
+#, c-format
+msgid "Cannot create process id file (pid file) %s"
+msgstr "Kan ikke opprette prosess-ID-fil (pid-fil) %s"
+
+#: src/motion.cpp
+msgid "Removed process id file (pid file)."
+msgstr "Fjernet prosess-ID-fil (pid-fil)."
+
+#: src/motion.cpp
+msgid "Error removing pid file"
+msgstr "Feil ved fjerning av pid-fil"
+
+#: src/motion.cpp
+msgid "Motion going to daemon mode"
+msgstr "Motion går til daemon-modus"
+
+#: src/motion.cpp
+msgid "Could not change directory"
+msgstr "Kunne ikke endre katalog"
+
+#: src/motion.cpp
+msgid "Device IDs are not unique."
+msgstr "Enhets-ID-er er ikke unike."
+
+#: src/motion.cpp
+msgid "Falling back to sequence numbers"
+msgstr "Faller tilbake til sekvensnummer"
+
+#: src/motion.cpp
+msgid "v4l2   : available"
+msgstr "v4l2 : tilgjengelig"
+
+#: src/motion.cpp
+msgid "v4l2   : not available"
+msgstr "v4l2: ikke tilgjengelig"
+
+#: src/motion.cpp
+msgid "webp   : available"
+msgstr "webp : tilgjengelig"
+
+#: src/motion.cpp
+msgid "webp   : not available"
+msgstr "webp : ikke tilgjengelig"
+
+#: src/motion.cpp
+msgid "libcam : available"
+msgstr "libcam : tilgjengelig"
+
+#: src/motion.cpp
+msgid "libcam : not available"
+msgstr "libcam: ikke tilgjengelig"
+
+#: src/motion.cpp
+msgid "mysql  : available"
+msgstr "mysql: tilgjengelig"
+
+#: src/motion.cpp
+msgid "mysql  : not available"
+msgstr "mysql: ikke tilgjengelig"
+
+#: src/motion.cpp
+msgid "MariaDB: available"
+msgstr "MariaDB: tilgjengelig"
+
+#: src/motion.cpp
+msgid "MariaDB: not available"
+msgstr "MariaDB: ikke tilgjengelig"
+
+#: src/motion.cpp
+msgid "sqlite3: available"
+msgstr "sqlite3: tilgjengelig"
+
+#: src/motion.cpp
+msgid "sqlite3: not available"
+msgstr "sqlite3: ikke tilgjengelig"
+
+#: src/motion.cpp
+msgid "pgsql  : available"
+msgstr "pgsql: tilgjengelig"
+
+#: src/motion.cpp
+msgid "pgsql  : not available"
+msgstr "pgsql: ikke tilgjengelig"
+
+#: src/motion.cpp
+msgid "nls    : available"
+msgstr "nls : tilgjengelig"
+
+#: src/motion.cpp
+msgid "nls    : not available"
+msgstr "nls: ikke tilgjengelig"
+
+#: src/motion.cpp
+msgid "alsa   : available"
+msgstr "alsa : tilgjengelig"
+
+#: src/motion.cpp
+msgid "alsa   : not available"
+msgstr "alsa : ikke tilgjengelig"
+
+#: src/motion.cpp
+msgid "fftw3  : available"
+msgstr "fftw3 : tilgjengelig"
+
+#: src/motion.cpp
+msgid "fftw3  : not available"
+msgstr "fftw3 : ikke tilgjengelig"
+
+#: src/motion.cpp
 msgid "Motion running as daemon process"
-msgstr "Bevegelse som kjøres som en demonprosess"
+msgstr "Motion kjører som demonprosess"
 
-#: src/motion.c
+#: src/motion.cpp
 msgid "Motion running in setup mode."
-msgstr "Bevegelse som kjører i oppsettmodus."
+msgstr "Motion kjører i oppsettmodus."
 
-#: src/motion.c
-#, c-format
-msgid "Camera ID: %d is from %s"
-msgstr "Kamera-ID: %d er fra %s"
+#: src/motion.cpp
+msgid "Unable to start camera thread."
+msgstr "Kan ikke starte kameratråden."
 
-#: src/motion.c
-#, c-format
-msgid "Camera ID: %d Camera Name: %s Service: %s"
-msgstr "Kamera-ID: %d Kameranavn: %s Service: %s"
+#: src/motion.cpp
+msgid "Unable to start sound thread."
+msgstr "Kan ikke starte lydtråden."
 
-#: src/motion.c
-#, c-format
-msgid "Camera ID: %d Camera Name: %s Device: %s"
-msgstr "Kamera-ID: %d Kameranavn: %s Enhet: %s"
+#: src/motion.cpp
+msgid "Restarting Motion."
+msgstr "Starter Motion på nytt."
 
-#: src/motion.c
-#, c-format
-msgid "Stream port number %d for thread %d conflicts with the control port"
-msgstr "Stream portnummer %d for tråd %d konflikter med kontrollporten"
-
-#: src/motion.c
-#, c-format
-msgid "Stream feature for thread %d is disabled."
-msgstr "Streamfunksjon for tråd %d er deaktivert."
-
-#: src/motion.c
-#, c-format
-msgid "Stream port number %d for thread %d conflicts with thread %d"
-msgstr "Stream portnummer %d for tråd %d konflikter med tråd %d"
-
-#: src/motion.c
-msgid "Restarting motion."
-msgstr "Start bevegelse på nytt."
-
-#: src/motion.c
+#: src/motion.cpp
 msgid "Motion restarted"
-msgstr "Bevegelsen startet på nytt"
+msgstr "Motion startet på nytt"
 
-#: src/motion.c
+#: src/motion.cpp
 #, c-format
-msgid "Thread %d - Watchdog timeout. Trying to do a graceful restart"
-msgstr "Tråd %d - Timeout for vakthund. Prøver å gjøre en grasiøs omstart"
+msgid "Camera %d - Watchdog timeout."
+msgstr "Kamera %d - Watchdog-tidsavbrudd."
 
-#: src/motion.c
+#: src/motion.cpp
 #, c-format
-msgid "Thread %d - Watchdog timeout did NOT restart, killing it!"
-msgstr "Tråd %d - Timeout for vakthund startet IKKE på nytt, og drepte den!"
+msgid "Camera %d - Watchdog netcam kill."
+msgstr "Kamera %d - Watchdog netcam kill."
 
-#: src/motion.c
+#: src/motion.cpp
 #, c-format
-msgid "Thread %d - Cleaning thread."
-msgstr "Tråd %d - Rengjøringstråd."
+msgid "Camera %d - Watchdog netcam_high kill."
+msgstr "Kamera %d - Watchdog netcam high kill."
 
-#: src/motion.c
+#: src/motion.cpp
 #, c-format
-msgid "DEBUG-1 threads_running %d motion_threads_running %d , finish %d"
-msgstr "DEBUG-1 tråder kjører %d bevegelsestråder kjører %d, finish %d"
+msgid "Camera %d - Watchdog kill."
+msgstr "Kamera %d - Watchdog-drap."
 
-#: src/motion.c
+#: src/motion.cpp
 #, c-format
-msgid "Waiting for threads to finish, pid: %d"
-msgstr "Venter på at trådene skal bli ferdige, pid: %d"
+msgid "Invalid camera specified for deletion. %d"
+msgstr "Ugyldig kamera spesifisert for sletting. %d"
 
-#: src/motion.c
+#: src/motion.cpp
 #, c-format
-msgid "Motion thread %d restart"
-msgstr "Bevegelsestråd %d start på nytt"
+msgid "Stopping %s device_id %d"
+msgstr "Stopper %s enhets-ID %d"
 
-#: src/motion.c
-msgid "Threads finished"
-msgstr "Tråder ferdig"
+#: src/motion.cpp
+#, c-format
+msgid "Motion pid: %d"
+msgstr "Motion pid: %d"
 
-#: src/motion.c src/webu.c
+#: src/motion.cpp
+#, c-format
+msgid "Motion camera %d restart"
+msgstr "Motion-kamera %d starter på nytt"
+
+#: src/motion.cpp
+#, c-format
+msgid "Motion sound %d restart"
+msgstr "Motion-lyd %d starter på nytt"
+
+#: src/motion.cpp
+msgid "Motion devices finished"
+msgstr "Motion-enheter er ferdige"
+
+#: src/motion.cpp
 msgid "Motion terminating"
-msgstr "Bevegelsesavslutning"
+msgstr "Motion avsluttes"
 
-#: src/netcam.c
+#: src/movie.cpp
+#, c-format
+msgid "Error setting timelapse append for container %s"
+msgstr "Feil ved innstilling av timelapse append for container %s"
+
+#: src/movie.cpp
+#, c-format
+msgid "container option value %s is not supported"
+msgstr "Beholderalternativverdi %s støttes ikke"
+
+#: src/movie.cpp
+msgid "Could not get the container"
+msgstr "Kunne ikke hente beholderen"
+
+#: src/movie.cpp
+#, c-format
+msgid "Error sending frame for encoding:%s"
+msgstr "Feil ved sending av ramme for koding:%s"
+
+#: src/movie.cpp
+#, c-format
+msgid "Error receiving encoded packet video:%s"
+msgstr "Feil ved mottak av kodet pakkevideo:%s"
+
+#: src/movie.cpp
+#, c-format
+msgid "Error encoding video:%s"
+msgstr "Feil ved koding av video:%s"
+
+#: src/movie.cpp
+msgid "Error encoding video"
+msgstr "Feil ved koding av video"
+
+#: src/movie.cpp
+#, c-format
+msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d"
+msgstr "PTS %<PRId64> Base PTS %<PRId64> ms intervall %<PRId64> tidsbase %d-%d"
+
+#: src/movie.cpp
+msgid "BAD TIMING!! Frame skipped."
+msgstr "DÅRLIG TIMING!! Rammen hoppet over."
+
+#: src/movie.cpp
+#, c-format
+msgid "%s codec vbr/crf/bit_rate: %d"
+msgstr "%s kodek vbr/crf/bithastighet: %d"
+
+#: src/movie.cpp
+#, c-format
+msgid "Preferred codec %s has been blacklisted: %s"
+msgstr "Foretrukket kodek %s har blitt svartelistet: %s"
+
+#: src/movie.cpp
+#, c-format
+msgid "container %s not found"
+msgstr "container %s ikke funnet"
+
+#: src/movie.cpp
+#, c-format
+msgid "Using codec %s"
+msgstr "Bruker kodeken %s"
+
+#: src/movie.cpp
+msgid "Could not alloc stream"
+msgstr "Kunne ikke tildele strøm"
+
+#: src/movie.cpp
+msgid "Failed to allocate codec context!"
+msgstr "Kunne ikke tildele kodek-kontekst!"
+
+#: src/movie.cpp
+msgid "Unable to set quality"
+msgstr "Kan ikke stille inn kvalitet"
+
+#: src/movie.cpp
+#, c-format
+msgid "Reported FPS Supported %d/%d"
+msgstr "Rapportert FPS Støttet %d/%d"
+
+#: src/movie.cpp
+#, c-format
+msgid "Could not open codec %s"
+msgstr "Kunne ikke åpne kodeken %s"
+
+#: src/movie.cpp
+#, c-format
+msgid "Failed to copy decoder parameters!: %s"
+msgstr "Kunne ikke kopiere dekoderparametere!: %s"
+
+#: src/movie.cpp
+msgid "could not alloc frame"
+msgstr "kunne ikke tildele ramme"
+
+#: src/movie.cpp
+#, c-format
+msgid "could not alloc buffers %s"
+msgstr "kunne ikke tildele buffere %s"
+
+#: src/movie.cpp
+msgid "Movie timed out"
+msgstr "Filmen ble tidsavbrutt"
+
+#: src/movie.cpp
+msgid "Error setting file name"
+msgstr "Feil ved innstilling av filnavn"
+
+#: src/movie.cpp
+#, c-format
+msgid "avio_open: %s File %s"
+msgstr "avio åpen: %s Fil %s"
+
+#: src/movie.cpp
+#, c-format
+msgid "error %s opening file %s"
+msgstr "feil %s ved åpning av filen %s"
+
+#: src/movie.cpp
+#, c-format
+msgid "Error opening file %s"
+msgstr "Feil ved åpning av filen %s"
+
+#: src/movie.cpp
+#, c-format
+msgid "Could not write movie header %s"
+msgstr "Kunne ikke skrive filmoverskriften %s"
+
+#: src/movie.cpp
+#, c-format
+msgid "Error entering draining mode:%s"
+msgstr "Feil ved å gå inn i dreneringsmodus:%s"
+
+#: src/movie.cpp
+#, c-format
+msgid "Error draining codec:%s"
+msgstr "Feil ved tømming av kodeken:%s"
+
+#: src/movie.cpp
+msgid "Error writing draining video frame"
+msgstr "Feil ved skriving av tømming av videoramme"
+
+#: src/movie.cpp
+msgid "Error while encoding picture"
+msgstr "Feil under koding av bilde"
+
+#: src/movie.cpp
+msgid "Error while writing video frame"
+msgstr "Feil under skriving av videoramme"
+
+#: src/movie.cpp
+#, c-format
+msgid "Error while writing video frame: %s"
+msgstr "Feil under skriving av videoramme: %s"
+
+#: src/movie.cpp
+msgid "Could not alloc video stream"
+msgstr "Kunne ikke tildele videostrøm"
+
+#: src/movie.cpp
+msgid "Unable to copy video codec parameters"
+msgstr "Kan ikke kopiere videokodekparametere"
+
+#: src/movie.cpp
+#, c-format
+msgid "video timebase %d/%d fps %d/%d"
+msgstr "video tidsbase %d/%d fps %d/%d"
+
+#: src/movie.cpp
+msgid "Could not alloc audio stream"
+msgstr "Kunne ikke tildele lydstrøm"
+
+#: src/movie.cpp
+msgid "Unable to copy audio codec parameters"
+msgstr "Kan ikke kopiere lydkodekparametere"
+
+#: src/movie.cpp
+#, c-format
+msgid "audio timebase %d/%d"
+msgstr "lydtidsbase %d/%d"
+
+#: src/movie.cpp
+msgid "Pass-through disabled.  ffmpeg too old"
+msgstr "Pass-through deaktivert. ffmpeg for gammel"
+
+#: src/movie.cpp
+msgid "rtsp camera not ready for pass-through."
+msgstr "rtsp-kamera er ikke klart for gjennomføring."
+
+#: src/movie.cpp
+msgid "RTSP context not available."
+msgstr "RTSP-kontekst er ikke tilgjengelig."
+
+#: src/movie.cpp
+msgid "Could not allocate output context"
+msgstr "Kunne ikke tildele utdatakontekst"
+
+#: src/movie.cpp
+msgid "Changing to MP4 container for pass-through."
+msgstr "Bytter til MP4-beholder for gjennomføring."
+
+#: src/movie.cpp
+msgid "Could not get output format!"
+msgstr "Kunne ikke hente utdataformat!"
+
+#: src/movie.cpp
+msgid "Could not get streams!"
+msgstr "Kunne ikke hente strømmer!"
+
+#: src/movie.cpp
+msgid "Could not set the output file"
+msgstr "Kunne ikke angi utdatafilen"
+
+#: src/movie.cpp
+#, c-format
+msgid "Timebase after open audio: %d/%d video: %d/%d"
+msgstr "Tidsbase etter åpen lyd: %d/%d video: %d/%d"
+
+#: src/movie.cpp
+#, c-format
+msgid "libavcodec  version %d.%d.%d"
+msgstr "libavcodec versjon %d.%d.%d"
+
+#: src/movie.cpp
+#, c-format
+msgid "libavformat version %d.%d.%d"
+msgstr "libavformat versjon %d.%d.%d"
+
+#: src/movie.cpp
+msgid "av_lockmgr_register reset failed on cleanup"
+msgstr "av lockmgr register tilbakestilling mislyktes ved opprydding"
+
+#: src/movie.cpp
+msgid "Could not setup passthrough!"
+msgstr "Kunne ikke konfigurere passthrough!"
+
+#: src/movie.cpp
+msgid "Could not get codec!"
+msgstr "Kunne ikke hente kodeken!"
+
+#: src/movie.cpp
+msgid "Failed to allocate codec!"
+msgstr "Kunne ikke tildele kodeken!"
+
+#: src/movie.cpp
+msgid "Could not set the stream"
+msgstr "Kunne ikke angi strømmen"
+
+#: src/movie.cpp
+msgid "Error flushing codec"
+msgstr "Feil ved spyling av kodeken"
+
+#: src/movie.cpp
+msgid "Excessive attempts to clear buffered packet"
+msgstr "Overdrevne forsøk på å fjerne bufret pakke"
+
+#: src/movie.cpp
+msgid "Buffered packet"
+msgstr "Bufret pakke"
+
+#: src/movie.cpp
+#, c-format
+msgid "Error setting timelapse file name %s"
+msgstr "Feil ved innstilling av timelapse-filnavn %s"
+
+#: src/movie.cpp
+msgid "Timelapse using mpg container."
+msgstr "Timelapse ved hjelp av mpg-beholder."
+
+#: src/movie.cpp
+msgid "Events will be appended to file"
+msgstr "Hendelser vil bli lagt til filen"
+
+#: src/movie.cpp
+msgid "Timelapse using mkv container."
+msgstr "Timelapse ved hjelp av mkv-beholder."
+
+#: src/movie.cpp
+msgid "Events will be trigger new files"
+msgstr "Hendelser vil utløse nye filer"
+
+#: src/netcam.cpp
 msgid "Invalid URL.  Can not parse values."
 msgstr "Ugyldig URL. Kan ikke analysere verdier."
 
-#: src/netcam.c
+#: src/netcam.cpp
 #, c-format
-msgid "Camera handler thread [%d] started"
-msgstr "Kamerahandlertråden [ %d] startet"
+msgid "Using port number %d"
+msgstr "Bruker portnummer %d"
 
-#: src/netcam.c
-msgid ""
-"Closing netcam socket as Keep-Alive time is up (camera sent Close field). A "
-"reconnect should happen."
-msgstr ""
-"Lukking av netcam-kontakten når Keep-Alive-tiden er oppe (kameraet sendes "
-"Lukk felt). ENkoble til igjen skal skje."
-
-#: src/netcam.c
-msgid "re-opening camera (non-streaming)"
-msgstr "gjenåpningskamera (ikke-streaming)"
-
-#: src/netcam.c
-msgid "camera re-connected"
-msgstr "kameraet tilkoblet på nytt"
-
-#: src/netcam.c
-#, c-format
-msgid "Unrecognized image header (%d)"
-msgstr "Ukjent bildeoverskrift ( %d)"
-
-#: src/netcam.c
-#, c-format
-msgid "Error in header (%d)"
-msgstr "Feil i overskriften ( %d)"
-
-#: src/netcam.c
-msgid "re-opening camera (streaming)"
-msgstr "gjenåpningskamera (streaming)"
-
-#: src/netcam.c
-msgid "Error getting jpeg image"
-msgstr "Feil ved å få jpeg-bilde"
-
-#: src/netcam.c
-msgid "Trying to re-connect"
-msgstr "Prøver å koble til igjen"
-
-#: src/netcam.c src/netcam_rtsp.c
-msgid "netcam camera handler: finish set, exiting"
-msgstr "netcam camera handler: finish set, exit"
-
-#: src/netcam.c
-msgid "No response from camera handler - it must have already died"
-msgstr "Ingen svar fra kamerahåndterer - den må allerede ha dødd"
-
-#: src/netcam.c
-msgid "called with no data in buffer"
-msgstr "ringte uten data i buffer"
-
-#: src/netcam.c
-#, c-format
-msgid "Network Camera starting for camera (%s)"
-msgstr "Nettverkskamera starter for kamera ( %s)"
-
-#: src/netcam.c
-#, c-format
-msgid "Invalid netcam_proxy (%s)"
-msgstr "Ugyldig nettkamera-proxy ( %s)"
-
-#: src/netcam.c
-msgid "Username/password not allowed on a proxy URL"
-msgstr "Brukernavn / passord er ikke tillatt på en proxy-URL"
-
-#: src/netcam.c
-#, c-format
-msgid "Invalid netcam service '%s' "
-msgstr "Ugyldig nettkamatjeneste ' %s'"
-
-#: src/netcam.c
-#, c-format
-msgid "Invalid netcam_url for camera (%s)"
-msgstr "Ugyldig nettkamera-url for kamera ( %s)"
-
-#: src/netcam.c
-#, c-format
-msgid ""
-"Netcam_http parameter '%s' converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-"
-"Alive %s."
-msgstr ""
-"Netcam http-parameter ' %s' konverterer til flagg: HTTP / 1.0: %s HTTP / "
-"1.1: %s Keep-Lever %s."
-
-#: src/netcam.c
-msgid "now calling netcam_setup_html()"
-msgstr "ringer nå netcam setup html ()"
-
-#: src/netcam.c
-msgid "now calling netcam_setup_ftp"
-msgstr "nå ringer netcam setup ftp"
-
-#: src/netcam.c
-msgid "now calling netcam_setup_file()"
-msgstr "ringer nå oppsettfil for netcam ()"
-
-#: src/netcam.c src/netcam_http.c
-msgid "now calling netcam_setup_mjpg()"
-msgstr "ringer nå netcam setup mjpg ()"
-
-#: src/netcam.c
-#, c-format
-msgid "Invalid netcam service '%s' - must be mjpeg, ftp, mjpg or jpeg."
-msgstr "Ugyldig netcam -tjeneste '%s' - må være mjpeg, ftp, mjpg eller jpeg."
-
-#: src/netcam.c src/netcam_rtsp.c
-#, c-format
-msgid "Failed trying to read first image - retval:%d"
-msgstr "Kunne ikke prøve å lese det første bildet - retval: %d"
-
-#: src/netcam.c
-msgid "libjpeg decompression failure on first frame - giving up!"
-msgstr "libjpeg dekompresjonssvikt på første ramme - å gi opp!"
-
-#: src/netcam.c
-#, c-format
-msgid "Width/height(%dx%d) must be multiples of 8"
-msgstr "Bredde / høyde ( %dx %d) må være multipler på 8"
-
-#: src/netcam.c
-#, c-format
-msgid "Error starting camera handler thread [%d]"
-msgstr "Feil ved start av kamerahandlertråden [ %d]"
-
-#: src/netcam_ftp.c
-msgid "recv failed in ftp_get_more"
-msgstr "recv mislyktes i ftp få mer"
-
-#: src/netcam_ftp.c
-#, c-format
-msgid "Server Response: %s"
-msgstr "Serverrespons: %s"
-
-#: src/netcam_ftp.c
-msgid "send failed in ftp_send_user"
-msgstr "send mislyktes i ftp send bruker"
-
-#: src/netcam_ftp.c
-msgid "send failed in ftp_send_passwd"
-msgstr "send mislyktes i ftp send passwd"
-
-#: src/netcam_ftp.c
-msgid "send failed in ftp_quit"
-msgstr "sending mislyktes i ftp avslutt"
-
-#: src/netcam_ftp.c
-msgid "gethostbyname failed in ftp_connect"
-msgstr "gethostbyname mislyktes i ftp-tilkobling"
-
-#: src/netcam_ftp.c
-msgid "gethostbyname address mismatch in ftp_connect"
-msgstr "gethostbyname adresse mismatch i ftp connect"
-
-#: src/netcam_ftp.c
-msgid "socket failed"
-msgstr "stikkontakten mislyktes"
-
-#: src/netcam_ftp.c
-msgid "Failed to create a connection"
-msgstr "Kunne ikke opprette en forbindelse"
-
-#: src/netcam_ftp.c
-msgid "FTP server asking for ACCT on anonymous"
-msgstr "FTP-server som ber om ACCT på anonym"
-
-#: src/netcam_ftp.c
-msgid "setting socket option SO_REUSEADDR"
-msgstr "innstille socket-alternativet SO REUSEADDR"
-
-#: src/netcam_ftp.c
-msgid "send failed in ftp_get_connection"
-msgstr "send mislyktes i ftp få tilkobling"
-
-#: src/netcam_ftp.c
-msgid "Invalid answer to PASV"
-msgstr "Ugyldig svar på PASV"
-
-#: src/netcam_ftp.c
-msgid "Failed to create a data connection"
-msgstr "Kunne ikke opprette en datatilkobling"
-
-#: src/netcam_ftp.c
-msgid "bind failed"
-msgstr "bind mislyktes"
-
-#: src/netcam_ftp.c
-msgid "listen failed"
-msgstr "lytten mislyktes"
-
-#: src/netcam_ftp.c
-msgid "send failed in ftp_get_socket"
-msgstr "send mislyktes i ftp få socket"
-
-#: src/netcam_ftp.c
-msgid "accept in ftp_get_socket"
-msgstr "godta i ftp få stikkontakt"
-
-#: src/netcam_ftp.c
-msgid "recv failed in ftp_read"
-msgstr "mottak mislyktes i ftp-lesing"
-
-#: src/netcam_ftp.c
-msgid "ftp_get_socket failed"
-msgstr "ftp get socket failed"
-
-#: src/netcam_ftp.c
-msgid "Error sending TYPE I to ftp server"
-msgstr "Feil ved sending av TYPE I til ftp-server"
-
-#: src/netcam_http.c
-#, c-format
-msgid "malformed token Content-Length but value %ld"
-msgstr "feilformet token Innholdslengde men verdi %ld"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Content-Length %ld"
-msgstr "Innholdslengde %ld"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Content-type %s"
-msgstr "Innholdstype %s"
-
-#: src/netcam_http.c
-msgid "Error reading image header, streaming mode (1). Null header."
-msgstr "Feil ved lesing av bildeoverskrift, streaming-modus (1). Null header."
-
-#: src/netcam_http.c
-#, c-format
-msgid "Error reading image header, streaming mode (1). Unknown header '%s'"
-msgstr ""
-"Feil ved lesing av bildeoverskrift, streaming-modus (1). Ukjent topptekst ' "
-"%s'"
-
-#: src/netcam_http.c
-msgid "Error reading image header (2)"
-msgstr "Feil ved lesing av bildeoverskrift (2)"
-
-#: src/netcam_http.c
-msgid "Header not JPEG"
-msgstr "Topptekst ikke JPEG"
-
-#: src/netcam_http.c
-msgid "Content-Length 0"
-msgstr "Innholdslengde 0"
-
-#: src/netcam_http.c
-msgid "Found image header record"
-msgstr "Fant bildet overskrift"
-
-#: src/netcam_http.c
-msgid "Error sending 'connect' request"
-msgstr "Feil ved sending av \"koble\" -forespørselen"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Received first header ('%s')"
-msgstr "Mottatt første overskrift (' %s')"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Error reading first header (%s)"
-msgstr "Feil ved lesing av første topptekst ( %s)"
-
-#: src/netcam_http.c
-#, c-format
-msgid "HTTP Result code %d"
-msgstr "HTTP Resultatkode %d"
-
-#: src/netcam_http.c
-msgid "Removed netcam Keep-Alive flag due to apparent closed HTTP connection."
-msgstr ""
-"Fjernet netcam Keep-Alive-flagg på grunn av tilsynelatende lukket HTTP-"
-"forbindelse."
-
-#: src/netcam_http.c
-msgid "Non-streaming camera (keep-alive set)"
-msgstr "Ikke-streaming-kamera (keep-live set)"
-
-#: src/netcam_http.c
-msgid "Non-streaming camera (keep-alive not set)"
-msgstr "Ikke-streaming-kamera (hold deg i live ikke innstilt)"
-
-#: src/netcam_http.c
-msgid "Streaming camera"
-msgstr "Streaming kamera"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Boundary string [%s]"
-msgstr "Grensestreng [ %s]"
-
-#: src/netcam_http.c
-msgid "Boundary string not found in header"
-msgstr "Grensestreng ikke funnet i overskriften"
-
-#: src/netcam_http.c
-msgid ""
-"Streaming camera probably using MJPG-blocks, consider using mjpg:// "
-"netcam_url."
-msgstr ""
-"Streaming kamera sannsynligvis bruker MJPG-blokker, kan du vurdere å bruke "
-"mjpg: //nettkamera url."
-
-#: src/netcam_http.c
-msgid "Unrecognized content type"
-msgstr "Ukjent innholdstype"
-
-#: src/netcam_http.c
-msgid "Content-length present"
-msgstr "Innholdslengde til stede"
-
-#: src/netcam_http.c
-msgid "Content-length 0"
-msgstr "Innholdslengde 0"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Found Conn: close header ('%s')"
-msgstr "Fant Conn: close header (' %s')"
-
-#: src/netcam_http.c
-msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
-"Motion removes keepalive."
-msgstr ""
-"Både 'Connection: Keep-Alive' og 'Connection: close' overskrift mottatt."
-"Bevegelse fjerner keepalive."
-
-#: src/netcam_http.c
-msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
-"Motion continues unchanged."
-msgstr ""
-"Både 'Connection: Keep-Alive' og 'Connection: close' overskrift mottatt."
-"Bevegelsen fortsetter uendret."
-
-#: src/netcam_http.c
-msgid "Received a Keep-Alive field in this set of headers."
-msgstr "Fikk et Keep-Alive-felt i dette settet med overskrifter."
-
-#: src/netcam_http.c
-msgid ""
-"No 'Connection: Keep-Alive' nor 'Connection: close' header received.\n"
-" Motion removes keepalive."
-msgstr ""
-"Ingen \"Connection: Keep-Alive\" eller \"Connection: close\" overskrift "
-"mottatt. \n"
-" Bevegelse fjerner keepalive."
-
-#: src/netcam_http.c
-msgid ""
-"No 'Connection: Keep-Alive' nor 'Connection: close' header received.\n"
-" Motion continues unchanged."
-msgstr ""
-"Ingen \"Connection: Keep-Alive\" eller \"Connection: close\" overskrift "
-"mottatt. \n"
-" Bevegelsen fortsetter uendret."
-
-#: src/netcam_http.c
-msgid ""
-"Removed netcam Keep-Alive flag because 'Connection: close' header received.\n"
-" Netcam does not support Keep-Alive. Motion continues in non-Keep-Alive."
-msgstr ""
-"Fjernet netcam Keep-Alive-flagget fordi 'Connection: close' overskrift "
-"mottatt. \n"
-" Netcam støtter ikke Keep-Alive. Bevegelse fortsetter i ikke-Keep-Alive."
-
-#: src/netcam_http.c
-msgid ""
-"Keep-Alive has reached end of valid period.\n"
-"Motion will close netcam, then resume Keep-Alive with a new socket."
-msgstr ""
-"Keep-Alive har nådd slutten av gyldig periode. \n"
-" Bevegelse vil lukke netcam og deretter fortsette Keep-Alive med en ny "
-"stikkontakt."
-
-#: src/netcam_http.c
-msgid "disconnect"
-msgstr "koble fra"
-
-#: src/netcam_http.c
-#, c-format
-msgid "getaddrinfo() failed (%s): %s"
-msgstr "getaddrinfo () mislyktes ( %s): %s"
-
-#: src/netcam_http.c
-msgid "disconnecting netcam (1)"
-msgstr "koble fra nettkamera (1)"
-
-#: src/netcam_http.c
-msgid "disconnecting netcam since keep-alive not set."
-msgstr "koble fra netcam siden keep-alive ikke er satt."
-
-#: src/netcam_http.c
-msgid "with no keepalive, attempt to create socket failed."
-msgstr "uten keepalive, forsøk på å lage socket mislyktes."
-
-#: src/netcam_http.c
-#, c-format
-msgid "with no keepalive, new socket created fd %d"
-msgstr "uten keepalive, ny socket opprettet fd %d"
-
-#: src/netcam_http.c
-msgid ""
-"with keepalive set, invalid socket.This could be the first time. Creating a "
-"new one failed."
-msgstr ""
-"med keepalive sett, ugyldig stikkontakt. Dette kan være første gang. "
-"Opprette enden nye mislyktes."
-
-#: src/netcam_http.c
-#, c-format
-msgid ""
-"with keepalive set, invalid socket.This could be first time, created a new "
-"one with fd %d"
-msgstr ""
-"med keepalive sett, ugyldig socket. Dette kan være første gang, opprettet en "
-"nyen med fd %d"
-
-#: src/netcam_http.c
-#, c-format
-msgid "SO_KEEPALIVE is %s"
-msgstr "SÅ KEEPALIVE er %s"
-
-#: src/netcam_http.c
-msgid "ON"
-msgstr "PÅ"
-
-#: src/netcam_http.c
-msgid "OFF"
-msgstr "AV"
-
-#: src/netcam_http.c
-msgid "SO_KEEPALIVE set on socket."
-msgstr "SÅ KEEPALIVE sett på stikkontakt."
-
-#: src/netcam_http.c
-msgid "fcntl(1) on socket"
-msgstr "fcntl (1) på stikkontakt"
-
-#: src/netcam_http.c
-msgid "fcntl(2) on socket"
-msgstr "fcntl (2) på stikkontakt"
-
-#: src/netcam_http.c
-#, c-format
-msgid "connect() failed (%d)"
-msgstr "koble til () mislyktes ( %d)"
-
-#: src/netcam_http.c
-msgid "disconnecting netcam (4)"
-msgstr "frakobling av nettkamera (4)"
-
-#: src/netcam_http.c
-msgid "timeout on connect()"
-msgstr "timeout på koble ()"
-
-#: src/netcam_http.c
-msgid "disconnecting netcam (2)"
-msgstr "koble fra nettkamera (2)"
-
-#: src/netcam_http.c
-msgid "getsockopt after connect"
-msgstr "getockopt etter koble til"
-
-#: src/netcam_http.c
-msgid "connect returned error"
-msgstr "koble tilbake feil"
-
-#: src/netcam_http.c
-msgid "disconnecting netcam (3)"
-msgstr "koble fra nettkamera (3)"
-
-#: src/netcam_http.c
-#, c-format
-msgid "expanding buffer from [%d/%d] to [%d/%d] bytes."
-msgstr "utvide buffer fra [ %d / %d] til [ %d / %d] byte."
-
-#: src/netcam_http.c
-#, c-format
-msgid "Potential split boundary - %d chars flushed, %d re-positioned"
-msgstr "Potensiell splittgrense - %d overskylte tegn, %d plassert på nytt"
-
-#: src/netcam_http.c
-msgid "recv() fail after boundary string"
-msgstr "recv () mislykkes etter grensestreng"
-
-#: src/netcam_http.c
-msgid "leaving netcam connected."
-msgstr "forlater nettkamera tilkoblet."
-
-#: src/netcam_http.c
-#, c-format
-msgid "about to try to connect, time #%d"
-msgstr "i ferd med å prøve å koble til, tid # %d"
-
-#: src/netcam_http.c
-msgid "Failed to open camera - check your config and that netcamera is online"
-msgstr ""
-"Kunne ikke åpne kameraet - sjekk konfigurasjonen din, og at nettkameraet er "
-"online"
-
-#: src/netcam_http.c
-msgid "Error reading first header - re-trying"
-msgstr "Feil ved lesing av første topptekst - prøv på nytt"
-
-#: src/netcam_http.c
-msgid "Failed to read first camera header - giving up for now"
-msgstr "Kunne ikke lese det første kamerahodet - og ga opp for nå"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Netcam has flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s."
-msgstr "Netcam har flagg: HTTP / 1.0: %s HTTP / 1.1: %s Keep-Alive %s."
-
-#: src/netcam_http.c
-msgid ""
-"Removed netcam_keepalive flag due to proxy set.Proxy is incompatible with "
-"Keep-Alive."
-msgstr ""
-"Fjernet netcam keepalive flagg på grunn av proxy-sett. Proxy er inkompatibel "
-"medHolde i live."
-
-#: src/netcam_http.c
-msgid "Failed to read first stream header - giving up for now"
-msgstr "Kunne ikke lese første stream-topptekst - gi opp for nå"
-
-#: src/netcam_http.c
-msgid "connected, going on to read image."
-msgstr "tilkoblet, fortsetter å lese bilde."
-
-#: src/netcam_http.c
-msgid "Read error, trying to reconnect.."
-msgstr "Les feil, prøver å koble til igjen .."
-
-#: src/netcam_http.c
-msgid "lost the cam."
-msgstr "mistet kammen."
-
-#: src/netcam_http.c
-#, c-format
-msgid "Refilled buffer with [%d] bytes from the network."
-msgstr "Etterfylt buffer med [ %d] byte fra nettverket."
-
-#: src/netcam_http.c
-#, c-format
-msgid "Read [%d/%d] header bytes."
-msgstr "Les [ %d / %d] overskriftsbyte."
-
-#: src/netcam_http.c
-msgid "Invalid header received, reconnecting"
-msgstr "Ugyldig overskrift mottatt, og koble til igjen"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Read [%d/%d] chunk bytes, [%d/%d] total"
-msgstr "Les [ %d / %d] delebytes, [ %d / %d] totalt"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Chunk complete, buffer used [%d] bytes."
-msgstr "Chunk komplett, buffer brukt [ %d] byte."
-
-#: src/netcam_http.c
-#, c-format
-msgid "Image complete, buffer used [%d] bytes."
-msgstr "Bilde komplett, buffer brukt [ %d] byte."
-
-#: src/netcam_http.c
-msgid "connected, going on to read and decode MJPG chunks."
-msgstr "tilkoblet, går til å lese og avkode MJPG-biter."
-
-#: src/netcam_http.c
-msgid "Begin"
-msgstr "Begynne"
-
-#: src/netcam_http.c
-#, c-format
-msgid "stat(%s) error"
-msgstr "stat ( %s) feil"
-
-#: src/netcam_http.c
-#, c-format
-msgid "statbuf.st_mtime[%d] != last_st_mtime[%d]"
-msgstr "statbuf.st mtime [ %d]! = siste mtime [ %d]"
-
-#: src/netcam_http.c
-msgid "waiting new file image timeout"
-msgstr "venter på timeout for nytt filbilde"
-
-#: src/netcam_http.c
-msgid "delay waiting new file image "
-msgstr "forsinkelse av å vente på nytt filbilde"
-
-#: src/netcam_http.c
-#, c-format
-msgid "processing new file image - st_mtime %d"
-msgstr "behandler nytt filbilde - st mtime %d"
-
-#: src/netcam_http.c
-#, c-format
-msgid "open(%s) error: %d"
-msgstr "åpen ( %s) feil: %d"
-
-#: src/netcam_http.c
-#, c-format
-msgid "read(%s) error: %d"
-msgstr "lese ( %s) feil: %d"
-
-#: src/netcam_http.c
-msgid "End"
-msgstr "Slutt"
-
-#: src/netcam_http.c
-#, c-format
-msgid "netcam->file->path %s"
-msgstr "netcam-> fil-> bane %s"
-
-#: src/netcam_jpeg.c
-msgid "Not enough data from netcam."
-msgstr "Ikke nok data fra netcam."
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid "netcam->jpeg_error %d"
-msgstr "netcam-> jpeg-feil %d"
-
-#: src/netcam_jpeg.c
-msgid "***new pic delay successful***"
-msgstr "*** ny bilde forsinkelse vellykket ***"
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid "jpeg_error %d"
-msgstr "jpeg-feil %d"
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid "processing jpeg image - content length %d"
-msgstr "behandler jpeg image - innholdslengde %d"
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid ""
-"Camera width/height mismatch with JPEG image -  expected %dx%d, JPEG %dx%d "
-"retval %d"
-msgstr ""
-"Kamerabredde / høydefeil i forhold til JPEG-bilde - forventet %dx %d, JPEG "
-"%dx %dgjentakelse %d"
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid "ret %d retval %d"
-msgstr "ret %d retval %d"
-
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Resized packet array to %d"
 msgstr "%s: Endret størrelse på pakkearray til %d"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: av_copy_packet: %s ,Interrupt: %s"
-msgstr "%s: av kopipakke: %s, Avbryt: %s"
+msgstr "%s: av kopipakke: %s ,Avbrudd: %s"
 
-#: src/netcam_rtsp.c
-msgid "True"
+#: src/netcam.cpp
+msgid "true"
 msgstr "ekte"
 
-#: src/netcam_rtsp.c
-msgid "False"
-msgstr "Falsk"
+#: src/netcam.cpp
+msgid "false"
+msgstr "falsk"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Ignoring packet with invalid data"
 msgstr "%s: Ignorerer pakke med ugyldige data"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Rec frame error: %s"
-msgstr "%s: Rec frame frame: %s"
+msgstr "%s: Opptaksrammefeil: %s"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Error transferring HW decoded to system memory"
+msgstr "%s: Feil ved overføring av HW dekodet til systemminnet"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Interrupted or finish on send"
+msgstr "%s: Avbrutt eller fullfør ved sending"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Send ignoring packet with invalid data"
+msgstr "%s: Send ignorerende pakke med ugyldige data"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Error sending packet to codec: %s"
+msgstr "%s: Feil ved sending av pakke til kodek: %s"
+
+#: src/netcam.cpp
 msgid "Ignoring packet with invalid data"
-msgstr "Ignorerer pakken med ugyldige data"
+msgstr "Ignorerer pakke med ugyldige data"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "Error decoding packet: %s"
 msgstr "Feil ved dekoding av pakke: %s"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "%s: Error transferring HW decoded to system memory"
-msgstr "%s: Feil ved overføring av HW dekodet til systemminne"
+msgid "%s: Error decoding video packet...it is audio"
+msgstr "%s: Feil ved dekoding av videopakke...det er lyd"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "Error sending packet to codec: %s"
-msgstr "Feil ved sending av pakke til codec: %s"
+msgid "%s: Error decoding video packet: Copying to buffer"
+msgstr "%s: Feil ved dekoding av videopakke: Kopierer til buffer"
 
-#: src/netcam_rtsp.c
-msgid "Error decoding video packet: Copying to buffer"
-msgstr "Feil ved dekoding av videopakke: Kopiering til buffer"
-
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: HW Devices: "
-msgstr "%s: HW -enheter:"
+msgstr "%s: HW-enheter:"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: %s (available)"
 msgstr "%s: %s (tilgjengelig)"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: %s (not implemented)"
 msgstr "%s: %s (ikke implementert)"
 
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: netcam_decoder %s disabled."
-msgstr "%s: netcam -dekoder %s deaktivert."
-
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 msgid "Failed to get vaapi pix format"
-msgstr "Kunne ikke hente vaapi pix -format"
+msgstr "Kunne ikke hente vaapi pix-format"
 
-#: src/netcam_rtsp.c
-msgid "Failed to get cuda pix format"
-msgstr "Kunne ikke hente cuda pix -format"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Interrupted."
-msgstr "%s: Avbrutt."
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: %s: %s"
-msgstr "%s: %s: %s"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: %s: Failed"
-msgstr "%s: %s: mislyktes"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Decoder %s did not work."
-msgstr "%s: Dekoder %s fungerte ikke."
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Ignoring and removing the user requested decoder %s"
-msgstr "%s: Ignorerer og fjerner brukerens forespurte dekoder %s"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Initializing vaapi decoder"
-msgstr "%s: Initialiserer vaapi -dekoder"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Unable to find vaapi hw device"
-msgstr "%s: Kan ikke finne vaapi hw -enheten"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Initializing cuda decoder"
-msgstr "%s: Initialiserer cuda -dekoder"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Unable to find cuda hw device"
-msgstr "%s: Kan ikke finne cuda hw -enheten"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Initializing decoder"
-msgstr "%s: Initialiserer dekoder"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Using decoder %s"
-msgstr "%s: Bruker dekoder %s"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Decoder opened"
-msgstr "%s: Dekoder åpnet"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Camera reading (%s) timed out"
-msgstr "%s: Kameralesing ( %s) gikk ut"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Camera (%s) timed out"
-msgstr "%s: Kameraet ( %s) gikk ut"
-
-#: src/netcam_rtsp.c
-msgid "Unable to allocate swsframe_in."
-msgstr "Kan ikke tildele swsframe i."
-
-#: src/netcam_rtsp.c
-msgid "Unable to allocate swsframe_out."
-msgstr "Kan ikke tildele swsframe ut."
-
-#: src/netcam_rtsp.c
-msgid "Unable to allocate scaling context."
-msgstr "Kan ikke tildele skaleringskontekst."
-
-#: src/netcam_rtsp.c
-msgid "Error determining size of frame out"
-msgstr "Feil ved bestemmelse av størrelsen på rammen ut"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "Error allocating picture in: %s"
-msgstr "Feil ved tildeling av bilde i: %s"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "Error allocating picture out: %s"
-msgstr "Feil ved tildeling av bilde: %s"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "Error resizing/reformatting: %s"
-msgstr "Feil ved endring av størrelse / omformatering: %s"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "Error putting frame into output buffer: %s"
-msgstr "Feil ved å sette ramme i utgangsbuffer: %s"
-
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Interrupted"
 msgstr "%s: Avbrutt"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+#, c-format
+msgid "%s: %s: %s"
+msgstr "%s: %s: %s"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: %s: Failed"
+msgstr "%s: %s: Mislyktes"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Decoder %s did not work."
+msgstr "%s: Dekoder %s fungerte ikke."
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Ignoring and removing the user requested decoder %s"
+msgstr "%s: Ignorerer og fjerner den brukerforespurte dekoderen %s"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Initializing vaapi decoder"
+msgstr "%s: Initialiserer vaapi-dekoder"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Unable to find vaapi hw device"
+msgstr "%s: Kan ikke finne vaapi hw-enhet"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Initializing decoder"
+msgstr "%s: Initialiserer dekoder"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Using decoder %s"
+msgstr "%s: Bruker dekoder %s"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Decoder opened"
+msgstr "%s: Dekoder åpnet"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Camera reading (%s) timed out"
+msgstr "%s: Kameralesing (%s) ble tidsavbrutt"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Camera (%s) timed out"
+msgstr "%s: Kamera (%s) ble tidsavbrutt"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Unable to allocate swsframe_in."
+msgstr "%s: Kan ikke tildele swsframe inn."
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Unable to allocate swsframe_out."
+msgstr "%s: Kan ikke tildele swsframe ut."
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Pixel format %d will be converted."
+msgstr "%s: Pikselformat %d vil bli konvertert."
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Unable to allocate scaling context."
+msgstr "%s: Kan ikke tildele skaleringskontekst."
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Error determining size of frame out"
+msgstr "%s: Feil ved å bestemme størrelsen på rammen ut"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Error allocating picture in: %s"
+msgstr "%s: Feil ved tildeling av bilde i: %s"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Error allocating picture out: %s"
+msgstr "%s: Feil ved tildeling av bilde ut: %s"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Error resizing/reformatting: %s"
+msgstr "%s: Feil ved endring av størrelse/omformatering: %s"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Error putting frame into output buffer: %s"
+msgstr "%s: Feil ved innsetting av ramme i utdatabuffer: %s"
+
+#: src/netcam.cpp
 #, c-format
 msgid "%s: av_read_frame: %s"
 msgstr "%s: av leseramme: %s"
 
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Excessive tries to get data from camera %d"
-msgstr "%s: For mange forsøk på å hente data fra kameraet %d"
-
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using %d"
-msgstr "%s: fangsthastighet ikke spesifisert i netcam -params. Bruker %d"
+msgstr "%s: fangsthastighet er ikke spesifisert i netcam-parametere. Bruker %d"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
 msgstr ""
-"%s: fangsthastighet ikke spesifisert i netcam -params. Bruker framerate %d"
+"%s: fangsthastighet er ikke spesifisert i netcam-parametere. Bruker "
+"framerate %d"
 
-#: src/netcam_rtsp.c
-msgid "The network camera is sending pictures in a different"
-msgstr "Nettverkskameraet sender bilder på et annet"
-
-#: src/netcam_rtsp.c
-msgid "size than specified in the config and also a "
-msgstr "størrelse enn spesifisert i konfigurasjonen og også en"
-
-#: src/netcam_rtsp.c
-msgid "different picture format.  The picture is being"
-msgstr "ulikt bildeformat. Bildet blir"
-
-#: src/netcam_rtsp.c
-msgid "transcoded to YUV420P and into the size requested"
-msgstr "kodet til YUV420P og i den ønskede størrelsen"
-
-#: src/netcam_rtsp.c
-msgid "in the config file.  If possible change netcam to"
-msgstr "i konfigurasjonsfilen. Endre om mulig netcam til"
-
-#: src/netcam_rtsp.c
-msgid "be in YUV420P format and the size requested in the"
-msgstr "være i YUV420P-format og størrelsen som er forespurt i"
-
-#: src/netcam_rtsp.c
-msgid "config to possibly lower CPU usage."
-msgstr "config for å muligens redusere CPU-bruken."
-
-#: src/netcam_rtsp.c
-msgid "size than specified in the configuration file."
-msgstr "størrelse enn spesifisert i konfigurasjonsfilen."
-
-#: src/netcam_rtsp.c
-msgid "The picture is being transcoded into the size "
-msgstr "Bildet blir kodet inn i størrelsen"
-
-#: src/netcam_rtsp.c
-msgid "requested in the configuration.  If possible change"
-msgstr "forespurt i konfigurasjonen. Endre om mulig"
-
-#: src/netcam_rtsp.c
-msgid "netcam or configuration to indicate the same size"
-msgstr "nettkamera eller konfigurasjon for å indikere samme størrelse"
-
-#: src/netcam_rtsp.c
-msgid "to possibly lower CPU usage."
-msgstr "for å muligens redusere CPU-bruken."
-
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "Netcam: %d x %d => Config: %d x %d"
-msgstr "Netcam: %dx %d => Konfigurasjon: %dx %d"
+msgid "The network camera is sending pictures at %dx%d"
+msgstr "Nettverkskameraet sender bilder på %dx%d"
 
-#: src/netcam_rtsp.c
-msgid "The image sent is being "
-msgstr "Bildet som sendes blir holdt"
+#: src/netcam.cpp
+#, c-format
+msgid "resolution but config is %dx%d. If possible change"
+msgstr "oppløsning, men konfigurasjonen er %dx%d. Om mulig endre"
 
-#: src/netcam_rtsp.c
-msgid "trancoded to YUV420P.  If possible change netcam "
-msgstr "trukket til YUV420P. Skift om mulig netcam"
+#: src/netcam.cpp
+msgid "the netcam or config so that the image height and"
+msgstr "nettkameraet eller konfigurasjonen slik at bildehøyden og"
 
-#: src/netcam_rtsp.c
-msgid "picture format to YUV420P to possibly lower CPU usage."
-msgstr "bildeformat til YUV420P for muligens å redusere CPU-bruken."
+#: src/netcam.cpp
+msgid "width are the same to lower the CPU usage."
+msgstr "bredden er den samme for å redusere CPU-bruken."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Setting rtsp/rtmp"
 msgstr "%s: Innstilling av rtsp/rtmp"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Setting input_format mjpeg"
-msgstr "%s: Angi inngangsformat mjpeg"
+msgstr "%s: Innstilling av inndataformat mjpeg"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Setting input_format video4linux2"
-msgstr "%s: Angi inndataformat video4linux2"
+msgstr "%s: Innstilling av inngangsformat video4linux2"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Setting up movie file"
-msgstr "%s: Konfigurering av filmfil"
+msgstr "%s: Setter opp filmfil"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Setting up %s"
-msgstr "%s: Konfigurering av %s"
+msgstr "%s: Setter opp %s"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: option: %s = %s"
 msgstr "%s: alternativ: %s = %s"
 
-#: src/netcam_rtsp.c
-msgid "Setting up v4l2 via netcam"
-msgstr "Setter opp v4l2 via netcam"
+#: src/netcam.cpp
+msgid "Error getting userpass"
+msgstr "Feil ved henting av brukerpass"
 
-#: src/netcam_rtsp.c
-msgid "Setting up file via netcam"
-msgstr "Setter opp fil via netcam"
+#: src/netcam.cpp
+msgid "Setting up v4l2"
+msgstr "Sette opp v4l2"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+msgid "Setting up file"
+msgstr "Setter opp fil"
+
+#: src/netcam.cpp
 #, c-format
-msgid "Setting up %s via netcam"
-msgstr "Konfigurerer %s via netcam"
+msgid "Setting up %s "
+msgstr "Setter opp %s"
 
-#: src/netcam_rtsp.c
-msgid "highres"
-msgstr "høy oppløsning"
+#: src/netcam.cpp
+msgid "High"
+msgstr "Høy"
 
-#: src/netcam_rtsp.c
-msgid "norm"
-msgstr "norm"
+#: src/netcam.cpp
+msgid "Norm"
+msgstr "Norm"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "Setting up %s stream."
-msgstr "Setter opp %s strøm."
+msgid "%s: Setting up camera."
+msgstr "%s: Setter opp kamera."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 msgid "Unknown"
 msgstr "Ukjent"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Adjusting width to next higher multiple of 8 (%d)."
+msgstr "%s: Justerer bredden til neste høyere multiplum av 8 (%d)."
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Unable to copy codec parameters"
+msgstr "%s: Kan ikke kopiere kodekparametere"
+
+#: src/netcam.cpp
 msgid "Stream copied for pass-through"
-msgstr "Strømmen er kopiert for gjennomføring"
+msgstr "Strømmen er kopiert for videresending"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+msgid "ffmpeg too old"
+msgstr "ffmpeg for gammel"
+
+#: src/netcam.cpp
 msgid "Null path passed to connect"
-msgstr "Null sti passert for å koble til"
+msgstr "Null bane passert for å koble til"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Unable to open camera(%s): %s"
-msgstr "%s: Kan ikke åpne kameraet ( %s): %s"
+msgstr "%s: Kan ikke åpne kamera (%s): %s"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Opened camera(%s)"
-msgstr "%s: Åpnet kamera ( %s)"
+msgstr "%s: Åpnet kamera (%s)"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Unable to find stream info: %s"
-msgstr "%s: Kan ikke finne strøminfo: %s"
+msgstr "%s: Kan ikke finne strøminformasjon: %s"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Unable to open codec context: %s"
-msgstr "%s: Kan ikke åpne codec-kontekst: %s"
+msgstr "%s: Kan ikke åpne kodek-kontekst: %s"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Connected and unable to open codec context: %s"
+msgstr "%s: Tilkoblet og kan ikke åpne kodek-kontekst: %s"
+
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Camera image size is invalid"
-msgstr "%s: Størrelsen på kameraet er ugyldig"
+msgstr "%s: Kameraets bildestørrelse er ugyldig"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Unable to allocate frame."
 msgstr "%s: Kan ikke tildele ramme."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Failed to copy stream for pass-through."
-msgstr "%s: Kunne ikke kopiere strøm for gjennomføring."
+msgstr "%s: Kunne ikke kopiere strømmen for pass-through."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Failed to read first image"
 msgstr "%s: Kunne ikke lese det første bildet"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Camera (%s) connected"
-msgstr "%s: Kamera ( %s) tilkoblet"
+msgstr "%s: Kamera (%s) tilkoblet"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "%s: Netcam capture_rate is %d."
-msgstr "%s: fangstfrekvensen for Netcam er %d."
+msgid "%s: Netcam capture FPS is %d."
+msgstr "%s: Netcam-fangst-FPS er %d."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Camera source is %d FPS"
 msgstr "%s: Kamerakilden er %d FPS"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Unable to determine the camera source FPS."
 msgstr "%s: Kan ikke bestemme kamerakilden FPS."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "%s: capture_rate is less than camera FPS."
-msgstr "%s: fangehastigheten er lavere enn kameraets FPS."
+msgid "%s: Capture FPS less than camera FPS. Decoding errors will occur."
+msgstr "%s: Fang FPS mindre enn kamera FPS. Dekodingsfeil vil oppstå."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "%s: Decoding errors will occur."
-msgstr "%s: Det vil oppstå feil ved dekoding."
+msgid "%s: Capture FPS should be greater than camera FPS."
+msgstr "%s: Capture FPS bør være større enn kameraets FPS."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "%s: capture_rate slightly larger than camera FPS is recommended."
-msgstr "%s: opptakshastighet litt større enn kameraets FPS anbefales."
+msgid ""
+"%s: An audio stream was detected.  Capture_rate increased to compensate."
+msgstr "%s: En lydstrøm ble oppdaget. Fangsthastigheten økte for å kompensere."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Reconnecting with camera...."
-msgstr "%s: Koble til igjen med kamera ...."
+msgstr "%s: Kobler til kameraet igjen..."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Camera did not reconnect."
-msgstr "%s: Kameraet koblet ikke til igjen."
+msgstr "%s: Kameraet ble ikke koblet til igjen."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Checking for camera every 10 seconds."
-msgstr "%s: Kontroller om kameraet hvert 10. sekund."
+msgstr "%s: Ser etter kamera hvert 10. sekund."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Checking for camera every 10 minutes."
+msgstr "%s: Ser etter kamera hvert 10. minutt."
+
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Camera handler thread [%d] started"
-msgstr "%s: Kamerahandlertråden [ %d] startet"
+msgstr "%s: Kamerabehandlertråden [%d] startet"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "%s: Handler loop finished."
-msgstr "%s: Håndteringssløyfen er ferdig."
+msgid "%s: Loop finished."
+msgstr "%s: Sløyfe fullført."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Exiting"
+msgstr "%s: Avslutter"
+
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Error starting handler thread"
-msgstr "%s: Feil ved start av behandlertråden"
+msgstr "%s: Feil ved start av behandlertråd"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Waiting for first image from the handler."
 msgstr "%s: Venter på første bilde fra behandleren."
 
-#: src/netcam_rtsp.c
-msgid "unable to create rtsp context"
-msgstr "klarer ikke å opprette rtsp-kontekst"
-
-#: src/netcam_rtsp.c
-msgid "unable to create rtsp high context"
-msgstr "klarer ikke å lage rtsp høy kontekst"
-
-#: src/netcam_rtsp.c
-msgid "No FFmpeg support"
-msgstr "Ingen FFmpeg -støtte"
-
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Shutting down network camera."
-msgstr "%s: Slå av nettverkskamera."
+msgstr "%s: Slår av nettverkskamera."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: No response from handler thread."
 msgstr "%s: Ingen respons fra behandlertråden."
 
-#: src/netcam_rtsp.c
-msgid "Normal resolution: Shut down complete."
-msgstr "Normal oppløsning: Avslutt komplett."
+#: src/netcam.cpp
+msgid "Norm: Shut down complete."
+msgstr "Norm: Avslutning fullført."
 
-#: src/netcam_rtsp.c
-msgid "High resolution: Shut down complete."
-msgstr "Høy oppløsning: Avslutt komplett."
+#: src/netcam.cpp
+msgid "High: Shut down complete."
+msgstr "Høy: Avslutning fullført."
 
-#: src/picture.c
+#: src/netcam.cpp
+msgid "Opening Netcam"
+msgstr "Åpner Netcam"
+
+#: src/netcam.cpp
+msgid "unable to create rtsp context"
+msgstr "kan ikke opprette rtsp-kontekst"
+
+#: src/netcam.cpp
+msgid "unable to create rtsp high context"
+msgstr "kan ikke lage rtsp høy kontekst"
+
+#: src/netcam.cpp
+msgid "Failed trying to read first image"
+msgstr "Kunne ikke prøve å lese det første bildet"
+
+#: src/picture.cpp
 msgid "Unable to set set EXIF to webp chunk"
-msgstr "Kan ikke sette EXIF ​​til webpunktsdel"
+msgstr "Kan ikke sette EXIF til webp chunk"
 
-#: src/picture.c
+#: src/picture.cpp
 msgid "libwebp version error"
 msgstr "libwebp versjonsfeil"
 
-#: src/picture.c
+#: src/picture.cpp
 msgid "libwebp image buffer allocation error"
-msgstr "libwebp feil for tildeling av bildebuffer"
+msgstr "libwebp bildebuffertildelingsfeil"
 
-#: src/picture.c
+#: src/picture.cpp
 msgid "libwebp image compression error"
 msgstr "libwebp bildekomprimeringsfeil"
 
-#: src/picture.c
+#: src/picture.cpp
 msgid "unable to assemble webp image"
-msgstr "ikke i stand til å sette sammen webbildet"
+msgstr "kan ikke sette sammen webp-bilde"
 
-#: src/picture.c
+#: src/picture.cpp
 msgid "unable to save webp image to file"
-msgstr "klarer ikke å lagre webbildet til filen"
+msgstr "kan ikke lagre webp-bilde til fil"
 
-#: src/picture.c
+#: src/picture.cpp
 #, c-format
 msgid ""
 "Can't write picture to file %s - check access rights to target directory\n"
 "Thread is going to finish due to this fatal error"
 msgstr ""
-"Kan ikke skrive bilde til fil %s - sjekk tilgangsrettigheter til "
-"målkatalog \n"
-"Tråden kommer til å bli ferdig på grunn av denne fatale feilen"
+"Kan ikke skrive bilde til filen %s - sjekk tilgangsrettighetene til "
+"målkatalogen\n"
+"Tråden blir ferdig på grunn av denne fatale feilen"
 
-#: src/picture.c
+#: src/picture.cpp
 #, c-format
 msgid "Can't write picture to file %s"
-msgstr "Kan ikke skrive bilde til fil %s"
+msgstr "Kan ikke skrive bilde til filen %s"
 
-#: src/picture.c
-msgid "Error getting PGM vars."
-msgstr "Feil ved henting av PGM vars."
+#: src/picture.cpp
+msgid "Could not read from pgm file"
+msgstr "Kunne ikke lese fra pgm-filen"
 
-#: src/picture.c
+#: src/picture.cpp
 #, c-format
 msgid "This is not a pgm file, starts with '%s'"
-msgstr "Dette er ikke en pgm-fil, starter med ' %s'"
+msgstr "Dette er ikke en pgm-fil, starter med '%s'"
 
-#: src/picture.c
-#, c-format
-msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
-msgstr "Magisk %s: Bredde %s(%d): Høyde %s(%d): Maksverdi: %s(%d)"
+#: src/picture.cpp
+msgid "Failed reading size in pgm file"
+msgstr "Mislykket lesing av størrelse i pgm-fil"
 
-#: src/picture.c
-msgid "Failed reading image data from pgm file"
-msgstr "Kunne ikke lese bildedata fra pgm-fil"
+#: src/picture.cpp
+msgid "Failed reading maximum value in pgm file"
+msgstr "Kunne ikke lese maksimalverdi i pgm-fil"
 
-#: src/picture.c
+#: src/picture.cpp
 msgid "The mask file specified is not the same size as image from camera."
 msgstr ""
-"Maskefilen som er spesifisert, er ikke i samme størrelse som bildet fra "
+"Maskefilen som er spesifisert har ikke samme størrelse som bildet fra "
 "kameraet."
 
-#: src/picture.c
+#: src/picture.cpp
 #, c-format
 msgid "Attempting to resize mask image from %dx%d to %dx%d"
-msgstr "Forsøker å endre størrelse på maskebildet fra %dx %d til %dx %d"
+msgstr "Forsøker å endre størrelsen på maskebildet fra %dx%d til %dx%d"
 
-#: src/picture.c
+#: src/picture.cpp
 #, c-format
 msgid "can't write mask file %s - check access rights to target directory"
-msgstr "kan ikke skrive maskefil %s - sjekk tilgangsrettigheter til målkatalog"
+msgstr ""
+"kan ikke skrive maskefilen %s - sjekk tilgangsrettighetene til målkatalogen"
 
-#: src/picture.c
+#: src/picture.cpp
 #, c-format
 msgid "can't write mask file %s"
 msgstr "kan ikke skrive maskefil %s"
 
-#: src/picture.c
+#: src/picture.cpp
 msgid "Failed writing default mask as pgm file"
 msgstr "Kunne ikke skrive standardmaske som pgm-fil"
 
-#: src/picture.c
+#: src/picture.cpp
 #, c-format
 msgid ""
 "Creating empty mask %s\n"
 "Please edit this file and re-run motion to enable mask feature"
 msgstr ""
-"Oppretter tom maske %s \n"
-"Rediger denne filen og kjør bevegelse på nytt for å aktivere maskefunksjonen"
+"Oppretter tom maske %s\n"
+"Rediger denne filen og kjør bevegelsen på nytt for å aktivere maskefunksjonen"
 
-#: src/rotate.c
+#: src/picture.cpp
+msgid "Opening privacy mask file"
+msgstr "Åpner personvernmaskefil"
+
+#: src/picture.cpp
+msgid "Opening high resolution privacy mask file"
+msgstr "Åpner personvernmaskefil med høy oppløsning"
+
+#: src/picture.cpp
+#, c-format
+msgid "Error opening mask file %s"
+msgstr "Feil ved åpning av maskefilen %s"
+
+#: src/picture.cpp
+msgid "Failed to read mask privacy image. Mask privacy feature disabled."
+msgstr ""
+"Kunne ikke lese maskens personvernbilde. Mask personvern funksjonen "
+"deaktivert."
+
+#: src/picture.cpp
+#, c-format
+msgid "Mask privacy file \"%s\" loaded."
+msgstr "Maskepersonvernfil \"%s\" er lastet inn."
+
+#: src/picture.cpp
+msgid "Failed to read mask image. Mask feature disabled."
+msgstr "Kunne ikke lese maskebildet. Maskefunksjonen er deaktivert."
+
+#: src/picture.cpp
+#, c-format
+msgid "Maskfile \"%s\" loaded."
+msgstr "Maskefilen \"%s\" er lastet inn."
+
+#: src/rotate.cpp
 #, c-format
 msgid "Config option \"rotate\" not a multiple of 90: %d"
-msgstr "Konfigureringsalternativet \"roter \" ikke et multiplum på 90: %d"
+msgstr "Konfigurasjonsalternativet \"roter\" ikke et multiplum av 90: %d"
 
-#: src/track.c
-msgid "internal error"
-msgstr "Intern feil"
-
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "internal error, %hu is not a known track-type"
-msgstr "intern feil, %hu er ikke en kjent sporetype"
+msgid "Card %i(%s): %s [%s]"
+msgstr "Kort %i(%s): %s [%s]"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "port %s dev fd %i, motor %hu command %hu data %hu"
-msgstr "port %s dev fd %i, motor %hu kommando %hu data %hu"
+msgid "  Device %i (%s,%d): %s [%s]"
+msgstr "Enhet %i (%s,%d): %s [%s]"
 
-#: src/track.c
-msgid "Status byte timeout!"
-msgstr "Statusbyte-timeout!"
-
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "Try to open serial device %s"
-msgstr "Forsøk å åpne seriell enhet %s"
+msgid "  Subdevices: %i/%i"
+msgstr "Underenheter: %i/%i"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "Unable to open serial device %s"
-msgstr "Kan ikke åpne seriell enhet %s"
+msgid "control digital audio playback info (%i): %s"
+msgstr "kontroller digital lydavspillingsinformasjon (%i): %s"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "Unable to initialize serial device %s"
-msgstr "Kan ikke initialisere seriell enhet %s"
+msgid "  Subdevice #%i: %s"
+msgstr "Underenhet #%i: %s"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "Opened serial device %s and initialize, fd %i"
-msgstr "Åpnet seriell enhet %s og initialiser, fd %i"
+msgid "control hardware info (%i): %s"
+msgstr "kontroll maskinvareinformasjon (%i): %s"
 
-#: src/track.c
+#: src/sound.cpp
+msgid "snd_ctl_pcm_next_device"
+msgstr "snd ctl pcm neste enhet"
+
+#: src/sound.cpp
 #, c-format
-msgid "No device %s started yet , trying stepper_center()"
-msgstr "Ingen enhet %s startet ennå, prøver stepper center ()"
+msgid "control digital audio info (%i): %s"
+msgstr "kontroller digital lydinformasjon (%i): %s"
 
-#: src/track.c
+#: src/sound.cpp
+msgid "no soundcards found..."
+msgstr "ingen lydkort funnet..."
+
+#: src/sound.cpp
+msgid "Devices"
+msgstr "Enheter"
+
+#: src/sound.cpp
 #, c-format
-msgid "failed to initialize stepper device on %s , fd [%i]."
-msgstr "kunne ikke initialisere stepper-enheten på %s, fd [ %i]."
+msgid "control open (%i): %s"
+msgstr "kontroll åpen (%i): %s"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "succeed , device started %s , fd [%i]"
-msgstr "lykkes, enheten startet %s, fd [ %i]"
+msgid "error: snd_pcm_open device %s (%s)"
+msgstr "feil: snd pcm åpen enhet %s (%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "SENDS port %s dev fd %i, motor %hu command %hu data %hu"
-msgstr "SENDER port %s dev fd %i, motor %hu kommando %hu data %hu"
+msgid "error: snd_pcm_hw_params_malloc(%s)"
+msgstr "feil: snd pcm hw params malloc(%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "Command return %d"
-msgstr "Kommandoavkastning %d"
+msgid "error: snd_pcm_hw_params_any(%s)"
+msgstr "feil: snd pcm hw params any(%s)"
 
-#: src/track.c
-msgid "Problem opening servo!"
-msgstr "Problem med å åpne servo!"
-
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "cent->x %d, cent->y %d, reversex %d, reversey %d manual %d"
-msgstr "cent-> x %d, cent-> y %d, reversex %d, reversey %d manuell %d"
+msgid "error: snd_pcm_hw_params_set_access(%s)"
+msgstr "feil: snd pcm hw params sett tilgang (%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "x %d value out of range! (%d - %d)"
-msgstr "x %d verdi utenfor rekkevidde! ( %d - %d)"
+msgid "error: snd_pcm_hw_params_set_format(%s)"
+msgstr "feil: snd pcm hw params sett format (%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "y %d value out of range! (%d - %d)"
-msgstr "y %d verdi utenfor rekkevidde! ( %d - %d)"
+msgid "error: snd_pcm_hw_params_set_rate_near(%s)"
+msgstr "feil: snd pcm hw params sett hastighet nær(%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "X offset %d"
-msgstr "X forskyvning %d"
+msgid "error: snd_pcm_hw_params_set_channels(%s)"
+msgstr "feil: snd pcm hw params setter kanaler (%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid ""
-"X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command "
-"%d"
-msgstr ""
-"X cent-> x %d, cent-> y %d, reversex %d, reversey %d motorx %d data %d "
-"kommando%d"
+msgid "error: snd_pcm_hw_params_set_period_size_near(%s)"
+msgstr "feil: snd pcm hw params sett periodestørrelse nær(%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "Y offset %d"
-msgstr "Y utlignet %d"
+msgid "error: snd_pcm_hw_params(%s)"
+msgstr "feil: snd pcm hw params(%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid ""
-"Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command "
-"%d"
-msgstr ""
-"Y cent-> x %d, cent-> y %d, reversex %d, reversey %d motory %d data %d "
-"kommando%d"
+msgid "error: snd_pcm_prepare(%s)"
+msgstr "feil: snd pcm prepare(%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid ""
-"X-offset %d, Y-offset %d, x-position %d. y-position %d,reversex %d, reversey "
-"%d , stepsize %d"
-msgstr ""
-"X-offset %d, Y-offset %d, x-stilling %d. y-stilling %d, reversex %d, reversey"
-"%d, trinnstørrelse %d"
+msgid "error: snd_pcm_hw_params_get_format(%s)"
+msgstr "feil: snd pcm hw params får format (%s)"
 
-#: src/track.c
-msgid "Return byte timeout!"
-msgstr "Returner byte-timeout!"
-
-#: src/track.c
-msgid "Unable to set camera speed"
-msgstr "Kan ikke angi kamerahastighet"
-
-#: src/track.c
-msgid "succeed"
-msgstr "lykkes"
-
-#: src/track.c
-msgid "Failed to reset pwc camera to starting position! Reason"
-msgstr "Kunne ikke tilbakestille pwc-kameraet til startposisjon! Grunnen til"
-
-#: src/track.c
-msgid "failed VIDIOCPWCMPTGRANGE"
-msgstr "mislyktes VIDIOCPWCMPTGRANGE"
-
-#: src/track.c
-msgid "ioctl VIDIOCPWCMPTGANGLE"
-msgstr "ioctl VIDIOCPWCMPTGANGLE"
-
-#: src/track.c
-msgid "Failed to pan/tilt pwc camera! Reason"
-msgstr "Kunne ikke panorere / vippe pwc-kamera! Grunnen til"
-
-#: src/track.c
-msgid "Failed to reset UVC camera to starting position! Reason"
-msgstr "Kunne ikke tilbakestille UVC-kameraet til startposisjonen! Grunnen til"
-
-#: src/track.c
-msgid "Reseting UVC camera to starting position"
-msgstr "Tilbakestill UVC-kamera til startposisjon"
-
-#: src/track.c
-msgid "ioctl querycontrol"
-msgstr "ioctl querycontrol"
-
-#: src/track.c
-msgid "Getting camera range"
-msgstr "Få kameraområde"
-
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d "
-msgstr "INNGANG PARAM ABS pan min %d, pan max %d, tilt min %d, tilt max %d"
+msgid "error: snd_pcm_hw_params_get_rate(%s)"
+msgstr "feil: snd pcm hw params får rate(%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "INPUT_PARAM_ABS X_Angel %d, Y_Angel %d "
-msgstr "INPUT PARAM ABS X Angel %d, Y Angel %d"
+msgid "error: snd_pcm_hw_params_get_period_size(%s)"
+msgstr "feil: snd pcm hw params får periodestørrelse (%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "For_SET_ABS move_X %d,move_Y %d"
-msgstr "For SET ABS flytt X %d, flytt Y %d"
+msgid "Actual rate %hu"
+msgstr "Faktisk rate %hu"
 
-#: src/track.c
-msgid "Failed to move UVC camera!"
-msgstr "Kunne ikke flytte UVC-kamera!"
-
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "Found MINMAX = %d"
-msgstr "Fant MINMAX = %d"
+msgid "Actual frames per %lu"
+msgstr "Faktiske rammer per %lu"
 
-#: src/track.c
+#: src/sound.cpp
+msgid "Sound format 16"
+msgstr "Lydformat 16"
+
+#: src/sound.cpp
+msgid "Sound format 24"
+msgstr "Lydformat 24"
+
+#: src/sound.cpp
+msgid "Sound format 32"
+msgstr "Lydformat 32"
+
+#: src/sound.cpp
 #, c-format
-msgid "Before_ABS_Y_Angel : x= %d , Y= %d, "
-msgstr "Før ABS Y Angel: x = %d, Y = %d,"
+msgid "error: read from audio interface failed (%s)"
+msgstr "feil: lesing fra lydgrensesnitt mislyktes (%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "After_ABS_Y_Angel : x= %d , Y= %d"
-msgstr "Etter ABS Y Angel: x = %d, Y = %d"
+msgid "Error opening pulse (%s)"
+msgstr "Feil ved åpningspuls (%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "For_SET_REL pan_min %d,pan_max %d,tilt_min %d,tilt_max %d"
-msgstr "For SET REL pan min %d, pan max %d, tilt min %d, tilt max %d"
+msgid "Error capturing PulseAudio (%s)"
+msgstr "Feil ved opptak av PulseAudio (%s)"
 
-#: src/track.c
+#: src/sound.cpp
+msgid "Opening FFTW plan"
+msgstr "Åpning av FFTW-plan"
+
+#: src/sound.cpp
+msgid "Invalid sound source."
+msgstr "Ugyldig lydkilde."
+
+#: src/sound.cpp
+msgid "Detecting"
+msgstr "Oppdager"
+
+#: src/sound.cpp
 #, c-format
-msgid "For_SET_REL track_pan_Angel %d, track_tilt_Angel %d"
-msgstr "For SET REL sporpanel Angel %d, sporvinkling Angel %d"
+msgid "Freq: %.4f threshold: %d count: %d maximum: %d"
+msgstr "Frekvens: %.4f terskel: %d telling: %d maksimum: %d"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "For_SET_REL move_X %d,move_Y %d"
-msgstr "For SET REL flytt X %d, flytt Y %d"
+msgid "Sound Alert %d-%s : level %d count %d max vol %d"
+msgstr "Lydvarsel %d-%s : nivå %d telling %d maks vol %d"
 
-#: src/track.c
-#, c-format
-msgid " dev %d, addr= %d, control_S= %d, Wert= %d"
-msgstr "dev %d, addr = %d, kontroll S = %d, Wert = %d"
+#: src/sound.cpp
+msgid "Capture loop finished"
+msgstr "Capture loop ferdig"
 
-#: src/track.c
-#, c-format
-msgid " dev %d,addr= %d, control_S= %d, Wert= %d"
-msgstr "dev %d, addr = %d, kontroll S = %d, Wert = %d"
+#: src/sound.cpp
+msgid "Sound detection functionality not supported"
+msgstr "Lyddeteksjonsfunksjonalitet støttes ikke"
 
-#: src/track.c
-#, c-format
-msgid "Before_REL_Y_Angel : x= %d , Y= %d"
-msgstr "Før REL Y Angel: x = %d, Y = %d"
-
-#: src/track.c
-#, c-format
-msgid "After_REL_Y_Angel : x= %d , Y= %d"
-msgstr "Etter REL Y Angel: x = %d, Y = %d"
-
-#: src/translate.c
-msgid "Language: English"
-msgstr "Språk Engelsk"
-
-#: src/util.c
+#: src/util.cpp
 #, c-format
 msgid "Could not allocate %llu bytes of memory!"
-msgstr "Kunne ikke tildele %llu byte minne!"
+msgstr "Kunne ikke tildele %llu byte med minne!"
 
-#: src/util.c
+#: src/util.cpp
 #, c-format
 msgid "Warning! Function %s tries to resize memoryblock at %p to 0 bytes!"
 msgstr ""
-"Advarsel! Funksjon %s prøver å endre størrelse på minneblokk ved %p til 0 "
-"byte!"
+"Advarsel! Funksjonen %s prøver å endre størrelsen på minneblokken ved %p til "
+"0 byte!"
 
-#: src/util.c
+#: src/util.cpp
 #, c-format
 msgid "Could not resize memory-block at offset %p to %llu bytes (function %s)!"
 msgstr ""
-"Kunne ikke endre størrelse på minneblokk ved forskyvning %p til %llu byte "
+"Kunne ikke endre størrelse på minneblokk ved offset %p til %llu byte "
 "(funksjon %s)!"
 
-#: src/util.c
+#: src/util.cpp
+#, c-format
+msgid "Creating %s"
+msgstr "Oppretter %s"
+
+#: src/util.cpp
 #, c-format
 msgid "Problem creating directory %s"
-msgstr "Problem med å lage katalog %s"
+msgstr "Problem med å opprette katalogen %s"
 
-#: src/util.c
-#, c-format
-msgid "creating directory %s"
-msgstr "opprette katalog %s"
-
-#: src/util.c
+#: src/util.cpp
 #, c-format
 msgid "Error opening file %s with mode %s"
-msgstr "Feil ved åpning av fil %s med modus %s"
+msgstr "Feil ved åpning av filen %s med modus %s"
 
-#: src/util.c
+#: src/util.cpp
 msgid "Error closing file"
-msgstr "Feil ved lukking av fil"
+msgstr "Feil ved lukking av filen"
 
-#: src/util.c
-msgid "{dbeventid} is not supported. Use eventid."
-msgstr "{dbeventid} støttes ikke. Bruk eventtid."
-
-#: src/util.c
+#: src/util.cpp
 #, c-format
 msgid "invalid format specifier keyword %*.*s"
-msgstr "ugyldig format spesifiser nøkkelord %*.*s"
+msgstr "ugyldig formatspesifikasjonsnøkkel %*.*s"
 
-#: src/util.c
+#: src/util.cpp
 #, c-format
 msgid "Unable to set thread name %s"
-msgstr "Kan ikke angi trådenavn %s"
+msgstr "Kan ikke angi trådnavnet %s"
 
-#: src/util.c
+#: src/util.cpp
 msgid "FFMPEG version too old. Disabling pass-through processing."
-msgstr "FFMPEG-versjonen er for gammel. Deaktiverer gjennomgangsbehandling."
+msgstr "FFMPEG-versjonen er for gammel. Deaktiverer pass-through-behandling."
 
-#: src/util.c
-msgid "pass-through enabled."
-msgstr "pass-through aktivert."
+#: src/util.cpp
+msgid "Language: English"
+msgstr "Språk Engelsk"
 
-#: src/util.c
+#: src/util.cpp
+msgid "Disabling native language support"
+msgstr "Deaktivere støtte for morsmål"
+
+#: src/util.cpp
+msgid "Enabling native language support"
+msgstr "Aktiver støtte for morsmål"
+
+#: src/util.cpp
 #, c-format
-msgid "Error setting parm >%s<"
-msgstr "Feil ved innstilling av parm>%s <"
+msgid "parse file: %s"
+msgstr "parse fil: %s"
 
-#: src/util.c
+#: src/util.cpp
+msgid "Only one params_file specification is permitted."
+msgstr "Bare én params-filspesifikasjon er tillatt."
+
+#: src/util.cpp
 #, c-format
 msgid "Parsed: >%s< >%s<"
-msgstr "Parset:>%s <>%s <"
+msgstr "Parsed: >%s< >%s<"
 
-#: src/util.c
-msgid "Parsed: >redacted< >redacted<"
-msgstr "Parsed:> redacted <> redacted <"
-
-#: src/util.c
+#: src/util.cpp
 #, c-format
-msgid "Error parsing parm_nm controls: %s"
-msgstr "Feil ved analyse av parm nm -kontroller: %s"
+msgid "Parsing: >%s< >%ld %ld %ld %ld<"
+msgstr "Parsing: >%s< >%ld %ld %ld %ld<"
 
-#: src/util.c
+#: src/util.cpp
+msgid "Starting parsing parameters"
+msgstr "Starter parsing av parametere"
+
+#: src/util.cpp
 #, c-format
-msgid "Error parsing parm_vl controls: %s"
-msgstr "Feil ved analyse av parm vl -kontroller: %s"
+msgid "New config: %s"
+msgstr "Ny konfigurasjon: %s"
 
-#: src/util.c
+#: src/util.cpp
 #, c-format
-msgid "Error setting temp: %s"
-msgstr "Feil ved innstilling av temperatur: %s"
+msgid "Unable to start external command '%s'"
+msgstr "Kan ikke starte ekstern kommando '%s'"
 
-#: src/util.c
+#: src/util.cpp
 #, c-format
-msgid "Error reparsing controls: %s"
-msgstr "Feil ved ny kontroll av kontroller: %s"
+msgid "Executing external command '%s'"
+msgstr "Utfører ekstern kommando '%s'"
 
-#: src/util.c
-#, c-format
-msgid "Parsing: %s"
-msgstr "Analyse: %s"
-
-#: src/util.c
-msgid "Parsing: <redacted>"
-msgstr "Parsing: <redaktert>"
-
-#: src/util.c
-#, c-format
-msgid "Error parsing controls: %s"
-msgstr "Feil ved analysering av kontroller: %s"
-
-#: src/util.c
-#, c-format
-msgid "Error: %s"
-msgstr "Feil: %s"
-
-#: src/util.c
-#, c-format
-msgid "New netcam_params: %s"
-msgstr "Nye netcam -params: %s"
-
-#: src/util.c
-#, c-format
-msgid "New netcam_high_params: %s"
-msgstr "Nye netcam high params: %s"
-
-#: src/util.c
-#, c-format
-msgid "New video_params: %s"
-msgstr "Nye videoparameter: %s"
-
-#: src/util.c
-#, c-format
-msgid "New webcontrol_header_params: %s"
-msgstr "Nye webkontrolloverskrifter: %s"
-
-#: src/util.c
-msgid "New webcontrol_header_params: <redacted>"
-msgstr "Nye webkontrolloverskriftsparametre: <redaktert>"
-
-#: src/util.c
-#, c-format
-msgid "New stream_header_params: %s"
-msgstr "Nye strømoverskriftsparametre: %s"
-
-#: src/util.c
-msgid "New stream_header_params: <redacted>"
-msgstr "Nye stream header params: <redacted>"
-
-#: src/util.c
-#, c-format
-msgid "Programming error.  Unknown configuration item: %s"
-msgstr "Programmeringsfeil. Ukjent konfigurasjonselement: %s "
-
-#: src/video_bktr.c
-#, c-format
-msgid "METEORSHUE Error setting hue [%d]"
-msgstr "METEORSHUE Feilinnstilling fargetone [ %d]"
-
-#: src/video_bktr.c
-#, c-format
-msgid "to [%d]"
-msgstr "til [ %d]"
-
-#: src/video_bktr.c
-msgid "METEORGHUE Error getting hue"
-msgstr "METEORGHUE Feil ved å få fargetone"
-
-#: src/video_bktr.c
-#, c-format
-msgid "METEORSCSAT Error setting saturation [%d]"
-msgstr "METEORSCSAT Feil ved innstilling av metning [ %d]"
-
-#: src/video_bktr.c
-msgid "METEORGCSAT Error getting saturation"
-msgstr "METEORGCSAT Feil ved metning"
-
-#: src/video_bktr.c
-#, c-format
-msgid "METEORSCONT Error setting contrast [%d]"
-msgstr "METEORSCONT Feilinnstilling av kontrast [ %d]"
-
-#: src/video_bktr.c
-msgid "METEORGCONT Error getting contrast"
-msgstr "METEORGCONT Feil ved å få kontrast"
-
-#: src/video_bktr.c
-#, c-format
-msgid "METEORSBRIG  brightness [%d]"
-msgstr "METEORSBRIG lysstyrke [ %d]"
-
-#: src/video_bktr.c
-msgid "METEORGBRIG  getting brightness"
-msgstr "METEORGBRIG får lysstyrke"
-
-#: src/video_bktr.c
-msgid "Not implemented"
-msgstr "Ikke implementert"
-
-#: src/video_bktr.c
-#, c-format
-msgid "Device Input %d out of range (0-4)"
-msgstr "Enhetsinngang %d utenfor rekkevidde (0-4)"
-
-#: src/video_bktr.c
-#, c-format
-msgid "METEORSINPUT %d invalid -Trying composite %d"
-msgstr "METEORSINPUT %d ugyldig -Prøve sammensatt %d"
-
-#: src/video_bktr.c
-msgid "BT848SFMT, Couldn't set the input format, try again with default"
-msgstr "BT848SFMT, Kunne ikke angi inndataformatet, prøv igjen med standard"
-
-#: src/video_bktr.c
-msgid "BT848SFMT, Couldn't set the input format either default"
-msgstr "BT848SFMT, Kunne ikke sette inndataformatet verken som standard"
-
-#: src/video_bktr.c
-msgid "Couldn't set the geometry"
-msgstr "Kunne ikke angi geometrien"
-
-#: src/video_bktr.c
-#, c-format
-msgid "to [%d/%d] Norm %d"
-msgstr "til [ %d / %d] Norm %d"
-
-#: src/video_bktr.c
-#, c-format
-msgid "Not valid Frequency [%ld] for Source input [%i]"
-msgstr "Ikke gyldig Frekvens [%ld] for kildeinngang [%i]"
-
-#: src/video_bktr.c
-#, c-format
-msgid "Frequency [%ld] Source input [%i]"
-msgstr "Frekvens [%ld] Kildeinngang [%i]"
-
-#: src/video_bktr.c
-#, c-format
-msgid "set input [%d]"
-msgstr "angi inndata [ %d]"
-
-#: src/video_bktr.c
-#, c-format
-msgid "set input format [%d]"
-msgstr "angi inndataformat [ %d]"
-
-#: src/video_bktr.c
-#, c-format
-msgid "set geometry [%d]x[%d]"
-msgstr "angi geometri [ %d] x [ %d]"
-
-#: src/video_bktr.c
-msgid "Frequency set (no implemented yet"
-msgstr "Frekvenssett (ikke implementert ennå"
-
-#: src/video_bktr.c
-msgid "Sizing buffer to 3x"
-msgstr "Størrelse på buffer til 3x"
-
-#: src/video_bktr.c
-msgid "Sizing buffer to 3/2x"
-msgstr "Dimensjonering av buffer til 3 / 2x"
-
-#: src/video_bktr.c
-msgid "mmap failed"
-msgstr "mmap mislyktes"
-
-#: src/video_bktr.c
-msgid "METEORCAPTUR using single method Error capturing"
-msgstr "METEORCAPTUR bruker enkeltmetode Feilfangst"
-
-#: src/video_bktr.c
-msgid "Error capturing using single method"
-msgstr "Feil under fangst ved bruk av en enkelt metode"
-
-#: src/video_bktr.c src/video_v4l2.c
-msgid "Unable to find video device"
-msgstr "Kan ikke finne videoenhet"
-
-#: src/video_bktr.c src/video_v4l2.c
-#, c-format
-msgid "Closing video device %s"
-msgstr "Lukker videoenhet %s"
-
-#: src/video_bktr.c src/video_v4l2.c
-#, c-format
-msgid "Still %d users of video device %s, so we don't close it now"
-msgstr "Fortsatt %d brukere av videoenhet %s, så vi lukker den ikke nå"
-
-#: src/video_bktr.c src/video_v4l2.c
-#, c-format
-msgid "config image width (%d) is not modulo 8"
-msgstr "config bildebredde ( %d) er ikke modulo 8"
-
-#: src/video_bktr.c src/video_v4l2.c
-#, c-format
-msgid "config image height (%d) is not modulo 8"
-msgstr "config image høyde ( %d) er ikke modulo 8"
-
-#: src/video_bktr.c
-msgid "Stopping capture"
-msgstr "Stopper fangst"
-
-#: src/video_bktr.c
-#, c-format
-msgid "Reusing [%s] inputs [%d,%d] Change capture method METEOR_CAP_SINGLE"
-msgstr ""
-"Gjenbruk av [ %s] innganger [ %d, %d] Endre fangstmetode METEOR CAP SINGLE"
-
-#: src/video_bktr.c
-msgid "VIDEO_PALETTE_YUV420P setting imgs.size_norm and imgs.motionsize"
-msgstr "VIDEO PALETTE YUV420P innstilling imgs.size norm og imgs.motionsize"
-
-#: src/video_bktr.c
-#, c-format
-msgid "open video device %s"
-msgstr "åpen videoenhet %s"
-
-#: src/video_bktr.c
-#, c-format
-msgid "open tuner device %s"
-msgstr "åpen tunerenhet %s"
-
-#: src/video_common.c
+#: src/video_common.cpp
 msgid "Corrupt image ... continue"
 msgstr "Korrupt bilde ... fortsett"
 
-#: src/video_common.c
+#: src/video_common.cpp
 #, c-format
 msgid "SOI position adjusted by %d bytes."
 msgstr "SOI-posisjon justert med %d byte."
 
-#: src/video_common.c
-msgid "calling netcam_cleanup"
-msgstr "ringer netcam opprydding"
-
-#: src/video_common.c
-msgid "calling netcam_rtsp_cleanup"
-msgstr "ringer netcam rtsp opprydding"
-
-#: src/video_common.c
-msgid "Cleaning up V4L2 device"
-msgstr "Rensing av V4L2-enhet"
-
-#: src/video_common.c
-msgid "Cleaning up BKTR device"
-msgstr "Rensing av BKTR-enhet"
-
-#: src/video_common.c
-msgid "No Camera device cleanup (Netcam, V4L2, BKTR)"
-msgstr "Ingen opprydding av kameraenhet (Netcam, V4L2, BKTR)"
-
-#: src/video_common.c
-msgid "Opening Netcam"
-msgstr "Åpner Netcam"
-
-#: src/video_common.c
-msgid "Netcam failed to open"
-msgstr "Netcam kunne ikke åpne"
-
-#: src/video_common.c
-msgid "Opening Netcam RTSP"
-msgstr "Åpning Netcam RTSP"
-
-#: src/video_common.c
-msgid "Netcam RTSP failed to open"
-msgstr "Netcam RTSP kunne ikke åpnes"
-
-#: src/video_common.c
-msgid "Opening V4L2 device"
-msgstr "Åpner V4L2-enhet"
-
-#: src/video_common.c
-msgid "V4L2 device failed to open"
-msgstr "V4L2-enheten kunne ikke åpnes"
-
-#: src/video_common.c
-msgid "Opening BKTR device"
-msgstr "Åpning av BKTR-enhet"
-
-#: src/video_common.c
-msgid "BKTR device failed to open"
-msgstr "BKTR-enheten kunne ikke åpnes"
-
-#: src/video_common.c
-msgid "No Camera device specified (Netcam, V4L2, BKTR)"
-msgstr "Ingen kameraenhet spesifisert (Netcam, V4L2, BKTR)"
-
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 #, c-format
 msgid "Failed to open '%s'"
-msgstr "Kunne ikke åpne ' %s'"
+msgstr "Kunne ikke åpne «%s»"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 #, c-format
 msgid "Error specifying buffer: %s"
-msgstr "Feil ved spesifisering av buffer: %s"
+msgstr "Feil ved spesifikasjon av buffer: %s"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 #, c-format
 msgid "Opening buffer: %s"
 msgstr "Åpningsbuffer: %s"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 #, c-format
 msgid "Read buffer: %s"
-msgstr "Les buffer: %s"
+msgstr "Lesebuffer: %s"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 #, c-format
 msgid "found video device '%s' %d"
-msgstr "fant videoenheten ' %s' %d"
+msgstr "fant videoenheten '%s' %d"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 #, c-format
 msgid "Opened %s as pipe output"
-msgstr "Åpnet %s som rørutgang"
+msgstr "Åpnet %s som pipeutgang"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 #, c-format
 msgid "Opening %s as pipe output failed"
-msgstr "Åpning av %s da rørutgangen mislyktes"
+msgstr "Åpning av %s som pipeutgang mislyktes"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 msgid "Original pipe specifications"
 msgstr "Originale rørspesifikasjoner"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 msgid "Proposed pipe specifications"
-msgstr "Foreslåtte rørspesifikasjoner"
+msgstr "Forslag til rørspesifikasjoner"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 msgid "Final pipe specifications"
-msgstr "Endelig rørspesifikasjoner"
+msgstr "Endelige rørspesifikasjoner"
 
-#: src/video_v4l2.c
-msgid "No Controls found for device"
-msgstr "Ingen kontroller funnet for enheten"
+#: src/video_loopback.cpp
+msgid "Opening video loopback device for normal pictures"
+msgstr "Åpning av video loopback-enhet for normale bilder"
 
-#: src/video_v4l2.c
+#: src/video_loopback.cpp
+msgid "Failed to open video loopback for normal pictures"
+msgstr "Kunne ikke åpne video loopback for normale bilder"
+
+#: src/video_loopback.cpp
+msgid "Opening video loopback device for motion pictures"
+msgstr "Åpne video loopback-enhet for film"
+
+#: src/video_loopback.cpp
+msgid "Failed to open video loopback for motion pictures"
+msgstr "Kunne ikke åpne video loopback for film"
+
+#: src/video_v4l2.cpp
 msgid "---------Controls---------"
-msgstr "--------- Controls ---------"
+msgstr "----------Kontroller---------"
 
-#: src/video_v4l2.c
-msgid "  V4L2 ID   Name and Range"
-msgstr "V4L2 ID Navn og rekkevidde"
+#: src/video_v4l2.cpp
+msgid "  V4L2 ID :  Name : Range"
+msgstr "V4L2 ID : Navn : Rekkevidde"
 
-#: src/video_v4l2.c
-msgid "Error resetting user value"
-msgstr "Feil ved tilbakestilling av brukerverdi"
+#: src/video_v4l2.cpp
+msgid "No Controls found for device"
+msgstr "Finner ingen kontroller for enheten"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "Leaving control %s \"%s\" set to %d"
-msgstr "Forlater kontroll %s \"%s\" satt til %d"
+msgid "setting control %s \"%s\" to %d failed with return code %d"
+msgstr "innstilling av kontroll %s \"%s\" til %d mislyktes med returkode %d"
 
-#: src/video_v4l2.c
-msgid "Device not ready"
-msgstr "Enheten er ikke klar"
-
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Set control \"%s\" to value %d"
-msgstr "Sett kontroll \" %s \" til verdi %d"
+msgstr "Sett kontroll \"%s\" til verdien %d"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "setting control %s \"%s\" to %d failed. "
-msgstr "innstilling av kontroll %s \"%s\" til %d mislyktes."
+msgid "%s control option value %s is below minimum.  Skipping..."
+msgstr "%s kontrollalternativverdi %s er under minimum. Hopp over..."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "%s control option value %s is below minimum.  Using minimum %d"
-msgstr "%s kontrollalternativverdi %s er under minimum. Bruk minimum %d "
+msgid "%s control option value %s is above maximum.  Skipping..."
+msgstr "%s kontrollalternativverdi %s er over maksimum. Hopp over..."
 
-#: src/video_v4l2.c
-#, c-format
-msgid "%s control option value %s is above maximum.  Using maximum %d"
-msgstr "%s kontrollalternativverdi %s er over maksimum. Bruker maksimal %d "
-
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "control type not supported yet"
 msgstr "kontrolltype støttes ikke ennå"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid ""
 "Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input "
 "value in conf by -1"
 msgstr ""
-"Kan ikke spørre om inndata %d. VIDIOC ENUMINPUT, hvis du bruker en WEBCAM "
-"endre inngangverdi i konf. med -1"
+"Kan ikke spørre inndata %d. VIDIOC ENUMINPUT, hvis du bruker en WEBCAM endre "
+"inngangverdi i konf med -1"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Name = \"%s\", type 0x%08X, status %08x"
-msgstr "Navn = \" %s \", skriv 0x %08X, status %08x"
+msgstr "Navn = \"%s\", skriv inn 0x%08X, status %08x"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Name = \"%s\",- TUNER"
-msgstr "Navn = \" %s \", - TUNER"
+msgstr "Navn = \"%s\",- TUNER"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Name = \"%s\"- CAMERA"
-msgstr "Navn = \" %s \" - KAMERA"
+msgstr "Navn = \"%s\"- KAMERA"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Error selecting input %d VIDIOC_S_INPUT"
 msgstr "Feil ved valg av inngang %d VIDIOC S INPUT"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Device does not support specifying PAL/NTSC norm"
-msgstr "Enheten støtter ikke spesifisering av PAL / NTSC-norm"
+msgstr "Enheten støtter ikke spesifisering av PAL/NTSC-norm"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "- video standard %s"
 msgstr "- videostandard %s"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Error selecting standard method %d VIDIOC_S_STD"
 msgstr "Feil ved valg av standardmetode %d VIDIOC S STD"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Video standard set to NTSC"
 msgstr "Videostandard satt til NTSC"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Video standard set to SECAM"
 msgstr "Videostandard satt til SECAM"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Video standard set to PAL"
 msgstr "Videostandard satt til PAL"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "tuner %d VIDIOC_G_TUNER"
 msgstr "tuner %d VIDIOC G TUNER"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Set tuner %d"
 msgstr "Still inn tuner %d"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "freq %ul VIDIOC_S_FREQUENCY"
-msgstr "freq %ul VIDIOC S FREQUENCY"
+msgstr "frekv %ul VIDIOC S FREKVENS"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Set Frequency to %ul"
-msgstr "Sett frekvens til %ul"
+msgstr "Sett Frekvens til %ul"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "Unable to use %c%c%c%c (%dx%d)"
-msgstr "Kan ikke bruke %c%c%c%c (%dx%d)"
+msgid "Unable to use palette %c%c%c%c (%dx%d)"
+msgstr "Kan ikke bruke paletten %c%c%c%c (%dx%d)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Testing palette %c%c%c%c (%dx%d)"
-msgstr "Testpalett %c %c %c %c ( %dx %d)"
+msgstr "Testpalett %c%c%c%c (%dx%d)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Checking image size %dx%d with stride %d"
 msgstr "Kontrollerer bildestørrelse %dx%d med steg %d"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "No stride value provided from device."
 msgstr "Ingen skrittverdi oppgitt fra enheten."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Width(%d) must be less than stride(%d)"
 msgstr "Bredde(%d) må være mindre enn skritt(%d)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "The image width(%d) is not multiple of the stride(%d)"
 msgstr "Bildebredden (%d) er ikke multiplum av skrittet (%d)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
 msgstr "Umulig tilstand: Bredde(%d), Skritt(%d), Per skritt(%d)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Image width will be padded %d bytes"
 msgstr "Bildebredden vil være polstret %d byte"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Adjusting resolution from %ix%i to %ix%i."
-msgstr "Justere oppløsningen fra %ix %i til %ix %i."
+msgstr "Justerer oppløsningen fra %ix%i til %ix%i."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Adjusted resolution not modulo 8."
 msgstr "Justert oppløsning ikke modulo 8."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Specify different palette or width/height in config file."
-msgstr "Spesifiser annen palett eller bredde / høyde i konfigurasjonsfilen."
+msgstr "Spesifiser annen palett eller bredde/høyde i konfigurasjonsfilen."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Error setting pixel format."
 msgstr "Feil ved innstilling av pikselformat."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
-msgstr "Bruker palett %c %c %c %c ( %dx %d)"
+msgstr "Bruker paletten %c%c%c%c (%dx%d)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
+#, c-format
+msgid "config image width (%d) is not modulo 8"
+msgstr "konfigurasjonsbildebredden (%d) er ikke modulo 8"
+
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Adjusting to width (%d)"
-msgstr "Justering til bredde ( %d)"
+msgstr "Justerer til bredde (%d)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
+#, c-format
+msgid "config image height (%d) is not modulo 8"
+msgstr "konfigurasjonsbildehøyde (%d) er ikke modulo 8"
+
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Adjusting to height (%d)"
-msgstr "Justering til høyde ( %d)"
+msgstr "Justerer til høyden (%d)"
 
-#: src/video_v4l2.c
-#, c-format
-msgid "Configuration palette index %d (%s) for %dx%d doesn't work."
-msgstr "Konfigurasjonspalettindeks %d ( %s) for %dx %d fungerer ikke."
+#: src/video_v4l2.cpp
+msgid "Invalid palette.  Changing to default"
+msgstr "Ugyldig palett. Bytter til standard"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Supported palettes:"
 msgstr "Støttede paletter:"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "%d - %s (compressed : %d) (%#x)"
-msgstr "%d - %s (komprimert: %d) ( %# x)"
+msgid "Configuration palette index %d (%s) for %dx%d doesn't work."
+msgstr "Konfigurasjonspalettindeks %d (%s) for %dx%d fungerer ikke."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
+msgid "Unable to find a compatible palette format."
+msgstr "Kan ikke finne et kompatibelt palettformat."
+
+#: src/video_v4l2.cpp
+#, c-format
+msgid "Palette selection failed for format %s"
+msgstr "Palettvalg mislyktes for formatet %s"
+
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Selected palette %s"
 msgstr "Valgt palett %s"
 
-#: src/video_v4l2.c
-#, c-format
-msgid "Palette selection failed for format %s"
-msgstr "Valg av palett mislyktes for format %s"
-
-#: src/video_v4l2.c
-msgid "Unable to find a compatible palette format."
-msgstr "Kan ikke finne et kompatibelt palettformat."
-
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Error requesting buffers %d for memory map. VIDIOC_REQBUFS"
 msgstr "Feil ved forespørsel om buffere %d for minnekart. VIDIOC REQBUFS"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "mmap information: frames=%d"
-msgstr "mmap informasjon: rammer = %d"
+msgstr "mmap informasjon: frames=%d"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Insufficient buffer memory %d < MIN_MMAP_BUFFERS."
-msgstr "Utilstrekkelig bufferminne %d <MIN MMAP BUFFERS."
+msgstr "Utilstrekkelig bufferminne %d < MIN MMAP BUFFERE."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Out of memory."
 msgstr "Tomt for minne."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "Error querying buffer %i"
-msgstr "Feil ved spørring etter buffer %i"
+msgid ""
+"Error querying buffer %i\n"
+"VIDIOC_QUERYBUF: "
+msgstr ""
+"Feil ved spørring etter buffer %i\n"
+"VIDIOC QUERYBUF:"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Error mapping buffer %i mmap"
-msgstr "Feil ved kartlegging av buffer %i mmap"
+msgstr "Feil ved tilordning av buffer %i mmap"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "%i length=%d Address (%x) offset %d"
-msgstr "%i length=%d Adresse (%x) forskyvning %d"
+msgid "%i length=%d Address (%x)"
+msgstr "%i length=%d Adresse (%x)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Error starting stream. VIDIOC_STREAMON"
 msgstr "Feil ved start av strømmen. VIDIOC STREAMON"
 
-#: src/video_v4l2.c
-msgid "Errors occurred during device select"
-msgstr "Det oppstod feil under valg av enhet"
+#: src/video_v4l2.cpp
+msgid "Error setting device controls"
+msgstr "Feil ved innstilling av enhetskontroller"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "Using videodevice %s and input %d"
-msgstr "Bruker videodevice %s og input %d"
+msgid "Opening video device %s"
+msgstr "Åpner videoenhet %s"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Failed to open video device %s"
 msgstr "Kunne ikke åpne videoenheten %s"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Not a V4L2 device?"
 msgstr "Ikke en V4L2-enhet?"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Device does not support capturing."
-msgstr "Enheten støtter ikke fangst."
+msgstr "Enheten støtter ikke opptak."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "Trying to set fps to %d"
-msgstr "Prøver å sette fps til %d"
+msgid "Supported palette %s (%c%c%c%c)"
+msgstr "Støttet palett %s (%c%c%c%c)"
 
-#: src/video_v4l2.c
-#, c-format
-msgid "Error setting fps. Return code %d"
-msgstr "Feil ved innstilling av fps. Returkode %d"
-
-#: src/video_v4l2.c
-#, c-format
-msgid "Device set fps to %d"
-msgstr "Enhet satt fps til %d"
-
-#: src/video_v4l2.c
-msgid "V4L2 is not enabled"
-msgstr "V4L2 er ikke aktivert"
-
-#: src/video_v4l2.c
-msgid "V4L2 is not enabled."
-msgstr "V4L2 er ikke aktivert."
-
-#: src/video_v4l2.c
-#, c-format
-msgid "Testing palette %s (%c%c%c%c)"
-msgstr "Testpalett %s ( %c %c %c %c)"
-
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "  Width: %d, Height %d"
 msgstr "Bredde: %d, Høyde %d"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "    Framerate %d/%d"
-msgstr "Framerate %d / %d"
+msgstr "Framerate %d/%d"
 
-#: src/webu.c
+#: src/video_v4l2.cpp
+#, c-format
+msgid "Trying to set fps to %d"
+msgstr "Prøver å sette fps til %d"
+
+#: src/video_v4l2.cpp
+#, c-format
+msgid "Error setting fps. Return code %d"
+msgstr "Feil ved innstilling av fps. Returkode %d"
+
+#: src/video_v4l2.cpp
+#, c-format
+msgid "Device set fps to %d"
+msgstr "Enheten satt fps til %d"
+
+#: src/video_v4l2.cpp
+#, c-format
+msgid "Closing video device %s"
+msgstr "Lukker videoenheten %s"
+
+#: src/video_v4l2.cpp
+msgid "Opening V4L2 device"
+msgstr "Åpner V4L2-enhet"
+
+#: src/video_v4l2.cpp
+msgid "V4L2 device failed to open"
+msgstr "V4L2-enheten kunne ikke åpnes"
+
+#: src/webu.cpp
 #, c-format
 msgid "Sent url: %s"
 msgstr "Sendt url: %s"
 
-#: src/webu.c
+#: src/webu.cpp
 #, c-format
 msgid "Decoded url: %s"
-msgstr "Avkodet url: %s"
+msgstr "Dekodet url: %s"
 
-#: src/webu.c
-msgid "Restarting all threads"
-msgstr "Start alle trådene på nytt"
-
-#: src/webu.c
+#: src/webu.cpp
 #, c-format
-msgid "Restarting thread %d"
-msgstr "Start tråden %d på nytt"
+msgid "Full Host:  %s"
+msgstr "Full vert: %s"
 
-#: src/webu.c
-#, c-format
-msgid "Quitting thread %d"
-msgstr "Avslutt tråd %d"
-
-#: src/webu.c src/webu_html.c src/webu_text.c
-#, c-format
-msgid "Invalid action requested: >%s< >%s< >%s<"
-msgstr "Ugyldig handling forespurt:> %s <> %s <> %s <"
-
-#: src/webu.c
-msgid "Native Language : on"
-msgstr "Modersmål: på"
-
-#: src/webu.c
-msgid "Native Language : off"
-msgstr "Morsmål: av"
-
-#: src/webu.c
-msgid "Set the value to null/zero"
-msgstr "Sett verdien til null / null"
-
-#: src/webu.c
-#, c-format
-msgid "Ignoring connection from: %s"
-msgstr "Ignorerer tilkobling fra: %s"
-
-#: src/webu.c
+#: src/webu.cpp
 #, c-format
 msgid "Failed authentication from %s"
-msgstr "Kunne ikke godkjenne fra %s"
+msgstr "Mislykket autentisering fra %s"
 
-#: src/webu.c
-msgid "No webcontrol user:pass provided"
-msgstr "Ingen bruker av nettkontroll: pass gitt"
-
-#: src/webu.c
-msgid "No stream user:pass provided"
-msgstr "Ingen strømbruker: pass gitt"
-
-#: src/webu.c src/webu_stream.c
-msgid "Invalid response"
-msgstr "Ugyldig svar"
-
-#: src/webu.c
-#, c-format
-msgid "Error adding webcontrol header %s %s"
-msgstr "Feil under tilføyelse av webkontrolloverskrift %s %s"
-
-#: src/webu.c src/webu_stream.c
-#, c-format
-msgid "Error adding stream header %s %s"
-msgstr "Feil under tilføyelse av strømtekst %s %s"
-
-#: src/webu.c
-#, c-format
-msgid "Invalid Method requested: %s"
-msgstr "Ugyldig metode forespurt: %s"
-
-#: src/webu.c
+#: src/webu.cpp
 #, c-format
 msgid "Connection from: %s"
 msgstr "Tilkobling fra: %s"
 
-#: src/webu.c
+#: src/webu.cpp
 #, c-format
-msgid "send page failed %d"
-msgstr "sendes side mislyktes %d"
+msgid "Ignoring connection from: %s"
+msgstr "Ignorerer tilkobling fra: %s"
 
-#: src/webu.c
-msgid "Stream picture is not ready yet"
-msgstr "Stream -bildet er ikke klart ennå"
+#: src/webu.cpp
+msgid "No webcontrol user:pass provided"
+msgstr "Ingen webcontrol user:pass gitt"
 
-#: src/webu.c
-msgid "Stream process requested to finish."
-msgstr "Stream -prosessen ble bedt om å fullføre."
+#: src/webu.cpp
+#: src/webu_stream.cpp
+msgid "Invalid response"
+msgstr "Ugyldig svar"
 
-#: src/webu.c
-msgid "Send page failed."
-msgstr "Sendesiden mislyktes."
+#: src/webu.cpp
+msgid "send page failed."
+msgstr "sende siden mislyktes."
 
-#: src/webu.c
+#: src/webu.cpp
+msgid "Shutting down camera"
+msgstr "Slår av kameraet"
+
+#: src/webu.cpp
 msgid "Basic authentication: available"
 msgstr "Grunnleggende autentisering: tilgjengelig"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "Basic authentication: disabled"
 msgstr "Grunnleggende autentisering: deaktivert"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "Digest authentication: available"
-msgstr "Digest autentisering: tilgjengelig"
+msgstr "Digest-autentisering: tilgjengelig"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "Digest authentication: disabled"
-msgstr "Digest autentisering: deaktivert"
+msgstr "Sammendragsgodkjenning: deaktivert"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "libmicrohttpd libary too old ipv6 disabled"
-msgstr "libmicrohttpd libary for gammel ipv6 deaktivert"
+msgstr "libmicrohttpd-biblioteket er for gammelt ipv6 deaktivert"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "IPV6: available"
 msgstr "IPV6: tilgjengelig"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "IPV6: disabled"
 msgstr "IPV6: deaktivert"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "libmicrohttpd libary too old SSL/TLS disabled"
-msgstr "libmicrohttpd libary for gammel SSL / TLS deaktivert"
+msgstr "libmicrohttpd-biblioteket er for gammelt SSL/TLS deaktivert"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "SSL/TLS: available"
-msgstr "SSL / TLS: tilgjengelig"
+msgstr "SSL/TLS: tilgjengelig"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "SSL/TLS: disabled"
-msgstr "SSL / TLS: deaktivert"
+msgstr "SSL/TLS: deaktivert"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "Error reading file for SSL/TLS support."
-msgstr "Feil under lesing av fil for SSL / TLS-støtte."
+msgstr "Feil ved lesing av fil for SSL/TLS-støtte."
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "SSL/TLS requested but no cert file provided.  SSL/TLS disabled"
-msgstr ""
-"SSL / TLS forespurt, men ingen certifikatfil gitt. SSL / TLS deaktivert"
+msgstr "SSL/TLS forespurt, men ingen sertifikatfil oppgitt. SSL/TLS deaktivert"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "SSL/TLS requested but no key file provided.  SSL/TLS disabled"
-msgstr "SSL / TLS forespurt, men ingen nøkkelfil gitt. SSL / TLS deaktivert"
+msgstr "SSL/TLS forespurt, men ingen nøkkelfil oppgitt. SSL/TLS deaktivert"
 
-#: src/webu.c
+#: src/webu.cpp
 #, c-format
 msgid "Starting webcontrol on port %d"
-msgstr "Starter nettkontroll på port %d"
+msgstr "Starter webcontrol på port %d"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "Unable to start MHD"
 msgstr "Kan ikke starte MHD"
 
-#: src/webu.c
+#: src/webu.cpp
 #, c-format
 msgid "Started webcontrol on port %d"
-msgstr "Startet nettkontroll på port %d"
+msgstr "Startet webkontroll på port %d"
 
-#: src/webu.c
+#: src/webu_html.cpp
 #, c-format
-msgid "Started camera %d stream on port/camera_id %d/%d"
-msgstr "Startet kamera %d strøm på port / kamera-ID %d / %d"
+msgid "Invalid user html file: %s"
+msgstr "Ugyldig bruker-html-fil: %s"
 
-#: src/webu.c
+#: src/webu_post.cpp
+msgid "Restarting all cameras"
+msgstr "Starter alle kameraer på nytt"
+
+#: src/webu_post.cpp
 #, c-format
-msgid "Started camera %d stream on port %d"
-msgstr "Startet kamera %d strøm på port %d"
+msgid "Restarting camera %d"
+msgstr "Starter kameraet på nytt %d"
 
-#: src/webu.c
+#: src/webu_post.cpp
 #, c-format
-msgid "Starting all camera streams on port %d"
-msgstr "Starte alle kamerastrømmer på port %d"
+msgid "Stopping cam %d"
+msgstr "Stopper kamera %d"
 
-#: src/webu.c
+#: src/webu_post.cpp
 #, c-format
-msgid "Starting camera %d stream on port %d"
-msgstr "Starter kamera %d strøm på port %d"
+msgid "Invalid character included in action user \"%c\""
+msgstr "Ugyldig tegn inkludert i handlingsbruker \"%c\""
 
-#: src/webu.c
+#: src/webu_post.cpp
 #, c-format
-msgid "Unable to start stream for camera %d"
-msgstr "Kan ikke starte strømmen for kamera %d"
+msgid "Executing user action on cam %d"
+msgstr "Utfører brukerhandling på kamera %d"
 
-#: src/webu.c
+#: src/webu_post.cpp
 #, c-format
-msgid "Duplicate port requested %d"
-msgstr "Duplisert port forespurt %d"
+msgid "Invalid action requested: command: >%s< threadnbr : >%d< "
+msgstr "Ugyldig handling forespurt: kommando: >%s< threadnbr : >%d<"
 
-#: src/webu.c
-msgid "Invalid webcontrol_lock_max_ips.  Setting equal to 25."
-msgstr "Ugyldig webkontrolllås maks. IPS. Innstilling lik 25. "
-
-#: src/webu_html.c
-msgid "Cameras"
-msgstr "Kameraer"
-
-#: src/webu_html.c
-msgid "Camera"
-msgstr "Kamera"
-
-#: src/webu_html.c
-msgid "All"
-msgstr "Alle"
-
-#: src/webu_html.c
-msgid "Action"
-msgstr "Handling"
-
-#: src/webu_html.c
-msgid "Start Event"
-msgstr "Start begivenhet"
-
-#: src/webu_html.c
-msgid "End Event"
-msgstr "Sluttbegivenhet"
-
-#: src/webu_html.c
-msgid "Snapshot"
-msgstr "Stillbilde"
-
-#: src/webu_html.c
-msgid "Change Configuration"
-msgstr "Endre konfigurasjon"
-
-#: src/webu_html.c
-msgid "Write Configuration"
-msgstr "Skriv konfigurasjon"
-
-#: src/webu_html.c
-msgid "Tracking"
-msgstr "Sporing"
-
-#: src/webu_html.c
-msgid "Pause"
-msgstr "Pause"
-
-#: src/webu_html.c
-msgid "Start"
-msgstr "Start"
-
-#: src/webu_html.c
-msgid "Restart"
-msgstr "Omstart"
-
-#: src/webu_html.c
-msgid "Quit"
-msgstr "Slutte"
-
-#: src/webu_html.c
-msgid "Help"
-msgstr "Hjelp"
-
-#: src/webu_html.c
-msgid "No Configuration Options"
-msgstr "Ingen konfigurasjons alternativer"
-
-#: src/webu_html.c
-msgid "Limited Configuration Options"
-msgstr "Begrensede konfigurasjons alternativer"
-
-#: src/webu_html.c
-msgid "Advanced Configuration Options"
-msgstr "Avanserte konfigurasjon alternativer"
-
-#: src/webu_html.c
-msgid "Restricted Configuration Options"
-msgstr "Konfidensielle konfigurasjons alternativer"
-
-#: src/webu_html.c
-msgid "All Cameras"
-msgstr "Alle kameraer"
-
-#: src/webu_html.c
-msgid "Not running"
-msgstr "Ikke aktiv"
-
-#: src/webu_html.c
-msgid "Lost connection"
-msgstr "Mistet tilkobling"
-
-#: src/webu_html.c
-msgid "Paused"
-msgstr "Pauset"
-
-#: src/webu_html.c
-msgid "Active"
-msgstr "Aktiv"
-
-#: src/webu_html.c
-msgid "Select option"
-msgstr "Velg alternativ"
-
-#: src/webu_html.c
-msgid "Save"
-msgstr "Lagre"
-
-#: src/webu_html.c
-msgid "Pan/Tilt"
-msgstr "Svivel / Tilt"
-
-#: src/webu_html.c
-msgid "Absolute Change"
-msgstr "Absolutt Endring"
-
-#: src/webu_html.c
-msgid "Center"
-msgstr "Senter"
-
-#: src/webu_html.c
-msgid "Pan"
-msgstr "Svivel"
-
-#: src/webu_html.c
-msgid "Tilt"
-msgstr "Tilt"
-
-#: src/webu_stream.c
+#: src/webu_stream.cpp
 #, c-format
 msgid "Invalid thread specified: %s"
 msgstr "Ugyldig tråd spesifisert: %s"
 
-#: src/webu_stream.c
-#, c-format
-msgid "Invalid URL for a camera specific port: %s"
-msgstr "Ugyldig URL for en kameraspesifikk port: %s"
-
-#: src/webu_stream.c
-#, c-format
-msgid "URL for thread 0 is not valid when using camera specific files.: %s"
-msgstr "URL for tråd 0 er ikke gyldig når du bruker kameraspesifikke filer: %s"
-
-#: src/webu_stream.c
-#, c-format
-msgid "Bad URL for a camera specific port: %s"
-msgstr "Dårlig URL for en kameraspesifikk port: %s"
-
-#: src/webu_stream.c
+#: src/webu_stream.cpp
 msgid "Could not get image to stream."
-msgstr "Kunne ikke få bilde til å strømme."
-
-#: src/webu_text.c
-#, c-format
-msgid "'%s' option is depreciated.  New option name is '%s'"
-msgstr "Alternativet '%s' avskrives. Navnet på det nye alternativet er '%s' "
+msgstr "Kunne ikke få bildet til å strømme."

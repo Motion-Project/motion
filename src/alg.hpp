@@ -1,62 +1,66 @@
-/*   This file is part of Motion.
- *
- *   Motion is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   Motion is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 /*
- *  alg.h
- *    Detect changes in a video stream.
- *    Copyright 2001 by Jeroen Vreeken (pe1rxq@amsat.org)
+ *    This file is part of Motion.
+ *
+ *    Motion is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    Motion is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ *
  */
 
-#ifndef _INCLUDE_ALG_H
-#define _INCLUDE_ALG_H
+#ifndef _INCLUDE_ALG_HPP_
+#define _INCLUDE_ALG_HPP_
+    #define THRESHOLD_TUNE_LENGTH  256
 
-#include "motion.hpp"
+    class cls_alg {
+        public:
+            cls_alg(cls_camera *p_cam);
+            ~cls_alg();
+            void diff();
+            void noise_tune();
+            void threshold_tune();
+            void tune_smartmask();
+            void ref_frame_update();
+            void ref_frame_reset();
+            void stddev();
+            void location();
+            u_char  *smartmask_final;
+        private:
+            cls_camera *cam;
+            int     smartmask_count;
+            u_char  *smartmask;
+            int     *smartmask_buffer;
+            int     diffs_last[THRESHOLD_TUNE_LENGTH];
+            bool    calc_stddev;
 
-struct coord {
-    int x;
-    int y;
-    int width;
-    int height;
-    int minx;
-    int maxx;
-    int miny;
-    int maxy;
-};
+            int iflood(int x, int y, int width, int height,
+                u_char *out, int *labels, int newvalue, int oldvalue);
+            int labeling();
+            int dilate9(u_char *img, int width, int height, void *buffer);
+            int dilate5(u_char *img, int width, int height, void *buffer);
+            int erode9(u_char *img, int width, int height, void *buffer, u_char flag);
+            int erode5(u_char *img, int width, int height, void *buffer, u_char flag);
+            void despeckle();
+            void diff_nomask();
+            void diff_mask();
+            void diff_smart();
+            void diff_masksmart();
+            bool diff_fast();
+            void diff_standard();
+            void lightswitch();
+            void location_center();
+            void location_dist_stddev();
+            void location_dist_basic();
+            void location_minmax();
 
-struct segment {
-    struct coord coord;
-    int width;
-    int height;
-    int open;
-    int count;
-};
+    };
 
-void alg_locate_center_size(struct images *imgs, int width, int height, struct coord *cent);
-void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsigned char *new,
-                       int style, int mode, int process_thisframe);
-void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, unsigned char *new,
-                           int style, int mode, int process_thisframe);
-void alg_noise_tune(struct context *cnt, unsigned char *new);
-void alg_threshold_tune(struct context *cnt, int diffs, int motion);
-int alg_despeckle(struct context *cnt, int olddiffs);
-void alg_tune_smartmask(struct context *cnt);
-int alg_diff_standard(struct context *cnt, unsigned char *new);
-int alg_diff(struct context *cnt, unsigned char *new);
-int alg_lightswitch(struct context *cnt, int diffs);
-int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg);
-void alg_update_reference_frame(struct context *cnt, int action);
-
-#endif /* _INCLUDE_ALG_H */
+#endif /* _INCLUDE_ALG_HPP_ */

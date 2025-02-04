@@ -1,0 +1,70 @@
+#
+#   This file is part of Motion.
+#
+#   MotionPLus is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   Motion is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+#
+#
+
+[Unit]
+Description=Motion - Enhanced security camera monitoring software.
+Documentation=man:motion(1)
+After=local-fs.target network.target
+
+[Service]
+User=motion
+UMask=002
+ExecStart=@BIN_PATH@/motion
+
+Type=simple
+# Set StandardError=journal to use journald to log messages from motion.
+# See also the "log_file" config file option in motion(1) and systemd.service(5).
+StandardError=null
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+ExecStartPre=!/bin/mkdir -p /var/log/motion
+ExecStartPre=!/bin/chown motion:adm /var/log/motion
+
+# Don't restart if unconfigured / misconfigured  e.g. daemon disabled
+# in defaults file.  See also /usr/include/sysexits.h or sysexits(3)
+RestartPreventExitStatus=78
+
+# To tune restart behaviour, see systemd.unit(5) and use
+# "systemctl edit motion" to change the following settings:
+#StartLimitBurst=
+#StartLimitIntervalSec=
+#StartLimitAction=
+#FailureAction=
+
+# The following can be used to increase the security of the
+# installation, by mitigating risk from attacks on motion and the
+# binaries, libraries and scripts which it relies on.  They are disabled
+# by default in case they break existing installations, e.g. those which
+# call site-local scripts which would inherit the same restrictions.
+#
+# See systemd.exec(5) and
+# http://0pointer.net/public/systemd-nluug-2014.pdf for more details
+# of these and other related options.
+#
+# Use "systemctl edit motion" to change these settings.
+#PrivateTmp=true
+#NoNewPrivileges=yes
+#PrivateNetwork=yes
+#ProtectHome=yes
+#DeviceAllow=/dev/video0
+#MountFlags=slave
+#SystemCallFilter=
+
+[Install]
+WantedBy=multi-user.target

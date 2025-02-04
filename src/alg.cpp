@@ -1,451 +1,122 @@
-/*   This file is part of Motion.
+/*
+ *    This file is part of Motion.
  *
- *   Motion is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 2 of the License, or
- *   (at your option) any later version.
+ *    Motion is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
  *
- *   Motion is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    Motion is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
- */
-
-/*    alg.c
- *
- *    Detect changes in a video stream.
- *    Copyright 2001 by Jeroen Vreeken (pe1rxq@amsat.org)
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
-
 #include "motion.hpp"
 #include "util.hpp"
+#include "conf.hpp"
+#include "camera.hpp"
 #include "draw.hpp"
+#include "logger.hpp"
 #include "alg.hpp"
-
-#ifdef __MMX__
-    #define HAVE_MMX
-    #include "mmx.hpp"
-#endif
 
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MAX3(x, y, z) ((x) > (y) ? ((x) > (z) ? (x) : (z)) : ((y) > (z) ? (y) : (z)))
-
-/**
- * alg_locate_center_size
- *      Locates the center and size of the movement.
- */
-void alg_locate_center_size(struct images *imgs, int width, int height, struct coord *cent)
-{
-    unsigned char *out = imgs->img_motion.image_norm;
-    int *labels = imgs->labels;
-    int x, y, centc = 0, xdist = 0, ydist = 0;
-
-    cent->x = 0;
-    cent->y = 0;
-    cent->maxx = 0;
-    cent->maxy = 0;
-    cent->minx = width;
-    cent->miny = height;
-
-    /* If Labeling enabled - locate center of largest labelgroup. */
-    if (imgs->labelsize_max) {
-        /* Locate largest labelgroup */
-        for (y = 0; y < height; y++) {
-            for (x = 0; x < width; x++) {
-                if (*(labels++) & 32768) {
-                    cent->x += x;
-                    cent->y += y;
-                    centc++;
-                }
-            }
-        }
-
-    } else {
-        /* Locate movement */
-        for (y = 0; y < height; y++) {
-            for (x = 0; x < width; x++) {
-                if (*(out++)) {
-                    cent->x += x;
-                    cent->y += y;
-                    centc++;
-                }
-            }
-        }
-
-    }
-
-    if (centc) {
-        cent->x = cent->x / centc;
-        cent->y = cent->y / centc;
-    }
-
-    /* Now we find the size of the Motion. */
-
-    /* First reset pointers back to initial value. */
-    centc = 0;
-    labels = imgs->labels;
-    out = imgs->img_motion.image_norm;
-
-    /* If Labeling then we find the area around largest labelgroup instead. */
-    if (imgs->labelsize_max) {
-        for (y = 0; y < height; y++) {
-            for (x = 0; x < width; x++) {
-                if (*(labels++) & 32768) {
-                    if (x > cent->x) {
-                        xdist += x - cent->x;
-                    } else if (x < cent->x) {
-                        xdist += cent->x - x;
-                    }
-                    if (y > cent->y) {
-                        ydist += y - cent->y;
-                    } else if (y < cent->y) {
-                        ydist += cent->y - y;
-                    }
-                    centc++;
-                }
-            }
-        }
-
-    } else {
-        for (y = 0; y < height; y++) {
-            for (x = 0; x < width; x++) {
-                if (*(out++)) {
-                    if (x > cent->x) {
-                        xdist += x - cent->x;
-                    } else if (x < cent->x) {
-                        xdist += cent->x - x;
-                    }
-                    if (y > cent->y) {
-                        ydist += y - cent->y;
-                    } else if (y < cent->y) {
-                        ydist += cent->y - y;
-                    }
-                    centc++;
-                }
-            }
-        }
-
-    }
-
-    if (centc) {
-        cent->minx = cent->x - xdist / centc * 2;
-        cent->maxx = cent->x + xdist / centc * 2;
-        /*
-         * Make the box a little bigger in y direction to make sure the
-         * heads fit in so we multiply by 3 instead of 2 which seems to
-         * to work well in practical.
-         */
-        cent->miny = cent->y - ydist / centc * 3;
-        cent->maxy = cent->y + ydist / centc * 2;
-    }
-
-    if (cent->maxx > width - 1) {
-        cent->maxx = width - 1;
-    } else if (cent->maxx < 0) {
-        cent->maxx = 0;
-    }
-    if (cent->maxy > height - 1) {
-        cent->maxy = height - 1;
-    } else if (cent->maxy < 0) {
-        cent->maxy = 0;
-    }
-
-    if (cent->minx > width - 1) {
-        cent->minx = width - 1;
-    } else if (cent->minx < 0) {
-        cent->minx = 0;
-    }
-
-    if (cent->miny > height - 1) {
-        cent->miny = height - 1;
-    } else if (cent->miny < 0) {
-        cent->miny = 0;
-    }
-
-    /* Align for better locate box handling */
-    cent->minx += cent->minx % 2;
-    cent->miny += cent->miny % 2;
-    cent->maxx -= cent->maxx % 2;
-    cent->maxy -= cent->maxy % 2;
-
-    cent->width = cent->maxx - cent->minx;
-    cent->height = cent->maxy - cent->miny;
-
-    /*
-     * We want to center Y coordinate to be the center of the action.
-     * The head of a person is important so we correct the cent.y coordinate
-     * to match the correction to include a persons head that we just did above.
-     */
-    cent->y = (cent->miny + cent->maxy) / 2;
-
-}
-
-
-/**
- * alg_draw_location
- *      Draws a box around the movement.
- */
-void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsigned char *new,
-                       int style, int mode, int process_thisframe)
-{
-    unsigned char *out = imgs->img_motion.image_norm;
-    int x, y;
-
-    out = imgs->img_motion.image_norm;
-
-    /* Debug image always gets a 'normal' box. */
-    if ((mode == LOCATE_BOTH) && process_thisframe) {
-        int width_miny = width * cent->miny;
-        int width_maxy = width * cent->maxy;
-
-        for (x = cent->minx; x <= cent->maxx; x++) {
-            int width_miny_x = x + width_miny;
-            int width_maxy_x = x + width_maxy;
-
-            out[width_miny_x] =~out[width_miny_x];
-            out[width_maxy_x] =~out[width_maxy_x];
-        }
-
-        for (y = cent->miny; y <= cent->maxy; y++) {
-            int width_minx_y = cent->minx + y * width;
-            int width_maxx_y = cent->maxx + y * width;
-
-            out[width_minx_y] =~out[width_minx_y];
-            out[width_maxx_y] =~out[width_maxx_y];
-        }
-    }
-    if (style == LOCATE_BOX) { /* Draw a box on normal images. */
-        int width_miny = width * cent->miny;
-        int width_maxy = width * cent->maxy;
-
-        for (x = cent->minx; x <= cent->maxx; x++) {
-            int width_miny_x = x + width_miny;
-            int width_maxy_x = x + width_maxy;
-
-            new[width_miny_x] =~new[width_miny_x];
-            new[width_maxy_x] =~new[width_maxy_x];
-        }
-
-        for (y = cent->miny; y <= cent->maxy; y++) {
-            int width_minx_y = cent->minx + y * width;
-            int width_maxx_y = cent->maxx + y * width;
-
-            new[width_minx_y] =~new[width_minx_y];
-            new[width_maxx_y] =~new[width_maxx_y];
-        }
-    } else if (style == LOCATE_CROSS) { /* Draw a cross on normal images. */
-        int centy = cent->y * width;
-
-        for (x = cent->x - 10;  x <= cent->x + 10; x++) {
-            new[centy + x] =~new[centy + x];
-            out[centy + x] =~out[centy + x];
-        }
-
-        for (y = cent->y - 10; y <= cent->y + 10; y++) {
-            new[cent->x + y * width] =~new[cent->x + y * width];
-            out[cent->x + y * width] =~out[cent->x + y * width];
-        }
-    }
-}
-
-
-/**
- * alg_draw_red_location
- *          Draws a RED box around the movement.
- */
-void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, unsigned char *new,
-                           int style, int mode, int process_thisframe)
-{
-    unsigned char *out = imgs->img_motion.image_norm;
-    unsigned char *new_u, *new_v;
-    int x, y, v, cwidth, cblock;
-
-    cwidth = width / 2;
-    cblock = imgs->motionsize / 4;
-    x = imgs->motionsize;
-    v = x + cblock;
-    out = imgs->img_motion.image_norm;
-    new_u = new + x;
-    new_v = new + v;
-
-    /* Debug image always gets a 'normal' box. */
-    if ((mode == LOCATE_BOTH) && process_thisframe) {
-        int width_miny = width * cent->miny;
-        int width_maxy = width * cent->maxy;
-
-        for (x = cent->minx; x <= cent->maxx; x++) {
-            int width_miny_x = x + width_miny;
-            int width_maxy_x = x + width_maxy;
-
-            out[width_miny_x] =~out[width_miny_x];
-            out[width_maxy_x] =~out[width_maxy_x];
-        }
-
-        for (y = cent->miny; y <= cent->maxy; y++) {
-            int width_minx_y = cent->minx + y * width;
-            int width_maxx_y = cent->maxx + y * width;
-
-            out[width_minx_y] =~out[width_minx_y];
-            out[width_maxx_y] =~out[width_maxx_y];
-        }
-    }
-
-    if (style == LOCATE_REDBOX) { /* Draw a red box on normal images. */
-        int width_miny = width * cent->miny;
-        int width_maxy = width * cent->maxy;
-        int cwidth_miny = cwidth * (cent->miny / 2);
-        int cwidth_maxy = cwidth * (cent->maxy / 2);
-
-        for (x = cent->minx + 2; x <= cent->maxx - 2; x += 2) {
-            int width_miny_x = x + width_miny;
-            int width_maxy_x = x + width_maxy;
-            int cwidth_miny_x = x / 2 + cwidth_miny;
-            int cwidth_maxy_x = x / 2 + cwidth_maxy;
-
-            new_u[cwidth_miny_x] = 128;
-            new_u[cwidth_maxy_x] = 128;
-            new_v[cwidth_miny_x] = 255;
-            new_v[cwidth_maxy_x] = 255;
-
-            new[width_miny_x] = 128;
-            new[width_maxy_x] = 128;
-
-            new[width_miny_x + 1] = 128;
-            new[width_maxy_x + 1] = 128;
-
-            new[width_miny_x + width] = 128;
-            new[width_maxy_x + width] = 128;
-
-            new[width_miny_x + 1 + width] = 128;
-            new[width_maxy_x + 1 + width] = 128;
-        }
-
-        for (y = cent->miny; y <= cent->maxy; y += 2) {
-            int width_minx_y = cent->minx + y * width;
-            int width_maxx_y = cent->maxx + y * width;
-            int cwidth_minx_y = (cent->minx / 2) + (y / 2) * cwidth;
-            int cwidth_maxx_y = (cent->maxx / 2) + (y / 2) * cwidth;
-
-            new_u[cwidth_minx_y] = 128;
-            new_u[cwidth_maxx_y] = 128;
-            new_v[cwidth_minx_y] = 255;
-            new_v[cwidth_maxx_y] = 255;
-
-            new[width_minx_y] = 128;
-            new[width_maxx_y] = 128;
-
-            new[width_minx_y + width] = 128;
-            new[width_maxx_y + width] = 128;
-
-            new[width_minx_y + 1] = 128;
-            new[width_maxx_y + 1] = 128;
-
-            new[width_minx_y + width + 1] = 128;
-            new[width_maxx_y + width + 1] = 128;
-        }
-    } else if (style == LOCATE_REDCROSS) { /* Draw a red cross on normal images. */
-        int cwidth_maxy = cwidth * (cent->y / 2);
-
-        for (x = cent->x - 10; x <= cent->x + 10; x += 2) {
-            int cwidth_maxy_x = x / 2 + cwidth_maxy;
-
-            new_u[cwidth_maxy_x] = 128;
-            new_v[cwidth_maxy_x] = 255;
-        }
-
-        for (y = cent->y - 10; y <= cent->y + 10; y += 2) {
-            int cwidth_minx_y = (cent->x / 2) + (y / 2) * cwidth;
-
-            new_u[cwidth_minx_y] = 128;
-            new_v[cwidth_minx_y] = 255;
-        }
-    }
-}
-
-
 #define NORM               100
 #define ABS(x)             ((x) < 0 ? -(x) : (x))
 #define DIFF(x, y)         (ABS((x)-(y)))
 #define NDIFF(x, y)        (ABS(x) * NORM / (ABS(x) + 2 * DIFF(x, y)))
+#define MAXS 10000               /* max depth of stack */
+#define EXCLUDE_LEVEL_PERCENT 20
+/* Increment for *smartmask_buffer in alg_diff_standard. */
+#define SMARTMASK_SENSITIVITY_INCR 5
+#define PUSH(Y, XL, XR, DY)     /* push new segment on stack */  \
+        if (sp<stack+MAXS && Y+(DY) >= 0 && Y+(DY) < height)     \
+        {sp->y = Y; sp->xl = XL; sp->xr = XR; sp->dy = DY; sp++;}
 
-/**
- * alg_noise_tune
- *
- */
-void alg_noise_tune(struct context *cnt, unsigned char *new)
+#define POP(Y, XL, XR, DY)      /* pop segment off stack */      \
+        {sp--; Y = sp->y+(DY = sp->dy); XL = sp->xl; XR = sp->xr;}
+
+typedef struct {
+    int y, xl, xr, dy;
+} Segment;
+
+
+void cls_alg::noise_tune()
 {
-    struct images *imgs = &cnt->imgs;
+    ctx_images *imgs = &cam->imgs;
     int i;
-    unsigned char *ref = imgs->ref;
+    u_char *ref = imgs->ref;
     int diff, sum = 0, count = 0;
-    unsigned char *mask = imgs->mask;
-    unsigned char *smartmask = imgs->smartmask_final;
+    u_char *mask = imgs->mask;
+    u_char *mask_final = smartmask_final;
+    u_char *new_img = cam->imgs.image_vprvcy;
+
 
     i = imgs->motionsize;
 
     for (; i > 0; i--) {
-        diff = ABS(*ref - *new);
+        diff = ABS(*ref - *new_img);
 
         if (mask) {
             diff = ((diff * *mask++) / 255);
         }
 
-        if (*smartmask) {
+        if (*mask_final) {
             sum += diff + 1;
             count++;
         }
 
         ref++;
-        new++;
-        smartmask++;
+        new_img++;
+        mask_final++;
     }
 
-    if (count > 3) {
+    if (count > 3)  {
         /* Avoid divide by zero. */
         sum /= count / 3;
     }
 
     /* 5: safe, 4: regular, 3: more sensitive */
-    cnt->noise = 4 + (cnt->conf.noise_level / 2) + (cnt->noise + sum) / 2;
+    cam->noise = 4 + (cam->noise + sum) / 2;
 }
 
-/**
- * alg_threshold_tune
- *
- */
-void alg_threshold_tune(struct context *cnt, int diffs, int motion)
+void cls_alg::threshold_tune()
 {
-    int i;
-    int sum = 0, top = diffs;
+    int i, top;
+    int sum = 0;
+    int diffs = cam->current_image->diffs;
+    int motion = cam->detecting_motion;
 
     if (!diffs) {
         return;
     }
 
+    top = diffs;
+
     if (motion) {
-        diffs = cnt->threshold / 4;
+        diffs = cam->threshold / 4;
     }
 
     for (i = 0; i < THRESHOLD_TUNE_LENGTH - 1; i++) {
-        sum += cnt->diffs_last[i];
+        sum += diffs_last[i];
 
-        if (cnt->diffs_last[i + 1] && !motion) {
-            cnt->diffs_last[i] = cnt->diffs_last[i + 1];
+        if (diffs_last[i + 1] && !motion) {
+            diffs_last[i] = diffs_last[i + 1];
         } else {
-            cnt->diffs_last[i] = cnt->threshold / 4;
+            diffs_last[i] = cam->threshold / 4;
         }
 
-        if (cnt->diffs_last[i] > top) {
-            top = cnt->diffs_last[i];
+        if (diffs_last[i] > top) {
+            top = diffs_last[i];
         }
     }
 
-    sum += cnt->diffs_last[i];
-    cnt->diffs_last[i] = diffs;
+    sum += diffs_last[i];
+    diffs_last[i] = diffs;
 
     sum /= THRESHOLD_TUNE_LENGTH / 4;
 
@@ -453,8 +124,8 @@ void alg_threshold_tune(struct context *cnt, int diffs, int motion)
         sum = top * 2;
     }
 
-    if (sum < cnt->conf.threshold) {
-        cnt->threshold = (cnt->threshold + sum) / 2;
+    if (sum < cam->cfg->threshold) {
+        cam->threshold = (cam->threshold + sum) / 2;
     }
 }
 
@@ -467,37 +138,19 @@ void alg_threshold_tune(struct context *cnt, int diffs, int motion)
  * Filled horizontal segment of scanline y for xl <= x <= xr.
  * Parent segment was on line y - dy.  dy = 1 or -1
  */
-
-#define MAXS 10000               /* max depth of stack */
-
-#define PUSH(Y, XL, XR, DY)     /* push new segment on stack */  \
-        if (sp<stack+MAXS && Y+(DY) >= 0 && Y+(DY) < height)     \
-        {sp->y = Y; sp->xl = XL; sp->xr = XR; sp->dy = DY; sp++;}
-
-#define POP(Y, XL, XR, DY)      /* pop segment off stack */      \
-        {sp--; Y = sp->y+(DY = sp->dy); XL = sp->xl; XR = sp->xr;}
-
-typedef struct {
-    short y, xl, xr, dy;
-} Segment;
-
-/**
- * iflood
- *
- */
-static int iflood(int x, int y, int width, int height,
-                  unsigned char *out, int *labels, int newvalue, int oldvalue)
+int cls_alg::iflood(int x, int y, int width, int height,
+        u_char *out, int *labels, int newvalue, int oldvalue)
 {
     int l, x1, x2, dy;
-    Segment stack[MAXS], *sp = stack;    /* Stack of filled segments. */
+    Segment stack[MAXS], *sp = stack; /* Stack of filled segments. */
     int count = 0;
 
     if (x < 0 || x >= width || y < 0 || y >= height) {
         return 0;
     }
 
-    PUSH(y, x, x, 1);             /* Needed in some cases. */
-    PUSH(y+1, x, x, -1);          /* Seed segment (popped 1st). */
+    PUSH(y, x, x, 1);      /* Needed in some cases. */
+    PUSH(y + 1, x, x, -1); /* Seed segment (popped 1st). */
 
     while (sp > stack) {
         /* Pop segment off stack and fill a neighboring scan line. */
@@ -518,7 +171,7 @@ static int iflood(int x, int y, int width, int height,
         l = x + 1;
 
         if (l < x1) {
-            PUSH(y, l, x1 - 1, -dy);  /* Leak on left? */
+            PUSH(y, l, x1 - 1, -dy); /* Leak on left? */
         }
 
         x = x1 + 1;
@@ -532,27 +185,21 @@ static int iflood(int x, int y, int width, int height,
             PUSH(y, l, x - 1, dy);
 
             if (x > x2 + 1) {
-                PUSH(y, x2 + 1, x - 1, -dy);  /* Leak on right? */
+                PUSH(y, x2 + 1, x - 1, -dy); /* Leak on right? */
             }
 
-            skip:
-
-            for (x++; x <= x2 && !(out[y * width + x] != 0 && labels[y * width + x] == oldvalue); x++) {}
-
+        skip:
+            for (x++; x <= x2 && !(out[y * width + x] != 0 && labels[y * width + x] == oldvalue); x++);
             l = x;
         } while (x <= x2);
     }
     return count;
 }
 
-/**
- * alg_labeling
- *
- */
-static int alg_labeling(struct context *cnt)
+int cls_alg::labeling()
 {
-    struct images *imgs = &cnt->imgs;
-    unsigned char *out = imgs->img_motion.image_norm;
+    ctx_images *imgs = &cam->imgs;
+    u_char *out = imgs->image_motion.image_norm;
     int *labels = imgs->labels;
     int ix, iy, pixelpos;
     int width = imgs->width;
@@ -562,14 +209,14 @@ static int alg_labeling(struct context *cnt)
     /* Keep track of the area just under the threshold.  */
     int max_under = 0;
 
-    cnt->current_image->total_labels = 0;
+    cam->current_image->total_labels = 0;
     imgs->labelsize_max = 0;
     /* ALL labels above threshold are counted as labelgroup. */
     imgs->labelgroup_max = 0;
     imgs->labels_above = 0;
 
     /* Init: 0 means no label set / not checked. */
-    memset(labels, 0, width * height * sizeof(*labels));
+    memset(labels, 0,(uint)(width * height) * sizeof(*labels));
     pixelpos = 0;
 
     for (iy = 0; iy < height - 1; iy++) {
@@ -580,7 +227,7 @@ static int alg_labeling(struct context *cnt)
                 continue;
             }
 
-            /* Already visited by iflood */
+            /* Already visited by alg_iflood */
             if (labels[pixelpos] > 0) {
                 continue;
             }
@@ -588,12 +235,8 @@ static int alg_labeling(struct context *cnt)
             labelsize = iflood(ix, iy, width, height, out, labels, current_label, 0);
 
             if (labelsize > 0) {
-                //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Label: %i (%i) Size: %i (%i,%i)",
-                //            current_label, cnt->current_image->total_labels,
-                //           labelsize, ix, iy);
-
                 /* Label above threshold? Mark it again (add 32768 to labelnumber). */
-                if (labelsize > cnt->threshold) {
+                if (labelsize > cam->threshold) {
                     labelsize = iflood(ix, iy, width, height, out, labels, current_label + 32768, current_label);
                     imgs->labelgroup_max += labelsize;
                     imgs->labels_above++;
@@ -606,16 +249,12 @@ static int alg_labeling(struct context *cnt)
                     imgs->largest_label = current_label;
                 }
 
-                cnt->current_image->total_labels++;
+                cam->current_image->total_labels++;
                 current_label++;
             }
         }
         pixelpos++; /* Compensate for ix < width - 1 */
     }
-
-    //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%i Labels found. Largest connected Area: %i Pixel(s). "
-    //           "Largest Label: %i", imgs->largest_label, imgs->labelsize_max,
-    //           cnt->current_image->total_labels);
 
     /* Return group of significant labels or if that's none, the next largest
      * group (which is under the threshold, but especially for setup gives an
@@ -624,11 +263,8 @@ static int alg_labeling(struct context *cnt)
     return imgs->labelgroup_max ? imgs->labelgroup_max : max_under;
 }
 
-/**
- * dilate9
- *      Dilates a 3x3 box.
- */
-static int dilate9(unsigned char *img, int width, int height, void *buffer)
+/**  Dilates a 3x3 box. */
+int cls_alg::dilate9(u_char *img, int width, int height, void *buffer)
 {
     /*
      * - row1, row2 and row3 represent lines in the temporary buffer.
@@ -639,17 +275,17 @@ static int dilate9(unsigned char *img, int width, int height, void *buffer)
      * - blob keeps the current max value.
      */
     int y, i, sum = 0, widx;
-    unsigned char *row1, *row2, *row3, *rowTemp,*yp;
-    unsigned char window[3], blob, latest;
+    u_char *row1, *row2, *row3, *rowTemp, *yp;
+    u_char window[3], blob, latest;
 
     /* Set up row pointers in the temporary buffer. */
-    row1 = buffer;
+    row1 = (u_char *)buffer;
     row2 = row1 + width;
     row3 = row2 + width;
 
     /* Init rows 2 and 3. */
-    memset(row2, 0, width);
-    memcpy(row3, img, width);
+    memset(row2, 0, (uint)width);
+    memcpy(row3, img, (uint)width);
 
     /* Pointer to the current row in img. */
     yp = img;
@@ -663,9 +299,9 @@ static int dilate9(unsigned char *img, int width, int height, void *buffer)
 
         /* If we're at the last row, fill with zeros, otherwise copy from img. */
         if (y == height - 1) {
-            memset(row3, 0, width);
+            memset(row3, 0, (uint)width);
         } else {
-            memcpy(row3, yp+width, width);
+            memcpy(row3, yp + width, (uint)width);
         }
 
         /* Init slots 0 and 1 in the moving window. */
@@ -714,28 +350,25 @@ static int dilate9(unsigned char *img, int width, int height, void *buffer)
     return sum;
 }
 
-/**
- * dilate5
- *      Dilates a + shape.
- */
-static int dilate5(unsigned char *img, int width, int height, void *buffer)
+/**  Dilates a + shape. */
+int cls_alg::dilate5(u_char *img, int width, int height, void *buffer)
 {
     /*
      * - row1, row2 and row3 represent lines in the temporary buffer.
      * - mem holds the max value of the overlapping part of two + shapes.
      */
     int y, i, sum = 0;
-    unsigned char *row1, *row2, *row3, *rowTemp, *yp;
-    unsigned char blob, mem, latest;
+    u_char *row1, *row2, *row3, *rowTemp, *yp;
+    u_char blob, mem, latest;
 
     /* Set up row pointers in the temporary buffer. */
-    row1 = buffer;
+    row1 = (u_char *)buffer;
     row2 = row1 + width;
     row3 = row2 + width;
 
     /* Init rows 2 and 3. */
-    memset(row2, 0, width);
-    memcpy(row3, img, width);
+    memset(row2, 0, (uint)width);
+    memcpy(row3, img, (uint)width);
 
     /* Pointer to the current row in img. */
     yp = img;
@@ -749,9 +382,9 @@ static int dilate5(unsigned char *img, int width, int height, void *buffer)
 
         /* If we're at the last row, fill with zeros, otherwise copy from img. */
         if (y == height - 1) {
-            memset(row3, 0, width);
+            memset(row3, 0, (uint)width);
         } else {
-            memcpy(row3, yp + width, width);
+            memcpy(row3, yp + width, (uint)width);
         }
 
         /* Init mem and set blob to force an evaluation of the entire + shape. */
@@ -786,29 +419,26 @@ static int dilate5(unsigned char *img, int width, int height, void *buffer)
     return sum;
 }
 
-/**
- * erode9
- *      Erodes a 3x3 box.
- */
-static int erode9(unsigned char *img, int width, int height, void *buffer, unsigned char flag)
+/**  Erodes a 3x3 box. */
+int cls_alg::erode9(u_char *img, int width, int height, void *buffer, u_char flag)
 {
     int y, i, sum = 0;
-    char *Row1,*Row2,*Row3;
+    char *Row1, *Row2, *Row3;
 
-    Row1 = buffer;
+    Row1 = (char *)buffer;
     Row2 = Row1 + width;
     Row3 = Row1 + 2 * width;
-    memset(Row2, flag, width);
-    memcpy(Row3, img, width);
+    memset(Row2, flag, (uint)width);
+    memcpy(Row3, img, (uint)width);
 
     for (y = 0; y < height; y++) {
-        memcpy(Row1, Row2, width);
-        memcpy(Row2, Row3, width);
+        memcpy(Row1, Row2, (uint)width);
+        memcpy(Row2, Row3, (uint)width);
 
-        if (y == height-1) {
-            memset(Row3, flag, width);
+        if (y == height - 1) {
+            memset(Row3, flag, (uint)width);
         } else {
-            memcpy(Row3, img + (y+1) * width, width);
+            memcpy(Row3, img + (y + 1) * width, (uint)width);
         }
 
         for (i = width - 2; i >= 1; i--) {
@@ -832,29 +462,26 @@ static int erode9(unsigned char *img, int width, int height, void *buffer, unsig
     return sum;
 }
 
-/**
- * erode5
- *      Erodes in a + shape.
- */
-static int erode5(unsigned char *img, int width, int height, void *buffer, unsigned char flag)
+/* Erodes in a + shape. */
+int cls_alg::erode5(u_char *img, int width, int height, void *buffer, u_char flag)
 {
     int y, i, sum = 0;
-    char *Row1,*Row2,*Row3;
+    char *Row1, *Row2, *Row3;
 
-    Row1 = buffer;
+    Row1 = (char *)buffer;
     Row2 = Row1 + width;
     Row3 = Row1 + 2 * width;
-    memset(Row2, flag, width);
-    memcpy(Row3, img, width);
+    memset(Row2, flag, (uint)width);
+    memcpy(Row3, img, (uint)width);
 
     for (y = 0; y < height; y++) {
-        memcpy(Row1, Row2, width);
-        memcpy(Row2, Row3, width);
+        memcpy(Row1, Row2, (uint)width);
+        memcpy(Row2, Row3, (uint)width);
 
-        if (y == height-1) {
-            memset(Row3, flag, width);
+        if (y == height - 1) {
+            memset(Row3, flag, (uint)width);
         } else {
-            memcpy(Row3, img + (y + 1) * width, width);
+            memcpy(Row3, img + (y + 1) * width, (uint)width);
         }
 
         for (i = width - 2; i >= 1; i--) {
@@ -874,29 +501,41 @@ static int erode5(unsigned char *img, int width, int height, void *buffer, unsig
     return sum;
 }
 
-/**
- * alg_despeckle
- *      Despeckling routine to remove noisy detections.
- */
-int alg_despeckle(struct context *cnt, int olddiffs)
+void cls_alg::despeckle()
 {
-    int diffs = 0;
-    unsigned char *out = cnt->imgs.img_motion.image_norm;
-    int width = cnt->imgs.width;
-    int height = cnt->imgs.height;
-    int done = 0, i, len = strlen(cnt->conf.despeckle_filter);
-    unsigned char *common_buffer = cnt->imgs.common_buffer;
+    int diffs, width, height, done;
+    uint i, len;
+    u_char *out, *common_buffer;
+
+    if ((cam->cfg->despeckle_filter == "") || cam->current_image->diffs <= 0) {
+        if (cam->imgs.labelsize_max) {
+            cam->imgs.labelsize_max = 0;
+        }
+        return;
+    }
+
+    diffs = 0;
+    out = cam->imgs.image_motion.image_norm;
+    width = cam->imgs.width;
+    height = cam->imgs.height;
+    done = 0;
+    len = (uint)cam->cfg->despeckle_filter.length();
+    common_buffer = cam->imgs.common_buffer;
+    cam->current_image->total_labels = 0;
+    cam->imgs.largest_label = 0;
 
     for (i = 0; i < len; i++) {
-        switch (cnt->conf.despeckle_filter[i]) {
+        switch (cam->cfg->despeckle_filter[i]) {
         case 'E':
-            if ((diffs = erode9(out, width, height, common_buffer, 0)) == 0) {
+            diffs = erode9(out, width, height, common_buffer, 0);
+            if (diffs == 0) {
                 i = len;
             }
             done = 1;
             break;
         case 'e':
-            if ((diffs = erode5(out, width, height, common_buffer, 0)) == 0) {
+            diffs = erode5(out, width, height, common_buffer, 0);
+            if (diffs == 0) {
                 i = len;
             }
             done = 1;
@@ -911,7 +550,7 @@ int alg_despeckle(struct context *cnt, int olddiffs)
             break;
         /* No further despeckle after labeling! */
         case 'l':
-            diffs = alg_labeling(cnt);
+            diffs = labeling();
             i = len;
             done = 2;
             break;
@@ -921,28 +560,29 @@ int alg_despeckle(struct context *cnt, int olddiffs)
     /* If conf.despeckle_filter contains any valid action EeDdl */
     if (done) {
         if (done != 2) {
-            cnt->imgs.labelsize_max = 0; // Disable Labeling
+            cam->imgs.labelsize_max = 0; // Disable Labeling
         }
-        return diffs;
+        cam->current_image->diffs = diffs;
+        return;
     } else {
-        cnt->imgs.labelsize_max = 0; // Disable Labeling
+        cam->imgs.labelsize_max = 0; // Disable Labeling
     }
 
-    return olddiffs;
+    return;
 }
 
-/**
- * alg_tune_smartmask
- *      Generates actual smartmask. Calculate sensitivity based on motion.
- */
-void alg_tune_smartmask(struct context *cnt)
+void cls_alg::tune_smartmask()
 {
-    int i, diff;
-    int motionsize = cnt->imgs.motionsize;
-    unsigned char *smartmask = cnt->imgs.smartmask;
-    unsigned char *smartmask_final = cnt->imgs.smartmask_final;
-    int *smartmask_buffer = cnt->imgs.smartmask_buffer;
-    int sensitivity = cnt->lastrate * (11 - cnt->smartmask_speed);
+    int i;
+    u_char diff;
+    int motionsize = cam->imgs.motionsize;
+    int sensitivity = cam->lastrate * (11 - cam->cfg->smart_mask_speed);
+
+    if ((cam->cfg->smart_mask_speed == 0) ||
+        (cam->event_curr_nbr == cam->event_prev_nbr) ||
+        (--smartmask_count)) {
+        return;
+    }
 
     for (i = 0; i < motionsize; i++) {
         /* Decrease smart_mask sensitivity every 5*speed seconds only. */
@@ -950,7 +590,7 @@ void alg_tune_smartmask(struct context *cnt)
             smartmask[i]--;
         }
         /* Increase smart_mask sensitivity based on the buffered values. */
-        diff = smartmask_buffer[i]/sensitivity;
+        diff = (u_char)(smartmask_buffer[i] / sensitivity);
 
         if (diff) {
             if (smartmask[i] <= diff + 80) {
@@ -968,487 +608,639 @@ void alg_tune_smartmask(struct context *cnt)
         }
     }
     /* Further expansion (here:erode due to inverted logic!) of the mask. */
-    diff = erode9(smartmask_final, cnt->imgs.width, cnt->imgs.height,
-                  cnt->imgs.common_buffer, 255);
-    diff = erode5(smartmask_final, cnt->imgs.width, cnt->imgs.height,
-                  cnt->imgs.common_buffer, 255);
+    erode9(smartmask_final, cam->imgs.width, cam->imgs.height,
+                      cam->imgs.common_buffer, 255);
+    erode5(smartmask_final, cam->imgs.width, cam->imgs.height,
+                      cam->imgs.common_buffer, 255);
+    smartmask_count = 5 * cam->lastrate * (11 - cam->cfg->smart_mask_speed);
 }
 
-/* Increment for *smartmask_buffer in alg_diff_standard. */
-#define SMARTMASK_SENSITIVITY_INCR 5
-
-/**
- * alg_diff_standard
- *
- */
-int alg_diff_standard(struct context *cnt, unsigned char *new)
+void cls_alg::diff_nomask()
 {
-    struct images *imgs = &cnt->imgs;
-    int i, diffs = 0;
-    int noise = cnt->noise;
-    int smartmask_speed = cnt->smartmask_speed;
-    unsigned char *ref = imgs->ref;
-    unsigned char *out = imgs->img_motion.image_norm;
-    unsigned char *mask = imgs->mask;
-    unsigned char *smartmask_final = imgs->smartmask_final;
-    int *smartmask_buffer = imgs->smartmask_buffer;
-    #ifdef HAVE_MMX
-        mmx_t mmtemp; /* Used for transferring to/from memory. */
-        int unload;   /* Counter for unloading diff counts. */
-    #endif
+    u_char *ref = cam->imgs.ref;
+    u_char *out = cam->imgs.image_motion.image_norm;
+    u_char *new_img = cam->imgs.image_vprvcy;
 
-    i = imgs->motionsize;
-    memset(out + i, 128, i / 2); /* Motion pictures are now b/w i.o. green */
-    /*
-     * Keeping this memset in the MMX case when zeroes are necessarily
-     * written anyway seems to be beneficial in terms of speed. Perhaps a
-     * cache thing?
-     */
-    memset(out, 0, i);
+    int i, curdiff;
+    int imgsz = cam->imgs.motionsize;
+    int diffs = 0, diffs_net = 0;
+    int noise = cam->noise;
+    int lrgchg = cam->cfg->threshold_ratio_change;
 
-    #ifdef HAVE_MMX
-        /*
-        * NOTE: The Pentium has two instruction pipes: U and V. I have grouped MMX
-        * instructions in pairs according to how I think they will be scheduled in
-        * the U and V pipes. Due to pairing constraints, the V pipe will sometimes
-        * be empty (for example, memory access always goes into the U pipe).
-        *
-        * The following MMX registers are kept throughout the loop:
-        * mm5 - 8 separate diff counters (unloaded periodically)
-        * mm6 - mask: 00ff 00ff 00ff 00ff
-        * mm7 - noise level as 8 packed bytes
-        *
-        * -- Per Jonsson
-        */
+    memset(out + imgsz, 128, (uint)(imgsz / 2));
+    memset(out, 0, (uint)imgsz);
 
-        /*
-        * To avoid a div, we work with differences multiplied by 255 in the
-        * default case and *mask otherwise. Thus, the limit to compare with is
-        * 255 * (noise + 1) - 1).
-        */
-        mmtemp.uw[0] = mmtemp.uw[1] = mmtemp.uw[2] = mmtemp.uw[3] =
-                    (unsigned short)(noise * 255 + 254);
-
-        /*
-        * Reset mm5 to zero, set the mm6 mask, and store the multiplied noise
-        * level as four words in mm7.
-        */
-        movq_m2r(mmtemp, mm7);             /* U */
-        pcmpeqb_r2r(mm6, mm6);             /* V */
-
-        pxor_r2r(mm5, mm5);                /* U */
-        psrlw_i2r(8, mm6);                 /* V */
-
-        /*
-        * We must unload mm5 every 255th round, because the diffs accumulate
-        * in each packed byte, which can hold at most 255 diffs before it
-        * gets saturated.
-        */
-        unload = 255;
-
-        for (; i > 7; i -= 8) {
-            /* Calculate abs(*ref-*new) for 8 pixels in parallel. */
-            movq_m2r(*ref, mm0);           /* U: mm0 = r7 r6 r5 r4 r3 r2 r1 r0 */
-            pxor_r2r(mm4, mm4);            /* V: mm4 = 0 */
-
-            movq_m2r(*new, mm1);           /* U: mm1 = n7 n6 n5 n4 n3 n2 n1 n0 */
-            movq_r2r(mm0, mm2);            /* V: mm2 = r7 r6 r5 r4 r3 r2 r1 r0 */
-
-            /* These subtractions are saturated, i.e. won't go below 0. */
-            psubusb_r2r(mm1, mm0);         /* U: mm0 = (r7-n7) ... (r0-n0) */
-            psubusb_r2r(mm2, mm1);         /* V: mm1 = (n7-r7) ... (n0-r0) */
-
-            /* Each byte dX in mm0 is abs(nX-rX). */
-            por_r2r(mm1, mm0);             /* U: mm0 = d7 d6 d5 d4 d3 d2 d1 d0 */
-
-            /* Expand the absolute differences to words in mm0 and mm1. */
-            movq_r2r(mm0, mm1);            /* U: mm1 = d7 d6 d5 d4 d3 d2 d1 d0 */
-            punpcklbw_r2r(mm4, mm0);       /* V: mm0 =    d3    d2    d1    d0 */
-
-            punpckhbw_r2r(mm4, mm1);       /* U: mm1 =    d7    d6    d5    d4 */
-
-            if (mask) {
-                /*
-                * Load and expand 8 mask bytes to words in mm2 and mm3. Then
-                * multiply by mm0 and mm1, respectively.
-                */
-                movq_m2r(*mask, mm2);      /* U: mm2 = m7 m6 m5 m4 m3 m2 m1 m0 */
-
-                movq_r2r(mm2, mm3);        /* U: mm3 = m7 m6 m5 m4 m3 m2 m1 m0 */
-                punpcklbw_r2r(mm4, mm2);   /* v: mm2 =    m3    m2    m1    m0 */
-
-                punpckhbw_r2r(mm4, mm3);   /* U: mm3 =    m7    m6    m5    m4 */
-                pmullw_r2r(mm2, mm0);      /* V: mm0 = (d3*m3) ... (d0*m0) */
-
-                pmullw_r2r(mm3, mm1);      /* U: mm1 = (d7*m7) ... (d4*m4) */
-
-                mask += 8;
-            } else {
-                /*
-                * Not using mask - multiply the absolute differences by 255. We
-                * do this by left-shifting 8 places and then subtracting dX.
-                */
-                movq_r2r(mm0, mm2);        /* U: mm2 =    d3    d2    d1    d0 */
-                psllw_i2r(8, mm0);         /* V: mm2 = (256*d3) ... (256*d0) */
-
-                movq_r2r(mm1, mm3);        /* U: mm3 =    d7    d6    d5    d4 */
-                psllw_i2r(8, mm1);         /* V: mm3 = (256*d7) ... (256*d4) */
-
-                psubusw_r2r(mm2, mm0);     /* U */
-                psubusw_r2r(mm3, mm1);     /* V */
-            }
-
-            /*
-            * Next, compare the multiplied absolute differences with the multiplied
-            * noise level (repeated as 4 words in mm7), resulting in a "motion flag"
-            * for each pixel.
-            *
-            * Since pcmpgtw performs signed comparisons, we have to subtract noise,
-            * test for equality to 0 and then invert the result.
-            *
-            * Note that it is safe to generate the "motion flags" before the
-            * smartmask code, as all that can happen is that individual flags get
-            * reset to 0 because of the smartmask.
-            */
-            psubusw_r2r(mm7, mm0);         /* U: subtract by (multiplied) noise */
-            psubusw_r2r(mm7, mm1);         /* V */
-
-            pcmpeqw_r2r(mm4, mm0);         /* U: test for equality with 0 */
-            pcmpeqw_r2r(mm4, mm1);         /* V */
-
-            pand_r2r(mm6, mm0);            /* U: convert 0xffff -> 0x00ff */
-            pand_r2r(mm6, mm1);            /* V */
-
-            pxor_r2r(mm6, mm0);            /* U: invert the result */
-            pxor_r2r(mm6, mm1);            /* V */
-
-            /* Each fX is the "motion flag" = 0 for no motion, 0xff for motion. */
-            packuswb_r2r(mm1, mm0);        /* U: mm0 = f7 f6 f5 f4 f3 f2 f1 f0 */
-
-            if (smartmask_speed) {
-                /*
-                * Apply the smartmask. Basically, if *smartmask_final is 0, the
-                * corresponding "motion flag" in mm0 will be reset.
-                */
-                movq_m2r(*smartmask_final, mm3); /* U: mm3 = s7 s6 s5 s4 s3 s2 s1 s0 */
-
-                /*
-                * ...but move the "motion flags" to memory before, in order to
-                * increment *smartmask_buffer properly below.
-                */
-                movq_r2m(mm0, mmtemp);           /* U */
-                pcmpeqb_r2r(mm4, mm3);           /* V: mm3 = 0xff where sX==0 */
-
-                /* AND negates the target before anding. */
-                pandn_r2r(mm0, mm3);             /* U: mm3 = 0xff where dX>noise && sX>0 */
-
-                movq_r2r(mm3, mm0);              /* U */
-
-                /* Add to *smartmask_buffer. This is probably the fastest way to do it. */
-                /* TODO:  Revise this to use a loop */
-                if (cnt->event_nr != cnt->prev_event) {
-                    if (mmtemp.ub[0]) {
-                        smartmask_buffer[0] += SMARTMASK_SENSITIVITY_INCR;
-                    }
-                    if (mmtemp.ub[1]) {
-                        smartmask_buffer[1] += SMARTMASK_SENSITIVITY_INCR;
-                    }
-                    if (mmtemp.ub[2]) {
-                        smartmask_buffer[2] += SMARTMASK_SENSITIVITY_INCR;
-                    }
-                    if (mmtemp.ub[3]) {
-                        smartmask_buffer[3] += SMARTMASK_SENSITIVITY_INCR;
-                    }
-                    if (mmtemp.ub[4]) {
-                        smartmask_buffer[4] += SMARTMASK_SENSITIVITY_INCR;
-                    }
-                    if (mmtemp.ub[5]) {
-                        smartmask_buffer[5] += SMARTMASK_SENSITIVITY_INCR;
-                    }
-                    if (mmtemp.ub[6]) {
-                        smartmask_buffer[6] += SMARTMASK_SENSITIVITY_INCR;
-                    }
-                    if (mmtemp.ub[7]) {
-                        smartmask_buffer[7] += SMARTMASK_SENSITIVITY_INCR;
-                    }
-                }
-
-                smartmask_buffer += 8;
-                smartmask_final += 8;
-            }
-
-            movq_m2r(*new, mm2);           /* U: mm1 = n7 n6 n5 n4 n3 n2 n1 n0 */
-
-            /*
-            * Cancel out pixels in *new according to the "motion flags" in mm0.
-            * Each NX is either 0 or nX as from *new.
-            */
-            pand_r2r(mm0, mm2);            /* U: mm1 = N7 N6 N5 N4 N3 N2 N1 N0 */
-            psubb_r2r(mm0, mm4);           /* V: mm4 = 0x01 where dX>noise */
-
-            /*
-            * mm5 holds 8 separate counts - each one is increased according to
-            * the contents of mm4 (where each byte is either 0x00 or 0x01).
-            */
-            movq_r2m(mm2, *out);           /* U: this will stall */
-            paddusb_r2r(mm4, mm5);         /* V: add counts to mm5 */
-
-            /*
-            * Every 255th turn, we need to unload mm5 into the diffs variable,
-            * because otherwise the packed bytes will get saturated.
-            */
-            if (--unload == 0) {
-                /* Unload mm5 to memory and reset it. */
-                movq_r2m(mm5, mmtemp);     /* U */
-                pxor_r2r(mm5, mm5);        /* V: mm5 = 0 */
-
-                diffs += mmtemp.ub[0] + mmtemp.ub[1] + mmtemp.ub[2] + mmtemp.ub[3] +
-                        mmtemp.ub[4] + mmtemp.ub[5] + mmtemp.ub[6] + mmtemp.ub[7];
-                unload = 255;
-            }
-
-            out += 8;
-            ref += 8;
-            new += 8;
-        }
-
-        /*
-        * Check if there are diffs left in mm5 that need to be copied to the
-        * diffs variable.
-        */
-        if (unload < 255) {
-            movq_r2m(mm5, mmtemp);
-            diffs += mmtemp.ub[0] + mmtemp.ub[1] + mmtemp.ub[2] + mmtemp.ub[3] +
-                    mmtemp.ub[4] + mmtemp.ub[5] + mmtemp.ub[6] + mmtemp.ub[7];
-        }
-
-        emms();
-
-    #endif
-    /*
-     * Note that the non-MMX code is present even if the MMX code is present.
-     * This is necessary if the resolution is not a multiple of 8, in which
-     * case the non-MMX code needs to take care of the remaining pixels.
-     */
-
-    for (; i > 0; i--) {
-        int curdiff = abs((char)*ref - (char)*new);
-        /* Apply fixed mask */
-        if (mask) {
-            curdiff = ((int)(curdiff * *mask++) / 255);
-        }
-
-        if (smartmask_speed) {
-            if (curdiff > noise) {
-                /*
-                 * Increase smart_mask sensitivity every frame when motion
-                 * is detected. (with speed=5, mask is increased by 1 every
-                 * second. To be able to increase by 5 every second (with
-                 * speed=10) we add 5 here. NOT related to the 5 at ratio-
-                 * calculation.
-                 */
-                if (cnt->event_nr != cnt->prev_event) {
-                    (*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
-                }
-                /* Apply smart_mask */
-                if (!*smartmask_final) {
-                    curdiff = 0;
-                }
-            }
-            smartmask_final++;
-            smartmask_buffer++;
-        }
-        /* Pixel still in motion after all the masks? */
-        if (curdiff > noise) {
-            *out = *new;
+    for (i = 0; i < imgsz; i++) {
+        curdiff = (*ref - *new_img);
+        if (abs(curdiff) > noise) {
+            *out = *new_img;
             diffs++;
+            if (curdiff > lrgchg) {
+                diffs_net++;
+            } else if (curdiff < -lrgchg) {
+                diffs_net--;
+            }
         }
         out++;
         ref++;
-        new++;
+        new_img++;
     }
-    return diffs;
+    cam->current_image->diffs_raw = diffs;
+    cam->current_image->diffs = diffs;
+    cam->imgs.image_motion.imgts = cam->current_image->imgts;
+
+    if (diffs > 0 ) {
+        cam->current_image->diffs_ratio = (abs(diffs_net) * 100) / diffs;
+    } else {
+        cam->current_image->diffs_ratio = 100;
+    }
+
 }
 
-/**
- * alg_diff_fast
- *      Very fast diff function, does not apply mask overlaying.
- */
-static char alg_diff_fast(struct context *cnt, int max_n_changes, unsigned char *new)
+void cls_alg::diff_mask()
 {
-    struct images *imgs = &cnt->imgs;
-    int i, diffs = 0, step = imgs->motionsize/10000;
-    int noise = cnt->noise;
-    unsigned char *ref = imgs->ref;
+    u_char *ref  = cam->imgs.ref;
+    u_char *out  = cam->imgs.image_motion.image_norm;
+    u_char *mask = cam->imgs.mask;
+    u_char *new_img = cam->imgs.image_vprvcy;
+
+    int i, curdiff;
+    int imgsz = cam->imgs.motionsize;
+    int diffs = 0, diffs_net = 0;
+    int noise = cam->noise;
+    int lrgchg = cam->cfg->threshold_ratio_change;
+
+    memset(out + imgsz, 128, (uint)(imgsz / 2));
+    memset(out, 0, (uint)imgsz);
+
+    for (i = 0; i < imgsz; i++) {
+        curdiff = (*ref - *new_img);
+        if (mask) {
+            curdiff = ((curdiff * *mask) / 255);
+        }
+
+        if (abs(curdiff) > noise) {
+            *out = *new_img;
+            diffs++;
+            if (curdiff > lrgchg) {
+                diffs_net++;
+            } else if (curdiff < -lrgchg) {
+                diffs_net--;
+            }
+        }
+
+        out++;
+        ref++;
+        new_img++;
+        mask++;
+    }
+    cam->current_image->diffs_raw = diffs;
+    cam->current_image->diffs = diffs;
+    cam->imgs.image_motion.imgts = cam->current_image->imgts;
+
+    if (diffs > 0 ) {
+        cam->current_image->diffs_ratio = (abs(diffs_net) * 100) / diffs;
+    } else {
+        cam->current_image->diffs_ratio = 100;
+    }
+
+}
+
+void cls_alg::diff_smart()
+{
+
+    u_char *ref  = cam->imgs.ref;
+    u_char *out  = cam->imgs.image_motion.image_norm;
+    u_char *mask_final = smartmask_final;
+    u_char *new_img = cam->imgs.image_vprvcy;
+
+    int i, curdiff;
+    int imgsz = cam->imgs.motionsize;
+    int diffs = 0, diffs_net = 0;
+    int noise = cam->noise;
+    int *mask_buffer = smartmask_buffer;
+    int lrgchg = cam->cfg->threshold_ratio_change;
+
+    imgsz = cam->imgs.motionsize;
+    memset(out + imgsz, 128, (uint)(imgsz / 2));
+    memset(out, 0, (uint)imgsz);
+
+    for (i = 0; i < imgsz; i++) {
+        curdiff = (*ref - *new_img);
+        if (cam->cfg->smart_mask_speed) {
+            if (abs(curdiff) > noise) {
+                if (cam->event_curr_nbr != cam->event_prev_nbr) {
+                    (*mask_buffer) += SMARTMASK_SENSITIVITY_INCR;
+                }
+                if (!*mask_final) {
+                    curdiff = 0;
+                }
+            }
+            mask_final++;
+            mask_buffer++;
+        }
+        /* Pixel still in motion after all the masks? */
+        if (abs(curdiff) > noise) {
+            *out = *new_img;
+            diffs++;
+            if (curdiff > lrgchg) {
+                diffs_net++;
+            } else if (curdiff < -lrgchg) {
+                diffs_net--;
+            }
+        }
+        out++;
+        ref++;
+        new_img++;
+    }
+    cam->current_image->diffs_raw = diffs;
+    cam->current_image->diffs = diffs;
+    cam->imgs.image_motion.imgts = cam->current_image->imgts;
+
+    if (diffs > 0 ) {
+        cam->current_image->diffs_ratio = (abs(diffs_net) * 100) / diffs;
+    } else {
+        cam->current_image->diffs_ratio = 100;
+    }
+}
+
+void cls_alg::diff_masksmart()
+{
+    u_char *ref = cam->imgs.ref;
+    u_char *out = cam->imgs.image_motion.image_norm;
+    u_char *mask = cam->imgs.mask;
+    u_char *mask_final = smartmask_final;
+    u_char *new_img = cam->imgs.image_vprvcy;
+
+    int i, curdiff;
+    int imgsz = cam->imgs.motionsize;
+    int diffs = 0, diffs_net = 0;
+    int noise = cam->noise;
+    int *mask_buffer = smartmask_buffer;
+    int lrgchg = cam->cfg->threshold_ratio_change;
+
+    imgsz= cam->imgs.motionsize;
+    memset(out + imgsz, 128, ((uint)imgsz / 2));
+    memset(out, 0, (uint)imgsz);
+
+    for (i = 0; i < imgsz; i++) {
+        curdiff = (*ref - *new_img);
+        if (mask) {
+            curdiff = ((curdiff * *mask) / 255);
+        }
+
+        if (cam->cfg->smart_mask_speed) {
+            if (abs(curdiff) > noise) {
+                if (cam->event_curr_nbr != cam->event_prev_nbr) {
+                    (*mask_buffer) += SMARTMASK_SENSITIVITY_INCR;
+                }
+                if (!*mask_final) {
+                    curdiff = 0;
+                }
+            }
+            mask_final++;
+            mask_buffer++;
+        }
+
+        /* Pixel still in motion after all the masks? */
+        if (abs(curdiff) > noise) {
+            *out = *new_img;
+            diffs++;
+            if (curdiff > lrgchg) {
+                diffs_net++;
+            } else if (curdiff < -lrgchg) {
+                diffs_net--;
+            }
+        }
+
+        out++;
+        ref++;
+        new_img++;
+        mask++;
+    }
+
+    cam->current_image->diffs_raw = diffs;
+    cam->current_image->diffs = diffs;
+    cam->imgs.image_motion.imgts = cam->current_image->imgts;
+
+    if (diffs > 0 ) {
+        cam->current_image->diffs_ratio = (abs(diffs_net) * 100) / diffs;
+    } else {
+        cam->current_image->diffs_ratio = 100;
+    }
+
+}
+
+bool cls_alg::diff_fast()
+{
+    ctx_images *imgs = &cam->imgs;
+    int i, curdiff, diffs = 0;
+    int step = cam->imgs.motionsize / 10000;
+    int noise = cam->noise;
+    int max_n_changes = cam->cfg->threshold / 2;
+    u_char *ref = imgs->ref;
+    u_char *new_img = cam->imgs.image_vprvcy;
 
     if (!step % 2) {
         step++;
     }
-    /* We're checking only 1 of several pixels. */
+
     max_n_changes /= step;
 
     i = imgs->motionsize;
 
     for (; i > 0; i -= step) {
-        int curdiff = abs((char)*ref - (char)*new);
+        curdiff = abs(*ref - *new_img); /* Using a temp variable is 12% faster. */
         if (curdiff >  noise) {
             diffs++;
             if (diffs > max_n_changes) {
-                return 1;
+               return true;
             }
         }
         ref += step;
-        new += step;
+        new_img += step;
     }
 
-    return 0;
+    return false;
 }
 
-/**
- * alg_diff
- *      Uses diff_fast to quickly decide if there is anything worth
- *      sending to diff_standard.
- */
-int alg_diff(struct context *cnt, unsigned char *new)
+void cls_alg::diff_standard()
 {
-    int diffs = 0;
-
-    if (alg_diff_fast(cnt, cnt->conf.threshold / 2, new)) {
-        diffs = alg_diff_standard(cnt, new);
+    if (cam->cfg->smart_mask_speed == 0) {
+        if (cam->imgs.mask == NULL) {
+            diff_nomask();
+        } else {
+            diff_mask();
+        }
+    } else {
+        if (cam->imgs.mask == NULL) {
+            diff_smart();
+        } else {
+            diff_masksmart();
+        }
     }
-
-    return diffs;
 }
 
-/**
- * alg_lightswitch
- *      Detects a sudden massive change in the picture.
- *      It is assumed to be the light being switched on or a camera displacement.
- *      In any way the user doesn't think it is worth capturing.
- */
-int alg_lightswitch(struct context *cnt, int diffs)
+void cls_alg::lightswitch()
 {
-    struct images *imgs = &cnt->imgs;
-
-    if (cnt->conf.lightswitch_percent < 0) {
-        cnt->conf.lightswitch_percent = 0;
+    if (cam->cfg->lightswitch_percent >= 1) {
+        if (cam->current_image->diffs > (cam->imgs.motionsize * cam->cfg->lightswitch_percent / 100)) {
+            MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
+            if (cam->frame_skip < cam->cfg->lightswitch_frames) {
+                cam->frame_skip = cam->cfg->lightswitch_frames;
+            }
+            cam->current_image->diffs = 0;
+            ref_frame_update();
+        }
     }
-    if (cnt->conf.lightswitch_percent > 100) {
-        cnt->conf.lightswitch_percent = 100;
-    }
-
-    /* Is lightswitch percent of the image changed? */
-    if (diffs > (imgs->motionsize * cnt->conf.lightswitch_percent / 100)) {
-        return 1;
-    }
-
-    return 0;
 }
 
-/**
- * alg_switchfilter
- *
- */
-int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
+void cls_alg::ref_frame_update()
 {
-    int linediff = diffs / cnt->imgs.height;
-    unsigned char *out = cnt->imgs.img_motion.image_norm;
-    int y, x, line;
-    int lines = 0, vertlines = 0;
+    int accept_timer;
+    int i, threshold_ref;
+    int *ref_dyn = cam->imgs.ref_dyn;
+    u_char *image_virgin = cam->imgs.image_vprvcy;
+    u_char *ref = cam->imgs.ref;
+    u_char *mask_final = smartmask_final;
+    u_char *out = cam->imgs.image_motion.image_norm;
 
-    for (y = 0; y < cnt->imgs.height; y++) {
-        line = 0;
-        for (x = 0; x < cnt->imgs.width; x++) {
+    accept_timer = cam->cfg->static_object_time * cam->cfg->framerate;
+    threshold_ref = cam->noise * EXCLUDE_LEVEL_PERCENT / 100;
+
+    for (i = cam->imgs.motionsize; i > 0; i--) {
+        /* Exclude pixels from ref frame well below noise level. */
+        if (((int)(abs(*ref - *image_virgin)) > threshold_ref) && (*mask_final)) {
+            if (*ref_dyn == 0) { /* Always give new pixels a chance. */
+                *ref_dyn = 1;
+            } else if (*ref_dyn > accept_timer) { /* Include static Object after some time. */
+                *ref_dyn = 0;
+                *ref = *image_virgin;
+            } else if (*out) {
+                (*ref_dyn)++; /* Motionpixel? Keep excluding from ref frame. */
+            } else {
+                *ref_dyn = 0; /* Nothing special - release pixel. */
+                *ref = (u_char)((*ref + *image_virgin) / 2);
+            }
+        } else {  /* No motion: copy to ref frame. */
+            *ref_dyn = 0; /* Reset pixel */
+            *ref = *image_virgin;
+        }
+
+        ref++;
+        image_virgin++;
+        mask_final++;
+        ref_dyn++;
+        out++;
+    }
+
+}
+
+void cls_alg::ref_frame_reset()
+{
+    /* Copy fresh image */
+    memcpy(cam->imgs.ref, cam->imgs.image_vprvcy, (uint)cam->imgs.size_norm);
+    /* Reset static objects */
+    memset(cam->imgs.ref_dyn, 0
+        ,(uint)cam->imgs.motionsize * sizeof(*cam->imgs.ref_dyn));
+
+}
+
+/*Calculate the center location of changes*/
+void cls_alg::location_center()
+{
+    int width = cam->imgs.width;
+    int height = cam->imgs.height;
+    ctx_coord *cent = &cam->current_image->location;
+    u_char *out = cam->imgs.image_motion.image_norm;
+    int x, y, centc = 0;
+
+    cent->x = 0;
+    cent->y = 0;
+
+    for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
             if (*(out++)) {
-                line++;
+                cent->x += x;
+                cent->y += y;
+                centc++;
             }
         }
-
-        if (line > cnt->imgs.width / 18) {
-            vertlines++;
-        }
-
-        if (line > linediff * 2) {
-            lines++;
-        }
     }
 
-    if (vertlines > cnt->imgs.height / 10 && lines < vertlines / 3 &&
-        (vertlines > cnt->imgs.height / 4 || lines - vertlines > lines / 2)) {
-        if (cnt->conf.text_changes) {
-            char tmp[80];
-            sprintf(tmp, "%d %d", lines, vertlines);
-            draw_text(newimg, cnt->imgs.width, cnt->imgs.height, cnt->imgs.width - 10, 20, tmp, cnt->conf.text_scale);
-        }
-        return diffs;
+    if (centc) {
+        cent->x = cent->x / centc;
+        cent->y = cent->y / centc;
     }
-    return 0;
+
+    /* This allows for the redcross and boxes to be drawn*/
+    if (cent->x < 10) {
+        cent->x = 15;
+    }
+    if (cent->y < 10) {
+        cent->y = 15;
+    }
+    if ((cent->x + 10) > width) {
+        cent->x = width - 15;
+    }
+    if ((cent->y + 10) > height) {
+        cent->y = height - 15;
+    }
+
 }
 
-/**
- * alg_update_reference_frame
- *
- *   Called from 'motion_loop' to calculate the reference frame
- *   Moving objects are excluded from the reference frame for a certain
- *   amount of time to improve detection.
- *
- * Parameters:
- *
- *   cnt    - current thread's context struct
- *   action - UPDATE_REF_FRAME or RESET_REF_FRAME
- *
- */
-#define ACCEPT_STATIC_OBJECT_TIME 10  /* Seconds */
-#define EXCLUDE_LEVEL_PERCENT 20
-void alg_update_reference_frame(struct context *cnt, int action)
+/*Calculate distribution and variances of changes*/
+void cls_alg::location_dist_stddev()
 {
-    int accept_timer = cnt->lastrate * ACCEPT_STATIC_OBJECT_TIME;
-    int i, threshold_ref;
-    int *ref_dyn = cnt->imgs.ref_dyn;
-    unsigned char *image_virgin = cnt->imgs.image_vprvcy.image_norm;
-    unsigned char *ref = cnt->imgs.ref;
-    unsigned char *smartmask = cnt->imgs.smartmask_final;
-    unsigned char *out = cnt->imgs.img_motion.image_norm;
+    ctx_images *imgs = &cam->imgs;
+    int width = cam->imgs.width;
+    int height = cam->imgs.height;
+    ctx_coord *cent = &cam->current_image->location;
+    u_char *out = imgs->image_motion.image_norm;
+    int x, y, centc = 0, xdist = 0, ydist = 0;
+    int64_t variance_x, variance_y, variance_xy, distance_mean;
 
-    /* Match rate limit */
-    if (cnt->lastrate > 5) {
-        accept_timer /= (cnt->lastrate / 3);
-    }
+    cent->maxx = 0;
+    cent->maxy = 0;
+    cent->minx = width;
+    cent->miny = height;
+    variance_x = 0;
+    variance_y = 0;
+    distance_mean = 0;
 
-    if (action == UPDATE_REF_FRAME) { /* Black&white only for better performance. */
-        threshold_ref = cnt->noise * EXCLUDE_LEVEL_PERCENT / 100;
+    for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+            if (*(out++)) {
+                variance_x += ((x - cent->x) * (x - cent->x));
+                variance_y += ((y - cent->y) * (y - cent->y));
+                distance_mean += (int64_t)sqrt(
+                        ((x - cent->x) * (x - cent->x)) +
+                        ((y - cent->y) * (y - cent->y)));
 
-        for (i = cnt->imgs.motionsize; i > 0; i--) {
-            /* Exclude pixels from ref frame well below noise level. */
-            if (((int)(abs(*ref - *image_virgin)) > threshold_ref) && (*smartmask)) {
-                if (*ref_dyn == 0) { /* Always give new pixels a chance. */
-                    *ref_dyn = 1;
-                } else if (*ref_dyn > accept_timer) { /* Include static Object after some time. */
-                    *ref_dyn = 0;
-                    *ref = *image_virgin;
-                } else if (*out) {
-                    (*ref_dyn)++; /* Motionpixel? Keep excluding from ref frame. */
-                } else {
-                    *ref_dyn = 0; /* Nothing special - release pixel. */
-                    *ref = (*ref + *image_virgin) / 2;
+                if (x > cent->x) {
+                    xdist += x - cent->x;
+                } else if (x < cent->x) {
+                    xdist += cent->x - x;
                 }
 
-            } else {  /* No motion: copy to ref frame. */
-                *ref_dyn = 0; /* Reset pixel */
-                *ref = *image_virgin;
+                if (y > cent->y) {
+                    ydist += y - cent->y;
+                } else if (y < cent->y) {
+                    ydist += cent->y - y;
+                }
+
+                centc++;
             }
+        }
+    }
 
-            ref++;
-            image_virgin++;
-            smartmask++;
-            ref_dyn++;
-            out++;
-        } /* end for i */
+    if (centc) {
+        cent->minx = cent->x - xdist / centc * 3;
+        cent->maxx = cent->x + xdist / centc * 3;
+        cent->miny = cent->y - ydist / centc * 3;
+        cent->maxy = cent->y + ydist / centc * 3;
+        cent->stddev_x = (int)sqrt((variance_x / centc));
+        cent->stddev_y = (int)sqrt((variance_y / centc));
+        distance_mean = (int64_t)(distance_mean / centc);
+    } else {
+        cent->stddev_y = 0;
+        cent->stddev_x = 0;
+        distance_mean = 0;
+    }
 
-    } else {   /* action == RESET_REF_FRAME - also used to initialize the frame at startup. */
-        /* Copy fresh image */
-        memcpy(cnt->imgs.ref, cnt->imgs.image_vprvcy.image_norm, cnt->imgs.size_norm);
-        /* Reset static objects */
-        memset(cnt->imgs.ref_dyn, 0, cnt->imgs.motionsize * sizeof(*cnt->imgs.ref_dyn));
+    variance_xy = 0;
+    out = imgs->image_motion.image_norm;
+    for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+            if (*(out++)) {
+                variance_xy += (
+                    ((int64_t)sqrt(((x - cent->x) * (x - cent->x)) +
+                          ((y - cent->y) * (y - cent->y))) - distance_mean) *
+                    ((int64_t)sqrt(((x - cent->x) * (x - cent->x)) +
+                          ((y - cent->y) * (y - cent->y))) - distance_mean));
+            }
+        }
+    }
+    /* Per statistics, divide by n-1 for calc of a standard deviation */
+    if ((centc-1) > 0) {
+        cent->stddev_xy = (int)sqrt((variance_xy / (centc-1)));
     }
 }
+
+void cls_alg::location_dist_basic()
+{
+    ctx_images *imgs = &cam->imgs;
+    int width = cam->imgs.width;
+    int height = cam->imgs.height;
+    ctx_coord *cent = &cam->current_image->location;
+    u_char *out = imgs->image_motion.image_norm;
+    int x, y, centc = 0, xdist = 0, ydist = 0;
+
+    cent->maxx = 0;
+    cent->maxy = 0;
+    cent->minx = width;
+    cent->miny = height;
+
+    for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+            if (*(out++)) {
+                if (x > cent->x) {
+                    xdist += x - cent->x;
+                } else if (x < cent->x) {
+                    xdist += cent->x - x;
+                }
+
+                if (y > cent->y) {
+                    ydist += y - cent->y;
+                } else if (y < cent->y) {
+                    ydist += cent->y - y;
+                }
+
+                centc++;
+            }
+        }
+    }
+
+    if (centc) {
+        cent->minx = cent->x - xdist / centc * 3;
+        cent->maxx = cent->x + xdist / centc * 3;
+        cent->miny = cent->y - ydist / centc * 3;
+        cent->maxy = cent->y + ydist / centc * 3;
+    } else {
+        cent->stddev_y = 0;
+        cent->stddev_x = 0;
+    }
+}
+
+/* Ensure min/max are within limits*/
+void cls_alg::location_minmax()
+{
+
+    int width = cam->imgs.width;
+    int height = cam->imgs.height;
+    ctx_coord *cent = &cam->current_image->location;
+
+    if (cent->maxx > width - 1) {
+        cent->maxx = width - 1;
+    } else if (cent->maxx < 0) {
+        cent->maxx = 0;
+    }
+
+    if (cent->maxy > height - 1) {
+        cent->maxy = height - 1;
+    } else if (cent->maxy < 0) {
+        cent->maxy = 0;
+    }
+
+    if (cent->minx > width - 1) {
+        cent->minx = width - 1;
+    } else if (cent->minx < 0) {
+        cent->minx = 0;
+    }
+
+    if (cent->miny > height - 1) {
+        cent->miny = height - 1;
+    } else if (cent->miny < 0) {
+        cent->miny = 0;
+    }
+
+    /* Align for better locate box handling */
+    cent->minx += cent->minx % 2;
+    cent->miny += cent->miny % 2;
+    cent->maxx -= cent->maxx % 2;
+    cent->maxy -= cent->maxy % 2;
+
+    cent->width = cent->maxx - cent->minx;
+    cent->height = cent->maxy - cent->miny;
+    cent->y = (cent->miny + cent->maxy) / 2;
+}
+
+/* Determine the location and standard deviations of changes*/
+void cls_alg::location()
+{
+    location_center();
+    if (calc_stddev) {
+        location_dist_stddev();
+    } else {
+        location_dist_basic();
+    }
+    location_minmax();
+}
+
+/* Apply user or default thresholds on standard deviations*/
+void cls_alg::stddev()
+{
+    if (calc_stddev == false) {
+        return;
+    }
+    if (cam->cfg->threshold_sdevx > 0) {
+        if (cam->current_image->location.stddev_x > cam->cfg->threshold_sdevx) {
+            cam->current_image->diffs = 0;
+            return;
+        }
+    } else if (cam->cfg->threshold_sdevy > 0) {
+        if (cam->current_image->location.stddev_y > cam->cfg->threshold_sdevy) {
+            cam->current_image->diffs = 0;
+            return;
+        }
+    } else if (cam->cfg->threshold_sdevxy > 0) {
+        if (cam->current_image->location.stddev_xy > cam->cfg->threshold_sdevxy) {
+            cam->current_image->diffs = 0;
+            return;
+        }
+    }
+}
+
+void cls_alg::diff()
+{
+    if (cam->detecting_motion) {
+        diff_standard();
+    } else {
+        if (diff_fast()) {
+            diff_standard();
+        } else {
+            cam->current_image->diffs = 0;
+            cam->current_image->diffs_raw = 0;
+            cam->current_image->diffs_ratio = 100;
+        }
+    }
+    lightswitch();
+    despeckle();
+}
+
+cls_alg::cls_alg(cls_camera *p_cam)
+{
+    int i;
+
+    cam = p_cam;
+
+    if ((cam->cfg->threshold_sdevx == 0) &&
+        (cam->cfg->threshold_sdevy == 0) &&
+        (cam->cfg->threshold_sdevxy == 0)) {
+        calc_stddev = false;
+    } else {
+        calc_stddev = true;
+    }
+
+    smartmask =(unsigned char*) mymalloc((uint)cam->imgs.motionsize);
+    smartmask_final =(unsigned char*) mymalloc((uint)cam->imgs.motionsize);
+    smartmask_buffer =(int*) mymalloc((uint)cam->imgs.motionsize * sizeof(*smartmask_buffer));
+
+    memset(smartmask, 0, (uint)cam->imgs.motionsize);
+    memset(smartmask_final, 255, (uint)cam->imgs.motionsize);
+    memset(smartmask_buffer, 0, (uint)cam->imgs.motionsize * sizeof(*smartmask_buffer));
+
+    for (i = 0; i < THRESHOLD_TUNE_LENGTH - 1; i++) {
+        diffs_last[i] = 0;
+    }
+
+}
+
+cls_alg::~cls_alg()
+{
+    myfree(smartmask);
+    myfree(smartmask_final);
+    myfree(smartmask_buffer);
+
+}
+

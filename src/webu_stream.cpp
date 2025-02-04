@@ -1,83 +1,76 @@
-/*   This file is part of Motion.
- *
- *   Motion is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   Motion is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 /*
- *    webu_stream.c
+ *    This file is part of Motion.
  *
- *    Create the web streams for Motion
+ *    Motion is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
  *
- *    Functional naming scheme
- *    webu_stream*      - All functions in this module
- *    webu_stream_mjpeg*    - Create the motion-jpeg stream for the user
- *    webu_stream_static*   - Create the static jpg image for the user.
- *    webu_stream_checks    - Edit/validate request from user
- */
+ *    Motion is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ *
+*/
 
 #include "motion.hpp"
 #include "util.hpp"
+#include "camera.hpp"
+#include "allcam.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
+#include "picture.hpp"
 #include "webu.hpp"
+#include "webu_ans.hpp"
 #include "webu_stream.hpp"
-#include "translate.hpp"
+#include "webu_mpegts.hpp"
+#include "alg_sec.hpp"
+#include "jpegutils.hpp"
 
-void webu_stream_deinit(struct webui_ctx *webui, struct stream_data *stream)
+static ssize_t webu_mjpeg_response (void *cls, uint64_t pos, char *buf, size_t max)
 {
-    pthread_mutex_lock(&webui->cnt->mutex_stream);
-        stream->cnct_count--;
-        if (stream->cnct_count == 0) {
-            if (stream->jpeg_data != NULL) {
-                free(stream->jpeg_data);
-                stream->jpeg_data = NULL;
-            }
-        }
-    pthread_mutex_unlock(&webui->cnt->mutex_stream);
+    cls_webu_stream *webu_stream = (cls_webu_stream *)cls;
+    (void)pos;
+    return webu_stream->mjpeg_response(buf, max);
 }
 
-static void webu_stream_mjpeg_checkbuffers(struct webui_ctx *webui)
+void cls_webu_stream::set_fps()
 {
-    /* Allocate buffers if needed */
-    if (webui->resp_size < (size_t)webui->cnt->imgs.size_norm) {
-        if (webui->resp_page   != NULL) {
-            free(webui->resp_page);
-        }
-        webui->resp_page   = mymalloc(webui->cnt->imgs.size_norm);
-        memset(webui->resp_page,'\0',webui->cnt->imgs.size_norm);
-        webui->resp_size = webui->cnt->imgs.size_norm;
-        webui->resp_used = 0;
+    if (webua->device_id == 0) {
+        stream_fps = app->cfg->stream_maxrate;
+        return;
     }
-
+    if (webua->camindx >= app->cam_list.size()) {
+        stream_fps = 1;
+    } else if ((webua->cam->detecting_motion == false) &&
+        (app->cam_list[webua->camindx]->cfg->stream_motion)) {
+        stream_fps = 1;
+    } else {
+        stream_fps = app->cam_list[webua->camindx]->cfg->stream_maxrate;
+    }
 }
 
-static void webu_stream_mjpeg_delay(struct webui_ctx *webui)
+/* Sleep required time to get to the user requested framerate for the stream */
+void cls_webu_stream::delay()
 {
-    /* Sleep required time to get to the user requested frame
-     * rate for the stream
-     */
-
     long   stream_rate;
-    struct timeval time_curr;
+    struct timespec time_curr;
     long   stream_delay;
 
-    gettimeofday(&time_curr, NULL);
+    if (check_finish()) {
+        return;
+    }
+
+    clock_gettime(CLOCK_MONOTONIC, &time_curr);
 
     /* The stream rate MUST be less than 1000000000 otherwise undefined behaviour
      * will occur with the SLEEP function.
      */
-    stream_delay = ((time_curr.tv_usec - webui->time_last.tv_usec)*1000) +
-        ((time_curr.tv_sec - webui->time_last.tv_sec)*1000000000);
+    stream_delay = ((time_curr.tv_nsec - time_last.tv_nsec)) +
+        ((time_curr.tv_sec - time_last.tv_sec)*1000000000);
     if (stream_delay < 0)  {
         stream_delay = 0;
     }
@@ -85,232 +78,360 @@ static void webu_stream_mjpeg_delay(struct webui_ctx *webui)
         stream_delay = 1000000000;
     }
 
-    if (webui->stream_fps >= 1) {
-        stream_rate = ( (1000000000 / webui->stream_fps) - stream_delay);
+    if (stream_fps >= 1) {
+        stream_rate = ( (1000000000 / stream_fps) - stream_delay);
         if ((stream_rate > 0) && (stream_rate < 1000000000)) {
             SLEEP(0,stream_rate);
         } else if (stream_rate == 1000000000) {
             SLEEP(1,0);
         }
     }
-    gettimeofday(&webui->time_last, NULL);
-
+    clock_gettime(CLOCK_MONOTONIC, &time_last);
 }
 
-static void webu_stream_mjpeg_getimg(struct webui_ctx *webui)
+void cls_webu_stream::one_buffer()
 {
-    long jpeg_size;
+    if (webua->cam == NULL) {
+        return;
+    }
+    if (resp_size < (size_t)webua->cam->imgs.size_norm) {
+        if (resp_image != NULL) {
+            myfree(resp_image);
+        }
+        resp_image = (unsigned char*) mymalloc((uint)webua->cam->imgs.size_norm);
+        memset(resp_image,'\0', (uint)webua->cam->imgs.size_norm);
+        resp_size = (uint)webua->cam->imgs.size_norm;
+        resp_used = 0;
+    }
+}
+
+void cls_webu_stream::all_buffer()
+{
+    if (resp_size < (size_t)app->allcam->all_sizes.dst_sz) {
+        if (resp_image != nullptr) {
+            myfree(resp_image);
+        }
+        resp_size = (uint)app->allcam->all_sizes.dst_sz;
+        resp_image = (unsigned char*) mymalloc(resp_size);
+        memset(resp_image, '\0', resp_size);
+        resp_used = 0;
+    }
+}
+
+bool cls_webu_stream::check_finish()
+{
+    if (webu->finish){
+        resp_used = 0;
+        return true;
+    }
+    if (webua->cam != NULL) {
+        if ((webua->cam->finish == true) ||
+            (webua->cam->passflag == false)) {
+            resp_used = 0;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool cls_webu_stream::all_ready()
+{
+    int indx, indx1;
+    cls_camera *p_cam;
+
+    for (indx=0; indx<app->cam_cnt; indx++) {
+        p_cam = app->cam_list[indx];
+        if ((p_cam->device_status == STATUS_OPENED) &&
+            (p_cam->passflag == false)) {
+            indx1 = 0;
+            while (indx1 < 1000) {
+                SLEEP(0, 1000);
+                if (p_cam->passflag) {
+                    break;
+                }
+                indx1++;
+            }
+            if (p_cam->passflag == false) {
+                MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+                    , "Camera %d not ready", p_cam->cfg->device_id);
+                return false;
+            }
+        }
+    }
+    if ((webua->app->allcam->all_sizes.dst_h == 0) ||
+        (webua->app->allcam->all_sizes.dst_w == 0)) {
+            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO, "All cameras not ready");
+            return false;
+    }
+
+    return true;
+}
+
+void cls_webu_stream::mjpeg_all_img()
+{
     char resp_head[80];
     int  header_len;
-    struct stream_data *local_stream;
+    ctx_stream_data *strm;
 
-    memset(webui->resp_page, '\0', webui->resp_size);
+    if (check_finish()) {
+        return;
+    }
+
+    if (all_ready() == false) {
+        return;
+    }
+
+    all_buffer();
+
+    memset(resp_image, '\0', resp_size);
 
     /* Assign to a local pointer the stream we want */
-    if (webui->cnct_type == WEBUI_CNCT_FULL) {
-        local_stream = &webui->cnt->stream_norm;
-
-    } else if (webui->cnct_type == WEBUI_CNCT_SUB) {
-        local_stream = &webui->cnt->stream_sub;
-
-    } else if (webui->cnct_type == WEBUI_CNCT_MOTION) {
-        local_stream = &webui->cnt->stream_motion;
-
-    } else if (webui->cnct_type == WEBUI_CNCT_SOURCE) {
-        local_stream = &webui->cnt->stream_source;
-
+    if (webua->app == NULL) {
+        return;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_FULL) {
+        strm = &webua->app->allcam->stream.norm;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SUB) {
+        strm = &webua->app->allcam->stream.sub;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_MOTION) {
+        strm = &webua->app->allcam->stream.motion;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SOURCE) {
+        strm = &webua->app->allcam->stream.source;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SECONDARY) {
+        strm = &webua->app->allcam->stream.secondary;
     } else {
         return;
     }
 
     /* Copy jpg from the motion loop thread */
-    pthread_mutex_lock(&webui->cnt->mutex_stream);
-        if ((!webui->cnt->detecting_motion) && (webui->cnt->conf.stream_motion)) {
-            webui->stream_fps = 1;
-        } else {
-            webui->stream_fps = webui->cnt->conf.stream_maxrate;
-        }
-        /* If no image, wait a second*/
-        if (local_stream->jpeg_data == NULL) {
-            pthread_mutex_unlock(&webui->cnt->mutex_stream);
-                SLEEP(1,0);
-            pthread_mutex_lock(&webui->cnt->mutex_stream);
-        }
-        /* If still no image, give up */
-        if (local_stream->jpeg_data == NULL) {
-            pthread_mutex_unlock(&webui->cnt->mutex_stream);
+    pthread_mutex_lock(&webua->app->allcam->stream.mutex);
+        set_fps();
+        if (strm->jpg_data == NULL) {
+            pthread_mutex_unlock(&webua->app->allcam->stream.mutex);
             return;
         }
-        jpeg_size = local_stream->jpeg_size;
         header_len = snprintf(resp_head, 80
             ,"--BoundaryString\r\n"
             "Content-type: image/jpeg\r\n"
-            "Content-Length: %9ld\r\n\r\n"
-            ,jpeg_size);
-        memcpy(webui->resp_page, resp_head, header_len);
-        memcpy(webui->resp_page + header_len
-            ,local_stream->jpeg_data
-            ,jpeg_size);
+            "Content-Length: %9d\r\n\r\n"
+            ,strm->jpg_sz);
+        memcpy(resp_image, resp_head, (uint)header_len);
+        memcpy(resp_image + header_len
+            , strm->jpg_data
+            , (uint)strm->jpg_sz);
         /* Copy in the terminator after the jpg data at the end*/
-        memcpy(webui->resp_page + header_len + jpeg_size,"\r\n",2);
-        webui->resp_used = header_len + jpeg_size + 2;
-    pthread_mutex_unlock(&webui->cnt->mutex_stream);
+        memcpy(resp_image + header_len + strm->jpg_sz,"\r\n",2);
+        resp_used =(uint)(header_len + strm->jpg_sz + 2);
+        strm->consumed = true;
+    pthread_mutex_unlock(&webua->app->allcam->stream.mutex);
 
 }
 
-static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, size_t max)
+void cls_webu_stream::mjpeg_one_img()
 {
-    /* This is the callback response function for MHD streams.  It is kept "open" and
-     * in process during the entire time that the user has the stream open in the web
-     * browser.  We sleep the requested amount of time between fetching images to match
-     * the user configuration parameters.  This function may be called multiple times for
-     * a single image so we can write what we can to the buffer and pick up remaining bytes
-     * to send based upon the stream position
-     */
-    struct webui_ctx *webui = cls;
+    char resp_head[80];
+    int  header_len;
+    ctx_stream_data *strm;
+
+    if (check_finish()) {
+        return;
+    }
+
+    memset(resp_image, '\0', resp_size);
+
+    /* Assign to a local pointer the stream we want */
+    if (webua->cam == NULL) {
+        return;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_FULL) {
+        strm = &webua->cam->stream.norm;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SUB) {
+        strm = &webua->cam->stream.sub;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_MOTION) {
+        strm = &webua->cam->stream.motion;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SOURCE) {
+        strm = &webua->cam->stream.source;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SECONDARY) {
+        strm = &webua->cam->stream.secondary;
+    } else {
+        return;
+    }
+
+    /* Copy jpg from the motion loop thread */
+    pthread_mutex_lock(&webua->cam->stream.mutex);
+        set_fps();
+        if (strm->jpg_data == NULL) {
+            pthread_mutex_unlock(&webua->cam->stream.mutex);
+            return;
+        }
+        header_len = snprintf(resp_head, 80
+            ,"--BoundaryString\r\n"
+            "Content-type: image/jpeg\r\n"
+            "Content-Length: %9d\r\n\r\n"
+            ,strm->jpg_sz);
+        memcpy(resp_image, resp_head, (uint)header_len);
+        memcpy(resp_image + header_len
+            , strm->jpg_data
+            , (uint)strm->jpg_sz);
+        /* Copy in the terminator after the jpg data at the end*/
+        memcpy(resp_image + header_len + strm->jpg_sz,"\r\n",2);
+        resp_used =(uint)(header_len + strm->jpg_sz + 2);
+        strm->consumed = true;
+    pthread_mutex_unlock(&webua->cam->stream.mutex);
+
+}
+
+ssize_t cls_webu_stream::mjpeg_response (char *buf, size_t max)
+{
     size_t sent_bytes;
 
-    (void)pos;  /*Remove compiler warning */
-
-    if (webui->cnt->webcontrol_finish) {
+    if (check_finish()) {
         return -1;
     }
 
-    if ((webui->stream_pos == 0) || (webui->resp_used == 0)) {
+    if ((stream_pos == 0) || (resp_used == 0)) {
 
-        webu_stream_mjpeg_delay(webui);
+        delay();
 
-        webui->stream_pos = 0;
-        webui->resp_used = 0;
+        stream_pos = 0;
+        resp_used = 0;
 
-        webu_stream_mjpeg_getimg(webui);
+        if (webua->device_id == 0) {
+            mjpeg_all_img();
+        } else {
+            mjpeg_one_img();
+        }
 
-        if (webui->resp_used == 0) {
+        if (resp_used == 0) {
             return 0;
         }
     }
 
-    if ((webui->resp_used - webui->stream_pos) > max) {
+    if ((resp_used - stream_pos) > max) {
         sent_bytes = max;
     } else {
-        sent_bytes = webui->resp_used - webui->stream_pos;
+        sent_bytes = resp_used - stream_pos;
     }
 
-    memcpy(buf, webui->resp_page + webui->stream_pos, sent_bytes);
+    memcpy(buf, resp_image + stream_pos, sent_bytes);
 
-    webui->stream_pos = webui->stream_pos + sent_bytes;
-    if (webui->stream_pos >= webui->resp_used) {
-        webui->stream_pos = 0;
+    stream_pos = stream_pos + sent_bytes;
+    if (stream_pos >= resp_used) {
+        stream_pos = 0;
     }
 
-    return sent_bytes;
+    return (ssize_t)sent_bytes;
+}
+
+/* Increment the all camera stream counters */
+void cls_webu_stream::all_cnct()
+{
+    ctx_stream_data *strm;
+    int indx_cam;
+
+    for (indx_cam=0; indx_cam<app->cam_cnt; indx_cam++) {
+        if (webua->cnct_type == WEBUI_CNCT_JPG_SUB) {
+            strm = &app->cam_list[indx_cam]->stream.sub;
+        } else if (webua->cnct_type == WEBUI_CNCT_JPG_MOTION) {
+            strm = &app->cam_list[indx_cam]->stream.motion;
+        } else if (webua->cnct_type == WEBUI_CNCT_JPG_SOURCE) {
+            strm = &app->cam_list[indx_cam]->stream.source;
+        } else if (webua->cnct_type == WEBUI_CNCT_JPG_SECONDARY) {
+            strm = &app->cam_list[indx_cam]->stream.secondary;
+        } else {
+            strm = &app->cam_list[indx_cam]->stream.norm;
+        }
+        pthread_mutex_lock(&app->cam_list[indx_cam]->stream.mutex);
+            strm->all_cnct++;
+        pthread_mutex_unlock(&app->cam_list[indx_cam]->stream.mutex);
+    }
+    if (webua->cnct_type == WEBUI_CNCT_JPG_SUB) {
+        strm = &app->allcam->stream.sub;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_MOTION) {
+        strm = &app->allcam->stream.motion;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SOURCE) {
+        strm = &app->allcam->stream.source;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SECONDARY) {
+        strm = &app->allcam->stream.secondary;
+    } else {
+        strm = &app->allcam->stream.norm;
+    }
+    pthread_mutex_lock(&app->allcam->stream.mutex);
+        strm->all_cnct++;
+    pthread_mutex_unlock(&app->allcam->stream.mutex);
 
 }
 
-static void webu_stream_static_getimg(struct webui_ctx *webui)
+/* Obtain the current image for the camera.*/
+void cls_webu_stream::static_all_img()
 {
-    /* Obtain the current image, compress it to a JPG and put into webui->resp_page
-     * for MHD to send back to user
-     */
-    webui->resp_used = 0;
+    ctx_stream_data *strm;
 
-    memset(webui->resp_page, '\0', webui->resp_size);
+    if (check_finish()) {
+        return;
+    }
 
-    pthread_mutex_lock(&webui->cnt->mutex_stream);
-        /* If no image, wait a second*/
-        if (webui->cnt->stream_norm.jpeg_data == NULL) {
-            pthread_mutex_unlock(&webui->cnt->mutex_stream);
-                SLEEP(1,0);
-            pthread_mutex_lock(&webui->cnt->mutex_stream);
-        }
-        /* If still no image, give up */
-        if (webui->cnt->stream_norm.jpeg_data == NULL) {
-            pthread_mutex_unlock(&webui->cnt->mutex_stream);
+    if (all_ready() == false) {
+        return;
+    }
+
+    all_buffer();
+
+    resp_used = 0;
+    memset(resp_image, '\0', resp_size);
+
+    /* Assign to a local pointer the stream we want */
+    if (webua->cnct_type == WEBUI_CNCT_JPG_FULL) {
+        strm = &webua->app->allcam->stream.norm;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SUB) {
+        strm = &webua->app->allcam->stream.sub;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_MOTION) {
+        strm = &webua->app->allcam->stream.motion;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SOURCE) {
+        strm = &webua->app->allcam->stream.source;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SECONDARY) {
+        strm = &webua->app->allcam->stream.secondary;
+    } else {
+        return;
+    }
+
+    pthread_mutex_lock(&webua->app->allcam->stream.mutex);
+        if (strm->jpg_data == NULL) {
+            pthread_mutex_unlock(&webua->app->allcam->stream.mutex);
             return;
         }
-        memcpy(webui->resp_page
-            ,webui->cnt->stream_norm.jpeg_data
-            ,webui->cnt->stream_norm.jpeg_size);
-        webui->resp_used = webui->cnt->stream_norm.jpeg_size;
-    pthread_mutex_unlock(&webui->cnt->mutex_stream);
+        memcpy(resp_image
+            , strm->jpg_data
+            , (uint)strm->jpg_sz);
+        resp_used =(uint)strm->jpg_sz;
+        strm->consumed = true;
+    pthread_mutex_unlock(&webua->app->allcam->stream.mutex);
 
 }
 
-static int webu_stream_checks(struct webui_ctx *webui)
+/* Increment the jpg stream counters */
+void cls_webu_stream::jpg_cnct()
 {
-    /* Perform edits to determine whether the user specified a valid URL
-     * for the particular port
-     */
-    if ((webui->cntlst != NULL) && (webui->thread_nbr >= webui->cam_threads)) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            , _("Invalid thread specified: %s"),webui->url);
-        return -1;
-    }
+    ctx_stream_data *strm;
 
-    if ((webui->cntlst != NULL) && (webui->thread_nbr < 0) && (webui->cam_threads > 1)) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            , _("Invalid thread specified: %s"),webui->url);
-        return -1;
-    }
-
-    /* Thread numbers are not used for context specific ports. */
-    if ((webui->cntlst == NULL) && (webui->thread_nbr >= 0)) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            , _("Invalid URL for a camera specific port: %s"),webui->url);
-        return -1;
-    }
-
-    /* If multiple threads then thread zero is invalid. */
-    if ((webui->cam_threads > 1) && (webui->thread_nbr == 0)) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            , _("URL for thread 0 is not valid when using camera specific files.: %s")
-            ,webui->url);
-        return -1;
-    }
-
-    /* Thread numbers are not used for context specific ports. */
-    if ((webui->cntlst == NULL) && (strlen(webui->uri_cmd1) > 0)) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            , _("Bad URL for a camera specific port: %s"),webui->url);
-        return -1;
-    }
-
-    return 0;
-}
-
-static void webu_stream_cnct_count(struct webui_ctx *webui)
-{
-    /* Increment the counters for the connections to the streams */
-    int cnct_count;
-
-    cnct_count = 0;
-    if (webui->cnct_type == WEBUI_CNCT_SUB) {
-        pthread_mutex_lock(&webui->cnt->mutex_stream);
-            webui->cnt->stream_sub.cnct_count++;
-            cnct_count = webui->cnt->stream_sub.cnct_count;
-        pthread_mutex_unlock(&webui->cnt->mutex_stream);
-
-    } else if (webui->cnct_type == WEBUI_CNCT_MOTION) {
-        pthread_mutex_lock(&webui->cnt->mutex_stream);
-            webui->cnt->stream_motion.cnct_count++;
-            cnct_count = webui->cnt->stream_motion.cnct_count;
-        pthread_mutex_unlock(&webui->cnt->mutex_stream);
-
-    } else if (webui->cnct_type == WEBUI_CNCT_SOURCE) {
-        pthread_mutex_lock(&webui->cnt->mutex_stream);
-            webui->cnt->stream_source.cnct_count++;
-            cnct_count = webui->cnt->stream_source.cnct_count;
-        pthread_mutex_unlock(&webui->cnt->mutex_stream);
-
+    if (webua->cam == NULL) {
+        return;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SUB) {
+        strm = &webua->cam->stream.sub;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_MOTION) {
+        strm = &webua->cam->stream.motion;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SOURCE) {
+        strm = &webua->cam->stream.source;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SECONDARY) {
+        strm = &webua->cam->stream.secondary;
     } else {
-        /* Stream, Static */
-        pthread_mutex_lock(&webui->cnt->mutex_stream);
-            webui->cnt->stream_norm.cnct_count++;
-            cnct_count = webui->cnt->stream_norm.cnct_count;
-        pthread_mutex_unlock(&webui->cnt->mutex_stream);
+        strm = &webua->cam->stream.norm;
     }
 
-    if (cnct_count == 1) {
+    pthread_mutex_lock(&webua->cam->stream.mutex);
+        strm->jpg_cnct++;
+    pthread_mutex_unlock(&webua->cam->stream.mutex);
+
+
+    if (strm->jpg_cnct == 1) {
         /* This is the first connection so we need to wait half a sec
          * so that the motion loop on the other thread can update image
          */
@@ -319,99 +440,298 @@ static void webu_stream_cnct_count(struct webui_ctx *webui)
 
 }
 
-mymhd_retcd webu_stream_mjpeg(struct webui_ctx *webui)
+/* Obtain the current image for the camera.*/
+void cls_webu_stream::static_one_img()
 {
-    /* Create the stream for the motion jpeg */
-    mymhd_retcd retcd;
+    ctx_stream_data *strm;
+
+    one_buffer();
+
+    resp_used = 0;
+    memset(resp_image, '\0', resp_size);
+
+    /* Assign to a local pointer the stream we want */
+    if (webua->cam == NULL) {
+        return;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_FULL) {
+        strm = &webua->cam->stream.norm;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SUB) {
+        strm = &webua->cam->stream.sub;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_MOTION) {
+        strm = &webua->cam->stream.motion;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SOURCE) {
+        strm = &webua->cam->stream.source;
+    } else if (webua->cnct_type == WEBUI_CNCT_JPG_SECONDARY) {
+        strm = &webua->cam->stream.secondary;
+    } else {
+        return;
+    }
+
+    pthread_mutex_lock(&webua->cam->stream.mutex);
+        if (strm->jpg_data == NULL) {
+            pthread_mutex_unlock(&webua->cam->stream.mutex);
+            return;
+        }
+        memcpy(resp_image
+            , strm->jpg_data
+            , (uint)strm->jpg_sz);
+        resp_used =(uint)strm->jpg_sz;
+        strm->consumed = true;
+    pthread_mutex_unlock(&webua->cam->stream.mutex);
+
+}
+
+bool cls_webu_stream::valid_request()
+{
+    if (check_finish()) {
+        return false;
+    }
+
+    pthread_mutex_lock(&app->mutex_camlst);
+        if (webua->device_id < 0) {
+            MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                , _("Invalid camera specified: %s"), webua->url.c_str());
+            pthread_mutex_unlock(&app->mutex_camlst);
+            return false;
+        }
+        if ((webua->device_id > 0) && (webua->cam == NULL)) {
+            MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                , _("Invalid camera specified: %s"), webua->url.c_str());
+            pthread_mutex_unlock(&app->mutex_camlst);
+            return false;
+        }
+    pthread_mutex_unlock(&app->mutex_camlst);
+
+    return true;
+}
+
+/* Increment the transport stream counters */
+void cls_webu_stream::ts_cnct()
+{
+    ctx_stream_data *strm;
+
+    if (webua->cam == NULL) {
+        return;
+    } else if (webua->cnct_type == WEBUI_CNCT_TS_SUB) {
+        strm = &webua->cam->stream.sub;
+    } else if (webua->cnct_type == WEBUI_CNCT_TS_MOTION) {
+        strm = &webua->cam->stream.motion;
+    } else if (webua->cnct_type == WEBUI_CNCT_TS_SOURCE) {
+        strm = &webua->cam->stream.source;
+    } else if (webua->cnct_type == WEBUI_CNCT_TS_SECONDARY) {
+        strm = &webua->cam->stream.secondary;
+    } else {
+        strm = &webua->cam->stream.norm;
+    }
+    pthread_mutex_lock(&webua->cam->stream.mutex);
+        strm->ts_cnct++;
+    pthread_mutex_unlock(&webua->cam->stream.mutex);
+
+    if (strm->ts_cnct == 1) {
+        /* This is the first connection so we need to wait half a sec
+         * so that the motion loop on the other thread can update image
+         */
+        SLEEP(0,500000000L);
+    }
+}
+
+/* Assign the type of stream that is being answered*/
+void cls_webu_stream::set_cnct_type()
+{
+    if (webua->uri_cmd1 == "mpegts") {
+        if (webua->uri_cmd2 == "stream") {
+            webua->cnct_type = WEBUI_CNCT_TS_FULL;
+        } else if (webua->uri_cmd2 == "substream") {
+            webua->cnct_type = WEBUI_CNCT_TS_SUB;
+        } else if (webua->uri_cmd2 == "motion") {
+            webua->cnct_type = WEBUI_CNCT_TS_MOTION;
+        } else if (webua->uri_cmd2 == "source") {
+            webua->cnct_type = WEBUI_CNCT_TS_SOURCE;
+        } else if (webua->uri_cmd2 == "secondary") {
+            if (webua->cam == NULL) {
+                webua->cnct_type = WEBUI_CNCT_UNKNOWN;
+            } else {
+                if (webua->cam->algsec->method != "none") {
+                    webua->cnct_type = WEBUI_CNCT_TS_SECONDARY;
+                } else {
+                    webua->cnct_type = WEBUI_CNCT_UNKNOWN;
+                }
+            }
+        } else if (webua->uri_cmd2 == "") {
+            webua->cnct_type = WEBUI_CNCT_TS_FULL;
+        } else {
+            webua->cnct_type = WEBUI_CNCT_UNKNOWN;
+        }
+    } else {
+        if (webua->uri_cmd2 == "stream") {
+            webua->cnct_type = WEBUI_CNCT_JPG_FULL;
+        } else if (webua->uri_cmd2 == "substream") {
+            webua->cnct_type = WEBUI_CNCT_JPG_SUB;
+        } else if (webua->uri_cmd2 == "motion") {
+            webua->cnct_type = WEBUI_CNCT_JPG_MOTION;
+        } else if (webua->uri_cmd2 == "source") {
+            webua->cnct_type = WEBUI_CNCT_JPG_SOURCE;
+        } else if (webua->uri_cmd2 == "secondary") {
+            if (webua->cam == NULL) {
+                webua->cnct_type = WEBUI_CNCT_UNKNOWN;
+            } else {
+                if (webua->cam->algsec->method != "none") {
+                    webua->cnct_type = WEBUI_CNCT_JPG_SECONDARY;
+                } else {
+                    webua->cnct_type = WEBUI_CNCT_UNKNOWN;
+                }
+            }
+        } else if (webua->uri_cmd2 == "") {
+            webua->cnct_type = WEBUI_CNCT_JPG_FULL;
+        } else {
+            webua->cnct_type = WEBUI_CNCT_UNKNOWN;
+        }
+    }
+}
+
+mhdrslt cls_webu_stream::stream_mjpeg()
+{
+    mhdrslt retcd;
     struct MHD_Response *response;
     int indx;
 
-    if (webu_stream_checks(webui) == -1) {
-        return MHD_NO;
-    }
-
-    webu_stream_cnct_count(webui);
-
-    webu_stream_mjpeg_checkbuffers(webui);
-
-    gettimeofday(&webui->time_last, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &time_last);
 
     response = MHD_create_response_from_callback (MHD_SIZE_UNKNOWN, 1024
-        ,&webu_stream_mjpeg_response, webui, NULL);
-    if (!response) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
+        , &webu_mjpeg_response, (void *)this, NULL);
+    if (response == NULL) {
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
 
-    for (indx = 0; indx < webui->cnt->stream_headers->params_count; indx++) {
-        retcd = MHD_add_response_header (response
-            , webui->cnt->stream_headers->params_array[indx].param_name
-            , webui->cnt->stream_headers->params_array[indx].param_value);
-        if (retcd == MHD_NO) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-                , _("Error adding stream header %s %s")
-                , webui->cnt->stream_headers->params_array[indx].param_name
-                , webui->cnt->stream_headers->params_array[indx].param_value);
+    if (webu->wb_headers->params_cnt > 0) {
+        for (indx=0;indx<webu->wb_headers->params_cnt;indx++) {
+            MHD_add_response_header (response
+                , webu->wb_headers->params_array[indx].param_name.c_str()
+                , webu->wb_headers->params_array[indx].param_value.c_str());
         }
     }
 
-    MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE
+    MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE
         , "multipart/x-mixed-replace; boundary=BoundaryString");
 
-    retcd = MHD_queue_response (webui->connection, MHD_HTTP_OK, response);
+    retcd = MHD_queue_response(webua->connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
 
     return retcd;
 }
 
-mymhd_retcd webu_stream_static(struct webui_ctx *webui)
+/* Create the response for the static image request*/
+mhdrslt cls_webu_stream::stream_static()
 {
-    /* Create the response for the static image request*/
-    mymhd_retcd retcd;
+    mhdrslt retcd;
     struct MHD_Response *response;
-    char resp_used[20];
+    char resp_head[20];
     int indx;
 
-    if (webu_stream_checks(webui) == -1) {
+    if (resp_used == 0) {
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Could not get image to stream."));
         return MHD_NO;
     }
 
-    webu_stream_cnct_count(webui);
-
-    webu_stream_mjpeg_checkbuffers(webui);
-
-    webu_stream_static_getimg(webui);
-
-    if (webui->resp_used == 0) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Could not get image to stream."));
+    response = MHD_create_response_from_buffer (
+            resp_size,(void *)resp_image
+            , MHD_RESPMEM_MUST_COPY);
+    if (response == NULL) {
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
 
-    response = MHD_create_response_from_buffer (webui->resp_used
-        ,(void *)webui->resp_page, MHD_RESPMEM_MUST_COPY);
-    if (!response) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
-        return MHD_NO;
-    }
-
-    for (indx = 0; indx < webui->cnt->stream_headers->params_count; indx++) {
-        retcd = MHD_add_response_header (response
-            , webui->cnt->stream_headers->params_array[indx].param_name
-            , webui->cnt->stream_headers->params_array[indx].param_value);
-        if (retcd == MHD_NO) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-                , _("Error adding stream header %s %s")
-                , webui->cnt->stream_headers->params_array[indx].param_name
-                , webui->cnt->stream_headers->params_array[indx].param_value);
+    if (webu->wb_headers->params_cnt > 0) {
+        for (indx=0;indx<webu->wb_headers->params_cnt;indx++) {
+            MHD_add_response_header (response
+                , webu->wb_headers->params_array[indx].param_name.c_str()
+                , webu->wb_headers->params_array[indx].param_value.c_str());
         }
     }
 
     MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "image/jpeg");
-    snprintf(resp_used, 20, "%9ld\r\n\r\n",(long)webui->resp_used);
-    MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_LENGTH, resp_used);
+    snprintf(resp_head, 20, "%9ld\r\n\r\n",(long)resp_used);
+    MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_LENGTH, resp_head);
 
-    retcd = MHD_queue_response (webui->connection, MHD_HTTP_OK, response);
+    retcd = MHD_queue_response (webua->connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
 
     return retcd;
+}
+
+/* Entry point for answering stream*/
+mhdrslt cls_webu_stream::main()
+{
+    mhdrslt retcd;
+
+    if (valid_request() == false) {
+        webua->bad_request();
+        return MHD_NO;
+    }
+
+    set_cnct_type();
+
+    if (webua->uri_cmd1 == "static") {
+        if (webua->device_id > 0) {
+            jpg_cnct();
+            static_one_img();
+        } else {
+            all_cnct();
+            static_all_img();
+        }
+        retcd = stream_static();
+    } else if (webua->uri_cmd1 == "mjpg") {
+        if (webua->device_id > 0) {
+            jpg_cnct();
+            one_buffer();
+        } else {
+            all_cnct();
+            all_buffer();
+        }
+        retcd = stream_mjpeg();
+    } else if (webua->uri_cmd1 == "mpegts") {
+        if (webua->device_id > 0) {
+            ts_cnct();
+        } else {
+            all_cnct();
+        }
+        if (webu_mpegts == nullptr){
+            webu_mpegts = new cls_webu_mpegts(webua, this);
+        }
+        retcd = webu_mpegts->main();
+        if (retcd == MHD_NO) {
+            mydelete(webu_mpegts);
+        }
+
+    } else {
+        webua->bad_request();
+        retcd = MHD_NO;
+    }
+
+    return retcd;
+}
+
+cls_webu_stream::cls_webu_stream(cls_webu_ans *p_webua)
+{
+    app    = p_webua->app;
+    webu   = p_webua->webu;
+    webua  = p_webua;
+    webu_mpegts = nullptr;
+
+    resp_image    = nullptr;
+    resp_size     = 0;
+    resp_used     = 0;
+
+    stream_pos = 0;
+    stream_fps = 1;
+
+}
+
+cls_webu_stream::~cls_webu_stream()
+{
+    mydelete(webu_mpegts);
+
+    myfree(resp_image);
+
 }

@@ -1,328 +1,317 @@
-/*   This file is part of Motion.
- *
- *   Motion is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   Motion is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 /*
- *      logger.c
+ *    This file is part of Motion.
  *
- *      Logger for motion
+ *    Motion is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
  *
- *      Copyright 2005, William M. Brack
- *      Copyright 2008 by Angel Carpintero  (motiondevelop@gmail.com)
+ *    Motion is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
-
-#include "logger.hpp"   /* already includes motion.h */
+#include "motion.hpp"
 #include "util.hpp"
-#include <stdarg.h>
+#include "conf.hpp"
+#include "logger.hpp"
 
-static int log_mode = LOGMODE_SYSLOG;
-static FILE *logfile;
-static unsigned int log_level = LEVEL_DEFAULT;
-static unsigned int log_type = TYPE_DEFAULT;
+cls_log *motlog;
 
-static const char *log_type_str[] = {NULL, "COR", "STR", "ENC", "NET", "DBL", "EVT", "TRK", "VID", "ALL"};
-static const char *log_level_str[] = {"EMG", "ALR", "CRT", "ERR", "WRN", "NTC", "INF", "DBG", "ALL", NULL};
+const char *log_type_str[]  = {NULL, "COR", "STR", "ENC", "NET", "DBS", "EVT", "TRK", "VID", "ALL"};
+const char *log_level_str[] = {NULL, "EMG", "ALR", "CRT", "ERR", "WRN", "NTC", "INF", "DBG", "ALL"};
 
-
-/**
- * get_log_type
- *
- *
- * Returns: index of log type or 0 if not valid type.
- */
-int get_log_type(const char *type)
+void ff_log(void *var1, int errnbr, const char *fmt, va_list vlist)
 {
-    unsigned int i, ret = 0;
-    unsigned int maxtype = sizeof(log_type_str)/sizeof(const char *);
+    (void)var1;
+    char buff[1024];
+    int fflvl;
 
-    for (i = 1;i < maxtype; i++) {
-        if (!strncasecmp(type, log_type_str[i], 3)) {
-            ret = i;
-            break;
-        }
+    vsnprintf(buff, sizeof(buff), fmt, vlist);
+
+    buff[strlen(buff)-1] = 0;
+
+    if (strstr(buff, "forced frame type") != nullptr) {
+        return;
     }
 
-    return ret;
-}
+    /*
+    AV_LOG_QUIET    -8  1
+    AV_LOG_PANIC     0  2
+    AV_LOG_FATAL     8  3
+    AV_LOG_ERROR    16  4
+    AV_LOG_WARNING  24  5
+    AV_LOG_INFO     32  6
+    AV_LOG_VERBOSE  40  7
+    AV_LOG_DEBUG    48  8
+    AV_LOG_TRACE    56  9
+    */
 
-/**
- * get_log_type_str
- *      Gets string value for type log level.
- *
- * Returns: name of type log level.
- */
-const char* get_log_type_str(unsigned int type)
-{
-    return log_type_str[type];
-}
+    fflvl = ((motlog->log_fflevel -2) * 8);
 
-/**
- * set_log_type
- *      Sets log type level.
- *
- * Returns: nothing.
- */
-void set_log_type(unsigned int type)
-{
-    log_type = type;
-    //printf("set log type %d\n", type);
-}
-
-/**
- * get_log_level_str
- *      Gets string value for log level.
- *
- * Returns: name of log level.
- */
-const char* get_log_level_str(unsigned int level)
-{
-    return log_level_str[level];
-}
-
-/**
- * set_log_level
- *      Sets log level.
- *
- * Returns nothing.
- */
-void set_log_level(unsigned int level)
-{
-    log_level = level;
-    //printf("set log level %d\n", level);
-}
-
-/**
- * set_log_mode
- *      Sets mode of logging, could be using syslog or files.
- *
- * Returns: nothing.
- */
-void set_log_mode(int mode)
-{
-    int prev_mode = log_mode;
-
-    log_mode = mode;
-    //printf("set log mode %d\n", mode);
-
-    if (mode == LOGMODE_SYSLOG && prev_mode != LOGMODE_SYSLOG) {
-        openlog("motion", LOG_PID, LOG_USER);
-    }
-
-    if (mode != LOGMODE_SYSLOG && prev_mode == LOGMODE_SYSLOG) {
-        closelog();
+    if (errnbr <= fflvl ) {
+        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,"%s",buff );
     }
 }
 
-/**
- * set_logfile
- *      Sets logfile to be used instead of syslog.
- *
- * Returns: pointer to log file.
- */
-FILE * set_logfile(const char *logfile_name)
+void cls_log::log_history_init()
 {
-    /* Setup temporary to let log if myfopen fails */
-    set_log_mode(LOGMODE_SYSLOG);
+    int             indx;
+    ctx_log_item    log_item;
 
-    logfile = myfopen(logfile_name, "ae");
+    log_item.log_msg= "";
+    for (indx=0;indx<200;indx++){
+        log_item.log_nbr = indx;
+        log_vec.push_back(log_item);
+    }
+}
 
-    /* If logfile was opened correctly */
-    if (logfile) {
-        set_log_mode(LOGMODE_FILE);
+void cls_log::log_history_add(std::string msg)
+{
+    int indx, mx;
+
+    mx = (int)log_vec.size();
+    for (indx=0;indx<mx-1;indx++) {
+        log_vec[indx].log_nbr = log_vec[indx+1].log_nbr;
+        log_vec[indx].log_msg = log_vec[indx+1].log_msg;
     }
 
-    return logfile;
+    /*Arbritrary large number*/
+    if (log_vec[mx-1].log_nbr >50000000L) {
+        log_history_init();
+    }
+    log_vec[mx-1].log_nbr++;
+    log_vec[mx-1].log_msg = msg;
+
 }
 
-/**
- * str_time
- *
- * Return: string with human readable time
- */
-static char *str_time(void)
+void cls_log::write_flood(int loglvl)
 {
-    static char buffer[30]; /* Arbitrary length*/
-    time_t now = 0;
-
-    now = time(0);
-    strftime(buffer, sizeof(buffer), "%b %d %H:%M:%S", localtime(&now));
-    return buffer;
-}
-
-/**
- * MOTION_LOG
- *
- *    This routine is used for printing all informational, debug or error
- *    messages produced by any of the other motion functions.  It always
- *    produces a message of the form "[n] {message}", and (if the param
- *    'errno_flag' is set) follows the message with the associated error
- *    message from the library.
- *
- * Parameters:
- *
- *     level           logging level for the 'syslog' function
- *
- *     type            logging type.
- *
- *     errno_flag      if set, the log message should be followed by the
- *                     error message.
- *     fmt             the format string for producing the message
- *     ap              variable-length argument list
- *
- * Returns:
- *                     Nothing
- */
-void motion_log(int level, unsigned int type, int errno_flag,int fncname, const char *fmt, ...)
-{
-    int errno_save, n;
-    char buf[1024];
-    char usrfmt[1024];
-
-    /* GNU-specific strerror_r() */
-    #if (!defined(XSI_STRERROR_R))
-        char msg_buf[100];
-    #endif
-    va_list ap;
-    int threadnr;
-
-    static int flood_cnt = 0;
-    static char flood_msg[1024];
     char flood_repeats[1024];
 
-
-    /* Exit if level is greater than log_level */
-    if ((unsigned int)level > log_level) {
+    if (flood_cnt <= 1) {
         return;
     }
 
-    /* Exit if type is not equal to log_type and not TYPE_ALL */
-    if ((log_type != TYPE_ALL) && (type != log_type)) {
-        return;
-    }
+    snprintf(flood_repeats, sizeof(flood_repeats)
+        , "%s Above message repeats %d times\n"
+        , msg_prefix, flood_cnt-1);
 
-    //printf("log_type %d, type %d level %d\n", log_type, type, level);
-
-    threadnr = (unsigned long)pthread_getspecific(tls_key_threadnr);
-
-    /*
-     * First we save the current 'error' value.  This is required because
-     * the subsequent calls to vsnprintf could conceivably change it!
-     */
-    errno_save = errno;
-
-    char threadname[32];
-    util_threadname_get(threadname);
-
-    /*
-     * Prefix the message with the thread number and name,
-     * log level string, log type string, and time.
-     * e.g. [1:enc] [ERR] [ALL] [Apr 03 00:08:44] blah
-     */
     if (log_mode == LOGMODE_FILE) {
-        n = snprintf(buf, sizeof(buf), "[%d:%s] [%s] [%s] [%s] ",
-                     threadnr, threadname, get_log_level_str(level), get_log_type_str(type),
-                     str_time());
+        fputs(flood_repeats, log_file_ptr);
+        fflush(log_file_ptr);
+
+    } else {    /* The syslog level values are one less*/
+        syslog(loglvl-1, "%s", flood_repeats);
+        fputs(flood_repeats, stderr);
+        fflush(stderr);
+    }
+    log_history_add(flood_repeats);
+}
+
+void cls_log::write_norm(int loglvl, uint prefixlen)
+{
+    flood_cnt = 1;
+
+    if (snprintf(msg_flood, sizeof(msg_flood), "%s", &msg_full[prefixlen]) < 0) {
+        return;
+    }
+    if (snprintf(msg_prefix, prefixlen, "%s", msg_full) < 0) {
+        return;
+    }
+
+    if (log_mode == LOGMODE_FILE) {
+        strcpy(msg_full + strlen(msg_full),"\n");
+        fputs(msg_full, log_file_ptr);
+        fflush(log_file_ptr);
     } else {
-    /*
-     * Prefix the message with the thread number and name,
-     * log level string and log type string.
-     * e.g. [1:trk] [DBG] [ALL] blah
-     */
-        n = snprintf(buf, sizeof(buf), "[%d:%s] [%s] [%s] ",
-                     threadnr, threadname, get_log_level_str(level), get_log_type_str(type));
+        syslog(loglvl-1, "%s", msg_full);
+        strcpy(msg_full + strlen(msg_full),"\n");
+        fputs(msg_full, stderr);
+        fflush(stderr);
+    }
+    log_history_add(msg_full);
+}
+
+void cls_log::add_errmsg(int flgerr, int err_save)
+{
+    size_t errsz, msgsz;
+    char err_buf[90];
+
+    if (flgerr == NO_ERRNO) {
+        return;
     }
 
-    /* Prepend the format specifier for the function name */
-    if (fncname) {
-        snprintf(usrfmt, sizeof (usrfmt),"%s: %s", "%s", fmt);
-    } else {
-        snprintf(usrfmt, sizeof (usrfmt),"%s",fmt);
+    memset(err_buf, 0, sizeof(err_buf));
+    #if defined(XSI_STRERROR_R) /* XSI-compliant strerror_r() */
+        (void)strerror_r(err_save, err_buf, sizeof(err_buf));
+    #else/* GNU-specific strerror_r() */
+        (void)snprintf(err_buf, sizeof(err_buf),"%s"
+            , strerror_r(err_save, err_buf, sizeof(err_buf)));
+    #endif
+    errsz = strlen(err_buf);
+    msgsz = strlen(msg_full);
+
+    if ((msgsz+errsz+2) >= sizeof(msg_full)) {
+        msgsz = msgsz-errsz-2;
+        memset(msg_full+msgsz, 0, sizeof(msg_full) - msgsz);
     }
-
-    /* Next add the user's message. */
-    va_start(ap, fmt);
-    n += vsnprintf(buf + n, sizeof(buf) - n, usrfmt, ap);
-    va_end(ap);
-    buf[1023] = '\0';
-
-    /* If errno_flag is set, add on the library error message. */
-    if (errno_flag) {
-      size_t buf_len = strlen(buf);
-
-      // just knock off 10 characters if we're that close...
-      if (buf_len + 10 > 1024) {
-          buf[1024 - 10] = '\0';
-          buf_len = 1024 - 10;
-      }
-
-      strncat(buf, ": ", 1024 - buf_len);
-      n += 2;
-        /*
-         * This is bad - apparently gcc/libc wants to use the non-standard GNU
-         * version of strerror_r, which doesn't actually put the message into
-         * my buffer :-(.  I have put in a 'hack' to get around this.
-         */
-        #if defined(XSI_STRERROR_R)
-            /* XSI-compliant strerror_r() */
-            strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
-        #else
-            /* GNU-specific strerror_r() */
-            strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
-        #endif
-    }
-
-    if ((mystreq(buf,flood_msg)) && (flood_cnt <= 5000)) {
-        flood_cnt++;
-    } else {
-        if (flood_cnt > 1) {
-            snprintf(flood_repeats,1024,"[%d:%s] [%s] [%s] Above message repeats %d times",
-                     threadnr, threadname, get_log_level_str(level)
-                     , get_log_type_str(type), flood_cnt-1);
-            switch (log_mode) {
-            case LOGMODE_FILE:
-                strncat(flood_repeats, "\n", 1024 - strlen(flood_repeats));
-                fputs(flood_repeats, logfile);
-                fflush(logfile);
-                break;
-
-            case LOGMODE_SYSLOG:
-                syslog(level, "%s", flood_repeats);
-                strncat(flood_repeats, "\n", 1024 - strlen(flood_repeats));
-                fputs(flood_repeats, stderr);
-                fflush(stderr);
-                break;
-            }
-        }
-        flood_cnt = 1;
-        snprintf(flood_msg,1024,"%s",buf);
-        switch (log_mode) {
-        case LOGMODE_FILE:
-            strncat(buf, "\n", 1024 - strlen(buf));
-            fputs(buf, logfile);
-            fflush(logfile);
-            break;
-
-        case LOGMODE_SYSLOG:
-            syslog(level, "%s", buf);
-            strncat(buf, "\n", 1024 - strlen(buf));
-            fputs(buf, stderr);
-            fflush(stderr);
-            break;
-        }
-    }
+    strcpy(msg_full+msgsz,": ");
+    memcpy(msg_full+msgsz + 2, err_buf, errsz);
 
 }
+
+void cls_log::set_mode(int mode_new)
+{
+    if ((log_mode != LOGMODE_SYSLOG) && (mode_new == LOGMODE_SYSLOG)) {
+        openlog("motion", LOG_PID, LOG_USER);
+    }
+    if ((log_mode == LOGMODE_SYSLOG) && (mode_new != LOGMODE_SYSLOG)) {
+        closelog();
+    }
+    log_mode = mode_new;
+}
+
+void cls_log::set_log_file(std::string pname)
+{
+    if ((pname == "") || (pname == "syslog")) {
+        if (log_file_ptr != nullptr) {
+            myfclose(log_file_ptr);
+            log_file_ptr = nullptr;
+        }
+        if (log_file_name == "") {
+            set_mode(LOGMODE_SYSLOG);
+            log_file_name = "syslog";
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Logging to syslog");
+        }
+
+    } else if ((pname != log_file_name) || (log_file_ptr == nullptr)) {
+        if (log_file_ptr != nullptr) {
+            myfclose(log_file_ptr);
+            log_file_ptr = nullptr;
+        }
+        log_file_ptr = myfopen(pname.c_str(), "ae");
+        if (log_file_ptr != nullptr) {
+            log_file_name = pname;
+            set_mode(LOGMODE_SYSLOG);
+            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, "Logging to file (%s)"
+                ,pname.c_str());
+            set_mode(LOGMODE_FILE);
+        } else {
+            log_file_name = "syslog";
+            set_mode(LOGMODE_SYSLOG);
+            MOTPLS_LOG(EMG, TYPE_ALL, SHOW_ERRNO, "Cannot create log file %s"
+                , pname.c_str());
+        }
+    }
+}
+
+void cls_log::write_msg(int loglvl, int msg_type, int flgerr, int flgfnc, ...)
+{
+    int err_save, n;
+    uint prefixlen;
+    std::string usrfmt;
+    char msg_time[32];
+    char threadname[32];
+    va_list ap;
+    time_t now;
+
+    if (loglvl > log_level) {
+        return;
+    }
+
+    pthread_mutex_lock(&mutex_log);
+
+    err_save = errno;
+    memset(msg_full, 0, sizeof(msg_full));
+
+    mythreadname_get(threadname);
+
+    now = time(NULL);
+    strftime(msg_time, sizeof(msg_time)
+        , "%b %d %H:%M:%S", localtime(&now));
+
+    if (log_mode == LOGMODE_FILE) {
+        n = snprintf(msg_full, sizeof(msg_full)
+            , "%s [%s][%s][%s] ", msg_time
+            , log_level_str[loglvl],log_type_str[msg_type], threadname );
+    } else {
+        n = snprintf(msg_full, sizeof(msg_full)
+        , "[%s][%s][%s] "
+        , log_level_str[loglvl],log_type_str[msg_type], threadname );
+    }
+    prefixlen = (uint)n;
+
+    /* flgfnc must be an int.  Bool has compile error*/
+    va_start(ap, flgfnc);
+        usrfmt = va_arg(ap, char *);
+        if (flgfnc == 1) {
+            usrfmt.append(": ").append(va_arg(ap, char *));
+        }
+        n += vsnprintf(msg_full + n
+            , sizeof(msg_full) - (uint)n - 1
+            , usrfmt.c_str(), ap);
+    va_end(ap);
+
+    add_errmsg(flgerr, err_save);
+
+    if ((flood_cnt <= 5000) &&
+        mystreq(msg_flood, &msg_full[prefixlen])) {
+        flood_cnt++;
+        pthread_mutex_unlock(&mutex_log);
+        return;
+    }
+
+    write_flood(loglvl);
+
+    write_norm(loglvl, prefixlen);
+
+    pthread_mutex_unlock(&mutex_log);
+
+}
+
+void cls_log::shutdown()
+{
+    if (log_file_ptr != nullptr) {
+        myfclose(log_file_ptr);
+        log_file_ptr = nullptr;
+    }
+}
+
+void cls_log::startup()
+{
+    motlog->log_level = app->cfg->log_level;
+    motlog->log_fflevel = app->cfg->log_fflevel;
+    motlog->set_log_file(app->cfg->log_file);
+}
+
+cls_log::cls_log(cls_motapp *p_app)
+{
+    app = p_app;
+    log_mode = LOGMODE_NONE;
+    log_level = LEVEL_DEFAULT;
+    log_fflevel = 4;
+    log_file_ptr  = nullptr;
+    log_file_name = "";
+    flood_cnt = 0;
+    restart = false;
+    set_mode(LOGMODE_SYSLOG);
+    pthread_mutex_init(&mutex_log, NULL);
+    memset(msg_prefix,0,sizeof(msg_prefix));
+    memset(msg_flood,0,sizeof(msg_flood));
+    memset(msg_full,0,sizeof(msg_full));
+    log_history_init();
+    av_log_set_callback(ff_log);
+}
+
+cls_log::~cls_log()
+{
+    shutdown();
+    pthread_mutex_destroy(&mutex_log);
+}
+
 

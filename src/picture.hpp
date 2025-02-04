@@ -1,39 +1,77 @@
-/*   This file is part of Motion.
- *
- *   Motion is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   Motion is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 /*
- *  picture.h
- *    Headers associated with functions in the picture.c module.
- *    Copyright 2002 by Jeroen Vreeken (pe1rxq@amsat.org)
- *    Portions of this file are Copyright by Lionnel Maugis
- */
+ *    This file is part of Motion.
+ *
+ *    Motion is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    Motion is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *
+*/
+#ifndef _INCLUDE_PICTURE_HPP_
+#define _INCLUDE_PICTURE_HPP_
 
-#ifndef _INCLUDE_PICTURE_H_
-#define _INCLUDE_PICTURE_H_
+#ifdef HAVE_WEBP
+    #include <webp/encode.h>
+    #include <webp/mux.h>
+#endif /* HAVE_WEBP */
 
-void overlay_smartmask(struct context *cnt, unsigned char *out);
-void overlay_fixed_mask(struct context *cnt, unsigned char *out);
-void put_fixed_mask(struct context *cnt, const char *file);
-void overlay_largest_label(struct context *cnt, unsigned char *out);
-int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image_size
-            , unsigned char *image, int quality, int width, int height);
-void put_picture(struct context *cnt, char *file, unsigned char *image, int ftype);
-unsigned char *get_pgm(FILE *picture, int width, int height);
-void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst);
-unsigned prepare_exif(unsigned char **exif, const struct context *cnt
-            , const struct timeval *tv_in1, const struct coord *box);
+class cls_picture {
+    public:
+        cls_picture(cls_camera *p_cam);
+        ~cls_picture();
 
-#endif /* _INCLUDE_PICTURE_H_ */
+        int put_memory(u_char* img_dst
+            , int image_size, u_char *image, int quality, int width, int height);
+        void scale_img(int width_src, int height_src, u_char *img_src, u_char *img_dst);
+        void save_preview();
+        void process_norm();
+        void process_motion();
+        void process_snapshot();
+        void process_preview();
+
+    private:
+        cls_camera *cam;
+
+        std::string         full_nm;
+        std::string         file_nm;
+        std::string         file_dir;
+
+        #ifdef HAVE_WEBP
+            void webp_exif(WebPMux* webp_mux
+                , timespec *ts1, ctx_coord *box);
+        #endif
+        void save_webp(FILE *fp, u_char *image
+            , int width, int height
+            , timespec *ts1, ctx_coord *box);
+        void save_yuv420p(FILE *fp, u_char *image
+            , int width, int height
+            , timespec *ts1, ctx_coord *box);
+        void save_grey(FILE *picture, u_char *image
+            , int width, int height
+            , timespec *ts1, ctx_coord *box);
+        void save_norm( char *file, u_char *image);
+        void save_roi( char *file, u_char *image);
+        void save_ppm(FILE *picture, u_char *image, int width, int height);
+        void pic_write(FILE *picture, u_char *image);
+        u_char *load_pgm(FILE *picture, int width, int height);
+        void write_mask(const char *file);
+        void init_privacy();
+        void init_mask();
+        void init_cfg();
+        void on_picture_save_command(char *fname);
+        void picname(char* fullname, std::string fmtstr
+            , std::string basename, std::string extname);
+
+};
+
+
+#endif /* _INCLUDE_PICTURE_HPP_ */

@@ -3,37 +3,36 @@ Motion
 
 ## Description
 
-Motion is a program that monitors the video signal from one or more cameras and
-is able to detect if a significant part of the picture has changed. Or in other
-words, it can detect motion.
+Motion is a program that monitors the signal from video cameras
+and detects changes in the images.  Version 5.0 and later versions
+remove some of the outdated processes, cleans up the code base and
+introduces new functionality.
 
-## Documentation
-
-The documentation for Motion is contained within the file motion_guide.html.
-
-The offline version of this file is available in the **doc/motion** directory.  The
-online version of the motion_guide.html file can be viewed [here](https://motion-project.github.io/motion_guide.html)
-
-In addition to the detailed building instructions included within the guide, the
-INSTALL file contains abbreviated building instructions.
-
-## Resources
-
-Please join the mailing list [here](https://lists.sourceforge.net/lists/listinfo/motion-user)
-
-We prefer support through the mailing list because more people will have the benefit from the answers.
-A archive of mailing list discussions can be viewed [here](https://sourceforge.net/p/motion/mailman/motion-user/)
+The following are some of the things that are different from earlier
+version of Motion (versions 4.7 and lower).
+- Secondary detection method via OpenCV
+  - HOG (Histogram of Oriented Gradients)
+  - Haar cascade classifiers
+  - Deep neural networks(Caffe, TensorFlow, etc.)
+- Direct Pi camera support and ability to change camera parameters
+- Sound frequency detection
+- Additional primary detection parameters
+- Sound recording from network camera sources
+- ROI pictures for output or secondary detection
+- Enhanced web contorl
+  - Single port for all camera video streams and controls
+  - Consolidated stream(a single image) showing all cameras
+  - List/download movies
+  - Add/delete cameras
+  - Live view of the Motion log output
+  - Video streams via MPEGTS format
+  - Change/update configuration parameters
+  - Permits a user created web page
+  - JSON status/configuration pages
+  - POST web control processing
 
 ## License
 
-Motion is mainly distributed under the GNU GENERAL PUBLIC LICENSE (GPL) version 2 or later.
-See the copyright file for a list of all the licensing terms of the various components of Motion.
+Motion version 5.0 and later is distributed under the GNU GENERAL PUBLIC LICENSE (GPL) version 3 or later.
 
-The file CREDITS lists the many people who have contributed to Motion over the years.
-
-## Contributing
-
-Issues and Patches should be submitted via github and include detail descriptions
-of the issue being addressed as well as any documentation updates that would be
-needed with the change.
 

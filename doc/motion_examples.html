@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <link href="motion.png" rel="icon" type="image/png">
+    <title>Motion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="motion_stylesheet.css" media="screen">
+    <script>
+      function fnc_topnav() {
+        var x = document.getElementById("id_topnav");
+        if (x.className === "topnav") {
+          x.className += " responsive";
+        } else {
+          x.className = "topnav";
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="topnav" id="id_topnav">
+      <img class="logoimg" src="motion.gif">
+
+      <a class="topnav-d" href="https://motion-project.github.io/motion_support.html">Support</a>
+      <a class="topnav-d" href="https://motion-project.github.io/motion_news.html" >News</a>
+      <a class="topnav-d" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+      <a class="topnav-d" href="https://motion-project.github.io/motion_download.html">Download</a>
+      <a class="topnav-d" href="https://motion-project.github.io/index.html">Home</a>
+
+      <a class="topnav-m" href="https://motion-project.github.io/index.html">Home</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_download.html">Download</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_news.html" >News</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_support.html">Support</a>
+
+      <a href="javascript:void(0);" class="icon" onclick="fnc_topnav()">&#9776;</a>
+    </div>
+    <section class="page-header">
+      <h1>
+        Examples
+      </h1>
+    </section>
+    <section class="main-content">
+
+      <h3><a name="Examples"></a> Examples</h3>
+      <ul>
+        The following provides some sample configuration options and examples for Motion.
+        <li> <a href="#persistent_device"> Persistent v4l2 device name </a></li>
+        <li> <a href="#extpipe_commands"> Sample extpipe commands </a></li>
+        <li> <a href="#loopback_setup">Loopback device setup</a></li>
+        <li> <a href="#ffmpeg_input_device">FFmpeg as input device</a></li>
+        <li> <a href="#webcontrol_pages">Webcontrol pages</a></li>
+        <li> <a href="#database_setup">Database setup</a></li>
+        <li> <a href="#haar_setup">Haar setup</a></li>
+        <li> <a href="#hog_setup">HOG setup</a></li>
+        <li> <a href="#dnn_setup">DNN setup</a></li>
+        <li> <a href="#haar_train">Haar Model Training</a></li>
+        <li> <a href="#sound_sample">Sound Frequency Sample</a></li>
+        <li> <a href="#fail2ban">Fail2Ban example</a></li>
+        <li> <a href="#ptz">PTZ command examples</a></li>
+        <p></p>
+        <p></p>
+      </ul>
+      <p></p>
+      <p></p>
+
+      <h3><a name="persistent_device"></a> Persistent v4l2 device name </h3>
+      <ul>
+        Since the exact device number is set by the kernel upon boot, when there is more than one video device
+        it is possible that the particular cameras that were assigned to /dev/video0 and /dev/video1 may switch. In
+        order to set up Motion so that a particular camera is always assigned the same way, users can set up
+        a symbolic link using udev rules.  To do this a unique attribute must be identified for each camera. The
+        camera attributes can be viewed by using the command
+        <code>udevadm info -a -p $(udevadm info -q path -n /dev/video0) </code> while the camera is attached.  Usually
+        a serial number can be used.  ("Usually" because some cameras have been observed to have the same serial
+        number for different cameras)
+        <p></p>
+        Once a unique attribute has been identified for each camera, edit or create the file
+        <code>/etc/udev/rules.d/99-local.rules</code>.
+        <p></p>
+        Assuming that the unique attribute for the camera was name and was
+        <code>ATTR{name}=="Philips SPC 900NC webcam"</code> you would add the following line to the
+        99-local.rules file:
+        <code> KERNEL=="video[0-9]*", ATTR{name}=="Philips\ SPC\ 900NC*", SYMLINK+="video-webcam0"</code>
+        <p></p>
+        Once the change has been made and saved, reboot the computer and there should now be a "sticky" device called
+        /dev/video-webcam0
+        <p></p>
+      </ul>
+
+      <h3><a name="extpipe_commands"></a>Sample extpipe commands</h3>
+      <ul>
+        The following are some sample extpipe commands
+        <p></p>
+        <code>
+        movie_extpipe mencoder -demuxer rawvideo -rawvideo w=%w:h=%h:i420 -ovc x264 -x264encopts bframes=4:frameref=1:subq=1:scenecut=-1:nob_adapt:threads=1:keyint=1000:8x8dct:vbv_bufsize=4000:crf=24:partitions=i8x8,i4x4:vbv_maxrate=800:no-chroma-me -vf denoise3d=16:12:48:4,pp=lb -of   avi -o %f.avi - -fps %{fps}
+        </code>
+        <p></p>
+        <code>
+        movie_extpipe x264 - --input-res %wx%h --fps %{fps} --bitrate 2000 --preset ultrafast --quiet -o %f.mp4
+        </code>
+        <p></p>
+        <code>
+        movie_extpipe mencoder -demuxer rawvideo -rawvideo w=%w:h=%h:fps=%{fps} -ovc x264 -x264encopts preset=ultrafast -of lavf -o %f.mp4 - -fps %{fps}
+        </code>
+        <p></p>
+        <code>
+        movie_extpipe ffmpeg -y -f rawvideo -pix_fmt yuv420p -video_size %wx%h -framerate %{fps} -i pipe:0 -vcodec libx264 -preset ultrafast -f mp4 %f.mp4
+        </code>
+        <p></p>
+      </ul>
+
+      <h3><a name="loopback_setup"></a>Loopback device setup</h3>
+      <ul>
+        The video loopback device can be added installed via apt in many distributions.  The package tested
+        with Motion is v4l2loopback-dkms.  Once the package is installed, you just need to run
+        <code>sudo modprobe v4l2loopback</code>.  This will add a new video device that you
+        can use for the loopback.  It is believed that there are additional options associated with the
+        v4l2loopback that allows for adding more than one device.  See the documentation of the v4l2loopback
+        project for additional details.
+        <p></p>
+        To activate the vloopback device in Motion set the 'video_pipe' option in the motion.conf file to the
+        device name associated with the one created by v4l2loopback.
+        <br />You can also view the special motion pictures where you see the changed pixels by setting the option
+        'video_pipe_motion' in motion.conf. When setting the video_pipe and/or video_pipe_motion options
+        specify the input device as e.g. /dev/video1.
+        <p></p>
+        De-activating should be done with this command
+        <p></p>
+        <code>sudo modprobe -r v4l2loopback</code>
+        <p></p>
+      </ul>
+
+      <h3><a name="ffmpeg_input_device"></a>Use ffmpeg as input device</h3>
+      <ul>
+      Sometimes the particular device is not function for Motion but does work with FFmpeg.  In
+      this situation the device can be setup to be used in Motion using FFMpeg as an intermediate
+      application.  The process would be to set up a loopback device and then have FFmpeg feed the
+      video into that device and then Motion can read from it.  The following are some examples.  First set up
+      the loopback device and set it to /dev/video0.  Then start ffmpeg using options such as the following.
+      <code> ffmpeg -re -i mymovie.mp4 -f v4l2 /dev/video0 </code>  Then in a separate terminal, start Motion
+      with it set to use the <code>/dev/video0</code> device as input.  This method can can also be used to
+      reformat the content to a different format.  The following outputs the original movie into a gray pixel format.
+      <code> ffmpeg -re -i mymovie.mp4 -f v4l2 -pix_fmt gray /dev/video0 </code>
+      </ul>
+
+      <h3><a name="database_setup"></a>Database Setup</h3>
+      <ul>
+        If a database is specified in the Motion configuration, upon start up, Motion will check for a table in
+        the database called "motion" and if it is not found, it will create it.  This Motion specific table is
+        required so that movies can be displayed on the webcontrol page.  It tracks the movies created by Motion along
+        with the various metadata about the movies.  The following is a brief overview of how to create a simple database
+        and specify it within the Motion parameters so recordings can be downloaded from the webcontrol.
+       <ul>
+          <div>
+            <i><h4>sqlite3</h4></i>
+            This database type is by far the easiest to set up since it is file based.  Simply provide the
+            parameters in the Motion configuration parameters
+            <ul>
+            <small><small><code>
+            database_type sqlite3
+            <br>database_dbname /full/path/and/file/name.db
+            </code></small></small>
+            </ul>
+            While this is the easiest to set up, it has also been observed that it can at times be unstable.  This
+            is especially true if the database file is included as part of a archive process while in use by Motion.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>mariadb</h4></i>
+            The following describes the process to set up a Mariadb database.  If your machine already has a Mariadb database,
+            adjust as appropriate to the situation that exists on your computer.  Those with more experience with MariaDb are
+            invited to provide suggestions and corrections to these steps.
+            <small><small><code>
+            <ul>
+            sudo apt install libmariadb-dev libmariadb3 mariadb-client mariadb-client-core mariadb-common mariadb-server
+            <br>sudo mariadb
+              <ul>
+              GRANT ALL ON *.* TO 'YourUserNameHere'@'localhost' IDENTIFIED BY 'YourPasswordHere' WITH GRANT OPTION;
+              <br>FLUSH PRIVILEGES;
+              <br>exit
+              </ul>
+            mariadb -u YourUserNameHere -p
+              <ul>
+              {enter YourPasswordHere}
+              <br>create database motion;
+              <br>use motion;
+              <br>quit;
+              </ul>
+            </code></small></small>
+            </ul>
+
+            Once the database is set up, check the status of Mariadb via systemctl.
+            <ul>
+            <small><small><code>
+            sudo systemctl status mariadb
+            </code></small></small>
+            </ul>
+
+            Specify the following in the Motion configuration parameters.
+            <ul>
+            <small><small><code>
+            database_type mariadb
+            <br>database_dbname motion
+            <br>database_host localhost
+            <br>database_port 3306
+            <br>database_user YourUserNameHere
+            <br>database_password YourPasswordHere
+            </code></small></small>
+            </ul>
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>postgresql</h4></i>
+            The following describes the process to set up a PostgreSQL database.
+            If your machine already has a PostgreSQL database,
+            adjust as appropriate to the situation that exists on your computer.
+            Those with more experience with PostgreSQL are
+            invited to provide suggestions and corrections to these steps.
+            <small><small><code>
+            <ul>
+            sudo apt install postgresql postgresql-contrib
+            <br>sudo -u postgres psql
+              <ul>
+              CREATE ROLE 'your_username_here' LOGIN PASSWORD 'YourPasswordHere';
+              <br>CREATE DATABASE motion WITH OWNER = your_username_here;
+              <br>GRANT ALL PRIVILEGES ON DATABASE motion TO your_username_here;
+              <br>\quit
+              </ul>
+            </code></small></small>
+            </ul>
+
+            Once the database is set up, check the status via systemctl.
+            <ul>
+            <small><small><code>
+            sudo systemctl status postgresql
+            </code></small></small>
+            </ul>
+
+            Check the login information via the following command line. (note that the
+            username only seems to accept lowercase)
+            <ul>
+            <small><small><code>
+            psql -h localhost -d motion -U your_username_here -p 5432
+            </code></small></small>
+
+            Specify the following in the Motion configuration parameters.
+            <ul>
+            <small><small><code>
+            database_type postgresql
+            <br>database_dbname motion
+            <br>database_host localhost
+            <br>database_port 5432
+            <br>database_user your_username_here
+            <br>database_password YourPasswordHere
+            </code></small></small>
+            </ul>
+
+          </div>
+          <p></p>
+
+
+       </ul>
+
+      </ul>
+
+      <h3><a name="webcontrol_pages"></a>Webcontrol pages</h3>
+      <ul>
+        <li><code>{IP}:{port0}/</code> Home html page with streams for all cameras</li>
+
+        The following JSON pages are available via the webcontrol.
+        <ul>
+          <li><code>{IP}:{port0}/0/config.json</code> JSON object with the configuration information for all cameras</li>
+          <li><code>{IP}:{port0}/0/status.json</code> JSON object with information about status of all cameras</li>
+          <li><code>{IP}:{port0}/0/movies.json</code> JSON object with information about all movies</li>
+        </ul>
+        The following mjpg streams are available via the webcontrol. (Update automatically).  Specify {camid}
+        as 0 to obtain a consolidated mjpg stream of all cameras.
+        <ul>
+          <li><code>{IP}:{port0}/{camid}/mjpg</code> Primary stream for the camera updated as a mjpg</li>
+          <li><code>{IP}:{port0}/{camid}/mjpg/substream</code> Substream for the camera updated as a mjpg</li>
+          <li><code>{IP}:{port0}/{camid}/mjpg/motion</code> Stream of motion images for the camera as a mjpg</li>
+          <li><code>{IP}:{port0}/{camid}/mjpg/source</code> Source image stream of the camera as a mjpg</li>
+          <li><code>{IP}:{port0}/{camid}/mjpg/secondary</code> Image from secondary detection stream (if active) as a mjpg</li>
+        </ul>
+        The following mpegts streams are available via the webcontrol. (Update automatically) Specify {camid}
+        as 0 to obtain a consolidated mpegts stream of all cameras.
+        <ul>
+          <li><code>{IP}:{port0}/{camid}/mpegts</code> Primary stream for the camera updated as a mpeg transport stream</li>
+          <li><code>{IP}:{port0}/{camid}/mpegts/substream</code> Substream for the camera updated as a mpeg transport stream</li>
+          <li><code>{IP}:{port0}/{camid}/mpegts/motion</code> Stream of motion images for the camera as a mpeg transport stream</li>
+          <li><code>{IP}:{port0}/{camid}/mpegts/source</code> Source image stream of the camera as a mpeg transport stream</li>
+          <li><code>{IP}:{port0}/{camid}/mpegts/secondary</code> Image from secondary detection stream (if active) as a mpeg transport stream</li>
+        </ul>
+        The following static pages are available via the webcontrol. (Update manually) Specify {camid}
+        as 0 to obtain a consolidated image of all cameras.
+        <ul>
+          <li><code>{IP}:{port0}/{camid}/static</code> Primary image for the camera</li>
+          <li><code>{IP}:{port0}/{camid}/static/substream</code> Substream image for the camera</li>
+          <li><code>{IP}:{port0}/{camid}/static/motion</code> Motion image for the camera</li>
+          <li><code>{IP}:{port0}/{camid}/static/source</code> Source image of the camera</li>
+          <li><code>{IP}:{port0}/{camid}/static/secondary</code> Image from secondary detection stream (if active)</li>
+        </ul>
+        The following actions can be executed by sending post request.
+        <ul>
+          <li><code>eventstart</code>Start an event</li>
+          <li><code>eventend</code>End an event</li>
+          <li><code>snapshot</code>Invoke a snapshot</li>
+          <li><code>pause_on</code>Pause motion detection</li>
+          <li><code>pause_off</code>Enable motion detection</li>
+          <li><code>pause_schedule</code>Allow schedule to pause or enable motion detection</li>
+          <li><code>restart</code>Restart camera</li>
+          <li><code>stop</code>Stop camera</li>
+          <li><code>config_write</code>Write out the configuration to file.  User account running Motion must have write access to directory</li>
+          <li><code>camera_add</code>Add a camera</li>
+          <li><code>camera_delete</code>Delete camera</li>
+          <li><code>config</code>Set configuration item</li>
+          <li><code>action_user</code>Execute the on_action_user command.  Provide as needed the additional parameter of action_user</li>
+          <li><code>pan_left</code>Execute the ptz_pan_left command</li>
+          <li><code>pan_right</code>Execute the ptz_pan_left command</li>
+          <li><code>tilt_up</code>Execute the ptz_tilt_up</li>
+          <li><code>tilt_down</code>Execute the ptz_tilt_down</li>
+          <li><code>zoom_in</code>Execute ptz_zoom_in command</li>
+          <li><code>zoom_out</code>Execute the ptz_zoom_out command</li>
+        </ul>
+        Sample commands
+        <ul>
+          <li><code>curl -s -o -X POST {IP}:{port0} --data "camid={camid}" --data "command=eventstart"  1>/dev/null</code></li>
+          <li><code>curl -s -o -X POST {IP}:{port0} --data "camid={camid}" --data "command=config" --data "framerate=12"  1>/dev/null</code></li>
+        </ul>
+      </ul>
+
+      <h3><a name="haar_setup"></a>HAAR setup</h3>
+      <ul>
+        <li>Set the following Motion items within the secondardy_params</li>
+        <ul>
+          <li><code>frame_interval</code>Default: 5 | The number of images between each secondary detection</li>
+          <li><code>image_type</code>Default: full | Type of image to process through secondary detection</li>
+          <li><code>model_file</code>Default: None | Full path and file name for the haar model</li>
+          <li><code>rotate</code>Default: 0 | Degrees of rotation of the image when processing through secondary detection </li>
+          <li><code>threshold</code>Default: 1.10 | weights of detected values </li>
+        </ul>
+        <li>Set the following parameters to the OpenCV function <code>CascadeClassifier::detectMultScale</code> within the secondardy_params</li>
+        </u>
+          <li><code>scalefactor</code>Default: 1.10 | Scale factor to apply to the image</li>
+          <li><code>flags</code>Default: 0 | </li>
+          <li><code>maxsize</code>Default: 1024 | </li>
+          <li><code>minsize</code>Default: 8 |  </li>
+          <li><code>minneighbors</code>Default: 8 | </li>
+        </ul>
+
+      </ul>
+
+      <h3><a name="hog_device"></a>HOG setup</h3>
+      <ul>
+        <li>Set the following items within the secondardy_params</li>
+        <ul>
+          <li><code>frame_interval</code>Default: 5 | The number of images between each secondary detection</li>
+          <li><code>image_type</code>Default: full | Type of image to process through secondary detection</li>
+          <li><code>model_file</code>Default: None | Full path and file name for the haar model</li>
+          <li><code>rotate</code>Default: 0 | Degrees of rotation of the image when processing through secondary detection </li>
+          <li><code>threshold</code>Default: 1.10 | Weights of detected values</li>
+        </ul>
+        <li>Set the following parameters to the OpenCV function <code>HOGDescriptor::detectMultScale</code> within the secondardy_params</li>
+        <ul>
+          <li><code>threshold_model</code>Default: 2.00 | </li>
+          <li><code>scalefactor</code>Default: 1.05 | </li>
+          <li><code>padding</code>Default: 8 | </li>
+          <li><code>winstride</code>Default: 8 | </li>
+        </ul>
+
+      </ul>
+
+      <h3><a name="dnn_setup"></a>DNN setup</h3>
+      <ul>
+        <li>Set the following items within the secondardy_params</li>
+        <ul>
+          <li><code>model_file</code>Default: None | Full path and file name for the haar model</li>
+          <li><code>frame_interval</code>Default: 5 | The number of images between each secondary detection</li>
+          <li><code>image_type</code>Default: full | Type of image to process through secondary detection</li>
+          <li><code>rotate</code>Default: 0 | Degrees of rotation of the image when processing through secondary detection </li>
+          <li><code>threshold</code>Default: 0.75 | Confidence threshold</li>
+          <li><code>scalefactor</code>Default: 1.05 | </li>
+
+          <li><code>backend</code>Default: 0(DNN_BACKEND_DEFAULT) | </li>
+          <li><code>target</code>Default: 0(DNN_TARGET_CPU) | </li>
+          <li><code>width</code>Default: none | Width for the model (not the source image)</li>
+          <li><code>height</code>Default: none | Height for the model (not the source image)</li>
+          <li><code>scale</code>Default: none | Scale used in the model</li>
+          <li><code>config</code>Default: none | </li>
+          <li><code>classes_file</code>Default: none | Full path and name for a file with the names of the classes </li>
+          <li><code>framework</code>Default: none | </li>
+        </ul>
+
+      </ul>
+
+      <h3><a name="haar_train"></a>Haar Model Training</h3>
+      <ul>
+        The OpenCV documentation is the definitive source for instructions on how to train
+        a Haar model.  This brief introduction only provides a few scripts that may be
+        helpful in using Motion to get positive and negative images to feed into the
+        training process.
+        <br>
+        <br>Start with creating positive images movie as input file.
+        <br>Run with picture_output_motion roi
+        <br>Remove any pictures that are not desired.
+        <br>Run the script to create the positive file list
+        <br>Run while in the directory with the positive images.
+        <small><code><ul>
+          opencv_createsamples -vec posfiles.vec -info poslist.txt -num 350 -h 96 -w 96
+        </ul></code></small>
+        Next get a sample file that does not have desired positives.
+        <br>Change to picture_output on and turn off motion roi
+        <br>Change threshold to tiny number and run to create negatives
+        <small><code><ul>
+        opencv_traincascade -data ./model -vec ./pos/posfiles.vec -bg neglist.txt -numPos 350 -numNeg 325
+        </ul></code></small>
+        The following are the simple scripts to create positive and negative list files for training
+        <small><small><code>
+        <ul>
+          !/bin/bash
+          <br>FILES=./pos/*.jpg
+          <br>for FULLNAME in $FILES
+          <br>do
+          <br>HW=$(identify -format '%w %h' $FULLNAME)
+          <br>printf "$FULLNAME 1 0 0 $HW \n" >>poslist.txt
+          <br>done
+        </ul>
+        <ul>
+          <br>!/bin/bash
+          <br>FILES=./neg/*.jpg
+          <br>for FULLNAME in $FILES
+          <br>do
+          <br>  printf "$FULLNAME \n" >>neglist.txt
+          <br>done
+        </ul>
+        </code></small></small>
+
+      </ul>
+
+      <h3><a name="sound_sample"></a>Sound Frequency Sample</h3>
+      <ul>
+        Since sound frequency processing is new to Motion, the following provides an illustrative sample of setting
+        up the sound and the associated alerts processing.  This example will use ALSA.  For PulseAudio, Motion uses
+        the default audio recording device.  Although Motion has parameters for the PulseAudio server and device,
+        the set up is not straight forward and it is just recommended to change the PulseAudio default.
+        <br>
+        <br>Go to the command prompt and use <small><code>arecord -l</code></small> to get the
+        device name such as <small><code>hw:1,0</code></small>
+        <br>Specify log_level 8 in Motion.conf
+        <br>Do not specify a log file so that it is console output.
+        <br>Specify snd_device and snd_show in the sound configuration file such as
+        <br><small><code>snd_device hw:1,0</code></small>
+        <br><small><code>snd_show on</code></small>
+        <br>Start Motion and make a noise to test the output.
+        <br>Once Motion responds to sounds, press the test button on the device to be monitored.
+        <br>Note that while the various devices being monitored may be the same, the detected frequency from
+        each may be slightly different.  Care should be taken to not be too precise in the setting of the alert
+        range for Motion.  For example, the frequency may be reported as 3402.2456 and Motion can be
+        set up to look for that precise number but devices age and the frequency may change.  Also, note that the
+        frequency resolution of Motion is limited by the sample rate and frames from the audio device.
+        The maximum resolution is determined by the following formula.  Sample Rate / (frames * 2).  So with the
+        default sample rate of 44100hz, and frames of 2048, the maximum resolution is appoximately 10.7666hz.  This
+        means that the frequencies detected around the range reported above would be 3413.0122, 3402.2456
+        or 3391.4790 and no values between.
+        <br>Once the frequencies of all the devices have been logged, set up the alerts in the sound configuration
+        file as well as the on_sound_alert and turn off the showing of frequencies. (The frequencies in this sample
+        are random)
+        <small><code><ul>
+        <br>snd_alerts alert_id=01,volume_level=01,volume_count=10,freq_low=2976,freq_high=2977,alert_nm=smokedown1
+        <br>snd_alerts alert_id=02,volume_level=01,volume_count=10,freq_low=3400,freq_high=3450,alert_nm=smokelr
+        <br>snd_alerts alert_id=03,volume_level=01,volume_count=10,freq_low=3388,freq_high=3399,alert_nm=smokebr1
+        <br>snd_alerts alert_id=11,volume_level=01,volume_count=10,freq_low=3378,freq_high=3379,alert_nm=furnace
+        <br>snd_alerts alert_id=22,volume_level=01,volume_count=10,freq_low=3281,freq_high=3399,alert_nm=waterheater
+        <br>snd_alerts alert_id=22,volume_level=01,volume_count=10,freq_low=3270,freq_high=3279,alert_nm=kitchBath
+        <br>snd_show off
+        <br>on_sound_alert %{trig_nbr} %{trig_nm} %{trig_freq}
+        <br>&nbsp;
+        </ul></code></small>
+        Then you can set up a script to send email or text messages using the sendemail
+        application like below
+        <small><small><code>
+        <ul>
+          <br>#!/bin/bash
+          <br>&nbsp;  ALRTNBR=$1
+          <br>&nbsp;  ALRTNM=$2
+          <br>&nbsp;  FREQ=$3
+          <br>&nbsp;  ATCH=$4
+          <br>&nbsp;  MYSTR=""
+          <br>&nbsp;  MYSTR=$MYSTR" -f  \"Friendly Name <SendingEmailAddress@gwhatever.com>\" "
+          <br>&nbsp;  MYSTR=$MYSTR" -t  \"DestinationEmailAddress@gwhatever.com\" "
+          <br>&nbsp;  MYSTR=$MYSTR" -u  \"Motion Notification\" "
+          <br>&nbsp;  MYSTR=$MYSTR" -s  \"smtp.gwhatever.com:587\" "
+          <br>&nbsp;  MYSTR=$MYSTR" -xu \"SendingEmailAddress@gwhatever.com\" "
+          <br>&nbsp;  MYSTR=$MYSTR" -xp \"SendingEmailPassword\" "
+          <br>&nbsp;  BODY=""
+          <br>&nbsp;  if [[ "$ALRTNBR" -ge 1 && "$ALRTNBR" -le 9 ]]; then
+          <br>&nbsp;&nbsp;    BODY="So, hey.  Sorry to bother you.  But thought I'd just let"
+          <br>&nbsp;&nbsp;    BODY=$BODY" you know that your house is burning down.  The neighbors"
+          <br>&nbsp;&nbsp;    BODY=$BODY" may get annoyed so you should think about doing something. "
+          <br>&nbsp;&nbsp;    BODY=$BODY" The "$ALRTNM" alert numbered "$ALRTNBR" was triggered with "
+          <br>&nbsp;&nbsp;    BODY=$BODY" frequency "$FREQ
+          <br>&nbsp;  elif [[ "$ALRTNBR" -ge 10 && "$ALRTNBR" -le 19 ]]; then
+          <br>&nbsp;&nbsp;    BODY="Hi.  So I noticed that the natural gas leak alarm is going off."
+          <br>&nbsp;&nbsp;    BODY=$BODY" Nothing too urgent or anything but when you get home, you"
+          <br>&nbsp;&nbsp;    BODY=$BODY" may want to hold off making any sparks to avoid blowing yourself up."
+          <br>&nbsp;&nbsp;    BODY=$BODY" The "$ALRTNM" alert numbered "$ALRTNBR" was triggered with "
+          <br>&nbsp;&nbsp;    BODY=$BODY" frequency "$FREQ
+          <br>&nbsp;  elif [[ "$ALRTNBR" -ge 20 && "$ALRTNBR" -le 29 ]]; then
+          <br>&nbsp;&nbsp;    BODY="Ahoy!  Your house is going to be next water park attraction in"
+          <br>&nbsp;&nbsp;    BODY=$BODY" the neighborhood!!!  The water is filling it up and the"
+          <br>&nbsp;&nbsp;    BODY=$BODY" children will be splashing around in it soon."
+          <br>&nbsp;&nbsp;    BODY=$BODY" The "$ALRTNM" alert numbered "$ALRTNBR" was triggered with "
+          <br>&nbsp;&nbsp;    BODY=$BODY" frequency "$FREQ
+          <br>&nbsp;  fi
+          <br>&nbsp;  if [ "$BODY" != "" ]; then
+          <br>&nbsp;&nbsp;    MYSTR=$MYSTR" -m \""$BODY"\" "
+          <br>&nbsp;&nbsp;    if [ -f "$ATCH" ]; then
+          <br>&nbsp;&nbsp;&nbsp;      MYSTR=$MYSTR" -m \""$ATCH"\" "
+          <br>&nbsp;&nbsp;    fi
+          <br>&nbsp;&nbsp;    sendemail $MYSTR
+          <br>&nbsp;  fi
+          <br>exit 0
+        </ul>
+        </code></small></small>
+
+      </ul>
+
+      <h3><a name="fail2ban"></a>Fail2Ban Example</h3>
+      <ul>
+        The following are example files to use with the fail2ban application.  This allows users to ban IPs that
+        may be attempting to get in.  This example was created using Debian 11.  Adjust as appropriate for other
+        distros and versions.
+        <br>
+        Install fail2ban and create the following files:
+        <br>File 1:
+        <small><small><code><ul>
+          <br>&nbsp;# Fail2Ban configuration file: /etc/fail2ban/filter.d/motion.conf
+          <br>&nbsp;# Author: Mr Dave
+          <br>&nbsp;#
+          <br>&nbsp;[INCLUDES]
+          <br>&nbsp;# Read common prefixes. If any customizations available -- read them from common.local
+          <br>&nbsp;before = common.conf
+          <br>&nbsp;
+          <br>&nbsp;[Definition]
+          <br>&nbsp;daemon = nsd
+          <br>&nbsp;
+          <br>&nbsp;# Option:  failregex
+          <br>&nbsp;# Notes.:
+          <br>&nbsp;#&nbsp;    regex to match the log in failures messages in the logfile. The
+          <br>&nbsp;#&nbsp;    host must be matched by a group named "host". The tag "&ltHOST&gt" can
+          <br>&nbsp;#&nbsp;    be used for standard IP/hostname matching and is only an alias for
+          <br>&nbsp;#&nbsp;    (?:::f{4,6}:)?(?P<host>[\w\-.^_]+)
+          <br>&nbsp;# Sample:  Jul 01 02:50:32 [EMG][STR][00:wc00] webu_failauth_check: Ignoring connection from: 192.168.1.10
+          <br>&nbsp;# Values:  TEXT
+          <br>&nbsp;
+          <br>&nbsp;failregex =  ^.*Ignoring connection from: &ltHOST&gt$
+          <br>&nbsp;
+          <br>&nbsp;ignoreregex =
+          <br>&nbsp;
+          <br>&nbsp;datepattern = {^LN-BEG}Epoch
+          <br>&nbsp;&nbsp;&nbsp;&nbsp;{^LN-BEG}
+          <br>&nbsp;
+        </ul></code></small></small>
+        <br>File2:
+        <small><small><code><ul>
+          <br>&nbsp;#Fail2Ban Jail Configuration File: /etc/fail2ban/jail.d/motion-jail.conf
+          <br>&nbsp;[motion]
+          <br>&nbsp;enabled   = true
+          <br>&nbsp;filter    = motion
+          <br>&nbsp;logpath   = /var/log/motion/motion.log
+          <br>&nbsp;bantime   = 23h
+          <br>&nbsp;banaction = iptables-allports[blocktype="DROP"]
+          <br>&nbsp;maxretry  = 0
+          <br>&nbsp;port      = 0:65535
+        </ul></code></small></small>
+        <br>Make sure to adjust the log file location indicated in the jail file as well as how long to ban the IP address.
+       </ul>
+
+      <h3><a name="ptz"></a>PTZ command examples</h3>
+      <ul>
+        The following are some example sources and scripts to send PTZ (Pan Tilt Zoom) commands to cameras.
+        <br><br>
+        <a href="https://github.com/667bdrm/sofiactl">sofiactl</a> is a Perl script that can control many imported inexpensive cameras.
+        <br> Adjust script location, timing, cameraip, user, etc as appropriate.
+        <small><small><code><ul>
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp;sofiactl.pl --user admin --host cameraip --port 34567 --command OPPTZControl --sd ZoomTile --s2 0.5
+          <br>&nbsp;&nbsp;sofiactl.pl --user admin --host cameraip --port 34567 --command OPPTZControl --sd ZoomWide --s2 0.5
+          <br>&nbsp;&nbsp;sofiactl.pl --user admin --host cameraip --port 34567 --command OPPTZControl --sd DirectionUp --s2 2.0
+          <br>&nbsp;&nbsp;sofiactl.pl --user admin --host cameraip --port 34567 --command OPPTZControl --sd DirectionDown --s2 2.0
+          <br>&nbsp;&nbsp;sofiactl.pl --user admin --host cameraip --port 34567 --command OPPTZControl --sd DirectionLeft --s2 2.0
+          <br>&nbsp;&nbsp;sofiactl.pl --user admin --host cameraip --port 34567 --command OPPTZControl --sd DirectionRight --s2 2.0
+          <br>&nbsp;exit
+        </ul></code></small></small>
+
+        <br>
+        <a href="https://github.com/Mr-Dave/camxmctl">camxmctl</a> is a c++ program with a sample HTML page that makes adjusting the parameters
+        easier.  It reuses some of the code from Motion and is based upon the JSON files and commands in the
+        <a href="https://github.com/667bdrm/sofiactl">sofiactl</a> script.
+        <br> Adjust location, timing, cameraip, user, etc as appropriate.
+        <small><small><code><ul>
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp; tbd.  Review sample page to see post commands.
+          <br>&nbsp;exit
+        </ul></code></small></small>
+
+        <br>
+        curl scripts.  Example 1
+        <br> Adjust as appropriate.
+        <small><small><code><ul>
+          <br>&nbsp;#!/bin/bash
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=1'     http://admin@cameraip:80/PTZ/1/TurnDown
+            <br>&nbsp;&nbsp;sleep 2
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=0'     http://admin@cameraip:80/PTZ/1/TurnDown
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=1'     http://admin@cameraip:80/PTZ/1/TurnLeft
+            <br>&nbsp;&nbsp;sleep 2
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=0'     http://admin@cameraip:80/PTZ/1/TurnLeft
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=1'     http://admin@cameraip:80/PTZ/1/TurnRight
+            <br>&nbsp;&nbsp;sleep 2
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=0'     http://admin@cameraip:80/PTZ/1/TurnRight
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=1'     http://admin@cameraip:80/PTZ/1/TurnUp
+            <br>&nbsp;&nbsp;sleep 2
+            <br>&nbsp;&nbsp;curl -X PUT -H "Content-Type: application/x-www-form-urlencoded"     -d 'Param1=0'     http://admin@cameraip:80/PTZ/1/TurnUp
+          <br>&nbsp;exit
+        </ul></code></small></small>
+
+        <br>
+        curl scripts.  Example 2
+        <br> Adjust as appropriate.
+        <small><small><code><ul>
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=left&-speed=45'
+          <br>&nbsp;&nbsp;sleep 1
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=stop&-speed=45'
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=right&-speed=45'
+          <br>&nbsp;&nbsp;sleep 1
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=stop&-speed=45'
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=down&-speed=45'
+          <br>&nbsp;&nbsp;sleep 1
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=stop&-speed=45'
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=up&-speed=45'
+          <br>&nbsp;&nbsp;sleep 1
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=stop&-speed=45'
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=zoomin&-speed=45'
+          <br>&nbsp;&nbsp;sleep 1
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=stop&-speed=45'
+          <br>&nbsp;exit
+          <br>&nbsp;#!/bin/bash
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=zoomout&-speed=45'
+          <br>&nbsp;&nbsp;sleep 1
+          <br>&nbsp;&nbsp;curl  'http://admin:admin@cameraip:80/web/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=stop&-speed=45'
+          <br>&nbsp;exit
+        </ul></code></small></small>
+       </ul>
+
+    </section>
+  </body>
+</html>
+

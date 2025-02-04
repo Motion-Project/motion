@@ -1,833 +1,1179 @@
 # Motion Application
-# Copyright (2018)
+# Copyright (2020 - 2023)
 # This file is distributed under the same license as the Motion package.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.x\n"
+"Project-Id-Version: 0.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-24 08:29-0600\n"
-"PO-Revision-Date: 2022-10-24 08:39-0600\n"
+"POT-Creation-Date: 2023-02-04 18:23-0700\n"
+"PO-Revision-Date: 2023-02-048 21:45-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 2.0.6\n"
 
-#: src/conf.c
+#: src/alg.cpp
+msgid "Lightswitch detected"
+msgstr "Interruptor de luz detectado"
+
+#: src/alg_sec.cpp
 #, c-format
-msgid "%s after version %s"
-msgstr "%s después de la versión %s"
+msgid "Error %s"
+msgstr "Error %s"
 
-#: src/conf.c
+#: src/alg_sec.cpp
+msgid "Disabling secondary detection"
+msgstr "Deshabilitar la detección secundaria"
+
+#: src/alg_sec.cpp
+msgid "No secondary model specified."
+msgstr "No se especifica ningún modelo secundario."
+
+#: src/alg_sec.cpp
+#, c-format
+msgid "Failed loading model %s"
+msgstr "Error al cargar el modelo %s"
+
+#: src/alg_sec.cpp
+#, c-format
+msgid "Classes file not found: %s"
+msgstr "Archivo de clases no encontrado: %s"
+
+#: src/alg_sec.cpp
+msgid "Starting."
+msgstr "A partir de."
+
+#: src/alg_sec.cpp
+msgid "Exiting."
+msgstr "saliendo"
+
+#: src/alg_sec.cpp
+msgid "Error starting algsec handler thread"
+msgstr "Error al iniciar el subproceso del controlador algsec"
+
+#: src/alg_sec.cpp
+msgid "Graceful shutdown of secondary detector thread failed"
+msgstr "El apagado correcto del subproceso del detector secundario falló"
+
+#: src/alg_sec.cpp
+msgid "Your computer is too slow for these settings."
+msgstr "Su computadora es demasiado lenta para esta configuración."
+
+#: src/alg_sec.cpp
+msgid "Missed many frames for secondary detection."
+msgstr "Se perdieron muchos marcos para la detección secundaria."
+
+#: src/alg_sec.cpp
+msgid "Your computer is too slow."
+msgstr "Su computadora es demasiado lenta."
+
+#: src/conf.cpp
+msgid "daemon"
+msgstr "demonio"
+
+#: src/conf.cpp
+msgid "setup_mode"
+msgstr "modo de configuración"
+
+#: src/conf.cpp
+msgid "log_file"
+msgstr "archivo de registro"
+
+#: src/conf.cpp
+msgid "pid_file"
+msgstr "archivo pid"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid log_level %d"
+msgstr "Nivel de registro no válido %d"
+
+#: src/conf.cpp
+msgid "log_level"
+msgstr "nivel de registro"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid log_type %s"
+msgstr "Tipo de registro no válido %s"
+
+#: src/conf.cpp
+msgid "log_type"
+msgstr "tipo de registro"
+
+#: src/conf.cpp
+msgid "native_language"
+msgstr "lengua materna"
+
+#: src/conf.cpp
+msgid "camera"
+msgstr "cámara"
+
+#: src/conf.cpp
+msgid "device_name"
+msgstr "nombre del dispositivo"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid device_id %d"
+msgstr "ID de dispositivo no válido %d"
+
+#: src/conf.cpp
+msgid "device_id"
+msgstr "ID del dispositivo"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid device_tmo %d"
+msgstr "Dispositivo no válido tmo %d"
+
+#: src/conf.cpp
+msgid "device_tmo"
+msgstr "dispositivo tmo"
+
+#: src/conf.cpp
+msgid "pause"
+msgstr "pausa"
+
+#: src/conf.cpp
+msgid "config_dir"
+msgstr "directorio de configuración"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid target_dir.  Conversion specifiers not permitted. %s"
+msgstr ""
+"Directorio de destino no válido. No se permiten especificadores de "
+"conversión. %s"
+
+#: src/conf.cpp
+msgid "target_dir"
+msgstr "directorio de destino"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid watchdog timeout %d"
+msgstr "Tiempo de espera de vigilancia no válido %d"
+
+#: src/conf.cpp
+msgid "watchdog_tmo"
+msgstr "perro guardián tmo"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid watchdog kill timeout %d"
+msgstr "Tiempo de espera de eliminación de vigilancia no válido %d"
+
+#: src/conf.cpp
+msgid "watchdog_kill"
+msgstr "perro guardián matar"
+
+#: src/conf.cpp
+msgid "v4l2_device"
+msgstr "dispositivo v4l2"
+
+#: src/conf.cpp
+msgid "v4l2_params"
+msgstr "parámetros v4l2"
+
+#: src/conf.cpp
+msgid "netcam_url"
+msgstr "URL de la cámara de red"
+
+#: src/conf.cpp
+msgid "netcam_params"
+msgstr "parámetros de netcam"
+
+#: src/conf.cpp
+msgid "netcam_high_url"
+msgstr "URL alta de netcam"
+
+#: src/conf.cpp
+msgid "netcam_high_params"
+msgstr "parámetros altos de netcam"
+
+#: src/conf.cpp
+msgid "netcam_userpass"
+msgstr "contraseña de usuario de netcam"
+
+#: src/conf.cpp
+msgid "libcam_device"
+msgstr "dispositivo libcam"
+
+#: src/conf.cpp
+msgid "libcam_params"
+msgstr "parámetros de libcam"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid width %d"
+msgstr "Ancho no válido %d"
+
+#: src/conf.cpp
+#: src/netcam.cpp
+#, c-format
+msgid "Image width (%d) requested is not modulo 8."
+msgstr "El ancho de imagen (%d) solicitado no es módulo 8."
+
+#: src/conf.cpp
+#, c-format
+msgid "Adjusting width to next higher multiple of 8 (%d)."
+msgstr "Ajustando el ancho al siguiente múltiplo más alto de 8 (%d)."
+
+#: src/conf.cpp
+msgid "width"
+msgstr "ancho"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid height %d"
+msgstr "Altura no válida %d"
+
+#: src/conf.cpp
+#: src/netcam.cpp
+#, c-format
+msgid "Image height (%d) requested is not modulo 8."
+msgstr "La altura de la imagen (%d) solicitada no es módulo 8."
+
+#: src/conf.cpp
+#: src/netcam.cpp
+#, c-format
+msgid "Adjusting height to next higher multiple of 8 (%d)."
+msgstr "Ajustando la altura al siguiente múltiplo más alto de 8 (%d)."
+
+#: src/conf.cpp
+msgid "height"
+msgstr "altura"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid framerate %d"
+msgstr "Velocidad de fotogramas no válida %d"
+
+#: src/conf.cpp
+msgid "framerate"
+msgstr "cuadros por segundo"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid rotate %d"
+msgstr "Rotación no válida %d"
+
+#: src/conf.cpp
+msgid "rotate"
+msgstr "girar"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid flip_axis %s"
+msgstr "Eje de volteo no válido %s"
+
+#: src/conf.cpp
+msgid "flip_axis"
+msgstr "eje de giro"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid locate_motion_mode %s"
+msgstr "Modo de movimiento de localización no válido %s"
+
+#: src/conf.cpp
+msgid "locate_motion_mode"
+msgstr "localizar el modo de movimiento"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid locate_motion_style %s"
+msgstr "Estilo de movimiento de localización %s no válido"
+
+#: src/conf.cpp
+msgid "locate_motion_style"
+msgstr "localizar estilo de movimiento"
+
+#: src/conf.cpp
+msgid "text_left"
+msgstr "texto a la izquierda"
+
+#: src/conf.cpp
+msgid "text_right"
+msgstr "texto a la derecha"
+
+#: src/conf.cpp
+msgid "text_changes"
+msgstr "cambios de texto"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid text_scale %d"
+msgstr "Escala de texto no válida %d"
+
+#: src/conf.cpp
+msgid "text_scale"
+msgstr "escala de texto"
+
+#: src/conf.cpp
+msgid "text_event"
+msgstr "evento de texto"
+
+#: src/conf.cpp
+msgid "emulate_motion"
+msgstr "emular movimiento"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid threshold %d"
+msgstr "Umbral no válido %d"
+
+#: src/conf.cpp
+msgid "threshold"
+msgstr "límite"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid threshold_maximum %d"
+msgstr "Umbral máximo %d no válido"
+
+#: src/conf.cpp
+msgid "threshold_maximum"
+msgstr "umbral máximo"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid threshold_sdevx %d"
+msgstr "Umbral no válido sdevx %d"
+
+#: src/conf.cpp
+msgid "threshold_sdevx"
+msgstr "umbral sdevx"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid threshold_sdevy %d"
+msgstr "Umbral no válido sdevy %d"
+
+#: src/conf.cpp
+msgid "threshold_sdevy"
+msgstr "umbral sdevy"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid threshold_sdevxy %d"
+msgstr "Umbral no válido sdevxy %d"
+
+#: src/conf.cpp
+msgid "threshold_sdevxy"
+msgstr "umbral sdevxy"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid threshold_ratio %d"
+msgstr "Cociente de umbral no válido %d"
+
+#: src/conf.cpp
+msgid "threshold_ratio"
+msgstr "relación de umbral"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid threshold_ratio_change %d"
+msgstr "Cambio de relación de umbral no válido %d"
+
+#: src/conf.cpp
+msgid "threshold_ratio_change"
+msgstr "cambio de relación de umbral"
+
+#: src/conf.cpp
+msgid "threshold_tune"
+msgstr "tono de umbral"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid secondary_method %s"
+msgstr "Método secundario no válido %s"
+
+#: src/conf.cpp
+msgid "secondary_method"
+msgstr "método secundario"
+
+#: src/conf.cpp
+msgid "secondary_params"
+msgstr "parámetros secundarios"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid noise_level %d"
+msgstr "Nivel de ruido no válido %d"
+
+#: src/conf.cpp
+msgid "noise_level"
+msgstr "nivel de ruido"
+
+#: src/conf.cpp
+msgid "noise_tune"
+msgstr "melodía de ruido"
+
+#: src/conf.cpp
+msgid "despeckle_filter"
+msgstr "filtro antimanchas"
+
+#: src/conf.cpp
+msgid "area_detect"
+msgstr "detección de área"
+
+#: src/conf.cpp
+msgid "mask_file"
+msgstr "archivo de máscara"
+
+#: src/conf.cpp
+msgid "mask_privacy"
+msgstr "máscara de privacidad"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid smart_mask_speed %d"
+msgstr "Velocidad de máscara inteligente no válida %d"
+
+#: src/conf.cpp
+msgid "smart_mask_speed"
+msgstr "velocidad de máscara inteligente"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid lightswitch_percent %d"
+msgstr "Porcentaje de interruptor de luz no válido %d"
+
+#: src/conf.cpp
+msgid "lightswitch_percent"
+msgstr "porcentaje de interruptor de luz"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid lightswitch_frames %d"
+msgstr "Fotogramas de interruptor de luz no válidos %d"
+
+#: src/conf.cpp
+msgid "lightswitch_frames"
+msgstr "marcos de interruptor de luz"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid minimum_motion_frames %d"
+msgstr "Cuadros mínimos de movimiento no válidos %d"
+
+#: src/conf.cpp
+msgid "minimum_motion_frames"
+msgstr "marcos mínimos de movimiento"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid static_object_time %d"
+msgstr "Tiempo de objeto estático no válido %d"
+
+#: src/conf.cpp
+msgid "static_object_time"
+msgstr "tiempo de objeto estático"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid event_gap %d"
+msgstr "Brecha de evento no válida %d"
+
+#: src/conf.cpp
+msgid "event_gap"
+msgstr "brecha de eventos"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid pre_capture %d"
+msgstr "Precaptura no válida %d"
+
+#: src/conf.cpp
+msgid "pre_capture"
+msgstr "antes de la captura"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid post_capture %d"
+msgstr "Captura de publicación no válida %d"
+
+#: src/conf.cpp
+msgid "post_capture"
+msgstr "captura posterior"
+
+#: src/conf.cpp
+msgid "on_event_start"
+msgstr "en el inicio del evento"
+
+#: src/conf.cpp
+msgid "on_event_end"
+msgstr "al final del evento"
+
+#: src/conf.cpp
+msgid "on_picture_save"
+msgstr "en la imagen guardar"
+
+#: src/conf.cpp
+msgid "on_area_detected"
+msgstr "en el área detectada"
+
+#: src/conf.cpp
+msgid "on_motion_detected"
+msgstr "en movimiento detectado"
+
+#: src/conf.cpp
+msgid "on_movie_start"
+msgstr "en el inicio de la película"
+
+#: src/conf.cpp
+msgid "on_movie_end"
+msgstr "al final de la película"
+
+#: src/conf.cpp
+msgid "on_camera_lost"
+msgstr "en cámara perdido"
+
+#: src/conf.cpp
+msgid "on_camera_found"
+msgstr "en la cámara encontrado"
+
+#: src/conf.cpp
+msgid "on_secondary_detect"
+msgstr "en detección secundaria"
+
+#: src/conf.cpp
+msgid "on_action_user"
+msgstr "en la acción del usuario"
+
+#: src/conf.cpp
+msgid "on_sound_alert"
+msgstr "en alerta sonora"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid picture_output %s"
+msgstr "Salida de imagen no válida %s"
+
+#: src/conf.cpp
+msgid "picture_output"
+msgstr "salida de imagen"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid picture_output_motion %s"
+msgstr "Movimiento de salida de imagen no válido %s"
+
+#: src/conf.cpp
+msgid "picture_output_motion"
+msgstr "movimiento de salida de imagen"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid picture_type %s"
+msgstr "Tipo de imagen no válido %s"
+
+#: src/conf.cpp
+msgid "picture_type"
+msgstr "tipo de imagen"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid picture_quality %d"
+msgstr "Calidad de imagen no válida %d"
+
+#: src/conf.cpp
+msgid "picture_quality"
+msgstr "calidad de imagen"
+
+#: src/conf.cpp
+msgid "picture_exif"
+msgstr "imagen exif"
+
+#: src/conf.cpp
+msgid "picture_filename"
+msgstr "nombre de archivo de imagen"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid snapshot_interval %d"
+msgstr "Intervalo de instantánea no válido %d"
+
+#: src/conf.cpp
+msgid "snapshot_interval"
+msgstr "intervalo de instantáneas"
+
+#: src/conf.cpp
+msgid "snapshot_filename"
+msgstr "nombre de archivo de instantánea"
+
+#: src/conf.cpp
+msgid "movie_output"
+msgstr "salida de película"
+
+#: src/conf.cpp
+msgid "movie_output_motion"
+msgstr "movimiento de salida de película"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid movie_max_time %d"
+msgstr "Tiempo máximo de película no válido %d"
+
+#: src/conf.cpp
+msgid "movie_max_time"
+msgstr "tiempo máximo de la película"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid movie_bps %d"
+msgstr "Bps de película no válidos %d"
+
+#: src/conf.cpp
+msgid "movie_bps"
+msgstr "bps de la película"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid movie_quality %d"
+msgstr "Calidad de película no válida %d"
+
+#: src/conf.cpp
+msgid "movie_quality"
+msgstr "calidad de la película"
+
+#: src/conf.cpp
+msgid "movie_container"
+msgstr "contenedor de películas"
+
+#: src/conf.cpp
+msgid "movie_passthrough"
+msgstr "traspaso de la película"
+
+#: src/conf.cpp
+msgid "movie_filename"
+msgstr "nombre de archivo de la película"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid movie_retain %s"
+msgstr "Retención de película no válida %s"
+
+#: src/conf.cpp
+msgid "movie_retain"
+msgstr "retención de la película"
+
+#: src/conf.cpp
+msgid "movie_extpipe_use"
+msgstr "uso de tubo de escape de película"
+
+#: src/conf.cpp
+msgid "movie_extpipe"
+msgstr "tubo de salida de la película"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid timelapse_interval %d"
+msgstr "Intervalo de lapso de tiempo no válido %d"
+
+#: src/conf.cpp
+msgid "timelapse_interval"
+msgstr "intervalo de lapso de tiempo"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid timelapse_mode %s"
+msgstr "Modo de lapso de tiempo no válido %s"
+
+#: src/conf.cpp
+msgid "timelapse_mode"
+msgstr "modo de lapso de tiempo"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid timelapse_fps %d"
+msgstr "Fps de lapso de tiempo no válido %d"
+
+#: src/conf.cpp
+msgid "timelapse_fps"
+msgstr "lapso de tiempo fps"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid timelapse_container %s"
+msgstr "Contenedor de lapso de tiempo no válido %s"
+
+#: src/conf.cpp
+msgid "timelapse_container"
+msgstr "contenedor de lapso de tiempo"
+
+#: src/conf.cpp
+msgid "timelapse_filename"
+msgstr "nombre de archivo de lapso de tiempo"
+
+#: src/conf.cpp
+msgid "video_pipe"
+msgstr "tubería de vídeo"
+
+#: src/conf.cpp
+msgid "video_pipe_motion"
+msgstr "movimiento de tubería de vídeo"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid webcontrol_port %d"
+msgstr "Puerto de control web no válido %d"
+
+#: src/conf.cpp
+msgid "webcontrol_port"
+msgstr "puerto de control web"
+
+#: src/conf.cpp
+msgid "Invalid webcontrol_base_path: Use blank instead of single / "
+msgstr ""
+"Ruta base de webcontrol no válida: use un espacio en blanco en lugar de uno /"
+
+#: src/conf.cpp
+msgid "Invalid webcontrol_base_path:  Must start with a / "
+msgstr "Ruta base de control web no válida: debe comenzar con /"
+
+#: src/conf.cpp
+msgid "webcontrol_base_path"
+msgstr "ruta base de control web"
+
+#: src/conf.cpp
+msgid "webcontrol_ipv6"
+msgstr "control web ipv6"
+
+#: src/conf.cpp
+msgid "webcontrol_localhost"
+msgstr "servidor local de control web"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid webcontrol_parms %d"
+msgstr "Parámetros de control web no válidos %d"
+
+#: src/conf.cpp
+msgid "webcontrol_parms"
+msgstr "parámetros de control web"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid webcontrol_interface %s"
+msgstr "Interfaz de control web no válida %s"
+
+#: src/conf.cpp
+msgid "webcontrol_interface"
+msgstr "interfaz de control web"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid webcontrol_auth_method %s"
+msgstr "Método de autenticación de control web no válido %s"
+
+#: src/conf.cpp
+msgid "webcontrol_auth_method"
+msgstr "método de autenticación de control web"
+
+#: src/conf.cpp
+msgid "webcontrol_authentication"
+msgstr "autenticación de control web"
+
+#: src/conf.cpp
+msgid "webcontrol_tls"
+msgstr "control web tls"
+
+#: src/conf.cpp
+msgid "webcontrol_cert"
+msgstr "certificado de control web"
+
+#: src/conf.cpp
+msgid "webcontrol_key"
+msgstr "clave de control web"
+
+#: src/conf.cpp
+msgid "webcontrol_headers"
+msgstr "encabezados de control web"
+
+#: src/conf.cpp
+msgid "webcontrol_html"
+msgstr "control web html"
+
+#: src/conf.cpp
+msgid "webcontrol_actions"
+msgstr "acciones de control web"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid webcontrol_lock_minutes %d"
+msgstr "Minutos de bloqueo de webcontrol no válidos %d"
+
+#: src/conf.cpp
+msgid "webcontrol_lock_minutes"
+msgstr "minutos de bloqueo webcontrol"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid webcontrol_lock_attempts %d"
+msgstr "Intentos de bloqueo de webcontrol no válidos %d"
+
+#: src/conf.cpp
+msgid "webcontrol_lock_attempts"
+msgstr "intentos de bloqueo de control web"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid stream_preview_scale %d"
+msgstr "Escala de vista previa de transmisión no válida %d"
+
+#: src/conf.cpp
+msgid "stream_preview_scale"
+msgstr "escala de vista previa de transmisión"
+
+#: src/conf.cpp
+msgid "stream_preview_newline"
+msgstr "transmisión de vista previa nueva línea"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid stream_preview_method %s"
+msgstr "Método de vista previa de transmisión no válido %s"
+
+#: src/conf.cpp
+msgid "stream_preview_method"
+msgstr "método de vista previa de transmisión"
+
+#: src/conf.cpp
+msgid "stream_preview_ptz"
+msgstr "vista previa de transmisión ptz"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid stream_quality %d"
+msgstr "Calidad de transmisión no válida %d"
+
+#: src/conf.cpp
+msgid "stream_quality"
+msgstr "calidad de transmisión"
+
+#: src/conf.cpp
+msgid "stream_grey"
+msgstr "corriente gris"
+
+#: src/conf.cpp
+msgid "stream_motion"
+msgstr "corriente de movimiento"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid stream_maxrate %d"
+msgstr "Tasa máxima de transmisión no válida %d"
+
+#: src/conf.cpp
+msgid "stream_maxrate"
+msgstr "tasa máxima de transmisión"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid stream_scan_time %d"
+msgstr "Tiempo de escaneo de transmisión no válido %d"
+
+#: src/conf.cpp
+msgid "stream_scan_time"
+msgstr "tiempo de escaneo de flujo"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid stream_scan_scale %d"
+msgstr "Escala de escaneo de transmisión no válida %d"
+
+#: src/conf.cpp
+msgid "stream_scan_scale"
+msgstr "escala de escaneo de flujo"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid database_type %s"
+msgstr "Tipo de base de datos no válido %s"
+
+#: src/conf.cpp
+msgid "database_type"
+msgstr "tipo de base de datos"
+
+#: src/conf.cpp
+msgid "database_dbname"
+msgstr "base de datos dbname"
+
+#: src/conf.cpp
+msgid "database_host"
+msgstr "anfitrión de la base de datos"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid database_port %d"
+msgstr "Puerto de base de datos no válido %d"
+
+#: src/conf.cpp
+msgid "database_port"
+msgstr "puerto de base de datos"
+
+#: src/conf.cpp
+msgid "database_user"
+msgstr "usuario de la base de datos"
+
+#: src/conf.cpp
+msgid "database_password"
+msgstr "contraseña de la base de datos"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid database_busy_timeout %d"
+msgstr "Tiempo de espera ocupado de la base de datos no válido %d"
+
+#: src/conf.cpp
+msgid "database_busy_timeout"
+msgstr "tiempo de espera ocupado de la base de datos"
+
+#: src/conf.cpp
+msgid "sql_event_start"
+msgstr "inicio de evento sql"
+
+#: src/conf.cpp
+msgid "sql_event_end"
+msgstr "final del evento sql"
+
+#: src/conf.cpp
+msgid "sql_movie_start"
+msgstr "comienzo de la película sql"
+
+#: src/conf.cpp
+msgid "sql_movie_end"
+msgstr "final de la película sql"
+
+#: src/conf.cpp
+msgid "sql_pic_save"
+msgstr "guardar foto sql"
+
+#: src/conf.cpp
+msgid "ptz_auto_track"
+msgstr "seguimiento automático ptz"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid ptz_wait %d"
+msgstr "Espera ptz no válida %d"
+
+#: src/conf.cpp
+msgid "ptz_wait"
+msgstr "ptz espera"
+
+#: src/conf.cpp
+msgid "ptz_move_track"
+msgstr "pista de movimiento ptz"
+
+#: src/conf.cpp
+msgid "ptz_pan_left"
+msgstr "ptz pan a la izquierda"
+
+#: src/conf.cpp
+msgid "ptz_pan_right"
+msgstr "ptz pan a la derecha"
+
+#: src/conf.cpp
+msgid "ptz_tilt_up"
+msgstr "ptz inclinar hacia arriba"
+
+#: src/conf.cpp
+msgid "ptz_tilt_down"
+msgstr "inclinación ptz hacia abajo"
+
+#: src/conf.cpp
+msgid "ptz_zoom_in"
+msgstr "acercar ptz"
+
+#: src/conf.cpp
+msgid "ptz_zoom_out"
+msgstr "alejar ptz"
+
+#: src/conf.cpp
+msgid "snd_device"
+msgstr "segundo dispositivo"
+
+#: src/conf.cpp
+msgid "snd_params"
+msgstr "y parámetros"
+
+#: src/conf.cpp
+msgid "snd_alerts"
+msgstr "y alertas"
+
+#: src/conf.cpp
+#, c-format
+msgid "Invalid snd_window %s"
+msgstr "Ventana snd inválida %s"
+
+#: src/conf.cpp
+msgid "snd_window"
+msgstr "segunda ventana"
+
+#: src/conf.cpp
+msgid "snd_show"
+msgstr "y mostrar"
+
+#: src/conf.cpp
 #, c-format
 msgid "Unknown config option \"%s\""
-msgstr "Opción de configuración desconocida \" %s \""
+msgstr "Opción de configuración desconocida \"%s\""
 
-#: src/conf.c
+#: src/conf.cpp
 #, c-format
-msgid "Writing config file to %s"
-msgstr "Escribir archivo de configuración en %s"
+msgid "Camera config file %s not found"
+msgstr "Archivo de configuración de la cámara %s no encontrado"
 
-#: src/conf.c
+#: src/conf.cpp
 #, c-format
-msgid "Configfile %s not found - trying defaults."
-msgstr ""
-"No se encontró el archivo de configuración %s: se intentan los valores "
-"predeterminados."
+msgid "Sound config file %s not found"
+msgstr "Archivo de configuración de sonido %s no encontrado"
 
-#: src/conf.c
-msgid "Error getcwd"
-msgstr "Error getcwd"
-
-#: src/conf.c
+#: src/conf.cpp
 #, c-format
-msgid "could not open configfile %s"
-msgstr "no se pudo abrir el archivo de configuración %s"
+msgid "Processing config file %s"
+msgstr "Procesando el archivo de configuración %s"
 
-#: src/conf.c
+#: src/conf.cpp
+#: src/util.cpp
 #, c-format
-msgid "Invalid file name %s"
-msgstr "Nombre de archivo no válido %s"
+msgid "params_file not found: %s"
+msgstr "archivo de parámetros no encontrado: %s"
 
-#: src/conf.c
+#: src/conf.cpp
+#: src/util.cpp
 #, c-format
-msgid "Processing thread 0 - config file %s"
-msgstr "Procesando hilo 0 - archivo de configuración %s"
+msgid "Unable to parse line: %s"
+msgstr "No se puede analizar la línea: %s"
 
-#: src/conf.c
-msgid "No config file to process, using default values"
-msgstr ""
-"Ningún archivo de configuración para procesar, utilizando valores "
-"predeterminados"
-
-#: src/conf.c
-#, c-format
-msgid "Writing configuration parameters from all files (%d):"
-msgstr "Escribir parámetros de configuración de todos los archivos ( %d):"
-
-#: src/conf.c
-#, c-format
-msgid "Thread %d - Config file: %s"
-msgstr "Hilo %d - Archivo de configuración: %s"
-
-#: src/conf.c
+#: src/conf.cpp
 #, c-format
 msgid "%-25s <redacted>"
 msgstr "%-25s <redactado>"
 
-#: src/conf.c
+#: src/conf.cpp
+msgid "Logging configuration parameters from all files"
+msgstr "Registro de parámetros de configuración de todos los archivos"
+
+#: src/conf.cpp
 #, c-format
-msgid "Processing config file %s"
-msgstr "Procesando archivo de configuración %s"
+msgid "Config file: %s"
+msgstr "Archivo de configuración: %s"
 
-#: src/conf.c
+#: src/conf.cpp
 #, c-format
-msgid "Camera directory config %s not found"
-msgstr "No se encontró la configuración del directorio de la cámara %s"
+msgid "Camera %d - Config file: %s"
+msgstr "Cámara %d - Archivo de configuración: %s"
 
-#: src/conf.c
+#: src/conf.cpp
 #, c-format
-msgid "Camera config file %s not found"
-msgstr "No se encontró el archivo de configuración de la cámara %s"
+msgid "Sound %d - Config file: %s"
+msgstr "Sonido %d - Archivo de configuración: %s"
 
-#: src/conf.c
+#: src/conf.cpp
 #, c-format
-msgid "Processing camera config file %s"
-msgstr "Procesando el archivo de configuración de la cámara %s"
+msgid "Failed to write configuration to %s"
+msgstr "No se pudo escribir la configuración en %s"
 
-#: src/conf.c
-msgid "daemon"
-msgstr "demonio"
-
-# Configuration Option Hints
-#: src/conf.c
-msgid "setup_mode"
-msgstr "modo de configuración"
-
-#: src/conf.c
-msgid "pid_file"
-msgstr "archivo pid"
-
-#: src/conf.c
-msgid "log_file"
-msgstr "archivo de registro"
-
-#: src/conf.c
-msgid "log_level"
-msgstr "nivel de registro"
-
-#: src/conf.c
-msgid "log_type"
-msgstr "tipo de registro"
-
-#: src/conf.c
-msgid "quiet"
-msgstr "tranquilo"
-
-#: src/conf.c
-msgid "watchdog_tmo"
-msgstr "perro guardián tmo"
-
-#: src/conf.c
-msgid "watchdog_kill"
-msgstr "perro guardián matar"
-
-#: src/conf.c
-msgid "native_language"
-msgstr "lengua materna"
-
-#: src/conf.c
-msgid "camera_name"
-msgstr "nombre de la cámara"
-
-#: src/conf.c
-msgid "camera_id"
-msgstr "identificación de la cámara"
-
-#: src/conf.c
-msgid "target_dir"
-msgstr "dir de destino"
-
-#: src/conf.c
-msgid "video_device"
-msgstr "dispositivo de video"
-
-#: src/conf.c
-msgid "video_params"
-msgstr "parámetros de video"
-
-#: src/conf.c
-msgid "auto_brightness"
-msgstr "brillo automático"
-
-#: src/conf.c
-msgid "tuner_device"
-msgstr "dispositivo sintonizador"
-
-#: src/conf.c
-msgid "roundrobin_frames"
-msgstr "marcos de roundrobin"
-
-#: src/conf.c
-msgid "roundrobin_skip"
-msgstr "salto de roundrobin"
-
-#: src/conf.c
-msgid "roundrobin_switchfilter"
-msgstr "filtro de interruptor de roundrobin"
-
-#: src/conf.c
-msgid "netcam_url"
-msgstr "url de netcam"
-
-#: src/conf.c
-msgid "netcam_params"
-msgstr "parámetros de netcam"
-
-#: src/conf.c
-msgid "netcam_high_url"
-msgstr "url alta de netcam"
-
-#: src/conf.c
-msgid "netcam_high_params"
-msgstr "netcam high params"
-
-#: src/conf.c
-msgid "netcam_userpass"
-msgstr "netcam userpass"
-
-#: src/conf.c
-msgid "width"
-msgstr "anchura"
-
-#: src/conf.c
-msgid "height"
-msgstr "altura"
-
-#: src/conf.c
-msgid "framerate"
-msgstr "cuadros por segundo"
-
-#: src/conf.c
-msgid "minimum_frame_time"
-msgstr "tiempo de trama mínimo"
-
-#: src/conf.c
-msgid "rotate"
-msgstr "girar"
-
-#: src/conf.c
-msgid "flip_axis"
-msgstr "eje giratorio"
-
-#: src/conf.c
-msgid "locate_motion_mode"
-msgstr "localizar el modo de movimiento"
-
-#: src/conf.c
-msgid "locate_motion_style"
-msgstr "localizar estilo de movimiento"
-
-#: src/conf.c
-msgid "text_left"
-msgstr "texto restante"
-
-#: src/conf.c
-msgid "text_right"
-msgstr "texto a la derecha"
-
-#: src/conf.c
-msgid "text_changes"
-msgstr "cambios de texto"
-
-#: src/conf.c
-msgid "text_scale"
-msgstr "escala de texto"
-
-#: src/conf.c
-msgid "text_event"
-msgstr "evento de texto"
-
-#: src/conf.c
-msgid "emulate_motion"
-msgstr "emular movimiento"
-
-#: src/conf.c
-msgid "pause"
-msgstr "pausa"
-
-#: src/conf.c
-msgid "threshold"
-msgstr "límite"
-
-#: src/conf.c
-msgid "threshold_maximum"
-msgstr "umbral máximo"
-
-#: src/conf.c
-msgid "threshold_tune"
-msgstr "tono de umbral"
-
-#: src/conf.c
-msgid "noise_level"
-msgstr "nivel de ruido"
-
-#: src/conf.c
-msgid "noise_tune"
-msgstr "melodía de ruido"
-
-#: src/conf.c
-msgid "despeckle_filter"
-msgstr "filtro de eliminación de virutas"
-
-#: src/conf.c
-msgid "area_detect"
-msgstr "detección de área"
-
-#: src/conf.c
-msgid "mask_file"
-msgstr "archivo de máscara"
-
-#: src/conf.c
-msgid "mask_privacy"
-msgstr "máscara de privacidad"
-
-#: src/conf.c
-msgid "smart_mask_speed"
-msgstr "velocidad de máscara inteligente"
-
-#: src/conf.c
-msgid "lightswitch_percent"
-msgstr "interruptor de luz por ciento"
-
-#: src/conf.c
-msgid "lightswitch_frames"
-msgstr "marcos de interruptor de luz"
-
-#: src/conf.c
-msgid "minimum_motion_frames"
-msgstr "marcos mínimos de movimiento"
-
-#: src/conf.c
-msgid "event_gap"
-msgstr "brecha de eventos"
-
-#: src/conf.c
-msgid "pre_capture"
-msgstr "pre captura"
-
-#: src/conf.c
-msgid "post_capture"
-msgstr "post captura"
-
-#: src/conf.c
-msgid "on_event_start"
-msgstr "al inicio del evento"
-
-#: src/conf.c
-msgid "on_event_end"
-msgstr "al final del evento"
-
-#: src/conf.c
-msgid "on_picture_save"
-msgstr "en la imagen guardar"
-
-#: src/conf.c
-msgid "on_area_detected"
-msgstr "en el área detectada"
-
-#: src/conf.c
-msgid "on_motion_detected"
-msgstr "en movimiento detectado"
-
-#: src/conf.c
-msgid "on_movie_start"
-msgstr "en el comienzo de la película"
-
-#: src/conf.c
-msgid "on_movie_end"
-msgstr "al final de la película"
-
-#: src/conf.c
-msgid "on_camera_lost"
-msgstr "en cámara perdida"
-
-#: src/conf.c
-msgid "on_camera_found"
-msgstr "en la cámara encontrada"
-
-#: src/conf.c
-msgid "picture_output"
-msgstr "salida de imagen"
-
-#: src/conf.c
-msgid "picture_output_motion"
-msgstr "movimiento de salida de imagen"
-
-#: src/conf.c
-msgid "picture_type"
-msgstr "tipo de imagen"
-
-#: src/conf.c
-msgid "picture_quality"
-msgstr "calidad de imagen"
-
-#: src/conf.c
-msgid "picture_exif"
-msgstr "imagen exif"
-
-#: src/conf.c
-msgid "picture_filename"
-msgstr "nombre de archivo de imagen"
-
-#: src/conf.c
-msgid "snapshot_interval"
-msgstr "intervalo de instantánea"
-
-#: src/conf.c
-msgid "snapshot_filename"
-msgstr "nombre de archivo de instantánea"
-
-#: src/conf.c
-msgid "movie_output"
-msgstr "salida de película"
-
-#: src/conf.c
-msgid "movie_output_motion"
-msgstr "movimiento de salida de película"
-
-#: src/conf.c
-msgid "movie_max_time"
-msgstr "tiempo máximo de película"
-
-#: src/conf.c
-msgid "movie_bps"
-msgstr "película bps"
-
-#: src/conf.c
-msgid "movie_quality"
-msgstr "calidad de pelicula"
-
-#: src/conf.c
-msgid "movie_codec"
-msgstr "códec de película"
-
-#: src/conf.c
-msgid "movie_duplicate_frames"
-msgstr "fotogramas duplicados de películas"
-
-#: src/conf.c
-msgid "movie_passthrough"
-msgstr "paso de la película"
-
-#: src/conf.c
-msgid "movie_filename"
-msgstr "nombre de archivo de la película"
-
-#: src/conf.c
-msgid "movie_extpipe_use"
-msgstr "uso de la película extpipe"
-
-#: src/conf.c
-msgid "movie_extpipe"
-msgstr "película extpipe"
-
-#: src/conf.c
-msgid "timelapse_interval"
-msgstr "intervalo de lapso de tiempo"
-
-#: src/conf.c
-msgid "timelapse_mode"
-msgstr "modo timelapse"
-
-#: src/conf.c
-msgid "timelapse_fps"
-msgstr "timelapse fps"
-
-#: src/conf.c
-msgid "timelapse_codec"
-msgstr "códec timelapse"
-
-#: src/conf.c
-msgid "timelapse_filename"
-msgstr "timelapse filename"
-
-#: src/conf.c
-msgid "video_pipe"
-msgstr "tubo de video"
-
-#: src/conf.c
-msgid "video_pipe_motion"
-msgstr "movimiento de tubo de video"
-
-#: src/conf.c
-msgid "webcontrol_port"
-msgstr "puerto de control web"
-
-#: src/conf.c
-msgid "webcontrol_ipv6"
-msgstr "webcontrol ipv6"
-
-#: src/conf.c
-msgid "webcontrol_localhost"
-msgstr "webcontrol localhost"
-
-#: src/conf.c
-msgid "webcontrol_parms"
-msgstr "parques de control web"
-
-#: src/conf.c
-msgid "webcontrol_interface"
-msgstr "interfaz de control web"
-
-#: src/conf.c
-msgid "webcontrol_auth_method"
-msgstr "método de autenticación de control web"
-
-#: src/conf.c
-msgid "webcontrol_authentication"
-msgstr "autenticación de control web"
-
-#: src/conf.c
-msgid "webcontrol_tls"
-msgstr "webcontrol tls"
-
-#: src/conf.c
-msgid "webcontrol_cert"
-msgstr "certificado de control web"
-
-#: src/conf.c
-msgid "webcontrol_key"
-msgstr "clave de control web"
-
-#: src/conf.c
-msgid "webcontrol_header_params"
-msgstr "parámetros de encabezado de webcontrol"
-
-#: src/conf.c
-msgid "webcontrol_lock_minutes"
-msgstr "minutos de bloqueo de webcontrol"
-
-#: src/conf.c
-msgid "webcontrol_lock_attempts"
-msgstr "intentos de bloqueo de webcontrol"
-
-#: src/conf.c
-msgid "webcontrol_lock_max_ips"
-msgstr "bloqueo de webcontrol max ips"
-
-#: src/conf.c
-msgid "stream_port"
-msgstr "puerto de transmisión"
-
-#: src/conf.c
-msgid "stream_localhost"
-msgstr "transmitir localhost"
-
-#: src/conf.c
-msgid "stream_auth_method"
-msgstr "método de autenticación de flujo"
-
-#: src/conf.c
-msgid "stream_authentication"
-msgstr "autenticación de flujo"
-
-#: src/conf.c
-msgid "stream_tls"
-msgstr "transmitir tls"
-
-#: src/conf.c
-msgid "stream_header_params"
-msgstr "parámetros de encabezado de flujo"
-
-#: src/conf.c
-msgid "stream_preview_scale"
-msgstr "escala de vista previa de transmisión"
-
-#: src/conf.c
-msgid "stream_preview_newline"
-msgstr "vista previa de transmisión nueva línea"
-
-#: src/conf.c
-msgid "stream_preview_method"
-msgstr "método de vista previa de flujo"
-
-#: src/conf.c
-msgid "stream_quality"
-msgstr "calidad de transmisión"
-
-#: src/conf.c
-msgid "stream_grey"
-msgstr "corriente gris"
-
-#: src/conf.c
-msgid "stream_motion"
-msgstr "corriente de movimiento"
-
-#: src/conf.c
-msgid "stream_maxrate"
-msgstr "flujo maxrate"
-
-#: src/conf.c
-msgid "stream_limit"
-msgstr "límite de flujo"
-
-#: src/conf.c
-msgid "database_type"
-msgstr "tipo de base de datos"
-
-#: src/conf.c
-msgid "database_dbname"
-msgstr "nombre de base de datos db"
-
-#: src/conf.c
-msgid "database_host"
-msgstr "host de base de datos"
-
-#: src/conf.c
-msgid "database_port"
-msgstr "puerto de base de datos"
-
-#: src/conf.c
-msgid "database_user"
-msgstr "usuario de la base de datos"
-
-#: src/conf.c
-msgid "database_password"
-msgstr "contraseña de la base de datos"
-
-#: src/conf.c
-msgid "database_busy_timeout"
-msgstr "tiempo de espera ocupado de la base de datos"
-
-#: src/conf.c
-msgid "sql_log_picture"
-msgstr "imagen de registro sql"
-
-#: src/conf.c
-msgid "sql_log_snapshot"
-msgstr "instantánea de registro de sql"
-
-#: src/conf.c
-msgid "sql_log_movie"
-msgstr "película de registro sql"
-
-#: src/conf.c
-msgid "sql_log_timelapse"
-msgstr "lapso de tiempo de registro sql"
-
-#: src/conf.c
-msgid "sql_query_start"
-msgstr "inicio de consulta sql"
-
-#: src/conf.c
-msgid "sql_query_stop"
-msgstr "parada de consulta sql"
-
-#: src/conf.c
-msgid "sql_query"
-msgstr "consulta sql"
-
-#: src/conf.c
-msgid "track_type"
-msgstr "tipo de pista"
-
-#: src/conf.c
-msgid "track_auto"
-msgstr "seguimiento automático"
-
-#: src/conf.c
-msgid "track_port"
-msgstr "rastrear puerto"
-
-#: src/conf.c
-msgid "track_motorx"
-msgstr "pista motorx"
-
-#: src/conf.c
-msgid "track_motorx_reverse"
-msgstr "pista motorx marcha atrás"
-
-#: src/conf.c
-msgid "track_motory"
-msgstr "seguimiento de la motivación"
-
-#: src/conf.c
-msgid "track_motory_reverse"
-msgstr "seguimiento de la marcha atrás motora"
-
-#: src/conf.c
-msgid "track_maxx"
-msgstr "seguimiento maxx"
-
-#: src/conf.c
-msgid "track_minx"
-msgstr "pista minx"
-
-#: src/conf.c
-msgid "track_maxy"
-msgstr "seguimiento de maxy"
-
-#: src/conf.c
-msgid "track_miny"
-msgstr "seguimiento miny"
-
-#: src/conf.c
-msgid "track_homex"
-msgstr "rastrear homex"
-
-#: src/conf.c
-msgid "track_homey"
-msgstr "seguimiento hogareño"
-
-#: src/conf.c
-msgid "track_iomojo_id"
-msgstr "rastrear id de iomojo"
-
-#: src/conf.c
-msgid "track_step_angle_x"
-msgstr "seguimiento de ángulo de paso x"
-
-#: src/conf.c
-msgid "track_step_angle_y"
-msgstr "seguimiento del ángulo de paso y"
-
-#: src/conf.c
-msgid "track_move_wait"
-msgstr "seguir mover esperar"
-
-#: src/conf.c
-msgid "track_speed"
-msgstr "velocidad de seguimiento"
-
-#: src/conf.c
-msgid "track_stepsize"
-msgstr "seguimiento de tamaño"
-
-#: src/conf.c
-msgid "track_generic_move"
-msgstr "rastrear movimiento genérico"
-
-#: src/conf.c
-msgid "camera"
-msgstr "cámara"
-
-#: src/conf.c
-msgid "camera_dir"
-msgstr "cámara dir"
-
-#: src/dbse.c
-msgid "Closing MySQL library"
-msgstr "Cerrando la biblioteca MySQL"
-
-#: src/dbse.c
-msgid "Closing MariaDB library"
-msgstr "Cerrando la biblioteca MariaDB"
-
-#: src/dbse.c
-msgid "Database closed"
-msgstr "Base de datos cerrada"
-
-#: src/dbse.c
-msgid "Initializing database"
-msgstr "Inicializando base de datos"
-
-#: src/dbse.c
+#: src/conf.cpp
 #, c-format
-msgid "Cannot connect to MySQL database %s on host %s with user %s"
-msgstr ""
-"No se puede conectar a la base de datos MySQL %s en el host %s con el "
-"usuario %s"
+msgid "Configuration written to %s"
+msgstr "Configuración escrita en %s"
 
-#: src/dbse.c
+#: src/conf.cpp
+msgid "Error getcwd"
+msgstr "Error getcwd"
+
+#: src/conf.cpp
+msgid "Could not open configuration file"
+msgstr "No se pudo abrir el archivo de configuración"
+
+#: src/dbse.cpp
+msgid "Invalid database name"
+msgstr "Nombre de base de datos no válido"
+
+#: src/dbse.cpp
+msgid "Must specify database port for mariadb/pgsql"
+msgstr "Debe especificar el puerto de la base de datos para mariadb/pgsql"
+
+#: src/dbse.cpp
+msgid "Must specify database name for sqlite3"
+msgstr "Debe especificar el nombre de la base de datos para sqlite3"
+
+#: src/dbse.cpp
+msgid "Database functionality disabled."
+msgstr "Funcionalidad de base de datos deshabilitada."
+
+#: src/dbse.cpp
 #, c-format
-msgid "MySQL error was %s"
-msgstr "El error de MySQL fue %s"
+msgid "SQLite error was %s"
+msgstr "El error de SQLite fue %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Cannot connect to MariaDB database %s on host %s with user %s"
-msgstr ""
-"No se puede conectar a la base de datos MariaDB %s en el host %s con el "
-"usuario %s"
+msgid "Error retrieving table columns: %s"
+msgstr "Error al recuperar las columnas de la tabla: %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "MariaDB error was %s"
-msgstr "El error de MariaDB fue %s"
+msgid "SQLite3 Database filename %s"
+msgstr "Nombre de archivo de la base de datos SQLite3 %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Opening database %s"
-msgstr "Abriendo base de datos %s"
+msgid "Can't open database %s : %s"
+msgstr "No se puede abrir la base de datos %s: %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Can't open SQLite3 database %s.  Error %d : %s"
-msgstr "No se puede abrir la base de datos SQLite3 %s. Error %d: %s"
+msgid "Could not initialize database %s"
+msgstr "No se pudo inicializar la base de datos %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Setting busy timeout to %d msec"
-msgstr "Configuración del tiempo de espera ocupado en %d mseg"
+msgid "database_busy_timeout %d msec"
+msgstr "tiempo de espera ocupado de la base de datos %d mseg"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Setting busy timeout failed.  Error %d:%s"
-msgstr "Error al configurar el tiempo de espera ocupado. Error %d:%s"
+msgid "database_busy_timeout failed %s"
+msgstr "el tiempo de espera ocupado de la base de datos falló %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Connection to PostgreSQL database '%s' failed: %s"
-msgstr "La conexión a la base de datos PostgreSQL ' %s' falló: %s"
+msgid "Error checking table: %s"
+msgstr "Tabla de comprobación de errores: %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Database type %s"
-msgstr "Tipo de base de datos %s"
+msgid "Error creating table: %s"
+msgstr "Error al crear la tabla: %s"
 
-#: src/dbse.c
-msgid "Executing MySQL query"
-msgstr "Ejecutando consulta MySQL"
-
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "MySQL query failed %s error code %d"
-msgstr "Error en la consulta de MySQL %s código de error %d"
+msgid "Error counting table: %s"
+msgstr "Tabla de conteo de errores: %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid ""
-"Cannot reconnect to MySQL database %s on host %s with user %s MySQL error "
-"was %s"
-msgstr ""
-"No se puede volver a conectar a la base de datos MySQL %s en el host %s con "
-"el usuario %s Error de MySQLera %s"
+msgid "Error retrieving table: %s"
+msgstr "Error al recuperar la tabla: %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Re-Connection to MySQL database '%s' Succeed"
-msgstr "Reconexión a la base de datos MySQL ' %s' exitosa"
+msgid "MariaDB query '%s' failed. %s error code %d"
+msgstr "La consulta MariaDB '%s' falló. %s código de error %d"
 
-#: src/dbse.c
-#, c-format
-msgid "after re-connection MySQL query failed %s error code %d"
-msgstr ""
-"después de la reconexión, la consulta de MySQL falló %s código de error %d"
-
-#: src/dbse.c
-msgid "Executing MariaDB query"
-msgstr "Ejecutando la consulta MariaDB"
-
-#: src/dbse.c
-#, c-format
-msgid "MariaDB query failed %s error code %d"
-msgstr "Error en la consulta MariaDB %s código de error %d"
-
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
 msgid ""
 "Cannot reconnect to MariaDB database %s on host %s with user %s MariaDB "
@@ -836,3643 +1182,2311 @@ msgstr ""
 "No se puede volver a conectar a la base de datos MariaDB %s en el host %s "
 "con el usuario %s MariaDBel error fue %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
 msgid "Re-Connection to MariaDB database '%s' Succeed"
-msgstr "Reconexión a la base de datos MariaDB ' %s' exitosa"
+msgstr "Reconexión a la base de datos MariaDB '%s' Exitosa"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
 msgid "after re-connection MariaDB query failed %s error code %d"
 msgstr ""
-"después de la reconexión, la consulta MariaDB falló %s código de error %d"
+"después de volver a conectar la consulta MariaDB falló %s código de error %d"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Re-connected to PostgreSQL database '%s'"
-msgstr "Reconectado a la base de datos de PostgreSQL ' %s'"
+msgid "Query error: %s"
+msgstr "Error de consulta: %s"
 
-#: src/dbse.c
-msgid "Executing PostgreSQL query"
-msgstr "Ejecutando una consulta PostgreSQL"
-
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "Attempting reconnect to PostgreSQL database '%s': %s"
+msgid "Query store error: %s"
+msgstr "Error del almacén de consultas: %s"
+
+#: src/dbse.cpp
+msgid "Creating motion table"
+msgstr "Creación de la mesa motion"
+
+#: src/dbse.cpp
+#, c-format
+msgid "Cannot connect to MariaDB database %s on host %s with user %s"
 msgstr ""
-"Intentando volver a conectarse a la base de datos de PostgreSQL ' %s': %s"
+"No se puede conectar a la base de datos MariaDB %s en el host %s con el "
+"usuario %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "PGSQL query failed: [%s]  %s %s"
-msgstr "La consulta de PGSQL falló: [%s] %s %s"
+msgid "MariaDB error was %s"
+msgstr "El error de MariaDB fue %s"
 
-#: src/dbse.c
+#: src/dbse.cpp
+msgid "Disabling database functionality"
+msgstr "Deshabilitar la funcionalidad de la base de datos"
+
+#: src/dbse.cpp
 #, c-format
-msgid "Executing %s"
-msgstr "Ejecutando %s"
+msgid "%s database opened"
+msgstr "%s base de datos abierta"
 
-#: src/dbse.c
+#: src/dbse.cpp
 #, c-format
-msgid "SQLite3 error %d : %s"
-msgstr "Error de SQLite3 %d: %s"
+msgid "Connection to PostgreSQL database '%s' failed: %s"
+msgstr "Falló la conexión a la base de datos PostgreSQL '%s': %s"
 
-#: src/dbse.c
-msgid "Ignoring empty sql query"
-msgstr "Ignorando la consulta sql vacía"
-
-#: src/event.c src/track.c
+#: src/dbse.cpp
 #, c-format
-msgid "Unable to start external command '%s'"
-msgstr "No se puede iniciar el comando externo ' %s'"
+msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
+msgstr "Falló la reconexión a la base de datos PostgreSQL '%s': %s"
 
-#: src/event.c src/track.c
+#: src/dbse.cpp
 #, c-format
-msgid "Executing external command '%s'"
-msgstr "Ejecutando comando externo ' %s'"
+msgid "Re-Connection to PostgreSQL database '%s' Succeed"
+msgstr "Reconexión a la base de datos PostgreSQL '%s' Exitosa"
 
-#: src/event.c
+#: src/dbse.cpp
+msgid "Initializing database"
+msgstr "Inicializando base de datos"
+
+#: src/draw.cpp
 #, c-format
-msgid "Writing image to file: %s"
-msgstr "Escribiendo imagen en archivo: %s"
+msgid "Invalid text scale.  Adjusted to %d"
+msgstr "Escala de texto no válida. Ajustado a %d"
 
-#: src/event.c
+#: src/event.cpp
 #, c-format
-msgid "Writing movie to file: %s"
-msgstr "Escribiendo película en archivo: %s"
+msgid "File saved to: %s"
+msgstr "Archivo guardado en: %s"
 
-#: src/event.c
-#, c-format
-msgid "Saved image to file: %s"
-msgstr "Imagen guardada en el archivo: %s"
-
-#: src/event.c
-#, c-format
-msgid "Saved movie to file: %s"
-msgstr "Película guardada en archivo: %s"
-
-#: src/event.c
+#: src/event.cpp
 msgid "Failed to put image into video pipe"
-msgstr "Error al colocar la imagen en la tubería de video"
+msgstr "No se pudo poner la imagen en la canalización de video"
 
-#: src/event.c
+#: src/event.cpp
+msgid "Error creating image file name"
+msgstr "Error al crear el nombre del archivo de imagen"
+
+#: src/event.cpp
+msgid "Error creating image motion file name"
+msgstr "Error al crear el nombre del archivo de movimiento de la imagen"
+
+#: src/event.cpp
+msgid "Error creating image motion roi file name"
+msgstr "Error al crear el nombre del archivo roi de movimiento de imagen"
+
+#: src/event.cpp
+msgid "Error option"
+msgstr "opción de error"
+
+#: src/event.cpp
 #, c-format
 msgid "Could not create symbolic link [%s]"
-msgstr "No se pudo crear el enlace simbólico [ %s]"
+msgstr "No se pudo crear el enlace simbólico [%s]"
 
-#: src/event.c
-#, c-format
-msgid "Error creating preview pipe name %d %s"
-msgstr "Error al crear el nombre de la tubería de vista previa %d %s"
+#: src/event.cpp
+msgid "Error creating preview file name"
+msgstr "Error al crear el nombre del archivo de vista previa"
 
-#: src/event.c
-#, c-format
-msgid "Error creating file name base %d %s"
-msgstr "Error al crear la base de nombre de archivo %d %s"
+#: src/event.cpp
+msgid "Event secondary detect"
+msgstr "Detección secundaria de eventos"
 
-#: src/event.c
-#, c-format
-msgid "Error creating preview name %d %s"
-msgstr "Error al crear el nombre de vista previa %d %s"
-
-#: src/event.c
+#: src/event.cpp
 #, c-format
 msgid "CLOSING: extpipe file desc %d, error state %d"
-msgstr "CIERRE: archivo extpipe desc %d, estado de error %d"
+msgstr "CIERRE: descripción del archivo extpipe %d, estado de error %d"
 
-#: src/event.c
+#: src/event.cpp
 #, c-format
-msgid "pclose return: %d"
-msgstr "pclose return: %d"
+msgid "Unable to remove file %s"
+msgstr "No se puede eliminar el archivo %s"
 
-#: src/event.c
-#, c-format
-msgid "Source FPS %d"
-msgstr "Fuente FPS %d"
-
-#: src/event.c
-#, c-format
-msgid "moviepath: %s"
-msgstr "ruta de película: %s"
-
-#: src/event.c
+#: src/event.cpp
 #, c-format
 msgid "no write access to target directory %s"
 msgstr "sin acceso de escritura al directorio de destino %s"
 
-#: src/event.c
+#: src/event.cpp
 #, c-format
 msgid "path not found, trying to create it %s ..."
-msgstr "ruta no encontrada, intentando crearla %s ..."
+msgstr "Ruta no encontrada, tratando de crearla %s..."
 
-#: src/event.c
+#: src/event.cpp
 #, c-format
 msgid "error accesing path %s"
 msgstr "error al acceder a la ruta %s"
 
-#: src/event.c
+#: src/event.cpp
 #, c-format
 msgid "Error specifying command line: %s"
 msgstr "Error al especificar la línea de comando: %s"
 
-#: src/event.c
+#: src/event.cpp
 #, c-format
 msgid "pipe: %s"
 msgstr "tubería: %s"
 
-#: src/event.c
-#, c-format
-msgid "cnt->moviefps: %d"
-msgstr "cnt->moviefps: %d"
-
-#: src/event.c
+#: src/event.cpp
 msgid "popen failed"
-msgstr "popen falló"
+msgstr "papa fallida"
 
-#: src/event.c
+#: src/event.cpp
 msgid "Using extpipe"
-msgstr "Usando extpipe"
+msgstr "Usando tubería de salida"
 
-#: src/event.c
+#: src/event.cpp
 #, c-format
 msgid "Error writing in pipe , state error %d"
-msgstr "Error al escribir en la tubería, error de estado %d"
+msgstr "Error al escribir en tubería, error de estado %d"
 
-#: src/event.c
+#: src/event.cpp
 #, c-format
 msgid "pipe %s not created or closed already "
-msgstr "tubería %s no creada o cerrada ya "
+msgstr "tubería %s no creada o cerrada ya"
 
-#: src/event.c
-msgid "The ogg container is no longer supported.  Changing to mpeg4"
-msgstr "El contenedor ogg ya no es compatible. Cambiar a mpeg4"
+#: src/event.cpp
+msgid "Error opening ctx_dev for movie output."
+msgstr "Error al abrir ctx dev para salida de película."
 
-#: src/event.c
-msgid "Running test of the various output formats."
-msgstr "Ejecución de prueba de los distintos formatos de salida."
-
-#: src/event.c
-msgid "Error opening context for movie output."
-msgstr "Error al abrir el contexto para la salida de la película."
-
-#: src/event.c
+#: src/event.cpp
 #, c-format
-msgid "ffopen_open error creating (motion) file [%s]"
-msgstr "ffopen error de apertura al crear (movimiento) archivo [ %s]"
+msgid "Error creating motion file [%s]"
+msgstr "Error al crear el archivo de movimiento [%s]"
 
-#: src/event.c
-msgid ""
-"The swf container for timelapse no longer supported.  Using mpg container."
-msgstr ""
-"El contenedor swf para timelapse ya no es compatible. Usando contenedor mpg."
-
-#: src/event.c
-msgid "Timelapse using mpg codec."
-msgstr "Timelapse usando códec mpg."
-
-#: src/event.c
-msgid "Events will be appended to file"
-msgstr "Los eventos se agregarán al archivo"
-
-#: src/event.c
-msgid "Timelapse using mpeg4 codec."
-msgstr "Timelapse usando el códec mpeg4."
-
-#: src/event.c
-msgid "Events will be trigger new files"
-msgstr "Los eventos activarán nuevos archivos"
-
-#: src/event.c
-#, c-format
-msgid "ffopen_open error creating (timelapse) file [%s]"
-msgstr "ffopen abrir error al crear (timelapse) archivo [ %s]"
-
-#: src/event.c
+#: src/event.cpp
 msgid "Error encoding image"
-msgstr "Error al codificar imagen"
+msgstr "Error al codificar la imagen"
 
-#: src/ffmpeg.c
-msgid "Failed to allocate memory for codec name"
-msgstr "Error al asignar memoria para el nombre del códec"
-
-#: src/ffmpeg.c
-msgid ""
-"The frame rate specified is too high for the ffmpeg movie type specified. "
-"Choose a different ffmpeg container or lower framerate."
-msgstr ""
-"La velocidad de fotogramas especificada es demasiado alta para el tipo de "
-"película ffmpeg especificado.Elija un contenedor de ffmpeg diferente o una "
-"velocidad de fotogramas más baja."
-
-#: src/ffmpeg.c
-msgid "Error setting base file name"
-msgstr "Error al establecer el nombre del archivo base"
-
-#: src/ffmpeg.c
+#: src/event.cpp
 #, c-format
-msgid "Error setting timelapse append for codec %s"
-msgstr "Error al establecer timelapse append para el códec %s"
+msgid "Error creating timelapse file [%s]"
+msgstr "Error al crear el archivo de lapso de tiempo [%s]"
 
-#: src/ffmpeg.c
-msgid "Error setting file name"
-msgstr "Error al configurar el nombre del archivo"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "codec option value %s is not supported"
-msgstr "el valor de la opción de códec %s no es compatible"
-
-#: src/ffmpeg.c
-msgid "Could not get the codec"
-msgstr "No se pudo obtener el códec"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Error sending frame for encoding:%s"
-msgstr "Error al enviar el marco para la codificación: %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Receive packet threw EAGAIN returning -2 code :%s"
-msgstr "Recibir paquete arrojó EAGAIN devolviendo código -2: %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Error receiving encoded packet video:%s"
-msgstr "Error al recibir el paquete de video codificado: %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Error encoding video:%s"
-msgstr "Error al codificar video: %s"
-
-#: src/ffmpeg.c
-msgid "Error encoding video"
-msgstr "Error al codificar video"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d"
-msgstr ""
-"PTS %<PRId64> Base PTS %<PRId64> ms intervalo %<PRId64> base de tiempo %d- %d"
-
-#: src/ffmpeg.c
-msgid "BAD TIMING!! Frame skipped."
-msgstr "MAL MOMENTO !! Se omitió el marco."
-
-#: src/ffmpeg.c
-#, c-format
-msgid ""
-"PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change "
-"%d"
-msgstr ""
-"PTS %<PRId64> Base PTS %<PRId64> intervalo ms %<PRId64> base de tiempo %d- "
-"%d Cambiar %d"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "%s codec vbr/crf/bit_rate: %d"
-msgstr "%s codec vbr / crf / bit rate: %d"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Preferred codec %s has been blacklisted: %s"
-msgstr "El códec preferido %s ha sido incluido en la lista negra: %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Codec %s not found"
-msgstr "Códec %s no encontrado"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Using codec %s"
-msgstr "Usando el códec %s"
-
-#: src/ffmpeg.c
-msgid "Could not alloc stream"
-msgstr "No se pudo asignar la secuencia"
-
-#: src/ffmpeg.c
-msgid "Failed to allocate codec!"
-msgstr "¡Error al asignar el códec!"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Low fps. Encoding %d frames into a %d frames container."
-msgstr ""
-"Bajo fps. Codificación de% d fotogramas en un contenedor% d fotogramas."
-
-#: src/ffmpeg.c
-msgid "Unable to set quality"
-msgstr "No se puede establecer la calidad"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Reported FPS Supported %d/%d"
-msgstr "FPS reportados compatibles %d / %d"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Could not open codec %s"
-msgstr "No se pudo abrir el códec %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Failed to copy decoder parameters!: %s"
-msgstr "¡Error al copiar los parámetros del decodificador !: %s"
-
-#: src/ffmpeg.c
-msgid "could not alloc frame"
-msgstr "no se pudo asignar marco"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "could not alloc buffers %s"
-msgstr "no se pudieron asignar buffers %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "error opening file %s"
-msgstr "error al abrir el archivo %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Permission denied. %s"
-msgstr "Permiso denegado. %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Error opening file %s"
-msgstr "Error al abrir el archivo %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Could not write ffmpeg header %s"
-msgstr "No se pudo escribir el encabezado ffmpeg %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Error entering draining mode:%s"
-msgstr "Error al ingresar al modo de drenaje: %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Error draining codec:%s"
-msgstr "Error al drenar el códec: %s"
-
-#: src/ffmpeg.c
-msgid "Error writing draining video frame"
-msgstr "Error al escribir el fotograma de drenaje del video"
-
-#: src/ffmpeg.c
-msgid "Error while encoding picture"
-msgstr "Error al codificar imagen"
-
-#: src/ffmpeg.c
-msgid "Error while writing video frame"
-msgstr "Error al escribir el cuadro de video"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "av_copy_packet: %s"
-msgstr "av_copy_packet: %s"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "Error while writing video frame: %s"
-msgstr "Error al escribir el cuadro de video: %s"
-
-#: src/ffmpeg.c
-msgid "RTSP context not available."
-msgstr "El contexto RTSP no está disponible."
-
-#: src/ffmpeg.c
-msgid "rtsp camera not ready for pass-through."
-msgstr "la cámara rtsp no está lista para pasar."
-
-#: src/ffmpeg.c
-msgid "pass-through mode enabled.  Changing to MP4 container."
-msgstr "modo de paso habilitado. Cambio a contenedor MP4."
-
-#: src/ffmpeg.c
-msgid "Could not get codec!"
-msgstr "¡No se pudo obtener el códec!"
-
-#: src/ffmpeg.c src/netcam_rtsp.c
-msgid "Unable to copy codec parameters"
-msgstr "No se pueden copiar los parámetros del códec"
-
-#: src/ffmpeg.c
-msgid "Pass-through disabled.  ffmpeg too old"
-msgstr "Paso deshabilitado. ffmpeg demasiado viejo"
-
-#: src/ffmpeg.c
-msgid "Pass-through stream opened"
-msgstr "Transmisión de paso abierta"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "ffmpeg libavcodec version %d.%d.%d libavformat version %d.%d.%d"
-msgstr "ffmpeg libavcodec versión %d. %d. %d libavformat versión %d. %d. %d"
-
-#: src/ffmpeg.c
-#, c-format
-msgid "av_lockmgr_register failed (%d)"
-msgstr "el registro de bloqueo de av falló ( %d)"
-
-#: src/ffmpeg.c
-msgid "No ffmpeg functionality included"
-msgstr "No se incluye la funcionalidad ffmpeg"
-
-#: src/ffmpeg.c
-msgid "av_lockmgr_register reset failed on cleanup"
-msgstr "av resetmgr reset reset falló en la limpieza"
-
-#: src/ffmpeg.c
-msgid "Could not allocate output context"
-msgstr "No se pudo asignar el contexto de salida"
-
-#: src/ffmpeg.c
-msgid "Could not setup passthru!"
-msgstr "No se pudo configurar passthru!"
-
-#: src/ffmpeg.c
-msgid "Could not set the stream"
-msgstr "No se pudo establecer la transmisión"
-
-#: src/ffmpeg.c
-msgid "Error flushing codec"
-msgstr "Error al descargar el códec"
-
-#: src/ffmpeg.c
-msgid "Excessive attempts to clear buffered packet"
-msgstr "Intentos excesivos de borrar el paquete almacenado"
-
-#: src/ffmpeg.c
-msgid "Buffered packet"
-msgstr "Paquete tamponado"
-
-#: src/jpegutils.c
+#: src/jpegutils.cpp
 #, c-format
 msgid "%s: Given jpeg buffer was too small"
-msgstr "%s: el buffer jpeg dado era demasiado pequeño"
+msgstr "%s: el búfer jpeg dado era demasiado pequeño"
 
-#: src/jpegutils.c
+#: src/jpegutils.cpp
 msgid "Invalid JPEG image dimensions"
 msgstr "Dimensiones de imagen JPEG no válidas"
 
-#: src/jpegutils.c src/netcam_jpeg.c
+#: src/jpegutils.cpp
 #, c-format
 msgid "JPEG image size %dx%d, JPEG was %dx%d"
-msgstr "Tamaño de imagen JPEG %dx %d, JPEG fue %dx %d"
+msgstr "Tamaño de imagen JPEG %dx%d, JPEG era %dx%d"
 
-#: src/motion.c
+#: src/libcam.cpp
+msgid "Opening libcam"
+msgstr "Apertura de cámara libre"
+
+#: src/libcam.cpp
+msgid "libcam failed to open"
+msgstr "libcam no pudo abrir"
+
+#: src/logger.cpp
 #, c-format
-msgid "Resizing pre_capture buffer to %d items"
-msgstr "Cambiar el tamaño del búfer de captura previa a %d elementos"
+msgid "Using default log level (%s) (%d)"
+msgstr "Uso del nivel de registro predeterminado (%s) (%d)"
 
-#: src/motion.c
-msgid "Removed process id file (pid file)."
-msgstr "Se eliminó el archivo de identificación del proceso (archivo pid)."
+#: src/logger.cpp
+#, c-format
+msgid "Logging to file (%s)"
+msgstr "Registro en el archivo (%s)"
 
-#: src/motion.c
-msgid "Error removing pid file"
-msgstr "Error al eliminar el archivo pid"
+#: src/logger.cpp
+#, c-format
+msgid "Exit motion, cannot create log file %s"
+msgstr "Salir del movimiento, no se puede crear el archivo de registro %s"
 
-#: src/motion.c
+#: src/logger.cpp
+msgid "Logging to syslog"
+msgstr "Iniciar sesión en syslog"
+
+#: src/logger.cpp
+#, c-format
+msgid "Using log type (%s) log level (%s)"
+msgstr "Usando tipo de registro (%s) nivel de registro (%s)"
+
+#: src/logger.cpp
 #, c-format
 msgid "Closing logfile (%s)."
-msgstr "Archivo de registro de cierre ( %s)."
+msgstr "Cierre del archivo de registro (%s)."
 
-#: src/motion.c
+#: src/camera.cpp
 #, c-format
-msgid "Motion detected - starting event %d."
-msgstr "Movimiento detectado: evento de inicio %d."
+msgid "Resizing buffer to %d items"
+msgstr "Cambiar el tamaño del búfer a %d elementos"
 
-#: src/motion.c
+#: src/camera.cpp
 #, c-format
-msgid "Added %d fillerframes into movie"
-msgstr "Se agregaron %d fillerframes a la película"
+msgid "Motion detected - starting event %d"
+msgstr "Movimiento detectado: evento de inicio %d"
 
-#: src/motion.c
-msgid "Unable to determine camera type (Netcam, V4L2, BKTR)"
-msgstr "No se puede determinar el tipo de cámara (Netcam, V4L2, BKTR)"
+#: src/camera.cpp
+msgid "No Camera device cleanup"
+msgstr "Sin limpieza del dispositivo de la cámara"
 
-#: src/motion.c
-msgid "Opening privacy mask file"
-msgstr "Abrir archivo de máscara de privacidad"
+#: src/camera.cpp
+msgid "No Camera device specified"
+msgstr "No se especificó ningún dispositivo de cámara"
 
-#: src/motion.c
-msgid "Opening high resolution privacy mask file"
-msgstr "Abrir archivo de máscara de privacidad de alta resolución"
+#: src/camera.cpp
+msgid "Unable to determine camera type"
+msgstr "No se puede determinar el tipo de cámara"
 
-#: src/motion.c
+#: src/camera.cpp
 #, c-format
-msgid "Error opening mask file %s"
-msgstr "Error al abrir el archivo de máscara %s"
+msgid "Image width (%d) or height(%d) requested is not modulo 8."
+msgstr "El ancho de la imagen (%d) o la altura (%d) solicitada no es módulo 8."
 
-#: src/motion.c
-msgid "Failed to read mask privacy image. Mask privacy feature disabled."
-msgstr ""
-"Error al leer la imagen de privacidad de la máscara. Función de privacidad "
-"de máscara deshabilitada."
-
-#: src/motion.c
+#: src/camera.cpp
 #, c-format
-msgid "Mask privacy file \"%s\" loaded."
-msgstr "Se ha cargado el archivo de privacidad de la máscara \" %s \"."
+msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
+msgstr "Motion solo admite ancho y alto mayor o igual a 64 %dx%d"
 
-#: src/motion.c
-#, c-format
-msgid "Invalid text scale.  Adjusted to %d"
-msgstr "Escala de texto inválida. Ajustado a %d"
+#: src/camera.cpp
+msgid "Substream not available.  Image sizes not modulo 16."
+msgstr "Subtransmisión no disponible. Tamaños de imagen no módulo 16."
 
-#: src/motion.c
+#: src/camera.cpp
+msgid "Pass-through processing disabled."
+msgstr "Procesamiento de transferencia deshabilitado."
+
+#: src/camera.cpp
+msgid "Failed to start camera."
+msgstr "No se pudo iniciar la cámara."
+
+#: src/camera.cpp
+#: src/sound.cpp
+msgid "Initialize"
+msgstr "Inicializar"
+
+#: src/camera.cpp
 #, c-format
 msgid "Camera %d started: motion detection %s"
 msgstr "Cámara %d iniciada: detección de movimiento %s"
 
-#: src/motion.c
+#: src/camera.cpp
 msgid "Disabled"
-msgstr "Discapacitado"
+msgstr "Desactivado"
 
-#: src/motion.c
+#: src/camera.cpp
 msgid "Enabled"
-msgstr "Habilitado"
+msgstr "Activado"
 
-#: src/motion.c
-msgid "Pass-through processing disabled."
-msgstr "Procesamiento de paso deshabilitado."
-
-#: src/motion.c
-#, c-format
-msgid "Invalid configuration dimensions %dx%d"
-msgstr "Dimensiones de configuración no válidas %dx %d"
-
-#: src/motion.c
-#, c-format
-msgid "Using default dimensions %dx%d"
-msgstr "Uso de dimensiones predeterminadas %dx %d"
-
-#: src/motion.c src/netcam_rtsp.c
-#, c-format
-msgid "Image width (%d) requested is not modulo 8."
-msgstr "El ancho de imagen ( %d) solicitado no es el módulo 8."
-
-#: src/motion.c src/netcam_rtsp.c
-#, c-format
-msgid "Adjusting width to next higher multiple of 8 (%d)."
-msgstr "Ajuste del ancho al siguiente múltiplo superior de 8 ( %d)."
-
-#: src/motion.c src/netcam_rtsp.c
-#, c-format
-msgid "Image height (%d) requested is not modulo 8."
-msgstr "La altura de la imagen ( %d) solicitada no es el módulo 8."
-
-#: src/motion.c src/netcam_rtsp.c
-#, c-format
-msgid "Adjusting height to next higher multiple of 8 (%d)."
-msgstr "Ajuste de altura al siguiente múltiplo superior de 8 ( %d)."
-
-#: src/motion.c
-msgid "Could not fetch initial image from camera "
-msgstr "No se pudo recuperar la imagen inicial de la cámara "
-
-#: src/motion.c
-msgid "Motion continues using width and height from config file(s)"
-msgstr ""
-"El movimiento continúa usando el ancho y la altura de los archivos de "
-"configuración"
-
-#: src/motion.c
-msgid "Motion only supports width and height modulo 8"
-msgstr "Motion solo admite ancho y alto módulo 8"
-
-#: src/motion.c
-#, c-format
-msgid "Image width (%d) or height(%d) requested is not modulo 8."
-msgstr ""
-"El ancho de imagen ( %d) o la altura ( %d) solicitada no es el módulo 8."
-
-#: src/motion.c
-#, c-format
-msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
-msgstr ""
-"El movimiento solo admite un ancho y una altura mayor o igual que 64 %dx %d"
-
-#: src/motion.c
-msgid "Substream not available.  Image sizes not modulo 16."
-msgstr "Substream no disponible. Tamaños de imagen no modulares 16."
-
-#: src/motion.c
-msgid "webp image format is not available, failing back to jpeg"
-msgstr "el formato de imagen webp no está disponible, volviendo a jpeg"
-
-#: src/motion.c
-msgid "Error capturing first image"
-msgstr "Error al capturar la primera imagen"
-
-#: src/motion.c
-msgid "Opening video loopback device for normal pictures"
-msgstr "Dispositivo de apertura de video en bucle para imágenes normales"
-
-#: src/motion.c
-msgid "Failed to open video loopback for normal pictures"
-msgstr "Error al abrir el loopback de video para imágenes normales"
-
-#: src/motion.c
-msgid "Opening video loopback device for motion pictures"
-msgstr "Dispositivo de apertura de video loopback para imágenes en movimiento"
-
-#: src/motion.c
-msgid "Failed to open video loopback for motion pictures"
-msgstr "Error al abrir loopback de video para imágenes en movimiento"
-
-#: src/motion.c
-msgid "Failed to read mask image. Mask feature disabled."
-msgstr ""
-"Error al leer la imagen de la máscara. Función de máscara deshabilitada."
-
-#: src/motion.c
-#, c-format
-msgid "Maskfile \"%s\" loaded."
-msgstr "Archivo de máscara \" %s \" cargado."
-
-#: src/motion.c
+#: src/camera.cpp
 msgid "Emulating motion"
-msgstr "Emulando movimiento"
+msgstr "Emulación de movimiento"
 
-#: src/motion.c
+#: src/camera.cpp
 #, c-format
 msgid "Motion in area %d detected."
 msgstr "Movimiento en el área %d detectado."
 
-#: src/motion.c
+#: src/camera.cpp
 msgid "Retrying until successful connection with camera"
-msgstr "Reintentando hasta una conexión exitosa con la cámara"
+msgstr "Reintentando hasta la conexión exitosa con la cámara"
 
-#: src/motion.c
-msgid "Camera has become available."
-msgstr "La cámara está disponible."
+#: src/camera.cpp
+msgid "Resetting image buffers"
+msgstr "Restablecimiento de búferes de imágenes"
 
-#: src/motion.c
-#, c-format
-msgid ""
-"Restarting Motion.\n"
-"Image width (%d) or height(%d) requested is not modulo 8."
-msgstr ""
-"Reiniciando movimiento.\n"
-"El ancho de la imagen (%d) o la altura (%d) solicitada no es módulo 8."
-
-#: src/motion.c
-#, c-format
-msgid ""
-"Restarting Motion.\n"
-"Motion only supports width and height greater than or equal to 64 %dx%d"
-msgstr ""
-"Reiniciando movimiento.\n"
-"Motion solo admite ancho y alto mayor o igual a 64 %dx%d"
-
-#: src/motion.c
-msgid ""
-"Restarting Motion.\n"
-"Height or width has changed on camera."
-msgstr ""
-"Reiniciando movimiento.\n"
-"La altura o el ancho han cambiado en la cámara."
-
-#: src/motion.c
-msgid ""
-"Restarting Motion.\n"
-"High resolution has changed on camera."
-msgstr ""
-"Reiniciando movimiento.\n"
-"La alta resolución ha cambiado en la cámara."
-
-#: src/motion.c
+#: src/camera.cpp
 msgid "Video signal re-acquired"
-msgstr "Señal de video readquirida"
+msgstr "Señal de video recuperada"
 
-#: src/motion.c
-msgid "Video device fatal error - Closing video device"
-msgstr "Error grave del dispositivo de video: cierre del dispositivo de video"
-
-#: src/motion.c
-msgid "Restarting Motion thread to reinitialize all image buffers"
-msgstr ""
-"Reinicio del hilo de movimiento para reinicializar todos los búferes de "
-"imagen"
-
-#: src/motion.c
+#: src/camera.cpp
 msgid "Video signal lost - Adding grey image"
-msgstr "Señal de video perdida - Agregar imagen gris"
+msgstr "Pérdida de señal de video - Agregar imagen gris"
 
-#: src/motion.c
+#: src/camera.cpp
 msgid "Video signal still lost - Trying to close video device"
-msgstr "Señal de video aún perdida - Intentando cerrar el dispositivo de video"
+msgstr ""
+"Se sigue perdiendo la señal de video: intento cerrar el dispositivo de video"
 
-#: src/motion.c
-msgid "Lightswitch detected"
-msgstr "Interruptor de luz detectado"
-
-#: src/motion.c
-msgid "Switchfilter detected"
-msgstr "Switchfilter detectado"
-
-#: src/motion.c
-msgid "micro-lightswitch!"
-msgstr "micro-interruptor de luz!"
-
-#: src/motion.c
+#: src/camera.cpp
 #, c-format
 msgid "End of event %d"
 msgstr "Fin del evento %d"
 
-#: src/motion.c
+#: src/camera.cpp
 #, c-format
-msgid "Raw changes: %5d - changes after '%s': %5d"
-msgstr "Cambios sin formato: %5d - cambios después de ' %s': %5d"
+msgid "changes after '%s': %5d"
+msgstr "cambios después de '%s': %5d"
 
-#: src/motion.c
+#: src/camera.cpp
 #, c-format
 msgid " - labels: %3d"
-msgstr " - etiquetas: %3d"
+msgstr "- etiquetas: %3d"
 
-#: src/motion.c
+#: src/camera.cpp
 #, c-format
 msgid "Changes: %5d"
 msgstr "Cambios: %5d"
 
-#: src/motion.c
+#: src/camera.cpp
 #, c-format
 msgid " - noise level: %2d"
-msgstr " - nivel de ruido: %2d"
+msgstr "- nivel de ruido: %2d"
 
-#: src/motion.c
+#: src/camera.cpp
 #, c-format
 msgid " - threshold: %d"
-msgstr " - umbral: %d"
+msgstr "- umbral: %d"
 
-#: src/motion.c
-#, c-format
-msgid "Invalid timelapse_mode argument '%s'"
-msgstr "Argumento de modo timelapse no válido ' %s'"
+#: src/camera.cpp
+#: src/sound.cpp
+msgid "Exiting"
+msgstr "saliendo"
 
-#: src/motion.c
-msgid "%:s Defaulting to manual timelapse mode"
-msgstr "%: s Por defecto al modo de lapso de tiempo manual"
-
-#: src/motion.c
-msgid "Thread exiting"
-msgstr "Hilo saliendo"
-
-#: src/motion.c
-msgid "Motion going to daemon mode"
-msgstr "El movimiento va al modo demonio"
-
-#: src/motion.c
-#, c-format
-msgid "Exit motion, cannot create process id file (pid file) %s"
-msgstr ""
-"Salir de movimiento, no se puede crear el archivo de identificación del "
-"proceso (archivo pid) %s"
-
-#: src/motion.c
-msgid "Could not change directory"
-msgstr "No se pudo cambiar el directorio"
-
-#: src/motion.c
+#: src/motion.cpp
 #, c-format
 msgid "Created process id file %s. Process ID is %d"
 msgstr ""
-"Se creó el archivo de identificación del proceso %s. La ID del proceso es %d"
+"Archivo de identificación de proceso creado %s. El ID del proceso es %d"
 
-#: src/motion.c
-msgid ""
-"Camara IDs are not unique or have values over 32,000.  Falling back to "
-"thread numbers"
+#: src/motion.cpp
+#, c-format
+msgid "Cannot create process id file (pid file) %s"
 msgstr ""
-"Las ID de Camara no son únicas o tienen valores superiores a 32,000. "
-"Volviendo anúmeros de hilo"
+"No se puede crear el archivo de identificación del proceso (archivo pid) %s"
 
-#: src/motion.c
+#: src/motion.cpp
+msgid "Removed process id file (pid file)."
+msgstr "Se eliminó el archivo de identificación del proceso (archivo pid)."
+
+#: src/motion.cpp
+msgid "Error removing pid file"
+msgstr "Error al eliminar el archivo pid"
+
+#: src/motion.cpp
+msgid "Motion going to daemon mode"
+msgstr "Motion yendo al modo demonio"
+
+#: src/motion.cpp
+msgid "Could not change directory"
+msgstr "No se pudo cambiar de directorio"
+
+#: src/motion.cpp
+msgid "Device IDs are not unique."
+msgstr "Los ID de dispositivo no son únicos."
+
+#: src/motion.cpp
+msgid "Falling back to sequence numbers"
+msgstr "Volviendo a los números de secuencia"
+
+#: src/motion.cpp
 msgid "v4l2   : available"
 msgstr "v4l2: disponible"
 
-#: src/motion.c
+#: src/motion.cpp
 msgid "v4l2   : not available"
 msgstr "v4l2: no disponible"
 
-#: src/motion.c
-msgid "bktr   : available"
-msgstr "bktr: disponible"
-
-#: src/motion.c
-msgid "bktr   : not available"
-msgstr "bktr: no disponible"
-
-#: src/motion.c
+#: src/motion.cpp
 msgid "webp   : available"
-msgstr "webp: disponible"
+msgstr "web: disponible"
 
-#: src/motion.c
+#: src/motion.cpp
 msgid "webp   : not available"
 msgstr "webp: no disponible"
 
-#: src/motion.c
-msgid "ffmpeg : available"
-msgstr "ffmpeg: disponible"
+#: src/motion.cpp
+msgid "libcam : available"
+msgstr "libcam: disponible"
 
-#: src/motion.c
-msgid "ffmpeg : not available"
-msgstr "ffmpeg: no disponible"
+#: src/motion.cpp
+msgid "libcam : not available"
+msgstr "libcam: no disponible"
 
-#: src/motion.c
+#: src/motion.cpp
 msgid "mysql  : available"
 msgstr "mysql: disponible"
 
-#: src/motion.c
+#: src/motion.cpp
 msgid "mysql  : not available"
 msgstr "mysql: no disponible"
 
-#: src/motion.c
+#: src/motion.cpp
 msgid "MariaDB: available"
 msgstr "MariaDB: disponible"
 
-#: src/motion.c
+#: src/motion.cpp
 msgid "MariaDB: not available"
-msgstr "MariaDB: no disponible"
+msgstr "Maria DB: no disponible"
 
-#: src/motion.c
+#: src/motion.cpp
 msgid "sqlite3: available"
 msgstr "sqlite3: disponible"
 
-#: src/motion.c
+#: src/motion.cpp
 msgid "sqlite3: not available"
 msgstr "sqlite3: no disponible"
 
-#: src/motion.c
+#: src/motion.cpp
 msgid "pgsql  : available"
 msgstr "pgsql: disponible"
 
-#: src/motion.c
+#: src/motion.cpp
 msgid "pgsql  : not available"
 msgstr "pgsql: no disponible"
 
-#: src/motion.c
+#: src/motion.cpp
 msgid "nls    : available"
 msgstr "nls: disponible"
 
-#: src/motion.c
+#: src/motion.cpp
 msgid "nls    : not available"
 msgstr "nls: no disponible"
 
-#: src/motion.c
-#, c-format
-msgid "Using default log level (%s) (%d)"
-msgstr "Uso del nivel de registro predeterminado ( %s) ( %d)"
+#: src/motion.cpp
+msgid "alsa   : available"
+msgstr "alsa : disponible"
 
-#: src/motion.c
-#, c-format
-msgid "Logging to file (%s)"
-msgstr "Iniciar sesión en el archivo ( %s)"
+#: src/motion.cpp
+msgid "alsa   : not available"
+msgstr "alsa : no disponible"
 
-#: src/motion.c
-#, c-format
-msgid "Exit motion, cannot create log file %s"
-msgstr "Salir de movimiento, no se puede crear el archivo de registro %s"
+#: src/motion.cpp
+msgid "fftw3  : available"
+msgstr "fftw3: disponible"
 
-#: src/motion.c
-msgid "Logging to syslog"
-msgstr "Iniciando sesión en syslog"
+#: src/motion.cpp
+msgid "fftw3  : not available"
+msgstr "fftw3: no disponible"
 
-#: src/motion.c
-#, c-format
-msgid "Motion %s Started"
-msgstr "Motion %s iniciado"
-
-#: src/motion.c
-#, c-format
-msgid "Using default log type (%s)"
-msgstr "Uso del tipo de registro predeterminado ( %s)"
-
-#: src/motion.c
-#, c-format
-msgid "Using log type (%s) log level (%s)"
-msgstr "Uso del tipo de registro ( %s) nivel de registro ( %s)"
-
-#: src/motion.c
+#: src/motion.cpp
 msgid "Motion running as daemon process"
-msgstr "Movimiento en ejecución como proceso demonio"
+msgstr "Motion ejecutándose como proceso daemon"
 
-#: src/motion.c
+#: src/motion.cpp
 msgid "Motion running in setup mode."
-msgstr "Movimiento en modo de configuración."
+msgstr "Motion ejecutándose en modo de configuración."
 
-#: src/motion.c
-#, c-format
-msgid "Camera ID: %d is from %s"
-msgstr "ID de cámara: %d es de %s"
+#: src/motion.cpp
+msgid "Unable to start camera thread."
+msgstr "No se puede iniciar el hilo de la cámara."
 
-#: src/motion.c
-#, c-format
-msgid "Camera ID: %d Camera Name: %s Service: %s"
-msgstr "ID de cámara: %d Nombre de cámara: %s Servicio: %s"
+#: src/motion.cpp
+msgid "Unable to start sound thread."
+msgstr "No se puede iniciar el hilo de sonido."
 
-#: src/motion.c
-#, c-format
-msgid "Camera ID: %d Camera Name: %s Device: %s"
-msgstr "ID de cámara: %d Nombre de cámara: %s Dispositivo: %s"
+#: src/motion.cpp
+msgid "Restarting Motion."
+msgstr "Reiniciando Motion."
 
-#: src/motion.c
-#, c-format
-msgid "Stream port number %d for thread %d conflicts with the control port"
-msgstr ""
-"El número de puerto de transmisión %d para el hilo %d entra en conflicto con "
-"el puerto de control"
-
-#: src/motion.c
-#, c-format
-msgid "Stream feature for thread %d is disabled."
-msgstr "La función de transmisión para el hilo %d está deshabilitada."
-
-#: src/motion.c
-#, c-format
-msgid "Stream port number %d for thread %d conflicts with thread %d"
-msgstr ""
-"El número de puerto de transmisión %d para el hilo %d entra en conflicto con "
-"el hilo %d"
-
-#: src/motion.c
-msgid "Restarting motion."
-msgstr "Reinicio de movimiento."
-
-#: src/motion.c
+#: src/motion.cpp
 msgid "Motion restarted"
-msgstr "Movimiento reiniciado"
+msgstr "Motion reiniciado"
 
-#: src/motion.c
+#: src/motion.cpp
 #, c-format
-msgid "Thread %d - Watchdog timeout. Trying to do a graceful restart"
+msgid "Camera %d - Watchdog timeout."
+msgstr "Cámara %d: tiempo de vigilancia agotado."
+
+#: src/motion.cpp
+#, c-format
+msgid "Camera %d - Watchdog netcam kill."
+msgstr "Cámara %d - Eliminación de la cámara de vigilancia del perro guardián."
+
+#: src/motion.cpp
+#, c-format
+msgid "Camera %d - Watchdog netcam_high kill."
 msgstr ""
-"Hilo %d - Tiempo de espera de vigilancia. Intentando hacer un reinicio "
-"elegante"
+"Cámara %d - Supervisión alta de la cámara de vigilancia del perro guardián."
 
-#: src/motion.c
+#: src/motion.cpp
 #, c-format
-msgid "Thread %d - Watchdog timeout did NOT restart, killing it!"
-msgstr "Hilo %d - ¡El tiempo de espera de Watchdog NO se reinició, matándolo!"
+msgid "Camera %d - Watchdog kill."
+msgstr "Cámara %d - Eliminación del perro guardián."
 
-#: src/motion.c
+#: src/motion.cpp
 #, c-format
-msgid "Thread %d - Cleaning thread."
-msgstr "Hilo %d - Hilo de limpieza."
+msgid "Invalid camera specified for deletion. %d"
+msgstr "Cámara especificada para eliminación no válida. %d"
 
-#: src/motion.c
+#: src/motion.cpp
 #, c-format
-msgid "DEBUG-1 threads_running %d motion_threads_running %d , finish %d"
-msgstr ""
-"DEBUG-1 subprocesos ejecutando %d subprocesos de movimiento ejecutando %d, "
-"terminar %d"
+msgid "Stopping %s device_id %d"
+msgstr "Deteniendo %s ID de dispositivo %d"
 
-#: src/motion.c
+#: src/motion.cpp
 #, c-format
-msgid "Waiting for threads to finish, pid: %d"
-msgstr "Esperando que los hilos terminen, pid: %d"
+msgid "Motion pid: %d"
+msgstr "Motion pid: %d"
 
-#: src/motion.c
+#: src/motion.cpp
 #, c-format
-msgid "Motion thread %d restart"
-msgstr "Hilo de movimiento %d reiniciar"
+msgid "Motion camera %d restart"
+msgstr "Cámara Motion %d reiniciar"
 
-#: src/motion.c
-msgid "Threads finished"
-msgstr "Hilos terminados"
+#: src/motion.cpp
+#, c-format
+msgid "Motion sound %d restart"
+msgstr "Motion sonido %d reiniciar"
 
-#: src/motion.c src/webu.c
+#: src/motion.cpp
+msgid "Motion devices finished"
+msgstr "Dispositivos Motion terminados"
+
+#: src/motion.cpp
 msgid "Motion terminating"
-msgstr "Movimiento terminando"
+msgstr "Terminación Motion"
 
-#: src/netcam.c
+#: src/movie.cpp
+#, c-format
+msgid "Error setting timelapse append for container %s"
+msgstr ""
+"Error al configurar la adición de lapso de tiempo para el contenedor %s"
+
+#: src/movie.cpp
+#, c-format
+msgid "container option value %s is not supported"
+msgstr "el valor de opción de contenedor %s no es compatible"
+
+#: src/movie.cpp
+msgid "Could not get the container"
+msgstr "No se pudo obtener el contenedor."
+
+#: src/movie.cpp
+#, c-format
+msgid "Error sending frame for encoding:%s"
+msgstr "Error al enviar trama para codificar:%s"
+
+#: src/movie.cpp
+#, c-format
+msgid "Error receiving encoded packet video:%s"
+msgstr "Error al recibir el paquete de video codificado:%s"
+
+#: src/movie.cpp
+#, c-format
+msgid "Error encoding video:%s"
+msgstr "Error al codificar video:%s"
+
+#: src/movie.cpp
+msgid "Error encoding video"
+msgstr "Error al codificar video"
+
+#: src/movie.cpp
+#, c-format
+msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d"
+msgstr ""
+"PTS %<PRId64> Base PTS %<PRId64> ms intervalo %<PRId64> base de tiempo %d-%d"
+
+#: src/movie.cpp
+msgid "BAD TIMING!! Frame skipped."
+msgstr "¡¡MAL MOMENTO!! Marco omitido."
+
+#: src/movie.cpp
+#, c-format
+msgid "%s codec vbr/crf/bit_rate: %d"
+msgstr "%s códec vbr/crf/tasa de bits: %d"
+
+#: src/movie.cpp
+#, c-format
+msgid "Preferred codec %s has been blacklisted: %s"
+msgstr "El códec preferido %s se ha incluido en la lista negra: %s"
+
+#: src/movie.cpp
+#, c-format
+msgid "container %s not found"
+msgstr "contenedor %s no encontrado"
+
+#: src/movie.cpp
+#, c-format
+msgid "Using codec %s"
+msgstr "Usando el códec %s"
+
+#: src/movie.cpp
+msgid "Could not alloc stream"
+msgstr "No se pudo asignar la secuencia"
+
+#: src/movie.cpp
+msgid "Failed to allocate codec context!"
+msgstr "¡No se pudo asignar el contexto del códec!"
+
+#: src/movie.cpp
+msgid "Unable to set quality"
+msgstr "No se puede establecer la calidad"
+
+#: src/movie.cpp
+#, c-format
+msgid "Reported FPS Supported %d/%d"
+msgstr "FPS informado compatible %d/%d"
+
+#: src/movie.cpp
+#, c-format
+msgid "Could not open codec %s"
+msgstr "No se pudo abrir el códec %s"
+
+#: src/movie.cpp
+#, c-format
+msgid "Failed to copy decoder parameters!: %s"
+msgstr "¡Error al copiar los parámetros del decodificador!: %s"
+
+#: src/movie.cpp
+msgid "could not alloc frame"
+msgstr "no se pudo asignar el marco"
+
+#: src/movie.cpp
+#, c-format
+msgid "could not alloc buffers %s"
+msgstr "no se pudieron asignar los búferes %s"
+
+#: src/movie.cpp
+msgid "Movie timed out"
+msgstr "Se agotó el tiempo de espera de la película"
+
+#: src/movie.cpp
+msgid "Error setting file name"
+msgstr "Error al establecer el nombre del archivo"
+
+#: src/movie.cpp
+#, c-format
+msgid "avio_open: %s File %s"
+msgstr "avio abierto: %s Archivo %s"
+
+#: src/movie.cpp
+#, c-format
+msgid "error %s opening file %s"
+msgstr "error %s abriendo archivo %s"
+
+#: src/movie.cpp
+#, c-format
+msgid "Error opening file %s"
+msgstr "Error al abrir el archivo %s"
+
+#: src/movie.cpp
+#, c-format
+msgid "Could not write movie header %s"
+msgstr "No se pudo escribir el encabezado de la película %s"
+
+#: src/movie.cpp
+#, c-format
+msgid "Error entering draining mode:%s"
+msgstr "Error al ingresar al modo de drenaje:%s"
+
+#: src/movie.cpp
+#, c-format
+msgid "Error draining codec:%s"
+msgstr "Error al vaciar el códec:%s"
+
+#: src/movie.cpp
+msgid "Error writing draining video frame"
+msgstr "Error al escribir el cuadro de video agotado"
+
+#: src/movie.cpp
+msgid "Error while encoding picture"
+msgstr "Error al codificar la imagen"
+
+#: src/movie.cpp
+msgid "Error while writing video frame"
+msgstr "Error al escribir el cuadro de video"
+
+#: src/movie.cpp
+#, c-format
+msgid "Error while writing video frame: %s"
+msgstr "Error al escribir cuadro de video: %s"
+
+#: src/movie.cpp
+msgid "Could not alloc video stream"
+msgstr "No se pudo asignar la transmisión de video"
+
+#: src/movie.cpp
+msgid "Unable to copy video codec parameters"
+msgstr "No se pueden copiar los parámetros del códec de video"
+
+#: src/movie.cpp
+#, c-format
+msgid "video timebase %d/%d fps %d/%d"
+msgstr "base de tiempo de video %d/%d fps %d/%d"
+
+#: src/movie.cpp
+msgid "Could not alloc audio stream"
+msgstr "No se pudo asignar la transmisión de audio"
+
+#: src/movie.cpp
+msgid "Unable to copy audio codec parameters"
+msgstr "No se pueden copiar los parámetros del códec de audio"
+
+#: src/movie.cpp
+#, c-format
+msgid "audio timebase %d/%d"
+msgstr "base de tiempo de audio %d/%d"
+
+#: src/movie.cpp
+msgid "Pass-through disabled.  ffmpeg too old"
+msgstr "Paso deshabilitado. ffmpeg demasiado viejo"
+
+#: src/movie.cpp
+msgid "rtsp camera not ready for pass-through."
+msgstr "La cámara rtsp no está lista para la transferencia."
+
+#: src/movie.cpp
+msgid "RTSP context not available."
+msgstr "Contexto RTSP no disponible."
+
+#: src/movie.cpp
+msgid "Could not allocate output context"
+msgstr "No se pudo asignar el contexto de salida"
+
+#: src/movie.cpp
+msgid "Changing to MP4 container for pass-through."
+msgstr "Cambio a contenedor MP4 para transferencia."
+
+#: src/movie.cpp
+msgid "Could not get output format!"
+msgstr "¡No se pudo obtener el formato de salida!"
+
+#: src/movie.cpp
+msgid "Could not get streams!"
+msgstr "¡No se pudieron obtener transmisiones!"
+
+#: src/movie.cpp
+msgid "Could not set the output file"
+msgstr "No se pudo establecer el archivo de salida"
+
+#: src/movie.cpp
+#, c-format
+msgid "Timebase after open audio: %d/%d video: %d/%d"
+msgstr "Base de tiempo después de abrir audio: %d/%d video: %d/%d"
+
+#: src/movie.cpp
+#, c-format
+msgid "libavcodec  version %d.%d.%d"
+msgstr "libavcodec versión %d.%d.%d"
+
+#: src/movie.cpp
+#, c-format
+msgid "libavformat version %d.%d.%d"
+msgstr "versión de formato libav %d.%d.%d"
+
+#: src/movie.cpp
+msgid "av_lockmgr_register reset failed on cleanup"
+msgstr "el restablecimiento del registro av lockmgr falló en la limpieza"
+
+#: src/movie.cpp
+msgid "Could not setup passthrough!"
+msgstr "¡No se pudo configurar el paso a través!"
+
+#: src/movie.cpp
+msgid "Could not get codec!"
+msgstr "¡No se pudo obtener el códec!"
+
+#: src/movie.cpp
+msgid "Failed to allocate codec!"
+msgstr "¡Error al asignar el códec!"
+
+#: src/movie.cpp
+msgid "Could not set the stream"
+msgstr "No se pudo configurar la transmisión"
+
+#: src/movie.cpp
+msgid "Error flushing codec"
+msgstr "Error al vaciar el códec"
+
+#: src/movie.cpp
+msgid "Excessive attempts to clear buffered packet"
+msgstr "Intentos excesivos de borrar el paquete almacenado en el búfer"
+
+#: src/movie.cpp
+msgid "Buffered packet"
+msgstr "Paquete almacenado en búfer"
+
+#: src/movie.cpp
+#, c-format
+msgid "Error setting timelapse file name %s"
+msgstr "Error al establecer el nombre del archivo de lapso de tiempo %s"
+
+#: src/movie.cpp
+msgid "Timelapse using mpg container."
+msgstr "Timelapse usando contenedor mpg."
+
+#: src/movie.cpp
+msgid "Events will be appended to file"
+msgstr "Los eventos se adjuntarán al archivo."
+
+#: src/movie.cpp
+msgid "Timelapse using mkv container."
+msgstr "Timelapse con contenedor mkv."
+
+#: src/movie.cpp
+msgid "Events will be trigger new files"
+msgstr "Los eventos activarán nuevos archivos."
+
+#: src/netcam.cpp
 msgid "Invalid URL.  Can not parse values."
 msgstr "URL invalida. No se pueden analizar los valores."
 
-#: src/netcam.c
+#: src/netcam.cpp
 #, c-format
-msgid "Camera handler thread [%d] started"
-msgstr "Se inició el subproceso de controlador de cámara [ %d]"
+msgid "Using port number %d"
+msgstr "Usando el número de puerto %d"
 
-#: src/netcam.c
-msgid ""
-"Closing netcam socket as Keep-Alive time is up (camera sent Close field). A "
-"reconnect should happen."
-msgstr ""
-"Cierre del zócalo de la cámara web cuando el tiempo de Keep-Alive ha "
-"terminado (la cámara envió el campo Cerrar). UNAla reconexión debería "
-"suceder."
-
-#: src/netcam.c
-msgid "re-opening camera (non-streaming)"
-msgstr "reabrir la cámara (sin transmisión)"
-
-#: src/netcam.c
-msgid "camera re-connected"
-msgstr "cámara reconectada"
-
-#: src/netcam.c
-#, c-format
-msgid "Unrecognized image header (%d)"
-msgstr "Encabezado de imagen no reconocido ( %d)"
-
-#: src/netcam.c
-#, c-format
-msgid "Error in header (%d)"
-msgstr "Error en el encabezado ( %d)"
-
-#: src/netcam.c
-msgid "re-opening camera (streaming)"
-msgstr "reabrir cámara (transmisión)"
-
-#: src/netcam.c
-msgid "Error getting jpeg image"
-msgstr "Error al obtener la imagen JPEG"
-
-#: src/netcam.c
-msgid "Trying to re-connect"
-msgstr "Intentando reconectar"
-
-#: src/netcam.c src/netcam_rtsp.c
-msgid "netcam camera handler: finish set, exiting"
-msgstr "controlador de cámara netcam: conjunto finalizado, salir"
-
-#: src/netcam.c
-msgid "No response from camera handler - it must have already died"
-msgstr "No hay respuesta del manejador de la cámara: ya debe haber muerto"
-
-#: src/netcam.c
-msgid "called with no data in buffer"
-msgstr "llamado sin datos en el búfer"
-
-#: src/netcam.c
-#, c-format
-msgid "Network Camera starting for camera (%s)"
-msgstr "Cámara de red a partir de cámara ( %s)"
-
-#: src/netcam.c
-#, c-format
-msgid "Invalid netcam_proxy (%s)"
-msgstr "Netcam proxy no válido ( %s)"
-
-#: src/netcam.c
-msgid "Username/password not allowed on a proxy URL"
-msgstr "Nombre de usuario / contraseña no permitidos en una URL proxy"
-
-#: src/netcam.c
-#, c-format
-msgid "Invalid netcam service '%s' "
-msgstr "Servicio de cámara web no válido ' %s' "
-
-#: src/netcam.c
-#, c-format
-msgid "Invalid netcam_url for camera (%s)"
-msgstr "URL de netcam no válida para cámara ( %s)"
-
-#: src/netcam.c
-#, c-format
-msgid ""
-"Netcam_http parameter '%s' converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-"
-"Alive %s."
-msgstr ""
-"El parámetro http de Netcam ' %s' se convierte en banderas: HTTP / 1.0: %s "
-"HTTP / 1.1: %s Keep-Vivo %s."
-
-#: src/netcam.c
-msgid "now calling netcam_setup_html()"
-msgstr "ahora llamando a netcam setup html ()"
-
-#: src/netcam.c
-msgid "now calling netcam_setup_ftp"
-msgstr "ahora llamando a ftp de configuración de netcam"
-
-#: src/netcam.c
-msgid "now calling netcam_setup_file()"
-msgstr "ahora llamando al archivo de configuración de netcam ()"
-
-#: src/netcam.c src/netcam_http.c
-msgid "now calling netcam_setup_mjpg()"
-msgstr "ahora llamando a netcam setup mjpg ()"
-
-#: src/netcam.c
-#, c-format
-msgid "Invalid netcam service '%s' - must be mjpeg, ftp, mjpg or jpeg."
-msgstr "Servicio de netcam no válido ' %s': debe ser mjpeg, ftp, mjpg o jpeg."
-
-#: src/netcam.c src/netcam_rtsp.c
-#, c-format
-msgid "Failed trying to read first image - retval:%d"
-msgstr "Error al intentar leer la primera imagen - retval: %d"
-
-#: src/netcam.c
-msgid "libjpeg decompression failure on first frame - giving up!"
-msgstr "error de descompresión de libjpeg en el primer fotograma: ¡rendirse!"
-
-#: src/netcam.c
-#, c-format
-msgid "Width/height(%dx%d) must be multiples of 8"
-msgstr "Ancho / alto ( %dx %d) deben ser múltiplos de 8"
-
-#: src/netcam.c
-#, c-format
-msgid "Error starting camera handler thread [%d]"
-msgstr "Error al iniciar el subproceso del controlador de la cámara [ %d]"
-
-#: src/netcam_ftp.c
-msgid "recv failed in ftp_get_more"
-msgstr "recv falló en ftp obtener más"
-
-#: src/netcam_ftp.c
-#, c-format
-msgid "Server Response: %s"
-msgstr "Respuesta del servidor: %s"
-
-#: src/netcam_ftp.c
-msgid "send failed in ftp_send_user"
-msgstr "error de envío en el usuario de envío ftp"
-
-#: src/netcam_ftp.c
-msgid "send failed in ftp_send_passwd"
-msgstr "falló el envío en ftp send passwd"
-
-#: src/netcam_ftp.c
-msgid "send failed in ftp_quit"
-msgstr "envío fallido en ftp salir"
-
-#: src/netcam_ftp.c
-msgid "gethostbyname failed in ftp_connect"
-msgstr "gethostbyname falló en la conexión ftp"
-
-#: src/netcam_ftp.c
-msgid "gethostbyname address mismatch in ftp_connect"
-msgstr "la dirección gethostbyname no coincide en ftp connect"
-
-#: src/netcam_ftp.c
-msgid "socket failed"
-msgstr "socket fallido"
-
-#: src/netcam_ftp.c
-msgid "Failed to create a connection"
-msgstr "Error al crear una conexión"
-
-#: src/netcam_ftp.c
-msgid "FTP server asking for ACCT on anonymous"
-msgstr "Servidor FTP que solicita ACCT en anónimo"
-
-#: src/netcam_ftp.c
-msgid "setting socket option SO_REUSEADDR"
-msgstr "configurando la opción de socket SO REUSEADDR"
-
-#: src/netcam_ftp.c
-msgid "send failed in ftp_get_connection"
-msgstr "envío fallido en ftp obtener conexión"
-
-#: src/netcam_ftp.c
-msgid "Invalid answer to PASV"
-msgstr "Respuesta inválida a PASV"
-
-#: src/netcam_ftp.c
-msgid "Failed to create a data connection"
-msgstr "Error al crear una conexión de datos"
-
-#: src/netcam_ftp.c
-msgid "bind failed"
-msgstr "enlace fallido"
-
-#: src/netcam_ftp.c
-msgid "listen failed"
-msgstr "escucha fallido"
-
-#: src/netcam_ftp.c
-msgid "send failed in ftp_get_socket"
-msgstr "envío fallido en ftp get socket"
-
-#: src/netcam_ftp.c
-msgid "accept in ftp_get_socket"
-msgstr "aceptar en ftp get socket"
-
-#: src/netcam_ftp.c
-msgid "recv failed in ftp_read"
-msgstr "recv falló en la lectura de ftp"
-
-#: src/netcam_ftp.c
-msgid "ftp_get_socket failed"
-msgstr "ftp get socket falló"
-
-#: src/netcam_ftp.c
-msgid "Error sending TYPE I to ftp server"
-msgstr "Error al enviar TYPE I al servidor ftp"
-
-#: src/netcam_http.c
-#, c-format
-msgid "malformed token Content-Length but value %ld"
-msgstr "token mal formado Contenido-Longitud pero valor %ld"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Content-Length %ld"
-msgstr "Contenido-Longitud %ld"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Content-type %s"
-msgstr "Tipos de contenido %s"
-
-#: src/netcam_http.c
-msgid "Error reading image header, streaming mode (1). Null header."
-msgstr ""
-"Error al leer el encabezado de la imagen, modo de transmisión (1). "
-"Encabezado nulo."
-
-#: src/netcam_http.c
-#, c-format
-msgid "Error reading image header, streaming mode (1). Unknown header '%s'"
-msgstr ""
-"Error al leer el encabezado de la imagen, modo de transmisión (1). "
-"Encabezado desconocido ' %s'"
-
-#: src/netcam_http.c
-msgid "Error reading image header (2)"
-msgstr "Error al leer el encabezado de la imagen (2)"
-
-#: src/netcam_http.c
-msgid "Header not JPEG"
-msgstr "Encabezado no JPEG"
-
-#: src/netcam_http.c
-msgid "Content-Length 0"
-msgstr "Longitud del contenido 0"
-
-#: src/netcam_http.c
-msgid "Found image header record"
-msgstr "Registro de encabezado de imagen encontrado"
-
-#: src/netcam_http.c
-msgid "Error sending 'connect' request"
-msgstr "Error al enviar la solicitud 'conectar'"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Received first header ('%s')"
-msgstr "Recibió el primer encabezado (' %s')"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Error reading first header (%s)"
-msgstr "Error al leer el primer encabezado ( %s)"
-
-#: src/netcam_http.c
-#, c-format
-msgid "HTTP Result code %d"
-msgstr "Código de resultado HTTP %d"
-
-#: src/netcam_http.c
-msgid "Removed netcam Keep-Alive flag due to apparent closed HTTP connection."
-msgstr ""
-"Se eliminó el indicador de Netcam Keep-Alive debido a una aparente conexión "
-"HTTP cerrada."
-
-#: src/netcam_http.c
-msgid "Non-streaming camera (keep-alive set)"
-msgstr "Cámara sin transmisión (conjunto para mantener vivo)"
-
-#: src/netcam_http.c
-msgid "Non-streaming camera (keep-alive not set)"
-msgstr "Cámara sin transmisión (mantener vivo no configurado)"
-
-#: src/netcam_http.c
-msgid "Streaming camera"
-msgstr "Cámara de streaming"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Boundary string [%s]"
-msgstr "Cadena de límite [ %s]"
-
-#: src/netcam_http.c
-msgid "Boundary string not found in header"
-msgstr "Cadena de límite no encontrada en el encabezado"
-
-#: src/netcam_http.c
-msgid ""
-"Streaming camera probably using MJPG-blocks, consider using mjpg:// "
-"netcam_url."
-msgstr ""
-"Cámara de transmisión probablemente usando bloques MJPG, considere usar "
-"mjpg: //netcam url."
-
-#: src/netcam_http.c
-msgid "Unrecognized content type"
-msgstr "Tipo de contenido no reconocido"
-
-#: src/netcam_http.c
-msgid "Content-length present"
-msgstr "Presente de longitud de contenido"
-
-#: src/netcam_http.c
-msgid "Content-length 0"
-msgstr "Longitud del contenido 0"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Found Conn: close header ('%s')"
-msgstr "Conexión encontrada: cerrar encabezado (' %s')"
-
-#: src/netcam_http.c
-msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
-"Motion removes keepalive."
-msgstr ""
-"Se recibió el encabezado 'Connection: Keep-Alive' y 'Connection: close'.El "
-"movimiento elimina keepalive."
-
-#: src/netcam_http.c
-msgid ""
-"Both 'Connection: Keep-Alive' and 'Connection: close' header received. "
-"Motion continues unchanged."
-msgstr ""
-"Se recibió el encabezado 'Connection: Keep-Alive' y 'Connection: close'.El "
-"movimiento continúa sin cambios."
-
-#: src/netcam_http.c
-msgid "Received a Keep-Alive field in this set of headers."
-msgstr "Recibió un campo Keep-Alive en este conjunto de encabezados."
-
-#: src/netcam_http.c
-msgid ""
-"No 'Connection: Keep-Alive' nor 'Connection: close' header received.\n"
-" Motion removes keepalive."
-msgstr ""
-"No se recibió el encabezado 'Conexión: Keep-Alive' ni 'Conexión: cerrar'. \n"
-" El movimiento elimina keepalive."
-
-#: src/netcam_http.c
-msgid ""
-"No 'Connection: Keep-Alive' nor 'Connection: close' header received.\n"
-" Motion continues unchanged."
-msgstr ""
-"No se recibió el encabezado 'Conexión: Keep-Alive' ni 'Conexión: cerrar'. \n"
-" El movimiento continúa sin cambios."
-
-#: src/netcam_http.c
-msgid ""
-"Removed netcam Keep-Alive flag because 'Connection: close' header received.\n"
-" Netcam does not support Keep-Alive. Motion continues in non-Keep-Alive."
-msgstr ""
-"Se eliminó el indicador de Netcam Keep-Alive porque se recibió el encabezado "
-"'Conexión: cerrar'. \n"
-" Netcam no es compatible con Keep-Alive. El movimiento continúa en no-Keep-"
-"Alive."
-
-#: src/netcam_http.c
-msgid ""
-"Keep-Alive has reached end of valid period.\n"
-"Motion will close netcam, then resume Keep-Alive with a new socket."
-msgstr ""
-"Keep-Alive ha llegado al final del período válido. \n"
-" Motion cerrará netcam, luego reanudará Keep-Alive con un nuevo socket."
-
-#: src/netcam_http.c
-msgid "disconnect"
-msgstr "desconectar"
-
-#: src/netcam_http.c
-#, c-format
-msgid "getaddrinfo() failed (%s): %s"
-msgstr "getaddrinfo () falló ( %s): %s"
-
-#: src/netcam_http.c
-msgid "disconnecting netcam (1)"
-msgstr "desconectar netcam (1)"
-
-#: src/netcam_http.c
-msgid "disconnecting netcam since keep-alive not set."
-msgstr "desconectando netcam ya que no se ha establecido mantener vivo."
-
-#: src/netcam_http.c
-msgid "with no keepalive, attempt to create socket failed."
-msgstr "sin keepalive, el intento de crear un socket falló."
-
-#: src/netcam_http.c
-#, c-format
-msgid "with no keepalive, new socket created fd %d"
-msgstr "sin keepalive, se creó un nuevo socket fd %d"
-
-#: src/netcam_http.c
-msgid ""
-"with keepalive set, invalid socket.This could be the first time. Creating a "
-"new one failed."
-msgstr ""
-"con keepalive establecido, socket no válido. Esta podría ser la primera vez. "
-"Creando unEl nuevo falló."
-
-#: src/netcam_http.c
-#, c-format
-msgid ""
-"with keepalive set, invalid socket.This could be first time, created a new "
-"one with fd %d"
-msgstr ""
-"con keepalive establecido, socket no válido. Esto podría ser la primera vez, "
-"creó un nuevouno con fd %d"
-
-#: src/netcam_http.c
-#, c-format
-msgid "SO_KEEPALIVE is %s"
-msgstr "SO KEEPALIVE es %s"
-
-#: src/netcam_http.c
-msgid "ON"
-msgstr "EN"
-
-#: src/netcam_http.c
-msgid "OFF"
-msgstr "APAGADO"
-
-#: src/netcam_http.c
-msgid "SO_KEEPALIVE set on socket."
-msgstr "SO KEEPALIVE establecido en el zócalo."
-
-#: src/netcam_http.c
-msgid "fcntl(1) on socket"
-msgstr "fcntl (1) en el zócalo"
-
-#: src/netcam_http.c
-msgid "fcntl(2) on socket"
-msgstr "fcntl (2) en el zócalo"
-
-#: src/netcam_http.c
-#, c-format
-msgid "connect() failed (%d)"
-msgstr "connect () falló ( %d)"
-
-#: src/netcam_http.c
-msgid "disconnecting netcam (4)"
-msgstr "desconectar netcam (4)"
-
-#: src/netcam_http.c
-msgid "timeout on connect()"
-msgstr "tiempo de espera en connect ()"
-
-#: src/netcam_http.c
-msgid "disconnecting netcam (2)"
-msgstr "desconectar netcam (2)"
-
-#: src/netcam_http.c
-msgid "getsockopt after connect"
-msgstr "getsockopt después de conectar"
-
-#: src/netcam_http.c
-msgid "connect returned error"
-msgstr "conectar error devuelto"
-
-#: src/netcam_http.c
-msgid "disconnecting netcam (3)"
-msgstr "desconectar netcam (3)"
-
-#: src/netcam_http.c
-#, c-format
-msgid "expanding buffer from [%d/%d] to [%d/%d] bytes."
-msgstr "expandir el búfer de [ %d / %d] a [ %d / %d] bytes."
-
-#: src/netcam_http.c
-#, c-format
-msgid "Potential split boundary - %d chars flushed, %d re-positioned"
-msgstr "Límite de división potencial: %d caracteres enjuagados, %d reubicados"
-
-#: src/netcam_http.c
-msgid "recv() fail after boundary string"
-msgstr "recv () falla después de la cadena de límite"
-
-#: src/netcam_http.c
-msgid "leaving netcam connected."
-msgstr "dejando netcam conectada."
-
-#: src/netcam_http.c
-#, c-format
-msgid "about to try to connect, time #%d"
-msgstr "a punto de intentar conectarse, tiempo # %d"
-
-#: src/netcam_http.c
-msgid "Failed to open camera - check your config and that netcamera is online"
-msgstr ""
-"Error al abrir la cámara: verifique su configuración y que la cámara de red "
-"esté en línea"
-
-#: src/netcam_http.c
-msgid "Error reading first header - re-trying"
-msgstr "Error al leer el primer encabezado - reintentando"
-
-#: src/netcam_http.c
-msgid "Failed to read first camera header - giving up for now"
-msgstr ""
-"No se pudo leer el primer encabezado de la cámara, renunciando por ahora"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Netcam has flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s."
-msgstr "Netcam tiene banderas: HTTP / 1.0: %s HTTP / 1.1: %s Keep-Alive %s."
-
-#: src/netcam_http.c
-msgid ""
-"Removed netcam_keepalive flag due to proxy set.Proxy is incompatible with "
-"Keep-Alive."
-msgstr ""
-"Se eliminó el indicador de netcam keepalive debido al conjunto de proxy. El "
-"proxy es incompatible conMantener viva."
-
-#: src/netcam_http.c
-msgid "Failed to read first stream header - giving up for now"
-msgstr ""
-"No se pudo leer el encabezado de la primera secuencia; por ahora, desistir"
-
-#: src/netcam_http.c
-msgid "connected, going on to read image."
-msgstr "conectado, pasando a leer la imagen."
-
-#: src/netcam_http.c
-msgid "Read error, trying to reconnect.."
-msgstr "Error de lectura al intentar volver a conectar."
-
-#: src/netcam_http.c
-msgid "lost the cam."
-msgstr "perdí la cámara."
-
-#: src/netcam_http.c
-#, c-format
-msgid "Refilled buffer with [%d] bytes from the network."
-msgstr "Relleno de búfer con [ %d] bytes de la red."
-
-#: src/netcam_http.c
-#, c-format
-msgid "Read [%d/%d] header bytes."
-msgstr "Lea los bytes del encabezado [ %d / %d]."
-
-#: src/netcam_http.c
-msgid "Invalid header received, reconnecting"
-msgstr "Encabezado no válido recibido, reconectando"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Read [%d/%d] chunk bytes, [%d/%d] total"
-msgstr "Leer [ %d / %d] bytes de fragmento, [ %d / %d] total"
-
-#: src/netcam_http.c
-#, c-format
-msgid "Chunk complete, buffer used [%d] bytes."
-msgstr "Trozo completo, el búfer usó [ %d] bytes."
-
-#: src/netcam_http.c
-#, c-format
-msgid "Image complete, buffer used [%d] bytes."
-msgstr "Imagen completa, el búfer utilizó [ %d] bytes."
-
-#: src/netcam_http.c
-msgid "connected, going on to read and decode MJPG chunks."
-msgstr "conectado, pasando a leer y decodificar fragmentos MJPG."
-
-#: src/netcam_http.c
-msgid "Begin"
-msgstr "Empezar"
-
-#: src/netcam_http.c
-#, c-format
-msgid "stat(%s) error"
-msgstr "error de stat ( %s)"
-
-#: src/netcam_http.c
-#, c-format
-msgid "statbuf.st_mtime[%d] != last_st_mtime[%d]"
-msgstr "statbuf.st mtime [ %d]! = last st mtime [ %d]"
-
-#: src/netcam_http.c
-msgid "waiting new file image timeout"
-msgstr "esperando nuevo tiempo de espera de imagen de archivo"
-
-#: src/netcam_http.c
-msgid "delay waiting new file image "
-msgstr "retrasar la espera de una nueva imagen de archivo "
-
-#: src/netcam_http.c
-#, c-format
-msgid "processing new file image - st_mtime %d"
-msgstr "procesamiento de nueva imagen de archivo - st mtime %d"
-
-#: src/netcam_http.c
-#, c-format
-msgid "open(%s) error: %d"
-msgstr "error de apertura ( %s): %d"
-
-#: src/netcam_http.c
-#, c-format
-msgid "read(%s) error: %d"
-msgstr "error de lectura ( %s): %d"
-
-#: src/netcam_http.c
-msgid "End"
-msgstr "Fin"
-
-#: src/netcam_http.c
-#, c-format
-msgid "netcam->file->path %s"
-msgstr "netcam-> archivo-> ruta %s"
-
-#: src/netcam_jpeg.c
-msgid "Not enough data from netcam."
-msgstr "No hay suficientes datos de netcam."
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid "netcam->jpeg_error %d"
-msgstr "netcam-> error de jpeg %d"
-
-#: src/netcam_jpeg.c
-msgid "***new pic delay successful***"
-msgstr "*** nuevo retraso de foto exitoso ***"
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid "jpeg_error %d"
-msgstr "jpeg error %d"
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid "processing jpeg image - content length %d"
-msgstr "procesamiento de imagen jpeg - longitud del contenido %d"
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid ""
-"Camera width/height mismatch with JPEG image -  expected %dx%d, JPEG %dx%d "
-"retval %d"
-msgstr ""
-"El ancho / alto de la cámara no coincide con la imagen JPEG: %dx %d "
-"esperado, JPEG %dx %dretval %d"
-
-#: src/netcam_jpeg.c
-#, c-format
-msgid "ret %d retval %d"
-msgstr "ret %d retval %d"
-
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Resized packet array to %d"
-msgstr "%s: matriz de paquetes redimensionada a %d"
+msgstr "%s: Matriz de paquetes redimensionada a %d"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: av_copy_packet: %s ,Interrupt: %s"
-msgstr "%s: paquete de copia av: %s, interrupción: %s"
+msgstr "%s: paquete de copia av: %s ,Interrupción: %s"
 
-#: src/netcam_rtsp.c
-msgid "True"
-msgstr "Cierto"
+#: src/netcam.cpp
+msgid "true"
+msgstr "verdadero"
 
-#: src/netcam_rtsp.c
-msgid "False"
-msgstr "Falso"
+#: src/netcam.cpp
+msgid "false"
+msgstr "FALSO"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Ignoring packet with invalid data"
 msgstr "%s: ignorando el paquete con datos no válidos"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Rec frame error: %s"
-msgstr "%s: Error de cuadro de grabación: %s"
+msgstr "%s: error de cuadro de grabación: %s"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Error transferring HW decoded to system memory"
+msgstr "%s: error al transferir HW decodificado a la memoria del sistema"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Interrupted or finish on send"
+msgstr "%s: interrumpido o finalizado al enviar"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Send ignoring packet with invalid data"
+msgstr "%s: enviar ignorando el paquete con datos no válidos"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Error sending packet to codec: %s"
+msgstr "%s: error al enviar el paquete al códec: %s"
+
+#: src/netcam.cpp
 msgid "Ignoring packet with invalid data"
-msgstr "Ignorando el paquete con datos no válidos"
+msgstr "Ignorar paquete con datos inválidos"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "Error decoding packet: %s"
 msgstr "Error al decodificar el paquete: %s"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "%s: Error transferring HW decoded to system memory"
-msgstr "%s: Error al transferir HW decodificado a la memoria del sistema"
+msgid "%s: Error decoding video packet...it is audio"
+msgstr "%s: error al decodificar el paquete de video... es audio"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "Error sending packet to codec: %s"
-msgstr "Error al enviar el paquete al códec: %s"
+msgid "%s: Error decoding video packet: Copying to buffer"
+msgstr "%s: error al decodificar el paquete de video: copiando al búfer"
 
-#: src/netcam_rtsp.c
-msgid "Error decoding video packet: Copying to buffer"
-msgstr "Error al decodificar el paquete de video: copiando al búfer"
-
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: HW Devices: "
-msgstr "%s: Dispositivos HW: "
+msgstr "%s: Dispositivos HW:"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: %s (available)"
 msgstr "%s: %s (disponible)"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: %s (not implemented)"
 msgstr "%s: %s (no implementado)"
 
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: netcam_decoder %s disabled."
-msgstr "%s: descodificador de netcam %s deshabilitado."
-
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 msgid "Failed to get vaapi pix format"
-msgstr "No se pudo obtener el formato vaapi pix"
+msgstr "No se pudo obtener el formato de imagen vaapi"
 
-#: src/netcam_rtsp.c
-msgid "Failed to get cuda pix format"
-msgstr "No se pudo obtener el formato cuda pix"
-
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "%s: Interrupted."
-msgstr "%s: interrumpido."
+msgid "%s: Interrupted"
+msgstr "%s: interrumpido"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: %s: %s"
 msgstr "%s: %s: %s"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: %s: Failed"
-msgstr "%s: %s: fallido"
+msgstr "%s: %s: Error"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Decoder %s did not work."
 msgstr "%s: el decodificador %s no funcionó."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Ignoring and removing the user requested decoder %s"
 msgstr ""
 "%s: ignorando y eliminando el decodificador solicitado por el usuario %s"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Initializing vaapi decoder"
 msgstr "%s: inicializando el decodificador vaapi"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Unable to find vaapi hw device"
 msgstr "%s: no se puede encontrar el dispositivo vaapi hw"
 
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Initializing cuda decoder"
-msgstr "%s: Inicializando el decodificador cuda"
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Unable to find cuda hw device"
-msgstr "%s: no se puede encontrar el dispositivo cuda hw"
-
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Initializing decoder"
 msgstr "%s: Inicializando decodificador"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Using decoder %s"
-msgstr "%s: uso del decodificador %s"
+msgstr "%s: usando el decodificador %s"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Decoder opened"
-msgstr "%s: decodificador abierto"
+msgstr "%s: Decodificador abierto"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Camera reading (%s) timed out"
-msgstr "%s: tiempo de espera de lectura de cámara ( %s)"
+msgstr "%s: Lectura de la cámara (%s) agotada"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Camera (%s) timed out"
-msgstr "%s: se agotó el tiempo de espera de la cámara ( %s)"
+msgstr "%s: cámara (%s) agotó el tiempo de espera"
 
-#: src/netcam_rtsp.c
-msgid "Unable to allocate swsframe_in."
-msgstr "No se puede asignar swsframe en."
-
-#: src/netcam_rtsp.c
-msgid "Unable to allocate swsframe_out."
-msgstr "No se puede asignar swsframe out."
-
-#: src/netcam_rtsp.c
-msgid "Unable to allocate scaling context."
-msgstr "No se puede asignar el contexto de escala."
-
-#: src/netcam_rtsp.c
-msgid "Error determining size of frame out"
-msgstr "Error al determinar el tamaño del marco"
-
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "Error allocating picture in: %s"
-msgstr "Error al asignar imagen en: %s"
+msgid "%s: Unable to allocate swsframe_in."
+msgstr "%s: no se puede asignar swsframe."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "Error allocating picture out: %s"
-msgstr "Error al asignar la imagen: %s"
+msgid "%s: Unable to allocate swsframe_out."
+msgstr "%s: no se puede asignar swsframe fuera."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "Error resizing/reformatting: %s"
-msgstr "Error al cambiar el tamaño / formatear: %s"
+msgid "%s: Pixel format %d will be converted."
+msgstr "%s: se convertirá el formato de píxeles %d."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "Error putting frame into output buffer: %s"
-msgstr "Error al colocar el marco en el búfer de salida: %s"
+msgid "%s: Unable to allocate scaling context."
+msgstr "%s: no se puede asignar el contexto de escala."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "%s: Interrupted"
-msgstr "%s: interrumpido"
+msgid "%s: Error determining size of frame out"
+msgstr "%s: error al determinar el tamaño del marco de salida"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Error allocating picture in: %s"
+msgstr "%s: error al asignar la imagen en: %s"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Error allocating picture out: %s"
+msgstr "%s: error al asignar la imagen: %s"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Error resizing/reformatting: %s"
+msgstr "%s: Error al cambiar el tamaño/reformatear: %s"
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Error putting frame into output buffer: %s"
+msgstr "%s: error al colocar el marco en el búfer de salida: %s"
+
+#: src/netcam.cpp
 #, c-format
 msgid "%s: av_read_frame: %s"
-msgstr "%s: av fotograma de lectura: %s"
+msgstr "%s: marco de lectura av: %s"
 
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Excessive tries to get data from camera %d"
-msgstr "%s: Intentos excesivos de obtener datos de la cámara %d"
-
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using %d"
 msgstr ""
 "%s: tasa de captura no especificada en los parámetros de netcam. Usando %d"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
 msgstr ""
-"%s: tasa de captura no especificada en los parámetros de netcam. Usando "
-"framerate %d"
+"%s: tasa de captura no especificada en los parámetros de netcam. Usando la "
+"tasa de fotogramas %d"
 
-#: src/netcam_rtsp.c
-msgid "The network camera is sending pictures in a different"
-msgstr "La cámara de red está enviando imágenes en un lugar diferente"
-
-#: src/netcam_rtsp.c
-msgid "size than specified in the config and also a "
-msgstr "tamaño que se especifica en la configuración y también un "
-
-#: src/netcam_rtsp.c
-msgid "different picture format.  The picture is being"
-msgstr "formato de imagen diferente La imagen está siendo"
-
-#: src/netcam_rtsp.c
-msgid "transcoded to YUV420P and into the size requested"
-msgstr "transcodificado a YUV420P y en el tamaño solicitado"
-
-#: src/netcam_rtsp.c
-msgid "in the config file.  If possible change netcam to"
-msgstr "en el archivo de configuración. Si es posible, cambie netcam a"
-
-#: src/netcam_rtsp.c
-msgid "be in YUV420P format and the size requested in the"
-msgstr "estar en formato YUV420P y el tamaño solicitado en el"
-
-#: src/netcam_rtsp.c
-msgid "config to possibly lower CPU usage."
-msgstr "config para posiblemente reducir el uso de la CPU."
-
-#: src/netcam_rtsp.c
-msgid "size than specified in the configuration file."
-msgstr "tamaño que el especificado en el archivo de configuración."
-
-#: src/netcam_rtsp.c
-msgid "The picture is being transcoded into the size "
-msgstr "La imagen se está transcodificando al tamaño "
-
-#: src/netcam_rtsp.c
-msgid "requested in the configuration.  If possible change"
-msgstr "solicitado en la configuración. Si es posible, cambie"
-
-#: src/netcam_rtsp.c
-msgid "netcam or configuration to indicate the same size"
-msgstr "netcam o configuración para indicar el mismo tamaño"
-
-#: src/netcam_rtsp.c
-msgid "to possibly lower CPU usage."
-msgstr "para posiblemente reducir el uso de la CPU."
-
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "Netcam: %d x %d => Config: %d x %d"
-msgstr "Netcam: %dx %d => Configuración: %dx %d"
+msgid "The network camera is sending pictures at %dx%d"
+msgstr "La cámara de red está enviando imágenes a %dx%d"
 
-#: src/netcam_rtsp.c
-msgid "The image sent is being "
-msgstr "La imagen enviada está siendo "
+#: src/netcam.cpp
+#, c-format
+msgid "resolution but config is %dx%d. If possible change"
+msgstr "resolución pero la configuración es %dx%d. Si es posible cambiar"
 
-#: src/netcam_rtsp.c
-msgid "trancoded to YUV420P.  If possible change netcam "
-msgstr "transcodificado a YUV420P. Si es posible cambie netcam "
+#: src/netcam.cpp
+msgid "the netcam or config so that the image height and"
+msgstr "la netcam o la configuración para que la altura de la imagen y"
 
-#: src/netcam_rtsp.c
-msgid "picture format to YUV420P to possibly lower CPU usage."
-msgstr "formato de imagen a YUV420P para posiblemente reducir el uso de CPU."
+#: src/netcam.cpp
+msgid "width are the same to lower the CPU usage."
+msgstr "ancho son los mismos para reducir el uso de la CPU."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Setting rtsp/rtmp"
-msgstr "%s: Configuración de rtsp / rtmp"
+msgstr "%s: Configuración de rtsp/rtmp"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Setting input_format mjpeg"
 msgstr "%s: configuración del formato de entrada mjpeg"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Setting input_format video4linux2"
 msgstr "%s: Configuración del formato de entrada video4linux2"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Setting up movie file"
-msgstr "%s: configurando archivo de película"
+msgstr "%s: Configuración del archivo de película"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Setting up %s"
 msgstr "%s: configurando %s"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: option: %s = %s"
 msgstr "%s: opción: %s = %s"
 
-#: src/netcam_rtsp.c
-msgid "Setting up v4l2 via netcam"
-msgstr "Configuración de v4l2 a través de netcam"
+#: src/netcam.cpp
+msgid "Error getting userpass"
+msgstr "Error al obtener la contraseña de usuario"
 
-#: src/netcam_rtsp.c
-msgid "Setting up file via netcam"
-msgstr "Configuración de archivo a través de netcam"
+#: src/netcam.cpp
+msgid "Setting up v4l2"
+msgstr "Configuración de v4l2"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+msgid "Setting up file"
+msgstr "Configurar archivo"
+
+#: src/netcam.cpp
 #, c-format
-msgid "Setting up %s via netcam"
-msgstr "Configurando %s a través de netcam"
+msgid "Setting up %s "
+msgstr "Configurando %s"
 
-#: src/netcam_rtsp.c
-msgid "highres"
-msgstr "alta resolución"
+#: src/netcam.cpp
+msgid "High"
+msgstr "Alto"
 
-#: src/netcam_rtsp.c
-msgid "norm"
-msgstr "norma"
+#: src/netcam.cpp
+msgid "Norm"
+msgstr "Norma"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "Setting up %s stream."
-msgstr "Configurando %s stream."
+msgid "%s: Setting up camera."
+msgstr "%s: Configuración de la cámara."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 msgid "Unknown"
 msgstr "Desconocido"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Adjusting width to next higher multiple of 8 (%d)."
+msgstr "%s: ajuste del ancho al siguiente múltiplo superior de 8 (%d)."
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Unable to copy codec parameters"
+msgstr "%s: no se pueden copiar los parámetros del códec"
+
+#: src/netcam.cpp
 msgid "Stream copied for pass-through"
-msgstr "Stream copiado para pasar"
+msgstr "Transmisión copiada para transferencia"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+msgid "ffmpeg too old"
+msgstr "ffmpeg demasiado viejo"
+
+#: src/netcam.cpp
 msgid "Null path passed to connect"
-msgstr "Camino nulo pasado para conectar"
+msgstr "Ruta nula pasada para conectarse"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Unable to open camera(%s): %s"
-msgstr "%s: no se puede abrir la cámara ( %s): %s"
+msgstr "%s: No se puede abrir la cámara (%s): %s"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Opened camera(%s)"
-msgstr "%s: cámara abierta ( %s)"
+msgstr "%s: cámara abierta (%s)"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Unable to find stream info: %s"
-msgstr "%s: no se puede encontrar la información de la transmisión: %s"
+msgstr "%s: no se puede encontrar la información de transmisión: %s"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Unable to open codec context: %s"
 msgstr "%s: no se puede abrir el contexto del códec: %s"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Connected and unable to open codec context: %s"
+msgstr "%s: conectado y no se puede abrir el contexto del códec: %s"
+
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Camera image size is invalid"
 msgstr "%s: el tamaño de la imagen de la cámara no es válido"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Unable to allocate frame."
 msgstr "%s: no se puede asignar el marco."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Failed to copy stream for pass-through."
-msgstr "%s: no se pudo copiar la transmisión para la transferencia."
+msgstr "%s: no se pudo copiar la secuencia para la transferencia."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Failed to read first image"
 msgstr "%s: no se pudo leer la primera imagen"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Camera (%s) connected"
-msgstr "%s: cámara ( %s) conectada"
+msgstr "%s: Cámara (%s) conectada"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "%s: Netcam capture_rate is %d."
-msgstr "%s: la tasa de captura de Netcam es %d."
+msgid "%s: Netcam capture FPS is %d."
+msgstr "%s: el FPS de captura de Netcam es %d."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Camera source is %d FPS"
 msgstr "%s: la fuente de la cámara es %d FPS"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Unable to determine the camera source FPS."
-msgstr "%s: No se puede determinar el FPS de origen de la cámara."
+msgstr "%s: no se puede determinar el FPS de origen de la cámara."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "%s: capture_rate is less than camera FPS."
-msgstr "%s: la tasa de captura es menor que los FPS de la cámara."
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Decoding errors will occur."
-msgstr "%s: se producirán errores de decodificación."
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: capture_rate slightly larger than camera FPS is recommended."
+msgid "%s: Capture FPS less than camera FPS. Decoding errors will occur."
 msgstr ""
-"%s: se recomienda una velocidad de captura ligeramente superior a los FPS de "
-"la cámara."
+"%s: captura FPS menos que la cámara FPS. Se producirán errores de "
+"decodificación."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Capture FPS should be greater than camera FPS."
+msgstr "%s: el FPS de captura debe ser mayor que el FPS de la cámara."
+
+#: src/netcam.cpp
+#, c-format
+msgid ""
+"%s: An audio stream was detected.  Capture_rate increased to compensate."
+msgstr ""
+"%s: se detectó una transmisión de audio. Tasa de captura aumentada para "
+"compensar."
+
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Reconnecting with camera...."
-msgstr "%s: Reconectando con la cámara ..."
+msgstr "%s: Reconectando con la cámara...."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Camera did not reconnect."
 msgstr "%s: la cámara no se volvió a conectar."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Checking for camera every 10 seconds."
-msgstr "%s: Verificando la cámara cada 10 segundos."
+msgstr "%s: Comprobación de la cámara cada 10 segundos."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Checking for camera every 10 minutes."
+msgstr "%s: Comprobación de la cámara cada 10 minutos."
+
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Camera handler thread [%d] started"
-msgstr "%s: Comenzó el subproceso del controlador de la cámara [ %d]"
+msgstr "%s: subproceso del controlador de cámara [%d] iniciado"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
-msgid "%s: Handler loop finished."
-msgstr "%s: bucle del controlador terminado."
+msgid "%s: Loop finished."
+msgstr "%s: Bucle terminado."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Exiting"
+msgstr "%s: saliendo"
+
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Error starting handler thread"
-msgstr "%s: error al iniciar el subproceso del controlador"
+msgstr "%s: error al iniciar el hilo del controlador"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 #, c-format
 msgid "%s: Waiting for first image from the handler."
 msgstr "%s: esperando la primera imagen del controlador."
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
+#, c-format
+msgid "%s: Shutting down network camera."
+msgstr "%s: Apagando la cámara de red."
+
+#: src/netcam.cpp
+#, c-format
+msgid "%s: No response from handler thread."
+msgstr "%s: No hay respuesta del subproceso del controlador."
+
+#: src/netcam.cpp
+msgid "Norm: Shut down complete."
+msgstr "Norma: Apagado completo."
+
+#: src/netcam.cpp
+msgid "High: Shut down complete."
+msgstr "Alto: Apagado completo."
+
+#: src/netcam.cpp
+msgid "Opening Netcam"
+msgstr "Apertura de cámara de red"
+
+#: src/netcam.cpp
 msgid "unable to create rtsp context"
 msgstr "incapaz de crear contexto rtsp"
 
-#: src/netcam_rtsp.c
+#: src/netcam.cpp
 msgid "unable to create rtsp high context"
-msgstr "incapaz de crear contexto alto rtsp"
+msgstr "incapaz de crear rtsp alto contexto"
 
-#: src/netcam_rtsp.c
-msgid "No FFmpeg support"
-msgstr "Sin soporte FFmpeg"
+#: src/netcam.cpp
+msgid "Failed trying to read first image"
+msgstr "Error al intentar leer la primera imagen"
 
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: Shutting down network camera."
-msgstr "%s: apagando la cámara de red."
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: No response from handler thread."
-msgstr "%s: no hay respuesta del subproceso del controlador."
-
-#: src/netcam_rtsp.c
-msgid "Normal resolution: Shut down complete."
-msgstr "Resolución normal: cierre completo."
-
-#: src/netcam_rtsp.c
-msgid "High resolution: Shut down complete."
-msgstr "Alta resolución: cierre completo."
-
-#: src/picture.c
+#: src/picture.cpp
 msgid "Unable to set set EXIF to webp chunk"
-msgstr "No se puede establecer establecer EXIF ​​en un fragmento webp"
+msgstr "No se puede establecer establecer EXIF en webp chunk"
 
-#: src/picture.c
+#: src/picture.cpp
 msgid "libwebp version error"
 msgstr "error de versión de libwebp"
 
-#: src/picture.c
+#: src/picture.cpp
 msgid "libwebp image buffer allocation error"
 msgstr "error de asignación de búfer de imagen libwebp"
 
-#: src/picture.c
+#: src/picture.cpp
 msgid "libwebp image compression error"
 msgstr "error de compresión de imagen libwebp"
 
-#: src/picture.c
+#: src/picture.cpp
 msgid "unable to assemble webp image"
-msgstr "incapaz de ensamblar la imagen webp"
+msgstr "no se puede ensamblar la imagen webp"
 
-#: src/picture.c
+#: src/picture.cpp
 msgid "unable to save webp image to file"
 msgstr "no se puede guardar la imagen webp en el archivo"
 
-#: src/picture.c
+#: src/picture.cpp
 #, c-format
 msgid ""
 "Can't write picture to file %s - check access rights to target directory\n"
 "Thread is going to finish due to this fatal error"
 msgstr ""
 "No se puede escribir la imagen en el archivo %s: verifique los derechos de "
-"acceso al directorio de destino \n"
+"acceso al directorio de destino\n"
 "El hilo va a terminar debido a este error fatal"
 
-#: src/picture.c
+#: src/picture.cpp
 #, c-format
 msgid "Can't write picture to file %s"
-msgstr "No se puede escribir la imagen en el archivo %s"
+msgstr "No puedo escribir la imagen en el archivo %s"
 
-#: src/picture.c
-msgid "Error getting PGM vars."
-msgstr "Error al obtener las variables PGM."
+#: src/picture.cpp
+msgid "Could not read from pgm file"
+msgstr "No se pudo leer del archivo pgm"
 
-#: src/picture.c
+#: src/picture.cpp
 #, c-format
 msgid "This is not a pgm file, starts with '%s'"
-msgstr "Este no es un archivo pgm, comienza con ' %s'"
+msgstr "Este no es un archivo pgm, comienza con '%s'"
 
-#: src/picture.c
-#, c-format
-msgid "Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)"
-msgstr "Mágico %s: Ancho %s(%d): Alto %s(%d): MaxVal: %s(%d)"
+#: src/picture.cpp
+msgid "Failed reading size in pgm file"
+msgstr "Tamaño de lectura fallido en el archivo pgm"
 
-#: src/picture.c
-msgid "Failed reading image data from pgm file"
-msgstr "Error al leer los datos de imagen del archivo pgm"
+#: src/picture.cpp
+msgid "Failed reading maximum value in pgm file"
+msgstr "Error al leer el valor máximo en el archivo pgm"
 
-#: src/picture.c
+#: src/picture.cpp
 msgid "The mask file specified is not the same size as image from camera."
 msgstr ""
 "El archivo de máscara especificado no tiene el mismo tamaño que la imagen de "
 "la cámara."
 
-#: src/picture.c
+#: src/picture.cpp
 #, c-format
 msgid "Attempting to resize mask image from %dx%d to %dx%d"
 msgstr ""
-"Intentando cambiar el tamaño de la imagen de máscara de %dx %d a %dx %d"
+"Intentando cambiar el tamaño de la imagen de la máscara de %dx%d a %dx%d"
 
-#: src/picture.c
+#: src/picture.cpp
 #, c-format
 msgid "can't write mask file %s - check access rights to target directory"
 msgstr ""
 "no se puede escribir el archivo de máscara %s - verifique los derechos de "
 "acceso al directorio de destino"
 
-#: src/picture.c
+#: src/picture.cpp
 #, c-format
 msgid "can't write mask file %s"
-msgstr "no se puede escribir el archivo de máscara %s"
+msgstr "no puedo escribir el archivo de máscara %s"
 
-#: src/picture.c
+#: src/picture.cpp
 msgid "Failed writing default mask as pgm file"
 msgstr "Error al escribir la máscara predeterminada como archivo pgm"
 
-#: src/picture.c
+#: src/picture.cpp
 #, c-format
 msgid ""
 "Creating empty mask %s\n"
 "Please edit this file and re-run motion to enable mask feature"
 msgstr ""
-"Creando una máscara vacía %s \n"
+"Creando máscara vacía %s\n"
 "Edite este archivo y vuelva a ejecutar el movimiento para habilitar la "
 "función de máscara"
 
-#: src/rotate.c
+#: src/picture.cpp
+msgid "Opening privacy mask file"
+msgstr "Abrir archivo de máscara de privacidad"
+
+#: src/picture.cpp
+msgid "Opening high resolution privacy mask file"
+msgstr "Abrir archivo de máscara de privacidad de alta resolución"
+
+#: src/picture.cpp
+#, c-format
+msgid "Error opening mask file %s"
+msgstr "Error al abrir el archivo de máscara %s"
+
+#: src/picture.cpp
+msgid "Failed to read mask privacy image. Mask privacy feature disabled."
+msgstr ""
+"No se pudo leer la imagen de privacidad de la máscara. Función de privacidad "
+"de máscara deshabilitada."
+
+#: src/picture.cpp
+#, c-format
+msgid "Mask privacy file \"%s\" loaded."
+msgstr "Archivo de privacidad de máscara \"%s\" cargado."
+
+#: src/picture.cpp
+msgid "Failed to read mask image. Mask feature disabled."
+msgstr ""
+"No se pudo leer la imagen de la máscara. Función de máscara deshabilitada."
+
+#: src/picture.cpp
+#, c-format
+msgid "Maskfile \"%s\" loaded."
+msgstr "Archivo de máscara \"%s\" cargado."
+
+#: src/rotate.cpp
 #, c-format
 msgid "Config option \"rotate\" not a multiple of 90: %d"
-msgstr "La opción de configuración \"rotar \" no es un múltiplo de 90: %d"
+msgstr "La opción de configuración \"rotar\" no es un múltiplo de 90: %d"
 
-#: src/track.c
-msgid "internal error"
-msgstr "error interno"
-
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "internal error, %hu is not a known track-type"
-msgstr "error interno, %hu no es un tipo de pista conocido"
+msgid "Card %i(%s): %s [%s]"
+msgstr "Tarjeta %i(%s): %s [%s]"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "port %s dev fd %i, motor %hu command %hu data %hu"
-msgstr "puerto %s dev fd %i, motor %hu comando %hu data %hu"
+msgid "  Device %i (%s,%d): %s [%s]"
+msgstr "Dispositivo %i (%s,%d): %s [%s]"
 
-#: src/track.c
-msgid "Status byte timeout!"
-msgstr "Byte de estado de tiempo de espera!"
-
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "Try to open serial device %s"
-msgstr "Intenta abrir el dispositivo serie %s"
+msgid "  Subdevices: %i/%i"
+msgstr "Subdispositivos: %i/%i"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "Unable to open serial device %s"
-msgstr "No se puede abrir el dispositivo serie %s"
+msgid "control digital audio playback info (%i): %s"
+msgstr "controlar la información de reproducción de audio digital (%i): %s"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "Unable to initialize serial device %s"
-msgstr "No se puede inicializar el dispositivo serie %s"
+msgid "  Subdevice #%i: %s"
+msgstr "Subdispositivo #%i: %s"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "Opened serial device %s and initialize, fd %i"
-msgstr "Dispositivo serie %s abierto e inicialización, fd %i"
+msgid "control hardware info (%i): %s"
+msgstr "información del hardware de control (%i): %s"
 
-#: src/track.c
+#: src/sound.cpp
+msgid "snd_ctl_pcm_next_device"
+msgstr "snd ctl pcm próximo dispositivo"
+
+#: src/sound.cpp
 #, c-format
-msgid "No device %s started yet , trying stepper_center()"
-msgstr "Todavía no se inició el dispositivo %s, probando stepper center ()"
+msgid "control digital audio info (%i): %s"
+msgstr "controlar información de audio digital (%i): %s"
 
-#: src/track.c
+#: src/sound.cpp
+msgid "no soundcards found..."
+msgstr "no se encontraron tarjetas de sonido..."
+
+#: src/sound.cpp
+msgid "Devices"
+msgstr "Dispositivos"
+
+#: src/sound.cpp
 #, c-format
-msgid "failed to initialize stepper device on %s , fd [%i]."
-msgstr "no se pudo inicializar el dispositivo paso a paso en %s, fd [ %i]."
+msgid "control open (%i): %s"
+msgstr "control abierto (%i): %s"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "succeed , device started %s , fd [%i]"
-msgstr "éxito, dispositivo iniciado %s, fd [ %i]"
+msgid "error: snd_pcm_open device %s (%s)"
+msgstr "error: snd pcm dispositivo abierto %s (%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "SENDS port %s dev fd %i, motor %hu command %hu data %hu"
-msgstr "ENVIOS puerto %s dev fd %i, motor %hu comando %hu data %hu"
+msgid "error: snd_pcm_hw_params_malloc(%s)"
+msgstr "error: snd pcm hw params malloc(%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "Command return %d"
-msgstr "Comando return %d"
+msgid "error: snd_pcm_hw_params_any(%s)"
+msgstr "error: snd pcm hw params any(%s)"
 
-#: src/track.c
-msgid "Problem opening servo!"
-msgstr "Problema al abrir el servo!"
-
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "cent->x %d, cent->y %d, reversex %d, reversey %d manual %d"
-msgstr "cent-> x %d, cent-> y %d, reversex %d, reversey %d manual %d"
+msgid "error: snd_pcm_hw_params_set_access(%s)"
+msgstr "error: snd pcm hw params set access(%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "x %d value out of range! (%d - %d)"
-msgstr "x %d valor fuera de rango! ( %d - %d)"
+msgid "error: snd_pcm_hw_params_set_format(%s)"
+msgstr "error: snd pcm hw params set format(%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "y %d value out of range! (%d - %d)"
-msgstr "y %d valor fuera de rango! ( %d - %d)"
+msgid "error: snd_pcm_hw_params_set_rate_near(%s)"
+msgstr "error: snd pcm hw params set rate near(%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "X offset %d"
-msgstr "X offset %d"
+msgid "error: snd_pcm_hw_params_set_channels(%s)"
+msgstr "error: snd pcm hw params set channel(%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid ""
-"X cent->x %d, cent->y %d, reversex %d,reversey %d motorx %d data %d command "
-"%d"
-msgstr ""
-"X cent-> x %d, cent-> y %d, reversex %d, reversey %d motorx %d data %d "
-"comando %d"
+msgid "error: snd_pcm_hw_params_set_period_size_near(%s)"
+msgstr "error: snd pcm hw params establece el tamaño del período cerca de (%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "Y offset %d"
-msgstr "Y offset %d"
+msgid "error: snd_pcm_hw_params(%s)"
+msgstr "error: snd pcm hw params(%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid ""
-"Y cent->x %d, cent->y %d, reversex %d,reversey %d motory %d data %d command "
-"%d"
-msgstr ""
-"Y cent-> x %d, cent-> y %d, reversex %d, reversey %d motory %d data %d "
-"comando %d"
+msgid "error: snd_pcm_prepare(%s)"
+msgstr "error: snd pcm prepare(%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid ""
-"X-offset %d, Y-offset %d, x-position %d. y-position %d,reversex %d, reversey "
-"%d , stepsize %d"
-msgstr ""
-"X-offset %d, Y-offset %d, x-position %d. posición y %d, reversex %d, reversey"
-"%d, tamaño de paso %d"
+msgid "error: snd_pcm_hw_params_get_format(%s)"
+msgstr "error: snd pcm hw params get format(%s)"
 
-#: src/track.c
-msgid "Return byte timeout!"
-msgstr "Tiempo de espera de byte de retorno!"
-
-#: src/track.c
-msgid "Unable to set camera speed"
-msgstr "No se puede establecer la velocidad de la cámara"
-
-#: src/track.c
-msgid "succeed"
-msgstr "tener éxito"
-
-#: src/track.c
-msgid "Failed to reset pwc camera to starting position! Reason"
-msgstr "¡Error al restablecer la cámara pwc a la posición inicial! Razón"
-
-#: src/track.c
-msgid "failed VIDIOCPWCMPTGRANGE"
-msgstr "fallido VIDIOCPWCMPTGRANGE"
-
-#: src/track.c
-msgid "ioctl VIDIOCPWCMPTGANGLE"
-msgstr "ioctl VIDIOCPWCMPTGANGLE"
-
-#: src/track.c
-msgid "Failed to pan/tilt pwc camera! Reason"
-msgstr "¡Error al mover / inclinar la cámara pwc! Razón"
-
-#: src/track.c
-msgid "Failed to reset UVC camera to starting position! Reason"
-msgstr "¡Error al restablecer la cámara UVC a la posición inicial! Razón"
-
-#: src/track.c
-msgid "Reseting UVC camera to starting position"
-msgstr "Resetear la cámara UVC a la posición inicial"
-
-#: src/track.c
-msgid "ioctl querycontrol"
-msgstr "ioctl querycontrol"
-
-#: src/track.c
-msgid "Getting camera range"
-msgstr "Obtener alcance de la cámara"
-
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d "
-msgstr ""
-"ENTRADA PARAM ABS pan mín. %d, pan máx. %d, inclinación mín. %d, inclinación "
-"máx. %d "
+msgid "error: snd_pcm_hw_params_get_rate(%s)"
+msgstr "error: snd pcm hw params get rate(%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "INPUT_PARAM_ABS X_Angel %d, Y_Angel %d "
-msgstr "PARAM ENTRADA ABS X Angel %d, Y Angel %d "
+msgid "error: snd_pcm_hw_params_get_period_size(%s)"
+msgstr "error: snd pcm hw params obtiene el tamaño del período (%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "For_SET_ABS move_X %d,move_Y %d"
-msgstr "Para SET ABS mover X %d, mover Y %d"
+msgid "Actual rate %hu"
+msgstr "Tasa real %hu"
 
-#: src/track.c
-msgid "Failed to move UVC camera!"
-msgstr "¡Error al mover la cámara UVC!"
-
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "Found MINMAX = %d"
-msgstr "MINMAX encontrado = %d"
+msgid "Actual frames per %lu"
+msgstr "Fotogramas reales por %lu"
 
-#: src/track.c
+#: src/sound.cpp
+msgid "Sound format 16"
+msgstr "Formato de sonido 16"
+
+#: src/sound.cpp
+msgid "Sound format 24"
+msgstr "Formato de sonido 24"
+
+#: src/sound.cpp
+msgid "Sound format 32"
+msgstr "Formato de sonido 32"
+
+#: src/sound.cpp
 #, c-format
-msgid "Before_ABS_Y_Angel : x= %d , Y= %d, "
-msgstr "Antes de ABS Y Angel: x = %d, Y = %d, "
+msgid "error: read from audio interface failed (%s)"
+msgstr "error: la lectura desde la interfaz de audio falló (%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "After_ABS_Y_Angel : x= %d , Y= %d"
-msgstr "Después de ABS Y Angel: x = %d, Y = %d"
+msgid "Error opening pulse (%s)"
+msgstr "Pulso de apertura de error (%s)"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "For_SET_REL pan_min %d,pan_max %d,tilt_min %d,tilt_max %d"
-msgstr "Para SET REL pan min %d, pan max %d, tilt min %d, tilt max %d"
+msgid "Error capturing PulseAudio (%s)"
+msgstr "Error al capturar PulseAudio (%s)"
 
-#: src/track.c
+#: src/sound.cpp
+msgid "Opening FFTW plan"
+msgstr "Apertura del plan FFTW"
+
+#: src/sound.cpp
+msgid "Invalid sound source."
+msgstr "Fuente de sonido no válida."
+
+#: src/sound.cpp
+msgid "Detecting"
+msgstr "Detector"
+
+#: src/sound.cpp
 #, c-format
-msgid "For_SET_REL track_pan_Angel %d, track_tilt_Angel %d"
-msgstr "Para SET REL track pan Angel %d, track tilt Angel %d"
+msgid "Freq: %.4f threshold: %d count: %d maximum: %d"
+msgstr "Frecuencia: %.4f umbral: %d recuento: %d máximo: %d"
 
-#: src/track.c
+#: src/sound.cpp
 #, c-format
-msgid "For_SET_REL move_X %d,move_Y %d"
-msgstr "Para SET REL mover X %d, mover Y %d"
+msgid "Sound Alert %d-%s : level %d count %d max vol %d"
+msgstr "Alerta sonora %d-%s: nivel %d recuento %d vol. máx. %d"
 
-#: src/track.c
-#, c-format
-msgid " dev %d, addr= %d, control_S= %d, Wert= %d"
-msgstr " dev %d, addr = %d, control S = %d, Wert = %d"
+#: src/sound.cpp
+msgid "Capture loop finished"
+msgstr "Bucle de captura terminado"
 
-#: src/track.c
-#, c-format
-msgid " dev %d,addr= %d, control_S= %d, Wert= %d"
-msgstr " dev %d, addr = %d, control S = %d, Wert = %d"
+#: src/sound.cpp
+msgid "Sound detection functionality not supported"
+msgstr "La función de detección de sonido no es compatible"
 
-#: src/track.c
-#, c-format
-msgid "Before_REL_Y_Angel : x= %d , Y= %d"
-msgstr "Antes de REL Y Angel: x = %d, Y = %d"
-
-#: src/track.c
-#, c-format
-msgid "After_REL_Y_Angel : x= %d , Y= %d"
-msgstr "Después de REL Y Angel: x = %d, Y = %d"
-
-#: src/translate.c
-msgid "Language: English"
-msgstr "Idioma: Español"
-
-#: src/util.c
+#: src/util.cpp
 #, c-format
 msgid "Could not allocate %llu bytes of memory!"
-msgstr "¡No se pudo asignar %llu bytes de memoria!"
+msgstr "¡No se pudieron asignar %llu bytes de memoria!"
 
-#: src/util.c
+#: src/util.cpp
 #, c-format
 msgid "Warning! Function %s tries to resize memoryblock at %p to 0 bytes!"
 msgstr ""
 "¡Advertencia! ¡La función %s intenta cambiar el tamaño del bloque de memoria "
-"en %p a 0 bytes!"
+"en %pa 0 bytes!"
 
-#: src/util.c
+#: src/util.cpp
 #, c-format
 msgid "Could not resize memory-block at offset %p to %llu bytes (function %s)!"
 msgstr ""
 "¡No se pudo cambiar el tamaño del bloque de memoria en el desplazamiento %p "
 "a %llu bytes (función %s)!"
 
-#: src/util.c
+#: src/util.cpp
+#, c-format
+msgid "Creating %s"
+msgstr "Creando %s"
+
+#: src/util.cpp
 #, c-format
 msgid "Problem creating directory %s"
 msgstr "Problema al crear el directorio %s"
 
-#: src/util.c
-#, c-format
-msgid "creating directory %s"
-msgstr "creando el directorio %s"
-
-#: src/util.c
+#: src/util.cpp
 #, c-format
 msgid "Error opening file %s with mode %s"
 msgstr "Error al abrir el archivo %s con el modo %s"
 
-#: src/util.c
+#: src/util.cpp
 msgid "Error closing file"
-msgstr "Error al cerrar archivo"
+msgstr "Error al cerrar el archivo"
 
-#: src/util.c
-msgid "{dbeventid} is not supported. Use eventid."
-msgstr "{dbeventid} no es compatible. Usar id. de evento."
-
-#: src/util.c
+#: src/util.cpp
 #, c-format
 msgid "invalid format specifier keyword %*.*s"
-msgstr "palabra clave de especificador de formato no válido %*.*s"
+msgstr "palabra clave especificada de formato no válida %*.*s"
 
-#: src/util.c
+#: src/util.cpp
 #, c-format
 msgid "Unable to set thread name %s"
 msgstr "No se puede establecer el nombre del hilo %s"
 
-#: src/util.c
+#: src/util.cpp
 msgid "FFMPEG version too old. Disabling pass-through processing."
 msgstr ""
-"La versión de FFMPEG es demasiado antigua. Deshabilitar el procesamiento de "
-"paso."
+"Versión de FFMPEG demasiado antigua. Deshabilitar el procesamiento de "
+"transferencia."
 
-#: src/util.c
-msgid "pass-through enabled."
-msgstr "transferencia habilitada."
+#: src/util.cpp
+msgid "Language: English"
+msgstr "Idioma: inglés"
 
-#: src/util.c
+#: src/util.cpp
+msgid "Disabling native language support"
+msgstr "Deshabilitar el soporte de idioma nativo"
+
+#: src/util.cpp
+msgid "Enabling native language support"
+msgstr "Habilitación de la compatibilidad con el idioma nativo"
+
+#: src/util.cpp
 #, c-format
-msgid "Error setting parm >%s<"
-msgstr "Error al configurar el parámetro> %s <"
+msgid "parse file: %s"
+msgstr "analizar archivo: %s"
 
-#: src/util.c
+#: src/util.cpp
+msgid "Only one params_file specification is permitted."
+msgstr "Solo se permite una especificación de archivo de parámetros."
+
+#: src/util.cpp
 #, c-format
 msgid "Parsed: >%s< >%s<"
-msgstr "Analizado:> %s <> %s <"
+msgstr "Analizado: >%s< >%s<"
 
-#: src/util.c
-msgid "Parsed: >redacted< >redacted<"
-msgstr "Analizado:> redactado <> redactado <"
-
-#: src/util.c
+#: src/util.cpp
 #, c-format
-msgid "Error parsing parm_nm controls: %s"
-msgstr "Error al analizar los controles parm nm: %s"
+msgid "Parsing: >%s< >%ld %ld %ld %ld<"
+msgstr "Análisis: >%s< >%ld %ld %ld %ld<"
 
-#: src/util.c
+#: src/util.cpp
+msgid "Starting parsing parameters"
+msgstr "Comenzando parámetros de análisis"
+
+#: src/util.cpp
 #, c-format
-msgid "Error parsing parm_vl controls: %s"
-msgstr "Error al analizar los controles de parm vl: %s"
+msgid "New config: %s"
+msgstr "Nueva configuración: %s"
 
-#: src/util.c
+#: src/util.cpp
 #, c-format
-msgid "Error setting temp: %s"
-msgstr "Error al configurar la temperatura: %s"
+msgid "Unable to start external command '%s'"
+msgstr "No se puede iniciar el comando externo '%s'"
 
-#: src/util.c
+#: src/util.cpp
 #, c-format
-msgid "Error reparsing controls: %s"
-msgstr "Error al analizar los controles: %s"
+msgid "Executing external command '%s'"
+msgstr "Ejecutando el comando externo '%s'"
 
-#: src/util.c
-#, c-format
-msgid "Parsing: %s"
-msgstr "Análisis: %s"
-
-#: src/util.c
-msgid "Parsing: <redacted>"
-msgstr "Análisis: <redactado>"
-
-#: src/util.c
-#, c-format
-msgid "Error parsing controls: %s"
-msgstr "Error al analizar los controles: %s"
-
-#: src/util.c
-#, c-format
-msgid "Error: %s"
-msgstr "Error: %s"
-
-#: src/util.c
-#, c-format
-msgid "New netcam_params: %s"
-msgstr "Nuevos parámetros de netcam: %s"
-
-#: src/util.c
-#, c-format
-msgid "New netcam_high_params: %s"
-msgstr "Nuevos parámetros altos de netcam: %s"
-
-#: src/util.c
-#, c-format
-msgid "New video_params: %s"
-msgstr "Nuevos parámetros de video: %s"
-
-#: src/util.c
-#, c-format
-msgid "New webcontrol_header_params: %s"
-msgstr "Nuevos parámetros de encabezado de control web: %s"
-
-#: src/util.c
-msgid "New webcontrol_header_params: <redacted>"
-msgstr "Nuevos parámetros de encabezado de webcontrol: <redactado>"
-
-#: src/util.c
-#, c-format
-msgid "New stream_header_params: %s"
-msgstr "Nuevos parámetros de encabezado de transmisión: %s"
-
-#: src/util.c
-msgid "New stream_header_params: <redacted>"
-msgstr "Nuevos parámetros de encabezado de transmisión: <redactado>"
-
-#: src/util.c
-#, c-format
-msgid "Programming error.  Unknown configuration item: %s"
-msgstr "Error de programación. Elemento de configuración desconocido: %s"
-
-#: src/video_bktr.c
-#, c-format
-msgid "METEORSHUE Error setting hue [%d]"
-msgstr "METEORSHUE Error al establecer el tono [ %d]"
-
-#: src/video_bktr.c
-#, c-format
-msgid "to [%d]"
-msgstr "a [ %d]"
-
-#: src/video_bktr.c
-msgid "METEORGHUE Error getting hue"
-msgstr "METEORGHUE Error al obtener tono"
-
-#: src/video_bktr.c
-#, c-format
-msgid "METEORSCSAT Error setting saturation [%d]"
-msgstr "METEORSCSAT Error al establecer la saturación [ %d]"
-
-#: src/video_bktr.c
-msgid "METEORGCSAT Error getting saturation"
-msgstr "METEORGCSAT Error al obtener la saturación"
-
-#: src/video_bktr.c
-#, c-format
-msgid "METEORSCONT Error setting contrast [%d]"
-msgstr "METEORSCONT Error al establecer el contraste [ %d]"
-
-#: src/video_bktr.c
-msgid "METEORGCONT Error getting contrast"
-msgstr "METEORGCONT Error al obtener contraste"
-
-#: src/video_bktr.c
-#, c-format
-msgid "METEORSBRIG  brightness [%d]"
-msgstr "METEORSBRIG brillo [ %d]"
-
-#: src/video_bktr.c
-msgid "METEORGBRIG  getting brightness"
-msgstr "METEORGBRIG obteniendo brillo"
-
-#: src/video_bktr.c
-msgid "Not implemented"
-msgstr "No se ha implementado"
-
-#: src/video_bktr.c
-#, c-format
-msgid "Device Input %d out of range (0-4)"
-msgstr "Entrada de dispositivo %d fuera de rango (0-4)"
-
-#: src/video_bktr.c
-#, c-format
-msgid "METEORSINPUT %d invalid -Trying composite %d"
-msgstr "METEORSINPUT %d inválido - Intentando compuesto %d"
-
-#: src/video_bktr.c
-msgid "BT848SFMT, Couldn't set the input format, try again with default"
-msgstr ""
-"BT848SFMT, no se pudo establecer el formato de entrada, intente nuevamente "
-"con el valor predeterminado"
-
-#: src/video_bktr.c
-msgid "BT848SFMT, Couldn't set the input format either default"
-msgstr "BT848SFMT, no se pudo establecer el formato de entrada por defecto"
-
-#: src/video_bktr.c
-msgid "Couldn't set the geometry"
-msgstr "No se pudo establecer la geometría"
-
-#: src/video_bktr.c
-#, c-format
-msgid "to [%d/%d] Norm %d"
-msgstr "a [ %d / %d] Norma %d"
-
-#: src/video_bktr.c
-#, c-format
-msgid "Not valid Frequency [%ld] for Source input [%i]"
-msgstr "Frecuencia no válida [ %ld] para la entrada de fuente [ %i]"
-
-#: src/video_bktr.c
-#, c-format
-msgid "Frequency [%ld] Source input [%i]"
-msgstr "Frecuencia [ %ld] Entrada de fuente [ %i]"
-
-#: src/video_bktr.c
-#, c-format
-msgid "set input [%d]"
-msgstr "establecer entrada [ %d]"
-
-#: src/video_bktr.c
-#, c-format
-msgid "set input format [%d]"
-msgstr "establecer formato de entrada [ %d]"
-
-#: src/video_bktr.c
-#, c-format
-msgid "set geometry [%d]x[%d]"
-msgstr "establecer geometría [ %d] x [ %d]"
-
-#: src/video_bktr.c
-msgid "Frequency set (no implemented yet"
-msgstr "Conjunto de frecuencias (aún no implementado"
-
-#: src/video_bktr.c
-msgid "Sizing buffer to 3x"
-msgstr "Dimensionar el búfer a 3x"
-
-#: src/video_bktr.c
-msgid "Sizing buffer to 3/2x"
-msgstr "Dimensionar el búfer a 3 / 2x"
-
-#: src/video_bktr.c
-msgid "mmap failed"
-msgstr "mmap falló"
-
-#: src/video_bktr.c
-msgid "METEORCAPTUR using single method Error capturing"
-msgstr "METEORCAPTUR utilizando un solo método Captura de errores"
-
-#: src/video_bktr.c
-msgid "Error capturing using single method"
-msgstr "Error al capturar usando un método único"
-
-#: src/video_bktr.c src/video_v4l2.c
-msgid "Unable to find video device"
-msgstr "No se puede encontrar el dispositivo de video"
-
-#: src/video_bktr.c src/video_v4l2.c
-#, c-format
-msgid "Closing video device %s"
-msgstr "Dispositivo de video de cierre %s"
-
-#: src/video_bktr.c src/video_v4l2.c
-#, c-format
-msgid "Still %d users of video device %s, so we don't close it now"
-msgstr ""
-"Todavía %d usuarios del dispositivo de video %s, por lo que no lo cerramos "
-"ahora"
-
-#: src/video_bktr.c src/video_v4l2.c
-#, c-format
-msgid "config image width (%d) is not modulo 8"
-msgstr "ancho de imagen de configuración ( %d) no es módulo 8"
-
-#: src/video_bktr.c src/video_v4l2.c
-#, c-format
-msgid "config image height (%d) is not modulo 8"
-msgstr "la altura de la imagen de configuración ( %d) no es el módulo 8"
-
-#: src/video_bktr.c
-msgid "Stopping capture"
-msgstr "Deteniendo la captura"
-
-#: src/video_bktr.c
-#, c-format
-msgid "Reusing [%s] inputs [%d,%d] Change capture method METEOR_CAP_SINGLE"
-msgstr ""
-"Reutilizando [ %s] entradas [ %d, %d] Cambiar el método de captura METEOR "
-"CAP SINGLE"
-
-#: src/video_bktr.c
-msgid "VIDEO_PALETTE_YUV420P setting imgs.size_norm and imgs.motionsize"
-msgstr "PALETA DE VIDEO YUV420P configurando imgs.size norm y imgs.motionsize"
-
-#: src/video_bktr.c
-#, c-format
-msgid "open video device %s"
-msgstr "dispositivo de video abierto %s"
-
-#: src/video_bktr.c
-#, c-format
-msgid "open tuner device %s"
-msgstr "dispositivo sintonizador abierto %s"
-
-#: src/video_common.c
+#: src/video_common.cpp
 msgid "Corrupt image ... continue"
-msgstr "Imagen corrupta ... continuar"
+msgstr "Imagen corrupta... continuar"
 
-#: src/video_common.c
+#: src/video_common.cpp
 #, c-format
 msgid "SOI position adjusted by %d bytes."
-msgstr "Posición de SOI ajustada por %d bytes."
+msgstr "Posición SOI ajustada por %d bytes."
 
-#: src/video_common.c
-msgid "calling netcam_cleanup"
-msgstr "llamada limpieza de netcam"
-
-#: src/video_common.c
-msgid "calling netcam_rtsp_cleanup"
-msgstr "llamando a netcam rtsp cleanup"
-
-#: src/video_common.c
-msgid "Cleaning up V4L2 device"
-msgstr "Limpieza del dispositivo V4L2"
-
-#: src/video_common.c
-msgid "Cleaning up BKTR device"
-msgstr "Limpieza del dispositivo BKTR"
-
-#: src/video_common.c
-msgid "No Camera device cleanup (Netcam, V4L2, BKTR)"
-msgstr "Sin limpieza del dispositivo de la cámara (Netcam, V4L2, BKTR)"
-
-#: src/video_common.c
-msgid "Opening Netcam"
-msgstr "Abriendo Netcam"
-
-#: src/video_common.c
-msgid "Netcam failed to open"
-msgstr "Netcam no se pudo abrir"
-
-#: src/video_common.c
-msgid "Opening Netcam RTSP"
-msgstr "Abriendo Netcam RTSP"
-
-#: src/video_common.c
-msgid "Netcam RTSP failed to open"
-msgstr "Netcam RTSP no pudo abrirse"
-
-#: src/video_common.c
-msgid "Opening V4L2 device"
-msgstr "Apertura del dispositivo V4L2"
-
-#: src/video_common.c
-msgid "V4L2 device failed to open"
-msgstr "El dispositivo V4L2 no pudo abrirse"
-
-#: src/video_common.c
-msgid "Opening BKTR device"
-msgstr "Apertura del dispositivo BKTR"
-
-#: src/video_common.c
-msgid "BKTR device failed to open"
-msgstr "El dispositivo BKTR no pudo abrirse"
-
-#: src/video_common.c
-msgid "No Camera device specified (Netcam, V4L2, BKTR)"
-msgstr ""
-"No se especificó ningún dispositivo de cámara (Netcam, V4L2, BKTR)"
-
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 #, c-format
 msgid "Failed to open '%s'"
-msgstr "Error al abrir ' %s'"
+msgstr "Error al abrir '%s'"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 #, c-format
 msgid "Error specifying buffer: %s"
 msgstr "Error al especificar el búfer: %s"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 #, c-format
 msgid "Opening buffer: %s"
-msgstr "Tampón de apertura: %s"
+msgstr "Búfer de apertura: %s"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 #, c-format
 msgid "Read buffer: %s"
-msgstr "Tampón de lectura: %s"
+msgstr "Leer búfer: %s"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 #, c-format
 msgid "found video device '%s' %d"
-msgstr "dispositivo de video encontrado ' %s' %d"
+msgstr "dispositivo de video encontrado '%s' %d"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 #, c-format
 msgid "Opened %s as pipe output"
-msgstr "Abierto %s como salida de tubería"
+msgstr "%s abierto como salida de tubería"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 #, c-format
 msgid "Opening %s as pipe output failed"
-msgstr "Abriendo %s cuando la salida de la tubería falló"
+msgstr "Error al abrir %s como salida de conducto"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 msgid "Original pipe specifications"
-msgstr "Especificaciones de tubería originales"
+msgstr "Especificaciones originales de la tubería"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 msgid "Proposed pipe specifications"
 msgstr "Especificaciones de tubería propuestas"
 
-#: src/video_loopback.c
+#: src/video_loopback.cpp
 msgid "Final pipe specifications"
-msgstr "Especificaciones finales de la tubería"
+msgstr "Especificaciones finales de tubería"
 
-#: src/video_v4l2.c
+#: src/video_loopback.cpp
+msgid "Opening video loopback device for normal pictures"
+msgstr ""
+"Apertura del dispositivo de bucle invertido de video para imágenes normales"
+
+#: src/video_loopback.cpp
+msgid "Failed to open video loopback for normal pictures"
+msgstr "No se pudo abrir el loopback de video para imágenes normales"
+
+#: src/video_loopback.cpp
+msgid "Opening video loopback device for motion pictures"
+msgstr "Apertura del dispositivo de loopback de video para películas"
+
+#: src/video_loopback.cpp
+msgid "Failed to open video loopback for motion pictures"
+msgstr "No se pudo abrir el loopback de video para imágenes en movimiento"
+
+#: src/video_v4l2.cpp
+msgid "---------Controls---------"
+msgstr "---------Control S---------"
+
+#: src/video_v4l2.cpp
+msgid "  V4L2 ID :  Name : Range"
+msgstr "V4L2 ID: Nombre: Rango"
+
+#: src/video_v4l2.cpp
 msgid "No Controls found for device"
 msgstr "No se encontraron controles para el dispositivo"
 
-#: src/video_v4l2.c
-msgid "---------Controls---------"
-msgstr "--------- Controles ---------"
-
-#: src/video_v4l2.c
-msgid "  V4L2 ID   Name and Range"
-msgstr " Nombre y rango de identificación de V4L2"
-
-#: src/video_v4l2.c
-msgid "Error resetting user value"
-msgstr "Error al restablecer el valor del usuario"
-
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "Leaving control %s \"%s\" set to %d"
-msgstr "Dejando el control %s \"%s\" establecido en %d"
+msgid "setting control %s \"%s\" to %d failed with return code %d"
+msgstr ""
+"la configuración del control %s \"%s\" en %d falló con el código de retorno "
+"%d"
 
-#: src/video_v4l2.c
-msgid "Device not ready"
-msgstr "Dispositivo no listo"
-
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Set control \"%s\" to value %d"
-msgstr "Establezca el control \" %s \" en el valor %d"
+msgstr "Establezca el control \"%s\" en el valor %d"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "setting control %s \"%s\" to %d failed. "
-msgstr "No se pudo establecer el control %s \"%s\" en %d."
-
-#: src/video_v4l2.c
-#, c-format
-msgid "%s control option value %s is below minimum.  Using minimum %d"
+msgid "%s control option value %s is below minimum.  Skipping..."
 msgstr ""
-"El valor de la opción de control %s %s está por debajo del mínimo. Usando un "
-"mínimo de %d"
+"El valor de la opción de control %s %s está por debajo del mínimo. Salto a "
+"la comba..."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "%s control option value %s is above maximum.  Using maximum %d"
+msgid "%s control option value %s is above maximum.  Skipping..."
 msgstr ""
-"El valor de la opción de control %s %s está por encima del máximo. Usando el "
-"máximo %d"
+"El valor de la opción de control %s %s está por encima del máximo. Salto a "
+"la comba..."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "control type not supported yet"
-msgstr "tipo de control aún no compatible"
+msgstr "el tipo de control aún no es compatible"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid ""
 "Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input "
 "value in conf by -1"
 msgstr ""
-"No se puede consultar la entrada %d. ENTRADA VIDIOC, si usa una entrada de "
-"cambio WEBCAMvalor en conf por -1"
+"No se puede consultar la entrada %d. VIDIOC ENUMINPUT, si usa una WEBCAM "
+"cambie la entradavalor en conf por -1"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Name = \"%s\", type 0x%08X, status %08x"
-msgstr "Nombre = \" %s \", escriba 0x %08X, estado %08x"
+msgstr "Nombre = \"%s\", tipo 0x%08X, estado %08x"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Name = \"%s\",- TUNER"
-msgstr "Nombre = \" %s \", - SINTONIZADOR"
+msgstr "Nombre = \"%s\",- SINTONIZADOR"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Name = \"%s\"- CAMERA"
-msgstr "Nombre = \" %s \" - CÁMARA"
+msgstr "Nombre = \"%s\"- CÁMARA"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Error selecting input %d VIDIOC_S_INPUT"
-msgstr "Error al seleccionar la entrada %d ENTRADA VIDIOC"
+msgstr "Error al seleccionar entrada %d VIDIOC S INPUT"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Device does not support specifying PAL/NTSC norm"
-msgstr "El dispositivo no admite la especificación de la norma PAL / NTSC"
+msgstr "El dispositivo no admite la especificación de la norma PAL/NTSC"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "- video standard %s"
-msgstr "- estándar de video %s"
+msgstr "- estándar de vídeo %s"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Error selecting standard method %d VIDIOC_S_STD"
 msgstr "Error al seleccionar el método estándar %d VIDIOC S STD"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Video standard set to NTSC"
-msgstr "Estándar de video configurado en NTSC"
+msgstr "Estándar de video establecido en NTSC"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Video standard set to SECAM"
-msgstr "Estándar de video configurado en SECAM"
+msgstr "Estándar de video establecido en SECAM"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Video standard set to PAL"
-msgstr "Estándar de video configurado en PAL"
+msgstr "Estándar de video establecido en PAL"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "tuner %d VIDIOC_G_TUNER"
-msgstr "sintonizador %d SINTONIZADOR VIDIOC G"
+msgstr "sintonizador %d VIDIOC G SINTONIZADOR"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Set tuner %d"
 msgstr "Establecer sintonizador %d"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "freq %ul VIDIOC_S_FREQUENCY"
-msgstr "frecuencia %ul FRECUENCIA VIDIOC"
+msgstr "freq %ul VIDIOC S FRECUENCIA"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Set Frequency to %ul"
 msgstr "Establecer frecuencia en %ul"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "Unable to use %c%c%c%c (%dx%d)"
-msgstr "No se puede usar %c%c%c%c (%dx%d)"
+msgid "Unable to use palette %c%c%c%c (%dx%d)"
+msgstr "No se puede usar la paleta %c%c%c%c (%dx%d)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Testing palette %c%c%c%c (%dx%d)"
-msgstr "Paleta de prueba %c %c %c %c ( %dx %d)"
+msgstr "Paleta de prueba %c%c%c%c (%dx%d)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Checking image size %dx%d with stride %d"
 msgstr "Comprobación del tamaño de imagen %dx%d con zancada %d"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "No stride value provided from device."
 msgstr "No se proporciona ningún valor de zancada desde el dispositivo."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Width(%d) must be less than stride(%d)"
 msgstr "El ancho (%d) debe ser menor que el paso (%d)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "The image width(%d) is not multiple of the stride(%d)"
 msgstr "El ancho de la imagen (%d) no es múltiplo del paso (%d)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
 msgstr "Condición imposible: Ancho (%d), Zancada (%d), Por zancada (%d)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Image width will be padded %d bytes"
 msgstr "El ancho de la imagen se rellenará %d bytes"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Adjusting resolution from %ix%i to %ix%i."
-msgstr "Ajuste de la resolución de %ix %i a %ix %i."
+msgstr "Ajuste de resolución de %ix%i a %ix%i."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Adjusted resolution not modulo 8."
 msgstr "Resolución ajustada no módulo 8."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Specify different palette or width/height in config file."
 msgstr ""
-"Especifique diferentes paletas o ancho / alto en el archivo de configuración."
+"Especifique una paleta diferente o ancho/alto en el archivo de configuración."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Error setting pixel format."
 msgstr "Error al configurar el formato de píxeles."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
-msgstr "Uso de la paleta %c %c %c %c ( %dx %d)"
+msgstr "Usando la paleta %c%c%c%c (%dx%d)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
+#, c-format
+msgid "config image width (%d) is not modulo 8"
+msgstr "el ancho de la imagen de configuración (%d) no es módulo 8"
+
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Adjusting to width (%d)"
-msgstr "Ajuste al ancho ( %d)"
+msgstr "Ajuste al ancho (%d)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
+#, c-format
+msgid "config image height (%d) is not modulo 8"
+msgstr "la altura de la imagen de configuración (%d) no es módulo 8"
+
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Adjusting to height (%d)"
-msgstr "Ajuste a la altura ( %d)"
+msgstr "Ajuste a la altura (%d)"
 
-#: src/video_v4l2.c
-#, c-format
-msgid "Configuration palette index %d (%s) for %dx%d doesn't work."
-msgstr ""
-"El índice de la paleta de configuración %d ( %s) para %dx %d no funciona."
+#: src/video_v4l2.cpp
+msgid "Invalid palette.  Changing to default"
+msgstr "Paleta no válida. Cambiar a predeterminado"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Supported palettes:"
 msgstr "Paletas compatibles:"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "%d - %s (compressed : %d) (%#x)"
-msgstr "%d - %s (comprimido: %d) ( %# x)"
+msgid "Configuration palette index %d (%s) for %dx%d doesn't work."
+msgstr ""
+"El índice de la paleta de configuración %d (%s) para %dx%d no funciona."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
+msgid "Unable to find a compatible palette format."
+msgstr "No se puede encontrar un formato de paleta compatible."
+
+#: src/video_v4l2.cpp
+#, c-format
+msgid "Palette selection failed for format %s"
+msgstr "La selección de paleta falló para el formato %s"
+
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Selected palette %s"
 msgstr "Paleta seleccionada %s"
 
-#: src/video_v4l2.c
-#, c-format
-msgid "Palette selection failed for format %s"
-msgstr "Error en la selección de paleta para el formato %s"
-
-#: src/video_v4l2.c
-msgid "Unable to find a compatible palette format."
-msgstr "No se puede encontrar un formato de paleta compatible."
-
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Error requesting buffers %d for memory map. VIDIOC_REQBUFS"
-msgstr "Error al solicitar buffers %d para el mapa de memoria. VIDIOC REQBUFS"
+msgstr ""
+"Error al solicitar los búferes %d para el mapa de memoria. REQUISITOS DE "
+"VÍDEO"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "mmap information: frames=%d"
-msgstr "información de mmap: marcos = %d"
+msgstr "información mmap: marcos = %d"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Insufficient buffer memory %d < MIN_MMAP_BUFFERS."
-msgstr "Memoria de búfer insuficiente %d <MÍNIMOS BUFFERS MMAP."
+msgstr "Memoria de búfer insuficiente %d < MIN MMAP BUFFERS."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Out of memory."
 msgstr "Sin memoria."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "Error querying buffer %i"
-msgstr "Error al consultar el búfer %i"
+msgid ""
+"Error querying buffer %i\n"
+"VIDIOC_QUERYBUF: "
+msgstr ""
+"Error al consultar el búfer %i\n"
+"CONSULTA VIDIOC:"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Error mapping buffer %i mmap"
-msgstr "Error de asignación de búfer %i mmap"
+msgstr "Búfer de asignación de errores %i mmap"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "%i length=%d Address (%x) offset %d"
-msgstr "%i longitud=%d Dirección (%x) desplazamiento %d"
+msgid "%i length=%d Address (%x)"
+msgstr "%i longitud=%d Dirección (%x)"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Error starting stream. VIDIOC_STREAMON"
-msgstr "Error al iniciar la transmisión. VIDIOC STREAMON"
+msgstr "Error al iniciar la transmisión. FLUJO DE VIDIOC"
 
-#: src/video_v4l2.c
-msgid "Errors occurred during device select"
-msgstr "Se produjeron errores durante la selección del dispositivo"
+#: src/video_v4l2.cpp
+msgid "Error setting device controls"
+msgstr "Error al configurar los controles del dispositivo"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "Using videodevice %s and input %d"
-msgstr "Uso del dispositivo de video %sy entrada %d"
+msgid "Opening video device %s"
+msgstr "Abriendo dispositivo de video %s"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Failed to open video device %s"
-msgstr "Error al abrir el dispositivo de video %s"
+msgstr "No se pudo abrir el dispositivo de video %s"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Not a V4L2 device?"
 msgstr "¿No es un dispositivo V4L2?"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 msgid "Device does not support capturing."
 msgstr "El dispositivo no admite la captura."
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
+#, c-format
+msgid "Supported palette %s (%c%c%c%c)"
+msgstr "Paleta compatible %s (%c%c%c%c)"
+
+#: src/video_v4l2.cpp
+#, c-format
+msgid "  Width: %d, Height %d"
+msgstr "Ancho: %d, Alto %d"
+
+#: src/video_v4l2.cpp
+#, c-format
+msgid "    Framerate %d/%d"
+msgstr "Velocidad de fotogramas %d/%d"
+
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Trying to set fps to %d"
 msgstr "Intentando establecer fps en %d"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Error setting fps. Return code %d"
 msgstr "Error al configurar fps. Código de retorno %d"
 
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
 msgid "Device set fps to %d"
-msgstr "Dispositivo configurado fps en %d"
+msgstr "Dispositivo establecido fps a %d"
 
-#: src/video_v4l2.c
-msgid "V4L2 is not enabled"
-msgstr "V4L2 no está habilitado"
-
-#: src/video_v4l2.c
-msgid "V4L2 is not enabled."
-msgstr "V4L2 no está habilitado."
-
-#: src/video_v4l2.c
+#: src/video_v4l2.cpp
 #, c-format
-msgid "Testing palette %s (%c%c%c%c)"
-msgstr "Paleta de prueba %s ( %c %c %c %c)"
+msgid "Closing video device %s"
+msgstr "Cerrando el dispositivo de video %s"
 
-#: src/video_v4l2.c
-#, c-format
-msgid "  Width: %d, Height %d"
-msgstr " Ancho: %d, Altura %d"
+#: src/video_v4l2.cpp
+msgid "Opening V4L2 device"
+msgstr "Apertura del dispositivo V4L2"
 
-#: src/video_v4l2.c
-#, c-format
-msgid "    Framerate %d/%d"
-msgstr " Velocidad de fotogramas %d / %d"
+#: src/video_v4l2.cpp
+msgid "V4L2 device failed to open"
+msgstr "El dispositivo V4L2 no se pudo abrir"
 
-#: src/webu.c
+#: src/webu.cpp
 #, c-format
 msgid "Sent url: %s"
 msgstr "URL enviada: %s"
 
-#: src/webu.c
+#: src/webu.cpp
 #, c-format
 msgid "Decoded url: %s"
 msgstr "URL decodificada: %s"
 
-#: src/webu.c
-msgid "Restarting all threads"
-msgstr "Reiniciar todos los hilos"
-
-#: src/webu.c
+#: src/webu.cpp
 #, c-format
-msgid "Restarting thread %d"
-msgstr "Reinicio del hilo %d"
+msgid "Full Host:  %s"
+msgstr "Host completo: %s"
 
-#: src/webu.c
-#, c-format
-msgid "Quitting thread %d"
-msgstr "Saliendo del hilo %d"
-
-#: src/webu.c src/webu_html.c src/webu_text.c
-#, c-format
-msgid "Invalid action requested: >%s< >%s< >%s<"
-msgstr "Acción solicitada no válida:> %s <> %s <> %s <"
-
-#: src/webu.c
-msgid "Native Language : on"
-msgstr "Idioma nativo: en"
-
-#: src/webu.c
-msgid "Native Language : off"
-msgstr "Idioma nativo: off"
-
-#: src/webu.c
-msgid "Set the value to null/zero"
-msgstr "Establezca el valor en nulo / cero"
-
-#: src/webu.c
-#, c-format
-msgid "Ignoring connection from: %s"
-msgstr "Ignorando la conexión de: %s"
-
-#: src/webu.c
+#: src/webu.cpp
 #, c-format
 msgid "Failed authentication from %s"
 msgstr "Autenticación fallida de %s"
 
-#: src/webu.c
-msgid "No webcontrol user:pass provided"
-msgstr "Ningún usuario de control web: pase proporcionado"
-
-#: src/webu.c
-msgid "No stream user:pass provided"
-msgstr "Sin usuario de transmisión: pase proporcionado"
-
-#: src/webu.c src/webu_stream.c
-msgid "Invalid response"
-msgstr "Respuesta invalida"
-
-#: src/webu.c
-#, c-format
-msgid "Error adding webcontrol header %s %s"
-msgstr "Error al agregar el encabezado de control web %s %s"
-
-#: src/webu.c src/webu_stream.c
-#, c-format
-msgid "Error adding stream header %s %s"
-msgstr "Error al agregar el encabezado de la transmisión %s %s"
-
-#: src/webu.c
-#, c-format
-msgid "Invalid Method requested: %s"
-msgstr "Método no válido solicitado: %s"
-
-#: src/webu.c
+#: src/webu.cpp
 #, c-format
 msgid "Connection from: %s"
 msgstr "Conexión desde: %s"
 
-#: src/webu.c
+#: src/webu.cpp
 #, c-format
-msgid "send page failed %d"
-msgstr "la página de envío falló %d"
+msgid "Ignoring connection from: %s"
+msgstr "Ignorando la conexión de: %s"
 
-#: src/webu.c
-msgid "Stream picture is not ready yet"
-msgstr "La imagen de la transmisión aún no está lista"
+#: src/webu.cpp
+msgid "No webcontrol user:pass provided"
+msgstr "Sin usuario de control web: pase proporcionado"
 
-#: src/webu.c
-msgid "Stream process requested to finish."
-msgstr "Se solicitó finalizar el proceso de transmisión."
+#: src/webu.cpp
+#: src/webu_stream.cpp
+msgid "Invalid response"
+msgstr "Respuesta invalida"
 
-#: src/webu.c
-msgid "Send page failed."
-msgstr "Error al enviar la página."
+#: src/webu.cpp
+msgid "send page failed."
+msgstr "Enviar página falló."
 
-#: src/webu.c
+#: src/webu.cpp
+msgid "Shutting down camera"
+msgstr "Apagando la cámara"
+
+#: src/webu.cpp
 msgid "Basic authentication: available"
 msgstr "Autenticación básica: disponible"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "Basic authentication: disabled"
 msgstr "Autenticación básica: deshabilitada"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "Digest authentication: available"
 msgstr "Autenticación implícita: disponible"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "Digest authentication: disabled"
 msgstr "Autenticación implícita: deshabilitada"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "libmicrohttpd libary too old ipv6 disabled"
-msgstr "libmicrohttpd libary demasiado viejo ipv6 deshabilitado"
+msgstr "libmicrohttpd biblioteca demasiado antigua ipv6 deshabilitado"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "IPV6: available"
 msgstr "IPV6: disponible"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "IPV6: disabled"
 msgstr "IPV6: deshabilitado"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "libmicrohttpd libary too old SSL/TLS disabled"
-msgstr "libmicrohttpd libary SSL / TLS demasiado viejo deshabilitado"
+msgstr "libmicrohttpd biblioteca demasiado antigua SSL/TLS deshabilitado"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "SSL/TLS: available"
-msgstr "SSL / TLS: disponible"
+msgstr "SSL/TLS: disponible"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "SSL/TLS: disabled"
-msgstr "SSL / TLS: deshabilitado"
+msgstr "SSL/TLS: deshabilitado"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "Error reading file for SSL/TLS support."
-msgstr "Error al leer el archivo para el soporte SSL / TLS."
+msgstr "Error al leer el archivo de compatibilidad con SSL/TLS."
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "SSL/TLS requested but no cert file provided.  SSL/TLS disabled"
 msgstr ""
-"Se requiere SSL / TLS pero no se proporciona un archivo cert. SSL / TLS "
-"deshabilitado"
+"Se solicitó SSL/TLS pero no se proporcionó ningún archivo de certificado. "
+"SSL/TLS deshabilitado"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "SSL/TLS requested but no key file provided.  SSL/TLS disabled"
 msgstr ""
-"SSL / TLS solicitado pero no se proporciona ningún archivo de clave. SSL / "
-"TLS deshabilitado"
+"Se solicitó SSL/TLS pero no se proporcionó ningún archivo de clave. SSL/TLS "
+"deshabilitado"
 
-#: src/webu.c
+#: src/webu.cpp
 #, c-format
 msgid "Starting webcontrol on port %d"
-msgstr "Inicio de webcontrol en el puerto %d"
+msgstr "Iniciando webcontrol en el puerto %d"
 
-#: src/webu.c
+#: src/webu.cpp
 msgid "Unable to start MHD"
 msgstr "No se puede iniciar MHD"
 
-#: src/webu.c
+#: src/webu.cpp
 #, c-format
 msgid "Started webcontrol on port %d"
-msgstr "Se inició webcontrol en el puerto %d"
+msgstr "Webcontrol iniciado en el puerto %d"
 
-#: src/webu.c
+#: src/webu_html.cpp
 #, c-format
-msgid "Started camera %d stream on port/camera_id %d/%d"
-msgstr ""
-"Se inició la transmisión de la cámara %d en el puerto / identificación de la "
-"cámara %d / %d"
+msgid "Invalid user html file: %s"
+msgstr "Archivo html de usuario no válido: %s"
 
-#: src/webu.c
+#: src/webu_post.cpp
+msgid "Restarting all cameras"
+msgstr "Reinicio de todas las cámaras"
+
+#: src/webu_post.cpp
 #, c-format
-msgid "Started camera %d stream on port %d"
-msgstr "Se inició la transmisión de la cámara %d en el puerto %d"
+msgid "Restarting camera %d"
+msgstr "Reiniciando cámara %d"
 
-#: src/webu.c
+#: src/webu_post.cpp
 #, c-format
-msgid "Starting all camera streams on port %d"
-msgstr "Inicio de todas las transmisiones de cámara en el puerto %d"
+msgid "Stopping cam %d"
+msgstr "Cámara de parada %d"
 
-#: src/webu.c
+#: src/webu_post.cpp
 #, c-format
-msgid "Starting camera %d stream on port %d"
-msgstr "Iniciando la transmisión de la cámara %d en el puerto %d"
+msgid "Invalid character included in action user \"%c\""
+msgstr "Carácter no válido incluido en la acción del usuario \"%c\""
 
-#: src/webu.c
+#: src/webu_post.cpp
 #, c-format
-msgid "Unable to start stream for camera %d"
-msgstr "No se puede iniciar la transmisión para la cámara %d"
+msgid "Executing user action on cam %d"
+msgstr "Ejecutando la acción del usuario en la cámara %d"
 
-#: src/webu.c
+#: src/webu_post.cpp
 #, c-format
-msgid "Duplicate port requested %d"
-msgstr "Puerto duplicado solicitado %d"
+msgid "Invalid action requested: command: >%s< threadnbr : >%d< "
+msgstr "Acción solicitada no válida: comando: >%s< threadnbr : >%d<"
 
-#: src/webu.c
-msgid "Invalid webcontrol_lock_max_ips.  Setting equal to 25."
-msgstr "Bloqueo de webcontrol no válido max ips. Ajuste igual a 25."
-
-#: src/webu_html.c
-msgid "Cameras"
-msgstr "Cámaras"
-
-#: src/webu_html.c
-msgid "Camera"
-msgstr "Cámara"
-
-#: src/webu_html.c
-msgid "All"
-msgstr "Todas"
-
-#: src/webu_html.c
-msgid "Action"
-msgstr "Acción"
-
-#: src/webu_html.c
-msgid "Start Event"
-msgstr "Evento de inicio"
-
-#: src/webu_html.c
-msgid "End Event"
-msgstr "Evento final"
-
-#: src/webu_html.c
-msgid "Snapshot"
-msgstr "Instantánea"
-
-#: src/webu_html.c
-msgid "Change Configuration"
-msgstr "Cambiar Configuración"
-
-#: src/webu_html.c
-msgid "Write Configuration"
-msgstr "Configuración de Escritura"
-
-#: src/webu_html.c
-msgid "Tracking"
-msgstr "Rastreo"
-
-#: src/webu_html.c
-msgid "Pause"
-msgstr "Pausa"
-
-#: src/webu_html.c
-msgid "Start"
-msgstr "Comienzo"
-
-#: src/webu_html.c
-msgid "Restart"
-msgstr "Reiniciar"
-
-#: src/webu_html.c
-msgid "Quit"
-msgstr "Dejar"
-
-#: src/webu_html.c
-msgid "Help"
-msgstr "Ayuda"
-
-#: src/webu_html.c
-msgid "No Configuration Options"
-msgstr "Sin opciones de configuración"
-
-#: src/webu_html.c
-msgid "Limited Configuration Options"
-msgstr "Opciones de configuración limitadas"
-
-#: src/webu_html.c
-msgid "Advanced Configuration Options"
-msgstr "Opciones de configuración avanzada"
-
-#: src/webu_html.c
-msgid "Restricted Configuration Options"
-msgstr "Opciones de configuración restringida"
-
-#: src/webu_html.c
-msgid "All Cameras"
-msgstr "Todas Cámaras"
-
-#: src/webu_html.c
-msgid "Not running"
-msgstr "No activo"
-
-#: src/webu_html.c
-msgid "Lost connection"
-msgstr "Conexión perdida"
-
-#: src/webu_html.c
-msgid "Paused"
-msgstr "En pausa"
-
-#: src/webu_html.c
-msgid "Active"
-msgstr "Activo"
-
-#: src/webu_html.c
-msgid "Select option"
-msgstr "Seleccionar opción"
-
-#: src/webu_html.c
-msgid "Save"
-msgstr "Salvar"
-
-#: src/webu_html.c
-msgid "Pan/Tilt"
-msgstr "Girar/Inclinación"
-
-#: src/webu_html.c
-msgid "Absolute Change"
-msgstr "Cambio Absoluto"
-
-#: src/webu_html.c
-msgid "Center"
-msgstr "Centro"
-
-#: src/webu_html.c
-msgid "Pan"
-msgstr "Girar"
-
-#: src/webu_html.c
-msgid "Tilt"
-msgstr "Inclinación"
-
-#: src/webu_stream.c
+#: src/webu_stream.cpp
 #, c-format
 msgid "Invalid thread specified: %s"
 msgstr "Hilo especificado no válido: %s"
 
-#: src/webu_stream.c
-#, c-format
-msgid "Invalid URL for a camera specific port: %s"
-msgstr "URL no válida para un puerto específico de la cámara: %s"
-
-#: src/webu_stream.c
-#, c-format
-msgid "URL for thread 0 is not valid when using camera specific files.: %s"
-msgstr ""
-"La URL del hilo 0 no es válida cuando se usan archivos específicos de la "
-"cámara .: %s"
-
-#: src/webu_stream.c
-#, c-format
-msgid "Bad URL for a camera specific port: %s"
-msgstr "URL incorrecta para un puerto específico de la cámara: %s"
-
-#: src/webu_stream.c
+#: src/webu_stream.cpp
 msgid "Could not get image to stream."
 msgstr "No se pudo obtener la imagen para transmitir."
-
-#: src/webu_text.c
-#, c-format
-msgid "'%s' option is depreciated.  New option name is '%s'"
-msgstr "La opción ' %s' se deprecia. El nuevo nombre de la opción es '%s'"

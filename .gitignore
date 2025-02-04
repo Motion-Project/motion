@@ -3,9 +3,15 @@ Makefile.in
 ABOUT-NLS
 compile
 config.guess
+<<<<<<< HEAD
 config.h
 config.h.in
 config.h.in~
+=======
+config.hpp
+config.hpp.in
+config.hpp.in~
+>>>>>>> 5.0
 config.log
 config.rpath
 config.status
@@ -20,12 +26,20 @@ missing
 stamp-h1
 
 #data
+<<<<<<< HEAD
 data/motion.service
+=======
+data/motion-dist.service
+>>>>>>> 5.0
 data/motion-dist.conf
 data/camera1-dist.conf
 data/camera2-dist.conf
 data/camera3-dist.conf
+<<<<<<< HEAD
 data/camera4-dist.conf
+=======
+data/sound1-dist.conf
+>>>>>>> 5.0
 
 #src
 src/*.o
@@ -35,9 +49,12 @@ src/Makefile.in
 src/.deps/
 src/Makefile
 src/Makefile.in
+<<<<<<< HEAD
 src/raspicam/*.o
 src/raspicam/.dirstamp
 src/raspicam/.deps/
+=======
+>>>>>>> 5.0
 *.log
 .depend
 

@@ -1,125 +1,125 @@
-/*   This file is part of Motion.
- *
- *   Motion is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   Motion is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 /*
- *  util.h
- *    Headers associated with functions in the util.c module.
- */
+ *    This file is part of Motion.
+ *
+ *    Motion is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    Motion is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *
+*/
 
-#ifndef _INCLUDE_UTIL_H
-#define _INCLUDE_UTIL_H
+#ifndef _INCLUDE_UTIL_HPP_
+#define _INCLUDE_UTIL_HPP_
 
-#ifdef HAVE_FFMPEG
+#define MYFFVER (LIBAVFORMAT_VERSION_MAJOR * 1000)+LIBAVFORMAT_VERSION_MINOR
 
-    #if ( MYFFVER >= 56000)
-        #define MY_PIX_FMT_YUV420P   AV_PIX_FMT_YUV420P
-        #define MY_PIX_FMT_YUVJ420P  AV_PIX_FMT_YUVJ420P
-        #define MyPixelFormat AVPixelFormat
-    #else  //Old ffmpeg pixel formats
-        #define MY_PIX_FMT_YUV420P   PIX_FMT_YUV420P
-        #define MY_PIX_FMT_YUVJ420P  PIX_FMT_YUVJ420P
-        #define MyPixelFormat PixelFormat
-    #endif  //myffver >= 56000
+#if (LIBAVCODEC_VERSION_MAJOR >= 59)
+    typedef const AVCodec myAVCodec; /* Version independent definition for AVCodec*/
+#else
+    typedef AVCodec myAVCodec; /* Version independent definition for AVCodec*/
+#endif
 
-    #if ( MYFFVER > 54006)
-        #define MY_FLAG_READ       AVIO_FLAG_READ
-        #define MY_FLAG_WRITE      AVIO_FLAG_WRITE
-        #define MY_FLAG_READ_WRITE AVIO_FLAG_READ_WRITE
-    #else  //Older versions
-        #define MY_FLAG_READ       URL_RDONLY
-        #define MY_FLAG_WRITE      URL_WRONLY
-        #define MY_FLAG_READ_WRITE URL_RDWR
-    #endif
+#if (MYFFVER <= 60016)
+    typedef uint8_t myuint;         /* Version independent uint */
+#else
+    typedef const uint8_t myuint;   /* Version independent uint */
+#endif
 
-    /*********************************************/
-    #if ( MYFFVER >= 56000)
-        #define MY_CODEC_ID_MSMPEG4V2 AV_CODEC_ID_MSMPEG4V2
-        #define MY_CODEC_ID_FLV1      AV_CODEC_ID_FLV1
-        #define MY_CODEC_ID_FFV1      AV_CODEC_ID_FFV1
-        #define MY_CODEC_ID_NONE      AV_CODEC_ID_NONE
-        #define MY_CODEC_ID_MPEG2VIDEO AV_CODEC_ID_MPEG2VIDEO
-        #define MY_CODEC_ID_H264      AV_CODEC_ID_H264
-        #define MY_CODEC_ID_HEVC      AV_CODEC_ID_HEVC
-    #else
-        #define MY_CODEC_ID_MSMPEG4V2 CODEC_ID_MSMPEG4V2
-        #define MY_CODEC_ID_FLV1      CODEC_ID_FLV1
-        #define MY_CODEC_ID_FFV1      CODEC_ID_FFV1
-        #define MY_CODEC_ID_NONE      CODEC_ID_NONE
-        #define MY_CODEC_ID_MPEG2VIDEO CODEC_ID_MPEG2VIDEO
-        #define MY_CODEC_ID_H264      CODEC_ID_H264
-        #define MY_CODEC_ID_HEVC      CODEC_ID_H264
-    #endif
 
-    /*********************************************/
-    #if (MYFFVER >= 57000)
-        #define MY_CODEC_FLAG_GLOBAL_HEADER AV_CODEC_FLAG_GLOBAL_HEADER
-        #define MY_CODEC_FLAG_QSCALE        AV_CODEC_FLAG_QSCALE
-    #else
-        #define MY_CODEC_FLAG_GLOBAL_HEADER CODEC_FLAG_GLOBAL_HEADER
-        #define MY_CODEC_FLAG_QSCALE        CODEC_FLAG_QSCALE
-    #endif
+#ifdef HAVE_GETTEXT
+    #include <libintl.h>
+    extern int  _nl_msg_cat_cntr;    /* Required for changing the locale dynamically */
+#endif
 
-    #if  (MYFFVER >= 59000)
-        typedef const AVCodec my_AVCodec; /* Version independent for AVCodec*/
-    #else
-        typedef AVCodec my_AVCodec; /* Version independent for AVCodec*/
-    #endif
+#define _(STRING) mytranslate_text(STRING, 2)
 
-    AVFrame *my_frame_alloc(void);
-    void my_frame_free(AVFrame *frame);
-    void my_packet_free(AVPacket *pkt);
-    void my_avcodec_close(AVCodecContext *codec_context);
-    int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height);
-    int my_image_copy_to_buffer(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height,int dest_size);
-    int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height);
-    int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt);
-    AVPacket *my_packet_alloc(AVPacket *pkt);
-
-#endif /* HAVE_FFMPEG */
+#define SLEEP(seconds, nanoseconds) {              \
+                struct timespec ts1;                \
+                ts1.tv_sec = seconds;             \
+                ts1.tv_nsec = (long)nanoseconds;        \
+                while (nanosleep(&ts1, &ts1) == -1); \
+        }
+#define myfree(x)   {if(x!=nullptr) {free(x);  x=nullptr;}}
+#define mydelete(x) {if(x!=nullptr) {delete x; x=nullptr;}}
 
 #if MHD_VERSION >= 0x00097002
-    typedef enum MHD_Result mymhd_retcd;
+    typedef enum MHD_Result mhdrslt; /* Version independent return result from MHD */
 #else
-    typedef int mymhd_retcd;
+    typedef int             mhdrslt; /* Version independent return result from MHD */
 #endif
 
-void *mymalloc(size_t nbytes);
-void *myrealloc(void *ptr, size_t size, const char *desc);
-FILE *myfopen(const char *path, const char *mode);
-int myfclose(FILE *fh);
-size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *userformat
-            , const struct timeval *tv1, const char *filename, int sqltype);
-int mycreate_path(const char *path);
+struct ctx_params_item {
+    std::string     param_name;       /* The name or description of the ID as requested by user*/
+    std::string     param_value;      /* The value that the user wants the control set to*/
+};
+typedef std::vector<ctx_params_item> vec_params;
+struct ctx_params {
+    vec_params  params_array;
+    int         params_cnt;
+    std::string params_desc;
+};
 
-char *mystrcpy(char *to, const char *from);
-char *mystrdup(const char *from);
+    void *mymalloc(size_t nbytes);
 
-void util_threadname_set(const char *abbr, int threadnbr, const char *threadname);
-void util_threadname_get(char *threadname);
-int util_check_passthrough(struct context *cnt);
-void util_trim(char *parm);
-void util_parms_free(struct params_context *parameters);
-void util_parms_parse(struct params_context *parameters, char *confparm, int logmsg);
-void util_parms_add_default(struct params_context *parameters, const char *parm_nm, const char *parm_vl);
-void util_parms_add_update(struct params_context *parameters, const char *parm_nm, const char *parm_vl);
-void util_parms_update(struct params_context *params, struct context *cnt, const char *cfgitm);
+    void *myrealloc(void *ptr, size_t size, const char *desc);
+    int mycreate_path(const char *path);
+    FILE *myfopen(const char *path, const char *mode);
+    int myfclose(FILE *fh);
+    void mystrftime(cls_camera *cam, char *s, size_t mx_sz
+        , const char *usrfmt, const char *fname);
+    void mystrftime(cls_camera *cam, std::string &rslt
+        , std::string usrfmt, std::string fname);
+    void mystrftime(cls_sound *snd, std::string &dst, std::string fmt);
+    void util_exec_command(cls_camera *cam, const char *command, const char *filename);
+    void util_exec_command(cls_sound *snd, std::string cmd);
+    void util_exec_command(cls_camera *cam, std::string cmd);
 
-int mystrceq(const char *var1, const char *var2);
-int mystrcne(const char *var1, const char *var2);
-int mystreq(const char *var1, const char *var2);
-int mystrne(const char *var1, const char *var2);
+    void mythreadname_set(const char *abbr, int threadnbr, const char *threadname);
+    void mythreadname_get(char *threadname);
+    void mythreadname_get(std::string &threadname);
 
-#endif
+    char* mytranslate_text(const char *msgid, int setnls);
+    void mytranslate_init(void);
+
+    int mystrceq(const char* var1, const char* var2);
+    int mystrcne(const char* var1, const char* var2);
+    int mystreq(const char* var1, const char* var2);
+    int mystrne(const char* var1, const char* var2);
+    void myltrim(std::string &parm);
+    void myrtrim(std::string &parm);
+    void mytrim(std::string &parm);
+    void myunquote(std::string &parm);
+
+    void myframe_key(AVFrame *frame);
+    void myframe_interlaced(AVFrame *frame);
+    AVPacket *mypacket_alloc(AVPacket *pkt);
+
+    void util_parms_parse(ctx_params *params, std::string parm_desc, std::string confline);
+    void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl);
+    void util_parms_add_default(ctx_params *params, std::string parm_nm, int parm_vl);
+    void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_val);
+    void util_parms_update(ctx_params *params, std::string &confline);
+
+    int mtoi(std::string parm);
+    int mtoi(char *parm);
+    float mtof(char *parm);
+    float mtof(std::string parm);
+    bool mtob(std::string parm);
+    bool mtob(char *parm);
+    long mtol(std::string parm);
+    long mtol(char *parm);
+    std::string mtok(std::string &parm, std::string tok);
+
+    void util_resize(uint8_t *src, int src_w, int src_h
+        , uint8_t *dst, int dst_w, int dst_h);
+
+#endif /* _INCLUDE_UTIL_HPP_ */

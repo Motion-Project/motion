@@ -1,94 +1,127 @@
-/*   This file is part of Motion.
- *
- *   Motion is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   Motion is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 /*
- *  webu.h
- *    Headers associated with functions in the webu.c module.
- */
+ *    This file is part of Motion.
+ *
+ *    Motion is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    Motion is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
+ *
+*/
 
-#ifndef _INCLUDE_WEBU_H_
-#define _INCLUDE_WEBU_H_
+#ifndef _INCLUDE_WEBU_HPP_
+#define _INCLUDE_WEBU_HPP_
 
+    /* Some defines of lengths for our buffers */
+    #define WEBUI_LEN_PARM 512          /* Parameters specified */
+    #define WEBUI_LEN_URLI 512          /* Maximum URL permitted */
+    #define WEBUI_LEN_RESP 1024         /* Initial response size */
+    #define WEBUI_MHD_OPTS 10           /* Maximum number of options permitted for MHD */
 
-/* Some defines of lengths for our buffers */
-#define WEBUI_LEN_PARM 512          /* Parameters specified */
-#define WEBUI_LEN_URLI 512          /* Maximum URL permitted */
-#define WEBUI_LEN_RESP 1024         /* Initial response size */
-#define WEBUI_MHD_OPTS 10           /* Maximum number of options permitted for MHD */
-#define WEBUI_LEN_LNK  15           /* Maximum length for chars in strminfo */
+    #define WEBUI_POST_BFRSZ  512
 
-enum WEBUI_CNCT{
-  WEBUI_CNCT_CONTROL     = 0,
-  WEBUI_CNCT_FULL        = 1,
-  WEBUI_CNCT_SUB         = 2,
-  WEBUI_CNCT_MOTION      = 3,
-  WEBUI_CNCT_SOURCE      = 4,
-  WEBUI_CNCT_STATIC      = 5,
-  WEBUI_CNCT_STATUS_LIST = 6,
-  WEBUI_CNCT_STATUS_ONE  = 7,
-  WEBUI_CNCT_UNKNOWN     = 99
-};
+    enum WEBUI_METHOD {
+        WEBUI_METHOD_GET    = 0,
+        WEBUI_METHOD_POST   = 1
+    };
 
-struct webui_ctx {
-    char *url;                   /* The URL sent from the client */
-    char *uri_camid;            /* Parsed thread number from the url*/
-    char *uri_cmd1;              /* Parsed command(action) from the url*/
-    char *uri_cmd2;              /* Parsed command (set) from the url*/
-    char *uri_parm1;             /* Parameter 1 for the command */
-    char *uri_value1;            /* The value for parameter 1*/
-    char *uri_parm2;             /* Parameter 2 for the command */
-    char *uri_value2;            /* The value for parameter 2*/
+    enum WEBUI_CNCT {
+        WEBUI_CNCT_CONTROL,
+        WEBUI_CNCT_FILE,
+        WEBUI_CNCT_JPG_MIN,
+        WEBUI_CNCT_JPG_FULL,
+        WEBUI_CNCT_JPG_SUB,
+        WEBUI_CNCT_JPG_MOTION,
+        WEBUI_CNCT_JPG_SOURCE,
+        WEBUI_CNCT_JPG_SECONDARY,
+        WEBUI_CNCT_JPG_MAX,
+        WEBUI_CNCT_TS_MIN,
+        WEBUI_CNCT_TS_FULL,
+        WEBUI_CNCT_TS_SUB,
+        WEBUI_CNCT_TS_MOTION,
+        WEBUI_CNCT_TS_SOURCE,
+        WEBUI_CNCT_TS_SECONDARY,
+        WEBUI_CNCT_TS_MAX,
+        WEBUI_CNCT_UNKNOWN
+    };
 
-    char *hostname;              /* Host name provided from header content*/
-    char  hostproto[6];          /* Protocol for host http or https */
-    char *clientip;              /* IP of the connecting client */
-    char *auth_denied;          /* Denied access response to user*/
-    char *auth_opaque;          /* Opaque string for digest authentication*/
-    char *auth_realm;           /* Realm string for digest authentication*/
-    char *auth_user;            /* Parsed user from config authentication string*/
-    char *auth_pass;            /* Parsed password from config authentication string*/
-    int  authenticated;         /* Boolean for whether authentication has been passed */
+    enum WEBUI_RESP {
+        WEBUI_RESP_HTML     = 0,
+        WEBUI_RESP_JSON     = 1,
+        WEBUI_RESP_TEXT     = 2
+    };
 
-    int   cam_count;            /* Count of the number of cameras*/
-    int   cam_threads;          /* Count of the number of camera threads running*/
-    char *lang;                 /* Two character abbreviation for locale language*/
-    char *lang_full;            /* Five character abbreviation for language-country*/
-    int   thread_nbr;           /* Thread number provided from the uri */
-    char *text_eol;             /* End of line for text interface either <br> or "" */
-    enum WEBUI_CNCT cnct_type;  /* Type of connection we are processing */
+    struct ctx_webu_clients {
+        std::string                 clientip;
+        bool                        authenticated;
+        int                         conn_nbr;
+        struct timespec             conn_time;
+        int                         userid_fail_nbr;
+    };
 
-    char            *resp_page;        /* The response that will be sent */
-    size_t          resp_size;         /* The allocated size of the response */
-    size_t          resp_used;         /* The amount of the response page used */
-    uint64_t        stream_pos;        /* Stream position of sent image */
-    int             stream_fps;        /* Stream rate per second */
-    struct timeval  time_last;         /* Keep track of processing time for stream thread*/
-    int             mhd_first;         /* Boolean for whether it is the first connection*/
+    struct ctx_key {
+        char                        *key_nm;        /* Name of the key item */
+        char                        *key_val;       /* Value of the key item */
+        size_t                      key_sz;         /* The size of the value */
+    };
 
-    struct MHD_Connection  *connection; /* The MHD connection value from the client */
-    struct context        **cntlst;     /* The context list of all cameras */
-    struct context         *cnt;        /* The context information for the camera requested */
+    /* Context to pass the parms to functions to start mhd */
+    struct ctx_mhdstart {
+        std::string             tls_cert;
+        std::string             tls_key;
+        bool                    tls_use;
+        struct MHD_OptionItem   *mhd_ops;
+        int                     mhd_opt_nbr;
+        unsigned int            mhd_flags;
+        int                     ipv6;
+        struct sockaddr_in      lpbk_ipv4;
+        struct sockaddr_in6     lpbk_ipv6;
+    };
 
-};
+    class cls_webu {
+        public:
+            cls_webu(cls_motapp *p_app);
+            ~cls_webu();
+            bool                        finish;
+            ctx_params                  *wb_headers;
+            ctx_params                  *wb_actions;
+            char                        wb_digest_rand[12];
+            struct MHD_Daemon           *wb_daemon;
+            struct MHD_Daemon           *wb_daemon2;
+            std::list<ctx_webu_clients> wb_clients;
+            std::string                 info_tls;
+            int                         cnct_cnt;
+            bool                        restart;
+            void startup();
+            void shutdown();
 
-void webu_start(struct context **cnt);
-void webu_stop(struct context **cnt);
-void webu_process_action(struct webui_ctx *webui);
-int webu_process_config(struct webui_ctx *webui);
-int webu_process_track(struct webui_ctx *webui);
-void webu_write(struct webui_ctx *webui, const char *buf);
+        private:
+            ctx_mhdstart    *mhdst;
+            cls_motapp      *app;
+            void init_actions();
+            void start_daemon_port1();
+            void start_daemon_port2();
+            void mhd_features_basic();
+            void mhd_features_digest();
+            void mhd_features_ipv6();
+            void mhd_features_tls();
+            void mhd_features();
+            void mhd_loadfile(std::string fname, std::string &filestr);
+            void mhd_checktls();
+            void mhd_opts_init();
+            void mhd_opts_deinit();
+            void mhd_opts_localhost();
+            void mhd_opts_digest();
+            void mhd_opts_tls();
+            void mhd_opts();
+            void mhd_flags();
+    };
 
 #endif

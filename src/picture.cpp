@@ -1,373 +1,198 @@
-/*   This file is part of Motion.
+/*
+ *    This file is part of Motion.
  *
- *   Motion is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 2 of the License, or
- *   (at your option) any later version.
+ *    Motion is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
  *
- *   Motion is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    Motion is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
- */
-
-/*    picture.c
- *
- *    Various funtions for saving/loading pictures.
- *    Copyright 2002 by Jeroen Vreeken (pe1rxq@amsat.org)
- *    Portions of this file are Copyright by Lionnel Maugis
- *    Portions of this file are Copyright 2010 by Wim Lewis (wiml@hhhh.org)
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 #include "motion.hpp"
-#include "translate.hpp"
 #include "util.hpp"
+#include "camera.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 #include "picture.hpp"
 #include "jpegutils.hpp"
-#include "event.hpp"
-#include "netcam.hpp"
-
-#include <assert.h>
-
-#ifdef HAVE_WEBP
-    #include <webp/encode.h>
-    #include <webp/mux.h>
-#endif /* HAVE_WEBP */
+#include "draw.hpp"
+#include "dbse.hpp"
+#include "picture.hpp"
 
 
-/* EXIF image data is always in TIFF format, even if embedded in another
- * file type. This consists of a constant header (TIFF file header,
- * IFD header) followed by the tags in the IFD and then the data
- * from any tags which do not fit inline in the IFD.
- *
- * The tags we write in the main IFD are:
- *  0x010E   Image description
- *  0x8769   Exif sub-IFD
- *  0x882A   Time zone of time stamps
- * and in the Exif sub-IFD:
- *  0x9000   Exif version
- *  0x9003   File date and time
- *  0x9291   File date and time subsecond info
- * But we omit any empty IFDs.
- */
-
-#define TIFF_TAG_IMAGE_DESCRIPTION    0x010E
-#define TIFF_TAG_DATETIME             0x0132
-#define TIFF_TAG_EXIF_IFD             0x8769
-#define TIFF_TAG_TZ_OFFSET            0x882A
-
-#define EXIF_TAG_EXIF_VERSION         0x9000
-#define EXIF_TAG_ORIGINAL_DATETIME    0x9003
-#define EXIF_TAG_SUBJECT_AREA         0x9214
-#define EXIF_TAG_TIFF_DATETIME_SS     0x9290
-#define EXIF_TAG_ORIGINAL_DATETIME_SS 0x9291
-
-#define TIFF_TYPE_ASCII  2  /* ASCII text */
-#define TIFF_TYPE_USHORT 3  /* Unsigned 16-bit int */
-#define TIFF_TYPE_LONG   4  /* Unsigned 32-bit int */
-#define TIFF_TYPE_UNDEF  7  /* Byte blob */
-#define TIFF_TYPE_SSHORT 8  /* Signed 16-bit int */
-
-static const char exif_marker_start[14] = {
-    'E', 'x', 'i', 'f', 0, 0,   /* EXIF marker signature */
-    'M', 'M', 0, 42,            /* TIFF file header (big-endian) */
-    0, 0, 0, 8,                 /* Offset to first toplevel IFD */
-};
-
-static const char exif_version_tag[12] = {
-    0x90, 0x00,                 /* EXIF version tag, 0x9000 */
-    0x00, 0x07,                 /* Data type 7 = "unknown" (raw byte blob) */
-    0x00, 0x00, 0x00, 0x04,     /* Data length */
-    0x30, 0x32, 0x32, 0x30      /* Inline data, EXIF version 2.2 */
-};
-
-static const char exif_subifd_tag[8] = {
-    0x87, 0x69,                 /* EXIF Sub-IFD tag */
-    0x00, 0x04,                 /* Data type 4 = uint32 */
-    0x00, 0x00, 0x00, 0x01,     /* Number of values */
-};
-
-static const char exif_tzoffset_tag[12] = {
-    0x88, 0x2A,                 /* TIFF/EP time zone offset tag */
-    0x00, 0x08,                 /* Data type 8 = sint16 */
-    0x00, 0x00, 0x00, 0x01,     /* Number of values */
-    0, 0, 0, 0                  /* Dummy data */
-};
-
-static void put_uint16(JOCTET *buf, unsigned value)
+void cls_picture::picname(char* fullname, std::string fmtstr
+    , std::string basename, std::string extname)
 {
-    buf[0] = ( value & 0xFF00 ) >> 8;
-    buf[1] = ( value & 0x00FF );
+    char filename[PATH_MAX];
+    int  retcd;
+
+    mystrftime(cam, filename, sizeof(filename)
+        , basename.c_str(), NULL);
+    retcd = snprintf(fullname, PATH_MAX, fmtstr.c_str()
+        , cam->cfg->target_dir.c_str(), filename, extname.c_str());
+    if ((retcd < 0) || (retcd >= PATH_MAX)) {
+        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            ,_("Error creating picture file name"));
+        return;
+    }
+    full_nm = fullname;
+    file_dir =full_nm.substr(0,full_nm.find_last_of("/"));
+    file_nm = full_nm.substr(file_dir.length()+1);
+
 }
 
-static void put_sint16(JOCTET *buf, int value)
+void cls_picture::on_picture_save_command(char *fname)
 {
-    buf[0] = ( value & 0xFF00 ) >> 8;
-    buf[1] = ( value & 0x00FF );
+    MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("File saved to: %s"), fname);
+
+    if (cam->cfg->on_picture_save != "") {
+        util_exec_command(cam, cam->cfg->on_picture_save.c_str(), fname);
+    }
 }
 
-static void put_uint32(JOCTET *buf, unsigned value)
+void cls_picture::process_norm()
 {
-    buf[0] = ( value & 0xFF000000 ) >> 24;
-    buf[1] = ( value & 0x00FF0000 ) >> 16;
-    buf[2] = ( value & 0x0000FF00 ) >> 8;
-    buf[3] = ( value & 0x000000FF );
+    char filename[PATH_MAX];
+
+    if (cam->cfg->picture_output == "on") {
+        picname(filename,"%s/%s.%s"
+            , cam->cfg->picture_filename
+            , cam->cfg->picture_type);
+        if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
+            save_norm(filename, cam->current_image->image_high);
+        } else {
+            save_norm(filename,cam->current_image->image_norm);
+        }
+        on_picture_save_command(filename);
+        cam->app->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->filelist_add(cam, &cam->current_image->imgts
+            ,"pic", file_nm, full_nm, file_dir);
+    }
 }
 
-struct tiff_writing {
-    JOCTET * const base;
-    JOCTET *buf;
-    unsigned data_offset;
-};
-
-static void put_direntry(struct tiff_writing *into, const char *data, unsigned length)
+void cls_picture::process_motion()
 {
-    if (length <= 4) {
-        /* Entries that fit in the directory entry are stored there */
-        memset(into->buf, 0, 4);
-        memcpy(into->buf, data, length);
+    char filename[PATH_MAX];
+
+    if (cam->cfg->picture_output_motion == "on") {
+        picname(filename,"%s/%sm.%s", cam->cfg->picture_filename, cam->cfg->picture_type);
+        save_norm(filename, cam->imgs.image_motion.image_norm);
+        on_picture_save_command(filename);
+        cam->app->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->filelist_add(cam, &cam->imgs.image_motion.imgts
+            ,"pic", file_nm, full_nm, file_dir);
+
+
+    } else if (cam->cfg->picture_output_motion == "roi") {
+        picname(filename,"%s/%sr.%s", cam->cfg->picture_filename, cam->cfg->picture_type);
+        save_roi(filename, cam->current_image->image_norm);
+        on_picture_save_command(filename);
+        cam->app->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->filelist_add(cam, &cam->current_image->imgts
+            ,"pic", file_nm, full_nm, file_dir);
+
+    }
+}
+
+void cls_picture::process_snapshot()
+{
+    char filename[PATH_MAX];
+    char linkpath[PATH_MAX];
+    int offset;
+
+    offset = (int)cam->cfg->snapshot_filename.length() - 8;
+    if (offset < 0) {
+        offset = 1;
+    }
+
+    if (cam->cfg->snapshot_filename.compare((uint)offset, 8, "lastsnap") != 0) {
+        picname(filename,"%s/%s.%s"
+            , cam->cfg->snapshot_filename
+            , cam->cfg->picture_type);
+        if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
+            save_norm(filename, cam->current_image->image_high);
+        } else {
+            save_norm(filename, cam->current_image->image_norm);
+        }
+        on_picture_save_command(filename);
+        cam->app->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->filelist_add(cam, &cam->current_image->imgts
+            ,"pic", file_nm, full_nm, file_dir);
+
+        /* Update symbolic link */
+        picname(linkpath,"%s/%s.%s"
+            , "lastsnap", cam->cfg->picture_type);
+        remove(linkpath);
+        if (symlink(filename, linkpath)) {
+            MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                ,_("Could not create symbolic link [%s]"), filename);
+            return;
+        }
+
     } else {
-        /* Longer entries are stored out-of-line */
-        unsigned offset = into->data_offset;
-
-        while ((offset & 0x03) != 0) {  /* Alignment */
-            into->base[offset] = 0;
-            offset ++;
+        picname(filename,"%s/%s.%s"
+            , cam->cfg->snapshot_filename
+            , cam->cfg->picture_type);
+        remove(filename);
+        if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
+            save_norm(filename, cam->current_image->image_high);
+        } else {
+            save_norm(filename, cam->current_image->image_norm);
         }
-
-        put_uint32(into->buf, offset);
-        memcpy(into->base + offset, data, length);
-        into->data_offset = offset + length;
+        on_picture_save_command(filename);
+        cam->app->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->filelist_add(cam, &cam->current_image->imgts
+            ,"pic", file_nm, full_nm, file_dir);
     }
+
+    cam->action_snapshot = false;
 }
 
-static void put_stringentry(struct tiff_writing *into, unsigned tag, const char *str, int with_nul)
+void cls_picture::process_preview()
 {
-    unsigned stringlength = strlen(str) + (with_nul?1:0);
+    char filename[PATH_MAX];
+    ctx_image_data *saved_current_image;
 
-    put_uint16(into->buf, tag);
-    put_uint16(into->buf + 2, TIFF_TYPE_ASCII);
-    put_uint32(into->buf + 4, stringlength);
-    into->buf += 8;
-    put_direntry(into, str, stringlength);
-    into->buf += 4;
-}
+    if (cam->imgs.image_preview.diffs) {
+        saved_current_image = cam->current_image;
+        saved_current_image->imgts= cam->current_image->imgts;
 
-static void put_subjectarea(struct tiff_writing *into, const struct coord *box)
-{
-    put_uint16(into->buf    , EXIF_TAG_SUBJECT_AREA);
-    put_uint16(into->buf + 2, TIFF_TYPE_USHORT);
-    put_uint32(into->buf + 4, 4 /* Four USHORTs */);
-    put_uint32(into->buf + 8, into->data_offset);
-    into->buf += 12;
-    JOCTET *ool = into->base + into->data_offset;
-    put_uint16(ool  , box->x); /* Center.x */
-    put_uint16(ool+2, box->y); /* Center.y */
-    put_uint16(ool+4, box->width);
-    put_uint16(ool+6, box->height);
-    into->data_offset += 8;
-}
+        cam->current_image = &cam->imgs.image_preview;
+        cam->current_image->imgts = cam->imgs.image_preview.imgts;
 
-/*
- * prepare_exif() is a comon function used to prepare
- * exif data to be inserted into jpeg or webp files
- *
- */
-unsigned prepare_exif(unsigned char **exif, const struct context *cnt
-            , const struct timeval *tv_in1, const struct coord *box)
-{
-    /* description, datetime, and subtime are the values that are actually
-     * put into the EXIF data
-    */
-    char *description, *datetime, *subtime;
-    char datetime_buf[22];
-    struct tm timestamp_tm;
-    struct timeval tv1;
+        picname(filename,"%s/%s.%s"
+            , cam->cfg->picture_filename
+            , cam->cfg->picture_type);
 
-    gettimeofday(&tv1, NULL);
-    if (tv_in1 != NULL) {
-        tv1.tv_sec = tv_in1->tv_sec;
-        tv1.tv_usec = tv_in1->tv_usec;
-    }
-
-    localtime_r(&tv1.tv_sec, &timestamp_tm);
-    /* Exif requires this exact format */
-    snprintf(datetime_buf, 21, "%04d:%02d:%02d %02d:%02d:%02d",
-        (timestamp_tm.tm_year + 1900) & 0xffff,
-        (timestamp_tm.tm_mon + 1) & 0x0f,
-        timestamp_tm.tm_mday,
-        timestamp_tm.tm_hour,
-        timestamp_tm.tm_min,
-        timestamp_tm.tm_sec);
-    datetime = datetime_buf;
-
-    // TODO: Extract subsecond timestamp from somewhere, but only
-    // use as much of it as is indicated by conf->frame_limit
-    subtime = NULL;
-
-    if (cnt->conf.picture_exif) {
-        description = malloc(PATH_MAX);
-        mystrftime(cnt, description, PATH_MAX-1, cnt->conf.picture_exif, &tv1, NULL, 0);
-    } else {
-        description = NULL;
-    }
-
-    /* Calculate an upper bound on the size of the APP1 marker so
-     * we can allocate a buffer for it.
-     */
-
-    /* Count up the number of tags and max amount of OOL data */
-    int ifd0_tagcount = 0;
-    int ifd1_tagcount = 0;
-    unsigned datasize = 0;
-
-    if (description) {
-        ifd0_tagcount ++;
-        datasize += 5 + strlen(description); /* Add 5 for NUL and alignment */
-    }
-
-    if (datetime) {
-    /* We write this to both the TIFF datetime tag (which most programs
-     * treat as "last-modified-date") and the EXIF "time of creation of
-     * original image" tag (which many programs ignore). This is
-     * redundant but seems to be the thing to do.
-     */
-        ifd0_tagcount++;
-        ifd1_tagcount++;
-        /* We also write the timezone-offset tag in IFD0 */
-        ifd0_tagcount++;
-        /* It would be nice to use the same offset for both tags' values,
-        * but I don't want to write the bookkeeping for that right now */
-        datasize += 2 * (5 + strlen(datetime));
-    }
-
-    if (subtime) {
-        ifd1_tagcount++;
-        datasize += 5 + strlen(subtime);
-    }
-
-    if (box) {
-        ifd1_tagcount++;
-        datasize += 2 * 4;  /* Four 16-bit ints */
-    }
-
-    if (ifd1_tagcount > 0) {
-        /* If we're writing the Exif sub-IFD, account for the
-        * two tags that requires */
-        ifd0_tagcount ++; /* The tag in IFD0 that points to IFD1 */
-        ifd1_tagcount ++; /* The EXIF version tag */
-    }
-
-    /* Each IFD takes 12 bytes per tag, plus six more (the tag count and the
-     * pointer to the next IFD, always zero in our case)
-     */
-    int ifds_size =
-    ( ifd1_tagcount > 0 ? ( 12 * ifd1_tagcount + 6 ) : 0 ) +
-    ( ifd0_tagcount > 0 ? ( 12 * ifd0_tagcount + 6 ) : 0 );
-
-    if (ifds_size == 0) {
-        /* We're not actually going to write any information. */
-        return 0;
-    }
-
-    unsigned int buffer_size = 6 /* EXIF marker signature */ +
-                               8 /* TIFF file header */ +
-                               ifds_size /* the tag directories */ +
-                               datasize;
-
-    JOCTET *marker = malloc(buffer_size);
-    memcpy(marker, exif_marker_start, 14); /* EXIF and TIFF headers */
-
-    struct tiff_writing writing = (struct tiff_writing) {
-    .base = marker + 6, /* base address for intra-TIFF offsets */
-    .buf = marker + 14, /* current write position */
-    .data_offset = 8 + ifds_size, /* where to start storing data */
-    };
-
-    /* Write IFD 0 */
-    /* Note that tags are stored in numerical order */
-    put_uint16(writing.buf, ifd0_tagcount);
-    writing.buf += 2;
-
-    if (description) {
-        put_stringentry(&writing, TIFF_TAG_IMAGE_DESCRIPTION, description, 1);
-    }
-
-    if (datetime) {
-        put_stringentry(&writing, TIFF_TAG_DATETIME, datetime, 1);
-    }
-
-    if (ifd1_tagcount > 0) {
-        /* Offset of IFD1 - TIFF header + IFD0 size. */
-        unsigned ifd1_offset = 8 + 6 + ( 12 * ifd0_tagcount );
-        memcpy(writing.buf, exif_subifd_tag, 8);
-        put_uint32(writing.buf + 8, ifd1_offset);
-        writing.buf += 12;
-    }
-
-    if (datetime) {
-        memcpy(writing.buf, exif_tzoffset_tag, 12);
-        put_sint16(writing.buf+8, timestamp_tm.tm_gmtoff / 3600);
-        writing.buf += 12;
-    }
-
-    put_uint32(writing.buf, 0); /* Next IFD offset = 0 (no next IFD) */
-    writing.buf += 4;
-
-    /* Write IFD 1 */
-    if (ifd1_tagcount > 0) {
-        /* (remember that the tags in any IFD must be in numerical order
-        * by tag) */
-        put_uint16(writing.buf, ifd1_tagcount);
-        memcpy(writing.buf + 2, exif_version_tag, 12); /* tag 0x9000 */
-        writing.buf += 14;
-
-        if (datetime) {
-            put_stringentry(&writing, EXIF_TAG_ORIGINAL_DATETIME, datetime, 1);
+        if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
+            save_norm(filename, cam->imgs.image_preview.image_high);
+        } else {
+            save_norm(filename, cam->imgs.image_preview.image_norm);
         }
+        on_picture_save_command(filename);
+        cam->app->dbse->exec(cam, filename, "pic_save");
+        cam->app->dbse->filelist_add(cam, &cam->imgs.image_preview.imgts
+            ,"pic", file_nm, full_nm, file_dir);
 
-        if (box) {
-            put_subjectarea(&writing, box);
-        }
-
-        if (subtime) {
-            put_stringentry(&writing, EXIF_TAG_ORIGINAL_DATETIME_SS, subtime, 0);
-        }
-
-        put_uint32(writing.buf, 0); /* Next IFD = 0 (no next IFD) */
-        writing.buf += 4;
+        /* Restore global context values. */
+        cam->current_image = saved_current_image;
+        cam->current_image->imgts = saved_current_image->imgts;
     }
-
-    /* We should have met up with the OOL data */
-    assert( (writing.buf - writing.base) == 8 + ifds_size );
-
-    /* The buffer is complete; write it out */
-    unsigned marker_len = 6 + writing.data_offset;
-
-    /* assert we didn't underestimate the original buffer size */
-    assert(marker_len <= buffer_size);
-
-    free(description);
-
-    *exif = marker;
-    return marker_len;
 }
 
 #ifdef HAVE_WEBP
-/*
- * put_webp_exif writes the EXIF APP1 chunk to the webp file.
- * It must be called after WebPEncode() and the result
- * can then be written out to webp a file
- */
-static void put_webp_exif(WebPMux* webp_mux, const struct context *cnt
-            , const struct timeval *tv1, const struct coord *box)
+void cls_picture::webp_exif(WebPMux* webp_mux
+        , timespec *ts1, ctx_coord *box)
 {
-    unsigned char *exif = NULL;
-    unsigned exif_len = prepare_exif(&exif, cnt, tv1, box);
+    u_char *exif = NULL;
+        uint exif_len = jpgutl_exif(&exif, cam, ts1, box);
 
     if(exif_len > 0) {
         WebPData webp_exif;
@@ -377,7 +202,7 @@ static void put_webp_exif(WebPMux* webp_mux, const struct context *cnt
 
         WebPMuxError err = WebPMuxSetChunk(webp_mux, "EXIF", &webp_exif, 1);
         if (err != WEBP_MUX_OK) {
-            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO
+            MOTPLS_LOG(ERR, TYPE_CORE, NO_ERRNO
                 , _("Unable to set set EXIF to webp chunk"));
         }
         free(exif);
@@ -385,36 +210,23 @@ static void put_webp_exif(WebPMux* webp_mux, const struct context *cnt
 }
 #endif /* HAVE_WEBP */
 
-/**
- * put_webp_yuv420p_file
- *      Converts an YUV420P coded image to a webp image and writes
- *      it to an already open file.
- *
- * Inputs:
- * - image is the image in YUV420P format.
- * - width and height are the dimensions of the image
- * - quality is the webp encoding quality 0-100%
- *
- * Output:
- * - The webp is written directly to the file given by the file pointer fp
- *
- * Returns nothing
- */
-static void put_webp_yuv420p_file(FILE *fp, unsigned char *image, int width, int height
-            , int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
+/** Save image as webp to file */
+void cls_picture::save_webp(FILE *fp, u_char *image, int width, int height
+        , timespec *ts1, ctx_coord *box)
 {
     #ifdef HAVE_WEBP
         /* Create a config present and check for compatible library version */
         WebPConfig webp_config;
-        if (!WebPConfigPreset(&webp_config, WEBP_PRESET_DEFAULT, (float) quality)) {
-            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, _("libwebp version error"));
+        if (!WebPConfigPreset(&webp_config, WEBP_PRESET_DEFAULT
+            , (float) cam->cfg->picture_quality)) {
+            MOTPLS_LOG(ERR, TYPE_CORE, NO_ERRNO, _("libwebp version error"));
             return;
         }
 
         /* Create the input data structure and check for compatible library version */
         WebPPicture webp_image;
         if (!WebPPictureInit(&webp_image)) {
-            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp version error"));
+            MOTPLS_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp version error"));
             return;
         }
 
@@ -422,7 +234,7 @@ static void put_webp_yuv420p_file(FILE *fp, unsigned char *image, int width, int
         webp_image.width = width;
         webp_image.height = height;
         if (!WebPPictureAlloc(&webp_image)) {
-            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp image buffer allocation error"));
+            MOTPLS_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp image buffer allocation error"));
             return;
         }
 
@@ -439,9 +251,8 @@ static void put_webp_yuv420p_file(FILE *fp, unsigned char *image, int width, int
 
         /* Encode the YUV image as webp */
         if (!WebPEncode(&webp_config, &webp_image)) {
-            MOTION_LOG(WRN, TYPE_CORE, NO_ERRNO,_("libwebp image compression error"));
+            MOTPLS_LOG(WRN, TYPE_CORE, NO_ERRNO,_("libwebp image compression error"));
         }
-
         /* A bitstream object is needed for the muxing proces */
         WebPData webp_bitstream;
         webp_bitstream.bytes = webp_writer.mem;
@@ -449,18 +260,18 @@ static void put_webp_yuv420p_file(FILE *fp, unsigned char *image, int width, int
 
         /* Create a mux from the prepared image data */
         WebPMux* webp_mux = WebPMuxCreate(&webp_bitstream, 1);
-        put_webp_exif(webp_mux, cnt, tv1, box);
+        webp_exif(webp_mux, ts1, box);
 
         /* Add Exif data to the webp image data */
         WebPData webp_output;
         WebPMuxError err = WebPMuxAssemble(webp_mux, &webp_output);
         if (err != WEBP_MUX_OK) {
-            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to assemble webp image"));
+            MOTPLS_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to assemble webp image"));
         }
 
         /* Write the webp final bitstream to the file */
         if (fwrite(webp_output.bytes, sizeof(uint8_t), webp_output.size, fp) != webp_output.size) {
-            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to save webp image to file"));
+            MOTPLS_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to save webp image to file"));
         }
 
         #if WEBP_ENCODER_ABI_VERSION > 0x0202
@@ -482,92 +293,55 @@ static void put_webp_yuv420p_file(FILE *fp, unsigned char *image, int width, int
         (void)image;
         (void)width;
         (void)height;
-        (void)quality;
-        (void)cnt;
-        (void)tv1;
+        (void)ts1;
         (void)box;
     #endif /* HAVE_WEBP */
 }
 
-/**
- * put_jpeg_yuv420p_file
- *      Converts an YUV420P coded image to a jpeg image and writes
- *      it to an already open file.
- *
- * Inputs:
- * - image is the image in YUV420P format.
- * - width and height are the dimensions of the image
- * - quality is the jpeg encoding quality 0-100%
- *
- * Output:
- * - The jpeg is written directly to the file given by the file pointer fp
- *
- * Returns nothing
- */
-static void put_jpeg_yuv420p_file(FILE *fp, unsigned char *image, int width, int height
-            , int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
+/** Save image as yuv420p jpeg to file */
+void cls_picture::save_yuv420p(FILE *fp, u_char *image, int width, int height
+        , timespec *ts1, ctx_coord *box)
 {
+
     int sz, image_size;
 
     image_size = (width * height * 3)/2;
-    unsigned char *buf = mymalloc(image_size);
+    u_char *buf =(u_char*) mymalloc((uint)image_size);
 
-    sz = jpgutl_put_yuv420p(buf, image_size, image, width, height, quality, cnt ,tv1, box);
-    fwrite(buf, sz, 1, fp);
+    sz = jpgutl_put_yuv420p(buf, image_size, image, width, height
+        , cam->cfg->picture_quality, cam ,ts1, box);
+    fwrite(buf, (uint)sz, 1, fp);
 
     free(buf);
 
 }
 
-/**
- * put_jpeg_grey_file
- *      Converts an greyscale image to a jpeg image and writes
- *      it to an already open file.
- *
- * Inputs:
- * - image is the image in greyscale format.
- * - width and height are the dimensions of the image
- * - quality is the jpeg encoding quality 0-100%
- * Output:
- * - The jpeg is written directly to the file given by the file pointer fp
- *
- * Returns nothing
- */
-static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, int height,
-            int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
+/** Save image as grey jpeg to file */
+void cls_picture::save_grey(FILE *picture, u_char *image, int width, int height
+        , timespec *ts1, ctx_coord *box)
 {
     int sz, image_size;
 
     image_size = (width * height * 3)/2;
-    unsigned char *buf = mymalloc(image_size);
 
-    sz = jpgutl_put_grey(buf, image_size, image, width, height, quality, cnt ,tv1, box);
-    fwrite(buf, sz, 1, picture);
+    u_char *buf =(u_char*) mymalloc((uint)image_size);
+
+    sz = jpgutl_put_grey(buf, image_size, image, width, height
+        , cam->cfg->picture_quality, cam ,ts1, box);
+    fwrite(buf, (uint)sz, 1, picture);
 
     free(buf);
 }
 
-/**
- * put_ppm_bgr24_file
- *      Converts an greyscale image to a PPM image and writes
- *      it to an already open file.
- * Inputs:
- * - image is the image in YUV420P format.
- * - width and height are the dimensions of the image
- *
- * Output:
- * - The PPM is written directly to the file given by the file pointer fp
- *
- * Returns nothing
- */
-static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, int height)
+/** Save image as greyscale ppm image to file */
+void cls_picture::save_ppm(FILE *picture, u_char *image, int width, int height)
 {
     int x, y;
-    unsigned char *l = image;
-    unsigned char *u = image + width * height;
-    unsigned char *v = u + (width * height) / 4;
+    u_char *l = image;
+    u_char *u = image + width * height;
+    u_char *v = u + (width * height) / 4;
     int r, g, b;
-    unsigned char rgb[3];
+    u_char rgb[3];
 
     /*
      *  ppm header
@@ -586,25 +360,28 @@ static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, i
             r = r >> 16;
             g = g >> 16;
             b = b >> 16;
+
             if (r < 0) {
                 r = 0;
             } else if (r > 255) {
                 r = 255;
             }
+
             if (g < 0) {
                 g = 0;
             } else if (g > 255) {
                 g = 255;
             }
+
             if (b < 0) {
                 b = 0;
             } else if (b > 255) {
                 b = 255;
             }
 
-            rgb[0] = b;
-            rgb[1] = g;
-            rgb[2] = r;
+            rgb[0] = (u_char)b;
+            rgb[1] = (u_char)g;
+            rgb[2] = (u_char)r;
 
             l++;
             if (x%2 != 0) {
@@ -621,338 +398,188 @@ static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, i
     }
 }
 
-/**
- * overlay_smartmask
- *      Copies smartmask as an overlay into motion images and movies.
- *
- * Returns nothing.
- */
-void overlay_smartmask(struct context *cnt, unsigned char *out)
+/** Put picture into memory as jpg */
+int cls_picture::put_memory(u_char *img_dst, int image_size
+        , u_char *image, int quality, int width, int height)
 {
-    int i, x, v, width, height, line;
-    struct images *imgs = &cnt->imgs;
-    unsigned char *smartmask = imgs->smartmask_final;
-    unsigned char *out_y, *out_u, *out_v;
+    struct timespec ts1;
+    int retcd;
 
-    i = imgs->motionsize;
-    v = i + ((imgs->motionsize) / 4);
-    width = imgs->width;
-    height = imgs->height;
-
-    /* Set V to 255 to make smartmask appear red. */
-    out_v = out + v;
-    out_u = out + i;
-    for (i = 0; i < height; i += 2) {
-        line = i * width;
-        for (x = 0; x < width; x += 2) {
-            if (smartmask[line + x] == 0 || smartmask[line + x + 1] == 0 ||
-                smartmask[line + width + x] == 0 ||
-                smartmask[line + width + x + 1] == 0) {
-                *out_v = 255;
-                *out_u = 128;
-            }
-            out_v++;
-            out_u++;
-        }
-    }
-    out_y = out;
-    /* Set colour intensity for smartmask. */
-    for (i = 0; i < imgs->motionsize; i++) {
-        if (smartmask[i] == 0) {
-            *out_y = 0;
-        }
-        out_y++;
-    }
-}
-
-/**
- * overlay_fixed_mask
- *      Copies fixed mask as green overlay into motion images and movies.
- *
- * Returns nothing.
- */
-void overlay_fixed_mask(struct context *cnt, unsigned char *out)
-{
-    int i, x, v, width, height, line;
-    struct images *imgs = &cnt->imgs;
-    unsigned char *mask = imgs->mask;
-    unsigned char *out_y, *out_u, *out_v;
-
-    i = imgs->motionsize;
-    v = i + ((imgs->motionsize) / 4);
-    width = imgs->width;
-    height = imgs->height;
-
-    /* Set U and V to 0 to make fixed mask appear green. */
-    out_v = out + v;
-    out_u = out + i;
-    for (i = 0; i < height; i += 2) {
-        line = i * width;
-        for (x = 0; x < width; x += 2) {
-            if (mask[line + x] == 0 || mask[line + x + 1] == 0 ||
-                mask[line + width + x] == 0 ||
-                mask[line + width + x + 1] == 0) {
-                *out_v = 0;
-                *out_u = 0;
-            }
-            out_v++;
-            out_u++;
-        }
-    }
-    out_y = out;
-    /* Set colour intensity for mask. */
-    for (i = 0; i < imgs->motionsize; i++) {
-        if (mask[i] == 0) {
-            *out_y = 0;
-        }
-        out_y++;
-    }
-}
-
-/**
- * overlay_largest_label
- *      Copies largest label as an overlay into motion images and movies.
- *
- * Returns nothing.
- */
-void overlay_largest_label(struct context *cnt, unsigned char *out)
-{
-    int i, x, v, width, height, line;
-    struct images *imgs = &cnt->imgs;
-    int *labels = imgs->labels;
-    unsigned char *out_y, *out_u, *out_v;
-
-    i = imgs->motionsize;
-    v = i + ((imgs->motionsize) / 4);
-    width = imgs->width;
-    height = imgs->height;
-
-    /* Set U to 255 to make label appear blue. */
-    out_u = out + i;
-    out_v = out + v;
-    for (i = 0; i < height; i += 2) {
-        line = i * width;
-        for (x = 0; x < width; x += 2) {
-            if (labels[line + x] & 32768 || labels[line + x + 1] & 32768 ||
-                labels[line + width + x] & 32768 ||
-                labels[line + width + x + 1] & 32768) {
-                *out_u = 255;
-                *out_v = 128;
-            }
-            out_u++;
-            out_v++;
-        }
-    }
-    out_y = out;
-    /* Set intensity for coloured label to have better visibility. */
-    for (i = 0; i < imgs->motionsize; i++) {
-        if (*labels++ & 32768) {
-            *out_y = 0;
-        }
-        out_y++;
-    }
-}
-
-/**
- * put_picture_mem
- *      Is used for the webcam feature. Depending on the image type
- *      (colour YUV420P or greyscale) the corresponding put_jpeg_X_memory function is called.
- * Inputs:
- * - cnt is the thread context struct
- * - image_size is the size of the input image buffer
- * - *image points to the image buffer that contains the YUV420P or Grayscale image about to be put
- * - quality is the jpeg quality setting from the config file.
- *
- * Output:
- * - **dest_image is a pointer to a pointer that points to the destination buffer in which the
- *   converted image it put
- *
- * Returns the dest_image_size if successful. Otherwise 0.
- */
-int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image_size
-            , unsigned char *image, int quality, int width, int height)
-{
-    struct timeval tv1;
-
-    /*
-     * Reset the time for the current image since it is not reliable
-     * for putting images to memory.
-     */
-    gettimeofday(&tv1, NULL);
-
-    if (!cnt->conf.stream_grey) {
-        return jpgutl_put_yuv420p(dest_image, image_size, image,
-                                       width, height, quality, cnt ,&tv1,NULL);
+    clock_gettime(CLOCK_REALTIME, &ts1);
+    if (cam->cfg->stream_grey) {
+        retcd = jpgutl_put_grey(img_dst, image_size, image
+            , width, height, quality, cam, &ts1, NULL);
     } else {
-        return jpgutl_put_grey(dest_image, image_size, image,
-                                       width, height, quality, cnt,&tv1,NULL);
+        retcd = jpgutl_put_yuv420p(img_dst, image_size, image
+            , width, height, quality, cam, &ts1, NULL);
     }
 
-    return 0;
+    return retcd;
 }
 
-static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image
-            , int quality, int ftype)
+/* Write the picture to a file */
+void cls_picture::pic_write(FILE *picture, u_char *image)
 {
-    int width, height, passthrough;
+    int width, height;
 
-    passthrough = util_check_passthrough(cnt);
-    if (((ftype == FTYPE_IMAGE) || (ftype == FTYPE_IMAGE_SNAPSHOT)) &&
-        (cnt->imgs.size_high > 0) && (!passthrough)) {
-        width = cnt->imgs.width_high;
-        height = cnt->imgs.height_high;
+    if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
+        width = cam->imgs.width_high;
+        height = cam->imgs.height_high;
     } else {
-        width = cnt->imgs.width;
-        height = cnt->imgs.height;
+        width = cam->imgs.width;
+        height = cam->imgs.height;
     }
 
-    if (cnt->imgs.picture_type == IMAGE_TYPE_PPM) {
-        put_ppm_bgr24_file(picture, image, width, height);
-
-    } else if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP) {
-        put_webp_yuv420p_file(picture, image, width, height, quality, cnt
-            , &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
-
-    } else if (cnt->imgs.picture_type == IMAGE_TYPE_GREY) {
-        put_jpeg_grey_file(picture, image, width, height, quality, cnt
-            , &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
-
+    if (cam->cfg->picture_type == "ppm") {
+        save_ppm(picture, image, width, height);
+    } else if (cam->cfg->picture_type == "webp") {
+        save_webp(picture, image, width, height
+            , &(cam->current_image->imgts), &(cam->current_image->location));
+    } else if (cam->cfg->picture_type == "grey") {
+        save_grey(picture, image, width, height
+            , &(cam->current_image->imgts), &(cam->current_image->location));
     } else {
-        put_jpeg_yuv420p_file(picture, image, width, height, quality, cnt
-            , &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+        save_yuv420p(picture, image, width, height
+            , &(cam->current_image->imgts), &(cam->current_image->location));
     }
-
 }
 
-void put_picture(struct context *cnt, char *file, unsigned char *image, int ftype)
+/* Saves image to a file in format requested */
+void cls_picture::save_norm(char *file, u_char *image)
 {
     FILE *picture;
 
     picture = myfopen(file, "wbe");
     if (!picture) {
-        /* Report to syslog - suggest solution if the problem is access rights to target dir. */
-        if (errno ==  EACCES) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
-                ,_("Can't write picture to file %s - check access rights to target directory\n"
-                "Thread is going to finish due to this fatal error"), file);
-            cnt->finish = 1;
-            cnt->restart = 0;
-            return;
-        } else {
-            /* If target dir is temporarily unavailable we may survive. */
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
-                ,_("Can't write picture to file %s"), file);
-            return;
-        }
+        MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            ,_("Can't write picture to file %s"), file);
+        return;
     }
 
-    put_picture_fd(cnt, picture, image, cnt->conf.picture_quality, ftype);
+    pic_write(picture, image);
 
     myfclose(picture);
 }
 
-/**
- * get_pgm
- *      Get the pgm file used as fixed mask
- *
- */
-unsigned char *get_pgm(FILE *picture, int width, int height)
+/* Saves image to a file in format requested */
+void cls_picture::save_roi(char *file, u_char *image)
+{
+    FILE *picture;
+    int image_size, sz, indxh;
+    ctx_coord *bx;
+    u_char *buf, *img;
+
+    bx = &cam->current_image->location;
+
+    if ((bx->width <64) || (bx->height <64)) {
+        return;
+    }
+
+    picture = myfopen(file, "wbe");
+    if (!picture) {
+        MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            ,_("Can't write picture to file %s"), file);
+        return;
+    }
+
+    image_size = bx->width * bx->height;
+
+    buf =(u_char*) mymalloc((uint)image_size);
+    img =(u_char*) mymalloc((uint)image_size);
+
+    for (indxh=bx->miny; indxh< bx->miny + bx->height; indxh++){
+        memcpy(img+((indxh - bx->miny)* bx->width)
+            , image+(indxh*cam->imgs.width) + bx->minx
+            , (uint)bx->width);
+    }
+
+    sz = jpgutl_put_grey(buf, image_size, img
+        , bx->width, bx->height
+        , cam->cfg->picture_quality, cam
+        ,&(cam->current_image->imgts), bx);
+
+    fwrite(buf, (uint)sz, 1, picture);
+
+    free(buf);
+    free(img);
+
+    myfclose(picture);
+}
+
+/** Get the pgm file used as fixed mask */
+u_char *cls_picture::load_pgm(FILE *picture, int width, int height)
 {
     int x, y, mask_width, mask_height, maxval;
-    unsigned char *image, *resized_image;
-    char byte, magic[256], w[256], h[256], mx[256];
-    int vars, comment, retcd, indx;
+    char line[256];
+    u_char *image, *resized_image;
 
-    memset(&magic,0,255);
-    memset(&w,0,255);
-    memset(&h, 0, 255);
-    memset(&mx, 0, 255);
+    line[255] = 0;
 
-    //CR = 0x0D , LF = '0x0A' space = 0x20, # = 0x23, tab = 0x09
-    vars = 0; comment = 0; indx= 0; retcd = 1;
+    if (!fgets(line, 255, picture)) {
+        MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO,_("Could not read from pgm file"));
+        return NULL;
+    }
 
-    while (retcd != 0) {
-        retcd = fread(&byte, 1, 1, picture);
-        if (retcd !=0) {
-            if (comment == 0) {   /* Not in a comment */
-                if (byte == 0x23) { /* Start of a comment */
-                    comment = 1;
-                } else if ((byte == 0x0d) || (byte == 0x0a) ||
-                           (byte == 0x20) || (byte == 0x09)) {
-                    /* White space, reset indx */
-                    indx = 0;
-                    if (vars == 4) {
-                        retcd = 0;
-                    }
-                } else {    /* All other characters */
-                    if (indx == 0) {
-                        vars++;
-                    }
-                    if (vars == 1) {
-                        magic[indx] = byte;
-                        indx++;
-                    } else if (vars == 2) {
-                        w[indx] = byte;
-                        indx++;
-                    } else if (vars == 3) {
-                        h[indx] = byte;
-                        indx++;
-                    } else if (vars == 4) {
-                        mx[indx] = byte;
-                        indx++;
-                    }
-                }
-            } else {    /* Processing a comment */
-                if ((byte == 0x0d) || (byte == 0x0a)) {
-                    /* End of line for the comment */
-                    comment = 0;
-                }
-            }
+    if (strncmp(line, "P5", 2)) {
+        MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            ,_("This is not a pgm file, starts with '%s'"), line);
+        return NULL;
+    }
+
+    /* Skip comment */
+    line[0] = '#';
+    while (line[0] == '#')
+        if (!fgets(line, 255, picture)) {
+            return NULL;
         }
-    }
 
-    if (vars != 4) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error getting PGM vars."));
+    /* Read image size */
+    if (sscanf(line, "%d %d", &mask_width, &mask_height) != 2) {
+        MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            ,_("Failed reading size in pgm file"));
         return NULL;
     }
 
-    if (mystrne(magic,"P5")) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
-            ,_("This is not a pgm file, starts with '%s'"), magic);
+    /* Maximum value */
+    line[0] = '#';
+    while (line[0] == '#')
+        if (!fgets(line, 255, picture)) {
+            return NULL;
+        }
+
+    if (sscanf(line, "%d", &maxval) != 1) {
+        MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            ,_("Failed reading maximum value in pgm file"));
         return NULL;
     }
 
-    mask_width = atoi(w);
-    mask_height = atoi(h);
-    maxval = atoi(mx);
-
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
-        , _("Magic %s: Width %s(%d): Height %s(%d): MaxVal: %s(%d)")
-        , magic, w, mask_width, h, mask_height, mx, maxval);
-
-    /* Read data into image*/
-    image = mymalloc((mask_width * mask_height * 3) / 2);
+    /* Read data */
+    /* We allocate the size for a 420P since we will use
+    ** this image for masking privacy which needs the space for
+    ** the cr / cb components
+    */
+    image =(u_char*) mymalloc((uint)((mask_width * mask_height * 3) / 2));
 
     for (y = 0; y < mask_height; y++) {
-        if ((int)fread(&image[y * mask_width], 1, mask_width, picture) != mask_width) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Failed reading image data from pgm file"));
+        if ((int)fread(&image[y * mask_width], 1, (uint)mask_width, picture) != mask_width) {
+            MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Failed reading image data from pgm file");
         }
 
         for (x = 0; x < mask_width; x++) {
-            image[y * mask_width + x] = (int)image[y * mask_width + x] * 255 / maxval;
+            image[y * mask_width + x] = (u_char)((int)image[y * mask_width + x] * 255 / maxval);
         }
 
     }
 
     /* Resize mask if required */
     if (mask_width != width || mask_height != height) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("The mask file specified is not the same size as image from camera."));
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Attempting to resize mask image from %dx%d to %dx%d")
             ,mask_width, mask_height, width, height);
 
-        resized_image = mymalloc((width * height * 3) / 2);
+        resized_image =(u_char*) mymalloc((uint)((width * height * 3) / 2));
 
         for (y = 0; y < height; y++) {
             for (x = 0; x < width; x++) {
@@ -969,15 +596,7 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
     return image;
 }
 
-/**
- * put_fixed_mask
- *      If a mask file is asked for but does not exist this function
- *      creates an empty mask file in the right binary pgm format and
- *      and the right size - easy to edit with Gimp or similar tool.
- *
- * Returns nothing.
- */
-void put_fixed_mask(struct context *cnt, const char *file)
+void cls_picture::write_mask(const char *file)
 {
     FILE *picture;
 
@@ -985,54 +604,248 @@ void put_fixed_mask(struct context *cnt, const char *file)
     if (!picture) {
         /* Report to syslog - suggest solution if the problem is access rights to target dir. */
         if (errno ==  EACCES) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
                 ,_("can't write mask file %s - check access rights to target directory")
                 ,file);
         } else {
             /* If target dir is temporarily unavailable we may survive. */
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
                 ,_("can't write mask file %s"), file);
         }
         return;
     }
-    memset(cnt->imgs.img_motion.image_norm, 255, cnt->imgs.motionsize); /* Initialize to unset */
+    memset(cam->imgs.image_motion.image_norm, 255, (uint)cam->imgs.motionsize); /* Initialize to unset */
 
     /* Write pgm-header. */
     fprintf(picture, "P5\n");
-    fprintf(picture, "%d %d\n", cnt->conf.width, cnt->conf.height);
+    fprintf(picture, "%d %d\n", cam->cfg->width, cam->cfg->height);
     fprintf(picture, "%d\n", 255);
 
     /* Write pgm image data at once. */
-    if ((int)fwrite(cnt->imgs.img_motion.image_norm, cnt->conf.width, cnt->conf.height, picture) != cnt->conf.height) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+    if ((int)fwrite(cam->imgs.image_motion.image_norm, (uint)cam->cfg->width, (uint)cam->cfg->height, picture) != cam->cfg->height) {
+        MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
             ,_("Failed writing default mask as pgm file"));
         return;
     }
 
     myfclose(picture);
 
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
         ,_("Creating empty mask %s\nPlease edit this file and "
-        "re-run motion to enable mask feature"), cnt->conf.mask_file);
+        "re-run motion to enable mask feature"), cam->cfg->mask_file.c_str());
 }
 
-void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst)
+void cls_picture::scale_img(int width_src, int height_src, u_char *img_src, u_char *img_dst)
 {
 
     int i = 0, x, y;
-    for (y = 0; y < height_src; y+=2) {
-        for (x = 0; x < width_src; x+=2) {
+    for (y = 0; y < height_src; y+=2)
+        for (x = 0; x < width_src; x+=2)
             img_dst[i++] = img_src[y * width_src + x];
-        }
-    }
 
-    for (y = 0; y < height_src / 2; y+=2) {
-       for (x = 0; x < width_src; x += 4) {
+    for (y = 0; y < height_src / 2; y+=2)
+       for (x = 0; x < width_src; x += 4)
+       {
           img_dst[i++] = img_src[(width_src * height_src) + (y * width_src) + x];
           img_dst[i++] = img_src[(width_src * height_src) + (y * width_src) + (x + 1)];
        }
-    }
 
     return;
+}
+
+void cls_picture::save_preview()
+{
+    u_char *image_norm, *image_high;
+
+    /* Save our pointers to our memory locations for images*/
+    image_norm = cam->imgs.image_preview.image_norm;
+    image_high = cam->imgs.image_preview.image_high;
+
+    /* Copy over the meta data from the img into preview */
+    memcpy(&cam->imgs.image_preview, cam->current_image, sizeof(ctx_image_data));
+
+    /* Restore the pointers to the memory locations for images*/
+    cam->imgs.image_preview.image_norm = image_norm;
+    cam->imgs.image_preview.image_high = image_high;
+
+    /* Copy the actual images for norm and high */
+    memcpy(cam->imgs.image_preview.image_norm
+        , cam->current_image->image_norm, (uint)cam->imgs.size_norm);
+    if (cam->imgs.size_high > 0) {
+        memcpy(cam->imgs.image_preview.image_high
+            , cam->current_image->image_high, (uint)cam->imgs.size_high);
+    }
+
+    /*
+     * If we set output_all to yes and during the event
+     * there is no image with motion, diffs is 0, we are not going to save the preview event
+     */
+    if (cam->imgs.image_preview.diffs == 0) {
+        cam->imgs.image_preview.diffs = 1;
+    }
+
+    cam->draw->locate();
+
+}
+
+void cls_picture::init_privacy()
+{
+    int indxrow, indxcol;
+    int start_cr, offset_cb, start_cb;
+    int y_index, uv_index;
+    int indx_img, indx_max;         /* Counter and max for norm/high */
+    int indx_width, indx_height;
+    u_char *img_temp, *img_temp_uv;
+
+
+    FILE *picture;
+
+    /* Load the privacy file if any */
+    cam->imgs.mask_privacy = NULL;
+    cam->imgs.mask_privacy_uv = NULL;
+    cam->imgs.mask_privacy_high = NULL;
+    cam->imgs.mask_privacy_high_uv = NULL;
+
+    if (cam->cfg->mask_privacy != "") {
+        if ((picture = myfopen(cam->cfg->mask_privacy.c_str(), "rbe"))) {
+            MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, _("Opening privacy mask file"));
+            /*
+             * NOTE: The mask is expected to have the output dimensions. I.e., the mask
+             * applies to the already rotated image, not the capture image. Thus, use
+             * width and height from imgs.
+             */
+            cam->imgs.mask_privacy = load_pgm(picture, cam->imgs.width, cam->imgs.height);
+
+            /* We only need the "or" mask for the U & V chrominance area.  */
+            cam->imgs.mask_privacy_uv =(u_char*) mymalloc((uint)
+                ((cam->imgs.height * cam->imgs.width) / 2));
+            if (cam->imgs.size_high > 0) {
+                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+                    ,_("Opening high resolution privacy mask file"));
+                rewind(picture);
+                cam->imgs.mask_privacy_high = load_pgm(picture, cam->imgs.width_high, cam->imgs.height_high);
+                cam->imgs.mask_privacy_high_uv =(u_char*) mymalloc((uint)
+                    ((cam->imgs.height_high * cam->imgs.width_high) / 2));
+            }
+
+            myfclose(picture);
+        } else {
+            MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+                ,_("Error opening mask file %s"), cam->cfg->mask_privacy.c_str());
+            /* Try to write an empty mask file to make it easier for the user to edit it */
+            write_mask(cam->cfg->mask_privacy.c_str() );
+        }
+
+        if (!cam->imgs.mask_privacy) {
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                ,_("Failed to read mask privacy image. Mask privacy feature disabled."));
+        } else {
+            MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+            ,_("Mask privacy file \"%s\" loaded."), cam->cfg->mask_privacy.c_str());
+
+            indx_img = 1;
+            if (cam->imgs.size_high > 0) {
+                indx_max = 2;
+            } else {
+                indx_max = 1;
+            }
+
+            while (indx_img <= indx_max){
+                if (indx_img == 1) {
+                    start_cr = (cam->imgs.height * cam->imgs.width);
+                    offset_cb = ((cam->imgs.height * cam->imgs.width)/4);
+                    start_cb = start_cr + offset_cb;
+                    indx_width = cam->imgs.width;
+                    indx_height = cam->imgs.height;
+                    img_temp = cam->imgs.mask_privacy;
+                    img_temp_uv = cam->imgs.mask_privacy_uv;
+                } else {
+                    start_cr = (cam->imgs.height_high * cam->imgs.width_high);
+                    offset_cb = ((cam->imgs.height_high * cam->imgs.width_high)/4);
+                    start_cb = start_cr + offset_cb;
+                    indx_width = cam->imgs.width_high;
+                    indx_height = cam->imgs.height_high;
+                    img_temp = cam->imgs.mask_privacy_high;
+                    img_temp_uv = cam->imgs.mask_privacy_high_uv;
+                }
+
+                for (indxrow = 0; indxrow < indx_height; indxrow++) {
+                    for (indxcol = 0; indxcol < indx_width; indxcol++) {
+                        y_index = indxcol + (indxrow * indx_width);
+                        if (img_temp[y_index] == 0xff) {
+                            if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ) {
+                                uv_index = (indxcol/2) + ((indxrow * indx_width)/4);
+                                img_temp[start_cr + uv_index] = 0xff;
+                                img_temp[start_cb + uv_index] = 0xff;
+                                img_temp_uv[uv_index] = 0x00;
+                                img_temp_uv[offset_cb + uv_index] = 0x00;
+                            }
+                        } else {
+                            img_temp[y_index] = 0x00;
+                            if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ) {
+                                uv_index = (indxcol/2) + ((indxrow * indx_width)/4);
+                                img_temp[start_cr + uv_index] = 0x00;
+                                img_temp[start_cb + uv_index] = 0x00;
+                                img_temp_uv[uv_index] = 0x80;
+                                img_temp_uv[offset_cb + uv_index] = 0x80;
+                            }
+                        }
+                    }
+                }
+                indx_img++;
+            }
+        }
+    }
+
+}
+
+void cls_picture::init_mask()
+{
+    FILE *picture;
+
+    /* Load the mask file if any */
+    if (cam->cfg->mask_file != "") {
+        if ((picture = myfopen(cam->cfg->mask_file.c_str(), "rbe"))) {
+            /*
+             * NOTE: The mask is expected to have the output dimensions. I.e., the mask
+             * applies to the already rotated image, not the capture image. Thus, use
+             * width and height from imgs.
+             */
+            cam->imgs.mask = load_pgm(picture, cam->imgs.width, cam->imgs.height);
+            myfclose(picture);
+        } else {
+            MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+                ,_("Error opening mask file %s")
+                ,cam->cfg->mask_file.c_str());
+            /*
+             * Try to write an empty mask file to make it easier
+             * for the user to edit it
+             */
+            write_mask(cam->cfg->mask_file.c_str());
+        }
+
+        if (!cam->imgs.mask) {
+            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                ,_("Failed to read mask image. Mask feature disabled."));
+        } else {
+            MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+                ,_("Maskfile \"%s\" loaded.")
+                ,cam->cfg->mask_file.c_str());
+        }
+    } else {
+        cam->imgs.mask = NULL;
+    }
+}
+
+cls_picture::cls_picture(cls_camera *p_cam)
+{
+    cam = p_cam;
+    init_mask();
+    init_privacy();
+}
+
+cls_picture::~cls_picture()
+{
+
 }
 

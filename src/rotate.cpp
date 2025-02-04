@@ -1,52 +1,27 @@
-/*   This file is part of Motion.
- *
- *   Motion is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   Motion is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 /*
- *    rotate.c
+ *    This file is part of Motion.
  *
- *    Module for handling image rotation.
+ *    Motion is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
  *
- *    Copyright 2004-2005, Per Jonsson (per@pjd.nu)
+ *    Motion is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *    Image rotation is a feature of Motion that can be used when the
- *    camera is mounted upside-down or on the side. The module only
- *    supports rotation in multiples of 90 degrees. Using rotation
- *    increases the Motion CPU usage slightly.
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
- *    Version history:
- *      v6 (29-Aug-2005) - simplified the code as Motion now requires
- *                         that width and height are multiples of 16
- *      v5 (3-Aug-2005)  - cleanup in code comments
- *                       - better adherence to coding standard
- *                       - fix for __bswap_32 macro collision
- *                       - fixed bug where initialization would be
- *                         incomplete for invalid degrees of rotation
- *                       - now uses MOTION_LOG for error reporting
- *      v4 (26-Oct-2004) - new fix for width/height from imgs/conf due to
- *                         earlier misinterpretation
- *      v3 (11-Oct-2004) - cleanup of width/height from imgs/conf
- *      v2 (26-Sep-2004) - separation of capture/internal dimensions
- *                       - speed optimization, including bswap
- *      v1 (28-Aug-2004) - initial version
  */
 #include "motion.hpp"
-#include "translate.hpp"
 #include "util.hpp"
+#include "camera.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 #include "rotate.hpp"
+
 #include <stdint.h>
 #if defined(__APPLE__)
     #include <libkern/OSByteOrder.h>
@@ -64,24 +39,11 @@
     #include <byteswap.h>
 #endif
 
-/**
- * reverse_inplace_quad
- *
- *  Reverses a block of memory in-place, 4 bytes at a time. This function
- *  requires the uint32_t type, which is 32 bits wide.
- *
- * Parameters:
- *
- *   src  - the memory block to reverse
- *   size - the size (in bytes) of the memory block
- *
- * Returns: nothing
- */
-static void reverse_inplace_quad(unsigned char *src, int size)
+void cls_rotate::reverse_inplace_quad(u_char *src, int size)
 {
     uint32_t *nsrc = (uint32_t *)src;              /* first quad */
     uint32_t *ndst = (uint32_t *)(src + size - 4); /* last quad */
-    register uint32_t tmp;
+    uint32_t tmp;
 
     while (nsrc < ndst) {
         tmp = bswap_32(*ndst);
@@ -90,10 +52,10 @@ static void reverse_inplace_quad(unsigned char *src, int size)
     }
 }
 
-static void flip_inplace_horizontal(unsigned char *src, int width, int height)
+void cls_rotate::flip_inplace_horizontal(u_char *src, int width, int height)
 {
     uint8_t *nsrc, *ndst;
-    register uint8_t tmp;
+    uint8_t tmp;
     int l,w;
 
     for(l=0; l < height/2; l++) {
@@ -108,10 +70,10 @@ static void flip_inplace_horizontal(unsigned char *src, int width, int height)
 
 }
 
-static void flip_inplace_vertical(unsigned char *src, int width, int height)
+void cls_rotate::flip_inplace_vertical(u_char *src, int width, int height)
 {
     uint8_t *nsrc, *ndst;
-    register uint8_t tmp;
+    uint8_t tmp;
     int l;
 
     for(l=0; l < height; l++) {
@@ -125,206 +87,38 @@ static void flip_inplace_vertical(unsigned char *src, int width, int height)
     }
 }
 
-/**
- * rot90cw
- *
- *  Performs a 90 degrees clockwise rotation of the memory block pointed to
- *  by src. The rotation is NOT performed in-place; dst must point to a
- *  receiving memory block the same size as src.
- *
- * Parameters:
- *
- *   src    - pointer to the memory block (image) to rotate clockwise
- *   dst    - where to put the rotated memory block
- *   size   - the size (in bytes) of the memory blocks (both src and dst)
- *   width  - the width of the memory block when seen as an image
- *   height - the height of the memory block when seen as an image
- *
- * Returns: nothing
- */
-static void rot90cw(unsigned char *src, register unsigned char *dst
-            ,int size, int width, int height)
+void cls_rotate::rot90cw(u_char *src, u_char *dst, int size, int width, int height)
 {
-    unsigned char *endp;
-    register unsigned char *base;
+    u_char *endp;
+    u_char *base;
     int j;
 
     endp = src + size;
     for (base = endp - width; base < endp; base++) {
         src = base;
-        for (j = 0; j < height; j++, src -= width) {
+        for (j = 0; j < height; j++, src -= width)
             *dst++ = *src;
-        }
+
     }
 }
 
-/**
- * rot90ccw
- *
- *  Performs a 90 degrees counterclockwise rotation of the memory block pointed
- *  to by src. The rotation is not performed in-place; dst must point to a
- *  receiving memory block the same size as src.
- *
- * Parameters:
- *
- *   src    - pointer to the memory block (image) to rotate counterclockwise
- *   dst    - where to put the rotated memory block
- *   size   - the size (in bytes) of the memory blocks (both src and dst)
- *   width  - the width of the memory block when seen as an image
- *   height - the height of the memory block when seen as an image
- *
- * Returns: nothing
- */
-static inline void rot90ccw(unsigned char *src, register unsigned char *dst
-            ,int size, int width, int height)
+void cls_rotate::rot90ccw(u_char *src, u_char *dst, int size, int width, int height)
 {
-    unsigned char *endp;
-    register unsigned char *base;
+    u_char *endp;
+    u_char *base;
     int j;
 
     endp = src + size;
     dst = dst + size - 1;
     for (base = endp - width; base < endp; base++) {
         src = base;
-        for (j = 0; j < height; j++, src -= width) {
+        for (j = 0; j < height; j++, src -= width)
             *dst-- = *src;
-        }
+
     }
 }
 
-/**
- * rotate_init
- *
- *  Initializes rotation data - allocates memory and determines which function
- *  to use for 180 degrees rotation.
- *
- * Parameters:
- *
- *   cnt - the current thread's context structure
- *
- * Returns: nothing
- */
-void rotate_init(struct context *cnt)
-{
-    int size_norm, size_high;
-
-    /* Make sure buffer_norm isn't freed if it hasn't been allocated. */
-    cnt->rotate_data.buffer_norm = NULL;
-    cnt->rotate_data.buffer_high = NULL;
-
-    /*
-     * Assign the value in conf.rotate to rotate_data.degrees. This way,
-     * we have a value that is safe from changes caused by motion-control.
-     */
-    if ((cnt->conf.rotate % 90) > 0) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
-            ,_("Config option \"rotate\" not a multiple of 90: %d")
-            ,cnt->conf.rotate);
-        cnt->conf.rotate = 0;     /* Disable rotation. */
-        cnt->rotate_data.degrees = 0; /* Force return below. */
-    } else {
-        cnt->rotate_data.degrees = cnt->conf.rotate % 360; /* Range: 0..359 */
-    }
-
-    if (cnt->conf.flip_axis[0]=='h') {
-        cnt->rotate_data.axis = FLIP_TYPE_HORIZONTAL;
-    } else if (cnt->conf.flip_axis[0]=='v') {
-        cnt->rotate_data.axis = FLIP_TYPE_VERTICAL;
-    } else {
-        cnt->rotate_data.axis = FLIP_TYPE_NONE;
-    }
-
-    /*
-     * Upon entrance to this function, imgs.width and imgs.height contain the
-     * capture dimensions (as set in the configuration file, or read from a
-     * netcam source).
-     *
-     * If rotating 90 or 270 degrees, the capture dimensions and output dimensions
-     * are not the same. Capture dimensions will be contained in capture_width_norm and
-     * capture_height_norm in cnt->rotate_data, while output dimensions will be contained
-     * in imgs.width and imgs.height.
-     */
-
-    /* 1. Transfer capture dimensions into capture_width_norm and capture_height_norm. */
-    cnt->rotate_data.capture_width_norm  = cnt->imgs.width;
-    cnt->rotate_data.capture_height_norm = cnt->imgs.height;
-
-    cnt->rotate_data.capture_width_high  = cnt->imgs.width_high;
-    cnt->rotate_data.capture_height_high = cnt->imgs.height_high;
-
-    size_norm = cnt->imgs.width * cnt->imgs.height * 3 / 2;
-    size_high = cnt->imgs.width_high * cnt->imgs.height_high * 3 / 2;
-
-    if ((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270)) {
-        /* 2. "Swap" imgs.width and imgs.height. */
-        cnt->imgs.width = cnt->rotate_data.capture_height_norm;
-        cnt->imgs.height = cnt->rotate_data.capture_width_norm;
-        if (size_high > 0 ) {
-            cnt->imgs.width_high = cnt->rotate_data.capture_height_high;
-            cnt->imgs.height_high = cnt->rotate_data.capture_width_high;
-        }
-    }
-
-    /*
-     * If we're not rotating, let's exit once we have setup the capture dimensions
-     * and output dimensions properly.
-     */
-    if (cnt->rotate_data.degrees == 0) {
-        return;
-    }
-
-    /*
-     * Allocate memory if rotating 90 or 270 degrees, because those rotations
-     * cannot be performed in-place (they can, but it would be too slow).
-     */
-    if ((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270)) {
-        cnt->rotate_data.buffer_norm = mymalloc(size_norm);
-        if (size_high > 0) {
-            cnt->rotate_data.buffer_high = mymalloc(size_high);
-        }
-    }
-
-}
-
-/**
- * rotate_deinit
- *
- *  Frees resources previously allocated by rotate_init.
- *
- * Parameters:
- *
- *   cnt - the current thread's context structure
- *
- * Returns: nothing
- */
-void rotate_deinit(struct context *cnt)
-{
-
-    if (cnt->rotate_data.buffer_norm) {
-        free(cnt->rotate_data.buffer_norm);
-    }
-
-    if (cnt->rotate_data.buffer_high) {
-        free(cnt->rotate_data.buffer_high);
-    }
-}
-
-/**
- * rotate_map
- *
- *  Main entry point for rotation.
- *
- * Parameters:
- *
- *   img_data- pointer to the image data to rotate
- *   cnt - the current thread's context structure
- *
- * Returns:
- *
- *   0  - success
- *   -1 - failure (shouldn't happen)
- */
-int rotate_map(struct context *cnt, struct image_data *img_data)
+void cls_rotate::process(ctx_image_data *img_data)
 {
     /*
      * The image format is YUV 4:2:0 planar, which has the pixel
@@ -336,38 +130,33 @@ int rotate_map(struct context *cnt, struct image_data *img_data)
 
     int indx, indx_max;
     int wh, wh4 = 0, w2 = 0, h2 = 0;  /* width * height, width * height / 4 etc. */
-    int size, deg;
-    enum FLIP_TYPE axis;
+    int size;
     int width, height;
-    unsigned char *img;
-    unsigned char *temp_buff;
+    u_char *img;
+    u_char *temp_buff;
 
-    if (cnt->rotate_data.degrees == 0 && cnt->rotate_data.axis == FLIP_TYPE_NONE) {
-        return 0;
+    if ((degrees == 0) && (axis == FLIP_TYPE_NONE)) {
+        return;
     }
 
     indx = 0;
-    indx_max = 0;
-    if ((cnt->rotate_data.capture_width_high != 0) && (cnt->rotate_data.capture_height_high != 0)) {
+    if ((capture_width_high != 0) && (capture_height_high != 0)) {
         indx_max = 1;
+    } else {
+        indx_max = 0;
     }
 
     while (indx <= indx_max) {
-        deg = cnt->rotate_data.degrees;
-        axis = cnt->rotate_data.axis;
-        wh4 = 0;
-        w2 = 0;
-        h2 = 0;
-        if (indx == 0) {
+        if (indx == 0 ) {
             img = img_data->image_norm;
-            width = cnt->rotate_data.capture_width_norm;
-            height = cnt->rotate_data.capture_height_norm;
-            temp_buff = cnt->rotate_data.buffer_norm;
+            width = capture_width_norm;
+            height = capture_height_norm;
+            temp_buff = buffer_norm;
         } else {
             img = img_data->image_high;
-            width = cnt->rotate_data.capture_width_high;
-            height = cnt->rotate_data.capture_height_high;
-            temp_buff = cnt->rotate_data.buffer_high;
+            width = capture_width_high;
+            height = capture_height_high;
+            temp_buff = buffer_high;
         }
         /*
          * Pre-calculate some stuff:
@@ -398,12 +187,12 @@ int rotate_map(struct context *cnt, struct image_data *img_data)
             break;
         }
 
-        switch (deg) {
+        switch (degrees) {
         case 90:
             rot90cw(img, temp_buff, wh, width, height);
             rot90cw(img + wh, temp_buff + wh, wh4, w2, h2);
             rot90cw(img + wh + wh4, temp_buff + wh + wh4, wh4, w2, h2);
-            memcpy(img, temp_buff, size);
+            memcpy(img, temp_buff, (uint)size);
             break;
         case 180:
             reverse_inplace_quad(img, wh);
@@ -414,15 +203,83 @@ int rotate_map(struct context *cnt, struct image_data *img_data)
             rot90ccw(img, temp_buff, wh, width, height);
             rot90ccw(img + wh, temp_buff + wh, wh4, w2, h2);
             rot90ccw(img + wh + wh4, temp_buff + wh + wh4, wh4, w2, h2);
-            memcpy(img, temp_buff, size);
+            memcpy(img, temp_buff, (uint)size);
             break;
         default:
-            /* Invalid */
-            return -1;
+            break;
         }
             indx++;
     }
 
-    return 0;
+    return;
 }
 
+cls_rotate::cls_rotate(cls_camera *p_cam)
+{
+    cam = p_cam;
+    int size_norm, size_high;
+
+    buffer_norm = nullptr;
+    buffer_high = nullptr;
+
+    if ((cam->cfg->rotate % 90) > 0) {
+        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
+            ,_("Config option \"rotate\" not a multiple of 90: %d")
+            ,cam->cfg->rotate);
+        cam->cfg->rotate = 0;     /* Disable rotation. */
+        degrees = 0; /* Force return below. */
+    } else {
+        degrees = cam->cfg->rotate % 360; /* Range: 0..359 */
+    }
+
+    if (cam->cfg->flip_axis == "horizontal") {
+        axis = FLIP_TYPE_HORIZONTAL;
+    } else if (cam->cfg->flip_axis == "vertical") {
+        axis = FLIP_TYPE_VERTICAL;
+    } else {
+        axis = FLIP_TYPE_NONE;
+    }
+
+    /* At this point, imgs.width and imgs.height contain the capture dimensions.
+     * If rotating 90 or 270 degrees, the output h/w will be swapped.
+     */
+
+    /* 1. Transfer capture dimensions into capture_width_norm and capture_height_norm. */
+    capture_width_norm  = cam->imgs.width;
+    capture_height_norm = cam->imgs.height;
+
+    capture_width_high  = cam->imgs.width_high;
+    capture_height_high = cam->imgs.height_high;
+
+    size_norm = cam->imgs.width * cam->imgs.height * 3 / 2;
+    size_high = cam->imgs.width_high * cam->imgs.height_high * 3 / 2;
+
+    /* "Swap" imgs.width and imgs.height. */
+    if ((degrees == 90) || (degrees == 270)) {
+        cam->imgs.width = capture_height_norm;
+        cam->imgs.height = capture_width_norm;
+        if (size_high > 0 ) {
+            cam->imgs.width_high = capture_height_high;
+            cam->imgs.height_high = capture_width_high;
+        }
+    }
+
+    if (degrees == 0) {
+        return;
+    }
+
+    if ((degrees == 90) || (degrees == 270)) {
+        buffer_norm =(u_char*) mymalloc((uint)size_norm);
+        if (size_high > 0 ) {
+            buffer_high =(u_char*) mymalloc((uint)size_high);
+        }
+    }
+
+}
+
+cls_rotate::~cls_rotate()
+{
+    myfree(buffer_norm);
+    myfree(buffer_high);
+
+}

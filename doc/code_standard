@@ -1,76 +1,15 @@
-Formatting rules for Motion code.
-
-Note: To understand them you must view this document with spaces and tabs
-visible.
+Formatting for Motion.
 
 --------------------
 RULE 1
 Code is generally indented using 4 spaces
 
-Example
-/* allocate some memory and check if that succeeded or not. If it failed
- * do some error logging and bail out
- */
-void * mymalloc(size_t nbytes)
-{
-    void *dummy = malloc(nbytes);
-    if (!dummy) {
-        printf("Could not allocate %llu bytes of memory!\n", (unsigned long long) nbytes);
-        syslog(EMERG, TYPE_ALL, "%s: Could not allocate %llu bytes of memory!",
-               __FUNCTION__, (unsigned long long) nbytes);
-        exit(1);
-    }
-
-    return dummy;
-}
-
-RULE 1A
-Preprocessor statements such as #IF, #DEFINE, etc are to be indented
-similar to normal code.  These statements shall not be forced to start in column 1.
-
-RULE 1B
-When entire functions are enclosed in a #IF block, the functions should continue to
-start in column 1.
-
-
 --------------------
 RULE 2
 If a line or statement is broken into two lines you will normally want the text
-in the 2nd line to align with text in the first line if it enhances the readability
-of the statement.  The alignment is done using spaces making the code on the
-following lines appear in a natural way below the corresponding code above.
-Use common sense to enhance readability.
-
-Example
-/* allocate some memory and check if that succeeded or not. If it failed
- * do some error logging and bail out
- */
-void * mymalloc(size_t nbytes)
-{
-    void *dummy = malloc(nbytes);
-    if (!dummy) {
-        printf("Could not allocate %llu bytes of memory!\n",
-               (unsigned long long) nbytes);
-        syslog(EMERG, TYPE_ALL,"Could not allocate %llu bytes of memory!",
-               __FUNCTION__, (unsigned long long) nbytes);
-        exit(1);
-    }
-
-    return dummy;
-}
-
-Example
-    cnt->sql_mask = cnt->conf.sql_log_image * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
-                    cnt->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
-                    cnt->conf.sql_log_mpeg * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
-                    cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
-
-
-
-Example
-    char msg[] = "This is a very long message which we would like to break"
-                 "into two lines or more because otherwise the line gets"
-                 "too long to read. We align them below each other for readability"
+in the 2nd line to align with text in the first line.  The alignment is done
+using spaces making the code on the following lines appear in a natural way below
+the corresponding code above. Use common sense to enhance readability.
 
 --------------------
 RULE 3
@@ -79,177 +18,37 @@ and 8 in another. A space is always a space.
 
 --------------------
 RULE 4
-Functions should be written with this syntax.
-
-GOOD EXAMPLE
-/* Comment block
- * A comment block should be at least one line saying what the function does.
- * It is better to make several lines explaining what it does, what it takes
- * for arguments and what it returns. It is a bad idea to try to use tabs to
- * align text in the comment block
- */
-type function_name(parameters)
-{
-    declarations
-    declarations
-
-    statements
-    statements
-}
-
-For function declarations that span more than one line, a triple indent is
-generally used for the second and subsequent lines to avoid excessive lines.
-
-Do not stuff everything on a single line.  Keep the line length to less than
-100 characters.  All variable names should be seen without having to scroll.
-
-Do not put the '{' after the function declaration. Put it on an empty line
-right after. Note that this rule is only for functions.
+If blocks always use braces and follow K&R.  Braces are free and do not cost money,
+use them to clarify what you are doing.
 
 --------------------
 RULE 5
-Blocks follow K&R.
-
-GOOD EXAMPLE
-
-if ((picture=fopen(cnt->conf.mask_file, "r"))) {
-    cnt->imgs.mask=get_pgm(cnt, picture, cnt->imgs.width, cnt->imgs.height);
-} else {
-    printf("Hello world\n");
-}
-
-
-BAD EXAMPLE
-
-if ((picture=fopen(cnt->conf.mask_file, "r")))
-{
-    cnt->imgs.mask=get_pgm(cnt, picture, cnt->imgs.width, cnt->imgs.height);
-    fclose(picture);
-}
-else
-{
-    put_fixed_mask(cnt, cnt->conf.mask_file);
-    printf("Hello world\n");
-}
-
-
-
-GOOD EXAMPLE
-
-switch (expr) {
-case ABC:
-case DEF:
-    statement;
-    break;
-case UVW:
-    statement;
-    break;
-default:
-    /* default case */
-    statement;
-}
-
-BAD EXAMPLE
-
-switch (expr) {
-    case ABC:
-    case DEF:
-        statement;
-    break;
-    case UVW:
-        statement;
-    break;
-    default:
-        /* default case */
-        statement;
-}
-
-RULE 5A
-if, while and for statements shall always use braces.
-
-
---------------------
-RULE 6
-Whitespace.
-To ensure that Motion code looks homogeneous and to enhance readability:
-  1. Do not use a space before a comma
+Use whitespace, commas, braces and indentation to enhance readability:
+  1. No spaces before a comma
   2. Always leave at least one space after a comma
   3. Use one space between a block start statement and a '{'
   4. Do not use a space between a function name and the '('
-  5. Use spaces to enhance readability (a non objective rule but at least
-     think about it)
-  6. The '*' for pointers should be just before the variable name with no
-     space.
-
-GOOD EXAMPLES
-int function_name(int *par1, int par2, int par3)
-{
-if (var1==2 || var2==3) {
-
-BAD EXAMPLES
-int function_name (int * par1 , int par2,int par3){
-if (var1==2||var2==3){
+  5. The '*' for pointers should be just before the variable name with no space.
+  6. Use spaces to enhance readability (a non objective rule but at least think about it)
 
 --------------------
-RULE 7
-Comment your code but do not be verbose.  Do not literally describe what
-the code does unless it would not be obvious to someone who knows C.
-
-BAD EXAMPLES
-    while (1) {     /* 'Do forever' */
-
-    /*
-     * Now we increment the index
-     */
-    indx++;
-
+RULE 6
+Comment the code where it isn't intuitive to new programmers.
 Use /* This style of comment for permament comments */ or
 /*
  * This style of comment for comments which
  * require more that one line
  */
-Use // this style comments for something you add temporarily while testing and
-FIXME type comments. It is much easier to spot the temporary comments this way.
+Use // style comments for something you add temporarily while testing.
 
 --------------------
-RULE 8
+RULE 7
 Use variable names that say what the variable is used for.
-Avoid x,t,vt type variable names.
-Use names like image, image_buffer, image_height, output_buffer
-Short names like i and j for loop index variable are a known good practice.
-Variable and function names are in lower case. Use '_' to separate words.
+Variable and function names are in lower case.
+Use '_' to separate words.
 MACROS are in uppercase.
-camelCase (mix of upper and lower case) is not allowed
-
-RULE 9
-Break code into many smaller functions rather than one extremely long one.
-It is easier to follow the flow when functions are simple and concise.
-
---------------------
-
-BEST PRACTICES
-Not rules, but these suggestions make code easier to read.
-
-Use white space and empty lines to group code.
-For example, large if statements are easier to read when there is an empty
-line before and after them.
-
-Use an empty line before a comment which describes the code lines below.
-
-Always use spaces in statements like
-thisvar->thismember>thisvar->thisothermember (bad)
-thisvar->thismember > thisvar->thisothermember (good)
-
-if (cnt->event_nr==cnt->prev_event||cnt->makemovie) (bad)
-if (cnt->event_nr == cnt->prev_event || cnt->makemovie) (good)
-
-frame_delay=(1000000L/cnt->conf.low_cpu)-frame_delay-elapsedtime; (bad)
-frame_delay = (1000000L / cnt->conf.low_cpu) - frame_delay - elapsedtime; (good)
+Follow the naming scheme for functions
 
 
---------------------
 
-This document can probably be enhanced more as time goes by.
-Hope it helps developers to understand the ideas.
 
-Please help the developers by at least trying to follow the spirit of this document.  We all have our coding preferences, but

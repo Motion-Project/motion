@@ -1,6 +1,6 @@
-.TH MOTION 1 2020-10-19 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2022-03-13 "Motion" "Motion Options and Config Files"
 .SH NAME
-motion \-   Detect motion using a video4linux device or network camera
+Motion \-   Detect motion using a video4linux device or network camera
 .SH SYNOPSIS
 .B motion [ \-hbnsm ] [ \-c config file path ] [ \-d level ] [ \-k level ] [ \-p pid_file ][ \-l log_file ]
 .SH DESCRIPTION
@@ -59,19 +59,6 @@ Description:
 .fi
 .RS
 When specified as ON, Motion goes into daemon (background process) mode and releases the terminal.
-.RE
-.RE
-
-.TP
-.B setup_mode
-.RS
-.nf
-Values: on/off
-Default: off
-Description:
-.fi
-.RS
-Start in Setup-Mode, daemon disabled.
 .RE
 .RE
 
@@ -154,7 +141,7 @@ Use this option to enable native language on the webcontrol and log message.  Sp
 .RE
 
 .TP
-.B camera_name
+.B device_name
 .RS
 .nf
 Values: User specified string
@@ -162,16 +149,16 @@ Default: Not Defined
 Description:
 .fi
 .RS
-User specified string to describe the camera.
+User specified string to describe the device.
 .RE
 .RE
 
 .TP
-.B camera_id
+.B device_id
 .RS
 .nf
-Values: Numeric identification number for the camera
-Default: The order in which the camera is opened by Motion
+Values: Numeric identification number for the device
+Default: The order in which the device is opened by Motion
 Description:
 .fi
 .RS
@@ -205,7 +192,7 @@ camera config files.
 .RE
 
 .TP
-.B camera_dir
+.B config_dir
 .RS
 .nf
 Values: User specified string
@@ -213,7 +200,7 @@ Default: Not Defined
 Description:
 .fi
 .RS
-This option specifies the optional subdirectory that contains the camera config files.
+This option specifies the optional subdirectory that contains the configuration files.
 .RE
 .RE
 
@@ -234,22 +221,7 @@ This option accepts the conversion specifiers included at the end of this manual
 .RE
 
 .TP
-.B video_device
-.RS
-.nf
-Values: User specified string
-Default: /dev/video0
-Description:
-.fi
-.RS
-String to specify the video device to be used for capturing.
-The format is usually /dev/videoX where X varies depending upon the video devices connected to the computer.
-For FreeBSD certain devices use the bktr subsystem and they will use /dev/bktr0.
-.RE
-.RE
-
-.TP
-.B video_params
+.B v4l2_device
 .RS
 .nf
 Values: User specified string
@@ -257,9 +229,111 @@ Default: None
 Description:
 .fi
 .RS
-String to specify the parameters to pass in for a video_device.  The parameters
+String to specify the videodevice to be used for capturing.
+The format is usually /dev/videoX where X varies depending upon the video devices connected to the computer.
+.RE
+.RE
+
+.TP
+.B vid_control_params
+.RS
+.nf
+Values: User specified string
+Default: None
+Description:
+.fi
+.RS
+String to specify the parameters to pass in for a videodevice.  The parameters
 permitted are dependent upon the device.  This only applies to V4L2 devices.  The
 Motion log reports all the available options for the device.
+.RE
+.RE
+
+.TP
+.B v4l2_palette
+.RS
+.nf
+Values: 0 to 21
+.RS
+V4L2_PIX_FMT_SN9C10X : 0  'S910'
+V4L2_PIX_FMT_SBGGR16 : 1  'BYR2'
+V4L2_PIX_FMT_SBGGR8  : 2  'BA81'
+V4L2_PIX_FMT_SPCA561 : 3  'S561'
+V4L2_PIX_FMT_SGBRG8  : 4  'GBRG'
+V4L2_PIX_FMT_SGRBG8  : 5  'GRBG'
+V4L2_PIX_FMT_PAC207  : 6  'P207'
+V4L2_PIX_FMT_PJPG    : 7  'PJPG'
+V4L2_PIX_FMT_MJPEG   : 8  'MJPEG'
+V4L2_PIX_FMT_JPEG    : 9  'JPEG'
+V4L2_PIX_FMT_RGB24   : 10 'RGB3'
+V4L2_PIX_FMT_SPCA501 : 11 'S501'
+V4L2_PIX_FMT_SPCA505 : 12 'S505'
+V4L2_PIX_FMT_SPCA508 : 13 'S508'
+V4L2_PIX_FMT_UYVY    : 14 'UYVY'
+V4L2_PIX_FMT_YUYV    : 15 'YUYV'
+V4L2_PIX_FMT_YUV422P : 16 '422P'
+V4L2_PIX_FMT_YUV420  : 17 'YU12'
+V4L2_PIX_FMT_Y10     : 18 'Y10'
+V4L2_PIX_FMT_Y12     : 19 'Y12'
+V4L2_PIX_FMT_GREY    : 20 'GREY'
+V4L2_PIX_FMT_H264    : 21 'H264'
+.RE
+Default: 17
+Description:
+.fi
+.RS
+The v4l2_palette option allows users to choose the preferred palette to be use by Motion to capture from the video device.
+If the preferred palette is not available from the video device, Motion will attempt to use palettes that are supported.
+.RE
+.RE
+
+.TP
+.B input
+.RS
+.nf
+Values:
+.RS
+\-1 : USB Cameras
+0 : video/TV cards or uvideo(4) on OpenBSD
+1 : video/TV cards
+.RE
+Default: \-1
+Description:
+.fi
+.RS
+The video input to be used.
+.RE
+.RE
+
+.TP
+.B norm
+.RS
+.nf
+Values:
+.RS
+0 (PAL)
+1 (NTSC)
+2 (SECAM)
+3 (PAL NC no colour)
+.RE
+Default: 0 (PAL)
+Description:
+.fi
+.RS
+The video norm to use when capturing from TV tuner cards
+.RE
+.RE
+
+.TP
+.B frequency
+.RS
+.nf
+Values: Dependent upon video device
+Default: 0
+Description:
+.fi
+.RS
+The frequency to set the tuner in kHz when using a TV tuner card.
 .RE
 .RE
 
@@ -279,7 +353,7 @@ Only recommended for cameras without auto brightness.
 .RE
 
 .TP
-.B tuner_device
+.B tunerdevice
 .RS
 .nf
 Values: User Specified String
@@ -341,12 +415,15 @@ Description:
 .fi
 .RS
 Full connection URL string to use to connect to a network camera.
-In addition to standard camera protocols, the following prefixes are
-added by the Motion application.
+The URL must provide a stream of images instead of only a static image.
+The following prefixes are recognized
 
 .RS
+http://
 ftp://
 mjpg://
+rtsp://
+rtmp://
 mjpeg://
 file://
 v4l2://
@@ -354,24 +431,12 @@ v4l2://
 
 The connection string is camera specific.
 It is usually the same as what other video playing applications would use to connect to the camera stream.
+Authentication can be specified in the URL or via the netcam_userpass option.
 .RE
 .RE
 
 .TP
-.B netcam_params
-.RS
-.nf
-Values: User specified string
-Default: Not Defined
-Description:
-.fi
-.RS
-User specified parameters for the network camera.
-.RE
-.RE
-
-.TP
-.B netcam_high_url
+.B netcam_highres
 .RS
 .nf
 Values: User specified string
@@ -390,25 +455,9 @@ rtmp://
 
 The connection string is camera specific.
 It is usually the same as what other video playing applications would use to connect to the camera stream.
-Motion currently only supports basic authentication for the cameras.
-Digest is not currently supported.
-Basic authentication can be specified in the URL or via the netcam_userpass option.
+Authentication can be specified in the URL or via the netcam_userpass option.
 .RE
 .RE
-
-.TP
-.B netcam_high_params
-.RS
-.nf
-Values: User specified string
-Default: Not Defined
-Description:
-.fi
-.RS
-User specified parameters for the network camera.
-.RE
-.RE
-
 
 .TP
 .B netcam_userpass
@@ -422,6 +471,78 @@ Description:
 The user id and password required to access the network camera string.
 Only basic authentication is supported at this time.
 Format is in user:password format when both a user name and password are required.
+.RE
+.RE
+
+.TP
+.B netcam_keepalive
+.RS
+.nf
+Values:
+.RS
+.fi
+off:   The historical implementation using HTTP/1.0, closing the socket after each http request.
+.nf
+
+.fi
+force: Use HTTP/1.0 requests with keep alive header to reuse the same connection.
+.nf
+
+.fi
+on:    Use HTTP/1.1 requests that support keep alive as default.
+.nf
+.RE
+Default: off
+Description:
+.fi
+.RS
+This setting is to keep-alive (open) the network socket between requests.
+When used, this option should improve performance on compatible net cameras.
+This option is not applicable for the rtsp://, rtmp:// and mjpeg:// formats.
+.RE
+.RE
+
+.TP
+.B netcam_proxy
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+If required, the URL to use for a netcam proxy server.
+For example, "http://myproxy".
+If a port number other than 80 is needed, append to the specification.
+For examplet, "http://myproxy:1234".
+.RE
+.RE
+
+.TP
+.B netcam_tolerant_check
+.RS
+.nf
+Values: on/off
+Default: off
+Description:
+.fi
+.RS
+Use a less strict jpeg validation for network cameras.
+This can assist with cameras that have poor or buggy firmware.
+.RE
+.RE
+
+.TP
+.B netcam_use_tcp
+.RS
+.nf
+Values: on/off
+Default: on
+Description:
+.fi
+.RS
+When using a RTSP/RTMP connection for a network camera, use a TCP transport instead of UDP.
+The UDP transport frequently results in "smeared" corrupt images.
 .RE
 .RE
 
@@ -463,21 +584,6 @@ Description:
 The maximum number of frames to capture in 1 second.
 The default of 100 will normally be limited by the capabilities of the video device.
 Typical video devices have a maximum rate of 30.
-.RE
-.RE
-
-.TP
-.B minimum_frame_time
-.RS
-.nf
-Values: 0 to unlimited
-Default: 0
-Description:
-.fi
-.RS
-The minimum time in seconds between capturing picture frames from the camera.
-The default of 0 disables this option and relies upon the capture rate of the camera.
-This option is used when you want to capture images at a rate lower than 2 per second.
 .RE
 .RE
 
@@ -589,7 +695,7 @@ Description:
 .fi
 .RS
 When specified, draw the number of changed pixed on the images.
-This option will normally be set to off except when you setup and adjust the motion settings.
+This option will normally be set to off except when you setup and adjust the Motion settings.
 The text is placed in upper right corner of the image.
 .RE
 .RE
@@ -634,19 +740,6 @@ Description:
 .fi
 .RS
 Always save images even if there was no motion.
-.RE
-.RE
-
-.TP
-.B pause
-.RS
-.nf
-Values: on/off
-Default: off
-Description:
-.fi
-.RS
-When Motion is started, pause the motion detection.
 .RE
 .RE
 
@@ -883,7 +976,7 @@ Description:
 .RS
 The number of pre-captured (buffered) pictures from before motion was detected that will be output upon motion detection.
 The recommended range is 0 to 5.
-It is not recommended to use large values since it will cause Motion to skip frames.
+It is not recommended to use large values since it will cause skipped frames.
 To smooth movies use larger values of post_capture instead.
 .RE
 .RE
@@ -958,7 +1051,7 @@ Output pictures with only the pixels moving object (ghost images)
 .B picture_type
 .RS
 .nf
-Values: jpeg/ppm/webp/grey
+Values: jpeg/ppm/webp
 Default: jpeg
 Description:
 .fi
@@ -1114,7 +1207,7 @@ A value of 1 is worst quality versus a value of 100 is best quality.
 .RE
 
 .TP
-.B  movie_codec
+.B  movie_container
 .RS
 .nf
 Values:
@@ -1276,9 +1369,9 @@ Default: mpg
 Description:
 .fi
 .RS
-For mpg timelapse videos, if motion is shutdown and restarted, new pics will be appended
+For mpg timelapse videos, if Motion is shutdown and restarted, new pics will be appended
 to any previously created file with name indicated for timelapse.
-For mpeg4 timelapse videos, if motion is shutdown and restarted, new pics will create a
+For mpeg4 timelapse videos, if Motion is shutdown and restarted, new pics will create a
 new file with the name indicated for timelapse.
 .RE
 .RE
@@ -1468,7 +1561,7 @@ The full path to the SSL key file for webcontrol
 .RE
 
 .TP
-.B webcontrol_header_params
+.B webcontrol_cors_header
 .RS
 .nf
 Values: User specified string
@@ -1476,46 +1569,7 @@ Default: Not defined
 Description:
 .fi
 .RS
-The comma separated header=value pairs to use for the webcontrol responses.
-.RE
-.RE
-
-.TP
-.B webcontrol_lock_attempts
-.RS
-.nf
-Values: integer
-Default: 5
-Description:
-.fi
-.RS
-The number of failed authentication attempts before IP is locked out.
-.RE
-.RE
-
-.TP
-.B webcontrol_lock_minutes
-.RS
-.nf
-Values: integer
-Default: 5
-Description:
-.fi
-.RS
-The number of minutes a failed authentication IP is locked out.
-.RE
-.RE
-
-.TP
-.B webcontrol_lock_max_ips
-.RS
-.nf
-Values: integer
-Default: 5
-Description:
-.fi
-.RS
-The maximum number of concurrent IPs that can be locked out.
+The header to add for cross orgin on the webcontrol
 .RE
 .RE
 
@@ -1591,7 +1645,7 @@ When specified as on, use SSL/TLS for the stream port.
 .RE
 
 .TP
-.B stream_header_params
+.B stream_cors_header
 .RS
 .nf
 Values: User specified string
@@ -1599,7 +1653,10 @@ Default: Not defined
 Description:
 .fi
 .RS
-The comma separated header=value pairs to send for the stream responses.
+The Access-Control-Allow-Origin header value to be sent with the stream.
+If unspecified, no Access-Control-Allow-Origin header is sent.
+The header allows browsers to access the stream via cross-origin resource sharing (CORS).
+For example, * allows access from browser client code served from any domain.
 .RE
 .RE
 
@@ -1700,7 +1757,7 @@ Limit stream to 1 fps when no motion is being detected.
 .B database_type
 .RS
 .nf
-Values: mysql, mariadb, postgresql, sqlite3
+Values: mariadb, postgresql, sqlite3
 Default: Not defined
 Description:
 .fi
@@ -1718,8 +1775,7 @@ Default: Not defined
 Description:
 .fi
 .RS
-The name of the database being used (dbname).
-For SQLite3, the full path to the database.
+The name of the database being used (dbname).  For Sqlite3, the full path to the database.
 .RE
 .RE
 
@@ -1732,9 +1788,7 @@ Default: localhost
 Description:
 .fi
 .RS
-The hostname, DNS name, or IP address at which the database is running.
-Optionally for PostgreSQL, full path of the local directory containing its Unix domain pipe.
-For SQLite3, ignored.
+The name of the host on which the database is running.
 .RE
 .RE
 
@@ -1747,9 +1801,8 @@ Default: Not defined
 Description:
 .fi
 .RS
-TCP port number used for database access.
-For SQLite3, ignored.
-Default ports used by DBMSs: MySQL & MariaDB, 3306; PostgreSQL, 5432.
+The port to use in order to access the database.
+Default ports: mariadb 3306 , postgresql 5432
 .RE
 .RE
 
@@ -1763,8 +1816,7 @@ Default: Not Defined
 Description:
 .fi
 .RS
-The username to access the database.
-For SQLite3, ignored.
+The username to access the database
 .RE
 .RE
 
@@ -1778,7 +1830,6 @@ Description:
 .fi
 .RS
 The database password for the user to access the database.
-For SQLite3, ignored.
 .RE
 .RE
 
@@ -1791,7 +1842,7 @@ Default: 0
 Description:
 .fi
 .RS
-SQLite3 only: database wait time in milliseconds for locked database to be unlocked before returning database locked error
+Database wait time in milliseconds for locked database to be unlocked before returning database locked error
 .RE
 .RE
 
@@ -1848,36 +1899,6 @@ Log to the database when creating timelapse movies file
 .RE
 
 .TP
-.B sql_query
-.RS
-.nf
-Values: User defined string
-Default: Not defined
-Description:
-.fi
-.RS
-SQL statement to execute when Motion saves an image file or begins recording a movie and the corresponding file type's sql_log_* configuration option is set on.
-Use same conversion specifiers as for text features.
-Additional special conversion specifiers are:
-.RS
-%n = the number representing the file_type
-%f = filename with full path
-.RE
-Sample table set up (not sql_query):
-.RS
-Mysql:  CREATE TABLE security (camera INTEGER NOT NULL, filename CHAR(80) NOT NULL, frame INTEGER, file_type INTEGER NOT NULL, time_stamp DATETIME NOT NULL, text_event CHAR(255));
-.RE
-.RS
-Postgresql: CREATE TABLE security (camera INTEGER NOT NULL, filename VARCHAR NOT NULL, frame INTEGER, file_type INTEGER NOT NULL, time_stamp TIMESTAMP NOT NULL, text_event VARCHAR);
-.RE
-Sample sql_query
-.RS
-INSERT INTO security(camera, filename, frame, file_type, time_stamp, text_event) VALUES(%t, '%f', %q, %n, '%Y-%m-%d %T', '%C')
-.RE
-.RE
-.RE
-
-.TP
 .B sql_query_start
 .RS
 .nf
@@ -1886,9 +1907,7 @@ Default: Not defined
 Description:
 .fi
 .RS
-SQL statement to execute at the start of a motion event.
-When the related table schema (and, for PostgreSQL, a RETURNING clause included in this statement) provide for it, the database generates a table-unique event ID that is returned and substituted for the %{dbeventid} conversion specifier.
-When no valid value is returned, %{dbeventid} is replaced by zero.
+SQL statement to execute at the start of a event.
 .RE
 .RE
 .RE
@@ -1902,7 +1921,37 @@ Default: Not defined
 Description:
 .fi
 .RS
-SQL statement to execute upon closure of a motion event movie or timelapse movie file, provided the corresponding file type's sql_log_* configuration option is set on.
+SQL statement to execute at the end of a event.
+.RE
+.RE
+.RE
+
+.TP
+.B sql_query
+.RS
+.nf
+Values: User defined string
+Default: Not defined
+Description:
+.fi
+.RS
+SQL statement to execute when a event occurs.
+Use same conversion specifiers as for text features
+Additional special conversion specifiers are
+.RS
+%n = the number representing the file_type
+%f = filename with full path
+.RE
+Sample table set up (not sql_query):
+.RS
+MariaDB:  CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp(14), event_time_stamp timestamp(14));
+.RE
+.RS
+Postgresql: CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp without time zone, event_time_stamp timestamp without time zone);
+.RE
+Sample sql_query
+.RS
+insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
 .RE
 .RE
 .RE
@@ -1992,8 +2041,70 @@ Full path and file name for the script to execute to move a camera in generic tr
 .RE
 .RE
 
+.TP
+.B snd_device
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+Sound device.
+.RE
+.RE
 
+.TP
+.B snd_params
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+Device parameters for sound device.
+.RE
+.RE
 
+.TP
+.B snd_alerts
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+Comma separated parameters for the sound alert.
+.RE
+.RE
+
+.TP
+.B snd_window
+.RS
+.nf
+Values: User specified string
+Default: hamming
+Description:
+.fi
+.RS
+Sound frequency detection window.
+.RE
+.RE
+
+.TP
+.B snd_show
+.RS
+.nf
+Values: Boolean
+Default: off
+Description:
+.fi
+.RS
+Show the sound frequencies being detected.
+.RE
+.RE
 
 .SH SIGNALS
 Motion responds to the following signals:
@@ -2002,7 +2113,7 @@ Motion responds to the following signals:
 The config file will be reread.
 .TP
 .B SIGTERM
-If needed motion will create an movie file of the last event and exit
+If needed Motion will create an movie file of the last event and exit
 .TP
 .B SIGUSR1
 Motion will create an movie file of the current event.
@@ -2022,11 +2133,11 @@ If Motion was invoked with command line option \-c pathname Motion will expect t
 .br
 If you do not specify \-c or the filename you give Motion does not exist, Motion will search for the configuration file called 'motion.conf' in the following order:
 .br
-1. Current directory from where motion was invoked
+1. Current directory from where Motion was invoked
 .br
 2. Then in a directory called '.motion' in the current users home directory (shell environment variable $HOME). E.g. /home/goofy/.motion/motion.conf
 .br
-3. The motion/ subdirectory inside the directory defined by the \-\-sysconfdir=DIR when running .configure during installation of Motion (If this option was not defined the default is /usr/local/etc/)
+3. The motion subdirectory inside the directory defined by the \-\-sysconfdir=DIR when running .configure during installation of Motion (If this option was not defined the default is /usr/local/etc/)
 .br
 If you have write access to /usr/local/etc/motion then the editor recommends having only one motion.conf file in the default /usr/local/etc/motion directory.
 .br
@@ -2058,9 +2169,9 @@ Motion reads its configuration parameters in the following sequence. If the same
 .br
 So always call the camera config files in the end of the motion.conf file. If you define options in motion.conf AFTER the camera file calls, the same options in the camera files will never be used. So always put the camera file call at the end of motion.conf.
 .br
-If motion is built without specific features such as ffmpeg, mysql etc it will ignore the options that belongs to these features. You do not have to remove them or comment them out.
+If Motion is built without specific features such as ffmpeg, MariaDB etc it will ignore the options that belongs to these features. You do not have to remove them or comment them out.
 .br
-If you run the http control command http://host:port/0/config/writeyes, motion will overwrite motion.conf and all the camera.conf files by autogenerated config files neatly formatted and only with the features included that Motion was built with. If you later re-build Motion with more features or upgrade to a new version, you can use your old config files, run the motion.conf.write command, and you will have new config files with the new options included all set to their default values. This makes upgrading very easy to do.
+If you run the http control command http://host:port/0/config/writeyes, Motion will overwrite motion.conf and all the camera.conf files by autogenerated config files neatly formatted and only with the features included that Motion was built with. If you later re-build Motion with more features or upgrade to a new version, you can use your old config files, run the motion.conf.write command, and you will have new config files with the new options included all set to their default values. This makes upgrading very easy to do.
 .TP
 .B Conversion Specifiers for Advanced Filename and Text Features
 The table below shows all the supported Conversion Specifiers you can use in the options text_left, text_right, snapshot_filename, jpeg_filename, ffmpeg_filename, timelapse_filename, on_event_start, on_event_end, on_picture_save, on_movie_start, on_movie_end, and on_motion_detected.
@@ -2221,9 +2332,6 @@ The computer host name
 .B %{fps}
 The frame per seconds.
 .TP
-.B %{dbeventid}
-The id number returned from mysql_insert_id.
-.TP
 .B %{ver}
 The version number of Motion.
 
@@ -2231,14 +2339,7 @@ The version number of Motion.
 
 .TP
 .B More information
-Motion homepage: https://motion-project.github.io/
+Motion homepage: TBD
 
 Motion Guide (user and installation guide):
 .br /usr/share/doc/motion/motion_guide.html
-.SH AUTHORS
-Jeroen Vreeken (pe1rxq@amsat.org),
-Folkert van Heusden,
-Kenneth Lavrsen (kenneth@lavrsen.dk),
-Juan Angulo Moreno <juan@apuntale.com>,
-the motion-project team,
-and many others

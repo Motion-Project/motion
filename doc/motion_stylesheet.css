@@ -10,7 +10,7 @@ body {
   line-height: 1.5;
   color: #606c71; }
 a {
-  color: #1e6bb8;
+  color: #0f7040;
   text-decoration: none;}
 a:hover {
     text-decoration: underline; }
@@ -34,8 +34,8 @@ a:hover {
 .page-header {
   color: #fff;
   text-align: center;
-  background-color: #159957;
-  background-image: linear-gradient(120deg, #155799, #159957); }
+  background-color: #155799;
+  background-image: linear-gradient(120deg, #159957, #155799); }
 .page-header h1 {
   margin-bottom: 0.1em;
   margin-top: 0.1em;}
@@ -253,8 +253,8 @@ a:hover {
 
 .subnav {
     overflow: hidden;
-    background-color: #159957;
-    background-image: linear-gradient(120deg, #155799, #159957);
+    background-color: #155799;
+    background-image: linear-gradient(120deg, #159957, #155799);
     border-top: 2px solid black;
 }
 .subnav a {

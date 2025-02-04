@@ -30,9 +30,15 @@ body:
         - 4.5.x
         - 4.6.x
         - 4.7.x
+<<<<<<< HEAD
         - 4.8.x
         - 4.9.x
         - 4.10.x
+=======
+        - 5.0.x
+        - 5.1.x
+        - 5.2.x
+>>>>>>> 5.0
     validations:
       required: true
   - type: dropdown
@@ -53,7 +59,11 @@ body:
       options:
         - ARM-32bit
         - ARM-64bit
+<<<<<<< HEAD
         - x86
+=======
+        - x86/x64
+>>>>>>> 5.0
         - Other
     validations:
       required: true
@@ -80,6 +90,7 @@ body:
   - type: dropdown
     id: camtype
     attributes:
+<<<<<<< HEAD
       label: Camera type(s) being used?
       multiple: true
       options:
@@ -89,6 +100,18 @@ body:
         - PI cam via MMAL
         - Network camera with RTSP
         - Network camera with HTTP
+=======
+      label: Camera/Sound type(s) being used?
+      multiple: true
+      options:
+        - v4l2 camera
+        - PI cam via libcamerify
+        - PI camera via libcam
+        - Network camera with RTSP
+        - Network camera with HTTP
+        - Sound via ALSA
+        - Sound via PulseAudio
+>>>>>>> 5.0
         - Other
     validations:
       required: true
@@ -103,8 +126,13 @@ body:
   - type: textarea
     id: logs
     attributes:
+<<<<<<< HEAD
       label: Motion log output at log_level 8
       description: Provide the entire log output from Motion start up to when the issue occurs so we can see the parameters.  This will be automatically formatted into code, so no need for backticks.
+=======
+      label: Full Motion log output (at log_level 8)
+      description: Please copy and paste the full log output. This will be automatically formatted into code, so no need for backticks.
+>>>>>>> 5.0
       render: shell
     validations:
       required: true

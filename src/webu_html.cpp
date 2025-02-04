@@ -1,181 +1,259 @@
-/*   This file is part of Motion.
- *
- *   Motion is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   Motion is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with Motion.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 /*
- *    webu_html.c
+ *    This file is part of Motion.
  *
- *    Create the html for the webcontrol page
+ *    Motion is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
  *
- *    Functional naming scheme
- *        webu_html* - Functions that create the display webcontrol page.
- *        webu_html_main        - Entry point from webu_ans_ctrl(in webu.c)
- *        webu_html_page        - Create the web page
- *          webu_html_head      - Header section of the page
- *            webu_html_style*  - The style section of the web page
- *          webu_html_body      - Calls all the functions to create the body
- *            webu_html_navbar* - The navbar section of the web page
- *            webu_html_config* - config parms of page
- *            webu_html_track*  - Tracking functions
- *            webu_html_script* - The javascripts of the web page
+ *    Motion is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *    To debug, run code, open page, view source and make copy of html
- *    into a local file to revise changes then determine applicable section(s)
- *    in this code to modify to match modified version.
- *    Known HTML Issues:
- *      Single and double quotes are not consistently used.
- *      HTML ids do not follow any naming convention.
- *      After clicking restart, do something...Try to connect again?
+ *    You should have received a copy of the GNU General Public License
+ *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
- *    Additional functionality considerations:
- *      Notification to user of items that require restart when changed.
- *      Notification to user that item successfully implemented (config change/tracking)
- *      List motion parms somewhere so they can be found by xgettext
- *
- */
+*/
 
 #include "motion.hpp"
 #include "util.hpp"
+#include "camera.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 #include "webu.hpp"
+#include "webu_ans.hpp"
 #include "webu_html.hpp"
-#include "translate.hpp"
 
-/* struct to save information regarding the links to include in html page */
-struct strminfo_ctx {
-    struct context  **cntlst;
-    char            lnk_ref[WEBUI_LEN_LNK];
-    char            lnk_src[WEBUI_LEN_LNK];
-    char            lnk_camid[WEBUI_LEN_LNK];
-    char            proto[WEBUI_LEN_LNK];
-    int             port;
-    int             motion_images;
-};
-
-static void webu_html_style_navbar(struct webui_ctx *webui)
+/* Create the CSS styles used in the navigation bar/side of the page */
+void cls_webu_html::style_navbar()
 {
-    /* Write out the style section of the web page */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    .navbar {\n"
-        "      overflow: hidden;\n"
-        "      background-color: #333;\n"
-        "      font-family: Arial;\n"
-        "    }\n"
-        "    .navbar a {\n"
-        "      float: left;\n"
-        "      font-size: 16px;\n"
-        "      color: white;\n"
-        "      text-align: center;\n"
-        "      padding: 14px 16px;\n"
-        "      text-decoration: none;\n"
-        "    }\n"
-        "    .navbar a:hover, {\n"
-        "      background-color: darkgray;\n"
-        "    }\n");
-    webu_write(webui, response);
-
-}
-
-static void webu_html_style_dropdown(struct webui_ctx *webui)
-{
-    /* Write out the style section of the web page */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    .dropdown {\n"
-        "      float: left;\n"
-        "      overflow: hidden;\n"
-        "    }\n"
-        "    .dropdown .dropbtn {\n"
-        "      font-size: 16px;\n"
-        "      border: none;\n"
-        "      outline: none;\n"
-        "      color: white;\n"
-        "      padding: 14px 16px;\n"
-        "      background-color: inherit;\n"
-        "      font-family: inherit;\n"
-        "      margin: 0;\n"
-        "    }\n"
-        "    .dropdown-content {\n"
-        "      display: none;\n"
-        "      position: absolute;\n"
-        "      background-color: #f9f9f9;\n"
-        "      min-width: 160px;\n"
-        "      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);\n"
+    webua->resp_page +=
+        "    .sidenav {\n"
+        "      height: 100%;\n"
+        "      width: 10rem;\n"
+        "      position: fixed;\n"
         "      z-index: 1;\n"
+        "      top: 0;\n"
+        "      left: 0;\n"
+        "      background-color: lightgrey;\n"
+        "      overflow-x: hidden;\n"
+        "      overflow: auto;\n"
         "    }\n"
-        "    .dropdown-content a {\n"
-        "      float: none;\n"
-        "      color: black;\n"
-        "      padding: 12px 16px;\n"
+        "    .sidenav a, .dropbtn {\n"
+        "      padding: 0.5rem 0rem 0.5em 1rem;\n"
         "      text-decoration: none;\n"
+        "      font-size: 1rem;\n"
         "      display: block;\n"
+        "      border: none;\n"
+        "      background: none;\n"
+        "      width:90%;\n"
         "      text-align: left;\n"
-        "    }\n"
-        "    .dropdown-content a:hover {\n"
+        "      cursor: pointer;\n"
+        "      outline: none;\n"
+        "      color: black;\n"
         "      background-color: lightgray;\n"
         "    }\n"
-        "    .dropdown:hover .dropbtn {\n"
-        "      background-color: darkgray;\n"
+        "    .sidenav a:hover, .dropbtn:hover {\n"
+        "      background-color: #555;\n"
+        "      color: white;\n"
         "    }\n"
-        "    .border {\n"
-        "      border-width: 2px;\n"
-        "      border-color: white;\n"
-        "      border-style: solid;\n"
-        "    }\n");
-    webu_write(webui, response);
+        "    .sidenav .closebtn {\n"
+        "      color: black;\n"
+        "      top: 0;\n"
+        "      margin-left: 80%;\n"
+        "      width: 1rem;\n"
+        "      font-size: 1rem;\n"
+        "      background-color: lightgray;\n"
+        "    }\n"
+        "    .sidenav .closebtn:hover {\n"
+        "      background-color: lightgray;\n"
+        "      color: white;\n"
+        "    }\n"
+        "    .menubtn {\n"
+        "      top: 0;\n"
+        "      width: 1rem;\n"
+        "      margin-left: 0.5rem;\n"
+        "      margin-bottom: 0.25rem;\n"
+        "      font-size: 1.5rem;\n"
+        "      color:black;\n"
+        "      transform: rotate(90deg);\n"
+        "      -webkit-transform: rotate(90deg);\n"
+        "      background-color: transparent;\n"
+        "      border-color: transparent;\n"
+        "    }\n"
+        "    .menubtn:hover {\n"
+        "      color: white;\n"
+        "    }\n"
+
+        "    .dropdown-content {\n"
+        "      display: none;\n"
+        "      background-color:lightgray;\n"
+        "      padding-left: 1rem;\n"
+        "    }\n"
+        "    .actionbtn {\n"
+        "      padding: 0.25rem;\n"
+        "      text-decoration: none;\n"
+        "      font-size: 0.5rem;\n"
+        "      display: block;\n"
+        "      border: none;\n"
+        "      background: none;\n"
+        "      width: 3rem;\n"
+        "      text-align: center;\n"
+        "      cursor: pointer;\n"
+        "      outline: none;\n"
+        "      color: black;\n"
+        "      background-color: lightgray;\n"
+        "    }\n";
+
 }
 
-static void webu_html_style_input(struct webui_ctx *webui)
+/* Create the css styles used in the config sections */
+void cls_webu_html::style_config()
 {
-    /* Write out the style section of the web page */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    input , select  {\n"
-        "      width: 25%;\n"
-        "      padding: 5px;\n"
-        "      margin: 0;\n"
+    webua->resp_page +=
+        "    .cls_config {\n"
+        "      background-color: #000000;\n"
+        "      color: #fff;\n"
+        "      text-align: center;\n"
+        "      margin-top: 0rem;\n"
+        "      margin-bottom: 0rem;\n"
+        "      font-weight: normal;\n"
+        "      font-size: 0.90rem;\n"
+        "    }\n"
+        "    .cls_config table {\n"
+        "      display: table;\n"
+        "      border-spacing: 1rem;\n"
+        "      margin: auto;\n"
+        "    }\n"
+        "    .cls_config label {\n"
+        "      padding: 0rem;\n"
+        "      text-align: right;\n"
+        "      width: 10rem;\n"
+        "      height: 2.5rem;\n"
+        "    }\n"
+        "    .cls_config textarea {\n"
+        "      margin: auto;\n"
+        "      text-align: center;\n"
+        "      width: 15.5rem;\n"
+        "      height: 2.5rem;\n"
+        "    }\n"
+        "    .cls_button {\n"
+        "      width: 10rem;\n"
+        "      height: 2rem;\n"
+        "      padding: 0rem;\n"
+        "    }\n"
+        "    .cls_drop {\n"
+        "      padding: 0rem;\n"
+        "      text-align: right;\n"
+        "      width: 10rem;\n"
+        "      height: 2.25rem;\n"
+        "    }\n"
+        "    .cls_text {\n"
+        "      padding: 0rem;\n"
+        "      width: 10em;\n"
+        "      text-align: right;\n"
+        "    }\n"
+        "    .cls_text_nbr {\n"
+        "      padding: 0rem;\n"
+        "      width: 10rem;\n"
+        "      text-align: right;\n"
+        "    }\n"
+        "    .cls_text_wide {\n"
+        "      padding: 0rem;\n"
+        "      height: 3rem;\n"
+        "      width: 20rem;\n"
+        "      text-align: right;\n"
+        "    }\n"
+        "    .cls_camdrop {\n"
+        "      /* Only used to identify all the cam drops on page */\n"
+        "    }\n"
+        "    .arrow {\n"
+        "      border: solid black;\n"
+        "      border-width: 0 1rem 1rem 0;\n"
+        "      border: double black;\n"
+        "      border-width: 0 0.75rem 0.75rem 0;\n"
         "      display: inline-block;\n"
-        "      border: 1px solid #ccc;\n"
-        "      border-radius: 4px;\n"
-        "      box-sizing: border-box;\n"
-        "      height: 50%;\n"
-        "      font-size: 75%;\n"
-        "      margin-bottom: 5px;\n"
+        "      padding: 1rem;\n"
+        "      font-size: 0.5rem;\n"
         "    }\n"
-        "    .frm-input{\n"
-        "      text-align:center;\n"
-        "    }\n");
-    webu_write(webui, response);
+        "    .right {\n"
+        "      transform: rotate(-45deg);\n"
+        "      -webkit-transform: rotate(-45deg);\n"
+        "    }\n"
+        "    .left {\n"
+        "      transform: rotate(135deg);\n"
+        "      -webkit-transform: rotate(135deg);\n"
+        "    }\n"
+        "    .up {\n"
+        "      transform: rotate(-135deg);\n"
+        "      -webkit-transform: rotate(-135deg);\n"
+        "    }\n"
+        "    .down {\n"
+        "      transform: rotate(45deg);\n"
+        "      -webkit-transform: rotate(45deg);\n"
+        "    }\n"
+        "    .zoombtn {\n"
+        "      font-size:1.25rem;\n"
+        "      width: 3rem;\n"
+        "      height: 1.5rem;\n"
+        "      margin: 0;\n"
+        "    }\n"
+        "    .cls_movies {\n"
+        "      background-color: transparent;\n"
+        "      color: white;\n"
+        "      text-align: center;\n"
+        "      margin-top: 0rem;\n"
+        "      margin-bottom: 0rem;\n"
+        "      font-weight: normal;\n"
+        "      font-size: 0.90rem;\n"
+        "    }\n"
+        "    a:link {\n"
+        "      color: white;\n"
+        "      background-color: transparent;\n"
+        "      text-decoration: none;\n"
+        "    }\n"
+        "    a:visited {\n"
+        "      color: black;\n"
+        "      background-color: transparent;\n"
+        "      text-decoration: none;\n"
+        "    }\n"
+
+        "   .cls_log {\n"
+        "     background-color: transparent;\n"
+        "     color: white;\n"
+        "     text-align: center;\n"
+        "     margin-top: 0rem;\n"
+        "     margin-bottom: 0rem;\n"
+        "     font-weight: normal;\n"
+        "     font-size: 0.90rem;\n"
+        "   }\n"
+
+        "   .cls_log textarea {\n"
+        "     overflow-y: scroll;\n"
+        "     background-color: lightgrey;\n"
+        "     padding: 0rem;\n"
+        "     height: 10rem;\n"
+        "     width: 50rem;\n"
+        "     text-align: left;\n"
+        "   }\n";
+
+
 }
 
-static void webu_html_style_base(struct webui_ctx *webui)
+/* Write out the starting style section of the web page */
+void cls_webu_html::style_base()
 {
-    /* Write out the style section of the web page */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    * {margin: 0; padding: 0; }\n"
+    webua->resp_page +=
+        "    * {\n"
+        "      margin: 0;\n"
+        "      padding: 0;\n"
+        "    }\n"
         "    body {\n"
         "      padding: 0;\n"
         "      margin: 0;\n"
         "      font-family: Arial, Helvetica, sans-serif;\n"
-        "      font-size: 16px;\n"
+        "      font-size: 1rem;\n"
         "      line-height: 1;\n"
         "      color: #606c71;\n"
         "      background-color: #159957;\n"
@@ -184,34 +262,21 @@ static void webu_html_style_base(struct webui_ctx *webui)
         "      margin-right:0.5% ;\n"
         "      width: device-width ;\n"
         "    }\n"
-        "    img {\n"
-        "      max-width: 100%;\n"
-        "      max-height: 100%;\n"
-        "      height: auto;\n"
-        "    }\n"
         "    .page-header {\n"
         "      color: #fff;\n"
         "      text-align: center;\n"
         "      margin-top: 0rem;\n"
         "      margin-bottom: 0rem;\n"
         "      font-weight: normal;\n"
-        "    }\n");
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),"%s",
-        "    .page-header h4 {\n"
-        "      height: 2px;\n"
+        "    }\n"
+        "    .page-header h3 {\n"
+        "      height: 2rem;\n"
         "      padding: 0;\n"
-        "      margin: 1rem 0;\n"
+        "      margin: 1rem;\n"
         "      border: 0;\n"
         "    }\n"
-        "    .main-content {\n"
-        "      background-color: #000000;\n"
-        "      text-align: center;\n"
-        "      margin-top: 0rem;\n"
-        "      margin-bottom: 0rem;\n"
-        "      font-weight: normal;\n"
-        "      font-size: 0.90em;\n"
+        "    h3 {\n"
+        "      margin-left: 10rem;\n"
         "    }\n"
         "    .header-right{\n"
         "      float: right;\n"
@@ -220,1097 +285,1360 @@ static void webu_html_style_base(struct webui_ctx *webui)
         "    .header-center {\n"
         "      text-align: center;\n"
         "      color: white;\n"
-        "      margin-top: 10px;\n"
-        "      margin-bottom: 10px;\n"
-        "    }\n");
-    webu_write(webui, response);
-}
-
-static void webu_html_style(struct webui_ctx *webui)
-{
-    /* Write out the style section of the web page */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s", "  <style>\n");
-    webu_write(webui, response);
-
-    webu_html_style_base(webui);
-
-    webu_html_style_navbar(webui);
-
-    webu_html_style_input(webui);
-
-    webu_html_style_dropdown(webui);
-
-    snprintf(response, sizeof (response),"%s", "  </style>\n");
-    webu_write(webui, response);
+        "      margin-top: 1rem;\n"
+        "      margin-bottom: 1rem;\n"
+        "    }\n"
+        "    .border {\n"
+        "      border-width: 1rem;\n"
+        "      border-color: white;\n"
+        "      border-style: solid;\n"
+        "    }\n";
 
 }
 
-static void webu_html_head(struct webui_ctx *webui)
+/* Write out the style section of the web page */
+void cls_webu_html::style()
 {
-    /* Write out the header section of the web page */
-    char response[WEBUI_LEN_RESP];
+    webua->resp_page += "  <style>\n";
 
-    snprintf(response, sizeof (response),"%s","<head>\n"
-        "  <meta charset=\"UTF-8\">\n"
-        "  <title>Motion</title>\n"
-        "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n");
-    webu_write(webui, response);
+    style_base();
 
-    webu_html_style(webui);
+    style_navbar();
 
-    snprintf(response, sizeof (response),"%s", "</head>\n");
-    webu_write(webui, response);
+    style_config();
 
+    webua->resp_page += "  </style>\n";
 }
 
-static void webu_html_navbar_camera(struct webui_ctx *webui)
+/* Create the header section of the page */
+void cls_webu_html::head()
 {
-    /*Write out the options included in the camera dropdown */
-    char response[WEBUI_LEN_RESP];
-    int indx;
+    webua->resp_page += "<head> \n"
+        "<meta charset='UTF-8'> \n"
+        "<title>Motion</title> \n"
+        "<meta name='viewport' content='width=device-width, initial-scale=1'> \n";
 
-    if (webui->cam_threads == 1) {
-        /* Only Motion.conf file */
-        if (webui->cntlst[0]->conf.camera_name == NULL) {
-            snprintf(response, sizeof (response),
-                "    <div class=\"dropdown\">\n"
-                "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
-                "      <div id='cam_btn' class=\"dropdown-content\">\n"
-                "        <a onclick=\"camera_click('cam_%05d');\">%s 1</a>\n"
-                ,_("Cameras")
-                ,webui->cntlst[0]->camera_id
-                ,_("Camera"));
-            webu_write(webui, response);
-        } else {
-            snprintf(response, sizeof (response),
-                "    <div class=\"dropdown\">\n"
-                "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
-                "      <div id='cam_btn' class=\"dropdown-content\">\n"
-                "        <a onclick=\"camera_click('cam_%05d');\">%s</a>\n"
-                ,_("Cameras")
-                ,webui->cntlst[0]->camera_id
-                ,webui->cntlst[0]->conf.camera_name);
-            webu_write(webui, response);
-        }
-    } else if (webui->cam_threads > 1) {
-        /* Motion.conf + separate camera.conf file */
-        snprintf(response, sizeof (response),
-            "    <div class=\"dropdown\">\n"
-            "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
-            "      <div id='cam_btn' class=\"dropdown-content\">\n"
-            "        <a onclick=\"camera_click('cam_all00');\">%s</a>\n"
-            ,_("Cameras")
-            ,_("All"));
-        webu_write(webui, response);
+    style();
 
-        for (indx=1;indx <= webui->cam_count;indx++) {
-            if (webui->cntlst[indx]->conf.camera_name == NULL) {
-                snprintf(response, sizeof (response),
-                    "        <a onclick=\"camera_click('cam_%05d');\">%s %d</a>\n"
-                    ,webui->cntlst[indx]->camera_id
-                    , _("Camera"), webui->cntlst[indx]->camera_id);
-            } else {
-                snprintf(response, sizeof (response),
-                    "        <a onclick=\"camera_click('cam_%05d');\">%s</a>\n"
-                    ,webui->cntlst[indx]->camera_id
-                    ,webui->cntlst[indx]->conf.camera_name
-                );
-            }
-            webu_write(webui, response);
-        }
-    }
-
-    snprintf(response, sizeof (response),"%s",
-        "      </div>\n"
-        "    </div>\n");
-    webu_write(webui, response);
-
+    webua->resp_page += "</head>\n\n";
 }
 
-static void webu_html_navbar_action(struct webui_ctx *webui)
+/* Create the navigation bar section of the page */
+void cls_webu_html::navbar()
 {
-    /* Write out the options included in the actions dropdown*/
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),
-        "    <div class=\"dropdown\">\n"
-        "      <button onclick='display_actions()' id=\"act_drop\" class=\"dropbtn\">%s</button>\n"
-        "      <div id='act_btn' class=\"dropdown-content\">\n"
-        "        <a onclick=\"action_click('/action/eventstart');\">%s</a>\n"
-        "        <a onclick=\"action_click('/action/eventend');\">%s</a>\n"
-        "        <a onclick=\"action_click('/action/snapshot');\">%s</a>\n"
-        "        <a onclick=\"action_click('config');\">%s</a>\n"
-        "        <a onclick=\"action_click('/config/write');\">%s</a>\n"
-        "        <a onclick=\"action_click('track');\">%s</a>\n"
-        "        <a onclick=\"action_click('/detection/pause');\">%s</a>\n"
-        "        <a onclick=\"action_click('/detection/start');\">%s</a>\n"
-        "        <a onclick=\"action_click('/action/restart');\">%s</a>\n"
-        "        <a onclick=\"action_click('/action/quit');\">%s</a>\n"
-        "      </div>\n"
+    webua->resp_page +=
+        "  <div id=\"divnav_main\" class=\"sidenav\">\n"
+        "    <a class='closebtn' onclick='nav_close()'>X</a>\n"
+        "    <div id=\"divnav_version\">\n"
+        "      <!-- Filled in by script -->\n"
         "    </div>\n"
-        ,_("Action")
-        ,_("Start Event")
-        ,_("End Event")
-        ,_("Snapshot")
-        ,_("Change Configuration")
-        ,_("Write Configuration")
-        ,_("Tracking")
-        ,_("Pause")
-        ,_("Start")
-        ,_("Restart")
-        ,_("Quit"));
-    webu_write(webui, response);
+        "    <button onclick='display_cameras()' "
+            " id='cam_btn' class='dropbtn'>Cameras</button>\n"
+        "    <div id='divnav_cam' class='dropdown-content'>\n"
+        "      <!-- Filled in by script -->\n"
+        "    </div>\n"
+        "    <button onclick='display_actions()' "
+            " id='actions_btn' class='dropbtn'>Actions</button>\n"
+        "    <div id='divnav_actions' class='dropdown-content'>\n"
+        "      <!-- Filled in by script -->\n"
+        "    </div>\n"
+        "    <button\n"
+        "      onclick='display_config()' id='cfg_btn' class='dropbtn'>\n"
+        "      Configuration\n"
+        "    </button>\n"
+        "    <div id='divnav_config' class='dropdown-content'>\n"
+        "      <!-- Filled in by script -->\n"
+        "    </div>\n"
+        "    <button\n"
+        "      onclick='display_movies()' id='mov_btn' class='dropbtn'>\n"
+        "      Recordings\n"
+        "    </button>\n"
+        "    <div id='divnav_movies' class='dropdown-content'>\n"
+        "      <!-- Filled in by script -->\n"
+        "    </div>\n"
+        "  </div>\n\n";
 }
 
-static void webu_html_navbar(struct webui_ctx *webui)
+/* Create the body main section of the page */
+void cls_webu_html::divmain()
 {
-    /* Write the navbar section*/
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "  <div class=\"navbar\">\n");
-    webu_write(webui, response);
-
-    webu_html_navbar_camera(webui);
-
-    webu_html_navbar_action(webui);
-
-    snprintf(response, sizeof (response),
-        "    <a href=\"https://motion-project.github.io/motion_guide.html\" "
-        " target=\"_blank\">%s</a>\n"
-        "    <p class=\"header-right\">Motion "VERSION"</p>\n"
-        "  </div>\n"
-        ,_("Help"));
-    webu_write(webui, response);
-
-}
-
-static void webu_html_config_notice(struct webui_ctx *webui)
-{
-    /* Print out the header description of which parameters are included based upon the
-     * webcontrol_parms that was specified
-     */
-    char response[WEBUI_LEN_RESP];
-
-    if (webui->cntlst[0]->conf.webcontrol_parms == 0) {
-        snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 0 (%s)</h4>\n"
-            ,_("No Configuration Options"));
-    } else if (webui->cntlst[0]->conf.webcontrol_parms == 1) {
-        snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 1 (%s)</h4>\n"
-            ,_("Limited Configuration Options"));
-    } else if (webui->cntlst[0]->conf.webcontrol_parms == 2) {
-        snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 2 (%s)</h4>\n"
-            ,_("Advanced Configuration Options"));
-    } else{
-        snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 3 (%s)</h4>\n"
-            ,_("Restricted Configuration Options"));
-    }
-    webu_write(webui, response);
-}
-
-static void webu_html_h3desc(struct webui_ctx *webui)
-{
-    /* Write out the status description for the camera */
-    char response[WEBUI_LEN_RESP];
-
-    if (webui->cam_threads == 1) {
-        snprintf(response, sizeof (response),
-            "  <div id=\"id_header\">\n"
-            "    <h3 id='h3_cam' data-cam=\"cam_all00\" class='header-center'>%s (%s)</h3>\n"
-            "  </div>\n"
-            ,_("All Cameras")
-            ,(!webui->cntlst[0]->running)? _("Not running") :
-                (webui->cntlst[0]->lost_connection)? _("Lost connection"):
-                (webui->cntlst[0]->pause)? _("Paused"):_("Active")
-            );
-        webu_write(webui,response);
-    } else {
-        snprintf(response, sizeof (response),
-            "  <div id=\"id_header\">\n"
-            "    <h3 id='h3_cam' data-cam=\"cam_all00\" class='header-center'>%s</h3>\n"
-            "  </div>\n"
-            ,_("All Cameras"));
-        webu_write(webui,response);
-    }
-}
-
-static void webu_html_config(struct webui_ctx *webui)
-{
-
-    /* Write out the options to put into the config dropdown
-     * We use html data attributes to store the values for the options
-     * We always set a cam_all00 attribute and if the value if different for
-     * any of our cameras, then we also add a cam_xxxxx which has the config
-     * value for camera xxxxx  The javascript then decodes these to display
-     */
-
-    char response[WEBUI_LEN_RESP];
-    int indx_parm, indx, diff_vals;
-    const char *val_main, *val_thread;
-    char *val_temp;
-
-
-    snprintf(response, sizeof (response),"%s",
-        "  <div id='cfg_form' style=\"display:none\">\n");
-    webu_write(webui, response);
-
-    webu_html_config_notice(webui);
-
-    snprintf(response, sizeof (response),
-        "    <form class=\"frm-input\">\n"
-        "      <select id='cfg_parms' name='onames' "
-        " autocomplete='off' onchange='config_change();'>\n"
-        "        <option value='default' data-cam_all00=\"\" >%s</option>\n"
-        ,_("Select option"));
-    webu_write(webui, response);
-
-    /* The config_params[indx_parm].print reuses the buffer so create a
-     * temporary variable for storing our parameter from main to compare
-     * to the thread specific value
-     */
-    val_temp=malloc(PATH_MAX);
-    indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL) {
-
-        if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
-            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER)) {
-            indx_parm++;
-            continue;
-        }
-
-        val_main = config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, 0);
-
-        snprintf(response, sizeof (response),
-            "        <option value='%s' data-cam_all00=\""
-            , config_params[indx_parm].param_name);
-        webu_write(webui, response);
-
-        memset(val_temp,'\0',PATH_MAX);
-        if (val_main != NULL) {
-            snprintf(response, sizeof (response),"%s", val_main);
-            webu_write(webui, response);
-            snprintf(val_temp, PATH_MAX,"%s", val_main);
-        }
-
-        /* Loop through all the treads and see if any have a different value from motion.conf */
-        if (webui->cam_threads > 1) {
-            for (indx=1;indx <= webui->cam_count;indx++) {
-                val_thread=config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, indx);
-                diff_vals = FALSE;
-                if (((strlen(val_temp) == 0) && (val_thread == NULL)) ||
-                    ((strlen(val_temp) != 0) && (val_thread == NULL))) {
-                    diff_vals = FALSE;
-                } else if (((strlen(val_temp) == 0) && (val_thread != NULL)) ) {
-                    diff_vals = TRUE;
-                } else {
-                    if (strcasecmp(val_temp, val_thread)) {
-                        diff_vals = TRUE;
-                    }
-                }
-                if (diff_vals) {
-                    snprintf(response, sizeof (response),"%s","\" \\ \n");
-                    webu_write(webui, response);
-
-                    snprintf(response, sizeof (response),
-                        "           data-cam_%05d=\""
-                        ,webui->cntlst[indx]->camera_id);
-                    webu_write(webui, response);
-                    if (val_thread != NULL) {
-                        snprintf(response, sizeof (response),"%s", val_thread);
-                        webu_write(webui, response);
-                    }
-                }
-            }
-        }
-        /* Terminate the open quote and option.  For foreign language put hint in ()  */
-        if (mystrceq(webui->lang,"en") ||
-            mystrceq(config_params[indx_parm].param_name
-                ,_(config_params[indx_parm].param_name))) {
-            snprintf(response, sizeof (response),"\" >%s</option>\n",
-                config_params[indx_parm].param_name);
-            webu_write(webui, response);
-        } else {
-            snprintf(response, sizeof (response),"\" >%s (%s)</option>\n",
-                config_params[indx_parm].param_name
-                ,_(config_params[indx_parm].param_name));
-            webu_write(webui, response);
-        }
-
-        indx_parm++;
-    }
-
-    free(val_temp);
-
-    snprintf(response, sizeof (response),
-        "      </select>\n"
-        "      <input type=\"text\"   id=\"cfg_value\" >\n"
-        "      <input type='button' id='cfg_button' value='%s' onclick='config_click()'>\n"
-        "    </form>\n"
-        "  </div>\n"
-        ,_("Save"));
-    webu_write(webui, response);
+    webua->resp_page +=
+        "  <div id='divmain' style='margin-left:10rem' >\n"
+        "    <button id='menu_btn' \n"
+        "      onclick='nav_open();' \n"
+        "      style='display:none' \n"
+        "      class='menubtn'>|||</button>\n"
+        "    <p></p>\n"
+        "    <div id='div_cam' >\n"
+        "      <!-- Filled in by script -->\n"
+        "    </div>\n\n"
+        "    <div id='div_config'>\n"
+        "      <!-- Filled in by script -->\n"
+        "    </div>\n\n"
+        "    <div id='div_movies' class='cls_movies'>\n"
+        "      <!-- Filled in by script -->\n"
+        "    </div>\n\n"
+        "    <div id='div_log' class='cls_log' style='display:none' >\n"
+        "      <textarea id='txta_log' ></textarea>\n"
+        "    </div>\n\n"
+        "  </div>\n\n";
 
 }
 
-static void webu_html_track(struct webui_ctx *webui)
+/* Create the javascript function send_config */
+void cls_webu_html::script_nav()
 {
-    /* Write the section for handling the tracking function */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),
-        "  <div id='trk_form' style='display:none'>\n"
-        "    <form class='frm-input'>\n"
-        "      <select id='trk_option' name='trkopt'  autocomplete='off' "
-        " style='width:20%%' onchange='track_change();'>\n"
-        "        <option value='pan/tilt' data-trk='pan' >%s</option>\n"
-        "        <option value='absolute' data-trk='abs' >%s</option>\n"
-        "        <option value='center' data-trk='ctr' >%s</option>\n"
-        "      </select>\n"
-        "      <label id='trk_lblpan' style='color:white; display:inline' >%s</label>\n"
-        "      <label id='trk_lblx'   style='color:white; display:none' >X</label>\n"
-        "      <input type='text'   id='trk_panx' style='width:10%%' >\n"
-        "      <label id='trk_lbltilt' style='color:white; display:inline' >%s</label>\n"
-        "      <label id='trk_lbly'   style='color:white; display:none' >Y</label>\n"
-        "      <input type='text'   id='trk_tilty' style='width:10%%' >\n"
-        "      <input type='button' id='trk_button' value='%s' "
-        " style='width:10%%' onclick='track_click()'>\n"
-        "    </form>\n"
-        "  </div>\n"
-        ,_("Pan/Tilt")
-        ,_("Absolute Change")
-        ,_("Center")
-        ,_("Pan")
-        ,_("Tilt")
-        ,_("Save"));
-    webu_write(webui, response);
-
-}
-
-static void webu_html_strminfo(struct strminfo_ctx *strm_info, int indx)
-{
-    /* This determines all the items we need to know to specify links and
-     * stream sources for the page.  The options are 0-3 as of this writing
-     * where 0 = full streams, 1 = substreams, 2 = static images and 3 is
-     * the legacy code for creating streams.  So we need to assign not only
-     * what images are to be sent but also whether we have tls/ssl.
-     * There are WAY too many options for this.
-    */
-    /* If using the main port,we need to insert a thread number into url*/
-    if (strm_info->cntlst[0]->conf.stream_port != 0) {
-        snprintf(strm_info->lnk_camid,WEBUI_LEN_LNK,"/%d"
-            ,strm_info->cntlst[indx]->camera_id);
-        strm_info->port = strm_info->cntlst[0]->conf.stream_port;
-        if (strm_info->cntlst[0]->conf.stream_tls) {
-            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
-        } else {
-            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
-        }
-    } else {
-        snprintf(strm_info->lnk_camid,WEBUI_LEN_LNK,"%s","");
-        strm_info->port = strm_info->cntlst[indx]->conf.stream_port;
-        if (strm_info->cntlst[indx]->conf.stream_tls) {
-            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
-        } else {
-            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
-        }
-    }
-    if (strm_info->motion_images) {
-        snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/motion");
-        snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/motion");
-    } else {
-        /* Assign what images and links we want */
-        if (strm_info->cntlst[indx]->conf.stream_preview_method == 1) {
-            /* Substream for preview */
-            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
-            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/substream");
-        } else if (strm_info->cntlst[indx]->conf.stream_preview_method == 2) {
-            /* Static image for preview */
-            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
-            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/current");
-        } else if (strm_info->cntlst[indx]->conf.stream_preview_method == 4) {
-            /* Source image for preview */
-            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/source");
-            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/source");
-        } else {
-            /* Full stream for preview (method 0 or 3)*/
-            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
-            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/stream");
-        }
-    }
-}
-
-static void webu_html_preview(struct webui_ctx *webui)
-{
-
-    /* Write the initial version of the preview section.  The javascript
-     * will change this section when user selects a different camera */
-    char response[WEBUI_LEN_RESP];
-    int indx, indx_st, preview_scale;
-    struct strminfo_ctx strm_info;
-
-    strm_info.cntlst = webui->cntlst;
-
-    snprintf(response, sizeof (response),"%s",
-        "  <div id=\"liveview\">\n"
-        "    <section class=\"main-content\">\n"
-        "      <br>\n"
-        "      <p id=\"id_preview\">\n");
-    webu_write(webui, response);
-
-    if (webui->cam_threads == 1) {
-        indx_st = 0;
-    } else {
-        indx_st = 1;
-    }
-
-    for (indx = indx_st; indx<webui->cam_threads; indx++) {
-        if (webui->cntlst[indx]->conf.stream_preview_newline) {
-            snprintf(response, sizeof (response),"%s","      <br>\n");
-            webu_write(webui, response);
-        }
-
-        if (webui->cntlst[indx]->conf.stream_preview_method == 3) {
-            preview_scale = 45;
-        } else {
-            preview_scale = webui->cntlst[indx]->conf.stream_preview_scale;
-        }
-
-        strm_info.motion_images = FALSE;
-        webu_html_strminfo(&strm_info,indx);
-        snprintf(response, sizeof (response),
-            "      <a href=%s://%s:%d%s%s> "
-            " <img src=%s://%s:%d%s%s border=0 width=%d%%></a>\n"
-            ,strm_info.proto, webui->hostname, strm_info.port
-            ,strm_info.lnk_camid, strm_info.lnk_ref
-            ,strm_info.proto, webui->hostname, strm_info.port
-            ,strm_info.lnk_camid, strm_info.lnk_src
-            ,preview_scale);
-        webu_write(webui, response);
-
-        if (webui->cntlst[indx]->conf.stream_preview_method == 3) {
-            strm_info.motion_images = TRUE;
-            webu_html_strminfo(&strm_info,indx);
-            snprintf(response, sizeof (response),
-                "      <a href=%s://%s:%d%s%s> "
-                " <img src=%s://%s:%d%s%s class=border width=%d%%></a>\n"
-                ,strm_info.proto, webui->hostname, strm_info.port
-                ,strm_info.lnk_camid, strm_info.lnk_ref
-                ,strm_info.proto, webui->hostname, strm_info.port
-                ,strm_info.lnk_camid, strm_info.lnk_src
-                ,preview_scale);
-            webu_write(webui, response);
-        }
-
-    }
-
-    snprintf(response, sizeof (response),"%s",
-        "      </p>\n"
-        "      <br>\n"
-        "    </section>\n"
-        "  </div>\n");
-    webu_write(webui, response);
-
-}
-
-static void webu_html_script_action(struct webui_ctx *webui)
-{
-    /* Write the javascript action_click() function.
-     * We do not have a good notification section on the page so the successful
-     * submission and response is currently a empty if block for the future
-     * enhancement to somehow notify the user everything worked */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function event_reloadpage() {\n"
-        "      window.location.reload();\n"
+    webua->resp_page +=
+        "    function nav_open() {\n"
+        "      document.getElementById('divnav_main').style.width = '10rem';\n"
+        "      document.getElementById('divmain').style.marginLeft = '10rem';\n"
+        "      document.getElementById('menu_btn').style.display= 'none';\n"
         "    }\n\n"
-    );
-    webu_write(webui, response);
 
-    snprintf(response, sizeof (response),"%s",
-        "    function action_click(actval) {\n"
-        "      if (actval == \"config\") {\n"
-        "        document.getElementById('trk_form').style.display=\"none\";\n"
-        "        document.getElementById('cfg_form').style.display=\"inline\";\n"
-        "      } else if (actval == \"track\") {\n"
-        "        document.getElementById('cfg_form').style.display=\"none\";\n"
-        "        document.getElementById('trk_form').style.display=\"inline\";\n"
+        "    function nav_close() {\n"
+        "      document.getElementById('divnav_main').style.width = '0rem';\n"
+        "      document.getElementById('divmain').style.marginLeft = '0rem';\n"
+        "      document.getElementById('menu_btn').style.display= 'inline';\n"
+        "    }\n\n";
+}
+
+/* Create the javascript function send_config */
+void cls_webu_html::script_send_config()
+{
+    webua->resp_page +=
+        "    function send_config(category) {\n"
+        "      var formData = new FormData();\n"
+        "      var request = new XMLHttpRequest();\n"
+        "      var xmlhttp = new XMLHttpRequest();\n"
+        "      var camid = document.getElementsByName('camdrop')[0].value;\n\n"
+
+        "      if (camid == 0) {\n"
+        "        var pCfg = pData['configuration']['default'];\n"
         "      } else {\n"
-        "        document.getElementById('cfg_form').style.display=\"none\";\n"
-        "        document.getElementById('trk_form').style.display=\"none\";\n"
-        "        var camstr = document.getElementById('h3_cam').getAttribute('data-cam');\n"
-        "        var camnbr = camstr.substring(4,9);\n"
-        "        var http = new XMLHttpRequest();\n"
-        "        if ((actval == \"/detection/pause\") || (actval == \"/detection/start\")) {\n"
-        "          http.addEventListener('load', event_reloadpage); \n"
+        "        var pCfg = pData['configuration']['cam'+camid];\n"
+        "      }\n\n"
+
+        "      xmlhttp.onreadystatechange = function() {\n"
+        "        if (this.readyState == 4 && this.status == 200) {\n"
+        "          pData = JSON.parse(this.responseText);\n"
         "        }\n"
-    );
-    webu_write(webui, response);
+        "      };\n"
 
-    snprintf(response, sizeof (response),
-        "        var url = \"%s://%s:%d/\"; \n"
-        ,webui->hostproto, webui->hostname
-        ,webui->cntlst[0]->conf.webcontrol_port);
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),
-        "        if (camnbr == \"all00\") {\n"
-        "          url = url + \"%05d\";\n"
-        "        } else {\n"
-        "          url = url + camnbr;\n"
+        "      request.onreadystatechange = function() {\n"
+        "        if (this.readyState == 4 && this.status == 200) {\n"
+        "          xmlhttp.open('GET', pHostFull+'/0/config.json');\n"
+        "          xmlhttp.send();\n\n"
         "        }\n"
-        "        url = url + actval;\n"
-       ,webui->cntlst[0]->camera_id);
-    webu_write(webui, response);
+        "      };\n"
 
-    snprintf(response, sizeof (response),"%s",
-        "        http.open(\"GET\", url, true);\n"
-        "        http.onreadystatechange = function() {\n"
-        "          if(http.readyState == 4 && http.status == 200) {\n"
+        "      formData.append('command', 'config');\n"
+        "      formData.append('camid', camid);\n\n"
+        "      for (jkey in pCfg) {\n"
+        "        if (document.getElementsByName(jkey)[0] != null) {\n"
+        "          if (pCfg[jkey].category == category) {\n"
+        "            if (document.getElementsByName(jkey)[0].type == 'checkbox') {\n"
+        "              formData.append(jkey, document.getElementsByName(jkey)[0].checked);\n"
+        "            } else {\n"
+        "              formData.append(jkey, document.getElementsByName(jkey)[0].value);\n"
+        "            }\n"
         "          }\n"
         "        }\n"
-        "        http.send(null);\n"
         "      }\n"
-        "      document.getElementById('act_btn').style.display=\"none\"; \n"
-        "      document.getElementById('cfg_value').value = '';\n"
-        "      document.getElementById('cfg_parms').value = 'default';\n"
-        "    }\n\n");
-    webu_write(webui, response);
+        "      request.open('POST', pHostFull);\n"
+        "      request.send(formData);\n\n"
+        "    }\n\n";
 }
 
-static void webu_html_script_camera_thread(struct webui_ctx *webui)
+/* Create the send_action javascript function */
+void cls_webu_html::script_send_action()
 {
-    /* Write the javascript thread IF conditions of camera_click() function */
-    char response[WEBUI_LEN_RESP];
-    int indx, indx_st, preview_scale;
-    struct strminfo_ctx strm_info;
+    webua->resp_page +=
+        "    function send_action(actval) {\n\n"
 
-    if (webui->cam_threads == 1) {
-        indx_st = 0;
-    } else {
-        indx_st = 1;
-    }
+        "      var dsp_cam = document.getElementById('div_cam').style.display;\n"
+        "      if ((dsp_cam == 'none' || dsp_cam == '') && (actval != 'config_write')) {\n"
+        "        return;\n"
+        "      }\n\n"
 
-    strm_info.cntlst = webui->cntlst;
+        "      var formData = new FormData();\n"
+        "      var camid;\n"
+        "      var ans;\n\n"
 
-    for (indx = indx_st; indx<webui->cam_threads; indx++) {
-        snprintf(response, sizeof (response),
-            "      if (camid == \"cam_%05d\") {\n"
-            ,webui->cntlst[indx]->camera_id);
-        webu_write(webui, response);
+        "      camid = assign_camid();\n\n"
 
-        if (webui->cntlst[indx]->conf.stream_preview_method == 3) {
-            preview_scale = 45;
-        } else {
-            preview_scale = 95;
-        }
-
-        strm_info.motion_images = FALSE;
-        webu_html_strminfo(&strm_info, indx);
-        snprintf(response, sizeof (response),
-            "        preview=\"<a href=%s://%s:%d%s%s> "
-            " <img src=%s://%s:%d%s%s/ border=0 width=%d%%></a>\"  \n"
-            ,strm_info.proto, webui->hostname, strm_info.port
-            ,strm_info.lnk_camid, strm_info.lnk_ref
-            ,strm_info.proto, webui->hostname,strm_info.port
-            ,strm_info.lnk_camid, strm_info.lnk_src, preview_scale);
-        webu_write(webui, response);
-
-        if (webui->cntlst[indx]->conf.stream_preview_method == 3) {
-            strm_info.motion_images = TRUE;
-            webu_html_strminfo(&strm_info, indx);
-            snprintf(response, sizeof (response),
-                "        preview=preview + \"<a href=%s://%s:%d%s%s> "
-                " <img src=%s://%s:%d%s%s/ class=border width=%d%%></a>\"  \n"
-                ,strm_info.proto, webui->hostname, strm_info.port
-                ,strm_info.lnk_camid, strm_info.lnk_ref
-                ,strm_info.proto, webui->hostname,strm_info.port
-                ,strm_info.lnk_camid, strm_info.lnk_src, preview_scale);
-            webu_write(webui, response);
-        }
-
-        if (webui->cntlst[indx]->conf.camera_name == NULL) {
-            snprintf(response, sizeof (response),
-                "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
-                " class='header-center' >%s %d (%s)</h3>\"\n"
-                ,_("Camera")
-                , webui->cntlst[indx]->camera_id
-                ,(!webui->cntlst[indx]->running)? _("Not running") :
-                 (webui->cntlst[indx]->lost_connection)? _("Lost connection"):
-                 (webui->cntlst[indx]->pause)? _("Paused"):_("Active")
-             );
-        } else {
-            snprintf(response, sizeof (response),
-                "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
-                " class='header-center' >%s (%s)</h3>\"\n"
-                , webui->cntlst[indx]->conf.camera_name
-                ,(!webui->cntlst[indx]->running)? _("Not running") :
-                 (webui->cntlst[indx]->lost_connection)? _("Lost connection"):
-                 (webui->cntlst[indx]->pause)? _("Paused"):_("Active")
-                );
-        }
-        webu_write(webui, response);
-
-        snprintf(response, sizeof (response),"%s","      }\n");
-        webu_write(webui, response);
-    }
-
-    return;
-}
-
-static void webu_html_script_camera_all(struct webui_ctx *webui)
-{
-    /* Write the javascript "All" IF condition of camera_click() function */
-    char response[WEBUI_LEN_RESP];
-    int indx, indx_st, preview_scale;
-    struct strminfo_ctx strm_info;
-
-    if (webui->cam_threads == 1) {
-        indx_st = 0;
-    } else {
-        indx_st = 1;
-    }
-
-    strm_info.cntlst = webui->cntlst;
-
-    snprintf(response, sizeof (response), "      if (camid == \"cam_all00\") {\n");
-    webu_write(webui, response);
-
-    for (indx = indx_st; indx<webui->cam_threads; indx++) {
-        if (indx == indx_st) {
-            snprintf(response, sizeof (response),"%s","        preview = \"\";\n");
-            webu_write(webui, response);
-        }
-
-        if (webui->cntlst[indx]->conf.stream_preview_newline) {
-            snprintf(response, sizeof (response),"%s","        preview = preview + \"      <br>\";\n");
-            webu_write(webui, response);
-        }
-
-        if (webui->cntlst[indx]->conf.stream_preview_method == 3) {
-            preview_scale = 45;
-        } else {
-            preview_scale = webui->cntlst[indx]->conf.stream_preview_scale;
-        }
-
-        strm_info.motion_images = FALSE;
-        webu_html_strminfo(&strm_info, indx);
-        snprintf(response, sizeof (response),
-            "        preview = preview + \"<a href=%s://%s:%d%s%s> "
-            " <img src=%s://%s:%d%s%s border=0 width=%d%%></a>\"; \n"
-            ,strm_info.proto, webui->hostname, strm_info.port
-            ,strm_info.lnk_camid, strm_info.lnk_ref
-            ,strm_info.proto, webui->hostname, strm_info.port
-            ,strm_info.lnk_camid, strm_info.lnk_src
-            ,preview_scale);
-        webu_write(webui, response);
-
-        if (webui->cntlst[indx]->conf.stream_preview_method == 3) {
-            strm_info.motion_images = TRUE;
-            webu_html_strminfo(&strm_info, indx);
-            snprintf(response, sizeof (response),
-                "        preview = preview + \"<a href=%s://%s:%d%s%s> "
-                " <img src=%s://%s:%d%s%s class=border width=%d%%></a>\"; \n"
-                ,strm_info.proto, webui->hostname, strm_info.port
-                ,strm_info.lnk_camid, strm_info.lnk_ref
-                ,strm_info.proto, webui->hostname, strm_info.port
-                ,strm_info.lnk_camid, strm_info.lnk_src
-                ,preview_scale);
-            webu_write(webui, response);
-        }
-    }
-
-    snprintf(response, sizeof (response),
-        "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
-        " class='header-center' >%s</h3>\"\n"
-        "      }\n"
-        ,_("All Cameras"));
-    webu_write(webui, response);
-
-    return;
-}
-
-static void webu_html_script_camera(struct webui_ctx *webui)
-{
-    /* Write the javascript camera_click() function */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function camera_click(camid) {\n"
-        "      var preview = \"\";\n"
-        "      var header = \"\";\n");
-    webu_write(webui, response);
-
-    webu_html_script_camera_thread(webui);
-
-    webu_html_script_camera_all(webui);
-
-    snprintf(response, sizeof (response),"%s",
-        "      document.getElementById(\"id_preview\").innerHTML = preview; \n"
-        "      document.getElementById(\"id_header\").innerHTML = header; \n"
-        "      document.getElementById('cfg_form').style.display=\"none\"; \n"
-        "      document.getElementById('trk_form').style.display=\"none\"; \n"
-        "      document.getElementById('cam_btn').style.display=\"none\"; \n"
-        "      document.getElementById('cfg_value').value = '';\n"
-        "      document.getElementById('cfg_parms').value = 'default';\n"
-        "    }\n\n");
-    webu_write(webui, response);
-
-}
-
-static void webu_html_script_menucam(struct webui_ctx *webui)
-{
-    /* Write the javascript display_cameras() function */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function display_cameras() {\n"
-        "      document.getElementById('act_btn').style.display = 'none';\n"
-        "      if (document.getElementById('cam_btn').style.display == 'block') {\n"
-        "        document.getElementById('cam_btn').style.display = 'none';\n"
+        "      if (actval == 'action_user') {\n"
+        "        ans = prompt('Enter user parameter');\n"
         "      } else {\n"
-        "        document.getElementById('cam_btn').style.display = 'block';\n"
-        "      }\n"
-        "    }\n\n");
-    webu_write(webui, response);
+        "        ans = '';\n"
+        "      }\n\n"
 
+        "      formData.append('command', actval);\n"
+        "      formData.append('camid', camid);\n"
+        "      formData.append('user', ans);\n\n"
+        "      var request = new XMLHttpRequest();\n"
+        "      request.open('POST', pHostFull);\n"
+        "      request.send(formData);\n\n"
+        "      return;\n"
+        "    }\n\n";
 }
 
-static void webu_html_script_menuact(struct webui_ctx *webui)
+/* Create the send_reload javascript function */
+void cls_webu_html::script_send_reload()
 {
-    /* Write the javascript display_actions() function */
-    char response[WEBUI_LEN_RESP];
+    webua->resp_page +=
+        "    function send_reload(actval) {\n\n"
+        "      var formData = new FormData();\n"
+        "      var request = new XMLHttpRequest();\n"
+        "      var xmlhttp = new XMLHttpRequest();\n"
+        "      var camid;\n"
+        "      var ans;\n\n"
 
-    snprintf(response, sizeof (response),"%s",
-        "    function display_actions() {\n"
-        "      document.getElementById('cam_btn').style.display = 'none';\n"
-        "      if (document.getElementById('act_btn').style.display == 'block') {\n"
-        "        document.getElementById('act_btn').style.display = 'none';\n"
+        "      camid = assign_camid();\n\n"
+
+        "      if (actval == 'camera_delete') {\n"
+        "        ans = confirm('Delete camera ' + camid);\n"
+        "        if (ans == false) {\n"
+        "          return;\n"
+        "        }\n"
+        "      }\n\n"
+
+        "      xmlhttp.onreadystatechange = function() {\n"
+        "        if (this.readyState == 4 && this.status == 200) {\n"
+        "          pData = JSON.parse(this.responseText);\n"
+        "          gIndxCam = -1;\n"
+        "          assign_config_nav();\n"
+        "          assign_vals(0);\n"
+        "          assign_cams();\n"
+        "        }\n"
+        "      };\n"
+
+        "      request.onreadystatechange = function() {\n"
+        "        if (this.readyState == 4 && this.status == 200) {\n"
+        "          xmlhttp.open('GET', pHostFull+'/0/config.json');\n"
+        "          xmlhttp.send();\n\n"
+        "        }\n"
+        "      };\n"
+
+        "      formData.append('command', actval);\n"
+        "      formData.append('camid', camid);\n\n"
+
+        "      request.open('POST', pHostFull);\n"
+        "      request.send(formData);\n\n"
+
+        "    }\n\n";
+}
+
+/* Create the javascript function dropchange_cam */
+void cls_webu_html::script_dropchange_cam()
+{
+    webua->resp_page +=
+        "    function dropchange_cam(camobj) {\n"
+        "      var indx;\n\n"
+
+        "      assign_vals(camobj.value);\n\n"
+
+        "      var sect = document.getElementsByName('camdrop');\n"
+        "      for (indx = 0; indx < sect.length; indx++) {\n"
+        "        sect.item(indx).selectedIndex =camobj.selectedIndex;\n"
+        "      }\n\n"
+
+        "      gIndxCam = -1;\n"
+        "      for (indx = 0; indx < pData['cameras']['count']; indx++) {\n"
+        "        if (pData['cameras'][indx]['id'] == camobj.value) {\n"
+        "          gIndxCam = indx;\n"
+        "        }\n"
+        "      }\n\n"
+
+        "      if (gIndxCam == -1) {\n"
+        "        document.getElementById('cfgpic').src =\n"
+        "          pHostFull+\"/0/mjpg/stream\";\n"
         "      } else {\n"
-        "        document.getElementById('act_btn').style.display = 'block';\n"
-        "      }\n"
-        "    }\n\n");
-    webu_write(webui, response);
+        "        document.getElementById('cfgpic').src =\n"
+        "          pData['cameras'][gIndxCam]['url'] + \"mjpg/stream\" ;\n"
+        "      }\n\n"
 
+        "    }\n\n";
 }
 
-static void webu_html_script_evtclk(struct webui_ctx *webui)
+/* Create the javascript function config_hideall */
+void cls_webu_html::script_config_hideall()
 {
-    /* Write the javascript 'click' EventListener */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    document.addEventListener('click', function(event) {\n"
-        "      const dropCam = document.getElementById('cam_drop');\n"
-        "      const dropAct = document.getElementById('act_drop');\n"
-        "      if (!dropCam.contains(event.target) && !dropAct.contains(event.target)) {\n"
-        "        document.getElementById('cam_btn').style.display = 'none';\n"
-        "        document.getElementById('act_btn').style.display = 'none';\n"
+    webua->resp_page +=
+        "    function config_hideall() {\n"
+        "      var sect = document.getElementsByClassName('cls_config');\n"
+        "      for (var i = 0; i < sect.length; i++) {\n"
+        "        sect.item(i).style.display='none';\n"
         "      }\n"
-        "    });\n\n");
-    webu_write(webui, response);
-
+        "      return;\n"
+        "    }\n\n";
 }
 
-static void webu_html_script_cfgclk(struct webui_ctx *webui)
+/* Create the javascript function config_click */
+void cls_webu_html::script_config_click()
 {
-    /* Write the javascript config_click function
-     * We do not have a good notification section on the page so the successful
-     * submission and response is currently a empty if block for the future
-     * enhancement to somehow notify the user everything worked */
+    webua->resp_page +=
+        "    function config_click(actval) {\n"
+        "      config_hideall();\n"
+        "      document.getElementById('div_cam').style.display='none';\n"
+        "      document.getElementById('div_movies').style.display='none';\n"
+        "      document.getElementById('div_config').style.display='inline';\n"
+        "      document.getElementById('div_' + actval).style.display='inline';\n"
+        "      cams_reset();\n"
+        "    }\n\n";
+}
 
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function config_click() {\n"
-        "      var camstr = document.getElementById('h3_cam').getAttribute('data-cam');\n"
-        "      var camnbr = camstr.substring(4,9);\n"
-        "      var opts = document.getElementById('cfg_parms');\n"
-        "      var optsel = opts.options[opts.selectedIndex].value;\n"
-        "      var baseval = document.getElementById('cfg_value').value;\n"
-        "      var http = new XMLHttpRequest();\n");
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),
-        "      var url = \"%s://%s:%d/\"; \n"
-        ,webui->hostproto, webui->hostname
-        ,webui->cntlst[0]->conf.webcontrol_port);
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),
-        "      var optval=encodeURI(baseval);\n"
-        "      if (camnbr == \"all00\") {\n"
-        "        url = url + \"%05d\";\n"
+/* Create the javascript function assign_camid */
+void cls_webu_html::script_assign_camid()
+{
+    webua->resp_page +=
+        "    function assign_camid() {\n"
+        "      if (gIndxCam == -1 ) {\n"
+        "        camid = 0;\n"
         "      } else {\n"
-        "        url = url + camnbr;\n"
-        "      }\n"
-        ,webui->cntlst[0]->camera_id);
-    webu_write(webui, response);
+        "        camid = pData['cameras'][gIndxCam]['id'];\n"
+        "      }\n\n"
+        "      return camid; \n"
+        "    }\n\n";
+}
 
-    snprintf(response, sizeof (response),"%s",
-        "      url = url + \"/config/set?\" + optsel + \"=\" + optval;\n"
-        "      http.open(\"GET\", url, true);\n"
-        "      http.onreadystatechange = function() {\n"
-        "        if(http.readyState == 4 && http.status == 200) {\n"
+/* Create the javascript function assign_version */
+void cls_webu_html::script_assign_version()
+{
+    webua->resp_page +=
+        "    function assign_version() {\n"
+        "      var verstr ='<a>Motion \\n'+pData['version'] +'</a>';\n"
+        "      document.getElementById('divnav_version').innerHTML = verstr;\n"
+        "    }\n\n";
+}
+
+/* Create the javascript function assign_cams */
+void cls_webu_html::script_assign_cams()
+{
+    webua->resp_page +=
+        "    function assign_cams() {\n"
+        "      var camcnt = pData['cameras']['count'];\n"
+        "      var indx = 0;\n"
+        "      var html_drop = \"\\n\";\n"
+        "      var html_nav = \"\\n\";\n"
+        "      var html_mov = \"\\n\";\n\n"
+        "      html_drop += \" <select class='cls_drop' \";\n"
+        "      html_drop += \" onchange='dropchange_cam(this)' \";\n"
+        "      html_drop += \" name='camdrop'>\\n\";\n\n"
+        "      for (indx=0; indx<camcnt; indx++) {\n"
+        "        if (indx == 0) {\n"
+        "          html_nav += \"<a onclick='cams_all_click();'>\";\n"
+        "          html_nav += \"All Cameras</a>\\n\";\n"
+        "          html_nav += \"<a onclick='cams_scan_click();'>\";\n"
+        "          html_nav += \"Scan Cameras</a>\\n\";\n\n"
+        "          html_drop += \"<option \";\n"
+        "          html_drop += \" value='0'>default\";\n"
+        "          html_drop += \"</option>\\n\";\n"
+        "        }\n\n"
+        "        html_nav += \"<a onclick='cams_one_click(\" + indx + \");'>\";\n"
+        "        html_nav += pData[\"cameras\"][indx][\"name\"] + \"</a>\\n\";\n"
+        "        html_mov += \"<a onclick='movies_click(\" + indx + \");'>\";\n"
+        "        html_mov += pData[\"cameras\"][indx][\"name\"] + \"</a>\";\n"
+        "        html_drop += \"<option \";\n"
+        "        html_drop += \" value='\"+pData[\"cameras\"][indx][\"id\"]+\"'>\";\n"
+        "        html_drop += pData[\"cameras\"][indx][\"name\"];\n"
+        "        html_drop += \"</option>\\n\";\n"
+        "      }\n"
+        "      html_drop += \" </select>\\n\";\n\n"
+        "      var sect = document.getElementsByClassName(\"cls_camdrop\");\n"
+        "      for (indx = 0; indx < sect.length; indx++) {\n"
+        "        sect.item(indx).innerHTML = html_drop;\n"
+        "      }\n\n"
+        "      document.getElementById(\"divnav_cam\").innerHTML = html_nav;\n\n"
+        "      document.getElementById(\"divnav_movies\").innerHTML = html_mov;\n\n"
+        "      return;\n"
+        "    }\n\n";
+}
+
+/* Create the javascript function assign_actions */
+void cls_webu_html::script_assign_actions()
+{
+    int indx;
+    ctx_params_item *itm;
+
+    webua->resp_page +=
+        "    function assign_actions() {\n"
+        "      var html_actions = \"\\n\";\n"
+        "      html_actions += \"  \";\n";
+
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        itm = &webu->wb_actions->params_array[indx];
+        if ((itm->param_name == "snapshot") &&
+            (itm->param_value == "on")) {
+            webua->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'snapshot');\\\">\";\n"
+                "      html_actions += \"Snapshot</a>\\n\";\n\n"
+                ;
+        } else if ((itm->param_name == "event") &&
+            (itm->param_value == "on")) {
+            webua->resp_page +=
+            "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+            "      html_actions += \"'eventstart');\\\">\";\n"
+            "      html_actions += \"Start Event</a>\\n\";\n\n"
+
+            "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+            "      html_actions += \"'eventend');\\\">\";\n"
+            "      html_actions += \"End Event</a>\\n\";\n\n"
+            ;
+        } else if ((itm->param_name == "pause") &&
+            (itm->param_value == "on")) {
+            webua->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'pause_on');\\\">\";\n"
+                "      html_actions += \"Pause On</a>\\n\";\n\n"
+
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'pause_off');\\\">\";\n"
+                "      html_actions += \"Pause Off</a>\\n\";\n\n"
+
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'pause_schedule');\\\">\";\n"
+                "      html_actions += \"Pause Schedule</a>\\n\";\n\n"
+                ;
+        } else if ((itm->param_name == "camera_add") &&
+            (itm->param_value == "on")) {
+            webua->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_reload(\";\n"
+                "      html_actions += \"'camera_add');\\\">\";\n"
+                "      html_actions += \"Add Camera</a>\\n\";\n\n"
+                ;
+        } else if ((itm->param_name == "camera_delete") &&
+            (itm->param_value == "on")) {
+            webua->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_reload(\";\n"
+                "      html_actions += \"'camera_delete');\\\">\";\n"
+                "      html_actions += \"Delete Camera</a>\\n\";\n\n"
+                ;
+        } else if ((itm->param_name == "config_write") &&
+            (itm->param_value == "on")) {
+            webua->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'config_write');\\\">\";\n"
+                "      html_actions += \"Save Config</a>\\n\";\n\n"
+                ;
+        } else if ((itm->param_name == "stop") &&
+            (itm->param_value == "on")) {
+            webua->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'stop');\\\">\";\n"
+                "      html_actions += \"Stop</a>\\n\";\n\n"
+                ;
+        } else if ((itm->param_name == "restart") &&
+            (itm->param_value == "on")) {
+            webua->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'restart');\\\">\";\n"
+                "      html_actions += \"Start/Restart</a>\\n\";\n\n"
+                ;
+        } else if ((itm->param_name == "action_user") &&
+            (itm->param_value == "on")) {
+            webua->resp_page +=
+                "      html_actions += \"<a onclick=\\\"send_action(\";\n"
+                "      html_actions += \"'action_user');\\\">\";\n"
+                "      html_actions += \"User Action</a>\\n\";\n\n"
+                ;
+        }
+    }
+
+    webua->resp_page +=
+        "      html_actions += \"<a onclick=\\\"log_showhide();\\\">\";\n"
+        "      html_actions += \"Show/hide log</a>\\n\";\n\n";
+
+    webua->resp_page +=
+        "      document.getElementById(\"divnav_actions\").innerHTML = html_actions;\n\n"
+        "      return;\n"
+
+        "    }\n\n";
+}
+
+/* Create the javascript function assign_vals */
+void cls_webu_html::script_assign_vals()
+{
+    webua->resp_page +=
+        "    function assign_vals(camid) {\n"
+        "      var pCfg;\n\n"
+
+        "     if (camid == 0) {\n"
+        "       pCfg = pData[\"configuration\"][\"default\"];\n"
+        "     } else {\n"
+        "       pCfg = pData[\"configuration\"][\"cam\"+camid];\n"
+        "     }\n\n"
+
+        "      for (jkey in pCfg) {\n"
+        "        if (document.getElementsByName(jkey)[0] != null) {\n"
+        "          if (pCfg[jkey].enabled) {\n"
+        "            document.getElementsByName(jkey)[0].disabled = false;\n"
+        "            if (document.getElementsByName(jkey)[0].type == \"checkbox\") {\n"
+        "              document.getElementsByName(jkey)[0].checked = pCfg[jkey].value;\n"
+        "            } else {\n"
+        "              document.getElementsByName(jkey)[0].value = pCfg[jkey].value;\n"
+        "            }\n"
+        "          } else {\n"
+        "            document.getElementsByName(jkey)[0].disabled = true;\n"
+        "            document.getElementsByName(jkey)[0].value = '';\n"
+        "          }\n"
+        "        } else {\n"
+        "          console.log('Uncoded ' + jkey + ' : ' + pCfg[jkey].value);\n"
         "        }\n"
         "      }\n"
-        "      http.send(null);\n"
-        "      document.getElementById('cfg_value').value = \"\";\n"
-        "      opts.options[opts.selectedIndex].setAttribute('data-'+camstr,baseval);\n"
-        "      opts.value = 'default';\n"
-        "    }\n\n");
-    webu_write(webui, response);
-
+        "    }\n\n";
 }
 
-static void webu_html_script_cfgchg(struct webui_ctx *webui)
+/* Create the javascript function assign_config_nav */
+void cls_webu_html::script_assign_config_nav()
 {
-    /* Write the javascript option_change function */
-    char response[WEBUI_LEN_RESP];
+    webua->resp_page +=
+        "    function assign_config_nav() {\n"
+        "      var pCfg = pData['configuration']['default'];\n"
+        "      var pCat = pData['categories'];\n"
+        "      var html_nav = \"\\n\";\n\n"
 
-    snprintf(response, sizeof (response),"%s",
-        "    function config_change() {\n"
-        "      var camSel = 'data-'+ document.getElementById('h3_cam').getAttribute('data-cam');\n"
-        "      var opts = document.getElementById('cfg_parms');\n"
-        "      var optval = opts.options[opts.selectedIndex].getAttribute(camSel);\n"
-        "      if (optval == null) {\n"
-        "        optval = opts.options[opts.selectedIndex].getAttribute('data-cam_all00');\n"
+        "      for (jcat in pCat) {\n"
+        "        html_nav += \"<a onclick=\\\"config_click('\";\n"
+        "        html_nav += pCat[jcat][\"name\"]+\"');\\\">\";\n"
+        "        html_nav += pCat[jcat][\"display\"]+\"</a>\\n\";\n\n"
+        "      }\n\n"
+
+        "      document.getElementById(\"divnav_config\").innerHTML = html_nav;\n\n"
+
+        "    }\n\n";
+}
+
+/* Create the javascript function assign_config_item */
+void cls_webu_html::script_assign_config_item()
+{
+    webua->resp_page +=
+        "    function assign_config_item(jkey) {\n"
+        "      var pCfg = pData['configuration']['default'];\n"
+        "      var html_cfg = \"\";\n"
+        "      var indx_lst = 0;\n\n"
+
+        "      html_cfg += \"<tr><td><label for='\";\n"
+        "      html_cfg += jkey + \"'>\"+jkey+\"</label></td>\\n\";\n\n"
+        "      if (pCfg[jkey][\"type\"] == \"string\") {\n"
+        "        html_cfg += \"<td><textarea name='\";\n"
+        "        html_cfg += jkey+\"'></textarea></td>\";\n\n"
+        "      } else if (pCfg[jkey][\"type\"] == \"bool\") {\n"
+        "        html_cfg += \"<td><input class='cfg_check' \";\n"
+        "        html_cfg += \" type='checkbox' name='\";\n"
+        "        html_cfg += jkey+\"'></td>\";\n\n"
+        "      } else if (pCfg[jkey][\"type\"] == \"int\") {\n"
+        "        html_cfg += \"<td><input class='cls_text_nbr' \";\n"
+        "        html_cfg += \"type='text' name='\";\n"
+        "        html_cfg += jkey+\"'></td>\";\n\n"
+        "      } else if (pCfg[jkey][\"type\"] == \"list\") {\n"
+        "        html_cfg += \"<td><select class='cls_drop' \";\n"
+        "        html_cfg += \" name='\"+jkey+\"'  autocomplete='off'>\";\n\n"
+        "        for (indx_lst=0; indx_lst < pCfg[jkey][\"list\"].length; indx_lst++) {\n"
+        "          html_cfg += \"<option value='\";\n"
+        "          html_cfg += pCfg[jkey][\"list\"][indx_lst] + \"'>\";\n"
+        "          html_cfg += pCfg[jkey][\"list\"][indx_lst] + \"</option>\\n\";\n"
+        "        }\n"
+        "        html_cfg += \"</select></td>\";\n"
         "      }\n"
-        "      document.getElementById('cfg_value').value = optval;\n"
-        "    }\n\n");
-    webu_write(webui, response);
+        "      html_cfg += \"</tr>\\n\";\n\n"
+
+        "      return html_cfg;\n\n"
+
+        "    }\n\n";
 }
 
-static void webu_html_script_trkchg(struct webui_ctx *webui)
+/* Create the javascript function assign_config_cat */
+void cls_webu_html::script_assign_config_cat()
 {
-    char response[WEBUI_LEN_RESP];
+    webua->resp_page +=
+        "    function assign_config_cat(jcat) {\n"
+        "      var pCfg = pData['configuration']['default'];\n"
+        "      var pCat = pData['categories'];\n"
+        "      var html_cfg = \"\";\n\n"
 
-    snprintf(response, sizeof (response),"%s",
-        "    function track_change() {\n"
-        "      var opts = document.getElementById('trk_option');\n"
-        "      var optval = opts.options[opts.selectedIndex].getAttribute('data-trk');\n"
-        "      if (optval == 'pan') {\n"
-        "        document.getElementById('trk_panx').disabled=false;\n"
-        "        document.getElementById('trk_tilty').disabled = false;\n"
-        "        document.getElementById('trk_lblx').style.display='none';\n"
-        "        document.getElementById('trk_lbly').style.display='none';\n"
-        "        document.getElementById('trk_lblpan').style.display='inline';\n"
-        "        document.getElementById('trk_lbltilt').style.display='inline';\n");
-    webu_write(webui, response);
+        "      html_cfg += \"<div id='div_\";\n"
+        "      html_cfg += pCat[jcat][\"name\"];\n"
+        "      html_cfg += \"' style='display:none' class='cls_config'>\\n\";\n"
 
-    snprintf(response, sizeof (response),"%s",
-        "      } else if (optval =='abs') {\n"
-        "        document.getElementById('trk_panx').disabled=false;\n"
-        "        document.getElementById('trk_tilty').disabled = false;\n"
-        "        document.getElementById('trk_lblx').value = 'X';\n"
-        "        document.getElementById('trk_lbly').value = 'Y';\n"
-        "        document.getElementById('trk_lblpan').style.display='none';\n"
-        "        document.getElementById('trk_lbltilt').style.display='none';\n"
-        "        document.getElementById('trk_lblx').style.display='inline';\n"
-        "        document.getElementById('trk_lbly').style.display='inline';\n");
-    webu_write(webui, response);
+        "      html_cfg += \"<table style='float: left'>\";\n"
+        "      html_cfg += \"<tr><th colspan='2'>\";\n"
+        "      html_cfg += pCat[jcat][\"display\"];\n"
+        "      html_cfg += \" Parameters</th></tr>\\n\";\n"
 
-   snprintf(response, sizeof (response),"%s",
+        "      html_cfg += \"<tr><td><label for 'camdrop'>camera</label></td>\\n\";\n"
+        "      html_cfg += \"<td class='cls_camdrop'>\";\n"
+        "      html_cfg += \"<select class='cls_drop' \";\n"
+        "      html_cfg += \"onchange='dropchange_cam.call(this)' \";\n"
+        "      html_cfg += \"name='camdrop'>\\n\";\n"
+        "      html_cfg += \"<option value='0000'>default</option>\\n\";\n"
+        "      html_cfg += \"</select></td></tr>\\n\";\n\n"
+        "      for (jkey in pCfg) {\n"
+        "        if (pCfg[jkey][\"category\"] == jcat) {\n"
+        "          html_cfg += assign_config_item(jkey); \n"
+        "        }\n"
+        "      }\n"
+        "      html_cfg += \"<tr><td><input type='hidden' name='trailer' value='null'></td>\\n\";\n"
+        "      html_cfg += \"<td> <button onclick='send_config(\";\n"
+        "      html_cfg += jcat + \")'>Submit</button></td></tr>\\n\";\n"
+        "      html_cfg += \"</table></div>\\n\";\n\n"
+
+        "      return html_cfg;\n\n"
+
+        "    }\n\n";
+}
+
+/* Create the javascript function assign_config */
+void cls_webu_html::script_assign_config()
+{
+    webua->resp_page +=
+        "    function assign_config() {\n"
+        "      var pCat = pData['categories'];\n"
+        "      var html_cfg = \"\";\n\n"
+
+        "      assign_config_nav();\n\n"
+
+        "      for (jcat in pCat) {\n"
+        "        html_cfg += assign_config_cat(jcat);\n"
+        "      }\n\n"
+
+        "      html_cfg += \"<br><br><br>\";\n"
+        "      html_cfg += \"<a><img id='cfgpic'\";\n"
+        "      html_cfg += \"' src=\" + pHostFull + \"/0/mjpg/stream\";\n"
+        "      html_cfg += \" border=0 width=45%></a>\\n\";\n"
+        "      html_cfg += \"<div style='clear: both'></div>\\n;\"\n\n"
+
+
+        "      document.getElementById(\"div_config\").innerHTML = html_cfg;\n\n"
+
+        "    }\n\n";
+}
+
+/* Create the javascript function init_form */
+void cls_webu_html::script_initform()
+{
+    webua->resp_page +=
+        "    function initform() {\n"
+        "      var xmlhttp = new XMLHttpRequest();\n\n"
+
+        "      pHostFull = '//' + window.location.hostname;\n"
+        "      pHostFull = pHostFull + ':' + window.location.port;\n\n"
+
+        "      xmlhttp.onreadystatechange = function() {\n"
+        "        if (this.readyState == 4 && this.status == 200) {\n"
+        "          pData = JSON.parse(this.responseText);\n"
+        "          gIndxCam  = -1;\n"
+        "          gGetImgs  = 1;\n"
+        "          gIndxScan = -1;\n"
+        "          gLogNbr = 0;\n\n"
+
+        "          assign_config();\n"
+        "          assign_version();\n"
+        "          assign_vals(0);\n"
+        "          assign_cams();\n"
+        "          assign_actions();\n"
+        "          cams_all_click();\n"
+        "          nav_close();\n"
+
+        "        }\n"
+        "      };\n"
+        "      xmlhttp.open('GET', pHostFull+'/0/config.json');\n"
+        "      xmlhttp.send();\n"
+        "    }\n\n";
+}
+
+/* Create the javascript function display_cameras */
+void cls_webu_html::script_display_cameras()
+{
+    webua->resp_page +=
+        "    function display_cameras() {\n"
+        "      document.getElementById('divnav_config').style.display = 'none';\n"
+        "      document.getElementById('divnav_actions').style.display = 'none';\n"
+        "      document.getElementById('divnav_movies').style.display = 'none';\n"
+        "      if (document.getElementById('divnav_cam').style.display == 'block'){\n"
+        "        document.getElementById('divnav_cam').style.display = 'none';\n"
         "      } else {\n"
-        "        document.getElementById('cfg_form').style.display='none';\n"
-        "        document.getElementById('trk_panx').disabled=true;\n"
-        "        document.getElementById('trk_tilty').disabled = true;\n"
+        "        document.getElementById('divnav_cam').style.display = 'block';\n"
         "      }\n"
-        "    }\n\n");
-    webu_write(webui, response);
-
+        "    }\n\n";
 }
 
-static void webu_html_script_trkclk(struct webui_ctx *webui)
+/* Create the javascript function display_config */
+void cls_webu_html::script_display_config()
 {
-    char response[WEBUI_LEN_RESP];
-    snprintf(response, sizeof (response),"%s",
-        "    function track_click() {\n"
-        "      var camstr = document.getElementById('h3_cam').getAttribute('data-cam');\n"
-        "      var camnbr = camstr.substring(4,9);\n"
-        "      var opts = document.getElementById('trk_option');\n"
-        "      var optsel = opts.options[opts.selectedIndex].getAttribute('data-trk');\n"
-        "      var optval1 = document.getElementById('trk_panx').value;\n"
-        "      var optval2 = document.getElementById('trk_tilty').value;\n"
-        "      var http = new XMLHttpRequest();\n");
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),
-        "      var url = \"%s://%s:%d/\"; \n"
-        ,webui->hostproto, webui->hostname
-        ,webui->cntlst[0]->conf.webcontrol_port);
-    webu_write(webui, response);
-
-    snprintf(response, sizeof (response),
-        "      if (camnbr == \"all00\") {\n"
-        "        url = url + \"%05d\";\n"
+    webua->resp_page +=
+        "    function display_config() {\n"
+        "      document.getElementById('divnav_cam').style.display = 'none';\n"
+        "      document.getElementById('divnav_actions').style.display = 'none';\n"
+        "      document.getElementById('divnav_movies').style.display = 'none';\n"
+        "      if (document.getElementById('divnav_config').style.display == 'block') {\n"
+        "        document.getElementById('divnav_config').style.display = 'none';\n"
         "      } else {\n"
-        "        url = url + camnbr;\n"
+        "        document.getElementById('divnav_config').style.display = 'block';\n"
         "      }\n"
-        ,webui->cntlst[0]->camera_id);
-    webu_write(webui, response);
+        "      gIndxScan = -1; \n"
+        "      cams_timer_stop();\n"
+        "    }\n\n";
+}
 
-    snprintf(response, sizeof (response),"%s",
-
-        "      if (optsel == 'pan') {\n"
-        "        url = url + '/track/set?pan=' + optval1 + '&tilt=' + optval2;\n"
-        "      } else if (optsel == 'abs') {\n"
-        "        url = url + '/track/set?x=' + optval1 + '&y=' + optval2;\n"
+/* Create the javascript function display_movies */
+void cls_webu_html::script_display_movies()
+{
+    webua->resp_page +=
+        "    function display_movies() {\n"
+        "      document.getElementById('divnav_cam').style.display = 'none';\n"
+        "      document.getElementById('divnav_actions').style.display = 'none';\n"
+        "      document.getElementById('divnav_config').style.display = 'none';\n"
+        "      if (document.getElementById('divnav_movies').style.display == 'block') {\n"
+        "        document.getElementById('divnav_movies').style.display = 'none';\n"
         "      } else {\n"
-        "        url = url + '/track/center'\n"
+        "        document.getElementById('divnav_movies').style.display = 'block';\n"
         "      }\n"
-        "      http.open(\"GET\", url, true);\n"
-        "      http.onreadystatechange = function() {\n"
-        "        if(http.readyState == 4 && http.status == 200) {\n"
-        "         }\n"
+        "      gIndxScan = -1; \n"
+        "      cams_timer_stop();\n"
+        "    }\n\n";
+}
+
+/* Create the javascript function display_actions */
+void cls_webu_html::script_display_actions()
+{
+    webua->resp_page +=
+        "    function display_actions() {\n"
+        "      document.getElementById('divnav_cam').style.display = 'none';\n"
+        "      document.getElementById('divnav_config').style.display = 'none';\n"
+        "     if (document.getElementById('divnav_actions').style.display == 'block') {\n"
+        "        document.getElementById('divnav_actions').style.display = 'none';\n"
+        "      } else {\n"
+        "        document.getElementById('divnav_actions').style.display = 'block';\n"
         "      }\n"
-        "      http.send(null);\n"
-        "    }\n\n");
-    webu_write(webui, response);
+        "      gIndxScan = -1; \n"
+        "    }\n\n";
+}
+
+/* Create the camera_buttons_ptz javascript function */
+void cls_webu_html::script_camera_buttons_ptz()
+{
+    webua->resp_page +=
+        "    function camera_buttons_ptz() {\n\n"
+        "      var html_preview = \"\";\n"
+
+        "      html_preview += \"<table style='float: left' >\";\n"
+        "      html_preview += \"<tr><td>&nbsp&nbsp</td><td>&nbsp&nbsp</td></tr>\\n\";\n"
+
+        "      html_preview += \"<tr><td></td><td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"send_action('tilt_up');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"arrow up\\\" \\n\";\n"
+        "      html_preview += \"></button></td></tr> \\n\";\n"
+
+        "      html_preview += \"<tr><td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"send_action('pan_left');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"arrow left\\\" \\n\";\n"
+        "      html_preview += \"></button></td><td></td> \\n\";\n"
+
+        "      html_preview += \"<td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"send_action('pan_right');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"arrow right\\\" \\n\";\n"
+        "      html_preview += \"></button></td><td>&nbsp&nbsp</td> \\n\";\n"
+
+        "      html_preview += \"<td>&nbsp</td><td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"send_action('zoom_in');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"zoombtn\\\" \\n\";\n"
+        "      html_preview += \">+</button></td> \\n\";\n"
+
+        "      html_preview += \"<td>&nbsp</td><td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"send_action('zoom_out');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"zoombtn\\\" \\n\";\n"
+        "      html_preview += \">-</button></td></tr> \\n\";\n"
+
+        "      html_preview += \"<tr><td></td><td><button \\n\";\n"
+        "      html_preview += \"onclick=\\\"send_action('tilt_down');\\\" \\n\";\n"
+        "      html_preview += \"class=\\\"arrow down\\\" \\n\";\n"
+        "      html_preview += \"></button></td></tr> \\n\";\n"
+        "      html_preview += \"<tr><td>&nbsp&nbsp</td><td>&nbsp&nbsp</td></tr>\\n\";\n"
+        "      html_preview += \"</table><p></p>\";\n"
+
+        "      return html_preview;\n\n"
+
+        "    }\n\n";
+}
+
+void cls_webu_html::script_image_picall()
+{
+    webua->resp_page +=
+        "    function image_picall() {\n\n"
+        "      document.getElementById('picall').addEventListener('click',function(event){\n"
+        "        bounds=this.getBoundingClientRect();\n"
+        "        var locx,locy,locw, loch,pctx,pcty;\n"
+        "        var indx, camcnt, caminfo;\n"
+        "        locx = Math.floor(event.pageX - bounds.left - window.scrollX);\n"
+        "        locy = Math.floor(event.pageY - bounds.top - window.scrollY);\n"
+        "        locw = Math.floor(bounds.width);\n"
+        "        loch = Math.floor(bounds.height);\n"
+        "        pctx = ((locx*100)/locw);\n"
+        "        pcty = ((locy*100)/loch);\n"
+        "        camcnt = pData['cameras']['count'];\n"
+        "        for (indx=0; indx<camcnt; indx++) {\n"
+        "          if ((pctx >= pData['cameras'][indx]['all_xpct_st']) &&\n"
+        "              (pctx <= pData['cameras'][indx]['all_xpct_en']) &&\n"
+        "              (pcty >= pData['cameras'][indx]['all_ypct_st']) &&\n"
+        "              (pcty <= pData['cameras'][indx]['all_ypct_en'])) {\n"
+        "              cams_one_click(indx);\n"
+        "          }\n"
+        "        }\n"
+        "      });\n"
+        "    }\n\n";
+}
+
+/* Create the image_pantilt javascript function */
+void cls_webu_html::script_image_pantilt()
+{
+    webua->resp_page +=
+        "    function image_pantilt() {\n\n"
+        "      if (gIndxCam == -1 ) {\n"
+        "        return;\n"
+        "      }\n\n"
+        "      document.getElementById('pic'+ gIndxCam).addEventListener('click',function(event){\n"
+        "        bounds=this.getBoundingClientRect();\n"
+        "        var x = Math.floor(event.pageX - bounds.left - window.scrollX);\n"
+        "        var y = Math.floor(event.pageY - bounds.top - window.scrollY);\n"
+        "        var w = Math.floor(bounds.width);\n"
+        "        var h = Math.floor(bounds.height);\n"
+        "        var qtr_x = Math.floor(bounds.width/4);\n"
+        "        var qtr_y = Math.floor(bounds.height/4);\n"
+        "        if ((x > qtr_x) && (x < (w - qtr_x)) && (y < qtr_y)) {\n"
+        "          send_action('tilt_up');\n"
+        "        } else if ((x > qtr_x) && (x < (w - qtr_x)) && (y >(h - qtr_y))) {\n"
+        "          send_action('tilt_down');\n"
+        "        } else if ((x < qtr_x) && (y > qtr_y) && (y < (h - qtr_y))) {\n"
+        "           send_action('pan_left');\n"
+        "        } else if ((x >(w - qtr_x)) && (y > qtr_y) && (y < (h - qtr_y))) {\n"
+        "           send_action('pan_right');\n"
+        "        }\n"
+        "      });\n"
+        "    }\n\n";
+}
+
+/* Create the cams_reset javascript function */
+void cls_webu_html::script_cams_reset()
+{
+    webua->resp_page +=
+        "    function cams_timer_stop() {\n"
+        "      clearInterval(cams_one_timer);\n"
+        "      clearInterval(cams_all_timer);\n"
+        "      clearInterval(cams_scan_timer);\n"
+        "    }\n\n";
+
+    webua->resp_page +=
+        "    function cams_reset() {\n"
+        "      var indx, camcnt;\n"
+        "      camcnt = pData['cameras']['count'];\n"
+        "      for (indx=0; indx<camcnt; indx++) {\n"
+        "        if (document.getElementById('pic'+indx) != null) { \n"
+        "          document.getElementById('pic'+indx).src = ''; \n"
+        "        }\n"
+        "      }\n"
+        "      document.getElementById('cfgpic').src = ''; \n"
+        "    } \n\n";
+}
+
+/* Create the cams_one_click javascript function */
+void cls_webu_html::script_cams_one_click()
+{
+    webua->resp_page +=
+        "    function cams_one_click(index_cam) {\n\n"
+        "      var html_preview = \"\";\n"
+        "      var camid;\n\n"
+        "      config_hideall();\n"
+        "      cams_timer_stop();\n"
+        "      gIndxCam = index_cam;\n\n"
+        "      gIndxScan = -1; \n\n"
+
+        "      if (gIndxCam == -1 ) {\n"
+        "        return;\n"
+        "      }\n\n"
+
+        "      camid = pData['cameras'][index_cam].id;\n"
+
+        "      if ((pData['configuration']['cam'+camid].stream_preview_ptz.value == true)) {\n"
+        "        html_preview += camera_buttons_ptz();\n"
+        "      }\n\n"
+        "      if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {\n"
+        "        html_preview += \"<a><img id='pic\" + gIndxCam + \"' src=\";\n"
+        "        html_preview += pData['cameras'][gIndxCam]['url'];\n"
+        "        html_preview += \"static/stream/t\" + new Date().getTime();\n"
+        "        html_preview += \" border=0 width=95%></a>\\n\";\n"
+        "      } else { \n"
+        "        html_preview += \"<a><img id='pic\" + gIndxCam + \"' src=\";\n"
+        "        html_preview += pData['cameras'][gIndxCam]['url'];\n"
+        "        html_preview += \"mjpg/stream\" ;\n"
+        "        html_preview += \" border=0 width=95%></a>\\n\";\n"
+        "      }\n"
+        "      document.getElementById('div_config').style.display='none';\n"
+        "      document.getElementById('div_movies').style.display = 'none';\n"
+        "      cams_reset();\n"
+        "      document.getElementById('div_cam').style.display='block';\n"
+        "      document.getElementById('div_cam').innerHTML = html_preview;\n\n"
+        "      image_pantilt();\n\n"
+        "      cams_one_timer = setInterval(cams_one_fnc, 1000);\n\n"
+        "    }\n\n";
+}
+
+/* Create the cams_all_click javascript function */
+void cls_webu_html::script_cams_all_click()
+{
+    webua->resp_page +=
+        "    function cams_all_click() {\n\n"
+        "      var html_preview = \"\";\n"
+        "      var indx, chk;\n"
+        "      var camid;\n\n"
+
+        "      config_hideall();\n"
+        "      cams_timer_stop();\n"
+        "      gIndxCam = -1;\n"
+        "      gIndxScan = -1; \n\n"
+        "      var camcnt = pData['cameras']['count'];\n"
+        "      html_preview += \"</table>\";\n"
+        "      chk = 0;\n"
+        "      for (indx=0; indx<camcnt; indx++) {\n"
+        "        camid = pData['cameras'][indx].id;\n"
+        "        if (pData['configuration']['cam'+camid].stream_preview_method.value == 'combined') {\n"
+        "          chk = 1;\n"
+        "        }\n"
+        "      }\n"
+        "      if (chk == 0) {\n"
+        "        for (indx=0; indx<camcnt; indx++) {\n"
+        "          camid = pData['cameras'][indx].id;\n"
+        "          if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {\n"
+        "            html_preview += \"<a><img id='pic\" + indx + \"' src=\"\n"
+        "            html_preview += pData['cameras'][indx]['url'];\n"
+        "            html_preview += \"static/stream/t\" + new Date().getTime();\n"
+        "            html_preview += \" onclick='cams_one_click(\" + indx + \")' \";\n"
+        "            html_preview += \" border=0 width=\";\n"
+        "            html_preview += pData['configuration']['cam'+camid].stream_preview_scale.value;\n"
+        "            html_preview += \"%></a>\\n\";\n"
+        "            if (pData['configuration']['cam'+camid].stream_preview_newline.value == true) {\n"
+        "              html_preview += \"<br>\\n\";\n"
+        "            }\n"
+        "          } else { \n"
+        "            html_preview += \"<a><img id='pic\" + indx + \"' src=\"\n"
+        "            html_preview += pData['cameras'][indx]['url'];\n"
+        "            html_preview += \"mjpg/stream\" ;\n"
+        "            html_preview += \" onclick='cams_one_click(\" + indx + \")' \";\n"
+        "            html_preview += \" border=0 width=\";\n"
+        "            html_preview += pData['configuration']['cam'+camid].stream_preview_scale.value;\n"
+        "            html_preview += \"%></a>\\n\";\n"
+        "            if (pData['configuration']['cam'+camid].stream_preview_newline.value == true) {\n"
+        "              html_preview += \"<br>\\n\";\n"
+        "            }\n"
+        "          } \n"
+        "        }\n"
+        "      } else { \n"
+        "        html_preview += \"<a><img id='picall' src=\"\n"
+        "        html_preview += pHostFull;\n"
+        "        html_preview += \"/0/mjpg/stream\" ;\n"
+        "        html_preview += \" border=0 width=95\";\n"
+        "        html_preview += \"%></a>\\n\";\n"
+        "      }\n"
+        "      document.getElementById('div_config').style.display='none';\n"
+        "      document.getElementById('div_movies').style.display = 'none';\n"
+        "      cams_reset();\n"
+        "      document.getElementById('div_cam').style.display='block';\n"
+        "      document.getElementById('div_cam').innerHTML = html_preview;\n"
+        "      if (chk == 0) {\n"
+        "        cams_all_timer = setInterval(cams_all_fnc, 1000);\n"
+        "      } else {\n"
+        "        image_picall();\n"
+        "      }\n\n"
+        "    }\n\n";
+}
+
+/* Create the movies_page javascript function */
+void cls_webu_html::script_movies_page()
+{
+    webua->resp_page +=
+        "    function movies_page() {\n\n"
+        "      var html_tab = \"<div>\";\n"
+        "      var indx, movcnt, camid, uri;\n"
+        "      var fname,fsize,fdate;\n\n"
+
+        "      if (gIndxCam == -1 ) {\n"
+        "        return;\n"
+        "      }\n\n"
+
+        "      camid = assign_camid();\n"
+        "      uri = pHostFull+'/'+camid+'/movies/';\n\n"
+
+        "      movcnt = pMovies['movies'][gIndxCam].count;\n"
+        "      html_tab +=\"<table style='color:white;' >\";\n"
+        "      html_tab +=\"  <colgroup width='20%'></colgroup>\";\n"
+        "      html_tab +=\"  <colgroup width='2%'></colgroup>\";\n"
+        "      html_tab +=\"  <colgroup width='2%'></colgroup>\";\n"
+        "      html_tab +=\"  <colgroup width='2%'></colgroup>\";\n"
+        "      html_tab +=\"  <colgroup width='2%'></colgroup>\";\n"
+        "      html_tab +=\"  <colgroup width='2%'></colgroup>\";\n"
+        "      html_tab +=\"  <colgroup width='2%'></colgroup>\";\n"
+        "      html_tab +=\"  <colgroup width='2%'></colgroup>\";\n"
+        "      html_tab +=\"  <colgroup width='2%'></colgroup>\";\n"
+
+        "      html_tab +=\"  <tr>\";\n"
+        "      html_tab +=\"    <td align='left'><b>Name</b></td>\";\n"
+        "      html_tab +=\"    <td align='left'><b>Size</b></td>\";\n"
+        "      html_tab +=\"    <td align='left'><b>Date</b></td>\";\n"
+        "      html_tab +=\"    <td align='left'><b>time</b></td>\";\n"
+        "      html_tab +=\"    <td align='left'><b>diff_avg</b></td>\";\n"
+        "      html_tab +=\"    <td align='left'><b>sdev_min</b></td>\";\n"
+        "      html_tab +=\"    <td align='left'><b>sdev_max</b></td>\";\n"
+        "      html_tab +=\"    <td align='left'><b>sdev_avg</b></td>\";\n"
+        "      html_tab +=\"    <td align='left'><b></b></td>\";\n"
+        "      html_tab +=\"  </tr>\";\n\n"
+
+        "      for (indx = 0; indx < movcnt; indx++) {\n"
+        "        fname = pMovies['movies'][gIndxCam][indx]['name'];\n"
+        "        fsize = pMovies['movies'][gIndxCam][indx]['size'];\n"
+        "        fdate = pMovies['movies'][gIndxCam][indx]['date'];\n\n"
+        "        ftime = pMovies['movies'][gIndxCam][indx]['time'];\n\n"
+        "        fdavg = pMovies['movies'][gIndxCam][indx]['diff_avg'];\n\n"
+        "        fsmin = pMovies['movies'][gIndxCam][indx]['sdev_min'];\n\n"
+        "        fsmax = pMovies['movies'][gIndxCam][indx]['sdev_max'];\n\n"
+        "        fsavg = pMovies['movies'][gIndxCam][indx]['sdev_avg'];\n\n"
+
+        "        html_tab +=\"<tr>\";\n"
+        "        html_tab +=\"  <td align='left'><a href='\"\n"
+        "        html_tab += uri + fname + \"'>\" + fname + \"</a></td>\";\n"
+
+        "        html_tab +=\"  <td align='center'>\"+fsize+\"</td>\";\n"
+        "        html_tab +=\"  <td align='center'>\"+fdate+\"</td>\";\n"
+        "        html_tab +=\"  <td align='center'>\"+ftime+\"</td>\";\n"
+        "        html_tab +=\"  <td align='center'>\"+fdavg+\"</td>\";\n"
+        "        html_tab +=\"  <td align='center'>\"+fsmin+\"</td>\";\n"
+        "        html_tab +=\"  <td align='center'>\"+fsmax+\"</td>\";\n"
+        "        html_tab +=\"  <td align='center'>\"+fsavg+\"</td>\";\n"
+
+        "        html_tab +=\"  <td align='center'> </td>\";\n"
+        "        html_tab +=\"</tr>\";\n"
+        "      }\n"
+        "      html_tab +=\"</table>\";\n"
+        "      html_tab +=\"</div>\";\n\n"
+
+        "      document.getElementById('div_config').style.display='none';\n"
+        "      document.getElementById('div_cam').style.display='none';\n"
+        "      cams_reset();\n"
+        "      document.getElementById('div_movies').style.display='block';\n"
+        "      document.getElementById('div_movies').innerHTML = html_tab;\n\n"
+        "    }\n\n";
+}
+
+/* Create the movies_page javascript function */
+void cls_webu_html::script_movies_click()
+{
+    webua->resp_page +=
+        "    function movies_click(index_cam) {\n"
+        "      var camid, indx, camcnt, uri;\n\n"
+
+        "      gIndxCam = index_cam;\n"
+        "      gIndxScan = -1; \n"
+        "      camid = assign_camid();\n"
+        "      uri = pHostFull+'/'+camid+'/movies.json';\n\n"
+        "      config_hideall();\n"
+        "      cams_reset();\n"
+        "      var xmlhttp = new XMLHttpRequest();\n"
+        "      xmlhttp.onreadystatechange = function() {\n"
+        "        if (this.readyState == 4 && this.status == 200) {\n"
+        "          pMovies = JSON.parse(this.responseText);\n"
+        "          movies_page();\n"
+        "        }\n"
+        "      };\n"
+        "      xmlhttp.open('GET', uri);\n"
+        "      xmlhttp.send();\n"
+        "    }\n\n";
+}
+
+/* Create the cams_scan_click javascript function */
+void cls_webu_html::script_cams_scan_click()
+{
+    webua->resp_page +=
+        "    function cams_scan_click() {\n\n"
+        "      cams_timer_stop();\n\n"
+        "      gIndxCam = -1; \n"
+        "      gIndxScan = 0; \n\n"
+        "      cams_scan_timer = setInterval(cams_scan_fnc, 5);\n"
+        "    }\n\n";
+}
+
+/* Create the cams_one_fnc javascript function */
+void cls_webu_html::script_cams_one_fnc()
+{
+    webua->resp_page +=
+        "    function cams_one_fnc () {\n"
+        "      var img = new Image();\n"
+        "      var camid;\n\n"
+        "      if (gIndxCam == -1 ) {\n"
+        "        return;\n"
+        "      }\n\n"
+        "      camid = pData['cameras'][gIndxCam]['id'];\n\n"
+        "      if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {\n"
+        "        pic_url[0] = pData['cameras'][gIndxCam]['url'] + \"static/stream/t\" + new Date().getTime();\n"
+        "        img.src = pic_url[0];\n"
+        "        document.getElementById('pic'+gIndxCam).src = pic_url[0];\n"
+        "      }\n"
+        "    }\n\n ";
+}
+
+/* Create the cams_all_fnc javascript function */
+void cls_webu_html::script_cams_all_fnc()
+{
+    webua->resp_page +=
+        "    function cams_all_fnc () {\n"
+        "      var previndx = gGetImgs;\n"
+        "      gGetImgs++;\n"
+        "      if (gGetImgs >= pData['cameras']['count']) {\n"
+        "        gGetImgs = 0;\n"
+        "      }\n"
+        "      camid = pData['cameras'][gGetImgs]['id'];\n"
+        "      if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {\n"
+        "        document.getElementById('pic'+previndx).src =\n"
+        "          pData['cameras'][previndx]['url'] + \"static/stream/t\" + new Date().getTime();\n"
+        "        document.getElementById('pic'+gGetImgs).src =\n"
+        "          pData['cameras'][gGetImgs]['url'] + \"mjpg/stream\";\n"
+        "      }\n"
+        "    }\n\n";
+}
+
+/* Create the scancam_function javascript function */
+void cls_webu_html::script_cams_scan_fnc()
+{
+    webua->resp_page +=
+        "    function cams_scan_fnc() {\n"
+        "      var html_preview = \"\";\n"
+        "      var camid;\n"
+        "      var camcnt = pData['cameras']['count'];\n\n"
+        "      cams_reset();\n"
+
+        "      if(gIndxScan == -1) {\n"
+        "        clearInterval(cams_scan_timer);\n"
+        "        return;\n"
+        "      }\n\n"
+
+        "      if(gIndxScan == (camcnt-1)) {\n"
+        "        gIndxScan = 0;\n"
+        "      } else { \n"
+        "        gIndxScan++;\n"
+        "      }\n\n"
+
+        "      camid = pData['cameras'][gIndxScan]['id'];\n"
+        "      clearInterval(cams_scan_timer);\n"
+
+        "      cams_scan_timer = setInterval(cams_scan_fnc,\n"
+        "        pData['configuration']['cam'+camid].stream_scan_time.value * 1000 \n"
+        "      );\n"
+
+        "      html_preview += \"<a><img id='pic0' src=\"\n"
+        "      html_preview += pData['cameras'][gIndxScan]['url'];\n"
+        "      html_preview += \"mjpg/stream\" ;\n"
+        "      html_preview += \" onclick='cams_one_click(\" + gIndxScan + \")' \";\n"
+        "      html_preview += \" border=0 width=\";\n"
+        "      html_preview += pData['configuration']['cam'+camid].stream_scan_scale.value;\n"
+        "      html_preview += \"%></a>\\n\";\n"
+        "      document.getElementById('div_config').style.display='none';\n"
+        "      document.getElementById('div_movies').style.display='none';\n"
+        "      cams_reset();\n"
+        "      document.getElementById('div_cam').style.display='block';\n"
+        "      document.getElementById('div_cam').innerHTML = html_preview;\n"
+        "    };\n\n";
+}
+
+void cls_webu_html::script_log_display()
+{
+    webua->resp_page +=
+        "    function log_display() {\n"
+        "      var itm, msg, nbr, indx, txtalog;\n"
+        "      txtalog = document.getElementById('txta_log').value;\n"
+        "      for (indx = 0; indx < 1000; indx++) {\n"
+        "        itm = pLog[indx];\n"
+        "        if (typeof(itm) != 'undefined') {\n"
+        "          msg = pLog[indx]['logmsg'];\n"
+        "          if (typeof(msg) != 'undefined') {\n"
+        "            gLogNbr = pLog[indx]['lognbr'];\n"
+        "            if (txtalog.length > 2000) {\n"
+        "              txtalog = txtalog.substring(txtalog.length - 2000);\n"
+        "              txtalog = txtalog.substring(txtalog.search('\\n'));\n"
+        "            }\n"
+        "            txtalog += '\\n' + msg;\n"
+        "          }\n"
+        "        }\n"
+        "      }\n"
+        "      document.getElementById('txta_log').enabled = true;\n"
+        "      document.getElementById('txta_log').value = txtalog;\n"
+        "      document.getElementById('txta_log').scrollTop =\n"
+        "        document.getElementById('txta_log').scrollHeight;\n"
+        "      document.getElementById('txta_log').enabled = false;\n"
+        "    }\n\n";
 
 }
 
-static void webu_html_script(struct webui_ctx *webui)
+void cls_webu_html::script_log_get()
 {
-    /* Write the javascripts */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s", "  <script>\n");
-    webu_write(webui, response);
-
-    webu_html_script_action(webui);
-
-    webu_html_script_camera(webui);
-
-    webu_html_script_cfgclk(webui);
-
-    webu_html_script_cfgchg(webui);
-
-    webu_html_script_trkclk(webui);
-
-    webu_html_script_trkchg(webui);
-
-    webu_html_script_menucam(webui);
-
-    webu_html_script_menuact(webui);
-
-    webu_html_script_evtclk(webui);
-
-    snprintf(response, sizeof (response),"%s", "  </script>\n");
-    webu_write(webui, response);
+    webua->resp_page +=
+        "    function log_get() {\n"
+        "      var xmlhttp = new XMLHttpRequest();\n"
+        "      xmlhttp.onreadystatechange = function() {\n"
+        "        if (this.readyState == 4 && this.status == 200) {\n"
+        "          pLog = JSON.parse(this.responseText);\n"
+        "          log_display();\n"
+        "        }\n"
+        "      };\n"
+        "      xmlhttp.open('GET', pHostFull+'/0/log/'+ gLogNbr);\n"
+        "      xmlhttp.send();\n"
+        "    }\n\n";
 
 }
 
-static void webu_html_body(struct webui_ctx *webui)
+void cls_webu_html::script_log_showhide()
 {
-    /* Write the body section of the form */
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s","<body class=\"body\">\n");
-    webu_write(webui, response);
-
-    webu_html_navbar(webui);
-
-    webu_html_h3desc(webui);
-
-    webu_html_config(webui);
-
-    webu_html_track(webui);
-
-    webu_html_preview(webui);
-
-    webu_html_script(webui);
-
-    snprintf(response, sizeof (response),"%s", "</body>\n");
-    webu_write(webui, response);
+    webua->resp_page +=
+        "    function log_showhide() {\n"
+        "      if (document.getElementById('div_log').style.display == 'none') {\n"
+        "        document.getElementById('div_log').style.display='block';\n"
+        "        document.getElementById('txta_log').value = '';\n"
+        "        log_timer = setInterval(log_get, 2000);\n"
+        "      } else {\n"
+        "        document.getElementById('div_log').style.display='none';\n"
+        "        document.getElementById('txta_log').value = '';\n"
+        "        clearInterval(log_timer);\n"
+        "      }\n"
+        "    }\n\n";
 
 }
 
-static void webu_html_page(struct webui_ctx *webui)
+/* Call all the functions to create the java scripts of page*/
+void cls_webu_html::script()
 {
-    /* Write the main page html */
-    char response[WEBUI_LEN_RESP];
+    webua->resp_page += "  <script>\n"
+        "    var pData, pMovies, pHostFull;\n"
+        "    var gIndxScan, gIndxCam, gGetImgs, gLogNbr;\n"
+        "    var pic_url = Array(4);\n"
+        "    var log_timer;\n"
+        "    var cams_scan_timer, cams_all_timer, cams_one_timer;\n\n";
 
-    snprintf(response, sizeof (response),
-        "<!DOCTYPE html>\n"
-        "<html lang=\"%s\">\n",webui->lang);
-    webu_write(webui, response);
+    script_nav();
 
-    webu_html_head(webui);
+    script_send_config();
+    script_send_action();
+    script_send_reload();
 
-    webu_html_body(webui);
+    script_dropchange_cam();
+    script_config_hideall();
+    script_config_click();
 
-    snprintf(response, sizeof (response),"%s", "</html>\n");
-    webu_write(webui, response);
+    script_assign_camid();
+    script_assign_version();
+    script_assign_cams();
+    script_assign_actions();
+    script_assign_vals();
+    script_assign_config_nav();
+    script_assign_config_item();
+    script_assign_config_cat();
+    script_assign_config();
 
+    script_initform();
+    script_display_cameras();
+    script_display_config();
+    script_display_movies();
+    script_display_actions();
+
+    script_camera_buttons_ptz();
+    script_image_picall();
+    script_image_pantilt();
+
+    script_cams_reset();
+
+    script_cams_all_click();
+    script_cams_one_click();
+    script_cams_scan_click();
+
+    script_cams_one_fnc();
+    script_cams_all_fnc();
+    script_cams_scan_fnc();
+
+    script_movies_page();
+    script_movies_click();
+
+    script_log_display();
+    script_log_get();
+    script_log_showhide();
+
+    webua->resp_page += "  </script>\n\n";
 }
 
-void webu_html_badreq(struct webui_ctx *webui)
+/* Create the body section of the web page */
+void cls_webu_html::body()
 {
+    webua->resp_page += "<body class='body' onload='initform()'>\n";
 
-    char response[WEBUI_LEN_RESP];
+    navbar();
 
-    snprintf(response, sizeof (response),"%s",
-        "<!DOCTYPE html>\n"
-        "<html>\n"
-        "<body>\n"
-        "<p>Bad Request</p>\n"
-        "<p>The server did not understand your request.</p>\n"
-        "</body>\n"
-        "</html>\n");
-    webu_write(webui, response);
+    divmain();
 
-    return;
+    script();
 
+    webua->resp_page += "</body>\n";
 }
 
-void webu_html_main(struct webui_ctx *webui)
+void cls_webu_html::default_page()
 {
+    webua->resp_page += "<!DOCTYPE html>\n"
+        "<html lang='" + webua->lang + "'>\n";
+    head();
+    body();
+    webua->resp_page += "</html>\n";
+}
 
-    /* Note some detection and config requested actions call the
-     * action function.  This is because the legacy interface
-     * put these into those pages.  We put them together here
-     * based upon the structure of the new interface
-     */
+void cls_webu_html::user_page()
+{
+    char response[PATH_MAX];
+    FILE *fp = NULL;
 
-    int retcd;
-
-    retcd = 0;
-    if (strlen(webui->uri_camid) == 0){
-        webu_html_page(webui);
-
-    } else if ((mystreq(webui->uri_cmd1,"config")) &&
-               (mystreq(webui->uri_cmd2,"write"))) {
-        webu_process_action(webui);
-
-    } else if (mystreq(webui->uri_cmd1,"config")) {
-        retcd = webu_process_config(webui);
-
-    } else if (mystreq(webui->uri_cmd1,"action")) {
-        webu_process_action(webui);
-
-    } else if (mystreq(webui->uri_cmd1,"detection")) {
-        webu_process_action(webui);
-
-    } else if (mystreq(webui->uri_cmd1,"track")) {
-        retcd = webu_process_track(webui);
-
-    } else{
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
-            _("Invalid action requested: >%s< >%s< >%s<")
-            ,webui->uri_camid, webui->uri_cmd1, webui->uri_cmd2);
-        retcd = -1;
+    webua->resp_page = "";
+    fp = myfopen(app->cfg->webcontrol_html.c_str(), "re");
+    if (fp == NULL) {
+        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            , _("Invalid user html file: %s")
+            , app->cfg->webcontrol_html.c_str());
+    } else {
+        while (fgets(response, PATH_MAX-1, fp)) {
+            webua->resp_page += response;
+        }
+        myfclose(fp);
     }
+}
 
-    if (retcd < 0) {
-        webu_html_badreq(webui);
+void cls_webu_html::main()
+{
+    pthread_mutex_lock(&app->mutex_post);
+        if (app->cfg->webcontrol_interface == "user") {
+            user_page();
+        } else {
+            default_page();
+        }
+    pthread_mutex_unlock(&app->mutex_post);
+
+    if (webua->resp_page == "") {
+        webua->bad_request();
+    } else {
+        webua->mhd_send();
     }
+}
 
-    return;
+cls_webu_html::cls_webu_html(cls_webu_ans *p_webua)
+{
+    app    = p_webua->app;
+    webu   = p_webua->webu;
+    webua  = p_webua;
+}
+
+cls_webu_html::~cls_webu_html()
+{
+    app    = nullptr;
+    webu   = nullptr;
+    webua  = nullptr;
 }
