@@ -1,0 +1,3123 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta charset="UTF-8">
+  <link href="motion.png" rel="icon" type="image/png">
+  <title>Motion</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="motion_stylesheet.css" media="screen">
+  <script>
+    function fnc_topnav() {
+      var x = document.getElementById("id_topnav");
+      if (x.className === "topnav") {
+          x.className += " responsive";
+      } else {
+          x.className = "topnav";
+      }
+    }
+    function fnc_subnav() {
+      var x = document.getElementById("id_subnav");
+      if (x.className === "subnav") {
+          x.className += " responsive";
+      } else {
+          x.className = "subnav";
+      }
+    }
+  </script>
+</head>
+
+<body>
+   <div class="topnav" id="id_topnav">
+      <img class="logoimg" src="motion.gif">
+
+      <a class="topnav-d" href="https://motion-project.github.io/motion_support.html">Support</a>
+      <a class="topnav-d" href="https://motion-project.github.io/motion_news.html" >News</a>
+      <a class="topnav-d" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+      <a class="topnav-d" href="https://motion-project.github.io/motion_download.html">Download</a>
+      <a class="topnav-d" href="https://motion-project.github.io/index.html">Home</a>
+
+      <a class="topnav-m" href="https://motion-project.github.io/index.html">Home</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_download.html">Download</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_news.html" >News</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_support.html">Support</a>
+
+      <a href="javascript:void(0);" class="icon" onclick="fnc_topnav()">&#9776;</a>
+    </div>
+
+  <section class="page-header">
+    <h1>
+    Configuration
+    </h1>
+  </section>
+
+  <div class="subnav" id="id_subnav">
+    <div class="dropdown">
+      <button class="dropbtn">General/Cameras</button>
+      <div class="dropdown-content">
+        <a href="#OptTopic_System_Processing">System Processing</a>
+        <a href="#conversion_specifiers">Conversion Specifiers</a>
+        <a href="#OptDetail_Camera_Parameters" >General Device Parameters</a>
+        <a href="#OptTopic_Devices">Camera Source Parameters</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Processing/Output</button>
+      <div class="dropdown-content">
+        <a href="#OptTopic_Image_Processing">Image Processing</a>
+        <a href="#OptTopic_Motion_Detection">Motion Detection</a>
+        <a href="#OptTopic_Scripts">Script Execution</a>
+        <a href="#OptTopic_Pictures">Pictures</a>
+        <a href="#OptTopic_Movies">Movies</a>
+        <a href="#OptTopic_Pipe">Pipe Output</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Webcontrol/Other</button>
+      <div class="dropdown-content">
+        <a href="#OptTopic_Webcontrol">Webcontrol</a>
+        <a href="#OptTopic_Stream">Live Stream</a>
+        <a href="#OptTopic_Database">Database Options</a>
+        <a href="#OptTopic_Tracking">Tracking Options</a>
+        <a href="#OptTopic_Sound">Sound Options</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Commands/Files</button>
+      <div class="dropdown-content">
+        <a href="#command_line_options">Command Line</a>
+        <a href="#config_files">Configuration Files </a>
+        <a href="#signals">Signals</a>
+      </div>
+    </div>
+
+    <a href="javascript:void(0);" class="icon" onclick="fnc_subnav()">menu&#8659;&nbsp&nbsp  </a>
+  </div>
+
+  <section class="main-content">
+
+    <h2><a name="Configuration_OptionsTopic"></a>  Configuration Options-Listed by Topic </h2>
+    <ul>
+      <p></p>
+      Configuration options sorted by topic.
+      <p></p>
+      <p></p>
+
+      <a name="OptTopic_System_Processing" ></a>
+      <a href="#OptDetail_System_Processing" >System Processing-General Info</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#daemon" >daemon</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#pid_file" >pid_file</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#log_file" >log_file</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#log_level" >log_level</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#log_fflevel" >log_fflevel</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#log_type" >log_type</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#native_language" >native_language</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#target_dir" >target_dir</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Camera_Parameters" ></a>
+      <a href="#OptDetail_Camera_Parameters" >General Device Parameters</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#device_name" >device_name</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#device_id" >device_id</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#device_tmo" >device_tmo</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#pause" >pause</a> </td>
+            </tr>
+              <td bgcolor="#edf4f9" ><a href="#schedule_params" >schedule_params</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#cleandir_params" >cleandir_params</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#watchdog_tmo" >watchdog_tmo</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#watchdog_kill" >watchdog_kill</a> </td>
+            <tr>
+            </tr>
+              <td bgcolor="#edf4f9" ><a href="#camera" >camera</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#config_dir" >config_dir</a> </td>
+            <tr>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Devices" ></a>
+      <a href="#OptDetail_Devices" >Camera Source Parameters</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#v4l2_device" >v4l2_device</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#v4l2_params" >v4l2_params</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#libcam_device" >libcam_device</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#libcam_params" >libcam_params</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#netcam_url" >netcam_url</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_params" >netcam_params</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_high_url" >netcam_high_url</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_high_params" >netcam_high_params</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#netcam_userpass" >netcam_userpass</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Image_Processing" ></a>
+      <a href="#OptDetail_Image_Processing" >Image Processing-General Info</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#width" >width</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#height" >height</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#framerate" >framerate</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#text_event" >text_event</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#rotate" >rotate</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#flip_axis" >flip_axis</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#locate_motion_mode" >locate_motion_mode</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#locate_motion_style" >locate_motion_style</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#text_left" >text_left</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#text_right" >text_right</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#text_changes" >text_changes</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#text_scale" >text_scale</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Motion_Detection" ></a>
+      <a href="#OptDetail_Motion_Detection" >Motion Detection-General Info</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#emulate_motion" >emulate_motion</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#threshold" >threshold</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#threshold_maximum" >threshold_maximum</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#threshold_tune" >threshold_tune</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#threshold_sdevx" >threshold_sdevx</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#threshold_sdevy" >threshold_sdevy</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#threshold_sdevxy" >threshold_sdevxy</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#threshold_ratio" >threshold_tune</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#threshold_ratio_change" >threshold_ratio_change</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#secondary_method" >secondary_method</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#secondary_params" >secondary_params</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#noise_level" >noise_level</a> </td>
+            </tr>
+
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#noise_tune" >noise_tune</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#despeckle_filter" >despeckle_filter</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#area_detect" >area_detect</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#mask_file" >mask_file</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#mask_privacy" >mask_privacy</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#smart_mask_speed" >smart_mask_speed</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#lightswitch_percent" >lightswitch_percent</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#lightswitch_frames" >lightswitch_frames</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#minimum_motion_frames" >minimum_motion_frames</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#event_gap" >event_gap</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#pre_capture" >pre_capture</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#post_capture" >post_capture</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#static_object_time" >static_object_time</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Scripts" ></a>
+      <a href="#OptDetail_Scripts" >Script Execution-General Info</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#on_event_start" >on_event_start</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_event_end" >on_event_end</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_picture_save" >on_picture_save</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_motion_detected" >on_motion_detected</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#on_area_detected" >on_area_detected</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_movie_start" >on_movie_start</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_movie_end" >on_movie_end</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_camera_lost" >on_camera_lost</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#on_camera_found" >on_camera_found</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_secondary_detect" >on_secondary_detect</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_action_user" >on_action_user</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_sound_alert" >on_sound_alert</a> </td>
+
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Pictures" ></a>
+      <a href="#OptDetail_Pictures" >Pictures-General Info</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#picture_output" >picture_output</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#picture_output_motion" >picture_output_motion</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#picture_type" >picture_type</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#picture_quality" >picture_quality</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#picture_exif" >picture_exif</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#picture_filename" >picture_filename</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#snapshot_interval" >snapshot_interval</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#snapshot_filename" >snapshot_filename</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Movies" ></a>
+      <a href="#OptDetail_Movies" >Movies-General Info</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#movie_output" >movie_output</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_output_motion" >movie_output_motion</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_max_time" >movie_max_time</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_bps" >movie_bps</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#movie_quality" >movie_quality</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_container" >movie_container</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_retain" >movie_retain</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_passthrough" >movie_passthrough</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#movie_filename" >movie_filename</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_extpipe_use" >movie_extpipe_use</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_extpipe" >movie_extpipe</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_filename" >timelapse_filename</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_interval" >timelapse_interval</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_mode" >timelapse_mode</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_container" >timelapse_container</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_fps" >timelapse_fps</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Pipe" ></a>
+      <a href="#OptDetail_Pipe" >Pipes-General Info</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#video_pipe" >video_pipe</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#video_pipe_motion" >video_pipe_motion</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Webcontrol" ></a>
+      <a href="#OptDetail_Webcontrol" >Webcontrol-General Info</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_port2" >webcontrol_port2</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_ipv6" >webcontrol_ipv6</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_parms" >webcontrol_parms</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_interface" >webcontrol_interface</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_auth_method" >webcontrol_auth_method</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_tls" >webcontrol_tls</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_cert" >webcontrol_cert</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_key" >webcontrol_key</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_headers" >webcontrol_headers</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_actions" >webcontrol_actions</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_html" >webcontrol_html</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_base_path" >webcontrol_base_path</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_attempts" >webcontrol_lock_attempts</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_minutes" >webcontrol_lock_minutes</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_script" >webcontrol_lock_script</a> </td>
+            </tr>
+            </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Stream" ></a>
+      <a href="#OptDetail_Stream" >Live Stream-General Info</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#stream_preview_scale" >stream_preview_scale</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_preview_newline" >stream_preview_newline</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_preview_params" >stream_preview_params</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_preview_method" >stream_preview_method</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#stream_preview_ptz" >stream_preview_ptz</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_quality" >stream_quality</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_grey" >stream_grey</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_maxrate" >stream_maxrate</a> </td>
+            </tr>
+           <tr>
+              <td bgcolor="#edf4f9" ><a href="#stream_motion" >stream_motion</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_scan_time" >stream_scan_time</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_scan_scale" >stream_scan_scale</a> </td>
+           </tr>
+           </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Database" ></a>
+      <a href="#OptDetail_Database" >Database-General Info</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#database_type" >database_type</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#database_dbname" >database_dbname</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#database_host" >database_host</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#database_port" >database_port</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#database_user" >database_user</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#database_password" >database_password</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#database_busy_timeout" >database_busy_timeout</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#sql_event_end" >sql_event_end</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#sql_event_start" >sql_event_start</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#sql_movie_end" >sql_movie_end</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#sql_movie_start" >sql_movie_start</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#sql_pic_save" >sql_pic_save</a> </td>
+            </tr>
+           </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Tracking" ></a>
+      <a href="#OptDetail_Tracking" >Tracking-General Info</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#ptz_auto_track" >ptz_auto_track</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#ptz_wait" >ptz_wait</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#ptz_move_track" >ptz_move_track</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#ptz_pan_left" >ptz_pan_left</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#ptz_pan_right" >ptz_pan_right</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#ptz_tilt_up" >ptz_tilt_up</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#ptz_tilt_down" >ptz_tilt_down</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#ptz_zoom_in" >ptz_zoom_in</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#ptz_zoom_out" >ptz_zoom_out</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Sound" ></a>
+      <a href="#OptDetail_Sound" >Sound Detection</a>
+      <ul>
+        <table class="tbldetail" border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#snd_device" >snd_device</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#snd_params" >snd_params</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#snd_alerts" >snd_alerts</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#snd_window" >snd_window</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#snd_show" >snd_show</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <p></p>
+     </ul>
+
+    <h2><a name="Configuration_OptionsDetail"></a>  Configuration Options-Detail Descriptions </h2>
+    <ul>
+      <p></p>
+      <p></p>
+      The following section provides detailed descriptions of each of the configuration options.
+      <p></p>
+
+      <h3><a name="conversion_specifiers"></a>Conversion Specifiers</h3>
+      <ul>
+        <div class="tblconvr">
+        <table border="1" class="fixed" >
+          <colgroup>
+            <col width="50px">
+            <col width="300px">
+            <col width="50px">
+            <col width="300px">
+            <col width="50px">
+            <col width="300px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" >%Y </a> </td>
+              <td bgcolor="#edf4f9" >year</a> </td>
+              <td bgcolor="#edf4f9" >%m  </a> </td>
+              <td bgcolor="#edf4f9" >month</a> </td>
+              <td bgcolor="#edf4f9" >%d   </a> </td>
+              <td bgcolor="#edf4f9" >day</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" >%H   </a> </td>
+              <td bgcolor="#edf4f9" >hour</a> </td>
+              <td bgcolor="#edf4f9" >%M   </a> </td>
+              <td bgcolor="#edf4f9" >minute</a> </td>
+              <td bgcolor="#edf4f9" >%S   </a> </td>
+              <td bgcolor="#edf4f9" >second</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" >%T   </a> </td>
+              <td bgcolor="#edf4f9" >HH:MM:SS </a> </td>
+              <td bgcolor="#edf4f9" >%v   </a> </td>
+              <td bgcolor="#edf4f9" >event</a> </td>
+              <td bgcolor="#edf4f9" >%q    </a> </td>
+              <td bgcolor="#edf4f9" >frame number</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" >%t</a> </td>
+              <td bgcolor="#edf4f9" >device id number</a> </td>
+              <td bgcolor="#edf4f9" >%D </a> </td>
+              <td bgcolor="#edf4f9" >changed pixels</a> </td>
+              <td bgcolor="#edf4f9" >%N </a> </td>
+              <td bgcolor="#edf4f9" >noise level</a> </td>
+             </tr>
+             <tr>
+               <td bgcolor="#edf4f9" >%w </a> </td>
+               <td bgcolor="#edf4f9" >width of the image</a> </td>
+               <td bgcolor="#edf4f9" >%h </a> </td>
+               <td bgcolor="#edf4f9" >height of the image</a> </td>
+               <td bgcolor="#edf4f9" >%i </a> </td>
+               <td bgcolor="#edf4f9" >width of motion area</a> </td>
+             </tr>
+             <tr>
+               <td bgcolor="#edf4f9" >%J  </a> </td>
+               <td bgcolor="#edf4f9" >height of motion area</a> </td>
+               <td bgcolor="#edf4f9" >%K   </a> </td>
+               <td bgcolor="#edf4f9" >X coordinates of motion center</a> </td>
+               <td bgcolor="#edf4f9" >%L  </a> </td>
+               <td bgcolor="#edf4f9" >Y coordinates of motion center</a> </td>
+             </tr>
+             <tr>
+               <td bgcolor="#edf4f9" >%C   </a> </td>
+               <td bgcolor="#edf4f9" >value defined by text_event</a> </td>
+               <td bgcolor="#edf4f9" >%f</a> </td>
+               <td bgcolor="#edf4f9" >filename with full path</a> </td>
+               <td bgcolor="#edf4f9" >%n   </a> </td>
+               <td bgcolor="#edf4f9" >number indicating filetype</a> </td>
+             </tr>
+             <tr>
+               <td bgcolor="#edf4f9" >%o</a> </td>
+               <td bgcolor="#edf4f9" >threshold</a> </td>
+               <td bgcolor="#edf4f9" >%Q</a> </td>
+               <td bgcolor="#edf4f9" >Number of labels from despeckle</a> </td>
+               <td bgcolor="#edf4f9" >%{eventid}</a> </td>
+               <td bgcolor="#edf4f9" >Unique identifier for event (cam id + date/time)</a> </td>
+             </tr>
+             <tr>
+               <td bgcolor="#edf4f9" >%$</a> </td>
+               <td bgcolor="#edf4f9" >device name</a> </td>
+               <td bgcolor="#edf4f9" >%{fps}</a> </td>
+               <td bgcolor="#edf4f9" >current frames per second</a> </td>
+               <td bgcolor="#edf4f9" >%{host}</a> </td>
+               <td bgcolor="#edf4f9" >name of computer running Motion</a> </td>
+             </tr>
+             <tr>
+               <td bgcolor="#edf4f9" >%{ver}</a> </td>
+               <td bgcolor="#edf4f9" >version of Motion</a> </td>
+               <td bgcolor="#edf4f9" >%{trig_nbr}</a> </td>
+               <td bgcolor="#edf4f9" >sound alert number that was triggered</a> </td>
+               <td bgcolor="#edf4f9" >%{trig_nm}</a> </td>
+               <td bgcolor="#edf4f9" >sound alert name that was triggered</a> </td>
+             </tr>
+             <tr>
+               <td bgcolor="#edf4f9" >%{trig_freq}</a> </td>
+               <td bgcolor="#edf4f9" >frequency that triggered the sound alert</a> </td>
+             </tr>
+
+            </tbody>
+        </table>
+        </div>
+        <p></p>
+        The use of quotation marks around string is permitted.  In addition to the above, the conversion
+        specifiers include the same options as for the C function strftime (3).
+        <p></p>
+      </ul>
+
+      <h3><a name="OptDetail_System_Processing"></a>System Processing</h3>
+      <ul>
+        <p></p>
+        <h3><a name="daemon"></a> daemon </h3>
+        <ul>
+          <li> Values: on, off | Default: off</li>
+          Run in daemon mode.  When running Motion under systemd specify as off.
+        </ul>
+        <p></p>
+
+        <h3><a name="pid_file"></a> pid_file </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and name of the process id file.
+        </ul>
+        <p></p>
+
+        <h3><a name="log_file"></a> log_file </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and name for the log file. When not specified, use syslog.
+        </ul>
+        <p></p>
+
+        <h3><a name="log_level"></a> log_level </h3>
+        <ul>
+          <li> Values: 1 - 9 | Default: 6</li>
+          Verbosity level(EMR, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL) of messages.
+          <br>
+          At the DBG Level(8) and higher:
+          <br>Additional values related to the trigger,
+          motion, precap and postcap are overlayed on the images.
+          <br>Additional information regarding the available parameters to libcamera are
+          printed to the log.
+          <br>Additional information regarding the available parameters to v4l2 devices is
+          printed to the log.
+          <br>
+          If a secondary detection algorithms is specified:
+          <br>
+          The image sent to the secondary algorithm for detection will
+          be saved to the target directory with the name src_"algorithm".jpg
+          e.g. src_haar.jpg
+          <br>
+          If the secondary algorithm is triggered by the image, the resulting
+          image will be saved into the target directory with the name
+          detect_"algorithm".jpg e.g. detect_haar.jpg
+        </ul>
+        <p></p>
+
+       <h3><a name="log_fflevel"></a> log_fflevel </h3>
+        <ul>
+          <li> Values: 1 - 9 | Default: 3</li>
+          Verbosity level of ffmpeg messages.
+          <br>
+            <ul>
+              <li>1 = AV_LOG_QUIET</li>
+              <li>2 = AV_LOG_PANIC</li>
+              <li>3 = AV_LOG_FATAL</li>
+              <li>4 = AV_LOG_ERROR</li>
+              <li>5 = AV_LOG_WARNING</li>
+              <li>6 = AV_LOG_INFO</li>
+              <li>7 = AV_LOG_VERBOSE</li>
+              <li>8 = AV_LOG_DEBUG</li>
+              <li>9 = AV_LOG_TRACE</li>
+            </ul>
+        </ul>
+        <p></p>
+
+        <h3><a name="log_type"></a> log_type </h3>
+        <ul>
+          <li> Values: COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL | Default: ALL</li>
+          The component for which to log messages.
+        </ul>
+        <p></p>
+
+        <h3><a name="native_language"></a> native_language</h3>
+        <ul>
+          <li> Values: on, off | Default: on</li>
+          Enable native language messages.
+        </ul>
+        <p></p>
+
+        <h3><a name="target_dir"></a> target_dir </h3>
+        <ul>
+          <li> Values: String | Default: current directory</li>
+          The full path for the target directory for pictures, snapshots, movies, etc. to be saved.
+        </ul>
+        <p></p>
+
+        <h3><a name="device_name"></a> device_name </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+         The device name to be used in the format specifiers and web interface.
+        </ul>
+        <p></p>
+
+        <h3><a name="device_id"></a> device_id </h3>
+        <ul>
+          <li> Values: 1 - 32000 | Default: The sequence that the device file is read</li>
+          Unique numeric id for the device.
+        </ul>
+        <p></p>
+
+        <h3><a name="device_tmo"></a>device_tmo</h3>
+        <ul>
+          <li> Values: Integer | Default: 30 </li>
+          Number of seconds that elapse before the device is deemed to be lost.
+        </ul>
+        <p></p>
+
+        <h3><a name="pause"></a>pause</h3>
+        <ul>
+          <li> Values: Boolean | Default: false </li>
+          <li> Values: on, off, schedule | Default: schedule</li>
+          Use 'on' and 'off' to pause or enable motion detection respectively.  Use
+          'schedule' to allow the schedule process to pause or enable detection.
+        </ul>
+        <p></p>
+
+        <h3><a name="schedule_params"></a>schedule_params</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters.  Format is: option=value,option2=value2
+        </ul>
+        <ul>
+          <p></p>
+          This parameter specifies the time of the day that Motion will perform
+          motion detection.  To use this, the pause parameter must be set to schedule.
+          <p></p>
+
+          <div>
+            <i><h4>default</h4></i>
+            Boolean specifying the default for the motion detection.  The times specified for the
+            other parameters will then indicate the times for the inverse of this option.  For
+            example, if the default is specified as <code><small>on</small></code>, then motion
+            detection will be on by default and the times specified will have motion detection
+            turned off.  And if the default is specified as <code><small>off</small></code> the
+            times specified would indicate when motion detection would be on.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>action</h4></i>
+            This parameter has the option values of <code><small>pause</small></code> or
+            <code><small>stop</small></code>.  When the <code><small>pause</small></code> value
+            is specified the motion detection is paused and the camera will continue to process
+            images.  This will allow the webcontrol to continue to show
+            images.  When this option is specified as <code><small>stop</small></code>, the
+            camera will be shut down and therefore images will not be available via the
+            webcontrol.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>sun, mon, tue, wed, thu, fri, sat</h4></i>
+            These parameters specify the day and the values specify the time period.  The
+            time period is specified in the format <code><small>hhmm-hhmm</small></code> where
+            the first <code><small>hhmm</small></code> specifies the start time and the
+            second <code><small>hhmm</small></code> is the end time.  If the hours or minutes is
+            less than 10, leading zeros must be included.  Each time value is also inclusive meaning
+            that the criteria is greater than or equal or less than or equal.  For multiple
+            time periods during the same day specify the parameter multiple times.  For example,
+            <code><small>wed=0905-1130,wed=1330-1605</small></code>.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4> params_file </h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+              Full path and file name for a file containing the params listed one per line.
+            </ul>
+          </div>
+          <p></p>
+
+         </ul>
+        <p></p>
+
+        <h3><a name="cleandir_params"></a>cleandir_params</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters.  Format is: option=value,option2=value2
+        </ul>
+        <ul>
+          <p></p>
+          This parameter specifies the information used for purging older recording and pictures created by Motion.  This option
+          is only applicable if a database has been specified.  The default for this parameter is an empty string which means that
+          no clean directory actions will be performed.
+          <p></p>
+
+          <div>
+            <i><h4>action</h4></i>
+            String specifying either <code><small>delete</small></code> or <code><small>script</small></code>.  If the option
+            of <code><small>script</small></code> is specified, then the provided script will be executed at the specified
+            interval.  If the option of <code><small>delete</small></code> is specified, then all files that were created
+            by Motion will be deleted from the system according to the schedule.  The default for this
+            parameter is <code><small>delete</small></code>
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>freq</h4></i>
+            This parameter specifies the frequency that the clean directory will be run.  Valid options for this parameter
+            are <code><small>hourly</small></code>, <code><small>daily</small></code> or <code><small>weekly</small></code>.
+            The default value for this parameter is <code><small>weekly</small></code>.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>runtime</h4></i>
+            This parameter specifies the timing for running the clean directory actions.  The format of this value
+            varies depending upon the frequency specified.
+            <ul>
+              <li><code><small>hourly</small></code> | Specify the minute of the hour using the format mm. e.g. 05 for 5 minutes past each hour</li>
+              <li><code><small>daily</small></code> | Specify the hour and minute using the format hhmm. e.g. 1420 for 2:20pm</li>
+              <li><code><small>weekly</small></code> | Specify the day, hour and minute using the format dow-hhmm. e.g. tue-1420 for Tuesdays at 2:20pm</li>
+            </ul>
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>dur_unit</h4></i>
+            This parameter specifies the unit of duration for the criteria used to select files.  Valid options for this parameter
+            are <code><small>m</small></code>, <code><small>h</small></code>,<code><small>d</small></code> or <code><small>w</small></code>. For
+            minutes, hours, days or weeks. The default value for this parameter is <code><small>d</small></code>.  As an
+            example, if the <code><small>dur_unit=d</small></code>
+            and the <code><small>dur_val=7</small></code> then all files older than 7 days would be deleted.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>dur_val</h4></i>
+            This parameter specifies the number associated with the duration units for the criteria used to select files.
+            The default value for this parameter is <code><small>7</small></code>.  As an example, if the <code><small>dur_unit=d</small></code>
+            and the <code><small>dur_val=7</small></code> then all files older than 7 days would be deleted.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>removedir</h4></i>
+            This parameter is a boolean that specifies whether the associated directory (only one level up) should be
+            removed if there are no longer any files in it after the clean process has run. If there are other files
+            in the directory that are not created by Motion, then the directory will not be removed.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>script</h4></i>
+            This parameter specifies the full path to a script to run at the scheduled time.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4> params_file </h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+              Full path and file name for a file containing the params listed one per line.
+            </ul>
+          </div>
+          <p></p>
+
+         </ul>
+        <p></p>
+
+        <h3><a name="watchdog_tmo"></a>watchdog_tmo</h3>
+        <ul>
+          <li> Values: Integer | Default: 90 </li>
+          Number of seconds that elapse before a camera is deemed to be unresponsive and Motion triggers
+          a watchdog timeout and begins to force the camera to shut down.  When camera is initially starting, the
+          timeout is set to three(3) times this value.
+        </ul>
+        <p></p>
+
+        <h3><a name="watchdog_kill"></a>watchdog_kill</h3>
+        <ul>
+          <li> Values: Integer | Default: 0 </li>
+          Specifying a value of zero indicates that Motion will completely terminate after the watchdog_tmo.
+          Values greater than zero represent the number of additional seconds after the watchdog_tmo Motion will wait
+          until camera processes are forcefully terminated.  Forceful termination of camera processes will result in memory
+          leaks and detrimental effects therefore the default is to completely terminate the application let external processes
+          such as systemctl or cron jobs restart Motion.
+        </ul>
+        <p></p>
+
+        <h3><a name="camera"></a> camera </h3>
+        <p></p>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name with the configuration parameters for the individual camera.
+        </ul>
+        <p></p>
+
+        <h3><a name="config_dir"></a> config_dir </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          Directory containing individual device configuration files.  Any files ending in '.conf' in
+          the directory will be read as a device configuration file.
+        </ul>
+        <p></p>
+
+      </ul>
+
+      <h3><a name="OptDetail_Devices"></a>Devices</h3>
+      <ul>
+        <h3><a name="v4l2_device"></a>v4l2_device</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined </li>
+          The v4l2 device to be used for capturing.
+        </ul>
+        <p></p>
+
+        <h3><a name="v4l2_params"></a>v4l2_params</h3>
+        <p></p>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters (aka controls) for the v4l2 device.
+        </ul>
+        <p></p>
+
+       <ul>
+          <p></p>
+          The configuration parameters for v4l2_params are specified by name or ID.  They may also be
+          enclosed in double quotes. Review the Motion log with log_level 8 to see the options that
+          are applicable to the device.  The following is a sample output from the log and
+          examples of how to specify the parameters
+          <p></p>
+          <div>
+          <ul style="list-style: none;">
+            <li>Log: [INF][VID][01:ml01:cam01] v4l2_ctrls_log: ID09963776 : Brightness : 0 to 255</li>
+            <p></p>
+            <li>Example 1:<code>v4l2_params Brightness=130,palette=15</code></li>
+            <li>Example 2:<code>v4l2_params "Brightness"=130,palette=15</code></li>
+            <li>Example 3:<code>v4l2_params ID09963776=130,palette=15</code></li>
+          </ul>
+          </div>
+          <p></p>
+          Additional Motion specific options for v4l2_params are listed below.
+        </ul>
+
+        <ul>
+        <i><h4> palette </h4></i>
+        <div>
+          <ul>
+            <li> Values: 0 - 20 | Default: 17</li>
+            Preferred color palette for Motion to use for the device.  See table below for the meaning of
+            each parameter number value.
+            <div class="tblpaltte">
+            <table border="1" class="fixed" >
+              <colgroup>
+                  <col width="250px">
+                  <col width="200px">
+                  <col width="200px">
+              </colgroup>
+              <tbody>
+                <tr>
+                  <td bgcolor="#edf4f9" align="center" > V4l2 Option</td>
+                  <td bgcolor="#edf4f9" align="center" > FOURCC</td>
+                  <td bgcolor="#edf4f9" align="center" > palette option </td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SN9C10X</td>
+                  <td bgcolor="#edf4f9" align="center" >S910</td>
+                  <td bgcolor="#edf4f9" align="center" >0</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SBGGR16</td>
+                  <td bgcolor="#edf4f9" align="center" >BYR2</td>
+                  <td bgcolor="#edf4f9" align="center" >1</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SBGGR8</td>
+                  <td bgcolor="#edf4f9" align="center" >BA81</td>
+                  <td bgcolor="#edf4f9" align="center" >2</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SPCA561</td>
+                  <td bgcolor="#edf4f9" align="center" >S561</td>
+                  <td bgcolor="#edf4f9" align="center" >3</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SGBRG8</td>
+                  <td bgcolor="#edf4f9" align="center" >GBRG</td>
+                  <td bgcolor="#edf4f9" align="center" >4</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SGRBG8</td>
+                  <td bgcolor="#edf4f9" align="center" >GRBG</td>
+                  <td bgcolor="#edf4f9" align="center" >5</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_PAC207</td>
+                  <td bgcolor="#edf4f9" align="center" >P207</td>
+                  <td bgcolor="#edf4f9" align="center" >6</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_PJPG</td>
+                  <td bgcolor="#edf4f9" align="center" >PJPG</li>
+                  <td bgcolor="#edf4f9" align="center" >7</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_MJPEG</td>
+                  <td bgcolor="#edf4f9" align="center" >MJPG</li>
+                  <td bgcolor="#edf4f9" align="center" >8</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_JPEG</td>
+                  <td bgcolor="#edf4f9" align="center" >JPEG</li>
+                  <td bgcolor="#edf4f9" align="center" >9</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_RGB24</td>
+                  <td bgcolor="#edf4f9" align="center" >RGB3</li>
+                  <td bgcolor="#edf4f9" align="center" >10</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA501</td>
+                  <td bgcolor="#edf4f9" align="center" >S501</li>
+                  <td bgcolor="#edf4f9" align="center" >11</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA505</td>
+                  <td bgcolor="#edf4f9" align="center" >S505</li>
+                  <td bgcolor="#edf4f9" align="center" >12</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA508</td>
+                  <td bgcolor="#edf4f9" align="center" >S508</li>
+                  <td bgcolor="#edf4f9" align="center" >13</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_UYVY</td>
+                  <td bgcolor="#edf4f9" align="center" >UYVY</li>
+                  <td bgcolor="#edf4f9" align="center" >14</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUYV</td>
+                  <td bgcolor="#edf4f9" align="center" >YUYV</li>
+                  <td bgcolor="#edf4f9" align="center" >15</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUV422P</td>
+                  <td bgcolor="#edf4f9" align="center" >422P</li>
+                  <td bgcolor="#edf4f9" align="center" >16</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUV420</td>
+                  <td bgcolor="#edf4f9" align="center" >YU12</li>
+                  <td bgcolor="#edf4f9" align="center" >17</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y10</td>
+                  <td bgcolor="#edf4f9" align="center" >Y10</li>
+                  <td bgcolor="#edf4f9" align="center" >18</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y12</td>
+                  <td bgcolor="#edf4f9" align="center" >Y12</li>
+                  <td bgcolor="#edf4f9" align="center" >19</td>
+                </tr>
+                <tr>
+                  <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_GREY</td>
+                  <td bgcolor="#edf4f9" align="center" >GREY</li>
+                  <td bgcolor="#edf4f9" align="center" >20</td>
+                </tr>
+              </tbody>
+            </table>
+            </div>
+          </ul>
+          <p></p>
+          <p></p>
+        </div>
+
+        <i><h4> input </h4></i>
+        <div>
+        <ul>
+          <li> Values: Integer | Default: -1 </li>
+          Input channel for the v4l2 device.  Use -1 for web cams.
+        </ul>
+        <p></p>
+        </div>
+
+        <i><h4> norm </h4></i>
+        <div>
+        <ul>
+          <li> Values: 0-3: | Default: 0 </li>
+          The TV norm to use for the device (PAL, NTSC, SECCAM, PAL-BW)
+        </ul>
+        <p></p>
+        </div>
+
+        <i><h4>frequency </h4></i>
+        <div>
+        <ul>
+          <li> Values: Long | Default: 0</li>
+          The tuner frequency to use for the device.
+        </ul>
+        <p></p>
+        </div>
+
+        <i><h4> params_file </h4></i>
+        <div>
+        <ul>
+          <li> Values: String | Default: Not Defined </li>
+          Full path and file name for a file containing the params listed one per line.
+        </ul>
+        <p></p>
+        </div>
+        </ul>
+        <p></p>
+
+        <h3><a name="libcam_device"></a>libcam_device</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined </li>
+          The libcamera device.  The value of 'camera0' is the only currently supported device.
+        </ul>
+        <p></p>
+
+        <h3><a name="libcam_params"></a>libcam_params</h3>
+        <p></p>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters (aka controls) for the libcamera device.
+        </ul>
+        <ul>
+          <i><h4> Transform(string)</h4></i>
+           (These are libcamera transform and rotate options and may not provide result you anticipate.)
+          <div><ul>
+            <li> Identity</h4></i>
+            <li> Rot0</li>
+            <li> HFlip</li>
+            <li> VFlip</li>
+            <li> HVFlip</li>
+            <li> Rot180</li>
+            <li> Transpose(not currently supported by libcamera)</li>
+            <li> Rot270(not currently supported by libcamera)</li>
+            <li> Rot90(not currently supported by libcamera)</li>
+            <li> Rot180Transpose</li>
+          </ul></div>
+
+          <i><h4> AeEnable(bool)</h4></i>
+          <i><h4> AeLocked(bool)</h4></i>
+          <i><h4> AeMeteringMode(int)</h4></i>
+          <div><ul>
+            <li> MeteringCentreWeighted = 0</h4></i>
+            <li> MeteringSpot = 1</li>
+            <li> MeteringMatrix = 2</li>
+            <li> MeteringCustom = 3</li>
+          </ul></div>
+          <i><h4> AeConstraintMode(int)</h4></i>
+          <div><ul>
+            <li> ConstraintNormal = 0</li>
+            <li> ConstraintHighlight = 1</li>
+            <li> ConstraintShadows = 2</li>
+            <li> ConstraintCustom = 3</li>
+          </ul></div>
+          <i><h4> AeExposureMode(int)</h4></i>
+          <div><ul>
+            <li> ExposureNormal = 0</li>
+            <li> ExposureShort = 1</li>
+            <li> ExposureLong = 2</li>
+            <li> ExposureCustom = 3</li>
+          </ul></div>
+          <i><h4> ExposureValue(float)</h4></i>
+          <i><h4> ExposureTime(int)</h4></i>
+          <i><h4> AnalogueGain(float)</h4></i>
+          <i><h4> Brightness(float)</h4></i>
+          <i><h4> Contrast(float)</h4></i>
+          <i><h4> Lux(float)</h4></i>
+          <i><h4> AwbEnable(bool)</h4></i>
+          <i><h4> AwbMode(int)</h4></i>
+          <div><ul>
+            <li> AwbAuto = 0</li>
+            <li> AwbIncandescent = 1</li>
+            <li> AwbTungsten = 2</li>
+            <li> AwbFluorescent = 3</li>
+            <li> AwbIndoor = 4</li>
+            <li> AwbDaylight = 5</li>
+            <li> AwbCloudy = 6</li>
+            <li> AwbCustom = 7</li>
+          </ul></div>
+          <i><h4> AwbLocked(bool)</h4></i>
+          <i><h4> ColourGains(Pipe delimited)</h4></i>
+          <div><ul>
+            <li> Red | Blue</li>
+          </ul></div>
+          <i><h4> ColourTemperature(int)</h4></i>
+          <i><h4> Saturation(float)</h4></i>
+          <i><h4> SensorBlackLevels(Pipe delimited)</h4></i>
+          <div><ul>
+            <li> var1|var2|var3|var4</li>
+          </ul></div>
+          <i><h4> Sharpness(float)</h4></i>
+          <i><h4> FocusFoM(int)</h4></i>
+          <i><h4> ColourCorrectionMatrix(Pipe delimited)</h4></i>
+          <div><ul>
+            <li> var1|var2|var3|var4|var5|var6|var7|var8|var9</li>
+          </ul></div>
+          <i><h4> ScalerCrop(Pipe delimited)</h4></i>
+          <div><ul>
+            <li> x|y|height|width</li>
+          </ul></div>
+          <i><h4> DigitalGain(float)</h4></i>
+          <i><h4> FrameDuration(int)</h4></i>
+          <i><h4> FrameDurationLimits(Pipe delimited)</h4></i>
+          <div><ul>
+            <li> min|max</li>
+          </ul></div>
+          <i><h4> SensorTemperature(float)</h4></i>
+          <i><h4> SensorTimestamp(int)</h4></i>
+          <i><h4> AfMode(int)</h4></i>
+          <div><ul>
+            <li> AfModeManual = 0</li>
+            <li> AfModeAuto = 1</li>
+            <li> AfModeContinuous = 2</li>
+          </ul></div>
+          <i><h4> AfRange(0-2)</h4></i>
+          <div><ul>
+            <li> AfRangeNormal = 0</li>
+            <li> AfRangeMacro = 1</li>
+            <li> AfRangeFull = 2</li>
+          </ul></div>
+          <i><h4> AfSpeed(int)</h4></i>
+          <div><ul>
+            <li> AfSpeedNormal = 0</li>
+            <li> AfSpeedFast = 1</li>
+          </ul></div>
+          <i><h4> AfMetering(int)</h4></i>
+          <div><ul>
+            <li> AfMeteringAuto = 0</li>
+            <li> AfMeteringWindows = 1</li>
+          </ul></div>
+          <i><h4> AfWindows(Pipe delimited)</h4></i>
+          <div><ul>
+            <li> x|y|height|width</li>
+          </ul></div>
+          <i><h4> AfTrigger(int)</h4></i>
+          <div><ul>
+            <li> AfTriggerStart = 0</li>
+            <li> AfTriggerCancel = 1</li>
+          </ul></div>
+          <i><h4> AfPause(int)</h4></i>
+          <div><ul>
+            <li> AfPauseImmediate = 0</li>
+            <li> AfPauseDeferred = 1</li>
+            <li> AfPauseResume = 2</li>
+          </ul></div>
+          <i><h4> LensPosition(float)</h4></i>
+          <i><h4> AfState(int)</h4></i>
+          <div><ul>
+            <li> AfStateIdle = 0</li>
+            <li> AfStateScanning = 1</li>
+            <li> AfStateFocused = 2</li>
+            <li> AfStateFailed = 3</li>
+          </ul></div>
+          <i><h4> AfPauseState(int)</h4></i>
+          <div><ul>
+            <li> AfPauseStateRunning = 0</li>
+            <li> AfPauseStatePausing = 1</li>
+            <li> AfPauseStatePaused = 2</li>
+          </ul></div>
+          <i><h4> AePrecaptureTrigger(int)</h4></i>
+          <div><ul>
+            <li> AePrecaptureTriggerIdle = 0</li>
+            <li> AePrecaptureTriggerStart = 1</li>
+            <li> AePrecaptureTriggerCancel = 2</li>
+          </ul></div>
+          <i><h4> NoiseReductionMode(int)</h4></i>
+          <div><ul>
+            <li> NoiseReductionModeOff = 0</li>
+            <li> NoiseReductionModeFast = 1</li>
+            <li> NoiseReductionModeHighQuality = 2</li>
+            <li> NoiseReductionModeMinimal = 3</li>
+            <li> NoiseReductionModeZSL = 4</li>
+          </ul></div>
+          <i><h4> ColorCorrectionAberrationMode(int)</h4></i>
+          <div><ul>
+            <li> ColorCorrectionAberrationOff = 0</li>
+            <li> ColorCorrectionAberrationFast = 1</li>
+            <li> ColorCorrectionAberrationHighQuality = 2</li>
+          </ul></div>
+          <i><h4> AeState(int)</h4></i>
+          <div><ul>
+            <li> AeStateSearching = 1</li>
+            <li> AeStateConverged = 2</li>
+            <li> AeStateLocked = 3</li>
+            <li> AeStateFlashRequired = 4</li>
+            <li> AeStatePrecapture = 5</li>
+          </ul></div>
+          <i><h4> AwbState(int)</h4></i>
+          <div><ul>
+            <li> AwbStateInactive = 0</li>
+            <li> AwbStateSearching = 1</li>
+            <li> AwbConverged = 2</li>
+            <li> AwbLocked = 3</li>
+          </ul></div>
+          <i><h4> SensorRollingShutterSkew(int)</h4></i>
+          <i><h4> LensShadingMapMode(int)</h4></i>
+          <div><ul>
+            <li> LensShadingMapModeOff = 0</li>
+            <li> LensShadingMapModeOn = 1</li>
+          </ul></div>
+          <i><h4> PipelineDepth(int)</h4></i>
+          <i><h4> MaxLatency(int)</h4></i>
+          <i><h4> TestPatternMode(int)</h4></i>
+          <div><ul>
+            <li> TestPatternModeOff = 0</li>
+            <li> TestPatternModeSolidColor = 1</li>
+            <li> TestPatternModeColorBars = 2</li>
+            <li> TestPatternModeColorBarsFadeToGray = 3</li>
+            <li> TestPatternModePn9 = 4</li>
+            <li> TestPatternModeCustom1 = 256</li>
+          </ul></div>
+
+        </ul>
+        <p></p>
+
+        <h3><a name="netcam_url"></a> netcam_url </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          URL associated with the network camera.
+        </ul>
+        <p></p>
+
+        <h3><a name="netcam_params"></a>netcam_params</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters.  Format is: option=value,option2=value2
+        </ul>
+        <ul>
+          <p></p>
+          Motion uses the ffmpeg libraries to process network cameras.  This option is
+          a comma separated list of the ffmpeg options for the camera.  In addition
+          to the ffmpeg options, Motion includes the following additional options.
+          <p></p>
+
+          <div>
+            <i><h4>capture_rate</h4></i>
+            The number of frames per second to capture from the camera. This option should be slightly higher than
+            the FPS that the camera is sending image.  Users can also specify the capture_rate as
+            <code>pts</code>.  When using <code>pts</code> as the capture_rate Motion will sync the timing
+            of the capture to match between the clock and the presentation time stamps sent from the camera.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>decoder</h4></i>
+            The ffmpeg hardware decoder to use.  Note that not all of the hardware decoders provided by ffmpeg are
+            available.  The only hardware decoders are those that do not require customization of library usage.  The
+            ffmpeg libraries on the computer must usually be built from source in order to enable hardware decoding.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>interrupt</h4></i>
+            The duration in seconds permitted for the library functions to respond.  For the initial connection
+            to the camera, the maximum duration is set equal to three times the interrupt specified.  The default
+            is 90 seconds.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>input_format</h4></i>
+            The ffmpeg input format to use for the network camera.  For  cameras using http/https the
+            input_format defaults to mjpeg.  Another common option for this parameter with
+            a http/https stream would be mpegts.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4> params_file </h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+              Full path and file name for a file containing the params listed one per line.
+            </ul>
+          </div>
+         </ul>
+        <p></p>
+
+        <h3><a name="netcam_high_url"></a>netcam_high_url</h3>
+        <p></p>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          URL associated with the high resolution stream of the network camera.  This option is typically used with
+          the <a href="#movie_passthrough">movie_passthrough</a> to minimize CPU usage.  The netcam_url specifies a low
+          resolution stream which is decoded and processed and the movies are saved directly from the data provided
+          from the netcam_high_url without decoding or processing it.
+        </ul>
+        <p></p>
+
+        <h3><a name="netcam_high_params"></a>netcam_high_params</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters.  Format is: option=value,option2=value2
+        </ul>
+        <ul>
+          <p></p>
+          Motion uses the ffmpeg libraries to process network cameras.  This option is
+          a comma separated list of the ffmpeg options for the stream specified by netcam_high_url.  In addition
+          to the ffmpeg options, Motion includes the following additional options.
+          <p></p>
+
+          <div>
+            <i><h4>capture_rate</h4></i>
+            The number of frames per second to capture from the camera. This option should be slightly higher than
+            the FPS that the camera is sending images.  Users can also specify the capture_rate as
+            <code>pts</code>.  When using <code>pts</code> as the capture_rate Motion will sync the timing
+            of the capture to match between the clock and the presentation time stamps sent from the camera.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4>input_format</h4></i>
+            The ffmpeg input format to use for the network camera.  For  cameras using http/https the
+            input_format defaults to mjpeg.  Another common option for this parameter with
+            a http/https stream would be mpegts.
+          </div>
+          <p></p>
+
+          <div>
+            <i><h4> params_file </h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+              Full path and file name for a file containing the params listed one per line.
+            </ul>
+          </div>
+         </ul>
+        <p></p>
+
+        <h3><a name="netcam_userpass"></a> netcam_userpass </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          Username and password for the network camera specified as username:password.
+        </ul>
+        <p></p>
+
+      </ul>
+
+      <h3><a name="OptDetail_Image_Processing"></a> Image Processing</h3>
+      <ul>
+        <h3><a name="width"></a> width </h3>
+        <ul>
+          <li> Values: Integer | Default: 640</li>
+          The width of the image in pixels.  Must be a multiple of 8.
+        </ul>
+        <p></p>
+
+        <h3><a name="height"></a> height </h3>
+        <ul>
+          <li> Values: Integer | Default: 480</li>
+          The height of the image in pixels. Must be a multiple of 8.
+        </ul>
+        <p></p>
+
+        <h3><a name="framerate"></a> framerate </h3>
+        <ul>
+          <li> Values: 2 - 100 | Default: 15 </li>
+          The number of frames to be processed per second for motion detection.
+        </ul>
+        <p></p>
+
+        <h3><a name="rotate"></a> rotate </h3>
+        <ul>
+          <li> Values: 0, 90, 180, 270 | Default: 0</li>
+          Rotate image the given number of degrees.
+        </ul>
+        <p></p>
+
+        <h3><a name="flip_axis"></a> flip_axis </h3>
+        <ul>
+          <li> Values: none, vertical, horizontal | Default: none</li>
+          Flip the image according to specified axis.
+        </ul>
+        <p></p>
+
+        <h3><a name="locate_motion_mode"></a> locate_motion_mode </h3>
+        <ul>
+          <li> Values: on, off, preview | Default: off</li>
+          Locate and draw around/on the moving object. Preview only applies to pictures.
+        </ul>
+
+        <h3><a name="locate_motion_style"></a> locate_motion_style </h3>
+        <ul>
+          <li> Values: box, redbox, cross, redcross | Default: box</li>
+          Set the look and style of the locate mode.
+        </ul>
+        <p></p>
+
+        <h3><a name="text_left"></a> text_left </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          User defined text overlaid in the lower left corner.
+        </ul>
+        <p></p>
+
+        <h3><a name="text_right"></a> text_right </h3>
+        <ul>
+          <li> Values: String | Default: %Y-%m-%d\\n%T</li>
+          User defined text overlaid in the lower right corner.
+        </ul>
+        <p></p>
+
+        <h3><a name="text_changes"></a> text_changes </h3>
+        <ul>
+          <li> Values: on, off | Default: off</li>
+          Show the number of pixels that changed in the upper right corner.
+        </ul>
+        <p></p>
+
+        <h3><a name="text_scale"></a> text_scale </h3>
+        <ul>
+          <li> Values: 1 - 10 | Default: 1</li>
+          Scale factor for text drawn on images.
+        </ul>
+        <p></p>
+
+        <h3><a name="text_event"></a> text_event </h3>
+        <ul>
+          <li> Values: String | Default: %Y%m%d%H%M%S</li>
+          Creates conversion specifier %C
+        </ul>
+        <p></p>
+      </ul>
+
+      <h3><a name="OptDetail_Motion_Detection"></a>Motion Detection</h3>
+      <ul>
+        <h3><a name="emulate_motion"></a> emulate_motion </h3>
+        <ul>
+          <li> Values: on, off | Default: off</li>
+          Always save images even if there was no motion
+        </ul>
+        <p></p>
+
+        <h3><a name="threshold"></a> threshold </h3>
+        <ul>
+          <li> Values: Integer | Default: 1500</li>
+          Minimum number of changed pixels that triggers an event.
+        </ul>
+        <p></p>
+
+        <h3><a name="threshold_maximum"></a> threshold_maximum</h3>
+        <ul>
+          <li> Values: Integer | Default: 0</li>
+          Maximum number of changed pixels that triggers an event.  If the number of changed pixels is over
+          the threshold maximum, no event is triggered.  A value of zero disables threshold_maximum.
+        </ul>
+        <p></p>
+
+
+        <h3><a name="threshold_tune"></a> threshold_tune </h3>
+        <ul>
+          <li> Values: on, off | Default: off</li>
+          Continuously adjust the threshold for triggering an event.
+        </ul>
+        <p></p>
+
+
+       <h3><a name="threshold_sdevx"></a>threshold_sdevx</h3>
+       <ul>
+         <li> Values: Integer | Default: 0</li>
+         The maximum standard deviation of the changed pixels in the x (width) axis.
+       </ul>
+       <p></p>
+
+       <h3><a name="threshold_sdevy"></a>threshold_sdevy</h3>
+       <ul>
+         <li> Values: Integer | Default: 0</li>
+         The maximum standard deviation of the changed pixels in the y (height) axis.
+       </ul>
+       <p></p>
+
+       <h3><a name="threshold_sdevxy"></a>threshold_sdevxy</h3>
+       <ul>
+         <li> Values: Integer | Default: 0</li>
+         The maximum standard deviation of the changed pixels in the x (width) and y(height) axis.
+       </ul>
+       <p></p>
+
+       <h3><a name="threshold_ratio"></a>threshold_ratio</h3>
+       <ul>
+         <li> Values: Integer | Default: </li>
+         The maximum ratio comparing the pixels that went white to black and vice versa.
+       </ul>
+       <p></p>
+
+       <h3><a name="threshold_ratio_change"></a>threshold_ratio_change</h3>
+       <ul>
+         <li> Values: Integer | Default: </li>
+         The minimum change in the ratio to trigger a event.
+       </ul>
+       <p></p>
+
+       <h3><a name="secondary_method"></a>secondary_method</h3>
+       <ul>
+         <li> Values: haar, hog, dnn | Default: Not Defined</li>
+         The secondary detection method.
+       </ul>
+       <p></p>
+
+       <p></p>
+       <h3><a name="secondary_params"></a>secondary_params</h3>
+       <ul>
+         <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters for the camera. Format is option=value,option2=value2
+       </ul>
+       <ul>
+          <p></p>
+          This option is a comma separated list of the secondary detection model options.  In addition to the
+          options for each of the models, Motion includes the following additional options.
+          <p></p>
+
+          <div>
+            <i><h4>frame_interval</h4></i>
+            <ul>
+              <li> Values: Integer | Default: 5 </li>
+                The interval of images between processing using the secondary method.  This works in conjunction with
+                the framerate.  For example, a frame_interval of 5 with a framerate of 30 means secondary processing
+                will be at 6 fps while a frame_interval of 60 would have secondary processing every other second.
+            </ul>
+            <p></p>
+          </div>
+
+          <div>
+            <i><h4>model_file</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+              Full path and file name for the model file associated with the secondary model.
+            </ul>
+            <p></p>
+          </div>
+
+          <div>
+            <i><h4> image_type </h4></i>
+            <ul>
+              <li> Values: full, grey, roi | Default: full </li>
+              Process full color image, the full grey image or just the region of interest(roi).
+            </ul>
+            <p></p>
+          </div>
+
+          <div>
+            <i><h4>rotate</h4></i>
+            <ul>
+              <li> Values: Integer | Default: 0 </li>
+              Rotation of image when being processed through secondary detection model.
+            </ul>
+            <p></p>
+          </div>
+
+          <div>
+            <i><h4> params_file </h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+              Full path and file name for a file containing the params listed one per line.
+            </ul>
+            <p></p>
+          </div>
+
+          <div>
+            <i><h4>threshold</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>scalefactor</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>minsize</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>maxsize</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>padding</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>threshold_model</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>winstride</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>flags</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>minneighbors</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>config</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>classes_file</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>framework</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>backend</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>target</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>scale</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>width</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>height</h4></i>
+            <ul>
+              <li> Values: String | Default: Not Defined </li>
+            </ul>
+            <p></p>
+          </div>
+
+         </ul>
+        <p></p>
+
+
+        <h3><a name="noise_level"></a> noise_level </h3>
+        <ul>
+          <li> Values: 1 - 255 | Default: 32</li>
+          The minimum amount of change in a single pixel before it is counted towards the threshold value.
+        </ul>
+
+        <h3><a name="noise_tune"></a> noise_tune </h3>
+        <ul>
+          <li> Values: on, off | Default: on</li>
+          Continuously adjust the noise_level parameter.
+        </ul>
+        <p></p>
+
+        <h3><a name="despeckle_filter"></a> despeckle_filter </h3>
+        <ul>
+          <li> Values: Combinations of E,e,D,d and l | Default: Not defined </li>
+          Despeckle the image using combinations of (E/e)rode or (D/d)ilate. And ending with optional (l)abeling.
+          This reduces noise in the motion image. Adding a trailing l enables labeling in which only the largest
+          section section is used to calculate the threshold.  Typical value is EedDl
+        </ul>
+        <p></p>
+
+        <h3><a name="area_detect"></a> area_detect </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          Detect motion in predefined areas (1 - 9) and when Motion is detected in the area, execute the script. This
+          option is only to execute the on_area_detect script.
+          <p></p>
+          Areas are numbered like
+          <ul>
+            <li>1 2 3</li>
+            <li>4 5 6</li>
+            <li>7 8 9</li>
+            </li>
+          </ul>
+        </ul>
+        <p></p>
+
+        <h3><a name="mask_file"></a> mask_file </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and filename for the masking pgm file.  If needed, the mask will be resized to
+          match the width and height of the image.  The areas in the mask file colored black will be
+          excluded from motion detection.  Shades of grey on the mask will diminish the detection while
+          areas of white will not have any impact on motion detection.
+        </ul>
+        <p></p>
+
+
+        <h3><a name="mask_privacy"></a> mask_privacy </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and filename for the privacy masking pgm file.  This mask completely removes the
+          indicated sections of the image.
+        </ul>
+        <p></p>
+
+        <h3><a name="smart_mask_speed"></a> smart_mask_speed </h3>
+        <ul>
+          <li> Values: 0 - 10 | Default: 0</li>
+          The smartmask is intended to be a dynamic, self-learning mask to decrease sensitivity
+          in areas with frequent motion.  The speed specified by this parameter is
+          how quickly the mask gets adjusted.  Zero disables the smart mask
+        </ul>
+        <p></p>
+
+        <h3><a name="lightswitch_percent"></a> lightswitch_percent </h3>
+        <ul>
+          <li> Values: 0 - 100 | Default: 0</li>
+          The minimum change in the portion of the image that will trigger a lightswitch condition
+        </ul>
+        <p></p>
+
+        <h3><a name="lightswitch_frames"></a> lightswitch_frames </h3>
+        <ul>
+          <li> Values: Integer | Default: 5</li>
+          The number of frames to ignore when the lightswitch condition is triggered (see above).
+        </ul>
+        <p></p>
+
+        <h3><a name="minimum_motion_frames"></a> minimum_motion_frames </h3>
+        <ul>
+          <li> Values: Integer | Default: 1</li>
+          The number of frames that must contain motion in order to trigger an event.
+        </ul>
+        <p></p>
+
+        <h3><a name="event_gap"></a> event_gap </h3>
+        <ul>
+          <li> Values: Integer | Default: 60</li>
+          The seconds of no motion detection that triggers the end of an event.
+        </ul>
+        <p></p>
+
+        <h3><a name="pre_capture"></a> pre_capture </h3>
+        <ul>
+          <li> Values: Integer | Default: 0</li>
+          The number of pre-captured (buffered) frames to be captured before an event.
+        </ul>
+        <p></p>
+
+        <h3><a name="post_capture"></a> post_capture </h3>
+        <ul>
+          <li> Values: Integer | Default: 0</li>
+          The number of frames to be captured after an event has ended.
+        </ul>
+        <p></p>
+
+        <h3><a name="static_object_time"></a>static_object_time</h3>
+        <ul>
+          <li> Values: Integer | Default:</li>
+          Number of seconds before a new object is included in the reference image.
+        </ul>
+        <p></p>
+
+      </ul>
+
+      <h3><a name="OptDetail_Scripts"></a> Script Execution </h3>
+      <ul>
+        <h3><a name="on_event_start"></a> on_event_start </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed at the start of an event.
+        </ul>
+        <p></p>
+
+        <h3><a name="on_event_end"></a> on_event_end </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed at the end of an event.
+        </ul>
+        <p></p>
+
+        <h3><a name="on_picture_save"></a> on_picture_save </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed when a picture is saved.
+        </ul>
+        <p></p>
+
+        <h3><a name="on_motion_detected"></a> on_motion_detected </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed when motion is detected.
+        </ul>
+        <p></p>
+
+        <h3><a name="on_area_detected"></a> on_area_detected </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed when motion is detected in the area specified.
+        </ul>
+        <p></p>
+
+        <h3><a name="on_movie_start"></a> on_movie_start </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed at the creation of a movie.
+        </ul>
+        <p></p>
+
+        <h3><a name="on_movie_end"></a> on_movie_end </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed when a movie ends.
+        </ul>
+        <p></p>
+
+        <h3><a name="on_camera_lost"></a> on_camera_lost </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed when the camera is no longer detected.
+        </ul>
+        <p></p>
+
+        <h3><a name="on_camera_found"></a> on_camera_found </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name of the program/script to be executed when a previously lost camera is active again.
+        </ul>
+        <p></p>
+
+        <h3><a name="on_secondary_detect"></a>on_secondary_detect</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          The full path and file name of the program/script to be executed when secondary detection occurs.
+        </ul>
+        <p></p>
+
+        <h3><a name="on_action_user"></a>on_action_user</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          The full path and file name of the program/script to be executed when user selects the user action from the web interface.
+        </ul>
+        <p></p>
+
+        <h3><a name="on_sound_alert"></a>on_sound_alert</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          The full path and file name of the program/script to be executed when a sound alert is triggered.
+        </ul>
+        <p></p>
+
+      </ul>
+
+      <h3><a name="OptDetail_Pictures"></a>Output - Picture Options </h3>
+      <ul>
+        <h3><a name="picture_output"></a> picture_output </h3>
+        <ul>
+          <li> Values: on, off, first, best | Default: off</li>
+          'on' saves all motion images during an event.  'first' saves only the first image that detected
+          motion.  'best' saves image with most changed pixels.
+        </ul>
+        <p></p>
+
+        <h3><a name="picture_output_motion"></a> picture_output_motion </h3>
+        <ul>
+          <li> Values: on, off, roi | Default: off</li>
+          Save the motion(debug) pictures with the pixels that change as a graytone image.  If
+          labeling is enabled via the despeckele option, the largest area will be blue and
+          areas in red are those determined by the smartmask option.
+          <p></p>
+          The option of 'roi' provides a smaller normal image of just the section
+          that caused the motion. i.e. The Region Of Interest).
+        </ul>
+        <p></p>
+
+        <h3><a name="picture_type"></a> picture_type </h3>
+        <ul>
+          <li> Values: jpeg, webp, ppm | Default: jpeg</li>
+          The type of picture file to output.
+        </ul>
+        <p></p>
+
+        <h3><a name="picture_quality"></a> picture_quality </h3>
+        <ul>
+          <li> Values: 1 - 100 | Default: 75</li>
+          The image quality for the jpeg or webp images in percent.  The value of 1 is worst and 100 is best.
+        </ul>
+        <p></p>
+
+        <h3><a name="picture_exif"></a> picture_exif </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The text for the JPEG EXIF comment with the EXIF timestamp.
+        </ul>
+        <p></p>
+
+        <h3><a name="picture_filename"></a> picture_filename </h3>
+        <ul>
+          <li> Values: String | Default: %v-%Y%m%d%H%M%S-%q</li>
+          The file name and optionally the path for the pictures relative to target_dir. The file
+          extension will be added based upon the picture_type.
+        </ul>
+        <p></p>
+
+        <h3><a name="snapshot_interval"></a> snapshot_interval </h3>
+        <ul>
+          <li> Values: Integer | Default: 0</li>
+          The number of seconds between snapshots
+        </ul>
+        <p></p>
+
+        <h3><a name="snapshot_filename"></a> snapshot_filename </h3>
+        <ul>
+          <li> Values: String | Default: %v-%Y%m%d%H%M%S-snapshot</li>
+          The file name and optionally the path for the snapshots relative to target_dir. The file
+          extension is automatically added.  A symbolic link called lastsnap.jpg is created in the
+          target_dir and will always point to the latest snapshot, unless snapshot_filename is exactly 'lastsnap'
+        </ul>
+        <p></p>
+
+      </ul>
+
+      <h3><a name="OptDetail_Movies"></a>Output - Movie Options</h3>
+      <ul>
+        <h3><a name="movie_output"></a>movie_output </h3>
+        <ul>
+          <li> Values: on, off | Default: on</li>
+          Encode movies of the motion events.
+        </ul>
+        <p></p>
+
+        <h3><a name="movie_output_motion"></a>movie_output_motion</h3>
+        <ul>
+          <li> Values: on, off | Default: off</li>
+          Encode movies that show the pixels that changed.  If labeling is enabled via the
+          despeckle option, the largest area will be in blue.  If smartmask is enabled it will
+          be shown in red. The filename will be the same as normal movies except with
+          an 'm' appended.
+        </ul>
+        <p></p>
+
+        <h3><a name="movie_max_time"></a> movie_max_time </h3>
+        <ul>
+          <li> Values: Integer | Default: 120</li>
+          The maximum length of a movie in seconds. Set this to zero for unlimited length.
+        </ul>
+        <p></p>
+
+        <h3><a name="movie_bps"></a> movie_bps </h3>
+        <ul>
+          <li> Values: Integer | Default: 400000</li>
+          Bitrate to use in encoding of movies.  This option is ignored if movie_quality is specified.
+        </ul>
+        <p></p>
+
+        <h3><a name="movie_quality"></a> movie_quality </h3>
+        <ul>
+          <li> Values: 0 - 100 | Default: 60</li>
+          A value of 0 disables this option while values 1 - 100 change the quality
+          of the movie.  The value of 1 means worst quality and 100 is the best quality.  High
+          values of this option (e.g. 100) may cause difficulty with some players.
+        </ul>
+        <p></p>
+
+        <h3><a name="movie_container"></a> movie_container </h3>
+        <ul>
+          <li> Values: flv, ogg, webm, mp4, mkv, hevc, mov | Default: mkv</li>
+          Container/Codec to be used for the video.  Preferred codec can be appended e.g. <code>mkv:libx265</code>
+        </ul>
+        <p></p>
+
+        <h3><a name="movie_retain"></a>movie_retain</h3>
+        <ul>
+          <li> Values: on, off | Default: off</li>
+          Retain movie only if the secondary detection occurred.
+        </ul>
+        <p></p>
+
+        <h3><a name="movie_passthrough"></a> movie_passthrough </h3>
+        <ul>
+          <li> Values: on, off | Default: off</li>
+          When using a RTSP, RTMP, mjpeg and some V4l2 cameras, create movie files with the packets
+          obtained directly from the camera.
+        </ul>
+        <p></p>
+
+        <h3><a name="movie_filename"></a> movie_filename </h3>
+        <ul>
+          <li> Values: String | Default: %v-%Y%m%d%H%M%S</li>
+          The file name and optionally the path for the movie relative to target_dir. The file extension
+          is automatically added based upon the container.
+        </ul>
+        <p></p>
+
+        <h3><a name="movie_extpipe_use"></a> movie_extpipe_use </h3>
+        <ul>
+          <li> Values: on, off | Default: off</li>
+          Specifies whether to send the pictures to pipe for external encoding into a movie.
+        </ul>
+        <p></p>
+
+        <h3><a name="movie_extpipe"></a> movie_extpipe </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The program name and options for processing the images.
+        </ul>
+        <p></p>
+
+        <h3><a name="timelapse_interval"></a> timelapse_interval </h3>
+        <ul>
+          <li> Values: Integer | Default: 0</li>
+          Interval in seconds for saving a picture into timelapse movie.  Zero disables timelapse.
+        </ul>
+        <p></p>
+
+        <h3><a name="timelapse_mode"></a> timelapse_mode </h3>
+        <ul>
+          <li> Values: hourly, daily, weekly-sunday, weekly-monday, monthly, manual | Default: daily</li>
+          File rollover mode of the timelapse video.
+        </ul>
+        <p></p>
+
+        <h3><a name="timelapse_fps"></a> timelapse_fps </h3>
+        <ul>
+          <li>Values: Integer | Default: 30</li>
+          The frame per second rate to use in the playback of the timelapse video.
+        </ul>
+        <p></p>
+
+        <h3><a name="timelapse_container"></a>timelapse_container</h3>
+        <ul>
+          <li> Values: mpg, mkv | Default: mpg</li>
+          Container to be used by timelapse video.
+          <ul>
+            <li>mpg - Creates mpg file with mpeg-2 encoding. If Motion is shutdown and restarted, new
+            pictures will be appended to any previously created file with name indicated for timelapse.</li>
+            <li>mkv - Creates mkv file with the default encoding.  If Motion is shutdown and restarted,
+            new pictures will create a new file with the name indicated for timelapse.</li>
+          </ul>
+        </ul>
+        <p></p>
+
+        <h3><a name="timelapse_filename"></a> timelapse_filename </h3>
+        <ul>
+          <li> Values: String | Default: %Y%m%d-timelapse</li>
+          The file name and optionally the path for the timelapse movies relative to target_dir. The
+          file extension is automatically added based upon the container.
+        </ul>
+        <p></p>
+
+      </ul>
+
+      <h3><a name="OptDetail_Pipe"></a>Output - Pipe Options</h3>
+      <ul>
+        <h3><a name="video_pipe"></a> video_pipe </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The video4linux video loopback device for normal images. The device would be specified
+          in the format like /dev/video1
+        </ul>
+        <p></p>
+
+        <h3><a name="video_pipe_motion"></a> video_pipe_motion </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The video4linux video loopback device for motion images. The device would be specified
+          in the format like /dev/video1
+        </ul>
+        <p></p>
+      </ul>
+
+      <h3><a name="OptDetail_Webcontrol"></a>Web Control</a> </h3>
+      <p></p>
+      These options must be placed in the Motion.conf file and not in a camera config files.
+      <ul>
+        <h3><a name="webcontrol_port"></a> webcontrol_port </h3>
+        <ul>
+          <li>Values: 0 to 65535 | Default: 0 (disabled)</li>
+          The port number for the web based control of Motion.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_port2"></a> webcontrol_port </h3>
+        <ul>
+          <li>Values: 0 to 65535 | Default: 0 (disabled)</li>
+          Second port for the web control that does not use TLS.  This allows for specifying one port that
+          provides a TLS connection (to be used externally) while this port serves the local lan without getting
+          certificate domain warnings.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_ipv6"></a> webcontrol_ipv6 </h3>
+        <ul>
+          <li> Values: on, off | Default: off</li>
+          Listen for connections from IPv6 and IPV4.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_localhost"></a> webcontrol_localhost </h3>
+        <ul>
+          <li> Values: on, off | Default: on</li>
+          Restrict the webcontrol of Motion to the localhost.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_base_path"></a> webcontrol_base_path </h3>
+        <ul>
+          <li> Values: Valid url path | Default: Not Defined </li>
+          Specify new base url path for the webcontrol.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_parms"></a> webcontrol_parms </h3>
+        <ul>
+          <li> Values: 0 - 3 | Default: 0 </li>
+          Set the type of parameters that can be accessed via the webcontrol page.
+          <ul>
+            <li> 0: None - No configuration parameters or actions will be available.</li>
+            <li> 1: Limited- A limited list of parameters will be available. </li>
+            <li> 2: Advanced - The advanced list of parameters will be available.  These
+              typically require Motion to be restarted to become effective.</li>
+            <li> 3: Restricted - User IDs, passwords and "on_" commands.</li>
+          </ul>
+          The default for this parameter is 0 (none) to enhance the security of the web interface.  The
+          setting of the webcontrol_parms is not included on the web interface and this parameter
+          can only be specified via the configuration file.
+          <p></p>
+          Once Motion has been configured, it is advised to complete the setup by setting
+          this value to zero.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_interface"></a> webcontrol_interface </h3>
+        <ul>
+          <li> Values: `default` or `user` | Default: `default`</li>
+          The type of webcontrol interface to provide.
+          <ul>
+            <li>The value of `default` provides a traditional web page interface using html/css.</li>
+            <li>The value of `user` means the html will be provided by file specified in webcontrol_html</li>
+          </ul>
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_auth_method"></a> webcontrol_auth_method </h3>
+        <ul>
+          <li> Values: none, basic, digest | Default: none</li>
+          Authentication method to use for the webcontrol port
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_authentication"></a> webcontrol_authentication </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The username and password specified as username:password
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_tls"></a> webcontrol_tls </h3>
+        <ul>
+          <li> Values: on, off | Default: off</li>
+          Enable SSL/TLS (https) for the webcontrol.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_cert"></a> webcontrol_cert </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          Full path and file name  to the certification file for SSL/TLS support.  Only used when
+          <a href="#webcontrol_tls">webcontrol_tls</a> is enabled.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_key"></a> webcontrol_key </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          Full path and file name to the key file for SSL/TLS support.  Only used when
+          <a href="#webcontrol_tls">webcontrol_tls</a> is enabled.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_headers"></a> webcontrol_headers </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          Comma separated list of headers=values for the webcontrol.  Use
+          Access-Control-Allow-Origin header to specify the CORS header.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_actions"></a> webcontrol_actions </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          Comma separated list of the actions=values to allow and show on the web control page.  The
+          following parameters are recognized.
+          <ul>
+            <li> pause:  Applies for Pause On, Pause Off and Pause schedule actions</li>
+            <li> event:  Applies for both Start Event and End Event actions</li>
+            <li> snapshot</li>
+            <li> camera_add</li>
+            <li> camera_delete</li>
+            <li> ptz:  Applies for all PTZ commands</li>
+            <li> stop</li>
+            <li> restart</li>
+            <li> action_user</li>
+            <li> config_write</li>
+            <li> config:  Applies for any and all configuration parameters</li>
+            <li> movies:  Show page of recorded movies on webcontrol for downloading (requires database functionality)</li>
+          </ul>
+          Specify each of these using values of `on` or `off` to permit or deny respectively.  The specification in
+          this parameter will override the default that is associated with
+          <a href="#webcontrol_parms">webcontrol_parms</a>.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_html"></a> webcontrol_html</h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name for a user specified html page to use as the webcontrol.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_lock_attempts"></a> webcontrol_lock_attempt</h3>
+        <ul>
+          <li> Values: Integer | Default: 3</li>
+          Number of permitted attempts to log in before triggering lockout.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_lock_minutes"></a> webcontrol_lock_minutes</h3>
+        <ul>
+          <li> Values: Integer | Default: 10</li>
+          Number of minutes that the IP will be locked out from further attempts to log in.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_lock_script"></a> webcontrol_lock_script</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Script to execute when a lockout has been triggered.  Two additional parameters are passed to this script
+          when executed.  The number of times the userid failed as well as the IP address attempting to log in.
+        </ul>
+        <p></p>
+
+
+      </ul>
+
+      <h3><a name="OptDetail_Stream"></a> Live Stream</a> </h3>
+      <ul>
+        <h3><a name="stream_preview_scale"></a> stream_preview_scale </h3>
+        <ul>
+          <li> Values: Integer | Default: 25</li>
+          The percentage to scale the stream image when it is placed on the webcontrol
+          page or into the combined image when the stream_preview_method is set to combined.
+          <br>Numbers greater than 100 are permitted.
+        </ul>
+        <p></p>
+
+        <h3><a name="stream_preview_newline"></a> stream_preview_newline </h3>
+        <ul>
+          <li> Values: on, off | Default: off</li>
+          Insert a new line indicator prior to the image on the webcontrol web page.
+        <p></p>
+          Note that this parameter is ignored when the stream_preview_method is set to
+          combined.
+        </ul>
+        <p></p>
+
+        <h3><a name="stream_preview_params"></a> stream_preview_params</h3>
+        <ul>
+         <li> Values: String | Default: Not Defined</li>
+          Comma separated parameters for the video streams and consolidated image.
+          The consolidated image puts together a single image of all the cameras currently
+          running. Format is parm1=value1,parm2=value2 etc.
+          <p></p>
+          <div>
+            <i><h4>row</h4></i>
+            <ul>
+              <li> Values: positive integers | Default: Not Defined </li>
+              On the consolidated image, the row number that the image will be shown.
+              Row numbers are counts of images on the page and not pixels.  For example,
+              if there are six cameras running and they are all stacked on top of each other
+              on the page, the last image will be at row 6 (Not image1 height + image2 height +
+              ...image 5 height)
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>col</h4></i>
+            <ul>
+              <li> Values: positive integers | Default: Not Defined </li>
+              On the consolidated image, the column number that the image will be shown.
+              Column numbers are counts of images on the page and not pixels.  For example,
+              if there are six cameras running and they are all put side by side
+              on the page, the last image will be at column 6 (Not image1 width + image2 width +
+              ...image 5 width)
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>offset_col</h4></i>
+            <ul>
+              <li> Values: positive and negative integers | Default: 0 </li>
+              On the consolidated image, Motion will arrange the image of
+              the camera into the row and columns indicated by the other parameters.
+              After the image is positioned, Motion centers the image in the
+              row and column grid space.  This parameter allows the user to move the image
+              to the left(negative values) or right(positive values) from that center position.
+              <p></p>
+              This parameter is in pixels.
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>offset_row </h4></i>
+            <ul>
+              <li> Values: positive and negative integers | Default: 0 </li>
+              On the consolidated image, Motion will arrange the image of
+              the camera into the row and columns indicated by the other parameters.
+              After the image is positioned, Motion centers the image in the
+              row and column grid space.  This parameter allows the user to move the image
+              up (negative values) or down(positive values) from that center position.
+              <p></p>
+              This parameter is in pixels.
+            </ul>
+            <p></p>
+          </div>
+
+          <p></p>
+          Note that the row and col must be continuous without gaps in the numbers.
+          e.g. If one of the cameras specifies a row number of 5, then some of the other
+          cameras must specify numbers 1 to 4 inclusive.  Likewise on the col parameter.
+          For each row, the col must start at 1 and increase sequentially.  It is however
+          permitted to have a different number of cameras on each row.
+          <p></p>
+          <div>
+            <p></p>
+            <h4>Illustrative sample:</h4>
+            <p></p>
+            Two cameras on first row, one camera on second row, three cameras on third row.
+            <ul style="list-style: none;">
+              <li>camera1 configuration: <code><small>stream_preview_params row=3,col=1</small></code></li>
+              <li>camera2 configuration: <code><small>stream_preview_params row=1,col=2</small></code></li>
+              <li>camera3 configuration: <code><small>stream_preview_params row=3,col=3</small></code></li>
+              <li>camera4 configuration: <code><small>stream_preview_params row=1,col=1</small></code></li>
+              <li>camera5 configuration: <code><small>stream_preview_params row=3,col=2</small></code></li>
+              <li>camera6 configuration: <code><small>stream_preview_params row=2,col=1</small></code></li>
+            </ul>
+            <p></p>
+          </div>
+        </ul>
+        <p></p>
+
+        <h3><a name="stream_preview_method"></a> stream_preview_method </h3>
+        <ul>
+          <li> Values: `combined`, `mjpg`, `static` | Default: `combined`</li>
+          This option determines the method used for displaying images on the webcontrol page.
+          <ul>
+          <li>`mjpg`<br> The webcontrol page is created with a mjpg stream for each camera.  This method
+          creates a connection to the server for each camera.  Note that if there are many cameras,
+          this method may not show/refresh properly in the browser due to browser settings regarding
+          the maximum number of concurrent connections.</li>
+          <br><li> `static`<br> The webcontrol page loops through all the cameras and refreshes the
+          images using static jpgs.  This method provides a slower refresh rate
+          than the mjpg option but allows for a higher number of cameras to get around the
+          browser concurrent connection limits.</li>
+          <br><li>`combined`<br>The webcontrol page uses a combined single mjpg stream.  The
+          combined single mjpg stream is constructed by Motion from all of the cameras
+          currently running.</li>
+          </ul>
+        </ul>
+        <p></p>
+
+        <h3><a name="stream_preview_ptz"></a> stream_preview_ptz</h3>
+        <ul>
+          <li> Values: on, off | Default: on</li>
+          Include the PTZ buttons on the webcontrol page.
+        </ul>
+        <p></p>
+
+        <h3><a name="stream_quality"></a> stream_quality </h3>
+        <ul>
+          <li> Values: 1 - 100 | Default: 50</li>
+          JPG compression quality setting in percent for the images transferred to live stream.
+        </ul>
+        <p></p>
+
+        <h3><a name="stream_grey"></a> stream_grey </h3>
+        <ul>
+          <li> Values: on, off | Default: off</li>
+          Send the live stream in grey rather than color.
+        </ul>
+        <p></p>
+
+        <h3><a name="stream_maxrate"></a> stream_maxrate </h3>
+        <ul>
+          <li> Values: Integer | Default: 1</li>
+          The frames per second for the webcontrol camera stream.
+        </ul>
+        <p></p>
+
+        <h3><a name="stream_motion"></a> stream_motion </h3>
+        <ul>
+          <li> Values: on, off | Default: off</li>
+          Limit the frames per second for the webcontrol stream to 1 when there
+          is no motion being detected and increase to the stream_maxrate when there is motion.
+        </ul>
+        <p></p>
+
+        <h3><a name="stream_scan_time"></a>stream_scan_time</h3>
+        <ul>
+          <li> Values: Integer | Default: 5</li>
+          Time in seconds to display image when in scan mode.
+        </ul>
+        <p></p>
+
+        <h3><a name="stream_scan_scale"></a>stream_scan_scale</h3>
+        <ul>
+          <li> Values: Integer | Default: 25</li>
+          Percentage scaling factor to apply on the image when in scan mode.
+        </ul>
+        <p></p>
+      </ul>
+
+      <h3><a name="OptDetail_Database"></a>Database</h3>
+      Only one database can be used by Motion at a time.  These options must be placed in the Motion.conf
+      file and not in a camera config files.
+      <ul>
+        <h3><a name="database_type"></a> database_type </h3>
+        <ul>
+          <li> Values: mariadb, postgresql, sqlite3 | Default: Not defined</li>
+          The database type.
+        </ul>
+        <p></p>
+
+        <h3><a name="database_dbname"></a> database_dbname </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The full path and file name to the Sqlite3 database.
+        </ul>
+        <p></p>
+
+        <h3><a name="database_host"></a> database_host </h3>
+        <ul>
+          <li> Values: String | Default: localhost</li>
+          The host on which the database is located
+        </ul>
+        <p></p>
+
+        <h3><a name="database_port"></a> database_port </h3>
+        <ul>
+          <li> Values: 0 - 65535 | Default: 0</li>
+          The port number that is used for the database.  Typical values are: MariaDB=3306 and postgresql=5432
+        </ul>
+        <p></p>
+
+        <h3><a name="database_user"></a> database_user </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The user account name for database
+        </ul>
+        <p></p>
+
+        <h3><a name="database_password"></a> database_password </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The user password for database
+        </ul>
+        <p></p>
+
+        <h3><a name="database_busy_timeout"></a> database_busy_timeout </h3>
+        <ul>
+          <li> Values: Integer | Default: 0</li>
+          The time to wait before issuing a timeout message for sqlite3.
+        </ul>
+        <p></p>
+
+        <h3><a name="sql_event_end"></a> sql_event_end </h3>
+        <ul>
+          <li> Values: String | Default: </li>
+          SQL query to execute at the end of the event.
+        </ul>
+        <p></p>
+
+        <h3><a name="sql_event_start"></a> sql_event_start </h3>
+        <ul>
+          <li> Values: String | Default: </li>
+          SQL query to execute at the start of the event.
+        </ul>
+        <p></p>
+
+        <h3><a name="sql_movie_end"></a> sql_movie_end </h3>
+        <ul>
+          <li> Values: String | Default: </li>
+          SQL query to execute at the end of the movie.
+        </ul>
+        <p></p>
+
+        <h3><a name="sql_movie_start"></a> sql_movie_start </h3>
+        <ul>
+          <li> Values: String | Default: </li>
+          SQL query to execute at the start of the movie.
+        </ul>
+        <p></p>
+
+        <h3><a name="sql_pic_save"></a> sql_pic_save</h3>
+        <ul>
+          <li> Values: String | Default: </li>
+          SQL query to execute when a picture has been saved.
+        </ul>
+        <p></p>
+      </ul>
+
+      <h3><a name="OptDetail_Tracking"></a>Tracking</h3>
+      <ul>
+        <h3><a name="ptz_auto_track"></a>ptz_auto_track</h3>
+        <ul>
+          <li> Values: on,off Default: off</li>
+          Enable automatic tracking.
+        </ul>
+        <p></p>
+
+        <h3><a name="ptz_wait"></a>ptz_wait</h3>
+        <ul>
+          <li> Values: Integer | Default: 0</li>
+          Time in seconds to wait after a PTZ script is called before resuming motion detection.
+        </ul>
+        <p></p>
+
+        <h3><a name="ptz_move_track"></a>ptz_move_track</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Full path and file name for script to execute for auto tracking.
+        </ul>
+        <p></p>
+
+      <h3><a name="ptz_pan_left"></a>ptz_pan_left</h3>
+        <p></p>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Full path and file name for script to pan the camera left.
+        </ul>
+        <p></p>
+
+        <h3><a name="ptz_pan_right"></a>ptz_pan_right</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Full path and file name for script to pan the camera right.
+        </ul>
+        <p></p>
+
+        <h3><a name="ptz_tilt_up"></a>ptz_tilt_up</h3>
+        <ul>
+          <li> Values: String | Default:</li>
+          Full path and file name for script to tilt the camera up.
+        </ul>
+        <p></p>
+
+        <h3><a name="ptz_tilt_down"></a>ptz_tilt_down</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Full path and file name for script to tilt the camera down.
+        </ul>
+        <p></p>
+
+        <h3><a name="ptz_zoom_in"></a>ptz_zoom_in</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Full path and file name for script to zoom the camera in .
+        </ul>
+        <p></p>
+
+        <h3><a name="ptz_zoom_out"></a>ptz_zoom_out</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Full path and file name for script to zoom the camera out.
+        </ul>
+        <p></p>
+      </ul>
+
+      <h3><a name="OptDetail_Sound"></a>Sound</h3>
+      <ul>
+        <h3><a name="snd_device"></a>snd_device</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          String specifying the sound device.
+          <p></p>
+          For alsa use the format such as hw:1,0
+          <p></p>
+          For PulseAudio, usually leave this empty and let PulseAudio use the defaults.  If a
+          specific PulseAudio device string is known, specify using this parameter.
+        </ul>
+        <p></p>
+
+        <h3><a name="snd_params"></a>snd_params</h3>
+        <p></p>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters for the sound device.
+        </ul>
+        <p></p>
+        <ul>
+          <p></p>
+          The configuration parameters for snd_device
+        <ul>
+        <i><h4>source</h4></i>
+        <div>
+        <ul>
+          <li> Values: String | Default: alsa </li>
+          The type of source for the sound device.  Currently supported sources are 'alsa' or 'pulse'.
+        </ul>
+        <p></p>
+        </div>
+
+        <i><h4>channels</h4></i>
+        <div>
+        <ul>
+          <li> Values: Integer: | Default: 1 </li>
+          The number of audio channels for the sound device
+        </ul>
+        <p></p>
+        </div>
+
+        <i><h4>frames</h4></i>
+        <div>
+        <ul>
+          <li> Values: Integer | Default: 2048</li>
+          The number of bytes to read in for each frame from the sound device.
+        </ul>
+        <p></p>
+        </div>
+
+        <i><h4>sample_rate</h4></i>
+        <div>
+        <ul>
+          <li> Values: Integer | Default: 44100</li>
+          The sample rate for the sound device.
+        </ul>
+        <p></p>
+        </div>
+
+        <i><h4>pulse_server</h4></i>
+        <div>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The override name of the pulse server to use.
+        </ul>
+        <p></p>
+        </div>
+
+        <i><h4> params_file </h4></i>
+        <div>
+        <ul>
+          <li> Values: String | Default: Not Defined </li>
+          Full path and file name for a file containing the params listed one per line.
+        </ul>
+        <p></p>
+        </div>
+        </ul>
+        <p></p>
+
+        <h3><a name="snd_alerts"></a>snd_alerts</h3>
+        <ul>
+          <li> Values: String | Default: Not Defined</li>
+          Comma separated list of configuration parameters for the criteria of each alert.
+          <p></p>
+          Multiple specifications of this parameter are permitted.
+        </ul>
+        <p></p>
+        <ul>
+          <p></p>
+          The configuration parameters for each alert associated with the sound detection.  Multiple alerts can be specified
+          and each one can be set up to check for a different frequency. The following are the parameters that are specified
+          on each alert.
+        </ul>
+
+        <ul>
+          <i><h4>alert_id</h4></i>
+          <div>
+          <ul>
+            <li> Values: Integer | Default:  </li>
+            The unique number associated with the alert.
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4>volume_level</h4></i>
+          <div>
+          <ul>
+            <li> Values: Integer | Default: 0 </li>
+            The minimum volume level required to be start the detection process
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4>volume_count</h4></i>
+          <div>
+          <ul>
+            <li> Values: Integer | Default: 100</li>
+            The minimum number of times that the frequency must be detected above the volume_level before triggering event.
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4>freq_low</h4></i>
+          <div>
+          <ul>
+            <li> Values: Float | Default: 0</li>
+            The minimum frequency associated with the detection.
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4>freq_high</h4></i>
+          <div>
+          <ul>
+            <li> Values: Float | Default: 10000</li>
+            The maximum frequency associated with the detection.
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4>trigger_duration</h4></i>
+          <div>
+          <ul>
+            <li> Values: Integer | Default: 10</li>
+            The duration that must occur in seconds between triggered events before resetting.  This prevents a perpetual
+            stream of on_sound_event being triggered upon a constant sound.  The sound frequency must not occur for at least
+            trigger_duration seconds before a new on_sound_event is triggered for that particular alert.
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4>trigger_threshold</h4></i>
+          <div>
+          <ul>
+            <li> Values: Integer | Default: 10</li>
+            The number of times that the alert must be triggered before invoking the on_sound_event
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4>alert_nm</h4></i>
+          <div>
+          <ul>
+            <li> Values: String | Default: Not defined</li>
+            The description associated with the alert.
+          </ul>
+          <p></p>
+          </div>
+
+          <i><h4> params_file </h4></i>
+          <div>
+          <ul>
+            <li> Values: String | Default: Not Defined </li>
+            Full path and file name for a file containing the params listed one per line.
+          </ul>
+          <p></p>
+          </div>
+          </ul>
+          <p></p>
+        </ul>
+
+        <h3><a name="snd_window"></a>snd_window</h3>
+        <p></p>
+        <ul>
+          <li> Values: hamming, hann, none | Default: hamming</li>
+          The sound frequency detection window function method to use.
+        </ul>
+        <p></p>
+
+        <h3><a name="snd_show"></a>snd_show</h3>
+        <ul>
+          <li> Values: boolean | Default: off</li>
+          Write to the log the frequencies being detected.
+        </ul>
+        <p></p>
+
+      </ul>
+
+    </ul>
+
+    <h2><a name="command_line_options"></a>  Command Line Options </h2>
+    <ul>
+      <p></p>
+      <code>Motion [ -hbnsm ] [ -c config file path ] [ -d level ] [ -k level ] [ -p pid_file ] [ -l log_file ]</code>
+      <p></p>
+      <ul>
+        <li>-c : Full path and filename of config file.</li>
+        <li>-h : Show help screen</li>
+        <li>-b : Run in daemon mode</li>
+        <li>-n : Run in non-daemon mode</li>
+        <li>-d : Run with message log level 1 - 9</li>
+        <li>-k : Run with message log type 1 - 9</li>
+        <li>-l : Full path and file name for log file</li>
+        <li>-p : Full path and file name for the process id file</li>
+        <li>-m : Start in pause mode</li>
+      </ul>
+      <p></p>
+      <p></p>
+    </ul>
+
+    <h2><a name="config_files"></a>  The Configuration Files </h2>
+    <ul>
+      <p></p>
+      Motion will search for the configuration file called 'Motion.conf' in the following order:
+      <p></p>
+      <ol>
+        <li> Current directory where Motion was invoked</li>
+        <li> The directory called '.Motion' in the current users home directory</li>
+        <li> The sub directory of lib/Motion from the directory defined
+          by --localstatedir=DIR during the configure step of installation. If this was
+          not defined, it will default to /var/lib/Motion or /usr/local/var/lib/Motion
+          depending upon your system</li>
+        <li> The directory defined by --sysconfdir=DIR during the configure step of installation.
+          If this was not defined, it will default to /etc/Motion or /usr/local/etc/Motion
+          depending upon your system.  Please note that the use of this directory for the configuration
+          files is deprecated.  Some significant functionality of Motion will not be available
+          if the configuration files are in this directory.</li>
+      </ol>
+      <p></p>
+      The Motion.conf file specifies parameters for the entire Motion application and defaults for
+      each camera.  Specifications that are unique to each camera are included in separate files.
+      <p></p>
+
+    </ul>
+
+    <h2><a name="signals"></a>  Signals </h2>
+    <ul>
+      <p></p>
+        A signal can be sent from the command line by typing
+        e.g. <code>kill -s SIGHUP pid</code>, where the last parameter is the process ID for Motion.
+      <p></p>
+      <div class="tblsignal">
+      <table border="1" class="fixed" >
+        <colgroup>
+          <col width="30%">
+          <col width="30%">
+          <col width="30%">
+        </colgroup>
+        <thead >
+          <tr >
+            <th bgcolor="#edf4f9" word-wrap:break-word > Signal </th>
+            <th bgcolor="#edf4f9" word-wrap:break-word > Description </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > SIGHUP </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > The config file will be reread. </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > SIGTERM </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > If needed Motion will create an movie file of the last event and exit </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > SIGUSR1 </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Motion will create an movie file of the current event. </td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <p></p>
+      <p></p>
+    </ul>
+
+  </section>
+
+
+</body>
+</html>

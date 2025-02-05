@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta charset="UTF-8">
+  <link href="motion.png" rel="icon" type="image/png">
+  <title>motion</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="motion_stylesheet.css" media="screen">
+  <script>
+    function fnc_topnav() {
+      var x = document.getElementById("id_topnav");
+      if (x.className === "topnav") {
+          x.className += " responsive";
+      } else {
+          x.className = "topnav";
+      }
+    }
+    function fnc_subnav() {
+      var x = document.getElementById("id_subnav");
+      if (x.className === "subnav") {
+          x.className += " responsive";
+      } else {
+          x.className = "subnav";
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="topnav" id="id_topnav">
+    <img class="logoimg" src="motion.gif">
+
+    <a class="topnav-d" href="https://motion-project.github.io/motion_support.html">Support</a>
+    <a class="topnav-d" href="https://motion-project.github.io/motion_news.html" >News</a>
+    <a class="topnav-d" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+    <a class="topnav-d" href="https://motion-project.github.io/motion_download.html">Download</a>
+    <a class="topnav-d" href="https://motion-project.github.io/index.html">Home</a>
+
+    <a class="topnav-m" href="https://motion-project.github.io/index.html">Home</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_download.html">Download</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_news.html" >News</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_support.html">Support</a>
+
+    <a href="javascript:void(0);" class="icon" onclick="fnc_topnav()">&#9776;</a>
+  </div>
+  <section class="page-header">
+    <h1>
+      Installing and Building from Source
+    </h1>
+  </section>
+  <div class="subnav" id="id_subnav">
+    <div class="dropdown">
+      <button class="dropbtn">Abbreviated Building</button>
+      <div class="dropdown-content">
+        <a href="#Install_Deb"> Install from a deb package</a>
+        <a href="#Build_Deb"> Building a deb package</a>
+        <a href="#Building"> Abbreviated Building Guide</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Configure/Make Options</button>
+      <div class="dropdown-content">
+        <a href="#Configure_Script"> Configure Script Options </a>
+        <a href="#Make_Options"> Make Options </a>
+      </div>
+    </div>
+
+    <a href="javascript:void(0);" class="icon" onclick="fnc_subnav()">menu&#8659;&nbsp&nbsp  </a>
+  </div>
+
+  <section class="main-content" style="padding:0.5em 0.1em;height:1000px;font-size: 0.90em;">
+
+    <h3><a name="Install_Deb"></a> Installing with a release deb package </h3>
+    <ul>
+      motion can also be installed from the release deb files.  Download the appropriate
+      deb from the <a href="https://github.com/Motion-Project/motion/releases">Releases</a> page
+      and install using <code><strong>dpkg</strong></code>
+      or <code><strong>gdebi-core</strong></code>.
+    </ul>
+
+    <h3><a name="Build_Deb"></a> Building a deb package </h3>
+    <ul>
+      A script has also been written to allow users to create their own deb package
+      from either a tagged release or the most current master branch of the code.  Download the
+      script by using the following
+      command.  <code><strong>wget https://raw.githubusercontent.com/Motion-Project/motion-packaging/master/buildplus.sh </strong></code>
+      <p></p>
+      Review the script and specify the following few optional parameters.
+      <code><strong> Username, EmailAddress, branch, install, arch</strong></code>.  If
+      the parameters are not provided, the script will create defaults.
+      <p></p>
+      <p></p>
+      Once the script has been run and the deb file is created, install it as described above.
+      <p></p>
+    </ul>
+
+    <h3><a name="Building"></a> Building Guide  </a> </h3>
+    <ul>
+    <p></p>
+      <p></p>
+      <p></p>
+      Debian based distros
+      <ul>
+          <code><strong>sudo apt install autoconf automake autopoint build-essential pkgconf libtool libzip-dev
+          libjpeg-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev libopencv-dev
+          libwebp-dev gettext libmicrohttpd-dev libmariadb-dev libcamera-dev libcamera-tools libcamera-v4l2
+          libasound2-dev libpulse-dev libfftw3-dev </strong></code>
+          <p></p>
+          Note:  PostgreSQL or Sqlite3 database may also be added
+          via <code><strong>sudo apt install libpq-dev libsqlite3-dev</strong></code>.  If
+          no database is running on the system, some functionality of motion will not be available.
+          <p></p>
+          Once packages are installed, run the following to build motion
+	        <p></p>
+          <code><strong>cd ~</strong></code>
+          <br /><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
+          <br /><code><strong>cd motion</strong></code>
+          <br /><code><strong>autoreconf -fiv</strong></code>
+          <br /><code><strong>./configure</strong></code>
+          <br /><code><strong>make</strong></code>
+          <br /><code><strong>make install</strong></code>
+          <p></p>
+      </ul>
+      <p></p>
+    </ul>
+
+    <h3><a name="Configure_Script"></a>  Additional Configure Options</a> </h3>
+    <ul>
+      <p></p>
+      <p></p>
+      The following custom configure options can be specified for motion.
+      <div class="tblconfig">
+      <table border="1" class="fixed" >
+          <colgroup>
+          <col width="200px">
+          <col width="500px">
+          <col width="700px">
+        </colgroup>
+        <tbody>
+            <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Options</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Description </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Editors comment </td>
+           </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --without-v4l2 </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Exclude v4l2 </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --without-webp </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Compile without webp image support</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >  </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-libcam=DIR </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Specify the pkgconf dir for libcam</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use --without-libcam to disable </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-ffmpeg=DIR </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Specify the pkgconf dir for ffmpeg.</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > ffmpeg is required </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-opencv=DIR </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Specify the pkgconf dir for opencv.</td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use --without-opencv to disable </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-mariadb=DIR </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Specify the pkgconf DIR for MariaDB </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use --without-mariadb to disable </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-mysql=DIR </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Specify the pkgconf dir for mysql </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use --without-mysql to disable </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-pgsql=DIR </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Specify the pkgconf DIR for PostgreSQL </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use --without-pgsql to disable</td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-sqlite3=DIR </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Specify the pkgconf DIR for sqlite3. </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use --without-sqlite3 to disable </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-pulse=DIR </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Specify the pkgconf DIR for PulseAudio. </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use --without-pulse to disable </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-alsa=DIR </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Specify the pkgconf DIR for alsa. </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use --without-alsa to disable </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-fftw3=DIR </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Specify the pkgconf DIR for fftw3. </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use --without-fftw3 to disable </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-developer-flags </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Add additional warning flags for the compiler. </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > </td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <p></p>
+      <p></p>
+    </ul>
+
+    <h3><a name="Make_Options"></a>  Additional Make Options </h3>
+    <ul>
+      <p></p>
+       <dl>
+        <dt> <strong>make cleanall</strong> </dt>
+        <dd>
+          This command creates a pristine directory without any of the files generated from
+          the <code><strong>autoreconf</strong></code> command.
+        </dd>
+      </dl>
+      <p></p>
+
+      <p></p>
+       <dl>
+        <dt> <strong>make maintainer-check</strong> </dt>
+        <dd> Executes multiple configure and make using the developer flags for various combinations of the options.</dd>
+      </dl>
+      <p></p>
+
+      <p></p>
+       <dl>
+        <dt> <strong>make maintainer-clang</strong> </dt>
+        <dd> Compile using clang.</dd>
+      </dl>
+      <p></p>
+
+      <p></p>
+    </ul>
+
+  </section>
+</body>
