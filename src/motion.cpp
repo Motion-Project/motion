@@ -659,7 +659,7 @@ int main (int p_argc, char **p_argv)
     app = new cls_motapp();
     motlog = new cls_log(app);
 
-    mythreadname_set("mp",0,"");
+    mythreadname_set("mo",0,"");
 
     while (true) {
         app->init(p_argc, p_argv);
