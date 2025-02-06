@@ -1004,6 +1004,9 @@ void cls_dbse::filelist_get(std::string sql, vec_files &p_flst)
                 sqlite3db_filelist(sql);
             }
         #endif
+        #ifndef HAVE_DBSE
+            (void)sql;
+        #endif
         for (indx=0;indx<filelist.size();indx++){
             p_flst.push_back(filelist[indx]);
         }

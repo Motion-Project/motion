@@ -212,7 +212,6 @@ class cls_camera {
         cls_v4l2cam     *v4l2cam;
         cls_libcam      *libcam;
 
-        pthread_t       thread_id;
         int             track_posx;
         int             track_posy;
         int             threshold_maximum;

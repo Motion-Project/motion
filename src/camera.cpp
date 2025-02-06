@@ -822,7 +822,7 @@ void cls_camera::init_cleandir_default()
         cleandir->dur_unit = "d";
     }
 
-    if ((cleandir->dur_val == 0 )) {
+    if (cleandir->dur_val == 0 ) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Invalid clean directory duration number : %d")
             ,cleandir->dur_val);
