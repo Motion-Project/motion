@@ -411,33 +411,51 @@ ctx_parm_depr config_parms_depr[] = {
     },
     {
     "movie_codec",
-    "0.0.1",
+    "5.0.0",
     "\"movie_codec\" replaced with \"movie_container\"",
     "movie_container"
     },
     {
     "camera_id",
-    "0.0.1",
+    "5.0.0",
     "\"camera_id\" replaced with \"device_id\"",
     "device_id"
     },
     {
     "camera_name",
-    "0.0.1",
+    "5.0.0",
     "\"camera_name\" replaced with \"device_name\"",
     "device_name"
     },
     {
     "camera_tmo",
-    "0.0.1",
+    "5.0.0",
     "\"camera_tmo\" replaced with \"device_tmo\"",
     "device_tmo"
     },
     {
     "libcam_name",
-    "0.0.1",
+    "5.0.0",
     "\"libcam_name\" replaced with \"libcam_device\"",
     "libcam_device"
+    },
+    {
+    "video_device",
+    "5.0.0",
+    "\"video_device\" replaced with \"v4l2_device\"",
+    "v4l2_device"
+    },
+    {
+    "video_params",
+    "5.0.0",
+    "\"video_params\" replaced with \"v4l2_params\"",
+    "v4l2_params"
+    },
+    {
+    "timelapse_codec",
+    "5.0.0",
+    "\"timelapse_codec\" replaced with \"timelapse_container\"",
+    "timelapse_container"
     },
     { "","","",""}
 };
