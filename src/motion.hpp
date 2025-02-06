@@ -17,8 +17,8 @@
  *
 */
 
-#ifndef _INCLUDE_MOTIONPLUS_HPP_
-#define _INCLUDE_MOTIONPLUS_HPP_
+#ifndef _INCLUDE_MOTION_HPP_
+#define _INCLUDE_MOTION_HPP_
 
 #include "config.hpp"
 
@@ -116,12 +116,12 @@ class cls_webu_post;
 class cls_webu_common;
 class cls_webu_stream;
 
-enum MOTPLS_SIGNAL {
-    MOTPLS_SIGNAL_NONE,
-    MOTPLS_SIGNAL_ALARM,
-    MOTPLS_SIGNAL_USR1,
-    MOTPLS_SIGNAL_SIGHUP,
-    MOTPLS_SIGNAL_SIGTERM
+enum MOTION_SIGNAL {
+    MOTION_SIGNAL_NONE,
+    MOTION_SIGNAL_ALARM,
+    MOTION_SIGNAL_USR1,
+    MOTION_SIGNAL_SIGHUP,
+    MOTION_SIGNAL_SIGTERM
 };
 
 enum DEVICE_STATUS {
@@ -219,4 +219,4 @@ class cls_motapp {
         void watchdog(uint camindx);
 };
 
-#endif /* _INCLUDE_MOTIONPLUS_HPP_ */
+#endif /* _INCLUDE_MOTION_HPP_ */

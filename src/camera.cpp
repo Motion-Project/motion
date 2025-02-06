@@ -53,7 +53,7 @@ void cls_camera::ring_resize()
         new_size = 1;
     }
 
-    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
         ,_("Resizing buffer to %d items"), new_size);
 
     tmp =(ctx_image_data*) mymalloc((uint)new_size * sizeof(ctx_image_data));
@@ -131,15 +131,15 @@ void cls_camera::ring_process_image()
     picture->process_norm();
     if (movie_norm->put_image(current_image
             , &current_image->imgts) == -1) {
-        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
     }
     if (movie_motion->put_image(&imgs.image_motion
             , &imgs.image_motion.imgts) == -1) {
-        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
     }
     if (movie_extpipe->put_image(current_image
             , &current_image->imgts) == -1) {
-        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
     }
 }
 
@@ -234,7 +234,7 @@ void cls_camera::detected_trigger()
             sprintf(eventid, "%05d", cfg->device_id);
             strftime(eventid+5, 15, "%Y%m%d%H%M%S", &evt_tm);
 
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
                        event_curr_nbr);
 
             mystrftime(this, text_event_string
@@ -420,7 +420,7 @@ void cls_camera::cam_start()
     } else if (camera_type == CAMERA_TYPE_V4L2) {
         v4l2cam = new cls_v4l2cam(this);
     } else {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("No Camera device specified"));
         device_status = STATUS_CLOSED;
     }
@@ -454,7 +454,7 @@ int cls_camera::cam_next(ctx_image_data *img_data)
     if (retcd == CAPTURE_SUCCESS) {
         imgsz = (imgs.width * imgs.height * 3) / 2;
         if (imgs.size_norm != imgsz) {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Resetting image buffers"));
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Resetting image buffers"));
             device_status = STATUS_CLOSED;
             restart = true;
             return CAPTURE_FAILURE;
@@ -481,7 +481,7 @@ void cls_camera::init_camera_type()
     } else if (cfg->v4l2_device != "") {
         camera_type = CAMERA_TYPE_V4L2;
     } else {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("Unable to determine camera type"));
         camera_type = CAMERA_TYPE_UNKNOWN;
         handler_stop = true;
@@ -512,9 +512,9 @@ void cls_camera::init_firstimage()
 
     if ((indx >= 5) || (device_status != STATUS_OPENED)) {
         if (device_status != STATUS_OPENED) {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", "Unable to open camera");
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", "Unable to open camera");
         } else {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", "Error capturing first image");
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", "Error capturing first image");
         }
         for (indx = 0; indx<imgs.ring_size; indx++) {
             memset(imgs.image_ring[indx].image_norm
@@ -536,20 +536,20 @@ void cls_camera::init_firstimage()
 void cls_camera::check_szimg()
 {
     if ((imgs.width % 8) || (imgs.height % 8)) {
-        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             ,_("Image width (%d) or height(%d) requested is not modulo 8.")
             ,imgs.width, imgs.height);
         device_status = STATUS_CLOSED;
     }
     if ((imgs.width  < 64) || (imgs.height < 64)) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
             ,imgs.width, imgs.height);
         device_status = STATUS_CLOSED;
     }
     /* Substream size notification*/
     if ((imgs.width % 16) || (imgs.height % 16)) {
-        MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("Substream not available.  Image sizes not modulo 16."));
     }
 
@@ -633,7 +633,7 @@ void cls_camera::init_values()
     movie_passthrough = cfg->movie_passthrough;
     if ((camera_type != CAMERA_TYPE_NETCAM) &&
         (movie_passthrough)) {
-        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
         movie_passthrough = false;
     }
 
@@ -673,7 +673,7 @@ void cls_camera::init_cam_start()
     cam_start();
 
     if (device_status == STATUS_CLOSED) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Failed to start camera."));
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Failed to start camera."));
         imgs.width = cfg->width;
         imgs.height = cfg->height;
     }
@@ -766,13 +766,13 @@ void cls_camera::init_cleandir_default()
 {
     if ((cleandir->action != "delete") &&
         (cleandir->action != "script")) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Invalid clean directory action : %s")
             ,cleandir->action.c_str());
         cleandir->action = "";
     }
     if (cleandir->action == "") {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Setting default clean directory action to delete."));
         cleandir->action = "delete";
     }
@@ -780,28 +780,28 @@ void cls_camera::init_cleandir_default()
     if ((cleandir->freq != "hourly") &&
         (cleandir->freq != "daily") &&
         (cleandir->freq != "weekly")) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Invalid clean directory freq : %s")
             ,cleandir->freq.c_str());
         cleandir->freq = "";
     }
     if (cleandir->freq == "") {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Setting default clean directory frequency to weekly."));
         cleandir->freq = "weekly";
     }
 
     if (cleandir->runtime == "") {
         if (cleandir->freq == "hourly") {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Setting default clean directory runtime to 15."));
             cleandir->runtime = "15";
         } else if (cleandir->freq == "daily") {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Setting default clean directory runtime to 0115."));
             cleandir->runtime = "0115";
         } else if (cleandir->freq == "weekly") {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Setting default clean directory runtime to mon-0115."));
             cleandir->runtime = "mon-0115";
         }
@@ -811,25 +811,25 @@ void cls_camera::init_cleandir_default()
         (cleandir->dur_unit != "h") &&
         (cleandir->dur_unit != "d") &&
         (cleandir->dur_unit != "w")) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Invalid clean directory duration unit : %s")
             ,cleandir->dur_unit.c_str());
         cleandir->dur_unit = "";
     }
     if (cleandir->dur_unit == "") {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Setting default clean directory duration unit to d."));
         cleandir->dur_unit = "d";
     }
 
     if ((cleandir->dur_val == 0 )) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Invalid clean directory duration number : %d")
             ,cleandir->dur_val);
         cleandir->dur_val = -1;
     }
     if (cleandir->dur_val <= 0) {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Setting default clean directory duration value to 7."));
         cleandir->dur_val = 7;
     }
@@ -856,7 +856,7 @@ void cls_camera::init_cleandir_runtime()
             p_min = mtoi(cleandir->runtime);
         }
         if ((p_min > 59) || (p_min < 0)) {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 ,_("Invalid clean directory hourly runtime : %s")
                 ,cleandir->runtime.c_str());
             cleandir->runtime = "";
@@ -877,7 +877,7 @@ void cls_camera::init_cleandir_runtime()
         }
         if ((p_min > 59) || (p_min < 0) ||
             (p_hr > 23)  || (p_hr < 0)) {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 ,_("Invalid clean directory daily runtime : %s")
                 ,cleandir->runtime.c_str());
             cleandir->runtime = "";
@@ -911,7 +911,7 @@ void cls_camera::init_cleandir_runtime()
         if ((p_min > 59) || (p_min < 0) ||
             (p_hr > 23)  || (p_hr < 0) ||
             (p_dow == -1)) {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 ,_("Invalid clean directory weekly runtime : %s")
                 ,cleandir->runtime.c_str());
             cleandir->runtime = "";
@@ -931,7 +931,7 @@ void cls_camera::init_cleandir_runtime()
     cleandir->next_ts.tv_sec -= c_tm.tm_sec;
 
     if (cleandir->action == "delete") {
-        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
             , _("Cleandir next run:%04d-%02d-%02d %02d:%02d Criteria:%d%s RemoveDir:%s")
             ,c_tm.tm_year+1900,c_tm.tm_mon+1,c_tm.tm_mday
             ,c_tm.tm_hour,c_tm.tm_min
@@ -939,7 +939,7 @@ void cls_camera::init_cleandir_runtime()
             ,cleandir->dur_unit.c_str()
             ,cleandir->removedir ? "Y":"N");
     } else {
-        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
             , _("Clean directory set to run script at %04d-%02d-%02d %02d:%02d")
             ,c_tm.tm_year+1900,c_tm.tm_mon+1,c_tm.tm_mday
             ,c_tm.tm_hour,c_tm.tm_min);
@@ -1092,7 +1092,7 @@ void cls_camera::init_schedule()
                     (sched_itm.en_min < 0) || (sched_itm.en_min > 59) ||
                     (sched_itm.st_hr  > sched_itm.en_hr) ||
                     (pvl.length() != 9)) {
-                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                         ,_("Invalid schedule parameter: %s %s")
                         , pnm.c_str(), pvl.c_str());
                 } else {
@@ -1121,7 +1121,7 @@ void cls_camera::init_schedule()
             } else {
                 action = "active";
             }
-            MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
                 ,_("Schedule: %s %02d:%02d to %02d:%02d %s")
                 ,tst.c_str()
                 ,sched_day[indx1].st_hr
@@ -1153,7 +1153,7 @@ void cls_camera::init()
 
     mythreadname_set("cl",cfg->device_id, cfg->device_name.c_str());
 
-    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize Camera"));
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize Camera"));
 
     init_camera_type();
 
@@ -1193,12 +1193,12 @@ void cls_camera::init()
     init_ref();
 
     if (device_status == STATUS_OPENED) {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Camera %d started: motion detection %s"),
             cfg->device_id, pause ? _("disabled"):_("enabled"));
 
         if (cfg->emulate_motion) {
-            MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, _("Emulating motion"));
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Emulating motion"));
         }
     }
 
@@ -1224,7 +1224,7 @@ void cls_camera::areadetect()
                         util_exec_command(this, cfg->on_area_detected.c_str(), NULL);
                     }
                     areadetect_eventnbr = event_curr_nbr; /* Fire script only once per event */
-                    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
+                    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
                         ,_("Motion in area %d detected."), z + 1);
                     break;
                 }
@@ -1320,7 +1320,7 @@ int cls_camera::capture()
         connectionlosttime.tv_sec = 0;
 
         if (missing_frame_counter >= (cfg->device_tmo * cfg->framerate)) {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
             if (cfg->on_camera_found != "") {
                 util_exec_command(this, cfg->on_camera_found.c_str(), NULL);
             }
@@ -1362,7 +1362,7 @@ int cls_camera::capture()
 
             /* Write error message only once */
             if (missing_frame_counter == (cfg->device_tmo * cfg->framerate)) {
-                MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                     ,_("Video signal lost - Adding grey image"));
                 if (cfg->on_camera_lost != "") {
                     util_exec_command(this, cfg->on_camera_lost.c_str(), NULL);
@@ -1376,7 +1376,7 @@ int cls_camera::capture()
             } else if (camera_type == CAMERA_TYPE_V4L2) {
                 v4l2cam->noimage();
             } else {
-                MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Unknown camera type"));
+                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Unknown camera type"));
             }
         }
     }
@@ -1625,7 +1625,7 @@ void cls_camera::actions_event()
             track_center();
 
             if (algsec->detected) {
-                MOTPLS_LOG(NTC, TYPE_EVENTS
+                MOTION_LOG(NTC, TYPE_EVENTS
                     , NO_ERRNO, _("Secondary detect"));
                 if (cfg->on_secondary_detect != "") {
                     util_exec_command(this
@@ -1635,7 +1635,7 @@ void cls_camera::actions_event()
             }
             algsec->detected = false;
 
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), event_curr_nbr);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), event_curr_nbr);
 
             postcap = 0;
             event_curr_nbr++;
@@ -1676,7 +1676,7 @@ void cls_camera::actions()
             info_sdev_max = current_image->location.stddev_xy;
         }
         /*
-        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
         , "dev_x %d dev_y %d dev_xy %d, diff %d ratio %d"
         , current_image->location.stddev_x
         , current_image->location.stddev_y
@@ -1776,7 +1776,7 @@ void cls_camera::timelapse()
             movie_timelapse->start();
             if (movie_timelapse->put_image(
                 current_image, &current_image->imgts) == -1) {
-                MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+                MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
             }
         }
 
@@ -1846,13 +1846,13 @@ void cls_camera::check_schedule()
         }
     }
     if (prev != pause) {
-        MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO
             , _("Scheduled action. Motion detection %s")
             , pause ? _("disabled"):_("enabled"));
     }
 
     /*
-    MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
+    MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO
     , "Motion %02d:%02d %02d:%02d detection %d %d"
     ,schedule[cur_dy][indx].st_hr
     ,schedule[cur_dy][indx].st_min
@@ -1912,7 +1912,7 @@ void cls_camera::handler()
 
     cleanup();
 
-    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Camera closed"));
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Camera closed"));
 
     handler_running = false;
     pthread_exit(NULL);
@@ -1931,7 +1931,7 @@ void cls_camera::handler_startup()
         pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
         retcd = pthread_create(&handler_thread, &thread_attr, &camera_handler, this);
         if (retcd != 0) {
-            MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start camera thread."));
+            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start camera thread."));
             handler_running = false;
             handler_stop = true;
         }
@@ -1951,10 +1951,10 @@ void cls_camera::handler_shutdown()
             waitcnt++;
         }
         if (waitcnt == cfg->watchdog_tmo) {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("Normal shutdown of camera failed"));
             if (cfg->watchdog_kill > 0) {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Waiting additional %d seconds (watchdog_kill).")
                     ,cfg->watchdog_kill);
                 waitcnt = 0;
@@ -1963,14 +1963,14 @@ void cls_camera::handler_shutdown()
                     waitcnt++;
                 }
                 if (waitcnt == cfg->watchdog_kill) {
-                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                         , _("No response to shutdown.  Killing it."));
-                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                         , _("Memory leaks will occur."));
                     pthread_kill(handler_thread, SIGVTALRM);
                 }
             } else {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     , _("watchdog_kill set to terminate application."));
                 exit(1);
             }

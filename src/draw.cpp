@@ -1225,7 +1225,7 @@ void cls_draw::init_scale()
         if (cam->text_scale <= 0) {
             cam->text_scale = 1;
         }
-        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Invalid text scale.  Adjusted to %d"), cam->text_scale);
     }
 
@@ -1234,7 +1234,7 @@ void cls_draw::init_scale()
         if (cam->text_scale <= 0) {
             cam->text_scale = 1;
         }
-        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Invalid text scale.  Adjusted to %d"), cam->text_scale);
     }
 

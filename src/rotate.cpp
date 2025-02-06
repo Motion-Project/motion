@@ -223,7 +223,7 @@ cls_rotate::cls_rotate(cls_camera *p_cam)
     buffer_high = nullptr;
 
     if ((cam->cfg->rotate % 90) > 0) {
-        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Config option \"rotate\" not a multiple of 90: %d")
             ,cam->cfg->rotate);
         cam->cfg->rotate = 0;     /* Disable rotation. */

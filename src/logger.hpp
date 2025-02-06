@@ -51,8 +51,8 @@
     #define TYPE_DEFAULT            TYPE_ALL      /* Default type      */
     #define TYPE_DEFAULT_STR        "ALL"         /* Default name logs */
 
-    #define MOTPLS_LOG(x, y, z, ...) motlog->write_msg(x, y, z, 1, __FUNCTION__, __VA_ARGS__)
-    #define MOTPLS_SHT(x, y, z, ...) motlog->write_msg(x, y, z, 0, __VA_ARGS__)
+    #define MOTION_LOG(x, y, z, ...) motlog->write_msg(x, y, z, 1, __FUNCTION__, __VA_ARGS__)
+    #define MOTION_SHT(x, y, z, ...) motlog->write_msg(x, y, z, 0, __VA_ARGS__)
 
     struct ctx_log_item {
         uint64_t    log_nbr;

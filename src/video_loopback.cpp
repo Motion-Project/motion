@@ -73,7 +73,7 @@ static int vlp_open_vidpipe(void)
     int retcd;
 
     if ((dir = opendir(prefix)) == NULL) {
-        MOTPLS_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("Failed to open '%s'"), prefix);
+        MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("Failed to open '%s'"), prefix);
         return -1;
     }
 
@@ -82,11 +82,11 @@ static int vlp_open_vidpipe(void)
 
             retcd = snprintf(buffer, sizeof(buffer),"%s%s/name", prefix, dirp->d_name);
             if ((retcd<0) || (retcd >= (int)sizeof(buffer))) {
-                MOTPLS_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO
+                MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO
                     ,_("Error specifying buffer: %s"),buffer);
                 continue;
             } else {
-                MOTPLS_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO,_("Opening buffer: %s"),buffer);
+                MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO,_("Opening buffer: %s"),buffer);
             }
 
             if ((fd = open(buffer, O_RDONLY|O_CLOEXEC)) >= 0) {
@@ -95,7 +95,7 @@ static int vlp_open_vidpipe(void)
                     continue;
                 }
                 buffer[len]=0;
-                MOTPLS_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO,_("Read buffer: %s"),buffer);
+                MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO,_("Read buffer: %s"),buffer);
                 if (strncmp(buffer, "Loopback video device",21)) { /* weird stuff after minor */
                     close(fd);
                     continue;
@@ -104,12 +104,12 @@ static int vlp_open_vidpipe(void)
 
                 retcd = snprintf(buffer,sizeof(buffer),"/dev/%s",dirp->d_name);
                 if ((retcd < 0) || (retcd >= (int)sizeof(buffer))) {
-                    MOTPLS_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO
+                    MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO
                         ,_("Error specifying buffer: %s"),buffer);
                     close(fd);
                     continue;
                 } else {
-                    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("found video device '%s' %d"), buffer,min);
+                    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("found video device '%s' %d"), buffer,min);
                 }
 
                 if ((tfd = open(buffer, O_RDWR|O_CLOEXEC)) >= 0) {
@@ -128,7 +128,7 @@ static int vlp_open_vidpipe(void)
     closedir(dir);
 
     if (pipe_fd >= 0) {
-      MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opened %s as pipe output"), pipepath);
+      MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opened %s as pipe output"), pipepath);
     }
 
     return pipe_fd;
@@ -140,31 +140,31 @@ static void vlp_show_vcap(struct v4l2_capability *cap)
     unsigned int c    = cap->capabilities;
     int i;
 
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Pipe Device");
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.driver:   %s",cap->driver);
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.card:     %s",cap->card);
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.bus_info: %s",cap->bus_info);
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.card:     %u.%u.%u",(vers >> 16) & 0xFF,(vers >> 8) & 0xFF,vers & 0xFF);
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Device capabilities");
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Pipe Device");
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.driver:   %s",cap->driver);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.card:     %s",cap->card);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.bus_info: %s",cap->bus_info);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.card:     %u.%u.%u",(vers >> 16) & 0xFF,(vers >> 8) & 0xFF,vers & 0xFF);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Device capabilities");
     for (i=0;cap_list[i].code;i++) {
         if (c & cap_list[i].code) {
-            MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s",cap_list[i].cap);
+            MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s",cap_list[i].cap);
         }
     }
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "------------------------");
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "------------------------");
 }
 
 static void vlp_show_vfmt(struct v4l2_format *v)
 {
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "type: type:           %d",v->type);
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.width:        %d",v->fmt.pix.width);
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.height:       %d",v->fmt.pix.height);
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.pixelformat:  %d",v->fmt.pix.pixelformat);
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.sizeimage:    %d",v->fmt.pix.sizeimage);
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.field:        %d",v->fmt.pix.field);
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.bytesperline: %d",v->fmt.pix.bytesperline);
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.colorspace:   %d",v->fmt.pix.colorspace);
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO, "------------------------");
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "type: type:           %d",v->type);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.width:        %d",v->fmt.pix.width);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.height:       %d",v->fmt.pix.height);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.pixelformat:  %d",v->fmt.pix.pixelformat);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.sizeimage:    %d",v->fmt.pix.sizeimage);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.field:        %d",v->fmt.pix.field);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.bytesperline: %d",v->fmt.pix.bytesperline);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.colorspace:   %d",v->fmt.pix.colorspace);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "------------------------");
 }
 
 int vlp_startpipe(const char *dev_name, int width, int height)
@@ -177,17 +177,17 @@ int vlp_startpipe(const char *dev_name, int width, int height)
         dev = vlp_open_vidpipe();
     } else {
         dev = open(dev_name, O_RDWR|O_CLOEXEC);
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opened %s as pipe output"), dev_name);
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opened %s as pipe output"), dev_name);
     }
 
     if (dev < 0) {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,_("Opening %s as pipe output failed"), dev_name);
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,_("Opening %s as pipe output failed"), dev_name);
         return -1;
     }
 
 
     if (ioctl(dev, VIDIOC_QUERYCAP, &vc) == -1) {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "ioctl (VIDIOC_QUERYCAP)");
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "ioctl (VIDIOC_QUERYCAP)");
         return -1;
     }
 
@@ -198,10 +198,10 @@ int vlp_startpipe(const char *dev_name, int width, int height)
     v.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
 
     if (ioctl(dev, VIDIOC_G_FMT, &v) == -1) {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "ioctl (VIDIOC_G_FMT)");
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "ioctl (VIDIOC_G_FMT)");
         return -1;
     }
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Original pipe specifications"));
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Original pipe specifications"));
     vlp_show_vfmt(&v);
 
     v.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
@@ -212,15 +212,15 @@ int vlp_startpipe(const char *dev_name, int width, int height)
     v.fmt.pix.bytesperline = (uint)width;
     v.fmt.pix.field = V4L2_FIELD_NONE;
     v.fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Proposed pipe specifications"));
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Proposed pipe specifications"));
     vlp_show_vfmt(&v);
 
     if (ioctl(dev,VIDIOC_S_FMT, &v) == -1) {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "ioctl (VIDIOC_S_FMT)");
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "ioctl (VIDIOC_S_FMT)");
         return -1;
     }
 
-    MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Final pipe specifications"));
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Final pipe specifications"));
     vlp_show_vfmt(&v);
 
     return dev;
@@ -238,7 +238,7 @@ void vlp_putpipe(cls_camera *cam)
                 , cam->current_image->image_norm
                 , (uint)cam->imgs.size_norm);
             if (retcd < 0) {
-                MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     ,_("Failed to put image into video pipe"));
             }
         }
@@ -247,7 +247,7 @@ void vlp_putpipe(cls_camera *cam)
                 , cam->imgs.image_motion.image_norm
                 , (uint)cam->imgs.size_norm);
             if (retcd < 0) {
-                MOTPLS_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     ,_("Failed to put image into motion video pipe"));
             }
         }
@@ -261,14 +261,14 @@ void vlp_init(cls_camera *cam)
     #if defined(HAVE_V4L2) && !defined(BSD)
         /* open video loopback devices if enabled */
         if (cam->cfg->video_pipe != "") {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Opening video loopback device for normal pictures"));
 
             /* vid_startpipe should get the output dimensions */
             cam->pipe = vlp_startpipe(cam->cfg->video_pipe.c_str(), cam->imgs.width, cam->imgs.height);
 
             if (cam->pipe < 0) {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Failed to open video loopback for normal pictures"));
                 return;
             }
@@ -277,14 +277,14 @@ void vlp_init(cls_camera *cam)
         }
 
         if (cam->cfg->video_pipe_motion != "") {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Opening video loopback device for motion pictures"));
 
             /* vid_startpipe should get the output dimensions */
             cam->mpipe = vlp_startpipe(cam->cfg->video_pipe_motion.c_str(), cam->imgs.width, cam->imgs.height);
 
             if (cam->mpipe < 0) {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Failed to open video loopback for motion pictures"));
                 return;
             }

@@ -1601,7 +1601,7 @@ void cls_webu_html::user_page()
     webua->resp_page = "";
     fp = myfopen(app->cfg->webcontrol_html.c_str(), "re");
     if (fp == NULL) {
-        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             , _("Invalid user html file: %s")
             , app->cfg->webcontrol_html.c_str());
     } else {

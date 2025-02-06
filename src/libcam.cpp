@@ -32,180 +32,180 @@ using namespace libcamera;
 void cls_libcam::log_orientation()
 {
     #if (LIBCAMVER >= 2000)
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Orientation Options:");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate0");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate0Mirror");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate180");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate180Mirror");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate90");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate90Mirror");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate270");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate270Mirror");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Orientation Options:");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate0");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate0Mirror");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate180");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate180Mirror");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate90");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate90Mirror");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate270");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate270Mirror");
     #else
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Orientation Not available");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Orientation Not available");
     #endif
 
 }
 
 void cls_libcam::log_controls()
 {
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls:");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls:");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeEnable(bool)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeLocked(bool)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeEnable(bool)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeLocked(bool)");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeMeteringMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringCentreWeighted = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringSpot = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringMatrix = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringCustom = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeMeteringMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringCentreWeighted = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringSpot = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringMatrix = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringCustom = 3");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeConstraintMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintNormal = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintHighlight = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintShadows = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintCustom = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeConstraintMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintNormal = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintHighlight = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintShadows = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintCustom = 3");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeExposureMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureNormal = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureShort = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureLong = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureCustom = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeExposureMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureNormal = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureShort = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureLong = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureCustom = 3");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ExposureValue(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ExposureTime(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AnalogueGain(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Brightness(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Contrast(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Lux(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbEnable(bool)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ExposureValue(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ExposureTime(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AnalogueGain(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Brightness(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Contrast(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Lux(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbEnable(bool)");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbAuto = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbIncandescent = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbTungsten = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbFluorescent = 3");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbIndoor = 4");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbDaylight = 5");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbCloudy = 6");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbCustom = 7");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbAuto = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbIncandescent = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbTungsten = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbFluorescent = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbIndoor = 4");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbDaylight = 5");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbCloudy = 6");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbCustom = 7");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbLocked(bool)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourGains(Pipe delimited)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     Red | Blue");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourTemperature(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Saturation(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorBlackLevels(Pipe delimited)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     var1|var2|var3|var4");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Sharpness(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FocusFoM(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourCorrectionMatrix(Pipe delimited)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     var1|var2|...|var8|var9");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ScalerCrop(Pipe delimited)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     x | y | h | w");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  DigitalGain(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FrameDuration(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FrameDurationLimits(Pipe delimited)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     min | max");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorTemperature(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorTimestamp(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbLocked(bool)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourGains(Pipe delimited)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     Red | Blue");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourTemperature(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Saturation(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorBlackLevels(Pipe delimited)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     var1|var2|var3|var4");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Sharpness(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FocusFoM(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourCorrectionMatrix(Pipe delimited)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     var1|var2|...|var8|var9");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ScalerCrop(Pipe delimited)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     x | y | h | w");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  DigitalGain(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FrameDuration(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FrameDurationLimits(Pipe delimited)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     min | max");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorTemperature(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorTimestamp(int)");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeManual = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeAuto = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeContinuous = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeManual = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeAuto = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeContinuous = 2");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfRange(0-2)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeNormal = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeMacro = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeFull = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfRange(0-2)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeNormal = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeMacro = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeFull = 2");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfSpeed(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfSpeedNormal = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfSpeedFast = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfSpeed(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfSpeedNormal = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfSpeedFast = 1");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfMetering(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfMeteringAuto = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfMeteringWindows = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfMetering(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfMeteringAuto = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfMeteringWindows = 1");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfWindows(Pipe delimited)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     x | y | h | w");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfWindows(Pipe delimited)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     x | y | h | w");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfTrigger(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfTriggerStart = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfTriggerCancel = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfTrigger(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfTriggerStart = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfTriggerCancel = 1");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfPause(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseImmediate = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseDeferred = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseResume = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfPause(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseImmediate = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseDeferred = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseResume = 2");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  LensPosition(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  LensPosition(float)");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfState(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateIdle = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateScanning = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateFocused = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateFailed = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfState(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateIdle = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateScanning = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateFocused = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateFailed = 3");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfPauseState(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStateRunning = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStatePausing = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStatePaused = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfPauseState(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStateRunning = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStatePausing = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStatePaused = 2");
 
 }
 
 void cls_libcam:: log_draft()
 {
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls Draft:");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls Draft:");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AePrecaptureTrigger(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerIdle = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerStart = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerCancel = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AePrecaptureTrigger(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerIdle = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerStart = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerCancel = 2");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  NoiseReductionMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeOff = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeFast = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeHighQuality = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeMinimal = 3");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeZSL = 4");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  NoiseReductionMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeOff = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeFast = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeHighQuality = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeMinimal = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeZSL = 4");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColorCorrectionAberrationMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationOff = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationFast = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationHighQuality = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColorCorrectionAberrationMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationOff = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationFast = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationHighQuality = 2");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeState(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateSearching = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateConverged = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateLocked = 3");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateFlashRequired = 4");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStatePrecapture = 5");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeState(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateSearching = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateConverged = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateLocked = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateFlashRequired = 4");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStatePrecapture = 5");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbState(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbStateInactive = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbStateSearching = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbConverged = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbLocked = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbState(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbStateInactive = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbStateSearching = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbConverged = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbLocked = 3");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorRollingShutterSkew(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorRollingShutterSkew(int)");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  LensShadingMapMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    LensShadingMapModeOff = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    LensShadingMapModeOn = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  LensShadingMapMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    LensShadingMapModeOff = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    LensShadingMapModeOn = 1");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  PipelineDepth(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  PipelineDepth(int)");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  MaxLatency(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  MaxLatency(int)");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  TestPatternMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeOff = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeSolidColor = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeColorBars = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeColorBarsFadeToGray = 3");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModePn9 = 4");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeCustom1 = 256");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  TestPatternMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeOff = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeSolidColor = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeColorBars = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeColorBarsFadeToGray = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModePn9 = 4");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeCustom1 = 256");
 
 }
 
@@ -219,7 +219,7 @@ void cls_libcam::start_params()
 
     for (indx=0;indx<params->params_cnt;indx++) {
         itm = &params->params_array[indx];
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s : %s"
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s : %s"
             ,itm->param_name.c_str(), itm->param_value.c_str());
     }
 }
@@ -229,28 +229,28 @@ int cls_libcam::start_mgr()
     int retcd;
     std::string camid;
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
     cam_mgr = std::make_unique<CameraManager>();
     retcd = cam_mgr->start();
     if (retcd != 0) {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Error starting camera manager.  Return code: %d",retcd);
         return retcd;
     }
     started_mgr = true;
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "cam_mgr started.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "cam_mgr started.");
 
     if (cam->cfg->libcam_device == "camera0"){
         if (cam_mgr->cameras().size() == 0) {
-            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 , "No camera devices found");
             return -1;
         }
         camid = cam_mgr->cameras()[0]->id();
     } else {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Invalid libcam_device '%s'.  The only name supported is 'camera0' "
             ,cam->cfg->libcam_device.c_str());
         return -1;
@@ -259,7 +259,7 @@ int cls_libcam::start_mgr()
     camera->acquire();
     started_aqr = true;
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
 
     return 0;
 }
@@ -455,13 +455,13 @@ void cls_libcam::config_controls()
 
     retcd = config->validate();
     if (retcd == CameraConfiguration::Adjusted) {
-        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
             , "Configuration controls adjusted.");
     } else if (retcd == CameraConfiguration::Valid) {
-         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+         MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
             , "Configuration controls valid");
     } else if (retcd == CameraConfiguration::Invalid) {
-         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Configuration controls error");
     }
 
@@ -494,7 +494,7 @@ void cls_libcam:: config_orientation()
                 } else if (itm->param_value == "Rotate270Mirror") {
                     config->orientation = Orientation::Rotate270Mirror;
                 } else {
-                    MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                         , "Invalid Orientation option: %s."
                         , itm->param_value.c_str());
                 }
@@ -522,18 +522,18 @@ void cls_libcam:: config_orientation()
             } else {
                 adjdesc = "unknown";
             }
-            MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
+            MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
                 , "Configuration orientation adjusted to %s."
                 , adjdesc.c_str());
         } else if (retcd == CameraConfiguration::Valid) {
-            MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
                 , "Configuration orientation valid");
         } else if (retcd == CameraConfiguration::Invalid) {
-            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 , "Configuration orientation error");
         }
     #else
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Orientation Not available");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Orientation Not available");
     #endif
 
 }
@@ -542,7 +542,7 @@ int cls_libcam::start_config()
 {
     int retcd;
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
     config = camera->generateConfiguration({ StreamRole::Viewfinder });
 
@@ -556,26 +556,26 @@ int cls_libcam::start_config()
     retcd = config->validate();
     if (retcd == CameraConfiguration::Adjusted) {
         if (config->at(0).pixelFormat != PixelFormat::fromString("YUV420")) {
-            MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 , "Pixel format was adjusted to %s."
                 , config->at(0).pixelFormat.toString().c_str());
             return -1;
         } else {
-            MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 , "Configuration adjusted.");
         }
     } else if (retcd == CameraConfiguration::Valid) {
-         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             , "Configuration is valid");
     } else if (retcd == CameraConfiguration::Invalid) {
-         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Error setting configuration");
         return -1;
     }
 
     if ((config->at(0).size.width != (uint)cam->cfg->width) ||
         (config->at(0).size.height != (uint)cam->cfg->height)) {
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             , "Image size adjusted from %d x %d to %d x %d"
             , cam->cfg->width, cam->cfg->height
             , config->at(0).size.width, config->at(0).size.height);
@@ -595,7 +595,7 @@ int cls_libcam::start_config()
 
     camera->configure(config.get());
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
 
     return 0;
 }
@@ -611,21 +611,21 @@ int cls_libcam::start_req()
 {
     int retcd, bytes, indx, width;
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
     camera->requestCompleted.connect(this, &cls_libcam::req_complete);
     frmbuf = std::make_unique<FrameBufferAllocator>(camera);
 
     retcd = frmbuf->allocate(config->at(0).stream());
     if (retcd < 0) {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Buffer allocation error.");
         return -1;
     }
 
     std::unique_ptr<Request> request = camera->createRequest();
     if (!request) {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Create request error.");
         return -1;
     }
@@ -637,7 +637,7 @@ int cls_libcam::start_req()
 
     retcd = request->addBuffer(stream, buffer.get());
     if (retcd < 0) {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Add buffer for request error.");
         return -1;
     }
@@ -649,7 +649,7 @@ int cls_libcam::start_req()
     bytes = 0;
     for (indx=0; indx<(int)buffer->planes().size(); indx++){
         bytes += buffer->planes()[(uint)indx].length;
-        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "Plane %d of %d length %d"
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "Plane %d of %d length %d"
             , indx, buffer->planes().size()
             , buffer->planes()[(uint)indx].length);
     }
@@ -658,11 +658,11 @@ int cls_libcam::start_req()
         width = ((int)buffer->planes()[0].length / cam->imgs.height);
         if (((int)buffer->planes()[0].length != (width * cam->imgs.height)) ||
             (bytes > ((width * cam->imgs.height * 3)/2))) {
-            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 , "Error setting image size.  Plane 0 length %d, total bytes %d"
                 , buffer->planes()[0].length, bytes);
         }
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             , "Image size adjusted from %d x %d to %d x %d"
             , cam->imgs.width,cam->imgs.height
             , width,cam->imgs.height);
@@ -677,7 +677,7 @@ int cls_libcam::start_req()
 
     requests.push_back(std::move(request));
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
 
     return 0;
 }
@@ -686,11 +686,11 @@ int cls_libcam::start_capture()
 {
     int retcd;
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
     retcd = camera->start(&this->controls);
     if (retcd) {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Failed to start capture.");
         return -1;
     }
@@ -699,7 +699,7 @@ int cls_libcam::start_capture()
     for (std::unique_ptr<Request> &request : requests) {
         retcd = req_add(request.get());
         if (retcd < 0) {
-            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 , "Failed to queue request.");
             if (started_cam) {
                 camera->stop();
@@ -707,7 +707,7 @@ int cls_libcam::start_capture()
             return -1;
         }
     }
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
 
     return 0;
 }
@@ -747,7 +747,7 @@ int cls_libcam::libcam_start()
 
     started_cam = true;
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera started");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera started");
 
     return 0;
 }
@@ -782,7 +782,7 @@ void cls_libcam::libcam_stop()
         cam_mgr.reset();
     }
     cam->device_status = STATUS_CLOSED;
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera stopped.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera stopped.");
 }
 
 #endif
@@ -796,17 +796,17 @@ void cls_libcam::noimage()
             reconnect_count++;
         } else {
             if (reconnect_count >= 500) {
-                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
-                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 2 hours."));
+                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
+                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 2 hours."));
                 slp_dur = 7200;
             } else if (reconnect_count >= 200) {
-                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
-                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 10 minutes."));
+                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
+                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 10 minutes."));
                 reconnect_count++;
                 slp_dur = 600;
             } else {
-                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
-                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 30 seconds."));
+                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
+                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 30 seconds."));
                 reconnect_count++;
                 slp_dur = 30;
             }
@@ -814,7 +814,7 @@ void cls_libcam::noimage()
             SLEEP(slp_dur,0);
             libcam_stop();
             if (libcam_start() < 0) {
-                MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
+                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
                 libcam_stop();
             } else {
                 cam->device_status = STATUS_OPENED;
@@ -868,18 +868,18 @@ cls_libcam::cls_libcam(cls_camera *p_cam)
 {
     cam = p_cam;
     #ifdef HAVE_LIBCAM
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
         params = nullptr;
         reconnect_count = 0;
         cam->watchdog = cam->cfg->watchdog_tmo * 3; /* 3 is arbitrary multiplier to give startup more time*/
         if (libcam_start() < 0) {
-            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
             libcam_stop();
         } else {
             cam->device_status = STATUS_OPENED;
         }
     #else
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("libcam not available"));
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("libcam not available"));
         cam->device_status = STATUS_CLOSED;
     #endif
 }

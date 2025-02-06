@@ -411,7 +411,7 @@ static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr, const UI
         nsymbols += bits[len];
 
     if (nsymbols < 1 || nsymbols > 256) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("%s: Given jpeg buffer was too small"));
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("%s: Given jpeg buffer was too small"));
     }
 
     memcpy((*htblptr)->huffval, val, (uint)nsymbols * sizeof(UINT8));
@@ -613,7 +613,7 @@ static void jpgutl_error_exit(j_common_ptr cinfo)
      */
     (*cinfo->err->format_message) (cinfo, buffer);
 
-    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", buffer);
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", buffer);
 
     /* Return control to the setjmp point. */
     longjmp (myerr->setjmp_buffer, 1);
@@ -642,7 +642,7 @@ static void jpgutl_emit_message(j_common_ptr cinfo, int msg_level)
     if ((cinfo->err->msg_code != JWRN_EXTRANEOUS_DATA) && (msg_level < 0) ) {
         myerr->warning_seen++ ;
         (*cinfo->err->format_message) (cinfo, buffer);
-            MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "msg_level: %d, %s", msg_level, buffer);
+            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "msg_level: %d, %s", msg_level, buffer);
     }
 
 }
@@ -785,13 +785,13 @@ int jpgutl_decode_jpeg (u_char *jpeg_data_in, int jpeg_data_len,
     jpeg_start_decompress (&dinfo);
 
     if ((dinfo.output_width == 0) || (dinfo.output_height == 0)) {
-        MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO,_("Invalid JPEG image dimensions"));
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO,_("Invalid JPEG image dimensions"));
         jpeg_destroy_decompress(&dinfo);
         return -1;
     }
 
     if ((dinfo.output_width != width) || (dinfo.output_height != height)) {
-        MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             ,_("JPEG image size %dx%d, JPEG was %dx%d")
             ,width, height, dinfo.output_width, dinfo.output_height);
         jpeg_destroy_decompress(&dinfo);

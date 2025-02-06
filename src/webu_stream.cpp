@@ -152,7 +152,7 @@ bool cls_webu_stream::all_ready()
                 indx1++;
             }
             if (p_cam->passflag == false) {
-                MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+                MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
                     , "Camera %d not ready", p_cam->cfg->device_id);
                 return false;
             }
@@ -160,7 +160,7 @@ bool cls_webu_stream::all_ready()
     }
     if ((webua->app->allcam->all_sizes.dst_h == 0) ||
         (webua->app->allcam->all_sizes.dst_w == 0)) {
-            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO, "All cameras not ready");
+            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, "All cameras not ready");
             return false;
     }
 
@@ -489,13 +489,13 @@ bool cls_webu_stream::valid_request()
 
     pthread_mutex_lock(&app->mutex_camlst);
         if (webua->device_id < 0) {
-            MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
                 , _("Invalid camera specified: %s"), webua->url.c_str());
             pthread_mutex_unlock(&app->mutex_camlst);
             return false;
         }
         if ((webua->device_id > 0) && (webua->cam == NULL)) {
-            MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
                 , _("Invalid camera specified: %s"), webua->url.c_str());
             pthread_mutex_unlock(&app->mutex_camlst);
             return false;
@@ -600,7 +600,7 @@ mhdrslt cls_webu_stream::stream_mjpeg()
     response = MHD_create_response_from_callback (MHD_SIZE_UNKNOWN, 1024
         , &webu_mjpeg_response, (void *)this, NULL);
     if (response == NULL) {
-        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
 
@@ -630,7 +630,7 @@ mhdrslt cls_webu_stream::stream_static()
     int indx;
 
     if (resp_used == 0) {
-        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Could not get image to stream."));
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Could not get image to stream."));
         return MHD_NO;
     }
 
@@ -638,7 +638,7 @@ mhdrslt cls_webu_stream::stream_static()
             resp_size,(void *)resp_image
             , MHD_RESPMEM_MUST_COPY);
     if (response == NULL) {
-        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
 

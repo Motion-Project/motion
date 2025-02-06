@@ -85,7 +85,7 @@ int cls_webu_ans::check_tls()
     }
 
     if (file_chk != webu->info_tls) {
-        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
             , _("Webcontrol files have changed.  Restarting webcontrol"));
         webu->restart = true;
         return -1;
@@ -107,7 +107,7 @@ int cls_webu_ans::parseurl()
     uri_cmd2 = "";
     uri_cmd3 = "";
 
-    MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Sent url: %s"),url.c_str());
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Sent url: %s"),url.c_str());
 
     tmpurl = (char*)mymalloc(url.length()+1);
     memcpy(tmpurl, url.c_str(), url.length());
@@ -117,7 +117,7 @@ int cls_webu_ans::parseurl()
     url.assign(tmpurl);
     free(tmpurl);
 
-    MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),url.c_str());
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),url.c_str());
 
     baselen = app->cfg->webcontrol_base_path.length();
 
@@ -227,7 +227,7 @@ void cls_webu_ans::parms_edit()
         }
     }
 
-    MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
         , "camid: >%s< camindx: >%d< cmd1: >%s< cmd2: >%s< cmd3: >%s<"
         , uri_camid.c_str(), camindx
         , uri_cmd1.c_str(), uri_cmd2.c_str()
@@ -289,7 +289,7 @@ void cls_webu_ans::hostname_get()
             app->cfg->webcontrol_base_path;
     }
 
-    MOTPLS_LOG(DBG,TYPE_ALL, NO_ERRNO, _("Full Host:  %s"), hostfull.c_str());
+    MOTION_LOG(DBG,TYPE_ALL, NO_ERRNO, _("Full Host:  %s"), hostfull.c_str());
 
     return;
 }
@@ -301,7 +301,7 @@ void cls_webu_ans::failauth_log(bool userid_fail)
     ctx_webu_clients    clients;
     std::list<ctx_webu_clients>::iterator   it;
 
-    MOTPLS_LOG(ALR, TYPE_STREAM, NO_ERRNO
+    MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
             ,_("Failed authentication from %s"), clientip.c_str());
 
     clock_gettime(CLOCK_MONOTONIC, &tm_cnct);
@@ -362,7 +362,7 @@ void cls_webu_ans::client_connect()
     while (it != webu->wb_clients.end()) {
         if (it->clientip == clientip) {
             if (it->authenticated == false) {
-                MOTPLS_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),clientip.c_str());
+                MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),clientip.c_str());
             }
             it->authenticated = true;
             it->conn_nbr = 1;
@@ -381,7 +381,7 @@ void cls_webu_ans::client_connect()
     clients.authenticated = true;
     webu->wb_clients.push_back(clients);
 
-    MOTPLS_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),clientip.c_str());
+    MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),clientip.c_str());
 
     return;
 
@@ -406,7 +406,7 @@ mhdrslt cls_webu_ans::failauth_check()
              (app->cfg->webcontrol_lock_minutes*60)) &&
             (it->authenticated == false) &&
             (it->conn_nbr > app->cfg->webcontrol_lock_attempts)) {
-            MOTPLS_LOG(EMG, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(EMG, TYPE_STREAM, NO_ERRNO
                 , "Ignoring connection from: %s"
                 , clientip.c_str());
             it->conn_time = tm_cnct;
@@ -595,7 +595,7 @@ mhdrslt cls_webu_ans::mhd_auth()
     if (app->cfg->webcontrol_authentication == "") {
         authenticated = true;
         if (app->cfg->webcontrol_auth_method != "none") {
-            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No webcontrol user:pass provided"));
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No webcontrol user:pass provided"));
         }
         return MHD_YES;
     }
@@ -648,7 +648,7 @@ void cls_webu_ans::gzip_deflate()
 
     retcd = deflate(&zs, Z_FINISH);
     if (retcd < Z_OK) {
-        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             , _("deflate failed: %d") ,retcd);
         gzip_size = 0;
     } else {
@@ -657,13 +657,13 @@ void cls_webu_ans::gzip_deflate()
 
     retcd = deflateEnd(&zs);
     if (retcd < Z_OK) {
-        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             , _("deflateEnd failed: %d"), retcd);
         gzip_size = 0;
     }
 
     if (zs.avail_in != 0) {
-        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             , _("deflate failed avail in: %d"), zs.avail_in);
         gzip_size = 0;
     }
@@ -694,7 +694,7 @@ void cls_webu_ans::mhd_send()
             ,(void *)resp_page.c_str(), MHD_RESPMEM_PERSISTENT);
     }
     if (response == NULL) {
-        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
         return;
     }
 
@@ -722,7 +722,7 @@ void cls_webu_ans::mhd_send()
     MHD_destroy_response (response);
 
     if (retcd == MHD_NO) {
-        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
     }
 }
 
@@ -742,7 +742,7 @@ void cls_webu_ans::bad_request()
 /* Answer the get request from the user */
 void cls_webu_ans::answer_get()
 {
-    MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
         ,"processing get: %s",uri_cmd1.c_str());
 
     if ((uri_cmd1 == "mjpg") || (uri_cmd1 == "mpegts") ||
@@ -794,7 +794,7 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
 
     if (cam != NULL) {
         if (cam->finish) {
-           MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
+           MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
            return MHD_NO;
         }
     }

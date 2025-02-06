@@ -53,7 +53,7 @@ void cls_webu_file::main() {
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "movies") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Movies via webcontrol disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Movies via webcontrol disabled");
                 webua->bad_request();
                 return;
             } else {
@@ -83,7 +83,7 @@ void cls_webu_file::main() {
         webua->req_file = myfopen(full_nm.c_str(), "rbe");
     } else {
         webua->req_file = nullptr;
-        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             ,"Security warning: Client IP %s requested file: %s"
             ,webua->clientip.c_str(), webua->uri_cmd2.c_str());
     }
@@ -111,7 +111,7 @@ void cls_webu_file::main() {
         MHD_destroy_response (response);
     }
     if (retcd == MHD_NO) {
-        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Error processing file request");
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Error processing file request");
     }
 
 }

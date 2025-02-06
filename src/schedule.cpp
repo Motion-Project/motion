@@ -111,7 +111,7 @@ void cls_schedule::cleandir_remove_dir(std::string dirnm)
             ep = readdir(dp);
         }
         closedir(dp);
-        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
             , _("Removing empty directory %s"),dirnm.c_str());
         rmdir(dirnm.c_str());
     }
@@ -127,7 +127,7 @@ void cls_schedule::cleandir_remove(std::string sql, bool removedir)
 
     for (indx=0;indx<flst.size();indx++) {
         if (stat(flst[indx].full_nm.c_str(), &statbuf) == 0) {
-            MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
                 , _("Removing %s"),flst[indx].full_nm.c_str());
             remove(flst[indx].full_nm.c_str());
             sql  = " delete from motion ";
@@ -189,13 +189,13 @@ void cls_schedule::cleandir_run(cls_camera *p_cam)
     } else if (p_cam->cleandir->dur_unit == "w") {
         cdur = p_cam->cleandir->dur_val * (60 * 60 * 24 * 7);
     } else {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("Invalid clean directory duration units %s")
             ,p_cam->cleandir->dur_unit.c_str());
         return;
     }
     if (cdur <= 0) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             , _("Invalid clean directory duration %d%s")
             , p_cam->cleandir->dur_val
             , p_cam->cleandir->dur_unit.c_str());
@@ -242,7 +242,7 @@ void cls_schedule::cleandir_cam(cls_camera *p_cam)
         }
         localtime_r(&p_cam->cleandir->next_ts.tv_sec, &c_tm);
         if (p_cam->cleandir->action == "delete") {
-            MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
                 , _("Cleandir next run:%04d-%02d-%02d %02d:%02d Criteria:%d%s RemoveDir:%s")
                 ,c_tm.tm_year+1900,c_tm.tm_mon+1,c_tm.tm_mday
                 ,c_tm.tm_hour,c_tm.tm_min
@@ -250,7 +250,7 @@ void cls_schedule::cleandir_cam(cls_camera *p_cam)
                 ,p_cam->cleandir->dur_unit.c_str()
                 ,p_cam->cleandir->removedir ? "Y":"N");
         } else {
-            MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
                 , _("Clean directory set to run script at %04d-%02d-%02d %02d:%02d")
                 ,c_tm.tm_year+1900,c_tm.tm_mon+1,c_tm.tm_mday
                 ,c_tm.tm_hour,c_tm.tm_min);
@@ -285,7 +285,7 @@ void cls_schedule::handler()
         timing();
     }
 
-    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Schedule process closed"));
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Schedule process closed"));
     handler_running = false;
     pthread_exit(NULL);
 }
@@ -303,7 +303,7 @@ void cls_schedule::handler_startup()
         pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
         retcd = pthread_create(&handler_thread, &thread_attr, &schedule_handler, this);
         if (retcd != 0) {
-            MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start schedule thread."));
+            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start schedule thread."));
             handler_running = false;
             handler_stop = true;
         }
@@ -323,10 +323,10 @@ void cls_schedule::handler_shutdown()
             waitcnt++;
         }
         if (waitcnt == app->cfg->watchdog_tmo) {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("Normal shutdown of schedule thread failed"));
             if (app->cfg->watchdog_kill > 0) {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Waiting additional %d seconds (watchdog_kill).")
                     ,app->cfg->watchdog_kill);
                 waitcnt = 0;
@@ -335,14 +335,14 @@ void cls_schedule::handler_shutdown()
                     waitcnt++;
                 }
                 if (waitcnt == app->cfg->watchdog_kill) {
-                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                         , _("No response to shutdown.  Killing it."));
-                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                         , _("Memory leaks will occur."));
                     pthread_kill(handler_thread, SIGVTALRM);
                 }
             } else {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     , _("watchdog_kill set to terminate application."));
                 exit(1);
             }
