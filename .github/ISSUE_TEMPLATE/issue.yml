@@ -22,12 +22,17 @@ body:
       label: What is the base version number of Motion being used?
       multiple: false
       options:
-        - 0.0.x
-        - 0.1.x
-        - 0.2.x
-        - 0.3.x
-        - 0.4.x
-        - 0.5.x
+        - 4.0.x
+        - 4.1.x
+        - 4.2.x
+        - 4.3.x
+        - 4.4.x
+        - 4.5.x
+        - 4.6.x
+        - 4.7.x
+        - 5.0.x
+        - 5.1.x
+        - 5.2.x
     validations:
       required: true
   - type: dropdown
