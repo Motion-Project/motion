@@ -293,8 +293,9 @@ void mystrftime_base(cls_camera *cam
     char tmp[PATH_MAX];
     struct tm timestamp_tm;
     timespec  curr_ts;
-    std::string user_fmt;
+    std::string user_fmt, tst;
     uint indx;
+    int wd;
     ctx_image_data img;
 
     if (cam->current_image == nullptr) {
@@ -312,111 +313,143 @@ void mystrftime_base(cls_camera *cam
     }
 
     user_fmt = "";
-    for (indx=0; indx<fmt.length(); indx++){
+    indx = 0;
+    while (indx<fmt.length()) {
         memset(tmp, 0, sizeof(tmp));
-        if (fmt.substr(indx,2) == "%v") {
-            sprintf(tmp, "%02d", cam->event_curr_nbr);
-            user_fmt.append(tmp);
+        if ((fmt.substr(indx,1) == "%") && (indx <(fmt.length()-1))) {
+            wd = 0;
             indx++;
-        } else if (fmt.substr(indx,2) == "%q") {
-            sprintf(tmp, "%d", img.shot);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%D") {
-            sprintf(tmp, "%d", img.diffs);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%N") {
-            sprintf(tmp, "%d", cam->noise);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%i") {
-            sprintf(tmp, "%d", img.location.width);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%J") {
-            sprintf(tmp, "%d", img.location.height);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%K") {
-            sprintf(tmp, "%d", img.location.x);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%L") {
-            sprintf(tmp, "%d", img.location.y);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%o") {
-            sprintf(tmp, "%d", cam->threshold);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%Q") {
-            sprintf(tmp, "%d", img.total_labels);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%t") {
-            sprintf(tmp, "%d", cam->cfg->device_id);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%C") {
-            user_fmt.append(cam->text_event_string);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%w") {
-            sprintf(tmp, "%d", cam->imgs.width);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%h") {
-            sprintf(tmp, "%d", cam->imgs.height);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%f") {
-            user_fmt.append(fname);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%$") {
-            user_fmt.append(cam->cfg->device_name);
-            indx++;
-        } else if (fmt.substr(indx,strlen("%{host}")) == "%{host}") {
-            user_fmt.append(cam->hostname);
-            indx += (strlen("%{host}")-1);
-        } else if (fmt.substr(indx,strlen("%{fps}")) == "%{fps}") {
-            sprintf(tmp, "%d", cam->movie_fps);
-            user_fmt.append(tmp);
-            indx += (strlen("%{fps}")-1);
-        } else if (fmt.substr(indx,strlen("%{eventid}")) == "%{eventid}") {
-            user_fmt.append(cam->eventid);
-            indx += (strlen("%{eventid}")-1);
-        } else if (fmt.substr(indx,strlen("%{ver}")) == "%{ver}") {
-            user_fmt.append(VERSION);
-            indx += (strlen("%{ver}")-1);
-        } else if (fmt.substr(indx,strlen("%{sdevx}")) == "%{sdevx}") {
-            sprintf(tmp, "%d", cam->current_image->location.stddev_x);
-            user_fmt.append(tmp);
-            indx += (strlen("%{sdevx}")-1);
-        } else if (fmt.substr(indx,strlen("%{sdevy}")) == "%{sdevy}") {
-            sprintf(tmp, "%d", cam->current_image->location.stddev_y);
-            user_fmt.append(tmp);
-            indx += (strlen("%{sdevy}")-1);
-        } else if (fmt.substr(indx,strlen("%{sdevxy}")) == "%{sdevxy}") {
-            sprintf(tmp, "%d", cam->current_image->location.stddev_xy);
-            user_fmt.append(tmp);
-            indx += (strlen("%{sdevxy}")-1);
-        } else if (fmt.substr(indx,strlen("%{ratio}")) == "%{ratio}") {
-            sprintf(tmp, "%d", cam->current_image->diffs_ratio);
-            user_fmt.append(tmp);
-            indx += (strlen("%{ratio}")-1);
-        } else if (fmt.substr(indx,strlen("%{action_user}")) == "%{action_user}") {
-            user_fmt.append(cam->action_user);
-            indx += (strlen("%{action_user}")-1);
-        } else if (fmt.substr(indx,strlen("%{secdetect}")) == "%{secdetect}") {
-            if (cam->algsec->detected) {
-                user_fmt.append("Y");
-            } else {
-                user_fmt.append("N");
+            tst = fmt.substr(indx,1);
+            while ((tst>="0") && (tst<="9") && (indx <(fmt.length()-1))) {
+                wd *= 10;
+                wd += atoi(fmt.substr(indx,1).c_str());
+                indx++;
+                tst = fmt.substr(indx,1);
             }
-            indx += (strlen("%{secdetect}")-1);
+            if (tst == "v") {
+                sprintf(tmp, "%0*d", wd ? wd : 2, cam->event_curr_nbr);
+                user_fmt.append(tmp);
+            } else if (tst == "q") {
+                sprintf(tmp, "%0*d",  wd ? wd : 2, img.shot);
+                user_fmt.append(tmp);
+            } else if (tst == "D") {
+                sprintf(tmp, "%0*d", wd, img.diffs);
+                user_fmt.append(tmp);
+            } else if (tst == "N") {
+                sprintf(tmp, "%0*d",  wd ? wd : 2, cam->noise);
+                user_fmt.append(tmp);
+            } else if (tst == "i") {
+                sprintf(tmp, "%0*d", wd, img.location.width);
+                user_fmt.append(tmp);
+            } else if (tst == "J") {
+                sprintf(tmp, "%0*d", wd, img.location.height);
+                user_fmt.append(tmp);
+            } else if (tst == "K") {
+                sprintf(tmp, "%0*d", wd, img.location.x);
+                user_fmt.append(tmp);
+            } else if (tst == "L") {
+                sprintf(tmp, "%0*d", wd, img.location.y);
+                user_fmt.append(tmp);
+            } else if (tst == "o") {
+                sprintf(tmp, "%0*d", wd, cam->threshold);
+                user_fmt.append(tmp);
+            } else if (tst == "Q") {
+                sprintf(tmp, "%0*d", wd, img.total_labels);
+                user_fmt.append(tmp);
+            } else if (tst == "t") {
+                sprintf(tmp, "%0*d", wd, cam->cfg->device_id);
+                user_fmt.append(tmp);
+            } else if (tst == "C") {
+                tst = cam->text_event_string;
+                if (wd > 0) {
+                    user_fmt.append(tst.substr(0, wd));
+                } else {
+                    user_fmt.append(tst);
+                }
+            } else if (tst == "w") {
+                sprintf(tmp, "%0*d", wd, cam->imgs.width);
+                user_fmt.append(tmp);
+            } else if (tst == "h") {
+                sprintf(tmp, "%0*d", wd, cam->imgs.height);
+                user_fmt.append(tmp);
+            } else if (tst == "f") {
+                if (wd > 0) {
+                    user_fmt.append(fname.substr(0, wd));
+                } else {
+                    user_fmt.append(fname);
+                }
+            } else if (tst == "$") {
+                if (wd > 0) {
+                    user_fmt.append(cam->cfg->device_name.substr(0, wd));
+                } else {
+                    user_fmt.append(cam->cfg->device_name);
+                }
+            } else if (fmt.substr(indx,strlen("{host}")) == "{host}") {
+                tst = cam->hostname;
+                if (wd > 0) {
+                    user_fmt.append(tst.substr(0, wd));
+                } else {
+                    user_fmt.append(tst);
+                }
+                indx += (strlen("{host}")-1);
+            } else if (fmt.substr(indx,strlen("{fps}")) == "{fps}") {
+                sprintf(tmp, "%0*d", wd, cam->movie_fps);
+                user_fmt.append(tmp);
+                indx += (strlen("{fps}")-1);
+            } else if (fmt.substr(indx,strlen("{eventid}")) == "{eventid}") {
+                tst = cam->eventid;
+                if (wd > 0) {
+                    user_fmt.append(tst.substr(0, wd));
+                } else {
+                    user_fmt.append(tst);
+                }
+                indx += (strlen("{eventid}")-1);
+            } else if (fmt.substr(indx,strlen("{ver}")) == "{ver}") {
+                tst = VERSION;
+                if (wd > 0) {
+                    user_fmt.append(tst.substr(0, wd));
+                } else {
+                    user_fmt.append(tst);
+                }
+                indx += (strlen("{ver}")-1);
+            } else if (fmt.substr(indx,strlen("{sdevx}")) == "{sdevx}") {
+                sprintf(tmp, "%0*d", wd, cam->current_image->location.stddev_x);
+                user_fmt.append(tmp);
+                indx += (strlen("{sdevx}")-1);
+            } else if (fmt.substr(indx,strlen("{sdevy}")) == "{sdevy}") {
+                sprintf(tmp, "%0*d", wd, cam->current_image->location.stddev_y);
+                user_fmt.append(tmp);
+                indx += (strlen("{sdevy}")-1);
+            } else if (fmt.substr(indx,strlen("{sdevxy}")) == "{sdevxy}") {
+                sprintf(tmp, "%0*d", wd, cam->current_image->location.stddev_xy);
+                user_fmt.append(tmp);
+                indx += (strlen("{sdevxy}")-1);
+            } else if (fmt.substr(indx,strlen("{ratio}")) == "{ratio}") {
+                sprintf(tmp, "%0*d", wd, cam->current_image->diffs_ratio);
+                user_fmt.append(tmp);
+                indx += (strlen("{ratio}")-1);
+            } else if (fmt.substr(indx,strlen("{action_user}")) == "{action_user}") {
+                user_fmt.append(cam->action_user);
+                indx += (strlen("{action_user}")-1);
+            } else if (fmt.substr(indx,strlen("{secdetect}")) == "{secdetect}") {
+                if (cam->algsec->detected) {
+                    user_fmt.append("Y");
+                } else {
+                    user_fmt.append("N");
+                }
+                indx += (strlen("{secdetect}")-1);
+            } else {
+                if (wd >0) {
+                    sprintf(tmp, "\%%%d%s", wd, tst.c_str());
+                } else {
+                    sprintf(tmp, "\%%%s", tst.c_str());
+                }
+                user_fmt.append(tmp);
+            }
         } else {
             user_fmt.append(fmt.substr(indx,1));
         }
+        indx++;
     }
 
     memset(tmp, 0, sizeof(tmp));
