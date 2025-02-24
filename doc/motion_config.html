@@ -2468,7 +2468,14 @@
         <h3><a name="webcontrol_html"></a> webcontrol_html</h3>
         <ul>
           <li> Values: String | Default: Not defined</li>
-          The full path and file name for a user specified html page to use as the webcontrol.
+          The file name for a user specified html page to use as the webcontrol.  The file
+          must be placed in a subdirectory from the motion.conf file called webcontrol.  e.g.
+          if the <code><small>motion.conf</small></code> file is located
+          at <code><small>/var/lib/motion/motion.conf</small></code>, the webcontrol
+          page must be located in the directory
+          <code><small>/var/lib/motion/webcontrol</small></code>.  Additionally, any files
+          in the webcontrol directory with an extension of html, json, js or css will also
+          be available as resources to the user html page.
         </ul>
         <p></p>
 

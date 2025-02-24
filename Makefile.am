@@ -23,6 +23,7 @@ SUBDIRS = src po
 
 pkgsysconfdir = $(sysconfdir)/@PACKAGE@
 libstatedir = @localstatedir@/lib/@PACKAGE@
+libwebdir = @localstatedir@/lib/@PACKAGE@/webcontrol
 
 dist_libstate_DATA = \
 	data/motion-dist.conf \
@@ -30,6 +31,9 @@ dist_libstate_DATA = \
 	data/camera2-dist.conf \
 	data/camera3-dist.conf \
 	data/sound1-dist.conf
+
+dist_libweb_DATA = \
+	data/webcontrol/samplepage.html
 
 dist_man_MANS = man/motion.1
 
@@ -60,6 +64,7 @@ cleanall: distclean
 	@rm -f data/motion-dist.service data/motion-dist.conf
 	@rm -f data/camera1-dist.conf data/camera2-dist.conf
 	@rm -f data/camera3-dist.conf data/sound1-dist.conf
+	@rm -f data/webcontrol/samplepage.conf
 
 ###################################################################
 ## Testing options for maintainer

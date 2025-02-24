@@ -1596,20 +1596,66 @@ void cls_webu_html::default_page()
 void cls_webu_html::user_page()
 {
     char response[PATH_MAX];
+    std::string fname, ext;
+    size_t pos;
     FILE *fp = NULL;
 
     webua->resp_page = "";
-    fp = myfopen(app->cfg->webcontrol_html.c_str(), "re");
+    pos = app->cfg->conf_filename.find("/",0);
+    if (pos == std::string::npos) {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            , _("Unable to determine base path for: %s")
+            , app->cfg->conf_filename.c_str());
+        return;
+    }
+    fname = app->cfg->conf_filename.substr(0,
+                app->cfg->conf_filename.find_last_of("/"));
+    fname += "/webcontrol";
+
+    if (webua->uri_cmd0 == "") {
+        fname += "/"+app->cfg->webcontrol_html;
+    } else {
+        fname += webua->url;
+    }
+
+    pos = fname.find(".", 0);
+    if (pos == std::string::npos) {
+        ext = "";
+    } else {
+        ext = fname.substr(fname.find_last_of(".")+1);
+    }
+    mylower(ext);
+    if (ext == "json") {
+        webua->resp_type = WEBUI_RESP_JSON;
+    } else if ((ext == "js") || (ext == "css")) {
+        webua->resp_type = WEBUI_RESP_TEXT;
+    } else if (ext == "html") {
+        webua->resp_type = WEBUI_RESP_HTML;
+    } else {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            , _("Invalid file requested: %s")
+            , fname.c_str());
+        return;
+    }
+
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
+        , _("Retrieving file: %s type/extension: %d/%s")
+        , fname.c_str(), webua->resp_type, ext.c_str());
+
+    fp = myfopen(fname.c_str(), "re");
     if (fp == NULL) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            , _("Invalid user html file: %s")
-            , app->cfg->webcontrol_html.c_str());
+            , _("Invalid user requested file: %s")
+            , fname.c_str());
+        return;
     } else {
         while (fgets(response, PATH_MAX-1, fp)) {
             webua->resp_page += response;
         }
         myfclose(fp);
     }
+
+
 }
 
 void cls_webu_html::main()

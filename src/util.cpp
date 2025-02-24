@@ -62,6 +62,19 @@ int mystrne(const char* var1, const char* var2)
     return (strcmp(var1,var2) ? 1: 0);
 }
 
+/*Convert string to lower case*/
+void mylower(std::string &parm)
+{
+    if (parm.length() == 0 ) {
+        return;
+    }
+
+    std::transform(parm.begin(),parm.end(),parm.begin()
+        ,[](unsigned char c)
+        { return std::tolower(c); });
+
+}
+
 /* Trim whitespace from left side */
 void myltrim(std::string &parm)
 {

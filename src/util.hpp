@@ -94,6 +94,7 @@ struct ctx_params {
     int mystrcne(const char* var1, const char* var2);
     int mystreq(const char* var1, const char* var2);
     int mystrne(const char* var1, const char* var2);
+    void mylower(std::string &parm);
     void myltrim(std::string &parm);
     void myrtrim(std::string &parm);
     void mytrim(std::string &parm);

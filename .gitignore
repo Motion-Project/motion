@@ -27,6 +27,7 @@ data/camera1-dist.conf
 data/camera2-dist.conf
 data/camera3-dist.conf
 data/sound1-dist.conf
+data/webcontrol/samplepage.html
 
 #src
 src/*.o

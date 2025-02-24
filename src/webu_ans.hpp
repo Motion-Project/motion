@@ -33,10 +33,10 @@
             std::string     lang;           /* Two character abbreviation for locale language*/
 
             std::string     url;            /* The URL sent from the client */
-            std::string     uri_camid;      /* Parsed camera number from the url eg /camid/cmd1/cmd2/cmd3 */
-            std::string     uri_cmd1;       /* Parsed command1 from the url eg /camid/cmd1/cmd2/cmd3 */
-            std::string     uri_cmd2;       /* Parsed command2 from the url eg /camid/cmd1/cmd2/cmd3 */
-            std::string     uri_cmd3;       /* Parsed command3 from the url eg /camid/cmd1/cmd2/cmd3 */
+            std::string     uri_cmd0;       /* Parsed command1 from the url eg /cmd0/cmd1/cmd2/cmd3 */
+            std::string     uri_cmd1;       /* Parsed command1 from the url eg /cmd0/cmd1/cmd2/cmd3 */
+            std::string     uri_cmd2;       /* Parsed command2 from the url eg /cmd0/cmd1/cmd2/cmd3 */
+            std::string     uri_cmd3;       /* Parsed command3 from the url eg /cmd0/cmd1/cmd2/cmd3 */
 
             enum WEBUI_RESP resp_type;      /* indicator for the type of response to provide. */
             std::string     resp_page;      /* The response that will be sent */

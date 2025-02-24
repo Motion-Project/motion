@@ -102,7 +102,7 @@ int cls_webu_ans::parseurl()
     size_t  pos_slash1, pos_slash2, baselen;
 
     /* Example:  /camid/cmd1/cmd2/cmd3   */
-    uri_camid = "";
+    uri_cmd0 = "";
     uri_cmd1 = "";
     uri_cmd2 = "";
     uri_cmd3 = "";
@@ -149,9 +149,9 @@ int cls_webu_ans::parseurl()
 
     pos_slash1 = url.find("/", baselen+1);
     if (pos_slash1 != std::string::npos) {
-        uri_camid = url.substr(baselen+1, pos_slash1-baselen- 1);
+        uri_cmd0 = url.substr(baselen+1, pos_slash1-baselen- 1);
     } else {
-        uri_camid = url.substr(baselen+1);
+        uri_cmd0 = url.substr(baselen+1);
         return 0;
     }
 
@@ -201,22 +201,22 @@ void cls_webu_ans::parms_edit()
     int indx, is_nbr;
 
     if (parseurl() != 0) {
-        uri_camid = "";
+        uri_cmd0 = "";
         uri_cmd1 = "";
         uri_cmd2 = "";
         uri_cmd3 = "";
         url = "";
     }
 
-    if (uri_camid.length() > 0) {
+    if (uri_cmd0.length() > 0) {
         is_nbr = true;
-        for (indx=0; indx < (int)uri_camid.length(); indx++) {
-            if ((uri_camid[(uint)indx] > '9') || (uri_camid[(uint)indx] < '0')) {
+        for (indx=0; indx < (int)uri_cmd0.length(); indx++) {
+            if ((uri_cmd0[(uint)indx] > '9') || (uri_cmd0[(uint)indx] < '0')) {
                 is_nbr = false;
             }
         }
         if (is_nbr) {
-            device_id = atoi(uri_camid.c_str());
+            device_id = atoi(uri_cmd0.c_str());
         }
     }
 
@@ -228,10 +228,10 @@ void cls_webu_ans::parms_edit()
     }
 
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
-        , "camid: >%s< camindx: >%d< cmd1: >%s< cmd2: >%s< cmd3: >%s<"
-        , uri_camid.c_str(), camindx
-        , uri_cmd1.c_str(), uri_cmd2.c_str()
-        , uri_cmd3.c_str());
+        , "cmd0: >%s< cmd1: >%s< cmd2: >%s< cmd3: >%s< camindx: >%d< "
+        , uri_cmd0.c_str(), uri_cmd1.c_str()
+        , uri_cmd2.c_str(), uri_cmd3.c_str()
+        , camindx );
 
 }
 
@@ -951,7 +951,7 @@ cls_webu_ans::cls_webu_ans(cls_motapp *p_app, const char *uri)
     char *tmplang;
 
     url           = "";
-    uri_camid     = "";
+    uri_cmd0      = "";
     uri_cmd1      = "";
     uri_cmd2      = "";
     uri_cmd3      = "";
