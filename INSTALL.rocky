@@ -1,0 +1,44 @@
+The following is a brief overview of the building and installing instructions for debian / ubuntu.
+
+For full instructions on how to build and install Motion, see the motion_guide.html that is
+distributed with this source code. The guide also includes instructions for building Motion
+on distributions other than debian/ubuntu such as BSD, Mac and Centos.
+
+The packages and library names change frequently and vary across base operating systems.
+Adjust the following lines as required by the base operating system.
+
+Install buildessential equivalents
+    Minimal:
+    sudo dnf --setopt="install_weak_deps=False" install \
+         gcc \
+         gcc-c++ \
+         make
+
+    Extensive, but major cruft:
+    sudo dnf --setopt="install_weak_deps=False" groupinstall "Development Tools"
+
+Install necessary additional build tools and support packages:
+    sudo dnf --setopt="install_weak_deps=False" install \
+        autoconf \
+        automake \
+        autopoint \
+        pkgconf \
+        libtool \
+        libjpeg-devel \
+        libzip-devel \
+        gettext \
+        gettext-devel \
+        libmicrohttpd-devel
+
+Install FFMPEG packages
+    sudo apt-get install libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev
+
+Once the packages have been installed, continue as for the default (.deb system) compilation:
+    autoreconf -fiv
+    ./configure
+    make
+    make install
+
+Sample custom configuration options:
+    --prefix               :  Specify the install location for the motion package
+    --with-ffmpeg=[dir]    :  Specify the location in which ffmpeg/libav is installed.
