@@ -1,4 +1,5 @@
-The following is a brief overview of the building and installing instructions for debian / ubuntu.
+The following is a brief overview of the building and installing instructions for for Rocky Linux 9 
+(and presumably other compatible RPM Enterprise Linux distros).
 
 For full instructions on how to build and install Motion, see the motion_guide.html that is
 distributed with this source code. The guide also includes instructions for building Motion
