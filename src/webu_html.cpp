@@ -1601,6 +1601,8 @@ void cls_webu_html::user_page()
     FILE *fp = NULL;
 
     webua->resp_page = "";
+    webua->resp_type = WEBUI_RESP_HTML;
+
     pos = app->cfg->conf_filename.find("/",0);
     if (pos == std::string::npos) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
@@ -1627,8 +1629,10 @@ void cls_webu_html::user_page()
     mylower(ext);
     if (ext == "json") {
         webua->resp_type = WEBUI_RESP_JSON;
-    } else if ((ext == "js") || (ext == "css")) {
-        webua->resp_type = WEBUI_RESP_TEXT;
+    } else if ((ext == "js") ) {
+        webua->resp_type = WEBUI_RESP_JS;
+    } else if ((ext == "css") ) {
+        webua->resp_type = WEBUI_RESP_CSS;
     } else if (ext == "html") {
         webua->resp_type = WEBUI_RESP_HTML;
     } else {
@@ -1647,6 +1651,7 @@ void cls_webu_html::user_page()
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             , _("Invalid user requested file: %s")
             , fname.c_str());
+        webua->resp_type = WEBUI_RESP_HTML;
         return;
     } else {
         while (fgets(response, PATH_MAX-1, fp)) {
@@ -1654,8 +1659,6 @@ void cls_webu_html::user_page()
         }
         myfclose(fp);
     }
-
-
 }
 
 void cls_webu_html::main()

@@ -710,6 +710,10 @@ void cls_webu_ans::mhd_send()
         MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/plain;");
     } else if (resp_type == WEBUI_RESP_JSON) {
         MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "application/json;");
+    } else if (resp_type == WEBUI_RESP_CSS) {
+        MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/css;");
+    } else if (resp_type == WEBUI_RESP_JS) {
+        MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/javascript;");
     } else {
         MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
     }
