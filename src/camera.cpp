@@ -105,7 +105,7 @@ void cls_camera::ring_process_debug()
     char tmp[32];
     const char *t;
 
-    if (current_image->flags & IMAGE_TRIGGER) {
+    if (current_image->trigger) {
         t = "Trigger";
     } else if (current_image->flags & IMAGE_MOTION) {
         t = "Motion";
@@ -222,7 +222,7 @@ void cls_camera::detected_trigger()
     time_t raw_time;
     struct tm evt_tm;
 
-    if (current_image->flags & IMAGE_TRIGGER) {
+    if (current_image->trigger) {
         if (event_curr_nbr != event_prev_nbr) {
             info_reset();
             event_prev_nbr = event_curr_nbr;
@@ -1211,7 +1211,7 @@ void cls_camera::areadetect()
 
     if ((cfg->area_detect != "" ) &&
         (event_curr_nbr != areadetect_eventnbr) &&
-        (current_image->flags & IMAGE_TRIGGER)) {
+        (current_image->trigger)) {
         j = (int)cfg->area_detect.length();
         for (i = 0; i < j; i++) {
             z = cfg->area_detect[(uint)i] - 49; /* characters are stored as ascii 48-57 (0-9) */
@@ -1285,6 +1285,7 @@ void cls_camera::resetimages()
     current_image = &imgs.image_ring[imgs.ring_in];
     current_image->diffs = 0;
     current_image->flags = 0;
+    current_image->trigger = false;
     current_image->cent_dist = 0;
     memset(&current_image->location, 0, sizeof(current_image->location));
     current_image->total_labels = 0;
@@ -1543,7 +1544,8 @@ void cls_camera::actions_emulate()
         postcap = cfg->post_capture;
     }
 
-    current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
+    current_image->trigger = true;
+    current_image->flags |= IMAGE_SAVE;
     /* Mark all images in image_ring to be saved */
     for (indx = 0; indx < imgs.ring_size; indx++) {
         imgs.image_ring[indx].flags |= IMAGE_SAVE;
@@ -1571,7 +1573,8 @@ void cls_camera::actions_motion()
 
     if (frame_count >= cfg->minimum_motion_frames) {
 
-        current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
+        current_image->trigger = true;
+        current_image->flags |= IMAGE_SAVE;
 
         if ((detecting_motion == false) &&
             (movie_norm->is_running == true)) {

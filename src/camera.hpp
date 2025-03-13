@@ -21,7 +21,6 @@
 #define _INCLUDE_CAMERA_HPP_
 
 #define IMAGE_MOTION     1
-#define IMAGE_TRIGGER    2
 #define IMAGE_SAVE       4
 #define IMAGE_SAVED      8
 #define IMAGE_PRECAP    16
@@ -67,6 +66,7 @@ struct ctx_image_data {
     int                 shot;           /* Sub second timestamp count */
     unsigned long       cent_dist;      /* Movement center to img center distance * Note: Dist is calculated distX*distX + distY*distY */
     unsigned int        flags;          /* See IMAGE_* defines */
+    bool                trigger;
     ctx_coord           location;       /* coordinates for center and size of last motion detection*/
     int                 total_labels;
 };
