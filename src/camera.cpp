@@ -109,7 +109,7 @@ void cls_camera::ring_process_debug()
         t = "Trigger";
     } else if (current_image->motion) {
         t = "Motion";
-    } else if (current_image->flags & IMAGE_PRECAP) {
+    } else if (current_image->precap) {
         t = "Precap";
     } else if (current_image->flags & IMAGE_POSTCAP) {
         t = "Postcap";
@@ -1287,6 +1287,7 @@ void cls_camera::resetimages()
     current_image->flags = 0;
     current_image->trigger = false;
     current_image->motion = false;
+    current_image->precap = false;
     current_image->cent_dist = 0;
     memset(&current_image->location, 0, sizeof(current_image->location));
     current_image->total_labels = 0;
@@ -1597,7 +1598,7 @@ void cls_camera::actions_motion()
         current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
         postcap--;
     } else {
-        current_image->flags |= IMAGE_PRECAP;
+        current_image->precap = true;
     }
 
     detected();
@@ -1654,7 +1655,7 @@ void cls_camera::actions_event()
         ((frame_curr_ts.tv_sec - movie_start_time) >=
             cfg->movie_max_time) &&
         ( !(current_image->flags & IMAGE_POSTCAP)) &&
-        ( !(current_image->flags & IMAGE_PRECAP))) {
+        ( current_image->precap == false)) {
         movie_end();
         movie_start();
     }
@@ -1698,7 +1699,7 @@ void cls_camera::actions()
         current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
         postcap--;
     } else {
-        current_image->flags |= IMAGE_PRECAP;
+        current_image->precap = true;
         if ((cfg->event_gap == 0) && detecting_motion) {
             event_stop = true;
         }

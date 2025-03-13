@@ -22,7 +22,6 @@
 
 #define IMAGE_SAVE       4
 #define IMAGE_SAVED      8
-#define IMAGE_PRECAP    16
 #define IMAGE_POSTCAP   32
 
 enum CAMERA_TYPE {
@@ -67,6 +66,7 @@ struct ctx_image_data {
     unsigned int        flags;          /* See IMAGE_* defines */
     bool                trigger;
     bool                motion;
+    bool                precap;
     ctx_coord           location;       /* coordinates for center and size of last motion detection*/
     int                 total_labels;
 };
