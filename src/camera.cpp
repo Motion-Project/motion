@@ -128,18 +128,22 @@ void cls_camera::ring_process_debug()
 
 void cls_camera::ring_process_image()
 {
-    picture->process_norm();
-    if (movie_norm->put_image(current_image
-            , &current_image->imgts) == -1) {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+    if (current_image->save_pic) {
+        picture->process_norm();
     }
-    if (movie_motion->put_image(&imgs.image_motion
-            , &imgs.image_motion.imgts) == -1) {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
-    }
-    if (movie_extpipe->put_image(current_image
-            , &current_image->imgts) == -1) {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+    if (current_image->save_movie) {
+        if (movie_norm->put_image(current_image
+                , &current_image->imgts) == -1) {
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+        }
+        if (movie_motion->put_image(&imgs.image_motion
+                , &imgs.image_motion.imgts) == -1) {
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+        }
+        if (movie_extpipe->put_image(current_image
+                , &current_image->imgts) == -1) {
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+        }
     }
 }
 
@@ -149,10 +153,10 @@ void cls_camera::ring_process()
     ctx_image_data *saved_current_image = current_image;
 
     do {
-        if ((imgs.image_ring[imgs.ring_out].flags & (IMAGE_SAVE | IMAGE_SAVED)) != IMAGE_SAVE) {
+        if ((imgs.image_ring[imgs.ring_out].save_pic == false) &&
+            (imgs.image_ring[imgs.ring_out].save_movie == false)) {
             break;
         }
-
         current_image = &imgs.image_ring[imgs.ring_out];
 
         if (current_image->shot <= cfg->framerate) {
@@ -162,7 +166,8 @@ void cls_camera::ring_process()
             ring_process_image();
         }
 
-        current_image->flags |= IMAGE_SAVED;
+        current_image->save_pic = false;
+        current_image->save_movie = false;
 
         if (current_image->motion) {
             if (cfg->picture_output == "best") {
@@ -1284,11 +1289,12 @@ void cls_camera::resetimages()
 
     current_image = &imgs.image_ring[imgs.ring_in];
     current_image->diffs = 0;
-    current_image->flags = 0;
     current_image->trigger = false;
     current_image->motion = false;
     current_image->precap = false;
     current_image->postcap = false;
+    current_image->save_pic = false;
+    current_image->save_movie = false;
     current_image->cent_dist = 0;
     memset(&current_image->location, 0, sizeof(current_image->location));
     current_image->total_labels = 0;
@@ -1548,10 +1554,12 @@ void cls_camera::actions_emulate()
     }
 
     current_image->trigger = true;
-    current_image->flags |= IMAGE_SAVE;
+    current_image->save_pic = true;
+    current_image->save_movie = true;
     /* Mark all images in image_ring to be saved */
     for (indx = 0; indx < imgs.ring_size; indx++) {
-        imgs.image_ring[indx].flags |= IMAGE_SAVE;
+        imgs.image_ring[indx].save_pic = true;
+        imgs.image_ring[indx].save_movie = true;
     }
 
     detected();
@@ -1575,9 +1583,9 @@ void cls_camera::actions_motion()
     }
 
     if (frame_count >= cfg->minimum_motion_frames) {
-
         current_image->trigger = true;
-        current_image->flags |= IMAGE_SAVE;
+        current_image->save_pic = true;
+        current_image->save_movie = true;
 
         if ((detecting_motion == false) &&
             (movie_norm->is_running == true)) {
@@ -1591,13 +1599,15 @@ void cls_camera::actions_motion()
         postcap = cfg->post_capture;
 
         for (indx = 0; indx < imgs.ring_size; indx++) {
-            imgs.image_ring[indx].flags |= IMAGE_SAVE;
+            imgs.image_ring[indx].save_pic = true;
+            imgs.image_ring[indx].save_movie = true;
         }
 
     } else if (postcap > 0) {
         /* we have motion in this frame, but not enough frames for trigger. Check postcap */
         current_image->postcap = true;
-        current_image->flags |= IMAGE_SAVE;
+        current_image->save_pic = true;
+        current_image->save_movie = true;
         postcap--;
     } else {
         current_image->precap = true;
@@ -1699,7 +1709,8 @@ void cls_camera::actions()
         actions_motion();
     } else if (postcap > 0) {
         current_image->postcap = true;
-        current_image->flags |= IMAGE_SAVE;
+        current_image->save_pic = true;
+        current_image->save_movie = true;
         postcap--;
     } else {
         current_image->precap = true;
@@ -1709,7 +1720,7 @@ void cls_camera::actions()
         detecting_motion = false;
     }
 
-    if (current_image->flags & IMAGE_SAVE) {
+    if ((current_image->save_pic) || (current_image->save_movie )) {
         lasttime = current_image->monots.tv_sec;
     }
 
