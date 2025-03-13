@@ -107,7 +107,7 @@ void cls_camera::ring_process_debug()
 
     if (current_image->trigger) {
         t = "Trigger";
-    } else if (current_image->flags & IMAGE_MOTION) {
+    } else if (current_image->motion) {
         t = "Motion";
     } else if (current_image->flags & IMAGE_PRECAP) {
         t = "Precap";
@@ -164,7 +164,7 @@ void cls_camera::ring_process()
 
         current_image->flags |= IMAGE_SAVED;
 
-        if (current_image->flags & IMAGE_MOTION) {
+        if (current_image->motion) {
             if (cfg->picture_output == "best") {
                 if (current_image->diffs > imgs.image_preview.diffs) {
                     picture->save_preview();
@@ -1286,6 +1286,7 @@ void cls_camera::resetimages()
     current_image->diffs = 0;
     current_image->flags = 0;
     current_image->trigger = false;
+    current_image->motion = false;
     current_image->cent_dist = 0;
     memset(&current_image->location, 0, sizeof(current_image->location));
     current_image->total_labels = 0;
@@ -1561,7 +1562,7 @@ void cls_camera::actions_motion()
     int pos = imgs.ring_in;
 
     for (indx = 0; indx < cfg->minimum_motion_frames; indx++) {
-        if (imgs.image_ring[pos].flags & IMAGE_MOTION) {
+        if (imgs.image_ring[pos].motion) {
             frame_count++;
         }
         if (pos == 0) {
@@ -1668,7 +1669,7 @@ void cls_camera::actions()
 
      if ((current_image->diffs > threshold) &&
         (current_image->diffs < threshold_maximum)) {
-        current_image->flags |= IMAGE_MOTION;
+        current_image->motion = true;
         info_diff_cnt++;
         info_diff_tot += (uint)current_image->diffs;
         info_sdev_tot += (uint)current_image->location.stddev_xy;
@@ -1691,7 +1692,7 @@ void cls_camera::actions()
 
     if ((cfg->emulate_motion || event_user) && (startup_frames == 0)) {
         actions_emulate();
-    } else if ((current_image->flags & IMAGE_MOTION) && (startup_frames == 0)) {
+    } else if ((current_image->motion) && (startup_frames == 0)) {
         actions_motion();
     } else if (postcap > 0) {
         current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
