@@ -28,6 +28,7 @@
 #include "webu_stream.hpp"
 #include "webu_mpegts.hpp"
 #include "webu_json.hpp"
+#include "webu_text.hpp"
 #include "webu_post.hpp"
 #include "webu_file.hpp"
 #include "video_v4l2.hpp"
@@ -771,6 +772,12 @@ void cls_webu_ans::answer_get()
         }
         webu_json->main();
 
+    } else if ((uri_cmd1 == "detection") || (uri_cmd1 == "action")) {
+        if (webu_text == nullptr) {
+            webu_text = new cls_webu_text(this);
+        }
+        webu_text->main();
+
     } else {
         if (webu_html == nullptr) {
             webu_html = new cls_webu_html(this);
@@ -992,6 +999,7 @@ cls_webu_ans::cls_webu_ans(cls_motapp *p_app, const char *uri)
     webu_file = nullptr;
     webu_html = nullptr;
     webu_json = nullptr;
+    webu_text = nullptr;
     webu_post = nullptr;
     webu_stream = nullptr;
 
@@ -1009,6 +1017,7 @@ cls_webu_ans::~cls_webu_ans()
     mydelete(webu_file);
     mydelete(webu_html);
     mydelete(webu_json);
+    mydelete(webu_text);
     mydelete(webu_post);
     mydelete(webu_stream);
 

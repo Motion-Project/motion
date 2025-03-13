@@ -59,6 +59,7 @@
             cls_webu_html   *webu_html;
             cls_webu_json   *webu_json;
             cls_webu_post   *webu_post;
+            cls_webu_text   *webu_text;
             cls_webu_stream *webu_stream;
 
             int             mhd_first;      /* Boolean for whether it is the first connection*/
