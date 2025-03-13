@@ -111,7 +111,7 @@ void cls_camera::ring_process_debug()
         t = "Motion";
     } else if (current_image->precap) {
         t = "Precap";
-    } else if (current_image->flags & IMAGE_POSTCAP) {
+    } else if (current_image->postcap) {
         t = "Postcap";
     } else {
         t = "Other";
@@ -1288,6 +1288,7 @@ void cls_camera::resetimages()
     current_image->trigger = false;
     current_image->motion = false;
     current_image->precap = false;
+    current_image->postcap = false;
     current_image->cent_dist = 0;
     memset(&current_image->location, 0, sizeof(current_image->location));
     current_image->total_labels = 0;
@@ -1595,7 +1596,8 @@ void cls_camera::actions_motion()
 
     } else if (postcap > 0) {
         /* we have motion in this frame, but not enough frames for trigger. Check postcap */
-        current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
+        current_image->postcap = true;
+        current_image->flags |= IMAGE_SAVE;
         postcap--;
     } else {
         current_image->precap = true;
@@ -1654,8 +1656,8 @@ void cls_camera::actions_event()
         (event_curr_nbr == event_prev_nbr) &&
         ((frame_curr_ts.tv_sec - movie_start_time) >=
             cfg->movie_max_time) &&
-        ( !(current_image->flags & IMAGE_POSTCAP)) &&
-        ( current_image->precap == false)) {
+        (current_image->postcap == false) &&
+        (current_image->precap == false)) {
         movie_end();
         movie_start();
     }
@@ -1696,7 +1698,8 @@ void cls_camera::actions()
     } else if ((current_image->motion) && (startup_frames == 0)) {
         actions_motion();
     } else if (postcap > 0) {
-        current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
+        current_image->postcap = true;
+        current_image->flags |= IMAGE_SAVE;
         postcap--;
     } else {
         current_image->precap = true;
