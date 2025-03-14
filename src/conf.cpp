@@ -140,6 +140,7 @@ ctx_parm config_parms[] = {
     {"movie_passthrough",         PARM_TYP_BOOL,   PARM_CAT_10, PARM_LEVEL_LIMITED },
     {"movie_filename",            PARM_TYP_STRING, PARM_CAT_10, PARM_LEVEL_LIMITED },
     {"movie_retain",              PARM_TYP_LIST,   PARM_CAT_10, PARM_LEVEL_LIMITED },
+    {"movie_all_frames",          PARM_TYP_BOOL,   PARM_CAT_10, PARM_LEVEL_LIMITED },
     {"movie_extpipe_use",         PARM_TYP_BOOL,   PARM_CAT_10, PARM_LEVEL_RESTRICTED },
     {"movie_extpipe",             PARM_TYP_STRING, PARM_CAT_10, PARM_LEVEL_RESTRICTED },
 
@@ -2110,6 +2111,19 @@ void cls_config::edit_movie_retain(std::string &parm, enum PARM_ACT pact)
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_retain",_("movie_retain"));
 }
 
+void cls_config::edit_movie_all_frames(std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        movie_all_frames = true;
+    } else if (pact == PARM_ACT_SET) {
+        edit_set_bool(movie_all_frames, parm);
+    } else if (pact == PARM_ACT_GET) {
+        edit_get_bool(parm, movie_all_frames);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_all_frames",_("movie_all_frames"));
+}
+
 void cls_config::edit_movie_extpipe_use(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
@@ -3311,6 +3325,7 @@ void cls_config::edit_cat10(std::string parm_nm, std::string &parm_val, enum PAR
     } else if (parm_nm == "movie_passthrough") {       edit_movie_passthrough(parm_val, pact);
     } else if (parm_nm == "movie_filename") {          edit_movie_filename(parm_val, pact);
     } else if (parm_nm == "movie_retain") {            edit_movie_retain(parm_val, pact);
+    } else if (parm_nm == "movie_all_frames") {        edit_movie_all_frames(parm_val, pact);
     } else if (parm_nm == "movie_extpipe_use") {       edit_movie_extpipe_use(parm_val, pact);
     } else if (parm_nm == "movie_extpipe") {           edit_movie_extpipe(parm_val, pact);
     }

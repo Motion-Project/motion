@@ -1562,6 +1562,8 @@ void cls_camera::actions_emulate()
         imgs.image_ring[indx].save_movie = true;
     }
 
+    lasttime = current_image->monots.tv_sec;
+
     detected();
 }
 
@@ -1609,9 +1611,13 @@ void cls_camera::actions_motion()
         current_image->save_pic = true;
         current_image->save_movie = true;
         postcap--;
+    } else if ((cfg->movie_all_frames) && (event_curr_nbr == event_prev_nbr)) {
+        current_image->save_movie = true;
     } else {
         current_image->precap = true;
     }
+
+    lasttime = current_image->monots.tv_sec;
 
     detected();
 }
@@ -1712,16 +1718,14 @@ void cls_camera::actions()
         current_image->save_pic = true;
         current_image->save_movie = true;
         postcap--;
+    } else if ((cfg->movie_all_frames) && (event_curr_nbr == event_prev_nbr)) {
+        current_image->save_movie = true;
     } else {
         current_image->precap = true;
         if ((cfg->event_gap == 0) && detecting_motion) {
             event_stop = true;
         }
         detecting_motion = false;
-    }
-
-    if ((current_image->save_pic) || (current_image->save_movie )) {
-        lasttime = current_image->monots.tv_sec;
     }
 
     if (detecting_motion) {
