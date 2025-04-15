@@ -453,9 +453,9 @@ void mystrftime_base(cls_camera *cam
                 indx += (strlen("{secdetect}")-1);
             } else {
                 if (wd >0) {
-                    sprintf(tmp, "\%%%d%s", wd, tst.c_str());
+                    sprintf(tmp, "%%%d%s", wd, tst.c_str());
                 } else {
-                    sprintf(tmp, "\%%%s", tst.c_str());
+                    sprintf(tmp, "%%%s", tst.c_str());
                 }
                 user_fmt.append(tmp);
             }
