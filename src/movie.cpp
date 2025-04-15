@@ -434,14 +434,8 @@ int cls_movie::set_codec()
 
     retcd = avcodec_open2(ctx_codec, codec, &opts);
     if (retcd < 0) {
-        if (codec->supported_framerates) {
-            const AVRational *p_fps = codec->supported_framerates;
-            while (p_fps->num) {
-                MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
-                    ,_("Reported FPS Supported %d/%d"), p_fps->num, p_fps->den);
-                p_fps++;
-            }
-        }
+        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
+            ,_("Unable to open codec.  Trying alternate FPS values"));
         chkrate = 1;
         while ((chkrate < 36) && (retcd != 0)) {
             ctx_codec->time_base.den = chkrate;
@@ -454,8 +448,10 @@ int cls_movie::set_codec()
             av_dict_free(&opts);
             free_context();
             return -1;
+        } else {
+            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
+            ,_("Opened codec with %d fps."), chkrate);
         }
-
     }
     av_dict_free(&opts);
 
