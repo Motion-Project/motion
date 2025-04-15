@@ -51,9 +51,6 @@ void cls_libcam::log_controls()
 {
     MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls:");
 
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeEnable(bool)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeLocked(bool)");
-
     MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeMeteringMode(int)");
     MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringCentreWeighted = 0");
     MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringSpot = 1");
@@ -176,13 +173,6 @@ void cls_libcam:: log_draft()
     MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationFast = 1");
     MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationHighQuality = 2");
 
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeState(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateSearching = 1");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateConverged = 2");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateLocked = 3");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateFlashRequired = 4");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStatePrecapture = 5");
-
     MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbState(int)");
     MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbStateInactive = 0");
     MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbStateSearching = 1");
@@ -266,12 +256,6 @@ int cls_libcam::start_mgr()
 
 void cls_libcam::config_control_item(std::string pname, std::string pvalue)
 {
-    if (pname == "AeEnable") {
-        controls.set(controls::AeEnable, mtob(pvalue));
-    }
-    if (pname == "AeLocked") {
-        controls.set(controls::AeLocked, mtob(pvalue));
-    }
     if (pname == "AeMeteringMode") {
        controls.set(controls::AeMeteringMode, mtoi(pvalue));
     }
@@ -418,9 +402,6 @@ void cls_libcam::config_control_item(std::string pname, std::string pvalue)
     }
     if (pname == "ColorCorrectionAberrationMode") {
         controls.set(controls::draft::ColorCorrectionAberrationMode, mtoi(pvalue));
-    }
-    if (pname == "AeState") {
-        controls.set(controls::draft::AeState, mtoi(pvalue));
     }
     if (pname == "AwbState") {
         controls.set(controls::draft::AwbState, mtoi(pvalue));
