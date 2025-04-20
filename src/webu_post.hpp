@@ -32,6 +32,13 @@
             mhdrslt iterate_post (const char *key, const char *data, size_t datasz);
             mhdrslt processor_init();
             mhdrslt processor_start(const char *upload_data, size_t *upload_data_size);
+            void action_eventend();
+            void action_eventstart();
+            void action_snapshot();
+            void action_pause_on();
+            void action_pause_off();
+            void action_restart();
+            void action_stop();
 
         private:
             cls_motapp      *app;
@@ -51,14 +58,7 @@
             void iterate_post_append(int indx, const char *data, size_t datasz);
             void iterate_post_new(const char *key, const char *data, size_t datasz);
             void process_actions();
-            void action_eventend();
-            void action_eventstart();
-            void action_snapshot();
-            void action_pause_on();
-            void action_pause_off();
             void action_pause_schedule();
-            void action_restart();
-            void action_stop();
             void action_user();
             void write_config();
             void config_set(int indx_parm, std::string parm_val);

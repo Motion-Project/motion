@@ -388,12 +388,15 @@
               <td bgcolor="#edf4f9" ><a href="#movie_filename" >movie_filename</a> </td>
               <td bgcolor="#edf4f9" ><a href="#movie_extpipe_use" >movie_extpipe_use</a> </td>
               <td bgcolor="#edf4f9" ><a href="#movie_extpipe" >movie_extpipe</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#timelapse_filename" >timelapse_filename</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_all_frames" >movie_all_frames</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_filename" >timelapse_filename</a> </td>
               <td bgcolor="#edf4f9" ><a href="#timelapse_interval" >timelapse_interval</a> </td>
               <td bgcolor="#edf4f9" ><a href="#timelapse_mode" >timelapse_mode</a> </td>
               <td bgcolor="#edf4f9" ><a href="#timelapse_container" >timelapse_container</a> </td>
+            </tr>
+            <tr>
               <td bgcolor="#edf4f9" ><a href="#timelapse_fps" >timelapse_fps</a> </td>
             </tr>
           </tbody>
@@ -2257,6 +2260,14 @@
         <ul>
           <li> Values: String | Default: Not defined</li>
           The program name and options for processing the images.
+        </ul>
+        <p></p>
+
+        <h3><a name="movie_all_frames"></a> movie_all_frames </h3>
+        <ul>
+          <li> Values: on, off | Default: on</li>
+          Specifies whether to send all frames for encoding during an event instead of just
+          those associated with motion or pre/post capture.
         </ul>
         <p></p>
 

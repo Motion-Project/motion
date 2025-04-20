@@ -125,22 +125,10 @@ void cls_motapp::signal_process()
         }
         break;
     case MOTION_SIGNAL_SIGHUP:      /* Reload the parameters and restart*/
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Reloading parameters"));
         reload_all = true;
-        webu->finish = true;
-        for (indx=0; indx<cam_cnt; indx++) {
-            cam_list[indx]->event_stop = true;
-            cam_list[indx]->handler_stop = true;
-        }
-        for (indx=0; indx<snd_cnt; indx++) {
-            snd_list[indx]->handler_stop = true;
-        }
-        for (indx=0; indx<cam_cnt; indx++) {
-            cam_list[indx]->handler_shutdown();
-        }
-        for (indx=0; indx<snd_cnt; indx++) {
-            snd_list[indx]->handler_shutdown();
-        }
-        break;
+        /*FALLTHROUGH*/
     case MOTION_SIGNAL_SIGTERM:     /* Quit application */
         webu->finish = true;
         webu->restart = false;
@@ -516,6 +504,9 @@ void cls_motapp::init(int p_argc, char *p_argv[])
     webu = nullptr;
     allcam = nullptr;
     schedule = nullptr;
+    cam_list.clear();
+    snd_list.clear();
+
 
     pthread_mutex_init(&mutex_camlst, NULL);
     pthread_mutex_init(&mutex_post, NULL);

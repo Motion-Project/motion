@@ -683,15 +683,13 @@ void util_exec_command(cls_camera *cam, const char *command, const char *filenam
         exit(1);
     }
 
-    if (pid > 0) {
-        waitpid(pid, NULL, 0);
-    } else {
+    if (pid == 0) {
         MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
             ,_("Unable to start external command '%s'"), stamp);
+    } else {
+        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO
+            ,_("Executing external command '%s'"), stamp);
     }
-
-    MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO
-        ,_("Executing external command '%s'"), stamp);
 }
 
 void util_exec_command(cls_camera *cam, std::string cmd)

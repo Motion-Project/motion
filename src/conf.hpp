@@ -204,6 +204,7 @@
             bool            movie_passthrough;
             std::string     movie_filename;
             std::string     movie_retain;
+            bool            movie_all_frames;
             bool            movie_extpipe_use;
             std::string     movie_extpipe;
 
@@ -441,6 +442,7 @@
             void edit_snapshot_filename(std::string &parm, enum PARM_ACT pact);
             void edit_snapshot_interval(std::string &parm, enum PARM_ACT pact);
 
+            void edit_movie_all_frames(std::string &parm, enum PARM_ACT pact);
             void edit_movie_bps(std::string &parm, enum PARM_ACT pact);
             void edit_movie_container(std::string &parm, enum PARM_ACT pact);
             void edit_movie_extpipe(std::string &parm, enum PARM_ACT pact);

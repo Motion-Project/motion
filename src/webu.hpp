@@ -55,7 +55,9 @@
     enum WEBUI_RESP {
         WEBUI_RESP_HTML     = 0,
         WEBUI_RESP_JSON     = 1,
-        WEBUI_RESP_TEXT     = 2
+        WEBUI_RESP_TEXT     = 2,
+        WEBUI_RESP_JS       = 3,
+        WEBUI_RESP_CSS      = 4
     };
 
     struct ctx_webu_clients {
