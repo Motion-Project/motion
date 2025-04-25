@@ -147,9 +147,9 @@ void cls_log::add_errmsg(int flgerr, int err_save)
     }
 
     memset(err_buf, 0, sizeof(err_buf));
-    #if defined(XSI_STRERROR_R) /* XSI-compliant strerror_r() */
+    #if not defined(_GNU_SOURCE) /* XSI-compliant strerror_r() */
         (void)strerror_r(err_save, err_buf, sizeof(err_buf));
-    #else/* GNU-specific strerror_r() */
+    #else /* GNU-specific strerror_r() */
         (void)snprintf(err_buf, sizeof(err_buf),"%s"
             , strerror_r(err_save, err_buf, sizeof(err_buf)));
     #endif
