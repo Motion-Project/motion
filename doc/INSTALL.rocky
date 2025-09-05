@@ -8,6 +8,10 @@ on distributions other than debian/ubuntu such as BSD, Mac and Centos.
 The packages and library names change frequently and vary across base operating systems.
 Adjust the following lines as required by the base operating system.
 
+Install the EPEL repo:
+    sudo dnf install \
+        https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+
 Install buildessential equivalents
     Minimal:
     sudo dnf --setopt="install_weak_deps=False" install \
@@ -32,13 +36,18 @@ Install necessary additional build tools and support packages:
         libmicrohttpd-devel
 
 Install FFMPEG packages
-    sudo apt-get install libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev
+    sudo dnf --setopt="install_weak_deps=False" install \
+        libavformat-free-devel \
+        libavcodec-free-devel \
+        libavutil-free-devel \
+        libavdevice-free-devel \
+        libswscale-free-devel
 
 Once the packages have been installed, continue as for the default (.deb system) compilation:
     autoreconf -fiv
     ./configure
     make
-    make install
+    sudo make install
 
 Sample custom configuration options:
     --prefix               :  Specify the install location for the motion package
