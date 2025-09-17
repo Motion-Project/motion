@@ -1310,7 +1310,7 @@ static int v4l2_device_init(struct context *cnt, struct video_dev *curdev)
     src_v4l2_t *vid_source;
 
     /* Allocate memory for the state structure. */
-    if (!(vid_source = calloc(sizeof(src_v4l2_t), 1))) {
+    if (!(vid_source = calloc(1, sizeof(src_v4l2_t)))) {
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, _("Out of memory."));
         vid_source = NULL;
         return -1;
@@ -1845,7 +1845,7 @@ int v4l2_palette_valid(char *video_device, int v4l2_palette)
 
         v4l2_palette_init(palette_array);
 
-        vid_source = calloc(sizeof(src_v4l2_t), 1);
+        vid_source = calloc(1, sizeof(src_v4l2_t));
         vid_source->fd_device = open(video_device, O_RDWR|O_CLOEXEC);
         if (vid_source->fd_device < 0) {
             MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
@@ -1934,7 +1934,7 @@ int v4l2_parms_valid(char *video_device, int v4l2_palette, int v4l2_fps, int v4l
 
         v4l2_palette_init(palette_array);
 
-        vid_source = calloc(sizeof(src_v4l2_t), 1);
+        vid_source = calloc(1, sizeof(src_v4l2_t));
         vid_source->fd_device = open(video_device, O_RDWR|O_CLOEXEC);
         if (vid_source->fd_device < 0) {
             MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
