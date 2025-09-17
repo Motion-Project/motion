@@ -553,7 +553,7 @@ static int ffmpeg_set_quality(struct ffmpeg *ffmpeg)
                 // magic number
                 ffmpeg->quality = 4000;
             }
-            ffmpeg->ctx_codec->profile = FF_PROFILE_H264_HIGH;
+            ffmpeg->ctx_codec->profile = MY_PROFILE_H264_MAIN;
             ffmpeg->ctx_codec->bit_rate = ffmpeg->quality;
         } else {
             // Control other H264 encoders quality via CRF
@@ -754,14 +754,8 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg)
 
     retcd = avcodec_open2(ffmpeg->ctx_codec, ffmpeg->codec, &ffmpeg->opts);
     if (retcd < 0) {
-        if (ffmpeg->codec->supported_framerates) {
-            const AVRational *fps = ffmpeg->codec->supported_framerates;
-            while (fps->num) {
-                MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
-                    ,_("Reported FPS Supported %d/%d"), fps->num, fps->den);
-                fps++;
-            }
-        }
+        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
+            , _("Unable to open codec.  Trying alternate FPS values"));
         chkrate = 1;
         while ((chkrate < 36) && (retcd != 0)) {
             ffmpeg->ctx_codec->time_base.den = chkrate;
@@ -774,8 +768,10 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg)
             av_dict_free(&ffmpeg->opts);
             ffmpeg_free_context(ffmpeg);
             return -1;
+        } else {
+            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
+                ,_("Opened codec with %d fps."), chkrate);
         }
-
     }
     av_dict_free(&ffmpeg->opts);
 
@@ -1495,11 +1491,11 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const s
             ffmpeg->gop_cnt ++;
             if (ffmpeg->gop_cnt == ffmpeg->ctx_codec->gop_size ) {
                 ffmpeg->picture->pict_type = AV_PICTURE_TYPE_I;
-                ffmpeg->picture->key_frame = 1;
+                my_frame_key(ffmpeg->picture);
                 ffmpeg->gop_cnt = 0;
             } else {
                 ffmpeg->picture->pict_type = AV_PICTURE_TYPE_P;
-                ffmpeg->picture->key_frame = 0;
+                my_frame_interlaced(ffmpeg->picture);
             }
 
             /* A return code of -2 is thrown by the put_frame

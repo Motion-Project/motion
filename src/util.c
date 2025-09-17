@@ -28,7 +28,24 @@
 
 #ifdef HAVE_FFMPEG
 
-
+/*********************************************/
+void my_frame_key(AVFrame *frame)
+{
+    #if (MYFFVER < 60016)
+        frame->key_frame = 1;
+    #else
+        frame->flags |= AV_FRAME_FLAG_KEY;
+    #endif
+}
+/*********************************************/
+void my_frame_interlaced(AVFrame *frame)
+{
+    #if (MYFFVER < 60016)
+        frame->key_frame = 0;
+    #else
+        frame->flags |= AV_FRAME_FLAG_INTERLACED;
+    #endif
+}
 /*********************************************/
 AVFrame *my_frame_alloc(void)
 {

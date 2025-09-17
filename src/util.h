@@ -23,6 +23,15 @@
 #define _INCLUDE_UTIL_H
 
 #ifdef HAVE_FFMPEG
+    #if (MYFFVER < 60016)
+        #define MY_PROFILE_H264_BASELINE    FF_PROFILE_H264_BASELINE
+        #define MY_PROFILE_H264_MAIN        FF_PROFILE_H264_MAIN
+        #define MY_PROFILE_H264_HIGH        FF_PROFILE_H264_HIGH
+    #else
+        #define MY_PROFILE_H264_BASELINE    AV_PROFILE_H264_BASELINE
+        #define MY_PROFILE_H264_MAIN        AV_PROFILE_H264_MAIN
+        #define MY_PROFILE_H264_HIGH        AV_PROFILE_H264_HIGH
+    #endif
 
     #if ( MYFFVER >= 56000)
         #define MY_PIX_FMT_YUV420P   AV_PIX_FMT_YUV420P
@@ -78,6 +87,8 @@
         typedef AVCodec my_AVCodec; /* Version independent for AVCodec*/
     #endif
 
+    void my_frame_key(AVFrame *frame);
+    void my_frame_interlaced(AVFrame *frame);
     AVFrame *my_frame_alloc(void);
     void my_frame_free(AVFrame *frame);
     void my_packet_free(AVPacket *pkt);
