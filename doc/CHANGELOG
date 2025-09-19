@@ -1,3 +1,6 @@
+Summary of changes for version 4.7.1 are below
+    * Revision for new versions of FFMPEG
+    * Fix compiler warnings on calloc
 Summary of changes for version 4.7.0 are below
     * Documentation updates
     * Remove outdated MMAL camera source.
