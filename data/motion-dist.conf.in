@@ -94,6 +94,17 @@ stream_preview_scale 100
 stream_preview_method combined
 
 ;*************************************************
+;*****   Database
+;*************************************************
+database_type sqlite3
+database_dbname @localstatedir@/lib/@PACKAGE_NAME@/motion.db
+database_host localhost
+database_port 0
+database_user
+database_password
+database_busy_timeout 0
+
+;*************************************************
 ; Device config files - One for each device.
 ;*************************************************
 camera @localstatedir@/lib/@PACKAGE_NAME@/camera1.conf

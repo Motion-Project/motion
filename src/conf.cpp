@@ -2771,7 +2771,7 @@ void cls_config::edit_stream_scan_scale(std::string &parm, enum PARM_ACT pact)
 void cls_config::edit_database_type(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        database_type = "";
+        database_type = "sqlite3";
     } else if (pact == PARM_ACT_SET) {
         if ((parm == "mariadb") || (parm == "") ||
             (parm == "postgresql") || (parm == "sqlite3")) {
@@ -2793,7 +2793,7 @@ void cls_config::edit_database_type(std::string &parm, enum PARM_ACT pact)
 void cls_config::edit_database_dbname(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        database_dbname = "";
+        database_dbname = std::string( configdir ) + std::string("/motion.db");
     } else if (pact == PARM_ACT_SET) {
         database_dbname = parm;
     } else if (pact == PARM_ACT_GET) {
