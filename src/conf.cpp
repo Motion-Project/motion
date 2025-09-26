@@ -4457,6 +4457,14 @@ void cls_config::init()
 
     app->conf_src->process();
 
+    if ((app->cam_cnt == 0) && (app->snd_cnt == 0)) {
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            , _("No camera or sound configuration files specified."));
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            , _("Adding a camera configuration file."));
+        app->conf_src->camera_add("", false);
+    }
+
     cmdline();
 
     for (indx=0; indx<app->cam_cnt; indx++) {
