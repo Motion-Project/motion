@@ -19,7 +19,7 @@ log_type ALL
 ;*************************************************
 device_name
 device_id
-;target_dir
+target_dir @localstatedir@/lib/@PACKAGE_NAME@/media
 
 ;*************************************************
 ;*****   Source

@@ -783,7 +783,7 @@ void cls_config::edit_config_dir(std::string &parm, enum PARM_ACT pact)
 void cls_config::edit_target_dir(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        target_dir = ".";
+        target_dir = std::string( configdir ) + std::string("/media");
     } else if (pact == PARM_ACT_SET) {
         if (parm.find("%", 0) != std::string::npos) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
