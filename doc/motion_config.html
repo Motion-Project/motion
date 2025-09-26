@@ -806,8 +806,13 @@
 
         <h3><a name="target_dir"></a> target_dir </h3>
         <ul>
-          <li> Values: String | Default: current directory</li>
+          <li> Values: String</li>
           The full path for the target directory for pictures, snapshots, movies, etc. to be saved.
+          <p></p>
+          Default: The sub directory of lib/motion/media from the directory defined
+          by --localstatedir=DIR during the configure step of installation. If this was
+          not defined, it will default to /var/lib/motion/media or /usr/local/var/lib/motion/media
+          depending upon your system</li>
         </ul>
         <p></p>
 
@@ -2695,15 +2700,20 @@
       <ul>
         <h3><a name="database_type"></a> database_type </h3>
         <ul>
-          <li> Values: mariadb, postgresql, sqlite3 | Default: Not defined</li>
+          <li> Values: mariadb, postgresql, sqlite3 | Default: sqlite3</li>
           The database type.
         </ul>
         <p></p>
 
         <h3><a name="database_dbname"></a> database_dbname </h3>
         <ul>
-          <li> Values: String | Default: Not defined</li>
+          <li> Values: String </li>
           The full path and file name to the Sqlite3 database.
+        <p></p>
+          Default: motion.db in the directory defined by --localstatedir=DIR during
+          the configure step of installation. If this was not defined, it will
+          default to /var/lib/motion/motion.db or /usr/local/var/lib/motion/motion.db
+          depending upon your system</li>
         </ul>
         <p></p>
 
