@@ -44,7 +44,7 @@ dist_doc_DATA = \
 	doc/motion_config.html \
 	doc/motion_examples.html \
 	doc/motion.gif \
-	doc/motion_png
+	doc/motion.png
 
 ###################################################################
 ## Clean tilde crumbs and add prefix in config file.
