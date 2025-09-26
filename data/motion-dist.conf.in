@@ -76,7 +76,7 @@ picture_filename %v-%Y%m%d%H%M%S-%q
 ;*************************************************
 movie_output on
 movie_max_time 120
-movie_quality 45
+movie_quality 60
 movie_container mkv
 movie_filename %v-%Y%m%d%H%M%S
 
@@ -84,13 +84,13 @@ movie_filename %v-%Y%m%d%H%M%S
 ;*****   Web Control
 ;*************************************************
 webcontrol_port 8080
-webcontrol_localhost off
+webcontrol_localhost on
 webcontrol_parms 2
 
 ;*************************************************
 ;*****   Web Stream
 ;*************************************************
-stream_preview_scale 25
+stream_preview_scale 100
 stream_preview_method combined
 
 ;*************************************************

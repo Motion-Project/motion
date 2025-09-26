@@ -1422,7 +1422,7 @@ void cls_config::edit_noise_tune(std::string &parm, enum PARM_ACT pact)
 void cls_config::edit_despeckle_filter(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        despeckle_filter = "";
+        despeckle_filter = "EedDl";
     } else if (pact == PARM_ACT_SET) {
         despeckle_filter = parm;
     } else if (pact == PARM_ACT_GET) {
@@ -1594,7 +1594,7 @@ void cls_config::edit_pre_capture(std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        pre_capture = 0;
+        pre_capture = 3;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 1000)) {
@@ -1613,7 +1613,7 @@ void cls_config::edit_post_capture(std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        post_capture = 0;
+        post_capture = 10;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
@@ -2287,7 +2287,7 @@ void cls_config::edit_webcontrol_port(std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        webcontrol_port = 0;
+        webcontrol_port = 8080;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 65535)) {
@@ -2378,7 +2378,7 @@ void cls_config::edit_webcontrol_parms(std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        webcontrol_parms = 0;
+        webcontrol_parms = 2;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 3)) {
@@ -2589,7 +2589,7 @@ void cls_config::edit_stream_preview_scale(std::string &parm, enum PARM_ACT pact
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        stream_preview_scale = 25;
+        stream_preview_scale = 100;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 1000)) {
