@@ -49,8 +49,8 @@ ctx_parm config_parms[] = {
     {"device_id",                 PARM_TYP_INT,    PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"device_tmo",                PARM_TYP_INT,    PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"pause",                     PARM_TYP_LIST,   PARM_CAT_01, PARM_LEVEL_LIMITED },
-    {"schedule_params",           PARM_TYP_STRING, PARM_CAT_01, PARM_LEVEL_LIMITED },
-    {"cleandir_params",           PARM_TYP_STRING, PARM_CAT_01, PARM_LEVEL_LIMITED },
+    {"schedule_params",           PARM_TYP_PARAMS, PARM_CAT_01, PARM_LEVEL_LIMITED },
+    {"cleandir_params",           PARM_TYP_PARAMS, PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"target_dir",                PARM_TYP_STRING, PARM_CAT_01, PARM_LEVEL_ADVANCED },
     {"watchdog_tmo",              PARM_TYP_INT,    PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"watchdog_kill",             PARM_TYP_INT,    PARM_CAT_01, PARM_LEVEL_LIMITED },
@@ -58,14 +58,14 @@ ctx_parm config_parms[] = {
     {"camera",                    PARM_TYP_STRING, PARM_CAT_01, PARM_LEVEL_ADVANCED },
 
     {"v4l2_device",               PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
-    {"v4l2_params",               PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
+    {"v4l2_params",               PARM_TYP_PARAMS, PARM_CAT_02, PARM_LEVEL_ADVANCED },
     {"netcam_url",                PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
-    {"netcam_params",             PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
+    {"netcam_params",             PARM_TYP_PARAMS, PARM_CAT_02, PARM_LEVEL_ADVANCED },
     {"netcam_high_url",           PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
-    {"netcam_high_params",        PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
+    {"netcam_high_params",        PARM_TYP_PARAMS, PARM_CAT_02, PARM_LEVEL_ADVANCED },
     {"netcam_userpass",           PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
     {"libcam_device",             PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
-    {"libcam_params",             PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
+    {"libcam_params",             PARM_TYP_PARAMS, PARM_CAT_02, PARM_LEVEL_ADVANCED },
 
     {"width",                     PARM_TYP_INT,    PARM_CAT_03, PARM_LEVEL_LIMITED },
     {"height",                    PARM_TYP_INT,    PARM_CAT_03, PARM_LEVEL_LIMITED },
@@ -91,7 +91,7 @@ ctx_parm config_parms[] = {
     {"threshold_ratio_change",    PARM_TYP_INT,    PARM_CAT_05, PARM_LEVEL_LIMITED },
     {"threshold_tune",            PARM_TYP_BOOL,   PARM_CAT_05, PARM_LEVEL_LIMITED },
     {"secondary_method",          PARM_TYP_LIST,   PARM_CAT_05, PARM_LEVEL_LIMITED },
-    {"secondary_params",          PARM_TYP_STRING, PARM_CAT_05, PARM_LEVEL_LIMITED },
+    {"secondary_params",          PARM_TYP_PARAMS, PARM_CAT_05, PARM_LEVEL_LIMITED },
 
     {"noise_level",               PARM_TYP_INT,    PARM_CAT_06, PARM_LEVEL_LIMITED },
     {"noise_tune",                PARM_TYP_BOOL,   PARM_CAT_06, PARM_LEVEL_LIMITED },
@@ -174,7 +174,7 @@ ctx_parm config_parms[] = {
 
     {"stream_preview_scale",      PARM_TYP_INT,    PARM_CAT_14, PARM_LEVEL_LIMITED },
     {"stream_preview_newline",    PARM_TYP_BOOL,   PARM_CAT_14, PARM_LEVEL_LIMITED },
-    {"stream_preview_params",   PARM_TYP_STRING, PARM_CAT_14, PARM_LEVEL_LIMITED },
+    {"stream_preview_params",     PARM_TYP_PARAMS, PARM_CAT_14, PARM_LEVEL_LIMITED },
     {"stream_preview_method",     PARM_TYP_LIST,   PARM_CAT_14, PARM_LEVEL_LIMITED },
     {"stream_preview_ptz",        PARM_TYP_BOOL,   PARM_CAT_14, PARM_LEVEL_LIMITED },
     {"stream_quality",            PARM_TYP_INT,    PARM_CAT_14, PARM_LEVEL_LIMITED },
@@ -209,7 +209,7 @@ ctx_parm config_parms[] = {
     {"ptz_zoom_out",              PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_RESTRICTED },
 
     {"snd_device",                PARM_TYP_STRING, PARM_CAT_18, PARM_LEVEL_ADVANCED },
-    {"snd_params",                PARM_TYP_STRING, PARM_CAT_18, PARM_LEVEL_ADVANCED },
+    {"snd_params",                PARM_TYP_PARAMS, PARM_CAT_18, PARM_LEVEL_ADVANCED },
     {"snd_alerts",                PARM_TYP_ARRAY, PARM_CAT_18, PARM_LEVEL_ADVANCED },
     {"snd_window",                PARM_TYP_LIST, PARM_CAT_18, PARM_LEVEL_ADVANCED },
     {"snd_show",                  PARM_TYP_BOOL, PARM_CAT_18, PARM_LEVEL_ADVANCED },
@@ -3626,6 +3626,7 @@ std::string cls_config::type_desc(enum PARM_TYP ptype)
     } else if (ptype == PARM_TYP_LIST) {    return "list";
     } else if (ptype == PARM_TYP_STRING) {  return "string";
     } else if (ptype == PARM_TYP_ARRAY) {   return "array";
+    } else if (ptype == PARM_TYP_PARAMS) {  return "params";
     } else {                                return "error";
     }
 }
@@ -4478,4 +4479,3 @@ cls_config::~cls_config()
 {
 
 }
-
