@@ -78,7 +78,7 @@ movie_output on
 movie_max_time 120
 movie_quality 60
 movie_container mkv
-movie_filename %v-%Y%m%d%H%M%S
+movie_filename %v-%{movienbr}-%Y%m%d%H%M%S
 
 ;*************************************************
 ;*****   Web Control

@@ -31,6 +31,6 @@ text_left CAMERA 1
 ;*************************************************
 ;*****   Movie
 ;*************************************************
-movie_filename CAM01_%t-%v-%Y%m%d%H%M%S
+movie_filename CAM01_%t-%v-%{movienbr}-%Y%m%d%H%M%S
 
 

@@ -167,6 +167,7 @@ class cls_camera {
         bool    detecting_motion;
         int     event_curr_nbr;
         int     event_prev_nbr;
+        int     movie_nbr;
         int     threshold;
         int     lastrate;
         int     frame_skip;
