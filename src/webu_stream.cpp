@@ -661,15 +661,14 @@ mhdrslt cls_webu_stream::stream_static()
 }
 
 /* Entry point for answering stream*/
-mhdrslt cls_webu_stream::main()
+void cls_webu_stream::main()
 {
-    mhdrslt retcd;
+    mhdrslt retcd = MHD_NO;
 
     if (valid_request() == false) {
         webua->bad_request();
-        return MHD_NO;
+        return;
     }
-
     set_cnct_type();
 
     if (webua->uri_cmd1 == "static") {
@@ -703,13 +702,12 @@ mhdrslt cls_webu_stream::main()
         if (retcd == MHD_NO) {
             mydelete(webu_mpegts);
         }
-
-    } else {
-        webua->bad_request();
-        retcd = MHD_NO;
     }
 
-    return retcd;
+    if (retcd == MHD_NO) {
+        webua->bad_request();
+    }
+
 }
 
 cls_webu_stream::cls_webu_stream(cls_webu_ans *p_webua)
