@@ -53,7 +53,6 @@
             mhdrslt stream_static();
             mhdrslt stream_mjpeg();
 
-            bool valid_request();
             void all_cnct();
             void jpg_cnct();
             void ts_cnct();

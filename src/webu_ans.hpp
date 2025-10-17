@@ -50,6 +50,7 @@
 
             void mhd_send();
             void bad_request();
+            bool valid_request();
 
             mhdrslt answer_main(struct MHD_Connection *connection, const char *method
                 , const char *upload_data, size_t *upload_data_size);
