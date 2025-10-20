@@ -134,29 +134,6 @@ void myunquote(std::string &parm)
 
 }
 
-/* Enclose and escape with single quotes */
-void myescquote(std::string &parm)
-{
-    size_t plen, loc;
-    std::string tparm;
-
-    mytrim(parm);
-
-    plen = parm.length();
-    tparm ="'";
-    loc = 0;
-    while (loc < plen) {
-        if (parm.substr(loc,1)== "'") {
-            tparm += "'\''";
-        } else {
-            tparm += parm.substr(loc,1);
-        }
-        loc++;
-    }
-    tparm += "'";
-    parm = tparm;
-}
-
 /** mymalloc */
 void *mymalloc(size_t nbytes)
 {
@@ -692,20 +669,16 @@ AVPacket *mypacket_alloc(AVPacket *pkt)
 void util_exec_command(cls_camera *cam, const char *command, const char *filename)
 {
     char stamp[PATH_MAX];
-    std::string  dst;
     int pid;
 
     mystrftime(cam, stamp, sizeof(stamp), command, filename);
-
-    dst = stamp;
-    myescquote(dst);
 
     pid = fork();
     if (!pid) {
         /* Detach from parent */
         setsid();
 
-        execl("/bin/sh", "sh", "-c", dst.c_str(), " &",(char*)NULL);
+        execl("/bin/sh", "sh", "-c", stamp, " &",(char*)NULL);
 
         /* if above function succeeds the program never reach here */
         MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
@@ -729,8 +702,6 @@ void util_exec_command(cls_camera *cam, std::string cmd)
     int pid;
 
     mystrftime(cam, dst, cmd, "");
-
-    myescquote(dst);
 
     pid = fork();
     if (!pid) {

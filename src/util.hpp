@@ -101,7 +101,6 @@ struct ctx_params {
     void myrtrim(std::string &parm);
     void mytrim(std::string &parm);
     void myunquote(std::string &parm);
-    void myescquote(std::string &parm);
 
     void myframe_key(AVFrame *frame);
     void myframe_interlaced(AVFrame *frame);
