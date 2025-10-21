@@ -49,6 +49,7 @@
         , PARM_TYP_LIST
         , PARM_TYP_BOOL
         , PARM_TYP_ARRAY
+        , PARM_TYP_PARAMS
     };
     enum PARM_LEVEL{
         PARM_LEVEL_ALWAYS      = 0

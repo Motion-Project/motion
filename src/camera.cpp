@@ -209,6 +209,7 @@ void cls_camera::movie_start()
     } else {
         movie_fps = lastrate;
     }
+    movie_nbr++;
     movie_norm->start();
     movie_motion->start();
     movie_extpipe->start();
@@ -231,6 +232,7 @@ void cls_camera::detected_trigger()
         if (event_curr_nbr != event_prev_nbr) {
             info_reset();
             event_prev_nbr = event_curr_nbr;
+            movie_nbr = 0;
 
             algsec->detected = false;
 

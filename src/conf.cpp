@@ -49,8 +49,8 @@ ctx_parm config_parms[] = {
     {"device_id",                 PARM_TYP_INT,    PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"device_tmo",                PARM_TYP_INT,    PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"pause",                     PARM_TYP_LIST,   PARM_CAT_01, PARM_LEVEL_LIMITED },
-    {"schedule_params",           PARM_TYP_STRING, PARM_CAT_01, PARM_LEVEL_LIMITED },
-    {"cleandir_params",           PARM_TYP_STRING, PARM_CAT_01, PARM_LEVEL_LIMITED },
+    {"schedule_params",           PARM_TYP_PARAMS, PARM_CAT_01, PARM_LEVEL_LIMITED },
+    {"cleandir_params",           PARM_TYP_PARAMS, PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"target_dir",                PARM_TYP_STRING, PARM_CAT_01, PARM_LEVEL_ADVANCED },
     {"watchdog_tmo",              PARM_TYP_INT,    PARM_CAT_01, PARM_LEVEL_LIMITED },
     {"watchdog_kill",             PARM_TYP_INT,    PARM_CAT_01, PARM_LEVEL_LIMITED },
@@ -58,14 +58,14 @@ ctx_parm config_parms[] = {
     {"camera",                    PARM_TYP_STRING, PARM_CAT_01, PARM_LEVEL_ADVANCED },
 
     {"v4l2_device",               PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
-    {"v4l2_params",               PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
+    {"v4l2_params",               PARM_TYP_PARAMS, PARM_CAT_02, PARM_LEVEL_ADVANCED },
     {"netcam_url",                PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
-    {"netcam_params",             PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
+    {"netcam_params",             PARM_TYP_PARAMS, PARM_CAT_02, PARM_LEVEL_ADVANCED },
     {"netcam_high_url",           PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
-    {"netcam_high_params",        PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
+    {"netcam_high_params",        PARM_TYP_PARAMS, PARM_CAT_02, PARM_LEVEL_ADVANCED },
     {"netcam_userpass",           PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
     {"libcam_device",             PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
-    {"libcam_params",             PARM_TYP_STRING, PARM_CAT_02, PARM_LEVEL_ADVANCED },
+    {"libcam_params",             PARM_TYP_PARAMS, PARM_CAT_02, PARM_LEVEL_ADVANCED },
 
     {"width",                     PARM_TYP_INT,    PARM_CAT_03, PARM_LEVEL_LIMITED },
     {"height",                    PARM_TYP_INT,    PARM_CAT_03, PARM_LEVEL_LIMITED },
@@ -91,7 +91,7 @@ ctx_parm config_parms[] = {
     {"threshold_ratio_change",    PARM_TYP_INT,    PARM_CAT_05, PARM_LEVEL_LIMITED },
     {"threshold_tune",            PARM_TYP_BOOL,   PARM_CAT_05, PARM_LEVEL_LIMITED },
     {"secondary_method",          PARM_TYP_LIST,   PARM_CAT_05, PARM_LEVEL_LIMITED },
-    {"secondary_params",          PARM_TYP_STRING, PARM_CAT_05, PARM_LEVEL_LIMITED },
+    {"secondary_params",          PARM_TYP_PARAMS, PARM_CAT_05, PARM_LEVEL_LIMITED },
 
     {"noise_level",               PARM_TYP_INT,    PARM_CAT_06, PARM_LEVEL_LIMITED },
     {"noise_tune",                PARM_TYP_BOOL,   PARM_CAT_06, PARM_LEVEL_LIMITED },
@@ -165,16 +165,16 @@ ctx_parm config_parms[] = {
     {"webcontrol_tls",            PARM_TYP_BOOL,   PARM_CAT_13, PARM_LEVEL_RESTRICTED },
     {"webcontrol_cert",           PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_RESTRICTED },
     {"webcontrol_key",            PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_RESTRICTED },
-    {"webcontrol_headers",        PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_ADVANCED },
+    {"webcontrol_headers",        PARM_TYP_PARAMS, PARM_CAT_13, PARM_LEVEL_ADVANCED },
     {"webcontrol_html",           PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_ADVANCED },
-    {"webcontrol_actions",        PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_RESTRICTED },
+    {"webcontrol_actions",        PARM_TYP_PARAMS, PARM_CAT_13, PARM_LEVEL_RESTRICTED },
     {"webcontrol_lock_minutes",   PARM_TYP_INT,    PARM_CAT_13, PARM_LEVEL_ADVANCED },
     {"webcontrol_lock_attempts",  PARM_TYP_INT,    PARM_CAT_13, PARM_LEVEL_ADVANCED },
     {"webcontrol_lock_script",    PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_RESTRICTED },
 
     {"stream_preview_scale",      PARM_TYP_INT,    PARM_CAT_14, PARM_LEVEL_LIMITED },
     {"stream_preview_newline",    PARM_TYP_BOOL,   PARM_CAT_14, PARM_LEVEL_LIMITED },
-    {"stream_preview_params",   PARM_TYP_STRING, PARM_CAT_14, PARM_LEVEL_LIMITED },
+    {"stream_preview_params",     PARM_TYP_PARAMS, PARM_CAT_14, PARM_LEVEL_LIMITED },
     {"stream_preview_method",     PARM_TYP_LIST,   PARM_CAT_14, PARM_LEVEL_LIMITED },
     {"stream_preview_ptz",        PARM_TYP_BOOL,   PARM_CAT_14, PARM_LEVEL_LIMITED },
     {"stream_quality",            PARM_TYP_INT,    PARM_CAT_14, PARM_LEVEL_LIMITED },
@@ -209,7 +209,7 @@ ctx_parm config_parms[] = {
     {"ptz_zoom_out",              PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_RESTRICTED },
 
     {"snd_device",                PARM_TYP_STRING, PARM_CAT_18, PARM_LEVEL_ADVANCED },
-    {"snd_params",                PARM_TYP_STRING, PARM_CAT_18, PARM_LEVEL_ADVANCED },
+    {"snd_params",                PARM_TYP_PARAMS, PARM_CAT_18, PARM_LEVEL_ADVANCED },
     {"snd_alerts",                PARM_TYP_ARRAY, PARM_CAT_18, PARM_LEVEL_ADVANCED },
     {"snd_window",                PARM_TYP_LIST, PARM_CAT_18, PARM_LEVEL_ADVANCED },
     {"snd_show",                  PARM_TYP_BOOL, PARM_CAT_18, PARM_LEVEL_ADVANCED },
@@ -783,7 +783,7 @@ void cls_config::edit_config_dir(std::string &parm, enum PARM_ACT pact)
 void cls_config::edit_target_dir(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        target_dir = ".";
+        target_dir = std::string( configdir ) + std::string("/media");
     } else if (pact == PARM_ACT_SET) {
         if (parm.find("%", 0) != std::string::npos) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
@@ -1422,7 +1422,7 @@ void cls_config::edit_noise_tune(std::string &parm, enum PARM_ACT pact)
 void cls_config::edit_despeckle_filter(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        despeckle_filter = "";
+        despeckle_filter = "EedDl";
     } else if (pact == PARM_ACT_SET) {
         despeckle_filter = parm;
     } else if (pact == PARM_ACT_GET) {
@@ -1594,7 +1594,7 @@ void cls_config::edit_pre_capture(std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        pre_capture = 0;
+        pre_capture = 3;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 1000)) {
@@ -1613,7 +1613,7 @@ void cls_config::edit_post_capture(std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        post_capture = 0;
+        post_capture = 10;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
@@ -2287,7 +2287,7 @@ void cls_config::edit_webcontrol_port(std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        webcontrol_port = 0;
+        webcontrol_port = 8080;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 65535)) {
@@ -2378,7 +2378,7 @@ void cls_config::edit_webcontrol_parms(std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        webcontrol_parms = 0;
+        webcontrol_parms = 2;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 3)) {
@@ -2589,7 +2589,7 @@ void cls_config::edit_stream_preview_scale(std::string &parm, enum PARM_ACT pact
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        stream_preview_scale = 25;
+        stream_preview_scale = 100;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 1000)) {
@@ -2771,7 +2771,7 @@ void cls_config::edit_stream_scan_scale(std::string &parm, enum PARM_ACT pact)
 void cls_config::edit_database_type(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        database_type = "";
+        database_type = "sqlite3";
     } else if (pact == PARM_ACT_SET) {
         if ((parm == "mariadb") || (parm == "") ||
             (parm == "postgresql") || (parm == "sqlite3")) {
@@ -2793,7 +2793,7 @@ void cls_config::edit_database_type(std::string &parm, enum PARM_ACT pact)
 void cls_config::edit_database_dbname(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        database_dbname = "";
+        database_dbname = std::string( configdir ) + std::string("/motion.db");
     } else if (pact == PARM_ACT_SET) {
         database_dbname = parm;
     } else if (pact == PARM_ACT_GET) {
@@ -3626,6 +3626,7 @@ std::string cls_config::type_desc(enum PARM_TYP ptype)
     } else if (ptype == PARM_TYP_LIST) {    return "list";
     } else if (ptype == PARM_TYP_STRING) {  return "string";
     } else if (ptype == PARM_TYP_ARRAY) {   return "array";
+    } else if (ptype == PARM_TYP_PARAMS) {  return "params";
     } else {                                return "error";
     }
 }
@@ -3681,7 +3682,7 @@ std::string cls_config::cat_desc(enum PARM_CAT pcat, bool shrt) {
 
 void cls_config::usage(void)
 {
-    printf("Motion version %s, Copyright 2020-2024\n",PACKAGE_VERSION);
+    printf("Motion version %s, Copyright 2020-2025\n",PACKAGE_VERSION);
     printf("\nusage:\tmotion [options]\n");
     printf("\n\n");
     printf("Possible options:\n\n");
@@ -4456,6 +4457,14 @@ void cls_config::init()
 
     app->conf_src->process();
 
+    if ((app->cam_cnt == 0) && (app->snd_cnt == 0)) {
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            , _("No camera or sound configuration files specified."));
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            , _("Adding a camera configuration file."));
+        app->conf_src->camera_add("", false);
+    }
+
     cmdline();
 
     for (indx=0; indx<app->cam_cnt; indx++) {
@@ -4478,4 +4487,3 @@ cls_config::~cls_config()
 {
 
 }
-

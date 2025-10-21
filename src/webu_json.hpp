@@ -39,6 +39,7 @@
             void status();
             void loghistory();
             std::string escstr(std::string invar);
+            void parms_item_detail(cls_config *conf, std::string pNm);
     };
 
 #endif /* _INCLUDE_WEBU_JSON_HPP_ */

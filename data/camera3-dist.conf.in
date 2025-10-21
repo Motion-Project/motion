@@ -34,5 +34,5 @@ text_scale 4
 ;*************************************************
 ;*****   Movie
 ;*************************************************
-movie_filename CAM03_%t-%v-%Y%m%d%H%M%S
+movie_filename CAM03_%t-%v-%{movienbr}-%Y%m%d%H%M%S
 

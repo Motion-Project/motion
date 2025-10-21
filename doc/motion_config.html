@@ -711,7 +711,9 @@
              <tr>
                <td bgcolor="#edf4f9" >%{trig_freq}</a> </td>
                <td bgcolor="#edf4f9" >frequency that triggered the sound alert</a> </td>
-             </tr>
+               <td bgcolor="#edf4f9" >%{movienbr}</a> </td>
+               <td bgcolor="#edf4f9" >id number for the movie within the event</a> </td>
+              </tr>
 
             </tbody>
         </table>
@@ -806,8 +808,13 @@
 
         <h3><a name="target_dir"></a> target_dir </h3>
         <ul>
-          <li> Values: String | Default: current directory</li>
+          <li> Values: String</li>
           The full path for the target directory for pictures, snapshots, movies, etc. to be saved.
+          <p></p>
+          Default: The sub directory of lib/motion/media from the directory defined
+          by --localstatedir=DIR during the configure step of installation. If this was
+          not defined, it will default to /var/lib/motion/media or /usr/local/var/lib/motion/media
+          depending upon your system</li>
         </ul>
         <p></p>
 
@@ -1918,10 +1925,10 @@
 
         <h3><a name="despeckle_filter"></a> despeckle_filter </h3>
         <ul>
-          <li> Values: Combinations of E,e,D,d and l | Default: Not defined </li>
+          <li> Values: Combinations of E,e,D,d and l | Default: EedDl </li>
           Despeckle the image using combinations of (E/e)rode or (D/d)ilate. And ending with optional (l)abeling.
           This reduces noise in the motion image. Adding a trailing l enables labeling in which only the largest
-          section section is used to calculate the threshold.  Typical value is EedDl
+          section section is used to calculate the threshold.
         </ul>
         <p></p>
 
@@ -1999,14 +2006,14 @@
 
         <h3><a name="pre_capture"></a> pre_capture </h3>
         <ul>
-          <li> Values: Integer | Default: 0</li>
+          <li> Values: Integer | Default: 3</li>
           The number of pre-captured (buffered) frames to be captured before an event.
         </ul>
         <p></p>
 
         <h3><a name="post_capture"></a> post_capture </h3>
         <ul>
-          <li> Values: Integer | Default: 0</li>
+          <li> Values: Integer | Default: 10</li>
           The number of frames to be captured after an event has ended.
         </ul>
         <p></p>
@@ -2340,15 +2347,15 @@
       <ul>
         <h3><a name="webcontrol_port"></a> webcontrol_port </h3>
         <ul>
-          <li>Values: 0 to 65535 | Default: 0 (disabled)</li>
-          The port number for the web based control of Motion.
+          <li>Values: 0 to 65535 | Default: 8080</li>
+          The port number for the web based interface of Motion.
         </ul>
         <p></p>
 
-        <h3><a name="webcontrol_port2"></a> webcontrol_port </h3>
+        <h3><a name="webcontrol_port2"></a> webcontrol_port2 </h3>
         <ul>
           <li>Values: 0 to 65535 | Default: 0 (disabled)</li>
-          Second port for the web control that does not use TLS.  This allows for specifying one port that
+          Second port for the web interface that does not use TLS.  This allows for specifying one port that
           provides a TLS connection (to be used externally) while this port serves the local lan without getting
           certificate domain warnings.
         </ul>
@@ -2377,7 +2384,7 @@
 
         <h3><a name="webcontrol_parms"></a> webcontrol_parms </h3>
         <ul>
-          <li> Values: 0 - 3 | Default: 0 </li>
+          <li> Values: 0 - 3 | Default: 2 </li>
           Set the type of parameters that can be accessed via the webcontrol page.
           <ul>
             <li> 0: None - No configuration parameters or actions will be available.</li>
@@ -2386,12 +2393,9 @@
               typically require Motion to be restarted to become effective.</li>
             <li> 3: Restricted - User IDs, passwords and "on_" commands.</li>
           </ul>
-          The default for this parameter is 0 (none) to enhance the security of the web interface.  The
-          setting of the webcontrol_parms is not included on the web interface and this parameter
-          can only be specified via the configuration file.
-          <p></p>
-          Once Motion has been configured, it is advised to complete the setup by setting
-          this value to zero.
+          webcontrol_parms is not shown or allowed to be revised from the web interface.  This
+          allows users to lock out any changes to parameters.  This may be desired if the
+          webcontrol port is opened to the internet.
         </ul>
         <p></p>
 
@@ -2519,7 +2523,7 @@
       <ul>
         <h3><a name="stream_preview_scale"></a> stream_preview_scale </h3>
         <ul>
-          <li> Values: Integer | Default: 25</li>
+          <li> Values: Integer | Default: 100</li>
           The percentage to scale the stream image when it is placed on the webcontrol
           page or into the combined image when the stream_preview_method is set to combined.
           <br>Numbers greater than 100 are permitted.
@@ -2698,15 +2702,20 @@
       <ul>
         <h3><a name="database_type"></a> database_type </h3>
         <ul>
-          <li> Values: mariadb, postgresql, sqlite3 | Default: Not defined</li>
+          <li> Values: mariadb, postgresql, sqlite3 | Default: sqlite3</li>
           The database type.
         </ul>
         <p></p>
 
         <h3><a name="database_dbname"></a> database_dbname </h3>
         <ul>
-          <li> Values: String | Default: Not defined</li>
+          <li> Values: String </li>
           The full path and file name to the Sqlite3 database.
+        <p></p>
+          Default: motion.db in the directory defined by --localstatedir=DIR during
+          the configure step of installation. If this was not defined, it will
+          default to /var/lib/motion/motion.db or /usr/local/var/lib/motion/motion.db
+          depending upon your system</li>
         </ul>
         <p></p>
 

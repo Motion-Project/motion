@@ -1863,7 +1863,7 @@ int cls_netcam::open_context()
                     ,cameratype.c_str(), errstr);
             } else if (interrupted) {
                 MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s:Unable to find stream info:%s")
+                    ,_("%s:Unable to find stream info")
                     ,cameratype.c_str());
             }
         }

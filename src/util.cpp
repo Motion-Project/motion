@@ -409,6 +409,10 @@ void mystrftime_base(cls_camera *cam
                 sprintf(tmp, "%0*d", wd, cam->movie_fps);
                 user_fmt.append(tmp);
                 indx += (strlen("{fps}")-1);
+            } else if (fmt.substr(indx,strlen("{movienbr}")) == "{movienbr}") {
+                sprintf(tmp, "%0*d", wd, cam->movie_nbr);
+                user_fmt.append(tmp);
+                indx += (strlen("{movienbr}")-1);
             } else if (fmt.substr(indx,strlen("{eventid}")) == "{eventid}") {
                 tst = cam->eventid;
                 if (wd > 0) {
