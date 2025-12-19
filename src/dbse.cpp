@@ -155,8 +155,13 @@ void cls_dbse::sql_motion(std::string &sql)
         sql += ");";
 
     } else if ((dbse_action == DBSE_COLS_LIST) || (dbse_action == DBSE_COLS_CURRENT)) {
-        sql = " select * from motion;";
-
+        if ((app->cfg->database_type == "mariadb") ||
+            (app->cfg->database_type == "postgresql")) {
+            sql = " select * from motion;";
+        } else if (app->cfg->database_type == "sqlite3") {
+            /*empty tables do not trigger the callback*/
+            sql = " select t.* from (select 1) left join 'motion' as t;";
+        }
     }
 
 }

@@ -1425,16 +1425,17 @@ void cls_camera::tuning()
         return;
     }
 
-    if ((cfg->noise_tune && shots_mt == 0) &&
+    if ((cfg->noise_tune && shots_mt == 0) && (pause == false) &&
           (!detecting_motion && (current_image->diffs <= threshold))) {
         alg->noise_tune();
     }
 
-    if (cfg->threshold_tune) {
+    if (cfg->threshold_tune && (pause == false)) {
         alg->threshold_tune();
     }
 
-    if ((current_image->diffs > threshold) &&
+    if ((pause == false) &&
+        (current_image->diffs > threshold) &&
         (current_image->diffs < threshold_maximum)) {
         alg->location();
         alg->stddev();
@@ -1445,9 +1446,10 @@ void cls_camera::tuning()
         current_image->diffs = 0;
     }
 
-    alg->tune_smartmask();
-
-    alg->ref_frame_update();
+    if (pause == false) {
+        alg->tune_smartmask();
+        alg->ref_frame_update();
+    }
 
     previous_diffs = current_image->diffs;
     previous_location_x = current_image->location.x;

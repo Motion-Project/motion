@@ -481,30 +481,6 @@ void cls_webu_stream::static_one_img()
 
 }
 
-bool cls_webu_stream::valid_request()
-{
-    if (check_finish()) {
-        return false;
-    }
-
-    pthread_mutex_lock(&app->mutex_camlst);
-        if (webua->device_id < 0) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-                , _("Invalid camera specified: %s"), webua->url.c_str());
-            pthread_mutex_unlock(&app->mutex_camlst);
-            return false;
-        }
-        if ((webua->device_id > 0) && (webua->cam == NULL)) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-                , _("Invalid camera specified: %s"), webua->url.c_str());
-            pthread_mutex_unlock(&app->mutex_camlst);
-            return false;
-        }
-    pthread_mutex_unlock(&app->mutex_camlst);
-
-    return true;
-}
-
 /* Increment the transport stream counters */
 void cls_webu_stream::ts_cnct()
 {
@@ -661,13 +637,12 @@ mhdrslt cls_webu_stream::stream_static()
 }
 
 /* Entry point for answering stream*/
-mhdrslt cls_webu_stream::main()
+void cls_webu_stream::main()
 {
-    mhdrslt retcd;
+    mhdrslt retcd = MHD_NO;
 
-    if (valid_request() == false) {
-        webua->bad_request();
-        return MHD_NO;
+    if (check_finish()) {
+        return;
     }
 
     set_cnct_type();
@@ -703,13 +678,12 @@ mhdrslt cls_webu_stream::main()
         if (retcd == MHD_NO) {
             mydelete(webu_mpegts);
         }
-
-    } else {
-        webua->bad_request();
-        retcd = MHD_NO;
     }
 
-    return retcd;
+    if (retcd == MHD_NO) {
+        webua->bad_request();
+    }
+
 }
 
 cls_webu_stream::cls_webu_stream(cls_webu_ans *p_webua)

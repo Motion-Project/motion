@@ -219,6 +219,8 @@ void cls_webu_ans::parms_edit()
         if (is_nbr) {
             device_id = atoi(uri_cmd0.c_str());
         }
+    } else if (uri_cmd0 == "") {
+        device_id = 0;
     }
 
     for (indx=0; indx<app->cam_cnt; indx++) {
@@ -744,11 +746,36 @@ void cls_webu_ans::bad_request()
     mhd_send();
 }
 
+bool cls_webu_ans::valid_request()
+{
+    pthread_mutex_lock(&app->mutex_camlst);
+        if (device_id < 0) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                , _("Invalid camera specified: %s"), url.c_str());
+            pthread_mutex_unlock(&app->mutex_camlst);
+            return false;
+        }
+        if ((device_id > 0) && (cam == NULL)) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                , _("Invalid camera specified: %s"), url.c_str());
+            pthread_mutex_unlock(&app->mutex_camlst);
+            return false;
+        }
+    pthread_mutex_unlock(&app->mutex_camlst);
+
+    return true;
+}
+
 /* Answer the get request from the user */
 void cls_webu_ans::answer_get()
 {
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
         ,"processing get: %s",uri_cmd1.c_str());
+
+    if (valid_request() == false) {
+        bad_request();
+        return;
+    }
 
     if ((uri_cmd1 == "mjpg") || (uri_cmd1 == "mpegts") ||
         (uri_cmd1 == "static")) {

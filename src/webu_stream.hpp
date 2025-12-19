@@ -28,7 +28,7 @@
             size_t  resp_used;      /* The amount of the response page used */
             u_char  *resp_image;    /* Response image to provide to user */
 
-            mhdrslt main();
+            void main();
             ssize_t mjpeg_response (char *buf, size_t max);
             bool check_finish();
             void delay();
@@ -53,7 +53,6 @@
             mhdrslt stream_static();
             mhdrslt stream_mjpeg();
 
-            bool valid_request();
             void all_cnct();
             void jpg_cnct();
             void ts_cnct();
