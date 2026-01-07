@@ -1116,6 +1116,7 @@ void cls_v4l2cam::start_cam()
     palette_set();
     set_fps();
     ctrls_list();
+    parms_set();
     ctrls_set();
     set_mmap();
     set_imgs();
