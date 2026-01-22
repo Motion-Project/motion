@@ -1101,6 +1101,9 @@ int cls_draw::textn(u_char *image
     for (pos = 0; pos < len; pos++) {
         int pos_check = (int)text[pos];
 
+        if ((pos_check <0) || (pos_check >126)) {
+            pos_check = 45; /* Use a - for non ascii characters*/
+        }
         char_ptr = char_arr_ptr[pos_check];
 
         for (y = 0; y < 8 * factor; y++) {
