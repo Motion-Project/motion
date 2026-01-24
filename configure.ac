@@ -746,7 +746,6 @@ AC_CONFIG_FILES([
   data/sound1-dist.conf
   data/motion-dist.conf
   data/motion-dist.service
-  data/webcontrol/samplepage.html
 ])
 
 AC_OUTPUT
