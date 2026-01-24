@@ -104,8 +104,8 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: Full Motion log output (at log_level 8)
-      description: Please copy and paste the full log output. This will be automatically formatted into code, so no need for backticks.
+      label: Relevant Motion log output (at log_level 8)
+      description: Please copy and paste the log output. This will be automatically formatted into code, so no need for backticks.
       render: shell
     validations:
       required: true

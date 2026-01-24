@@ -3411,7 +3411,6 @@ msgstr "MHD를 시작할 수 없습니다."
 msgid "Started webcontrol on port %d"
 msgstr "포트 %d에서 웹 제어를 시작했습니다."
 
-#: src/webu_html.cpp
 #, c-format
 msgid "Invalid user html file: %s"
 msgstr "잘못된 사용자 html 파일: %s"

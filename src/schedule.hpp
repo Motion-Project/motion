@@ -16,6 +16,15 @@
  *
  */
 
+/*
+ * schedule.hpp - Time-Based Scheduling Interface
+ *
+ * Header file defining the scheduling class for time-based camera
+ * operations, enabling detection windows, recording schedules, and
+ * automated parameter changes by time of day or day of week.
+ *
+ */
+
 #ifndef _INCLUDE_SCHEDULE_HPP_
 #define _INCLUDE_SCHEDULE_HPP_
 

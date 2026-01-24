@@ -14,6 +14,14 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
+ */
+
+/*
+ * libcam.cpp - Raspberry Pi Camera (libcamera) Interface
+ *
+ * This module provides camera capture using libcamera API for Raspberry Pi
+ * Camera Module 3 and compatible devices, managing camera controls (ISO,
+ * white balance, focus) and efficient frame acquisition.
  *
  */
 
@@ -29,183 +37,182 @@
 
 using namespace libcamera;
 
+/* AnalogueGain notes:
+ * IMX708 (Pi Camera v3) max analog gain is 16.0.
+ * Values above 16.0 trigger digital gain which adds significant noise
+ * and may require reduced framerate (< 10 fps) for stable operation.
+ * UI typically limits to 10.0 for best quality.
+ */
+
 void cls_libcam::log_orientation()
 {
     #if (LIBCAMVER >= 2000)
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Orientation Options:");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate0");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate0Mirror");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate180");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate180Mirror");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate90");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate90Mirror");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate270");
-        MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate270Mirror");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Orientation Options:");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate0");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate0Mirror");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate180");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate180Mirror");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate90");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate90Mirror");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate270");
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate270Mirror");
     #else
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Orientation Not available");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Orientation Not available");
     #endif
 
 }
 
 void cls_libcam::log_controls()
 {
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls:");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls:");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeEnable(bool)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeLocked(bool)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeMeteringMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringCentreWeighted = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringSpot = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringMatrix = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringCustom = 3");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeMeteringMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringCentreWeighted = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringSpot = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringMatrix = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringCustom = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeConstraintMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintNormal = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintHighlight = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintShadows = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintCustom = 3");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeConstraintMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintNormal = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintHighlight = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintShadows = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintCustom = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeExposureMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureNormal = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureShort = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureLong = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureCustom = 3");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeExposureMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureNormal = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureShort = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureLong = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureCustom = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ExposureValue(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ExposureTime(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AnalogueGain(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Brightness(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Contrast(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Lux(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbEnable(bool)");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ExposureValue(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ExposureTime(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AnalogueGain(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Brightness(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Contrast(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Lux(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbEnable(bool)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbAuto = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbIncandescent = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbTungsten = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbFluorescent = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbIndoor = 4");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbDaylight = 5");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbCloudy = 6");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbCustom = 7");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbAuto = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbIncandescent = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbTungsten = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbFluorescent = 3");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbIndoor = 4");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbDaylight = 5");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbCloudy = 6");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbCustom = 7");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbLocked(bool)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourGains(Pipe delimited)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     Red | Blue");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourTemperature(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Saturation(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorBlackLevels(Pipe delimited)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     var1|var2|var3|var4");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Sharpness(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FocusFoM(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourCorrectionMatrix(Pipe delimited)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     var1|var2|...|var8|var9");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ScalerCrop(Pipe delimited)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     x | y | h | w");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  DigitalGain(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FrameDuration(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FrameDurationLimits(Pipe delimited)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     min | max");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorTemperature(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorTimestamp(int)");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbLocked(bool)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourGains(Pipe delimited)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     Red | Blue");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourTemperature(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Saturation(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorBlackLevels(Pipe delimited)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     var1|var2|var3|var4");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Sharpness(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FocusFoM(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourCorrectionMatrix(Pipe delimited)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     var1|var2|...|var8|var9");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ScalerCrop(Pipe delimited)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     x | y | h | w");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  DigitalGain(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FrameDuration(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FrameDurationLimits(Pipe delimited)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     min | max");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorTemperature(float)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorTimestamp(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeManual = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeAuto = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeContinuous = 2");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeManual = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeAuto = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeContinuous = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfRange(0-2)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeNormal = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeMacro = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeFull = 2");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfRange(0-2)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeNormal = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeMacro = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeFull = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfSpeed(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfSpeedNormal = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfSpeedFast = 1");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfSpeed(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfSpeedNormal = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfSpeedFast = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfMetering(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfMeteringAuto = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfMeteringWindows = 1");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfMetering(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfMeteringAuto = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfMeteringWindows = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfWindows(Multiple windows supported)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     Format: x|y|width|height[;x|y|width|height;...]");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     Example: 100|100|200|200;400|100|200|200");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     Max 4 windows. Coordinates in ScalerCropMaximum space.");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfWindows(Pipe delimited)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     x | y | h | w");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfTrigger(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfTriggerStart = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfTriggerCancel = 1");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfTrigger(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfTriggerStart = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfTriggerCancel = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfPause(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseImmediate = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseDeferred = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseResume = 2");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfPause(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseImmediate = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseDeferred = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseResume = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  LensPosition(float)");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  LensPosition(float)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfState(int) [READ-ONLY - reported by camera]");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateIdle = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateScanning = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateFocused = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateFailed = 3");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfState(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateIdle = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateScanning = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateFocused = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateFailed = 3");
-
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfPauseState(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStateRunning = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStatePausing = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStatePaused = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfPauseState(int) [READ-ONLY - reported by camera]");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStateRunning = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStatePausing = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStatePaused = 2");
 
 }
 
 void cls_libcam:: log_draft()
 {
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls Draft:");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls Draft:");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AePrecaptureTrigger(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerIdle = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerStart = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerCancel = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AePrecaptureTrigger(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerIdle = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerStart = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerCancel = 2");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  NoiseReductionMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeOff = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeFast = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeHighQuality = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeMinimal = 3");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeZSL = 4");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  NoiseReductionMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeOff = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeFast = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeHighQuality = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeMinimal = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeZSL = 4");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColorCorrectionAberrationMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationOff = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationFast = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationHighQuality = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColorCorrectionAberrationMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationOff = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationFast = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationHighQuality = 2");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeState(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateSearching = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateConverged = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateLocked = 3");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStateFlashRequired = 4");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AeStatePrecapture = 5");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbState(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbStateInactive = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbStateSearching = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbConverged = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbLocked = 3");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbState(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbStateInactive = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbStateSearching = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbConverged = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbLocked = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorRollingShutterSkew(int)");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorRollingShutterSkew(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  LensShadingMapMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    LensShadingMapModeOff = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    LensShadingMapModeOn = 1");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  LensShadingMapMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    LensShadingMapModeOff = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    LensShadingMapModeOn = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  PipelineDepth(int)");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  PipelineDepth(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  MaxLatency(int)");
 
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  MaxLatency(int)");
-
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  TestPatternMode(int)");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeOff = 0");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeSolidColor = 1");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeColorBars = 2");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeColorBarsFadeToGray = 3");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModePn9 = 4");
-    MOTPLS_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeCustom1 = 256");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  TestPatternMode(int)");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeOff = 0");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeSolidColor = 1");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeColorBars = 2");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeColorBarsFadeToGray = 3");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModePn9 = 4");
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeCustom1 = 256");
 
 }
 
@@ -219,59 +226,327 @@ void cls_libcam::start_params()
 
     for (indx=0;indx<params->params_cnt;indx++) {
         itm = &params->params_array[indx];
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s : %s"
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s : %s"
             ,itm->param_name.c_str(), itm->param_value.c_str());
     }
+}
+
+/* Filter out USB/UVC cameras, return only Pi CSI cameras */
+std::vector<std::shared_ptr<Camera>> cls_libcam::get_pi_cameras()
+{
+    std::vector<std::shared_ptr<Camera>> pi_cams;
+
+    for (const auto& cam_item : cam_mgr->cameras()) {
+        std::string id = cam_item->id();
+        /* Filter out USB cameras (UVC devices)
+         * Pi cameras have IDs like: /base/axi/pcie@120000/rp1/i2c@88000/imx708@1a
+         * USB cameras have IDs containing "usb" or are UVC devices
+         */
+        std::string id_lower = id;
+        std::transform(id_lower.begin(), id_lower.end(), id_lower.begin(), ::tolower);
+
+        if (id_lower.find("usb") == std::string::npos &&
+            id_lower.find("uvc") == std::string::npos) {
+            pi_cams.push_back(cam_item);
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                , "Found Pi camera: %s", id.c_str());
+        } else {
+            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+                , "Filtered out USB camera: %s", id.c_str());
+        }
+    }
+
+    /* Sort for consistent ordering across restarts */
+    std::sort(pi_cams.begin(), pi_cams.end(),
+        [](const std::shared_ptr<Camera>& a, const std::shared_ptr<Camera>& b) {
+            return a->id() < b->id();
+        });
+
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        , "Found %d Pi camera(s) after filtering", (int)pi_cams.size());
+
+    return pi_cams;
+}
+
+/* Find camera by sensor model name (e.g., "imx708", "imx477") */
+std::shared_ptr<Camera> cls_libcam::find_camera_by_model(const std::string &model)
+{
+    std::string model_lower = model;
+    std::transform(model_lower.begin(), model_lower.end(), model_lower.begin(), ::tolower);
+
+    for (const auto& cam_item : cam_mgr->cameras()) {
+        std::string id = cam_item->id();
+        std::string id_lower = id;
+        std::transform(id_lower.begin(), id_lower.end(), id_lower.begin(), ::tolower);
+
+        if (id_lower.find(model_lower) != std::string::npos) {
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                , "Found camera matching model '%s': %s"
+                , model.c_str(), id.c_str());
+            return cam_item;
+        }
+    }
+
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+        , "No camera found matching model '%s'", model.c_str());
+    return nullptr;
 }
 
 int cls_libcam::start_mgr()
 {
     int retcd;
-    std::string camid;
+    std::string device;
+    std::vector<std::shared_ptr<Camera>> pi_cams;
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
     cam_mgr = std::make_unique<CameraManager>();
     retcd = cam_mgr->start();
     if (retcd != 0) {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Error starting camera manager.  Return code: %d",retcd);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            , "Error starting camera manager.  Return code: %d", retcd);
         return retcd;
     }
     started_mgr = true;
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "cam_mgr started.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        , "cam_mgr started. Total cameras available: %d"
+        , (int)cam_mgr->cameras().size());
 
-    if (cam->cfg->libcam_device == "camera0"){
-        if (cam_mgr->cameras().size() == 0) {
-            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                , "No camera devices found");
-            return -1;
-        }
-        camid = cam_mgr->cameras()[0]->id();
-    } else {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Invalid libcam_device '%s'.  The only name supported is 'camera0' "
-            ,cam->cfg->libcam_device.c_str());
+    /* Get filtered list of Pi cameras (excludes USB/UVC) */
+    pi_cams = get_pi_cameras();
+
+    if (pi_cams.empty()) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            , "No Pi cameras found. Check camera connection and config.txt");
         return -1;
     }
-    camera = cam_mgr->get(camid);
-    camera->acquire();
-    started_aqr = true;
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
+    device = cam->cfg->libcam_device;
+
+    /* Enhanced camera selection:
+     * - "auto" or "camera0": First Pi camera
+     * - "camera1", "camera2", etc.: Pi camera by index
+     * - "imx708", "imx477", etc.: Pi camera by sensor model
+     */
+    if (device == "auto" || device == "camera0") {
+        camera = pi_cams[0];
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+            , "Selected first Pi camera (auto/camera0)");
+    } else if (device.length() > 6 && device.substr(0, 6) == "camera") {
+        /* Camera by index: camera0, camera1, etc. */
+        int idx = 0;
+        try {
+            idx = std::stoi(device.substr(6));
+        } catch (...) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                , "Invalid camera index in '%s'", device.c_str());
+            return -1;
+        }
+
+        if (idx < 0 || idx >= (int)pi_cams.size()) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                , "Camera index %d out of range (have %d Pi cameras)"
+                , idx, (int)pi_cams.size());
+            return -1;
+        }
+        camera = pi_cams[(size_t)idx];
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+            , "Selected Pi camera by index: %d", idx);
+    } else {
+        /* Try to find camera by sensor model name */
+        camera = find_camera_by_model(device);
+        if (!camera) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                , "Camera '%s' not found. Available cameras:", device.c_str());
+            for (size_t i = 0; i < pi_cams.size(); i++) {
+                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                    , "  camera%d: %s", (int)i, pi_cams[i]->id().c_str());
+            }
+            return -1;
+        }
+    }
+
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        , "Selected camera: %s", camera->id().c_str());
+
+    int acq_ret = camera->acquire();
+    if (acq_ret < 0) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            , "Failed to acquire camera: %d", acq_ret);
+        return -1;
+    }
+    started_aqr = true;
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera acquired successfully");
+
+    /* Discover camera capabilities after acquiring camera */
+    discover_capabilities();
+
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
 
     return 0;
 }
 
+/* Discover which controls the camera supports at runtime
+ * This queries the libcamera ControlInfoMap instead of hardcoding camera models
+ */
+void cls_libcam::discover_capabilities()
+{
+    cam_controls = &camera->controls();
+
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        , "Camera capability discovery: %zu controls available"
+        , cam_controls->size());
+
+    /* Log key capabilities for debugging */
+    if (cam_controls->find(&controls::AfMode) != cam_controls->end()) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "  Autofocus (AfMode): SUPPORTED");
+    } else {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "  Autofocus (AfMode): not available");
+    }
+
+    if (cam_controls->find(&controls::LensPosition) != cam_controls->end()) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "  Manual focus (LensPosition): SUPPORTED");
+    } else {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "  Manual focus (LensPosition): not available");
+    }
+
+    if (cam_controls->find(&controls::AfTrigger) != cam_controls->end()) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "  Focus trigger (AfTrigger): SUPPORTED");
+    }
+
+    if (cam_controls->find(&controls::AfRange) != cam_controls->end()) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "  Focus range (AfRange): SUPPORTED");
+    }
+
+    if (cam_controls->find(&controls::AfSpeed) != cam_controls->end()) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "  Focus speed (AfSpeed): SUPPORTED");
+    }
+
+    if (cam_controls->find(&controls::ExposureTime) != cam_controls->end()) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "  Exposure control: SUPPORTED");
+    }
+
+    if (cam_controls->find(&controls::AnalogueGain) != cam_controls->end()) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "  Analogue gain (ISO): SUPPORTED");
+    }
+
+    if (cam_controls->find(&controls::AwbEnable) != cam_controls->end()) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "  Auto white balance: SUPPORTED");
+    }
+}
+
+/* Check if a specific control is supported by the camera */
+bool cls_libcam::is_control_supported(const ControlId *id)
+{
+    if (cam_controls == nullptr) {
+        return false;
+    }
+    return cam_controls->find(id) != cam_controls->end();
+}
+
+/* Check if this is a NoIR (No IR filter) camera variant.
+ * NoIR cameras don't support meaningful color temperature adjustment
+ * because they lack the IR filter needed for proper color calibration.
+ * Detection is based on "noir" appearing in the camera model name.
+ */
+bool cls_libcam::is_noir_camera()
+{
+    if (!camera) {
+        return false;
+    }
+
+    /* Get camera model from libcamera properties */
+    const ControlList &props = camera->properties();
+    auto model_opt = props.get(properties::Model);
+
+    if (model_opt) {
+        std::string model(*model_opt);
+        std::string model_lower = model;
+        std::transform(model_lower.begin(), model_lower.end(), model_lower.begin(), ::tolower);
+
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , "Camera model: %s", model.c_str());
+
+        if (model_lower.find("noir") != std::string::npos) {
+            return true;
+        }
+    }
+
+    /* Fallback: also check camera ID in case Model property is empty */
+    std::string id = camera->id();
+    std::string id_lower = id;
+    std::transform(id_lower.begin(), id_lower.end(), id_lower.begin(), ::tolower);
+
+    return id_lower.find("noir") != std::string::npos;
+}
+
+/* Build a map of control names to supported status for JSON API */
+std::map<std::string, bool> cls_libcam::get_capability_map()
+{
+    std::map<std::string, bool> caps;
+
+    /* Autofocus controls (Pi Camera v3 / IMX708) */
+    caps["AfMode"] = is_control_supported(&controls::AfMode);
+    caps["LensPosition"] = is_control_supported(&controls::LensPosition);
+    caps["AfTrigger"] = is_control_supported(&controls::AfTrigger);
+    caps["AfRange"] = is_control_supported(&controls::AfRange);
+    caps["AfSpeed"] = is_control_supported(&controls::AfSpeed);
+    caps["AfMetering"] = is_control_supported(&controls::AfMetering);
+
+    /* Exposure controls */
+    caps["ExposureTime"] = is_control_supported(&controls::ExposureTime);
+    caps["ExposureValue"] = is_control_supported(&controls::ExposureValue);
+    caps["AnalogueGain"] = is_control_supported(&controls::AnalogueGain);
+    caps["AeEnable"] = is_control_supported(&controls::AeEnable);
+    caps["AeMeteringMode"] = is_control_supported(&controls::AeMeteringMode);
+    caps["AeConstraintMode"] = is_control_supported(&controls::AeConstraintMode);
+    caps["AeExposureMode"] = is_control_supported(&controls::AeExposureMode);
+
+    /* White balance controls */
+    caps["AwbEnable"] = is_control_supported(&controls::AwbEnable);
+    caps["AwbMode"] = is_control_supported(&controls::AwbMode);
+    caps["AwbLocked"] = is_control_supported(&controls::AwbLocked);
+    caps["ColourGains"] = is_control_supported(&controls::ColourGains);
+    caps["ColourTemperature"] = is_control_supported(&controls::ColourTemperature);
+
+    /* Image quality controls */
+    caps["Brightness"] = is_control_supported(&controls::Brightness);
+    caps["Contrast"] = is_control_supported(&controls::Contrast);
+    caps["Saturation"] = is_control_supported(&controls::Saturation);
+    caps["Sharpness"] = is_control_supported(&controls::Sharpness);
+
+    /* Other controls */
+    caps["DigitalGain"] = is_control_supported(&controls::DigitalGain);
+    caps["ScalerCrop"] = is_control_supported(&controls::ScalerCrop);
+
+    /* NoIR camera overrides:
+     * NoIR cameras lack an IR filter, so color temperature adjustment
+     * doesn't work properly. Override these capabilities to false.
+     */
+    if (is_noir_camera()) {
+        caps["ColourTemperature"] = false;
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+            , "NoIR camera detected - disabling ColourTemperature control");
+    }
+
+    return caps;
+}
+
+/* Get list of controls that were ignored because camera doesn't support them */
+std::vector<std::string> cls_libcam::get_ignored_controls()
+{
+    return ignored_controls_;
+}
+
+/* Clear the ignored controls list (call after reporting to API) */
+void cls_libcam::clear_ignored_controls()
+{
+    ignored_controls_.clear();
+}
+
 void cls_libcam::config_control_item(std::string pname, std::string pvalue)
 {
-    if (pname == "AeEnable") {
-        controls.set(controls::AeEnable, mtob(pvalue));
-    }
-    if (pname == "AeLocked") {
-        controls.set(controls::AeLocked, mtob(pvalue));
-    }
     if (pname == "AeMeteringMode") {
        controls.set(controls::AeMeteringMode, mtoi(pvalue));
     }
@@ -374,71 +649,166 @@ void cls_libcam::config_control_item(std::string pname, std::string pvalue)
         controls.set(controls::SensorTimestamp, mtoi(pvalue));
     }
     if (pname == "AfMode") {
+        if (!is_control_supported(&controls::AfMode)) {
+            MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+                , "AfMode not supported by this camera (ignored)");
+            ignored_controls_.push_back("libcam_af_mode");
+            return;
+        }
         controls.set(controls::AfMode, mtoi(pvalue));
     }
     if (pname == "AfRange") {
+        if (!is_control_supported(&controls::AfRange)) {
+            MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+                , "AfRange not supported by this camera (ignored)");
+            ignored_controls_.push_back("libcam_af_range");
+            return;
+        }
         controls.set(controls::AfRange, mtoi(pvalue));
     }
     if (pname == "AfSpeed") {
+        if (!is_control_supported(&controls::AfSpeed)) {
+            MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+                , "AfSpeed not supported by this camera (ignored)");
+            ignored_controls_.push_back("libcam_af_speed");
+            return;
+        }
         controls.set(controls::AfSpeed, mtoi(pvalue));
     }
     if (pname == "AfMetering") {
+        if (!is_control_supported(&controls::AfMetering)) {
+            MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+                , "AfMetering not supported by this camera (ignored)");
+            ignored_controls_.push_back("libcam_af_metering");
+            return;
+        }
         controls.set(controls::AfMetering, mtoi(pvalue));
     }
     if (pname == "AfWindows") {
-        Rectangle afwin[1];
-        afwin[0].x = mtoi(mtok(pvalue,"|"));
-        afwin[0].y = mtoi(mtok(pvalue,"|"));
-        afwin[0].width = (uint)mtoi(mtok(pvalue,"|"));
-        afwin[0].height = (uint)mtoi(mtok(pvalue,"|"));
-        controls.set(controls::AfWindows, afwin);
+        std::vector<Rectangle> afwindows;
+        std::string windows_str = pvalue;
+        std::string window_token;
+
+        // Split by semicolon for multiple windows
+        size_t pos = 0;
+        while ((pos = windows_str.find(';')) != std::string::npos || !windows_str.empty()) {
+            if (pos != std::string::npos) {
+                window_token = windows_str.substr(0, pos);
+                windows_str.erase(0, pos + 1);
+            } else {
+                window_token = windows_str;
+                windows_str.clear();
+            }
+
+            if (!window_token.empty()) {
+                Rectangle rect;
+                std::string temp = window_token;
+                rect.x = mtoi(mtok(temp, "|"));
+                rect.y = mtoi(mtok(temp, "|"));
+                rect.width = (uint)mtoi(mtok(temp, "|"));
+                rect.height = (uint)mtoi(mtok(temp, "|"));
+
+                // Only add valid rectangles (non-zero dimensions)
+                if (rect.width > 0 && rect.height > 0) {
+                    afwindows.push_back(rect);
+                    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+                        , "AF window %d: x=%d y=%d w=%u h=%u"
+                        , (int)afwindows.size(), rect.x, rect.y, rect.width, rect.height);
+                }
+            }
+
+            // Limit to 4 windows
+            if (afwindows.size() >= 4) break;
+        }
+
+        if (!afwindows.empty()) {
+            controls.set(controls::AfWindows,
+                Span<const Rectangle>(afwindows.data(), afwindows.size()));
+        }
     }
     if (pname == "AfTrigger") {
+        if (!is_control_supported(&controls::AfTrigger)) {
+            MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+                , "AfTrigger not supported by this camera (ignored)");
+            ignored_controls_.push_back("libcam_af_trigger");
+            return;
+        }
         controls.set(controls::AfTrigger, mtoi(pvalue));
     }
     if (pname == "AfPause") {
+        if (!is_control_supported(&controls::AfPause)) {
+            MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+                , "AfPause not supported by this camera (ignored)");
+            ignored_controls_.push_back("libcam_af_pause");
+            return;
+        }
         controls.set(controls::AfPause, mtoi(pvalue));
     }
     if (pname == "LensPosition") {
+        if (!is_control_supported(&controls::LensPosition)) {
+            MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+                , "LensPosition not supported by this camera (ignored)");
+            ignored_controls_.push_back("libcam_lens_position");
+            return;
+        }
         controls.set(controls::LensPosition, mtof(pvalue));
     }
     if (pname == "AfState") {
-        controls.set(controls::AfState, mtoi(pvalue));
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+            , "AfState is read-only (output control) - cannot be set");
+        return;  // Skip this control
     }
     if (pname == "AfPauseState") {
-        controls.set(controls::AfPauseState, mtoi(pvalue));
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+            , "AfPauseState is read-only (output control) - cannot be set");
+        return;  // Skip this control
     }
 
-    /* DRAFT*/
+    /* DRAFT - with silent skip if unavailable (Trixie 64-bit compatibility) */
     if (pname == "AePrecaptureTrigger") {
-        controls.set(controls::draft::AePrecaptureTrigger, mtoi(pvalue));
+        if (is_control_supported(&controls::draft::AePrecaptureTrigger)) {
+            controls.set(controls::draft::AePrecaptureTrigger, mtoi(pvalue));
+        }
     }
     if (pname == "NoiseReductionMode") {
-        controls.set(controls::draft::NoiseReductionMode, mtoi(pvalue));
+        if (is_control_supported(&controls::draft::NoiseReductionMode)) {
+            controls.set(controls::draft::NoiseReductionMode, mtoi(pvalue));
+        }
     }
     if (pname == "ColorCorrectionAberrationMode") {
-        controls.set(controls::draft::ColorCorrectionAberrationMode, mtoi(pvalue));
-    }
-    if (pname == "AeState") {
-        controls.set(controls::draft::AeState, mtoi(pvalue));
+        if (is_control_supported(&controls::draft::ColorCorrectionAberrationMode)) {
+            controls.set(controls::draft::ColorCorrectionAberrationMode, mtoi(pvalue));
+        }
     }
     if (pname == "AwbState") {
-        controls.set(controls::draft::AwbState, mtoi(pvalue));
+        if (is_control_supported(&controls::draft::AwbState)) {
+            controls.set(controls::draft::AwbState, mtoi(pvalue));
+        }
     }
     if (pname == "SensorRollingShutterSkew") {
-        controls.set(controls::draft::SensorRollingShutterSkew, mtoi(pvalue));
+        if (is_control_supported(&controls::draft::SensorRollingShutterSkew)) {
+            controls.set(controls::draft::SensorRollingShutterSkew, mtoi(pvalue));
+        }
     }
     if (pname == "LensShadingMapMode") {
-        controls.set(controls::draft::LensShadingMapMode, mtoi(pvalue));
+        if (is_control_supported(&controls::draft::LensShadingMapMode)) {
+            controls.set(controls::draft::LensShadingMapMode, mtoi(pvalue));
+        }
     }
     if (pname == "PipelineDepth") {
-        controls.set(controls::draft::PipelineDepth, mtoi(pvalue));
+        if (is_control_supported(&controls::draft::PipelineDepth)) {
+            controls.set(controls::draft::PipelineDepth, mtoi(pvalue));
+        }
     }
     if (pname == "MaxLatency") {
-        controls.set(controls::draft::MaxLatency, mtoi(pvalue));
+        if (is_control_supported(&controls::draft::MaxLatency)) {
+            controls.set(controls::draft::MaxLatency, mtoi(pvalue));
+        }
     }
     if (pname == "TestPatternMode") {
-        controls.set(controls::draft::TestPatternMode, mtoi(pvalue));
+        if (is_control_supported(&controls::draft::TestPatternMode)) {
+            controls.set(controls::draft::TestPatternMode, mtoi(pvalue));
+        }
     }
 
 }
@@ -453,15 +823,62 @@ void cls_libcam::config_controls()
             ,params->params_array[indx].param_value);
     }
 
+    /* Apply initial brightness/contrast/gain from config */
+    controls.set(controls::Brightness, cam->cfg->parm_cam.libcam_brightness);
+    controls.set(controls::Contrast, cam->cfg->parm_cam.libcam_contrast);
+    controls.set(controls::AnalogueGain, cam->cfg->parm_cam.libcam_gain);
+
+    /* Apply initial AWB controls from config */
+    controls.set(controls::AwbEnable, cam->cfg->parm_cam.libcam_awb_enable);
+    controls.set(controls::AwbMode, cam->cfg->parm_cam.libcam_awb_mode);
+    controls.set(controls::AwbLocked, cam->cfg->parm_cam.libcam_awb_locked);
+
+    /* Apply AF controls from config (only if camera supports them) */
+    if (is_control_supported(&controls::AfMode)) {
+        controls.set(controls::AfMode, cam->cfg->parm_cam.libcam_af_mode);
+    } else if (cam->cfg->parm_cam.libcam_af_mode != 0) {
+        /* Only warn if user explicitly set a non-default AF mode */
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+            , "libcam_af_mode ignored: camera does not support autofocus");
+        ignored_controls_.push_back("libcam_af_mode");
+    }
+
+    if (is_control_supported(&controls::AfRange)) {
+        controls.set(controls::AfRange, cam->cfg->parm_cam.libcam_af_range);
+    } else if (cam->cfg->parm_cam.libcam_af_range != 0) {
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+            , "libcam_af_range ignored: camera does not support autofocus");
+        ignored_controls_.push_back("libcam_af_range");
+    }
+
+    if (is_control_supported(&controls::AfSpeed)) {
+        controls.set(controls::AfSpeed, cam->cfg->parm_cam.libcam_af_speed);
+    } else if (cam->cfg->parm_cam.libcam_af_speed != 0) {
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+            , "libcam_af_speed ignored: camera does not support autofocus");
+        ignored_controls_.push_back("libcam_af_speed");
+    }
+
+    /* Apply LensPosition only in manual mode and if supported */
+    if (cam->cfg->parm_cam.libcam_af_mode == 0) {
+        if (is_control_supported(&controls::LensPosition)) {
+            controls.set(controls::LensPosition, cam->cfg->parm_cam.libcam_lens_position);
+        } else if (cam->cfg->parm_cam.libcam_lens_position > 0.0f) {
+            MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+                , "libcam_lens_position ignored: camera does not support manual focus");
+            ignored_controls_.push_back("libcam_lens_position");
+        }
+    }
+
     retcd = config->validate();
     if (retcd == CameraConfiguration::Adjusted) {
-        MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
             , "Configuration controls adjusted.");
     } else if (retcd == CameraConfiguration::Valid) {
-         MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+         MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
             , "Configuration controls valid");
     } else if (retcd == CameraConfiguration::Invalid) {
-         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Configuration controls error");
     }
 
@@ -494,7 +911,7 @@ void cls_libcam:: config_orientation()
                 } else if (itm->param_value == "Rotate270Mirror") {
                     config->orientation = Orientation::Rotate270Mirror;
                 } else {
-                    MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                         , "Invalid Orientation option: %s."
                         , itm->param_value.c_str());
                 }
@@ -522,18 +939,18 @@ void cls_libcam:: config_orientation()
             } else {
                 adjdesc = "unknown";
             }
-            MOTPLS_LOG(INF, TYPE_VIDEO, NO_ERRNO
+            MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
                 , "Configuration orientation adjusted to %s."
                 , adjdesc.c_str());
         } else if (retcd == CameraConfiguration::Valid) {
-            MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
                 , "Configuration orientation valid");
         } else if (retcd == CameraConfiguration::Invalid) {
-            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 , "Configuration orientation error");
         }
     #else
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Orientation Not available");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Orientation Not available");
     #endif
 
 }
@@ -541,41 +958,82 @@ void cls_libcam:: config_orientation()
 int cls_libcam::start_config()
 {
     int retcd;
+    int buffer_count;
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
-    config = camera->generateConfiguration({ StreamRole::Viewfinder });
+    /* Pi 5 requires VideoRecording role for proper PiSP pipeline initialization */
+    config = camera->generateConfiguration({ StreamRole::VideoRecording });
 
     config->at(0).pixelFormat = PixelFormat::fromString("YUV420");
 
     config->at(0).size.width = (uint)cam->cfg->width;
     config->at(0).size.height = (uint)cam->cfg->height;
-    config->at(0).bufferCount = 1;
+
+    /* Multi-buffer support for Pi 5: default 4 buffers to prevent pipeline stalls */
+    buffer_count = cam->cfg->libcam_buffer_count;
+    if (buffer_count < 2) {
+        buffer_count = 2;
+    } else if (buffer_count > 8) {
+        buffer_count = 8;
+    }
+    config->at(0).bufferCount = (uint)buffer_count;
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Buffer count: %d", buffer_count);
+
     config->at(0).stride = 0;
 
+    /* DIAGNOSTIC: Log pre-validate configuration */
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        , "DIAG: Pre-validate config: requested=%dx%d, pixelFormat=%s, bufferCount=%d"
+        , config->at(0).size.width, config->at(0).size.height
+        , config->at(0).pixelFormat.toString().c_str()
+        , config->at(0).bufferCount);
+
     retcd = config->validate();
+
+    /* DIAGNOSTIC: Log post-validate configuration */
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        , "DIAG: Post-validate config: size=%dx%d, stride=%d, frameSize=%zu, validate_result=%d"
+        , config->at(0).size.width, config->at(0).size.height
+        , config->at(0).stride
+        , config->at(0).frameSize
+        , retcd);
+
     if (retcd == CameraConfiguration::Adjusted) {
-        if (config->at(0).pixelFormat != PixelFormat::fromString("YUV420")) {
-            MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-                , "Pixel format was adjusted to %s."
-                , config->at(0).pixelFormat.toString().c_str());
+        /* Accept safe YUV 4:2:0 format alternatives (Trixie 64-bit compatibility) */
+        libcamera::PixelFormat adjusted = config->at(0).pixelFormat;
+        libcamera::PixelFormat yuv420 = PixelFormat::fromString("YUV420");
+        libcamera::PixelFormat nv12 = PixelFormat::fromString("NV12");
+
+        if (adjusted != yuv420 && adjusted != nv12) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                , "Unsupported pixel format: %s (need YUV420 or NV12)"
+                , adjusted.toString().c_str());
             return -1;
+        }
+
+        if (adjusted != yuv420) {
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                , "Using pixel format %s (NV12 uses same Y-plane for motion detection)"
+                , adjusted.toString().c_str());
+            /* Note: NV12 conversion deferred - testing may show it's not needed
+             * since motion detection primarily uses Y-plane which is identical */
         } else {
-            MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 , "Configuration adjusted.");
         }
     } else if (retcd == CameraConfiguration::Valid) {
-         MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             , "Configuration is valid");
     } else if (retcd == CameraConfiguration::Invalid) {
-         MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Error setting configuration");
         return -1;
     }
 
     if ((config->at(0).size.width != (uint)cam->cfg->width) ||
         (config->at(0).size.height != (uint)cam->cfg->height)) {
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             , "Image size adjusted from %d x %d to %d x %d"
             , cam->cfg->width, cam->cfg->height
             , config->at(0).size.width, config->at(0).size.height);
@@ -586,6 +1044,12 @@ int cls_libcam::start_config()
     cam->imgs.size_norm = (cam->imgs.width * cam->imgs.height * 3) / 2;
     cam->imgs.motionsize = cam->imgs.width * cam->imgs.height;
 
+    /* DIAGNOSTIC: Log final image dimensions */
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        , "DIAG: Final image dimensions: imgs.width=%d, imgs.height=%d, size_norm=%d, motionsize=%d"
+        , cam->imgs.width, cam->imgs.height
+        , cam->imgs.size_norm, cam->imgs.motionsize);
+
     log_orientation();
     log_controls();
     log_draft();
@@ -593,9 +1057,16 @@ int cls_libcam::start_config()
     config_orientation();
     config_controls();
 
-    camera->configure(config.get());
+    int cfg_ret = camera->configure(config.get());
+    if (cfg_ret < 0) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            , "Failed to configure camera: %d", cfg_ret);
+        return -1;
+    }
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        , "Camera configured successfully, state should now be Configured");
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
 
     return 0;
 }
@@ -603,81 +1074,212 @@ int cls_libcam::start_config()
 int cls_libcam::req_add(Request *request)
 {
     int retcd;
+
+    /* Apply pending controls under lock */
+    {
+        std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+        if (pending_ctrls.dirty) {
+            ControlList &req_controls = request->controls();
+            req_controls.set(controls::Brightness, pending_ctrls.brightness);
+            req_controls.set(controls::Contrast, pending_ctrls.contrast);
+            req_controls.set(controls::AnalogueGain, pending_ctrls.gain);
+
+            // Apply AWB controls
+            req_controls.set(controls::AwbEnable, pending_ctrls.awb_enable);
+            req_controls.set(controls::AwbMode, pending_ctrls.awb_mode);
+            req_controls.set(controls::AwbLocked, pending_ctrls.awb_locked);
+
+            // Apply manual colour controls only when AWB is disabled
+            if (!pending_ctrls.awb_enable) {
+                if (pending_ctrls.colour_temp > 0) {
+                    req_controls.set(controls::ColourTemperature, pending_ctrls.colour_temp);
+                }
+                if (pending_ctrls.colour_gain_r > 0.0f || pending_ctrls.colour_gain_b > 0.0f) {
+                    float cg[2] = {pending_ctrls.colour_gain_r, pending_ctrls.colour_gain_b};
+                    req_controls.set(controls::ColourGains, cg);
+                }
+            }
+
+            // Apply AF controls (only if camera supports them)
+            if (is_control_supported(&controls::AfMode)) {
+                req_controls.set(controls::AfMode, pending_ctrls.af_mode);
+            }
+            if (is_control_supported(&controls::AfRange)) {
+                req_controls.set(controls::AfRange, pending_ctrls.af_range);
+            }
+            if (is_control_supported(&controls::AfSpeed)) {
+                req_controls.set(controls::AfSpeed, pending_ctrls.af_speed);
+            }
+
+            // Apply LensPosition only in manual mode and if supported
+            if (pending_ctrls.af_mode == 0 && is_control_supported(&controls::LensPosition)) {
+                req_controls.set(controls::LensPosition, pending_ctrls.lens_position);
+            }
+
+            // Handle AF trigger (one-shot, then clear) - only if supported
+            if (pending_ctrls.af_trigger && is_control_supported(&controls::AfTrigger)) {
+                req_controls.set(controls::AfTrigger, controls::AfTriggerStart);
+                pending_ctrls.af_trigger = false;
+            } else if (pending_ctrls.af_trigger) {
+                pending_ctrls.af_trigger = false;  // Clear even if not supported
+            }
+
+            // Handle AF cancel (one-shot, then clear) - only if supported
+            if (pending_ctrls.af_cancel && is_control_supported(&controls::AfTrigger)) {
+                req_controls.set(controls::AfTrigger, controls::AfTriggerCancel);
+                pending_ctrls.af_cancel = false;
+            } else if (pending_ctrls.af_cancel) {
+                pending_ctrls.af_cancel = false;  // Clear even if not supported
+            }
+
+            pending_ctrls.dirty = false;
+            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+                , "Applied controls: brightness=%.2f, contrast=%.2f, gain=%.2f, "
+                  "awb_enable=%s, awb_mode=%d, af_mode=%d, lens_pos=%.2f"
+                , pending_ctrls.brightness, pending_ctrls.contrast
+                , pending_ctrls.gain
+                , pending_ctrls.awb_enable ? "true" : "false"
+                , pending_ctrls.awb_mode
+                , pending_ctrls.af_mode
+                , pending_ctrls.lens_position);
+            if (!pending_ctrls.awb_enable && pending_ctrls.colour_temp > 0) {
+                MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+                    , "Applied manual colour temperature: %dK", pending_ctrls.colour_temp);
+            }
+            if (!pending_ctrls.awb_enable && (pending_ctrls.colour_gain_r > 0.0f || pending_ctrls.colour_gain_b > 0.0f)) {
+                MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+                    , "Applied manual colour gains: R=%.2f, B=%.2f"
+                    , pending_ctrls.colour_gain_r, pending_ctrls.colour_gain_b);
+            }
+        }
+    }  // lock released here
+
     retcd = camera->queueRequest(request);
     return retcd;
 }
 
 int cls_libcam::start_req()
 {
-    int retcd, bytes, indx, width;
+    int retcd, indx, width;
+    size_t bytes;  /* Changed to size_t for 64-bit safety */
+    unsigned int buf_idx;
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
     camera->requestCompleted.connect(this, &cls_libcam::req_complete);
     frmbuf = std::make_unique<FrameBufferAllocator>(camera);
 
     retcd = frmbuf->allocate(config->at(0).stream());
     if (retcd < 0) {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Buffer allocation error.");
-        return -1;
-    }
-
-    std::unique_ptr<Request> request = camera->createRequest();
-    if (!request) {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Create request error.");
         return -1;
     }
 
     Stream *stream = config->at(0).stream();
     const std::vector<std::unique_ptr<FrameBuffer>> &buffers =
         frmbuf->buffers(stream);
-    const std::unique_ptr<FrameBuffer> &buffer = buffers[0];
 
-    retcd = request->addBuffer(stream, buffer.get());
-    if (retcd < 0) {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Add buffer for request error.");
-        return -1;
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        , "Allocated %d buffers for stream", (int)buffers.size());
+
+    /* Create a request for each buffer in the pool */
+    for (buf_idx = 0; buf_idx < buffers.size(); buf_idx++) {
+        std::unique_ptr<Request> request = camera->createRequest();
+        if (!request) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                , "Create request error for buffer %d.", buf_idx);
+            return -1;
+        }
+
+        retcd = request->addBuffer(stream, buffers[buf_idx].get());
+        if (retcd < 0) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                , "Add buffer %d for request error.", buf_idx);
+            return -1;
+        }
+
+        requests.push_back(std::move(request));
     }
 
     started_req = true;
 
+    /* Calculate buffer size from first buffer (all buffers same size) */
+    const std::unique_ptr<FrameBuffer> &buffer = buffers[0];
     const FrameBuffer::Plane &plane0 = buffer->planes()[0];
 
     bytes = 0;
-    for (indx=0; indx<(int)buffer->planes().size(); indx++){
+    for (indx = 0; indx < (int)buffer->planes().size(); indx++) {
         bytes += buffer->planes()[(uint)indx].length;
-        MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "Plane %d of %d length %d"
-            , indx, buffer->planes().size()
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "Plane %d of %d length %d"
+            , indx, (int)buffer->planes().size()
             , buffer->planes()[(uint)indx].length);
     }
 
+    /* DIAGNOSTIC: Log buffer allocation info */
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        , "DIAG: Buffer allocation: total_bytes=%d, expected_size_norm=%d, plane0_length=%d, num_planes=%d"
+        , bytes, cam->imgs.size_norm
+        , (int)buffer->planes()[0].length
+        , (int)buffer->planes().size());
+
+    /* Adjust image dimensions if buffer size doesn't match expected */
     if (bytes > cam->imgs.size_norm) {
         width = ((int)buffer->planes()[0].length / cam->imgs.height);
         if (((int)buffer->planes()[0].length != (width * cam->imgs.height)) ||
-            (bytes > ((width * cam->imgs.height * 3)/2))) {
-            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            (bytes > ((width * cam->imgs.height * 3) / 2))) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 , "Error setting image size.  Plane 0 length %d, total bytes %d"
                 , buffer->planes()[0].length, bytes);
         }
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             , "Image size adjusted from %d x %d to %d x %d"
-            , cam->imgs.width,cam->imgs.height
-            , width,cam->imgs.height);
+            , cam->imgs.width, cam->imgs.height
+            , width, cam->imgs.height);
         cam->imgs.width = width;
         cam->imgs.size_norm = (cam->imgs.width * cam->imgs.height * 3) / 2;
         cam->imgs.motionsize = cam->imgs.width * cam->imgs.height;
     }
 
-    membuf.buf = (uint8_t *)mmap(NULL, (uint)bytes, PROT_READ
+    /* DIAGNOSTIC: Log final dimensions after any buffer-based adjustment */
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        , "DIAG: After buffer check: imgs.width=%d, imgs.height=%d, size_norm=%d"
+        , cam->imgs.width, cam->imgs.height, cam->imgs.size_norm);
+
+    /* Map memory for legacy single-buffer access (backwards compatibility) */
+    membuf.buf = (uint8_t *)mmap(NULL, bytes, PROT_READ
         , MAP_SHARED, plane0.fd.get(), 0);
     membuf.bufsz = bytes;
 
-    requests.push_back(std::move(request));
+    /* Map memory for each buffer in the pool */
+    membuf_pool.clear();
+    for (buf_idx = 0; buf_idx < buffers.size(); buf_idx++) {
+        ctx_imgmap map;
+        const FrameBuffer::Plane &p0 = buffers[buf_idx]->planes()[0];
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
+        size_t buf_bytes = 0;  /* Changed to size_t for 64-bit safety */
+        for (const auto &plane : buffers[buf_idx]->planes()) {
+            buf_bytes += plane.length;
+        }
+
+        map.buf = (uint8_t *)mmap(NULL, buf_bytes, PROT_READ
+            , MAP_SHARED, p0.fd.get(), 0);
+        map.bufsz = buf_bytes;
+
+        if (map.buf == MAP_FAILED) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                , "mmap failed for buffer %d", buf_idx);
+            return -1;
+        }
+
+        membuf_pool.push_back(map);
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , "Mapped buffer %d: %d bytes", buf_idx, buf_bytes);
+    }
+
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        , "Finished. Created %d requests with %d mapped buffers."
+        , (int)requests.size(), (int)membuf_pool.size());
 
     return 0;
 }
@@ -686,11 +1288,11 @@ int cls_libcam::start_capture()
 {
     int retcd;
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
     retcd = camera->start(&this->controls);
     if (retcd) {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Failed to start capture.");
         return -1;
     }
@@ -699,7 +1301,7 @@ int cls_libcam::start_capture()
     for (std::unique_ptr<Request> &request : requests) {
         retcd = req_add(request.get());
         if (retcd < 0) {
-            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                 , "Failed to queue request.");
             if (started_cam) {
                 camera->stop();
@@ -707,7 +1309,7 @@ int cls_libcam::start_capture()
             return -1;
         }
     }
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
 
     return 0;
 }
@@ -717,7 +1319,38 @@ void cls_libcam::req_complete(Request *request)
     if (request->status() == Request::RequestCancelled) {
         return;
     }
-    req_queue.push(request);
+
+    /* Find which buffer index this request corresponds to */
+    Stream *stream = config->at(0).stream();
+    FrameBuffer *buffer = request->findBuffer(stream);
+
+    const std::vector<std::unique_ptr<FrameBuffer>> &buffers =
+        frmbuf->buffers(stream);
+
+    int buf_idx = -1;
+    for (size_t i = 0; i < buffers.size(); i++) {
+        if (buffers[i].get() == buffer) {
+            buf_idx = (int)i;
+            break;
+        }
+    }
+
+    if (buf_idx >= 0 && buf_idx < (int)membuf_pool.size()) {
+        ctx_reqinfo req_info;
+        req_info.request = request;
+        req_info.buffer_idx = buf_idx;
+        req_queue.push(req_info);
+    } else {
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+            , "Request completed with unknown buffer index");
+        /* Fallback: use buffer 0 if available */
+        if (!membuf_pool.empty()) {
+            ctx_reqinfo req_info;
+            req_info.request = request;
+            req_info.buffer_idx = 0;
+            req_queue.push(req_info);
+        }
+    }
 }
 
 int cls_libcam::libcam_start()
@@ -747,7 +1380,7 @@ int cls_libcam::libcam_start()
 
     started_cam = true;
 
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera started");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera started");
 
     return 0;
 }
@@ -782,7 +1415,210 @@ void cls_libcam::libcam_stop()
         cam_mgr.reset();
     }
     cam->device_status = STATUS_CLOSED;
-    MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera stopped.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera stopped.");
+}
+
+void cls_libcam::set_brightness(float value)
+{
+    std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+    pending_ctrls.brightness = value;
+    pending_ctrls.dirty = true;
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+        , "Hot-reload: brightness set to %.2f", value);
+}
+
+void cls_libcam::set_contrast(float value)
+{
+    std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+    pending_ctrls.contrast = value;
+    pending_ctrls.dirty = true;
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+        , "Hot-reload: contrast set to %.2f", value);
+}
+
+void cls_libcam::set_gain(float value)
+{
+    std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+    pending_ctrls.gain = value;
+    pending_ctrls.dirty = true;
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+        , "Hot-reload: AnalogueGain set to %.2f", value);
+}
+
+void cls_libcam::set_awb_enable(bool value)
+{
+    std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+    pending_ctrls.awb_enable = value;
+    pending_ctrls.dirty = true;
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+        , "Hot-reload: AWB enable set to %s", value ? "true" : "false");
+}
+
+void cls_libcam::set_awb_mode(int value)
+{
+
+        std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+        pending_ctrls.awb_mode = value;
+        /* When using AWB presets (not Custom), clear manual controls */
+        if (value != 7) {  // 7 = AwbCustom
+            pending_ctrls.colour_temp = 0;
+            pending_ctrls.colour_gain_r = 0.0f;
+            pending_ctrls.colour_gain_b = 0.0f;
+        }
+        pending_ctrls.dirty = true;
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , "Hot-reload: AWB mode set to %d (manual controls cleared)", value);
+
+
+
+}
+
+void cls_libcam::set_awb_locked(bool value)
+{
+
+        std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+        pending_ctrls.awb_locked = value;
+        pending_ctrls.dirty = true;
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , "Hot-reload: AWB locked set to %s", value ? "true" : "false");
+
+
+
+}
+
+void cls_libcam::set_colour_temp(int value)
+{
+
+        std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+        pending_ctrls.colour_temp = value;
+        /* Mutual exclusivity: temperature and gains cannot both be active */
+        if (value > 0) {
+            pending_ctrls.colour_gain_r = 0.0f;
+            pending_ctrls.colour_gain_b = 0.0f;
+        }
+        pending_ctrls.dirty = true;
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , "Hot-reload: Colour temperature set to %dK (gains cleared)", value);
+
+
+
+}
+
+void cls_libcam::set_colour_gains(float red, float blue)
+{
+
+        std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+        pending_ctrls.colour_gain_r = red;
+        pending_ctrls.colour_gain_b = blue;
+        /* Mutual exclusivity: gains and temperature cannot both be active */
+        if (red > 0.0f || blue > 0.0f) {
+            pending_ctrls.colour_temp = 0;
+        }
+        pending_ctrls.dirty = true;
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , "Hot-reload: Colour gains set to R=%.2f, B=%.2f (temp cleared)", red, blue);
+
+        (void)red; (void)blue;
+
+}
+
+void cls_libcam::set_af_mode(int value)
+{
+
+        std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+        pending_ctrls.af_mode = value;
+        pending_ctrls.dirty = true;
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , "Hot-reload: AF mode set to %d (%s)"
+            , value
+            , value == 0 ? "Manual" : value == 1 ? "Auto" : "Continuous");
+
+
+
+}
+
+void cls_libcam::set_lens_position(float value)
+{
+
+        std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+        pending_ctrls.lens_position = value;
+        pending_ctrls.dirty = true;
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , "Hot-reload: Lens position set to %.2f dioptres (focus at %.2fm)"
+            , value, value > 0 ? 1.0f / value : INFINITY);
+
+
+
+}
+
+void cls_libcam::set_af_range(int value)
+{
+
+        std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+        pending_ctrls.af_range = value;
+        pending_ctrls.dirty = true;
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , "Hot-reload: AF range set to %d (%s)"
+            , value
+            , value == 0 ? "Normal" : value == 1 ? "Macro" : "Full");
+
+
+
+}
+
+void cls_libcam::set_af_speed(int value)
+{
+
+        std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+        pending_ctrls.af_speed = value;
+        pending_ctrls.dirty = true;
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , "Hot-reload: AF speed set to %d (%s)"
+            , value, value == 0 ? "Normal" : "Fast");
+
+
+
+}
+
+void cls_libcam::trigger_af_scan()
+{
+
+        std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+        pending_ctrls.af_trigger = true;
+        pending_ctrls.dirty = true;
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , "Hot-reload: AF scan triggered");
+
+
+
+}
+
+void cls_libcam::cancel_af_scan()
+{
+
+        std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+        pending_ctrls.af_cancel = true;
+        pending_ctrls.dirty = true;
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , "Hot-reload: AF scan cancelled");
+
+
+
+}
+
+void cls_libcam::apply_pending_controls()
+{
+    /* Note: libcamera 0.5.2 doesn't have Camera::setControls().
+     * Controls are applied via requests. For now, we'll apply them
+     * on the next queued request in req_add(). The dirty flag signals
+     * that controls should be updated on next request.
+     */
+    std::lock_guard<std::mutex> lock(pending_ctrls.mtx);
+    if (pending_ctrls.dirty) {
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
+            , "Brightness/Contrast/Gain update pending: brightness=%.2f, contrast=%.2f, gain=%.2f"
+            , pending_ctrls.brightness, pending_ctrls.contrast, pending_ctrls.gain);
+    }
 }
 
 #endif
@@ -790,23 +1626,24 @@ void cls_libcam::libcam_stop()
 void cls_libcam::noimage()
 {
     #ifdef HAVE_LIBCAM
+
         int slp_dur;
 
         if (reconnect_count < 100) {
             reconnect_count++;
         } else {
             if (reconnect_count >= 500) {
-                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
-                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 2 hours."));
+                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
+                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 2 hours."));
                 slp_dur = 7200;
             } else if (reconnect_count >= 200) {
-                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
-                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 10 minutes."));
+                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
+                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 10 minutes."));
                 reconnect_count++;
                 slp_dur = 600;
             } else {
-                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
-                MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 30 seconds."));
+                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Camera did not reconnect."));
+                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Checking for camera every 30 seconds."));
                 reconnect_count++;
                 slp_dur = 30;
             }
@@ -814,7 +1651,7 @@ void cls_libcam::noimage()
             SLEEP(slp_dur,0);
             libcam_stop();
             if (libcam_start() < 0) {
-                MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
+                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
                 libcam_stop();
             } else {
                 cam->device_status = STATUS_OPENED;
@@ -833,25 +1670,43 @@ int cls_libcam::next(ctx_image_data *img_data)
         }
 
         cam->watchdog = cam->cfg->watchdog_tmo;
-        /* Allow time for request to finish.*/
-        indx=0;
-        while ((req_queue.empty() == true) && (indx < 50)) {
-            SLEEP(0,2000)
+
+        /* Allow time for request to finish */
+        indx = 0;
+        while (req_queue.empty() && indx < 50) {
+            SLEEP(0, 2000);
             indx++;
         }
 
         cam->watchdog = cam->cfg->watchdog_tmo;
-        if (req_queue.empty() == false) {
-            Request *request = this->req_queue.front();
 
-            memcpy(img_data->image_norm, membuf.buf, (uint)membuf.bufsz);
+        if (!req_queue.empty()) {
+            /* Get request info including buffer index */
+            ctx_reqinfo req_info = req_queue.front();
+            req_queue.pop();
 
-            this->req_queue.pop();
+            Request *request = req_info.request;
+            int buf_idx = req_info.buffer_idx;
+
+            /* Copy frame data from the correct buffer in the pool */
+            if (buf_idx >= 0 && buf_idx < (int)membuf_pool.size()) {
+                memcpy(img_data->image_norm,
+                       membuf_pool[(size_t)buf_idx].buf,
+                       membuf_pool[(size_t)buf_idx].bufsz);
+            } else {
+                /* Fallback to legacy single buffer for compatibility */
+                memcpy(img_data->image_norm, membuf.buf, membuf.bufsz);
+            }
+
+            /* Requeue request for next frame */
             request->reuse(Request::ReuseBuffers);
             req_add(request);
 
             cam->rotate->process(img_data);
             reconnect_count = 0;
+
+            /* Apply any pending hot-reload control changes */
+            apply_pending_controls();
 
             return CAPTURE_SUCCESS;
 
@@ -868,18 +1723,36 @@ cls_libcam::cls_libcam(cls_camera *p_cam)
 {
     cam = p_cam;
     #ifdef HAVE_LIBCAM
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
         params = nullptr;
+        cam_controls = nullptr;
         reconnect_count = 0;
+        /* Initialize pending controls with config values */
+        pending_ctrls.brightness = cam->cfg->parm_cam.libcam_brightness;
+        pending_ctrls.contrast = cam->cfg->parm_cam.libcam_contrast;
+        pending_ctrls.gain = cam->cfg->parm_cam.libcam_gain;
+        pending_ctrls.awb_enable = cam->cfg->parm_cam.libcam_awb_enable;
+        pending_ctrls.awb_mode = cam->cfg->parm_cam.libcam_awb_mode;
+        pending_ctrls.awb_locked = cam->cfg->parm_cam.libcam_awb_locked;
+        pending_ctrls.colour_temp = cam->cfg->parm_cam.libcam_colour_temp;
+        pending_ctrls.colour_gain_r = cam->cfg->parm_cam.libcam_colour_gain_r;
+        pending_ctrls.colour_gain_b = cam->cfg->parm_cam.libcam_colour_gain_b;
+        pending_ctrls.af_mode = cam->cfg->parm_cam.libcam_af_mode;
+        pending_ctrls.lens_position = cam->cfg->parm_cam.libcam_lens_position;
+        pending_ctrls.af_range = cam->cfg->parm_cam.libcam_af_range;
+        pending_ctrls.af_speed = cam->cfg->parm_cam.libcam_af_speed;
+        pending_ctrls.af_trigger = false;
+        pending_ctrls.af_cancel = false;
+        pending_ctrls.dirty = false;
         cam->watchdog = cam->cfg->watchdog_tmo * 3; /* 3 is arbitrary multiplier to give startup more time*/
         if (libcam_start() < 0) {
-            MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
             libcam_stop();
         } else {
             cam->device_status = STATUS_OPENED;
         }
     #else
-        MOTPLS_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("libcam not available"));
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("libcam not available"));
         cam->device_status = STATUS_CLOSED;
     #endif
 }
@@ -891,4 +1764,25 @@ cls_libcam::~cls_libcam()
     #endif
     cam->device_status = STATUS_CLOSED;
 }
+
+#ifndef HAVE_LIBCAM
+/* Stub implementations for libcam hot-reload methods when libcam is not available */
+void cls_libcam::set_brightness(float value) { (void)value; }
+void cls_libcam::set_contrast(float value) { (void)value; }
+void cls_libcam::set_iso(float value) { (void)value; }
+void cls_libcam::set_awb_enable(bool value) { (void)value; }
+void cls_libcam::set_awb_mode(int value) { (void)value; }
+void cls_libcam::set_awb_locked(bool value) { (void)value; }
+void cls_libcam::set_colour_temp(int value) { (void)value; }
+void cls_libcam::set_colour_gains(float red, float blue) { (void)red; (void)blue; }
+void cls_libcam::set_af_mode(int value) { (void)value; }
+void cls_libcam::set_lens_position(float value) { (void)value; }
+void cls_libcam::set_af_range(int value) { (void)value; }
+void cls_libcam::set_af_speed(int value) { (void)value; }
+void cls_libcam::trigger_af_scan() {}
+void cls_libcam::cancel_af_scan() {}
+std::map<std::string, bool> cls_libcam::get_capability_map() { return std::map<std::string, bool>(); }
+std::vector<std::string> cls_libcam::get_ignored_controls() { return std::vector<std::string>(); }
+void cls_libcam::clear_ignored_controls() {}
+#endif
 

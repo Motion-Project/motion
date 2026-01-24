@@ -16,6 +16,15 @@
  *
  */
 
+/*
+ * allcam.hpp - Multi-Camera Coordination Interface
+ *
+ * Header file defining the all-camera class for managing multi-camera
+ * coordination, aggregated views, and synchronized operations across
+ * multiple camera instances.
+ *
+ */
+
 #ifndef _INCLUDE_ALLCAM_HPP_
 #define _INCLUDE_ALLCAM_HPP_
 

@@ -14,8 +14,17 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
+ */
+
+/*
+ * picture.hpp - Image Capture Interface Definitions
  *
-*/
+ * Header file defining image capture class for snapshots, motion-triggered
+ * images, and timelapse photography in JPEG, PNG, and WebP formats with
+ * filename formatting support.
+ *
+ */
+
 #ifndef _INCLUDE_PICTURE_HPP_
 #define _INCLUDE_PICTURE_HPP_
 

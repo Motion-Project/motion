@@ -24,15 +24,18 @@ AM_CPPFLAGS= \
 
 LDADD = $(LIBINTL)
 
-bin_PROGRAMS = motion
+bin_PROGRAMS = motion motion-setup
 
 motion_SOURCES = \
 	alg.hpp            alg.cpp \
 	alg_sec.hpp        alg_sec.cpp \
 	conf.hpp           conf.cpp \
+	conf_file.hpp      conf_file.cpp \
+	conf_profile.hpp   conf_profile.cpp \
 	dbse.hpp           dbse.cpp \
 	draw.hpp           draw.cpp \
 	jpegutils.hpp      jpegutils.cpp \
+	json_parse.hpp     json_parse.cpp \
 	libcam.hpp         libcam.cpp \
 	logger.hpp         logger.cpp \
 	motion.hpp         motion.cpp \
@@ -41,20 +44,26 @@ motion_SOURCES = \
 	camera.hpp         camera.cpp \
 	movie.hpp          movie.cpp \
 	netcam.hpp         netcam.cpp \
+	parm_registry.hpp  parm_registry.cpp \
+	parm_structs.hpp \
 	picture.hpp        picture.cpp \
 	rotate.hpp         rotate.cpp \
 	sound.hpp          sound.cpp \
+	thumbnail.hpp      thumbnail.cpp \
 	util.hpp           util.cpp \
 	video_v4l2.hpp     video_v4l2.cpp \
 	video_convert.hpp  video_convert.cpp \
 	video_loopback.hpp video_loopback.cpp \
 	webu.hpp           webu.cpp \
 	webu_ans.hpp       webu_ans.cpp \
+	webu_auth.hpp      webu_auth.cpp \
 	webu_file.hpp      webu_file.cpp \
-	webu_html.hpp      webu_html.cpp \
 	webu_json.hpp      webu_json.cpp \
-	webu_post.hpp      webu_post.cpp \
 	webu_stream.hpp    webu_stream.cpp \
 	webu_getimg.hpp    webu_getimg.cpp \
 	webu_mpegts.hpp    webu_mpegts.cpp
+
+motion_setup_SOURCES = \
+	motion_setup.cpp \
+	webu_auth.hpp      webu_auth.cpp
 

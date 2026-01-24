@@ -14,9 +14,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
- *
-*/
+ */
 
+/*
+ * netcam.hpp - Network Camera Interface Definitions
+ *
+ * Header file defining network camera capture interfaces for RTSP, HTTP,
+ * and other protocols using FFmpeg, supporting IP cameras and remote
+ * video sources.
+ *
+ */
 
 #ifndef _INCLUDE_NETCAM_HPP_
 #define _INCLUDE_NETCAM_HPP_

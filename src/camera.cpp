@@ -14,8 +14,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
+ */
+
+/*
+ * camera.cpp - Camera Thread and Image Capture Management
  *
-*/
+ * This module implements per-camera thread execution, coordinating image
+ * acquisition from various sources (libcamera, V4L2, netcam), motion detection,
+ * event handling, and output generation (movies, images, streams).
+ *
+ */
 
 #include "motion.hpp"
 #include "util.hpp"
@@ -53,7 +61,7 @@ void cls_camera::ring_resize()
         new_size = 1;
     }
 
-    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
         ,_("Resizing buffer to %d items"), new_size);
 
     tmp =(ctx_image_data*) mymalloc((uint)new_size * sizeof(ctx_image_data));
@@ -105,13 +113,13 @@ void cls_camera::ring_process_debug()
     char tmp[32];
     const char *t;
 
-    if (current_image->flags & IMAGE_TRIGGER) {
+    if (current_image->trigger) {
         t = "Trigger";
-    } else if (current_image->flags & IMAGE_MOTION) {
+    } else if (current_image->motion) {
         t = "Motion";
-    } else if (current_image->flags & IMAGE_PRECAP) {
+    } else if (current_image->precap) {
         t = "Precap";
-    } else if (current_image->flags & IMAGE_POSTCAP) {
+    } else if (current_image->postcap) {
         t = "Postcap";
     } else {
         t = "Other";
@@ -128,18 +136,22 @@ void cls_camera::ring_process_debug()
 
 void cls_camera::ring_process_image()
 {
-    picture->process_norm();
-    if (movie_norm->put_image(current_image
-            , &current_image->imgts) == -1) {
-        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+    if (current_image->save_pic) {
+        picture->process_norm();
     }
-    if (movie_motion->put_image(&imgs.image_motion
-            , &imgs.image_motion.imgts) == -1) {
-        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
-    }
-    if (movie_extpipe->put_image(current_image
-            , &current_image->imgts) == -1) {
-        MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+    if (current_image->save_movie) {
+        if (movie_norm->put_image(current_image
+                , &current_image->imgts) == -1) {
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+        }
+        if (movie_motion->put_image(&imgs.image_motion
+                , &imgs.image_motion.imgts) == -1) {
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+        }
+        if (movie_extpipe->put_image(current_image
+                , &current_image->imgts) == -1) {
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+        }
     }
 }
 
@@ -149,10 +161,10 @@ void cls_camera::ring_process()
     ctx_image_data *saved_current_image = current_image;
 
     do {
-        if ((imgs.image_ring[imgs.ring_out].flags & (IMAGE_SAVE | IMAGE_SAVED)) != IMAGE_SAVE) {
+        if ((imgs.image_ring[imgs.ring_out].save_pic == false) &&
+            (imgs.image_ring[imgs.ring_out].save_movie == false)) {
             break;
         }
-
         current_image = &imgs.image_ring[imgs.ring_out];
 
         if (current_image->shot <= cfg->framerate) {
@@ -162,9 +174,10 @@ void cls_camera::ring_process()
             ring_process_image();
         }
 
-        current_image->flags |= IMAGE_SAVED;
+        current_image->save_pic = false;
+        current_image->save_movie = false;
 
-        if (current_image->flags & IMAGE_MOTION) {
+        if (current_image->motion) {
             if (cfg->picture_output == "best") {
                 if (current_image->diffs > imgs.image_preview.diffs) {
                     picture->save_preview();
@@ -204,6 +217,7 @@ void cls_camera::movie_start()
     } else {
         movie_fps = lastrate;
     }
+    movie_nbr++;
     movie_norm->start();
     movie_motion->start();
     movie_extpipe->start();
@@ -222,10 +236,12 @@ void cls_camera::detected_trigger()
     time_t raw_time;
     struct tm evt_tm;
 
-    if (current_image->flags & IMAGE_TRIGGER) {
+    if (current_image->trigger) {
         if (event_curr_nbr != event_prev_nbr) {
             info_reset();
             event_prev_nbr = event_curr_nbr;
+            movie_nbr = 0;
+            picture_event_count = 0;  /* Reset picture counter for new event */
 
             algsec->detected = false;
 
@@ -234,7 +250,7 @@ void cls_camera::detected_trigger()
             sprintf(eventid, "%05d", cfg->device_id);
             strftime(eventid+5, 15, "%Y%m%d%H%M%S", &evt_tm);
 
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
                        event_curr_nbr);
 
             mystrftime(this, text_event_string
@@ -420,7 +436,7 @@ void cls_camera::cam_start()
     } else if (camera_type == CAMERA_TYPE_V4L2) {
         v4l2cam = new cls_v4l2cam(this);
     } else {
-        MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("No Camera device specified"));
         device_status = STATUS_CLOSED;
     }
@@ -454,7 +470,7 @@ int cls_camera::cam_next(ctx_image_data *img_data)
     if (retcd == CAPTURE_SUCCESS) {
         imgsz = (imgs.width * imgs.height * 3) / 2;
         if (imgs.size_norm != imgsz) {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Resetting image buffers"));
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Resetting image buffers"));
             device_status = STATUS_CLOSED;
             restart = true;
             return CAPTURE_FAILURE;
@@ -481,10 +497,15 @@ void cls_camera::init_camera_type()
     } else if (cfg->v4l2_device != "") {
         camera_type = CAMERA_TYPE_V4L2;
     } else {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
-            , _("Unable to determine camera type"));
+        /* No camera configured - allow camera to remain UNKNOWN
+         * User can configure camera via web UI
+         * Camera will not capture images until configured
+         */
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            , _("No camera device configured. Configure camera via web interface."));
         camera_type = CAMERA_TYPE_UNKNOWN;
-        handler_stop = true;
+        /* Don't stop handler - allow web UI access for camera configuration */
+        handler_stop = false;
         restart = false;
     }
 }
@@ -512,9 +533,9 @@ void cls_camera::init_firstimage()
 
     if ((indx >= 5) || (device_status != STATUS_OPENED)) {
         if (device_status != STATUS_OPENED) {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", "Unable to open camera");
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", "Unable to open camera");
         } else {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", "Error capturing first image");
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", "Error capturing first image");
         }
         for (indx = 0; indx<imgs.ring_size; indx++) {
             memset(imgs.image_ring[indx].image_norm
@@ -536,20 +557,20 @@ void cls_camera::init_firstimage()
 void cls_camera::check_szimg()
 {
     if ((imgs.width % 8) || (imgs.height % 8)) {
-        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             ,_("Image width (%d) or height(%d) requested is not modulo 8.")
             ,imgs.width, imgs.height);
         device_status = STATUS_CLOSED;
     }
     if ((imgs.width  < 64) || (imgs.height < 64)) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
             ,imgs.width, imgs.height);
         device_status = STATUS_CLOSED;
     }
     /* Substream size notification*/
     if ((imgs.width % 16) || (imgs.height % 16)) {
-        MOTPLS_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("Substream not available.  Image sizes not modulo 16."));
     }
 
@@ -624,6 +645,8 @@ void cls_camera::init_values()
     event_user = false;
     lasttime = frame_curr_ts.tv_sec;
     postcap = 0;
+    picture_event_count = 0;
+    picture_last_ts = {0, 0};
     event_stop = false;
     text_scale = cfg->text_scale;
     connectionlosttime.tv_sec = 0;
@@ -633,7 +656,7 @@ void cls_camera::init_values()
     movie_passthrough = cfg->movie_passthrough;
     if ((camera_type != CAMERA_TYPE_NETCAM) &&
         (movie_passthrough)) {
-        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
         movie_passthrough = false;
     }
 
@@ -652,7 +675,6 @@ void cls_camera::init_values()
     libcam = nullptr;
     rotate = nullptr;
     picture = nullptr;
-    movie_norm = nullptr;
     movie_norm = nullptr;
     movie_motion = nullptr;
     movie_timelapse = nullptr;
@@ -673,7 +695,7 @@ void cls_camera::init_cam_start()
     cam_start();
 
     if (device_status == STATUS_CLOSED) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Failed to start camera."));
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Failed to start camera."));
         imgs.width = cfg->width;
         imgs.height = cfg->height;
     }
@@ -766,13 +788,13 @@ void cls_camera::init_cleandir_default()
 {
     if ((cleandir->action != "delete") &&
         (cleandir->action != "script")) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Invalid clean directory action : %s")
             ,cleandir->action.c_str());
         cleandir->action = "";
     }
     if (cleandir->action == "") {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Setting default clean directory action to delete."));
         cleandir->action = "delete";
     }
@@ -780,28 +802,28 @@ void cls_camera::init_cleandir_default()
     if ((cleandir->freq != "hourly") &&
         (cleandir->freq != "daily") &&
         (cleandir->freq != "weekly")) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Invalid clean directory freq : %s")
             ,cleandir->freq.c_str());
         cleandir->freq = "";
     }
     if (cleandir->freq == "") {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Setting default clean directory frequency to weekly."));
         cleandir->freq = "weekly";
     }
 
     if (cleandir->runtime == "") {
         if (cleandir->freq == "hourly") {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Setting default clean directory runtime to 15."));
             cleandir->runtime = "15";
         } else if (cleandir->freq == "daily") {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Setting default clean directory runtime to 0115."));
             cleandir->runtime = "0115";
         } else if (cleandir->freq == "weekly") {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Setting default clean directory runtime to mon-0115."));
             cleandir->runtime = "mon-0115";
         }
@@ -811,25 +833,25 @@ void cls_camera::init_cleandir_default()
         (cleandir->dur_unit != "h") &&
         (cleandir->dur_unit != "d") &&
         (cleandir->dur_unit != "w")) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Invalid clean directory duration unit : %s")
             ,cleandir->dur_unit.c_str());
         cleandir->dur_unit = "";
     }
     if (cleandir->dur_unit == "") {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Setting default clean directory duration unit to d."));
         cleandir->dur_unit = "d";
     }
 
-    if ((cleandir->dur_val == 0 )) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+    if (cleandir->dur_val == 0 ) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Invalid clean directory duration number : %d")
             ,cleandir->dur_val);
         cleandir->dur_val = -1;
     }
     if (cleandir->dur_val <= 0) {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Setting default clean directory duration value to 7."));
         cleandir->dur_val = 7;
     }
@@ -856,7 +878,7 @@ void cls_camera::init_cleandir_runtime()
             p_min = mtoi(cleandir->runtime);
         }
         if ((p_min > 59) || (p_min < 0)) {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 ,_("Invalid clean directory hourly runtime : %s")
                 ,cleandir->runtime.c_str());
             cleandir->runtime = "";
@@ -877,7 +899,7 @@ void cls_camera::init_cleandir_runtime()
         }
         if ((p_min > 59) || (p_min < 0) ||
             (p_hr > 23)  || (p_hr < 0)) {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 ,_("Invalid clean directory daily runtime : %s")
                 ,cleandir->runtime.c_str());
             cleandir->runtime = "";
@@ -911,7 +933,7 @@ void cls_camera::init_cleandir_runtime()
         if ((p_min > 59) || (p_min < 0) ||
             (p_hr > 23)  || (p_hr < 0) ||
             (p_dow == -1)) {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 ,_("Invalid clean directory weekly runtime : %s")
                 ,cleandir->runtime.c_str());
             cleandir->runtime = "";
@@ -931,7 +953,7 @@ void cls_camera::init_cleandir_runtime()
     cleandir->next_ts.tv_sec -= c_tm.tm_sec;
 
     if (cleandir->action == "delete") {
-        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
             , _("Cleandir next run:%04d-%02d-%02d %02d:%02d Criteria:%d%s RemoveDir:%s")
             ,c_tm.tm_year+1900,c_tm.tm_mon+1,c_tm.tm_mday
             ,c_tm.tm_hour,c_tm.tm_min
@@ -939,7 +961,7 @@ void cls_camera::init_cleandir_runtime()
             ,cleandir->dur_unit.c_str()
             ,cleandir->removedir ? "Y":"N");
     } else {
-        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
             , _("Clean directory set to run script at %04d-%02d-%02d %02d:%02d")
             ,c_tm.tm_year+1900,c_tm.tm_mon+1,c_tm.tm_mday
             ,c_tm.tm_hour,c_tm.tm_min);
@@ -1092,7 +1114,7 @@ void cls_camera::init_schedule()
                     (sched_itm.en_min < 0) || (sched_itm.en_min > 59) ||
                     (sched_itm.st_hr  > sched_itm.en_hr) ||
                     (pvl.length() != 9)) {
-                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                         ,_("Invalid schedule parameter: %s %s")
                         , pnm.c_str(), pvl.c_str());
                 } else {
@@ -1121,8 +1143,139 @@ void cls_camera::init_schedule()
             } else {
                 action = "active";
             }
-            MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
                 ,_("Schedule: %s %02d:%02d to %02d:%02d %s")
+                ,tst.c_str()
+                ,sched_day[indx1].st_hr
+                ,sched_day[indx1].st_min
+                ,sched_day[indx1].en_hr
+                ,sched_day[indx1].en_min
+                ,action.c_str()
+                );
+        }
+    }
+
+    mydelete(params);
+}
+
+void cls_camera::init_picture_schedule()
+{
+    int indx, indx1;
+    bool dflt_capture, rev_capture;
+    ctx_params  *params;
+    std::string  pnm, pvl, tst, action;
+    std::vector<ctx_schedule_data> sched_day;
+    ctx_schedule_data sched_itm;
+
+    if (cfg->picture_schedule_params == "") {
+        return;
+    }
+
+    params = new ctx_params;
+    util_parms_parse(params, "picture_schedule_params", cfg->picture_schedule_params);
+
+    if (params->params_cnt == 0) {
+        mydelete(params);
+        return;
+    }
+
+    action = "pause";
+    dflt_capture = true;
+    for (indx=0; indx<params->params_cnt; indx++) {
+        pnm = params->params_array[indx].param_name;
+        pvl = params->params_array[indx].param_value;
+        if (pnm == "default") {
+            dflt_capture = mtob(params->params_array[indx].param_value);
+        }
+        if (pnm == "action") {
+            if (pvl == "stop") {
+                action = "stop";
+            } else {
+                action = "pause";
+            }
+        }
+    }
+
+    if (dflt_capture) {
+        rev_capture = false;
+    } else {
+        rev_capture = true;
+    }
+
+    for (indx=0; indx<7; indx++) {
+        sched_day.clear();
+
+        sched_itm.st_hr = 0;
+        sched_itm.st_min = 0;
+        sched_itm.en_hr = 23;
+        sched_itm.en_min = 59;
+        sched_itm.action = action;
+        sched_itm.detect = dflt_capture;
+        sched_day.push_back(sched_itm);
+
+        sched_itm.st_hr = -1;
+        sched_itm.st_min = -1;
+        sched_itm.en_hr = -1;
+        sched_itm.en_min = -1;
+        sched_itm.action = action;
+        sched_itm.detect = rev_capture;
+
+        if (indx == 0) {        tst = "sun";
+        } else if (indx == 1) { tst = "mon";
+        } else if (indx == 2) { tst = "tue";
+        } else if (indx == 3) { tst = "wed";
+        } else if (indx == 4) { tst = "thu";
+        } else if (indx == 5) { tst = "fri";
+        } else if (indx == 6) { tst = "sat";
+        }
+        for (indx1=0; indx1<params->params_cnt; indx1++) {
+            pnm = params->params_array[indx1].param_name;
+            pvl = params->params_array[indx1].param_value;
+            if ((pnm == tst) || (pnm == "sun-sat") ||
+                ((pnm == "mon-fri") && (indx>=1) && (indx<=5))) {
+                sched_itm.st_hr = mtoi(pvl.substr(0,2));
+                sched_itm.st_min = mtoi(pvl.substr(2,2));
+                sched_itm.en_hr = mtoi(pvl.substr(5,2));
+                sched_itm.en_min = mtoi(pvl.substr(7,2));
+                sched_itm.action = action;
+                sched_itm.detect = rev_capture;
+                if ((sched_itm.st_hr  < 0) || (sched_itm.st_hr  > 23) ||
+                    (sched_itm.st_min < 0) || (sched_itm.st_min > 59) ||
+                    (sched_itm.en_hr  < 0) || (sched_itm.en_hr  > 23) ||
+                    (sched_itm.en_min < 0) || (sched_itm.en_min > 59) ||
+                    (sched_itm.st_hr  > sched_itm.en_hr) ||
+                    (pvl.length() != 9)) {
+                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                        ,_("Invalid picture schedule parameter: %s %s")
+                        , pnm.c_str(), pvl.c_str());
+                } else {
+                    sched_day.push_back(sched_itm);
+                }
+            }
+        }
+        picture_schedule.push_back(sched_day);
+    }
+
+    for (indx=0; indx<7; indx++) {
+        if (indx == 0) {        tst = "sun";
+        } else if (indx == 1) { tst = "mon";
+        } else if (indx == 2) { tst = "tue";
+        } else if (indx == 3) { tst = "wed";
+        } else if (indx == 4) { tst = "thu";
+        } else if (indx == 5) { tst = "fri";
+        } else if (indx == 6) { tst = "sat";
+        }
+        for (indx1=0; indx1<picture_schedule[indx].size(); indx1++) {
+            if ((picture_schedule[indx][indx1].action == "stop") &&
+                (picture_schedule[indx][indx1].detect == false)) {
+                action = "stopped";
+            } else if (sched_day[indx1].detect == false) {
+               action = "paused";
+            } else {
+                action = "active";
+            }
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+                ,_("Picture Schedule: %s %02d:%02d to %02d:%02d %s")
                 ,tst.c_str()
                 ,sched_day[indx1].st_hr
                 ,sched_day[indx1].st_min
@@ -1153,7 +1306,7 @@ void cls_camera::init()
 
     mythreadname_set("cl",cfg->device_id, cfg->device_name.c_str());
 
-    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize Camera"));
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize Camera"));
 
     init_camera_type();
 
@@ -1187,18 +1340,19 @@ void cls_camera::init()
     init_cleandir();
 
     init_schedule();
+    init_picture_schedule();
 
     init_areadetect();
 
     init_ref();
 
     if (device_status == STATUS_OPENED) {
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Camera %d started: motion detection %s"),
             cfg->device_id, pause ? _("disabled"):_("enabled"));
 
         if (cfg->emulate_motion) {
-            MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, _("Emulating motion"));
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Emulating motion"));
         }
     }
 
@@ -1211,7 +1365,7 @@ void cls_camera::areadetect()
 
     if ((cfg->area_detect != "" ) &&
         (event_curr_nbr != areadetect_eventnbr) &&
-        (current_image->flags & IMAGE_TRIGGER)) {
+        (current_image->trigger)) {
         j = (int)cfg->area_detect.length();
         for (i = 0; i < j; i++) {
             z = cfg->area_detect[(uint)i] - 49; /* characters are stored as ascii 48-57 (0-9) */
@@ -1224,7 +1378,7 @@ void cls_camera::areadetect()
                         util_exec_command(this, cfg->on_area_detected.c_str(), NULL);
                     }
                     areadetect_eventnbr = event_curr_nbr; /* Fire script only once per event */
-                    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
+                    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
                         ,_("Motion in area %d detected."), z + 1);
                     break;
                 }
@@ -1284,7 +1438,12 @@ void cls_camera::resetimages()
 
     current_image = &imgs.image_ring[imgs.ring_in];
     current_image->diffs = 0;
-    current_image->flags = 0;
+    current_image->trigger = false;
+    current_image->motion = false;
+    current_image->precap = false;
+    current_image->postcap = false;
+    current_image->save_pic = false;
+    current_image->save_movie = false;
     current_image->cent_dist = 0;
     memset(&current_image->location, 0, sizeof(current_image->location));
     current_image->total_labels = 0;
@@ -1320,7 +1479,7 @@ int cls_camera::capture()
         connectionlosttime.tv_sec = 0;
 
         if (missing_frame_counter >= (cfg->device_tmo * cfg->framerate)) {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
             if (cfg->on_camera_found != "") {
                 util_exec_command(this, cfg->on_camera_found.c_str(), NULL);
             }
@@ -1362,7 +1521,7 @@ int cls_camera::capture()
 
             /* Write error message only once */
             if (missing_frame_counter == (cfg->device_tmo * cfg->framerate)) {
-                MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                     ,_("Video signal lost - Adding grey image"));
                 if (cfg->on_camera_lost != "") {
                     util_exec_command(this, cfg->on_camera_lost.c_str(), NULL);
@@ -1376,7 +1535,7 @@ int cls_camera::capture()
             } else if (camera_type == CAMERA_TYPE_V4L2) {
                 v4l2cam->noimage();
             } else {
-                MOTPLS_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Unknown camera type"));
+                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Unknown camera type"));
             }
         }
     }
@@ -1413,16 +1572,17 @@ void cls_camera::tuning()
         return;
     }
 
-    if ((cfg->noise_tune && shots_mt == 0) &&
+    if ((cfg->noise_tune && shots_mt == 0) && (pause == false) &&
           (!detecting_motion && (current_image->diffs <= threshold))) {
         alg->noise_tune();
     }
 
-    if (cfg->threshold_tune) {
+    if (cfg->threshold_tune && (pause == false)) {
         alg->threshold_tune();
     }
 
-    if ((current_image->diffs > threshold) &&
+    if ((pause == false) &&
+        (current_image->diffs > threshold) &&
         (current_image->diffs < threshold_maximum)) {
         alg->location();
         alg->stddev();
@@ -1433,9 +1593,10 @@ void cls_camera::tuning()
         current_image->diffs = 0;
     }
 
-    alg->tune_smartmask();
-
-    alg->ref_frame_update();
+    if (pause == false) {
+        alg->tune_smartmask();
+        alg->ref_frame_update();
+    }
 
     previous_diffs = current_image->diffs;
     previous_location_x = current_image->location.x;
@@ -1543,11 +1704,16 @@ void cls_camera::actions_emulate()
         postcap = cfg->post_capture;
     }
 
-    current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
+    current_image->trigger = true;
+    current_image->save_pic = true;
+    current_image->save_movie = true;
     /* Mark all images in image_ring to be saved */
     for (indx = 0; indx < imgs.ring_size; indx++) {
-        imgs.image_ring[indx].flags |= IMAGE_SAVE;
+        imgs.image_ring[indx].save_pic = true;
+        imgs.image_ring[indx].save_movie = true;
     }
+
+    lasttime = current_image->monots.tv_sec;
 
     detected();
 }
@@ -1559,7 +1725,7 @@ void cls_camera::actions_motion()
     int pos = imgs.ring_in;
 
     for (indx = 0; indx < cfg->minimum_motion_frames; indx++) {
-        if (imgs.image_ring[pos].flags & IMAGE_MOTION) {
+        if (imgs.image_ring[pos].motion) {
             frame_count++;
         }
         if (pos == 0) {
@@ -1570,8 +1736,9 @@ void cls_camera::actions_motion()
     }
 
     if (frame_count >= cfg->minimum_motion_frames) {
-
-        current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
+        current_image->trigger = true;
+        current_image->save_pic = true;
+        current_image->save_movie = true;
 
         if ((detecting_motion == false) &&
             (movie_norm->is_running == true)) {
@@ -1585,16 +1752,23 @@ void cls_camera::actions_motion()
         postcap = cfg->post_capture;
 
         for (indx = 0; indx < imgs.ring_size; indx++) {
-            imgs.image_ring[indx].flags |= IMAGE_SAVE;
+            imgs.image_ring[indx].save_pic = true;
+            imgs.image_ring[indx].save_movie = true;
         }
 
     } else if (postcap > 0) {
         /* we have motion in this frame, but not enough frames for trigger. Check postcap */
-        current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
+        current_image->postcap = true;
+        current_image->save_pic = true;
+        current_image->save_movie = true;
         postcap--;
+    } else if ((cfg->movie_all_frames) && (event_curr_nbr == event_prev_nbr)) {
+        current_image->save_movie = true;
     } else {
-        current_image->flags |= IMAGE_PRECAP;
+        current_image->precap = true;
     }
+
+    lasttime = current_image->monots.tv_sec;
 
     detected();
 }
@@ -1625,7 +1799,7 @@ void cls_camera::actions_event()
             track_center();
 
             if (algsec->detected) {
-                MOTPLS_LOG(NTC, TYPE_EVENTS
+                MOTION_LOG(NTC, TYPE_EVENTS
                     , NO_ERRNO, _("Secondary detect"));
                 if (cfg->on_secondary_detect != "") {
                     util_exec_command(this
@@ -1635,7 +1809,7 @@ void cls_camera::actions_event()
             }
             algsec->detected = false;
 
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), event_curr_nbr);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), event_curr_nbr);
 
             postcap = 0;
             event_curr_nbr++;
@@ -1649,8 +1823,8 @@ void cls_camera::actions_event()
         (event_curr_nbr == event_prev_nbr) &&
         ((frame_curr_ts.tv_sec - movie_start_time) >=
             cfg->movie_max_time) &&
-        ( !(current_image->flags & IMAGE_POSTCAP)) &&
-        ( !(current_image->flags & IMAGE_PRECAP))) {
+        (current_image->postcap == false) &&
+        (current_image->precap == false)) {
         movie_end();
         movie_start();
     }
@@ -1665,7 +1839,7 @@ void cls_camera::actions()
 
      if ((current_image->diffs > threshold) &&
         (current_image->diffs < threshold_maximum)) {
-        current_image->flags |= IMAGE_MOTION;
+        current_image->motion = true;
         info_diff_cnt++;
         info_diff_tot += (uint)current_image->diffs;
         info_sdev_tot += (uint)current_image->location.stddev_xy;
@@ -1676,7 +1850,7 @@ void cls_camera::actions()
             info_sdev_max = current_image->location.stddev_xy;
         }
         /*
-        MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
         , "dev_x %d dev_y %d dev_xy %d, diff %d ratio %d"
         , current_image->location.stddev_x
         , current_image->location.stddev_y
@@ -1688,21 +1862,21 @@ void cls_camera::actions()
 
     if ((cfg->emulate_motion || event_user) && (startup_frames == 0)) {
         actions_emulate();
-    } else if ((current_image->flags & IMAGE_MOTION) && (startup_frames == 0)) {
+    } else if ((current_image->motion) && (startup_frames == 0)) {
         actions_motion();
     } else if (postcap > 0) {
-        current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
+        current_image->postcap = true;
+        current_image->save_pic = true;
+        current_image->save_movie = true;
         postcap--;
+    } else if ((cfg->movie_all_frames) && (event_curr_nbr == event_prev_nbr)) {
+        current_image->save_movie = true;
     } else {
-        current_image->flags |= IMAGE_PRECAP;
+        current_image->precap = true;
         if ((cfg->event_gap == 0) && detecting_motion) {
             event_stop = true;
         }
         detecting_motion = false;
-    }
-
-    if (current_image->flags & IMAGE_SAVE) {
-        lasttime = current_image->monots.tv_sec;
     }
 
     if (detecting_motion) {
@@ -1724,12 +1898,22 @@ void cls_camera::snapshot()
         return;
     }
 
-    if ((cfg->snapshot_interval > 0 && shots_mt == 0 &&
-         frame_curr_ts.tv_sec % cfg->snapshot_interval <=
-         frame_last_ts.tv_sec % cfg->snapshot_interval) ||
-         action_snapshot) {
+    /* Manual snapshot via action_snapshot always allowed */
+    if (action_snapshot) {
         picture->process_snapshot();
         action_snapshot = false;
+        return;
+    }
+
+    /* Scheduled snapshots respect picture_pause */
+    if (picture_pause) {
+        return;
+    }
+
+    if (cfg->snapshot_interval > 0 && shots_mt == 0 &&
+        frame_curr_ts.tv_sec % cfg->snapshot_interval <=
+        frame_last_ts.tv_sec % cfg->snapshot_interval) {
+        picture->process_snapshot();
     }
 }
 
@@ -1745,6 +1929,7 @@ void cls_camera::timelapse()
     if (cfg->timelapse_interval) {
         localtime_r(&current_image->imgts.tv_sec, &timestamp_tm);
 
+        /* Handle timelapse file rollover (always allowed, even when paused) */
         if (timestamp_tm.tm_min == 0 &&
             (frame_curr_ts.tv_sec % 60 < frame_last_ts.tv_sec % 60) &&
             shots_mt == 0) {
@@ -1770,13 +1955,14 @@ void cls_camera::timelapse()
             }
         }
 
-        if (shots_mt == 0 &&
+        /* Adding frames respects picture_pause schedule */
+        if (!picture_pause && shots_mt == 0 &&
             frame_curr_ts.tv_sec % cfg->timelapse_interval <=
             frame_last_ts.tv_sec % cfg->timelapse_interval) {
             movie_timelapse->start();
             if (movie_timelapse->put_image(
                 current_image, &current_image->imgts) == -1) {
-                MOTPLS_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
+                MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
             }
         }
 
@@ -1846,13 +2032,13 @@ void cls_camera::check_schedule()
         }
     }
     if (prev != pause) {
-        MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO
             , _("Scheduled action. Motion detection %s")
             , pause ? _("disabled"):_("enabled"));
     }
 
     /*
-    MOTPLS_LOG(NTC, TYPE_EVENTS, NO_ERRNO
+    MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO
     , "Motion %02d:%02d %02d:%02d detection %d %d"
     ,schedule[cur_dy][indx].st_hr
     ,schedule[cur_dy][indx].st_min
@@ -1861,6 +2047,44 @@ void cls_camera::check_schedule()
     ,schedule[cur_dy][indx].detect
     ,pause);
     */
+}
+
+void cls_camera::check_picture_schedule()
+{
+    struct tm c_tm;
+    int indx, cur_dy;
+    bool prev;
+
+    if ((restart == true) || (handler_stop == true)) {
+        return;
+    }
+
+    if (picture_schedule.size() == 0) {
+        return;
+    }
+
+    localtime_r(&current_image->imgts.tv_sec, &c_tm);
+    cur_dy = c_tm.tm_wday;
+    prev = picture_pause;
+
+    for (indx=0; indx<picture_schedule[cur_dy].size(); indx++) {
+        if ((picture_schedule[cur_dy][indx].action == "pause") &&
+            (c_tm.tm_hour >= picture_schedule[cur_dy][indx].st_hr) &&
+            (c_tm.tm_min  >= picture_schedule[cur_dy][indx].st_min) &&
+            (c_tm.tm_hour <= picture_schedule[cur_dy][indx].en_hr) &&
+            (c_tm.tm_min  <= picture_schedule[cur_dy][indx].en_min) ) {
+            if (picture_schedule[cur_dy][indx].detect) {
+                picture_pause = false;
+            } else {
+                picture_pause = true;
+            }
+        }
+    }
+    if (prev != picture_pause) {
+        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO
+            , _("Scheduled action. Picture capture %s")
+            , picture_pause ? _("disabled"):_("enabled"));
+    }
 }
 
 /* sleep the loop to get framerate requested */
@@ -1903,6 +2127,7 @@ void cls_camera::handler()
         tuning();
         overlay();
         actions();
+        check_picture_schedule();
         snapshot();
         timelapse();
         loopback();
@@ -1912,7 +2137,7 @@ void cls_camera::handler()
 
     cleanup();
 
-    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Camera closed"));
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Camera closed"));
 
     handler_running = false;
     pthread_exit(NULL);
@@ -1931,7 +2156,7 @@ void cls_camera::handler_startup()
         pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
         retcd = pthread_create(&handler_thread, &thread_attr, &camera_handler, this);
         if (retcd != 0) {
-            MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start camera thread."));
+            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start camera thread."));
             handler_running = false;
             handler_stop = true;
         }
@@ -1951,10 +2176,10 @@ void cls_camera::handler_shutdown()
             waitcnt++;
         }
         if (waitcnt == cfg->watchdog_tmo) {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("Normal shutdown of camera failed"));
             if (cfg->watchdog_kill > 0) {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Waiting additional %d seconds (watchdog_kill).")
                     ,cfg->watchdog_kill);
                 waitcnt = 0;
@@ -1963,14 +2188,14 @@ void cls_camera::handler_shutdown()
                     waitcnt++;
                 }
                 if (waitcnt == cfg->watchdog_kill) {
-                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                         , _("No response to shutdown.  Killing it."));
-                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                         , _("Memory leaks will occur."));
                     pthread_kill(handler_thread, SIGVTALRM);
                 }
             } else {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     , _("watchdog_kill set to terminate application."));
                 exit(1);
             }
@@ -2016,9 +2241,11 @@ cls_camera::cls_camera(cls_motapp *p_app)
     pipe = -1;
     mpipe = -1;
     pause = false;
+    picture_pause = false;
     user_pause = "schedule";
     missing_frame_counter = -1;
     schedule.clear();
+    picture_schedule.clear();
     cleandir = nullptr;
 
     info_diff_tot = 0;
@@ -2055,4 +2282,131 @@ cls_camera::~cls_camera()
     mydelete(cfg);
     pthread_mutex_destroy(&stream.mutex);
     device_status = STATUS_CLOSED;
+}
+
+void cls_camera::set_libcam_brightness(float value)
+{
+    if (libcam != nullptr) {
+        libcam->set_brightness(value);
+    }
+}
+
+void cls_camera::set_libcam_contrast(float value)
+{
+    if (libcam != nullptr) {
+        libcam->set_contrast(value);
+    }
+}
+
+void cls_camera::set_libcam_gain(float value)
+{
+    if (libcam != nullptr) {
+        libcam->set_gain(value);
+    }
+}
+
+void cls_camera::set_libcam_awb_enable(bool value)
+{
+    if (libcam != nullptr) {
+        libcam->set_awb_enable(value);
+    }
+}
+
+void cls_camera::set_libcam_awb_mode(int value)
+{
+    if (libcam != nullptr) {
+        libcam->set_awb_mode(value);
+    }
+}
+
+void cls_camera::set_libcam_awb_locked(bool value)
+{
+    if (libcam != nullptr) {
+        libcam->set_awb_locked(value);
+    }
+}
+
+void cls_camera::set_libcam_colour_temp(int value)
+{
+    if (libcam != nullptr) {
+        libcam->set_colour_temp(value);
+    }
+}
+
+void cls_camera::set_libcam_colour_gains(float red, float blue)
+{
+    if (libcam != nullptr) {
+        libcam->set_colour_gains(red, blue);
+    }
+}
+
+void cls_camera::set_libcam_af_mode(int value)
+{
+    if (libcam != nullptr) {
+        libcam->set_af_mode(value);
+    }
+}
+
+void cls_camera::set_libcam_lens_position(float value)
+{
+    if (libcam != nullptr) {
+        libcam->set_lens_position(value);
+    }
+}
+
+void cls_camera::set_libcam_af_range(int value)
+{
+    if (libcam != nullptr) {
+        libcam->set_af_range(value);
+    }
+}
+
+void cls_camera::set_libcam_af_speed(int value)
+{
+    if (libcam != nullptr) {
+        libcam->set_af_speed(value);
+    }
+}
+
+void cls_camera::trigger_libcam_af_scan()
+{
+    if (libcam != nullptr) {
+        libcam->trigger_af_scan();
+    }
+}
+
+void cls_camera::cancel_libcam_af_scan()
+{
+    if (libcam != nullptr) {
+        libcam->cancel_af_scan();
+    }
+}
+
+/* Capability discovery accessors */
+bool cls_camera::has_libcam() const
+{
+    return libcam != nullptr;
+}
+
+std::map<std::string, bool> cls_camera::get_libcam_capabilities()
+{
+    if (libcam != nullptr) {
+        return libcam->get_capability_map();
+    }
+    return std::map<std::string, bool>();
+}
+
+std::vector<std::string> cls_camera::get_libcam_ignored_controls()
+{
+    if (libcam != nullptr) {
+        return libcam->get_ignored_controls();
+    }
+    return std::vector<std::string>();
+}
+
+void cls_camera::clear_libcam_ignored_controls()
+{
+    if (libcam != nullptr) {
+        libcam->clear_ignored_controls();
+    }
 }

@@ -16,6 +16,15 @@
  *
  */
 
+/*
+ * draw.hpp - Image Overlay and Annotation Interface
+ *
+ * Header file defining drawing functions for overlaying text, timestamps,
+ * motion boxes, and privacy masks on video frames with support for
+ * various colors and formats.
+ *
+ */
+
 #ifndef _INCLUDE_DRAW_HPP_
 #define _INCLUDE_DRAW_HPP_
     #define ASCII_MAX 127

@@ -17,6 +17,15 @@
  *
  */
 
+/*
+ * alg_sec.hpp - Secondary Detection Algorithms Interface
+ *
+ * Header file defining optional OpenCV-based detection algorithms including
+ * object detection, face recognition, and advanced tracking for enhanced
+ * motion analysis beyond the primary detection algorithm.
+ *
+ */
+
 #ifndef _INCLUDE_ALG_SEC_HPP_
 #define _INCLUDE_ALG_SEC_HPP_
 

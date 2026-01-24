@@ -14,8 +14,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
+ */
+
+/*
+ * util.cpp - Common Utility Functions
  *
-*/
+ * This module provides general-purpose utility functions for string
+ * manipulation, file operations, time handling, and other shared
+ * functionality used throughout the application.
+ *
+ */
 
 #include "motion.hpp"
 #include "util.hpp"
@@ -60,6 +68,19 @@ int mystrne(const char* var1, const char* var2)
         return 0;
     }
     return (strcmp(var1,var2) ? 1: 0);
+}
+
+/*Convert string to lower case*/
+void mylower(std::string &parm)
+{
+    if (parm.length() == 0 ) {
+        return;
+    }
+
+    std::transform(parm.begin(),parm.end(),parm.begin()
+        ,[](unsigned char c)
+        { return std::tolower(c); });
+
 }
 
 /* Trim whitespace from left side */
@@ -127,7 +148,7 @@ void *mymalloc(size_t nbytes)
     void *dummy = calloc(nbytes, 1);
 
     if (!dummy) {
-        MOTPLS_LOG(EMG, TYPE_ALL, SHOW_ERRNO
+        MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
             , _("Could not allocate %llu bytes of memory!")
             , (unsigned long long)nbytes);
         exit(1);
@@ -143,12 +164,12 @@ void *myrealloc(void *ptr, size_t size, const char *desc)
 
     if (size == 0) {
         free(ptr);
-        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Warning! Function %s tries to resize 0 bytes!"),desc);
     } else {
         dummy = realloc(ptr, size);
         if (!dummy) {
-            MOTPLS_LOG(EMG, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO
                 ,_("Could not resize memory-block at offset %p to %llu bytes (function %s)!")
                 ,ptr, (unsigned long long)size, desc);
             exit(1);
@@ -182,11 +203,11 @@ int mycreate_path(const char *path)
 
     while (indx_pos != std::string::npos) {
         if (stat(tmp.substr(0, indx_pos + 1).c_str(), &statbuf) != 0) {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Creating %s"), tmp.substr(0, indx_pos + 1).c_str());
             retcd = mkdir(tmp.substr(0, indx_pos + 1).c_str(), mode);
             if (retcd == -1 && errno != EEXIST) {
-                MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+                MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
                     ,_("Problem creating directory %s")
                     , tmp.substr(0, indx_pos + 1).c_str());
                 return -1;
@@ -220,7 +241,7 @@ FILE *myfopen(const char *path, const char *mode)
         fp = fopen(path, mode);
     }
     if (!fp) {
-        MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
             ,_("Error opening file %s with mode %s"), path, mode);
         return NULL;
     }
@@ -234,10 +255,52 @@ int myfclose(FILE* fh)
     int rval = fclose(fh);
 
     if (rval != 0) {
-        MOTPLS_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error closing file"));
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error closing file"));
     }
 
     return rval;
+}
+
+/**
+ * Sanitize string for safe use in shell commands
+ * Removes shell metacharacters that could be used for command injection
+ *
+ * Dangerous characters: ` $ | ; & > < \n \r ( ) { } [ ] ' " \ * ? #
+ *
+ * Returns: Sanitized string with only safe characters
+ */
+std::string util_sanitize_shell_chars(const std::string &input)
+{
+    /* Whitelist of safe characters for shell substitutions */
+    static const char* SHELL_SAFE_CHARS =
+        "abcdefghijklmnopqrstuvwxyz"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "0123456789"
+        "._-/:@,+=";  /* Limited safe special chars */
+
+    std::string result;
+    result.reserve(input.length());
+    bool modified = false;
+
+    for (size_t i = 0; i < input.length(); i++) {
+        /* Check if character is in safe set */
+        if (strchr(SHELL_SAFE_CHARS, input[i]) != nullptr) {
+            result += input[i];
+        } else {
+            /* Unsafe character detected - replace with underscore */
+            result += '_';
+            modified = true;
+        }
+    }
+
+    if (modified) {
+        MOTION_LOG(WRN, TYPE_EVENTS, NO_ERRNO,
+            _("Shell metacharacters sanitized in substitution. "
+              "Original: '%s' Sanitized: '%s'"),
+            input.c_str(), result.c_str());
+    }
+
+    return result;
 }
 
 void mystrftime(cls_sound *snd, std::string &dst, std::string fmt)
@@ -264,7 +327,9 @@ void mystrftime(cls_sound *snd, std::string &dst, std::string fmt)
             user_fmt.append(tmp);
             indx++;
         } else if (fmt.substr(indx,2) == "%$") {
-            user_fmt.append(snd->device_name);
+            /* Sanitize device name to prevent command injection */
+            std::string safe_devname = util_sanitize_shell_chars(snd->device_name);
+            user_fmt.append(safe_devname);
             indx++;
         } else if (fmt.substr(indx,strlen("%{ver}")) == "%{ver}") {
             user_fmt.append(VERSION);
@@ -293,8 +358,9 @@ void mystrftime_base(cls_camera *cam
     char tmp[PATH_MAX];
     struct tm timestamp_tm;
     timespec  curr_ts;
-    std::string user_fmt;
+    std::string user_fmt, tst;
     uint indx;
+    int wd;
     ctx_image_data img;
 
     if (cam->current_image == nullptr) {
@@ -312,111 +378,153 @@ void mystrftime_base(cls_camera *cam
     }
 
     user_fmt = "";
-    for (indx=0; indx<fmt.length(); indx++){
+    indx = 0;
+    while (indx<fmt.length()) {
         memset(tmp, 0, sizeof(tmp));
-        if (fmt.substr(indx,2) == "%v") {
-            sprintf(tmp, "%02d", cam->event_curr_nbr);
-            user_fmt.append(tmp);
+        if ((fmt.substr(indx,1) == "%") && (indx <(fmt.length()-1))) {
+            wd = 0;
             indx++;
-        } else if (fmt.substr(indx,2) == "%q") {
-            sprintf(tmp, "%d", img.shot);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%D") {
-            sprintf(tmp, "%d", img.diffs);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%N") {
-            sprintf(tmp, "%d", cam->noise);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%i") {
-            sprintf(tmp, "%d", img.location.width);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%J") {
-            sprintf(tmp, "%d", img.location.height);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%K") {
-            sprintf(tmp, "%d", img.location.x);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%L") {
-            sprintf(tmp, "%d", img.location.y);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%o") {
-            sprintf(tmp, "%d", cam->threshold);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%Q") {
-            sprintf(tmp, "%d", img.total_labels);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%t") {
-            sprintf(tmp, "%d", cam->cfg->device_id);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%C") {
-            user_fmt.append(cam->text_event_string);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%w") {
-            sprintf(tmp, "%d", cam->imgs.width);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%h") {
-            sprintf(tmp, "%d", cam->imgs.height);
-            user_fmt.append(tmp);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%f") {
-            user_fmt.append(fname);
-            indx++;
-        } else if (fmt.substr(indx,2) == "%$") {
-            user_fmt.append(cam->cfg->device_name);
-            indx++;
-        } else if (fmt.substr(indx,strlen("%{host}")) == "%{host}") {
-            user_fmt.append(cam->hostname);
-            indx += (strlen("%{host}")-1);
-        } else if (fmt.substr(indx,strlen("%{fps}")) == "%{fps}") {
-            sprintf(tmp, "%d", cam->movie_fps);
-            user_fmt.append(tmp);
-            indx += (strlen("%{fps}")-1);
-        } else if (fmt.substr(indx,strlen("%{eventid}")) == "%{eventid}") {
-            user_fmt.append(cam->eventid);
-            indx += (strlen("%{eventid}")-1);
-        } else if (fmt.substr(indx,strlen("%{ver}")) == "%{ver}") {
-            user_fmt.append(VERSION);
-            indx += (strlen("%{ver}")-1);
-        } else if (fmt.substr(indx,strlen("%{sdevx}")) == "%{sdevx}") {
-            sprintf(tmp, "%d", cam->current_image->location.stddev_x);
-            user_fmt.append(tmp);
-            indx += (strlen("%{sdevx}")-1);
-        } else if (fmt.substr(indx,strlen("%{sdevy}")) == "%{sdevy}") {
-            sprintf(tmp, "%d", cam->current_image->location.stddev_y);
-            user_fmt.append(tmp);
-            indx += (strlen("%{sdevy}")-1);
-        } else if (fmt.substr(indx,strlen("%{sdevxy}")) == "%{sdevxy}") {
-            sprintf(tmp, "%d", cam->current_image->location.stddev_xy);
-            user_fmt.append(tmp);
-            indx += (strlen("%{sdevxy}")-1);
-        } else if (fmt.substr(indx,strlen("%{ratio}")) == "%{ratio}") {
-            sprintf(tmp, "%d", cam->current_image->diffs_ratio);
-            user_fmt.append(tmp);
-            indx += (strlen("%{ratio}")-1);
-        } else if (fmt.substr(indx,strlen("%{action_user}")) == "%{action_user}") {
-            user_fmt.append(cam->action_user);
-            indx += (strlen("%{action_user}")-1);
-        } else if (fmt.substr(indx,strlen("%{secdetect}")) == "%{secdetect}") {
-            if (cam->algsec->detected) {
-                user_fmt.append("Y");
-            } else {
-                user_fmt.append("N");
+            tst = fmt.substr(indx,1);
+            while ((tst>="0") && (tst<="9") && (indx <(fmt.length()-1))) {
+                wd *= 10;
+                wd += atoi(fmt.substr(indx,1).c_str());
+                indx++;
+                tst = fmt.substr(indx,1);
             }
-            indx += (strlen("%{secdetect}")-1);
+            if (tst == "v") {
+                sprintf(tmp, "%0*d", wd ? wd : 2, cam->event_curr_nbr);
+                user_fmt.append(tmp);
+            } else if (tst == "q") {
+                sprintf(tmp, "%0*d",  wd ? wd : 2, img.shot);
+                user_fmt.append(tmp);
+            } else if (tst == "D") {
+                sprintf(tmp, "%0*d", wd, img.diffs);
+                user_fmt.append(tmp);
+            } else if (tst == "N") {
+                sprintf(tmp, "%0*d",  wd ? wd : 2, cam->noise);
+                user_fmt.append(tmp);
+            } else if (tst == "i") {
+                sprintf(tmp, "%0*d", wd, img.location.width);
+                user_fmt.append(tmp);
+            } else if (tst == "J") {
+                sprintf(tmp, "%0*d", wd, img.location.height);
+                user_fmt.append(tmp);
+            } else if (tst == "K") {
+                sprintf(tmp, "%0*d", wd, img.location.x);
+                user_fmt.append(tmp);
+            } else if (tst == "L") {
+                sprintf(tmp, "%0*d", wd, img.location.y);
+                user_fmt.append(tmp);
+            } else if (tst == "o") {
+                sprintf(tmp, "%0*d", wd, cam->threshold);
+                user_fmt.append(tmp);
+            } else if (tst == "Q") {
+                sprintf(tmp, "%0*d", wd, img.total_labels);
+                user_fmt.append(tmp);
+            } else if (tst == "t") {
+                sprintf(tmp, "%0*d", wd, cam->cfg->device_id);
+                user_fmt.append(tmp);
+            } else if (tst == "C") {
+                tst = cam->text_event_string;
+                if (wd > 0) {
+                    user_fmt.append(tst.substr(0, wd));
+                } else {
+                    user_fmt.append(tst);
+                }
+            } else if (tst == "w") {
+                sprintf(tmp, "%0*d", wd, cam->imgs.width);
+                user_fmt.append(tmp);
+            } else if (tst == "h") {
+                sprintf(tmp, "%0*d", wd, cam->imgs.height);
+                user_fmt.append(tmp);
+            } else if (tst == "f") {
+                /* Sanitize filename to prevent command injection */
+                std::string safe_fname = util_sanitize_shell_chars(fname);
+                if (wd > 0) {
+                    user_fmt.append(safe_fname.substr(0, wd));
+                } else {
+                    user_fmt.append(safe_fname);
+                }
+            } else if (tst == "$") {
+                /* Sanitize device name to prevent command injection */
+                std::string safe_devname = util_sanitize_shell_chars(cam->cfg->device_name);
+                if (wd > 0) {
+                    user_fmt.append(safe_devname.substr(0, wd));
+                } else {
+                    user_fmt.append(safe_devname);
+                }
+            } else if (fmt.substr(indx,strlen("{host}")) == "{host}") {
+                tst = cam->hostname;
+                if (wd > 0) {
+                    user_fmt.append(tst.substr(0, wd));
+                } else {
+                    user_fmt.append(tst);
+                }
+                indx += (strlen("{host}")-1);
+            } else if (fmt.substr(indx,strlen("{fps}")) == "{fps}") {
+                sprintf(tmp, "%0*d", wd, cam->movie_fps);
+                user_fmt.append(tmp);
+                indx += (strlen("{fps}")-1);
+            } else if (fmt.substr(indx,strlen("{movienbr}")) == "{movienbr}") {
+                sprintf(tmp, "%0*d", wd, cam->movie_nbr);
+                user_fmt.append(tmp);
+                indx += (strlen("{movienbr}")-1);
+            } else if (fmt.substr(indx,strlen("{eventid}")) == "{eventid}") {
+                tst = cam->eventid;
+                if (wd > 0) {
+                    user_fmt.append(tst.substr(0, wd));
+                } else {
+                    user_fmt.append(tst);
+                }
+                indx += (strlen("{eventid}")-1);
+            } else if (fmt.substr(indx,strlen("{ver}")) == "{ver}") {
+                tst = VERSION;
+                if (wd > 0) {
+                    user_fmt.append(tst.substr(0, wd));
+                } else {
+                    user_fmt.append(tst);
+                }
+                indx += (strlen("{ver}")-1);
+            } else if (fmt.substr(indx,strlen("{sdevx}")) == "{sdevx}") {
+                sprintf(tmp, "%0*d", wd, cam->current_image->location.stddev_x);
+                user_fmt.append(tmp);
+                indx += (strlen("{sdevx}")-1);
+            } else if (fmt.substr(indx,strlen("{sdevy}")) == "{sdevy}") {
+                sprintf(tmp, "%0*d", wd, cam->current_image->location.stddev_y);
+                user_fmt.append(tmp);
+                indx += (strlen("{sdevy}")-1);
+            } else if (fmt.substr(indx,strlen("{sdevxy}")) == "{sdevxy}") {
+                sprintf(tmp, "%0*d", wd, cam->current_image->location.stddev_xy);
+                user_fmt.append(tmp);
+                indx += (strlen("{sdevxy}")-1);
+            } else if (fmt.substr(indx,strlen("{ratio}")) == "{ratio}") {
+                sprintf(tmp, "%0*d", wd, cam->current_image->diffs_ratio);
+                user_fmt.append(tmp);
+                indx += (strlen("{ratio}")-1);
+            } else if (fmt.substr(indx,strlen("{action_user}")) == "{action_user}") {
+                /* Sanitize action_user parameter to prevent command injection */
+                std::string safe_action = util_sanitize_shell_chars(cam->action_user);
+                user_fmt.append(safe_action);
+                indx += (strlen("{action_user}")-1);
+            } else if (fmt.substr(indx,strlen("{secdetect}")) == "{secdetect}") {
+                if (cam->algsec->detected) {
+                    user_fmt.append("Y");
+                } else {
+                    user_fmt.append("N");
+                }
+                indx += (strlen("{secdetect}")-1);
+            } else {
+                if (wd >0) {
+                    sprintf(tmp, "%%%d%s", wd, tst.c_str());
+                } else {
+                    sprintf(tmp, "%%%s", tst.c_str());
+                }
+                user_fmt.append(tmp);
+            }
         } else {
             user_fmt.append(fmt.substr(indx,1));
         }
+        indx++;
     }
 
     memset(tmp, 0, sizeof(tmp));
@@ -473,7 +581,7 @@ void mythreadname_set(const char *abbr, int threadnbr, const char *threadname)
     #elif HAVE_PTHREAD_SETNAME_NP
         pthread_setname_np(pthread_self(), tname);
     #else
-        MOTPLS_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Unable to set thread name %s"), tname);
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Unable to set thread name %s"), tname);
     #endif
 
 }
@@ -514,7 +622,7 @@ static void mytranslate_locale_chg(const char *langcd)
         ++_nl_msg_cat_cntr;
     #else
         if (langcd != NULL) {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,"No native language support");
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,"No native language support");
         }
     #endif
 }
@@ -532,7 +640,7 @@ void mytranslate_init(void)
         bind_textdomain_codeset ("motion", "UTF-8");
         textdomain ("motion");
 
-        MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Language: English"));
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Language: English"));
 
     #else
         /* Disable native language support */
@@ -549,14 +657,14 @@ char* mytranslate_text(const char *msgid, int setnls)
 
     if (setnls == 0) {
         if (nls_enabled) {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Disabling native language support"));
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Disabling native language support"));
         }
         nls_enabled = false;
         return NULL;
 
     } else if (setnls == 1) {
         if (!nls_enabled) {
-            MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Enabling native language support"));
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Enabling native language support"));
         }
         nls_enabled = true;
         return NULL;
@@ -631,21 +739,19 @@ void util_exec_command(cls_camera *cam, const char *command, const char *filenam
         execl("/bin/sh", "sh", "-c", stamp, " &",(char*)NULL);
 
         /* if above function succeeds the program never reach here */
-        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
             ,_("Unable to start external command '%s'"), stamp);
 
         exit(1);
     }
 
-    if (pid > 0) {
-        waitpid(pid, NULL, 0);
-    } else {
-        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+    if (pid == 0) {
+        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
             ,_("Unable to start external command '%s'"), stamp);
+    } else {
+        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO
+            ,_("Executing external command '%s'"), stamp);
     }
-
-    MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO
-        ,_("Executing external command '%s'"), stamp);
 }
 
 void util_exec_command(cls_camera *cam, std::string cmd)
@@ -663,7 +769,7 @@ void util_exec_command(cls_camera *cam, std::string cmd)
         execl("/bin/sh", "sh", "-c", dst.c_str(), " &",(char*)NULL);
 
         /* if above function succeeds the program never reach here */
-        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
             ,_("Unable to start external command '%s'"),dst.c_str());
 
         exit(1);
@@ -672,11 +778,11 @@ void util_exec_command(cls_camera *cam, std::string cmd)
     if (pid > 0) {
         waitpid(pid, NULL, 0);
     } else {
-        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
             ,_("Unable to start external command '%s'"), dst.c_str());
     }
 
-    MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO
+    MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO
         ,_("Executing external command '%s'"), dst.c_str());
 }
 
@@ -695,7 +801,7 @@ void util_exec_command(cls_sound *snd, std::string cmd)
         execl("/bin/sh", "sh", "-c", dst.c_str(), " &",(char*)NULL);
 
         /* if above function succeeds the program never reach here */
-        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
             ,_("Unable to start external command '%s'"),dst.c_str());
 
         exit(1);
@@ -704,11 +810,11 @@ void util_exec_command(cls_sound *snd, std::string cmd)
     if (pid > 0) {
         waitpid(pid, NULL, 0);
     } else {
-        MOTPLS_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
             ,_("Unable to start external command '%s'"), dst.c_str());
     }
 
-    MOTPLS_LOG(DBG, TYPE_EVENTS, NO_ERRNO
+    MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO
         ,_("Executing external command '%s'"), dst.c_str());
 }
 
@@ -720,7 +826,7 @@ static void util_parms_file(ctx_params *params, std::string params_file)
     std::string line, parm_nm, parm_vl;
     std::ifstream ifs;
 
-    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
         ,_("parse file:%s"), params_file.c_str());
 
     chk = 0;
@@ -730,14 +836,14 @@ static void util_parms_file(ctx_params *params, std::string params_file)
         }
     }
     if (chk > 1){
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Only one params_file specification is permitted."));
         return;
     }
 
     ifs.open(params_file.c_str());
         if (ifs.is_open() == false) {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 ,_("params_file not found: %s"), params_file.c_str());
             return;
         }
@@ -760,7 +866,7 @@ static void util_parms_file(ctx_params *params, std::string params_file)
             } else if ((line != "") &&
                 (line.substr(0, 1) != ";") &&
                 (line.substr(0, 1) != "#")) {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Unable to parse line:%s"), line.c_str());
             }
         }
@@ -786,7 +892,7 @@ void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_va
     parm_itm.param_value.assign(parm_val);
     params->params_array.push_back(parm_itm);
 
-    MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:>%s< >%s<"
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:>%s< >%s<"
         ,params->params_desc.c_str(), parm_nm.c_str(),parm_val.c_str());
 
     if ((parm_nm == "params_file") && (parm_val != "")) {
@@ -950,7 +1056,7 @@ void util_parms_parse_qte(ctx_params *params, std::string &parmline)
             }
         }
 
-        //MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"Parsing: >%s< >%ld %ld %ld %ld<"
+        //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"Parsing: >%s< >%ld %ld %ld %ld<"
         //    ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
@@ -981,7 +1087,7 @@ void util_parms_parse_comma(ctx_params *params, std::string &parmline)
             indxvl_en = parmline.find(",",indxvl_st) - 1;
         }
 
-        //MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
+        //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
         //    ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
@@ -1001,7 +1107,7 @@ void util_parms_parse_comma(ctx_params *params, std::string &parmline)
         }
         indxvl_en = parmline.length() - 1;
 
-        //MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,"Parsing: >%s< >%ld %ld %ld %ld<"
+        //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"Parsing: >%s< >%ld %ld %ld %ld<"
         //    ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
@@ -1099,7 +1205,7 @@ void util_parms_update(ctx_params *params, std::string &confline)
 
     confline = parmline;
 
-    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
         ,_("New config:%s"), confline.c_str());
 
 }
@@ -1193,14 +1299,14 @@ void util_resize(uint8_t *src, int src_w, int src_h
 
     frm_in = av_frame_alloc();
     if (frm_in == NULL) {
-        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             , _("Unable to allocate frm_in."));
         return;
     }
 
     frm_out = av_frame_alloc();
     if (frm_out == NULL) {
-        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             , _("Unable to allocate frm_out."));
         av_frame_free(&frm_in);
         return;
@@ -1212,7 +1318,7 @@ void util_resize(uint8_t *src, int src_w, int src_h
         , src_w, src_h, 1);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             , "Error filling arrays: %s", errstr);
         av_frame_free(&frm_in);
         av_frame_free(&frm_out);
@@ -1227,7 +1333,7 @@ void util_resize(uint8_t *src, int src_w, int src_h
         , dst_w, dst_h, 1);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             , "Error Filling array 2: %s", errstr);
         free(buf);
         av_frame_free(&frm_in);
@@ -1240,7 +1346,7 @@ void util_resize(uint8_t *src, int src_w, int src_h
             ,dst_w, dst_h, AV_PIX_FMT_YUV420P
             ,SWS_BICUBIC, NULL, NULL, NULL);
     if (swsctx == NULL) {
-        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             , _("Unable to allocate scaling context."));
         free(buf);
         av_frame_free(&frm_in);
@@ -1253,7 +1359,7 @@ void util_resize(uint8_t *src, int src_w, int src_h
         , 0, src_h, frm_out->data, frm_out->linesize);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             ,_("Error resizing/reformatting: %s"), errstr);
         free(buf);
         av_frame_free(&frm_in);
@@ -1270,7 +1376,7 @@ void util_resize(uint8_t *src, int src_w, int src_h
 
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTPLS_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             ,_("Error putting frame into output buffer: %s"), errstr);
         free(buf);
         av_frame_free(&frm_in);

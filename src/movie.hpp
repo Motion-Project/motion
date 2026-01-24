@@ -14,8 +14,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
+ */
+
+/*
+ * movie.hpp - Video Recording and Encoding Interface
  *
-*/
+ * Header file defining the movie class for video recording using FFmpeg,
+ * managing encoders, containers, and timelapse functionality for motion
+ * events and continuous recording.
+ *
+ */
 
 #ifndef _INCLUDE_MOVIE_HPP_
 #define _INCLUDE_MOVIE_HPP_

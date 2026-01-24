@@ -16,6 +16,15 @@
  *
  */
 
+/*
+ * alg.hpp - Motion Detection Algorithm Interface
+ *
+ * Header file defining the motion detection algorithm class and methods
+ * for frame differencing, threshold tuning, noise reduction, and smart
+ * masking used in the core motion detection system.
+ *
+ */
+
 #ifndef _INCLUDE_ALG_HPP_
 #define _INCLUDE_ALG_HPP_
     #define THRESHOLD_TUNE_LENGTH  256

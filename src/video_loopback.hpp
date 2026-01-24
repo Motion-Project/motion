@@ -15,6 +15,16 @@
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
+
+/*
+ * video_loopback.hpp - Video Loopback Device Interface
+ *
+ * Header file defining V4L2 loopback device functions for outputting
+ * processed video streams to virtual video devices, enabling other
+ * applications to consume Motion's output.
+ *
+ */
+
 #ifndef _INCLUDE_VIDEO_LOOPBACK_HPP_
 #define _INCLUDE_VIDEO_LOOPBACK_HPP_
     void vlp_putpipe(cls_camera *cam);

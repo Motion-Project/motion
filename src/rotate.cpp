@@ -15,6 +15,16 @@
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
+
+/*
+ * rotate.cpp - Image Rotation and Transformation
+ *
+ * This module provides efficient image rotation (90°, 180°, 270°) and
+ * flipping operations for camera orientation adjustment, supporting
+ * various pixel formats with optimized algorithms.
+ *
+ */
+
 #include "motion.hpp"
 #include "util.hpp"
 #include "camera.hpp"
@@ -41,14 +51,19 @@
 
 void cls_rotate::reverse_inplace_quad(u_char *src, int size)
 {
-    uint32_t *nsrc = (uint32_t *)src;              /* first quad */
-    uint32_t *ndst = (uint32_t *)(src + size - 4); /* last quad */
-    uint32_t tmp;
+    u_char *front = src;
+    u_char *back = src + size - 4;
+    uint32_t tmp_front, tmp_back;
 
-    while (nsrc < ndst) {
-        tmp = bswap_32(*ndst);
-        *ndst-- = bswap_32(*nsrc);
-        *nsrc++ = tmp;
+    while (front < back) {
+        memcpy(&tmp_front, front, sizeof(uint32_t));
+        memcpy(&tmp_back, back, sizeof(uint32_t));
+        tmp_front = bswap_32(tmp_front);
+        tmp_back = bswap_32(tmp_back);
+        memcpy(front, &tmp_back, sizeof(uint32_t));
+        memcpy(back, &tmp_front, sizeof(uint32_t));
+        front += 4;
+        back -= 4;
     }
 }
 
@@ -223,7 +238,7 @@ cls_rotate::cls_rotate(cls_camera *p_cam)
     buffer_high = nullptr;
 
     if ((cam->cfg->rotate % 90) > 0) {
-        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Config option \"rotate\" not a multiple of 90: %d")
             ,cam->cfg->rotate);
         cam->cfg->rotate = 0;     /* Disable rotation. */

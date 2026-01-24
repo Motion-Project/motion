@@ -11,6 +11,7 @@ config.rpath
 config.status
 config.sub
 configure
+configure~
 autom4te.cache
 aclocal.m4
 depcomp
@@ -19,6 +20,25 @@ m4/
 missing
 stamp-h1
 
+#devFiles
+doc/analysis/
+doc/architecture/
+doc/github/
+doc/handoff-prompts/
+doc/installation/
+doc/issues/
+doc/libcamera/
+doc/plans/
+doc/project/
+doc/reviews/
+doc/scratchpads/
+doc/sub-agent-summaries/
+doc/summaries/
+doc/aar/
+doc/Screenshots/
+doc/sub-agent-plans/
+doc/MOTION_PI5_CHANGES.md
+
 #data
 data/motion-dist.service
 data/motion-dist.conf
@@ -26,6 +46,12 @@ data/camera1-dist.conf
 data/camera2-dist.conf
 data/camera3-dist.conf
 data/sound1-dist.conf
+data/webcontrol/samplepage.html
+
+#development scripts (local only)
+scripts/deploy-pi4.sh
+scripts/deploy-pi5.sh
+scripts/pi5-test.conf
 
 #src
 src/*.o
@@ -59,3 +85,15 @@ po/stamp-po
 
 .vscode/
 
+# macOS
+.DS_Store
+
+# Node.js / Testing
+node_modules/
+package.json
+package-lock.json
+test-ui.mjs
+
+# Claude Code local settings
+.claude/
+CLAUDE.md

@@ -5,6 +5,10 @@
 ; system working.  There are many more options available.  Please
 ; consult the documentation for the complete list of all options.
 ;
+; SYNC REQUIREMENT: When changing default values in this file, also update:
+;   1. src/conf.cpp - Compiled-in defaults (edit_generic_* functions)
+;   2. frontend/src/utils/parameterMappings.ts - UI labels if showing defaults
+;
 
 ;*************************************************
 ;*****   System
@@ -19,13 +23,15 @@ log_type ALL
 ;*************************************************
 device_name
 device_id
-;target_dir
+target_dir @localstatedir@/lib/@PACKAGE_NAME@/media
 
 ;*************************************************
 ;*****   Source
 ;*************************************************
 ;v4l2_device /dev/video0
 ;netcam_url
+;libcam_brightness 0.0
+;libcam_contrast 1.0
 
 ;*************************************************
 ;*****   Image
@@ -70,28 +76,66 @@ on_event_end
 ;*************************************************
 picture_output off
 picture_filename %v-%Y%m%d%H%M%S-%q
+; Maximum pictures per motion event (0 = unlimited)
+; Prevents runaway capture when picture_output=on
+picture_max_per_event 0
+; Minimum milliseconds between picture captures (0 = no limit)
+; Set to 1000 for max 1 picture/second, 500 for 2 pictures/second, etc.
+picture_min_interval 0
 
 ;*************************************************
 ;*****   Movie
 ;*************************************************
-movie_output on
+movie_output off
 movie_max_time 120
-movie_quality 45
-movie_container mkv
-movie_filename %v-%Y%m%d%H%M%S
+movie_quality 60
+; Encoder preset controls CPU usage vs compression efficiency for H.264/H.265
+; Options: ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow
+; Faster presets = lower CPU usage but larger files.
+; Note: ultrafast forces H.264 baseline profile (~30% larger files than superfast with high profile)
+; For Pi 5: use ultrafast if CPU/heat is critical, superfast for better compression
+movie_encoder_preset veryfast
+movie_container mp4
+movie_filename %v-%{movienbr}-%Y%m%d%H%M%S
 
 ;*************************************************
 ;*****   Web Control
+;*****
+;*****   SECURITY: Configure authentication for network access:
+;*****   - Authentication method set to digest (more secure than basic)
+;*****   - Lockout protection enabled after 5 failed attempts
+;*****   - webcontrol_parms 3 allows admin access to all settings including credentials
+;*****
+;*****   For localhost-only access, set webcontrol_localhost on
+;*****   For network access, configure webcontrol_authentication.
 ;*************************************************
 webcontrol_port 8080
 webcontrol_localhost off
-webcontrol_parms 2
+webcontrol_parms 3
+webcontrol_auth_method digest
+webcontrol_lock_attempts 5
+webcontrol_lock_minutes 10
+
+;*****   React UI path (set to enable modern web interface)
+;*****   Leave empty or comment out to use legacy HTML interface
+webcontrol_html_path @localstatedir@/lib/@PACKAGE_NAME@/webui
 
 ;*************************************************
 ;*****   Web Stream
 ;*************************************************
-stream_preview_scale 25
+stream_preview_scale 100
 stream_preview_method combined
+
+;*************************************************
+;*****   Database
+;*************************************************
+database_type sqlite3
+database_dbname @localstatedir@/lib/@PACKAGE_NAME@/motion.db
+database_host localhost
+database_port 0
+database_user
+database_password
+database_busy_timeout 0
 
 ;*************************************************
 ; Device config files - One for each device.

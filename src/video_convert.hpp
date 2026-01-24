@@ -14,7 +14,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
-*/
+ */
+
+/*
+ * video_convert.hpp - Video Format Conversion Interface
+ *
+ * Header file defining pixel format conversion and color space
+ * transformation functions for various camera formats (YUV, RGB, YUYV)
+ * and codec-specific decompression.
+ *
+ */
 
 #ifndef _INCLUDE_VIDEO_COMMON_HPP_
 #define _INCLUDE_VIDEO_COMMON_HPP_

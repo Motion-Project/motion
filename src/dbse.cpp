@@ -16,12 +16,52 @@
  *
  */
 
+/*
+ * dbse.cpp - Database Integration (SQLite/MySQL/PostgreSQL)
+ *
+ * This module provides database connectivity for logging motion events,
+ * file captures, and camera status to SQLite, MySQL, or PostgreSQL databases
+ * for external analysis and record-keeping.
+ *
+ */
+
 #include "motion.hpp"
 #include "util.hpp"
 #include "camera.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "dbse.hpp"
+
+/**
+ * Escape special characters in a string for safe SQL insertion
+ * Prevents SQL injection by escaping: single quotes, backslashes, null bytes
+ *
+ * @param input The string to escape
+ * @return Escaped string safe for SQL VALUES
+ */
+static std::string dbse_escape_sql_string(const std::string &input)
+{
+    std::string result;
+    result.reserve(input.length() * 2);  /* Worst case: all chars need escaping */
+
+    for (size_t i = 0; i < input.length(); i++) {
+        char c = input[i];
+        switch (c) {
+            case '\'':
+                result += "''";  /* Standard SQL escaping for single quotes */
+                break;
+            case '\\':
+                result += "\\\\";
+                break;
+            case '\0':
+                /* Skip null bytes - they can cause truncation attacks */
+                break;
+            default:
+                result += c;
+        }
+    }
+    return result;
+}
 
 static void *dbse_handler(void *arg)
 {
@@ -117,7 +157,7 @@ void cls_dbse::item_assign(std::string col_nm, std::string col_val)
     }
 }
 
-void cls_dbse::sql_motpls(std::string &sql)
+void cls_dbse::sql_motion(std::string &sql)
 {
     std::string delimit;
 
@@ -155,13 +195,18 @@ void cls_dbse::sql_motpls(std::string &sql)
         sql += ");";
 
     } else if ((dbse_action == DBSE_COLS_LIST) || (dbse_action == DBSE_COLS_CURRENT)) {
-        sql = " select * from motion;";
-
+        if ((app->cfg->database_type == "mariadb") ||
+            (app->cfg->database_type == "postgresql")) {
+            sql = " select * from motion;";
+        } else if (app->cfg->database_type == "sqlite3") {
+            /*empty tables do not trigger the callback*/
+            sql = " select t.* from (select 1) left join 'motion' as t;";
+        }
     }
 
 }
 
-void cls_dbse::sql_motpls(std::string &sql, std::string col_p1, std::string col_p2)
+void cls_dbse::sql_motion(std::string &sql, std::string col_p1, std::string col_p2)
 {
     if ((is_open == false) || (finish == true)) {
         return;
@@ -200,15 +245,15 @@ void cls_dbse::sqlite3db_exec(std::string sql)
         return;
     }
 
-    MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing query");
+    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing query");
     retcd = sqlite3_exec(database_sqlite3db
         , sql.c_str(), nullptr, 0, &errmsg);
     if (retcd != SQLITE_OK ) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("SQLite error was %s"), errmsg);
         sqlite3_free(errmsg);
     }
-    MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "Finished query");
+    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Finished query");
 }
 
 void cls_dbse::sqlite3db_cb (int arg_nb, char **arg_val, char **col_nm)
@@ -263,11 +308,11 @@ void cls_dbse::sqlite3db_cols_verify()
     cols_vec_create();
 
     dbse_action = DBSE_COLS_LIST;
-    sql_motpls(sql);
+    sql_motion(sql);
     retcd = sqlite3_exec(database_sqlite3db
         , sql.c_str(), dbse_sqlite3db_cb, this, &errmsg);
     if (retcd != SQLITE_OK ) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error retrieving table columns: %s"), errmsg);
         sqlite3_free(errmsg);
         return;
@@ -276,7 +321,7 @@ void cls_dbse::sqlite3db_cols_verify()
     for (indx=0;indx<col_names.size();indx++) {
         if (col_names[indx].found == false) {
             dbse_action = DBSE_COLS_ADD;
-            sql_motpls(sql
+            sql_motion(sql
                 , col_names[indx].col_nm
                 , col_names[indx].col_typ);
             sqlite3db_exec(sql.c_str());
@@ -295,11 +340,11 @@ void cls_dbse::sqlite3db_cols_rename()
     }
 
     dbse_action = DBSE_COLS_CURRENT;
-    sql_motpls(sql);
+    sql_motion(sql);
     retcd = sqlite3_exec(database_sqlite3db
         , sql.c_str(), dbse_sqlite3db_cb, this, &errmsg);
     if (retcd != SQLITE_OK ) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error retrieving table columns: %s"), errmsg);
         sqlite3_free(errmsg);
         return;
@@ -309,7 +354,7 @@ void cls_dbse::sqlite3db_cols_rename()
             if (col_names[indx].col_nm.substr(0,5) == "movie") {
                 dbse_action = DBSE_COLS_RENAME;
                 tmp = "file"+col_names[indx].col_nm.substr(5);
-                sql_motpls(sql,col_names[indx].col_nm, tmp);
+                sql_motion(sql,col_names[indx].col_nm, tmp);
                 sqlite3db_exec(sql.c_str());
             }
         }
@@ -329,7 +374,7 @@ void cls_dbse::sqlite3db_init()
         return;
     }
 
-    MOTPLS_LOG(NTC, TYPE_DB, NO_ERRNO
+    MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
         , _("SQLite3 Database filename %s")
         , app->cfg->database_dbname.c_str());
     retcd = sqlite3_open(
@@ -337,12 +382,12 @@ void cls_dbse::sqlite3db_init()
         , &database_sqlite3db);
     if (retcd != SQLITE_OK) {
         err_open =sqlite3_errmsg(database_sqlite3db);
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Can't open database %s : %s")
             , app->cfg->database_dbname.c_str()
             , err_open);
         sqlite3_close(database_sqlite3db);
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Could not initialize database %s")
             , app->cfg->database_dbname.c_str());
         is_open = false;
@@ -351,23 +396,23 @@ void cls_dbse::sqlite3db_init()
     }
 
     is_open = true;
-    MOTPLS_LOG(NTC, TYPE_DB, NO_ERRNO
+    MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
         ,  _("database_busy_timeout %d msec")
         , app->cfg->database_busy_timeout);
     retcd = sqlite3_busy_timeout(database_sqlite3db, app->cfg->database_busy_timeout);
     if (retcd != SQLITE_OK) {
         err_open = sqlite3_errmsg(database_sqlite3db);
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("database_busy_timeout failed %s"), err_open);
     }
 
     table_ok = false;
     dbse_action = DBSE_TBL_CHECK;
-    sql_motpls(sql);
+    sql_motion(sql);
     retcd = sqlite3_exec(database_sqlite3db
         , sql.c_str(), dbse_sqlite3db_cb, this, &err_qry);
     if (retcd != SQLITE_OK ) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error checking table: %s"), err_qry);
         sqlite3_free(err_qry);
         return;
@@ -375,10 +420,10 @@ void cls_dbse::sqlite3db_init()
 
     if (table_ok == false) {
         dbse_action = DBSE_TBL_CREATE;
-        sql_motpls(sql);
+        sql_motion(sql);
         retcd = sqlite3_exec(database_sqlite3db, sql.c_str(), 0, 0, &err_qry);
         if (retcd != SQLITE_OK ) {
-            MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 , _("Error creating table: %s"), err_qry);
                 sqlite3_free(err_qry);
             return;
@@ -403,7 +448,7 @@ void cls_dbse::sqlite3db_filelist(std::string sql)
     retcd = sqlite3_exec(database_sqlite3db, sql.c_str()
         , dbse_sqlite3db_cb, this, &errmsg);
     if (retcd != SQLITE_OK ) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Error retrieving table: %s"), errmsg);
         sqlite3_free(errmsg);
         return;
@@ -433,11 +478,11 @@ void cls_dbse::mariadb_exec (std::string sql)
         return;
     }
 
-    MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing MariaDB query");
+    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing MariaDB query");
     retcd = mysql_query(database_mariadb, sql.c_str());
     if (retcd != 0) {
         retcd = (int)mysql_errno(database_mariadb);
-        MOTPLS_LOG(ERR, TYPE_DB, SHOW_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
             , _("MariaDB query '%s' failed. %s error code %d")
             , sql.c_str()
             , mysql_error(database_mariadb)
@@ -450,7 +495,7 @@ void cls_dbse::mariadb_exec (std::string sql)
     retcd = mysql_query(database_mariadb, "commit;");
     if (retcd != 0) {
         retcd = (int)mysql_errno(database_mariadb);
-        MOTPLS_LOG(ERR, TYPE_DB, SHOW_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
             , _("MariaDB query commit failed. %s error code %d")
             , mysql_error(database_mariadb), retcd);
         if (retcd >= 2000) {
@@ -477,7 +522,7 @@ void cls_dbse::mariadb_recs(std::string sql)
 
     retcd = mysql_query(database_mariadb, sql.c_str());
     if (retcd != 0){
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Query error: %s"),sql.c_str());
         shutdown();
         return;
@@ -485,7 +530,7 @@ void cls_dbse::mariadb_recs(std::string sql)
 
     qry_result = mysql_store_result(database_mariadb);
     if (qry_result == nullptr) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Query store error: %s"),sql.c_str());
         shutdown();
         return;
@@ -561,13 +606,13 @@ void cls_dbse::mariadb_cols_verify()
     cols_vec_create();
 
     dbse_action = DBSE_COLS_LIST;
-    sql_motpls(sql);
+    sql_motion(sql);
     mariadb_recs(sql.c_str());
 
     for (indx=0;indx<col_names.size();indx++) {
         if (col_names[indx].found == false) {
             dbse_action = DBSE_COLS_ADD;
-            sql_motpls(sql
+            sql_motion(sql
                 ,col_names[indx].col_nm
                 ,col_names[indx].col_typ);
             mariadb_exec(sql.c_str());
@@ -585,7 +630,7 @@ void cls_dbse::mariadb_cols_rename()
     }
 
     dbse_action = DBSE_COLS_CURRENT;
-    sql_motpls(sql);
+    sql_motion(sql);
     mariadb_recs(sql.c_str());
 
     for (indx=0;indx<col_names.size();indx++) {
@@ -593,7 +638,7 @@ void cls_dbse::mariadb_cols_rename()
             if (col_names[indx].col_nm.substr(0,5) == "movie") {
                 dbse_action = DBSE_COLS_RENAME;
                 tmp = "file"+col_names[indx].col_nm.substr(5);
-                sql_motpls(sql,col_names[indx].col_nm, tmp);
+                sql_motion(sql,col_names[indx].col_nm, tmp);
                 mariadb_exec(sql.c_str());
             }
         }
@@ -609,14 +654,14 @@ void cls_dbse::mariadb_setup()
     }
 
     dbse_action = DBSE_TBL_CHECK;
-    sql_motpls(sql);
+    sql_motion(sql);
     mariadb_recs(sql.c_str());
 
     if (table_ok == false) {
-        MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
+        MOTION_LOG(INF, TYPE_DB, NO_ERRNO
             , _("Creating motion table"));
         dbse_action = DBSE_TBL_CREATE;
-        sql_motpls(sql);
+        sql_motion(sql);
         mariadb_exec(sql.c_str());
     }
 
@@ -636,7 +681,7 @@ void cls_dbse::mariadb_init()
     }
 
     if (mysql_library_init(0, nullptr, nullptr)) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Could not initialize database %s")
             , app->cfg->database_type.c_str());
         is_open = false;
@@ -654,12 +699,12 @@ void cls_dbse::mariadb_init()
         , app->cfg->database_dbname.c_str()
         , (uint)app->cfg->database_port, nullptr, 0) == nullptr) {
 
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Cannot connect to MariaDB database %s on host %s with user %s")
             , app->cfg->database_dbname.c_str()
             , app->cfg->database_host.c_str()
             , app->cfg->database_user.c_str());
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("MariaDB error was %s")
             , mysql_error(database_mariadb));
         shutdown();
@@ -671,7 +716,7 @@ void cls_dbse::mariadb_init()
 
     mariadb_setup();
 
-    MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
+    MOTION_LOG(INF, TYPE_DB, NO_ERRNO
         , _("%s database opened")
         , app->cfg->database_dbname.c_str() );
 }
@@ -707,16 +752,16 @@ void cls_dbse::pgsqldb_exec(std::string sql)
         return;
     }
 
-    MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing postgresql query");
+    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing postgresql query");
     res = PQexec(database_pgsqldb, sql.c_str());
     if (PQstatus(database_pgsqldb) == CONNECTION_BAD) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Connection to PostgreSQL database '%s' failed: %s")
             , app->cfg->database_dbname.c_str()
             , PQerrorMessage(database_pgsqldb));
         PQreset(database_pgsqldb);
         if (PQstatus(database_pgsqldb) == CONNECTION_BAD) {
-            MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 , _("Re-Connection to PostgreSQL database '%s' failed: %s")
                 , app->cfg->database_dbname.c_str()
                 , PQerrorMessage(database_pgsqldb));
@@ -724,12 +769,12 @@ void cls_dbse::pgsqldb_exec(std::string sql)
             shutdown();
             return;
         } else {
-            MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
+            MOTION_LOG(INF, TYPE_DB, NO_ERRNO
                 , _("Re-Connection to PostgreSQL database '%s' Succeed")
                 , app->cfg->database_dbname.c_str());
         }
     } else if (!(PQresultStatus(res) == PGRES_COMMAND_OK || PQresultStatus(res) == PGRES_TUPLES_OK)) {
-        MOTPLS_LOG(ERR, TYPE_DB, SHOW_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
             , "PGSQL query failed: [%s]  %s %s"
             , sql.c_str()
             , PQresStatus(PQresultStatus(res))
@@ -837,13 +882,13 @@ void cls_dbse::pgsqldb_cols_verify()
     cols_vec_create();
 
     dbse_action = DBSE_COLS_LIST;
-    sql_motpls(sql);
+    sql_motion(sql);
     pgsqldb_recs(sql.c_str());
 
     for (indx=0;indx<col_names.size();indx++) {
         if (col_names[indx].found == false) {
             dbse_action = DBSE_COLS_ADD;
-            sql_motpls(sql
+            sql_motion(sql
                 , col_names[indx].col_nm
                 , col_names[indx].col_typ);
             pgsqldb_exec(sql.c_str());
@@ -861,7 +906,7 @@ void cls_dbse::pgsqldb_cols_rename()
     }
 
     dbse_action = DBSE_COLS_CURRENT;
-    sql_motpls(sql);
+    sql_motion(sql);
     pgsqldb_recs(sql.c_str());
 
     for (indx=0;indx<col_names.size();indx++) {
@@ -869,7 +914,7 @@ void cls_dbse::pgsqldb_cols_rename()
             if (col_names[indx].col_nm.substr(0,5) == "movie") {
                 dbse_action = DBSE_COLS_RENAME;
                 tmp = "file"+col_names[indx].col_nm.substr(5);
-                sql_motpls(sql,col_names[indx].col_nm, tmp);
+                sql_motion(sql,col_names[indx].col_nm, tmp);
                 pgsqldb_exec(sql.c_str());
             }
         }
@@ -885,14 +930,14 @@ void cls_dbse::pgsqldb_setup()
     }
 
     dbse_action = DBSE_TBL_CHECK;
-    sql_motpls(sql);
+    sql_motion(sql);
     pgsqldb_recs(sql.c_str());
 
     if (table_ok == false) {
-        MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
+        MOTION_LOG(INF, TYPE_DB, NO_ERRNO
             , _("Creating motion table"));
         dbse_action = DBSE_TBL_CREATE;
-        sql_motpls(sql);
+        sql_motion(sql);
         pgsqldb_exec(sql.c_str());
     }
 
@@ -918,7 +963,7 @@ void cls_dbse::pgsqldb_init()
     constr += " port="+std::to_string(app->cfg->database_port) + " ";
     database_pgsqldb = PQconnectdb(constr.c_str());
     if (PQstatus(database_pgsqldb) == CONNECTION_BAD) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Connection to PostgreSQL database '%s' failed: %s")
             , app->cfg->database_dbname.c_str()
             , PQerrorMessage(database_pgsqldb));
@@ -929,7 +974,7 @@ void cls_dbse::pgsqldb_init()
 
     pgsqldb_setup();
 
-    MOTPLS_LOG(INF, TYPE_DB, NO_ERRNO
+    MOTION_LOG(INF, TYPE_DB, NO_ERRNO
         , _("%s database opened")
         , app->cfg->database_dbname.c_str() );
 }
@@ -953,7 +998,7 @@ bool cls_dbse::dbse_open()
         return false;
     }
 
-    MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO,_("Opening database"));
+    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("Opening database"));
 
     #ifdef HAVE_MARIADB
         if (app->cfg->database_type == "mariadb") {
@@ -1003,6 +1048,9 @@ void cls_dbse::filelist_get(std::string sql, vec_files &p_flst)
             if (app->cfg->database_type == "sqlite3") {
                 sqlite3db_filelist(sql);
             }
+        #endif
+        #ifndef HAVE_DBSE
+            (void)sql;
         #endif
         for (indx=0;indx<filelist.size();indx++){
             p_flst.push_back(filelist[indx]);
@@ -1078,7 +1126,7 @@ void cls_dbse::exec(cls_camera *cam, std::string fname, std::string cmd)
     if (sql == "") {
         return;
     }
-    MOTPLS_LOG(DBG, TYPE_DB, NO_ERRNO, "%s query: %s"
+    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "%s query: %s"
         , cmd.c_str(), sql.c_str());
 
     exec_sql(sql);
@@ -1131,10 +1179,11 @@ void cls_dbse::filelist_add(cls_camera *cam, timespec *ts1, std::string ftyp
     sqlquery += " , file_tmc, file_tml, diff_avg";
     sqlquery += " , sdev_min, sdev_max, sdev_avg)";
     sqlquery += " values ("+std::to_string(cam->cfg->device_id);
-    sqlquery += " ,'" + filenm + "'";
-    sqlquery += " ,'" + ftyp + "'";
-    sqlquery += " ,'" + dirnm + "'";
-    sqlquery += " ,'" + fullnm + "'";
+    /* Use SQL escaping to prevent injection attacks */
+    sqlquery += " ,'" + dbse_escape_sql_string(filenm) + "'";
+    sqlquery += " ,'" + dbse_escape_sql_string(ftyp) + "'";
+    sqlquery += " ,'" + dbse_escape_sql_string(dirnm) + "'";
+    sqlquery += " ,'" + dbse_escape_sql_string(fullnm) + "'";
     sqlquery += " ,"  + std::to_string(bsz);
     sqlquery += " ,"  + std::string(dtl);
     sqlquery += " ,'" + std::string(tmc)+ "'";
@@ -1155,7 +1204,7 @@ void cls_dbse::dbse_edits()
 
     if ((app->cfg->database_type != "") &&
         (app->cfg->database_dbname == "")) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             , _("Invalid database name"));
         retcd = -1;
     }
@@ -1164,7 +1213,7 @@ void cls_dbse::dbse_edits()
         (app->cfg->database_type != "postgresql") &&
         (app->cfg->database_type != "sqlite3") &&
         (app->cfg->database_type != "")) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             ,_("Invalid database_type %s")
             , app->cfg->database_type.c_str());
         retcd = -1;
@@ -1173,20 +1222,20 @@ void cls_dbse::dbse_edits()
     if (((app->cfg->database_type == "mariadb") ||
          (app->cfg->database_type == "postgresql")) &&
          (app->cfg->database_port == 0)) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             ,_("Must specify database port for mariadb/pgsql"));
         retcd = -1;
     }
 
     if ((app->cfg->database_type == "sqlite3") &&
         (app->cfg->database_dbname == "")) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             ,_("Must specify database name for sqlite3"));
         retcd = -1;
     }
 
     if ((app->cfg->database_type != "") && (retcd == -1)) {
-        MOTPLS_LOG(ERR, TYPE_DB, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
             ,_("Database functionality disabled."));
         app->cfg->database_type = "";
     }
@@ -1297,7 +1346,7 @@ void cls_dbse::handler()
         timing();
     }
 
-    MOTPLS_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Database handler closed"));
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Database handler closed"));
 
     handler_running = false;
     pthread_exit(NULL);
@@ -1316,7 +1365,7 @@ void cls_dbse::handler_startup()
         pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
         retcd = pthread_create(&handler_thread, &thread_attr, &dbse_handler, this);
         if (retcd != 0) {
-            MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start database handler thread."));
+            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Unable to start database handler thread."));
             handler_running = false;
             handler_stop = true;
         }
@@ -1336,10 +1385,10 @@ void cls_dbse::handler_shutdown()
             waitcnt++;
         }
         if (waitcnt == app->cfg->watchdog_tmo) {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , _("Normal shutdown of database handler failed"));
             if (app->cfg->watchdog_kill > 0) {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Waiting additional %d seconds (watchdog_kill).")
                     ,app->cfg->watchdog_kill);
                 waitcnt = 0;
@@ -1348,14 +1397,14 @@ void cls_dbse::handler_shutdown()
                     waitcnt++;
                 }
                 if (waitcnt == app->cfg->watchdog_kill) {
-                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                         , _("No response to shutdown.  Killing it."));
-                    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                         , _("Memory leaks will occur."));
                     pthread_kill(handler_thread, SIGVTALRM);
                 }
             } else {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     , _("watchdog_kill set to terminate application."));
                 exit(1);
             }

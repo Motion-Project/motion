@@ -14,7 +14,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
-*/
+ */
+
+/*
+ * webu.cpp - Web Server Infrastructure (libmicrohttpd)
+ *
+ * This module provides the embedded web server using libmicrohttpd, handling
+ * HTTP request routing, authentication, and connection management for the
+ * JSON API, MJPEG streams, and static file serving.
+ *
+ */
 
 #include "motion.hpp"
 #include "util.hpp"
@@ -23,13 +32,12 @@
 #include "logger.hpp"
 #include "webu.hpp"
 #include "webu_ans.hpp"
-#include "webu_html.hpp"
 #include "webu_json.hpp"
-#include "webu_post.hpp"
 #include "webu_file.hpp"
 #include "webu_stream.hpp"
 #include "webu_mpegts.hpp"
 #include "video_v4l2.hpp"
+#include <cstdio>
 
 /* Initialize the MHD answer */
 static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *connection)
@@ -89,13 +97,13 @@ void cls_webu::mhd_features_basic()
         mhdrslt retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_BASIC_AUTH);
         if (retcd == MHD_YES) {
-            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: available"));
+            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: available"));
         } else {
             if (app->cfg->webcontrol_auth_method == "basic") {
-                MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
                 app->cfg->webcontrol_auth_method = "none";
             } else {
-                MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
             }
         }
     #endif
@@ -110,13 +118,13 @@ void cls_webu::mhd_features_digest()
         mhdrslt retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_DIGEST_AUTH);
         if (retcd == MHD_YES) {
-            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: available"));
+            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: available"));
         } else {
             if (app->cfg->webcontrol_auth_method == "digest") {
-                MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
                 app->cfg->webcontrol_auth_method = "none";
             } else {
-                MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
             }
         }
     #endif
@@ -127,7 +135,7 @@ void cls_webu::mhd_features_ipv6()
 {
     #if MHD_VERSION < 0x00094400
         if (mhdst->ipv6) {
-            MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old ipv6 disabled"));
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old ipv6 disabled"));
             if (mhdst->ipv6) {
                 mhdst->ipv6 = 0;
             }
@@ -136,9 +144,9 @@ void cls_webu::mhd_features_ipv6()
         mhdrslt retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_IPv6);
         if (retcd == MHD_YES) {
-            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("IPV6: available"));
+            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("IPV6: available"));
         } else {
-            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("IPV6: disabled"));
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("IPV6: disabled"));
             if (mhdst->ipv6) {
                 mhdst->ipv6 = 0;
             }
@@ -151,20 +159,20 @@ void cls_webu::mhd_features_tls()
 {
     #if MHD_VERSION < 0x00094400
         if (mhdst->tls_use) {
-            MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL/TLS disabled"));
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL/TLS disabled"));
             mhdst->tls_use = false;
         }
     #else
         mhdrslt retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_SSL);
         if (retcd == MHD_YES) {
-            MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: available"));
+            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: available"));
         } else {
             if (mhdst->tls_use) {
-                MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
                 mhdst->tls_use = false;
             } else {
-                MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
             }
         }
     #endif
@@ -205,7 +213,7 @@ void cls_webu::mhd_loadfile(std::string fname, std::string &filestr)
                     file_char[file_size] = 0;
                     filestr.assign(file_char, file_size);
                 } else {
-                    MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                    MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
                         ,_("Error reading file for SSL/TLS support."));
                 }
                 free(file_char);
@@ -229,12 +237,12 @@ void cls_webu::mhd_checktls()
 {
     if (mhdst->tls_use) {
         if ((app->cfg->webcontrol_cert == "") || (mhdst->tls_cert == "")) {
-            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
             mhdst->tls_use = false;
         }
         if ((app->cfg->webcontrol_key == "") || (mhdst->tls_key == "")) {
-            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 ,_("SSL/TLS requested but no key file provided.  SSL/TLS disabled"));
             mhdst->tls_use = false;
         }
@@ -420,14 +428,14 @@ void cls_webu::start_daemon_port1()
 
     free(mhdst->mhd_ops);
     if (wb_daemon == nullptr) {
-        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             ,_("Unable to start webserver on port %d")
             ,app->cfg->webcontrol_port);
-        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             ,_("Validate no other applications/instances are using port %d")
             ,app->cfg->webcontrol_port);
     } else {
-        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             ,_("Started webcontrol on port %d")
             ,app->cfg->webcontrol_port);
     }
@@ -442,7 +450,7 @@ void cls_webu::start_daemon_port2()
         return;
     }
 
-    MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
         , _("Starting secondary webcontrol on port %d")
         , app->cfg->webcontrol_port2);
 
@@ -454,7 +462,7 @@ void cls_webu::start_daemon_port2()
     mhdst->tls_use = false;
 
     if (app->cfg->webcontrol_tls) {
-        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("TLS will be disabled on webcontrol port %d")
             , app->cfg->webcontrol_port2);
     }
@@ -473,14 +481,14 @@ void cls_webu::start_daemon_port2()
 
     free(mhdst->mhd_ops);
     if (wb_daemon2 == nullptr) {
-        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             ,_("Unable to start secondary webserver on port %d")
             ,app->cfg->webcontrol_port2);
-        MOTPLS_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             ,_("Validate no other applications/instances are using port %d")
             ,app->cfg->webcontrol_port2);
     } else {
-        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             ,_("Started webcontrol on port %d")
             ,app->cfg->webcontrol_port2);
     }
@@ -504,7 +512,7 @@ void cls_webu::startup()
         return;
     }
 
-    MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
         , _("Starting webcontrol on port %d")
         , app->cfg->webcontrol_port);
 
@@ -517,11 +525,254 @@ void cls_webu::startup()
     randnbr = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
     snprintf(wb_digest_rand, sizeof(wb_digest_rand),"%d",randnbr);
 
+    /* Generate CSRF token for this session */
+    csrf_generate();
+
     start_daemon_port1();
 
     start_daemon_port2();
     cnct_cnt = 0;
 
+}
+
+/* Generate a CSRF token using cryptographically secure random data */
+void cls_webu::csrf_generate()
+{
+    unsigned char random_bytes[32];
+    char hex_token[65];
+
+    /* Use /dev/urandom for cryptographically secure random generation */
+    FILE *urandom = fopen("/dev/urandom", "rb");
+    if (urandom == nullptr) {
+        /* Fallback: use time-based seed with additional entropy */
+        MOTION_LOG(WRN, TYPE_STREAM, NO_ERRNO,
+            _("Cannot open /dev/urandom, using fallback random"));
+        srand((unsigned int)(time(NULL) ^ getpid()));
+        for (int i = 0; i < 32; i++) {
+            random_bytes[i] = (unsigned char)(rand() % 256);
+        }
+    } else {
+        size_t read_cnt = fread(random_bytes, 1, 32, urandom);
+        fclose(urandom);
+        if (read_cnt != 32) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,
+                _("Failed to read sufficient random data for CSRF token"));
+            /* Use partial data with fallback */
+            srand((unsigned int)(time(NULL) ^ getpid()));
+            for (size_t i = read_cnt; i < 32; i++) {
+                random_bytes[i] = (unsigned char)(rand() % 256);
+            }
+        }
+    }
+
+    /* Convert to hex string */
+    for (int i = 0; i < 32; i++) {
+        snprintf(hex_token + (i * 2), 3, "%02x", random_bytes[i]);
+    }
+    hex_token[64] = '\0';
+
+    csrf_token = std::string(hex_token);
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("CSRF token generated"));
+}
+
+/* Validate a CSRF token using constant-time comparison */
+bool cls_webu::csrf_validate(const std::string &token)
+{
+    if (token.empty() || csrf_token.empty()) {
+        return false;
+    }
+
+    /* Constant-time comparison to prevent timing attacks */
+    if (token.length() != csrf_token.length()) {
+        return false;
+    }
+
+    volatile int result = 0;
+    for (size_t i = 0; i < token.length(); i++) {
+        result |= (token[i] ^ csrf_token[i]);
+    }
+    return result == 0;
+}
+
+/* Validate CSRF token for a request, checking both session and global tokens.
+ * This is the main validation method that should be used by all endpoints.
+ *
+ * Authentication modes:
+ * 1. Session tokens (React UI): Uses per-session CSRF tokens
+ * 2. HTTP Basic/Digest (external API clients): Uses global CSRF token
+ *
+ * The global CSRF fallback supports external clients (curl, scripts, automation tools)
+ * that authenticate via HTTP Basic/Digest instead of session tokens.
+ */
+bool cls_webu::csrf_validate_request(const std::string &csrf_token_received, const std::string &session_token)
+{
+    if (csrf_token_received.empty()) {
+        return false;
+    }
+
+    /* If using session authentication, check session-specific CSRF token first */
+    if (!session_token.empty()) {
+        std::string session_csrf = session_get_csrf(session_token);
+        if (!session_csrf.empty()) {
+            /* Use constant-time comparison for session CSRF */
+            if (session_csrf.length() == csrf_token_received.length()) {
+                volatile int result = 0;
+                for (size_t i = 0; i < session_csrf.length(); i++) {
+                    result |= (session_csrf[i] ^ csrf_token_received[i]);
+                }
+                if (result == 0) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    /* Global CSRF token for external API clients using HTTP Basic/Digest auth */
+    return csrf_validate(csrf_token_received);
+}
+
+/* Generate cryptographically secure session token (64 hex chars) */
+std::string cls_webu::session_generate_token()
+{
+    unsigned char random_bytes[32];
+    char hex_token[65];
+
+    /* Use /dev/urandom for cryptographically secure random generation */
+    FILE *urandom = fopen("/dev/urandom", "rb");
+    if (urandom == nullptr) {
+        /* Fallback: use time-based seed with additional entropy */
+        MOTION_LOG(WRN, TYPE_STREAM, NO_ERRNO,
+            _("Cannot open /dev/urandom for session token, using fallback random"));
+        srand((unsigned int)(time(NULL) ^ getpid()));
+        for (int i = 0; i < 32; i++) {
+            random_bytes[i] = (unsigned char)(rand() % 256);
+        }
+    } else {
+        size_t read_cnt = fread(random_bytes, 1, 32, urandom);
+        fclose(urandom);
+        if (read_cnt != 32) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,
+                _("Failed to read sufficient random data for session token"));
+            /* Use partial data with fallback */
+            srand((unsigned int)(time(NULL) ^ getpid()));
+            for (size_t i = read_cnt; i < 32; i++) {
+                random_bytes[i] = (unsigned char)(rand() % 256);
+            }
+        }
+    }
+
+    /* Convert to hex string */
+    for (int i = 0; i < 32; i++) {
+        snprintf(hex_token + (i * 2), 3, "%02x", random_bytes[i]);
+    }
+    hex_token[64] = '\0';
+
+    return std::string(hex_token);
+}
+
+/* Create new session after successful authentication */
+std::string cls_webu::session_create(const std::string& role, const std::string& client_ip)
+{
+    std::lock_guard<std::mutex> lock(sessions_mutex);
+
+    ctx_session session;
+    session.token = session_generate_token();
+    session.csrf_token = session_generate_token();  /* Separate CSRF per session */
+    session.role = role;
+    session.client_ip = client_ip;
+    session.created = time(NULL);
+    session.last_access = session.created;
+    session.expires = session.created + app->cfg->webcontrol_session_timeout;
+
+    sessions[session.token] = session;
+
+    /* Cleanup expired sessions (limit memory growth) */
+    session_cleanup_expired();
+
+    MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
+        _("Session created for role '%s' from %s"), role.c_str(), client_ip.c_str());
+
+    return session.token;
+}
+
+/* Validate session token from request header
+ * Returns role if valid, empty string if invalid/expired
+ */
+std::string cls_webu::session_validate(const std::string& token, const std::string& client_ip)
+{
+    std::lock_guard<std::mutex> lock(sessions_mutex);
+
+    auto it = sessions.find(token);
+    if (it == sessions.end()) {
+        return "";  /* Token not found */
+    }
+
+    ctx_session& session = it->second;
+
+    /* Check expiration */
+    if (time(NULL) > session.expires) {
+        MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO,
+            _("Session expired for %s"), client_ip.c_str());
+        sessions.erase(it);
+        return "";  /* Expired */
+    }
+
+    /* Optional: IP binding (prevents token theft)
+     * Disabled by default to allow mobile clients switching networks
+     */
+    /* if (session.client_ip != client_ip) {
+        MOTION_LOG(WRN, TYPE_STREAM, NO_ERRNO,
+            _("Session IP mismatch: expected %s, got %s"),
+            session.client_ip.c_str(), client_ip.c_str());
+        return "";
+    } */
+
+    /* Update last access, extend expiration (sliding window) */
+    session.last_access = time(NULL);
+    session.expires = session.last_access + app->cfg->webcontrol_session_timeout;
+
+    return session.role;
+}
+
+/* Get CSRF token for session */
+std::string cls_webu::session_get_csrf(const std::string& token)
+{
+    std::lock_guard<std::mutex> lock(sessions_mutex);
+
+    auto it = sessions.find(token);
+    if (it != sessions.end()) {
+        return it->second.csrf_token;
+    }
+    return "";
+}
+
+/* Destroy session (logout) */
+void cls_webu::session_destroy(const std::string& token)
+{
+    std::lock_guard<std::mutex> lock(sessions_mutex);
+    auto it = sessions.find(token);
+    if (it != sessions.end()) {
+        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
+            _("Session destroyed for %s"), it->second.client_ip.c_str());
+        sessions.erase(it);
+    }
+}
+
+/* Cleanup expired sessions (called periodically)
+ * Note: Must be called with sessions_mutex already locked
+ */
+void cls_webu::session_cleanup_expired()
+{
+    time_t now = time(NULL);
+    for (auto it = sessions.begin(); it != sessions.end(); ) {
+        if (now > it->second.expires) {
+            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO,
+                _("Cleaning up expired session for %s"), it->second.client_ip.c_str());
+            it = sessions.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 void cls_webu::shutdown()
@@ -530,7 +781,7 @@ void cls_webu::shutdown()
 
     finish = true;
 
-    MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Closing webcontrol"));
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Closing webcontrol"));
 
     chkcnt = 0;
     while ((chkcnt < 1000) && (cnct_cnt >0)) {
@@ -539,7 +790,7 @@ void cls_webu::shutdown()
     }
 
     if (chkcnt>=1000){
-        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Excessive wait closing webcontrol"));
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Excessive wait closing webcontrol"));
     }
 
     if (wb_daemon != nullptr) {
