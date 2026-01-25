@@ -37,6 +37,8 @@
 #include "webu_json.hpp"
 #include "dbse.hpp"
 #include "libcam.hpp"
+#include "netcam.hpp"
+#include "video_v4l2.hpp"
 #include "json_parse.hpp"
 #include <map>
 #include <algorithm>
